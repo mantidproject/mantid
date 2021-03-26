@@ -58,26 +58,30 @@ class PythonAlgorithmChildAlgCallTest(unittest.TestCase):
 
     def test_ChildAlg_call_with_output_and_input_ws_the_same_succeeds(self):
         data = [1.0]
-        api.CreateWorkspace(DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', OutputWorkspace=self._ws_name)
+        api.CreateWorkspace(DataX=data, DataY=data, NSpec=1, UnitX='Wavelength', OutputWorkspace=self._ws_name)
         try:
-            run_algorithm('PythonAlgorithmChildAlgCallTestAlg', InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name)
+            run_algorithm('PythonAlgorithmChildAlgCallTestAlg',
+                          InputWorkspace=self._ws_name,
+                          OutputWorkspace=self._ws_name)
         except Exception as exc:
             self.fail("Algorithm call failed: %s" % str(exc))
 
         self.assertTrue(self._ws_name in mtd)
-        self.assertAlmostEqual(mtd[self._ws_name].readY(0)[0],2.0, places=10)
+        self.assertAlmostEqual(mtd[self._ws_name].readY(0)[0], 2.0, places=10)
 
     def test_ChildAlg_call_with_output_and_input_ws_different_succeeds(self):
         data = [1.0]
-        api.CreateWorkspace(DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', OutputWorkspace=self._ws_name)
+        api.CreateWorkspace(DataX=data, DataY=data, NSpec=1, UnitX='Wavelength', OutputWorkspace=self._ws_name)
 
         try:
-            run_algorithm('PythonAlgorithmChildAlgCallTestAlg', InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name2)
+            run_algorithm('PythonAlgorithmChildAlgCallTestAlg',
+                          InputWorkspace=self._ws_name,
+                          OutputWorkspace=self._ws_name2)
         except Exception as exc:
             self.fail("Algorithm call failed: %s" % str(exc))
 
         self.assertTrue(self._ws_name2 in mtd)
-        self.assertAlmostEqual(mtd[self._ws_name2].readY(0)[0],2.0, places=10)
+        self.assertAlmostEqual(mtd[self._ws_name2].readY(0)[0], 2.0, places=10)
 
 
 if __name__ == '__main__':

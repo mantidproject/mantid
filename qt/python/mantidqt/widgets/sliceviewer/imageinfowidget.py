@@ -23,8 +23,7 @@ ImageInfoWidget = import_qt('.._common', 'mantidqt.widgets', 'ImageInfoWidget')
 
 
 class ImageInfoTracker(CursorTracker):
-    def __init__(self, image: Union[AxesImage, QuadMesh], transpose_xy: bool,
-                 widget: ImageInfoWidget):
+    def __init__(self, image: Union[AxesImage, QuadMesh], transpose_xy: bool, widget: ImageInfoWidget):
         """
         Update the image that the widget refers too.
         :param: An AxesImage or Mesh instance to track

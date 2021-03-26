@@ -11,7 +11,6 @@ from abins import IO, test_helpers
 
 
 class IOTest(unittest.TestCase):
-
     def tearDown(self):
         test_helpers.remove_output_files(list_of_names=["Cars", "temphgfrt"])
 
@@ -28,10 +27,27 @@ class IOTest(unittest.TestCase):
         saver.add_data("FireExtinguishers", np.array([2]))
 
         # add some mode complex data sets
-        wheels = [{"Winter":   False, "Punctured": False, "Brand": "Mercedes", "Age":  2},
-                  {"Winter":   False, "Punctured": False, "Brand": "Mercedes", "Age":  3},
-                  {"Winter":   False, "Punctured": False, "Brand": "Mercedes", "Age":  5},
-                  {"Winter":   False, "Punctured": True,  "Brand": "Mercedes", "Age":  7}]
+        wheels = [{
+            "Winter": False,
+            "Punctured": False,
+            "Brand": "Mercedes",
+            "Age": 2
+        }, {
+            "Winter": False,
+            "Punctured": False,
+            "Brand": "Mercedes",
+            "Age": 3
+        }, {
+            "Winter": False,
+            "Punctured": False,
+            "Brand": "Mercedes",
+            "Age": 5
+        }, {
+            "Winter": False,
+            "Punctured": True,
+            "Brand": "Mercedes",
+            "Age": 7
+        }]
         chairs = {"AdjustableHeadrests": True, "ExtraPadding": True}
 
         saver.add_data("wheels", wheels)
@@ -86,14 +102,29 @@ class IOTest(unittest.TestCase):
 
         data = self.loader.load(list_of_datasets=["wheels", "chairs"])
 
-        self.assertEqual([{"Winter": False, "Punctured": False, "Brand": "Mercedes", "Age": 2},
-                          {"Winter": False, "Punctured": False, "Brand": "Mercedes", "Age": 3},
-                          {"Winter": False, "Punctured": False, "Brand": "Mercedes", "Age": 5},
-                          {"Winter": False, "Punctured": True,  "Brand": "Mercedes", "Age":  7}],
-                         data["datasets"]["wheels"])
+        self.assertEqual([{
+            "Winter": False,
+            "Punctured": False,
+            "Brand": "Mercedes",
+            "Age": 2
+        }, {
+            "Winter": False,
+            "Punctured": False,
+            "Brand": "Mercedes",
+            "Age": 3
+        }, {
+            "Winter": False,
+            "Punctured": False,
+            "Brand": "Mercedes",
+            "Age": 5
+        }, {
+            "Winter": False,
+            "Punctured": True,
+            "Brand": "Mercedes",
+            "Age": 7
+        }], data["datasets"]["wheels"])
 
-        self.assertEqual({"AdjustableHeadrests": True, "ExtraPadding": True},
-                         data["datasets"]["chairs"])
+        self.assertEqual({"AdjustableHeadrests": True, "ExtraPadding": True}, data["datasets"]["chairs"])
 
         self.assertRaises(ValueError, self.loader.load, list_of_datasets=["WrongDataSet"])
 

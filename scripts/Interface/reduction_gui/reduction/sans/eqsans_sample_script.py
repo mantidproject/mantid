@@ -62,10 +62,10 @@ class SampleData(BaseSampleData):
 
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("Transmission")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             instrument_dom = element_list[0]
-            self.combine_transmission_frames = BaseScriptElement.getBoolElement(instrument_dom, "combine_transmission_frames",
-                                                                                default = SampleData.combine_transmission_frames)
+            self.combine_transmission_frames = BaseScriptElement.getBoolElement(
+                instrument_dom, "combine_transmission_frames", default=SampleData.combine_transmission_frames)
 
     def from_setup_info(self, xml_str):
         """
@@ -77,5 +77,5 @@ class SampleData(BaseSampleData):
         super(SampleData, self).from_setup_info(xml_str)
 
         (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
-        self.combine_transmission_frames = BaseScriptElement.getPropertyValue(alg, "FitFramesTogether",
-                                                                              default=SampleData.combine_transmission_frames)
+        self.combine_transmission_frames = BaseScriptElement.getPropertyValue(
+            alg, "FitFramesTogether", default=SampleData.combine_transmission_frames)

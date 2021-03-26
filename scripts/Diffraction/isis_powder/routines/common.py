@@ -46,7 +46,8 @@ def apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
         for mask_params in bank_mask_list:
             output_workspaces[ws_index] = mantid.MaskBins(InputWorkspace=output_workspaces[ws_index],
                                                           OutputWorkspace=output_name,
-                                                          XMin=mask_params[0], XMax=mask_params[1])
+                                                          XMin=mask_params[0],
+                                                          XMax=mask_params[1])
     return output_workspaces
 
 
@@ -66,8 +67,11 @@ def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None)
     err_message = "The field '" + str(key) + "' is required within the calibration file but was not found."
     err_message += '\n' + str(append_to_error_message) if append_to_error_message else ''
 
-    return dictionary_key_helper(dictionary=dictionary, key=key, throws=True,
-                                 case_insensitive=True, exception_msg=err_message)
+    return dictionary_key_helper(dictionary=dictionary,
+                                 key=key,
+                                 throws=True,
+                                 case_insensitive=True,
+                                 exception_msg=err_message)
 
 
 def crop_banks_using_crop_list(bank_list, crop_values_list):
@@ -174,8 +178,11 @@ def extract_ws_spectra(ws_to_split):
     for i in range(0, num_spectra):
         output_name = ws_to_split.name() + "-" + str(i + 1)
         # Have to use crop workspace as extract single spectrum struggles with the variable bin widths
-        spectra_bank_list.append(mantid.CropWorkspace(InputWorkspace=ws_to_split, OutputWorkspace=output_name,
-                                                      StartWorkspaceIndex=i, EndWorkspaceIndex=i))
+        spectra_bank_list.append(
+            mantid.CropWorkspace(InputWorkspace=ws_to_split,
+                                 OutputWorkspace=output_name,
+                                 StartWorkspaceIndex=i,
+                                 EndWorkspaceIndex=i))
     return spectra_bank_list
 
 
@@ -358,8 +365,7 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
 
     instrument.mask_prompt_pulses_if_necessary(raw_ws_list)
 
-    normalised_ws_list = _normalise_workspaces(ws_list=raw_ws_list, run_details=run_information,
-                                               instrument=instrument)
+    normalised_ws_list = _normalise_workspaces(ws_list=raw_ws_list, run_details=run_information, instrument=instrument)
 
     return normalised_ws_list
 
@@ -416,8 +422,7 @@ def rebin_workspace_list(workspace_list, bin_width_list, start_x_list=None, end_
 
     output_list = []
     for ws, bin_width, start_x, end_x in zip(workspace_list, bin_width_list, start_x_list, end_x_list):
-        output_list.append(rebin_workspace(workspace=ws, new_bin_width=bin_width,
-                                           start_x=start_x, end_x=end_x))
+        output_list.append(rebin_workspace(workspace=ws, new_bin_width=bin_width, start_x=start_x, end_x=end_x))
 
     return output_list
 
@@ -447,8 +452,8 @@ def run_normalise_by_current(ws):
         ws = mantid.NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
     else:
         warnings.warn(
-            "Run {} had no current. NormaliseByCurrent will not be run on it, and empty will not be subtracted".
-            format(ws.getRunNumber()))
+            "Run {} had no current. NormaliseByCurrent will not be run on it, and empty will not be subtracted".format(
+                ws.getRunNumber()))
     return ws
 
 
@@ -504,11 +509,14 @@ def generate_summed_runs(empty_sample_ws_string, instrument, scale_factor=None):
     :return: The summed and normalised empty runs
     """
 
-    empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
+    empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string,
+                                                   instrument=instrument,
                                                    input_batching=INPUT_BATCHING.Summed)
     empty_sample = empty_sample[0]
     if scale_factor:
-        empty_sample = mantid.Scale(InputWorkspace=empty_sample, OutputWorkspace=empty_sample, Factor=scale_factor,
+        empty_sample = mantid.Scale(InputWorkspace=empty_sample,
+                                    OutputWorkspace=empty_sample,
+                                    Factor=scale_factor,
                                     Operation="Multiply")
     return empty_sample
 
@@ -527,8 +535,9 @@ def subtract_summed_runs(ws_to_correct, empty_sample):
         try:
             mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample, OutputWorkspace=ws_to_correct)
         except ValueError:
-            raise ValueError("The empty run(s) specified for this file do not have matching binning. Do the TOF windows of"
-                             " the empty and sample match?")
+            raise ValueError(
+                "The empty run(s) specified for this file do not have matching binning. Do the TOF windows of"
+                " the empty and sample match?")
     else:
         ws_to_correct = copy.deepcopy(ws_to_correct)
 
@@ -590,8 +599,7 @@ def _crop_single_ws_in_tof(ws_to_rebin, x_max, x_min):
         x_axis = ws_to_rebin.dataX(0)
         x_min = x_axis[0] * (1 + x_min)
         x_max = x_axis[-1] * x_max
-    cropped_ws = mantid.CropWorkspace(InputWorkspace=ws_to_rebin, OutputWorkspace=ws_to_rebin,
-                                      XMin=x_min, XMax=x_max)
+    cropped_ws = mantid.CropWorkspace(InputWorkspace=ws_to_rebin, OutputWorkspace=ws_to_rebin, XMin=x_min, XMax=x_max)
     if previous_units != "TOF":
         cropped_ws = mantid.ConvertUnits(InputWorkspace=cropped_ws, Target=previous_units, OutputWorkspace=cropped_ws)
     return cropped_ws
@@ -692,10 +700,12 @@ def generate_sample_geometry(sample_details):
     :param sample_details: Instance of SampleDetails containing details about sample geometry and material
     :return: A map of the sample geometry
     """
-    return {'Shape': 'Cylinder',
-            'Height': sample_details.height(),
-            'Radius': sample_details.radius(),
-            'Center': sample_details.center()}
+    return {
+        'Shape': 'Cylinder',
+        'Height': sample_details.height(),
+        'Radius': sample_details.radius(),
+        'Center': sample_details.center()
+    }
 
 
 def generate_sample_material(sample_details):

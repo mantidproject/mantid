@@ -260,7 +260,7 @@ _translations = {
     'Sam Tygier': 'Tygier, Sam',
     'Silke Schomann': 'Schomann, Silke',
     'Jenna Delozier': 'Delozier, Jenna',
-    'Cole Kendrick':  'Kendrick, Cole',
+    'Cole Kendrick': 'Kendrick, Cole',
     'Zhang, Chen': 'Zhang, Chen'
 }
 
@@ -268,41 +268,17 @@ _translations = {
 # to be used in the case where a Git user has multiple accounts; a translation
 # entry would suffice in such an instance.
 _blacklist = [
-    '',
-    'unknown',
-    'Yao, Marie',
-    'Utkarsh Ayachit',
-    'Chris Kerr',
-    'Thomas Brooks',
-    'mantid-builder',
-    'Erik B Knudsen',
-    'Bartomeu Llopis',
-    'dpaj',
-    'Daniel Pajerowski',
-    'thomueller',
-    'luz.paz',
-    'davidvoneshen',
-    'dependabot[bot]'
+    '', 'unknown', 'Yao, Marie', 'Utkarsh Ayachit', 'Chris Kerr', 'Thomas Brooks', 'mantid-builder', 'Erik B Knudsen',
+    'Bartomeu Llopis', 'dpaj', 'Daniel Pajerowski', 'thomueller', 'luz.paz', 'davidvoneshen', 'dependabot[bot]'
 ]
 
 # The whitelist is used for sponsors / contributors who should be included,
 # but who are not listed as authors on Git.  These names will be shown in the
 # "main" DOI only.
 whitelist = [
-    'Cottrell, Stephen',
-    'Dillow, David',
-    'Hagen, Mark',
-    'Hillier, Adrian',
-    'Heller, William',
-    'Howells, Spencer',
-    'McGreevy, Robert',
-    'Pascal, Manuel',
-    'Perring, Toby',
-    'Pratt, Francis',
-    'Proffen, Thomas',
-    'Radaelli, Paolo',
-    'Taylor, Jon',
-    'Granroth, Garrett'
+    'Cottrell, Stephen', 'Dillow, David', 'Hagen, Mark', 'Hillier, Adrian', 'Heller, William', 'Howells, Spencer',
+    'McGreevy, Robert', 'Pascal, Manuel', 'Perring, Toby', 'Pratt, Francis', 'Proffen, Thomas', 'Radaelli, Paolo',
+    'Taylor, Jon', 'Granroth, Garrett'
 ]
 
 
@@ -312,7 +288,6 @@ def run_from_script_dir(func):
     can be sure that calls to "git tag" and "git log" still work, even if this
     script is called from outside the Git tree.
     '''
-
     def change_dir_wrapper(*args, **kwargs):
         cwd = os.getcwd()
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -343,10 +318,8 @@ def _clean_up_author_list(author_list):
     # Make sure there are no names in Git without a corresponding translation.
     untranslated = set(filterfalse(_translations.keys().__contains__, result))
     if untranslated:
-        raise Exception(
-            'No translation exists for the following Git author(s): \n'
-            + '\n'.join(untranslated) + '\n'
-            + 'Please edit the translations table accordingly.')
+        raise Exception('No translation exists for the following Git author(s): \n' + '\n'.join(untranslated) + '\n' +
+                        'Please edit the translations table accordingly.')
 
     # Translate all remaining names.
     result = [_translations[a] for a in result]
@@ -364,13 +337,7 @@ def _authors_from_tag_info(tag_info):
     '''Given some tag/commit information, will return the corresponding Git
     authors.
     '''
-    args = [
-        'git', 'log',
-        '--pretty=short',
-        tag_info,
-        '--format="%aN"',
-        '--reverse'
-    ]
+    args = ['git', 'log', '--pretty=short', tag_info, '--format="%aN"', '--reverse']
 
     authors = subprocess.getoutput(args).replace('"', '').split('\n')
     return _clean_up_author_list(authors)
@@ -432,8 +399,7 @@ def get_version_from_git_tag(tag):
         match_text = re.match(long_regexp, tag).group(0)
         a, b, c, = [int(x) for x in re.findall(r'\d+', match_text)]
     else:
-        raise RuntimeError(
-            "Unable to parse version information from \"" + tag + "\"")
+        raise RuntimeError("Unable to parse version information from \"" + tag + "\"")
     return '{0}.{1}.{2}'.format(a, b, c)
 
 

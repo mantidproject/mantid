@@ -13,7 +13,6 @@ import math
 
 class MRGetTheta(PythonAlgorithm):
     """ Get the theta scattering angle for the Magnetism Reflectometer """
-
     def category(self):
         """ Return category """
         return "Reflectometry\\SNS"
@@ -29,8 +28,10 @@ class MRGetTheta(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties """
         self.declareProperty(WorkspaceProperty("Workspace", "", Direction.Input), "Workspace containing MR data")
-        self.declareProperty("AngleOffset", 0.,FloatBoundedValidator(lower=0.), "Angle offset (rad)")
-        self.declareProperty("UseSANGLE", False, doc="If True, use SANGLE as the scattering angle. If False, use DANGLE.")
+        self.declareProperty("AngleOffset", 0., FloatBoundedValidator(lower=0.), "Angle offset (rad)")
+        self.declareProperty("UseSANGLE",
+                             False,
+                             doc="If True, use SANGLE as the scattering angle. If False, use DANGLE.")
         self.declareProperty("SpecularPixel", 0., doc="Pixel position of the specular reflectivity [optional]")
         self.declareProperty("DirectPixelOverwrite", Property.EMPTY_DBL, doc="DIRPIX overwrite value")
         self.declareProperty("DAngle0Overwrite", Property.EMPTY_DBL, doc="DANGLE0 overwrite value (degrees)")
@@ -39,7 +40,7 @@ class MRGetTheta(PythonAlgorithm):
 
     def PyExec(self):
         """ Main execution body """
-        _w=self.getProperty("Workspace").value
+        _w = self.getProperty("Workspace").value
 
         angle_offset = self.getProperty("AngleOffset").value
         dirpix_overwrite = self.getProperty("DirectPixelOverwrite").value
@@ -84,11 +85,20 @@ class MRGetTheta(PythonAlgorithm):
             :param str target_units: units to convert to
             :param str assumed_units: units of origin, if not specified in the log itself
         """
-        _units = {'m': {'mm': 1000.0,},
-                  'mm': {'m': 0.001,},
-                  'deg': {'rad': math.pi/180.,},
-                  'rad': {'deg': 180./math.pi,},
-                  }
+        _units = {
+            'm': {
+                'mm': 1000.0,
+            },
+            'mm': {
+                'm': 0.001,
+            },
+            'deg': {
+                'rad': math.pi / 180.,
+            },
+            'rad': {
+                'deg': 180. / math.pi,
+            },
+        }
         prop = ws.getRun().getProperty(name)
         value = prop.getStatistics().mean
 

@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-
 """
 System test for MDNorm
 """
@@ -16,17 +15,17 @@ import systemtesting
 
 class MDNormHYSPECTest(systemtesting.MantidSystemTest):
 
-    tolerance=1e-8
+    tolerance = 1e-8
 
     def requiredMemoryMB(self):
         return 5000
 
     def requiredFiles(self):
-        return ['HYS_13656_event.nxs','HYS_13657_event.nxs','HYS_13658_event.nxs']
+        return ['HYS_13656_event.nxs', 'HYS_13657_event.nxs', 'HYS_13658_event.nxs']
 
     def runTest(self):
         config.setFacility('SNS')
-        Load(Filename='HYS_13656-13658',OutputWorkspace='sum')
+        Load(Filename='HYS_13656-13658', OutputWorkspace='sum')
         SetGoniometer(Workspace='sum', Axis0='s1,0,1,0,1')
         GenerateEventsFilter(InputWorkspace='sum',
                              OutputWorkspace='splboth',
@@ -53,16 +52,8 @@ class MDNormHYSPECTest(systemtesting.MantidSystemTest):
                      TibTofRangeStart=10400,
                      TibTofRangeEnd=12400,
                      OutputWorkspace='reduced')
-        SetUB(Workspace='reduced',
-              a=5.823,
-              b=6.475,
-              c=3.186,
-              u='0,1,0',
-              v='0,0,1')
-        CropWorkspaceForMDNorm(InputWorkspace='reduced',
-                               XMin=-25,
-                               XMax=49,
-                               OutputWorkspace='reduced')
+        SetUB(Workspace='reduced', a=5.823, b=6.475, c=3.186, u='0,1,0', v='0,0,1')
+        CropWorkspaceForMDNorm(InputWorkspace='reduced', XMin=-25, XMax=49, OutputWorkspace='reduced')
         ConvertToMD(InputWorkspace='reduced',
                     QDimensions='Q3D',
                     Q3DFrames='Q_sample',
@@ -94,4 +85,4 @@ class MDNormHYSPECTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-8
-        return 'result','MDNormHYSPEC.nxs'
+        return 'result', 'MDNormHYSPEC.nxs'

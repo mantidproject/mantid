@@ -12,19 +12,16 @@ from mantid.kernel import PhysicalConstants as const
 
 
 class StandardSC(IFunction1D):
-
     def category(self):
         return "Muon\\MuonGeneric"
 
     def init(self):
-        self.declareParameter(
-            "A0", 0.16, 'Amplitude of interal field oscillation')
+        self.declareParameter("A0", 0.16, 'Amplitude of interal field oscillation')
         self.declareParameter("Sigma", 0.2, 'Gaussian decay rate')
         self.declareParameter("FieldSC", 300.0, 'Internal Field (G)')
         self.declareParameter("FieldBG", 300.0, 'External Field (G)')
         self.declareParameter("Phi", 0.0, 'Phase')
-        self.declareParameter(
-            "Abg", 0.1, 'Amplitude of external field oscillation')
+        self.declareParameter("Abg", 0.1, 'Amplitude of external field oscillation')
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
@@ -36,7 +33,7 @@ class StandardSC(IFunction1D):
         gamma_mu = const.MuonGyromagneticRatio
         omegaSC = FieldSC * gamma_mu * 2 * np.pi
         omegaBG = FieldBG * gamma_mu * 2 * np.pi
-        return A0 * np.exp(- 0.5 * sigma * sigma * x * x) * np.cos(omegaSC * x + phi) + Abg * np.cos(omegaBG * x + phi)
+        return A0 * np.exp(-0.5 * sigma * sigma * x * x) * np.cos(omegaSC * x + phi) + Abg * np.cos(omegaBG * x + phi)
 
 
 FunctionFactory.subscribe(StandardSC)

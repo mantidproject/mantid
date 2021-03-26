@@ -37,12 +37,11 @@ import warnings
 import inspect
 from reduction.find_data import find_data
 
-
 ## Version number
 __version__ = '1.0'
 
 
-def validate_loader(func): # noqa
+def validate_loader(func):  # noqa
     def validated_f(reducer, algorithm, *args, **kwargs):
         if issubclass(algorithm.__class__, ReductionStep) or algorithm is None:
             # If we have a ReductionStep object, just use it.
@@ -84,14 +83,15 @@ def validate_loader(func): # noqa
                             if data_file is None:
                                 return
                         else:
-                            raise RuntimeError("SANSReductionSteps.LoadRun doesn't recognize workspace handle %s" % inputworkspace)
+                            raise RuntimeError("SANSReductionSteps.LoadRun doesn't recognize workspace handle %s" %
+                                               inputworkspace)
                     else:
                         data_file = self._data_file
 
                     alg = mantid.api.AlgorithmManager.create(algorithm)
                     if not isinstance(alg, mantid.api.IAlgorithm):
-                        raise RuntimeError("Reducer expects an Algorithm object from FrameworkManager, found '%s'" % str(
-                            type(alg)))
+                        raise RuntimeError("Reducer expects an Algorithm object from FrameworkManager, found '%s'" %
+                                           str(type(alg)))
 
                     propertyOrder = alg.orderedProperties()
 
@@ -122,6 +122,7 @@ def validate_loader(func): # noqa
 
         elif isinstance(algorithm, mantid.api.IAlgorithm) \
                 or type(algorithm).__name__ == "IAlgorithm":
+
             class _AlgorithmStep(ReductionStep):
                 def __init__(self):
                     self.algorithm = algorithm
@@ -151,7 +152,8 @@ def validate_loader(func): # noqa
                             if data_file is None:
                                 return
                         else:
-                            raise RuntimeError("SANSReductionSteps.LoadRun doesn't recognize workspace handle %s" % inputworkspace)
+                            raise RuntimeError("SANSReductionSteps.LoadRun doesn't recognize workspace handle %s" %
+                                               inputworkspace)
                     else:
                         data_file = self._data_file
 
@@ -180,7 +182,7 @@ def validate_loader(func): # noqa
     return validated_f
 
 
-def validate_step(func): # noqa
+def validate_step(func):  # noqa
     """
         Decorator for Reducer methods that need a ReductionStep
         object as its first argument.
@@ -198,7 +200,6 @@ def validate_step(func): # noqa
         InputWorkspace and OutputWorkspace arguments can be left as None
         if they are to be overwritten by the Reducer.
     """
-
     def validated_f(reducer, algorithm, *args, **kwargs):
         """
             Wrapper function around the function func.
@@ -242,8 +243,8 @@ def validate_step(func): # noqa
                         outputworkspace = inputworkspace
                     alg = mantid.AlgorithmManager.create(algorithm)
                     if not isinstance(alg, mantid.api.IAlgorithm):
-                        raise RuntimeError("Reducer expects an Algorithm object from FrameworkManager, found '%s'" % str(
-                            type(alg)))
+                        raise RuntimeError("Reducer expects an Algorithm object from FrameworkManager, found '%s'" %
+                                           str(type(alg)))
 
                     propertyOrder = alg.orderedProperties()
 
@@ -270,6 +271,7 @@ def validate_step(func): # noqa
 
         elif isinstance(algorithm, mantid.api.IAlgorithm) \
                 or type(algorithm).__name__ == "IAlgorithm":
+
             class _AlgorithmStep(ReductionStep):
                 def __init__(self):
                     self.algorithm = algorithm
@@ -356,8 +358,8 @@ class Reducer(object):
         if issubclass(configuration.__class__, Instrument):
             self.instrument = configuration
         else:
-            raise RuntimeError("Reducer.set_instrument expects an %s object, found %s" % (
-                Instrument, configuration.__class__))
+            raise RuntimeError("Reducer.set_instrument expects an %s object, found %s" %
+                               (Instrument, configuration.__class__))
 
     def dirty(self, workspace):
         """
@@ -545,7 +547,6 @@ class ReductionStep(object):
     """
         Base class for reduction steps
     """
-
     @classmethod
     def delete_workspaces(cls, workspace):
         """
@@ -568,7 +569,8 @@ class ReductionStep(object):
             Implemented the reduction step.
             @param reducer: Reducer object for which the step is executed
             @param inputworkspace: Name of the workspace to apply this step to
-            @param outputworkspace: Name of the workspace to have as an output. If this is None it will be set to inputworkspace
+            @param outputworkspace: Name of the workspace to have as an output. If this is None it will be set to
+             inputworkspace
         """
         raise NotImplementedError
 

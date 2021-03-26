@@ -42,34 +42,49 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
 
         # wrong filename
         with self.assertRaises(ValueError):
-            abins.SCalculatorFactory.init(filename=1, temperature=self._temperature, sample_form=self._sample_form,
-                                          abins_data=good_data, instrument=self._instrument,
+            abins.SCalculatorFactory.init(filename=1,
+                                          temperature=self._temperature,
+                                          sample_form=self._sample_form,
+                                          abins_data=good_data,
+                                          instrument=self._instrument,
                                           quantum_order_num=self._order_event)
 
         # wrong temperature
         with self.assertRaises(ValueError):
-            abins.SCalculatorFactory.init(filename=full_path_filename, temperature=-1, sample_form=self._sample_form,
-                                          abins_data=good_data, instrument=self._instrument,
+            abins.SCalculatorFactory.init(filename=full_path_filename,
+                                          temperature=-1,
+                                          sample_form=self._sample_form,
+                                          abins_data=good_data,
+                                          instrument=self._instrument,
                                           quantum_order_num=self._order_event)
 
         # wrong sample
         with self.assertRaises(ValueError):
-            abins.SCalculatorFactory.init(filename=full_path_filename, temperature=self._temperature,
-                                          sample_form="SOLID", abins_data=good_data, instrument=self._instrument,
+            abins.SCalculatorFactory.init(filename=full_path_filename,
+                                          temperature=self._temperature,
+                                          sample_form="SOLID",
+                                          abins_data=good_data,
+                                          instrument=self._instrument,
                                           quantum_order_num=self._order_event)
 
         # wrong abins data: content of abins data instead of object abins_data
         with self.assertRaises(ValueError):
-            abins.SCalculatorFactory.init(filename=full_path_filename, temperature=self._temperature,
-                                          sample_form=self._sample_form, abins_data=good_data.extract(),
-                                          instrument=self._instrument, quantum_order_num=self._order_event)
+            abins.SCalculatorFactory.init(filename=full_path_filename,
+                                          temperature=self._temperature,
+                                          sample_form=self._sample_form,
+                                          abins_data=good_data.extract(),
+                                          instrument=self._instrument,
+                                          quantum_order_num=self._order_event)
 
         # wrong instrument
         with self.assertRaises(ValueError):
             # noinspection PyUnusedLocal
-            abins.SCalculatorFactory.init(filename=full_path_filename, temperature=self._temperature,
-                                          sample_form=self._sample_form, abins_data=good_data.extract(),
-                                          instrument=self._instrument, quantum_order_num=self._order_event)
+            abins.SCalculatorFactory.init(filename=full_path_filename,
+                                          temperature=self._temperature,
+                                          sample_form=self._sample_form,
+                                          abins_data=good_data.extract(),
+                                          instrument=self._instrument,
+                                          quantum_order_num=self._order_event)
 
     #  main test
     def test_good_case(self):
@@ -79,27 +94,31 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
     def _good_case(self, name=None):
         # calculation of powder data
         good_data = self._get_good_data(filename=name)
-        good_tester = abins.SCalculatorFactory.init(
-            filename=abins.test_helpers.find_file(filename=name + ".phonon"), temperature=self._temperature,
-            sample_form=self._sample_form, abins_data=good_data["DFT"], instrument=self._instrument,
-            quantum_order_num=self._order_event)
+        good_tester = abins.SCalculatorFactory.init(filename=abins.test_helpers.find_file(filename=name + ".phonon"),
+                                                    temperature=self._temperature,
+                                                    sample_form=self._sample_form,
+                                                    abins_data=good_data["DFT"],
+                                                    instrument=self._instrument,
+                                                    quantum_order_num=self._order_event)
         calculated_data = good_tester.get_formatted_data()
 
         self._check_data(good_data=good_data["S"], data=calculated_data.extract())
 
         # check if loading powder data is correct
-        new_tester = abins.SCalculatorFactory.init(
-            filename=abins.test_helpers.find_file(filename=name + ".phonon"), temperature=self._temperature,
-            sample_form=self._sample_form, abins_data=good_data["DFT"], instrument=self._instrument,
-            quantum_order_num=self._order_event)
+        new_tester = abins.SCalculatorFactory.init(filename=abins.test_helpers.find_file(filename=name + ".phonon"),
+                                                   temperature=self._temperature,
+                                                   sample_form=self._sample_form,
+                                                   abins_data=good_data["DFT"],
+                                                   instrument=self._instrument,
+                                                   quantum_order_num=self._order_event)
         loaded_data = new_tester.load_formatted_data()
 
         self._check_data(good_data=good_data["S"], data=loaded_data.extract())
 
     def _get_good_data(self, filename=None):
 
-        castep_reader = abins.input.CASTEPLoader(
-            input_ab_initio_filename=abins.test_helpers.find_file(filename=filename + ".phonon"))
+        castep_reader = abins.input.CASTEPLoader(input_ab_initio_filename=abins.test_helpers.find_file(
+            filename=filename + ".phonon"))
         s_data = self._prepare_data(filename=abins.test_helpers.find_file(filename=filename + "_S.txt"))
 
         return {"DFT": castep_reader.read_vibrational_or_phonon_data(), "S": s_data}
@@ -109,12 +128,9 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
         """Reads a correct values from ASCII file."""
         with open(filename) as data_file:
             # noinspection PyPep8
-            correct_data = json.loads(data_file.read().replace("\\n", " ").
-                                      replace("array",    "").
-                                      replace("([",  "[").
-                                      replace("])",  "]").
-                                      replace("'",  '"').
-                                      replace("0. ", "0.0"))
+            correct_data = json.loads(data_file.read().replace("\\n",
+                                                               " ").replace("array", "").replace("([", "[").replace(
+                                                                   "])", "]").replace("'", '"').replace("0. ", "0.0"))
 
         temp = np.asarray(correct_data["frequencies"])
         correct_data["frequencies"] = temp

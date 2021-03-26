@@ -94,15 +94,17 @@ class IO(object):
         from abins.parameters import non_performance_parameters as current_advanced_parameters
 
         previous_advanced_parameters = self.load(list_of_attributes=["advanced_parameters"])
-        previous_advanced_parameters = json.loads(
-            previous_advanced_parameters["attributes"]["advanced_parameters"])
+        previous_advanced_parameters = json.loads(previous_advanced_parameters["attributes"]["advanced_parameters"])
 
-        diff = {key: (value, previous_advanced_parameters.get(key, None))
-                for key, value in current_advanced_parameters.items()
-                if previous_advanced_parameters.get(key, None) != value}
-        diff.update({key: (None, value)
-                     for key, value in previous_advanced_parameters.items()
-                     if key not in current_advanced_parameters})
+        diff = {
+            key: (value, previous_advanced_parameters.get(key, None))
+            for key, value in current_advanced_parameters.items()
+            if previous_advanced_parameters.get(key, None) != value
+        }
+        diff.update({
+            key: (None, value)
+            for key, value in previous_advanced_parameters.items() if key not in current_advanced_parameters
+        })
 
         if diff:
             sections = ('instruments', 'sampling', 'hdf_groups')
@@ -168,8 +170,7 @@ class IO(object):
         self.add_attribute("hash", self._hash_input_filename)
         self.add_attribute("setting", self._setting)
         self.add_attribute("filename", self._input_filename)
-        self.add_attribute("advanced_parameters",
-                           json.dumps(abins.parameters.non_performance_parameters))
+        self.add_attribute("advanced_parameters", json.dumps(abins.parameters.non_performance_parameters))
 
     def add_data(self, name=None, value=None):
         """
@@ -191,9 +192,8 @@ class IO(object):
                 group.attrs[name] = self._attributes[name]
             else:
                 raise ValueError("Invalid value of attribute. String, "
-                                 "int or bytes was expected! "
-                                 + name
-                                 + "= (invalid type : %s) " % type(self._attributes[name]))
+                                 "int or bytes was expected! " + name +
+                                 "= (invalid type : %s) " % type(self._attributes[name]))
 
     def _recursively_save_structured_data_to_group(self, hdf_file=None, path=None, dic=None):
         """
@@ -268,8 +268,8 @@ class IO(object):
             path = os.getcwd()
             temp_file = self._hdf_filename[self._hdf_filename.find(".")] + "temphgfrt.hdf5"
 
-            subprocess.check_call(["h5repack" + " -i " + os.path.join(path, self._hdf_filename)
-                                   + " -o " + os.path.join(path, temp_file)])
+            subprocess.check_call(
+                ["h5repack" + " -i " + os.path.join(path, self._hdf_filename) + " -o " + os.path.join(path, temp_file)])
 
             shutil.move(os.path.join(path, temp_file), os.path.join(path, self._hdf_filename))
         except OSError:
@@ -289,8 +289,7 @@ class IO(object):
         if list_str is None:
             return False
 
-        if not (isinstance(list_str, list)
-                and all([isinstance(list_str[item], str) for item in range(len(list_str))])):
+        if not (isinstance(list_str, list) and all([isinstance(list_str[item], str) for item in range(len(list_str))])):
             raise ValueError("Invalid list of items to load!")
 
         return True

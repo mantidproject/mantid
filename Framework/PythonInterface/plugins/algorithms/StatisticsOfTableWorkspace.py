@@ -31,7 +31,6 @@ def _stats_to_dict(stats):
 
 
 class StatisticsOfTableWorkspace(PythonAlgorithm):
-
     def category(self):
         return 'Utility\\Workspaces'
 

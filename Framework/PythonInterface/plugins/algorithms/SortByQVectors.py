@@ -16,12 +16,11 @@ class SortByQVectors(PythonAlgorithm):
     Sorts spectra from a workspace
 
     """
-
     def category(self):
         return "Transforms\\Merging;Utility\\Sorting"
 
     def seeAlso(self):
-        return [ "SortDetectors" ]
+        return ["SortDetectors"]
 
     def name(self):
         return "SortByQVectors"
@@ -73,7 +72,7 @@ class SortByQVectors(PythonAlgorithm):
             for norm, spec in sortStat:
                 ms.ExtractSingleSpectrum(InputWorkspace=wsName, OutputWorkspace=wsTemp, WorkspaceIndex=spec)
                 if wsOutput in mtd:
-                    ms.ConjoinWorkspaces(InputWorkspace1=wsOutput,InputWorkspace2=wsTemp,CheckOverlapping=False)
+                    ms.ConjoinWorkspaces(InputWorkspace1=wsOutput, InputWorkspace2=wsTemp, CheckOverlapping=False)
                     if wsTemp in mtd:
                         ms.DeleteWorkspace(Workspace=wsTemp)
                 else:
@@ -83,7 +82,7 @@ class SortByQVectors(PythonAlgorithm):
             loopIndex = 0
             wsOut = mtd[wsOutput]
             for norm, spec in sortStat:
-                wsOut.getSpectrum(loopIndex).setSpectrumNo(int(norm*1000))
+                wsOut.getSpectrum(loopIndex).setSpectrumNo(int(norm * 1000))
                 loopIndex = loopIndex + 1
             if len(yUnit) > 0:
                 wsOut.getAxis(1).setUnit(yUnit)

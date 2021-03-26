@@ -43,7 +43,7 @@ def get_full_path_SANS_system_test(filename):
 
 class SANSFileCheckingTest(unittest.TestCase):
     def _do_test(self, file_name, expected_time):
-        exists, full_path =  get_full_path_SANS_system_test(file_name)
+        exists, full_path = get_full_path_SANS_system_test(file_name)
         if exists:
             measurement_time = su.get_measurement_time_from_file(full_path)
             self.assertEqual(measurement_time, expected_time)
@@ -90,7 +90,7 @@ class SANSFileCheckingTest(unittest.TestCase):
 
 class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
     def _get_idf_path_for_workspace(self, filename, instrument_name):
-        exists, full_path =  get_full_path_SANS_system_test(filename)
+        exists, full_path = get_full_path_SANS_system_test(filename)
         idf_path_workspace = None
         if exists:
             measurement_time = su.get_measurement_time_from_file(full_path)
@@ -159,7 +159,7 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
         LARMOR("LARMOR_Definition_19000000-20150317.xml")
         MaskFile('USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt')
         Set1D()
-        instrument_name ="LARMOR"
+        instrument_name = "LARMOR"
         filename = 'LARMOR00000063.nxs'
         idf_workspace = self._get_idf_path_for_workspace(filename, instrument_name)
         idf_reducer_before = ReductionSingleton().get_idf_file_path()

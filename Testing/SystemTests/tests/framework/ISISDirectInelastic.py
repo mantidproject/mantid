@@ -39,8 +39,7 @@ class ISISDirectInelasticReduction(systemtesting.MantidSystemTest, metaclass=ABC
     @abstractmethod
     def get_reference_file(self):
         """Returns the name of the reference file to compare against"""
-        raise NotImplementedError("Implement get_reference_file to return "
-                                  "the name of the file to compare against.")
+        raise NotImplementedError("Implement get_reference_file to return " "the name of the file to compare against.")
 
     @abstractmethod
     def get_result_workspace(self):
@@ -49,7 +48,8 @@ class ISISDirectInelasticReduction(systemtesting.MantidSystemTest, metaclass=ABC
     @abstractmethod
     def runTest(self):
         """Defines the workflow for the test"""
-     # rename workspace to the name expected by unit test framework
+
+    # rename workspace to the name expected by unit test framework
 
     def validate(self):
         """Returns the name of the workspace & file to compare"""
@@ -76,13 +76,13 @@ class ISISDirectInelasticReduction(systemtesting.MantidSystemTest, metaclass=ABC
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)
         # this is temporary parameter
-        self.scale_to_fix_abf=1
+        self.scale_to_fix_abf = 1
+
 
 #------------------------- MARI tests -------------------------------------------------
 
 
 class MARIReductionFromFile(ISISDirectInelasticReduction):
-
     def __init__(self):
         ISISDirectInelasticReduction.__init__(self)
 
@@ -91,14 +91,14 @@ class MARIReductionFromFile(ISISDirectInelasticReduction):
         self.red = ReduceMARIFromFile()
         self.red.def_advanced_properties()
         self.red.def_main_properties()
-    # temporary fix to account for different monovan integral
+        # temporary fix to account for different monovan integral
         self.scale_to_fix_abf = 1
 
     def runTest(self):
         #self.red.run_reduction()
         #pylint: disable=unused-variable
         outWS = self.red.reduce()
-        outWS*=self.scale_to_fix_abf
+        outWS *= self.scale_to_fix_abf
 
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
@@ -109,7 +109,6 @@ class MARIReductionFromFile(ISISDirectInelasticReduction):
 
 
 class MARIReductionAutoEi(ISISDirectInelasticReduction):
-
     def __init__(self):
         ISISDirectInelasticReduction.__init__(self)
 
@@ -118,7 +117,7 @@ class MARIReductionAutoEi(ISISDirectInelasticReduction):
         self.red = ReduceMARIAutoEi()
         self.red.def_advanced_properties()
         self.red.def_main_properties()
-    # temporary fix to account for different monovan integral
+        # temporary fix to account for different monovan integral
         self.scale_to_fix_abf = 1
         self.tolerance = 1e-6
         self.ws_name = "outWS"
@@ -128,7 +127,7 @@ class MARIReductionAutoEi(ISISDirectInelasticReduction):
         #pylint: disable=unused-variable
         outWS = self.red.reduce()
         outWS = outWS[0]
-        outWS*=self.scale_to_fix_abf
+        outWS *= self.scale_to_fix_abf
         self.ws_name = outWS.name()
 
     def get_result_workspace(self):
@@ -140,7 +139,7 @@ class MARIReductionAutoEi(ISISDirectInelasticReduction):
 
 
 class MARIReductionFromFileCache(ISISDirectInelasticReduction):
-    _counter=0
+    _counter = 0
 
     def __init__(self):
         ISISDirectInelasticReduction.__init__(self)
@@ -151,7 +150,7 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
         self.red = ReduceMARIFromFile()
         self.red.def_advanced_properties()
         self.red.def_main_properties()
-        self.counter=0
+        self.counter = 0
 
     def prepare_test_file(self):
         """ This method will run instead of pause and
@@ -159,7 +158,7 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
           appearance of this file from instrument
       """
 
-        self._counter+=1
+        self._counter += 1
         if self._counter == 1:
             # first step -- nothing happens. No target file
             # the script reports "waiting for file"
@@ -169,11 +168,11 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
             # second step. File is there but log have not been updated
             # nothing happens, the script reports "waiting for file"
             print('******  Fake pause. step: 2. Fake nxs file created to ignore')
-            source =  FileFinder.findRuns('MAR11001')[0]
+            source = FileFinder.findRuns('MAR11001')[0]
             targ_path = config['defaultsave.directory']
-            targ_file = os.path.join(targ_path,'MAR11002.nxs')
-            shutil.copy2(source ,targ_file )
-            self._file_to_clear +=[targ_file]
+            targ_file = os.path.join(targ_path, 'MAR11002.nxs')
+            shutil.copy2(source, targ_file)
+            self._file_to_clear += [targ_file]
             return
         if self._counter == 3:
             # this is fake step as logs should be updated
@@ -182,58 +181,58 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
             # of the code: invalid extension found
             print('******  Fake pause. step: 3. Run log updated but file is not there')
             test_log = self._test_log_file
-            with open(test_log ,'w') as fh:
+            with open(test_log, 'w') as fh:
                 fh.write('MAR 11002 0 \n')
             m_time = os.path.getmtime(test_log)
             # Update modification time manually as Unix may
             # run the test too fast and mtime will be the same
             # as the log has been generated initially
-            m_time  = m_time +1
-            os.utime(test_log,(m_time,m_time))
+            m_time = m_time + 1
+            os.utime(test_log, (m_time, m_time))
             return
 
-        if self._counter>= 4:
+        if self._counter >= 4:
             print('******  Fake pause. step: {0}. Created fake source. Reduction should run'.format(self._counter))
 
-            source =  FileFinder.findRuns('MAR11001')[0]
+            source = FileFinder.findRuns('MAR11001')[0]
             targ_path = config['defaultsave.directory']
-            targ_file = os.path.join(targ_path,'MAR11002.raw')
-            shutil.copy2(source ,targ_file )
+            targ_file = os.path.join(targ_path, 'MAR11002.raw')
+            shutil.copy2(source, targ_file)
             # Reduction should run now
 
-            self._file_to_clear +=[targ_file]
+            self._file_to_clear += [targ_file]
             #self._counter = 0
 
     def runTest(self):
         self.red.wait_for_file = 10
         self.red._debug_wait_for_files_operation = self.prepare_test_file
-        self._counter=0
+        self._counter = 0
 
         # Add test log files, which mimicks information,
         # recorded when file have been added to archive
         test_dir = config.getString('defaultsave.directory')
-        test_log = os.path.join(test_dir,'lastrun.txt')
+        test_log = os.path.join(test_dir, 'lastrun.txt')
         self._test_log_file = test_log
-        with open(test_log,'w') as fh:
+        with open(test_log, 'w') as fh:
             fh.write('MAR 11001 0 \n')
         self._file_to_clear = [test_log]
 
         self.red.reducer.prop_man.archive_upload_log_file = test_log
-        self.red.reducer.prop_man.sample_run = [11001,11002]
-       # self.red.reducer.background_range = (10000,12000)
+        self.red.reducer.prop_man.sample_run = [11001, 11002]
+        # self.red.reducer.background_range = (10000,12000)
         MARreducedRuns = self.red.run_reduction()
 
-        RenameWorkspace(InputWorkspace=MARreducedRuns[0],OutputWorkspace='MARreducedFromFile')
-        RenameWorkspace(InputWorkspace=MARreducedRuns[1],OutputWorkspace='MARreducedWithCach')
+        RenameWorkspace(InputWorkspace=MARreducedRuns[0], OutputWorkspace='MARreducedFromFile')
+        RenameWorkspace(InputWorkspace=MARreducedRuns[1], OutputWorkspace='MARreducedWithCach')
 
-        self.red.wait_for_file =0
+        self.red.wait_for_file = 0
         self.red._debug_wait_for_files_operation = None
         for file in self._file_to_clear:
             os.remove(file)
 
     def validate(self):
         """Returns the name of the workspace & file to compare"""
-        super(MARIReductionFromFileCache,self).validate()
+        super(MARIReductionFromFileCache, self).validate()
         self.tolerance = 1e-9
         return 'MARreducedFromFile', 'MARreducedWithCach'
 
@@ -249,7 +248,6 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
 
 
 class MARIReductionFromWorkspace(ISISDirectInelasticReduction):
-
     def __init__(self):
         ISISDirectInelasticReduction.__init__(self)
 
@@ -264,9 +262,9 @@ class MARIReductionFromWorkspace(ISISDirectInelasticReduction):
     def runTest(self):
         """Defines the workflow for the test"""
         #pylint: disable=unused-variable
-        outWS=self.red.reduce()
+        outWS = self.red.reduce()
         # temporary fix to account for different monovan integral
-        outWS*=self.scale_to_fix_abf
+        outWS *= self.scale_to_fix_abf
 
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
@@ -277,7 +275,6 @@ class MARIReductionFromWorkspace(ISISDirectInelasticReduction):
 
 
 class MARIReductionMon2Norm(ISISDirectInelasticReduction):
-
     def __init__(self):
         ISISDirectInelasticReduction.__init__(self)
 
@@ -290,11 +287,11 @@ class MARIReductionMon2Norm(ISISDirectInelasticReduction):
     def runTest(self):
         """Defines the workflow for the test"""
         #pylint: disable=unused-variable
-        outWS=self.red.reduce()
+        outWS = self.red.reduce()
         # As we compare with workspace, normalized by current, this is the difference
         # between current and monitor-2 normalization in this particular case
         # (well within round-off)
-        outWS*=0.991886
+        outWS *= 0.991886
 
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
@@ -304,13 +301,12 @@ class MARIReductionMon2Norm(ISISDirectInelasticReduction):
         return "MARIReduction.nxs"
 
     def validate(self):
-        result,reference = super(MARIReductionMon2Norm,self).validate()
+        result, reference = super(MARIReductionMon2Norm, self).validate()
         self.tolerance = 1e-3
-        return result,reference
+        return result, reference
 
 
 class MARIReductionMonSeparate(ISISDirectInelasticReduction):
-
     def __init__(self):
         ISISDirectInelasticReduction.__init__(self)
         # This test has not been run properly so reference file is kind-of
@@ -329,7 +325,7 @@ class MARIReductionMonSeparate(ISISDirectInelasticReduction):
         # temporary fix cross-influence of tests for MARI. changes to nex ticket make this unnecessary
         PropertyManager.mono_correction_factor.set_cash_mono_run_number(None)
         #pylint: disable=unused-variable
-        outWS=self.red.reduce()
+        outWS = self.red.reduce()
         # temporary fix to account for different monovan integral
         #outWS*=0.997966051169129
         self.ws_name = outWS.name()
@@ -345,7 +341,6 @@ class MARIReductionMonSeparate(ISISDirectInelasticReduction):
 
 
 class MARIReductionSum(ISISDirectInelasticReduction):
-
     def __init__(self):
 
         ISISDirectInelasticReduction.__init__(self)
@@ -360,7 +355,7 @@ class MARIReductionSum(ISISDirectInelasticReduction):
         It verifies operation on summing two files on demand. No absolute units
         """
         #pylint: disable=unused-variable
-        outWS=self.red.reduce()
+        outWS = self.red.reduce()
         #outWS*=1.00001556766686
         self.ws_name = outWS.name()
 
@@ -373,7 +368,6 @@ class MARIReductionSum(ISISDirectInelasticReduction):
 
 
 class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
-
     def __init__(self):
 
         ISISDirectInelasticReduction.__init__(self)
@@ -382,7 +376,7 @@ class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
         self.red = MARIReductionSum()
         self.red.def_advanced_properties()
         self.red.def_main_properties()
-        self._counter=0
+        self._counter = 0
         self._file_to_clear = ''
 
     def prepare_test_file(self):
@@ -390,12 +384,12 @@ class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
           would copy run file 11015 into 11002 emulating
           appearance of this file from instrument
       """
-        self._counter+=1
-        if self._counter>= 3:
-            source =  FileFinder.findRuns('MAR11015')[0]
+        self._counter += 1
+        if self._counter >= 3:
+            source = FileFinder.findRuns('MAR11015')[0]
             targ_path = config['defaultsave.directory']
-            targ_file = os.path.join(targ_path,'MAR11002.raw')
-            shutil.copy2(source ,targ_file )
+            targ_file = os.path.join(targ_path, 'MAR11002.raw')
+            shutil.copy2(source, targ_file)
 
             self._file_to_clear = targ_file
             self._counter = 0
@@ -406,21 +400,21 @@ class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
       files appearing on data search path
       """
         targ_path = config['defaultsave.directory']
-        self._file_to_clear = os.path.join(targ_path,'MAR11002.raw')
+        self._file_to_clear = os.path.join(targ_path, 'MAR11002.raw')
         if os.path.exists(self._file_to_clear):
             os.remove(self._file_to_clear)
             self._file_to_clear = ''
 
         self.red.wait_for_file = 100
         self.red._debug_wait_for_files_operation = self.prepare_test_file
-        self._counter=0
+        self._counter = 0
 
-        self.red.reducer.prop_man.sample_run=[11001,11002]
+        self.red.reducer.prop_man.sample_run = [11001, 11002]
         #pylint: disable=unused-variable
         outWS = self.red.run_reduction()
         self.ws_name = outWS.name()
 
-        self.red.wait_for_file =0
+        self.red.wait_for_file = 0
         self.red._debug_wait_for_files_operation = None
         os.remove(self._file_to_clear)
 
@@ -431,11 +425,11 @@ class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
     def get_reference_file(self):
         return "MARIReductionSum.nxs"
 
+
 #------------------------- MAPS tests -------------------------------------------------
 
 
 class MAPSDgreduceReduction(ISISDirectInelasticReduction):
-
     def requiredMemoryMB(self):
         """Far too slow for managed workspaces. They're tested in other places. Requires 10Gb"""
         return 10000
@@ -444,14 +438,14 @@ class MAPSDgreduceReduction(ISISDirectInelasticReduction):
         ISISDirectInelasticReduction.__init__(self)
 
         from ISIS_MAPS_DGSReduction import ReduceMAPS
-        self.ws_name=''
+        self.ws_name = ''
         self.red = ReduceMAPS()
         self.red.def_advanced_properties()
         self.red.def_main_properties()
 
     def runTest(self):
         #pylint: disable=unused-variable
-        outWS=self.red.reduce()
+        outWS = self.red.reduce()
         #New WBI value 0.02720959162181584
         #Old WBI Value 0.027209867107187088
         # fix old system test.
@@ -471,8 +465,8 @@ class MAPSDgreduceReduction(ISISDirectInelasticReduction):
 
 #------------------------- MERLIN tests -------------------------------------------------
 
-class MERLINReduction(ISISDirectInelasticReduction):
 
+class MERLINReduction(ISISDirectInelasticReduction):
     def requiredMemoryMB(self):
         """Far too slow for managed workspaces. They're tested in other places. Requires 16Gb"""
         return 16000
@@ -509,13 +503,14 @@ class MERLINReduction(ISISDirectInelasticReduction):
         reference = self.get_reference_file()
         return result, reference
 
+
 #------------------------- LET tests -------------------------------------------------
 #
 
 
 class LETReduction(systemtesting.MantidSystemTest):
     tolerance = 1e-6
-    tolerance_is_rel_err=True
+    tolerance_is_rel_err = True
 
     def requiredMemoryMB(self):
         """Far too slow for managed workspaces. They're tested in other places. Requires 2Gb"""
@@ -532,7 +527,7 @@ class LETReduction(systemtesting.MantidSystemTest):
         red.def_main_properties()
         red.def_advanced_properties()
         #pylint: disable=unused-variable
-        outWS=red.reduce()
+        outWS = red.reduce()
         self.ws_name = outWS.name()
 
     def validate(self):
@@ -568,8 +563,8 @@ class LETReductionEvent2015Multirep(systemtesting.MantidSystemTest):
         red.def_main_properties()
 
         #pylint: disable=unused-variable
-        out_ws_list=red.run_reduction()
-        self.ws_names=[ws.name() for ws in out_ws_list]
+        out_ws_list = red.run_reduction()
+        self.ws_names = [ws.name() for ws in out_ws_list]
 
         #for ind,ws in enumerate(out_ws_list):
         #  ws *=mults[ind]
@@ -580,4 +575,4 @@ class LETReductionEvent2015Multirep(systemtesting.MantidSystemTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
 
-        return self.ws_names[0],"LET14305_3_4meV2015.nxs",self.ws_names[1], "LET14305_8_0meV2015.nxs"
+        return self.ws_names[0], "LET14305_3_4meV2015.nxs", self.ws_names[1], "LET14305_8_0meV2015.nxs"

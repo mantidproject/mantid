@@ -13,10 +13,8 @@ from mantidqt.utils.qt import import_qt
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 
 # Import widget from C++ wrappers
-_InstrumentWidgetEncoder = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview',
-                                     'InstrumentWidgetEncoder')
-_InstrumentWidgetDecoder = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview',
-                                     'InstrumentWidgetDecoder')
+_InstrumentWidgetEncoder = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview', 'InstrumentWidgetEncoder')
+_InstrumentWidgetDecoder = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview', 'InstrumentWidgetDecoder')
 
 
 class InstrumentViewAttributes(object):

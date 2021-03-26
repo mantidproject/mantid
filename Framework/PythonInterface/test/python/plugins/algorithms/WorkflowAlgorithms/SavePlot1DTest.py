@@ -27,12 +27,25 @@ except:
 
 class SavePlot1DTest(unittest.TestCase):
     def makeWs(self):
-        simpleapi.CreateWorkspace(OutputWorkspace='test1', DataX='1,2,3,4,5,1,2,3,4,5', DataY='1,2,3,4,2,3,4,5',
-                                  DataE='1,2,3,4,2,3,4,5', NSpec='2', UnitX='dSpacing', Distribution='1', YUnitlabel="S(q)")
-        simpleapi.CreateWorkspace(OutputWorkspace='test2', DataX='1,2,3,4,5,1,2,3,4,5', DataY='1,2,3,4,2,3,4,5',
-                                  DataE='1,2,3,4,2,3,4,5', NSpec='2',
-                                  UnitX='Momentum', VerticalAxisUnit='TOF', VerticalAxisValues='1,2', Distribution='1',
-                                  YUnitLabel='E', WorkspaceTitle='x')
+        simpleapi.CreateWorkspace(OutputWorkspace='test1',
+                                  DataX='1,2,3,4,5,1,2,3,4,5',
+                                  DataY='1,2,3,4,2,3,4,5',
+                                  DataE='1,2,3,4,2,3,4,5',
+                                  NSpec='2',
+                                  UnitX='dSpacing',
+                                  Distribution='1',
+                                  YUnitlabel="S(q)")
+        simpleapi.CreateWorkspace(OutputWorkspace='test2',
+                                  DataX='1,2,3,4,5,1,2,3,4,5',
+                                  DataY='1,2,3,4,2,3,4,5',
+                                  DataE='1,2,3,4,2,3,4,5',
+                                  NSpec='2',
+                                  UnitX='Momentum',
+                                  VerticalAxisUnit='TOF',
+                                  VerticalAxisValues='1,2',
+                                  Distribution='1',
+                                  YUnitLabel='E',
+                                  WorkspaceTitle='x')
         simpleapi.GroupWorkspaces("test1,test2", OutputWorkspace="group")
         self.plotfile = os.path.join(config.getString('defaultsave.directory'), 'plot.png')
 
@@ -64,7 +77,6 @@ class SavePlot1DTest(unittest.TestCase):
         div = simpleapi.SavePlot1D(InputWorkspace='test1', OutputType='plotly')
         self.cleanup()
         self.assertGreater(len(div), 0)  # confirm result is non-empty
-
 
     @unittest.skipIf(not havePlotly, 'Do not have plotly installed')
     def testPlotlyGroup(self):

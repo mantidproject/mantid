@@ -29,7 +29,7 @@ def create_simple_workspace(data_x, data_y, run_number=0):
 
 class MuonFileUtilsTest(unittest.TestCase):
     def test_get_run_from_multi_period_data(self):
-        simple_workspace = create_simple_workspace(data_x=[1,2,3,4], data_y=[10,20,30,40], run_number=74044)
+        simple_workspace = create_simple_workspace(data_x=[1, 2, 3, 4], data_y=[10, 20, 30, 40], run_number=74044)
         workspace_list = [simple_workspace] * 5
 
         run_number = utils.get_run_from_multi_period_data(workspace_list)
@@ -81,12 +81,10 @@ class MuonFileUtilsTest(unittest.TestCase):
         ConfigService.Instance().setString("default.facility", " ")
 
     def test_load_workspace_from_filename_for_file_path(self):
-        filename = 'PSI'+ os.sep + 'run_1529_templs0.mon'
-        inputs = {
-              "DeadTimeTable": "__notUsed",
-              "DetectorGroupingTable": "__notUsed"}
+        filename = 'PSI' + os.sep + 'run_1529_templs0.mon'
+        inputs = {"DeadTimeTable": "__notUsed", "DetectorGroupingTable": "__notUsed"}
 
-        alg, _ = utils.create_load_algorithm(filename,inputs)
+        alg, _ = utils.create_load_algorithm(filename, inputs)
         self.assertTrue(filename in alg.getProperty("Filename").value)
 
 

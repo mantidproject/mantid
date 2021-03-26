@@ -12,44 +12,43 @@ from mantid.api import PythonAlgorithm
 
 
 class RebinParamsValidatorTest(unittest.TestCase):
-
     def test_default_constructor(self):
         alg = self._create_alg_with_RebinParamsValidator()
         input = []
         self.assertRaises(ValueError, alg.setProperty, "Input", input)
-        input = [0.7,1.3]
+        input = [0.7, 1.3]
         self.assertRaises(ValueError, alg.setProperty, "Input", input)
-        input = [0.7,0.2,2.9]
+        input = [0.7, 0.2, 2.9]
         testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", input)
-        input = [0.7,0.2,2.9,1.5]
+        input = [0.7, 0.2, 2.9, 1.5]
         self.assertRaises(ValueError, alg.setProperty, "Input", input)
-        input = [0.7,0.2,2.9,1.5,5.1]
+        input = [0.7, 0.2, 2.9, 1.5, 5.1]
         testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", input)
 
     def test_allow_empty(self):
         alg = self._create_alg_with_RebinParamsValidator(True)
         input = []
         testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", input)
-        input = [0.7,1.3]
+        input = [0.7, 1.3]
         self.assertRaises(ValueError, alg.setProperty, "Input", input)
-        input = [0.7,0.2,2.9]
+        input = [0.7, 0.2, 2.9]
         testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", input)
-        input = [0.7,0.2,2.9,1.5]
+        input = [0.7, 0.2, 2.9, 1.5]
         self.assertRaises(ValueError, alg.setProperty, "Input", input)
-        input = [0.7,0.2,2.9,1.5,5.1]
+        input = [0.7, 0.2, 2.9, 1.5, 5.1]
         testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", input)
 
     def test_allow_empty_and_allow_ranges(self):
         alg = self._create_alg_with_RebinParamsValidator(True, True)
         input = []
         testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", input)
-        input = [0.7,1.3]
+        input = [0.7, 1.3]
         testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", input)
-        input = [0.7,0.2,2.9]
+        input = [0.7, 0.2, 2.9]
         testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", input)
-        input = [0.7,0.2,2.9,1.5]
+        input = [0.7, 0.2, 2.9, 1.5]
         self.assertRaises(ValueError, alg.setProperty, "Input", input)
-        input = [0.7,0.2,2.9,1.5,5.1]
+        input = [0.7, 0.2, 2.9, 1.5, 5.1]
         testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", input)
 
     def _create_alg_with_RebinParamsValidator(self, allow_empty=None, allow_ranges=None):
@@ -57,7 +56,6 @@ class RebinParamsValidatorTest(unittest.TestCase):
             Creates a test algorithm with the validator
         """
         class TestAlgorithm(PythonAlgorithm):
-
             def PyInit(self):
                 if not allow_empty:
                     if not allow_ranges:
@@ -75,6 +73,7 @@ class RebinParamsValidatorTest(unittest.TestCase):
         alg = TestAlgorithm()
         alg.initialize()
         return alg
+
 
 if __name__ == '__main__':
     unittest.main()

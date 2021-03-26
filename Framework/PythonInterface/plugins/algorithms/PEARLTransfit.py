@@ -121,10 +121,7 @@ class PEARLTransfit(PythonAlgorithm):
                              validator=StringListValidator(['Hf01', 'Hf02', 'Ta10', 'Irp6', 'Iro5', 'Iro9']),
                              direction=Direction.Input,
                              doc="Type of foil included with the sample")
-        self.declareProperty(name='Ediv',
-                             defaultValue='0.0025',
-                             direction=Direction.Input,
-                             doc="Energy step in eV")
+        self.declareProperty(name='Ediv', defaultValue='0.0025', direction=Direction.Input, doc="Energy step in eV")
         self.declareProperty(name='ReferenceTemp',
                              defaultValue='290',
                              direction=Direction.Input,
@@ -162,10 +159,10 @@ class PEARLTransfit(PythonAlgorithm):
         TD = self.ResParamsDict[foilType + '_TD']
         # Energy parameters are in eV
         energy = self.ResParamsDict[foilType + '_En']
-        TwogG = self.ResParamsDict[foilType+'_TwogG']
-        Gg = self.ResParamsDict[foilType+'_Gg']
-        startE = self.ResParamsDict[foilType+'_startE']
-        endE = self.ResParamsDict[foilType+'_endE']
+        TwogG = self.ResParamsDict[foilType + '_TwogG']
+        Gg = self.ResParamsDict[foilType + '_Gg']
+        startE = self.ResParamsDict[foilType + '_startE']
+        endE = self.ResParamsDict[foilType + '_endE']
         refTemp = float(self.getProperty("ReferenceTemp").value)
         isDebug = self.getProperty("Debug").value
 
@@ -183,7 +180,7 @@ class PEARLTransfit(PythonAlgorithm):
         # Define the gaussian width at the reference temperature
         # Factor of 1e3 converting to meV for Mantid
 
-        width_300 = 1000.0 * np.sqrt(4 * energy * self.k * refTemp * mass / (self.e * (1 + mass) ** 2))
+        width_300 = 1000.0 * np.sqrt(4 * energy * self.k * refTemp * mass / (self.e * (1 + mass)**2))
 
         # ----------------------------------------------------------
         # Perform fits based on whether isCalib is flagged (calibration or measurement)
@@ -197,10 +194,12 @@ class PEARLTransfit(PythonAlgorithm):
             wsBgGuess = mtd[fileName_monitor]
             bg0guess = 0.86 * wsBgGuess.readY(0)[0]
             # New Voigt function as from Igor pro function
-            Fit(Function='name=PEARLTransVoigt,Position=' + str(peakPosGuess) + ',LorentzianFWHM=' + str(
-                lorentzFWHM) + ',GaussianFWHM=' + str(width_300) + ',Amplitude=1.6,Bg0=' + str(
-                bg0guess) + ',Bg1=0.0063252,Bg2=0,constraints=(1<LorentzianFWHM,' + str(width_300)
-                + '<GaussianFWHM)', InputWorkspace=fileName_monitor, MaxIterations=200, Output='S_fit')
+            Fit(Function='name=PEARLTransVoigt,Position=' + str(peakPosGuess) + ',LorentzianFWHM=' + str(lorentzFWHM) +
+                ',GaussianFWHM=' + str(width_300) + ',Amplitude=1.6,Bg0=' + str(bg0guess) +
+                ',Bg1=0.0063252,Bg2=0,constraints=(1<LorentzianFWHM,' + str(width_300) + '<GaussianFWHM)',
+                InputWorkspace=fileName_monitor,
+                MaxIterations=200,
+                Output='S_fit')
             #
             DeleteWorkspace('S_fit_NormalisedCovarianceMatrix')
             DeleteWorkspace(fileName_monitor)
@@ -218,26 +217,27 @@ class PEARLTransfit(PythonAlgorithm):
                 gaussianFWHM_inst = 0
             #
             # New Voigt function as from Igor pro function
-            Fit(Function='name=PEARLTransVoigt,Position=' + str(S_fit.column(1)[0]) + ',LorentzianFWHM='
-                         + str(lorentzFWHM) + ',GaussianFWHM=' + str(gaussianFWHM) + ',Amplitude='
-                         + str(S_fit.column(1)[3]) + ',Bg0=' + str(S_fit.column(1)[4]) + ',Bg1='
-                         + str(S_fit.column(1)[5]) + ',Bg2=' + str(S_fit.column(1)[6]) + ',constraints=('
-                         + str(gaussianFWHM) + '<GaussianFWHM),ties=(LorentzianFWHM=' + str(lorentzFWHM) + ')',
-                InputWorkspace=fnNoExt + '_monitor', MaxIterations=200, Output='T_fit')
+            Fit(Function='name=PEARLTransVoigt,Position=' + str(S_fit.column(1)[0]) + ',LorentzianFWHM=' +
+                str(lorentzFWHM) + ',GaussianFWHM=' + str(gaussianFWHM) + ',Amplitude=' + str(S_fit.column(1)[3]) +
+                ',Bg0=' + str(S_fit.column(1)[4]) + ',Bg1=' + str(S_fit.column(1)[5]) + ',Bg2=' +
+                str(S_fit.column(1)[6]) + ',constraints=(' + str(gaussianFWHM) +
+                '<GaussianFWHM),ties=(LorentzianFWHM=' + str(lorentzFWHM) + ')',
+                InputWorkspace=fnNoExt + '_monitor',
+                MaxIterations=200,
+                Output='T_fit')
             #
             DeleteWorkspace('T_fit_NormalisedCovarianceMatrix')
             DeleteWorkspace(fnNoExt + '_monitor')
             T_fit = mtd['T_fit_Parameters']
             gaussian_FWHM_fitted = T_fit.column(1)[2]
-            width_T = np.sqrt(gaussian_FWHM_fitted ** 2 - gaussianFWHM_inst ** 2)
+            width_T = np.sqrt(gaussian_FWHM_fitted**2 - gaussianFWHM_inst**2)
             # Factor of 1e-3 converts back from meV to eV
-            Teff = (((width_T * 1e-3) ** 2) * self.e * ((1 + mass) ** 2)) / (4 * 1e-3 * T_fit.column(1)[0] * self.k
-                                                                             * mass)
-            Teff_low = ((((width_T - T_fit.column(2)[2]) * 1e-3) ** 2) * self.e
-                        * ((1 + mass) ** 2))/(4 * 1e-3 * (T_fit.column(1)[0] + T_fit.column(2)[0]) * self.k * mass)
+            Teff = (((width_T * 1e-3)**2) * self.e * ((1 + mass)**2)) / (4 * 1e-3 * T_fit.column(1)[0] * self.k * mass)
+            Teff_low = ((((width_T - T_fit.column(2)[2]) * 1e-3)**2) * self.e *
+                        ((1 + mass)**2)) / (4 * 1e-3 * (T_fit.column(1)[0] + T_fit.column(2)[0]) * self.k * mass)
             Teff_high = ((((width_T + T_fit.column(2)[2]) * 1e-3) ** 2) * self.e * ((1 + mass) ** 2)) /\
                         (4 * 1e-3 * (T_fit.column(1)[0] - T_fit.column(2)[0]) * self.k * mass)
-            errTeff = 0.5*(Teff_high-Teff_low)
+            errTeff = 0.5 * (Teff_high - Teff_low)
             # ----------------------------------------------------------
             # If the temperature is too far below the Debye temperature, then the result is inaccurate. Else the
             # temperature is calculated assuming free gas formulation
@@ -248,7 +248,7 @@ class PEARLTransfit(PythonAlgorithm):
                 Tactual = Teff
                 Terror = errTeff
             else:
-                Tactual = 3 * TD / (4 * np.log((8 * Teff + 3 * TD)/(8 * Teff - 3 * TD)))
+                Tactual = 3 * TD / (4 * np.log((8 * Teff + 3 * TD) / (8 * Teff - 3 * TD)))
                 Tactual_high = 3 * TD / (4 * np.log((8 * (Teff + errTeff) + 3 * TD) / (8 * (Teff + errTeff) - 3 * TD)))
                 Tactual_low = 3 * TD / (4 * np.log((8 * (Teff - errTeff) + 3 * TD) / (8 * (Teff - errTeff) - 3 * TD)))
                 Terror = 0.5 * (np.abs(Tactual - Tactual_high) + np.abs(Tactual - Tactual_low))
@@ -262,20 +262,20 @@ class PEARLTransfit(PythonAlgorithm):
                 self.log().information("-----------------------------")
                 self.log().information("Debugging....")
                 self.log().information("The Debye temperature is " + str(TD) + " K")
-                self.log().information("The effective temperature is: {:.1f}"
-                                       .format(Teff) + "+/- {:.1f}".format(errTeff) + " K")
+                self.log().information("The effective temperature is: {:.1f}".format(Teff) +
+                                       "+/- {:.1f}".format(errTeff) + " K")
                 self.log().information("Energy bin width set to " + str(1000 * divE) + " meV")
                 self.log().information("E range is between " + str(startE) + " and " + str(endE))
-                self.log().information("Gaussian width at this reference temperature is: {:.2f}".format(width_300)
-                                       + " meV")
-                self.log().information("Lorentzian FWHM is fixed: {:.2f}".format(lorentzFWHM)+" meV")
+                self.log().information("Gaussian width at this reference temperature is: {:.2f}".format(width_300) +
+                                       " meV")
+                self.log().information("Lorentzian FWHM is fixed: {:.2f}".format(lorentzFWHM) + " meV")
                 self.log().information("Gaussian FWHM is fitted as: {:.2f}".format(gaussian_FWHM_fitted) + " meV")
                 self.log().information("Instrumental contribution is: {:.2f}".format(gaussianFWHM_inst) + " meV")
                 self.log().information("Temperature contribution is: {:.2f}".format(width_T) + " meV")
                 self.log().information("-----------------------------")
 
-            self.log().information("Sample temperature is: {:.1f}".format(Tactual) + " +/- {:.1f}".format(Terror)
-                                   + " K")
+            self.log().information("Sample temperature is: {:.1f}".format(Tactual) + " +/- {:.1f}".format(Terror) +
+                                   " K")
             if Terror_flag == 1:
                 self.log().information("(the default error, as determined error unphysically small)")
 
@@ -308,9 +308,10 @@ class PEARLTransfit(PythonAlgorithm):
         if isSingleFile:
             RenameWorkspace(InputWorkspace=firstFileName + '_3', OutputWorkspace=firstFileName + '_monitor')
         else:
-            noFiles = len(files) ** (-1)
+            noFiles = len(files)**(-1)
             CreateSingleValuedWorkspace(OutputWorkspace='scale', DataValue=noFiles)
-            Multiply(LHSWorkspace=firstFileName + '_3', RHSWorkspace='scale',
+            Multiply(LHSWorkspace=firstFileName + '_3',
+                     RHSWorkspace='scale',
                      OutputWorkspace=firstFileName + '_monitor')
             DeleteWorkspace('scale')
             DeleteWorkspace(firstFileName + '_3')

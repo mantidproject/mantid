@@ -15,10 +15,10 @@ from sans.test_helper.mock_objects import (create_run_tab_presenter_mock)
 
 class DiagnosticsPagePresenterTest(unittest.TestCase):
     def setUp(self):
-        self.parent_presenter = create_run_tab_presenter_mock(use_fake_state = False)
+        self.parent_presenter = create_run_tab_presenter_mock(use_fake_state=False)
         self.view = create_mock_diagnostics_tab()
         self.state = mock.MagicMock()
-        self.create_state = mock.MagicMock(return_value = self.state)
+        self.create_state = mock.MagicMock(return_value=self.state)
         self.WorkHandler = mock.MagicMock()
         self.run_integral = mock.MagicMock()
         self.presenter = DiagnosticsPagePresenter(self.parent_presenter, self.WorkHandler, self.run_integral,

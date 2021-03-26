@@ -4,11 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantiddoc.directives.base import AlgorithmBaseDirective #pylint: disable=unused-import
+from mantiddoc.directives.base import AlgorithmBaseDirective  #pylint: disable=unused-import
 
 
 class SummaryDirective(AlgorithmBaseDirective):
-
     """
     Obtains the summary for a given algorithm based on it's name.
     """
@@ -24,6 +23,7 @@ class SummaryDirective(AlgorithmBaseDirective):
         self.add_rst(alg.summary())
 
         return []
+
 
 def setup(app):
     """

@@ -32,25 +32,41 @@ class MatchPeaksTest(unittest.TestCase):
         spectrum_0 = CreateSampleWorkspace(Function='User Defined',
                                            WorkspaceType='Histogram',
                                            UserDefinedFunction=func0,
-                                           NumBanks=1, BankPixelWidth=1,
-                                           XUnit='DeltaE', XMin=0, XMax=7, BinWidth=0.099,
+                                           NumBanks=1,
+                                           BankPixelWidth=1,
+                                           XUnit='DeltaE',
+                                           XMin=0,
+                                           XMax=7,
+                                           BinWidth=0.099,
                                            OutputWorkspace=_input_ws_0)
         spectrum_1 = CreateSampleWorkspace(Function='User Defined',
                                            WorkspaceType='Histogram',
                                            UserDefinedFunction=func1,
-                                           NumBanks=1, BankPixelWidth=1,
-                                           XUnit='DeltaE', XMin=0, XMax=7, BinWidth=0.099,
+                                           NumBanks=1,
+                                           BankPixelWidth=1,
+                                           XUnit='DeltaE',
+                                           XMin=0,
+                                           XMax=7,
+                                           BinWidth=0.099,
                                            OutputWorkspace=_input_ws_1)
         spectrum_2 = CreateSampleWorkspace(Function='User Defined',
                                            WorkspaceType='Histogram',
                                            UserDefinedFunction=func2,
-                                           NumBanks=1, BankPixelWidth=1,
-                                           XUnit='DeltaE', XMin=0, XMax=7, BinWidth=0.099,
+                                           NumBanks=1,
+                                           BankPixelWidth=1,
+                                           XUnit='DeltaE',
+                                           XMin=0,
+                                           XMax=7,
+                                           BinWidth=0.099,
                                            OutputWorkspace=_input_ws_2)
         spectrum_3 = CreateSampleWorkspace(Function='Flat background',
                                            WorkspaceType='Histogram',
-                                           NumBanks=1, BankPixelWidth=1,
-                                           XUnit='DeltaE', XMin=0, XMax=7, BinWidth=0.099,
+                                           NumBanks=1,
+                                           BankPixelWidth=1,
+                                           XUnit='DeltaE',
+                                           XMin=0,
+                                           XMax=7,
+                                           BinWidth=0.099,
                                            OutputWorkspace=_input_ws_3)
 
         AppendSpectra(InputWorkspace1=spectrum_0, InputWorkspace2=spectrum_1, OutputWorkspace=self._ws_shift)
@@ -63,8 +79,12 @@ class MatchPeaksTest(unittest.TestCase):
         CreateSampleWorkspace(Function='User Defined',
                               WorkspaceType='Histogram',
                               UserDefinedFunction=func3,
-                              NumBanks=4, BankPixelWidth=1,
-                              XUnit='DeltaE', XMin=0, XMax=7, BinWidth=0.099,
+                              NumBanks=4,
+                              BankPixelWidth=1,
+                              XUnit='DeltaE',
+                              XMin=0,
+                              XMax=7,
+                              BinWidth=0.099,
                               OutputWorkspace=self._ws_in_2)
 
         # Input workspace 3
@@ -73,22 +93,34 @@ class MatchPeaksTest(unittest.TestCase):
         CreateSampleWorkspace(Function='User Defined',
                               WorkspaceType='Histogram',
                               UserDefinedFunction=func4,
-                              NumBanks=4, BankPixelWidth=1,
-                              XUnit='DeltaE', XMin=0, XMax=7, BinWidth=0.099,
+                              NumBanks=4,
+                              BankPixelWidth=1,
+                              XUnit='DeltaE',
+                              XMin=0,
+                              XMax=7,
+                              BinWidth=0.099,
                               OutputWorkspace=self._ws_in_3)
 
         # Input workspaces that are incompatible
         self._in1 = 'wrong_number_of_histograms'
         CreateSampleWorkspace(Function='Flat background',
                               WorkspaceType='Histogram',
-                              NumBanks=1, BankPixelWidth=1,
-                              XUnit='DeltaE', XMin=0, XMax=7, BinWidth=0.1,
+                              NumBanks=1,
+                              BankPixelWidth=1,
+                              XUnit='DeltaE',
+                              XMin=0,
+                              XMax=7,
+                              BinWidth=0.1,
                               OutputWorkspace=self._in1)
         self._in2 = 'wrong_number_of_bins'
         CreateSampleWorkspace(Function='Flat background',
                               WorkspaceType='Histogram',
-                              NumBanks=4, BankPixelWidth=1,
-                              XUnit='DeltaE', XMin=0, XMax=8, BinWidth=0.1,
+                              NumBanks=4,
+                              BankPixelWidth=1,
+                              XUnit='DeltaE',
+                              XMin=0,
+                              XMax=8,
+                              BinWidth=0.1,
                               OutputWorkspace=self._in2)
 
         # mtd[self._ws_shift].blocksize() = 70
@@ -132,11 +164,13 @@ class MatchPeaksTest(unittest.TestCase):
         with self.assertRaises(RuntimeError) as contextManager:
             self._args['InputWorkspace2'] = self._in1
             run_algorithm('MatchPeaks', **self._args)
-        self.assertEqual('Some invalid Properties found: [ InputWorkspace2 InputWorkspace3 ]', str(contextManager.exception))
+        self.assertEqual('Some invalid Properties found: [ InputWorkspace2 InputWorkspace3 ]',
+                         str(contextManager.exception))
         with self.assertRaises(RuntimeError) as contextManager:
             self._args['InputWorkspace2'] = self._in2
             run_algorithm('MatchPeaks', **self._args)
-        self.assertEqual('Some invalid Properties found: [ InputWorkspace2 InputWorkspace3 ]', str(contextManager.exception))
+        self.assertEqual('Some invalid Properties found: [ InputWorkspace2 InputWorkspace3 ]',
+                         str(contextManager.exception))
 
     def testValidateInputWorkspace3(self):
         self._args['InputWorkspace'] = self._ws_shift
@@ -144,7 +178,8 @@ class MatchPeaksTest(unittest.TestCase):
         self._args['OutputWorkspace'] = 'output'
         with self.assertRaises(RuntimeError) as contextManager:
             run_algorithm('MatchPeaks', **self._args)
-        self.assertEqual('Some invalid Properties found: [ InputWorkspace2 InputWorkspace3 ]', str(contextManager.exception))
+        self.assertEqual('Some invalid Properties found: [ InputWorkspace2 InputWorkspace3 ]',
+                         str(contextManager.exception))
 
     def testMatchCenter(self):
         # Input workspace should match its center
@@ -200,7 +235,7 @@ class MatchPeaksTest(unittest.TestCase):
     def testNoMasking(self):
         self._args['InputWorkspace'] = self._ws_shift
         self._args['OutputWorkspace'] = 'output'
-        self._args['MaskBins'] = False # this is the default behaviour
+        self._args['MaskBins'] = False  # this is the default behaviour
         alg_test = run_algorithm('MatchPeaks', **self._args)
         self.assertTrue(alg_test.isExecuted())
         not_masked = AnalysisDataService.retrieve('output')
@@ -250,8 +285,8 @@ class MatchPeaksTest(unittest.TestCase):
         shifted = AnalysisDataService.retrieve('output')
         bin_range_table = AnalysisDataService.retrieve('bin_range')
         fit_table = FindEPP(shifted)
-        self.assertEqual(32-7, shifted.yIndexOfX(fit_table.row(0)["PeakCentre"]))
-        self.assertEqual(40-7, np.argmax(shifted.readY(2)))
+        self.assertEqual(32 - 7, shifted.yIndexOfX(fit_table.row(0)["PeakCentre"]))
+        self.assertEqual(40 - 7, np.argmax(shifted.readY(2)))
         # Bin range
         self.assertEqual(0, bin_range_table.row(0)["MinBin"])
         self.assertEqual(62, bin_range_table.row(0)["MaxBin"])
@@ -274,8 +309,8 @@ class MatchPeaksTest(unittest.TestCase):
         shifted = AnalysisDataService.retrieve('output')
         bin_range_table = AnalysisDataService.retrieve('bin_range')
         fit_table = FindEPP(shifted)
-        self.assertEqual(32+17, shifted.yIndexOfX(fit_table.row(0)["PeakCentre"]))
-        self.assertEqual(40+17, np.argmax(shifted.readY(2)))
+        self.assertEqual(32 + 17, shifted.yIndexOfX(fit_table.row(0)["PeakCentre"]))
+        self.assertEqual(40 + 17, np.argmax(shifted.readY(2)))
         # Bin range
         self.assertEqual(17, bin_range_table.row(0)["MinBin"])
         self.assertEqual(70, bin_range_table.row(0)["MaxBin"])
@@ -298,5 +333,6 @@ class MatchPeaksTest(unittest.TestCase):
         self.assertTrue(test_ws.getRun().getLogData(), "Should have SampleLogs")
         self.assertTrue(test_ws.getHistory().lastAlgorithm(), "Should have AlgorithmsHistory")
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     unittest.main()

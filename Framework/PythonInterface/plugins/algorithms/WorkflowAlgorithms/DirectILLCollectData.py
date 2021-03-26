@@ -13,8 +13,9 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, In
 from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator,
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
 from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CorrectTOFAxis, CreateEPP,
-                              CreateSingleValuedWorkspace, CreateWorkspace, CropWorkspace, DeleteWorkspace, ExtractMonitors,
-                              FindEPP, GetEiMonDet, LoadAndMerge, Minus, NormaliseToMonitor, Scale, SetInstrumentParameter)
+                              CreateSingleValuedWorkspace, CreateWorkspace, CropWorkspace, DeleteWorkspace,
+                              ExtractMonitors, FindEPP, GetEiMonDet, LoadAndMerge, Minus, NormaliseToMonitor, Scale,
+                              SetInstrumentParameter)
 import numpy
 
 _MONSUM_LIMIT = 100
@@ -55,14 +56,12 @@ def _applyIncidentEnergyCalibration(ws, eiWS, wsNames, report, algorithmLogging)
 
 def _calculateEPP(ws, sigma, wsNames, algorithmLogging):
     eppWSName = wsNames.withSuffix('epp_detectors')
-    eppWS = CreateEPP(InputWorkspace=ws,
-                      OutputWorkspace=eppWSName,
-                      Sigma=sigma,
-                      EnableLogging=algorithmLogging)
+    eppWS = CreateEPP(InputWorkspace=ws, OutputWorkspace=eppWSName, Sigma=sigma, EnableLogging=algorithmLogging)
     return eppWS
 
 
-def _calibratedIncidentEnergy(detWorkspace, monWorkspace, monEPPWorkspace, eiCalibrationMon, wsNames, log, algorithmLogging):
+def _calibratedIncidentEnergy(detWorkspace, monWorkspace, monEPPWorkspace, eiCalibrationMon, wsNames, log,
+                              algorithmLogging):
     """Return the calibrated incident energy."""
     instrument = detWorkspace.getInstrument()
     instrument_name = instrument.getName()
@@ -133,14 +132,9 @@ def _fitElasticChannel(ys, wsNames, wsCleanup, algorithmLogging):
     """Return index to the peak position of ys."""
     xs = numpy.array([i for i in range(len(ys))])
     l2SumWSName = wsNames.withSuffix('summed_detectors_at_l2')
-    l2SumWS = CreateWorkspace(OutputWorkspace=l2SumWSName,
-                              DataX=xs,
-                              DataY=ys,
-                              EnableLogging=algorithmLogging)
+    l2SumWS = CreateWorkspace(OutputWorkspace=l2SumWSName, DataX=xs, DataY=ys, EnableLogging=algorithmLogging)
     fitWSName = wsNames.withSuffix('summed_detectors_at_l2_fit_results')
-    fitWS = FindEPP(InputWorkspace=l2SumWS,
-                    OutputWorkspace=fitWSName,
-                    EnableLogging=algorithmLogging)
+    fitWS = FindEPP(InputWorkspace=l2SumWS, OutputWorkspace=fitWSName, EnableLogging=algorithmLogging)
     peakCentre = float(fitWS.cell('PeakCentre', 0))
     wsCleanup.cleanup(l2SumWS)
     wsCleanup.cleanup(fitWS)
@@ -153,9 +147,7 @@ def _fitEPP(ws, wsType, wsNames, algorithmLogging):
         eppWSName = wsNames.withSuffix('epp_detectors')
     else:
         eppWSName = wsNames.withSuffix('epp_monitors')
-    eppWS = FindEPP(InputWorkspace=ws,
-                    OutputWorkspace=eppWSName,
-                    EnableLogging=algorithmLogging)
+    eppWS = FindEPP(InputWorkspace=ws, OutputWorkspace=eppWSName, EnableLogging=algorithmLogging)
     return eppWS
 
 
@@ -169,8 +161,7 @@ def _monitorCounts(ws):
         return logs.getProperty('monitor.monsum').value
 
 
-def _normalizeToMonitor(ws, monWS, monIndex, integrationBegin, integrationEnd,
-                        wsNames, wsCleanup, algorithmLogging):
+def _normalizeToMonitor(ws, monWS, monIndex, integrationBegin, integrationEnd, wsNames, wsCleanup, algorithmLogging):
     """Normalize to monitor counts."""
     normalizedWSName = wsNames.withSuffix('normalized_to_monitor')
     normalizationFactorWsName = wsNames.withSuffix('normalization_factor_monitor')
@@ -201,7 +192,7 @@ def _normalizeToTime(ws, wsNames, wsCleanup, algorithmLogging):
         raise RuntimeError("Cannot normalise to acquisition time: time is negative.")
     normalizedWSName = wsNames.withSuffix('normalized_to_time')
     normalizedWS = Scale(InputWorkspace=ws,
-                         Factor=1./time,
+                         Factor=1. / time,
                          OutputWorkspace=normalizedWSName,
                          EnableLogging=algorithmLogging)
     return normalizedWS
@@ -216,10 +207,7 @@ def _scaleAfterMonitorNormalization(ws, wsNames, wsCleanup, algorithmLogging):
         return ws
     factor = instr.getNumberParameter(SCALING_PARAM, NON_RECURSIVE)[0]
     scaledWSName = wsNames.withSuffix('scaled_by_monitor_factor')
-    scaledWS = Scale(InputWorkspace=ws,
-                     OutputWorkspace=scaledWSName,
-                     Factor=factor,
-                     EnableLogging=algorithmLogging)
+    scaledWS = Scale(InputWorkspace=ws, OutputWorkspace=scaledWSName, Factor=factor, EnableLogging=algorithmLogging)
     wsCleanup.cleanup(ws)
     return scaledWS
 
@@ -262,7 +250,6 @@ def _sumDetectorsAtDistance(ws, distance, tolerance):
 
 class DirectILLCollectData(DataProcessorAlgorithm):
     """A workflow algorithm for the initial sample, vanadium and empty container reductions."""
-
     def __init__(self):
         """Initialize an instance of the algorithm."""
         DataProcessorAlgorithm.__init__(self)
@@ -362,61 +349,50 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                                   action=FileAction.OptionalLoad,
                                                   extensions=['nxs']),
                              doc='An input run number (or a list thereof) or a filename.')
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=common.PROP_INPUT_WS,
-            defaultValue='',
-            validator=inputWorkspaceValidator,
-            optional=PropertyMode.Optional,
-            direction=Direction.Input),
-            doc='Input workspace if no run is given.')
-        self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
-                                               defaultValue='',
-                                               direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty(name=common.PROP_INPUT_WS,
+                                                     defaultValue='',
+                                                     validator=inputWorkspaceValidator,
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
+                             doc='Input workspace if no run is given.')
+        self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS, defaultValue='', direction=Direction.Output),
                              doc='A flux normalized and background subtracted workspace.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
                              defaultValue=utils.Cleanup.ON,
-                             validator=StringListValidator([
-                                 utils.Cleanup.ON,
-                                 utils.Cleanup.OFF]),
+                             validator=StringListValidator([utils.Cleanup.ON, utils.Cleanup.OFF]),
                              direction=Direction.Input,
                              doc='What to do with intermediate workspaces.')
         self.declareProperty(name=common.PROP_SUBALG_LOGGING,
                              defaultValue=common.SUBALG_LOGGING_OFF,
-                             validator=StringListValidator([
-                                 common.SUBALG_LOGGING_OFF,
-                                 common.SUBALG_LOGGING_ON]),
+                             validator=StringListValidator([common.SUBALG_LOGGING_OFF, common.SUBALG_LOGGING_ON]),
                              direction=Direction.Input,
                              doc='Enable or disable subalgorithms to ' + 'print in the logs.')
         self.declareProperty(name=common.PROP_EPP_METHOD,
                              defaultValue=common.EPP_METHOD_AUTO,
-                             validator=StringListValidator([
-                                 common.EPP_METHOD_AUTO,
-                                 common.EPP_METHOD_FIT,
-                                 common.EPP_METHOD_CALCULATE]),
+                             validator=StringListValidator(
+                                 [common.EPP_METHOD_AUTO, common.EPP_METHOD_FIT, common.EPP_METHOD_CALCULATE]),
                              direction=Direction.Input,
                              doc='Method to create the EPP table for detectors (monitor is awlays fitted).')
         self.declareProperty(name=common.PROP_EPP_SIGMA,
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc='Nominal sigma for the EPP table when ' + common.PROP_EPP_METHOD
-                                 + ' is set to ' + common.EPP_METHOD_CALCULATE
-                                 + ' (default: 10 times the first bin width).')
+                             doc='Nominal sigma for the EPP table when ' + common.PROP_EPP_METHOD + ' is set to ' +
+                             common.EPP_METHOD_CALCULATE + ' (default: 10 times the first bin width).')
         self.declareProperty(name=common.PROP_ELASTIC_CHANNEL_MODE,
                              defaultValue=common.ELASTIC_CHANNEL_AUTO,
                              validator=StringListValidator([
-                                 common.ELASTIC_CHANNEL_AUTO,
-                                 common.ELASTIC_CHANNEL_SAMPLE_LOG,
-                                 common.ELASTIC_CHANNEL_FIT]),
+                                 common.ELASTIC_CHANNEL_AUTO, common.ELASTIC_CHANNEL_SAMPLE_LOG,
+                                 common.ELASTIC_CHANNEL_FIT
+                             ]),
                              direction=Direction.Input,
                              doc='How to acquire the nominal elastic channel.')
-        self.declareProperty(MatrixWorkspaceProperty(
-                             name=common.PROP_ELASTIC_CHANNEL_WS,
-                             defaultValue='',
-                             direction=Direction.Input,
-                             optional=PropertyMode.Optional),
-                             doc='A single value workspace containing the nominal elastic channel index. Overrides '
-                                 + common.PROP_ELASTIC_CHANNEL_MODE + '.')
+        self.declareProperty(MatrixWorkspaceProperty(name=common.PROP_ELASTIC_CHANNEL_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='A single value workspace containing the nominal elastic channel index. Overrides ' +
+                             common.PROP_ELASTIC_CHANNEL_MODE + '.')
         self.declareProperty(name=common.PROP_MON_INDEX,
                              defaultValue=Property.EMPTY_INT,
                              validator=positiveInt,
@@ -425,25 +401,21 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         self.declareProperty(name=common.PROP_INCIDENT_ENERGY_CALIBRATION,
                              defaultValue=common.INCIDENT_ENERGY_CALIBRATION_AUTO,
                              validator=StringListValidator([
-                                 common.INCIDENT_ENERGY_CALIBRATION_AUTO,
-                                 common.INCIDENT_ENERGY_CALIBRATION_ON,
-                                 common.INCIDENT_ENERGY_CALIBRATION_OFF]),
+                                 common.INCIDENT_ENERGY_CALIBRATION_AUTO, common.INCIDENT_ENERGY_CALIBRATION_ON,
+                                 common.INCIDENT_ENERGY_CALIBRATION_OFF
+                             ]),
                              direction=Direction.Input,
                              doc='Control the incident energy calibration.')
         self.setPropertyGroup(common.PROP_INCIDENT_ENERGY_CALIBRATION, PROPGROUP_INCIDENT_ENERGY_CALIBRATION)
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=common.PROP_INCIDENT_ENERGY_WS,
-            defaultValue='',
-            direction=Direction.Input,
-            optional=PropertyMode.Optional),
-            doc='A single-valued workspace holding a previously determined ' + 'incident energy.')
+        self.declareProperty(MatrixWorkspaceProperty(name=common.PROP_INCIDENT_ENERGY_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='A single-valued workspace holding a previously determined ' + 'incident energy.')
         self.setPropertyGroup(common.PROP_INCIDENT_ENERGY_WS, PROPGROUP_INCIDENT_ENERGY_CALIBRATION)
         self.declareProperty(name=common.PROP_FLAT_BKG,
                              defaultValue=common.BKG_AUTO,
-                             validator=StringListValidator([
-                                 common.BKG_AUTO,
-                                 common.BKG_ON,
-                                 common.BKG_OFF]),
+                             validator=StringListValidator([common.BKG_AUTO, common.BKG_ON, common.BKG_OFF]),
                              direction=Direction.Input,
                              doc='Control flat background subtraction.')
         self.setPropertyGroup(common.PROP_FLAT_BKG, PROPGROUP_FLAT_BKG)
@@ -459,19 +431,16 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Running average window width (in bins) for flat background.')
         self.setPropertyGroup(common.PROP_FLAT_BKG_WINDOW, PROPGROUP_FLAT_BKG)
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=common.PROP_FLAT_BKG_WS,
-            defaultValue='',
-            direction=Direction.Input,
-            optional=PropertyMode.Optional),
-            doc='Workspace with previously determined flat background data.')
+        self.declareProperty(MatrixWorkspaceProperty(name=common.PROP_FLAT_BKG_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='Workspace with previously determined flat background data.')
         self.setPropertyGroup(common.PROP_FLAT_BKG_WS, PROPGROUP_FLAT_BKG)
         self.declareProperty(name=common.PROP_NORMALISATION,
                              defaultValue=common.NORM_METHOD_MON,
-                             validator=StringListValidator([
-                                 common.NORM_METHOD_MON,
-                                 common.NORM_METHOD_TIME,
-                                 common.NORM_METHOD_OFF]),
+                             validator=StringListValidator(
+                                 [common.NORM_METHOD_MON, common.NORM_METHOD_TIME, common.NORM_METHOD_OFF]),
                              direction=Direction.Input,
                              doc='Normalisation method.')
         self.setPropertyGroup(common.PROP_NORMALISATION, PROPGROUP_MON_NORMALISATION)
@@ -482,46 +451,37 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              doc="Width of the monitor peak in multiples " + " of 'Sigma' in monitor's EPP table.")
         self.setPropertyGroup(common.PROP_MON_PEAK_SIGMA_MULTIPLIER, PROPGROUP_MON_NORMALISATION)
         # Rest of the output properties.
-        self.declareProperty(WorkspaceProperty(
-            name=common.PROP_OUTPUT_RAW_WS,
-            defaultValue='',
-            direction=Direction.Output,
-            optional=PropertyMode.Optional),
+        self.declareProperty(
+            WorkspaceProperty(name=common.PROP_OUTPUT_RAW_WS,
+                              defaultValue='',
+                              direction=Direction.Output,
+                              optional=PropertyMode.Optional),
             doc='Non-normalized and non-background subtracted output workspace for DirectILLDiagnostics.')
-        self.setPropertyGroup(common.PROP_OUTPUT_RAW_WS,
-                              common.PROPGROUP_OPTIONAL_OUTPUT)
-        self.declareProperty(WorkspaceProperty(
-            name=common.PROP_OUTPUT_ELASTIC_CHANNEL_WS,
-            defaultValue='',
-            direction=Direction.Output,
-            optional=PropertyMode.Optional),
-            doc='Output workspace for elastic channel index.')
-        self.setPropertyGroup(common.PROP_OUTPUT_ELASTIC_CHANNEL_WS,
-                              common.PROPGROUP_OPTIONAL_OUTPUT)
-        self.declareProperty(ITableWorkspaceProperty(
-            name=common.PROP_OUTPUT_DET_EPP_WS,
-            defaultValue='',
-            direction=Direction.Output,
-            optional=PropertyMode.Optional),
-            doc='Output workspace for elastic peak positions.')
-        self.setPropertyGroup(common.PROP_OUTPUT_DET_EPP_WS,
-                              common.PROPGROUP_OPTIONAL_OUTPUT)
-        self.declareProperty(WorkspaceProperty(
-            name=common.PROP_OUTPUT_INCIDENT_ENERGY_WS,
-            defaultValue='',
-            direction=Direction.Output,
-            optional=PropertyMode.Optional),
-            doc='Output workspace for calibrated incident energy.')
-        self.setPropertyGroup(common.PROP_OUTPUT_INCIDENT_ENERGY_WS,
-                              common.PROPGROUP_OPTIONAL_OUTPUT)
-        self.declareProperty(WorkspaceProperty(
-            name=common.PROP_OUTPUT_FLAT_BKG_WS,
-            defaultValue='',
-            direction=Direction.Output,
-            optional=PropertyMode.Optional),
-            doc='Output workspace for flat background.')
-        self.setPropertyGroup(common.PROP_OUTPUT_FLAT_BKG_WS,
-                              common.PROPGROUP_OPTIONAL_OUTPUT)
+        self.setPropertyGroup(common.PROP_OUTPUT_RAW_WS, common.PROPGROUP_OPTIONAL_OUTPUT)
+        self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_ELASTIC_CHANNEL_WS,
+                                               defaultValue='',
+                                               direction=Direction.Output,
+                                               optional=PropertyMode.Optional),
+                             doc='Output workspace for elastic channel index.')
+        self.setPropertyGroup(common.PROP_OUTPUT_ELASTIC_CHANNEL_WS, common.PROPGROUP_OPTIONAL_OUTPUT)
+        self.declareProperty(ITableWorkspaceProperty(name=common.PROP_OUTPUT_DET_EPP_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Output,
+                                                     optional=PropertyMode.Optional),
+                             doc='Output workspace for elastic peak positions.')
+        self.setPropertyGroup(common.PROP_OUTPUT_DET_EPP_WS, common.PROPGROUP_OPTIONAL_OUTPUT)
+        self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_INCIDENT_ENERGY_WS,
+                                               defaultValue='',
+                                               direction=Direction.Output,
+                                               optional=PropertyMode.Optional),
+                             doc='Output workspace for calibrated incident energy.')
+        self.setPropertyGroup(common.PROP_OUTPUT_INCIDENT_ENERGY_WS, common.PROPGROUP_OPTIONAL_OUTPUT)
+        self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_FLAT_BKG_WS,
+                                               defaultValue='',
+                                               direction=Direction.Output,
+                                               optional=PropertyMode.Optional),
+                             doc='Output workspace for flat background.')
+        self.setPropertyGroup(common.PROP_OUTPUT_FLAT_BKG_WS, common.PROPGROUP_OPTIONAL_OUTPUT)
 
     def validateInputs(self):
         """Check for issues with user input."""
@@ -546,14 +506,14 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         if self._eiCalibrationEnabled(mainWS):
             if self.getProperty(common.PROP_INCIDENT_ENERGY_WS).isDefault:
                 monIndex = self._monitorIndex(monWS)
-                eiCalibrationWS = _calibratedIncidentEnergy(mainWS, monWS, monEPPWS, monIndex, self._names,
-                                                            self.log(), self._subalgLogging)
+                eiCalibrationWS = _calibratedIncidentEnergy(mainWS, monWS, monEPPWS, monIndex, self._names, self.log(),
+                                                            self._subalgLogging)
             else:
                 eiCalibrationWS = self.getProperty(common.PROP_INCIDENT_ENERGY_WS).value
                 self._cleanup.protect(eiCalibrationWS)
             if eiCalibrationWS:
-                mainWS = _applyIncidentEnergyCalibration(mainWS, eiCalibrationWS, self._names,
-                                                         self._report, self._subalgLogging)
+                mainWS = _applyIncidentEnergyCalibration(mainWS, eiCalibrationWS, self._names, self._report,
+                                                         self._subalgLogging)
                 monWS = _applyIncidentEnergyCalibration(monWS, eiCalibrationWS, self._names, self._report,
                                                         self._subalgLogging)
         if not self.getProperty(common.PROP_OUTPUT_INCIDENT_ENERGY_WS).isDefault:
@@ -574,16 +534,16 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             instrument = mainWS.getInstrument()
             if instrument.hasParameter('enable_elastic_channel_fitting'):
                 if instrument.getBoolParameter('enable_elastic_channel_fitting')[0]:
-                    self._report.notice(common.PROP_ELASTIC_CHANNEL_MODE + ' set to '
-                                        + common.ELASTIC_CHANNEL_FIT + ' by the IPF.')
+                    self._report.notice(common.PROP_ELASTIC_CHANNEL_MODE + ' set to ' + common.ELASTIC_CHANNEL_FIT +
+                                        ' by the IPF.')
                     return common.ELASTIC_CHANNEL_FIT
                 else:
-                    self._report.notice(common.PROP_ELASTIC_CHANNEL_MODE + ' set to '
-                                        + common.ELASTIC_CHANNEL_SAMPLE_LOG + ' by the IPF.')
+                    self._report.notice(common.PROP_ELASTIC_CHANNEL_MODE + ' set to ' +
+                                        common.ELASTIC_CHANNEL_SAMPLE_LOG + ' by the IPF.')
                     return common.ELASTIC_CHANNEL_SAMPLE_LOG
             else:
-                self._report.notice('Defaulted ' + common.PROP_ELASTIC_CHANNEL_MODE + ' to '
-                                    + common.ELASTIC_CHANNEL_SAMPLE_LOG + '.')
+                self._report.notice('Defaulted ' + common.PROP_ELASTIC_CHANNEL_MODE + ' to ' +
+                                    common.ELASTIC_CHANNEL_SAMPLE_LOG + '.')
                 return common.ELASTIC_CHANNEL_SAMPLE_LOG
         return mode
 
@@ -594,16 +554,14 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             instrument = mainWS.getInstrument()
             if instrument.hasParameter('enable_elastic_peak_fitting'):
                 if instrument.getBoolParameter('enable_elastic_peak_fitting')[0]:
-                    self._report.notice(common.PROP_EPP_METHOD + ' set to '
-                                        + common.EPP_METHOD_FIT + ' by the IPF.')
+                    self._report.notice(common.PROP_EPP_METHOD + ' set to ' + common.EPP_METHOD_FIT + ' by the IPF.')
                     return common.EPP_METHOD_FIT
                 else:
-                    self._report.notice(common.PROP_EPP_METHOD + ' set to '
-                                        + common.EPP_METHOD_CALCULATE + ' by the IPF.')
+                    self._report.notice(common.PROP_EPP_METHOD + ' set to ' + common.EPP_METHOD_CALCULATE +
+                                        ' by the IPF.')
                     return common.EPP_METHOD_CALCULATE
             else:
-                self._report.notice('Defaulted ' + common.PROP_EPP_METHOD + ' to '
-                                    + common.EPP_METHOD_FIT + '.')
+                self._report.notice('Defaulted ' + common.PROP_EPP_METHOD + ' to ' + common.EPP_METHOD_FIT + '.')
                 return common.EPP_METHOD_FIT
         return eppMethod
 
@@ -621,7 +579,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             mode = self._chooseElasticChannelMode(mainWS)
             if mode == common.ELASTIC_CHANNEL_SAMPLE_LOG:
                 if not mainWS.run().hasProperty('Detector.elasticpeak'):
-                    self.log().warning('No ' + common.PROP_ELASTIC_CHANNEL_WS + ' given. TOF axis will not be adjusted.')
+                    self.log().warning('No ' + common.PROP_ELASTIC_CHANNEL_WS +
+                                       ' given. TOF axis will not be adjusted.')
                     return mainWS
                 index = mainWS.run().getLogData('Detector.elasticpeak').value
             else:
@@ -743,8 +702,11 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         inputFiles = self.getPropertyValue(common.PROP_INPUT_FILE)
         if inputFiles:
             mergedWSName = self._names.withSuffix('merged')
-            mainWS = LoadAndMerge(Filename=inputFiles, OutputWorkspace=mergedWSName,
-                                  LoaderName='LoadILLTOF', LoaderOptions={"ConvertToTOF": True}, EnableLogging=self._subalgLogging)
+            mainWS = LoadAndMerge(Filename=inputFiles,
+                                  OutputWorkspace=mergedWSName,
+                                  LoaderName='LoadILLTOF',
+                                  LoaderOptions={"ConvertToTOF": True},
+                                  EnableLogging=self._subalgLogging)
         else:
             mainWS = self.getProperty(common.PROP_INPUT_WS).value
             self._cleanup.protect(mainWS)
@@ -755,8 +717,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         if self.getProperty(common.PROP_MON_INDEX).isDefault:
             NON_RECURSIVE = False  # Prevent recursive calls in the following.
             if not monWS.getInstrument().hasParameter('default-incident-monitor-spectrum', NON_RECURSIVE):
-                raise RuntimeError('default-incident-monitor-spectrum missing in instrument parameters; '
-                                   + common.PROP_MON_INDEX + ' must be specified.')
+                raise RuntimeError('default-incident-monitor-spectrum missing in instrument parameters; ' +
+                                   common.PROP_MON_INDEX + ' must be specified.')
             monIndex = monWS.getInstrument().getIntParameter('default-incident-monitor-spectrum', NON_RECURSIVE)[0]
             monIndex = common.convertToWorkspaceIndex(monIndex, monWS, common.INDEX_TYPE_SPECTRUM_NUMBER)
         else:
@@ -780,8 +742,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                 monIndex = self._monitorIndex(monWS)
                 eppRow = monEPPWS.row(monIndex)
                 if eppRow['FitStatus'] != 'success':
-                    self.log().warning('Fitting to monitor data failed. Integrating the intensity over '
-                                       + 'the entire TOF range for normalisation.')
+                    self.log().warning('Fitting to monitor data failed. Integrating the intensity over ' +
+                                       'the entire TOF range for normalisation.')
                     begin = monWS.dataX(monIndex)[0]
                     end = monWS.dataX(monIndex)[-1]
                 else:
@@ -791,7 +753,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                     end = centre + sigmaMultiplier * sigma
                 normalizedWS = _normalizeToMonitor(mainWS, monWS, monIndex, begin, end, self._names, self._cleanup,
                                                    self._subalgLogging)
-                normalizedWS = _scaleAfterMonitorNormalization(normalizedWS, self._names, self._cleanup, self._subalgLogging)
+                normalizedWS = _scaleAfterMonitorNormalization(normalizedWS, self._names, self._cleanup,
+                                                               self._subalgLogging)
         if normalisationMethod == common.NORM_METHOD_TIME:
             normalizedWS = _normalizeToTime(mainWS, self._names, self._cleanup, self._subalgLogging)
         self._cleanup.cleanup(mainWS)
@@ -812,8 +775,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                            ReferenceWorkspace=mainWS,
                            EnableLogging=self._subalgLogging)
             self.setProperty(common.PROP_OUTPUT_RAW_WS, rawWS)
-            DeleteWorkspace(Workspace=rawWS,
-                            EnableLogging=self._subalgLogging)
+            DeleteWorkspace(Workspace=rawWS, EnableLogging=self._subalgLogging)
 
     def _separateMons(self, mainWS):
         """Extract monitors to a separate workspace."""

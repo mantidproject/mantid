@@ -21,7 +21,6 @@ class LARMORMultiPeriodEventModeLoading(systemtesting.MantidSystemTest):
     This test checks if the positioning of all workspaces of a
     multi-period event-type file are the same.
     """
-
     def __init__(self):
         super(LARMORMultiPeriodEventModeLoading, self).__init__()
         self.success = True

@@ -30,11 +30,10 @@ def getSourceDir():
 
 
 # These are the table fields, in order
-TABLE_FIELDS = ['date', 'name', 'type', 'host', 'environment', 'runner',
-                 'revision', 'commitid', 'runtime', 'cpu_fraction',
-                 'success',
-                 'status', 'logarchive', 'variables']
-
+TABLE_FIELDS = [
+    'date', 'name', 'type', 'host', 'environment', 'runner', 'revision', 'commitid', 'runtime', 'cpu_fraction',
+    'success', 'status', 'logarchive', 'variables'
+]
 
 # The default path to the database file
 database_file = os.path.join(getSourceDir(), "MantidSystemTests.db")
@@ -69,7 +68,7 @@ def get_TestResult_from_row(row):
     res.testID = row[0]
     # ------ Get each entry in the table ---------
     for i in range(len(TABLE_FIELDS)):
-        res[TABLE_FIELDS[i]] = row[i+1]
+        res[TABLE_FIELDS[i]] = row[i + 1]
 
     return (res)
 
@@ -167,7 +166,7 @@ def get_all_field_values(field_name, where_clause=""):
     # Get all rows
     rows = c.fetchall()
 
-    out = [x for (x,) in rows]
+    out = [x for (x, ) in rows]
 
     return out
 
@@ -209,10 +208,10 @@ def setup_database():
     """ Routine to set up the mysql database the first time.
     WARNING: THIS DELETES ANY TABLES ALREADY THERE
     """
-    print("Setting up SQL database at",get_database_filename())
+    print("Setting up SQL database at", get_database_filename())
     if os.path.exists(get_database_filename()):
-        print("Creating a backup at", get_database_filename()+".bak")
-        shutil.copyfile(get_database_filename(), get_database_filename()+".bak")
+        print("Creating a backup at", get_database_filename() + ".bak")
+        shutil.copyfile(get_database_filename(), get_database_filename() + ".bak")
 
     db = SQLgetConnection()
 
@@ -250,7 +249,6 @@ class SQLResultReporter(reporters.ResultReporter):
     '''
     Send the test results to the Mantid test results database
     '''
-
     def __init__(self):
         pass
 
@@ -291,12 +289,12 @@ class SQLResultReporter(reporters.ResultReporter):
         dbcxn.close()
 
 
-def generate_fake_data(num_extra = 0):
+def generate_fake_data(num_extra=0):
     """ Make up some data for a database """
     print("Generating fake data...")
     setup_database()
     rep = SQLResultReporter()
-    for timer in [9400, 9410,9411, 9412] + range(9420,9440) + [9450, 9466] + range(9450, 9450+num_extra):
+    for timer in [9400, 9410, 9411, 9412] + range(9420, 9440) + [9450, 9466] + range(9450, 9450 + num_extra):
         rev = add_revision()
         for name in ["Project1.MyFakeTest", "Project1.AnotherFakeTest", "Project2.FakeTest", "Project2.OldTest"]:
             if (name != "Project2.OldTest"):
@@ -304,10 +302,10 @@ def generate_fake_data(num_extra = 0):
                 result["name"] = name
                 result["date"] = datetime.datetime.now() + datetime.timedelta(days=timer, minutes=timer)
                 result["log_contents"] = "Revision %d" % rev
-                result["runtime"] = timer/10.0 + random.randrange(-2,2)
-                result["commitid"] = rev #'926bf82e36b4c90c95efc3f1151725696273de5a'
-                result["success"] = (random.randint(0,10) > 0)
-                result["status"] = ["failed","success"][result["success"]]
+                result["runtime"] = timer / 10.0 + random.randrange(-2, 2)
+                result["commitid"] = rev  #'926bf82e36b4c90c95efc3f1151725696273de5a'
+                result["success"] = (random.randint(0, 10) > 0)
+                result["status"] = ["failed", "success"][result["success"]]
                 result["revision"] = rev
                 rep.dispatchResults(result)
     print("... Fake data made.")

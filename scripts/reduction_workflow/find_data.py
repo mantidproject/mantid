@@ -74,7 +74,7 @@ def find_data(file, instrument='', allow_multiple=False):
     # which is incompatible with the FileFinder
     n_files = 1
     if allow_multiple:
-        file=file.replace(';',',')
+        file = file.replace(';', ',')
         toks = file.split(',')
         n_files = len(toks)
 
@@ -86,12 +86,12 @@ def find_data(file, instrument='', allow_multiple=False):
     # Second, assume a run number and pass the instrument name as a hint
     try:
         # FileFinder doesn't like dashes...
-        instrument=instrument.replace('-','')
-        f = FileFinder.findRuns(instrument+file)
+        instrument = instrument.replace('-', '')
+        f = FileFinder.findRuns(instrument + file)
         if os.path.isfile(f[0]):
             if allow_multiple:
                 # Mantid returns its own list object type, so make a real list out if it
-                if len(f)==n_files:
+                if len(f) == n_files:
                     return [i for i in f]
             else:
                 return f[0]
@@ -105,7 +105,7 @@ def find_data(file, instrument='', allow_multiple=False):
         if os.path.isfile(f[0]):
             if allow_multiple:
                 # Mantid returns its own list object type, so make a real list out if it
-                if len(f)==n_files:
+                if len(f) == n_files:
                     return [i for i in f]
             else:
                 return f[0]

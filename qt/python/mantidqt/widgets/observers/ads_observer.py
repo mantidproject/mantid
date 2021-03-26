@@ -16,7 +16,6 @@ def _catch_exceptions(func):
     """
     Catch all exceptions in method and print a traceback to stderr
     """
-
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -30,7 +29,6 @@ def _catch_exceptions(func):
 
 
 class WorkspaceDisplayADSObserver(AnalysisDataServiceObserver):
-
     def __init__(self, presenter, observe_replace=True):
         super(WorkspaceDisplayADSObserver, self).__init__()
         self.presenter = presenter

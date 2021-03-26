@@ -9,9 +9,10 @@ from mantid.kernel import MaterialBuilder, NumberDensityUnit
 
 NAME = 'Bizarre oxide'
 FORMULA = 'Al2 O3'
-NUMBER_DENSITY = 0.23 # atoms / Angstrom^3
+NUMBER_DENSITY = 0.23  # atoms / Angstrom^3
 MASS_DENSITY = 3.987  # g/cm^3
 PACKING_OBS = 0.51192  # packing fraction from the above two values
+
 
 class MaterialBuilderTest(unittest.TestCase):
     def test_build_material(self):
@@ -79,7 +80,8 @@ class MaterialBuilderTest(unittest.TestCase):
 
         # setting all 3 should be an error
         try:
-            material = builder.setPackingFraction(0.5).setNumberDensity(NUMBER_DENSITY).setMassDensity(MASS_DENSITY).build()
+            material = builder.setPackingFraction(0.5).setNumberDensity(NUMBER_DENSITY).setMassDensity(
+                MASS_DENSITY).build()
             raise AssertionError('Should throw an exception')
         except RuntimeError as e:
             assert 'number density' in str(e)
@@ -92,6 +94,7 @@ class MaterialBuilderTest(unittest.TestCase):
         self.assertEqual(material.numberDensity, NUMBER_DENSITY * (2. + 3.))
         self.assertEqual(material.numberDensityEffective, NUMBER_DENSITY * (2. + 3.))
         self.assertEqual(material.packingFraction, 1.)
+
 
 if __name__ == '__main__':
     unittest.main()

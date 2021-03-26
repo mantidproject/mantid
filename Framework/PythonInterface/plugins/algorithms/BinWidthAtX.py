@@ -45,19 +45,20 @@ class BinWidthAtX(PythonAlgorithm):
         '''
         Declares algorithm's properties.
         '''
-        self.declareProperty(
-            MatrixWorkspaceProperty(name=self._PROP_INPUT_WS,
-                                    defaultValue='',
-                                    validator=HistogramValidator(),
-                                    direction=Direction.Input),
-            doc='A workspace containing the input histograms')
-        self.declareProperty(
-            name=self._PROP_X_VALUE, defaultValue=0.0,
-            direction=Direction.Input, doc='The x value of the bin to use.')
+        self.declareProperty(MatrixWorkspaceProperty(name=self._PROP_INPUT_WS,
+                                                     defaultValue='',
+                                                     validator=HistogramValidator(),
+                                                     direction=Direction.Input),
+                             doc='A workspace containing the input histograms')
+        self.declareProperty(name=self._PROP_X_VALUE,
+                             defaultValue=0.0,
+                             direction=Direction.Input,
+                             doc='The x value of the bin to use.')
         roundinghelper.declare_rounding_property(self)
-        self.declareProperty(
-            name=self._PROP_BIN_WIDTH, defaultValue=0.0,
-            direction=Direction.Output, doc='The averaged bin width')
+        self.declareProperty(name=self._PROP_BIN_WIDTH,
+                             defaultValue=0.0,
+                             direction=Direction.Output,
+                             doc='The averaged bin width')
 
     def PyExec(self):
         '''
@@ -65,8 +66,7 @@ class BinWidthAtX(PythonAlgorithm):
         '''
         inputWs = self.getProperty(self._PROP_INPUT_WS).value
         x = self.getProperty(self._PROP_X_VALUE).value
-        roundingMode = self.getProperty(
-            roundinghelper.PROP_NAME_ROUNDING_MODE).value
+        roundingMode = self.getProperty(roundinghelper.PROP_NAME_ROUNDING_MODE).value
         n = inputWs.getNumberHistograms()
         widths = numpy.empty(n)
         for wsIndex in range(n):
@@ -76,7 +76,8 @@ class BinWidthAtX(PythonAlgorithm):
             if lowerBound > upperBound:
                 lowerBound, upperBound = upperBound, lowerBound
             if x <= lowerBound or x > upperBound:
-                raise RuntimeError(self._PROP_X_VALUE + ' = {0} out of range for workspace index {1}'.format(x, wsIndex))
+                raise RuntimeError(self._PROP_X_VALUE +
+                                   ' = {0} out of range for workspace index {1}'.format(x, wsIndex))
             binIndex = inputWs.yIndexOfX(x, wsIndex)
             dx = xs[binIndex + 1] - xs[binIndex]
             widths[wsIndex] = dx

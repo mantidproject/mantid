@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceGroupProperty,
-                        Progress, mtd, SpectraAxis, WorkspaceGroup, WorkspaceProperty)
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceGroupProperty, Progress, mtd,
+                        SpectraAxis, WorkspaceGroup, WorkspaceProperty)
 from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, LogicOperator, config)
 
@@ -69,27 +69,34 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         # Sample options
         self.declareProperty(WorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
                              doc='Sample Workspace')
-        self.declareProperty(name='SampleChemicalFormula', defaultValue='',
+        self.declareProperty(name='SampleChemicalFormula',
+                             defaultValue='',
                              doc='Chemical formula for the sample material')
-        self.declareProperty(name='SampleCoherentXSection', defaultValue=0.0,
+        self.declareProperty(name='SampleCoherentXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The coherent cross-section for the sample material in barns. To be used instead of '
-                                 'Chemical Formula.')
-        self.declareProperty(name='SampleIncoherentXSection', defaultValue=0.0,
+                             'Chemical Formula.')
+        self.declareProperty(name='SampleIncoherentXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The incoherent cross-section for the sample material in barns. To be used instead of '
-                                 'Chemical Formula.')
-        self.declareProperty(name='SampleAttenuationXSection', defaultValue=0.0,
+                             'Chemical Formula.')
+        self.declareProperty(name='SampleAttenuationXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The absorption cross-section for the sample material in barns. To be used instead of '
-                                 'Chemical Formula.')
-        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
+                             'Chemical Formula.')
+        self.declareProperty(name='SampleDensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass density or Number density for the sample.')
-        self.declareProperty(name='SampleNumberDensityUnit', defaultValue='Atoms',
+        self.declareProperty(name='SampleNumberDensityUnit',
+                             defaultValue='Atoms',
                              validator=StringListValidator(['Atoms', 'Formula Units']),
                              doc='Choose which units SampleDensity refers to. Allowed values: [Atoms, Formula Units]')
-        self.declareProperty(name='SampleDensity', defaultValue=0.0,
+        self.declareProperty(name='SampleDensity',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The value for the sample Mass density (g/cm^3) or Number density (1/Angstrom^3).')
 
@@ -102,10 +109,12 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('SampleDensity', 'Sample Options')
 
         # Beam Options
-        self.declareProperty(name='BeamHeight', defaultValue=1.0,
+        self.declareProperty(name='BeamHeight',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Height of the beam (cm)')
-        self.declareProperty(name='BeamWidth', defaultValue=1.0,
+        self.declareProperty(name='BeamWidth',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Width of the beam (cm)')
 
@@ -113,17 +122,20 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('BeamWidth', 'Beam Options')
 
         # Monte Carlo options
-        self.declareProperty(name='NumberOfWavelengthPoints', defaultValue=10,
+        self.declareProperty(name='NumberOfWavelengthPoints',
+                             defaultValue=10,
                              validator=IntBoundedValidator(1),
                              doc='Number of wavelengths for calculation')
-        self.declareProperty(name='EventsPerPoint', defaultValue=1000,
+        self.declareProperty(name='EventsPerPoint',
+                             defaultValue=1000,
                              validator=IntBoundedValidator(0),
                              doc='Number of neutron events')
-        self.declareProperty(name='Interpolation', defaultValue='Linear',
-                             validator=StringListValidator(
-                                 ['Linear', 'CSpline']),
+        self.declareProperty(name='Interpolation',
+                             defaultValue='Linear',
+                             validator=StringListValidator(['Linear', 'CSpline']),
                              doc='Type of interpolation')
-        self.declareProperty(name='MaxScatterPtAttempts', defaultValue=5000,
+        self.declareProperty(name='MaxScatterPtAttempts',
+                             defaultValue=5000,
                              validator=IntBoundedValidator(0),
                              doc='Maximum number of tries made to generate a scattering point')
 
@@ -133,33 +145,43 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('MaxScatterPtAttempts', 'Monte Carlo Options')
 
         # Container options
-        self.declareProperty(WorkspaceProperty('ContainerWorkspace', '', direction=Direction.Input,
+        self.declareProperty(WorkspaceProperty('ContainerWorkspace',
+                                               '',
+                                               direction=Direction.Input,
                                                optional=PropertyMode.Optional),
                              doc='Container Workspace')
 
         container_condition = VisibleWhenProperty('ContainerWorkspace', PropertyCriterion.IsNotDefault)
 
-        self.declareProperty(name='ContainerChemicalFormula', defaultValue='',
+        self.declareProperty(name='ContainerChemicalFormula',
+                             defaultValue='',
                              doc='Chemical formula for the container material')
-        self.declareProperty(name='ContainerCoherentXSection', defaultValue=0.0,
+        self.declareProperty(name='ContainerCoherentXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The coherent cross-section for the can material in barns. To be used instead of '
-                                 'Chemical Formula.')
-        self.declareProperty(name='ContainerIncoherentXSection', defaultValue=0.0,
+                             'Chemical Formula.')
+        self.declareProperty(name='ContainerIncoherentXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The incoherent cross-section for the can material in barns. To be used instead of '
-                                 'Chemical Formula.')
-        self.declareProperty(name='ContainerAttenuationXSection', defaultValue=0.0,
+                             'Chemical Formula.')
+        self.declareProperty(name='ContainerAttenuationXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The absorption cross-section for the can material in barns. To be used instead of '
-                                 'Chemical Formula.')
-        self.declareProperty(name='ContainerDensityType', defaultValue='Mass Density',
+                             'Chemical Formula.')
+        self.declareProperty(name='ContainerDensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass density or Number density for the container.')
-        self.declareProperty(name='ContainerNumberDensityUnit', defaultValue='Atoms',
-                             validator=StringListValidator(['Atoms', 'Formula Units']),
-                             doc='Choose which units ContainerDensity refers to. Allowed values: [Atoms, Formula Units]')
-        self.declareProperty(name='ContainerDensity', defaultValue=0.0,
+        self.declareProperty(
+            name='ContainerNumberDensityUnit',
+            defaultValue='Atoms',
+            validator=StringListValidator(['Atoms', 'Formula Units']),
+            doc='Choose which units ContainerDensity refers to. Allowed values: [Atoms, Formula Units]')
+        self.declareProperty(name='ContainerDensity',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The value for the container Mass density (g/cm^3) or Number density (1/Angstrom^3).')
 
@@ -176,7 +198,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertySettings('ContainerDensity', container_condition)
 
         # Shape options
-        self.declareProperty(name='Shape', defaultValue='FlatPlate',
+        self.declareProperty(name='Shape',
+                             defaultValue='FlatPlate',
                              validator=StringListValidator(['FlatPlate', 'Cylinder', 'Annulus']),
                              doc='Geometric shape of the sample environment')
 
@@ -185,7 +208,9 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         annulus_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Annulus')
 
         # height is common to all, and should be the same for sample and container
-        self.declareProperty('Height', defaultValue=0.0, validator=FloatBoundedValidator(0.0),
+        self.declareProperty('Height',
+                             defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
                              doc='Height of the sample environment (cm)')
 
         self.setPropertyGroup('Shape', 'Shape Options')
@@ -193,15 +218,17 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
         # ---------------------------Sample---------------------------
         # Flat Plate
-        self.declareProperty(name='SampleWidth', defaultValue=0.0,
+        self.declareProperty(name='SampleWidth',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Width of the sample environment (cm)')
-        self.declareProperty(name='SampleThickness', defaultValue=0.0,
+        self.declareProperty(name='SampleThickness',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Thickness of the sample environment (cm)')
-        self.declareProperty(name='SampleCenter', defaultValue=0.0,
-                             doc='Center of the sample environment')
-        self.declareProperty(name='SampleAngle', defaultValue=0.0,
+        self.declareProperty(name='SampleCenter', defaultValue=0.0, doc='Center of the sample environment')
+        self.declareProperty(name='SampleAngle',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Angle of the sample environment with respect to the beam (degrees)')
 
@@ -216,7 +243,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('SampleAngle', 'Sample Shape Options')
 
         # Cylinder
-        self.declareProperty(name='SampleRadius', defaultValue=0.0,
+        self.declareProperty(name='SampleRadius',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Radius of the sample environment (cm)')
 
@@ -224,10 +252,12 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('SampleRadius', 'Sample Shape Options')
 
         # Annulus
-        self.declareProperty(name='SampleInnerRadius', defaultValue=0.0,
+        self.declareProperty(name='SampleInnerRadius',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Inner radius of the sample environment (cm)')
-        self.declareProperty(name='SampleOuterRadius', defaultValue=0.0,
+        self.declareProperty(name='SampleOuterRadius',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Outer radius of the sample environment (cm)')
 
@@ -239,10 +269,12 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
         # ---------------------------Container---------------------------
         # Flat Plate
-        self.declareProperty(name='ContainerFrontThickness', defaultValue=0.0,
+        self.declareProperty(name='ContainerFrontThickness',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Front thickness of the container environment (cm)')
-        self.declareProperty(name='ContainerBackThickness', defaultValue=0.0,
+        self.declareProperty(name='ContainerBackThickness',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Back thickness of the container environment (cm)')
 
@@ -262,10 +294,12 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         container_n_f_p_condition = VisibleWhenProperty(container_condition, not_flat_plate_condition,
                                                         LogicOperator.And)
 
-        self.declareProperty(name='ContainerInnerRadius', defaultValue=0.0,
+        self.declareProperty(name='ContainerInnerRadius',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Inner radius of the container environment (cm)')
-        self.declareProperty(name='ContainerOuterRadius', defaultValue=0.0,
+        self.declareProperty(name='ContainerOuterRadius',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Outer radius of the container environment (cm)')
 
@@ -443,15 +477,16 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         # algorithm is a workspace group. This causes a crash in the ADS when this
         # algorithm attempts to put a workspace group into another workspace group
         if sample_is_group or container_is_group:
-            raise RuntimeError("CalculateMonteCarloAbsorption does not currently support"
-                               " WorkspaceGroups")
+            raise RuntimeError("CalculateMonteCarloAbsorption does not currently support" " WorkspaceGroups")
 
-        self._general_kwargs = {'BeamHeight': self.getProperty('BeamHeight').value,
-                                'BeamWidth': self.getProperty('BeamWidth').value,
-                                'NumberOfWavelengthPoints': self.getProperty('NumberOfWavelengthPoints').value,
-                                'EventsPerPoint': self.getProperty('EventsPerPoint').value,
-                                'Interpolation': self.getProperty('Interpolation').value,
-                                'MaxScatterPtAttempts': self.getProperty('MaxScatterPtAttempts').value}
+        self._general_kwargs = {
+            'BeamHeight': self.getProperty('BeamHeight').value,
+            'BeamWidth': self.getProperty('BeamWidth').value,
+            'NumberOfWavelengthPoints': self.getProperty('NumberOfWavelengthPoints').value,
+            'EventsPerPoint': self.getProperty('EventsPerPoint').value,
+            'Interpolation': self.getProperty('Interpolation').value,
+            'MaxScatterPtAttempts': self.getProperty('MaxScatterPtAttempts').value
+        }
 
         self._shape = self.getProperty('Shape').value
         self._height = self.getProperty('Height').value

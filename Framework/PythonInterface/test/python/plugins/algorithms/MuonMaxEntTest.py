@@ -12,16 +12,11 @@ from mantid.api import *
 
 
 class MuonMaxEntTest(unittest.TestCase):
-
     def genData(self):
         x_data = np.linspace(0, 30., 100)
         e_data = np.cos(0.0 * x_data)
         y_data = np.sin(2.3 * x_data + 0.1) * np.exp(-x_data / 2.19703)
-        inputData = CreateWorkspace(
-            DataX=x_data,
-            DataY=y_data,
-            DataE=e_data,
-            UnitX='Time')
+        inputData = CreateWorkspace(DataX=x_data, DataY=y_data, DataE=e_data, UnitX='Time')
         return inputData
 
     def genData2(self):
@@ -35,12 +30,7 @@ class MuonMaxEntTest(unittest.TestCase):
             y_data.append(np.sin(4.3 * xx + 0.2) * np.exp(-xx / 2.19703))
             e_data.append(np.cos(0.2 * xx))
 
-        inputData = CreateWorkspace(
-            DataX=x_data,
-            DataY=y_data,
-            DataE=e_data,
-            NSpec=2,
-            UnitX='Time')
+        inputData = CreateWorkspace(DataX=x_data, DataY=y_data, DataE=e_data, NSpec=2, UnitX='Time')
         return inputData
 
     def genDataWithDeadDetectors(self):
@@ -65,16 +55,15 @@ class MuonMaxEntTest(unittest.TestCase):
 
     def test_executes(self):
         inputData = self.genData()
-        MuonMaxent(
-            InputWorkspace=inputData,
-            Npts=32768,
-            FitDeaDTime=False,
-            FixPhases=True,
-            OuterIterations=1,
-            InnerIterations=1,
-            OutputWorkspace='freq',
-            ReconstructedSpectra='time',
-            OutputPhaseTable="phase")
+        MuonMaxent(InputWorkspace=inputData,
+                   Npts=32768,
+                   FitDeaDTime=False,
+                   FixPhases=True,
+                   OuterIterations=1,
+                   InnerIterations=1,
+                   OutputWorkspace='freq',
+                   ReconstructedSpectra='time',
+                   OutputPhaseTable="phase")
         freq = AnalysisDataService.retrieve("freq")
         time = AnalysisDataService.retrieve("time")
         phase = AnalysisDataService.retrieve("phase")
@@ -91,17 +80,16 @@ class MuonMaxEntTest(unittest.TestCase):
                 self.assertEqual(np.count_nonzero(inputData.readY(k)), 0)
             else:
                 self.assertNotEqual(np.count_nonzero(inputData.readY(k)), 0)
-        MuonMaxent(
-            InputWorkspace=inputData,
-            Npts=32768,
-            FitDeaDTime=False,
-            FixPhases=False,
-            OuterIterations=5,
-            InnerIterations=5,
-            OutputWorkspace='freq',
-            ReconstructedSpectra='time',
-            OutputPhaseTable="phase",
-            PhaseConvergenceTable="con")
+        MuonMaxent(InputWorkspace=inputData,
+                   Npts=32768,
+                   FitDeaDTime=False,
+                   FixPhases=False,
+                   OuterIterations=5,
+                   InnerIterations=5,
+                   OutputWorkspace='freq',
+                   ReconstructedSpectra='time',
+                   OutputPhaseTable="phase",
+                   PhaseConvergenceTable="con")
         freq = AnalysisDataService.retrieve("freq")
         time = AnalysisDataService.retrieve("time")
         phase = AnalysisDataService.retrieve("phase")
@@ -124,36 +112,33 @@ class MuonMaxEntTest(unittest.TestCase):
     def test_exitOnNAN(self):
         inputData = self.genData()
         try:
-            MuonMaxent(
-                InputWorkspace=inputData,
-                Npts=32768,
-                FitDeaDTime=False,
-                FixPhases=True,
-                OuterIterations=10,
-                InnerIterations=10,
-                OutputWorkspace='freq',
-                ReconstructedSpectra='time',
-                OutputPhaseTable="phase")
+            MuonMaxent(InputWorkspace=inputData,
+                       Npts=32768,
+                       FitDeaDTime=False,
+                       FixPhases=True,
+                       OuterIterations=10,
+                       InnerIterations=10,
+                       OutputWorkspace='freq',
+                       ReconstructedSpectra='time',
+                       OutputPhaseTable="phase")
         except RuntimeError:
             pass
         else:
-            self.fail(
-                "should throw an error as it will get stuck in a loop due to NAN values")
+            self.fail("should throw an error as it will get stuck in a loop due to NAN values")
         finally:
             DeleteWorkspace("InputData")
 
     def test_multipleSpec(self):
         inputData = self.genData2()
-        MuonMaxent(
-            InputWorkspace=inputData,
-            Npts=32768,
-            FitDeaDTime=False,
-            FixPhases=True,
-            OuterIterations=1,
-            InnerIterations=1,
-            OutputWorkspace='freq',
-            ReconstructedSpectra='time',
-            OutputPhaseTable="phase")
+        MuonMaxent(InputWorkspace=inputData,
+                   Npts=32768,
+                   FitDeaDTime=False,
+                   FixPhases=True,
+                   OuterIterations=1,
+                   InnerIterations=1,
+                   OutputWorkspace='freq',
+                   ReconstructedSpectra='time',
+                   OutputPhaseTable="phase")
         freq = AnalysisDataService.retrieve("freq")
         time = AnalysisDataService.retrieve("time")
         phase = AnalysisDataService.retrieve("phase")
@@ -165,148 +150,142 @@ class MuonMaxEntTest(unittest.TestCase):
     def test_badRange(self):
         inputData = self.genData2()
         try:
-            MuonMaxent(
-                InputWorkspace=inputData,
-                FirstGoodData = 10.0,
-                LastGoodData = 1.0,
-                Npts=32768,
-                FitDeaDTime=False,
-                FixPhases=True,
-                OuterIterations=1,
-                InnerIterations=1,
-                OutputWorkspace='freq',
-                ReconstructedSpectra='time',
-                OutputPhaseTable="phase")
+            MuonMaxent(InputWorkspace=inputData,
+                       FirstGoodData=10.0,
+                       LastGoodData=1.0,
+                       Npts=32768,
+                       FitDeaDTime=False,
+                       FixPhases=True,
+                       OuterIterations=1,
+                       InnerIterations=1,
+                       OutputWorkspace='freq',
+                       ReconstructedSpectra='time',
+                       OutputPhaseTable="phase")
         except:
-           pass
+            pass
         else:
-           self.fail("should have failed as start > end")
+            self.fail("should have failed as start > end")
         finally:
             DeleteWorkspace("InputData")
 
     def test_badStart(self):
         inputData = self.genData2()
         try:
-            MuonMaxent(
-                InputWorkspace=inputData,
-                FirstGoodData = -10.0,
-                Npts=32768,
-                FitDeaDTime=False,
-                FixPhases=True,
-                OuterIterations=1,
-                InnerIterations=1,
-                OutputWorkspace='freq',
-                ReconstructedSpectra='time',
-                OutputPhaseTable="phase")
+            MuonMaxent(InputWorkspace=inputData,
+                       FirstGoodData=-10.0,
+                       Npts=32768,
+                       FitDeaDTime=False,
+                       FixPhases=True,
+                       OuterIterations=1,
+                       InnerIterations=1,
+                       OutputWorkspace='freq',
+                       ReconstructedSpectra='time',
+                       OutputPhaseTable="phase")
         except:
-           pass
+            pass
         else:
-           self.fail("should have failed as start < 0.0")
+            self.fail("should have failed as start < 0.0")
         finally:
             DeleteWorkspace("InputData")
 
     def test_badInner(self):
         inputData = self.genData2()
         try:
-            MuonMaxent(
-                InputWorkspace=inputData,
-                Npts=32768,
-                FitDeaDTime=False,
-                FixPhases=True,
-                OuterIterations=1,
-                InnerIterations=0,
-                OutputWorkspace='freq',
-                ReconstructedSpectra='time',
-                OutputPhaseTable="phase")
+            MuonMaxent(InputWorkspace=inputData,
+                       Npts=32768,
+                       FitDeaDTime=False,
+                       FixPhases=True,
+                       OuterIterations=1,
+                       InnerIterations=0,
+                       OutputWorkspace='freq',
+                       ReconstructedSpectra='time',
+                       OutputPhaseTable="phase")
         except:
-           pass
+            pass
         else:
-           self.fail("should have failed as InnerIterations <= 0.0")
+            self.fail("should have failed as InnerIterations <= 0.0")
         finally:
             DeleteWorkspace("InputData")
 
     def test_badOuter(self):
         inputData = self.genData2()
         try:
-            MuonMaxent(
-                InputWorkspace=inputData,
-                Npts=32768,
-                FitDeaDTime=False,
-                FixPhases=True,
-                OuterIterations=0,
-                InnerIterations=1,
-                OutputWorkspace='freq',
-                ReconstructedSpectra='time',
-                OutputPhaseTable="phase")
+            MuonMaxent(InputWorkspace=inputData,
+                       Npts=32768,
+                       FitDeaDTime=False,
+                       FixPhases=True,
+                       OuterIterations=0,
+                       InnerIterations=1,
+                       OutputWorkspace='freq',
+                       ReconstructedSpectra='time',
+                       OutputPhaseTable="phase")
         except:
-           pass
+            pass
         else:
-           self.fail("should have failed as OuterIterations <= 0.0")
+            self.fail("should have failed as OuterIterations <= 0.0")
         finally:
             DeleteWorkspace("InputData")
 
     def test_badField(self):
         inputData = self.genData2()
         try:
-            MuonMaxent(
-                InputWorkspace=inputData,
-                Npts=32768,
-                MaxField = -10.,
-                FitDeaDTime=False,
-                FixPhases=True,
-                OuterIterations=1,
-                InnerIterations=1,
-                OutputWorkspace='freq',
-                ReconstructedSpectra='time',
-                OutputPhaseTable="phase")
+            MuonMaxent(InputWorkspace=inputData,
+                       Npts=32768,
+                       MaxField=-10.,
+                       FitDeaDTime=False,
+                       FixPhases=True,
+                       OuterIterations=1,
+                       InnerIterations=1,
+                       OutputWorkspace='freq',
+                       ReconstructedSpectra='time',
+                       OutputPhaseTable="phase")
         except:
-           pass
+            pass
         else:
-           self.fail("should have failed as MaxField <= 0.0")
+            self.fail("should have failed as MaxField <= 0.0")
         finally:
             DeleteWorkspace("InputData")
 
     def test_badFactor(self):
         inputData = self.genData2()
         try:
-            MuonMaxent(
-                InputWorkspace=inputData,
-                Npts=32768,
-                Factor = -10.,
-                FitDeaDTime=False,
-                FixPhases=True,
-                OuterIterations=1,
-                InnerIterations=1,
-                OutputWorkspace='freq',
-                ReconstructedSpectra='time',
-                OutputPhaseTable="phase")
+            MuonMaxent(InputWorkspace=inputData,
+                       Npts=32768,
+                       Factor=-10.,
+                       FitDeaDTime=False,
+                       FixPhases=True,
+                       OuterIterations=1,
+                       InnerIterations=1,
+                       OutputWorkspace='freq',
+                       ReconstructedSpectra='time',
+                       OutputPhaseTable="phase")
         except:
-           pass
+            pass
         else:
-           self.fail("should have failed as Factor <= 0.0")
+            self.fail("should have failed as Factor <= 0.0")
         finally:
             DeleteWorkspace("InputData")
 
     def test_badDefault(self):
         inputData = self.genData2()
         try:
-            MuonMaxent(
-                InputWorkspace=inputData,
-                Npts=32768,
-                DefaultLevel = -10.,
-                FitDeaDTime=False,
-                FixPhases=True,
-                OuterIterations=1,
-                InnerIterations=1,
-                OutputWorkspace='freq',
-                ReconstructedSpectra='time',
-                OutputPhaseTable="phase")
+            MuonMaxent(InputWorkspace=inputData,
+                       Npts=32768,
+                       DefaultLevel=-10.,
+                       FitDeaDTime=False,
+                       FixPhases=True,
+                       OuterIterations=1,
+                       InnerIterations=1,
+                       OutputWorkspace='freq',
+                       ReconstructedSpectra='time',
+                       OutputPhaseTable="phase")
         except:
-           pass
+            pass
         else:
-           self.fail("should have failed as DefaultLevel <= 0.0")
+            self.fail("should have failed as DefaultLevel <= 0.0")
         finally:
             DeleteWorkspace("InputData")
+
 
 if __name__ == '__main__':
     unittest.main()

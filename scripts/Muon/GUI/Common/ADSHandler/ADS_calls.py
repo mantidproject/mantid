@@ -12,4 +12,4 @@ def remove_ws(name):
 
 
 def retrieve_ws(name):
-    return  AnalysisDataService.retrieve(name)
+    return AnalysisDataService.retrieve(name)

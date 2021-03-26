@@ -89,8 +89,8 @@ class PairingTableView(QtWidgets.QWidget):
 
     def set_up_table(self):
         self.pairing_table.setColumnCount(6)
-        self.pairing_table.setHorizontalHeaderLabels(["Pair Name", "Analyse (plot/fit)", "Group 1", " Group 2",
-                                                      "Alpha", "Guess Alpha"])
+        self.pairing_table.setHorizontalHeaderLabels(
+            ["Pair Name", "Analyse (plot/fit)", "Group 1", " Group 2", "Alpha", "Guess Alpha"])
         header = self.pairing_table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
@@ -226,7 +226,7 @@ class PairingTableView(QtWidgets.QWidget):
             return str(self.pairing_table.cellWidget(row, col).currentText())
         elif pair_columns[col] == "guess_alpha":
             return "Guess"
-        else: # columns without widgets
+        else:  # columns without widgets
             return str(self.pairing_table.item(row, col).text())
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -307,7 +307,7 @@ class PairingTableView(QtWidgets.QWidget):
 
     def get_selected_pair_names_and_indexes(self):
         indexes = self._get_selected_row_indices()
-        return [[str(self.pairing_table.item(i, 0).text()),i] for i in indexes]
+        return [[str(self.pairing_table.item(i, 0).text()), i] for i in indexes]
 
     def remove_pair_by_index(self, index):
         self.pairing_table.removeRow(index)

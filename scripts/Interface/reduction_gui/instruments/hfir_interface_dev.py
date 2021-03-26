@@ -29,7 +29,7 @@ if "workbench.app.mainwindow" in sys.modules:
     IS_IN_MANTIDGUI = True
 else:
     try:
-        import mantidplot # noqa
+        import mantidplot  # noqa
         IS_IN_MANTIDGUI = True
     except:
         pass
@@ -41,7 +41,6 @@ class HFIRInterface(InstrumentInterface):
     """
         Defines the widgets for HFIR reduction
     """
-
     def __init__(self, name, settings):
         super(HFIRInterface, self).__init__(name, settings)
 
@@ -49,27 +48,27 @@ class HFIRInterface(InstrumentInterface):
         self.LAST_REDUCTION_NAME = ".mantid_last_HFIR_reduction.xml"
 
         # Scripter object to interface with Mantid
-        self.scripter = HFIRReductionScripter(name=name, settings = self._settings)
+        self.scripter = HFIRReductionScripter(name=name, settings=self._settings)
 
         # Instrument description
-        self.attach(SANSInstrumentWidget(settings = self._settings, name=name, data_proxy=DataProxy))
+        self.attach(SANSInstrumentWidget(settings=self._settings, name=name, data_proxy=DataProxy))
 
         # Detector
-        self.attach(DetectorWidget(settings = self._settings, data_proxy=DataProxy,
-                                   options_callback = self.scripter.set_options))
+        self.attach(
+            DetectorWidget(settings=self._settings, data_proxy=DataProxy, options_callback=self.scripter.set_options))
 
         # Sample
-        self.attach(SampleDataWidget(settings = self._settings, data_proxy=DataProxy))
+        self.attach(SampleDataWidget(settings=self._settings, data_proxy=DataProxy))
 
         # Background
-        self.attach(BackgroundWidget(settings = self._settings, data_proxy=DataProxy))
+        self.attach(BackgroundWidget(settings=self._settings, data_proxy=DataProxy))
 
         # Reduction output
-        self.attach(OutputWidget(settings = self._settings))
+        self.attach(OutputWidget(settings=self._settings))
 
         # Catalog
-        self.attach(SANSCatalogWidget(settings = self._settings, catalog_cls=DataCatalog))
+        self.attach(SANSCatalogWidget(settings=self._settings, catalog_cls=DataCatalog))
 
         # Stitcher
         if IS_IN_MANTIDGUI:
-            self.attach(StitcherWidget(settings = self._settings))
+            self.attach(StitcherWidget(settings=self._settings))

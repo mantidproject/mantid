@@ -12,18 +12,17 @@ from mantidqt.utils.qt.testing import get_application
 
 from qtpy.QtCore import QCoreApplication, QSettings
 
-
 # Frequency_Domain_Analysis_Old.py  -  Excluded because is being deleted in Mantid Version 6.0
 # Frequency_Domain_Analysis.py      -  Excluded because it is causing a crash
 EXCLUDED_SCRIPTS = ["Frequency_Domain_Analysis_Old.py", "Frequency_Domain_Analysis.py"]
 
-INSTRUMENT_SWITCHER = {"DGS_Reduction.py": "ARCS",
-                       "ORNL_SANS.py": "EQSANS",
-                       "Powder_Diffraction_Reduction.py": "NOM"}
+INSTRUMENT_SWITCHER = {"DGS_Reduction.py": "ARCS", "ORNL_SANS.py": "EQSANS", "Powder_Diffraction_Reduction.py": "NOM"}
 
-APP_NAME_SWITCHER = {"DGS_Reduction.py": "python",
-                     "ORNL_SANS.py": "python",
-                     "Powder_Diffraction_Reduction.py": "python"}
+APP_NAME_SWITCHER = {
+    "DGS_Reduction.py": "python",
+    "ORNL_SANS.py": "python",
+    "Powder_Diffraction_Reduction.py": "python"
+}
 
 
 def set_instrument(interface_script_name):
@@ -48,9 +47,10 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
         self._app = get_application()
 
         self._interface_directory = ConfigService.getString('mantidqt.python_interfaces_directory')
-        self._interface_scripts = [interface.split("/")[1] for interface in
-                                   ConfigService.getString('mantidqt.python_interfaces').split()
-                                   if interface.split("/")[1] not in EXCLUDED_SCRIPTS]
+        self._interface_scripts = [
+            interface.split("/")[1] for interface in ConfigService.getString('mantidqt.python_interfaces').split()
+            if interface.split("/")[1] not in EXCLUDED_SCRIPTS
+        ]
 
     def runTest(self):
         if len(self._interface_scripts) == 0:

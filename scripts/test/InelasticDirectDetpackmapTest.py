@@ -9,7 +9,6 @@ import unittest
 
 
 class InelasticDirectDetpackmapTest(unittest.TestCase):
-
     def test_sequoia(self):
         self.assertEqual(sequoia('B1'), 38)
         self.assertEqual(sequoia('B37'), 74)

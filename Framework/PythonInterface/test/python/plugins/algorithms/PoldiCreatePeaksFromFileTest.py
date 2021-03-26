@@ -61,7 +61,9 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
         self.assertEqual(ws.getNumberOfEntries(), 1)
         self.assertTrue(ws.contains("SiliconCarbon"))
 
-        ws_expected = PoldiCreatePeaksFromCell("F d -3 m", "Si 0 0 0 0.9 0.05; C 0 0 0 0.1 0.05", a=5.43,
+        ws_expected = PoldiCreatePeaksFromCell("F d -3 m",
+                                               "Si 0 0 0 0.9 0.05; C 0 0 0 0.1 0.05",
+                                               a=5.43,
                                                LatticeSpacingMin=0.7)
         si_ws = AnalysisDataService.retrieve("SiliconCarbon")
         self._tablesAreEqual(si_ws, ws_expected)

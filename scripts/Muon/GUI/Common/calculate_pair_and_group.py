@@ -33,8 +33,8 @@ def estimate_group_asymmetry_data(context, group, run, rebin, workspace_name, un
 
     params = _get_MuonGroupingAsymmetry_parameters(context, group, run, periods)
     params["InputWorkspace"] = processed_data
-    group_asymmetry, group_asymmetry_unnorm = algorithm_utils.run_MuonGroupingAsymmetry(params, workspace_name,
-                                                                                        unormalised_workspace_name)
+    group_asymmetry, group_asymmetry_unnorm = algorithm_utils.run_MuonGroupingAsymmetry(
+        params, workspace_name, unormalised_workspace_name)
 
     return group_asymmetry, group_asymmetry_unnorm
 
@@ -67,8 +67,8 @@ def _get_pre_processing_params(context, run, rebin):
         if context.gui_context['TimeZeroFromFile']:
             time_offset = 0.0
         else:
-            time_offset = context.data_context.get_loaded_data_for_run(run)["TimeZero"] - context.gui_context[
-                'TimeZero']
+            time_offset = context.data_context.get_loaded_data_for_run(
+                run)["TimeZero"] - context.gui_context['TimeZero']
         pre_process_params["TimeOffset"] = time_offset
     except KeyError:
         pass
@@ -103,8 +103,9 @@ def _setup_rebin_options(context, pre_process_params, run):
 
     try:
         if context.gui_context['RebinType'] == 'Fixed' and context.gui_context["RebinFixed"]:
-            x_data = context.data_context._loaded_data.get_data(run=run, instrument=context.data_context.instrument
-                                                                )['workspace']['OutputWorkspace'][0].workspace.dataX(0)
+            x_data = context.data_context._loaded_data.get_data(
+                run=run,
+                instrument=context.data_context.instrument)['workspace']['OutputWorkspace'][0].workspace.dataX(0)
             original_step = x_data[1] - x_data[0]
             pre_process_params["RebinArgs"] = float(context.gui_context["RebinFixed"]) * original_step
     except KeyError:

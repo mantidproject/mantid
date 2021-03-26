@@ -45,8 +45,10 @@ class BatchProcessRunnerTest(unittest.TestCase):
 
         self.batch_process_runner.process_states(row_index_pair=self._mock_rows,
                                                  get_states_func=get_states_mock,
-                                                 use_optimizations=False, output_mode=OutputMode.BOTH,
-                                                 plot_results=False, output_graph='')
+                                                 use_optimizations=False,
+                                                 output_mode=OutputMode.BOTH,
+                                                 plot_results=False,
+                                                 output_graph='')
         QThreadPool.globalInstance().waitForDone()
 
         self.assertEqual(self.sans_batch_instance.call_count, 3)
@@ -62,8 +64,10 @@ class BatchProcessRunnerTest(unittest.TestCase):
 
         self.batch_process_runner.process_states(row_index_pair=self._mock_rows,
                                                  get_states_func=get_states_mock,
-                                                 use_optimizations=False, output_mode=OutputMode.BOTH,
-                                                 plot_results=False, output_graph='')
+                                                 use_optimizations=False,
+                                                 output_mode=OutputMode.BOTH,
+                                                 plot_results=False,
+                                                 output_graph='')
         QThreadPool.globalInstance().waitForDone()
 
         self.assertEqual(self.batch_process_runner.row_processed_signal.emit.call_count, 3)
@@ -84,8 +88,10 @@ class BatchProcessRunnerTest(unittest.TestCase):
 
         self.batch_process_runner.process_states(row_index_pair=self._mock_rows,
                                                  get_states_func=get_states_mock,
-                                                 use_optimizations=False, output_mode=OutputMode.BOTH,
-                                                 plot_results=False, output_graph='')
+                                                 use_optimizations=False,
+                                                 output_mode=OutputMode.BOTH,
+                                                 plot_results=False,
+                                                 output_graph='')
         QThreadPool.globalInstance().waitForDone()
 
         self.assertEqual(3, self.batch_process_runner.row_failed_signal.emit.call_count)

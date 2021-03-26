@@ -13,16 +13,21 @@ import numpy as np
 try:
     from scipy.special import spherical_jn
 
-    def j1(z): return spherical_jn(1, z)
+    def j1(z):
+        return spherical_jn(1, z)
 
-    def j1d(z): return spherical_jn(1, z, derivative=True)
+    def j1d(z):
+        return spherical_jn(1, z, derivative=True)
 except ImportError:
     # spherical_jn removed from scipy >= 1.0.0
     from scipy.special import sph_jn
 
-    def j1(z): return sph_jn(1, z)[0][1]
+    def j1(z):
+        return sph_jn(1, z)[0][1]
 
-    def j1d(z): return sph_jn(1, z)[1][1]
+    def j1d(z):
+        return sph_jn(1, z)[1][1]
+
 
 from mantid.api import IFunction1D, FunctionFactory
 
@@ -40,10 +45,8 @@ class EISFDiffSphereAlkyl(IFunction1D):
     def init(self):
         # Active fitting parameters
         self.declareParameter('A', 1.0, 'Amplitude')
-        self.declareParameter(
-            'Rmin', 1.0, 'Minimum radius, inverse units of Q.')
-        self.declareParameter(
-            'Rmax', 2.0, 'Maximum radius, inverse units of Q.')
+        self.declareParameter('Rmin', 1.0, 'Minimum radius, inverse units of Q.')
+        self.declareParameter('Rmax', 2.0, 'Maximum radius, inverse units of Q.')
         self.declareAttribute('M', 2)
         # Vectorize the calculation of the bessel functions
 

@@ -21,9 +21,7 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
         charTable = PDLoadCharacterizations(Filename=charfile)
         char = charTable[0]
 
-        PDDetermineCharacterizations(InputWorkspace=mtd["data"],
-                                     Characterizations=char,
-                                     ReductionProperties="props")
+        PDDetermineCharacterizations(InputWorkspace=mtd["data"], Characterizations=char, ReductionProperties="props")
 
     @classmethod
     def tearDownClass(cls):
@@ -47,8 +45,7 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
 
     def test_correction_methods(self):
         # no caching
-        sample_ws, container_ws = absorptioncorrutils.calculate_absorption_correction(
-            '', "None", None, "V", 1.0)
+        sample_ws, container_ws = absorptioncorrutils.calculate_absorption_correction('', "None", None, "V", 1.0)
 
         self.assertIsNone(sample_ws)
         self.assertIsNone(container_ws)
@@ -83,7 +80,7 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
             1.165,
             element_size=2,
             cache_dirs=cachedirs,
-            )
+        )
         self.assertIsNotNone(abs_s)
 
 

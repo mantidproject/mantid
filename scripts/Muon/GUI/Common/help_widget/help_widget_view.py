@@ -12,7 +12,6 @@ from mantidqt.interfacemanager import InterfaceManager
 
 
 class HelpWidgetView(QtWidgets.QWidget):
-
     @staticmethod
     def warning_popup(message):
         message_box.warning(str(message))
@@ -36,8 +35,7 @@ class HelpWidgetView(QtWidgets.QWidget):
         self.help_button.setText("?")
 
         self.manage_user_dir_button = QtWidgets.QPushButton(self)
-        self.manage_user_dir_button.setObjectName(
-            "manageUserDirectoriesButton")
+        self.manage_user_dir_button.setObjectName("manageUserDirectoriesButton")
         self.manage_user_dir_button.setText("Manage User Directories")
 
         self.horizontal_layout = QtWidgets.QHBoxLayout()

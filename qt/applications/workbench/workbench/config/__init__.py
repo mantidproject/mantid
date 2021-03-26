@@ -59,11 +59,9 @@ WINDOW_STANDARD_FLAGS = Qt.WindowFlags(Qt.Window)
 if sys.platform == 'win32':
     WINDOW_ONTOP_FLAGS = WINDOW_STANDARD_FLAGS
 elif sys.platform == 'darwin':
-    WINDOW_ONTOP_FLAGS = (Qt.Tool | Qt.CustomizeWindowHint | Qt.WindowCloseButtonHint
-                          | Qt.WindowMinimizeButtonHint)
+    WINDOW_ONTOP_FLAGS = (Qt.Tool | Qt.CustomizeWindowHint | Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint)
 else:
-    WINDOW_ONTOP_FLAGS = (Qt.Tool | Qt.CustomizeWindowHint | Qt.WindowCloseButtonHint
-                          | Qt.WindowMinimizeButtonHint)
+    WINDOW_ONTOP_FLAGS = (Qt.Tool | Qt.CustomizeWindowHint | Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint)
 
 # Iterable containing defaults for each configurable section of the code
 # General application settings are in the main section

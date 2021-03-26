@@ -16,7 +16,6 @@ from mantidqt.widgets.plotconfigdialog.imagestabwidget.view import ImagesTabWidg
 
 
 class ImagesTabWidgetPresenter:
-
     def __init__(self, fig, view=None, parent=None):
         self.fig = fig
         if not view:
@@ -27,8 +26,7 @@ class ImagesTabWidgetPresenter:
         self.image_names_dict = dict()
         self.populate_select_image_combo_box_and_update_view()
 
-        self.view.select_image_combo_box.currentIndexChanged.connect(
-            self.update_view)
+        self.view.select_image_combo_box.currentIndexChanged.connect(self.update_view)
 
     def apply_properties(self):
         props = self.view.get_properties()
@@ -110,7 +108,6 @@ class ImagesTabWidgetPresenter:
     def _populate_select_image_combo_box(self):
         self.view.select_image_combo_box.clear()
         for img in get_images_from_fig(self.fig):
-            self.image_names_dict = self.set_name_in_names_dict(
-                self.generate_image_name(img[0]), img, self.image_names_dict)
-        self.view.populate_select_image_combo_box(
-            sorted(self.image_names_dict.keys()))
+            self.image_names_dict = self.set_name_in_names_dict(self.generate_image_name(img[0]), img,
+                                                                self.image_names_dict)
+        self.view.populate_select_image_combo_box(sorted(self.image_names_dict.keys()))

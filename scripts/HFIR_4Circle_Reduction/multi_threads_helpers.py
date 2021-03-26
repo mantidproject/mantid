@@ -7,7 +7,7 @@
 #pylint: disable=W0403,R0913,R0902
 import os
 from qtpy.QtCore import Signal as pyqtSignal
-from qtpy.QtCore import QThread   # noqa
+from qtpy.QtCore import QThread  # noqa
 import HFIR_4Circle_Reduction.reduce4circleControl as r4c  # noqa
 from HFIR_4Circle_Reduction import peak_integration_utility  # noqa
 
@@ -121,8 +121,16 @@ class IntegratePeaksThread(QThread):
     # signal to report state: (1) experiment, (2) scan, (3) mode, (4) message
     mergeMsgSignal = pyqtSignal(int, int, int, str)
 
-    def __init__(self, main_window, exp_number, scan_tuple_list, mask_det, mask_name, norm_type, num_pt_bg_left,
-                 num_pt_bg_right, scale_factor=1.000):
+    def __init__(self,
+                 main_window,
+                 exp_number,
+                 scan_tuple_list,
+                 mask_det,
+                 mask_name,
+                 norm_type,
+                 num_pt_bg_left,
+                 num_pt_bg_right,
+                 scale_factor=1.000):
         """
 
         :param main_window:
@@ -247,7 +255,7 @@ class IntegratePeaksThread(QThread):
                 ret_obj = 'AssertionError: %s.' % str(ass_err)
 
             if status:
-                center_i = ret_obj   # 3-tuple
+                center_i = ret_obj  # 3-tuple
             else:
                 error_msg = 'Unable to find peak for exp %d scan %d: %s.' % (self._expNumber, scan_number, str(ret_obj))
                 # no need... self._mainWindow.controller.set_peak_intensity(self._expNumber, scan_number, 0.)
@@ -257,8 +265,10 @@ class IntegratePeaksThread(QThread):
 
             # check given mask workspace
             if self._maskDetector:
-                self._mainWindow.controller.check_generate_mask_workspace(self._expNumber, scan_number,
-                                                                          self._selectedMaskName, check_throw=True)
+                self._mainWindow.controller.check_generate_mask_workspace(self._expNumber,
+                                                                          scan_number,
+                                                                          self._selectedMaskName,
+                                                                          check_throw=True)
 
             bkgd_pt_list = (self._numBgPtLeft, self._numBgPtRight)
             # integrate peak
@@ -339,8 +349,8 @@ class IntegratePeaksThread(QThread):
 
         # calculate lorentz correction
         # TODO/FIXME/NOW2 : peak center Q shall be from calculation!
-        lorentz_factor = peak_integration_utility.calculate_lorentz_correction_factor(peak_center_q, wavelength,
-                                                                                      motor_step)
+        lorentz_factor = peak_integration_utility.calculate_lorentz_correction_factor(
+            peak_center_q, wavelength, motor_step)
 
         peak_info_obj.lorentz_correction_factor = lorentz_factor
         # set motor

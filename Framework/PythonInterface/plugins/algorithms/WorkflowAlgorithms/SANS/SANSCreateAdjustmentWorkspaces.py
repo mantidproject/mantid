@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-
 """ SANSCreateAdjustmentWorkspaces algorithm creates workspaces for pixel adjustment
     , wavelength adjustment and pixel-and-wavelength adjustment workspaces.
 """
@@ -34,69 +33,86 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         # INPUT
         # ---------------
         # State
-        self.declareProperty('SANSState', '',
-                             doc='A JSON string which fulfills the SANSState contract.')
+        self.declareProperty('SANSState', '', doc='A JSON string which fulfills the SANSState contract.')
 
         # Input workspaces
-        self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
                              doc='The transmission workspace.')
-        self.declareProperty(MatrixWorkspaceProperty('DirectWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('DirectWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
                              doc='The direct workspace.')
-        self.declareProperty(MatrixWorkspaceProperty('MonitorWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('MonitorWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
                              doc='The scatter monitor workspace. This workspace only contains monitors.')
 
         workspace_validator = CompositeValidator()
         workspace_validator.add(WorkspaceUnitValidator("Wavelength"))
-        self.declareProperty(MatrixWorkspaceProperty('SampleData', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input,
+        self.declareProperty(MatrixWorkspaceProperty('SampleData',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input,
                                                      validator=workspace_validator),
                              doc='A workspace cropped to the detector to be reduced (the SAME as the input to Q1D). '
-                                 'This used to verify the solid angle. The workspace is not modified, just inspected.')
+                             'This used to verify the solid angle. The workspace is not modified, just inspected.')
 
         # The component
-        allowed_detector_types = StringListValidator([DetectorType.HAB.value,
-                                                      DetectorType.LAB.value])
-        self.declareProperty("Component", DetectorType.LAB.value,
-                             validator=allowed_detector_types, direction=Direction.Input,
+        allowed_detector_types = StringListValidator([DetectorType.HAB.value, DetectorType.LAB.value])
+        self.declareProperty("Component",
+                             DetectorType.LAB.value,
+                             validator=allowed_detector_types,
+                             direction=Direction.Input,
                              doc="The component of the instrument which is currently being investigated.")
 
         # The data type
-        allowed_data = StringListValidator([DataType.SAMPLE.value,
-                                            DataType.CAN.value])
-        self.declareProperty("DataType", DataType.SAMPLE.value,
-                             validator=allowed_data, direction=Direction.Input,
+        allowed_data = StringListValidator([DataType.SAMPLE.value, DataType.CAN.value])
+        self.declareProperty("DataType",
+                             DataType.SAMPLE.value,
+                             validator=allowed_data,
+                             direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
         # Slice factor for monitor
-        self.declareProperty('SliceEventFactor', 1.0, direction=Direction.Input, doc='The slice factor for the monitor '
-                                                                                     'normalization. This factor is the'
-                                                                                     ' one obtained from event '
-                                                                                     'slicing.')
+        self.declareProperty('SliceEventFactor',
+                             1.0,
+                             direction=Direction.Input,
+                             doc='The slice factor for the monitor '
+                             'normalization. This factor is the'
+                             ' one obtained from event '
+                             'slicing.')
 
         # ---------------
         # Output
         # ---------------
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceWavelengthAdjustment', '',
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceWavelengthAdjustment',
+                                                     '',
                                                      direction=Direction.Output),
                              doc='The workspace for wavelength-based adjustments.')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspacePixelAdjustment', '',
-                                                     direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspacePixelAdjustment', '', direction=Direction.Output),
                              doc='The workspace for wavelength-based adjustments.')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceWavelengthAndPixelAdjustment', '',
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceWavelengthAndPixelAdjustment',
+                                                     '',
                                                      direction=Direction.Output),
                              doc='The workspace for, both, wavelength- and pixel-based adjustments.')
 
-        self.declareProperty(MatrixWorkspaceProperty('CalculatedTransmissionWorkspace', ''
-                                                     , optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('CalculatedTransmissionWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The calculated transmission workspace')
 
-        self.declareProperty(MatrixWorkspaceProperty('UnfittedTransmissionWorkspace', ''
-                                                     , optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('UnfittedTransmissionWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The unfitted transmission workspace')
 
     def PyExec(self):
@@ -118,16 +134,16 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         # --------------------------------------
         # Get the wide angle correction workspace
         # --------------------------------------
-        wave_length_and_pixel_adjustment_workspace = self._get_wide_angle_correction_workspace(state,
-                                                                                               calculated_transmission_workspace)  # noqa
+        wave_length_and_pixel_adjustment_workspace = self._get_wide_angle_correction_workspace(
+            state, calculated_transmission_workspace)  # noqa
 
         # --------------------------------------------
         # Get the full wavelength and pixel adjustment
         # --------------------------------------------
         wave_length_adjustment_workspace, \
-        pixel_length_adjustment_workspace = self._get_wavelength_and_pixel_adjustment_workspaces(monitor_normalization_workspace,
-                                                                                                 # noqa
-                                                                                                 calculated_transmission_workspace)  # noqa
+        pixel_length_adjustment_workspace = \
+            self._get_wavelength_and_pixel_adjustment_workspaces(monitor_normalization_workspace, # noqa
+                                                                 calculated_transmission_workspace)  # noqa
 
         if wave_length_adjustment_workspace:
             self.setProperty("OutputWorkspaceWavelengthAdjustment", wave_length_adjustment_workspace)
@@ -139,18 +155,19 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         self.setProperty("CalculatedTransmissionWorkspace", calculated_transmission_workspace)
         self.setProperty("UnfittedTransmissionWorkspace", unfitted_transmission_workspace)
 
-    def _get_wavelength_and_pixel_adjustment_workspaces(self,
-                                                        monitor_normalization_workspace,
+    def _get_wavelength_and_pixel_adjustment_workspaces(self, monitor_normalization_workspace,
                                                         calculated_transmission_workspace):
         component = self.getProperty("Component").value
 
         wave_pixel_adjustment_name = "SANSCreateWavelengthAndPixelAdjustment"
         serialized_state = self.getProperty("SANSState").value
-        wave_pixel_adjustment_options = {"SANSState": serialized_state,
-                                         "NormalizeToMonitorWorkspace": monitor_normalization_workspace,
-                                         "OutputWorkspaceWavelengthAdjustment": EMPTY_NAME,
-                                         "OutputWorkspacePixelAdjustment": EMPTY_NAME,
-                                         "Component": component}
+        wave_pixel_adjustment_options = {
+            "SANSState": serialized_state,
+            "NormalizeToMonitorWorkspace": monitor_normalization_workspace,
+            "OutputWorkspaceWavelengthAdjustment": EMPTY_NAME,
+            "OutputWorkspacePixelAdjustment": EMPTY_NAME,
+            "Component": component
+        }
         if calculated_transmission_workspace:
             wave_pixel_adjustment_options.update({"TransmissionWorkspace": calculated_transmission_workspace})
         wave_pixel_adjustment_alg = create_unmanaged_algorithm(wave_pixel_adjustment_name,
@@ -171,7 +188,8 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         monitor_workspace = self.getProperty("MonitorWorkspace").value
         scale_factor = self.getProperty("SliceEventFactor").value
 
-        ws = normalize_to_monitor(workspace=monitor_workspace, scale_factor=scale_factor,
+        ws = normalize_to_monitor(workspace=monitor_workspace,
+                                  scale_factor=scale_factor,
                                   state_adjustment_normalize_to_monitor=state.adjustment.normalize_to_monitor)
 
         return ws
@@ -206,9 +224,11 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         workspace = None
         if wide_angle_correction and sample_data and calculated_transmission_workspace:
             wide_angle_name = "SANSWideAngleCorrection"
-            wide_angle_options = {"SampleData": sample_data,
-                                  "TransmissionData": calculated_transmission_workspace,
-                                  "OutputWorkspace": EMPTY_NAME}
+            wide_angle_options = {
+                "SampleData": sample_data,
+                "TransmissionData": calculated_transmission_workspace,
+                "OutputWorkspace": EMPTY_NAME
+            }
             wide_angle_alg = create_unmanaged_algorithm(wide_angle_name, **wide_angle_options)
             wide_angle_alg.execute()
             workspace = wide_angle_alg.getProperty("OutputWorkspace").value

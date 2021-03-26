@@ -37,6 +37,7 @@ def _execute(algorithm_str, parameters, is_name=True):
         Logger("TransmissionUtils").error(str(sys.exc_info()[1]))
     return alg
 
+
 #pylint: disable=too-many-locals
 
 
@@ -66,12 +67,13 @@ def load_monitors(self, property_manager):
         if not property_manager.existsProperty("LoadAlgorithm"):
             Logger("SANSDirectBeamTransmission").error("SANS reduction not set up properly: missing load algorithm")
             raise RuntimeError("SANS reduction not set up properly: missing load algorithm")
-        p=property_manager.getProperty("LoadAlgorithm")
+        p = property_manager.getProperty("LoadAlgorithm")
 
-        alg_props = {"Filename": filename,
-                     "OutputWorkspace": output_ws,
-                     "ReductionProperties": property_manager_name,
-                     }
+        alg_props = {
+            "Filename": filename,
+            "OutputWorkspace": output_ws,
+            "ReductionProperties": property_manager_name,
+        }
         if beam_center_x is not None and beam_center_y is not None:
             alg_props["BeamCenterX"] = beam_center_x
             alg_props["BeamCenterY"] = beam_center_y
@@ -95,8 +97,8 @@ def load_monitors(self, property_manager):
     output_str += tmp_str.replace('\n', '\n      ')
 
     sample_ws, l_text = subtract_dark_current(self, sample_ws, property_manager)
-    if len(l_text)>0:
-        output_str += l_text.replace('\n', '\n      ')+'\n'
+    if len(l_text) > 0:
+        output_str += l_text.replace('\n', '\n      ') + '\n'
 
     empty_ws_name = "__transmission_empty"
     empty_ws, l_text = _load_data(empty_file, empty_ws_name)
@@ -104,8 +106,8 @@ def load_monitors(self, property_manager):
     output_str += tmp_str.replace('\n', '\n      ')
 
     empty_ws, l_text = subtract_dark_current(self, empty_ws, property_manager)
-    if len(l_text)>0:
-        output_str += l_text.replace('\n', '\n      ')+'\n'
+    if len(l_text) > 0:
+        output_str += l_text.replace('\n', '\n      ') + '\n'
 
     # Find which pixels to sum up as our "monitor". At this point we have moved the detector
     # so that the beam is at (0,0), so all we need is to sum the area around that point.
@@ -120,9 +122,7 @@ def load_monitors(self, property_manager):
 
     # Use the transmission workspaces to find the list of monitor pixels
     # since the beam center may be at a different location
-    alg = _execute("FindDetectorsInShape",
-                   {"Workspace": sample_ws,
-                    "ShapeXML": cylXML})
+    alg = _execute("FindDetectorsInShape", {"Workspace": sample_ws, "ShapeXML": cylXML})
     det_list = alg.getProperty("DetectorList").value
     first_det = det_list[0]
 
@@ -131,23 +131,26 @@ def load_monitors(self, property_manager):
     # Get normalization for transmission calculation
     monitor_det_ID = None
     if property_manager.existsProperty("TransmissionNormalisation"):
-        if property_manager.getProperty("TransmissionNormalisation").value=="Monitor":
+        if property_manager.getProperty("TransmissionNormalisation").value == "Monitor":
             monitor_det_ID = int(sample_ws.getInstrument().getNumberParameter("default-incident-monitor-spectrum")[0])
         else:
             monitor_det_ID = int(sample_ws.getInstrument().getNumberParameter("default-incident-timer-spectrum")[0])
     elif property_manager.existsProperty("NormaliseAlgorithm"):
+
         def _normalise(workspace):
-            p=property_manager.getProperty("NormaliseAlgorithm")
-            alg = _execute(p.valueAsStr,
-                           {"InputWorkspace": workspace,
-                            "OutputWorkspace": workspace,
-                            "ReductionProperties": property_manager_name},
+            p = property_manager.getProperty("NormaliseAlgorithm")
+            alg = _execute(p.valueAsStr, {
+                "InputWorkspace": workspace,
+                "OutputWorkspace": workspace,
+                "ReductionProperties": property_manager_name
+            },
                            is_name=False)
             msg = ''
             if alg.existsProperty("OutputMessage"):
-                msg += alg.getProperty("OutputMessage").value+'\n'
+                msg += alg.getProperty("OutputMessage").value + '\n'
             ws = alg.getProperty("OutputWorkspace").value
             return ws, msg
+
         empty_ws, norm_msg = _normalise(empty_ws)
         output_str += "   %s\n" % norm_msg.replace('\n', '   \n')
         sample_ws, norm_msg = _normalise(sample_ws)
@@ -161,61 +164,65 @@ def load_monitors(self, property_manager):
 
     # Ensuring that the binning is uniform
     spec0 = empty_ws.dataX(0)
-    spec_last = empty_ws.dataX(empty_ws.getNumberHistograms()-1)
-    if abs(sum(spec0)-sum(spec_last))>0.000001:
-        alg = _execute("ExtractSingleSpectrum",
-                       {"InputWorkspace": empty_ws,
-                        "OutputWorkspace": '__reference_binning',
-                        "WorkspaceIndex": det_list[0]})
+    spec_last = empty_ws.dataX(empty_ws.getNumberHistograms() - 1)
+    if abs(sum(spec0) - sum(spec_last)) > 0.000001:
+        alg = _execute("ExtractSingleSpectrum", {
+            "InputWorkspace": empty_ws,
+            "OutputWorkspace": '__reference_binning',
+            "WorkspaceIndex": det_list[0]
+        })
         reference_ws = alg.getProperty("OutputWorkspace").value
-        alg = _execute("RebinToWorkspace",
-                       {"WorkspaceToRebin": empty_ws,
-                        "WorkspaceToMatch": reference_ws,
-                        "OutputWorkspace": empty_ws_name})
+        alg = _execute("RebinToWorkspace", {
+            "WorkspaceToRebin": empty_ws,
+            "WorkspaceToMatch": reference_ws,
+            "OutputWorkspace": empty_ws_name
+        })
         empty_ws = alg.getProperty("OutputWorkspace").value
-        alg = _execute("RebinToWorkspace",
-                       {"WorkspaceToRebin": sample_ws,
-                        "WorkspaceToMatch": reference_ws,
-                        "OutputWorkspace": sample_ws_name})
+        alg = _execute("RebinToWorkspace", {
+            "WorkspaceToRebin": sample_ws,
+            "WorkspaceToMatch": reference_ws,
+            "OutputWorkspace": sample_ws_name
+        })
         sample_ws = alg.getProperty("OutputWorkspace").value
 
-    alg = _execute("GroupDetectors",
-                   {"InputWorkspace": empty_ws,
-                    "OutputWorkspace": empty_mon_ws_name,
-                    "DetectorList": det_list,
-                    "KeepUngroupedSpectra": True})
+    alg = _execute(
+        "GroupDetectors", {
+            "InputWorkspace": empty_ws,
+            "OutputWorkspace": empty_mon_ws_name,
+            "DetectorList": det_list,
+            "KeepUngroupedSpectra": True
+        })
     empty_mon_ws = alg.getProperty("OutputWorkspace").value
 
-    alg = _execute("GroupDetectors",
-                   {"InputWorkspace": sample_ws,
-                    "OutputWorkspace": sample_mon_ws_name,
-                    "DetectorList": det_list,
-                    "KeepUngroupedSpectra": True})
+    alg = _execute(
+        "GroupDetectors", {
+            "InputWorkspace": sample_ws,
+            "OutputWorkspace": sample_mon_ws_name,
+            "DetectorList": det_list,
+            "KeepUngroupedSpectra": True
+        })
     sample_mon_ws = alg.getProperty("OutputWorkspace").value
 
-    alg = _execute("ConvertToMatrixWorkspace",
-                   {"InputWorkspace": empty_mon_ws,
-                    "OutputWorkspace": empty_mon_ws_name})
+    alg = _execute("ConvertToMatrixWorkspace", {"InputWorkspace": empty_mon_ws, "OutputWorkspace": empty_mon_ws_name})
     empty_mon_ws = alg.getProperty("OutputWorkspace").value
 
-    alg = _execute("ConvertToMatrixWorkspace",
-                   {"InputWorkspace": sample_mon_ws,
-                    "OutputWorkspace": sample_mon_ws_name})
+    alg = _execute("ConvertToMatrixWorkspace", {"InputWorkspace": sample_mon_ws, "OutputWorkspace": sample_mon_ws_name})
     sample_mon_ws = alg.getProperty("OutputWorkspace").value
 
-    alg = _execute("RebinToWorkspace",
-                   {"WorkspaceToRebin": empty_mon_ws,
-                    "WorkspaceToMatch": sample_mon_ws,
-                    "OutputWorkspace": empty_mon_ws_name})
+    alg = _execute("RebinToWorkspace", {
+        "WorkspaceToRebin": empty_mon_ws,
+        "WorkspaceToMatch": sample_mon_ws,
+        "OutputWorkspace": empty_mon_ws_name
+    })
     empty_mon_ws = alg.getProperty("OutputWorkspace").value
 
     return sample_mon_ws, empty_mon_ws, first_det, output_str, monitor_det_ID
 
+
 #pylint: disable=too-many-arguments
 
 
-def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det,
-                           trans_output_workspace, monitor_det_ID=None):
+def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det, trans_output_workspace, monitor_det_ID=None):
     """
         Compute zero-angle transmission.
 
@@ -229,21 +236,25 @@ def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det,
     """
     try:
         if monitor_det_ID is not None:
-            alg = _execute("CalculateTransmission",
-                           {"DirectRunWorkspace": empty_mon_ws,
-                            "SampleRunWorkspace": sample_mon_ws,
-                            "OutputWorkspace": trans_output_workspace,
-                            "IncidentBeamMonitor": str(monitor_det_ID),
-                            "TransmissionMonitor": str(first_det),
-                            "OutputUnfittedData": True})
+            alg = _execute(
+                "CalculateTransmission", {
+                    "DirectRunWorkspace": empty_mon_ws,
+                    "SampleRunWorkspace": sample_mon_ws,
+                    "OutputWorkspace": trans_output_workspace,
+                    "IncidentBeamMonitor": str(monitor_det_ID),
+                    "TransmissionMonitor": str(first_det),
+                    "OutputUnfittedData": True
+                })
             output_ws = alg.getProperty("OutputWorkspace").value
         else:
-            alg = _execute("CalculateTransmission",
-                           {"DirectRunWorkspace": empty_mon_ws,
-                            "SampleRunWorkspace": sample_mon_ws,
-                            "OutputWorkspace": trans_output_workspace,
-                            "TransmissionMonitor": str(first_det),
-                            "OutputUnfittedData": True})
+            alg = _execute(
+                "CalculateTransmission", {
+                    "DirectRunWorkspace": empty_mon_ws,
+                    "SampleRunWorkspace": sample_mon_ws,
+                    "OutputWorkspace": trans_output_workspace,
+                    "TransmissionMonitor": str(first_det),
+                    "OutputUnfittedData": True
+                })
             output_ws = alg.getProperty("OutputWorkspace").value
 
         ##### HACK START ######
@@ -259,10 +270,12 @@ def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det,
         if alg.existsProperty("UnfittedData"):
             raw_ws = alg.getProperty("UnfittedData").value
         if raw_ws is None:
-            Logger("TransmissionUtils").warning("Could not retrieve unfitted transmission for %s" % trans_output_workspace)
+            Logger("TransmissionUtils").warning("Could not retrieve unfitted transmission for %s" %
+                                                trans_output_workspace)
         return output_ws, raw_ws
     except:
-        Logger("TransmissionUtils").error("Couldn't compute transmission. Is the beam center in the right place?\n%s" % sys.exc_info()[1])
+        Logger("TransmissionUtils").error("Couldn't compute transmission. Is the beam center in the right place?\n%s" %
+                                          sys.exc_info()[1])
         return None, None
 
 
@@ -277,21 +290,25 @@ def apply_transmission(self, workspace, trans_workspace):
         return None
 
     # Make sure the binning is compatible
-    alg = _execute("RebinToWorkspace",
-                   {"WorkspaceToRebin": trans_workspace,
-                    "WorkspaceToMatch": workspace,
-                    "OutputWorkspace": '__trans_rebin',
-                    "PreserveEvents": False})
+    alg = _execute(
+        "RebinToWorkspace", {
+            "WorkspaceToRebin": trans_workspace,
+            "WorkspaceToMatch": workspace,
+            "OutputWorkspace": '__trans_rebin',
+            "PreserveEvents": False
+        })
     rebinned_ws = alg.getProperty("OutputWorkspace").value
 
     # Apply angle-dependent transmission correction using the zero-angle transmission
     theta_dependent = self.getProperty("ThetaDependent").value
 
-    alg = _execute("ApplyTransmissionCorrection",
-                   {"InputWorkspace": workspace,
-                    "TransmissionWorkspace": rebinned_ws,
-                    "OutputWorkspace": '__corrected_output',
-                    "ThetaDependent": theta_dependent})
+    alg = _execute(
+        "ApplyTransmissionCorrection", {
+            "InputWorkspace": workspace,
+            "TransmissionWorkspace": rebinned_ws,
+            "OutputWorkspace": '__corrected_output',
+            "ThetaDependent": theta_dependent
+        })
     output_ws = alg.getProperty("OutputWorkspace").value
     return output_ws
 
@@ -309,11 +326,13 @@ def subtract_dark_current(self, workspace, property_manager):
 
     def _dark(ws, dark_current_property, dark_current_file=None):
         if property_manager.existsProperty(dark_current_property):
-            p=property_manager.getProperty(dark_current_property)
+            p = property_manager.getProperty(dark_current_property)
 
-            alg_props = {"InputWorkspace": ws,
-                         "PersistentCorrection": False,
-                         "ReductionProperties": property_manager_name}
+            alg_props = {
+                "InputWorkspace": ws,
+                "PersistentCorrection": False,
+                "ReductionProperties": property_manager_name
+            }
             if dark_current_file is not None:
                 alg_props["Filename"] = dark_current_file
 
@@ -322,12 +341,11 @@ def subtract_dark_current(self, workspace, property_manager):
             if alg.existsProperty("OutputMessage"):
                 msg = alg.getProperty("OutputMessage").value
             ws = alg.getProperty("OutputWorkspace").value
-            return ws, msg.replace('\n', '\n|')+'\n'
+            return ws, msg.replace('\n', '\n|') + '\n'
         return ws, ""
 
-    if len(dark_current_data.strip())>0:
-        return _dark(workspace, "DefaultDarkCurrentAlgorithm",
-                     dark_current_file=dark_current_data)
+    if len(dark_current_data.strip()) > 0:
+        return _dark(workspace, "DefaultDarkCurrentAlgorithm", dark_current_file=dark_current_data)
     elif use_sample_dc is True:
         return _dark(workspace, "DarkCurrentAlgorithm")
     return workspace, ""

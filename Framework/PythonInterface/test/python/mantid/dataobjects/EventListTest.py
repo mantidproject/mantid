@@ -16,7 +16,6 @@ gps_epoch_plus_42_nanoseconds = np.datetime64('1990-01-01T00:00:00.000000042Z', 
 
 
 class EventListTest(unittest.TestCase):
-
     def createRandomEventList(self, length):
         el = EventList()
         for i in range(length):
@@ -71,7 +70,7 @@ class EventListTest(unittest.TestCase):
         self.assertEqual(left.getNumberEvents(), 30)
         self.assertEqual(rght.getNumberEvents(), 20)
 
-        self.assertEqual(left.integrate(-1.,31., True), -10.)
+        self.assertEqual(left.integrate(-1., 31., True), -10.)
 
     def test_mask_condition(self):
         evl = self.createRandomEventList(20)
@@ -82,6 +81,7 @@ class EventListTest(unittest.TestCase):
 
         self.assertEqual(evl.getNumberEvents(), 10)
         self.assertEqual(evl.getTofMax(), float(9.0))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -19,7 +19,6 @@ from matplotlib.legend import Legend
 
 
 class UtilityTest(unittest.TestCase):
-
     def test_legend_set_draggable(self):
         legend = create_autospec(Legend)
         args = (None, False, 'loc')

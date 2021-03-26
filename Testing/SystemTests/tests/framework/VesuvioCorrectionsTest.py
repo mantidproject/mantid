@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods,invalid-name,no-init
-
 """
 Unit test for Vesuvio corrections steps
 
@@ -22,19 +21,27 @@ from mantid import *
 
 
 def setup():
-    test_ws = ms.LoadVesuvio(Filename="15039-15045", InstrumentParFile="IP0004_10.par",
-                             Mode="SingleDifference", SpectrumList="135-136")
-    test_container_ws = ms.LoadVesuvio(Filename="15036", InstrumentParFile="IP0004_10.par",
-                                       Mode="SingleDifference", SpectrumList="135-136")
+    test_ws = ms.LoadVesuvio(Filename="15039-15045",
+                             InstrumentParFile="IP0004_10.par",
+                             Mode="SingleDifference",
+                             SpectrumList="135-136")
+    test_container_ws = ms.LoadVesuvio(Filename="15036",
+                                       InstrumentParFile="IP0004_10.par",
+                                       Mode="SingleDifference",
+                                       SpectrumList="135-136")
 
     return test_ws, test_container_ws
 
 
 def setup_back_scattering():
-    test_ws = ms.LoadVesuvio(Filename="15039-15045", InstrumentParFile="IP0004_10.par",
-                             Mode="SingleDifference", SpectrumList="3-6")
-    test_container_ws = ms.LoadVesuvio(Filename="15036", InstrumentParFile="IP0004_10.par",
-                                       Mode="SingleDifference", SpectrumList="3-6")
+    test_ws = ms.LoadVesuvio(Filename="15039-15045",
+                             InstrumentParFile="IP0004_10.par",
+                             Mode="SingleDifference",
+                             SpectrumList="3-6")
+    test_container_ws = ms.LoadVesuvio(Filename="15036",
+                                       InstrumentParFile="IP0004_10.par",
+                                       Mode="SingleDifference",
+                                       SpectrumList="3-6")
 
     return test_ws, test_container_ws
 
@@ -142,6 +149,7 @@ def _create_dummy_profiles():
 
 # ===========================================================================================
 # ========================================Success cases======================================
+
 
 class TestGammaAndMsCorrectWorkspaceIndexOne(systemtesting.MantidSystemTest):
     _algorithm = None
@@ -456,13 +464,21 @@ class TestCorrectionsInBackScatteringSpectra(systemtesting.MantidSystemTest):
         _validate_group_structure(self, corrections_wsg, 3)
         corrections_ts_peak = 0.131359579675
         corrections_ms_peak = 0.001551
-        corrections_ts_bin  = 701
+        corrections_ts_bin = 701
         corrections_ms_bin = 48
 
-        _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, corrections_ts_bin,
-                                     tolerance=0.2, bin_tolerance=5)
-        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin,
-                                     tolerance=0.2, bin_tolerance=5)
+        _validate_matrix_peak_height(self,
+                                     corrections_wsg.getItem(1),
+                                     corrections_ts_peak,
+                                     corrections_ts_bin,
+                                     tolerance=0.2,
+                                     bin_tolerance=5)
+        _validate_matrix_peak_height(self,
+                                     corrections_wsg.getItem(2),
+                                     corrections_ms_peak,
+                                     corrections_ms_bin,
+                                     tolerance=0.2,
+                                     bin_tolerance=5)
 
         # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
@@ -472,27 +488,35 @@ class TestCorrectionsInBackScatteringSpectra(systemtesting.MantidSystemTest):
         corrected_ts_bin = 17
         correction_ms_bin = 17
 
-        _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, corrected_ts_bin,
-                                     tolerance=0.2, bin_tolerance=3)
-        _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, correction_ms_bin,
-                                     tolerance=0.2, bin_tolerance=3)
+        _validate_matrix_peak_height(self,
+                                     corrected_wsg.getItem(1),
+                                     corrected_ts_peak,
+                                     corrected_ts_bin,
+                                     tolerance=0.2,
+                                     bin_tolerance=3)
+        _validate_matrix_peak_height(self,
+                                     corrected_wsg.getItem(2),
+                                     corrected_ms_peak,
+                                     correction_ms_bin,
+                                     tolerance=0.2,
+                                     bin_tolerance=3)
 
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
         output_expected_peak = 0.226039019062
-        _validate_matrix_peak_height(self, output_ws, output_expected_peak, 17,
-                                     tolerance=0.2, bin_tolerance=0.3)
+        _validate_matrix_peak_height(self, output_ws, output_expected_peak, 17, tolerance=0.2, bin_tolerance=0.3)
 
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
         _validate_table_workspace(self, linear_params, 7, 3)
-        expected_table_values = [0.1,0.0,1.0,'skip',0.0,1.0,'skip']
+        expected_table_values = [0.1, 0.0, 1.0, 'skip', 0.0, 1.0, 'skip']
         _validate_table_values_top_to_bottom(self, linear_params, expected_table_values)
         tear_down()
 
 
 # ========================================Failure cases======================================
+
 
 class TestRunningWithoutFitParamsRaisesError(systemtesting.MantidSystemTest):
     _algorithm = None
@@ -536,6 +560,7 @@ class TestRunningWithoutProfilesRaisesError(systemtesting.MantidSystemTest):
 # =========================================Validation======================================
 # =========================================Structure=======================================
 
+
 def _validate_group_structure(self, ws_group, expected_entries):
     """
     Checks that a workspace is a group and has the correct number of entries
@@ -557,12 +582,13 @@ def _validate_matrix_structure(self, matrix_ws, expected_hist, expected_bins):
     self.assertTrue(isinstance(matrix_ws, MatrixWorkspace))
     num_hists = matrix_ws.getNumberHistograms()
     num_bins = matrix_ws.blocksize()
-    self.assertEqual(num_hists, expected_hist,
-                     msg="Expected Number of Histograms: " + str(expected_hist)
-                         + "\nActual Number of Histograms: " + str(num_hists))
-    self.assertEqual(num_bins, expected_bins,
-                     msg="Expected Number of Bins: " + str(expected_bins)
-                         + "\nActual Number of Bins: " + str(num_bins))
+    self.assertEqual(num_hists,
+                     expected_hist,
+                     msg="Expected Number of Histograms: " + str(expected_hist) + "\nActual Number of Histograms: " +
+                     str(num_hists))
+    self.assertEqual(num_bins,
+                     expected_bins,
+                     msg="Expected Number of Bins: " + str(expected_bins) + "\nActual Number of Bins: " + str(num_bins))
 
 
 def _validate_table_workspace(self, table_ws, expected_rows, expected_columns):
@@ -575,12 +601,13 @@ def _validate_table_workspace(self, table_ws, expected_rows, expected_columns):
     self.assertTrue(isinstance(table_ws, ITableWorkspace))
     num_rows = table_ws.rowCount()
     num_columns = table_ws.columnCount()
-    self.assertEqual(num_rows, expected_rows,
-                     msg="Expected Number of Rows: " + str(expected_rows)
-                         + "\nActual Number of Rows: " + str(num_rows))
-    self.assertEqual(num_columns, expected_columns,
-                     msg="Expected Number of Columns: " + str(expected_columns)
-                         + "\nActual Number of Columns: " + str(num_columns))
+    self.assertEqual(num_rows,
+                     expected_rows,
+                     msg="Expected Number of Rows: " + str(expected_rows) + "\nActual Number of Rows: " + str(num_rows))
+    self.assertEqual(num_columns,
+                     expected_columns,
+                     msg="Expected Number of Columns: " + str(expected_columns) + "\nActual Number of Columns: " +
+                     str(num_columns))
 
 
 # =======================================Values===========================================
@@ -598,15 +625,22 @@ def _validate_table_values_top_to_bottom(self, table_ws, expected_values, tolera
         if expected_values[i] != 'skip':
             tolerance_value = expected_values[i] * tolerance
             abs_difference = abs(expected_values[i] - table_ws.cell(i, 1))
-            self.assertLessEqual(abs_difference, abs(tolerance_value),
-                                 msg="Expected Value in Cell " + str(i) + ": " + str(expected_values[i])
-                                     + "\nActual Value in Cell " + str(i) + ": " + str(table_ws.cell(i, 1)))
+            self.assertLessEqual(abs_difference,
+                                 abs(tolerance_value),
+                                 msg="Expected Value in Cell " + str(i) + ": " + str(expected_values[i]) +
+                                 "\nActual Value in Cell " + str(i) + ": " + str(table_ws.cell(i, 1)))
 
 
 # pylint: disable=too-many-arguments
 
 
-def _validate_matrix_peak_height(self, matrix_ws, expected_height, expected_bin, ws_index=0, tolerance=0.05, bin_tolerance=1):
+def _validate_matrix_peak_height(self,
+                                 matrix_ws,
+                                 expected_height,
+                                 expected_bin,
+                                 ws_index=0,
+                                 tolerance=0.05,
+                                 bin_tolerance=1):
     """
     Checks that the heightest peak value is as expected
     matrix_ws       :: Workspace to validate
@@ -620,8 +654,9 @@ def _validate_matrix_peak_height(self, matrix_ws, expected_height, expected_bin,
     peak_bin = np.argmax(y_data)
     tolerance_value = expected_height * tolerance
     abs_difference = abs(expected_height - peak_height)
-    self.assertLessEqual(abs_difference, abs(tolerance_value),
-                         msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected_height,peak_height, tolerance_value))
+    self.assertLessEqual(abs_difference,
+                         abs(tolerance_value),
+                         msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected_height, peak_height, tolerance_value))
     self.assertTrue(abs(peak_bin - expected_bin) <= bin_tolerance,
                     msg="abs({:.6f} - {:.6f}) > {:.6f}".format(peak_bin, expected_bin, bin_tolerance))
 

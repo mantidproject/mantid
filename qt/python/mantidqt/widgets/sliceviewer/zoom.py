@@ -19,12 +19,7 @@ class ScrollZoomMixin:
     Mixin class to add zoom on scolling mouse wheel capability to a
     matplotlib axes on a figure canvas
     """
-    def enable_zoom_on_scroll(self,
-                              axes,
-                              base_scale: float = 1.2,
-                              redraw: bool = True,
-                              toolbar=None,
-                              callback=None):
+    def enable_zoom_on_scroll(self, axes, base_scale: float = 1.2, redraw: bool = True, toolbar=None, callback=None):
         """
         Connect scroll events so that they zoom in/out of a canvas
         :param axes: A matplotlib.Axes instance that will receive the scroll events

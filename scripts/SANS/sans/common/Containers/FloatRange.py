@@ -9,7 +9,7 @@
 
 class FloatRange(object):
     start = None  # : float
-    end= None  #: float
+    end = None  #: float
 
     def __init__(self, start, end):
         self.start = start

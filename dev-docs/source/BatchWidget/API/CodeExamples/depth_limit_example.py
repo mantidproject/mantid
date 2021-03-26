@@ -13,8 +13,7 @@ def empty_cell():
 
 # Inside the parent view
 def setup(self):
-    self.table = MantidQt.MantidWidgets.Batch.JobTreeView(
-        ["Column 1", "Column 2"], empty_cell(), self)
+    self.table = MantidQt.MantidWidgets.Batch.JobTreeView(["Column 1", "Column 2"], empty_cell(), self)
 
     self.table_signals = MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.table, self)
 

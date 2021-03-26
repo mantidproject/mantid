@@ -87,25 +87,21 @@ class SaveReflections(PythonAlgorithm):
         self.declareProperty(IPeaksWorkspaceProperty("InputWorkspace", '', Direction.Input),
                              doc="The name of the peaks worksapce to save")
 
-        self.declareProperty(FileProperty("Filename",
-                                          "",
-                                          action=FileAction.Save,
-                                          direction=Direction.Input),
+        self.declareProperty(FileProperty("Filename", "", action=FileAction.Save, direction=Direction.Input),
                              doc="File with the data from a phonon calculation.")
 
         self.declareProperty(name="Format",
                              direction=Direction.Input,
                              defaultValue="Fullprof",
-                             validator=StringListValidator(
-                                 [fmt.name for fmt in ReflectionFormat]),
+                             validator=StringListValidator([fmt.name for fmt in ReflectionFormat]),
                              doc="The output format to export reflections to")
 
         self.declareProperty(name="SplitFiles",
                              defaultValue=False,
                              direction=Direction.Input,
                              doc="If True save separate files with only the peaks associated"
-                                 "with a single modulation vector in a single file. Only "
-                                 "applies to JANA format.")
+                             "with a single modulation vector in a single file. Only "
+                             "applies to JANA format.")
 
     def PyExec(self):
         """Execute the algorithm"""
@@ -127,7 +123,6 @@ class FullprofFormat(object):
     This is a 7 columns file format consisting of H, K, L, instensity,
     sigma, crystal domain, and wavelength.
     """
-
     def __call__(self, file_name, workspace, split_files):
         """Write a PeaksWorkspace to an ASCII file using this formatter.
 
@@ -184,10 +179,8 @@ class JanaFormat(object):
 
     Currently the last three columns are hard coded to 1.0, 0.0, and 0.0 respectively.
     """
-
     class FileBuilder(object):
         """Encapsulate information to build a single Jana file"""
-
         def __init__(self, filepath, workspace, num_mod_vec, modulation_col_num=None):
             self._filepath = filepath
             self._workspace = workspace
@@ -207,8 +200,7 @@ class JanaFormat(object):
                 vec = lattice.getModVec(index)
                 x, y, z = vec.X(), vec.Y(), vec.Z()
                 if abs(x) > 0 or abs(y) > 0 or abs(z) > 0:
-                    headers.append("       {}{: >13.6f}{: >13.6f}{: >13.6f}\n".format(
-                        col_num, x, y, z))
+                    headers.append("       {}{: >13.6f}{: >13.6f}{: >13.6f}\n".format(col_num, x, y, z))
 
             # propagation vector information if required
             if lattice is not None:
@@ -245,8 +237,7 @@ class JanaFormat(object):
                 modulated_cols = ["m{}".format(i + 1) for i in range(self._num_mod_vec)]
                 headers.append("(3i5," + num_modulation_vectors(self._workspace) * "1i5," + "2f12.2,i5,4f10.4)\n")
             column_names.extend(modulated_cols)
-            column_names.extend(
-                ["Fsqr", "s(Fsqr)", "Cod", "Lambda", "Twotheta", "Transm.", "Tbar", "TDS"])
+            column_names.extend(["Fsqr", "s(Fsqr)", "Cod", "Lambda", "Twotheta", "Transm.", "Tbar", "TDS"])
 
             column_format = "#{:>4}{:>4}{:>4}"
             column_format += "".join(["{:>4}" for _ in range(len(modulated_cols))])
@@ -284,10 +275,8 @@ class JanaFormat(object):
                     hkl = peak.getHKL()
                     modulation_indices = []
                 self._peaks.append(
-                    self.create_peak_line(hkl, modulation_indices,
-                                          peak.getIntensity(), peak.getSigmaIntensity(),
-                                          peak.getWavelength(),
-                                          get_two_theta(peak.getDSpacing(), peak.getWavelength()),
+                    self.create_peak_line(hkl, modulation_indices, peak.getIntensity(), peak.getSigmaIntensity(),
+                                          peak.getWavelength(), get_two_theta(peak.getDSpacing(), peak.getWavelength()),
                                           peak.getAbsorptionWeightedPathLength()))
 
         def create_peak_line(self, hkl, mnp, intensity, sig_int, wavelength, two_theta, t_bar):
@@ -303,10 +292,11 @@ class JanaFormat(object):
             :param two_theta: Two theta of detector
             :param t_bar: absorption weighted path length for the detector/wavelength
             """
-            template = "{: >5.0f}{: >5.0f}{: >5.0f}{}{: >12.2f}{: >12.2f}{: >5.0f}{: >10.4f}{: >10.4f}{: >10.4f}{: >10.4f}{: >10.4f}\n"
+            template = "{: >5.0f}{: >5.0f}{: >5.0f}{}{: >12.2f}{: >12.2f}{: >5.0f}{: >10.4f}{: >10.4f}{: >10.4f}" \
+                       "{: >10.4f}{: >10.4f}\n"
             mod_indices = "".join(["{: >5.0f}".format(value) for value in mnp])
-            return template.format(hkl[0], hkl[1], hkl[2], mod_indices, intensity, sig_int, 1, wavelength,
-                                   two_theta, 1.0, t_bar, 0.0)
+            return template.format(hkl[0], hkl[1], hkl[2], mod_indices, intensity, sig_int, 1, wavelength, two_theta,
+                                   1.0, t_bar, 0.0)
 
         def write(self):
             with open(self._filepath, 'w') as handle:
@@ -342,8 +332,7 @@ class JanaFormat(object):
         if split_files and num_mod_vec > 1:
             name, ext = osp.splitext(file_name)
             builders = [
-                JanaFormat.FileBuilder('{}-m{}{}'.format(name, col_num, ext), workspace,
-                                       num_mod_vec, col_num)
+                JanaFormat.FileBuilder('{}-m{}{}'.format(name, col_num, ext), workspace, num_mod_vec, col_num)
                 for col_num in range(1, num_mod_vec + 1)
             ]
         else:
@@ -362,7 +351,6 @@ class SaveHKLFormat(object):
     The SaveHKL algorithm currently supports both the GSAS and SHELX formats. For
     more information see the SaveHKL algorithm documentation.
     """
-
     def __call__(self, file_name, workspace, _):
         """Write a PeaksWorkspace to an ASCII file using this formatter.
 
@@ -371,8 +359,7 @@ class SaveHKLFormat(object):
         :param _: Ignored parameter for compatability with other savers
         """
         if has_modulated_indexing(workspace):
-            raise RuntimeError(
-                "Cannot currently save modulated structures to GSAS or SHELX formats")
+            raise RuntimeError("Cannot currently save modulated structures to GSAS or SHELX formats")
 
         from mantid.simpleapi import SaveHKL
         SaveHKL(Filename=file_name, InputWorkspace=workspace, OutputWorkspace=workspace.name())

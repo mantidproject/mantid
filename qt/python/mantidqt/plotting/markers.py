@@ -21,8 +21,17 @@ class HorizontalMarker(QObject):
 
     y_moved = Signal(float)
 
-    def __init__(self, canvas, color, y, x0=None, x1=None, line_width=1.0, picker_width=5, line_style='-',
-                 move_cursor=None, axis=None):
+    def __init__(self,
+                 canvas,
+                 color,
+                 y,
+                 x0=None,
+                 x1=None,
+                 line_width=1.0,
+                 picker_width=5,
+                 line_style='-',
+                 move_cursor=None,
+                 axis=None):
         """
         Init the marker.
         :param canvas: A MPL canvas.
@@ -209,8 +218,17 @@ class VerticalMarker(QObject):
 
     x_moved = Signal(float)
 
-    def __init__(self, canvas, color, x, y0=None, y1=None, line_width=1.0, picker_width=5, line_style='-',
-                 move_cursor=None, axis=None):
+    def __init__(self,
+                 canvas,
+                 color,
+                 x,
+                 y0=None,
+                 y1=None,
+                 line_width=1.0,
+                 picker_width=5,
+                 line_style='-',
+                 move_cursor=None,
+                 axis=None):
         """
         Init the marker.
         :param canvas: A MPL canvas.
@@ -235,8 +253,13 @@ class VerticalMarker(QObject):
         self.y1 = y1
         y0, y1 = self._get_y0_y1()
         path = Path([(x, y0), (x, y1)], [Path.MOVETO, Path.LINETO])
-        self.patch = PathPatch(path, facecolor='None', edgecolor=color, picker=picker_width,
-                               linewidth=line_width, linestyle=line_style, animated=True)
+        self.patch = PathPatch(path,
+                               facecolor='None',
+                               edgecolor=color,
+                               picker=picker_width,
+                               linewidth=line_width,
+                               linestyle=line_style,
+                               animated=True)
         self.axis.add_patch(self.patch)
         self.axis.interactive_markers.append(self.patch)
         self.is_moving = False
@@ -486,7 +509,6 @@ class WidthMarker(VerticalMarker):
     """
     A peak width marker (left or right).
     """
-
     def __init__(self, canvas, x):
         VerticalMarker.__init__(self, canvas, 'red', x, line_style='--')
 
@@ -674,8 +696,16 @@ class SingleMarker(QObject):
     """
         A marker used to mark out a vertical or horizontal line on a plot.
     """
-    def __init__(self, canvas, color, position, lower_bound, upper_bound, marker_type='XSingle',
-                 line_style='-', name=None, axis=None):
+    def __init__(self,
+                 canvas,
+                 color,
+                 position,
+                 lower_bound,
+                 upper_bound,
+                 marker_type='XSingle',
+                 line_style='-',
+                 name=None,
+                 axis=None):
         """
         Init the marker.
         :param canvas: The MPL canvas.
@@ -881,11 +911,11 @@ class SingleMarker(QObject):
             horizontal = 'left'
             vertical = 'top'
         if not 0.0 <= x_pos <= 1.0:
-            raise RuntimeError('The horizontal position of the label is relative.\nmust be 0 < pos < 1. Got {} instead'
-                               .format(x_pos))
+            raise RuntimeError(
+                'The horizontal position of the label is relative.\nmust be 0 < pos < 1. Got {} instead'.format(x_pos))
         if not 0.0 <= y_pos <= 1.0:
-            raise RuntimeError('The vertical position of the label is relative.\nmust be 0 < pos < 1. Got {} instead'
-                               .format(y_pos))
+            raise RuntimeError(
+                'The vertical position of the label is relative.\nmust be 0 < pos < 1. Got {} instead'.format(y_pos))
 
         if marker_in_scope:
             self.annotations[text] = self.marker.axis.annotate(text,
@@ -1025,8 +1055,20 @@ class RangeMarker(QObject):
         super(RangeMarker, self).__init__()
         self.range_type = range_type
         single_marker_type = 'XSingle' if self.range_type == 'XMinMax' else 'YSingle'
-        self.min_marker = SingleMarker(canvas, color, minimum, minimum, maximum, single_marker_type, line_style=line_style)
-        self.max_marker = SingleMarker(canvas, color, maximum, minimum, maximum, single_marker_type, line_style=line_style)
+        self.min_marker = SingleMarker(canvas,
+                                       color,
+                                       minimum,
+                                       minimum,
+                                       maximum,
+                                       single_marker_type,
+                                       line_style=line_style)
+        self.max_marker = SingleMarker(canvas,
+                                       color,
+                                       maximum,
+                                       minimum,
+                                       maximum,
+                                       single_marker_type,
+                                       line_style=line_style)
 
     def set_visible(self, visible):
         self.min_marker.set_visible(visible)

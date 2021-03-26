@@ -9,5 +9,4 @@
 #
 from mantidqt.utils.qt import import_qt
 
-
 ScriptRepositoryView = import_qt('.._common', 'mantidqt.widgets', 'ScriptRepositoryView')

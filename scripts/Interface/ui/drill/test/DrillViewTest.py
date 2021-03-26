@@ -16,24 +16,20 @@ from qtpy.QtTest import *
 
 from Interface.ui.drill.view.DrillView import DrillView
 
-
 app = QApplication(sys.argv)
 
 
 class DrillViewTest(unittest.TestCase):
-
     def setUp(self):
         patch = mock.patch('Interface.ui.drill.view.DrillView.QMessageBox')
         self.mMsgBox = patch.start()
         self.addCleanup(patch.stop)
 
-        patch = mock.patch(
-                'Interface.ui.drill.view.DrillView.manageuserdirectories')
+        patch = mock.patch('Interface.ui.drill.view.DrillView.manageuserdirectories')
         self.mUserDir = patch.start()
         self.addCleanup(patch.stop)
 
-        patch = mock.patch(
-                'Interface.ui.drill.view.DrillView.DrillPresenter')
+        patch = mock.patch('Interface.ui.drill.view.DrillView.DrillPresenter')
         self.mPresenter = patch.start()
         self.addCleanup(patch.stop)
 
@@ -67,8 +63,7 @@ class DrillViewTest(unittest.TestCase):
         self.view.copySelectedCells()
         self.assertEqual(self.view.buffer, ["test"])
         self.assertEqual(self.view.bufferShape, (1, 1))
-        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1),
-                                                         (1, 0), (1, 1)]
+        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1), (1, 0), (1, 1)]
         self.view.table.getSelectionShape.return_value = (2, 2)
         self.view.table.getCellContents.return_value = "test"
         self.view.copySelectedCells()
@@ -87,8 +82,7 @@ class DrillViewTest(unittest.TestCase):
         self.view.table.reset_mock()
         self.view.buffer = ["test"]
         self.view.bufferShape = (1, 1)
-        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1),
-                                                         (1, 0), (1, 1)]
+        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1), (1, 0), (1, 1)]
         self.view.table.getSelectionShape.return_value = (1, 1)
         self.view.table.getCellContents.return_value = ""
         self.view.copySelectedCells()
@@ -115,15 +109,13 @@ class DrillViewTest(unittest.TestCase):
         self.view.table.eraseCell.assert_called_once_with(0, 0)
 
         self.view.table.reset_mock()
-        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1),
-                                                         (1, 0), (1, 1)]
+        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1), (1, 0), (1, 1)]
         self.view.table.getSelectionShape.return_value = (2, 2)
         self.view.table.getCellContents.return_value = "test"
         self.view.cutSelectedCells()
         self.assertEqual(self.view.buffer, ["test", "test", "test", "test"])
         self.assertEqual(self.view.bufferShape, (2, 2))
-        calls = [mock.call(0, 0), mock.call(0, 1),
-                 mock.call(1, 0), mock.call(1, 1)]
+        calls = [mock.call(0, 0), mock.call(0, 1), mock.call(1, 0), mock.call(1, 1)]
         self.view.table.eraseCell.assert_has_calls(calls)
 
         # invalid selection
@@ -159,24 +151,24 @@ class DrillViewTest(unittest.TestCase):
         self.view.table.setCellContents.assert_called_once()
 
         self.view.table.reset_mock()
-        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1),
-                                                         (1, 0), (1, 1)]
+        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1), (1, 0), (1, 1)]
         self.view.table.getSelectionShape.return_value = (2, 2)
         self.view.pasteCells()
-        calls = [mock.call(0, 0, "test"), mock.call(0, 1, "test"),
-                 mock.call(1, 0, "test"), mock.call(1, 1, "test")]
+        calls = [mock.call(0, 0, "test"), mock.call(0, 1, "test"), mock.call(1, 0, "test"), mock.call(1, 1, "test")]
         self.view.table.setCellContents.assert_has_calls(calls)
 
-        self.view.buffer = ["test00", "test01",
-                            "test10", "test11"]
+        self.view.buffer = ["test00", "test01", "test10", "test11"]
         self.view.bufferShape = (2, 2)
         self.view.table.reset_mock()
-        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1),
-                                                         (1, 0), (1, 1)]
+        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1), (1, 0), (1, 1)]
         self.view.table.getSelectionShape.return_value = (2, 2)
         self.view.pasteCells()
-        calls = [mock.call(0, 0, "test00"), mock.call(0, 1, "test01"),
-                 mock.call(1, 0, "test10"), mock.call(1, 1, "test11")]
+        calls = [
+            mock.call(0, 0, "test00"),
+            mock.call(0, 1, "test01"),
+            mock.call(1, 0, "test10"),
+            mock.call(1, 1, "test11")
+        ]
         self.view.table.setCellContents.assert_has_calls(calls)
 
     def test_eraseSelectedCells(self):
@@ -184,9 +176,7 @@ class DrillViewTest(unittest.TestCase):
         self.view.table.getSelectedCells.return_value = []
         self.view.eraseSelectedCells()
         self.view.table.eraseCell.assert_not_called()
-        self.view.table.getSelectedCells.return_value = [(0, 0),
-                                                         (0, 1),
-                                                         (2, 1)]
+        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1), (2, 1)]
         # selection
         self.view.eraseSelectedCells()
         calls = [mock.call(0, 0), mock.call(0, 1), mock.call(2, 1)]
@@ -229,16 +219,17 @@ class DrillViewTest(unittest.TestCase):
 
     def test_updateLabelsFromGroups(self):
         self.view.table.rowCount.return_value = 6
-        groups = {'A': {1, 2, 3},
-                  'B': {5, 6}}
+        groups = {'A': {1, 2, 3}, 'B': {5, 6}}
         masters = {'B': 6}
         self.view.updateLabelsFromGroups(groups, masters)
         self.view.table.delRowLabel.assert_called()
-        calls = [mock.call(1, "A1", False, "This row belongs to the sample group A"),
-                 mock.call(2, "A2", False, "This row belongs to the sample group A"),
-                 mock.call(3, "A3", False, "This row belongs to the sample group A"),
-                 mock.call(5, "B1", False, "This row belongs to the sample group B"),
-                 mock.call(6, "B2", True,  "This is the master row of the group B")]
+        calls = [
+            mock.call(1, "A1", False, "This row belongs to the sample group A"),
+            mock.call(2, "A2", False, "This row belongs to the sample group A"),
+            mock.call(3, "A3", False, "This row belongs to the sample group A"),
+            mock.call(5, "B1", False, "This row belongs to the sample group B"),
+            mock.call(6, "B2", True, "This is the master row of the group B")
+        ]
         self.view.table.setRowLabel.assert_has_calls(calls)
 
     def test_keyPressEvent(self):
@@ -261,8 +252,7 @@ class DrillViewTest(unittest.TestCase):
         self.view.eraseSelectedCells.assert_called_once()
         QTest.keyClick(self.view, Qt.Key_G, Qt.ControlModifier)
         self.view.groupSelectedRows.emit.assert_called_once()
-        QTest.keyClick(self.view, Qt.Key_G,
-                       Qt.ControlModifier | Qt.ShiftModifier)
+        QTest.keyClick(self.view, Qt.Key_G, Qt.ControlModifier | Qt.ShiftModifier)
         self.view.ungroupSelectedRows.emit.assert_called_once()
         QTest.keyClick(self.view, Qt.Key_M, Qt.ControlModifier)
         self.view.setMasterRow.emit.assert_called_once()
@@ -275,14 +265,12 @@ class DrillViewTest(unittest.TestCase):
         self.view.modeSelector = mock.Mock()
         self.view.set_available_modes(["test", "test"])
         self.view.modeSelector.clear.assert_called_once()
-        self.view.modeSelector.addItems.assert_called_once_with(
-                ["test", "test"])
+        self.view.modeSelector.addItems.assert_called_once_with(["test", "test"])
 
     def test_setAcquisitionMode(self):
         self.view.modeSelector = mock.Mock()
         self.view.set_acquisition_mode("test")
-        self.view.modeSelector.setCurrentText.assert_called_once_with(
-                "test")
+        self.view.modeSelector.setCurrentText.assert_called_once_with("test")
 
     def test_setCycleAndExperiment(self):
         self.view.setCycleAndExperiment("test1", "test2")
@@ -377,12 +365,12 @@ class DrillViewTest(unittest.TestCase):
         self.view.columns = ["test1", "test2", "test3"]
         self.view.table.getFoldedColumns.return_value = ["test1", "test3"]
         self.view.table.getHiddenColumns.return_value = ["test1", "test2"]
-        self.view.table.getColumnsOrder.return_value  = ["test1",
-                                                         "test2",
-                                                         "test3"]
-        d = {"FoldedColumns": ["test1", "test3"],
-             "HiddenColumns": ["test1", "test2"],
-             "ColumnsOrder": ["test1", "test2", "test3"]}
+        self.view.table.getColumnsOrder.return_value = ["test1", "test2", "test3"]
+        d = {
+            "FoldedColumns": ["test1", "test3"],
+            "HiddenColumns": ["test1", "test2"],
+            "ColumnsOrder": ["test1", "test2", "test3"]
+        }
         self.assertDictEqual(self.view.getVisualSettings(), d)
 
 

@@ -59,15 +59,16 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.dock_window.addDockWidget(Qt.BottomDockWidgetArea, self.plot_dock)
         self.vLayout_plot.addWidget(self.dock_window)
 
-        self.fit_browser = EngDiffFitPropertyBrowser(self.figure.canvas,
-                                                     ToolbarStateManager(self.toolbar))
+        self.fit_browser = EngDiffFitPropertyBrowser(self.figure.canvas, ToolbarStateManager(self.toolbar))
         # remove SequentialFit from fit menu (implemented a different way)
         qmenu = self.fit_browser.getFitMenu()
         qmenu.removeAction([qact for qact in qmenu.actions() if qact.text() == "Sequential Fit"][0])
         # hide unnecessary properties of browser
-        hide_props = ['StartX', 'EndX', 'Minimizer', 'Cost function', 'Max Iterations', 'Output',
-                      'Ignore invalid data', 'Peak Radius', 'Plot Composite Members',
-                      'Convolve Composite Members', 'Show Parameter Errors', 'Evaluate Function As']
+        hide_props = [
+            'StartX', 'EndX', 'Minimizer', 'Cost function', 'Max Iterations', 'Output', 'Ignore invalid data',
+            'Peak Radius', 'Plot Composite Members', 'Convolve Composite Members', 'Show Parameter Errors',
+            'Evaluate Function As'
+        ]
         self.fit_browser.removePropertiesFromSettingsBrowser(hide_props)
         self.fit_browser.toggleWsListVisible()
         self.fit_browser.closing.connect(self.toolbar.handle_fit_browser_close)

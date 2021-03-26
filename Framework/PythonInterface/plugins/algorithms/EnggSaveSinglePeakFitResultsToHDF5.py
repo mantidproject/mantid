@@ -19,8 +19,10 @@ class EnggSaveSinglePeakFitResultsToHDF5(PythonAlgorithm):
     BANK_GROUP_NAME = "Bank {}".format
     RUN_GROUP_NAME = "Run {}".format
     PEAKS_DATASET_NAME = "Single Peak Fitting"
-    FIT_PARAMS = ["dSpacing", "A0", "A0_Err", "A1", "A1_Err", "X0", "X0_Err",
-                  "A", "A_Err", "B", "B_Err", "S", "S_Err", "I", "I_Err", "Chi"]
+    FIT_PARAMS = [
+        "dSpacing", "A0", "A0_Err", "A1", "A1_Err", "X0", "X0_Err", "A", "A_Err", "B", "B_Err", "S", "S_Err", "I",
+        "I_Err", "Chi"
+    ]
 
     def category(self):
         return "DataHandling"
@@ -60,8 +62,11 @@ class EnggSaveSinglePeakFitResultsToHDF5(PythonAlgorithm):
         self.declareProperty(IntArrayProperty(name=self.PROP_RUN_NUMBERS),
                              doc="The run number of each input workspace, in order")
 
-        self.declareProperty(FileProperty(name=self.PROP_FILENAME, defaultValue="", action=FileAction.Save,
-                                          extensions=[".hdf5", ".h5", ".hdf"]), doc="HDF5 file to save to")
+        self.declareProperty(FileProperty(name=self.PROP_FILENAME,
+                                          defaultValue="",
+                                          action=FileAction.Save,
+                                          extensions=[".hdf5", ".h5", ".hdf"]),
+                             doc="HDF5 file to save to")
 
     def PyExec(self):
         output_file_name = self.getProperty(self.PROP_FILENAME).value
@@ -83,7 +88,8 @@ class EnggSaveSinglePeakFitResultsToHDF5(PythonAlgorithm):
                 if self.PEAKS_DATASET_NAME in bank_group:
                     del bank_group[self.PEAKS_DATASET_NAME]
 
-                peaks_dataset = bank_group.create_dataset(name=self.PEAKS_DATASET_NAME, shape=(input_ws.rowCount(),),
+                peaks_dataset = bank_group.create_dataset(name=self.PEAKS_DATASET_NAME,
+                                                          shape=(input_ws.rowCount(), ),
                                                           dtype=[(column_name, "f") for column_name in self.FIT_PARAMS])
 
                 for i, row in enumerate(input_ws):

@@ -35,73 +35,68 @@ class CalculateEfficiencyCorrection(PythonAlgorithm):
                 or vanadium measurements.'
 
     def seeAlso(self):
-        return ["He3TubeEfficiency", "CalculateSampleTransmission",
-                "DetectorEfficiencyCor", "DetectorEfficiencyCorUser",
-                "CalculateEfficiency", "ComputeCalibrationCoefVan"]
+        return [
+            "He3TubeEfficiency", "CalculateSampleTransmission", "DetectorEfficiencyCor", "DetectorEfficiencyCorUser",
+            "CalculateEfficiency", "ComputeCalibrationCoefVan"
+        ]
 
     def PyInit(self):
-        self.declareProperty(
-            MatrixWorkspaceProperty('InputWorkspace', '',
-                                    direction=Direction.Input,
-                                    optional=PropertyMode.Optional,
-                                    validator=CommonBinsValidator()),
-            doc='Input workspace with wavelength range to calculate for the correction.')
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace',
+                                                     '',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional,
+                                                     validator=CommonBinsValidator()),
+                             doc='Input workspace with wavelength range to calculate for the correction.')
 
-        self.declareProperty(name='WavelengthRange', defaultValue='',
+        self.declareProperty(name='WavelengthRange',
+                             defaultValue='',
                              doc='Wavelength range to calculate efficiency for.')
 
-        self.declareProperty(
-            MatrixWorkspaceProperty('OutputWorkspace', '',
-                                    direction=Direction.Output),
-            doc="Output workspace for the efficiency correction. \
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
+                             doc="Output workspace for the efficiency correction. \
                  This can be applied by multiplying the OutputWorkspace \
                  to the workspace that requires the correction.")
 
-        self.declareProperty(
-            name='ChemicalFormula', defaultValue='None',
-            validator=StringMandatoryValidator(),
-            doc='Sample chemical formula used to determine cross-section term.')
+        self.declareProperty(name='ChemicalFormula',
+                             defaultValue='None',
+                             validator=StringMandatoryValidator(),
+                             doc='Sample chemical formula used to determine cross-section term.')
 
-        self.declareProperty(
-            name='DensityType', defaultValue='Mass Density',
-            validator=StringListValidator(['Mass Density', 'Number Density']),
-            doc='Use of Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
+        self.declareProperty(name='DensityType',
+                             defaultValue='Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc='Use of Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
 
-        self.declareProperty(
-            name='Density',
-            defaultValue=0.0,
-            validator=FloatBoundedValidator(0.0),
-            doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3).')
+        self.declareProperty(name='Density',
+                             defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3).')
 
-        self.declareProperty(
-            name='Thickness',
-            defaultValue=1.0,
-            validator=FloatBoundedValidator(0.0),
-            doc='Sample thickness (cm).')
+        self.declareProperty(name='Thickness',
+                             defaultValue=1.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Sample thickness (cm).')
 
-        self.declareProperty(
-            name='MeasuredEfficiency',
-            defaultValue=0.0,
-            validator=FloatBoundedValidator(0.0, 1.0),
-            doc="Directly input the efficiency measured at MeasuredEfficiencyWavelength. \
+        self.declareProperty(name='MeasuredEfficiency',
+                             defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0, 1.0),
+                             doc="Directly input the efficiency measured at MeasuredEfficiencyWavelength. \
                  This is used to determine a Density*Thickness term.")
 
-        self.declareProperty(
-            name='MeasuredEfficiencyWavelength',
-            defaultValue=1.7982,
-            validator=FloatBoundedValidator(0.0),
-            doc="The wavelength at which the MeasuredEfficiency was measured.")
+        self.declareProperty(name='MeasuredEfficiencyWavelength',
+                             defaultValue=1.7982,
+                             validator=FloatBoundedValidator(0.0),
+                             doc="The wavelength at which the MeasuredEfficiency was measured.")
 
-        self.declareProperty(
-            name='Alpha', defaultValue=0.0,
-            doc="Directly input the alpha term in exponential to multiply by the wavelength. \
+        self.declareProperty(name='Alpha',
+                             defaultValue=0.0,
+                             doc="Directly input the alpha term in exponential to multiply by the wavelength. \
                  XSectionType has no effect if this is used.")
 
-        self.declareProperty(
-            name='XSectionType',
-            defaultValue="AttenuationXSection",
-            validator=StringListValidator(['AttenuationXSection', 'TotalXSection']),
-            doc='Use either the absorption  or total cross section in exponential term. \
+        self.declareProperty(name='XSectionType',
+                             defaultValue="AttenuationXSection",
+                             validator=StringListValidator(['AttenuationXSection', 'TotalXSection']),
+                             doc='Use either the absorption  or total cross section in exponential term. \
                    The absorption cross section is for monitor-type corrections and \
                    the total cross section is for transmission-type corrections')
 
@@ -123,8 +118,8 @@ class CalculateEfficiencyCorrection(PythonAlgorithm):
         # Check the different inputs for the exponential term
         isDensityDefault = self.getProperty('Density').isDefault
         isFormulaDefault = self.getProperty('ChemicalFormula').isDefault
-        isEffDefault     = self.getProperty('MeasuredEfficiency').isDefault
-        isAlphaDefault   = self.getProperty('Alpha').isDefault
+        isEffDefault = self.getProperty('MeasuredEfficiency').isDefault
+        isAlphaDefault = self.getProperty('Alpha').isDefault
 
         if not isDensityDefault:
             if isFormulaDefault:
@@ -169,19 +164,18 @@ class CalculateEfficiencyCorrection(PythonAlgorithm):
                                              OutputWorkspace=self._output_ws,
                                              StoreInADS=False)
         else:
-            self._output_ws = CreateWorkspace(NSpec=1, DataX=[0], DataY=[0],
-                                              UnitX='Wavelength', Distribution=False,
+            self._output_ws = CreateWorkspace(NSpec=1,
+                                              DataX=[0],
+                                              DataY=[0],
+                                              UnitX='Wavelength',
+                                              Distribution=False,
                                               StoreInADS=False)
-            self._output_ws = Rebin(InputWorkspace=self._output_ws,
-                                    Params=self._bin_params,
-                                    StoreInADS=False)
+            self._output_ws = Rebin(InputWorkspace=self._output_ws, Params=self._bin_params, StoreInADS=False)
 
         if self._output_ws.isDistribution():
-            ConvertFromDistribution(Workspace=self._output_ws,
-                                    StoreInADS=False)
+            ConvertFromDistribution(Workspace=self._output_ws, StoreInADS=False)
 
-        self._output_ws = ConvertToPointData(InputWorkspace=self._output_ws,
-                                             StoreInADS=False)
+        self._output_ws = ConvertToPointData(InputWorkspace=self._output_ws, StoreInADS=False)
         self._output_ws = ConvertUnits(InputWorkspace=self._output_ws,
                                        Target='Wavelength',
                                        EMode='Elastic',
@@ -189,18 +183,16 @@ class CalculateEfficiencyCorrection(PythonAlgorithm):
 
         if self.getProperty('Alpha').isDefault:
             if self._density_type == 'Mass Density':
-                SetSampleMaterial(
-                    InputWorkspace=self._output_ws,
-                    ChemicalFormula=self._chemical_formula,
-                    SampleMassDensity=self._density,
-                    StoreInADS=False)
+                SetSampleMaterial(InputWorkspace=self._output_ws,
+                                  ChemicalFormula=self._chemical_formula,
+                                  SampleMassDensity=self._density,
+                                  StoreInADS=False)
                 self._density = self._output_ws.sample().getMaterial().numberDensityEffective
             elif self._density_type == 'Number Density':
-                SetSampleMaterial(
-                    InputWorkspace=self._output_ws,
-                    ChemicalFormula=self._chemical_formula,
-                    SampleNumberDensity=self._density,
-                    StoreInADS=False)
+                SetSampleMaterial(InputWorkspace=self._output_ws,
+                                  ChemicalFormula=self._chemical_formula,
+                                  SampleNumberDensity=self._density,
+                                  StoreInADS=False)
             else:
                 raise RuntimeError(f'Unknown "DensityType": {self._density_type}')
             if self.getProperty('MeasuredEfficiency').isDefault:
@@ -225,7 +217,7 @@ class CalculateEfficiencyCorrection(PythonAlgorithm):
         xs_term = ref_absXS * self._efficiency_wavelength / TABULATED_WAVELENGTH
         if self._xsection_type == "TotalXSection":
             xs_term += material.totalScatterXSection()
-        self._area_density = - np.log(1.0 - self._efficiency) / xs_term
+        self._area_density = -np.log(1.0 - self._efficiency) / xs_term
 
     def _calculate_area_density_from_density(self):
         """Calculates area density (atom/cm^2) using number density and thickness."""

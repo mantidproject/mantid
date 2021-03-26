@@ -56,9 +56,7 @@ class InstrumentView(QWidget, ObservingView):
         self.close_signal.connect(self._run_close)
 
     def get_tab(self, tab_index):
-        tab_name = [InstrumentWidget.RENDER,
-                    InstrumentWidget.PICK,
-                    InstrumentWidget.MASK,
+        tab_name = [InstrumentWidget.RENDER, InstrumentWidget.PICK, InstrumentWidget.MASK,
                     InstrumentWidget.TREE][tab_index]
         print(f'Tab: {tab_name}')
 

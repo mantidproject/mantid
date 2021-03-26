@@ -6,15 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 import unittest
-from mantid.simpleapi import (
-    AlignComponents, ConvertUnits, CloneWorkspace, CreateSampleWorkspace, Max, MoveInstrumentComponent,
-    CreateEmptyTableWorkspace, mtd, RotateInstrumentComponent)
+from mantid.simpleapi import (AlignComponents, ConvertUnits, CloneWorkspace, CreateSampleWorkspace, Max,
+                              MoveInstrumentComponent, CreateEmptyTableWorkspace, mtd, RotateInstrumentComponent)
 from mantid.api import AlgorithmFactory
 from mantid.kernel import V3D
 
 
 class AlignComponentsTest(unittest.TestCase):
-
     def testAlignComponentsPosition(self):
         r"""
 
@@ -37,23 +35,41 @@ class AlignComponentsTest(unittest.TestCase):
 
         Correspondence betwee
         """
-
         def serve_instrument(output_workspace):
             scattering_angle = 20  # in degrees
             # Instrument with four spectra. Each spectrum has one single Gaussian peak in TOF, centered at 10000
-            CreateSampleWorkspace(OutputWorkspace=output_workspace, BinWidth=0.1, NumBanks=1, BankPixelWidth=2,
+            CreateSampleWorkspace(OutputWorkspace=output_workspace,
+                                  BinWidth=0.1,
+                                  NumBanks=1,
+                                  BankPixelWidth=2,
                                   Function='User Defined',
                                   UserDefinedFunction='name=Gaussian, PeakCentre=10000, Height=100, Sigma=2',
-                                  Xmin=9900, Xmax=10100, BankDistanceFromSample=2, SourceDistanceFromSample=20)
-            MoveInstrumentComponent(Workspace=output_workspace, ComponentName='bank1', RelativePosition=False,
-                                    X=0, Y=0.0, Z=0)  # move to the origin
-            RotateInstrumentComponent(Workspace=output_workspace, ComponentName='bank1', X=0, Y=1, Z=0,
-                                      Angle=scattering_angle, RelativeRotation=False)
+                                  Xmin=9900,
+                                  Xmax=10100,
+                                  BankDistanceFromSample=2,
+                                  SourceDistanceFromSample=20)
+            MoveInstrumentComponent(Workspace=output_workspace,
+                                    ComponentName='bank1',
+                                    RelativePosition=False,
+                                    X=0,
+                                    Y=0.0,
+                                    Z=0)  # move to the origin
+            RotateInstrumentComponent(Workspace=output_workspace,
+                                      ComponentName='bank1',
+                                      X=0,
+                                      Y=1,
+                                      Z=0,
+                                      Angle=scattering_angle,
+                                      RelativeRotation=False)
             sin, cos = np.sin(np.radians(scattering_angle)), np.cos(np.radians(scattering_angle))
             # detector pixel width is 0.008m, perpendicular to the scattered beam. Detector is 2m away from the sample
             z, x = 2 * cos + 0.004 * sin, 2 * sin - 0.004 * cos
-            MoveInstrumentComponent(Workspace=output_workspace, ComponentName='bank1', RelativePosition=False,
-                                    X=x, Y=0, Z=z)  # translate 2 meters away and center the detector
+            MoveInstrumentComponent(Workspace=output_workspace,
+                                    ComponentName='bank1',
+                                    RelativePosition=False,
+                                    X=x,
+                                    Y=0,
+                                    Z=z)  # translate 2 meters away and center the detector
             return mtd['original']
 
         serve_instrument('original')
@@ -79,17 +95,29 @@ class AlignComponentsTest(unittest.TestCase):
         component = 'bank1'
         xyz_shift = V3D(0.005, 0.010, 0.007)
         CloneWorkspace(InputWorkspace='original', OutputWorkspace='perturbed')
-        MoveInstrumentComponent(Workspace='perturbed', ComponentName='bank1', RelativePosition=True,
-                                X=xyz_shift.X(), Y=xyz_shift.Y(), Z=xyz_shift.Z())
+        MoveInstrumentComponent(Workspace='perturbed',
+                                ComponentName='bank1',
+                                RelativePosition=True,
+                                X=xyz_shift.X(),
+                                Y=xyz_shift.Y(),
+                                Z=xyz_shift.Z())
 
         # calibrate the perturbed bank
-        AlignComponents(PeakCentersTofTable='table_tofs', PeakPositions=peak_positions, OutputWorkspace='calibrated',
-                        InputWorkspace='perturbed', ComponentList=component, AdjustmentsTable='adjustments',
-                        Xposition=True, Yposition=True, Zposition=True)
+        AlignComponents(PeakCentersTofTable='table_tofs',
+                        PeakPositions=peak_positions,
+                        OutputWorkspace='calibrated',
+                        InputWorkspace='perturbed',
+                        ComponentList=component,
+                        AdjustmentsTable='adjustments',
+                        Xposition=True,
+                        Yposition=True,
+                        Zposition=True)
 
         # compare the peak-centers (in d-spacing units) between the original and calibrated
         # spectra, up to 0.001 Angstroms
-        ConvertUnits(InputWorkspace='calibrated', Target='dSpacing', EMode='Elastic',
+        ConvertUnits(InputWorkspace='calibrated',
+                     Target='dSpacing',
+                     EMode='Elastic',
                      OutputWorkspace='calibrated_dspacing')
         Max(InputWorkspace='calibrated_dspacing', OutputWorkspace='calibrated_d_at_max')
         calibrated_d = np.average(mtd['calibrated_d_at_max'].extractX(), axis=1)
@@ -97,17 +125,34 @@ class AlignComponentsTest(unittest.TestCase):
 
         # perturb the orientation of the bank with a rotation of a small angle around an axis almost parallel
         # to the vertical
-        axis_shift, angle_shift = V3D(0.2, 0.8, np.sqrt(1 - 0.2 ** 2 - 0.8 ** 2)), 9.0  # angle shift in degrees
+        axis_shift, angle_shift = V3D(0.2, 0.8, np.sqrt(1 - 0.2**2 - 0.8**2)), 9.0  # angle shift in degrees
         CloneWorkspace(InputWorkspace='original', OutputWorkspace='perturbed')
-        RotateInstrumentComponent(Workspace='perturbed', ComponentName='bank1', RelativeRotation=True,
-                                  X=axis_shift.X(), Y=axis_shift.Y(), Z=axis_shift.Z(), Angle=angle_shift)
-        ConvertUnits(InputWorkspace='perturbed', OutputWorkspace='perturbed_dspacing', Target='dSpacing', Emode='Elastic')
+        RotateInstrumentComponent(Workspace='perturbed',
+                                  ComponentName='bank1',
+                                  RelativeRotation=True,
+                                  X=axis_shift.X(),
+                                  Y=axis_shift.Y(),
+                                  Z=axis_shift.Z(),
+                                  Angle=angle_shift)
+        ConvertUnits(InputWorkspace='perturbed',
+                     OutputWorkspace='perturbed_dspacing',
+                     Target='dSpacing',
+                     Emode='Elastic')
 
         # calibrate the perturbed bank
-        AlignComponents(PeakCentersTofTable='table_tofs', PeakPositions=peak_positions, OutputWorkspace='calibrated',
-                        InputWorkspace='perturbed', ComponentList=component, AdjustmentsTable='adjustments',
-                        AlphaRotation=True, BetaRotation=True, GammaRotation=True)
-        ConvertUnits(InputWorkspace='calibrated', OutputWorkspace='calibrated_dspacing', Target='dSpacing', Emode='Elastic')
+        AlignComponents(PeakCentersTofTable='table_tofs',
+                        PeakPositions=peak_positions,
+                        OutputWorkspace='calibrated',
+                        InputWorkspace='perturbed',
+                        ComponentList=component,
+                        AdjustmentsTable='adjustments',
+                        AlphaRotation=True,
+                        BetaRotation=True,
+                        GammaRotation=True)
+        ConvertUnits(InputWorkspace='calibrated',
+                     OutputWorkspace='calibrated_dspacing',
+                     Target='dSpacing',
+                     Emode='Elastic')
 
         # compare the peak-centers (in d-spacing units) between the original and calibrated
         # spectra, up to 0.001 Angstroms

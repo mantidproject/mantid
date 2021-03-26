@@ -191,13 +191,10 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.presenter.handle_fit_selected_in_table()
 
         self.assertEqual(self.presenter.get_workspaces_for_row_in_fit_table.call_count, len(selected_rows))
-        self.presenter.get_workspaces_for_row_in_fit_table.assert_has_calls([mock.call(0),
-                                                                             mock.call(2),
-                                                                             mock.call(5)])
+        self.presenter.get_workspaces_for_row_in_fit_table.assert_has_calls([mock.call(0), mock.call(2), mock.call(5)])
 
     def test_workspace_deleted_in_ads_updates_fit_table(self):
-        self.presenter.model.get_runs_groups_and_pairs_for_fits = mock.MagicMock(
-            return_value=[[], []])
+        self.presenter.model.get_runs_groups_and_pairs_for_fits = mock.MagicMock(return_value=[[], []])
 
         workspace = CreateSampleWorkspace(OutputWorkspace="test")
         DeleteWorkspace(workspace)

@@ -7,15 +7,13 @@
 """Test the exposed ArrayProperty
 """
 import unittest
-from mantid.kernel import (FloatArrayProperty, StringArrayProperty, IntArrayProperty, Direction,
-                           NullValidator)
+from mantid.kernel import (FloatArrayProperty, StringArrayProperty, IntArrayProperty, Direction, NullValidator)
 from mantid.api import PythonAlgorithm
 import numpy as np
 import sys
 
 
 class ArrayPropertyTest(unittest.TestCase):
-
     def test_default_constructor_raises_an_exception(self):
         """
             Test that the class cannot be default constructed
@@ -62,11 +60,10 @@ class ArrayPropertyTest(unittest.TestCase):
         validator = NullValidator()
         values_str = "1.345,34.2,5345.3,4,5.3948"
         arr = FloatArrayProperty(name, values_str, validator, direc)
-        self._check_object_attributes(arr, name, direc, length = 5)
+        self._check_object_attributes(arr, name, direc, length=5)
         self.assertEqual(arr.isValid, "")
         values = arr.value
         self.assertTrue(isinstance(values, np.ndarray))
-
 
     def test_name_values_from_list_validator_direction_constructor_gives_correct_object(self):
         """
@@ -76,9 +73,9 @@ class ArrayPropertyTest(unittest.TestCase):
         name = "numbers"
         direc = Direction.Output
         validator = NullValidator()
-        input_values =[1.1,2.5,5.6,4.6,9.0, 6.0]
+        input_values = [1.1, 2.5, 5.6, 4.6, 9.0, 6.0]
         arr = FloatArrayProperty(name, input_values, validator, direc)
-        self._check_object_attributes(arr, name, direc, length = len(input_values))
+        self._check_object_attributes(arr, name, direc, length=len(input_values))
 
     def test_name_values_from_array_validator_direction_constructor_gives_correct_object(self):
         """
@@ -88,11 +85,11 @@ class ArrayPropertyTest(unittest.TestCase):
         name = "numbers"
         direc = Direction.Output
         validator = NullValidator()
-        input_values = np.array([1.1,2.5,5.6,4.6,9.0, 6.0])
+        input_values = np.array([1.1, 2.5, 5.6, 4.6, 9.0, 6.0])
         arr = FloatArrayProperty(name, input_values, validator, direc)
-        self._check_object_attributes(arr, name, direc, length = 6)
+        self._check_object_attributes(arr, name, direc, length=6)
 
-    def _check_object_attributes(self, arrprop, name, direction, length = 0):
+    def _check_object_attributes(self, arrprop, name, direction, length=0):
         """
             Do attribute tests
         """
@@ -110,13 +107,12 @@ class ArrayPropertyTest(unittest.TestCase):
 
             def PyInit(self):
                 name = "numbers"
-                self.declareProperty(
-                    FloatArrayProperty("Input", Direction.Input), "Float array")
+                self.declareProperty(FloatArrayProperty("Input", Direction.Input), "Float array")
 
             def PyExec(self):
                 self._input_values = self.getProperty("Input").value
 
-        input_values = [1.1,2.5,5.6,4.6,9.0,6.0]
+        input_values = [1.1, 2.5, 5.6, 4.6, 9.0, 6.0]
         self._do_algorithm_test(AlgWithFloatArrayProperty, input_values)
 
     def test_setProperty_With_FloatArrayProperty_And_Py3_Range_Object(self):
@@ -126,10 +122,11 @@ class ArrayPropertyTest(unittest.TestCase):
         """
         class AlgWithFloatArrayProperty(PythonAlgorithm):
             _input_values = None
+
             def PyInit(self):
                 name = "numbers"
-                self.declareProperty(
-                    FloatArrayProperty("Input", Direction.Input), "Float array")
+                self.declareProperty(FloatArrayProperty("Input", Direction.Input), "Float array")
+
             def PyExec(self):
                 self._input_values = self.getProperty("Input").value
 
@@ -235,13 +232,12 @@ class ArrayPropertyTest(unittest.TestCase):
             _input_values = None
 
             def PyInit(self):
-                        self.declareProperty(
-                            StringArrayProperty("Input", Direction.Input), "string array")
+                self.declareProperty(StringArrayProperty("Input", Direction.Input), "string array")
 
             def PyExec(self):
                 self._input_values = self.getProperty("Input").value
 
-        input_values = ["val1","val2","val3"]
+        input_values = ["val1", "val2", "val3"]
         self._do_algorithm_test(AlgWithStringArrayProperty, input_values)
 
     def _do_algorithm_test(self, class_, input_values):
@@ -256,7 +252,8 @@ class ArrayPropertyTest(unittest.TestCase):
         self.assertTrue(alg._input_values is not None)
         self.assertEqual(len(alg._input_values), len(input_values))
         for index, val in enumerate(input_values):
-            self.assertEqual(val,input_values[index])
+            self.assertEqual(val, input_values[index])
+
 
 if __name__ == "__main__":
     unittest.main()

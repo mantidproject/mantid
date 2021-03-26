@@ -24,29 +24,22 @@ class MatchSpectra(PythonAlgorithm):
         return "Calculate factors to most closely match all spectra to reference spectrum"
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
-                                                     Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', Direction.Input),
                              doc='Workspace to match the spectra between')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                                                     Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
                              doc='Workspace with the spectra matched')
-        self.declareProperty('ReferenceSpectrum', 1,
-                             doc='Spectrum to match other spectra to')
-        self.declareProperty('CalculateOffset', True,
-                             doc='Calculate vertical shift')
-        self.declareProperty('CalculateScale', True,
-                             doc='Calculate scale factor')
+        self.declareProperty('ReferenceSpectrum', 1, doc='Spectrum to match other spectra to')
+        self.declareProperty('CalculateOffset', True, doc='Calculate vertical shift')
+        self.declareProperty('CalculateScale', True, doc='Calculate scale factor')
 
-        self.declareProperty(FloatArrayProperty('Offset', values=[],
-                                                direction=Direction.Output),
+        self.declareProperty(FloatArrayProperty('Offset', values=[], direction=Direction.Output),
                              'Additive factor from matching')
-        self.declareProperty(FloatArrayProperty('Scale', values=[],
-                                                direction=Direction.Output),
+        self.declareProperty(FloatArrayProperty('Scale', values=[], direction=Direction.Output),
                              'Multiplicitive factor from matching')
-        self.declareProperty(FloatArrayProperty('ChiSq', values=[],
-                                                direction=Direction.Output),
-                             'Unweighted ChiSq between the spectrum and the reference. '
-                             'NaN means that the spectrum was not matched')
+        self.declareProperty(
+            FloatArrayProperty('ChiSq', values=[], direction=Direction.Output),
+            'Unweighted ChiSq between the spectrum and the reference. '
+            'NaN means that the spectrum was not matched')
 
     def __getReferenceWsIndex(self):
         refSpectrum = self.getProperty('ReferenceSpectrum').value
@@ -85,14 +78,14 @@ class MatchSpectra(PythonAlgorithm):
         else:
             tstLower = np.searchsorted(testing, reference[0])
             if tstLower == testing.size:
-                msg = 'Falied to find {} in the x-axis of the spectrum being matched (spectrum={})'.format(reference[0],
-                                                                                                           spectrumNum)
+                msg = 'Falied to find {} in the x-axis of the spectrum being matched (spectrum={})'.format(
+                    reference[0], spectrumNum)
                 self.log().notice(msg)
                 return BAD_RESULT
 
         # find the upper bounds
-        refUpper = reference.size-1
-        tstUpper = testing.size-1
+        refUpper = reference.size - 1
+        tstUpper = testing.size - 1
         if binBoundaries:
             refUpper -= 1
             tstUpper -= 1
@@ -101,8 +94,8 @@ class MatchSpectra(PythonAlgorithm):
         elif reference[refUpper] < testing[tstUpper]:
             tstUpper = np.searchsorted(testing, reference[refUpper])
             if reference[refUpper] != testing[tstUpper]:
-                msg = 'Falied to find {} in the x-axis of the spectrum being matched (spectrum={})'.format(reference[-1],
-                                                                                                           spectrumNum)
+                msg = 'Falied to find {} in the x-axis of the spectrum being matched (spectrum={})'.format(
+                    reference[-1], spectrumNum)
                 self.log().notice(msg)
                 return BAD_RESULT
         else:
@@ -121,7 +114,7 @@ class MatchSpectra(PythonAlgorithm):
     def __residual(self, X, Y1, Y2):
         deltaX = np.diff(X)
         deltaX = np.append(deltaX, deltaX[-1])  # add the last value to the end
-        return (np.square(Y1 - Y2)*deltaX).sum() / deltaX.sum()
+        return (np.square(Y1 - Y2) * deltaX).sum() / deltaX.sum()
 
     def PyExec(self):
         referenceWkspIndex = self.__getReferenceWsIndex()
@@ -158,13 +151,15 @@ class MatchSpectra(PythonAlgorithm):
             E = outputWS.readE(wkspIndex)
 
             if not np.any(E > 0.):
-                self.log().warning('None of the uncertainties in the reference spectrum {} is greater than zero'.format(spectrumNum))
+                self.log().warning(
+                    'None of the uncertainties in the reference spectrum {} is greater than zero'.format(spectrumNum))
                 resultOffset.append(0.)
                 resultScale.append(1.)
                 resultResidual.append(np.nan)
                 continue
 
-            hasOverlap, refIndices, tstIndices = self.__generateIndices(spectrumNum, referenceX, X, X.size == Y.size+1)
+            hasOverlap, refIndices, tstIndices = self.__generateIndices(spectrumNum, referenceX, X,
+                                                                        X.size == Y.size + 1)
             if not hasOverlap:
                 resultOffset.append(0.)
                 resultScale.append(1.)
@@ -176,7 +171,8 @@ class MatchSpectra(PythonAlgorithm):
                 resultOffset.append(0.)
                 resultScale.append(1.)
                 resultResidual.append(np.nan)
-                self.log().warning('The overlap region of spectrum {} has no uncertainties greater than zero'.format(spectrumNum))
+                self.log().warning(
+                    'The overlap region of spectrum {} has no uncertainties greater than zero'.format(spectrumNum))
                 continue
             totalBins = mask.sum()  # number of bins being used
 
@@ -186,7 +182,8 @@ class MatchSpectra(PythonAlgorithm):
                 sumSpec = Y[tstIndices[0]:tstIndices[1]][mask].sum()
             if doScale:
                 sumSpecSq = (Y[tstIndices[0]:tstIndices[1]][mask] * Y[tstIndices[0]:tstIndices[1]][mask]).sum()
-                sumRefSpec = (Y[tstIndices[0]:tstIndices[1]][mask] * referenceY[refIndices[0]:refIndices[1]][mask]).sum()
+                sumRefSpec = (Y[tstIndices[0]:tstIndices[1]][mask] *
+                              referenceY[refIndices[0]:refIndices[1]][mask]).sum()
 
             # defaults are to do nothing
             scale = 1.

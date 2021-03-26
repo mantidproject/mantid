@@ -22,9 +22,11 @@ class TableWorkspaceDisplayEncoder(TableWorkspaceDisplayAttributes):
 
     def encode(self, obj, _=None):
         obj = obj.presenter.view
-        return {"workspace": obj.presenter.model.ws.name(),
-                "markedColumns": self._encode_marked_columns(obj.presenter.model.marked_columns),
-                "windowName": obj.presenter.name}
+        return {
+            "workspace": obj.presenter.model.ws.name(),
+            "markedColumns": self._encode_marked_columns(obj.presenter.model.marked_columns),
+            "windowName": obj.presenter.name
+        }
 
     @staticmethod
     def _encode_marked_columns(marked_columns):
@@ -53,8 +55,7 @@ class TableWorkspaceDisplayDecoder(TableWorkspaceDisplayAttributes):
 
         error_columns = []
         for y_err in obj_dic["markedColumns"]["as_y_err"]:
-            error_columns.append(ErrorColumn(column=y_err["column"],
-                                             related_y_column=y_err["relatedY"]))
+            error_columns.append(ErrorColumn(column=y_err["column"], related_y_column=y_err["relatedY"]))
         pres.model.marked_columns.as_y_err = error_columns
 
         pres.presenter.update_column_headers()

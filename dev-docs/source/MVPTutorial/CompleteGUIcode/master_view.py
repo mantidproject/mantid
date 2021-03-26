@@ -11,7 +11,6 @@ import plot_view
 
 
 class MasterView(QtWidgets.QWidget):
-
     def __init__(self, parent=None):
         super(MasterView, self).__init__(parent)
 

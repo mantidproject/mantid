@@ -15,4 +15,4 @@ RunDescriptor          -- Class descripbing a run and instantiated as property o
                           particular kind of run (e.g. sample run, monovan run etc...)
 
 """
-__all__=['dgreduce','DirectEnergyConversion','PropertyManager','ReductionWrapper','RunDescriptor']
+__all__ = ['dgreduce', 'DirectEnergyConversion', 'PropertyManager', 'ReductionWrapper', 'RunDescriptor']

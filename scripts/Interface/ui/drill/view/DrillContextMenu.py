@@ -12,32 +12,26 @@ from mantidqt import icons
 
 
 class DrillContextMenu(QMenu):
-
     """
     DrillContextMenuPresenter
     """
     _presenter = None
-
     """
     Signal sent when the visibility of a column is changed.
     """
     toogleColumnVisibility = Signal(str)
-
     """
     Sent to group the selected rows.
     """
     groupSelectedRows = Signal()
-
     """
     Sent to ungroup the selected rows.
     """
     ungroupSelectedRows = Signal()
-
     """
     Sent to set the selected row as the master row of its group.
     """
     setMasterRow = Signal()
-
     """
     Sent when the selected rows have to be added to an existing group.
     Args:
@@ -83,13 +77,10 @@ class DrillContextMenu(QMenu):
         """
         for column in allColumns:
             if column in hiddenColumns:
-                action = self._colMenu.addAction(icons.get_icon("mdi.close"),
-                                                 column)
+                action = self._colMenu.addAction(icons.get_icon("mdi.close"), column)
             else:
-                action = self._colMenu.addAction(icons.get_icon("mdi.check"),
-                                                 column)
-            action.triggered.connect(lambda _, c=column:
-                                     self.toogleColumnVisibility.emit(c))
+                action = self._colMenu.addAction(icons.get_icon("mdi.check"), column)
+            action.triggered.connect(lambda _, c=column: self.toogleColumnVisibility.emit(c))
 
     def setGroups(self, groups):
         """
@@ -100,8 +91,7 @@ class DrillContextMenu(QMenu):
         """
         for group in groups:
             action = self._groupMenu.addAction(group)
-            action.triggered.connect(lambda _, g=group:
-                                     self.addToGroup.emit(g))
+            action.triggered.connect(lambda _, g=group: self.addToGroup.emit(g))
 
     def show(self):
         """

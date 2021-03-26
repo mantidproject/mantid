@@ -15,12 +15,11 @@ from mantidqt.utils.qt import load_ui
 
 
 class AdvancedLegendOptionsView(QDialog):
-
     def __init__(self, parent):
         super(AdvancedLegendOptionsView, self).__init__(parent=parent)
         self.ui = load_ui(__file__, 'advanced_legend_options.ui', baseinstance=self)
         self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
-        self.setFixedSize(QSize(350,350))
+        self.setFixedSize(QSize(350, 350))
         self.setWindowFlags(Qt.Dialog | Qt.MSWindowsFixedSizeDialogHint)
 
     def get_shadow(self):

@@ -9,6 +9,7 @@
 import unittest
 
 import matplotlib
+
 matplotlib.use("AGG")  # noqa
 import matplotlib.pyplot as plt
 from numpy import array_equal
@@ -43,7 +44,6 @@ class FigureErrorsManagerTest(unittest.TestCase):
     Test class that covers the interaction of the FigureErrorsManager with plots
     that use the mantid projection and have MantidAxes
     """
-
     @classmethod
     def setUpClass(cls):
         cls.ws2d_histo = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],

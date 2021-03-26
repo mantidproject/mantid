@@ -25,7 +25,6 @@ OUTPUT_MONITOR_WORKSPACE_GROUP = OUTPUT_MONITOR_WORKSPACE + "_"
 WORKSPACE = "Workspace"
 EMPTY_NAME = "empty_name"
 
-
 # ----------------------------------------
 # Other
 # ---------------------------------------

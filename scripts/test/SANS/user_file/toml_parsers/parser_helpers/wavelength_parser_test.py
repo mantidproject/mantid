@@ -40,12 +40,10 @@ class WavelengthParserTest(unittest.TestCase):
 
     @staticmethod
     def _get_wavelength_objs():
-        return DuplicateWavelengthStates(
-            mock.NonCallableMock(), mock.NonCallableMock(),
-            mock.NonCallableMock(), mock.NonCallableMock())
+        return DuplicateWavelengthStates(mock.NonCallableMock(), mock.NonCallableMock(), mock.NonCallableMock(),
+                                         mock.NonCallableMock())
 
-    def _assert_wav_objs(self, state_objs: DuplicateWavelengthStates,
-                         wav_high, wav_low, range_type, step_size=None):
+    def _assert_wav_objs(self, state_objs: DuplicateWavelengthStates, wav_high, wav_low, range_type, step_size=None):
         for i in state_objs.iterate_fields():
             self.assertEqual(wav_high, i.wavelength_high)
             self.assertEqual(wav_low, i.wavelength_low)
@@ -54,29 +52,25 @@ class WavelengthParserTest(unittest.TestCase):
                 self.assertEqual(step_size, i.wavelength_step)
 
     def test_linear_wavelength_setting(self):
-        input_dict = {"binning": {"wavelength": {"type": "Lin",
-                                                 "start": 1.0,
-                                                 "stop": 10.0,
-                                                 "step": 2.0}}}
+        input_dict = {"binning": {"wavelength": {"type": "Lin", "start": 1.0, "stop": 10.0, "step": 2.0}}}
         wav_objs = self._get_wavelength_objs()
         WavelengthTomlParser(input_dict).set_wavelength_details(wav_objs)
 
-        self._assert_wav_objs(wav_objs, wav_low=[1.0], wav_high=[10.0],
-                              range_type=RangeStepType.LIN, step_size=2.0)
+        self._assert_wav_objs(wav_objs, wav_low=[1.0], wav_high=[10.0], range_type=RangeStepType.LIN, step_size=2.0)
 
     def test_rangelin_wavelength_setting(self):
-        input_dict = {"binning": {"wavelength": {"type": "RangeLin",
-                                                 "binning": "1-3,4-6"}}}
+        input_dict = {"binning": {"wavelength": {"type": "RangeLin", "binning": "1-3,4-6"}}}
         wav_objs = self._get_wavelength_objs()
         WavelengthTomlParser(input_dict).set_wavelength_details(wav_objs)
 
-        self._assert_wav_objs(wav_objs, range_type=RangeStepType.RANGE_LIN,
-                              wav_low=[1.0, 1.0, 4.0], wav_high=[6.0, 3.0, 6.0])
+        self._assert_wav_objs(wav_objs,
+                              range_type=RangeStepType.RANGE_LIN,
+                              wav_low=[1.0, 1.0, 4.0],
+                              wav_high=[6.0, 3.0, 6.0])
 
     def test_can_handle_no_wavelength(self):
         input_dict = {"binning": {"another_field": None}}
-        self.assertIsNone(WavelengthTomlParser(input_dict)
-                          .set_wavelength_details(mock.NonCallableMock()))
+        self.assertIsNone(WavelengthTomlParser(input_dict).set_wavelength_details(mock.NonCallableMock()))
 
 
 if __name__ == '__main__':

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
-from Muon.MaxentTools.chosol import  CHOSOL
+from Muon.MaxentTools.chosol import CHOSOL
 
 # translation of chinow.for
 """

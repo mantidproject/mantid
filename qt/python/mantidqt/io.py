@@ -15,7 +15,11 @@ from qtpy.QtCore import QDir
 _LAST_SAVE_DIRECTORY = None
 
 
-def open_a_file_dialog(parent=None,  default_suffix=None, directory=None, file_filter=None, accept_mode=None,
+def open_a_file_dialog(parent=None,
+                       default_suffix=None,
+                       directory=None,
+                       file_filter=None,
+                       accept_mode=None,
                        file_mode=None):
     """
     Open a dialog asking for a file location and name to and return it

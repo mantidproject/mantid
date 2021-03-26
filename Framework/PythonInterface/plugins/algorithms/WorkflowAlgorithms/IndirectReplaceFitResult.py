@@ -70,8 +70,10 @@ def get_indices_of_equivalent_labels(input_workspace, destination_workspace):
 def fit_parameter_missing(single_fit_workspace, destination_workspace, exclude_parameters):
     single_parameters = single_fit_workspace.getAxis(1).extractValues()
     destination_parameters = destination_workspace.getAxis(1).extractValues()
-    return any([parameter not in destination_parameters and parameter not in exclude_parameters
-                for parameter in single_parameters])
+    return any([
+        parameter not in destination_parameters and parameter not in exclude_parameters
+        for parameter in single_parameters
+    ])
 
 
 class IndirectReplaceFitResult(PythonAlgorithm):
@@ -95,19 +97,22 @@ class IndirectReplaceFitResult(PythonAlgorithm):
                'Single Fit Workspace.'
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace',
+                                                     '',
                                                      optional=PropertyMode.Mandatory,
                                                      direction=Direction.Input),
                              doc='The result workspace containing the poor fit value which needs replacing. It\'s name '
-                                 'must end with _Result.')
+                             'must end with _Result.')
 
-        self.declareProperty(MatrixWorkspaceProperty('SingleFitWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('SingleFitWorkspace',
+                                                     '',
                                                      optional=PropertyMode.Mandatory,
                                                      direction=Direction.Input),
                              doc='The result workspace containing the result data from a single fit. It\'s name must '
-                                 'end with _Result.')
+                             'end with _Result.')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace',
+                                                     '',
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
                              doc='The name of the output workspace.')
@@ -194,14 +199,23 @@ class IndirectReplaceFitResult(PythonAlgorithm):
             self._copy_value(from_index, to_index, self._output_workspace)
 
     def _copy_value(self, row_index, insertion_index, destination_workspace):
-        copy_algorithm = self.createChildAlgorithm(name='CopyDataRange', startProgress=0.1,
-                                                   endProgress=1.0, enableLogging=True)
+        copy_algorithm = self.createChildAlgorithm(name='CopyDataRange',
+                                                   startProgress=0.1,
+                                                   endProgress=1.0,
+                                                   enableLogging=True)
         copy_algorithm.setAlwaysStoreInADS(True)
 
-        args = {"InputWorkspace": self._single_fit_workspace, "DestWorkspace": destination_workspace,
-                "StartWorkspaceIndex": row_index, "EndWorkspaceIndex": row_index, "XMin": self._bin_value,
-                "XMax": self._bin_value, "InsertionYIndex": insertion_index, "InsertionXIndex": self._insertion_x_index,
-                "OutputWorkspace": self._output_workspace}
+        args = {
+            "InputWorkspace": self._single_fit_workspace,
+            "DestWorkspace": destination_workspace,
+            "StartWorkspaceIndex": row_index,
+            "EndWorkspaceIndex": row_index,
+            "XMin": self._bin_value,
+            "XMax": self._bin_value,
+            "InsertionYIndex": insertion_index,
+            "InsertionXIndex": self._insertion_x_index,
+            "OutputWorkspace": self._output_workspace
+        }
 
         for key, value in args.items():
             copy_algorithm.setProperty(key, value)

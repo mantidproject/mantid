@@ -18,7 +18,6 @@ DEFAULT_Y_LIMITS = [-1, 1]
 
 
 class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
-
     def __init__(self, view: PlottingCanvasViewInterface, model: PlottingCanvasModel,
                  options_presenter: QuickEditPresenter):
         self._view = view
@@ -50,8 +49,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._view.add_disable_autoscale_subscriber(self.disable_autoscale_observer)
 
     # Interface implementation
-    def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int], hold_on: bool,
-                        autoscale: bool):
+    def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int], hold_on: bool, autoscale: bool):
         """Plots the input workspace names and indices in the figure window
         If hold_on is True the existing workspaces plotted in the figure are kept"""
         # Create workspace information named tuple from input list
@@ -59,13 +57,16 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
                                                                             self._options_presenter.get_errors())
         if not hold_on:
             # Remove data which is currently plotted and not in the new workspace_plot_info
-            workspaces_info_to_remove = [plot_info for plot_info in self._view.plotted_workspace_information
-                                         if plot_info not in workspace_plot_info]
+            workspaces_info_to_remove = [
+                plot_info for plot_info in self._view.plotted_workspace_information
+                if plot_info not in workspace_plot_info
+            ]
             self._view.remove_workspace_info_from_plot(workspaces_info_to_remove)
 
         # Add workspace info which is currently not plotted
-        workspace_info_to_add = [plot_info for plot_info in workspace_plot_info if plot_info
-                                 not in self._view.plotted_workspace_information]
+        workspace_info_to_add = [
+            plot_info for plot_info in workspace_plot_info if plot_info not in self._view.plotted_workspace_information
+        ]
 
         self._view.add_workspaces_to_plot(workspace_info_to_add)
         # check if to force autoscale

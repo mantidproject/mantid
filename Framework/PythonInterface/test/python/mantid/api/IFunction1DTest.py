@@ -10,7 +10,6 @@ import numpy as np
 
 
 class NoCatgeoryFunction(IFunction1D):
-
     def init(self):
         pass
 
@@ -19,7 +18,6 @@ class NoCatgeoryFunction(IFunction1D):
 
 
 class Times2(IFunction1D):
-
     def category(self):
         return "SimpleFunction"
 
@@ -32,14 +30,13 @@ class Times2(IFunction1D):
 
         self.declareParameter("ParamZeroInitNoDescr")
         self.declareParameter("ParamNoDescr", 1.5)
-        self.declareParameter("OtherParam",4,"Some fitting parameter")
+        self.declareParameter("OtherParam", 4, "Some fitting parameter")
 
     def function1D(self, xvals):
-        return 2*xvals
+        return 2 * xvals
 
 
 class IFunction1DTest(unittest.TestCase):
-
     def test_instance_can_be_created_standalone(self):
         func = Times2()
         self.assertTrue(isinstance(func, IFunction1D))
@@ -65,13 +62,13 @@ class IFunction1DTest(unittest.TestCase):
 
     def test_declareAttribute_only_accepts_known_types(self):
         func = Times2()
-        func.initialize() # Contains known types
-        self.assertEqual(5, func.nAttributes()) # Make sure initialize ran
-        self.assertRaises(ValueError, func.declareAttribute, "DictAtt", {1,2,3})
+        func.initialize()  # Contains known types
+        self.assertEqual(5, func.nAttributes())  # Make sure initialize ran
+        self.assertRaises(ValueError, func.declareAttribute, "DictAtt", {1, 2, 3})
 
     def test_correct_attribute_values_are_returned_when_asked(self):
         func = Times2()
-        func.initialize() # Contains known types
+        func.initialize()  # Contains known types
 
         self.assertEqual(1, func.getAttributeValue("IntAtt"))
         self.assertEqual(3.4, func.getAttributeValue("DoubleAtt"))
@@ -84,27 +81,28 @@ class IFunction1DTest(unittest.TestCase):
 
         self.assertEqual(3, func.nParams())
 
-        self.assertEqual("ParamZeroInitNoDescr",func.parameterName(0))
-        self.assertEqual("",func.paramDescription(0))
-        self.assertEqual(0.0,func.getParameterValue(0))
+        self.assertEqual("ParamZeroInitNoDescr", func.parameterName(0))
+        self.assertEqual("", func.paramDescription(0))
+        self.assertEqual(0.0, func.getParameterValue(0))
 
-        self.assertEqual("ParamNoDescr",func.parameterName(1))
-        self.assertEqual("",func.paramDescription(1))
-        self.assertEqual(1.5,func.getParameterValue(1))
+        self.assertEqual("ParamNoDescr", func.parameterName(1))
+        self.assertEqual("", func.paramDescription(1))
+        self.assertEqual(1.5, func.getParameterValue(1))
 
-        self.assertEqual("OtherParam",func.parameterName(2))
-        self.assertEqual("Some fitting parameter",func.paramDescription(2))
-        self.assertEqual(4.0,func.getParameterValue(2))
+        self.assertEqual("OtherParam", func.parameterName(2))
+        self.assertEqual("Some fitting parameter", func.paramDescription(2))
+        self.assertEqual(4.0, func.getParameterValue(2))
 
     def test_function1D_can_be_called_directly(self):
         func = Times2()
         func.initialize()
-        xvals=np.array([1,2,3])
+        xvals = np.array([1, 2, 3])
         out = func.function1D(xvals)
         self.assertEqual(3, out.shape[0])
         self.assertEqual(2, out[0])
         self.assertEqual(4, out[1])
         self.assertEqual(6, out[2])
+
 
 if __name__ == '__main__':
     unittest.main()

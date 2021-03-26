@@ -15,7 +15,7 @@ class DrillAlgorithmObserverSignals(QObject):
     Signals that the observer could send.
     """
     finished = Signal(int, str)  # return code (0: success - 1: error), error msg
-    progress = Signal(float)     # progress value between 0.0 and 1.0
+    progress = Signal(float)  # progress value between 0.0 and 1.0
 
 
 class DrillAlgorithmObserver(AlgorithmObserver):

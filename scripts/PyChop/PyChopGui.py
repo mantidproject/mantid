@@ -9,7 +9,6 @@
 # pylint: disable=attribute-defined-outside-init, protected-access, super-on-old-class, redefined-outer-name
 # pylint: disable=too-many-statements, too-many-instance-attributes, too-many-locals, too-many-branches
 # pylint: disable=too-many-public-methods
-
 """
 This module contains a class to create a graphical user interface for PyChop.
 """
@@ -22,9 +21,9 @@ import warnings
 import copy
 from .Instruments import Instrument
 from qtpy.QtCore import (QEventLoop, Qt)  # noqa
-from qtpy.QtWidgets import (QAction, QCheckBox, QComboBox, QDialog, QFileDialog, QGridLayout, QHBoxLayout, QMenu, QLabel,
-                            QLineEdit, QMainWindow, QMessageBox, QPushButton, QSizePolicy, QSpacerItem, QTabWidget,
-                            QTextEdit, QVBoxLayout, QWidget)  # noqa
+from qtpy.QtWidgets import (QAction, QCheckBox, QComboBox, QDialog, QFileDialog, QGridLayout, QHBoxLayout, QMenu,
+                            QLabel, QLineEdit, QMainWindow, QMessageBox, QPushButton, QSizePolicy, QSpacerItem,
+                            QTabWidget, QTextEdit, QVBoxLayout, QWidget)  # noqa
 from mantid.plots.utility import legend_set_draggable
 from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 from mantidqt.MPLwidgets import NavigationToolbar2QT as NavigationToolbar
@@ -88,7 +87,9 @@ class PyChopGui(QMainWindow):
             self.widgets['PulseRemoverCombo']['Combo'].show()
             self.widgets['PulseRemoverCombo']['Label'].show()
             if hasattr(self.engine.chopper_system, 'frequency_names'):
-                for idx, chp in enumerate([self.widgets['FrequencyCombo']['Label'], self.widgets['PulseRemoverCombo']['Label']]):
+                for idx, chp in \
+                        enumerate([self.widgets['FrequencyCombo']['Label'],
+                                   self.widgets['PulseRemoverCombo']['Label']]):
                     chp.setText(self.engine.chopper_system.frequency_names[idx])
             for fq in range(rep, maxfreq[0] + 1, rep):
                 self.widgets['FrequencyCombo']['Combo'].addItem(str(fq))
@@ -157,7 +158,7 @@ class PyChopGui(QMainWindow):
         """
         freq_gui = float(self.widgets['FrequencyCombo']['Combo'].currentText())
         freq_in = kwargs['manual_freq'] if ('manual_freq' in kwargs.keys()) else freq_gui
-        if len(self.engine.getFrequency()) > 1 and (not hasattr(freq_in, '__len__') or len(freq_in)==1):
+        if len(self.engine.getFrequency()) > 1 and (not hasattr(freq_in, '__len__') or len(freq_in) == 1):
             freqpr = float(self.widgets['PulseRemoverCombo']['Combo'].currentText())
             freq_in = [freq_in, freqpr]
         if not self.widgets['Chopper2Phase']['Label'].isHidden():
@@ -224,7 +225,7 @@ class PyChopGui(QMainWindow):
                     mess = [str(w[i].message) for i in range(len(w))]
                     self.errormess = '\n'.join([m for m in mess if 'tchop' in m])
         else:
-            en = np.linspace(0, 0.95*self.engine.getEi(), 200)
+            en = np.linspace(0, 0.95 * self.engine.getEi(), 200)
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter('always', UserWarning)
                 self.res = self.engine.getResolution(en)
@@ -235,10 +236,10 @@ class PyChopGui(QMainWindow):
     def _set_overplot(self, overplot, axisname):
         axis = getattr(self, axisname)
         if overplot:
-            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+            if matplotlib.compare_versions('2.1.0', matplotlib.__version__):
                 axis.hold(True)
         else:
-            setattr(self, axisname+'_xlim', 0)
+            setattr(self, axisname + '_xlim', 0)
             axis.clear()
             axis.axhline(color='k')
 
@@ -255,10 +256,10 @@ class PyChopGui(QMainWindow):
         if hasattr(freq, '__len__'):
             freq = freq[0]
         if multiplot:
-            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+            if matplotlib.compare_versions('2.1.0', matplotlib.__version__):
                 self.resaxes.hold(True)
             for ie, Ei in enumerate(self.eis):
-                en = np.linspace(0, 0.95*Ei, 200)
+                en = np.linspace(0, 0.95 * Ei, 200)
                 if any(self.res[ie]):
                     if not self.flux[ie]:
                         continue
@@ -268,11 +269,11 @@ class PyChopGui(QMainWindow):
                     if self.tabs.isTabEnabled(self.qetabID):
                         self.plot_qe(Ei, label_text, hold=True)
                     self.resaxes_xlim = max(Ei, self.resaxes_xlim)
-            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+            if matplotlib.compare_versions('2.1.0', matplotlib.__version__):
                 self.resaxes.hold(False)
         else:
             ei = self.engine.getEi()
-            en = np.linspace(0, 0.95*ei, 200)
+            en = np.linspace(0, 0.95 * ei, 200)
             line, = self.resaxes.plot(en, self.res)
             chopper = self.engine.getChopper()
             label_text = '%s_%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s' % (inst, chopper, ei, freq, self.flux)
@@ -289,7 +290,7 @@ class PyChopGui(QMainWindow):
     def plot_qe(self, Ei, label_text, hold=False):
         """ Plots the Q-E diagram """
         from scipy import constants
-        E2q, meV2J = (2. * constants.m_n / (constants.hbar ** 2), constants.e / 1000.)
+        E2q, meV2J = (2. * constants.m_n / (constants.hbar**2), constants.e / 1000.)
         en = np.linspace(-Ei / 5., Ei, 100)
         q2 = []
         for tth in self.engine.detector.tthlims:
@@ -297,7 +298,8 @@ class PyChopGui(QMainWindow):
             q2.append(np.concatenate((np.flipud(q), q)))
         self._set_overplot(hold, 'qeaxes')
         self.qeaxes_xlim = max(np.max(q2), self.qeaxes_xlim)
-        line, = self.qeaxes.plot(np.hstack(q2), np.concatenate((np.flipud(en), en)).tolist() * len(self.engine.detector.tthlims))
+        line, = self.qeaxes.plot(np.hstack(q2),
+                                 np.concatenate((np.flipud(en), en)).tolist() * len(self.engine.detector.tthlims))
         line.set_label(label_text)
         self.qeaxes.set_xlim([0, self.qeaxes_xlim])
         legend_set_draggable(self.qeaxes.legend(), True)
@@ -330,14 +332,14 @@ class PyChopGui(QMainWindow):
                         return
         ne = 25
         mn = self.minE[inst]
-        mx = (self.flxslder.val/100)*self.maxE[inst]
+        mx = (self.flxslder.val / 100) * self.maxE[inst]
         eis = np.linspace(mn, mx, ne)
-        flux = eis*0
-        elres = eis*0
+        flux = eis * 0
+        elres = eis * 0
         if update:
             self.flxaxes1.clear()
             self.flxaxes2.clear()
-            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+            if matplotlib.compare_versions('2.1.0', matplotlib.__version__):
                 self.flxaxes1.hold(True)
                 self.flxaxes2.hold(True)
             for ii, instrument in enumerate(tmpinst):
@@ -356,7 +358,7 @@ class PyChopGui(QMainWindow):
                     flux[ie] = self.engine.getFlux(ei)
                     elres[ie] = self.engine.getResolution(0., ei)[0]
             if overplot:
-                if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+                if matplotlib.compare_versions('2.1.0', matplotlib.__version__):
                     self.flxaxes1.hold(True)
                     self.flxaxes2.hold(True)
             else:
@@ -383,7 +385,7 @@ class PyChopGui(QMainWindow):
             val = float(self.flxedt.text()) / self.maxE[self.engine.instname] * 100
             if val < self.minE[self.engine.instname]:
                 self.errormessage("Max Ei must be greater than %2.1f" % (self.minE[self.engine.instname]))
-                val = (self.minE[self.engine.instname]+0.1) / self.maxE[self.engine.instname] * 100
+                val = (self.minE[self.engine.instname] + 0.1) / self.maxE[self.engine.instname] * 100
             self.flxslder.set_val(val)
         else:
             val = self.flxslder.val * self.maxE[self.engine.instname] / 100
@@ -405,7 +407,7 @@ class PyChopGui(QMainWindow):
         if labels and (overplot or len(labels) == 1):
             for prevtitle in labels:
                 prevInst, prevChop, prevEi = re.search(searchStr, prevtitle).groups()
-                if inst == prevInst and chop == prevChop and abs(ei-float(prevEi)) < 0.01:
+                if inst == prevInst and chop == prevChop and abs(ei - float(prevEi)) < 0.01:
                     return
         freq0 = self.engine.getFrequency()
         rep = self.engine.moderator.source_rep
@@ -423,7 +425,7 @@ class PyChopGui(QMainWindow):
                 flux[ie] = self.engine.getFlux(ei)
                 elres[ie] = self.engine.getResolution(0., ei)[0]
         if overplot:
-            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+            if matplotlib.compare_versions('2.1.0', matplotlib.__version__):
                 self.frqaxes1.hold(True)
                 self.frqaxes2.hold(True)
         else:
@@ -471,7 +473,8 @@ class PyChopGui(QMainWindow):
         msg.exec_()
 
     def loadYaml(self):
-        yaml_file = QFileDialog().getOpenFileName(self.mainWidget, 'Open Instrument YAML File', self.folder, 'Files (*.yaml)')
+        yaml_file = QFileDialog().getOpenFileName(self.mainWidget, 'Open Instrument YAML File', self.folder,
+                                                  'Files (*.yaml)')
         if isinstance(yaml_file, tuple):
             yaml_file = yaml_file[0]
         yaml_file = str(yaml_file)
@@ -511,6 +514,7 @@ class PyChopGui(QMainWindow):
         def overwriteCB(idx):
             self.overwrite_flag = idx
             msg.accept()
+
         for idx, button in enumerate(buttons):
             button.clicked.connect(lambda _, idx=idx: overwriteCB(idx))
             layout.addWidget(button, locations[idx][0], locations[idx][1])
@@ -545,7 +549,7 @@ class PyChopGui(QMainWindow):
     def _gen_text_ei(self, ei, obj_in):
         obj = Instrument(obj_in)
         obj.setEi(ei)
-        en = np.linspace(0, 0.95*ei, 10)
+        en = np.linspace(0, 0.95 * ei, 10)
         try:
             flux = self.engine.getFlux()
             res = self.engine.getResolution(en)
@@ -563,9 +567,9 @@ class PyChopGui(QMainWindow):
         txt += '# Ei = %8.2f meV\n' % (ei)
         txt += '# Flux = %8.2f n/cm2/s\n' % (flux)
         txt += '# Elastic resolution = %6.2f meV\n' % (res[0])
-        txt += '# Time width at sample = %6.2f us, of which:\n' % (1e6*np.sqrt(tsqvan))
+        txt += '# Time width at sample = %6.2f us, of which:\n' % (1e6 * np.sqrt(tsqvan))
         for ky, val in list(tsqdic.items()):
-            txt += '#     %20s : %6.2f us\n' % (ky, 1e6*np.sqrt(val))
+            txt += '#     %20s : %6.2f us\n' % (ky, 1e6 * np.sqrt(val))
         txt += '# %s distances:\n' % (obj.instname)
         txt += '#     x0 = %6.2f m (%s to Fermi)\n' % (x0, first_component)
         txt += '#     x1 = %6.2f m (Fermi to sample)\n' % (x1)
@@ -578,13 +582,15 @@ class PyChopGui(QMainWindow):
         txt += '#     and t_mod and t_chop are the moderator and chopper time widths at the\n'
         txt += '#     moderator and chopper positions (not at the sample as listed above).\n'
         txt += '# Which in this case is:\n'
-        txt += '#     %.4e*sqrt(ef**3 * ( (%6.5f*(%.3f+%.3f*(ei/ef)**1.5))**2 \n' % (874.78672e-6/x2, v_mod, x1/x0, x2/x0)
-        txt += '#                              + (%6.5f*(%.3f+%.3f*(ei/ef)**1.5))**2) )\n' % (v_chop, 1+x1/x0, x2/x0)
+        txt += '#     %.4e*sqrt(ef**3 * ( (%6.5f*(%.3f+%.3f*(ei/ef)**1.5))**2 \n' % (874.78672e-6 / x2, v_mod, x1 / x0,
+                                                                                     x2 / x0)
+        txt += '#                              + (%6.5f*(%.3f+%.3f*(ei/ef)**1.5))**2) )\n' % (v_chop, 1 + x1 / x0,
+                                                                                              x2 / x0)
         txt += '#  EN (meV)   Full dE (meV)   Approx dE (meV)\n'
         for ii in range(len(res)):
-            ef = ei-en[ii]
-            approx = (874.78672e-6/x2)*np.sqrt(ef**3 * ((v_mod*((x1/x0)+(x2/x0)*(ei/ef)**1.5))**2
-                                                        + (v_chop*(1+(x1/x0)+(x2/x0)*(ei/ef)**1.5))**2))
+            ef = ei - en[ii]
+            approx = (874.78672e-6 / x2) * np.sqrt(ef**3 * ((v_mod * ((x1 / x0) + (x2 / x0) * (ei / ef)**1.5))**2 +
+                                                            (v_chop * (1 + (x1 / x0) + (x2 / x0) * (ei / ef)**1.5))**2))
             txt += '%12.5f %12.5f %12.5f\n' % (en[ii], res[ii], approx)
         return txt
 
@@ -664,16 +670,19 @@ class PyChopGui(QMainWindow):
                 percent = res / ee * 100
                 chop_width = out['chopper'][ie]
                 mod_width = out['moderator'][ie]
-                new_str += 'Ei is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n' % (ee, res * 1000, percent)
-                new_str += 'FWHM at sample from chopper and moderator are %6.2f us, %6.2f us\n' % (chop_width, mod_width)
+                new_str += 'Ei is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n' % (
+                    ee, res * 1000, percent)
+                new_str += 'FWHM at sample from chopper and moderator are %6.2f us, %6.2f us\n' % (chop_width,
+                                                                                                   mod_width)
         else:
-            ei =  self.engine.getEi()
+            ei = self.engine.getEi()
             out = self.engine.getWidths()
             res = out['Energy']
             percent = res / ei * 100
             chop_width = out['chopper']
             mod_width = out['moderator']
-            new_str = '\nEi is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n' % (ei, res * 1000, percent)
+            new_str = '\nEi is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n' % (ei, res * 1000,
+                                                                                                        percent)
             new_str += 'FWHM at sample from chopper and moderator are %6.2f us, %6.2f us\n' % (chop_width, mod_width)
         self.scredt.append(new_str)
 
@@ -685,11 +694,16 @@ class PyChopGui(QMainWindow):
             import mantidqt
             mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp("PyChop", 'direct')
         except ImportError:
-            helpTxt = "PyChop is a tool to allow direct inelastic neutron\nscattering users to estimate the inelastic resolution\n"
-            helpTxt += "and incident flux for a given spectrometer setting.\n\nFirst select the instrument, chopper settings and\n"
-            helpTxt += "Ei, and then click 'Calculate and Plot'. Data for all\nthe graphs will be generated (may take 1-2s) and\n"
-            helpTxt += "all graphs will be updated. If the 'Hold current plot'\ncheck box is ticked, additional settings will be\n"
-            helpTxt += "overplotted on the existing graphs if they are\ndifferent from previous settings.\n\nMore in-depth help "
+            helpTxt = "PyChop is a tool to allow direct inelastic neutron\nscattering users to estimate the " \
+                      "inelastic resolution\n"
+            helpTxt += "and incident flux for a given spectrometer setting.\n\nFirst select the instrument, chopper " \
+                       "settings and\n"
+            helpTxt += "Ei, and then click 'Calculate and Plot'. Data for all\nthe graphs will be generated (may" \
+                       " take 1-2s) and\n"
+            helpTxt += "all graphs will be updated. If the 'Hold current plot'\ncheck box is ticked, additional " \
+                       "settings will be\n"
+            helpTxt += "overplotted on the existing graphs if they are\ndifferent from previous settings.\n\nMore" \
+                       " in-depth help "
             helpTxt += "can be obtained from the\nMantid help pages."
             self.hlpwin = QDialog()
             self.hlpedt = QLabel(helpTxt)
@@ -717,12 +731,10 @@ class PyChopGui(QMainWindow):
             ['pair', 'show', 'Frequency', 'combo', '', self.setFreq, 'FrequencyCombo'],
             ['pair', 'hide', 'Pulse remover chopper freq', 'combo', '', self.setFreq, 'PulseRemoverCombo'],
             ['pair', 'show', 'Ei', 'edit', '', self.setEi, 'EiEdit'],
-            ['pair', 'hide', 'Chopper 2 phase delay time', 'edit', '5', self.setFreq, 'Chopper2Phase'],
-            ['spacer'],
+            ['pair', 'hide', 'Chopper 2 phase delay time', 'edit', '5', self.setFreq, 'Chopper2Phase'], ['spacer'],
             ['single', 'show', 'Calculate and Plot', 'button', self.calc_callback, 'CalculateButton'],
             ['single', 'show', 'Hold current plot', 'check', lambda: None, 'HoldCheck'],
-            ['single', 'show', 'Show multi-reps', 'check', lambda: None, 'MultiRepCheck'],
-            ['spacer'],
+            ['single', 'show', 'Show multi-reps', 'check', lambda: None, 'MultiRepCheck'], ['spacer'],
             ['single', 'show', 'Show data ascii window', 'button', self.showText, 'ShowAsciiButton'],
             ['single', 'show', 'Save data as ascii', 'button', self.saveText, 'SaveAsciiButton']
         ]
@@ -743,11 +755,11 @@ class PyChopGui(QMainWindow):
                     self.dropboxes[-1].activated['QString'].connect(widget[5])
                     for item in widget[4]:
                         self.dropboxes[-1].addItem(item)
-                    self.widgets[widget[-1]] = {'Combo':self.dropboxes[-1], 'Label':self.droplabels[-1]}
+                    self.widgets[widget[-1]] = {'Combo': self.dropboxes[-1], 'Label': self.droplabels[-1]}
                 elif 'edit' in widget[3]:
                     self.dropboxes.append(QLineEdit(self))
                     self.dropboxes[-1].returnPressed.connect(widget[5])
-                    self.widgets[widget[-1]] = {'Edit':self.dropboxes[-1], 'Label':self.droplabels[-1]}
+                    self.widgets[widget[-1]] = {'Edit': self.dropboxes[-1], 'Label': self.droplabels[-1]}
                 else:
                     raise RuntimeError('Bug in code - widget %s is not recognised.' % (widget[3]))
                 self.leftPanel.addWidget(self.droplabels[-1])

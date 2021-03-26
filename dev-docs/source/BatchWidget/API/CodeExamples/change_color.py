@@ -9,8 +9,7 @@ from mantidqtpython import MantidQt
 
 # Inside the parent view
 def setup(self):
-    self.table = MantidQt.MantidWidgets.Batch.JobTreeView(
-        ["Column 1", "Column 2"], cell(""), self)
+    self.table = MantidQt.MantidWidgets.Batch.JobTreeView(["Column 1", "Column 2"], cell(""), self)
 
     self.table_signals = \
         MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.table, self)

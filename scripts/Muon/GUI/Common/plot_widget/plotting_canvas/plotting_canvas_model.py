@@ -32,7 +32,6 @@ class WorkspacePlotInformation(NamedTuple):
 
 
 class PlottingCanvasModel(object):
-
     def __init__(self, context: MuonContext):
         self._user_axis_limits = None
         self._axes_workspace_map = {}
@@ -96,9 +95,12 @@ class PlottingCanvasModel(object):
         :return: A WorkspacePlotInformation instance desciribng the data to be plotted
         """
         label = self._create_workspace_label(workspace_name, index)
-        return WorkspacePlotInformation(workspace_name=workspace_name, index=index, axis=axis,
+        return WorkspacePlotInformation(workspace_name=workspace_name,
+                                        index=index,
+                                        axis=axis,
                                         normalised=self._normalised,
-                                        errors=errors, label=label)
+                                        errors=errors,
+                                        label=label)
 
     def create_plot_information_for_guess_ws(self, guess_ws_name: str) -> WorkspacePlotInformation:
         """
@@ -107,9 +109,12 @@ class PlottingCanvasModel(object):
         :return: A WorkspacePlotInformation instance describing the data to be plotted
         """
         axis = self._get_workspace_plot_axis(guess_ws_name)
-        return WorkspacePlotInformation(workspace_name=guess_ws_name, index=1, axis=axis,
+        return WorkspacePlotInformation(workspace_name=guess_ws_name,
+                                        index=1,
+                                        axis=axis,
                                         normalised=self._normalised,
-                                        errors=False, label=FIT_FUNCTION_GUESS_LABEL)
+                                        errors=False,
+                                        label=FIT_FUNCTION_GUESS_LABEL)
 
     def create_axes_titles(self):
         if not self._is_tiled:
@@ -135,7 +140,8 @@ class PlottingCanvasModel(object):
         if not self._is_tiled:
             return 0
 
-        group_pair_name, run_as_string = self._context.group_pair_context.get_group_pair_name_and_run_from_workspace_name(workspace_name)
+        group_pair_name, run_as_string = \
+            self._context.group_pair_context.get_group_pair_name_and_run_from_workspace_name(workspace_name)
 
         if group_pair_name in self._axes_workspace_map:
             return self._axes_workspace_map[group_pair_name]

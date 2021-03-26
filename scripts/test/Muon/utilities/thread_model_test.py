@@ -14,7 +14,6 @@ from Muon.GUI.Common.thread_model import ThreadModel
 
 
 class testModelWithoutExecute:
-
     def __init__(self):
         pass
 
@@ -23,7 +22,6 @@ class testModelWithoutExecute:
 
 
 class testModelWithoutOutput:
-
     def __init__(self):
         pass
 
@@ -32,7 +30,6 @@ class testModelWithoutOutput:
 
 
 class testModelWithoutLoadData:
-
     def __init__(self):
         pass
 
@@ -44,7 +41,6 @@ class testModelWithoutLoadData:
 
 
 class testModel:
-
     def __init__(self):
         self._data = None
 
@@ -64,7 +60,6 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         """This runner class creates a main event loop for threaded code to run within (otherwise the threaded
         code will not connect signals/slots properly).
         The finished signal of a QThread is connected to the finished method below"""
-
         def __init__(self, thread_model):
             if thread_model:
                 thread_model.start()

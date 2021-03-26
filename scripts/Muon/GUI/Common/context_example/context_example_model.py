@@ -11,7 +11,6 @@ from Muon.GUI.Common.muon_context.muon_context import *
 
 
 class ContextExampleModel(object):
-
     def __init__(self, context):
         self._context = context
 

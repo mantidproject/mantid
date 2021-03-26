@@ -16,7 +16,6 @@ class PlottingWidgetViewMeta(type(QtWidgets.QWidget), ABCMeta):
 
 
 class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
-
     @abstractmethod
     def show_plot_diff(self):
         """Shows Plot Difference Checkbox"""
@@ -99,7 +98,7 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
         pass
 
     @abstractmethod
-    def set_is_tiled_plot(self, is_tiled : bool):
+    def set_is_tiled_plot(self, is_tiled: bool):
         """
         Sets whether a tiled plot should made
         """
@@ -138,7 +137,7 @@ class PlotWidgetViewInterface(metaclass=PlottingWidgetViewMeta):
         pass
 
     @abstractmethod
-    def on_plot_diff_checkbox_changed(self,slot):
+    def on_plot_diff_checkbox_changed(self, slot):
         """
         Connect the plot difference checkbox to the input slot
         """

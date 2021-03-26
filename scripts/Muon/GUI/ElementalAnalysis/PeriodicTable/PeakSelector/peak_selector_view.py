@@ -24,10 +24,7 @@ def value_in_bounds(val, lower, upper):
 def valid_data(peak_data):
     # Check that the new data format contains at least A, Z, primary (they can be empty)
     data_label = peak_data.keys()
-    if any([
-            'Z' not in data_label, 'A' not in data_label, 'Primary' not in data_label,
-            'Secondary' not in data_label
-    ]):
+    if any(['Z' not in data_label, 'A' not in data_label, 'Primary' not in data_label, 'Secondary' not in data_label]):
         return False
 
     # Check that the data is a sensible number (high bound set by element Oganesson, heaviest known element as of 2019)
@@ -75,9 +72,7 @@ class PeakSelectorView(QtWidgets.QListWidget):
         primary = peak_data["Primary"]
         self.primary_checkboxes = self._create_checkbox_list("Primary", primary)
         secondary = peak_data["Secondary"]
-        self.secondary_checkboxes = self._create_checkbox_list("Secondary",
-                                                               secondary,
-                                                               checked=False)
+        self.secondary_checkboxes = self._create_checkbox_list("Secondary", secondary, checked=False)
         try:
             gammas = peak_data["Gammas"]
             self.gamma_checkboxes = self._create_checkbox_list("Gammas", gammas, checked=False)
@@ -90,9 +85,7 @@ class PeakSelectorView(QtWidgets.QListWidget):
             for xpos, int in electrons.items():
                 name = r'$e^-\quad$  {}'.format(xpos)
                 electron_data[name] = float(xpos)
-            self.electron_checkboxes = self._create_checkbox_list("Electrons",
-                                                                  electron_data,
-                                                                  checked=False)
+            self.electron_checkboxes = self._create_checkbox_list("Electrons", electron_data, checked=False)
         except KeyError:
             self.electron_checkboxes = []
 

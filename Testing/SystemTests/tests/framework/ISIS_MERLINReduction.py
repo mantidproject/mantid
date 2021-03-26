@@ -24,11 +24,11 @@ class ReduceMERLIN(ReductionWrapper):
         prop['incident_energy'] = 18
         prop['energy_bins'] = [-10, 0.2, 15]
 
-      # Absolute units reduction properties.
-       #prop['monovan_run'] = 17589
-       #prop['sample_mass'] = 10/(94.4/13)
-       # -- this number allows to get approximately the same system test intensities for MAPS as the old test
-       #prop['sample_rmm'] = 435.96 #
+        # Absolute units reduction properties.
+        #prop['monovan_run'] = 17589
+        #prop['sample_mass'] = 10/(94.4/13)
+        # -- this number allows to get approximately the same system test intensities for MAPS as the old test
+        #prop['sample_rmm'] = 435.96 #
         return prop
 
     @AdvancedProperties
@@ -39,25 +39,27 @@ class ReduceMERLIN(ReductionWrapper):
       """
         prop = {}
         prop['map_file'] = 'rings_113.map'
-      #prop['monovan_mapfile'] = 'default' #'4to1_mid_lowang.map' # default
-        prop['hard_mask_file'] =None
-        prop['det_cal_file'] = 6399 #? default?
-        prop['save_format']=''
+        #prop['monovan_mapfile'] = 'default' #'4to1_mid_lowang.map' # default
+        prop['hard_mask_file'] = None
+        prop['det_cal_file'] = 6399  #? default?
+        prop['save_format'] = ''
 
         return prop
-      #
+
+    #
 
     @iliad
-    def reduce(self,input_file=None,output_directory=None):
+    def reduce(self, input_file=None, output_directory=None):
         """ Method executes reduction over single file
          Overload only if custom reduction is needed
      """
-        outWS = ReductionWrapper.reduce(self,input_file,output_directory)
-     #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
+        outWS = ReductionWrapper.reduce(self, input_file, output_directory)
+        #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
         return outWS
-      #
 
-    def do_preprocessing(self,reducer,ws):
+    #
+
+    def do_preprocessing(self, reducer, ws):
         """ Custom function, applied to each run or every workspace, the run is divided to
             in multirep mode
             Applied after diagnostics but before any further reduction is invoked.
@@ -73,9 +75,10 @@ class ReduceMERLIN(ReductionWrapper):
             Must return pointer to the preprocessed workspace
         """
         return ws
+
     #
 
-    def do_postprocessing(self,reducer,ws):
+    def do_postprocessing(self, reducer, ws):
         """ Custom function, applied to each reduced run or every reduced workspace,
             the run is divided into, in multirep mode.
             Applied after reduction is completed but before saving the result.
@@ -96,9 +99,10 @@ class ReduceMERLIN(ReductionWrapper):
             (E.g. if you decide to convert workspace units to wavelength, you can not save result as nxspe)
         """
         return ws
+
     #
 
-    def eval_absorption_corrections(self,test_ws=None):
+    def eval_absorption_corrections(self, test_ws=None):
         """ The method to evaluate the speed and efficiency of the absorption corrections procedure,
             before applying your corrections to the whole workspace and all sample runs.
 
@@ -124,19 +128,19 @@ class ReduceMERLIN(ReductionWrapper):
         """
 
         # Gain access to the property manager:
-        propman =  rd.reducer.prop_man
+        propman = rd.reducer.prop_man
         # Set up Sample as one of:
         # 1) Cylinder([Chem_formula],[Height,Radius])
         # 2) FlatPlate([Chem_formula],[Height,Width,Thick])
         # 3) HollowCylinder([Chem_formula],[Height,InnerRadius,OuterRadius])
         # 4) Sphere([[Chem_formula],Radius)
         # The units are in cm
-        propman.correct_absorption_on = Cylinder('Fe',[10,2]) # Will be taken from def_advanced_properties
+        propman.correct_absorption_on = Cylinder('Fe', [10, 2])  # Will be taken from def_advanced_properties
         #                                prop['correct_absorption_on'] =  if not defined here
         #
         # Use Monte-Carlo integration.  Take sparse energy points and a few integration attempts
         # to increase initial speed. Increase these numbers to achieve better accuracy.
-        propman.abs_corr_info = {'EventsPerPoint':3000}#,'NumberOfWavelengthPoints':30}
+        propman.abs_corr_info = {'EventsPerPoint': 3000}  #,'NumberOfWavelengthPoints':30}
         # See MonteCarloAbsorption for all possible properties description and possibility to define
         # a sparse instrument for speed.
         #
@@ -145,26 +149,27 @@ class ReduceMERLIN(ReductionWrapper):
         if test_ws is None:
             test_ws = PropertyManager.sample_run.get_workspace()
         # Define spectra list to test absorption on
-        check_spectra = [1,200]
+        check_spectra = [1, 200]
         # Evaluate corrections on the selected spectra of the workspace and the time to obtain
         # the corrections on the whole workspace.
-        corrections,time_to_correct_abs = self.evaluate_abs_corrections(test_ws,check_spectra)
+        corrections, time_to_correct_abs = self.evaluate_abs_corrections(test_ws, check_spectra)
         # When accuracy and speed of the corrections is satisfactory, copy chosen abs_corr_info
         # properties from above to the advanced_porperties area to run in reduction.
         #
         return corrections
 
-    def __init__(self,web_var=None):
+    def __init__(self, web_var=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MER',web_var)
+        ReductionWrapper.__init__(self, 'MER', web_var)
         Mt = MethodType(self.do_preprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, 'do_preprocessing', Mt)
         Mt = MethodType(self.do_postprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, 'do_postprocessing', Mt)
+
+
 #----------------------------------------------------------------------------------------------------------------------
 
-
-if __name__=="__main__":
+if __name__ == "__main__":
     #maps_dir = r'd:\Data\MantidDevArea\Datastore\DataCopies\Testing\Data\SystemTest'
     #data_dir = r'd:\Data\Mantid_Testing\15_03_01'
     #ref_data_dir = r'd:\Data\MantidDevArea\Datastore\DataCopies\Testing\SystemTests\tests\analysis\reference'
@@ -178,26 +183,26 @@ if __name__=="__main__":
     rd.def_advanced_properties()
     rd.def_main_properties()
 
-#### uncomment rows below to generate web variables and save then to transfer to   ###
+    #### uncomment rows below to generate web variables and save then to transfer to   ###
     ## web services.
     #run_dir = os.path.dirname(os.path.realpath(__file__))
     #file = os.path.join(run_dir,'reduce_vars.py')
     #rd.save_web_variables(file)
 
-#### Set up time interval (sec) for reducer to check for input data file.         ####
+    #### Set up time interval (sec) for reducer to check for input data file.         ####
     #  If this file is not present and this value is 0,reduction fails
     #  if this value >0 the reduction wait until file appears on the data
     #  search path checking after time specified below.
     rd.wait_for_file = 0  # waiting time interval
 
-####get reduction parameters from properties above, override what you want locally ###
-   # and run reduction. Overriding would have form:
-   # rd.reducer.property_name (from the dictionary above) = new value e.g.
-   # rd.reducer.energy_bins = [-40,2,40]
-   # or
-   ## rd.reducer.sum_runs = False
+    ####get reduction parameters from properties above, override what you want locally ###
+    # and run reduction. Overriding would have form:
+    # rd.reducer.property_name (from the dictionary above) = new value e.g.
+    # rd.reducer.energy_bins = [-40,2,40]
+    # or
+    ## rd.reducer.sum_runs = False
 
-###### Run reduction over all run numbers or files assigned to                   ######
+    ###### Run reduction over all run numbers or files assigned to                   ######
     # sample_run  variable
 
     # return output workspace only if you are going to do
@@ -209,5 +214,5 @@ if __name__=="__main__":
 
 ###### Test absorption corrections to find optimal settings for corrections algorithm
 #     corr = rd.eval_absorption_corrections()
-    #import os
-    #os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#import os
+#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]

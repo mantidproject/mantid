@@ -23,8 +23,12 @@ class MoveTypes(Enum):
     RESET_POSITION = 3
 
 
-def move_component(component_name, state: AllStates, move_type,
-                   workspace, is_transmission_workspace=False, beam_coordinates=None):
+def move_component(component_name,
+                   state: AllStates,
+                   move_type,
+                   workspace,
+                   is_transmission_workspace=False,
+                   beam_coordinates=None):
     mover = create_mover(workspace, state)
     inst_info = state.instrument_info
 

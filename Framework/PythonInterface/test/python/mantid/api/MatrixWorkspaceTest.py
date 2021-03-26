@@ -8,8 +8,8 @@ import unittest
 import sys
 import math
 from testhelpers import create_algorithm, run_algorithm, can_be_instantiated, WorkspaceCreationHelper
-from mantid.api import (MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, Workspace,
-                        ExperimentInfo, AnalysisDataService, WorkspaceFactory, NumericAxis)
+from mantid.api import (MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, Workspace, ExperimentInfo,
+                        AnalysisDataService, WorkspaceFactory, NumericAxis)
 from mantid.geometry import Detector
 from mantid.kernel import Direction, V3D
 from mantid.simpleapi import CreateSampleWorkspace, Rebin
@@ -22,8 +22,8 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
     def setUp(self):
         if self._test_ws is None:
-            self.__class__._test_ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(
-                2, 102, False)  # no monitors
+            self.__class__._test_ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 102,
+                                                                                                  False)  # no monitors
 
     def test_that_one_cannot_be_instantiated_directly(self):
         self.assertFalse(can_be_instantiated(MatrixWorkspace))
@@ -257,9 +257,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
             self.assertEqual(y_np.shape, (nhist, blocksize))  # 2 rows, 102 columns
             self.assertEqual(e_np.shape, (nhist, blocksize))  # 2 rows, 102 columns
         else:
-            self.assertEqual(x_np.shape, (blocksize + 1,))  # 2 rows, 103 columns
-            self.assertEqual(y_np.shape, (blocksize,))  # 2 rows, 102 columns
-            self.assertEqual(e_np.shape, (blocksize,))  # 2 rows, 102 columns
+            self.assertEqual(x_np.shape, (blocksize + 1, ))  # 2 rows, 103 columns
+            self.assertEqual(y_np.shape, (blocksize, ))  # 2 rows, 102 columns
+            self.assertEqual(e_np.shape, (blocksize, ))  # 2 rows, 102 columns
 
         for i in range(start, end):
             if nhist > 1:
@@ -300,12 +300,20 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEqual(self._test_ws.readY(0)[0], ynow)
 
     def test_operators_with_workspaces_in_ADS(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='a', DataX=[
-            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+        run_algorithm('CreateWorkspace',
+                      OutputWorkspace='a',
+                      DataX=[1., 2., 3.],
+                      DataY=[2., 3.],
+                      DataE=[2., 3.],
+                      UnitX='TOF')
         ads = AnalysisDataService
         A = ads['a']
-        run_algorithm('CreateWorkspace', OutputWorkspace='b', DataX=[
-            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+        run_algorithm('CreateWorkspace',
+                      OutputWorkspace='b',
+                      DataX=[1., 2., 3.],
+                      DataY=[2., 3.],
+                      DataE=[2., 3.],
+                      UnitX='TOF')
         B = ads['b']
 
         # Equality
@@ -334,8 +342,12 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
         ads.remove('C')
         self.assertTrue('C' not in ads)
-        run_algorithm('CreateWorkspace', OutputWorkspace='ca', DataX=[
-            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+        run_algorithm('CreateWorkspace',
+                      OutputWorkspace='ca',
+                      DataX=[1., 2., 3.],
+                      DataY=[2., 3.],
+                      DataE=[2., 3.],
+                      UnitX='TOF')
         C = ads['ca']
 
         C *= B
@@ -359,8 +371,12 @@ class MatrixWorkspaceTest(unittest.TestCase):
         ads.remove('C')
 
     def test_complex_binary_ops_do_not_leave_temporary_workspaces_behind(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='ca', DataX=[
-            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+        run_algorithm('CreateWorkspace',
+                      OutputWorkspace='ca',
+                      DataX=[1., 2., 3.],
+                      DataY=[2., 3.],
+                      DataE=[2., 3.],
+                      UnitX='TOF')
         ads = AnalysisDataService
         w1 = (ads['ca'] * 0.0) + 1.0
 
@@ -369,8 +385,12 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertTrue('__python_op_tmp0' not in ads)
 
     def test_history_access(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='raw', DataX=[
-            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+        run_algorithm('CreateWorkspace',
+                      OutputWorkspace='raw',
+                      DataX=[1., 2., 3.],
+                      DataY=[2., 3.],
+                      DataE=[2., 3.],
+                      UnitX='TOF')
         run_algorithm('Rebin', InputWorkspace='raw', Params=[1., 0.5, 3.], OutputWorkspace='raw')
         raw = AnalysisDataService['raw']
         history = raw.getHistory()
@@ -383,8 +403,12 @@ class MatrixWorkspaceTest(unittest.TestCase):
         AnalysisDataService.remove('raw')
 
     def test_setTitleAndComment(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='ws1', DataX=[
-            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+        run_algorithm('CreateWorkspace',
+                      OutputWorkspace='ws1',
+                      DataX=[1., 2., 3.],
+                      DataY=[2., 3.],
+                      DataE=[2., 3.],
+                      UnitX='TOF')
         ws1 = AnalysisDataService['ws1']
         title = 'test_title'
         ws1.setTitle(title)
@@ -395,10 +419,18 @@ class MatrixWorkspaceTest(unittest.TestCase):
         AnalysisDataService.remove(ws1.name())
 
     def test_setGetMonitorWS(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='ws1', DataX=[
-            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
-        run_algorithm('CreateWorkspace', OutputWorkspace='ws_mon', DataX=[
-            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+        run_algorithm('CreateWorkspace',
+                      OutputWorkspace='ws1',
+                      DataX=[1., 2., 3.],
+                      DataY=[2., 3.],
+                      DataE=[2., 3.],
+                      UnitX='TOF')
+        run_algorithm('CreateWorkspace',
+                      OutputWorkspace='ws_mon',
+                      DataX=[1., 2., 3.],
+                      DataY=[2., 3.],
+                      DataE=[2., 3.],
+                      UnitX='TOF')
 
         ws1 = AnalysisDataService.retrieve('ws1')
         try:

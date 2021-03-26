@@ -12,8 +12,7 @@ import unittest
 from unittest.mock import MagicMock, call, patch
 import sys
 
-from mantid.api import (MatrixWorkspace, IMDEventWorkspace, IMDHistoWorkspace,
-                        SpecialCoordinateSystem)
+from mantid.api import (MatrixWorkspace, IMDEventWorkspace, IMDHistoWorkspace, SpecialCoordinateSystem)
 from mantid.geometry import IMDDimension
 from numpy.testing import assert_equal
 import numpy as np
@@ -24,9 +23,8 @@ from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE, MIN_WI
 
 
 # Mock helpers
-def _create_mock_histoworkspace(ndims: int, coords: SpecialCoordinateSystem, extents: tuple,
-                                signal: np.array, error: np.array, nbins: tuple, names: tuple,
-                                units: tuple, isq: tuple):
+def _create_mock_histoworkspace(ndims: int, coords: SpecialCoordinateSystem, extents: tuple, signal: np.array,
+                                error: np.array, nbins: tuple, names: tuple, units: tuple, isq: tuple):
     """
     :param ndims: The number of dimensions
     :param coords: MD coordinate system
@@ -58,8 +56,8 @@ def _attach_as_original(histo_ws, mde_ws):
     histo_ws.hasOriginalWorkspace.side_effect = lambda index: False
 
 
-def _create_mock_mdeventworkspace(ndims: int, coords: SpecialCoordinateSystem, extents: tuple,
-                                  names: tuple, units: tuple, isq: tuple):
+def _create_mock_mdeventworkspace(ndims: int, coords: SpecialCoordinateSystem, extents: tuple, names: tuple,
+                                  units: tuple, isq: tuple):
     """
     :param ndims: The number of dimensions
     :param coords: MD coordinate system
@@ -69,7 +67,7 @@ def _create_mock_mdeventworkspace(ndims: int, coords: SpecialCoordinateSystem, e
     :param isq: Boolean for each dimension defining if Q or not
     """
     ws = _create_mock_workspace(IMDEventWorkspace, coords, has_oriented_lattice=False, ndims=ndims)
-    return _add_dimensions(ws, names, isq, extents, nbins=(1,) * ndims, units=units)
+    return _add_dimensions(ws, names, isq, extents, nbins=(1, ) * ndims, units=units)
 
 
 def _create_mock_matrixworkspace(x_axis: tuple,
@@ -91,10 +89,7 @@ def _create_mock_matrixworkspace(x_axis: tuple,
     ws.getNumberHistograms.return_value = len(y_axis)
     ws.isDistribution.return_value = distribution
     ws.extractX.return_value = x_axis
-    axes = [
-        MagicMock(),
-        MagicMock(isSpectra=lambda: y_is_spectra, isNumeric=lambda: not y_is_spectra)
-    ]
+    axes = [MagicMock(), MagicMock(isSpectra=lambda: y_is_spectra, isNumeric=lambda: not y_is_spectra)]
     ws.getAxis.side_effect = lambda i: axes[i]
     axes[1].extractValues.return_value = np.array(y_axis)
     if y_is_spectra:
@@ -144,12 +139,7 @@ def _create_mock_workspace(ws_type,
     return ws
 
 
-def _add_dimensions(mock_ws,
-                    names,
-                    isq,
-                    extents: tuple = None,
-                    nbins: tuple = None,
-                    units: tuple = None):
+def _add_dimensions(mock_ws, names, isq, extents: tuple = None, nbins: tuple = None, units: tuple = None):
     """
     :param mock_ws: An existing mock workspace object
     :param names: The name of each dimension
@@ -158,7 +148,6 @@ def _add_dimensions(mock_ws,
     :param nbins: Number of bins in each dimension
     :param units: Unit labels for each dimension
     """
-
     def create_dimension(index):
         dimension = MagicMock(spec=IMDDimension)
         dimension.name = names[index]
@@ -186,7 +175,6 @@ def _add_dimensions(mock_ws,
 class ArraysEqual:
     """Compare arrays for equality in mock.assert_called_with calls.
     """
-
     def __init__(self, expected):
         self._expected = expected
 
@@ -204,8 +192,7 @@ def create_mock_sliceinfo(indices: tuple):
     :param indices: 3D indices defining permuation order of dimensions
     """
     slice_info = MagicMock()
-    slice_info.transform.side_effect = lambda x: np.array(
-        [x[indices[0]], x[indices[1]], x[indices[2]]])
+    slice_info.transform.side_effect = lambda x: np.array([x[indices[0]], x[indices[1]], x[indices[2]]])
     return slice_info
 
 
@@ -219,8 +206,7 @@ class SliceViewerModelTest(unittest.TestCase):
                                                     error=np.arange(100.).reshape(5, 5, 4),
                                                     nbins=(5, 5, 4),
                                                     names=('Dim1', 'Dim2', 'Dim3'),
-                                                    units=('MomentumTransfer', 'EnergyTransfer',
-                                                           'Angstrom'),
+                                                    units=('MomentumTransfer', 'EnergyTransfer', 'Angstrom'),
                                                     isq=(False, False, False))
         self.ws_MD_3D.name.return_value = 'ws_MD_3D'
         self.ws_MDE_3D = _create_mock_mdeventworkspace(ndims=3,
@@ -323,8 +309,7 @@ class SliceViewerModelTest(unittest.TestCase):
         model = SliceViewerModel(self.ws_MDE_3D)
         mock_binmd.return_value = self.ws_MD_3D
 
-        self.assertNotEqual(model.get_ws((None, None, 0), (1, 2, 4), ((-2, 2), (-1, 1))),
-                            self.ws_MDE_3D)
+        self.assertNotEqual(model.get_ws((None, None, 0), (1, 2, 4), ((-2, 2), (-1, 1))), self.ws_MDE_3D)
 
         call_params = dict(AxisAligned=False,
                            BasisVector0='h,rlu,1.0,0.0,0.0',
@@ -348,8 +333,7 @@ class SliceViewerModelTest(unittest.TestCase):
         xmin = -5e-8
         xmax = 5e-8
 
-        self.assertNotEqual(model.get_ws((None, None, 0), (1, 2, 4), ((xmin, xmax), (-1, 1))),
-                            self.ws_MDE_3D)
+        self.assertNotEqual(model.get_ws((None, None, 0), (1, 2, 4), ((xmin, xmax), (-1, 1))), self.ws_MDE_3D)
 
         call_params = dict(AxisAligned=False,
                            BasisVector0='h,rlu,1.0,0.0,0.0',
@@ -396,8 +380,7 @@ class SliceViewerModelTest(unittest.TestCase):
         mock_q3d = _create_mock_workspace(IMDEventWorkspace,
                                           coords=SpecialCoordinateSystem.QLab,
                                           has_oriented_lattice=False)
-        mock_q3d = _add_dimensions(mock_q3d, ('Q_lab_x', 'Q_lab_y', 'Q_lab_z', 'DeltaE'),
-                                   isq=(True, True, True, False))
+        mock_q3d = _add_dimensions(mock_q3d, ('Q_lab_x', 'Q_lab_y', 'Q_lab_z', 'DeltaE'), isq=(True, True, True, False))
         model = SliceViewerModel(mock_q3d)
 
         for i in range(3):
@@ -423,8 +406,7 @@ class SliceViewerModelTest(unittest.TestCase):
         mock_q3d = _create_mock_workspace(IMDEventWorkspace,
                                           coords=SpecialCoordinateSystem.HKL,
                                           has_oriented_lattice=False)
-        mock_q3d = _add_dimensions(mock_q3d, ('[H,0,0]', '[0,K,0]', '[0,0,L]', 'DeltaE'),
-                                   isq=(True, True, True, False))
+        mock_q3d = _add_dimensions(mock_q3d, ('[H,0,0]', '[0,K,0]', '[0,0,L]', 'DeltaE'), isq=(True, True, True, False))
         model = SliceViewerModel(mock_q3d)
 
         for i in range(3):
@@ -433,9 +415,7 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertFalse(model.get_dim_info(3)['qdim'])
 
     def test_matrix_workspace_can_be_normalized_if_not_a_distribution(self):
-        non_distrib_ws2d = _create_mock_matrixworkspace((1, 2, 3), (4, 5, 6),
-                                                        distribution=False,
-                                                        names=('a', 'b'))
+        non_distrib_ws2d = _create_mock_matrixworkspace((1, 2, 3), (4, 5, 6), distribution=False, names=('a', 'b'))
         model = SliceViewerModel(non_distrib_ws2d)
         self.assertTrue(model.can_normalize_workspace())
 
@@ -513,20 +493,12 @@ class SliceViewerModelTest(unittest.TestCase):
         self._assert_supports_peaks_overlay(True, IMDHistoWorkspace, ndims=3)
 
     def test_mdeventworkspace_supports_dynamic_rebinning(self):
-        self._assert_supports_dynamic_rebinning(True,
-                                                IMDEventWorkspace,
-                                                has_original_workspace=True)
-        self._assert_supports_dynamic_rebinning(True,
-                                                IMDEventWorkspace,
-                                                has_original_workspace=False)
+        self._assert_supports_dynamic_rebinning(True, IMDEventWorkspace, has_original_workspace=True)
+        self._assert_supports_dynamic_rebinning(True, IMDEventWorkspace, has_original_workspace=False)
 
     def test_mdhistoworkspace_supports_dynamic_rebinning_if_original_exists_with_same_ndims(self):
-        self._assert_supports_dynamic_rebinning(True,
-                                                IMDHistoWorkspace,
-                                                has_original_workspace=True)
-        self._assert_supports_dynamic_rebinning(False,
-                                                IMDHistoWorkspace,
-                                                has_original_workspace=False)
+        self._assert_supports_dynamic_rebinning(True, IMDHistoWorkspace, has_original_workspace=True)
+        self._assert_supports_dynamic_rebinning(False, IMDHistoWorkspace, has_original_workspace=False)
 
     def test_mdhistoworkspace_does_not_support_dynamic_rebinning_if_original_exists_with_different_ndims(self):
         self._assert_supports_dynamic_rebinning(False,
@@ -560,17 +532,13 @@ class SliceViewerModelTest(unittest.TestCase):
 
     def test_create_non_orthogonal_transform_raises_error_if_not_supported(self):
         model = SliceViewerModel(
-            _create_mock_workspace(MatrixWorkspace,
-                                   SpecialCoordinateSystem.QLab,
-                                   has_oriented_lattice=False))
+            _create_mock_workspace(MatrixWorkspace, SpecialCoordinateSystem.QLab, has_oriented_lattice=False))
 
         self.assertRaises(RuntimeError, model.create_nonorthogonal_transform, (0, 1, 2))
 
     @patch("mantidqt.widgets.sliceviewer.model.NonOrthogonalTransform")
     def test_create_non_orthogonal_transform_uses_W_if_available(self, mock_nonortho_trans):
-        ws = _create_mock_workspace(IMDEventWorkspace,
-                                    SpecialCoordinateSystem.HKL,
-                                    has_oriented_lattice=True)
+        ws = _create_mock_workspace(IMDEventWorkspace, SpecialCoordinateSystem.HKL, has_oriented_lattice=True)
         w_prop = MagicMock()
         w_prop.value = [0, 1, 1, 0, 0, 1, 1, 0, 0]
         run = MagicMock()
@@ -582,17 +550,13 @@ class SliceViewerModelTest(unittest.TestCase):
 
         model.create_nonorthogonal_transform(create_mock_sliceinfo([1, 2, 0]))
 
-        mock_nonortho_trans.from_lattice.assert_called_once_with(
-            lattice,
-            x_proj=ArraysEqual(np.array([0, 0, 1])),
-            y_proj=ArraysEqual(np.array([1, 1, 0])))
+        mock_nonortho_trans.from_lattice.assert_called_once_with(lattice,
+                                                                 x_proj=ArraysEqual(np.array([0, 0, 1])),
+                                                                 y_proj=ArraysEqual(np.array([1, 1, 0])))
 
     @patch("mantidqt.widgets.sliceviewer.model.NonOrthogonalTransform")
-    def test_create_non_orthogonal_transform_uses_identity_if_W_unavailable(
-            self, mock_nonortho_trans):
-        ws = _create_mock_workspace(IMDEventWorkspace,
-                                    SpecialCoordinateSystem.HKL,
-                                    has_oriented_lattice=True)
+    def test_create_non_orthogonal_transform_uses_identity_if_W_unavailable(self, mock_nonortho_trans):
+        ws = _create_mock_workspace(IMDEventWorkspace, SpecialCoordinateSystem.HKL, has_oriented_lattice=True)
         lattice = MagicMock()
         ws.getExperimentInfo().sample().getOrientedLattice.return_value = lattice
         run = MagicMock()
@@ -602,10 +566,9 @@ class SliceViewerModelTest(unittest.TestCase):
 
         model.create_nonorthogonal_transform(create_mock_sliceinfo([1, 2, 0]))
 
-        mock_nonortho_trans.from_lattice.assert_called_once_with(
-            lattice,
-            x_proj=ArraysEqual(np.array([1, 0, 0])),
-            y_proj=ArraysEqual(np.array([0, 0, 1])))
+        mock_nonortho_trans.from_lattice.assert_called_once_with(lattice,
+                                                                 x_proj=ArraysEqual(np.array([1, 0, 0])),
+                                                                 y_proj=ArraysEqual(np.array([0, 0, 1])))
 
     def test_get_dim_limits_returns_limits_for_display_dimensions_for_matrix(self):
         model = SliceViewerModel(self.ws2d_histo)
@@ -633,17 +596,13 @@ class SliceViewerModelTest(unittest.TestCase):
         model = SliceViewerModel(self.ws_MDE_3D)
 
         self.assertRaises(ValueError, model.get_dim_limits, slicepoint=(0, 0, 0), transpose=False)
-        self.assertRaises(ValueError,
-                          model.get_dim_limits,
-                          slicepoint=(None, 0, 0),
-                          transpose=False)
+        self.assertRaises(ValueError, model.get_dim_limits, slicepoint=(None, 0, 0), transpose=False)
 
     @patch('mantidqt.widgets.sliceviewer.roi.ExtractSpectra')
     def test_export_roi_for_matrixworkspace(self, mock_extract_spectra):
         xmin, xmax, ymin, ymax = -1., 3., 2., 4.
 
-        def assert_call_as_expected(exp_xmin, exp_xmax, exp_start_index, exp_end_index, transpose,
-                                    is_spectra):
+        def assert_call_as_expected(exp_xmin, exp_xmax, exp_start_index, exp_end_index, transpose, is_spectra):
             mock_ws = _create_mock_matrixworkspace(x_axis=[10, 20, 30],
                                                    y_axis=[1, 2, 3, 4, 5],
                                                    distribution=False,
@@ -652,8 +611,7 @@ class SliceViewerModelTest(unittest.TestCase):
             model = SliceViewerModel(mock_ws)
             slicepoint, bin_params = MagicMock(), MagicMock()
 
-            help_msg = model.export_roi_to_workspace(slicepoint, bin_params,
-                                                     ((xmin, xmax), (ymin, ymax)), transpose)
+            help_msg = model.export_roi_to_workspace(slicepoint, bin_params, ((xmin, xmax), (ymin, ymax)), transpose)
 
             self.assertEqual('ROI created: mock_ws_roi', help_msg)
             if is_spectra:
@@ -679,16 +637,14 @@ class SliceViewerModelTest(unittest.TestCase):
     @patch('mantidqt.widgets.sliceviewer.roi.Rebin')
     @patch('mantidqt.widgets.sliceviewer.roi.SumSpectra')
     @patch('mantidqt.widgets.sliceviewer.roi.Transpose')
-    def test_export_cuts_for_matrixworkspace(self, mock_transpose, mock_sum_spectra, mock_rebin,
-                                             mock_extract_spectra):
+    def test_export_cuts_for_matrixworkspace(self, mock_transpose, mock_sum_spectra, mock_rebin, mock_extract_spectra):
         xmin, xmax, ymin, ymax = -4., 5., 6., 9.
 
         def assert_call_as_expected(mock_ws, transpose, export_type, is_spectra, is_ragged):
             model = SliceViewerModel(mock_ws)
             slicepoint, bin_params = MagicMock(), MagicMock()
 
-            help_msg = model.export_cuts_to_workspace(slicepoint, bin_params,
-                                                      ((xmin, xmax), (ymin, ymax)), transpose,
+            help_msg = model.export_cuts_to_workspace(slicepoint, bin_params, ((xmin, xmax), (ymin, ymax)), transpose,
                                                       export_type)
 
             if export_type == 'c':
@@ -768,12 +724,11 @@ class SliceViewerModelTest(unittest.TestCase):
             model = SliceViewerModel(self.ws_MDE_3D)
 
             if export_type == 'r':
-                help_msg = model.export_roi_to_workspace(slicepoint, bin_params,
-                                                         ((xmin, xmax), (ymin, ymax)), transpose)
+                help_msg = model.export_roi_to_workspace(slicepoint, bin_params, ((xmin, xmax), (ymin, ymax)),
+                                                         transpose)
             else:
-                help_msg = model.export_cuts_to_workspace(slicepoint, bin_params,
-                                                          ((xmin, xmax), (ymin, ymax)), transpose,
-                                                          export_type)
+                help_msg = model.export_cuts_to_workspace(slicepoint, bin_params, ((xmin, xmax), (ymin, ymax)),
+                                                          transpose, export_type)
 
             if transpose:
                 extents = [ymin, ymax, xmin, xmax, zmin, zmax]
@@ -788,23 +743,15 @@ class SliceViewerModelTest(unittest.TestCase):
             xcut_name, ycut_name = 'ws_MDE_3D_cut_x', 'ws_MDE_3D_cut_y'
             if export_type == 'r':
                 expected_help_msg = 'ROI created: ws_MDE_3D_roi'
-                expected_calls = [
-                    call(**common_call_params,
-                         OutputBins=[100, 100, 1],
-                         OutputWorkspace='ws_MDE_3D_roi')
-                ]
+                expected_calls = [call(**common_call_params, OutputBins=[100, 100, 1], OutputWorkspace='ws_MDE_3D_roi')]
             elif export_type == 'x':
                 expected_help_msg = f'Cut along X created: {xcut_name}'
                 expected_bins = [1, 100, 1] if transpose else [100, 1, 1]
-                expected_calls = [
-                    call(**common_call_params, OutputBins=expected_bins, OutputWorkspace=xcut_name)
-                ]
+                expected_calls = [call(**common_call_params, OutputBins=expected_bins, OutputWorkspace=xcut_name)]
             elif export_type == 'y':
                 expected_help_msg = f'Cut along Y created: {ycut_name}'
                 expected_bins = [100, 1, 1] if transpose else [1, 100, 1]
-                expected_calls = [
-                    call(**common_call_params, OutputBins=expected_bins, OutputWorkspace=ycut_name)
-                ]
+                expected_calls = [call(**common_call_params, OutputBins=expected_bins, OutputWorkspace=ycut_name)]
             elif export_type == 'c':
                 expected_help_msg = f'Cuts along X/Y created: {xcut_name} & {ycut_name}'
                 expected_bins = [100, 1, 1] if transpose else [1, 100, 1]
@@ -822,14 +769,10 @@ class SliceViewerModelTest(unittest.TestCase):
             else:
                 if export_type == 'x':
                     index = 1 if transpose else 0
-                    expected_calls = [
-                        call(InputWorkspace=xcut_name, OutputWorkspace=xcut_name, Axes=[index])
-                    ]
+                    expected_calls = [call(InputWorkspace=xcut_name, OutputWorkspace=xcut_name, Axes=[index])]
                 elif export_type == 'y':
                     index = 0 if transpose else 1
-                    expected_calls = [
-                        call(InputWorkspace=ycut_name, OutputWorkspace=ycut_name, Axes=[index])
-                    ]
+                    expected_calls = [call(InputWorkspace=ycut_name, OutputWorkspace=ycut_name, Axes=[index])]
                 elif export_type == 'c':
                     xindex = 1 if transpose else 0
                     yindex = 0 if transpose else 1
@@ -850,19 +793,16 @@ class SliceViewerModelTest(unittest.TestCase):
 
     @patch('mantidqt.widgets.sliceviewer.model.BinMD')
     @patch('mantidqt.widgets.sliceviewer.roi.ExtractSpectra')
-    def test_export_region_raises_exception_if_operation_failed(self, mock_extract_spectra,
-                                                                mock_binmd):
+    def test_export_region_raises_exception_if_operation_failed(self, mock_extract_spectra, mock_binmd):
         def assert_error_returned_in_help(workspace, export_type, mock_alg, err_msg):
             model = SliceViewerModel(workspace)
             slicepoint, bin_params = (None, None, None), MagicMock()
             mock_alg.side_effect = RuntimeError(err_msg)
             try:
                 if export_type == 'r':
-                    help_msg = model.export_roi_to_workspace(slicepoint, bin_params,
-                                                             ((1.0, 2.0), (-1, 2.0)), True)
+                    help_msg = model.export_roi_to_workspace(slicepoint, bin_params, ((1.0, 2.0), (-1, 2.0)), True)
                 else:
-                    help_msg = model.export_cuts_to_workspace(slicepoint, bin_params,
-                                                              ((1.0, 2.0), (-1, 2.0)), True,
+                    help_msg = model.export_cuts_to_workspace(slicepoint, bin_params, ((1.0, 2.0), (-1, 2.0)), True,
                                                               export_type)
             except Exception as exc:
                 help_msg = str(exc)
@@ -871,14 +811,12 @@ class SliceViewerModelTest(unittest.TestCase):
             self.assertTrue(err_msg in help_msg)
 
         for export_type in ('r', 'c', 'x', 'y'):
-            assert_error_returned_in_help(self.ws2d_histo, export_type, mock_extract_spectra,
-                                          'ExtractSpectra failed')
+            assert_error_returned_in_help(self.ws2d_histo, export_type, mock_extract_spectra, 'ExtractSpectra failed')
         for export_type in ('r', 'c', 'x', 'y'):
             assert_error_returned_in_help(self.ws_MDE_3D, export_type, mock_binmd, 'BinMD failed')
 
     # private
-    def _assert_supports_non_orthogonal_axes(self, expectation, ws_type, coords,
-                                             has_oriented_lattice):
+    def _assert_supports_non_orthogonal_axes(self, expectation, ws_type, coords, has_oriented_lattice):
         model = SliceViewerModel(_create_mock_workspace(ws_type, coords, has_oriented_lattice))
         self.assertEqual(expectation, model.can_support_nonorthogonal_axes())
 
@@ -890,7 +828,11 @@ class SliceViewerModelTest(unittest.TestCase):
         model = SliceViewerModel(ws)
         self.assertEqual(expectation, model.can_support_peaks_overlays())
 
-    def _assert_supports_dynamic_rebinning(self, expectation, ws_type, ndims=3, has_original_workspace=None,
+    def _assert_supports_dynamic_rebinning(self,
+                                           expectation,
+                                           ws_type,
+                                           ndims=3,
+                                           has_original_workspace=None,
                                            original_ws_ndims=None):
         ws = _create_mock_workspace(ws_type,
                                     coords=SpecialCoordinateSystem.QLab,

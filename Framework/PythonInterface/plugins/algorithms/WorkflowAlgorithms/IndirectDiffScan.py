@@ -48,33 +48,34 @@ class IndirectDiffScan(DataProcessorAlgorithm):
 
     def PyInit(self):
         # Input properties
-        self.declareProperty(StringArrayProperty(name='InputFiles'),
-                             doc='Comma separated list of input files')
+        self.declareProperty(StringArrayProperty(name='InputFiles'), doc='Comma separated list of input files')
 
-        self.declareProperty(name='LoadLogFiles', defaultValue=True,
-                             doc='Load log files when loading runs')
+        self.declareProperty(name='LoadLogFiles', defaultValue=True, doc='Load log files when loading runs')
 
         # Instrument configuration properties
-        self.declareProperty(name='Instrument', defaultValue='',
+        self.declareProperty(name='Instrument',
+                             defaultValue='',
                              validator=StringListValidator(['IRIS', 'OSIRIS']),
                              doc='Instrument used during run.')
 
         int_arr_valid = IntArrayBoundedValidator(lower=0)
 
-        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],
-                                              validator=int_arr_valid),
+        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1], validator=int_arr_valid),
                              doc='Comma separated range of spectra number to use.')
 
-        self.declareProperty(name='SampleEnvironmentLogName', defaultValue='sample',
+        self.declareProperty(name='SampleEnvironmentLogName',
+                             defaultValue='sample',
                              doc='Name of the sample environment log entry')
 
         sampEnvLogVal_type = ['last_value', 'average']
-        self.declareProperty('SampleEnvironmentLogValue', 'last_value',
+        self.declareProperty('SampleEnvironmentLogValue',
+                             'last_value',
                              StringListValidator(sampEnvLogVal_type),
                              doc='Value selection of the sample environment log entry')
 
         # Output properties
-        self.declareProperty(name='OutputWorkspace', defaultValue='Output',
+        self.declareProperty(name='OutputWorkspace',
+                             defaultValue='Output',
                              doc='Workspace group for the resulting workspaces.')
 
     def PyExec(self):
@@ -190,9 +191,7 @@ class IndirectDiffScan(DataProcessorAlgorithm):
         if self._sample_log_name in run:
             # Look for temperature in logs in workspace
             tmp = run[self._sample_log_name].value
-            value_action = {'last_value': lambda x: x[-1],
-                            'average': lambda x: x.mean()
-                            }
+            value_action = {'last_value': lambda x: x[-1], 'average': lambda x: x.mean()}
             temp = value_action[self._sample_log_value](tmp)
             logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
             return temp

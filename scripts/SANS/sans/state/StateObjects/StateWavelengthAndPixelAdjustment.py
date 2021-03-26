@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
-
 """State describing the creation of pixel and wavelength adjustment workspaces for SANS reduction."""
 
 import copy
@@ -43,8 +42,10 @@ class StateWavelengthAndPixelAdjustment(metaclass=JsonSerializable):
 
         self.idf_path = None  # : Str()
 
-        self.adjustment_files = {DetectorType.LAB.value: StateAdjustmentFiles(),
-                                 DetectorType.HAB.value: StateAdjustmentFiles()}
+        self.adjustment_files = {
+            DetectorType.LAB.value: StateAdjustmentFiles(),
+            DetectorType.HAB.value: StateAdjustmentFiles()
+        }
 
     @property
     def wavelength_step_type_lin_log(self):
@@ -61,25 +62,26 @@ class StateWavelengthAndPixelAdjustment(metaclass=JsonSerializable):
         is_invalid = {}
 
         if one_is_none([self.wavelength_low, self.wavelength_high, self.wavelength_step, self.wavelength_step_type]):
-            entry = validation_message("A wavelength entry has not been set.",
-                                       "Make sure that all entries are set.",
-                                       {"wavelength_low": self.wavelength_low,
-                                        "wavelength_high": self.wavelength_high,
-                                        "wavelength_step": self.wavelength_step,
-                                        "wavelength_step_type": self.wavelength_step_type})
+            entry = validation_message(
+                "A wavelength entry has not been set.", "Make sure that all entries are set.", {
+                    "wavelength_low": self.wavelength_low,
+                    "wavelength_high": self.wavelength_high,
+                    "wavelength_step": self.wavelength_step,
+                    "wavelength_step_type": self.wavelength_step_type
+                })
             is_invalid.update(entry)
 
         if self.wavelength_step_type is RangeStepType.NOT_SET:
-            entry = validation_message("A wavelength entry has not been set.",
-                                       "Make sure that all entries are set.",
+            entry = validation_message("A wavelength entry has not been set.", "Make sure that all entries are set.",
                                        {"wavelength_step_type": self.wavelength_step_type})
             is_invalid.update(entry)
 
         if is_not_none_and_first_larger_than_second([self.wavelength_low, self.wavelength_high]):
             entry = validation_message("Incorrect wavelength bounds.",
-                                       "Make sure that lower wavelength bound is smaller then upper bound.",
-                                       {"wavelength_low": self.wavelength_low,
-                                        "wavelength_high": self.wavelength_high})
+                                       "Make sure that lower wavelength bound is smaller then upper bound.", {
+                                           "wavelength_low": self.wavelength_low,
+                                           "wavelength_high": self.wavelength_high
+                                       })
             is_invalid.update(entry)
 
         try:

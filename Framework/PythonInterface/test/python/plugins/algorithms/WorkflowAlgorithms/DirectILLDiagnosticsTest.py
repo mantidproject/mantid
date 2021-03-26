@@ -21,8 +21,8 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
 
     def setUp(self):
         if DirectILLDiagnosticsTest._TEST_WS is None:
-            DirectILLDiagnosticsTest._TEST_WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL,
-                                                                                          illhelpers.default_test_detectors)
+            DirectILLDiagnosticsTest._TEST_WS = illhelpers.create_poor_mans_in5_workspace(
+                self._BKG_LEVEL, illhelpers.default_test_detectors)
         inWSName = 'inputWS'
         mtd.addOrReplace(inWSName, DirectILLDiagnosticsTest._TEST_WS)
         kwargs = {
@@ -100,17 +100,13 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
 
     def testDirectBeamMasking(self):
         beamWSName = 'beam_masking_ws'
-        kwargs = {
-            'OutputWorkspace': beamWSName,
-            'Function': 'One Peak',
-            'rethrow': True
-        }
+        kwargs = {'OutputWorkspace': beamWSName, 'Function': 'One Peak', 'rethrow': True}
         run_algorithm('CreateSampleWorkspace', **kwargs)
         kwargs = {
             'Workspace': beamWSName,
             'ParameterName': 'beam_stop_diagnostics_spectra',
             'ParameterType': 'String',
-            'Value': '43-57, 90-110, 145-155', # Spectrum numbers.
+            'Value': '43-57, 90-110, 145-155',  # Spectrum numbers.
             'rethrow': True
         }
         run_algorithm('SetInstrumentParameter', **kwargs)
@@ -238,11 +234,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         outWS = mtd[outWSName]
         self.assertEqual(outWS.getNumberHistograms(), spectraCount)
         self.assertEqual(outWS.blocksize(), 1)
-        kwargs = {
-            'Workspace': self._RAW_WS_NAME,
-            'MaskedWorkspace': outWSName,
-            'rethrow': True
-        }
+        kwargs = {'Workspace': self._RAW_WS_NAME, 'MaskedWorkspace': outWSName, 'rethrow': True}
         run_algorithm('MaskDetectors', **kwargs)
         maskedWS = mtd[self._RAW_WS_NAME]
         spectrumInfo = maskedWS.spectrumInfo()

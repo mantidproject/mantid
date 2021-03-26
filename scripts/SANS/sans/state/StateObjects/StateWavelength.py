@@ -39,18 +39,20 @@ class StateWavelength(metaclass=JsonSerializable):
     def validate(self):
         is_invalid = dict()
         if one_is_none([self.wavelength_low, self.wavelength_high, self.wavelength_step]):
-            entry = validation_message("A wavelength entry has not been set.",
-                                       "Make sure that all entries for the wavelength are set.",
-                                       {"wavelength_low": self.wavelength_low,
-                                        "wavelength_high": self.wavelength_high,
-                                        "wavelength_step": self.wavelength_step})
+            entry = validation_message(
+                "A wavelength entry has not been set.", "Make sure that all entries for the wavelength are set.", {
+                    "wavelength_low": self.wavelength_low,
+                    "wavelength_high": self.wavelength_high,
+                    "wavelength_step": self.wavelength_step
+                })
             is_invalid.update(entry)
 
         if is_not_none_and_first_larger_than_second([self.wavelength_low, self.wavelength_high]):
             entry = validation_message("Incorrect wavelength bounds.",
-                                       "Make sure that lower wavelength bound is smaller then upper bound.",
-                                       {"wavelength_low": self.wavelength_low,
-                                        "wavelength_high": self.wavelength_high})
+                                       "Make sure that lower wavelength bound is smaller then upper bound.", {
+                                           "wavelength_low": self.wavelength_low,
+                                           "wavelength_high": self.wavelength_high
+                                       })
             is_invalid.update(entry)
 
         if is_invalid:

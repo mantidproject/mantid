@@ -16,28 +16,20 @@ from qtpy.QtTest import QTest
 
 from mantid.api import AlgorithmFactoryImpl
 from unittest.mock import Mock, patch, call
-from mantidqt.utils.qt.testing import (select_item_in_combo_box,
-                                       select_item_in_tree, start_qapplication)
+from mantidqt.utils.qt.testing import (select_item_in_combo_box, select_item_in_tree, start_qapplication)
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 
 AlgorithmDescriptorMock = namedtuple('AlgorithmDescriptorMock', ['name', 'alias', 'category', 'version'])
 mock_get_algorithm_descriptors = Mock()
 mock_get_algorithm_descriptors.return_value = [
-    AlgorithmDescriptorMock(name='Rebin', version=1,
-                            category='Transform', alias=''),
-    AlgorithmDescriptorMock(name='Rebin', version=1,
-                            category='Transform\\Rebin', alias=''),
-    AlgorithmDescriptorMock(name='Load', version=1,
-                            category='Data', alias=''),
-    AlgorithmDescriptorMock(name='DoStuff', version=1,
-                            category='Stuff', alias=''),
-    AlgorithmDescriptorMock(name='DoStuff', version=2,
-                            category='Stuff', alias=''),
-    AlgorithmDescriptorMock(name='ComesFirst', version=1,
-                            category="Sorted", alias=''),
-    AlgorithmDescriptorMock(name='GoesSecond', version=1,
-                            category="Sorted", alias='')
+    AlgorithmDescriptorMock(name='Rebin', version=1, category='Transform', alias=''),
+    AlgorithmDescriptorMock(name='Rebin', version=1, category='Transform\\Rebin', alias=''),
+    AlgorithmDescriptorMock(name='Load', version=1, category='Data', alias=''),
+    AlgorithmDescriptorMock(name='DoStuff', version=1, category='Stuff', alias=''),
+    AlgorithmDescriptorMock(name='DoStuff', version=2, category='Stuff', alias=''),
+    AlgorithmDescriptorMock(name='ComesFirst', version=1, category="Sorted", alias=''),
+    AlgorithmDescriptorMock(name='GoesSecond', version=1, category="Sorted", alias='')
 ]
 
 empty_mock_get_algorithm_descriptors = Mock()
@@ -46,7 +38,6 @@ empty_mock_get_algorithm_descriptors.return_value = []
 
 @patch.object(AlgorithmFactoryImpl, 'getDescriptors', mock_get_algorithm_descriptors)
 class ModelTest(unittest.TestCase):
-
     def test_get_algorithm_data(self):
         model = AlgorithmSelectorModel(None)
         names, descriptors = model.get_algorithm_data()
@@ -72,8 +63,7 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(mock_get_algorithm_descriptors.mock_calls[-1], call(True, True))
 
 
-createDialogFromName_func_name = ('mantidqt.interfacemanager.InterfaceManager.'
-                                  'createDialogFromName')
+createDialogFromName_func_name = ('mantidqt.interfacemanager.InterfaceManager.' 'createDialogFromName')
 
 
 @patch.object(AlgorithmFactoryImpl, 'getDescriptors', mock_get_algorithm_descriptors)
@@ -175,8 +165,7 @@ class WidgetTest(unittest.TestCase):
             self._select_in_tree(widget, 'Load v.1')
             selected_item = widget.tree.selectedItems()[0]
             item_pos = widget.tree.visualItemRect(selected_item).center()
-            QTest.mouseDClick(widget.tree.viewport(), Qt.LeftButton,
-                              Qt.NoModifier, pos=item_pos)
+            QTest.mouseDClick(widget.tree.viewport(), Qt.LeftButton, Qt.NoModifier, pos=item_pos)
             createDialog.assert_called_once_with('Load', 1, None, False, {}, '', [])
 
     def test_sorting_of_algorithms(self):

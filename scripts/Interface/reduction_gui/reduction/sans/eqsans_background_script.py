@@ -14,7 +14,6 @@ from reduction_gui.reduction.sans.eqsans_sample_script import SampleData
 
 
 class Background(BaseBackground):
-
     class DirectBeam(SampleData.DirectBeam):
         def __init__(self, state=None):
             SampleData.DirectBeam.__init__(self)
@@ -27,7 +26,7 @@ class Background(BaseBackground):
             """
                 Generate reduction script
             """
-            if len(str(self.sample_file).strip())==0 or len(str(self.direct_beam).strip())==0:
+            if len(str(self.sample_file).strip()) == 0 or len(str(self.direct_beam).strip()) == 0:
                 raise RuntimeError("Direct beam method for background transmission was selected but was selected "
                                    "but all the appropriate data files were not entered.")
 
@@ -45,7 +44,8 @@ class Background(BaseBackground):
 
             self.sample_file = BaseScriptElement.getPropertyValue(alg, "BckTransmissionSampleDataFile", default='')
             self.direct_beam = BaseScriptElement.getPropertyValue(alg, "BckTransmissionEmptyDataFile", default='')
-            self.beam_radius = BaseScriptElement.getPropertyValue(alg, "BckTransmissionBeamRadius",
+            self.beam_radius = BaseScriptElement.getPropertyValue(alg,
+                                                                  "BckTransmissionBeamRadius",
                                                                   default=SampleData.DirectBeam.beam_radius)
 
     trans_calculation_method = DirectBeam()
@@ -96,10 +96,10 @@ class Background(BaseBackground):
 
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("Background")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             instrument_dom = element_list[0]
-            self.combine_transmission_frames = BaseScriptElement.getBoolElement(instrument_dom, "combine_transmission_frames",
-                                                                                default = Background.combine_transmission_frames)
+            self.combine_transmission_frames = BaseScriptElement.getBoolElement(
+                instrument_dom, "combine_transmission_frames", default=Background.combine_transmission_frames)
 
     def from_setup_info(self, xml_str):
         """
@@ -111,5 +111,5 @@ class Background(BaseBackground):
         super(Background, self).from_setup_info(xml_str)
 
         (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
-        self.combine_transmission_frames = BaseScriptElement.getPropertyValue(alg, "BckFitFramesTogether",
-                                                                              default=SampleData.combine_transmission_frames)
+        self.combine_transmission_frames = BaseScriptElement.getPropertyValue(
+            alg, "BckFitFramesTogether", default=SampleData.combine_transmission_frames)

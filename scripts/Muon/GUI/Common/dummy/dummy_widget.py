@@ -11,10 +11,10 @@ from Muon.GUI.Common.dummy.dummy_presenter import DummyPresenter
 class DummyWidget(object):
     """
     """
-    def __init__(self,name,parent=None):
-        view=DummyView(name,parent)
-        model=None
-        self._presenter = DummyPresenter(view,model)
+    def __init__(self, name, parent=None):
+        view = DummyView(name, parent)
+        model = None
+        self._presenter = DummyPresenter(view, model)
 
     @property
     def presenter(self):
@@ -24,6 +24,6 @@ class DummyWidget(object):
     def widget(self):
         return self._presenter.widget
 
-    def setButtonConnection(self,slot):
-        view=self._presenter.widget
+    def setButtonConnection(self, slot):
+        view = self._presenter.widget
         view.buttonSignal.connect(slot)

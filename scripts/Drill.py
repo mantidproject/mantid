@@ -11,7 +11,6 @@ from qtpy import PYQT5
 
 from mantid.kernel import config, logger
 
-
 if not PYQT5:
     logger.error('Drill interface is supported only in workbench.')
 else:

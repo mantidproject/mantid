@@ -12,7 +12,6 @@ class Observer(object):
     The Observer subscribes to Observables, when the Observable notifies its subscribers (the observers)
     they will call their update() method
     """
-
     def __init__(self):
         pass
 

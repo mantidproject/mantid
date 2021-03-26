@@ -28,7 +28,6 @@ class ThreadModelWorker(QtCore.QObject):
     into the thread (this prevents us needing to inherit from QThread, with is not a QObject, which causes many issues
     for parenting widgets and managing the threading).
     """
-
     def __init__(self, model):
         super(ThreadModelWorker, self).__init__()
         self.signals = WorkerSignals()

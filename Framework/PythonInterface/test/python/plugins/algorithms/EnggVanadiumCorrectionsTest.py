@@ -29,14 +29,14 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
         if not self.__class__._van_curves_ws:
             # Note the pre-calculated file instead of the too big vanadium run
             # self.__class__._van_ws = LoadNexus("ENGINX00236516.nxs", OutputWorkspace='ENGIN-X_test_vanadium_ws')
-            self.__class__._van_curves_ws = sapi.LoadNexus(Filename=
-                                                           'ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs',
-                                                           OutputWorkspace='ENGIN-X_vanadium_curves_test_ws')
+            self.__class__._van_curves_ws = sapi.LoadNexus(
+                Filename='ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs',
+                OutputWorkspace='ENGIN-X_vanadium_curves_test_ws')
 
         if not self.__class__._van_integ_tbl:
-            self.__class__._van_integ_tbl = sapi.LoadNexus(Filename=
-                                                           'ENGINX_precalculated_vanadium_run000236516_integration.nxs',
-                                                           OutputWorkspace='ENGIN-X_vanadium_integ_test_ws')
+            self.__class__._van_integ_tbl = sapi.LoadNexus(
+                Filename='ENGINX_precalculated_vanadium_run000236516_integration.nxs',
+                OutputWorkspace='ENGIN-X_vanadium_integ_test_ws')
 
     def test_issues_with_properties(self):
         """
@@ -45,14 +45,10 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
         """
 
         # absolutely wrong properties passed
-        self.assertRaises(RuntimeError,
-                          sapi.EnggVanadiumCorrections,
-                          File='foo', Bank='1')
+        self.assertRaises(RuntimeError, sapi.EnggVanadiumCorrections, File='foo', Bank='1')
 
         # Wrong (mispelled) Workspace property
-        self.assertRaises(RuntimeError,
-                          sapi.EnggVanadiumCorrections,
-                          InputWorkspace='anything_goes')
+        self.assertRaises(RuntimeError, sapi.EnggVanadiumCorrections, InputWorkspace='anything_goes')
 
         # mispelled VanadiumWorkspace
         self.assertRaises(RuntimeError,
@@ -105,15 +101,13 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
         self.assertEqual(wks.getNumberHistograms(), self.NUM_SPEC)
 
     def _check_integ_ws(self, wks):
-        self.assertTrue(isinstance(wks, ITableWorkspace),
-                        'The integration workspace should be a table workspace.')
+        self.assertTrue(isinstance(wks, ITableWorkspace), 'The integration workspace should be a table workspace.')
         self.assertEqual(wks.columnCount(), 1)
         self.assertEqual(wks.rowCount(), self.NUM_SPEC)
 
     def _check_curves_ws(self, wks):
-        self.assertEqual(0,  wks.getNumberHistograms() % 3)
-        self.assertTrue(isinstance(wks, MatrixWorkspace),
-                        'The integration workspace should be a matrix workspace.')
+        self.assertEqual(0, wks.getNumberHistograms() % 3)
+        self.assertTrue(isinstance(wks, MatrixWorkspace), 'The integration workspace should be a matrix workspace.')
 
     def test_runs_ok_when_reusing_precalculated(self):
         """
@@ -123,9 +117,7 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
         sample_ws = self.__class__._data_ws
         int_ws = self.__class__._van_integ_tbl
         curves_ws = self.__class__._van_curves_ws
-        sapi.EnggVanadiumCorrections(Workspace=sample_ws,
-                                     IntegrationWorkspace=int_ws,
-                                     CurvesWorkspace=curves_ws)
+        sapi.EnggVanadiumCorrections(Workspace=sample_ws, IntegrationWorkspace=int_ws, CurvesWorkspace=curves_ws)
 
         self._check_corrected_ws(sample_ws)
         self._check_integ_ws(int_ws)

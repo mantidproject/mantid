@@ -58,18 +58,15 @@ class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
     def set_row_enabled(self, row, enabled):
         item = self.item_table_widget.item(row, WORKSPACE_NAME_COLUMN)
         if enabled:
-            item.setFlags(
-                Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled)
+            item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled)
         else:
-            item.setFlags(
-                Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled)
+            item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled)
         item = self.item_table_widget.item(row, CHECKBOX_COLUMN)
         if enabled:
-            item.setFlags(
-                Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled)
+            item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled
+                          | Qt.ItemIsDropEnabled)
         else:
-            item.setFlags(
-                Qt.ItemIsUserCheckable | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled)
+            item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled)
 
     def set_filter_line_edit_changed_action(self, action):
         self.filter_line_edit.textChanged.connect(action)
@@ -97,7 +94,8 @@ class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
             self._item_selection_changed_action(name, state)
 
     def update_number_of_selected_label(self, number_selected, number_selected_displayed):
-        self.number_of_selected_display_box.setText('Displaying {} of {} selected'.format(number_selected, number_selected_displayed))
+        self.number_of_selected_display_box.setText('Displaying {} of {} selected'.format(
+            number_selected, number_selected_displayed))
 
     def disable_filtering_options(self):
         self.filter_line_edit.setEnabled(False)

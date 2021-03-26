@@ -17,7 +17,6 @@ from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import Periodi
 
 @start_qapplication
 class PeriodicTablePresenterTest(unittest.TestCase):
-
     def setUp(self):
         self._model = mock.create_autospec(PeriodicTableModel)
         self.view = PeriodicTableView()
@@ -47,34 +46,22 @@ class PeriodicTablePresenterTest(unittest.TestCase):
         assert signal_func.call_count == 1
 
     def test_register_table_lclicked(self):
-        self.check_second_func_called(
-            self.presenter.register_table_lclicked,
-            self.view.on_table_lclicked)
+        self.check_second_func_called(self.presenter.register_table_lclicked, self.view.on_table_lclicked)
 
     def test_unregister_table_lclicked(self):
-        self.check_second_func_called(
-            self.presenter.unregister_table_lclicked,
-            self.view.unreg_on_table_lclicked)
+        self.check_second_func_called(self.presenter.unregister_table_lclicked, self.view.unreg_on_table_lclicked)
 
     def test_register_table_rclicked(self):
-        self.check_second_func_called(
-            self.presenter.register_table_rclicked,
-            self.view.on_table_rclicked)
+        self.check_second_func_called(self.presenter.register_table_rclicked, self.view.on_table_rclicked)
 
     def test_unregister_table_rclicked(self):
-        self.check_second_func_called(
-            self.presenter.unregister_table_rclicked,
-            self.view.unreg_on_table_rclicked)
+        self.check_second_func_called(self.presenter.unregister_table_rclicked, self.view.unreg_on_table_rclicked)
 
     def test_register_table_changed(self):
-        self.check_second_func_called(
-            self.presenter.register_table_changed,
-            self.view.on_table_changed)
+        self.check_second_func_called(self.presenter.register_table_changed, self.view.on_table_changed)
 
     def test_unregister_table_changed(self):
-        self.check_second_func_called(
-            self.presenter.unregister_table_changed,
-            self.view.unreg_on_table_changed)
+        self.check_second_func_called(self.presenter.unregister_table_changed, self.view.unreg_on_table_changed)
 
     def test_selection(self):
         assert self.presenter.selection == self.mock_elem
@@ -83,14 +70,10 @@ class PeriodicTablePresenterTest(unittest.TestCase):
         assert self.presenter.is_selected(mock.Mock())
 
     def test_select_element(self):
-        self.check_second_func_called(
-            self.presenter.select_element,
-            self.view.ptable.setElementSelected)
+        self.check_second_func_called(self.presenter.select_element, self.view.ptable.setElementSelected)
 
     def test_add_elements(self):
-        self.check_second_func_called(
-            self.presenter.add_elements,
-            self.view.ptable.setSelection)
+        self.check_second_func_called(self.presenter.add_elements, self.view.ptable.setSelection)
 
     def test_set_buttons(self):
         self.presenter.model.peak_data = [self.mock_elem.symbol]

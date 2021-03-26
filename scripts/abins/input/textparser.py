@@ -45,7 +45,7 @@ class TextParser(object):
             while not self.file_end(file_obj=file_obj):
                 line = file_obj.readline()
                 if test.match(line):
-                    return(line)
+                    return (line)
             raise EOFError(f'"{regex.decode()}" not found')
         else:
             raise ValueError("No msg or regex provided: nothing to match")

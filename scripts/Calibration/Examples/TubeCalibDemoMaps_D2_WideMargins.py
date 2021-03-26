@@ -45,7 +45,6 @@ print("Got calibration (new positions of detectors) ")
 mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 print("Applied calibration")
 
-
 # == Save workspace ==
 # mantid.SaveNexusProcessed(CalibInstWS, path+'TubeCalibDemoMapsResult.nxs', "Result of Running TCDemoMaps.py")
 # print("saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs")

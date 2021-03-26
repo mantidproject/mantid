@@ -15,13 +15,7 @@ from mantidqt.widgets.sliceviewer.peaksviewer.test.modeltesthelpers \
 import numpy as np
 
 
-def draw_representation(cls,
-                        peak_origin,
-                        shape_info,
-                        painter,
-                        fg_color,
-                        bg_color,
-                        slice_transform=None):
+def draw_representation(cls, peak_origin, shape_info, painter, fg_color, bg_color, slice_transform=None):
     """
     Calls draw on a given representation type
     :param cls: The representation type expected to have a classmethod called draw
@@ -32,7 +26,6 @@ def draw_representation(cls,
     :param bg_color: str containing the background color
     :param slice_transform: Optional function to assign as slice transformation. Defaults to identity
     """
-
     def identity(x):
         return x
 
@@ -45,7 +38,7 @@ def draw_representation(cls,
     return cls.draw(peak_origin, peak_shape, slice_info, painter, fg_color, bg_color)
 
 
-def create_ellipsoid_info(radii, axes, bkgd_radii, translation = [0,0,0]):
+def create_ellipsoid_info(radii, axes, bkgd_radii, translation=[0, 0, 0]):
     """
     Create a dict describing an ellipsoid.
     :param radii: 3-tuple containing radii for each axis
@@ -81,17 +74,13 @@ def create_sphere_info(radius, bkgd_radii=None):
         "radius": radius,
     }
     if bkgd_radii is not None:
-        shape_descr.update({
-            "background_inner_radius": bkgd_radii[0],
-            "background_outer_radius": bkgd_radii[1]
-        })
+        shape_descr.update({"background_inner_radius": bkgd_radii[0], "background_outer_radius": bkgd_radii[1]})
 
     return shape_descr
 
 
 class FuzzyMatch:
     """Matcher class to fuzzy compare a value with an expected value"""
-
     def __init__(self, expected, atol):
         """
         :param expected: The expected value

@@ -27,8 +27,6 @@ class PluginWidget(QWidget):
         self.main = main_window
         self.settings_read = False
 
-# ----------------- Plugin API --------------------
-
     def app_closing(self):
         raise NotImplementedError()
 
@@ -58,13 +56,11 @@ class PluginWidget(QWidget):
         """
         raise NotImplementedError()
 
-# ----------------- Plugin behaviour ------------------
-
     def create_dockwidget(self):
         """Creates a QDockWidget suitable for wrapping
         this plugin"""
         dock = QDockWidget(self.get_plugin_title(), self.main)
-        dock.setObjectName(self.__class__.__name__+"_dockwidget")
+        dock.setObjectName(self.__class__.__name__ + "_dockwidget")
         dock.setAllowedAreas(self.ALLOWED_AREAS)
         dock.setFeatures(self.FEATURES)
         dock.setWidget(self)

@@ -303,7 +303,8 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         model.ws_spectrum_info.isMonitor.assert_called_once_with(row)
 
         self.assertEqual(
-            MatrixWorkspaceTableViewModel.MONITOR_ROW_TOOLTIP + MatrixWorkspaceTableViewModel.MASKED_BIN_TOOLTIP, output)
+            MatrixWorkspaceTableViewModel.MONITOR_ROW_TOOLTIP + MatrixWorkspaceTableViewModel.MASKED_BIN_TOOLTIP,
+            output)
 
         # Doing the same thing a second time should hit the cache, so no additional calls will have been made
         output = model.data(index, Qt.ToolTipRole)
@@ -313,7 +314,8 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         model.ws_spectrum_info.isMonitor.assert_called_once_with(row)
 
         self.assertEqual(
-            MatrixWorkspaceTableViewModel.MONITOR_ROW_TOOLTIP + MatrixWorkspaceTableViewModel.MASKED_BIN_TOOLTIP, output)
+            MatrixWorkspaceTableViewModel.MONITOR_ROW_TOOLTIP + MatrixWorkspaceTableViewModel.MASKED_BIN_TOOLTIP,
+            output)
 
     def test_data_tooltip_role_masked_bin(self):
         if not qtpy.PYQT5:
@@ -364,8 +366,8 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         ws.getAxis.assert_called_with(AXIS_INDEX_FOR_VERTICAL)
         ws.mock_axis.label.assert_called_once_with(mock_section)
 
-        expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_DISPLAY_STRING.format(mock_section,
-                                                                                              MockMantidAxis.TEST_LABEL)
+        expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_DISPLAY_STRING.format(
+            mock_section, MockMantidAxis.TEST_LABEL)
 
         self.assertEqual(expected_output, output)
 
@@ -379,8 +381,8 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         ws.getSpectrum.assert_called_once_with(mock_section)
         ws.mock_spectrum.getSpectrumNo.assert_called_once_with()
 
-        expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_TOOLTIP_STRING.format(mock_section,
-                                                                                              MockSpectrum.SPECTRUM_NO)
+        expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_TOOLTIP_STRING.format(
+            mock_section, MockSpectrum.SPECTRUM_NO)
         self.assertEqual(expected_output, output)
 
     def test_headerData_vertical_header_display_for_numeric_axis_with_point_data(self):
@@ -399,9 +401,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         output = model.headerData(mock_section, Qt.Vertical, Qt.DisplayRole)
 
         expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_DISPLAY_STRING_FOR_NUMERIC_AXIS.format(
-            mock_section,
-            expected_value,
-            dummy_unit)
+            mock_section, expected_value, dummy_unit)
         self.assertEqual(expected_output, output)
 
     def test_headerData_vertical_header_display_for_numeric_axis_with_binned_data(self):
@@ -422,9 +422,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         output = model.headerData(mock_section, Qt.Vertical, Qt.DisplayRole)
 
         expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_DISPLAY_STRING_FOR_NUMERIC_AXIS.format(
-            mock_section,
-            0.5,
-            dummy_unit)
+            mock_section, 0.5, dummy_unit)
         self.assertEqual(expected_output, output)
 
     def test_headerData_vertical_header_tooltip_for_numeric_axis_with_point_data(self):
@@ -444,9 +442,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         output = model.headerData(mock_section, Qt.Vertical, Qt.ToolTipRole)
 
         expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_TOOLTIP_STRING_FOR_NUMERIC_AXIS.format(
-            mock_section,
-            0,
-            dummy_unit)
+            mock_section, 0, dummy_unit)
         self.assertEqual(expected_output, output)
 
     def test_headerData_vertical_header_tooltip_for_numeric_axis_with_binned_data(self):
@@ -466,9 +462,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         output = model.headerData(mock_section, Qt.Vertical, Qt.ToolTipRole)
 
         expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_TOOLTIP_STRING_FOR_NUMERIC_AXIS.format(
-            mock_section,
-            0.5,
-            dummy_unit)
+            mock_section, 0.5, dummy_unit)
         self.assertEqual(expected_output, output)
 
     def test_headerData_horizontal_header_display_role_for_X_values(self):
@@ -560,10 +554,8 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         ws.mock_axis.mock_unit.caption.assert_called_once_with()
         ws.mock_axis.mock_unit.mock_symbol.utf8.assert_called_once_with()
 
-        expected_output = MatrixWorkspaceTableViewModel.HORIZONTAL_HEADER_TOOLTIP_STRING.format(mock_section,
-                                                                                                MockMantidUnit.TEST_CAPTION,
-                                                                                                expected_bin_centre,
-                                                                                                MockMantidSymbol.TEST_UTF8)
+        expected_output = MatrixWorkspaceTableViewModel.HORIZONTAL_HEADER_TOOLTIP_STRING.format(
+            mock_section, MockMantidUnit.TEST_CAPTION, expected_bin_centre, MockMantidSymbol.TEST_UTF8)
         self.assertEqual(expected_output, output)
 
     def test_not_common_bins_horizontal_display_role(self):

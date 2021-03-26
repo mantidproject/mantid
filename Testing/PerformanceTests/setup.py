@@ -14,6 +14,6 @@ when running the scripts.
 import sys
 import time
 
-
 import sqlresults
+
 sqlresults.setup_database()

@@ -101,10 +101,18 @@ class StateTest(unittest.TestCase):
     @staticmethod
     def _get_state(entries):
         state = AllStates()
-        default_entries = {"data": MockStateData(), "move": MockStateMove(), "reduction": MockStateReduction(),
-                           "slice": MockStateSliceEvent(), "mask": MockStateMask(), "wavelength": MockStateWavelength(),
-                           "save": MockStateSave(), "scale": MockStateScale(), "adjustment": MockStateAdjustment(),
-                           "convert_to_q": MockStateConvertToQ()}
+        default_entries = {
+            "data": MockStateData(),
+            "move": MockStateMove(),
+            "reduction": MockStateReduction(),
+            "slice": MockStateSliceEvent(),
+            "mask": MockStateMask(),
+            "wavelength": MockStateWavelength(),
+            "save": MockStateSave(),
+            "scale": MockStateScale(),
+            "adjustment": MockStateAdjustment(),
+            "convert_to_q": MockStateConvertToQ()
+        }
         default_entries["data"].instrument = SANSInstrument.LARMOR
         default_entries["data"].facility = SANSFacility.ISIS
 

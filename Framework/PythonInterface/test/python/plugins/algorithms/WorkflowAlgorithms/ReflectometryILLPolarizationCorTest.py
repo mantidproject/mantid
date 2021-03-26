@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import MatrixWorkspace, WorkspaceGroup
-from mantid.simpleapi import (ReflectometryILLPreprocess, ReflectometryILLSumForeground, ReflectometryILLPolarizationCor, mtd)
+from mantid.simpleapi import (ReflectometryILLPreprocess, ReflectometryILLSumForeground,
+                              ReflectometryILLPolarizationCor, mtd)
 import unittest
 
 
 class ReflectometryILLPolarizationCorTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         ReflectometryILLPreprocess(Run='ILL/D17/317369.nxs',
@@ -23,8 +23,7 @@ class ReflectometryILLPolarizationCorTest(unittest.TestCase):
                                    ForegroundHalfWidth=5,
                                    OutputWorkspace='rb')
         # first the direct beam
-        ReflectometryILLSumForeground(InputWorkspace='db',
-                                      OutputWorkspace='db_frg')
+        ReflectometryILLSumForeground(InputWorkspace='db', OutputWorkspace='db_frg')
 
         # then the reflected beam
         ReflectometryILLSumForeground(InputWorkspace='rb',
@@ -38,11 +37,9 @@ class ReflectometryILLPolarizationCorTest(unittest.TestCase):
         mtd.clear()
 
     def testExecutes(self):
-        ReflectometryILLPolarizationCor(
-            InputWorkspaces='rb_frg',
-            OutputWorkspace='pol_corrected',
-            EfficiencyFile='ILL/D17/PolarizationFactors.txt'
-        )
+        ReflectometryILLPolarizationCor(InputWorkspaces='rb_frg',
+                                        OutputWorkspace='pol_corrected',
+                                        EfficiencyFile='ILL/D17/PolarizationFactors.txt')
         self.checkOutput(mtd['pol_corrected'], 1, 991)
 
     def checkOutput(self, ws, items, blocksize):
@@ -55,6 +52,7 @@ class ReflectometryILLPolarizationCorTest(unittest.TestCase):
         self.assertEquals(item.blocksize(), blocksize)
         self.assertEquals(item.getNumberHistograms(), 1)
         self.assertEquals(item.getAxis(0).getUnit().unitID(), 'Wavelength')
+
 
 if __name__ == "__main__":
     unittest.main()

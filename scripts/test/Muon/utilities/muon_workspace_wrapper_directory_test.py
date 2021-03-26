@@ -43,7 +43,6 @@ class MuonWorkspaceAddDirectoryTest(unittest.TestCase):
     Test the functionality surrounding adding "directory structures" to the ADS, in other words
     adding nested structures of WorkspaceGroups to help structure the data.
     """
-
     def setUp(self):
         assert simpleapi.mtd.size() == 0
 

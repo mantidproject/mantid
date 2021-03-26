@@ -10,7 +10,6 @@ from Muon.GUI.Common.muon_diff import MuonDiff
 
 
 class MuonDifferenceTest(unittest.TestCase):
-
     def test_that_cannot_initialize_MuonDiff_without_name(self):
         with self.assertRaises(TypeError):
             MuonDiff(positive="positive", negative="negative")

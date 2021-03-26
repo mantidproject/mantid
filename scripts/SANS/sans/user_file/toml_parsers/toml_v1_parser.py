@@ -195,15 +195,17 @@ class _TomlV1ParserImpl(TomlParserImplBase):
 
         self.adjustment.calibration = self.get_val(["tube", "file"], calibration_dict)
 
-        name_attr_pairs = {"_x": "x_translation_correction",
-                           "_y": "y_translation_correction",
-                           "_z": "z_translation_correction",
-                           "_radius": "radius_correction",
-                           "_rot": "rotation_correction",
-                           "_side": "side_correction",
-                           "_x_tilt": "x_tilt_correction",
-                           "_y_tilt": "y_tilt_correction",
-                           "_z_tilt": "z_tilt_correction"}
+        name_attr_pairs = {
+            "_x": "x_translation_correction",
+            "_y": "y_translation_correction",
+            "_z": "z_translation_correction",
+            "_radius": "radius_correction",
+            "_rot": "rotation_correction",
+            "_side": "side_correction",
+            "_x_tilt": "x_tilt_correction",
+            "_y_tilt": "y_tilt_correction",
+            "_z_tilt": "z_tilt_correction"
+        }
 
         position_dict = self.get_val("position", calibration_dict)
         lab_move = self.move.detectors[DetectorType.LAB.value]
@@ -218,11 +220,10 @@ class _TomlV1ParserImpl(TomlParserImplBase):
     def _parse_binning(self):
         binning_dict = self.get_val(["binning"])
 
-        to_set = DuplicateWavelengthStates(
-            transmission=self.calculate_transmission,
-            normalize=self.normalize_to_monitor,
-            wavelength=self.wavelength,
-            pixel=self.wavelength_and_pixel)
+        to_set = DuplicateWavelengthStates(transmission=self.calculate_transmission,
+                                           normalize=self.normalize_to_monitor,
+                                           wavelength=self.wavelength,
+                                           pixel=self.wavelength_and_pixel)
 
         WavelengthTomlParser(toml_dict=self._input).set_wavelength_details(state_objs=to_set)
 
@@ -376,7 +377,10 @@ class _TomlV1ParserImpl(TomlParserImplBase):
 
         # Mandatory as its subtle if missing
         monitor_spec_num = monitor_dict["spectrum_number"]
-        background = self.get_val("background", monitor_dict, )
+        background = self.get_val(
+            "background",
+            monitor_dict,
+        )
 
         self.normalize_to_monitor.incident_monitor = monitor_spec_num
 

@@ -28,17 +28,27 @@ class SingleDomainDoublePulseFitTest(unittest.TestCase):
         innerFunction = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0')
         deltaFunctions = FunctionFactory.createInitialized(
             '(name=DeltaFunction,Height=0.5,Centre={},ties=(Height=0.5,Centre={});name=DeltaFunction,Height=0.5,'
-            'Centre={},ties=(Height=0.5,Centre={}))'.format(
-                -delta / 2, -delta / 2, delta / 2, delta / 2))
+            'Centre={},ties=(Height=0.5,Centre={}))'.format(-delta / 2, -delta / 2, delta / 2, delta / 2))
         convolution.setAttributeValue('FixResolution', False)
         convolution.add(innerFunction)
         convolution.add(deltaFunctions)
 
         innerFunctionSingle = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0')
 
-        DoublePulseFit(Function=innerFunctionSingle, InputWorkspace=ws, CreateOutput=True, PulseOffset=delta,
-                       StartX=0.0, EndX=15.0, Output='DoublePulseFit', MaxIterations=100)
-        Fit(Function=convolution, InputWorkspace=ws, CreateOutput=True, StartX=0.0, EndX=15.0, Output='Fit',
+        DoublePulseFit(Function=innerFunctionSingle,
+                       InputWorkspace=ws,
+                       CreateOutput=True,
+                       PulseOffset=delta,
+                       StartX=0.0,
+                       EndX=15.0,
+                       Output='DoublePulseFit',
+                       MaxIterations=100)
+        Fit(Function=convolution,
+            InputWorkspace=ws,
+            CreateOutput=True,
+            StartX=0.0,
+            EndX=15.0,
+            Output='Fit',
             MaxIterations=100)
 
     @classmethod
@@ -83,8 +93,7 @@ class MultiDomainDoublePulseFitTest(unittest.TestCase):
         innerFunction = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0')
         deltaFunctions = FunctionFactory.createInitialized(
             '(name=DeltaFunction,Height=0.5,Centre={},ties=(Height=0.5,Centre={});name=DeltaFunction,Height=0.5,'
-            'Centre={},ties=(Height=0.5,Centre={}))'.format(
-                -delta / 2, -delta / 2, delta / 2, delta / 2))
+            'Centre={},ties=(Height=0.5,Centre={}))'.format(-delta / 2, -delta / 2, delta / 2, delta / 2))
         convolution.setAttributeValue('FixResolution', False)
         convolution.add(innerFunction)
         convolution.add(deltaFunctions)
@@ -93,10 +102,23 @@ class MultiDomainDoublePulseFitTest(unittest.TestCase):
             'name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0', 2)
         MultiDomainConvolutionFunction = FunctionFactory.createInitializedMultiDomainFunction(str(convolution), 2)
 
-        DoublePulseFit(Function=MultiDomainSingleFunction, InputWorkspace=ws, InputWorkspace_1=ws, CreateOutput=True,
-                       PulseOffset=delta, StartX=0.0, EndX=15.0, Output='DoublePulseFit', MaxIterations=1)
-        Fit(Function=MultiDomainConvolutionFunction, InputWorkspace=ws, InputWorkspace_1=ws, CreateOutput=True,
-            StartX=0.0, EndX=15.0, Output='Fit', MaxIterations=1)
+        DoublePulseFit(Function=MultiDomainSingleFunction,
+                       InputWorkspace=ws,
+                       InputWorkspace_1=ws,
+                       CreateOutput=True,
+                       PulseOffset=delta,
+                       StartX=0.0,
+                       EndX=15.0,
+                       Output='DoublePulseFit',
+                       MaxIterations=1)
+        Fit(Function=MultiDomainConvolutionFunction,
+            InputWorkspace=ws,
+            InputWorkspace_1=ws,
+            CreateOutput=True,
+            StartX=0.0,
+            EndX=15.0,
+            Output='Fit',
+            MaxIterations=1)
 
     @classmethod
     def tearDownClass(cls):
@@ -138,8 +160,7 @@ class CompositeFunctionDoublePulseFitTest(unittest.TestCase):
             'name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0; name=FlatBackground, A0=5.0')
         deltaFunctions = FunctionFactory.createInitialized(
             '(name=DeltaFunction,Height=0.5,Centre={},ties=(Height=0.5,Centre={});name=DeltaFunction,Height=0.5,'
-            'Centre={},ties=(Height=0.5,Centre={}))'.format(
-                -delta / 2, -delta / 2, delta / 2, delta / 2))
+            'Centre={},ties=(Height=0.5,Centre={}))'.format(-delta / 2, -delta / 2, delta / 2, delta / 2))
         convolution.setAttributeValue('FixResolution', False)
         convolution.add(innerFunction)
         convolution.add(deltaFunctions)
@@ -147,9 +168,20 @@ class CompositeFunctionDoublePulseFitTest(unittest.TestCase):
         innerFunctionSingle = FunctionFactory.createInitialized(
             'name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0; name=FlatBackground, A0=5.0')
 
-        DoublePulseFit(Function=innerFunctionSingle, InputWorkspace=ws, CreateOutput=True, PulseOffset=delta,
-                       StartX=0.0, EndX=15.0, Output='DoublePulseFit', MaxIterations=100)
-        Fit(Function=convolution, InputWorkspace=ws, CreateOutput=True, StartX=0.0, EndX=15.0, Output='Fit',
+        DoublePulseFit(Function=innerFunctionSingle,
+                       InputWorkspace=ws,
+                       CreateOutput=True,
+                       PulseOffset=delta,
+                       StartX=0.0,
+                       EndX=15.0,
+                       Output='DoublePulseFit',
+                       MaxIterations=100)
+        Fit(Function=convolution,
+            InputWorkspace=ws,
+            CreateOutput=True,
+            StartX=0.0,
+            EndX=15.0,
+            Output='Fit',
             MaxIterations=100)
 
     @classmethod

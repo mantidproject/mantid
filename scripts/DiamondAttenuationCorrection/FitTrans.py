@@ -199,8 +199,7 @@ def allowedDiamRefs(hmin, hmax, kmin, kmax, lmin, lmax):
     for i in range(n):
         if not (allhkl[i][0] == 0 and allhkl[i][1] == 0 and allhkl[i][2] == 0):
             hkl = np.vstack((hkl, [allhkl[i][0], allhkl[i][1], allhkl[i][2]]))
-            d.append(calcDspacing(3.56683, 3.56683, 3.56683, 90,
-                                  90, 90, hkl[k][0], hkl[k][1], hkl[k][2]))
+            d.append(calcDspacing(3.56683, 3.56683, 3.56683, 90, 90, 90, hkl[k][0], hkl[k][1], hkl[k][2]))
             k += 1
     d = np.array(d)
 
@@ -270,84 +269,45 @@ def pkintread(hkl, loc):
     '''
     # A = np.genfromtxt('diamond_reflist.csv', delimiter=',', skip_header=True)
     # print A
-    A = np.array([[1.00000000e+00, 1.00000000e+00, 1.00000000e+00, 8.00000000e+00,
-                   2.06110000e+00, 5.54000000e+04],
-                  [2.00000000e+00, 2.00000000e+00, 0.00000000e+00, 1.20000000e+01,
-                   1.26220000e+00, 7.52000000e+04],
-                  [3.00000000e+00, 1.00000000e+00, 1.00000000e+00, 2.40000000e+01,
-                   1.07640000e+00, 2.98000000e+04],
-                  [2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 8.00000000e+00,
-                   1.03060000e+00, 2.50000000e-25],
-                  [4.00000000e+00, 0.00000000e+00, 0.00000000e+00, 6.00000000e+00,
-                   8.92500000e-01, 4.05000000e+04],
-                  [3.00000000e+00, 3.00000000e+00, 1.00000000e+00, 2.40000000e+01,
-                   8.19000000e-01, 1.61000000e+04],
-                  [4.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.40000000e+01,
-                   7.28700000e-01, 2.18000000e+04],
-                  [5.00000000e+00, 1.00000000e+00, 1.00000000e+00, 2.40000000e+01,
-                   6.87000000e-01, 8.64000000e+03],
-                  [3.00000000e+00, 3.00000000e+00, 3.00000000e+00, 8.00000000e+00,
-                   6.87000000e-01, 8.64000000e+03],
-                  [4.00000000e+00, 4.00000000e+00, 0.00000000e+00, 1.20000000e+01,
-                   6.31100000e-01, 1.17000000e+04],
-                  [5.00000000e+00, 3.00000000e+00, 1.00000000e+00, 4.80000000e+01,
-                   6.03400000e-01, 4.65000000e+03],
-                  [4.00000000e+00, 4.00000000e+00, 2.00000000e+00, 2.40000000e+01,
-                   5.95000000e-01, 1.83000000e-12],
-                  [6.00000000e+00, 2.00000000e+00, 0.00000000e+00, 2.40000000e+01,
-                   5.64500000e-01, 6.31000000e+03],
-                  [5.00000000e+00, 3.00000000e+00, 3.00000000e+00, 2.40000000e+01,
-                   5.44400000e-01, 2.50000000e+03],
-                  [6.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.40000000e+01,
-                   5.38200000e-01, 8.80000000e-26],
-                  [4.00000000e+00, 4.00000000e+00, 4.00000000e+00, 8.00000000e+00,
-                   5.15300000e-01, 3.40000000e+03],
-                  [5.00000000e+00, 5.00000000e+00, 1.00000000e+00, 2.40000000e+01,
-                   4.99900000e-01, 1.35000000e+03],
-                  [7.00000000e+00, 1.00000000e+00, 1.00000000e+00, 2.40000000e+01,
-                   4.99900000e-01, 1.35000000e+03],
-                  [6.00000000e+00, 4.00000000e+00, 2.00000000e+00, 4.80000000e+01,
-                   4.77100000e-01, 1.83000000e+03],
-                  [7.00000000e+00, 3.00000000e+00, 1.00000000e+00, 4.80000000e+01,
-                   4.64800000e-01, 7.25000000e+02],
-                  [5.00000000e+00, 5.00000000e+00, 3.00000000e+00, 2.40000000e+01,
-                   4.64800000e-01, 7.25000000e+02],
-                  [8.00000000e+00, 0.00000000e+00, 0.00000000e+00, 6.00000000e+00,
-                   4.46200000e-01, 9.84000000e+02],
-                  [7.00000000e+00, 3.00000000e+00, 3.00000000e+00, 2.40000000e+01,
-                   4.36100000e-01, 3.90000000e+02],
-                  [6.00000000e+00, 4.00000000e+00, 4.00000000e+00, 2.40000000e+01,
-                   4.32900000e-01, 1.53000000e-13],
-                  [6.00000000e+00, 6.00000000e+00, 0.00000000e+00, 1.20000000e+01,
-                   4.20700000e-01, 5.30000000e+02],
-                  [8.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.40000000e+01,
-                   4.20700000e-01, 5.30000000e+02],
-                  [5.00000000e+00, 5.00000000e+00, 5.00000000e+00, 8.00000000e+00,
-                   4.12200000e-01, 2.10000000e+02],
-                  [7.00000000e+00, 5.00000000e+00, 1.00000000e+00, 4.80000000e+01,
-                   4.12200000e-01, 2.10000000e+02],
-                  [6.00000000e+00, 6.00000000e+00, 2.00000000e+00, 2.40000000e+01,
-                   4.09500000e-01, 1.98000000e-26],
-                  [8.00000000e+00, 4.00000000e+00, 0.00000000e+00, 2.40000000e+01,
-                   3.99100000e-01, 2.85000000e+02],
-                  [7.00000000e+00, 5.00000000e+00, 3.00000000e+00, 4.80000000e+01,
-                   3.91900000e-01, 1.13000000e+02],
-                  [9.00000000e+00, 1.00000000e+00, 1.00000000e+00, 2.40000000e+01,
-                   3.91900000e-01, 1.13000000e+02],
-                  [8.00000000e+00, 4.00000000e+00, 2.00000000e+00, 4.80000000e+01,
-                   3.89500000e-01, 4.44000000e-14],
-                  [6.00000000e+00, 6.00000000e+00, 4.00000000e+00, 2.40000000e+01,
-                   3.80600000e-01, 1.53000000e+02],
-                  [9.00000000e+00, 3.00000000e+00, 1.00000000e+00, 4.80000000e+01,
-                   3.74200000e-01, 6.08000000e+01],
-                  [8.00000000e+00, 4.00000000e+00, 4.00000000e+00, 2.40000000e+01,
-                   3.64400000e-01, 8.26000000e+01],
-                  [9.00000000e+00, 3.00000000e+00, 3.00000000e+00, 2.40000000e+01,
-                   3.58800000e-01, 3.27000000e+01],
-                  [7.00000000e+00, 5.00000000e+00, 5.00000000e+00, 2.40000000e+01,
-                   3.58800000e-01, 3.27000000e+01],
-                  [7.00000000e+00, 7.00000000e+00, 1.00000000e+00, 2.40000000e+01,
-                   3.58800000e-01, 3.27000000e+01]])
+    A = np.array([[1.00000000e+00, 1.00000000e+00, 1.00000000e+00, 8.00000000e+00, 2.06110000e+00, 5.54000000e+04],
+                  [2.00000000e+00, 2.00000000e+00, 0.00000000e+00, 1.20000000e+01, 1.26220000e+00, 7.52000000e+04],
+                  [3.00000000e+00, 1.00000000e+00, 1.00000000e+00, 2.40000000e+01, 1.07640000e+00, 2.98000000e+04],
+                  [2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 8.00000000e+00, 1.03060000e+00, 2.50000000e-25],
+                  [4.00000000e+00, 0.00000000e+00, 0.00000000e+00, 6.00000000e+00, 8.92500000e-01, 4.05000000e+04],
+                  [3.00000000e+00, 3.00000000e+00, 1.00000000e+00, 2.40000000e+01, 8.19000000e-01, 1.61000000e+04],
+                  [4.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.40000000e+01, 7.28700000e-01, 2.18000000e+04],
+                  [5.00000000e+00, 1.00000000e+00, 1.00000000e+00, 2.40000000e+01, 6.87000000e-01, 8.64000000e+03],
+                  [3.00000000e+00, 3.00000000e+00, 3.00000000e+00, 8.00000000e+00, 6.87000000e-01, 8.64000000e+03],
+                  [4.00000000e+00, 4.00000000e+00, 0.00000000e+00, 1.20000000e+01, 6.31100000e-01, 1.17000000e+04],
+                  [5.00000000e+00, 3.00000000e+00, 1.00000000e+00, 4.80000000e+01, 6.03400000e-01, 4.65000000e+03],
+                  [4.00000000e+00, 4.00000000e+00, 2.00000000e+00, 2.40000000e+01, 5.95000000e-01, 1.83000000e-12],
+                  [6.00000000e+00, 2.00000000e+00, 0.00000000e+00, 2.40000000e+01, 5.64500000e-01, 6.31000000e+03],
+                  [5.00000000e+00, 3.00000000e+00, 3.00000000e+00, 2.40000000e+01, 5.44400000e-01, 2.50000000e+03],
+                  [6.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.40000000e+01, 5.38200000e-01, 8.80000000e-26],
+                  [4.00000000e+00, 4.00000000e+00, 4.00000000e+00, 8.00000000e+00, 5.15300000e-01, 3.40000000e+03],
+                  [5.00000000e+00, 5.00000000e+00, 1.00000000e+00, 2.40000000e+01, 4.99900000e-01, 1.35000000e+03],
+                  [7.00000000e+00, 1.00000000e+00, 1.00000000e+00, 2.40000000e+01, 4.99900000e-01, 1.35000000e+03],
+                  [6.00000000e+00, 4.00000000e+00, 2.00000000e+00, 4.80000000e+01, 4.77100000e-01, 1.83000000e+03],
+                  [7.00000000e+00, 3.00000000e+00, 1.00000000e+00, 4.80000000e+01, 4.64800000e-01, 7.25000000e+02],
+                  [5.00000000e+00, 5.00000000e+00, 3.00000000e+00, 2.40000000e+01, 4.64800000e-01, 7.25000000e+02],
+                  [8.00000000e+00, 0.00000000e+00, 0.00000000e+00, 6.00000000e+00, 4.46200000e-01, 9.84000000e+02],
+                  [7.00000000e+00, 3.00000000e+00, 3.00000000e+00, 2.40000000e+01, 4.36100000e-01, 3.90000000e+02],
+                  [6.00000000e+00, 4.00000000e+00, 4.00000000e+00, 2.40000000e+01, 4.32900000e-01, 1.53000000e-13],
+                  [6.00000000e+00, 6.00000000e+00, 0.00000000e+00, 1.20000000e+01, 4.20700000e-01, 5.30000000e+02],
+                  [8.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.40000000e+01, 4.20700000e-01, 5.30000000e+02],
+                  [5.00000000e+00, 5.00000000e+00, 5.00000000e+00, 8.00000000e+00, 4.12200000e-01, 2.10000000e+02],
+                  [7.00000000e+00, 5.00000000e+00, 1.00000000e+00, 4.80000000e+01, 4.12200000e-01, 2.10000000e+02],
+                  [6.00000000e+00, 6.00000000e+00, 2.00000000e+00, 2.40000000e+01, 4.09500000e-01, 1.98000000e-26],
+                  [8.00000000e+00, 4.00000000e+00, 0.00000000e+00, 2.40000000e+01, 3.99100000e-01, 2.85000000e+02],
+                  [7.00000000e+00, 5.00000000e+00, 3.00000000e+00, 4.80000000e+01, 3.91900000e-01, 1.13000000e+02],
+                  [9.00000000e+00, 1.00000000e+00, 1.00000000e+00, 2.40000000e+01, 3.91900000e-01, 1.13000000e+02],
+                  [8.00000000e+00, 4.00000000e+00, 2.00000000e+00, 4.80000000e+01, 3.89500000e-01, 4.44000000e-14],
+                  [6.00000000e+00, 6.00000000e+00, 4.00000000e+00, 2.40000000e+01, 3.80600000e-01, 1.53000000e+02],
+                  [9.00000000e+00, 3.00000000e+00, 1.00000000e+00, 4.80000000e+01, 3.74200000e-01, 6.08000000e+01],
+                  [8.00000000e+00, 4.00000000e+00, 4.00000000e+00, 2.40000000e+01, 3.64400000e-01, 8.26000000e+01],
+                  [9.00000000e+00, 3.00000000e+00, 3.00000000e+00, 2.40000000e+01, 3.58800000e-01, 3.27000000e+01],
+                  [7.00000000e+00, 5.00000000e+00, 5.00000000e+00, 2.40000000e+01, 3.58800000e-01, 3.27000000e+01],
+                  [7.00000000e+00, 7.00000000e+00, 1.00000000e+00, 2.40000000e+01, 3.58800000e-01, 3.27000000e+01]])
 
     diamd = A[:, 4]
     # diamMult = A[:, 3] # unused variable
@@ -355,7 +315,6 @@ def pkintread(hkl, loc):
     nref = hkl.shape[0]
     # % disp(['there are: ' num2str(nref) ' reflections']);
     # % whos loc
-
     '''
     % [i,j] = size(x);
     % dipspec = zeros(i,j); %array containing dip spectrum
@@ -374,12 +333,11 @@ def pkintread(hkl, loc):
             # % satisfies Bragg condition (otherwise ignore)
             Fsq = Fsqcalc(loc[i][1], diamd, diamFCalcSq)
             # % Fsq = 1;
-            L = (np.sin(np.radians(loc[i][2] / 2.0))) ** 2  # Lorentz correction
+            L = (np.sin(np.radians(loc[i][2] / 2.0)))**2  # Lorentz correction
             R = 1.0  # %dipLam(i)^4; %reflectivity correction
             A = 1.0  # %Absorption correction
             Ecor = 1
             pkint[i] = Fsq * R * A / (L * Ecor)  # %scattered intensity
-
     '''
     % whos difspec
     % whos van
@@ -535,8 +493,7 @@ def findeqvs(hkl):
             eqvlab[i] = lab
             refhkl = np.array([abs(hkl[i][0]), abs(hkl[i][1]), abs(hkl[i][2])])
             for j in range(i + 1, n):  # check remaining indices
-                comphkl = np.array(
-                    [abs(hkl[j][0]), abs(hkl[j][1]), abs(hkl[j][2])])
+                comphkl = np.array([abs(hkl[j][0]), abs(hkl[j][1]), abs(hkl[j][2])])
                 # all possible permutations
                 permcomphkl = list(itt.permutations(comphkl))
                 nperm = len(permcomphkl)
@@ -585,11 +542,9 @@ def showx3(x):
     L2 = x[neqv1 + neqv2 + 13]
 
     print('_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/\n')
-    print(('Setting angles diam {0} : \nalp {1} bet {2} gam {3} \n'.format(
-        1, setang1[0], setang1[1], setang1[2])))
+    print(('Setting angles diam {0} : \nalp {1} bet {2} gam {3} \n'.format(1, setang1[0], setang1[1], setang1[2])))
     print(('pkmult1: {0}\n'.format(pkmult1)))
-    print(('Setting angles diam {0} : \nalp {1} bet {2} gam {3} \n'.format(
-        2, setang2[0], setang2[1], setang2[2])))
+    print(('Setting angles diam {0} : \nalp {1} bet {2} gam {3} \n'.format(2, setang2[0], setang2[1], setang2[2])))
     print(('pkmult2: {0}\n'.format(pkmult2)))
     print(('Scale factor: {0}\n'.format(sf)))
     print(('pkwid1: {0}\n'.format(pkwid1)))
@@ -654,7 +609,7 @@ def SimTransOutput3(name, x):
     delam = x[neqv1 + neqv2 + 12]
     L2 = x[neqv1 + neqv2 + 13]
 
-    shftlam = 0.0039558 * TOF / (L1 + L2) + difa * (TOF ** 2)
+    shftlam = 0.0039558 * TOF / (L1 + L2) + difa * (TOF**2)
     # number of lambda points to calculate over
     npt = shftlam.shape[0]
     # calculate information for peaks for crystal 1 using hkl,UB1, setang,
@@ -674,7 +629,7 @@ def SimTransOutput3(name, x):
 
     X = np.ones(shape=(nco, npt))
     for i in range(nco):
-        X[i, :] = shftlam ** (bgd[bgdco[i]] - 1)
+        X[i, :] = shftlam**(bgd[bgdco[i]] - 1)
         nonzerobgd[i] = bgd[bgdco[i]]
 
     # calculate background profile by multiplying this with coefficients
@@ -689,20 +644,20 @@ def SimTransOutput3(name, x):
     for i in range(nref1):
         if pktype == 1:
             pkpars1[i][0] = pkpars1[i][0] * delam  # linear lambda shift
-            sig = pkwid1 * pkpars1[i][0] + pkwid2 * (pkpars1[i][0] ** 2.)  # const del(lambda)/lambda
-            extScl = pkpars1[i][0] ** 0  # lambda dependent extinction effect
-            t1 = t1 - extScl * pkmult1[int(eqvlab1[i])] * pkcalcint1[i] * (
-                np.exp(-((shftlam - pkpars1[i][0]) ** 2.) / (2 * (sig ** 2))))
+            sig = pkwid1 * pkpars1[i][0] + pkwid2 * (pkpars1[i][0]**2.)  # const del(lambda)/lambda
+            extScl = pkpars1[i][0]**0  # lambda dependent extinction effect
+            t1 = t1 - extScl * pkmult1[int(eqvlab1[i])] * pkcalcint1[i] * (np.exp(-((shftlam - pkpars1[i][0])**2.) /
+                                                                                  (2 * (sig**2))))
 
     # calculate peaks for crystal 2
     t2 = np.zeros(npt)  # initialise array containing profile
     for i in range(nref2):
         if pktype == 1:
             pkpars2[i][0] = pkpars2[i][0] * delam  # linear lambda shift
-            sig = pkwid1 * pkpars2[i][0] + pkwid2 * (pkpars2[i][0] ** 2.)  # const del(lambda)/lambda
-            extScl = pkpars2[i][0] ** 0  # lambda dependent extinction effect
-            t2 = t2 - extScl * pkmult2[int(eqvlab2[i])] * pkcalcint2[i] * (
-                np.exp(-(shftlam - pkpars2[i][0]) ** 2. / (2 * (sig ** 2))))
+            sig = pkwid1 * pkpars2[i][0] + pkwid2 * (pkpars2[i][0]**2.)  # const del(lambda)/lambda
+            extScl = pkpars2[i][0]**0  # lambda dependent extinction effect
+            t2 = t2 - extScl * pkmult2[int(eqvlab2[i])] * pkcalcint2[i] * (np.exp(-(shftlam - pkpars2[i][0])**2. /
+                                                                                  (2 * (sig**2))))
 
     # calculate final profile
     ttot = (bgdprof + sf * t1) * (bgdprof + sf * t2)
@@ -718,7 +673,7 @@ def SimTransOutput3(name, x):
     # w(i1:j1)=5; %extra weighting but not too much
 
     resid = (y - ttot) * w
-    chi2 = np.sum(resid ** 2. / (2 * e ** 2)) / npt
+    chi2 = np.sum(resid**2. / (2 * e**2)) / npt
 
     output = 1
     if output == 1:
@@ -733,17 +688,14 @@ def SimTransOutput3(name, x):
     plt.plot(shftlam, ttot, 'r', label='Total att.')
     plt.plot(shftlam, diam1trans, 'k', label='Diam 1 att.')
     plt.plot(shftlam, diam2trans, 'b', label='Diam 2 att.')
-    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
-               ncol=3, mode="expand", borderaxespad=0.)
+    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=3, mode="expand", borderaxespad=0.)
     plt.xlabel('Wavelength (A)')
     plt.ylabel('Transmission')
     plt.grid()
     for i in range(len(pkpars1)):
-        plt.arrow(pkpars1[i, 0] * delam, 1.1, 0.0, 0.025,
-                  fc="k", ec="k", head_width=0, head_length=0)
+        plt.arrow(pkpars1[i, 0] * delam, 1.1, 0.0, 0.025, fc="k", ec="k", head_width=0, head_length=0)
     for i in range(len(pkpars2)):
-        plt.arrow(pkpars2[i, 0] * delam, 1.15, 0.0, 0.025,
-                  fc="k", ec="k", head_width=0, head_length=0)
+        plt.arrow(pkpars2[i, 0] * delam, 1.15, 0.0, 0.025, fc="k", ec="k", head_width=0, head_length=0)
     plt.xlim(1, 2.7)
     plt.ylim(0, 1.2)
     plt.show()
@@ -816,7 +768,7 @@ def SimTrans3(x):
     delam = x[neqv1 + neqv2 + 12]
     L2 = x[neqv1 + neqv2 + 13]
 
-    shftlam = 0.0039558 * TOF / (L1 + L2) + difa * (TOF ** 2)
+    shftlam = 0.0039558 * TOF / (L1 + L2) + difa * (TOF**2)
     # number of lambda points to calculate over
     npt = shftlam.shape[0]
     # calculate information for peaks for crystal 1 using hkl,UB1, setang,
@@ -836,7 +788,7 @@ def SimTrans3(x):
 
     X = np.ones(shape=(nco, npt))
     for i in range(nco):
-        X[i, :] = shftlam ** (bgd[bgdco[i]] - 1)
+        X[i, :] = shftlam**(bgd[bgdco[i]] - 1)
         nonzerobgd[i] = bgd[bgdco[i]]
 
     # calculate background profile by multiplying this with coefficients
@@ -851,20 +803,20 @@ def SimTrans3(x):
     for i in range(nref1):
         if pktype == 1:
             pkpars1[i][0] = pkpars1[i][0] * delam  # linear lambda shift
-            sig = pkwid1 * pkpars1[i][0] + pkwid2 * (pkpars1[i][0] ** 2.)  # const del(lambda)/lambda
-            extScl = pkpars1[i][0] ** 0  # lambda dependent extinction effect
-            t1 = t1 - extScl * pkmult1[int(eqvlab1[i])] * pkcalcint1[i] * (
-                np.exp(-((shftlam - pkpars1[i][0]) ** 2.) / (2 * (sig ** 2))))
+            sig = pkwid1 * pkpars1[i][0] + pkwid2 * (pkpars1[i][0]**2.)  # const del(lambda)/lambda
+            extScl = pkpars1[i][0]**0  # lambda dependent extinction effect
+            t1 = t1 - extScl * pkmult1[int(eqvlab1[i])] * pkcalcint1[i] * (np.exp(-((shftlam - pkpars1[i][0])**2.) /
+                                                                                  (2 * (sig**2))))
 
     # calculate peaks for crystal 2
     t2 = np.zeros(npt)  # initialise array containing profile
     for i in range(nref2):
         if pktype == 1:
             pkpars2[i][0] = pkpars2[i][0] * delam  # linear lambda shift
-            sig = pkwid1 * pkpars2[i][0] + pkwid2 * (pkpars2[i][0] ** 2.)  # const del(lambda)/lambda
-            extScl = pkpars2[i][0] ** 0  # lambda dependent extinction effect
-            t2 = t2 - extScl * pkmult2[int(eqvlab2[i])] * pkcalcint2[i] * (
-                np.exp(-(shftlam - pkpars2[i][0]) ** 2. / (2 * (sig ** 2))))
+            sig = pkwid1 * pkpars2[i][0] + pkwid2 * (pkpars2[i][0]**2.)  # const del(lambda)/lambda
+            extScl = pkpars2[i][0]**0  # lambda dependent extinction effect
+            t2 = t2 - extScl * pkmult2[int(eqvlab2[i])] * pkcalcint2[i] * (np.exp(-(shftlam - pkpars2[i][0])**2. /
+                                                                                  (2 * (sig**2))))
 
     # calculate final profile
     ttot = (bgdprof + sf * t1) * (bgdprof + sf * t2)
@@ -880,7 +832,7 @@ def SimTrans3(x):
     # w(i1:j1)=5; %extra weighting but not too much
 
     resid = (y - ttot) * w
-    chi2 = np.sum(resid ** 2. / (2 * e ** 2)) / npt
+    chi2 = np.sum(resid**2. / (2 * e**2)) / npt
 
     # Print if the user wants verbose minimization
     if function_verbose == 'y':
@@ -925,10 +877,10 @@ def FitTrans():
         print('*diamonds allowed to have different dip intensities!*')
 
     if cnstang == 1:
-        print((
-            '*Diam {0} setting angles constrained to range of +/- {1} about their current values*'.format(1, anglim1)))
-        print((
-            '*Diam {0} setting angles constrained to range of +/- {1} about their current values*'.format(2, anglim2)))
+        print(
+            ('*Diam {0} setting angles constrained to range of +/- {1} about their current values*'.format(1, anglim1)))
+        print(
+            ('*Diam {0} setting angles constrained to range of +/- {1} about their current values*'.format(2, anglim2)))
     else:
         print('no constraint on setting angles')
 
@@ -1072,8 +1024,7 @@ def FitTrans():
     prevf = str(input('Look for pars from a previous run ([y]/n)? '))
 
     if prevf == 'n':
-        x0 = np.hstack((setang1, pkmult1, setang2, pkmult2, sf,
-                        pkwid, tbgd, pkwid2, relsf, delam, L2))
+        x0 = np.hstack((setang1, pkmult1, setang2, pkmult2, sf, pkwid, tbgd, pkwid2, relsf, delam, L2))
     else:
         # choose which file to use
         parfilename = str(input('Choose file with starting pars: '))
@@ -1081,8 +1032,7 @@ def FitTrans():
         x0 = dlmread(parfullfilename)
         tog = str(input('Got parameters from: \n' + parfilename + '\nUse these ([y]/n)?'))
         if tog == 'n':
-            x0 = np.hstack((setang1, pkmult1, setang2, pkmult2,
-                            sf, pkwid, tbgd, pkwid2, relsf, delam, L2))
+            x0 = np.hstack((setang1, pkmult1, setang2, pkmult2, sf, pkwid, tbgd, pkwid2, relsf, delam, L2))
             print('discarding pars from previous run')
 
     print((str(len(x0)) + ' parameters will be refined'))
@@ -1111,8 +1061,7 @@ def FitTrans():
     plt.xlabel('Wavelength (A)')
     plt.ylabel('Transmission')
     plt.grid()
-    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
-               ncol=3, mode="expand", borderaxespad=0.)
+    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=3, mode="expand", borderaxespad=0.)
     plt.show()
     print(('Initial chi^2 is: ' + str(chi2)))
 
@@ -1208,8 +1157,7 @@ def FitTrans():
     prompt = str(input('Enter anything to begin refinement...'))
     print('Refining...\nMight take quite a long time...')
 
-    max_number_iterations = int(
-        input('Maximum number of iterations for minimization: '))
+    max_number_iterations = int(input('Maximum number of iterations for minimization: '))
     function_verbose = str(input('Verbose minimization ([y]/n): '))
 
     # make dictionary holding constraints for minimization
@@ -1221,8 +1169,15 @@ def FitTrans():
 
     # bounds have to be list of tuples with (lower, upper) for each parameter
     bds = np.vstack((lb, ub)).T
-    res = sp.minimize(SimTrans3, x0, method='SLSQP', bounds=bds, constraints=cons,
-                      options={'disp': True, 'maxiter': max_number_iterations})
+    res = sp.minimize(SimTrans3,
+                      x0,
+                      method='SLSQP',
+                      bounds=bds,
+                      constraints=cons,
+                      options={
+                          'disp': True,
+                          'maxiter': max_number_iterations
+                      })
 
     # tolerance limits to put in minimization if you want so : 'ftol': 0.001
 
@@ -1264,23 +1219,20 @@ def FitTrans():
 
     # lamscale = x[neqv1 + neqv2 + 12] # unused variable
     L2 = x[neqv1 + neqv2 + 13]
-    outlam = 0.0039558 * TOF / (L1 + L2) + difa * (TOF ** 2)
+    outlam = 0.0039558 * TOF / (L1 + L2) + difa * (TOF**2)
 
     fig_name_final = 'Final result ' + run_number
     plt.figure(fig_name_final)
     plt.plot(outlam, y, 'k', label='Observed')
     plt.plot(outlam, ttot, 'r', label='Calculated')
     plt.plot(outlam, (y - ttot), 'b', label='Final residuals')
-    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
-               ncol=3, mode="expand", borderaxespad=0.)
+    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=3, mode="expand", borderaxespad=0.)
     plt.text(2.1, 0.5, 'CHI^2=' + str(chi2))
     plt.grid()
     for i in range(len(pkpars1)):
-        plt.arrow(pkpars1[i, 0] * delam, 1.1, 0.0, 0.025,
-                  fc="k", ec="k", head_width=0, head_length=0)
+        plt.arrow(pkpars1[i, 0] * delam, 1.1, 0.0, 0.025, fc="k", ec="k", head_width=0, head_length=0)
     for i in range(len(pkpars2)):
-        plt.arrow(pkpars2[i, 0] * delam, 1.15, 0.0, 0.025,
-                  fc="k", ec="k", head_width=0, head_length=0)
+        plt.arrow(pkpars2[i, 0] * delam, 1.15, 0.0, 0.025, fc="k", ec="k", head_width=0, head_length=0)
     plt.xlim(1.0, 2.7)
     plt.ylim(ymax=1.2)
     plt.xlabel('Wavelength (A)')

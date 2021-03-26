@@ -19,7 +19,6 @@ from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 
 
 class ErrorFormatterTest(unittest.TestCase):
-
     def test_syntax_error(self):
         try:
             exec("if:")

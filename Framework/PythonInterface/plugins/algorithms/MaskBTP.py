@@ -17,17 +17,45 @@ class MaskBTP(mantid.api.PythonAlgorithm):
     """
 
     # list of supported instruments
-    INSTRUMENT_LIST = ['ARCS', 'BIOSANS', 'CG2', 'CG3', 'CHESS', 'CNCS', 'CORELLI', 'D11', 'D11B', 'D11lr', 'D16',
-                       'D22', 'D22B', 'D22lr', 'D33', 'EQ-SANS', 'GPSANS', 'HYSPEC', 'MANDI', 'NOMAD', 'POWGEN',
-                       'REF_M', 'SEQUOIA', 'SNAP', 'SXD', 'TOPAZ', 'WAND', 'WISH']
+    INSTRUMENT_LIST = [
+        'ARCS', 'BIOSANS', 'CG2', 'CG3', 'CHESS', 'CNCS', 'CORELLI', 'D11', 'D11B', 'D11lr', 'D16', 'D22', 'D22B',
+        'D22lr', 'D33', 'EQ-SANS', 'GPSANS', 'HYSPEC', 'MANDI', 'NOMAD', 'POWGEN', 'REF_M', 'SEQUOIA', 'SNAP', 'SXD',
+        'TOPAZ', 'WAND', 'WISH'
+    ]
 
     instname = None
     instrument = None
     bankmin = defaultdict(lambda: 1, {'D33': 0, 'SEQUOIA': 23, 'TOPAZ': 10})  # default is one
-    bankmax = {'ARCS': 115, 'BIOSANS': 88, 'CG2': 48, 'CG3': 88, 'CHESS': 163, 'CNCS': 50, 'CORELLI': 91, 'D11': 1,
-               'D11B': 3, 'D11lr': 1, 'D16': 1, 'D22': 1, 'D22B': 2, 'D22lr': 1, 'D33': 4, 'EQ-SANS': 48, 'GPSANS': 48,
-               'HYSPEC': 20, 'MANDI': 59, 'NOMAD': 99, 'POWGEN': 300, 'REF_M': 1, 'SEQUOIA': 150, 'SNAP': 64, 'SXD': 11,
-               'TOPAZ': 59, 'WAND': 8, 'WISH': 10}
+    bankmax = {
+        'ARCS': 115,
+        'BIOSANS': 88,
+        'CG2': 48,
+        'CG3': 88,
+        'CHESS': 163,
+        'CNCS': 50,
+        'CORELLI': 91,
+        'D11': 1,
+        'D11B': 3,
+        'D11lr': 1,
+        'D16': 1,
+        'D22': 1,
+        'D22B': 2,
+        'D22lr': 1,
+        'D33': 4,
+        'EQ-SANS': 48,
+        'GPSANS': 48,
+        'HYSPEC': 20,
+        'MANDI': 59,
+        'NOMAD': 99,
+        'POWGEN': 300,
+        'REF_M': 1,
+        'SEQUOIA': 150,
+        'SNAP': 64,
+        'SXD': 11,
+        'TOPAZ': 59,
+        'WAND': 8,
+        'WISH': 10
+    }
 
     def category(self):
         """ Mantid required
@@ -48,13 +76,17 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         return "Algorithm to mask detectors in particular banks, tube, or pixels."
 
     def PyInit(self):
-        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "", direction=Direction.InOut,
-                                                          optional=mantid.api.PropertyMode.Optional), "Input workspace (optional)")
-        allowedInstrumentList = StringListValidator(['']+self.INSTRUMENT_LIST)
-        self.declareProperty("Instrument", "", validator=allowedInstrumentList, doc="One of the following instruments: "
-                             + ', '.join(self.INSTRUMENT_LIST))
-        self.declareProperty(StringArrayProperty(name='Components', values=[]),
-                             doc='Component names to mask')
+        self.declareProperty(
+            mantid.api.WorkspaceProperty("Workspace",
+                                         "",
+                                         direction=Direction.InOut,
+                                         optional=mantid.api.PropertyMode.Optional), "Input workspace (optional)")
+        allowedInstrumentList = StringListValidator([''] + self.INSTRUMENT_LIST)
+        self.declareProperty("Instrument",
+                             "",
+                             validator=allowedInstrumentList,
+                             doc="One of the following instruments: " + ', '.join(self.INSTRUMENT_LIST))
+        self.declareProperty(StringArrayProperty(name='Components', values=[]), doc='Component names to mask')
         self.declareProperty(IntArrayProperty(name="Bank", values=[]),
                              doc="Bank(s) to be masked. If empty, will apply to all banks")
         self.declareProperty("Tube", "", doc="Tube(s) to be masked. If empty, will apply to all tubes")
@@ -90,7 +122,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             if self.instname not in self.INSTRUMENT_LIST:
                 if deleteWS:
                     mantid.simpleapi.DeleteWorkspace(str(ws))
-                raise ValueError("Instrument '"+self.instname+"' not in the allowed list")
+                raise ValueError("Instrument '" + self.instname + "' not in the allowed list")
 
         # Get the component names. This turns banks into component names if they weren't supplied.
         components = self.getProperty('components').value
@@ -160,8 +192,10 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         -------
         int
         """
-        if self.instname in ['ARCS', 'BIOSANS', 'CG2', 'CG3', 'CHESS', 'CNCS', 'CORELLI', 'EQ-SANS', 'GPSANS',
-                             'HYSPEC', 'NOMAD', 'SEQUOIA', 'WAND', 'WISH']:
+        if self.instname in [
+                'ARCS', 'BIOSANS', 'CG2', 'CG3', 'CHESS', 'CNCS', 'CORELLI', 'EQ-SANS', 'GPSANS', 'HYSPEC', 'NOMAD',
+                'SEQUOIA', 'WAND', 'WISH'
+        ]:
             return 1
         else:
             return 0
@@ -204,7 +238,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                               ['M{}'.format(b) for b in range(33, 39)] + \
                               ['T{}'.format(b) for b in range(1, 39)]
             if self.bankmin[self.instname] <= banknum <= self.bankmax[self.instname]:
-                return ARCS_bank_names[banknum-1]
+                return ARCS_bank_names[banknum - 1]
             else:
                 raise ValueError("Out of range index for ARCS instrument bank numbers: {}".format(banknum))
         elif self.instname == 'SEQUOIA':
@@ -220,20 +254,17 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 banknum = banknum - 37
             elif 74 < banknum <= 98:
                 label = 'C'
-                banknum = banknum-74
-            elif banknum in range(99, 102+1):
+                banknum = banknum - 74
+            elif banknum in range(99, 102 + 1):
                 label = 'C'
-                d = {99: (25, 'T'),
-                     100: (26, 'T'),
-                     101: (25, 'B'),
-                     102: (26, 'B')}
+                d = {99: (25, 'T'), 100: (26, 'T'), 101: (25, 'B'), 102: (26, 'B')}
                 banknum, ToB = d[banknum]
             elif 102 < banknum <= 113:
                 label = 'C'
-                banknum = banknum-76
+                banknum = banknum - 76
             elif 113 < banknum <= self.bankmax[self.instname]:
                 label = 'D'
-                banknum = banknum-113
+                banknum = banknum - 113
             else:
                 raise ValueError("Out of range index for SEQUOIA instrument bank numbers: {}".format(banknum))
             return '{}{}{}'.format(label, banknum, ToB)
@@ -261,8 +292,10 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 elif banknum == 2:
                     return 'wing_detector'
         elif self.instname == "D33":
-            banks = ["back_detector", "front_detector_top", "front_detector_right", "front_detector_bottom",
-                     "front_detector_left"]
+            banks = [
+                "back_detector", "front_detector_top", "front_detector_right", "front_detector_bottom",
+                "front_detector_left"
+            ]
             return banks[banknum]
         elif self.instname == "D11B":
             return ["detector_center", "detector_left", "detector_right"][banknum - 1]
@@ -296,7 +329,8 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             except ValueError:
                 continue  # bank wasn't found
 
-        self.log().information('While determining banks, filtered from {} banks to {}'.format(len(bankNames), len(bankIndices)))
+        self.log().information('While determining banks, filtered from {} banks to {}'.format(
+            len(bankNames), len(bankIndices)))
         if len(bankIndices) == 0:
             raise RuntimeError('Filtered out all detectors from list of things to mask')
 

@@ -15,7 +15,6 @@ from mantid.plots.utility import legend_set_draggable
 
 
 class ExternalPlottingView(object):
-
     def __init__(self):
         self.number_of_axes = 0
 
@@ -74,7 +73,9 @@ class ExternalPlottingView(object):
         external_axes = fig_window.axes
         for plot_info in data:
             external_axis = external_axes[plot_info.axis]
-            external_axis.plot(plot_info.workspace, specNum=plot_info.specNum, autoscale_on_update=True,
+            external_axis.plot(plot_info.workspace,
+                               specNum=plot_info.specNum,
+                               autoscale_on_update=True,
                                distribution=not plot_info.normalised)
             legend_set_draggable(external_axis.legend(), True)
         fig_window.show()
@@ -97,13 +98,15 @@ class ExternalPlottingView(object):
         for i, plot_info in enumerate(data):
             distr_state = self._get_distr_state_mantid_plot(plot_info.normalised)
             if self.number_of_axes == 1:
-                plotSpectrum(plot_info.workspace, plot_info.specNum - 1,
-                             distribution=distr_state, window=fig_window)
+                plotSpectrum(plot_info.workspace, plot_info.specNum - 1, distribution=distr_state, window=fig_window)
             else:
                 lay = fig_window.layer(plot_info.axis + 1)
                 fig_window.setActiveLayer(lay)
-                plotSpectrum(plot_info.workspace, plot_info.specNum - 1,
-                             distribution=distr_state, window=fig_window, type=0)
+                plotSpectrum(plot_info.workspace,
+                             plot_info.specNum - 1,
+                             distribution=distr_state,
+                             window=fig_window,
+                             type=0)
         if self.number_of_axes != 1:
             fig_window.arrangeLayers(False, False)
 

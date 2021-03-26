@@ -64,8 +64,7 @@ class MultiPlottingContextTest(unittest.TestCase):
 
         gridspec = mock.Mock()
         self.context._gridspec = gridspec
-        with mock.patch(
-                "MultiPlotting.subplot.subplot_context.subplotContext.update_gridspec") as patch:
+        with mock.patch("MultiPlotting.subplot.subplot_context.subplotContext.update_gridspec") as patch:
             self.context.update_layout(figure)
             self.assertEqual(patch.call_count, 3)
             # only last iteration survives

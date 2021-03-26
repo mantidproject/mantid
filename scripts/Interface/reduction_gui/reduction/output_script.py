@@ -40,7 +40,7 @@ class Output(BaseScriptElement):
                         for ws in AnalysisDataService.Instance().getObjectNames():
                             if ws.startswith(item) and ws.endswith('_Iq'):
                                 iq_plots.append(ws)
-                    if len(iq_plots)>0:
+                    if len(iq_plots) > 0:
                         mantidplot.plotSpectrum(iq_plots, 0, True)
             except:
                 raise RuntimeError("Could not plot resulting output\n  %s" % sys.exc_info()[1])

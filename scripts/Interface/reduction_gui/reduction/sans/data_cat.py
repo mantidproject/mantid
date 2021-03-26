@@ -18,11 +18,11 @@ import traceback
 # Only way that I have found to use the logger from both the command line
 # and mantiplot
 try:
-    import mantidplot # noqa
+    import mantidplot  # noqa
     from mantid.kernel import logger
 except ImportError:
     import logging
-    logging.basicConfig()#level=logging.DEBUG)
+    logging.basicConfig()  #level=logging.DEBUG)
     logger = logging.getLogger("data_cat")
 
 
@@ -30,11 +30,13 @@ class DataType(object):
     TABLE_NAME = "datatype"
 
     # Data type names
-    DATA_TYPES = {"FLOOD_FIELD":"Flood Field",
-                  "DARK_CURRENT":"Dark Current",
-                  "TRANS_SAMPLE":"Transmission Sample",
-                  "TRANS_BCK":"Transmission Background",
-                  "TRANS_DIRECT":"Transmission Empty"}
+    DATA_TYPES = {
+        "FLOOD_FIELD": "Flood Field",
+        "DARK_CURRENT": "Dark Current",
+        "TRANS_SAMPLE": "Transmission Sample",
+        "TRANS_BCK": "Transmission Background",
+        "TRANS_DIRECT": "Transmission Empty"
+    }
 
     @classmethod
     def create_table(cls, cursor, data_set_table):
@@ -42,8 +44,7 @@ class DataType(object):
                             id integer primary key,
                             type_id integer,
                             dataset_id integer,
-                            foreign key(dataset_id) references %s(id))"""
-                       % (cls.TABLE_NAME, data_set_table))
+                            foreign key(dataset_id) references %s(id))""" % (cls.TABLE_NAME, data_set_table))
 
     @classmethod
     def add(cls, dataset_id, type_id, cursor):
@@ -53,17 +54,19 @@ class DataType(object):
         if type_id not in cls.DATA_TYPES.keys():
             raise RuntimeError("DataType got an unknown type ID: %s" % type_id)
 
-        t = (type_id, dataset_id,)
-        cursor.execute("insert into %s(type_id, dataset_id) values (?,?)"
-                       % cls.TABLE_NAME, t)
+        t = (
+            type_id,
+            dataset_id,
+        )
+        cursor.execute("insert into %s(type_id, dataset_id) values (?,?)" % cls.TABLE_NAME, t)
 
     @classmethod
     def get_likely_type(cls, dataset_id, cursor):
-        t = (dataset_id,)
+        t = (dataset_id, )
         cursor.execute("select type_id from %s where dataset_id=?" % cls.TABLE_NAME, t)
         rows = cursor.fetchall()
-        if len(rows)>1:
-            return cls.DATA_TYPES[rows[len(rows)-1][0]]
+        if len(rows) > 1:
+            return cls.DATA_TYPES[rows[len(rows) - 1][0]]
         return None
 
 
@@ -120,12 +123,12 @@ class DataSet(object):
         """
             Return a list of data set attributes as strings
         """
-        return (str(self.run_number), self.title, self.run_start, "%-g"%self.duration, "%-10.0f"%self.sdd)
+        return (str(self.run_number), self.title, self.run_start, "%-g" % self.duration, "%-10.0f" % self.sdd)
 
     @classmethod
     def get_data_set_id(cls, run, cursor):
-        t = (run,)
-        cursor.execute('select * from %s where run=?'% cls.TABLE_NAME, t)
+        t = (run, )
+        cursor.execute('select * from %s where run=?' % cls.TABLE_NAME, t)
         rows = cursor.fetchall()
         if len(rows) == 0:
             return -1
@@ -141,8 +144,8 @@ class DataSet(object):
         if run is None:
             return None
 
-        t = (run,)
-        cursor.execute('select * from %s where run=?'% cls.TABLE_NAME, t)
+        t = (run, )
+        cursor.execute('select * from %s where run=?' % cls.TABLE_NAME, t)
         rows = cursor.fetchall()
 
         if len(rows) == 0:
@@ -173,8 +176,14 @@ class DataSet(object):
         cls.data_type_cls.create_table(cursor, cls.TABLE_NAME)
 
     def insert_in_db(self, cursor):
-        t = (self.run_number, self.title, self.run_start, self.duration, self.sdd,)
-        cursor.execute('insert into %s(run, title, start, duration,sdd) values (?,?,?,?,?)'%self.TABLE_NAME, t)
+        t = (
+            self.run_number,
+            self.title,
+            self.run_start,
+            self.duration,
+            self.sdd,
+        )
+        cursor.execute('insert into %s(run, title, start, duration,sdd) values (?,?,?,?,?)' % self.TABLE_NAME, t)
         return cursor.lastrowid
 
 
@@ -252,12 +261,12 @@ class DataCatalog(object):
 
     def add_type(self, run, type):
         if self.db is None:
-            print ("DataCatalog: Could not access local data catalog")
+            print("DataCatalog: Could not access local data catalog")
             return
 
         c = self.db.cursor()
         id = self.data_set_cls.get_data_set_id(run, c)
-        if id>0:
+        if id > 0:
             self.data_set_cls.data_type_cls.add(id, type, c)
 
         self.db.commit()
@@ -270,7 +279,7 @@ class DataCatalog(object):
         self.catalog = []
 
         if self.db is None:
-            print ("DataCatalog: Could not access local data catalog")
+            print("DataCatalog: Could not access local data catalog")
             return
 
         c = self.db.cursor()
@@ -284,16 +293,14 @@ class DataCatalog(object):
                     if f.endswith(extension):
                         file_path = os.path.join(data_dir, f)
                         if hasattr(self.data_set_cls, "find_with_api"):
-                            d = self.data_set_cls.find_with_api(file_path, c,
-                                                                process_files=process_files)
+                            d = self.data_set_cls.find_with_api(file_path, c, process_files=process_files)
                         else:
-                            d = self.data_set_cls.find(file_path, c,
-                                                       process_files=process_files)
+                            d = self.data_set_cls.find(file_path, c, process_files=process_files)
                         if d is not None:
                             if call_back is not None:
                                 attr_list = d.as_string_list()
                                 type_id = self.data_set_cls.data_type_cls.get_likely_type(d.id, c)
-                                attr_list += (type_id,)
+                                attr_list += (type_id, )
                                 call_back(attr_list)
                             self.catalog.append(d)
 

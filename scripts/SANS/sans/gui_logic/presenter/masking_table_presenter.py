@@ -96,17 +96,19 @@ def store_in_ads_as_hidden(workspace_name, workspace):
 
 def create_load_algorithm(serialized_state):
     load_name = "SANSLoad"
-    load_options = {"SANSState": serialized_state,
-                    "PublishToCache": True,
-                    "UseCached": True,
-                    "SampleScatterWorkspace": EMPTY_NAME,
-                    "SampleScatterMonitorWorkspace": EMPTY_NAME,
-                    "SampleTransmissionWorkspace": EMPTY_NAME,
-                    "SampleDirectWorkspace": EMPTY_NAME,
-                    "CanScatterWorkspace": EMPTY_NAME,
-                    "CanScatterMonitorWorkspace": EMPTY_NAME,
-                    "CanTransmissionWorkspace": EMPTY_NAME,
-                    "CanDirectWorkspace": EMPTY_NAME}
+    load_options = {
+        "SANSState": serialized_state,
+        "PublishToCache": True,
+        "UseCached": True,
+        "SampleScatterWorkspace": EMPTY_NAME,
+        "SampleScatterMonitorWorkspace": EMPTY_NAME,
+        "SampleTransmissionWorkspace": EMPTY_NAME,
+        "SampleDirectWorkspace": EMPTY_NAME,
+        "CanScatterWorkspace": EMPTY_NAME,
+        "CanScatterMonitorWorkspace": EMPTY_NAME,
+        "CanTransmissionWorkspace": EMPTY_NAME,
+        "CanDirectWorkspace": EMPTY_NAME
+    }
     return create_unmanaged_algorithm(load_name, **load_options)
 
 
@@ -219,7 +221,8 @@ class MaskingTablePresenter(object):
         self.display_masking_information(state=None)
 
     def get_state(self, index, file_lookup=True, suppress_warnings=False):
-        return self._parent_presenter.get_state_for_row(index, file_lookup=file_lookup,
+        return self._parent_presenter.get_state_for_row(index,
+                                                        file_lookup=file_lookup,
                                                         suppress_warnings=suppress_warnings)
 
     @staticmethod
@@ -261,26 +264,24 @@ class MaskingTablePresenter(object):
         # Get the vertical spectrum masks
         # -------------------------------
         single_vertical_strip_mask = mask_detector_info.single_vertical_strip_mask
-        MaskingTablePresenter._append_single_spectrum_mask(single_vertical_strip_mask, spectrum_masks,
-                                                           detector_name, "V")
+        MaskingTablePresenter._append_single_spectrum_mask(single_vertical_strip_mask, spectrum_masks, detector_name,
+                                                           "V")
 
         range_vertical_strip_start = mask_detector_info.range_vertical_strip_start
         range_vertical_strip_stop = mask_detector_info.range_vertical_strip_stop
-        MaskingTablePresenter._append_strip_spectrum_mask(range_vertical_strip_start,
-                                                          range_vertical_strip_stop,
+        MaskingTablePresenter._append_strip_spectrum_mask(range_vertical_strip_start, range_vertical_strip_stop,
                                                           spectrum_masks, detector_name, "V")
 
         # ---------------------------------
         # Get the horizontal spectrum masks
         # ---------------------------------
         single_horizontal_strip_mask = mask_detector_info.single_horizontal_strip_mask
-        MaskingTablePresenter._append_single_spectrum_mask(single_horizontal_strip_mask, spectrum_masks,
-                                                           detector_name, "H")
+        MaskingTablePresenter._append_single_spectrum_mask(single_horizontal_strip_mask, spectrum_masks, detector_name,
+                                                           "H")
 
         range_horizontal_strip_start = mask_detector_info.range_horizontal_strip_start
         range_horizontal_strip_stop = mask_detector_info.range_horizontal_strip_stop
-        MaskingTablePresenter._append_strip_spectrum_mask(range_horizontal_strip_start,
-                                                          range_horizontal_strip_stop,
+        MaskingTablePresenter._append_strip_spectrum_mask(range_horizontal_strip_start, range_horizontal_strip_stop,
                                                           spectrum_masks, detector_name, "H")
 
         # ---------------------------------
@@ -291,8 +292,8 @@ class MaskingTablePresenter(object):
         block_vertical_start = mask_detector_info.block_vertical_start
         block_vertical_stop = mask_detector_info.block_vertical_stop
         MaskingTablePresenter._append_block_spectrum_mask(block_horizontal_start, block_horizontal_stop,
-                                                          block_vertical_start, block_vertical_stop,
-                                                          spectrum_masks, detector_name)
+                                                          block_vertical_start, block_vertical_stop, spectrum_masks,
+                                                          detector_name)
 
         block_cross_horizontal = mask_detector_info.block_cross_horizontal
         block_cross_vertical = mask_detector_info.block_cross_vertical
@@ -303,14 +304,12 @@ class MaskingTablePresenter(object):
         # Get spectrum masks
         # ---------------------------------
         single_spectra = mask_detector_info.single_spectra
-        MaskingTablePresenter._append_single_spectrum_mask(single_spectra, spectrum_masks,
-                                                           detector_name, "S")
+        MaskingTablePresenter._append_single_spectrum_mask(single_spectra, spectrum_masks, detector_name, "S")
 
         spectrum_range_start = mask_detector_info.spectrum_range_start
         spectrum_range_stop = mask_detector_info.spectrum_range_stop
-        MaskingTablePresenter._append_strip_spectrum_mask(spectrum_range_start,
-                                                          spectrum_range_stop,
-                                                          spectrum_masks, detector_name, "S")
+        MaskingTablePresenter._append_strip_spectrum_mask(spectrum_range_start, spectrum_range_stop, spectrum_masks,
+                                                          detector_name, "S")
 
         return spectrum_masks
 
@@ -345,8 +344,8 @@ class MaskingTablePresenter(object):
         beam_stop_arm_pos1 = mask_info.beam_stop_arm_pos1 if mask_info.beam_stop_arm_pos1 else 0.
         beam_stop_arm_pos2 = mask_info.beam_stop_arm_pos2 if mask_info.beam_stop_arm_pos2 else 0.
         if beam_stop_arm_width and beam_stop_arm_angle:
-            detail = "LINE {}, {}, {}, {}".format(beam_stop_arm_width, beam_stop_arm_angle,
-                                                  beam_stop_arm_pos1, beam_stop_arm_pos2)
+            detail = "LINE {}, {}, {}, {}".format(beam_stop_arm_width, beam_stop_arm_angle, beam_stop_arm_pos1,
+                                                  beam_stop_arm_pos2)
             container.append(masking_information(first="Arm", second="", third=detail))
         return container
 
@@ -395,7 +394,8 @@ class MaskingTablePresenter(object):
         masks = []
 
         mask_info_lab = mask_info.detectors[DetectorType.LAB.value]
-        mask_info_hab = mask_info.detectors[DetectorType.HAB.value] if DetectorType.HAB.value in mask_info.detectors else None  # noqa
+        mask_info_hab = mask_info.detectors[
+            DetectorType.HAB.value] if DetectorType.HAB.value in mask_info.detectors else None  # noqa
 
         # Add the radius mask
         radius_mask = self._get_radius(mask_info)

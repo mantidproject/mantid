@@ -57,8 +57,8 @@ class ISISReflectometryWorkflowBase():
 
     def regenerateRunsFile():
         setupInstrument()
-        regenerateRunsFile(self.first_transmission_runs + self.second_transmission_runs,
-                           self.run_numbers, self.input_run_file)
+        regenerateRunsFile(self.first_transmission_runs + self.second_transmission_runs, self.run_numbers,
+                           self.input_run_file)
 
     def regenerateReferenceFileFromDirectory(reference_file_directory):
         setupInstrument()
@@ -85,10 +85,10 @@ def workspaceName(file_path):
 
 def stitchedWorkspaceName(run1_number, run2_number):
     '''Gets the name of the stitched workspace based on the two input workspace names'''
-    run1_name=str(run1_number)
-    run2_name=str(run2_number)
-    run2_short_name=run2_name[-2:]
-    return run1_name+'_'+run2_short_name
+    run1_name = str(run1_number)
+    run2_name = str(run2_number)
+    run2_short_name = run2_name[-2:]
+    return run1_name + '_' + run2_short_name
 
 
 def transmissionWorkspaceName(run):
@@ -102,30 +102,37 @@ def stitchedTransmissionWorkspaceName(run_number_1, run_number_2):
 def stitchTransmissionWorkspaces(runs1, runs2, output_names, scaleRHSWorkspace=True):
     '''Create a transmission workspace for each pair of input runs with the given output names'''
     for run1, run2, name in zip(runs1, runs2, output_names):
-        CreateTransmissionWorkspaceAuto(
-            FirstTransmissionRun=run1,
-            SecondTransmissionRun=run2,
-            OutputWorkspace=name,
-            StartOverlap=10,
-            EndOverlap=12,
-            ScaleRHSWorkspace=scaleRHSWorkspace)
+        CreateTransmissionWorkspaceAuto(FirstTransmissionRun=run1,
+                                        SecondTransmissionRun=run2,
+                                        OutputWorkspace=name,
+                                        StartOverlap=10,
+                                        EndOverlap=12,
+                                        ScaleRHSWorkspace=scaleRHSWorkspace)
 
 
-def reduceRun(run_number, angle, first_transmission_runs = [], second_transmission_runs = [],
-              time_interval = None, suffix = '_IvsQ', debug = False):
+def reduceRun(run_number,
+              angle,
+              first_transmission_runs=[],
+              second_transmission_runs=[],
+              time_interval=None,
+              suffix='_IvsQ',
+              debug=False):
     ''' Perform reflectometry reduction on the run'''
-    run_name=str(run_number)
+    run_name = str(run_number)
     if time_interval is not None:
         do_slicing = True
     else:
         do_slicing = False
     # Reduce this run
-    ReflectometryISISLoadAndProcess(InputRunList=run_name, Debug=debug,
+    ReflectometryISISLoadAndProcess(InputRunList=run_name,
+                                    Debug=debug,
                                     ProcessingInstructions='4',
-                                    StartOverlap=10, EndOverlap=12,
+                                    StartOverlap=10,
+                                    EndOverlap=12,
                                     FirstTransmissionRunList=','.join(first_transmission_runs),
                                     SecondTransmissionRunList=','.join(second_transmission_runs),
-                                    SliceWorkspace=do_slicing, TimeInterval=time_interval,
+                                    SliceWorkspace=do_slicing,
+                                    TimeInterval=time_interval,
                                     UseNewFilterAlgorithm=False,
                                     OutputWorkspaceBinned=run_name + suffix + '_binned',
                                     OutputWorkspace=run_name + suffix,
@@ -149,8 +156,7 @@ def regenerateReferenceFile(reference_file_directory, output_filename):
     SaveNexus(InputWorkspace=output_workspace_name, Filename=output_filename)
 
 
-def regenerateRunsFile(transmission_run_names, run_numbers, event_run_numbers,
-                       input_workspaces_file):
+def regenerateRunsFile(transmission_run_names, run_numbers, event_run_numbers, input_workspaces_file):
     '''Generate the test input file from a range of run numbers and transmission runs.'''
     # Load transmission runs
     for run in transmission_run_names:
@@ -165,7 +171,7 @@ def regenerateRunsFile(transmission_run_names, run_numbers, event_run_numbers,
     event_run_names = [str(event_run_number) for event_run_number in event_run_numbers]
     for event_run_name in event_run_names:
         LoadEventNexus(event_run_name, OutputWorkspace=event_run_name, LoadMonitors=True)
-    event_monitor_names = [str(run_number)+'_monitors' for run_number in event_run_numbers]
+    event_monitor_names = [str(run_number) + '_monitors' for run_number in event_run_numbers]
     # Group and save
     GroupWorkspaces(InputWorkspaces=run_names + transmission_run_names + event_run_names + event_monitor_names,
                     OutputWorkspace='Input')

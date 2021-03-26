@@ -18,9 +18,10 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
     This algorithm is written for the DNS @ MLZ,
     but can be adjusted for other instruments if needed.
     """
-    properties_to_compare = ['deterota', 'wavelength', 'slit_i_left_blade_position',
-                             'slit_i_right_blade_position', 'slit_i_lower_blade_position',
-                             'slit_i_upper_blade_position']
+    properties_to_compare = [
+        'deterota', 'wavelength', 'slit_i_left_blade_position', 'slit_i_right_blade_position',
+        'slit_i_lower_blade_position', 'slit_i_upper_blade_position'
+    ]
 
     def __init__(self):
         """
@@ -38,7 +39,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         return 'Workflow\\MLZ\\DNS;;CorrectionFunctions\\SpecialCorrections'
 
     def seeAlso(self):
-        return [ "DNSComputeDetEffCorrCoefs" ]
+        return ["DNSComputeDetEffCorrCoefs"]
 
     def name(self):
         """
@@ -181,8 +182,13 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        workspaces = {"NSFDataWorkspace": None, "SFNiCrWorkspace": None, "NSFNiCrWorkspace": None,
-                      "SFBkgrWorkspace": None, "NSFBkgrWorkspace": None}
+        workspaces = {
+            "NSFDataWorkspace": None,
+            "SFNiCrWorkspace": None,
+            "NSFNiCrWorkspace": None,
+            "SFBkgrWorkspace": None,
+            "NSFBkgrWorkspace": None
+        }
 
         for key in workspaces.keys():
             workspaces[key] = self.getProperty(key).value
@@ -235,9 +241,11 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         sf_outws = api.AnalysisDataService.retrieve(self.sf_outws_name)
 
         # copy sample logs from data workspace to the output workspace
-        api.CopyLogs(InputWorkspace=self.input_workspaces['SF_Data'], OutputWorkspace=self.sf_outws_name,
+        api.CopyLogs(InputWorkspace=self.input_workspaces['SF_Data'],
+                     OutputWorkspace=self.sf_outws_name,
                      MergeStrategy='MergeReplaceExisting')
-        api.CopyLogs(InputWorkspace=self.input_workspaces['NSF_Data'], OutputWorkspace=self.nsf_outws_name,
+        api.CopyLogs(InputWorkspace=self.input_workspaces['NSF_Data'],
+                     OutputWorkspace=self.nsf_outws_name,
                      MergeStrategy='MergeReplaceExisting')
         self.setProperty("SFOutputWorkspace", sf_outws)
         self.setProperty("NSFOutputWorkspace", nsf_outws)

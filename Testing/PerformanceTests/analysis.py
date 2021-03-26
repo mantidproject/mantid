@@ -139,13 +139,7 @@ def get_results_matching(results, field, value):
 def plot_runtime(annotate, saveImage, path, **kwargs):
     name = kwargs['name']
     (xData, yData) = get_runtime_data(**kwargs)
-    trace1 = go.Scatter(x=xData, y=yData,
-                        mode='lines+markers',
-                        marker=dict(
-                            size='5',
-                            color="blue"
-                        )
-                        )
+    trace1 = go.Scatter(x=xData, y=yData, mode='lines+markers', marker=dict(size='5', color="blue"))
 
     annotations = []
 
@@ -161,16 +155,13 @@ def plot_runtime(annotate, saveImage, path, **kwargs):
 
         for x, y, text in zip(xData, yData, commitids):
             annotations.append(
-                dict(
-                    x=x,
-                    y=y,
-                    text=text,
-                    showarrow=False,
-                    font=dict(family='sans serif', size=10),
-                    xanchor='center',
-                    yanchor='center'
-                )
-            )
+                dict(x=x,
+                     y=y,
+                     text=text,
+                     showarrow=False,
+                     font=dict(family='sans serif', size=10),
+                     xanchor='center',
+                     yanchor='center'))
 
     if last_num is not None:
         title = "Runtime History of %s (last %d revs)" % (name, last_num)
@@ -180,14 +171,11 @@ def plot_runtime(annotate, saveImage, path, **kwargs):
     yAxisTitle = 'Runtime/iteration (sec)'
     xAxisTitle = kwargs['x_field']
 
-    layout = go.Layout(showlegend=False, annotations=annotations,
+    layout = go.Layout(showlegend=False,
+                       annotations=annotations,
                        title=title,
                        xaxis=dict(title=xAxisTitle),
-                       yaxis=dict(
-                           title=yAxisTitle,
-                           range=[0, np.amax(yData)]
-                       )
-                       )
+                       yaxis=dict(title=yAxisTitle, range=[0, np.amax(yData)]))
     data = [trace1]
     fig = go.Figure(data=data, layout=layout)
 
@@ -310,8 +298,7 @@ def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
             if field == 'compare':
                 # Comparison to previous commit, if anything can be done
                 if (last_commitid != ""):
-                    val = """<a href="%s/compare/%s...%s">diff</a>""" % (
-                        MANTID_ADDRESS, last_commitid, commitid)
+                    val = """<a href="%s/compare/%s...%s">diff</a>""" % (MANTID_ADDRESS, last_commitid, commitid)
 
             else:
                 # Normal fields
@@ -325,7 +312,7 @@ def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
                 if field == "commitid":
                     commitid = val
                     partial_commitid = val
-                    if (len(partial_commitid) > 7): partial_commitid = partial_commitid[0:7];
+                    if (len(partial_commitid) > 7): partial_commitid = partial_commitid[0:7]
                     val = """<a href="%s/commit/%s">%s</a>""" % (MANTID_ADDRESS, commitid, partial_commitid)
 
                 if field == "runtime":

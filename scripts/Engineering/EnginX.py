@@ -114,12 +114,15 @@ def run(ceria_run, do_cal, do_van, van_run, calibration_directory, calibration_g
         create_vanadium(van_run, calibration_directory)
 
     # find the file names of calibration files that would be created by this run
-    cal_endings = {"banks": ["all_banks", "bank_{}".format(crop_on)],
-                   "spectra": ["all_banks", "bank_{}".format(crop_name)],
-                   None: ["all_banks", "bank_North", "bank_South"]}
+    cal_endings = {
+        "banks": ["all_banks", "bank_{}".format(crop_on)],
+        "spectra": ["all_banks", "bank_{}".format(crop_name)],
+        None: ["all_banks", "bank_North", "bank_South"]
+    }
     expected_cals = ["ENGINX_{0}_{1}_{2}.prm".format(van_run, ceria_run, i) for i in cal_endings.get(cropped)]
-    expected_cals_present = [os.path.isfile(os.path.join(calibration_directory, cal_file)) for cal_file in
-                             expected_cals]
+    expected_cals_present = [
+        os.path.isfile(os.path.join(calibration_directory, cal_file)) for cal_file in expected_cals
+    ]
 
     # if the calibration files that this run would create are not present, or the user has requested it, create the
     # calibration files
@@ -207,8 +210,10 @@ def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, cali
     if use_spectrum_number:
         param_tbl_name = crop_name if crop_name is not None else "cropped"
         # run the calibration cropping on spectrum number
-        output = simple.EnggCalibrate(InputWorkspace=ceria_ws, VanIntegrationWorkspace=van_integrated_ws,
-                                      VanCurvesWorkspace=van_curves_ws, SpectrumNumbers=str(spec_nos),
+        output = simple.EnggCalibrate(InputWorkspace=ceria_ws,
+                                      VanIntegrationWorkspace=van_integrated_ws,
+                                      VanCurvesWorkspace=van_curves_ws,
+                                      SpectrumNumbers=str(spec_nos),
                                       FittedPeaks=param_tbl_name,
                                       OutputParametersTableName=param_tbl_name)
         # get the values needed for saving out the .prm files
@@ -227,8 +232,11 @@ def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, cali
         else:
             param_tbl_name = "engg_calibration_bank_2"
             bank = 2
-        output = simple.EnggCalibrate(InputWorkspace=ceria_ws, VanIntegrationWorkspace=van_integrated_ws,
-                                      VanCurvesWorkspace=van_curves_ws, Bank=str(bank), FittedPeaks=param_tbl_name,
+        output = simple.EnggCalibrate(InputWorkspace=ceria_ws,
+                                      VanIntegrationWorkspace=van_integrated_ws,
+                                      VanCurvesWorkspace=van_curves_ws,
+                                      Bank=str(bank),
+                                      FittedPeaks=param_tbl_name,
                                       OutputParametersTableName=param_tbl_name)
         # get the values needed for saving out the .prm files
         difc = [output.DIFC]
@@ -265,8 +273,11 @@ def create_calibration_files(ceria_run, van_run, curve_van, int_van, calibration
     # loop through the banks, calibrating both
     for i in range(1, banks):
         param_tbl_name = "engg_calibration_bank_{}".format(i)
-        output = simple.EnggCalibrate(InputWorkspace=ceria_ws, VanIntegrationWorkspace=van_integrated_ws,
-                                      VanCurvesWorkspace=van_curves_ws, Bank=str(i), FittedPeaks=param_tbl_name,
+        output = simple.EnggCalibrate(InputWorkspace=ceria_ws,
+                                      VanIntegrationWorkspace=van_integrated_ws,
+                                      VanCurvesWorkspace=van_curves_ws,
+                                      Bank=str(i),
+                                      FittedPeaks=param_tbl_name,
                                       OutputParametersTableName=param_tbl_name)
         # add the needed outputs to a list
         difcs.append(output.DIFC)
@@ -274,8 +285,8 @@ def create_calibration_files(ceria_run, van_run, curve_van, int_van, calibration
         difas.append(output.DIFA)
         # save out the ones needed for this loop
         save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
-                         "bank_{}".format(bank_names[i - 1]), [bank_names[i - 1]],
-                         [tzeros[i - 1]], [difcs[i - 1]], [difas[i - 1]])
+                         "bank_{}".format(bank_names[i - 1]), [bank_names[i - 1]], [tzeros[i - 1]], [difcs[i - 1]],
+                         [difas[i - 1]])
     # save out the total version, then create the table of params
     save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", bank_names, tzeros,
                      difcs, difas)
@@ -323,8 +334,13 @@ def save_calibration(ceria_run, van_run, calibration_directory, calibration_gene
         template_file = "template_ENGINX_241391_236516_North_bank.prm"
     # write out the param file to the users directory
 
-    Utils.write_ENGINX_GSAS_iparam_file(output_file=gsas_iparm_fname, bank_names=bank_names, difa=difas, difc=difcs,
-                                        tzero=zeros, ceria_run=ceria_run, vanadium_run=van_run,
+    Utils.write_ENGINX_GSAS_iparam_file(output_file=gsas_iparm_fname,
+                                        bank_names=bank_names,
+                                        difa=difas,
+                                        difc=difcs,
+                                        tzero=zeros,
+                                        ceria_run=ceria_run,
+                                        vanadium_run=van_run,
                                         template_file=template_file)
     if not calibration_general == calibration_directory:
         # copy the param file to the general directory
@@ -395,7 +411,9 @@ def create_difc_zero_workspace(difc, tzero, crop_on, name):
             y2_val.append(x_val[irow] * difc[i - 1] + tzero[i - 1])
 
         # create workspaces to temporary hold the data
-        simple.CreateWorkspace(OutputWorkspace="ws1", DataX=x_val, DataY=y_val,
+        simple.CreateWorkspace(OutputWorkspace="ws1",
+                               DataX=x_val,
+                               DataY=y_val,
                                UnitX="Expected Peaks Centre(dSpacing, A)",
                                YUnitLabel="Fitted Peaks Centre(TOF, us)")
         simple.CreateWorkspace(OutputWorkspace="ws2", DataX=x_val, DataY=y2_val)
@@ -406,8 +424,7 @@ def create_difc_zero_workspace(difc, tzero, crop_on, name):
         output_name = "Engg difc Zero Peaks Bank {}".format(name)
 
         # use the two workspaces to creat the output
-        output = simple.AppendSpectra(InputWorkspace1="ws1", InputWorkspace2="ws2",
-                                      OutputWorkspace=output_name)
+        output = simple.AppendSpectra(InputWorkspace1="ws1", InputWorkspace2="ws2", OutputWorkspace=output_name)
         plot_calibration(output, output_name)
 
     # remove the left-over workspaces
@@ -426,9 +443,19 @@ def plot_calibration(workspace, name):
     fig.canvas.set_window_title(name)
 
     # plot lines based off of old gui plot
-    ax.plot(workspace, wkspIndex=0, label="Peaks Fitted", linestyle=":", color="black", marker='o', markersize=2,
+    ax.plot(workspace,
+            wkspIndex=0,
+            label="Peaks Fitted",
+            linestyle=":",
+            color="black",
+            marker='o',
+            markersize=2,
             linewidth=1.5)
-    ax.plot(workspace, wkspIndex=1, label="Expected Peaks Centre(dspacing, A)", color="orange", marker='o',
+    ax.plot(workspace,
+            wkspIndex=1,
+            label="Expected Peaks Centre(dspacing, A)",
+            color="orange",
+            marker='o',
             markersize=2)
 
     # set the plot and axes titles
@@ -504,15 +531,16 @@ def focus_whole(run_number, van_curves, van_int, focus_directory, focus_general,
     # loop through both banks, focus and save them
     for i in range(1, 3):
         output_ws = "engg_focus_output_bank_{}".format(i)
-        simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
-                         VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
+        simple.EnggFocus(InputWorkspace=ws_to_focus,
+                         OutputWorkspace=output_ws,
+                         VanIntegrationWorkspace=van_integrated_ws,
+                         VanCurvesWorkspace=van_curves_ws,
                          Bank=str(i))
         _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_{}{{}}", str(i))
 
 
 def focus_cropped(run_number, van_curves, van_int, focus_directory, focus_general, do_pre_process, params, time_period,
-                  crop_on,
-                  use_spectra):
+                  crop_on, use_spectra):
     """
     focus a partial run, cropping either on banks or on specific spectra
 
@@ -534,25 +562,27 @@ def focus_cropped(run_number, van_curves, van_int, focus_directory, focus_genera
     # check whether to crop on bank or spectra
     if not use_spectra:
         # get the bank to crop on, focus and save it out
-        bank = {"North": "1",
-                "South": "2"}
+        bank = {"North": "1", "South": "2"}
         output_ws = output_ws.format("_bank_", bank.get(crop_on))
-        simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
-                         VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
+        simple.EnggFocus(InputWorkspace=ws_to_focus,
+                         OutputWorkspace=output_ws,
+                         VanIntegrationWorkspace=van_integrated_ws,
+                         VanCurvesWorkspace=van_curves_ws,
                          Bank=bank.get(crop_on))
         _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_{}{{}}", crop_on)
     else:
         # crop on the spectra passed in, focus and save it out
         output_ws = output_ws.format("", "")
-        simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
+        simple.EnggFocus(InputWorkspace=ws_to_focus,
+                         OutputWorkspace=output_ws,
                          VanIntegrationWorkspace=van_integrated_ws,
-                         VanCurvesWorkspace=van_curves_ws, SpectrumNumbers=crop_on)
+                         VanCurvesWorkspace=van_curves_ws,
+                         SpectrumNumbers=crop_on)
         _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_bank_{}{{}}", "cropped")
 
 
 def focus_texture_mode(run_number, van_curves, van_int, focus_directory, focus_general, do_pre_process, params,
-                       time_period,
-                       dg_file):
+                       time_period, dg_file):
     """
     perform a texture mode focusing using the grouping csv file
 
@@ -582,8 +612,10 @@ def focus_texture_mode(run_number, van_curves, van_int, focus_directory, focus_g
     for bank in banks:
         output_ws = "engg_focusing_output_ws_texture_bank_{}"
         output_ws = output_ws.format(bank)
-        simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
-                         VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
+        simple.EnggFocus(InputWorkspace=ws_to_focus,
+                         OutputWorkspace=output_ws,
+                         VanIntegrationWorkspace=van_integrated_ws,
+                         VanCurvesWorkspace=van_curves_ws,
                          SpectrumNumbers=banks.get(bank))
         _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_texture_{}{{}}", bank)
 
@@ -621,14 +653,12 @@ def _save_out(run_number, focus_directory, focus_general, output, enginx_file_na
 
     """
     # work out where to save the files
-    dat_name, genie_filename, gss_name, hdf5_name, nxs_name = _find_focus_file_location(bank_id, focus_directory,
-                                                                                        enginx_file_name_format,
-                                                                                        run_number)
+    dat_name, genie_filename, gss_name, hdf5_name, nxs_name = _find_focus_file_location(
+        bank_id, focus_directory, enginx_file_name_format, run_number)
     if not str(bank_id).isnumeric():
         bank_id = 0
     # save the files out to the user directory
-    simple.SaveFocusedXYE(InputWorkspace=output, Filename=dat_name, SplitFiles=False,
-                          StartAtBankNumber=bank_id)
+    simple.SaveFocusedXYE(InputWorkspace=output, Filename=dat_name, SplitFiles=False, StartAtBankNumber=bank_id)
     simple.SaveGSS(InputWorkspace=output, Filename=gss_name, SplitFiles=False, Bank=bank_id)
     simple.SaveOpenGenieAscii(InputWorkspace=output, Filename=genie_filename, OpenGenieFormat="ENGIN-X Format")
     simple.SaveNexus(InputWorkspace=output, Filename=nxs_name)

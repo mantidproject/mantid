@@ -15,7 +15,7 @@ def readWebPage(url):
     proxy = urllib2.ProxyHandler({'http': 'wwwcache.rl.ac.uk:8080'})
     opener = urllib2.build_opener(proxy)
     urllib2.install_opener(opener)
-    aResp =urllib2.urlopen(url)
+    aResp = urllib2.urlopen(url)
     web_pg = aResp.read()
     return web_pg
 
@@ -36,29 +36,28 @@ def outputError(alg, algVersion, description, notes=""):
 
 
 rstdir = r"C:\Mantid\Code\Mantid\docs\source\algorithms"
-ticketList = [9582,9586,9607,9610,9704,9804,9726]
+ticketList = [9582, 9586, 9607, 9610, 9704, 9804, 9726]
 
 ticketHash = {}
 for ticket in ticketList:
-    ticketHash[ticket] = readWebPage( r"http://trac.mantidproject.org/mantid/ticket/" + str(ticket))
+    ticketHash[ticket] = readWebPage(r"http://trac.mantidproject.org/mantid/ticket/" + str(ticket))
 
 usagePattern = re.compile('Usage', re.IGNORECASE)
-excusesPattern = re.compile('(rarely called directly|designed to work with other algorithms|only used for testing|deprecated)',
-                            re.IGNORECASE)
-
+excusesPattern = re.compile(
+    '(rarely called directly|designed to work with other algorithms|only used for testing|deprecated)', re.IGNORECASE)
 
 algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 for alg in algs:
     algVersion = algs[alg][0]
     fileFound = False
-    filename = os.path.join(rstdir,alg + "-v" + str(algVersion) + ".rst")
+    filename = os.path.join(rstdir, alg + "-v" + str(algVersion) + ".rst")
     if os.path.exists(filename):
-        with open (filename, "r") as algRst:
+        with open(filename, "r") as algRst:
             fileFound = True
             algText = algRst.read()
             if (usagePattern.search(algText) is None) and (excusesPattern.search(algText) is None):
                 #check if already in a ticket
-                usageTicket = ticketExists(alg,ticketHash)
+                usageTicket = ticketExists(alg, ticketHash)
                 outputError(alg, algVersion, "No usage section", usageTicket)
     if not fileFound:
         outputError(alg, algVersion, "File not found")

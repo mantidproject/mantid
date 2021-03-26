@@ -28,7 +28,6 @@ import collections
 # -----------------------------------------------------------------------------------------
 class PropDescriptor(object):
     """Class provides common custom interface for property descriptors """
-
     def dependencies(self):
         """Returns the list of other properties names, this property depends on"""
         return []
@@ -57,7 +56,6 @@ class SumRuns(PropDescriptor):
     """Boolean property specifies if list of files provided as input for sample_run property
        should be summed.
     """
-
     def __init__(self, sample_run_prop):
         # internal reference to sample run property
         self._sample_run = sample_run_prop
@@ -97,7 +95,6 @@ class AvrgAccuracy(PropDescriptor):
     """Property-helper to round-of data nicely to provide consistent binning
        in auto-ei mode.
     """
-
     def __init__(self):
         self._accuracy = 2
 
@@ -123,7 +120,7 @@ class AvrgAccuracy(PropDescriptor):
         else:
             vallist = [value]
         rez = []
-        lim = 10 ** (self._accuracy - 1)
+        lim = 10**(self._accuracy - 1)
 
         def out(a, b, mult):
             if mult > 1:
@@ -163,7 +160,6 @@ class IncidentEnergy(PropDescriptor):
        Set it up to single value (e.g. prop_man.incident_energy=10) to treat energy_bins
        as absolute energy values.
     """
-
     def __init__(self):
         self._incident_energy = 0
         self._num_energies = 1
@@ -328,15 +324,14 @@ class IncidentEnergy(PropDescriptor):
         self._autoEiCalculated = False
         if ei_mon_spec is None:
             ei_mon_spec = instance.ei_mon_spectra
-        guess_ei_ws = GetAllEi(
-            Workspace=monitor_ws, Monitor1SpecID=ei_mon_spec[0],
-            Monitor2SpecID=ei_mon_spec[1])
+        guess_ei_ws = GetAllEi(Workspace=monitor_ws, Monitor1SpecID=ei_mon_spec[0], Monitor2SpecID=ei_mon_spec[1])
         guessEi = guess_ei_ws.readX(0)
         fin_ei = []
         for ei in guessEi:
             try:
                 ei_ref, _, _, _ = GetEi(InputWorkspace=monitor_ws,
-                                        Monitor1Spec=ei_mon_spec[0], Monitor2Spec=ei_mon_spec[1],
+                                        Monitor1Spec=ei_mon_spec[0],
+                                        Monitor2Spec=ei_mon_spec[1],
                                         EnergyEstimate=ei)
                 fin_ei.append(ei_ref)
             # pylint: disable=bare-except
@@ -363,12 +358,14 @@ class IncidentEnergy(PropDescriptor):
             for ind, en in enumerate(inc_en):
                 if en <= 0:
                     return (False, 2, "Incident energy have to be positive number or list of positive numbers.\n"
-                                      "For input argument {0} got negative energy {1}".format(ind, en))
+                            "For input argument {0} got negative energy {1}".format(ind, en))
         else:
             if inc_en <= 0:
                 return (False, 2, "Incident energy have to be positive number or list of positive numbers.\n"
-                                  "Got single negative incident energy {0} ".format(inc_en))
+                        "Got single negative incident energy {0} ".format(inc_en))
         return (True, 0, '')
+
+
 # end IncidentEnergy
 # -----------------------------------------------------------------------------------------
 
@@ -386,7 +383,6 @@ class EnergyBins(PropDescriptor):
        The list of energies can contain only single value.
        (e.g. prop_man.incident_energy=[100])/
     """
-
     def __init__(self, IncidentEnergyProp, AccuracyProp):
         self._incident_energy = IncidentEnergyProp
         self._averager = AccuracyProp
@@ -432,9 +428,10 @@ class EnergyBins(PropDescriptor):
                     rez = self._calc_relative_range(ei)
                 else:
                     if instance:
-                        instance.log("*** WARNING! Got energy_bins specified as absolute values in multirep mode.\n"
-                                     "          Will normalize these values by max value and treat as relative values",
-                                     "warning")
+                        instance.log(
+                            "*** WARNING! Got energy_bins specified as absolute values in multirep mode.\n"
+                            "          Will normalize these values by max value and treat as relative values",
+                            "warning")
                     mult = self._range / self._energy_bins[2]
                     rez = self._calc_relative_range(ei, mult)
                 if self._incident_energy.autoEi_mode():
@@ -447,9 +444,9 @@ class EnergyBins(PropDescriptor):
                 return self._energy_bins
             else:
                 if instance:
-                    instance.log("*** WARNING! Requested maximum binning range exceeds incident energy!\n"
-                                 "             Will normalize binning range by max value and treat as relative range",
-                                 "warning")
+                    instance.log(
+                        "*** WARNING! Requested maximum binning range exceeds incident energy!\n"
+                        "             Will normalize binning range by max value and treat as relative range", "warning")
                     mult = self._range / self._energy_bins[2]
                     ei = self._incident_energy.get_current()
                     return self._calc_relative_range(ei, mult)
@@ -472,13 +469,16 @@ class EnergyBins(PropDescriptor):
         ebin = instance.energy_bins
         if isinstance(ei, list) or owner.incident_energy.autoEi_mode():  # ebin expected to be relative
             if ebin[2] > 1:
-                return (False, 1,
-                        "Binning for multiple energy range should be relative to incident energy. Got ebin_max={0} > 1\n"
-                        + "Energy range will be normalized and treated as relative range")
+                return (
+                    False, 1,
+                    "Binning for multiple energy range should be relative to incident energy. Got ebin_max={0} > 1\n" +
+                    "Energy range will be normalized and treated as relative range")
         else:
             if not owner.incident_energy.autoEi_mode() and ebin[2] > ei:
                 return (False, 2, 'Max rebin range {0:f} exceeds incident energy {1:f}'.format(ebin[2], ei))
         return (True, 0, '')
+
+
 # -----------------------------------------------------------------------------------------
 # end EnergyBins
 # -----------------------------------------------------------------------------------------
@@ -491,7 +491,6 @@ class SaveFileName(PropDescriptor):
       other properties values, but user can assign its own name, which will be
       used instead.
     """
-
     def __init__(self, Name=None):
         self._file_name = Name
         self._custom_print = None
@@ -544,6 +543,8 @@ class SaveFileName(PropDescriptor):
 
     def set_custom_print(self, routine):
         self._custom_print = routine
+
+
 # end SaveFileName
 # -----------------------------------------------------------------------------------------
 
@@ -552,7 +553,6 @@ class InstrumentDependentProp(PropDescriptor):
     """Generic property describing some aspects of instrument (e.g. name, short name etc),
        which are undefined if no instrument is defined.
     """
-
     def __init__(self, prop_name):
         self._prop_name = prop_name
 
@@ -568,13 +568,14 @@ class InstrumentDependentProp(PropDescriptor):
 
     def __set__(self, instance, values):
         raise AttributeError("Property {0} can not be assigned. It defined by instrument".format(self._prop_name))
+
+
 # end InstrumentDependentProp
 # -----------------------------------------------------------------------------------------
 
 
 class VanadiumRMM(PropDescriptor):
     """Defines constant static rmm for vanadium."""
-
     def __get__(self, instance, owner=None):
         """ return rmm for vanadium """
 
@@ -582,6 +583,8 @@ class VanadiumRMM(PropDescriptor):
 
     def __set__(self, instance, value):
         raise AttributeError("Can not change vanadium rmm")
+
+
 # end VanadiumRMM
 # -----------------------------------------------------------------------------------------
 # END Descriptors for NonIDF_Properties class
@@ -603,7 +606,6 @@ class mon2NormalizationEnergyRange(PropDescriptor):
        To find the actual integration ranges one should convert these values into TOF (or
        convert monitor signal to energy).
     """
-
     def __init__(self):
         # default range
         self._relative_range = [0.8, 1.2]
@@ -632,8 +634,8 @@ class mon2NormalizationEnergyRange(PropDescriptor):
         """ method to check if list of values acceptable as ranges """
 
         if len(val) != 2:
-            raise KeyError(
-                "mon2_norm_energy_range needs to be initialized by lost of two values. Got {0}".format(len(val)))
+            raise KeyError("mon2_norm_energy_range needs to be initialized by lost of two values. Got {0}".format(
+                len(val)))
         self._relative_range = (float(val[0]), float(val[1]))
         ok, sev, message = self.validate(instance)
         if not ok:
@@ -657,7 +659,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
         en_range = self._relative_range
         if len(en_range) != 2:
             return (False, 2, 'mon2_normalization_energy_range can be initialized by list of two values only.'
-                              ' Got {0} values'.format(len(range)))
+                    ' Got {0} values'.format(len(range)))
 
         result = (True, 0, '')
 
@@ -685,12 +687,13 @@ class mon2NormalizationEnergyRange(PropDescriptor):
                 return (False, 2, message)
 
         return result
+
+
 # -----------------------------------------------------------------------------------------
 
 
 class PropertyFromRange(PropDescriptor):
     """Generic descriptor for property, which can have one value from a list of values."""
-
     def __init__(self, availible_values, default_value):
         self._availible_values = availible_values
         self.__set__(None, default_value)
@@ -719,7 +722,6 @@ class DetCalFile(PropDescriptor):
        or a run number, corresponding to a file to be loaded as a
        workspace.
     """
-
     def __init__(self):
         self._det_cal_file = None
         self._calibrated_by_run = False
@@ -762,7 +764,8 @@ class DetCalFile(PropDescriptor):
             self._calibrated_by_run = True
             return
         raise NameError(
-            'Detector calibration file name can be a workspace name present in Mantid or string describing an file name')
+            'Detector calibration file name can be a workspace name present in Mantid or string describing an file name'
+        )
 
     # if Reducer.det_cal_file != None :
     #    if isinstance(Reducer.det_cal_file,str) and not Reducer.det_cal_file
@@ -826,13 +829,14 @@ class DetCalFile(PropDescriptor):
             pass
         self._det_cal_file = file_name
         return (True, file_name)
+
+
 # end DetCalFile
 # -----------------------------------------------------------------------------------------
 
 
 class MapMaskFile(PropDescriptor):
     """common method to wrap around an auxiliary file name"""
-
     def __init__(self, prop_name, file_ext, doc_string=None):
         self._file_name = None
         self._file_ext = file_ext
@@ -870,6 +874,8 @@ class MapMaskFile(PropDescriptor):
         else:
             self._file_name = file_name
             return (True, file_name)
+
+
 # end MapMaskFile
 
 # -----------------------------------------------------------------------------------------
@@ -884,7 +890,6 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
        so that both hard mask file and the diagnostics procedures are used to identify
        and exclude failing detectors.
     """
-
     def __init__(self):
         prop_helpers.ComplexProperty.__init__(self, ['use_hard_mask_only', 'run_diagnostics'])
 
@@ -922,7 +927,6 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
        to the file name provided and use_hard_mask_only property to True, so that
        only hard mask file provided is used to exclude failing detectors.
     """
-
     def __init__(self):
         prop_helpers.ComplexProperty.__init__(self, ['use_hard_mask_only', 'run_diagnostics'])
 
@@ -963,6 +967,8 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
         # pylint: disable=bare-except
         except:
             pass
+
+
 # end HardMaskOnly
 # -----------------------------------------------------------------------------------------
 
@@ -988,7 +994,6 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
        actual range is calculated according to the expression:
        integration_range = [monovan_lo_value,monovan_hi_value].
     """
-
     def __init__(self, DepType=None):
         if DepType:
             self._rel_range = False
@@ -1012,7 +1017,8 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
         if self._rel_range:  # relative range
             if ei is None:
                 raise AttributeError(
-                    'Attempted to obtain relative to ei monovan integration range, but incident energy has not been set')
+                    'Attempted to obtain relative to ei monovan integration range, but incident energy has not been set'
+                )
             rel_range = prop_helpers.ComplexProperty.__get__(self, tDict)
             the_range = [rel_range[0] * ei, rel_range[1] * ei]
             return the_range
@@ -1060,6 +1066,8 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
             return False, 1, 'monovan integration is suspiciously wide: [{0}:{1}]. ' \
                              'This may be incorrect'.format(the_range[0], the_range[1])
         return True, 0, ''
+
+
 # end MonovanIntegrationRange
 
 
@@ -1069,7 +1077,6 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
        or two spectra lists to sum and obtain workspace with two combined spectra
        for GetEi algorithm to work.
     """
-
     def __init__(self):
         """ Ei mon spectra is defined as function of two other complex properties"""
         prop_helpers.ComplexProperty.__init__(self, ['ei-mon1-spec', 'ei-mon2-spec'])
@@ -1112,8 +1119,7 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
         # end if
         if len(val) != 2:
             raise KeyError("ei_mon_spectra may be either tuple defining two spectra "
-                           "lists or string, which can be transformed to such lists. Got {0}"
-                           .format(value))
+                           "lists or string, which can be transformed to such lists. Got {0}".format(value))
 
         # Handle self-assignment. Otherwise suppose that the values are meaningful
         if val[0] == 'ei-mon1-spec':
@@ -1179,7 +1185,6 @@ class SpectraToMonitorsList(PropDescriptor):
 
        Written to work with old IDF too, where this property is absent and property defaults to empty list.
    """
-
     def __init__(self):
         self._spectra_to_monitors_list = None
 
@@ -1217,6 +1222,8 @@ class SpectraToMonitorsList(PropDescriptor):
             else:
                 result = [int(spectra_list)]
         return result
+
+
 # end SpectraToMonitorsList
 
 # -----------------------------------------------------------------------------------------
@@ -1243,8 +1250,10 @@ class SaveFormat(PropDescriptor):
         return self._save_format
 
     def __set__(self, instance, value):
-        """ user can clear save formats by setting save_format=None or save_format = [] or save_format=''
-            if empty string or empty list is provided as part of the list, all save_format-s set up earlier are cleared"""
+        """
+         user can clear save formats by setting save_format=None or save_format = [] or save_format=''
+         if empty string or empty list is provided as part of the list, all save_format-s set up earlier are cleared
+        """
 
         # clear format by using None
         if value is None:
@@ -1262,8 +1271,8 @@ class SaveFormat(PropDescriptor):
                 value = subformats[0]
 
                 if value not in SaveFormat.save_formats:
-                    instance.log("Trying to set saving in unknown format: \"" + str(
-                        value) + "\" No saving will occur for this format")
+                    instance.log("Trying to set saving in unknown format: \"" + str(value) +
+                                 "\" No saving will occur for this format")
                     return
         else:
             try:
@@ -1273,8 +1282,8 @@ class SaveFormat(PropDescriptor):
                 return
             except:
                 raise KeyError(
-                    ' Attempting to set unknown saving format {0} of type {1}. Allowed values can be spe, nxspe or nxs'
-                    .format(value, type(value)))
+                    ' Attempting to set unknown saving format {0} of type {1}. Allowed values can be spe, nxspe or nxs'.
+                    format(value, type(value)))
         # end if different types
         self._save_format.add(value)
 
@@ -1285,6 +1294,8 @@ class SaveFormat(PropDescriptor):
             return (False, 1, 'No internal save format is defined. Results may be lost')
         else:
             return (True, 0, '')
+
+
 # end SaveFormat
 
 # -----------------------------------------------------------------------------------------
@@ -1299,7 +1310,6 @@ class DiagSpectra(PropDescriptor):
 
        if set to None or not set, all spectra are used in diagnostics together.
     """
-
     def __init__(self):
         self._diag_spectra = None
 
@@ -1325,14 +1335,16 @@ class DiagSpectra(PropDescriptor):
                 for b in banks:
                     token = b.split(",")  # b = "(,)"
                     if len(token) != 2:
-                        raise ValueError(
-                            "Invalid bank spectra specification in diagnostics properties %s" % specta_sring)
+                        raise ValueError("Invalid bank spectra specification in diagnostics properties %s" %
+                                         specta_sring)
                     start = int(token[0].lstrip('('))
                     end = int(token[1].rstrip(')'))
                     bank_spectra.append((start, end))
             return bank_spectra
         else:
             raise ValueError("Spectra For diagnostics can be a string inthe form (num1,num2);(num3,num4) etc. or None")
+
+
 # end class DiagSpectra
 
 # -----------------------------------------------------------------------------------------
@@ -1344,7 +1356,6 @@ class BackbgroundTestRange(PropDescriptor):
        Usually it is the same range as the TOF range used to remove
        background (usually in powders) though it may be set up separately.
     """
-
     def __init__(self):
         self._background_test_range = None
 
@@ -1378,8 +1389,10 @@ class BackbgroundTestRange(PropDescriptor):
             return False, 2, ' Background test range is TOF range, so it can not be negative={0}'.format(test_range[0])
         if test_range[1] > 20000:
             return False, 1, ' Background test range is TOF range, its max value looks suspiciously big={0}'.format(
-                   test_range[1])
+                test_range[1])
         return True, 0, ''
+
+
 # end BackbgroundTestRange
 
 # -----------------------------------------------------------------------------------------
@@ -1392,7 +1405,6 @@ class MultirepTOFSpectraList(PropDescriptor):
        Usually it is list of two numbers, specifying spectra with detectors placed
        closest and furthest from the sample.
     """
-
     def __init__(self):
         self._spectra_list = None
 
@@ -1417,6 +1429,8 @@ class MultirepTOFSpectraList(PropDescriptor):
         else:
             rez = [int(value)]
         self._spectra_list = rez
+
+
 # end MultirepTOFSpectraList
 
 
@@ -1435,7 +1449,6 @@ class MonoCorrectionFactor(PropDescriptor):
           This value is cashed at first run and reapplied if
           no changes to the values it depends on were identified.
     """
-
     def __init__(self, ei_prop, monovan_run_prop):
         self._cor_factor = None
         self._mono_run_number = None
@@ -1498,6 +1511,8 @@ class MonoCorrectionFactor(PropDescriptor):
         if self._cor_factor <= 0:
             return (False, 2, 'Mono-correction factor has to be positive if specified: {0}'.format(self._cor_factor))
         return (True, 0, '')
+
+
 # end MonoCorrectionFactor
 
 
@@ -1509,7 +1524,6 @@ class MotorLogName(PropDescriptor):
        property to identify crystal rotation (psi in Horace) and
        to write this psi value into nxspe file.
     """
-
     def __init__(self):
         self._log_names = []
 
@@ -1528,6 +1542,8 @@ class MotorLogName(PropDescriptor):
         else:
             val_list = [str(value)]
         self._log_names = val_list
+
+
 # end MotorLogName
 
 
@@ -1536,7 +1552,6 @@ class MotorOffset(PropDescriptor):
        psi=motor_offset+wccr.timeAverageValue() where wccr is the log describing
        crystal rotation. See motor_log_name property for its description.
     """
-
     def __init__(self):
         self._offset = None
 
@@ -1552,6 +1567,8 @@ class MotorOffset(PropDescriptor):
             self._offset = None
         else:
             self._offset = float(value)
+
+
 # end MotorOffset
 
 
@@ -1564,7 +1581,6 @@ class RotationAngle(PropDescriptor):
        property value. If set explicitly to some value,
        the value specified is used and stored in NXSPE files.
     """
-
     def __init__(self, MotorLogNamesClass, Motor_Offset):
         self._mot_offset = Motor_Offset
         self._motor_log = MotorLogNamesClass
@@ -1643,6 +1659,8 @@ class RotationAngle(PropDescriptor):
 
     def dependencies(self):
         return ['motor_log_names', 'motor_offset']
+
+
 # end RotationAngle
 
 
@@ -1668,24 +1686,30 @@ class AbsCorrInfo(PropDescriptor):
     """
     # The set of properties acceptable by MonteCarloAbsorption algorithm:
     _MC_corrections_accepts = {
-        'NumberOfWavelengthPoints':lambda x: int(x),
-        'EventsPerPoint':lambda x : int(x),
-        'SeedValue':lambda x : int(x),
-        'Interpolation':lambda x : list_checker(x,('Linear','CSpline'),'MonteCarloAbsorptions "Interpolation"'),
-        'SparseInstrument':lambda x : bool(x),'NumberOfDetectorRows':lambda x: int(x),
-        'NumberOfDetectorColumns':lambda x: int(x),'MaxScatterPtAttempts':lambda x: int(x)}
+        'NumberOfWavelengthPoints': lambda x: int(x),
+        'EventsPerPoint': lambda x: int(x),
+        'SeedValue': lambda x: int(x),
+        'Interpolation': lambda x: list_checker(x, ('Linear', 'CSpline'), 'MonteCarloAbsorptions "Interpolation"'),
+        'SparseInstrument': lambda x: bool(x),
+        'NumberOfDetectorRows': lambda x: int(x),
+        'NumberOfDetectorColumns': lambda x: int(x),
+        'MaxScatterPtAttempts': lambda x: int(x)
+    }
     # The set of properties acceptable by AbsorptionCorrection algorithm:
     _Fast_corrections_accepts = {
-        'ScatterFrom':lambda x : list_checker(x,('Sample', 'Container', 'Environment'),'AbsorptionCorrections "ScatterFrom"'),
-        'NumberOfWavelengthPoints':lambda x: float(x),
-        'ExpMethod':lambda x : list_checker(x,('Normal', 'FastApprox'),'AbsorptionCorrections "ExpMethod"'),
-        'EMode':lambda x: list_checker(x,('Direct', 'Indirect', 'Elastic'),'AbsorptionCorrections "EMode"'),
-        'EFixed':lambda x: float(x),'ElementSize':lambda x: float(x)}
+        'ScatterFrom': lambda x: list_checker(x, ('Sample', 'Container', 'Environment'),
+                                              'AbsorptionCorrections "ScatterFrom"'),
+        'NumberOfWavelengthPoints': lambda x: float(x),
+        'ExpMethod': lambda x: list_checker(x, ('Normal', 'FastApprox'), 'AbsorptionCorrections "ExpMethod"'),
+        'EMode': lambda x: list_checker(x, ('Direct', 'Indirect', 'Elastic'), 'AbsorptionCorrections "EMode"'),
+        'EFixed': lambda x: float(x),
+        'ElementSize': lambda x: float(x)
+    }
 
     def __init__(self):
         self._alg_prop = {}
         # Use Monte-Carlo corrections by default
-        self._is_fast  = False
+        self._is_fast = False
 
     def __get__(self, instance, owner=None):
         if instance is None:
@@ -1700,40 +1724,39 @@ class AbsCorrInfo(PropDescriptor):
     def __set__(self, instance, value):
         if value is None or len(value) == 0:
             # Clear all previous values and set up the defaults
-            self._alg_prop = {'is_mc':True}
-            self._is_fast  = False
+            self._alg_prop = {'is_mc': True}
+            self._is_fast = False
             return
-        val_dict =  {}
+        val_dict = {}
         if isinstance(value, str):
             val = re.sub(' u ', ' ', re.sub(r'[{}\[\]"=:;,\']', ' ', value))
-            val_list = re.split(r'\s+',val)
+            val_list = re.split(r'\s+', val)
             ik = 0
             while ik < len(val_list):
                 key = val_list[ik]
-                if len(key)==0:
-                    ik+=1
+                if len(key) == 0:
+                    ik += 1
                     continue
-                val = val_list[ik+1]
-                if key in ('is_fast','is_mc'):
-                    self._algo_selector(key,val)
-                    ik +=2
+                val = val_list[ik + 1]
+                if key in ('is_fast', 'is_mc'):
+                    self._algo_selector(key, val)
+                    ik += 2
                     continue
                 val_dict[key] = val
-                ik +=2
+                ik += 2
         elif isinstance(value, dict):
             val_dict = value
-            is_fast=val_dict.pop('is_fast',None)
+            is_fast = val_dict.pop('is_fast', None)
             if is_fast is not None:
-                self._algo_selector('is_fast',is_fast)
-            is_mc = val_dict.pop('is_mc',None)
+                self._algo_selector('is_fast', is_fast)
+            is_mc = val_dict.pop('is_mc', None)
             if is_mc is not None:
-                self._algo_selector('is_mc',is_mc)
+                self._algo_selector('is_mc', is_mc)
 
         else:
-            raise(KeyError(
-                'AbsCorrInfo accepts only a dictionary '  # noqa
-                'with AbsorptionCorrections algorithm properties '  # noqa
-                'or string representation of such dictionary'))  # noqa
+            raise (KeyError('AbsCorrInfo accepts only a dictionary '  # noqa
+                            'with AbsorptionCorrections algorithm properties '  # noqa
+                            'or string representation of such dictionary'))  # noqa
 
         if self._is_fast:
             algo_name = 'AdsorptionCorrection'
@@ -1742,19 +1765,19 @@ class AbsCorrInfo(PropDescriptor):
             algo_name = 'MonteCarloAbsorption'
             acceptable_prop = AbsCorrInfo._MC_corrections_accepts
 
-        for key,val in val_dict.items():
-            check_normalizer = acceptable_prop.get(key,None)
+        for key, val in val_dict.items():
+            check_normalizer = acceptable_prop.get(key, None)
             if check_normalizer is None:
-                raise KeyError('The key {0} is not acceptable key for {1} algorithm'.format(key,algo_name))
+                raise KeyError('The key {0} is not acceptable key for {1} algorithm'.format(key, algo_name))
             val_dict[key] = check_normalizer(val)
         # Store new dictionary in the property
         self._alg_prop = val_dict
 
     def __str__(self):
-        alg_prop = self.__get__(self,AbsCorrInfo)
+        alg_prop = self.__get__(self, AbsCorrInfo)
         return str(alg_prop)
 
-    def _algo_selector(self,algo_key,key_val):
+    def _algo_selector(self, algo_key, key_val):
         if algo_key == 'is_fast':
             self._is_fast = bool(key_val)
         elif algo_key == 'is_mc':
@@ -1787,7 +1810,7 @@ class AbsorptionShapesContainer(PropDescriptor):
             return
         if isinstance(value, str):
             self._theShapeHolder = anAbsorptionShape.from_str(value)
-        elif isinstance(value,anAbsorptionShape):
+        elif isinstance(value, anAbsorptionShape):
             self._theShapeHolder = value
         else:
             raise ValueError('The property accepts only anAbsorptionShape type classes or their string representation')
@@ -1799,7 +1822,7 @@ class AbsorptionShapesContainer(PropDescriptor):
             return self._theShapeHolder.str()
 
 
-def list_checker(val,list_in,mess_base):
+def list_checker(val, list_in, mess_base):
     """ Helper function to check the value val (first input) belongs to the
         set, specified as the second input.
 
@@ -1810,9 +1833,9 @@ def list_checker(val,list_in,mess_base):
     if val in list_in:
         return val
     else:
-        raise ValueError(
-            '{0} property can only have values from the set of: {1}'  # noqa
-            .format(mess_base,str(list_in)))  # noqa
+        raise ValueError('{0} property can only have values from the set of: {1}'  # noqa
+                         .format(mess_base, str(list_in)))  # noqa
+
 
 # -----------------------------------------------------------------------------------------
 # END Descriptors for PropertyManager itself

@@ -11,10 +11,9 @@ import unittest
 
 
 class ReflectometryILLSumForegroundTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
-        ReflectometryILLPreprocess(Run = 'ILL/D17/317369.nxs',
+        ReflectometryILLPreprocess(Run='ILL/D17/317369.nxs',
                                    Measurement='DirectBeam',
                                    ForegroundHalfWidth=5,
                                    OutputWorkspace='db')
@@ -33,8 +32,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
 
     def testSumInLambdaD17(self):
         # first the direct beam
-        ReflectometryILLSumForeground(InputWorkspace='db',
-                                      OutputWorkspace='db_frg')
+        ReflectometryILLSumForeground(InputWorkspace='db', OutputWorkspace='db_frg')
 
         # then the reflected beam
         ReflectometryILLSumForeground(InputWorkspace='rb',
@@ -44,11 +42,9 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
                                       DirectForegroundWorkspace='db_frg')
         self.checkOutput(mtd['rb_frg'], 991)
 
-
     def testSumInQD17(self):
         # first the direct beam
-        ReflectometryILLSumForeground(InputWorkspace='db',
-                                      OutputWorkspace='db_frg')
+        ReflectometryILLSumForeground(InputWorkspace='db', OutputWorkspace='db_frg')
 
         # then the reflected beam
         ReflectometryILLSumForeground(InputWorkspace='rb',
@@ -61,11 +57,9 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
 
     def testDirectBeamFigaro(self):
         # the direct beam
-        ReflectometryILLSumForeground(InputWorkspace='fig_db',
-                                      OutputWorkspace='fig_db_frg')
+        ReflectometryILLSumForeground(InputWorkspace='fig_db', OutputWorkspace='fig_db_frg')
 
         self.checkOutput(mtd['fig_db_frg'], 971)
-
 
     def checkOutput(self, ws, blocksize):
         self.assertTrue(ws)

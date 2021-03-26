@@ -11,10 +11,11 @@ from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.functionbrowser import FunctionBrowser
 
 ui_fitting_tab, _ = load_ui(__file__, "fitting_tab.ui")
-allowed_minimizers = ['Levenberg-Marquardt', 'BFGS', 'Conjugate gradient (Fletcher-Reeves imp.)',
-                      'Conjugate gradient (Polak-Ribiere imp.)',
-                      'Damped GaussNewton', 'Levenberg-MarquardtMD', 'Simplex',
-                      'SteepestDescent', 'Trust Region']
+allowed_minimizers = [
+    'Levenberg-Marquardt', 'BFGS', 'Conjugate gradient (Fletcher-Reeves imp.)',
+    'Conjugate gradient (Polak-Ribiere imp.)', 'Damped GaussNewton', 'Levenberg-MarquardtMD', 'Simplex',
+    'SteepestDescent', 'Trust Region'
+]
 FIT_START_TABLE_ROW = 0
 FIT_END_TABLE_ROW = 1
 RAW_DATA_TABLE_ROW = 3
@@ -138,8 +139,8 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
             self.global_fit_status_label.setText('Fit Successful')
             self.global_fit_status_label.setStyleSheet('color: green')
         else:
-            self.global_fit_status_label.setText(
-                '{} of {} fits failed'.format(len(boolean_list) - sum(boolean_list), len(boolean_list)))
+            self.global_fit_status_label.setText('{} of {} fits failed'.format(
+                len(boolean_list) - sum(boolean_list), len(boolean_list)))
             self.global_fit_status_label.setStyleSheet('color: red')
 
     def set_slot_for_fit_generator_clicked(self, slot):
@@ -333,8 +334,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_options_table.setColumnWidth(1, 300)
         self.fit_options_table.verticalHeader().setVisible(False)
         self.fit_options_table.horizontalHeader().setStretchLastSection(True)
-        self.fit_options_table.setHorizontalHeaderLabels(
-            ("Property;Value").split(";"))
+        self.fit_options_table.setHorizontalHeaderLabels(("Property;Value").split(";"))
 
         table_utils.setRowName(self.fit_options_table, FIT_START_TABLE_ROW, "Time Start")
         self.time_start = table_utils.addDoubleToTable(self.fit_options_table, 0.0, FIT_START_TABLE_ROW, 1)
@@ -347,12 +347,12 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.minimizer_combo.addItems(allowed_minimizers)
 
         table_utils.setRowName(self.fit_options_table, RAW_DATA_TABLE_ROW, "Fit To Raw Data")
-        self.fit_to_raw_data_checkbox = table_utils.addCheckBoxWidgetToTable(
-            self.fit_options_table, True, RAW_DATA_TABLE_ROW)
+        self.fit_to_raw_data_checkbox = table_utils.addCheckBoxWidgetToTable(self.fit_options_table, True,
+                                                                             RAW_DATA_TABLE_ROW)
 
         table_utils.setRowName(self.fit_options_table, TF_ASYMMETRY_MODE_TABLE_ROW, "TF Asymmetry Mode")
-        self.tf_asymmetry_mode_checkbox = table_utils.addCheckBoxWidgetToTable(
-            self.fit_options_table, False, TF_ASYMMETRY_MODE_TABLE_ROW)
+        self.tf_asymmetry_mode_checkbox = table_utils.addCheckBoxWidgetToTable(self.fit_options_table, False,
+                                                                               TF_ASYMMETRY_MODE_TABLE_ROW)
 
         table_utils.setRowName(self.fit_options_table, 5, "Evaluate Function As")
         self.evaluation_combo = table_utils.addComboToTable(self.fit_options_table, 5, ['CentrePoint', 'Histogram'])

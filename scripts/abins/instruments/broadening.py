@@ -86,9 +86,7 @@ def broaden_spectrum(frequencies, bins, s_dft, sigma, scheme='gaussian_truncated
         # Gaussian broadening on the full grid (no range cutoff, sum over all peaks).
         # This is not very optimised but a useful reference for "correct" results.
         bin_width = bins[1] - bins[0]
-        kernels = mesh_gaussian(sigma=sigma[:, np.newaxis],
-                                points=freq_points,
-                                center=frequencies[:, np.newaxis])
+        kernels = mesh_gaussian(sigma=sigma[:, np.newaxis], points=freq_points, center=frequencies[:, np.newaxis])
         spectrum = np.dot(kernels.transpose(), s_dft)
         return freq_points, spectrum
 
@@ -97,9 +95,7 @@ def broaden_spectrum(frequencies, bins, s_dft, sigma, scheme='gaussian_truncated
         # In principle this scheme yields slightly more accurate histograms that direct
         # Gaussian evaluation. In practice the results are very similar but there may
         # be a performance boost from avoiding the normalisation step.
-        kernels = normal(sigma=sigma[:, np.newaxis],
-                         bins=bins,
-                         center=frequencies[:, np.newaxis])
+        kernels = normal(sigma=sigma[:, np.newaxis], bins=bins, center=frequencies[:, np.newaxis])
         spectrum = np.dot(kernels.transpose(), s_dft)
         return freq_points, spectrum
 
@@ -134,14 +130,26 @@ def broaden_spectrum(frequencies, bins, s_dft, sigma, scheme='gaussian_truncated
                                      method='auto')
 
     elif scheme == 'interpolate':
-        return interpolated_broadening(sigma=sigma, points=freq_points, bins=bins,
-                                       center=frequencies, weights=s_dft, is_hist=True,
-                                       limit=3, function='gaussian', spacing='sqrt2')
+        return interpolated_broadening(sigma=sigma,
+                                       points=freq_points,
+                                       bins=bins,
+                                       center=frequencies,
+                                       weights=s_dft,
+                                       is_hist=True,
+                                       limit=3,
+                                       function='gaussian',
+                                       spacing='sqrt2')
 
     elif scheme == 'interpolate_coarse':
-        return interpolated_broadening(sigma=sigma, points=freq_points, bins=bins,
-                                       center=frequencies, weights=s_dft, is_hist=True,
-                                       limit=3, function='gaussian', spacing='2')
+        return interpolated_broadening(sigma=sigma,
+                                       points=freq_points,
+                                       bins=bins,
+                                       center=frequencies,
+                                       weights=s_dft,
+                                       is_hist=True,
+                                       limit=3,
+                                       function='gaussian',
+                                       spacing='2')
 
     else:
         raise ValueError('Broadening scheme "{}" not supported for this instrument, please correct '
@@ -172,10 +180,10 @@ def mesh_gaussian(sigma=None, points=None, center=0):
     """
 
     if len(points) < 2:
-        return(np.zeros_like(points * sigma))
+        return (np.zeros_like(points * sigma))
 
     bin_width = points[1] - points[0]
-    return(gaussian(sigma=sigma, points=points, center=center) * bin_width)
+    return (gaussian(sigma=sigma, points=points, center=center) * bin_width)
 
 
 def gaussian(sigma=None, points=None, center=0):
@@ -200,7 +208,7 @@ def gaussian(sigma=None, points=None, center=0):
          """
     two_sigma = 2.0 * sigma
     sigma_factor = two_sigma * sigma
-    kernel = np.exp(-(points - center) ** 2 / sigma_factor) / (np.sqrt(sigma_factor * np.pi))
+    kernel = np.exp(-(points - center)**2 / sigma_factor) / (np.sqrt(sigma_factor * np.pi))
 
     return kernel
 
@@ -288,9 +296,15 @@ def trunc_function(function=None, sigma=None, points=None, center=None, limit=3)
     return results
 
 
-def trunc_and_sum_inplace(function=None, function_uses='points',
-                          sigma=None, points=None, bins=None, center=None, weights=1,
-                          limit=3, method='auto'):
+def trunc_and_sum_inplace(function=None,
+                          function_uses='points',
+                          sigma=None,
+                          points=None,
+                          bins=None,
+                          center=None,
+                          weights=1,
+                          limit=3,
+                          method='auto'):
     """Wrap a simple broadening function, evaluate within a consistent range and sum to spectrum
 
                       center1                          center2
@@ -379,8 +393,7 @@ def trunc_and_sum_inplace(function=None, function_uses='points',
     #   |     s---x--|-
     #
     #
-    start_indices = np.asarray((center - points[0] - freq_range + (bin_width / 2)) // bin_width,
-                               int)
+    start_indices = np.asarray((center - points[0] - freq_range + (bin_width / 2)) // bin_width, int)
     # Values exceeding calculation range would have illegally large "initial guess" indices so clip those to final point
     #   |            | s---x----     ->       |           s|--x----
     start_indices[start_indices > len(points)] = -1
@@ -418,14 +431,11 @@ def trunc_and_sum_inplace(function=None, function_uses='points',
 
     # Dispatch kernel generation depending on x-coordinate scheme
     if function_uses == 'points':
-        kernels = function(sigma=sigma,
-                           points=freq_matrix,
-                           center=center)
+        kernels = function(sigma=sigma, points=freq_matrix, center=center)
     elif function_uses == 'bins':
-        bin_matrix = start_freqs.reshape(nrows, 1) + np.arange(-bin_width / 2, 2 * freq_range + bin_width / 2, bin_width)
-        kernels = function(sigma=sigma,
-                           bins=bin_matrix,
-                           center=center)
+        bin_matrix = start_freqs.reshape(nrows, 1) + np.arange(-bin_width / 2, 2 * freq_range + bin_width / 2,
+                                                               bin_width)
+        kernels = function(sigma=sigma, bins=bin_matrix, center=center)
     else:
         raise ValueError('x-basis "{}" for broadening function is unknown.'.format(function_uses))
 
@@ -439,16 +449,22 @@ def trunc_and_sum_inplace(function=None, function_uses='points',
         spectrum = np.zeros_like(points)
         for start, kernel, weight in zip(start_indices.flatten(), kernels, np.asarray(weights).flatten()):
             scaled_kernel = kernel * weight
-            spectrum[start:start+ncols] += scaled_kernel
+            spectrum[start:start + ncols] += scaled_kernel
     else:
         raise ValueError('Summation method "{}" is unknown.', format(method))
 
     return points, spectrum
 
 
-def interpolated_broadening(sigma=None, points=None, bins=None,
-                            center=None, weights=1, is_hist=False, limit=3,
-                            function='gaussian', spacing='sqrt2'):
+def interpolated_broadening(sigma=None,
+                            points=None,
+                            bins=None,
+                            center=None,
+                            weights=1,
+                            is_hist=False,
+                            limit=3,
+                            function='gaussian',
+                            spacing='sqrt2'):
     """Return a fast estimate of frequency-dependent broadening
 
     Consider a spectrum of two peaks, in the case where (as in indirect-geometry INS) the peak width
@@ -522,10 +538,18 @@ def interpolated_broadening(sigma=None, points=None, bins=None,
 
     """
 
-    mix_functions = {'gaussian': {'2': {'lower': [-0.1873, 1.464, -4.079, 3.803],
-                                        'upper': [0.2638, -1.968, 5.057, -3.353]},
-                                  'sqrt2': {'lower': [-0.6079, 4.101, -9.632, 7.139],
-                                            'upper': [0.7533, -4.882, 10.87, -6.746]}}}
+    mix_functions = {
+        'gaussian': {
+            '2': {
+                'lower': [-0.1873, 1.464, -4.079, 3.803],
+                'upper': [0.2638, -1.968, 5.057, -3.353]
+            },
+            'sqrt2': {
+                'lower': [-0.6079, 4.101, -9.632, 7.139],
+                'upper': [0.7533, -4.882, 10.87, -6.746]
+            }
+        }
+    }
     log_bases = {'2': 2, 'sqrt2': np.sqrt(2)}
     log_base = log_bases[spacing]
 
@@ -557,10 +581,10 @@ def interpolated_broadening(sigma=None, points=None, bins=None,
     spectra = np.array([convolve(hist, kernel, mode='same') for kernel in kernels])
 
     # Interpolate with parametrised relationship
-    sigma_locations = np.searchsorted(sigma_samples, sigma) # locations in sampled values of points from sigma
+    sigma_locations = np.searchsorted(sigma_samples, sigma)  # locations in sampled values of points from sigma
     spectrum = np.zeros_like(points)
     # Samples with sigma == min(sigma) are a special case: copy directly from spectrum
-    spectrum[sigma_locations==0] = spectra[0, sigma_locations==0]
+    spectrum[sigma_locations == 0] = spectra[0, sigma_locations == 0]
 
     for i in range(1, len(sigma_samples)):
         masked_block = (sigma_locations == i)
@@ -568,7 +592,6 @@ def interpolated_broadening(sigma=None, points=None, bins=None,
         lower_mix = np.polyval(mix_functions[function][spacing]['lower'], sigma_factors)
         upper_mix = np.polyval(mix_functions[function][spacing]['upper'], sigma_factors)
 
-        spectrum[masked_block] = (lower_mix * spectra[i-1, masked_block]
-                                  + upper_mix * spectra[i, masked_block])
+        spectrum[masked_block] = (lower_mix * spectra[i - 1, masked_block] + upper_mix * spectra[i, masked_block])
 
     return points, spectrum

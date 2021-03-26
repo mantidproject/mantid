@@ -20,22 +20,22 @@ def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, is_vana
 
     absorb_dict = polaris_advanced_config.absorption_correction_params
     sample_details_obj = absorb_corrections.create_vanadium_sample_details_obj(config_dict=absorb_dict)
-    ws_to_correct = absorb_corrections.run_cylinder_absorb_corrections(
-        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering, sample_details_obj=sample_details_obj,
-        is_vanadium=is_vanadium)
+    ws_to_correct = absorb_corrections.run_cylinder_absorb_corrections(ws_to_correct=ws_to_correct,
+                                                                       multiple_scattering=multiple_scattering,
+                                                                       sample_details_obj=sample_details_obj,
+                                                                       is_vanadium=is_vanadium)
     return ws_to_correct
 
 
 def _get_run_numbers_for_key(current_mode_run_numbers, key):
     err_message = "this must be under the relevant Rietveld or PDF mode."
-    return common.cal_map_dictionary_key_helper(current_mode_run_numbers, key=key,
-                                                append_to_error_message=err_message)
+    return common.cal_map_dictionary_key_helper(current_mode_run_numbers, key=key, append_to_error_message=err_message)
 
 
 def _get_current_mode_dictionary(run_number_string, inst_settings):
     mapping_dict = get_cal_mapping_dict(run_number_string, inst_settings.cal_mapping_path)
     if inst_settings.mode is None:
-        ws = mantid.Load('POLARIS'+run_number_string+'.nxs')
+        ws = mantid.Load('POLARIS' + run_number_string + '.nxs')
         mode, cropping_vals = _determine_chopper_mode(ws)
         inst_settings.mode = mode
         inst_settings.focused_cropping_values = cropping_vals
@@ -51,15 +51,20 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
     err_message = "this must be under the relevant Rietveld or PDF mode."
 
     empty_runs = common.cal_map_dictionary_key_helper(mode_run_numbers,
-                                                      key="empty_run_numbers", append_to_error_message=err_message)
-    vanadium_runs = common.cal_map_dictionary_key_helper(mode_run_numbers, key="vanadium_run_numbers",
+                                                      key="empty_run_numbers",
+                                                      append_to_error_message=err_message)
+    vanadium_runs = common.cal_map_dictionary_key_helper(mode_run_numbers,
+                                                         key="vanadium_run_numbers",
                                                          append_to_error_message=err_message)
 
     grouping_file_name = inst_settings.grouping_file_name
 
-    return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
-                                     is_vanadium_run=is_vanadium_run, empty_run_number=empty_runs,
-                                     vanadium_string=vanadium_runs, grouping_file_name=grouping_file_name)
+    return create_run_details_object(run_number_string=run_number_string,
+                                     inst_settings=inst_settings,
+                                     is_vanadium_run=is_vanadium_run,
+                                     empty_run_number=empty_runs,
+                                     vanadium_string=vanadium_runs,
+                                     grouping_file_name=grouping_file_name)
 
 
 def save_unsplined_vanadium(vanadium_ws, output_path):
@@ -79,13 +84,22 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
     mantid.DeleteWorkspace(converted_group)
 
 
-def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None,
-                    sample_details=None, delta_r=None, delta_q=None, pdf_type="G(r)", lorch_filter=None,
-                    freq_params=None, debug=False):
+def generate_ts_pdf(run_number,
+                    focus_file_path,
+                    merge_banks=False,
+                    q_lims=None,
+                    cal_file_name=None,
+                    sample_details=None,
+                    delta_r=None,
+                    delta_q=None,
+                    pdf_type="G(r)",
+                    lorch_filter=None,
+                    freq_params=None,
+                    debug=False):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
 
-    raw_ws = mantid.Load(Filename='POLARIS'+str(run_number)+'.nxs')
+    raw_ws = mantid.Load(Filename='POLARIS' + str(run_number) + '.nxs')
     sample_geometry = common.generate_sample_geometry(sample_details)
     sample_material = common.generate_sample_material(sample_details)
     self_scattering_correction = mantid.TotScatCalculateSelfScattering(
@@ -98,7 +112,8 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     ws_group_list = []
     for i in range(self_scattering_correction.getNumberHistograms()):
         ws_name = 'correction_' + str(i)
-        mantid.ExtractSpectra(InputWorkspace=self_scattering_correction, OutputWorkspace=ws_name,
+        mantid.ExtractSpectra(InputWorkspace=self_scattering_correction,
+                              OutputWorkspace=ws_name,
                               WorkspaceIndexList=[i])
         ws_group_list.append(ws_name)
     self_scattering_correction = mantid.GroupWorkspaces(InputWorkspaces=ws_group_list)
@@ -110,37 +125,46 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
         focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=delta_q)
     if merge_banks:
         q_min, q_max = _load_qlims(q_lims)
-        merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max,
+        merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws,
+                                                   XMin=q_min,
+                                                   XMax=q_max,
                                                    CalculateScale=False)
         fast_fourier_filter(merged_ws, freq_params=freq_params)
-        pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", InputSofQType="S(Q)-1", PDFType=pdf_type,
-                                                Filter=lorch_filter, DeltaR=delta_r,
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws",
+                                                InputSofQType="S(Q)-1",
+                                                PDFType=pdf_type,
+                                                Filter=lorch_filter,
+                                                DeltaR=delta_r,
                                                 rho0=sample_details.material_object.crystal_density)
     else:
         for ws in focused_ws:
             fast_fourier_filter(ws, freq_params=freq_params)
-        pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1", PDFType=pdf_type,
-                                                Filter=lorch_filter, DeltaR=delta_r,
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws',
+                                                InputSofQType="S(Q)-1",
+                                                PDFType=pdf_type,
+                                                Filter=lorch_filter,
+                                                DeltaR=delta_r,
                                                 rho0=sample_details.material_object.crystal_density)
-        pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
+        pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output,
+                                             WorkspaceToMatch=pdf_output[4],
                                              PreserveEvents=True)
     if not debug:
         common.remove_intermediate_workspace('self_scattering_correction')
     # Rename output ws
     if 'merged_ws' in locals():
         mantid.RenameWorkspace(InputWorkspace='merged_ws', OutputWorkspace=run_number + '_merged_Q')
-    mantid.RenameWorkspace(InputWorkspace='focused_ws', OutputWorkspace=run_number+'_focused_Q')
+    mantid.RenameWorkspace(InputWorkspace='focused_ws', OutputWorkspace=run_number + '_focused_Q')
     target_focus_ws_name = run_number + '_focused_Q_'
     target_pdf_ws_name = run_number + '_pdf_R_'
     if isinstance(focused_ws, WorkspaceGroup):
         for i in range(len(focused_ws)):
-            if str(focused_ws[i]) != (target_focus_ws_name + str(i+1)):
-                mantid.RenameWorkspace(InputWorkspace=focused_ws[i], OutputWorkspace=target_focus_ws_name + str(i+1))
-    mantid.RenameWorkspace(InputWorkspace='pdf_output', OutputWorkspace=run_number+'_pdf_R')
+            if str(focused_ws[i]) != (target_focus_ws_name + str(i + 1)):
+                mantid.RenameWorkspace(InputWorkspace=focused_ws[i], OutputWorkspace=target_focus_ws_name + str(i + 1))
+    mantid.RenameWorkspace(InputWorkspace='pdf_output', OutputWorkspace=run_number + '_pdf_R')
     if isinstance(pdf_output, WorkspaceGroup):
         for i in range(len(pdf_output)):
-            if str(pdf_output[i]) != (target_pdf_ws_name + str(i+1)):
-                mantid.RenameWorkspace(InputWorkspace=pdf_output[i], OutputWorkspace=target_pdf_ws_name + str(i+1))
+            if str(pdf_output[i]) != (target_pdf_ws_name + str(i + 1)):
+                mantid.RenameWorkspace(InputWorkspace=pdf_output[i], OutputWorkspace=target_pdf_ws_name + str(i + 1))
     return pdf_output
 
 
@@ -165,8 +189,8 @@ def _obtain_focused_run(run_number, focus_file_path):
             focused_ws = mantid.LoadNexus(Filename=focus_file_path, OutputWorkspace='focused_ws').OutputWorkspace
         except ValueError:
             raise ValueError("Could not find focused file for run number:%s\n"
-                             "Please ensure a focused file has been produced and is located in the output directory."
-                             % run_number)
+                             "Please ensure a focused file has been produced and is located in the output directory." %
+                             run_number)
     return focused_ws
 
 
@@ -219,8 +243,21 @@ def fast_fourier_filter(ws, freq_params=None):
         else:
             r_max = 1000
         ws_name = str(ws)
-        mantid.PDFFourierTransform(Inputworkspace=ws_name, OutputWorkspace=ws_name, SofQType="S(Q)-1", PDFType="G(r)",
-                                   Filter=True, DeltaR=0.01, Rmax=r_max, Direction='Forward')
-        mantid.PDFFourierTransform(Inputworkspace=ws_name, OutputWorkspace=ws_name, SofQType="S(Q)-1", PDFType="G(r)",
-                                   Filter=True, Qmax=q_max, deltaQ=q_delta, Rmin=r_min, Rmax=r_max,
+        mantid.PDFFourierTransform(Inputworkspace=ws_name,
+                                   OutputWorkspace=ws_name,
+                                   SofQType="S(Q)-1",
+                                   PDFType="G(r)",
+                                   Filter=True,
+                                   DeltaR=0.01,
+                                   Rmax=r_max,
+                                   Direction='Forward')
+        mantid.PDFFourierTransform(Inputworkspace=ws_name,
+                                   OutputWorkspace=ws_name,
+                                   SofQType="S(Q)-1",
+                                   PDFType="G(r)",
+                                   Filter=True,
+                                   Qmax=q_max,
+                                   deltaQ=q_delta,
+                                   Rmin=r_min,
+                                   Rmax=r_max,
                                    Direction='Backward')

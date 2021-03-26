@@ -39,8 +39,8 @@ else:
     # Save original definition
     plot_directive_orig = mpl_plot_directive_module.plot_directive
 
-    def plot_directive_patch(name, arguments, options, content, lineno, content_offset, block_text,
-                             state, state_machine):
+    def plot_directive_patch(name, arguments, options, content, lineno, content_offset, block_text, state,
+                             state_machine):
         """
         Drop-in replacement for plot_directive allowing plots to be
         enabled by defining ENABLE_PLOTDIRECTIVE environment variable.
@@ -50,8 +50,8 @@ else:
         if plot_directive_disabled():
             return insert_placeholder_caption(state_machine)
         else:
-            return plot_directive_orig(name, arguments, options, content, lineno, content_offset,
-                                       block_text, state, state_machine)
+            return plot_directive_orig(name, arguments, options, content, lineno, content_offset, block_text, state,
+                                       state_machine)
 
     # Monkey-patch in our definition
     mpl_plot_directive_module.plot_directive = plot_directive_patch

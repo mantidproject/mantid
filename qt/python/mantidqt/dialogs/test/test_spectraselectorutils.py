@@ -30,10 +30,14 @@ class SpectraSelectionUtilsTest(unittest.TestCase):
         self._mock_get_icon.return_value = QIcon()
         self.addCleanup(patcher.stop)
         if self._single_spec_ws is None:
-            self.__class__._single_spec_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=1,
-                                                                                XLength=1, YLength=1)
-            self.__class__._multi_spec_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=200,
-                                                                               XLength=1, YLength=1)
+            self.__class__._single_spec_ws = WorkspaceFactory.Instance().create("Workspace2D",
+                                                                                NVectors=1,
+                                                                                XLength=1,
+                                                                                YLength=1)
+            self.__class__._multi_spec_ws = WorkspaceFactory.Instance().create("Workspace2D",
+                                                                               NVectors=200,
+                                                                               XLength=1,
+                                                                               YLength=1)
 
     @mock.patch('mantidqt.dialogs.spectraselectorutils.SpectraSelectionDialog', autospec=True)
     def test_get_spectra_selection_cancelled_returns_None(self, mock_SpectraSelectionDialog):

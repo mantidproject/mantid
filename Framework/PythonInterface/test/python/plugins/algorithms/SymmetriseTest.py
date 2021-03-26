@@ -13,7 +13,7 @@ from mantid.simpleapi import CreateWorkspace, ScaleX, Symmetrise
 
 
 def _rayleigh(x, sigma):
-    return (x / sigma ** 2) * np.exp(-x ** 2 / (2 * sigma ** 2))
+    return (x / sigma**2) * np.exp(-x**2 / (2 * sigma**2))
 
 
 def _generate_sample_ws(ws_name):
@@ -42,8 +42,13 @@ def _generate_big_sample_ws(ws_name, n_spec):
         v_axis.append(str(0.1 * idx))
 
     # Create the workspace and give it some units
-    CreateWorkspace(OutputWorkspace=ws_name, DataX=data_x, DataY=data_y, NSpec=n_spec,
-                    UnitX='MomentumTransfer', VerticalAxisUnit='QSquared', VerticalAxisValues=','.join(v_axis))
+    CreateWorkspace(OutputWorkspace=ws_name,
+                    DataX=data_x,
+                    DataY=data_y,
+                    NSpec=n_spec,
+                    UnitX='MomentumTransfer',
+                    VerticalAxisUnit='QSquared',
+                    VerticalAxisValues=','.join(v_axis))
     # Centre the peak over 0
     ScaleX(InputWorkspace=ws_name, Factor=-1, Operation="Add", OutputWorkspace=ws_name)
 
@@ -51,7 +56,6 @@ def _generate_big_sample_ws(ws_name, n_spec):
 
 
 class SymmetriseTest(unittest.TestCase):
-
     def _validate_workspace(self, workspace):
         """
         Verifies that the output workspace is actually symmetrical and
@@ -101,8 +105,7 @@ class SymmetriseTest(unittest.TestCase):
         """
         Tests symmetrising about x=0.
         """
-        symm_test_out_ws = Symmetrise(InputWorkspace=self._sample_ws,
-                                      XMin=0.0, XMax=0.2)
+        symm_test_out_ws = Symmetrise(InputWorkspace=self._sample_ws, XMin=0.0, XMax=0.2)
 
         self._validate_workspace(symm_test_out_ws)
 
@@ -114,7 +117,8 @@ class SymmetriseTest(unittest.TestCase):
         self._spec_range = [3, 7]
 
         symm_test_out_ws = Symmetrise(InputWorkspace=self._sample_ws,
-                                      XMin=0.05, XMax=0.2,
+                                      XMin=0.05,
+                                      XMax=0.2,
                                       SpectraRange=self._spec_range)
 
         self._validate_workspace(symm_test_out_ws)
@@ -123,9 +127,7 @@ class SymmetriseTest(unittest.TestCase):
         """
         Tests running with a given spectra range.
         """
-        symm_test_out_ws = Symmetrise(InputWorkspace=self._sample_ws,
-                                      XMin=0.05, XMax=0.2,
-                                      SpectraRange=[1, 1])
+        symm_test_out_ws = Symmetrise(InputWorkspace=self._sample_ws, XMin=0.05, XMax=0.2, SpectraRange=[1, 1])
 
         self._validate_workspace(symm_test_out_ws)
 
@@ -133,47 +135,57 @@ class SymmetriseTest(unittest.TestCase):
         """
         Tests validation on entering an XMin value lower than the smallest value in the X range.
         """
-        self.assertRaises(RuntimeError, Symmetrise,
+        self.assertRaises(RuntimeError,
+                          Symmetrise,
                           InputWorkspace=self._sample_ws,
                           OutputWOrkspace='__Symmetrise_TestWS',
-                          XMin=-5, XMax=0.2)
+                          XMin=-5,
+                          XMax=0.2)
 
     def test_failure_xmax_out_of_range(self):
         """
         Tests validation on entering an XMax value greater than the largest value in the X range.
         """
-        self.assertRaises(RuntimeError, Symmetrise,
+        self.assertRaises(RuntimeError,
+                          Symmetrise,
                           InputWorkspace=self._sample_ws,
                           OutputWOrkspace='__Symmetrise_TestWS',
-                          XMin=0.05, XMax=15)
+                          XMin=0.05,
+                          XMax=15)
 
     def test_failure_invalid_x_range(self):
         """
         Tests validation on entering an XMax value lower then XMin.
         """
-        self.assertRaises(RuntimeError, Symmetrise,
+        self.assertRaises(RuntimeError,
+                          Symmetrise,
                           InputWorkspace=self._sample_ws,
                           OutputWOrkspace='__Symmetrise_TestWS',
-                          XMin=0.2, XMax=0.1)
+                          XMin=0.2,
+                          XMax=0.1)
 
     def test_failure_spectra_range_lower(self):
         """
         Tests validation on entering a minimum spectra number lower then that of the workspace.
         """
-        self.assertRaises(RuntimeError, Symmetrise,
+        self.assertRaises(RuntimeError,
+                          Symmetrise,
                           InputWorkspace=self._sample_ws,
                           OutputWOrkspace='__Symmetrise_TestWS',
-                          XMin=0.05, XMax=0.2,
+                          XMin=0.05,
+                          XMax=0.2,
                           SpectraRange=[0, 1])
 
     def test_failure_spectra_range_upper(self):
         """
         Tests validation on entering a maximum spectra number higher then that of the workspace.
         """
-        self.assertRaises(RuntimeError, Symmetrise,
+        self.assertRaises(RuntimeError,
+                          Symmetrise,
                           InputWorkspace=self._sample_ws,
                           OutputWOrkspace='__Symmetrise_TestWS',
-                          XMin=0.05, XMax=0.2,
+                          XMin=0.05,
+                          XMax=0.2,
                           SpectraRange=[1, 2])
 
 

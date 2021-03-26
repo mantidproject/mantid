@@ -31,9 +31,8 @@ class GroupingTabWidget(object):
         self.pairing_table_widget = PairingTablePresenter(self.pairing_table_view, self.group_tab_model)
 
         self.group_tab_view = GroupingTabView(self.grouping_table_view, self.pairing_table_view, self.diff_table.view)
-        self.group_tab_presenter = GroupingTabPresenter(self.group_tab_view,
-                                                        self.group_tab_model,
-                                                        self.grouping_table_widget,
-                                                        self.pairing_table_widget, self.diff_table)
+        self.group_tab_presenter = GroupingTabPresenter(self.group_tab_view, self.group_tab_model,
+                                                        self.grouping_table_widget, self.pairing_table_widget,
+                                                        self.diff_table)
 
         context.update_view_from_model_notifier.add_subscriber(self.group_tab_presenter.update_view_from_model_observer)

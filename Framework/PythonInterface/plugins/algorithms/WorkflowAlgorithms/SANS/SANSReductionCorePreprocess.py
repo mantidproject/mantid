@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-
 """ SANSReductionCorePreprocess algorithm runs the sequence of reduction steps which are necessary to reduce a data set,
 which can be performed before event slicing."""
 
@@ -95,8 +94,7 @@ class SANSReductionCorePreprocess(SANSReductionCoreBase):
         workspace = self._convert_to_wavelength(state=state, workspace=workspace)
         # Convert and rebin the dummy workspace to get correct bin flags
         if use_dummy_workspace:
-            dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace,
-                                             DetectorType(component_as_string))
+            dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace, DetectorType(component_as_string))
             dummy_mask_workspace = self._convert_to_wavelength(state=state, workspace=dummy_mask_workspace)
 
         # --------------------------------------------------------------------------------------------------------------

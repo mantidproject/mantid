@@ -11,7 +11,6 @@ from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 
 class MuonLoadDataTest(unittest.TestCase):
-
     def setUp(self):
         self.muon_load_data = MuonLoadData()
         self.workspace = mock.MagicMock()
@@ -32,7 +31,8 @@ class MuonLoadDataTest(unittest.TestCase):
     def assert_unchanged(self, load_data):
         self.assertEqual(load_data.get_parameter("run"), [1234, 1235, 1236])
         self.assertEqual(load_data.get_parameter("workspace"), [[1], [2], [3]])
-        self.assertEqual(load_data.get_parameter("filename"), ["C:\\dir1\\file1.nxs", "C:\\dir1\\file2.nxs", "C:\\dir1\\file3.nxs"])
+        self.assertEqual(load_data.get_parameter("filename"),
+                         ["C:\\dir1\\file1.nxs", "C:\\dir1\\file2.nxs", "C:\\dir1\\file3.nxs"])
 
         self.assertEqual(load_data.num_items(), 3)
 
@@ -155,9 +155,22 @@ class MuonLoadDataTest(unittest.TestCase):
     def test_iterator_behaviour_of_data(self):
         data = self.populate_loaded_data()
 
-        check = [{"run": 1234, "workspace": [1], "filename": "C:\\dir1\\file1.nxs", 'instrument': 'EMU'},
-                 {"run": 1235, "workspace": [2], "filename": "C:\\dir1\\file2.nxs", 'instrument': 'EMU'},
-                 {"run": 1236, "workspace": [3], "filename": "C:\\dir1\\file3.nxs", 'instrument': 'EMU'}]
+        check = [{
+            "run": 1234,
+            "workspace": [1],
+            "filename": "C:\\dir1\\file1.nxs",
+            'instrument': 'EMU'
+        }, {
+            "run": 1235,
+            "workspace": [2],
+            "filename": "C:\\dir1\\file2.nxs",
+            'instrument': 'EMU'
+        }, {
+            "run": 1236,
+            "workspace": [3],
+            "filename": "C:\\dir1\\file3.nxs",
+            'instrument': 'EMU'
+        }]
 
         for data_item in iter(data):
             self.assertEqual(data_item, check.pop(0))
@@ -167,8 +180,17 @@ class MuonLoadDataTest(unittest.TestCase):
 
         data.remove_current_data()
 
-        check = [{"run": 1234, "workspace": [1], "filename": "C:\\dir1\\file1.nxs", 'instrument': 'EMU'},
-                 {"run": 1235, "workspace": [2], "filename": "C:\\dir1\\file2.nxs", 'instrument': 'EMU'}]
+        check = [{
+            "run": 1234,
+            "workspace": [1],
+            "filename": "C:\\dir1\\file1.nxs",
+            'instrument': 'EMU'
+        }, {
+            "run": 1235,
+            "workspace": [2],
+            "filename": "C:\\dir1\\file2.nxs",
+            'instrument': 'EMU'
+        }]
 
         for data_item in iter(data):
             self.assertEqual(data_item, check.pop(0))
@@ -178,8 +200,17 @@ class MuonLoadDataTest(unittest.TestCase):
 
         data.remove_last_added_data()
 
-        check = [{"run": 1234, "workspace": [1], "filename": "C:\\dir1\\file1.nxs", 'instrument': 'EMU'},
-                 {"run": 1236, "workspace": [3], "filename": "C:\\dir1\\file3.nxs", 'instrument': 'EMU'}]
+        check = [{
+            "run": 1234,
+            "workspace": [1],
+            "filename": "C:\\dir1\\file1.nxs",
+            'instrument': 'EMU'
+        }, {
+            "run": 1236,
+            "workspace": [3],
+            "filename": "C:\\dir1\\file3.nxs",
+            'instrument': 'EMU'
+        }]
 
         for data_item in iter(data):
             self.assertEqual(data_item, check.pop(0))
@@ -213,12 +244,22 @@ class MuonLoadDataTest(unittest.TestCase):
     def test_that_get_data_returns_correct_dict(self):
         data_dict = self.muon_load_data.get_data(run=2)
 
-        self.assertEqual(data_dict, {'workspace': self.workspace, 'filename': 'path to file', 'run': 2, 'instrument': ''})
+        self.assertEqual(data_dict, {
+            'workspace': self.workspace,
+            'filename': 'path to file',
+            'run': 2,
+            'instrument': ''
+        })
 
     def test_that_get_latest_data_returns_correct_dict(self):
         data_dict = self.muon_load_data.get_latest_data()
 
-        self.assertEqual(data_dict, {'workspace': self.workspace_last, 'filename': 'path to file', 'run': 4, 'instrument': ''})
+        self.assertEqual(data_dict, {
+            'workspace': self.workspace_last,
+            'filename': 'path to file',
+            'run': 4,
+            'instrument': ''
+        })
 
 
 if __name__ == "__main__":

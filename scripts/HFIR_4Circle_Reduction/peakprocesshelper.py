@@ -20,7 +20,6 @@ class PeakProcessRecord(object):
     In order to manage some operations for a peak
     It does not contain peak workspace but will hold all the parameters about peak integration
     """
-
     def __init__(self, exp_number, scan_number, peak_ws_name, two_theta):
         """ Initialization
         Purpose: set up unchanged parameters including experiment number, scan number and peak workspace's name
@@ -46,9 +45,9 @@ class PeakProcessRecord(object):
 
         # Define class variable
         # HKL list
-        self._calculatedHKL = None    # user specified HKL
-        self._spiceHKL = None                        # spice HKL
-        self._prevHKL = numpy.array([0., 0., 0.])    # previous HKL
+        self._calculatedHKL = None  # user specified HKL
+        self._spiceHKL = None  # spice HKL
+        self._prevHKL = numpy.array([0., 0., 0.])  # previous HKL
 
         # magnetic peak set up
         self._kShiftVector = [0, 0, 0]
@@ -132,7 +131,7 @@ class PeakProcessRecord(object):
             q_i = peak_i.getQSampleFrame()
             q_array = numpy.array([q_i.X(), q_i.Y(), q_i.Z()])
             # calculate weight
-            weight_i = float(det_counts)/float(monitor_counts)
+            weight_i = float(det_counts) / float(monitor_counts)
             # contribute to total
             weight_sum += weight_i
             q_sample_sum += q_array * weight_i
@@ -141,7 +140,7 @@ class PeakProcessRecord(object):
         # END-FOR (i_peak)
 
         try:
-            self._avgPeakCenter = q_sample_sum/weight_sum
+            self._avgPeakCenter = q_sample_sum / weight_sum
         except Exception as e:
             raise RuntimeError('Unable to calculate average peak center due to value error as {0}.'.format(e))
 
@@ -160,7 +159,7 @@ class PeakProcessRecord(object):
         generate a dictionary for this PeakInfo
         :return:
         """
-        print ('[DB..BAT] generate_integration_report is called!')
+        print('[DB..BAT] generate_integration_report is called!')
 
         report = dict()
 
@@ -214,8 +213,8 @@ class PeakProcessRecord(object):
         report['Absorption Correction'] = self._absorptionCorrection
 
         if self._gaussIntegrationInfoDict:
-            print ('[FLAG-SigmaError] {0}  {1}'.format(self._myScanNumber,
-                                                       self._gaussIntegrationInfoDict['gauss errors']['s']))
+            print('[FLAG-SigmaError] {0}  {1}'.format(self._myScanNumber,
+                                                      self._gaussIntegrationInfoDict['gauss errors']['s']))
 
         return report
 
@@ -457,7 +456,7 @@ class PeakProcessRecord(object):
             hkl += numpy.array([mi_h, mi_k, mi_l])
         # END-FOR
 
-        self._spiceHKL = hkl/num_rows
+        self._spiceHKL = hkl / num_rows
 
         return
 
@@ -521,7 +520,7 @@ class PeakProcessRecord(object):
         """
         # check
         assert isinstance(hkl, numpy.ndarray), 'HKL must be a numpy array but not %s.' % type(hkl)
-        assert hkl.shape == (3,), 'HKL must be a 3-element 1-D array but not %s.' % str(hkl.shape)
+        assert hkl.shape == (3, ), 'HKL must be a 3-element 1-D array but not %s.' % str(hkl.shape)
 
         # store the HKL
         if self._calculatedHKL is not None:
@@ -550,7 +549,7 @@ class PeakProcessRecord(object):
 
         if self._calculatedHKL is None:
             # init HKL
-            self._calculatedHKL = numpy.ndarray(shape=(3,), dtype='float')
+            self._calculatedHKL = numpy.ndarray(shape=(3, ), dtype='float')
         else:
             # save previous HKL
             self._prevHKL = self._calculatedHKL[:]
@@ -761,7 +760,7 @@ class SinglePointPeakIntegration(object):
             hkl += numpy.array([mi_h, mi_k, mi_l])
         # END-FOR
 
-        self._spiceHKL = hkl/num_rows
+        self._spiceHKL = hkl / num_rows
 
         return
 
@@ -841,6 +840,8 @@ class SinglePointPeakIntegration(object):
             self._ref_peak_sigma /= 2.355
 
         return
+
+
 # END-CLASS
 
 
@@ -962,6 +963,7 @@ class SinglePtScansIntegrationOperation(object):
         self._model_ws_name = model_ws_name
 
         return
+
 
 # END-CLASS
 

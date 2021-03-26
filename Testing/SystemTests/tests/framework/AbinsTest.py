@@ -8,8 +8,7 @@ import systemtesting
 from mantid.simpleapi import Abins, mtd, DeleteWorkspace
 
 import abins
-from abins.constants import (ALL_INSTRUMENTS, ALL_SUPPORTED_AB_INITIO_PROGRAMS,
-                             QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO,
+from abins.constants import (ALL_INSTRUMENTS, ALL_SUPPORTED_AB_INITIO_PROGRAMS, QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO,
                              QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR)
 
 
@@ -60,22 +59,19 @@ class HelperTestingClass(object):
 
     def set_order(self, order=None):
 
-        orders = [QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO,
-                  QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR]
+        orders = [QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO, QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR]
 
         if order in orders:
             self._quantum_order_event = order
         else:
-            raise RuntimeError(
-                "Unsupported number of quantum order event %s" % order)
+            raise RuntimeError("Unsupported number of quantum order event %s" % order)
 
     def set_name(self, name):
         if isinstance(name, str):
             self._system_name = name
             self._output_name = name
         else:
-            raise RuntimeError(
-                "Invalid name. Name should be a string but it is %s " % type(name))
+            raise RuntimeError("Invalid name. Name should be a string but it is %s " % type(name))
 
     def set_cross_section(self, cross_section=None):
         self._cross_section_factor = cross_section
@@ -86,10 +82,16 @@ class HelperTestingClass(object):
         """
         Abins(AbInitioProgram=self._ab_initio_program,
               VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
-              TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              BinWidthInWavenumber=self._bin_width, Atoms=self._atoms, SumContributions=self._sum_contributions,
-              QuantumOrderEventsNumber=str(self._quantum_order_event), Scale=self._scale,
-              ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=self._output_name)
+              TemperatureInKelvin=self._temperature,
+              SampleForm=self._sample_form,
+              Instrument=self._instrument_name,
+              BinWidthInWavenumber=self._bin_width,
+              Atoms=self._atoms,
+              SumContributions=self._sum_contributions,
+              QuantumOrderEventsNumber=str(self._quantum_order_event),
+              Scale=self._scale,
+              ScaleByCrossSection=self._cross_section_factor,
+              OutputWorkspace=self._output_name)
 
     def case_restart_diff_t(self):
         """
@@ -105,27 +107,44 @@ class HelperTestingClass(object):
         # T = 10 K
         Abins(AbInitioProgram=self._ab_initio_program,
               VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
-              TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              BinWidthInWavenumber=self._bin_width, Atoms=self._atoms, SumContributions=self._sum_contributions,
-              Scale=self._scale, QuantumOrderEventsNumber=str(self._quantum_order_event),
-              ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=wrk_name + "init")
+              TemperatureInKelvin=self._temperature,
+              SampleForm=self._sample_form,
+              Instrument=self._instrument_name,
+              BinWidthInWavenumber=self._bin_width,
+              Atoms=self._atoms,
+              SumContributions=self._sum_contributions,
+              Scale=self._scale,
+              QuantumOrderEventsNumber=str(self._quantum_order_event),
+              ScaleByCrossSection=self._cross_section_factor,
+              OutputWorkspace=wrk_name + "init")
 
         # T = 20 K
         Abins(AbInitioProgram=self._ab_initio_program,
               VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
-              TemperatureInKelvin=temperature_for_test, SampleForm=self._sample_form, Instrument=self._instrument_name,
+              TemperatureInKelvin=temperature_for_test,
+              SampleForm=self._sample_form,
+              Instrument=self._instrument_name,
               BinWidthInWavenumber=self._bin_width,
-              Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
-              QuantumOrderEventsNumber=str(self._quantum_order_event), ScaleByCrossSection=self._cross_section_factor,
+              Atoms=self._atoms,
+              SumContributions=self._sum_contributions,
+              Scale=self._scale,
+              QuantumOrderEventsNumber=str(self._quantum_order_event),
+              ScaleByCrossSection=self._cross_section_factor,
               OutputWorkspace=wrk_name + "_mod")
 
         # T = 10 K
         Abins(AbInitioProgram=self._ab_initio_program,
               VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
-              TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              BinWidthInWavenumber=self._bin_width, Atoms=self._atoms, SumContributions=self._sum_contributions,
-              Scale=self._scale, QuantumOrderEventsNumber=str(self._quantum_order_event),
-              ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=self._output_name)
+              TemperatureInKelvin=self._temperature,
+              SampleForm=self._sample_form,
+              Instrument=self._instrument_name,
+              BinWidthInWavenumber=self._bin_width,
+              Atoms=self._atoms,
+              SumContributions=self._sum_contributions,
+              Scale=self._scale,
+              QuantumOrderEventsNumber=str(self._quantum_order_event),
+              ScaleByCrossSection=self._cross_section_factor,
+              OutputWorkspace=self._output_name)
 
     def case_restart_diff_order(self, order=None):
         """
@@ -138,9 +157,15 @@ class HelperTestingClass(object):
         DeleteWorkspace(self._output_name)
         Abins(AbInitioProgram=self._ab_initio_program,
               VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
-              TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              BinWidthInWavenumber=self._bin_width, Atoms=self._atoms, SumContributions=self._sum_contributions,
-              Scale=self._scale, QuantumOrderEventsNumber=str(order), ScaleByCrossSection=self._cross_section_factor,
+              TemperatureInKelvin=self._temperature,
+              SampleForm=self._sample_form,
+              Instrument=self._instrument_name,
+              BinWidthInWavenumber=self._bin_width,
+              Atoms=self._atoms,
+              SumContributions=self._sum_contributions,
+              Scale=self._scale,
+              QuantumOrderEventsNumber=str(order),
+              ScaleByCrossSection=self._cross_section_factor,
               OutputWorkspace=self._output_name)
 
     def __del__(self):

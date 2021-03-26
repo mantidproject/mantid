@@ -14,7 +14,6 @@ from mantidqt.widgets.waterfallplotfillareadialog.view import WaterfallPlotFillA
 
 
 class WaterfallPlotFillAreaDialogPresenter:
-
     def __init__(self, fig, view=None, parent=None):
         self.fig = fig
         self.ax = fig.get_axes()[0]

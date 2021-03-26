@@ -13,7 +13,6 @@ from scipy.integrate import quad
 
 
 class SCgapSwave(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
@@ -27,15 +26,15 @@ class SCgapSwave(IFunction1D):
         Ec = 15.0
         Delta_0 = self.getParameterValue("Delta")
         Tc = self.getParameterValue("Tcritical")
-        kb = k / (1.6 * 10 ** -22)
+        kb = k / (1.6 * 10**-22)
         Integral = []
 
         def Integrand(E):
             DeltaSwave = Delta_0
             a = 1.018
             c = 1.82
-            Delta = DeltaSwave * np.tanh(c * (a*Tc / xx - 1.00) ** 0.51)
-            return 1.00 / np.cosh(np.sqrt((Ec * E) ** 2 + Delta ** 2) / (2 * kb * xx)) ** 2
+            Delta = DeltaSwave * np.tanh(c * (a * Tc / xx - 1.00)**0.51)
+            return 1.00 / np.cosh(np.sqrt((Ec * E)**2 + Delta**2) / (2 * kb * xx))**2
 
         for xx in x:
             if xx > Tc:

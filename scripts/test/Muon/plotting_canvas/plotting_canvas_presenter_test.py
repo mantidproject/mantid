@@ -18,9 +18,12 @@ from mantid.simpleapi import CreateWorkspace, AnalysisDataService
 
 
 def create_test_plot_information(name, index, axis, normalised, errors, label):
-    return WorkspacePlotInformation(workspace_name=name, index=index, axis=axis,
+    return WorkspacePlotInformation(workspace_name=name,
+                                    index=index,
+                                    axis=axis,
                                     normalised=normalised,
-                                    errors=errors, label=label)
+                                    errors=errors,
+                                    label=label)
 
 
 def create_test_workspaces(ws_names):
@@ -34,7 +37,6 @@ def create_test_workspaces(ws_names):
 
 @start_qapplication
 class PlottingCanvasPresenterTest(unittest.TestCase):
-
     def setUp(self):
         self.view = mock.Mock(spec=PlottingCanvasViewInterface)
         self.model = mock.Mock(spec=PlottingCanvasModel)
@@ -51,14 +53,19 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         workspace_names = ["MUSR6220"]
         workspace_indices = [0]
         self.presenter._set_axes_limits_and_titles = mock.Mock()
-        plotted_information = create_test_plot_information("MUSR6220;fwd", index=0, axis=0, normalised=False,
+        plotted_information = create_test_plot_information("MUSR6220;fwd",
+                                                           index=0,
+                                                           axis=0,
+                                                           normalised=False,
                                                            errors=False,
                                                            label='test')
         self.view.plotted_workspace_information = [plotted_information]
         self.model.create_workspace_plot_information.return_value = []
 
-        self.presenter.plot_workspaces(workspace_names=workspace_names, workspace_indices=workspace_indices,
-                                       hold_on=False, autoscale=False)
+        self.presenter.plot_workspaces(workspace_names=workspace_names,
+                                       workspace_indices=workspace_indices,
+                                       hold_on=False,
+                                       autoscale=False)
 
         self.view.remove_workspace_info_from_plot.assert_called_once_with([plotted_information])
 
@@ -66,14 +73,19 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         workspace_names = ["MUSR6220"]
         workspace_indices = [0]
         self.presenter._set_axes_limits_and_titles = mock.Mock()
-        plotted_information = create_test_plot_information("MUSR6220;fwd", index=0, axis=0, normalised=False,
+        plotted_information = create_test_plot_information("MUSR6220;fwd",
+                                                           index=0,
+                                                           axis=0,
+                                                           normalised=False,
                                                            errors=False,
                                                            label='test')
         self.view.plotted_workspace_information = [plotted_information]
         self.model.create_workspace_plot_information.return_value = [plotted_information]
 
-        self.presenter.plot_workspaces(workspace_names=workspace_names, workspace_indices=workspace_indices,
-                                       hold_on=False, autoscale=False)
+        self.presenter.plot_workspaces(workspace_names=workspace_names,
+                                       workspace_indices=workspace_indices,
+                                       hold_on=False,
+                                       autoscale=False)
 
         self.view.add_workspaces_to_plot.assert_called_once_with([])
 
@@ -81,12 +93,18 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         workspace_names = ["MUSR6220"]
         workspace_indices = [0]
         self.presenter._set_axes_limits_and_titles = mock.Mock()
-        plot_info = create_test_plot_information("MUSR6220", index=0, axis=0, normalised=False, errors=False,
+        plot_info = create_test_plot_information("MUSR6220",
+                                                 index=0,
+                                                 axis=0,
+                                                 normalised=False,
+                                                 errors=False,
                                                  label='test')
         self.model.create_workspace_plot_information.return_value = [plot_info]
 
-        self.presenter.plot_workspaces(workspace_names=workspace_names, workspace_indices=workspace_indices,
-                                       hold_on=False, autoscale=False)
+        self.presenter.plot_workspaces(workspace_names=workspace_names,
+                                       workspace_indices=workspace_indices,
+                                       hold_on=False,
+                                       autoscale=False)
 
         self.model.create_workspace_plot_information.assert_called_once()
 
@@ -94,12 +112,18 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         workspace_names = ["MUSR6220"]
         workspace_indices = [0]
         self.presenter._set_axes_limits_and_titles = mock.Mock()
-        plot_info = create_test_plot_information("MUSR6220", index=0, axis=0, normalised=False, errors=False,
+        plot_info = create_test_plot_information("MUSR6220",
+                                                 index=0,
+                                                 axis=0,
+                                                 normalised=False,
+                                                 errors=False,
                                                  label='test')
         self.model.create_workspace_plot_information.return_value = [plot_info]
 
-        self.presenter.plot_workspaces(workspace_names=workspace_names, workspace_indices=workspace_indices,
-                                       hold_on=False, autoscale=False)
+        self.presenter.plot_workspaces(workspace_names=workspace_names,
+                                       workspace_indices=workspace_indices,
+                                       hold_on=False,
+                                       autoscale=False)
 
         self.view.add_workspaces_to_plot.assert_called_once_with([plot_info])
 
@@ -122,8 +146,7 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.presenter.convert_plot_to_single_plot()
 
         self.view.create_new_plot_canvas.assert_called_once_with(1)
-        self.presenter.plot_workspaces.assert_called_once_with(workspaces, indices,
-                                                               hold_on=False, autoscale=False)
+        self.presenter.plot_workspaces.assert_called_once_with(workspaces, indices, hold_on=False, autoscale=False)
 
     def test_convert_to_tiled_plot_correctly_sets_up_new_plot(self):
         workspaces = ["MUSR62260;fwd", "MUSR62260;bkwd"]
@@ -137,8 +160,7 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
 
         self.view.create_new_plot_canvas.assert_called_once_with(len(keys))
         self.model.update_tiled_axis_map.assert_called_once_with(keys, tiled_by)
-        self.presenter.plot_workspaces.assert_called_once_with(workspaces, indices,
-                                                               hold_on=False, autoscale=False)
+        self.presenter.plot_workspaces.assert_called_once_with(workspaces, indices, hold_on=False, autoscale=False)
 
     def test_set_axes_limits_uses_default_limits_if_quick_edit_options_not_set(self):
         self.figure_options.get_plot_x_range.return_value = [0, 0]

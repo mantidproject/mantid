@@ -23,6 +23,7 @@ def get_year():
     """returns the current year"""
     return datetime.datetime.now().year
 
+
 #======================================================================
 
 
@@ -75,8 +76,13 @@ public:{algorithm_header}}};
 
 }} // namespace {subproject}
 }} // namespace Mantid
-""".format(subproject=subproject, alg_include=alg_include, classname=classname, year=get_year(),
-           subproject_upper=subproject_upper, alg_class_declare=alg_class_declare, algorithm_header=algorithm_header)
+""".format(subproject=subproject,
+           alg_include=alg_include,
+           classname=classname,
+           year=get_year(),
+           subproject_upper=subproject_upper,
+           alg_class_declare=alg_class_declare,
+           algorithm_header=algorithm_header)
 
     f.write(s)
     f.close()
@@ -154,12 +160,14 @@ namespace {subproject} {{
 {algorithm_top}{algorithm_source}
 }} // namespace {subproject}
 }} // namespace Mantid
-""".format(
-        year=get_year(), subproject=subproject, subfolder=args.subfolder, classname=classname,
-        algorithm_top=algorithm_top, algorithm_source=algorithm_source)
+""".format(year=get_year(),
+           subproject=subproject,
+           subfolder=args.subfolder,
+           classname=classname,
+           algorithm_top=algorithm_top,
+           algorithm_source=algorithm_source)
     f.write(s)
     f.close()
-
 
 
 #======================================================================
@@ -198,7 +206,7 @@ def write_test(subproject, classname, filename, args):
     TS_ASSERT(outputWS);
     TS_FAIL("TODO: Check the results and remove this line");
   }}
-  """.format(algname=classname);
+  """.format(algname=classname)
 
     if not args.alg:
         algorithm_test = ""
@@ -232,14 +240,13 @@ public:
 
 
 }};
-""".format(year=get_year(), subproject=subproject, subfolder=args.subfolder, classname=classname,
+""".format(year=get_year(),
+           subproject=subproject,
+           subfolder=args.subfolder,
+           classname=classname,
            algorithm_test=algorithm_test)
     f.write(s)
     f.close()
-
-
-
-
 
 
 #======================================================================
@@ -347,39 +354,66 @@ def generate(subproject, classname, overwrite, args):
         print("Note: if this algorithm operates on a WorkspaceGroup, please override processGroups()")
         print()
 
+
 #======================================================================
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Utility to create Mantid class files: header, source and test. version ' + VERSION)
-    parser.add_argument('subproject', metavar='SUBPROJECT', type=str,
+    parser = argparse.ArgumentParser(
+        description='Utility to create Mantid class files: header, source and test. version ' + VERSION)
+    parser.add_argument('subproject',
+                        metavar='SUBPROJECT',
+                        type=str,
                         help='The subproject under Framework/; e.g. Kernel')
-    parser.add_argument('classname', metavar='CLASSNAME', type=str,
-                        help='Name of the class to create')
-    parser.add_argument('--force', dest='force', action='store_const',
-                        const=True, default=False,
+    parser.add_argument('classname', metavar='CLASSNAME', type=str, help='Name of the class to create')
+    parser.add_argument('--force',
+                        dest='force',
+                        action='store_const',
+                        const=True,
+                        default=False,
                         help='Force overwriting existing files. Use with caution!')
-    parser.add_argument('--no-header', dest='header', action='store_const',
-                        const=False, default=True,
+    parser.add_argument('--no-header',
+                        dest='header',
+                        action='store_const',
+                        const=False,
+                        default=True,
                         help="Don't create the header file")
-    parser.add_argument('--no-test', dest='test', action='store_const',
-                        const=False, default=True,
+    parser.add_argument('--no-test',
+                        dest='test',
+                        action='store_const',
+                        const=False,
+                        default=True,
                         help="Don't create the test file")
-    parser.add_argument('--no-cpp', dest='cpp', action='store_const',
-                        const=False, default=True,
+    parser.add_argument('--no-cpp',
+                        dest='cpp',
+                        action='store_const',
+                        const=False,
+                        default=True,
                         help="Don't create the cpp file")
-    parser.add_argument('--no-rst', dest='rst', action='store_const',
-                        const=False, default=True,
+    parser.add_argument('--no-rst',
+                        dest='rst',
+                        action='store_const',
+                        const=False,
+                        default=True,
                         help="Don't create the rst file")
-    parser.add_argument('--no-cmake', dest='cmake', action='store_const',
-                        const=False, default=True,
+    parser.add_argument('--no-cmake',
+                        dest='cmake',
+                        action='store_const',
+                        const=False,
+                        default=True,
                         help="Don't modify cmake files")
-    parser.add_argument('--alg', dest='alg', action='store_const',
-                        const=True, default=False,
+    parser.add_argument('--alg',
+                        dest='alg',
+                        action='store_const',
+                        const=True,
+                        default=False,
                         help='Create an Algorithm stub. This adds some methods common to algorithms.')
-    parser.add_argument('--subfolder', dest='subfolder',
-                        default="",
-                        help='Put the source under a subfolder below the main part of the project, e.g. Geometry/Instrument.')
-    parser.add_argument('--project', dest='project',
+    parser.add_argument(
+        '--subfolder',
+        dest='subfolder',
+        default="",
+        help='Put the source under a subfolder below the main part of the project, e.g. Geometry/Instrument.')
+    parser.add_argument('--project',
+                        dest='project',
                         default="Framework",
                         help='The project in which this goes. Default: Framework. Can be MantidQt')
 

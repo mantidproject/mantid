@@ -157,7 +157,7 @@ class DataCorrectionsWidget(BaseWidget):
         d.use_proc_detvan = self._content.use_procdetvan_cb.isChecked()
         return d
 
-    def live_button_toggled_actions(self,checked):
+    def live_button_toggled_actions(self, checked):
         if checked:
             self._old_norm_button = self.incident_beam_norm_grp.checkedId()
             self._old_backgnd_sub = self._content.background_sub_gb.isChecked()

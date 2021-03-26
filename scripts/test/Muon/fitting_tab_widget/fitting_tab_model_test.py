@@ -20,25 +20,30 @@ EVALUATION_TYPE = 'CentrePoint'
 MINIMISER = 'Levenberg-Marquardt'
 
 EXAMPLE_TF_ASYMMETRY_FUNCTION = '(composite=ProductFunction,NumDeriv=false;name=FlatBackground,A0=1.02709;' \
-                                '(name=FlatBackground,A0=1,ties=(A0=1);name=ExpDecayOsc,A=0.2,Lambda=0.2,Frequency=0.1,Phi=0))' \
-                                ';name=ExpDecayMuon,A=0,Lambda=-2.19698,ties=(A=0,Lambda=-2.19698)'
+                                '(name=FlatBackground,A0=1,ties=(A0=1);name=ExpDecayOsc,A=0.2,Lambda=0.2,' \
+                                'Frequency=0.1,Phi=0));name=ExpDecayMuon,A=0,Lambda=-2.19698,ties=(A=0,Lambda=-2.19698)'
 
 EXAMPLE_SINGLE_DOMAIN_FUNCTION = 'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'
 
-EXAMPLE_MULTI_DOMAIN_FUNCTION = 'composite=MultiDomainFunction,NumDeriv=true;name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,' \
-                                'Phi=0,$domains=i;name=GausOsc,A=0.2,Sigma=0.2,' \
+EXAMPLE_MULTI_DOMAIN_FUNCTION = 'composite=MultiDomainFunction,NumDeriv=true;name=GausOsc,A=0.2,Sigma=0.2,' \
+                                'Frequency=0.1,Phi=0,$domains=i;name=GausOsc,A=0.2,Sigma=0.2,' \
                                 'Frequency=0.1,Phi=0,$domains=i;name=GausOsc,A=0.2,' \
                                 'Sigma=0.2,Frequency=0.1,Phi=0,$domains=i'
 
 
 @start_qapplication
 class FittingTabModelTest(unittest.TestCase):
-
     def setUp(self):
         self.model = FittingTabModel(setup_context())
         self.model.context.ads_observer.unsubscribe()
-        self.model.fitting_options = {"startX": START_X, "endX": END_X, "evaluation_type": EVALUATION_TYPE,
-                                      "minimiser": MINIMISER, "fit_type": "Single", "tf_asymmetry_mode": False}
+        self.model.fitting_options = {
+            "startX": START_X,
+            "endX": END_X,
+            "evaluation_type": EVALUATION_TYPE,
+            "minimiser": MINIMISER,
+            "fit_type": "Single",
+            "tf_asymmetry_mode": False
+        }
 
     def setup_fit_workspace_map(self, workspace_list, fit_functions):
         self.model.ws_fit_function_map = {}
@@ -64,8 +69,14 @@ class FittingTabModelTest(unittest.TestCase):
         y_data = [5 + x * x for x in x_data]
         workspace = CreateWorkspace(x_data, y_data)
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
-        parameter_dict = {'Function': trial_function, 'InputWorkspace': workspace, 'Minimizer': 'Levenberg-Marquardt',
-                          'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'}
+        parameter_dict = {
+            'Function': trial_function,
+            'InputWorkspace': workspace,
+            'Minimizer': 'Levenberg-Marquardt',
+            'StartX': 0.0,
+            'EndX': 100.0,
+            'EvaluationType': 'CentrePoint'
+        }
 
         output_workspace, parameter_table_name, fitting_function, fit_status, fit_chi_squared, covariance_matrix = \
             self.model.do_single_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
@@ -92,25 +103,40 @@ class FittingTabModelTest(unittest.TestCase):
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
         self.model.do_single_fit = mock.MagicMock(return_value=(trial_function, 'success', 0.56))
         workspace = "MUSR1223"
-        parameter_dict = {'Function': trial_function, 'InputWorkspace': workspace,
-                          'Minimizer': 'Levenberg-Marquardt',
-                          'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'}
+        parameter_dict = {
+            'Function': trial_function,
+            'InputWorkspace': workspace,
+            'Minimizer': 'Levenberg-Marquardt',
+            'StartX': 0.0,
+            'EndX': 100.0,
+            'EvaluationType': 'CentrePoint'
+        }
         self.model.get_parameters_for_single_fit = mock.MagicMock(return_value=parameter_dict)
         self.model.do_sequential_fit([workspace] * 5)
 
         self.assertEqual(self.model.do_single_fit.call_count, 5)
-        self.model.do_single_fit.assert_called_with(
-            {'Function': mock.ANY, 'InputWorkspace': workspace, 'Minimizer': 'Levenberg-Marquardt',
-             'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'})
+        self.model.do_single_fit.assert_called_with({
+            'Function': mock.ANY,
+            'InputWorkspace': workspace,
+            'Minimizer': 'Levenberg-Marquardt',
+            'StartX': 0.0,
+            'EndX': 100.0,
+            'EvaluationType': 'CentrePoint'
+        })
 
     def test_do_simultaneous_fit_adds_single_input_workspace_to_fit_context_with_globals(self):
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
         x_data = range(0, 100)
         y_data = [5 + x * x for x in x_data]
         workspace = CreateWorkspace(x_data, y_data)
-        parameter_dict = {'Function': trial_function, 'InputWorkspace': [workspace.name()],
-                          'Minimizer': 'Levenberg-Marquardt',
-                          'StartX': [0.0], 'EndX': [100.0], 'EvaluationType': 'CentrePoint'}
+        parameter_dict = {
+            'Function': trial_function,
+            'InputWorkspace': [workspace.name()],
+            'Minimizer': 'Levenberg-Marquardt',
+            'StartX': [0.0],
+            'EndX': [100.0],
+            'EvaluationType': 'CentrePoint'
+        }
         global_parameters = ['A0']
         self.model.do_simultaneous_fit(parameter_dict, global_parameters)
 
@@ -127,9 +153,14 @@ class FittingTabModelTest(unittest.TestCase):
         y_data = [5 + x * x for x in x_data]
         workspace1 = CreateWorkspace(x_data, y_data)
         workspace2 = CreateWorkspace(x_data, y_data)
-        parameter_dict = {'Function': trial_function, 'InputWorkspace': [workspace1.name(), workspace2.name()],
-                          'Minimizer': 'Levenberg-Marquardt',
-                          'StartX': [0.0] * 2, 'EndX': [100.0] * 2, 'EvaluationType': 'CentrePoint'}
+        parameter_dict = {
+            'Function': trial_function,
+            'InputWorkspace': [workspace1.name(), workspace2.name()],
+            'Minimizer': 'Levenberg-Marquardt',
+            'StartX': [0.0] * 2,
+            'EndX': [100.0] * 2,
+            'EvaluationType': 'CentrePoint'
+        }
         self.model.do_simultaneous_fit(parameter_dict, global_parameters=[])
 
         fit_context = self.model.context.fitting_context
@@ -146,12 +177,13 @@ class FittingTabModelTest(unittest.TestCase):
 
     def test_get_function_name_returns_correctly_for_composite_functions_multi_domain_function(self):
         function_string = 'composite=MultiDomainFunction,NumDeriv=true;(composite=CompositeFunction,NumDeriv=false,' \
-                          '$domains=i;name=FlatBackground,A0=-0.800317;name=Polynomial,n=0,A0=0.791112;name=ExpDecayOsc,' \
-                          'A=0.172355,Lambda=0.111114,Frequency=0.280027,Phi=-0.101717);(composite=CompositeFunction,' \
-                          'NumDeriv=false,$domains=i;name=FlatBackground,A0=1.8125;name=Polynomial,n=0,A0=-1.81432;' \
-                          'name=ExpDecayOsc,A=0.17304,Lambda=0.102673,Frequency=0.278695,Phi=-0.0461353);' \
-                          '(composite=CompositeFunction,NumDeriv=false,$domains=i;name=FlatBackground,A0=1.045;' \
-                          'name=Polynomial,n=0,A0=-1.04673;name=ExpDecayOsc,A=-0.170299,Lambda=0.118256,Frequency=0.281085,Phi=-0.155812)'
+                          '$domains=i;name=FlatBackground,A0=-0.800317;name=Polynomial,n=0,A0=0.791112;' \
+                          'name=ExpDecayOsc,A=0.172355,Lambda=0.111114,Frequency=0.280027,Phi=-0.101717);(composite=' \
+                          'CompositeFunction,NumDeriv=false,$domains=i;name=FlatBackground,A0=1.8125;name=Polynomial,' \
+                          'n=0,A0=-1.81432;name=ExpDecayOsc,A=0.17304,Lambda=0.102673,Frequency=0.278695,' \
+                          'Phi=-0.0461353);(composite=CompositeFunction,NumDeriv=false,$domains=i;' \
+                          'name=FlatBackground,A0=1.045;name=Polynomial,n=0,A0=-1.04673;name=ExpDecayOsc,A=-0.170299,' \
+                          'Lambda=0.118256,Frequency=0.281085,Phi=-0.155812)'
         function_object = FunctionFactory.createInitialized(function_string)
 
         name_as_string = self.model.get_function_name(function_object)
@@ -159,10 +191,11 @@ class FittingTabModelTest(unittest.TestCase):
         self.assertEqual(name_as_string, 'FlatBackground,Polynomial,ExpDecayOsc')
 
     def test_get_function_name_truncates_function_with_more_than_three_composite_members(self):
-        function_string = 'name=ExpDecayOsc,A=-5.87503,Lambda=0.0768409,Frequency=0.0150173,Phi=-1.15833;name=GausDecay,' \
-                          'A=-1.59276,Sigma=0.361339;name=ExpDecayOsc,A=-5.87503,Lambda=0.0768409,Frequency=0.0150173,' \
-                          'Phi=-1.15833;name=ExpDecayMuon,A=-0.354664,Lambda=-0.15637;name=DynamicKuboToyabe,' \
-                          'BinWidth=0.050000000000000003,Asym=7.0419,Delta=0.797147,Field=606.24,Nu=2.67676e-09'
+        function_string = 'name=ExpDecayOsc,A=-5.87503,Lambda=0.0768409,Frequency=0.0150173,Phi=-1.15833;' \
+                          'name=GausDecay,A=-1.59276,Sigma=0.361339;name=ExpDecayOsc,A=-5.87503,Lambda=0.0768409,' \
+                          'Frequency=0.0150173,Phi=-1.15833;name=ExpDecayMuon,A=-0.354664,Lambda=-0.15637;' \
+                          'name=DynamicKuboToyabe,BinWidth=0.050000000000000003,Asym=7.0419,Delta=0.797147,' \
+                          'Field=606.24,Nu=2.67676e-09'
         function_object = FunctionFactory.createInitialized(function_string)
 
         name_as_string = self.model.get_function_name(function_object)
@@ -170,9 +203,9 @@ class FittingTabModelTest(unittest.TestCase):
         self.assertEqual(name_as_string, 'ExpDecayOsc,GausDecay,ExpDecayOsc,...')
 
     def test_get_function_name_does_truncate_for_exactly_four_members(self):
-        function_string = 'name=ExpDecayOsc,A=-5.87503,Lambda=0.0768409,Frequency=0.0150173,Phi=-1.15833;name=GausDecay,' \
-                          'A=-1.59276,Sigma=0.361339;name=ExpDecayOsc,A=-5.87503,Lambda=0.0768409,Frequency=0.0150173,' \
-                          'Phi=-1.15833;name=ExpDecayMuon,A=-0.354664,Lambda=-0.15637'
+        function_string = 'name=ExpDecayOsc,A=-5.87503,Lambda=0.0768409,Frequency=0.0150173,Phi=-1.15833;' \
+                          'name=GausDecay,A=-1.59276,Sigma=0.361339;name=ExpDecayOsc,A=-5.87503,Lambda=0.0768409,' \
+                          'Frequency=0.0150173,Phi=-1.15833;name=ExpDecayMuon,A=-0.354664,Lambda=-0.15637'
         function_object = FunctionFactory.createInitialized(function_string)
 
         name_as_string = self.model.get_function_name(function_object)
@@ -225,8 +258,8 @@ class FittingTabModelTest(unittest.TestCase):
                                          EndX=END_X,
                                          OutputWorkspace='__unknown_interface_fitting_guess')
         self.assertEqual(1, self.model.context.fitting_context.notify_plot_guess_changed.call_count)
-        self.model.context.fitting_context.notify_plot_guess_changed.assert_called_with(True,
-                                                                                        '__unknown_interface_fitting_guess')
+        self.model.context.fitting_context.notify_plot_guess_changed.assert_called_with(
+            True, '__unknown_interface_fitting_guess')
 
     def test_evaluate_single_fit_calls_correctly_for_single_fit(self):
         workspace = ["MUSR:62260;bwd"]
@@ -328,8 +361,7 @@ class FittingTabModelTest(unittest.TestCase):
         key_1 = self.model.create_workspace_key(workspace_1)
         trial_function_1 = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
         trial_function_2 = trial_function_1.clone()
-        self.model.ws_fit_function_map = {key: trial_function_1,
-                                          key_1: trial_function_2}
+        self.model.ws_fit_function_map = {key: trial_function_1, key_1: trial_function_2}
 
         return_function = self.model.get_ws_fit_function(workspace)
 
@@ -342,8 +374,7 @@ class FittingTabModelTest(unittest.TestCase):
         key_1 = self.model.create_workspace_key(workspaces_1)
         trial_function_1 = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
         trial_function_2 = trial_function_1.clone()
-        self.model.ws_fit_function_map = {key: trial_function_1,
-                                          key_1: trial_function_2}
+        self.model.ws_fit_function_map = {key: trial_function_1, key_1: trial_function_2}
 
         return_function = self.model.get_ws_fit_function(workspaces)
 
@@ -390,20 +421,23 @@ class FittingTabModelTest(unittest.TestCase):
 
         result = self.model.get_parameters_for_single_tf_fit(workspace_list[0])
 
-        self.assertEqual(result, {'InputFunction': fit_functions[0],
-                                  'Minimizer': 'Levenberg-Marquardt',
-                                  'OutputFitWorkspace': mock.ANY,
-                                  'ReNormalizedWorkspaceList': workspace_list[0],
-                                  'StartX': START_X,
-                                  'EndX': END_X,
-                                  'UnNormalizedWorkspaceList': un_normalised_workspace_name}
-                         )
+        self.assertEqual(
+            result, {
+                'InputFunction': fit_functions[0],
+                'Minimizer': 'Levenberg-Marquardt',
+                'OutputFitWorkspace': mock.ANY,
+                'ReNormalizedWorkspaceList': workspace_list[0],
+                'StartX': START_X,
+                'EndX': END_X,
+                'UnNormalizedWorkspaceList': un_normalised_workspace_name
+            })
 
     def test_get_parameters_for_tf_simultaneous_fit_returns_correctly(self):
         workspaces = [["MUSR62260;fwd", "MUSR62260;bwd"], ["MUSR62260;top", "MUSR62260;bot"]]
         trial_function = FunctionFactory.createInitialized(EXAMPLE_TF_ASYMMETRY_FUNCTION)
-        un_normalised_workspace_names = ['__MUSR62260; Group; fwd; Asymmetry_unnorm',
-                                         '__MUSR22725; Group; bwd; Asymmetry_unnorm']
+        un_normalised_workspace_names = [
+            '__MUSR62260; Group; fwd; Asymmetry_unnorm', '__MUSR22725; Group; bwd; Asymmetry_unnorm'
+        ]
         fit_functions = [trial_function, trial_function.clone()]
         self.setup_multi_fit_workspace_map(workspaces, fit_functions)
         self.model.context.group_pair_context.get_unormalisised_workspace_list = mock.MagicMock(
@@ -411,14 +445,16 @@ class FittingTabModelTest(unittest.TestCase):
 
         result = self.model.get_parameters_for_simultaneous_tf_fit(workspaces[1])
 
-        self.assertEqual(result, {'InputFunction': fit_functions[1],
-                                  'Minimizer': MINIMISER,
-                                  'OutputFitWorkspace': mock.ANY,
-                                  'ReNormalizedWorkspaceList': workspaces[1],
-                                  'StartX': START_X,
-                                  'EndX': END_X,
-                                  'UnNormalizedWorkspaceList': un_normalised_workspace_names}
-                         )
+        self.assertEqual(
+            result, {
+                'InputFunction': fit_functions[1],
+                'Minimizer': MINIMISER,
+                'OutputFitWorkspace': mock.ANY,
+                'ReNormalizedWorkspaceList': workspaces[1],
+                'StartX': START_X,
+                'EndX': END_X,
+                'UnNormalizedWorkspaceList': un_normalised_workspace_names
+            })
 
     def test_get_parameters_for_single_tf_calculation_returns_correctly(self):
         trial_function = FunctionFactory.createInitialized(EXAMPLE_TF_ASYMMETRY_FUNCTION)
@@ -428,32 +464,37 @@ class FittingTabModelTest(unittest.TestCase):
             return_value=[un_normalised_workspace_name])
 
         result = self.model.get_params_for_single_tf_function_calculation(workspace, trial_function)
-        self.assertEqual(result, {'InputFunction': trial_function,
-                                  'Minimizer': MINIMISER,
-                                  'OutputFitWorkspace': 'fit',
-                                  'ReNormalizedWorkspaceList': workspace,
-                                  'StartX': START_X,
-                                  'EndX': END_X,
-                                  'UnNormalizedWorkspaceList': un_normalised_workspace_name}
-                         )
+        self.assertEqual(
+            result, {
+                'InputFunction': trial_function,
+                'Minimizer': MINIMISER,
+                'OutputFitWorkspace': 'fit',
+                'ReNormalizedWorkspaceList': workspace,
+                'StartX': START_X,
+                'EndX': END_X,
+                'UnNormalizedWorkspaceList': un_normalised_workspace_name
+            })
 
     def test_get_parameters_for_multi_tf_calculation_returns_correctly(self):
         trial_function = FunctionFactory.createInitialized(EXAMPLE_TF_ASYMMETRY_FUNCTION)
         workspaces = ["MUSR62260;fwd", "MUSR62260;bwd"]
-        un_normalised_workspace_names = ['__MUSR62260; Group; fwd; Asymmetry_unnorm',
-                                         '__MUSR62260; Group; bwd; Asymmetry_unnorm']
+        un_normalised_workspace_names = [
+            '__MUSR62260; Group; fwd; Asymmetry_unnorm', '__MUSR62260; Group; bwd; Asymmetry_unnorm'
+        ]
         self.model.context.group_pair_context.get_unormalisised_workspace_list = mock.MagicMock(
             return_value=un_normalised_workspace_names)
 
         result = self.model.get_params_for_multi_tf_function_calculation(workspaces, trial_function)
-        self.assertEqual(result, {'InputFunction': trial_function,
-                                  'Minimizer': MINIMISER,
-                                  'OutputFitWorkspace': 'fit',
-                                  'ReNormalizedWorkspaceList': workspaces,
-                                  'StartX': START_X,
-                                  'EndX': END_X,
-                                  'UnNormalizedWorkspaceList': un_normalised_workspace_names}
-                         )
+        self.assertEqual(
+            result, {
+                'InputFunction': trial_function,
+                'Minimizer': MINIMISER,
+                'OutputFitWorkspace': 'fit',
+                'ReNormalizedWorkspaceList': workspaces,
+                'StartX': START_X,
+                'EndX': END_X,
+                'UnNormalizedWorkspaceList': un_normalised_workspace_names
+            })
 
     def test_create_double_pulse_alg_initialses_algorithm_with_correct_values(self):
         self.model.context.gui_context['DoublePulseTime'] = 2.0
@@ -476,7 +517,8 @@ class FittingTabModelTest(unittest.TestCase):
         self.assertEquals(parameters['EnableDoublePulse'], True)
         self.assertAlmostEquals(parameters['FirstPulseWeight'], 0.287, places=3)
 
-    def test_that_single_fit_initialises_algorithm_with_correct_values_for_simultaneous_tf_asymmetry_double_pulse_mode(self):
+    def test_that_single_fit_initialises_algorithm_with_correct_values_for_simultaneous_tf_asymmetry_double_pulse_mode(
+            self):
         workspace_name = 'MUSR62260; Group; fwd;'
         pulse_offset = 2.0
         self.model.context.gui_context['DoublePulseTime'] = pulse_offset
@@ -490,10 +532,10 @@ class FittingTabModelTest(unittest.TestCase):
 
     def test_fit_ws_names_from_groups_and_runs(self):
         self.model.fitting_options["fit_to_raw"] = False
-        self.model.context.data_context.instrument="MUSR"
+        self.model.context.data_context.instrument = "MUSR"
         # make some pairs
-        pair = MuonPair("long", "f","b",1.)
-        pair2 = MuonPair("long2", "f","b",2.)
+        pair = MuonPair("long", "f", "b", 1.)
+        pair2 = MuonPair("long2", "f", "b", 2.)
         # make some phasequads
         phase_Re = MuonBasePair("phase_Re_")
         phase_Im = MuonBasePair("phase_Im_")
@@ -511,24 +553,22 @@ class FittingTabModelTest(unittest.TestCase):
         self.model.context.group_pair_context.add_pair_to_selected_pairs("phase_Re_")
         self.model.context.group_pair_context.add_pair_to_selected_pairs("phase2_Im_")
         # do test
-        selection = ["long","long2","phase_Re_","phase_Im_", "phase2_Re_", "phase2_Im_"]
-        result = self.model.get_fit_workspace_names_from_groups_and_runs([1,2,3], selection)
-        self.assertEqual(["MUSR1; Pair Asym; long; Rebin; MA",
-                          "MUSR1; PhaseQuad; phase_Re_; Rebin; MA",
-                          'MUSR1; PhaseQuad; phase2_Im_; Rebin; MA',
-                          'MUSR2; Pair Asym; long; Rebin; MA',
-                          'MUSR2; PhaseQuad; phase_Re_; Rebin; MA',
-                          'MUSR2; PhaseQuad; phase2_Im_; Rebin; MA',
-                          'MUSR3; Pair Asym; long; Rebin; MA',
-                          'MUSR3; PhaseQuad; phase_Re_; Rebin; MA',
-                          'MUSR3; PhaseQuad; phase2_Im_; Rebin; MA'], result)
+        selection = ["long", "long2", "phase_Re_", "phase_Im_", "phase2_Re_", "phase2_Im_"]
+        result = self.model.get_fit_workspace_names_from_groups_and_runs([1, 2, 3], selection)
+        self.assertEqual([
+            "MUSR1; Pair Asym; long; Rebin; MA", "MUSR1; PhaseQuad; phase_Re_; Rebin; MA",
+            'MUSR1; PhaseQuad; phase2_Im_; Rebin; MA', 'MUSR2; Pair Asym; long; Rebin; MA',
+            'MUSR2; PhaseQuad; phase_Re_; Rebin; MA', 'MUSR2; PhaseQuad; phase2_Im_; Rebin; MA',
+            'MUSR3; Pair Asym; long; Rebin; MA', 'MUSR3; PhaseQuad; phase_Re_; Rebin; MA',
+            'MUSR3; PhaseQuad; phase2_Im_; Rebin; MA'
+        ], result)
 
     def test_fit_ws_names_from_groups_and_runs_raw(self):
         self.model.fitting_options["fit_to_raw"] = True
-        self.model.context.data_context.instrument="MUSR"
+        self.model.context.data_context.instrument = "MUSR"
         # make some pairs
-        pair = MuonPair("long", "f","b",1.)
-        pair2 = MuonPair("long2", "f","b",2.)
+        pair = MuonPair("long", "f", "b", 1.)
+        pair2 = MuonPair("long2", "f", "b", 2.)
         # make some phasequads
         phase_Re = MuonBasePair("phase_Re_")
         phase_Im = MuonBasePair("phase_Im_")
@@ -546,17 +586,13 @@ class FittingTabModelTest(unittest.TestCase):
         self.model.context.group_pair_context.add_pair_to_selected_pairs("phase_Re_")
         self.model.context.group_pair_context.add_pair_to_selected_pairs("phase2_Im_")
         # do test
-        selection = ["long","long2","phase_Re_","phase_Im_", "phase2_Re_", "phase2_Im_"]
-        result = self.model.get_fit_workspace_names_from_groups_and_runs([1,2,3], selection)
-        self.assertEqual(["MUSR1; Pair Asym; long; MA",
-                          "MUSR1; PhaseQuad; phase_Re_; MA",
-                          'MUSR1; PhaseQuad; phase2_Im_; MA',
-                          'MUSR2; Pair Asym; long; MA',
-                          'MUSR2; PhaseQuad; phase_Re_; MA',
-                          'MUSR2; PhaseQuad; phase2_Im_; MA',
-                          'MUSR3; Pair Asym; long; MA',
-                          'MUSR3; PhaseQuad; phase_Re_; MA',
-                          'MUSR3; PhaseQuad; phase2_Im_; MA'], result)
+        selection = ["long", "long2", "phase_Re_", "phase_Im_", "phase2_Re_", "phase2_Im_"]
+        result = self.model.get_fit_workspace_names_from_groups_and_runs([1, 2, 3], selection)
+        self.assertEqual([
+            "MUSR1; Pair Asym; long; MA", "MUSR1; PhaseQuad; phase_Re_; MA", 'MUSR1; PhaseQuad; phase2_Im_; MA',
+            'MUSR2; Pair Asym; long; MA', 'MUSR2; PhaseQuad; phase_Re_; MA', 'MUSR2; PhaseQuad; phase2_Im_; MA',
+            'MUSR3; Pair Asym; long; MA', 'MUSR3; PhaseQuad; phase_Re_; MA', 'MUSR3; PhaseQuad; phase2_Im_; MA'
+        ], result)
 
 
 if __name__ == '__main__':

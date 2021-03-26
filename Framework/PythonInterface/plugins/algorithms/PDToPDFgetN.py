@@ -25,7 +25,7 @@ class PDToPDFgetN(DataProcessorAlgorithm):
         return "Workflow\\Diffraction"
 
     def seeAlso(self):
-        return [ "PDToGUDRUN" ]
+        return ["PDToGUDRUN"]
 
     def name(self):
         return "PDToPDFgetN"
@@ -35,16 +35,18 @@ class PDToPDFgetN(DataProcessorAlgorithm):
 
     def PyInit(self):
         group = "Input"
-        self.declareProperty(FileProperty(name="Filename",
-                                          defaultValue="", action=FileAction.OptionalLoad,
-                                          extensions=["_event.nxs", ".nxs.h5"]),
-                             "Event file")
+        self.declareProperty(
+            FileProperty(name="Filename",
+                         defaultValue="",
+                         action=FileAction.OptionalLoad,
+                         extensions=["_event.nxs", ".nxs.h5"]), "Event file")
         self.copyProperties('AlignAndFocusPowderFromFiles', 'MaxChunkSize')
-        self.declareProperty("FilterBadPulses", 95.,
-                             doc="Filter out events measured while proton "
-                                 + "charge is more than 5% below average")
+        self.declareProperty("FilterBadPulses",
+                             95.,
+                             doc="Filter out events measured while proton " + "charge is more than 5% below average")
 
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace",
+                                                     "",
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc="Handle to reduced workspace")
@@ -54,32 +56,35 @@ class PDToPDFgetN(DataProcessorAlgorithm):
         self.setPropertyGroup("InputWorkspace", group)
 
         group = "Output"
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
-                                                     direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              doc="Handle to reduced workspace")
         self.copyProperties('AlignAndFocusPowderFromFiles', 'CacheDir')
-        self.declareProperty(FileProperty(name="PDFgetNFile", defaultValue="", action=FileAction.Save,
-                                          extensions=[".getn"]), "Output filename")
+        self.declareProperty(
+            FileProperty(name="PDFgetNFile", defaultValue="", action=FileAction.Save, extensions=[".getn"]),
+            "Output filename")
         self.setPropertyGroup("OutputWorkspace", group)
         self.setPropertyGroup("PDFgetNFile", group)
 
-        self.declareProperty(FileProperty(name="CalibrationFile",
-                                          defaultValue="", action=FileAction.OptionalLoad,
-                                          extensions=[".h5", ".hd5", ".hdf", ".cal"]))
-        self.declareProperty(FileProperty(name="CharacterizationRunsFile", defaultValue="",
-                                          action=FileAction.OptionalLoad,
-                                          extensions=["txt"]),
-                             "File with characterization runs denoted")
-        self.copyProperties('AlignAndFocusPowderFromFiles',
-                            ['FrequencyLogNames', 'WaveLengthLogNames', 'RemovePromptPulseWidth',
-                             'CropWavelengthMin', 'CropWavelengthMax'])
+        self.declareProperty(
+            FileProperty(name="CalibrationFile",
+                         defaultValue="",
+                         action=FileAction.OptionalLoad,
+                         extensions=[".h5", ".hd5", ".hdf", ".cal"]))
+        self.declareProperty(
+            FileProperty(name="CharacterizationRunsFile",
+                         defaultValue="",
+                         action=FileAction.OptionalLoad,
+                         extensions=["txt"]), "File with characterization runs denoted")
+        self.copyProperties('AlignAndFocusPowderFromFiles', [
+            'FrequencyLogNames', 'WaveLengthLogNames', 'RemovePromptPulseWidth', 'CropWavelengthMin',
+            'CropWavelengthMax'
+        ])
 
-        self.declareProperty(FloatArrayProperty("Binning", values=[0., 0., 0.],
-                                                direction=Direction.Input),
+        self.declareProperty(FloatArrayProperty("Binning", values=[0., 0., 0.], direction=Direction.Input),
                              "Positive is linear bins, negative is logorithmic")
-        self.declareProperty("ResampleX", 0,
-                             "Number of bins in x-axis. Non-zero value overrides \"Params\" property. "
-                             + "Negative value means logorithmic binning.")
+        self.declareProperty(
+            "ResampleX", 0, "Number of bins in x-axis. Non-zero value overrides \"Params\" property. " +
+            "Negative value means logorithmic binning.")
 
     def validateInputs(self):
         issues = {}
@@ -101,7 +106,7 @@ class PDToPDFgetN(DataProcessorAlgorithm):
                 binning = binning[0]
             else:
                 binning = binning[1]
-            if binning == 0.:   # has to be non-zero delta
+            if binning == 0.:  # has to be non-zero delta
                 msg = 'Must supply a Binning or ResampleX'
                 issues['Binning'] = msg
                 issues['ResampleX'] = msg
@@ -117,8 +122,7 @@ class PDToPDFgetN(DataProcessorAlgorithm):
         if charFilename is None or len(charFilename) <= 0:
             return
 
-        results = PDLoadCharacterizations(Filename=charFilename,
-                                          OutputWorkspace="characterizations")
+        results = PDLoadCharacterizations(Filename=charFilename, OutputWorkspace="characterizations")
         self._iparmFile = results[1]
         self._alignArgs['PrimaryFlightPath'] = results[2]
         self._alignArgs['SpectrumIDs'] = results[3]
@@ -138,9 +142,9 @@ class PDToPDFgetN(DataProcessorAlgorithm):
         self._alignArgs['CompressTolerance'] = COMPRESS_TOL_TOF
         self._alignArgs['PreserveEvents'] = True
         self._alignArgs['CalFileName'] = self.getProperty("CalibrationFile").value
-        self._alignArgs['Params']=self.getProperty("Binning").value
-        self._alignArgs['ResampleX']=self.getProperty("ResampleX").value
-        self._alignArgs['Dspacing']=True
+        self._alignArgs['Params'] = self.getProperty("Binning").value
+        self._alignArgs['ResampleX'] = self.getProperty("ResampleX").value
+        self._alignArgs['Dspacing'] = True
         self._alignArgs['CropWavelengthMin'] = self.getProperty('CropWavelengthMin').value
         self._alignArgs['CropWavelengthMax'] = self.getProperty('CropWavelengthMax').value
         self._alignArgs['ReductionProperties'] = '__snspowderreduction'
@@ -156,8 +160,8 @@ class PDToPDFgetN(DataProcessorAlgorithm):
                                                 WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value,
                                                 **(self._alignArgs))
         else:  # process the input workspace
-            self.log().information("Using input workspace. Ignoring properties 'Filename', "
-                                   + "'OutputWorkspace', 'MaxChunkSize', and 'FilterBadPulses'")
+            self.log().information("Using input workspace. Ignoring properties 'Filename', " +
+                                   "'OutputWorkspace', 'MaxChunkSize', and 'FilterBadPulses'")
 
             # get the correct row of the table
             PDDetermineCharacterizations(InputWorkspace=wksp,
@@ -166,22 +170,22 @@ class PDToPDFgetN(DataProcessorAlgorithm):
                                          FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
                                          WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value)
 
-            wksp = AlignAndFocusPowder(InputWorkspace=wksp,
-                                       **(self._alignArgs))
+            wksp = AlignAndFocusPowder(InputWorkspace=wksp, **(self._alignArgs))
 
         wksp = NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
         wksp.getRun()['gsas_monitor'] = 1
         if self._iparmFile is not None:
             wksp.getRun()['iparm_file'] = self._iparmFile
 
-        wksp = SetUncertainties(InputWorkspace=wksp, OutputWorkspace=wksp,
-                                SetError="sqrtOrOne")
+        wksp = SetUncertainties(InputWorkspace=wksp, OutputWorkspace=wksp, SetError="sqrtOrOne")
         SaveGSS(InputWorkspace=wksp,
                 Filename=self.getProperty("PDFgetNFile").value,
-                SplitFiles=False, Append=False,
+                SplitFiles=False,
+                Append=False,
                 MultiplyByBinWidth=False,
                 Bank=mantid.pmds["__snspowderreduction"]["bank"].value,
-                Format="SLOG", ExtendedHeader=True)
+                Format="SLOG",
+                ExtendedHeader=True)
 
         self.setProperty("OutputWorkspace", wksp)
 

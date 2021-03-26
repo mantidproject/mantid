@@ -7,9 +7,10 @@
 # pylint: disable=no-init, too-many-instance-attributes
 
 from mantid.simpleapi import *
-from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress, WorkspaceGroupProperty
-from mantid.kernel import (StringMandatoryValidator, Direction, logger, IntBoundedValidator,
-                           FloatBoundedValidator, StringListValidator, MaterialBuilder)
+from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress, \
+                       WorkspaceGroupProperty
+from mantid.kernel import (StringMandatoryValidator, Direction, logger, IntBoundedValidator, FloatBoundedValidator,
+                           StringListValidator, MaterialBuilder)
 
 
 class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
@@ -48,45 +49,57 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
                              doc='Sample workspace.')
 
-        self.declareProperty(name='SampleChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
+        self.declareProperty(name='SampleChemicalFormula',
+                             defaultValue='',
+                             validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
-        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
+        self.declareProperty(name='SampleDensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass density or Number density')
-        self.declareProperty(name='SampleDensity', defaultValue=0.1,
+        self.declareProperty(name='SampleDensity',
+                             defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
-        self.declareProperty(name='SampleInnerRadius', defaultValue=0.2,
+        self.declareProperty(name='SampleInnerRadius',
+                             defaultValue=0.2,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample radius')
-        self.declareProperty(name='SampleOuterRadius', defaultValue=0.25,
+        self.declareProperty(name='SampleOuterRadius',
+                             defaultValue=0.25,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample radius')
 
         # Container options
-        self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '', optional=PropertyMode.Optional,
+        self.declareProperty(MatrixWorkspaceProperty('CanWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
                                                      direction=Direction.Input),
                              doc='Container workspace.')
-        self.declareProperty(name='UseCanCorrections', defaultValue=False,
-                             doc='Use can corrections in subtraction')
-        self.declareProperty(name='CanChemicalFormula', defaultValue='',
-                             doc='Chemical formula for the can')
-        self.declareProperty(name='CanDensityType', defaultValue='Mass Density',
+        self.declareProperty(name='UseCanCorrections', defaultValue=False, doc='Use can corrections in subtraction')
+        self.declareProperty(name='CanChemicalFormula', defaultValue='', doc='Chemical formula for the can')
+        self.declareProperty(name='CanDensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass density or Number density')
-        self.declareProperty(name='CanDensity', defaultValue=0.1,
+        self.declareProperty(name='CanDensity',
+                             defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
-        self.declareProperty(name='CanInnerRadius', defaultValue=0.19,
+        self.declareProperty(name='CanInnerRadius',
+                             defaultValue=0.19,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample radius')
-        self.declareProperty(name='CanOuterRadius', defaultValue=0.26,
+        self.declareProperty(name='CanOuterRadius',
+                             defaultValue=0.26,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample radius')
-        self.declareProperty(name='CanScaleFactor', defaultValue=1.0,
+        self.declareProperty(name='CanScaleFactor',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Scale factor to multiply can data')
 
         # General options
-        self.declareProperty(name='Events', defaultValue=5000,
+        self.declareProperty(name='Events',
+                             defaultValue=5000,
                              validator=IntBoundedValidator(0),
                              doc='Number of neutron events')
 
@@ -94,7 +107,9 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output corrected workspace.')
 
-        self.declareProperty(WorkspaceGroupProperty('CorrectionsWorkspace', '', direction=Direction.Output,
+        self.declareProperty(WorkspaceGroupProperty('CorrectionsWorkspace',
+                                                    '',
+                                                    direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
                              doc='The corrections workspace for scattering and absorptions in sample.')
 
@@ -113,8 +128,12 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         efixed = getEfixed(self._sample_ws_name)
 
         sample_wave_ws = '__sam_wave'
-        ConvertUnits(InputWorkspace=self._sample_ws_name, OutputWorkspace=sample_wave_ws,
-                     Target='Wavelength', EMode='Indirect', EFixed=efixed, EnableLogging=False)
+        ConvertUnits(InputWorkspace=self._sample_ws_name,
+                     OutputWorkspace=sample_wave_ws,
+                     Target='Wavelength',
+                     EMode='Indirect',
+                     EFixed=efixed,
+                     EnableLogging=False)
 
         sample_thickness = self._sample_outer_radius - self._sample_inner_radius
         logger.information('Sample thickness: ' + str(sample_thickness))
@@ -124,7 +143,9 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
             builder = MaterialBuilder()
             mat = builder.setFormula(self._sample_chemical_formula).setMassDensity(self._sample_density).build()
             self._sample_density = mat.numberDensity
-        SetSampleMaterial(sample_wave_ws, ChemicalFormula=self._sample_chemical_formula, SampleNumberDensity=self._sample_density)
+        SetSampleMaterial(sample_wave_ws,
+                          ChemicalFormula=self._sample_chemical_formula,
+                          SampleNumberDensity=self._sample_density)
         AnnularRingAbsorption(InputWorkspace=sample_wave_ws,
                               OutputWorkspace=self._ass_ws,
                               SampleHeight=3.0,
@@ -141,11 +162,18 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         if self._can_ws_name is not None:
             can1_wave_ws = '__can1_wave'
             can2_wave_ws = '__can2_wave'
-            ConvertUnits(InputWorkspace=self._can_ws_name, OutputWorkspace=can1_wave_ws,
-                         Target='Wavelength', EMode='Indirect', EFixed=efixed, EnableLogging=False)
+            ConvertUnits(InputWorkspace=self._can_ws_name,
+                         OutputWorkspace=can1_wave_ws,
+                         Target='Wavelength',
+                         EMode='Indirect',
+                         EFixed=efixed,
+                         EnableLogging=False)
             if self._can_scale != 1.0:
                 logger.information('Scaling container by: ' + str(self._can_scale))
-                Scale(InputWorkspace=can1_wave_ws, OutputWorkspace=can1_wave_ws, Factor=self._can_scale, Operation='Multiply')
+                Scale(InputWorkspace=can1_wave_ws,
+                      OutputWorkspace=can1_wave_ws,
+                      Factor=self._can_scale,
+                      Operation='Multiply')
             CloneWorkspace(InputWorkspace=can1_wave_ws, OutputWorkspace=can2_wave_ws, EnableLogging=False)
 
             can_thickness_1 = self._sample_inner_radius - self._can_inner_radius
@@ -160,7 +188,8 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                     builder = MaterialBuilder()
                     mat = builder.setFormula(self._can_chemical_formula).setMassDensity(self._can_density).build()
                     self._can_density = mat.numberDensity
-                SetSampleMaterial(can1_wave_ws, ChemicalFormula=self._can_chemical_formula,
+                SetSampleMaterial(can1_wave_ws,
+                                  ChemicalFormula=self._can_chemical_formula,
                                   SampleNumberDensity=self._can_density)
 
                 AnnularRingAbsorption(InputWorkspace=can1_wave_ws,
@@ -174,7 +203,9 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                                       NumberOfWavelengthPoints=10,
                                       EventsPerPoint=self._events)
 
-                SetSampleMaterial(can2_wave_ws, ChemicalFormula=self._can_chemical_formula, SampleNumberDensity=self._can_density)
+                SetSampleMaterial(can2_wave_ws,
+                                  ChemicalFormula=self._can_chemical_formula,
+                                  SampleNumberDensity=self._can_density)
                 AnnularRingAbsorption(InputWorkspace=can2_wave_ws,
                                       OutputWorkspace='__Acc2',
                                       SampleHeight=3.0,
@@ -186,7 +217,10 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                                       NumberOfWavelengthPoints=10,
                                       EventsPerPoint=self._events)
 
-                Multiply(LHSWorkspace='__Acc1', RHSWorkspace='__Acc2', OutputWorkspace=self._acc_ws, EnableLogging=False)
+                Multiply(LHSWorkspace='__Acc1',
+                         RHSWorkspace='__Acc2',
+                         OutputWorkspace=self._acc_ws,
+                         EnableLogging=False)
                 DeleteWorkspace('__Acc1', EnableLogging=False)
                 DeleteWorkspace('__Acc2', EnableLogging=False)
 
@@ -203,9 +237,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
             DeleteWorkspace(can2_wave_ws, EnableLogging=False)
 
         else:
-            Divide(LHSWorkspace=sample_wave_ws,
-                   RHSWorkspace=self._ass_ws,
-                   OutputWorkspace=sample_wave_ws)
+            Divide(LHSWorkspace=sample_wave_ws, RHSWorkspace=self._ass_ws, OutputWorkspace=sample_wave_ws)
 
         ConvertUnits(InputWorkspace=sample_wave_ws,
                      OutputWorkspace=self._output_ws,
@@ -217,12 +249,9 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
 
         prog.report('Recording sample logs')
         sample_log_workspaces = [self._output_ws, self._ass_ws]
-        sample_logs = [('sample_shape', 'annulus'),
-                       ('sample_filename', self._sample_ws_name),
-                       ('sample_inner', self._sample_inner_radius),
-                       ('sample_outer', self._sample_outer_radius),
-                       ('can_inner', self._can_inner_radius),
-                       ('can_outer', self._can_outer_radius)]
+        sample_logs = [('sample_shape', 'annulus'), ('sample_filename', self._sample_ws_name),
+                       ('sample_inner', self._sample_inner_radius), ('sample_outer', self._sample_outer_radius),
+                       ('can_inner', self._can_inner_radius), ('can_outer', self._can_outer_radius)]
 
         if self._can_ws_name is not None:
             sample_logs.append(('container_filename', self._can_ws_name))

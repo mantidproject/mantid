@@ -20,7 +20,6 @@ class Worker(QRunnable):
     """
     Worker thread which allows for async execution
     """
-
     def __init__(self, func, *args, **kwargs):
         super(Worker, self).__init__()
         self.func = func

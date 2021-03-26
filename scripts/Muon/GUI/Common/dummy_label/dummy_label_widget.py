@@ -10,7 +10,6 @@ from Muon.GUI.Common.dummy_label.dummy_label_model import DummyLabelModel
 
 
 class DummyLabelWidget(object):
-
     def __init__(self, context, key, parent=None):
         model = DummyLabelModel(context, key)
         sub_context = model.getSubContext()

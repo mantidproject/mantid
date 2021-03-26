@@ -41,9 +41,9 @@ def _normalize_by_index(workspace, index):
         y_values_normalised = scale * y_values
 
         # Propagate y errors: C = A / B ; dC = sqrt( (dA/B)^2 + (A*dB/B^2)^2 )
-        a = (y_errors*scale)
-        b = (y_values*y_errors[index]*(scale ** 2))
-        y_errors_propagated = np.sqrt(a ** 2 + b ** 2)
+        a = (y_errors * scale)
+        b = (y_values * y_errors[index] * (scale**2))
+        y_errors_propagated = np.sqrt(a**2 + b**2)
 
         workspace.setY(idx, y_values_normalised)
         workspace.setE(idx, y_errors_propagated)
@@ -72,36 +72,39 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceGroupProperty('InputWorkspaces', '', Direction.Input),
                              doc='Grouped input workspaces')
 
-        self.declareProperty(name='IntegrationRangeStart', defaultValue=0.0,
+        self.declareProperty(name='IntegrationRangeStart',
+                             defaultValue=0.0,
                              doc='Start of integration range in time of flight')
-        self.declareProperty(name='IntegrationRangeEnd', defaultValue=0.0,
+        self.declareProperty(name='IntegrationRangeEnd',
+                             defaultValue=0.0,
                              doc='End of integration range in time of flight')
 
-        self.declareProperty(name='BackgroundRangeStart', defaultValue=Property.EMPTY_DBL,
+        self.declareProperty(name='BackgroundRangeStart',
+                             defaultValue=Property.EMPTY_DBL,
                              doc='Start of background range in time of flight')
-        self.declareProperty(name='BackgroundRangeEnd', defaultValue=Property.EMPTY_DBL,
+        self.declareProperty(name='BackgroundRangeEnd',
+                             defaultValue=Property.EMPTY_DBL,
                              doc='End of background range in time of flight')
 
-        self.declareProperty(name='SampleEnvironmentLogName', defaultValue='sample',
+        self.declareProperty(name='SampleEnvironmentLogName',
+                             defaultValue='sample',
                              doc='Name of the sample environment log entry')
 
         sample_environment_log_values = ['last_value', 'average']
-        self.declareProperty('SampleEnvironmentLogValue', 'last_value',
+        self.declareProperty('SampleEnvironmentLogValue',
+                             'last_value',
                              StringListValidator(sample_environment_log_values),
                              doc='Value selection of the sample environment log entry')
 
-        self.declareProperty(WorkspaceProperty('OutputInQ', '', Direction.Output),
-                             doc='Output workspace in Q')
+        self.declareProperty(WorkspaceProperty('OutputInQ', '', Direction.Output), doc='Output workspace in Q')
 
         self.declareProperty(WorkspaceProperty('OutputInQSquared', '', Direction.Output),
                              doc='Output workspace in Q Squared')
 
-        self.declareProperty(WorkspaceProperty('OutputELF', '', Direction.Output,
-                                               PropertyMode.Optional),
+        self.declareProperty(WorkspaceProperty('OutputELF', '', Direction.Output, PropertyMode.Optional),
                              doc='Output workspace ELF')
 
-        self.declareProperty(WorkspaceProperty('OutputELT', '', Direction.Output,
-                                               PropertyMode.Optional),
+        self.declareProperty(WorkspaceProperty('OutputELT', '', Direction.Output, PropertyMode.Optional),
                              doc='Output workspace ELT')
 
     def validateInputs(self):
@@ -162,11 +165,15 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                                                       IntegrationRangeEnd=self._integration_range_end,
                                                       BackgroundRangeStart=self._background_range_start,
                                                       BackgroundRangeEnd=self._background_range_end,
-                                                      OutputInQ="__q", OutputInQSquared="__q2",
-                                                      StoreInADS=False, EnableLogging=False)
+                                                      OutputInQ="__q",
+                                                      OutputInQSquared="__q2",
+                                                      StoreInADS=False,
+                                                      EnableLogging=False)
 
-            q2_workspace = Logarithm(InputWorkspace=q2_workspace, OutputWorkspace="__q2",
-                                     StoreInADS=False, EnableLogging=False)
+            q2_workspace = Logarithm(InputWorkspace=q2_workspace,
+                                     OutputWorkspace="__q2",
+                                     StoreInADS=False,
+                                     EnableLogging=False)
 
             q_workspaces.append(q_workspace)
             q2_workspaces.append(q2_workspace)
@@ -233,8 +240,10 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             if self._elf_ws_name == '':
                 elt_workspace = _sort_x_axis(_transpose(q_workspace))
             else:
-                elt_workspace = CloneWorkspace(InputWorkspace=elf_workspace, OutputWorkspace="__cloned",
-                                               StoreInADS=False, EnableLogging=False)
+                elt_workspace = CloneWorkspace(InputWorkspace=elf_workspace,
+                                               OutputWorkspace="__cloned",
+                                               StoreInADS=False,
+                                               EnableLogging=False)
 
             _normalize_by_index(elt_workspace, 0)
 
@@ -370,18 +379,19 @@ def _append_all(workspaces):
 
 
 def _append_spectra(workspace1, workspace2):
-    return AppendSpectra(InputWorkspace1=workspace1, InputWorkspace2=workspace2,
-                         OutputWorkspace="__appended", StoreInADS=False, EnableLogging=False)
+    return AppendSpectra(InputWorkspace1=workspace1,
+                         InputWorkspace2=workspace2,
+                         OutputWorkspace="__appended",
+                         StoreInADS=False,
+                         EnableLogging=False)
 
 
 def _transpose(workspace):
-    return Transpose(InputWorkspace=workspace, OutputWorkspace="__transposed",
-                     StoreInADS=False, EnableLogging=False)
+    return Transpose(InputWorkspace=workspace, OutputWorkspace="__transposed", StoreInADS=False, EnableLogging=False)
 
 
 def _sort_x_axis(workspace):
-    return SortXAxis(InputWorkspace=workspace, OutputWorkspace="__sorted",
-                     StoreInADS=False, EnableLogging=False)
+    return SortXAxis(InputWorkspace=workspace, OutputWorkspace="__sorted", StoreInADS=False, EnableLogging=False)
 
 
 # Register algorithm with Mantid

@@ -27,7 +27,6 @@ class EQSANSSolid(systemtesting.MantidSystemTest):
         Analysis Tests for EQSANS
         Testing that the I(Q) output of is correct
     """
-
     def cleanup(self):
         do_cleanup()
         return True
@@ -37,7 +36,7 @@ class EQSANSSolid(systemtesting.MantidSystemTest):
             Check that EQSANSTofStructure returns the correct workspace
         """
         configI = ConfigService.Instance()
-        configI["facilityName"]='SNS'
+        configI["facilityName"] = 'SNS'
         EQSANS(False)
         AppendDataFile("EQSANS_1466_event.nxs")
         SolidAngle()
@@ -46,11 +45,13 @@ class EQSANSSolid(systemtesting.MantidSystemTest):
         UseConfigMask(False)
         TotalChargeNormalization(normalize_to_beam=False)
         SetBeamCenter(96.29, 126.15)
-        SetTransmission(1.0,0.0, False)
+        SetTransmission(1.0, 0.0, False)
         Reduce1D()
-         # Scale up to match correct scaling.
-        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81,
-              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")
+        # Scale up to match correct scaling.
+        Scale(InputWorkspace="EQSANS_1466_event_Iq",
+              Factor=2777.81,
+              Operation='Multiply',
+              OutputWorkspace="EQSANS_1466_event_Iq")
 
     def validate(self):
         self.tolerance = 0.2
@@ -71,7 +72,6 @@ class EQSANSSolidEvent(EQSANSSolid):
         Analysis Tests for EQSANS
         Testing that the I(Q) output of is correct
     """
-
     def cleanup(self):
         do_cleanup()
         return True
@@ -81,7 +81,7 @@ class EQSANSSolidEvent(EQSANSSolid):
             Check that EQSANSTofStructure returns the correct workspace
         """
         configI = ConfigService.Instance()
-        configI["facilityName"]='SNS'
+        configI["facilityName"] = 'SNS'
         EQSANS(True)
         AppendDataFile("EQSANS_1466_event.nxs")
         SolidAngle()
@@ -90,8 +90,10 @@ class EQSANSSolidEvent(EQSANSSolid):
         UseConfigMask(False)
         TotalChargeNormalization(normalize_to_beam=False)
         SetBeamCenter(96.29, 126.15)
-        SetTransmission(1.0,0.0, False)
+        SetTransmission(1.0, 0.0, False)
         Reduce1D()
         # Scale up to match correct scaling.
-        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81,
-              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")
+        Scale(InputWorkspace="EQSANS_1466_event_Iq",
+              Factor=2777.81,
+              Operation='Multiply',
+              OutputWorkspace="EQSANS_1466_event_Iq")

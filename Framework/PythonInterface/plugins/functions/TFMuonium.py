@@ -11,15 +11,13 @@ import numpy as np
 
 
 class TFMuonium(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.5, 'Amplitude')
         self.declareParameter("Field", 5, 'B-field (G)')
-        self.declareParameter(
-            "A", 600, 'Isotropic hyperfine coupling constant (MHz)')
+        self.declareParameter("A", 600, 'Isotropic hyperfine coupling constant (MHz)')
         self.declareParameter("Phi", 0.0, 'Phase')
 
     def function1D(self, x):
@@ -32,19 +30,19 @@ class TFMuonium(IFunction1D):
         fcut = 10**32
         chi = (gm + ge) * B / A
         diff = (ge - gm) / (gm + ge)
-        delta = chi / np.sqrt(1 + chi ** 2)
+        delta = chi / np.sqrt(1 + chi**2)
         E1 = A / 4 * (1 + 2 * diff * chi)
-        E2 = A / 4 * (- 1 + 2 * np.sqrt(1 + chi ** 2))
+        E2 = A / 4 * (-1 + 2 * np.sqrt(1 + chi**2))
         E3 = A / 4 * (1 - 2 * diff * chi)
-        E4 = A / 4 * (- 1 - 2 * np.sqrt(1 + chi ** 2))
+        E4 = A / 4 * (-1 - 2 * np.sqrt(1 + chi**2))
         w12 = 2 * np.pi * (E1 - E2)
         w14 = 2 * np.pi * (E1 - E4)
         w34 = 2 * np.pi * (E3 - E4)
         w23 = 2 * np.pi * (E2 - E3)
-        a12 = 1 / (1 + (w12 / (2 * np.pi * fcut)) ** 2)
-        a14 = 1 / (1 + (w14 / (2 * np.pi * fcut)) ** 2)
-        a34 = 1 / (1 + (w34 / (2 * np.pi * fcut)) ** 2)
-        a23 = 1 / (1 + (w23 / (2 * np.pi * fcut)) ** 2)
+        a12 = 1 / (1 + (w12 / (2 * np.pi * fcut))**2)
+        a14 = 1 / (1 + (w14 / (2 * np.pi * fcut))**2)
+        a34 = 1 / (1 + (w34 / (2 * np.pi * fcut))**2)
+        a23 = 1 / (1 + (w23 / (2 * np.pi * fcut))**2)
         Term1 = (1 + delta) * a12 * np.cos(w12 * x + phi)
         Term2 = (1 - delta) * a14 * np.cos(w14 * x + phi)
         Term3 = (1 + delta) * a34 * np.cos(w34 * x + phi)

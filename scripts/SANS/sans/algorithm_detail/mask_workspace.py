@@ -122,8 +122,7 @@ def mask_with_mask_files(mask_info, inst_info, workspace):
 
         # Mask loader
         load_name = "LoadMask"
-        load_options = {"Instrument": idf_path,
-                        "OutputWorkspace": EMPTY_NAME}
+        load_options = {"Instrument": idf_path, "OutputWorkspace": EMPTY_NAME}
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
         mask_alg = create_unmanaged_algorithm("MaskDetectors")
 
@@ -241,8 +240,8 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
     block_vertical_stop = detector.block_vertical_stop
 
     if block_horizontal_start and block_horizontal_stop and block_vertical_start and block_vertical_stop:
-        for h_start, h_stop, v_start, v_stop in zip(block_horizontal_start, block_horizontal_stop,
-                                                    block_vertical_start, block_vertical_stop):
+        for h_start, h_stop, v_start, v_stop in zip(block_horizontal_start, block_horizontal_stop, block_vertical_start,
+                                                    block_vertical_stop):
             x_dim = abs(v_stop - v_start) + 1
             y_dim = abs(h_stop - h_start) + 1
             total_spectra.extend(spectra_block.get_block(h_start, v_start, y_dim, x_dim))
@@ -274,9 +273,11 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
             log.information(str(i))
 
     mask_name = "MaskSpectra"
-    mask_options = {"InputWorkspace": workspace,
-                    "InputWorkspaceIndexType": "SpectrumNumber",
-                    "OutputWorkspace": "__dummy"}
+    mask_options = {
+        "InputWorkspace": workspace,
+        "InputWorkspaceIndexType": "SpectrumNumber",
+        "OutputWorkspace": "__dummy"
+    }
     mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
     mask_alg.setProperty("InputWorkspaceIndexSet", list(set(filtered_mask_spectra)))
     mask_alg.setProperty("OutputWorkspace", workspace)
@@ -311,8 +312,7 @@ def mask_angle(mask_info, workspace):
 
         if phi_mask:
             mask_name = "MaskDetectorsInShape"
-            mask_options = {"Workspace": workspace,
-                            "ShapeXML": phi_mask}
+            mask_options = {"Workspace": workspace, "ShapeXML": phi_mask}
             mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
             mask_alg.execute()
             workspace = mask_alg.getProperty("Workspace").value
@@ -351,8 +351,7 @@ def mask_beam_stop(mask_info, workspace):
     line_mask = create_line_mask(start_point, 100., beam_stop_arm_width, beam_stop_arm_angle)
 
     mask_name = "MaskDetectorsInShape"
-    mask_options = {"Workspace": workspace,
-                    "ShapeXML": line_mask}
+    mask_options = {"Workspace": workspace, "ShapeXML": line_mask}
     mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
     mask_alg.execute()
     workspace = mask_alg.getProperty("Workspace").value
@@ -362,6 +361,7 @@ def mask_beam_stop(mask_info, workspace):
 # ------------------------------------------------------------------
 # Masker classes
 # ------------------------------------------------------------------
+
 
 class Masker(metaclass=ABCMeta):
     def __init__(self):

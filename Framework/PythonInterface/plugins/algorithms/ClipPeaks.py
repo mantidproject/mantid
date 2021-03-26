@@ -17,35 +17,25 @@ class ClipPeaks(PythonAlgorithm):
 
     This algorithm is extracted from the SNAPReduce Normalization option.
     """
-
     def PyInit(self):
-        self.declareProperty(
-            WorkspaceProperty("InputWorkspace", "", Direction.Input),
-            "The workspace containing the normalization data.")
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "", Direction.Input),
+                             "The workspace containing the normalization data.")
 
         self.declareProperty(
             "LLSCorrection", True,
-            "Whether to apply a log-log-sqrt transformation to make data more sensitive to weaker peaks."
-        )
+            "Whether to apply a log-log-sqrt transformation to make data more sensitive to weaker peaks.")
 
-        self.declareProperty(
-            "IncreasingWindow", False,
-            "Use an increasing moving window when clipping."
-        )
+        self.declareProperty("IncreasingWindow", False, "Use an increasing moving window when clipping.")
 
-        self.declareProperty(
-            name="SmoothingRange",
-            defaultValue=10,
-            validator=IntBoundedValidator(lower=0),
-            doc="The size of the window used for smoothing data. No smoothing if set to 0."
-        )
+        self.declareProperty(name="SmoothingRange",
+                             defaultValue=10,
+                             validator=IntBoundedValidator(lower=0),
+                             doc="The size of the window used for smoothing data. No smoothing if set to 0.")
 
-        self.declareProperty(
-            name="WindowSize",
-            defaultValue=10,
-            validator=IntBoundedValidator(lower=0),
-            doc="The size of the peak clipping window to be used."
-        )
+        self.declareProperty(name="WindowSize",
+                             defaultValue=10,
+                             validator=IntBoundedValidator(lower=0),
+                             doc="The size of the peak clipping window to be used.")
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),
                              "The workspace containing the normalization data.")
@@ -94,7 +84,7 @@ class ClipPeaks(PythonAlgorithm):
         This transforms data to be more sensitive to weak peaks. The
         function is reversed by the inv_log_log_sqrt_transformation function below
         """
-        out = np.log(np.log((input + 1) ** 0.5 + 1) + 1)
+        out = np.log(np.log((input + 1)**0.5 + 1) + 1)
 
         return out
 
@@ -102,7 +92,7 @@ class ClipPeaks(PythonAlgorithm):
         """
         Applies the inverse log-log-sqrt function on the input data. See Function LLS function above
         """
-        out = (np.exp(np.exp(input) - 1) - 1) ** 2 - 1
+        out = (np.exp(np.exp(input) - 1) - 1)**2 - 1
 
         return out
 

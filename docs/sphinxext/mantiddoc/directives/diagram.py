@@ -26,8 +26,7 @@ edge[fontname="Helvetica"]
 
 STYLE['param_style'] = 'node[fillcolor = khaki, shape = oval]'
 STYLE['decision_style'] = 'node[fillcolor = limegreen, shape = diamond]'
-STYLE[
-    'algorithm_style'] = 'node[style = "rounded,filled", fillcolor = lightskyblue, shape = rectangle]'
+STYLE['algorithm_style'] = 'node[style = "rounded,filled", fillcolor = lightskyblue, shape = rectangle]'
 STYLE['process_style'] = 'node[fillcolor = lightseagreen, shape = rectangle]'
 STYLE['value_style'] = 'node[fontname = "Times-Roman", fillcolor = grey, shape = parallelogram]'
 
@@ -74,8 +73,7 @@ class DiagramDirective(BaseDirective):
         env = self.state.document.settings.env
         diagrams_dir = self.diagrams_dir
         if diagrams_dir is None:
-            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n" +
-                         "    diagram generation was disabled")
+            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n" + "    diagram generation was disabled")
             return []
 
         try:
@@ -90,8 +88,7 @@ class DiagramDirective(BaseDirective):
             os.makedirs(diagrams_dir)
         diagram_name = self.arguments[0]
         if diagram_name[-4:] != ".dot":
-            raise RuntimeError(
-                "Diagrams need to be referred to by their filename, including '.dot' extension.")
+            raise RuntimeError("Diagrams need to be referred to by their filename, including '.dot' extension.")
 
         in_path = os.path.join(env.srcdir, "diagrams", diagram_name)
         out_path = os.path.join(diagrams_dir, diagram_name[:-4] + ".png")

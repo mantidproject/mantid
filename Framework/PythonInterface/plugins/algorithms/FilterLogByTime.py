@@ -13,12 +13,11 @@ import sys
 
 
 class FilterLogByTime(PythonAlgorithm):
-
     def category(self):
         return "Events\\EventFiltering"
 
     def seeAlso(self):
-        return [ "FilterByTime","FilterByLogValue" ]
+        return ["FilterByTime", "FilterByLogValue"]
 
     def name(self):
         return "FilterLogByTime"
@@ -29,17 +28,31 @@ class FilterLogByTime(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(WorkspaceProperty("InputWorkspace", "", direction=Direction.Input), "Input workspace")
         log_validator = StringMandatoryValidator()
-        self.declareProperty(name="LogName", defaultValue="", direction=Direction.Input,
-                             validator=log_validator, doc="Log name to filter by")
-        self.declareProperty(name="StartTime", defaultValue=-sys.float_info.max, validator=FloatBoundedValidator(),
-                             direction=Direction.Input, doc="Start time for filtering. Seconds after run start")
-        self.declareProperty(name="EndTime", defaultValue=sys.float_info.max, validator=FloatBoundedValidator(),
-                             direction=Direction.Input, doc="End time for filtering. Seconds after run start")
-        self.declareProperty(name="Method",defaultValue="mean", validator=StringListValidator(["mean","min", "max", "median"]),
+        self.declareProperty(name="LogName",
+                             defaultValue="",
+                             direction=Direction.Input,
+                             validator=log_validator,
+                             doc="Log name to filter by")
+        self.declareProperty(name="StartTime",
+                             defaultValue=-sys.float_info.max,
+                             validator=FloatBoundedValidator(),
+                             direction=Direction.Input,
+                             doc="Start time for filtering. Seconds after run start")
+        self.declareProperty(name="EndTime",
+                             defaultValue=sys.float_info.max,
+                             validator=FloatBoundedValidator(),
+                             direction=Direction.Input,
+                             doc="End time for filtering. Seconds after run start")
+        self.declareProperty(name="Method",
+                             defaultValue="mean",
+                             validator=StringListValidator(["mean", "min", "max", "median"]),
                              doc="Statistical method to use to generate ResultStatistic output")
         self.declareProperty(FloatArrayProperty(name="FilteredResult", direction=Direction.Output),
                              doc="Filtered values between specified times.")
-        self.declareProperty(name="ResultStatistic", defaultValue=0.0, direction=Direction.Output, doc="Requested statistic")
+        self.declareProperty(name="ResultStatistic",
+                             defaultValue=0.0,
+                             direction=Direction.Output,
+                             doc="Requested statistic")
 
     def PyExec(self):
         in_ws = self.getProperty("InputWorkspace").value
@@ -63,24 +76,24 @@ class FilterLogByTime(PythonAlgorithm):
 
     def __filter(self, ws, logname, starttime=None, endtime=None):
         run = ws.getRun()
-        runstart = run.startTime().to_datetime64()     # start of the run since epoch
+        runstart = run.startTime().to_datetime64()  # start of the run since epoch
 
-        tstart = runstart                              # copy the start of the run
-        tend = run.endTime().to_datetime64()           # end of the run since epoch
+        tstart = runstart  # copy the start of the run
+        tend = run.endTime().to_datetime64()  # end of the run since epoch
 
-        if starttime:                                  # user supplied
-            tstart = runstart + (starttime * numpy.timedelta64(1,'s'))
-        if  endtime:                                   # user supplied
-            tend = runstart + (endtime * numpy.timedelta64(1,'s'))
+        if starttime:  # user supplied
+            tstart = runstart + (starttime * numpy.timedelta64(1, 's'))
+        if endtime:  # user supplied
+            tend = runstart + (endtime * numpy.timedelta64(1, 's'))
 
         log = run.getLogData(logname)
         if not hasattr(log, "times"):
             raise ValueError("log called %s is not a FloatTimeSeries log" % logname)
 
-        times = log.times # local copy
+        times = log.times  # local copy
 
         values = numpy.array(log.value)
-        mask = numpy.logical_and((tstart <= times), (times <= tend)) # Get times between filter start and end.
+        mask = numpy.logical_and((tstart <= times), (times <= tend))  # Get times between filter start and end.
 
         filteredvalues = values[mask]
         return filteredvalues

@@ -118,9 +118,9 @@ class MainWindowTest(unittest.TestCase):
         self.main_window.editor = Mock()
         self.main_window.populate_interfaces_menu = Mock()
         expected_file_menu_items = [
-            'Open Script', 'Open Project', None, 'Save Script', 'Save Script as...', RecentlyClosedScriptsMenu, 'Generate Recovery Script',
-            None, 'Save Project', 'Save Project as...', None, 'Settings', None, 'Manage User Directories', None, 'Script Repository', None,
-            'Clear All Memory', None, '&Quit'
+            'Open Script', 'Open Project', None, 'Save Script', 'Save Script as...', RecentlyClosedScriptsMenu,
+            'Generate Recovery Script', None, 'Save Project', 'Save Project as...', None, 'Settings', None,
+            'Manage User Directories', None, 'Script Repository', None, 'Clear All Memory', None, '&Quit'
         ]
         # There are no wigets on this instance of MainWindow, so they will not appear on the view menu.
         expected_view_menu_items = ['Restore Default Layout', None]
@@ -202,7 +202,10 @@ class MainWindowTest(unittest.TestCase):
         }, {}))
         self.main_window._discover_cpp_interfaces = Mock()
         self.main_window.interfaces_menu = Mock()
-        ConfigService_dict = {'interfaces.categories.hidden': 'category1;category2', 'mantidqt.python_interfaces_directory': interface_dir}
+        ConfigService_dict = {
+            'interfaces.categories.hidden': 'category1;category2',
+            'mantidqt.python_interfaces_directory': interface_dir
+        }
 
         with patch.object(self.main_window, 'interfaces_menu') as mock_interfaces_menu:
             with patch('workbench.app.mainwindow.ConfigService', new=ConfigService_dict):
@@ -247,8 +250,8 @@ class MainWindowTest(unittest.TestCase):
     @patch('workbench.app.mainwindow.ConfigService')
     @patch('workbench.app.mainwindow.QApplication')
     @patch('matplotlib.pyplot.close')
-    def test_main_window_close_behavior_correct_when_workbench_able_to_be_closed(self, mock_plt_close, mock_QApplication,
-                                                                                 mock_ConfigService):
+    def test_main_window_close_behavior_correct_when_workbench_able_to_be_closed(self, mock_plt_close,
+                                                                                 mock_QApplication, mock_ConfigService):
         mock_event = Mock()
         mock_project = Mock()
         mock_project.is_saving, mock_project.is_loading, mock_project.saved = False, False, True
@@ -270,7 +273,8 @@ class MainWindowTest(unittest.TestCase):
         self.main_window.writeSettings.assert_called()
         mock_plt_close.assert_called_with('all')
         mock_QApplication.instance().closeAllWindows.assert_called()
-        self.main_window.project_recovery.assert_has_calls([call.stop_recovery_thread(), call.remove_current_pid_folder()])
+        self.main_window.project_recovery.assert_has_calls(
+            [call.stop_recovery_thread(), call.remove_current_pid_folder()])
         self.assertTrue(self.main_window.project_recovery.closing_workbench)
         self.main_window.interface_manager.closeHelpWindow.assert_called()
         mock_event.accept.assert_called()

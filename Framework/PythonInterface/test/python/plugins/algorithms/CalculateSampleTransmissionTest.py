@@ -20,13 +20,22 @@ class CalculateSampleTransmissionTest(unittest.TestCase):
         density = 0.100272
         thickness = 0.1
 
-        ws = CalculateSampleTransmission(WavelengthRange='5.0,0.2,7.0', ChemicalFormula=formula,
-                                         Density=density, Thickness=thickness, DensityType='Number Density')
+        ws = CalculateSampleTransmission(WavelengthRange='5.0,0.2,7.0',
+                                         ChemicalFormula=formula,
+                                         Density=density,
+                                         Thickness=thickness,
+                                         DensityType='Number Density')
 
         self.assertEqual(ws.getNumberHistograms(), 2)
 
-        expected_trans = [0.56619985, 0.56605978, 0.56591975, 0.56577975, 0.56563978, 0.56549985, 0.56535996, 0.56522009, 0.56508027, 0.56494047]
-        expected_scatt = [0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862]
+        expected_trans = [
+            0.56619985, 0.56605978, 0.56591975, 0.56577975, 0.56563978, 0.56549985, 0.56535996, 0.56522009, 0.56508027,
+            0.56494047
+        ]
+        expected_scatt = [
+            0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862, 0.43017862,
+            0.43017862
+        ]
         trans = ws.readY(0)
         scatt = ws.readY(1)
 
@@ -41,13 +50,22 @@ class CalculateSampleTransmissionTest(unittest.TestCase):
         density = 1
         thickness = 0.1
 
-        ws = CalculateSampleTransmission(WavelengthRange='5.0,0.2,7.0', ChemicalFormula=formula,
-                                         Density=density, Thickness=thickness, DensityType='Mass Density')
+        ws = CalculateSampleTransmission(WavelengthRange='5.0,0.2,7.0',
+                                         ChemicalFormula=formula,
+                                         Density=density,
+                                         Thickness=thickness,
+                                         DensityType='Mass Density')
 
         self.assertEqual(ws.getNumberHistograms(), 2)
 
-        expected_trans = [0.56619985, 0.56605978, 0.56591975, 0.56577975, 0.56563978, 0.56549985, 0.56535996, 0.56522009, 0.56508027, 0.56494047]
-        expected_scatt = [0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665]
+        expected_trans = [
+            0.56619985, 0.56605978, 0.56591975, 0.56577975, 0.56563978, 0.56549985, 0.56535996, 0.56522009, 0.56508027,
+            0.56494047
+        ]
+        expected_scatt = [
+            0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665, 0.43021665,
+            0.43021665
+        ]
 
         trans = ws.readY(0)
         scatt = ws.readY(1)
@@ -64,9 +82,12 @@ class CalculateSampleTransmissionTest(unittest.TestCase):
         density = -0.1
         thickness = 0.1
 
-        self.assertRaises(RuntimeError, CalculateSampleTransmission,
-                          WavelengthRange='5.0,0.2,7.0', ChemicalFormula=formula,
-                          NumberDensity=density, Thickness=thickness)
+        self.assertRaises(RuntimeError,
+                          CalculateSampleTransmission,
+                          WavelengthRange='5.0,0.2,7.0',
+                          ChemicalFormula=formula,
+                          NumberDensity=density,
+                          Thickness=thickness)
 
     def test_validate_thickness(self):
         """
@@ -78,9 +99,12 @@ class CalculateSampleTransmissionTest(unittest.TestCase):
         density = 0.1
         thickness = -0.1
 
-        self.assertRaises(RuntimeError, CalculateSampleTransmission,
-                          WavelengthRange='5.0,0.2,7.0', ChemicalFormula=formula,
-                          NumberDensity=density, Thickness=thickness)
+        self.assertRaises(RuntimeError,
+                          CalculateSampleTransmission,
+                          WavelengthRange='5.0,0.2,7.0',
+                          ChemicalFormula=formula,
+                          NumberDensity=density,
+                          Thickness=thickness)
 
 
 if __name__ == "__main__":

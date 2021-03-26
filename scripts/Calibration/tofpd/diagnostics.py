@@ -18,10 +18,9 @@ from mantid.plots.resampling_image.samplingimage import imshow_sampling
 from mantid.plots.utility import colormap_as_plot_color
 from mantid.simpleapi import CalculateDIFC, LoadDiffCal, mtd
 
-
 # Diamond peak positions in d-space which may differ from actual sample
-DIAMOND = np.asarray((2.06,1.2615,1.0758,0.892,0.8186,0.7283,0.6867,0.6307,0.5642,0.5441,0.515,0.4996,0.4768,
-                      0.4645,0.4205,0.3916,0.3499,0.3257,0.3117))
+DIAMOND = np.asarray((2.06, 1.2615, 1.0758, 0.892, 0.8186, 0.7283, 0.6867, 0.6307, 0.5642, 0.5441, 0.515, 0.4996,
+                      0.4768, 0.4645, 0.4205, 0.3916, 0.3499, 0.3257, 0.3117))
 
 
 def _get_xrange(wksp, xmarkers, tolerance, xmin, xmax):
@@ -79,7 +78,8 @@ def _get_difc_ws(wksp, instr_ws=None):
             # Only need the first two columns for the CalculateDIFC algorithm to work
             if len(col_names) >= 2 and col_names[0] == "detid" and col_names[1] == "difc":
                 # Calculate DIFC on this workspace
-                difc_ws = CalculateDIFC(InputWorkspace=mtd[str(instr_ws)], CalibrationWorkspace=mtd[ws_str],
+                difc_ws = CalculateDIFC(InputWorkspace=mtd[str(instr_ws)],
+                                        CalibrationWorkspace=mtd[ws_str],
                                         OutputWorkspace="__difc_{}".format(ws_str))
         else:
             raise TypeError("Wrong workspace type. Expects SpecialWorkspace2D, TableWorkspace, or a filename")
@@ -125,8 +125,12 @@ def __get_bad_counts(y, mean=None, band=0.01):
     return len(y[(y > top) | (y < bot)])
 
 
-def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
-           xmin: float=np.nan, xmax: float=np.nan, horiz_markers=[]):
+def plot2d(workspace,
+           tolerance: float = 0.001,
+           peakpositions: np.ndarray = DIAMOND,
+           xmin: float = np.nan,
+           xmax: float = np.nan,
+           horiz_markers=[]):
     TOLERANCE_COLOR = 'w'  # color to mark the area within tolerance
     MARKER_COLOR = 'b'  # color for peak markers and horizontal (between bank) markers
 
@@ -150,7 +154,7 @@ def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
     # annotate expected peak positions and tolerances
     for peak in peakpositions:
         if peak > 0.4 and peak < 1.5:
-            shade = ((1-tolerance) * peak, (1+tolerance) * peak)
+            shade = ((1 - tolerance) * peak, (1 + tolerance) * peak)
             ax.axvspan(shade[0], shade[1], color=TOLERANCE_COLOR, alpha=.2)
             ax.axvline(x=peak, color=MARKER_COLOR, alpha=0.4)
 
@@ -170,7 +174,7 @@ def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
     return fig, fig.axes
 
 
-def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(0,1)):
+def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(0, 1)):
     """
     Plots the percent change in DIFC between calib_new and calib_old
     :param calib_new: New calibration, can be filename, SpecialWorkspace2D, or calibration table (TableWorkspace)
@@ -299,13 +303,14 @@ def __create_outputws(donor: Union[str, Workspace2D], numSpec, numPeaks):
         donor = mtd[str(donor)]
     else:
         donor = 'Workspace2D'
-    output = WorkspaceFactory.create(donor, NVectors=numSpec,
-                                     XLength=numPeaks, YLength=numPeaks)
+    output = WorkspaceFactory.create(donor, NVectors=numSpec, XLength=numPeaks, YLength=numPeaks)
     output.getAxis(0).setUnit('dSpacing')
     return output
 
 
-def collect_peaks(wksp: Union[str, TableWorkspace], outputname: str, donor: Union[str, Workspace2D] = None,
+def collect_peaks(wksp: Union[str, TableWorkspace],
+                  outputname: str,
+                  donor: Union[str, Workspace2D] = None,
                   infotype: str = 'strain'):
     """
     Calculate different types of information for each peak position in wksp and create a new Workspace2D
@@ -322,8 +327,7 @@ def collect_peaks(wksp: Union[str, TableWorkspace], outputname: str, donor: Unio
     wksp = mtd[str(wksp)]
 
     numSpec = int(wksp.rowCount())
-    peak_names = [item for item in wksp.getColumnNames()
-                  if item not in ['detid', 'chisq', 'normchisq']]
+    peak_names = [item for item in wksp.getColumnNames() if item not in ['detid', 'chisq', 'normchisq']]
     peaks = np.asarray([float(item[1:]) for item in peak_names])
     numPeaks = len(peaks)
 
@@ -345,8 +349,12 @@ def collect_peaks(wksp: Union[str, TableWorkspace], outputname: str, donor: Unio
     return mtd[outputname]
 
 
-def collect_fit_result(wksp: Union[str, TableWorkspace], outputname: str, peaks, donor: Union[str, Workspace2D] = None,
-                       infotype: str = 'centre', chisq_max: float = 1.e4):
+def collect_fit_result(wksp: Union[str, TableWorkspace],
+                       outputname: str,
+                       peaks,
+                       donor: Union[str, Workspace2D] = None,
+                       infotype: str = 'centre',
+                       chisq_max: float = 1.e4):
     """
     Extracts different information about fit results from a TableWorkspace and places into a Workspace2D
     This assumes that the input is sorted by wsindex then peakindex
@@ -385,7 +393,7 @@ def collect_fit_result(wksp: Union[str, TableWorkspace], outputname: str, peaks,
         start = int(np.searchsorted(wsindex, wsindex_unique[i]))
         i = int(i)  # to be compliant with mantid API
         output.setX(i, peaks)
-        output.setY(i, observable[start:start+numPeaks])
+        output.setY(i, observable[start:start + numPeaks])
     mtd.addOrReplace(outputname, output)
     return mtd[outputname]
 
@@ -406,7 +414,8 @@ def extract_peak_info(wksp: Union[str, Workspace2D], outputname: str, peak_posit
     peak_index = wksp.readX(0).searchsorted(peak_position)
 
     # create a workspace to put the result into
-    single = WorkspaceFactory.create('Workspace2D', NVectors=1,
+    single = WorkspaceFactory.create('Workspace2D',
+                                     NVectors=1,
                                      XLength=wksp.getNumberHistograms(),
                                      YLength=wksp.getNumberHistograms())
     single.setTitle('d-spacing={}\\A'.format(wksp.readX(0)[peak_index]))
@@ -432,9 +441,14 @@ def extract_peak_info(wksp: Union[str, Workspace2D], outputname: str, peak_posit
     mtd.addOrReplace(outputname, single)
     return mtd[outputname]
 
+
 # flake8: noqa: C901
-def plot_peakd(wksp: Union[str, Workspace2D], peak_positions: Union[float, list], plot_regions=True, show_bad_cnt=True,
-               drange=(0, 0), threshold=0.01):
+def plot_peakd(wksp: Union[str, Workspace2D],
+               peak_positions: Union[float, list],
+               plot_regions=True,
+               show_bad_cnt=True,
+               drange=(0, 0),
+               threshold=0.01):
     """
     Plots peak d spacing value for each peak position in peaks
     :param wksp: Workspace returned from collect_peaks
@@ -525,7 +539,10 @@ def plot_peakd(wksp: Union[str, Workspace2D], peak_positions: Union[float, list]
                     ax.axvline(x=region[1], lw=0.5, color="black", ls="--")
         plotted_peaks.append(peak)
 
-        ax.plot(x[cut_id[0]:cut_id[1]], y[cut_id[0]:cut_id[1]], marker="x", linestyle="None",
+        ax.plot(x[cut_id[0]:cut_id[1]],
+                y[cut_id[0]:cut_id[1]],
+                marker="x",
+                linestyle="None",
                 label="{:0.6f}".format(peak))
         ax.legend(bbox_to_anchor=(1, 1), loc="upper left")
 
@@ -536,7 +553,7 @@ def plot_peakd(wksp: Union[str, Workspace2D], peak_positions: Union[float, list]
     # Calculate total mean and stddev of all peaks
     total_mean = np.sum(np.asarray(means) * np.asarray(lens)) / np.sum(lens)
     sq_sum = np.sum(lens * (np.power(stddevs, 2) + np.power(means, 2)))
-    total_stddev = np.sqrt((sq_sum / np.sum(lens)) - total_mean ** 2)
+    total_stddev = np.sqrt((sq_sum / np.sum(lens)) - total_mean**2)
 
     # Get bad counts in regions over all peaks using the total mean
     if show_bad_cnt and regions:
@@ -553,12 +570,18 @@ def plot_peakd(wksp: Union[str, Workspace2D], peak_positions: Union[float, list]
         if plot_regions:
             for i in range(len(regions)):
                 mid_region = regions[i][0] + 0.5 * (regions[i][1] - regions[i][0])
-                ax.annotate("{}".format(region_cnts[i]), xy=(mid_region, 0.05), xycoords=('data', 'axes fraction'),
-                            clip_on=True, ha="center")
+                ax.annotate("{}".format(region_cnts[i]),
+                            xy=(mid_region, 0.05),
+                            xycoords=('data', 'axes fraction'),
+                            clip_on=True,
+                            ha="center")
         else:
             overall_cnt = int(np.sum(region_cnts))
-            ax.annotate("{}".format(overall_cnt), xy=(0.5, 0.05), xycoords=('axes fraction', 'axes fraction'),
-                        clip_on=True, ha="center")
+            ax.annotate("{}".format(overall_cnt),
+                        xy=(0.5, 0.05),
+                        xycoords=('axes fraction', 'axes fraction'),
+                        clip_on=True,
+                        ha="center")
     # Draw solid line at mean
     ax.axhline(total_mean, color="black", lw=2.5)  # default lw=1.5
 

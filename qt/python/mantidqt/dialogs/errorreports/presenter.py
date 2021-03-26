@@ -12,7 +12,8 @@ from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
 
 
 class ErrorReporterPresenter(object):
-    SENDING_ERROR_MESSAGE = 'There was an error when sending the report.\nPlease contact mantid-help@mantidproject.org directly'
+    SENDING_ERROR_MESSAGE = 'There was an error when sending the report.\nPlease contact ' \
+                            'mantid-help@mantidproject.org directly'
 
     def __init__(self, view, exit_code: str, application: str, traceback: Optional[str] = None):
         """
@@ -87,22 +88,15 @@ class ErrorReporterPresenter(object):
         else:
             self.error_log.error("Continue working.")
 
-    def _send_report_to_server(self,
-                               share_identifiable=False,
-                               name='',
-                               email='',
-                               uptime='',
-                               text_box=''):
-        errorReporter = ErrorReporter(self._application, uptime,
-                                      self._exit_code, share_identifiable, str(name), str(email),
-                                      str(text_box), "".join(self._traceback))
+    def _send_report_to_server(self, share_identifiable=False, name='', email='', uptime='', text_box=''):
+        errorReporter = ErrorReporter(self._application, uptime, self._exit_code, share_identifiable, str(name),
+                                      str(email), str(text_box), "".join(self._traceback))
         status = errorReporter.sendErrorReport()
 
         if status != 201:
             self._view.display_message_box('Error contacting server', self.SENDING_ERROR_MESSAGE,
                                            'http request returned with status {}'.format(status))
-            self.error_log.error(
-                "Failed to send error report http request returned status {}".format(status))
+            self.error_log.error("Failed to send error report http request returned status {}".format(status))
 
         return status
 
@@ -113,15 +107,13 @@ class ErrorReporterPresenter(object):
         self._view.exec_()
 
     def show_more_details(self):
-        error_reporter = ErrorReporter(self._application, UsageService.getUpTime(), self._exit_code,
-                                       True, str(self._view.input_name_line_edit.text()),
+        error_reporter = ErrorReporter(self._application, UsageService.getUpTime(), self._exit_code, True,
+                                       str(self._view.input_name_line_edit.text()),
                                        str(self._view.input_email_line_edit.text()),
-                                       str(self._view.input_free_text.toPlainText()),
-                                       "".join(self._traceback))
+                                       str(self._view.input_free_text.toPlainText()), "".join(self._traceback))
 
         error_message_json = json.loads(error_reporter.generateErrorMessage())
         stacktrace_text = error_message_json["stacktrace"]
         del error_message_json["stacktrace"]  # remove this entry so it doesn't appear twice.
-        user_information = ''.join('{}: {}\n'.format(key, error_message_json[key])
-                                   for key in error_message_json)
+        user_information = ''.join('{}: {}\n'.format(key, error_message_json[key]) for key in error_message_json)
         self._view.display_more_details(user_information, stacktrace_text)

@@ -21,9 +21,15 @@ LOGGER = Logger("mantid.plots.plotCompatability")
 # ================================================
 
 
-def plotSpectrum(workspaces, indices=None, distribution=None, error_bars=False,
-                 type=None, window=None, clearWindow=None,
-                 waterfall=None, spectrum_nums=None):
+def plotSpectrum(workspaces,
+                 indices=None,
+                 distribution=None,
+                 error_bars=False,
+                 type=None,
+                 window=None,
+                 clearWindow=None,
+                 waterfall=None,
+                 spectrum_nums=None):
     """
     Create a figure with a single subplot and for each workspace/index add a
     line plot to the new axes. show() is called before returning the figure instance
@@ -45,16 +51,20 @@ def plotSpectrum(workspaces, indices=None, distribution=None, error_bars=False,
     _report_deprecated_parameter("distribution", distribution)
 
     plot_kwargs = {}
-    if type==1:
+    if type == 1:
         plot_kwargs["linestyle"] = "None"
         plot_kwargs["marker"] = "."
-    return plot(_ensure_object_is_list(workspaces), wksp_indices=_ensure_object_is_list(indices),
-                errors=error_bars, spectrum_nums=_ensure_object_is_list(spectrum_nums), waterfall = waterfall,
-                fig=window, overplot=((window is not None) and not clearWindow), plot_kwargs=plot_kwargs)
+    return plot(_ensure_object_is_list(workspaces),
+                wksp_indices=_ensure_object_is_list(indices),
+                errors=error_bars,
+                spectrum_nums=_ensure_object_is_list(spectrum_nums),
+                waterfall=waterfall,
+                fig=window,
+                overplot=((window is not None) and not clearWindow),
+                plot_kwargs=plot_kwargs)
 
 
-def plotBin(workspaces, indices, error_bars=False, type=None, window=None, clearWindow=None,
-            waterfall=None):
+def plotBin(workspaces, indices, error_bars=False, type=None, window=None, clearWindow=None, waterfall=None):
     """Create a 1D Plot of bin count vs spectrum in a workspace.
 
     This puts the spectrum number as the X variable, and the
@@ -74,12 +84,16 @@ def plotBin(workspaces, indices, error_bars=False, type=None, window=None, clear
     """
 
     plot_kwargs = {"axis": MantidAxType.BIN}
-    if type==1:
+    if type == 1:
         plot_kwargs["linestyle"] = "None"
         plot_kwargs["marker"] = "."
-    return plot(_ensure_object_is_list(workspaces), wksp_indices=_ensure_object_is_list(indices),
-                errors=error_bars, plot_kwargs=plot_kwargs, fig = window, waterfall = waterfall,
-                overplot = ((window is not None) and not clearWindow))
+    return plot(_ensure_object_is_list(workspaces),
+                wksp_indices=_ensure_object_is_list(indices),
+                errors=error_bars,
+                plot_kwargs=plot_kwargs,
+                fig=window,
+                waterfall=waterfall,
+                overplot=((window is not None) and not clearWindow))
 
 
 # -----------------------------------------------------------------------------
@@ -93,7 +107,7 @@ def _ensure_object_is_list(object):
         return [object]
 
 
-def _report_deprecated_parameter(param_name,param_value):
+def _report_deprecated_parameter(param_name, param_value):
     """Logs a warning message if the parameter value is not None"""
     if param_value is not None:
         LOGGER.warning("The argument '{}' is not supported in workbench and has been ignored".format(param_name))

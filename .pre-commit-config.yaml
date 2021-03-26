@@ -16,10 +16,15 @@ repos:
       - id: check-xml
       - id: check-yaml
 
+  - repo: https://github.com/google/yapf
+    rev: a53e340c2ff24b36c98945c6f0374c6e21899afe
+    hooks:
+      - id: yapf
+
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.7.9
     hooks:
       - id: flake8
         # Have to manually copy this from the .flake8 as flake8 will just ignore the config if the file is passed
         exclude: build|buildconfig|docs|Framework/Algorithms/test|Framework/DataObjects|Framework/MPIAlgorithms|Framework/PythonInterface/mantid|Framework/PythonInterface/test|images|installers|instrument|MantidPlot|qt/applications/workbench/workbench/app/resources.py|qt/paraview_ext|qt/python/mantidqt/resources.py|qt/python/mantidqt/dialogs/errorreports/resources_qt4.py|qt/python/mantidqt/dialogs/errorreports/resources_qt5.py|qt/scientific_interfaces|qt/widgets|Testing/PerformanceTests|Testing/SystemTests/lib|Testing/SystemTests/scripts|Testing/SystemTests/tests/framework/reference|Testing/Tools|scripts/ErrorReporter/ui_errorreport.py|scripts/Interface/ui|scripts/Interface/ui/dataprocessorinterface
-        args: ['--extend-ignore=E999,F821,E127']
+        args: ['--extend-ignore=E999,F821,E127,W504,E114,E115,E116,E121,E123,E126,E133,E2,E704,E722,E741,E743,W503,F403,F405,F999']

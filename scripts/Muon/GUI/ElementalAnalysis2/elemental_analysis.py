@@ -19,7 +19,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     """
     The Elemental Analysis 2.0 interface.
     """
-
     @staticmethod
     def warning_popup(message):
         message_box.warning(str(message))
@@ -62,8 +61,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         """
         self.tabs = DetachableTabWidget(self)
         self.tabs.addTabWithOrder(self.home_tab, 'Home')
-        self.tabs.addTabWithOrder(self.grouping_tab_widget,
-                                  'Grouping')
+        self.tabs.addTabWithOrder(self.grouping_tab_widget, 'Grouping')
         self.tabs.addTabWithOrder(self.fitting_tab, 'Fitting')
 
     def closeEvent(self, event):

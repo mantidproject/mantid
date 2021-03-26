@@ -31,7 +31,6 @@ def set_find_text(search_string, replace_string=None):
     It expects to receive the function already decorated with view, presenter, editor
     and sets the return value on one of the view's mocks.
     """
-
     def this_receives_the_function(func):
         def wrapper(self, view, presenter, editor):
             view.find.currentText = Mock(return_value=search_string)
@@ -52,7 +51,6 @@ def set_editor_text_selection(selected_text):
     It expects to receive the function already decorated with view, presenter, editor
     and sets the return value on one of the view's mocks.
     """
-
     def this_receives_the_function(func):
         def wrapper(self, view, presenter, editor):
             editor.hasSelectedText.return_value = True

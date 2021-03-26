@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress)
-from mantid.kernel import (VisibleWhenProperty, EnabledWhenProperty, Property, PropertyCriterion,
-                           StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction)
+from mantid.kernel import (VisibleWhenProperty, EnabledWhenProperty, Property, PropertyCriterion, StringListValidator,
+                           IntBoundedValidator, FloatBoundedValidator, Direction)
 
 
 class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
@@ -55,40 +55,46 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                              doc='Input workspace')
 
-        self.declareProperty(name='MaterialAlreadyDefined', defaultValue=False,
+        self.declareProperty(name='MaterialAlreadyDefined',
+                             defaultValue=False,
                              doc='Select this option if the material has already been defined')
 
         material_defined_prop = EnabledWhenProperty('MaterialAlreadyDefined', PropertyCriterion.IsDefault)
 
-        self.declareProperty(name='ChemicalFormula', defaultValue='',
-                             doc='Chemical formula of sample')
+        self.declareProperty(name='ChemicalFormula', defaultValue='', doc='Chemical formula of sample')
         self.setPropertySettings('ChemicalFormula', material_defined_prop)
 
-        self.declareProperty(name='CoherentXSection', defaultValue=Property.EMPTY_DBL,
+        self.declareProperty(name='CoherentXSection',
+                             defaultValue=Property.EMPTY_DBL,
                              doc='The coherent cross section of the sample in barns. It can be used instead of the'
-                                 'Chemical Formula.')
+                             'Chemical Formula.')
         self.setPropertySettings('CoherentXSection', material_defined_prop)
 
-        self.declareProperty(name='IncoherentXSection', defaultValue=Property.EMPTY_DBL,
+        self.declareProperty(name='IncoherentXSection',
+                             defaultValue=Property.EMPTY_DBL,
                              doc='The incoherent cross section of the sample in barns. It can be used instead of the'
-                                 'Chemical Formula.')
+                             'Chemical Formula.')
         self.setPropertySettings('IncoherentXSection', material_defined_prop)
 
-        self.declareProperty(name='AttenuationXSection', defaultValue=Property.EMPTY_DBL,
+        self.declareProperty(name='AttenuationXSection',
+                             defaultValue=Property.EMPTY_DBL,
                              doc='The absorption cross section of the sample in barns. It can be used instead of the'
-                                 'Chemical Formula.')
+                             'Chemical Formula.')
         self.setPropertySettings('AttenuationXSection', material_defined_prop)
 
-        self.declareProperty(name='DensityType', defaultValue='Mass Density',
+        self.declareProperty(name='DensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass density or Number density.')
         self.setPropertySettings('DensityType', material_defined_prop)
 
-        self.declareProperty(name='Density', defaultValue=0.1,
+        self.declareProperty(name='Density',
+                             defaultValue=0.1,
                              doc='The value for the Mass density (g/cm^3) or Number density (1/Angstrom^3).')
         self.setPropertySettings('Density', material_defined_prop)
 
-        self.declareProperty(name='NumberDensityUnit', defaultValue='Atoms',
+        self.declareProperty(name='NumberDensityUnit',
+                             defaultValue='Atoms',
                              validator=StringListValidator(['Atoms', 'Formula Units']),
                              doc='Choose which units Density refers to. Allowed values: [Atoms, Formula Units]')
         self.setPropertySettings('NumberDensityUnit', material_defined_prop)
@@ -96,30 +102,36 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         # -------------------------------------------------------------------------------------------
 
         # Monte Carlo options
-        self.declareProperty(name='NumberOfWavelengthPoints', defaultValue=10,
+        self.declareProperty(name='NumberOfWavelengthPoints',
+                             defaultValue=10,
                              validator=IntBoundedValidator(1),
                              doc='Number of wavelengths for calculation')
 
-        self.declareProperty(name='EventsPerPoint', defaultValue=1000,
+        self.declareProperty(name='EventsPerPoint',
+                             defaultValue=1000,
                              validator=IntBoundedValidator(0),
                              doc='Number of neutron events')
 
-        self.declareProperty(name='Interpolation', defaultValue='Linear',
+        self.declareProperty(name='Interpolation',
+                             defaultValue='Linear',
                              validator=StringListValidator(['Linear', 'CSpline']),
                              doc='Type of interpolation')
 
-        self.declareProperty(name='MaxScatterPtAttempts', defaultValue=5000,
+        self.declareProperty(name='MaxScatterPtAttempts',
+                             defaultValue=5000,
                              validator=IntBoundedValidator(0),
                              doc='Maximum number of tries made to generate a scattering point')
 
         # -------------------------------------------------------------------------------------------
 
         # Beam size
-        self.declareProperty(name='BeamHeight', defaultValue=1.0,
+        self.declareProperty(name='BeamHeight',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Height of the beam (cm)')
 
-        self.declareProperty(name='BeamWidth', defaultValue=1.0,
+        self.declareProperty(name='BeamWidth',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Width of the beam (cm)')
 
@@ -127,7 +139,8 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
 
         # set up shape options
 
-        self.declareProperty(name='Shape', defaultValue='FlatPlate',
+        self.declareProperty(name='Shape',
+                             defaultValue='FlatPlate',
                              validator=StringListValidator(['FlatPlate', 'Cylinder', 'Annulus']),
                              doc='Geometry of sample environment. Options are: FlatPlate, Cylinder, Annulus')
 
@@ -137,46 +150,52 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
 
         # height is common to all options
 
-        self.declareProperty(name='Height', defaultValue=0.0,
+        self.declareProperty(name='Height',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Height of the sample environment (cm)')
 
         # flat plate options
 
-        self.declareProperty(name='Width', defaultValue=0.0,
+        self.declareProperty(name='Width',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Width of the FlatPlate sample environment (cm)')
         self.setPropertySettings('Width', flat_plate_condition)
 
-        self.declareProperty(name='Thickness', defaultValue=0.0,
+        self.declareProperty(name='Thickness',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(),
                              doc='Thickness of the FlatPlate sample environment (cm)')
         self.setPropertySettings('Thickness', flat_plate_condition)
 
-        self.declareProperty(name='Center', defaultValue=0.0,
-                             doc='Center of the FlatPlate sample environment')
+        self.declareProperty(name='Center', defaultValue=0.0, doc='Center of the FlatPlate sample environment')
         self.setPropertySettings('Center', flat_plate_condition)
 
-        self.declareProperty(name='Angle', defaultValue=0.0,
+        self.declareProperty(name='Angle',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Angle of the FlatPlate sample environment with respect to the beam (degrees)')
         self.setPropertySettings('Angle', flat_plate_condition)
 
         # cylinder options
 
-        self.declareProperty(name='Radius', defaultValue=0.0,
+        self.declareProperty(name='Radius',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Radius of the Cylinder sample environment (cm)')
         self.setPropertySettings('Radius', cylinder_condition)
 
         # annulus options
 
-        self.declareProperty(name='OuterRadius', defaultValue=0.0,
+        self.declareProperty(name='OuterRadius',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Outer radius of the Annulus sample environment (cm)')
         self.setPropertySettings('OuterRadius', annulus_condition)
 
-        self.declareProperty(name='InnerRadius', defaultValue=0.0,
+        self.declareProperty(name='InnerRadius',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Inner radius of the Annulus sample environment (cm)')
         self.setPropertySettings('InnerRadius', annulus_condition)
@@ -200,9 +219,7 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         # set the beam shape
         set_beam_alg = self.createChildAlgorithm("SetBeam", enableLogging=False)
         set_beam_alg.setProperty("InputWorkspace", self._input_ws)
-        set_beam_alg.setProperty("Geometry", {'Shape': 'Slit',
-                                              'Width': self._beam_width,
-                                              'Height': self._beam_height})
+        set_beam_alg.setProperty("Geometry", {'Shape': 'Slit', 'Width': self._beam_width, 'Height': self._beam_height})
         set_beam_alg.execute()
 
         # set the sample geometry
@@ -246,7 +263,8 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
                 sample_material['CoherentXSection'] = float(self._coherent_cross_section)
                 sample_material['IncoherentXSection'] = float(self._incoherent_cross_section)
                 sample_material['AttenuationXSection'] = float(self._attenuation_cross_section)
-                sample_material['ScatteringXSection'] = float(self._coherent_cross_section) + float(self._incoherent_cross_section)
+                sample_material['ScatteringXSection'] = float(self._coherent_cross_section) + float(
+                    self._incoherent_cross_section)
 
             if self._density_type == 'Mass Density':
                 sample_material['SampleMassDensity'] = self._density

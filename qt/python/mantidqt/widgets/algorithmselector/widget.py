@@ -9,8 +9,8 @@ from typing import Callable, Sequence
 
 import qtpy
 from qtpy.QtCore import QModelIndex, Qt
-from qtpy.QtWidgets import (QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout,
-                            QCompleter, QTreeWidgetItem)
+from qtpy.QtWidgets import (QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout, QCompleter,
+                            QTreeWidgetItem)
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import block_signals
@@ -261,8 +261,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
                         enabled.append(property_name)
 
             manager = InterfaceManager()
-            dialog = manager.createDialogFromName(algorithm.name, algorithm.version, None, False,
-                                                  presets, "", enabled)
+            dialog = manager.createDialogFromName(algorithm.name, algorithm.version, None, False, presets, "", enabled)
             dialog.show()
 
 
@@ -274,8 +273,7 @@ class _AlgorithmTreeWidget(QTreeWidget):
 
     def mouseDoubleClickEvent(self, mouse_event):
         if mouse_event.button() == Qt.LeftButton:
-            if self.selectedItems() and get_name_and_version_from_item_label(
-                    self.selectedItems()[0].text(0)):
+            if self.selectedItems() and get_name_and_version_from_item_label(self.selectedItems()[0].text(0)):
                 self.parent().execute_algorithm()
             else:
                 super().mouseDoubleClickEvent(mouse_event)

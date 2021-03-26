@@ -71,5 +71,6 @@ class CrystalStructureTest(unittest.TestCase):
 
         self.assertEqual(len(fsSquared), len(hkls))
 
+
 if __name__ == '__main__':
     unittest.main()

@@ -11,7 +11,6 @@ from MsdTestHelper import (is_registered, check_output, do_a_fit)
 
 
 class PCRmagnetZFKTTest(unittest.TestCase):
-
     def test_function_has_been_registered(self):
         status, msg = is_registered("PCRmagnetZFKT")
         if not status:
@@ -19,18 +18,19 @@ class PCRmagnetZFKTTest(unittest.TestCase):
 
     def test_function_output(self):
         input = [0.0, 4.0, 8.0, 12.0]
-        expected = [0.19949686683312307, - 0.05390429458550442, 0.15089039943898633, 0.022794980245122262]
+        expected = [0.19949686683312307, -0.05390429458550442, 0.15089039943898633, 0.022794980245122262]
         tolerance = 1.0e-05
-        status, output = check_output("PCRmagnetZFKT", input, expected, tolerance, A0 = 0.2, Delta = 0.1, H0 = 10.0, Toff = 0.1)
+        status, output = check_output("PCRmagnetZFKT", input, expected, tolerance, A0=0.2, Delta=0.1, H0=10.0, Toff=0.1)
 
         if not status:
             msg = 'Computed output {} from input {} unequal to expected: {}'
             self.fail(msg.format(*[str(i) for i in (output, input, expected)]))
 
     def test_do_fit(self):
-        guess = dict(A0 = 0.25, Delta = 0.15, H0 = 10.0, Toff = 0.15)
-        target = dict(A0 = 0.2, Delta = 0.1, H0 = 10.0, Toff = 0.1)
-        do_a_fit(np.arange(0.1, 16, 0.2), 'PCRmagnetZFKT', guess, target, atol = 0.01)
+        guess = dict(A0=0.25, Delta=0.15, H0=10.0, Toff=0.15)
+        target = dict(A0=0.2, Delta=0.1, H0=10.0, Toff=0.1)
+        do_a_fit(np.arange(0.1, 16, 0.2), 'PCRmagnetZFKT', guess, target, atol=0.01)
+
 
 if __name__ == '__main__':
-	unittest.main()
+    unittest.main()

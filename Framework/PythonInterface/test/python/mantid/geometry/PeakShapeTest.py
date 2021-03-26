@@ -10,10 +10,9 @@ from mantid.geometry import PeakShape
 
 
 class PeakShapeTest(unittest.TestCase):
-
     def test_basic_access(self):
         sampleWs = CreateSampleWorkspace()
-        ws = CreatePeaksWorkspace(InstrumentWorkspace=sampleWs,NumberOfPeaks=1)
+        ws = CreatePeaksWorkspace(InstrumentWorkspace=sampleWs, NumberOfPeaks=1)
         peak = ws.getPeak(0)
         peak_shape = peak.getPeakShape()
         self.assertTrue(isinstance(peak_shape, PeakShape))

@@ -100,8 +100,7 @@ class LoadUtilsTest(unittest.TestCase):
         for i in range(0, num_workspaces):
             name = "test_" + str(i)
             workspace_names.append(name)
-            ws = mantid.WorkspaceFactory.create("Workspace2D", NVectors=1,
-                                                XLength=num_bins, YLength=num_bins)
+            ws = mantid.WorkspaceFactory.create("Workspace2D", NVectors=1, XLength=num_bins, YLength=num_bins)
             mantid.mtd.add(name, ws)
             Y_data = Yfunc(X_data, i)
             E_data = Efunc(X_data, i)
@@ -126,6 +125,7 @@ class LoadUtilsTest(unittest.TestCase):
         num_bins = 100
         X_data = np.linspace(0, 400, num_bins)
         names = ["Total", "Prompt"]
+
         # create data in each workspace based on y = mx + specNumber
 
         def Yfunc(x, specNo):
@@ -136,8 +136,7 @@ class LoadUtilsTest(unittest.TestCase):
 
         for i in range(0, 2):
             name = names[i]
-            ws = mantid.WorkspaceFactory.create("Workspace2D", NVectors=1,
-                                                XLength=num_bins, YLength=num_bins)
+            ws = mantid.WorkspaceFactory.create("Workspace2D", NVectors=1, XLength=num_bins, YLength=num_bins)
             mantid.mtd.add(name, ws)
             Y_data = Yfunc(X_data, i)
             E_data = Efunc(X_data, i)

@@ -11,7 +11,6 @@ import numpy as np
 
 
 class MyPeak(IPeakFunction):
-
     def init(self):
         self.declareAttribute("Centre", 1)
         self.declareAttribute("Height", 3.4)
@@ -58,7 +57,6 @@ class RectangularFunction(IPeakFunction):
 
 
 class IPeakFunctionTest(unittest.TestCase):
-
     def test_instance_can_be_created_standalone(self):
         func = MyPeak()
         self.assertTrue(isinstance(func, IPeakFunction))

@@ -4,25 +4,28 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable = no-init, invalid-name, line-too-long, eval-used, unused-argument, too-many-locals, too-many-branches, too-many-statements
 import numpy as np
 from scipy import constants
 from mantid.kernel import CompositeValidator, Direction, FloatBoundedValidator
-from mantid.api import AlgorithmFactory, CommonBinsValidator, HistogramValidator, MatrixWorkspaceProperty, PythonAlgorithm
+from mantid.api import AlgorithmFactory, CommonBinsValidator, HistogramValidator, MatrixWorkspaceProperty, \
+    PythonAlgorithm
 from mantid.simpleapi import *
 
 
 class UnitError(ValueError):
     def __init__(self):
-        super(ValueError, self).__init__('Input workspace must be in (Q,E) [momentum and energy transfer]'
-                                         + ' or (2theta, E) [scattering angle and energy transfer.]')
+        super(ValueError, self).__init__('Input workspace must be in (Q,E) [momentum and energy transfer]' +
+                                         ' or (2theta, E) [scattering angle and energy transfer.]')
 
 
 def cut1D(dos2d, qqgrid, spectrum_binning, dosebin):
     if qqgrid.shape[1] > 1:
         dSpectrum = spectrum_binning[1] - spectrum_binning[0]
-        dos1d = Rebin2D(dos2d, [spectrum_binning[0], dSpectrum, spectrum_binning[1]], dosebin,
-                        UseFractionalArea=True, Transpose=True, StoreInADS=False)
+        dos1d = Rebin2D(dos2d, [spectrum_binning[0], dSpectrum, spectrum_binning[1]],
+                        dosebin,
+                        UseFractionalArea=True,
+                        Transpose=True,
+                        StoreInADS=False)
     else:
         dos2d = Transpose(dos2d, StoreInADS=False)
         dos1d = Rebin(dos2d, dosebin, StoreInADS=False)
@@ -34,7 +37,7 @@ def evaluateEbin(Emin, Emax, Ei, strn):
     if len(splits) < 2 or len(splits) > 3:
         raise ValueError('EnergyBinning must be a comma separated string with two or three values.')
     try:
-        out = [eval(estr, None, {'Emax':Emax, 'Emin':Emin, 'Ei':Ei}) for estr in splits]
+        out = [eval(estr, None, {'Emax': Emax, 'Emin': Emin, 'Ei': Ei}) for estr in splits]
     except NameError:
         raise ValueError("Malformed EnergyBinning. Only the variables 'Emin', 'Emax' or 'Ei' are allowed.")
     except:
@@ -47,7 +50,7 @@ def evaluateQRange(Qmin, Qmax, strn):
     if len(splits) != 2:
         raise ValueError('QSumRange must be a comma separated string with two values.')
     try:
-        out = [eval(qstr, None, {'Qmin':Qmin, 'Qmax':Qmax}) for qstr in splits]
+        out = [eval(qstr, None, {'Qmin': Qmin, 'Qmax': Qmax}) for qstr in splits]
     except NameError:
         raise ValueError("Malformed QSumRange. Only the variables 'Qmin' and 'Qmax' are allowed.")
     except:
@@ -60,7 +63,7 @@ def evaluateTwoThetaRange(Twothetamin, Twothetamax, strn):
     if len(splits) != 2:
         raise ValueError('TwoThetaSumRange must be a comma separated string with two values.')
     try:
-        out = [eval(tstr, None, {'Twothetamin':Twothetamin, 'Twothetamax':Twothetamax}) for tstr in splits]
+        out = [eval(tstr, None, {'Twothetamin': Twothetamin, 'Twothetamax': Twothetamax}) for tstr in splits]
     except NameError:
         raise ValueError("Malformed TwoThetaSumRange. Only the variables 'Twothetamin' and 'Twothetamax' are allowed.")
     except:
@@ -99,7 +102,7 @@ def scaleUnits(dos1d, cm, input_en_in_meV, mev2cm):
         dos1d = ScaleX(dos1d, mev2cm, StoreInADS=False)
     elif not cm and not input_en_in_meV:
         dos1d.getAxis(0).setUnit('DeltaE')
-        dos1d = ScaleX(dos1d, 1/mev2cm, StoreInADS=False)
+        dos1d = ScaleX(dos1d, 1 / mev2cm, StoreInADS=False)
     return dos1d
 
 
@@ -158,25 +161,37 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         validators = CompositeValidator()
         validators.add(HistogramValidator(True))
         validators.add(CommonBinsValidator())
-        self.declareProperty(MatrixWorkspaceProperty(name='InputWorkspace', defaultValue='',
-                                                     direction=Direction.Input, validator=validators),
-                             doc='Input MatrixWorkspace containing the reduced inelastic neutron spectrum in (Q,E) or (2theta,E) space.')
-        self.declareProperty(name='Temperature', defaultValue=300., validator=FloatBoundedValidator(lower=0),
+        self.declareProperty(
+            MatrixWorkspaceProperty(name='InputWorkspace',
+                                    defaultValue='',
+                                    direction=Direction.Input,
+                                    validator=validators),
+            doc='Input MatrixWorkspace containing the reduced inelastic neutron spectrum in (Q,E) or (2theta,E) space.')
+        self.declareProperty(name='Temperature',
+                             defaultValue=300.,
+                             validator=FloatBoundedValidator(lower=0),
                              doc='Sample temperature in Kelvin.')
-        self.declareProperty(name='MeanSquareDisplacement', defaultValue=0., validator=FloatBoundedValidator(lower=0),
+        self.declareProperty(name='MeanSquareDisplacement',
+                             defaultValue=0.,
+                             validator=FloatBoundedValidator(lower=0),
                              doc='Average mean square displacement in Angstrom^2.')
-        self.declareProperty(name='QSumRange', defaultValue='0,Qmax',
+        self.declareProperty(name='QSumRange',
+                             defaultValue='0,Qmax',
                              doc='Range in Q (in Angstroms^-1) to sum data over.')
-        self.declareProperty(name='EnergyBinning', defaultValue='0,Emax/50,Emax*0.9',
+        self.declareProperty(name='EnergyBinning',
+                             defaultValue='0,Emax/50,Emax*0.9',
                              doc='Energy binning parameters [Emin, Emax] or [Emin, Estep, Emax] in meV.')
-        self.declareProperty(name='Wavenumbers', defaultValue=False,
-                             doc='Should the output be in Wavenumbers (cm^-1)?')
-        self.declareProperty(name='StatesPerEnergy', defaultValue=False,
-                             doc='Should the output be in states per unit energy rather than mb/sr/fu/energy?\n'
-                                 + '(Only for pure elements, need to set the sample material information)')
-        self.declareProperty(MatrixWorkspaceProperty(name='OutputWorkspace', defaultValue='', direction=Direction.Output),
+        self.declareProperty(name='Wavenumbers', defaultValue=False, doc='Should the output be in Wavenumbers (cm^-1)?')
+        self.declareProperty(name='StatesPerEnergy',
+                             defaultValue=False,
+                             doc='Should the output be in states per unit energy rather than mb/sr/fu/energy?\n' +
+                             '(Only for pure elements, need to set the sample material information)')
+        self.declareProperty(MatrixWorkspaceProperty(name='OutputWorkspace',
+                                                     defaultValue='',
+                                                     direction=Direction.Output),
                              doc='Output workspace name.')
-        self.declareProperty(name='TwoThetaSumRange', defaultValue='Twothetamin, Twothetamax',
+        self.declareProperty(name='TwoThetaSumRange',
+                             defaultValue='Twothetamin, Twothetamax',
                              doc='Range in 2theta (in degrees) to sum data over.')
 
     def PyExec(self):
@@ -206,7 +221,7 @@ class ComputeIncoherentDOS(PythonAlgorithm):
 
         eBins = inws.getAxis(energy_axis_index).extractValues()
         if energy_axis_index == 0 or len(eBins) != inws.getNumberHistograms():
-            en = (eBins[1:]+eBins[:-1])/2
+            en = (eBins[1:] + eBins[:-1]) / 2
 
         # Gets meV to cm^-1 conversion
         mev2cm = (constants.elementary_charge / 1000) / (constants.h * constants.c * 100)
@@ -225,7 +240,7 @@ class ComputeIncoherentDOS(PythonAlgorithm):
             ei = np.amax(en)
             self.log().warning('Could not find EFixed. Using {}mev'.format(ei))
         if not input_en_in_meV:
-            dosebin = evaluateEbin(np.amin(eBins*mev2cm), np.amax(eBins*mev2cm), ei*mev2cm, EnergyBinning)
+            dosebin = evaluateEbin(np.amin(eBins * mev2cm), np.amax(eBins * mev2cm), ei * mev2cm, EnergyBinning)
         else:
             dosebin = evaluateEbin(np.amin(eBins), np.amax(eBins), ei, EnergyBinning)
         if len(dosebin) == 2:
@@ -251,24 +266,25 @@ class ComputeIncoherentDOS(PythonAlgorithm):
             if spectrum_axis_index == 0 or len(two_theta) != inws.getNumberHistograms():
                 two_theta = (two_theta[1:] + two_theta[:-1]) / 2.
             two_theta = np.deg2rad(two_theta)
-            qqgrid = qGridFromTwoTheta(two_theta, en ,ei)
+            qqgrid = qGridFromTwoTheta(two_theta, en, ei)
 
         engrid = np.transpose(np.tile(en, (np.shape(y)[1], 1)))
         # Calculates the Debye-Waller and Bose factors from the Temperature and mean-squared displacements
         qqgridsq = qqgrid**2
-        DWF = np.exp(-2*(qqgridsq*msd))
+        DWF = np.exp(-2 * (qqgridsq * msd))
         idm = np.where(engrid < 0)
         idp = np.where(engrid >= 0)
-        # The expression for the population (Bose) factor and phonon energy dependence below actually refer to the phonon
-        # energy (always defined to be positive) rather than the neutron energy transfer. So we need the absolute value here
+        # The expression for the population (Bose) factor and phonon energy dependence below actually refer to the
+        # phonon energy (always defined to be positive) rather than the neutron energy transfer. So we need the absolute
+        # value here
         engrid = np.abs(engrid)
-        expm = np.exp(-engrid[idm]*mev2k/Temperature)
-        expp = np.exp(-engrid[idp]*mev2k/Temperature)
+        expm = np.exp(-engrid[idm] * mev2k / Temperature)
+        expp = np.exp(-engrid[idp] * mev2k / Temperature)
         Bose = np.empty_like(DWF)
-        Bose[idm] = expm / (1 - expm)      # n energy gain, phonon annihilation
+        Bose[idm] = expm / (1 - expm)  # n energy gain, phonon annihilation
         Bose[idp] = expp / (1 - expp) + 1  # n energy loss, phonon creation
         # Calculates the density of states from S(q,w)
-        f = (engrid/qqgridsq) / (Bose*DWF)
+        f = (engrid / qqgridsq) / (Bose * DWF)
         y *= f
         e *= f
 
@@ -283,15 +299,15 @@ class ComputeIncoherentDOS(PythonAlgorithm):
             e /= mev2cm
             #yunit = 'DeltaE_inWavenumber'
         #else:
-            #yunit = 'DeltaE'
+        #yunit = 'DeltaE'
 
         # Outputs the calculated density of states to another workspace
         dos2d = CloneWorkspace(inws, StoreInADS=False)
         if spectrum_axis_index == 1:
             dos2d = Transpose(dos2d, StoreInADS=False)
         for i in range(len(y)):
-            dos2d.setY(i, y[i,:])
-            dos2d.setE(i, e[i,:])
+            dos2d.setY(i, y[i, :])
+            dos2d.setE(i, e[i, :])
         dos2d.setYUnitLabel(ylabel)
 
         dos1d = cut1D(dos2d, qqgrid, spectrum_binning, dosebin)
@@ -302,7 +318,7 @@ class ComputeIncoherentDOS(PythonAlgorithm):
             # cross-section information is given in barns, but data is in millibarns.
             sigma = atoms[0].neutron()['tot_scatt_xs'] * 1000
             mass = atoms[0].mass
-            dos1d *= (mass/sigma) * 4 * np.pi
+            dos1d *= (mass / sigma) * 4 * np.pi
 
         self.setProperty("OutputWorkspace", dos1d)
 

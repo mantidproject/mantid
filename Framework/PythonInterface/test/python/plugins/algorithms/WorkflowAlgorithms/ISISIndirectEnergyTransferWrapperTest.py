@@ -14,8 +14,7 @@ import numpy as np
 
 
 def _generate_calibration_workspace(instrument, ws_name='__calib'):
-    simulation_workspace = CreateSimulationWorkspace(Instrument=instrument,
-                                                     BinParams='0,1,2')
+    simulation_workspace = CreateSimulationWorkspace(Instrument=instrument, BinParams='0,1,2')
     number_of_histograms = simulation_workspace.getNumberHistograms()
 
     calib_workspace = CreateWorkspace(OutputWorkspace=ws_name,
@@ -30,7 +29,6 @@ def _generate_calibration_workspace(instrument, ws_name='__calib'):
 
 
 class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
-
     def test_that_a_basic_reduction_will_result_in_an_output_group_containing_a_workspace_with_the_correct_name(self):
         workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
                                                       Instrument='IRIS',
@@ -76,7 +74,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
 
         self.assertTrue(CompareWorkspaces(reference, workspace)[0])
 
-    def test_that_a_reduction_performed_with_a_spectra_range_will_result_in_a_workspace_with_a_correct_number_of_histograms(self):
+    def test_that_a_reduction_performed_with_a_spectra_range_will_result_in_a_workspace_with_a_correct_number_of_histograms(
+            self):
         workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
                                                       Instrument='IRIS',
                                                       Analyser='graphite',
@@ -86,7 +85,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
         red_workspace = workspace.getItem(0)
         self.assertEqual(red_workspace.getNumberHistograms(), 6)
 
-    def test_that_a_reduction_performed_with_a_grouping_method_of_all_will_produce_a_workspace_with_the_correct_number_of_histograms(self):
+    def test_that_a_reduction_performed_with_a_grouping_method_of_all_will_produce_a_workspace_with_the_correct_number_of_histograms(
+            self):
         workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
                                                       Instrument='IRIS',
                                                       Analyser='graphite',
@@ -97,7 +97,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
         red_workspace = workspace.getItem(0)
         self.assertEqual(red_workspace.getNumberHistograms(), 1)
 
-    def test_that_a_reduction_performed_with_a_grouping_method_of_all_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(self):
+    def test_that_a_reduction_performed_with_a_grouping_method_of_all_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(
+            self):
         reference = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
                                                Instrument='IRIS',
                                                Analyser='graphite',
@@ -114,7 +115,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
 
         self.assertTrue(CompareWorkspaces(reference, workspace)[0])
 
-    def test_that_a_reduction_performed_with_a_grouping_method_of_individual_will_produce_a_workspace_with_the_correct_number_of_histograms(self):
+    def test_that_a_reduction_performed_with_a_grouping_method_of_individual_will_produce_a_workspace_with_the_correct_number_of_histograms(
+            self):
         workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
                                                       Instrument='IRIS',
                                                       Analyser='graphite',
@@ -125,7 +127,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
         red_workspace = workspace.getItem(0)
         self.assertEqual(red_workspace.getNumberHistograms(), 51)
 
-    def test_that_a_reduction_performed_with_a_grouping_method_of_individual_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(self):
+    def test_that_a_reduction_performed_with_a_grouping_method_of_individual_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(
+            self):
         reference = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
                                                Instrument='IRIS',
                                                Analyser='graphite',
@@ -142,7 +145,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
 
         self.assertTrue(CompareWorkspaces(reference, workspace)[0])
 
-    def test_that_a_reduction_with_a_background_subtraction_will_produce_an_output_group_containing_a_workspace_with_the_correct_name(self):
+    def test_that_a_reduction_with_a_background_subtraction_will_produce_an_output_group_containing_a_workspace_with_the_correct_name(
+            self):
         workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
                                                       Instrument='IRIS',
                                                       Analyser='graphite',
@@ -153,7 +157,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
         self.assertTrue(isinstance(workspace, WorkspaceGroup), 'Result workspace should be a workspace group.')
         self.assertEqual(workspace.getNames()[0], 'iris26176_graphite002_red')
 
-    def test_that_a_reduction_with_a_background_subtraction_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(self):
+    def test_that_a_reduction_with_a_background_subtraction_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(
+            self):
         reference = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
                                                Instrument='IRIS',
                                                Analyser='graphite',
@@ -182,7 +187,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
         self.assertEqual(red_workspace.getNumberHistograms(), 51)
         self.assertEqual(red_workspace.getAxis(0).getUnit().unitID(), 'DeltaE_inWavenumber')
 
-    def test_that_a_reduction_with_a_detailed_balance_produces_an_output_workspace_with_the_correct_naming_and_number_of_histograms(self):
+    def test_that_a_reduction_with_a_detailed_balance_produces_an_output_workspace_with_the_correct_naming_and_number_of_histograms(
+            self):
         workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
                                                       Instrument='IRIS',
                                                       Analyser='graphite',
@@ -196,7 +202,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
         red_workspace = workspace.getItem(0)
         self.assertEqual(red_workspace.getNumberHistograms(), 51)
 
-    def test_that_a_reduction_with_a_detailed_balance_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(self):
+    def test_that_a_reduction_with_a_detailed_balance_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(
+            self):
         reference = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
                                                Instrument='IRIS',
                                                Analyser='graphite',
@@ -228,7 +235,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
         red_workspace = workspace.getItem(0)
         self.assertEqual(red_workspace.getNumberHistograms(), 14)
 
-    def test_that_a_reduction_using_a_map_file_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(self):
+    def test_that_a_reduction_using_a_map_file_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(
+            self):
         reference = ISISIndirectEnergyTransfer(InputFiles=['OSI97919.raw'],
                                                Instrument='OSIRIS',
                                                Analyser='graphite',
@@ -247,7 +255,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
 
         self.assertTrue(CompareWorkspaces(reference, workspace)[0])
 
-    def test_that_a_reduction_using_a_calibration_workspace_will_produce_a_workspace_with_the_correct_number_of_histograms(self):
+    def test_that_a_reduction_using_a_calibration_workspace_will_produce_a_workspace_with_the_correct_number_of_histograms(
+            self):
         workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
                                                       Instrument='IRIS',
                                                       Analyser='graphite',
@@ -261,7 +270,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
         red_workspace = workspace.getItem(0)
         self.assertEqual(red_workspace.getNumberHistograms(), 51)
 
-    def test_that_a_reduction_using_a_calibration_workspace_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(self):
+    def test_that_a_reduction_using_a_calibration_workspace_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(
+            self):
         reference = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
                                                Instrument='IRIS',
                                                Analyser='graphite',
@@ -278,7 +288,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
 
         self.assertTrue(CompareWorkspaces(reference, workspace)[0])
 
-    def test_that_a_reduction_with_a_calibration_workspace_and_range_will_produce_a_workspace_with_the_correct_number_of_histograms(self):
+    def test_that_a_reduction_with_a_calibration_workspace_and_range_will_produce_a_workspace_with_the_correct_number_of_histograms(
+            self):
         workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
                                                       Instrument='IRIS',
                                                       Analyser='graphite',
@@ -319,7 +330,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
 
         self.assertTrue(CompareWorkspaces(reference, workspace)[0])
 
-    def test_a_reduction_with_multiple_files_when_summing_each_of_the_runs_will_produce_a_workspace_with_the_correct_name(self):
+    def test_a_reduction_with_multiple_files_when_summing_each_of_the_runs_will_produce_a_workspace_with_the_correct_name(
+            self):
         workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW', 'IRS26173.RAW'],
                                                       SumFIles=True,
                                                       Instrument='IRIS',
@@ -331,7 +343,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
         self.assertEqual(len(workspace), 1)
         self.assertEqual(workspace.getNames()[0], 'iris26176_multi_graphite002_red')
 
-    def test_a_reduction_with_multiple_files_when_summing_each_of_the_runs_will_produce_a_workspace_with_the_correct_run_numbers(self):
+    def test_a_reduction_with_multiple_files_when_summing_each_of_the_runs_will_produce_a_workspace_with_the_correct_run_numbers(
+            self):
         workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW', 'IRS26173.RAW'],
                                                       SumFIles=True,
                                                       Instrument='IRIS',
@@ -343,7 +356,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
         self.assertTrue('multi_run_numbers' in red_workspace.getRun())
         self.assertEqual(red_workspace.getRun().get('multi_run_numbers').value, '26176,26173')
 
-    def test_a_reduction_with_multiple_files_when_summing_each_of_the_runs_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(self):
+    def test_a_reduction_with_multiple_files_when_summing_each_of_the_runs_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(
+            self):
         reference = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW', 'IRS26173.RAW'],
                                                SumFIles=True,
                                                Instrument='IRIS',
@@ -379,7 +393,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
                                               GroupingMethod='Workspace',
                                               OutputWorkspace='__ISISIndirectEnergyTransferTest_ws')
 
-    def test_that_a_reduction_with_a_manual_efixed_will_return_a_workspace_with_the_correct_naming_and_number_of_histograms(self):
+    def test_that_a_reduction_with_a_manual_efixed_will_return_a_workspace_with_the_correct_naming_and_number_of_histograms(
+            self):
         workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
                                                       Instrument='IRIS',
                                                       Analyser='graphite',
@@ -393,7 +408,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
         red_workspace = workspace.getItem(0)
         self.assertEqual(red_workspace.getNumberHistograms(), 51)
 
-    def test_that_a_reduction_with_a_manual_efixed_which_is_the_same_as_the_default_will_produce_an_identical_workspace(self):
+    def test_that_a_reduction_with_a_manual_efixed_which_is_the_same_as_the_default_will_produce_an_identical_workspace(
+            self):
         reference = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
                                                       Instrument='IRIS',
                                                       Analyser='graphite',
@@ -409,7 +425,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
 
         self.assertTrue(CompareWorkspaces(reference, workspace)[0])
 
-    def test_that_a_reduction_with_a_manual_efixed_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(self):
+    def test_that_a_reduction_with_a_manual_efixed_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(
+            self):
         reference = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
                                                Instrument='IRIS',
                                                Analyser='graphite',
@@ -437,7 +454,8 @@ class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
         red_workspace = workspace.getItem(0)
         self.assertEqual(red_workspace.getNumberHistograms(), 51)
 
-    def test_that_a_reduction_with_scale_factor_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(self):
+    def test_that_a_reduction_with_scale_factor_will_produce_the_same_result_as_the_ISISIndirectEnergyTransfer_algorithm(
+            self):
         reference = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
                                                Instrument='IRIS',
                                                Analyser='graphite',

@@ -22,12 +22,9 @@ def raise_exception(exception):
 
 @start_qapplication
 class MultiFileEditorTest(unittest.TestCase):
-
     def test_tab_session_restore(self):
         editor = MultiFileEditor(QMainWindow())
-        prev_session_tabs = [
-            os.path.join(os.path.dirname(__file__), '__init__.py'),
-            __file__]
+        prev_session_tabs = [os.path.join(os.path.dirname(__file__), '__init__.py'), __file__]
         editor.restore_session_tabs(prev_session_tabs)
         self.assertEqual(2, editor.editors.editor_count)
 

@@ -48,74 +48,94 @@ class TomlSchemaV1Validator(object):
         Returns a dictionary layout of all supported keys
         :return: Dictionary containing all keys, and values set to None
         """
-        instrument_keys = {"name": None,
-                           "configuration": {"collimation_length",
-                                             "gravity_extra_length",
-                                             "norm_monitor",
-                                             "sample_aperture_diameter",
-                                             "sample_offset",
-                                             "trans_monitor"}}
+        instrument_keys = {
+            "name": None,
+            "configuration": {
+                "collimation_length", "gravity_extra_length", "norm_monitor", "sample_aperture_diameter",
+                "sample_offset", "trans_monitor"
+            }
+        }
 
-        detector_keys = {"configuration": {"selected_detector": None,
-                                           "rear_scale": None,
-                                           "front_centre": {"x", "y", "z"},
-                                           "rear_centre": {"x", "y", "z"}},
-                         "calibration": {"direct": {"front_file", "rear_file"},
-                                         "flat": {"front_file", "rear_file"},
-                                         "tube": {"file"},
-                                         "position": {"front_x", "front_y", "front_z",
-                                                      "front_rot", "front_radius", "front_side",
-                                                      "front_x_tilt", "front_y_tilt", "front_z_tilt",
-                                                      "rear_x", "rear_y", "rear_z",
-                                                      "rear_rot", "rear_radius", "rear_side",
-                                                      "rear_x_tilt", "rear_y_tilt", "rear_z_tilt"}},
-                         "radius_limit": {"min", "max"}}
+        detector_keys = {
+            "configuration": {
+                "selected_detector": None,
+                "rear_scale": None,
+                "front_centre": {"x", "y", "z"},
+                "rear_centre": {"x", "y", "z"}
+            },
+            "calibration": {
+                "direct": {"front_file", "rear_file"},
+                "flat": {"front_file", "rear_file"},
+                "tube": {"file"},
+                "position": {
+                    "front_x", "front_y", "front_z", "front_rot", "front_radius", "front_side", "front_x_tilt",
+                    "front_y_tilt", "front_z_tilt", "rear_x", "rear_y", "rear_z", "rear_rot", "rear_radius",
+                    "rear_side", "rear_x_tilt", "rear_y_tilt", "rear_z_tilt"
+                }
+            },
+            "radius_limit": {"min", "max"}
+        }
 
-        binning_keys = {"wavelength": {"start", "step", "stop", "type", "binning"},
-                        "1d_reduction": {"binning", "radius_cut", "wavelength_cut"},
-                        "2d_reduction": {"step", "stop", "type", "interpolate"}}
+        binning_keys = {
+            "wavelength": {"start", "step", "stop", "type", "binning"},
+            "1d_reduction": {"binning", "radius_cut", "wavelength_cut"},
+            "2d_reduction": {"step", "stop", "type", "interpolate"}
+        }
 
-        reduction_keys = {"merged": {"rescale": {"min", "max", "use_fit"},
-                                     "shift": {"min", "max", "use_fit", "factor", "distance"},
-                                     "merge_range": {"min", "max", "use_fit"}},
-                          "events": {"binning", "type"}}
+        reduction_keys = {
+            "merged": {
+                "rescale": {"min", "max", "use_fit"},
+                "shift": {"min", "max", "use_fit", "factor", "distance"},
+                "merge_range": {"min", "max", "use_fit"}
+            },
+            "events": {"binning", "type"}
+        }
 
-        q_resolution_keys = {"enabled", "moderator_file", "source_aperture", "delta_r",
-                             "h1", "h2", "w1", "w2"}
+        q_resolution_keys = {"enabled", "moderator_file", "source_aperture", "delta_r", "h1", "h2", "w1", "w2"}
 
         gravity_keys = {"enabled"}
 
-        transmission_keys = {"monitor": {"*": {"spectrum_number", "background", "shift", "use_own_background"}},
-                             "fitting": {"enabled": None, "function": None, "polynomial_order": None,
-                                         "parameters": {"lambda_min", "lambda_max"}},
-                             "selected_monitor": None}
+        transmission_keys = {
+            "monitor": {
+                "*": {"spectrum_number", "background", "shift", "use_own_background"}
+            },
+            "fitting": {
+                "enabled": None,
+                "function": None,
+                "polynomial_order": None,
+                "parameters": {"lambda_min", "lambda_max"}
+            },
+            "selected_monitor": None
+        }
 
-        normalisation_keys = {"monitor": {"*": {"spectrum_number", "background"}},
-                              "selected_monitor": None}
+        normalisation_keys = {"monitor": {"*": {"spectrum_number", "background"}}, "selected_monitor": None}
 
-        mask_keys = {"beamstop_shadow": {"angle", "width"},
-                     "prompt_peak" : {"start", "stop"},
-                     "mask_files": None,
-                     "mask_pixels": None,
-                     "phi": {"mirror", "start", "stop"},
-                     "time": {"tof"},
-                     "spatial": {"rear": {"detector_columns", "detector_rows",
-                                          "detector_column_ranges", "detector_row_ranges"},
-                                 "front": {"detector_columns", "detector_rows",
-                                           "detector_column_ranges", "detector_row_ranges"}}}
+        mask_keys = {
+            "beamstop_shadow": {"angle", "width"},
+            "prompt_peak": {"start", "stop"},
+            "mask_files": None,
+            "mask_pixels": None,
+            "phi": {"mirror", "start", "stop"},
+            "time": {"tof"},
+            "spatial": {
+                "rear": {"detector_columns", "detector_rows", "detector_column_ranges", "detector_row_ranges"},
+                "front": {"detector_columns", "detector_rows", "detector_column_ranges", "detector_row_ranges"}
+            }
+        }
 
-        return {"toml_file_version": None,
-                "binning": binning_keys,
-                "metadata": ".*",
-                "detector": detector_keys,
-                "gravity": gravity_keys,
-                "mask": mask_keys,
-                "instrument": instrument_keys,
-                "normalisation": normalisation_keys,
-                "q_resolution": q_resolution_keys,
-                "reduction": reduction_keys,
-                "transmission": transmission_keys
-                }
+        return {
+            "toml_file_version": None,
+            "binning": binning_keys,
+            "metadata": ".*",
+            "detector": detector_keys,
+            "gravity": gravity_keys,
+            "mask": mask_keys,
+            "instrument": instrument_keys,
+            "normalisation": normalisation_keys,
+            "q_resolution": q_resolution_keys,
+            "reduction": reduction_keys,
+            "transmission": transmission_keys
+        }
 
     @staticmethod
     def _build_nested_keys(d, path="", current_out=None):

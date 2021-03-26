@@ -38,12 +38,22 @@ class BatchProcessRunner(QObject):
     def on_error(self):
         self._worker = None
 
-    def process_states(self, row_index_pair, get_states_func, use_optimizations, output_mode, plot_results, output_graph,
+    def process_states(self,
+                       row_index_pair,
+                       get_states_func,
+                       use_optimizations,
+                       output_mode,
+                       plot_results,
+                       output_graph,
                        save_can=False):
         self._worker = Worker(self._process_states_on_thread,
-                              row_index_pair=row_index_pair, get_states_func=get_states_func, use_optimizations=use_optimizations,
-                              output_mode=output_mode, plot_results=plot_results,
-                              output_graph=output_graph, save_can=save_can)
+                              row_index_pair=row_index_pair,
+                              get_states_func=get_states_func,
+                              use_optimizations=use_optimizations,
+                              output_mode=output_mode,
+                              plot_results=plot_results,
+                              output_graph=output_graph,
+                              save_can=save_can)
         self._worker.signals.finished.connect(self.on_finished)
         self._worker.signals.error.connect(self.on_error)
 
@@ -57,8 +67,14 @@ class BatchProcessRunner(QObject):
 
         QThreadPool.globalInstance().start(self._worker)
 
-    def _process_states_on_thread(self, row_index_pair, get_states_func, use_optimizations,
-                                  output_mode, plot_results, output_graph, save_can=False):
+    def _process_states_on_thread(self,
+                                  row_index_pair,
+                                  get_states_func,
+                                  use_optimizations,
+                                  output_mode,
+                                  plot_results,
+                                  output_graph,
+                                  save_can=False):
         for row, index in row_index_pair:
 
             # TODO update the get_states_func to support one per call
@@ -77,7 +93,8 @@ class BatchProcessRunner(QObject):
             for state in states.values():
                 try:
                     out_scale_factors, out_shift_factors = \
-                        self.batch_processor([state.all_states], use_optimizations, output_mode, plot_results, output_graph, save_can)
+                        self.batch_processor([state.all_states], use_optimizations, output_mode, plot_results,
+                                             output_graph, save_can)
                 except Exception as e:
                     self._handle_err(index, e)
                     continue

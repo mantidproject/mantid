@@ -97,14 +97,12 @@ def get_settings_object(settings_prop_man_name=REDUCTION_SETTINGS_OBJ_NAME):
         Also take this opportunity to change typed property-getting to the
         simpler "[]" operator rather than getProperty().value.
         """
-
         def __init__(self, name):
             self.name = name
 
         def _get_prop_man(self, name):
             if not PropertyManagerDataService.doesExist(name):
-                logger.debug("Creating reduction settings PropertyManager "
-                             "object with name \"%s\"." % name)
+                logger.debug("Creating reduction settings PropertyManager " "object with name \"%s\"." % name)
                 PropertyManagerDataService.add(name, PropertyManager())
 
             return PropertyManagerDataService.retrieve(name)

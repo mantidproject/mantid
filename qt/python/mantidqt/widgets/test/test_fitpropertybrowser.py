@@ -9,6 +9,7 @@
 import unittest
 
 import matplotlib
+
 matplotlib.use('AGG')  # noqa
 from numpy import zeros
 
@@ -63,15 +64,11 @@ class FitPropertyBrowserTest(unittest.TestCase):
 
         for plot_diff in [True, False]:
             # create fake fit output results
-            matrixWorkspace = WorkspaceFactory.Instance().create("Workspace2D",
-                                                                 NVectors=3,
-                                                                 YLength=5,
-                                                                 XLength=5)
+            matrixWorkspace = WorkspaceFactory.Instance().create("Workspace2D", NVectors=3, YLength=5, XLength=5)
             tableWorkspace = WorkspaceFactory.createTable()
             AnalysisDataService.Instance().addOrReplace("ws_Workspace", matrixWorkspace)
             AnalysisDataService.Instance().addOrReplace("ws_Parameters", tableWorkspace)
-            AnalysisDataService.Instance().addOrReplace("ws_NormalisedCovarianceMatrix",
-                                                        tableWorkspace)
+            AnalysisDataService.Instance().addOrReplace("ws_NormalisedCovarianceMatrix", tableWorkspace)
 
             property_browser.plotDiff = Mock(return_value=plot_diff)
             property_browser.fitting_done_slot("ws_Workspace")
@@ -224,9 +221,8 @@ class FitPropertyBrowserTest(unittest.TestCase):
     def _create_widget(self, canvas=MagicMock(), toolbar_manager=Mock()):
         return FitPropertyBrowser(canvas, toolbar_manager)
 
-    def _create_and_plot_matrix_workspace(self, name = "workspace", distribution = False):
-        ws = CreateWorkspace(OutputWorkspace = name, DataX=zeros(10), DataY=zeros(10),
-                             NSpec=2, Distribution=distribution)
+    def _create_and_plot_matrix_workspace(self, name="workspace", distribution=False):
+        ws = CreateWorkspace(OutputWorkspace=name, DataX=zeros(10), DataY=zeros(10), NSpec=2, Distribution=distribution)
         fig = plot([ws], spectrum_nums=[1])
         canvas = fig.canvas
         return fig, canvas

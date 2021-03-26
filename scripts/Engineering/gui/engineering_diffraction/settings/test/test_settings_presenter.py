@@ -18,13 +18,14 @@ class SettingsPresenterTest(unittest.TestCase):
         self.view = mock.create_autospec(settings_view.SettingsView)
         self.presenter = settings_presenter.SettingsPresenter(self.model, self.view)
         self.presenter.settings = {}
-        self.settings = {"save_location": "save",
-                         "full_calibration": "cal",
-                         "recalc_vanadium": False,
-                         "logs": "some,logs",
-                         "primary_log": "some",
-                         "sort_ascending": True
-                         }
+        self.settings = {
+            "save_location": "save",
+            "full_calibration": "cal",
+            "recalc_vanadium": False,
+            "logs": "some,logs",
+            "primary_log": "some",
+            "sort_ascending": True
+        }
 
     def test_load_existing_settings(self):
         self.model.get_settings_dict.return_value = self.settings.copy()
@@ -43,10 +44,7 @@ class SettingsPresenterTest(unittest.TestCase):
         self.assertEqual(1, self.view.find_save.call_count)
 
     def test_load_invalid_settings(self):
-        self.model.get_settings_dict.return_value = {
-            "foo": "dud",
-            "bar": "result"
-        }
+        self.model.get_settings_dict.return_value = {"foo": "dud", "bar": "result"}
         self.presenter.savedir_notifier = mock.MagicMock()
 
         self.presenter.load_settings_from_file_or_default()

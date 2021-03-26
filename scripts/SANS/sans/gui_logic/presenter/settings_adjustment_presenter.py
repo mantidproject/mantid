@@ -20,9 +20,7 @@ class SettingsAdjustmentPresenter(PresenterCommon):
 
     def default_gui_setup(self):
         # Set the fit options
-        fit_types = [FitType.LINEAR.value,
-                     FitType.LOGARITHMIC.value,
-                     FitType.POLYNOMIAL.value]
+        fit_types = [FitType.LINEAR.value, FitType.LOGARITHMIC.value, FitType.POLYNOMIAL.value]
 
         self._view.transmission_sample_fit_type = fit_types
         self._view.transmission_can_fit_type = fit_types
@@ -32,7 +30,7 @@ class SettingsAdjustmentPresenter(PresenterCommon):
 
     def update_instrument(self, instrument):
         self._model.instrument = instrument
-        monitor_5_movement =  self._model.does_instrument_support_monitor_5()
+        monitor_5_movement = self._model.does_instrument_support_monitor_5()
         self._view.set_monitor_5_enabled(monitor_5_movement)
 
     def update_view_from_model(self):
@@ -45,8 +43,8 @@ class SettingsAdjustmentPresenter(PresenterCommon):
         self._set_on_view("transmission_mask_files")
         self._set_on_view("transmission_radius")
         self._set_on_view("transmission_monitor")
-        self._set_on_view("transmission_mn_4_shift",1)
-        self._set_on_view("transmission_mn_5_shift",1)
+        self._set_on_view("transmission_mn_4_shift", 1)
+        self._set_on_view("transmission_mn_5_shift", 1)
 
         self._set_on_view_transmission_fit()
 

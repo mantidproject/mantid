@@ -11,7 +11,6 @@ from Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws
 from copy import copy
 from mantid.kernel import PhysicalConstants as const
 
-
 muon_logger = Logger('Muon-Algs')
 
 
@@ -139,8 +138,10 @@ def run_Fit(parameters_dict, alg):
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
     alg.setProperty('CreateOutput', True)
-    pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
-                             key not in ['InputWorkspace', 'StartX', 'EndX']}
+    pruned_parameter_dict = {
+        key: value
+        for key, value in parameters_dict.items() if key not in ['InputWorkspace', 'StartX', 'EndX']
+    }
     alg.setProperties(pruned_parameter_dict)
     alg.setProperty('InputWorkspace', parameters_dict['InputWorkspace'])
     alg.setProperty('StartX', parameters_dict['StartX'])
@@ -157,8 +158,10 @@ def run_simultaneous_Fit(parameters_dict, alg):
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
     alg.setProperty('CreateOutput', True)
-    pruned_parameter_dict = {key: value for key,value in parameters_dict.items() if
-                             key not in ['InputWorkspace', 'StartX', 'EndX']}
+    pruned_parameter_dict = {
+        key: value
+        for key, value in parameters_dict.items() if key not in ['InputWorkspace', 'StartX', 'EndX']
+    }
     alg.setProperties(pruned_parameter_dict)
 
     for index, input_workspace in enumerate(parameters_dict['InputWorkspace']):
@@ -239,7 +242,7 @@ def convert_to_field(workspace_name):
     alg.setAlwaysStoreInADS(True)
     alg.setProperty("InputWorkspace", workspace_name)
     alg.setProperty("OutputWorkspace", workspace_name)
-    alg.setProperty("Formula", 'x * 1. / '+str(const.MuonGyromagneticRatio))
+    alg.setProperty("Formula", 'x * 1. / ' + str(const.MuonGyromagneticRatio))
     alg.setProperty("AxisTitle", 'Field')
     alg.setProperty('AxisUnits', 'Gauss')
     alg.execute()

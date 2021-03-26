@@ -10,7 +10,6 @@ from mantid.api import PythonAlgorithm
 
 
 class CompositeValidatorTest(unittest.TestCase):
-
     def test_creation_with_add_succeeds_correctly_in_algorithm(self):
         """
             Tests that a composite validator created with the add
@@ -29,9 +28,10 @@ class CompositeValidatorTest(unittest.TestCase):
         self._do_validation_test(validation)
 
     def test_composite_validator_with_or_relation(self):
-        validation = CompositeValidator([FloatBoundedValidator(lower=5, upper=10),
-                                         FloatBoundedValidator(lower=15, upper=20)],
-                                        relation=CompositeRelation.OR)
+        validation = CompositeValidator(
+            [FloatBoundedValidator(lower=5, upper=10),
+             FloatBoundedValidator(lower=15, upper=20)],
+            relation=CompositeRelation.OR)
 
         test_alg = self._create_test_algorithm(validation)
 
@@ -48,7 +48,6 @@ class CompositeValidatorTest(unittest.TestCase):
         self.assertRaises(ValueError, test_alg.setProperty, "Input", 13.0)
         self.assertRaises(ValueError, test_alg.setProperty, "Input", 23.0)
 
-
     def _do_validation_test(self, validation):
         """Run the validator tests"""
         test_alg = self._create_test_algorithm(validation)
@@ -61,7 +60,6 @@ class CompositeValidatorTest(unittest.TestCase):
     def _create_test_algorithm(self, validator):
         """Create a test algorithm"""
         class TestAlgorithm(PythonAlgorithm):
-
             def PyInit(self):
                 self.declareProperty("Input", -1.0, validator)
 

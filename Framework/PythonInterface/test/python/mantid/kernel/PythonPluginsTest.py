@@ -28,14 +28,13 @@ AlgorithmFactory.subscribe(TestPyAlg)
 
 
 class PythonPluginsTest(unittest.TestCase):
-
     def setUp(self):
         # Make a test directory and test plugin
         self._testdir = os.path.join(os.getcwd(), 'PythonPluginsTest_TmpDir')
         try:
             os.mkdir(self._testdir)
         except OSError:
-            pass # Already exists, maybe it was not removed when a test failed?
+            pass  # Already exists, maybe it was not removed when a test failed?
         filename = os.path.join(self._testdir, 'TestPyAlg.py')
         if not os.path.exists(filename):
             plugin = open(filename, 'w')
@@ -63,7 +62,7 @@ class PythonPluginsTest(unittest.TestCase):
             self.assertEqual(expected_name, test_alg.name())
             self.assertEqual(1, test_alg.version())
         except RuntimeError as exc:
-            self.fail("Failed to create plugin algorithm from the manager: '%s' " %s)
+            self.fail("Failed to create plugin algorithm from the manager: '%s' " % s)
 
 
 if __name__ == '__main__':

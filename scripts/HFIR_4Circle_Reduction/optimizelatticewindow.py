@@ -36,13 +36,8 @@ class OptimizeLatticeWindow(QMainWindow):
         self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
         # initialize widgets
-        self.ui.comboBox_unitCellTypes.addItems(['Cubic',
-                                                 'Tetragonal',
-                                                 'Orthorhombic',
-                                                 'Hexagonal',
-                                                 'Rhombohedral',
-                                                 'Monoclinic',
-                                                 'Triclinic'])
+        self.ui.comboBox_unitCellTypes.addItems(
+            ['Cubic', 'Tetragonal', 'Orthorhombic', 'Hexagonal', 'Rhombohedral', 'Monoclinic', 'Triclinic'])
 
         self.ui.comboBox_ubSource.addItems(['Tab - Calculate UB Matrix', 'Tab - Accepted UB Matrix'])
 

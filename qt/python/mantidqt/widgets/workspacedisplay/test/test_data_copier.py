@@ -32,9 +32,11 @@ class DataCopierTest(TestCase):
 
         mock_selection_model = MockQSelectionModel(has_selection=True)
         mock_selection_model.selectedRows = Mock(
-            return_value=[MockQModelIndex(1, 1), MockQModelIndex(2, 2), MockQModelIndex(3, 3)])
+            return_value=[MockQModelIndex(1, 1), MockQModelIndex(2, 2),
+                          MockQModelIndex(3, 3)])
         mock_selection_model.selectedColumns = Mock(
-            return_value=[MockQModelIndex(1, 1), MockQModelIndex(2, 2), MockQModelIndex(3, 3)])
+            return_value=[MockQModelIndex(1, 1), MockQModelIndex(2, 2),
+                          MockQModelIndex(3, 3)])
         self.table = Mock(spec=TableWorkspaceDisplayView)
         self.table.mock_selection_model = mock_selection_model
 
@@ -59,8 +61,7 @@ class DataCopierTest(TestCase):
 
     @patch(show_mouse_toast_package)
     @patch(copy_to_clipboard_package)
-    def test_action_copy_spectrum_values_no_selection(self, mock_copy,
-                                                      mock_show_mouse_toast):
+    def test_action_copy_spectrum_values_no_selection(self, mock_copy, mock_show_mouse_toast):
         mock_table = MockQTableView()
         mock_table.mock_selection_model.hasSelection = Mock(return_value=False)
         mock_table.mock_selection_model.selectedRows = Mock()

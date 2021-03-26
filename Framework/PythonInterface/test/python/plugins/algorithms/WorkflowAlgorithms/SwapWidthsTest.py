@@ -14,10 +14,8 @@ class SwapWidthsTest(unittest.TestCase):
     _input_ws = 'IN16B_125878_QLd_Result'
     _swap_point = 5
 
-
     def setUp(self):
         self._input_ws = Load(Filename='IN16B_125878_QLd_Result.nxs', OutputWorkspace=self._input_ws)
-
 
     def _validate_result_shape(self, result):
         """
@@ -44,7 +42,7 @@ class SwapWidthsTest(unittest.TestCase):
         # f2.f1.FWHM = first_fwhm, f2.f2.FWHM = second_fwhm
         first_fwhm_idx = 0
         second_fwhm_idx = 0
-        for i in range (0,self._input_ws.getNumberHistograms() - 1):
+        for i in range(0, self._input_ws.getNumberHistograms() - 1):
             if self._input_ws.getAxis(1).label(i) == 'f2.f1.FWHM':
                 first_fwhm_idx = i
             if self._input_ws.getAxis(1).label(i) == 'f2.f2.FWHM':
@@ -65,15 +63,14 @@ class SwapWidthsTest(unittest.TestCase):
                 self.assertEqual(in_first_fwhm[i], result_second_fwhm[i])
                 self.assertEqual(in_second_fwhm[i], result_first_fwhm[i])
 
-
     def test_basic(self):
         """
         Tests a basic run of SwapWidths.
         """
-        result = SwapWidths(InputWorkspace=self._input_ws,
-                            SwapPoint=self._swap_point)
+        result = SwapWidths(InputWorkspace=self._input_ws, SwapPoint=self._swap_point)
         self._validate_result_shape(result)
         self._validate_result_values(result)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     unittest.main()

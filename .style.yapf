@@ -1,5 +1,5 @@
 [style]
 based_on_style = pep8
-column_limit = 140
+column_limit = 120
 allow_split_before_dict_value = false
 each_dict_entry_on_separate_line = true

@@ -21,9 +21,8 @@ else:
 if 'Elemental_Analysis' in globals():
     Elemental_Analysis = globals()['Elemental_Analysis']
     if not Elemental_Analysis.isHidden():
-        Elemental_Analysis.setWindowState(
-            Elemental_Analysis.windowState(
-            ) & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+        Elemental_Analysis.setWindowState(Elemental_Analysis.windowState() & ~QtCore.Qt.WindowMinimized
+                                          | QtCore.Qt.WindowActive)
         Elemental_Analysis.activateWindow()
     else:
         Elemental_Analysis = ElementalAnalysisGui(parent, flags)

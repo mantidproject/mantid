@@ -9,7 +9,6 @@ import plot_presenter
 
 
 class MasterPresenter(object):
-
     def __init__(self, view, data_model, colour_list):
         self.view = view
 

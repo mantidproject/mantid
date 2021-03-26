@@ -20,13 +20,12 @@ def default_ceria_expected_peaks():
 
     @Returns :: a list of peaks in d-spacing as a float list
     """
-    _CERIA_EXPECTED_PEAKS = [3.124277511, 2.705702376, 1.913220892, 1.631600313,
-                             1.562138267, 1.352851554, 1.241461538, 1.210027059,
-                             1.104598643, 1.04142562, 0.956610446, 0.914694494,
-                             0.901900955, 0.855618487, 0.825231622, 0.815800156,
-                             0.781069134, 0.757748432, 0.750426918, 0.723129589,
-                             0.704504971, 0.676425777, 0.66110842, 0.656229382,
-                             0.637740216, 0.624855346, 0.620730846, 0.605013529]
+    _CERIA_EXPECTED_PEAKS = [
+        3.124277511, 2.705702376, 1.913220892, 1.631600313, 1.562138267, 1.352851554, 1.241461538, 1.210027059,
+        1.104598643, 1.04142562, 0.956610446, 0.914694494, 0.901900955, 0.855618487, 0.825231622, 0.815800156,
+        0.781069134, 0.757748432, 0.750426918, 0.723129589, 0.704504971, 0.676425777, 0.66110842, 0.656229382,
+        0.637740216, 0.624855346, 0.620730846, 0.605013529
+    ]
 
     return _CERIA_EXPECTED_PEAKS
 
@@ -61,8 +60,8 @@ def read_in_expected_peaks(filename, expected_peaks):
         if not ex_peak_array:
             # "File could not be read. Defaults in alternative option used."
             if not expected_peaks:
-                raise ValueError("Could not read any peaks from the file given in 'ExpectedPeaksFromFile: '"
-                                 + filename + "', and no expected peaks were given in the property "
+                raise ValueError("Could not read any peaks from the file given in 'ExpectedPeaksFromFile: '" +
+                                 filename + "', and no expected peaks were given in the property "
                                  "'ExpectedPeaks' either. Cannot continue without a list of expected peaks.")
             expected_peaks_d = sorted(expected_peaks)
 
@@ -131,8 +130,8 @@ def parse_spectrum_indices(workspace, spectrum_numbers):
     max_index = workspace.getNumberHistograms()
     if indices[-1] >= max_index:
         raise ValueError("A workspace index equal or bigger than the number of histograms available in the "
-                         "workspace '" + workspace.name() + "' (" + str(workspace.getNumberHistograms())
-                         + ") has been given. Please check the list of indices.")
+                         "workspace '" + workspace.name() + "' (" + str(workspace.getNumberHistograms()) +
+                         ") has been given. Please check the list of indices.")
     # and finally translate from 'spectrum numbers' to 'workspace indices'
     return [workspace.getIndexFromSpectrumNumber(sn) for sn in indices]
 
@@ -168,8 +167,7 @@ def get_detector_ids_for_bank(bank):
     @returns list of detector IDs corresponding to the specified Engg bank number
     """
     import os
-    grouping_file_path = os.path.join(mantid.config.getInstrumentDirectory(),
-                                      'Grouping', 'ENGINX_Grouping.xml')
+    grouping_file_path = os.path.join(mantid.config.getInstrumentDirectory(), 'Grouping', 'ENGINX_Grouping.xml')
 
     alg = AlgorithmManager.create('LoadDetectorsGroupingFile')
     alg.initialize()
@@ -226,7 +224,12 @@ def generate_output_param_table(name, difa, difc, tzero):
     tbl.addRow([float(difa), float(difc), float(tzero)])
 
 
-def apply_vanadium_corrections(parent, ws, indices, vanadium_ws, van_integration_ws, van_curves_ws,
+def apply_vanadium_corrections(parent,
+                               ws,
+                               indices,
+                               vanadium_ws,
+                               van_integration_ws,
+                               van_curves_ws,
                                progress_range=None):
     """
     Apply the EnggVanadiumCorrections algorithm on the workspace given, by using the algorithm
@@ -351,8 +354,15 @@ def sum_spectra(parent, ws):
     return alg.getProperty('OutputWorkspace').value
 
 
-def write_ENGINX_GSAS_iparam_file(output_file, difa, difc, tzero, bk2bk_params=None, bank_names=None, ceria_run=241391,
-                                  vanadium_run=236516, template_file=None):
+def write_ENGINX_GSAS_iparam_file(output_file,
+                                  difa,
+                                  difc,
+                                  tzero,
+                                  bk2bk_params=None,
+                                  bank_names=None,
+                                  ceria_run=241391,
+                                  vanadium_run=236516,
+                                  template_file=None):
     """
     Produces and writes an ENGIN-X instrument parameter file for GSAS
     (in the GSAS iparam format, as partially described in the GSAS
@@ -384,8 +394,7 @@ def write_ENGINX_GSAS_iparam_file(output_file, difa, difc, tzero, bk2bk_params=N
 
     """
     if not isinstance(difc, list) or not isinstance(tzero, list):
-        raise ValueError("The parameters difc and tzero must be lists, with as many elements as "
-                         "banks")
+        raise ValueError("The parameters difc and tzero must be lists, with as many elements as " "banks")
 
     if len(difc) != len(tzero) and len(difc) != len(difa):
         raise ValueError("The lengths of the difa, difc and tzero lists must be the same")
@@ -419,35 +428,37 @@ def write_ENGINX_GSAS_iparam_file(output_file, difa, difc, tzero, bk2bk_params=N
     # - .his file name for open genie (INCBM)
     # - BackToBackExponential parameters (PRCF11+12)
     for b_idx, _bank_name in enumerate(bank_names):
-        patterns = ["INS  %d ICONS" % (b_idx + 1),  # bank calibration parameters: DIFC, DIFA, TZERO
-                    "INS    CALIB",  # calibration run numbers (Vanadium and Ceria)
-                    "INS    INCBM"   # A his file for open genie (with ceria run number in the name)
-                    ]
+        patterns = [
+            "INS  %d ICONS" % (b_idx + 1),  # bank calibration parameters: DIFC, DIFA, TZERO
+            "INS    CALIB",  # calibration run numbers (Vanadium and Ceria)
+            "INS    INCBM"  # A his file for open genie (with ceria run number in the name)
+        ]
         # the ljust(80) ensures a length of 80 characters for the lines (GSAS rules...)
-        replacements = [("INS  {0} ICONS  {1:.2f}    {2:.2f}    {3:.2f}".
-                         format(b_idx + 1, difc[b_idx], difa[b_idx], tzero[b_idx])).ljust(80) + '\n',
-                        ("INS    CALIB   {0}   {1} ceo2".
-                         format(ceria_run, vanadium_run)).ljust(80) + '\n',
-                        ("INS    INCBM  ob+mon_{0}_North_and_South_banks.his".
-                         format(ceria_run)).ljust(80) + '\n']
+        replacements = [("INS  {0} ICONS  {1:.2f}    {2:.2f}    {3:.2f}".format(b_idx + 1, difc[b_idx], difa[b_idx],
+                                                                                tzero[b_idx])).ljust(80) + '\n',
+                        ("INS    CALIB   {0}   {1} ceo2".format(ceria_run, vanadium_run)).ljust(80) + '\n',
+                        ("INS    INCBM  ob+mon_{0}_North_and_South_banks.his".format(ceria_run)).ljust(80) + '\n']
 
         if bk2bk_params:  # template params not overwritten if none provided
 
             patterns += ["INS  {}PRCF11".format(b_idx + 1), "INS  {}PRCF12".format(b_idx + 1)]
 
-            replacements += [("INS  {0}PRCF11   {1:.6E}   {2:.6E}   {3:.6E}   {4:.6E}".
-                              format(b_idx + 1,
-                                     bk2bk_params[b_idx][0],  # alpha
-                                     bk2bk_params[b_idx][1],  # beta_0
-                                     bk2bk_params[b_idx][2],  # beta_1
-                                     bk2bk_params[b_idx][3]   # sigma_0_sq
-                                     )).ljust(80) + '\n',
-                             ("INS  {0}PRCF12   {1:.6E}   {2:.6E}   0.000000E+00   0.000000E+00 ".
-                              format(b_idx + 1,
-                                     bk2bk_params[b_idx][4],  # sigma_1_sq
-                                     bk2bk_params[b_idx][5]   # sigma_2_sq
-                                     )).ljust(80) + '\n'
-                             ]
+            replacements += [
+                (
+                    "INS  {0}PRCF11   {1:.6E}   {2:.6E}   {3:.6E}   {4:.6E}".format(
+                        b_idx + 1,
+                        bk2bk_params[b_idx][0],  # alpha
+                        bk2bk_params[b_idx][1],  # beta_0
+                        bk2bk_params[b_idx][2],  # beta_1
+                        bk2bk_params[b_idx][3]  # sigma_0_sq
+                    )).ljust(80) + '\n',
+                (
+                    "INS  {0}PRCF12   {1:.6E}   {2:.6E}   0.000000E+00   0.000000E+00 ".format(
+                        b_idx + 1,
+                        bk2bk_params[b_idx][4],  # sigma_1_sq
+                        bk2bk_params[b_idx][5]  # sigma_2_sq
+                    )).ljust(80) + '\n'
+            ]
 
         output_lines = [replace_patterns(line, patterns, replacements) for line in output_lines]
 

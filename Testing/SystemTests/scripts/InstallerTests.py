@@ -32,14 +32,12 @@ parser.add_argument('-n',
                     dest='doInstall',
                     action='store_false',
                     help='Run tests without installing Mantid (it must be already installed)')
-parser.add_argument('-N', '--dry-run',
+parser.add_argument('-N',
+                    '--dry-run',
                     dest='dry_run',
                     action='store_true',
                     help='Do not run tests just print what would be run.')
-parser.add_argument('-o',
-                    dest='out2stdout',
-                    action='store_true',
-                    help='Output to the screen instead of log files')
+parser.add_argument('-o', dest='out2stdout', action='store_true', help='Output to the screen instead of log files')
 parser.add_argument('-R',
                     dest='test_regex',
                     metavar='regexp',
@@ -107,8 +105,8 @@ try:
     if sys.platform == 'win32':
         executor_args = ' ' + executor_args
     run_test_cmd = '{} {} {}/runSystemTests.py --loglevel={} --executable="{}" --exec-args="{}"'.format(
-        installer.python_cmd, installer.python_args, THIS_MODULE_DIR,
-        options.log_level, installer.python_cmd, executor_args)
+        installer.python_cmd, installer.python_args, THIS_MODULE_DIR, options.log_level, installer.python_cmd,
+        executor_args)
     run_test_cmd += " -j%i --quiet --output-on-failure" % options.ncores
     if options.test_regex is not None:
         run_test_cmd += " -R " + options.test_regex
@@ -127,10 +125,7 @@ try:
         p = subprocess.Popen(run_test_cmd, shell=True)  # no PIPE: print on screen for debugging
         p.wait()
     else:
-        p = subprocess.Popen(run_test_cmd,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE,
-                             shell=True)
+        p = subprocess.Popen(run_test_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         out, err = p.communicate()  # waits for p to finish
         testsRunLog = open(testRunLogPath, 'w')
         if out:

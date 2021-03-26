@@ -36,8 +36,7 @@ def slice_sans_event(state_slice, input_ws, input_ws_monitor, data_type_str="Sam
         sliced_workspace = input_ws
         slice_factor = 1.0
     else:
-        sliced_workspace, slice_factor = _create_slice(workspace=input_ws, slice_info=state_slice,
-                                                       data_type=data_type)
+        sliced_workspace, slice_factor = _create_slice(workspace=input_ws, slice_info=state_slice, data_type=data_type)
 
     # Scale the monitor accordingly
     slice_monitor = _scale_monitors(slice_factor=slice_factor, input_monitor_ws=input_ws_monitor)
@@ -45,9 +44,11 @@ def slice_sans_event(state_slice, input_ws, input_ws_monitor, data_type_str="Sam
     # Set the outputs
     append_to_sans_file_tag(sliced_workspace, "_sliced")
 
-    to_return = {"OutputWorkspace": sliced_workspace,
-                 "SliceEventFactor": slice_factor,
-                 "OutputWorkspaceMonitor": slice_monitor}
+    to_return = {
+        "OutputWorkspace": sliced_workspace,
+        "SliceEventFactor": slice_factor,
+        "OutputWorkspaceMonitor": slice_monitor
+    }
 
     return to_return
 
@@ -101,8 +102,7 @@ def _slice_by_time(workspace, start_time=None, stop_time=None):
     :return: the sliced workspace.
     """
     filter_name = "FilterByTime"
-    filter_options = {"InputWorkspace": workspace,
-                      "OutputWorkspace": EMPTY_NAME}
+    filter_options = {"InputWorkspace": workspace, "OutputWorkspace": EMPTY_NAME}
     if start_time:
         filter_options.update({'StartTime': start_time})
     if stop_time:
@@ -122,16 +122,17 @@ def _get_scaled_workspace(workspace, factor):
     :return: the scaled workspace.
     """
     single_valued_name = "CreateSingleValuedWorkspace"
-    single_valued_options = {"OutputWorkspace": EMPTY_NAME,
-                             "DataValue": factor}
+    single_valued_options = {"OutputWorkspace": EMPTY_NAME, "DataValue": factor}
     single_valued_alg = create_unmanaged_algorithm(single_valued_name, **single_valued_options)
     single_valued_alg.execute()
     single_valued_workspace = single_valued_alg.getProperty("OutputWorkspace").value
 
     multiply_name = "Multiply"
-    multiply_options = {"LHSWorkspace": workspace,
-                        "RHSWorkspace": single_valued_workspace,
-                        "OutputWorkspace": EMPTY_NAME}
+    multiply_options = {
+        "LHSWorkspace": workspace,
+        "RHSWorkspace": single_valued_workspace,
+        "OutputWorkspace": EMPTY_NAME
+    }
     multiply_alg = create_unmanaged_algorithm(multiply_name, **multiply_options)
     multiply_alg.execute()
     return multiply_alg.getProperty("OutputWorkspace").value

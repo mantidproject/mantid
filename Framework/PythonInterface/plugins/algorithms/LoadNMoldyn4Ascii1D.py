@@ -33,19 +33,17 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
                'convoluting it with a resolution function if required.'
 
     def PyInit(self):
-        self.declareProperty(FileProperty('Directory', '',
-                                          action=FileAction.Directory),
+        self.declareProperty(FileProperty('Directory', '', action=FileAction.Directory),
                              doc=('Path to directory containing dat files'))
 
-        self.declareProperty(StringArrayProperty('Functions'),
-                             doc='Names of functions to attempt to load from file')
+        self.declareProperty(StringArrayProperty('Functions'), doc='Names of functions to attempt to load from file')
 
-        self.declareProperty('ResolutionConvolution', 'No',
+        self.declareProperty('ResolutionConvolution',
+                             'No',
                              StringListValidator(['No', 'TOSCA']),
                              doc='Use resolution function to \'smear\' dos data?')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                                               direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace name')
 
     def validateInputs(self):
@@ -89,9 +87,8 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
                 logger.information('Function ' + str(y_name) + ' will be convoluted')
 
             # Create the workspace for function
-            ws_title = out_ws_name+'('+function+')'
-            CreateWorkspace(OutputWorkspace=ws_title, DataX=x_data, DataY=y_data,
-                            UnitX=x_unit, WorkspaceTitle=ws_title)
+            ws_title = out_ws_name + '(' + function + ')'
+            CreateWorkspace(OutputWorkspace=ws_title, DataX=x_data, DataY=y_data, UnitX=x_unit, WorkspaceTitle=ws_title)
 
             loaded_function_workspaces.append(ws_title)
 
@@ -172,7 +169,7 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
         # chops the data in half, discarding physically meaningless data points
 
         if abs(data[0]) == abs(data[-1]):
-            half_length = int(float(len(data))/2-0.5)
+            half_length = int(float(len(data)) / 2 - 0.5)
             data = data[half_length:]
         return data
 
@@ -200,7 +197,7 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
         # Used in convolution
 
         x_data = np.array(x_data)
-        delE = x_data*(16*np.exp(-x_data*0.0295)+0.000285*x_data + 1.058)
+        delE = x_data * (16 * np.exp(-x_data * 0.0295) + 0.000285 * x_data + 1.058)
         delE /= 100
         return delE
 
@@ -210,7 +207,7 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
         # Used in convolution
 
         x_data = np.array(x_data)
-        coeff_arr = -((x_data-point_x)**2)/(2*fwhm**2)
+        coeff_arr = -((x_data - point_x)**2) / (2 * fwhm**2)
         g_of_x = np.exp(coeff_arr)
 
         return g_of_x
@@ -221,7 +218,7 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
 
         h_of_x = 0
         for i in range(len(x_data)):
-            h_of_x += (y_data[i]*g_of_x[i])
+            h_of_x += (y_data[i] * g_of_x[i])
         return h_of_x
 
     def gaussians(self, x_data, resfunction):
@@ -229,7 +226,7 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
         # Used in convolution
 
         all_gx = []
-        fwhm_arr = fwhm_arr = resfunction(x_data)/2.35482
+        fwhm_arr = fwhm_arr = resfunction(x_data) / 2.35482
         all_gx = [self.gaussianfunc(x_data, x_data[i], resfunction, fwhm_arr[i]) for i in range(len(x_data))]
         return all_gx
 

@@ -52,8 +52,8 @@ class DataProxy(object):
                 api.HFIRLoad(Filename=str(data_file), OutputWorkspace=self.data_ws)
                 ws = AnalysisDataService.retrieve(self.data_ws)
                 x = ws.dataX(0)
-                self.wavelength = (x[0]+x[1])/2.0
-                self.wavelength_spread = x[1]-x[0]
+                self.wavelength = (x[0] + x[1]) / 2.0
+                self.wavelength_spread = x[1] - x[0]
                 self.sample_detector_distance = ws.getRun().getProperty("sample-detector-distance").value
                 self.sample_detector_distance_offset = ws.getRun().getProperty("sample-detector-distance-offset").value
                 self.sample_si_window_distance = ws.getRun().getProperty("sample-si-window-distance").value

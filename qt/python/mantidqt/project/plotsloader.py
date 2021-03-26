@@ -54,9 +54,8 @@ class PlotsLoader(object):
         creation_args = plot_dict["creationArguments"]
 
         if len(creation_args) == 0:
-            logger.information(
-                "A plot could not be loaded from the save file, as it did not have creation_args. "
-                "The original plot title was: {}".format(plot_dict["label"]))
+            logger.information("A plot could not be loaded from the save file, as it did not have creation_args. "
+                               "The original plot title was: {}".format(plot_dict["label"]))
             return
 
         for sublist in creation_args:
@@ -135,10 +134,7 @@ class PlotsLoader(object):
         :param creation_arg: The functions' arguments when it was originally called.
         """
         function_to_call = creation_arg.pop('function')
-        function_dict = {
-            "axhline": axes.axhline,
-            "axvline": axes.axvline
-        }
+        function_dict = {"axhline": axes.axhline, "axvline": axes.axvline}
 
         func = function_dict[function_to_call]
         func(*creation_arg['args'], **creation_arg['kwargs'])
@@ -353,9 +349,8 @@ class PlotsLoader(object):
         try:
             image.axes.set_cmap(cm.get_cmap(dic["cmap"]))
         except AttributeError as e:
-            logger.debug(
-                "PlotsLoader - The Image accessed did not have an axes with the ability to set the cmap: "
-                + str(e))
+            logger.debug("PlotsLoader - The Image accessed did not have an axes with the ability to set the cmap: " +
+                         str(e))
 
         # Redraw
         image.axes.figure.canvas.draw()

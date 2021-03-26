@@ -8,8 +8,7 @@ import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 
 
-def bivariate_normal(X, Y, sigmax=1.0, sigmay=1.0,
-                     mux=0.0, muy=0.0, sigmaxy=0.0):
+def bivariate_normal(X, Y, sigmax=1.0, sigmay=1.0, mux=0.0, muy=0.0, sigmaxy=0.0):
     """
     Bivariate Gaussian distribution for equal shape *X*, *Y*.
 
@@ -23,14 +22,15 @@ def bivariate_normal(X, Y, sigmax=1.0, sigmay=1.0,
     Ymu = Y - muy
 
     rho = sigmaxy / (sigmax * sigmay)
-    z = Xmu ** 2 / sigmax ** 2 + Ymu ** 2 / sigmay ** 2 - 2 * rho * Xmu * Ymu / (sigmax * sigmay)
-    denom = 2 * np.pi * sigmax * sigmay * np.sqrt(1 - rho ** 2)
-    return np.exp(-z / (2 * (1 - rho ** 2))) / denom
+    z = Xmu**2 / sigmax**2 + Ymu**2 / sigmay**2 - 2 * rho * Xmu * Ymu / (sigmax * sigmay)
+    denom = 2 * np.pi * sigmax * sigmay * np.sqrt(1 - rho**2)
+    return np.exp(-z / (2 * (1 - rho**2))) / denom
 
 
 class BivariateGaussian(IFunction1D):
     """
-    BivariateGaussian implements a bivariate gaussian (BivariateGaussian) in Mantid (M) as a 1D function.  This is done so that it can be
+    BivariateGaussian implements a bivariate gaussian (BivariateGaussian) in Mantid (M) as a 1D function.  This is done
+     so that it can be
     fit in a straightforward fashion using Mantid's Fit() function.  To achieve this, we use the flattened
     version of the 2D profile and fit it as a 1D function.  It is built on matplotlib.mlab.bivariate_normal, which
     is available on SNS analysis machines.
@@ -64,7 +64,6 @@ class BivariateGaussian(IFunction1D):
 
         BS - May 18 2018
     """
-
     def init(self):
         self.declareParameter("A", 1.0)  # Amplitude
         self.declareParameter("MuX", 0.0)  # Mean along the x direction
@@ -95,7 +94,7 @@ class BivariateGaussian(IFunction1D):
         if t.ndim == 1:
             nX = int(self.getAttributeValue('nX'))
             nY = int(self.getAttributeValue('nY'))
-            if nX*nY*2 != t.size:
+            if nX * nY * 2 != t.size:
                 raise ValueError(f"Input array cannot be resized as a {nX} x {nY} x 2 matrix, please modify "
                                  "attributes nX and nY")
             pos = t.reshape(nX, nY, 2)
@@ -112,10 +111,9 @@ class BivariateGaussian(IFunction1D):
         Bg = self.getParamValue(6)
 
         SigXY = SigX * SigY * SigP
-        Z = A * bivariate_normal(X, Y, sigmax=SigX, sigmay=SigY,
-                                 mux=MuX, muy=MuY, sigmaxy=SigXY)
+        Z = A * bivariate_normal(X, Y, sigmax=SigX, sigmay=SigY, mux=MuX, muy=MuY, sigmaxy=SigXY)
         if t.ndim == 1:
-            zRet = np.empty(Z.shape + (2,))
+            zRet = np.empty(Z.shape + (2, ))
             zRet[:, :, 0] = Z
             zRet[:, :, 1] = Z
         elif t.ndim == 3:
@@ -132,7 +130,7 @@ class BivariateGaussian(IFunction1D):
         SigX = self.getParamValue(3)
         SigY = self.getParamValue(4)
         SigP = self.getParamValue(5)
-        return np.array([[SigX ** 2, SigX * SigY * SigP], [SigX * SigY * SigP, SigY ** 2]])
+        return np.array([[SigX**2, SigX * SigY * SigP], [SigX * SigY * SigP, SigY**2]])
 
     def getMuSigma(self):
         return self.getMu(), self.getSigma()
@@ -148,17 +146,17 @@ class BivariateGaussian(IFunction1D):
         for param in boundsDict.keys():
             try:
                 if boundsDict[param][0] < boundsDict[param][1]:
-                    constraintString = "{:4.4e} < {:s} < {:4.4e}".format(
-                        boundsDict[param][0], param, boundsDict[param][1])
+                    constraintString = "{:4.4e} < {:s} < {:4.4e}".format(boundsDict[param][0], param,
+                                                                         boundsDict[param][1])
                     self.addConstraints(constraintString)
                 else:
-                    self.addConstraints("{:4.4e} < {:s} < {:4.4e}".format(
-                        boundsDict[param][1], param, boundsDict[param][0]))
+                    self.addConstraints("{:4.4e} < {:s} < {:4.4e}".format(boundsDict[param][1], param,
+                                                                          boundsDict[param][0]))
                 if penalty is not None:
                     self.setConstraintPenaltyFactor(param, penalty)
             except ValueError:
-                raise UserWarning("Cannot set parameter {:s} for mbvg.  Valid choices are "
-                                  + "('A', 'MuX', 'MuY', 'SigX', 'SigY', 'SigP', 'Bg')".format(param))
+                raise UserWarning("Cannot set parameter {:s} for mbvg.  Valid choices are " +
+                                  "('A', 'MuX', 'MuY', 'SigX', 'SigY', 'SigP', 'Bg')".format(param))
 
     def function2D(self, t):
         """
@@ -188,8 +186,7 @@ class BivariateGaussian(IFunction1D):
         Bg = self.getParamValue(6)
 
         SigXY = SigX * SigY * SigP
-        Z = A * bivariate_normal(X, Y, sigmax=SigX, sigmay=SigY,
-                                 mux=MuX, muy=MuY, sigmaxy=SigXY)
+        Z = A * bivariate_normal(X, Y, sigmax=SigX, sigmay=SigY, mux=MuX, muy=MuY, sigmaxy=SigXY)
         Z += Bg
         return Z
 
@@ -207,8 +204,7 @@ class BivariateGaussian(IFunction1D):
         Bg = self.getParamValue(6)
 
         SigXY = SigX * SigY * SigP
-        Z = A * bivariate_normal(X, Y, sigmax=SigX, sigmay=SigY,
-                                 mux=MuX, muy=MuY, sigmaxy=SigXY)
+        Z = A * bivariate_normal(X, Y, sigmax=SigX, sigmay=SigY, mux=MuX, muy=MuY, sigmaxy=SigXY)
         Z += Bg
         return Z
 

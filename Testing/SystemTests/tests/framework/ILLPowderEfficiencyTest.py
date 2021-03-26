@@ -10,7 +10,6 @@ from mantid import config, mtd
 
 
 class ILLPowderEfficiencyTest(systemtesting.MantidSystemTest):
-
     def __init__(self):
         super(ILLPowderEfficiencyTest, self).__init__()
         self.setUp()
@@ -28,10 +27,8 @@ class ILLPowderEfficiencyTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
 
-        PowderILLEfficiency(CalibrationRun='967076.nxs',
-                            OutputWorkspace='calib',
-                            OutputResponseWorkspace='response')
-        GroupWorkspaces(InputWorkspaces=['calib','response'], OutputWorkspace='group')
+        PowderILLEfficiency(CalibrationRun='967076.nxs', OutputWorkspace='calib', OutputResponseWorkspace='response')
+        GroupWorkspaces(InputWorkspaces=['calib', 'response'], OutputWorkspace='group')
 
     def validate(self):
         self.tolerance = 0.0001
@@ -39,7 +36,6 @@ class ILLPowderEfficiencyTest(systemtesting.MantidSystemTest):
 
 
 class ILLPowderEfficiencyCycle203Test(systemtesting.MantidSystemTest):
-
     def __init__(self):
         super(ILLPowderEfficiencyCycle203Test, self).__init__()
         self.setUp()
@@ -58,7 +54,7 @@ class ILLPowderEfficiencyCycle203Test(systemtesting.MantidSystemTest):
                             OutputWorkspace='calib',
                             InterpolateOverlappingAngles=True,
                             OutputResponseWorkspace='response')
-        GroupWorkspaces(InputWorkspaces=['calib','response'], OutputWorkspace='group')
+        GroupWorkspaces(InputWorkspaces=['calib', 'response'], OutputWorkspace='group')
 
     def validate(self):
         self.tolerance = 0.0001

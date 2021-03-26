@@ -13,7 +13,6 @@ class SpaceGroupUnitCellTest(systemtesting.MantidSystemTest):
     '''
     This test checks that SpaceGroup.isAllowedUnitCell produces the expected result for each registered space group.
     '''
-
     def runTest(self):
         cells = self.getUnitCells()
         metric_compatibility = self.getMetricCompatibility(cells)
@@ -42,9 +41,10 @@ class SpaceGroupUnitCellTest(systemtesting.MantidSystemTest):
             is_allowed = sg.isAllowedUnitCell(cell)
             should_be_allowed = system in compatible_metrics
 
-            self.assertEqual(is_allowed, should_be_allowed,
-                             'Problem in space group {0}: UnitCell with {1} metric is {2}, should be {3}.'.format(
-                                 sg.getHMSymbol(), str(system), str(is_allowed), str(should_be_allowed)))
+            self.assertEqual(
+                is_allowed, should_be_allowed,
+                'Problem in space group {0}: UnitCell with {1} metric is {2}, should be {3}.'.format(
+                    sg.getHMSymbol(), str(system), str(is_allowed), str(should_be_allowed)))
 
     def getUnitCells(self):
         # Create a unit cell for each of the lattice systems in a dictionary
@@ -63,15 +63,17 @@ class SpaceGroupUnitCellTest(systemtesting.MantidSystemTest):
         # with triclinic symmetry, but the opposite is not true.
         return {
             PointGroup.LatticeSystem.Triclinic: list(cells.keys()),
-            PointGroup.LatticeSystem.Monoclinic: [PointGroup.LatticeSystem.Monoclinic,
-                                                  PointGroup.LatticeSystem.Orthorhombic,
-                                                  PointGroup.LatticeSystem.Tetragonal,
-                                                  PointGroup.LatticeSystem.Cubic],
-            PointGroup.LatticeSystem.Orthorhombic: [PointGroup.LatticeSystem.Orthorhombic,
-                                                    PointGroup.LatticeSystem.Tetragonal,
-                                                    PointGroup.LatticeSystem.Cubic],
-            PointGroup.LatticeSystem.Rhombohedral: [PointGroup.LatticeSystem.Rhombohedral,
-                                                    PointGroup.LatticeSystem.Cubic],
+            PointGroup.LatticeSystem.Monoclinic: [
+                PointGroup.LatticeSystem.Monoclinic, PointGroup.LatticeSystem.Orthorhombic,
+                PointGroup.LatticeSystem.Tetragonal, PointGroup.LatticeSystem.Cubic
+            ],
+            PointGroup.LatticeSystem.Orthorhombic: [
+                PointGroup.LatticeSystem.Orthorhombic, PointGroup.LatticeSystem.Tetragonal,
+                PointGroup.LatticeSystem.Cubic
+            ],
+            PointGroup.LatticeSystem.Rhombohedral: [
+                PointGroup.LatticeSystem.Rhombohedral, PointGroup.LatticeSystem.Cubic
+            ],
             PointGroup.LatticeSystem.Hexagonal: [PointGroup.LatticeSystem.Hexagonal],
             PointGroup.LatticeSystem.Tetragonal: [PointGroup.LatticeSystem.Tetragonal, PointGroup.LatticeSystem.Cubic],
             PointGroup.LatticeSystem.Cubic: [PointGroup.LatticeSystem.Cubic]

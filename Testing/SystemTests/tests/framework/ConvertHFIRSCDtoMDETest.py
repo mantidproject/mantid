@@ -21,8 +21,10 @@ class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
 
         self.assertEqual(ConvertHFIRSCDtoMDETest_Q.getNEvents(), 18022177)
 
-        ConvertHFIRSCDtoMDETest_peaks = FindPeaksMD(InputWorkspace=ConvertHFIRSCDtoMDETest_Q, PeakDistanceThreshold=2.2,
-                                                    CalculateGoniometerForCW=True, Wavelength=1.488)
+        ConvertHFIRSCDtoMDETest_peaks = FindPeaksMD(InputWorkspace=ConvertHFIRSCDtoMDETest_Q,
+                                                    PeakDistanceThreshold=2.2,
+                                                    CalculateGoniometerForCW=True,
+                                                    Wavelength=1.488)
 
         self.assertEqual(ConvertHFIRSCDtoMDETest_peaks.getNumberPeaks(), 14)
 
@@ -35,7 +37,8 @@ class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
         self.assertDelta(peak.getWavelength(), 1.488, 1e-5)
 
         # new method using multiple goniometers, compare peak q_sample to old method
-        ConvertHFIRSCDtoMDETest_peaks2 = FindPeaksMD(InputWorkspace=ConvertHFIRSCDtoMDETest_Q, PeakDistanceThreshold=2.2)
+        ConvertHFIRSCDtoMDETest_peaks2 = FindPeaksMD(InputWorkspace=ConvertHFIRSCDtoMDETest_Q,
+                                                     PeakDistanceThreshold=2.2)
 
         self.assertEqual(ConvertHFIRSCDtoMDETest_peaks2.getNumberPeaks(), 14)
 
@@ -88,7 +91,8 @@ class ConvertHFIRSCDtoMDE_HB3A_Test(systemtesting.MantidSystemTest):
 
         self.assertEqual(ConvertHFIRSCDtoMDETest_peaks2.getNumberPeaks(), 1)
         np.testing.assert_allclose(ConvertHFIRSCDtoMDETest_peaks2.getPeak(0).getQSampleFrame(),
-                                   [-0.417683, 1.792265, 2.238072], rtol=1e-3)
+                                   [-0.417683, 1.792265, 2.238072],
+                                   rtol=1e-3)
 
     def validate(self):
         results = 'ConvertHFIRSCDtoMDETest_Q'

@@ -66,12 +66,14 @@ class ReductionSingleton(object):
         """ Delegate access to implementation """
         return setattr(self.__instance, attr, value)
 
+
 ## Utilities
 
 
 def get_property_manager(name):
     # prop_mng = mantid.PropertyManagerDataService.retrieve(name)
     pass
+
 
 ## List of user commands ######################################################
 

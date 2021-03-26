@@ -86,8 +86,7 @@ class MainWindow(QMainWindow):
         try:
             import mantid
             #register startup
-            mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface,
-                                                     "TofConverter", False)
+            mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "TofConverter", False)
         except ImportError:
             pass
 
@@ -119,9 +118,8 @@ class MainWindow(QMainWindow):
             else:
                 self.Theta = -1.0
 
-            self.output = TofConverter.convertUnits.doConversion(self.ui.InputVal.text(), inOption,
-                                                                 outOption, self.Theta,
-                                                                 self.flightpath)
+            self.output = TofConverter.convertUnits.doConversion(self.ui.InputVal.text(), inOption, outOption,
+                                                                 self.Theta, self.flightpath)
 
             self.ui.convertedVal.clear()
             self.ui.convertedVal.insert(str(self.output))

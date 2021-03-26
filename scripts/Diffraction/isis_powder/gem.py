@@ -14,12 +14,14 @@ from isis_powder.routines import absorb_corrections, common, instrument_settings
 class Gem(AbstractInst):
     def __init__(self, **kwargs):
         self._inst_settings = instrument_settings.InstrumentSettings(
-            param_map=gem_param_mapping.attr_mapping, adv_conf_dict=gem_advanced_config.get_all_adv_variables(),
+            param_map=gem_param_mapping.attr_mapping,
+            adv_conf_dict=gem_advanced_config.get_all_adv_variables(),
             kwargs=kwargs)
 
         super(Gem, self).__init__(user_name=self._inst_settings.user_name,
                                   calibration_dir=self._inst_settings.calibration_dir,
-                                  output_dir=self._inst_settings.output_dir, inst_prefix="GEM")
+                                  output_dir=self._inst_settings.output_dir,
+                                  inst_prefix="GEM")
 
         self._cached_run_details = {}
         self._sample_details = None
@@ -30,9 +32,9 @@ class Gem(AbstractInst):
         self._inst_settings.update_attributes(kwargs=kwargs)
         self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
 
-        return self._focus(
-            run_number_string=self._inst_settings.run_number, do_van_normalisation=self._inst_settings.do_van_norm,
-            do_absorb_corrections=self._inst_settings.do_absorb_corrections)
+        return self._focus(run_number_string=self._inst_settings.run_number,
+                           do_van_normalisation=self._inst_settings.do_van_norm,
+                           do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def create_vanadium(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
@@ -47,15 +49,19 @@ class Gem(AbstractInst):
         self._inst_settings.update_attributes(advanced_config=gem_advanced_config.get_calibration_variables())
         run_details = self._get_run_details(self._inst_settings.run_number)
 
-        cross_correlate_params = {"ReferenceSpectra": self._inst_settings.reference_spectra,
-                                  "WorkspaceIndexMin": self._inst_settings.cross_corr_ws_min,
-                                  "WorkspaceIndexMax": self._inst_settings.cross_corr_ws_max,
-                                  "XMin": self._inst_settings.cross_corr_x_min,
-                                  "XMax": self._inst_settings.cross_corr_x_max}
-        get_detector_offsets_params = {"DReference": self._inst_settings.d_reference,
-                                       "Step": self._inst_settings.get_det_offsets_step,
-                                       "XMin": self._inst_settings.get_det_offsets_x_min,
-                                       "XMax": self._inst_settings.get_det_offsets_x_max}
+        cross_correlate_params = {
+            "ReferenceSpectra": self._inst_settings.reference_spectra,
+            "WorkspaceIndexMin": self._inst_settings.cross_corr_ws_min,
+            "WorkspaceIndexMax": self._inst_settings.cross_corr_ws_max,
+            "XMin": self._inst_settings.cross_corr_x_min,
+            "XMax": self._inst_settings.cross_corr_x_max
+        }
+        get_detector_offsets_params = {
+            "DReference": self._inst_settings.d_reference,
+            "Step": self._inst_settings.get_det_offsets_step,
+            "XMin": self._inst_settings.get_det_offsets_x_min,
+            "XMax": self._inst_settings.get_det_offsets_x_max
+        }
         if self._inst_settings.cal_adjust:
             return gem_calibration_algs.adjust_calibration(calibration_runs=self._inst_settings.run_number,
                                                            instrument=self,
@@ -80,9 +86,10 @@ class Gem(AbstractInst):
     def set_sample_details(self, **kwargs):
         kwarg_name = "sample"
         sample_details_obj = common.dictionary_key_helper(
-            dictionary=kwargs, key=kwarg_name,
+            dictionary=kwargs,
+            key=kwarg_name,
             exception_msg="The argument containing sample details was not found. Please"
-                          " set the following argument: " + kwarg_name)
+            " set the following argument: " + kwarg_name)
         self._sample_details = sample_details_obj
 
     def should_subtract_empty_inst(self):
@@ -96,8 +103,9 @@ class Gem(AbstractInst):
         if run_number_string_key in self._cached_run_details:
             return self._cached_run_details[run_number_string_key]
 
-        self._cached_run_details[run_number_string_key] = gem_algs.get_run_details(
-            run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
+        self._cached_run_details[run_number_string_key] = gem_algs.get_run_details(run_number_string=run_number_string,
+                                                                                   inst_settings=self._inst_settings,
+                                                                                   is_vanadium_run=self._is_vanadium)
         return self._cached_run_details[run_number_string_key]
 
     def _generate_output_file_name(self, run_number_string):
@@ -183,12 +191,15 @@ class Gem(AbstractInst):
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         if self._is_vanadium:
             return gem_algs.calculate_van_absorb_corrections(
-                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
+                ws_to_correct=ws_to_correct,
+                multiple_scattering=self._inst_settings.multiple_scattering,
                 is_vanadium=self._is_vanadium)
         else:
             return absorb_corrections.run_cylinder_absorb_corrections(
-                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
-                sample_details_obj=self._sample_details, is_vanadium=self._is_vanadium)
+                ws_to_correct=ws_to_correct,
+                multiple_scattering=self._inst_settings.multiple_scattering,
+                sample_details_obj=self._sample_details,
+                is_vanadium=self._is_vanadium)
 
     def _crop_banks_to_user_tof(self, focused_banks):
         return common.crop_banks_using_crop_list(focused_banks, self._inst_settings.focused_cropping_values)
@@ -221,8 +232,7 @@ class Gem(AbstractInst):
         adv_config_variables = gem_advanced_config.get_mode_specific_variables(mode, save_all)
         if self.should_subtract_empty_inst() is None:
             adv_config_variables.update({"subtract_empty_instrument": True})
-        self._inst_settings.update_attributes(advanced_config=adv_config_variables,
-                                              suppress_warnings=True)
+        self._inst_settings.update_attributes(advanced_config=adv_config_variables, suppress_warnings=True)
 
 
 def _gem_generate_inst_name(run_number):

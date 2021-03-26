@@ -25,8 +25,7 @@ def get_pixel_from_coordinate(x, y, workspace):
     """
     nx_pixels, ny_pixels, pixel_size_x, pixel_size_y = _get_pixel_info(workspace)
 
-    return [-x/pixel_size_x*1000.0 + nx_pixels/2.0-0.5,
-            y/pixel_size_y*1000.0 + ny_pixels/2.0-0.5]
+    return [-x / pixel_size_x * 1000.0 + nx_pixels / 2.0 - 0.5, y / pixel_size_y * 1000.0 + ny_pixels / 2.0 - 0.5]
 
 
 def get_coordinate_from_pixel(x, y, workspace):
@@ -43,8 +42,7 @@ def get_coordinate_from_pixel(x, y, workspace):
     """
     nx_pixels, ny_pixels, pixel_size_x, pixel_size_y = _get_pixel_info(workspace)
 
-    return [(nx_pixels/2.0-0.5-x) * pixel_size_x/1000.0,
-            (y-ny_pixels/2.0+0.5) * pixel_size_y/1000.0]
+    return [(nx_pixels / 2.0 - 0.5 - x) * pixel_size_x / 1000.0, (y - ny_pixels / 2.0 + 0.5) * pixel_size_y / 1000.0]
 
 
 def get_masked_pixels(nx_low, nx_high, ny_low, ny_high, workspace):
@@ -57,20 +55,20 @@ def get_masked_pixels(nx_low, nx_high, ny_low, ny_high, workspace):
         @param workspace: the pixel number and size info will be taken from the workspace
     """
     nx_pixels, ny_pixels, pixel_size_x, pixel_size_y = _get_pixel_info(workspace)
-    if nx_low<0 or nx_high<0 or ny_low<0 or ny_high<0:
+    if nx_low < 0 or nx_high < 0 or ny_low < 0 or ny_high < 0:
         raise RuntimeError("Pixel edges should be greater than zero")
 
     masked_x = list(range(0, nx_low))
-    masked_x.extend(list(range(nx_pixels-nx_high, nx_pixels)))
+    masked_x.extend(list(range(nx_pixels - nx_high, nx_pixels)))
 
     masked_y = list(range(0, ny_low))
-    masked_y.extend(list(range(ny_pixels-ny_high, ny_pixels)))
+    masked_y.extend(list(range(ny_pixels - ny_high, ny_pixels)))
 
     masked_pts = []
     for y in masked_y:
-        masked_pts.extend([ [x,y] for x in range(nx_pixels) ])
+        masked_pts.extend([[x, y] for x in range(nx_pixels)])
     for x in masked_x:
-        masked_pts.extend([ [x,y] for y in range(ny_low, ny_pixels-ny_high) ])
+        masked_pts.extend([[x, y] for y in range(ny_low, ny_pixels - ny_high)])
 
     return masked_pts
 
@@ -82,4 +80,4 @@ def get_detector_from_pixel(pixel_list, workspace):
         @param workspace: the pixel number and size info will be taken from the workspace
     """
     nx_pixels, ny_pixels, pixel_size_x, pixel_size_y = _get_pixel_info(workspace)
-    return [ ny_pixels*p[0] + p[1] for p in pixel_list ]
+    return [ny_pixels * p[0] + p[1] for p in pixel_list]

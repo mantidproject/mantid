@@ -23,7 +23,6 @@ class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
     includes an example of a peak whose center is predicted to fall between two
     tubes.
     """
-
     def requiredFiles(self):
         return ["WISH00038237.raw", "WISHPredictedSingleCrystalPeaks.nxs"]
 
@@ -40,17 +39,14 @@ class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
     def runTest(self):
         ws = LoadRaw(Filename='WISH00038237.raw', OutputWorkspace='38237')
         ws = ConvertUnits(ws, 'dSpacing', OutputWorkspace='38237')
-        UB = np.array([[-0.00601763,  0.07397297,  0.05865706],
-                       [ 0.05373321,  0.050198,   -0.05651455],
-                       [-0.07822144,  0.0295911,  -0.04489172]])
+        UB = np.array([[-0.00601763, 0.07397297, 0.05865706], [0.05373321, 0.050198, -0.05651455],
+                       [-0.07822144, 0.0295911, -0.04489172]])
 
         SetUB(ws, UB=UB)
 
-        self._peaks = PredictPeaks(ws, WavelengthMin=0.1, WavelengthMax=100,
-                                   OutputWorkspace='peaks')
+        self._peaks = PredictPeaks(ws, WavelengthMin=0.1, WavelengthMax=100, OutputWorkspace='peaks')
         # We specifically want to check peak -5 -1 -7 exists, so filter for it
-        self._filtered = FilterPeaks(self._peaks, "h^2+k^2+l^2", 75, '=',
-                                     OutputWorkspace='filtered')
+        self._filtered = FilterPeaks(self._peaks, "h^2+k^2+l^2", 75, '=', OutputWorkspace='filtered')
 
         SaveIsawPeaks(self._peaks, Filename='WISHSXReductionPeaksTest.peaks')
 

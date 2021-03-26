@@ -7,8 +7,8 @@
 import sys
 # Check whether Mantid is available
 try:
-    from mantid.api import AnalysisDataService # noqa
-    from mantid.kernel import Logger # noqa
+    from mantid.api import AnalysisDataService  # noqa
+    from mantid.kernel import Logger  # noqa
     import mantid.simpleapi as api
     HAS_MANTID = True
 except:

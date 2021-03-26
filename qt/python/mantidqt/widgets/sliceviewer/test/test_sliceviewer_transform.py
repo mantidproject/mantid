@@ -20,23 +20,20 @@ class TransformTest(unittest.TestCase):
 
         self.assertAlmostEqual(transform.angle, 0.5 * np.pi)
 
-    def test_create_nonorthogonal_transform_with_orthogonal_lattice_and_nonorthogonal_projections(
-            self):
+    def test_create_nonorthogonal_transform_with_orthogonal_lattice_and_nonorthogonal_projections(self):
         lattice = OrientedLattice()  # default angle=90 degrees
         transform = NonOrthogonalTransform.from_lattice(lattice, x_proj=(1, 0, 0), y_proj=(1, 1, 0))
 
         self.assertAlmostEqual(transform.angle, 0.25 * np.pi)
 
-    def test_create_nonorthogonal_transform_with_nonorthogonal_lattice_and_orthogonal_projections(
-            self):
+    def test_create_nonorthogonal_transform_with_nonorthogonal_lattice_and_orthogonal_projections(self):
         lattice = OrientedLattice(1, 1, 2, 90, 90, 120.)
         x_proj, y_proj = (1, 0, 0), (0, 1, 0)
         transform = NonOrthogonalTransform.from_lattice(lattice, x_proj, y_proj)
 
         self.assertAlmostEqual(transform.angle, np.radians(lattice.recAngle(*x_proj, *y_proj)))
 
-    def test_create_nonorthogonal_transform_with_nonorthogonal_lattice_and_nonorthogonal_projections(
-            self):
+    def test_create_nonorthogonal_transform_with_nonorthogonal_lattice_and_nonorthogonal_projections(self):
         lattice = OrientedLattice(1, 1, 2, 90, 90, 120.)
         x_proj, y_proj = (1, 0, 0), (1, 1, 0)
         transform = NonOrthogonalTransform.from_lattice(lattice, x_proj, y_proj)

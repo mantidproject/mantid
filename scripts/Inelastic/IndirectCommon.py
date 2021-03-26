@@ -438,8 +438,12 @@ def getInstrumentParameter(ws, param_name):
 
     # Create a map of type parameters to functions. This is so we avoid writing lots of
     # if statements because there's no way to dynamically get the type.
-    func_map = {'double': inst.getNumberParameter, 'string': inst.getStringParameter,
-                'int': inst.getIntParameter, 'bool': inst.getBoolParameter}
+    func_map = {
+        'double': inst.getNumberParameter,
+        'string': inst.getStringParameter,
+        'int': inst.getIntParameter,
+        'bool': inst.getBoolParameter
+    }
 
     if inst.hasParameter(param_name):
         param_type = inst.getParameterType(param_name)
@@ -467,7 +471,10 @@ def convertToElasticQ(input_ws, output_ws=None):
     axis = s_api.mtd[input_ws].getAxis(1)
     if axis.isSpectra():
         e_fixed = getEfixed(input_ws)
-        s_api.ConvertSpectrumAxis(input_ws, Target='ElasticQ', EMode='Indirect', EFixed=e_fixed,
+        s_api.ConvertSpectrumAxis(input_ws,
+                                  Target='ElasticQ',
+                                  EMode='Indirect',
+                                  EFixed=e_fixed,
                                   OutputWorkspace=output_ws)
 
     elif axis.isNumeric():

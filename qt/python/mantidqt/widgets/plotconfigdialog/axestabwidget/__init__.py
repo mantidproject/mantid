@@ -15,7 +15,6 @@ class AxProperties(dict):
     An object to store the properties that can be set in the Axes
     Tab. It can be constructed from a view or an Axes object.
     """
-
     def __init__(self, props):
         self.update(props)
 

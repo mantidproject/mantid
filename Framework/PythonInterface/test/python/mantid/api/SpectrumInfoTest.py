@@ -17,7 +17,7 @@ class SpectrumInfoTest(unittest.TestCase):
     def setUp(self):
         """ Set up code. """
         if self.__class__._ws is None:
-            self.__class__._ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(3, 1, False) # no monitors
+            self.__class__._ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(3, 1, False)  # no monitors
             self.__class__._ws.getSpectrum(0).clearDetectorIDs()
 
     """
@@ -131,6 +131,7 @@ class SpectrumInfoTest(unittest.TestCase):
     Iteration
     ---------------
     """
+
     def test_basic_iteration(self):
         info = self._ws.spectrumInfo()
         expected_iterations = len(info)
@@ -141,7 +142,7 @@ class SpectrumInfoTest(unittest.TestCase):
         info = self._ws.spectrumInfo()
         # check no monitors in instrument
         it = iter(info)
-        next(it) # skip first as detectors cleared
+        next(it)  # skip first as detectors cleared
         for item in it:
             self.assertFalse(item.isMonitor)
 
@@ -149,7 +150,7 @@ class SpectrumInfoTest(unittest.TestCase):
         info = self._ws.spectrumInfo()
         # nothing should be masked
         it = iter(info)
-        next(it) # skip first as detectors cleared
+        next(it)  # skip first as detectors cleared
         for item in it:
             self.assertFalse(item.isMasked)
 
@@ -157,7 +158,7 @@ class SpectrumInfoTest(unittest.TestCase):
         info = self._ws.spectrumInfo()
         # nothing should be masked
         it = iter(info)
-        next(it) # skip first as detectors cleared
+        next(it)  # skip first as detectors cleared
         for item in it:
             # mask and check
             item.setMasked(True)
@@ -167,13 +168,13 @@ class SpectrumInfoTest(unittest.TestCase):
         info = self._ws.spectrumInfo()
         lastY = None
         it = iter(info)
-        next(it) # skip first as detectors cleared
-        for i,item in enumerate(it):
+        next(it)  # skip first as detectors cleared
+        for i, item in enumerate(it):
             pos = item.position
             # See test helper for position construction
             self.assertAlmostEquals(pos.X(), 0)
             self.assertAlmostEquals(pos.Z(), 5)
-            if(lastY):
+            if (lastY):
                 self.assertGreater(pos.Y(), lastY)
             lastY = pos.Y()
 
@@ -351,7 +352,7 @@ class SpectrumInfoTest(unittest.TestCase):
         spectrumDefinition = info.getSpectrumDefinition(0)
         # Check equality with equals() and == to make sure same result is given
         self.assertTrue(spectrumDefinition.equals(spectrumDefinition))
-        self.assertEqual(spectrumDefinition,  spectrumDefinition)
+        self.assertEqual(spectrumDefinition, spectrumDefinition)
 
     def test_spectrumDefintionNotEquals(self):
         """ Check the equality of the SpectrumDefintions """
@@ -361,7 +362,7 @@ class SpectrumInfoTest(unittest.TestCase):
         # Check inequality with not (by negating equals())
         # and != to make sure same result is given
         self.assertTrue(not spectrumDefinitionOne.equals(spectrumDefinitionTwo))
-        self.assertNotEqual(spectrumDefinitionOne,  spectrumDefinitionTwo)
+        self.assertNotEqual(spectrumDefinitionOne, spectrumDefinitionTwo)
 
     def test_spectrumDefintionGet(self):
         """ See if indexing works """

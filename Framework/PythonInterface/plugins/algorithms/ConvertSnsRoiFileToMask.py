@@ -36,7 +36,7 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         return "Inelastic\\Utility"
 
     def seeAlso(self):
-        return [ "MaskDetectors" ]
+        return ["MaskDetectors"]
 
     def name(self):
         """
@@ -51,23 +51,19 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         """
         Set the algorithm properties.
         """
-        self.declareProperty(api.FileProperty(name="SnsRoiFile",
-                                              defaultValue="",
-                                              action=api.FileAction.Load,
-                                              extensions=EXTENSIONS),
-                             "SNS reduction ROI file to load.")
+        self.declareProperty(
+            api.FileProperty(name="SnsRoiFile", defaultValue="", action=api.FileAction.Load, extensions=EXTENSIONS),
+            "SNS reduction ROI file to load.")
         allowedInstruments = kernel.StringListValidator(INSTRUMENTS)
-        self.declareProperty("Instrument", "",
-                             validator=allowedInstruments,
-                             doc="One of the supported instruments")
-        self.declareProperty("OutputFilePrefix", "",
-                             "Overrides the default filename for the output "
-                             +"file (Optional). Default is <inst_name>_Mask.")
-        self.declareProperty(api.FileProperty(name="OutputDirectory",
-                                              defaultValue=config['defaultsave.directory'],
-                                              action=api.FileAction.Directory),
-                             "Directory to save mask file."
-                             +" Default is current Mantid save directory.")
+        self.declareProperty("Instrument", "", validator=allowedInstruments, doc="One of the supported instruments")
+        self.declareProperty(
+            "OutputFilePrefix", "",
+            "Overrides the default filename for the output " + "file (Optional). Default is <inst_name>_Mask.")
+        self.declareProperty(
+            api.FileProperty(name="OutputDirectory",
+                             defaultValue=config['defaultsave.directory'],
+                             action=api.FileAction.Directory),
+            "Directory to save mask file." + " Default is current Mantid save directory.")
 
     def PyExec(self):
         """
@@ -106,8 +102,7 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         fh.close()
 
         # Load and invert mask
-        mask_ws = msapi.LoadMask(InputFile=temp_file,
-                                 Instrument=self._instName)
+        mask_ws = msapi.LoadMask(InputFile=temp_file, Instrument=self._instName)
         mask_ws = msapi.InvertMask(mask_ws)
 
         # Clean up temporary file
@@ -118,7 +113,7 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
             self._filePrefix = self._instName + "_Mask"
 
         output_file = os.path.join(self._outputDir, self._filePrefix)
-        msapi.SaveMask(mask_ws, OutputFile=output_file+".xml")
+        msapi.SaveMask(mask_ws, OutputFile=output_file + ".xml")
 
     def _get_id(self, idx):
         """
@@ -132,7 +127,7 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
 
         parts = idx.split('_')
         bankid = int(parts[0].split('bank')[-1])
-        return int(parts[2]) + det_size[1] * (int(parts[1]) + det_size[0] * (bankid-1))
+        return int(parts[2]) + det_size[1] * (int(parts[1]) + det_size[0] * (bankid - 1))
 
 
 # Register algorithm with Mantid.

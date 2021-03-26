@@ -41,7 +41,7 @@ class PowderILLParameterScan(PythonAlgorithm):
         return 'Performs powder diffraction data reduction for ILL instrument D20 and D1B.'
 
     def seeAlso(self):
-        return [ "PowderILLDetectorScan", "PowderILLEfficiency"]
+        return ["PowderILLDetectorScan", "PowderILLEfficiency"]
 
     def name(self):
         return "PowderILLParameterScan"
@@ -56,15 +56,12 @@ class PowderILLParameterScan(PythonAlgorithm):
 
     def PyInit(self):
 
-        self.declareProperty(MultipleFileProperty('Run', extensions=['nxs']),
-                             doc='File path of run(s).')
+        self.declareProperty(MultipleFileProperty('Run', extensions=['nxs']), doc='File path of run(s).')
 
-        self.declareProperty(FileProperty('CalibrationFile', '',
-                                          action=FileAction.OptionalLoad, extensions=['nxs']),
+        self.declareProperty(FileProperty('CalibrationFile', '', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the detector efficiencies.')
 
-        self.declareProperty(FileProperty('ROCCorrectionFile', '',
-                                          action=FileAction.OptionalLoad, extensions=['nxs']),
+        self.declareProperty(FileProperty('ROCCorrectionFile', '', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the radial oscillating collimator (ROC) corrections.')
 
         self.declareProperty(name='NormaliseTo',
@@ -88,14 +85,18 @@ class PowderILLParameterScan(PythonAlgorithm):
                              defaultValue=False,
                              doc='Whether or not to sort the scanning observable axis.')
 
-        self.declareProperty(name='ScanAxisBinWidth', defaultValue=0., validator=FloatBoundedValidator(lower=0.),
+        self.declareProperty(name='ScanAxisBinWidth',
+                             defaultValue=0.,
+                             validator=FloatBoundedValidator(lower=0.),
                              doc='Rebin the observable axis to this width. Default is to not rebin.')
 
-        self.declareProperty(name='CropNegative2Theta', defaultValue=True,
+        self.declareProperty(name='CropNegative2Theta',
+                             defaultValue=True,
                              doc='Whether or not to crop out the bins corresponding to negative scattering angle.')
 
-        self.declareProperty(name='ZeroCountingCells', defaultValue='Interpolate',
-                             validator=StringListValidator(['Crop','Interpolate','Leave']),
+        self.declareProperty(name='ZeroCountingCells',
+                             defaultValue='Interpolate',
+                             validator=StringListValidator(['Crop', 'Interpolate', 'Leave']),
                              doc='Crop out the zero counting cells or interpolate the counts from the neighbours.')
 
         self.declareProperty(name='Unit',
@@ -103,8 +104,7 @@ class PowderILLParameterScan(PythonAlgorithm):
                              validator=StringListValidator(['ScatteringAngle', 'MomentumTransfer', 'dSpacing']),
                              doc='The unit of the reduced diffractogram.')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                                                     direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace containing the reduced data.')
 
     def PyExec(self):
@@ -117,9 +117,7 @@ class PowderILLParameterScan(PythonAlgorithm):
         mon_ws = self._hide('mon')
 
         self._progress.report('Loading the data')
-        LoadAndMerge(Filename=self.getPropertyValue('Run'),
-                     LoaderName='LoadILLDiffraction',
-                     OutputWorkspace=temp_ws)
+        LoadAndMerge(Filename=self.getPropertyValue('Run'), LoaderName='LoadILLDiffraction', OutputWorkspace=temp_ws)
 
         self._progress.report('Normalising and merging')
         if self._normalise_option == 'Time':
@@ -127,10 +125,10 @@ class PowderILLParameterScan(PythonAlgorithm):
                 for ws in mtd[temp_ws]:
                     # normalise to time here, before joining, since the duration is in sample logs
                     duration = ws.getRun().getLogData('duration').value
-                    Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=1./duration)
+                    Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1. / duration)
             else:
                 duration = mtd[temp_ws].getRun().getLogData('duration').value
-                Scale(InputWorkspace=temp_ws,OutputWorkspace=temp_ws,Factor=1./duration)
+                Scale(InputWorkspace=temp_ws, OutputWorkspace=temp_ws, Factor=1. / duration)
 
         try:
             ConjoinXRuns(InputWorkspaces=temp_ws, SampleLogAsXAxis=self._observable, OutputWorkspace=joined_ws)
@@ -223,7 +221,7 @@ class PowderILLParameterScan(PythonAlgorithm):
         size = mtd[ws].blocksize()
         for spectrum in range(mtd[ws].getNumberHistograms()):
             counts = mtd[ws].readY(spectrum)
-            if np.count_nonzero(counts) < size/5:
+            if np.count_nonzero(counts) < size / 5:
                 self._zero_cells.append(spectrum)
         self._zero_cells.sort()
         self.log().information('Found zero counting cells at indices: ' + str(self._zero_cells))
@@ -250,17 +248,17 @@ class PowderILLParameterScan(PythonAlgorithm):
             next_cell = cell + 1
 
             while prev_cell in self._zero_cells:
-                prev_cell-=1
+                prev_cell -= 1
             while next_cell in self._zero_cells:
-                next_cell+=1
+                next_cell += 1
 
             if prev_cell == -1:
-                self.log().notice('Unable to interpolate for cell #'+str(cell)
-                                  + ': no non-zero neighbour cell was found on the left side. Bin will be cropped.')
+                self.log().notice('Unable to interpolate for cell #' + str(cell) +
+                                  ': no non-zero neighbour cell was found on the left side. Bin will be cropped.')
                 unable_to_interpolate.append(cell)
             if next_cell == mtd[ws].getNumberHistograms():
-                self.log().notice('Unable to interpolate for cell #'+str(cell)
-                                  + ': no non-zero neighbour cell was found on the right side. Bin will be cropped.')
+                self.log().notice('Unable to interpolate for cell #' + str(cell) +
+                                  ': no non-zero neighbour cell was found on the right side. Bin will be cropped.')
                 unable_to_interpolate.append(cell)
 
             if prev_cell >= 0 and next_cell < mtd[ws].getNumberHistograms():
@@ -274,8 +272,8 @@ class PowderILLParameterScan(PythonAlgorithm):
                 coefficient = (theta - theta_prev) / (theta_next - theta_prev)
                 counts = counts_prev + coefficient * (counts_next - counts_prev)
                 errors = errors_prev + coefficient * (errors_next - errors_prev)
-                mtd[ws].setY(cell,counts)
-                mtd[ws].setE(cell,errors)
+                mtd[ws].setY(cell, counts)
+                mtd[ws].setE(cell, errors)
 
         self._crop_zero_cells(ws, unable_to_interpolate)
 
@@ -305,13 +303,13 @@ class PowderILLParameterScan(PythonAlgorithm):
         index = 0
         while index < len(self._region_of_interest):
             start = self._region_of_interest[index]
-            end = self._region_of_interest[index+1]
+            end = self._region_of_interest[index + 1]
             start_index = np.argwhere(axis > start)
             end_index = np.argwhere(axis < end)
-            result += str(start_index[0][0])+'-'+str(end_index[-1][0])
+            result += str(start_index[0][0]) + '-' + str(end_index[-1][0])
             result += ','
             index += 2
-        self.log().information('ROI summing pattern is '+result[:-1])
+        self.log().information('ROI summing pattern is ' + result[:-1])
         return result[:-1]
 
     def _group_spectra(self, ws):
@@ -327,10 +325,12 @@ class PowderILLParameterScan(PythonAlgorithm):
         while start_index < len(axis):
             end = axis[start_index] + self._rebin_width
             end_index = np.argwhere(axis < end)[-1][0]
-            SumSpectra(InputWorkspace=ws, OutputWorkspace=name,
-                       StartWorkspaceIndex=int(start_index), EndWorkspaceIndex=int(end_index))
+            SumSpectra(InputWorkspace=ws,
+                       OutputWorkspace=name,
+                       StartWorkspaceIndex=int(start_index),
+                       EndWorkspaceIndex=int(end_index))
             count = end_index - start_index + 1
-            Scale(InputWorkspace=name, OutputWorkspace=name, Factor=1./count)
+            Scale(InputWorkspace=name, OutputWorkspace=name, Factor=1. / count)
             new_axis.append(np.sum(axis[start_index:end_index + 1]) / count)
             if name != grouped:
                 AppendSpectra(InputWorkspace1=grouped, InputWorkspace2=name, OutputWorkspace=grouped)

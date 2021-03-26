@@ -34,11 +34,10 @@ def get_subPlot(name):
     subplot.addLine(label1, line1, ws1, 2)
     return subplot, ws1
 
-@unittest.skipIf(lambda: sys.platform=='win32'(),
-                 "Test segfaults on Windows and code will be removed soon")
+
+@unittest.skipIf(lambda: sys.platform == 'win32' (), "Test segfaults on Windows and code will be removed soon")
 @start_qapplication
 class PlottingViewHelperFunctionTests(unittest.TestCase):
-
     def setUp(self):
         self.view = PlotView()
         self.mock_func = mock.Mock(return_value=True)
@@ -54,8 +53,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
 
         self.view.figure = mock.Mock()
         self.view.figure.tight_layout = mock.Mock()
-        self.view.figure.add_subplot = mock.Mock(
-            return_value=self.plots_return_value)
+        self.view.figure.add_subplot = mock.Mock(return_value=self.plots_return_value)
         self.view.canvas = mock.Mock()
         self.view.canvas.draw = mock.Mock()
 
@@ -69,17 +67,14 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
 
         self.mock_grid_pos = mock.Mock()
         self.view.current_grid = mock.Mock()
-        self.view.current_grid.__getitem__ = mock.Mock(
-            return_value=self.mock_grid_pos)
+        self.view.current_grid.__getitem__ = mock.Mock(return_value=self.mock_grid_pos)
         self.mock_grid_pos.get_position = mock.Mock(return_value=True)
 
         self.view.gridspecs = mock.Mock()
-        self.view.gridspecs.__getitem__ = mock.Mock(
-            return_value=self.view.current_grid)
+        self.view.gridspecs.__getitem__ = mock.Mock(return_value=self.view.current_grid)
 
         self.view.plot_selector = mock.Mock()
-        self.view.plot_selector.currentText = mock.Mock(
-            return_value=self.plot_name)
+        self.view.plot_selector.currentText = mock.Mock(return_value=self.plot_name)
         self.view.plot_selector.clear = mock.Mock()
         self.view.plot_selector.addItems = mock.Mock()
 
@@ -108,8 +103,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
     def test_silent_checkbox_check(self):
         test_state = mock.Mock()
         self.view._silent_checkbox_check(test_state)
-        self.view.errors.blockSignals.assert_has_calls(
-            [mock.call(True), mock.call(False)])
+        self.view.errors.blockSignals.assert_has_calls([mock.call(True), mock.call(False)])
         self.view.errors.setChecked.assert_called_once_with(test_state)
 
     def test_get_current_plot_name(self):
@@ -118,10 +112,8 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
     def _common_set_plot_bounds(self, result):
         self.view._silent_checkbox_check = mock.Mock()
         self.view._set_plot_bounds(self.plot_name, self.mock_plot)
-        self.view.x_axis_changer.set_bounds.assert_called_once_with(
-            self.mock_plot.get_xlim())
-        self.view.y_axis_changer.set_bounds.assert_called_once_with(
-            self.mock_plot.get_ylim())
+        self.view.x_axis_changer.set_bounds.assert_called_once_with(self.mock_plot.get_xlim())
+        self.view.y_axis_changer.set_bounds.assert_called_once_with(self.mock_plot.get_ylim())
         self.view._silent_checkbox_check.assert_called_once_with(result)
 
     def test_set_plot_bounds_in_errors_list(self):
@@ -137,8 +129,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self.view.plots = {self.plot_name: self.mock_plot}
         self.view._set_bounds(self.plot_name)
         self.view.get_subplot.assert_called_once_with(self.plot_name)
-        self.view._set_plot_bounds.assert_called_once_with(
-            self.plot_name, self.mock_plot)
+        self.view._set_plot_bounds.assert_called_once_with(self.plot_name, self.mock_plot)
 
     def common_set_bounds_else_statement(self, plot_name):
         self.view._set_bounds(plot_name)
@@ -152,9 +143,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self.common_set_bounds_else_statement("")
 
     def test_get_current_plots(self):
-        self.assertEqual(
-            self.view._get_current_plots(),
-            [self.plots_return_value])
+        self.assertEqual(self.view._get_current_plots(), [self.plots_return_value])
 
     def test_get_current_plots_raises_key_error(self):
         self.view.plots = {}
@@ -164,14 +153,12 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
     def test_update_x_axis_lower(self):
         self.view._update_x_axis = mock.Mock()
         self.view._update_x_axis_lower(self.mock_bounds)
-        self.view._update_x_axis.assert_called_once_with(
-            {"left": self.mock_bounds})
+        self.view._update_x_axis.assert_called_once_with({"left": self.mock_bounds})
 
     def test_update_x_axis_upper(self):
         self.view._update_x_axis = mock.Mock()
         self.view._update_x_axis_upper(self.mock_bounds)
-        self.view._update_x_axis.assert_called_once_with(
-            {"right": self.mock_bounds})
+        self.view._update_x_axis.assert_called_once_with({"right": self.mock_bounds})
 
     def test_update_x_axis(self):
         test_arg = {"left": self.mock_bounds}
@@ -182,14 +169,12 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
     def test_update_y_axis_lower(self):
         self.view._update_y_axis = mock.Mock()
         self.view._update_y_axis_lower(self.mock_bounds)
-        self.view._update_y_axis.assert_called_once_with(
-            {"bottom": self.mock_bounds})
+        self.view._update_y_axis.assert_called_once_with({"bottom": self.mock_bounds})
 
     def test_update_y_axis_upper(self):
         self.view._update_y_axis = mock.Mock()
         self.view._update_y_axis_upper(self.mock_bounds)
-        self.view._update_y_axis.assert_called_once_with(
-            {"top": self.mock_bounds})
+        self.view._update_y_axis.assert_called_once_with({"top": self.mock_bounds})
 
     def test_update_y_axis(self):
         test_arg = {"top": self.mock_bounds}
@@ -217,17 +202,14 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self.view._get_current_plot_name = mock.Mock(return_value="All")
         self.view._change_plot_errors = mock.Mock()
         self.view._errors_changed(mock_state)
-        self.view._change_plot_errors.assert_called_once_with(
-            self.plot_name, self.plots_return_value, mock_state)
+        self.view._change_plot_errors.assert_called_once_with(self.plot_name, self.plots_return_value, mock_state)
 
     def test_errors_changed(self):
         mock_state = True
-        self.view._get_current_plot_name = mock.Mock(
-            return_value=self.plot_name)
+        self.view._get_current_plot_name = mock.Mock(return_value=self.plot_name)
         self.view._change_plot_errors = mock.Mock()
         self.view._errors_changed(mock_state)
-        self.view._change_plot_errors.assert_called_once_with(
-            self.plot_name, self.plots_return_value, mock_state)
+        self.view._change_plot_errors.assert_called_once_with(self.plot_name, self.plots_return_value, mock_state)
 
     def test_change_plot_errors(self):
         args = [self.plot_name, self.plots_return_value, True]
@@ -240,19 +222,13 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
 
         self.view._change_plot_errors(*args)
         self.view._modify_errors_list.assert_called_once_with(*args[::2])
-        self.assertEqual(
-            self.view.plot_storage[
-                self.plot_name].delete.call_count,
-            1)
-        self.view.plot.assert_called_once_with(
-            self.plot_name, ws)
+        self.assertEqual(self.view.plot_storage[self.plot_name].delete.call_count, 1)
+        self.view.plot.assert_called_once_with(self.plot_name, ws)
 
     def test_set_positions(self):
         self.view._set_positions([[0, 0]])
-        self.plots_return_value.set_position.assert_called_once_with(
-            self.mock_grid_pos.get_position())
-        self.plots_return_value.set_subplotspec.assert_called_once_with(
-            self.mock_grid_pos)
+        self.plots_return_value.set_position.assert_called_once_with(self.mock_grid_pos.get_position())
+        self.plots_return_value.set_subplotspec.assert_called_once_with(self.mock_grid_pos)
 
     def _set_update_plot_selector_and_set_positions_mocked(self):
         self.view._set_positions = mock.Mock()
@@ -272,10 +248,8 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self._set_update_plot_selector_and_set_positions_mocked()
         get_layout.return_value = [[0, 0]]
         self.view._update_gridspec([self.mock_plot], last=self.plot_name)
-        self.view.figure.add_subplot.assert_called_once_with(
-            self.mock_grid_pos, label=self.plot_name)
-        self.plots_return_value.set_subplotspec.assert_called_once_with(
-            self.mock_grid_pos)
+        self.view.figure.add_subplot.assert_called_once_with(self.mock_grid_pos, label=self.plot_name)
+        self.plots_return_value.set_subplotspec.assert_called_once_with(self.mock_grid_pos)
         self.assertEqual(self.view._update_plot_selector.call_count, 1)
 
     def test_gridspec_if_not_new_plots(self):
@@ -286,14 +260,12 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
     def test_update_plot_selector(self):
         self.view._update_plot_selector()
         self.assertEqual(self.view.plot_selector.clear.call_count, 1)
-        self.view.plot_selector.addItems.assert_called_once_with(
-            list(self.view.plots.keys()))
+        self.view.plot_selector.addItems.assert_called_once_with(list(self.view.plots.keys()))
 
 
-@unittest.skipIf(lambda: sys.platform=='win32'(), "Test segfaults on Windows and code will be removed soon")
+@unittest.skipIf(lambda: sys.platform == 'win32' (), "Test segfaults on Windows and code will be removed soon")
 @start_qapplication
 class PlottingViewPlotFunctionsTests(unittest.TestCase):
-
     def setUp(self):
 
         self.view = PlotView()
@@ -328,15 +300,13 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
         self.view.errors_list = [self.plot_name]
         self.view.plot_workspace_errors = mock.Mock()
         self.view.plot(self.plot_name, self.mock_workspace)
-        self.view.plot_workspace_errors.assert_called_once_with(
-            self.plot_name, self.mock_workspace)
+        self.view.plot_workspace_errors.assert_called_once_with(self.plot_name, self.mock_workspace)
         self.view._set_bounds.assert_called_once_with(self.plot_name)
 
     def test_plot_errors_not_in_errors_list(self):
         self.view.plot_workspace = mock.Mock()
         self.view.plot(self.plot_name, self.mock_workspace)
-        self.view.plot_workspace.assert_called_once_with(
-            self.plot_name, self.mock_workspace)
+        self.view.plot_workspace.assert_called_once_with(self.plot_name, self.mock_workspace)
         self.view._set_bounds.assert_called_once_with(self.plot_name)
 
     @mock.patch("mantid.plots.plotfunctions.errorbar")
@@ -349,9 +319,7 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
         mock_line.remove = mock.Mock()
         with mock.patch("mantid.plots.plotfunctions.plot") as normal_plot:
             normal_plot.return_value = tuple([mock_line])
-            self.view.plot_workspace_errors(
-                self.plot_name,
-                self.mock_workspace)
+            self.view.plot_workspace_errors(self.plot_name, self.mock_workspace)
             self.assertEqual(error_bar.call_count, 1)
             self.assertEqual(self.view._add_plotted_line.call_count, 1)
             self.assertEqual(normal_plot.call_count, 1)
@@ -369,10 +337,7 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
             self.view.get_subplot(self.plot_name)
 
     def test_get_subplot(self):
-        self.assertEquals(
-            self.view.get_subplot(
-                self.plot_name),
-            self.plots_return_value)
+        self.assertEquals(self.view.get_subplot(self.plot_name), self.plots_return_value)
 
     def test_get_subplots(self):
         self.assertEqual(self.view.get_subplots(), self.view.plots)
@@ -380,8 +345,7 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
     def test_add_subplot(self):
         self.view.get_subplot = mock.Mock(return_value=True)
         return_value = self.view.add_subplot(self.mock_name)
-        self.view._update_gridspec.assert_called_once_with(
-            len(self.view.plots) + 1, last=self.mock_name)
+        self.view._update_gridspec.assert_called_once_with(len(self.view.plots) + 1, last=self.mock_name)
         self.assertEqual(return_value, True)
 
     def test_remove_subplot(self):
@@ -389,13 +353,11 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
         self.view.subplotRemovedSignal = mock.Mock()
         self.view.remove_subplot(self.plot_name)
         self.view.subplotRemovedSignal.callled_once_with(self.plot_name)
-        self.view.figure.delaxes.assert_called_once_with(
-            self.plots_return_value)
+        self.view.figure.delaxes.assert_called_once_with(self.plots_return_value)
         print(self.view.plots)
         for _dict in [self.view.plots, self.view.plot_storage]:
             self.assertEqual(_dict, {})
-        self.view._update_gridspec.assert_called_once_with(
-            len(self.view.plots))
+        self.view._update_gridspec.assert_called_once_with(len(self.view.plots))
 
     def test_remove_subplot_raise_key_error(self):
         self.view.plots = {}

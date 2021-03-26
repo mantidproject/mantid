@@ -12,8 +12,7 @@ from copy import deepcopy
 from unittest import mock
 
 from Muon.GUI.Common.contexts.fitting_context import FittingContext, FitInformation
-from Muon.GUI.Common.results_tab_widget.results_tab_model import (
-    DEFAULT_TABLE_NAME, ResultsTabModel, TableColumnType)
+from Muon.GUI.Common.results_tab_widget.results_tab_model import (DEFAULT_TABLE_NAME, ResultsTabModel, TableColumnType)
 from mantidqt.utils.qt.testing import start_qapplication
 
 from mantid.api import AnalysisDataService, ITableWorkspace
@@ -27,11 +26,7 @@ def create_test_workspace(ws_name=None):
     return AnalysisDataService.Instance().retrieve(ws_name)
 
 
-def create_test_fits(input_workspaces,
-                     function_name,
-                     parameters,
-                     output_workspace_names=None,
-                     global_parameters=None):
+def create_test_fits(input_workspaces, function_name, parameters, output_workspace_names=None, global_parameters=None):
     """
     Create a list of fits
     :param input_workspaces: The input workspaces
@@ -41,24 +36,16 @@ def create_test_fits(input_workspaces,
     :param global_parameters: An optional list of tied parameters
     :return: A list of Fits
     """
-    output_workspace_names = output_workspace_names if output_workspace_names is not None else [
-        'test-output-ws'
-    ]
+    output_workspace_names = output_workspace_names if output_workspace_names is not None else ['test-output-ws']
     # Convert parameters to fit table-like structure
-    fit_table = [{
-        'Name': name,
-        'Value': value,
-        'Error': error
-    } for name, (value, error) in parameters.items()]
+    fit_table = [{'Name': name, 'Value': value, 'Error': error} for name, (value, error) in parameters.items()]
 
     fits = []
     for name in input_workspaces:
         parameter_workspace = mock.NonCallableMagicMock()
         parameter_workspace.workspace.__iter__.return_value = fit_table
         parameter_workspace.workspace_name = name + '_Parameters'
-        fits.append(
-            FitInformation(parameter_workspace, function_name, name,
-                           output_workspace_names, global_parameters))
+        fits.append(FitInformation(parameter_workspace, function_name, name, output_workspace_names, global_parameters))
 
     return fits
 
@@ -78,8 +65,7 @@ def create_test_model(input_workspaces,
     :param global_parameters: An optional list of tied parameters
     :return: A list of Fits with workspaces/logs attached
     """
-    fits = create_test_fits(input_workspaces, function_name, parameters,
-                            output_workspace_names, global_parameters)
+    fits = create_test_fits(input_workspaces, function_name, parameters, output_workspace_names, global_parameters)
     logs = logs if logs is not None else []
     for fit, workspace_name in zip(fits, input_workspaces):
         add_logs(workspace_name, logs)
@@ -123,18 +109,13 @@ class ResultsTabModelTest(unittest.TestCase):
         self.f1_centre = (2.5, 0.004)
         self.f1_sigma = (0.9, 0.002)
         self.cost_function = (30.8, 0)
-        self.parameters = OrderedDict([('f0.Height', self.f0_height),
-                                       ('f0.PeakCentre', self.f0_centre),
-                                       ('f0.Sigma', self.f0_sigma),
-                                       ('f1.Height', self.f1_height),
-                                       ('f1.PeakCentre', self.f1_centre),
-                                       ('f1.Sigma', self.f1_sigma),
-                                       ('Cost function value',
-                                        self.cost_function)])
+        self.parameters = OrderedDict([('f0.Height', self.f0_height), ('f0.PeakCentre', self.f0_centre),
+                                       ('f0.Sigma', self.f0_sigma), ('f1.Height', self.f1_height),
+                                       ('f1.PeakCentre', self.f1_centre), ('f1.Sigma', self.f1_sigma),
+                                       ('Cost function value', self.cost_function)])
 
         self.log_names = ['sample_temp', 'sample_magn_field']
-        self.logs = [(self.log_names[0], (50., 60.)),
-                     (self.log_names[1], (2., 3.))]
+        self.logs = [(self.log_names[0], (50., 60.)), (self.log_names[1], (2., 3.))]
 
     def tearDown(self):
         AnalysisDataService.Instance().clear()
@@ -164,8 +145,7 @@ class ResultsTabModelTest(unittest.TestCase):
         self.assertEqual(model.selected_fit_function(), new_selection)
 
     def test_model_returns_fit_functions_from_context(self):
-        _, model = create_test_model(('ws1',), 'func1', self.parameters, [],
-                                     self.logs)
+        _, model = create_test_model(('ws1', ), 'func1', self.parameters, [], self.logs)
 
         self.assertEqual(['func1'], model.fit_functions())
 
@@ -174,37 +154,26 @@ class ResultsTabModelTest(unittest.TestCase):
         self.assertEqual(0, len(model.fit_selection({})))
 
     def test_model_creates_fit_selection_given_no_existing_state(self):
-        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters,
-                                     [], self.logs)
+        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters, [], self.logs)
 
-        expected_list_state = {
-            'ws1_Parameters': [0, False, True],
-            'ws2_Parameters': [1, False, True]
-        }
+        expected_list_state = {'ws1_Parameters': [0, False, True], 'ws2_Parameters': [1, False, True]}
         self.assertDictEqual(expected_list_state, model.fit_selection({}))
 
     def test_model_creates_fit_selection_given_existing_state(self):
-        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters,
-                                     [], self.logs)
+        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters, [], self.logs)
 
         orig_list_state = ["ws2_Parameters"]
-        expected_list_state = {
-            'ws1_Parameters': [0, False, True],
-            'ws2_Parameters': [1, True, True]
-        }
-        self.assertEqual(expected_list_state,
-                         model.fit_selection(orig_list_state))
+        expected_list_state = {'ws1_Parameters': [0, False, True], 'ws2_Parameters': [1, True, True]}
+        self.assertEqual(expected_list_state, model.fit_selection(orig_list_state))
 
     def test_model_returns_no_log_selection_if_no_fits_present(self):
         model = ResultsTabModel(FittingContext())
         self.assertEqual(0, len(model.log_selection({})))
 
     def test_model_combines_existing_log_selection(self):
-        _, model = create_test_model(('ws1',), 'func1', self.parameters)
+        _, model = create_test_model(('ws1', ), 'func1', self.parameters)
         model._fit_context.log_names = mock.MagicMock()
-        model._fit_context.log_names.return_value = [
-            'run_number', 'run_start', 'magnetic_field'
-        ]
+        model._fit_context.log_names.return_value = ['run_number', 'run_start', 'magnetic_field']
 
         existing_selection = {
             'run_number': [0, False, True],
@@ -217,159 +186,115 @@ class ResultsTabModelTest(unittest.TestCase):
             'magnetic_field': [2, False, True],
         })
 
-        self.assertDictEqual(expected_selection,
-                             model.log_selection(existing_selection))
+        self.assertDictEqual(expected_selection, model.log_selection(existing_selection))
 
     def test_create_results_table_with_no_logs_or_global_parameters(self):
-        _, model = create_test_model(('ws1',), 'func1', self.parameters, [])
+        _, model = create_test_model(('ws1', ), 'func1', self.parameters, [])
         logs = []
         selected_results = [('ws1', 0)]
         table = model.create_results_table(logs, selected_results)
 
         expected_cols = [
-            'workspace_name', 'f0.Height', 'f0.HeightError', 'f0.PeakCentre',
-            'f0.PeakCentreError', 'f0.Sigma', 'f0.SigmaError', 'f1.Height',
-            'f1.HeightError', 'f1.PeakCentre', 'f1.PeakCentreError',
-            'f1.Sigma', 'f1.SigmaError', 'Cost function value'
+            'workspace_name', 'f0.Height', 'f0.HeightError', 'f0.PeakCentre', 'f0.PeakCentreError', 'f0.Sigma',
+            'f0.SigmaError', 'f1.Height', 'f1.HeightError', 'f1.PeakCentre', 'f1.PeakCentreError', 'f1.Sigma',
+            'f1.SigmaError', 'Cost function value'
         ]
-        expected_types = (TableColumnType.NoType, TableColumnType.Y,
-                          TableColumnType.YErr, TableColumnType.Y,
-                          TableColumnType.YErr, TableColumnType.Y,
-                          TableColumnType.YErr, TableColumnType.Y,
-                          TableColumnType.YErr, TableColumnType.Y,
-                          TableColumnType.YErr, TableColumnType.Y,
+        expected_types = (TableColumnType.NoType, TableColumnType.Y, TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y, TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y, TableColumnType.YErr, TableColumnType.Y,
                           TableColumnType.YErr, TableColumnType.Y)
         expected_content = [
-            ('ws1_Parameters', self.f0_height[0], self.f0_height[1],
-             self.f0_centre[0], self.f0_centre[1], self.f0_sigma[0],
-             self.f0_sigma[1], self.f1_height[0], self.f1_height[1],
-             self.f1_centre[0], self.f1_centre[1], self.f1_sigma[0],
-             self.f1_sigma[1], self.cost_function[0])
+            ('ws1_Parameters', self.f0_height[0], self.f0_height[1], self.f0_centre[0], self.f0_centre[1],
+             self.f0_sigma[0], self.f0_sigma[1], self.f1_height[0], self.f1_height[1], self.f1_centre[0],
+             self.f1_centre[1], self.f1_sigma[0], self.f1_sigma[1], self.cost_function[0])
         ]
-        self._assert_table_matches_expected(zip(expected_cols, expected_types),
-                                            expected_content, table,
+        self._assert_table_matches_expected(zip(expected_cols, expected_types), expected_content, table,
                                             model.results_table_name())
 
     def test_create_results_table_with_logs_selected(self):
-        _, model = create_test_model(('ws1',), 'func1', self.parameters, ('ws1',),
-                                     self.logs)
+        _, model = create_test_model(('ws1', ), 'func1', self.parameters, ('ws1', ), self.logs)
         selected_results = [('ws1', 0)]
         table = model.create_results_table(self.log_names, selected_results)
 
         expected_cols = ['workspace_name'] + self.log_names + [
-            'f0.Height', 'f0.HeightError', 'f0.PeakCentre',
-            'f0.PeakCentreError', 'f0.Sigma', 'f0.SigmaError', 'f1.Height',
-            'f1.HeightError', 'f1.PeakCentre', 'f1.PeakCentreError',
-            'f1.Sigma', 'f1.SigmaError', 'Cost function value'
+            'f0.Height', 'f0.HeightError', 'f0.PeakCentre', 'f0.PeakCentreError', 'f0.Sigma', 'f0.SigmaError',
+            'f1.Height', 'f1.HeightError', 'f1.PeakCentre', 'f1.PeakCentreError', 'f1.Sigma', 'f1.SigmaError',
+            'Cost function value'
         ]
-        expected_types = (TableColumnType.NoType, TableColumnType.X,
-                          TableColumnType.X, TableColumnType.Y,
-                          TableColumnType.YErr, TableColumnType.Y,
-                          TableColumnType.YErr, TableColumnType.Y,
-                          TableColumnType.YErr, TableColumnType.Y,
-                          TableColumnType.YErr, TableColumnType.Y,
-                          TableColumnType.YErr, TableColumnType.Y,
-                          TableColumnType.YErr, TableColumnType.Y)
+        expected_types = (TableColumnType.NoType, TableColumnType.X, TableColumnType.X, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y, TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y, TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y, TableColumnType.YErr, TableColumnType.Y)
         avg_log_values = 50., 2.0
-        expected_content = [
-            ('ws1_Parameters', avg_log_values[0], avg_log_values[1],
-             self.f0_height[0], self.f0_height[1], self.f0_centre[0],
-             self.f0_centre[1], self.f0_sigma[0], self.f0_sigma[1],
-             self.f1_height[0], self.f1_height[1], self.f1_centre[0],
-             self.f1_centre[1], self.f1_sigma[0], self.f1_sigma[1],
-             self.cost_function[0])
-        ]
-        self._assert_table_matches_expected(zip(expected_cols, expected_types),
-                                            expected_content, table,
+        expected_content = [('ws1_Parameters', avg_log_values[0], avg_log_values[1], self.f0_height[0],
+                             self.f0_height[1], self.f0_centre[0], self.f0_centre[1], self.f0_sigma[0],
+                             self.f0_sigma[1], self.f1_height[0], self.f1_height[1], self.f1_centre[0],
+                             self.f1_centre[1], self.f1_sigma[0], self.f1_sigma[1], self.cost_function[0])]
+        self._assert_table_matches_expected(zip(expected_cols, expected_types), expected_content, table,
                                             model.results_table_name())
 
     def test_create_results_table_with_fit_with_global_parameters(self):
         logs = []
         global_parameters = ['Height']
-        _, model = create_test_model(('simul-1',), 'func1', self.parameters,
-                                     [], logs, global_parameters)
+        _, model = create_test_model(('simul-1', ), 'func1', self.parameters, [], logs, global_parameters)
         selected_results = [('simul-1', 0)]
         table = model.create_results_table(logs, selected_results)
 
         expected_cols = [
-            'workspace_name', 'Height', 'HeightError', 'f0.PeakCentre',
-            'f0.PeakCentreError', 'f0.Sigma', 'f0.SigmaError', 'f1.PeakCentre',
-            'f1.PeakCentreError', 'f1.Sigma', 'f1.SigmaError',
-            'Cost function value'
+            'workspace_name', 'Height', 'HeightError', 'f0.PeakCentre', 'f0.PeakCentreError', 'f0.Sigma',
+            'f0.SigmaError', 'f1.PeakCentre', 'f1.PeakCentreError', 'f1.Sigma', 'f1.SigmaError', 'Cost function value'
         ]
-        expected_types = (TableColumnType.NoType, TableColumnType.Y,
-                          TableColumnType.YErr, TableColumnType.Y,
-                          TableColumnType.YErr, TableColumnType.Y,
-                          TableColumnType.YErr, TableColumnType.Y,
-                          TableColumnType.YErr, TableColumnType.Y,
-                          TableColumnType.YErr, TableColumnType.Y)
-        expected_content = [
-            ('simul-1_Parameters', self.f0_height[0], self.f0_height[1],
-             self.f0_centre[0], self.f0_centre[1], self.f0_sigma[0],
-             self.f0_sigma[1], self.f1_centre[0], self.f1_centre[1],
-             self.f1_sigma[0], self.f1_sigma[1], self.cost_function[0])
-        ]
-        self._assert_table_matches_expected(zip(expected_cols, expected_types),
-                                            expected_content, table,
+        expected_types = (TableColumnType.NoType, TableColumnType.Y, TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y, TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y, TableColumnType.YErr, TableColumnType.Y)
+        expected_content = [('simul-1_Parameters', self.f0_height[0], self.f0_height[1], self.f0_centre[0],
+                             self.f0_centre[1], self.f0_sigma[0], self.f0_sigma[1], self.f1_centre[0],
+                             self.f1_centre[1], self.f1_sigma[0], self.f1_sigma[1], self.cost_function[0])]
+        self._assert_table_matches_expected(zip(expected_cols, expected_types), expected_content, table,
                                             model.results_table_name())
 
     # ------------------------- failure tests ----------------------------
-    def test_create_results_table_raises_error_if_number_params_different(
-            self):
-        parameters = OrderedDict([('Height', (100, 0.1)),
-                                  ('Cost function value', (1.5, 0))])
-        fits_func1 = create_test_fits(('ws1',), 'func1', parameters, [])
+    def test_create_results_table_raises_error_if_number_params_different(self):
+        parameters = OrderedDict([('Height', (100, 0.1)), ('Cost function value', (1.5, 0))])
+        fits_func1 = create_test_fits(('ws1', ), 'func1', parameters, [])
 
-        parameters = OrderedDict([('Height', (100, 0.1)), ('A0', (1, 0.001)),
-                                  ('Cost function value', (1.5, 0))])
-        fits_func2 = create_test_fits(('ws2',), 'func2', parameters, [])
+        parameters = OrderedDict([('Height', (100, 0.1)), ('A0', (1, 0.001)), ('Cost function value', (1.5, 0))])
+        fits_func2 = create_test_fits(('ws2', ), 'func2', parameters, [])
         model = ResultsTabModel(FittingContext(fits_func1 + fits_func2))
 
         selected_results = [('ws1', 0), ('ws2', 1)]
-        self.assertRaises(RuntimeError, model.create_results_table, [],
-                          selected_results)
+        self.assertRaises(RuntimeError, model.create_results_table, [], selected_results)
 
-    def test_create_results_table_with_mixed_global_non_global_raises_error(
-            self):
-        parameters = OrderedDict([('f0.Height', (100, 0.1)),
-                                  ('f1.Height', (90, 0.001)),
+    def test_create_results_table_with_mixed_global_non_global_raises_error(self):
+        parameters = OrderedDict([('f0.Height', (100, 0.1)), ('f1.Height', (90, 0.001)),
                                   ('Cost function value', (1.5, 0))])
-        fits_func1 = create_test_fits(('ws1',), 'func1', parameters, [])
-        fits_globals = create_test_fits(('ws2',),
-                                        'func1',
-                                        parameters, [],
-                                        global_parameters=['Height'])
+        fits_func1 = create_test_fits(('ws1', ), 'func1', parameters, [])
+        fits_globals = create_test_fits(('ws2', ), 'func1', parameters, [], global_parameters=['Height'])
         model = ResultsTabModel(FittingContext(fits_func1 + fits_globals))
 
         selected_results = [('ws1', 0), ('ws2', 1)]
-        self.assertRaises(RuntimeError, model.create_results_table, [],
-                          selected_results)
+        self.assertRaises(RuntimeError, model.create_results_table, [], selected_results)
 
-    def test_create_results_table_with_logs_missing_from_some_workspaces_raises(
-            self):
+    def test_create_results_table_with_logs_missing_from_some_workspaces_raises(self):
         parameters = OrderedDict([('f0.Height', (100, 0.1))])
-        logs = [('log1', (1., 2.)), ('log2', (3., 4.)), ('log3', (4., 5.)),
-                ('log4', (5., 6.))]
-        fits_logs1 = create_test_fits(('ws1',), 'func1', parameters, output_workspace_names=('ws1',))
+        logs = [('log1', (1., 2.)), ('log2', (3., 4.)), ('log3', (4., 5.)), ('log4', (5., 6.))]
+        fits_logs1 = create_test_fits(('ws1', ), 'func1', parameters, output_workspace_names=('ws1', ))
         add_logs(fits_logs1[0].input_workspaces[0], logs[:2])
 
-        fits_logs2 = create_test_fits(('ws2',), 'func1', parameters, output_workspace_names=('ws2',))
+        fits_logs2 = create_test_fits(('ws2', ), 'func1', parameters, output_workspace_names=('ws2', ))
         add_logs(fits_logs2[0].input_workspaces[0], logs[2:])
         model = ResultsTabModel(FittingContext(fits_logs1 + fits_logs2))
 
         selected_results = [('ws1', 0), ('ws2', 1)]
         selected_logs = ['log1', 'log3']
-        self.assertRaises(RuntimeError, model.create_results_table,
-                          selected_logs, selected_results)
+        self.assertRaises(RuntimeError, model.create_results_table, selected_logs, selected_results)
 
     def test_that_when_new_fit_is_performed_function_name_is_set_to_lastest_fit_name(self):
-        parameters = OrderedDict([('Height', (100, 0.1)),
-                                  ('Cost function value', (1.5, 0))])
-        fits_func1 = create_test_fits(('ws1',), 'func1', parameters, [])
+        parameters = OrderedDict([('Height', (100, 0.1)), ('Cost function value', (1.5, 0))])
+        fits_func1 = create_test_fits(('ws1', ), 'func1', parameters, [])
 
-        parameters = OrderedDict([('Height', (100, 0.1)), ('A0', (1, 0.001)),
-                                  ('Cost function value', (1.5, 0))])
-        fits_func2 = create_test_fits(('ws2',), 'func2', parameters, [])
+        parameters = OrderedDict([('Height', (100, 0.1)), ('A0', (1, 0.001)), ('Cost function value', (1.5, 0))])
+        fits_func2 = create_test_fits(('ws2', ), 'func2', parameters, [])
         model = ResultsTabModel(FittingContext(fits_func1 + fits_func2))
 
         model.on_new_fit_performed()
@@ -378,8 +303,7 @@ class ResultsTabModelTest(unittest.TestCase):
 
     # ---------------------- Private helper functions -------------------------
 
-    def _assert_table_matches_expected(self, expected_cols, expected_content,
-                                       table, table_name):
+    def _assert_table_matches_expected(self, expected_cols, expected_content, table, table_name):
         self.assertTrue(isinstance(table, ITableWorkspace))
         self.assertTrue(table_name in AnalysisDataService.Instance())
         self.assertEqual(len(expected_content), table.rowCount())
@@ -389,8 +313,7 @@ class ResultsTabModelTest(unittest.TestCase):
             self.assertEqual(expected_name, actual_col_names[index])
             self.assertEqual(expected_type.value, table.getPlotType(index))
 
-        for row_index, (expected_row,
-                        actual_row) in enumerate(zip(expected_content, table)):
+        for row_index, (expected_row, actual_row) in enumerate(zip(expected_content, table)):
             self.assertEqual(len(expected_row), len(actual_row))
             for col_index, expected in enumerate(expected_row):
                 actual = table.cell(row_index, col_index)

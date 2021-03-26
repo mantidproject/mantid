@@ -16,7 +16,6 @@ except ImportError:
     from mantidplot import load_ui
 from qtpy.QtWidgets import (QVBoxLayout)
 
-
 from HFIR_4Circle_Reduction.mplgraphicsview3d import MplPlot3dCanvas
 from HFIR_4Circle_Reduction import guiutility
 
@@ -27,7 +26,6 @@ class Plot3DWindow(QMainWindow):
     """
     Main window to view merged data in 3D
     """
-
     def __init__(self, parent=None):
         """
         Initialization
@@ -37,7 +35,7 @@ class Plot3DWindow(QMainWindow):
         # Init
         QMainWindow.__init__(self, parent)
 
-        ui_path ="View3DWidget.ui"
+        ui_path = "View3DWidget.ui"
         self.ui = load_ui(__file__, ui_path, baseinstance=self)
         self._promote_widgets()
 
@@ -119,9 +117,8 @@ class Plot3DWindow(QMainWindow):
         :return:
         """
         # get threshold (upper and lower)
-        status, ret_obj = guiutility.parse_integers_editors([self.ui.lineEdit_countsThresholdLower,
-                                                             self.ui.lineEdit_countsThresholdUpper],
-                                                            allow_blank=True)
+        status, ret_obj = guiutility.parse_integers_editors(
+            [self.ui.lineEdit_countsThresholdLower, self.ui.lineEdit_countsThresholdUpper], allow_blank=True)
         assert status, ret_obj
         threshold_lower, threshold_upper = ret_obj
         if threshold_lower is None:
@@ -198,9 +195,8 @@ class Plot3DWindow(QMainWindow):
         :return:
         """
         # color: get R, G, B
-        status, rgb_values = guiutility.parse_float_editors([self.ui.lineEdit_baseColorRed,
-                                                             self.ui.lineEdit_baseColorGreen,
-                                                             self.ui.lineEdit_baseColorBlue])
+        status, rgb_values = guiutility.parse_float_editors(
+            [self.ui.lineEdit_baseColorRed, self.ui.lineEdit_baseColorGreen, self.ui.lineEdit_baseColorBlue])
         assert status
 
         # set the color to get change
@@ -209,9 +205,8 @@ class Plot3DWindow(QMainWindow):
         change_b = self.ui.checkBox_changeBlue.isChecked()
 
         # get threshold
-        status, thresholds = guiutility.parse_integers_editors([self.ui.lineEdit_countsThresholdLower,
-                                                                self.ui.lineEdit_countsThresholdUpper],
-                                                               allow_blank=True)
+        status, thresholds = guiutility.parse_integers_editors(
+            [self.ui.lineEdit_countsThresholdLower, self.ui.lineEdit_countsThresholdUpper], allow_blank=True)
         assert status, thresholds
         if thresholds[0] is None:
             thresholds[0] = 0
@@ -330,7 +325,7 @@ def filter_points_by_intensity(points, intensities, lower_boundary, upper_bounda
 
     # initialize output arrays
     new_points = np.ndarray(shape=(new_array_size, 3), dtype='float')
-    new_intensities = np.ndarray(shape=(new_array_size,), dtype='float')
+    new_intensities = np.ndarray(shape=(new_array_size, ), dtype='float')
     new_index = 0
     for raw_index in range(raw_array_size):
         if lower_boundary <= intensities[raw_index] <= upper_boundary:

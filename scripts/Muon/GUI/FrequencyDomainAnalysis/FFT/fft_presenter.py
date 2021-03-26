@@ -10,11 +10,9 @@ from Muon.GUI.Common import thread_model
 
 
 class FFTPresenter(object):
-
     """
     This class links the FFT model to the GUI
     """
-
     def __init__(self, view, alg, load):
         self.view = view
         self.alg = alg
@@ -85,13 +83,9 @@ class FFTPresenter(object):
 
     def tableClicked(self, row, col):
         if row == self.view.getImBoxRow() and col == 1 and "PhaseQuad" not in self.view.getWS():
-            self.view.changedHideUnTick(
-                self.view.getImBox(),
-                self.view.getImBoxRow() + 1)
+            self.view.changedHideUnTick(self.view.getImBox(), self.view.getImBoxRow() + 1)
         elif row == self.view.getShiftBoxRow() and col == 1:
-            self.view.changed(
-                self.view.getShiftBox(),
-                self.view.getShiftBoxRow() + 1)
+            self.view.changed(self.view.getShiftBox(), self.view.getShiftBoxRow() + 1)
 
     def createThread(self):
         return thread_model.ThreadModel(self.alg)
@@ -113,8 +107,7 @@ class FFTPresenter(object):
 
         # for new version 2 of FDA
         if self.load.version == 2:
-            inputs["Run"] = self.getRun(
-                self.view.getInputWS().split(";", 1)[0].split("_", 1)[0])
+            inputs["Run"] = self.getRun(self.view.getInputWS().split(";", 1)[0].split("_", 1)[0])
         # do apodization and padding to real data
 
         preInputs = self.view.initAdvanced()
@@ -129,8 +122,7 @@ class FFTPresenter(object):
             phaseTable['MaskedDetectors'] = []
 
             if self.load.version == 2:
-                phaseTable["InputWorkspace"] = self.clean(
-                    self.view.getInputWS())
+                phaseTable["InputWorkspace"] = self.clean(self.view.getInputWS())
                 phaseTable['MaskedDetectors'] = self.load.get_detectors_excluded_from_default_grouping_tables()
 
             inputs["phaseTable"] = phaseTable
@@ -140,8 +132,7 @@ class FFTPresenter(object):
             if self.view.isRaw() and self.load.version == 1:
                 self.view.addRaw(preInputs, "InputWorkspace")
             if self.load.version == 2:
-                preInputs["InputWorkspace"] = self.clean(
-                    self.view.getInputWS())
+                preInputs["InputWorkspace"] = self.clean(self.view.getInputWS())
         inputs["preRe"] = preInputs
 
         # do apodization and padding to complex data
@@ -152,8 +143,7 @@ class FFTPresenter(object):
                 self.view.addRaw(ImPreInputs, "InputWorkspace")
 
             if self.load.version == 2:
-                ImPreInputs["InputWorkspace"] = self.clean(
-                    self.view.getInputImWS())
+                ImPreInputs["InputWorkspace"] = self.clean(self.view.getInputImWS())
 
             inputs["preIm"] = ImPreInputs
 
@@ -164,12 +154,10 @@ class FFTPresenter(object):
             if self.view.isComplex():
                 self.view.getFFTImPhase(FFTInputs)
             if self.load.version == 2:
-                FFTInputs["OutputWorkspace"] = self.getRun(
-                    self.view.getInputWS()) + ";PhaseQuad;FFT"
+                FFTInputs["OutputWorkspace"] = self.getRun(self.view.getInputWS()) + ";PhaseQuad;FFT"
         else:
             if self.load.version == 2:
-                FFTInputs["OutputWorkspace"] = self.getRun(
-                    self.view.getInputWS()) + ";FFT"
+                FFTInputs["OutputWorkspace"] = self.getRun(self.view.getInputWS()) + ";FFT"
             if self.view.isRaw() and self.load.version == 1:
                 self.view.addRaw(FFTInputs, "OutputWorkspace")
         inputs["FFT"] = FFTInputs
@@ -189,8 +177,7 @@ class FFTPresenter(object):
     def get_FFT_input(self):
         FFTInputs = {}
         if self.load.version == 2:
-            FFTInputs = self.view.initFFTInput(
-                self.clean(self.view.getInputWS()))
+            FFTInputs = self.view.initFFTInput(self.clean(self.view.getInputWS()))
         else:
             FFTInputs = self.view.initFFTInput()
 

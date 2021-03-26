@@ -31,13 +31,11 @@ class PowderCalculatorTest(unittest.TestCase):
         good_data = castep_reader.read_vibrational_or_phonon_data()
 
         # wrong filename
-        self.assertRaises(ValueError, abins.PowderCalculator,
-                          filename=1, abins_data=good_data)
+        self.assertRaises(ValueError, abins.PowderCalculator, filename=1, abins_data=good_data)
 
         # data from object of type AtomsData instead of object of type AbinsData
         bad_data = good_data.extract()["atoms_data"]
-        self.assertRaises(ValueError, abins.PowderCalculator,
-                          filename=full_path_filename, abins_data=bad_data)
+        self.assertRaises(ValueError, abins.PowderCalculator, filename=full_path_filename, abins_data=bad_data)
 
     #       main test
     def test_good_case(self):
@@ -50,9 +48,8 @@ class PowderCalculatorTest(unittest.TestCase):
         # calculation of powder data
         good_data = self._get_good_data(filename=name)
 
-        good_tester = abins.PowderCalculator(
-            filename=abins.test_helpers.find_file(filename=name + ".phonon"),
-            abins_data=good_data["DFT"])
+        good_tester = abins.PowderCalculator(filename=abins.test_helpers.find_file(filename=name + ".phonon"),
+                                             abins_data=good_data["DFT"])
         calculated_data = good_tester.calculate_data().extract()
 
         # check if evaluated powder data  is correct
@@ -61,9 +58,8 @@ class PowderCalculatorTest(unittest.TestCase):
                 self.assertEqual(True, np.allclose(good_data["powder"][key][i], calculated_data[key][i]))
 
         # check if loading powder data is correct
-        new_tester = abins.PowderCalculator(
-            filename=abins.test_helpers.find_file(name + ".phonon"),
-            abins_data=good_data["DFT"])
+        new_tester = abins.PowderCalculator(filename=abins.test_helpers.find_file(name + ".phonon"),
+                                            abins_data=good_data["DFT"])
         loaded_data = new_tester.load_formatted_data().extract()
         for key in good_data["powder"]:
             for i in good_data["powder"][key]:
@@ -71,8 +67,8 @@ class PowderCalculatorTest(unittest.TestCase):
 
     def _get_good_data(self, filename=None):
 
-        castep_reader = abins.input.CASTEPLoader(
-            input_ab_initio_filename=abins.test_helpers.find_file(filename + ".phonon"))
+        castep_reader = abins.input.CASTEPLoader(input_ab_initio_filename=abins.test_helpers.find_file(filename +
+                                                                                                       ".phonon"))
         powder = self._prepare_data(filename=abins.test_helpers.find_file(filename + "_powder.txt"))
 
         return {"DFT": castep_reader.read_vibrational_or_phonon_data(), "powder": powder}
@@ -81,12 +77,9 @@ class PowderCalculatorTest(unittest.TestCase):
     def _prepare_data(self, filename=None):
         """Reads a correct values from ASCII file."""
         with open(filename) as data_file:
-            correct_data = json.loads(data_file.read().replace("\\n",    " ").
-                                      replace("array",  "").
-                                      replace("([",     "[").
-                                      replace("])",     "]").
-                                      replace("'",      '"').
-                                      replace("0. ",    "0.0"))
+            correct_data = json.loads(data_file.read().replace("\\n",
+                                                               " ").replace("array", "").replace("([", "[").replace(
+                                                                   "])", "]").replace("'", '"').replace("0. ", "0.0"))
 
         for key in correct_data.keys():
             for k in correct_data[key]:

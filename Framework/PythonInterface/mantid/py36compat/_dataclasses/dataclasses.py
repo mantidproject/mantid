@@ -7,21 +7,22 @@ import types
 import inspect
 import keyword
 
-__all__ = ['dataclass',
-           'field',
-           'Field',
-           'FrozenInstanceError',
-           'InitVar',
-           'MISSING',
+__all__ = [
+    'dataclass',
+    'field',
+    'Field',
+    'FrozenInstanceError',
+    'InitVar',
+    'MISSING',
 
-           # Helper functions.
-           'fields',
-           'asdict',
-           'astuple',
-           'make_dataclass',
-           'replace',
-           'is_dataclass',
-           ]
+    # Helper functions.
+    'fields',
+    'asdict',
+    'astuple',
+    'make_dataclass',
+    'replace',
+    'is_dataclass',
+]
 
 # Conditions for adding methods.  The boxes indicate what action the
 # dataclass decorator takes.  For all of these tables, when I talk
@@ -67,7 +68,6 @@ __all__ = ['dataclass',
 # +-------+-------+-------+
 # | True  | add   |       |  <- the default
 # +=======+=======+=======+
-
 
 # __setattr__
 # __delattr__
@@ -150,7 +150,9 @@ __all__ = ['dataclass',
 
 
 # Raised when an attempt is made to modify a frozen class.
-class FrozenInstanceError(AttributeError): pass
+class FrozenInstanceError(AttributeError):
+    pass
+
 
 # A sentinel object for default values to signal that a default
 # factory will be used.  This is given a nice repr() which will appear
@@ -158,24 +160,33 @@ class FrozenInstanceError(AttributeError): pass
 class _HAS_DEFAULT_FACTORY_CLASS:
     def __repr__(self):
         return '<factory>'
+
+
 _HAS_DEFAULT_FACTORY = _HAS_DEFAULT_FACTORY_CLASS()
+
 
 # A sentinel object to detect if a parameter is supplied or not.  Use
 # a class to give it a better repr.
 class _MISSING_TYPE:
     pass
+
+
 MISSING = _MISSING_TYPE()
 
 # Since most per-field metadata will be unused, create an empty
 # read-only proxy that can be shared among all fields.
 _EMPTY_METADATA = types.MappingProxyType({})
 
+
 # Markers for the various kinds of fields and pseudo-fields.
 class _FIELD_BASE:
     def __init__(self, name):
         self.name = name
+
     def __repr__(self):
         return self.name
+
+
 _FIELD = _FIELD_BASE('_FIELD')
 _FIELD_CLASSVAR = _FIELD_BASE('_FIELD_CLASSVAR')
 _FIELD_INITVAR = _FIELD_BASE('_FIELD_INITVAR')
@@ -197,9 +208,11 @@ _POST_INIT_NAME = '__post_init__'
 # https://bugs.python.org/issue33453 for details.
 _MODULE_IDENTIFIER_RE = re.compile(r'^(?:\s*(\w+)\s*\.)?\s*(\w+)')
 
+
 class _InitVarMeta(type):
     def __getitem__(self, params):
         return self
+
 
 class InitVar(metaclass=_InitVarMeta):
     pass
@@ -216,20 +229,20 @@ class InitVar(metaclass=_InitVarMeta):
 # When cls._FIELDS is filled in with a list of Field objects, the name
 # and type fields will have been populated.
 class Field:
-    __slots__ = ('name',
-                 'type',
-                 'default',
-                 'default_factory',
-                 'repr',
-                 'hash',
-                 'init',
-                 'compare',
-                 'metadata',
-                 '_field_type',  # Private: not to be used by user code.
-                 )
+    __slots__ = (
+        'name',
+        'type',
+        'default',
+        'default_factory',
+        'repr',
+        'hash',
+        'init',
+        'compare',
+        'metadata',
+        '_field_type',  # Private: not to be used by user code.
+    )
 
-    def __init__(self, default, default_factory, init, repr, hash, compare,
-                 metadata):
+    def __init__(self, default, default_factory, init, repr, hash, compare, metadata):
         self.name = None
         self.type = None
         self.default = default
@@ -239,8 +252,7 @@ class Field:
         self.hash = hash
         self.compare = compare
         self.metadata = (_EMPTY_METADATA
-                         if metadata is None or len(metadata) == 0 else
-                         types.MappingProxyType(metadata))
+                         if metadata is None or len(metadata) == 0 else types.MappingProxyType(metadata))
         self._field_type = None
 
     def __repr__(self):
@@ -274,13 +286,14 @@ class Field:
 
 
 class _DataclassParams:
-    __slots__ = ('init',
-                 'repr',
-                 'eq',
-                 'order',
-                 'unsafe_hash',
-                 'frozen',
-                 )
+    __slots__ = (
+        'init',
+        'repr',
+        'eq',
+        'order',
+        'unsafe_hash',
+        'frozen',
+    )
 
     def __init__(self, init, repr, eq, order, unsafe_hash, frozen):
         self.init = init
@@ -304,8 +317,7 @@ class _DataclassParams:
 # This function is used instead of exposing Field creation directly,
 # so that a type checker can be told (via overloads) that this is a
 # function whose type depends on its parameters.
-def field(*, default=MISSING, default_factory=MISSING, init=True, repr=True,
-          hash=None, compare=True, metadata=None):
+def field(*, default=MISSING, default_factory=MISSING, init=True, repr=True, hash=None, compare=True, metadata=None):
     """Return an object to identify dataclass fields.
 
     default is the default value of the field.  default_factory is a
@@ -322,8 +334,7 @@ def field(*, default=MISSING, default_factory=MISSING, init=True, repr=True,
 
     if default is not MISSING and default_factory is not MISSING:
         raise ValueError('cannot specify both default and default_factory')
-    return Field(default, default_factory, init, repr, hash, compare,
-                 metadata)
+    return Field(default, default_factory, init, repr, hash, compare, metadata)
 
 
 def _tuple_str(obj_name, fields):
@@ -338,8 +349,7 @@ def _tuple_str(obj_name, fields):
     return f'({",".join([f"{obj_name}.{f.name}" for f in fields])},)'
 
 
-def _create_fn(name, args, body, *, globals=None, locals=None,
-               return_type=MISSING):
+def _create_fn(name, args, body, *, globals=None, locals=None, return_type=MISSING):
     # Note that we mutate locals when exec() is called.  Caller
     # beware!  The only callers are internal to this module, so no
     # worries about external callers.
@@ -381,9 +391,7 @@ def _field_init(f, frozen, globals, self_name):
             # This field has a default factory.  If a parameter is
             # given, use it.  If not, call the factory.
             globals[default_name] = f.default_factory
-            value = (f'{default_name}() '
-                     f'if {f.name} is _HAS_DEFAULT_FACTORY '
-                     f'else {f.name}')
+            value = (f'{default_name}() ' f'if {f.name} is _HAS_DEFAULT_FACTORY ' f'else {f.name}')
         else:
             # This is a field that's not in the __init__ params, but
             # has a default factory function.  It needs to be
@@ -459,11 +467,9 @@ def _init_fn(fields, frozen, has_post_init, self_name):
             if not (f.default is MISSING and f.default_factory is MISSING):
                 seen_default = True
             elif seen_default:
-                raise TypeError(f'non-default argument {f.name!r} '
-                                'follows default argument')
+                raise TypeError(f'non-default argument {f.name!r} ' 'follows default argument')
 
-    globals = {'MISSING': MISSING,
-               '_HAS_DEFAULT_FACTORY': _HAS_DEFAULT_FACTORY}
+    globals = {'MISSING': MISSING, '_HAS_DEFAULT_FACTORY': _HAS_DEFAULT_FACTORY}
 
     body_lines = []
     for f in fields:
@@ -475,8 +481,7 @@ def _init_fn(fields, frozen, has_post_init, self_name):
 
     # Does this class have a post-init function?
     if has_post_init:
-        params_str = ','.join(f.name for f in fields
-                              if f._field_type is _FIELD_INITVAR)
+        params_str = ','.join(f.name for f in fields if f._field_type is _FIELD_INITVAR)
         body_lines.append(f'{self_name}.{_POST_INIT_NAME}({params_str})')
 
     # If no body lines, use 'pass'.
@@ -484,8 +489,7 @@ def _init_fn(fields, frozen, has_post_init, self_name):
         body_lines = ['pass']
 
     locals = {f'_type_{f.name}': f.type for f in fields}
-    return _create_fn('__init__',
-                      [self_name] + [_init_param(f) for f in fields if f.init],
+    return _create_fn('__init__', [self_name] + [_init_param(f) for f in fields if f.init],
                       body_lines,
                       locals=locals,
                       globals=globals,
@@ -493,37 +497,32 @@ def _init_fn(fields, frozen, has_post_init, self_name):
 
 
 def _repr_fn(fields):
-    return _create_fn('__repr__',
-                      ('self',),
-                      ['return self.__class__.__qualname__ + f"(' +
-                       ', '.join([f"{f.name}={{self.{f.name}!r}}"
-                                  for f in fields]) +
-                       ')"'])
+    return _create_fn('__repr__', ('self', ), [
+        'return self.__class__.__qualname__ + f"(' + ', '.join([f"{f.name}={{self.{f.name}!r}}" for f in fields]) + ')"'
+    ])
 
 
 def _frozen_get_del_attr(cls, fields):
     # XXX: globals is modified on the first call to _create_fn, then
     # the modified version is used in the second call.  Is this okay?
-    globals = {'cls': cls,
-              'FrozenInstanceError': FrozenInstanceError}
+    globals = {'cls': cls, 'FrozenInstanceError': FrozenInstanceError}
     if fields:
         fields_str = '(' + ','.join(repr(f.name) for f in fields) + ',)'
     else:
         # Special case for the zero-length tuple.
         fields_str = '()'
-    return (_create_fn('__setattr__',
-                      ('self', 'name', 'value'),
-                      (f'if type(self) is cls or name in {fields_str}:',
-                        ' raise FrozenInstanceError(f"cannot assign to field {name!r}")',
-                       f'super(cls, self).__setattr__(name, value)'),
-                       globals=globals),
-            _create_fn('__delattr__',
-                      ('self', 'name'),
-                      (f'if type(self) is cls or name in {fields_str}:',
-                        ' raise FrozenInstanceError(f"cannot delete field {name!r}")',
-                       f'super(cls, self).__delattr__(name)'),
-                       globals=globals),
-            )
+    return (
+        _create_fn('__setattr__', ('self', 'name', 'value'),
+                   (f'if type(self) is cls or name in {fields_str}:',
+                    ' raise FrozenInstanceError(f"cannot assign to field {name!r}")',
+                    f'super(cls, self).__setattr__(name, value)'),
+                   globals=globals),
+        _create_fn(
+            '__delattr__', ('self', 'name'),
+            (f'if type(self) is cls or name in {fields_str}:',
+             ' raise FrozenInstanceError(f"cannot delete field {name!r}")', f'super(cls, self).__delattr__(name)'),
+            globals=globals),
+    )
 
 
 def _cmp_fn(name, op, self_tuple, other_tuple):
@@ -532,18 +531,14 @@ def _cmp_fn(name, op, self_tuple, other_tuple):
     # '(self.x,self.y)' and other_tuple is the string
     # '(other.x,other.y)'.
 
-    return _create_fn(name,
-                      ('self', 'other'),
-                      [ 'if other.__class__ is self.__class__:',
-                       f' return {self_tuple}{op}{other_tuple}',
-                        'return NotImplemented'])
+    return _create_fn(
+        name, ('self', 'other'),
+        ['if other.__class__ is self.__class__:', f' return {self_tuple}{op}{other_tuple}', 'return NotImplemented'])
 
 
 def _hash_fn(fields):
     self_tuple = _tuple_str('self', fields)
-    return _create_fn('__hash__',
-                      ('self',),
-                      [f'return hash({self_tuple})'])
+    return _create_fn('__hash__', ('self', ), [f'return hash({self_tuple})'])
 
 
 def _is_classvar(a_type, typing):
@@ -659,9 +654,7 @@ def _get_field(cls, a_name, a_type):
     typing = sys.modules.get('typing')
     if typing:
         if (_is_classvar(a_type, typing)
-            or (isinstance(f.type, str)
-                and _is_type(f.type, cls, typing, typing.ClassVar,
-                             _is_classvar))):
+                or (isinstance(f.type, str) and _is_type(f.type, cls, typing, typing.ClassVar, _is_classvar))):
             f._field_type = _FIELD_CLASSVAR
 
     # If the type is InitVar, or if it's a matching string annotation,
@@ -671,9 +664,7 @@ def _get_field(cls, a_name, a_type):
         # currently in (dataclasses.py).
         dataclasses = sys.modules[__name__]
         if (_is_initvar(a_type, dataclasses)
-            or (isinstance(f.type, str)
-                and _is_type(f.type, cls, dataclasses, dataclasses.InitVar,
-                             _is_initvar))):
+                or (isinstance(f.type, str) and _is_type(f.type, cls, dataclasses, dataclasses.InitVar, _is_initvar))):
             f._field_type = _FIELD_INITVAR
 
     # Validations for individual fields.  This is delayed until now,
@@ -683,8 +674,7 @@ def _get_field(cls, a_name, a_type):
     # Special restrictions for ClassVar and InitVar.
     if f._field_type in (_FIELD_CLASSVAR, _FIELD_INITVAR):
         if f.default_factory is not MISSING:
-            raise TypeError(f'field {f.name} cannot have a '
-                            'default factory')
+            raise TypeError(f'field {f.name} cannot have a ' 'default factory')
         # Should I check for other field settings? default_factory
         # seems the most serious to check for.  Maybe add others.  For
         # example, how about init=False (or really,
@@ -713,17 +703,20 @@ def _set_new_attribute(cls, name, value):
 # take.  The common case is to do nothing, so instead of providing a
 # function that is a no-op, use None to signify that.
 
+
 def _hash_set_none(cls, fields):
     return None
+
 
 def _hash_add(cls, fields):
     flds = [f for f in fields if (f.compare if f.hash is None else f.hash)]
     return _hash_fn(flds)
 
+
 def _hash_exception(cls, fields):
     # Raise an exception.
-    raise TypeError(f'Cannot overwrite attribute __hash__ '
-                    f'in class {cls.__name__}')
+    raise TypeError(f'Cannot overwrite attribute __hash__ ' f'in class {cls.__name__}')
+
 
 #
 #                +-------------------------------------- unsafe_hash?
@@ -734,23 +727,24 @@ def _hash_exception(cls, fields):
 #                |      |      |      |        +-------  action
 #                |      |      |      |        |
 #                v      v      v      v        v
-_hash_action = {(False, False, False, False): None,
-                (False, False, False, True ): None,
-                (False, False, True,  False): None,
-                (False, False, True,  True ): None,
-                (False, True,  False, False): _hash_set_none,
-                (False, True,  False, True ): None,
-                (False, True,  True,  False): _hash_add,
-                (False, True,  True,  True ): None,
-                (True,  False, False, False): _hash_add,
-                (True,  False, False, True ): _hash_exception,
-                (True,  False, True,  False): _hash_add,
-                (True,  False, True,  True ): _hash_exception,
-                (True,  True,  False, False): _hash_add,
-                (True,  True,  False, True ): _hash_exception,
-                (True,  True,  True,  False): _hash_add,
-                (True,  True,  True,  True ): _hash_exception,
-                }
+_hash_action = {
+    (False, False, False, False): None,
+    (False, False, False, True): None,
+    (False, False, True, False): None,
+    (False, False, True, True): None,
+    (False, True, False, False): _hash_set_none,
+    (False, True, False, True): None,
+    (False, True, True, False): _hash_add,
+    (False, True, True, True): None,
+    (True, False, False, False): _hash_add,
+    (True, False, False, True): _hash_exception,
+    (True, False, True, False): _hash_add,
+    (True, False, True, True): _hash_exception,
+    (True, True, False, False): _hash_add,
+    (True, True, False, True): _hash_exception,
+    (True, True, True, False): _hash_add,
+    (True, True, True, True): _hash_exception,
+}
 # See https://bugs.python.org/issue32929#msg312829 for an if-statement
 # version of this table.
 
@@ -762,8 +756,7 @@ def _process_class(cls, init, repr, eq, order, unsafe_hash, frozen):
     # is defined by the base class, which is found first.
     fields = {}
 
-    setattr(cls, _PARAMS, _DataclassParams(init, repr, eq, order,
-                                           unsafe_hash, frozen))
+    setattr(cls, _PARAMS, _DataclassParams(init, repr, eq, order, unsafe_hash, frozen))
 
     # Find our base classes in reverse MRO order, and exclude
     # ourselves.  In reversed order so that more derived classes
@@ -799,8 +792,7 @@ def _process_class(cls, init, repr, eq, order, unsafe_hash, frozen):
     # Now find fields in our class.  While doing so, validate some
     # things, and set the default values (as class attributes) where
     # we can.
-    cls_fields = [_get_field(cls, name, type)
-                  for name, type in cls_annotations.items()]
+    cls_fields = [_get_field(cls, name, type) for name, type in cls_annotations.items()]
     for f in cls_fields:
         fields[f.name] = f
 
@@ -829,13 +821,11 @@ def _process_class(cls, init, repr, eq, order, unsafe_hash, frozen):
     if has_dataclass_bases:
         # Raise an exception if any of our bases are frozen, but we're not.
         if any_frozen_base and not frozen:
-            raise TypeError('cannot inherit non-frozen dataclass from a '
-                            'frozen one')
+            raise TypeError('cannot inherit non-frozen dataclass from a ' 'frozen one')
 
         # Raise an exception if we're frozen, but none of our bases are.
         if not any_frozen_base and frozen:
-            raise TypeError('cannot inherit frozen dataclass from a '
-                            'non-frozen one')
+            raise TypeError('cannot inherit frozen dataclass from a ' 'non-frozen one')
 
     # Remember all of the fields on our class (including bases).  This
     # also marks this class as being a dataclass.
@@ -847,8 +837,7 @@ def _process_class(cls, init, repr, eq, order, unsafe_hash, frozen):
     # that such a __hash__ == None was not auto-generated, but it
     # close enough.
     class_hash = cls.__dict__.get('__hash__', MISSING)
-    has_explicit_hash = not (class_hash is MISSING or
-                             (class_hash is None and '__eq__' in cls.__dict__))
+    has_explicit_hash = not (class_hash is MISSING or (class_hash is None and '__eq__' in cls.__dict__))
 
     # If we're generating ordering methods, we must be generating the
     # eq methods.
@@ -860,18 +849,19 @@ def _process_class(cls, init, repr, eq, order, unsafe_hash, frozen):
         has_post_init = hasattr(cls, _POST_INIT_NAME)
 
         # Include InitVars and regular fields (so, not ClassVars).
-        flds = [f for f in fields.values()
-                if f._field_type in (_FIELD, _FIELD_INITVAR)]
-        _set_new_attribute(cls, '__init__',
-                           _init_fn(flds,
-                                    frozen,
-                                    has_post_init,
-                                    # The name to use for the "self"
-                                    # param in __init__.  Use "self"
-                                    # if possible.
-                                    '__dataclass_self__' if 'self' in fields
-                                            else 'self',
-                          ))
+        flds = [f for f in fields.values() if f._field_type in (_FIELD, _FIELD_INITVAR)]
+        _set_new_attribute(
+            cls,
+            '__init__',
+            _init_fn(
+                flds,
+                frozen,
+                has_post_init,
+                # The name to use for the "self"
+                # param in __init__.  Use "self"
+                # if possible.
+                '__dataclass_self__' if 'self' in fields else 'self',
+            ))
 
     # Get the fields as a list, and include only real fields.  This is
     # used in all of the following methods.
@@ -887,22 +877,20 @@ def _process_class(cls, init, repr, eq, order, unsafe_hash, frozen):
         flds = [f for f in field_list if f.compare]
         self_tuple = _tuple_str('self', flds)
         other_tuple = _tuple_str('other', flds)
-        _set_new_attribute(cls, '__eq__',
-                           _cmp_fn('__eq__', '==',
-                                   self_tuple, other_tuple))
+        _set_new_attribute(cls, '__eq__', _cmp_fn('__eq__', '==', self_tuple, other_tuple))
 
     if order:
         # Create and set the ordering methods.
         flds = [f for f in field_list if f.compare]
         self_tuple = _tuple_str('self', flds)
         other_tuple = _tuple_str('other', flds)
-        for name, op in [('__lt__', '<'),
-                         ('__le__', '<='),
-                         ('__gt__', '>'),
-                         ('__ge__', '>='),
-                         ]:
-            if _set_new_attribute(cls, name,
-                                  _cmp_fn(name, op, self_tuple, other_tuple)):
+        for name, op in [
+            ('__lt__', '<'),
+            ('__le__', '<='),
+            ('__gt__', '>'),
+            ('__ge__', '>='),
+        ]:
+            if _set_new_attribute(cls, name, _cmp_fn(name, op, self_tuple, other_tuple)):
                 raise TypeError(f'Cannot overwrite attribute {name} '
                                 f'in class {cls.__name__}. Consider using '
                                 'functools.total_ordering')
@@ -910,14 +898,10 @@ def _process_class(cls, init, repr, eq, order, unsafe_hash, frozen):
     if frozen:
         for fn in _frozen_get_del_attr(cls, field_list):
             if _set_new_attribute(cls, fn.__name__, fn):
-                raise TypeError(f'Cannot overwrite attribute {fn.__name__} '
-                                f'in class {cls.__name__}')
+                raise TypeError(f'Cannot overwrite attribute {fn.__name__} ' f'in class {cls.__name__}')
 
     # Decide if/how we're going to create a hash function.
-    hash_action = _hash_action[bool(unsafe_hash),
-                               bool(eq),
-                               bool(frozen),
-                               has_explicit_hash]
+    hash_action = _hash_action[bool(unsafe_hash), bool(eq), bool(frozen), has_explicit_hash]
     if hash_action:
         # No need to call _set_new_attribute here, since by the time
         # we're here the overwriting is unconditional.
@@ -925,8 +909,7 @@ def _process_class(cls, init, repr, eq, order, unsafe_hash, frozen):
 
     if not getattr(cls, '__doc__'):
         # Create a class doc-string.
-        cls.__doc__ = (cls.__name__ +
-                       str(inspect.signature(cls)).replace(' -> None', ''))
+        cls.__doc__ = (cls.__name__ + str(inspect.signature(cls)).replace(' -> None', ''))
 
     return cls
 
@@ -934,8 +917,7 @@ def _process_class(cls, init, repr, eq, order, unsafe_hash, frozen):
 # _cls should never be specified by keyword, so start it with an
 # underscore.  The presence of _cls is used to detect if this
 # decorator is being called with parameters or not.
-def dataclass(_cls=None, *, init=True, repr=True, eq=True, order=False,
-              unsafe_hash=False, frozen=False):
+def dataclass(_cls=None, *, init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False):
     """Returns the same class as was passed in, with dunder methods
     added based on the fields defined in the class.
 
@@ -947,7 +929,6 @@ def dataclass(_cls=None, *, init=True, repr=True, eq=True, order=False,
     __hash__() method function is added. If frozen is true, fields may
     not be assigned to after instance creation.
     """
-
     def wrap(cls):
         return _process_class(cls, init, repr, eq, order, unsafe_hash, frozen)
 
@@ -1023,8 +1004,7 @@ def _asdict_inner(obj, dict_factory):
     elif isinstance(obj, (list, tuple)):
         return type(obj)(_asdict_inner(v, dict_factory) for v in obj)
     elif isinstance(obj, dict):
-        return type(obj)((_asdict_inner(k, dict_factory), _asdict_inner(v, dict_factory))
-                          for k, v in obj.items())
+        return type(obj)((_asdict_inner(k, dict_factory), _asdict_inner(v, dict_factory)) for k, v in obj.items())
     else:
         return copy.deepcopy(obj)
 
@@ -1063,14 +1043,21 @@ def _astuple_inner(obj, tuple_factory):
     elif isinstance(obj, (list, tuple)):
         return type(obj)(_astuple_inner(v, tuple_factory) for v in obj)
     elif isinstance(obj, dict):
-        return type(obj)((_astuple_inner(k, tuple_factory), _astuple_inner(v, tuple_factory))
-                          for k, v in obj.items())
+        return type(obj)((_astuple_inner(k, tuple_factory), _astuple_inner(v, tuple_factory)) for k, v in obj.items())
     else:
         return copy.deepcopy(obj)
 
 
-def make_dataclass(cls_name, fields, *, bases=(), namespace=None, init=True,
-                   repr=True, eq=True, order=False, unsafe_hash=False,
+def make_dataclass(cls_name,
+                   fields,
+                   *,
+                   bases=(),
+                   namespace=None,
+                   init=True,
+                   repr=True,
+                   eq=True,
+                   order=False,
+                   unsafe_hash=False,
                    frozen=False):
     """Return a new dynamically created dataclass.
 
@@ -1131,8 +1118,7 @@ def make_dataclass(cls_name, fields, *, bases=(), namespace=None, init=True,
     # We use `types.new_class()` instead of simply `type()` to allow dynamic creation
     # of generic dataclassses.
     cls = types.new_class(cls_name, bases, {}, lambda ns: ns.update(namespace))
-    return dataclass(cls, init=init, repr=repr, eq=eq, order=order,
-                     unsafe_hash=unsafe_hash, frozen=frozen)
+    return dataclass(cls, init=init, repr=repr, eq=eq, order=order, unsafe_hash=unsafe_hash, frozen=frozen)
 
 
 def replace(obj, **changes):
@@ -1174,8 +1160,7 @@ def replace(obj, **changes):
 
         if f.name not in changes:
             if f._field_type is _FIELD_INITVAR:
-                raise ValueError(f"InitVar {f.name!r} "
-                                 'must be specified with replace()')
+                raise ValueError(f"InitVar {f.name!r} " 'must be specified with replace()')
             changes[f.name] = getattr(obj, f.name)
 
     # Create the new object, which calls __init__() and

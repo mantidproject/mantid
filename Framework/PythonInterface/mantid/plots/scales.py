@@ -10,8 +10,7 @@ Defines a set of custom axis scales
 """
 from mantid.plots.utility import mpl_version_info
 from matplotlib.scale import ScaleBase
-from matplotlib.ticker import (AutoLocator, NullFormatter,
-                               NullLocator, ScalarFormatter)
+from matplotlib.ticker import (AutoLocator, NullFormatter, NullLocator, ScalarFormatter)
 from matplotlib.transforms import Transform
 import numpy as np
 
@@ -31,7 +30,7 @@ class PowerScale(ScaleBase):
 
         gamma: The power used to scale the data.
         """
-        if mpl_version_info() > (3,):
+        if mpl_version_info() > (3, ):
             super(PowerScale, self).__init__(_axis)
         else:
             super(PowerScale, self).__init__()
@@ -63,10 +62,9 @@ class PowerScale(ScaleBase):
         if not self._gamma.is_integer() or self._gamma % 2 == 0:
             if not np.isfinite(minpos):
                 minpos = 1e-300  # This value should rarely if ever
-                                 # end up with a visible effect.
+                # end up with a visible effect.
 
-            return (minpos if vmin <= 0 else vmin,
-                    minpos if vmax <= 0 else vmax)
+            return (minpos if vmin <= 0 else vmin, minpos if vmax <= 0 else vmax)
         else:
             return vmin, vmax
 

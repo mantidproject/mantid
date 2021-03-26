@@ -24,13 +24,14 @@ class SData(collections.abc.Sequence):
     Indexing will return dict(s) of S by quantum order for atom(s)
     corresponding to index/slice.
     """
-
-    def __init__(self, *,
-                 data: dict,
-                 frequencies: np.ndarray,
-                 temperature: Optional[float] = None,
-                 sample_form: str = '',
-                 ) -> None:
+    def __init__(
+        self,
+        *,
+        data: dict,
+        frequencies: np.ndarray,
+        temperature: Optional[float] = None,
+        sample_form: str = '',
+    ) -> None:
         super().__init__()
 
         if temperature is None:
@@ -93,13 +94,11 @@ class SData(collections.abc.Sequence):
         """Raise an error if sample form is not known to Abins"""
         sample_form = self.get_sample_form()
         if sample_form not in ALL_SAMPLE_FORMS:
-            raise ValueError(
-                f"Invalid sample form {sample_form}: known sample forms are {ALL_SAMPLE_FORMS}")
+            raise ValueError(f"Invalid sample form {sample_form}: known sample forms are {ALL_SAMPLE_FORMS}")
 
     def _check_frequencies(self):
         # Check frequencies are ordered low to high
-        if not np.allclose(np.sort(self._frequencies),
-                           self._frequencies):
+        if not np.allclose(np.sort(self._frequencies), self._frequencies):
             raise ValueError("Frequencies not sorted low to high")
 
     def _check_data(self):
@@ -165,8 +164,7 @@ class SData(collections.abc.Sequence):
         if len(warning_cases) > 0:
             logger.warning("Warning: some contributions had small S compared to threshold.")
             logger.warning("The minimum S threshold ({}) is greater than {}% of the "
-                           "maximum S for the following:".format(absolute_threshold,
-                                                                 relative_threshold * 100))
+                           "maximum S for the following:".format(absolute_threshold, relative_threshold * 100))
 
             # Sort the warnings by atom number, order number
             # Assuming that keys will be of form "atom_1", "atom_2", ...
@@ -194,7 +192,7 @@ class SData(collections.abc.Sequence):
         ...
 
     @overload  # noqa F811
-    def __getitem__(self, item: slice) -> List[OneAtomSData]: # noqa F811
+    def __getitem__(self, item: slice) -> List[OneAtomSData]:  # noqa F811
         ...
 
     def __getitem__(self, item):  # noqa F811
@@ -206,21 +204,22 @@ class SData(collections.abc.Sequence):
         elif isinstance(item, slice):
             return [self[i] for i in range(len(self))[item]]
         else:
-            raise TypeError(
-                "Indices must be integers or slices, not {}.".format(type(item)))
+            raise TypeError("Indices must be integers or slices, not {}.".format(type(item)))
 
 
 SDBA = TypeVar('SDBA', bound='SDataByAngle')
 
 
 class SDataByAngle(collections.abc.Sequence):
-    def __init__(self, *,
-                 data: Dict[str, OneAtomSData],
-                 angles: Sequence[float],
-                 frequencies: np.ndarray,
-                 temperature: Optional[float] = None,
-                 sample_form: str = '',
-                 ) -> None:
+    def __init__(
+        self,
+        *,
+        data: Dict[str, OneAtomSData],
+        angles: Sequence[float],
+        frequencies: np.ndarray,
+        temperature: Optional[float] = None,
+        sample_form: str = '',
+    ) -> None:
         """Container for scattering spectra resolved by angle and atom
 
         Args:
@@ -256,14 +255,11 @@ class SDataByAngle(collections.abc.Sequence):
         for atom_key, atom_data in data.items():
             for order, order_data in atom_data['s'].items():
                 if order_data.shape != (n_angles, n_frequencies):
-                    raise IndexError("SDataByAngle input should have 2D array "
-                                     "in (angles, frequencies)")
+                    raise IndexError("SDataByAngle input should have 2D array " "in (angles, frequencies)")
 
         self.angles = list(angles)
         self._data = data
-        self._metadata = {'frequencies': frequencies,
-                          'temperature': temperature,
-                          'sample_form': sample_form}
+        self._metadata = {'frequencies': frequencies, 'temperature': temperature, 'sample_form': sample_form}
 
         self.frequencies = self._metadata['frequencies']
         self.temperature = self._metadata['temperature']
@@ -277,34 +273,32 @@ class SDataByAngle(collections.abc.Sequence):
         ...
 
     @overload  # noqa F811
-    def __getitem__(self: SDBA, item: slice) -> SDBA: # noqa F811
+    def __getitem__(self: SDBA, item: slice) -> SDBA:  # noqa F811
         ...
 
     def __getitem__(self, item):  # noqa F811
         if isinstance(item, (int, slice)):
-            data = {atom_index: {'s': {order_index:
-                                       self._data[atom_index]['s'][order_index][item, :]
-                                       for order_index in self._data[atom_index]['s']}}
-                    for atom_index in self._data}
+            data = {
+                atom_index: {
+                    's': {
+                        order_index: self._data[atom_index]['s'][order_index][item, :]
+                        for order_index in self._data[atom_index]['s']
+                    }
+                }
+                for atom_index in self._data
+            }
         else:
-            raise TypeError(
-                "Indices must be integers or slices, not {}.".format(type(item)))
+            raise TypeError("Indices must be integers or slices, not {}.".format(type(item)))
 
         if isinstance(item, int):
             return SData(data=data, **self._metadata)
 
         else:  # Must be a slice, return angle-resolved data
-            return type(self)(data=data,
-                              angles=self.angles[item],
-                              **self._metadata)
+            return type(self)(data=data, angles=self.angles[item], **self._metadata)
 
     @classmethod
-    def get_empty(cls: SDBA, *,
-                  angles: Sequence[float],
-                  frequencies: np.ndarray,
-                  atom_keys: Sequence[str],
-                  order_keys: Sequence[str],
-                  **kwargs) -> SDBA:
+    def get_empty(cls: SDBA, *, angles: Sequence[float], frequencies: np.ndarray, atom_keys: Sequence[str],
+                  order_keys: Sequence[str], **kwargs) -> SDBA:
         """Construct data container with zeroed arrays of appropriate dimensions
 
         This is useful as a starting point for accumulating data in a loop.
@@ -333,14 +327,17 @@ class SDataByAngle(collections.abc.Sequence):
 
         n_angles, n_frequencies = len(angles), len(frequencies)
 
-        data = {atom_key: {'s': {order_key: np.zeros((n_angles, n_frequencies))
-                                 for order_key in order_keys}}
-                for atom_key in atom_keys}
+        data = {
+            atom_key: {
+                's': {order_key: np.zeros((n_angles, n_frequencies))
+                      for order_key in order_keys}
+            }
+            for atom_key in atom_keys
+        }
 
         return cls(data=data, angles=angles, frequencies=frequencies, **kwargs)
 
-    def set_angle_data(self, angle_index: int, sdata: SData,
-                       add_to_existing: bool = False) -> None:
+    def set_angle_data(self, angle_index: int, sdata: SData, add_to_existing: bool = False) -> None:
         """Set data for one angle from SData object
 
         Args:
@@ -360,10 +357,10 @@ class SDataByAngle(collections.abc.Sequence):
         if 'frequencies' in data:
             del data['frequencies']
 
-        self.set_angle_data_from_dict(angle_index, data,
-                                      add_to_existing=add_to_existing)
+        self.set_angle_data_from_dict(angle_index, data, add_to_existing=add_to_existing)
 
-    def set_angle_data_from_dict(self, angle_index: int,
+    def set_angle_data_from_dict(self,
+                                 angle_index: int,
                                  data: Dict[str, OneAtomSData],
                                  add_to_existing: bool = False) -> None:
 
@@ -399,10 +396,8 @@ class SDataByAngle(collections.abc.Sequence):
                 if key not in metadata:
                     metadata[key] = getattr(sdata, f'get_{key}')()
                 else:
-                    if not near_enough(metadata[key],
-                                       getattr(sdata, f'get_{key}')()):
-                        raise ValueError(f"Property '{key}' must agree for all "
-                                         "SData being collected.")
+                    if not near_enough(metadata[key], getattr(sdata, f'get_{key}')()):
+                        raise ValueError(f"Property '{key}' must agree for all " "SData being collected.")
 
         atom_keys = list(data[0]._data.keys())
         sdata_collection = cls.get_empty(angles=angles,
@@ -416,9 +411,7 @@ class SDataByAngle(collections.abc.Sequence):
 
         return sdata_collection
 
-    def sum_over_angles(self,
-                        average: bool = False,
-                        weights: Sequence[float] = None) -> SData:
+    def sum_over_angles(self, average: bool = False, weights: Sequence[float] = None) -> SData:
         """Combine S values over all angles
 
         :param average:
@@ -448,14 +441,18 @@ class SDataByAngle(collections.abc.Sequence):
 
         assert isinstance(weights, (Sequence, np.ndarray))
 
-        flattened_data = {atom_key: {'s': {order_key: np.zeros(n_frequencies)
-                                           for order_key in order_keys}}
-                          for atom_key in atom_keys}
+        flattened_data = {
+            atom_key: {
+                's': {order_key: np.zeros(n_frequencies)
+                      for order_key in order_keys}
+            }
+            for atom_key in atom_keys
+        }
 
         for angle_index, weight in enumerate(weights):
             for atom_key in atom_keys:
                 for order_key in order_keys:
-                    flattened_data[atom_key]['s'][order_key] += (
-                        weight * self._data[atom_key]['s'][order_key][angle_index, :])
+                    flattened_data[atom_key]['s'][order_key] += (weight *
+                                                                 self._data[atom_key]['s'][order_key][angle_index, :])
 
         return SData(data=flattened_data, **self._metadata)

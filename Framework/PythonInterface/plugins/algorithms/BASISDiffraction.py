@@ -14,19 +14,13 @@ from contextlib import contextmanager
 import numpy as np
 
 from mantid import config as mantid_config
-from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, FileProperty,
-                        WorkspaceProperty, FileAction, PropertyMode, mtd,
-                        AnalysisDataService, Progress)
-from mantid.simpleapi import (DeleteWorkspace, LoadEventNexus, SetGoniometer,
-                              SetUB, ModeratorTzeroLinear, SaveNexus,
-                              ConvertToMD, LoadMask, MaskDetectors, LoadNexus,
-                              MDNormSCDPreprocessIncoherent, MDNormSCD,
-                              MultiplyMD, CreateSingleValuedWorkspace,
-                              ConvertUnits, CropWorkspace, DivideMD, MinusMD,
-                              RenameWorkspace, ConvertToMDMinMaxGlobal,
-                              ClearMaskFlag)
-from mantid.kernel import (Direction, EnabledWhenProperty, PropertyCriterion,
-                           IntArrayProperty, FloatArrayProperty,
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, FileProperty, WorkspaceProperty, FileAction,
+                        PropertyMode, mtd, AnalysisDataService, Progress)
+from mantid.simpleapi import (DeleteWorkspace, LoadEventNexus, SetGoniometer, SetUB, ModeratorTzeroLinear, SaveNexus,
+                              ConvertToMD, LoadMask, MaskDetectors, LoadNexus, MDNormSCDPreprocessIncoherent, MDNormSCD,
+                              MultiplyMD, CreateSingleValuedWorkspace, ConvertUnits, CropWorkspace, DivideMD, MinusMD,
+                              RenameWorkspace, ConvertToMDMinMaxGlobal, ClearMaskFlag)
+from mantid.kernel import (Direction, EnabledWhenProperty, PropertyCriterion, IntArrayProperty, FloatArrayProperty,
                            FloatArrayLengthValidator)
 
 DEPRECATION_NOTICE = """BASISDiffraction is deprecated (on 2018-08-27).
@@ -110,7 +104,7 @@ class BASISDiffraction(DataProcessorAlgorithm):
         return DEPRECATION_NOTICE
 
     def seeAlso(self):
-        return [ "AlignDetectors","DiffractionFocussing","SNSPowderReduction" ]
+        return ["AlignDetectors", "DiffractionFocussing", "SNSPowderReduction"]
 
     def PyInit(self):
         # Input validators
@@ -124,17 +118,15 @@ class BASISDiffraction(DataProcessorAlgorithm):
                                           extensions=['.xml']),
                              doc='See documentation for latest mask files.')
 
-        self.declareProperty(FloatArrayProperty('LambdaRange',
-                                                self._lambda_range,
-                                                direction=Direction.Input),
+        self.declareProperty(FloatArrayProperty('LambdaRange', self._lambda_range, direction=Direction.Input),
                              doc='Incoming neutron wavelength range')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
+        self.declareProperty(WorkspaceProperty('OutputWorkspace',
+                                               '',
                                                optional=PropertyMode.Mandatory,
                                                direction=Direction.Output),
-                             doc='Output Workspace. If background is '
-                                 + 'subtracted, _data and _background '
-                                 + 'workspaces will also be generated')
+                             doc='Output Workspace. If background is ' + 'subtracted, _data and _background ' +
+                             'workspaces will also be generated')
 
         #
         # Background for the sample runs
@@ -142,9 +134,9 @@ class BASISDiffraction(DataProcessorAlgorithm):
         background_title = 'Background runs'
         self.declareProperty('BackgroundRuns', '', 'Background run numbers')
         self.setPropertyGroup('BackgroundRuns', background_title)
-        self.declareProperty("BackgroundScale", 1.0,
-                             doc='The background will be scaled by this '
-                                 + 'number before being subtracted.')
+        self.declareProperty("BackgroundScale",
+                             1.0,
+                             doc='The background will be scaled by this ' + 'number before being subtracted.')
         self.setPropertyGroup('BackgroundScale', background_title)
         #
         # Vanadium
@@ -158,67 +150,53 @@ class BASISDiffraction(DataProcessorAlgorithm):
         #
         crystal_diffraction_title = 'Single Crystal Diffraction'
         self.declareProperty('SingleCrystalDiffraction',
-                             False, direction=Direction.Input,
+                             False,
+                             direction=Direction.Input,
                              doc='Calculate diffraction pattern?')
         crystal_diffraction_enabled =\
             EnabledWhenProperty('SingleCrystalDiffraction',
                                 PropertyCriterion.IsNotDefault)
-        self.declareProperty('PsiAngleLog', 'SE50Rot',
+        self.declareProperty('PsiAngleLog',
+                             'SE50Rot',
                              direction=Direction.Input,
                              doc='log entry storing rotation of the sample'
-                                 'around the vertical axis')
-        self.declareProperty('PsiOffset', 0.0,
-                             direction=Direction.Input,
-                             doc='Add this quantity to PsiAngleLog')
-        self.declareProperty(FloatArrayProperty('LatticeSizes', [0,0,0],
+                             'around the vertical axis')
+        self.declareProperty('PsiOffset', 0.0, direction=Direction.Input, doc='Add this quantity to PsiAngleLog')
+        self.declareProperty(FloatArrayProperty('LatticeSizes', [0, 0, 0],
                                                 array_length_three,
                                                 direction=Direction.Input),
                              doc='three item comma-separated list "a, b, c"')
-        self.declareProperty(FloatArrayProperty('LatticeAngles',
-                                                [90.0, 90.0, 90.0],
+        self.declareProperty(FloatArrayProperty('LatticeAngles', [90.0, 90.0, 90.0],
                                                 array_length_three,
                                                 direction=Direction.Input),
                              doc='three item comma-separated ' + 'list "alpha, beta, gamma"')
         #    Reciprocal vector to be aligned with incoming beam
-        self.declareProperty(FloatArrayProperty('VectorU', [1, 0, 0],
-                                                array_length_three,
-                                                direction=Direction.Input),
+        self.declareProperty(FloatArrayProperty('VectorU', [1, 0, 0], array_length_three, direction=Direction.Input),
                              doc='three item, comma-separated, HKL indexes'
-                                 'of the diffracting plane')
+                             'of the diffracting plane')
         #    Reciprocal vector orthogonal to VectorU and in-plane with
         #    incoming beam
-        self.declareProperty(FloatArrayProperty('VectorV', [0, 1, 0],
-                                                array_length_three,
-                                                direction=Direction.Input),
+        self.declareProperty(FloatArrayProperty('VectorV', [0, 1, 0], array_length_three, direction=Direction.Input),
                              doc='three item, comma-separated, HKL indexes'
-                                 'of the direction perpendicular to VectorV'
-                                 'and the vertical axis')
+                             'of the direction perpendicular to VectorV'
+                             'and the vertical axis')
         #    Abscissa view
-        self.declareProperty(FloatArrayProperty('Uproj', [1, 0, 0],
-                                                array_length_three,
-                                                direction=Direction.Input),
+        self.declareProperty(FloatArrayProperty('Uproj', [1, 0, 0], array_length_three, direction=Direction.Input),
                              doc='three item comma-separated Abscissa view'
-                                 'of the diffraction pattern')
+                             'of the diffraction pattern')
         #    Ordinate view
-        self.declareProperty(FloatArrayProperty('Vproj', [0, 1, 0],
-                                                array_length_three,
-                                                direction=Direction.Input),
+        self.declareProperty(FloatArrayProperty('Vproj', [0, 1, 0], array_length_three, direction=Direction.Input),
                              doc='three item comma-separated Ordinate view'
-                                 'of the diffraction pattern')
+                             'of the diffraction pattern')
         #    Hidden axis
-        self.declareProperty(FloatArrayProperty('Wproj', [0, 0, 1],
-                                                array_length_three,
-                                                direction=Direction.Input),
+        self.declareProperty(FloatArrayProperty('Wproj', [0, 0, 1], array_length_three, direction=Direction.Input),
                              doc='Hidden axis view')
         #    Binnin in reciprocal slice
-        self.declareProperty('NBins', 400, direction=Direction.Input,
-                             doc='number of bins in the HKL slice')
+        self.declareProperty('NBins', 400, direction=Direction.Input, doc='number of bins in the HKL slice')
 
-        self.setPropertyGroup('SingleCrystalDiffraction',
-                              crystal_diffraction_title)
-        for a_property in ('PsiAngleLog', 'PsiOffset',
-                           'LatticeSizes', 'LatticeAngles', 'VectorU',
-                           'VectorV', 'Uproj', 'Vproj', 'Wproj', 'NBins'):
+        self.setPropertyGroup('SingleCrystalDiffraction', crystal_diffraction_title)
+        for a_property in ('PsiAngleLog', 'PsiOffset', 'LatticeSizes', 'LatticeAngles', 'VectorU', 'VectorV', 'Uproj',
+                           'Vproj', 'Wproj', 'NBins'):
             self.setPropertyGroup(a_property, crystal_diffraction_title)
             self.setPropertySettings(a_property, crystal_diffraction_enabled)
 
@@ -228,9 +206,11 @@ class BASISDiffraction(DataProcessorAlgorithm):
         self.log().error(DEPRECATION_NOTICE)
 
         # Facility and database configuration
-        config_new_options = {'default.facility': 'SNS',
-                              'default.instrument': 'BASIS',
-                              'datasearch.searcharchive': 'On'}
+        config_new_options = {
+            'default.facility': 'SNS',
+            'default.instrument': 'BASIS',
+            'datasearch.searcharchive': 'On'
+        }
 
         # Find valid incoming momentum range
         self._lambda_range = np.array(self.getProperty('LambdaRange').value)
@@ -240,19 +220,15 @@ class BASISDiffraction(DataProcessorAlgorithm):
         with pyexec_setup(config_new_options) as self._temps:
             # Load the mask to a workspace
             self._t_mask = LoadMask(Instrument='BASIS',
-                                    InputFile=self.getProperty('MaskFile').
-                                    value,
+                                    InputFile=self.getProperty('MaskFile').value,
                                     OutputWorkspace='_t_mask')
 
             # Pre-process the background runs
             if self.getProperty('BackgroundRuns').value:
-                bkg_run_numbers = self._getRuns(
-                    self.getProperty('BackgroundRuns').value,
-                    doIndiv=True)
+                bkg_run_numbers = self._getRuns(self.getProperty('BackgroundRuns').value, doIndiv=True)
                 bkg_run_numbers = \
                     list(itertools.chain.from_iterable(bkg_run_numbers))
-                background_reporter = Progress(self, start=0.0, end=1.0,
-                                               nreports=len(bkg_run_numbers))
+                background_reporter = Progress(self, start=0.0, end=1.0, nreports=len(bkg_run_numbers))
                 for i, run in enumerate(bkg_run_numbers):
                     if self._bkg is None:
                         self._bkg = self._mask_t0_crop(run, '_bkg')
@@ -271,12 +247,9 @@ class BASISDiffraction(DataProcessorAlgorithm):
 
             # Pre-process the vanadium run(s)
             if self.getProperty('VanadiumRuns').value:
-                run_numbers = self._getRuns(
-                    self.getProperty('VanadiumRuns').value,
-                    doIndiv=True)
+                run_numbers = self._getRuns(self.getProperty('VanadiumRuns').value, doIndiv=True)
                 run_numbers = list(itertools.chain.from_iterable(run_numbers))
-                vanadium_reporter = Progress(self, start=0.0, end=1.0,
-                                             nreports=len(run_numbers))
+                vanadium_reporter = Progress(self, start=0.0, end=1.0, nreports=len(run_numbers))
                 self._vanadium_files = list()
                 for i, run in enumerate(run_numbers):
                     self._vanadium_files.append(self._save_t0(run))
@@ -311,14 +284,16 @@ class BASISDiffraction(DataProcessorAlgorithm):
         axis1 = '{},0,1,0,1'.format(self.getProperty('PsiOffset').value)
 
         # Options for SetUB independent of run
-        ub_args = dict(a=a, b=b, c=c,
-                       alpha=alpha, beta=beta, gamma=gamma,
-                       u=u, v=v)
+        ub_args = dict(a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma, u=u, v=v)
         min_values = None
         # Options for algorithm ConvertToMD independent of run
-        cmd_args = dict(QDimensions='Q3D', dEAnalysisMode='Elastic',
-                        Q3DFrames='HKL', QConversionScales='HKL',
-                        Uproj=uproj, Vproj=vproj, Wproj=wproj)
+        cmd_args = dict(QDimensions='Q3D',
+                        dEAnalysisMode='Elastic',
+                        Q3DFrames='HKL',
+                        QConversionScales='HKL',
+                        Uproj=uproj,
+                        Vproj=vproj,
+                        Wproj=wproj)
         mdn_args = None  # Options for algorithm MDNormSCD
 
         # Find solid angle and flux
@@ -334,11 +309,9 @@ class BASISDiffraction(DataProcessorAlgorithm):
             _t_int_flux = self.nominal_integrated_flux('_t_int_flux')
 
         # Process a sample at a time
-        run_numbers = self._getRuns(self.getProperty("RunNumbers").value,
-                                    doIndiv=True)
+        run_numbers = self._getRuns(self.getProperty("RunNumbers").value, doIndiv=True)
         run_numbers = list(itertools.chain.from_iterable(run_numbers))
-        diffraction_reporter = Progress(self, start=0.0, end=1.0,
-                                        nreports=len(run_numbers))
+        diffraction_reporter = Progress(self, start=0.0, end=1.0, nreports=len(run_numbers))
         for i_run, run in enumerate(run_numbers):
             _t_sample = self._mask_t0_crop(run, '_t_sample')
 
@@ -352,30 +325,26 @@ class BASISDiffraction(DataProcessorAlgorithm):
             # Determine limits for momentum transfer in HKL space. Needs to be
             # done only once. We use the first run.
             if min_values is None:
-                kwargs = dict(QDimensions='Q3D',
-                              dEAnalysisMode='Elastic',
-                              Q3DFrames='HKL')
+                kwargs = dict(QDimensions='Q3D', dEAnalysisMode='Elastic', Q3DFrames='HKL')
                 min_values, max_values = ConvertToMDMinMaxGlobal(_t_sample, **kwargs)
-                cmd_args.update({'MinValues': min_values,
-                                 'MaxValues': max_values})
+                cmd_args.update({'MinValues': min_values, 'MaxValues': max_values})
 
             # Convert to MD
-            _t_md = ConvertToMD(_t_sample, OutputWorkspace='_t_md',
-                                **cmd_args)
+            _t_md = ConvertToMD(_t_sample, OutputWorkspace='_t_md', **cmd_args)
             if self._bkg:
-                _t_bkg_md = ConvertToMD(self._bkg, OutputWorkspace='_t_bkg_md',
-                                        **cmd_args)
+                _t_bkg_md = ConvertToMD(self._bkg, OutputWorkspace='_t_bkg_md', **cmd_args)
 
             # Determine aligned dimensions. Need to be done only once
             if mdn_args is None:
                 aligned = list()
                 for i_dim in range(3):
-                    kwargs = {'name': _t_md.getDimension(i_dim).name,
-                              'min': min_values[i_dim],
-                              'max': max_values[i_dim],
-                              'n_bins': self._n_bins[i_dim]}
-                    aligned.append(
-                        '{name},{min},{max},{n_bins}'.format(**kwargs))
+                    kwargs = {
+                        'name': _t_md.getDimension(i_dim).name,
+                        'min': min_values[i_dim],
+                        'max': max_values[i_dim],
+                        'n_bins': self._n_bins[i_dim]
+                    }
+                    aligned.append('{name},{min},{max},{n_bins}'.format(**kwargs))
                 mdn_args = dict(AlignedDim0=aligned[0],
                                 AlignedDim1=aligned[1],
                                 AlignedDim2=aligned[2],
@@ -388,19 +357,15 @@ class BASISDiffraction(DataProcessorAlgorithm):
             MDNormSCD(_t_md,
                       OutputWorkspace='_t_data',
                       OutputNormalizationWorkspace='_t_norm',
-                      TemporaryDataWorkspace='_t_data' if
-                      mtd.doesExist('_t_data') else None,
-                      TemporaryNormalizationWorkspace='_t_norm' if
-                      mtd.doesExist('_t_norm') else None,
+                      TemporaryDataWorkspace='_t_data' if mtd.doesExist('_t_data') else None,
+                      TemporaryNormalizationWorkspace='_t_norm' if mtd.doesExist('_t_norm') else None,
                       **mdn_args)
             if self._bkg:
                 MDNormSCD(_t_bkg_md,
                           OutputWorkspace='_t_bkg_data',
                           OutputNormalizationWorkspace='_t_bkg_norm',
-                          TemporaryDataWorkspace='_t_bkg_data' if
-                          mtd.doesExist('_t_bkg_data') else None,
-                          TemporaryNormalizationWorkspace='_t_bkg_norm'
-                          if mtd.doesExist('_t_bkg_norm') else None,
+                          TemporaryDataWorkspace='_t_bkg_data' if mtd.doesExist('_t_bkg_data') else None,
+                          TemporaryNormalizationWorkspace='_t_bkg_norm' if mtd.doesExist('_t_bkg_norm') else None,
                           **mdn_args)
             message = 'Processing sample {} of {}'.\
                 format(i_run+1, len(run_numbers))
@@ -412,8 +377,7 @@ class BASISDiffraction(DataProcessorAlgorithm):
         name = self.getPropertyValue("OutputWorkspace")
         _t_data = DivideMD(LHSWorkspace='_t_data', RHSWorkspace='_t_norm')
         if self._bkg:
-            _t_bkg_data = DivideMD(LHSWorkspace='_t_bkg_data',
-                                   RHSWorkspace='_t_bkg_norm')
+            _t_bkg_data = DivideMD(LHSWorkspace='_t_bkg_data', RHSWorkspace='_t_bkg_norm')
             _t_scale = CreateSingleValuedWorkspace(DataValue=self._bkg_scale)
             _t_bkg_data = MultiplyMD(_t_bkg_data, _t_scale)
             ws = MinusMD(_t_data, _t_bkg_data)
@@ -434,11 +398,8 @@ class BASISDiffraction(DataProcessorAlgorithm):
         :return: file name of event file with events treated with algorithm
         ModeratorTzeroLinear.
         """
-        ws = LoadEventNexus(Filename=self._makeRunFile(run_number),
-                            NXentryName='entry-diff',
-                            OutputWorkspace=name)
-        ws = ModeratorTzeroLinear(InputWorkspace=ws.name(),
-                                  OutputWorkspace=ws.name())
+        ws = LoadEventNexus(Filename=self._makeRunFile(run_number), NXentryName='entry-diff', OutputWorkspace=name)
+        ws = ModeratorTzeroLinear(InputWorkspace=ws.name(), OutputWorkspace=ws.name())
         file_name = self._spawn_tempnexus()
         SaveNexus(ws, file_name)
         return file_name
@@ -459,13 +420,9 @@ class BASISDiffraction(DataProcessorAlgorithm):
                             SingleBankPixelsOnly=False,
                             OutputWorkspace=name)
         MaskDetectors(ws, MaskedWorkspace=self._t_mask)
-        ws = ModeratorTzeroLinear(InputWorkspace=ws.name(),
-                                  OutputWorkspace=ws.name())
+        ws = ModeratorTzeroLinear(InputWorkspace=ws.name(), OutputWorkspace=ws.name())
         ws = ConvertUnits(ws, Target='Momentum', OutputWorkspace=ws.name())
-        ws = CropWorkspace(ws,
-                           OutputWorkspace=ws.name(),
-                           XMin=self._momentum_range[0],
-                           XMax=self._momentum_range[1])
+        ws = CropWorkspace(ws, OutputWorkspace=ws.name(), XMin=self._momentum_range[0], XMax=self._momentum_range[1])
         return ws
 
     def _getRuns(self, rlist, doIndiv=True):

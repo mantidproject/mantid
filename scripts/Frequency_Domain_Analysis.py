@@ -27,9 +27,7 @@ if 'muon_freq' in globals():
     except RuntimeError:
         is_hidden = True
     if not is_hidden:
-        muon_freq.setWindowState(
-            muon_freq.windowState(
-            ) & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+        muon_freq.setWindowState(muon_freq.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
         muon_freq.activateWindow()
     else:
         muon_freq = FrequencyAnalysisGui(parent, flags)

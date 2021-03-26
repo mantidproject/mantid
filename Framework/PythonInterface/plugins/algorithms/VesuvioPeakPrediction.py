@@ -34,32 +34,31 @@ class VesuvioPeakPrediction(VesuvioBase):
 
     def PyInit(self):
 
-        self.declareProperty(name='Model', defaultValue='Einstein',
+        self.declareProperty(name='Model',
+                             defaultValue='Einstein',
                              validator=StringListValidator(['Debye', 'Einstein']),
                              doc='Model used to make predictions')
 
         arrvalid = FloatArrayBoundedValidator(lower=0.)
 
-        self.declareProperty(FloatArrayProperty(name='Temperature', validator=arrvalid),
-                             doc='Temperature (K)')
+        self.declareProperty(FloatArrayProperty(name='Temperature', validator=arrvalid), doc='Temperature (K)')
 
         floatvalid = FloatBoundedValidator(0.0)
         floatvalid.setLowerExclusive(True)
 
-        self.declareProperty(name='AtomicMass', defaultValue=1.0,
-                             validator=floatvalid,
-                             doc='Atomic Mass (AMU)')
+        self.declareProperty(name='AtomicMass', defaultValue=1.0, validator=floatvalid, doc='Atomic Mass (AMU)')
 
-        self.declareProperty(name='Frequency', defaultValue=1.0,
+        self.declareProperty(name='Frequency',
+                             defaultValue=1.0,
                              validator=floatvalid,
                              doc='Fundamental frequency of oscillator (mEV)')
 
-        self.declareProperty(name='DebyeTemperature', defaultValue=1.0,
+        self.declareProperty(name='DebyeTemperature',
+                             defaultValue=1.0,
                              validator=floatvalid,
                              doc='Debye Temperature (K)')
 
-        self.declareProperty(ITableWorkspaceProperty("OutputTable", "vesuvio_params",
-                                                     direction=Direction.Output),
+        self.declareProperty(ITableWorkspaceProperty("OutputTable", "vesuvio_params", direction=Direction.Output),
                              doc="The name of the output table")
 
     def setup(self):
@@ -134,7 +133,7 @@ class VesuvioPeakPrediction(VesuvioBase):
         dx = debye_energy / (n - 1)
         for i in range(1, n + 1):
             x = dx * (i - 1) + dx / 1e6
-            y[i] = x * (3.0 * x ** 2 / debye_energy ** 3) / (math.tanh(x / (2 * temp)))
+            y[i] = x * (3.0 * x**2 / debye_energy**3) / (math.tanh(x / (2 * temp)))
 
         w_bar = self.r_integral(y, dx, n)
 
@@ -159,7 +158,7 @@ class VesuvioPeakPrediction(VesuvioBase):
         dx = debye_energy / (n - 1)
         for i in range(1, n + 1):
             x = dx * (i - 1) + dx / 1e6
-            y[i] = (3.0 * x ** 2 / debye_energy ** 3) / (x * math.tanh(x / (2 * temp)))
+            y[i] = (3.0 * x**2 / debye_energy**3) / (x * math.tanh(x / (2 * temp)))
 
         disp = math.sqrt(self.r_integral(y, dx, n) * DEBYE_CONSTANT / (2 * atomic_mass))
         return disp

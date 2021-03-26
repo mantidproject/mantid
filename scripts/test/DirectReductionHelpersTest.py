@@ -245,7 +245,6 @@ class DirectReductionHelpersTest(unittest.TestCase):
         self.assertEqual(kkdict['C'], 20)
 
     def test_class_property_setter(self):
-
         class test_class(object):
             def __init__(self):
                 object.__setattr__(self, 'A', helpers.ComplexProperty(['B', 'C']))

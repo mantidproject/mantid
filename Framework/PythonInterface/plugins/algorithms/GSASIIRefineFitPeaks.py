@@ -51,7 +51,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         return "Diffraction\\Engineering;Diffraction\\Fitting"
 
     def seeAlso(self):
-        return [ "LoadGSS","SaveGSS","Fit","EnggFitPeaks" ]
+        return ["LoadGSS", "SaveGSS", "Fit", "EnggFitPeaks"]
 
     def name(self):
         return "GSASIIRefineFitPeaks"
@@ -79,70 +79,105 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         return errors
 
     def PyInit(self):
-        self.declareProperty(name=self.PROP_REFINEMENT_METHOD, defaultValue=self.REFINEMENT_METHODS[0],
-                             validator=StringListValidator(self.REFINEMENT_METHODS), direction=Direction.Input,
+        self.declareProperty(name=self.PROP_REFINEMENT_METHOD,
+                             defaultValue=self.REFINEMENT_METHODS[0],
+                             validator=StringListValidator(self.REFINEMENT_METHODS),
+                             direction=Direction.Input,
                              doc="Refinement method (Rietvield or Pawley)")
 
-        self.declareProperty(WorkspaceProperty(name=self.PROP_INPUT_WORKSPACE, defaultValue="",
-                                               direction=Direction.Input), doc="Workspace with spectra to fit peaks")
-        self.declareProperty(name=self.PROP_WORKSPACE_INDEX, defaultValue=0, direction=Direction.Input,
+        self.declareProperty(WorkspaceProperty(name=self.PROP_INPUT_WORKSPACE,
+                                               defaultValue="",
+                                               direction=Direction.Input),
+                             doc="Workspace with spectra to fit peaks")
+        self.declareProperty(name=self.PROP_WORKSPACE_INDEX,
+                             defaultValue=0,
+                             direction=Direction.Input,
                              doc="Index of the spectrum in InputWorkspace to fit. By default, the first spectrum "
-                                 "(ie the only one for a focused workspace) is used")
-        self.declareProperty(FileProperty(name=self.PROP_PATH_TO_INST_PARAMS, defaultValue="", action=FileAction.Load,
-                                          extensions=[".prm"]), doc="Location of the phase file")
+                             "(ie the only one for a focused workspace) is used")
+        self.declareProperty(FileProperty(name=self.PROP_PATH_TO_INST_PARAMS,
+                                          defaultValue="",
+                                          action=FileAction.Load,
+                                          extensions=[".prm"]),
+                             doc="Location of the phase file")
         self.declareProperty(MultipleFileProperty(name=self.PROP_PATHS_TO_PHASE_FILES, extensions=[".cif"]),
                              doc="Paths to each required phase file")
         self.declareProperty(FileProperty(name=self.PROP_PATH_TO_GSASII, defaultValue="", action=FileAction.Directory),
                              doc="Path to the directory containing GSASII executable on the user's machine")
 
-        self.declareProperty(name=self.PROP_XMIN, defaultValue=0.0, direction=Direction.Input,
-                             doc="Minimum x value to use for refinement, in the same units as the input workspace. "
-                                 + "Leave blank to refine from the start of the data to {0}. Note, if {1} corresponds"
-                                 "  to a greater TOF value than this, then {1} is used".format(self.PROP_XMAX,
-                                                                                               self.PROP_PAWLEY_DMIN))
-        self.declareProperty(name=self.PROP_XMAX, defaultValue=0.0, direction=Direction.Input,
-                             doc="Maximum x value to use for refinement, in the same units as the input workspace. "
-                                 + "Leave blank to refine in the range {} to the end of the data".format(self.PROP_XMIN))
-        self.declareProperty(name=self.PROP_REFINE_SIGMA, defaultValue=False, direction=Direction.Input,
+        self.declareProperty(
+            name=self.PROP_XMIN,
+            defaultValue=0.0,
+            direction=Direction.Input,
+            doc="Minimum x value to use for refinement, in the same units as the input workspace. " +
+            "Leave blank to refine from the start of the data to {0}. Note, if {1} corresponds"
+            "  to a greater TOF value than this, then {1} is used".format(self.PROP_XMAX, self.PROP_PAWLEY_DMIN))
+        self.declareProperty(name=self.PROP_XMAX,
+                             defaultValue=0.0,
+                             direction=Direction.Input,
+                             doc="Maximum x value to use for refinement, in the same units as the input workspace. " +
+                             "Leave blank to refine in the range {} to the end of the data".format(self.PROP_XMIN))
+        self.declareProperty(name=self.PROP_REFINE_SIGMA,
+                             defaultValue=False,
+                             direction=Direction.Input,
                              doc="Whether to refine the sigma-1 profile coefficient")
-        self.declareProperty(name=self.PROP_REFINE_GAMMA, defaultValue=False, direction=Direction.Input,
+        self.declareProperty(name=self.PROP_REFINE_GAMMA,
+                             defaultValue=False,
+                             direction=Direction.Input,
                              doc="Whether to refine the gamma-1 (called 'X' in GSAS-II) profile coefficient")
 
-        self.declareProperty(WorkspaceProperty(name=self.PROP_OUT_FITTED_PEAKS_WS, defaultValue="",
-                                               direction=Direction.Output), doc="Workspace with fitted peaks")
-        self.declareProperty(ITableWorkspaceProperty(name=self.PROP_OUT_LATTICE_PARAMS, direction=Direction.Output,
+        self.declareProperty(WorkspaceProperty(name=self.PROP_OUT_FITTED_PEAKS_WS,
+                                               defaultValue="",
+                                               direction=Direction.Output),
+                             doc="Workspace with fitted peaks")
+        self.declareProperty(ITableWorkspaceProperty(name=self.PROP_OUT_LATTICE_PARAMS,
+                                                     direction=Direction.Output,
                                                      defaultValue=self.PROP_OUT_LATTICE_PARAMS),
                              doc="Table to output the lattice parameters (refined)")
-        self.declareProperty(name=self.PROP_OUT_RWP, direction=Direction.Output, defaultValue=0.0,
+        self.declareProperty(name=self.PROP_OUT_RWP,
+                             direction=Direction.Output,
+                             defaultValue=0.0,
                              doc="Weighted profile R factor (as a percentage)")
-        self.declareProperty(name=self.PROP_OUT_SIGMA, direction=Direction.Output, defaultValue=0.0,
+        self.declareProperty(name=self.PROP_OUT_SIGMA,
+                             direction=Direction.Output,
+                             defaultValue=0.0,
                              doc="Sigma-1 profile coefficient")
-        self.declareProperty(name=self.PROP_OUT_GAMMA, direction=Direction.Output, defaultValue=0.0,
+        self.declareProperty(name=self.PROP_OUT_GAMMA,
+                             direction=Direction.Output,
+                             defaultValue=0.0,
                              doc="Gamma-1 profile coefficient (called X in GSAS-II)")
-        self.declareProperty(FileProperty(name=self.PROP_GSAS_PROJ_PATH, defaultValue="", action=FileAction.Save,
-                                          extensions=".gpx"), doc="GSASII Project to work on")
+        self.declareProperty(FileProperty(name=self.PROP_GSAS_PROJ_PATH,
+                                          defaultValue="",
+                                          action=FileAction.Save,
+                                          extensions=".gpx"),
+                             doc="GSASII Project to work on")
 
         self.setPropertyGroup(self.PROP_OUT_FITTED_PEAKS_WS, self.PROP_OUT_GROUP_RESULTS)
         self.setPropertyGroup(self.PROP_OUT_LATTICE_PARAMS, self.PROP_OUT_GROUP_RESULTS)
         self.setPropertyGroup(self.PROP_OUT_RWP, self.PROP_OUT_GROUP_RESULTS)
         self.setPropertyGroup(self.PROP_GSAS_PROJ_PATH, self.PROP_OUT_GROUP_RESULTS)
 
-        self.declareProperty(name=self.PROP_PAWLEY_DMIN, defaultValue=1.0, direction=Direction.Input,
+        self.declareProperty(name=self.PROP_PAWLEY_DMIN,
+                             defaultValue=1.0,
+                             direction=Direction.Input,
                              doc="For Pawley refiment: as defined in GSAS-II, the minimum d-spacing to be used in a "
-                                 "Pawley refinement. Please refer to the GSAS-II documentation for full details. Note, "
-                                 "if this corresponds to a TOF value less than {0} or the lowest TOF value in the data,"
-                                 " the greatest of the 3 values is used as {0}".format(self.PROP_XMIN))
-        self.declareProperty(name=self.PROP_PAWLEY_NEGATIVE_WEIGHT, defaultValue=0.0, direction=Direction.Input,
+                             "Pawley refinement. Please refer to the GSAS-II documentation for full details. Note, "
+                             "if this corresponds to a TOF value less than {0} or the lowest TOF value in the data,"
+                             " the greatest of the 3 values is used as {0}".format(self.PROP_XMIN))
+        self.declareProperty(name=self.PROP_PAWLEY_NEGATIVE_WEIGHT,
+                             defaultValue=0.0,
+                             direction=Direction.Input,
                              doc="For Pawley refinement: as defined in GSAS-II, the weight for a penalty function "
-                                 "applied during a Pawley refinement on resulting negative intensities. "
-                                 "Please refer to the GSAS-II documentation for full details.")
+                             "applied during a Pawley refinement on resulting negative intensities. "
+                             "Please refer to the GSAS-II documentation for full details.")
 
         self.setPropertyGroup(self.PROP_PAWLEY_DMIN, self.PROP_GROUP_PAWLEY_PARAMS)
         self.setPropertyGroup(self.PROP_PAWLEY_NEGATIVE_WEIGHT, self.PROP_GROUP_PAWLEY_PARAMS)
 
-        self.declareProperty(name=self.PROP_SUPPRESS_GSAS_OUTPUT, defaultValue=False, direction=Direction.Input,
+        self.declareProperty(name=self.PROP_SUPPRESS_GSAS_OUTPUT,
+                             defaultValue=False,
+                             direction=Direction.Input,
                              doc="Set to True to prevent GSAS run info from being "
-                                 "printed (not recommended, but can be useful for debugging)")
+                             "printed (not recommended, but can be useful for debugging)")
 
     def PyExec(self):
         with self._suppress_stdout():
@@ -152,7 +187,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                 self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj,
                                                      do_pawley=self._refinement_method_is_pawley())
 
-            self._set_output_properties(lattice_params=lattice_params, rwp=rwp,
+            self._set_output_properties(lattice_params=lattice_params,
+                                        rwp=rwp,
                                         fitted_peaks_ws=self._generate_fitted_peaks_ws(gsas_proj),
                                         gamma=gsas_proj.values()[5]["Instrument Parameters"][0]["X"][1],
                                         sigma=gsas_proj.values()[5]["Instrument Parameters"][0]["sig-1"][1])
@@ -168,8 +204,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         return table
 
     def _create_refinement_params_dict(self, num_phases, pawley_tmin=None):
-        basic_refinement = {"set": {"Background": {"no.coeffs": 3, "refine": True},
-                                    "Sample Parameters": ["Scale"]}}
+        basic_refinement = {"set": {"Background": {"no.coeffs": 3, "refine": True}, "Sample Parameters": ["Scale"]}}
 
         input_ws = self.getProperty(self.PROP_INPUT_WORKSPACE).value
         x_max = self.getProperty(self.PROP_XMAX).value
@@ -180,8 +215,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         self.setProperty(self.PROP_XMAX, x_max)
         basic_refinement["set"].update({"Limits": [x_min, x_max]})
 
-        scale_refinement = {"set": {"Scale": True},
-                            "phases": range(1, num_phases)}
+        scale_refinement = {"set": {"Scale": True}, "phases": range(1, num_phases)}
         unit_cell_refinement = {"set": {"Cell": True}}
 
         profile_coeffs_refinement = {"set": {"Instrument Parameters": []}}
@@ -208,8 +242,10 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         ws = self.getProperty(self.PROP_INPUT_WORKSPACE).value
         if ws.getNumberHistograms > 1:
             ws_index = self.getPropertyValue(self.PROP_WORKSPACE_INDEX)
-            spectrum = mantid.ExtractSpectra(InputWorkspace=ws, StartWorkspaceIndex=ws_index,
-                                             EndWorkspaceIndex=ws_index, StoreInADS=False)
+            spectrum = mantid.ExtractSpectra(InputWorkspace=ws,
+                                             StartWorkspaceIndex=ws_index,
+                                             EndWorkspaceIndex=ws_index,
+                                             StoreInADS=False)
         else:
             spectrum = mantid.CloneWorkspace(InputWorkspace=ws, StoreInADS=False)
 
@@ -218,7 +254,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
     def _generate_fitted_peaks_ws(self, gsas_proj):
         input_ws = self.getProperty(self.PROP_INPUT_WORKSPACE).value
         fitted_peaks_ws_name = self.getPropertyValue(self.PROP_OUT_FITTED_PEAKS_WS)
-        fitted_peaks_ws = mantid.CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=fitted_peaks_ws_name,
+        fitted_peaks_ws = mantid.CloneWorkspace(InputWorkspace=input_ws,
+                                                OutputWorkspace=fitted_peaks_ws_name,
                                                 StoreInADS=False)
 
         hist = gsas_proj.histogram(0)

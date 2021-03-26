@@ -22,7 +22,7 @@ class CorrectLogTimes(mantid.api.PythonAlgorithm):
         return "DataHandling\\Logs"
 
     def seeAlso(self):
-        return [ "ChangeLogTime","CreateLogTimeCorrection","ChangePulsetime","ShiftLogTime" ]
+        return ["ChangeLogTime", "CreateLogTimeCorrection", "ChangePulsetime", "ShiftLogTime"]
 
     def name(self):
         """ Mantid required
@@ -34,30 +34,36 @@ class CorrectLogTimes(mantid.api.PythonAlgorithm):
                "as the first time in the proton charge log."
 
     def PyInit(self):
-        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.InOut), "Input workspace")
-        self.declareProperty("LogNames","",doc="Experimental log values to be shifted. If empty, will attempt to shift all logs")
+        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "", direction=mantid.kernel.Direction.InOut),
+                             "Input workspace")
+        self.declareProperty("LogNames",
+                             "",
+                             doc="Experimental log values to be shifted. If empty, will attempt to shift all logs")
 
     def PyExec(self):
         self.ws = self.getProperty("Workspace").value
         logNames = self.getProperty("LogNames").value
 
-        logList=[]
+        logList = []
 
         #check for parameters and build the result string
         for value in logNames.split(','):
-            value=value.strip()
-            if len(value)>0:
+            value = value.strip()
+            if len(value) > 0:
                 if not self.ws.run().hasProperty(value):
-                    err = 'Property '+value+' not found'
+                    err = 'Property ' + value + ' not found'
                     raise ValueError(err)
                 else:
                     logList.append(value)
 
-        if len(logList)==0:
-            logList=list(self.ws.getRun().keys())
+        if len(logList) == 0:
+            logList = list(self.ws.getRun().keys())
 
         for x in logList:
-            if x not in ['duration','proton_charge','start_time','run_title','run_start','run_number','gd_prtn_chrg','end_time']:
+            if x not in [
+                    'duration', 'proton_charge', 'start_time', 'run_title', 'run_start', 'run_number', 'gd_prtn_chrg',
+                    'end_time'
+            ]:
                 try:
                     self.ShiftTime(x)
                 #pylint: disable= bare-except
@@ -70,9 +76,12 @@ class CorrectLogTimes(mantid.api.PythonAlgorithm):
         """
         PC = self.ws.getRun()['proton_charge'].firstTime()
         P = self.ws.getRun()[logName].firstTime()
-        Tdiff = PC-P
-        Tdiff_num = Tdiff.total_milliseconds()*1E-3
-        mantid.simpleapi.ChangeLogTime(InputWorkspace=self.ws, OutputWorkspace = self.ws, LogName = logName, TimeOffset = Tdiff_num)
+        Tdiff = PC - P
+        Tdiff_num = Tdiff.total_milliseconds() * 1E-3
+        mantid.simpleapi.ChangeLogTime(InputWorkspace=self.ws,
+                                       OutputWorkspace=self.ws,
+                                       LogName=logName,
+                                       TimeOffset=Tdiff_num)
 
 
 mantid.api.AlgorithmFactory.subscribe(CorrectLogTimes)

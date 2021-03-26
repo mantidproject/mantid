@@ -13,20 +13,11 @@ from Interface.ui.drill.model.DrillExportModel import DrillExportModel
 
 class DrillExportModelTest(unittest.TestCase):
 
-    EXPORT_ALGORITHMS = {
-            "a1": {"ea1": True, "ea2": False},
-            "a2": {"ea2": True}
-            }
+    EXPORT_ALGORITHMS = {"a1": {"ea1": True, "ea2": False}, "a2": {"ea2": True}}
 
-    EXPORT_ALGO_CRITERIA = {
-            "ea1": "%param% == 'test'",
-            "ea2": "%param% != 'test'"
-            }
+    EXPORT_ALGO_CRITERIA = {"ea1": "%param% == 'test'", "ea2": "%param% != 'test'"}
 
-    EXPORT_ALGO_EXTENSION = {
-            "ea1": ".txt",
-            "ea2": ".xml"
-            }
+    EXPORT_ALGO_EXTENSION = {"ea1": ".txt", "ea2": ".xml"}
 
     def setUp(self):
         patch = mock.patch("Interface.ui.drill.model.DrillExportModel.mtd")
@@ -43,38 +34,38 @@ class DrillExportModelTest(unittest.TestCase):
 
         patch = mock.patch.dict("Interface.ui.drill.model.DrillExportModel"
                                 ".RundexSettings.EXPORT_ALGORITHMS",
-                                self.EXPORT_ALGORITHMS, clear=True)
+                                self.EXPORT_ALGORITHMS,
+                                clear=True)
         self.mAlgo = patch.start()
         self.addCleanup(patch.stop)
 
         patch = mock.patch.dict("Interface.ui.drill.model.DrillExportModel"
                                 ".RundexSettings.EXPORT_ALGO_CRITERIA",
-                                self.EXPORT_ALGO_CRITERIA, clear=True)
+                                self.EXPORT_ALGO_CRITERIA,
+                                clear=True)
         self.mAlgoCriteria = patch.start()
         self.addCleanup(patch.stop)
 
         patch = mock.patch.dict("Interface.ui.drill.model.DrillExportModel"
                                 ".RundexSettings.EXPORT_ALGO_EXTENSION",
-                                self.EXPORT_ALGO_EXTENSION, clear=True)
+                                self.EXPORT_ALGO_EXTENSION,
+                                clear=True)
         self.mAlgoExtension = patch.start()
         self.addCleanup(patch.stop)
 
-        patch = mock.patch("Interface.ui.drill.model.DrillExportModel"
-                           ".DrillAlgorithmPool")
+        patch = mock.patch("Interface.ui.drill.model.DrillExportModel" ".DrillAlgorithmPool")
         self.mTasksPool = patch.start()
         self.mTasksPool = self.mTasksPool.return_value
         self.addCleanup(patch.stop)
 
-        patch = mock.patch("Interface.ui.drill.model.DrillExportModel"
-                           ".DrillTask")
+        patch = mock.patch("Interface.ui.drill.model.DrillExportModel" ".DrillTask")
         self.mTask = patch.start()
         self.addCleanup(patch.stop)
 
         self.exportModel = DrillExportModel("a1")
 
     def test_init(self):
-        self.assertDictEqual(self.exportModel._exportAlgorithms,
-                             self.EXPORT_ALGORITHMS["a1"])
+        self.assertDictEqual(self.exportModel._exportAlgorithms, self.EXPORT_ALGORITHMS["a1"])
         self.mTasksPool.signals.taskError.connect.assert_called_once()
         self.mTasksPool.signals.taskSuccess.connect.assert_called_once()
         self.assertEqual(self.exportModel._exports, {})
@@ -118,34 +109,25 @@ class DrillExportModelTest(unittest.TestCase):
 
     def test_onTaskSuccess(self):
         self.exportModel._logSuccessExport = mock.Mock()
-        self.exportModel._exports = {"workspace1": {"filename1", "filename2"},
-                                     "workspace2": {"filename3"}}
+        self.exportModel._exports = {"workspace1": {"filename1", "filename2"}, "workspace2": {"filename3"}}
         self.exportModel._onTaskSuccess("workspace1:filename1")
-        self.assertDictEqual(self.exportModel._successExports,
-                             {"workspace1": {"filename1"}})
-        self.assertDictEqual(self.exportModel._exports,
-                             {"workspace1": {"filename2"},
-                              "workspace2": {"filename3"}})
+        self.assertDictEqual(self.exportModel._successExports, {"workspace1": {"filename1"}})
+        self.assertDictEqual(self.exportModel._exports, {"workspace1": {"filename2"}, "workspace2": {"filename3"}})
         self.exportModel._onTaskSuccess("workspace1:filename2")
-        self.assertDictEqual(self.exportModel._successExports,
-                             {"workspace1": {"filename1", "filename2"}})
-        self.assertDictEqual(self.exportModel._exports,
-                             {"workspace2": {"filename3"}})
+        self.assertDictEqual(self.exportModel._successExports, {"workspace1": {"filename1", "filename2"}})
+        self.assertDictEqual(self.exportModel._exports, {"workspace2": {"filename3"}})
         self.exportModel._logSuccessExport.assert_called_once()
 
     def test_onTaskError(self):
         self.exportModel._logSuccessExport = mock.Mock()
-        self.exportModel._exports = {"workspace1": {"filename1", "filename2"},
-                                     "workspace2": {"filename3"}}
+        self.exportModel._exports = {"workspace1": {"filename1", "filename2"}, "workspace2": {"filename3"}}
         self.exportModel._onTaskError("workspace2:filename3", "error message")
         self.mLogger.error.assert_called()
-        self.assertDictEqual(self.exportModel._exports,
-                             {"workspace1": {"filename1", "filename2"}})
+        self.assertDictEqual(self.exportModel._exports, {"workspace1": {"filename1", "filename2"}})
         self.exportModel._logSuccessExport.assert_called_once()
 
     def test_logSuccessExport(self):
-        self.exportModel._successExports = {"workspace1": {"filename1",
-                                                           "filename2"}}
+        self.exportModel._successExports = {"workspace1": {"filename1", "filename2"}}
         self.exportModel._logSuccessExport("workspace1")
         self.mLogger.notice.assert_called()
         self.assertDictEqual(self.exportModel._successExports, {})
@@ -157,19 +139,15 @@ class DrillExportModelTest(unittest.TestCase):
         mGroup = mock.Mock()
         mGroup.getNames.return_value = ["workspace"]
         self.mMtd.__getitem__.return_value = mGroup
-        self.mMtd.getObjectNames.return_value = ["workspace_1",
-                                                 "workspace_2"]
+        self.mMtd.getObjectNames.return_value = ["workspace_1", "workspace_2"]
         self.exportModel._validCriteria = mock.Mock()
         self.exportModel._validCriteria.return_value = True
         self.exportModel.run(mSample)
-        self.assertDictEqual(self.exportModel._exports,
-                             {"workspace_1": {
-                                 "/default/save/directory/workspace_1.txt"
-                                 },
-                              "workspace_2": {
-                                 "/default/save/directory/workspace_2.txt"
-                                 }
-                              })
+        self.assertDictEqual(
+            self.exportModel._exports, {
+                "workspace_1": {"/default/save/directory/workspace_1.txt"},
+                "workspace_2": {"/default/save/directory/workspace_2.txt"}
+            })
         self.mTask.assert_called()
 
 

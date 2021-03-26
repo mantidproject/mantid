@@ -34,13 +34,7 @@ output_dir = os.path.join(working_dir, output_folder_name)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 # just test 5 and 6 to save time as process is the same for all other pairs
 panels = [5, 6]
-linked_panels = {
-    1: 10,
-    2: 9,
-    3: 8,
-    4: 7,
-    5: 6
-}
+linked_panels = {1: 10, 2: 9, 3: 8, 4: 7, 5: 6}
 
 
 class WISHPowderReductionNoAbsorptionTest(MantidSystemTest):
@@ -106,8 +100,10 @@ class WISHPowderReductionTest(MantidSystemTest):
         self.tolerance = 1.e-8
         validation_files = []
         for panel in [x for x in panels if x < 6]:
-            validation_files = validation_files + ["w40503-{0}_{1}foc".format(panel, linked_panels.get(panel)),
-                                                   "WISH40503-{0}_{1}raw.nxs".format(panel, linked_panels.get(panel))]
+            validation_files = validation_files + [
+                "w40503-{0}_{1}foc".format(panel, linked_panels.get(panel)), "WISH40503-{0}_{1}raw.nxs".format(
+                    panel, linked_panels.get(panel))
+            ]
         return validation_files
 
     def clearWorkspaces(self):
@@ -141,8 +137,9 @@ class WISHPowderReductionCreateVanadiumTest(MantidSystemTest):
         self.tolerance = 1.e-8
         validation_files = []
         for panel in [x for x in panels if x < 6]:
-            validation_files = validation_files + ["w19612-{}foc".format(panel),
-                                                   "vana19612-{}foc-SF-SS.nxs".format(panel)]
+            validation_files = validation_files + [
+                "w19612-{}foc".format(panel), "vana19612-{}foc-SF-SS.nxs".format(panel)
+            ]
         return validation_files
 
     def requiredMemoryMB(self):

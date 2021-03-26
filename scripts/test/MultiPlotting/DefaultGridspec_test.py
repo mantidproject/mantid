@@ -10,17 +10,16 @@ from MultiPlotting.gridspec_engine import defaultGridspecGrid
 
 
 class DefaultGridSpecTest(unittest.TestCase):
-
     def test_someSquares(self):
         roots = [2, 3, 4, 5, 123]
         for root in roots:
-            result = defaultGridspecGrid(root*root)
+            result = defaultGridspecGrid(root * root)
             self.assertEqual(result, [root, root])
 
     def test_notSquares(self):
         roots = [3, 4, 5, 123]
         for root in roots:
-            result = defaultGridspecGrid(root*root-1)
+            result = defaultGridspecGrid(root * root - 1)
             self.assertEqual(result, [root, root])
 
     def test_specialCaseOne(self):

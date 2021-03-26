@@ -11,6 +11,10 @@ from .vasploader import VASPLoader
 
 from .tester import Tester
 
-all_loaders = {"CASTEP": CASTEPLoader, "CRYSTAL": CRYSTALLoader,
-               "DMOL3": DMOL3Loader, "GAUSSIAN": GAUSSIANLoader,
-               "VASP": VASPLoader}
+all_loaders = {
+    "CASTEP": CASTEPLoader,
+    "CRYSTAL": CRYSTALLoader,
+    "DMOL3": DMOL3Loader,
+    "GAUSSIAN": GAUSSIANLoader,
+    "VASP": VASPLoader
+}

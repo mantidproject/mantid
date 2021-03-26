@@ -8,12 +8,10 @@ from qtpy import QtWidgets, QtCore
 
 from Muon.GUI.Common.utilities import table_utils
 
-
 construct = "Construct"
 
 
 class MaxEntView(QtWidgets.QWidget):
-
     """
     The view for the MaxEnt widget. This
     creates the look of the widget
@@ -41,8 +39,7 @@ class MaxEntView(QtWidgets.QWidget):
         self.table.setColumnWidth(1, 300)
         self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setStretchLastSection(True)
-        self.table.setHorizontalHeaderLabels(
-            ("MaxEnt Property;Value").split(";"))
+        self.table.setHorizontalHeaderLabels(("MaxEnt Property;Value").split(";"))
         table_utils.setTableHeaders(self.table)
 
         # populate table
@@ -61,36 +58,29 @@ class MaxEntView(QtWidgets.QWidget):
         self.dead_box = table_utils.addCheckBoxToTable(self.table, True, 3)
 
         table_utils.setRowName(self.table, 4, "Use Phase Table")
-        self.use_phaseTable_box = table_utils.addCheckBoxToTable(
-            self.table, False, 4)
+        self.use_phaseTable_box = table_utils.addCheckBoxToTable(self.table, False, 4)
 
         table_utils.setRowName(self.table, 5, "Select Phase Table")
         options = [construct]
-        self.phaseTable_box = table_utils.addComboToTable(
-            self.table, 5, options)
+        self.phaseTable_box = table_utils.addComboToTable(self.table, 5, options)
 
         table_utils.setRowName(self.table, 6, "Fix phases")
-        self.fix_phase_box = table_utils.addCheckBoxToTable(
-            self.table, False, 6)
+        self.fix_phase_box = table_utils.addCheckBoxToTable(self.table, False, 6)
 
         self.table.hideRow(5)
         self.table.hideRow(6)
 
         table_utils.setRowName(self.table, 7, "Output phase table")
-        self.output_phase_box = table_utils.addCheckBoxToTable(
-            self.table, False, 7)
+        self.output_phase_box = table_utils.addCheckBoxToTable(self.table, False, 7)
 
         table_utils.setRowName(self.table, 8, "Output deadtimes")
-        self.output_dead_box = table_utils.addCheckBoxToTable(
-            self.table, False, 8)
+        self.output_dead_box = table_utils.addCheckBoxToTable(self.table, False, 8)
 
         table_utils.setRowName(self.table, 9, "Output reconstructed data")
-        self.output_data_box = table_utils.addCheckBoxToTable(
-            self.table, False, 9)
+        self.output_data_box = table_utils.addCheckBoxToTable(self.table, False, 9)
 
         table_utils.setRowName(self.table, 10, "Output phase convergence")
-        self.output_phase_evo_box = table_utils.addCheckBoxToTable(
-            self.table, False, 10)
+        self.output_phase_evo_box = table_utils.addCheckBoxToTable(self.table, False, 10)
 
         self.table.resizeRowsToContents()
 
@@ -108,8 +98,7 @@ class MaxEntView(QtWidgets.QWidget):
         self.tableA.verticalHeader().setVisible(False)
         self.tableA.horizontalHeader().setStretchLastSection(True)
 
-        self.tableA.setHorizontalHeaderLabels(
-            ("Advanced Property;Value").split(";"))
+        self.tableA.setHorizontalHeaderLabels(("Advanced Property;Value").split(";"))
         table_utils.setTableHeaders(self.tableA)
 
         table_utils.setRowName(self.tableA, 0, "Maximum entropy constant (A)")
@@ -125,8 +114,7 @@ class MaxEntView(QtWidgets.QWidget):
         self.outer_loop = table_utils.addSpinBoxToTable(self.tableA, 10, 3)
 
         table_utils.setRowName(self.tableA, 4, "Double pulse data")
-        self.double_pulse_box = table_utils.addCheckBoxToTable(
-            self.tableA, False, 4)
+        self.double_pulse_box = table_utils.addCheckBoxToTable(self.tableA, False, 4)
 
         table_utils.setRowName(self.tableA, 5, "Number of data points")
         self.N_points = table_utils.addComboToTable(self.tableA, 5, options)
@@ -192,14 +180,8 @@ class MaxEntView(QtWidgets.QWidget):
         self.run = run
 
     def changedPhaseBox(self):
-        self.table.setRowHidden(
-            5,
-            self.use_phaseTable_box.checkState(
-            ) != QtCore.Qt.Checked)
-        self.table.setRowHidden(
-            6,
-            self.use_phaseTable_box.checkState(
-            ) != QtCore.Qt.Checked)
+        self.table.setRowHidden(5, self.use_phaseTable_box.checkState() != QtCore.Qt.Checked)
+        self.table.setRowHidden(6, self.use_phaseTable_box.checkState() != QtCore.Qt.Checked)
 
     # send signal
     def MaxEntButtonClick(self):
@@ -280,25 +262,13 @@ class MaxEntView(QtWidgets.QWidget):
     def getInputWS(self):
         return str(self.ws.currentText())
 
-#    def calcPhasesInit(self):
-#        inputs={}
-#
-# this will be removed once maxEnt does a simultaneous fit
-#        inputs['InputWorkspace']=str( self.ws.currentText())
-# will use this instead of the above
-#        inputs["FirstGoodData"]= float( self.first_good.text())
-#        inputs['LastGoodData']=float(self.last_good.text())
-#        inputs["DetectorTable"] = "PhaseTable"
-#        inputs["DataFitted"] = "fits"
-#
-#        return inputs
     def getFirstGoodData(self):
         return float(self.first_good.text())
 
     def getLastGoodData(self):
         return float(self.last_good.text())
-    # turn button on and off
 
+    # turn button on and off
     def activateCalculateButton(self):
         self.button.setEnabled(True)
         self.cancel.setEnabled(False)

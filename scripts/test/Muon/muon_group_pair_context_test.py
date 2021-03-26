@@ -28,7 +28,7 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.assertEqual(self.context.diffs, [])
 
     def test_group_can_be_added(self):
-        group = MuonGroup('group_1', [1,3,5,7,9])
+        group = MuonGroup('group_1', [1, 3, 5, 7, 9])
 
         self.context.add_group(group)
 
@@ -235,7 +235,7 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.context.add_group(group_2)
         self.context.add_group(group_3)
         group_1.update_workspaces([62260], 'group_1_counts', 'group_1_asym', 'group_1_asym_unorm', False)
-        workspace_name_list = self.context.get_group_workspace_names(runs = [[62260]], groups=['group_1'], rebin=False)
+        workspace_name_list = self.context.get_group_workspace_names(runs=[[62260]], groups=['group_1'], rebin=False)
 
         group_name, run = self.context.get_group_pair_name_and_run_from_workspace_name(workspace_name_list[0])
 
@@ -250,7 +250,9 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.context.add_group(group_2)
         self.context.add_group(group_3)
         group_1.update_workspaces([62260, 62261], 'group_1_counts', 'group_1_asym', 'group_1_asym_unorm', False)
-        workspace_name_list = self.context.get_group_workspace_names(runs = [[62260, 62261]], groups=['group_1'], rebin=False)
+        workspace_name_list = self.context.get_group_workspace_names(runs=[[62260, 62261]],
+                                                                     groups=['group_1'],
+                                                                     rebin=False)
 
         group_name, run = self.context.get_group_pair_name_and_run_from_workspace_name(workspace_name_list[0])
 
@@ -265,41 +267,44 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.context.add_group(group_2)
         self.context.add_group(group_3)
         group_1.update_workspaces([62260, 62261], 'group_1_counts', 'group_1_asym', 'group_1_asym_unorm', False)
-        workspace_name_list = self.context.get_group_workspace_names(runs = [[62260, 62261]], groups=['group_1'], rebin=False)
+        workspace_name_list = self.context.get_group_workspace_names(runs=[[62260, 62261]],
+                                                                     groups=['group_1'],
+                                                                     rebin=False)
 
-        group_name, run = self.context.get_group_pair_name_and_run_from_workspace_name(workspace_name_list[0] + '; Fit Seq Flatbackground')
+        group_name, run = self.context.get_group_pair_name_and_run_from_workspace_name(workspace_name_list[0] +
+                                                                                       '; Fit Seq Flatbackground')
 
         self.assertEqual(group_name, 'group_1')
         self.assertEqual(run, '62260-62261')
 
     def test_add_phasequad(self):
         phasequad = MuonPhasequad("test", "table")
-        self.assertEqual(len(self.context._phasequad),0)
-        self.assertEqual(len(self.context._pairs),0)
+        self.assertEqual(len(self.context._phasequad), 0)
+        self.assertEqual(len(self.context._pairs), 0)
 
         self.context.add_phasequad(phasequad)
-        self.assertEqual(len(self.context._phasequad),1)
-        self.assertEqual(len(self.context._pairs),2)
+        self.assertEqual(len(self.context._phasequad), 1)
+        self.assertEqual(len(self.context._pairs), 2)
 
-        self.assertEqual(self.context._phasequad[0].name,"test")
-        self.assertEqual(self.context._pairs[0].name,"test_Re_")
-        self.assertEqual(self.context._pairs[1].name,"test_Im_")
+        self.assertEqual(self.context._phasequad[0].name, "test")
+        self.assertEqual(self.context._pairs[0].name, "test_Re_")
+        self.assertEqual(self.context._pairs[1].name, "test_Im_")
 
     def test_rm_phasequad(self):
         phasequad = MuonPhasequad("test", "table")
         phasequad2 = MuonPhasequad("test2", "table2")
         self.context.add_phasequad(phasequad)
         self.context.add_phasequad(phasequad2)
-        self.assertEqual(len(self.context._phasequad),2)
-        self.assertEqual(len(self.context._pairs),4)
+        self.assertEqual(len(self.context._phasequad), 2)
+        self.assertEqual(len(self.context._pairs), 4)
 
         self.context.remove_phasequad(phasequad)
-        self.assertEqual(len(self.context._phasequad),1)
-        self.assertEqual(len(self.context._pairs),2)
+        self.assertEqual(len(self.context._phasequad), 1)
+        self.assertEqual(len(self.context._pairs), 2)
 
-        self.assertEqual(self.context._phasequad[0].name,"test2")
-        self.assertEqual(self.context._pairs[0].name,"test2_Re_")
-        self.assertEqual(self.context._pairs[1].name,"test2_Im_")
+        self.assertEqual(self.context._phasequad[0].name, "test2")
+        self.assertEqual(self.context._pairs[0].name, "test2_Re_")
+        self.assertEqual(self.context._pairs[1].name, "test2_Im_")
 
 
 if __name__ == '__main__':

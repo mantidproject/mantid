@@ -11,24 +11,15 @@ from Muon.MaxentTools.zft import ZFT
 #
 
 
-def MODAMP(
-     hists,
-     datum,
-     sigma,
-     MISSCHANNELS_MM,
-     FASE_phase,
-     MAXPAGE_f,
-     PULSESHAPE_convol,
-     DETECT_e,
-     SAVETIME_I2,
-     mylog):
+def MODAMP(hists, datum, sigma, MISSCHANNELS_MM, FASE_phase, MAXPAGE_f, PULSESHAPE_convol, DETECT_e, SAVETIME_I2,
+           mylog):
     npts, ngroups = datum.shape
     zr, zi = ZFT(MAXPAGE_f, PULSESHAPE_convol, DETECT_e, SAVETIME_I2)
     cs = np.cos(FASE_phase)
     sn = np.sin(FASE_phase)
     AMPS_amp = np.zeros([ngroups])
     for i in range(ngroups):
-        if(hists[i] != 0):
+        if (hists[i] != 0):
             hij = cs[i] * zr + sn[i] * zi
             s = np.sum(datum[:, i] * hij / (sigma[:, i]**2))
             t = np.sum(hij**2 / (sigma[:, i]**2))

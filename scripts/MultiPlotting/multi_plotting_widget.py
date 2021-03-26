@@ -39,7 +39,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self._context = context
         layout = QtWidgets.QVBoxLayout()
         splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
-        self.quickEdit = QuickEditWidget(self, auto_btn = True)
+        self.quickEdit = QuickEditWidget(self, auto_btn=True)
         self.quickEdit.connect_x_range_changed(self._x_range_changed)
         self.quickEdit.connect_y_range_changed(self._y_range_changed)
         self.quickEdit.connect_errors_changed(self._errors_changed)
@@ -57,6 +57,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.setLayout(layout)
 
     """ plotting """
+
     def add_subplot(self, name):
         self.plots.add_subplot(name, len(self.quickEdit.get_subplots()))
 
@@ -136,6 +137,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.plots.disconnect_rm_subplot_signal()
 
     """ update GUI """
+
     def _if_empty_close(self):
         if not self._context.subplots:
             self.closeSignal.emit()

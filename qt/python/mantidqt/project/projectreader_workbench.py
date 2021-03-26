@@ -12,7 +12,6 @@ import json
 
 
 class ProjectReaderWorkbench(ProjectReaderInterface):
-
     def __init__(self, project_file_ext, filename):
         super().__init__(project_file_ext, filename)
         self.json_data = []

@@ -19,8 +19,8 @@ from Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_select
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_selection_widget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
-
 # pass the call not the object to widget
+
 
 @start_qapplication
 class Transform2Test(unittest.TestCase):
@@ -28,8 +28,9 @@ class Transform2Test(unittest.TestCase):
         self.context = setup_context(True)
         # create widget
         self.widget = transform_widget.TransformWidget(self.context, FFTWidget, MaxEntWidget)
-        self.widget._maxent._presenter = mock.MagicMock()#create_autospec(maxent_presenter_new.MaxEntPresenter, spec_set=True)
-        self.widget._fft._presenter = mock.MagicMock()#create_autospec(fft_presenter_new.FFTPresenter, spec_Set=True)
+        self.widget._maxent._presenter = mock.MagicMock(
+        )  #create_autospec(maxent_presenter_new.MaxEntPresenter, spec_set=True)
+        self.widget._fft._presenter = mock.MagicMock()  #create_autospec(fft_presenter_new.FFTPresenter, spec_Set=True)
         # create the view
         self.view = mock.create_autospec(transform_view.TransformView, spec_set=False)
         self.view.getView = mock.Mock()
@@ -68,8 +69,8 @@ class Transform2Test(unittest.TestCase):
 
     def test_new_data(self):
         self.widget.handle_new_data_loaded()
-        self.assertEquals(self.widget._maxent._presenter.runChanged.call_count,1)
-        self.assertEquals(self.widget._fft._presenter.runChanged.call_count,1)
+        self.assertEquals(self.widget._maxent._presenter.runChanged.call_count, 1)
+        self.assertEquals(self.widget._fft._presenter.runChanged.call_count, 1)
 
     def test_new_instrument(self):
         self.mock_widgets()

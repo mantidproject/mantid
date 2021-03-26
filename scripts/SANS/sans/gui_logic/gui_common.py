@@ -44,16 +44,19 @@ OPTIONS_EQUAL = "="
 # ----------------------------------------------------------------------------------------------------------------------
 #  Other Globals
 # ----------------------------------------------------------------------------------------------------------------------
-LAB_STRINGS = {SANSInstrument.SANS2D: "rear",
-               SANSInstrument.LOQ: "main-detector",
-               SANSInstrument.LARMOR: "DetectorBench",
-               SANSInstrument.ZOOM: "rear-detector",
-               SANSInstrument.NO_INSTRUMENT: ReductionMode.LAB.value
-               }
+LAB_STRINGS = {
+    SANSInstrument.SANS2D: "rear",
+    SANSInstrument.LOQ: "main-detector",
+    SANSInstrument.LARMOR: "DetectorBench",
+    SANSInstrument.ZOOM: "rear-detector",
+    SANSInstrument.NO_INSTRUMENT: ReductionMode.LAB.value
+}
 
-HAB_STRINGS = {SANSInstrument.SANS2D: "front",
-               SANSInstrument.LOQ: "Hab",
-               SANSInstrument.NO_INSTRUMENT: ReductionMode.HAB.value}
+HAB_STRINGS = {
+    SANSInstrument.SANS2D: "front",
+    SANSInstrument.LOQ: "Hab",
+    SANSInstrument.NO_INSTRUMENT: ReductionMode.HAB.value
+}
 
 ALL = ReductionMode.ALL.value
 DEFAULT_HAB = ReductionMode.HAB.value
@@ -79,7 +82,7 @@ def millimeter_2_meter(num):
     @param float in mm
     @returns float in m
     '''
-    return num/1000.
+    return num / 1000.
 
 
 def get_detector_strings_for_gui(instrument=None):
@@ -90,8 +93,7 @@ def get_detector_strings_for_gui(instrument=None):
         return [LAB_STRINGS[instrument]]
 
     else:
-        return [LAB_STRINGS[SANSInstrument.NO_INSTRUMENT],
-                HAB_STRINGS[SANSInstrument.NO_INSTRUMENT]]
+        return [LAB_STRINGS[SANSInstrument.NO_INSTRUMENT], HAB_STRINGS[SANSInstrument.NO_INSTRUMENT]]
 
 
 def get_detector_strings_for_diagnostic_page(instrument=None):
@@ -102,8 +104,7 @@ def get_detector_strings_for_diagnostic_page(instrument=None):
         return [LAB_STRINGS[instrument]]
 
     else:
-        return [LAB_STRINGS[SANSInstrument.NO_INSTRUMENT],
-                HAB_STRINGS[SANSInstrument.NO_INSTRUMENT]]
+        return [LAB_STRINGS[SANSInstrument.NO_INSTRUMENT], HAB_STRINGS[SANSInstrument.NO_INSTRUMENT]]
 
 
 def get_reduction_mode_strings_for_gui(instrument=None):
@@ -117,9 +118,7 @@ def get_reduction_mode_strings_for_gui(instrument=None):
         return [LAB_STRINGS[instrument]]
 
     else:
-        return [LAB_STRINGS[SANSInstrument.NO_INSTRUMENT],
-                HAB_STRINGS[SANSInstrument.NO_INSTRUMENT],
-                MERGED, ALL]
+        return [LAB_STRINGS[SANSInstrument.NO_INSTRUMENT], HAB_STRINGS[SANSInstrument.NO_INSTRUMENT], MERGED, ALL]
 
 
 def get_instrument_strings_for_gui():
@@ -127,19 +126,19 @@ def get_instrument_strings_for_gui():
 
 
 def get_reduction_selection(instrument):
-    selection = {ReductionMode.MERGED: MERGED,
-                 ReductionMode.ALL: ALL}
+    selection = {ReductionMode.MERGED: MERGED, ReductionMode.ALL: ALL}
 
-    if any (instrument is x for x in [SANSInstrument.SANS2D, SANSInstrument.LOQ]):
-        selection.update({ReductionMode.LAB: LAB_STRINGS[instrument],
-                          ReductionMode.HAB: HAB_STRINGS[instrument]})
+    if any(instrument is x for x in [SANSInstrument.SANS2D, SANSInstrument.LOQ]):
+        selection.update({ReductionMode.LAB: LAB_STRINGS[instrument], ReductionMode.HAB: HAB_STRINGS[instrument]})
 
     elif any(instrument is x for x in [SANSInstrument.LARMOR, SANSInstrument.ZOOM]):
         selection = {ReductionMode.LAB: LAB_STRINGS[instrument]}
 
     else:
-        selection.update({ReductionMode.LAB: LAB_STRINGS[SANSInstrument.NO_INSTRUMENT],
-                          ReductionMode.HAB: HAB_STRINGS[SANSInstrument.NO_INSTRUMENT]})
+        selection.update({
+            ReductionMode.LAB: LAB_STRINGS[SANSInstrument.NO_INSTRUMENT],
+            ReductionMode.HAB: HAB_STRINGS[SANSInstrument.NO_INSTRUMENT]
+        })
     return selection
 
 
@@ -272,7 +271,6 @@ class SANSGuiPropertiesHandler(object):
     This class handles the setting and getting
     of SANSDataProcessorGUI default properties.
     """
-
     def __init__(self, keys, line_edits={}):
         """
         Initialise a properties handler for a particular pyqt view.

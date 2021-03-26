@@ -9,12 +9,11 @@ from mantid.api import *
 
 
 class EnggFitTOFFromPeaks(PythonAlgorithm):
-
     def category(self):
         return "Diffraction\\Engineering;Diffraction\\Fitting"
 
     def seeAlso(self):
-        return [ "EnggFitPeaks","GSASIIRefineFitPeaks","Fit" ]
+        return ["EnggFitPeaks", "GSASIIRefineFitPeaks", "Fit"]
 
     def name(self):
         return "EnggFitPeaks"
@@ -32,20 +31,19 @@ class EnggFitTOFFromPeaks(PythonAlgorithm):
                              "in the column labelled 'dSpacing'. When using the back-to-back exponential "
                              "peak function, the 'X0' column must have the fitted peak center.")
 
-        self.declareProperty('OutParametersTable', '', direction=Direction.Input,
+        self.declareProperty('OutParametersTable',
+                             '',
+                             direction=Direction.Input,
                              doc='Name for a table workspace with the fitted values calculated by '
                              'this algorithm (DIFA, DIFC and TZERO calibration parameters) for GSAS. '
                              'These three parameters are added as three columns in a single row. If not given, '
                              'the table workspace is not created.')
 
-        self.declareProperty('DIFA', 0.0, direction = Direction.Output,
-                             doc='Fitted DIFA calibration parameter')
+        self.declareProperty('DIFA', 0.0, direction=Direction.Output, doc='Fitted DIFA calibration parameter')
 
-        self.declareProperty('DIFC', 0.0, direction = Direction.Output,
-                             doc="Fitted DIFC calibration parameter")
+        self.declareProperty('DIFC', 0.0, direction=Direction.Output, doc="Fitted DIFC calibration parameter")
 
-        self.declareProperty('TZERO', 0.0, direction = Direction.Output,
-                             doc="Fitted TZERO calibration parameter")
+        self.declareProperty('TZERO', 0.0, direction=Direction.Output, doc="Fitted TZERO calibration parameter")
 
     def validateInputs(self):
         errors = dict()
@@ -68,8 +66,8 @@ class EnggFitTOFFromPeaks(PythonAlgorithm):
         out_tbl_name = self.getPropertyValue('OutParametersTable')
         self._produce_outputs(difa, difc, tzero, out_tbl_name)
 
-        self.log().information("Fitted {0} peaks in total. DIFA: {1}, DIFC: {2}, TZERO: {3}".
-                               format(peaks.rowCount(), difa, difc, tzero))
+        self.log().information("Fitted {0} peaks in total. DIFA: {1}, DIFC: {2}, TZERO: {3}".format(
+            peaks.rowCount(), difa, difc, tzero))
 
     def _fit_dSpacingTOF(self, fitted_peaks_table):
         """
@@ -89,8 +87,8 @@ class EnggFitTOFFromPeaks(PythonAlgorithm):
 
         num_peaks = fitted_peaks_table.rowCount()
         if num_peaks < 3:
-            raise ValueError('Cannot fit a quadratic function with less than three peaks. Got a table of '
-                             + 'peaks with ' + str(num_peaks) + ' peaks')
+            raise ValueError('Cannot fit a quadratic function with less than three peaks. Got a table of ' +
+                             'peaks with ' + str(num_peaks) + ' peaks')
 
         convert_tbl_alg = self.createChildAlgorithm('ConvertTableToMatrixWorkspace')
         convert_tbl_alg.setProperty('InputWorkspace', fitted_peaks_table)

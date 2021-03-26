@@ -14,15 +14,12 @@ from Interface.ui.drill.presenter.DrillPresenter import DrillPresenter
 
 
 class DrillPresenterTest(unittest.TestCase):
-
     def setUp(self):
-        patch = mock.patch('Interface.ui.drill.presenter.DrillPresenter'
-                           '.DrillSettingsDialog')
+        patch = mock.patch('Interface.ui.drill.presenter.DrillPresenter' '.DrillSettingsDialog')
         self.mSettings = patch.start()
         self.addCleanup(patch.stop)
 
-        patch = mock.patch(
-                'Interface.ui.drill.presenter.DrillPresenter.DrillModel')
+        patch = mock.patch('Interface.ui.drill.presenter.DrillPresenter.DrillModel')
         self.mModel = patch.start()
         self.mModel.return_value.getColumnHeaderData.return_value = [], []
         self.mModel.return_value.getCycleAndExperiment.return_value = "", ""
@@ -59,20 +56,16 @@ class DrillPresenterTest(unittest.TestCase):
         self.view.table.setCellContents.reset_mock()
         self.view.table.getCellContents.return_value = "test1,test,test_10"
         self.presenter.onAutomaticFilling()
-        self.view.table.setCellContents.assert_called_with(0, 1,
-                                                           "test2,test,test_11")
+        self.view.table.setCellContents.assert_called_with(0, 1, "test2,test,test_11")
         self.view.table.setCellContents.reset_mock()
         # multiple columns
         self.view.increment.value.return_value = 7
-        self.view.table.getSelectedCells.return_value = [(0, 0), (1, 0),
-                                                         (0, 1), (1, 1)]
+        self.view.table.getSelectedCells.return_value = [(0, 0), (1, 0), (0, 1), (1, 1)]
         self.view.table.getRowsFromSelectedCells.return_value = [0, 1]
         self.view.table.getCellContents.return_value = "10+15,100:200,1:10:2"
         self.presenter.onAutomaticFilling()
-        calls = [mock.call(1, 0, "17+22,207:307,17:26:2"),
-                 mock.call(1, 1, "17+22,207:307,17:26:2")]
+        calls = [mock.call(1, 0, "17+22,207:307,17:26:2"), mock.call(1, 1, "17+22,207:307,17:26:2")]
         self.view.table.setCellContents.assert_has_calls(calls)
-
 
     def test_onParamOk(self):
         self.view.columns = ["test1", "test2"]
@@ -101,8 +94,7 @@ class DrillPresenterTest(unittest.TestCase):
 
     def test_onProcessGroup(self):
         self.presenter._process = mock.Mock()
-        self.model.getSamplesGroups.return_value = {'A': [1, 2, 3],
-                                                    'B': [5, 6, 8]}
+        self.model.getSamplesGroups.return_value = {'A': [1, 2, 3], 'B': [5, 6, 8]}
         self.view.getSelectedRows.return_value = [1]
         self.presenter.onProcessGroup()
         self.presenter._process.assert_called_once_with({1, 2, 3})
@@ -199,8 +191,7 @@ class DrillPresenterTest(unittest.TestCase):
         self.model.getSettingsTypes.return_value = ({}, {}, {})
         self.presenter.settingsWindow()
         self.mSettings.assert_called_once()
-        self.mSettings.return_value.initWidgets.assert_called_once_with(
-                {}, {}, {})
+        self.mSettings.return_value.initWidgets.assert_called_once_with({}, {}, {})
         self.mSettings.return_value.setSettings.assert_called_once()
         self.model.getSettings.assert_called_once()
 

@@ -45,11 +45,12 @@ class CalibrationModel(object):
         :param bank: Optional parameter to crop by bank
         :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         """
-        van_integration, van_curves = vanadium_corrections.fetch_correction_workspaces(
-            vanadium_path, instrument, rb_num=rb_num)
+        van_integration, van_curves = vanadium_corrections.fetch_correction_workspaces(vanadium_path,
+                                                                                       instrument,
+                                                                                       rb_num=rb_num)
         sample_workspace = path_handling.load_workspace(sample_path)
-        full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
-                                      path_handling.ENGINEERING_PREFIX, "full_calibration")
+        full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+                                      "full_calibration")
         if full_calib_path is not None and path.exists(full_calib_path):
             full_calib = LoadAscii(full_calib_path, OutputWorkspace="det_pos", Separator="Tab")
             output = self.run_calibration(sample_workspace,
@@ -59,8 +60,7 @@ class CalibrationModel(object):
                                           spectrum_numbers,
                                           full_calib_ws=full_calib)
         else:
-            output = self.run_calibration(sample_workspace, van_integration, van_curves, bank,
-                                          spectrum_numbers)
+            output = self.run_calibration(sample_workspace, van_integration, van_curves, bank, spectrum_numbers)
         if plot_output:
             self._plot_vanadium_curves()
             for i in range(len(output)):
@@ -96,8 +96,7 @@ class CalibrationModel(object):
         self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, sample_path, vanadium_path, instrument,
                                  bank, spectrum_numbers)
         if rb_num:
-            user_calib_dir = path.join(path_handling.get_output_path(), "User", rb_num,
-                                       "Calibration", "")
+            user_calib_dir = path.join(path_handling.get_output_path(), "User", rb_num, "Calibration", "")
             self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, sample_path, vanadium_path,
                                      instrument, bank, spectrum_numbers)
 
@@ -108,11 +107,11 @@ class CalibrationModel(object):
         SouthBank = ws_inst.getComponentByName("SouthBank")
         params_north = []
         params_south = []
-        for param_name in ["alpha", "beta_0","beta_1","sigma_0_sq", "sigma_1_sq", "sigma_2_sq"]:
+        for param_name in ["alpha", "beta_0", "beta_1", "sigma_0_sq", "sigma_1_sq", "sigma_2_sq"]:
             params_north += [NorthBank.getNumberParameter(param_name)[0]]
             params_south += [SouthBank.getNumberParameter(param_name)[0]]
 
-        return [params_north,params_south]
+        return [params_north, params_south]
 
     def load_existing_gsas_parameters(self, file_path):
         if not path.exists(file_path):
@@ -124,7 +123,7 @@ class CalibrationModel(object):
         except RuntimeError:
             logger.error("Invalid file selected: ", file_path)
             return
-        vanadium_corrections.fetch_correction_workspaces(instrument+van_no, instrument)
+        vanadium_corrections.fetch_correction_workspaces(instrument + van_no, instrument)
         return instrument, van_no, sample_no
 
     @staticmethod
@@ -235,13 +234,7 @@ class CalibrationModel(object):
         ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
         ax.set_ylabel("Fitted Peaks Centre(TOF, us)")
 
-    def run_calibration(self,
-                        sample_ws,
-                        van_integration,
-                        van_curves,
-                        bank,
-                        spectrum_numbers,
-                        full_calib_ws=None):
+    def run_calibration(self, sample_ws, van_integration, van_curves, bank, spectrum_numbers, full_calib_ws=None):
         """
         Runs the main Engineering calibration algorithm.
         :param sample_ws: The workspace with the sample data.
@@ -267,8 +260,8 @@ class CalibrationModel(object):
             if bank is None:
                 output = [None] * 2
                 for i in range(len(output)):
-                    kwargs["Bank"] = str(i+1)
-                    kwargs["FittedPeaks"] = self._generate_table_workspace_name(str(i+1))
+                    kwargs["Bank"] = str(i + 1)
+                    kwargs["FittedPeaks"] = self._generate_table_workspace_name(str(i + 1))
                     output[i] = run_engg_calibrate(kwargs)
             else:
                 output = [None]
@@ -298,8 +291,10 @@ class CalibrationModel(object):
         :param bank: Optional parameter to crop by bank.
         :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         """
-        kwargs = {"ceria_run": path_handling.get_run_number_from_path(sample_path, instrument),
-                  "vanadium_run": path_handling.get_run_number_from_path(vanadium_path, instrument)}
+        kwargs = {
+            "ceria_run": path_handling.get_run_number_from_path(sample_path, instrument),
+            "vanadium_run": path_handling.get_run_number_from_path(vanadium_path, instrument)
+        }
 
         def south_kwargs():
             kwargs["template_file"] = SOUTH_BANK_TEMPLATE_FILE
@@ -310,8 +305,8 @@ class CalibrationModel(object):
             kwargs["bank_names"] = ["North"]
 
         def generate_output_file(difa_list, difc_list, tzero_list, bank_name, kwargs_to_pass):
-            file_path = calibration_dir + self._generate_output_file_name(vanadium_path, sample_path, instrument,
-                                                                          bank=bank_name)
+            file_path = calibration_dir + self._generate_output_file_name(
+                vanadium_path, sample_path, instrument, bank=bank_name)
             write_ENGINX_GSAS_iparam_file(file_path, difa_list, difc_list, tzero_list, bk2bk_params, **kwargs_to_pass)
 
         if not path.exists(calibration_dir):
@@ -349,11 +344,7 @@ class CalibrationModel(object):
                     # If formatted correctly the line should be in the format INS bank ICONS difc difa tzero
                     elements = line.split()
                     bank = elements[1]
-                    params_table.append(
-                        [int(bank) - 1,
-                         float(elements[3]),
-                         float(elements[4]),
-                         float(elements[5])])
+                    params_table.append([int(bank) - 1, float(elements[3]), float(elements[4]), float(elements[5])])
 
         if run_numbers == "":
             raise RuntimeError("Invalid file format.")

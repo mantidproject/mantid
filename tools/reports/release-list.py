@@ -17,7 +17,7 @@ class Release:
         name = name.replace("Iteration ", "Iteration")
         name = name.replace("Release ", "v")
         if name.count('.') == 1:
-            name = name+'.0'
+            name = name + '.0'
         self.name = name
 
         self.date = datestamp.strftime("%Y-%m-%d")
@@ -26,7 +26,7 @@ class Release:
         return "%s,%s" % (self.date, self.name)
 
     def __eq__(self, other):
-        return self.name == other.name and self.date==other.date
+        return self.name == other.name and self.date == other.date
 
     def __hash__(self):
         return hash(str(self))
@@ -36,34 +36,34 @@ def getTags(repolocation):
     arg_tags = ['git', 'log', '--tags', '--simplify-by-decoration', '--pretty="format:%ai %d"']
     sub = subprocess.Popen(arg_tags, stdout=subprocess.PIPE, close_fds=True, cwd=repolocation)
     tags = [line.decode('utf-8').strip() for line in sub.stdout]
-    tags = [tag for tag in tags  if "tag:" in tag]
+    tags = [tag for tag in tags if "tag:" in tag]
     result = []
     for tag in tags:
         tag = tag.split()
-        datestamp="%sT%s%s" % tuple(tag[:3])
-        datestamp=datestamp.split('format:')[1]
+        datestamp = "%sT%s%s" % tuple(tag[:3])
+        datestamp = datestamp.split('format:')[1]
 
         # grab out the timezone
-        tzd=0
+        tzd = 0
         if '+' in datestamp:
             (datestamp, tzd) = (datestamp.split('+'))
-            tzd = int(.01*float(tzd))
+            tzd = int(.01 * float(tzd))
         elif datestamp.count('-') == 3:
-            tzd = "-"+datestamp.split('-')[-1]
-            datestamp = datestamp.replace(tzd,'')
-            tzd = int(.01*float(tzd))
-        tzd=datetime.timedelta(hours=tzd)
+            tzd = "-" + datestamp.split('-')[-1]
+            datestamp = datestamp.replace(tzd, '')
+            tzd = int(.01 * float(tzd))
+        tzd = datetime.timedelta(hours=tzd)
 
         # parse the date and correct for timezone
         datestamp = datetime.datetime.strptime(datestamp, "%Y-%m-%dT%H:%M:%S")
         datestamp -= tzd
 
         tag = ' '.join(tag[3:])[:-1]
-        tag = tag.replace('(','')
-        tag = tag.replace(')','')
-        tag = [item.replace('tag: ','') for item in tag.split(', ') if 'tag:' in item]
+        tag = tag.replace('(', '')
+        tag = tag.replace(')', '')
+        tag = [item.replace('tag: ', '') for item in tag.split(', ') if 'tag:' in item]
         for item in tag:
-            result.append(Release(item,datestamp))
+            result.append(Release(item, datestamp))
 
     return result
 
@@ -72,8 +72,7 @@ def parseMilestones(json_doc):
     milestones = []
     for milestone in json_doc:
         name = milestone['title']
-        datestamp= datetime.datetime.strptime(milestone['due_on'],
-                                              "%Y-%m-%dT%H:%M:%SZ")
+        datestamp = datetime.datetime.strptime(milestone['due_on'], "%Y-%m-%dT%H:%M:%SZ")
         milestones.append(Release(name, datestamp))
     return milestones
 
@@ -82,11 +81,10 @@ def getMilestones(endpoint, oauth=None):
     #print('Getting list of all milestones from Github.')
     milestones = []
 
-    req_params={'state': 'all'}
+    req_params = {'state': 'all'}
     if oauth is not None:
         req_params['access_token'] = oauth
-    req = requests.get('%smilestones' % endpoint,
-                       params=req_params)
+    req = requests.get('%smilestones' % endpoint, params=req_params)
     status_code = req.status_code
     if status_code == 403:
         print("status:", status_code)
@@ -119,7 +117,7 @@ def writeFile(releases):
     csvreleases.write("date,milestone\n")
 
     for release in releases:
-        csvreleases.write(str(release)+"\n")
+        csvreleases.write(str(release) + "\n")
 
     csvreleases.close()
 
@@ -149,12 +147,12 @@ if __name__ == '__main__':
         # only unique milestones
         if milestone not in releases:
             # see if they have a different date
-            found=False
+            found = False
             for (i, release) in enumerate(releases):
                 if release.name == milestone.name:
                     found = True
                     if milestone.date < release.date:
-                        releases[i]=milestone
+                        releases[i] = milestone
                     break
             # only if they exist in the past
             if not found:

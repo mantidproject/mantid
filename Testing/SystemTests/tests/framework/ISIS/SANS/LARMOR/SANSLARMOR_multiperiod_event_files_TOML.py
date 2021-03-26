@@ -12,8 +12,8 @@ from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.kernel import config
 from mantid.api import AnalysisDataService
 from sans.command_interface.ISISCommandInterface import (Set1D, Detector, MaskFile, Gravity, AssignSample,
-                                                         WavRangeReduction, DefaultTrans, UseCompatibilityMode,
-                                                         AddRuns, LARMOR)
+                                                         WavRangeReduction, DefaultTrans, UseCompatibilityMode, AddRuns,
+                                                         LARMOR)
 from sans.common.enums import SANSInstrument
 
 
@@ -40,8 +40,10 @@ class LARMORMultiPeriodAddEventFilesTest_V2(systemtesting.MantidSystemTest):
             if AnalysisDataService.doesExist(element) and element != "13065_p1rear_1D_2.0_4.0":
                 AnalysisDataService.remove(element)
 
-        paths = [os.path.join(config['defaultsave.directory'], 'LARMOR00013065-add.nxs'),
-                 os.path.join(config['defaultsave.directory'], 'SANS2D00013065.log')]  # noqa
+        paths = [
+            os.path.join(config['defaultsave.directory'], 'LARMOR00013065-add.nxs'),
+            os.path.join(config['defaultsave.directory'], 'SANS2D00013065.log')
+        ]  # noqa
         for path in paths:
             if os.path.exists(path):
                 os.remove(path)

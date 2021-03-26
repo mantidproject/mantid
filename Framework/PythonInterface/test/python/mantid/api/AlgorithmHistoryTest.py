@@ -6,18 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.simpleapi import CreateWorkspace, set_properties
-from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, AlgorithmManager,
-                        DataProcessorAlgorithm, PythonAlgorithm)
+from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, AlgorithmManager, DataProcessorAlgorithm,
+                        PythonAlgorithm)
 from mantid.kernel import Direction
 
 
 class ChildAlg(PythonAlgorithm):
-
     def PyInit(self):
         pass
 
     def PyExec(self):
         pass
+
 
 AlgorithmFactory.subscribe(ChildAlg)
 
@@ -26,7 +26,6 @@ class ParentAlg(DataProcessorAlgorithm):
     """Dummy workflow algorithm for testing purposes.
     This just creates an output workspace and runs a child algorithm.
     """
-
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('Workspace', '', Direction.InOut),
                              doc="Name to give the input workspace.")
@@ -40,11 +39,11 @@ class ParentAlg(DataProcessorAlgorithm):
         set_properties(alg, *args, **kwargs)
         alg.execute()
 
+
 AlgorithmFactory.subscribe(ParentAlg)
 
 
 class AlgorithmHistoryTest(unittest.TestCase):
-
     def test_nested_history(self):
         ws_name = '__tmp_test_algorithm_history'
         ws = CreateWorkspace([0, 1, 2], [0, 1, 2], OutputWorkspace=ws_name)
@@ -93,6 +92,7 @@ class AlgorithmHistoryTest(unittest.TestCase):
             alg.setProperty(key, value)
         alg.execute()
         return alg
+
 
 if __name__ == '__main__':
     unittest.main()

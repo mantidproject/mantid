@@ -53,7 +53,6 @@ class ConfigUserManager(object):
 
 
 class ConfigUserTest(TestCase):
-
     @classmethod
     def setUpClass(cls):
         if not hasattr(cls, 'cfg'):

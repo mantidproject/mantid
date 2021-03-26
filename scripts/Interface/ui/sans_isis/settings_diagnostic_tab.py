@@ -66,11 +66,12 @@ class SettingsDiagnosticTab(QtWidgets.QWidget, Ui_SettingsDiagnosticTab):
         self.__generic_settings = GENERIC_SETTINGS
         self.__save_location_path_key = "save_state_location"
 
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Settings Diagnostics Tab"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Settings Diagnostics Tab"], False)
 
     def add_listener(self, listener):
         if not isinstance(listener, SettingsDiagnosticTab.SettingsDiagnosticTabListener):
-            raise ValueError("The listener is not of type SettingsDiagnosticTabListener but rather {}".format(type(listener)))
+            raise ValueError("The listener is not of type SettingsDiagnosticTabListener but rather {}".format(
+                type(listener)))
         self._settings_diagnostic_listeners.append(listener)
 
     def clear_listeners(self):

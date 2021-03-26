@@ -41,25 +41,22 @@ class _DiffReductionTest(systemtesting.MantidSystemTest):
 
 
 class D2B_2DTubes_ReductionTest(_DiffReductionTest):
-
     def runTest(self):
-        PowderILLDetectorScan(Run='508093:508095', Output2DTubes = True, Output1D = False, OutputWorkspace='out')
+        PowderILLDetectorScan(Run='508093:508095', Output2DTubes=True, Output1D=False, OutputWorkspace='out')
 
     def validate(self):
         return ['out_2DTubes', 'D2B_2DTubes.nxs']
 
 
 class D2B_2D_ReductionTest(_DiffReductionTest):
-
     def runTest(self):
-        PowderILLDetectorScan(Run='508093:508095', Output2D = True, Output1D = False, OutputWorkspace='out')
+        PowderILLDetectorScan(Run='508093:508095', Output2D=True, Output1D=False, OutputWorkspace='out')
 
     def validate(self):
         return ['out_2D', 'D2B_2D.nxs']
 
 
 class D2B_1D_ReductionTest(_DiffReductionTest):
-
     def runTest(self):
         PowderILLDetectorScan(Run='508093:508095', OutputWorkspace='out')
 
@@ -68,7 +65,6 @@ class D2B_1D_ReductionTest(_DiffReductionTest):
 
 
 class D2B_LowCounts_ReductionTest(_DiffReductionTest):
-
     def runTest(self):
         PowderILLDetectorScan(Run='540162', OutputWorkspace='out')
 
@@ -77,17 +73,19 @@ class D2B_LowCounts_ReductionTest(_DiffReductionTest):
 
 
 class D20_NoMask_ReductionTest(_DiffReductionTest):
-
     def runTest(self):
-        PowderILLDetectorScan(Run='967076', NormaliseTo='None', CropNegativeScatteringAngles=False,
-                              UseCalibratedData=False, InitialMask=0, OutputWorkspace='out')
+        PowderILLDetectorScan(Run='967076',
+                              NormaliseTo='None',
+                              CropNegativeScatteringAngles=False,
+                              UseCalibratedData=False,
+                              InitialMask=0,
+                              OutputWorkspace='out')
 
     def validate(self):
         return ['out_1D', 'D20_NoMask.nxs']
 
 
 class D20_Mask_ReductionTest(_DiffReductionTest):
-
     def runTest(self):
         ws = LoadILLDiffraction(Filename='967076')
         MaskDetectors(ws, DetectorList='0-63')
@@ -98,41 +96,59 @@ class D20_Mask_ReductionTest(_DiffReductionTest):
 
 
 class D2B_Component_ReductionTest(_DiffReductionTest):
-
     def runTest(self):
         PowderILLDetectorScan(Run='508093',
                               UseCalibratedData=False,
-                              Output2DTubes=True, Output1D=False,
+                              Output2DTubes=True,
+                              Output1D=False,
                               CropNegativeScatteringAngles=False,
                               OutputWorkspace='alltubes',
-                              InitialMask='0', FinalMask='0')
+                              InitialMask='0',
+                              FinalMask='0')
         PowderILLDetectorScan(Run='508093',
                               UseCalibratedData=False,
-                              Output2DTubes=True, Output1D=False,
+                              Output2DTubes=True,
+                              Output1D=False,
                               CropNegativeScatteringAngles=False,
                               OutputWorkspace='tube128',
-                              InitialMask='0', FinalMask='0',
+                              InitialMask='0',
+                              FinalMask='0',
                               ComponentsToReduce='tube_128')
         CropWorkspace(InputWorkspace='alltubes_2DTubes', OutputWorkspace='alltubes_tube128', XMin=147.471)
-        match = CompareWorkspaces(Workspace1='tube128_2DTubes', Workspace2='alltubes_tube128', Tolerance=self._tolerance)
+        match = CompareWorkspaces(Workspace1='tube128_2DTubes',
+                                  Workspace2='alltubes_tube128',
+                                  Tolerance=self._tolerance)
         self.assertTrue(match[0])
 
 
 class D2B_HeightRange_ReductionTest(_DiffReductionTest):
-
     def runTest(self):
-        PowderILLDetectorScan(Run='508093:508095', Output2D=True, Output1D=False, InitialMask=0, FinalMask=0,
-                              UseCalibratedData= False, NormaliseTo='None', OutputWorkspace='out')
-        PowderILLDetectorScan(Run='508093:508095', Output2D=True, Output1D=False, InitialMask=0, FinalMask=0,
-                              UseCalibratedData= False, NormaliseTo='None', OutputWorkspace='out_height',
+        PowderILLDetectorScan(Run='508093:508095',
+                              Output2D=True,
+                              Output1D=False,
+                              InitialMask=0,
+                              FinalMask=0,
+                              UseCalibratedData=False,
+                              NormaliseTo='None',
+                              OutputWorkspace='out')
+        PowderILLDetectorScan(Run='508093:508095',
+                              Output2D=True,
+                              Output1D=False,
+                              InitialMask=0,
+                              FinalMask=0,
+                              UseCalibratedData=False,
+                              NormaliseTo='None',
+                              OutputWorkspace='out_height',
                               HeightRange='-0.05,0.05')
         ExtractSpectra(InputWorkspace='out_2D', StartWorkspaceIndex=43, EndWorkspaceIndex=84, OutputWorkspace='cropped')
-        match = CompareWorkspaces(Workspace1='cropped', Workspace2='out_height_2D', CheckSpectraMap=False, Tolerance=self._tolerance)
+        match = CompareWorkspaces(Workspace1='cropped',
+                                  Workspace2='out_height_2D',
+                                  CheckSpectraMap=False,
+                                  Tolerance=self._tolerance)
         self.assertTrue(match[0])
 
 
 class D2B_Merge_ReductionTest(_DiffReductionTest):
-
     def runTest(self):
         PowderILLDetectorScan(Run='508093:508095', OutputWorkspace='out')
         PowderILLDetectorScan(Run='508093-508095', OutputWorkspace='sum')
@@ -141,7 +157,6 @@ class D2B_Merge_ReductionTest(_DiffReductionTest):
 
 
 class D20_TwoScansMerged_Test(_DiffReductionTest):
-
     def runTest(self):
         PowderILLDetectorScan(Run='167339:167340', OutputWorkspace='out', CropNegativeScatteringAngles=False)
         return ['out_1D', 'D20_DetectorScan_1D.nxs']

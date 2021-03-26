@@ -21,7 +21,6 @@ from sans.common.general_functions import create_unmanaged_algorithm
 from sans.state.Serializer import Serializer
 from sans.state.StateObjects.StateData import get_data_builder
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Base class containing useful functions for the tests
 # ----------------------------------------------------------------------------------------------------------------------
@@ -69,34 +68,41 @@ class SingleReductionTest(unittest.TestCase):
     def _compare_to_reference(self, workspace, reference_file_name, check_spectra_map=True, mismatch_name=""):
         # Load the reference file
         load_name = "LoadNexusProcessed"
-        load_options = {"Filename": reference_file_name,
-                        "OutputWorkspace": EMPTY_NAME}
+        load_options = {"Filename": reference_file_name, "OutputWorkspace": EMPTY_NAME}
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
-        load_alg.setProperty("OutputWorkspace",reference_file_name.split('.')[0] )
+        load_alg.setProperty("OutputWorkspace", reference_file_name.split('.')[0])
         load_alg.execute()
         reference_workspace = load_alg.getProperty("OutputWorkspace").value
 
         # Compare reference file with the output_workspace
-        self._compare_workspace(workspace, reference_workspace, check_spectra_map=check_spectra_map,
+        self._compare_workspace(workspace,
+                                reference_workspace,
+                                check_spectra_map=check_spectra_map,
                                 mismatch_name=mismatch_name)
 
-    def _compare_workspace(self, input_workspace, reference_workspace, check_spectra_map=True,
-                           tolerance=1e-6, mismatch_name = ""):
+    def _compare_workspace(self,
+                           input_workspace,
+                           reference_workspace,
+                           check_spectra_map=True,
+                           tolerance=1e-6,
+                           mismatch_name=""):
         # We need to disable the instrument comparison, it takes way too long
         # We need to disable the sample -- Not clear why yet
         # operation how many entries can be found in the sample logs
         compare_name = "CompareWorkspaces"
-        compare_options = {"Workspace1": input_workspace,
-                           "Workspace2": reference_workspace,
-                           "Tolerance": tolerance,
-                           "CheckInstrument": False,
-                           "CheckSample": False,
-                           "ToleranceRelErr": True,
-                           "CheckAllData": True,
-                           "CheckMasking": True,
-                           "CheckType": True,
-                           "CheckAxes": True,
-                           "CheckSpectraMap": check_spectra_map}
+        compare_options = {
+            "Workspace1": input_workspace,
+            "Workspace2": reference_workspace,
+            "Tolerance": tolerance,
+            "CheckInstrument": False,
+            "CheckSample": False,
+            "ToleranceRelErr": True,
+            "CheckAllData": True,
+            "CheckMasking": True,
+            "CheckType": True,
+            "CheckAxes": True,
+            "CheckSpectraMap": check_spectra_map
+        }
         compare_alg = create_unmanaged_algorithm(compare_name, **compare_options)
         compare_alg.setChild(False)
         compare_alg.execute()
@@ -111,23 +117,35 @@ class SingleReductionTest(unittest.TestCase):
         # Save the workspace out
         f_name = path.join(config.getString('defaultsave.directory'), mismatch_name)
         save_name = "SaveNexus"
-        save_options = {"Filename": f_name,
-                        "InputWorkspace": workspace}
+        save_options = {"Filename": f_name, "InputWorkspace": workspace}
         save_alg = create_unmanaged_algorithm(save_name, **save_options)
         save_alg.execute()
 
-    def _run_single_reduction(self, state, sample_scatter, sample_monitor, sample_transmission=None, sample_direct=None,
-                              can_scatter=None, can_monitor=None, can_transmission=None, can_direct=None,
-                              output_settings=None, event_slice_optimisation=False, save_can=False, use_optimizations=False):
+    def _run_single_reduction(self,
+                              state,
+                              sample_scatter,
+                              sample_monitor,
+                              sample_transmission=None,
+                              sample_direct=None,
+                              can_scatter=None,
+                              can_monitor=None,
+                              can_transmission=None,
+                              can_direct=None,
+                              output_settings=None,
+                              event_slice_optimisation=False,
+                              save_can=False,
+                              use_optimizations=False):
         single_reduction_name = "SANSSingleReduction"
         ver = 1 if not event_slice_optimisation else 2
         state_dict = Serializer.to_json(state)
 
-        single_reduction_options = {"SANSState": state_dict,
-                                    "SampleScatterWorkspace": sample_scatter,
-                                    "SampleScatterMonitorWorkspace": sample_monitor,
-                                    "UseOptimizations": use_optimizations,
-                                    "SaveCan": save_can}
+        single_reduction_options = {
+            "SANSState": state_dict,
+            "SampleScatterWorkspace": sample_scatter,
+            "SampleScatterMonitorWorkspace": sample_monitor,
+            "UseOptimizations": use_optimizations,
+            "SaveCan": save_can
+        }
         if sample_transmission:
             single_reduction_options.update({"SampleTransmissionWorkspace": sample_transmission})
 
@@ -149,7 +167,8 @@ class SingleReductionTest(unittest.TestCase):
         if output_settings:
             single_reduction_options.update(output_settings)
 
-        single_reduction_alg = create_unmanaged_algorithm(single_reduction_name, version=ver,
+        single_reduction_alg = create_unmanaged_algorithm(single_reduction_name,
+                                                          version=ver,
                                                           **single_reduction_options)
 
         # Act
@@ -179,8 +198,7 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
-        user_file_director = UserFileReaderAdapter(file_information=file_information,
-                                                   user_file_name=user_file)
+        user_file_director = UserFileReaderAdapter(file_information=file_information, user_file_name=user_file)
         state = user_file_director.get_all_states(file_information=file_information)
         # Set the reduction mode to LAB
         state.reduction.reduction_mode = ReductionMode.LAB
@@ -197,7 +215,8 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         # Act
         output_settings = {"OutputWorkspaceLAB": EMPTY_NAME}
-        single_reduction_alg = self._run_single_reduction(state, sample_scatter=sample,
+        single_reduction_alg = self._run_single_reduction(state,
+                                                          sample_scatter=sample,
                                                           sample_transmission=transmission_workspace,
                                                           sample_direct=direct_workspace,
                                                           sample_monitor=sample_monitor,
@@ -214,27 +233,32 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         # Compare the output of the reduction with the reference
         reference_file_name = "SANS2D_ws_D20_reference_LAB_1D.nxs"
-        self._compare_to_reference(output_workspace, reference_file_name,
+        self._compare_to_reference(output_workspace,
+                                   reference_file_name,
                                    mismatch_name=MantidSystemTest.mismatchWorkspaceName(reference_file_name))
 
         calculated_transmission_reference_file = "SANS2D_ws_D20_calculated_transmission_reference_LAB.nxs"
         unfitted_transmission_reference_file = "SANS2D_ws_D20_unfitted_transmission_reference_LAB.nxs"
         calculated_transmission_reference_file_can = "SANS2D_ws_D20_calculated_transmission_reference_LAB_can.nxs"
         unfitted_transmission_reference_file_can = "SANS2D_ws_D20_unfitted_transmission_reference_LAB_can.nxs"
-        self._compare_to_reference(calculated_transmission, calculated_transmission_reference_file,
-                                   check_spectra_map=False,
-                                   mismatch_name=MantidSystemTest.mismatchWorkspaceName(
-                                       calculated_transmission_reference_file))
-        self._compare_to_reference(unfitted_transmission, unfitted_transmission_reference_file,
-                                   mismatch_name=MantidSystemTest.mismatchWorkspaceName(
-                                       unfitted_transmission_reference_file))
-        self._compare_to_reference(calculated_transmission_can, calculated_transmission_reference_file_can,
-                                   check_spectra_map=False,
-                                   mismatch_name=MantidSystemTest.mismatchWorkspaceName(
-                                       calculated_transmission_reference_file_can))
-        self._compare_to_reference(unfitted_transmission_can, unfitted_transmission_reference_file_can,
-                                   mismatch_name=MantidSystemTest.mismatchWorkspaceName(
-                                       unfitted_transmission_reference_file_can))
+        self._compare_to_reference(
+            calculated_transmission,
+            calculated_transmission_reference_file,
+            check_spectra_map=False,
+            mismatch_name=MantidSystemTest.mismatchWorkspaceName(calculated_transmission_reference_file))
+        self._compare_to_reference(
+            unfitted_transmission,
+            unfitted_transmission_reference_file,
+            mismatch_name=MantidSystemTest.mismatchWorkspaceName(unfitted_transmission_reference_file))
+        self._compare_to_reference(
+            calculated_transmission_can,
+            calculated_transmission_reference_file_can,
+            check_spectra_map=False,
+            mismatch_name=MantidSystemTest.mismatchWorkspaceName(calculated_transmission_reference_file_can))
+        self._compare_to_reference(
+            unfitted_transmission_can,
+            unfitted_transmission_reference_file_can,
+            mismatch_name=MantidSystemTest.mismatchWorkspaceName(unfitted_transmission_reference_file_can))
 
     def test_that_single_reduction_evaluates_HAB(self):
         # Arrange
@@ -253,8 +277,7 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
-        user_file_director = UserFileReaderAdapter(file_information=file_information,
-                                                   user_file_name=user_file)
+        user_file_director = UserFileReaderAdapter(file_information=file_information, user_file_name=user_file)
         state = user_file_director.get_all_states(file_information=file_information)
         state.reduction.reduction_mode = ReductionMode.HAB
         state.compatibility.use_compatibility_mode = True
@@ -267,7 +290,8 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         # Act
         output_settings = {"OutputWorkspaceHAB": "TestSingleReductionEvalHab"}
-        single_reduction_alg = self._run_single_reduction(state, sample_scatter=sample,
+        single_reduction_alg = self._run_single_reduction(state,
+                                                          sample_scatter=sample,
                                                           sample_transmission=transmission_workspace,
                                                           sample_direct=direct_workspace,
                                                           sample_monitor=sample_monitor,
@@ -280,7 +304,8 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         # # Compare the output of the reduction with the reference
         reference_file_name = "SANS2D_ws_D20_reference_HAB_1D.nxs"
-        self._compare_to_reference(output_workspace, reference_file_name,
+        self._compare_to_reference(output_workspace,
+                                   reference_file_name,
                                    mismatch_name=MantidSystemTest.mismatchWorkspaceName(reference_file_name))
 
     def test_that_single_reduction_evaluates_merged(self):
@@ -300,8 +325,7 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
-        user_file_director = UserFileReaderAdapter(file_information=file_information,
-                                                   user_file_name=user_file)
+        user_file_director = UserFileReaderAdapter(file_information=file_information, user_file_name=user_file)
         state = user_file_director.get_all_states(file_information=file_information)
         state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
         state.reduction.reduction_mode = ReductionMode.MERGED
@@ -318,7 +342,8 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         # Act
         output_settings = {"OutputWorkspaceMerged": EMPTY_NAME}
-        single_reduction_alg = self._run_single_reduction(state, sample_scatter=sample,
+        single_reduction_alg = self._run_single_reduction(state,
+                                                          sample_scatter=sample,
                                                           sample_transmission=transmission_workspace,
                                                           sample_direct=direct_workspace,
                                                           sample_monitor=sample_monitor,
@@ -340,7 +365,8 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         # Compare the output of the reduction with the reference
         reference_file_name = "SANS2D_ws_D20_reference_Merged_1D.nxs"
-        self._compare_to_reference(output_workspace, reference_file_name,
+        self._compare_to_reference(output_workspace,
+                                   reference_file_name,
                                    mismatch_name=MantidSystemTest.mismatchWorkspaceName(reference_file_name))
 
     def test_that_single_reduction_evaluates_LAB_for_2D_reduction(self):
@@ -360,8 +386,7 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
-        user_file_director = UserFileReaderAdapter(file_information=file_information,
-                                                   user_file_name=user_file)
+        user_file_director = UserFileReaderAdapter(file_information=file_information, user_file_name=user_file)
         state = user_file_director.get_all_states(file_information=file_information)
 
         # Set the reduction mode to LAB
@@ -379,7 +404,8 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         # Act
         output_settings = {"OutputWorkspaceLAB": EMPTY_NAME}
-        single_reduction_alg = self._run_single_reduction(state, sample_scatter=sample,
+        single_reduction_alg = self._run_single_reduction(state,
+                                                          sample_scatter=sample,
                                                           sample_transmission=transmission_workspace,
                                                           sample_direct=direct_workspace,
                                                           sample_monitor=sample_monitor,
@@ -392,7 +418,8 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         # Compare the output of the reduction with the reference
         reference_file_name = "SANS2D_ws_D20_reference_LAB_2D.nxs"
-        self._compare_to_reference(output_workspace, reference_file_name,
+        self._compare_to_reference(output_workspace,
+                                   reference_file_name,
                                    mismatch_name=MantidSystemTest.mismatchWorkspaceName(reference_file_name))
 
 
@@ -424,8 +451,7 @@ class SANSSingleReduction2Test(SingleReductionTest):
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
-        user_file_director = UserFileReaderAdapter(file_information=file_information,
-                                                   user_file_name=user_file)
+        user_file_director = UserFileReaderAdapter(file_information=file_information, user_file_name=user_file)
         state = user_file_director.get_all_states(file_information=file_information)
         # Set the reduction mode to HAB
         state.reduction.reduction_mode = ReductionMode.HAB
@@ -443,7 +469,8 @@ class SANSSingleReduction2Test(SingleReductionTest):
 
         # Act
         output_settings = {"OutputWorkspaceHAB": EMPTY_NAME}
-        single_reduction_v2_alg = self._run_single_reduction(state, sample_scatter=sample,
+        single_reduction_v2_alg = self._run_single_reduction(state,
+                                                             sample_scatter=sample,
                                                              sample_transmission=transmission_workspace,
                                                              sample_direct=direct_workspace,
                                                              sample_monitor=sample_monitor,
@@ -478,7 +505,8 @@ class SANSSingleReduction2Test(SingleReductionTest):
         state.slice.start_time = [0.00]
         state.slice.end_time = [300.00]
 
-        single_reduction_alg_first_slice = self._run_single_reduction(state, sample_scatter=sample,
+        single_reduction_alg_first_slice = self._run_single_reduction(state,
+                                                                      sample_scatter=sample,
                                                                       sample_transmission=transmission_workspace,
                                                                       sample_direct=direct_workspace,
                                                                       sample_monitor=sample_monitor,
@@ -494,7 +522,8 @@ class SANSSingleReduction2Test(SingleReductionTest):
         state.slice.start_time = [300.00]
         state.slice.end_time = [600.00]
 
-        single_reduction_alg_second_slice = self._run_single_reduction(state, sample_scatter=sample,
+        single_reduction_alg_second_slice = self._run_single_reduction(state,
+                                                                       sample_scatter=sample,
                                                                        sample_transmission=transmission_workspace,
                                                                        sample_direct=direct_workspace,
                                                                        sample_monitor=sample_monitor,
@@ -547,8 +576,7 @@ class SANSSingleReduction2Test(SingleReductionTest):
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
-        user_file_director = UserFileReaderAdapter(file_information=file_information,
-                                                   user_file_name=user_file)
+        user_file_director = UserFileReaderAdapter(file_information=file_information, user_file_name=user_file)
         state = user_file_director.get_all_states(file_information=file_information)
         state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
         state.reduction.reduction_mode = ReductionMode.LAB
@@ -565,7 +593,8 @@ class SANSSingleReduction2Test(SingleReductionTest):
 
         # Act
         output_settings = {"OutputWorkspaceLAB": EMPTY_NAME}
-        single_reduction_v2_alg = self._run_single_reduction(state, sample_scatter=sample,
+        single_reduction_v2_alg = self._run_single_reduction(state,
+                                                             sample_scatter=sample,
                                                              sample_transmission=transmission_workspace,
                                                              sample_direct=direct_workspace,
                                                              sample_monitor=sample_monitor,
@@ -599,7 +628,8 @@ class SANSSingleReduction2Test(SingleReductionTest):
         state.slice.start_time = [0.00]
         state.slice.end_time = [300.00]
 
-        single_reduction_alg_first_slice = self._run_single_reduction(state, sample_scatter=sample,
+        single_reduction_alg_first_slice = self._run_single_reduction(state,
+                                                                      sample_scatter=sample,
                                                                       sample_transmission=transmission_workspace,
                                                                       sample_direct=direct_workspace,
                                                                       sample_monitor=sample_monitor,
@@ -615,7 +645,8 @@ class SANSSingleReduction2Test(SingleReductionTest):
         state.slice.start_time = [300.00]
         state.slice.end_time = [600.00]
 
-        single_reduction_alg_second_slice = self._run_single_reduction(state, sample_scatter=sample,
+        single_reduction_alg_second_slice = self._run_single_reduction(state,
+                                                                       sample_scatter=sample,
                                                                        sample_transmission=transmission_workspace,
                                                                        sample_direct=direct_workspace,
                                                                        sample_monitor=sample_monitor,

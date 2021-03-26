@@ -5,8 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import config
-from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, Progress,
-                        FileFinder, MultipleFileProperty, ITableWorkspaceProperty)
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, Progress, FileFinder, MultipleFileProperty,
+                        ITableWorkspaceProperty)
 from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateSampleWorkspace, LoadLog, LoadNexusLogs, LoadIsawUB,
                               SetUB, SaveIsawUB, DeleteWorkspace)
 from mantid.kernel import (Direction, FloatBoundedValidator, IntListValidator, StringMandatoryValidator, V3D)
@@ -16,7 +16,6 @@ import warnings
 
 
 class FindGoniometerFromUB(DataProcessorAlgorithm):
-
     def name(self):
         return "FindGoniometerFromUB"
 
@@ -37,71 +36,60 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
         self.declareProperty(
             MultipleFileProperty('UBfiles', extensions=".mat"),
             doc='Files with exported UB (from SaveISawUB). The filename must have .mat extension and only contain '
-                'the run number as would be supplied to Load (e.g. WISH00043350.mat). The first UB will be the '
-                'reference (typically, but not necessarily, omega = phi = 0) and a consistent UB will be made '
-                'for each of the subsequent runs.')
-        self.declareProperty(
-            name="Chi",
-            defaultValue=45.0,
-            direction=Direction.Input,
-            validator=FloatBoundedValidator(
-                lower=0.0, upper=90.0),
-            doc="Angle of the goniometer axis from +ve Z (vertical up).")
-        self.declareProperty(
-            name="ChiTol",
-            defaultValue=5.0,
-            validator=FloatBoundedValidator(
-                lower=0.0, upper=45.0),
-            direction=Direction.Input,
-            doc="Tolerance of chi angle to test for consistency.")
+            'the run number as would be supplied to Load (e.g. WISH00043350.mat). The first UB will be the '
+            'reference (typically, but not necessarily, omega = phi = 0) and a consistent UB will be made '
+            'for each of the subsequent runs.')
+        self.declareProperty(name="Chi",
+                             defaultValue=45.0,
+                             direction=Direction.Input,
+                             validator=FloatBoundedValidator(lower=0.0, upper=90.0),
+                             doc="Angle of the goniometer axis from +ve Z (vertical up).")
+        self.declareProperty(name="ChiTol",
+                             defaultValue=5.0,
+                             validator=FloatBoundedValidator(lower=0.0, upper=45.0),
+                             direction=Direction.Input,
+                             doc="Tolerance of chi angle to test for consistency.")
         self.declareProperty(
             name="PhiTol",
             defaultValue=15.0,
-            validator=FloatBoundedValidator(
-                lower=0.0, upper=45.0),
+            validator=FloatBoundedValidator(lower=0.0, upper=45.0),
             direction=Direction.Input,
             doc="Tolerance of phi angle to test for consistency (due to uncertainty on the gonio axis at omega=0"
-                "this tol might need to be quite large).")
-        self.declareProperty(
-            name="PhiHand",
-            defaultValue=1,
-            validator=IntListValidator([-1, 1]),
-            direction=Direction.Input,
-            doc="Handedness for the phi angles (rotation around goniometer axis) in the"
-                " log file (1 for ccw/RH, -1 for cw/LH)")
-        self.declareProperty(
-            name="PhiLogName",
-            defaultValue='ewald_pos',
-            direction=Direction.Input,
-            validator=StringMandatoryValidator(),
-            doc="Name of log entry that records angle of rotation about goniometer axis")
-        self.declareProperty(
-            name="DOmega",
-            defaultValue=0.0,
-            direction=Direction.Input,
-            validator=FloatBoundedValidator(
-                lower=0.0, upper=180.0),
-            doc="omega rotation between component of goniometer axis in XY-plane from +ve Y-axis"
-                "(perpendicular to ki)")
+            "this tol might need to be quite large).")
+        self.declareProperty(name="PhiHand",
+                             defaultValue=1,
+                             validator=IntListValidator([-1, 1]),
+                             direction=Direction.Input,
+                             doc="Handedness for the phi angles (rotation around goniometer axis) in the"
+                             " log file (1 for ccw/RH, -1 for cw/LH)")
+        self.declareProperty(name="PhiLogName",
+                             defaultValue='ewald_pos',
+                             direction=Direction.Input,
+                             validator=StringMandatoryValidator(),
+                             doc="Name of log entry that records angle of rotation about goniometer axis")
+        self.declareProperty(name="DOmega",
+                             defaultValue=0.0,
+                             direction=Direction.Input,
+                             validator=FloatBoundedValidator(lower=0.0, upper=180.0),
+                             doc="omega rotation between component of goniometer axis in XY-plane from +ve Y-axis"
+                             "(perpendicular to ki)")
         self.declareProperty(
             name="OmegaHand",
             defaultValue=1,
             validator=IntListValidator([-1, 1]),
             direction=Direction.Input,
             doc="Handedness for the omega angles (rotation around +ve Z) in the log file (1 for ccw/RH, -1 for cw/LH)")
-        self.declareProperty(
-            name="OmegaLogName",
-            defaultValue='ccr_pos',
-            direction=Direction.Input,
-            validator=StringMandatoryValidator(),
-            doc="Name of log entry that records angle of rotation about vertical axis")
+        self.declareProperty(name="OmegaLogName",
+                             defaultValue='ccr_pos',
+                             direction=Direction.Input,
+                             validator=StringMandatoryValidator(),
+                             doc="Name of log entry that records angle of rotation about vertical axis")
         # output
         self.declareProperty(
-            ITableWorkspaceProperty(
-                name="OutputTable",
-                defaultValue="",
-                validator=StringMandatoryValidator(),
-                direction=Direction.Output),
+            ITableWorkspaceProperty(name="OutputTable",
+                                    defaultValue="",
+                                    validator=StringMandatoryValidator(),
+                                    direction=Direction.Output),
             doc="Output table to display goniometer axis and angles for runs with UBs that can share common indexing")
 
     def validateInputs(self):
@@ -226,10 +214,7 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
                 # populate row of table
                 phi2print = phiHand * (phi + phiRef[0])
                 phi2print = phi2print + np.ceil(-phi2print / 360) * 360
-                nextRow = {'Run': nameUB[:-4],
-                           'Chi': chi,
-                           'Phi': phi2print,
-                           'GonioAxis': V3D(u[0], u[1], u[2])}
+                nextRow = {'Run': nameUB[:-4], 'Chi': chi, 'Phi': phi2print, 'GonioAxis': V3D(u[0], u[1], u[2])}
                 gonioTable.addRow(nextRow)
             else:
                 warnings.warn("WARNING: The UB {0} cannot be made consistent with the reference UB. "
@@ -266,8 +251,7 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
         :return: u: goniometer axis unit vector
         """
         phi = np.arccos((np.trace(r) - 1) / 2) * (180 / np.pi)
-        u = (1 / (2 * np.sin(phi * np.pi / 180))) * np.array(
-            [r[2, 1] - r[1, 2], r[0, 2] - r[2, 0], r[1, 0] - r[0, 1]])
+        u = (1 / (2 * np.sin(phi * np.pi / 180))) * np.array([r[2, 1] - r[1, 2], r[0, 2] - r[2, 0], r[1, 0] - r[0, 1]])
         return phi, u
 
     def getR(self, theta, u):
@@ -278,8 +262,7 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
         :return: R: rotation matrix
         """
         w = np.array([[0, -u[2], u[1]], [u[2], 0, -u[0]], [-u[1], u[0], 0]])
-        return np.eye(3, 3) + np.sin(theta * np.pi / 180) * w + (1 - np.cos(theta * np.pi / 180)) * (
-                w @ w)
+        return np.eye(3, 3) + np.sin(theta * np.pi / 180) * w + (1 - np.cos(theta * np.pi / 180)) * (w @ w)
 
     def getGonioAngles(self, aUB, zeroUB, omega):
         """

@@ -74,10 +74,12 @@ class PlotsSaver(object):
 
         if create_list and axes_list:
             self._add_normalisation_kwargs(create_list, axes_list)
-        fig_dict = {"creationArguments": create_list,
-                    "axes": axes_list,
-                    "label": fig._label,
-                    "properties": self.get_dict_from_fig_properties(fig)}
+        fig_dict = {
+            "creationArguments": create_list,
+            "axes": axes_list,
+            "label": fig._label,
+            "properties": self.get_dict_from_fig_properties(fig)
+        }
         return fig_dict
 
     @staticmethod
@@ -104,11 +106,13 @@ class PlotsSaver(object):
         return cb_dict
 
     def get_dict_for_axes(self, ax):
-        ax_dict = {"properties": self.get_dict_from_axes_properties(ax),
-                   "title": ax.get_title(),
-                   "xAxisTitle": ax.get_xlabel(),
-                   "yAxisTitle": ax.get_ylabel(),
-                   "colorbar": self.get_dict_for_axes_colorbar(ax)}
+        ax_dict = {
+            "properties": self.get_dict_from_axes_properties(ax),
+            "title": ax.get_title(),
+            "xAxisTitle": ax.get_xlabel(),
+            "yAxisTitle": ax.get_ylabel(),
+            "colorbar": self.get_dict_for_axes_colorbar(ax)
+        }
 
         # Get lines from the axes and store it's data
         lines_list = []
@@ -145,28 +149,32 @@ class PlotsSaver(object):
         return ax_dict
 
     def get_dict_from_axes_properties(self, ax):
-        return {"bounds": ax.get_position().bounds,
-                "dynamic": ax.get_navigate(),
-                "axisOn": ax.axison,
-                "frameOn": ax.get_frame_on(),
-                "visible": ax.get_visible(),
-                "xAxisProperties": self.get_dict_from_axis_properties(ax.xaxis),
-                "yAxisProperties": self.get_dict_from_axis_properties(ax.yaxis),
-                "xAxisScale": ax.xaxis.get_scale(),
-                "xLim": ax.get_xlim(),
-                "xAutoScale": ax.get_autoscalex_on(),
-                "yAxisScale": ax.yaxis.get_scale(),
-                "yLim": ax.get_ylim(),
-                "yAutoScale": ax.get_autoscaley_on(),
-                "showMinorGrid": hasattr(ax, 'show_minor_gridlines') and ax.show_minor_gridlines}
+        return {
+            "bounds": ax.get_position().bounds,
+            "dynamic": ax.get_navigate(),
+            "axisOn": ax.axison,
+            "frameOn": ax.get_frame_on(),
+            "visible": ax.get_visible(),
+            "xAxisProperties": self.get_dict_from_axis_properties(ax.xaxis),
+            "yAxisProperties": self.get_dict_from_axis_properties(ax.yaxis),
+            "xAxisScale": ax.xaxis.get_scale(),
+            "xLim": ax.get_xlim(),
+            "xAutoScale": ax.get_autoscalex_on(),
+            "yAxisScale": ax.yaxis.get_scale(),
+            "yLim": ax.get_ylim(),
+            "yAutoScale": ax.get_autoscaley_on(),
+            "showMinorGrid": hasattr(ax, 'show_minor_gridlines') and ax.show_minor_gridlines
+        }
 
     def get_dict_from_axis_properties(self, ax):
-        prop_dict = {"majorTickLocator": type(ax.get_major_locator()).__name__,
-                     "minorTickLocator": type(ax.get_minor_locator()).__name__,
-                     "majorTickFormatter": type(ax.get_major_formatter()).__name__,
-                     "minorTickFormatter": type(ax.get_minor_formatter()).__name__,
-                     "gridStyle": self.get_dict_for_grid_style(ax),
-                     "visible": ax.get_visible()}
+        prop_dict = {
+            "majorTickLocator": type(ax.get_major_locator()).__name__,
+            "minorTickLocator": type(ax.get_minor_locator()).__name__,
+            "majorTickFormatter": type(ax.get_major_formatter()).__name__,
+            "minorTickFormatter": type(ax.get_minor_formatter()).__name__,
+            "gridStyle": self.get_dict_for_grid_style(ax),
+            "visible": ax.get_visible()
+        }
         label1On = ax._major_tick_kw.get('label1On', True)
 
         if isinstance(ax, matplotlib.axis.XAxis):
@@ -226,36 +234,42 @@ class PlotsSaver(object):
         return grid_style
 
     def get_dict_from_line(self, line, index=0):
-        line_dict = {"lineIndex": index,
-                     "label": line.get_label(),
-                     "alpha": line.get_alpha(),
-                     "color": to_hex(line.get_color()),
-                     "lineWidth": line.get_linewidth(),
-                     "lineStyle": line.get_linestyle(),
-                     "markerStyle": self.get_dict_from_marker_style(line),
-                     "errorbars": self.get_dict_for_errorbars(line)}
+        line_dict = {
+            "lineIndex": index,
+            "label": line.get_label(),
+            "alpha": line.get_alpha(),
+            "color": to_hex(line.get_color()),
+            "lineWidth": line.get_linewidth(),
+            "lineStyle": line.get_linestyle(),
+            "markerStyle": self.get_dict_from_marker_style(line),
+            "errorbars": self.get_dict_for_errorbars(line)
+        }
         if line_dict["alpha"] is None:
             line_dict["alpha"] = 1
         return line_dict
 
     def get_dict_for_errorbars(self, line):
         if self.figure_creation_args[0]["function"] == "errorbar":
-            return {"exists": True,
-                    "dashCapStyle": line.get_dash_capstyle(),
-                    "dashJoinStyle": line.get_dash_joinstyle(),
-                    "solidCapStyle": line.get_solid_capstyle(),
-                    "solidJoinStyle": line.get_solid_joinstyle()}
+            return {
+                "exists": True,
+                "dashCapStyle": line.get_dash_capstyle(),
+                "dashJoinStyle": line.get_dash_joinstyle(),
+                "solidCapStyle": line.get_solid_capstyle(),
+                "solidJoinStyle": line.get_solid_joinstyle()
+            }
         else:
             return {"exists": False}
 
     @staticmethod
     def get_dict_from_marker_style(line):
-        style_dict = {"faceColor": to_hex(line.get_markerfacecolor()),
-                      "edgeColor": to_hex(line.get_markeredgecolor()),
-                      "edgeWidth": line.get_markeredgewidth(),
-                      "markerType": line.get_marker(),
-                      "markerSize": line.get_markersize(),
-                      "zOrder": line.get_zorder()}
+        style_dict = {
+            "faceColor": to_hex(line.get_markerfacecolor()),
+            "edgeColor": to_hex(line.get_markeredgecolor()),
+            "edgeWidth": line.get_markeredgewidth(),
+            "markerType": line.get_marker(),
+            "markerSize": line.get_markersize(),
+            "zOrder": line.get_zorder()
+        }
         return style_dict
 
     def get_dict_from_text(self, text):
@@ -269,13 +283,15 @@ class PlotsSaver(object):
 
     @staticmethod
     def get_dict_from_text_style(text):
-        style_dict = {"alpha": text.get_alpha(),
-                      "textSize": text.get_size(),
-                      "color": to_hex(text.get_color()),
-                      "hAlign": text.get_horizontalalignment(),
-                      "vAlign": text.get_verticalalignment(),
-                      "rotation": text.get_rotation(),
-                      "zOrder": text.get_zorder()}
+        style_dict = {
+            "alpha": text.get_alpha(),
+            "textSize": text.get_size(),
+            "color": to_hex(text.get_color()),
+            "hAlign": text.get_horizontalalignment(),
+            "vAlign": text.get_verticalalignment(),
+            "rotation": text.get_rotation(),
+            "zOrder": text.get_zorder()
+        }
         if style_dict["alpha"] is None:
             style_dict["alpha"] = 1
         return style_dict

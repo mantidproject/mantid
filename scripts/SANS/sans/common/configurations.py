@@ -14,7 +14,6 @@ class Configurations(object):
         """
         Interface for essential properties all config classes should have
         """
-
         @property
         @abstractmethod
         def wavelength_full_range_low(self):

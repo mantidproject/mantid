@@ -10,7 +10,6 @@ from mantidqt.widgets.waterfallplotoffsetdialog.view import WaterfallPlotOffsetD
 
 
 class WaterfallPlotOffsetDialogPresenter:
-
     def __init__(self, fig, view=None, parent=None):
         self.ax = fig.get_axes()[0]
         if view:

@@ -14,7 +14,7 @@ from mantid import config
 
 def MAX_DBL():
     import sys
-    return sys.float_info[0]/2
+    return sys.float_info[0] / 2
 
 
 def getNamedParameter(ws, name):
@@ -23,7 +23,7 @@ def getNamedParameter(ws, name):
 
 class DirectInelasticDiagnostic2(MantidSystemTest):
 
-    saved_diag_file=''
+    saved_diag_file = ''
 
     def requiredMemoryMB(self):
         """Requires 4Gb"""
@@ -65,17 +65,15 @@ class DirectInelasticDiagnostic2(MantidSystemTest):
         red_man["DetVanIntRangeLow"] = 20.
         red_man["DetVanIntRangeHigh"] = 300.
         red_man["BackgroundCheck"] = True
-        red_man["BackgroundTofStart"]=12000.
-        red_man["BackgroundTofEnd"]=18000.
+        red_man["BackgroundTofStart"] = 12000.
+        red_man["BackgroundTofEnd"] = 18000.
         #reducer.bkgd_range=[12000,18000]
 
-        diag_mask = DgsDiagnose(DetVanWorkspace=detvan, SampleWorkspace=sample,
-                                ReductionProperties=red_man_name)
+        diag_mask = DgsDiagnose(DetVanWorkspace=detvan, SampleWorkspace=sample, ReductionProperties=red_man_name)
 
         MaskDetectors(sample, MaskedWorkspace=diag_mask)
         # Save the masked spectra numbers to a simple ASCII file for comparison
-        self.saved_diag_file = os.path.join(config['defaultsave.directory'],
-                                            'CurrentDirectInelasticDiag2.txt')
+        self.saved_diag_file = os.path.join(config['defaultsave.directory'], 'CurrentDirectInelasticDiag2.txt')
         with open(self.saved_diag_file, 'w') as handle:
             spectrumInfo = sample.spectrumInfo()
             for index in range(sample.getNumberHistograms()):
@@ -89,8 +87,7 @@ class DirectInelasticDiagnostic2(MantidSystemTest):
                 os.remove(self.saved_diag_file)
             else:
                 os.rename(self.saved_diag_file,
-                          os.path.join(config['defaultsave.directory'],
-                                       'DirectInelasticDiag2-Mismatch.txt'))
+                          os.path.join(config['defaultsave.directory'], 'DirectInelasticDiag2-Mismatch.txt'))
 
     def validateMethod(self):
         return 'validateASCII'

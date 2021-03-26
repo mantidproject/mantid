@@ -26,7 +26,6 @@ class MuonLoadData:
     The instance of this class is intended to be shared between all models in the load widget (the parent, run and file
     widgets).
     """
-
     def __init__(self):
         """
         Hard code any parameters and their default values that are needed to be stored. The name given here

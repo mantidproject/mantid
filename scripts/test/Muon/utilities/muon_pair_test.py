@@ -24,7 +24,6 @@ class MuonPairTest(unittest.TestCase):
     to prevent obvious misuse. The class is used by the MuonAnalysis interface and so these
     tests should be amended with care.
     """
-
     def test_that_cannot_initialize_MuonPair_without_name(self):
         with self.assertRaises(TypeError):
             MuonPair()

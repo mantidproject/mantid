@@ -14,7 +14,6 @@ from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 @start_qapplication
 class LoadFileWidgetModelEATest(unittest.TestCase):
-
     def setUp(self):
         setup_context_for_tests(self)
         self.model = BrowseFileWidgetModel(self.loaded_data, self.context)

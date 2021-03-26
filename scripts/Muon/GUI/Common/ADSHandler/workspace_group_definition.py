@@ -28,7 +28,6 @@ class WorkspaceGroupDefinition(metaclass=Singleton):
     The grouping algorithm will then be executed on the contents of the grouping dict.
     The grouping dict contains: {workspace_group_name: [workspaces in that group]}
     """
-
     def __init__(self):
         self.__saveState = False
         self.grouping = {}

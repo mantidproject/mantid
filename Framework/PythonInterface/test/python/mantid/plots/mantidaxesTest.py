@@ -20,8 +20,8 @@ from mantid.plots.legend import convert_color_to_hex
 from mantid.plots.utility import MantidAxType
 from mantid.plots.axesfunctions import get_colorplot_extents
 from unittest.mock import Mock, patch
-from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace,
-                              RemoveSpectra, AnalysisDataService as ADS)
+from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace, RemoveSpectra,
+                              AnalysisDataService as ADS)
 from mantidqt.plotting.markers import SingleMarker
 
 
@@ -29,7 +29,6 @@ class MantidAxesTest(unittest.TestCase):
     '''
     Just test if mantid projection works
     '''
-
     @classmethod
     def setUpClass(cls):
         cls.ws2d_histo = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
@@ -60,7 +59,7 @@ class MantidAxesTest(unittest.TestCase):
 
     def test_errorbar_plots(self):
         self.ax.errorbar(self.ws2d_histo, specNum=2, linewidth=6)
-        self.ax.errorbar(np.arange(10), np.arange(10), 0.1 * np.ones((10,)), fmt='bo-')
+        self.ax.errorbar(np.arange(10), np.arange(10), 0.1 * np.ones((10, )), fmt='bo-')
 
     def test_imshow(self):
         self.ax.imshow(self.ws2d_histo)
@@ -100,8 +99,7 @@ class MantidAxesTest(unittest.TestCase):
         self.assertTrue(line_second_ws in self.ax.lines)
         DeleteWorkspace(second_ws)
 
-    def test_remove_workspace_artist_with_predicate_removes_only_lines_from_specified_workspace_which_return_true(
-            self):
+    def test_remove_workspace_artist_with_predicate_removes_only_lines_from_specified_workspace_which_return_true(self):
         line_ws2d_histo_spec_2 = self.ax.plot(self.ws2d_histo, specNum=2, linewidth=6)[0]
         line_ws2d_histo_spec_3 = self.ax.plot(self.ws2d_histo, specNum=3, linewidth=6)[0]
         self.assertEqual(2, len(self.ax.lines))
@@ -116,8 +114,7 @@ class MantidAxesTest(unittest.TestCase):
         line_ws2d_histo_spec_3 = self.ax.plot(self.ws2d_histo, specNum=3, linewidth=6)[0]
         self.assertEqual(2, len(self.ax.lines))
 
-        is_empty = self.ax.remove_artists_if(
-            lambda artist: artist.get_label() in ['ws2d_histo: 6', 'ws2d_histo: 8'])
+        is_empty = self.ax.remove_artists_if(lambda artist: artist.get_label() in ['ws2d_histo: 6', 'ws2d_histo: 8'])
         self.assertEqual(0, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo_spec_2 not in self.ax.lines)
         self.assertTrue(line_ws2d_histo_spec_3 not in self.ax.lines)
@@ -133,8 +130,7 @@ class MantidAxesTest(unittest.TestCase):
         self.assertEqual(1, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo_spec_2 not in self.ax.lines)
         self.assertTrue(line_ws2d_histo_spec_3 in self.ax.lines)
-        self.assertEqual(self.ax.tracked_workspaces[self.ws2d_histo.name()][0]._artists,
-                         [line_ws2d_histo_spec_3])
+        self.assertEqual(self.ax.tracked_workspaces[self.ws2d_histo.name()][0]._artists, [line_ws2d_histo_spec_3])
 
     def test_remove_if_removes_untracked_artists(self):
         line = self.ax.plot([0], [0])[0]
@@ -190,10 +186,7 @@ class MantidAxesTest(unittest.TestCase):
         line_ws2d_histo_spec_2 = self.ax.plot(plot_data, specNum=2, color='r')[0]
         line_ws2d_histo_spec_3 = self.ax.plot(plot_data, specNum=3, color='r')[0]
 
-        plot_data = CreateWorkspace(DataX=[20, 30, 40, 20, 30, 40],
-                                    DataY=[3, 4, 3, 4],
-                                    DataE=[1, 2, 1, 2],
-                                    NSpec=2)
+        plot_data = CreateWorkspace(DataX=[20, 30, 40, 20, 30, 40], DataY=[3, 4, 3, 4], DataE=[1, 2, 1, 2], NSpec=2)
         self.ax.replace_workspace_artists(plot_data)
         self.assertAlmostEqual(25, line_ws2d_histo_spec_2.get_xdata()[0])
         self.assertAlmostEqual(35, line_ws2d_histo_spec_2.get_xdata()[-1])
@@ -273,9 +266,7 @@ class MantidAxesTest(unittest.TestCase):
         self._do_image_replace_common_bins(self.ax.imshow, lambda ax: ax.images)
 
     def test_replace_workspace_data_imshow_with_norm_on_creation(self):
-        self._do_image_replace_common_bins(self.ax.imshow,
-                                           lambda ax: ax.images,
-                                           kwargs={'norm': Normalize()})
+        self._do_image_replace_common_bins(self.ax.imshow, lambda ax: ax.images, kwargs={'norm': Normalize()})
 
     def test_replace_workspace_data_imshow_keeps_cmap_changed_after_creation(self):
         new_cmap = 'copper'
@@ -382,8 +373,7 @@ class MantidAxesTest(unittest.TestCase):
         self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
-    def test_artists_normalization_state_labeled_correctly_for_non_dist_workspace_and_global_setting_off(
-            self):
+    def test_artists_normalization_state_labeled_correctly_for_non_dist_workspace_and_global_setting_off(self):
         non_dist_ws = CreateWorkspace(DataX=[10, 20, 25, 30],
                                       DataY=[2, 3, 4, 5],
                                       DataE=[1, 2, 1, 2],
@@ -397,8 +387,8 @@ class MantidAxesTest(unittest.TestCase):
 
     def test_artists_normalization_state_labeled_correctly_for_2d_plots_of_dist_workspace(self):
         plot_funcs = [
-            'imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor', 'contour', 'contourf',
-            'tricontour', 'tricontourf'
+            'imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor', 'contour', 'contourf', 'tricontour',
+            'tricontourf'
         ]
         dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
                                      DataY=[2, 3, 2, 3],
@@ -416,11 +406,10 @@ class MantidAxesTest(unittest.TestCase):
             self.assertTrue(ws_artists[1].is_normalized)
             self.assertTrue(ws_artists[2].is_normalized)
 
-    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_false(
-            self):
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_false(self):
         plot_funcs = [
-            'imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor', 'contour', 'contourf',
-            'tricontour', 'tricontourf'
+            'imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor', 'contour', 'contourf', 'tricontour',
+            'tricontourf'
         ]
         non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
                                          DataY=[2, 3, 2, 3],
@@ -434,11 +423,10 @@ class MantidAxesTest(unittest.TestCase):
             self.assertTrue(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
             del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
-    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_true(
-            self):
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_true(self):
         plot_funcs = [
-            'imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor', 'contour', 'contourf',
-            'tricontour', 'tricontourf'
+            'imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor', 'contour', 'contourf', 'tricontour',
+            'tricontourf'
         ]
         non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
                                          DataY=[2, 3, 2, 3],
@@ -452,11 +440,10 @@ class MantidAxesTest(unittest.TestCase):
             self.assertFalse(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
             del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
-    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_global_setting_on(
-            self):
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_global_setting_on(self):
         plot_funcs = [
-            'imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor', 'contour', 'contourf',
-            'tricontour', 'tricontourf'
+            'imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor', 'contour', 'contourf', 'tricontour',
+            'tricontourf'
         ]
         non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
                                          DataY=[2, 3, 2, 3],
@@ -468,15 +455,13 @@ class MantidAxesTest(unittest.TestCase):
             auto_dist = (config['graph1d.autodistribution'] == 'On')
             func = getattr(self.ax, plot_func)
             func(non_dist_2d_ws)
-            self.assertEqual(auto_dist,
-                             self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+            self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
             del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
-    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_global_setting_off(
-            self):
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_global_setting_off(self):
         plot_funcs = [
-            'imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor', 'contour', 'contourf',
-            'tricontour', 'tricontourf'
+            'imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor', 'contour', 'contourf', 'tricontour',
+            'tricontourf'
         ]
         non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 25, 30, 10, 20, 25, 30],
                                          DataY=[2, 3, 4, 5, 2, 3, 4, 5],
@@ -493,8 +478,7 @@ class MantidAxesTest(unittest.TestCase):
 
     def test_check_axes_distribution_consistency_mixed_normalization(self):
         mock_logger = self._run_check_axes_distribution_consistency([True, False, True])
-        mock_logger.assert_called_once_with("You are overlaying distribution and "
-                                            "non-distribution data!")
+        mock_logger.assert_called_once_with("You are overlaying distribution and " "non-distribution data!")
 
     def test_check_axes_distribution_consistency_all_normalized(self):
         mock_logger = self._run_check_axes_distribution_consistency([True, True, True])
@@ -551,10 +535,7 @@ class MantidAxesTest(unittest.TestCase):
 
     def test_that_plotting_ws_without_giving_spec_num_sets_spec_num_if_ws_has_1_histogram(self):
         ws_name = "ws-with-one-spec"
-        ws = CreateWorkspace(DataX=[10, 20],
-                             DataY=[10, 5000],
-                             DataE=[1, 1],
-                             OutputWorkspace=ws_name)
+        ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000], DataE=[1, 1], OutputWorkspace=ws_name)
         self.ax.plot(ws)
         ws_artist = self.ax.tracked_workspaces[ws_name][0]
         self.assertEqual(1, ws_artist.spec_num)
@@ -564,8 +545,7 @@ class MantidAxesTest(unittest.TestCase):
     def test_that_plotting_ws_without_giving_spec_num_raises_if_ws_has_more_than_1_histogram(self):
         self.assertRaises(RuntimeError, self.ax.plot, self.ws2d_histo)
 
-    def test_that_plotting_ws_without_giving_spec_num_sets_correct_spec_num_after_spectra_removed(
-            self):
+    def test_that_plotting_ws_without_giving_spec_num_sets_correct_spec_num_after_spectra_removed(self):
         CreateWorkspace(DataX=[10, 20, 30],
                         DataY=[10, 20, 30],
                         DataE=[1, 1, 1],
@@ -579,10 +559,7 @@ class MantidAxesTest(unittest.TestCase):
 
     def test_that_plotting_ws_without_spec_num_adds_default_spec_num_to_creation_args(self):
         ws_name = "ws-with-one-spec"
-        ws = CreateWorkspace(DataX=[10, 20],
-                             DataY=[10, 5000],
-                             DataE=[1, 1],
-                             OutputWorkspace=ws_name)
+        ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000], DataE=[1, 1], OutputWorkspace=ws_name)
         self.ax.plot(ws)
         self.assertEqual(1, self.ax.creation_args[0]['specNum'])
 
@@ -696,11 +673,9 @@ class MantidAxesTest(unittest.TestCase):
         datafunctions.waterfall_update_fill(ax)
 
         # Check that there are now three filled areas and the new line colour matches the new fill colour.
-        self.assertEqual(convert_color_to_hex(ax.collections[2].get_facecolor()[0]),
-                         ax.lines[2].get_color())
+        self.assertEqual(convert_color_to_hex(ax.collections[2].get_facecolor()[0]), ax.lines[2].get_color())
 
-    def test_overplotting_onto_waterfall_plot_with_solid_colour_fills_adds_a_filled_area_with_the_same_colour(
-            self):
+    def test_overplotting_onto_waterfall_plot_with_solid_colour_fills_adds_a_filled_area_with_the_same_colour(self):
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
         ax.plot([0, 1], [0, 1])
         ax.plot([0, 1], [0, 1])
@@ -741,10 +716,7 @@ class MantidAxesTest(unittest.TestCase):
 
         # 0,0 in ax coordinates is the bottom left of figure, add 0.5 to move into canvas
         xy_pixels = self.ax.transAxes.transform((0, 0)) + (0.5, 0.5)
-        bottom_left_corner = MouseEvent("motion_notify_event",
-                                        self.fig.canvas,
-                                        x=xy_pixels[0],
-                                        y=xy_pixels[1])
+        bottom_left_corner = MouseEvent("motion_notify_event", self.fig.canvas, x=xy_pixels[0], y=xy_pixels[1])
 
         self.assertEqual(image.get_extent(), (10.0, 30.0, 9.0, 3.0))
         self.assertEqual(image.get_cursor_data(bottom_left_corner), 3.0)
@@ -754,10 +726,7 @@ class MantidAxesTest(unittest.TestCase):
 
         # 0,0 in ax coordinates is the bottom left of figure, add 0.5 to move into canvas
         xy_pixels = self.ax.transAxes.transform((0, 0)) + (0.5, 0.5)
-        bottom_left_corner = MouseEvent("motion_notify_event",
-                                        self.fig.canvas,
-                                        x=xy_pixels[0],
-                                        y=xy_pixels[1])
+        bottom_left_corner = MouseEvent("motion_notify_event", self.fig.canvas, x=xy_pixels[0], y=xy_pixels[1])
 
         self.assertEqual(image.get_extent(), (10.0, 30.0, 3.0, 9.0))
         self.assertEqual(image.get_cursor_data(bottom_left_corner), 2.0)
@@ -795,10 +764,8 @@ class MantidAxesTest(unittest.TestCase):
 
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {
-            'ws': [
-                Mock(is_normalized=normalization_states[0]),
-                Mock(is_normalized=normalization_states[1])
-            ],
+            'ws': [Mock(is_normalized=normalization_states[0]),
+                   Mock(is_normalized=normalization_states[1])],
             'ws1': [Mock(is_normalized=normalization_states[2])]
         }
         with patch('mantid.kernel.logger.warning', Mock()) as mock_logger:

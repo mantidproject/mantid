@@ -12,7 +12,6 @@ from Interface.ui.drill.model.DrillRundexIO import DrillRundexIO
 
 
 class DrillRundexIOTest(unittest.TestCase):
-
     def setUp(self):
         # mock open
         patch = mock.patch('Interface.ui.drill.model.DrillRundexIO.open')
@@ -36,45 +35,30 @@ class DrillRundexIOTest(unittest.TestCase):
     @mock.patch("Interface.ui.drill.model.DrillRundexIO.DrillSample")
     def test_loadRundexV1(self, mSample):
         self.mJson.load.return_value = {
-                "Instrument": "i1",
-                "AcquisitionMode": "a1",
-                "CycleNumber": "cycle",
-                "ExperimentID": "exp",
-                "VisualSettings": {
-                    "FoldedColumns": [
-                        "c1",
-                        "c2",
-                        "c3"
-                        ],
-                    "HiddenColumns": [
-                        "c4",
-                        "c5"
-                        ],
-                    "ColumnsOrder": [
-                        "c1",
-                        "c2",
-                        "c3",
-                        "c4",
-                        "c5"
-                        ]
-                    },
-                "GlobalSettings": {
-                    "param1": True,
-                    "param2": "value1",
-                    "param3": 0.1,
-                    "param4": [0.1, 0.2, 0.3],
-                    "param5": [],
-                    },
-                "Samples": [
-                        {
-                            "param6": "value1",
-                            "param7": "value2",
-                            "CustomOptions": {
-                                "param1": False
-                                }
-                            }
-                        ]
+            "Instrument": "i1",
+            "AcquisitionMode": "a1",
+            "CycleNumber": "cycle",
+            "ExperimentID": "exp",
+            "VisualSettings": {
+                "FoldedColumns": ["c1", "c2", "c3"],
+                "HiddenColumns": ["c4", "c5"],
+                "ColumnsOrder": ["c1", "c2", "c3", "c4", "c5"]
+            },
+            "GlobalSettings": {
+                "param1": True,
+                "param2": "value1",
+                "param3": 0.1,
+                "param4": [0.1, 0.2, 0.3],
+                "param5": [],
+            },
+            "Samples": [{
+                "param6": "value1",
+                "param7": "value2",
+                "CustomOptions": {
+                    "param1": False
                 }
+            }]
+        }
         self.model.load()
         self.mOpen.assert_called_once_with("test")
         self.mJson.load.assert_called_once()
@@ -82,55 +66,34 @@ class DrillRundexIOTest(unittest.TestCase):
         mD.setCycleAndExperiment.assert_called_once_with("cycle", "exp")
         mD.setVisualSettings.assert_called_once()
         sample = mSample.return_value
-        sample.setParameters.assert_called_once_with(
-                {
-                    "param6": "value1",
-                    "param7": "value2",
-                    "param1": False
-                    }
-                )
+        sample.setParameters.assert_called_once_with({"param6": "value1", "param7": "value2", "param1": False})
         mD.addSample.assert_called_once_with(-1, sample)
 
     @mock.patch("Interface.ui.drill.model.DrillRundexIO.DrillSample")
     def test_loadRundexV2(self, mSample):
         self.mJson.load.return_value = {
-                "Instrument": "i1",
-                "AcquisitionMode": "a1",
-                "CycleNumber": "cycle",
-                "ExperimentID": "exp",
-                "VisualSettings": {
-                    "FoldedColumns": [
-                        "c1",
-                        "c2",
-                        "c3"
-                        ],
-                    "HiddenColumns": [
-                        "c4",
-                        "c5"
-                        ],
-                    "ColumnsOrder": [
-                        "c1",
-                        "c2",
-                        "c3",
-                        "c4",
-                        "c5"
-                        ]
-                    },
-                "GlobalSettings": {
-                    "param1": True,
-                    "param2": "value1",
-                    "param3": 0.1,
-                    "param4": [0.1, 0.2, 0.3],
-                    "param5": [],
-                    },
-                "Samples": [
-                        {
-                            "param6": "value1",
-                            "param7": "value2",
-                            "param1": False
-                            }
-                        ]
-                }
+            "Instrument": "i1",
+            "AcquisitionMode": "a1",
+            "CycleNumber": "cycle",
+            "ExperimentID": "exp",
+            "VisualSettings": {
+                "FoldedColumns": ["c1", "c2", "c3"],
+                "HiddenColumns": ["c4", "c5"],
+                "ColumnsOrder": ["c1", "c2", "c3", "c4", "c5"]
+            },
+            "GlobalSettings": {
+                "param1": True,
+                "param2": "value1",
+                "param3": 0.1,
+                "param4": [0.1, 0.2, 0.3],
+                "param5": [],
+            },
+            "Samples": [{
+                "param6": "value1",
+                "param7": "value2",
+                "param1": False
+            }]
+        }
         self.model.load()
         self.mOpen.assert_called_once_with("test")
         self.mJson.load.assert_called_once()
@@ -138,13 +101,7 @@ class DrillRundexIOTest(unittest.TestCase):
         mD.setCycleAndExperiment.assert_called_once_with("cycle", "exp")
         mD.setVisualSettings.assert_called_once()
         sample = mSample.return_value
-        sample.setParameters.assert_called_once_with(
-                {
-                    "param6": "value1",
-                    "param7": "value2",
-                    "param1": False
-                    }
-                )
+        sample.setParameters.assert_called_once_with({"param6": "value1", "param7": "value2", "param1": False})
         mD.addSample.assert_called_once_with(-1, sample)
 
     def test_save(self):
@@ -163,17 +120,27 @@ class DrillRundexIOTest(unittest.TestCase):
         mD.getMasterSamples.return_value = {"A": 0}
 
         json = {
-                "Instrument": "i1",
-                "AcquisitionMode": "a1",
-                "CycleNumber": "cycle",
-                "ExperimentID": "exp",
-                "VisualSettings": {"key": "value"},
-                "GlobalSettings": {"setting1": "value1"},
-                "ExportAlgorithms": ["ex1", "ex2"],
-                "Samples": [{"param1": "value1"}],
-                "SamplesGroups": {"A": [0]},
-                "MasterSamples": {"A": 0}
-                }
+            "Instrument": "i1",
+            "AcquisitionMode": "a1",
+            "CycleNumber": "cycle",
+            "ExperimentID": "exp",
+            "VisualSettings": {
+                "key": "value"
+            },
+            "GlobalSettings": {
+                "setting1": "value1"
+            },
+            "ExportAlgorithms": ["ex1", "ex2"],
+            "Samples": [{
+                "param1": "value1"
+            }],
+            "SamplesGroups": {
+                "A": [0]
+            },
+            "MasterSamples": {
+                "A": 0
+            }
+        }
         self.model.save()
         self.mOpen.assert_called_once_with("test", 'w')
         self.mJson.dump.assert_called_once()

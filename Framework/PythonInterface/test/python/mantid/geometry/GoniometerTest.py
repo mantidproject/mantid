@@ -13,7 +13,6 @@ import numpy as np
 
 
 class GoniometerTest(unittest.TestCase):
-
     def test_Goniometer_can_be_instantiated(self):
         self.assertTrue(can_be_instantiated(Goniometer))
 

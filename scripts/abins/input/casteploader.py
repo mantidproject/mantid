@@ -17,7 +17,6 @@ class CASTEPLoader(AbInitioLoader):
     Class which handles loading files from foo.phonon output CASTEP files.
     Functions to read phonon file taken from SimulatedDensityOfStates (credits for Elliot Oram.).
     """
-
     def __init__(self, input_ab_initio_filename):
         """
 
@@ -94,13 +93,16 @@ class CASTEPLoader(AbInitioLoader):
                         # H:D2
                         symbol = "H"
                     masses_from_file.append(float(line_data[5]))
-                    ion = {"symbol": symbol,
-                           "coord": np.array(float(line_data[1]) * file_data['unit_cell'][0]
-                                             + float(line_data[2]) * file_data['unit_cell'][1]
-                                             + float(line_data[3]) * file_data['unit_cell'][2]),
-                           # at the moment it is a dummy parameter, it will mark symmetry equivalent atoms
-                           "sort": indx,
-                           "mass": Atom(symbol=symbol).mass}
+                    ion = {
+                        "symbol": symbol,
+                        "coord": np.array(
+                            float(line_data[1]) * file_data['unit_cell'][0] +
+                            float(line_data[2]) * file_data['unit_cell'][1] +
+                            float(line_data[3]) * file_data['unit_cell'][2]),
+                        # at the moment it is a dummy parameter, it will mark symmetry equivalent atoms
+                        "sort": indx,
+                        "mass": Atom(symbol=symbol).mass
+                    }
                     file_data["atoms"].update({"atom_%s" % indx: ion})
 
             self.check_isotopes_substitution(atoms=file_data["atoms"], masses=masses_from_file)
@@ -259,11 +261,12 @@ class CASTEPLoader(AbInitioLoader):
         factor = 1.0 / np.sqrt(norm)
         disp = np.einsum('ijkl, ik-> ijkl', disp, factor)
 
-        file_data.update({"frequencies": np.asarray(frequencies),
-                          "weights": np.asarray(weights),
-                          "k_vectors": np.asarray(k_vectors),
-                          "atomic_displacements": disp
-                          })
+        file_data.update({
+            "frequencies": np.asarray(frequencies),
+            "weights": np.asarray(weights),
+            "k_vectors": np.asarray(k_vectors),
+            "atomic_displacements": disp
+        })
 
         # save stuff to hdf file
         data_to_save = ["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell", "atoms"]

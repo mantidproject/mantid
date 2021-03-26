@@ -15,7 +15,6 @@ from mantidqt.widgets.plotconfigdialog.axestabwidget.view import AxesTabWidgetVi
 
 
 class AxesTabWidgetPresenter:
-
     def __init__(self, fig, view=None, parent=None):
         self.fig = fig
         if not view:
@@ -36,13 +35,10 @@ class AxesTabWidgetPresenter:
         self.update_view()
 
         # Signals
-        self.view.select_axes_combo_box.currentIndexChanged.connect(
-            self.update_view)
-        self.view.axis_tab_bar.currentChanged.connect(
-            self.axis_changed)
+        self.view.select_axes_combo_box.currentIndexChanged.connect(self.update_view)
+        self.view.axis_tab_bar.currentChanged.connect(self.axis_changed)
         self.view.apply_all_button.clicked.connect(self.apply_all_properties)
-        self.view.show_minor_ticks_check_box.toggled.connect(
-            self.show_minor_ticks_checked)
+        self.view.show_minor_ticks_check_box.toggled.connect(self.show_minor_ticks_checked)
         self.view.autoscale.toggled.connect(self.autoscale_changed)
 
     def apply_properties(self):
@@ -184,8 +180,7 @@ class AxesTabWidgetPresenter:
     def populate_select_axes_combo_box(self):
         """Add axes' names to the 'select axes' combo box"""
         # Sort names by axes position
-        names = sorted(self.axes_names_dict.keys(),
-                       key=lambda x: x[x.rfind("("):])
+        names = sorted(self.axes_names_dict.keys(), key=lambda x: x[x.rfind("("):])
         self.view.populate_select_axes_combo_box(names)
 
     def rename_selected_axes(self, new_name):

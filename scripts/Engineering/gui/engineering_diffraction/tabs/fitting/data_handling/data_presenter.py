@@ -42,8 +42,7 @@ class FittingDataPresenter(object):
         #
         self.fit_enabled_observer = GenericObserverWithArgPassing(self.set_fit_enabled)
         self.seq_fit_done_observer = GenericObserverWithArgPassing(self.fit_completed)
-        self.focus_run_observer = GenericObserverWithArgPassing(
-            self.view.set_file_last)
+        self.focus_run_observer = GenericObserverWithArgPassing(self.view.set_file_last)
 
     def set_fit_enabled(self, fit_enabled):
         self.view.set_seq_fit_button_enabled(fit_enabled)
@@ -249,8 +248,16 @@ class FittingDataPresenter(object):
             return False
         return True
 
-    def _add_row_to_table(self, ws_name, row, run_no=None, bank=None, checked=False, bgsub=False, niter=100,
-                          xwindow=None, SG=True):
+    def _add_row_to_table(self,
+                          ws_name,
+                          row,
+                          run_no=None,
+                          bank=None,
+                          checked=False,
+                          bgsub=False,
+                          niter=100,
+                          xwindow=None,
+                          SG=True):
         words = ws_name.split("_")
         # find xwindow from ws xunit if not specified
         if not xwindow:
@@ -269,8 +276,7 @@ class FittingDataPresenter(object):
         else:
             logger.warning(
                 "The workspace '{}' was not in the correct naming format. Files should be named in the following way: "
-                "INSTRUMENT_RUNNUMBER_bank_BANK. Using workspace name as identifier.".format(ws_name)
-            )
+                "INSTRUMENT_RUNNUMBER_bank_BANK. Using workspace name as identifier.".format(ws_name))
             self.view.add_table_row(ws_name, "N/A", checked, bgsub, niter, xwindow, SG)
             self.row_numbers[ws_name] = row
 
@@ -288,7 +294,6 @@ class TwoWayRowDict(dict):
     """
     Two way dictionary used to map rows to workspaces and vice versa.
     """
-
     def __setitem__(self, key, value):
         if key in self:
             del self[key]

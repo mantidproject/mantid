@@ -42,7 +42,7 @@ def create_mock_diagnostics_tab():
     return view
 
 
-def get_cell_mock(row, column, convert_to=None, user_file_path = ""):
+def get_cell_mock(row, column, convert_to=None, user_file_path=""):
     _ = convert_to  # noqa
     if row == 0:
         # For the first row we return the

@@ -28,8 +28,7 @@ class DuplicateWavelengthStates:
     pixel: StateWavelengthAndPixelAdjustment
 
     def iterate_fields(self):
-        return [self.transmission, self.normalize,
-                self.wavelength, self. pixel]
+        return [self.transmission, self.normalize, self.wavelength, self.pixel]
 
 
 def parse_range_wavelength(wavelength_range: str) -> Tuple[List, List]:

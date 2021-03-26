@@ -23,7 +23,6 @@ _default_folder = os.path.join(mantid.kernel.config.getAppDataDirectory(), "reco
 
 
 class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
-
     def category(self):
         return "Utility"
 
@@ -35,14 +34,15 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
                " creates a single unified history from them."
 
     def PyInit(self):
-        self.declareProperty(mantid.api.FileProperty(_recovery_folder, _default_folder,
-                                                     action=mantid.api.FileAction.OptionalDirectory),
-                             "Location of all saved workspace histories")
+        self.declareProperty(
+            mantid.api.FileProperty(_recovery_folder, _default_folder, action=mantid.api.FileAction.OptionalDirectory),
+            "Location of all saved workspace histories")
 
-        self.declareProperty(mantid.api.FileProperty(_destination_file,
-                                                     os.path.join(_default_folder, "summedHistory.py"),
-                                                     action=mantid.api.FileAction.OptionalSave),
-                             "File destination to write the combined history to.")
+        self.declareProperty(
+            mantid.api.FileProperty(_destination_file,
+                                    os.path.join(_default_folder, "summedHistory.py"),
+                                    action=mantid.api.FileAction.OptionalSave),
+            "File destination to write the combined history to.")
 
         self.declareProperty("InputString", "", "The string to be turned into a single cohesive history",
                              Direction.Input)

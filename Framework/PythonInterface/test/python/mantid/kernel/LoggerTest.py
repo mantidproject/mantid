@@ -10,7 +10,6 @@ from mantid.kernel import Logger
 
 
 class LoggerTest(unittest.TestCase):
-
     def test_str_logger(self):
         logger = Logger(str("LoggerTest"))
         self.assertTrue(isinstance(logger, Logger))
@@ -28,8 +27,10 @@ class LoggerTest(unittest.TestCase):
     def test_unicode_logger(self):
         logger = Logger("LoggerTest")
         self.assertTrue(isinstance(logger, Logger))
-        for att in ['fatal', 'error', 'warning', 'notice', 'information', 'debug', 'flush', 'purge', 'accumulate',
-                    'flushDebug', 'flushInformation', 'flushNotice', 'flushWarning', 'flushError', 'flushFatal']:
+        for att in [
+                'fatal', 'error', 'warning', 'notice', 'information', 'debug', 'flush', 'purge', 'accumulate',
+                'flushDebug', 'flushInformation', 'flushNotice', 'flushWarning', 'flushError', 'flushFatal'
+        ]:
             if not hasattr(logger, att):
                 self.fail("Logger object does not have the required attribute '%s'" % att)
 

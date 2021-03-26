@@ -13,7 +13,6 @@ from qtpy import QtWidgets
 
 
 class TransformWidget(QtWidgets.QWidget):
-
     def __init__(self, load, fft_widget, maxent_widget, parent=None):
         super(TransformWidget, self).__init__(parent)
         self._fft = fft_widget(load=load, parent=self)
@@ -33,13 +32,11 @@ class TransformWidget(QtWidgets.QWidget):
 
         self._selector.setSelectionConnection(self.updateDisplay)
         self.updateDisplay('FFT')
-        self.update_view_from_model_observer = GenericObserver(
-            self.update_view_from_model)
+        self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
         self.disable_view()
         # to make it compatable with the old GUI
         try:
-            self.load.update_view_from_model_notifier.add_subscriber(
-                self.update_view_from_model_observer)
+            self.load.update_view_from_model_notifier.add_subscriber(self.update_view_from_model_observer)
         except:
             pass
 
@@ -93,20 +90,15 @@ class TransformWidget(QtWidgets.QWidget):
     def set_up_calculation_observers(self, enable, disable):
         # assume FFT are cheap enough that disable/enable GUI would make no
         # difference
-        self._maxent._presenter.calculation_finished_notifier.add_subscriber(
-            enable)
-        self._maxent._presenter.calculation_started_notifier.add_subscriber(
-            disable)
+        self._maxent._presenter.calculation_finished_notifier.add_subscriber(enable)
+        self._maxent._presenter.calculation_started_notifier.add_subscriber(disable)
 
     def new_data_observer(self, observer):
-        self._maxent._presenter.calculation_finished_notifier.add_subscriber(
-            observer)
-        self._fft._presenter.calculation_finished_notifier.add_subscriber(
-            observer)
+        self._maxent._presenter.calculation_finished_notifier.add_subscriber(observer)
+        self._fft._presenter.calculation_finished_notifier.add_subscriber(observer)
 
 
 class LoadObserver(Observer):
-
     def __init__(self, outer):
         Observer.__init__(self)
         self.outer = outer
@@ -116,7 +108,6 @@ class LoadObserver(Observer):
 
 
 class instrumentObserver(Observer):
-
     def __init__(self, outer):
         Observer.__init__(self)
         self.outer = outer
@@ -126,7 +117,6 @@ class instrumentObserver(Observer):
 
 
 class GroupPairObserver(Observer):
-
     def __init__(self, outer):
         Observer.__init__(self)
         self.outer = outer
@@ -136,7 +126,6 @@ class GroupPairObserver(Observer):
 
 
 class EnableObserver(Observer):
-
     def __init__(self, outer):
         Observer.__init__(self)
         self.outer = outer
@@ -146,7 +135,6 @@ class EnableObserver(Observer):
 
 
 class DisableObserver(Observer):
-
     def __init__(self, outer):
         Observer.__init__(self)
         self.outer = outer
@@ -156,7 +144,6 @@ class DisableObserver(Observer):
 
 
 class PhaseQuadObserver(Observer):
-
     def __init__(self, outer):
         Observer.__init__(self)
         self.outer = outer

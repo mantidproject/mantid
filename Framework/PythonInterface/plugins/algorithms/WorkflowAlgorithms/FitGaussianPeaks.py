@@ -33,13 +33,10 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         DataProcessorAlgorithm.__init__(self)
 
     def PyInit(self):
+        self.declareProperty(WorkspaceProperty(name='InputWorkspace', defaultValue='', direction=Direction.Input),
+                             'Workspace with peaks to be identified')
         self.declareProperty(
-            WorkspaceProperty(name='InputWorkspace', defaultValue='', direction=Direction.Input),
-            'Workspace with peaks to be identified')
-        self.declareProperty(
-            ITableWorkspaceProperty(name='PeakGuessTable',
-                                    defaultValue='peak_guess',
-                                    direction=Direction.Input),
+            ITableWorkspaceProperty(name='PeakGuessTable', defaultValue='peak_guess', direction=Direction.Input),
             'Table containing the guess for the peak position')
         self.declareProperty('CentreTolerance',
                              1.0,
@@ -68,9 +65,7 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
 
         # Output table
         self.declareProperty(
-            ITableWorkspaceProperty(name='PeakProperties',
-                                    defaultValue='peak_table',
-                                    direction=Direction.Output),
+            ITableWorkspaceProperty(name='PeakProperties', defaultValue='peak_table', direction=Direction.Output),
             'Table containing the properties of the peaks')
         self.declareProperty(
             ITableWorkspaceProperty(name='RefitPeakProperties',
@@ -79,9 +74,7 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
             'Table containing the properties of the peaks that had to be fitted twice as the first'
             'time the error was unreasonably large')
         self.declareProperty(
-            ITableWorkspaceProperty(name='FitCost',
-                                    defaultValue='fit_cost',
-                                    direction=Direction.Output),
+            ITableWorkspaceProperty(name='FitCost', defaultValue='fit_cost', direction=Direction.Output),
             'Table containing the value of both chi2 and poisson cost functions for the fit')
 
     def validateInputs(self):
@@ -146,8 +139,7 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         approx_peak_xvals = self.getProperty('PeakGuessTable').value.column(0)[:]
         peakids = []
         for peakx in approx_peak_xvals:
-            mask = np.logical_and(peakx - self._centre_tolerance <= xvals,
-                                  peakx + self._centre_tolerance >= xvals)
+            mask = np.logical_and(peakx - self._centre_tolerance <= xvals, peakx + self._centre_tolerance >= xvals)
             relative_id = np.argmax(flat_yvals[mask])
             offset_id = np.argwhere(mask)[0, 0]
             peakids.append(relative_id + offset_id)
@@ -155,13 +147,7 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         return peakids
 
     def _evaluate_final_cost(self, xvals, flat_yvals, baseline, errors, peak_table, refit_peak_table):
-        chi2 = self.evaluate_cost(xvals,
-                                  flat_yvals,
-                                  baseline,
-                                  errors,
-                                  peak_table,
-                                  refit_peak_table,
-                                  use_poisson=False)
+        chi2 = self.evaluate_cost(xvals, flat_yvals, baseline, errors, peak_table, refit_peak_table, use_poisson=False)
         poisson = self.evaluate_cost(xvals,
                                      flat_yvals,
                                      baseline,
@@ -207,8 +193,8 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
                 error_area = np.sqrt(error_area)
 
                 data_table.addRow([
-                    centre['Value'], centre['Error'], height['Value'], height['Error'],
-                    sigma['Value'], sigma['Error'], area, error_area
+                    centre['Value'], centre['Error'], height['Value'], height['Error'], sigma['Value'], sigma['Error'],
+                    area, error_area
                 ])
 
         return to_refit
@@ -289,8 +275,7 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         # Using the mantid fitting function will not produce an equally good result here
         p_est = scipy.optimize.leastsq(
             self.gaussian_peak_background,
-            x0=np.array([np.average(y_range), 0, xvals[centre], yvals[centre],
-                         self._estimate_sigma]),
+            x0=np.array([np.average(y_range), 0, xvals[centre], yvals[centre], self._estimate_sigma]),
             args=(x_range, y_range))[0]
         params = [p_est[2], p_est[0] + p_est[1] * p_est[2] + p_est[3], p_est[4]]
 
@@ -323,16 +308,15 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         if fit_constr.count('PeakCentre') == 1:
             fit_constr = fit_constr.replace('f0.', '')
 
-        _, _, _, param, fit_result, _, _ = Fit(
-            Function=fit_func,
-            InputWorkspace=self.getProperty('InputWorkspace').value,
-            Output='fit_result',
-            Minimizer='Levenberg-MarquardtMD',
-            OutputCompositeMembers=True,
-            StartX=min(xvals),
-            EndX=max(xvals),
-            Constraints=fit_constr,
-            StoreInADS=False)
+        _, _, _, param, fit_result, _, _ = Fit(Function=fit_func,
+                                               InputWorkspace=self.getProperty('InputWorkspace').value,
+                                               Output='fit_result',
+                                               Minimizer='Levenberg-MarquardtMD',
+                                               OutputCompositeMembers=True,
+                                               StartX=min(xvals),
+                                               EndX=max(xvals),
+                                               Constraints=fit_constr,
+                                               StoreInADS=False)
 
         return fit_result.readY(1).copy(), param
 
@@ -354,16 +338,15 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         if fit_constr.count('PeakCentre') == 1:
             fit_constr = fit_constr.replace('f0.', '')
 
-        _, _, _, param, fit_result, _, _ = Fit(
-            Function=fit_func,
-            InputWorkspace=self.getProperty('InputWorkspace').value,
-            Output='fit_result',
-            Minimizer='Levenberg-MarquardtMD',
-            OutputCompositeMembers=True,
-            StartX=min(xvals),
-            EndX=max(xvals),
-            Constraints=fit_constr,
-            StoreInADS=False)
+        _, _, _, param, fit_result, _, _ = Fit(Function=fit_func,
+                                               InputWorkspace=self.getProperty('InputWorkspace').value,
+                                               Output='fit_result',
+                                               Minimizer='Levenberg-MarquardtMD',
+                                               OutputCompositeMembers=True,
+                                               StartX=min(xvals),
+                                               EndX=max(xvals),
+                                               Constraints=fit_constr,
+                                               StoreInADS=False)
 
         return fit_result.readY(1).copy(), param
 

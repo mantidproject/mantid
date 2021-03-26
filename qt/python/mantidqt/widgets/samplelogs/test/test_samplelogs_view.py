@@ -8,6 +8,7 @@
 import unittest
 
 import matplotlib as mpl
+
 mpl.use('Agg')  # noqa
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.utils.qt.testing import start_qapplication

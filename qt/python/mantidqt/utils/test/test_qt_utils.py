@@ -8,7 +8,6 @@
 #
 #
 
-
 import unittest
 
 from qtpy.QtCore import QObject, Qt, Slot
@@ -27,7 +26,6 @@ from mantidqt.utils.qt import add_actions, create_action
 
 @start_qapplication
 class CreateActionTest(unittest.TestCase):
-
     def test_parent_and_name_only_required(self):
         class Parent(QObject):
             pass
@@ -66,8 +64,7 @@ class CreateActionTest(unittest.TestCase):
             self.assertEqual(expected, actual.toString())
 
     def test_shortcut_context_used_if_shortcut_given(self):
-        action = create_action(None, "Test Action", shortcut="Ctrl+S",
-                               shortcut_context=Qt.ApplicationShortcut)
+        action = create_action(None, "Test Action", shortcut="Ctrl+S", shortcut_context=Qt.ApplicationShortcut)
         self.assertEqual(Qt.ApplicationShortcut, action.shortcutContext())
 
     def test_shortcut_context_not_used_if_shortcut_given(self):
@@ -77,7 +74,6 @@ class CreateActionTest(unittest.TestCase):
 
 @start_qapplication
 class AddActionsTest(unittest.TestCase):
-
     def test_add_actions_with_qmenu_target(self):
         test_act_1 = create_action(None, "Test Action 1")
         test_act_2 = create_action(None, "Test Action 2")

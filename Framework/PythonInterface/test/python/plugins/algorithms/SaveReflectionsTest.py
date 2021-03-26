@@ -12,8 +12,8 @@ import numpy as np
 
 from mantid.api import FileFinder
 from mantid.kernel import V3D
-from mantid.simpleapi import (CloneWorkspace, CreatePeaksWorkspace, DeleteWorkspace,
-                              LoadEmptyInstrument, SetUB, SaveReflections)
+from mantid.simpleapi import (CloneWorkspace, CreatePeaksWorkspace, DeleteWorkspace, LoadEmptyInstrument, SetUB,
+                              SaveReflections)
 
 
 class SaveReflectionsTest(unittest.TestCase):
@@ -141,25 +141,19 @@ class SaveReflectionsTest(unittest.TestCase):
     def test_save_jana_format_modulated_separate_files(self):
         # Arrange
         workspace = self._create_modulated_peak_table()
-        reference_results = [
-            self._get_reference_result("jana_format_modulated-m{}.hkl".format(i))
-            for i in range(1, 3)
-        ]
+        reference_results = [self._get_reference_result("jana_format_modulated-m{}.hkl".format(i)) for i in range(1, 3)]
         file_name = os.path.join(self._test_dir, "test_jana_modulated.hkl")
         output_format = "Jana"
         split_files = True
 
         # Act
-        SaveReflections(InputWorkspace=workspace,
-                        Filename=file_name,
-                        Format=output_format,
-                        SplitFiles=split_files)
+        SaveReflections(InputWorkspace=workspace, Filename=file_name, Format=output_format, SplitFiles=split_files)
 
         # Assert
-        self._assert_file_content_equal(reference_results[0],
-                                        os.path.join(self._test_dir, "test_jana_modulated-m1.hkl"))
-        self._assert_file_content_equal(reference_results[1],
-                                        os.path.join(self._test_dir, "test_jana_modulated-m2.hkl"))
+        self._assert_file_content_equal(reference_results[0], os.path.join(self._test_dir,
+                                                                           "test_jana_modulated-m1.hkl"))
+        self._assert_file_content_equal(reference_results[1], os.path.join(self._test_dir,
+                                                                           "test_jana_modulated-m2.hkl"))
 
     def test_save_jana_with_no_lattice_information(self):
         peaks = CloneWorkspace(self._workspace)
@@ -167,8 +161,7 @@ class SaveReflectionsTest(unittest.TestCase):
         file_name = os.path.join(self._test_dir, "test_jana_no_lattice.hkl")
 
         # Act
-        SaveReflections(InputWorkspace=peaks, Filename=file_name,
-                        Format="Jana", SplitFiles=False)
+        SaveReflections(InputWorkspace=peaks, Filename=file_name, Format="Jana", SplitFiles=False)
 
     def test_save_GSAS_format(self):
         # Arrange

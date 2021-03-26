@@ -19,7 +19,6 @@ def get_ads_workspace(workspace_name):
 
 
 class IndirectQuickRunTest(unittest.TestCase):
-
     def setUp(self):
         self._run_numbers = '92762-92766'
         self._instrument = 'OSIRIS'
@@ -80,16 +79,25 @@ class IndirectQuickRunTest(unittest.TestCase):
         self.assertEqual(width_fit_group.getNumberOfEntries(), 12)
 
     def _execute_IndirectQuickRun(self, msd_fit=False, width_fit=False):
-        IndirectQuickRun(InputFiles=self._run_numbers, Instrument=self._instrument, Analyser=self._analyser,
-                         Reflection=self._reflection, SpectraRange=self._spectra_range,
-                         ElasticRange=self._elastic_range, InelasticRange=self._inelastic_range,
-                         TotalRange=self._total_range, MSDFit=msd_fit, WidthFit=width_fit)
+        IndirectQuickRun(InputFiles=self._run_numbers,
+                         Instrument=self._instrument,
+                         Analyser=self._analyser,
+                         Reflection=self._reflection,
+                         SpectraRange=self._spectra_range,
+                         ElasticRange=self._elastic_range,
+                         InelasticRange=self._inelastic_range,
+                         TotalRange=self._total_range,
+                         MSDFit=msd_fit,
+                         WidthFit=width_fit)
 
     def _assert_equal_to_reference_file(self, output_name, reference_name=None):
         reference_name = output_name if reference_name is None else reference_name
         expected_workspace = LoadNexus(Filename='IndirectQuickRun_' + reference_name + '.nxs')
-        self.assertTrue(CompareWorkspaces(Workspace1=get_ads_workspace(output_name), Workspace2=expected_workspace,
-                                          Tolerance=5.0, ToleranceRelErr=True)[0])
+        self.assertTrue(
+            CompareWorkspaces(Workspace1=get_ads_workspace(output_name),
+                              Workspace2=expected_workspace,
+                              Tolerance=5.0,
+                              ToleranceRelErr=True)[0])
 
 
 class IndirectQuickRunTestRunner(systemtesting.MantidSystemTest):

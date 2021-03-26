@@ -182,12 +182,12 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                     groupingStrings.append(name)
                     mantid.simpleapi.CloneWorkspace("__temp_instrument", OutputWorkspace=name)
                     mantid.simpleapi.SetGoniometer(Workspace=name,
-                                                   Axis0=str(g0) + "," + self.masterDict['gonioDirs'][0]
-                                                   + "," + str(self.masterDict['gonioSenses'][0]),
-                                                   Axis1=str(g1) + "," + self.masterDict['gonioDirs'][1]
-                                                   + "," + str(self.masterDict['gonioSenses'][1]),
-                                                   Axis2=str(g2) + "," + self.masterDict['gonioDirs'][2]
-                                                   + "," + str(self.masterDict['gonioSenses'][2]))
+                                                   Axis0=str(g0) + "," + self.masterDict['gonioDirs'][0] + "," +
+                                                   str(self.masterDict['gonioSenses'][0]),
+                                                   Axis1=str(g1) + "," + self.masterDict['gonioDirs'][1] + "," +
+                                                   str(self.masterDict['gonioSenses'][1]),
+                                                   Axis2=str(g2) + "," + self.masterDict['gonioDirs'][2] + "," +
+                                                   str(self.masterDict['gonioSenses'][2]))
         return groupingStrings
 
     # pylint: disable=too-many-locals
@@ -207,26 +207,30 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                                             self.masterDict['gonioSteps'][2])
             self.iterations = len(gonioAxis0values) * len(gonioAxis1values) * len(gonioAxis2values)
             if self.iterations > 10:
-                reply = QtWidgets.QMessageBox.warning(self, 'Goniometer',
-                                                      "More than 10 goniometer settings. This might be long.\n"
-                                                      "Are you sure you want to proceed?",
-                                                      QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                                                      QtWidgets.QMessageBox.No)
+                reply = QtWidgets.QMessageBox.warning(
+                    self, 'Goniometer', "More than 10 goniometer settings. This might be long.\n"
+                    "Are you sure you want to proceed?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                    QtWidgets.QMessageBox.No)
                 if reply == QtWidgets.QMessageBox.No:
                     return
 
             if self.wg is not None:
                 mantid.simpleapi.DeleteWorkspace(self.wg)
 
-            mantid.simpleapi.LoadEmptyInstrument(
-                mantid.api.ExperimentInfo.getInstrumentFilename(self.masterDict['instrument']),
-                OutputWorkspace="__temp_instrument")
+            mantid.simpleapi.LoadEmptyInstrument(mantid.api.ExperimentInfo.getInstrumentFilename(
+                self.masterDict['instrument']),
+                                                 OutputWorkspace="__temp_instrument")
             if self.masterDict['instrument'] == 'HYSPEC':
-                mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument", LogName='msd', LogText='1798.5',
+                mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument",
+                                              LogName='msd',
+                                              LogText='1798.5',
                                               LogType='Number Series')
-                mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument", LogName='s2',
-                                              LogText=str(self.masterDict['S2']), LogType='Number Series')
-                mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument", RewriteSpectraMap=True,
+                mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument",
+                                              LogName='s2',
+                                              LogText=str(self.masterDict['S2']),
+                                              LogType='Number Series')
+                mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument",
+                                                RewriteSpectraMap=True,
                                                 InstrumentName="HYSPEC")
             elif self.masterDict['instrument'] == 'EXED':
                 mantid.simpleapi.RotateInstrumentComponent(Workspace="__temp_instrument",
@@ -240,11 +244,10 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                     __maskWS = mantid.simpleapi.Load(self.masterDict['maskFilename'])
                     mantid.simpleapi.MaskDetectors(Workspace="__temp_instrument", MaskedWorkspace=__maskWS)
                 except (ValueError, RuntimeError) as e:
-                    reply = QtWidgets.QMessageBox.critical(self, 'Error',
-                                                           "The following error has occurred in loading the mask:\n"
-                                                           + str(e) + "\nDo you want to continue without mask?",
-                                                           QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                                                           QtWidgets.QMessageBox.No)
+                    reply = QtWidgets.QMessageBox.critical(
+                        self, 'Error', "The following error has occurred in loading the mask:\n" + str(e) +
+                        "\nDo you want to continue without mask?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                        QtWidgets.QMessageBox.No)
                     if reply == QtWidgets.QMessageBox.No:
                         return
             if self.masterDict['makeFast']:
@@ -352,12 +355,15 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             data += "S2 = " + str(self.masterDict['S2']) + '\n'
         data += "Ei = " + str(self.masterDict['Ei']) + ' meV\n'
         data += "Goniometer values:\n"
-        gonioAxis0values = numpy.arange(self.masterDict['gonioMinvals'][0], self.masterDict['gonioMaxvals'][0]
-                                        + 0.1 * self.masterDict['gonioSteps'][0], self.masterDict['gonioSteps'][0])
-        gonioAxis1values = numpy.arange(self.masterDict['gonioMinvals'][1], self.masterDict['gonioMaxvals'][1]
-                                        + 0.1 * self.masterDict['gonioSteps'][1], self.masterDict['gonioSteps'][1])
-        gonioAxis2values = numpy.arange(self.masterDict['gonioMinvals'][2], self.masterDict['gonioMaxvals'][2]
-                                        + 0.1 * self.masterDict['gonioSteps'][2], self.masterDict['gonioSteps'][2])
+        gonioAxis0values = numpy.arange(self.masterDict['gonioMinvals'][0],
+                                        self.masterDict['gonioMaxvals'][0] + 0.1 * self.masterDict['gonioSteps'][0],
+                                        self.masterDict['gonioSteps'][0])
+        gonioAxis1values = numpy.arange(self.masterDict['gonioMinvals'][1],
+                                        self.masterDict['gonioMaxvals'][1] + 0.1 * self.masterDict['gonioSteps'][1],
+                                        self.masterDict['gonioSteps'][1])
+        gonioAxis2values = numpy.arange(self.masterDict['gonioMinvals'][2],
+                                        self.masterDict['gonioMaxvals'][2] + 0.1 * self.masterDict['gonioSteps'][2],
+                                        self.masterDict['gonioSteps'][2])
         for g0 in gonioAxis0values:
             for g1 in gonioAxis1values:
                 for g2 in gonioAxis2values:
@@ -386,10 +392,10 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         if self.masterDict['dimIndex'][0] == 3 or self.masterDict['dimIndex'][1] == 3:
             return x, y
         else:
-            h1, k1, l1 = (float(temp) for temp in
-                          self.masterDict['dimBasis'][self.masterDict['dimIndex'][0]].split(','))
-            h2, k2, l2 = (float(temp) for temp in
-                          self.masterDict['dimBasis'][self.masterDict['dimIndex'][1]].split(','))
+            h1, k1, l1 = (float(temp)
+                          for temp in self.masterDict['dimBasis'][self.masterDict['dimIndex'][0]].split(','))
+            h2, k2, l2 = (float(temp)
+                          for temp in self.masterDict['dimBasis'][self.masterDict['dimIndex'][1]].split(','))
             angle = numpy.radians(self.ol.recAngle(h1, k1, l1, h2, k2, l2))
             return 1. * x + numpy.cos(angle) * y, numpy.sin(angle) * y
 
@@ -399,10 +405,10 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         if self.masterDict['dimIndex'][0] == 3 or self.masterDict['dimIndex'][1] == 3:
             return x, y
         else:
-            h1, k1, l1 = (float(temp) for temp in
-                          self.masterDict['dimBasis'][self.masterDict['dimIndex'][0]].split(','))
-            h2, k2, l2 = (float(temp) for temp in
-                          self.masterDict['dimBasis'][self.masterDict['dimIndex'][1]].split(','))
+            h1, k1, l1 = (float(temp)
+                          for temp in self.masterDict['dimBasis'][self.masterDict['dimIndex'][0]].split(','))
+            h2, k2, l2 = (float(temp)
+                          for temp in self.masterDict['dimBasis'][self.masterDict['dimIndex'][1]].split(','))
             angle = numpy.radians(self.ol.recAngle(h1, k1, l1, h2, k2, l2))
             return 1. * x - y / numpy.tan(angle), y / numpy.sin(angle)
 

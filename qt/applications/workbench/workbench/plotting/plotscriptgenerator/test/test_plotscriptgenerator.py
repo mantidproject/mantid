@@ -49,54 +49,54 @@ SAMPLE_SCRIPT = ("import matplotlib.pyplot as plt\n"
                  "\n"
                  "# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
 
-SAMPLE_SCRIPT_WITH_FIT = ("from mantid.simpleapi import Fit\n"
-                          "import matplotlib.pyplot as plt\n"
-                          "from mantid.plots.utility import MantidAxType\n"
-                          "# Fit definition, see https://docs.mantidproject.org/algorithms/Fit-v1.html for more details\n"
-                          "Function=\"GaussOsc\"\n"
-                          "InputWorkspace=\"TestWorkspace\"\n"
-                          "Output=\"TestOutput\"\n"
-                          "Fit(Function=Function, InputWorkspace=InputWorkspace, Output=Output)\n"
-                          "\n"
-                          "from mantid.api import AnalysisDataService\n"
-                          "\n"
-                          "ADS.retrieve(...)\n"
-                          "\n"
-                          "fig, axes = plt.subplots(...)\n"
-                          "axes[0].plot(...)\n"
-                          "axes[0].plot(...)\n"
-                          "axes[0].set_xlim(...)\n"
-                          "axes[0].set_ylim(...)\n"
-                          "\n"
-                          "axes[1].plot(...)\n"
-                          "axes[1].set_xlim(...)\n"
-                          "axes[1].set_ylim(...)\n"
-                          "\n"
-                          "plt.show()"
-                          "\n"
-                          "# Scripting Plots in Mantid:"
-                          "\n"
-                          "# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
+SAMPLE_SCRIPT_WITH_FIT = (
+    "from mantid.simpleapi import Fit\n"
+    "import matplotlib.pyplot as plt\n"
+    "from mantid.plots.utility import MantidAxType\n"
+    "# Fit definition, see https://docs.mantidproject.org/algorithms/Fit-v1.html for more details\n"
+    "Function=\"GaussOsc\"\n"
+    "InputWorkspace=\"TestWorkspace\"\n"
+    "Output=\"TestOutput\"\n"
+    "Fit(Function=Function, InputWorkspace=InputWorkspace, Output=Output)\n"
+    "\n"
+    "from mantid.api import AnalysisDataService\n"
+    "\n"
+    "ADS.retrieve(...)\n"
+    "\n"
+    "fig, axes = plt.subplots(...)\n"
+    "axes[0].plot(...)\n"
+    "axes[0].plot(...)\n"
+    "axes[0].set_xlim(...)\n"
+    "axes[0].set_ylim(...)\n"
+    "\n"
+    "axes[1].plot(...)\n"
+    "axes[1].set_xlim(...)\n"
+    "axes[1].set_ylim(...)\n"
+    "\n"
+    "plt.show()"
+    "\n"
+    "# Scripting Plots in Mantid:"
+    "\n"
+    "# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
 
 
 class PlotScriptGeneratorTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
-        cls.test_ws = CreateWorkspace(
-            DataX=[10, 20, 30, 10, 20, 30],
-            DataY=[2, 3, 4, 5],
-            DataE=[1, 2, 3, 4],
-            NSpec=2,
-            OutputWorkspace='test_ws')
+        cls.test_ws = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30],
+                                      DataY=[2, 3, 4, 5],
+                                      DataE=[1, 2, 3, 4],
+                                      NSpec=2,
+                                      OutputWorkspace='test_ws')
 
         cls.retrieval_cmds = ["from mantid.api import AnalysisDataService", "", "ADS.retrieve(...)"]
         cls.subplots_cmd = "plt.subplots(...)"
         cls.plot_cmd = "plot(...)"
         cls.ax_limit_cmds = ['set_xlim(...)', 'set_ylim(...)']
-        cls.fit_cmds = ["Function=\"GaussOsc\"", "InputWorkspace=\"TestWorkspace\"",
-                        "Output=\"TestOutput\"",
-                        "Fit(Function=Function, InputWorkspace=InputWorkspace, Output=Output)"]
+        cls.fit_cmds = [
+            "Function=\"GaussOsc\"", "InputWorkspace=\"TestWorkspace\"", "Output=\"TestOutput\"",
+            "Fit(Function=Function, InputWorkspace=InputWorkspace, Output=Output)"
+        ]
         cls.fit_header = ["from mantid.simpleapi import Fit"]
 
     def _gen_mock_axes(self, **kwargs):
@@ -136,10 +136,8 @@ class PlotScriptGeneratorTest(unittest.TestCase):
     @patch(GEN_WS_RETRIEVAL_CMDS)
     @patch(GEN_PLOT_CMDS)
     @patch(GEN_SUBPLOTS_CMD)
-    def test_generate_script_compiles_script_correctly(self, mock_subplots_cmd,
-                                                       mock_plot_cmd, mock_retrieval_cmd,
-                                                       mock_axis_lim_cmd,
-                                                       mock_autoscale_lims):
+    def test_generate_script_compiles_script_correctly(self, mock_subplots_cmd, mock_plot_cmd, mock_retrieval_cmd,
+                                                       mock_axis_lim_cmd, mock_autoscale_lims):
         mock_retrieval_cmd.return_value = self.retrieval_cmds
         mock_subplots_cmd.return_value = self.subplots_cmd
         mock_plot_cmd.return_value = self.plot_cmd
@@ -148,12 +146,15 @@ class PlotScriptGeneratorTest(unittest.TestCase):
 
         mock_axes1 = self._gen_mock_axes(get_tracked_artists=lambda: [None, None],
                                          get_lines=lambda: [None, None],
-                                         numRows=1, numCols=2, colNum=0)
+                                         numRows=1,
+                                         numCols=2,
+                                         colNum=0)
         mock_axes2 = self._gen_mock_axes(get_tracked_artists=lambda: [None],
                                          get_lines=lambda: [None],
-                                         numRows=1, numCols=2, colNum=1)
-        mock_fig = Mock(get_axes=lambda: [mock_axes1, mock_axes2],
-                        axes=[mock_axes1, mock_axes2])
+                                         numRows=1,
+                                         numCols=2,
+                                         colNum=1)
+        mock_fig = Mock(get_axes=lambda: [mock_axes1, mock_axes2], axes=[mock_axes1, mock_axes2])
         mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""
 
         output_script = generate_script(mock_fig, exclude_headers=True)
@@ -163,9 +164,8 @@ class PlotScriptGeneratorTest(unittest.TestCase):
     @patch(GEN_WS_RETRIEVAL_CMDS)
     @patch(GEN_PLOT_CMDS)
     @patch(GEN_SUBPLOTS_CMD)
-    def test_generate_script_adds_legend_command_if_legend_present(
-            self, mock_subplots_cmd, mock_plot_cmd, mock_retrieval_cmd,
-            mock_autoscale_lims):
+    def test_generate_script_adds_legend_command_if_legend_present(self, mock_subplots_cmd, mock_plot_cmd,
+                                                                   mock_retrieval_cmd, mock_autoscale_lims):
         mock_retrieval_cmd.return_value = self.retrieval_cmds
         mock_subplots_cmd.return_value = self.subplots_cmd
         mock_plot_cmd.return_value = self.plot_cmd
@@ -183,9 +183,9 @@ class PlotScriptGeneratorTest(unittest.TestCase):
     @patch(GEN_WS_RETRIEVAL_CMDS)
     @patch(GEN_PLOT_CMDS)
     @patch(GEN_SUBPLOTS_CMD)
-    def test_generate_script_does_not_add_legend_command_if_figure_has_no_legend(
-            self, mock_subplots_cmd, mock_plot_cmd, mock_retrieval_cmd,
-            mock_autoscale_lims):
+    def test_generate_script_does_not_add_legend_command_if_figure_has_no_legend(self, mock_subplots_cmd, mock_plot_cmd,
+                                                                                 mock_retrieval_cmd,
+                                                                                 mock_autoscale_lims):
         mock_retrieval_cmd.return_value = self.retrieval_cmds
         mock_subplots_cmd.return_value = self.subplots_cmd
         mock_plot_cmd.return_value = self.plot_cmd
@@ -199,11 +199,8 @@ class PlotScriptGeneratorTest(unittest.TestCase):
     @patch(GEN_WS_RETRIEVAL_CMDS)
     @patch(GEN_PLOT_CMDS)
     @patch(GEN_SUBPLOTS_CMD)
-    def test_generate_script_adds_minor_ticks_command_if_axes_has_minor_ticks(self,
-                                                                              mock_subplots_cmd,
-                                                                              mock_plot_cmd,
-                                                                              mock_retrieval_cmd,
-                                                                              mock_autoscale_lims):
+    def test_generate_script_adds_minor_ticks_command_if_axes_has_minor_ticks(self, mock_subplots_cmd, mock_plot_cmd,
+                                                                              mock_retrieval_cmd, mock_autoscale_lims):
         mock_retrieval_cmd.return_value = self.retrieval_cmds
         mock_subplots_cmd.return_value = self.subplots_cmd
         mock_plot_cmd.return_value = self.plot_cmd
@@ -222,11 +219,9 @@ class PlotScriptGeneratorTest(unittest.TestCase):
     @patch(GEN_WS_RETRIEVAL_CMDS)
     @patch(GEN_PLOT_CMDS)
     @patch(GEN_SUBPLOTS_CMD)
-    def test_generate_script_compiles_script_correctly_with_fit(self, mock_subplots_cmd,
-                                                                mock_plot_cmd, mock_retrieval_cmd,
-                                                                mock_axis_lim_cmd,
-                                                                mock_autoscale_lims,
-                                                                mock_fit_cmds):
+    def test_generate_script_compiles_script_correctly_with_fit(self, mock_subplots_cmd, mock_plot_cmd,
+                                                                mock_retrieval_cmd, mock_axis_lim_cmd,
+                                                                mock_autoscale_lims, mock_fit_cmds):
 
         mock_retrieval_cmd.return_value = self.retrieval_cmds
         mock_subplots_cmd.return_value = self.subplots_cmd
@@ -237,12 +232,15 @@ class PlotScriptGeneratorTest(unittest.TestCase):
 
         mock_axes1 = self._gen_mock_axes(get_tracked_artists=lambda: [None, None],
                                          get_lines=lambda: [None, None],
-                                         numRows=1, numCols=2, colNum=0)
+                                         numRows=1,
+                                         numCols=2,
+                                         colNum=0)
         mock_axes2 = self._gen_mock_axes(get_tracked_artists=lambda: [None],
                                          get_lines=lambda: [None],
-                                         numRows=1, numCols=2, colNum=1)
-        mock_fig = Mock(get_axes=lambda: [mock_axes1, mock_axes2],
-                        axes=[mock_axes1, mock_axes2])
+                                         numRows=1,
+                                         numCols=2,
+                                         colNum=1)
+        mock_fig = Mock(get_axes=lambda: [mock_axes1, mock_axes2], axes=[mock_axes1, mock_axes2])
         mock_fig.canvas.manager.fit_browser.fit_result_ws_name = "OutputWorkspace"
 
         output_script = generate_script(mock_fig, exclude_headers=True)
@@ -252,10 +250,7 @@ class PlotScriptGeneratorTest(unittest.TestCase):
     @patch(GEN_WS_RETRIEVAL_CMDS)
     @patch(GEN_PLOT_CMDS)
     @patch(GEN_SUBPLOTS_CMD)
-    def test_generate_script_adds_minor_and_major_tick_kw(self,
-                                                          mock_subplots_cmd,
-                                                          mock_plot_cmd,
-                                                          mock_retrieval_cmd,
+    def test_generate_script_adds_minor_and_major_tick_kw(self, mock_subplots_cmd, mock_plot_cmd, mock_retrieval_cmd,
                                                           mock_autoscale_lims):
         mock_retrieval_cmd.return_value = self.retrieval_cmds
         mock_subplots_cmd.return_value = self.subplots_cmd

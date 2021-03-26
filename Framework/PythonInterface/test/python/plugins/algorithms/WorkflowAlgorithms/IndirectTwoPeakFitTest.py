@@ -19,11 +19,17 @@ def get_ads_workspace(workspace_name):
 
 
 class IndirectTwoPeakFitTest(unittest.TestCase):
-
     def setUp(self):
-        EnergyWindowScan(InputFiles='OSIRIS92762', Instrument='OSIRIS', Analyser='graphite', Reflection='002',
-                         SpectraRange='963,980', ElasticRange='-0.02,0.02', InelasticRange='0.4,0.5',
-                         TotalRange='-0.5,0.5', ReducedWorkspace='__reduced_group', ScanWorkspace='__scan_workspace')
+        EnergyWindowScan(InputFiles='OSIRIS92762',
+                         Instrument='OSIRIS',
+                         Analyser='graphite',
+                         Reflection='002',
+                         SpectraRange='963,980',
+                         ElasticRange='-0.02,0.02',
+                         InelasticRange='0.4,0.5',
+                         TotalRange='-0.5,0.5',
+                         ReducedWorkspace='__reduced_group',
+                         ScanWorkspace='__scan_workspace')
 
         self._red_name = 'osiris92762_graphite002_red'
         self._output_name = 'osiris92762_graphite002_two_peak_fit'
@@ -73,13 +79,18 @@ class IndirectTwoPeakFitTest(unittest.TestCase):
         self._assert_equal_to_reference_file('osiris92762_graphite002_two_peak_fit_ChiSq')
 
     def _execute_IndirectTwoPeakFit(self):
-        IndirectTwoPeakFit(SampleWorkspace=self._red_name, EnergyMin=self._x_min, EnergyMax=self._x_max,
+        IndirectTwoPeakFit(SampleWorkspace=self._red_name,
+                           EnergyMin=self._x_min,
+                           EnergyMax=self._x_max,
                            OutputName=self._output_name)
 
     def _assert_equal_to_reference_file(self, output_name):
         expected_workspace = LoadNexus(Filename='IndirectTwoPeakFit_' + output_name + '.nxs')
-        self.assertTrue(CompareWorkspaces(Workspace1=get_ads_workspace(output_name), Workspace2=expected_workspace,
-                                          Tolerance=5.0, ToleranceRelErr=True)[0])
+        self.assertTrue(
+            CompareWorkspaces(Workspace1=get_ads_workspace(output_name),
+                              Workspace2=expected_workspace,
+                              Tolerance=5.0,
+                              ToleranceRelErr=True)[0])
 
 
 if __name__ == '__main__':

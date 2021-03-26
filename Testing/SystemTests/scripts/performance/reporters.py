@@ -7,6 +7,7 @@
 import os
 import sys
 
+
 #########################################################################
 # A base class to support report results in an appropriate manner
 #########################################################################
@@ -16,7 +17,6 @@ class ResultReporter(object):
     appropriate form, subclass this class and implement the dispatchResults
     method.
     '''
-
     def __init__(self):
         '''Initialize a class instance, e.g. connect to a database'''
         pass
@@ -35,7 +35,6 @@ class TextResultReporter(ResultReporter):
     '''
     Report the results of a test using standard out
     '''
-
     def dispatchResults(self, result):
         '''
         Print the results to standard out
@@ -73,6 +72,7 @@ class LogArchivingReporter(ResultReporter):
         f.write(result["log_contents"])
         f.close()
 
+
 #########################################################################
 # A class to report results as XML that Hudson can interpret
 #########################################################################
@@ -81,7 +81,6 @@ class JUnitXMLReporter(ResultReporter):
     Report the results of a test to a JUnit style XML format
     that can be read by Hudson/Jenkins
     '''
-
     def __init__(self, path):
         # Path to .xml files
         self._path = path
@@ -93,7 +92,7 @@ class JUnitXMLReporter(ResultReporter):
         fullpath = os.path.join(self._path, "%s.xml" % result["name"])
         f = open(fullpath, 'w')
 
-        names  = result["name"].split(".")
+        names = result["name"].split(".")
         suitename = names[0]
         testname = ".".join(names[1:])
 
@@ -109,11 +108,10 @@ class JUnitXMLReporter(ResultReporter):
     <testcase name="%s" time="%f" classname="%s">%s
     </testcase>
 </testsuite>
-""" % (suitename, num_failures, testname, result["runtime"], suitename, failure) )
+""" % (suitename, num_failures, testname, result["runtime"], suitename, failure))
 
 
-
-if __name__=="__main__":
+if __name__ == "__main__":
     import testresult
     rep = JUnitXMLReporter(".")
 

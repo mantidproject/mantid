@@ -14,7 +14,6 @@ import unittest
 
 
 class SaveYDATest(unittest.TestCase):
-
     def setUp(self):
 
         self.prop_num = 3
@@ -146,9 +145,9 @@ class SaveYDATest(unittest.TestCase):
         self.assertEqual(slices[1], "  - j: 0\n")
         self.assertTrue(slices[2].startswith("    z: [{val: 14.1499"))
         self.assertTrue(slices[2].endswith("}]\n"))
-        self.assertEqual(slices[3], "    x: [" + str((self.data_x[0] + self.data_x[1]) / 2) + ", "
-                         + str((self.data_x[1] + self.data_x[2]) / 2) + ", " + str((self.data_x[2] + self.data_x[3]) / 2)
-                         + "]" + "\n")
+        self.assertEqual(
+            slices[3], "    x: [" + str((self.data_x[0] + self.data_x[1]) / 2) + ", " + str(
+                (self.data_x[1] + self.data_x[2]) / 2) + ", " + str((self.data_x[2] + self.data_x[3]) / 2) + "]" + "\n")
         self.assertEqual(slices[4], "    y: " + str(self.data_y) + "\n")
 
     def test_event_ws(self):
@@ -201,8 +200,7 @@ class SaveYDATest(unittest.TestCase):
         f = open(filename, "r")
         return f
 
-    def _create_workspace(self, ws_2D=True, sample=True, xAx=True, yAxSpec=True,
-                          yAxMt=True, instrument=True):
+    def _create_workspace(self, ws_2D=True, sample=True, xAx=True, yAxSpec=True, yAxMt=True, instrument=True):
         """ create Workspace
         :param ws_2D: should workspace be 2D?
         :param sample: should workspace have sample logs?
@@ -219,31 +217,52 @@ class SaveYDATest(unittest.TestCase):
             ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="TOF")
             return ws
         if not instrument:
-            ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="DeltaE")
+            ws = CreateWorkspace(DataX=self.data_x,
+                                 DataY=self.data_y,
+                                 DataE=np.sqrt(self.data_y),
+                                 NSpec=1,
+                                 UnitX="DeltaE")
             return ws
         if not yAxMt and not yAxSpec:
-            ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="DeltaE")
+            ws = CreateWorkspace(DataX=self.data_x,
+                                 DataY=self.data_y,
+                                 DataE=np.sqrt(self.data_y),
+                                 NSpec=1,
+                                 UnitX="DeltaE")
             LoadInstrument(ws, True, InstrumentName="TOFTOF")
             ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target="theta", EMode="Direct")
             return ws
         if not yAxSpec and yAxMt:
-            ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="DeltaE")
+            ws = CreateWorkspace(DataX=self.data_x,
+                                 DataY=self.data_y,
+                                 DataE=np.sqrt(self.data_y),
+                                 NSpec=1,
+                                 UnitX="DeltaE")
             LoadInstrument(ws, True, InstrumentName="TOFTOF")
             self._add_all_sample_logs(ws)
-            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace="ws2", Target ="ElasticQ", EMode="Direct")
+            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace="ws2", Target="ElasticQ", EMode="Direct")
             ws2 = mtd["ws2"]
             return ws2
         if not sample:
-            ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="DeltaE")
+            ws = CreateWorkspace(DataX=self.data_x,
+                                 DataY=self.data_y,
+                                 DataE=np.sqrt(self.data_y),
+                                 NSpec=1,
+                                 UnitX="DeltaE")
             LoadInstrument(ws, False, InstrumentName="TOFTOF")
             for i in range(ws.getNumberHistograms()):
-                ws.getSpectrum(i).setDetectorID(i+1)
+                ws.getSpectrum(i).setDetectorID(i + 1)
             return ws
         else:
-            ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="DeltaE")
+            ws = CreateWorkspace(DataX=self.data_x,
+                                 DataY=self.data_y,
+                                 DataE=np.sqrt(self.data_y),
+                                 NSpec=1,
+                                 UnitX="DeltaE")
             LoadInstrument(ws, True, InstrumentName="TOFTOF")
             self._add_all_sample_logs(ws)
             return ws
+
 
 if __name__ == '__main__':
     unittest.main()

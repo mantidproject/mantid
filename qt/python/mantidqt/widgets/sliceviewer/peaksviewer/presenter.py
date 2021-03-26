@@ -184,8 +184,7 @@ class PeaksViewerCollectionPresenter:
         :returns: The child presenter
         """
         self.setup_ads_observer()
-        presenter = PeaksViewerPresenter(self._create_peaksviewer_model(name),
-                                         self._view.append_peaksviewer())
+        presenter = PeaksViewerPresenter(self._create_peaksviewer_model(name), self._view.append_peaksviewer())
         self._child_presenters.append(presenter)
         return presenter
 

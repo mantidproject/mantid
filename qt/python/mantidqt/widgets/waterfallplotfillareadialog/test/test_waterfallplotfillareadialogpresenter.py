@@ -17,7 +17,6 @@ from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlot
 
 
 class WaterfallPlotFillAreaDialogPresenterTest(unittest.TestCase):
-
     def setUp(self):
         self.fig = figure()
         self.ax = self.fig.add_subplot(111, projection='mantid')

@@ -22,7 +22,7 @@ DEBBASED = ['ubuntu', 'debian']
 
 def createScriptLog(path):
     global scriptLog
-    scriptLog = open(path,'w')
+    scriptLog = open(path, 'w')
 
 
 def stop(installer):
@@ -103,9 +103,8 @@ def linux_distro_distributor():
     """Extract the distributor for the current Linux distribution
     """
     try:
-        lsb_descr = subprocess.check_output('lsb_release --id', shell=True,
-                                            stderr=subprocess.STDOUT).decode('utf-8')
-        return lsb_descr.strip()[len('Distributor ID:')+1:].strip()
+        lsb_descr = subprocess.check_output('lsb_release --id', shell=True, stderr=subprocess.STDOUT).decode('utf-8')
+        return lsb_descr.strip()[len('Distributor ID:') + 1:].strip()
     except subprocess.CalledProcessError as exc:
         return f'Unknown distribution: lsb_release --id failed {exc}'
 
@@ -113,8 +112,7 @@ def linux_distro_distributor():
 def run(cmd):
     """Run a command in a subprocess"""
     try:
-        stdout = subprocess.check_output(cmd, shell=True,
-                                         stderr=subprocess.STDOUT).decode('utf-8')
+        stdout = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT).decode('utf-8')
     except subprocess.CalledProcessError as exc:
         log(f'Error in subprocess {exc}')
         raise
@@ -131,8 +129,7 @@ class MantidInstaller(object):
     python_cmd = None
     python_args = "--classic"
 
-    def __init__(self, package_dir, filepattern,
-                 do_install):
+    def __init__(self, package_dir, filepattern, do_install):
         """Initialized with a pattern to
         find a path to an installer
         """
@@ -170,7 +167,6 @@ class NSISInstaller(MantidInstaller):
     """Uses an NSIS installer
     to install Mantid
     """
-
     def __init__(self, package_dir, do_install):
         MantidInstaller.__init__(self, package_dir, 'mantid*.exe', do_install)
         package = os.path.basename(self.mantidInstaller)
@@ -209,9 +205,7 @@ class NSISInstaller(MantidInstaller):
 
 class LinuxInstaller(MantidInstaller):
     """Defines common properties for linux-based packages"""
-
-    def __init__(self, package_dir, filepattern,
-                 do_install):
+    def __init__(self, package_dir, filepattern, do_install):
         MantidInstaller.__init__(self, package_dir, filepattern, do_install)
         package = os.path.basename(self.mantidInstaller)
         install_prefix = '/opt'
@@ -231,7 +225,6 @@ class LinuxInstaller(MantidInstaller):
 class DebInstaller(LinuxInstaller):
     """Uses a deb package to install mantid
     """
-
     def __init__(self, package_dir, do_install):
         LinuxInstaller.__init__(self, package_dir, 'mantid*.deb', do_install)
 
@@ -250,7 +243,6 @@ class DebInstaller(LinuxInstaller):
 class RPMInstaller(LinuxInstaller):
     """Uses a rpm package to install mantid
     """
-
     def __init__(self, package_dir, do_install):
         LinuxInstaller.__init__(self, package_dir, 'mantid*.rpm', do_install)
 
@@ -296,12 +288,11 @@ class DMGInstaller(MantidInstaller):
     def do_install(self):
         """Mounts the dmg and copies the application into the right place.
         """
-        p = subprocess.Popen(['hdiutil','attach',self.mantidInstaller],
-                             stdin=subprocess.PIPE,stdout=subprocess.PIPE)
-        p.stdin.write(b'yes') # This accepts the GPL
-        p.communicate()[0] # This captures (and discards) the GPL text
+        p = subprocess.Popen(['hdiutil', 'attach', self.mantidInstaller], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        p.stdin.write(b'yes')  # This accepts the GPL
+        p.communicate()[0]  # This captures (and discards) the GPL text
         mantidInstallerName = os.path.basename(self.mantidInstaller)
-        mantidInstallerName = mantidInstallerName.replace('.dmg','')
+        mantidInstallerName = mantidInstallerName.replace('.dmg', '')
         try:
             run(f'sudo cp -a /Volumes/{mantidInstallerName}/{self.bundle_name} /Applications/')
         finally:
@@ -315,7 +306,7 @@ class DMGInstaller(MantidInstaller):
 
 class CondaInstaller(MantidInstaller):
 
-    python_args = "" # not mantidpython. just normal python
+    python_args = ""  # not mantidpython. just normal python
 
     def __init__(self, package_dir, do_install=True):
         filepattern = "mantid-framework*.tar.bz2"

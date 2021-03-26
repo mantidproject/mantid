@@ -15,7 +15,6 @@ from mantid.api import IFunction1D, FunctionFactory
 
 
 class MsdYi(IFunction1D):
-
     def category(self):
         return "QuasiElastic"
 

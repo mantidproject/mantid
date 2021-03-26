@@ -13,7 +13,6 @@ from reduction_workflow.find_data import find_data
 
 
 class SANSBeamSpreaderTransmission(PythonAlgorithm):
-
     def category(self):
         return "Workflow\\SANS\\UsesPropertyManager"
 
@@ -24,45 +23,33 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         return "Compute transmission using the beam spreader method"
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
-                                                     direction=Direction.Input))
-        self.declareProperty(FileProperty("SampleSpreaderFilename", "",
-                                          action=FileAction.Load,
-                                          extensions=['xml', 'nxs', 'nxs.h5']))
-        self.declareProperty(FileProperty("DirectSpreaderFilename", "",
-                                          action=FileAction.Load,
-                                          extensions=['xml', 'nxs', 'nxs.h5']))
-        self.declareProperty(FileProperty("SampleScatteringFilename", "",
-                                          action=FileAction.Load,
-                                          extensions=['xml', 'nxs', 'nxs.h5']))
-        self.declareProperty(FileProperty("DirectScatteringFilename", "",
-                                          action=FileAction.Load,
-                                          extensions=['xml', 'nxs', 'nxs.h5']))
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input))
+        self.declareProperty(
+            FileProperty("SampleSpreaderFilename", "", action=FileAction.Load, extensions=['xml', 'nxs', 'nxs.h5']))
+        self.declareProperty(
+            FileProperty("DirectSpreaderFilename", "", action=FileAction.Load, extensions=['xml', 'nxs', 'nxs.h5']))
+        self.declareProperty(
+            FileProperty("SampleScatteringFilename", "", action=FileAction.Load, extensions=['xml', 'nxs', 'nxs.h5']))
+        self.declareProperty(
+            FileProperty("DirectScatteringFilename", "", action=FileAction.Load, extensions=['xml', 'nxs', 'nxs.h5']))
 
-        self.declareProperty("SpreaderTransmissionValue", 1.0,
-                             "Transmission of the beam spreader")
-        self.declareProperty("SpreaderTransmissionError", 0.0,
-                             "Error on the transmission of the beam spreader")
+        self.declareProperty("SpreaderTransmissionValue", 1.0, "Transmission of the beam spreader")
+        self.declareProperty("SpreaderTransmissionError", 0.0, "Error on the transmission of the beam spreader")
 
-        self.declareProperty("ThetaDependent", True,
-                             "If true, a theta-dependent correction will be applied")
-        self.declareProperty(FileProperty("DarkCurrentFilename", "",
-                                          action=FileAction.OptionalLoad,
-                                          extensions=['xml', 'nxs', 'nxs.h5']))
-        self.declareProperty("UseSampleDarkCurrent", False,
-                             "If true, the sample dark current will be used")
+        self.declareProperty("ThetaDependent", True, "If true, a theta-dependent correction will be applied")
+        self.declareProperty(
+            FileProperty("DarkCurrentFilename", "", action=FileAction.OptionalLoad, extensions=['xml', 'nxs',
+                                                                                                'nxs.h5']))
+        self.declareProperty("UseSampleDarkCurrent", False, "If true, the sample dark current will be used")
 
-        self.declareProperty("ReductionProperties", "__sans_reduction_properties",
+        self.declareProperty("ReductionProperties",
+                             "__sans_reduction_properties",
                              validator=StringMandatoryValidator(),
                              doc="Property manager name for the reduction")
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
-                                                     direction = Direction.Output))
-        self.declareProperty("MeasuredTransmission", 0.0,
-                             direction=Direction.Output)
-        self.declareProperty("MeasuredError", 0.0,
-                             direction=Direction.Output)
-        self.declareProperty("OutputMessage", "",
-                             direction=Direction.Output, doc = "Output message")
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
+        self.declareProperty("MeasuredTransmission", 0.0, direction=Direction.Output)
+        self.declareProperty("MeasuredError", 0.0, direction=Direction.Output)
+        self.declareProperty("OutputMessage", "", direction=Direction.Output, doc="Output message")
 
     def PyExec(self):  # noqa: C901
         # Get the reduction property manager
@@ -91,10 +78,11 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         # Get the data loader
         def _load_data(filename, output_ws):
             if not property_manager.existsProperty("LoadAlgorithm"):
-                Logger("SANSBeamSpreaderTransmission").error("SANS reduction not set up properly: missing load algorithm")
+                Logger("SANSBeamSpreaderTransmission").error(
+                    "SANS reduction not set up properly: missing load algorithm")
                 raise RuntimeError("SANS reduction not set up properly: missing load algorithm")
-            p=property_manager.getProperty("LoadAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
+            p = property_manager.getProperty("LoadAlgorithm")
+            alg = Algorithm.fromString(p.valueAsStr)
             alg.setProperty("Filename", filename)
             alg.setProperty("OutputWorkspace", output_ws)
             if alg.existsProperty("ReductionProperties"):
@@ -117,10 +105,8 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
             direct_spread = self.getPropertyValue("DirectSpreaderFilename")
             direct_scatt = self.getPropertyValue("DirectScatteringFilename")
 
-            ws_names = [[sample_spread, sample_spreader_ws],
-                        [direct_spread, direct_spreader_ws],
-                        [sample_scatt, sample_scatt_ws],
-                        [direct_scatt, direct_scatt_ws]]
+            ws_names = [[sample_spread, sample_spreader_ws], [direct_spread, direct_spreader_ws],
+                        [sample_scatt, sample_scatt_ws], [direct_scatt, direct_scatt_ws]]
 
             for f in ws_names:
                 filepath = find_data(f[0], instrument=instrument)
@@ -131,14 +117,17 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
             monitor_det_ID = None
             if property_manager.existsProperty("TransmissionNormalisation"):
                 sample_ws = AnalysisDataService.retrieve(sample_scatt_ws)
-                if property_manager.getProperty("TransmissionNormalisation").value=="Monitor":
-                    monitor_det_ID = int(sample_ws.getInstrument().getNumberParameter("default-incident-monitor-spectrum")[0])
+                if property_manager.getProperty("TransmissionNormalisation").value == "Monitor":
+                    monitor_det_ID = int(
+                        sample_ws.getInstrument().getNumberParameter("default-incident-monitor-spectrum")[0])
                 else:
-                    monitor_det_ID = int(sample_ws.getInstrument().getNumberParameter("default-incident-timer-spectrum")[0])
+                    monitor_det_ID = int(
+                        sample_ws.getInstrument().getNumberParameter("default-incident-timer-spectrum")[0])
             elif property_manager.existsProperty("NormaliseAlgorithm"):
+
                 def _normalise(workspace):
-                    p=property_manager.getProperty("NormaliseAlgorithm")
-                    alg=Algorithm.fromString(p.valueAsStr)
+                    p = property_manager.getProperty("NormaliseAlgorithm")
+                    alg = Algorithm.fromString(p.valueAsStr)
                     alg.setProperty("InputWorkspace", workspace)
                     alg.setProperty("OutputWorkspace", workspace)
                     if alg.existsProperty("ReductionProperties"):
@@ -146,8 +135,9 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
                     alg.execute()
                     msg = ''
                     if alg.existsProperty("OutputMessage"):
-                        msg += alg.getProperty("OutputMessage").value+'\n'
+                        msg += alg.getProperty("OutputMessage").value + '\n'
                     return msg
+
                 for f in ws_names:
                     _normalise(f[1])
 
@@ -163,9 +153,9 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
             alg.setProperty("SampleScatterRunWorkspace", sample_scatt_ws)
             alg.setProperty("DirectScatterRunWorkspace", direct_scatt_ws)
             alg.setProperty("IncidentBeamMonitor", monitor_det_ID)
-            alg.setProperty("OutputWorkspace",trans_ws_name)
-            alg.setProperty("SpreaderTransmissionValue",spreader_t_value)
-            alg.setProperty("SpreaderTransmissionError",spreader_t_error)
+            alg.setProperty("OutputWorkspace", trans_ws_name)
+            alg.setProperty("SpreaderTransmissionValue", spreader_t_value)
+            alg.setProperty("SpreaderTransmissionError", spreader_t_error)
             alg.execute()
 
             trans_ws = AnalysisDataService.retrieve(trans_ws_name)
@@ -181,9 +171,8 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         workspace = AnalysisDataService.retrieve(input_ws_name).name()
 
         # Clone workspace to make boost-python happy
-        api.CloneWorkspace(InputWorkspace=workspace,
-                           OutputWorkspace='__'+workspace)
-        workspace = '__'+workspace
+        api.CloneWorkspace(InputWorkspace=workspace, OutputWorkspace='__' + workspace)
+        workspace = '__' + workspace
 
         self._apply_transmission(workspace, trans_ws_name)
 
@@ -191,7 +180,7 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         error = trans_ws.dataE(0)[0]
 
         output_str = ''
-        if len(trans_ws.dataY(0))==1:
+        if len(trans_ws.dataY(0)) == 1:
             self.setProperty("MeasuredTransmission", trans)
             self.setProperty("MeasuredError", error)
             output_str = "\n%s   T = %6.2g += %6.2g\n" % (output_str, trans, error)
@@ -210,18 +199,18 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         # Make sure the binning is compatible
         api.RebinToWorkspace(WorkspaceToRebin=trans_workspace,
                              WorkspaceToMatch=workspace,
-                             OutputWorkspace=trans_workspace+'_rebin',
+                             OutputWorkspace=trans_workspace + '_rebin',
                              PreserveEvents=False)
         # Apply angle-dependent transmission correction using the zero-angle transmission
         theta_dependent = self.getProperty("ThetaDependent").value
 
         api.ApplyTransmissionCorrection(InputWorkspace=workspace,
-                                        TransmissionWorkspace=trans_workspace+'_rebin',
+                                        TransmissionWorkspace=trans_workspace + '_rebin',
                                         OutputWorkspace=workspace,
                                         ThetaDependent=theta_dependent)
 
-        if AnalysisDataService.doesExist(trans_workspace+'_rebin'):
-            AnalysisDataService.remove(trans_workspace+'_rebin')
+        if AnalysisDataService.doesExist(trans_workspace + '_rebin'):
+            AnalysisDataService.remove(trans_workspace + '_rebin')
 
     def _subtract_dark_current(self, workspace_name, property_manager):
         """
@@ -236,9 +225,9 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
 
         def _dark(workspace, dark_current_property):
             if property_manager.existsProperty(dark_current_property):
-                p=property_manager.getProperty(dark_current_property)
+                p = property_manager.getProperty(dark_current_property)
                 # Dark current subtraction for sample data
-                alg=Algorithm.fromString(p.valueAsStr)
+                alg = Algorithm.fromString(p.valueAsStr)
                 alg.setProperty("InputWorkspace", workspace)
                 alg.setProperty("OutputWorkspace", workspace)
                 alg.setProperty("Filename", dark_current_data)
@@ -254,10 +243,10 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
 
         if use_sample_dc is True:
             _dark(workspace_name, "DarkCurrentAlgorithm")
-        elif len(dark_current_data.strip())>0:
+        elif len(dark_current_data.strip()) > 0:
             _dark(workspace_name, "DefaultDarkCurrentAlgorithm")
 
-#############################################################################################
 
+#############################################################################################
 
 AlgorithmFactory.subscribe(SANSBeamSpreaderTransmission)

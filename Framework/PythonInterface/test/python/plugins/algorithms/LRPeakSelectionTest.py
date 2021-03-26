@@ -16,15 +16,20 @@ class LRPeakSelectionTest(unittest.TestCase):
     def tearDown(self):
         if self.ws is not None: DeleteWorkspace(self.ws)
 
-    def _workspace(self,userFun):
+    def _workspace(self, userFun):
         if self.ws is not None: DeleteWorkspace(self.ws)
 
         self.ws = CreateSampleWorkspace(OutputWorkspace="out",
-            Function="User Defined",UserDefinedFunction=userFun,
-            NumBanks=1, BankPixelWidth=1, XMin=0, XMax=300, BinWidth=1.0)
+                                        Function="User Defined",
+                                        UserDefinedFunction=userFun,
+                                        NumBanks=1,
+                                        BankPixelWidth=1,
+                                        XMin=0,
+                                        XMax=300,
+                                        BinWidth=1.0)
 
-    def _gaussianWorkspace(self,peakCentre,height,sigma):
-        self._workspace("name=Gaussian,PeakCentre=%s,Height=%s,Sigma=%s" %(peakCentre,height,sigma))
+    def _gaussianWorkspace(self, peakCentre, height, sigma):
+        self._workspace("name=Gaussian,PeakCentre=%s,Height=%s,Sigma=%s" % (peakCentre, height, sigma))
 
     def test_peaks(self):
         """
@@ -68,6 +73,7 @@ class LRPeakSelectionTest(unittest.TestCase):
         # The low resolution range should fit within the primary range
         self.assertLess(primary_range[0], low_res[0])
         self.assertGreater(primary_range[1], low_res[1])
+
 
 if __name__ == "__main__":
     unittest.main()

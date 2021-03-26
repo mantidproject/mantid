@@ -24,8 +24,7 @@ def is_registered(function_name):
     try:
         FunctionFactory.createFunction(function_name)
     except RuntimeError as exc:
-        return False, 'Could not create {} function: {}'.format(function_name,
-                                                                str(exc))
+        return False, 'Could not create {} function: {}'.format(function_name, str(exc))
     return True, ""
 
 
@@ -33,8 +32,7 @@ def create_function_string(function_name, **function_params):
     return str(FunctionWrapper(function_name, **function_params))
 
 
-def check_output(function_name, input, expected_output, tolerance=0.0001,
-                 **function_params):
+def check_output(function_name, input, expected_output, tolerance=0.0001, **function_params):
     r"""Compare values returned by the function evaluation against expected
     values.
 
@@ -69,8 +67,7 @@ def create_model(function_name, **function_params):
 
 
 def create_test_workspace(model, num_bins):
-    workspace = WorkspaceFactory.create("Workspace2D", NVectors=1,
-                                        XLength=num_bins, YLength=num_bins)
+    workspace = WorkspaceFactory.create("Workspace2D", NVectors=1, XLength=num_bins, YLength=num_bins)
 
     for i in range(1, num_bins):
         noise = random.uniform(0.8, 1.2)
@@ -115,5 +112,4 @@ def do_a_fit(x, function, guess, target, fixes=None, atol=0.01):
         [model.fix(p) for p in fixes]
     fit = Fit(model, w, NIterations=2000)
     otarget = OrderedDict(target)
-    return np.allclose([fit.Function[p] for p in otarget.keys()],
-                       list(otarget.values()), atol), fit
+    return np.allclose([fit.Function[p] for p in otarget.keys()], list(otarget.values()), atol), fit

@@ -11,7 +11,6 @@ from mantid.api import *
 
 
 class SetDetScaleTest(unittest.TestCase):
-
     def testScaleDetectors(self):
         w = LoadNexusProcessed('TOPAZ_3007.peaks.nxs')
         x = w.getInstrument().getNumberParameter("detScale17")[0]
@@ -44,6 +43,7 @@ class SetDetScaleTest(unittest.TestCase):
         self.assertEqual(x, 1.0)
         self.assertEqual(y, 2.0)
         os.remove(filename)
+
 
 if __name__ == '__main__':
     unittest.main()

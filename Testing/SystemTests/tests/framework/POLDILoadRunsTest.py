@@ -13,7 +13,6 @@ import numpy as np
 
 class POLDILoadRunsTest(systemtesting.MantidSystemTest):
     """This assembly of test cases checks that the behavior of PoldiLoadRuns is correct."""
-
     def runTest(self):
         self.loadSingleWorkspace()
         self.loadMultipleSingleWorkspaces()
@@ -140,7 +139,11 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
 
     def checkRemoveBadDetectors(self):
         # Determine bad detectors automatically
-        PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=True,
+        PoldiLoadRuns(2013,
+                      6903,
+                      6904,
+                      2,
+                      MaskBadDetectors=True,
                       BadDetectorThreshold=2.5,
                       OutputWorkspace='twoWorkspacesMerged')
 
@@ -151,7 +154,11 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
         self.clearAnalysisDataService()
 
         # Lower threshold, more excluded detectors
-        PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=True,
+        PoldiLoadRuns(2013,
+                      6903,
+                      6904,
+                      2,
+                      MaskBadDetectors=True,
                       BadDetectorThreshold=2.0,
                       OutputWorkspace='twoWorkspacesMerged')
 
@@ -162,12 +169,11 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
         self.clearAnalysisDataService()
 
         # Only use those from the IDF
-        PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=False,
-                      OutputWorkspace='twoWorkspacesMerged')
+        PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=False, OutputWorkspace='twoWorkspacesMerged')
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
         specInfoMerged = wsMerged.spectrumInfo()
-        self.assertEqual( len([True for x in range(wsMerged.getNumberHistograms()) if specInfoMerged.isMasked(x)]), 12)
+        self.assertEqual(len([True for x in range(wsMerged.getNumberHistograms()) if specInfoMerged.isMasked(x)]), 12)
 
         self.clearAnalysisDataService()
 

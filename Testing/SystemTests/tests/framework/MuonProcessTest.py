@@ -10,16 +10,15 @@ from mantid.simpleapi import *
 
 
 class MuonProcessTest(systemtesting.MantidSystemTest):
-
     def runTest(self):
-      # Create custom grouping
+        # Create custom grouping
         grouping = WorkspaceFactory.createTable()
         grouping.addColumn("vector_int", "Detectors")
-        grouping.addRow([range(33,65)])
-        grouping.addRow([range(1,33)])
+        grouping.addRow([range(33, 65)])
+        grouping.addRow([range(1, 33)])
         mtd.addOrReplace("MuonProcess_Grouping", grouping)
 
-      # Create custom dead times
+        # Create custom dead times
         deadTimes = WorkspaceFactory.createTable()
         deadTimes.addColumn("int", "Index")
         deadTimes.addColumn("double", "Value")
@@ -27,27 +26,26 @@ class MuonProcessTest(systemtesting.MantidSystemTest):
             deadTimes.addRow([i, i * 0.01])
         mtd.addOrReplace("MuonProcess_DeadTimes", deadTimes)
 
-        load_result = LoadMuonNexus(Filename = "MUSR00015192",
-                                    OutputWorkspace = "MuonProcess_Loaded")
+        load_result = LoadMuonNexus(Filename="MUSR00015192", OutputWorkspace="MuonProcess_Loaded")
         loaded_time_zero = load_result[2]
 
-        MuonProcess(InputWorkspace = "MuonProcess_Loaded",
-                    Mode = "Combined",
-                    DetectorGroupingTable = "MuonProcess_Grouping",
-                    ApplyDeadTimeCorrection = True,
-                    DeadTimeTable = "MuonProcess_DeadTimes",
-                    SummedPeriodSet = "2",
-                    SubtractedPeriodSet = "1",
-                    TimeZero = 0.6,
-                    LoadedTimeZero = loaded_time_zero,
-                    Xmin = 0.11,
-                    Xmax = 10.0,
-                    RebinParams = "0.032",
-                    OutputType = "PairAsymmetry",
-                    PairFirstIndex = 0,
-                    PairSecondIndex = 1,
-                    Alpha = 0.8,
-                    OutputWorkspace = "MuonProcess_MUSR00015192")
+        MuonProcess(InputWorkspace="MuonProcess_Loaded",
+                    Mode="Combined",
+                    DetectorGroupingTable="MuonProcess_Grouping",
+                    ApplyDeadTimeCorrection=True,
+                    DeadTimeTable="MuonProcess_DeadTimes",
+                    SummedPeriodSet="2",
+                    SubtractedPeriodSet="1",
+                    TimeZero=0.6,
+                    LoadedTimeZero=loaded_time_zero,
+                    Xmin=0.11,
+                    Xmax=10.0,
+                    RebinParams="0.032",
+                    OutputType="PairAsymmetry",
+                    PairFirstIndex=0,
+                    PairSecondIndex=1,
+                    Alpha=0.8,
+                    OutputWorkspace="MuonProcess_MUSR00015192")
 
     def validate(self):
         return "MuonProcess_MUSR00015192", "MuonLoad_MUSR00015192.nxs"

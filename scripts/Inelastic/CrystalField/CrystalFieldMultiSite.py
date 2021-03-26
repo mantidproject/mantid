@@ -53,7 +53,6 @@ def get_parameters(crystal_field, ion_prefix, existing_prefix):
 
 
 class CrystalFieldMultiSite(object):
-
     def __init__(self, Ions, Symmetries, **kwargs):
         from collections import OrderedDict
 
@@ -84,7 +83,7 @@ class CrystalFieldMultiSite(object):
         kwargs = self._setMandatoryArguments(kwargs)
 
         self._abundances = OrderedDict()
-        abundances= kwargs.pop('abundances', None)
+        abundances = kwargs.pop('abundances', None)
         self._makeAbundances(abundances)
 
         self._setRemainingArguments(kwargs)
@@ -118,8 +117,10 @@ class CrystalFieldMultiSite(object):
         return kwargs
 
     def _setRemainingArguments(self, kwargs):
-        possible_args = ['ToleranceEnergy', 'ToleranceIntensity', 'NPeaks', 'FWHMVariation', 'FixAllPeaks',
-                         'PeakShape', 'PhysicalProperty']
+        possible_args = [
+            'ToleranceEnergy', 'ToleranceIntensity', 'NPeaks', 'FWHMVariation', 'FixAllPeaks', 'PeakShape',
+            'PhysicalProperty'
+        ]
         for attribute in possible_args:
             value = kwargs.pop(attribute, None)
             if value is not None:
@@ -253,7 +254,7 @@ class CrystalFieldMultiSite(object):
         """Create dict for ion intensity scalings"""
         if abundances is not None:
             for ion_index in range(len(self.Ions)):
-                self._abundances['ion{}'.format(ion_index)]  = abundances[ion_index]
+                self._abundances['ion{}'.format(ion_index)] = abundances[ion_index]
             max_ion = max(self._abundances, key=lambda key: self._abundances[key])
             ties = {}
             for ion in self._abundances.keys():
@@ -265,7 +266,7 @@ class CrystalFieldMultiSite(object):
             self.ties(ties)
         else:
             for ion_index in range(len(self.Ions)):
-                self._abundances['ion{}'.format(ion_index)]  = 1.0
+                self._abundances['ion{}'.format(ion_index)] = 1.0
 
     def update(self, func):
         """
@@ -379,8 +380,8 @@ class CrystalFieldMultiSite(object):
             setattr(self._background, property_name, Function(self.function, prefix='bg.'))
             self.function.setAttributeValue('Background', background)
         else:
-            raise ValueError("string passed to background must have exactly 1 or 2 functions, got {}".format(
-                number_of_functions))
+            raise ValueError(
+                "string passed to background must have exactly 1 or 2 functions, got {}".format(number_of_functions))
 
     def _combine_multisite(self, other):
         """Used to add two CrystalFieldMultiSite"""
@@ -389,8 +390,12 @@ class CrystalFieldMultiSite(object):
         abundances = list(self._abundances.values()) + list(other._abundances.values())
         params = get_parameters_for_add_from_multisite(self, 0)
         params.update(get_parameters_for_add_from_multisite(other, len(self.Ions)))
-        new_cf = CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=self.Temperatures,
-                                       FWHM=self.FWHM, parameters=params, abundances=abundances)
+        new_cf = CrystalFieldMultiSite(Ions=ions,
+                                       Symmetries=symmetries,
+                                       Temperatures=self.Temperatures,
+                                       FWHM=self.FWHM,
+                                       parameters=params,
+                                       abundances=abundances)
         return new_cf
 
     def __getitem__(self, item):
@@ -404,7 +409,7 @@ class CrystalFieldMultiSite(object):
 
     def __add__(self, other):
         scale_factor = 1.0
-        if hasattr(other, 'abundance'): # is CrystalFieldSite
+        if hasattr(other, 'abundance'):  # is CrystalFieldSite
             scale_factor = other.abundance
             other = other.crystalField
         elif isinstance(other, CrystalFieldMultiSite):
@@ -417,8 +422,12 @@ class CrystalFieldMultiSite(object):
         abundances = list(self._abundances.values()) + [scale_factor]
         params = get_parameters_for_add_from_multisite(self, 0)
         params.update(get_parameters_for_add(other, len(self.Ions)))
-        new_cf = CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=self.Temperatures,
-                                       FWHM=self.FWHM, parameters=params, abundances=abundances)
+        new_cf = CrystalFieldMultiSite(Ions=ions,
+                                       Symmetries=symmetries,
+                                       Temperatures=self.Temperatures,
+                                       FWHM=self.FWHM,
+                                       parameters=params,
+                                       abundances=abundances)
         return new_cf
 
     def __radd__(self, other):
@@ -434,8 +443,12 @@ class CrystalFieldMultiSite(object):
         abundances = [scale_factor] + list(self._abundances.values())
         params = get_parameters_for_add(other, 0)
         params.update(get_parameters_for_add_from_multisite(self, 1))
-        new_cf = CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=self.Temperatures,
-                                       FWHM=self.FWHM, parameters=params, abundances=abundances)
+        new_cf = CrystalFieldMultiSite(Ions=ions,
+                                       Symmetries=symmetries,
+                                       Temperatures=self.Temperatures,
+                                       FWHM=self.FWHM,
+                                       parameters=params,
+                                       abundances=abundances)
         return new_cf
 
     @property
@@ -458,7 +471,7 @@ class CrystalFieldMultiSite(object):
             self._setBackground(background=value)
         # Need this for a weird python bug: "IndexError: Function index (2) out of range (2)"
         # if user calls print(self.function) after setting background
-        _ = self.function.getTies() # noqa: F841
+        _ = self.function.getTies()  # noqa: F841
 
     @property
     def Ions(self):

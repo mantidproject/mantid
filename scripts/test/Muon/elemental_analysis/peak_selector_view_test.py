@@ -15,7 +15,6 @@ from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view im
 
 @start_qapplication
 class PeakSelectorViewTest(unittest.TestCase):
-
     def setUp(self):
         self.element = 'He'
         self.element_data = {

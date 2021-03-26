@@ -8,8 +8,14 @@ from isis_powder.routines import common, yaml_parser
 import os
 
 
-def create_run_details_object(run_number_string, inst_settings, is_vanadium_run, empty_run_number,
-                              grouping_file_name, vanadium_string, splined_name_list=None, van_abs_file_name=None):
+def create_run_details_object(run_number_string,
+                              inst_settings,
+                              is_vanadium_run,
+                              empty_run_number,
+                              grouping_file_name,
+                              vanadium_string,
+                              splined_name_list=None,
+                              van_abs_file_name=None):
     """
     Creates and returns a run details object which holds various
     properties about the current run.
@@ -67,27 +73,34 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
         offset_file_path = os.path.join(calibration_dir, label, offset_file_name)
 
     # Generate the paths
-    grouping_file_path = os.path.join(calibration_dir,  grouping_file_name)
+    grouping_file_path = os.path.join(calibration_dir, grouping_file_name)
     van_paths = os.path.join(calibration_dir, label)
     splined_van_path = os.path.join(van_paths, splined_van_name)
     unsplined_van_path = os.path.join(van_paths, unsplined_van_name)
     van_absorb_path = os.path.join(calibration_dir, van_abs_file_name) if van_abs_file_name else None
     summed_empty_path = os.path.join(van_paths, summed_empty_name)
 
-    return _RunDetails(empty_run_number=empty_run_number, file_extension=file_extension,
-                       run_number=run_number, output_run_string=output_run_string, label=label,
-                       offset_file_path=offset_file_path, grouping_file_path=grouping_file_path,
-                       splined_vanadium_path=splined_van_path, vanadium_run_number=vanadium_string,
-                       sample_empty=sample_empty, vanadium_abs_path=van_absorb_path,
-                       unsplined_vanadium_path=unsplined_van_path, output_suffix=suffix,van_paths=van_paths,
+    return _RunDetails(empty_run_number=empty_run_number,
+                       file_extension=file_extension,
+                       run_number=run_number,
+                       output_run_string=output_run_string,
+                       label=label,
+                       offset_file_path=offset_file_path,
+                       grouping_file_path=grouping_file_path,
+                       splined_vanadium_path=splined_van_path,
+                       vanadium_run_number=vanadium_string,
+                       sample_empty=sample_empty,
+                       vanadium_abs_path=van_absorb_path,
+                       unsplined_vanadium_path=unsplined_van_path,
+                       output_suffix=suffix,
+                       van_paths=van_paths,
                        summed_empty_path=summed_empty_path)
 
 
 def get_cal_mapping_dict(run_number_string, cal_mapping_path):
     # Get the python dictionary from the YAML mapping
     run_number = common.get_first_run_number(run_number_string=run_number_string)
-    cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number,
-                                                      file_path=cal_mapping_path)
+    cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number, file_path=cal_mapping_path)
     return cal_mapping_dict
 
 
@@ -95,11 +108,9 @@ class _RunDetails(object):
     """
     This class holds the full file paths associated with each run and various other useful attributes
     """
-
-    def __init__(self, empty_run_number, file_extension, run_number, output_run_string, label,
-                 offset_file_path, grouping_file_path, splined_vanadium_path, vanadium_run_number,
-                 sample_empty, vanadium_abs_path, unsplined_vanadium_path, output_suffix,van_paths,
-                 summed_empty_path):
+    def __init__(self, empty_run_number, file_extension, run_number, output_run_string, label, offset_file_path,
+                 grouping_file_path, splined_vanadium_path, vanadium_run_number, sample_empty, vanadium_abs_path,
+                 unsplined_vanadium_path, output_suffix, van_paths, summed_empty_path):
 
         # Essential attribute
         self.empty_runs = empty_run_number

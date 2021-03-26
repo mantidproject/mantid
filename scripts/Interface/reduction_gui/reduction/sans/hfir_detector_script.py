@@ -15,9 +15,9 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 # Disable unused import warning
 # pylint: disable=W0611
 try:
-    import mantidplot # noqa
+    import mantidplot  # noqa
     IS_IN_MANTIDPLOT = True
-except(ImportError, ImportWarning):
+except (ImportError, ImportWarning):
     IS_IN_MANTIDPLOT = False
 
 
@@ -54,12 +54,12 @@ class Detector(BaseScriptElement):
             Generate reduction script
             @param execute: if true, the script will be executed
         """
-        script  = ""
+        script = ""
 
         if not self.use_finder:
             script += "SetBeamCenter(%g, %g)\n" % (self.x_position, self.y_position)
         else:
-            if len(str(self.beam_file).strip())==0:
+            if len(str(self.beam_file).strip()) == 0:
                 raise RuntimeError("Beam finder was selected but no data file was entered.")
 
             if self.use_direct_beam:
@@ -68,29 +68,31 @@ class Detector(BaseScriptElement):
                 script += "ScatteringBeamCenter(\"%s\", %g)\n" % (self.beam_file, self.beam_radius)
 
         if self.sensitivity_corr:
-            if len(str(self.sensitivity_data).strip())==0:
+            if len(str(self.sensitivity_data).strip()) == 0:
                 raise RuntimeError("Sensitivity correction was selected but no sensitivity data file was entered.")
 
-            if len(str(self.sensitivity_dark).strip())>0:
+            if len(str(self.sensitivity_dark).strip()) > 0:
                 script += "SensitivityCorrection(\"%s\", min_sensitivity=%g, "\
                           "max_sensitivity=%g, dark_current=\"%s\", use_sample_dc=%s)\n" % \
-                    (self.sensitivity_data, self.min_sensitivity, self.max_sensitivity, self.sensitivity_dark, self.use_sample_dark)
+                    (self.sensitivity_data, self.min_sensitivity, self.max_sensitivity, self.sensitivity_dark,
+                     self.use_sample_dark)
             else:
-                script += "SensitivityCorrection(\"%s\", min_sensitivity=%g, max_sensitivity=%g, use_sample_dc=%s)\n" % \
-                    (self.sensitivity_data, self.min_sensitivity, self.max_sensitivity, self.use_sample_dark)
+                script += "SensitivityCorrection(\"%s\", min_sensitivity=%g, max_sensitivity=%g, use_sample_dc=%s)\n"\
+                          % (self.sensitivity_data, self.min_sensitivity, self.max_sensitivity, self.use_sample_dark)
 
             # Beam center
             if not self.use_sample_beam_center:
                 if not self.flood_use_finder:
                     script += "SetSensitivityBeamCenter(%g, %g)\n" % (self.flood_x_position, self.flood_y_position)
                 else:
-                    if len(str(self.flood_beam_file).strip())==0:
+                    if len(str(self.flood_beam_file).strip()) == 0:
                         raise RuntimeError("Sensitivity beam finder was selected but no data file was entered.")
 
                     if self.flood_use_direct_beam:
                         script += "SensitivityDirectBeamCenter(\"%s\")\n" % self.flood_beam_file
                     else:
-                        script += "SensitivityScatteringBeamCenter(\"%s\", %g)\n" % (self.flood_beam_file, self.flood_beam_radius)
+                        script += "SensitivityScatteringBeamCenter(\"%s\", %g)\n" % (self.flood_beam_file,
+                                                                                     self.flood_beam_radius)
 
         else:
             script += "NoSensitivityCorrection()\n"
@@ -140,7 +142,7 @@ class Detector(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml_out  = "<Sensitivity>\n"
+        xml_out = "<Sensitivity>\n"
         xml_out += "  <sensitivity_corr>%s</sensitivity_corr>\n" % str(self.sensitivity_corr)
         xml_out += "  <sensitivity_data>%s</sensitivity_data>\n" % self.sensitivity_data
         xml_out += "  <sensitivity_dark>%s</sensitivity_dark>\n" % self.sensitivity_dark
@@ -182,50 +184,61 @@ class Detector(BaseScriptElement):
 
         # Sensitivity correction
         element_list = dom.getElementsByTagName("Sensitivity")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             instrument_dom = element_list[0]
-            self.sensitivity_corr = BaseScriptElement.getBoolElement(instrument_dom, "sensitivity_corr",
-                                                                     default = Detector.sensitivity_corr)
+            self.sensitivity_corr = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                     "sensitivity_corr",
+                                                                     default=Detector.sensitivity_corr)
             self.sensitivity_data = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_data")
             self.sensitivity_dark = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_dark")
-            self.use_sample_dark = BaseScriptElement.getBoolElement(instrument_dom, "use_sample_dark",
-                                                                    default = Detector.use_sample_dark)
-            self.min_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_min",
+            self.use_sample_dark = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                    "use_sample_dark",
+                                                                    default=Detector.use_sample_dark)
+            self.min_sensitivity = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                     "sensitivity_min",
                                                                      default=Detector.min_sensitivity)
-            self.max_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_max",
+            self.max_sensitivity = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                     "sensitivity_max",
                                                                      default=Detector.max_sensitivity)
-            self.use_sample_beam_center = BaseScriptElement.getBoolElement(instrument_dom, "use_sample_beam_center",
-                                                                           default = Detector.use_sample_beam_center)
+            self.use_sample_beam_center = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                           "use_sample_beam_center",
+                                                                           default=Detector.use_sample_beam_center)
 
             beam_center_list = instrument_dom.getElementsByTagName("FloodBeamFinder")
-            if len(beam_center_list)>0:
+            if len(beam_center_list) > 0:
                 beam_finder_dom = beam_center_list[0]
-                self.flood_x_position = BaseScriptElement.getFloatElement(beam_finder_dom, "x",
+                self.flood_x_position = BaseScriptElement.getFloatElement(beam_finder_dom,
+                                                                          "x",
                                                                           default=Detector.flood_x_position)
-                self.flood_y_position = BaseScriptElement.getFloatElement(beam_finder_dom, "y",
+                self.flood_y_position = BaseScriptElement.getFloatElement(beam_finder_dom,
+                                                                          "y",
                                                                           default=Detector.flood_y_position)
-                self.flood_use_finder = BaseScriptElement.getBoolElement(beam_finder_dom, "use_finder",
-                                                                         default = Detector.flood_use_finder)
+                self.flood_use_finder = BaseScriptElement.getBoolElement(beam_finder_dom,
+                                                                         "use_finder",
+                                                                         default=Detector.flood_use_finder)
                 self.flood_beam_file = BaseScriptElement.getStringElement(beam_finder_dom, "beam_file")
-                self.flood_beam_radius = BaseScriptElement.getFloatElement(beam_finder_dom, "beam_radius",
+                self.flood_beam_radius = BaseScriptElement.getFloatElement(beam_finder_dom,
+                                                                           "beam_radius",
                                                                            default=Detector.flood_beam_radius)
-                self.flood_use_direct_beam = BaseScriptElement.getBoolElement(beam_finder_dom, "use_direct_beam",
-                                                                              default = Detector.flood_use_direct_beam)
+                self.flood_use_direct_beam = BaseScriptElement.getBoolElement(beam_finder_dom,
+                                                                              "use_direct_beam",
+                                                                              default=Detector.flood_use_direct_beam)
 
         element_list = dom.getElementsByTagName("BeamFinder")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             beam_finder_dom = element_list[0]
-            self.x_position = BaseScriptElement.getFloatElement(beam_finder_dom, "x",
-                                                                default=Detector.x_position)
-            self.y_position = BaseScriptElement.getFloatElement(beam_finder_dom, "y",
-                                                                default=Detector.y_position)
-            self.use_finder = BaseScriptElement.getBoolElement(beam_finder_dom, "use_finder",
-                                                               default = Detector.use_finder)
+            self.x_position = BaseScriptElement.getFloatElement(beam_finder_dom, "x", default=Detector.x_position)
+            self.y_position = BaseScriptElement.getFloatElement(beam_finder_dom, "y", default=Detector.y_position)
+            self.use_finder = BaseScriptElement.getBoolElement(beam_finder_dom,
+                                                               "use_finder",
+                                                               default=Detector.use_finder)
             self.beam_file = BaseScriptElement.getStringElement(beam_finder_dom, "beam_file")
-            self.beam_radius = BaseScriptElement.getFloatElement(beam_finder_dom, "beam_radius",
+            self.beam_radius = BaseScriptElement.getFloatElement(beam_finder_dom,
+                                                                 "beam_radius",
                                                                  default=Detector.beam_radius)
-            self.use_direct_beam = BaseScriptElement.getBoolElement(beam_finder_dom, "use_direct_beam",
-                                                                    default = Detector.use_direct_beam)
+            self.use_direct_beam = BaseScriptElement.getBoolElement(beam_finder_dom,
+                                                                    "use_direct_beam",
+                                                                    default=Detector.use_direct_beam)
 
     def from_setup_info(self, xml_str):
         """
@@ -238,39 +251,41 @@ class Detector(BaseScriptElement):
 
         # Sensitivity correction
         self.sensitivity_data = BaseScriptElement.getPropertyValue(alg, "SensitivityFile", default='')
-        self.sensitivity_corr = len(self.sensitivity_data)>0
+        self.sensitivity_corr = len(self.sensitivity_data) > 0
         self.sensitivity_dark = BaseScriptElement.getPropertyValue(alg, "SensitivityDarkCurrentFile", default='')
-        self.use_sample_dark = BaseScriptElement.getPropertyValue(alg, "UseDefaultDC",
-                                                                  default = Detector.use_sample_dark)
-        self.min_sensitivity = BaseScriptElement.getPropertyValue(alg, "MinEfficiency",
+        self.use_sample_dark = BaseScriptElement.getPropertyValue(alg, "UseDefaultDC", default=Detector.use_sample_dark)
+        self.min_sensitivity = BaseScriptElement.getPropertyValue(alg,
+                                                                  "MinEfficiency",
                                                                   default=Detector.min_sensitivity)
-        self.max_sensitivity = BaseScriptElement.getPropertyValue(alg, "MaxEfficiency",
+        self.max_sensitivity = BaseScriptElement.getPropertyValue(alg,
+                                                                  "MaxEfficiency",
                                                                   default=Detector.max_sensitivity)
 
-        sensitivity_center_method = BaseScriptElement.getPropertyValue(alg, "SensitivityBeamCenterMethod",
+        sensitivity_center_method = BaseScriptElement.getPropertyValue(alg,
+                                                                       "SensitivityBeamCenterMethod",
                                                                        default='None')
         self.flood_use_finder = sensitivity_center_method in ['DirectBeam', 'Scattering']
-        self.flood_use_direct_beam = sensitivity_center_method=='DirectBeam'
-        self.use_sample_beam_center =  sensitivity_center_method=='None'
-        self.flood_x_position = BaseScriptElement.getPropertyValue(alg, "SensitivityBeamCenterX",
+        self.flood_use_direct_beam = sensitivity_center_method == 'DirectBeam'
+        self.use_sample_beam_center = sensitivity_center_method == 'None'
+        self.flood_x_position = BaseScriptElement.getPropertyValue(alg,
+                                                                   "SensitivityBeamCenterX",
                                                                    default=Detector.flood_x_position)
-        self.flood_y_position = BaseScriptElement.getPropertyValue(alg, "SensitivityBeamCenterY",
+        self.flood_y_position = BaseScriptElement.getPropertyValue(alg,
+                                                                   "SensitivityBeamCenterY",
                                                                    default=Detector.flood_y_position)
         self.flood_beam_file = BaseScriptElement.getPropertyValue(alg, "SensitivityBeamCenterFile", default='')
-        self.flood_beam_radius = BaseScriptElement.getPropertyValue(alg, "SensitivityBeamCenterRadius",
+        self.flood_beam_radius = BaseScriptElement.getPropertyValue(alg,
+                                                                    "SensitivityBeamCenterRadius",
                                                                     default=Detector.flood_beam_radius)
 
         # Beam center
         center_method = BaseScriptElement.getPropertyValue(alg, "BeamCenterMethod", default='None')
         self.use_finder = center_method in ['DirectBeam', 'Scattering']
-        self.use_direct_beam = center_method=='DirectBeam'
-        self.x_position = BaseScriptElement.getPropertyValue(alg, "BeamCenterX",
-                                                             default=Detector.x_position)
-        self.y_position = BaseScriptElement.getPropertyValue(alg, "BeamCenterY",
-                                                             default=Detector.y_position)
+        self.use_direct_beam = center_method == 'DirectBeam'
+        self.x_position = BaseScriptElement.getPropertyValue(alg, "BeamCenterX", default=Detector.x_position)
+        self.y_position = BaseScriptElement.getPropertyValue(alg, "BeamCenterY", default=Detector.y_position)
         self.beam_file = BaseScriptElement.getPropertyValue(alg, "BeamCenterFile", default='')
-        self.beam_radius = BaseScriptElement.getPropertyValue(alg, "BeamRadius",
-                                                              default=Detector.beam_radius)
+        self.beam_radius = BaseScriptElement.getPropertyValue(alg, "BeamRadius", default=Detector.beam_radius)
 
     def reset(self):
         """

@@ -14,8 +14,8 @@ from sans.common.general_functions import create_managed_non_child_algorithm
 from sans.state.Serializer import Serializer
 
 
-def centre_finder_new(state, r_min, r_max, iterations, position_1_start, position_2_start,
-                      tolerance, find_direction, verbose, component):
+def centre_finder_new(state, r_min, r_max, iterations, position_1_start, position_2_start, tolerance, find_direction,
+                      verbose, component):
     """
     Finds the beam centre from a good initial guess.
 
@@ -34,15 +34,19 @@ def centre_finder_new(state, r_min, r_max, iterations, position_1_start, positio
     # ------------------------------------------------------------------------------------------------------------------
     # Load the data
     # ------------------------------------------------------------------------------------------------------------------
-    workspace_to_name = {SANSDataType.SAMPLE_SCATTER: "SampleScatterWorkspace",
-                         SANSDataType.SAMPLE_TRANSMISSION: "SampleTransmissionWorkspace",
-                         SANSDataType.SAMPLE_DIRECT: "SampleDirectWorkspace",
-                         SANSDataType.CAN_SCATTER: "CanScatterWorkspace",
-                         SANSDataType.CAN_TRANSMISSION: "CanTransmissionWorkspace",
-                         SANSDataType.CAN_DIRECT: "CanDirectWorkspace"}
+    workspace_to_name = {
+        SANSDataType.SAMPLE_SCATTER: "SampleScatterWorkspace",
+        SANSDataType.SAMPLE_TRANSMISSION: "SampleTransmissionWorkspace",
+        SANSDataType.SAMPLE_DIRECT: "SampleDirectWorkspace",
+        SANSDataType.CAN_SCATTER: "CanScatterWorkspace",
+        SANSDataType.CAN_TRANSMISSION: "CanTransmissionWorkspace",
+        SANSDataType.CAN_DIRECT: "CanDirectWorkspace"
+    }
 
-    workspace_to_monitor = {SANSDataType.SAMPLE_SCATTER: "SampleScatterMonitorWorkSpace",
-                            SANSDataType.CAN_SCATTER: "CanScatterMonitorWorkspace"}
+    workspace_to_monitor = {
+        SANSDataType.SAMPLE_SCATTER: "SampleScatterMonitorWorkSpace",
+        SANSDataType.CAN_SCATTER: "CanScatterMonitorWorkspace"
+    }
 
     workspaces, monitors = provide_loaded_data(state, False, workspace_to_name, workspace_to_monitor)
 
@@ -58,14 +62,21 @@ def centre_finder_new(state, r_min, r_max, iterations, position_1_start, positio
     # Setup the beam centre finder algorithm.
     # ------------------------------------------------------------------------------------------------------------------
     beam_centre_finder = "SANSBeamCentreFinder"
-    beam_centre_finder_options = {"Iterations": iterations, "RMin": r_min/1000, "RMax": r_max/1000,
-                                  "Position1Start": position_1_start, "Position2Start": position_2_start,
-                                  "Tolerance": tolerance, "Direction" : find_direction.value,
-                                  "Verbose": verbose, "Component": component.value}
+    beam_centre_finder_options = {
+        "Iterations": iterations,
+        "RMin": r_min / 1000,
+        "RMax": r_max / 1000,
+        "Position1Start": position_1_start,
+        "Position2Start": position_2_start,
+        "Tolerance": tolerance,
+        "Direction": find_direction.value,
+        "Verbose": verbose,
+        "Component": component.value
+    }
     beam_centre_alg = create_managed_non_child_algorithm(beam_centre_finder, **beam_centre_finder_options)
     beam_centre_alg.setChild(False)
-    set_properties_for_beam_centre_algorithm(beam_centre_alg, reduction_package,
-                                             workspace_to_name, workspace_to_monitor)
+    set_properties_for_beam_centre_algorithm(beam_centre_alg, reduction_package, workspace_to_name,
+                                             workspace_to_monitor)
     # -----------------------------------
     #  Run the beam centre finder algorithm.
     # -----------------------------------
@@ -80,8 +91,13 @@ def centre_finder_new(state, r_min, r_max, iterations, position_1_start, positio
     return {"pos1": centre1, "pos2": centre2}
 
 
-def centre_finder_mass(state, r_min = 0.06, max_iter=10, position_1_start = 0.0, position_2_start = 0.0,
-                       tolerance = 0.0001251, component=DetectorType.LAB):
+def centre_finder_mass(state,
+                       r_min=0.06,
+                       max_iter=10,
+                       position_1_start=0.0,
+                       position_2_start=0.0,
+                       tolerance=0.0001251,
+                       component=DetectorType.LAB):
     """
     Finds the beam centre from an initial guess.
 
@@ -114,16 +130,21 @@ def centre_finder_mass(state, r_min = 0.06, max_iter=10, position_1_start = 0.0,
     # Run reductions (one at a time)
     # ------------------------------------------------------------------------------------------------------------------
     beam_centre_finder = "SANSBeamCentreFinderMassMethod"
-    beam_centre_finder_options = {"RMin": r_min/1000, "Centre1": position_1_start,
-                                  "Centre2": position_2_start, "Tolerance": tolerance, "Component": component.value}
+    beam_centre_finder_options = {
+        "RMin": r_min / 1000,
+        "Centre1": position_1_start,
+        "Centre2": position_2_start,
+        "Tolerance": tolerance,
+        "Component": component.value
+    }
     beam_centre_alg = create_managed_non_child_algorithm(beam_centre_finder, **beam_centre_finder_options)
     beam_centre_alg.setChild(False)
 
     # -----------------------------------
     # Set the properties on the algorithm.
     # -----------------------------------
-    set_properties_for_beam_centre_algorithm(beam_centre_alg, reduction_package,
-                                             workspace_to_name, workspace_to_monitor)
+    set_properties_for_beam_centre_algorithm(beam_centre_alg, reduction_package, workspace_to_name,
+                                             workspace_to_monitor)
     # -----------------------------------
     #  Run the algorithm.
     # -----------------------------------

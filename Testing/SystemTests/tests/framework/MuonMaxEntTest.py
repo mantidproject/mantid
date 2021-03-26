@@ -11,17 +11,14 @@ from mantid.simpleapi import *
 
 
 class MuonMaxEntTest(systemtesting.MantidSystemTest):
-
     '''Tests the MaxEnt algorithm on a MUSR workspace'''
-
     def fixPhasesTest(self, phases0):
-        MuonMaxEnt(
-            InputWorkspace='MUSR00022725',
-            InputPhaseTable="tab",
-            Npts='16384',
-            FixPhases=True,
-            OutputWorkspace='tmp',
-            OutputPhaseTable='tmpPhase')
+        MuonMaxEnt(InputWorkspace='MUSR00022725',
+                   InputPhaseTable="tab",
+                   Npts='16384',
+                   FixPhases=True,
+                   OutputWorkspace='tmp',
+                   OutputPhaseTable='tmpPhase')
         tmp = AnalysisDataService.retrieve("tmpPhase")
         phases = tmp.column(2)
         self.assertListEqual(phases0, phases)
@@ -40,17 +37,24 @@ class MuonMaxEntTest(systemtesting.MantidSystemTest):
             tab.addRow([i + 33, 0.2, phi])
 
         # first do with fixed phases
-        MuonMaxent(
-            InputWorkspace='MUSR00022725', InputPhaseTable="tab", Npts='16384', FixPhases=True,
-            OutputWorkspace='freq0', OutputPhaseTable='PhasesOut0', ReconstructedSpectra="time0")
+        MuonMaxent(InputWorkspace='MUSR00022725',
+                   InputPhaseTable="tab",
+                   Npts='16384',
+                   FixPhases=True,
+                   OutputWorkspace='freq0',
+                   OutputPhaseTable='PhasesOut0',
+                   ReconstructedSpectra="time0")
         # then do with fitting phases
-        MuonMaxent(
-            InputWorkspace='MUSR00022725', InputPhaseTable="tab", Npts='16384', FixPhases=False,
-            OutputWorkspace='freq', OutputPhaseTable='PhasesOut', ReconstructedSpectra="time")
+        MuonMaxent(InputWorkspace='MUSR00022725',
+                   InputPhaseTable="tab",
+                   Npts='16384',
+                   FixPhases=False,
+                   OutputWorkspace='freq',
+                   OutputPhaseTable='PhasesOut',
+                   ReconstructedSpectra="time")
 
-        GroupWorkspaces(
-            InputWorkspaces='freq0,phasesOut0,time0,freq,phasesOut,time',
-            OutputWorkspace='MuonMaxEntResults')
+        GroupWorkspaces(InputWorkspaces='freq0,phasesOut0,time0,freq,phasesOut,time',
+                        OutputWorkspace='MuonMaxEntResults')
 
     def validate(self):
         self.tolerance = 5E-2

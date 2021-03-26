@@ -14,7 +14,6 @@ from mantidqt.project.project import Project
 
 
 class SaveProjectDialogTest(unittest.TestCase):
-
     def setUp(self):
         self.project = Project(Mock(), Mock())
         self.project.save_as = Mock()

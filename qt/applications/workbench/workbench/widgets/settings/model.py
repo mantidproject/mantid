@@ -13,7 +13,6 @@ from workbench.widgets.settings.general.presenter import GeneralProperties
 
 
 class SettingsModel:
-
     @staticmethod
     def save_settings_to_file(filepath, settings):
         with open(filepath, 'w') as file:

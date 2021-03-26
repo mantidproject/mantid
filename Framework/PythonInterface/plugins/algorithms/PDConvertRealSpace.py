@@ -5,9 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
-from mantid.api import (PythonAlgorithm, AlgorithmFactory,
-                        MatrixWorkspaceProperty,
-                        WorkspaceProperty, WorkspaceFactory)
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceProperty, WorkspaceFactory)
 from mantid.kernel import (Direction, StringListValidator, logger)
 
 from pystog.converter import Converter
@@ -43,16 +41,12 @@ class PDConvertRealSpace(PythonAlgorithm):
         """
         Declare properties
         """
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
-                                                     direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input),
                              doc="Input workspace. The units are assumed to be distance")
         functions = [Gr, GKr, gr]
-        self.declareProperty("From", Gr, StringListValidator(functions),
-                             "Function type in the input workspace")
-        self.declareProperty("To", Gr, StringListValidator(functions),
-                             "Function type in the output workspace")
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                                               direction=Direction.Output),
+        self.declareProperty("From", Gr, StringListValidator(functions), "Function type in the input workspace")
+        self.declareProperty("To", Gr, StringListValidator(functions), "Function type in the output workspace")
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace')
 
     def validateInputs(self):
@@ -85,13 +79,26 @@ class PDConvertRealSpace(PythonAlgorithm):
             return
 
         c = Converter()
-        transformation = {Gr: {GKr: c.G_to_GK, gr: c.G_to_g},
-                          GKr: {Gr: c.GK_to_G, gr: c.GK_to_g},
-                          gr: {Gr: c.g_to_G, GKr: c.g_to_GK}}
+        transformation = {
+            Gr: {
+                GKr: c.G_to_GK,
+                gr: c.G_to_g
+            },
+            GKr: {
+                Gr: c.GK_to_G,
+                gr: c.GK_to_g
+            },
+            gr: {
+                Gr: c.g_to_G,
+                GKr: c.g_to_GK
+            }
+        }
 
-        sample_kwargs = {"<b_coh>^2": input_ws.sample().getMaterial().cohScatterLengthSqrd(),
-                         "<b_tot^2>": input_ws.sample().getMaterial().totalScatterLengthSqrd(),
-                         "rho": input_ws.sample().getMaterial().numberDensity}
+        sample_kwargs = {
+            "<b_coh>^2": input_ws.sample().getMaterial().cohScatterLengthSqrd(),
+            "<b_tot^2>": input_ws.sample().getMaterial().totalScatterLengthSqrd(),
+            "rho": input_ws.sample().getMaterial().numberDensity
+        }
 
         for sp_num in range(input_ws.getNumberHistograms()):
             x = input_ws.readX(sp_num)

@@ -26,7 +26,6 @@ def process_file_parameter(f):
         Decorator that allows a function parameter to either be
         a string or a function returning a string
     """
-
     def processed_function(self, file_name=None, **kwargs):
         if file_name is None:
             return f(self, **kwargs)
@@ -34,6 +33,7 @@ def process_file_parameter(f):
             return f(self, file_name, **kwargs)
         else:
             return f(self, str(file_name()), **kwargs)
+
     return processed_function
 
 
@@ -54,7 +54,7 @@ class BaseWidget(QWidget):
             self._layout.addWidget(self._content)
 
         # Data filter for file dialog
-        self._data_type="Data files (*.xml)"
+        self._data_type = "Data files (*.xml)"
         if data_type is not None:
             self._data_type = data_type
 
@@ -142,8 +142,7 @@ class BaseWidget(QWidget):
             getOpenFileNames = QFileDialog.getOpenFileNamesAndFilter
         else:
             getOpenFileNames = QFileDialog.getOpenFileNames
-        flist, _ = getOpenFileNames(self, title, self._settings.data_path,
-                                    data_type)
+        flist, _ = getOpenFileNames(self, title, self._settings.data_path, data_type)
         if not flist:
             return None
 
@@ -167,9 +166,7 @@ class BaseWidget(QWidget):
             data_type = self._data_type
         if title is None:
             title = "Save file - Set a location and name"
-        fname = QFileDialog.getSaveFileName(self, title,
-                                            self._settings.data_path,
-                                            data_type)
+        fname = QFileDialog.getSaveFileName(self, title, self._settings.data_path, data_type)
         if isinstance(fname, tuple):
             fname = fname[0]
         return QFileInfo(fname).filePath()
@@ -217,7 +214,7 @@ class BaseWidget(QWidget):
 
         # Set up workspace name
         if workspace is None:
-            workspace = '__'+os.path.basename(file_name)
+            workspace = '__' + os.path.basename(file_name)
 
         # See if the file is already loaded
         if not reload and _show_ws_instrument(workspace):

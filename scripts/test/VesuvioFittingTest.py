@@ -12,7 +12,6 @@ from vesuvio.profiles import GaussianMassProfile, GramCharlierMassProfile
 
 
 class VesuvioFittingTest(unittest.TestCase):
-
     def test_function_str_with_no_given_params_looks_as_expected(self):
         fit_opts = self._create_test_fitting_opts()
 
@@ -30,8 +29,7 @@ class VesuvioFittingTest(unittest.TestCase):
     def test_function_str_with_given_params_looks_as_expected(self):
         fit_opts = self._create_test_fitting_opts()
 
-        param_vals = {"f0.Width": 7.5, "f0.FSECoeff": 0.1, "f0.C_0": 0.25,
-                      "f0.C_2": 0.5, "f0.C_4": 0.75}
+        param_vals = {"f0.Width": 7.5, "f0.FSECoeff": 0.1, "f0.C_0": 0.25, "f0.C_2": 0.5, "f0.C_4": 0.75}
         param_vals.update({"f1.Width": 11.0, "f1.Intensity": 4.5})
 
         expected = \

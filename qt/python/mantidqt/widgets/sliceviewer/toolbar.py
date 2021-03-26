@@ -34,26 +34,18 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
     peaksOverlayClicked = Signal(bool)
     zoomPanFinished = Signal()
 
-    toolitems = (
-        (ToolItemText.HOME, 'Reset original view', 'mdi.home', 'homeClicked', None),
-        (ToolItemText.PAN, 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan',
-         False),
-        (ToolItemText.ZOOM, 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
-        (None, None, None, None, None),
-        (ToolItemText.GRID, 'Toggle grid on/off', 'mdi.grid', 'gridClicked', False),
-        (None, None, None, None, None),
-        (ToolItemText.LINEPLOTS, 'Toggle lineplots on/off', 'mdi.chart-bell-curve',
-         'linePlotsClicked', False),
-        (ToolItemText.REGIONSELECTION, 'Toggle region selection on/off', 'mdi.vector-rectangle',
-         'regionSelectionClicked', False),
-        (None, None, None, None, None),
-        (ToolItemText.OVERLAY_PEAKS, 'Add peaks overlays on/off', 'mdi.chart-bubble',
-         'peaksOverlayClicked', None),
-        (ToolItemText.NONORTHOGONAL_AXES, 'Toggle nonorthogonal axes on/off', 'mdi.axis',
-         'nonOrthogonalClicked', False),
-        (None, None, None, None, None),
-        (ToolItemText.SAVE, 'Save the figure', 'mdi.content-save', 'save_figure', None)
-    )
+    toolitems = ((ToolItemText.HOME, 'Reset original view', 'mdi.home', 'homeClicked',
+                  None), (ToolItemText.PAN, 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan',
+                          False), (ToolItemText.ZOOM, 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
+                 (None, None, None, None, None), (ToolItemText.GRID, 'Toggle grid on/off', 'mdi.grid', 'gridClicked',
+                                                  False), (None, None, None, None, None),
+                 (ToolItemText.LINEPLOTS, 'Toggle lineplots on/off', 'mdi.chart-bell-curve', 'linePlotsClicked',
+                  False), (ToolItemText.REGIONSELECTION, 'Toggle region selection on/off', 'mdi.vector-rectangle',
+                           'regionSelectionClicked', False), (None, None, None, None, None),
+                 (ToolItemText.OVERLAY_PEAKS, 'Add peaks overlays on/off', 'mdi.chart-bubble', 'peaksOverlayClicked',
+                  None), (ToolItemText.NONORTHOGONAL_AXES, 'Toggle nonorthogonal axes on/off', 'mdi.axis',
+                          'nonOrthogonalClicked', False), (None, None, None, None, None),
+                 (ToolItemText.SAVE, 'Save the figure', 'mdi.content-save', 'save_figure', None))
 
     def _init_toolbar(self):
         for text, tooltip_text, fa_icon, callback, checked in self.toolitems:

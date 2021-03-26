@@ -29,7 +29,6 @@ class Priority:
 
 
 class MessageDisplay(MessageDisplay_cpp):
-
     def __init__(self, font=QFont(), parent=None):
         super(MessageDisplay, self).__init__(font, parent)
 
@@ -46,7 +45,7 @@ class MessageDisplay(MessageDisplay_cpp):
         self.setShowActiveScriptOutput(self.ReadSettingSafely(qsettings, SHOW_ACTIVE_SCRIPT_OUTPUT_KEY, True, bool))
         self.setShowAllScriptOutput(self.ReadSettingSafely(qsettings, SHOW_ALL_SCRIPT_OUTPUT_KEY, False, bool))
 
-    def ReadSettingSafely(self,qsettings,key,default,type):
+    def ReadSettingSafely(self, qsettings, key, default, type):
         """
         Reads a value from qsettings, returning the default if the value is missing or the type is wrong
         :param qsettings: the qsettings object

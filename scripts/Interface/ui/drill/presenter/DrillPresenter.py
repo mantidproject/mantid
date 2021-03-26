@@ -17,18 +17,15 @@ from .DrillContextMenuPresenter import DrillContextMenuPresenter
 
 
 class DrillPresenter:
-
     """
     Set of invalid cells. This is used to avoid the submission of invalid
     parameters for processing.
     """
     _invalidCells = set()
-
     """
     Set of rows for which processing failed. This is used to display a report.
     """
     _processError = set()
-
     """
     Set of custom options. Used to keep an history of the previous values.
     """
@@ -52,10 +49,8 @@ class DrillPresenter:
         # view signals connection
         self.view.instrumentChanged.connect(self.instrumentChanged)
         self.view.acquisitionModeChanged.connect(self.acquisitionModeChanged)
-        self.view.cycleAndExperimentChanged.connect(
-                self.model.setCycleAndExperiment)
-        self.view.rowAdded.connect(
-                lambda position : self.model.addSample(position, DrillSample()))
+        self.view.cycleAndExperimentChanged.connect(self.model.setCycleAndExperiment)
+        self.view.rowAdded.connect(lambda position: self.model.addSample(position, DrillSample()))
         self.view.rowDeleted.connect(self.model.deleteSample)
         self.view.dataChanged.connect(self.onDataChanged)
         self.view.groupSelectedRows.connect(self.onGroupSelectedRows)
@@ -76,9 +71,7 @@ class DrillPresenter:
         self.model.processStarted.connect(self.onProcessBegin)
         self.model.processSuccess.connect(self.onProcessSuccess)
         self.model.processError.connect(self.onProcessError)
-        self.model.progressUpdate.connect(
-                lambda progress: self.view.set_progress(progress, 100)
-                )
+        self.model.progressUpdate.connect(lambda progress: self.view.set_progress(progress, 100))
         self.model.processingDone.connect(self.onProcessingDone)
         self.model.paramOk.connect(self.onParamOk)
         self.model.paramError.connect(self.onParamError)
@@ -110,15 +103,13 @@ class DrillPresenter:
                 return
             for option in contents.split(';'):
                 if option and '=' not in option:
-                    self.onParamError(row, column, "Please provide semicolon "
-                                      "separated key=value pairs.")
+                    self.onParamError(row, column, "Please provide semicolon " "separated key=value pairs.")
                     return
                 try:
                     name = option.split("=")[0]
                     value = option.split("=")[1]
                 except:
-                    self.onParamError(row, column, "Please provide semicolon "
-                                      "separated key=value pairs.")
+                    self.onParamError(row, column, "Please provide semicolon " "separated key=value pairs.")
                     return
                 if name in self.view.columns:
                     self.onParamError(row, column, "Please use the table to "
@@ -131,7 +122,7 @@ class DrillPresenter:
                     value = False
                 params[name] = value
                 currentOptions = set()
-            for name,value in params.items():
+            for name, value in params.items():
                 currentOptions.add(name)
                 self.model.changeParameter(row, name, value)
             for name in self._customOptions.difference(currentOptions):
@@ -210,12 +201,10 @@ class DrillPresenter:
         # increment or copy the content of the previous cell
         for i in range(1, len(cells)):
             # if we increment along columns and this is a new column
-            if columnIncrement and cells[i][1] != cells[i-1][1]:
+            if columnIncrement and cells[i][1] != cells[i - 1][1]:
                 continue
-            contents = self.view.table.getCellContents(cells[i-1][0],
-                                                       cells[i-1][1])
-            self.view.table.setCellContents(cells[i][0], cells[i][1],
-                                            inc(contents, increment))
+            contents = self.view.table.getCellContents(cells[i - 1][0], cells[i - 1][1])
+            self.view.table.setCellContents(cells[i][0], cells[i][1], inc(contents, increment))
 
     def onGroupSelectedRows(self):
         """
@@ -320,8 +309,7 @@ class DrillPresenter:
             return
         for cell in self._invalidCells:
             if cell[0] in rows:
-                QMessageBox.warning(self.view, "Error", "Please check the "
-                                    "parameters value before processing.")
+                QMessageBox.warning(self.view, "Error", "Please check the " "parameters value before processing.")
                 return
         self._processError = set()
         self.view.set_disabled(True)
@@ -377,8 +365,7 @@ class DrillPresenter:
             labels = [self.view.getRowLabel(row) for row in self._processError]
             w = QMessageBox(QMessageBox.Critical, "Processing error(s)",
                             "Unable to process the row(s) {}. Please check the "
-                            "logs.".format(str(labels)[1:-1]),
-                            QMessageBox.Ok, self.view)
+                            "logs.".format(str(labels)[1:-1]), QMessageBox.Ok, self.view)
             w.exec()
 
     def instrumentChanged(self, instrument):
@@ -416,8 +403,7 @@ class DrillPresenter:
         Triggered when the user want to load a file. This methods start a
         QDialog to get the file path from the user.
         """
-        filename = QFileDialog.getOpenFileName(self.view, 'Load rundex', '.',
-                                               "Rundex (*.mrd);;All (*)")
+        filename = QFileDialog.getOpenFileName(self.view, 'Load rundex', '.', "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
         self.model.setIOFile(filename[0])
@@ -443,9 +429,7 @@ class DrillPresenter:
         will open a dialog to select the file even if one has previously been
         used.
         """
-        filename = QFileDialog.getSaveFileName(self.view, 'Save rundex',
-                                               './*.mrd',
-                                               "Rundex (*.mrd);;All (*)")
+        filename = QFileDialog.getSaveFileName(self.view, 'Save rundex', './*.mrd', "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
         self.model.setIOFile(filename[0])
@@ -463,19 +447,10 @@ class DrillPresenter:
         types, values, doc = self.model.getSettingsTypes()
         sw.initWidgets(types, values, doc)
         sw.setSettings(self.model.getSettings())
-        self.model.paramOk.connect(
-                lambda sample, param: sw.onSettingValidation(param, True)
-                )
-        self.model.paramError.connect(
-                lambda sample, param, msg: sw.onSettingValidation(param, False,
-                                                                  msg)
-                )
-        sw.valueChanged.connect(
-                lambda p : self.model.checkParameter(p, sw.getSettingValue(p))
-                )
-        sw.accepted.connect(
-                lambda : self.model.setSettings(sw.getSettings())
-                )
+        self.model.paramOk.connect(lambda sample, param: sw.onSettingValidation(param, True))
+        self.model.paramError.connect(lambda sample, param, msg: sw.onSettingValidation(param, False, msg))
+        sw.valueChanged.connect(lambda p: self.model.checkParameter(p, sw.getSettingValue(p)))
+        sw.accepted.connect(lambda: self.model.setSettings(sw.getSettings()))
         sw.show()
 
     def onShowExportDialog(self, dialog):
@@ -517,8 +492,7 @@ class DrillPresenter:
             return
         q = QMessageBox.question(self.view, "DrILL: Unsaved data", "You have "
                                  "unsaved modifications, do you want to save "
-                                 "them before?",
-                                 QMessageBox.Yes | QMessageBox.No)
+                                 "them before?", QMessageBox.Yes | QMessageBox.No)
         if (q == QMessageBox.Yes):
             self.onSaveAs()
 
@@ -546,7 +520,7 @@ class DrillPresenter:
             for i in range(len(samples)):
                 self.view.add_row_after(1)
                 params = samples[i].getParameters()
-                for k,v in params.items():
+                for k, v in params.items():
                     if k not in self.view.columns:
                         co = self.view.getCellContents(i, "CustomOptions")
                         if co:

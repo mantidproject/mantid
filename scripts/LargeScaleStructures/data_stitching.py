@@ -20,9 +20,9 @@ if "workbench.app.mainwindow" in sys.modules:
     IS_IN_MANTIDGUI = True
 else:
     try:
-        import mantidplot # noqa: F401
+        import mantidplot  # noqa: F401
         IS_IN_MANTIDGUI = True
-    except(ImportError, ImportWarning):
+    except (ImportError, ImportWarning):
         pass
 if IS_IN_MANTIDGUI:
     from mantid.plots._compatability import plotSpectrum
@@ -100,8 +100,14 @@ class RangeSelector(object):
                 for cid in self._cids:
                     self.canvas.mpl_disconnect(cid)
 
-        def connect(self, ws, call_back, xmin=None, xmax=None,
-                    range_min=None, range_max=None, x_title=None,
+        def connect(self,
+                    ws,
+                    call_back,
+                    xmin=None,
+                    xmax=None,
+                    range_min=None,
+                    range_max=None,
+                    x_title=None,
                     log_scale=False,
                     ws_output_base=None):
             if not IS_IN_MANTIDGUI:
@@ -131,8 +137,8 @@ class RangeSelector(object):
 
             if range_min is None or range_max is None:
                 range_min, range_max = l.get_xlim()
-                range_min = range_min + (range_max-range_min)/100.0
-                range_max = range_max - (range_max-range_min)/100.0
+                range_min = range_min + (range_max - range_min) / 100.0
+                range_max = range_max - (range_max - range_min) / 100.0
             self.marker = RangeMarker(l.figure.canvas, 'green', range_min, range_max, line_style='--')
             self.marker.min_marker.set_name('Min Q')
             self.marker.max_marker.set_name('Max Q')
@@ -145,13 +151,20 @@ class RangeSelector(object):
             self.marker.range_changed.connect(self._call_back)
             self._cids.append(g.canvas.mpl_connect('draw_event', add_range))
             self._cids.append(g.canvas.mpl_connect('button_press_event', self.on_mouse_button_press))
-            self._cids.append(g.canvas.mpl_connect('motion_notify_event',self.motion_event))
+            self._cids.append(g.canvas.mpl_connect('motion_notify_event', self.motion_event))
             self._cids.append(g.canvas.mpl_connect('button_release_event', self.on_mouse_button_release))
 
     @classmethod
-    def connect(cls, ws, call_back, xmin=None, xmax=None,
-                range_min=None, range_max=None, x_title=None,
-                log_scale=False, ws_output_base=None):
+    def connect(cls,
+                ws,
+                call_back,
+                xmin=None,
+                xmax=None,
+                range_min=None,
+                range_max=None,
+                x_title=None,
+                log_scale=False,
+                ws_output_base=None):
         """
             Connect method for the range selector
         """
@@ -160,16 +173,20 @@ class RangeSelector(object):
         else:
             RangeSelector.__instance = RangeSelector._Selector()
 
-        RangeSelector.__instance.connect(ws, call_back, xmin=xmin, xmax=xmax,
-                                         range_min=range_min, range_max=range_max,
-                                         x_title=x_title, log_scale=log_scale)
+        RangeSelector.__instance.connect(ws,
+                                         call_back,
+                                         xmin=xmin,
+                                         xmax=xmax,
+                                         range_min=range_min,
+                                         range_max=range_max,
+                                         x_title=x_title,
+                                         log_scale=log_scale)
 
 
 class DataSet(object):
     """
         Data set class for stitcher
     """
-
     def __init__(self, file_path=""):
         self._file_path = file_path
         self._xmin = None
@@ -216,16 +233,16 @@ class DataSet(object):
             x = mtd[self._ws_name].readX(0)
             y = mtd[self._ws_name].readY(0)
             xmin = x[0]
-            xmax = x[len(x)-1]
+            xmax = x[len(x) - 1]
 
             for i in range(len(y)):
                 if y[i] != 0.0:
-                    xmin = x[i+self._skip_first]
+                    xmin = x[i + self._skip_first]
                     break
 
-            for i in range(len(y)-1, -1, -1):
+            for i in range(len(y) - 1, -1, -1):
                 if y[i] != 0.0:
-                    xmax = x[i-self._skip_last]
+                    xmax = x[i - self._skip_last]
                     break
 
             return xmin, xmax
@@ -279,8 +296,7 @@ class DataSet(object):
         # Keep track of dQ
         dq = mtd[self._ws_name].readDx(0)
 
-        Scale(InputWorkspace=self._ws_name, OutputWorkspace=self._ws_scaled,
-              Operation="Multiply", Factor=self._scale)
+        Scale(InputWorkspace=self._ws_name, OutputWorkspace=self._ws_scaled, Operation="Multiply", Factor=self._scale)
 
         # Put back dQ
         dq_scaled = mtd[self._ws_scaled].dataDx(0)
@@ -304,7 +320,9 @@ class DataSet(object):
                     y_trim.append(y[i])
                     e_trim.append(e[i])
 
-            CreateWorkspace(DataX=x_trim, DataY=y_trim, DataE=e_trim,
+            CreateWorkspace(DataX=x_trim,
+                            DataY=y_trim,
+                            DataE=e_trim,
                             OutputWorkspace=self._ws_scaled,
                             UnitX="MomentumTransfer",
                             ParentWorkspace=self._ws_name)
@@ -319,7 +337,7 @@ class DataSet(object):
                 y_scaled[i] = 0
                 e_scaled[i] = 0
 
-            first_index = max(len(y_scaled)-self._skip_last, 0)
+            first_index = max(len(y_scaled) - self._skip_last, 0)
             for i in range(first_index, len(y_scaled)):
                 y_scaled[i] = 0
                 e_scaled[i] = 0
@@ -332,9 +350,7 @@ class DataSet(object):
                         e_scaled[i] = 0
 
             # Dummy operation to update the plot
-            Scale(InputWorkspace=self._ws_scaled,
-                  OutputWorkspace=self._ws_scaled,
-                  Operation="Multiply", Factor=1.0)
+            Scale(InputWorkspace=self._ws_scaled, OutputWorkspace=self._ws_scaled, Operation="Multiply", Factor=1.0)
 
     def load(self, update_range=False, restricted_range=False):
         """
@@ -355,8 +371,7 @@ class DataSet(object):
             # Make sure not to modify the original workspace.
             if mtd[self._ws_name].isHistogramData():
                 point_data_ws = '%s_' % self._ws_name
-                ConvertToPointData(InputWorkspace=self._ws_name,
-                                   OutputWorkspace=point_data_ws)
+                ConvertToPointData(InputWorkspace=self._ws_name, OutputWorkspace=point_data_ws)
                 # Copy over the resolution
                 dq_original = mtd[self._ws_name].readDx(0)
                 dq_points = mtd[point_data_ws].dataDx(0)
@@ -364,7 +379,7 @@ class DataSet(object):
                     dq_points[i] = dq_original[i]
 
                 self._ws_name = point_data_ws
-            self._ws_scaled = self._ws_name+"_scaled"
+            self._ws_scaled = self._ws_name + "_scaled"
             if update_range:
                 self._restricted_range = restricted_range
                 self._xmin = min(mtd[self._ws_name].readX(0))
@@ -377,7 +392,7 @@ class DataSet(object):
                         if y[i] != 0.0:
                             self._xmin = x[i]
                             break
-                    for i in range(len(y)-1, -1, -1):
+                    for i in range(len(y) - 1, -1, -1):
                         if y[i] != 0.0:
                             self._xmax = x[i]
                             break
@@ -397,13 +412,13 @@ class DataSet(object):
         sum_err = 0.0
         for i in range(len(y)):
             upper_bound = x[i]
-            if len(x) == len(y)+1:
-                upper_bound = x[i+1]
+            if len(x) == len(y) + 1:
+                upper_bound = x[i + 1]
             if x[i] >= xmin and upper_bound <= xmax:
-                sum_cts += y[i]/(e[i]*e[i])
-                sum_err += 1.0/(e[i]*e[i])
+                sum_cts += y[i] / (e[i] * e[i])
+                sum_err += 1.0 / (e[i] * e[i])
 
-        return sum_err/sum_cts
+        return sum_err / sum_cts
 
     def integrate(self, xmin=None, xmax=None):
         """
@@ -422,21 +437,21 @@ class DataSet(object):
         y = mtd[self._ws_name].readY(0)
         e = mtd[self._ws_name].readE(0)
 
-        is_histo = len(x) == len(y)+1
+        is_histo = len(x) == len(y) + 1
         if not is_histo and len(x) != len(y):
             raise RuntimeError("Corrupted I(q) %s" % self._ws_name)
 
         sum = 0.0
-        for i in range(len(y)-1):
+        for i in range(len(y) - 1):
             # Skip points compatible with zero within error
             if self._restricted_range and y[i] <= e[i]:
                 continue
-            if x[i] >= xmin and x[i+1] <= xmax:
-                sum += (y[i]+y[i+1])*(x[i+1]-x[i])/2.0
-            elif x[i] < xmin and x[i+1] > xmin:
-                sum += (y[i+1]+(y[i]-y[i+1])/(x[i]-x[i+1])*(x[i]-xmin)/2.0) * (x[i+1]-xmin)
-            elif x[i] < xmax and x[i+1] > xmax:
-                sum += (y[i]+(y[i+1]-y[i])/(x[i+1]-x[i])*(xmax-x[i])/2.0) * (xmax-x[i])
+            if x[i] >= xmin and x[i + 1] <= xmax:
+                sum += (y[i] + y[i + 1]) * (x[i + 1] - x[i]) / 2.0
+            elif x[i] < xmin and x[i + 1] > xmin:
+                sum += (y[i + 1] + (y[i] - y[i + 1]) / (x[i] - x[i + 1]) * (x[i] - xmin) / 2.0) * (x[i + 1] - xmin)
+            elif x[i] < xmax and x[i + 1] > xmax:
+                sum += (y[i] + (y[i + 1] - y[i]) / (x[i + 1] - x[i]) * (xmax - x[i]) / 2.0) * (xmax - x[i])
 
         return sum
 
@@ -451,7 +466,6 @@ class Stitcher(object):
     """
         Data set stitcher
     """
-
     def __init__(self):
         ## Reference ID (int)
         self._reference = None
@@ -463,7 +477,7 @@ class Stitcher(object):
             Returns a particular data set
             @param id: position of the data set in the list
         """
-        if id < 0 or id > len(self._data_sets)-1:
+        if id < 0 or id > len(self._data_sets) - 1:
             raise RuntimeError("Stitcher has not data set number %s" % str(id))
         return self._data_sets[id]
 
@@ -479,7 +493,7 @@ class Stitcher(object):
             @param data_set: DataSet object
         """
         self._data_sets.append(data_set)
-        return len(self._data_sets)-1
+        return len(self._data_sets) - 1
 
     @classmethod
     def normalize(cls, data_ref, data_to_scale):
@@ -510,7 +524,7 @@ class Stitcher(object):
 
         if sum_ref != 0 and sum_d != 0:
             ref_scale = data_ref.get_scale()
-            data_to_scale.set_scale(ref_scale*sum_ref/sum_d)
+            data_to_scale.set_scale(ref_scale * sum_ref / sum_d)
 
     def compute(self):
         """
@@ -519,10 +533,10 @@ class Stitcher(object):
         if len(self._data_sets) < 2:
             return
 
-        for i in range(self._reference-1, -1, -1):
-            Stitcher.normalize(self._data_sets[i+1], self._data_sets[i])
-        for i in range(self._reference, len(self._data_sets)-1):
-            Stitcher.normalize(self._data_sets[i], self._data_sets[i+1])
+        for i in range(self._reference - 1, -1, -1):
+            Stitcher.normalize(self._data_sets[i + 1], self._data_sets[i])
+        for i in range(self._reference, len(self._data_sets) - 1):
+            Stitcher.normalize(self._data_sets[i], self._data_sets[i + 1])
 
     def set_reference(self, id):
         """
@@ -543,9 +557,12 @@ class Stitcher(object):
             if as_canSAS:
                 SaveCanSAS1D(Filename=file_path, InputWorkspace=iq)
             else:
-                SaveAscii(Filename=file_path, InputWorkspace=iq,
-                          Separator="Tab", CommentIndicator="# ",
-                          WriteXError=True, WriteSpectrumID=False)
+                SaveAscii(Filename=file_path,
+                          InputWorkspace=iq,
+                          Separator="Tab",
+                          CommentIndicator="# ",
+                          WriteXError=True,
+                          WriteSpectrumID=False)
 
     def trim_zeros(self, x, y, e, dx):
         zipped = list(zip(x, y, e, dx))
@@ -561,7 +578,7 @@ class Stitcher(object):
         # Then the trailing zeros
         zipped = []
         data_started = False
-        for i in range(len(trimmed)-1, -1, -1):
+        for i in range(len(trimmed) - 1, -1, -1):
             if data_started or trimmed[i][1] != 0:
                 data_started = True
                 zipped.append(trimmed[i])
@@ -598,8 +615,8 @@ class Stitcher(object):
                 _y = mtd[ws].dataY(0)
                 _e = mtd[ws].dataE(0)
                 _dx = mtd[ws].dataDx(0)
-                if len(_x) == len(_y)+1:
-                    xtmp = [(_x[i]+_x[i+1])/2.0 for i in range(len(_y))]
+                if len(_x) == len(_y) + 1:
+                    xtmp = [(_x[i] + _x[i + 1]) / 2.0 for i in range(len(_y))]
                     _x = xtmp
 
                 _x, _y, _e, _dx = self.trim_zeros(_x, _y, _e, _dx)
@@ -614,10 +631,13 @@ class Stitcher(object):
             if p2[0] == p1[0]:
                 return 0
             return -1 if p2[0] > p1[0] else 1
+
         combined = sorted(zipped, key=cmp_to_key(cmp))
         x, y, e, dx = list(zip(*combined))
 
-        CreateWorkspace(DataX=x, DataY=y, DataE=e,
+        CreateWorkspace(DataX=x,
+                        DataY=y,
+                        DataE=e,
                         OutputWorkspace=ws_combined,
                         UnitX="MomentumTransfer",
                         ParentWorkspace=first_ws)
@@ -666,8 +686,8 @@ def _validate_q_value(q, n_data_sets, which_q):
         raise RuntimeError(error_msg)
 
     if len(q) != n_data_sets - 1:
-        error_msg = "The length of q_{0} must be 1 shorter than the length of data_list: q_{1}={2}".format(which_q,
-                                                                                                           which_q, q)
+        error_msg = "The length of q_{0} must be 1 shorter than the length of data_list: q_{1}={2}".format(
+            which_q, which_q, q)
         Logger("data_stitching").error(error_msg)
         raise RuntimeError(error_msg)
 
@@ -681,8 +701,7 @@ def _validate_q_value(q, n_data_sets, which_q):
     return q
 
 
-def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
-           scale=None, save_output=False):
+def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None, scale=None, save_output=False):
     """
         @param data_list: list of N data files or workspaces to stitch
         @param q_min: list of N-1 Qmin values of overlap regions
@@ -708,8 +727,8 @@ def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
         q_min = _validate_q_value(q_min, n_data_sets, "min")
         q_max = _validate_q_value(q_max, n_data_sets, "max")
     else:
-        q_min = (n_data_sets-1)*[None]
-        q_max = (n_data_sets-1)*[None]
+        q_min = (n_data_sets - 1) * [None]
+        q_max = (n_data_sets - 1) * [None]
 
     # Prepare the data sets
     s = Stitcher()
@@ -722,11 +741,11 @@ def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
         if is_q_range_limited:
             if i == 0:
                 xmax = min(q_max[i], xmax)
-            elif i < n_data_sets-1:
-                xmin = max(q_min[i-1], xmin)
+            elif i < n_data_sets - 1:
+                xmin = max(q_min[i - 1], xmin)
                 xmax = min(q_max[i], xmax)
-            elif i == n_data_sets-1:
-                xmin = max(q_min[i-1], xmin)
+            elif i == n_data_sets - 1:
+                xmin = max(q_min[i - 1], xmin)
 
         d.set_range(xmin, xmax)
 
@@ -748,8 +767,8 @@ def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
         d = s.get_data_set(i)
         xmin, xmax = d.get_range()
         if i > 0:
-            xmin = q_min[i-1]
-        if i < n_data_sets-1:
+            xmin = q_min[i - 1]
+        if i < n_data_sets - 1:
             xmax = q_max[i]
 
         d.apply_scale(xmin, xmax)
@@ -762,4 +781,4 @@ def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
     if save_output:
         if output_workspace is None:
             output_workspace = "combined_scaled_Iq"
-        s.save_combined(output_workspace+".xml", as_canSAS=True, workspace=output_workspace)
+        s.save_combined(output_workspace + ".xml", as_canSAS=True, workspace=output_workspace)

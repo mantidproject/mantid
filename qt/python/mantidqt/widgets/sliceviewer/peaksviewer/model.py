@@ -27,7 +27,6 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
     """View model for PeaksViewer
     Extends PeaksWorkspace functionality to include color selection
     """
-
     def __init__(self, peaks_ws, fg_color, bg_color):
         """
         :param peaks_ws: A pointer to the PeaksWorkspace
@@ -74,8 +73,8 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         representations = []
         for peak in self.ws:
             peak_origin = getattr(peak, frame_to_slice_fn)()
-            peak_repr = draw_peak_representation(peak_origin, peak.getPeakShape(), slice_info,
-                                                 painter, self.fg_color, self.bg_color)
+            peak_repr = draw_peak_representation(peak_origin, peak.getPeakShape(), slice_info, painter, self.fg_color,
+                                                 self.bg_color)
             representations.append(peak_repr)
 
         self._representations = representations
@@ -142,6 +141,5 @@ def _get_peaksworkspace(name: str):
     """
     workspace = AnalysisDataService.Instance()[name]
     if not hasattr(workspace, 'getNumberPeaks'):
-        raise ValueError("Requested workspace {} is not a PeaksWorkspace. Type={}".format(
-            name, type(workspace)))
+        raise ValueError("Requested workspace {} is not a PeaksWorkspace. Type={}".format(name, type(workspace)))
     return workspace

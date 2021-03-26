@@ -11,7 +11,7 @@ import os
 from mantid.api import AlgorithmFactory
 
 
-def grep(patt,lines):
+def grep(patt, lines):
     """ finds patt in file - patt is a compiled regex
         returns all lines that match patt """
     matchlines = []
@@ -29,10 +29,9 @@ def grep(patt,lines):
 
 #get alg names
 algs = AlgorithmFactory.getRegisteredAlgorithms(True)
-regexs= {}
+regexs = {}
 for alg in algs:
-    regexs[alg] = re.compile(r'`%s\s+<[\w\:\/\.]+\/%s>`_' % (alg,alg))
-
+    regexs[alg] = re.compile(r'`%s\s+<[\w\:\/\.]+\/%s>`_' % (alg, alg))
 
 # Example use
 dir = r"C:\Mantid\Code\Mantid\docs\source\algorithms"

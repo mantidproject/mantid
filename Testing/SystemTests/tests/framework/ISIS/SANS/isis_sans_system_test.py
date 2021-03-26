@@ -35,4 +35,5 @@ def ISISSansSystemTest(*args: SANSInstrument):
         setattr(cls, "setUp", patched_setUp)
         setattr(cls, "tearDown", patched_tearDown)
         return cls
+
     return class_decorator

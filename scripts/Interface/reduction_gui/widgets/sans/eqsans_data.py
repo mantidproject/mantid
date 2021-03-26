@@ -176,7 +176,8 @@ class DataSetsWidget(BaseWidget):
             # If we fix the transmission while not in debug mode, warn the user that
             # things will look weird.
             popup_warning = "Turn on debug mode to see all options:\n\n"
-            popup_warning += "The sample transmission for the loaded reduction was set in debug mode to %-6.1g\n" % state.transmission
+            popup_warning += "The sample transmission for the loaded reduction was set in debug mode to %-6.1g\n" \
+                             % state.transmission
 
         self._content.theta_dep_chk.setChecked(state.theta_dependent)
         self._content.fit_together_check.setChecked(state.combine_transmission_frames)
@@ -186,17 +187,17 @@ class DataSetsWidget(BaseWidget):
         #   Check whether we are updating the data file
         data_files = self._get_data_files()
         current_file = ''
-        if len(data_files)>0:
+        if len(data_files) > 0:
             current_file = data_files[0].strip()
         self._content.separate_jobs_check.setChecked(state.separate_jobs)
 
         self._content.data_file_edit.setText(str(';'.join(state.data_files)))
-        if len(state.data_files)>0:
+        if len(state.data_files) > 0:
             self._settings.last_file = state.data_files[0]
             self._settings.last_data_ws = ''
 
             # Store the location of the loaded file
-            if len(state.data_files[0])>0:
+            if len(state.data_files[0]) > 0:
                 (folder, file_name) = os.path.split(state.data_files[0])
                 self._settings.data_path = folder
                 if current_file != state.data_files[0].strip():
@@ -225,16 +226,16 @@ class DataSetsWidget(BaseWidget):
         if not self._settings.debug and not state.background.calculate_transmission:
             # If we fix the transmission while not in debug mode, warn the user that
             # things will look weird.
-            if len(popup_warning)==0:
+            if len(popup_warning) == 0:
                 popup_warning = "Turn on debug mode to see all options:\n\n"
-            popup_warning += "The background transmission for the loaded reduction was set in debug mode to %-6.1g\n" % \
-                             state.background.bck_transmission
+            popup_warning += "The background transmission for the loaded reduction was set in debug mode to %-6.1g\n"\
+                             % state.background.bck_transmission
 
         self._content.bck_theta_dep_chk.setChecked(state.background.theta_dependent)
         self._content.bck_fit_together_check.setChecked(state.background.combine_transmission_frames)
         self._bck_calculate_clicked(state.background.calculate_transmission)
 
-        if len(popup_warning)>0:
+        if len(popup_warning) > 0:
             QMessageBox.warning(self, "Turn ON debug mode", popup_warning)
 
     def get_state(self):
@@ -310,11 +311,11 @@ class DataSetsWidget(BaseWidget):
         #   Check whether we are updating the data file
         data_files = self._get_data_files()
         current_file = ''
-        if len(data_files)>0:
+        if len(data_files) > 0:
             current_file = data_files[0].strip()
 
         fname = self.data_browse_dialog(multi=True)
-        if fname and len(fname)>0:
+        if fname and len(fname) > 0:
             self._content.data_file_edit.setText(';'.join(fname))
             self._settings.last_file = fname[0]
             self._settings.last_data_ws = ''
@@ -343,7 +344,7 @@ class DataSetsWidget(BaseWidget):
 
     def _data_file_plot(self):
         data_files = self._get_data_files()
-        if len(data_files)>0:
+        if len(data_files) > 0:
             self.show_instrument(data_files[0])
 
     def _calculate_clicked(self):
@@ -406,12 +407,12 @@ class DataSetsWidget(BaseWidget):
             return
 
         data_files = self._get_data_files()
-        if len(data_files)<1:
+        if len(data_files) < 1:
             return
         fname = data_files[0]
-        if len(str(fname).strip())>0:
+        if len(str(fname).strip()) > 0:
             dataproxy = self._data_proxy(fname)
-            if len(dataproxy.errors)>0:
+            if len(dataproxy.errors) > 0:
                 #QMessageBox.warning(self, "Error", dataproxy.errors[0])
                 return
 

@@ -19,5 +19,5 @@ class CheckForSampleLogsTest(unittest.TestCase):
         self.assertNotEquals(result, '')
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()

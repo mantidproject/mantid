@@ -9,37 +9,23 @@ from mantid.simpleapi import mtd, LeadPressureCalc
 
 
 class LeadPressureCalcTest(unittest.TestCase):
-
     def test_negative_temp_fails_input_validation(self):
         d = 2.1
         temp = -30.0
-        self.assertRaises(ValueError,
-                          LeadPressureCalc,
-                          dSpacing=d,
-                          T=temp)
+        self.assertRaises(ValueError, LeadPressureCalc, dSpacing=d, T=temp)
 
     def test_oor_dspacing_fails_input_validation(self):
         d1 = 1.9
         d2 = 3.1
         temp = 300
-        self.assertRaises(ValueError,
-                          LeadPressureCalc,
-                          dSpacing=d1,
-                          T=temp)
-        self.assertRaises(ValueError,
-                          LeadPressureCalc,
-                          dSpacing=d2,
-                          T=temp)
+        self.assertRaises(ValueError, LeadPressureCalc, dSpacing=d1, T=temp)
+        self.assertRaises(ValueError, LeadPressureCalc, dSpacing=d2, T=temp)
 
     def test_negative_target_pressure_fails_input_validation(self):
         d = 2.1
         temp = 300
         tgt_p = -30
-        self.assertRaises(ValueError,
-                          LeadPressureCalc,
-                          dSpacing=d,
-                          T=temp,
-                          TargetPressure=tgt_p)
+        self.assertRaises(ValueError, LeadPressureCalc, dSpacing=d, T=temp, TargetPressure=tgt_p)
 
     def test_valid_run_produces_table_ws(self):
         d = 2.1

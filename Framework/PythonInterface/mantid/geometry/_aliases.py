@@ -9,10 +9,9 @@
     like in mantid.api.
 """
 
-
 from mantid.kernel._aliases import lazy_instance_access
-from mantid.geometry import (SpaceGroupFactoryImpl, SymmetryOperationFactoryImpl,
-                        SymmetryElementFactoryImpl, PointGroupFactoryImpl)
+from mantid.geometry import (SpaceGroupFactoryImpl, SymmetryOperationFactoryImpl, SymmetryElementFactoryImpl,
+                             PointGroupFactoryImpl)
 
 ###############################################################################
 # Singletons

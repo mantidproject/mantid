@@ -24,7 +24,6 @@ class UserProperties(object):
     """Helper class to define & retrieve user properties
        as retrieved from file provided by user office
     """
-
     def __init__(self, *args):
         """ Build user properties from space separated string in the form:
             "userId instr_name rb_num cycle_mu start_date"
@@ -52,14 +51,14 @@ class UserProperties(object):
             self._user_id = str(args[0])
             self.set_user_properties(args[1], args[2], args[3], args[4])
         else:
-            raise RuntimeError("User has to be defined by the list of 5 components in the form:\n{0}".
-                               format("[userId,instr_name,rb_num,cycle_mu,start_date]"))
+            raise RuntimeError("User has to be defined by the list of 5 components in the form:\n{0}".format(
+                "[userId,instr_name,rb_num,cycle_mu,start_date]"))
 
     def __str__(self):
         """Convert class to string. Only last cycle settings are returned"""
         if self._user_id:
-            return "{0} {1} {2} {3} {4}".format(self._user_id, self.instrument,
-                                                self.rb_folder, self.cycleID, str(self.start_date))
+            return "{0} {1} {2} {3} {4}".format(self._user_id, self.instrument, self.rb_folder, self.cycleID,
+                                                str(self.start_date))
         else:
             return "None"
 
@@ -265,10 +264,10 @@ class UserProperties(object):
         if isinstance(cycle, str):
             if len(cycle) == 11:
                 last_letter = cycle[-1]
-                if not last_letter.upper() in {'A','B','C','D','E'}:
-                    raise  RuntimeError("Cycle should be a string in the form CYCLEYYYYN[A,B,C,D "
-                                        "N-- the cycle's number in a year or integer in the form: YYYYN or YYN "
-                                        "but it is {0}".format(cycle))
+                if not last_letter.upper() in {'A', 'B', 'C', 'D', 'E'}:
+                    raise RuntimeError("Cycle should be a string in the form CYCLEYYYYN[A,B,C,D "
+                                       "N-- the cycle's number in a year or integer in the form: YYYYN or YYN "
+                                       "but it is {0}".format(cycle))
                 else:
                     cycle = cycle.upper()
             elif len(cycle) < 10:
@@ -310,8 +309,7 @@ class UserProperties(object):
 
     def validate_instrument(self, instrument):
         if instrument not in INELASTIC_INSTRUMENTS:
-            raise RuntimeError("Instrument {0} has to be one of "
-                               "ISIS inelastic instruments".format(instrument))
+            raise RuntimeError("Instrument {0} has to be one of " "ISIS inelastic instruments".format(instrument))
 
     def validate_date(self, start_date):
         if isinstance(start_date, str):
@@ -379,7 +377,9 @@ class MantidConfigDirectInelastic(object):
     # pylint: disable=too-many-instance-attributes
     # It has as many as parameters describing ISIS configuration.
 
-    def __init__(self, mantid='/opt/Mantid/', home_dir='/home/',
+    def __init__(self,
+                 mantid='/opt/Mantid/',
+                 home_dir='/home/',
                  script_repo='/opt/UserScripts/',
                  map_mask_folder='/usr/local/mprogs/InstrumentFileFinder/'):
         """Initialize generic config variables and variables specific to a server"""
@@ -417,16 +417,17 @@ class MantidConfigDirectInelastic(object):
         self._target_reduction_file = lambda InstrName, cycleID: '{0}Reduction_{1}.py'.format(InstrName, cycleID)
 
         # Static contents of the Mantid Config file
-        self._header = ("# This file can be used to override any properties for this installation.\n"
-                        "# Any properties found in this file will override any that are found in the Mantid.Properties file\n"
-                        "# As this file will not be replaced with further installations of Mantid it is a safe place to put\n"
-                        "# properties that suit your particular installation.\n"
-                        "#\n"
-                        "# See here for a list of possible options:''"
-                        "# http://www.mantidproject.org/Properties_File#Mantid.User.Properties''\n"
-                        "#\n"
-                        "#uncomment to enable archive search - ICat and Orbiter\n"
-                        "datasearch.searcharchive = On #  may be important for autoreduction to work,\n")
+        self._header = (
+            "# This file can be used to override any properties for this installation.\n"
+            "# Any properties found in this file will override any that are found in the Mantid.Properties file\n"
+            "# As this file will not be replaced with further installations of Mantid it is a safe place to put\n"
+            "# properties that suit your particular installation.\n"
+            "#\n"
+            "# See here for a list of possible options:''"
+            "# http://www.mantidproject.org/Properties_File#Mantid.User.Properties''\n"
+            "#\n"
+            "#uncomment to enable archive search - ICat and Orbiter\n"
+            "datasearch.searcharchive = On #  may be important for autoreduction to work,\n")
         #
         self._footer = ("##\n"
                         "## LOGGING\n"
@@ -447,11 +448,14 @@ class MantidConfigDirectInelastic(object):
                         "#MantidOptions.InstrumentView.UseOpenGL=Off\n")
 
         # Methods, which build & verify various parts of Mantid configuration
-        self._dynamic_options = [self._set_default_inst,
-                                 self._set_script_repo,
-                                 # necessary to have on an Instrument scientist account, disabled on generic setup
-                                 self._def_python_search_path,
-                                 self._set_datasearch_directory, self._set_rb_directory]
+        self._dynamic_options = [
+            self._set_default_inst,
+            self._set_script_repo,
+            # necessary to have on an Instrument scientist account, disabled on generic setup
+            self._def_python_search_path,
+            self._set_datasearch_directory,
+            self._set_rb_directory
+        ]
         self._user = None
         self._cycle_data_folder = set()
         # this is the list, containing configuration strings
@@ -497,8 +501,7 @@ class MantidConfigDirectInelastic(object):
         if self._user:
             if not instr_name:
                 instr_name = self._user.instrument
-            return os.path.join(self._script_repo, 'direct_inelastic', instr_name,
-                                self._user_files_descr)
+            return os.path.join(self._script_repo, 'direct_inelastic', instr_name, self._user_files_descr)
         else:
             return self._user_files_descr
             #
@@ -635,14 +638,14 @@ class MantidConfigDirectInelastic(object):
         source = repl_info.getAttribute("var")
         if len(source) == 0:
             raise ValueError(
-                '"replace" field of {0} file for instrument {1} has to contain attribute "var" and its value'
-                .format(self._user_files_descr, self._user.instrument))
+                '"replace" field of {0} file for instrument {1} has to contain attribute "var" and its value'.format(
+                    self._user_files_descr, self._user.instrument))
         # what should be placed instead of the replacement
         dest = repl_info.getAttribute("by_var")
         if len(dest) == 0:
             raise ValueError(
-                '"replace" field of {0} file for instrument {1} has to contain attribute "by_var" and its value'
-                .format(self._user_files_descr, self._user.instrument))
+                '"replace" field of {0} file for instrument {1} has to contain attribute "by_var" and its value'.format(
+                    self._user_files_descr, self._user.instrument))
 
         # replace use-specific variables by their values
         if '$' in dest:
@@ -836,8 +839,8 @@ class MantidConfigDirectInelastic(object):
             raise RuntimeError("Can not define Data search path without user being defined")
 
         instr_name = self._user.instrument
-        map_mask_dir = os.path.abspath(os.path.join('{0}'.format(self._map_mask_folder),
-                                                    '{0}'.format(str.lower(instr_name))))
+        map_mask_dir = os.path.abspath(
+            os.path.join('{0}'.format(self._map_mask_folder), '{0}'.format(str.lower(instr_name))))
         # set up all data folders
         all_data_folders = list(self._cycle_data_folder)
         data_dir = os.path.abspath('{0}'.format(all_data_folders[0]))
@@ -976,11 +979,11 @@ if __name__ == "__main__":
     rb_user_folder = os.path.join(mcf._home_path, user.userID)
     user.rb_dir = rb_user_folder
     if not user.rb_dir_exist:
-        print("RB folder {0} for user {1} should exist and be accessible to configure this user".format(user.rb_dir,
-                                                                                                        user.userID))
+        print("RB folder {0} for user {1} should exist and be accessible to configure this user".format(
+            user.rb_dir, user.userID))
         exit()
     # Configure user
     mcf.init_user(user.userID, user)
     mcf.generate_config()
-    print("Successfully Configured user: {0} for instrument {1} and RBNum: {2}"
-          .format(user.userID, user.instrument, user.rb_folder))
+    print("Successfully Configured user: {0} for instrument {1} and RBNum: {2}".format(
+        user.userID, user.instrument, user.rb_folder))

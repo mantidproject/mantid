@@ -15,7 +15,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
     """
     DataTable Model for the DataTableView widget.
     """
-    def __init__(self, parent, headers = ()):
+    def __init__(self, parent, headers=()):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self._tableData = []
         self.headers = headers
@@ -27,8 +27,9 @@ class DataTableModel(QtCore.QAbstractTableModel):
     @tableData.setter
     def tableData(self, data):
         def checkAndConvertRow(row):
-            assert(len(row) == self.columnCount())
+            assert (len(row) == self.columnCount())
             return list(row)
+
         self._tableData = list(map(checkAndConvertRow, data))
 
     def _numRows(self):
@@ -93,7 +94,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
         converts a displayable text back to stored data.
         Override this function if you need data types other than str in your table.
         """
-        return text # just return the value, it is already str.
+        return text  # just return the value, it is already str.
 
     def _setCellText(self, row, col, text):
         """
@@ -217,7 +218,8 @@ class DataTableView(QtWidgets.QTableView):
     def __init__(self, parent, headers, model_cls=None):
         """
         :param headers: tuple of strings of the column headers
-        :param model: a DataTableModel if an external model should be used. if not specified a new DataTableModel is created
+        :param model: a DataTableModel if an external model should be used. if not specified a new DataTableModel is
+         created
         :return: a brand new DataTableView
         """
         super(DataTableView, self).__init__(parent)

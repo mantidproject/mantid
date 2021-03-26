@@ -16,14 +16,12 @@ class DrillTaskSignals(QObject):
     """
     Signals that the DrillTask could send.
     """
-
     """
     Sent when the task starts.
     Args:
         object: the task
     """
     started = Signal(object)
-
     """
     Sent when the task finishes.
     Args:
@@ -32,7 +30,6 @@ class DrillTaskSignals(QObject):
         str: error message
     """
     finished = Signal(object, int, str)
-
     """
     Sent when the task progress is updated.
     Args:
@@ -46,7 +43,6 @@ class DrillTask(QRunnable):
     """
     Class that defines a processing task in the drill interface.
     """
-
     """
     Name of the task.
     """
@@ -89,13 +85,9 @@ class DrillTask(QRunnable):
         self.observer = DrillAlgorithmObserver()
         self.observer.observeFinish(self.alg)
         self.observer.observeError(self.alg)
-        self.observer.signals.finished.connect(
-                lambda ret, msg : self.signals.finished.emit(self, ret, msg)
-                )
+        self.observer.signals.finished.connect(lambda ret, msg: self.signals.finished.emit(self, ret, msg))
         self.observer.observeProgress(self.alg)
-        self.observer.signals.progress.connect(
-                lambda p : self.signals.progress.emit(self, p)
-                )
+        self.observer.signals.progress.connect(lambda p: self.signals.progress.emit(self, p))
         try:
             ret = self.alg.execute()
             if not ret:

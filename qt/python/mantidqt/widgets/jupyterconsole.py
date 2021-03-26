@@ -29,7 +29,6 @@ from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 
 
 class InProcessJupyterConsole(RichJupyterWidget):
-
     def __init__(self, *args, **kwargs):
         """
         A constructor matching that of RichJupyterWidget
@@ -74,7 +73,6 @@ def async_wrapper(orig_run_code, shell_instance):
     :param shell_instance: The shell instance associated with the orig_run_code
     :return: A new method that can be attached to shell_instance
     """
-
     def async_run_code(self, code_obj, result=None, async_=False):
         """A monkey-patched replacement for the InteractiveShell.run_code method.
         It runs the in a separate thread and calls QApplication.processEvents
@@ -95,10 +93,12 @@ def async_wrapper(orig_run_code, shell_instance):
             if hasattr(function_parameters, 'kwonlyargs') and 'async_' in function_parameters.kwonlyargs:
                 return orig_run_code(code_obj, result, async_=async_)  # return coroutine to be awaited
             else:
-                task = BlockingAsyncTaskWithCallback(target=orig_run_code, args=(code_obj, result),
+                task = BlockingAsyncTaskWithCallback(target=orig_run_code,
+                                                     args=(code_obj, result),
                                                      blocking_cb=QApplication.processEvents)
         else:
-            task = BlockingAsyncTaskWithCallback(target=orig_run_code, args=(code_obj,),
+            task = BlockingAsyncTaskWithCallback(target=orig_run_code,
+                                                 args=(code_obj, ),
                                                  blocking_cb=QApplication.processEvents)
         return task.start()
 

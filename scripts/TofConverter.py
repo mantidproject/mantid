@@ -17,7 +17,7 @@ if 'workbench' in sys.modules:
     parent, flags = get_window_config()
 else:
     parent, flags = None, None
-reducer = converterGUI.MainWindow(parent, flags)#the main ui class in this file is called MainWindow
+reducer = converterGUI.MainWindow(parent, flags)  #the main ui class in this file is called MainWindow
 reducer.show()
 if not within_mantid:
     app.exec_()

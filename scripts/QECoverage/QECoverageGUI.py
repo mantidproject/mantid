@@ -19,7 +19,7 @@ def calcQE(efix, tthlims, **kwargs):
     efix = np.abs(efix)
     qe_array = []
     # Conversion factors
-    E2q = 2. * constants.m_n / (constants.hbar ** 2)  # Energy to (neutron momentum)^2 (==2m_n/hbar^2)
+    E2q = 2. * constants.m_n / (constants.hbar**2)  # Energy to (neutron momentum)^2 (==2m_n/hbar^2)
     meV2J = constants.e / 1000.  # meV to Joules
     m2A = 1.e10  # metres to Angstrom
     for myE in efix:
@@ -29,13 +29,14 @@ def calcQE(efix, tthlims, **kwargs):
         elif 'emin' in kwargs:
             emax = kwargs['emin']
         Et0 = np.linspace(emax, myE, 200)
-        q1 = np.sqrt(
-            E2q * (2 * myE - Et0 - 2 * np.sqrt(myE * (myE - Et0)) * np.cos(np.deg2rad(tthlims[0]))) * meV2J) / m2A
+        q1 = np.sqrt(E2q * (2 * myE - Et0 - 2 * np.sqrt(myE *
+                                                        (myE - Et0)) * np.cos(np.deg2rad(tthlims[0]))) * meV2J) / m2A
         q1 = np.concatenate((np.flipud(q1), q1))
         Et = np.concatenate((np.flipud(fc * Et0), fc * Et0))
         for lines in range(1, len(tthlims)):
-            q2 = np.sqrt(E2q * (
-                2 * myE - Et0 - 2 * np.sqrt(myE * (myE - Et0)) * np.cos(np.deg2rad(tthlims[lines]))) * meV2J) / m2A
+            q2 = np.sqrt(E2q *
+                         (2 * myE - Et0 - 2 * np.sqrt(myE *
+                                                      (myE - Et0)) * np.cos(np.deg2rad(tthlims[lines]))) * meV2J) / m2A
             q2 = np.concatenate((np.flipud(q2), q2))
             q1 = np.append(q1, q2)
             Et = np.append(Et, np.concatenate((np.flipud(fc * Et0), fc * Et0)))
@@ -67,8 +68,10 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.tab_direct = QtWidgets.QWidget(self.tabs)
         self.direct_grid = QtWidgets.QVBoxLayout()
         self.tab_direct.setLayout(self.direct_grid)
-        self.direct_inst_list = ['LET', 'MAPS', 'MARI', 'MERLIN', 'ARCS', 'CHESS', 'CNCS', 'HYSPEC', 'SEQUOIA',
-                                 'IN4', 'IN5', 'IN6', 'FOCUS', 'MIBEMOL', 'DNS', 'TOFTOF']
+        self.direct_inst_list = [
+            'LET', 'MAPS', 'MARI', 'MERLIN', 'ARCS', 'CHESS', 'CNCS', 'HYSPEC', 'SEQUOIA', 'IN4', 'IN5', 'IN6', 'FOCUS',
+            'MIBEMOL', 'DNS', 'TOFTOF'
+        ]
         self.direct_inst_box = QtWidgets.QComboBox(self.tab_direct)
         for inst in self.direct_inst_list:
             self.direct_inst_box.addItem(inst)
@@ -206,9 +209,9 @@ class QECoverageGUI(QtWidgets.QWidget):
         #help
         self.assistant_process = QtCore.QProcess(self)
         # pylint: disable=protected-access
-        self.mantidplot_name='QE Coverage'
+        self.mantidplot_name = 'QE Coverage'
         #register startup
-        mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface,"QECoverage",False)
+        mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "QECoverage", False)
 
     def onHelp(self):
         show_interface_help(self.mantidplot_name, self.assistant_process, area='utility')
@@ -237,8 +240,10 @@ class QECoverageGUI(QtWidgets.QWidget):
         elif Inst == 'MAPS':
             self.tthlims = [3.0, 19.8, 21.1, 29.8, 31.1, 39.8, 41.1, 49.8, 51.1, 59.8]
         elif Inst == 'MARI':
-            self.tthlims = [3.43, 29.14, 30.86, 44.14, 45.86, 59.15, 60.86, 74.14, 75.86, 89.14, 90.86, 104.14, 105.86,
-                            119.14, 120.86, 134.14]
+            self.tthlims = [
+                3.43, 29.14, 30.86, 44.14, 45.86, 59.15, 60.86, 74.14, 75.86, 89.14, 90.86, 104.14, 105.86, 119.14,
+                120.86, 134.14
+            ]
         elif Inst == 'MERLIN':
             self.tthlims = [2.838, 135.69]
         elif Inst == 'ARCS':
@@ -350,8 +355,8 @@ class QECoverageGUI(QtWidgets.QWidget):
             self.xlim = 0
             self.axes.clear()
             self.axes.axhline(color='k')
-        if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
-            self.axes.hold(True) # hold is deprecated since 2.1.0, true by default
+        if matplotlib.compare_versions('2.1.0', matplotlib.__version__):
+            self.axes.hold(True)  # hold is deprecated since 2.1.0, true by default
         Inst = self.direct_inst_box.currentText()
         for n in range(len(qe)):
             name = Inst + '_Ei=' + str(ei_vec[n])
@@ -360,7 +365,9 @@ class QECoverageGUI(QtWidgets.QWidget):
             if max(qe[n][0]) > self.xlim:
                 self.xlim = max(qe[n][0])
             if createws:
-                mantid.simpleapi.CreateWorkspace(DataX=qe[n][0], DataY=qe[n][1], NSpec=1,
+                mantid.simpleapi.CreateWorkspace(DataX=qe[n][0],
+                                                 DataY=qe[n][1],
+                                                 NSpec=1,
                                                  OutputWorkspace=str('QECoverage_' + name))
         self.axes.set_xlim([0, self.xlim])
         self.axes.set_xlabel(r'$|Q|$ ($\AA^{-1}$)')
@@ -386,14 +393,16 @@ class QECoverageGUI(QtWidgets.QWidget):
             self.axes.clear()
             self.axes.axhline(color='k')
         else:
-            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
-                self.axes.hold(True) # hold is deprecated since 2.1.0, true by default
+            if matplotlib.compare_versions('2.1.0', matplotlib.__version__):
+                self.axes.hold(True)  # hold is deprecated since 2.1.0, true by default
         line, = self.axes.plot(qe[0][0], qe[0][1])
         line.set_label(inst + '_' + ana)
         if max(qe[0][0]) > self.xlim:
             self.xlim = max(qe[0][0])
         if createws:
-            mantid.simpleapi.CreateWorkspace(DataX=qe[0][0], DataY=qe[0][1], NSpec=1,
+            mantid.simpleapi.CreateWorkspace(DataX=qe[0][0],
+                                             DataY=qe[0][1],
+                                             NSpec=1,
                                              OutputWorkspace=str('QECoverage_' + inst + '_' + ana))
         self.axes.set_xlim([0, self.xlim])
         self.axes.set_xlabel(r'$|Q|$ ($\AA^{-1}$)')
@@ -461,9 +470,8 @@ class QECoverageGUI(QtWidgets.QWidget):
             Emax_min = -4896
 
         self.emaxfield_msgbox.setText("Invalid input has been provided for Emax. "
-                                      "Emax cannot be less than "
-                                      + str(Emax_min) + ", when Ef is set as "
-                                      + ana + "! Please try again.")
+                                      "Emax cannot be less than " + str(Emax_min) + ", when Ef is set as " + ana +
+                                      "! Please try again.")
 
         if float(self.indirect_emax_input.text()) < Emax_min:
             self.indirect_emax_input.setText(str(Emax_min))

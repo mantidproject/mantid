@@ -18,9 +18,7 @@ class AbinsData:
     :param atoms_data: object of type AtomsData
 
     """
-    def __init__(self, *,
-                 k_points_data: KpointsData,
-                 atoms_data: AtomsData) -> None:
+    def __init__(self, *, k_points_data: KpointsData, atoms_data: AtomsData) -> None:
         if not isinstance(k_points_data, KpointsData):
             raise TypeError("Invalid type of k-points data.: {}".format(type(k_points_data)))
         self._k_points_data = k_points_data
@@ -31,8 +29,7 @@ class AbinsData:
         self._check_consistent_dimensions()
 
     @staticmethod
-    def from_calculation_data(filename: str,
-                              ab_initio_program: str) -> 'AbinsData':
+    def from_calculation_data(filename: str, ab_initio_program: str) -> 'AbinsData':
         """
         Get AbinsData from ab initio calculation output file.
 
@@ -43,8 +40,7 @@ class AbinsData:
 
         if ab_initio_program.upper() not in all_loaders:
             raise ValueError("No loader available for {}: unknown program. "
-                             "supported loaders: {}".format(ab_initio_program.upper(),
-                                                            ' '.join(all_loaders.keys())))
+                             "supported loaders: {}".format(ab_initio_program.upper(), ' '.join(all_loaders.keys())))
         loader = all_loaders[ab_initio_program.upper()](input_ab_initio_filename=filename)
         data = loader.get_formatted_data()
         return data
@@ -67,8 +63,7 @@ class AbinsData:
 
     def extract(self) -> Dict[str, Any]:
         """Get a dict with k-points data and atoms data"""
-        return {"k_points_data": self.get_kpoints_data().extract(),
-                "atoms_data": self.get_atoms_data().extract()}
+        return {"k_points_data": self.get_kpoints_data().extract(), "atoms_data": self.get_atoms_data().extract()}
 
     def __str__(self) -> str:
         return "Abins data"

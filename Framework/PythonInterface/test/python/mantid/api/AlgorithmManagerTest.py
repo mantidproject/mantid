@@ -6,12 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import testhelpers
-from mantid.api import (AlgorithmManager, Algorithm,
-                        FrameworkManagerImpl, IAlgorithm)
+from mantid.api import (AlgorithmManager, Algorithm, FrameworkManagerImpl, IAlgorithm)
 
 
 class AlgorithmManagerTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         # Load the plugins
@@ -27,7 +25,7 @@ class AlgorithmManagerTest(unittest.TestCase):
         self.assertEqual(alg.helpURL(), "")
 
     def test_create_unknown_alg_throws(self):
-        self.assertRaises(RuntimeError, AlgorithmManager.create,"DoesNotExist")
+        self.assertRaises(RuntimeError, AlgorithmManager.create, "DoesNotExist")
 
     def test_created_alg_isinstance_of_IAlgorithm(self):
         alg = AlgorithmManager.create("ConvertUnits")
@@ -62,14 +60,17 @@ class AlgorithmManagerTest(unittest.TestCase):
         self.assertTrue(isinstance(algs, list))
 
         import threading
+
         class AlgThread(threading.Thread):
             def __init__(self):
                 threading.Thread.__init__(self)
                 self.algorithm = AlgorithmManager.create("Pause")
+
             def run(self):
                 self.algorithm.initialize()
-                self.algorithm.setProperty("Duration", -1.0) #forever
+                self.algorithm.setProperty("Duration", -1.0)  #forever
                 self.algorithm.execute()
+
         # end class
         pause_thread = AlgThread()
         try:
@@ -87,7 +88,6 @@ class AlgorithmManagerTest(unittest.TestCase):
         finally:
             pause_thread.algorithm.cancel()
             pause_thread.join()
-
 
     def test_clear_removes_all_managed_algorithms(self):
         AlgorithmManager.clear()

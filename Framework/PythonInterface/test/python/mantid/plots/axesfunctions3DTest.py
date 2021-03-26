@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 import matplotlib
+
 matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 import unittest
@@ -18,7 +19,6 @@ from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, CreateMDHistoWork
 
 
 class PlotFunctions3DTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.g1da = config['graph1d.autodistribution']

@@ -35,7 +35,8 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         return 'ILL\\Diffraction'
 
     def summary(self):
-        return 'Performs D7 position calibration using YIG scan and returns D7 IPF readable by LoadILLPolarizedDiffraction.'
+        return 'Performs D7 position calibration using YIG scan and returns D7 IPF readable by ' \
+               'LoadILLPolarizedDiffraction.'
 
     def seeAlso(self):
         return ['LoadILLPolarizedDiffraction', 'PolDiffILLReduction', 'D7AbsoluteCrossSections']
@@ -46,8 +47,9 @@ class D7YIGPositionCalibration(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
         if self.getProperty('Filenames').isDefault and self.getProperty('InputWorkspace').isDefault:
-            issues['Filenames'] = 'Either a list of file names containing YIG scan or the workspace with the loaded scan ' \
-                                  'is required for calibration. If both are provided, the InputWorkspace takes precedence.'
+            issues['Filenames'] = 'Either a list of file names containing YIG scan or the workspace with the loaded ' \
+                                  'scan is required for calibration. If both are provided, the InputWorkspace takes ' \
+                                  'precedence.'
             issues['InputWorkspace'] = issues['Filenames']
 
         if self.getPropertyValue('FittingMethod') != 'None' and self.getProperty('CalibrationOutputFile').isDefault:
@@ -56,18 +58,16 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         return issues
 
     def PyInit(self):
-        self.declareProperty(MultipleFileProperty("Filenames",
-                                                  action=FileAction.OptionalLoad),
+        self.declareProperty(MultipleFileProperty("Filenames", action=FileAction.OptionalLoad),
                              doc="The file names with a single YIG scan.")
 
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace',
+                                                     '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='The name of the workspace containing the entire YIG scan.')
 
-        self.declareProperty(FileProperty('YIGPeaksFile', '',
-                                          action=FileAction.Load,
-                                          extensions=['.xml']),
+        self.declareProperty(FileProperty('YIGPeaksFile', '', action=FileAction.Load, extensions=['.xml']),
                              doc='The file name with all YIG peaks in d-spacing.')
 
         self.declareProperty(name="ApproximateWavelength",
@@ -104,20 +104,25 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                                           defaultValue=''),
                              doc="The output YIG calibration Instrument Parameter File.")
 
-        self.declareProperty(name="ClearCache", defaultValue=True, direction=Direction.Input,
+        self.declareProperty(name="ClearCache",
+                             defaultValue=True,
+                             direction=Direction.Input,
                              doc="Whether to clear the intermediate fitting results.")
 
-        self.declareProperty(ITableWorkspaceProperty(name='FitOutputWorkspace',
-                                                     defaultValue='',
-                                                     direction=Direction.Output,
-                                                     optional=PropertyMode.Optional),
-                             doc="The table workspace name that will be used to store all of the calibration parameters.")
+        self.declareProperty(
+            ITableWorkspaceProperty(name='FitOutputWorkspace',
+                                    defaultValue='',
+                                    direction=Direction.Output,
+                                    optional=PropertyMode.Optional),
+            doc="The table workspace name that will be used to store all of the calibration parameters.")
 
-        self.declareProperty(name="FittingMethod",
-                             defaultValue="None",
-                             validator=StringListValidator(["None", "Individual", "Global"]),
-                             direction=Direction.Input,
-                             doc="Option to provide the initial guesses or perform fits for Bragg peaks either individually or globally.")
+        self.declareProperty(
+            name="FittingMethod",
+            defaultValue="None",
+            validator=StringListValidator(["None", "Individual", "Global"]),
+            direction=Direction.Input,
+            doc="Option to provide the initial guesses or perform fits for Bragg peaks either individually or globally."
+        )
 
     def PyExec(self):
         nfiles = self.getPropertyValue("Filenames").count(',')
@@ -143,9 +148,10 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         if not self.getProperty("BankOffsets").isDefault:
             offsets = self.getProperty("BankOffsets").value
             for bank_no in range(int(self._D7NumberPixels / self._D7NumberPixelsBank)):
-                ChangeBinOffset(InputWorkspace=conjoined_scan, Offset=-offsets[bank_no],
-                                WorkspaceIndexList='{0}-{1}'.format(bank_no*self._D7NumberPixelsBank,
-                                                                    (bank_no+1)*self._D7NumberPixelsBank-1),
+                ChangeBinOffset(InputWorkspace=conjoined_scan,
+                                Offset=-offsets[bank_no],
+                                WorkspaceIndexList='{0}-{1}'.format(bank_no * self._D7NumberPixelsBank,
+                                                                    (bank_no + 1) * self._D7NumberPixelsBank - 1),
                                 OutputWorkspace=conjoined_scan)
 
         # loads the YIG peaks from an IPF
@@ -159,8 +165,13 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         self._created_ws_names.append(single_peaks_fits)
         if self.getPropertyValue('FittingMethod') in ['Individual', 'Global']:
             self._created_ws_names.append(fitted_peaks_positions)
-            ReplaceSpecialValues(InputWorkspace=fitted_peaks_positions, OutputWorkspace=fitted_peaks_positions,
-                                 NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0, checkErrorAxis=True)
+            ReplaceSpecialValues(InputWorkspace=fitted_peaks_positions,
+                                 OutputWorkspace=fitted_peaks_positions,
+                                 NaNValue=0,
+                                 NaNError=0,
+                                 InfinityValue=0,
+                                 InfinityError=0,
+                                 checkErrorAxis=True)
             # fits the wavelength, bank gradients and individual
             progress.report('Fitting bank and detector parameters')
             detector_parameters = self._fit_detector_positions(fitted_peaks_positions)
@@ -177,7 +188,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
 
         if self.getProperty('ClearCache').value:
             DeleteWorkspaces(WorkspaceList=self._created_ws_names)
-        self._created_ws_names.clear() #cleanup
+        self._created_ws_names.clear()  #cleanup
 
     def _prepare_masking_criteria(self):
         """Builds list of string criterions readable by MaskBinsIf algorithm"""
@@ -189,7 +200,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                 index_start = 1
             for index in range(index_start, len(self._detectorMasks), 2):
                 lowerRange = self._detectorMasks[index]
-                upperRange = self._detectorMasks[index+1]
+                upperRange = self._detectorMasks[index + 1]
                 criterions.append('x>{0} && x<{1}'.format(lowerRange, upperRange))
         return criterions
 
@@ -197,12 +208,15 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         """ Loads YIG scan data, removes monitors, and prepares
         a workspace for Bragg peak fitting"""
         # workspace indices for monitors
-        monitor_indices = "{0}, {1}".format(self._D7NumberPixels, self._D7NumberPixels+1)
+        monitor_indices = "{0}, {1}".format(self._D7NumberPixels, self._D7NumberPixels + 1)
         scan_data_name = "scan_data_{}".format(ws_name)
         self._created_ws_names.append(scan_data_name)
         progress.report(0, 'Loading YIG scan data')
-        LoadAndMerge(Filename=self.getPropertyValue("Filenames"), OutputWorkspace=scan_data_name, LoaderName='LoadILLPolarizedDiffraction',
-                     startProgress=0.0, endProgress=0.6)
+        LoadAndMerge(Filename=self.getPropertyValue("Filenames"),
+                     OutputWorkspace=scan_data_name,
+                     LoaderName='LoadILLPolarizedDiffraction',
+                     startProgress=0.0,
+                     endProgress=0.6)
         progress.report(6, 'Conjoining the scan data')
         # load the group into a single table workspace
         nfiles = mtd[scan_data_name].getNumberOfEntries()
@@ -221,11 +235,10 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             monitor1_counts = entry.readY(self._D7NumberPixels)[0]
             if monitor1_counts != 0:
                 monitor_name = '__monitor_' + entry.name()
-                CreateSingleValuedWorkspace(DataValue=monitor1_counts, ErrorValue=np.sqrt(monitor1_counts),
+                CreateSingleValuedWorkspace(DataValue=monitor1_counts,
+                                            ErrorValue=np.sqrt(monitor1_counts),
                                             OutputWorkspace=monitor_name)
-                Divide(LHSWorkspace=entry,
-                       RHSWorkspace=monitor_name,
-                       OutputWorkspace=entry)
+                Divide(LHSWorkspace=entry, RHSWorkspace=monitor_name, OutputWorkspace=entry)
                 DeleteWorkspace(Workspace=monitor_name)
             # remove Monitors:
             RemoveSpectra(InputWorkspace=entry, WorkspaceIndices=monitor_indices, OutputWorkspace=entry)
@@ -239,9 +252,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                                  OutputWorkspace=entry)
             # mask bins using predefined ranges
             for criterion in masking_criteria:
-                MaskBinsIf(InputWorkspace=entry,
-                           Criterion=criterion,
-                           OutputWorkspace=entry)
+                MaskBinsIf(InputWorkspace=entry, Criterion=criterion, OutputWorkspace=entry)
             # append the new row to a new MatrixWorkspace
             ConvertToPointData(InputWorkspace=entry, OutputWorkspace=entry)
             name_list.append(entry.name())
@@ -252,14 +263,14 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         mtd[conjoined_scan_name].replaceAxis(0, x_axis)
         y_axis = NumericAxis.create(self._D7NumberPixels)
         for pixel_no in range(self._D7NumberPixels):
-            y_axis.setValue(pixel_no, pixel_no+1)
+            y_axis.setValue(pixel_no, pixel_no + 1)
         mtd[conjoined_scan_name].replaceAxis(1, y_axis)
         return conjoined_scan_name
 
     def _load_yig_peaks(self, ws):
         """Loads YIG peaks provided as an XML Instrument Parameter File"""
         parameterFilename = self.getPropertyValue('YIGPeaksFile')
-        ClearInstrumentParameters(Workspace=ws) #in case other IPF was loaded there before
+        ClearInstrumentParameters(Workspace=ws)  #in case other IPF was loaded there before
         LoadParameterFile(Workspace=ws, Filename=parameterFilename)
         yig_d_set = set()
         instrument = mtd[ws].getInstrument().getComponentByName('detector')
@@ -273,11 +284,13 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         and those that are too close to each other,
         and returns a list with peaks positions in 2theta"""
         wavelength = self.getProperty("ApproximateWavelength").value
-        yig_list = [2.0 * self._RAD_2_DEG * math.asin(wavelength / (2.0 * d_spacing))
-                    for d_spacing in yig_list if d_spacing > 0.5*wavelength]
+        yig_list = [
+            2.0 * self._RAD_2_DEG * math.asin(wavelength / (2.0 * d_spacing)) for d_spacing in yig_list
+            if d_spacing > 0.5 * wavelength
+        ]
         yig_peaks = []
-        for index in range(len(yig_list)-1):
-            if abs(yig_list[index]-yig_list[index+1]) >= 2*self._minDistance:
+        for index in range(len(yig_list) - 1):
+            if abs(yig_list[index] - yig_list[index + 1]) >= 2 * self._minDistance:
                 yig_peaks.append(yig_list[index])
         yig_peaks.append(yig_list[-1])
         return self._include_other_quadrants(yig_peaks)
@@ -308,23 +321,34 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                 if min2Theta < peak < max2Theta:
                     for bin_no in range(len(detector_2theta)):
                         twoTheta = detector_2theta[bin_no]
-                        if abs(twoTheta - peak) < 1: # within 1 degree from the expected peak position
+                        if abs(twoTheta - peak) < 1:  # within 1 degree from the expected peak position
                             # scan for the local maximum:
-                            indices = np.where((twoTheta-self._minDistance < detector_2theta)
-                                               & (detector_2theta < twoTheta+self._minDistance))
+                            indices = np.where((twoTheta - self._minDistance < detector_2theta)
+                                               & (detector_2theta < twoTheta + self._minDistance))
                             slice_intensity = intensity[indices[0][0]:indices[0][-1]]
                             peak_intensity = slice_intensity.max()
                             if peak_intensity == 0:
                                 break
-                            index_maximum = indices[0][0]+slice_intensity.argmax()
+                            index_maximum = indices[0][0] + slice_intensity.argmax()
                             expected_pos = peak
                             single_spectrum_peaks.append((peak_intensity, detector_2theta[index_maximum], expected_pos))
                             break
             peak_list.append(single_spectrum_peaks)
         return peak_list
 
-    def _call_fit(self, ws, out_name, fit_function, fit_constraints, initial_peak_no, pixel_no, peaks_list,
-                  results_x, results_y, results_e, startX=None, endX=None):
+    def _call_fit(self,
+                  ws,
+                  out_name,
+                  fit_function,
+                  fit_constraints,
+                  initial_peak_no,
+                  pixel_no,
+                  peaks_list,
+                  results_x,
+                  results_y,
+                  results_e,
+                  startX=None,
+                  endX=None):
         """Calls the fit algorithm using the provided parameters and updates result vectors with the fit output."""
         fit_output = Fit(Function=';'.join(fit_function),
                          InputWorkspace=ws,
@@ -380,17 +404,26 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                 fit_constraints = []
                 for peak_intensity, peak_centre_guess, peak_centre_expected in single_spectrum_peaks:
                     function_no += 1
-                    fit_function.append(function.format(float(peak_centre_guess), peak_intensity, 0.5*self._peakWidth))
-                    fit_constraints.append(constraints.format(function_no, self._peakWidth,
-                                                              peak_centre_guess - self._minDistance,
-                                                              peak_centre_guess + self._minDistance))
+                    fit_function.append(function.format(float(peak_centre_guess), peak_intensity,
+                                                        0.5 * self._peakWidth))
+                    fit_constraints.append(
+                        constraints.format(function_no, self._peakWidth, peak_centre_guess - self._minDistance,
+                                           peak_centre_guess + self._minDistance))
                     if fitting_method == 'Individual':
                         name = ws_name.format(peak_no)
                         ws_names.append(name)
-                        results_x, results_y, results_e = self._call_fit(ws, name, fit_function, fit_constraints,
-                                                                         peak_no, pixel_no, single_spectrum_peaks,
-                                                                         results_x, results_y, results_e,
-                                                                         startX=peak_centre_expected - self._minDistance,
+                        results_x, results_y, results_e = self._call_fit(ws,
+                                                                         name,
+                                                                         fit_function,
+                                                                         fit_constraints,
+                                                                         peak_no,
+                                                                         pixel_no,
+                                                                         single_spectrum_peaks,
+                                                                         results_x,
+                                                                         results_y,
+                                                                         results_e,
+                                                                         startX=peak_centre_expected -
+                                                                         self._minDistance,
                                                                          endX=peak_centre_expected + self._minDistance)
                         fit_function = [background]
                         fit_constraints = []
@@ -399,9 +432,9 @@ class D7YIGPositionCalibration(PythonAlgorithm):
 
                 if fitting_method == 'Global':
                     ws_names.append(ws_name)
-                    results_x, results_y, results_e = self._call_fit(ws, ws_name, fit_function, fit_constraints,
-                                                                     0, pixel_no, single_spectrum_peaks,
-                                                                     results_x, results_y, results_e)
+                    results_x, results_y, results_e = self._call_fit(ws, ws_name, fit_function, fit_constraints, 0,
+                                                                     pixel_no, single_spectrum_peaks, results_x,
+                                                                     results_y, results_e)
             if fitting_method != 'None':
                 CreateWorkspace(OutputWorkspace='ws',
                                 DataX=results_x,
@@ -410,7 +443,8 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                                 UnitX='degrees',
                                 NSpec=1)
                 try:
-                    ConjoinWorkspaces(InputWorkspace1=conjoined_peak_fit_name, InputWorkspace2='ws',
+                    ConjoinWorkspaces(InputWorkspace1=conjoined_peak_fit_name,
+                                      InputWorkspace2='ws',
                                       CheckOverlapping=False,
                                       YAxisLabel='TwoTheta_fit',
                                       YAxisUnit='degrees')
@@ -419,8 +453,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             else:
                 ws_names.append(ws_name)
                 single_spectrum_name = '{}_single_spectrum'.format(ws_name)
-                ExtractSpectra(InputWorkspace=ws, OutputWorkspace=single_spectrum_name,
-                               WorkspaceIndexList=[pixel_no])
+                ExtractSpectra(InputWorkspace=ws, OutputWorkspace=single_spectrum_name, WorkspaceIndexList=[pixel_no])
                 EvaluateFunction(Function=';'.join(fit_function),
                                  InputWorkspace=single_spectrum_name,
                                  OutputWorkspace=ws_name)
@@ -429,7 +462,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         if fitting_method in ['Individual', 'Global']:
             y_axis = NumericAxis.create(self._D7NumberPixels)
             for pixel_no in range(self._D7NumberPixels):
-                y_axis.setValue(pixel_no, pixel_no+1)
+                y_axis.setValue(pixel_no, pixel_no + 1)
             mtd[conjoined_peak_fit_name].replaceAxis(1, y_axis)
             # clean up after fitting:
             DeleteWorkspaces(['out_Parameters', 'out_NormalisedCovarianceMatrix'])
@@ -454,49 +487,44 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         ties_bank_off_list = []
         ties_gradient = ""
         ties_bank_off = ""
-        pixel_offset_constr = self._DEG_2_RAD*25 # +-25 degrees
-        bank_offset_constr = self._DEG_2_RAD*5 # +-5 degrees around the bank position
-        gradient_constr = 0.5 # +-5% around the m = 1.0 value
-        lambda_constr = 0.5 # +- 5% of lambda variation from the initial assumption
-        constraint_list = ['{0}<f0.lambda<{1}'.format(1-lambda_constr, 1+lambda_constr)]
+        pixel_offset_constr = self._DEG_2_RAD * 25  # +-25 degrees
+        bank_offset_constr = self._DEG_2_RAD * 5  # +-5 degrees around the bank position
+        gradient_constr = 0.5  # +-5% around the m = 1.0 value
+        lambda_constr = 0.5  # +- 5% of lambda variation from the initial assumption
+        constraint_list = ['{0}<f0.lambda<{1}'.format(1 - lambda_constr, 1 + lambda_constr)]
         function = 'name=UserFunction, \
         Formula = {0} * m * ( 2.0 * asin( lambda * sin( 0.5 * {1} * x ) ) + offset+ bank_offset), \
-        lambda= 1.0, m = 1.0, offset = {2}, bank_offset = {3}, $domains=i'.format(self._RAD_2_DEG,
-                                                                                  self._DEG_2_RAD,
-                                                                                  0, 0)
+        lambda= 1.0, m = 1.0, offset = {2}, bank_offset = {3}, $domains=i'.format(self._RAD_2_DEG, self._DEG_2_RAD, 0,
+                                                                                  0)
         function_list = mtd[ws].getNumberHistograms() * [function]
 
         for pixel_no in range(mtd[ws].getNumberHistograms()):
-            constraint_list.append('-{0} < f{1}.offset < {0}'.format(pixel_offset_constr,
-                                                                     pixel_no))
-            constraint_list.append('-{0} < f{1}.bank_offset < {0}'.format(bank_offset_constr,
-                                                                          pixel_no))
-            constraint_list.append('{0} < f{1}.m < {2}'.format(1-gradient_constr,
-                                                               pixel_no,
-                                                               1+gradient_constr))
+            constraint_list.append('-{0} < f{1}.offset < {0}'.format(pixel_offset_constr, pixel_no))
+            constraint_list.append('-{0} < f{1}.bank_offset < {0}'.format(bank_offset_constr, pixel_no))
+            constraint_list.append('{0} < f{1}.m < {2}'.format(1 - gradient_constr, pixel_no, 1 + gradient_constr))
             # add a global tie on lambda:
             ties_lambda_list.append('f{0}.lambda'.format(pixel_no))
             # set ties for three bank gradients:
             ties_gradient_list.append('f{0}.m'.format(pixel_no))
             ties_bank_off_list.append('f{0}.bank_offset'.format(pixel_no))
-            if pixel_no % self._D7NumberPixelsBank == (self._D7NumberPixelsBank-1):
+            if pixel_no % self._D7NumberPixelsBank == (self._D7NumberPixelsBank - 1):
                 ties_gradient += ',' + '='.join(ties_gradient_list)
                 ties_bank_off += ',' + '='.join(ties_bank_off_list)
-                ties_gradient_list=[]
-                ties_bank_off_list=[]
+                ties_gradient_list = []
+                ties_bank_off_list = []
 
         ties_lambda = '='.join(ties_lambda_list)
         ties = ties_lambda + ties_gradient + ties_bank_off
 
         constraints = ','.join(constraint_list)
         # create a multi domain function to perform a global fit
-        multiFunc='composite=MultiDomainFunction,NumDeriv=true;'
+        multiFunc = 'composite=MultiDomainFunction,NumDeriv=true;'
 
         # define the domains needed by the fitting algorithm
         fit_kwargs = {}
         func_no = 0
         for function in function_list:
-            multiFunc += "("+ function + ");\n"
+            multiFunc += "(" + function + ");\n"
             if func_no == 0:
                 fit_kwargs['WorkspaceIndex'] = func_no
                 fit_kwargs['InputWorkspace'] = ws
@@ -529,21 +557,24 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         intitial_wavelength = self.getProperty('ApproximateWavelength').value
         wavelength = parameter_table.column(1)[1] * intitial_wavelength
         if parameter_table.column(1)[0] == 0:
-            raise RuntimeError('Fitting bank gradients failed. Bank2 slope is equal to 0. Consider changing initial parameters')
+            raise RuntimeError(
+                'Fitting bank gradients failed. Bank2 slope is equal to 0. Consider changing initial parameters')
         bank2_slope = 1.0 / parameter_table.column(1)[0]
         bank2_offset = self._RAD_2_DEG * parameter_table.column(1)[3]
-        if parameter_table.column(1)[3*self._D7NumberPixelsBank] == 0:
-            raise RuntimeError('Fitting bank gradients failed. Bank3 slope is equal to 0. Consider changing initial parameters')
-        bank3_slope = 1.0 / parameter_table.column(1)[4*self._D7NumberPixelsBank]
-        bank3_offset = self._RAD_2_DEG * parameter_table.column(1)[4*self._D7NumberPixelsBank+3]
-        if parameter_table.column(1)[6*self._D7NumberPixelsBank] == 0:
-            raise RuntimeError('Fitting bank gradients failed. Bank4 slope is equal to 0. Consider changing initial parameters')
-        bank4_slope = 1.0 / parameter_table.column(1)[8*self._D7NumberPixelsBank]
-        bank4_offset = self._RAD_2_DEG * parameter_table.column(1)[8*self._D7NumberPixelsBank+3]
+        if parameter_table.column(1)[3 * self._D7NumberPixelsBank] == 0:
+            raise RuntimeError(
+                'Fitting bank gradients failed. Bank3 slope is equal to 0. Consider changing initial parameters')
+        bank3_slope = 1.0 / parameter_table.column(1)[4 * self._D7NumberPixelsBank]
+        bank3_offset = self._RAD_2_DEG * parameter_table.column(1)[4 * self._D7NumberPixelsBank + 3]
+        if parameter_table.column(1)[6 * self._D7NumberPixelsBank] == 0:
+            raise RuntimeError(
+                'Fitting bank gradients failed. Bank4 slope is equal to 0. Consider changing initial parameters')
+        bank4_slope = 1.0 / parameter_table.column(1)[8 * self._D7NumberPixelsBank]
+        bank4_offset = self._RAD_2_DEG * parameter_table.column(1)[8 * self._D7NumberPixelsBank + 3]
         bank_slopes = [bank2_slope, bank3_slope, bank4_slope]
         bank_offsets = [bank2_offset, bank3_offset, bank4_offset]
         user_offsets = self.getPropertyValue("BankOffsets").split(',')
-        bank_offsets = [offset1+float(offset2) for offset1, offset2 in zip(bank_offsets, user_offsets)]
+        bank_offsets = [offset1 + float(offset2) for offset1, offset2 in zip(bank_offsets, user_offsets)]
         pixel_offsets = []
         pixel_no = 0
         for row_no in range(parameter_table.rowCount()):
@@ -551,9 +582,11 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             if '.offset' in row_data['Name']:
                 pixel_offset = self._RAD_2_DEG * row_data['Value'] \
                              + (0.5*self._D7NumberPixelsBank) \
-                             - bank_slopes[math.floor(pixel_no / self._D7NumberPixelsBank)] * (pixel_no % self._D7NumberPixelsBank)
+                             - bank_slopes[math.floor(pixel_no / self._D7NumberPixelsBank)] \
+                             * (pixel_no % self._D7NumberPixelsBank)
                 if pixel_no % 2 == 0:
-                    pixel_offset -= self._RAD_2_DEG * 0.011 / (2.0 * (1.5177 - 0.01252)) # repeats calculation from the D7 IDF
+                    pixel_offset -= self._RAD_2_DEG * 0.011 / (2.0 * (1.5177 - 0.01252)
+                                                               )  # repeats calculation from the D7 IDF
                 pixel_offsets.append(pixel_offset)
                 pixel_no += 1
         self.log().notice('The calibrated wavelength is: {0:.2f}'.format(wavelength))
@@ -574,7 +607,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         param_file = ET.Element('parameter-file')
         param_file.set('instrument', 'D7')
         date_today = date.today()
-        param_file.set('date',  str(date_today))
+        param_file.set('date', str(date_today))
 
         # include the fitted wavelength in the output IPF
         detector = ET.SubElement(param_file, 'component-link')
@@ -586,7 +619,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
 
         for bank_no in range(int(self._D7NumberPixels / self._D7NumberPixelsBank)):
             bank = ET.SubElement(param_file, 'component-link')
-            bank.set('name', 'bank'+str(bank_no+2))
+            bank.set('name', 'bank' + str(bank_no + 2))
 
             offset = ET.SubElement(bank, 'parameter')
             offset.set('name', 'offset')
@@ -600,9 +633,9 @@ class D7YIGPositionCalibration(PythonAlgorithm):
 
             for pixel_no in range(self._D7NumberPixelsBank):
                 pixel = ET.SubElement(bank, 'parameter')
-                pixel.set('name', 'twoTheta_pixel_{0}'.format(pixel_no+1))
+                pixel.set('name', 'twoTheta_pixel_{0}'.format(pixel_no + 1))
                 value = ET.SubElement(pixel, 'value')
-                value.set('val', str(pixel_offsets[bank_no*self._D7NumberPixelsBank + pixel_no]))
+                value.set('val', str(pixel_offsets[bank_no * self._D7NumberPixelsBank + pixel_no]))
 
         filename = self.getPropertyValue('CalibrationOutputFile')
         output_path = filename

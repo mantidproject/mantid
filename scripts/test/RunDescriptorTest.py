@@ -17,7 +17,6 @@ from mantid.simpleapi import *
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
 class RunDescriptorTest(unittest.TestCase):
-
     def __init__(self, methodName):
         self.prop_man = PropertyManager("MAR")
         return super(RunDescriptorTest, self).__init__(methodName)
@@ -139,7 +138,7 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = 11001
         PropertyManager.sample_run.set_file_ext('raw')
 
-        ok, file = PropertyManager.sample_run.find_file(propman,force_extension='.nxs')
+        ok, file = PropertyManager.sample_run.find_file(propman, force_extension='.nxs')
         self.assertFalse(ok)
         self.assertEqual(file.strip(),
                          '*** Rejecting file matching hint: MAR11001.nxs as found file has wrong extension: .raw')
@@ -163,10 +162,16 @@ class RunDescriptorTest(unittest.TestCase):
 
     def test_copy_spectra2monitors(self):
         propman = self.prop_man
-        run_ws = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event', NumBanks=1, BankPixelWidth=5,
+        run_ws = CreateSampleWorkspace(Function='Multiple Peaks',
+                                       WorkspaceType='Event',
+                                       NumBanks=1,
+                                       BankPixelWidth=5,
                                        NumEvents=100)
-        run_ws_monitors = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Histogram', NumBanks=2,
-                                                BankPixelWidth=1, NumEvents=100)
+        run_ws_monitors = CreateSampleWorkspace(Function='Multiple Peaks',
+                                                WorkspaceType='Histogram',
+                                                NumBanks=2,
+                                                BankPixelWidth=1,
+                                                NumEvents=100)
         run_ws.setMonitorWorkspace(run_ws_monitors)
 
         self.assertEqual(run_ws_monitors.getNumberHistograms(), 2)
@@ -181,10 +186,16 @@ class RunDescriptorTest(unittest.TestCase):
 
     def test_copy_spectra2monitors_heterogen(self):
         propman = self.prop_man
-        run_ws = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event', NumBanks=1, BankPixelWidth=5,
+        run_ws = CreateSampleWorkspace(Function='Multiple Peaks',
+                                       WorkspaceType='Event',
+                                       NumBanks=1,
+                                       BankPixelWidth=5,
                                        NumEvents=100)
-        run_ws_monitors = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Histogram', NumBanks=2,
-                                                BankPixelWidth=1, NumEvents=100)
+        run_ws_monitors = CreateSampleWorkspace(Function='Multiple Peaks',
+                                                WorkspaceType='Histogram',
+                                                NumBanks=2,
+                                                BankPixelWidth=1,
+                                                NumEvents=100)
         run_ws_monitors = Rebin(run_ws_monitors, Params='1,-0.01,20000')
         run_ws.setMonitorWorkspace(run_ws_monitors)
 
@@ -264,11 +275,24 @@ class RunDescriptorTest(unittest.TestCase):
 
     def test_chop_ws_part(self):
         propman = self.prop_man
-        ws = CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
-                                   XMin=2000, XMax=20000, BinWidth=1)
+        ws = CreateSampleWorkspace(Function='Multiple Peaks',
+                                   NumBanks=4,
+                                   BankPixelWidth=1,
+                                   NumEvents=100,
+                                   XUnit='TOF',
+                                   XMin=2000,
+                                   XMax=20000,
+                                   BinWidth=1)
 
-        CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100,
-                              XUnit='TOF', XMin=2000, XMax=20000, BinWidth=1, OutputWorkspace="ws_monitors")
+        CreateSampleWorkspace(Function='Multiple Peaks',
+                              NumBanks=4,
+                              BankPixelWidth=1,
+                              NumEvents=100,
+                              XUnit='TOF',
+                              XMin=2000,
+                              XMax=20000,
+                              BinWidth=1,
+                              OutputWorkspace="ws_monitors")
 
         propman.sample_run = ws
 
@@ -492,9 +516,15 @@ class RunDescriptorTest(unittest.TestCase):
 
     def test_add_masks(self):
         propman = self.prop_man
-        ws = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event',
-                                   NumBanks=4, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
-                                   XMin=2000, XMax=20000, BinWidth=1)
+        ws = CreateSampleWorkspace(Function='Multiple Peaks',
+                                   WorkspaceType='Event',
+                                   NumBanks=4,
+                                   BankPixelWidth=1,
+                                   NumEvents=100,
+                                   XUnit='TOF',
+                                   XMin=2000,
+                                   XMax=20000,
+                                   BinWidth=1)
 
         PropertyManager.sample_run.add_masked_ws(ws)
 
@@ -555,9 +585,15 @@ class RunDescriptorTest(unittest.TestCase):
 
     def test_change_normalization(self):
         propman = self.prop_man
-        a_wksp = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event',
-                                       NumBanks=4, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
-                                       XMin=2000, XMax=20000, BinWidth=1)
+        a_wksp = CreateSampleWorkspace(Function='Multiple Peaks',
+                                       WorkspaceType='Event',
+                                       NumBanks=4,
+                                       BankPixelWidth=1,
+                                       NumEvents=100,
+                                       XUnit='TOF',
+                                       XMin=2000,
+                                       XMax=20000,
+                                       BinWidth=1)
         source_wksp = a_wksp / 5.
         propman.sample_run = source_wksp
         self.assertRaises(RuntimeError, PropertyManager.sample_run.export_normalization, a_wksp)
@@ -581,12 +617,25 @@ class RunDescriptorTest(unittest.TestCase):
         DeleteWorkspace(a_wksp)
 
     def test_monitors_renamed(self):
-        wksp = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event',
-                                     NumBanks=1, BankPixelWidth=1, NumEvents=1, XUnit='TOF',
-                                     XMin=2000, XMax=20000, BinWidth=1)
-        CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Histogram',
-                              NumBanks=3, BankPixelWidth=1, NumEvents=1, XUnit='TOF',
-                              XMin=2000, XMax=20000, BinWidth=1, OutputWorkspace="wksp_monitors")
+        wksp = CreateSampleWorkspace(Function='Multiple Peaks',
+                                     WorkspaceType='Event',
+                                     NumBanks=1,
+                                     BankPixelWidth=1,
+                                     NumEvents=1,
+                                     XUnit='TOF',
+                                     XMin=2000,
+                                     XMax=20000,
+                                     BinWidth=1)
+        CreateSampleWorkspace(Function='Multiple Peaks',
+                              WorkspaceType='Histogram',
+                              NumBanks=3,
+                              BankPixelWidth=1,
+                              NumEvents=1,
+                              XUnit='TOF',
+                              XMin=2000,
+                              XMax=20000,
+                              BinWidth=1,
+                              OutputWorkspace="wksp_monitors")
         propman = self.prop_man
 
         propman.sample_run = wksp

@@ -8,15 +8,13 @@ import os
 import re
 import subprocess
 
-
 LAST_MODIFIED_UNKNOWN = 'unknown'
 
 
 def cache_subtree(cache, root, path):
-    proc = subprocess.Popen(
-        ['git', 'log', '--pretty=format:%cd', '--date=short', '--name-only', path],
-        cwd=root,
-        stdout=subprocess.PIPE)
+    proc = subprocess.Popen(['git', 'log', '--pretty=format:%cd', '--date=short', '--name-only', path],
+                            cwd=root,
+                            stdout=subprocess.PIPE)
 
     current_date_str = None
 

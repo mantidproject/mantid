@@ -4,14 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import (DataProcessorAlgorithm, mtd, AlgorithmFactory,
-                        WorkspaceProperty,
-                        PropertyMode, ITableWorkspaceProperty)
-from mantid.simpleapi import (CalculateUMatrix, PredictPeaks, FilterPeaks,
-                              DeleteWorkspace, CreatePeaksWorkspace)
-from mantid.kernel import (Direction,
-                           FloatBoundedValidator, IntBoundedValidator,
-                           StringMandatoryValidator, StringListValidator, V3D)
+from mantid.api import (DataProcessorAlgorithm, mtd, AlgorithmFactory, WorkspaceProperty, PropertyMode,
+                        ITableWorkspaceProperty)
+from mantid.simpleapi import (CalculateUMatrix, PredictPeaks, FilterPeaks, DeleteWorkspace, CreatePeaksWorkspace)
+from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator, StringMandatoryValidator,
+                           StringListValidator, V3D)
 import numpy as np
 
 
@@ -57,45 +54,34 @@ class LinkedUBs(DataProcessorAlgorithm):
 
     def PyInit(self):
         # Refinement parameters
-        self.declareProperty(
-            name="QTolerance",
-            defaultValue=0.5,
-            direction=Direction.Input,
-            validator=FloatBoundedValidator(
-                lower=0.0),
-            doc="Radius of isotropic q envelope to search within.")
-        self.declareProperty(
-            name="QDecrement",
-            defaultValue=0.95,
-            validator=FloatBoundedValidator(
-                lower=0.0,
-                upper=1.0),
-            direction=Direction.Input,
-            doc="Multiplicative factor by which to decrement q envelope\
+        self.declareProperty(name="QTolerance",
+                             defaultValue=0.5,
+                             direction=Direction.Input,
+                             validator=FloatBoundedValidator(lower=0.0),
+                             doc="Radius of isotropic q envelope to search within.")
+        self.declareProperty(name="QDecrement",
+                             defaultValue=0.95,
+                             validator=FloatBoundedValidator(lower=0.0, upper=1.0),
+                             direction=Direction.Input,
+                             doc="Multiplicative factor by which to decrement q envelope\
              on each iteration.")
-        self.declareProperty(
-            name="DTolerance",
-            defaultValue=0.01,
-            direction=Direction.Input,
-            validator=FloatBoundedValidator(
-                lower=0.0),
-            doc="Observed peak is linked if\
+        self.declareProperty(name="DTolerance",
+                             defaultValue=0.01,
+                             direction=Direction.Input,
+                             validator=FloatBoundedValidator(lower=0.0),
+                             doc="Observed peak is linked if\
              abs(dSpacing) < dPredicted + dTolerance.")
-        self.declareProperty(
-            name="NumPeaks",
-            defaultValue=15,
-            direction=Direction.Input,
-            validator=IntBoundedValidator(
-                lower=0),
-            doc="Number of peaks, ordered from highest to lowest \
+        self.declareProperty(name="NumPeaks",
+                             defaultValue=15,
+                             direction=Direction.Input,
+                             validator=IntBoundedValidator(lower=0),
+                             doc="Number of peaks, ordered from highest to lowest \
             dSpacing to consider.")
-        self.declareProperty(
-            name="PeakIncrement",
-            defaultValue=10,
-            validator=IntBoundedValidator(
-                lower=0),
-            direction=Direction.Input,
-            doc="Number of peaks to add to numPeaks on each iteration.")
+        self.declareProperty(name="PeakIncrement",
+                             defaultValue=10,
+                             validator=IntBoundedValidator(lower=0),
+                             direction=Direction.Input,
+                             doc="Number of peaks to add to numPeaks on each iteration.")
         self.declareProperty(name="Iterations",
                              defaultValue=10,
                              validator=IntBoundedValidator(lower=1),
@@ -135,20 +121,16 @@ class LinkedUBs(DataProcessorAlgorithm):
                              doc="Lattice parameter gamma.")
 
         # linked predicted peaks parameters
-        self.declareProperty(
-            name="MinWavelength",
-            defaultValue=0.8,
-            validator=FloatBoundedValidator(
-                lower=0.0),
-            direction=Direction.Input,
-            doc="Minimum wavelength for LinkedPredictedPeaks.")
-        self.declareProperty(
-            name="MaxWavelength",
-            defaultValue=9.3,
-            validator=FloatBoundedValidator(
-                lower=0.0),
-            direction=Direction.Input,
-            doc="Maximum wavelength for LinkedPredictedPeaks.")
+        self.declareProperty(name="MinWavelength",
+                             defaultValue=0.8,
+                             validator=FloatBoundedValidator(lower=0.0),
+                             direction=Direction.Input,
+                             doc="Minimum wavelength for LinkedPredictedPeaks.")
+        self.declareProperty(name="MaxWavelength",
+                             defaultValue=9.3,
+                             validator=FloatBoundedValidator(lower=0.0),
+                             direction=Direction.Input,
+                             doc="Maximum wavelength for LinkedPredictedPeaks.")
         self.declareProperty(name="MinDSpacing",
                              defaultValue=0.6,
                              validator=FloatBoundedValidator(lower=0.0),
@@ -162,64 +144,48 @@ class LinkedUBs(DataProcessorAlgorithm):
         self.declareProperty(name="ReflectionCondition",
                              defaultValue="Primitive",
                              direction=Direction.Input,
-                             validator=StringListValidator(
-                                 ["Primitive",
-                                  "C-face centred",
-                                  "A-face centred",
-                                  "B-face centred",
-                                  "Body centred",
-                                  "All-face centred",
-                                  "Rhombohedrally centred, obverse",
-                                  "Rhombohedrally centred, reverse",
-                                  "Hexagonally centred, reverse"]),
+                             validator=StringListValidator([
+                                 "Primitive", "C-face centred", "A-face centred", "B-face centred", "Body centred",
+                                 "All-face centred", "Rhombohedrally centred, obverse",
+                                 "Rhombohedrally centred, reverse", "Hexagonally centred, reverse"
+                             ]),
                              doc="Reflection condition \
                                     for LinkedPredictedPeaks.")
 
         # input workspaces
-        self.declareProperty(
-            WorkspaceProperty(
-                name="Workspace",
-                defaultValue="",
-                optional=PropertyMode.Mandatory,
-                direction=Direction.Input),
-            doc="Instrument workspace on which observed peaks are defined.")
-        self.declareProperty(
-            ITableWorkspaceProperty(
-                name="ObservedPeaks",
-                defaultValue="",
-                optional=PropertyMode.Mandatory,
-                direction=Direction.Input),
-            doc="FindPeaks table to which PredictedPeaks are compared.")
-        self.declareProperty(
-            ITableWorkspaceProperty(
-                name="PredictedPeaks",
-                defaultValue="",
-                optional=PropertyMode.Mandatory,
-                direction=Direction.Input),
-            doc="PredictedPeaks table to which ObservedPeaks are compared.")
+        self.declareProperty(WorkspaceProperty(name="Workspace",
+                                               defaultValue="",
+                                               optional=PropertyMode.Mandatory,
+                                               direction=Direction.Input),
+                             doc="Instrument workspace on which observed peaks are defined.")
+        self.declareProperty(ITableWorkspaceProperty(name="ObservedPeaks",
+                                                     defaultValue="",
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Input),
+                             doc="FindPeaks table to which PredictedPeaks are compared.")
+        self.declareProperty(ITableWorkspaceProperty(name="PredictedPeaks",
+                                                     defaultValue="",
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Input),
+                             doc="PredictedPeaks table to which ObservedPeaks are compared.")
 
         # output workspaces
-        self.declareProperty(
-            ITableWorkspaceProperty(
-                name="LinkedPeaks",
-                defaultValue="",
-                validator=StringMandatoryValidator(),
-                direction=Direction.Output),
-            doc="Linked peaks: UB matrix consistent with that of \
+        self.declareProperty(ITableWorkspaceProperty(name="LinkedPeaks",
+                                                     defaultValue="",
+                                                     validator=StringMandatoryValidator(),
+                                                     direction=Direction.Output),
+                             doc="Linked peaks: UB matrix consistent with that of \
             PredictedPeaks.")
-        self.declareProperty(
-            ITableWorkspaceProperty(
-                name="LinkedPredictedPeaks",
-                defaultValue="",
-                validator=StringMandatoryValidator(),
-                direction=Direction.Output),
-            doc="LinkedPredictedPeaks: UB matrix consistent with \
+        self.declareProperty(ITableWorkspaceProperty(name="LinkedPredictedPeaks",
+                                                     defaultValue="",
+                                                     validator=StringMandatoryValidator(),
+                                                     direction=Direction.Output),
+                             doc="LinkedPredictedPeaks: UB matrix consistent with \
             PredictedPeaks.")
-        self.declareProperty(
-            "DeleteWorkspace",
-            defaultValue=False,
-            direction=Direction.Input,
-            doc="Delete workspace after execution for memory management.")
+        self.declareProperty("DeleteWorkspace",
+                             defaultValue=False,
+                             direction=Direction.Input,
+                             doc="Delete workspace after execution for memory management.")
 
         # groupings
         self.setPropertyGroup("QTolerance", "Refinement parameters")
@@ -268,28 +234,22 @@ class LinkedUBs(DataProcessorAlgorithm):
         self._wavelength_max = self.getProperty("MaxWavelength").value
         self._min_dspacing = self.getProperty("MinDSpacing").value
         self._max_dspacing = self.getProperty("MaxDSpacing").value
-        self._reflection_condition = self.getProperty(
-            "ReflectionCondition").value
+        self._reflection_condition = self.getProperty("ReflectionCondition").value
         self._workspace = self.getProperty("Workspace").value
         self._observed_peaks = self.getProperty("ObservedPeaks").value
         self._predicted_peaks = self.getProperty("PredictedPeaks").value
         self._linked_peaks = self.getPropertyValue("LinkedPeaks")
-        self._linked_predicted_peaks = self.getPropertyValue(
-            "LinkedPredictedPeaks")
+        self._linked_predicted_peaks = self.getPropertyValue("LinkedPredictedPeaks")
         self._delete_ws = self.getProperty("DeleteWorkspace").value
 
     def PyExec(self):
         # create peaks workspace to store linked peaks
-        linked_peaks = CreatePeaksWorkspace(
-            InstrumentWorkspace=self._workspace,
-            NumberOfPeaks=0,
-            StoreInADS=False)
+        linked_peaks = CreatePeaksWorkspace(InstrumentWorkspace=self._workspace, NumberOfPeaks=0, StoreInADS=False)
 
         # create peaks table to store linked predicted peaks
-        linked_peaks_predicted = CreatePeaksWorkspace(
-            InstrumentWorkspace=self._workspace,
-            NumberOfPeaks=0,
-            StoreInADS=False)
+        linked_peaks_predicted = CreatePeaksWorkspace(InstrumentWorkspace=self._workspace,
+                                                      NumberOfPeaks=0,
+                                                      StoreInADS=False)
 
         for m in range(0, self._iterations):
             if m == 0:
@@ -336,19 +296,16 @@ class LinkedUBs(DataProcessorAlgorithm):
                     qx_pred, qy_pred, qz_pred = q_ordered[j]
                     d_pred = d_ordered[j]
 
-                    if (qx_pred - qtol_var <= qx_obs <= qx_pred
-                            + qtol_var and qy_pred - qtol_var <= qy_obs <= qy_pred
-                            + qtol_var and qz_pred - qtol_var <= qz_obs <= qz_pred
-                            + qtol_var and d_pred - self._dtol <= d_obs <= d_pred + self._dtol):
+                    if (qx_pred - qtol_var <= qx_obs <= qx_pred + qtol_var
+                            and qy_pred - qtol_var <= qy_obs <= qy_pred + qtol_var
+                            and qz_pred - qtol_var <= qz_obs <= qz_pred + qtol_var
+                            and d_pred - self._dtol <= d_obs <= d_pred + self._dtol):
                         h, k, l = HKL_ordered[j]
                         p_obs.setHKL(h, k, l)
                         linked_peaks.addPeak(p_obs)
 
             # Clean up peaks where H == K == L == 0
-            linked_peaks = FilterPeaks(linked_peaks,
-                                       FilterVariable="h^2+k^2+l^2",
-                                       Operator="!=",
-                                       FilterValue="0")
+            linked_peaks = FilterPeaks(linked_peaks, FilterVariable="h^2+k^2+l^2", Operator="!=", FilterValue="0")
 
             # force UB on linked_peaks using known lattice parameters
             CalculateUMatrix(PeaksWorkspace=linked_peaks,
@@ -361,14 +318,13 @@ class LinkedUBs(DataProcessorAlgorithm):
                              StoreInADS=False)
 
             # new linked predicted peaks
-            linked_peaks_predicted = PredictPeaks(
-                InputWorkspace=linked_peaks,
-                WavelengthMin=self._wavelength_min,
-                WavelengthMax=self._wavelength_max,
-                MinDSpacing=self._min_dspacing,
-                MaxDSpacing=self._max_dspacing,
-                ReflectionCondition=self._reflection_condition,
-                StoreInADS=False)
+            linked_peaks_predicted = PredictPeaks(InputWorkspace=linked_peaks,
+                                                  WavelengthMin=self._wavelength_min,
+                                                  WavelengthMax=self._wavelength_max,
+                                                  MinDSpacing=self._min_dspacing,
+                                                  MaxDSpacing=self._max_dspacing,
+                                                  ReflectionCondition=self._reflection_condition,
+                                                  StoreInADS=False)
 
         # clean up
         self.setProperty("LinkedPeaks", linked_peaks)

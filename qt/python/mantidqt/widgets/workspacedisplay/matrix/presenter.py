@@ -24,8 +24,17 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     NUM_SELECTED_FOR_CONFIRMATION = 10
 
-    def __init__(self, ws, plot=None, parent=None, window_flags=Qt.Window, model=None, view=None, ads_observer=None, container=None,
-                 window_width=600, window_height=400):
+    def __init__(self,
+                 ws,
+                 plot=None,
+                 parent=None,
+                 window_flags=Qt.Window,
+                 model=None,
+                 view=None,
+                 ads_observer=None,
+                 container=None,
+                 window_width=600,
+                 window_height=400):
         """
         Creates a display for the provided workspace.
 
@@ -42,7 +51,9 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         # Create model and view, or accept mocked versions
         self.model = model if model else MatrixWorkspaceDisplayModel(ws)
         self.view = view if view else MatrixWorkspaceDisplayView(self, parent, window_flags)
-        self.container = container if container else StatusBarView(parent, self.view, self.model.get_name(),
+        self.container = container if container else StatusBarView(parent,
+                                                                   self.view,
+                                                                   self.model.get_name(),
                                                                    window_width=window_width,
                                                                    window_height=window_height,
                                                                    presenter=self)
@@ -190,8 +201,11 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         plot_kwargs["axis"] = axis
 
         ws_list = [self.model._ws]
-        self.plot(ws_list, wksp_indices=[get_index(index) for index in selected], errors=plot_errors,
-                  overplot=overplot, plot_kwargs=plot_kwargs)
+        self.plot(ws_list,
+                  wksp_indices=[get_index(index) for index in selected],
+                  errors=plot_errors,
+                  overplot=overplot,
+                  plot_kwargs=plot_kwargs)
 
     def action_plot_spectrum(self, table):
         self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row())
@@ -200,12 +214,10 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(), plot_errors=True)
 
     def action_overplot_spectrum(self, table):
-        self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(),
-                             plot_errors=False, overplot=True)
+        self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(), plot_errors=False, overplot=True)
 
     def action_overplot_spectrum_with_errors(self, table):
-        self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(),
-                             plot_errors=True, overplot=True)
+        self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(), plot_errors=True, overplot=True)
 
     def action_plot_bin(self, table):
         self._do_action_plot(table, MantidAxType.BIN, lambda index: index.column())

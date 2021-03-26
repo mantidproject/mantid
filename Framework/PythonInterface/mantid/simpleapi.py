@@ -131,20 +131,18 @@ def Load(*args, **kwargs):
 
     # Create and execute
     (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
-    algm = _create_algorithm_object('Load', startProgress=_startProgress,
-                                    endProgress=_endProgress)
+    algm = _create_algorithm_object('Load', startProgress=_startProgress, endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
     _set_store_ads(algm, kwargs)
     try:
         algm.setProperty('Filename', filename)  # Must be set first
     except ValueError as ve:
-        msg = 'Problem setting "Filename" in {}-v{}: {}'.format(name, algm.name(), algm.version(),
-                                                                str(ve))
+        msg = 'Problem setting "Filename" in {}-v{}: {}'.format(name, algm.name(), algm.version(), str(ve))
         raise ValueError(msg + '\nIf the file has been found '
-                               'but you got this error, you might not have read permissions '
-                               'or the file might be corrupted.\nIf the file has not been found, '
-                               'you might have forgotten to add its location in the data search '
-                               'directories.')
+                         'but you got this error, you might not have read permissions '
+                         'or the file might be corrupted.\nIf the file has not been found, '
+                         'you might have forgotten to add its location in the data search '
+                         'directories.')
     # Remove from keywords so it is not set twice
     if 'Filename' in kwargs:
         del kwargs['Filename']
@@ -193,9 +191,7 @@ def StartLiveData(*args, **kwargs):
 
     # Create and execute
     (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
-    algm = _create_algorithm_object('StartLiveData',
-                                    startProgress=_startProgress,
-                                    endProgress=_endProgress)
+    algm = _create_algorithm_object('StartLiveData', startProgress=_startProgress, endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
     _set_store_ads(algm, kwargs)
 
@@ -211,8 +207,7 @@ def StartLiveData(*args, **kwargs):
             algm.setProperty(name, value)
 
         except ValueError as ve:
-            raise ValueError('Problem setting "{}" in {}-v{}: {}'.format(name, algm.name(),
-                                                                         algm.version(), str(ve)))
+            raise ValueError('Problem setting "{}" in {}-v{}: {}'.format(name, algm.name(), algm.version(), str(ve)))
         except KeyError:
             pass  # ignore if kwargs[name] doesn't exist
 
@@ -256,16 +251,13 @@ def fitting_algorithm(inout=False):
     with code of function 'wrapper' defined below.
     :param inout: if True, return also the InOut properties of algorithm f
     """
-
     def inner_fitting_algorithm(f):
         """
         :param f: algorithm calling Fit
         """
-
         def wrapper(*args, **kwargs):
-            function, input_workspace = _get_mandatory_args(function_name,
-                                                            ["Function", "InputWorkspace"],
-                                                            *args, **kwargs)
+            function, input_workspace = _get_mandatory_args(function_name, ["Function", "InputWorkspace"], *args,
+                                                            **kwargs)
             # Remove from keywords so it is not set twice
             if "Function" in kwargs:
                 del kwargs['Function']
@@ -405,6 +397,7 @@ def IqtFitSimultaneous(*args, **kwargs):
     """
     return None
 
+
 # --------------------------------------------------- --------------------------
 
 
@@ -412,7 +405,7 @@ def CutMD(*args, **kwargs):
     """
     Slices multidimensional workspaces using input projection information and binning limits.
     """
-    (in_wss,) = _get_mandatory_args('CutMD', ["InputWorkspace"], *args, **kwargs)
+    (in_wss, ) = _get_mandatory_args('CutMD', ["InputWorkspace"], *args, **kwargs)
 
     # If the input isn't a list, wrap it in one so we can iterate easily
     if isinstance(in_wss, list):
@@ -463,8 +456,7 @@ def CutMD(*args, **kwargs):
 
     # Create and execute
     (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
-    algm = _create_algorithm_object('CutMD', startProgress=_startProgress,
-                                    endProgress=_endProgress)
+    algm = _create_algorithm_object('CutMD', startProgress=_startProgress, endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
     _set_store_ads(algm, kwargs)
 
@@ -520,11 +512,10 @@ def CutMD(*args, **kwargs):
 
 # enddef
 
-
 _replace_signature(CutMD, ("\bInputWorkspace", "**kwargs"))
 
-
 # --------------------- RenameWorkspace ------------- --------------------------
+
 
 def RenameWorkspace(*args, **kwargs):
     """ Rename workspace with option to renaming monitors
@@ -551,8 +542,7 @@ def RenameWorkspace(*args, **kwargs):
 
     # Create and execute
     (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
-    algm = _create_algorithm_object('RenameWorkspace', startProgress=_startProgress,
-                                    endProgress=_endProgress)
+    algm = _create_algorithm_object('RenameWorkspace', startProgress=_startProgress, endProgress=_endProgress)
     _set_logging_option(algm, arguments)
     algm.setAlwaysStoreInADS(True)
     # does not make sense otherwise, this overwrites even the __STORE_ADS_DEFAULT__
@@ -569,9 +559,7 @@ def RenameWorkspace(*args, **kwargs):
 
 # enddef
 
-
 _replace_signature(RenameWorkspace, ("\bInputWorkspace,[OutputWorkspace],[True||False]", "**kwargs"))
-
 
 # --------------------------------------------------- --------------------------
 
@@ -654,7 +642,6 @@ def _get_mandatory_args(func_name, required_args, *args, **kwargs):
     :type dict.
     :returns: A tuple of provided mandatory arguments
     """
-
     def get_argument_value(key, dict_containing_key):
         try:
             val = dict_containing_key[key]
@@ -680,8 +667,8 @@ def _get_mandatory_args(func_name, required_args, *args, **kwargs):
             mandatory_args.append(get_argument_value(arg, kwargs))
     else:
         reqd_as_str = ','.join(required_args).strip(",")
-        raise RuntimeError('%s() takes "%s" as positional arguments. Other arguments must be specified by keyword.'
-                           % (func_name, reqd_as_str))
+        raise RuntimeError('%s() takes "%s" as positional arguments. Other arguments must be specified by keyword.' %
+                           (func_name, reqd_as_str))
     return tuple(mandatory_args)
 
 
@@ -854,8 +841,8 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
                     value_str = prop.valueAsStr
                     retvals[name] = _api.AnalysisDataService[value_str]
                 except KeyError:
-                    if not (hasattr(prop,
-                                    'isOptional') and prop.isOptional()) and prop.direction == _kernel.Direction.InOut:
+                    if not (hasattr(prop, 'isOptional')
+                            and prop.isOptional()) and prop.direction == _kernel.Direction.InOut:
                         raise RuntimeError("Mandatory InOut workspace property '%s' on "
                                            "algorithm '%s' has not been set correctly. " % (name, algm_obj.name()))
         elif _is_function_property(prop):
@@ -880,8 +867,8 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
         # There is a discrepancy in the number are unpacking variables
         # Let's not have the more cryptic unpacking error raised
         raise RuntimeError("%s is trying to return %d output(s) but you have provided %d variable(s). "
-                           "These numbers must match." % (func_name,
-                                                          number_of_returned_values, number_of_values_on_lhs))
+                           "These numbers must match." %
+                           (func_name, number_of_returned_values, number_of_values_on_lhs))
     if number_of_returned_values > 0:
         ret_type = namedtuple(func_name + "_returns", retvals.keys())
         ret_value = ret_type(**retvals)
@@ -926,7 +913,6 @@ def set_properties(alg_object, *args, **kwargs):
         :param args: Positional arguments
         :param kwargs: Keyword arguments
     """
-
     def do_set_property(name, new_value):
         if new_value is None:
             return
@@ -936,8 +922,7 @@ def set_properties(alg_object, *args, **kwargs):
             else:
                 alg_object.setProperty(key, new_value)
         except (RuntimeError, TypeError, ValueError) as e:
-            msg = 'Problem setting "{}" in {}-v{}: {}'.format(name, alg_object.name(), alg_object.version(),
-                                                              str(e))
+            msg = 'Problem setting "{}" in {}-v{}: {}'.format(name, alg_object.name(), alg_object.version(), str(e))
             raise e.__class__(msg) from e
 
     # end
@@ -972,7 +957,6 @@ def _create_algorithm_function(name, version, algm_object):
         :param version: The version of the algorithm
         :param algm_object: the created algorithm object.
     """
-
     def algorithm_wrapper():
         """
         Creates a wrapper object around the algorithm functions.
@@ -1028,8 +1012,8 @@ def _create_algorithm_function(name, version, algm_object):
                             suggest = 'LoadOnly'
                             if algm.name() == 'LoadEventNexus':
                                 suggest = 'MonitorsLoadOnly'
-                            msg = 'Deprecated property "{}" in {}. Use "{}" instead'.format(propname,
-                                                                                            algm.name(), suggest)
+                            msg = 'Deprecated property "{}" in {}. Use "{}" instead'.format(
+                                propname, algm.name(), suggest)
                             raise ValueError(msg)
 
                 frame = kwargs.pop("__LHS_FRAME_OBJECT__", None)
@@ -1049,6 +1033,7 @@ def _create_algorithm_function(name, version, algm_object):
                         raise RuntimeError(msg) from e
 
                 return _gather_returns(name, lhs, algm)
+
         # Set the signature of the callable to be one that is only generated on request.
         Wrapper.__call__.__signature__ = LazyFunctionSignature(alg_name=name)
         return Wrapper()
@@ -1128,6 +1113,7 @@ def _find_parent_pythonalgorithm(frame):
         return get_self(frame)
     else:
         return None
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -1222,8 +1208,8 @@ def _translate():
                 raise RuntimeError("simpleapi: Trying to attach '%s' as method to point to '%s' algorithm but "
                                    "it has already been attached to point to the '%s' algorithm.\n"
                                    "Does one inherit from the other? "
-                                   "Please check and update one of the algorithms accordingly."
-                                   % (method_name, algm_object.name(), other_alg))
+                                   "Please check and update one of the algorithms accordingly." %
+                                   (method_name, algm_object.name(), other_alg))
             _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object)
             new_methods[method_name] = algm_object.name()
         new_func_attrs.append(name)
@@ -1246,8 +1232,8 @@ def _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object
     if input_prop == "":
         raise RuntimeError("simpleapi: '%s' has requested to be attached as a workspace method but "
                            "Algorithm::workspaceMethodInputProperty() has returned an empty string."
-                           "This method is required to map the calling object to the correct property."
-                           % algm_object.name())
+                           "This method is required to map the calling object to the correct property." %
+                           algm_object.name())
     _api._workspaceops.attach_func_as_method(method_name, algorithm_wrapper, input_prop, algm_object.name(),
                                              algm_object.workspaceMethodOn())
 

@@ -46,11 +46,14 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
         return issues
 
     def PyInit(self):
-        self.declareProperty(MultipleFileProperty('FileList',extensions=['nxs','hdf']),doc='List of input files')
-        self.declareProperty(name='NexusCriteria',defaultValue='',
+        self.declareProperty(MultipleFileProperty('FileList', extensions=['nxs', 'hdf']), doc='List of input files')
+        self.declareProperty(name='NexusCriteria',
+                             defaultValue='',
                              doc='Logical expresion for metadata criteria using python syntax. '
-                                 'Provide full absolute names for nexus entries enclosed with $ symbol from both sides.')
-        self.declareProperty(name='Result', defaultValue='', direction=Direction.Output,
+                             'Provide full absolute names for nexus entries enclosed with $ symbol from both sides.')
+        self.declareProperty(name='Result',
+                             defaultValue='',
+                             direction=Direction.Output,
                              doc='Comma separated list of the fully resolved file names satisfying the given criteria.')
 
     def PyExec(self):
@@ -84,7 +87,7 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
         else:
             self.log().notice('No files where found to satisfy the criteria, check the FileList and/or NexusCriteria')
 
-        self.setPropertyValue('Result',outputfiles)
+        self.setPropertyValue('Result', outputfiles)
 
     def checkCriteria(self, run, nexusfile):
         toeval = ''

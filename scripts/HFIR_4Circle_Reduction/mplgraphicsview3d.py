@@ -18,7 +18,6 @@ class MplPlot3dCanvas(FigureCanvas):
     """
     Matplotlib 3D canvas class
     """
-
     def __init__(self, parent=None):
         """
         Initialization
@@ -148,8 +147,7 @@ class MplPlot3dCanvas(FigureCanvas):
 
         #
         # plot scatters
-        plt = self._myAxes.scatter(points[:, 0], points[:, 1],  points[:, 2],
-                                   zdir='z', c=color_list)
+        plt = self._myAxes.scatter(points[:, 0], points[:, 1], points[:, 2], zdir='z', c=color_list)
         self._currPlotList.append(plt)
 
         self.draw()
@@ -191,9 +189,9 @@ class MplPlot3dCanvas(FigureCanvas):
             print(z_min, z_max)
 
             # use default setup
-            self._myAxes.set_xlim(x_min-d_x, x_max+d_x)
-            self._myAxes.set_ylim(y_min-d_y, y_max+d_y)
-            self._myAxes.set_zlim(z_min-d_z, z_max+d_z)
+            self._myAxes.set_xlim(x_min - d_x, x_max + d_x)
+            self._myAxes.set_ylim(y_min - d_y, y_max + d_y)
+            self._myAxes.set_zlim(z_min - d_z, z_max + d_z)
         # END-IF
 
         # color map for intensity
@@ -210,7 +208,7 @@ class MplPlot3dCanvas(FigureCanvas):
             max_intensity = max(intensities)
             diff = max_intensity - min_intensity
             b_list = intensities - min_intensity
-            b_list = b_list/diff
+            b_list = b_list / diff
 
             num_points = len(points[:, 2])
             for index in range(num_points):
@@ -220,7 +218,7 @@ class MplPlot3dCanvas(FigureCanvas):
             color_list.append((color_r, color_g, 0.5))
 
         # plot scatters
-        self._myAxes.scatter(points[:, 0], points[:, 1],  points[:, 2], zdir='z', c=color_list)
+        self._myAxes.scatter(points[:, 0], points[:, 1], points[:, 2], zdir='z', c=color_list)
 
         self.draw()
 
@@ -231,9 +229,14 @@ class MplPlot3dCanvas(FigureCanvas):
         """
         print('Number of surf = ', len(self._currSurfaceList))
         for surf in self._currSurfaceList:
-            plt = self._myAxes.plot_surface(surf["xx"], surf["yy"], surf["val"],
-                                            rstride=5, cstride=5,  # color map??? cmap=cm.jet,
-                                            linewidth=1, antialiased=True)
+            plt = self._myAxes.plot_surface(
+                surf["xx"],
+                surf["yy"],
+                surf["val"],
+                rstride=5,
+                cstride=5,  # color map??? cmap=cm.jet,
+                linewidth=1,
+                antialiased=True)
             self._currPlotList.append(plt)
         # END-FOR
 
@@ -281,7 +284,7 @@ class MplPlot3dCanvas(FigureCanvas):
         :param title:
         :return:
         """
-        self._myFigure.suptitle(title,  fontsize=font_size)
+        self._myFigure.suptitle(title, fontsize=font_size)
 
         return
 
@@ -334,8 +337,8 @@ def get_auto_xyz_limit(points):
     print(z_min, z_max)
 
     # use default setup
-    x_lim = (x_min-d_x, x_max+d_x)
-    y_lim = (y_min-d_y, y_max+d_y)
-    z_lim = (z_min-d_z, z_max+d_z)
+    x_lim = (x_min - d_x, x_max + d_x)
+    y_lim = (y_min - d_y, y_max + d_y)
+    z_lim = (z_min - d_z, z_max + d_z)
 
     return x_lim, y_lim, z_lim

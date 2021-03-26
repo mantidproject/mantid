@@ -14,9 +14,8 @@ from typing import List, Optional, Union
 # imports from Mantid
 from mantid.api import AnalysisDataService, mtd, WorkspaceGroup
 from mantid.dataobjects import TableWorkspace, Workspace2D
-from mantid.simpleapi import (ApplyCalibration, CloneWorkspace, CreateEmptyTableWorkspace,
-                              Integration, LoadEventNexus, LoadNexusProcessed, RenameWorkspace,
-                              UnGroupWorkspace)
+from mantid.simpleapi import (ApplyCalibration, CloneWorkspace, CreateEmptyTableWorkspace, Integration, LoadEventNexus,
+                              LoadNexusProcessed, RenameWorkspace, UnGroupWorkspace)
 try:
     from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
     from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
@@ -29,8 +28,7 @@ from Calibration.tube_calib_fit_params import TubeCalibFitParams
 __all__ = ['apply_calibration', 'preprocess_banks', 'load_banks', 'calibrate_tube']
 
 # Type aliases
-InputTable = Union[
-    str, TableWorkspace]  # allowed types for the input calibration table to append_bank_number
+InputTable = Union[str, TableWorkspace]  # allowed types for the input calibration table to append_bank_number
 WorkspaceTypes = Union[str, Workspace2D]  # allowed types for the input workspace to calibrate_bank
 WorkspaceGroupTypes = Union[str, WorkspaceGroup]
 
@@ -155,8 +153,11 @@ def load_banks(run: Union[int, str], bank_selection: str, output_workspace: str)
 
     bank_names = ','.join(['bank' + b for b in bank_numbers(bank_selection)])
     try:
-        LoadEventNexus(Filename=file_descriptor, OutputWorkspace=output_workspace,
-                       BankName=bank_names, LoadMonitors=False, LoadLogs=True)
+        LoadEventNexus(Filename=file_descriptor,
+                       OutputWorkspace=output_workspace,
+                       BankName=bank_names,
+                       LoadMonitors=False,
+                       LoadLogs=True)
     except (RuntimeError, ValueError):
         LoadNexusProcessed(Filename=file_descriptor, OutputWorkspace=output_workspace)
     Integration(InputWorkspace=output_workspace, OutputWorkspace=output_workspace)
@@ -272,13 +273,17 @@ def calibrate_tube(workspace: WorkspaceTypes,
     # - wires cast a shadow on a perfectly calibrated tube
     fit_extent = (fit_domain / PIXELS_PER_TUBE) * TUBE_LENGTH  # fit domain in meters
     assert fit_extent < WIRE_GAP, 'The fit domain cannot be larger than the distance between consecutive wires'
-    wire_pixel_positions = wire_positions(units='pixels')[1: -1]
+    wire_pixel_positions = wire_positions(units='pixels')[1:-1]
     fit_par = TubeCalibFitParams(wire_pixel_positions, height=peak_height, width=peak_width, margin=fit_domain)
     fit_par.setAutomatic(True)
     # Generate the calibration table, the peak table, and the parameters table
     peaks_form = [1] * len(wire_pixel_positions)  # signals we'll be fitting dips (peaks with negative heights)
-    calibration_table, _ = tube.calibrate(workspace, tube_name, wire_positions(units='meters')[1: -1], peaks_form,
-                                          fitPar=fit_par, outputPeak=True,
+    calibration_table, _ = tube.calibrate(workspace,
+                                          tube_name,
+                                          wire_positions(units='meters')[1:-1],
+                                          peaks_form,
+                                          fitPar=fit_par,
+                                          outputPeak=True,
                                           parameters_table_group='ParametersTableGroup')
     calibration_table = trim_calibration_table(calibration_table)  # discard X and Z coordinates
 
@@ -294,8 +299,10 @@ def calibrate_tube(workspace: WorkspaceTypes,
     return calibration_table
 
 
-def apply_calibration(workspace: WorkspaceTypes, calibration_table: InputTable,
-                      output_workspace: Optional[str] = None, show_instrument: bool = False) -> Workspace2D:
+def apply_calibration(workspace: WorkspaceTypes,
+                      calibration_table: InputTable,
+                      output_workspace: Optional[str] = None,
+                      show_instrument: bool = False) -> Workspace2D:
     r"""
     Calibrate the detector positions with an input table, and open the instrument view if so requested.
 

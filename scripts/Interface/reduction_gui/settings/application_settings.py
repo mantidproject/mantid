@@ -44,7 +44,7 @@ class GeneralSettings(QObject):
 
     # Mantid Python API version
     api2 = True
-    data_updated = Signal('PyQt_PyObject','PyQt_PyObject')
+    data_updated = Signal('PyQt_PyObject', 'PyQt_PyObject')
     progress = Signal(int)
 
     def __init__(self, settings=None):
@@ -77,7 +77,7 @@ class GeneralSettings(QObject):
 
     @property
     def debug(self):
-        self._debug = unicode(self._settings.value("debug_mode", 'false')).lower()=='true'
+        self._debug = unicode(self._settings.value("debug_mode", 'false')).lower() == 'true'
         return self._debug
 
     @debug.setter
@@ -88,7 +88,7 @@ class GeneralSettings(QObject):
 
     @property
     def advanced(self):
-        self._advanced = unicode(self._settings.value("advanced_mode", 'true')).lower()=='true'
+        self._advanced = unicode(self._settings.value("advanced_mode", 'true')).lower() == 'true'
         return self._advanced
 
     @advanced.setter
@@ -128,7 +128,7 @@ class GeneralSettings(QObject):
 
     @property
     def data_output_dir(self):
-        self._data_output_dir = unicode(self._settings.value("data_output_dir", 'true')).lower()=='true'
+        self._data_output_dir = unicode(self._settings.value("data_output_dir", 'true')).lower() == 'true'
         return self._data_output_dir
 
     @data_output_dir.setter
@@ -139,7 +139,7 @@ class GeneralSettings(QObject):
 
     @property
     def catalog_data_path(self):
-        self._catalog_data_path = unicode(self._settings.value("catalog_data_path", self.data_path ))
+        self._catalog_data_path = unicode(self._settings.value("catalog_data_path", self.data_path))
         return self._catalog_data_path
 
     @catalog_data_path.setter

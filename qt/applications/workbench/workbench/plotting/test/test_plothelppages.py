@@ -8,6 +8,7 @@
 import unittest
 from unittest.mock import patch
 from matplotlib import use as mpl_use
+
 mpl_use('Agg')  # noqa
 import numpy as np
 from workbench.plotting.plothelppages import *
@@ -15,12 +16,11 @@ from matplotlib.pyplot import figure
 
 
 class PlotHelpPagesTest(unittest.TestCase):
-
     @staticmethod
     # Generate some data
     def generate_XYZ_data():
         def fun(x, y):
-            return x ** 2 + y
+            return x**2 + y
 
         x = y = np.arange(-3.0, 3.0, 0.05)
         X, Y = np.meshgrid(x, y)

@@ -434,8 +434,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         for peak_id, prefix in self.peak_ids.items():
             if prefix == fun:
-                self.tool.update_peak(peak_id, self.getPeakCentreOf(prefix),
-                                      self.getPeakHeightOf(prefix), self.getPeakFwhmOf(prefix))
+                self.tool.update_peak(peak_id, self.getPeakCentreOf(prefix), self.getPeakHeightOf(prefix),
+                                      self.getPeakFwhmOf(prefix))
         self.plot_interaction_manager.update_guess()
 
     @Slot(str)
@@ -455,8 +455,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         peaks_to_add = []
         peaks = {v: k for k, v in self.peak_ids.items()}
         for prefix in self.getPeakPrefixes():
-            c, h, w = self.getPeakCentreOf(prefix), self.getPeakHeightOf(
-                prefix), self.getPeakFwhmOf(prefix)
+            c, h, w = self.getPeakCentreOf(prefix), self.getPeakHeightOf(prefix), self.getPeakFwhmOf(prefix)
             if w > (self.endX() - self.startX()):
                 w = (self.endX() - self.startX()) / 20.
                 self.setPeakFwhmOf(prefix, w)
@@ -480,8 +479,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                     need_update_markers = True
                     break
         if need_update_markers:
-            peak_ids, peak_updates = self.tool.update_peak_markers(self.peak_ids.keys(),
-                                                                   peaks_to_add)
+            peak_ids, peak_updates = self.tool.update_peak_markers(self.peak_ids.keys(), peaks_to_add)
             self.peak_ids.update(peak_ids)
             for prefix, c, h, w in peak_updates:
                 self.setPeakCentreOf(prefix, c)

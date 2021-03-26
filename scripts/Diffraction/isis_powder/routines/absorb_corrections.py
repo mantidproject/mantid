@@ -61,9 +61,10 @@ def run_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_d
     if multiple_scattering and not is_vanadium:
         raise NotImplementedError("Multiple scattering absorption corrections are not yet implemented for "
                                   "anisotropic samples")
-    ws_to_correct = _calculate__cylinder_absorb_corrections(
-        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering,
-        sample_details_obj=sample_details_obj, is_vanadium=is_vanadium)
+    ws_to_correct = _calculate__cylinder_absorb_corrections(ws_to_correct=ws_to_correct,
+                                                            multiple_scattering=multiple_scattering,
+                                                            sample_details_obj=sample_details_obj,
+                                                            is_vanadium=is_vanadium)
     return ws_to_correct
 
 
@@ -80,8 +81,7 @@ def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering, 
     :param is_vanadium: Whether the sample is a vanadium
     :return: The workspace with corrections applied
     """
-    _setup_sample_for_cylinder_absorb_corrections(ws_to_correct=ws_to_correct,
-                                                  sample_details_obj=sample_details_obj)
+    _setup_sample_for_cylinder_absorb_corrections(ws_to_correct=ws_to_correct, sample_details_obj=sample_details_obj)
     ws_to_correct = _do_cylinder_absorb_corrections(ws_to_correct=ws_to_correct,
                                                     multiple_scattering=multiple_scattering,
                                                     is_vanadium=is_vanadium)
@@ -107,8 +107,7 @@ def _do_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, is_vanad
                                                       MultipleScattering=multiple_scattering)
     else:
         # Ensure we never do multiple scattering if the sample is not isotropic (e.g. not a Vanadium)
-        ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct,
-                                                      MultipleScattering=False)
+        ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct, MultipleScattering=False)
     if previous_units != ws_units.tof:
         ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=previous_units)
     return ws_to_correct

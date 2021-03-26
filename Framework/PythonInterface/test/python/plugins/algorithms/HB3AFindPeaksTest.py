@@ -40,9 +40,7 @@ class HB3AFindPeaksTest(unittest.TestCase):
                                FlipX=True,
                                InnerGoniometer=True)
 
-        peaks = HB3AFindPeaks(InputWorkspace=mtd[self._data_ws],
-                              CellType="Orthorhombic",
-                              Centering="F")
+        peaks = HB3AFindPeaks(InputWorkspace=mtd[self._data_ws], CellType="Orthorhombic", Centering="F")
 
         # Verify that the algorithm found a UB matrix
         for i in range(peaks.size()):
@@ -79,8 +77,7 @@ class HB3AFindPeaksTest(unittest.TestCase):
         if self._data_ws is not None:
             mtd.clear()
 
-        norm = HB3AAdjustSampleNorm(Filename=self._files[0],
-                                    VanadiumFile="HB3A_exp0722_scan0220.nxs")
+        norm = HB3AAdjustSampleNorm(Filename=self._files[0], VanadiumFile="HB3A_exp0722_scan0220.nxs")
         peaks = HB3AFindPeaks(InputWorkspace=norm,
                               CellType="Orthorhombic",
                               Centering="F",

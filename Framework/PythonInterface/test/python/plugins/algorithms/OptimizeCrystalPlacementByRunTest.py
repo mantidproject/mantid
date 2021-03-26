@@ -11,10 +11,10 @@ from mantid.api import mtd
 
 class OptimizeCrystalPlacementByRunTest(unittest.TestCase):
     def test_simple(self):
-        ws=LoadIsawPeaks("calibrated.peaks")
-        FindUBUsingFFT(PeaksWorkspace=ws,MinD=2,MaxD=20,Tolerance=0.12)
-        IndexPeaks(PeaksWorkspace='ws',Tolerance=0.12)
-        wsd = OptimizeCrystalPlacementByRun(InputWorkspace=ws,OutputWorkspace='wsd',Tolerance=0.12)
+        ws = LoadIsawPeaks("calibrated.peaks")
+        FindUBUsingFFT(PeaksWorkspace=ws, MinD=2, MaxD=20, Tolerance=0.12)
+        IndexPeaks(PeaksWorkspace='ws', Tolerance=0.12)
+        wsd = OptimizeCrystalPlacementByRun(InputWorkspace=ws, OutputWorkspace='wsd', Tolerance=0.12)
         result = mtd['wsd'].getPeak(0).getSamplePos()
         self.assertAlmostEqual(result.getX(), -0.000678629)
         self.assertAlmostEqual(result.getY(), -2.16033e-05)
@@ -25,6 +25,5 @@ class OptimizeCrystalPlacementByRunTest(unittest.TestCase):
         self.assertAlmostEqual(result.getZ(), 0.00497094)
 
 
-
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()

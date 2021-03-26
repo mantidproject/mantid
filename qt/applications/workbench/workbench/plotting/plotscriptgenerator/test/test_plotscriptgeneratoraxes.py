@@ -9,16 +9,15 @@
 import unittest
 
 import matplotlib as mpl
+
 mpl.use('Agg')  # noqa
 import matplotlib.pyplot as plt
 
 from unittest.mock import Mock
-from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
-                                                         generate_axis_label_commands)
+from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands, generate_axis_label_commands)
 
 
 class PlotGeneratorAxisTest(unittest.TestCase):
-
     def test_generate_axis_label_commands_only_returns_commands_for_labels_that_are_set(self):
         mock_ax = Mock(get_xlabel=lambda: '', get_ylabel=lambda: 'y')
         expected = ["set_ylabel('y')"]
@@ -68,8 +67,7 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         ax.plot([-10, 10], [1, 2])
         ax.set_xlim([-5, 5])
         ax.set_ylim([0, 4])
-        self.assertEqual(['set_xlim([-5.0, 5.0])', 'set_ylim([0.0, 4.0])'],
-                         generate_axis_limit_commands(ax))
+        self.assertEqual(['set_xlim([-5.0, 5.0])', 'set_ylim([0.0, 4.0])'], generate_axis_limit_commands(ax))
         plt.close()
         del fig
 

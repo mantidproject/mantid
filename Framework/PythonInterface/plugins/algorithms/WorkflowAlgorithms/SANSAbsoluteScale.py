@@ -28,34 +28,31 @@ class SANSAbsoluteScale(PythonAlgorithm):
         return "Calculate and apply absolute scale correction for SANS data"
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
-                                                     direction=Direction.Input))
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
-                                                     direction = Direction.Output))
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input))
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
 
-        methods = [ "Value", "ReferenceData"]
-        self.declareProperty("Method", "Value",
-                             StringListValidator(methods),
+        methods = ["Value", "ReferenceData"]
+        self.declareProperty("Method", "Value", StringListValidator(methods),
                              "Scaling method - either a simple scaling by value or using a reference data set")
 
         self.declareProperty("ScalingFactor", 1.0, "Scaling factor to use with the Value method")
 
-        self.declareProperty(FileProperty("ReferenceDataFilename", "",
-                                          action=FileAction.OptionalLoad,
-                                          extensions=['xml', 'nxs', 'nxs.h5']),
-                             "Reference data file to compute the scaling factor")
+        self.declareProperty(
+            FileProperty("ReferenceDataFilename",
+                         "",
+                         action=FileAction.OptionalLoad,
+                         extensions=['xml', 'nxs', 'nxs.h5']), "Reference data file to compute the scaling factor")
         self.declareProperty("BeamstopDiameter", 0.0, "Diameter of the beam on the detector, in mm")
-        self.declareProperty("AttenuatorTransmission", 1.0,
-                             "Attenuator transmission used in the measurement")
+        self.declareProperty("AttenuatorTransmission", 1.0, "Attenuator transmission used in the measurement")
         self.declareProperty("ApplySensitivity", False,
                              "If True, the sensitivity correction will be applied to the reference data set")
 
-        self.declareProperty("ReductionProperties", "__sans_reduction_properties",
+        self.declareProperty("ReductionProperties",
+                             "__sans_reduction_properties",
                              validator=StringMandatoryValidator(),
                              doc="Property manager name for the reduction")
 
-        self.declareProperty("OutputMessage", "",
-                             direction=Direction.Output, doc = "Output message")
+        self.declareProperty("OutputMessage", "", direction=Direction.Output, doc="Output message")
 
     def PyExec(self):
         property_manager_name = self.getProperty("ReductionProperties").value
@@ -67,7 +64,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
             self.instrument = property_manager.getProperty("InstrumentName").value
 
         method = self.getPropertyValue("Method")
-        if method=="Value":
+        if method == "Value":
             input_ws = self.getProperty("InputWorkspace").value
             output_ws_name = self.getPropertyValue("OutputWorkspace")
             scaling_factor = self.getProperty("ScalingFactor").value
@@ -111,8 +108,8 @@ class SANSAbsoluteScale(PythonAlgorithm):
             if not property_manager.existsProperty("LoadAlgorithm"):
                 Logger("SANSDirectBeamTransmission").error("SANS reduction not set up properly: missing load algorithm")
                 raise RuntimeError("SANS reduction not set up properly: missing load algorithm")
-            p=property_manager.getProperty("LoadAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
+            p = property_manager.getProperty("LoadAlgorithm")
+            alg = Algorithm.fromString(p.valueAsStr)
             alg.setChild(True)
             alg.setProperty("Filename", filename)
             alg.setProperty("OutputWorkspace", output_ws)
@@ -126,14 +123,14 @@ class SANSAbsoluteScale(PythonAlgorithm):
             return ws, msg
 
         ref_ws, msg = _load_data(filepath, ref_ws_name)
-        output_msg += msg+'\n'
+        output_msg += msg + '\n'
 
         # Get monitor value:
         # This call is left unprotected because it should fail if that property
         # doesn't exist. It's the responsibility of the parent algorithm to
         # catch that error.
         monitor_prop = property_manager.getProperty("NormaliseAlgorithm")
-        alg=Algorithm.fromString(monitor_prop.valueAsStr)
+        alg = Algorithm.fromString(monitor_prop.valueAsStr)
         monitor_id = alg.getPropertyValue("NormalisationType").lower()
 
         monitor_value = ref_ws.getRun().getProperty(monitor_id.lower()).value
@@ -157,8 +154,8 @@ class SANSAbsoluteScale(PythonAlgorithm):
         # Apply sensitivity correction
         apply_sensitivity = self.getProperty("ApplySensitivity").value
         if apply_sensitivity and property_manager.existsProperty("SensitivityAlgorithm"):
-            p=property_manager.getProperty("SensitivityAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
+            p = property_manager.getProperty("SensitivityAlgorithm")
+            alg = Algorithm.fromString(p.valueAsStr)
             alg.setChild(True)
             alg.setProperty("InputWorkspace", ref_ws)
             alg.setProperty("OutputWorkspace", ref_ws)
@@ -166,7 +163,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
                 alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
             if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value+'\n'
+                output_msg += alg.getProperty("OutputMessage").value + '\n'
 
         # Get the reference count
         Logger("SANSAbsoluteScale").information("Using beamstop diameter: %g" % beam_diameter)
@@ -210,7 +207,8 @@ class SANSAbsoluteScale(PythonAlgorithm):
 
         attenuator_trans = self.getProperty("AttenuatorTransmission").value
         # (detector count rate)/(attenuator transmission)/(monitor rate)*(pixel size/SDD)**2
-        scaling_factor = 1.0/(det_count/attenuator_trans/(monitor_value)*(pixel_size/sdd)*(pixel_size/sdd))
+        scaling_factor = 1.0 / (det_count / attenuator_trans / (monitor_value) * (pixel_size / sdd) *
+                                (pixel_size / sdd))
 
         # Apply the scaling factor
         alg = AlgorithmManager.create("Scale")
@@ -222,9 +220,9 @@ class SANSAbsoluteScale(PythonAlgorithm):
         alg.setPropertyValue("Operation", "Multiply")
         alg.execute()
         output_ws = alg.getProperty("OutputWorkspace").value
-        Logger("SANSAbsoluteScale").notice( "Applied scaling factor %15.15f" % scaling_factor)
+        Logger("SANSAbsoluteScale").notice("Applied scaling factor %15.15f" % scaling_factor)
 
-        output_msg = output_msg.replace('\n','\n   |')
+        output_msg = output_msg.replace('\n', '\n   |')
         output_msg = "Applied scaling factor %g\n%s" % (scaling_factor, output_msg)
 
         self.setProperty("OutputWorkspace", output_ws)

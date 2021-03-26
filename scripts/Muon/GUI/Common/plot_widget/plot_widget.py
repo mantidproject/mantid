@@ -19,11 +19,8 @@ class PlotWidget(object):
         self.view.add_canvas_widget(self.plotting_canvas_widget.widget)
         self.model = PlotWidgetModel(context)
         # generate the presenter
-        self.presenter = PlotWidgetPresenterCommon(self.view,
-                                                   self.model,
-                                                   context,
-                                                   self.plotting_canvas_widget.presenter,
-                                                   get_selected_fit_workspaces)
+        self.presenter = PlotWidgetPresenterCommon(self.view, self.model, context,
+                                                   self.plotting_canvas_widget.presenter, get_selected_fit_workspaces)
 
         context.update_plots_notifier.add_subscriber(self.presenter.workspace_replaced_in_ads_observer)
         context.deleted_plots_notifier.add_subscriber(self.presenter.workspace_deleted_from_ads_observer)

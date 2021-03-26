@@ -14,7 +14,6 @@ from mantid.kernel import *
 
 
 class LRReflectivityOutput(PythonAlgorithm):
-
     def category(self):
         return "Reflectometry\\SNS"
 
@@ -31,8 +30,10 @@ class LRReflectivityOutput(PythonAlgorithm):
         self.declareProperty(StringArrayProperty("ReducedWorkspaces", [], direction=Direction.Input),
                              "List of workspace names of reduced reflectivity parts to be put together")
         self.declareProperty("SpecularCutoff", 0.01, "Q-value under which we should below the specular ridge")
-        self.declareProperty("ScaleToUnity", True, "If true, the reflectivity under the Q given cutoff will be scaled to 1")
-        self.declareProperty("ScalingWavelengthCutoff", 10.0, "Wavelength above which the scaling factors are assumed to be one")
+        self.declareProperty("ScaleToUnity", True,
+                             "If true, the reflectivity under the Q given cutoff will be scaled to 1")
+        self.declareProperty("ScalingWavelengthCutoff", 10.0,
+                             "Wavelength above which the scaling factors are assumed to be one")
         self.declareProperty(FloatArrayProperty("OutputBinning", [0.005, -0.01, 1.0], direction=Direction.Input))
         self.declareProperty("DQConstant", 0.0004, "Constant factor for the resolution dQ = dQ0 + Q dQ/Q")
         self.declareProperty("DQSlope", 0.025, "Slope for the resolution dQ = dQ0 + Q dQ/Q")
@@ -79,7 +80,7 @@ class LRReflectivityOutput(PythonAlgorithm):
         return normalization_available
 
     #pylint: disable=too-many-locals,too-many-branches
-    def average_points_for_single_q(self, scaled_ws_list): # noqa
+    def average_points_for_single_q(self, scaled_ws_list):  # noqa
         """
             Take the point with the smalled error when multiple points are
             at the same q-value.
@@ -90,22 +91,22 @@ class LRReflectivityOutput(PythonAlgorithm):
         """
         # Get binning parameters
         binning_parameters = self.getProperty("OutputBinning").value
-        header_list = ("DataRun", "NormRun", "TwoTheta(deg)", "LambdaMin(A)",
-                       "LambdaMax(A)", "Qmin(1/A)", "Qmax(1/A)", "SF_A", "SF_B", "PrimaryFrac")
+        header_list = ("DataRun", "NormRun", "TwoTheta(deg)", "LambdaMin(A)", "LambdaMax(A)", "Qmin(1/A)", "Qmax(1/A)",
+                       "SF_A", "SF_B", "PrimaryFrac")
         header_info = "# %-9s %-9s %-14s %-14s %-12s %-12s %-12s %-12s %-12s %-12s\n" % header_list
         # Convert each histo to histograms and rebin to final binning
         for ws in scaled_ws_list:
             new_name = "%s_histo" % ws
             # ConvertToHistogram(InputWorkspace=ws, OutputWorkspace=new_name)
             mtd[ws].setDistribution(True)
-            Rebin(InputWorkspace=ws, Params=binning_parameters,
-                  OutputWorkspace=new_name)
+            Rebin(InputWorkspace=ws, Params=binning_parameters, OutputWorkspace=new_name)
 
             # Gather info for meta data header
             def _get_value(name, default=None):
                 if mtd[new_name].getRun().hasProperty(name):
                     return mtd[new_name].getRun().getProperty(name).value
                 return default
+
             data_run = mtd[new_name].getRun().getProperty("run_number").value
             norm_run = mtd[new_name].getRun().getProperty("normalization_run").value
             two_theta = mtd[new_name].getRun().getProperty("two_theta").value
@@ -116,8 +117,8 @@ class LRReflectivityOutput(PythonAlgorithm):
             primary_fraction = mtd[new_name].getRun().getProperty("primary_fraction").value
             scaling_factor_a = _get_value("scaling_factor_a", 1.0)
             scaling_factor_b = _get_value("scaling_factor_b", 0.0)
-            value_list = (data_run, norm_run, two_theta, lambda_min, lambda_max, data_q_min,
-                          data_q_max, scaling_factor_a, scaling_factor_b, primary_fraction)
+            value_list = (data_run, norm_run, two_theta, lambda_min, lambda_max, data_q_min, data_q_max,
+                          scaling_factor_a, scaling_factor_b, primary_fraction)
             header_info += "# %-9s %-9s %-14.6g %-14.6g %-12.6g %-12.6s %-12.6s %-12.6s %-12.6s %-12.6s\n" % value_list
 
         # Take the first rebinned histo as our output
@@ -148,7 +149,7 @@ class LRReflectivityOutput(PythonAlgorithm):
                 if data_y_i[j] > 0:
                     if data_y[j] > 0:
                         denom = 1.0 / data_e[j]**2 + 1.0 / data_e_i[j]**2
-                        data_y[j] = (data_y[j]/data_e[j]**2 + data_y_i[j]/data_e_i[j]**2) / denom
+                        data_y[j] = (data_y[j] / data_e[j]**2 + data_y_i[j] / data_e_i[j]**2) / denom
                         data_e[j] = math.sqrt(1.0 / denom)
 
                         #data_y[j] = 0.5 * (data_y[j] + data_y_i[j])
@@ -185,8 +186,10 @@ class LRReflectivityOutput(PythonAlgorithm):
             if weights > 0:
                 scaling_factor = total / weights
 
-        Scale(InputWorkspace=scaled_ws_list[0] + '_histo', OutputWorkspace=scaled_ws_list[0] + '_scaled',
-              Factor=1.0 / scaling_factor, Operation='Multiply')
+        Scale(InputWorkspace=scaled_ws_list[0] + '_histo',
+              OutputWorkspace=scaled_ws_list[0] + '_scaled',
+              Factor=1.0 / scaling_factor,
+              Operation='Multiply')
 
         # Save the data
         file_path = self.getProperty("OutputFilename").value

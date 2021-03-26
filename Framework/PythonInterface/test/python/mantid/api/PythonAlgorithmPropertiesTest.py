@@ -14,11 +14,10 @@ import testhelpers
 from mantid.kernel import IntBoundedValidator, Direction
 from mantid.api import FileProperty, FileAction, PythonAlgorithm
 
-
 # ======================================================================
 
-class PythonAlgorithmPropertiesTest(unittest.TestCase):
 
+class PythonAlgorithmPropertiesTest(unittest.TestCase):
     def test_simple_property_declarations_have_correct_attrs(self):
         """
         Test the basic property declarations without validators
@@ -26,6 +25,7 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
         class BasicPropsAlg(PythonAlgorithm):
 
             _testdocstring = "This is a doc string"
+
             def PyInit(self):
                 self.declareProperty('SimpleInput', 1)
                 self.declareProperty('Switch', True)
@@ -34,9 +34,9 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
                 self.declareProperty('PropWithDocDefaultDir', 1, self._testdocstring)
                 self.declareProperty('PropWithDocOutputDir', 1.0, self._testdocstring, Direction.Output)
 
-
             def PyExec(self):
                 pass
+
         ##########################################################################
         alg = BasicPropsAlg()
         props = alg.getProperties()
@@ -71,15 +71,15 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
             The validators each have their own test.
         """
         class PropertiesWithValidation(PythonAlgorithm):
-
             def PyInit(self):
                 only_positive = IntBoundedValidator()
                 only_positive.setLower(0)
                 self.declareProperty('NumPropWithDefaultDir', -1, only_positive)
-                self.declareProperty('NumPropWithInOutDir', -1, only_positive,"doc string", Direction.InOut)
+                self.declareProperty('NumPropWithInOutDir', -1, only_positive, "doc string", Direction.InOut)
 
             def PyExec(self):
                 pass
+
         ###################################################
         alg = PropertiesWithValidation()
         alg.initialize()
@@ -100,12 +100,14 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
         class SpecializedProperties(PythonAlgorithm):
 
             _testdocstring = 'This is a FileProperty'
+
             def PyInit(self):
                 self.declareProperty(FileProperty("NoDocString", "", FileAction.Load))
                 self.declareProperty(FileProperty("WithDocString", "", FileAction.Load), self._testdocstring)
 
             def PyExec(self):
                 pass
+
         ####################################################
         alg = SpecializedProperties()
         alg.initialize()
@@ -119,26 +121,25 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
         self.assertTrue(isinstance(withdoc, FileProperty))
         self.assertEqual(alg._testdocstring, withdoc.documentation)
 
-
     def test_passing_settings_object_connects_to_correct_object(self):
         from mantid.kernel import EnabledWhenProperty, PropertyCriterion
 
         class DummyAlg(PythonAlgorithm):
-
             def PyInit(self):
-                self.declareProperty("BasicProp1",1)
-                self.declareProperty("BasicProp2",1)
+                self.declareProperty("BasicProp1", 1)
+                self.declareProperty("BasicProp2", 1)
                 self.setPropertySettings("BasicProp2", EnabledWhenProperty("BasicProp1", PropertyCriterion.IsDefault))
 
             def PyExec(self):
                 pass
+
         ##
         alg = DummyAlg()
         alg.initialize()
         settings = alg.getProperty("BasicProp2").settings
         self.assertNotEqual(settings, None)
         self.assertTrue(settings.isEnabled(alg))
-        alg.setProperty("BasicProp1", 2) # not default
+        alg.setProperty("BasicProp1", 2)  # not default
         self.assertTrue(not settings.isEnabled(alg))
 
 

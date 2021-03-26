@@ -11,7 +11,6 @@ import numpy as np
 
 
 class ConvertQtoHKLMDHistoTest(unittest.TestCase):
-
     @classmethod
     def tearDownClass(cls):
         mtd.clear()
@@ -31,8 +30,7 @@ class ConvertQtoHKLMDHistoTest(unittest.TestCase):
                       Wavelength=1.558,
                       OutputWorkspace="peaks")
 
-        hkl = ConvertQtoHKLMDHisto(InputWorkspace=mtd["mde_ws"],
-                                   PeaksWorkspace=mtd["peaks"])
+        hkl = ConvertQtoHKLMDHisto(InputWorkspace=mtd["mde_ws"], PeaksWorkspace=mtd["peaks"])
         self.assertEqual(hkl.getSpecialCoordinateSystem().name, "HKL")
 
         self.assertEqual(mtd["peaks"].getNumberPeaks(), 10)

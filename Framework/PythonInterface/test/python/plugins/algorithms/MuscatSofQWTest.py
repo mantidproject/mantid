@@ -10,21 +10,17 @@ from mantid.api import *
 
 
 class MuscatSofQWTest(unittest.TestCase):
-
     def setUp(self):
-        self._sample_ws = Load(Filename='irs26176_graphite002_red.nxs',
-                               OutputWorkspace='__MuscatSofQWTest_sample')
+        self._sample_ws = Load(Filename='irs26176_graphite002_red.nxs', OutputWorkspace='__MuscatSofQWTest_sample')
         self._resolution_ws = Load(Filename='irs26173_graphite002_res.nxs',
                                    OutputWorkspace='__MuscatSofQWTest_resolution')
         self._param_ws = Load(Filename='irs26176_graphite002_conv_1LFixF_s0_to_9_Result.nxs',
                               OutputWorkspace='__MuscatSofQWTest_param')
 
-
     def tearDown(self):
         DeleteWorkspace(self._sample_ws)
         DeleteWorkspace(self._resolution_ws)
         DeleteWorkspace(self._param_ws)
-
 
     def test_happy_case(self):
         """
@@ -42,10 +38,9 @@ class MuscatSofQWTest(unittest.TestCase):
         x_data = sqw_ws.dataX(0)
         self.assertAlmostEqual(x_data[0], -0.5)
         self.assertAlmostEqual(x_data[-1], 0.5)
-        self.assertAlmostEqual(x_data[len(x_data)//2], 0.0)
+        self.assertAlmostEqual(x_data[len(x_data) // 2], 0.0)
 
         self.assertEqual(sqw_ws.blocksize(), 200)
-
 
     def test_energy_max(self):
         """
@@ -64,10 +59,9 @@ class MuscatSofQWTest(unittest.TestCase):
         x_data = sqw_ws.dataX(0)
         self.assertAlmostEqual(x_data[0], -1.0)
         self.assertAlmostEqual(x_data[-1], 1.0)
-        self.assertAlmostEqual(x_data[len(x_data)//2], 0.0)
+        self.assertAlmostEqual(x_data[len(x_data) // 2], 0.0)
 
         self.assertEqual(sqw_ws.blocksize(), 400)
-
 
     def test_energy_increment(self):
         """
@@ -86,7 +80,7 @@ class MuscatSofQWTest(unittest.TestCase):
         x_data = sqw_ws.dataX(0)
         self.assertAlmostEqual(x_data[0], -0.5)
         self.assertAlmostEqual(x_data[-1], 0.5)
-        self.assertAlmostEqual(x_data[len(x_data)//2], 0.0)
+        self.assertAlmostEqual(x_data[len(x_data) // 2], 0.0)
 
         self.assertEqual(sqw_ws.blocksize(), 10)
 

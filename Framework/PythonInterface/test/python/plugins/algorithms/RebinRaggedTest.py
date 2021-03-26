@@ -51,8 +51,7 @@ class RebinRaggedTest(unittest.TestCase):
 
         # Verify ....
         outputws = AnalysisDataService.retrieve("NOM_91796_banks")
-        for i, Xlen in enumerate([256, 521, 1001, 1001, 1001,
-                                  235]):  # larger than in test_nomad_inplace
+        for i, Xlen in enumerate([256, 521, 1001, 1001, 1001, 235]):  # larger than in test_nomad_inplace
             self.assertEqual(len(outputws.readX(i)), Xlen)
 
         AnalysisDataService.remove("NOM_91796_banks")

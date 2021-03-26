@@ -14,7 +14,6 @@ import os, mantid, hashlib
 
 
 class CreateCacheFilename(unittest.TestCase):
-
     def test1(self):
         """CreateCacheFilename: one prop
         """
@@ -25,47 +24,37 @@ class CreateCacheFilename(unittest.TestCase):
         # Execute
         alg_test = run_algorithm(
             "CreateCacheFilename",
-            PropertyManager = "pm",
-            Properties = [],
-            OtherProperties = [],
-            Prefix = "",
-            CacheDir = "",
-            )
+            PropertyManager="pm",
+            Properties=[],
+            OtherProperties=[],
+            Prefix="",
+            CacheDir="",
+        )
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        expected = os.path.join(
-            ConfigService.getUserPropertiesDir(), "cache",
-            "%s.nxs" % hashlib.sha1("a=3").hexdigest()
-            )
-        self.assertEqual(
-            alg_test.getPropertyValue("OutputFilename"),
-            expected)
+        expected = os.path.join(ConfigService.getUserPropertiesDir(), "cache",
+                                "%s.nxs" % hashlib.sha1("a=3").hexdigest())
+        self.assertEqual(alg_test.getPropertyValue("OutputFilename"), expected)
 
         # Another test. don't specify the default values
         alg_test = run_algorithm(
             "CreateCacheFilename",
-            PropertyManager = "pm",
-            )
+            PropertyManager="pm",
+        )
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        expected = os.path.join(
-            ConfigService.getUserPropertiesDir(), "cache",
-            "%s.nxs" % hashlib.sha1("a=3").hexdigest()
-            )
-        self.assertEqual(
-            alg_test.getPropertyValue("OutputFilename"),
-            expected)
+        expected = os.path.join(ConfigService.getUserPropertiesDir(), "cache",
+                                "%s.nxs" % hashlib.sha1("a=3").hexdigest())
+        self.assertEqual(alg_test.getPropertyValue("OutputFilename"), expected)
         return
 
     def test_wronginput(self):
         """CreateCacheFilename: wrong input
         """
         # Execute
-        alg_test = run_algorithm(
-            "CreateCacheFilename",
-            )
+        alg_test = run_algorithm("CreateCacheFilename", )
         # executed?
         self.assertFalse(alg_test.isExecuted())
         return
@@ -86,20 +75,15 @@ class CreateCacheFilename(unittest.TestCase):
         # Execute
         alg_test = run_algorithm(
             "CreateCacheFilename",
-            PropertyManager = "test_glob",
-            Properties = ['*a*'],
-            )
+            PropertyManager="test_glob",
+            Properties=['*a*'],
+        )
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        s = ','.join(sorted( ['%s=3' % p for p in aprops] ))
-        expected = os.path.join(
-            ConfigService.getUserPropertiesDir(), "cache",
-            "%s.nxs" % hashlib.sha1(s).hexdigest()
-            )
-        self.assertEqual(
-            alg_test.getPropertyValue("OutputFilename"),
-            expected)
+        s = ','.join(sorted(['%s=3' % p for p in aprops]))
+        expected = os.path.join(ConfigService.getUserPropertiesDir(), "cache", "%s.nxs" % hashlib.sha1(s).hexdigest())
+        self.assertEqual(alg_test.getPropertyValue("OutputFilename"), expected)
         return
 
     def test_otherprops_only(self):
@@ -108,18 +92,14 @@ class CreateCacheFilename(unittest.TestCase):
         # Execute
         alg_test = run_algorithm(
             "CreateCacheFilename",
-            OtherProperties = ["a=1", "b=2"],
-            )
+            OtherProperties=["a=1", "b=2"],
+        )
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        expected = os.path.join(
-            ConfigService.getUserPropertiesDir(), "cache",
-            "%s.nxs" % hashlib.sha1("a=1,b=2").hexdigest()
-            )
-        self.assertEqual(
-            alg_test.getPropertyValue("OutputFilename"),
-            expected)
+        expected = os.path.join(ConfigService.getUserPropertiesDir(), "cache",
+                                "%s.nxs" % hashlib.sha1("a=1,b=2").hexdigest())
+        self.assertEqual(alg_test.getPropertyValue("OutputFilename"), expected)
         return
 
     def test_bothprops(self):
@@ -137,21 +117,16 @@ class CreateCacheFilename(unittest.TestCase):
         # Execute
         alg_test = run_algorithm(
             "CreateCacheFilename",
-            PropertyManager = "test_bothprops",
-            Properties = ['*a*'],
-            OtherProperties = other_props,
-            )
+            PropertyManager="test_bothprops",
+            Properties=['*a*'],
+            OtherProperties=other_props,
+        )
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        s = ','.join(sorted( ['%s=fish' % p for p in aprops] + other_props ))
-        expected = os.path.join(
-            ConfigService.getUserPropertiesDir(), "cache",
-            "%s.nxs" % hashlib.sha1(s).hexdigest()
-            )
-        self.assertEqual(
-            alg_test.getPropertyValue("OutputFilename"),
-            expected)
+        s = ','.join(sorted(['%s=fish' % p for p in aprops] + other_props))
+        expected = os.path.join(ConfigService.getUserPropertiesDir(), "cache", "%s.nxs" % hashlib.sha1(s).hexdigest())
+        self.assertEqual(alg_test.getPropertyValue("OutputFilename"), expected)
         return
 
     def test_prefix(self):
@@ -160,19 +135,15 @@ class CreateCacheFilename(unittest.TestCase):
         # Execute
         alg_test = run_algorithm(
             "CreateCacheFilename",
-            OtherProperties = ["a=1", "b=2"],
-            Prefix = "vanadium",
-            )
+            OtherProperties=["a=1", "b=2"],
+            Prefix="vanadium",
+        )
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        expected = os.path.join(
-            ConfigService.getUserPropertiesDir(), "cache",
-            "vanadium_%s.nxs" % hashlib.sha1("a=1,b=2").hexdigest()
-            )
-        self.assertEqual(
-            alg_test.getPropertyValue("OutputFilename"),
-            expected)
+        expected = os.path.join(ConfigService.getUserPropertiesDir(), "cache",
+                                "vanadium_%s.nxs" % hashlib.sha1("a=1,b=2").hexdigest())
+        self.assertEqual(alg_test.getPropertyValue("OutputFilename"), expected)
         return
 
     def test_cache_dir(self):
@@ -181,19 +152,14 @@ class CreateCacheFilename(unittest.TestCase):
         # Execute
         alg_test = run_algorithm(
             "CreateCacheFilename",
-            OtherProperties = ["a=1", "b=2"],
-            CacheDir = "my_cache",
-            )
+            OtherProperties=["a=1", "b=2"],
+            CacheDir="my_cache",
+        )
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        expected = os.path.join(
-            "my_cache",
-            "%s.nxs" % hashlib.sha1("a=1,b=2").hexdigest()
-            )
-        self.assertEqual(
-            alg_test.getPropertyValue("OutputFilename"),
-            expected)
+        expected = os.path.join("my_cache", "%s.nxs" % hashlib.sha1("a=1,b=2").hexdigest())
+        self.assertEqual(alg_test.getPropertyValue("OutputFilename"), expected)
         return
 
 

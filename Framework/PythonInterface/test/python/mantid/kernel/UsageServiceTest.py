@@ -10,17 +10,16 @@ from mantid.kernel import (UsageService, UsageServiceImpl, FeatureType)
 
 
 class UsageServiceTest(unittest.TestCase):
-
     def test_singleton_returns_instance_of_UsageService(self):
         self.assertTrue(isinstance(UsageService, UsageServiceImpl))
 
     def test_getSetEnabled(self):
         UsageService.setEnabled(False)
-        self.assertEqual(UsageService.isEnabled(),False)
+        self.assertEqual(UsageService.isEnabled(), False)
         UsageService.setEnabled(True)
-        self.assertEqual(UsageService.isEnabled(),True)
+        self.assertEqual(UsageService.isEnabled(), True)
         UsageService.setEnabled(False)
-        self.assertEqual(UsageService.isEnabled(),False)
+        self.assertEqual(UsageService.isEnabled(), False)
 
     def test_getSetApplication(self):
         self.assertEqual(UsageService.getApplicationName(), "python")
@@ -44,8 +43,7 @@ class UsageServiceTest(unittest.TestCase):
         UsageService.registerFeatureUsage(FeatureType.Algorithm, "testv1", True)
         UsageService.setEnabled(True)
         UsageService.registerFeatureUsage(FeatureType.Algorithm, "testv1", True)
-        UsageService.registerFeatureUsage(FeatureType.Algorithm, ["testv1","level2feature"], True)
-
+        UsageService.registerFeatureUsage(FeatureType.Algorithm, ["testv1", "level2feature"], True)
 
     def test_Flush(self):
         UsageService.setEnabled(False)

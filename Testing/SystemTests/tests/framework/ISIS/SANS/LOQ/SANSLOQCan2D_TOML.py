@@ -15,7 +15,6 @@ from sans.common.enums import SANSInstrument
 
 @ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQCan2DTest_TOML(systemtesting.MantidSystemTest):
-
     def runTest(self):
         UseCompatibilityMode()
         LOQ()
@@ -39,4 +38,4 @@ class SANSLOQCan2DTest_TOML(systemtesting.MantidSystemTest):
         self.disableChecking.append('Instrument')
         #when comparing LOQ files you seem to need the following
         self.disableChecking.append('Axes')
-        return '99630_main_2D_2.2_10.0','SANSLOQCan2D.nxs'
+        return '99630_main_2D_2.2_10.0', 'SANSLOQCan2D.nxs'

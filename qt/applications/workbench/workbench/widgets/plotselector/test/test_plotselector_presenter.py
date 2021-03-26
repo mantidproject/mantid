@@ -17,7 +17,6 @@ from workbench.widgets.plotselector.view import PlotSelectorView, Column
 
 
 class PlotSelectorPresenterTest(unittest.TestCase):
-
     def side_effect_plot_name(self, plot_number):
         if plot_number in [0, 101, 102, 103]:
             return "Plot1"
@@ -164,8 +163,7 @@ class PlotSelectorPresenterTest(unittest.TestCase):
 
         self.presenter.close_action_called()
         self.assertEqual(self.model.close_plot.call_count, 2)
-        self.model.close_plot.assert_has_calls(self.convert_list_to_calls([42, 43]),
-                                               any_order=True)
+        self.model.close_plot.assert_has_calls(self.convert_list_to_calls([42, 43]), any_order=True)
 
     def test_close_action_with_model_call_raising_value_error(self):
         self.view.get_all_selected_plot_numbers = mock.Mock(return_value=[42])
@@ -214,16 +212,14 @@ class PlotSelectorPresenterTest(unittest.TestCase):
         self.presenter.set_sort_type(Column.LastActive)
 
         self.view.set_sort_type.assert_called_once_with(Column.LastActive)
-        self.view.set_last_active_values.assert_called_once_with({0: 1,
-                                                                  1: 2})
+        self.view.set_last_active_values.assert_called_once_with({0: 1, 1: 2})
 
     def test_set_last_active_values_with_sorting_by_last_active(self):
         self.model.last_active_values = mock.Mock(return_value={0: 1, 1: 2})
         self.view.sort_type = mock.Mock(return_value=Column.LastActive)
         self.presenter.update_last_active_order()
 
-        self.view.set_last_active_values.assert_called_once_with({0: 1,
-                                                                  1: 2})
+        self.view.set_last_active_values.assert_called_once_with({0: 1, 1: 2})
 
     def test_set_last_active_values_with_sorting_by_name_does_nothing(self):
         self.model.last_active_order = mock.Mock(return_value={0: 1, 1: 2})
@@ -262,15 +258,15 @@ class PlotSelectorPresenterTest(unittest.TestCase):
         self.presenter.export_plots_called('.xyz')
         for i in range(len(self.model.export_plot.mock_calls)):
             self.assertEqual(self.model.export_plot.mock_calls[i],
-                             mock.call(i, os.path.join('/home/Documents', 'Plot{}.xyz'.format(i+1))))
+                             mock.call(i, os.path.join('/home/Documents', 'Plot{}.xyz'.format(i + 1))))
 
     def test_exporting_multiple_plots_with_repeated_plot_names_generates_unique_names(self):
         self.view.get_all_selected_plot_numbers = mock.Mock(return_value=[0, 101, 102, 103])
         self.view.get_directory_name_for_saving = mock.Mock(return_value='/home/Documents')
         self.presenter.export_plots_called('.xyz')
 
-        self.assertEqual(self.model.export_plot.mock_calls[0],
-                         mock.call(0, os.path.join('/home/Documents', 'Plot1.xyz')))
+        self.assertEqual(self.model.export_plot.mock_calls[0], mock.call(0,
+                                                                         os.path.join('/home/Documents', 'Plot1.xyz')))
 
         for i in range(1, len(self.model.export_plot.mock_calls)):
             self.assertEqual(self.model.export_plot.mock_calls[i],

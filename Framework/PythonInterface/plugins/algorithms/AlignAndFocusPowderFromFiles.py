@@ -8,8 +8,8 @@ from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm,
     MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
 from mantid.kernel import Direction, PropertyManagerDataService
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertDiffCal, ConvertUnits, CopyLogs, \
-    CopySample, CreateCacheFilename, DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, \
-    LoadDiffCal, Load, LoadIDFFromNexus, LoadNexusProcessed, PDDetermineCharacterizations, Plus, \
+    CopySample, CreateCacheFilename, DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, \
+    FilterBadPulses, LoadDiffCal, Load, LoadIDFFromNexus, LoadNexusProcessed, PDDetermineCharacterizations, Plus, \
     RebinToWorkspace, RemoveLogs, RenameWorkspace, SaveNexusProcessed
 import os
 import numpy as np
@@ -20,14 +20,11 @@ CAL_FILE, GROUP_FILE = "CalFileName", "GroupFilename"
 CAL_WKSP, GRP_WKSP, MASK_WKSP = "CalibrationWorkspace", "GroupingWorkspace", "MaskWorkspace"
 # AlignAndFocusPowder only uses the ranges
 PROPS_IN_PD_CHARACTER = ["DMin", "DMax", "DeltaRagged", "TMin", "TMax", "CropWavelengthMin", "CropWavelengthMax"]
-PROPS_FOR_ALIGN = [CAL_FILE, GROUP_FILE,
-                   GRP_WKSP, CAL_WKSP, "OffsetsWorkspace",
-                   MASK_WKSP, "MaskBinTable",
-                   "Params", "ResampleX", "Dspacing",
-                   "PreserveEvents",
-                   "RemovePromptPulseWidth", "CompressTolerance", "CompressWallClockTolerance",
-                   "CompressStartTime", "LorentzCorrection", "UnwrapRef", "LowResRef",
-                   "LowResSpectrumOffset", "ReductionProperties"]
+PROPS_FOR_ALIGN = [
+    CAL_FILE, GROUP_FILE, GRP_WKSP, CAL_WKSP, "OffsetsWorkspace", MASK_WKSP, "MaskBinTable", "Params", "ResampleX",
+    "Dspacing", "PreserveEvents", "RemovePromptPulseWidth", "CompressTolerance", "CompressWallClockTolerance",
+    "CompressStartTime", "LorentzCorrection", "UnwrapRef", "LowResRef", "LowResSpectrumOffset", "ReductionProperties"
+]
 PROPS_FOR_ALIGN.extend(PROPS_IN_PD_CHARACTER)
 PROPS_FOR_ALIGN.extend(PROPS_FOR_INSTR)
 PROPS_FOR_PD_CHARACTER = ['FrequencyLogNames', 'WaveLengthLogNames']
@@ -39,8 +36,8 @@ def determineChunking(filename, chunkSize):
         return [{}]
 
     # "small" files just get read in
-    sizeGiB = os.path.getsize(filename)/1024./1024./1024.
-    if 6.*sizeGiB < chunkSize:
+    sizeGiB = os.path.getsize(filename) / 1024. / 1024. / 1024.
+    if 6. * sizeGiB < chunkSize:
         return [{}]
 
     chunks = DetermineChunking(Filename=filename, MaxChunkSize=chunkSize, OutputWorkspace='chunks')
@@ -100,27 +97,24 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         return "The algorithm used for reduction of powder diffraction data"
 
     def PyInit(self):
-        self.declareProperty(MultipleFileProperty(name="Filename",
-                                                  extensions=EXTENSIONS_NXS),
+        self.declareProperty(MultipleFileProperty(name="Filename", extensions=EXTENSIONS_NXS),
                              "Files to combine in reduction")
         self.declareProperty("MaxChunkSize", 0.,
                              "Specify maximum Gbytes of file to read in one chunk.  Default is whole file.")
-        self.declareProperty("FilterBadPulses", 0.,
+        self.declareProperty("FilterBadPulses",
+                             0.,
                              doc="Filter out events measured while proton charge is more than 5% below average")
 
-        self.declareProperty(MatrixWorkspaceProperty('AbsorptionWorkspace', '',
-                                                     Direction.Input, PropertyMode.Optional),
+        self.declareProperty(MatrixWorkspaceProperty('AbsorptionWorkspace', '', Direction.Input, PropertyMode.Optional),
                              doc='Divide data by this Pixel-by-pixel workspace')
 
         self.copyProperties('CreateCacheFilename', 'CacheDir')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                                                     Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
                              doc='Combined output workspace')
         self.copyProperties('AlignAndFocusPowder', ['UnfocussedWorkspace'])
 
-        self.declareProperty(ITableWorkspaceProperty('Characterizations', '',
-                                                     Direction.Input, PropertyMode.Optional),
+        self.declareProperty(ITableWorkspaceProperty('Characterizations', '', Direction.Input, PropertyMode.Optional),
                              'Characterizations table')
 
         self.copyProperties("AlignAndFocusPowder", PROPS_FOR_ALIGN)
@@ -155,8 +149,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         if progstart is None or progstop is None:
             loader = self.createChildAlgorithm(self.__loaderName)
         else:
-            loader = self.createChildAlgorithm(self.__loaderName,
-                                               startProgress=progstart, endProgress=progstop)
+            loader = self.createChildAlgorithm(self.__loaderName, startProgress=progstart, endProgress=progstop)
         loader.setAlwaysStoreInADS(True)
         loader.setLogging(True)
         loader.initialize()
@@ -176,14 +169,11 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
     def __getAlignAndFocusArgs(self):
         # always put these in since they are loaded in __setupCalibration
         # this requires that function to be called before this one
-        args = {CAL_WKSP:  self.__calWksp,
-                GRP_WKSP:  self.__grpWksp,
-                MASK_WKSP: self.__mskWksp}
+        args = {CAL_WKSP: self.__calWksp, GRP_WKSP: self.__grpWksp, MASK_WKSP: self.__mskWksp}
 
         for name in PROPS_FOR_ALIGN + PROPS_IN_PD_CHARACTER:
             prop = self.getProperty(name)
-            name_list = ['PreserveEvents', 'CompressTolerance',
-                         'CompressWallClockTolerance', 'CompressStartTime']
+            name_list = ['PreserveEvents', 'CompressTolerance', 'CompressWallClockTolerance', 'CompressStartTime']
 
             if name in name_list or not prop.isDefault:
                 if 'Workspace' in name:
@@ -306,7 +296,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         wsname = self.__getGroupWkspName(group)
         filenames_str = ','.join(group)
         newprop = 'files_to_sum={}'.format(filenames_str)
-        return self.__getCacheName('summed_'+wsname, additional_props=[newprop])
+        return self.__getCacheName('summed_' + wsname, additional_props=[newprop])
 
     def __processFile(self, filename, file_prog_start, determineCharacterizations, createUnfocused):  # noqa: C902,C901
         # create a unique name for the workspace
@@ -334,7 +324,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         if createUnfocused:
             numSteps = 7  # one more for accumulating the unfocused workspace
         self.log().information('Processing \'{}\' in {:d} chunks'.format(filename, len(chunks)))
-        prog_per_chunk_step = self.prog_per_file * 1./(numSteps*float(len(chunks)))
+        prog_per_chunk_step = self.prog_per_file * 1. / (numSteps * float(len(chunks)))
 
         unfocusname_chunk = ''
         canSkipLoadingLogs = False
@@ -355,9 +345,12 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
             # load a chunk - this is a bit crazy long because we need to get an output property from `Load` when it
             # is run and the algorithm history doesn't exist until the parent algorithm (this) has finished
-            loader = self.__createLoader(filename, chunkname,
-                                         skipLoadingLogs=(len(chunks) > 1 and canSkipLoadingLogs and haveAccumulationForFile),
-                                         progstart=prog_start, progstop=prog_start + prog_per_chunk_step,
+            loader = self.__createLoader(filename,
+                                         chunkname,
+                                         skipLoadingLogs=(len(chunks) > 1 and canSkipLoadingLogs
+                                                          and haveAccumulationForFile),
+                                         progstart=prog_start,
+                                         progstop=prog_start + prog_per_chunk_step,
                                          **chunk)
             loader.execute()
             if j == 0:
@@ -377,21 +370,25 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 self.__loaderName = loader.getPropertyValue('LoaderName')
             # only LoadEventNexus can turn off loading logs, but FilterBadPulses
             # requires them to be loaded from the file
-            canSkipLoadingLogs = self.__loaderName == 'LoadEventNexus' and self.filterBadPulses <= 0. and haveAccumulationForFile
+            canSkipLoadingLogs = self.__loaderName == 'LoadEventNexus' and self.filterBadPulses <= 0. and \
+                                 haveAccumulationForFile
 
             if determineCharacterizations and j == 0:
                 self.__determineCharacterizations(filename, chunkname)  # updates instance variable
                 determineCharacterizations = False
 
             if self.__loaderName == 'LoadEventNexus' and mtd[chunkname].getNumberEvents() == 0:
-                self.log().notice('Chunk {} of {} contained no events. Skipping to next chunk.'.format(j+1,len(chunks)))
+                self.log().notice('Chunk {} of {} contained no events. Skipping to next chunk.'.format(
+                    j + 1, len(chunks)))
                 continue
 
             prog_start += prog_per_chunk_step
             if self.filterBadPulses > 0.:
-                FilterBadPulses(InputWorkspace=chunkname, OutputWorkspace=chunkname,
+                FilterBadPulses(InputWorkspace=chunkname,
+                                OutputWorkspace=chunkname,
                                 LowerCutoff=self.filterBadPulses,
-                                startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step)
+                                startProgress=prog_start,
+                                endProgress=prog_start + prog_per_chunk_step)
                 if mtd[chunkname].getNumberEvents() == 0:
                     msg = 'FilterBadPulses removed all events from '
                     if len(chunks) == 1:
@@ -403,32 +400,41 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
             # absorption correction workspace
             if self.absorption is not None and len(str(self.absorption)) > 0:
-                ConvertUnits(InputWorkspace=chunkname, OutputWorkspace=chunkname,
-                             Target='Wavelength', EMode='Elastic')
+                ConvertUnits(InputWorkspace=chunkname, OutputWorkspace=chunkname, Target='Wavelength', EMode='Elastic')
                 # rebin the absorption correction to match the binning of the inputs if in histogram mode
                 # EventWorkspace will compare the wavelength of each individual event
                 absWksp = self.absorption
                 if mtd[chunkname].id() != 'EventWorkspace':
                     absWksp = '__absWkspRebinned'
-                    RebinToWorkspace(WorkspaceToRebin=self.absorption, WorkspaceToMatch=chunkname, OutputWorkspace=absWksp)
-                Divide(LHSWorkspace=chunkname, RHSWorkspace=absWksp, OutputWorkspace=chunkname,
-                       startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step)
+                    RebinToWorkspace(WorkspaceToRebin=self.absorption,
+                                     WorkspaceToMatch=chunkname,
+                                     OutputWorkspace=absWksp)
+                Divide(LHSWorkspace=chunkname,
+                       RHSWorkspace=absWksp,
+                       OutputWorkspace=chunkname,
+                       startProgress=prog_start,
+                       endProgress=prog_start + prog_per_chunk_step)
                 if absWksp != self.absorption:  # clean up
                     DeleteWorkspace(Workspace=absWksp)
-                ConvertUnits(InputWorkspace=chunkname, OutputWorkspace=chunkname,
-                             Target='TOF', EMode='Elastic')
+                ConvertUnits(InputWorkspace=chunkname, OutputWorkspace=chunkname, Target='TOF', EMode='Elastic')
             prog_start += prog_per_chunk_step
 
             if self.kwargs is None:
                 raise RuntimeError('Somehow arguments for "AlignAndFocusPowder" aren\'t set')
 
             AlignAndFocusPowder(InputWorkspace=chunkname,
-                                OutputWorkspace=chunkname, UnfocussedWorkspace=unfocusname_chunk,
-                                startProgress=prog_start, endProgress=prog_start+2.*prog_per_chunk_step,
+                                OutputWorkspace=chunkname,
+                                UnfocussedWorkspace=unfocusname_chunk,
+                                startProgress=prog_start,
+                                endProgress=prog_start + 2. * prog_per_chunk_step,
                                 **self.kwargs)
             prog_start += 2. * prog_per_chunk_step  # AlignAndFocusPowder counts for two steps
 
-            self.__accumulate(chunkname, wkspname, unfocusname_chunk, unfocusname, not haveAccumulationForFile,
+            self.__accumulate(chunkname,
+                              wkspname,
+                              unfocusname_chunk,
+                              unfocusname,
+                              not haveAccumulationForFile,
                               removelogs=canSkipLoadingLogs)
 
             haveAccumulationForFile = True
@@ -438,8 +444,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         # copy the sample object from the absorption workspace
         if self.absorption is not None and len(str(self.absorption)) > 0:
-            CopySample(InputWorkspace=self.absorption, OutputWorkspace=wkspname,
-                       CopyEnvironment=False)
+            CopySample(InputWorkspace=self.absorption, OutputWorkspace=wkspname, CopyEnvironment=False)
 
         # write out the cachefile for the main reduced data independent of whether
         # the unfocussed workspace was requested
@@ -451,7 +456,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
     def __compressEvents(self, wkspname):
         if self.kwargs['PreserveEvents'] and self.kwargs['CompressTolerance'] > 0.:
-            CompressEvents(InputWorkspace=wkspname, OutputWorkspace=wkspname,
+            CompressEvents(InputWorkspace=wkspname,
+                           OutputWorkspace=wkspname,
                            WallClockTolerance=self.kwargs['CompressWallClockTolerance'],
                            Tolerance=self.kwargs['CompressTolerance'],
                            StartTime=self.kwargs['CompressStartTime'])
@@ -477,9 +483,10 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         else:
             if removelogs:
                 RemoveLogs(Workspace=chunkname)  # accumulation has them already
-            RebinToWorkspace(WorkspaceToRebin=chunkname, WorkspaceToMatch=sumname,
-                             OutputWorkspace=chunkname)
-            Plus(LHSWorkspace=sumname, RHSWorkspace=chunkname, OutputWorkspace=sumname,
+            RebinToWorkspace(WorkspaceToRebin=chunkname, WorkspaceToMatch=sumname, OutputWorkspace=chunkname)
+            Plus(LHSWorkspace=sumname,
+                 RHSWorkspace=chunkname,
+                 OutputWorkspace=sumname,
                  ClearRHSWorkspace=self.kwargs['PreserveEvents'])
             DeleteWorkspace(Workspace=chunkname)
             self.__compressEvents(sumname)  # could be smarter about when to run
@@ -487,7 +494,9 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if chunkunfocusname and chunkunfocusname != sumuunfocusname:
                 if removelogs:
                     RemoveLogs(Workspace=chunkunfocusname)  # accumulation has them already
-                Plus(LHSWorkspace=sumuunfocusname, RHSWorkspace=chunkunfocusname, OutputWorkspace=sumuunfocusname,
+                Plus(LHSWorkspace=sumuunfocusname,
+                     RHSWorkspace=chunkunfocusname,
+                     OutputWorkspace=sumuunfocusname,
                      ClearRHSWorkspace=self.kwargs['PreserveEvents'])
                 DeleteWorkspace(Workspace=chunkunfocusname)
                 self.__compressEvents(sumuunfocusname)  # could be smarter about when to run
@@ -556,7 +565,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         self._filenames = sorted(self.__getLinearizedFilenames('Filename'))
         self.instr = os.path.basename(self._filenames[0]).split('_')[0]  # wrong for instrument's with `_` in the name
         self.haveDeterminedCalibration = False  # setup variables for loading calibration into workspaces
-        self.__loaderName = 'Load'   # set the loader to be generic on first load
+        self.__loaderName = 'Load'  # set the loader to be generic on first load
         self.filterBadPulses = self.getProperty('FilterBadPulses').value
         self.chunkSize = self.getProperty('MaxChunkSize').value
         self.absorption = self.getProperty('AbsorptionWorkspace').value
@@ -581,7 +590,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             self.log().warning('CacheDir is not specified - functionality disabled')
 
         assert len(self._filenames), "No files specified"
-        self.prog_per_file = 1./float(len(self._filenames))  # for better progress reporting
+        self.prog_per_file = 1. / float(len(self._filenames))  # for better progress reporting
 
         # initialization for caching mechanism
         if self.useCaching:
@@ -651,9 +660,9 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         N = len(filenames)
         found = False
         for length in range(N, 1, -1):
-            for start in range(N-length+1):
-                end = start+length-1
-                fileSubset = filenames[start:end+1]
+            for start in range(N - length + 1):
+                end = start + length - 1
+                fileSubset = filenames[start:end + 1]
                 summed_cache_file = self.__getGroupCacheName(fileSubset)
                 wkspname = self.__getGroupWkspName(fileSubset)
                 try:
@@ -669,7 +678,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             continue
         if not found:
             return filenames
-        remained = filenames[:start] + filenames[end+1:]
+        remained = filenames[:start] + filenames[end + 1:]
         if remained:
             return self.__findAndLoadCachefiles(remained, finalname, False)
         return []
@@ -701,16 +710,16 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             wkspname, unfocusname = self.__processFile(filename, self.prog_per_file * float(i), not self.useCaching,
                                                        bool(finalunfocusname))
             # accumulate into partial sum
-            grain_start = i//grain_size*grain_size
-            grain_end = min((i//grain_size+1)*grain_size, numberFilesToProcess)
+            grain_start = i // grain_size * grain_size
+            grain_end = min((i // grain_size + 1) * grain_size, numberFilesToProcess)
             grain = files[grain_start:grain_end]
             partialsum_wkspname = '__' + self.__getGroupWkspName(grain)
             if finalunfocusname:
                 partialsum_unfocusname = partialsum_wkspname + '_unfocused'
             else:
                 partialsum_unfocusname = ''
-            self.__accumulate(wkspname, partialsum_wkspname, unfocusname, partialsum_unfocusname,
-                              (not hasAccumulated) or i == 0)
+            self.__accumulate(wkspname, partialsum_wkspname, unfocusname, partialsum_unfocusname, (not hasAccumulated)
+                              or i == 0)
             hasAccumulated = True
             if i == grain_end - 1:
                 if self.useCaching and len(grain) > 1:

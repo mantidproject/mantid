@@ -91,15 +91,13 @@ class FocusTestMixin(object):
 
 
 class FocusTestNoAbsCorr(FocusTestMixin, systemtesting.MantidSystemTest):
-
     def runTest(self):
         self.doTest(absorb_corrections=False)
 
     def validate(self):
         # check output files as expected
         def generate_error_message(expected_file, output_dir):
-            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir,
-                                                                  os.listdir(output_dir))
+            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
 
         def assert_output_file_exists(directory, filename):
             self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
@@ -117,7 +115,6 @@ class FocusTestNoAbsCorr(FocusTestMixin, systemtesting.MantidSystemTest):
 
 
 class FocusTestWithAbsCorr(FocusTestMixin, systemtesting.MantidSystemTest):
-
     def runTest(self):
         self.doTest(absorb_corrections=True)
 
@@ -154,8 +151,12 @@ class CreateCalTest(systemtesting.MantidSystemTest):
 
 
 def _gen_required_files():
-    required_run_numbers = ["83607", "83608",  # create_van : PDF mode
-                            "83605", "83608_splined"]  # File to focus (Si)
+    required_run_numbers = [
+        "83607",
+        "83608",  # create_van : PDF mode
+        "83605",
+        "83608_splined"
+    ]  # File to focus (Si)
 
     # Generate file names of form "INSTxxxxx.nxs"
     input_files = [os.path.join(input_dir, (inst_name + number + ".nxs")) for number in required_run_numbers]
@@ -169,8 +170,7 @@ def run_vanadium_calibration():
     pdf_inst_obj = setup_inst_object(mode="PDF")
 
     # Run create vanadium twice to ensure we get two different output splines / files
-    pdf_inst_obj.create_vanadium(first_cycle_run_no=vanadium_run,
-                                 do_absorb_corrections=True, multiple_scattering=False)
+    pdf_inst_obj.create_vanadium(first_cycle_run_no=vanadium_run, do_absorb_corrections=True, multiple_scattering=False)
 
     # Check the spline looks good and was saved
     if not os.path.exists(spline_path):
@@ -194,13 +194,16 @@ def run_focus(absorb_corrections):
     inst_object = setup_inst_object(mode="PDF")
     if absorb_corrections:
 
-        sample = SampleDetails(height=5.0, radius=0.3, center=[0,0,0], shape='cylinder')
-        sample.set_material(chemical_formula='(Li7)14 Mg1.05 Si2 S12.05',
-                            number_density=0.001641)
+        sample = SampleDetails(height=5.0, radius=0.3, center=[0, 0, 0], shape='cylinder')
+        sample.set_material(chemical_formula='(Li7)14 Mg1.05 Si2 S12.05', number_density=0.001641)
         inst_object.set_sample_details(sample=sample, mode="Rietveld")
 
-    return inst_object.focus(run_number=run_number, input_mode="Individual", vanadium_normalisation=True,
-                             do_absorb_corrections=absorb_corrections, multiple_scattering=False, sample_empty=sample_empty,
+    return inst_object.focus(run_number=run_number,
+                             input_mode="Individual",
+                             vanadium_normalisation=True,
+                             do_absorb_corrections=absorb_corrections,
+                             multiple_scattering=False,
+                             sample_empty=sample_empty,
                              sample_empty_scale=sample_empty_scale)
 
 
@@ -215,8 +218,11 @@ def setup_mantid_paths():
 
 
 def setup_inst_object(mode):
-    inst_obj = Gem(user_name=user_name, calibration_mapping_file=calibration_map_path,
-                   calibration_directory=calibration_dir, output_directory=output_dir, mode=mode)
+    inst_obj = Gem(user_name=user_name,
+                   calibration_mapping_file=calibration_map_path,
+                   calibration_directory=calibration_dir,
+                   output_directory=output_dir,
+                   mode=mode)
     return inst_obj
 
 

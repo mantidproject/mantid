@@ -10,8 +10,7 @@ from mantid import ConfigService
 class RunSelectorPresenter(object):
     file_extensions = ['.nxs']
 
-    def __init__(self, title, run_selection, run_finder,
-                 view, parent_view):
+    def __init__(self, title, run_selection, run_finder, view, parent_view):
         self._run_selection = run_selection
         self._run_finder = run_finder
         self.view = view
@@ -70,10 +69,8 @@ class RunSelectorPresenter(object):
     def find_from_file_path(self, file_path):
         return self._run_finder.find_from_file_path(file_path)
 
-    def _handle_browse(self): # Add Error handling
+    def _handle_browse(self):  # Add Error handling
         search_directories = ConfigService.Instance().getDataSearchDirs()
-        file_paths = self.view.show_file_picker(RunSelectorPresenter.file_extensions,
-                                                search_directories)
-        self._add_runs(self.find_from_file_path(file_path)
-                       for file_path in file_paths)
+        file_paths = self.view.show_file_picker(RunSelectorPresenter.file_extensions, search_directories)
+        self._add_runs(self.find_from_file_path(file_path) for file_path in file_paths)
         self._refresh()

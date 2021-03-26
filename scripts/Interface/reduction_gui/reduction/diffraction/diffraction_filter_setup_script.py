@@ -112,7 +112,7 @@ class FilterSetupScript(BaseScriptElement):
         # 2. Sort out some issue
         filtertype = "NoFilter"
         if self.filterbytime is True and self.filterbylogvalue is True:
-            print ("Impossible situation!  Coding must be wrong!")
+            print("Impossible situation!  Coding must be wrong!")
         elif self.filterbytime is True:
             filtertype = "ByTime"
         elif self.filterbylogvalue is True:
@@ -160,27 +160,35 @@ class FilterSetupScript(BaseScriptElement):
         """
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("FilterSetup")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             instrument_dom = element_list[0]
 
-            self.titleofsplitters = self.getStringElement(instrument_dom, "titleofsplitters", FilterSetupScript.titleofsplitters)
+            self.titleofsplitters = self.getStringElement(instrument_dom, "titleofsplitters",
+                                                          FilterSetupScript.titleofsplitters)
 
             self.starttime = self.getFloatElement(instrument_dom, "filterbytimemin", FilterSetupScript.starttime)
             self.stoptime = self.getFloatElement(instrument_dom, "filterbytimemax", FilterSetupScript.stoptime)
 
             filtertype = self.getStringElement(instrument_dom, "filtertype", FilterSetupScript.filtertype)
 
-            self.numbertimeinterval = self.getIntegerElement(instrument_dom, "numberoftimeinterval", FilterSetupScript.numbertimeinterval)
-            self.lengthtimeinterval = self.getFloatElement(instrument_dom, "lengthoftimeinterval", FilterSetupScript.lengthtimeinterval)
+            self.numbertimeinterval = self.getIntegerElement(instrument_dom, "numberoftimeinterval",
+                                                             FilterSetupScript.numbertimeinterval)
+            self.lengthtimeinterval = self.getFloatElement(instrument_dom, "lengthoftimeinterval",
+                                                           FilterSetupScript.lengthtimeinterval)
             self.unitoftime = self.getStringElement(instrument_dom, "unitoftime", FilterSetupScript.unitoftime)
 
             self.logname = self.getStringElement(instrument_dom, "logname", FilterSetupScript.logname)
-            self.logvaluetolerance = self.getFloatElement(instrument_dom, "logvaluetolerance", FilterSetupScript.logvaluetolerance)
-            self.minimumlogvalue = self.getFloatElement(instrument_dom, "minimumlogvalue", FilterSetupScript.minimumlogvalue)
-            self.maximumlogvalue = self.getFloatElement(instrument_dom, "maximumlogvalue", FilterSetupScript.maximumlogvalue)
-            self.logvalueinterval = self.getFloatElement(instrument_dom, "logvalueinterval", FilterSetupScript.logvalueinterval)
-            self.filterlogvaluebychangingdirection = self.getStringElement(instrument_dom, "filterlogvaluebychangingdirection",
-                                                                           FilterSetupScript.filterlogvaluebychangingdirection)
+            self.logvaluetolerance = self.getFloatElement(instrument_dom, "logvaluetolerance",
+                                                          FilterSetupScript.logvaluetolerance)
+            self.minimumlogvalue = self.getFloatElement(instrument_dom, "minimumlogvalue",
+                                                        FilterSetupScript.minimumlogvalue)
+            self.maximumlogvalue = self.getFloatElement(instrument_dom, "maximumlogvalue",
+                                                        FilterSetupScript.maximumlogvalue)
+            self.logvalueinterval = self.getFloatElement(instrument_dom, "logvalueinterval",
+                                                         FilterSetupScript.logvalueinterval)
+            self.filterlogvaluebychangingdirection = self.getStringElement(
+                instrument_dom, "filterlogvaluebychangingdirection",
+                FilterSetupScript.filterlogvaluebychangingdirection)
             self.timetolerance = self.getFloatElement(instrument_dom, "timetolerance", FilterSetupScript.timetolerance)
             self.logboundary = self.getStringElement(instrument_dom, "logboundary", FilterSetupScript.logboundary)
 
@@ -201,22 +209,22 @@ class FilterSetupScript(BaseScriptElement):
     def reset(self):
         """ 'Public' method to reset state
         """
-        self.starttime           = FilterSetupScript.starttime
-        self.stoptime            = FilterSetupScript.stoptime
-        self.filterbytime        = FilterSetupScript.filterbytime
-        self.filterbylogvalue    = FilterSetupScript.filterbylogvalue
-        self.numbertimeinterval  = FilterSetupScript.numbertimeinterval
-        self.lengthtimeinterval  = FilterSetupScript.lengthtimeinterval
-        self.unitoftime          = FilterSetupScript.unitoftime
-        self.logname             = FilterSetupScript.logname
-        self.minimumlogvalue     = FilterSetupScript.minimumlogvalue
-        self.maximumlogvalue     = FilterSetupScript.maximumlogvalue
-        self.logvalueinterval    = FilterSetupScript.logvalueinterval
-        self.timetolerance       = FilterSetupScript.timetolerance
-        self.logboundary         = FilterSetupScript.logboundary
-        self.logvaluetolerance   = FilterSetupScript.logvaluetolerance
-        self.titleofsplitters    = FilterSetupScript.titleofsplitters
-        self.logvaluetimesections     = FilterSetupScript.logvaluetimesections
+        self.starttime = FilterSetupScript.starttime
+        self.stoptime = FilterSetupScript.stoptime
+        self.filterbytime = FilterSetupScript.filterbytime
+        self.filterbylogvalue = FilterSetupScript.filterbylogvalue
+        self.numbertimeinterval = FilterSetupScript.numbertimeinterval
+        self.lengthtimeinterval = FilterSetupScript.lengthtimeinterval
+        self.unitoftime = FilterSetupScript.unitoftime
+        self.logname = FilterSetupScript.logname
+        self.minimumlogvalue = FilterSetupScript.minimumlogvalue
+        self.maximumlogvalue = FilterSetupScript.maximumlogvalue
+        self.logvalueinterval = FilterSetupScript.logvalueinterval
+        self.timetolerance = FilterSetupScript.timetolerance
+        self.logboundary = FilterSetupScript.logboundary
+        self.logvaluetolerance = FilterSetupScript.logvaluetolerance
+        self.titleofsplitters = FilterSetupScript.titleofsplitters
+        self.logvaluetimesections = FilterSetupScript.logvaluetimesections
         self.filterlogvaluebychangingdirection = FilterSetupScript.filterlogvaluebychangingdirection
 
         return
@@ -230,7 +238,7 @@ class FilterSetupScript(BaseScriptElement):
             try:
                 value = float(floatstr)
             except ValueError:
-                print ("Warning! XML field %s value %s cannot be converted to float" % (xmlname, floatstr))
+                print("Warning! XML field %s value %s cannot be converted to float" % (xmlname, floatstr))
                 value = None
         else:
             value = None
@@ -245,7 +253,7 @@ class FilterSetupScript(BaseScriptElement):
             try:
                 value = int(integerstr)
             except ValueError:
-                print ("Warning! XML field %s value %s cannot be converted to integer" % (xmlname, integerstr))
+                print("Warning! XML field %s value %s cannot be converted to integer" % (xmlname, integerstr))
                 value = None
         else:
             value = None

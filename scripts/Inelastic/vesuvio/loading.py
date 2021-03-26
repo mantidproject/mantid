@@ -22,7 +22,6 @@ class VesuvioLoadHelper(object):
                          If none, loaded data is not rebinned.
         _load_log_files  Whether to load sample log files into loaded data.
     """
-
     def __init__(self, diff_mode, fit_mode, param_file, rebin_params=None, load_log_files=True):
         self.fit_mode = fit_mode
         self._diff_mode = self._parse_diff_mode(diff_mode)
@@ -66,10 +65,7 @@ class VesuvioLoadHelper(object):
                              StoreInADS=False)
 
     def _rebin_workspace(self, workspace):
-        return Rebin(InputWorkspace=workspace,
-                     Params=self._rebin_params,
-                     OutputWorkspace="rebinned",
-                     StoreInADS=False)
+        return Rebin(InputWorkspace=workspace, Params=self._rebin_params, OutputWorkspace="rebinned", StoreInADS=False)
 
 
 class VesuvioTOFFitInput(object):
@@ -86,21 +82,18 @@ class VesuvioTOFFitInput(object):
         _back_scattering    True if back scattering spectra are being
                             loaded, false otherwise.
     """
-
     def __init__(self, sample_runs, container_runs, spectra, loader):
         # Load sample and container runs
         self.spectra = _parse_spectra(loader.fit_mode, spectra, sample_runs)
 
-        self.sample_runs, self.sample_data = self._try_load_data(sample_runs, self.spectra,
-                                                                 loader, "Unable to load Sample Runs:")
-        mtd.addOrReplace(self._tof_workspace_suffix(self.sample_runs, self.spectra),
-                         self.sample_data)
+        self.sample_runs, self.sample_data = self._try_load_data(sample_runs, self.spectra, loader,
+                                                                 "Unable to load Sample Runs:")
+        mtd.addOrReplace(self._tof_workspace_suffix(self.sample_runs, self.spectra), self.sample_data)
 
         if container_runs is not None:
-            self.container_runs, self.container_data = self._try_load_data(container_runs, self.spectra,
-                                                                           loader, "Unable to load Container Runs:")
-            mtd.addOrReplace(self._tof_workspace_suffix(self.container_runs, self.spectra),
-                             self.container_data)
+            self.container_runs, self.container_data = self._try_load_data(container_runs, self.spectra, loader,
+                                                                           "Unable to load Container Runs:")
+            mtd.addOrReplace(self._tof_workspace_suffix(self.container_runs, self.spectra), self.container_data)
         else:
             self.container_runs, self.container_data = None, None
 
@@ -185,8 +178,7 @@ def _parse_spectra_bank(spectra_bank):
     elif spectra_bank == "backward":
         bank_ranges = VESUVIO()._instrument.backward_banks
     else:
-        raise ValueError("Fitting by bank requires selecting either 'forward' or 'backward' "
-                         "for the spectra to load")
+        raise ValueError("Fitting by bank requires selecting either 'forward' or 'backward' " "for the spectra to load")
     bank_ranges = ["{0}-{1}".format(x, y) for x, y in bank_ranges]
     return ";".join(bank_ranges)
 

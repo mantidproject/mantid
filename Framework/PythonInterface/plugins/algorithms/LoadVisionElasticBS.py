@@ -22,7 +22,7 @@ class LoadVisionElasticBS(PythonAlgorithm):
         return "DataHandling\\Nexus"
 
     def seeAlso(self):
-        return [ "LoadVisionElasticEQ","LoadVisionInelastic" ]
+        return ["LoadVisionElasticEQ", "LoadVisionInelastic"]
 
     def name(self):
         return "LoadVisionElasticBS"
@@ -69,7 +69,7 @@ class LoadVisionElasticBS(PythonAlgorithm):
             # Now lets try histograms.
             for bank in banks_list:
                 mantid.simpleapi.LoadFlexiNexus(Filename=filename,
-                                                Dictionary=os.path.join(dictionary_path, 'vision-'+bank+'.dic'),
+                                                Dictionary=os.path.join(dictionary_path, 'vision-' + bank + '.dic'),
                                                 OutputWorkspace=bank)
                 mantid.simpleapi.LoadInstrument(Workspace=bank,
                                                 Filename=ExperimentInfo.getInstrumentFilename('VISION'),

@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=line-too-long, invalid-name, too-many-locals, too-many-branches, unused-variable
 # pylint: disable=attribute-defined-outside-init, old-style-class, too-many-instance-attributes
-
 """
 Contains the ISISDisk class which calculates resolution and flux for ISIS Disk chopper
 spectrometer (LET) - using the functions in MulpyRep and additional tables of instrument parameters
@@ -22,10 +21,10 @@ class ISISDisk:
     """
     Calculates the resolution and flux for the ISIS disk chopper spectrometer LET
     """
-
     def __init__(self, instname=None, variant=None, freq=None):
-        warnings.warn("The ISISDisk class is deprecated and will be removed in the next Mantid version. "
-                      "Please use the Instrument class or the official PyChop CLI interface.", DeprecationWarning)
+        warnings.warn(
+            "The ISISDisk class is deprecated and will be removed in the next Mantid version. "
+            "Please use the Instrument class or the official PyChop CLI interface.", DeprecationWarning)
         if instname:
             self.setInstrument(instname, variant)
             self.freq = 0
@@ -45,28 +44,29 @@ class ISISDisk:
         if 'LET' in instname:
             self.instname = 'LET'
             # Sets parameters which are the same for all configurations
-            self.dist = [7.83, 8.4, 11.75, 15.66, 23.5]        # distance to each chopper in m (same for all conf)
-            self.nslot = [6, 1, 2, 6, 2]                       # number of slots in each chopper. Assumed equally spaced
-            self.guide_width = [40, 40, 40, 40, 20]            # width of the guide in mm
-            self.radius = [290, 545, 290, 290, 290]            # radius in mm of each disk at centre of window
-            self.numDisk = [2, 1, 1, 1, 2]                     # whether double or single disks
-            # possible instname: ['LET', 'LETHIFLUX', 'LETINTERMED', 'LETHIRES'] - corresponds to different configurations
+            self.dist = [7.83, 8.4, 11.75, 15.66, 23.5]  # distance to each chopper in m (same for all conf)
+            self.nslot = [6, 1, 2, 6, 2]  # number of slots in each chopper. Assumed equally spaced
+            self.guide_width = [40, 40, 40, 40, 20]  # width of the guide in mm
+            self.radius = [290, 545, 290, 290, 290]  # radius in mm of each disk at centre of window
+            self.numDisk = [2, 1, 1, 1, 2]  # whether double or single disks
+            # possible instname: ['LET', 'LETHIFLUX', 'LETINTERMED', 'LETHIRES'] - corresponds to different
+            # configurations
             if 'FLUX' in instname or (variant is not None and 'FLUX' in variant.upper()):
-                self.slot_width = [40, 890, 56, 52, 31]        # width of chopper slots in mm
+                self.slot_width = [40, 890, 56, 52, 31]  # width of chopper slots in mm
                 self.variant = 'High flux'
             elif 'RES' in instname or (variant is not None and 'RES' in variant.upper()):
-                self.slot_width = [40, 890, 56, 52, 15]        # width of chopper slots in mm
+                self.slot_width = [40, 890, 56, 52, 15]  # width of chopper slots in mm
                 self.variant = 'High resolution'
             else:
-                self.slot_width = [40, 890, 56, 52, 20]        # width of chopper slots in mm
+                self.slot_width = [40, 890, 56, 52, 20]  # width of chopper slots in mm
                 self.variant = 'Intermediate'
-            self.ph_ind = 1        # index of chopper with user-determined phase
-            self.samp_det = 3.5    # sample to detector distance in m
-            self.chop_samp = 1.5   # final chopper to sample distance
-            self.source_rep = 10   # rep rate of source
-            self.tmod = 3500       # maximum emission window from moderator in us
-            self.frac_ei = 0.90    # fraction of Ei to plot energy loss lines
-            self.Chop2Phase = 5    # Phase delay time in usec for chopper 2 (T0/frame overlap chopper)
+            self.ph_ind = 1  # index of chopper with user-determined phase
+            self.samp_det = 3.5  # sample to detector distance in m
+            self.chop_samp = 1.5  # final chopper to sample distance
+            self.source_rep = 10  # rep rate of source
+            self.tmod = 3500  # maximum emission window from moderator in us
+            self.frac_ei = 0.90  # fraction of Ei to plot energy loss lines
+            self.Chop2Phase = 5  # Phase delay time in usec for chopper 2 (T0/frame overlap chopper)
         elif 'MERLIN' in instname:
             self.dist = [9.3, 10.1]
             self.nslot = [1, 2]
@@ -82,7 +82,7 @@ class ISISDisk:
             self.instname = 'MERLIN'
             self.variant = 'G'
             self.ph_ind = 0
-            self.Chop2Phase = 1500 # Phased to not let neutrons with Ei>200meV through
+            self.Chop2Phase = 1500  # Phased to not let neutrons with Ei>200meV through
         elif 'MARI' in instname:
             self.dist = [7.85, 10.1]
             self.nslot = [4, 2]
@@ -99,7 +99,7 @@ class ISISDisk:
             self.instname = 'MARI'
             self.variant = 'G'
             self.ph_ind = '0'
-            self.Chop2Phase = 2 # Mode (0,1,2,4 which slot for first rep)
+            self.Chop2Phase = 2  # Mode (0,1,2,4 which slot for first rep)
         elif 'MAPS' in instname:
             self.dist = [8.831, 10.143]
             self.nslot = [4, 1]
@@ -116,7 +116,7 @@ class ISISDisk:
             self.instname = 'MAPS'
             self.variant = 'S'
             self.ph_ind = '0'
-            self.Chop2Phase = 1 # Mode (0==non reprate, 1,2,3==which slot for first rep)
+            self.Chop2Phase = 1  # Mode (0==non reprate, 1,2,3==which slot for first rep)
         else:
             raise ValueError('Instrument %s not recognised.' % (instname))
 
@@ -136,39 +136,39 @@ class ISISDisk:
         if 'FLUX' in self.variant.upper():
             if hasattr(frequency, "__len__"):
                 if len(frequency) == 1:
-                    self.freq = [frequency[0]/4., 10., frequency[0]/2., frequency[0]/2., frequency[0]]
+                    self.freq = [frequency[0] / 4., 10., frequency[0] / 2., frequency[0] / 2., frequency[0]]
                 elif len(frequency) == 2:
-                    self.freq = [frequency[1]/2., 10., frequency[1], frequency[0]/2., frequency[0]]
+                    self.freq = [frequency[1] / 2., 10., frequency[1], frequency[0] / 2., frequency[0]]
                 elif len(frequency) == 5:
                     self.freq = frequency
                 else:
                     raise ValueError('Frequency must be a 1-, 2- or 5-element list/array')
             else:
-                self.freq = [frequency/4., 10., frequency/4., frequency/2., frequency]
+                self.freq = [frequency / 4., 10., frequency / 4., frequency / 2., frequency]
         elif 'RES' in self.variant.upper():
             if hasattr(frequency, "__len__"):
                 if len(frequency) == 1:
-                    self.freq = [frequency[0]/2., 10., frequency[0]/2., frequency[0]/2., frequency[0]]
+                    self.freq = [frequency[0] / 2., 10., frequency[0] / 2., frequency[0] / 2., frequency[0]]
                 elif len(frequency) == 2:
-                    self.freq = [frequency[0]/2., 10., frequency[1], frequency[1], frequency[0]]
+                    self.freq = [frequency[0] / 2., 10., frequency[1], frequency[1], frequency[0]]
                 elif len(frequency) == 5:
                     self.freq = frequency
                 else:
                     raise ValueError('Frequency must be a 1-, 2- or 5-element list/array')
             else:
-                self.freq = [frequency/2., 10., frequency/2., frequency/2., frequency]
+                self.freq = [frequency / 2., 10., frequency / 2., frequency / 2., frequency]
         else:
             if hasattr(frequency, "__len__"):
                 if len(frequency) == 1:
-                    self.freq = [frequency[0]/4., 10., frequency[0]/2., frequency[0]/2., frequency[0]]
+                    self.freq = [frequency[0] / 4., 10., frequency[0] / 2., frequency[0] / 2., frequency[0]]
                 elif len(frequency) == 2:
-                    self.freq = [frequency[1]/2., 10., frequency[1], frequency[0]/2., frequency[0]]
+                    self.freq = [frequency[1] / 2., 10., frequency[1], frequency[0] / 2., frequency[0]]
                 elif len(frequency) == 5:
                     self.freq = frequency
                 else:
                     raise ValueError('Frequency must be a 1-, 2- or 5-element list/array')
             else:
-                self.freq = [frequency/4., 10., frequency/2., frequency/2., frequency]
+                self.freq = [frequency / 4., 10., frequency / 2., frequency / 2., frequency]
 
     def setFrequency(self, frequency, **kwargs):
         """
@@ -224,15 +224,18 @@ class ISISDisk:
         Private method to calculate the resolution at given Ei, Etrans from chopper opening times.
         """
         Ei = self.Ei if Ei_in is None else Ei_in
-        instpars = [self.dist, self.nslot, self.slot_ang_pos, self.slot_width, self.guide_width, self.radius, self.numDisk,
-                    self.samp_det, self.chop_samp, self.source_rep, self.tmod, self.frac_ei, self.ph_ind]
+        instpars = [
+            self.dist, self.nslot, self.slot_ang_pos, self.slot_width, self.guide_width, self.radius, self.numDisk,
+            self.samp_det, self.chop_samp, self.source_rep, self.tmod, self.frac_ei, self.ph_ind
+        ]
         Eis, _, chop_times, lastChopDist, lines = MulpyRep.calcChopTimes(Ei, self.freq, instpars, self.Chop2Phase)
         Eis, _ = self._removeLowIntensityReps(Eis, lines, Ei)
-        res_el, percent, chop_width, mod_width = MulpyRep.calcRes(Eis, chop_times, lastChopDist, self.chop_samp, self.samp_det)
+        res_el, percent, chop_width, mod_width = MulpyRep.calcRes(Eis, chop_times, lastChopDist, self.chop_samp,
+                                                                  self.samp_det)
         if single_mode:
             #ie_list = [ii for ii,ee in enumerate(Eis) if np.abs((ee-Ei)/Ei)<0.05]
-            ie_list = np.where(np.abs(np.array(Eis)-Ei) == np.min(np.abs(np.array(Eis)-Ei)))[0]
-            Et = np.linspace(0.05, 0.95*Ei, 19, endpoint=True) if (Etrans is None) else Etrans
+            ie_list = np.where(np.abs(np.array(Eis) - Ei) == np.min(np.abs(np.array(Eis) - Ei)))[0]
+            Et = np.linspace(0.05, 0.95 * Ei, 19, endpoint=True) if (Etrans is None) else Etrans
         else:
             ie_list = range(len(Eis))
             # This is the relative energy transfer
@@ -241,16 +244,17 @@ class ISISDisk:
         if not np.shape(Et):
             Et = [Et]
         for ie in ie_list:
-            t_mod_chop = 252.82 * lastChopDist * np.sqrt(81.81/Eis[ie])
+            t_mod_chop = 252.82 * lastChopDist * np.sqrt(81.81 / Eis[ie])
             res = []
             energy_transfer = Et if single_mode else np.array(Et) * Eis[ie]
             for en in energy_transfer:
                 Ef = Eis[ie] - en
                 if (Ef > 0):
-                    fac = (Ef/Eis[ie])**1.5
-                    chopRes = (2*chop_width[ie]/t_mod_chop) * (1+((self.chop_samp+lastChopDist)/self.samp_det)*fac)
-                    modRes = (2*mod_width[ie]/t_mod_chop) * (1+(self.chop_samp/self.samp_det)*fac)
-                    res.append(np.sqrt(chopRes**2 + modRes**2)*Eis[ie])
+                    fac = (Ef / Eis[ie])**1.5
+                    chopRes = (2 * chop_width[ie] / t_mod_chop) * (1 + (
+                        (self.chop_samp + lastChopDist) / self.samp_det) * fac)
+                    modRes = (2 * mod_width[ie] / t_mod_chop) * (1 + (self.chop_samp / self.samp_det) * fac)
+                    res.append(np.sqrt(chopRes**2 + modRes**2) * Eis[ie])
                 else:
                     res.append(np.nan)
             if len(ie_list) == 1:
@@ -295,7 +299,7 @@ class ISISDisk:
         Returns the time widths contributing to the calculated energy width
         """
         res_el, percent, tchp, tmod = self.getElasticResolution(Ei_in, frequency)
-        return {"Moderator":tmod, "Chopper":tchp, "Energy":res_el}
+        return {"Moderator": tmod, "Chopper": tchp, "Energy": res_el}
 
     def getMultiWidths(self, Ei_in=None, frequency=None):
         """
@@ -322,7 +326,7 @@ class ISISDisk:
             tmod = mod_width
         if frequency:
             self.setFrequency(oldfreq)
-        return {"Eis":Eis, "Moderator":tmod, "Chopper":tchp, "Energy":res_el}
+        return {"Eis": Eis, "Moderator": tmod, "Chopper": tchp, "Energy": res_el}
 
     def getResolution(self, Etrans=None, Ei_in=None, frequency=None):
         """
@@ -338,7 +342,7 @@ class ISISDisk:
             _, res, _, _, _, _, _ = self.__LETgetResolution(True, Etrans, Ei)
         elif any([iname in self.instname for iname in ['MERLIN', 'MAPS', 'MARI']]):
             if Etrans is None:
-                Etrans = np.linspace(0.05*Ei, 0.95*Ei, 19, endpoint=True)
+                Etrans = np.linspace(0.05 * Ei, 0.95 * Ei, 19, endpoint=True)
             chopper_inst = ISISFermi(self.instname, self.variant, self.freq[-1])
             res = chopper_inst.getResolution(Etrans, Ei, None, True)
         else:
@@ -383,8 +387,10 @@ class ISISDisk:
         Ei = self.Ei if Ei_in is None else Ei_in
         if Ei is None:
             raise ValueError('Focused incident energy has not been specified')
-        instpars = [self.dist, self.nslot, self.slot_ang_pos, self.slot_width, self.guide_width, self.radius, self.numDisk,
-                    self.samp_det, self.chop_samp, self.source_rep, self.tmod, self.frac_ei, self.ph_ind]
+        instpars = [
+            self.dist, self.nslot, self.slot_ang_pos, self.slot_width, self.guide_width, self.radius, self.numDisk,
+            self.samp_det, self.chop_samp, self.source_rep, self.tmod, self.frac_ei, self.ph_ind
+        ]
         Eis, _, _, _, lines = MulpyRep.calcChopTimes(Ei, self.freq, instpars, self.Chop2Phase)
         Eis, _ = self._removeLowIntensityReps(Eis, lines, Ei)
         return Eis
@@ -464,8 +470,10 @@ class ISISDisk:
         if frequency:
             oldfreq = self.freq
             self.setFrequency(frequency)
-        instpars = [self.dist, self.nslot, self.slot_ang_pos, self.slot_width, self.guide_width, self.radius, self.numDisk,
-                    self.samp_det, self.chop_samp, self.source_rep, self.tmod, self.frac_ei, self.ph_ind]
+        instpars = [
+            self.dist, self.nslot, self.slot_ang_pos, self.slot_width, self.guide_width, self.radius, self.numDisk,
+            self.samp_det, self.chop_samp, self.source_rep, self.tmod, self.frac_ei, self.ph_ind
+        ]
         Eis, chop_times, _, lastChopDist, lines = MulpyRep.calcChopTimes(Ei, self.freq, instpars, self.Chop2Phase)
         Eis, lines = self._removeLowIntensityReps(Eis, lines, Ei)
         if frequency:
@@ -480,18 +488,18 @@ class ISISDisk:
         plt.plot([-20000, 120000], [totDist, totDist], c='k', linewidth=2.)
         for i in range(len(lines)):
             x0 = (-lines[i][0][1] / lines[i][0][0] - lines[i][1][1] / lines[i][1][0]) / 2.
-            x1 = ((modSamDist-lines[i][0][1]) / lines[i][0][0] + (modSamDist-lines[i][1][1]) / lines[i][1][0]) / 2.
+            x1 = ((modSamDist - lines[i][0][1]) / lines[i][0][0] + (modSamDist - lines[i][1][1]) / lines[i][1][0]) / 2.
             plt.plot([x0, x1], [0, modSamDist], c='b')
-            x2 = ((totDist-lines[i][0][1]) / lines[i][0][0] + (totDist-lines[i][1][1]) / lines[i][1][0]) / 2.
+            x2 = ((totDist - lines[i][0][1]) / lines[i][0][0] + (totDist - lines[i][1][1]) / lines[i][1][0]) / 2.
             lineM = totDist / x2
             plt.plot([x1, x2], [modSamDist, totDist], c='b')
-            newline = [lineM*np.sqrt(1+fracEi), modSamDist-lineM*np.sqrt(1+fracEi)*x1]
-            x3 = (totDist-newline[1]) / (newline[0])
+            newline = [lineM * np.sqrt(1 + fracEi), modSamDist - lineM * np.sqrt(1 + fracEi) * x1]
+            x3 = (totDist - newline[1]) / (newline[0])
             plt.plot([x1, x3], [modSamDist, totDist], c='r')
-            newline = [lineM*np.sqrt(1-fracEi), modSamDist-lineM*np.sqrt(1-fracEi)*x1]
-            x4 = (totDist-newline[1]) / (newline[0])
+            newline = [lineM * np.sqrt(1 - fracEi), modSamDist - lineM * np.sqrt(1 - fracEi) * x1]
+            x4 = (totDist - newline[1]) / (newline[0])
             plt.plot([x1, x4], [modSamDist, totDist], c='r')
-            plt.text(x2, totDist+0.2, "{:3.1f}".format(Eis[i]))
+            plt.text(x2, totDist + 0.2, "{:3.1f}".format(Eis[i]))
         xmax = 100000 if 'LET' in self.instname else 20000
         if h_plt is None:
             plt.xlim(0, xmax)
@@ -507,9 +515,9 @@ class ISISDisk:
         # Removes reps with Ei where there are no neutrons (E<7 meV for Merlin, E>40 meV for LET)
         Eis = np.array(Eis)
         if 'MERLIN' in self.instname:
-            idx = Eis > 7            # Keep reps above 7meV
+            idx = Eis > 7  # Keep reps above 7meV
         elif 'LET' in self.instname:
-            idx = Eis < 30           # Keep reps below 30meV
+            idx = Eis < 30  # Keep reps below 30meV
         elif 'MARI' in self.instname or 'MAPS' in self.instname:
             idx = Eis < 2000
         else:

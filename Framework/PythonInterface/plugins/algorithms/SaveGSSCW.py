@@ -12,7 +12,6 @@ from mantid.simpleapi import ConvertToPointData
 
 
 class SaveGSSCW(mantid.api.PythonAlgorithm):
-
     def category(self):
         return "DataHandling\\Nexus"
 
@@ -26,9 +25,7 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
         return "Save constant wavelength powder diffraction data to a GSAS file in FXYE format"
 
     def PyInit(self):
-        self.declareProperty(mantid.api.WorkspaceProperty('InputWorkspace',
-                                                          '',
-                                                          mantid.kernel.Direction.Input),
+        self.declareProperty(mantid.api.WorkspaceProperty('InputWorkspace', '', mantid.kernel.Direction.Input),
                              "Workspace to save")
         self.declareProperty(mantid.api.FileProperty('OutputFilename',
                                                      '',

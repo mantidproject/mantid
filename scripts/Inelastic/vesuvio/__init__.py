@@ -15,4 +15,4 @@ profiles    -- Defines mass profiles
 testing     -- Simulates Vesuvio data for use in tests
 """
 
-__all__=['backgrounds','base','commands','fitting','instrument','profiles', 'testing']
+__all__ = ['backgrounds', 'base', 'commands', 'fitting', 'instrument', 'profiles', 'testing']

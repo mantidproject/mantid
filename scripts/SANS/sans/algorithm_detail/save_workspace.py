@@ -92,8 +92,7 @@ def get_zero_error_free_workspace(workspace):
     :return: The zero-error free workspace
     """
     clone_name = "CloneWorkspace"
-    clone_options = {"InputWorkspace": workspace,
-                     "OutputWorkspace": EMPTY_NAME}
+    clone_options = {"InputWorkspace": workspace, "OutputWorkspace": EMPTY_NAME}
     clone_alg = create_unmanaged_algorithm(clone_name, **clone_options)
     clone_alg.execute()
     cloned_workspace = clone_alg.getProperty("OutputWorkspace").value

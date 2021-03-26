@@ -33,53 +33,57 @@ class LoadSINQFile(PythonAlgorithm):
 
     def PyInit(self):
         #global dictsearch
-        instruments=["AMOR","BOA","DMC","FOCUS","HRPT","MARSI","MARSE","POLDI",
-                     "RITA-2","SANS","SANS2","TRICS"]
-        self.declareProperty("Instrument","AMOR",
+        instruments = [
+            "AMOR", "BOA", "DMC", "FOCUS", "HRPT", "MARSI", "MARSE", "POLDI", "RITA-2", "SANS", "SANS2", "TRICS"
+        ]
+        self.declareProperty("Instrument",
+                             "AMOR",
                              StringListValidator(instruments),
-                             "Choose Instrument",direction=Direction.Input)
-        self.declareProperty(FileProperty(name="Filename",defaultValue="",
-                                          action=FileAction.Load, extensions=[".h5",".hdf"]))
-        self.declareProperty(WorkspaceProperty("OutputWorkspace","",direction=Direction.Output))
+                             "Choose Instrument",
+                             direction=Direction.Input)
+        self.declareProperty(
+            FileProperty(name="Filename", defaultValue="", action=FileAction.Load, extensions=[".h5", ".hdf"]))
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
 
     def PyExec(self):
-        inst=self.getProperty('Instrument').value
+        inst = self.getProperty('Instrument').value
         fname = self.getProperty('Filename').value
 
         diclookup = {
-            "AMOR":"amor.dic",
-            "BOA":"boa.dic",
-            "DMC":"dmc.dic",
-            "FOCUS":"focus.dic",
-            "HRPT":"hrpt.dic",
-            "MARSI":"marsin.dic",
-            "MARSE":"marse.dic",
-            "POLDI_legacy":"poldi_legacy.dic",
-            "POLDI":"poldi.dic",
-            "RITA-2":"rita.dic",
-            "SANS":"sans.dic",
-            "SANS2":"sans.dic",
-            "TRICS":"trics.dic"
+            "AMOR": "amor.dic",
+            "BOA": "boa.dic",
+            "DMC": "dmc.dic",
+            "FOCUS": "focus.dic",
+            "HRPT": "hrpt.dic",
+            "MARSI": "marsin.dic",
+            "MARSE": "marse.dic",
+            "POLDI_legacy": "poldi_legacy.dic",
+            "POLDI": "poldi.dic",
+            "RITA-2": "rita.dic",
+            "SANS": "sans.dic",
+            "SANS2": "sans.dic",
+            "TRICS": "trics.dic"
         }
 
         lookupInstrumentName = inst
         if inst == 'POLDI':
             lookupInstrumentName = self._getPoldiLookupName(fname, lookupInstrumentName)
 
-        dictsearch = os.path.join(config['instrumentDefinition.directory'],"nexusdictionaries")
+        dictsearch = os.path.join(config['instrumentDefinition.directory'], "nexusdictionaries")
         dicname = os.path.join(dictsearch, diclookup[lookupInstrumentName])
         wname = "__tmp"
-        ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,OutputWorkspace=wname)
+        ws = mantid.simpleapi.LoadFlexiNexus(fname, dicname, OutputWorkspace=wname)
 
         if inst == "POLDI":
             if ws.getNumberHistograms() == 800:
-                ws.maskDetectors(SpectraList=list(range(0,800))[::2])
+                ws.maskDetectors(SpectraList=list(range(0, 800))[::2])
 
                 config.appendDataSearchDir(config['groupingFiles.directory'])
                 grp_file = "POLDI_Grouping_800to400.xml"
                 ws = mantid.simpleapi.GroupDetectors(InputWorkspace=ws,
                                                      OutputWorkspace=wname,
-                                                     MapFile=grp_file, Behaviour="Sum")
+                                                     MapFile=grp_file,
+                                                     Behaviour="Sum")
 
             # Reverse direction of POLDI data so that low index corresponds to low 2theta.
             histogramCount = ws.getNumberHistograms()
@@ -91,13 +95,13 @@ class LoadSINQFile(PythonAlgorithm):
                 ws.setY(i, np.array(oldYData[histogramCount - 1 - i]))
 
         elif inst == "TRICS":
-            ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,OutputWorkspace=wname)
-            ws = mantid.simpleapi.SINQTranspose3D(ws,OutputWorkspace=wname)
+            ws = mantid.simpleapi.LoadFlexiNexus(fname, dicname, OutputWorkspace=wname)
+            ws = mantid.simpleapi.SINQTranspose3D(ws, OutputWorkspace=wname)
 
         # Attach workspace to the algorithm property
         self.setProperty("OutputWorkspace", ws)
         # delete temporary reference
-        mantid.simpleapi.DeleteWorkspace(wname,EnableLogging=False)
+        mantid.simpleapi.DeleteWorkspace(wname, EnableLogging=False)
 
     def _getPoldiLookupName(self, fname, lookupInstrumentName):
         year = self._extractYearFromFileName(fname)

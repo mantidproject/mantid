@@ -20,7 +20,6 @@ except ImportError:
 
 
 class BckDirectBeam(DirectBeam):
-
     def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
         super(BckDirectBeam, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
 
@@ -37,7 +36,6 @@ class BckDirectBeam(DirectBeam):
 
 
 class BckBeamSpreader(BeamSpreader):
-
     def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
         super(BckBeamSpreader, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
 
@@ -180,7 +178,7 @@ class BackgroundWidget(BaseWidget):
             m.trans_dark_current = self._content.trans_dark_current_edit.text()
 
             if self._method_box is not None:
-                m.trans_calculation_method=self._method_box.get_state()
+                m.trans_calculation_method = self._method_box.get_state()
         return m
 
     def _trans_dark_current_browse(self):
@@ -194,8 +192,12 @@ class BackgroundWidget(BaseWidget):
         if isinstance(self._method_box, BckBeamSpreader):
             self._last_spreader_state = self._method_box.get_state()
         if self.show_transmission:
-            self._replace_method(BckDirectBeam(self, state=state, settings=self._settings,
-                                               data_type=self._data_type, data_proxy=self._data_proxy))
+            self._replace_method(
+                BckDirectBeam(self,
+                              state=state,
+                              settings=self._settings,
+                              data_type=self._data_type,
+                              data_proxy=self._data_proxy))
 
     def _beam_spreader(self, state=None):
         if state is None:
@@ -203,8 +205,12 @@ class BackgroundWidget(BaseWidget):
         if isinstance(self._method_box, BckDirectBeam):
             self._last_direct_state = self._method_box.get_state()
         if self.show_transmission:
-            self._replace_method(BckBeamSpreader(self, state=state, settings=self._settings,
-                                                 data_type=self._data_type, data_proxy=self._data_proxy))
+            self._replace_method(
+                BckBeamSpreader(self,
+                                state=state,
+                                settings=self._settings,
+                                data_type=self._data_type,
+                                data_proxy=self._data_proxy))
 
     def _replace_method(self, widget):
         if self._method_box is not None:
@@ -260,9 +266,9 @@ class BackgroundWidget(BaseWidget):
             return
 
         fname = str(self._content.background_edit.text())
-        if len(str(fname).strip())>0:
+        if len(str(fname).strip()) > 0:
             dataproxy = self._data_proxy(fname, "__background_raw")
-            if len(dataproxy.errors)>0:
+            if len(dataproxy.errors) > 0:
                 return
 
             self._settings.last_data_ws = dataproxy.data_ws

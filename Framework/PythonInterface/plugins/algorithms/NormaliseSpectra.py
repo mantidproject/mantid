@@ -25,18 +25,15 @@ class NormaliseSpectra(DataProcessorAlgorithm):
         return 'Normalise all spectra to have a max value of 1'
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
-                                                     direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                              doc='Input workspace')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                                                     direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace')
 
     def PyExec(self):
         self._setup()
-        CloneWorkspace(InputWorkspace=self._input_ws,
-                       OutputWorkspace=self._output_ws_name)
+        CloneWorkspace(InputWorkspace=self._input_ws, OutputWorkspace=self._output_ws_name)
 
         num_hists = self._input_ws.getNumberHistograms()
         output_ws = mtd[self._output_ws_name]
@@ -49,11 +46,12 @@ class NormaliseSpectra(DataProcessorAlgorithm):
             if ymax <= 0:
                 spectrum_no = single_spectrum.getSpectrum(0).getSpectrumNo()
                 DeleteWorkspace('single_spectrum')
-                raise RuntimeError("Spectrum number %d:" % (spectrum_no)
-                                   + "has a maximum y value of 0 or less. "
-                                   + "All spectra must have a maximum y value more than 0")
-            Scale(InputWorkspace=single_spectrum, Operation="Multiply",
-                  Factor=(1/ymax), OutputWorkspace=single_spectrum)
+                raise RuntimeError("Spectrum number %d:" % (spectrum_no) + "has a maximum y value of 0 or less. " +
+                                   "All spectra must have a maximum y value more than 0")
+            Scale(InputWorkspace=single_spectrum,
+                  Operation="Multiply",
+                  Factor=(1 / ymax),
+                  OutputWorkspace=single_spectrum)
             output_ws.setY(idx, single_spectrum.readY(0))
             output_ws.setE(idx, single_spectrum.readE(0))
 

@@ -9,7 +9,6 @@ from mantid.simpleapi import PaalmanPingsMonteCarloAbsorption, Load, mtd
 
 
 class FlatPlateTest(systemtesting.MantidSystemTest):
-
     def __init__(self):
         super(FlatPlateTest, self).__init__()
         self.setUp()
@@ -27,26 +26,23 @@ class FlatPlateTest(systemtesting.MantidSystemTest):
         return ['flat_plate_corr', 'irs_PP_MC_flat_plate.nxs']
 
     def runTest(self):
-        PaalmanPingsMonteCarloAbsorption(
-            InputWorkspace='sample',
-            Shape='FlatPlate',
-            BeamHeight=2.0,
-            BeamWidth=2.0,
-            Height=2.0,
-            SampleWidth=2.0,
-            SampleThickness=0.1,
-            SampleChemicalFormula='H2-O',
-            SampleDensity=1.0,
-            ContainerFrontThickness=0.02,
-            ContainerBackThickness=0.02,
-            ContainerChemicalFormula='V',
-            ContainerDensity=6.0,
-            CorrectionsWorkspace='flat_plate_corr'
-        )
+        PaalmanPingsMonteCarloAbsorption(InputWorkspace='sample',
+                                         Shape='FlatPlate',
+                                         BeamHeight=2.0,
+                                         BeamWidth=2.0,
+                                         Height=2.0,
+                                         SampleWidth=2.0,
+                                         SampleThickness=0.1,
+                                         SampleChemicalFormula='H2-O',
+                                         SampleDensity=1.0,
+                                         ContainerFrontThickness=0.02,
+                                         ContainerBackThickness=0.02,
+                                         ContainerChemicalFormula='V',
+                                         ContainerDensity=6.0,
+                                         CorrectionsWorkspace='flat_plate_corr')
 
 
 class CylinderTest(systemtesting.MantidSystemTest):
-
     def __init__(self):
         super(CylinderTest, self).__init__()
         self.setUp()
@@ -64,24 +60,21 @@ class CylinderTest(systemtesting.MantidSystemTest):
         return ['cylinder_corr', 'irs_PP_MC_cylinder.nxs']
 
     def runTest(self):
-        PaalmanPingsMonteCarloAbsorption(
-            InputWorkspace='sample',
-            Shape='Cylinder',
-            BeamHeight=2.0,
-            BeamWidth=2.0,
-            Height=2.0,
-            SampleRadius=0.2,
-            SampleChemicalFormula='H2-O',
-            SampleDensity=1.0,
-            ContainerRadius=0.22,
-            ContainerChemicalFormula='V',
-            ContainerDensity=6.0,
-            CorrectionsWorkspace='cylinder_corr'
-        )
+        PaalmanPingsMonteCarloAbsorption(InputWorkspace='sample',
+                                         Shape='Cylinder',
+                                         BeamHeight=2.0,
+                                         BeamWidth=2.0,
+                                         Height=2.0,
+                                         SampleRadius=0.2,
+                                         SampleChemicalFormula='H2-O',
+                                         SampleDensity=1.0,
+                                         ContainerRadius=0.22,
+                                         ContainerChemicalFormula='V',
+                                         ContainerDensity=6.0,
+                                         CorrectionsWorkspace='cylinder_corr')
 
 
 class AnnulusTest(systemtesting.MantidSystemTest):
-
     def __init__(self):
         super(AnnulusTest, self).__init__()
         self.setUp()
@@ -99,20 +92,18 @@ class AnnulusTest(systemtesting.MantidSystemTest):
         return ['annulus_corr', 'irs_PP_MC_annulus.nxs']
 
     def runTest(self):
-        PaalmanPingsMonteCarloAbsorption(
-            InputWorkspace='sample',
-            Shape='Annulus',
-            BeamHeight=2.0,
-            BeamWidth=2.0,
-            Height=2.0,
-            SampleInnerRadius=0.2,
-            SampleOuterRadius=0.4,
-            SampleChemicalFormula='H2-O',
-            SampleDensity=1.0,
-            ContainerInnerRadius=0.19,
-            ContainerOuterRadius=0.41,
-            ContainerChemicalFormula='V',
-            ContainerDensity=6.0,
-            CorrectionsWorkspace='annulus_corr',
-            EventsPerPoint=5000
-        )
+        PaalmanPingsMonteCarloAbsorption(InputWorkspace='sample',
+                                         Shape='Annulus',
+                                         BeamHeight=2.0,
+                                         BeamWidth=2.0,
+                                         Height=2.0,
+                                         SampleInnerRadius=0.2,
+                                         SampleOuterRadius=0.4,
+                                         SampleChemicalFormula='H2-O',
+                                         SampleDensity=1.0,
+                                         ContainerInnerRadius=0.19,
+                                         ContainerOuterRadius=0.41,
+                                         ContainerChemicalFormula='V',
+                                         ContainerDensity=6.0,
+                                         CorrectionsWorkspace='annulus_corr',
+                                         EventsPerPoint=5000)

@@ -17,7 +17,6 @@ class FittingSettingsView(form, base):
     The view of the fitting settings. The layout is constructed inside the loaded UI file.
     The connections are setup in the presenter. This view only sets up and deletes itself on close.
     """
-
     def __init__(self, parent=None, presenter=None):
         super(FittingSettingsView, self).__init__(parent)
         self.setupUi(self)

@@ -10,11 +10,11 @@ import numpy
 
 
 class _MildnerCarpenterBase():
-
     def __call__(self, q):
         if isinstance(q, numpy.ndarray):
             if q.ndim > 1:
-                raise NotImplementedError('Resolution calculation not supported for arrays with more than one dimension.')
+                raise NotImplementedError(
+                    'Resolution calculation not supported for arrays with more than one dimension.')
             else:
                 return numpy.array([self._delta_q(qi) for qi in q])
         elif isinstance(q, list):
@@ -61,9 +61,9 @@ class MonochromaticScalarQCartesian(_MildnerCarpenterBase):
         Returns: Absolute Q resolution [inverse Angstrom]
         """
         sin = q * self._Lambda / (4 * math.pi)
-        sin_2theta = 2 * sin * math.sqrt(1 - sin ** 2)
-        r = self._l2 * sin_2theta / math.sqrt(1 - sin_2theta ** 2)
-        return math.sqrt(self._coeff * (self._delta_theta + self._delta_pixel + self._coeff_r2 * r ** 2))
+        sin_2theta = 2 * sin * math.sqrt(1 - sin**2)
+        r = self._l2 * sin_2theta / math.sqrt(1 - sin_2theta**2)
+        return math.sqrt(self._coeff * (self._delta_theta + self._delta_pixel + self._coeff_r2 * r**2))
 
 
 class MonochromaticScalarQCylindric(_MildnerCarpenterBase):
@@ -84,10 +84,10 @@ class MonochromaticScalarQCylindric(_MildnerCarpenterBase):
         """
         lprime = l1 * l2 / (l1 + l2)
         k = 2 * math.pi / Lambda
-        self._coeff = k ** 2 / 12
+        self._coeff = k**2 / 12
         self._delta_theta = 3 * r1**2 / l1**2 + 3 * r2**2 / lprime**2
         self._delta_pixel = (x3**2 + y3**2) / l2**2
-        self._coeff_r2 = delta_lambda ** 2 / l2 ** 2
+        self._coeff_r2 = delta_lambda**2 / l2**2
         self._l2 = l2
         self._Lambda = Lambda
 
@@ -99,6 +99,6 @@ class MonochromaticScalarQCylindric(_MildnerCarpenterBase):
         Returns: Absolute Q resolution [inverse Angstrom]
         """
         sin = q * self._Lambda / (4 * math.pi)
-        sin_2theta = 2 * sin * math.sqrt(1 - sin ** 2)
-        r = self._l2 * sin_2theta / math.sqrt(1 - sin_2theta ** 2)
-        return math.sqrt(self._coeff * (self._delta_theta + self._delta_pixel + self._coeff_r2 * r ** 2))
+        sin_2theta = 2 * sin * math.sqrt(1 - sin**2)
+        r = self._l2 * sin_2theta / math.sqrt(1 - sin_2theta**2)
+        return math.sqrt(self._coeff * (self._delta_theta + self._delta_pixel + self._coeff_r2 * r**2))

@@ -214,8 +214,7 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.create_axes_orthogonal.reset_mock()
         presenter.nonorthogonal_axes(True)
 
-        data_view_mock.deactivate_and_disable_tool.assert_called_once_with(
-            ToolItemText.REGIONSELECTION)
+        data_view_mock.deactivate_and_disable_tool.assert_called_once_with(ToolItemText.REGIONSELECTION)
         data_view_mock.create_axes_nonorthogonal.assert_called_once()
         data_view_mock.create_axes_orthogonal.assert_not_called()
         self.assertEqual(data_view_mock.plot_MDH.call_count, 2)
@@ -254,8 +253,7 @@ class SliceViewerTest(unittest.TestCase):
         presenter.show_all_data_requested()
 
         data_view = self.view.data_view
-        self.model.get_dim_limits.assert_called_once_with([None, None, 0.5],
-                                                          data_view.dimensions.transpose)
+        self.model.get_dim_limits.assert_called_once_with([None, None, 0.5], data_view.dimensions.transpose)
         data_view.set_axes_limits.assert_called_once_with((-1, 1), (-2, 2))
 
     @patch("sip.isdeleted", return_value=False)
@@ -282,8 +280,8 @@ class SliceViewerTest(unittest.TestCase):
 
     @patch("sip.isdeleted", return_value=False)
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
-    def test_changing_dimensions_in_nonortho_mode_switches_to_ortho_when_dim_not_Q(
-            self, mock_sliceinfo_cls, is_view_delete):
+    def test_changing_dimensions_in_nonortho_mode_switches_to_ortho_when_dim_not_Q(self, mock_sliceinfo_cls,
+                                                                                   is_view_delete):
         presenter, data_view_mock = _create_presenter(self.model,
                                                       self.view,
                                                       mock_sliceinfo_cls,
@@ -298,8 +296,7 @@ class SliceViewerTest(unittest.TestCase):
 
     @patch("sip.isdeleted", return_value=False)
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
-    def test_changing_dimensions_in_nonortho_mode_keeps_nonortho_when_dim_is_Q(
-            self, mock_sliceinfo_cls, _):
+    def test_changing_dimensions_in_nonortho_mode_keeps_nonortho_when_dim_is_Q(self, mock_sliceinfo_cls, _):
         presenter, data_view_mock = _create_presenter(self.model,
                                                       self.view,
                                                       mock_sliceinfo_cls,
@@ -314,8 +311,7 @@ class SliceViewerTest(unittest.TestCase):
 
     @patch("sip.isdeleted", return_value=False)
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
-    def test_changing_dimensions_in_ortho_mode_disables_nonortho_btn_if_not_supported(
-            self, mock_sliceinfo_cls, _):
+    def test_changing_dimensions_in_ortho_mode_disables_nonortho_btn_if_not_supported(self, mock_sliceinfo_cls, _):
         presenter, data_view_mock = _create_presenter(self.model,
                                                       self.view,
                                                       mock_sliceinfo_cls,
@@ -328,8 +324,7 @@ class SliceViewerTest(unittest.TestCase):
 
     @patch("sip.isdeleted", return_value=False)
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
-    def test_changing_dimensions_in_ortho_mode_enables_nonortho_btn_if_supported(
-            self, mock_sliceinfo_cls, _):
+    def test_changing_dimensions_in_ortho_mode_enables_nonortho_btn_if_supported(self, mock_sliceinfo_cls, _):
         presenter, data_view_mock = _create_presenter(self.model,
                                                       self.view,
                                                       mock_sliceinfo_cls,
@@ -346,8 +341,7 @@ class SliceViewerTest(unittest.TestCase):
                 spec=PeaksViewerCollectionPresenter)
     def test_overlay_peaks_workspaces_attaches_view_and_draws_peaks(self, mock_peaks_presenter, *_):
         for nonortho_axes in (False, True):
-            presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(), nonortho_axes,
-                                             nonortho_axes)
+            presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(), nonortho_axes, nonortho_axes)
 
             presenter.view.query_peaks_to_overlay.side_effect = ["peaks_workspace"]
             presenter.overlay_peaks_workspaces()
@@ -417,8 +411,8 @@ class SliceViewerTest(unittest.TestCase):
                                          enable_nonortho_axes=False,
                                          supports_nonortho=False)
         self.view.delayed_refresh = mock.Mock()
-        presenter._decide_plot_update_methods = mock.Mock(
-            return_value=(presenter.new_plot_matrix(), presenter.update_plot_data_matrix()))
+        presenter._decide_plot_update_methods = mock.Mock(return_value=(presenter.new_plot_matrix(),
+                                                                        presenter.update_plot_data_matrix()))
         workspace = create_workspace_mock()
         new_model_properties = self.model.get_properties()
 

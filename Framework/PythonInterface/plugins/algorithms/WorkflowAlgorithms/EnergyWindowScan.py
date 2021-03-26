@@ -66,73 +66,76 @@ class EnergyWindowScan(DataProcessorAlgorithm):
 
     def PyInit(self):
         # Input properties
-        self.declareProperty(StringArrayProperty(name='InputFiles'),
-                             doc='Comma separated list of input files')
+        self.declareProperty(StringArrayProperty(name='InputFiles'), doc='Comma separated list of input files')
 
-        self.declareProperty(name='LoadLogFiles', defaultValue=True,
-                             doc='Load log files when loading runs')
+        self.declareProperty(name='LoadLogFiles', defaultValue=True, doc='Load log files when loading runs')
 
-        self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '',
+        self.declareProperty(WorkspaceProperty('CalibrationWorkspace',
+                                               '',
                                                direction=Direction.Input,
                                                optional=PropertyMode.Optional),
                              doc='Workspace containing calibration data')
 
         # Instrument configuration properties
-        self.declareProperty(name='Instrument', defaultValue='',
+        self.declareProperty(name='Instrument',
+                             defaultValue='',
                              validator=StringListValidator(['IRIS', 'OSIRIS']),
                              doc='Instrument used during run.')
-        self.declareProperty(name='Analyser', defaultValue='',
+        self.declareProperty(name='Analyser',
+                             defaultValue='',
                              validator=StringListValidator(['graphite', 'mica', 'fmica']),
                              doc='Analyser bank used during run.')
-        self.declareProperty(name='Reflection', defaultValue='',
+        self.declareProperty(name='Reflection',
+                             defaultValue='',
                              validator=StringListValidator(['002', '004', '006']),
                              doc='Reflection number for instrument setup during run.')
 
-        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],
+        self.declareProperty(IntArrayProperty(name='SpectraRange',
+                                              values=[0, 1],
                                               validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of spectra number to use.')
 
-        self.declareProperty(FloatArrayProperty(name='ElasticRange'),
-                             doc='Energy range for the elastic component.')
-        self.declareProperty(FloatArrayProperty(name='InelasticRange'),
-                             doc='Energy range for the inelastic component.')
-        self.declareProperty(FloatArrayProperty(name='TotalRange'),
-                             doc='Energy range for the total energy component.')
+        self.declareProperty(FloatArrayProperty(name='ElasticRange'), doc='Energy range for the elastic component.')
+        self.declareProperty(FloatArrayProperty(name='InelasticRange'), doc='Energy range for the inelastic component.')
+        self.declareProperty(FloatArrayProperty(name='TotalRange'), doc='Energy range for the total energy component.')
 
-        self.declareProperty(name='DetailedBalance', defaultValue=Property.EMPTY_DBL,
+        self.declareProperty(name='DetailedBalance',
+                             defaultValue=Property.EMPTY_DBL,
                              doc='Apply the detailed balance correction')
 
         # Spectra grouping options
-        self.declareProperty(name='GroupingMethod', defaultValue='Individual',
+        self.declareProperty(name='GroupingMethod',
+                             defaultValue='Individual',
                              validator=StringListValidator(['Individual', 'All', 'File', 'Workspace', 'IPF']),
                              doc='Method used to group spectra.')
-        self.declareProperty(WorkspaceProperty('GroupingWorkspace', '',
+        self.declareProperty(WorkspaceProperty('GroupingWorkspace',
+                                               '',
                                                direction=Direction.Input,
                                                optional=PropertyMode.Optional),
                              doc='Workspace containing spectra grouping.')
-        self.declareProperty(FileProperty('MapFile', '',
-                                          action=FileAction.OptionalLoad,
-                                          extensions=['.map']),
+        self.declareProperty(FileProperty('MapFile', '', action=FileAction.OptionalLoad, extensions=['.map']),
                              doc='File containing spectra grouping.')
 
-        self.declareProperty(name='SampleEnvironmentLogName', defaultValue='sample',
+        self.declareProperty(name='SampleEnvironmentLogName',
+                             defaultValue='sample',
                              doc='Name of the sample environment log entry')
 
         sampEnvLogVal_type = ['last_value', 'average']
-        self.declareProperty('SampleEnvironmentLogValue', 'last_value',
+        self.declareProperty('SampleEnvironmentLogValue',
+                             'last_value',
                              StringListValidator(sampEnvLogVal_type),
                              doc='Value selection of the sample environment log entry')
 
-        self.declareProperty(name='MSDFit', defaultValue=False,
-                             doc='Perform an MSDFit')
+        self.declareProperty(name='MSDFit', defaultValue=False, doc='Perform an MSDFit')
 
-        self.declareProperty(name='SumFiles', defaultValue=False,
+        self.declareProperty(name='SumFiles',
+                             defaultValue=False,
                              doc='Toggle input file summing or sequential processing')
         # Output properties
-        self.declareProperty(name='ReducedWorkspace', defaultValue='Reduced',
+        self.declareProperty(name='ReducedWorkspace',
+                             defaultValue='Reduced',
                              doc='Workspace group for the resulting workspaces.')
-        self.declareProperty(name='ScanWorkspace', defaultValue='Scan',
-                             doc='Workspace for the scan results.')
+        self.declareProperty(name='ScanWorkspace', defaultValue='Scan', doc='Workspace for the scan results.')
 
     def PyExec(self):
 
@@ -337,8 +340,9 @@ class EnergyWindowScan(DataProcessorAlgorithm):
             self._sum_files = False
 
         # Get the IPF filename
-        self._ipf_filename = os.path.join(config['instrumentDefinition.directory'],
-                                          self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml')
+        self._ipf_filename = os.path.join(
+            config['instrumentDefinition.directory'],
+            self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml')
         logger.information('Instrument parameter file: %s' % self._ipf_filename)
 
         # Warn when grouping options are to be ignored

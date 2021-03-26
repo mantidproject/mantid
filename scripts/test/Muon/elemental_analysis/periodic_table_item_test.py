@@ -20,26 +20,26 @@ class PeriodicTableItemTest(unittest.TestCase):
     def test_that_given_list_of_elements_contains_all_the_required_fields(self):
         # Check that all elements in the periodic table are provided with all the required fields:
         # Symbol, Atomic Number, Col, Row, Name, Mass, Subcategory
-        for i in range(len(periodic_table._elements)-1):
+        for i in range(len(periodic_table._elements) - 1):
             self.assertTrue(isinstance(periodic_table._elements[i][0], str))
             self.assertTrue(isinstance(periodic_table._elements[i][1], int))
             self.assertTrue(isinstance(periodic_table._elements[i][2], int))
             self.assertTrue(isinstance(periodic_table._elements[i][3], int))
             self.assertTrue(isinstance(periodic_table._elements[i][4], str))
             # For some elements the atomic weight is only approximate and represented as an integer
-            self.assertTrue(isinstance(periodic_table._elements[i][5], float)
-                            or isinstance(periodic_table._elements[i][5], int))
+            self.assertTrue(
+                isinstance(periodic_table._elements[i][5], float) or isinstance(periodic_table._elements[i][5], int))
             self.assertTrue(isinstance(periodic_table._elements[i][6], str))
 
         # Meitnerium is not confirmed to be a transition metal, hence it lacks the subcategory field (ie. field 6)
-        i = len(periodic_table._elements)-1
+        i = len(periodic_table._elements) - 1
         self.assertTrue(isinstance(periodic_table._elements[i][0], str))
         self.assertTrue(isinstance(periodic_table._elements[i][1], int))
         self.assertTrue(isinstance(periodic_table._elements[i][2], int))
         self.assertTrue(isinstance(periodic_table._elements[i][3], int))
         self.assertTrue(isinstance(periodic_table._elements[i][4], str))
-        self.assertTrue(isinstance(periodic_table._elements[i][5], float)
-                        or isinstance(periodic_table._elements[i][5], int))
+        self.assertTrue(
+            isinstance(periodic_table._elements[i][5], float) or isinstance(periodic_table._elements[i][5], int))
 
     def test_that_get_method_works(self):
         expected = ["Ti", 22, 4, 4, "titanium", 47.9000]

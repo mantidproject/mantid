@@ -13,7 +13,6 @@ from mantid.kernel import config
 
 
 class ISISIndirectDiffractionReductionTest(unittest.TestCase):
-
     def setUp(self):
         self._oldFacility = config['default.facility']
         if self._oldFacility.strip() == '':
@@ -206,7 +205,8 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(round(red_ws.readY(0)[1], 7), 0.0215684)
         self.assertEqual(round(red_ws.readY(0)[-1], 7), 0.0022809)
 
-    def test_that_a_reduction_with_a_vanadium_file_containing_zeros_for_osiris_diffspec_produces_a_workspace_with_the_correct_name(self):
+    def test_that_a_reduction_with_a_vanadium_file_containing_zeros_for_osiris_diffspec_produces_a_workspace_with_the_correct_name(
+            self):
         output_group = ISISIndirectDiffractionReduction(InputFiles=['OSI137793.RAW'],
                                                         VanadiumFiles=['OSI137713.RAW'],
                                                         Instrument='OSIRIS',
@@ -217,7 +217,8 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(len(output_group), 1)
         self.assertEqual(output_group.getNames()[0], 'osiris137793_diffspec_red')
 
-    def test_that_a_reduction_with_a_vanadium_file_containing_zeros_for_osiris_diffspec_produces_the_correct_output_workspace(self):
+    def test_that_a_reduction_with_a_vanadium_file_containing_zeros_for_osiris_diffspec_produces_the_correct_output_workspace(
+            self):
         output_group = ISISIndirectDiffractionReduction(InputFiles=['OSI137793.RAW'],
                                                         VanadiumFiles=['OSI137713.RAW'],
                                                         Instrument='OSIRIS',
@@ -292,7 +293,9 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         """
         Test to ensure cal file can not be used in diffonly mode
         """
-        self.assertRaises(RuntimeError, ISISIndirectDiffractionReduction, InputFiles=['osi89813.raw'],
+        self.assertRaises(RuntimeError,
+                          ISISIndirectDiffractionReduction,
+                          InputFiles=['osi89813.raw'],
                           Instrument='OSIRIS',
                           Mode='diffonly',
                           CalFile='osi_041_RES10.cal',
@@ -303,7 +306,9 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         """
         Test to ensure cal file can not be used on a different instrument other than OSIRIS
         """
-        self.assertRaises(RuntimeError, ISISIndirectDiffractionReduction, InputFiles=['IRS26176.RAW'],
+        self.assertRaises(RuntimeError,
+                          ISISIndirectDiffractionReduction,
+                          InputFiles=['IRS26176.RAW'],
                           Instrument='IRIS',
                           Mode='diffspec',
                           CalFile='osi_041_RES10.cal',

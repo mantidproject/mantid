@@ -15,10 +15,10 @@ import systemtesting
 
 
 class ReflectometryInstrumentSignedThetaTest(systemtesting.MantidSystemTest):
-    def signed_theta_test(self, idf_name, detector_vertical_position, detector_name = 'point-detector'):
-        idf_dir=config['instrumentDefinition.directory']
+    def signed_theta_test(self, idf_name, detector_vertical_position, detector_name='point-detector'):
+        idf_dir = config['instrumentDefinition.directory']
         # Load instrument definition
-        I=LoadEmptyInstrument(os.path.join(idf_dir, idf_name))
+        I = LoadEmptyInstrument(os.path.join(idf_dir, idf_name))
         # Get the reference frame from loaded IDF
         ref_frame = I.getInstrument().getReferenceFrame()
         # Create translation vector for detector
@@ -27,14 +27,17 @@ class ReflectometryInstrumentSignedThetaTest(systemtesting.MantidSystemTest):
         movements[ref_frame.pointingAlongBeamAxis()] = 0
         movements[ref_frame.pointingHorizontalAxis()] = 0
         # Move detector based on vector
-        MoveInstrumentComponent(Workspace=I,ComponentName=detector_name,**movements)
+        MoveInstrumentComponent(Workspace=I, ComponentName=detector_name, **movements)
         # Convert from Signed-Theta vs Lam to signed theta
-        theta_spectrum_axis=ConvertSpectrumAxis(InputWorkspace=I,OutputWorkspace='SignedTheta_vs_Wavelength',Target='signed_theta')
+        theta_spectrum_axis = ConvertSpectrumAxis(InputWorkspace=I,
+                                                  OutputWorkspace='SignedTheta_vs_Wavelength',
+                                                  Target='signed_theta')
         # Retrieve point detector from IDF (after translation)
         detector = theta_spectrum_axis.getInstrument().getComponentByName(detector_name)
         # Compare det-position * detector two theta with signed 2 theta (they should always be equal)
-        self.assertTrue(detector_vertical_position * theta_spectrum_axis.detectorTwoTheta(detector)
-                        == theta_spectrum_axis.detectorSignedTwoTheta(detector))
+        self.assertTrue(
+            detector_vertical_position *
+            theta_spectrum_axis.detectorTwoTheta(detector) == theta_spectrum_axis.detectorSignedTwoTheta(detector))
 
         return True
 

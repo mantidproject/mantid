@@ -13,7 +13,6 @@ from Muon.GUI.Common.message_box import warning
 
 
 class FFTView(QtWidgets.QWidget):
-
     """
     creates the layout for the FFT GUI
     """
@@ -38,28 +37,22 @@ class FFTView(QtWidgets.QWidget):
         self.FFTTable.setColumnWidth(1, 300)
         self.FFTTable.verticalHeader().setVisible(False)
         self.FFTTable.horizontalHeader().setStretchLastSection(True)
-        self.FFTTable.setHorizontalHeaderLabels(
-            ("FFT Property;Value").split(";"))
+        self.FFTTable.setHorizontalHeaderLabels(("FFT Property;Value").split(";"))
         # populate table
         options = ['test']
 
         table_utils.setRowName(self.FFTTable, 0, "Workspace")
         self.ws = table_utils.addComboToTable(self.FFTTable, 0, options)
         self.Im_box_row = 1
-        table_utils.setRowName(
-            self.FFTTable,
-            self.Im_box_row,
-            "Imaginary Data")
-        self.Im_box = table_utils.addCheckBoxToTable(
-            self.FFTTable, True, self.Im_box_row)
+        table_utils.setRowName(self.FFTTable, self.Im_box_row, "Imaginary Data")
+        self.Im_box = table_utils.addCheckBoxToTable(self.FFTTable, True, self.Im_box_row)
 
         table_utils.setRowName(self.FFTTable, 2, "Imaginary Workspace")
         self.Im_ws = table_utils.addComboToTable(self.FFTTable, 2, options)
 
         self.shift_box_row = 3
         table_utils.setRowName(self.FFTTable, self.shift_box_row, "Auto shift")
-        self.shift_box = table_utils.addCheckBoxToTable(
-            self.FFTTable, True, self.shift_box_row)
+        self.shift_box = table_utils.addCheckBoxToTable(self.FFTTable, True, self.shift_box_row)
 
         table_utils.setRowName(self.FFTTable, 4, "Shift")
         self.shift = table_utils.addDoubleToTable(self.FFTTable, 0.0, 4)
@@ -77,8 +70,7 @@ class FFTView(QtWidgets.QWidget):
         self.FFTTable.hideRow(7)
 
         table_utils.setRowName(self.FFTTable, 8, "Construct Phase Table")
-        self.phaseTable_box = table_utils.addCheckBoxToTable(
-            self.FFTTable, True, 8)
+        self.phaseTable_box = table_utils.addCheckBoxToTable(self.FFTTable, True, 8)
         self.FFTTable.hideRow(8)
 
         self.FFTTable.resizeRowsToContents()
@@ -92,23 +84,17 @@ class FFTView(QtWidgets.QWidget):
         self.FFTTableA.setColumnWidth(1, 300)
         self.FFTTableA.verticalHeader().setVisible(False)
         self.FFTTableA.horizontalHeader().setStretchLastSection(True)
-        self.FFTTableA.setHorizontalHeaderLabels(
-            ("Advanced Property;Value").split(";"))
+        self.FFTTableA.setHorizontalHeaderLabels(("Advanced Property;Value").split(";"))
 
         table_utils.setRowName(self.FFTTableA, 0, "Apodization Function")
         options = ["Lorentz", "Gaussian", "None"]
-        self.apodization = table_utils.addComboToTable(
-            self.FFTTableA, 0, options)
+        self.apodization = table_utils.addComboToTable(self.FFTTableA, 0, options)
 
-        table_utils.setRowName(
-            self.FFTTableA,
-            1,
-            "Decay Constant (micro seconds)")
+        table_utils.setRowName(self.FFTTableA, 1, "Decay Constant (micro seconds)")
         self.decay = table_utils.addDoubleToTable(self.FFTTableA, 4.4, 1)
 
         table_utils.setRowName(self.FFTTableA, 2, "Negative Padding")
-        self.negativePadding = table_utils.addCheckBoxToTable(
-            self.FFTTableA, True, 2)
+        self.negativePadding = table_utils.addCheckBoxToTable(self.FFTTableA, True, 2)
 
         table_utils.setRowName(self.FFTTableA, 3, "Padding")
         self.padding = table_utils.addSpinBoxToTable(self.FFTTableA, 1, 3)
@@ -137,7 +123,6 @@ class FFTView(QtWidgets.QWidget):
     def getLayout(self):
         return self.grid
 
-  # add data to view
     def addItems(self, options):
         self.ws.clear()
         self.ws.addItems(options)
@@ -215,8 +200,7 @@ class FFTView(QtWidgets.QWidget):
 
     def initFFTInput(self, run=None):
         inputs = {}
-        inputs[
-            'InputWorkspace'] = "__ReTmp__"  #
+        inputs['InputWorkspace'] = "__ReTmp__"  #
         inputs['Real'] = 0  # always zero
         out = str(self.ws.currentText()).replace(";", "; ")
         if run is None:
@@ -253,15 +237,11 @@ class FFTView(QtWidgets.QWidget):
         return inputs
 
     def ReAdvanced(self, inputs):
-        inputs['InputWorkspace'] = str(
-            self.ws.currentText()).replace(";",
-                                           "; ")
+        inputs['InputWorkspace'] = str(self.ws.currentText()).replace(";", "; ")
         inputs['OutputWorkspace'] = "__ReTmp__"
 
     def ImAdvanced(self, inputs):
-        inputs['InputWorkspace'] = str(
-            self.Im_ws.currentText()).replace(";",
-                                              "; ")
+        inputs['InputWorkspace'] = str(self.Im_ws.currentText()).replace(";", "; ")
         inputs['OutputWorkspace'] = "__ImTmp__"
 
     def RePhaseAdvanced(self, inputs):

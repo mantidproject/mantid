@@ -134,9 +134,7 @@ class LegendProperties(dict):
         loc = ConfigService.getString('plots.legend.Location')
         font_size = float(ConfigService.getString('plots.legend.FontSize'))
         if not props:
-            legend_set_draggable(ax.legend(handles=get_legend_handles(ax), loc=loc,
-                                           prop={'size': font_size}),
-                                 True)
+            legend_set_draggable(ax.legend(handles=get_legend_handles(ax), loc=loc, prop={'size': font_size}), True)
             return
 
         if 'loc' in props.keys():

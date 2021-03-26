@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-
 """A base class to share functionality between SANSReductionCore algorithms."""
 
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, IEventWorkspace)
@@ -28,26 +27,33 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         # ----------
         # INPUT
         # ----------
-        self.declareProperty('SANSState', '',
-                             doc='A JSON String which fulfills the SANSState contract.')
+        self.declareProperty('SANSState', '', doc='A JSON String which fulfills the SANSState contract.')
 
         # WORKSPACES
         # Scatter Workspaces
-        self.declareProperty(MatrixWorkspaceProperty('ScatterWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('ScatterWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
                              doc='The scatter workspace. This workspace does not contain monitors.')
-        self.declareProperty(MatrixWorkspaceProperty('ScatterMonitorWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('ScatterMonitorWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
                              doc='The scatter monitor workspace. This workspace only contains monitors.')
 
         # Transmission Workspace
-        self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
                              doc='The transmission workspace.')
 
         # Direct Workspace
-        self.declareProperty(MatrixWorkspaceProperty('DirectWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('DirectWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
                              doc='The direct workspace.')
 
         self.setPropertyGroup("ScatterWorkspace", 'Data')
@@ -56,17 +62,19 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         self.setPropertyGroup("DirectWorkspace", 'Data')
 
         # The component
-        allowed_detectors = StringListValidator([DetectorType.LAB.value,
-                                                 DetectorType.HAB.value])
-        self.declareProperty("Component", DetectorType.LAB.value,
-                             validator=allowed_detectors, direction=Direction.Input,
+        allowed_detectors = StringListValidator([DetectorType.LAB.value, DetectorType.HAB.value])
+        self.declareProperty("Component",
+                             DetectorType.LAB.value,
+                             validator=allowed_detectors,
+                             direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
         # The data type
-        allowed_data = StringListValidator([DataType.SAMPLE.value,
-                                            DataType.CAN.value])
-        self.declareProperty("DataType", DataType.SAMPLE.value,
-                             validator=allowed_data, direction=Direction.Input,
+        allowed_data = StringListValidator([DataType.SAMPLE.value, DataType.CAN.value])
+        self.declareProperty("DataType",
+                             DataType.SAMPLE.value,
+                             validator=allowed_data,
+                             direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
     def _pyinit_output(self):
@@ -76,23 +84,29 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", '', direction=Direction.Output),
                              doc='The output workspace.')
 
-        self.declareProperty(MatrixWorkspaceProperty('SumOfCounts', '', optional=PropertyMode.Optional,
+        self.declareProperty(MatrixWorkspaceProperty('SumOfCounts',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
                                                      direction=Direction.Output),
                              doc='The sum of the counts of the output workspace.')
 
-        self.declareProperty(MatrixWorkspaceProperty('SumOfNormFactors', '', optional=PropertyMode.Optional,
+        self.declareProperty(MatrixWorkspaceProperty('SumOfNormFactors',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
                                                      direction=Direction.Output),
                              doc='The sum of the counts of the output workspace.')
 
-        self.declareProperty(
-            MatrixWorkspaceProperty('CalculatedTransmissionWorkspace', '', optional=PropertyMode.Optional,
-                                    direction=Direction.Output),
-            doc='The calculated transmission workspace')
+        self.declareProperty(MatrixWorkspaceProperty('CalculatedTransmissionWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc='The calculated transmission workspace')
 
-        self.declareProperty(
-            MatrixWorkspaceProperty('UnfittedTransmissionWorkspace', '', optional=PropertyMode.Optional,
-                                    direction=Direction.Output),
-            doc='The unfitted transmission workspace')
+        self.declareProperty(MatrixWorkspaceProperty('UnfittedTransmissionWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc='The unfitted transmission workspace')
 
     def _get_cropped_workspace(self, component):
         scatter_workspace = self.getProperty("ScatterWorkspace").value
@@ -101,9 +115,11 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         component_to_crop = DetectorType(component)
         component_to_crop = get_component_name(scatter_workspace, component_to_crop)
 
-        crop_options = {"InputWorkspace": scatter_workspace,
-                        "OutputWorkspace": EMPTY_NAME,
-                        "ComponentNames": component_to_crop}
+        crop_options = {
+            "InputWorkspace": scatter_workspace,
+            "OutputWorkspace": EMPTY_NAME,
+            "ComponentNames": component_to_crop
+        }
 
         crop_alg = create_child_algorithm(self, alg_name, **crop_options)
         crop_alg.execute()
@@ -112,8 +128,10 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         return output_workspace
 
     def _slice(self, state, workspace, monitor_workspace, data_type_as_string):
-        returned = slice_sans_event(input_ws_monitor=monitor_workspace, state_slice=state.slice,
-                                    input_ws=workspace, data_type_str=data_type_as_string)
+        returned = slice_sans_event(input_ws_monitor=monitor_workspace,
+                                    state_slice=state.slice,
+                                    input_ws=workspace,
+                                    data_type_str=data_type_as_string)
 
         workspace = returned["OutputWorkspace"]
         monitor_workspace = returned["OutputWorkspaceMonitor"]
@@ -124,11 +142,13 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
     def _move(self, state, workspace, component, is_transmission=False):
         # First we set the workspace to zero, since it might have been moved around by the user in the ADS
         # Second we use the initial move to bring the workspace into the correct position
-        move_component(component_name="", state=state, move_type=MoveTypes.RESET_POSITION,
-                       workspace=workspace)
+        move_component(component_name="", state=state, move_type=MoveTypes.RESET_POSITION, workspace=workspace)
 
-        move_component(component_name=component, state=state, move_type=MoveTypes.INITIAL_MOVE,
-                       workspace=workspace, is_transmission_workspace=is_transmission)
+        move_component(component_name=component,
+                       state=state,
+                       move_type=MoveTypes.INITIAL_MOVE,
+                       workspace=workspace,
+                       is_transmission_workspace=is_transmission)
 
         return workspace
 
@@ -139,13 +159,15 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
     def _convert_to_wavelength(self, state, workspace):
         wavelength_state = state.wavelength
         wavelength_name = "SANSConvertToWavelengthAndRebin"
-        wavelength_options = {"InputWorkspace": workspace,
-                              "OutputWorkspace": EMPTY_NAME,
-                              "WavelengthLow": wavelength_state.wavelength_low[0],
-                              "WavelengthHigh": wavelength_state.wavelength_high[0],
-                              "WavelengthStep": wavelength_state.wavelength_step,
-                              "WavelengthStepType": wavelength_state.wavelength_step_type_lin_log.value,
-                              "RebinMode": wavelength_state.rebin_type.value}
+        wavelength_options = {
+            "InputWorkspace": workspace,
+            "OutputWorkspace": EMPTY_NAME,
+            "WavelengthLow": wavelength_state.wavelength_low[0],
+            "WavelengthHigh": wavelength_state.wavelength_high[0],
+            "WavelengthStep": wavelength_state.wavelength_step,
+            "WavelengthStepType": wavelength_state.wavelength_step_type_lin_log.value,
+            "RebinMode": wavelength_state.rebin_type.value
+        }
 
         wavelength_alg = create_child_algorithm(self, wavelength_name, **wavelength_options)
         wavelength_alg.execute()
@@ -162,16 +184,22 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         direct_workspace = self._get_direct_workspace()
 
         if transmission_workspace:
-            transmission_workspace = self._move(state=state, workspace=transmission_workspace,
-                                                component=component_as_string, is_transmission=True)
+            transmission_workspace = self._move(state=state,
+                                                workspace=transmission_workspace,
+                                                component=component_as_string,
+                                                is_transmission=True)
 
         if direct_workspace:
-            direct_workspace = self._move(state=state, workspace=direct_workspace, component=component_as_string,
+            direct_workspace = self._move(state=state,
+                                          workspace=direct_workspace,
+                                          component=component_as_string,
                                           is_transmission=True)
 
         alg = CreateSANSAdjustmentWorkspaces(state_adjustment=state.adjustment,
-                                             component=component_as_string, data_type=data_type)
-        returned_dict = alg.create_sans_adjustment_workspaces(direct_ws=direct_workspace, monitor_ws=monitor_workspace,
+                                             component=component_as_string,
+                                             data_type=data_type)
+        returned_dict = alg.create_sans_adjustment_workspaces(direct_ws=direct_workspace,
+                                                              monitor_ws=monitor_workspace,
                                                               sample_data=workspace,
                                                               transmission_ws=transmission_workspace)
 
@@ -185,9 +213,7 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
             calculated_transmission_workspace, unfitted_transmission_workspace
 
     def _copy_bin_masks(self, workspace, dummy_workspace):
-        mask_options = {"InputWorkspace": workspace,
-                        "MaskedWorkspace": dummy_workspace,
-                        "OutputWorkspace": EMPTY_NAME}
+        mask_options = {"InputWorkspace": workspace, "MaskedWorkspace": dummy_workspace, "OutputWorkspace": EMPTY_NAME}
         mask_alg = create_child_algorithm(self, "MaskBinsFromWorkspace", **mask_options)
         mask_alg.execute()
         return mask_alg.getProperty("OutputWorkspace").value
@@ -195,10 +221,12 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
     def _convert_to_histogram(self, workspace):
         if isinstance(workspace, IEventWorkspace):
             convert_name = "RebinToWorkspace"
-            convert_options = {"WorkspaceToRebin": workspace,
-                               "WorkspaceToMatch": workspace,
-                               "OutputWorkspace": "OutputWorkspace",
-                               "PreserveEvents": False}
+            convert_options = {
+                "WorkspaceToRebin": workspace,
+                "WorkspaceToMatch": workspace,
+                "OutputWorkspace": "OutputWorkspace",
+                "PreserveEvents": False
+            }
             convert_alg = create_child_algorithm(self, convert_name, **convert_options)
             convert_alg.execute()
             workspace = convert_alg.getProperty("OutputWorkspace").value
@@ -220,7 +248,8 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         @param wavelength_and_pixel_adjustment_workspace: the wavelength and pixel adjustment workspace.
         @return: a reduced workspace
         """
-        output_dict = convert_workspace(workspace=workspace, state_convert_to_q=state.convert_to_q,
+        output_dict = convert_workspace(workspace=workspace,
+                                        state_convert_to_q=state.convert_to_q,
                                         wavelength_adj_workspace=wavelength_adjustment_workspace,
                                         pixel_adj_workspace=pixel_adjustment_workspace,
                                         wavelength_and_pixel_adj_workspace=wavelength_and_pixel_adjustment_workspace,
@@ -251,8 +280,7 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
 
     def _get_cloned_workspace(self, workspace):
         clone_name = "CloneWorkspace"
-        clone_options = {"InputWorkspace": workspace,
-                         "OutputWorkspace": EMPTY_NAME}
+        clone_options = {"InputWorkspace": workspace, "OutputWorkspace": EMPTY_NAME}
         clone_alg = create_child_algorithm(self, clone_name, **clone_options)
         clone_alg.execute()
         return clone_alg.getProperty("OutputWorkspace").value
@@ -269,19 +297,23 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
                 # Rebin to monitor workspace
                 if compatibility.time_rebin_string:
                     rebin_name = "Rebin"
-                    rebin_option = {"InputWorkspace": workspace,
-                                    "Params": compatibility.time_rebin_string,
-                                    "OutputWorkspace": EMPTY_NAME,
-                                    "PreserveEvents": False}
+                    rebin_option = {
+                        "InputWorkspace": workspace,
+                        "Params": compatibility.time_rebin_string,
+                        "OutputWorkspace": EMPTY_NAME,
+                        "PreserveEvents": False
+                    }
                     rebin_alg = create_child_algorithm(self, rebin_name, **rebin_option)
                     rebin_alg.execute()
                     workspace = rebin_alg.getProperty("OutputWorkspace").value
                 else:
                     rebin_name = "RebinToWorkspace"
-                    rebin_option = {"WorkspaceToRebin": workspace,
-                                    "WorkspaceToMatch": monitor_workspace,
-                                    "OutputWorkspace": EMPTY_NAME,
-                                    "PreserveEvents": False}
+                    rebin_option = {
+                        "WorkspaceToRebin": workspace,
+                        "WorkspaceToMatch": monitor_workspace,
+                        "OutputWorkspace": EMPTY_NAME,
+                        "PreserveEvents": False
+                    }
                     rebin_alg = create_child_algorithm(self, rebin_name, **rebin_option)
                     rebin_alg.execute()
                     workspace = rebin_alg.getProperty("OutputWorkspace").value
@@ -296,18 +328,22 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
                 # (cheaper operations).
                 # This is find because we only care about the mask flags in this workspace, not the y data.
                 extract_spectrum_name = "ExtractSingleSpectrum"
-                extract_spectrum_option = {"InputWorkspace": workspace,
-                                           "OutputWorkspace": "dummy_mask_workspace",
-                                           "WorkspaceIndex": 0}
+                extract_spectrum_option = {
+                    "InputWorkspace": workspace,
+                    "OutputWorkspace": "dummy_mask_workspace",
+                    "WorkspaceIndex": 0
+                }
                 extract_spectrum_alg = create_child_algorithm(self, extract_spectrum_name, **extract_spectrum_option)
                 extract_spectrum_alg.execute()
                 dummy_mask_workspace = extract_spectrum_alg.getProperty("OutputWorkspace").value
 
                 rebin_name = "RebinToWorkspace"
-                rebin_option = {"WorkspaceToRebin": dummy_mask_workspace,
-                                "WorkspaceToMatch": monitor_workspace,
-                                "OutputWorkspace": "dummy_mask_workspace",
-                                "PreserveEvents": False}
+                rebin_option = {
+                    "WorkspaceToRebin": dummy_mask_workspace,
+                    "WorkspaceToMatch": monitor_workspace,
+                    "OutputWorkspace": "dummy_mask_workspace",
+                    "PreserveEvents": False
+                }
                 rebin_alg = create_child_algorithm(self, rebin_name, **rebin_option)
                 rebin_alg.execute()
                 dummy_mask_workspace = rebin_alg.getProperty("OutputWorkspace").value

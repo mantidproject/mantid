@@ -52,8 +52,7 @@ class AxisChangerView(QtWidgets.QWidget):
 
     def get_bounds(self):
         bounds = [self.lower_bound, self.upper_bound]
-        return [float(str(bound.text())) if bound.text()
-                else 0 for bound in bounds]
+        return [float(str(bound.text())) if bound.text() else 0 for bound in bounds]
 
     def set_bounds(self, bounds):
         lower, upper = [str(bound) for bound in bounds]

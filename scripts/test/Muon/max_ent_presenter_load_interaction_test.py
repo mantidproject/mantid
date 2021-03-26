@@ -60,26 +60,36 @@ class MaxEntPresenterTest(unittest.TestCase):
 
         self.assertEquals(retrieve_combobox_info(self.view.ws), ['MUSR22725_raw_data FD'])
         self.assertEquals(retrieve_combobox_info(self.view.N_points),
-                          ['2048', '4096', '8192', '16384', '32768', '65536',
-                           '131072', '262144', '524288', '1048576'])
+                          ['2048', '4096', '8192', '16384', '32768', '65536', '131072', '262144', '524288', '1048576'])
 
     def test_get_parameters_for_maxent_calculations(self):
         self.presenter.getWorkspaceNames()
         self.context.dead_time_table = mock.MagicMock(return_value='deadtime_table_name')
         self.context.first_good_data = mock.MagicMock(return_value=0.11)
         self.context.last_good_data = mock.MagicMock(return_value=13.25)
-        self.context.phase_context.phase_tables = [create_workspace_wrapper_stub_object(x) for x in
-                                                   ['MUSR22222_phase_table', 'MUSR33333_phase_table',
-                                                    'EMU22222_phase_table']]
+        self.context.phase_context.phase_tables = [
+            create_workspace_wrapper_stub_object(x)
+            for x in ['MUSR22222_phase_table', 'MUSR33333_phase_table', 'EMU22222_phase_table']
+        ]
         self.presenter.update_phase_table_options()
 
         parameters = self.presenter.get_parameters_for_maxent_calculation()
 
-        self.assertEqual(parameters, {'DefaultLevel': 0.1, 'DoublePulse': False, 'Factor': 1.04, 'FirstGoodTime': 0.11,
-                                      'FitDeadTime': True, 'InnerIterations': 10,
-                                      'InputDeadTimeTable': 'deadtime_table_name',
-                                      'InputWorkspace': 'MUSR22725_raw_data FD',
-                                      'LastGoodTime': 13.25, 'MaxField': 1000.0, 'Npts': 2048, 'OuterIterations': 10})
+        self.assertEqual(
+            parameters, {
+                'DefaultLevel': 0.1,
+                'DoublePulse': False,
+                'Factor': 1.04,
+                'FirstGoodTime': 0.11,
+                'FitDeadTime': True,
+                'InnerIterations': 10,
+                'InputDeadTimeTable': 'deadtime_table_name',
+                'InputWorkspace': 'MUSR22725_raw_data FD',
+                'LastGoodTime': 13.25,
+                'MaxField': 1000.0,
+                'Npts': 2048,
+                'OuterIterations': 10
+            })
 
     def test_update_phase_table_options_adds_correct_options_to_view_item(self):
         phase_table_names = ['MUSR22222_phase_table', 'MUSR33333_phase_table', 'EMU22222_phase_table']
@@ -96,9 +106,10 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.context.dead_time_table = mock.MagicMock(return_value='deadtime_table_name')
         self.context.first_good_data = mock.MagicMock(return_value=0.11)
         self.context.last_good_data = mock.MagicMock(return_value=13.25)
-        self.context.phase_context.phase_tables = [create_workspace_wrapper_stub_object(x) for x in
-                                                   ['MUSR22222_phase_table', 'MUSR33333_phase_table',
-                                                    'EMU22222_phase_table']]
+        self.context.phase_context.phase_tables = [
+            create_workspace_wrapper_stub_object(x)
+            for x in ['MUSR22222_phase_table', 'MUSR33333_phase_table', 'EMU22222_phase_table']
+        ]
         self.presenter.update_phase_table_options()
         CreateWorkspace([0], [0], OutputWorkspace="maxent_workspace")
 
@@ -112,8 +123,13 @@ class MaxEntPresenterTest(unittest.TestCase):
 
         output_options = self.presenter.get_maxent_output_options()
 
-        self.assertEqual(output_options, {'OutputDeadTimeTable': False, 'PhaseConvergenceTable': False,
-                                          'OutputPhaseTable': False, 'ReconstructedSpectra': False})
+        self.assertEqual(
+            output_options, {
+                'OutputDeadTimeTable': False,
+                'PhaseConvergenceTable': False,
+                'OutputPhaseTable': False,
+                'ReconstructedSpectra': False
+            })
 
     def test_get_output_options_returns_correctly(self):
         self.presenter.getWorkspaceNames()
@@ -124,8 +140,13 @@ class MaxEntPresenterTest(unittest.TestCase):
 
         output_options = self.presenter.get_maxent_output_options()
 
-        self.assertEqual(output_options, {'OutputDeadTimeTable': True, 'PhaseConvergenceTable': True,
-                                          'OutputPhaseTable': True, 'ReconstructedSpectra': True})
+        self.assertEqual(
+            output_options, {
+                'OutputDeadTimeTable': True,
+                'PhaseConvergenceTable': True,
+                'OutputPhaseTable': True,
+                'ReconstructedSpectra': True
+            })
 
 
 if __name__ == '__main__':

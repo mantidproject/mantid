@@ -50,11 +50,9 @@ class SliceViewer(ObservingPresenter):
         self.normalization = False
 
         self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(),
-                                                      self.model.can_normalize_workspace(), parent,
-                                                      window_flags, conf)
+                                                      self.model.can_normalize_workspace(), parent, window_flags, conf)
         self.view.setWindowTitle(self.model.get_title())
-        self.view.data_view.create_axes_orthogonal(
-            redraw_on_zoom=not self.model.can_support_dynamic_rebinning())
+        self.view.data_view.create_axes_orthogonal(redraw_on_zoom=not self.model.can_support_dynamic_rebinning())
 
         if self.model.can_normalize_workspace():
             self.view.data_view.set_normalization(ws)
@@ -69,8 +67,8 @@ class SliceViewer(ObservingPresenter):
         # Start the GUI with zoom selected.
         self.view.data_view.activate_tool(ToolItemText.ZOOM)
 
-        self.ads_observer = SliceViewerADSObserver(self.replace_workspace, self.rename_workspace,
-                                                   self.ADS_cleared, self.delete_workspace)
+        self.ads_observer = SliceViewerADSObserver(self.replace_workspace, self.rename_workspace, self.ADS_cleared,
+                                                   self.delete_workspace)
 
         self.view.destroyed.connect(self._on_view_destroyed)
 
@@ -124,8 +122,7 @@ class SliceViewer(ObservingPresenter):
         Update the view to display an updated MDHistoWorkspace slice/cut
         """
         self.view.data_view.update_plot_data(
-            self.model.get_data(self.get_slicepoint(),
-                                transpose=self.view.data_view.dimensions.transpose),
+            self.model.get_data(self.get_slicepoint(), transpose=self.view.data_view.dimensions.transpose),
             self.view.data_view.dimensions.transpose)
 
     def update_plot_data_MDE(self):
@@ -172,8 +169,7 @@ class SliceViewer(ObservingPresenter):
         if data_view.nonorthogonal_mode:
             if sliceinfo.can_support_nonorthogonal_axes():
                 # axes need to be recreated to have the correct transform associated
-                data_view.create_axes_nonorthogonal(
-                    self.model.create_nonorthogonal_transform(sliceinfo))
+                data_view.create_axes_nonorthogonal(self.model.create_nonorthogonal_transform(sliceinfo))
             else:
                 data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
                 data_view.create_axes_orthogonal()
@@ -187,8 +183,7 @@ class SliceViewer(ObservingPresenter):
 
     def slicepoint_changed(self):
         """Indicates the slicepoint has been updated"""
-        self._call_peaks_presenter_if_created("notify",
-                                              PeaksViewerPresenter.Event.SlicePointChanged)
+        self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.SlicePointChanged)
         self.update_plot_data()
 
     def data_limits_changed(self):
@@ -201,8 +196,8 @@ class SliceViewer(ObservingPresenter):
 
     def show_all_data_requested(self):
         """Instructs the view to show all data"""
-        self.set_axes_limits(*self.model.get_dim_limits(self.get_slicepoint(),
-                                                        self.view.data_view.dimensions.transpose))
+        self.set_axes_limits(
+            *self.model.get_dim_limits(self.get_slicepoint(), self.view.data_view.dimensions.transpose))
 
     def set_axes_limits(self, xlim, ylim, auto_transform=True):
         """Set the axes limits on the view.
@@ -283,12 +278,11 @@ class SliceViewer(ObservingPresenter):
 
         try:
             self._show_status_message(
-                self.model.export_cuts_to_workspace(
-                    self.get_slicepoint(),
-                    bin_params=data_view.dimensions.get_bin_params(),
-                    limits=limits,
-                    transpose=data_view.dimensions.transpose,
-                    cut=cut_type))
+                self.model.export_cuts_to_workspace(self.get_slicepoint(),
+                                                    bin_params=data_view.dimensions.get_bin_params(),
+                                                    limits=limits,
+                                                    transpose=data_view.dimensions.transpose,
+                                                    cut=cut_type))
         except Exception as exc:
             self._logger.error(str(exc))
             self._show_status_message("Error exporting roi cut")
@@ -303,12 +297,11 @@ class SliceViewer(ObservingPresenter):
 
         try:
             self._show_status_message(
-                self.model.export_pixel_cut_to_workspace(
-                    self.get_slicepoint(),
-                    bin_params=data_view.dimensions.get_bin_params(),
-                    pos=pos,
-                    transpose=data_view.dimensions.transpose,
-                    axis=axis))
+                self.model.export_pixel_cut_to_workspace(self.get_slicepoint(),
+                                                         bin_params=data_view.dimensions.get_bin_params(),
+                                                         pos=pos,
+                                                         transpose=data_view.dimensions.transpose,
+                                                         axis=axis))
         except Exception as exc:
             self._logger.error(str(exc))
             self._show_status_message("Error exporting single-pixel cut")
@@ -322,8 +315,7 @@ class SliceViewer(ObservingPresenter):
         if state:
             data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
             data_view.disable_tool_button(ToolItemText.LINEPLOTS)
-            data_view.create_axes_nonorthogonal(
-                self.model.create_nonorthogonal_transform(self.get_sliceinfo()))
+            data_view.create_axes_nonorthogonal(self.model.create_nonorthogonal_transform(self.get_sliceinfo()))
             self.show_all_data_requested()
         else:
             data_view.create_axes_orthogonal()
@@ -377,8 +369,7 @@ class SliceViewer(ObservingPresenter):
             self.new_plot, self.update_plot_data = self._decide_plot_update_methods()
             self.view.delayed_refresh()
         except ValueError as err:
-            self._close_view_with_message(
-                f"Closing Sliceviewer as the underlying workspace was changed: {str(err)}")
+            self._close_view_with_message(f"Closing Sliceviewer as the underlying workspace was changed: {str(err)}")
             return
 
     def refresh_view(self):

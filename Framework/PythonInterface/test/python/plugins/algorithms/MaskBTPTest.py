@@ -30,21 +30,20 @@ class MaskBTPTest(unittest.TestCase):
                 self.assertFalse(detInfo.isMasked(detIndex),
                                  'DetID={} is a monitor and shouldn\'t be masked'.format(detId))
             else:
-                self.assertEqual(detInfo.isMasked(detIndex), detId in masked,
-                                 'DetID={} is has incorrect mask bit. "{}" should be "{}"'.format(detId,
-                                                                                                  detInfo.isMasked(int(detId)),
-                                                                                                  detId in masked))
+                self.assertEqual(
+                    detInfo.isMasked(detIndex), detId in masked,
+                    'DetID={} is has incorrect mask bit. "{}" should be "{}"'.format(
+                        detId, detInfo.isMasked(int(detId)), detId in masked))
 
     def checkDetectorIndexes(self, wksp, detIndices):
         '''This is use to spot check specific detector indices (not identifiers) as masked'''
         detInfo = wksp.detectorInfo()
         for detIndex in detIndices:
-            self.assertTrue(detInfo.isMasked(detIndex),
-                            'Detector index={} should be masked'.format(detIndex))
+            self.assertTrue(detInfo.isMasked(detIndex), 'Detector index={} should be masked'.format(detIndex))
 
     def testMaskBTPWrongInstrument(self):
         w = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30, 5, False, False)
-        AnalysisDataService.add('w',w)
+        AnalysisDataService.add('w', w)
         try:
             MaskBTP(Workspace=w, Pixel="1")
             self.fail("Should not have got here. Should throw because wrong instrument.")
@@ -82,29 +81,32 @@ class MaskBTPTest(unittest.TestCase):
         m1 = MaskBTP(Instrument='CNCS', Pixel="1-3,5")
         m2 = MaskBTP(Workspace='CNCSMaskBTP', Bank="1-2")
         m3 = MaskBTP(Workspace='CNCSMaskBTP', Bank='5-7', Tube='3')
-        p1 = arange(400)*128
-        m1p = sort(concatenate((p1, p1+1, p1+2, p1+4)))
+        p1 = arange(400) * 128
+        m1p = sort(concatenate((p1, p1 + 1, p1 + 2, p1 + 4)))
         self.assertTrue(array_equal(m1, m1p))
         self.assertTrue(array_equal(m2, arange(2048)))
-        b5t3 = arange(128)+4*1024+2*128
-        self.assertTrue(array_equal(m3, concatenate((b5t3, b5t3+1024, b5t3+2048))))
+        b5t3 = arange(128) + 4 * 1024 + 2 * 128
+        self.assertTrue(array_equal(m3, concatenate((b5t3, b5t3 + 1024, b5t3 + 2048))))
         # check whether some pixels are masked when they should
         w = mtd['CNCSMaskBTP']
         detInfo = w.detectorInfo()
         detIds = detInfo.detectorIDs()
 
         # check for some to be masked
-        for id in (29696, 29697, 29698, #29699,
-                   29700, 1020, 4400):
+        for id in (
+                29696,
+                29697,
+                29698,  #29699,
+                29700,
+                1020,
+                4400):
             index = int(where(detIds == id)[0][0])
-            self.assertTrue(detInfo.isMasked(index),
-                            msg='detId={}, index={} should not be masked'.format(id, index))
+            self.assertTrue(detInfo.isMasked(index), msg='detId={}, index={} should not be masked'.format(id, index))
 
         # check for some to not be masked
         for id in [3071]:
             index = int(where(detIds == id)[0][0])
-            self.assertFalse(detInfo.isMasked(index),
-                             msg='detId={}, index={} should not be masked'.format(id, index))
+            self.assertFalse(detInfo.isMasked(index), msg='detId={}, index={} should not be masked'.format(id, index))
         DeleteWorkspace(w)
 
     def testSEQMaskBTP(self):
@@ -129,8 +131,7 @@ class MaskBTPTest(unittest.TestCase):
         return
 
     def testEQSANSMaskBTP(self):
-        w = LoadEmptyInstrument(InstrumentName='EQ-SANS',
-                                OutputWorkspace='empty_eqsans')
+        w = LoadEmptyInstrument(InstrumentName='EQ-SANS', OutputWorkspace='empty_eqsans')
         m1 = MaskBTP(w, Bank='1-48', Pixel='1-8,249-256')  # tube tips
         m2 = MaskBTP(w, Bank='17', Tube='2')  # rogue tube
         m3 = MaskBTP(w, Components='back-panel')  # whole back panel
@@ -138,8 +139,7 @@ class MaskBTPTest(unittest.TestCase):
             self.assertEqual(len(mask), n_masked)
 
     def testCG2MaskBTP(self):
-        w = LoadEmptyInstrument(InstrumentName='EQ-SANS',
-                                OutputWorkspace='empty_eqsans')
+        w = LoadEmptyInstrument(InstrumentName='EQ-SANS', OutputWorkspace='empty_eqsans')
         m1 = MaskBTP(w, Bank='1-48', Pixel='1-8,249-256')  # tube tips
         m2 = MaskBTP(w, Bank='17', Tube='2')  # rogue tube
         m3 = MaskBTP(w, Components='back-panel')  # whole back panel
@@ -162,7 +162,7 @@ class MaskBTPTest(unittest.TestCase):
         # every other tube in a "bank"
         masked = MaskBTP(Workspace=ws_name, Tube="1,3")
         wksp = mtd[ws_name]
-        self.assertEqual(int(192*256/2), len(masked))
+        self.assertEqual(int(192 * 256 / 2), len(masked))
         self.checkConsistentMask(wksp, masked)
 
     def test_cg2_simple(self):
@@ -172,7 +172,7 @@ class MaskBTPTest(unittest.TestCase):
         # every other tube in a "bank"
         masked = MaskBTP(Workspace=ws_name, Tube="1,3")
         wksp = mtd[ws_name]
-        self.assertEqual(int(192*256/2), len(masked))
+        self.assertEqual(int(192 * 256 / 2), len(masked))
         self.checkConsistentMask(wksp, masked)
 
     def test_eqsans_interleaved(self):
@@ -182,11 +182,11 @@ class MaskBTPTest(unittest.TestCase):
         # legacy instrument had wacky numbering
         masked = MaskBTP(Workspace=ws_name, Tube="5:200:8,6:200:8,7:200:8,8:200:8")
         wksp = mtd[ws_name]
-        self.assertEqual(int(192*256/2), len(masked))
+        self.assertEqual(int(192 * 256 / 2), len(masked))
         self.checkConsistentMask(wksp, masked)
 
         # check for specific mask values
-        masked = [i + 1 for i in range(256*4, 256 * 8 * 24, 2048)]  # overwrite previous version
+        masked = [i + 1 for i in range(256 * 4, 256 * 8 * 24, 2048)]  # overwrite previous version
         self.checkDetectorIndexes(wksp, masked)
 
     def test_biosans_wing_plane(self):
@@ -207,8 +207,9 @@ class MaskBTPTest(unittest.TestCase):
     def test_components(self):
         # this also verifies support for instruments that aren't explicitly in the list
         wksp = LoadEmptyInstrument(InstrumentName='GEM', OutputWorkspace='GEM')
-        masked = MaskBTP(Workspace=wksp, Components='bank3-east,bank3-west', Tube='1-3')  # zero indexed b/c not supported instrument
-        self.assertEqual(2*3*90, len(masked))
+        masked = MaskBTP(Workspace=wksp, Components='bank3-east,bank3-west',
+                         Tube='1-3')  # zero indexed b/c not supported instrument
+        self.assertEqual(2 * 3 * 90, len(masked))
 
         wksp = LoadEmptyInstrument(InstrumentName='GEM', OutputWorkspace='GEM')
         masked = MaskBTP(Workspace=wksp, Components='bank3')
@@ -227,14 +228,14 @@ class MaskBTPTest(unittest.TestCase):
         ws = LoadEmptyInstrument(InstrumentName="d11")
         mask = MaskBTP(Workspace=ws, Pixel="0-10")
 
-        self.assertEquals(len(mask), 256*11)
+        self.assertEquals(len(mask), 256 * 11)
         self.checkConsistentMask(ws, mask)
 
     def test_d22(self):
         ws = LoadEmptyInstrument(InstrumentName="d22")
         mask = MaskBTP(Workspace=ws, Tube="2-5")
 
-        self.assertEquals(len(mask), 256*4)
+        self.assertEquals(len(mask), 256 * 4)
         self.checkConsistentMask(ws, mask)
 
     def test_d16(self):
@@ -259,7 +260,7 @@ class MaskBTPTest(unittest.TestCase):
         ws = LoadEmptyInstrument(Filename=path)
         mask = MaskBTP(Workspace=ws, Pixel="20-28")
 
-        self.assertEquals(len(mask), 9*128)
+        self.assertEquals(len(mask), 9 * 128)
         self.checkConsistentMask(ws, mask)
 
     def test_d22b(self):
@@ -267,7 +268,7 @@ class MaskBTPTest(unittest.TestCase):
         ws = LoadEmptyInstrument(Filename=path)
         mask = MaskBTP(Workspace=ws, Bank="2")
 
-        self.assertEquals(len(mask), 256*96)
+        self.assertEquals(len(mask), 256 * 96)
         self.checkConsistentMask(ws, mask)
 
     def test_d11b(self):
@@ -275,8 +276,9 @@ class MaskBTPTest(unittest.TestCase):
         ws = LoadEmptyInstrument(Filename=path)
         mask = MaskBTP(Workspace=ws, Components="detector_right, detector_left")
 
-        self.assertEquals(len(mask), 256*32*2)
+        self.assertEquals(len(mask), 256 * 32 * 2)
         self.checkConsistentMask(ws, mask)
+
 
 if __name__ == '__main__':
     unittest.main()

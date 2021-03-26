@@ -10,8 +10,8 @@ This is one of the two models which is used for the data reduction. It contains 
 are not available in the model associated with the data table.
 """
 
-from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SaveType,
-                               DetectorType, FitModeForMerge)
+from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SaveType, DetectorType,
+                               FitModeForMerge)
 from sans.common.general_functions import get_ranges_from_event_slice_setting
 from sans.gui_logic.models.model_common import ModelCommon
 from sans.state.AllStates import AllStates
@@ -197,8 +197,8 @@ class StateGuiModel(ModelCommon):
 
     @reduction_mode.setter
     def reduction_mode(self, value):
-        if (value is ReductionMode.LAB or value is ReductionMode.HAB
-                or value is ReductionMode.MERGED or value is ReductionMode.ALL):  # noqa
+        if (value is ReductionMode.LAB or value is ReductionMode.HAB or value is ReductionMode.MERGED
+                or value is ReductionMode.ALL):  # noqa
             self._all_states.reduction.reduction_mode = value
         else:
             raise ValueError("A reduction mode was expected, got instead {}".format(value))
@@ -330,16 +330,20 @@ class StateGuiModel(ModelCommon):
         norm_mon = self._all_states.adjustment.normalize_to_monitor
         wav_pixel = self._all_states.adjustment.wavelength_and_pixel_adjustment
         wavelength = self._all_states.wavelength
-        to_check = [getattr(calc_trans, attr_name), getattr(norm_mon, attr_name),
-                    getattr(wav_pixel, attr_name), getattr(wavelength, attr_name)]
+        to_check = [
+            getattr(calc_trans, attr_name),
+            getattr(norm_mon, attr_name),
+            getattr(wav_pixel, attr_name),
+            getattr(wavelength, attr_name)
+        ]
         assert all(x == to_check[0] for x in to_check), \
             "Wavelength attributes have got out of sync. This should not happen!"
 
     def _set_on_all_wavelength(self, attr_name, value):
-        objs_to_set = [self._all_states.adjustment.calculate_transmission,
-                       self._all_states.adjustment.normalize_to_monitor,
-                       self._all_states.adjustment.wavelength_and_pixel_adjustment,
-                       self._all_states.wavelength]
+        objs_to_set = [
+            self._all_states.adjustment.calculate_transmission, self._all_states.adjustment.normalize_to_monitor,
+            self._all_states.adjustment.wavelength_and_pixel_adjustment, self._all_states.wavelength
+        ]
         for obj in objs_to_set:
             setattr(obj, attr_name, value)
 

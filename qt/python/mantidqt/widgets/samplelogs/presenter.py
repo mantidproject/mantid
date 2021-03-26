@@ -19,12 +19,8 @@ class SampleLogs(object):
     def __init__(self, ws, parent=None, window_flags=Qt.Window, model=None, view=None):
         # Create model and view, or accept mocked versions
         self.model = model if model else SampleLogsModel(ws)
-        self.view = view if view else SampleLogsView(self,
-                                                     parent,
-                                                     window_flags,
-                                                     self.model.get_name(),
-                                                     self.model.isMD(),
-                                                     self.model.getNumExperimentInfo())
+        self.view = view if view else SampleLogsView(self, parent, window_flags, self.model.get_name(),
+                                                     self.model.isMD(), self.model.getNumExperimentInfo())
         self.filtered = True
         self.setup_table()
 
@@ -99,14 +95,18 @@ class SampleLogs(object):
 
     def plot_logs(self):
         """Get all selected rows, check if plottable, then plot the logs"""
-        to_plot = [row for row in self.view.get_selected_row_indexes()
-                   if self.model.is_log_plottable(self.view.get_row_log_name(row))]
+        to_plot = [
+            row for row in self.view.get_selected_row_indexes()
+            if self.model.is_log_plottable(self.view.get_row_log_name(row))
+        ]
         self.view.plot_selected_logs(self.model.get_ws(), self.model.get_exp(), to_plot)
 
     def new_plot_logs(self):
         """Get all selected rows, check if plottable, then plot the logs in new figure"""
-        to_plot = [row for row in self.view.get_selected_row_indexes()
-                   if self.model.is_log_plottable(self.view.get_row_log_name(row))]
+        to_plot = [
+            row for row in self.view.get_selected_row_indexes()
+            if self.model.is_log_plottable(self.view.get_row_log_name(row))
+        ]
         self.view.new_plot_selected_logs(self.model.get_ws(), self.model.get_exp(), to_plot)
 
     def setup_table(self, search_key=''):

@@ -67,7 +67,7 @@ def get_data(name='', type='', x_field='revision', y_field='runtime', last_num=-
 
         if data.has_key(x):
             old = data[x]
-            iters = old[0] + 1 # Iterations
+            iters = old[0] + 1  # Iterations
             runtime = old[1] + res[y_field]
         else:
             iters = 1
@@ -76,16 +76,16 @@ def get_data(name='', type='', x_field='revision', y_field='runtime', last_num=-
         data[x] = (iters, runtime)
 
     # Now make a sorted list of (x, runtime/iteration)
-    sorted = [(x, y[1]/y[0]) for (x,y) in data.items()]
+    sorted = [(x, y[1] / y[0]) for (x, y) in data.items()]
     sorted.sort()
 
-    x = [a for (a,b) in sorted]
+    x = [a for (a, b) in sorted]
     # For index, convert into an integer index
     if x_field == 'index':
-        x = range( len(x) )
-    y = [b for (a,b) in sorted]
+        x = range(len(x))
+    y = [b for (a, b) in sorted]
 
-    return (x,y)
+    return (x, y)
 
 
 #============================================================================================
@@ -94,8 +94,9 @@ def get_unique_fields(results, field):
     list of all unique values of 'field'"""
     out = set()
     for res in results:
-        out.add( res[field] )
+        out.add(res[field])
     return list(out)
+
 
 #============================================================================================
 
@@ -139,24 +140,23 @@ def smart_ticks(index, values):
 
     if len(values_str) == 0: return
 
-    w = gcf().get_figwidth()*gcf().get_dpi()
-    spacing = w/len(index)
+    w = gcf().get_figwidth() * gcf().get_dpi()
+    spacing = w / len(index)
 
     tick_index = []
     tick_strings = []
 
     space_available = 0
     for i in range(len(index)):
-        s = str(values_str[i]);
-        s_width = (len(s)+1) * 12.0 # About 12 pixels per letter? And add a space
-        space_available +=spacing
+        s = str(values_str[i])
+        s_width = (len(s) + 1) * 12.0  # About 12 pixels per letter? And add a space
+        space_available += spacing
         if space_available >= s_width:
             space_available = 0
             tick_index.append(i)
             tick_strings.append(s)
 
-    xticks( tick_index, tick_strings )
-
+    xticks(tick_index, tick_strings)
 
 
 #============================================================================================
@@ -192,16 +192,15 @@ def plot_success_count(type='system', last_num=-1, x_field='revision'):
     success = np.array(success)
 
     index = np.arange(len(revisions))
-#    p1 = bar(index, fail, color='r')
-#    p2 = bar(index, success, color='g', bottom=fail)
-#    legend( (p1[0], p2[0]), ('Failure', 'Success') )
+    #    p1 = bar(index, fail, color='r')
+    #    p2 = bar(index, success, color='g', bottom=fail)
+    #    legend( (p1[0], p2[0]), ('Failure', 'Success') )
 
     p1 = fill_between(index, fail, 0, color='r')
-    p2 = fill_between(index, success+fail, fail, color='g')
+    p2 = fill_between(index, success + fail, fail, color='g')
     #legend( (p1, p2), ('Failure', 'Success') )
 
-    smart_ticks( index, revisions)
-
+    smart_ticks(index, revisions)
 
     ylabel('Success/Fail')
     xlabel(x_field)
@@ -218,22 +217,20 @@ def plot_runtime(*args, **kwargs):
     ----------
         - See get_data() for the full list
     """
-    (x,y) = get_data(*args, **kwargs)
+    (x, y) = get_data(*args, **kwargs)
 
     figure()
     index = np.arange(len(x))
-    plot(index,y,'-b.')
-    smart_ticks( index, x)
+    plot(index, y, '-b.')
+    smart_ticks(index, x)
     ylabel('Runtime/iteration (sec)')
     xlabel(kwargs['x_field'])
 
-    last_num =kwargs.get('last_num',-1)
+    last_num = kwargs.get('last_num', -1)
     if last_num > 0:
-        title("Runtime History of %s (last %d revs)" % (kwargs['name'], kwargs["last_num"]) )
+        title("Runtime History of %s (last %d revs)" % (kwargs['name'], kwargs["last_num"]))
     else:
         title("Runtime History of %s (all revs)" % kwargs['name'])
-
-
 
 
 #============================================================================================
@@ -244,29 +241,20 @@ def plot_memory(*args, **kwargs):
     ----------
         - See get_data() for the full list
     """
-    (x,y) = get_data(*args, **kwargs)
+    (x, y) = get_data(*args, **kwargs)
 
     figure()
     index = np.arange(len(x))
-    plot(index,y,'-b.')
-    smart_ticks( index, x)
+    plot(index, y, '-b.')
+    smart_ticks(index, x)
     ylabel("Memory 'loss' (MB)")
     xlabel(kwargs['x_field'])
 
-    last_num =kwargs.get('last_num',-1)
+    last_num = kwargs.get('last_num', -1)
     if last_num > 0:
-        title("Memory History of %s (last %d revs)" % (kwargs['name'], kwargs["last_num"]) )
+        title("Memory History of %s (last %d revs)" % (kwargs['name'], kwargs["last_num"]))
     else:
         title("Memory History of %s (all revs)" % kwargs['name'])
-
-
-
-
-
-
-
-
-
 
 
 # The default HTML header
@@ -274,7 +262,7 @@ default_html_header = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transition
 <head><LINK href="report.css" rel="stylesheet" type="text/css"></head>
 """
 
-default_html_footer =  """</body></html>"""
+default_html_footer = """</body></html>"""
 
 #============================================================================================
 
@@ -313,6 +301,7 @@ font-weight: bold;
     f.write(default_css)
     f.close()
 
+
 #============================================================================================
 
 
@@ -327,6 +316,7 @@ def make_environment_html(res):
     """ % (res['host'], res['environment'], res['runner'])
     return html
 
+
 #============================================================================================
 
 
@@ -340,7 +330,9 @@ def make_detailed_html_file(basedir, name, fig1, fig2, fig3, fig4, last_num):
     html += """<img src="%s" alt="memory vs revision number" />\n""" % (fig4)
     html += """<h3>Test Results</h3>"""
 
-    fields = ['revision', 'date', 'commitid', 'compare', 'status', 'runtime', 'cpu_fraction', 'memory_change', 'variables']
+    fields = [
+        'revision', 'date', 'commitid', 'compare', 'status', 'runtime', 'cpu_fraction', 'memory_change', 'variables'
+    ]
 
     table_row_header = "<tr>"
     for field in fields:
@@ -386,24 +378,26 @@ def make_detailed_html_file(basedir, name, fig1, fig2, fig3, fig4, last_num):
             if field == 'compare':
                 # Comparison to previous commit, if anything can be done
                 if (last_commitid != ""):
-                    val = """<a href="https://github.com/mantidproject/mantid/compare/%s...%s">diff</a>""" % (last_commitid, commitid)
+                    val = """<a href="https://github.com/mantidproject/mantid/compare/%s...%s">diff</a>""" % (
+                        last_commitid, commitid)
 
             else:
                 # Normal fields
                 val = res[field]
 
                 # Trim the fractional seconds
-                if field=="date":
+                if field == "date":
                     val = str(val)[0:19]
 
                 # Add a trac link
-                if field=="commitid":
+                if field == "commitid":
                     commitid = val
                     partial_commitid = val
-                    if (len(partial_commitid) > 7): partial_commitid = partial_commitid[0:7];
-                    val = """<a href="https://github.com/mantidproject/mantid/commit/%s">%s</a>""" % (commitid, partial_commitid)
+                    if (len(partial_commitid) > 7): partial_commitid = partial_commitid[0:7]
+                    val = """<a href="https://github.com/mantidproject/mantid/commit/%s">%s</a>""" % (commitid,
+                                                                                                      partial_commitid)
 
-                if field=="runtime":
+                if field == "runtime":
                     val = "%.3f" % (res["runtime"])
 
             table_row_html += "<td>%s</td>" % val
@@ -418,23 +412,23 @@ def make_detailed_html_file(basedir, name, fig1, fig2, fig3, fig4, last_num):
 #        count += 1
 #        if count % 30 == 0: html += table_row_header
 
-    # And one more at the end for good measure
+# And one more at the end for good measure
     html += table_row_header
     html += "</table>"
 
-    if len(results)> 0:
+    if len(results) > 0:
         html += """<h3>Environment</h3>
         %s""" % make_environment_html(results[0])
 
     html += default_html_footer
 
-#    last_date = sorted[-1][1]["date"]
-#    results = get_results(name, type='', get_log=False, where_clause=" date = '%s'" % last_date)
-#    if len(results)>0:
-#        html +=
+    #    last_date = sorted[-1][1]["date"]
+    #    results = get_results(name, type='', get_log=False, where_clause=" date = '%s'" % last_date)
+    #    if len(results)>0:
+    #        html +=
 
     f = open(os.path.join(basedir, "%s.htm" % name), "w")
-    html = html.replace("\n", os.linesep) # Fix line endings for windows
+    html = html.replace("\n", os.linesep)  # Fix line endings for windows
     f.write(html)
     f.close()
 
@@ -446,7 +440,7 @@ def how_long_ago(timestr):
     import time
     now = datetime.datetime.now()
     then = datetime.datetime.strptime(timestr, DATE_STR_FORMAT)
-    td = (now-then)
+    td = (now - then)
     sec = td.seconds
     min = int(sec / 60)
     hours = int(min / 60)
@@ -458,7 +452,7 @@ def how_long_ago(timestr):
     days = days % 7
 
     if weeks > 0:
-        return "%dw%dd" % (weeks,days)
+        return "%dw%dd" % (weeks, days)
     elif days > 0:
         return "%dd%dh" % (days, hours)
     elif hours > 0:
@@ -500,7 +494,7 @@ def get_html_summary_table(test_names):
             # Friendly date
             try:
                 date = datetime.datetime.strptime(res['date'], DATE_STR_FORMAT)
-                html += """<td>%s</td>""" %  date.strftime("%b %d, %H:%M:%S")
+                html += """<td>%s</td>""" % date.strftime("%b %d, %H:%M:%S")
             except:
                 html += """<td></td>"""
 
@@ -523,7 +517,6 @@ def generate_html_subproject_report(path, last_num, x_field='revision', starts_w
     basedir = os.path.abspath(path)
     if not os.path.exists(basedir):
         os.mkdir(basedir)
-
 
     # Detect if you can do figures
     dofigs = True
@@ -561,38 +554,37 @@ def generate_html_subproject_report(path, last_num, x_field='revision', starts_w
 
         if dofigs:
             # Only the latest X entries
-            plot_runtime(name=name,x_field=x_field,last_num=last_num)
+            plot_runtime(name=name, x_field=x_field, last_num=last_num)
             savefig(os.path.join(basedir, fig1))
             close()
 
             # Plot all svn times
-            plot_runtime(name=name,x_field=x_field,last_num=-1)
+            plot_runtime(name=name, x_field=x_field, last_num=-1)
             savefig(os.path.join(basedir, fig2))
             close()
 
             # Only the latest X entries
-            plot_memory(name=name,x_field=x_field,y_field='memory_change',last_num=last_num)
+            plot_memory(name=name, x_field=x_field, y_field='memory_change', last_num=last_num)
             savefig(os.path.join(basedir, fig3))
             close()
 
             # Plot all svn times
-            plot_memory(name=name,x_field=x_field,y_field='memory_change',last_num=-1)
+            plot_memory(name=name, x_field=x_field, y_field='memory_change', last_num=-1)
             savefig(os.path.join(basedir, fig4))
             close()
 
-            overview_html +=  """<img src="%s" alt="runtime vs revision number" />""" % (fig1)
-            overview_html +=  """<img src="%s" alt="memory vs revision number" />\n""" % (fig3)
+            overview_html += """<img src="%s" alt="runtime vs revision number" />""" % (fig1)
+            overview_html += """<img src="%s" alt="memory vs revision number" />\n""" % (fig3)
 
         make_detailed_html_file(basedir, name, fig1, fig2, fig3, fig4, last_num)
         detailed_html = """<br><a href="%s.htm">Detailed test report for %s</a>
         <br><br>
         """ % (name, name)
-        overview_html +=  detailed_html
+        overview_html += detailed_html
 
     filename = starts_with + ".htm"
 
     return (filename, overview_html)
-
 
 
 #============================================================================================
@@ -627,7 +619,7 @@ def generate_html_report(path, last_num, x_field='revision'):
 
     html += """<h2>Run Environment</h2>
     %s
-    """ % ( make_environment_html(sqlresults.get_latest_result()) )
+    """ % (make_environment_html(sqlresults.get_latest_result()))
 
     overview_html = ""
 
@@ -642,7 +634,7 @@ def generate_html_report(path, last_num, x_field='revision'):
     for name in test_names:
         n = name.find(".")
         if n > 0:
-            subprojects.add( name[:n] )
+            subprojects.add(name[:n])
     subprojects = list(subprojects)
     subprojects.sort()
     html += """<h2>Test Subprojects</h2>
@@ -681,19 +673,17 @@ def generate_html_report(path, last_num, x_field='revision'):
     html += default_html_footer
 
     f = open(os.path.join(basedir, "report.htm"), "w")
-    html = html.replace("\n", os.linesep) # Fix line endings for windows
+    html = html.replace("\n", os.linesep)  # Fix line endings for windows
     f.write(html)
     f.close()
 
     # -------- Overview of plots ------------
     f = open(os.path.join(basedir, "overview_plot.htm"), "w")
-    overview_html = overview_html.replace("\n", os.linesep) # Fix line endings for windows
+    overview_html = overview_html.replace("\n", os.linesep)  # Fix line endings for windows
     f.write(overview_html)
     f.close()
 
     print("Report complete!")
-
-
 
 
 #============================================================================================
@@ -703,7 +693,6 @@ if __name__ == "__main__":
     if 0:
         if os.path.exists("MyFakeData.db"): os.remove("MyFakeData.db")
         sqlresults.generate_fake_data(300)
-
 
     generate_html_report("../Report", 50)
 

@@ -42,8 +42,7 @@ class Pearl(AbstractInst):
                                do_van_normalisation=self._inst_settings.van_norm)
 
     def create_vanadium(self, **kwargs):
-        kwargs[
-            "perform_attenuation"] = None  # Hard code this off as we do not need an attenuation file
+        kwargs["perform_attenuation"] = None  # Hard code this off as we do not need an attenuation file
 
         with self._apply_temporary_inst_settings(kwargs, kwargs.get("run_in_cycle")):
             if str(self._inst_settings.tt_mode).lower() == "all":
@@ -71,17 +70,16 @@ class Pearl(AbstractInst):
                 "XMax": self._inst_settings.get_det_offsets_x_max
             }
             output_file_paths = self._generate_out_file_paths(run_details)
-            return pearl_calibration_algs.create_calibration(
-                calibration_runs=self._inst_settings.run_number,
-                instrument=self,
-                offset_file_name=run_details.offset_file_path,
-                grouping_file_name=run_details.grouping_file_path,
-                calibration_dir=self._inst_settings.calibration_dir,
-                rebin_1_params=self._inst_settings.cal_rebin_1,
-                rebin_2_params=self._inst_settings.cal_rebin_2,
-                cross_correlate_params=cross_correlate_params,
-                get_det_offset_params=get_detector_offsets_params,
-                output_name=output_file_paths["output_name"] + "_grouped")
+            return pearl_calibration_algs.create_calibration(calibration_runs=self._inst_settings.run_number,
+                                                             instrument=self,
+                                                             offset_file_name=run_details.offset_file_path,
+                                                             grouping_file_name=run_details.grouping_file_path,
+                                                             calibration_dir=self._inst_settings.calibration_dir,
+                                                             rebin_1_params=self._inst_settings.cal_rebin_1,
+                                                             rebin_2_params=self._inst_settings.cal_rebin_2,
+                                                             cross_correlate_params=cross_correlate_params,
+                                                             get_det_offset_params=get_detector_offsets_params,
+                                                             output_name=output_file_paths["output_name"] + "_grouped")
 
     def should_subtract_empty_inst(self):
         return self._inst_settings.subtract_empty_inst
@@ -98,16 +96,15 @@ class Pearl(AbstractInst):
             self._inst_settings.update_attributes(kwargs=kwargs)
 
         # check that cache exists
-        run_number_string_key = self._generate_run_details_fingerprint(
-            run, self._inst_settings.file_extension, self._inst_settings.tt_mode)
+        run_number_string_key = self._generate_run_details_fingerprint(run, self._inst_settings.file_extension,
+                                                                       self._inst_settings.tt_mode)
         if run_number_string_key in self._cached_run_details:
             # update spline path of cache
 
             add_spline = [self._inst_settings.tt_mode, "long"] if self._inst_settings.long_mode else \
                 [self._inst_settings.tt_mode]
 
-            self._cached_run_details[run_number_string_key].update_file_paths(
-                self._inst_settings, add_spline)
+            self._cached_run_details[run_number_string_key].update_file_paths(self._inst_settings, add_spline)
         yield
         # reset instrument settings
         self._inst_settings = copy.deepcopy(self._default_inst_settings)
@@ -124,15 +121,14 @@ class Pearl(AbstractInst):
                                      do_absorb_corrections=self._inst_settings.absorb_corrections)
 
     def _get_run_details(self, run_number_string):
-        run_number_string_key = self._generate_run_details_fingerprint(
-            run_number_string, self._inst_settings.file_extension, self._inst_settings.tt_mode)
+        run_number_string_key = self._generate_run_details_fingerprint(run_number_string,
+                                                                       self._inst_settings.file_extension,
+                                                                       self._inst_settings.tt_mode)
         if run_number_string_key in self._cached_run_details:
             return self._cached_run_details[run_number_string_key]
 
         self._cached_run_details[run_number_string_key] = pearl_algs.get_run_details(
-            run_number_string=run_number_string,
-            inst_settings=self._inst_settings,
-            is_vanadium_run=self._is_vanadium)
+            run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
         return self._cached_run_details[run_number_string_key]
 
     def _add_formatting_options(self, format_options):
@@ -152,13 +148,12 @@ class Pearl(AbstractInst):
         monitor_ws = common.extract_single_spectrum(ws_to_process=ws_to_correct,
                                                     spectrum_number_to_extract=monitor_spectra)
 
-        normalised_ws = pearl_algs.normalise_ws_current(
-            ws_to_correct=ws_to_correct,
-            monitor_ws=monitor_ws,
-            spline_coeff=self._inst_settings.monitor_spline,
-            integration_range=self._inst_settings.monitor_integration_range,
-            lambda_values=self._inst_settings.monitor_lambda,
-            ex_regions=self._inst_settings.monitor_mask_regions)
+        normalised_ws = pearl_algs.normalise_ws_current(ws_to_correct=ws_to_correct,
+                                                        monitor_ws=monitor_ws,
+                                                        spline_coeff=self._inst_settings.monitor_spline,
+                                                        integration_range=self._inst_settings.monitor_integration_range,
+                                                        lambda_values=self._inst_settings.monitor_lambda,
+                                                        ex_regions=self._inst_settings.monitor_mask_regions)
         common.remove_intermediate_workspace(monitor_ws)
         return normalised_ws
 
@@ -173,8 +168,7 @@ class Pearl(AbstractInst):
         new_workspace_names = []
         for ws in splined_list:
             new_name = ws.name() + '_' + self._inst_settings.tt_mode
-            new_workspace_names.append(
-                mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace=new_name))
+            new_workspace_names.append(mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace=new_name))
 
         return new_workspace_names
 
@@ -187,13 +181,13 @@ class Pearl(AbstractInst):
 
         attenuation_path = None
         if self._inst_settings.perform_atten:
-            name_key='name'
-            path_key='path'
+            name_key = 'name'
+            path_key = 'path'
             if isinstance(self._inst_settings.attenuation_files, str):
                 self._inst_settings.attenuation_files = eval(self._inst_settings.attenuation_files)
             atten_file_found = False
             for atten_file in self._inst_settings.attenuation_files:
-                if any (required_key not in atten_file for required_key in [name_key,path_key]):
+                if any(required_key not in atten_file for required_key in [name_key, path_key]):
                     logger.warning("A dictionary in attenuation_files has been ignored because "
                                    f"it doesn't contain both {name_key} and {path_key} entries")
                 elif atten_file[name_key] == self._inst_settings.attenuation_file:
@@ -213,15 +207,12 @@ class Pearl(AbstractInst):
 
         group_name = "PEARL{0!s}_{1}{2}-Results-D-Grp"
         mode = "_long" if self._inst_settings.long_mode else ""
-        group_name = group_name.format(run_details.output_run_string, self._inst_settings.tt_mode,
-                                       mode)
-        grouped_d_spacing = mantid.GroupWorkspaces(InputWorkspaces=output_spectra,
-                                                   OutputWorkspace=group_name)
+        group_name = group_name.format(run_details.output_run_string, self._inst_settings.tt_mode, mode)
+        grouped_d_spacing = mantid.GroupWorkspaces(InputWorkspaces=output_spectra, OutputWorkspace=group_name)
         return grouped_d_spacing, None
 
     def _crop_banks_to_user_tof(self, focused_banks):
-        return common.crop_banks_using_crop_list(focused_banks,
-                                                 self._inst_settings.tof_cropping_values)
+        return common.crop_banks_using_crop_list(focused_banks, self._inst_settings.tof_cropping_values)
 
     def _crop_raw_to_expected_tof_range(self, ws_to_crop):
         out_ws = common.crop_in_tof(ws_to_crop=ws_to_crop,
@@ -239,11 +230,10 @@ class Pearl(AbstractInst):
         if self._inst_settings.gen_absorb:
             absorb_file_name = self._inst_settings.absorb_out_file
             if not absorb_file_name:
-                raise RuntimeError(
-                    "\"absorb_corrections_out_filename\" must be supplied when generating absorption "
-                    "corrections")
-            absorb_corrections = pearl_algs.generate_vanadium_absorb_corrections(
-                van_ws=ws_to_correct, output_filename=absorb_file_name)
+                raise RuntimeError("\"absorb_corrections_out_filename\" must be supplied when generating absorption "
+                                   "corrections")
+            absorb_corrections = pearl_algs.generate_vanadium_absorb_corrections(van_ws=ws_to_correct,
+                                                                                 output_filename=absorb_file_name)
         else:
             absorb_corrections = None
 
@@ -252,7 +242,6 @@ class Pearl(AbstractInst):
                                                             absorb_ws=absorb_corrections)
 
     def _switch_long_mode_inst_settings(self, long_mode_on):
-        self._inst_settings.update_attributes(
-            advanced_config=pearl_advanced_config.get_long_mode_dict(long_mode_on))
+        self._inst_settings.update_attributes(advanced_config=pearl_advanced_config.get_long_mode_dict(long_mode_on))
         if long_mode_on:
             setattr(self._inst_settings, "perform_atten", False)

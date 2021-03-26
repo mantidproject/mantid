@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0902,too-many-branches,C0302
 import os
 import numpy as np
 from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
@@ -12,46 +11,20 @@ from mantidqt.MPLwidgets import NavigationToolbar2QT as NavigationToolbar2
 from matplotlib.figure import Figure
 import matplotlib.image
 import matplotlib.collections
-from qtpy.QtWidgets import (QWidget, QVBoxLayout, QSizePolicy)   # noqa
+from qtpy.QtWidgets import (QWidget, QVBoxLayout, QSizePolicy)  # noqa
 from qtpy.QtCore import Signal as pyqtSignal
-
 
 MplLineStyles = ['-', '--', '-.', ':', 'None', ' ', '']
 MplLineMarkers = [
-    ". (point         )",
-    "* (star          )",
-    "x (x             )",
-    "o (circle        )",
-    "s (square        )",
-    "D (diamond       )",
-    ", (pixel         )",
-    "v (triangle_down )",
-    "^ (triangle_up   )",
-    "< (triangle_left )",
-    "> (triangle_right)",
-    "1 (tri_down      )",
-    "2 (tri_up        )",
-    "3 (tri_left      )",
-    "4 (tri_right     )",
-    "8 (octagon       )",
-    "p (pentagon      )",
-    "h (hexagon1      )",
-    "H (hexagon2      )",
-    "+ (plus          )",
-    "d (thin_diamond  )",
-    "| (vline         )",
-    "_ (hline         )",
-    "None (nothing    )"]
+    ". (point         )", "* (star          )", "x (x             )", "o (circle        )", "s (square        )",
+    "D (diamond       )", ", (pixel         )", "v (triangle_down )", "^ (triangle_up   )", "< (triangle_left )",
+    "> (triangle_right)", "1 (tri_down      )", "2 (tri_up        )", "3 (tri_left      )", "4 (tri_right     )",
+    "8 (octagon       )", "p (pentagon      )", "h (hexagon1      )", "H (hexagon2      )", "+ (plus          )",
+    "d (thin_diamond  )", "| (vline         )", "_ (hline         )", "None (nothing    )"
+]
 
 # Note: in colors, "white" is removed
-MplBasicColors = [
-    "black",
-    "red",
-    "blue",
-    "green",
-    "cyan",
-    "magenta",
-    "yellow"]
+MplBasicColors = ["black", "red", "blue", "green", "cyan", "magenta", "yellow"]
 
 
 class IndicatorManager(object):
@@ -168,9 +141,8 @@ class IndicatorManager(object):
         assert isinstance(indicator_id, int)
 
         if indicator_id not in self._canvasLineKeyDict:
-            raise RuntimeError('Indicator ID %s cannot be found. Current keys are %s.' % (
-                indicator_id, str(sorted(self._canvasLineKeyDict.keys()))
-            ))
+            raise RuntimeError('Indicator ID %s cannot be found. Current keys are %s.' %
+                               (indicator_id, str(sorted(self._canvasLineKeyDict.keys()))))
         return self._canvasLineKeyDict[indicator_id]
 
     def get_line_type(self, my_id):
@@ -426,16 +398,32 @@ class MplGraphicsView(QWidget):
         """
         key_list = list()
         for vec_x, vec_y in vec_set:
-            temp_key = self._myCanvas.add_plot_1d(vec_x, vec_y, color=color, marker=marker,
-                                                  line_style=line_style, line_width=line_width)
+            temp_key = self._myCanvas.add_plot_1d(vec_x,
+                                                  vec_y,
+                                                  color=color,
+                                                  marker=marker,
+                                                  line_style=line_style,
+                                                  line_width=line_width)
             assert isinstance(temp_key, int)
             assert temp_key >= 0
             key_list.append(temp_key)
 
         return key_list
 
-    def add_plot_1d(self, vec_x, vec_y, y_err=None, annotation_list=None, color=None, label='', x_label=None, y_label=None,
-                    marker=None, line_style=None, line_width=1, show_legend=True, update_plot=True):
+    def add_plot_1d(self,
+                    vec_x,
+                    vec_y,
+                    y_err=None,
+                    annotation_list=None,
+                    color=None,
+                    label='',
+                    x_label=None,
+                    y_label=None,
+                    marker=None,
+                    line_style=None,
+                    line_width=1,
+                    show_legend=True,
+                    update_plot=True):
         """
         Add a 1-D plot to canvas
         :param vec_x:
@@ -470,9 +458,13 @@ class MplGraphicsView(QWidget):
         :param line_width:
         :return:
         """
-        line_key = self._myCanvas.add_1d_plot_right(vec_x, vec_y, label=label,
-                                                    color=color, marker=marker,
-                                                    linestyle=line_style, linewidth=line_width)
+        line_key = self._myCanvas.add_1d_plot_right(vec_x,
+                                                    vec_y,
+                                                    label=label,
+                                                    color=color,
+                                                    marker=marker,
+                                                    linestyle=line_style,
+                                                    linewidth=line_width)
 
         self._statRightPlotDict[line_key] = (min(vec_x), max(vec_x), min(vec_y), max(vec_y))
 
@@ -505,12 +497,11 @@ class MplGraphicsView(QWidget):
         else:
             assert isinstance(color, str)
 
-        my_id = self._myIndicatorsManager.add_2way_indicator(x, x_min, x_max,
-                                                             y, y_min, y_max,
-                                                             color)
+        my_id = self._myIndicatorsManager.add_2way_indicator(x, x_min, x_max, y, y_min, y_max, color)
         vec_set = self._myIndicatorsManager.get_2way_data(my_id)
 
-        canvas_line_index = self.add_line_set(vec_set, color=color,
+        canvas_line_index = self.add_line_set(vec_set,
+                                              color=color,
                                               marker=self._myIndicatorsManager.get_marker(),
                                               line_style=self._myIndicatorsManager.get_line_style(),
                                               line_width=1)
@@ -540,8 +531,10 @@ class MplGraphicsView(QWidget):
         my_id = self._myIndicatorsManager.add_horizontal_indicator(y, x_min, x_max, color)
         vec_x, vec_y = self._myIndicatorsManager.get_data(my_id)
 
-        canvas_line_index = self._myCanvas.add_plot_1d(vec_x=vec_x, vec_y=vec_y,
-                                                       color=color, marker=self._myIndicatorsManager.get_marker(),
+        canvas_line_index = self._myCanvas.add_plot_1d(vec_x=vec_x,
+                                                       vec_y=vec_y,
+                                                       color=color,
+                                                       marker=self._myIndicatorsManager.get_marker(),
                                                        line_style=self._myIndicatorsManager.get_line_style(),
                                                        line_width=1)
 
@@ -581,8 +574,10 @@ class MplGraphicsView(QWidget):
         my_id = self._myIndicatorsManager.add_vertical_indicator(x, y_min, y_max, color)
         vec_x, vec_y = self._myIndicatorsManager.get_data(my_id)
 
-        canvas_line_index = self._myCanvas.add_plot_1d(vec_x=vec_x, vec_y=vec_y,
-                                                       color=color, marker=self._myIndicatorsManager.get_marker(),
+        canvas_line_index = self._myCanvas.add_plot_1d(vec_x=vec_x,
+                                                       vec_y=vec_y,
+                                                       color=color,
+                                                       marker=self._myIndicatorsManager.get_marker(),
                                                        line_style=self._myIndicatorsManager.get_line_style(),
                                                        line_width=1)
 
@@ -1091,13 +1086,23 @@ class Qt4MplCanvas(FigureCanvas):
         fc = 'k'
         ec = 'k'
 
-        self.axes.arrrow(start_x, start_y, stop_x, stop_y, head_width,
-                         head_length, fc, ec)
+        self.axes.arrrow(start_x, start_y, stop_x, stop_y, head_width, head_length, fc, ec)
 
         return
 
-    def add_plot_1d(self, vec_x, vec_y, y_err=None, color=None, label="", x_label=None, y_label=None,
-                    marker=None, line_style=None, line_width=1, show_legend=True, annotation_list=None):
+    def add_plot_1d(self,
+                    vec_x,
+                    vec_y,
+                    y_err=None,
+                    color=None,
+                    label="",
+                    x_label=None,
+                    y_label=None,
+                    marker=None,
+                    line_style=None,
+                    line_width=1,
+                    show_legend=True,
+                    annotation_list=None):
         """
 
         :param vec_x: numpy array X
@@ -1148,11 +1153,23 @@ class Qt4MplCanvas(FigureCanvas):
         # color must be RGBA (4-tuple)
         if plot_error is False:
             # return: list of matplotlib.lines.Line2D object
-            r = self.axes.plot(vec_x, vec_y, color=color, marker=marker, markersize=1, linestyle=line_style,
-                               label=label, linewidth=line_width)
+            r = self.axes.plot(vec_x,
+                               vec_y,
+                               color=color,
+                               marker=marker,
+                               markersize=1,
+                               linestyle=line_style,
+                               label=label,
+                               linewidth=line_width)
         else:
-            r = self.axes.errorbar(vec_x, vec_y, yerr=y_err, color=color, marker=marker, linestyle=line_style,
-                                   label=label, linewidth=line_width)
+            r = self.axes.errorbar(vec_x,
+                                   vec_y,
+                                   yerr=y_err,
+                                   color=color,
+                                   marker=marker,
+                                   linestyle=line_style,
+                                   label=label,
+                                   linewidth=line_width)
 
         self.axes.set_aspect('auto')
 
@@ -1191,7 +1208,15 @@ class Qt4MplCanvas(FigureCanvas):
 
         return line_key
 
-    def add_1d_plot_right(self, x, y, color=None, label="", x_label=None, ylabel=None, marker=None, linestyle=None,
+    def add_1d_plot_right(self,
+                          x,
+                          y,
+                          color=None,
+                          label="",
+                          x_label=None,
+                          ylabel=None,
+                          marker=None,
+                          linestyle=None,
                           linewidth=1):
         """ Add a line (1-d plot) at right axis
         """
@@ -1215,8 +1240,7 @@ class Qt4MplCanvas(FigureCanvas):
             color = 'red'
 
         # color must be RGBA (4-tuple)
-        r = self.axes2.plot(x, y, color=color, marker=marker, linestyle=linestyle,
-                            label=label, linewidth=linewidth)
+        r = self.axes2.plot(x, y, color=color, marker=marker, linestyle=linestyle, label=label, linewidth=linewidth)
         # return: list of matplotlib.lines.Line2D object
 
         self.axes2.set_aspect('auto')
@@ -1309,10 +1333,10 @@ class Qt4MplCanvas(FigureCanvas):
         print('[DB...BAT] Number of Y labels = ', len(labels), ', Number of Y = ', len(vec_y))
 
         # TODO/ISSUE/55: how to make this part more powerful
-        if len(labels) == 2*len(vec_y) - 1:
+        if len(labels) == 2 * len(vec_y) - 1:
             new_labels = [''] * len(labels)
             for i in range(len(vec_y)):
-                new_labels[i*2] = '%d' % int(vec_y[i])
+                new_labels[i * 2] = '%d' % int(vec_y[i])
             self.axes.set_yticklabels(new_labels)
 
         # explicitly set aspect ratio of the image
@@ -1365,8 +1389,8 @@ class Qt4MplCanvas(FigureCanvas):
                 try:
                     self.axes.lines.remove(plot)
                 except ValueError as e:
-                    print("[Error] Plot %s is not in axes.lines which has %d lines. Error message: %s" % (
-                        str(plot), len(self.axes.lines), str(e)))
+                    print("[Error] Plot %s is not in axes.lines which has %d lines. Error message: %s" %
+                          (str(plot), len(self.axes.lines), str(e)))
                 del self._lineDict[ikey]
             else:
                 # error bar: but not likely to be set to _lineDict
@@ -1439,7 +1463,7 @@ class Qt4MplCanvas(FigureCanvas):
     def getLastPlotIndexKey(self):
         """ Get the index/key of the last added line
         """
-        return self._lineIndex-1
+        return self._lineIndex - 1
 
     def getPlot(self):
         """ return figure's axes to expose the matplotlib figure to PyQt client
@@ -1558,8 +1582,8 @@ class Qt4MplCanvas(FigureCanvas):
             try:
                 self.axes.lines.remove(self._lineDict[plot_key])
             except ValueError as r_error:
-                error_message = 'Unable to remove to 1D line %s (ID=%d) due to %s.' % (str(self._lineDict[plot_key]),
-                                                                                       plot_key, str(r_error))
+                error_message = 'Unable to remove to 1D line %s (ID=%d) due to %s.' % (str(
+                    self._lineDict[plot_key]), plot_key, str(r_error))
                 raise RuntimeError(error_message)
             # remove the plot key from dictionary
             del self._lineDict[plot_key]
@@ -1679,7 +1703,7 @@ class Qt4MplCanvas(FigureCanvas):
             assert isinstance(error_bar_lineset, matplotlib.collections.LineCollection), 'Error bar line set type'
 
             segments = error_bar_lineset.get_segments()
-            vec_error = np.ndarray(shape=(len(segments),), dtype='float')
+            vec_error = np.ndarray(shape=(len(segments), ), dtype='float')
             for iseg, segment in enumerate(segments):
                 error_i = segment[1, 1] - segment[0, 1]
                 vec_error[iseg] = error_i * 0.5
@@ -1748,7 +1772,7 @@ class Qt4MplCanvas(FigureCanvas):
         """ A dirty hack to flush the image
         """
         w, h = self.get_width_height()
-        self.resize(w+1, h)
+        self.resize(w + 1, h)
         self.resize(w, h)
 
         return
@@ -1765,17 +1789,9 @@ class Qt4MplCanvas(FigureCanvas):
 
         """
         allowed_location_list = [
-            "best",
-            "upper right",
-            "upper left",
-            "lower left",
-            "lower right",
-            "right",
-            "center left",
-            "center right",
-            "lower center",
-            "upper center",
-            "center"]
+            "best", "upper right", "upper left", "lower left", "lower right", "right", "center left", "center right",
+            "lower center", "upper center", "center"
+        ]
 
         # Check legend location valid or not
         if location not in allowed_location_list:
@@ -1787,6 +1803,7 @@ class Qt4MplCanvas(FigureCanvas):
         self._isLegendOn = True
 
         return
+
 
 # END-OF-CLASS (MplGraphicsView)
 

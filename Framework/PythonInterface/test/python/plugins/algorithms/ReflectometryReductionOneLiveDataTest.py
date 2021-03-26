@@ -28,19 +28,27 @@ class GetFakeLiveInstrumentValue(DataProcessorAlgorithm):
         self._do_execute()
 
     def _declare_properties(self):
-        self.declareProperty(name='Instrument', defaultValue='', direction=Direction.Input,
+        self.declareProperty(name='Instrument',
+                             defaultValue='',
+                             direction=Direction.Input,
                              validator=StringListValidator(['CRISP', 'INTER', 'OFFSPEC', 'POLREF', 'SURF']),
                              doc='Instrument to find live value for.')
 
-        self.declareProperty(name='PropertyType', defaultValue='Run', direction=Direction.Input,
+        self.declareProperty(name='PropertyType',
+                             defaultValue='Run',
+                             direction=Direction.Input,
                              validator=StringListValidator(['Run', 'Block']),
                              doc='The type of property to find')
 
-        self.declareProperty(name='PropertyName', defaultValue='TITLE', direction=Direction.Input,
+        self.declareProperty(name='PropertyName',
+                             defaultValue='TITLE',
+                             direction=Direction.Input,
                              validator=StringMandatoryValidator(),
                              doc='Name of value to find.')
 
-        self.declareProperty(name='Value', defaultValue='', direction=Direction.Output,
+        self.declareProperty(name='Value',
+                             defaultValue='',
+                             direction=Direction.Output,
                              doc='The live value from the instrument, or an empty string if not found')
 
     def _do_execute(self):
@@ -108,21 +116,18 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
     def test_basic_reduction_works(self):
         workspace = self._run_algorithm_with_defaults()
         self.assertEqual(workspace.dataX(0).size, 55)
-        self._assert_delta(workspace.dataX(0)[0],  0.006462)
+        self._assert_delta(workspace.dataX(0)[0], 0.006462)
         self._assert_delta(workspace.dataX(0)[33], 0.027376)
         self._assert_delta(workspace.dataX(0)[54], 0.066421)
-        self._assert_delta(workspace.dataY(0)[4],  0.043630)
+        self._assert_delta(workspace.dataY(0)[4], 0.043630)
         self._assert_delta(workspace.dataY(0)[33], 0.000029)
         self._assert_delta(workspace.dataY(0)[53], 0.0)
 
     def test_missing_inputs(self):
-        self.assertRaises(RuntimeError,
-                          ReflectometryReductionOneLiveData)
+        self.assertRaises(RuntimeError, ReflectometryReductionOneLiveData)
 
     def test_invalid_input_workspace(self):
-        self.assertRaises(ValueError,
-                          ReflectometryReductionOneLiveData,
-                          InputWorkspace='bad')
+        self.assertRaises(ValueError, ReflectometryReductionOneLiveData, InputWorkspace='bad')
 
     def test_invalid_output_workspace(self):
         self.assertRaises(RuntimeError,
@@ -143,9 +148,11 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         # Get the properties for the child algorithm, apart from a list of known
         # exclusions
         child_alg = create_algorithm('ReflectometryISISLoadAndProcess')
-        excluded = ['InputRunList', 'ThetaIn', 'ThetaLogName', 'OutputWorkspaceTransmission',
-                    'OutputWorkspaceFirstTransmission', 'OutputWorkspaceSecondTransmission',
-                    'OutputWorkspaceBinned', 'OutputWorkspaceWavelength']
+        excluded = [
+            'InputRunList', 'ThetaIn', 'ThetaLogName', 'OutputWorkspaceTransmission',
+            'OutputWorkspaceFirstTransmission', 'OutputWorkspaceSecondTransmission', 'OutputWorkspaceBinned',
+            'OutputWorkspaceWavelength'
+        ]
         child_props = set([prop.name for prop in child_alg.getProperties() if prop.name not in excluded])
         # Check the child properties exist in the parent algorithm
         actual_alg = create_algorithm('ReflectometryReductionOneLiveData')
@@ -236,8 +243,21 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         """Create a test workspace with reflectometry data but no instrument or sample logs"""
         nSpec = 4
         x = range(5, 100000, 1000)
-        y = [6,1,0,0,0,3,22,40,59,135,241,406,645,932,1096,1348,1559,1640,1790,1933,2072,2349,2629,2838,2996,3141,3170,3250,3260,3359,3460,3316,3335,3470,3384,3367,3412,3431,3541,3569,3592,3526,3619,3757,3840,4031,4076,4342,4559,4998,5414,6260,8358,11083,11987,10507,9165,8226,6979,6068,5295,4587,4005,3489,3018,2728,2398,2220,1963,1753,1516,1384,1355,1192,1153,1002,944,926,788,778,687,618,586,531,456,305,77,0,0,0,0,0,0,0,0,0,0,0,0]
-        monitor_y = [14,7,583,97285,1474787,3362154,4790669,6768912,9359711,10443338,10478945,9957954,9387695,8660614,8354808,8036977,7649065,7067769,6275327,5558998,4898033,4307711,3776162,3302736,2895372,2539087,2226028,1956162,1721463,1518854,1343139,1193432,1057989,942001,839505,748921,669257,598804,537145,482685,433356,390183,352178,318584,288155,261372,237360,216296,197369,180357,164538,151010,138316,126428,116943,107688,98584,90757,81054,59764,21151,372,18,4,3,1,3,3,0,3,1,0,2,1,1,1,3,1,1,0,1,0,1,1,2,1,0,1,2,2,0,0,0,0,1,0,1,2,0]
+        y = [
+            6, 1, 0, 0, 0, 3, 22, 40, 59, 135, 241, 406, 645, 932, 1096, 1348, 1559, 1640, 1790, 1933, 2072, 2349, 2629,
+            2838, 2996, 3141, 3170, 3250, 3260, 3359, 3460, 3316, 3335, 3470, 3384, 3367, 3412, 3431, 3541, 3569, 3592,
+            3526, 3619, 3757, 3840, 4031, 4076, 4342, 4559, 4998, 5414, 6260, 8358, 11083, 11987, 10507, 9165, 8226,
+            6979, 6068, 5295, 4587, 4005, 3489, 3018, 2728, 2398, 2220, 1963, 1753, 1516, 1384, 1355, 1192, 1153, 1002,
+            944, 926, 788, 778, 687, 618, 586, 531, 456, 305, 77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        ]
+        monitor_y = [
+            14, 7, 583, 97285, 1474787, 3362154, 4790669, 6768912, 9359711, 10443338, 10478945, 9957954, 9387695,
+            8660614, 8354808, 8036977, 7649065, 7067769, 6275327, 5558998, 4898033, 4307711, 3776162, 3302736, 2895372,
+            2539087, 2226028, 1956162, 1721463, 1518854, 1343139, 1193432, 1057989, 942001, 839505, 748921, 669257,
+            598804, 537145, 482685, 433356, 390183, 352178, 318584, 288155, 261372, 237360, 216296, 197369, 180357,
+            164538, 151010, 138316, 126428, 116943, 107688, 98584, 90757, 81054, 59764, 21151, 372, 18, 4, 3, 1, 3, 3,
+            0, 3, 1, 0, 2, 1, 1, 1, 3, 1, 1, 0, 1, 0, 1, 1, 2, 1, 0, 1, 2, 2, 0, 0, 0, 0, 1, 0, 1, 2, 0
+        ]
         dataX = list()
         dataY = list()
         for i in range(0, nSpec - 1):

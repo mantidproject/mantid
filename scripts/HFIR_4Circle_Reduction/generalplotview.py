@@ -53,7 +53,8 @@ class GeneralPlotWindow(QMainWindow):
         :return:
         """
         # get directory
-        file_name = QFileDialog.getSaveFileName(self, caption='File to save the plot',
+        file_name = QFileDialog.getSaveFileName(self,
+                                                caption='File to save the plot',
                                                 directory=self._work_dir,
                                                 filter='Data File(*.dat);;All Files(*.*')
         if not file_name:

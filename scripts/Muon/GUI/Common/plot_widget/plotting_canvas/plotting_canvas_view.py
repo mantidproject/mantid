@@ -51,7 +51,6 @@ def get_y_min_max_between_x_range(line, x_min, x_max, y_min, y_max):
 
 
 class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
-
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -61,8 +60,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self.toolBar = PlotToolbar(self.fig.canvas, self)
 
         # Create a set of Mantid axis for the figure
-        self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=1,
-                                      fig=self.fig)
+        self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=1, fig=self.fig)
         self._number_of_axes = 1
         self._color_queue = [ColorQueue(DEFAULT_COLOR_CYCLE)]
 
@@ -105,8 +103,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self._number_of_axes = num_axes
         self._color_queue = [ColorQueue(DEFAULT_COLOR_CYCLE) for _ in range(num_axes)]
         self.fig.clf()
-        self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=num_axes,
-                                      fig=self.fig)
+        self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=num_axes, fig=self.fig)
         self.fig.tight_layout()
         self.fig.canvas.draw()
 
@@ -138,8 +135,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             ax = self.fig.axes[axis_number]
             plot_kwargs = self._get_plot_kwargs(workspace_plot_info)
             plot_kwargs['color'] = self._color_queue[axis_number]()
-            _do_single_plot(ax, workspace, ws_index, errors=errors,
-                            plot_kwargs=plot_kwargs)
+            _do_single_plot(ax, workspace, ws_index, errors=errors, plot_kwargs=plot_kwargs)
 
     def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
         for workspace_plot_info in workspace_plot_info_list:

@@ -84,5 +84,5 @@ class LoadView(QtWidgets.QWidget):
         except TypeError:
             return
 
-    def warning(self,msg):
+    def warning(self, msg):
         message_box.warning(msg)

@@ -11,7 +11,6 @@ from mantid.simpleapi import *
 
 
 class IndirectTransmissionMonitorTest(unittest.TestCase):
-
     def setUp(self):
         self._sample_workspace = 'IndirectTransmissionMonitorTest_sample'
         self._can_workspace = 'IndirectTransmissionMonitorTest_can'
@@ -23,12 +22,14 @@ class IndirectTransmissionMonitorTest(unittest.TestCase):
         self.kwargs['SampleWorkspace'] = self._sample_workspace
         self.kwargs['CanWorkspace'] = self._can_workspace
 
-
     def test_basic(self):
         trans_workspace = IndirectTransmissionMonitor(**self.kwargs)
 
-        self.assertTrue(isinstance(trans_workspace, mantid.api.WorkspaceGroup), msg='Result should be a workspace group')
-        self.assertEqual(trans_workspace.size(), 3, msg='Transmission workspace group should have 3 workspaces: sample, can and transfer')
+        self.assertTrue(isinstance(trans_workspace, mantid.api.WorkspaceGroup),
+                        msg='Result should be a workspace group')
+        self.assertEqual(trans_workspace.size(),
+                         3,
+                         msg='Transmission workspace group should have 3 workspaces: sample, can and transfer')
 
         expected_names = set()
         expected_names.add(self._sample_workspace + '_Can')

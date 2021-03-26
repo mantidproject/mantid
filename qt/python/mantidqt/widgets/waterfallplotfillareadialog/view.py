@@ -15,7 +15,6 @@ from mantidqt.widgets.plotconfigdialog.colorselector import ColorSelector
 
 
 class WaterfallPlotFillAreaDialogView(QDialog):
-
     def __init__(self, parent=None):
         super(WaterfallPlotFillAreaDialogView, self).__init__(parent=parent)
 

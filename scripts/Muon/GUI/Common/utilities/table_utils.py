@@ -7,7 +7,6 @@
 from functools import wraps
 import sys
 from qtpy import QtWidgets, QtCore, QtGui
-
 """
 This module contains the methods for
 adding information to tables.
@@ -33,7 +32,6 @@ class ValidatedTableItem(QtWidgets.QTableWidgetItem):
 
     table_item = ValidatedTableItem(greater_than_zero_validator)
     """
-
     @staticmethod
     def validator_before_set(func, validator):
         @wraps(func)
@@ -84,21 +82,21 @@ def setRowName(table, row, name, col=0):
     table.setItem(row, col, text)
 
 
-def addComboToTable(table,row,options,col=1):
-    combo=QtWidgets.QComboBox()
+def addComboToTable(table, row, options, col=1):
+    combo = QtWidgets.QComboBox()
     combo.addItems(options)
-    table.setCellWidget(row,col,combo)
+    table.setCellWidget(row, col, combo)
     return combo
 
 
-def addDoubleToTable(table,value,row,col=1, minimum=0.0):
+def addDoubleToTable(table, value, row, col=1, minimum=0.0):
     number_widget = QtWidgets.QLineEdit(str(value))
     number_widget.setValidator(QtGui.QDoubleValidator(minimum, sys.float_info.max, 3))
-    table.setCellWidget(row,col, number_widget)
+    table.setCellWidget(row, col, number_widget)
     return number_widget
 
 
-def addCheckBoxToTable(table,state,row,col=1):
+def addCheckBoxToTable(table, state, row, col=1):
     box = QtWidgets.QTableWidgetItem()
     box.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
     if state:
@@ -106,11 +104,11 @@ def addCheckBoxToTable(table,state,row,col=1):
     else:
         box.setCheckState(QtCore.Qt.Unchecked)
 
-    table.setItem(row,col, box)
+    table.setItem(row, col, box)
     return box
 
 
-def addCheckBoxWidgetToTable(table,state,row,col=1):
+def addCheckBoxWidgetToTable(table, state, row, col=1):
     check_box_widget = QtWidgets.QWidget()
     layout = QtWidgets.QHBoxLayout(check_box_widget)
     layout.setAlignment(QtCore.Qt.AlignCenter)
@@ -120,16 +118,16 @@ def addCheckBoxWidgetToTable(table,state,row,col=1):
 
     layout.addWidget(box)
 
-    table.setCellWidget(row,col, check_box_widget)
+    table.setCellWidget(row, col, check_box_widget)
     return box
 
 
-def addSpinBoxToTable(table,default,row,col=1):
+def addSpinBoxToTable(table, default, row, col=1):
     box = QtWidgets.QSpinBox()
     if default > 99:
         box.setMaximum(default * 10)
     box.setValue(default)
-    table.setCellWidget(row,col,box)
+    table.setCellWidget(row, col, box)
     return box
 
 

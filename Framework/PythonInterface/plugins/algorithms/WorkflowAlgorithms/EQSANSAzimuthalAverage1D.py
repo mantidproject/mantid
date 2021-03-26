@@ -11,7 +11,6 @@ from mantid.kernel import *
 
 
 class EQSANSAzimuthalAverage1D(PythonAlgorithm):
-
     def category(self):
         return 'Workflow\\SANS\\UsesPropertyManager'
 
@@ -22,29 +21,27 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         return "Compute I(q) for reduced EQSANS data"
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
-                                                     direction = Direction.Input))
-        self.declareProperty('NumberOfBins', 100,
-                             validator = IntBoundedValidator(lower = 1),
-                             doc = 'Number of Q bins to use if binning is not supplied')
-        self.declareProperty('LogBinning', False,
-                             doc = "Produce log binning in Q when true and binning wasn't supplied")
-        self.declareProperty('IndependentBinning', True,
-                             doc = 'If true and frame skipping is used, each frame will have its own binning')
-        self.declareProperty('ScaleResults', True,
-                             doc = 'If true and frame skipping is used, frame 1 will be scaled to frame 2')
-        self.declareProperty('ComputeResolution', True,
-                             doc = 'If true the Q resolution will be computed')
-        self.declareProperty('SampleApertureDiameter', 10.0,
-                             doc = 'Sample aperture diameter [mm]')
-        self.declareProperty('ReductionProperties', '__sans_reduction_properties',
-                             validator = StringMandatoryValidator(),
-                             doc = 'Property manager name for the reduction')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                                                     direction = Direction.Output),
-                             doc = 'I(q) workspace')
-        self.declareProperty('OutputMessage', '', direction = Direction.Output,
-                             doc = 'Output message')
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input))
+        self.declareProperty('NumberOfBins',
+                             100,
+                             validator=IntBoundedValidator(lower=1),
+                             doc='Number of Q bins to use if binning is not supplied')
+        self.declareProperty('LogBinning', False, doc="Produce log binning in Q when true and binning wasn't supplied")
+        self.declareProperty('IndependentBinning',
+                             True,
+                             doc='If true and frame skipping is used, each frame will have its own binning')
+        self.declareProperty('ScaleResults',
+                             True,
+                             doc='If true and frame skipping is used, frame 1 will be scaled to frame 2')
+        self.declareProperty('ComputeResolution', True, doc='If true the Q resolution will be computed')
+        self.declareProperty('SampleApertureDiameter', 10.0, doc='Sample aperture diameter [mm]')
+        self.declareProperty('ReductionProperties',
+                             '__sans_reduction_properties',
+                             validator=StringMandatoryValidator(),
+                             doc='Property manager name for the reduction')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
+                             doc='I(q) workspace')
+        self.declareProperty('OutputMessage', '', direction=Direction.Output, doc='Output message')
 
     def PyExec(self):
         input_ws_name = self.getPropertyValue('InputWorkspace')
@@ -105,8 +102,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         self.setProperty('OutputWorkspace', output_ws)
 
     #pylint: disable=too-many-arguments
-    def _call_sans_averaging(self, workspace, binning, nbins, log_binning,
-                             property_manager_name, output_workspace):
+    def _call_sans_averaging(self, workspace, binning, nbins, log_binning, property_manager_name, output_workspace):
         """
             Call the generic azimuthal averaging for SANS
             @param workspace: workspace to average
@@ -176,21 +172,17 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         if independent_binning:
             binning = None
         else:
-            (qmin, qstep, qmax) = self._get_binning(workspace,
-                                                    min(wl_min_f1, wl_min_f2),
-                                                    max(wl_max_f1, wl_max_f2))
+            (qmin, qstep, qmax) = self._get_binning(workspace, min(wl_min_f1, wl_min_f2), max(wl_max_f1, wl_max_f2))
             binning = '%g, %g, %g' % (qmin, qstep, qmax)
 
         # Average second frame
-        output_frame2 = self._process_frame(workspace, wl_min_f2, wl_max_f2,
-                                            source_aperture_radius, '2', binning)
+        output_frame2 = self._process_frame(workspace, wl_min_f2, wl_max_f2, source_aperture_radius, '2', binning)
 
         # Average first frame
         if independent_binning:
             binning = None
 
-        output_frame1 = self._process_frame(workspace, wl_min_f1, wl_max_f1,
-                                            source_aperture_radius, '1', binning)
+        output_frame1 = self._process_frame(workspace, wl_min_f1, wl_max_f1, source_aperture_radius, '1', binning)
 
         if scale_results:
             output_frame1 = self._scale(output_frame1, output_frame2)
@@ -198,15 +190,13 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         self.setPropertyValue('OutputWorkspace', ws_frame1)
         self.setProperty('OutputWorkspace', output_frame1)
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputFrame2', ws_frame2,
-                                                     direction = Direction.Output))
+        self.declareProperty(MatrixWorkspaceProperty('OutputFrame2', ws_frame2, direction=Direction.Output))
         self.setProperty('OutputFrame2', output_frame2)
 
         self.setProperty('OutputMessage', 'Performed radial averaging for two frames')
 
     #pylint: disable=too-many-arguments
-    def _process_frame(self, workspace, wl_min, wl_max, source_aperture_radius,
-                       frame_ID='1', binning=None):
+    def _process_frame(self, workspace, wl_min, wl_max, source_aperture_radius, frame_ID='1', binning=None):
         """
             Perform azimuthal averaging for a single frame
             @param workspace: reduced workspace object
@@ -224,7 +214,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         output_ws_name = self.getPropertyValue('OutputWorkspace')
         compute_resolution = self.getProperty('ComputeResolution').value
 
-        ws_frame = output_ws_name.replace('_Iq', '_frame'+frame_ID+'_Iq')
+        ws_frame = output_ws_name.replace('_Iq', '_frame' + frame_ID + '_Iq')
 
         # Rebin the data to cover the frame we are interested in
         alg = AlgorithmManager.create("Rebin")
@@ -344,7 +334,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         # ... then put Dq back
         dq_output = output_ws.dataDx(0)
         for i in range(len(dq_output)):
-            dq_output[i]=dq[i]
+            dq_output[i] = dq[i]
 
         return output_ws
 
@@ -382,31 +372,31 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
 
         # Q min is one pixel from the center, unless we have the beam trap size
         if workspace.getRun().hasProperty("beam-trap-diameter"):
-            mindist = workspace.getRun().getProperty("beam-trap-diameter").value/2.0
+            mindist = workspace.getRun().getProperty("beam-trap-diameter").value / 2.0
         else:
             mindist = min(pixel_size_x, pixel_size_y)
-        qmin = 4*math.pi/wavelength_max*math.sin(0.5*math.atan(mindist/sample_detector_distance))
+        qmin = 4 * math.pi / wavelength_max * math.sin(0.5 * math.atan(mindist / sample_detector_distance))
 
-        dxmax = pixel_size_x*max(beam_ctr_x,nx_pixels-beam_ctr_x)
-        dymax = pixel_size_y*max(beam_ctr_y,ny_pixels-beam_ctr_y)
-        maxdist = math.sqrt(dxmax*dxmax+dymax*dymax)
-        qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/sample_detector_distance))
+        dxmax = pixel_size_x * max(beam_ctr_x, nx_pixels - beam_ctr_x)
+        dymax = pixel_size_y * max(beam_ctr_y, ny_pixels - beam_ctr_y)
+        maxdist = math.sqrt(dxmax * dxmax + dymax * dymax)
+        qmax = 4 * math.pi / wavelength_min * math.sin(0.5 * math.atan(maxdist / sample_detector_distance))
 
         if not log_binning:
-            qstep = (qmax-qmin)/nbins
-            f_step = (qmax-qmin)/qstep
+            qstep = (qmax - qmin) / nbins
+            f_step = (qmax - qmin) / qstep
             n_step = math.floor(f_step)
-            if f_step-n_step>10e-10:
-                qmax = qmin+qstep*n_step
+            if f_step - n_step > 10e-10:
+                qmax = qmin + qstep * n_step
             return qmin, qstep, qmax
         else:
             # Note: the log binning in Mantid is x_i+1 = x_i * ( 1 + dx )
-            qstep = (math.log10(qmax)-math.log10(qmin))/nbins
-            f_step = (math.log10(qmax)-math.log10(qmin))/qstep
+            qstep = (math.log10(qmax) - math.log10(qmin)) / nbins
+            f_step = (math.log10(qmax) - math.log10(qmin)) / qstep
             n_step = math.floor(f_step)
-            if f_step-n_step>10e-10:
-                qmax = math.pow(10.0, math.log10(qmin)+qstep*n_step)
-            return qmin, -(math.pow(10.0,qstep)-1.0), qmax
+            if f_step - n_step > 10e-10:
+                qmax = math.pow(10.0, math.log10(qmin) + qstep * n_step)
+            return qmin, -(math.pow(10.0, qstep) - 1.0), qmax
 
 
 AlgorithmFactory.subscribe(EQSANSAzimuthalAverage1D)

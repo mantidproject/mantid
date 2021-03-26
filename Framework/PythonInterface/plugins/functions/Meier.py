@@ -11,18 +11,14 @@ import numpy as np
 
 
 class Meier(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.5, 'Amplitude')
-        self.declareParameter(
-            "FreqD", 0.01, 'Frequency due to dipolar coupling (MHz)')
-        self.declareParameter(
-            "FreqQ", 0.05, 'Frequency due to quadrupole interaction of the nuclear spin (MHz)')
-        self.declareParameter(
-            "Spin", 3.5, 'J, Total angular momentum quanutm number')
+        self.declareParameter("FreqD", 0.01, 'Frequency due to dipolar coupling (MHz)')
+        self.declareParameter("FreqQ", 0.05, 'Frequency due to quadrupole interaction of the nuclear spin (MHz)')
+        self.declareParameter("Spin", 3.5, 'J, Total angular momentum quanutm number')
         self.declareParameter("Sigma", 0.2, 'Gaussian decay rate')
         self.declareParameter("Lambda", 0.1, 'Exponential decay rate')
 
@@ -35,10 +31,10 @@ class Meier(IFunction1D):
         sigma = self.getParameterValue("Sigma")
         OmegaD = 2 * np.pi * FreqD
         OmegaQ = 2 * np.pi * FreqQ
-        gau = np.exp(- 0.5 * (sigma * x) ** 2)
-        Lor = np.exp(- Lambda * x)
+        gau = np.exp(-0.5 * (sigma * x)**2)
+        Lor = np.exp(-Lambda * x)
         J2 = round(2 * J)
-        J = J2/2
+        J = J2 / 2
         Wm = []
         lamp = []
         lamm = []
@@ -51,19 +47,19 @@ class Meier(IFunction1D):
             m = i - J
             q1 = (OmegaQ + OmegaD) * (2 * m - 1)
             q2 = OmegaD * np.sqrt(J * (J + 1) - m * (m - 1))
-            qq = q1 ** 2 + q2 ** 2
-            q3 = OmegaQ * (2 * m ** 2 - 2 * m + 1) + OmegaD
+            qq = q1**2 + q2**2
+            q3 = OmegaQ * (2 * m**2 - 2 * m + 1) + OmegaD
             Wm.append(np.sqrt(qq))
             if i < J2 + 1:
                 lamp.append(0.5 * (q3 + Wm[i]))
             else:
-                lamp.append(OmegaQ * J ** 2 - OmegaD * J)
+                lamp.append(OmegaQ * J**2 - OmegaD * J)
             if i > 0:
                 lamm.append(0.5 * (q3 - Wm[i]))
             else:
-                lamm.append(OmegaQ * J ** 2 - OmegaD * J)
+                lamm.append(OmegaQ * J**2 - OmegaD * J)
             if qq > 0:
-                cosSQ2alpha.append(q1 ** 2 / qq)
+                cosSQ2alpha.append(q1**2 / qq)
             else:
                 cosSQ2alpha.apend(0)
             sinSQ2alpha.append(1 - cosSQ2alpha[i])
@@ -88,7 +84,7 @@ class Meier(IFunction1D):
                 np.cos((lamm[i + 1] - lamm[i]) * x)
             tx = tx + a + b + c + d
         Px = tx / (2 * J + 1)
-        return A0 * gau * Lor * (1./3.) * (2 * Px + Pz)
+        return A0 * gau * Lor * (1. / 3.) * (2 * Px + Pz)
 
 
 FunctionFactory.subscribe(Meier)

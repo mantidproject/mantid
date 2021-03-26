@@ -60,6 +60,7 @@ BACKMATTER = """
 }
 """
 
+
 class Writer:
     def __init__(self, filename=None, overwrite=False, debug=False):
         if debug:
@@ -75,15 +76,21 @@ class Writer:
         self.__handle.write(FRONTMATTER)
         self.__handle.write(BACKMATTER)
 
+
 if __name__ == "__main__":
     import optparse
-    info=[]
-    parser = optparse.OptionParser("usage: %prog [options] <outfile>",
-                                   None, optparse.Option, VERSION, 'error',
+    info = []
+    parser = optparse.OptionParser("usage: %prog [options] <outfile>", None, optparse.Option, VERSION, 'error',
                                    " ".join(info))
-    parser.add_option("-d", "--debug", dest="debug", action="store_true",
+    parser.add_option("-d",
+                      "--debug",
+                      dest="debug",
+                      action="store_true",
                       help="print the file to stdout rather than write it to disk")
-    parser.add_option("", "--overwrite", dest="overwrite", action="store_true",
+    parser.add_option("",
+                      "--overwrite",
+                      dest="overwrite",
+                      action="store_true",
                       help="Whether or not to overwrite existing main.cpp file. Default=False.")
     parser.set_defaults(overwrite=False, debug=False)
     (options, args) = parser.parse_args()

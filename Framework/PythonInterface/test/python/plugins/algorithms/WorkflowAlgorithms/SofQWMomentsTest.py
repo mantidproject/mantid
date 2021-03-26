@@ -11,7 +11,6 @@ from mantid import mtd
 
 
 class SofQWMomentsTest(unittest.TestCase):
-
     def createSampleWorkspace(self):
         function = "name=Lorentzian,Amplitude=1,PeakCentre=5,FWHM=1"
 

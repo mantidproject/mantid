@@ -22,7 +22,6 @@ class FFTPresenter(object):
     """
     This class links the FFT model to the GUI
     """
-
     def __init__(self, view, alg, load):
         self.view = view
         self.alg = alg
@@ -71,8 +70,7 @@ class FFTPresenter(object):
         default_name = None
         # will need to check this exists before using it
         if current_group_pair:
-            default_name = current_group_pair.get_asymmetry_workspace_names(
-                    self.load.data_context.current_runs)
+            default_name = current_group_pair.get_asymmetry_workspace_names(self.load.data_context.current_runs)
         # if the original selection is available we should use it
         if original_Re_name in final_options:
             Re_name_to_use = original_Re_name
@@ -83,7 +81,7 @@ class FFTPresenter(object):
             Im_name_to_use = original_Im_name
         elif default_name:
             Im_name_to_use = default_name[0]
-        self.view.imaginary_workspace=Im_name_to_use
+        self.view.imaginary_workspace = Im_name_to_use
         return
 
     def handle_use_raw_data_changed(self):
@@ -96,13 +94,9 @@ class FFTPresenter(object):
 
     def tableClicked(self, row, col):
         if row == self.view.getImBoxRow() and col == 1:
-            self.view.changedHideUnTick(
-                self.view.getImBox(),
-                self.view.getImBoxRow() + 1)
+            self.view.changedHideUnTick(self.view.getImBox(), self.view.getImBoxRow() + 1)
         elif row == self.view.getShiftBoxRow() and col == 1:
-            self.view.changed(
-                self.view.getShiftBox(),
-                self.view.getShiftBoxRow() + 1)
+            self.view.changed(self.view.getShiftBox(), self.view.getShiftBoxRow() + 1)
 
     def createThread(self):
         self._phasequad_calculation_model = ThreadModelWrapper(self.calculate_FFT)
@@ -198,8 +192,11 @@ class FFTPresenter(object):
         Re = get_group_or_pair_from_name(input_workspace)
         Im = get_group_or_pair_from_name(imaginary_input_workspace)
         shift = 3 if fft_workspace.getNumberHistograms() == 6 else 0
-        spectra = {"_" + FREQUENCY_EXTENSIONS["RE"]: 0 + shift, "_" + FREQUENCY_EXTENSIONS["IM"]: 1 + shift,
-                   "_" + FREQUENCY_EXTENSIONS["MOD"]: 2 + shift}
+        spectra = {
+            "_" + FREQUENCY_EXTENSIONS["RE"]: 0 + shift,
+            "_" + FREQUENCY_EXTENSIONS["IM"]: 1 + shift,
+            "_" + FREQUENCY_EXTENSIONS["MOD"]: 2 + shift
+        }
 
         for spec_type in list(spectra.keys()):
             extracted_ws = extract_single_spec(fft_workspace, spectra[spec_type], fft_workspace_name + spec_type)

@@ -12,7 +12,6 @@ from mantid.api import *
 class TestWorkspaceGroupProperty(PythonAlgorithm):
     """
     """
-
     def category(self):
         return "Workflow\\Testing"
 

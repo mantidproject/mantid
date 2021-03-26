@@ -46,14 +46,10 @@ class DiagnoseDetectorsWidget(BaseWidget):
     def initialize_content(self):
         # Constraints
         for widget in [
-                self._content.median_test_high_edit,
-                self._content.median_test_low_edit,
-                self._content.median_test_out_high_edit,
-                self._content.median_test_out_low_edit,
-                self._content.errorbar_crit_edit,
-                self._content.ratio_var_crit_edit,
-                self._content.sambkg_median_test_high_edit,
-                self._content.sambkg_median_test_low_edit,
+                self._content.median_test_high_edit, self._content.median_test_low_edit,
+                self._content.median_test_out_high_edit, self._content.median_test_out_low_edit,
+                self._content.errorbar_crit_edit, self._content.ratio_var_crit_edit,
+                self._content.sambkg_median_test_high_edit, self._content.sambkg_median_test_low_edit,
                 self._content.sambkg_errorbar_crit_edit
         ]:
 
@@ -61,8 +57,7 @@ class DiagnoseDetectorsWidget(BaseWidget):
             dvp.setBottom(0.0)
             widget.setValidator(dvp)
 
-        for widget in [self._content.tof_start_edit,
-                       self._content.tof_end_edit]:
+        for widget in [self._content.tof_start_edit, self._content.tof_end_edit]:
             ivp = QIntValidator(widget)
             ivp.setBottom(0)
             widget.setValidator(ivp)

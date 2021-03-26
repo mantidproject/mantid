@@ -80,8 +80,7 @@ def is_supported_f2py_platform():
     @returns True if we are currently on a platform that supports the F2Py
     libraries, else False.
     """
-    if (_os_env().startswith("Windows")
-            and _numpy_abi_ver() == F2PY_MODULES_REQUIRED_C_ABI
+    if (_os_env().startswith("Windows") and _numpy_abi_ver() == F2PY_MODULES_REQUIRED_C_ABI
             and "python_d" not in sys.executable):
         return True
     return False

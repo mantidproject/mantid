@@ -10,7 +10,6 @@ from mantid.api import *
 
 
 class LoadEmptyVesuvioTest(unittest.TestCase):
-
     def test_load_empty_no_par_file(self):
         """
         Tests loading the instrument with no PAR file.

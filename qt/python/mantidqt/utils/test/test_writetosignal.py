@@ -25,7 +25,6 @@ class Receiver(QObject):
 
 @start_qapplication
 class WriteToSignalTest(unittest.TestCase):
-
     def test_run_with_output_present(self):
         with patch("sys.stdout") as mock_stdout:
             mock_stdout.fileno.return_value = 10

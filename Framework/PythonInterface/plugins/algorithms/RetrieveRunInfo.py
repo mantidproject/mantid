@@ -90,11 +90,12 @@ class Intervals(object):
     def __len__(self):
         return len(self.getValues())
 
+
 # Given a list of workspaces, will sum them together into a single new workspace, with the given name.
 # If no name is given, then one is constructed from the names of the given workspaces.
 
 
-def sumWsList(wsList, summedWsName = None):
+def sumWsList(wsList, summedWsName=None):
     if len(wsList) == 1:
         if summedWsName is not None:
             CloneWorkspace(InputWorkspace=wsList[0].name(), OutputWorkspace=summedWsName)
@@ -114,6 +115,7 @@ def sumWsList(wsList, summedWsName = None):
 
     return mtd[summedWsName]
 
+
 #pylint: disable=too-few-public-methods
 
 
@@ -121,7 +123,6 @@ class FileBackedWsIterator(object):
     ''' An iterator to iterate over workspaces.  Each filename in the list
     provided is loaded into a workspace, validated by the given ws_validator,
     yielded, and then deleted from memory. '''
-
     def __init__(self, filenames):
         ''' Constructor, takes in the list of filenames to load, who's
         workspaces will be iterated over. '''
@@ -172,12 +173,9 @@ class FileBackedWsIterator(object):
         dummy_base, ext = os.path.splitext(filename)
         if ext == ".raw":
             # Loading log files is extremely slow on archive
-            LoadRaw(Filename = filename,
-                    OutputWorkspace = wsName,
-                    LoadLogFiles = False)
+            LoadRaw(Filename=filename, OutputWorkspace=wsName, LoadLogFiles=False)
         else:
-            Load(Filename = filename,
-                 OutputWorkspace = wsName)
+            Load(Filename=filename, OutputWorkspace=wsName)
 
         self._loaded_ws = mtd[wsName]
 
@@ -196,22 +194,20 @@ class RetrieveRunInfo(PythonAlgorithm):
                "each run of the instrument you have set as default."
 
     def seeAlso(self):
-        return [ "CreateLogPropertyTable" ]
+        return ["CreateLogPropertyTable"]
 
     def PyInit(self):
         # Declare algorithm properties.
-        self.declareProperty(
-            'Runs',
-            '',
-            StringMandatoryValidator(),
-            doc='The range of runs to retrieve the run info for. E.g. "100-105".')
+        self.declareProperty('Runs',
+                             '',
+                             StringMandatoryValidator(),
+                             doc='The range of runs to retrieve the run info for. E.g. "100-105".')
         self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),
-                             doc= """The name of the TableWorkspace that will be created.
+                             doc="""The name of the TableWorkspace that will be created.
                                      '''You must specify a name that does not already exist.''' """)
 
     def PyExec(self):
-        PROP_NAMES = ["inst_abrv", "run_number", "user_name", "run_title",
-                      "hd_dur"]
+        PROP_NAMES = ["inst_abrv", "run_number", "user_name", "run_title", "hd_dur"]
 
         # Not all ISIS run files have the relevant prop_names, but we may as
         # well limit to ISIS only runs at this stage.
@@ -247,7 +243,7 @@ class RetrieveRunInfo(PythonAlgorithm):
             CreateLogPropertyTable(
                 InputWorkspaces=ws.name(),
                 LogPropertyNames=', '.join(PROP_NAMES),
-                GroupPolicy="First", # Include only the 1st child of any groups.
+                GroupPolicy="First",  # Include only the 1st child of any groups.
                 OutputWorkspace=temp_table_name)
             # Add its contents to the output before deleting it.
             temp_table = mtd[temp_table_name]

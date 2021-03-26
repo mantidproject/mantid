@@ -34,11 +34,12 @@ def load_and_rebin(runs: List[int],
 
     # Load the first run
     logger.information(f'Loading run {runs[0]}. {len(runs)} runs remaining to be loaded')
-    LoadEventNexus(Filename=f'{instrument}_{runs[0]}', OutputWorkspace=output_workspace,
-                   LoadLogs=False, **kwargs)
+    LoadEventNexus(Filename=f'{instrument}_{runs[0]}', OutputWorkspace=output_workspace, LoadLogs=False, **kwargs)
     if rebin_params is not None:
-        Rebin(InputWorkspace=output_workspace, OutputWorkspace=output_workspace,
-              Params=rebin_params, PreserveEvents=False)
+        Rebin(InputWorkspace=output_workspace,
+              OutputWorkspace=output_workspace,
+              Params=rebin_params,
+              PreserveEvents=False)
     # Iteratively load the remaining run, adding to the final workspace each time
     try:
         single_run = '__single_run_' + output_workspace

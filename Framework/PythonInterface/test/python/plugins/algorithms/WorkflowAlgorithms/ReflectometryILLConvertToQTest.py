@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import MatrixWorkspace
-from mantid.simpleapi import (ReflectometryILLPreprocess, ReflectometryILLSumForeground, ReflectometryILLConvertToQ, mtd)
+from mantid.simpleapi import (ReflectometryILLPreprocess, ReflectometryILLSumForeground, ReflectometryILLConvertToQ,
+                              mtd)
 import unittest
 
 
 class ReflectometryILLConvertToQTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         ReflectometryILLPreprocess(Run='ILL/D17/317369.nxs',
@@ -23,8 +23,7 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
                                    ForegroundHalfWidth=5,
                                    OutputWorkspace='rb')
         # first the direct beam
-        ReflectometryILLSumForeground(InputWorkspace='db',
-                                      OutputWorkspace='db_frg')
+        ReflectometryILLSumForeground(InputWorkspace='db', OutputWorkspace='db_frg')
 
         # then the reflected beam in lambda
         ReflectometryILLSumForeground(InputWorkspace='rb',
@@ -45,19 +44,15 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
         mtd.clear()
 
     def testD17InLambda(self):
-        ReflectometryILLConvertToQ(
-            InputWorkspace='rb_frg',
-            OutputWorkspace='in_lambda',
-            DirectForegroundWorkspace='db_frg'
-        )
+        ReflectometryILLConvertToQ(InputWorkspace='rb_frg',
+                                   OutputWorkspace='in_lambda',
+                                   DirectForegroundWorkspace='db_frg')
         self.checkOutput(mtd['in_lambda'], 991)
 
     def testD17InQ(self):
-        ReflectometryILLConvertToQ(
-            InputWorkspace='rb_inq_frg',
-            OutputWorkspace='in_q',
-            DirectForegroundWorkspace='db_frg'
-        )
+        ReflectometryILLConvertToQ(InputWorkspace='rb_inq_frg',
+                                   OutputWorkspace='in_q',
+                                   DirectForegroundWorkspace='db_frg')
         self.checkOutput(mtd['in_q'], 1045)
 
     def checkOutput(self, ws, blocksize):
@@ -68,6 +63,7 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
         self.assertEquals(ws.getNumberHistograms(), 1)
         self.assertTrue(ws.hasDx(0))
         self.assertEquals(ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
+
 
 if __name__ == "__main__":
     unittest.main()

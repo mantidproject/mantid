@@ -5,8 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import (AddSampleLog, ComputeIncoherentDOS, CreateSampleWorkspace, CreateWorkspace, LoadInstrument, ScaleX, Scale,
-                              SetInstrumentParameter, SetSampleMaterial, SofQW3, Transpose)
+from mantid.simpleapi import (AddSampleLog, ComputeIncoherentDOS, CreateSampleWorkspace, CreateWorkspace,
+                              LoadInstrument, ScaleX, Scale, SetInstrumentParameter, SetSampleMaterial, SofQW3,
+                              Transpose)
 import numpy as np
 from numpy import testing
 from scipy import constants
@@ -14,26 +15,30 @@ import testhelpers
 
 
 class ComputeIncoherentDOSTest(unittest.TestCase):
-
     def createPhononWS(self, T, en, e_units):
-        fn = 'name=Gaussian, PeakCentre='+str(en)+', Height=1, Sigma=0.5;'
-        fn +='name=Gaussian, PeakCentre=-'+str(en)+', Height='+str(np.exp(-en*11.6/T))+', Sigma=0.5;'
-        ws = CreateSampleWorkspace(binWidth = 0.1, XMin = -25, XMax = 25, XUnit = e_units, Function = 'User Defined', UserDefinedFunction=fn)
-        LoadInstrument(ws, InstrumentName='MARI', RewriteSpectraMap = True)
+        fn = 'name=Gaussian, PeakCentre=' + str(en) + ', Height=1, Sigma=0.5;'
+        fn += 'name=Gaussian, PeakCentre=-' + str(en) + ', Height=' + str(np.exp(-en * 11.6 / T)) + ', Sigma=0.5;'
+        ws = CreateSampleWorkspace(binWidth=0.1,
+                                   XMin=-25,
+                                   XMax=25,
+                                   XUnit=e_units,
+                                   Function='User Defined',
+                                   UserDefinedFunction=fn)
+        LoadInstrument(ws, InstrumentName='MARI', RewriteSpectraMap=True)
         with self.assertRaises(RuntimeError):
             ws_DOS = ComputeIncoherentDOS(ws)
         ws = SofQW3(ws, [0, 0.05, 8], 'Direct', 25)
-        qq = np.arange(0, 8, 0.05)+0.025
+        qq = np.arange(0, 8, 0.05) + 0.025
         for i in range(ws.getNumberHistograms()):
-            ws.setY(i, ws.readY(i)*qq[i]**2)
-            ws.setE(i, ws.readE(i)*qq[i]**2)
+            ws.setY(i, ws.readY(i) * qq[i]**2)
+            ws.setE(i, ws.readE(i) * qq[i]**2)
         return ws
 
     def compute(self, qs, energyBins, msd=0., temperature=300.):
         ws = (energyBins[1:] + energyBins[:-1]) / 2.
         if len(qs) > 1:
             qs = (qs[:-1] + qs[1:]) / 2.
-        g = qs**-2 * np.exp(2*msd * qs**2) * (1. - np.exp(-ws * constants.e * 1e-3 / constants.k / temperature)) * ws
+        g = qs**-2 * np.exp(2 * msd * qs**2) * (1. - np.exp(-ws * constants.e * 1e-3 / constants.k / temperature)) * ws
         return g
 
     def computeFromTwoTheta(self, twoThetas, energyBins, msd=0., temperature=300.):
@@ -44,8 +49,9 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         EFixed = 8.
         Ei = EFixed * constants.e * 1e-3
         Ef = (EFixed - ws) * constants.e * 1e-3
-        qs = np.sqrt(2. * constants.m_n / constants.hbar**2 *((Ei + Ef) - 2. * np.sqrt(Ei * Ef) * np.cos(twoTheta))) * 1e-10
-        g = qs**-2 * np.exp(2*msd * qs**2) * (1. - np.exp(-ws * constants.e * 1e-3 / constants.k / temperature)) * ws
+        qs = np.sqrt(2. * constants.m_n / constants.hbar**2 *
+                     ((Ei + Ef) - 2. * np.sqrt(Ei * Ef) * np.cos(twoTheta))) * 1e-10
+        g = qs**-2 * np.exp(2 * msd * qs**2) * (1. - np.exp(-ws * constants.e * 1e-3 / constants.k / temperature)) * ws
         return g
 
     def convertToWavenumber(self, ws):
@@ -57,7 +63,7 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
                 ws = Transpose(ws)
             ws.getAxis(0).setUnit('DeltaE_inWavenumber')
             ws = ScaleX(ws, mev2cm)
-            ws = Scale(ws, 1/mev2cm)
+            ws = Scale(ws, 1 / mev2cm)
             if u0 == 'MomentumTransfer':
                 ws = Transpose(ws)
         return ws
@@ -67,8 +73,13 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         Ys = np.ones(len(energyBins) - 1)
         Es = Ys
         verticalAxis = [str(q) for q in qs]
-        ws = CreateWorkspace(energyBins, Ys, Es, UnitX='DeltaE',
-                             VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=verticalAxis, StoreInADS=False)
+        ws = CreateWorkspace(energyBins,
+                             Ys,
+                             Es,
+                             UnitX='DeltaE',
+                             VerticalAxisUnit='MomentumTransfer',
+                             VerticalAxisValues=verticalAxis,
+                             StoreInADS=False)
         LoadInstrument(ws, InstrumentName='IN4', RewriteSpectraMap=False, StoreInADS=False)
         AddSampleLog(ws, LogName='Ei', LogText=str(EFixed), LogType='Number', LogUnit='meV', StoreInADS=False)
         return ws
@@ -78,8 +89,13 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         Ys = np.ones(len(energyBins) - 1)
         Es = Ys
         verticalAxis = [str(q) for q in qs]
-        ws = CreateWorkspace(energyBins, Ys, Es, UnitX='DeltaE',
-                             VerticalAxisUnit='Degrees', VerticalAxisValues=verticalAxis, StoreInADS=False)
+        ws = CreateWorkspace(energyBins,
+                             Ys,
+                             Es,
+                             UnitX='DeltaE',
+                             VerticalAxisUnit='Degrees',
+                             VerticalAxisValues=verticalAxis,
+                             StoreInADS=False)
         LoadInstrument(ws, InstrumentName='IN4', RewriteSpectraMap=False, StoreInADS=False)
         AddSampleLog(ws, LogName='Ei', LogText=str(EFixed), LogType='Number', LogUnit='meV', StoreInADS=False)
         return ws
@@ -89,7 +105,7 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         # Will fail unless the input workspace has Q and DeltaE axes.
         with self.assertRaises(RuntimeError):
             ws_DOS = ComputeIncoherentDOS(ws)
-        ws = CreateSampleWorkspace(XUnit = 'DeltaE')
+        ws = CreateSampleWorkspace(XUnit='DeltaE')
         with self.assertRaises(RuntimeError):
             ws_DOS = ComputeIncoherentDOS(ws)
         # Creates a workspace with two optic phonon modes at +E and -E with Q^2 dependence and population correct for T=300K
@@ -100,7 +116,7 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         self.assertEqual(ws_DOS.getNumberHistograms(), 1)
         # Checks that it works if the workspace has |Q| along x instead of y, and converts energy to wavenumber
         ws = Transpose(ws)
-        ws_DOS = ComputeIncoherentDOS(ws, Temperature = 300, EnergyBinning = '-20, 0.2, 20', Wavenumbers = True)
+        ws_DOS = ComputeIncoherentDOS(ws, Temperature=300, EnergyBinning='-20, 0.2, 20', Wavenumbers=True)
         self.assertEqual(ws_DOS.getAxis(0).getUnit().unitID(), 'DeltaE_inWavenumber')
         self.assertEqual(ws_DOS.blocksize(), 200)
         # Checks that the Bose factor correction is ok.
@@ -110,12 +126,12 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         # Check that unit conversion from cm^-1 to meV works and also that conversion to states/meV is done
         ws = self.convertToWavenumber(ws)
         SetSampleMaterial(ws, 'Al')
-        ws_DOSn = ComputeIncoherentDOS(ws, EnergyBinning = '-160, 1.6, 160', StatesPerEnergy = True)
+        ws_DOSn = ComputeIncoherentDOS(ws, EnergyBinning='-160, 1.6, 160', StatesPerEnergy=True)
         self.assertTrue('states' in ws_DOSn.YUnitLabel())
         self.assertEqual(ws_DOSn.getAxis(0).getUnit().unitID(), 'DeltaE')
         material = ws.sample().getMaterial()
         factor = material.relativeMolecularMass() / (material.totalScatterXSection() * 1000) * 4 * np.pi
-        self.assertAlmostEqual(np.max(ws_DOSn.readY(0)) / (np.max(ws_DOS.readY(0))*factor), 1., places=1)
+        self.assertAlmostEqual(np.max(ws_DOSn.readY(0)) / (np.max(ws_DOS.readY(0)) * factor), 1., places=1)
 
     def test_computation_nontransposed_QW(self):
         energyBins = np.arange(-7., 7., 0.13)
@@ -230,8 +246,14 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         Ys = np.ones(3 * (len(energyBins) - 1))
         Es = Ys
         verticalAxis = [str(q) for q in qs]
-        ws = CreateWorkspace(energyBins, Ys, Es, NSpec=3, UnitX='DeltaE',
-                             VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=verticalAxis, StoreInADS=False)
+        ws = CreateWorkspace(energyBins,
+                             Ys,
+                             Es,
+                             NSpec=3,
+                             UnitX='DeltaE',
+                             VerticalAxisUnit='MomentumTransfer',
+                             VerticalAxisValues=verticalAxis,
+                             StoreInADS=False)
         LoadInstrument(ws, InstrumentName='IN4', RewriteSpectraMap=False, StoreInADS=False)
         AddSampleLog(ws, LogName='Ei', LogText=str(EFixed), LogType='Number', LogUnit='meV', StoreInADS=False)
         dos = ComputeIncoherentDOS(ws, EnergyBinning='Emin, Emax', StoreInADS=False)
@@ -252,5 +274,5 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
             self.assertAlmostEquals(dos_Es[i], gE[i])
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()

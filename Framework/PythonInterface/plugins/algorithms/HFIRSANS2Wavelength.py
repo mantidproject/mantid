@@ -9,7 +9,6 @@ from mantid.kernel import (Direction)
 
 
 class HFIRSANS2Wavelength(PythonAlgorithm):
-
     def category(self):
         return 'SANS\\Wavelength'
 
@@ -18,11 +17,15 @@ class HFIRSANS2Wavelength(PythonAlgorithm):
 
     def PyInit(self):
         # Workspace which is to be masked
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace",
+                                                     '',
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Input),
                              doc='The workspace which is to be converted to wavelength')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Output),
                              doc='The output workspace.')
 
     def PyExec(self):

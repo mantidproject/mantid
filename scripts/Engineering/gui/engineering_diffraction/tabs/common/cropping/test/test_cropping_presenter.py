@@ -7,7 +7,8 @@
 import unittest
 
 from unittest import mock
-from Engineering.gui.engineering_diffraction.tabs.common.cropping import cropping_model, cropping_view, cropping_presenter
+from Engineering.gui.engineering_diffraction.tabs.common.cropping import cropping_model, cropping_view, \
+    cropping_presenter
 
 dir_path = "Engineering.gui.engineering_diffraction.tabs.common.cropping"
 
@@ -16,7 +17,7 @@ class CroppingPresenterTest(unittest.TestCase):
     def setUp(self):
         self.view = mock.create_autospec(cropping_view.CroppingView)
         self.model = mock.create_autospec(cropping_model.CroppingModel)
-        self.presenter=  cropping_presenter.CroppingPresenter(self.model, self.view)
+        self.presenter = cropping_presenter.CroppingPresenter(self.model, self.view)
 
     def test_combo_changed_index_bank_1(self):
         self.presenter.on_combo_changed(0)

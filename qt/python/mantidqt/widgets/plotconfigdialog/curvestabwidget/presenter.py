@@ -12,14 +12,12 @@ from mantid.plots.legend import LegendProperties
 from mantid.plots import datafunctions, MantidAxes
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
-from mantidqt.widgets.plotconfigdialog.curvestabwidget import (
-    CurveProperties, curve_has_errors, remove_curve_from_ax)
+from mantidqt.widgets.plotconfigdialog.curvestabwidget import (CurveProperties, curve_has_errors, remove_curve_from_ax)
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.view import CurvesTabWidgetView
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 
 
 class CurvesTabWidgetPresenter:
-
     def __init__(self, fig, view=None, parent_view=None, parent_presenter=None, legend_tab=None):
         self.fig = fig
 
@@ -38,25 +36,15 @@ class CurvesTabWidgetPresenter:
         self.update_view()
 
         # Signals
-        self.view.select_axes_combo_box.currentIndexChanged.connect(
-            self.on_axes_index_changed)
-        self.view.select_curve_list.currentRowChanged.connect(
-            self.on_curves_row_changed)
-        self.view.remove_curve_button.clicked.connect(
-            self.remove_selected_curves)
-        self.view.delete_key_pressed.connect(
-            self.remove_selected_curves)
-        self.view.line.apply_to_all_button.clicked.connect(
-            self.line_apply_to_all)
-        self.view.marker.apply_to_all_button.clicked.connect(
-            self.marker_apply_to_all)
-        self.view.marker.marker_style_combo_box.currentTextChanged.connect(
-            self.view.marker.set_colour_fields_enabled)
-        self.view.errorbars.apply_to_all_button.clicked.connect(
-            self.errorbars_apply_to_all)
-        self.view.select_curve_list.itemSelectionChanged.connect(
-            self.on_curves_selection_changed
-        )
+        self.view.select_axes_combo_box.currentIndexChanged.connect(self.on_axes_index_changed)
+        self.view.select_curve_list.currentRowChanged.connect(self.on_curves_row_changed)
+        self.view.remove_curve_button.clicked.connect(self.remove_selected_curves)
+        self.view.delete_key_pressed.connect(self.remove_selected_curves)
+        self.view.line.apply_to_all_button.clicked.connect(self.line_apply_to_all)
+        self.view.marker.apply_to_all_button.clicked.connect(self.marker_apply_to_all)
+        self.view.marker.marker_style_combo_box.currentTextChanged.connect(self.view.marker.set_colour_fields_enabled)
+        self.view.errorbars.apply_to_all_button.clicked.connect(self.errorbars_apply_to_all)
+        self.view.select_curve_list.itemSelectionChanged.connect(self.on_curves_selection_changed)
 
         self.parent_presenter = parent_presenter
 

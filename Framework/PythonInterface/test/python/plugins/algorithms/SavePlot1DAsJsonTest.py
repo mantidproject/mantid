@@ -17,7 +17,6 @@ import os, json
 
 
 class SavePlot1DAsJsonTest(unittest.TestCase):
-
     def test_save_one_curve(self):
         """ Test to Save one curve
         """
@@ -26,10 +25,7 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
 
         # Execute
         out_path = "tempout_curve.json"
-        alg_test = run_algorithm(
-            "SavePlot1DAsJson",
-            InputWorkspace = datawsname,
-            JsonFilename = out_path)
+        alg_test = run_algorithm("SavePlot1DAsJson", InputWorkspace=datawsname, JsonFilename=out_path)
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
@@ -40,7 +36,6 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         os.remove(out_path)
         return
 
-
     def test_save_one_histogram(self):
         """ Test to Save one histogram
         """
@@ -49,24 +44,17 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
 
         # Execute
         out_path = "tempout_hist.json"
-        alg_test = run_algorithm(
-            "SavePlot1DAsJson",
-            InputWorkspace = datawsname,
-            JsonFilename = out_path)
+        alg_test = run_algorithm("SavePlot1DAsJson", InputWorkspace=datawsname, JsonFilename=out_path)
         # Executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
         d = json.load(open(out_path))[datawsname]
         self._checkData(d, E, I, err)
         # test overwrite
-        alg_test = run_algorithm(
-            "SavePlot1DAsJson",
-            InputWorkspace = datawsname,
-            JsonFilename = out_path)
+        alg_test = run_algorithm("SavePlot1DAsJson", InputWorkspace=datawsname, JsonFilename=out_path)
         # Delete the output file
         os.remove(out_path)
         return
-
 
     def test_save_two_curves(self):
         """ Test to Save two curves
@@ -75,10 +63,7 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         E, I, err, I2, err2 = self._createTwoCurves(datawsname)
         # Execute
         out_path = "tempout_2curves.json"
-        alg_test = run_algorithm(
-            "SavePlot1DAsJson",
-            InputWorkspace = datawsname,
-            JsonFilename = out_path)
+        alg_test = run_algorithm("SavePlot1DAsJson", InputWorkspace=datawsname, JsonFilename=out_path)
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
@@ -89,7 +74,6 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         os.remove(out_path)
         return
 
-
     def test_save_one_curve_withdesignatedname(self):
         """ Test to Save one curve with a name specified by client
         """
@@ -98,11 +82,10 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         E, I, err = self._createOneCurve(datawsname)
         # Execute
         out_path = "tempout_curve_withname.json"
-        alg_test = run_algorithm(
-            "SavePlot1DAsJson",
-            InputWorkspace = datawsname,
-            JsonFilename = out_path,
-            PlotName = plotname)
+        alg_test = run_algorithm("SavePlot1DAsJson",
+                                 InputWorkspace=datawsname,
+                                 JsonFilename=out_path,
+                                 PlotName=plotname)
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
@@ -111,7 +94,6 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         # Delete the output file
         os.remove(out_path)
         return
-
 
     def _checkData(self, s, E, I, err, ID="1", dE=None):
         d0 = s["data"][ID]
@@ -122,70 +104,57 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
             np.testing.assert_array_equal(d0[3], dE)
         return
 
-
     def _createOneCurve(self, datawsname):
         """ Create data workspace
         """
         E = np.arange(-50, 50, 10.0)
-        I = 1000 * np.exp(-E**2/10**2)
-        err = I ** .5
+        I = 1000 * np.exp(-E**2 / 10**2)
+        err = I**.5
         # create workspace
-        dataws = api.CreateWorkspace(
-            DataX = E, DataY = I, DataE = err, NSpec = 1,
-            UnitX = "Energy")
+        dataws = api.CreateWorkspace(DataX=E, DataY=I, DataE=err, NSpec=1, UnitX="Energy")
         # Add to data service
         AnalysisDataService.addOrReplace(datawsname, dataws)
         return E, I, err
-
 
     def _createOneQCurve(self, datawsname):
         """ Create data workspace
         """
         Q = np.arange(0, 13, 1.0)
-        dQ = 0.1*Q
-        I = 1000 * np.exp(-Q**2/10**2)
-        err = I ** .5
+        dQ = 0.1 * Q
+        I = 1000 * np.exp(-Q**2 / 10**2)
+        err = I**.5
         # create workspace
-        dataws = api.CreateWorkspace(
-            DataX = Q, DataY = I, DataE = err, NSpec = 1,
-            UnitX = "Momentum")
+        dataws = api.CreateWorkspace(DataX=Q, DataY=I, DataE=err, NSpec=1, UnitX="Momentum")
         dataws.setDx(0, dQ)
         # Add to data service
         AnalysisDataService.addOrReplace(datawsname, dataws)
         return Q, I, err, dQ
-
 
     def _createOneHistogram(self, datawsname):
         """ Create data workspace
         """
         E = np.arange(-50.5, 50, 1.0)
         Ecenters = (E[:-1] + E[1:]) / 2
-        I = 1000 * np.exp(-Ecenters**2/10**2)
-        err = I ** .5
+        I = 1000 * np.exp(-Ecenters**2 / 10**2)
+        err = I**.5
         # create workspace
-        dataws = api.CreateWorkspace(
-            DataX = E, DataY = I, DataE = err, NSpec = 1,
-            UnitX = "Energy(meV)")
+        dataws = api.CreateWorkspace(DataX=E, DataY=I, DataE=err, NSpec=1, UnitX="Energy(meV)")
         # Add to data service
         AnalysisDataService.addOrReplace(datawsname, dataws)
         return E, I, err
-
 
     def _createTwoCurves(self, datawsname):
         """ Create data workspace
         """
         E = np.arange(-50, 50, 1.0)
         # curve 1
-        I = 1000 * np.exp(-E**2/10**2)
-        err = I ** .5
+        I = 1000 * np.exp(-E**2 / 10**2)
+        err = I**.5
         # curve 2
-        I2 = 1000 * (1+np.sin(E/5*np.pi))
-        err2 = I ** .5
+        I2 = 1000 * (1 + np.sin(E / 5 * np.pi))
+        err2 = I**.5
         # workspace
-        ws = WorkspaceFactory.create(
-            "Workspace2D", NVectors=2,
-            XLength = E.size, YLength = I.size
-            )
+        ws = WorkspaceFactory.create("Workspace2D", NVectors=2, XLength=E.size, YLength=I.size)
         # curve1
         ws.dataX(0)[:] = E
         ws.dataY(0)[:] = I

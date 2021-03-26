@@ -12,7 +12,7 @@ import Direct.DirectEnergyConversion as reduction
 
 
 class DirectInelasticDiagnostic(MantidSystemTest):
-    saved_diag_file=""
+    saved_diag_file = ""
 
     def requiredMemoryMB(self):
         """Requires 4Gb"""
@@ -23,8 +23,8 @@ class DirectInelasticDiagnostic(MantidSystemTest):
         sample = 'MAP17269.raw'
 
         # Libisis values to check against
-        tiny=1e-10
-        huge=1e10
+        tiny = 1e-10
+        huge = 1e10
 
         v_out_lo = 0.01
         v_out_hi = 100.
@@ -41,12 +41,22 @@ class DirectInelasticDiagnostic(MantidSystemTest):
         reducer = reduction.setup_reducer('MAPS')
         # parameters which explicitly affect diagnostics
         #
-        reducer.prop_man.wb_integr_range = [20,300]
-        reducer.prop_man.bkgd_range=[12000,18000]
-        diag_mask = reducer.diagnose(white, sample, tiny=tiny, huge=huge,
-                                     van_out_lo=v_out_lo, van_out_hi=v_out_hi,
-                                     van_lo=vv_lo, van_hi=vv_hi, van_sig=vv_sig,
-                                     samp_lo=sv_lo, samp_hi=sv_hi, samp_sig=sv_sig, samp_zero=s_zero,hard_mask_file=None)
+        reducer.prop_man.wb_integr_range = [20, 300]
+        reducer.prop_man.bkgd_range = [12000, 18000]
+        diag_mask = reducer.diagnose(white,
+                                     sample,
+                                     tiny=tiny,
+                                     huge=huge,
+                                     van_out_lo=v_out_lo,
+                                     van_out_hi=v_out_hi,
+                                     van_lo=vv_lo,
+                                     van_hi=vv_hi,
+                                     van_sig=vv_sig,
+                                     samp_lo=sv_lo,
+                                     samp_hi=sv_hi,
+                                     samp_sig=sv_sig,
+                                     samp_zero=s_zero,
+                                     hard_mask_file=None)
 
         sample = reducer.get_run_descriptor(sample)
         sample_ws = sample.get_workspace()
@@ -66,11 +76,11 @@ class DirectInelasticDiagnostic(MantidSystemTest):
             if self.succeeded():
                 os.remove(self.saved_diag_file)
             else:
-                os.rename(self.saved_diag_file, os.path.join(ms.config['defaultsave.directory'],
-                                                             'DirectInelasticDiag-Mismatch.txt'))
+                os.rename(self.saved_diag_file,
+                          os.path.join(ms.config['defaultsave.directory'], 'DirectInelasticDiag-Mismatch.txt'))
 
     def validateMethod(self):
         return 'validateASCII'
 
     def validate(self):
-        return (self.saved_diag_file,'DirectInelasticDiagnostic.txt')
+        return (self.saved_diag_file, 'DirectInelasticDiagnostic.txt')

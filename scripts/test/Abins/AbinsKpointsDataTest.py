@@ -11,65 +11,50 @@ from abins.kpointsdata import KpointsData, KpointData
 
 
 class KpointsDataTest(unittest.TestCase):
-    _good_data_1 = {"k_vectors": np.asarray([[0.2, 0.1, 0.2], [0.1, 0.0, 0.2], [0.2, 0.2, 0.2]]),
-                    "weights": np.asarray([0.3, 0.2, 0.5]),
-                    "frequencies": np.asarray([[1.0, 2.0, 34.0, 4.9, 1.0, 2.0],
-                                               [11.0, 12.0, 134.0, 14.9, 11.0, 12.0],
-                                               [1.0, 2.0, 34.0, 4.9, 1.0, 2.0]]),  # 6 frequencies for one k-point
-                    "atomic_displacements": np.asarray([[[[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
-                                                        [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]],
-
-                                                       [[1.0, 1.0, 1.0], [1.0, 1.0, 111.0], [1.0, 1.0, 1.0],
-                                                       [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]],
-
-                                                     [[[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
-                                                       [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]],
-
-                                                      [[1.0, 1.0, 1.0], [1.0, 1.0, 221.0], [1.0, 1.0, 1.0],
-                                                      [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]],
-
-                                                     [[[1.0, 1.0, 1.0], [1.0, 1.0, 41.0], [1.0, 1.0, 1.0],
-                                                      [1.0, 1.0, 1.0], [1.0, 1.0, 31.0], [1.0, 1.0, 1.0]],
-
-                                                      [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
-                                                      [1.0, 1.0, 1.0], [1.0, 1.0, 41.0], [1.0, 1.0, 1.0]]]
-                                                     # 12 atomic displacements for each k-point
-                                                      ]).astype(complex),
-                    "unit_cell": np.asarray([[ 7.44,  0.  ,  0.  ],
-                                             [ 0.  ,  9.55,  0.  ],
-                                             [ 0.  ,  0.  ,  6.92]])}
+    _good_data_1 = {
+        "k_vectors": np.asarray([[0.2, 0.1, 0.2], [0.1, 0.0, 0.2], [0.2, 0.2, 0.2]]),
+        "weights": np.asarray([0.3, 0.2, 0.5]),
+        "frequencies": np.asarray([[1.0, 2.0, 34.0, 4.9, 1.0, 2.0], [11.0, 12.0, 134.0, 14.9, 11.0, 12.0],
+                                   [1.0, 2.0, 34.0, 4.9, 1.0, 2.0]]),  # 6 frequencies for one k-point
+        "atomic_displacements": np.asarray([[[[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                              [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]],
+                                             [[1.0, 1.0, 1.0], [1.0, 1.0, 111.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                              [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]],
+                                            [[[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                              [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]],
+                                             [[1.0, 1.0, 1.0], [1.0, 1.0, 221.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                              [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]],
+                                            [[[1.0, 1.0, 1.0], [1.0, 1.0, 41.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                              [1.0, 1.0, 31.0], [1.0, 1.0, 1.0]],
+                                             [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                              [1.0, 1.0, 41.0], [1.0, 1.0, 1.0]]]
+                                            # 12 atomic displacements for each k-point
+                                            ]).astype(complex),
+        "unit_cell": np.asarray([[7.44, 0., 0.], [0., 9.55, 0.], [0., 0., 6.92]])
+    }
 
     # data with soft phonons
-    _good_data_2 = {"k_vectors": np.asarray([[0.2, 0.1, 0.2], [0.1, 0.0, 0.2], [0.2, 0.2, 0.2]]),
-                    "weights": np.asarray([0.3, 0.2, 0.5]),
-                    "frequencies": np.asarray([[-10.0, -2.0, -3.0, 4.9, 1.0, 2.0],
-                                               [11.0, 12.0, 134.0, 14.9, 11.0, 12.0],
-                                               [1.0, 2.0, 34.0, 4.9, 1.0, 2.0]]),  # 6 frequencies for one k-point
-                    "atomic_displacements": np.asarray([[[[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
-                                                          [1.0, 1.0, 1.0], [1.0, 121.0, 1.0], [1.0, 1.0, 1.0]],
-
-                                                         [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
-                                                          [1.0, 1.0, 1.0], [1.0, 1.0, 131.0], [1.0, 1.0, 1.0]]],
-
-
-                                                        [[[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
-                                                          [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]],
-
-                                                         [[1.0, 1.0, 1.0], [1.0, 1.0, 221.0], [1.0, 1.0, 1.0],
-                                                          [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]],
-
-
-                                                        [[[1.0, 1.0, 1.0], [1.0, 1.0, 41.0], [1.0, 1.0, 1.0],
-                                                          [1.0, 1.0, 1.0], [1.0, 1.0, 31.0], [1.0, 1.0, 1.0]],
-
-                                                         [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
-                                                          [1.0, 1.0, 1.0], [1.0, 1.0, 41.0], [1.0, 1.0, 1.0]]]
-                                                        # 12 atomic displacements for each k-point
-                                                        ]).astype(complex),
-                    "unit_cell": np.asarray([[7.44, 0., 0.],
-                                             [0., 9.55, 0.],
-                                             [0., 0., 6.92]])
-                    }
+    _good_data_2 = {
+        "k_vectors": np.asarray([[0.2, 0.1, 0.2], [0.1, 0.0, 0.2], [0.2, 0.2, 0.2]]),
+        "weights": np.asarray([0.3, 0.2, 0.5]),
+        "frequencies": np.asarray([[-10.0, -2.0, -3.0, 4.9, 1.0, 2.0], [11.0, 12.0, 134.0, 14.9, 11.0, 12.0],
+                                   [1.0, 2.0, 34.0, 4.9, 1.0, 2.0]]),  # 6 frequencies for one k-point
+        "atomic_displacements": np.asarray([[[[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                              [1.0, 121.0, 1.0], [1.0, 1.0, 1.0]],
+                                             [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                              [1.0, 1.0, 131.0], [1.0, 1.0, 1.0]]],
+                                            [[[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                              [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]],
+                                             [[1.0, 1.0, 1.0], [1.0, 1.0, 221.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                              [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]],
+                                            [[[1.0, 1.0, 1.0], [1.0, 1.0, 41.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                              [1.0, 1.0, 31.0], [1.0, 1.0, 1.0]],
+                                             [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                              [1.0, 1.0, 41.0], [1.0, 1.0, 1.0]]]
+                                            # 12 atomic displacements for each k-point
+                                            ]).astype(complex),
+        "unit_cell": np.asarray([[7.44, 0., 0.], [0., 9.55, 0.], [0., 0., 6.92]])
+    }
 
     def test_wrong_value(self):
         # All values should be numpy arrays
@@ -90,7 +75,7 @@ class KpointsDataTest(unittest.TestCase):
     def test_wrong_freq(self):
         # frequencies as a string
         wrong_items = self._good_data_1.copy()
-        wrong_items["frequencies"] =  "Wrong_freq"
+        wrong_items["frequencies"] = "Wrong_freq"
 
         with self.assertRaises(TypeError):
             KpointsData(**wrong_items)
@@ -119,13 +104,12 @@ class KpointsDataTest(unittest.TestCase):
 
         # wrong size of the second dimension
         wrong_items = self._good_data_1.copy()
-        wrong_items["atomic_displacements"] = np.asarray(
-            [[[[1., 1., 11.],  [1.,  1., 1., 1.0], [1.0, 1.0, 1.0],
-               [1., 1.0, 1.0], [1., 1., 11.],     [1., 1.,  11.]],
-              [[1., 1.0, 1.0], [1., 1., 11.],     [1., 1.,  11.],
-               [1., 1.0, 1.0],  [1., 1., 11.],     [1., 1.,  11.]]],
-             wrong_items["atomic_displacements"][0, 0],
-             wrong_items["atomic_displacements"][0, 1]])
+        wrong_items["atomic_displacements"] = np.asarray([[[[1., 1., 11.], [1., 1., 1., 1.0], [1.0, 1.0, 1.0],
+                                                            [1., 1.0, 1.0], [1., 1., 11.], [1., 1., 11.]],
+                                                           [[1., 1.0, 1.0],
+                                                            [1., 1., 11.], [1., 1., 11.], [1., 1.0, 1.0], [1., 1., 11.],
+                                                            [1., 1., 11.]]], wrong_items["atomic_displacements"][0, 0],
+                                                          wrong_items["atomic_displacements"][0, 1]])
 
         with self.assertRaises(ValueError):
             KpointsData(**wrong_items)
@@ -153,10 +137,9 @@ class KpointsDataTest(unittest.TestCase):
         collected_data = kpd.extract()
 
         for k in range(data["frequencies"].shape[0]):
-            self.assertEqual(True, np.allclose(data["frequencies"][k],
-                                               collected_data["frequencies"][str(k)]))
-            self.assertEqual(True, np.allclose(data["atomic_displacements"][k],
-                                               collected_data["atomic_displacements"][str(k)]))
+            self.assertEqual(True, np.allclose(data["frequencies"][k], collected_data["frequencies"][str(k)]))
+            self.assertEqual(
+                True, np.allclose(data["atomic_displacements"][k], collected_data["atomic_displacements"][str(k)]))
             self.assertEqual(True, np.allclose(data["k_vectors"][k], collected_data["k_vectors"][str(k)]))
             self.assertEqual(data["weights"][k], collected_data["weights"][str(k)])
 
@@ -171,13 +154,10 @@ class KpointsDataTest(unittest.TestCase):
         for kpd in (k_points_data, k_points_data[:], list(k_points_data)):
             for k in range(data["frequencies"].shape[0]):
                 self.assertIsInstance(kpd[k], KpointData)
-                self.assertEqual(True, np.allclose(data["k_vectors"][k],
-                                                   kpd[k].k))
+                self.assertEqual(True, np.allclose(data["k_vectors"][k], kpd[k].k))
                 self.assertEqual(data["weights"][k], kpd[k].weight)
-                self.assertEqual(True, np.allclose(data["frequencies"][k],
-                                                   kpd[k].frequencies))
-                self.assertEqual(True, np.allclose(data["atomic_displacements"][k],
-                                                   kpd[k].atomic_displacements))
+                self.assertEqual(True, np.allclose(data["frequencies"][k], kpd[k].frequencies))
+                self.assertEqual(True, np.allclose(data["atomic_displacements"][k], kpd[k].atomic_displacements))
 
             with self.assertRaises(IndexError):
                 kpd[3]

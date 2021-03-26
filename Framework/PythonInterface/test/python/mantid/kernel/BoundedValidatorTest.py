@@ -10,7 +10,6 @@ from mantid.kernel import FloatBoundedValidator, IntBoundedValidator
 
 
 class BoundedValidatorTest(unittest.TestCase):
-
     def test_construction_does_not_raise_error_when_both_are_floats(self):
         testhelpers.assertRaisesNothing(self, FloatBoundedValidator, 1.0, 2.0)
 
@@ -68,6 +67,7 @@ class BoundedValidatorTest(unittest.TestCase):
         self.assertEqual(validator.hasUpper(), True)
         self.assertEqual(validator.hasLower(), False)
         self.assertEqual(validator.upper(), upper)
+
 
 if __name__ == '__main__':
     unittest.main()

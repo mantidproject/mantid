@@ -28,7 +28,6 @@ class CategoriesSettings(object):
     If new options are added to the categories settings, their events when changed should
     be handled here.
     """
-
     def __init__(self, parent, view=None):
         self.view = view if view else CategoriesSettingsView(parent, self)
         self.parent = parent
@@ -63,7 +62,7 @@ class CategoriesSettings(object):
 
         self._update_partial_ticks(parent)
 
-    def _create_hidden_categories_string(self, widget, parent = None):
+    def _create_hidden_categories_string(self, widget, parent=None):
         results = []
         if parent:
             count = parent.childCount()
@@ -108,7 +107,7 @@ class CategoriesSettings(object):
         self.set_algorithm_tree_categories()
         self.set_interface_tree_categories()
 
-    def _set_tree_categories(self, widget, category_and_states, has_nested = True):
+    def _set_tree_categories(self, widget, category_and_states, has_nested=True):
         widget.clear()
         seen_categories = {}
         for category_location in sorted(category_and_states):
@@ -127,7 +126,7 @@ class CategoriesSettings(object):
                         # we need to go back up the category tree to find the first seen grandparent
                         # to attach the new tree node to the correct parent
                         grand_parent_cat = None
-                        for k in range (i - 1,-1,-1):
+                        for k in range(i - 1, -1, -1):
                             if split_cat[k] in seen_categories:
                                 grand_parent_cat = seen_categories[split_cat[k]]
                         parent_category = self.view.add_checked_widget_item(widget, parent_name,

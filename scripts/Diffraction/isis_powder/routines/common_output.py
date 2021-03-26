@@ -28,16 +28,12 @@ def split_into_tof_d_spacing_groups(run_details, processed_spectra):
         tof_out_name = run_number + ext + "-ResultTOF_" + str(name_index)
 
         d_spacing_output.append(
-            mantid.ConvertUnits(InputWorkspace=ws,
-                                OutputWorkspace=d_spacing_out_name,
-                                Target="dSpacing"))
-        tof_output.append(
-            mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=tof_out_name, Target="TOF"))
+            mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=d_spacing_out_name, Target="dSpacing"))
+        tof_output.append(mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=tof_out_name, Target="TOF"))
 
     # Group the outputs
     d_spacing_group_name = run_number + ext + "-ResultD"
-    d_spacing_group = mantid.GroupWorkspaces(InputWorkspaces=d_spacing_output,
-                                             OutputWorkspace=d_spacing_group_name)
+    d_spacing_group = mantid.GroupWorkspaces(InputWorkspaces=d_spacing_output, OutputWorkspace=d_spacing_group_name)
     tof_group_name = run_number + ext + "-ResultTOF"
     tof_group = mantid.GroupWorkspaces(InputWorkspaces=tof_output, OutputWorkspace=tof_group_name)
 
@@ -67,10 +63,8 @@ def save_focused_data(d_spacing_group, tof_group, output_paths):
                               Filename=ensure_dir_exists(output_paths["nxs_filename"]),
                               Append=False)
 
-    _save_xye(ws_group=d_spacing_group,
-              filename_template=ensure_dir_exists(output_paths["dspacing_xye_filename"]))
-    _save_xye(ws_group=tof_group,
-              filename_template=ensure_dir_exists(output_paths["tof_xye_filename"]))
+    _save_xye(ws_group=d_spacing_group, filename_template=ensure_dir_exists(output_paths["dspacing_xye_filename"]))
+    _save_xye(ws_group=tof_group, filename_template=ensure_dir_exists(output_paths["tof_xye_filename"]))
 
 
 def _save_xye(ws_group, filename_template):

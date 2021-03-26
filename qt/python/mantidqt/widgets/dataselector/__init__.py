@@ -7,8 +7,4 @@
 
 from mantidqt.utils.qt import import_qt
 
-DataSelector = import_qt(
-        '..._common',
-        'mantidqt.widgets.dataselector',
-        'DataSelector'
-        )
+DataSelector = import_qt('..._common', 'mantidqt.widgets.dataselector', 'DataSelector')

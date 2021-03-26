@@ -48,7 +48,7 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
         corrected, fact = IndirectFlatPlateAbsorption(SampleWorkspace=self._red_ws,
                                                       SampleChemicalFormula='H2-O',
                                                       ElementSize=1,
-                                                      Version = 1)
+                                                      Version=1)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
@@ -63,7 +63,7 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
                                                       CanWorkspace=self._can_ws,
                                                       ElementSize=1,
                                                       UseCanCorrections=False,
-                                                      Version = 1)
+                                                      Version=1)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
@@ -80,7 +80,7 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
                                                       CanScaleFactor=0.8,
                                                       ElementSize=1,
                                                       UseCanCorrections=False,
-                                                      Version = 1)
+                                                      Version=1)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
@@ -96,7 +96,7 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
                                                       CanChemicalFormula='V',
                                                       ElementSize=1,
                                                       UseCanCorrections=True,
-                                                      Version = 1)
+                                                      Version=1)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)
@@ -116,7 +116,7 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
                                                       CanDensity=0.5,
                                                       UseCanCorrections=True,
                                                       ElementSize=1,
-                                                      Version = 1)
+                                                      Version=1)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)
@@ -136,7 +136,7 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
                                                       CanDensity=0.5,
                                                       UseCanCorrections=True,
                                                       ElementSize=1,
-                                                      Version = 1)
+                                                      Version=1)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)

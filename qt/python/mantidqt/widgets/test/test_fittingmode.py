@@ -12,7 +12,6 @@ from testhelpers import assertRaisesNothing
 
 
 class FittingModeTest(unittest.TestCase):
-
     def test_that_FittingMode_has_been_exported_to_python_correctly(self):
         assertRaisesNothing(self, self._create_sequential_fitting_mode)
         assertRaisesNothing(self, self._create_simultaneous_fitting_mode)

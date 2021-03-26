@@ -13,7 +13,6 @@ import numpy as np
 
 
 class MatchAndMergeWorkspaces(DataProcessorAlgorithm):
-
     def name(self):
         return 'MatchAndMergeWorkspaces'
 
@@ -57,7 +56,8 @@ class MatchAndMergeWorkspaces(DataProcessorAlgorithm):
         return issues
 
     def PyInit(self):
-        self.declareProperty(StringArrayProperty('InputWorkspaces', direction=Direction.Input, validator=ADSValidator()),
+        self.declareProperty(StringArrayProperty('InputWorkspaces', direction=Direction.Input,
+                                                 validator=ADSValidator()),
                              doc='List of workspaces or group workspace containing workspaces to be merged.')
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The merged workspace.')
@@ -65,10 +65,8 @@ class MatchAndMergeWorkspaces(DataProcessorAlgorithm):
                              doc='Array of minimum X values for each workspace.')
         self.declareProperty(FloatArrayProperty('XMax', [], direction=Direction.Input),
                              doc='Array of maximum X values for each workspace.')
-        self.declareProperty('CalculateScale', True,
-                             doc='Calculate scale factor when matching spectra.')
-        self.declareProperty('CalculateOffset', True,
-                             doc='Calculate vertical shift when matching spectra.')
+        self.declareProperty('CalculateScale', True, doc='Calculate scale factor when matching spectra.')
+        self.declareProperty('CalculateOffset', True, doc='Calculate vertical shift when matching spectra.')
 
     def PyExec(self):
         ws_list = self.getProperty('InputWorkspaces').value
@@ -83,9 +81,7 @@ class MatchAndMergeWorkspaces(DataProcessorAlgorithm):
         for ws in flattened_list[1:]:
             temp = CloneWorkspace(InputWorkspace=ws)
             temp = Rebin(InputWorkspace=temp, Params=rebin_param)
-            ConjoinWorkspaces(InputWorkspace1='ws_conjoined',
-                              InputWorkspace2=temp,
-                              CheckOverlapping=False)
+            ConjoinWorkspaces(InputWorkspace1='ws_conjoined', InputWorkspace2=temp, CheckOverlapping=False)
         ws_conjoined = AnalysisDataService.retrieve('ws_conjoined')
         ref_spec = ws_conjoined.getSpectrum(largest_range_spectrum).getSpectrumNo()
         ws_conjoined, offset, scale, chisq = MatchSpectra(InputWorkspace=ws_conjoined,

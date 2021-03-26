@@ -30,8 +30,7 @@ class UserConfig(object):
         form of nested dict instances
         """
         # Loads the saved settings if found
-        self.qsettings = QSettings(QSettings.IniFormat, QSettings.UserScope,
-                                   organization, application)
+        self.qsettings = QSettings(QSettings.IniFormat, QSettings.UserScope, organization, application)
 
         # convert the defaults into something that qsettings can handle
         default_settings = self._flatten_defaults(defaults)
@@ -82,7 +81,6 @@ class UserConfig(object):
         ``config.get('main/window/size')`` If no option is found then
         a KeyError is raised
         """
-
         def raise_keyerror(key):
             raise KeyError('Unknown config item requested: "{}"'.format(option))
 
@@ -159,8 +157,8 @@ class UserConfig(object):
             return option
         else:  # first argument is actually the section/group
             if not isinstance(option, str):
-                raise TypeError(
-                    'Found invalid type ({}) for section ({}) must be a string'.format(type(option), option))
+                raise TypeError('Found invalid type ({}) for section ({}) must be a string'.format(
+                    type(option), option))
             if not isinstance(second, str):
                 raise TypeError('Found invalid type ({}) for option ({}) must be a string'.format(type(second), second))
             return joinsettings(option, second)

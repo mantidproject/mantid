@@ -20,7 +20,6 @@ class Guinier(IFunction1D):
 
         I(q) = I(0) exp(-R^2 q^2 / 3)
     """
-
     def category(self):
         return "SANS"
 
@@ -34,7 +33,7 @@ class Guinier(IFunction1D):
             Evaluate the model
             @param xvals: numpy array of q-values
         """
-        return self.getParameterValue("Scale") * np.exp(-(self.getParameterValue('Rg')*xvals)**2/3.0)
+        return self.getParameterValue("Scale") * np.exp(-(self.getParameterValue('Rg') * xvals)**2 / 3.0)
 
     def functionDeriv1D(self, xvals, jacobian):
         """
@@ -45,9 +44,8 @@ class Guinier(IFunction1D):
         i = 0
         rg = self.getParameterValue('Rg')
         for x in xvals:
-            jacobian.set(i, 0, math.exp(-(rg*x)**2/3.0))
-            jacobian.set(i, 1, -self.getParameterValue("Scale")
-                         * math.exp(-(rg*x)**2/3.0)*2.0/3.0*rg*x*x)
+            jacobian.set(i, 0, math.exp(-(rg * x)**2 / 3.0))
+            jacobian.set(i, 1, -self.getParameterValue("Scale") * math.exp(-(rg * x)**2 / 3.0) * 2.0 / 3.0 * rg * x * x)
             i += 1
 
 

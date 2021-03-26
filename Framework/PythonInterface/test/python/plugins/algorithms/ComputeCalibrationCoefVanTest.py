@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.kernel import FloatTimeSeriesProperty
-from mantid.simpleapi import (DeleteWorkspace, CreateSampleWorkspace,
-                              AddSampleLog, AddTimeSeriesLog, EditInstrumentGeometry,
-                              CloneWorkspace, CompareWorkspaces, FindEPP, SetInstrumentParameter)
+from mantid.simpleapi import (DeleteWorkspace, CreateSampleWorkspace, AddSampleLog, AddTimeSeriesLog,
+                              EditInstrumentGeometry, CloneWorkspace, CompareWorkspaces, FindEPP,
+                              SetInstrumentParameter)
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 from scipy.constants import N_A, hbar, k
@@ -17,16 +17,18 @@ import numpy as np
 
 class ComputeCalibrationCoefVanTest(unittest.TestCase):
     def setUp(self):
-        input_ws = CreateSampleWorkspace(
-            Function="User Defined",
-            UserDefinedFunction="name=LinearBackground, " +
-            "A0=0.3;name=Gaussian, PeakCentre=5, Height=10, Sigma=0.3",
-            NumBanks=2, BankPixelWidth=1, XMin=0, XMax=10, BinWidth=0.1,
-            BankDistanceFromSample=4.0)
+        input_ws = CreateSampleWorkspace(Function="User Defined",
+                                         UserDefinedFunction="name=LinearBackground, " +
+                                         "A0=0.3;name=Gaussian, PeakCentre=5, Height=10, Sigma=0.3",
+                                         NumBanks=2,
+                                         BankPixelWidth=1,
+                                         XMin=0,
+                                         XMax=10,
+                                         BinWidth=0.1,
+                                         BankDistanceFromSample=4.0)
         self._input_ws = input_ws
         self._table = FindEPP(input_ws, OutputWorkspace="table")
-        AddSampleLog(self._input_ws, LogName='wavelength', LogText='4.0',
-                     LogType='Number', LogUnit='Angstrom')
+        AddSampleLog(self._input_ws, LogName='wavelength', LogText='4.0', LogType='Number', LogUnit='Angstrom')
         for i in range(input_ws.getNumberHistograms()):
             y = input_ws.dataY(i)
             y.fill(0.)
@@ -49,8 +51,7 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
                          self._input_ws.getRun().getLogData('run_title').value)
 
         # Size of output workspace
-        self.assertEqual(wsoutput.getNumberHistograms(),
-                         self._input_ws.getNumberHistograms())
+        self.assertEqual(wsoutput.getNumberHistograms(), self._input_ws.getNumberHistograms())
 
         DeleteWorkspace(wsoutput)
         return
@@ -74,8 +75,7 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         outputWorkspaceName = "output_ws"
 
         # change theta to make dwf != 1
-        EditInstrumentGeometry(self._input_ws, L2="4,8", Polar="0,15",
-                               Azimuthal="0,0", DetectorIDs="1,2")
+        EditInstrumentGeometry(self._input_ws, L2="4,8", Polar="0,15", Azimuthal="0,0", DetectorIDs="1,2")
         alg_test = run_algorithm("ComputeCalibrationCoefVan",
                                  VanadiumWorkspace=self._input_ws,
                                  EPPTable=self._table,
@@ -90,8 +90,7 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
     def test_temperature_from_sample_log(self):
         self._input_ws.mutableRun().addProperty('temperature', 0.0, True)
         outputWorkspaceName = "output_ws"
-        EditInstrumentGeometry(self._input_ws, L2="4,8", Polar="0,15",
-                               Azimuthal="0,0", DetectorIDs="1,2")
+        EditInstrumentGeometry(self._input_ws, L2="4,8", Polar="0,15", Azimuthal="0,0", DetectorIDs="1,2")
         alg_test = run_algorithm("ComputeCalibrationCoefVan",
                                  VanadiumWorkspace=self._input_ws,
                                  EPPTable=self._table,
@@ -105,23 +104,10 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
 
     def test_temperature_log_is_time_series(self):
         outputWorkspaceName = "output_ws"
-        EditInstrumentGeometry(self._input_ws, L2="4,8", Polar="0,15",
-                               Azimuthal="0,0", DetectorIDs="1,2")
-        AddTimeSeriesLog(
-            self._input_ws,
-            'temperature',
-            '2010-09-14T04:20:12',
-            Value='0.0')
-        AddTimeSeriesLog(
-            self._input_ws,
-            'temperature',
-            '2010-09-14T04:20:13',
-            Value='0.0')
-        AddTimeSeriesLog(
-            self._input_ws,
-            'temperature',
-            '2010-09-14T04:20:14',
-            Value='0.0')
+        EditInstrumentGeometry(self._input_ws, L2="4,8", Polar="0,15", Azimuthal="0,0", DetectorIDs="1,2")
+        AddTimeSeriesLog(self._input_ws, 'temperature', '2010-09-14T04:20:12', Value='0.0')
+        AddTimeSeriesLog(self._input_ws, 'temperature', '2010-09-14T04:20:13', Value='0.0')
+        AddTimeSeriesLog(self._input_ws, 'temperature', '2010-09-14T04:20:14', Value='0.0')
         alg_test = run_algorithm("ComputeCalibrationCoefVan",
                                  VanadiumWorkspace=self._input_ws,
                                  EPPTable=self._table,
@@ -133,13 +119,11 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
 
     def test_temperature_log_name_from_IPF(self):
         self._input_ws.mutableRun().addProperty('sample.temperature', 0.0, True)
-        EditInstrumentGeometry(self._input_ws, L2="4,8", Polar="0,15",
-                               Azimuthal="0,0", DetectorIDs="1,2")
-        SetInstrumentParameter(
-            Workspace=self._input_ws,
-            ParameterName="temperature_log_entry",
-            ParameterType="String",
-            Value="sample.temperature")
+        EditInstrumentGeometry(self._input_ws, L2="4,8", Polar="0,15", Azimuthal="0,0", DetectorIDs="1,2")
+        SetInstrumentParameter(Workspace=self._input_ws,
+                               ParameterName="temperature_log_entry",
+                               ParameterType="String",
+                               Value="sample.temperature")
         outputWorkspaceName = "output_ws"
         alg_test = run_algorithm("ComputeCalibrationCoefVan",
                                  VanadiumWorkspace=self._input_ws,
@@ -153,8 +137,7 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
     def test_temperature_input_overrides_sample_log(self):
         self._input_ws.mutableRun().addProperty('temperature', 567.0, True)
         outputWorkspaceName = "output_ws"
-        EditInstrumentGeometry(self._input_ws, L2="4,8", Polar="0,15",
-                               Azimuthal="0,0", DetectorIDs="1,2")
+        EditInstrumentGeometry(self._input_ws, L2="4,8", Polar="0,15", Azimuthal="0,0", DetectorIDs="1,2")
         alg_test = run_algorithm("ComputeCalibrationCoefVan",
                                  VanadiumWorkspace=self._input_ws,
                                  EPPTable=self._table,
@@ -182,8 +165,7 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         outputWorkspaceName = "output_ws"
 
         # change theta to make dwf != 1
-        EditInstrumentGeometry(self._input_ws, L2="4,8", Polar="0,15",
-                               Azimuthal="0,0", DetectorIDs="1,2")
+        EditInstrumentGeometry(self._input_ws, L2="4,8", Polar="0,15", Azimuthal="0,0", DetectorIDs="1,2")
         alg_test = run_algorithm("ComputeCalibrationCoefVan",
                                  VanadiumWorkspace=self._input_ws,
                                  EPPTable=self._table,
@@ -212,16 +194,12 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         elif temperature == 293.0:
             integral = 4.736767162094296 / 3.0
         else:
-            raise RuntimeError("Unsupported temperature supplied to " +
-                               "_checkDWF(). Use 0K or 293K only.")
-        mvan = 0.001*50.942/N_A
-        Bcoef = 3.0*integral*1e+20*hbar*hbar/(2.0*mvan*k*389.0)
-        dwf = np.exp(
-            -1.0*Bcoef*(4.0*np.pi*np.sin(0.5*np.radians(15.0))/4.0)**2)
-        self.assertAlmostEqual(100./dwf, wsoutput.readY(1)[0],
-                               places=12)
-        self.assertAlmostEqual(10./dwf, wsoutput.readE(1)[0],
-                               places=12)
+            raise RuntimeError("Unsupported temperature supplied to " + "_checkDWF(). Use 0K or 293K only.")
+        mvan = 0.001 * 50.942 / N_A
+        Bcoef = 3.0 * integral * 1e+20 * hbar * hbar / (2.0 * mvan * k * 389.0)
+        dwf = np.exp(-1.0 * Bcoef * (4.0 * np.pi * np.sin(0.5 * np.radians(15.0)) / 4.0)**2)
+        self.assertAlmostEqual(100. / dwf, wsoutput.readY(1)[0], places=12)
+        self.assertAlmostEqual(10. / dwf, wsoutput.readE(1)[0], places=12)
 
 
 if __name__ == "__main__":

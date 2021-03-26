@@ -20,12 +20,26 @@ class StateNormalizeToMonitorTest(unittest.TestCase):
     @staticmethod
     def _get_normalize_to_monitor_state(**kwargs):
         state = StateNormalizeToMonitor()
-        default_entries = {"prompt_peak_correction_min": 12., "prompt_peak_correction_max": 17.,
-                           "rebin_type": RebinType.REBIN, "wavelength_low": [1.5], "wavelength_high": [2.7],
-                           "wavelength_step": 0.5, "incident_monitor": 1, "wavelength_step_type": RangeStepType.LIN,
-                           "background_TOF_general_start": 1.4, "background_TOF_general_stop": 24.5,
-                           "background_TOF_monitor_start": {"1": 123, "2": 123},
-                           "background_TOF_monitor_stop": {"1": 234, "2": 2323}}
+        default_entries = {
+            "prompt_peak_correction_min": 12.,
+            "prompt_peak_correction_max": 17.,
+            "rebin_type": RebinType.REBIN,
+            "wavelength_low": [1.5],
+            "wavelength_high": [2.7],
+            "wavelength_step": 0.5,
+            "incident_monitor": 1,
+            "wavelength_step_type": RangeStepType.LIN,
+            "background_TOF_general_start": 1.4,
+            "background_TOF_general_stop": 24.5,
+            "background_TOF_monitor_start": {
+                "1": 123,
+                "2": 123
+            },
+            "background_TOF_monitor_stop": {
+                "1": 234,
+                "2": 2323
+            }
+        }
 
         for key, value in list(default_entries.items()):
             if key in kwargs:
@@ -48,8 +62,8 @@ class StateNormalizeToMonitorTest(unittest.TestCase):
 
     def test_that_normalize_to_monitor_for_loq_has_default_prompt_peak(self):
         state = StateNormalizeToMonitorLOQ()
-        self.assertEqual(state.prompt_peak_correction_max,  20500.)
-        self.assertEqual(state.prompt_peak_correction_min,  19000.)
+        self.assertEqual(state.prompt_peak_correction_max, 20500.)
+        self.assertEqual(state.prompt_peak_correction_min, 19000.)
 
     def test_that_raises_for_partially_set_prompt_peak(self):
         self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("prompt_peak_correction_min", None, 1.)
@@ -67,47 +81,59 @@ class StateNormalizeToMonitorTest(unittest.TestCase):
         self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("background_TOF_general_start", 100., 1.)
 
     def test_that_raises_for_partially_set_monitor_background_tof(self):
-        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("background_TOF_monitor_start", None,
-                                                                           {"1": 123, "2": 123})
+        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("background_TOF_monitor_start", None, {
+            "1": 123,
+            "2": 123
+        })
 
     def test_that_raises_for_monitor_background_tof_with_different_lengths(self):
-        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("background_TOF_monitor_start", {"1": 123},
-                                                                           {"1": 123, "2": 123})
+        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("background_TOF_monitor_start", {"1": 123}, {
+            "1": 123,
+            "2": 123
+        })
 
     def test_that_raises_for_monitor_background_tof_with_differing_spectrum_numbers(self):
-        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("background_TOF_monitor_start",
-                                                                           {"1": 123, "5": 123},
-                                                                           {"1": 123, "2": 123})
+        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("background_TOF_monitor_start", {
+            "1": 123,
+            "5": 123
+        }, {
+            "1": 123,
+            "2": 123
+        })
 
     def test_that_raises_for_monitor_background_tof_with_inconsistent_bounds(self):
-        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("background_TOF_monitor_start",
-                                                                           {"1": 123, "2": 191123},
-                                                                           {"1": 123, "2": 123})
+        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("background_TOF_monitor_start", {
+            "1": 123,
+            "2": 191123
+        }, {
+            "1": 123,
+            "2": 123
+        })
 
     def test_convert_step_type_from_RANGE_LIN_to_LIN(self):
         state = StateNormalizeToMonitor()
         state.wavelength_step_type = RangeStepType.RANGE_LIN
-        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.LIN)
+        self.assertEqual(state.wavelength_step_type_lin_log, RangeStepType.LIN)
 
     def test_convert_step_type_from_RANGE_LOG_to_LOG(self):
         state = StateNormalizeToMonitor()
         state.wavelength_step_type = RangeStepType.RANGE_LOG
-        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.LOG)
+        self.assertEqual(state.wavelength_step_type_lin_log, RangeStepType.LOG)
 
     def test_convert_step_type_does_not_change_LIN(self):
         state = StateNormalizeToMonitor()
         state.wavelength_step_type = RangeStepType.LIN
-        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.LIN)
+        self.assertEqual(state.wavelength_step_type_lin_log, RangeStepType.LIN)
 
     def test_convert_step_type_does_not_change_LOG(self):
         state = StateNormalizeToMonitor()
         state.wavelength_step_type = RangeStepType.LOG
-        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.LOG)
+        self.assertEqual(state.wavelength_step_type_lin_log, RangeStepType.LOG)
 
     def test_convert_step_type_does_not_change_NOT_SET(self):
         state = StateNormalizeToMonitor()
         state.wavelength_step_type = RangeStepType.NOT_SET
-        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.NOT_SET)
+        self.assertEqual(state.wavelength_step_type_lin_log, RangeStepType.NOT_SET)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -142,18 +168,18 @@ class StateReductionBuilderTest(unittest.TestCase):
         state = builder.build()
 
         # Assert
-        self.assertEqual(state.prompt_peak_correction_min,  12.0)
-        self.assertEqual(state.prompt_peak_correction_max,  17.0)
+        self.assertEqual(state.prompt_peak_correction_min, 12.0)
+        self.assertEqual(state.prompt_peak_correction_max, 17.0)
         self.assertEqual(state.rebin_type, RebinType.REBIN)
-        self.assertEqual(state.wavelength_low,  [1.5])
-        self.assertEqual(state.wavelength_high,  [2.7])
-        self.assertEqual(state.wavelength_step,  0.5)
+        self.assertEqual(state.wavelength_low, [1.5])
+        self.assertEqual(state.wavelength_high, [2.7])
+        self.assertEqual(state.wavelength_step, 0.5)
         self.assertEqual(state.wavelength_step_type, RangeStepType.LIN)
-        self.assertEqual(state.background_TOF_general_start,  1.4)
-        self.assertEqual(state.background_TOF_general_stop,  34.4)
+        self.assertEqual(state.background_TOF_general_start, 1.4)
+        self.assertEqual(state.background_TOF_general_stop, 34.4)
         self.assertEqual(len(set(state.background_TOF_monitor_start.items()) & set({"1": 123, "2": 123}.items())), 2)
         self.assertEqual(len(set(state.background_TOF_monitor_stop.items()) & set({"1": 234, "2": 2323}.items())), 2)
-        self.assertEqual(state.incident_monitor,  1)
+        self.assertEqual(state.incident_monitor, 1)
 
 
 if __name__ == '__main__':

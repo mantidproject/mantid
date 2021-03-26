@@ -9,8 +9,8 @@ import unittest
 from sans.command_interface.command_interface_state_director import (NParameterCommand, NParameterCommandId,
                                                                      CommandInterfaceStateDirector, DataCommand,
                                                                      DataCommandId, FitData)
-from sans.common.enums import (SANSFacility, RebinType, DetectorType, ReductionDimensionality,
-                               FitType, RangeStepType, ReductionMode, FitModeForMerge, DataType)
+from sans.common.enums import (SANSFacility, RebinType, DetectorType, ReductionDimensionality, FitType, RangeStepType,
+                               ReductionMode, FitModeForMerge, DataType)
 
 
 class CommandInterfaceStateDirectorTest(unittest.TestCase):
@@ -24,18 +24,15 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         command_interface = CommandInterfaceStateDirector(SANSFacility.ISIS)
 
         # User file
-        command = NParameterCommand(command_id=NParameterCommandId.USER_FILE,
-                                    values=["test_user_file_sans2d.txt"])
+        command = NParameterCommand(command_id=NParameterCommandId.USER_FILE, values=["test_user_file_sans2d.txt"])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Mask
-        command = NParameterCommand(command_id=NParameterCommandId.MASK,
-                                    values=["MASK/ FRONT H197>H199"])
+        command = NParameterCommand(command_id=NParameterCommandId.MASK, values=["MASK/ FRONT H197>H199"])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Monitor spectrum (incident monitor for monitor normalization)
-        command = NParameterCommand(command_id=NParameterCommandId.INCIDENT_SPECTRUM,
-                                    values=[1, True, False])
+        command = NParameterCommand(command_id=NParameterCommandId.INCIDENT_SPECTRUM, values=[1, True, False])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Transmission spectrum (incident monitor for transmission calculation)
@@ -73,13 +70,13 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # # Trans fit
-        command = NParameterCommand(command_id=NParameterCommandId.TRANS_FIT, values=[FitData.Can, 10.4, 12.54,
-                                                                                      FitType.LOGARITHMIC, 0])
+        command = NParameterCommand(command_id=NParameterCommandId.TRANS_FIT,
+                                    values=[FitData.Can, 10.4, 12.54, FitType.LOGARITHMIC, 0])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Front detector rescale
-        command = NParameterCommand(command_id=NParameterCommandId.FRONT_DETECTOR_RESCALE, values=[1.2, 2.4, True,
-                                                                                                   False, None, 7.2])
+        command = NParameterCommand(command_id=NParameterCommandId.FRONT_DETECTOR_RESCALE,
+                                    values=[1.2, 2.4, True, False, None, 7.2])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Event slices
@@ -100,8 +97,7 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Radius mask
-        command = NParameterCommand(command_id=NParameterCommandId.MASK_RADIUS,
-                                    values=[23.5, 234.7])
+        command = NParameterCommand(command_id=NParameterCommandId.MASK_RADIUS, values=[23.5, 234.7])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Wavelength limits
@@ -120,45 +116,35 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         # Assert
         # We check here that the elements we set up above (except for from the user file) are being applied
         self.assertNotEqual(state, None)
-        self.assertTrue(state.mask.detectors[DetectorType.HAB.value].range_horizontal_strip_start[-1]
-                        == 197)
-        self.assertTrue(state.mask.detectors[DetectorType.HAB.value].range_horizontal_strip_stop[-1]
-                        == 199)
-        self.assertEqual(state.adjustment.normalize_to_monitor.incident_monitor,  1)
+        self.assertTrue(state.mask.detectors[DetectorType.HAB.value].range_horizontal_strip_start[-1] == 197)
+        self.assertTrue(state.mask.detectors[DetectorType.HAB.value].range_horizontal_strip_stop[-1] == 199)
+        self.assertEqual(state.adjustment.normalize_to_monitor.incident_monitor, 1)
         self.assertEqual(state.adjustment.normalize_to_monitor.rebin_type, RebinType.INTERPOLATING_REBIN)
-        self.assertEqual(state.adjustment.calculate_transmission.incident_monitor,  7)
+        self.assertEqual(state.adjustment.calculate_transmission.incident_monitor, 7)
         self.assertEqual(state.adjustment.calculate_transmission.rebin_type, RebinType.REBIN)
         self.assertEqual(state.reduction.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
         self.assertEqual(state.convert_to_q.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
-        self.assertEqual(state.move.sample_offset,  23.6/1000.)
-        self.assertEqual(state.data.sample_scatter,  "SANS2D00022024")
-        self.assertEqual(state.data.sample_scatter_period,  3)
+        self.assertEqual(state.move.sample_offset, 23.6 / 1000.)
+        self.assertEqual(state.data.sample_scatter, "SANS2D00022024")
+        self.assertEqual(state.data.sample_scatter_period, 3)
         self.assertEqual(state.reduction.reduction_mode, ReductionMode.HAB)
         self.assertTrue(state.convert_to_q.use_gravity)
-        self.assertEqual(state.convert_to_q.gravity_extra_length,  12.4)
-        self.assertEqual(state.move.detectors[DetectorType.LAB.value].sample_centre_pos1,
-                         108.1/1000.)
-        self.assertEqual(state.move.detectors[DetectorType.LAB.value].sample_centre_pos2,
-                         -83.0/1000.)
-        self.assertEqual(state.move.detectors[DetectorType.HAB.value].sample_centre_pos1,
-                         108.1/1000.)
-        self.assertEqual(state.move.detectors[DetectorType.HAB.value].sample_centre_pos2,
-                         -83.0/1000.)
-        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].fit_type
-                        is FitType.LOGARITHMIC)
-        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].polynomial_order
-                        == 0)
+        self.assertEqual(state.convert_to_q.gravity_extra_length, 12.4)
+        self.assertEqual(state.move.detectors[DetectorType.LAB.value].sample_centre_pos1, 108.1 / 1000.)
+        self.assertEqual(state.move.detectors[DetectorType.LAB.value].sample_centre_pos2, -83.0 / 1000.)
+        self.assertEqual(state.move.detectors[DetectorType.HAB.value].sample_centre_pos1, 108.1 / 1000.)
+        self.assertEqual(state.move.detectors[DetectorType.HAB.value].sample_centre_pos2, -83.0 / 1000.)
+        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].fit_type is FitType.LOGARITHMIC)
+        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].polynomial_order == 0)
 
-        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].wavelength_low
-                        == 10.4)
-        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].wavelength_high
-                        == 12.54)
+        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].wavelength_low == 10.4)
+        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.CAN.value].wavelength_high == 12.54)
 
-        self.assertEqual(state.reduction.merge_scale,  1.2)
-        self.assertEqual(state.reduction.merge_shift,  2.4)
+        self.assertEqual(state.reduction.merge_scale, 1.2)
+        self.assertEqual(state.reduction.merge_shift, 2.4)
         self.assertEqual(state.reduction.merge_fit_mode, FitModeForMerge.SCALE_ONLY)
         self.assertEqual(state.reduction.merge_range_min, None)
-        self.assertEqual(state.reduction.merge_range_max,  7.2)
+        self.assertEqual(state.reduction.merge_range_max, 7.2)
 
         # Event slices
         start_values = state.slice.start_time
@@ -166,24 +152,24 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         expected_start_values = [1., 55., 58., 61., 64.]
         expected_end_values = [23., 58., 61., 64., 65.]
         for s1, e1, s2, e2 in zip(start_values, end_values, expected_start_values, expected_end_values):
-            self.assertEqual(s1,  s2)
-            self.assertEqual(e1,  e2)
+            self.assertEqual(s1, s2)
+            self.assertEqual(e1, e2)
 
         self.assertTrue(state.adjustment.wavelength_and_pixel_adjustment.adjustment_files[
-                            DetectorType.LAB.value].pixel_adjustment_file == "test")
-        self.assertEqual(state.mask.phi_min,  12.5)
-        self.assertEqual(state.mask.phi_max,  123.6)
+            DetectorType.LAB.value].pixel_adjustment_file == "test")
+        self.assertEqual(state.mask.phi_min, 12.5)
+        self.assertEqual(state.mask.phi_max, 123.6)
         self.assertFalse(state.mask.use_mask_phi_mirror)
         self.assertTrue(state.adjustment.wavelength_and_pixel_adjustment.adjustment_files[
-                            DetectorType.HAB.value].wavelength_adjustment_file == "test")
-        self.assertEqual(state.mask.radius_min,  23.5 / 1000.)
-        self.assertEqual(state.mask.radius_max,  234.7 / 1000.)
-        self.assertEqual(state.wavelength.wavelength_low,  [1.23])
-        self.assertEqual(state.adjustment.normalize_to_monitor.wavelength_high,  [23.])
-        self.assertEqual(state.adjustment.wavelength_and_pixel_adjustment.wavelength_step,  1.1)
+            DetectorType.HAB.value].wavelength_adjustment_file == "test")
+        self.assertEqual(state.mask.radius_min, 23.5 / 1000.)
+        self.assertEqual(state.mask.radius_max, 234.7 / 1000.)
+        self.assertEqual(state.wavelength.wavelength_low, [1.23])
+        self.assertEqual(state.adjustment.normalize_to_monitor.wavelength_high, [23.])
+        self.assertEqual(state.adjustment.wavelength_and_pixel_adjustment.wavelength_step, 1.1)
         self.assertEqual(state.adjustment.calculate_transmission.wavelength_step_type, RangeStepType.LIN)
-        self.assertEqual(state.convert_to_q.q_xy_max,  23.)
-        self.assertEqual(state.convert_to_q.q_xy_step,  1.1)
+        self.assertEqual(state.convert_to_q.q_xy_max, 23.)
+        self.assertEqual(state.convert_to_q.q_xy_step, 1.1)
         self.assertEqual(state.convert_to_q.q_xy_step_type, RangeStepType.LIN)
 
     def test_that_can_remove_last_command(self):
@@ -197,14 +183,14 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
                                                         values=["file_3.txt"]))
         # Act
         commands = command_interface.get_commands()
-        self.assertEqual(len(commands),  3)
+        self.assertEqual(len(commands), 3)
 
         command_interface.remove_last_user_file()
 
         # Assert
-        self.assertEqual(len(commands),  2)
+        self.assertEqual(len(commands), 2)
         last_command = commands[-1]
-        self.assertEqual(last_command.values,  ["file_2.txt"])
+        self.assertEqual(last_command.values, ["file_2.txt"])
 
 
 if __name__ == '__main__':

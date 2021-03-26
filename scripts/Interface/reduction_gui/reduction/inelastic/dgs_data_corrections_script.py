@@ -54,7 +54,7 @@ class DataCorrectionsScript(BaseScriptElement):
     def to_script(self):
         script = ""
         if self.filter_bad_pulses:
-            script +=  "FilterBadPulses=%s,\n" % self.filter_bad_pulses
+            script += "FilterBadPulses=%s,\n" % self.filter_bad_pulses
         script += "IncidentBeamNormalisation=\"%s\",\n" % self.incident_beam_norm
         if self.incident_beam_norm == "ToMonitor":
             if self.monitor_int_low != DataCorrectionsScript.monitor_int_low:
@@ -92,7 +92,7 @@ class DataCorrectionsScript(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml =  "<DataCorrections>\n"
+        xml = "<DataCorrections>\n"
         xml += "  <filter_bad_pulses>%s</filter_bad_pulses>\n" % str(self.filter_bad_pulses)
         xml += "  <incident_beam_norm>%s</incident_beam_norm>\n" % self.incident_beam_norm
         xml += "  <monint_range_low>%d</monint_range_low>\n" % self.monitor_int_low
@@ -119,14 +119,13 @@ class DataCorrectionsScript(BaseScriptElement):
         """
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("DataCorrections")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             instrument_dom = element_list[0]
             self.filter_bad_pulses = BaseScriptElement.getBoolElement(instrument_dom,
                                                                       "filter_bad_pulses",
                                                                       default=DataCorrectionsScript.filter_bad_pulses)
-            self.incident_beam_norm = BaseScriptElement.getStringElement(instrument_dom,
-                                                                         "incident_beam_norm",
-                                                                         default=DataCorrectionsScript.incident_beam_norm)
+            self.incident_beam_norm = BaseScriptElement.getStringElement(
+                instrument_dom, "incident_beam_norm", default=DataCorrectionsScript.incident_beam_norm)
             self.monitor_int_low = BaseScriptElement.getIntElement(instrument_dom,
                                                                    "monint_range_low",
                                                                    default=DataCorrectionsScript.monitor_int_low)
@@ -151,21 +150,17 @@ class DataCorrectionsScript(BaseScriptElement):
             self.detvan_integration = BaseScriptElement.getBoolElement(instrument_dom,
                                                                        "use_bounds_detvan",
                                                                        default=DataCorrectionsScript.detvan_integration)
-            self.detvan_int_range_low = BaseScriptElement.getStringElement(instrument_dom,
-                                                                           "detvan_range_low",
-                                                                           default=DataCorrectionsScript.detvan_int_range_low)
-            self.detvan_int_range_high = BaseScriptElement.getStringElement(instrument_dom,
-                                                                            "detvan_range_high",
-                                                                            default=DataCorrectionsScript.detvan_int_range_high)
-            self.detvan_int_range_units = BaseScriptElement.getStringElement(instrument_dom,
-                                                                             "detvan_range_units",
-                                                                             default=DataCorrectionsScript.detvan_int_range_units)
+            self.detvan_int_range_low = BaseScriptElement.getStringElement(
+                instrument_dom, "detvan_range_low", default=DataCorrectionsScript.detvan_int_range_low)
+            self.detvan_int_range_high = BaseScriptElement.getStringElement(
+                instrument_dom, "detvan_range_high", default=DataCorrectionsScript.detvan_int_range_high)
+            self.detvan_int_range_units = BaseScriptElement.getStringElement(
+                instrument_dom, "detvan_range_units", default=DataCorrectionsScript.detvan_int_range_units)
             self.save_proc_detvan = BaseScriptElement.getBoolElement(instrument_dom,
                                                                      "save_proc_detvan",
                                                                      default=DataCorrectionsScript.save_proc_detvan)
-            self.save_proc_detvan_file = BaseScriptElement.getStringElement(instrument_dom,
-                                                                            "save_proc_detvan_filename",
-                                                                            default=DataCorrectionsScript.save_proc_detvan_file)
+            self.save_proc_detvan_file = BaseScriptElement.getStringElement(
+                instrument_dom, "save_proc_detvan_filename", default=DataCorrectionsScript.save_proc_detvan_file)
             self.use_proc_detvan = BaseScriptElement.getBoolElement(instrument_dom,
                                                                     "use_proc_detvan",
                                                                     default=DataCorrectionsScript.use_proc_detvan)

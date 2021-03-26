@@ -33,13 +33,7 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         mtd.clear()
 
     def testDetectorAngle(self):
-        args = {
-            'Run': '317370',
-            'DirectRun': '317369',
-            'OutputWorkspace': 'outWS',
-            'rethrow': True,
-            'child': True
-        }
+        args = {'Run': '317370', 'DirectRun': '317369', 'OutputWorkspace': 'outWS', 'rethrow': True, 'child': True}
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
         self.checkOutput(mtd['outWS'], 1)
@@ -58,7 +52,8 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         self.checkOutput(mtd['outWS'], 1)
         self.assertAlmostEqual(mtd['outWS'].getItem(0).spectrumInfo().signedTwoTheta(0),
-                               2.*0.8*numpy.pi/180., delta=0.00001)
+                               2. * 0.8 * numpy.pi / 180.,
+                               delta=0.00001)
 
     def testSampleAngle(self):
         args = {
@@ -133,12 +128,7 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         self.checkOutput(mtd['outWS'], 3)
 
     def testDefaultValues(self):
-        args = {
-            'Run': '317370',
-            'DirectRun': '317369',
-            'OutputWorkspace': 'outWS',
-            'rethrow': True
-        }
+        args = {'Run': '317370', 'DirectRun': '317369', 'OutputWorkspace': 'outWS', 'rethrow': True}
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
         out = mtd['outWS'].getItem(0)
@@ -184,6 +174,7 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
             self.assertFalse(ws.isHistogramData())
             self.assertEquals(ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
             self.assertTrue(ws.hasDx(0))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -10,8 +10,7 @@ import unittest
 from mantid.api import AnalysisDataService
 from mantid.kernel import config, ConfigService
 from mantid.simpleapi import (CreateSampleWorkspace, MaskDetectors, DeleteWorkspace, LoadNexusProcessed, Load, Rebin)
-from sans.algorithm_detail.calculate_transmission_helper import (get_masked_det_ids,
-                                                                 get_idf_path_from_workspace,
+from sans.algorithm_detail.calculate_transmission_helper import (get_masked_det_ids, get_idf_path_from_workspace,
                                                                  get_workspace_indices_for_monitors,
                                                                  apply_flat_background_correction_to_monitors,
                                                                  apply_flat_background_correction_to_detectors,
@@ -28,7 +27,7 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
 
     def _assert_collection_elements_are_equal(self, collection1, collection2):
         tolerance = 1e-7
-        self.assertEqual(len(collection1),  len(collection2))
+        self.assertEqual(len(collection1), len(collection2))
         for index in range(len(collection1)):
             self.assertTrue(abs(collection1[index] - collection2[index]) < tolerance)
 
@@ -126,16 +125,16 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
         idf_path = get_idf_path_from_workspace(self.immutable_test_workspace)
         # Assert
         self.assertTrue(os.path.exists(idf_path))
-        self.assertEqual(os.path.basename(idf_path),  "LOQ_Definition_20020226-.xml")
+        self.assertEqual(os.path.basename(idf_path), "LOQ_Definition_20020226-.xml")
 
     def test_that_extracts_workspace_indices_of_monitor_when_monitors_are_present(self):
         # Act
         workspace_indices_generator = get_workspace_indices_for_monitors(self.immutable_test_workspace)
         # Assert
         workspace_indices = list(workspace_indices_generator)
-        self.assertEqual(len(workspace_indices),  2)
-        self.assertEqual(workspace_indices[0],  0)
-        self.assertEqual(workspace_indices[1],  1)
+        self.assertEqual(len(workspace_indices), 2)
+        self.assertEqual(workspace_indices[0], 0)
+        self.assertEqual(workspace_indices[1], 1)
 
     def test_that_returns_empty_generator_if_no_monitors_are_present(self):
         # Arrange
@@ -144,7 +143,7 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
         workspace_indices_generator = get_workspace_indices_for_monitors(test_workspace_for_monitors)
         # Assert
         workspace_indices = list(workspace_indices_generator)
-        self.assertEqual(workspace_indices,  [])
+        self.assertEqual(workspace_indices, [])
         # Clean up
         DeleteWorkspace(test_workspace_for_monitors)
 
@@ -161,8 +160,7 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
         tof_general_start = 24
         tof_general_stop = 38
         # Act
-        output_workspace = apply_flat_background_correction_to_monitors(workspace,
-                                                                        monitor_workspace_indices,
+        output_workspace = apply_flat_background_correction_to_monitors(workspace, monitor_workspace_indices,
                                                                         monitor_spectrum_tof_start,
                                                                         monitor_spectrum_tof_stop, tof_general_start,
                                                                         tof_general_stop)
@@ -219,14 +217,17 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
 
     def test_that_gets_region_of_interest_for_roi_mask_and_radius(self):
         # Act
-        detector_ids = get_region_of_interest(self.region_of_interest_workspace, roi_files=[self.roi_file_path],
-                                              mask_files=[self.mask_file_path], radius=0.01)
+        detector_ids = get_region_of_interest(self.region_of_interest_workspace,
+                                              roi_files=[self.roi_file_path],
+                                              mask_files=[self.mask_file_path],
+                                              radius=0.01)
         # Assert
         # From Radius: [7872, 7873, 7874, 8000, 8001, 8002, 8003, 8128, 8129, 8130]
         # From Roi File: [6990, 6991, 6992, 6993, 6994, 6995, 6996]
         # Mask file removes: [6991]
-        expected_detector_ids = [6990, 6992, 6993, 6994, 6995, 6996, 7872, 7873, 7874, 8000,
-                                 8001, 8002, 8003, 8128, 8129, 8130]
+        expected_detector_ids = [
+            6990, 6992, 6993, 6994, 6995, 6996, 7872, 7873, 7874, 8000, 8001, 8002, 8003, 8128, 8129, 8130
+        ]
         self._assert_collection_elements_are_equal(detector_ids, expected_detector_ids)
 
     def test_that_returns_empty_list_if_nothing_is_specified(self):

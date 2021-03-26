@@ -11,7 +11,6 @@ import numpy as np
 
 
 class MuH(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
@@ -29,9 +28,10 @@ class MuH(IFunction1D):
         sigma = self.getParameterValue("Sigma")
         phi = self.getParameterValue("Phi")
         OmegaD = NuD * 2 * np.pi
-        gau = np.exp(-0.5 * (x * sigma) ** 2)
-        Lor = np.exp(- Lambda * x)
-        return A0 * gau * Lor * (1 + np.cos(OmegaD * x + phi) + 2 * np.cos(0.5 * OmegaD * x + phi) + 2 * np.cos(1.5 * OmegaD * x + phi)) / 6
+        gau = np.exp(-0.5 * (x * sigma)**2)
+        Lor = np.exp(-Lambda * x)
+        return A0 * gau * Lor * (1 + np.cos(OmegaD * x + phi) + 2 * np.cos(0.5 * OmegaD * x + phi) +
+                                 2 * np.cos(1.5 * OmegaD * x + phi)) / 6
 
 
 FunctionFactory.subscribe(MuH)

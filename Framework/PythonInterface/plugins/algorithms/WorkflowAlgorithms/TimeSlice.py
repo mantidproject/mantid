@@ -45,6 +45,7 @@ def _count_monitors(raw_file):
 
         return mon_count, False
 
+
 #pylint: disable=too-many-instance-attributes
 
 
@@ -65,26 +66,25 @@ class TimeSlice(PythonAlgorithm):
         return 'Performa an integration on a raw file over a specified time of flight range'
 
     def seeAlso(self):
-        return [ "Integration" ]
+        return ["Integration"]
 
     def PyInit(self):
-        self.declareProperty(StringArrayProperty(name='InputFiles'),
-                             doc='Comma separated list of input files')
+        self.declareProperty(StringArrayProperty(name='InputFiles'), doc='Comma separated list of input files')
 
-        self.declareProperty(WorkspaceProperty(name='CalibrationWorkspace', defaultValue='',
-                                               direction=Direction.Input, optional=PropertyMode.Optional),
+        self.declareProperty(WorkspaceProperty(name='CalibrationWorkspace',
+                                               defaultValue='',
+                                               direction=Direction.Input,
+                                               optional=PropertyMode.Optional),
                              doc='Calibration workspace')
 
-        self.declareProperty(IntArrayProperty(name='SpectraRange'),
-                             doc='Range of spectra to use')
+        self.declareProperty(IntArrayProperty(name='SpectraRange'), doc='Range of spectra to use')
 
-        self.declareProperty(FloatArrayProperty(name='PeakRange'),
-                             doc='Peak range in time of flight')
+        self.declareProperty(FloatArrayProperty(name='PeakRange'), doc='Peak range in time of flight')
 
-        self.declareProperty(FloatArrayProperty(name='BackgroundRange'),
-                             doc='Background range in time of flight')
+        self.declareProperty(FloatArrayProperty(name='BackgroundRange'), doc='Background range in time of flight')
 
-        self.declareProperty(name='OutputNameSuffix', defaultValue='_slice',
+        self.declareProperty(name='OutputNameSuffix',
+                             defaultValue='_slice',
                              doc='Suffix to append to raw file name for name of output workspace')
 
         self.declareProperty(WorkspaceGroupProperty(name='OutputWorkspace', defaultValue='',
@@ -127,7 +127,7 @@ class TimeSlice(PythonAlgorithm):
         # CheckXrange(xRange, 'Time')
         out_ws_list = []
         i = 0
-        workflow_prog = Progress(self, start=0.0, end=0.96, nreports=len(self._raw_files)*3)
+        workflow_prog = Progress(self, start=0.0, end=0.96, nreports=len(self._raw_files) * 3)
         for index, filename in enumerate(self._raw_files):
             workflow_prog.report('Reading file: ' + str(i))
             raw_file = self._read_raw_file(filename)

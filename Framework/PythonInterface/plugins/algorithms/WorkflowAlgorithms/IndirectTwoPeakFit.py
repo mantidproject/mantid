@@ -36,26 +36,24 @@ class IndirectTwoPeakFit(PythonAlgorithm):
         return 'Performs a convolution fit for 1 and 2 Lorentzians.'
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace',
+                                                     '',
                                                      optional=PropertyMode.Mandatory,
                                                      direction=Direction.Input),
                              doc="Name for the sample workspace.")
 
-        self.declareProperty(name='EnergyMin', defaultValue=-0.5,
-                             doc='Minimum energy for fit. Default=-0.5')
+        self.declareProperty(name='EnergyMin', defaultValue=-0.5, doc='Minimum energy for fit. Default=-0.5')
 
-        self.declareProperty(name='EnergyMax', defaultValue=0.5,
-                             doc='Maximum energy for fit. Default=0.5')
+        self.declareProperty(name='EnergyMax', defaultValue=0.5, doc='Maximum energy for fit. Default=0.5')
 
-        self.declareProperty(name='Minimizer', defaultValue='Levenberg-Marquardt',
+        self.declareProperty(name='Minimizer',
+                             defaultValue='Levenberg-Marquardt',
                              validator=StringListValidator(['Levenberg-Marquardt', 'FABADA']),
                              doc='Type of minimizer')
 
-        self.declareProperty(name='MaxIterations', defaultValue=500,
-                             doc='Max iterations. Default=500')
+        self.declareProperty(name='MaxIterations', defaultValue=500, doc='Max iterations. Default=500')
 
-        self.declareProperty(name='OutputName', defaultValue='',
-                             doc='Output workspace base name')
+        self.declareProperty(name='OutputName', defaultValue='', doc='Output workspace base name')
 
     def validateInputs(self):
         self._setup()
@@ -284,8 +282,18 @@ class IndirectTwoPeakFit(PythonAlgorithm):
 
         self._delete_workspace('__peak_NormalisedCovarianceMatrix')
 
-    def _plot_peak_by_log_value(self, input_string, function, start_x, end_x, fit_type, minimizer, max_iterations,
-                                output_name, create_output=True, composite_members=True, convolve_members=True):
+    def _plot_peak_by_log_value(self,
+                                input_string,
+                                function,
+                                start_x,
+                                end_x,
+                                fit_type,
+                                minimizer,
+                                max_iterations,
+                                output_name,
+                                create_output=True,
+                                composite_members=True,
+                                convolve_members=True):
         plot_alg = self.createChildAlgorithm("PlotPeakByLogValue", enableLogging=False)
         plot_alg.setProperty("Input", input_string)
         plot_alg.setProperty("Function", function)
@@ -357,7 +365,7 @@ class IndirectTwoPeakFit(PythonAlgorithm):
         mtd.addOrReplace(output_name, rename_alg.getProperty("OutputWorkspace").value)
 
     def _extract_single_spectrum(self, input_name, output_name, index):
-        extract_alg = self.createChildAlgorithm("ExtractSingleSpectrum", enableLogging = False)
+        extract_alg = self.createChildAlgorithm("ExtractSingleSpectrum", enableLogging=False)
         extract_alg.setProperty("InputWorkspace", input_name)
         extract_alg.setProperty("WorkspaceIndex", index)
         extract_alg.setProperty("OutputWorkspace", output_name)
@@ -365,7 +373,7 @@ class IndirectTwoPeakFit(PythonAlgorithm):
         mtd.addOrReplace(output_name, extract_alg.getProperty("OutputWorkspace").value)
 
     def _append_to(self, initial_workspace, to_append):
-        append_alg = self.createChildAlgorithm("AppendSpectra", enableLogging = False)
+        append_alg = self.createChildAlgorithm("AppendSpectra", enableLogging=False)
         append_alg.setProperty("InputWorkspace1", initial_workspace)
         append_alg.setProperty("InputWorkspace2", to_append)
         append_alg.setProperty("OutputWorkspace", initial_workspace)

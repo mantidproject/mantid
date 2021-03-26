@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=line-too-long, invalid-name, old-style-class, multiple-statements, too-many-branches
-
 """
 This module contains the PyChop2 class which allows calculation of the resolution and flux of
 direct geometry time-of-flight inelastic neutron spectrometers.
@@ -24,25 +23,28 @@ class PyChop2:
     """
 
     __Classes = {
-        'LET': ISISDisk,         # LET default
-        'LETHIFLUX': ISISDisk,   # LET, high flux configuration
-        'LETINTERMED': ISISDisk, # LET, medium flux configuration
-        'LETHIRES': ISISDisk,    # LET, low flux configuration
+        'LET': ISISDisk,  # LET default
+        'LETHIFLUX': ISISDisk,  # LET, high flux configuration
+        'LETINTERMED': ISISDisk,  # LET, medium flux configuration
+        'LETHIRES': ISISDisk,  # LET, low flux configuration
         'MAPS': ISISFermi,
         'MARI': ISISFermi,
-        'MERLIN': ISISFermi}
+        'MERLIN': ISISFermi
+    }
     __MultiRepClasses = {
-        'LET': ISISDisk,         # LET default
-        'LETHIFLUX': ISISDisk,   # LET, high flux configuration
-        'LETINTERMED': ISISDisk, # LET, medium flux configuration
-        'LETHIRES': ISISDisk,    # LET, low flux configuration
+        'LET': ISISDisk,  # LET default
+        'LETHIFLUX': ISISDisk,  # LET, high flux configuration
+        'LETINTERMED': ISISDisk,  # LET, medium flux configuration
+        'LETHIRES': ISISDisk,  # LET, low flux configuration
         'MERLIN': ISISDisk,
         'MAPS': ISISDisk,
-        'MARI': ISISDisk}
+        'MARI': ISISDisk
+    }
 
     def __init__(self, instname, *args):
-        warnings.warn("The PyChop2 class is deprecated and will be removed in the next Mantid version. "
-                      "Please use the Instrument class or the official PyChop CLI interface.", DeprecationWarning)
+        warnings.warn(
+            "The PyChop2 class is deprecated and will be removed in the next Mantid version. "
+            "Please use the Instrument class or the official PyChop CLI interface.", DeprecationWarning)
         instname = instname.upper()
         if instname not in self.__Classes.keys():
             raise ValueError('Instrument %s not recognised' % (instname))
@@ -228,7 +230,7 @@ class PyChop2:
                     argdict[ind] = kwargs[ind]
             for ind in range(1, 4):
                 if argname[ind] not in argdict:
-                    raise RuntimeError('Parameter ''%s'' must be specified' % (argname[ind]))
+                    raise RuntimeError('Parameter ' '%s' ' must be specified' % (argname[ind]))
             obj.setChopper(argdict['chtyp'], argdict['freq'])
             obj.setEi(argdict['ei'])
         else:

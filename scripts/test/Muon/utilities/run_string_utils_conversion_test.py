@@ -9,7 +9,6 @@ import unittest
 
 
 class RunStringUtilsListToStringTest(unittest.TestCase):
-
     def test_run_list_to_string_for_consecutive_runs(self):
         run_list = [1, 2, 3, 4, 5]
         run_string = utils.run_list_to_string(run_list)

@@ -24,27 +24,22 @@ from .DrillRundexIO import DrillRundexIO
 
 
 class DrillModel(QObject):
-
     """
     Data directory on Linux.
     """
     LINUX_BASE_DATA_PATH = "/net/serdon/illdata/"
-
     """
     Data directory on MacOS.
     """
     MACOS_BASE_DATA_PATH = "/Volumes/illdata/"
-
     """
     Data directory on Windows.
     """
     WIN_BASE_DATA_PATH = "Z:\\"
-
     """
     Raw data directory name.
     """
     RAW_DATA_DIR = "rawdata"
-
     """
     Processed data directory name.
     """
@@ -53,40 +48,34 @@ class DrillModel(QObject):
     ###########################################################################
     # signals                                                                 #
     ###########################################################################
-
     """
     Raised when a process is started.
     Args:
         (int): sample index
     """
     processStarted = Signal(int)
-
     """
     Raised when a process finished with success.
     Args:
         (int): sample index
     """
     processSuccess = Signal(int)
-
     """
     Raised when a process failed.
     Args:
         (int): sample index
     """
     processError = Signal(int)
-
     """
     Raised when all the processing are done.
     """
     processingDone = Signal()
-
     """
     Raised each time the processing progress is updated.
     Args:
         (int): sample index
     """
     progressUpdate = Signal(int)
-
     """
     Raised when a new param is ok.
     Args:
@@ -94,7 +83,6 @@ class DrillModel(QObject):
         (str): parameter name
     """
     paramOk = Signal(int, str)
-
     """
     Raised when a new parameter is wrong.
     Args:
@@ -102,7 +90,6 @@ class DrillModel(QObject):
         (str): parameter name
     """
     paramError = Signal(int, str, str)
-
     """
     Raised when groups are updated.
     """
@@ -176,8 +163,7 @@ class DrillModel(QObject):
             self.setAcquisitionMode(RundexSettings.ACQUISITION_MODES[instrument][0])
         else:
             if log:
-                logger.error('Instrument {0} is not supported yet.'
-                             .format(instrument))
+                logger.error('Instrument {0} is not supported yet.'.format(instrument))
 
     def getInstrument(self):
         """
@@ -197,9 +183,7 @@ class DrillModel(QObject):
         Args:
             mode (str): aquisition mode name
         """
-        if ((self.instrument is None)
-                or (mode not in RundexSettings.ACQUISITION_MODES[
-                    self.instrument])):
+        if ((self.instrument is None) or (mode not in RundexSettings.ACQUISITION_MODES[self.instrument])):
             return
         self.samples = list()
         self.groups = dict()
@@ -213,8 +197,7 @@ class DrillModel(QObject):
         else:
             nThreads = QThread.idealThreadCount()
         self.tasksPool.setMaxThreadCount(nThreads)
-        self.settings = dict.fromkeys(
-                RundexSettings.SETTINGS[self.acquisitionMode])
+        self.settings = dict.fromkeys(RundexSettings.SETTINGS[self.acquisitionMode])
         self._setDefaultSettings()
         self.exportModel = DrillExportModel(self.acquisitionMode)
         self._initController()
@@ -271,25 +254,20 @@ class DrillModel(QObject):
             return
 
         # data
-        dataDir = os.path.join(baseDir, "{0}/{1}/{2}"
-                                        .format(cycle,
-                                                self.instrument.lower(),
-                                                experiment))
+        dataDir = os.path.join(baseDir, "{0}/{1}/{2}".format(cycle, self.instrument.lower(), experiment))
         rawDataDir = os.path.join(dataDir, self.RAW_DATA_DIR)
         processedDataDir = os.path.join(dataDir, self.PROCESSED_DATA_DIR)
         if not os.path.isdir(dataDir):
             logger.warning("Cycle number and experiment ID do not lead to a "
                            "valid directory in the usual data directory ({0}): "
-                           "{1} does not exist."
-                           .format(baseDir, dataDir))
+                           "{1} does not exist.".format(baseDir, dataDir))
             return
 
         # add in user directories if needed
         userDirs = ConfigService.getDataSearchDirs()
         if ((os.path.isdir(rawDataDir)) and (rawDataDir not in userDirs)):
             ConfigService.appendDataSearchDir(rawDataDir)
-        if ((os.path.isdir(processedDataDir))
-                and (processedDataDir not in userDirs)):
+        if ((os.path.isdir(processedDataDir)) and (processedDataDir not in userDirs)):
             ConfigService.appendDataSearchDir(processedDataDir)
 
     def getCycleAndExperiment(self):
@@ -313,9 +291,7 @@ class DrillModel(QObject):
 
         def onParamError(p):
             if ((p.sample != -1) and (p.name not in self.columns)):
-                self.paramError.emit(p.sample,
-                                     RundexSettings.CUSTOM_OPT_JSON_KEY,
-                                     p.errorMsg)
+                self.paramError.emit(p.sample, RundexSettings.CUSTOM_OPT_JSON_KEY, p.errorMsg)
             elif ((p.name in self.columns) or (p.name in self.settings)):
                 self.paramError.emit(p.sample, p.name, p.errorMsg)
 
@@ -374,8 +350,7 @@ class DrillModel(QObject):
                 t = "file"
             elif (isinstance(p, MultipleFileProperty)):
                 t = "files"
-            elif (isinstance(p, (WorkspaceGroupProperty,
-                                 MatrixWorkspaceProperty))):
+            elif (isinstance(p, (WorkspaceGroupProperty, MatrixWorkspaceProperty))):
                 t = "workspace"
             elif (isinstance(p, StringPropertyWithValue)):
                 if (p.allowedValues):
@@ -458,11 +433,10 @@ class DrillModel(QObject):
             for group in self.groups:
                 if sample in self.groups[group]:
                     self.groups[group].remove(sample)
-                if ((group in self.masterSamples)
-                        and (self.masterSamples[group] == sample)):
+                if ((group in self.masterSamples) and (self.masterSamples[group] == sample)):
                     del self.masterSamples[group]
 
-        self.groups = {k:v for k,v in self.groups.items() if v}
+        self.groups = {k: v for k, v in self.groups.items() if v}
 
         def incrementName(name):
             """
@@ -515,11 +489,10 @@ class DrillModel(QObject):
             for group in self.groups:
                 if sample in self.groups[group]:
                     self.groups[group].remove(sample)
-                if ((group in self.masterSamples)
-                        and (self.masterSamples[group] == sample)):
+                if ((group in self.masterSamples) and (self.masterSamples[group] == sample)):
                     del self.masterSamples[group]
 
-        self.groups = {k:v for k,v in self.groups.items() if v}
+        self.groups = {k: v for k, v in self.groups.items() if v}
         self.groupsUpdated.emit()
 
     def setSamplesGroups(self, groups):
@@ -529,7 +502,7 @@ class DrillModel(QObject):
         Args:
             groups (dict(str:list(int))): samples groups
         """
-        self.groups = {k:set(self.samples[i] for i in v) for k,v in groups.items()}
+        self.groups = {k: set(self.samples[i] for i in v) for k, v in groups.items()}
 
     def getSamplesGroups(self):
         """
@@ -539,7 +512,7 @@ class DrillModel(QObject):
             dict(str, list(int)): groups of samples
         """
         groups = {}
-        for k,v in self.groups.items():
+        for k, v in self.groups.items():
             groups[k] = set(self.samples.index(s) for s in v)
         return groups
 
@@ -550,7 +523,7 @@ class DrillModel(QObject):
         Args:
             masterSamples (dict(str:int)): master samples
         """
-        self.masterSamples = {k:self.samples[v] for k,v in masterSamples.items()}
+        self.masterSamples = {k: self.samples[v] for k, v in masterSamples.items()}
 
     def getMasterSamples(self):
         """
@@ -559,7 +532,7 @@ class DrillModel(QObject):
         Returns:
             dict(str, int): master samples for each group.
         """
-        return {k:self.samples.index(v) for k,v in self.masterSamples.items()}
+        return {k: self.samples.index(v) for k, v in self.masterSamples.items()}
 
     def setGroupMaster(self, sampleIndex):
         """
@@ -640,8 +613,7 @@ class DrillModel(QObject):
         """
         ref = int(ref)
         name = str(ref + 1)
-        logger.information("Starting of sample {0} processing"
-                           .format(name))
+        logger.information("Starting of sample {0} processing".format(name))
         self.processStarted.emit(ref)
 
     def _onTaskSuccess(self, ref):
@@ -653,8 +625,7 @@ class DrillModel(QObject):
         """
         ref = int(ref)
         name = str(ref + 1)
-        logger.information("Processing of sample {0} finished with sucess"
-                           .format(name))
+        logger.information("Processing of sample {0} finished with sucess".format(name))
         self.processSuccess.emit(ref)
         self.exportModel.run(self.samples[ref])
 
@@ -669,8 +640,7 @@ class DrillModel(QObject):
         """
         ref = int(ref)
         name = str(ref + 1)
-        logger.error("Error while processing sample {0}: {1}"
-                     .format(name, msg))
+        logger.error("Error while processing sample {0}: {1}".format(name, msg))
         self.processError.emit(ref)
 
     def _onProcessingProgress(self, progress):
@@ -740,7 +710,7 @@ class DrillModel(QObject):
             vs (dict(str:str)): visual settings
         """
         if vs:
-            self.visualSettings = {k:v for k,v in vs.items()}
+            self.visualSettings = {k: v for k, v in vs.items()}
         else:
             self.visualSettings = dict()
 
@@ -751,7 +721,7 @@ class DrillModel(QObject):
         Returns:
             dict: visual settings that the view understands
         """
-        return {k:v for k,v in self.visualSettings.items()}
+        return {k: v for k, v in self.visualSettings.items()}
 
     def getColumnHeaderData(self):
         """
@@ -805,8 +775,7 @@ class DrillModel(QObject):
                 self.groups[group].remove(sample)
                 if not self.groups[group]:
                     del self.groups[group]
-                if ((group in self.masterSamples)
-                        and (self.masterSamples[group] == sample)):
+                if ((group in self.masterSamples) and (self.masterSamples[group] == sample)):
                     del self.masterSamples[group]
                 self.groupsUpdated.emit()
                 return

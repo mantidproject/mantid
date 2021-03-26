@@ -16,8 +16,13 @@ class SCalculatorFactory(object):
          * SPowderSemiEmpiricalCalculator
     """
     @staticmethod
-    def init(filename=None, temperature=None, sample_form=None, abins_data=None, instrument=None,
-             quantum_order_num=None, bin_width=1.0):
+    def init(filename=None,
+             temperature=None,
+             sample_form=None,
+             abins_data=None,
+             instrument=None,
+             quantum_order_num=None,
+             bin_width=1.0):
         """
         :param filename: name of input DFT file (CASTEP: foo.phonon)
         :param temperature: temperature in K for which calculation of S should be done
@@ -30,8 +35,10 @@ class SCalculatorFactory(object):
         if sample_form in ALL_SAMPLE_FORMS:
             if sample_form == "Powder":
 
-                return abins.SPowderSemiEmpiricalCalculator(filename=filename, temperature=temperature,
-                                                            abins_data=abins_data, instrument=instrument,
+                return abins.SPowderSemiEmpiricalCalculator(filename=filename,
+                                                            temperature=temperature,
+                                                            abins_data=abins_data,
+                                                            instrument=instrument,
                                                             quantum_order_num=quantum_order_num,
                                                             bin_width=bin_width)
                 # TODO: implement numerical powder averaging

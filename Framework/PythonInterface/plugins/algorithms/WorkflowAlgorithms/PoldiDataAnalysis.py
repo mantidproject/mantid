@@ -18,7 +18,6 @@ class PoldiDataAnalysis(PythonAlgorithm):
 
     All resulting workspaces are grouped together at the end so that they are all in one place.
     """
-
     def category(self):
         return "SINQ\\Poldi"
 
@@ -34,64 +33,85 @@ class PoldiDataAnalysis(PythonAlgorithm):
     def PyInit(self):
         self._allowedFunctions = ["Gaussian", "Lorentzian", "PseudoVoigt", "Voigt"]
 
-        self._globalParameters = {
-            'Gaussian': [],
-            'Lorentzian': [],
-            'PseudoVoigt': ['Mixing'],
-            'Voigt': ['LorentzFWHM']
-        }
+        self._globalParameters = {'Gaussian': [], 'Lorentzian': [], 'PseudoVoigt': ['Mixing'], 'Voigt': ['LorentzFWHM']}
 
         self.declareProperty(WorkspaceProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input),
                              doc='MatrixWorkspace with 2D POLDI data and valid POLDI instrument.')
 
-        self.declareProperty("MaximumPeakNumber", 10, direction=Direction.Input,
+        self.declareProperty("MaximumPeakNumber",
+                             10,
+                             direction=Direction.Input,
                              doc='Maximum number of peaks to process in the analysis.')
 
-        self.declareProperty("MinimumPeakSeparation", 10, direction=Direction.Input,
+        self.declareProperty("MinimumPeakSeparation",
+                             10,
+                             direction=Direction.Input,
                              doc='Minimum number of points between neighboring peaks.')
 
-        self.declareProperty("MinimumPeakHeight", 0.0, direction=Direction.Input,
+        self.declareProperty("MinimumPeakHeight",
+                             0.0,
+                             direction=Direction.Input,
                              doc=('Minimum height of peaks. If it is left at 0, the minimum peak height is calculated'
                                   'from background noise.'))
 
-        self.declareProperty("MaximumRelativeFwhm", 0.02, direction=Direction.Input,
+        self.declareProperty("MaximumRelativeFwhm",
+                             0.02,
+                             direction=Direction.Input,
                              doc=('Peaks with a relative FWHM larger than this are removed during the 1D fit.'))
 
-        self.declareProperty("ScatteringContributions", "1", direction=Direction.Input,
+        self.declareProperty("ScatteringContributions",
+                             "1",
+                             direction=Direction.Input,
                              doc=('If there is more than one compound, you may supply estimates of their scattering '
                                   'contributions, which sometimes improves indexing.'))
 
         self.declareProperty(WorkspaceProperty("ExpectedPeaks", defaultValue="", direction=Direction.Input),
                              doc='TableWorkspace or WorkspaceGroup with expected peaks used for indexing.')
 
-        self.declareProperty("RemoveUnindexedPeaksFor2DFit", defaultValue=False, direction=Direction.Input,
+        self.declareProperty("RemoveUnindexedPeaksFor2DFit",
+                             defaultValue=False,
+                             direction=Direction.Input,
                              doc='Discard unindexed peaks for 2D fit, this is always the case if PawleyFit is active.')
 
         allowedProfileFunctions = StringListValidator(self._allowedFunctions)
-        self.declareProperty("ProfileFunction", "Gaussian", validator=allowedProfileFunctions,
+        self.declareProperty("ProfileFunction",
+                             "Gaussian",
+                             validator=allowedProfileFunctions,
                              direction=Direction.Input)
 
-        self.declareProperty("TieProfileParameters", True, direction=Direction.Input,
+        self.declareProperty("TieProfileParameters",
+                             True,
+                             direction=Direction.Input,
                              doc=('If this option is activated, certain parameters are kept the same for all peaks. '
                                   'An example is the mixing parameter of the PseudoVoigt function.'))
 
-        self.declareProperty("PawleyFit", False, direction=Direction.Input,
+        self.declareProperty("PawleyFit",
+                             False,
+                             direction=Direction.Input,
                              doc='Should the 2D-fit determine lattice parameters?')
 
-        self.declareProperty("MultipleRuns", False, direction=Direction.Input,
+        self.declareProperty("MultipleRuns",
+                             False,
+                             direction=Direction.Input,
                              doc=('If this is activated, peaks are searched again in the'
                                   'residuals and the 1D- and 2D-fit is repeated '
                                   'with these data.'))
 
-        self.declareProperty("PlotResult", True, direction=Direction.Input,
+        self.declareProperty("PlotResult",
+                             True,
+                             direction=Direction.Input,
                              doc=('If this is activated, plot the sum of residuals and calculated spectrum together '
                                   'with the theoretical spectrum and the residuals.'))
 
-        self.declareProperty("OutputIntegratedIntensities", False, direction=Direction.Input,
+        self.declareProperty("OutputIntegratedIntensities",
+                             False,
+                             direction=Direction.Input,
                              doc=("If this option is checked the peak intensities of the 2D-fit will be integrated, "
                                   "otherwise they will be the maximum intensity."))
 
-        self.declareProperty('OutputRawFitParameters', False, direction=Direction.Input,
+        self.declareProperty('OutputRawFitParameters',
+                             False,
+                             direction=Direction.Input,
                              doc=('Activating this option produces an output workspace which contains the raw '
                                   'fit parameters.'))
 
@@ -261,9 +281,11 @@ class PoldiDataAnalysis(PythonAlgorithm):
                         RefinedCellParameters=refinedCellName,
                         RawFitParameters=rawFitParametersWorkspaceName)
 
-        workspaces = [AnalysisDataService.retrieve(spectrum2DName),
-                      AnalysisDataService.retrieve(spectrum1DName),
-                      AnalysisDataService.retrieve(refinedPeaksName)]
+        workspaces = [
+            AnalysisDataService.retrieve(spectrum2DName),
+            AnalysisDataService.retrieve(spectrum1DName),
+            AnalysisDataService.retrieve(refinedPeaksName)
+        ]
         if AnalysisDataService.doesExist(refinedCellName):
             workspaces.append(AnalysisDataService.retrieve(refinedCellName))
 

@@ -44,8 +44,7 @@ def run_fit(wks, function, minimizer='Levenberg-Marquardt', cost_function='Least
 
     @returns the fitted parameter values and error estimates for these
     """
-    Fit(function, wks, Output='ws',
-        Minimizer=minimizer, CostFunction=cost_function, IgnoreInvalidData=True)
+    Fit(function, wks, Output='ws', Minimizer=minimizer, CostFunction=cost_function, IgnoreInvalidData=True)
 
     param_table = mtd['ws_Parameters']
 
@@ -82,14 +81,12 @@ def compare_relative_errors(values_fitted, reference_values, tolerance=1e-6):
                                "Checking absolute difference from 0. Make sure this is the intended behavior!")
             check = (abs(val - expected) < tolerance)
         else:
-            check = (abs(val/expected - 1) < tolerance)
+            check = (abs(val / expected - 1) < tolerance)
 
         if not check:
             logger.error("For the parameter with index {0}, the value found '{1}' differs from "
-                         "reference '{2}' by more than required tolerance '{3}'".
-                         format(idx, val, expected, tolerance))
-            logger.error("These were the values found:         {0}".
-                         format(values_fitted))
+                         "reference '{2}' by more than required tolerance '{3}'".format(idx, val, expected, tolerance))
+            logger.error("These were the values found:         {0}".format(values_fitted))
             logger.error(" and these are the reference values: {0}".format(reference_values))
             raise RuntimeError("Some results were not as accurate as expected. Please check the log "
                                "messages for details")
@@ -108,6 +105,7 @@ def load_fitting_test_file_ascii(filename):
 
     return wks
 
+
 # pylint: disable=too-many-public-methods
 
 
@@ -119,8 +117,7 @@ class TwoGaussPeaksEVSData(unittest.TestCase):
     """
     filename = 'EVS14188-90_processed.txt'
     workspace = None
-    function_template = ("name=Gaussian, {0} ; name=LinearBackground,A0=0,A1=0;"
-                         "name=Gaussian, {1}")
+    function_template = ("name=Gaussian, {0} ; name=LinearBackground,A0=0,A1=0;" "name=Gaussian, {1}")
 
     # Using this workaround as we still support Python 2.6 on rhel6, where setUpClass()
     # is not available
@@ -137,10 +134,14 @@ class TwoGaussPeaksEVSData(unittest.TestCase):
         function = self.function_template.format('Height=0.0271028,PeakCentre=0.000371946,Sigma=1e-05',
                                                  'Height=0.0979798,PeakCentre=0.000167,Sigma=1.7267e-05')
 
-        expected_params = [0.117909282702681, 0.0003733355959906781, 4.750983503334754e-06, 0.002725666504029797,
-                           -4.494580010809393, 0.12986299166539694, 0.00016646632365980064, 2.616230019006275e-05]
-        expected_errors = [0.00655660314595665, 3.021546058414827e-07, 3.0766264397350073e-07, 0.0023835827954566415,
-                           5.996463420450547, 0.003059328883379551, 6.632752531256318e-07, 7.707070805005832e-07]
+        expected_params = [
+            0.117909282702681, 0.0003733355959906781, 4.750983503334754e-06, 0.002725666504029797, -4.494580010809393,
+            0.12986299166539694, 0.00016646632365980064, 2.616230019006275e-05
+        ]
+        expected_errors = [
+            0.00655660314595665, 3.021546058414827e-07, 3.0766264397350073e-07, 0.0023835827954566415,
+            5.996463420450547, 0.003059328883379551, 6.632752531256318e-07, 7.707070805005832e-07
+        ]
 
         params, errors = run_fit(self.workspace, function, 'Levenberg-Marquardt')
         compare_relative_errors(params, expected_params, tolerance=3e-1)
@@ -213,19 +214,18 @@ class VanadiumPatternFromENGINXSmoothing(unittest.TestCase):
         satisfactory to instrument scientists.
         """
         function_definition = self.spline_user_def_function.format('50')
-        expected_params = [0.0, 0.0, -37.210995939539366, 18.370350660372594,
-                           -2.323438604684101, 74.22342247724607, 489.75852793518493, 922.5302436427901,
-                           1261.989106878403, 1600.0406590395235, 1968.4303057681236, 2139.756948117313,
-                           2193.8413904726463, 2147.4316461957706, 2024.2113711188294, 1846.1816530559352,
-                           1667.087333750607, 1435.2097252716287, 1283.45250983148, 1114.837123909836,
-                           948.1243026646681, 795.8275797795692, 674.3966788220177, 566.7374883589133,
-                           470.0133310752506, 405.87945288846436, 343.15039206081804, 317.7445190490894,
-                           287.2471905069133, 253.30824044242098, 224.9453886333567, 197.47473222574482,
-                           175.01736182667756, 158.6559088656412, 134.93057836157, 113.46466051206023,
-                           103.07539466368209, 88.69333062995749, 73.2453746596794, 57.94761712646885,
-                           46.150107399338026, 33.49607446438909, 27.023391825663943, 19.660388795715143,
-                           14.846016985914035, 9.65919973049868, 5.724008517073549, 1.9527932349469075,
-                           -0.9197805852038337, 10.656047152998436, 0.0]
+        expected_params = [
+            0.0, 0.0, -37.210995939539366, 18.370350660372594, -2.323438604684101, 74.22342247724607,
+            489.75852793518493, 922.5302436427901, 1261.989106878403, 1600.0406590395235, 1968.4303057681236,
+            2139.756948117313, 2193.8413904726463, 2147.4316461957706, 2024.2113711188294, 1846.1816530559352,
+            1667.087333750607, 1435.2097252716287, 1283.45250983148, 1114.837123909836, 948.1243026646681,
+            795.8275797795692, 674.3966788220177, 566.7374883589133, 470.0133310752506, 405.87945288846436,
+            343.15039206081804, 317.7445190490894, 287.2471905069133, 253.30824044242098, 224.9453886333567,
+            197.47473222574482, 175.01736182667756, 158.6559088656412, 134.93057836157, 113.46466051206023,
+            103.07539466368209, 88.69333062995749, 73.2453746596794, 57.94761712646885, 46.150107399338026,
+            33.49607446438909, 27.023391825663943, 19.660388795715143, 14.846016985914035, 9.65919973049868,
+            5.724008517073549, 1.9527932349469075, -0.9197805852038337, 10.656047152998436, 0.0
+        ]
 
         # Note: ignoring parameter errors. Note the higher tolerance so that it works on all platforms
         fitted_params, _ = run_fit(self.workspace, function_definition)
@@ -236,10 +236,11 @@ class VanadiumPatternFromENGINXSmoothing(unittest.TestCase):
         This uses 12 break points, which usually produces poorish results.
         """
         function_definition = self.spline_user_def_function.format('12')
-        expected_params = [575.5043460508207, -362.0695583401004, 722.7394915082397, 2621.9749776340186,
-                           1572.450059153195, 836.417481475315, 361.6875979793134, 240.00983642384153,
-                           132.46098325093416, 63.95362315830608, 17.41805806345004, 0.8684078907341928,
-                           -5.204195324981802]
+        expected_params = [
+            575.5043460508207, -362.0695583401004, 722.7394915082397, 2621.9749776340186, 1572.450059153195,
+            836.417481475315, 361.6875979793134, 240.00983642384153, 132.46098325093416, 63.95362315830608,
+            17.41805806345004, 0.8684078907341928, -5.204195324981802
+        ]
 
         # Note: ignoring parameter errors. Note the higher tolerance so that it works on all platforms
         fitted_params, _ = run_fit(self.workspace, function_definition)
@@ -255,9 +256,9 @@ class WeightedLeastSquaresTest(systemtesting.MantidSystemTest):
         # Custom code to create and run one or more test suites
         suite = unittest.TestSuite()
         # Add the tests for all the datasets
-        suite.addTest( unittest.makeSuite(TwoGaussPeaksEVSData, "test") )
-        suite.addTest( unittest.makeSuite(SineLikeMuonExperimentAsymmetry, "test") )
-        suite.addTest( unittest.makeSuite(VanadiumPatternFromENGINXSmoothing, "test") )
+        suite.addTest(unittest.makeSuite(TwoGaussPeaksEVSData, "test"))
+        suite.addTest(unittest.makeSuite(SineLikeMuonExperimentAsymmetry, "test"))
+        suite.addTest(unittest.makeSuite(VanadiumPatternFromENGINXSmoothing, "test"))
 
         runner = unittest.TextTestRunner()
         # Run using either runner

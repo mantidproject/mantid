@@ -18,14 +18,13 @@ import os.path
 class SaveVulcanGSS(PythonAlgorithm):
     """ Save GSS file for VULCAN.  This is a workflow algorithm
     """
-
     def category(self):
         """ category
         """
         return "Workflow\\Diffraction\\DataHandling"
 
     def seeAlso(self):
-        return [ "SaveGSS" ]
+        return ["SaveGSS"]
 
     def name(self):
         """ name of algorithm
@@ -43,14 +42,15 @@ class SaveVulcanGSS(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
                              "Focused diffraction workspace to be exported to GSAS file. ")
 
-        self.declareProperty(ITableWorkspaceProperty('BinningTable', '', Direction.Input, PropertyMode.Optional),
-                             'Table workspace containing binning parameters. If not specified, then no re-binning'
-                             'is required')
+        self.declareProperty(
+            ITableWorkspaceProperty('BinningTable', '', Direction.Input, PropertyMode.Optional),
+            'Table workspace containing binning parameters. If not specified, then no re-binning'
+            'is required')
 
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
                              "Name of rebinned matrix workspace. ")
 
-        self.declareProperty(FileProperty("GSSFilename","", FileAction.Save, ['.gda']),
+        self.declareProperty(FileProperty("GSSFilename", "", FileAction.Save, ['.gda']),
                              "Name of the output GSAS file. ")
 
         self.declareProperty("IPTS", mantid.kernel.Property.EMPTY_INT, "IPTS number")
@@ -107,16 +107,18 @@ class SaveVulcanGSS(PythonAlgorithm):
                     # odd number and cannot be binning parameters
                     raise RuntimeError('Binning parameter {0} cannot be accepted.'.format(bin_params))
 
-                api.Rebin(InputWorkspace=temp_out_name, OutputWorkspace=temp_out_name,
-                          Params=bin_params, PreserveEvents=True)
+                api.Rebin(InputWorkspace=temp_out_name,
+                          OutputWorkspace=temp_out_name,
+                          Params=bin_params,
+                          PreserveEvents=True)
                 rebinned_ws = AnalysisDataService.retrieve(temp_out_name)
-                self.log().warning('Rebinnd workspace Size(x) = {0}, Size(y) = {1}'.format(len(rebinned_ws.readX(0)),
-                                                                                           len(rebinned_ws.readY(0))))
+                self.log().warning('Rebinnd workspace Size(x) = {0}, Size(y) = {1}'.format(
+                    len(rebinned_ws.readX(0)), len(rebinned_ws.readY(0))))
 
                 # Upon this point, the workspace is still HistogramData.
                 # Check whether it is necessary to reset the X-values to reference TOF from VDRIVE
                 temp_out_ws = AnalysisDataService.retrieve(temp_out_name)
-                if len(bin_params) == 2*len(temp_out_ws.readX(0)) - 1:
+                if len(bin_params) == 2 * len(temp_out_ws.readX(0)) - 1:
                     reset_bins = True
                 else:
                     reset_bins = False
@@ -129,14 +131,13 @@ class SaveVulcanGSS(PythonAlgorithm):
                 if reset_bins:
                     # good to align:
                     for tof_i in range(len(temp_out_ws.readX(0))):
-                        temp_out_ws.dataX(0)[tof_i] = int(bin_params[2*tof_i] * 10) / 10.
+                        temp_out_ws.dataX(0)[tof_i] = int(bin_params[2 * tof_i] * 10) / 10.
                     # END-FOR (tof-i)
                 # END-IF (align)
             # END-FOR
 
             # merge together
-            api.RenameWorkspace(InputWorkspace=processed_single_spec_ws_list[0],
-                                OutputWorkspace=output_ws_name)
+            api.RenameWorkspace(InputWorkspace=processed_single_spec_ws_list[0], OutputWorkspace=output_ws_name)
             for ws_index in range(1, len(processed_single_spec_ws_list)):
                 api.ConjoinWorkspaces(InputWorkspace1=output_ws_name,
                                       InputWorkspace2=processed_single_spec_ws_list[ws_index])
@@ -212,6 +213,7 @@ class SaveVulcanGSS(PythonAlgorithm):
             int_list = list(int_array)
 
             return int_list
+
         # END-DEF
 
         bin_par_workspace = AnalysisDataService.retrieve(bin_par_ws_name)
@@ -281,8 +283,7 @@ class SaveVulcanGSS(PythonAlgorithm):
             terms = bin_par_str.split(':')
             ref_ws_name = terms[0].strip()
             if AnalysisDataService.doesExist(ref_ws_name) is False:
-                raise RuntimeError('Workspace {0} does not exist (FYI {1})'
-                                   ''.format(ref_ws_name, bin_par_str))
+                raise RuntimeError('Workspace {0} does not exist (FYI {1})' ''.format(ref_ws_name, bin_par_str))
             try:
                 ws_index = int(terms[1].strip())
             except ValueError:
@@ -334,8 +335,12 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         # Save
         try:
-            api.SaveGSS(InputWorkspace=output_workspace, Filename=gsas_file_name, SplitFiles=False, Append=False,
-                        Format="SLOG", MultiplyByBinWidth=False,
+            api.SaveGSS(InputWorkspace=output_workspace,
+                        Filename=gsas_file_name,
+                        SplitFiles=False,
+                        Append=False,
+                        Format="SLOG",
+                        MultiplyByBinWidth=False,
                         ExtendedHeader=False,
                         UserSpecifiedGSASHeader=vulcan_gsas_header,
                         UserSpecifiedBankHeader=vulcan_bank_headers,
@@ -377,7 +382,7 @@ class SaveVulcanGSS(PythonAlgorithm):
             utctime = numpy.datetime64(run.getProperty('run_start').value)
             time0 = numpy.datetime64("1990-01-01T00:00:00")
             total_nanosecond_start = int((utctime - time0) / numpy.timedelta64(1, 'ns'))
-            total_nanosecond_stop = total_nanosecond_start + int(duration*1.0E9)
+            total_nanosecond_stop = total_nanosecond_start + int(duration * 1.0E9)
 
         else:
             # not both property is found

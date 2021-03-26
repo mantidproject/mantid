@@ -92,7 +92,7 @@ class PeakReport(object):
         """
         self.__xydim = (dim_x, dim_y)
 
-    def make_report(self, md_workspace, peaks_workspace, pdf_name = None):
+    def make_report(self, md_workspace, peaks_workspace, pdf_name=None):
         """
         Arguments:
           md_workspace -- md workspace to process.
@@ -104,14 +104,22 @@ class PeakReport(object):
             raise ValueError("A MD Workspace has not been provided.")
         if not isinstance(peaks_workspace, mantid.api.IPeaksWorkspace):
             raise VaueError("A Peaks Worksapce has not been provided.")
-        if  not pdf_name:
+        if not pdf_name:
             pdf_name = md_workspace.name() + 'IntegrationReport.pdf'
 
-        doc = SimpleDocTemplate(self.__out_location +  pdf_name, pagesize=letter, leftMargin=2, rightMargin=2,
-                                topMargin=2.5, bottomMargin=2 ,showBoundary=1)
+        doc = SimpleDocTemplate(self.__out_location + pdf_name,
+                                pagesize=letter,
+                                leftMargin=2,
+                                rightMargin=2,
+                                topMargin=2.5,
+                                bottomMargin=2,
+                                showBoundary=1)
         parts = list()
         styles = getSampleStyleSheet()
-        title = Paragraph("Peak Integration Report for %s" % md_workspace.name(), styles["Heading1"], )
+        title = Paragraph(
+            "Peak Integration Report for %s" % md_workspace.name(),
+            styles["Heading1"],
+        )
         parts.append(title)
         parts.append(Paragraph("MD Workspace: %s" % md_workspace.name(), styles["Normal"]))
         parts.append(Paragraph("Peaks Workspace: %s" % peaks_workspace.name(), styles["Normal"]))
@@ -121,7 +129,7 @@ class PeakReport(object):
 
         # Choose a different projection if one is specified
         if self.__xydim:
-            svw.setXYDim( self.__xydim[0], self.__xydim[1] )
+            svw.setXYDim(self.__xydim[0], self.__xydim[1])
 
         sv = svw.getSlicer()
         composite_presenter = sv.setPeaksWorkspaces([peaks_workspace.name()])
@@ -152,14 +160,15 @@ class PeakReport(object):
             # Get the peak object
             peak = peaks_workspace.getPeak(i)
 
-            infoData = [['PeakNumber:', i], ['Run Number:', peak.getRunNumber()], ['Intensity:', peak.getIntensity()],
+            infoData = [['PeakNumber:', i], ['Run Number:', peak.getRunNumber()], ['Intensity:',
+                                                                                   peak.getIntensity()],
                         ['TOF:', peak.getTOF()]]
             coordData = [['Q Lab:', peak.getQLabFrame()], ['Q Sample:', peak.getQSampleFrame()],
                          ['HKL:', peak.getHKL()]]
             if 'DetID' in peaks_workspace.getColumnNames():
                 detector_id = peaks_workspace.row(i)['DetID']
                 coordData = [['Detector Id:', detector_id]] + coordData
-            data = [[img , Table(infoData), Table(coordData)]]
+            data = [[img, Table(infoData), Table(coordData)]]
 
             colwidths = (150, 160, 160)
 

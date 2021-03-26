@@ -12,7 +12,6 @@ from copy import copy
 
 class AddedToSysPath:
     """Context manager to add paths to the system path."""
-
     def __init__(self, paths):
         self.original_sys_path = copy(sys.path)
         self.paths = paths

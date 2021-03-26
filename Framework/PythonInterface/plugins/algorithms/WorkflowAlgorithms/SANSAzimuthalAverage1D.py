@@ -13,7 +13,6 @@ from mantid.kernel import logger
 
 
 class SANSAzimuthalAverage1D(PythonAlgorithm):
-
     def category(self):
         return "Workflow\\SANS\\UsesPropertyManager"
 
@@ -24,26 +23,28 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         return "Compute I(q) for reduced SANS data"
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
-                                                     direction=Direction.Input))
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input))
 
-        self.declareProperty(FloatArrayProperty("Binning", values=[0.,0.,0.],
-                                                direction=Direction.InOut), "Positive is linear bins, negative is logarithmic")
+        self.declareProperty(FloatArrayProperty("Binning", values=[0., 0., 0.], direction=Direction.InOut),
+                             "Positive is linear bins, negative is logarithmic")
 
-        self.declareProperty("NumberOfBins", 100, validator=IntBoundedValidator(lower=1),
+        self.declareProperty("NumberOfBins",
+                             100,
+                             validator=IntBoundedValidator(lower=1),
                              doc="Number of Q bins to use if binning is not supplied")
         self.declareProperty("LogBinning", False, "Produce log binning in Q when true and binning wasn't supplied")
-        self.declareProperty("AlignWithDecades", False, "If True and log binning was chosen, the Q points will be aligned with Q decades")
+        self.declareProperty("AlignWithDecades", False,
+                             "If True and log binning was chosen, the Q points will be aligned with Q decades")
         self.declareProperty("NumberOfSubpixels", 1, "Number of sub-pixels per side of a detector pixel: use with care")
         self.declareProperty("ErrorWeighting", False, "Backward compatibility option: use with care")
         self.declareProperty('ComputeResolution', False, 'If true the Q resolution will be computed')
 
-        self.declareProperty("ReductionProperties", "__sans_reduction_properties",
+        self.declareProperty("ReductionProperties",
+                             "__sans_reduction_properties",
                              validator=StringMandatoryValidator(),
                              doc="Property manager name for the reduction")
 
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
-                                                     direction = Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              "I(q) workspace")
 
         self.declareProperty("NumberOfWedges", 2, "Number of wedges to calculate")
@@ -53,8 +54,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         #                                             Direction.Output,
         #                                             PropertyMode.Optional),
         #                     "I(q) wedge workspaces")
-        self.declareProperty("OutputMessage", "",
-                             direction=Direction.Output, doc = "Output message")
+        self.declareProperty("OutputMessage", "", direction=Direction.Output, doc="Output message")
 
     def PyExec(self):
         # Warn user if error-weighting was turned on
@@ -82,15 +82,15 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         pixel_size_x = workspace.getInstrument().getNumberParameter("x-pixel-size")[0]
         pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
 
-        if len(binning)==0 or (binning[0]==0 and binning[1]==0 and binning[2]==0):
+        if len(binning) == 0 or (binning[0] == 0 and binning[1] == 0 and binning[2] == 0):
             # Wavelength. Read in the wavelength bins. Skip the first one which is not set up properly for EQ-SANS
             x = workspace.dataX(1)
             x_length = len(x)
             if x_length < 2:
                 raise RuntimeError("Azimuthal averaging expects at least one wavelength bin")
-            wavelength_max = (x[x_length-2]+x[x_length-1])/2.0
-            wavelength_min = (x[0]+x[1])/2.0
-            if wavelength_min==0 or wavelength_max==0:
+            wavelength_max = (x[x_length - 2] + x[x_length - 1]) / 2.0
+            wavelength_min = (x[0] + x[1]) / 2.0
+            if wavelength_min == 0 or wavelength_max == 0:
                 raise RuntimeError("Azimuthal averaging needs positive wavelengths")
             qmin, qstep, qmax = self._get_binning(workspace, wavelength_min, wavelength_max)
             align = self.getProperty("AlignWithDecades").value
@@ -99,18 +99,18 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
                 binning_prop = self._get_aligned_binning(qmin, qmax)
             else:
                 binning_prop = "%g, %g, %g" % (qmin, qstep, qmax)
-                workspace.getRun().addProperty("qstep",float(qstep), True)
+                workspace.getRun().addProperty("qstep", float(qstep), True)
             self.setPropertyValue("Binning", binning_prop)
         else:
             qmin = binning[0]
             qmax = binning[2]
-        logger.debug("Qmin = %s"%qmin)
-        logger.debug("Qmax = %s"%qmax)
-        workspace.getRun().addProperty("qmin",float(qmin), True)
-        workspace.getRun().addProperty("qmax",float(qmax), True)
+        logger.debug("Qmin = %s" % qmin)
+        logger.debug("Qmax = %s" % qmax)
+        workspace.getRun().addProperty("qmin", float(qmin), True)
+        workspace.getRun().addProperty("qmax", float(qmax), True)
         # If we kept the events this far, we need to convert the input workspace
         # to a histogram here
-        if workspace.id()=="EventWorkspace":
+        if workspace.id() == "EventWorkspace":
             alg = AlgorithmManager.create("ConvertToMatrixWorkspace")
             alg.initialize()
             alg.setChild(True)
@@ -133,7 +133,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         n_wedges = self.getProperty("NumberOfWedges").value
         wedge_angle = self.getProperty("WedgeAngle").value
         wedge_offset = self.getProperty("WedgeOffset").value
-        alg.setPropertyValue("WedgeWorkspace", output_ws_name+'_wedges')
+        alg.setPropertyValue("WedgeWorkspace", output_ws_name + '_wedges')
         alg.setProperty("NumberOfWedges", n_wedges)
         alg.setProperty("WedgeAngle", wedge_angle)
         alg.setProperty("WedgeOffset", wedge_offset)
@@ -188,8 +188,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
                 alg.setProperty("InputWorkspace", wedge_i)
                 alg.execute()
 
-            self.declareProperty(MatrixWorkspaceProperty("WedgeWorkspace_%s" % i, "",
-                                                         direction = Direction.Output))
+            self.declareProperty(MatrixWorkspaceProperty("WedgeWorkspace_%s" % i, "", direction=Direction.Output))
             self.setPropertyValue("WedgeWorkspace_%s" % i, wedge_i_name)
             self.setProperty("WedgeWorkspace_%s" % i, wedge_i)
 
@@ -227,50 +226,50 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
 
             # Q min is one pixel from the center, unless we have the beam trap size
             if workspace.getRun().hasProperty("beam-trap-diameter"):
-                mindist = workspace.getRun().getProperty("beam-trap-diameter").value/2.0
+                mindist = workspace.getRun().getProperty("beam-trap-diameter").value / 2.0
             else:
                 mindist = min(pixel_size_x, pixel_size_y)
-            qmin = 4*math.pi/wavelength_max*math.sin(0.5*math.atan(mindist/sample_detector_distance))
+            qmin = 4 * math.pi / wavelength_max * math.sin(0.5 * math.atan(mindist / sample_detector_distance))
 
-            dxmax = pixel_size_x*max(beam_ctr_x,nx_pixels-beam_ctr_x)
-            dymax = pixel_size_y*max(beam_ctr_y,ny_pixels-beam_ctr_y)
-            maxdist = math.sqrt(dxmax*dxmax+dymax*dymax)
-            qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/sample_detector_distance))
+            dxmax = pixel_size_x * max(beam_ctr_x, nx_pixels - beam_ctr_x)
+            dymax = pixel_size_y * max(beam_ctr_y, ny_pixels - beam_ctr_y)
+            maxdist = math.sqrt(dxmax * dxmax + dymax * dymax)
+            qmax = 4 * math.pi / wavelength_min * math.sin(0.5 * math.atan(maxdist / sample_detector_distance))
 
         if not log_binning:
-            qstep = (qmax-qmin)/nbins
-            f_step = (qmax-qmin)/qstep
+            qstep = (qmax - qmin) / nbins
+            f_step = (qmax - qmin) / qstep
             n_step = math.floor(f_step)
-            if f_step-n_step>10e-10:
-                qmax = qmin+qstep*n_step
+            if f_step - n_step > 10e-10:
+                qmax = qmin + qstep * n_step
             return qmin, qstep, qmax
         else:
             # Note: the log binning in Mantid is x_i+1 = x_i * ( 1 + dx )
-            qstep = (math.log10(qmax)-math.log10(qmin))/nbins
-            f_step = (math.log10(qmax)-math.log10(qmin))/qstep
+            qstep = (math.log10(qmax) - math.log10(qmin)) / nbins
+            f_step = (math.log10(qmax) - math.log10(qmin)) / qstep
             n_step = math.floor(f_step)
-            if f_step-n_step>10e-10:
-                qmax = math.pow(10.0, math.log10(qmin)+qstep*n_step)
-            return qmin, -(math.pow(10.0,qstep)-1.0), qmax
+            if f_step - n_step > 10e-10:
+                qmax = math.pow(10.0, math.log10(qmin) + qstep * n_step)
+            return qmin, -(math.pow(10.0, qstep) - 1.0), qmax
 
     def _get_aligned_binning(self, qmin, qmax):
         npts = self.getProperty("NumberOfBins").value
 
-        x_min = math.pow(10,math.floor(npts*math.log10(qmin))/npts)
-        x_max = math.pow(10,math.ceil(npts*math.log10(qmax))/npts)
-        b = 1.0/npts
-        nsteps = int(1+math.ceil(npts*math.log10(x_max/x_min)))
+        x_min = math.pow(10, math.floor(npts * math.log10(qmin)) / npts)
+        x_max = math.pow(10, math.ceil(npts * math.log10(qmax)) / npts)
+        b = 1.0 / npts
+        nsteps = int(1 + math.ceil(npts * math.log10(x_max / x_min)))
 
         #binning = str(x_min)
-        x_bound = x_min - ( x_min*math.pow(10,b) - x_min )/2.0
+        x_bound = x_min - (x_min * math.pow(10, b) - x_min) / 2.0
         binning2 = str(x_bound)
 
         x = x_min
         for dummy_i in range(nsteps):
-            x_bound = 2*x-x_bound
-            x *= math.pow(10,b)
+            x_bound = 2 * x - x_bound
+            x *= math.pow(10, b)
             #binning += ",%g,%g" % (x,x)
-            binning2 += ",%g,%g" % (x_bound,x_bound)
+            binning2 += ",%g,%g" % (x_bound, x_bound)
 
         return binning2
 

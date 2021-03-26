@@ -41,7 +41,7 @@ class SANSLOQCentreNoGrav_V2(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return '54431_main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
+        return '54431_main_1D_3.0_9.0', 'LOQCentreNoGravSearchCentreFixed.nxs'
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)

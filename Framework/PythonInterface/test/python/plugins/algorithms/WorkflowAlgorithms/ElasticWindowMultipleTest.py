@@ -16,13 +16,21 @@ from mantid.simpleapi import (ConvertUnits, CreateSampleWorkspace, ElasticWindow
 def _create_single_test_workspace(fwhm, output_name, i):
     function = "name=Lorentzian,Amplitude=100,PeakCentre=27500,FWHM=" + str(fwhm)
 
-    CreateSampleWorkspace(Function='User Defined', UserDefinedFunction=function, XMin=27000, XMax=28000, BinWidth=10,
-                          NumBanks=1, OutputWorkspace=output_name)
+    CreateSampleWorkspace(Function='User Defined',
+                          UserDefinedFunction=function,
+                          XMin=27000,
+                          XMax=28000,
+                          BinWidth=10,
+                          NumBanks=1,
+                          OutputWorkspace=output_name)
     ConvertUnits(InputWorkspace=output_name, OutputWorkspace=output_name, Target='DeltaE', EMode='Indirect', EFixed=1.5)
     Rebin(InputWorkspace=output_name, OutputWorkspace=output_name, Params=[-0.2, 0.004, 0.2])
     LoadInstrument(Workspace=output_name, InstrumentName='IRIS', RewriteSpectraMap=True)
-    SetInstrumentParameter(Workspace=output_name, ParameterName='Efixed', DetectorList=range(1, 113),
-                           ParameterType='Number', Value='1.5')
+    SetInstrumentParameter(Workspace=output_name,
+                           ParameterName='Efixed',
+                           DetectorList=range(1, 113),
+                           ParameterType='Number',
+                           Value='1.5')
 
     output = AnalysisDataService.retrieve(output_name)
     output.mutableRun()['run_number'] = i + 1
@@ -41,15 +49,18 @@ def _create_group_test_workspace(output_name):
 
 
 class ElasticWindowMultipleTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         config['default.facility'] = 'ISIS'
 
         _create_group_test_workspace('__testData')
 
-        ElasticWindowMultiple(InputWorkspaces='__testData', IntegrationRangeStart=-0.1, IntegrationRangeEnd=0.1,
-                              OutputInQ='__q', OutputInQSquared='__q2', OutputELF='__elf')
+        ElasticWindowMultiple(InputWorkspaces='__testData',
+                              IntegrationRangeStart=-0.1,
+                              IntegrationRangeEnd=0.1,
+                              OutputInQ='__q',
+                              OutputInQSquared='__q2',
+                              OutputELF='__elf')
 
     @classmethod
     def tearDownClass(cls):
@@ -62,26 +73,34 @@ class ElasticWindowMultipleTest(unittest.TestCase):
 
     def test_ElasticWindowMultiple_returns_the_expected_q_data(self):
         np.testing.assert_allclose(np.array(self.q.readX(0)[:5]),
-                                   np.array([0, 0, 0.32031, 0.36003, 0.39825]), atol=1e-4)
+                                   np.array([0, 0, 0.32031, 0.36003, 0.39825]),
+                                   atol=1e-4)
         np.testing.assert_allclose(np.array(self.q.readY(0)[:5]),
-                                   np.array([9.88673, 9.88670, 9.88577, 9.88557, 9.88662]), atol=1e-4)
+                                   np.array([9.88673, 9.88670, 9.88577, 9.88557, 9.88662]),
+                                   atol=1e-4)
         np.testing.assert_allclose(np.array(self.q.readE(0)[:5]),
-                                   np.array([3.14432, 3.14431, 3.14416, 3.14413, 3.14430]), atol=1e-4)
+                                   np.array([3.14432, 3.14431, 3.14416, 3.14413, 3.14430]),
+                                   atol=1e-4)
 
     def test_ElasticWindowMultiple_returns_the_expected_q2_data(self):
         np.testing.assert_allclose(np.array(self.q2.readX(0)[:5]),
-                                   np.array([0, 0, 0.10260, 0.12963, 0.15860]), atol=1e-4)
+                                   np.array([0, 0, 0.10260, 0.12963, 0.15860]),
+                                   atol=1e-4)
         np.testing.assert_allclose(np.array(self.q2.readY(0)[:5]),
-                                   np.array([2.29119, 2.29119, 2.29110, 2.29108, 2.29118]), atol=1e-4)
+                                   np.array([2.29119, 2.29119, 2.29110, 2.29108, 2.29118]),
+                                   atol=1e-4)
         np.testing.assert_allclose(np.array(self.q2.readE(0)[:5]),
-                                   np.array([0.31803, 0.31804, 0.31805, 0.31805, 0.31804]), atol=1e-4)
+                                   np.array([0.31803, 0.31804, 0.31805, 0.31805, 0.31804]),
+                                   atol=1e-4)
 
     def test_ElasticWindowMultiple_returns_the_expected_elf_data(self):
         np.testing.assert_allclose(np.array(self.elf.readX(0)[:5]), np.array([3, 3, 3, 3, 3]), atol=1e-4)
         np.testing.assert_allclose(np.array(self.elf.readY(0)[:5]),
-                                   np.array([9.88673, 9.73880, 9.64518, 9.576120, 9.51828]), atol=1e-4)
+                                   np.array([9.88673, 9.73880, 9.64518, 9.576120, 9.51828]),
+                                   atol=1e-4)
         np.testing.assert_allclose(np.array(self.elf.readE(0)[:5]),
-                                   np.array([3.14432, 3.12071, 3.10567, 3.09453, 3.08517]), atol=1e-4)
+                                   np.array([3.14432, 3.12071, 3.10567, 3.09453, 3.08517]),
+                                   atol=1e-4)
 
     def test_ElasticWindowMultiple_returns_data_with_the_expected_number_of_histograms(self):
         self.assertEqual(self.q.getNumberHistograms(), 7)

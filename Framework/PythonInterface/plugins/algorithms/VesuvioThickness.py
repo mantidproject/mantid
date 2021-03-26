@@ -33,25 +33,19 @@ class VesuvioThickness(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty("Amplitudes", direction=Direction.Input),
                              doc="The amplitudes of the peaks")
 
-        self.declareProperty("TransmissionGuess", 1.0,
-                             doc="Initial guess for the transmission")
+        self.declareProperty("TransmissionGuess", 1.0, doc="Initial guess for the transmission")
 
-        self.declareProperty("Thickness", 5.0,
-                             doc="The thickness of the sample in centimetres (cm)")
+        self.declareProperty("Thickness", 5.0, doc="The thickness of the sample in centimetres (cm)")
 
-        self.declareProperty("NumberDensity", 1.0,
-                             doc="The Number Density of the sample material")
+        self.declareProperty("NumberDensity", 1.0, doc="The Number Density of the sample material")
 
-        self.declareProperty(ITableWorkspaceProperty("DensityWorkspace", "",
-                                                     direction=Direction.Output),
-                             doc="Output Workspace containing the iterative "
-                             +"approximations for Sample Density. The final "
-                             +"Y value in the first spectrum will be the last iteration")
+        self.declareProperty(ITableWorkspaceProperty("DensityWorkspace", "", direction=Direction.Output),
+                             doc="Output Workspace containing the iterative " +
+                             "approximations for Sample Density. The final " +
+                             "Y value in the first spectrum will be the last iteration")
 
-        self.declareProperty(ITableWorkspaceProperty("TransmissionWorkspace", "",
-                                                     direction=Direction.Output),
-                             doc="Output Workspace containing the iterative "
-                             +"approximation for Transmission.")
+        self.declareProperty(ITableWorkspaceProperty("TransmissionWorkspace", "", direction=Direction.Output),
+                             doc="Output Workspace containing the iterative " + "approximation for Transmission.")
 
     def _get_properties(self):
         self._masses = self.getProperty("Masses").value
@@ -72,8 +66,8 @@ class VesuvioThickness(PythonAlgorithm):
             issues['Amplitudes'] = ('Must have 1 or more Amplitudes defined')
 
         if num_masses != num_amplitudes:
-            issues['Masses'] = ('The number of masses: %d, ' % num_masses
-                                + 'is not equal to the number of amplitudes: %d' % num_amplitudes)
+            issues['Masses'] = ('The number of masses: %d, ' % num_masses +
+                                'is not equal to the number of amplitudes: %d' % num_amplitudes)
 
         return issues
 
@@ -95,8 +89,8 @@ class VesuvioThickness(PythonAlgorithm):
         create_tbl_alg.setProperty('OutputWorkspace', 'transmission_guesses')
         create_tbl_alg.execute()
         trans_guesses_tbl_ws = create_tbl_alg.getProperty('OutputWorkspace').value
-        trans_guesses_tbl_ws.addColumn("str","Iteration")
-        trans_guesses_tbl_ws.addColumn("double","Transmission")
+        trans_guesses_tbl_ws.addColumn("str", "Iteration")
+        trans_guesses_tbl_ws.addColumn("double", "Transmission")
         trans_guesses_tbl_ws.setPlotType(0, 1)
 
         ### Unit conversions and scatter length calculation ###
@@ -104,20 +98,20 @@ class VesuvioThickness(PythonAlgorithm):
         self._thickness /= 200.0
         scatter_length = np.sqrt(np.divide(self._amplitudes, self.FOUR_PI))
         # Mass * atomic mass unit(g)
-        total_mass = self._masses*1.66054e-24
+        total_mass = self._masses * 1.66054e-24
         total_mass = sum(total_mass)
 
         for i in range(10):
-            ndens = (self._number_density/total_mass)*1e6
+            ndens = (self._number_density / total_mass) * 1e6
             xst = self.free_xst(self._masses, scatter_length)
-            attenuation_length = ndens*xst*1e-28
+            attenuation_length = ndens * xst * 1e-28
 
-            dmur = 2*attenuation_length*self._thickness
+            dmur = 2 * attenuation_length * self._thickness
             trans_guess = math.exp(-dmur)
-            self._number_density = ((1-self._transmission_guess)/(1-trans_guess))*self._number_density
+            self._number_density = ((1 - self._transmission_guess) / (1 - trans_guess)) * self._number_density
             # Add guesses to output workspaces
-            density_guesses_tbl_ws.addRow([str(i+1), self._number_density])
-            trans_guesses_tbl_ws.addRow([str(i+1), trans_guess])
+            density_guesses_tbl_ws.addRow([str(i + 1), self._number_density])
+            trans_guesses_tbl_ws.addRow([str(i + 1), trans_guess])
 
         self.setProperty("DensityWorkspace", density_guesses_tbl_ws)
         self.setProperty("TransmissionWorkspace", trans_guesses_tbl_ws)
@@ -127,9 +121,9 @@ class VesuvioThickness(PythonAlgorithm):
         Analytic expression for integration of PDCS over E1 and solid angle
         """
         # Neutron rest mass(u) / Mass
-        xs_masses = 1.00867/Mass
+        xs_masses = 1.00867 / Mass
         scatter_len_sq = np.square(scatter_length)
-        cross_section = np.divide((self.FOUR_PI * scatter_len_sq),(np.square(xs_masses+1)))
+        cross_section = np.divide((self.FOUR_PI * scatter_len_sq), (np.square(xs_masses + 1)))
         xs_sum = sum(cross_section)
         return xs_sum
 

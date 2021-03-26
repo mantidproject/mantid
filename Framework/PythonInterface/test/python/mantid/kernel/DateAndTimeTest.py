@@ -38,7 +38,7 @@ class DateAndTimeTest(unittest.TestCase):
     def test_convert_from_np(self):
         if LooseVersion(numpy.__version__) < LooseVersion('1.9'):
             dt_np = datetime64('2000-01-01T00:00Z')
-        else: # newer numpy only uses UTC and warns on specifying timezones
+        else:  # newer numpy only uses UTC and warns on specifying timezones
             dt_np = datetime64('2000-01-01T00:00')
         dt = DateAndTime(dt_np)
 

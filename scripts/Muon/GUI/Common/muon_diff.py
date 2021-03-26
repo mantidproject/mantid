@@ -16,7 +16,6 @@ class MuonDiff(MuonBase):
     - The difference can be between two groups or two pairs only
     - The workspace associated to the difference can be set, but must be of type MuonWorkspaceWrapper.
     """
-
     def __init__(self, diff_name, positive, negative, group_or_pair="group", periods=[1]):
         super(MuonDiff, self).__init__(diff_name, periods)
         self._positive = positive

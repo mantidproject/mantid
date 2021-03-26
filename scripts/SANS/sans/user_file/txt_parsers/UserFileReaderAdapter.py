@@ -9,7 +9,7 @@ from sans.user_file.user_file_reader import UserFileReader
 
 
 class UserFileReaderAdapter(ParsedDictConverter):
-    def __init__(self, file_information, user_file_name, txt_user_file_reader = None):
+    def __init__(self, file_information, user_file_name, txt_user_file_reader=None):
         if not txt_user_file_reader:
             txt_user_file_reader = UserFileReader(user_file_name)
 

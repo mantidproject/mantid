@@ -132,7 +132,7 @@ class ScanPreProcessWindow(QMainWindow):
 
         :return:
         """
-        print ('[INFO] Closing {0}'.format(self.objectName()))
+        print('[INFO] Closing {0}'.format(self.objectName()))
 
         if self._myMergePeaksThread is not None:
             self._myMergePeaksThread.terminate()
@@ -178,8 +178,7 @@ class ScanPreProcessWindow(QMainWindow):
             file_list.append(md_file_name)
 
         # launch the multiple threading to scans
-        self._myMergePeaksThread = multi_threads_helpers.MergePeaksThread(self, exp_number, scan_list,
-                                                                          file_list)
+        self._myMergePeaksThread = multi_threads_helpers.MergePeaksThread(self, exp_number, scan_list, file_list)
         self._scansToProcess = set(scan_list)
         self._scanNumbersProcessed = set()
 
@@ -226,7 +225,7 @@ class ScanPreProcessWindow(QMainWindow):
                 if len(terms) == 2 and terms[0].isdigit() and terms[1].isdigit():
                     start_scan = int(terms[0])
                     end_scan = int(terms[1])
-                    scan_list.extend(range(start_scan, end_scan+1))
+                    scan_list.extend(range(start_scan, end_scan + 1))
                 else:
                     raise RuntimeError('{0} in scan list {1} cannot be converted to integer list.'
                                        ''.format(single_scan_str, scans_str))
@@ -270,8 +269,9 @@ class ScanPreProcessWindow(QMainWindow):
                 user_wavelength = float(user_wavelength_str)
                 self._myController.set_user_wave_length(exp_number, user_wavelength)
             except ValueError:
-                gui_util.show_message(self, '[ERROR] User-specified wave length {0} cannot be converted to float.'
-                                            ''.format(user_wavelength_str))
+                gui_util.show_message(
+                    self, '[ERROR] User-specified wave length {0} cannot be converted to float.'
+                    ''.format(user_wavelength_str))
                 return
         # END-IF
 
@@ -282,8 +282,9 @@ class ScanPreProcessWindow(QMainWindow):
             try:
                 det_center = gui_util.parse_integer_list(user_det_center_str, 2)
             except RuntimeError as run_err:
-                gui_util.show_message(self, 'Unable to parse detector center {0} due to {1}'
-                                            ''.format(user_det_center_str, run_err))
+                gui_util.show_message(
+                    self, 'Unable to parse detector center {0} due to {1}'
+                    ''.format(user_det_center_str, run_err))
                 return
             self._myController.set_detector_center(exp_number, det_center[0], det_center[1])
         # END-IF
@@ -302,8 +303,9 @@ class ScanPreProcessWindow(QMainWindow):
         # detector size
         curr_det_size_index = self.ui.comboBox_detSize.currentIndex()
         if curr_det_size_index > 2:
-            gui_util.show_message(self, 'Detector {0} is not supported by now!'
-                                        ''.format(str(self.ui.comboBox_detSize.currentText())))
+            gui_util.show_message(
+                self, 'Detector {0} is not supported by now!'
+                ''.format(str(self.ui.comboBox_detSize.currentText())))
             return
         det_size = [256, 512][curr_det_size_index]
         self._myController.set_detector_geometry(det_size, det_size)
@@ -445,8 +447,8 @@ class ScanPreProcessWindow(QMainWindow):
 
             for scan_number in scan_list:
                 record = fourcircle_utility.pre_processed_record_make(scan_number, self._mdFileDict[scan_number],
-                                                                      det_sample_distance,
-                                                                      det_center_x, det_center_y, user_wave_length)
+                                                                      det_sample_distance, det_center_x, det_center_y,
+                                                                      user_wave_length)
                 writer.writerow(record)
             # END-FOR
 
@@ -457,10 +459,7 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
     """
     Extended table widget for scans to process
     """
-    Table_Setup = [('Scan', 'int'),
-                   ('Status', 'str'),
-                   ('File', 'str'),
-                   ('Note', 'str')]
+    Table_Setup = [('Scan', 'int'), ('Status', 'str'), ('File', 'str'), ('Note', 'str')]
 
     def __init__(self, parent):
         """

@@ -50,8 +50,7 @@ class EngineeringDiffractionPresenter(object):
         view.tabs.addTab(cal_view, "Calibration")
 
     def setup_calibration_notifier(self):
-        self.calibration_presenter.calibration_notifier.add_subscriber(
-            self.focus_presenter.calibration_observer)
+        self.calibration_presenter.calibration_notifier.add_subscriber(self.focus_presenter.calibration_observer)
         self.calibration_presenter.calibration_notifier.add_subscriber(self.calibration_observer)
 
     def setup_focus(self, view):

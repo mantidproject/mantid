@@ -12,5 +12,3 @@ import sys
 _macos = Path(__file__).joinpath('../../../../../../../../MacOS')
 site.addsitedir(_macos.resolve())
 del _macos
-
-

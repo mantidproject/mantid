@@ -17,38 +17,42 @@ class EnggFitPeaksTest(unittest.TestCase):
 
         ws_name = 'out_ws'
         peak = "name=BackToBackExponential, I=5000,A=1, B=1., X0=10000, S=150"
-        sws = CreateSampleWorkspace(Function="User Defined", UserDefinedFunction=peak,
-                                    NumBanks=1, BankPixelWidth=1, XMin=5000, XMax=30000,
-                                    BinWidth=5, OutputWorkspace=ws_name)
+        sws = CreateSampleWorkspace(Function="User Defined",
+                                    UserDefinedFunction=peak,
+                                    NumBanks=1,
+                                    BankPixelWidth=1,
+                                    XMin=5000,
+                                    XMax=30000,
+                                    BinWidth=5,
+                                    OutputWorkspace=ws_name)
 
         # No InputWorkspace property (required)
-        self.assertRaises(RuntimeError,
-                          EnggFitPeaks,
-                          WorkspaceIndex=0, ExpectedPeaks='0.51, 0.72')
+        self.assertRaises(RuntimeError, EnggFitPeaks, WorkspaceIndex=0, ExpectedPeaks='0.51, 0.72')
 
         # Wrong WorkspaceIndex value
         self.assertRaises(RuntimeError,
                           EnggFitPeaks,
                           InputWorkspace=ws_name,
-                          WorkspaceIndex=-3, ExpectedPeaks='0.51, 0.72')
+                          WorkspaceIndex=-3,
+                          ExpectedPeaks='0.51, 0.72')
 
         # Wrong property
         self.assertRaises(RuntimeError,
                           EnggFitPeaks,
-                          InputWorkspace=ws_name, BankPixelFoo=33,
-                          WorkspaceIndex=0, ExpectedPeaks='0.51, 0.72')
+                          InputWorkspace=ws_name,
+                          BankPixelFoo=33,
+                          WorkspaceIndex=0,
+                          ExpectedPeaks='0.51, 0.72')
 
         # missing FittedPeaks output property
         self.assertRaises(RuntimeError,
                           EnggFitPeaks,
                           InputWorkspace=ws_name,
-                          WorkspaceIndex=0, ExpectedPeaks='0.51, 0.72')
+                          WorkspaceIndex=0,
+                          ExpectedPeaks='0.51, 0.72')
 
         # Wrong ExpectedPeaks value
-        self.assertRaises(ValueError,
-                          EnggFitPeaks,
-                          InputWorkspace=ws_name,
-                          WorkspaceIndex=0, ExpectedPeaks='a')
+        self.assertRaises(ValueError, EnggFitPeaks, InputWorkspace=ws_name, WorkspaceIndex=0, ExpectedPeaks='a')
 
     def _approxRelErrorLessThan(self, val, ref, epsilon):
         """
@@ -92,10 +96,10 @@ class EnggFitPeaksTest(unittest.TestCase):
         # number of peaks
         self.assertEqual(tbl.rowCount(), num_peaks)
         # number of parameters for every peak
-        col_names = ['dSpacing',
-                     'A0', 'A0_Err', 'A1', 'A1_Err', 'X0', 'X0_Err', 'A', 'A_Err',
-                     'B', 'B_Err', 'S', 'S_Err', 'I', 'I_Err',
-                     'Chi']
+        col_names = [
+            'dSpacing', 'A0', 'A0_Err', 'A1', 'A1_Err', 'X0', 'X0_Err', 'A', 'A_Err', 'B', 'B_Err', 'S', 'S_Err', 'I',
+            'I_Err', 'Chi'
+        ]
         self.assertEqual(tbl.columnCount(), len(col_names))
 
         # expected columns
@@ -116,36 +120,40 @@ class EnggFitPeaksTest(unittest.TestCase):
         peak_def = "name=BackToBackExponential, I=8000, A=1, B=1.2, X0=10000, S=150"
         sws = CreateSampleWorkspace(Function="User Defined",
                                     UserDefinedFunction=peak_def,
-                                    NumBanks=1, BankPixelWidth=1,
-                                    XMin=10000, XMax=30000, BinWidth=10, Random=1)
+                                    NumBanks=1,
+                                    BankPixelWidth=1,
+                                    XMin=10000,
+                                    XMax=30000,
+                                    BinWidth=10,
+                                    Random=1)
         # these should raise because of issues with the peak center - data range
-        self.assertRaises(RuntimeError,
-                          EnggFitPeaks,
-                          sws, 0, [0.5, 2.5])
+        self.assertRaises(RuntimeError, EnggFitPeaks, sws, 0, [0.5, 2.5])
         EditInstrumentGeometry(Workspace=sws, L2=[1.0], Polar=[90], PrimaryFlightPath=50)
-        self.assertRaises(RuntimeError,
-                          EnggFitPeaks,
-                          sws, 0, [1.1, 3])
+        self.assertRaises(RuntimeError, EnggFitPeaks, sws, 0, [1.1, 3])
 
         # this should fail because of nan/infinity issues
         peak_def = "name=BackToBackExponential, I=12000, A=1, B=1.5, X0=10000, S=350"
-        sws = CreateSampleWorkspace(Function="User Defined", UserDefinedFunction=peak_def,
-                                    NumBanks=1, BankPixelWidth=1,
-                                    XMin=10000, XMax=30000, BinWidth=10)
+        sws = CreateSampleWorkspace(Function="User Defined",
+                                    UserDefinedFunction=peak_def,
+                                    NumBanks=1,
+                                    BankPixelWidth=1,
+                                    XMin=10000,
+                                    XMax=30000,
+                                    BinWidth=10)
         EditInstrumentGeometry(Workspace=sws, L2=[1.0], Polar=[35], PrimaryFlightPath=35)
-        self.assertRaises(RuntimeError,
-                          EnggFitPeaks,
-                          sws, 0, [1, 2.3, 3])
+        self.assertRaises(RuntimeError, EnggFitPeaks, sws, 0, [1, 2.3, 3])
 
         # this should fail because FindPeaks doesn't initialize/converge well
         peak_def = "name=BackToBackExponential, I=90000, A=0.1, B=0.5, X0=5000, S=400"
-        sws = CreateSampleWorkspace(Function="User Defined", UserDefinedFunction=peak_def,
-                                    NumBanks=1, BankPixelWidth=1,
-                                    XMin=2000, XMax=30000, BinWidth=10)
+        sws = CreateSampleWorkspace(Function="User Defined",
+                                    UserDefinedFunction=peak_def,
+                                    NumBanks=1,
+                                    BankPixelWidth=1,
+                                    XMin=2000,
+                                    XMax=30000,
+                                    BinWidth=10)
         EditInstrumentGeometry(Workspace=sws, L2=[1.0], Polar=[90], PrimaryFlightPath=50)
-        self.assertRaises(RuntimeError,
-                          EnggFitPeaks,
-                          sws, 0, [0.6])
+        self.assertRaises(RuntimeError, EnggFitPeaks, sws, 0, [0.6])
 
     def test_fails_ok_1peak(self):
         """
@@ -154,12 +162,13 @@ class EnggFitPeaksTest(unittest.TestCase):
         peak_def = "name=BackToBackExponential, I=15000, A=1, B=1.2, X0=10000, S=400"
         sws = CreateSampleWorkspace(Function="User Defined",
                                     UserDefinedFunction=peak_def,
-                                    NumBanks=1, BankPixelWidth=1,
-                                    XMin=0, XMax=25000, BinWidth=10)
+                                    NumBanks=1,
+                                    BankPixelWidth=1,
+                                    XMin=0,
+                                    XMax=25000,
+                                    BinWidth=10)
         EditInstrumentGeometry(Workspace=sws, L2=[1.5], Polar=[90], PrimaryFlightPath=45)
-        self.assertRaises(RuntimeError,
-                          EnggFitPeaks,
-                          sws, WorkspaceIndex=0, ExpectedPeaks='0.542')
+        self.assertRaises(RuntimeError, EnggFitPeaks, sws, WorkspaceIndex=0, ExpectedPeaks='0.542')
 
     def test_2peaks_fails_1(self):
         """
@@ -171,8 +180,10 @@ class EnggFitPeaksTest(unittest.TestCase):
         peak_def2 = "name=BackToBackExponential, I=1000, A=1, B=1.7, X0=20000, S=300"
         sws = CreateSampleWorkspace(Function="User Defined",
                                     UserDefinedFunction=peak_def1 + ";" + peak_def2,
-                                    NumBanks=1, BankPixelWidth=1,
-                                    XMin=5000, XMax=30000,
+                                    NumBanks=1,
+                                    BankPixelWidth=1,
+                                    XMin=5000,
+                                    XMax=30000,
                                     BinWidth=25)
         EditInstrumentGeometry(Workspace=sws, L2=[1.5], Polar=[90], PrimaryFlightPath=50)
 
@@ -183,7 +194,8 @@ class EnggFitPeaksTest(unittest.TestCase):
         # will fail to fit the first peak (too far off initial guess)
         try:
             test_fit_peaks_table = EnggFitPeaks(sws,
-                                                WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2],
+                                                WorkspaceIndex=0,
+                                                ExpectedPeaks=[ep1, ep2],
                                                 OutFittedPeaksTable=peaksTblName)
             self.assertEqual(test_fit_peaks_table.rowCount(), 1)
         except RuntimeError as rex:
@@ -199,22 +211,25 @@ class EnggFitPeaksTest(unittest.TestCase):
         peak_def2 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=6000, A=0.02, B=0.021, X0=20000, S=40"
         sws = CreateSampleWorkspace(Function="User Defined",
                                     UserDefinedFunction=peak_def1 + ";" + peak_def2,
-                                    NumBanks=1, BankPixelWidth=1,
-                                    XMin=5000, XMax=30000,
+                                    NumBanks=1,
+                                    BankPixelWidth=1,
+                                    XMin=5000,
+                                    XMax=30000,
                                     BinWidth=25)
         EditInstrumentGeometry(Workspace=sws, L2=[1.5], Polar=[90], PrimaryFlightPath=50)
 
         peaksTblName = 'test_fit_peaks_table'
         ep1 = 0.83
         ep2 = 1.09
-        test_fit_peaks_table = EnggFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2],
+        test_fit_peaks_table = EnggFitPeaks(sws,
+                                            WorkspaceIndex=0,
+                                            ExpectedPeaks=[ep1, ep2],
                                             OutFittedPeaksTable=peaksTblName)
 
         self.assertEqual(test_fit_peaks_table.rowCount(), 2)
 
         # check 'OutFittedPeaksTable' table workspace
-        self._check_outputs_ok(peaksTblName, 2, [ep1, 1.98624796464,
-                                                 ep2, 0.00180987932115])
+        self._check_outputs_ok(peaksTblName, 2, [ep1, 1.98624796464, ep2, 0.00180987932115])
 
     def test_runs_ok_3peaks(self):
         """
@@ -225,10 +240,11 @@ class EnggFitPeaksTest(unittest.TestCase):
         peak_def2 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=6000, A=0.02, B=0.021, X0=20000, S=40"
         peak_def3 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=10000, A=0.1, B=0.09, X0=25000, S=60"
         sws = CreateSampleWorkspace(Function="User Defined",
-                                    UserDefinedFunction=
-                                    peak_def1 + ";" + peak_def2 + ";" + peak_def3,
-                                    NumBanks=1, BankPixelWidth=1,
-                                    XMin=5000, XMax=30000,
+                                    UserDefinedFunction=peak_def1 + ";" + peak_def2 + ";" + peak_def3,
+                                    NumBanks=1,
+                                    BankPixelWidth=1,
+                                    XMin=5000,
+                                    XMax=30000,
                                     BinWidth=25)
         EditInstrumentGeometry(Workspace=sws, L2=[1.5], Polar=[90], PrimaryFlightPath=50)
 
@@ -236,7 +252,9 @@ class EnggFitPeaksTest(unittest.TestCase):
         ep1 = 0.83
         ep2 = 1.09
         ep3 = 1.4
-        test_fit_peaks_table = EnggFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2, ep3],
+        test_fit_peaks_table = EnggFitPeaks(sws,
+                                            WorkspaceIndex=0,
+                                            ExpectedPeaks=[ep1, ep2, ep3],
                                             OutFittedPeaksTable=peaksTblName)
 
         self.assertEqual(test_fit_peaks_table.rowCount(), 3)
@@ -246,8 +264,7 @@ class EnggFitPeaksTest(unittest.TestCase):
         self.assertEqual(3, len(test_fit_peaks_table.column('S')))
 
         # check 'OutFittedPeaksTable' table workspace
-        self._check_outputs_ok(peaksTblName, 3, [ep1, 2.98294345043,
-                                                 ep2, 0.00212603392105])
+        self._check_outputs_ok(peaksTblName, 3, [ep1, 2.98294345043, ep2, 0.00212603392105])
 
     def test_reject_outlying_peaks(self):
         """
@@ -257,12 +274,15 @@ class EnggFitPeaksTest(unittest.TestCase):
         error_msg = None
 
         try:
-            EnggFitPeaks(InputWorkspace=input_ws, WorkspaceIndex=0, ExpectedPeaks=[35000.0, 40000.0],
+            EnggFitPeaks(InputWorkspace=input_ws,
+                         WorkspaceIndex=0,
+                         ExpectedPeaks=[35000.0, 40000.0],
                          FittedPeaks="peaks")
         except RuntimeError as e:
             error_msg = e.args[0].split("\n")[0]
 
-        self.assertEqual(error_msg, "EnggFitPeaks-v1: Expected peak centres lie outside the limits of the workspace x axis")
+        self.assertEqual(error_msg,
+                         "EnggFitPeaks-v1: Expected peak centres lie outside the limits of the workspace x axis")
 
     def test_expected_peaks_can_be_in_tof(self):
         """
@@ -273,11 +293,17 @@ class EnggFitPeaksTest(unittest.TestCase):
         peak_centre_1_tof = 41209
         peak_centre_2_tof = 46895
         peaks_def = peak_def1.format(peak_centre_1_tof) + ";" + peak_def2.format(peak_centre_2_tof)
-        sample_ws = CreateSampleWorkspace(Function="User Defined", UserDefinedFunction=peaks_def, NumBanks=1,
-                                          BankPixelWidth=1, XMin=40000, XMax=50000, BinWidth=25)
+        sample_ws = CreateSampleWorkspace(Function="User Defined",
+                                          UserDefinedFunction=peaks_def,
+                                          NumBanks=1,
+                                          BankPixelWidth=1,
+                                          XMin=40000,
+                                          XMax=50000,
+                                          BinWidth=25)
 
         EditInstrumentGeometry(Workspace=sample_ws, L2=[1.5], Polar=[90], PrimaryFlightPath=50)
-        fit_results = EnggFitPeaks(InputWorkspace=sample_ws, WorkspaceIndex=0,
+        fit_results = EnggFitPeaks(InputWorkspace=sample_ws,
+                                   WorkspaceIndex=0,
                                    ExpectedPeaks=[peak_centre_1_tof, peak_centre_2_tof])
 
         peak_centre_1_d = 2.238360
@@ -292,15 +318,21 @@ class EnggFitPeaksTest(unittest.TestCase):
         peak_centre_1_tof = 41209
         peak_centre_2_tof = 46895
         peaks_def = peak_def1.format(peak_centre_1_tof) + ";" + peak_def2.format(peak_centre_2_tof)
-        sample_ws = CreateSampleWorkspace(Function="User Defined", UserDefinedFunction=peaks_def, NumBanks=1,
-                                          BankPixelWidth=1, XMin=40000, XMax=50000, BinWidth=25)
+        sample_ws = CreateSampleWorkspace(Function="User Defined",
+                                          UserDefinedFunction=peaks_def,
+                                          NumBanks=1,
+                                          BankPixelWidth=1,
+                                          XMin=40000,
+                                          XMax=50000,
+                                          BinWidth=25)
         run = sample_ws.mutableRun()
         run.addProperty("difa", 0.0, False)
         run.addProperty("difc", 18400.0, False)
         run.addProperty("tzero", 4.0, False)
 
         EditInstrumentGeometry(Workspace=sample_ws, L2=[1.5], Polar=[90], PrimaryFlightPath=50)
-        fit_results = EnggFitPeaks(InputWorkspace=sample_ws, WorkspaceIndex=0,
+        fit_results = EnggFitPeaks(InputWorkspace=sample_ws,
+                                   WorkspaceIndex=0,
                                    ExpectedPeaks=[peak_centre_1_tof, peak_centre_2_tof])
         peak_centre_1_d = 2.239402
         peak_centre_2_d = 2.548424

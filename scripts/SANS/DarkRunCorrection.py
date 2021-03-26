@@ -12,7 +12,6 @@ class DarkRunCorrection(object):
     '''
     This class performs the dark run correction for ISIS SANS instruments
     '''
-
     def __init__(self):
         super(DarkRunCorrection, self).__init__()
         self._normalization_extractor = DarkRunNormalizationExtractor()
@@ -68,8 +67,8 @@ class DarkRunCorrection(object):
         @param dark_run: the dark run
         '''
         # Get the normalization ratio from the workspaces
-        normalization_ratio = self._normalization_extractor.extract_normalization(scatter_workspace,
-                                                                                  dark_run, self._use_time)
+        normalization_ratio = self._normalization_extractor.extract_normalization(scatter_workspace, dark_run,
+                                                                                  self._use_time)
         # Run the correction algorithm with the user settings
         corrected_ws_name = scatter_workspace.name() + "_dark_workspace_corrected"
         alg_dark = AlgorithmManager.createUnmanaged("SANSDarkRunBackgroundCorrection")
@@ -78,7 +77,7 @@ class DarkRunCorrection(object):
         alg_dark.setProperty("InputWorkspace", scatter_workspace)
         alg_dark.setProperty("DarkRun", dark_run)
         alg_dark.setProperty("Mean", self._use_mean)
-        alg_dark.setProperty("Uniform", self._use_time) # If we use time, then it is uniform
+        alg_dark.setProperty("Uniform", self._use_time)  # If we use time, then it is uniform
         alg_dark.setProperty("NormalizationRatio", normalization_ratio)
         alg_dark.setProperty("ApplyToDetectors", self._use_detectors)
         alg_dark.setProperty("ApplyToMonitors", self._use_monitors)
@@ -90,6 +89,7 @@ class DarkRunCorrection(object):
         self._reset_settings()
         return alg_dark.getProperty("OutputWorkspace").value
 
+
 # pylint: disable=too-few-public-methods
 
 
@@ -100,11 +100,10 @@ class DarkRunNormalizationExtractor(object):
     can be either calculated as a ratio of good proton charges or
     a ratio of measurement times
     '''
-
     def __init__(self):
         super(DarkRunNormalizationExtractor, self).__init__()
 
-    def extract_normalization(self, scatter_workspace, dark_run, use_time = True):
+    def extract_normalization(self, scatter_workspace, dark_run, use_time=True):
         '''
         Extract the normalization by either looking at the time duration of the measurement (good_frames)
         or by looking at the time of the good charge (good_uah_log)
@@ -124,7 +123,7 @@ class DarkRunNormalizationExtractor(object):
         '''
         scatter_proton_charge = self._get_good_proton_charge(scatter_workspace)
         dark_proton_charge = self._get_good_proton_charge(dark_run)
-        return scatter_proton_charge/dark_proton_charge
+        return scatter_proton_charge / dark_proton_charge
 
     def _get_good_proton_charge(self, workspace):
         '''
@@ -135,8 +134,8 @@ class DarkRunNormalizationExtractor(object):
         log_entry = "gd_prtn_chrg"
         run = workspace.getRun()
         if not run.hasProperty(log_entry):
-            raise RuntimeError("DarkRunCorrection: The workspace does not have a " + log_entry
-                               + "log entry. This is required for calculating the noramlization"
+            raise RuntimeError("DarkRunCorrection: The workspace does not have a " + log_entry +
+                               "log entry. This is required for calculating the noramlization"
                                "of the dark run.")
         entry = run.getProperty(log_entry)
         return entry.value
@@ -150,7 +149,7 @@ class DarkRunNormalizationExtractor(object):
         '''
         scatter_time = self._get_duration_for_frames(scatter_workspace)
         dark_time = self._get_duration_for_frames(dark_run)
-        return scatter_time/dark_time
+        return scatter_time / dark_time
 
     def _get_duration_for_frames(self, workspace):
         '''
@@ -161,13 +160,13 @@ class DarkRunNormalizationExtractor(object):
         log_entry = "good_frames"
         run = workspace.getRun()
         if not run.hasProperty(log_entry):
-            raise RuntimeError("DarkRunCorrection: The workspace does not have a " + log_entry
-                               + "log entry. This is required for calculating the noramlization"
+            raise RuntimeError("DarkRunCorrection: The workspace does not have a " + log_entry +
+                               "log entry. This is required for calculating the noramlization"
                                "of the dark run.")
         prop = run.getProperty(log_entry)
         frame_time = self._get_time_for_frame(workspace)
         number_of_frames = self._get_number_of_good_frames(prop)
-        return frame_time*number_of_frames
+        return frame_time * number_of_frames
 
     def _get_time_for_frame(self, workspace):
         '''

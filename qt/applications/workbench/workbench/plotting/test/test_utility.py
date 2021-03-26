@@ -15,7 +15,6 @@ from mantid.plots.utility import zoom, zoom_axis
 
 
 class TestUtility(unittest.TestCase):
-
     def test_zoom_axis_raises_for_invalid_axis(self):
         self.assertRaises(ValueError, zoom_axis, None, None, 'z', None)
 

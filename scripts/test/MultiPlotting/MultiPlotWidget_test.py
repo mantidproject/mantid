@@ -33,10 +33,12 @@ class bounds(object):
 
 
 def data():
-    values = {"one": bounds([5, 20], [5, 10]),
-              "two": bounds([6, 10], [0, 9]),
-              "three": bounds([-1, 11], [7, 8]),
-              "four": bounds([4, 12], [4, 50])}
+    values = {
+        "one": bounds([5, 20], [5, 10]),
+        "two": bounds([6, 10], [0, 9]),
+        "three": bounds([-1, 11], [7, 8]),
+        "four": bounds([4, 12], [4, 50])
+    }
     return values
 
 

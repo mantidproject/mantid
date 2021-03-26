@@ -30,7 +30,7 @@ SCRIPT_EXEC_METHOD = 'exec'
 try:
     import mantidplot
     SCRIPT_EXEC_METHOD = 'mantidplot'
-except(ImportError, ImportWarning):
+except (ImportError, ImportWarning):
     # are we running workbench
     if 'workbench' in sys.modules:
         SCRIPT_EXEC_METHOD = 'async'
@@ -376,8 +376,8 @@ class BaseReductionScripter(object):
 
             # check that the object class is consistent with what was initially stored
             elif not self._state.__class__ == self._state_cls:
-                raise RuntimeError("State class changed at runtime, was %s, now %s" % (
-                    self._state_cls, self._state.__class__))
+                raise RuntimeError("State class changed at runtime, was %s, now %s" %
+                                   (self._state_cls, self._state.__class__))
 
         def push(self):
             """
@@ -413,7 +413,8 @@ class BaseReductionScripter(object):
             config = ConfigService.Instance()
             #register startup
             if HAS_MANTID:
-                UsageService.registerFeatureUsage(FeatureType.Interface, "Reduction_gui:{0:.5}-{1:.10}".format(facility, name), False)
+                UsageService.registerFeatureUsage(FeatureType.Interface,
+                                                  "Reduction_gui:{0:.5}-{1:.10}".format(facility, name), False)
             try:
                 head, _tail = os.path.split(config.getUserFilename())
                 if os.path.isdir(head):
@@ -598,8 +599,7 @@ class BaseReductionScripter(object):
         script = self.to_live_script()
         self.execute_script(script)
 
-    def cluster_submit(self, output_dir, user, pwd, resource=None,
-                       nodes=4, cores_per_node=4, job_name=None):
+    def cluster_submit(self, output_dir, user, pwd, resource=None, nodes=4, cores_per_node=4, job_name=None):
         """
             Submit the reduction job to a cluster
             @param output_dir: directory where the output data will be written
@@ -663,6 +663,7 @@ class BaseReductionScripter(object):
         def on_error(arg):
             Logger('scripter').error('Failed to execute script: {}'.format(arg))
             raise RuntimeError(str(arg))
+
         execute_script(script, on_error)
 
     def reset(self):

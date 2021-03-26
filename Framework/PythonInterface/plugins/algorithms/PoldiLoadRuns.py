@@ -30,41 +30,57 @@ class PoldiLoadRuns(PythonAlgorithm):
     def PyInit(self):
         today = date.today()
 
-        self.declareProperty('Year', today.year, direction=Direction.Input,
+        self.declareProperty('Year',
+                             today.year,
+                             direction=Direction.Input,
                              doc="The year in which all runs were recorded.")
 
         firstRunValidator = CompositeValidator()
         firstRunValidator.add(IntMandatoryValidator())
         firstRunValidator.add(IntBoundedValidator(lower=1))
-        self.declareProperty('FirstRun', 1, direction=Direction.Input,
+        self.declareProperty('FirstRun',
+                             1,
+                             direction=Direction.Input,
                              doc=("Run number of the first run. "
                                   "If only this number is supplied, only this run is processed."),
                              validator=firstRunValidator)
 
-        self.declareProperty('LastRun', 1, direction=Direction.Input, doc="Run number of the last run.",
+        self.declareProperty('LastRun',
+                             1,
+                             direction=Direction.Input,
+                             doc="Run number of the last run.",
                              validator=IntBoundedValidator(lower=1))
 
-        self.declareProperty('MergeWidth', 1, direction=Direction.Input, doc="Number of runs to merge.",
+        self.declareProperty('MergeWidth',
+                             1,
+                             direction=Direction.Input,
+                             doc="Number of runs to merge.",
                              validator=IntBoundedValidator(lower=1))
 
-        self.declareProperty('OverwriteExistingWorkspace', False, direction=Direction.Input,
+        self.declareProperty('OverwriteExistingWorkspace',
+                             False,
+                             direction=Direction.Input,
                              doc="If a WorkspaceGroup already exists, overwrite it.")
 
-        self.declareProperty('EnableMergeCheck', True, direction=Direction.Input,
+        self.declareProperty('EnableMergeCheck',
+                             True,
+                             direction=Direction.Input,
                              doc="Enable all the checks in PoldiMerge. Do not deactivate without very good reason.")
 
-        self.declareProperty('MaskBadDetectors', True, direction=Direction.Input,
+        self.declareProperty('MaskBadDetectors',
+                             True,
+                             direction=Direction.Input,
                              doc=('Automatically disable detectors with unusually small or large values, in addition'
                                   ' to those masked in the instrument definition.'))
 
-        self.declareProperty('BadDetectorThreshold', 3.0, direction=Direction.Input,
+        self.declareProperty('BadDetectorThreshold',
+                             3.0,
+                             direction=Direction.Input,
                              doc=('Detectors are masked based on how much their intensity (integrated over time) '
                                   'deviates from the median calculated from all detectors. This parameter indicates '
                                   'how many times bigger the intensity needs to be for a detector to be masked.'))
 
-        self.declareProperty(WorkspaceProperty(name='OutputWorkspace',
-                                               defaultValue='',
-                                               direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty(name='OutputWorkspace', defaultValue='', direction=Direction.Output),
                              doc="Name of the output group workspace that contains all data workspaces.")
 
     def PyExec(self):
@@ -100,7 +116,7 @@ class PoldiLoadRuns(PythonAlgorithm):
         if AnalysisDataService.doesExist(outputWorkspaceName):
             if not self.isGroupWorkspace(AnalysisDataService.retrieve(outputWorkspaceName)) and not overwriteWorkspaces:
                 self.log().error("Workspace '" + outputWorkspaceName + "' already exists, is not a WorkspaceGroup "
-                                                                       "and is not supposed to be overwritten, aborting.")
+                                 "and is not supposed to be overwritten, aborting.")
                 return
 
         # Get the actual merge range, if the number of files is not compatible with the number of files to merge.
@@ -182,11 +198,12 @@ class PoldiLoadRuns(PythonAlgorithm):
             if mergeWidth > 1 and len(workspaceNames) > 1:
                 # If workspaces are not compatible, the range is skipped and the workspaces deleted.
                 try:
-                    PoldiMerge(workspaceNames, OutputWorkspace=currentTotalWsName,
+                    PoldiMerge(workspaceNames,
+                               OutputWorkspace=currentTotalWsName,
                                CheckInstruments=self._mergeCheckEnabled)
                 except:
-                    self.log().warning(
-                        "Could not merge range [" + str(i) + ", " + str(currentNameNumor) + "], skipping.")
+                    self.log().warning("Could not merge range [" + str(i) + ", " + str(currentNameNumor) +
+                                       "], skipping.")
 
                 # Delete all workspaces that contributed to the merged one.
                 for j in range(i, i + mergeWidth - 1):
@@ -213,8 +230,12 @@ class PoldiLoadRuns(PythonAlgorithm):
     def autoMaskBadDetectors(self, currentTotalWsName):
         Integration(currentTotalWsName, OutputWorkspace='integrated')
 
-        MedianDetectorTest('integrated', SignificanceTest=3.0, HighThreshold=self._autoMaskThreshold, HighOutlier=200,
-                           CorrectForSolidAngle=False, OutputWorkspace='maskWorkspace')
+        MedianDetectorTest('integrated',
+                           SignificanceTest=3.0,
+                           HighThreshold=self._autoMaskThreshold,
+                           HighOutlier=200,
+                           CorrectForSolidAngle=False,
+                           OutputWorkspace='maskWorkspace')
 
         MaskDetectors(Workspace=AnalysisDataService.retrieve(currentTotalWsName), MaskedWorkspace='maskWorkspace')
 

@@ -51,6 +51,7 @@ class VesuvioBase(Algorithm):
         else:
             return tuple(outputs)
 
+
 # -----------------------------------------------------------------------------------------
 # Helper to translate from an table workspace to a dictionary. Should be on the workspace
 # really ...
@@ -61,7 +62,6 @@ class TableWorkspaceDictionaryFacade(object):
     """
     Allows an underlying table workspace to be treated like a read-only dictionary
     """
-
     def __init__(self, held_object):
         self._table_ws = held_object
 
@@ -78,5 +78,6 @@ class TableWorkspaceDictionaryFacade(object):
                 return True
 
         return False
+
 
 # -----------------------------------------------------------------------------------------

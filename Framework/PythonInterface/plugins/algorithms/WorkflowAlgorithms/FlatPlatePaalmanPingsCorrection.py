@@ -71,108 +71,127 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     def PyInit(self):
         ws_validator = InstrumentValidator()
 
-        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace',
+                                                     '',
                                                      direction=Direction.Input,
                                                      validator=ws_validator),
                              doc='Name for the input sample workspace')
 
-        self.declareProperty(name='SampleChemicalFormula', defaultValue='',
-                             doc='Sample chemical formula')
+        self.declareProperty(name='SampleChemicalFormula', defaultValue='', doc='Sample chemical formula')
 
-        self.declareProperty(name='SampleCoherentXSection', defaultValue=0.0,
+        self.declareProperty(name='SampleCoherentXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The coherent cross-section for the sample material in barns. To be used instead of '
-                                 'Chemical Formula.')
+                             'Chemical Formula.')
 
-        self.declareProperty(name='SampleIncoherentXSection', defaultValue=0.0,
+        self.declareProperty(name='SampleIncoherentXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The incoherent cross-section for the sample material in barns. To be used instead of '
-                                 'Chemical Formula.')
+                             'Chemical Formula.')
 
-        self.declareProperty(name='SampleAttenuationXSection', defaultValue=0.0,
+        self.declareProperty(name='SampleAttenuationXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The absorption cross-section for the sample material in barns. To be used instead of '
-                                 'Chemical Formula.')
+                             'Chemical Formula.')
 
-        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
+        self.declareProperty(name='SampleDensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass density or Number density for the sample.')
 
-        self.declareProperty(name='SampleNumberDensityUnit', defaultValue='Atoms',
+        self.declareProperty(name='SampleNumberDensityUnit',
+                             defaultValue='Atoms',
                              validator=StringListValidator(['Atoms', 'Formula Units']),
                              doc='Choose which units SampleDensity refers to. Allowed values: '
-                                 '[Atoms, Formula Units]')
+                             '[Atoms, Formula Units]')
 
-        self.declareProperty(name='SampleDensity', defaultValue=0.1,
+        self.declareProperty(name='SampleDensity',
+                             defaultValue=0.1,
                              doc='The value for the sample Mass density (g/cm^3) or Number density (1/Angstrom^3).')
 
-        self.declareProperty(name='SampleThickness', defaultValue=0.0,
+        self.declareProperty(name='SampleThickness',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample thickness in cm')
 
-        self.declareProperty(name='SampleAngle', defaultValue=0.0,
+        self.declareProperty(name='SampleAngle',
+                             defaultValue=0.0,
                              doc='Angle between incident beam and normal to flat plate surface')
 
-        self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('CanWorkspace',
+                                                     '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional,
                                                      validator=ws_validator),
                              doc="Name for the input container workspace")
 
-        self.declareProperty(name='CanChemicalFormula', defaultValue='',
-                             doc='Container chemical formula')
+        self.declareProperty(name='CanChemicalFormula', defaultValue='', doc='Container chemical formula')
 
-        self.declareProperty(name='CanCoherentXSection', defaultValue=0.0,
+        self.declareProperty(name='CanCoherentXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The coherent cross-section for the can material in barns. To be used instead of '
-                                 'Chemical Formula.')
+                             'Chemical Formula.')
 
-        self.declareProperty(name='CanIncoherentXSection', defaultValue=0.0,
+        self.declareProperty(name='CanIncoherentXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The incoherent cross-section for the can material in barns. To be used instead of '
-                                 'Chemical Formula.')
+                             'Chemical Formula.')
 
-        self.declareProperty(name='CanAttenuationXSection', defaultValue=0.0,
+        self.declareProperty(name='CanAttenuationXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The absorption cross-section for the can material in barns. To be used instead of '
-                                 'Chemical Formula.')
+                             'Chemical Formula.')
 
-        self.declareProperty(name='CanDensityType', defaultValue='Mass Density',
+        self.declareProperty(name='CanDensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass density or Number density for the can.')
 
-        self.declareProperty(name='CanNumberDensityUnit', defaultValue='Atoms',
+        self.declareProperty(name='CanNumberDensityUnit',
+                             defaultValue='Atoms',
                              validator=StringListValidator(['Atoms', 'Formula Units']),
                              doc='Choose which units CanDensity refers to. Allowed values: [Atoms, Formula Units]')
 
-        self.declareProperty(name='CanDensity', defaultValue=0.1,
+        self.declareProperty(name='CanDensity',
+                             defaultValue=0.1,
                              doc='The value for the can Mass density (g/cm^3) or Number density (1/Angstrom^3).')
 
-        self.declareProperty(name='CanFrontThickness', defaultValue=0.0,
+        self.declareProperty(name='CanFrontThickness',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container front thickness in cm')
 
-        self.declareProperty(name='CanBackThickness', defaultValue=0.0,
+        self.declareProperty(name='CanBackThickness',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container back thickness in cm')
 
-        self.declareProperty(name='NumberWavelengths', defaultValue=10,
+        self.declareProperty(name='NumberWavelengths',
+                             defaultValue=10,
                              validator=IntBoundedValidator(1),
                              doc='Number of wavelengths for calculation')
 
-        self.declareProperty(name='Interpolate', defaultValue=True,
+        self.declareProperty(name='Interpolate',
+                             defaultValue=True,
                              doc='Interpolate the correction workspaces to match the sample workspace')
 
-        self.declareProperty(name='Emode', defaultValue='Elastic',
+        self.declareProperty(name='Emode',
+                             defaultValue='Elastic',
                              validator=StringListValidator(['Elastic', 'Indirect', 'Direct', 'Efixed']),
                              doc='Energy transfer mode.')
 
-        self.declareProperty(name='Efixed', defaultValue=0.,
+        self.declareProperty(name='Efixed',
+                             defaultValue=0.,
                              doc='Analyser energy (mev). By default will be read from the instrument parameters. '
-                                 'Specify manually to override. This is used only in Efixed energy transfer mode.')
+                             'Specify manually to override. This is used only in Efixed energy transfer mode.')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                                                    direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output corrections workspace group')
 
     # ------------------------------------------------------------------------------
@@ -217,28 +236,19 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         setup_prog = Progress(self, start=0.0, end=0.2, nreports=2)
         # Set sample material form chemical formula
         setup_prog.report('Set sample material')
-        self._sample_density = self._set_material(self._sample_ws_name,
-                                                  self._set_sample_method,
-                                                  self._sample_chemical_formula,
-                                                  self._sample_coherent_cross_section,
+        self._sample_density = self._set_material(self._sample_ws_name, self._set_sample_method,
+                                                  self._sample_chemical_formula, self._sample_coherent_cross_section,
                                                   self._sample_incoherent_cross_section,
-                                                  self._sample_attenuation_cross_section,
-                                                  self._sample_density_type,
-                                                  self._sample_density,
-                                                  self._sample_number_density_unit)
+                                                  self._sample_attenuation_cross_section, self._sample_density_type,
+                                                  self._sample_density, self._sample_number_density_unit)
 
         # If using a can, set sample material using chemical formula
         if self._use_can:
             setup_prog.report('Set container sample material')
-            self._can_density = self._set_material(self._can_ws_name,
-                                                   self._set_can_method,
-                                                   self._can_chemical_formula,
-                                                   self._can_coherent_cross_section,
-                                                   self._can_incoherent_cross_section,
-                                                   self._can_attenuation_cross_section,
-                                                   self._can_density_type,
-                                                   self._can_density,
-                                                   self._can_number_density_unit)
+            self._can_density = self._set_material(self._can_ws_name, self._set_can_method, self._can_chemical_formula,
+                                                   self._can_coherent_cross_section, self._can_incoherent_cross_section,
+                                                   self._can_attenuation_cross_section, self._can_density_type,
+                                                   self._can_density, self._can_number_density_unit)
 
         # Holders for the corrected data
         data_ass = []
@@ -253,10 +263,12 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         # Check sample input
         sam_material = mtd[self._sample_ws_name].sample().getMaterial()
         self._has_sample_in = \
-            bool(self._sample_density and self._sample_thickness and (sam_material.totalScatterXSection() + sam_material.absorbXSection()))
+            bool(self._sample_density and self._sample_thickness and (sam_material.totalScatterXSection() +
+                                                                      sam_material.absorbXSection()))
         if not self._has_sample_in:
-            logger.warning("The sample has not been given, or the information is incomplete. Continuing but no absorption for sample will "
-                           "be computed.")
+            logger.warning(
+                "The sample has not been given, or the information is incomplete. Continuing but no absorption for "
+                "sample will be computed.")
 
         # Check can input
         if self._use_can:
@@ -266,17 +278,17 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                 self._has_can_back_in = bool(self._can_back_thickness)
             else:
                 logger.warning(
-                    "A can workspace was given but the can information is incomplete. Continuing but no absorption for the can will "
-                    "be computed.")
+                    "A can workspace was given but the can information is incomplete. Continuing but no absorption for"
+                    " the can will be computed.")
 
             if not self._has_can_front_in:
                 logger.warning(
-                    "A can workspace was given but the can front thickness was not given. Continuing but no absorption for can front"
-                    " will be computed.")
+                    "A can workspace was given but the can front thickness was not given. Continuing but no absorption"
+                    " for can front will be computed.")
             if not self._has_can_back_in:
                 logger.warning(
-                    "A can workspace was given but the can back thickness was not given. Continuing but no absorption for can back"
-                    " will be computed.")
+                    "A can workspace was given but the can back thickness was not given. Continuing but no absorption"
+                    " for can back will be computed.")
 
         for angle_idx in range(num_angles):
             workflow_prog.report('Running flat correction for angle %s' % angle_idx)
@@ -292,9 +304,14 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         log_prog = Progress(self, start=0.8, end=1.0, nreports=8)
 
-        sample_logs = {'sample_shape': 'flatplate', 'sample_filename': self._sample_ws_name,
-                       'sample_thickness': self._sample_thickness, 'sample_angle': self._sample_angle,
-                       'emode': self._emode, 'efixed': self._efixed}
+        sample_logs = {
+            'sample_shape': 'flatplate',
+            'sample_filename': self._sample_ws_name,
+            'sample_thickness': self._sample_thickness,
+            'sample_angle': self._sample_angle,
+            'emode': self._emode,
+            'efixed': self._efixed
+        }
         dataX = self._wavelengths * num_angles
 
         # Create the output workspaces
@@ -315,7 +332,11 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         if self._use_can:
             log_prog.report('Adding can sample logs')
-            AddSampleLog(Workspace=ass_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name), EnableLogging=False)
+            AddSampleLog(Workspace=ass_ws,
+                         LogName='can_filename',
+                         LogType='String',
+                         LogText=str(self._can_ws_name),
+                         EnableLogging=False)
 
             assc_ws = self._output_ws_name + '_assc'
             workspaces.append(assc_ws)
@@ -330,7 +351,11 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                             EnableLogging=False)
             log_prog.report('Adding assc sample logs')
             self._add_sample_logs(assc_ws, sample_logs)
-            AddSampleLog(Workspace=assc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name), EnableLogging=False)
+            AddSampleLog(Workspace=assc_ws,
+                         LogName='can_filename',
+                         LogType='String',
+                         LogText=str(self._can_ws_name),
+                         EnableLogging=False)
 
             acsc_ws = self._output_ws_name + '_acsc'
             workspaces.append(acsc_ws)
@@ -345,7 +370,11 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                             EnableLogging=False)
             log_prog.report('Adding acsc sample logs')
             self._add_sample_logs(acsc_ws, sample_logs)
-            AddSampleLog(Workspace=acsc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name), EnableLogging=False)
+            AddSampleLog(Workspace=acsc_ws,
+                         LogName='can_filename',
+                         LogType='String',
+                         LogText=str(self._can_ws_name),
+                         EnableLogging=False)
 
             acc_ws = self._output_ws_name + '_acc'
             workspaces.append(acc_ws)
@@ -360,7 +389,11 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                             EnableLogging=False)
             log_prog.report('Adding acc sample logs')
             self._add_sample_logs(acc_ws, sample_logs)
-            AddSampleLog(Workspace=acc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name), EnableLogging=False)
+            AddSampleLog(Workspace=acc_ws,
+                         LogName='can_filename',
+                         LogType='String',
+                         LogText=str(self._can_ws_name),
+                         EnableLogging=False)
 
         if self._interpolate:
             self._interpolate_corrections(workspaces)
@@ -437,7 +470,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         @param attenuation_x_section:: the absorption cross section
         @param density_type         :: 'Mass Density' or 'Number Density'
         @param density              :: Density of sample
-        @param number_density_unit  :: the unit to use ('Atoms' or 'Formula Units') if the density type is Number density
+        @param number_density_unit  :: the unit to use ('Atoms' or 'Formula Units') if the density type is Number
+        density
         @return pointer to the workspace with sample material set
                 AND
                 number density of the sample material
@@ -581,9 +615,9 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         theta = angle * self.PICONV
         salpha = np.sin(alpha)
         if theta > (alpha + np.pi):
-            stha = np.sin(abs(theta-alpha-np.pi))
+            stha = np.sin(abs(theta - alpha - np.pi))
         else:
-            stha = np.sin(abs(theta-alpha))
+            stha = np.sin(abs(theta - alpha))
 
         nlam = len(self._wavelengths)
 
@@ -595,7 +629,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         # Scattering in direction of slab --> calculation is not reliable
         # Default to 1 for everything
         # Tolerance is 0.001 rad ~ 0.06 deg
-        if abs(theta-alpha) < 0.001:
+        if abs(theta - alpha) < 0.001:
             return ass, assc, acsc, acc
 
         sample = mtd[self._sample_ws_name].sample()
@@ -609,11 +643,13 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         ki_s, kf_s = 0, 0
         if self._has_sample_in:
-            ki_s, kf_s, ass = self._sample_cross_section_calc(sam_material, waveslengths, theta, alpha, stha, salpha, sst, ssr)
+            ki_s, kf_s, ass = self._sample_cross_section_calc(sam_material, waveslengths, theta, alpha, stha, salpha,
+                                                              sst, ssr)
 
         # Container --> Acc, Assc, Acsc
         if self._use_can:
-            ass, assc, acsc, acc = self._can_cross_section_calc(waveslengths, theta, alpha, stha, salpha, ki_s, kf_s, ass, acc, sst, ssr)
+            ass, assc, acsc, acc = self._can_cross_section_calc(waveslengths, theta, alpha, stha, salpha, ki_s, kf_s,
+                                                                ass, acc, sst, ssr)
 
         return ass, assc, acsc, acc
 
@@ -621,12 +657,12 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
     def _sample_cross_section_calc(self, sam_material, waves, theta, alpha, stha, salpha, sst, ssr):
         # Sample cross section (value for each of the wavelengths and for E = Efixed)
-        sample_x_section = (sam_material.totalScatterXSection()
-                            + sam_material.absorbXSection() * waves / self.TABULATED_WAVELENGTH) * self._sample_density
+        sample_x_section = (sam_material.totalScatterXSection() +
+                            sam_material.absorbXSection() * waves / self.TABULATED_WAVELENGTH) * self._sample_density
 
         if self._efixed > 0:
-            sample_x_section_efixed = (sam_material.totalScatterXSection()  + sam_material.absorbXSection()
-                                       * np.sqrt(self.TABULATED_ENERGY / self._efixed)) * self._sample_density
+            sample_x_section_efixed = (sam_material.totalScatterXSection() + sam_material.absorbXSection() *
+                                       np.sqrt(self.TABULATED_ENERGY / self._efixed)) * self._sample_density
         elif self._emode == 'Elastic':
             sample_x_section_efixed = 0
 
@@ -635,8 +671,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             ki_s = sample_x_section_efixed * self._sample_thickness / salpha
             kf_s = sample_x_section_efixed * self._sample_thickness / stha
         else:
-            ki_s, kf_s = self._calc_ki_kf(waves, self._sample_thickness, salpha, stha,
-                                          sample_x_section, sample_x_section_efixed)
+            ki_s, kf_s = self._calc_ki_kf(waves, self._sample_thickness, salpha, stha, sample_x_section,
+                                          sample_x_section_efixed)
 
         if theta < alpha or theta > (alpha + np.pi):
             # transmission case
@@ -655,12 +691,12 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         if self._has_can_front_in or self._has_can_back_in:
             # Calculate can cross section (value for each of the wavelengths and for E = Efixed)
-            can_x_section = (can_material.totalScatterXSection()
-                             + can_material.absorbXSection() * wavelengths / self.TABULATED_WAVELENGTH) * self._can_density
+            can_x_section = (can_material.totalScatterXSection() + can_material.absorbXSection() * wavelengths /
+                             self.TABULATED_WAVELENGTH) * self._can_density
 
             if self._efixed > 0:
-                can_x_section_efixed = (can_material.totalScatterXSection()
-                                        + can_material.absorbXSection() * np.sqrt(self.TABULATED_ENERGY / self._efixed)) * self._can_density
+                can_x_section_efixed = (can_material.totalScatterXSection() + can_material.absorbXSection() *
+                                        np.sqrt(self.TABULATED_ENERGY / self._efixed)) * self._can_density
             elif self._emode == 'Elastic':
                 can_x_section_efixed = 0
 
@@ -668,12 +704,13 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         acc1, acc2 = np.ones(len(self._wavelengths)), np.ones(len(self._wavelengths))
         if self._has_can_front_in:
             # Front container --> Acc1
-            ki_c1, kf_c1, acc1 = self._can_thickness_calc(can_x_section, can_x_section_efixed, self._can_front_thickness, wavelengths,
-                                                          theta, alpha, stha, salpha, ssr, sst)
+            ki_c1, kf_c1, acc1 = self._can_thickness_calc(can_x_section, can_x_section_efixed,
+                                                          self._can_front_thickness, wavelengths, theta, alpha, stha,
+                                                          salpha, ssr, sst)
         if self._has_can_back_in:
             # Back container --> Acc2
-            ki_c2, kf_c2, acc2 = self._can_thickness_calc(can_x_section, can_x_section_efixed, self._can_back_thickness, wavelengths,
-                                                          theta, alpha, stha, salpha, ssr, sst)
+            ki_c2, kf_c2, acc2 = self._can_thickness_calc(can_x_section, can_x_section_efixed, self._can_back_thickness,
+                                                          wavelengths, theta, alpha, stha, salpha, ssr, sst)
 
         # Attenuation due to passage by other layers (sample or container)
         if theta < alpha or theta > (alpha + np.pi):  # transmission case
@@ -685,7 +722,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
     # ------------------------------------------------------------------------------
 
-    def _can_thickness_calc(self, can_x_section, can_x_section_efixed, can_thickness, wavelengths, theta, alpha, stha, salpha, ssr, sst):
+    def _can_thickness_calc(self, can_x_section, can_x_section_efixed, can_thickness, wavelengths, theta, alpha, stha,
+                            salpha, ssr, sst):
         if self._emode == 'Efixed':
             ki = can_x_section_efixed * can_thickness / salpha
             kf = can_x_section_efixed * can_thickness / stha
@@ -705,7 +743,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
     def _container_transmission_calc(self, acc, acc1, acc2, ki_s, kf_s, ki_c1, kf_c2, ass):
         if self._has_can_front_in and self._has_can_back_in:
-            acc = (self._can_front_thickness * acc1 * np.exp(-kf_c2) + self._can_back_thickness * acc2 * np.exp(-ki_c1)) \
+            acc = (self._can_front_thickness * acc1 * np.exp(-kf_c2) + self._can_back_thickness * acc2 *
+                   np.exp(-ki_c1)) \
                   / (self._can_front_thickness + self._can_back_thickness)
             if self._has_sample_in:
                 acsc = (self._can_front_thickness * acc1 * np.exp(-kf_s - kf_c2)
@@ -744,7 +783,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             acc = (self._can_front_thickness * acc1 + self._can_back_thickness * acc2 * np.exp(-ki_c1 - kf_c1)) \
                   / (self._can_front_thickness + self._can_back_thickness)
             if self._has_sample_in:
-                acsc = (self._can_front_thickness * acc1 + self._can_back_thickness * acc2 * np.exp(-ki_c1 - ki_s - kf_s - kf_c1)) \
+                acsc = (self._can_front_thickness * acc1 + self._can_back_thickness * acc2 *
+                        np.exp(-ki_c1 - ki_s - kf_s - kf_c1)) \
                        / (self._can_front_thickness + self._can_back_thickness)
             else:
                 acsc = acc
@@ -775,19 +815,19 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     # ------------------------------------------------------------------------------
 
     def _self_shielding_transmission(self, ki, kf):
-        if abs(ki-kf) < 1.0e-3:
-            return np.exp(-ki) * ( 1.0 - 0.5*(kf-ki) + (kf-ki)**2/12.0 )
+        if abs(ki - kf) < 1.0e-3:
+            return np.exp(-ki) * (1.0 - 0.5 * (kf - ki) + (kf - ki)**2 / 12.0)
         else:
-            return (np.exp(-kf)-np.exp(-ki)) / (ki-kf)
+            return (np.exp(-kf) - np.exp(-ki)) / (ki - kf)
 
     # ------------------------------------------------------------------------------
 
     def _self_shielding_reflection(self, ki, kf):
-        return (1.0 - np.exp(-ki-kf)) / (ki+kf)
+        return (1.0 - np.exp(-ki - kf)) / (ki + kf)
 
     # ------------------------------------------------------------------------------
 
-    def _calc_ki_kf(self, waves, thickness, sinangle1, sinangle2, x_section, x_section_efixed = 0):
+    def _calc_ki_kf(self, waves, thickness, sinangle1, sinangle2, x_section, x_section_efixed=0):
         ki = np.ones(waves.size)
         kf = np.ones(waves.size)
         if self._emode == 'Elastic':

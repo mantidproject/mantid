@@ -24,8 +24,13 @@ class IndirectTransmissionTest(unittest.TestCase):
         density = 0.1
         thickness = 0.1
 
-        ws = IndirectTransmission(Instrument=instrument, Analyser=analyser, Reflection=reflection,
-                                  ChemicalFormula=formula, DensityType='Number Density', Density=density, Thickness=thickness)
+        ws = IndirectTransmission(Instrument=instrument,
+                                  Analyser=analyser,
+                                  Reflection=reflection,
+                                  ChemicalFormula=formula,
+                                  DensityType='Number Density',
+                                  Density=density,
+                                  Thickness=thickness)
 
         # Expected values from table
         ref_result = [6.65800, 0.82122, 0.039174, 56.05149, 56.09067, 0.1, 0.1, 0.56602, 0.42931]
@@ -46,11 +51,16 @@ class IndirectTransmissionTest(unittest.TestCase):
         density = 0.1
         thickness = 0.1
 
-        ws = IndirectTransmission(Instrument=instrument, Analyser=analyser, Reflection=reflection,
-                                  ChemicalFormula=formula, DensityType='Number Density', Density=density, Thickness=thickness)
+        ws = IndirectTransmission(Instrument=instrument,
+                                  Analyser=analyser,
+                                  Reflection=reflection,
+                                  ChemicalFormula=formula,
+                                  DensityType='Number Density',
+                                  Density=density,
+                                  Thickness=thickness)
 
         # Expected values from table
-        ref_result = [5.5137, 0.680081, 0.039174, 56.05149, 56.09067,   0.1, 0.1, 0.56682, 0.42931]
+        ref_result = [5.5137, 0.680081, 0.039174, 56.05149, 56.09067, 0.1, 0.1, 0.56682, 0.42931]
         values = ws.column(1)
         np.testing.assert_array_almost_equal(values, ref_result, decimal=4)
 
@@ -68,8 +78,13 @@ class IndirectTransmissionTest(unittest.TestCase):
         density = 0.1
         thickness = 0.1
 
-        ws = IndirectTransmission(Instrument=instrument, Analyser=analyser, Reflection=reflection,
-                                  ChemicalFormula=formula, DensityType='Number Density', Density=density, Thickness=thickness)
+        ws = IndirectTransmission(Instrument=instrument,
+                                  Analyser=analyser,
+                                  Reflection=reflection,
+                                  ChemicalFormula=formula,
+                                  DensityType='Number Density',
+                                  Density=density,
+                                  Thickness=thickness)
 
         # Expected values from table
         ref_result = [6.2676, 0.7731, 0.03917, 56.0515, 56.0907, 0.1, 0.1, 0.56630, 0.42931]
@@ -89,8 +104,12 @@ class IndirectTransmissionTest(unittest.TestCase):
         # Using water sample
         formula = "H2-O"
 
-        self.assertRaises(RuntimeError, IndirectTransmission,
-                          Instrument=instrument, Analyser=analyser, Reflection=reflection, ChemicalFormula=formula,
+        self.assertRaises(RuntimeError,
+                          IndirectTransmission,
+                          Instrument=instrument,
+                          Analyser=analyser,
+                          Reflection=reflection,
+                          ChemicalFormula=formula,
                           OutputWorkspace='__IndirectTransmissionTest_AnalyserValidation')
 
     def test_indirect_transmission_reflection_validation(self):
@@ -105,8 +124,12 @@ class IndirectTransmissionTest(unittest.TestCase):
         # Using water sample
         formula = "H2-O"
 
-        self.assertRaises(RuntimeError, IndirectTransmission,
-                          Instrument=instrument, Analyser=analyser, Reflection=reflection, ChemicalFormula=formula,
+        self.assertRaises(RuntimeError,
+                          IndirectTransmission,
+                          Instrument=instrument,
+                          Analyser=analyser,
+                          Reflection=reflection,
+                          ChemicalFormula=formula,
                           OutputWorkspace='__IndirectTransmissionTest_ReflectionValidation')
 
     def test_mass_density(self):
@@ -121,18 +144,29 @@ class IndirectTransmissionTest(unittest.TestCase):
         density = 1.0
         thickness = 0.1
 
-        ws = IndirectTransmission(Instrument=instrument, Analyser=analyser, Reflection=reflection,
-                                  ChemicalFormula=formula, DensityType='Mass Density', Density=density, Thickness=thickness)
+        ws = IndirectTransmission(Instrument=instrument,
+                                  Analyser=analyser,
+                                  Reflection=reflection,
+                                  ChemicalFormula=formula,
+                                  DensityType='Mass Density',
+                                  Density=density,
+                                  Thickness=thickness)
 
         ref_result = [6.65800, 0.82122, 0.0391739, 56.051493, 56.09067, 0.100283900, 0.1, 0.56511, 0.43022]
         mass_values = ws.column(1)
         np.testing.assert_array_almost_equal(mass_values, ref_result, decimal=4)
 
         density = 0.100272
-        ws = IndirectTransmission(Instrument=instrument, Analyser=analyser, Reflection=reflection,
-                                  ChemicalFormula=formula, DensityType='Number Density', Density=density, Thickness=thickness)
+        ws = IndirectTransmission(Instrument=instrument,
+                                  Analyser=analyser,
+                                  Reflection=reflection,
+                                  ChemicalFormula=formula,
+                                  DensityType='Number Density',
+                                  Density=density,
+                                  Thickness=thickness)
         num_values = ws.column(1)
         np.testing.assert_array_almost_equal(mass_values, num_values, decimal=4)
+
 
 if __name__ == "__main__":
     unittest.main()

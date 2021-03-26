@@ -7,8 +7,7 @@
 # pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
 from IndirectImport import *
 
-from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
-                        WorkspaceGroupProperty, Progress)
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, Progress)
 from mantid.kernel import StringListValidator, Direction
 import mantid.simpleapi as s_api
 from mantid import config, logger
@@ -42,44 +41,35 @@ class BayesStretch(PythonAlgorithm):
         return "This is a variation of the stretched exponential option of Quasi."
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
-                                                     direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
                              doc='Name of the Sample input Workspace')
 
-        self.declareProperty(MatrixWorkspaceProperty('ResolutionWorkspace', '',
-                                                     direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('ResolutionWorkspace', '', direction=Direction.Input),
                              doc='Name of the resolution input Workspace')
 
-        self.declareProperty(name='EMin', defaultValue=-0.2,
-                             doc='The start of the fitting range')
+        self.declareProperty(name='EMin', defaultValue=-0.2, doc='The start of the fitting range')
 
-        self.declareProperty(name='EMax', defaultValue=0.2,
-                             doc='The end of the fitting range')
+        self.declareProperty(name='EMax', defaultValue=0.2, doc='The end of the fitting range')
 
-        self.declareProperty(name='SampleBins', defaultValue=1,
-                             doc='The number of sample bins')
+        self.declareProperty(name='SampleBins', defaultValue=1, doc='The number of sample bins')
 
-        self.declareProperty(name='Elastic', defaultValue=True,
-                             doc='Fit option for using the elastic peak')
+        self.declareProperty(name='Elastic', defaultValue=True, doc='Fit option for using the elastic peak')
 
-        self.declareProperty(name='Background', defaultValue='Flat',
+        self.declareProperty(name='Background',
+                             defaultValue='Flat',
                              validator=StringListValidator(['Sloping', 'Flat', 'Zero']),
                              doc='Fit option for the type of background')
 
-        self.declareProperty(name='NumberSigma', defaultValue=50,
-                             doc='Number of sigma values')
+        self.declareProperty(name='NumberSigma', defaultValue=50, doc='Number of sigma values')
 
-        self.declareProperty(name='NumberBeta', defaultValue=30,
-                             doc='Number of beta values')
+        self.declareProperty(name='NumberBeta', defaultValue=30, doc='Number of beta values')
 
         self.declareProperty(name='Loop', defaultValue=True, doc='Switch Sequential fit On/Off')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceFit', '',
-                                                    direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceFit', '', direction=Direction.Output),
                              doc='The name of the fit output workspaces')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceContour', '',
-                                                    direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceContour', '', direction=Direction.Output),
                              doc='The name of the contour output workspaces')
 
     def validateInputs(self):
@@ -159,21 +149,19 @@ class BayesStretch(PythonAlgorithm):
         for m in range(nsam):
             logger.information('Group %i at angle %f' % (m, theta[m]))
             nsp = m + 1
-            nout, bnorm, Xdat, Xv, Yv, Ev = CalcErange(self._sam_name, m,
-                                                       self._erange, self._nbins[0])
+            nout, bnorm, Xdat, Xv, Yv, Ev = CalcErange(self._sam_name, m, self._erange, self._nbins[0])
             Ndat = nout[0]
             Imin = nout[1]
             Imax = nout[2]
 
             # get resolution data (4096 = FORTRAN array length)
             Nb, Xb, Yb, _ = GetXYE(self._res_name, 0, 4096)
-            numb = [nsam, nsp, ntc, Ndat, self._nbins[0], Imin,
-                    Imax, Nb, self._nbins[1], self._nbet, self._nsig]
+            numb = [nsam, nsp, ntc, Ndat, self._nbins[0], Imin, Imax, Nb, self._nbins[1], self._nbet, self._nsig]
             reals = [efix, theta[m], rscl, bnorm]
 
             workflow_prog.report('Processing spectrum number %i' % m)
-            xsout, ysout, xbout, ybout, zpout = Que.quest(numb, Xv, Yv, Ev, reals, fitOp,
-                                                          Xdat, Xb, Yb, wrks, wrkr, lwrk)
+            xsout, ysout, xbout, ybout, zpout = Que.quest(numb, Xv, Yv, Ev, reals, fitOp, Xdat, Xb, Yb, wrks, wrkr,
+                                                          lwrk)
             dataXs = xsout[:self._nsig]  # reduce from fixed FORTRAN array
             dataYs = ysout[:self._nsig]
             dataXb = xbout[:self._nbet]
@@ -217,11 +205,9 @@ class BayesStretch(PythonAlgorithm):
 
         group = fname + '_Sigma,' + fname + '_Beta'
         fit_ws = fname + '_Fit'
-        s_api.GroupWorkspaces(InputWorkspaces=group,
-                              OutputWorkspace=fit_ws)
+        s_api.GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=fit_ws)
         contour_ws = fname + '_Contour'
-        s_api.GroupWorkspaces(InputWorkspaces=groupZ,
-                              OutputWorkspace=contour_ws)
+        s_api.GroupWorkspaces(InputWorkspaces=groupZ, OutputWorkspace=contour_ws)
 
         # Add some sample logs to the output workspaces
         log_prog = Progress(self, start=0.8, end=1.0, nreports=6)
@@ -299,8 +285,11 @@ class BayesStretch(PythonAlgorithm):
             unit_x = 'MomentumTransfer'
 
         ws = s_api.CreateWorkspace(OutputWorkspace=name,
-                                   DataX=xye[0], DataY=xye[1], DataE=xye[2],
-                                   Nspec=num_spec, UnitX=unit_x,
+                                   DataX=xye[0],
+                                   DataY=xye[1],
+                                   DataE=xye[2],
+                                   Nspec=num_spec,
+                                   UnitX=unit_x,
                                    VerticalAxisUnit='MomentumTransfer',
                                    VerticalAxisValues=vert_axis)
 
@@ -321,10 +310,8 @@ class BayesStretch(PythonAlgorithm):
         """
         energy_min, energy_max = erange
 
-        log_names = ['res_file', 'background', 'elastic_peak',
-                     'energy_min', 'energy_max', 'sample_binning']
-        log_values = [self._res_name, str(self._background), str(self._elastic),
-                      energy_min, energy_max, sample_binning]
+        log_names = ['res_file', 'background', 'elastic_peak', 'energy_min', 'energy_max', 'sample_binning']
+        log_values = [self._res_name, str(self._background), str(self._elastic), energy_min, energy_max, sample_binning]
 
         add_log = self.createChildAlgorithm('AddSampleLogMultiple', enableLogging=False)
         add_log.setProperty('Workspace', workspace)

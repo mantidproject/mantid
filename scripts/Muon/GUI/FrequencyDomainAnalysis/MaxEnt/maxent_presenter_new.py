@@ -19,16 +19,18 @@ from Muon.GUI.Common.utilities.algorithm_utils import run_MuonMaxent
 
 raw_data = "_raw_data"
 
-optional_output_suffixes = {'OutputPhaseTable': '_phase_table', 'OutputDeadTimeTable': '_dead_times',
-                            'ReconstructedSpectra': '_reconstructed_spectra', 'PhaseConvergenceTable': '_phase_convergence'}
+optional_output_suffixes = {
+    'OutputPhaseTable': '_phase_table',
+    'OutputDeadTimeTable': '_dead_times',
+    'ReconstructedSpectra': '_reconstructed_spectra',
+    'PhaseConvergenceTable': '_phase_convergence'
+}
 
 
 class MaxEntPresenter(object):
-
     """
     This class links the MaxEnt model to the GUI
     """
-
     def __init__(self, view, load):
         self.view = view
         self.load = load
@@ -60,8 +62,7 @@ class MaxEntPresenter(object):
         final_options = self.load.getGroupedWorkspaceNames()
 
         self.view.addItems(final_options)
-        start = int(
-            math.ceil(math.log(self.load.data_context.num_points) / math.log(2.0)))
+        start = int(math.ceil(math.log(self.load.data_context.num_points) / math.log(2.0)))
         values = [str(2**k) for k in range(start, 21)]
         self.view.addNPoints(values)
 
@@ -155,7 +156,8 @@ class MaxEntPresenter(object):
     def add_maxent_workspace_to_ADS(self, input_workspace, maxent_workspace, alg):
         run = re.search('[0-9]+', input_workspace).group()
         base_name = get_maxent_workspace_name(input_workspace)
-        directory = get_maxent_workspace_group_name(base_name, self.load.data_context.instrument, self.load.workspace_suffix)
+        directory = get_maxent_workspace_group_name(base_name, self.load.data_context.instrument,
+                                                    self.load.workspace_suffix)
 
         muon_workspace_wrapper = MuonWorkspaceWrapper(directory + base_name)
         muon_workspace_wrapper.show()

@@ -22,8 +22,8 @@ except ImportError:
 
 IS_IN_MANTIDPLOT = False
 try:
-    from mantid.api import * # noqa
-    from mantid.kernel import * # noqa
+    from mantid.api import *  # noqa
+    from mantid.kernel import *  # noqa
     IS_IN_MANTIDPLOT = True
 except:
     pass
@@ -48,10 +48,10 @@ class RunSetupWidget(BaseWidget):
         class RunSetFrame(QFrame):
             """ Define class linked to UI Frame
             """
-
             def __init__(self, parent=None):
                 QFrame.__init__(self, parent)
                 self.ui = load_ui(__file__, '../../../ui/diffraction/diffraction_run_setup.ui', baseinstance=self)
+
         # END-DEF RunSetFrame
 
         # Instrument and facility information
@@ -363,7 +363,7 @@ class RunSetupWidget(BaseWidget):
             if currindex == 0:
                 self._content.binning_edit.setText(str(abs(curbinning)))
             else:
-                self._content.binning_edit.setText(str(-1.0*abs(curbinning)))
+                self._content.binning_edit.setText(str(-1.0 * abs(curbinning)))
             #ENDIFELSE
         #ENDIF
 
@@ -516,5 +516,6 @@ class RunSetupWidget(BaseWidget):
             def __init__(self, parent=None):
                 QDialog.__init__(self, parent)
                 self.ui = load_ui(__file__, '../../../ui/diffraction/diffraction_info.ui', baseinstance=self)
+
         dialog = HelpDialog(self)
         dialog.exec_()

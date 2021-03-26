@@ -17,7 +17,6 @@ from qtpy.QtTest import QTest
 
 @start_qapplication
 class LineEditDoubleValidatorTest(unittest.TestCase):
-
     def setUp(self):
         self.initial_value = "0.0"
 

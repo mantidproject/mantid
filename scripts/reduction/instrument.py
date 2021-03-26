@@ -28,17 +28,17 @@ class Instrument(object):
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
         if instr_filen is None:
-            instr_filen = self._NAME+'_Definition.xml'
+            instr_filen = self._NAME + '_Definition.xml'
 
         config = ConfigService.Instance()
-        self._definition_file = config["instrumentDefinition.directory"]+'/'+instr_filen
+        self._definition_file = config["instrumentDefinition.directory"] + '/' + instr_filen
 
         self.definition = self.load_instrument()
 
     def get_default_instrument(self):
-        instr_filen = self._NAME+'_Definition.xml'
+        instr_filen = self._NAME + '_Definition.xml'
         config = ConfigService.Instance()
-        self._definition_file =config["instrumentDefinition.directory"]+'/'+instr_filen
+        self._definition_file = config["instrumentDefinition.directory"] + '/' + instr_filen
         return self.load_instrument()
 
     def load_instrument(self):
@@ -46,10 +46,10 @@ class Instrument(object):
             Runs LoadInstrument get the parameters for the instrument
             @return the instrument parameter data
         """
-        wrksp = '__'+self._NAME+'instrument_definition'
+        wrksp = '__' + self._NAME + 'instrument_definition'
         if not AnalysisDataService.doesExist(wrksp):
-            api.CreateWorkspace(OutputWorkspace=wrksp,DataX="1",DataY="1",DataE="1")
-          #read the information about the instrument that stored in its xml
+            api.CreateWorkspace(OutputWorkspace=wrksp, DataX="1", DataY="1", DataE="1")
+            #read the information about the instrument that stored in its xml
             api.LoadInstrument(Workspace=wrksp, InstrumentName=self._NAME, RewriteSpectraMap=True)
 
         return AnalysisDataService.retrieve(wrksp).getInstrument()
@@ -67,7 +67,7 @@ class Instrument(object):
         """
         return [0, 0]
 
-    def view(self, workspace_name = None):
+    def view(self, workspace_name=None):
         """
             Opens Mantidplot's InstrumentView displaying the current instrument. This
             empty instrument created contained in the named workspace (a default name
@@ -76,7 +76,7 @@ class Instrument(object):
             @param workspace_name: the name of the workspace to create and/or display
         """
         if workspace_name is None:
-            workspace_name = self._NAME+'_instrument_view'
+            workspace_name = self._NAME + '_instrument_view'
             self.load_empty(workspace_name)
         elif not AnalysisDataService.doesExist(workspace_name):
             self.load_empty(workspace_name)
@@ -87,7 +87,7 @@ class Instrument(object):
 
         return workspace_name
 
-    def load_empty(self, workspace_name = None):
+    def load_empty(self, workspace_name=None):
         """
             Loads the instrument definition file into a workspace with the given name.
             If no name is given a hidden workspace is used
@@ -95,7 +95,7 @@ class Instrument(object):
             @return the name of the workspace that was created
         """
         if workspace_name is None:
-            workspace_name = '__'+self._NAME+'_empty'
+            workspace_name = '__' + self._NAME + '_empty'
 
         api.LoadEmptyInstrument(Filename=self._definition_file, OutputWorkspace=workspace_name)
 

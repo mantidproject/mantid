@@ -10,7 +10,7 @@ from mantid.simpleapi import *
 
 
 class CompressEventsTesting(systemtesting.MantidSystemTest):
-    event_files = ["PG3_4844_event.nxs"] # /SNS/PG3/IPTS-2767/0/ for 2.5 hours
+    event_files = ["PG3_4844_event.nxs"]  # /SNS/PG3/IPTS-2767/0/ for 2.5 hours
 
     def requiredFiles(self):
         return self.event_files
@@ -26,14 +26,12 @@ class CompressEventsTesting(systemtesting.MantidSystemTest):
             SumSpectra(InputWorkspace=wkspname, OutputWorkspace=wkspname)
 
             # max for Integration algorithm is not inclusive
-            for name in (outname, wkspname): # first out of place, then in place
-                CompressEvents(InputWorkspace=wkspname, OutputWorkspace=name,
-                               WallClockTolerance=10.)
+            for name in (outname, wkspname):  # first out of place, then in place
+                CompressEvents(InputWorkspace=wkspname, OutputWorkspace=name, WallClockTolerance=10.)
                 integral = Integration(InputWorkspace=name, RangeUpper=20000.)
                 compress10s = integral.readY(0)[0]
 
-                CompressEvents(InputWorkspace=wkspname, OutputWorkspace=name,
-                               WallClockTolerance=3600.)
+                CompressEvents(InputWorkspace=wkspname, OutputWorkspace=name, WallClockTolerance=3600.)
                 integral = Integration(InputWorkspace=name, RangeUpper=20000.)
                 compress1h = integral.readY(0)[0]
 

@@ -13,7 +13,6 @@ from mantid import UsageService
 from mantid.kernel import FeatureType
 from sans.common.enums import SaveType
 
-
 Ui_SaveOtherDialog, _ = load_ui(__file__, "save_other_dialog.ui")
 
 
@@ -23,7 +22,7 @@ class SANSSaveOtherDialog(QtWidgets.QDialog, Ui_SaveOtherDialog):
         self.subscribers = []
         self.setup_view()
 
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Save Other Tab"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Save Other Tab"], False)
 
     def setup_view(self):
         self.setupUi(self)
@@ -98,7 +97,7 @@ class SANSSaveOtherDialog(QtWidgets.QDialog, Ui_SaveOtherDialog):
     def _on_help_button_clicked(self):
         try:
             import mantidqt
-            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp('sans_save_other','isis_sans')
+            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp('sans_save_other', 'isis_sans')
         except:
             pass
 

@@ -24,9 +24,7 @@ import numpy as np
 
 class WANDPowderReductionTest(unittest.TestCase):
     def _create_workspaces(self):
-        cal = CreateSampleWorkspace(
-            NumBanks=1, BinWidth=20000, PixelSpacing=0.1, BankPixelWidth=100
-        )
+        cal = CreateSampleWorkspace(NumBanks=1, BinWidth=20000, PixelSpacing=0.1, BankPixelWidth=100)
         RotateInstrumentComponent(cal, ComponentName="bank1", X=1, Y=0.5, Z=2, Angle=35)
         MoveInstrumentComponent(cal, ComponentName="bank1", X=1, Y=1, Z=5)
         bkg = CloneWorkspace(cal)
@@ -52,12 +50,8 @@ class WANDPowderReductionTest(unittest.TestCase):
             NumberType="Double",
             LogText="100",
         )
-        AddSampleLog(
-            cal, LogName="duration", LogType="Number", NumberType="Double", LogText="20"
-        )
-        AddSampleLog(
-            bkg, LogName="duration", LogType="Number", NumberType="Double", LogText="5"
-        )
+        AddSampleLog(cal, LogName="duration", LogType="Number", NumberType="Double", LogText="20")
+        AddSampleLog(bkg, LogName="duration", LogType="Number", NumberType="Double", LogText="5")
         AddSampleLog(
             data,
             LogName="duration",
@@ -78,22 +72,14 @@ class WANDPowderReductionTest(unittest.TestCase):
         def get_data_counts(n, twoTheta):
             tt1 = 30
             tt2 = 45
-            return (
-                get_bkg_counts(n)
-                + 10 * np.exp(-((twoTheta - tt1) ** 2) / 1)
-                + 20 * np.exp(-((twoTheta - tt2) ** 2) / 0.2)
-            )
+            return (get_bkg_counts(n) + 10 * np.exp(-((twoTheta - tt1)**2) / 1) +
+                    20 * np.exp(-((twoTheta - tt2)**2) / 0.2))
 
         for i in range(cal.getNumberHistograms()):
             cal.setY(i, [get_cal_counts(i) * 2.0])
             bkg.setY(i, [get_bkg_counts(i) / 2.0])
-            twoTheta = (
-                data.getInstrument()
-                .getDetector(i + 10000)
-                .getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1))
-                * 180
-                / np.pi
-            )
+            twoTheta = (data.getInstrument().getDetector(i + 10000).getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)) * 180 /
+                        np.pi)
             data.setY(i, [get_data_counts(i, twoTheta)])
 
         return data, cal, bkg
@@ -103,9 +89,7 @@ class WANDPowderReductionTest(unittest.TestCase):
         data, cal, bkg = self._create_workspaces()
 
         # data normalised by monitor
-        pd_out = WANDPowderReduction(
-            InputWorkspace=data, Target="Theta", NumberBins=1000
-        )
+        pd_out = WANDPowderReduction(InputWorkspace=data, Target="Theta", NumberBins=1000)
 
         x = pd_out.extractX()
         y = pd_out.extractY()
@@ -120,7 +104,9 @@ class WANDPowderReductionTest(unittest.TestCase):
         # NOTE:
         # still needs to check physics
         pd_out_multi = WANDPowderReduction(
-            InputWorkspace=[data, data], Target="Theta", NumberBins=1000,
+            InputWorkspace=[data, data],
+            Target="Theta",
+            NumberBins=1000,
             Sum=True,
         )
 
@@ -196,15 +182,13 @@ class WANDPowderReductionTest(unittest.TestCase):
         # data, cal and background, normalised by time
         # NOTE:
         # still needs to check physics
-        pd_out3_multi = WANDPowderReduction(
-            InputWorkspace=[data, data],
-            CalibrationWorkspace=cal,
-            BackgroundWorkspace=bkg,
-            Target="Theta",
-            NumberBins=1000,
-            NormaliseBy="Time",
-            Sum=True
-        )
+        pd_out3_multi = WANDPowderReduction(InputWorkspace=[data, data],
+                                            CalibrationWorkspace=cal,
+                                            BackgroundWorkspace=bkg,
+                                            Target="Theta",
+                                            NumberBins=1000,
+                                            NormaliseBy="Time",
+                                            Sum=True)
 
         x = pd_out3_multi.extractX()
         y = pd_out3_multi.extractY()
@@ -234,15 +218,13 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(y.max(), 19.03642005)
         self.assertAlmostEqual(x[0, y.argmax()], 2.1543333)
 
-        pd_out4_multi = WANDPowderReduction(
-            InputWorkspace=[data, data],
-            CalibrationWorkspace=cal,
-            BackgroundWorkspace=bkg,
-            Target="ElasticDSpacing",
-            EFixed=30,
-            NumberBins=1000,
-            Sum=True
-        )
+        pd_out4_multi = WANDPowderReduction(InputWorkspace=[data, data],
+                                            CalibrationWorkspace=cal,
+                                            BackgroundWorkspace=bkg,
+                                            Target="ElasticDSpacing",
+                                            EFixed=30,
+                                            NumberBins=1000,
+                                            Sum=True)
 
         x = pd_out4_multi.extractX()
         y = pd_out4_multi.extractY()
@@ -275,16 +257,14 @@ class WANDPowderReductionTest(unittest.TestCase):
 
         # NOTE:
         # Need to check the physics
-        pd_out4_multi = WANDPowderReduction(
-            InputWorkspace=[data, data],
-            CalibrationWorkspace=cal,
-            BackgroundWorkspace=bkg,
-            Target="ElasticQ",
-            EFixed=30,
-            NumberBins=2000,
-            MaskAngle=60,
-            Sum=True
-        )
+        pd_out4_multi = WANDPowderReduction(InputWorkspace=[data, data],
+                                            CalibrationWorkspace=cal,
+                                            BackgroundWorkspace=bkg,
+                                            Target="ElasticQ",
+                                            EFixed=30,
+                                            NumberBins=2000,
+                                            MaskAngle=60,
+                                            Sum=True)
 
         x = pd_out4_multi.extractX()
         y = pd_out4_multi.extractY()
@@ -315,16 +295,14 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(y.max(), 20.72968357)
         self.assertAlmostEqual(x[0, y.argmax()], 45.008708196)
 
-        pd_out4_multi = WANDPowderReduction(
-            InputWorkspace=[data, data],
-            CalibrationWorkspace=cal,
-            BackgroundWorkspace=bkg,
-            BackgroundScale=0.5,
-            Target="Theta",
-            NumberBins=1000,
-            NormaliseBy="Time",
-            Sum=True
-        )
+        pd_out4_multi = WANDPowderReduction(InputWorkspace=[data, data],
+                                            CalibrationWorkspace=cal,
+                                            BackgroundWorkspace=bkg,
+                                            BackgroundScale=0.5,
+                                            Target="Theta",
+                                            NumberBins=1000,
+                                            NormaliseBy="Time",
+                                            Sum=True)
 
         x = pd_out4_multi.extractX()
         y = pd_out4_multi.extractY()

@@ -25,13 +25,21 @@ class SettingsPresenter(object):
     CHANGES_NEED_RESTART_TITLE = "Some changes require restart"
     CHANGES_NEED_RESTART_MESSAGE = "The following changes will be applied when the workbench is restarted:\n\n"
 
-    SETTINGS_TABS = {'general_settings' : "General",
-                     'categories_settings' : "Categories",
-                     'plot_settings': "Plots",
-                     'fitting_settings' : "Fitting"}
+    SETTINGS_TABS = {
+        'general_settings': "General",
+        'categories_settings': "Categories",
+        'plot_settings': "Plots",
+        'fitting_settings': "Fitting"
+    }
 
-    def __init__(self, parent, view=None, model=None, general_settings=None,
-                 categories_settings=None, plot_settings=None, fitting_settings=None):
+    def __init__(self,
+                 parent,
+                 view=None,
+                 model=None,
+                 general_settings=None,
+                 categories_settings=None,
+                 plot_settings=None,
+                 fitting_settings=None):
         self.view = view if view else SettingsView(parent, self)
         self.model = model if model else SettingsModel()
         self.general_settings = general_settings if general_settings else GeneralSettings(parent, None, self)
@@ -113,7 +121,8 @@ class SettingsPresenter(object):
             self.model.save_settings_to_file(filepath, self.all_properties)
 
     def action_load_settings_from_file(self):
-        filepath = self.view.get_properties_filename(accept_mode=QFileDialog.AcceptOpen, file_mode=QFileDialog.ExistingFile)
+        filepath = self.view.get_properties_filename(accept_mode=QFileDialog.AcceptOpen,
+                                                     file_mode=QFileDialog.ExistingFile)
         if filepath:
             self.model.load_settings_from_file(filepath, self.all_properties)
             self._update_all_properties()

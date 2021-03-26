@@ -12,7 +12,6 @@ MASKFILE = 'MaskSANS2D.txt'
 
 
 class Sans2DIsisGuiSettings(unittest.TestCase):
-
     def setUp(self):
         config['default.instrument'] = 'SANS2D'
         i.SANS2D()
@@ -61,7 +60,6 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
         pass
 
     def test_qx(self):  # GUI: q_min, q_max, q_dq, q_rebin, q_dq_opt
-
         def checkvalues(min_value, max_value, step_value, str_values):
             list_values = str_values.split(',')
             self.checkFloat(min_value, float(list_values[0]))
@@ -98,7 +96,6 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
         self.checkFloat(i.ReductionSingleton().DQXY, value_step)
 
     def test_fit(self):
-
         def checkEqualsOption(option, selector):
             if (option[1] is not None):
                 self.checkFloat(i.ReductionSingleton().transmission_calculator.lambdaMin(selector), option[1])
@@ -126,23 +123,15 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
 
         # transFitOnOff, transFit_ck, trans_min, trans_max, trans_opt
         # transFitOnOff_can, transFit_ck_can, trans_min_can, trans_max_can, trans_opt_can
-        options = [('Linear', 1.5, 12.5, 'BOTH'),
-                   ('Logarithmic', 1.3, 12.3, 'BOTH'),
-                   ('Polynomial3', 1.4, 12.4, 'BOTH'),
-                   ('Logarithmic', 1.1, 12.1, 'CAN'),
-                   ('Polynomial3', 1.6, 12.6, 'SAMPLE'),
-                   ('Polynomial3', 1.2, 12.2, 'SAMPLE'),
-                   ('Linear', 1.5, 12.5, 'CAN'),
-                   ('Off', None, None, 'CAN'),
-                   ('Polynomial4', None, None, 'SAMPLE'),
-                   ('Linear', None, None, 'CAN'),
-                   ('Off', None, None, 'SAMPLE'),
-                   ('Linear', 2.5, 13., 'CAN')]
+        options = [('Linear', 1.5, 12.5, 'BOTH'), ('Logarithmic', 1.3, 12.3, 'BOTH'),
+                   ('Polynomial3', 1.4, 12.4, 'BOTH'), ('Logarithmic', 1.1, 12.1, 'CAN'),
+                   ('Polynomial3', 1.6, 12.6, 'SAMPLE'), ('Polynomial3', 1.2, 12.2, 'SAMPLE'),
+                   ('Linear', 1.5, 12.5, 'CAN'), ('Off', None, None, 'CAN'), ('Polynomial4', None, None, 'SAMPLE'),
+                   ('Linear', None, None, 'CAN'), ('Off', None, None, 'SAMPLE'), ('Linear', 2.5, 13., 'CAN')]
 
         for option in options:
             print('Applying option ', str(option))
-            i.TransFit(mode=option[0], lambdamin=option[1],
-                       lambdamax=option[2], selector=option[3])
+            i.TransFit(mode=option[0], lambdamin=option[1], lambdamax=option[2], selector=option[3])
             checkFitOption(option)
 
     def test_direct_files(self):  # direct_file, front_direct_file
@@ -179,12 +168,8 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
             self.checkObj(i.ReductionSingleton().transmission_calculator.interpolate, option[1])
 
     def test_detector_selector(self):
-        options = [('front-detector', 'front-detector'),
-                   ('rear-detector', 'rear-detector'),
-                   ('both', 'rear-detector'),
-                   ('merged', 'rear-detector'),
-                   ('FRONT', 'front-detector'),
-                   ('REAR', 'rear-detector')]
+        options = [('front-detector', 'front-detector'), ('rear-detector', 'rear-detector'), ('both', 'rear-detector'),
+                   ('merged', 'rear-detector'), ('FRONT', 'front-detector'), ('REAR', 'rear-detector')]
 
         for option in options:
             i.ReductionSingleton().instrument.setDetector(option[0])
@@ -194,7 +179,6 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
         # TODO: for LOQ
 
     def test_Phi(self):  # phi_min, phi_max, mirror_phi
-
         def checkPhiValues(option):
             self.checkFloat(i.ReductionSingleton().mask.phi_min, option[0])
             self.checkFloat(i.ReductionSingleton().mask.phi_max, option[1])
@@ -230,12 +214,29 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
                 self.assertTrue(
                     not i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.qRangeUserSelected)
 
-        options = [{'scale': 1.2, 'shift': 0.3},
-                   {'scale': 1.3, 'shift': 0.4, 'fitScale': True},
-                   {'scale': 1.2, 'shift': 0.3, 'fitShift': True},
-                   {'scale': 1.4, 'shift': 0.32, 'qMin': 0.5, 'qMax': 2.1},
-                   {'scale': 1.2, 'shift': 0.41, 'qMin': 0.53, 'qMax': 2.12, 'fitScale': True}
-                   ]
+        options = [{
+            'scale': 1.2,
+            'shift': 0.3
+        }, {
+            'scale': 1.3,
+            'shift': 0.4,
+            'fitScale': True
+        }, {
+            'scale': 1.2,
+            'shift': 0.3,
+            'fitShift': True
+        }, {
+            'scale': 1.4,
+            'shift': 0.32,
+            'qMin': 0.5,
+            'qMax': 2.1
+        }, {
+            'scale': 1.2,
+            'shift': 0.41,
+            'qMin': 0.53,
+            'qMax': 2.12,
+            'fitScale': True
+        }]
 
         for option in options:
             i.SetFrontDetRescaleShift(**option)

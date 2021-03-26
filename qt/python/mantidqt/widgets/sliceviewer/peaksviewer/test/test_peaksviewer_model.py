@@ -51,8 +51,7 @@ class PeaksViewerModelTest(unittest.TestCase):
         # create 2 peaks: 1 visible, 1 not (far outside Z range)
         visible_peak_center, invisible_center = (0.5, 0.2, 0.25), (0.4, 0.3, 25)
 
-        _, mock_painter = draw_peaks(
-            (visible_peak_center, invisible_center), fg_color, slice_value=0.5, slice_width=30)
+        _, mock_painter = draw_peaks((visible_peak_center, invisible_center), fg_color, slice_value=0.5, slice_width=30)
 
         self.assertEqual(1, mock_painter.cross.call_count)
         call_args, call_kwargs = mock_painter.cross.call_args
@@ -65,8 +64,10 @@ class PeaksViewerModelTest(unittest.TestCase):
     def test_clear_peaks_removes_all_drawn(self):
         # create 2 peaks: 1 visible, 1 not (far outside Z range)
         visible_peak_center, invisible_center = (0.5, 0.2, 0.25), (0.4, 0.3, 25)
-        model, mock_painter = draw_peaks(
-            (visible_peak_center, invisible_center), fg_color='r', slice_value=0.5, slice_width=30)
+        model, mock_painter = draw_peaks((visible_peak_center, invisible_center),
+                                         fg_color='r',
+                                         slice_value=0.5,
+                                         slice_width=30)
 
         model.clear_peak_representations()
 
@@ -90,8 +91,10 @@ class PeaksViewerModelTest(unittest.TestCase):
 
     def test_viewlimits(self):
         visible_peak_center, invisible_center = (0.5, 0.2, 0.25), (0.4, 0.3, 25)
-        model, mock_painter = draw_peaks(
-            (visible_peak_center, invisible_center), fg_color='r', slice_value=0.5, slice_width=30)
+        model, mock_painter = draw_peaks((visible_peak_center, invisible_center),
+                                         fg_color='r',
+                                         slice_value=0.5,
+                                         slice_width=30)
 
         xlim, ylim = model.viewlimits(0)
 
@@ -109,8 +112,7 @@ class PeaksViewerModelTest(unittest.TestCase):
 
     # -------------------------- Failure Tests --------------------------------
     def test_model_accepts_only_peaks_workspaces(self):
-        self.assertRaises(ValueError, PeaksViewerModel, create_autospec(MatrixWorkspace), 'w',
-                          '1.0')
+        self.assertRaises(ValueError, PeaksViewerModel, create_autospec(MatrixWorkspace), 'w', '1.0')
 
 
 if __name__ == '__main__':

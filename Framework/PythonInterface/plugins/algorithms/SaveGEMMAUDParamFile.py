@@ -49,14 +49,11 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
                "MAUD-readable calibration format"
 
     def PyInit(self):
-        self.declareProperty(WorkspaceGroupProperty(name=self.PROP_INPUT_WS,
-                                                    defaultValue="",
+        self.declareProperty(WorkspaceGroupProperty(name=self.PROP_INPUT_WS, defaultValue="",
                                                     direction=Direction.Input),
                              doc="WorkspaceGroup of focused banks")
 
-        self.declareProperty(FileProperty(name=self.PROP_GSAS_PARAM_FILE,
-                                          action=FileAction.Load,
-                                          defaultValue=""),
+        self.declareProperty(FileProperty(name=self.PROP_GSAS_PARAM_FILE, action=FileAction.Load, defaultValue=""),
                              doc="GSAS parameter file to read diffractometer constants and profile coefficients from")
 
         self.declareProperty(FileProperty(name=self.PROP_TEMPLATE_FILE,
@@ -65,12 +62,10 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
                              doc="Template for the .maud file")
 
         self.declareProperty(IntArrayProperty(name=self.PROP_GROUPING_SCHEME),
-                             doc="An array of bank IDs, where the value at element i is the ID of the bank in "
-                                 + self.PROP_GSAS_PARAM_FILE + " to associate spectrum i with")
+                             doc="An array of bank IDs, where the value at element i is the ID of the bank in " +
+                             self.PROP_GSAS_PARAM_FILE + " to associate spectrum i with")
 
-        self.declareProperty(FileProperty(name=self.PROP_OUTPUT_FILE,
-                                          action=FileAction.Save,
-                                          defaultValue=""),
+        self.declareProperty(FileProperty(name=self.PROP_OUTPUT_FILE, action=FileAction.Save, defaultValue=""),
                              doc="Name of the file to save to")
 
     def PyExec(self):
@@ -89,8 +84,10 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
         output_params = {}
 
         gsas_file_params = self._parse_gsas_param_file(gsas_filename)
-        gsas_file_params_to_write = {key: self._format_param_list(expand_to_texture_bank(gsas_file_params[key]))
-                                     for key in gsas_file_params}
+        gsas_file_params_to_write = {
+            key: self._format_param_list(expand_to_texture_bank(gsas_file_params[key]))
+            for key in gsas_file_params
+        }
         output_params.update(gsas_file_params_to_write)
 
         two_thetas, phis = zip(*[self._get_two_theta_and_phi(bank) for bank in input_ws])
@@ -116,9 +113,7 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
         with open(self.getProperty(self.PROP_OUTPUT_FILE).value, "w") as output_file:
             # Note, once we've got rid of Python 2 support this can be simplified to
             # template.format_map(**defaultdict(create_empty_param_list, output_params))
-            output_file.write(Formatter().vformat(template, (),
-                                                  defaultdict(create_empty_param_list,
-                                                              output_params)))
+            output_file.write(Formatter().vformat(template, (), defaultdict(create_empty_param_list, output_params)))
 
     def validateInputs(self):
         issues = {}
@@ -126,9 +121,10 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
         input_ws = mtd[self.getPropertyValue(self.PROP_INPUT_WS)]
         grouping_scheme = self.getProperty(self.PROP_GROUPING_SCHEME).value
         if len(grouping_scheme) != input_ws.getNumberOfEntries():
-            issues[self.PROP_GROUPING_SCHEME] = ("Number of entries in {} does not match number of spectra in {}. "
-                                                 "You must assign a bank to every focused spectrum in the input workspace".
-                                                 format(self.PROP_GROUPING_SCHEME, self.PROP_INPUT_WS))
+            issues[self.PROP_GROUPING_SCHEME] = (
+                "Number of entries in {} does not match number of spectra in {}. "
+                "You must assign a bank to every focused spectrum in the input workspace".format(
+                    self.PROP_GROUPING_SCHEME, self.PROP_INPUT_WS))
 
         return issues
 
@@ -193,17 +189,19 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
                 sigma_ones.append(float(line_items[4]))
                 sigma_twos.append(float(line_items[5]))
 
-        return {"dists": distances,
-                "difas": difas,
-                "difcs": difcs,
-                "tzeros": tzeros,
-                "func_1_alpha_zeros": alpha_zeros,
-                "func_1_alpha_ones": alpha_ones,
-                "func_1_beta_zeros": beta_zeros,
-                "func_1_beta_ones": beta_ones,
-                "func_1_sigma_zeros": sigma_zeros,
-                "func_1_sigma_ones": sigma_ones,
-                "func_1_sigma_twos": sigma_twos}
+        return {
+            "dists": distances,
+            "difas": difas,
+            "difcs": difcs,
+            "tzeros": tzeros,
+            "func_1_alpha_zeros": alpha_zeros,
+            "func_1_alpha_ones": alpha_ones,
+            "func_1_beta_zeros": beta_zeros,
+            "func_1_beta_ones": beta_ones,
+            "func_1_sigma_zeros": sigma_zeros,
+            "func_1_sigma_ones": sigma_ones,
+            "func_1_sigma_twos": sigma_twos
+        }
 
 
 AlgorithmFactory.subscribe(SaveGEMMAUDParamFile)

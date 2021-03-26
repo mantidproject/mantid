@@ -12,7 +12,6 @@ from ISISCommandInterface import *
 import unittest
 
 from sans.common.enums import SANSInstrument
-
 """
 Allowing the reduction to use already loaded workspace will make it easier to
 deal with event mode and producing new workspaces for the reduction of data.
@@ -45,7 +44,6 @@ class SANS2DReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
      * If reload is False, it will be used, if it pass the following tests:
        * The instrument components have not been moved
     """
-
     def setUp(self):
         self.load_run = '2500.nxs'
         config["default.instrument"] = "SANS2D"
@@ -61,16 +59,16 @@ class SANS2DReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
         my_workspace = Load(self.load_run)
         #set the value for my_workspace to ensure it is the one used
         aux = my_workspace.dataY(0)
-        aux[10]=5
-        my_workspace.setY(0,aux)
+        aux[10] = 5
+        my_workspace.setY(0, aux)
         # ask to use the loaded workspace
-        AssignSample(my_workspace,reload=False)
+        AssignSample(my_workspace, reload=False)
 
         ws_name = ReductionSingleton().get_sample().get_wksp_name()
 
         self.assertTrue(ws_name, my_workspace.name())
 
-        self.assertTrue(my_workspace.dataY(0)[10],5)
+        self.assertTrue(my_workspace.dataY(0)[10], 5)
         # ensure that it is able to execute the reduction
         Reduce()
         self.assertTrue(self.control_name in mtd)
@@ -79,10 +77,10 @@ class SANS2DReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
         my_workspace = Load(self.load_run)
         #set the value for my_workspace to ensure it is the one used
         aux = my_workspace.dataY(0)
-        aux[10]=5
-        my_workspace.setY(0,aux)
+        aux[10] = 5
+        my_workspace.setY(0, aux)
         # ask to use the loaded workspace
-        AssignSample(my_workspace,reload=True)
+        AssignSample(my_workspace, reload=True)
 
         ws_name = ReductionSingleton().get_sample().get_wksp_name()
         # it is different, because, it will compose the name using its rule,
@@ -93,7 +91,7 @@ class SANS2DReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
 
     def test_should_not_accept_loaded_workspace_if_moved(self):
         my_workspace = Load(self.load_run)
-        MoveInstrumentComponent(my_workspace,self.inst_comp,X=2,Y=1,Z=0)
+        MoveInstrumentComponent(my_workspace, self.inst_comp, X=2, Y=1, Z=0)
         ## attempt to use a workspace that has been moved
         self.assertRaises(RuntimeError, AssignSample, my_workspace, False)
 
@@ -116,7 +114,7 @@ class SANSLOQReductionShouldAcceptLoadedWorkspaceSystemTest(systemtesting.Mantid
         self._success = False
         # Custom code to create and run this single test suite
         suite = unittest.TestSuite()
-        suite.addTest( unittest.makeSuite(self.cl, "test"))
+        suite.addTest(unittest.makeSuite(self.cl, "test"))
         runner = unittest.TextTestRunner()
         # Run using either runner
         res = runner.run(suite)
@@ -129,7 +127,6 @@ class SANSLOQReductionShouldAcceptLoadedWorkspaceSystemTest(systemtesting.Mantid
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DFrontNoGravReloadWorkspace(systemtesting.MantidSystemTest):
-
     def runTest(self):
         config["default.instrument"] = "SANS2D"
         SANS2D()
@@ -146,12 +143,11 @@ class SANS2DFrontNoGravReloadWorkspace(systemtesting.MantidSystemTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-        return '2500front_1D_4.6_12.85','SANS2DFrontNoGrav.nxs'
+        return '2500front_1D_4.6_12.85', 'SANS2DFrontNoGrav.nxs'
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DWaveloopsReloadWorkspace(systemtesting.MantidSystemTest):
-
     def runTest(self):
         config["default.instrument"] = "SANS2D"
         SANS2D()
@@ -164,7 +160,7 @@ class SANS2DWaveloopsReloadWorkspace(systemtesting.MantidSystemTest):
         direct_can = CloneWorkspace(direct)
         c = Load('993')
         c_t = Load('989')
-        AssignSample(s,False)
+        AssignSample(s, False)
         TransmissionSample(s_t, direct, False)
         AssignCan(c, False)
         TransmissionCan(c_t, direct_can, False)
@@ -175,9 +171,9 @@ class SANS2DWaveloopsReloadWorkspace(systemtesting.MantidSystemTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-    # testing one of the workspaces that is produced, best not to choose the
-    # first one in produced by the loop as this is the least error prone
-        return '992rear_1D_7.0_11.0','SANS2DWaveloops.nxs'
+        # testing one of the workspaces that is produced, best not to choose the
+        # first one in produced by the loop as this is the least error prone
+        return '992rear_1D_7.0_11.0', 'SANS2DWaveloops.nxs'
 
 
 if __name__ == "__main__":

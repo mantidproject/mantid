@@ -7,10 +7,8 @@
 #  This file is part of the mantid workbench.
 #
 #
-from qtpy.QtWidgets import (QTableView, QHBoxLayout, QVBoxLayout,
-                            QAbstractItemView, QFormLayout, QLineEdit,
-                            QHeaderView, QLabel, QCheckBox, QMenu,
-                            QSizePolicy, QSpinBox, QSplitter, QFrame,
+from qtpy.QtWidgets import (QTableView, QHBoxLayout, QVBoxLayout, QAbstractItemView, QFormLayout, QLineEdit,
+                            QHeaderView, QLabel, QCheckBox, QMenu, QSizePolicy, QSpinBox, QSplitter, QFrame,
                             QSpacerItem)
 from qtpy.QtCore import QItemSelectionModel, Qt
 from matplotlib.backends.backend_qt5agg import FigureCanvas
@@ -24,7 +22,7 @@ class SampleLogsView(QSplitter):
     This contains a table of the logs, a plot of the currently
     selected logs, and the statistics of the selected log.
     """
-    def __init__(self, presenter, parent=None, window_flags=Qt.Window, name='', isMD=False, noExp = 0):
+    def __init__(self, presenter, parent=None, window_flags=Qt.Window, name='', isMD=False, noExp=0):
         super(SampleLogsView, self).__init__(parent)
 
         self.presenter = presenter
@@ -42,7 +40,7 @@ class SampleLogsView(QSplitter):
             layout_mult_expt_info = QHBoxLayout()
             layout_mult_expt_info.addWidget(QLabel("Experiment Info #"))
             self.experimentInfo = QSpinBox()
-            self.experimentInfo.setMaximum(noExp-1)
+            self.experimentInfo.setMaximum(noExp - 1)
             self.experimentInfo.valueChanged.connect(self.presenter.changeExpInfo)
             layout_mult_expt_info.addWidget(self.experimentInfo)
             layout_mult_expt_info.addSpacerItem(QSpacerItem(10, 10, QSizePolicy.Expanding))
@@ -74,14 +72,13 @@ class SampleLogsView(QSplitter):
         if isMD:
             layout_options.addWidget(QLabel("Experiment Info #"))
             self.experimentInfo = QSpinBox()
-            self.experimentInfo.setMaximum(noExp-1)
+            self.experimentInfo.setMaximum(noExp - 1)
             self.experimentInfo.valueChanged.connect(self.presenter.changeExpInfo)
             layout_options.addWidget(self.experimentInfo)
 
         #check boxes
         self.full_time = QCheckBox("Relative Time")
-        self.full_time.setToolTip(
-            "Shows relative time in seconds from the start of the run.")
+        self.full_time.setToolTip("Shows relative time in seconds from the start of the run.")
         self.full_time.setChecked(True)
         self.full_time.stateChanged.connect(self.presenter.plot_logs)
         layout_options.addWidget(self.full_time)
@@ -98,7 +95,7 @@ class SampleLogsView(QSplitter):
         # Sample log plot
         self.fig = Figure()
         self.canvas = FigureCanvas(self.fig)
-        self.canvas.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+        self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.canvas.mpl_connect('button_press_event', self.presenter.plot_clicked)
         self.ax = self.fig.add_subplot(111, projection='mantid')
         layout_right.addWidget(self.canvas)
@@ -119,9 +116,9 @@ class SampleLogsView(QSplitter):
         self.frame_right.setLayout(layout_right)
 
         self.addWidget(self.frame_right)
-        self.setStretchFactor(0,1)
+        self.setStretchFactor(0, 1)
 
-        self.resize(1200,800)
+        self.resize(1200, 800)
         self.show()
 
     def closeEvent(self, event):
@@ -196,7 +193,7 @@ class SampleLogsView(QSplitter):
         if ax.get_legend_handles_labels()[0]:
             ax.legend()
 
-    def set_log_controls(self,are_logs_filtered):
+    def set_log_controls(self, are_logs_filtered):
         """Sets log specific settings based on the log clicked on"""
         self.show_filtered.setEnabled(are_logs_filtered)
 
@@ -220,14 +217,16 @@ class SampleLogsView(QSplitter):
 
     def create_stats_widgets(self):
         """Creates the statistics widgets"""
-        self.stats_widgets = {"minimum": QLineEdit(),
-                              "maximum": QLineEdit(),
-                              "mean": QLineEdit(),
-                              "median": QLineEdit(),
-                              "standard_deviation": QLineEdit(),
-                              "time_mean": QLineEdit(),
-                              "time_standard_deviation": QLineEdit(),
-                              "duration": QLineEdit()}
+        self.stats_widgets = {
+            "minimum": QLineEdit(),
+            "maximum": QLineEdit(),
+            "mean": QLineEdit(),
+            "median": QLineEdit(),
+            "standard_deviation": QLineEdit(),
+            "time_mean": QLineEdit(),
+            "time_standard_deviation": QLineEdit(),
+            "duration": QLineEdit()
+        }
         for widget in self.stats_widgets.values():
             widget.setReadOnly(True)
 

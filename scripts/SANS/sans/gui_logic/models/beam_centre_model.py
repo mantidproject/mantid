@@ -20,7 +20,7 @@ class BeamCentreModel(object):
         self._r_max = 0
         self._left_right = True
         self._up_down = True
-        self._tolerance = 1.251E-07 # metres
+        self._tolerance = 1.251E-07  # metres
         self._lab_pos_1 = ''
         self._lab_pos_2 = ''
         self._hab_pos_2 = ''
@@ -42,18 +42,19 @@ class BeamCentreModel(object):
 
     def reset_inst_defaults(self, instrument):
         if instrument is SANSInstrument.LOQ:
-            self._r_min = 0.096 # metres
-            self._r_max = 0.216 # metres
+            self._r_min = 0.096  # metres
+            self._r_max = 0.216  # metres
 
             # TODO HAB on LOQ prefers 96-750
         else:
             # All other instruments hard-code this as follows
-            self._r_min = 0.06 # metres
-            self._r_max = 0.280 # metres
+            self._r_min = 0.06  # metres
+            self._r_max = 0.280  # metres
 
     def find_beam_centre(self, state: AllStates):
         """
-        This is called from the GUI and runs the find beam centre algorithm given a state model and a beam_centre_model object.
+        This is called from the GUI and runs the find beam centre algorithm given a state model and a beam_centre_model
+        object.
 
         :param state: A SANS state object
         :param beam_centre_model: An instance of the BeamCentreModel class.
@@ -69,24 +70,40 @@ class BeamCentreModel(object):
         pos_2 = self._lab_pos_2 if self.component is DetectorType.LAB else self._hab_pos_2
 
         if self.COM:
-            centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
+            centre = centre_finder(state,
+                                   r_min=self.r_min,
+                                   r_max=self.r_max,
                                    max_iter=self.max_iterations,
-                                   x_start=pos_1, y_start=pos_2,
+                                   x_start=pos_1,
+                                   y_start=pos_2,
                                    tolerance=self.tolerance,
-                                   find_direction=find_direction, reduction_method=False, component=self.component)
+                                   find_direction=find_direction,
+                                   reduction_method=False,
+                                   component=self.component)
 
-            centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
+            centre = centre_finder(state,
+                                   r_min=self.r_min,
+                                   r_max=self.r_max,
                                    max_iter=self.max_iterations,
-                                   x_start=centre['pos1'], y_start=centre['pos2'],
+                                   x_start=centre['pos1'],
+                                   y_start=centre['pos2'],
                                    tolerance=self.tolerance,
-                                   find_direction=find_direction, reduction_method=True,
-                                   verbose=self.verbose, component=self.component)
+                                   find_direction=find_direction,
+                                   reduction_method=True,
+                                   verbose=self.verbose,
+                                   component=self.component)
         else:
-            centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
-                                   max_iter=self.max_iterations, x_start=pos_1,
-                                   y_start=pos_2, tolerance=self.tolerance,
-                                   find_direction=find_direction, reduction_method=True,
-                                   verbose=self.verbose, component=self.component)
+            centre = centre_finder(state,
+                                   r_min=self.r_min,
+                                   r_max=self.r_max,
+                                   max_iter=self.max_iterations,
+                                   x_start=pos_1,
+                                   y_start=pos_2,
+                                   tolerance=self.tolerance,
+                                   find_direction=find_direction,
+                                   reduction_method=True,
+                                   verbose=self.verbose,
+                                   component=self.component)
 
         self._update_centre_positions(results=centre)
 

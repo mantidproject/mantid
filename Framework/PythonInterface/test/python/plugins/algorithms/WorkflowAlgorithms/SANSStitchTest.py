@@ -118,7 +118,7 @@ class SANSStitchTest(unittest.TestCase):
         create_alg.setChild(True)
         create_alg.initialize()
         create_alg.setProperty('DataX', range(0, 1))
-        create_alg.setProperty('DataY', [1,1])
+        create_alg.setProperty('DataY', [1, 1])
         create_alg.setProperty('NSpec', 2)
         create_alg.setProperty('UnitX', 'MomentumTransfer')
         create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
@@ -292,7 +292,7 @@ class SANSStitchTest(unittest.TestCase):
         # LAB as linear function y=x+0
         create_alg.setProperty('DataY', range(0, 9))
         create_alg.execute()
-        lab_workspace= create_alg.getProperty('OutputWorkspace').value
+        lab_workspace = create_alg.getProperty('OutputWorkspace').value
 
         # FLAT NORM
         create_alg.setProperty('DataY', [1] * 9)
@@ -318,7 +318,7 @@ class SANSStitchTest(unittest.TestCase):
 
         y_array = out_ws.readY(0)
 
-        expected_y_array = lab_workspace.readY(0) # We scale and shift to the back (lab) detectors
+        expected_y_array = lab_workspace.readY(0)  # We scale and shift to the back (lab) detectors
 
         np.testing.assert_equal(y_array, expected_y_array)
 
@@ -342,7 +342,7 @@ class SANSStitchTest(unittest.TestCase):
         # LAB as linear function y=x+0
         create_alg.setProperty('DataY', range(0, 11))
         create_alg.execute()
-        lab_workspace= create_alg.getProperty('OutputWorkspace').value
+        lab_workspace = create_alg.getProperty('OutputWorkspace').value
 
         # FLAT NORM
         create_alg.setProperty('DataY', [1] * 11)
@@ -371,7 +371,8 @@ class SANSStitchTest(unittest.TestCase):
 
         y_array = out_ws.readY(0)
 
-        expected_y_array = [7497.5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 7502, 10.0]  # We scale and shift to the back (lab) detectors
+        expected_y_array = [7497.5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 7502,
+                            10.0]  # We scale and shift to the back (lab) detectors
 
         np.testing.assert_equal(y_array, expected_y_array)
 
@@ -392,7 +393,7 @@ class SANSStitchTest(unittest.TestCase):
         # LAB as linear function y=x+0
         create_alg.setProperty('DataY', range(0, 9))
         create_alg.execute()
-        lab_workspace= create_alg.getProperty('OutputWorkspace').value
+        lab_workspace = create_alg.getProperty('OutputWorkspace').value
 
         # FLAT NORM
         create_alg.setProperty('DataY', [1] * 9)
@@ -415,7 +416,7 @@ class SANSStitchTest(unittest.TestCase):
 
         y_array = out_ws.readY(0)
 
-        expected_y_array = lab_workspace.readY(0) # We scale and shift to the back (lab) detectors
+        expected_y_array = lab_workspace.readY(0)  # We scale and shift to the back (lab) detectors
         np.testing.assert_equal(y_array, expected_y_array)
 
     def test_scale_only_without_can(self):
@@ -458,7 +459,7 @@ class SANSStitchTest(unittest.TestCase):
 
         y_array = out_ws.readY(0)
 
-        expected_y_array = lab_workspace.readY(0) # We scale and shift to the back (lab) detectors
+        expected_y_array = lab_workspace.readY(0)  # We scale and shift to the back (lab) detectors
 
         np.testing.assert_equal(y_array, expected_y_array)
 
@@ -658,54 +659,54 @@ class SANSStitchTest(unittest.TestCase):
         np.testing.assert_equal(y_array, expected_y_array)
 
     def test_that_zero_merge_range_has_discrete_transition(self):
-            # This tests that if a merge_max or merge_min is specified greater than the overlap region of
-            # the HAB and LAB the relevant value is set to the maximum value.
-            create_alg = AlgorithmManager.create('CreateWorkspace')
-            create_alg.setChild(True)
-            create_alg.initialize()
-            create_alg.setProperty('DataX', range(0, 10))
-            create_alg.setProperty('DataY', [1] * 9)
-            create_alg.setProperty('NSpec', 1)
-            create_alg.setProperty('UnitX', 'MomentumTransfer')
-            create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
-            create_alg.execute()
-            single_spectra_input = create_alg.getProperty('OutputWorkspace').value
-            create_alg.setProperty('DataY', [2] * 9)
-            create_alg.execute()
-            single_spectra_input_HAB = create_alg.getProperty('OutputWorkspace').value
-            create_alg.setProperty('DataY', [0.5] * 9)
-            create_alg.execute()
-            smaller_single_spectra_input = create_alg.getProperty('OutputWorkspace').value
+        # This tests that if a merge_max or merge_min is specified greater than the overlap region of
+        # the HAB and LAB the relevant value is set to the maximum value.
+        create_alg = AlgorithmManager.create('CreateWorkspace')
+        create_alg.setChild(True)
+        create_alg.initialize()
+        create_alg.setProperty('DataX', range(0, 10))
+        create_alg.setProperty('DataY', [1] * 9)
+        create_alg.setProperty('NSpec', 1)
+        create_alg.setProperty('UnitX', 'MomentumTransfer')
+        create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
+        create_alg.execute()
+        single_spectra_input = create_alg.getProperty('OutputWorkspace').value
+        create_alg.setProperty('DataY', [2] * 9)
+        create_alg.execute()
+        single_spectra_input_HAB = create_alg.getProperty('OutputWorkspace').value
+        create_alg.setProperty('DataY', [0.5] * 9)
+        create_alg.execute()
+        smaller_single_spectra_input = create_alg.getProperty('OutputWorkspace').value
 
-            alg = AlgorithmManager.create('SANSStitch')
-            alg.setChild(True)
-            alg.initialize()
-            alg.setProperty('Mode', 'None')
-            alg.setProperty('HABCountsSample', single_spectra_input_HAB)
-            alg.setProperty('LABCountsSample', single_spectra_input)
-            alg.setProperty('HABNormSample', single_spectra_input)
-            alg.setProperty('LABNormSample', single_spectra_input)
-            alg.setProperty('ProcessCan', True)
-            alg.setProperty('HABCountsCan', smaller_single_spectra_input)
-            alg.setProperty('LABCountsCan', smaller_single_spectra_input)
-            alg.setProperty('HABNormCan', single_spectra_input)
-            alg.setProperty('LABNormCan', single_spectra_input)
-            alg.setProperty('OutputWorkspace', 'dummy_name')
-            alg.setProperty('ShiftFactor', 0.0)
-            alg.setProperty('ScaleFactor', 1.0)
-            alg.setProperty('MergeMask', True)
-            alg.setProperty('MergeMin', 5)
-            alg.setProperty('MergeMax', 5)
-            alg.execute()
-            out_ws = alg.getProperty('OutputWorkspace').value
+        alg = AlgorithmManager.create('SANSStitch')
+        alg.setChild(True)
+        alg.initialize()
+        alg.setProperty('Mode', 'None')
+        alg.setProperty('HABCountsSample', single_spectra_input_HAB)
+        alg.setProperty('LABCountsSample', single_spectra_input)
+        alg.setProperty('HABNormSample', single_spectra_input)
+        alg.setProperty('LABNormSample', single_spectra_input)
+        alg.setProperty('ProcessCan', True)
+        alg.setProperty('HABCountsCan', smaller_single_spectra_input)
+        alg.setProperty('LABCountsCan', smaller_single_spectra_input)
+        alg.setProperty('HABNormCan', single_spectra_input)
+        alg.setProperty('LABNormCan', single_spectra_input)
+        alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('ShiftFactor', 0.0)
+        alg.setProperty('ScaleFactor', 1.0)
+        alg.setProperty('MergeMask', True)
+        alg.setProperty('MergeMin', 5)
+        alg.setProperty('MergeMax', 5)
+        alg.execute()
+        out_ws = alg.getProperty('OutputWorkspace').value
 
-            self.assertTrue(isinstance(out_ws, MatrixWorkspace))
+        self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
-            y_array = out_ws.readY(0)
+        y_array = out_ws.readY(0)
 
-            expected_y_array = [0.5] * 5 + [1.5] * 4
+        expected_y_array = [0.5] * 5 + [1.5] * 4
 
-            np.testing.assert_equal(y_array, expected_y_array)
+        np.testing.assert_equal(y_array, expected_y_array)
 
     def test_that_can_merge_2D_reduction_when_fitting_set_to_none(self):
         # create an input workspace that has multiple spectra
@@ -762,8 +763,8 @@ class SANSStitchTest(unittest.TestCase):
         alg.execute()
         out_ws = alg.getProperty('OutputWorkspace').value
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
-        self.assertEqual(out_ws.getNumberHistograms(),  2)
-        expected_entries = (1. + 3.) /(2. + 4.)
+        self.assertEqual(out_ws.getNumberHistograms(), 2)
+        expected_entries = (1. + 3.) / (2. + 4.)
         delta = 1e-5
         for index in range(0, 2):
             for element in out_ws.dataY(index):
@@ -771,9 +772,14 @@ class SANSStitchTest(unittest.TestCase):
 
 
 class TestQErrorCorrectionForMergedWorkspaces(unittest.TestCase):
-    def _provide_workspace_with_x_errors(self, workspace_name, use_xerror = True, nspec = 1,
-                                         x_in = [1,2,3,4,5,6,7,8,9,10], y_in = [2,2,2,2,2,2,2,2,2],
-                                         e_in = [1,1,1,1,1,1,1,1,1],  x_error = [1.1,2.2,3.3,4.4,5.5,6.6,7.7,8.8,9.9]):
+    def _provide_workspace_with_x_errors(self,
+                                         workspace_name,
+                                         use_xerror=True,
+                                         nspec=1,
+                                         x_in=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                         y_in=[2, 2, 2, 2, 2, 2, 2, 2, 2],
+                                         e_in=[1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                         x_error=[1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]):
         x = []
         y = []
         e = []
@@ -811,7 +817,7 @@ class TestQErrorCorrectionForMergedWorkspaces(unittest.TestCase):
         scale = 2.
         # Act
         q_correction = QErrorCorrectionForMergedWorkspaces()
-        q_correction.correct_q_resolution_for_merged(front, rear,result, scale)
+        q_correction.correct_q_resolution_for_merged(front, rear, result, scale)
         # Assert
         self.assertFalse(result.hasDx(0))
 
@@ -826,7 +832,7 @@ class TestQErrorCorrectionForMergedWorkspaces(unittest.TestCase):
         scale = 2.
         # Act
         q_correction = QErrorCorrectionForMergedWorkspaces()
-        q_correction.correct_q_resolution_for_merged(front, rear,result, scale)
+        q_correction.correct_q_resolution_for_merged(front, rear, result, scale)
         # Assert
         self.assertFalse(result.hasDx(0))
 
@@ -835,32 +841,32 @@ class TestQErrorCorrectionForMergedWorkspaces(unittest.TestCase):
         front_name = "front"
         rear_name = "rear"
         result_name = "result"
-        x1 = [1,2,3]
-        e1 = [1,1]
-        y1 = [2,2]
-        dx1 = [1.,2.]
-        x2 = [1,2,3,4]
-        e2 = [1,1, 1]
-        y2 = [2,2, 2]
-        dx2 = [1.,2.,3.]
+        x1 = [1, 2, 3]
+        e1 = [1, 1]
+        y1 = [2, 2]
+        dx1 = [1., 2.]
+        x2 = [1, 2, 3, 4]
+        e2 = [1, 1, 1]
+        y2 = [2, 2, 2]
+        dx2 = [1., 2., 3.]
         front = self._provide_workspace_with_x_errors(front_name, True, 1, x1, y1, e1, dx1)
         rear = self._provide_workspace_with_x_errors(rear_name, True, 1, x2, y2, e2, dx2)
         result = self._provide_workspace_with_x_errors(result_name, False, 1)
         scale = 2.
         # Act
         q_correction = QErrorCorrectionForMergedWorkspaces()
-        q_correction.correct_q_resolution_for_merged(front, rear,result, scale)
+        q_correction.correct_q_resolution_for_merged(front, rear, result, scale)
         # Assert
         self.assertFalse(result.hasDx(0))
 
     def test_correct_x_error_is_produced(self):
         # Arrange
-        x = [1,2,3]
-        e = [1,1]
-        y_front = [2,2]
-        dx_front = [1.,2.]
-        y_rear = [1.5,1.5]
-        dx_rear = [3.,2.]
+        x = [1, 2, 3]
+        e = [1, 1]
+        y_front = [2, 2]
+        dx_front = [1., 2.]
+        y_rear = [1.5, 1.5]
+        dx_rear = [3., 2.]
         front_name = "front"
         rear_name = "rear"
         result_name = "result"
@@ -870,14 +876,14 @@ class TestQErrorCorrectionForMergedWorkspaces(unittest.TestCase):
         scale = 2.
         # Act
         q_correction = QErrorCorrectionForMergedWorkspaces()
-        q_correction.correct_q_resolution_for_merged(front, rear,result, scale)
+        q_correction.correct_q_resolution_for_merged(front, rear, result, scale)
         # Assert
         self.assertTrue(result.hasDx(0))
 
-        dx_expected_0 = (dx_front[0]*y_front[0]*scale + dx_rear[0]*y_rear[0])/(y_front[0]*scale + y_rear[0])
-        dx_expected_1 = (dx_front[1]*y_front[1]*scale + dx_rear[1]*y_rear[1])/(y_front[1]*scale + y_rear[1])
+        dx_expected_0 = (dx_front[0] * y_front[0] * scale + dx_rear[0] * y_rear[0]) / (y_front[0] * scale + y_rear[0])
+        dx_expected_1 = (dx_front[1] * y_front[1] * scale + dx_rear[1] * y_rear[1]) / (y_front[1] * scale + y_rear[1])
         dx_result = result.readDx(0)
-        self.assertEqual(len(dx_result),  2)
+        self.assertEqual(len(dx_result), 2)
         self.assertEqual(dx_result[0], dx_expected_0)
         self.assertEqual(dx_result[1], dx_expected_1)
 

@@ -46,7 +46,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         return "DataHandling\\Logs"
 
     def seeAlso(self):
-        return [ "ExportExperimentLog" ]
+        return ["ExportExperimentLog"]
 
     def name(self):
         """ Algorithm name
@@ -76,26 +76,28 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         self.declareProperty("Header", "", "String in the header file.")
 
-        self.declareProperty('DateTitleInHeader', True,
-                             'If true, then the first 2 lines of header will be experiment date and title.'
-                             'Otherwise, there will be only 1 line in header.')
+        self.declareProperty(
+            'DateTitleInHeader', True, 'If true, then the first 2 lines of header will be experiment date and title.'
+            'Otherwise, there will be only 1 line in header.')
 
-        self.declareProperty('SeparateHeaderFile', True,
-                             'If true, then the header is written to another file.'
-                             'Otherwise, header will be in the same output file.')
+        self.declareProperty(
+            'SeparateHeaderFile', True, 'If true, then the header is written to another file.'
+            'Otherwise, header will be in the same output file.')
 
         # Time zone
-        timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London",
-                     "GMT+0", "Europe/Paris", "Europe/Copenhagen"]
+        timezones = [
+            "UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0", "Europe/Paris",
+            "Europe/Copenhagen"
+        ]
 
         description = "Sample logs recorded in NeXus files (in SNS) are in UTC time. " \
                       "TimeZone can allow the algorithm to output the log with local time."
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones), description)
 
         # Log time tolerance
-        self.declareProperty("TimeTolerance", 0.01,
-                             "If any 2 log entries with log times within the time tolerance, "
-                             + "they will be recorded in one line. Unit is second. ")
+        self.declareProperty(
+            "TimeTolerance", 0.01, "If any 2 log entries with log times within the time tolerance, " +
+            "they will be recorded in one line. Unit is second. ")
 
         return
 
@@ -160,7 +162,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         self._timeTolerance = self.getProperty("TimeTolerance").value
         if (self._timeTolerance) <= 0.:
             raise NotImplementedError("TimeTolerance must be larger than zero.")
-        self._timeTolerance = np.timedelta64(int(self._timeTolerance*1e9), 'ns')
+        self._timeTolerance = np.timedelta64(int(self._timeTolerance * 1e9), 'ns')
 
         # Set the flag to write header to separate file
         if self._writeheader is True:
@@ -189,7 +191,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         epoch = '1990-01-01T00:00'
         # older numpy assumes local timezone
         if LooseVersion(np.__version__) < LooseVersion('1.9'):
-            epoch = epoch+'Z'
+            epoch = epoch + 'Z'
         return np.datetime64(epoch) + localtimediff
 
     def _getLogsInfo(self, logtimeslist):
@@ -204,7 +206,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
             # count on lines
             tmplines = len(logtimes)
-            maxnumlines +=  tmplines
+            maxnumlines += tmplines
 
             # start and max time
             tmpstarttime = logtimes[0]
@@ -312,7 +314,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
                 # skip as out of boundary of log
                 continue
             tmptime = logtimeslist[i][timeindex]
-            self.log().debug("tmptime type = %s " % ( type(tmptime)))
+            self.log().debug("tmptime type = %s " % (type(tmptime)))
 
             # difftime = calTimeDiff(tmptime, nexttime)
             difftime = (tmptime - nexttime)
@@ -320,7 +322,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             if abs(difftime) < timetol:
                 # same ...
                 nexttimelogindexes.append(i)
-            elif difftime/np.timedelta64(1, 's') < 0:
+            elif difftime / np.timedelta64(1, 's') < 0:
                 # new smaller time
                 nexttime = tmptime
                 nexttimelogindexes[:] = []
@@ -343,8 +345,8 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         logindex = nexttimelogindexes[0]
         logtimes = logtimeslist[logindex]
         thislogtime = logtimes[currtimeindexes[logindex]]
-        abstime = (thislogtime - self._localtimediff) / np.timedelta64(1, 's') # time from epoch in seconds
-        reltime = (thislogtime - self._starttime) / np.timedelta64(1, 's') # time from start of run in seconds
+        abstime = (thislogtime - self._localtimediff) / np.timedelta64(1, 's')  # time from epoch in seconds
+        reltime = (thislogtime - self._starttime) / np.timedelta64(1, 's')  # time from start of run in seconds
         wbuf = "%.6f\t%.6f\t" % (abstime, reltime)
 
         # Log valuess
@@ -414,7 +416,8 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
                 tmplength = len(logtimesdict[self._sampleloglist[i]])
                 if loglength != tmplength:
                     if loglength != sys.maxsize:
-                        self.log().warning("Log %s has different length from previous ones. " % (self._sampleloglist[i]))
+                        self.log().warning("Log %s has different length from previous ones. " %
+                                           (self._sampleloglist[i]))
                     loglength = min(loglength, tmplength)
                 # ENDIF
             # ENDIF
@@ -442,9 +445,8 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         else:
             # Construct 3 lines of the header file
             testdatetime_mk = DateAndTime(test_datetime)
-            line0 = 'Test date: %s (%.6f) Time Zone: %s\n' % (str(test_datetime),
-                                                              float(testdatetime_mk.totalNanoseconds()) / 1.0E9,
-                                                              self._timezone)
+            line0 = 'Test date: %s (%.6f) Time Zone: %s\n' % (
+                str(test_datetime), float(testdatetime_mk.totalNanoseconds()) / 1.0E9, self._timezone)
             line1 = 'Test description: %s\n' % description
         # END-IF-ELSE
         line2 = self._headercontent
@@ -473,7 +475,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         return
 
 
-def getLocalTimeShiftInSecond(utctime, localtimezone, currentlogger = None):
+def getLocalTimeShiftInSecond(utctime, localtimezone, currentlogger=None):
     """ Calculate the difference between UTC time and local time of given
     DataAndTime
     """
@@ -508,7 +510,7 @@ def getLocalTimeShiftInSecond(utctime, localtimezone, currentlogger = None):
     newsns = sns.replace(tzinfo=None)
     newutc = utc.replace(tzinfo=None)
 
-    shift = newutc-newsns
+    shift = newutc - newsns
     return np.timedelta64(shift.seconds, 's')
 
 

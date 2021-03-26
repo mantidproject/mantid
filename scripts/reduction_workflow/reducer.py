@@ -40,8 +40,9 @@ class Reducer(object):
     reduction_algorithm = None
 
     def __init__(self):
-        self.UID = ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
-        self.property_manager = "__reduction_parameters_"+self.UID
+        self.UID = ''.join(
+            random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
+        self.property_manager = "__reduction_parameters_" + self.UID
         self._data_files = {}
         self._reduction_steps = []
         self.reduction_properties = {}
@@ -52,8 +53,7 @@ class Reducer(object):
     def set_reduction_table_name(self, name):
         self.property_manager = str(name)
 
-    def set_instrument(self, instrument, setup_algorithm=None,
-                       reduction_algorithm=None):
+    def set_instrument(self, instrument, setup_algorithm=None, reduction_algorithm=None):
         self.instrument_name = instrument
         self.setup_algorithm = setup_algorithm
         self.reduction_algorithm = reduction_algorithm
@@ -138,8 +138,7 @@ class Reducer(object):
                     Logger("Reducer").warning("Setup algorithm has no %s property" % key)
 
             if "ReductionProperties" in props:
-                alg.setPropertyValue("ReductionProperties",
-                                     self.get_reduction_table_name())
+                alg.setPropertyValue("ReductionProperties", self.get_reduction_table_name())
             alg.execute()
 
     def post_process(self):
@@ -179,7 +178,7 @@ class Reducer(object):
             if self._data_files[ws] is not None:
                 datafile = self._data_files[ws]
                 if isinstance(datafile, list):
-                    datafile=','.join(datafile)
+                    datafile = ','.join(datafile)
                 if "Filename" in props:
                     alg.setPropertyValue("Filename", datafile)
                 else:
@@ -193,15 +192,14 @@ class Reducer(object):
                     Logger("Reducer").error(msg)
 
             if "ReductionProperties" in props:
-                alg.setPropertyValue("ReductionProperties",
-                                     self.get_reduction_table_name())
+                alg.setPropertyValue("ReductionProperties", self.get_reduction_table_name())
 
             if "OutputWorkspace" in props:
                 alg.setPropertyValue("OutputWorkspace", ws)
 
             alg.execute()
             if "OutputMessage" in props:
-                self.log_text += alg.getProperty("OutputMessage").value+'\n'
+                self.log_text += alg.getProperty("OutputMessage").value + '\n'
 
         #any clean up, possibly removing workspaces
         self.post_process()
@@ -214,11 +212,11 @@ class Reducer(object):
             else:
                 output_dir = os.path.expanduser('~')
 
-        self.log_text += "Reduction completed in %g sec\n" % (time.time()-t_0)
+        self.log_text += "Reduction completed in %g sec\n" % (time.time() - t_0)
         if _first_ws_name is not None:
             log_path = os.path.join(output_dir, "%s_reduction.log" % _first_ws_name)
         else:
-            log_path = os.path.join(output_dir,"%s_reduction.log" % self.instrument_name)
+            log_path = os.path.join(output_dir, "%s_reduction.log" % self.instrument_name)
         self.log_text += "Log saved to %s" % log_path
 
         # Write the log to file
@@ -249,4 +247,4 @@ def extract_workspace_name(filepath, suffix=''):
     #TODO: check whether the workspace name is already in use
     #      and modify it if it is.
 
-    return basename+suffix
+    return basename + suffix

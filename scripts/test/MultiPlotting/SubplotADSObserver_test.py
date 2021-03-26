@@ -11,7 +11,6 @@ from MultiPlotting.subplot.subplot_ADS_observer import SubplotADSObserver
 
 
 class SubplotADSObserverTest(unittest.TestCase):
-
     def setUp(self):
         self.subplot = mock.Mock()
         self.obs = SubplotADSObserver(self.subplot)

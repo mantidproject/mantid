@@ -18,7 +18,6 @@ class ReductionStep(object):
     """
         Base class for reduction steps
     """
-
     @classmethod
     def delete_workspaces(cls, workspace):
         """
@@ -42,7 +41,8 @@ class ReductionStep(object):
             Implemented the reduction step.
             @param reducer: Reducer object for which the step is executed
             @param inputworkspace: Name of the workspace to apply this step to
-            @param outputworkspace: Name of the workspace to have as an output. If this is None it will be set to inputworkspace
+            @param outputworkspace: Name of the workspace to have as an output. If this is None it will be set to
+            inputworkspace
         """
         raise NotImplementedError
 
@@ -81,8 +81,8 @@ class Reducer(object):
         if issubclass(configuration.__class__, BaseInstrument):
             self.instrument = configuration
         else:
-            raise RuntimeError(
-                "Reducer.set_instrument expects an %s object, found %s" % (BaseInstrument, configuration.__class__))
+            raise RuntimeError("Reducer.set_instrument expects an %s object, found %s" %
+                               (BaseInstrument, configuration.__class__))
 
     def set_data_path(self, path):
         """

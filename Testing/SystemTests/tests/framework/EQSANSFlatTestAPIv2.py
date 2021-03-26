@@ -16,13 +16,13 @@ FILE_LOCATION = "/SNS/EQSANS/IPTS-5636/data/"
 class EQSANSFlatTest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
         files = []
-        files.append(FILE_LOCATION+"EQSANS_5704_event.nxs")
-        files.append(FILE_LOCATION+"EQSANS_5734_event.nxs")
-        files.append(FILE_LOCATION+"EQSANS_5732_event.nxs")
-        files.append(FILE_LOCATION+"EQSANS_5738_event.nxs")
-        files.append(FILE_LOCATION+"EQSANS_5729_event.nxs")
-        files.append(FILE_LOCATION+"EQSANS_5737_event.nxs")
-        files.append(FILE_LOCATION+"EQSANS_5703_event.nxs")
+        files.append(FILE_LOCATION + "EQSANS_5704_event.nxs")
+        files.append(FILE_LOCATION + "EQSANS_5734_event.nxs")
+        files.append(FILE_LOCATION + "EQSANS_5732_event.nxs")
+        files.append(FILE_LOCATION + "EQSANS_5738_event.nxs")
+        files.append(FILE_LOCATION + "EQSANS_5729_event.nxs")
+        files.append(FILE_LOCATION + "EQSANS_5737_event.nxs")
+        files.append(FILE_LOCATION + "EQSANS_5703_event.nxs")
         files.append("bl6_flux_at_sample")
         return files
 
@@ -34,10 +34,10 @@ class EQSANSFlatTest(systemtesting.MantidSystemTest):
             and reproduces reference results.
         """
         configI = ConfigService.Instance()
-        configI["facilityName"]='SNS'
+        configI["facilityName"] = 'SNS'
         EQSANS()
         SolidAngle()
-        DarkCurrent(FILE_LOCATION+"EQSANS_5704_event.nxs")
+        DarkCurrent(FILE_LOCATION + "EQSANS_5704_event.nxs")
         TotalChargeNormalization(beam_file="bl6_flux_at_sample")
         AzimuthalAverage(n_bins=100, n_subpix=1, log_binning=False)
         IQxQy(nbins=100)
@@ -45,18 +45,21 @@ class EQSANSFlatTest(systemtesting.MantidSystemTest):
         PerformFlightPathCorrection(True)
         UseConfigMask(True)
         SetBeamCenter(89.6749, 129.693)
-        SensitivityCorrection(FILE_LOCATION+'EQSANS_5703_event.nxs',
+        SensitivityCorrection(FILE_LOCATION + 'EQSANS_5703_event.nxs',
                               min_sensitivity=0.5,
-                              max_sensitivity=1.5, use_sample_dc=True)
-        DirectBeamTransmission(FILE_LOCATION+"EQSANS_5734_event.nxs",
-                               FILE_LOCATION+"EQSANS_5738_event.nxs", beam_radius=3)
+                              max_sensitivity=1.5,
+                              use_sample_dc=True)
+        DirectBeamTransmission(FILE_LOCATION + "EQSANS_5734_event.nxs",
+                               FILE_LOCATION + "EQSANS_5738_event.nxs",
+                               beam_radius=3)
         ThetaDependentTransmission(False)
-        AppendDataFile([FILE_LOCATION+"EQSANS_5729_event.nxs"])
+        AppendDataFile([FILE_LOCATION + "EQSANS_5729_event.nxs"])
         CombineTransmissionFits(True)
 
-        Background(FILE_LOCATION+"EQSANS_5732_event.nxs")
-        BckDirectBeamTransmission(FILE_LOCATION+"EQSANS_5737_event.nxs",
-                                  FILE_LOCATION+"EQSANS_5738_event.nxs", beam_radius=3)
+        Background(FILE_LOCATION + "EQSANS_5732_event.nxs")
+        BckDirectBeamTransmission(FILE_LOCATION + "EQSANS_5737_event.nxs",
+                                  FILE_LOCATION + "EQSANS_5738_event.nxs",
+                                  beam_radius=3)
         BckThetaDependentTransmission(False)
         BckCombineTransmissionFits(True)
         SaveIqAscii(process='None')

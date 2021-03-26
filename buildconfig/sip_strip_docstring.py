@@ -10,7 +10,6 @@ import sys
 from optparse import OptionParser
 
 
-
 #----------------------------------------------------------
 def process_sip(filename):
     """ Reads an input .sip file and removes anything
@@ -60,24 +59,22 @@ def process_sip(filename):
     # Give back the generated lines
     return (outlines, wikilines)
 
-#----------------------------------------------------------
-if __name__=="__main__":
 
-    parser = OptionParser(description=
-"""Script to strip Docstring directives from a .sip file.
+#----------------------------------------------------------
+if __name__ == "__main__":
+
+    parser = OptionParser(description="""Script to strip Docstring directives from a .sip file.
 For use with old version of sip (<4.10) e.g. RHEL5 build.
 This will not be needed when RHEL5 is no longer supported
 """)
-    parser.add_option('-i', metavar='SIPFILE', dest="sipfile",
-                        help='The .sip input file')
+    parser.add_option('-i', metavar='SIPFILE', dest="sipfile", help='The .sip input file')
 
-    parser.add_option('-o', metavar='OUTPUTFILE', dest="outputfile",
-                        help='The name of the output file')
+    parser.add_option('-o', metavar='OUTPUTFILE', dest="outputfile", help='The name of the output file')
 
-    parser.add_option('-w', metavar='WIKIFILE', dest="wikifile",
-                        help='The name of the file containing wiki text for documenting')
-
-
+    parser.add_option('-w',
+                      metavar='WIKIFILE',
+                      dest="wikifile",
+                      help='The name of the file containing wiki text for documenting')
 
     (options, args) = parser.parse_args()
 
@@ -99,4 +96,3 @@ This will not be needed when RHEL5 is no longer supported
         f = open(options.wikifile, 'w')
         f.write('\n'.join(wiki))
         f.close()
-

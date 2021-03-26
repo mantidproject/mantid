@@ -81,8 +81,8 @@ class ProjectRecoveryLoaderTest(unittest.TestCase):
 
         self.pr_loader._load_project_interfaces("")
 
-        self.assertEqual(loader.return_value.load_project.call_args, mock.call(file_name=self.pr.recovery_file_ext,
-                                                                               load_workspaces=False))
+        self.assertEqual(loader.return_value.load_project.call_args,
+                         mock.call(file_name=self.pr.recovery_file_ext, load_workspaces=False))
 
     def test_compile_recovery_script(self):
         # make sure to clear out the script if it exists

@@ -105,15 +105,9 @@ class MantidGeom(object):
             self._append_child("location", sample, x="0.0", y="0.0", z="0.0")
         else:
             if coord_type == "cartesian":
-                self._append_child("location", sample,
-                                   x=location[0],
-                                   y=location[1],
-                                   z=location[2])
+                self._append_child("location", sample, x=location[0], y=location[1], z=location[2])
             if coord_type == "spherical":
-                self._append_child("location", sample,
-                                   r=location[0],
-                                   t=location[1],
-                                   p=location[2])
+                self._append_child("location", sample, r=location[0], t=location[1], p=location[2])
 
         child = self._append_child("type", self._root, name="sample-position")
         child.setAttribute("is", "SamplePos")
@@ -129,8 +123,12 @@ class MantidGeom(object):
             for j in range(len(r[i])):
                 if str(r[i][j]) != "nan":
                     basecomponent = self._append_child("component", type_element, type="pixel")
-                    location_element = self._append_child("location", basecomponent, r=str(r[i][j]),
-                                                          t=str(theta[i][j]), p=str(phi[i][j]), name=str(names[i][j]))
+                    location_element = self._append_child("location",
+                                                          basecomponent,
+                                                          r=str(r[i][j]),
+                                                          t=str(theta[i][j]),
+                                                          p=str(phi[i][j]),
+                                                          name=str(names[i][j]))
                     self._append_child("facing", location_element, x="0.0", y="0.0", z="0.0")
 
                     efixed_comp = self._append_child("parameter", basecomponent, name="Efixed")
@@ -213,8 +211,7 @@ class MantidGeom(object):
         else:
             self.addLocation(comp_element, x, y, z, rot_x, rot_y, rot_z)
 
-    def addSingleDetector(self, root, x, y, z, rot_x, rot_y, rot_z, name=None,
-                          _id=None, usepolar=None):
+    def addSingleDetector(self, root, x, y, z, rot_x, rot_y, rot_z, name=None, _id=None, usepolar=None):
         """
         Add a single detector by explicit declaration. The rotation order is
         performed as follows: y, x, z.
@@ -237,20 +234,17 @@ class MantidGeom(object):
             pos_loc = self._append_child("location", root, x=str(x), y=str(y), z=str(z))
 
         if rot_y is not None:
-            r1 = self._append_child("rot", pos_loc, **{"val": str(rot_y), "axis-x": "0",
-                                                       "axis-y": "1", "axis-z": "0"})
+            r1 = self._append_child("rot", pos_loc, **{"val": str(rot_y), "axis-x": "0", "axis-y": "1", "axis-z": "0"})
         else:
             r1 = pos_loc
 
         if rot_x is not None:
-            r2 = self._append_child("rot", r1, **{"val": str(rot_x), "axis-x": "1",
-                                                  "axis-y": "0", "axis-z": "0"})
+            r2 = self._append_child("rot", r1, **{"val": str(rot_x), "axis-x": "1", "axis-y": "0", "axis-z": "0"})
         else:
             r2 = r1
 
         if rot_z is not None:
-            self._append_child("rot", r2, **{"val": str(rot_z), "axis-x": "0",
-                                             "axis-y": "0", "axis-z": "1"})
+            self._append_child("rot", r2, **{"val": str(rot_z), "axis-x": "0", "axis-y": "0", "axis-z": "1"})
 
     def addLocationPolar(self, root, r, theta, phi, name=None):
         if name is not None:
@@ -307,8 +301,7 @@ class MantidGeom(object):
             x = pack_start + (i * effective_tube_width)
             self._append_child("location", component, name=tube_name, x=str(x))
 
-    def addPixelatedTube(self, name, num_pixels, tube_height,
-                         type_name="pixel"):
+    def addPixelatedTube(self, name, num_pixels, tube_height, type_name="pixel"):
         """
         Add a tube of N pixels. If there are going to be more than one pixel
         type specified later, an optional type name can be given. The default
@@ -326,27 +319,25 @@ class MantidGeom(object):
             y = tube_start + (i * pixel_width)
             self._append_child("location", component, name=pixel_name, y=str(y))
 
-    def addCylinderPixel(self, name, center_bottom_base, axis, pixel_radius,
-                         pixel_height, is_type="detector"):
+    def addCylinderPixel(self, name, center_bottom_base, axis, pixel_radius, pixel_height, is_type="detector"):
         """
         Add a cylindrical pixel. The center_bottom_base is a 3-tuple of radius,
         theta, phi. The axis is a 3-tuple of x, y, z.
         """
         type_element = self._append_child("type", self._root, **{"name": name, "is": is_type})
         cylinder = self._append_child("cylinder", type_element, id="cyl-approx")
-        self._append_child("centre-of-bottom-base", cylinder,
+        self._append_child("centre-of-bottom-base",
+                           cylinder,
                            r=str(center_bottom_base[0]),
                            t=str(center_bottom_base[1]),
                            p=str(center_bottom_base[2]))
-        self._append_child("axis", cylinder,
-                           x=str(axis[0]), y=str(axis[1]), z=str(axis[2]))
+        self._append_child("axis", cylinder, x=str(axis[0]), y=str(axis[1]), z=str(axis[2]))
 
         self._append_child("radius", cylinder, val=str(pixel_radius))
         self._append_child("height", cylinder, val=str(pixel_height))
         self._append_child("algebra", type_element, val="cyl-approx")
 
-    def addCuboidPixel(self, name, lfb_pt, lft_pt, lbb_pt, rfb_pt,
-                       is_type="detector"):
+    def addCuboidPixel(self, name, lfb_pt, lft_pt, lbb_pt, rfb_pt, is_type="detector"):
         """
         Add a cuboid pixel. The origin of the cuboid is assumed to be the
         center of the front face of the cuboid. The parameters lfb_pt, lft_pt,
@@ -354,14 +345,10 @@ class MantidGeom(object):
         """
         type_element = self._append_child("type", self._root, **{"name": name, "is": is_type})
         cuboid = self._append_child("cuboid", type_element, id="shape")
-        self._append_child("left-front-bottom-point", cuboid, x=str(lfb_pt[0]),
-                           y=str(lfb_pt[1]), z=str(lfb_pt[2]))
-        self._append_child("left-front-top-point", cuboid, x=str(lft_pt[0]),
-                           y=str(lft_pt[1]), z=str(lft_pt[2]))
-        self._append_child("left-back-bottom-point", cuboid, x=str(lbb_pt[0]),
-                           y=str(lbb_pt[1]), z=str(lbb_pt[2]))
-        self._append_child("right-front-bottom-point", cuboid, x=str(rfb_pt[0]),
-                           y=str(rfb_pt[1]), z=str(rfb_pt[2]))
+        self._append_child("left-front-bottom-point", cuboid, x=str(lfb_pt[0]), y=str(lfb_pt[1]), z=str(lfb_pt[2]))
+        self._append_child("left-front-top-point", cuboid, x=str(lft_pt[0]), y=str(lft_pt[1]), z=str(lft_pt[2]))
+        self._append_child("left-back-bottom-point", cuboid, x=str(lbb_pt[0]), y=str(lbb_pt[1]), z=str(lbb_pt[2]))
+        self._append_child("right-front-bottom-point", cuboid, x=str(rfb_pt[0]), y=str(rfb_pt[1]), z=str(rfb_pt[2]))
         self._append_child("algebra", type_element, val="shape")
 
     def addDummyMonitor(self, radius, height):
@@ -395,17 +382,17 @@ class MantidGeom(object):
         step2, ...]. If no step is required, use None.
         """
         if len(idlist) % 3 != 0:
-            raise IndexError("Please specify list as [start1, end1, step1, "
-                             + "start2, end2, step2, ...]. If no step is"
-                             + "required, use None.")
+            raise IndexError("Please specify list as [start1, end1, step1, " +
+                             "start2, end2, step2, ...]. If no step is" + "required, use None.")
         num_ids = len(idlist) / 3
         id_element = self._append_child("idlist", self._root, idname=idname)
         for i in range(num_ids):
             if idlist[(i * 3) + 2] is None:
-                self._append_child("id", id_element, start=str(idlist[(i * 3)]),
-                                   end=str(idlist[(i * 3) + 1]))
+                self._append_child("id", id_element, start=str(idlist[(i * 3)]), end=str(idlist[(i * 3) + 1]))
             else:
-                self._append_child("id", id_element, start=str(idlist[(i * 3)]),
+                self._append_child("id",
+                                   id_element,
+                                   start=str(idlist[(i * 3)]),
                                    step=str(idlist[(i * 3) + 2]),
                                    end=str(idlist[(i * 3) + 1]))
 

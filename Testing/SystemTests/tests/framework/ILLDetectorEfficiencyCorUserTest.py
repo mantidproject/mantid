@@ -12,8 +12,10 @@ from testhelpers import assert_almost_equal
 
 class IN4(systemtesting.MantidSystemTest):
     def runTest(self):
-        ws = DirectILLCollectData('ILL/IN4/084446.nxs', ElasticChannel='Default Elastic Channel',
-                                  FlatBkg='Flat Bkg OFF', Normalisation='Normalisation OFF')
+        ws = DirectILLCollectData('ILL/IN4/084446.nxs',
+                                  ElasticChannel='Default Elastic Channel',
+                                  FlatBkg='Flat Bkg OFF',
+                                  Normalisation='Normalisation OFF')
         for i in range(ws.getNumberHistograms()):
             ws.dataY(i).fill(1)
         dE = ConvertUnits(ws, 'DeltaE', 'Direct')
@@ -43,8 +45,10 @@ class IN4(systemtesting.MantidSystemTest):
 
 class IN5(systemtesting.MantidSystemTest):
     def runTest(self):
-        ws = DirectILLCollectData('ILL/IN5/104007.nxs', ElasticChannel='Default Elastic Channel',
-                                  FlatBkg='Flat Bkg OFF', Normalisation='Normalisation OFF')
+        ws = DirectILLCollectData('ILL/IN5/104007.nxs',
+                                  ElasticChannel='Default Elastic Channel',
+                                  FlatBkg='Flat Bkg OFF',
+                                  Normalisation='Normalisation OFF')
         for i in range(ws.getNumberHistograms()):
             ws.dataY(i).fill(1)
         dE = ConvertUnits(ws, 'DeltaE', 'Direct')
@@ -63,8 +67,10 @@ class IN5(systemtesting.MantidSystemTest):
 
 class IN6(systemtesting.MantidSystemTest):
     def runTest(self):
-        ws = DirectILLCollectData('ILL/IN6/164192.nxs', ElasticChannel='Default Elastic Channel',
-                                  FlatBkg='Flat Bkg OFF', Normalisation='Normalisation OFF')
+        ws = DirectILLCollectData('ILL/IN6/164192.nxs',
+                                  ElasticChannel='Default Elastic Channel',
+                                  FlatBkg='Flat Bkg OFF',
+                                  Normalisation='Normalisation OFF')
         for i in range(ws.getNumberHistograms()):
             ws.dataY(i).fill(1)
         dE = ConvertUnits(ws, 'DeltaE', 'Direct')
@@ -75,8 +81,8 @@ class IN6(systemtesting.MantidSystemTest):
             high = x > 5.113
             low = x <= 5.113
             c = numpy.empty_like(x)
-            c[high] = 0.94 * (1. - numpy.exp(-3.284/numpy.sqrt(x[high])))
-            c[low] = numpy.exp(-0.0565 / numpy.sqrt(x[low])) * (1.- numpy.exp(-3.284 / numpy.sqrt(x[low])))
+            c[high] = 0.94 * (1. - numpy.exp(-3.284 / numpy.sqrt(x[high])))
+            c[low] = numpy.exp(-0.0565 / numpy.sqrt(x[low])) * (1. - numpy.exp(-3.284 / numpy.sqrt(x[low])))
             return c
 
         corr_at_Ei = det_corr(numpy.array([Ei]))[0]

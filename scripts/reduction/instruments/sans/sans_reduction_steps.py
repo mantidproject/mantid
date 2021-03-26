@@ -31,7 +31,6 @@ class BaseBeamFinder(ReductionStep):
         and the algorithm for calculates it using the beam's
         displacement under gravity
     """
-
     def __init__(self, beam_center_x=None, beam_center_y=None):
         """
             Initial beam center is given in pixel coordinates
@@ -79,7 +78,6 @@ class BaseTransmission(ReductionStep):
         as well as the algorithm for calculating it.
         TODO: ISIS doesn't use ApplyTransmissionCorrection, perhaps it's in Q1D, can we remove it from here?
     """
-
     def __init__(self, trans=0.0, error=0.0, theta_dependent=True):
         super(BaseTransmission, self).__init__()
         self._trans = float(trans)
@@ -135,7 +133,6 @@ class Normalize(ReductionStep):
         with in the workspace. By default the normalization is done with
         respect to the Instrument's incident monitor
     """
-
     def __init__(self, normalization_spectrum=None):
         super(Normalize, self).__init__()
         self._normalization_spectrum = normalization_spectrum
@@ -151,13 +148,11 @@ class Normalize(ReductionStep):
         if self._normalization_spectrum == reducer.instrument.NORMALIZATION_MONITOR:
             norm_count = mtd[workspace].getRun().getProperty("monitor").value
             # HFIR-specific: If we count for monitor we need to multiply by 1e8
-            Scale(InputWorkspace=workspace, OutputWorkspace=workspace,
-                  Factor=1.0e8 / norm_count, Operation='Multiply')
+            Scale(InputWorkspace=workspace, OutputWorkspace=workspace, Factor=1.0e8 / norm_count, Operation='Multiply')
             return "Normalization by monitor: %6.2g counts" % norm_count
         elif self._normalization_spectrum == reducer.instrument.NORMALIZATION_TIME:
             norm_count = mtd[workspace].getRun().getProperty("timer").value
-            Scale(InputWorkspace=workspace, OutputWorkspace=workspace,
-                  Factor=1.0 / norm_count, Operation='Multiply')
+            Scale(InputWorkspace=workspace, OutputWorkspace=workspace, Factor=1.0 / norm_count, Operation='Multiply')
             return "Normalization by time: %6.2g sec" % norm_count
         else:
             logger.notice("Normalization step did not get a valid normalization option: skipping")
@@ -175,7 +170,6 @@ class Mask(ReductionStep):
         ORNL & ISIS
 
     """
-
     def __init__(self):
         """
             Initialize masking
@@ -267,14 +261,14 @@ class Mask(ReductionStep):
     def add_cylinder(self, radius, xcentre, ycentre, ID='shape'):
         '''Mask the inside of an infinite cylinder on the input workspace.'''
         self.add_xml_shape(
-            self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0, 0, 1], id=ID) + '<algebra val="' + str(
-                ID) + '"/>')
+            self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0, 0, 1], id=ID) + '<algebra val="' + str(ID) +
+            '"/>')
 
     def add_outside_cylinder(self, radius, xcentre=0.0, ycentre=0.0, ID='shape'):
         '''Mask out the outside of a cylinder or specified radius'''
         self.add_xml_shape(
-            self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0, 0, 1], id=ID) + '<algebra val="#' + str(
-                ID) + '"/>')
+            self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0, 0, 1], id=ID) + '<algebra val="#' + str(ID) +
+            '"/>')
 
     def add_pixel_rectangle(self, x_min, x_max, y_min, y_max):
         """
@@ -331,11 +325,8 @@ class Mask(ReductionStep):
         instrument = reducer.instrument
         # Get a list of detector pixels to mask
         if self._nx_low != 0 or self._nx_high != 0 or self._ny_low != 0 or self._ny_high != 0:
-            self.masked_pixels.extend(instrument.get_masked_pixels(self._nx_low,
-                                                                   self._nx_high,
-                                                                   self._ny_low,
-                                                                   self._ny_high,
-                                                                   workspace))
+            self.masked_pixels.extend(
+                instrument.get_masked_pixels(self._nx_low, self._nx_high, self._ny_low, self._ny_high, workspace))
 
         if len(self.detect_list) > 0:
             MaskDetectors(Workspace=workspace, DetectorList=self.detect_list)
@@ -360,7 +351,6 @@ class CorrectToFileStep(ReductionStep):
         ISIS only
 
     """
-
     def __init__(self, file='', corr_type='', operation=''):
         """
             Parameters passed to this function are passed to
@@ -382,8 +372,11 @@ class CorrectToFileStep(ReductionStep):
 
     def execute(self, reducer, workspace):
         if self._filename:
-            CorrectToFile(WorkspaceToCorrect=workspace, Filename=self._filename, OutputWorkspace=workspace,
-                          FirstColumnValue=self._corr_type, WorkspaceOperation=self._operation)
+            CorrectToFile(WorkspaceToCorrect=workspace,
+                          Filename=self._filename,
+                          OutputWorkspace=workspace,
+                          FirstColumnValue=self._corr_type,
+                          WorkspaceOperation=self._operation)
 
 
 class CalculateNorm(object):
@@ -454,7 +447,8 @@ class CalculateNorm(object):
         wave_adj = None
         for wksp in wave_wksps:
             # before the workspaces can be combined they all need to match
-            api.RebinToWorkspace(WorkspaceToRebin=wksp, WorkspaceToMatch=reducer.output_wksp,
+            api.RebinToWorkspace(WorkspaceToRebin=wksp,
+                                 WorkspaceToMatch=reducer.output_wksp,
                                  OutputWorkspace=self.TMP_WORKSPACE_NAME)
 
             if not wave_adj:
@@ -493,8 +487,7 @@ class ConvertToQ(ReductionStep):
 
     """
     # the list of possible Q conversion algorithms to use
-    _OUTPUT_TYPES = {'1D': 'Q1D',
-                     '2D': 'Qxy'}
+    _OUTPUT_TYPES = {'1D': 'Q1D', '2D': 'Qxy'}
     # defines if Q1D should correct for gravity by default
     _DEFAULT_GRAV = False
 
@@ -587,15 +580,30 @@ class ConvertToQ(ReductionStep):
 
         try:
             if self._Q_alg == 'Q1D':
-                Q1D(DetBankWorkspace=workspace, OutputWorkspace=workspace, OutputBinning=self.binning,
-                    WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity,
-                    RadiusCut=self.r_cut * 1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
+                Q1D(DetBankWorkspace=workspace,
+                    OutputWorkspace=workspace,
+                    OutputBinning=self.binning,
+                    WavelengthAdj=wave_adj,
+                    PixelAdj=pixel_adj,
+                    AccountForGravity=self._use_gravity,
+                    RadiusCut=self.r_cut * 1000.0,
+                    WaveCut=self.w_cut,
+                    OutputParts=self.outputParts)
 
             elif self._Q_alg == 'Qxy':
-                Qxy(InputWorkspace=workspace, OutputWorkspace=workspace, MaxQxy=reducer.QXY2, DeltaQ=reducer.DQXY,
-                    WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity,
-                    RadiusCut=self.r_cut * 1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
-                ReplaceSpecialValues(InputWorkspace=workspace, OutputWorkspace=workspace, NaNValue="0",
+                Qxy(InputWorkspace=workspace,
+                    OutputWorkspace=workspace,
+                    MaxQxy=reducer.QXY2,
+                    DeltaQ=reducer.DQXY,
+                    WavelengthAdj=wave_adj,
+                    PixelAdj=pixel_adj,
+                    AccountForGravity=self._use_gravity,
+                    RadiusCut=self.r_cut * 1000.0,
+                    WaveCut=self.w_cut,
+                    OutputParts=self.outputParts)
+                ReplaceSpecialValues(InputWorkspace=workspace,
+                                     OutputWorkspace=workspace,
+                                     NaNValue="0",
                                      InfinityValue="0")
             else:
                 raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')
@@ -632,9 +640,7 @@ class GetSampleGeom(ReductionStep):
 
     """
     # IDs for each shape as used by the Colette software
-    _shape_ids = {1: 'cylinder-axis-up',
-                  2: 'cuboid',
-                  3: 'cylinder-axis-along'}
+    _shape_ids = {1: 'cylinder-axis-up', 2: 'cuboid', 3: 'cylinder-axis-along'}
     _default_shape = 'cylinder-axis-along'
 
     def __init__(self):
@@ -671,8 +677,8 @@ class GetSampleGeom(ReductionStep):
             # means that we weren't passed an ID number, the code below treats it as a shape name
             pass
         except KeyError:
-            sanslog.warning("Warning: Invalid geometry type for sample: " + str(
-                new_shape) + ". Setting default to " + self._default_shape)
+            sanslog.warning("Warning: Invalid geometry type for sample: " + str(new_shape) + ". Setting default to " +
+                            self._default_shape)
             new_shape = self._default_shape
 
         self._shape = new_shape
@@ -775,7 +781,6 @@ class SampleGeomCor(ReductionStep):
         ORNL only divides by thickness, in the absolute scaling step
 
     """
-
     def __init__(self):
         self.volume = 1.0
 
@@ -802,8 +807,8 @@ class SampleGeomCor(ReductionStep):
                 raise NotImplementedError('Shape "' + geo.shape + '" is not in the list of supported shapes')
         # pylint: disable=notimplemented-raised
         except TypeError:
-            raise TypeError('Error calculating sample volume with width=' + str(geo.width) + ' height=' + str(
-                geo.height) + 'and thickness=' + str(geo.thickness))
+            raise TypeError('Error calculating sample volume with width=' + str(geo.width) + ' height=' +
+                            str(geo.height) + 'and thickness=' + str(geo.thickness))
 
         return volume
 

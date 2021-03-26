@@ -23,7 +23,6 @@ class ObservableDictionary(dict):
     Override parts of dictionary that deal with adding, removing
     or changing data in the dictionary to call an observer.
     """
-
     def __init__(self, value):
         super(ObservableDictionary, self).__init__(value)
         self.observers = []

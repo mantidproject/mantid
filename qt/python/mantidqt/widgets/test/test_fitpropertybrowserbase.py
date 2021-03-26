@@ -16,7 +16,6 @@ from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowserBase
 
 @start_qapplication
 class TestFitPropertyBrowser(unittest.TestCase):
-
     def create_widget(self):
         return FitPropertyBrowserBase()
 
@@ -67,8 +66,7 @@ class TestFitPropertyBrowser(unittest.TestCase):
         yield self.start_load_from_string()
         yield self.set_function_string_blah()
         box = self.get_active_modal_widget()
-        self.assertEqual(box.text(),
-                         "Unexpected exception caught:\n\nError in input string to FunctionFactory\nblah")
+        self.assertEqual(box.text(), "Unexpected exception caught:\n\nError in input string to FunctionFactory\nblah")
         box.close()
 
     def test_load_from_string_lb(self):

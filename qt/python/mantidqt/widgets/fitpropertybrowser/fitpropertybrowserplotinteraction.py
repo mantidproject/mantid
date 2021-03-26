@@ -16,7 +16,6 @@ class FitPropertyBrowserPlotInteraction(QObject):
     """
     Defines an interface between the FitPropertyBrowser and the Matplotlib plot
     """
-
     def __init__(self, fit_browser, canvas, parent=None):
         super().__init__(parent)
         self.fit_browser = fit_browser
@@ -267,8 +266,13 @@ class FitPropertyBrowserPlotInteraction(QObject):
         legend = ax.get_legend()
 
         # Setting distribution=True prevents the guess being normalised
-        line = ax.plot(out_ws, wkspIndex=1, label=output_workspace_name, distribution=True,
-                       update_axes_labels=False, autoscale_on_update=False, **plotkwargs)[0]
+        line = ax.plot(out_ws,
+                       wkspIndex=1,
+                       label=output_workspace_name,
+                       distribution=True,
+                       update_axes_labels=False,
+                       autoscale_on_update=False,
+                       **plotkwargs)[0]
 
         if legend:
             ax.make_legend()

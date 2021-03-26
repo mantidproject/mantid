@@ -22,7 +22,7 @@ class LoadVisionInelastic(PythonAlgorithm):
         return "DataHandling\\Nexus"
 
     def seeAlso(self):
-        return [ "LoadVisionElasticBS","LoadVisionElasticEQ" ]
+        return ["LoadVisionElasticBS", "LoadVisionElasticEQ"]
 
     def name(self):
         return "LoadVisionInelastic"

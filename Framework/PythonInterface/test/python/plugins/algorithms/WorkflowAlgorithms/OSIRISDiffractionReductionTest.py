@@ -11,14 +11,10 @@ from mantid.api import *
 
 
 class OSIRISDiffractionReductionTest(unittest.TestCase):
-
     def _assert_valid_reduction_output(self, **kwargs):
-        workspace = OSIRISDiffractionReduction(StoreInADS=False,
-                                               OutputWorkspace="__temp",
-                                               **kwargs)
+        workspace = OSIRISDiffractionReduction(StoreInADS=False, OutputWorkspace="__temp", **kwargs)
 
-        self.assertTrue(isinstance(workspace, MatrixWorkspace),
-                        'Result workspace should be a matrix workspace.')
+        self.assertTrue(isinstance(workspace, MatrixWorkspace), 'Result workspace should be a matrix workspace.')
         self.assertEqual(workspace.getAxis(0).getUnit().unitID(), 'dSpacing')
         self.assertEqual(workspace.getNumberHistograms(), 1)
 
@@ -172,6 +168,7 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
                           Vanadium=['OSI10156.raw'],
                           SpectraMin=3,
                           SpectraMax=361)
+
 
 if __name__ == '__main__':
     unittest.main()

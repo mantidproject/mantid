@@ -23,15 +23,18 @@ class LoadDNSLegacyTest(unittest.TestCase):
     def test_LoadValidData(self):
         outputWorkspaceName = "LoadDNSLegacyTest_Test1"
         filename = "dn134011vana.d_dat"
-        alg_test = run_algorithm("LoadDNSLegacy", Filename=filename, Normalization='no',
-                                 OutputWorkspace=outputWorkspaceName, CoilCurrentsTable=self.curtable)
+        alg_test = run_algorithm("LoadDNSLegacy",
+                                 Filename=filename,
+                                 Normalization='no',
+                                 OutputWorkspace=outputWorkspaceName,
+                                 CoilCurrentsTable=self.curtable)
         self.assertTrue(alg_test.isExecuted())
 
         # Verify some values
         ws = AnalysisDataService.retrieve(outputWorkspaceName)
         # dimensions
         self.assertEqual(24, ws.getNumberHistograms())
-        self.assertEqual(2,  ws.getNumDims())
+        self.assertEqual(2, ws.getNumDims())
         # data array
         self.assertEqual(31461, ws.readY(1))
         self.assertEqual(13340, ws.readY(23))
@@ -44,7 +47,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual('no', run.getProperty('normalized').value)
         # check whether detector bank is rotated
         det = ws.getDetector(0)
-        self.assertAlmostEqual(8.54, ws.detectorSignedTwoTheta(det)*180/pi)
+        self.assertAlmostEqual(8.54, ws.detectorSignedTwoTheta(det) * 180 / pi)
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
         return
 
@@ -76,25 +79,31 @@ class LoadDNSLegacyTest(unittest.TestCase):
         outputWorkspaceName = "LoadDNSLegacyTest_Test2"
         filename = "dns-incomplete.d_dat"
         self._createIncompleteFile(filename)
-        self.assertRaises(RuntimeError, LoadDNSLegacy,  Filename=filename,
-                          OutputWorkspace=outputWorkspaceName, CoilCurrentsTable=self.curtable)
+        self.assertRaises(RuntimeError,
+                          LoadDNSLegacy,
+                          Filename=filename,
+                          OutputWorkspace=outputWorkspaceName,
+                          CoilCurrentsTable=self.curtable)
         os.remove(filename)
 
     def test_LoadNormalizeToDuration(self):
         outputWorkspaceName = "LoadDNSLegacyTest_Test1"
         filename = "dn134011vana.d_dat"
-        alg_test = run_algorithm("LoadDNSLegacy", Filename=filename, Normalization='duration',
-                                 OutputWorkspace=outputWorkspaceName, CoilCurrentsTable=self.curtable)
+        alg_test = run_algorithm("LoadDNSLegacy",
+                                 Filename=filename,
+                                 Normalization='duration',
+                                 OutputWorkspace=outputWorkspaceName,
+                                 CoilCurrentsTable=self.curtable)
         self.assertTrue(alg_test.isExecuted())
 
         # Verify some values
         ws = AnalysisDataService.retrieve(outputWorkspaceName)
         # dimensions
         self.assertEqual(24, ws.getNumberHistograms())
-        self.assertEqual(2,  ws.getNumDims())
+        self.assertEqual(2, ws.getNumDims())
         # data array
-        self.assertAlmostEqual(31461.0/600.0, ws.readY(1))
-        self.assertAlmostEqual(13340.0/600.0, ws.readY(23))
+        self.assertAlmostEqual(31461.0 / 600.0, ws.readY(1))
+        self.assertAlmostEqual(13340.0 / 600.0, ws.readY(23))
         # sample logs
         run = ws.getRun()
         self.assertEqual(-8.54, run.getProperty('deterota').value)
@@ -102,25 +111,28 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual('duration', run.getProperty('normalized').value)
         # check whether detector bank is rotated
         det = ws.getDetector(0)
-        self.assertAlmostEqual(8.54, ws.detectorSignedTwoTheta(det)*180/pi)
+        self.assertAlmostEqual(8.54, ws.detectorSignedTwoTheta(det) * 180 / pi)
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
         return
 
     def test_LoadNormalizeToMonitor(self):
         outputWorkspaceName = "LoadDNSLegacyTest_Test5"
         filename = "dn134011vana.d_dat"
-        alg_test = run_algorithm("LoadDNSLegacy", Filename=filename, Normalization='monitor',
-                                 OutputWorkspace=outputWorkspaceName, CoilCurrentsTable=self.curtable)
+        alg_test = run_algorithm("LoadDNSLegacy",
+                                 Filename=filename,
+                                 Normalization='monitor',
+                                 OutputWorkspace=outputWorkspaceName,
+                                 CoilCurrentsTable=self.curtable)
         self.assertTrue(alg_test.isExecuted())
 
         # Verify some values
         ws = AnalysisDataService.retrieve(outputWorkspaceName)
         # dimensions
         self.assertEqual(24, ws.getNumberHistograms())
-        self.assertEqual(2,  ws.getNumDims())
+        self.assertEqual(2, ws.getNumDims())
         # data array
-        self.assertAlmostEqual(31461.0/8332872.0, ws.readY(1))
-        self.assertAlmostEqual(13340.0/8332872.0, ws.readY(23))
+        self.assertAlmostEqual(31461.0 / 8332872.0, ws.readY(1))
+        self.assertAlmostEqual(13340.0 / 8332872.0, ws.readY(23))
         # sample logs
         run = ws.getRun()
         self.assertEqual(-8.54, run.getProperty('deterota').value)
@@ -128,14 +140,16 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual('monitor', run.getProperty('normalized').value)
         # check whether detector bank is rotated
         det = ws.getDetector(0)
-        self.assertAlmostEqual(8.54, ws.detectorSignedTwoTheta(det)*180/pi)
+        self.assertAlmostEqual(8.54, ws.detectorSignedTwoTheta(det) * 180 / pi)
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
         return
 
     def test_LoadNoCurtable(self):
         outputWorkspaceName = "LoadDNSLegacyTest_Test6"
         filename = "dn134011vana.d_dat"
-        alg_test = run_algorithm("LoadDNSLegacy", Filename=filename, Normalization='no',
+        alg_test = run_algorithm("LoadDNSLegacy",
+                                 Filename=filename,
+                                 Normalization='no',
                                  OutputWorkspace=outputWorkspaceName)
         self.assertTrue(alg_test.isExecuted())
 
@@ -143,7 +157,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         ws = AnalysisDataService.retrieve(outputWorkspaceName)
         # dimensions
         self.assertEqual(24, ws.getNumberHistograms())
-        self.assertEqual(2,  ws.getNumDims())
+        self.assertEqual(2, ws.getNumDims())
         # data array
         self.assertEqual(31461, ws.readY(1))
         self.assertEqual(13340, ws.readY(23))
@@ -156,27 +170,30 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual('no', run.getProperty('normalized').value)
         # check whether detector bank is rotated
         det = ws.getDetector(0)
-        self.assertAlmostEqual(8.54, ws.detectorSignedTwoTheta(det)*180/pi)
+        self.assertAlmostEqual(8.54, ws.detectorSignedTwoTheta(det) * 180 / pi)
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
         return
 
     def test_LoadTOF(self):
         outputWorkspaceName = "LoadDNSLegacyTest_Test7"
         filename = "dnstof.d_dat"
-        tof1 = 424.668     # must be changed if L1 will change
-        alg_test = run_algorithm("LoadDNSLegacy", Filename=filename, Normalization='no',
-                                 ElasticChannel=65, OutputWorkspace=outputWorkspaceName)
+        tof1 = 424.668  # must be changed if L1 will change
+        alg_test = run_algorithm("LoadDNSLegacy",
+                                 Filename=filename,
+                                 Normalization='no',
+                                 ElasticChannel=65,
+                                 OutputWorkspace=outputWorkspaceName)
         self.assertTrue(alg_test.isExecuted())
 
         # Verify some values
         ws = AnalysisDataService.retrieve(outputWorkspaceName)
         # dimensions
         self.assertEqual(24, ws.getNumberHistograms())
-        self.assertEqual(100,  ws.blocksize())
+        self.assertEqual(100, ws.blocksize())
         # data array
         self.assertEqual(8, ws.readY(19)[23])
         self.assertAlmostEqual(tof1, ws.readX(0)[0], 3)
-        self.assertAlmostEqual(tof1+40.1*100, ws.readX(0)[100], 3)
+        self.assertAlmostEqual(tof1 + 40.1 * 100, ws.readX(0)[100], 3)
         # sample logs
         run = ws.getRun()
         self.assertEqual(-7.5, run.getProperty('deterota').value)
@@ -188,15 +205,18 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual('no', run.getProperty('normalized').value)
         # check whether detector bank is rotated
         det = ws.getDetector(0)
-        self.assertAlmostEqual(7.5, ws.detectorSignedTwoTheta(det)*180/pi)
+        self.assertAlmostEqual(7.5, ws.detectorSignedTwoTheta(det) * 180 / pi)
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
         return
 
     def test_LoadWavelength(self):
         outputWorkspaceName = "LoadDNSLegacyTest_Test8"
         filename = "dn134011vana.d_dat"
-        alg_test = run_algorithm("LoadDNSLegacy", Filename=filename, Normalization='no',
-                                 OutputWorkspace=outputWorkspaceName, CoilCurrentsTable=self.curtable,
+        alg_test = run_algorithm("LoadDNSLegacy",
+                                 Filename=filename,
+                                 Normalization='no',
+                                 OutputWorkspace=outputWorkspaceName,
+                                 CoilCurrentsTable=self.curtable,
                                  Wavelength=5.7)
 
         self.assertTrue(alg_test.isExecuted())
@@ -205,7 +225,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         ws = AnalysisDataService.retrieve(outputWorkspaceName)
         # dimensions
         self.assertEqual(24, ws.getNumberHistograms())
-        self.assertEqual(2,  ws.getNumDims())
+        self.assertEqual(2, ws.getNumDims())
         # data array
         self.assertEqual(31461, ws.readY(1))
         self.assertEqual(13340, ws.readY(23))
@@ -217,6 +237,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertAlmostEqual(2.51782, run.getProperty('Ei').value, 3)
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
         return
+
 
 if __name__ == '__main__':
     unittest.main()

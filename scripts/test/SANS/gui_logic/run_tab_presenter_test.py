@@ -21,25 +21,44 @@ from sans.test_helper.common import (remove_file)
 from sans.test_helper.mock_objects import (create_mock_view)
 from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file)
 
-BATCH_FILE_TEST_CONTENT_1 = [RowEntries(sample_scatter=1, sample_transmission=2,
-                                        sample_direct=3, output_name='test_file',
-                                        user_file='user_test_file'),
-                             RowEntries(sample_scatter=1, can_scatter=2, output_name="test_file2")]
+BATCH_FILE_TEST_CONTENT_1 = [
+    RowEntries(sample_scatter=1,
+               sample_transmission=2,
+               sample_direct=3,
+               output_name='test_file',
+               user_file='user_test_file'),
+    RowEntries(sample_scatter=1, can_scatter=2, output_name="test_file2")
+]
 
-BATCH_FILE_TEST_CONTENT_2 = [RowEntries(sample_scatter='SANS2D00022024', sample_transmission='SANS2D00022048',
-                                        sample_direct='SANS2D00022048', output_name="test_file"),
-                             RowEntries(sample_scatter='SANS2D00022024', output_name='test_file2')]
+BATCH_FILE_TEST_CONTENT_2 = [
+    RowEntries(sample_scatter='SANS2D00022024',
+               sample_transmission='SANS2D00022048',
+               sample_direct='SANS2D00022048',
+               output_name="test_file"),
+    RowEntries(sample_scatter='SANS2D00022024', output_name='test_file2')
+]
 
-BATCH_FILE_TEST_CONTENT_3 = [RowEntries(sample_scatter='SANS2D00022024', sample_scatter_period=3,
-                                        output_name='test_file')]
+BATCH_FILE_TEST_CONTENT_3 = [
+    RowEntries(sample_scatter='SANS2D00022024', sample_scatter_period=3, output_name='test_file')
+]
 
-BATCH_FILE_TEST_CONTENT_4 = [RowEntries(sample_scatter='SANS2D00022024', sample_transmission='SANS2D00022048',
-                                        sample_direct='SANS2D00022048', output_name='test_file'),
-                             RowEntries(sample_scatter='SANS2D00022024', output_name='test_file2')]
+BATCH_FILE_TEST_CONTENT_4 = [
+    RowEntries(sample_scatter='SANS2D00022024',
+               sample_transmission='SANS2D00022048',
+               sample_direct='SANS2D00022048',
+               output_name='test_file'),
+    RowEntries(sample_scatter='SANS2D00022024', output_name='test_file2')
+]
 
-BATCH_FILE_TEST_CONTENT_5 = [RowEntries(sample_scatter='SANS2D00022024', sample_transmission='SANS2D00022048',
-                                        sample_direct='SANS2D00022048', output_name='test_file',
-                                        sample_thickness=5, sample_height=2, sample_width=8)]
+BATCH_FILE_TEST_CONTENT_5 = [
+    RowEntries(sample_scatter='SANS2D00022024',
+               sample_transmission='SANS2D00022048',
+               sample_direct='SANS2D00022048',
+               output_name='test_file',
+               sample_thickness=5,
+               sample_height=2,
+               sample_width=8)
+]
 
 
 def get_non_empty_row_mock(value):
@@ -80,7 +99,9 @@ class RunTabPresenterTest(unittest.TestCase):
         # TODO  an observer pattern and common interface to exchange messages. However for the moment
         # TODO  we will skip patching each
         self.presenter = RunTabPresenter(SANSFacility.ISIS,
-                                         model=self._mock_model, table_model=self._mock_table, view=self._mock_view)
+                                         model=self._mock_model,
+                                         table_model=self._mock_table,
+                                         view=self._mock_view)
 
         # The beam centre presenter will run QThreads which leads to flaky tests, so mock out
         self.presenter._beam_centre_presenter = mock.Mock()
@@ -553,9 +574,9 @@ class RunTabPresenterTest(unittest.TestCase):
         self._mock_table.get_non_empty_rows.return_value = []
 
         self.presenter.on_export_table_clicked()
-        self.assertEqual(self._mock_csv_parser.save_batch_file.call_count, 0,
-                         "_save_batch_file should not have been called."
-                         " It was called {} times.".format(self.presenter._export_table.call_count))
+        self.assertEqual(
+            self._mock_csv_parser.save_batch_file.call_count, 0, "_save_batch_file should not have been called."
+            " It was called {} times.".format(self.presenter._export_table.call_count))
 
     def test_buttons_enabled_after_export_table_fails(self):
         self._mock_table.get_non_empty_rows.return_value = [RowEntries()]

@@ -14,7 +14,6 @@ from qtpy import QtWidgets
 import Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table as periodic_table
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table import PeriodicList
 
-
 number_side_effect_true = 3
 
 
@@ -55,10 +54,10 @@ class PeriodicListTest(unittest.TestCase):
     def test_all_tree_items_have_correct_name(self):
         self.plist._fill_widget(None)
 
-        assert all([self.plist.tree_items[i].text(0) == str(el.Z)
-                    for i, el in enumerate(periodic_table._default_table_items)])
-        assert all([self.plist.tree_items[i].text(1) == el.symbol
-                    for i, el in enumerate(periodic_table._default_table_items)])
+        assert all(
+            [self.plist.tree_items[i].text(0) == str(el.Z) for i, el in enumerate(periodic_table._default_table_items)])
+        assert all(
+            [self.plist.tree_items[i].text(1) == el.symbol for i, el in enumerate(periodic_table._default_table_items)])
 
     def test_that_selectionChanged_emits_correct_signal(self):
         self.plist.sigSelectionChanged = mock.Mock()
@@ -73,9 +72,10 @@ class PeriodicListTest(unittest.TestCase):
         ret = self.plist.getSelection()
 
         self.assertEqual(len(ret), 3)
-        self.assertEqual(ret, [periodic_table._default_table_items[0],
-                               periodic_table._default_table_items[1],
-                               periodic_table._default_table_items[2]])
+        self.assertEqual(ret, [
+            periodic_table._default_table_items[0], periodic_table._default_table_items[1],
+            periodic_table._default_table_items[2]
+        ])
 
     def test_that_setSelectedElements_throws_when_given_no_elements(self):
         with self.assertRaises(IndexError):
@@ -90,9 +90,9 @@ class PeriodicListTest(unittest.TestCase):
         self.plist.setSelectedElements(['H', 'Li'])
 
         assert all([item.setSelected.call_count == 1 for item in self.plist.tree_items])
-        item1.setSelected.assert_called_with(True)   # H
+        item1.setSelected.assert_called_with(True)  # H
         item2.setSelected.assert_called_with(False)  # He
-        item3.setSelected.assert_called_with(True)   # Li
+        item3.setSelected.assert_called_with(True)  # Li
         item4.setSelected.assert_called_with(False)  # Be
 
 

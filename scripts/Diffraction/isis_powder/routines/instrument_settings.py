@@ -80,8 +80,7 @@ class InstrumentSettings(object):
         if advanced_config:
             self._parse_attributes(self._adv_config_dict, suppress_warnings=suppress_warnings)
         if advanced_config or basic_config:
-            self._parse_attributes(self._basic_conf_dict,
-                                   suppress_warnings=(not basic_config or suppress_warnings))
+            self._parse_attributes(self._basic_conf_dict, suppress_warnings=(not basic_config or suppress_warnings))
         if advanced_config or basic_config or kwargs:
             self._parse_attributes(self._kwargs, suppress_warnings=(not kwargs or suppress_warnings))
 
@@ -96,13 +95,13 @@ class InstrumentSettings(object):
                 continue  # Skip so we don't accidentally re-add this dictionary
 
             # Update attributes from said dictionary
-            found_param_entry = next((param_entry for param_entry in self._param_map
-                                      if config_key == param_entry.ext_name), None)
+            found_param_entry = next(
+                (param_entry for param_entry in self._param_map if config_key == param_entry.ext_name), None)
             if found_param_entry:
                 # Update the internal parameter entry
-                self._update_attribute(
-                    param_map=found_param_entry, param_val=dict_to_parse[found_param_entry.ext_name],
-                    suppress_warnings=suppress_warnings)
+                self._update_attribute(param_map=found_param_entry,
+                                       param_val=dict_to_parse[found_param_entry.ext_name],
+                                       suppress_warnings=suppress_warnings)
             else:
                 # Key is unknown to us
                 _print_known_keys(self._param_map)
@@ -136,8 +135,8 @@ class InstrumentSettings(object):
             if previous_value is not None and previous_value != param_val:
 
                 # Print warning of what we value we are replacing for which parameter
-                warnings.warn("Replacing parameter: '" + str(param_map.ext_name) + "' which was previously set to: '"
-                              + str(getattr(self, attribute_name)) + "' with new value: '" + str(param_val) + "'")
+                warnings.warn("Replacing parameter: '" + str(param_map.ext_name) + "' which was previously set to: '" +
+                              str(getattr(self, attribute_name)) + "' with new value: '" + str(param_val) + "'")
 
         # Finally set the new attribute value
         setattr(self, attribute_name, param_val)
@@ -197,9 +196,9 @@ def _get_enum_values(enum_cls):
 
 
 def _print_known_keys(master_mapping):
-    print ("\nKnown keys are:")
+    print("\nKnown keys are:")
     print("----------------------------------")
     sorted_attributes = sorted(master_mapping, key=lambda param_map_entry: param_map_entry.ext_name)
     for param_entry in sorted_attributes:
-        print (param_entry.ext_name + ', ', end="")
+        print(param_entry.ext_name + ', ', end="")
     print("\n----------------------------------")

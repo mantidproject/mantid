@@ -16,7 +16,6 @@ NORMALISATION_STATE = False
 
 
 class ExternalPlottingModelTest(unittest.TestCase):
-
     def setUp(self):
         self.external_plotting_model = ExternalPlottingModel()
         self.mock_artist = mock.NonCallableMock()

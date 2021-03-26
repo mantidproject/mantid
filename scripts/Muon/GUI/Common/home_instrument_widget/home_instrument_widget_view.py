@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-
 from qtpy import QtWidgets, QtCore, QtGui
 from qtpy.QtCore import Signal
 from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments, show_file_browser_and_return_selection
@@ -33,16 +32,11 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.dead_time_file_loader_hidden(True)
         self.dead_time_other_file_hidden(True)
 
-        self.dead_time_selector.currentIndexChanged.connect(
-            self.on_dead_time_combo_changed)
-        self.rebin_selector.currentIndexChanged.connect(
-            self.on_rebin_combo_changed)
-        self.time_zero_checkbox.stateChanged.connect(
-            self.on_time_zero_checkbox_state_change)
-        self.first_good_data_checkbox.stateChanged.connect(
-            self.on_first_good_data_checkbox_state_change)
-        self.last_good_data_checkbox.stateChanged.connect(
-            self.on_last_good_data_checkbox_state_change)
+        self.dead_time_selector.currentIndexChanged.connect(self.on_dead_time_combo_changed)
+        self.rebin_selector.currentIndexChanged.connect(self.on_rebin_combo_changed)
+        self.time_zero_checkbox.stateChanged.connect(self.on_time_zero_checkbox_state_change)
+        self.first_good_data_checkbox.stateChanged.connect(self.on_first_good_data_checkbox_state_change)
+        self.last_good_data_checkbox.stateChanged.connect(self.on_last_good_data_checkbox_state_change)
 
         self._on_dead_time_from_data_selected = None
         self._on_dead_time_from_other_file_selected = lambda: 0
@@ -61,14 +55,13 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self._on_dead_time_unselected = lambda: 0
         self._on_double_pulse_time_changed = lambda: 0
 
-        self.time_zero_edit.editingFinished.connect(
-            lambda: self._on_time_zero_changed() if not self.is_time_zero_checked() else None)
-        self.first_good_data_edit.editingFinished.connect(
-            lambda: self._on_first_good_data_changed() if not self.is_first_good_data_checked() else None)
-        self.last_good_data_edit.editingFinished.connect(
-            lambda: self._on_last_good_data_changed() if not self.is_last_good_data_checked() else None)
-        self.dead_time_file_selector.currentIndexChanged.connect(
-            self.on_dead_time_file_combo_changed)
+        self.time_zero_edit.editingFinished.connect(lambda: self._on_time_zero_changed()
+                                                    if not self.is_time_zero_checked() else None)
+        self.first_good_data_edit.editingFinished.connect(lambda: self._on_first_good_data_changed()
+                                                          if not self.is_first_good_data_checked() else None)
+        self.last_good_data_edit.editingFinished.connect(lambda: self._on_last_good_data_changed()
+                                                         if not self.is_last_good_data_checked() else None)
+        self.dead_time_file_selector.currentIndexChanged.connect(self.on_dead_time_file_combo_changed)
         self.double_pulse_data_edit.editingFinished.connect(lambda: self._on_double_pulse_time_changed())
 
     def setup_interface(self):
@@ -106,8 +99,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.widget_layout.addWidget(self.group2)
         self.setLayout(self.widget_layout)
 
-    def show_file_browser_and_return_selection(
-            self, file_filter, search_directories, multiple_files=False):
+    def show_file_browser_and_return_selection(self, file_filter, search_directories, multiple_files=False):
         return show_file_browser_and_return_selection(self, file_filter, search_directories, multiple_files)
 
     def set_combo_boxes_to_default(self):
@@ -130,9 +122,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def _fixed_aspect_ratio_size_policy(self, widget):
-        size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed,
-            QtWidgets.QSizePolicy.Fixed)
+        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
         size_policy.setHeightForWidth(widget.sizePolicy().hasHeightForWidth())
@@ -140,9 +130,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
 
     def setup_instrument_row(self):
         self.instrument_selector = QtWidgets.QComboBox(self)
-        self.instrument_selector.setSizePolicy(
-            self._fixed_aspect_ratio_size_policy(
-                self.instrument_selector))
+        self.instrument_selector.setSizePolicy(self._fixed_aspect_ratio_size_policy(self.instrument_selector))
         self.instrument_selector.addItems(allowed_instruments)
 
         self.instrument_label = QtWidgets.QLabel(self)
@@ -183,8 +171,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         msg.setIcon(QtWidgets.QMessageBox.Warning)
         msg.setText("Changing instrument will reset the interface, continue?")
         msg.setWindowTitle("Changing Instrument")
-        msg.setStandardButtons(
-            QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
         retval = msg.exec_()
         if retval == 1024:
             # The "OK" code
@@ -201,9 +188,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.time_zero_label.setText("Time Zero : ")
 
         self.time_zero_edit = QtWidgets.QLineEdit(self)
-        timezero_validator = QtGui.QRegExpValidator(
-            QtCore.QRegExp(valid_float_regex),
-            self.time_zero_edit)
+        timezero_validator = QtGui.QRegExpValidator(QtCore.QRegExp(valid_float_regex), self.time_zero_edit)
         self.time_zero_edit.setValidator(timezero_validator)
         self.time_zero_edit.setText("")
 
@@ -228,8 +213,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.layout.addItem(self.time_zero_layout, 1, 2)
 
     def set_time_zero(self, time_zero):
-        self.time_zero_edit.setText(
-            "{0:.3f}".format(round(float(time_zero), 3)))
+        self.time_zero_edit.setText("{0:.3f}".format(round(float(time_zero), 3)))
 
     def get_time_zero(self):
         return float(self.time_zero_edit.text())
@@ -263,9 +247,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
 
         self.first_good_data_edit = QtWidgets.QLineEdit(self)
 
-        first_good_data_validator = QtGui.QRegExpValidator(
-            QtCore.QRegExp(valid_float_regex),
-            self.time_zero_edit)
+        first_good_data_validator = QtGui.QRegExpValidator(QtCore.QRegExp(valid_float_regex), self.time_zero_edit)
         self.first_good_data_edit.setValidator(first_good_data_validator)
         self.first_good_data_edit.setText("")
 
@@ -293,8 +275,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self._on_first_good_data_changed = slot
 
     def set_first_good_data(self, first_good_data):
-        self.first_good_data_edit.setText(
-            "{0:.3f}".format(round(float(first_good_data), 3)))
+        self.first_good_data_edit.setText("{0:.3f}".format(round(float(first_good_data), 3)))
 
     def on_first_good_data_checkState_changed(self, slot):
         self.first_good_data_checkbox.stateChanged.connect(slot)
@@ -306,8 +287,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         return self.first_good_data_checkbox.checkState()
 
     def on_first_good_data_checkbox_state_change(self):
-        self.first_good_data_edit_enabled(
-            self.first_good_data_checkbox.checkState())
+        self.first_good_data_edit_enabled(self.first_good_data_checkbox.checkState())
 
     def first_good_data_edit_enabled(self, disabled):
         self.first_good_data_edit.setEnabled(not disabled)
@@ -326,9 +306,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
 
         self.last_good_data_edit = QtWidgets.QLineEdit(self)
 
-        last_good_data_validator = QtGui.QRegExpValidator(
-            QtCore.QRegExp(valid_float_regex),
-            self.first_good_data_edit)
+        last_good_data_validator = QtGui.QRegExpValidator(QtCore.QRegExp(valid_float_regex), self.first_good_data_edit)
         self.last_good_data_edit.setValidator(last_good_data_validator)
         self.last_good_data_edit.setText("")
 
@@ -356,8 +334,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self._on_last_good_data_changed = slot
 
     def set_last_good_data(self, last_good_data):
-        self.last_good_data_edit.setText(
-            "{0:.3f}".format(round(float(last_good_data), 3)))
+        self.last_good_data_edit.setText("{0:.3f}".format(round(float(last_good_data), 3)))
 
     def on_last_good_data_checkState_changed(self, slot):
         self.last_good_data_checkbox.stateChanged.connect(slot)
@@ -369,8 +346,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         return self.last_good_data_checkbox.checkState()
 
     def on_last_good_data_checkbox_state_change(self):
-        self.last_good_data_edit_enabled(
-            self.last_good_data_checkbox.checkState())
+        self.last_good_data_edit_enabled(self.last_good_data_checkbox.checkState())
 
     def last_good_data_edit_enabled(self, disabled):
         self.last_good_data_edit.setEnabled(not disabled)
@@ -385,9 +361,8 @@ class InstrumentWidgetView(QtWidgets.QWidget):
     def setup_double_pulse_row(self):
         self.double_pulse_data_edit = QtWidgets.QLineEdit(self)
 
-        double_pulse_data_validator = QtGui.QRegExpValidator(
-            QtCore.QRegExp(valid_float_regex),
-            self.double_pulse_data_edit)
+        double_pulse_data_validator = QtGui.QRegExpValidator(QtCore.QRegExp(valid_float_regex),
+                                                             self.double_pulse_data_edit)
         self.double_pulse_data_edit.setValidator(double_pulse_data_validator)
         self.double_pulse_data_edit.setText("0.33")
 
@@ -411,8 +386,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self._on_double_pulse_time_changed = slot
 
     def set_double_pulse_data(self, double_pulse_time):
-        self.double_pulse_data_edit.setText(
-            "{0:.3f}".format(round(float(double_pulse_time), 3)))
+        self.double_pulse_data_edit.setText("{0:.3f}".format(round(float(double_pulse_time), 3)))
 
     def on_double_pulse_checkState_changed(self, slot):
         self.double_pulse_data_combobox.currentIndexChanged.connect(slot)
@@ -435,11 +409,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.dead_time_label.setText("Dead Time : ")
 
         self.dead_time_selector = QtWidgets.QComboBox(self)
-        self.dead_time_selector.addItems(
-            ["From data file",
-             "From table workspace",
-             "From other file",
-             "None"])
+        self.dead_time_selector.addItems(["From data file", "From table workspace", "From other file", "None"])
 
         self.dead_time_label_2 = QtWidgets.QLabel(self)
         self.dead_time_label_2.setText("Dead Time Workspace : ")
@@ -449,8 +419,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
 
         self.dead_time_file_selector = QtWidgets.QComboBox(self)
         self.dead_time_file_selector.addItem("None")
-        self.dead_time_file_selector.setToolTip(
-            "Select a table which is loaded into the ADS.")
+        self.dead_time_file_selector.setToolTip("Select a table which is loaded into the ADS.")
 
         self.dead_time_browse_button = QtWidgets.QPushButton(self)
         self.dead_time_browse_button.setText("Browse")
@@ -590,21 +559,20 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.rebin_steps_edit = QtWidgets.QLineEdit(self)
         int_validator = QtGui.QDoubleValidator()
         self.rebin_steps_edit.setValidator(int_validator)
-        self.rebin_steps_edit.setToolTip(
-            'Value to scale current bin width by.')
+        self.rebin_steps_edit.setToolTip('Value to scale current bin width by.')
 
         self.rebin_variable_label = QtWidgets.QLabel(self)
         self.rebin_variable_label.setText("Bin Boundaries : ")
         self.rebin_variable_edit = QtWidgets.QLineEdit(self)
-        self.rebin_variable_edit.setToolTip('A comma separated list of first bin boundary, width, last bin boundary.\n'
-                                            'Optionally this can be followed by a comma and more widths and last boundary pairs.\n'
-                                            'Optionally this can also be a single number, which is the bin width.\n'
-                                            'Negative width values indicate logarithmic binning.\n\n'
-                                            'For example:\n'
-                                            '2,-0.035,10: from 2 rebin in Logarithmic bins of 0.035 up to 10;\n'
-                                            '0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000')
-        variable_validator = QtGui.QRegExpValidator(
-            QtCore.QRegExp(r'^(\s*-?\d+(\.\d+)?)(\s*,\s*-?\d+(\.\d+)?)*$'))
+        self.rebin_variable_edit.setToolTip(
+            'A comma separated list of first bin boundary, width, last bin boundary.\n'
+            'Optionally this can be followed by a comma and more widths and last boundary pairs.\n'
+            'Optionally this can also be a single number, which is the bin width.\n'
+            'Negative width values indicate logarithmic binning.\n\n'
+            'For example:\n'
+            '2,-0.035,10: from 2 rebin in Logarithmic bins of 0.035 up to 10;\n'
+            '0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000')
+        variable_validator = QtGui.QRegExpValidator(QtCore.QRegExp(r'^(\s*-?\d+(\.\d+)?)(\s*,\s*-?\d+(\.\d+)?)*$'))
         self.rebin_variable_edit.setValidator(variable_validator)
 
         self.rebin_layout = QtWidgets.QHBoxLayout()

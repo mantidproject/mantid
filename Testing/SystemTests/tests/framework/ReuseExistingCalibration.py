@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 """
-    Verifies that a calibration file can be loaded once and reused to apply, using CopyInstrumentParameters, the same calibration
-    in successive reductions.
+    Verifies that a calibration file can be loaded once and reused to apply, using CopyInstrumentParameters, the same
+    calibration in successive reductions.
 """
 import systemtesting
 
@@ -27,9 +27,11 @@ class ReuseExistingCalibration(systemtesting.MantidSystemTest):
             data = ms.Load("HRP39180.RAW")
             # copy parameters from calibration to data
             ms.CopyInstrumentParameters(calibration, data)
-            # Now move component on data workspace using a relative move, where that component was a detector in the calibrated workspace
-            ms.MoveInstrumentComponent(data, DetectorID=1100,X=0.0,Y=0.0,Z=5.0,RelativePosition=True)
+            # Now move component on data workspace using a relative move, where that component was a detector in the
+            # calibrated workspace
+            ms.MoveInstrumentComponent(data, DetectorID=1100, X=0.0, Y=0.0, Z=5.0, RelativePosition=True)
             return data.getDetector(0).getPos()
+
         ####
 
         # load calibration

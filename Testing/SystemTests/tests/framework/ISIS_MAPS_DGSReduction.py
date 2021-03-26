@@ -128,7 +128,6 @@ class ReduceMAPS(ReductionWrapper):
           In addition to that, example of accessing reduction properties
           Changing them if necessary
         """
-
         def custom_name(prop_man):
             """ sample function which builds filename from
               incident energy and run number and adds some auxiliary information

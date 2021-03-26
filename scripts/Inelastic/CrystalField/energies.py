@@ -39,8 +39,7 @@ def energies(nre, **kwargs):
         a tuple of energies (1D numpy array), wavefunctions (2D numpy array)
         and the hamiltonian (2D numpy array).
     """
-    warnings.warn('This function is under development and can be changed/removed in the future',
-                  FutureWarning)
+    warnings.warn('This function is under development and can be changed/removed in the future', FutureWarning)
     # Do the calculations
     res = CrystalFieldEnergies(nre, **kwargs)
 

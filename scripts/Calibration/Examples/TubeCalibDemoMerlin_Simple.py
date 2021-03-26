@@ -78,8 +78,13 @@ def CalibrateMerlin(RunNumber):
 
     # == Get the calibration and put results into calibration table ==
     # also put peaks into PeakFile
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm,
-                                                 outputPeak=True, fitPar=fitPar, plotTube=list(range(0, 280, 20)))
+    calibrationTable, peakTable = tube.calibrate(CalibInstWS,
+                                                 CalibratedComponent,
+                                                 knownPos,
+                                                 funcForm,
+                                                 outputPeak=True,
+                                                 fitPar=fitPar,
+                                                 plotTube=list(range(0, 280, 20)))
     print("Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt")
 
     # == Apply the Calibation ==
@@ -87,7 +92,8 @@ def CalibrateMerlin(RunNumber):
     print("Applied calibration")
 
     # == Save workspace ==
-    # mantid.SaveNexusProcessed(CalibInstWS, 'TubeCalibDemoMerlinResult.nxs', "Result of Running TubeCalibDemoMerlin_Simple.py")
+    # mantid.SaveNexusProcessed(CalibInstWS, 'TubeCalibDemoMerlinResult.nxs', "Result of Running
+    # TubeCalibDemoMerlin_Simple.py")
     # print("saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs")
 
     # == Reset default instrument ==

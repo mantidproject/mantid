@@ -44,15 +44,15 @@ class TOFTOFCropWorkspaceTest(unittest.TestCase):
     def test_inputgroup(self):
         group = GroupWorkspaces([self._input_ws])
         OutputWorkspaceName = "cropped_ws"
-        alg_test = run_algorithm("TOFTOFCropWorkspace",
-                                 InputWorkspace=group,
-                                 OutputWorkspace=OutputWorkspaceName)
+        alg_test = run_algorithm("TOFTOFCropWorkspace", InputWorkspace=group, OutputWorkspace=OutputWorkspaceName)
         self.assertTrue(alg_test.isExecuted())
 
     def test_invalid_xunits(self):
         self._input_ws.getAxis(0).setUnit('Wavelength')
         OutputWorkspaceName = "cropped_ws"
-        self.assertRaises(RuntimeError, TOFTOFCropWorkspace, InputWorkspace=self._input_ws,
+        self.assertRaises(RuntimeError,
+                          TOFTOFCropWorkspace,
+                          InputWorkspace=self._input_ws,
                           OutputWorkspace=OutputWorkspaceName)
 
     def cleanUp(self):
@@ -60,6 +60,7 @@ class TOFTOFCropWorkspaceTest(unittest.TestCase):
             DeleteWorkspace(self._input_ws)
         if AnalysisDataService.doesExist(self._cropped_ws):
             DeleteWorkspace(self._cropped_ws)
+
 
 if __name__ == "__main__":
     unittest.main()

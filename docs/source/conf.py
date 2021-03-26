@@ -99,17 +99,13 @@ pygments_style = 'sphinx'
 
 # Store certain config options so they can be restored to initial
 # settings after each test.
-mantid_init_config_keys = ('datasearch.directories', 'defaultsave.directory', 'default.facility',
-                           'default.instrument')
+mantid_init_config_keys = ('datasearch.directories', 'defaultsave.directory', 'default.facility', 'default.instrument')
 
 # With the default facility changed from ISIS to nothing (EMPTY),
 # the following setting is put in place to avoid failure of tests
 ConfigService.Instance().setString("default.facility", "ISIS")
 
-mantid_config_reset = [
-    "_cfg['{0}'] = '{1}'".format(k,
-                                 ConfigService.Instance()[k]) for k in mantid_init_config_keys
-]
+mantid_config_reset = ["_cfg['{0}'] = '{1}'".format(k, ConfigService.Instance()[k]) for k in mantid_init_config_keys]
 mantid_config_reset = '\n'.join(mantid_config_reset)
 
 # Run this before each test is executed

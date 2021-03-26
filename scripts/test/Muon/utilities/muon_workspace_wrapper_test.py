@@ -57,7 +57,6 @@ class MuonWorkspaceTest(unittest.TestCase):
     in the ADS to improve the user experience.
 
     """
-
     def setUp(self):
         self.workspace = create_simple_workspace(data_x=[1, 2, 3, 4], data_y=[10, 10, 10, 10])
         simpleapi.mtd.clear()

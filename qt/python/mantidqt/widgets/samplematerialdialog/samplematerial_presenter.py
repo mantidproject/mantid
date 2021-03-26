@@ -47,13 +47,15 @@ class SampleMaterialDialogPresenter(AlgorithmObserver):
         """
         Open a CopySample algorithm dialog with the CopyMaterial option.
         """
-        presets = {"InputWorkspace": self.workspace.name(),
-                   "CopyName": "0",
-                   "CopyMaterial": "1",
-                   "CopyEnvironment": "0",
-                   "CopyShape": "0",
-                   "CopyLattice": "0",
-                   "CopyOrientationOnly": "0"}
+        presets = {
+            "InputWorkspace": self.workspace.name(),
+            "CopyName": "0",
+            "CopyMaterial": "1",
+            "CopyEnvironment": "0",
+            "CopyShape": "0",
+            "CopyLattice": "0",
+            "CopyOrientationOnly": "0"
+        }
 
         manager = InterfaceManager()
         dialog = manager.createDialogFromName("CopySample", -1, self.view, False, presets)

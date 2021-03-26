@@ -8,7 +8,7 @@ import sys
 
 # See https://www.python.org/dev/peps/pep-0479/#abstract and
 # https://stackoverflow.com/a/51701040
-if sys.version_info >= (3,7):
+if sys.version_info >= (3, 7):
     NEW_STYLE_GENERATOR = True
 else:
     NEW_STYLE_GENERATOR = False
@@ -16,7 +16,6 @@ else:
 
 class switch(object):
     """ Helper class providing nice switch statement"""
-
     def __init__(self, value):
         self.value = value
         self.fall = False
@@ -33,7 +32,7 @@ class switch(object):
         """Indicate whether or not to enter a case suite"""
         if self.fall or not args:
             return True
-        elif self.value in args: # changed for v1.5, see below
+        elif self.value in args:  # changed for v1.5, see below
             self.fall = True
             return True
         else:

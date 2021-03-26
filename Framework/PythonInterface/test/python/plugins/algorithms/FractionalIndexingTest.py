@@ -15,7 +15,6 @@ import fractional_indexing as indexing
 
 
 class FractionIndexingTests(unittest.TestCase):
-
     def setUp(self):
         # Need to set the random seed because the scipy kmeans algorithm
         # randomly initilizes the starting centroids. This can lead to a
@@ -104,11 +103,7 @@ class FractionIndexingTests(unittest.TestCase):
         ndim, bases = indexing.find_bases(qs, 1e-5)
         self.assertEqual(ndim, 3, "Number of dimensions must be 3")
 
-        expected_bases = np.array([
-            [0., 0., 0.25],
-            [0., .5, 0.],
-            [0.51521732, 0.11589868, 0.04490415]
-        ])
+        expected_bases = np.array([[0., 0., 0.25], [0., .5, 0.], [0.51521732, 0.11589868, 0.04490415]])
 
         npt.assert_almost_equal(bases, expected_bases, err_msg="Basis vectors do not match")
 
@@ -126,12 +121,7 @@ class FractionIndexingTests(unittest.TestCase):
 
         indices = indexing.index_q_vectors(qs)
 
-        expected_indexing = np.array([
-            [0, 0, 1],
-            [0, 1, 0],
-            [2, 0, 0],
-            [1, 0, 0]
-        ])
+        expected_indexing = np.array([[0, 0, 1], [0, 1, 0], [2, 0, 0], [1, 0, 0]])
 
         npt.assert_equal(indices, expected_indexing, err_msg="Indexing does not match expected.")
 
@@ -145,14 +135,7 @@ class FractionIndexingTests(unittest.TestCase):
             [0, 0, .45],
         ])
 
-        expected_indexing = np.array([
-            [-1,  1,  0],
-            [ 1,  0,  0],
-            [ 0,  1,  0],
-            [ 0, -1,  0],
-            [-1,  2,  0],
-            [ 0,  0,  1]
-        ])
+        expected_indexing = np.array([[-1, 1, 0], [1, 0, 0], [0, 1, 0], [0, -1, 0], [-1, 2, 0], [0, 0, 1]])
 
         actual_indexing = indexing.index_q_vectors(qs, tolerance=.03)
         npt.assert_array_equal(actual_indexing, expected_indexing)
@@ -248,6 +231,7 @@ class FractionIndexingTests(unittest.TestCase):
         clusters, k = indexing.cluster_qs(qs, threshold=0.01)
         self.assertEqual(k, 2)
         npt.assert_array_equal(clusters, np.array([2, 2, 1, 1, 2]))
+
 
 if __name__ == "__main__":
     unittest.main()

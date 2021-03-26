@@ -27,16 +27,9 @@ class MatchSpectraTest(unittest.TestCase):
         dy = np.zeros(y.size, dtype=np.float) + 1
 
         if uncertainties:
-            CreateWorkspace(OutputWorkspace=name,
-                            DataX=x,
-                            DataY=y,
-                            DataE=dy,
-                            NSpec=self.numhist)
+            CreateWorkspace(OutputWorkspace=name, DataX=x, DataY=y, DataE=dy, NSpec=self.numhist)
         else:
-            CreateWorkspace(OutputWorkspace=name,
-                            DataX=x,
-                            DataY=y,
-                            NSpec=self.numhist)
+            CreateWorkspace(OutputWorkspace=name, DataX=x, DataY=y, NSpec=self.numhist)
 
     def __createRaggedWorkspace(self, name, histogram):
         xlen = self.numpoints
@@ -47,12 +40,12 @@ class MatchSpectraTest(unittest.TestCase):
         shifts = (0., 10., 20., 30.)
         # shift x-values so they are not common
         for i, shift in enumerate(shifts):
-            x[i*xlen:(i+1)*xlen] += shift
+            x[i * xlen:(i + 1) * xlen] += shift
 
         y = np.zeros(self.numhist * self.numpoints, dtype=np.float)
         for i, shift in enumerate(shifts):
             # follow shift from above
-            newY = np.arange(self.numpoints, dtype=np.float)+shift
+            newY = np.arange(self.numpoints, dtype=np.float) + shift
             if i == 1:
                 newY += 10.
             elif i == 2:
@@ -64,11 +57,7 @@ class MatchSpectraTest(unittest.TestCase):
 
         dy = np.zeros(y.size, dtype=np.float) + 1
 
-        CreateWorkspace(OutputWorkspace=name,
-                        DataX=x,
-                        DataY=y,
-                        DataE=dy,
-                        NSpec=self.numhist)
+        CreateWorkspace(OutputWorkspace=name, DataX=x, DataY=y, DataE=dy, NSpec=self.numhist)
 
     def __checkValues(self, results, index, scale, offset):
         self.assertEqual(results.Scale[index], scale,
@@ -90,9 +79,11 @@ class MatchSpectraTest(unittest.TestCase):
             self.__createWorkspace(inwsname, histogram, False)
 
             with self.assertRaises(RuntimeError):
-                results = MatchSpectra(InputWorkspace=inwsname, OutputWorkspace=outwsname,
+                results = MatchSpectra(InputWorkspace=inwsname,
+                                       OutputWorkspace=outwsname,
                                        ReferenceSpectrum=1,
-                                       CalculateOffset=True, CalculateScale=True)
+                                       CalculateOffset=True,
+                                       CalculateScale=True)
 
         DeleteWorkspace(Workspace=inwsname)
 
@@ -106,25 +97,31 @@ class MatchSpectraTest(unittest.TestCase):
         self.__createWorkspace(inwsname, histogram, True)
 
         ##### offset only
-        results = MatchSpectra(InputWorkspace=inwsname, OutputWorkspace=outwsname,
+        results = MatchSpectra(InputWorkspace=inwsname,
+                               OutputWorkspace=outwsname,
                                ReferenceSpectrum=2,
-                               CalculateOffset=True, CalculateScale=False)
+                               CalculateOffset=True,
+                               CalculateScale=False)
         self.__checkReference(results, 1)
         self.__checkValues(results, 0, 1., 10.)
         self.assertTrue(np.alltrue(mtd[outwsname].readY(0) == mtd[outwsname].readY(1)))
 
         ##### scale only
-        results = MatchSpectra(InputWorkspace=inwsname, OutputWorkspace=outwsname,
+        results = MatchSpectra(InputWorkspace=inwsname,
+                               OutputWorkspace=outwsname,
                                ReferenceSpectrum=3,
-                               CalculateOffset=False, CalculateScale=True)
+                               CalculateOffset=False,
+                               CalculateScale=True)
         self.__checkReference(results, 2)
         self.__checkValues(results, 0, 10., 0.)
         self.assertTrue(np.alltrue(mtd[outwsname].readY(0) == mtd[outwsname].readY(2)))
 
         ##### both
-        results = MatchSpectra(InputWorkspace=inwsname, OutputWorkspace=outwsname,
+        results = MatchSpectra(InputWorkspace=inwsname,
+                               OutputWorkspace=outwsname,
                                ReferenceSpectrum=4,
-                               CalculateOffset=True, CalculateScale=True)
+                               CalculateOffset=True,
+                               CalculateScale=True)
         self.__checkReference(results, 3)
         self.__checkValues(results, 0, 10., 10.)
         self.assertTrue(np.alltrue(mtd[outwsname].readY(0) == mtd[outwsname].readY(3)))
@@ -147,23 +144,29 @@ class MatchSpectraTest(unittest.TestCase):
         self.__createRaggedWorkspace(inwsname, histogram)
 
         ##### offset only
-        results = MatchSpectra(InputWorkspace=inwsname, OutputWorkspace=outwsname,
+        results = MatchSpectra(InputWorkspace=inwsname,
+                               OutputWorkspace=outwsname,
                                ReferenceSpectrum=2,
-                               CalculateOffset=True, CalculateScale=False)
+                               CalculateOffset=True,
+                               CalculateScale=False)
         self.__checkReference(results, 1)
         self.__checkValues(results, 0, 1., 10.)
 
         ##### scale only
-        results = MatchSpectra(InputWorkspace=inwsname, OutputWorkspace=outwsname,
+        results = MatchSpectra(InputWorkspace=inwsname,
+                               OutputWorkspace=outwsname,
                                ReferenceSpectrum=3,
-                               CalculateOffset=False, CalculateScale=True)
+                               CalculateOffset=False,
+                               CalculateScale=True)
         self.__checkReference(results, 2)
         self.__checkValues(results, 0, 10., 0.)
 
         ##### both
-        results = MatchSpectra(InputWorkspace=inwsname, OutputWorkspace=outwsname,
+        results = MatchSpectra(InputWorkspace=inwsname,
+                               OutputWorkspace=outwsname,
                                ReferenceSpectrum=4,
-                               CalculateOffset=True, CalculateScale=True)
+                               CalculateOffset=True,
+                               CalculateScale=True)
         self.__checkReference(results, 3)
         self.__checkValues(results, 0, 10., 10.)
 

@@ -23,9 +23,7 @@ class CurvesTabWidgetView(QWidget):
     def __init__(self, parent=None):
         super(CurvesTabWidgetView, self).__init__(parent=parent)
 
-        self.ui = load_ui(__file__,
-                          'curves_tab.ui',
-                          baseinstance=self)
+        self.ui = load_ui(__file__, 'curves_tab.ui', baseinstance=self)
         self.line = LineTabWidgetView(parent=self)
         self.tab_container.addTab(self.line, "Line")
         self.marker = MarkerTabWidgetView(parent=self)

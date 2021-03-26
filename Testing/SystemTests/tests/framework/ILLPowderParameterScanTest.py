@@ -10,7 +10,6 @@ from mantid import config, mtd
 
 
 class ILLPowderParameterScanTest(systemtesting.MantidSystemTest):
-
     def __init__(self):
         super(ILLPowderParameterScanTest, self).__init__()
         self.setUp()
@@ -27,7 +26,7 @@ class ILLPowderParameterScanTest(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def runTest(self):
-        PowderILLParameterScan(Run='967087,967088',OutputWorkspace='reduced')
+        PowderILLParameterScan(Run='967087,967088', OutputWorkspace='reduced')
 
     def validate(self):
         self.tolerance = 0.0001

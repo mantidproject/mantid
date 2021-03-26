@@ -28,12 +28,26 @@ def makeWorkspace(xArray, yArray):
 
 
 def islistlike(arg):
-    return (not hasattr(arg, "strip")) and (hasattr(arg, "__getitem__") or hasattr(arg, "__iter__")) and hasattr(arg, "__len__")
+    return (not hasattr(arg, "strip")) and (hasattr(arg, "__getitem__") or hasattr(arg, "__iter__")) and hasattr(
+        arg, "__len__")
 
 
 def ionname2Nre(ionname):
-    ion_nre_map = {'Ce': 1, 'Pr': 2, 'Nd': 3, 'Pm': 4, 'Sm': 5, 'Eu': 6, 'Gd': 7,
-                   'Tb': 8, 'Dy': 9, 'Ho': 10, 'Er': 11, 'Tm': 12, 'Yb': 13}
+    ion_nre_map = {
+        'Ce': 1,
+        'Pr': 2,
+        'Nd': 3,
+        'Pm': 4,
+        'Sm': 5,
+        'Eu': 6,
+        'Gd': 7,
+        'Tb': 8,
+        'Dy': 9,
+        'Ho': 10,
+        'Er': 11,
+        'Tm': 12,
+        'Yb': 13
+    }
     if ionname not in ion_nre_map.keys():
         msg = 'Value %s is not allowed for attribute Ion.\nList of allowed values: %s' % \
               (ionname, ', '.join(list(ion_nre_map.keys())))
@@ -43,22 +57,21 @@ def ionname2Nre(ionname):
             if nre < -99:
                 raise RuntimeError('J value ' + str(-nre / 2) + ' is too large.')
         else:
-            raise RuntimeError(msg+', S<n>, J<n>')
+            raise RuntimeError(msg + ', S<n>, J<n>')
     else:
         nre = ion_nre_map[ionname]
     return nre
 
 
 def cfpstrmaker(x, pref='B'):
-    return [pref+str(k)+str(x) for k in [2, 4, 6] if x <= k]
+    return [pref + str(k) + str(x) for k in [2, 4, 6] if x <= k]
 
 
 def getSymmAllowedParam(sym_str):
     if 'T' in sym_str or 'O' in sym_str:
         return ['B40', 'B60']
     if any([sym_str == val for val in ['C1', 'Ci']]):
-        return sum([cfpstrmaker(i) for i in range(7)]
-                   + [cfpstrmaker(i, 'IB') for i in range(1, 7)],[])
+        return sum([cfpstrmaker(i) for i in range(7)] + [cfpstrmaker(i, 'IB') for i in range(1, 7)], [])
     retval = cfpstrmaker(0)
     if '6' in sym_str or '3' in sym_str:
         retval += cfpstrmaker(6)
@@ -83,20 +96,25 @@ def getSymmAllowedParam(sym_str):
 class CrystalField(object):
     """Calculates the crystal fields for one ion"""
 
-    allowed_symmetries = ['C1', 'Ci', 'C2', 'Cs', 'C2h', 'C2v', 'D2', 'D2h', 'C4', 'S4', 'C4h',
-                          'D4', 'C4v', 'D2d', 'D4h', 'C3', 'S6', 'D3', 'C3v', 'D3d', 'C6', 'C3h',
-                          'C6h', 'D6', 'C6v', 'D3h', 'D6h', 'T', 'Td', 'Th', 'O', 'Oh']
+    allowed_symmetries = [
+        'C1', 'Ci', 'C2', 'Cs', 'C2h', 'C2v', 'D2', 'D2h', 'C4', 'S4', 'C4h', 'D4', 'C4v', 'D2d', 'D4h', 'C3', 'S6',
+        'D3', 'C3v', 'D3d', 'C6', 'C3h', 'C6h', 'D6', 'C6v', 'D3h', 'D6h', 'T', 'Td', 'Th', 'O', 'Oh'
+    ]
 
-    lande_g = [6.0 / 7., 4.0 / 5., 8.0 / 11., 3.0 / 5., 2.0 / 7., 0.0, 2.0,
-               3.0 / 2., 4.0 / 3., 5.0 / 4.,  6.0 / 5., 7.0 / 6., 8.0 / 7.]
+    lande_g = [
+        6.0 / 7., 4.0 / 5., 8.0 / 11., 3.0 / 5., 2.0 / 7., 0.0, 2.0, 3.0 / 2., 4.0 / 3., 5.0 / 4., 6.0 / 5., 7.0 / 6.,
+        8.0 / 7.
+    ]
 
     default_peakShape = 'Gaussian'
     default_background = 'FlatBackground'
     default_spectrum_size = 200
 
-    field_parameter_names = ['BmolX','BmolY','BmolZ','BextX','BextY','BextZ',
-                             'B20','B21','B22','B40','B41','B42','B43','B44','B60','B61','B62','B63','B64','B65','B66',
-                             'IB21','IB22','IB41','IB42','IB43','IB44','IB61','IB62','IB63','IB64','IB65','IB66']
+    field_parameter_names = [
+        'BmolX', 'BmolY', 'BmolZ', 'BextX', 'BextY', 'BextZ', 'B20', 'B21', 'B22', 'B40', 'B41', 'B42', 'B43', 'B44',
+        'B60', 'B61', 'B62', 'B63', 'B64', 'B65', 'B66', 'IB21', 'IB22', 'IB41', 'IB42', 'IB43', 'IB44', 'IB61', 'IB62',
+        'IB63', 'IB64', 'IB65', 'IB66'
+    ]
 
     def __init__(self, Ion, Symmetry, **kwargs):
         """
@@ -183,7 +201,7 @@ class CrystalField(object):
         free_parameters = {key: kwargs[key] for key in kwargs if key in CrystalField.field_parameter_names}
 
         if 'ResolutionModel' in kwargs and 'FWHM' in kwargs:
-            msg = 'Both ''ResolutionModel'' and ''FWHM'' specified but can only accept one width option.'
+            msg = 'Both ' 'ResolutionModel' ' and ' 'FWHM' ' specified but can only accept one width option.'
             msg += ' Preferring to use ResolutionModel, and ignoring FWHM.'
             kwargs.pop('FWHM')
             warnings.warn(msg, SyntaxWarning)
@@ -341,8 +359,8 @@ class CrystalField(object):
 
     def makeMultiSpectrumFunction(self):
         fun = re.sub(r'FWHM[X|Y]\d+=\(\),', '', str(self.function))
-        fun = re.sub(r'(name=.*?,)(.*?)(Temperatures=\(.*?\),)',r'\1\3\2', fun)
-        fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
+        fun = re.sub(r'(name=.*?,)(.*?)(Temperatures=\(.*?\),)', r'\1\3\2', fun)
+        fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)', r'\1\3\2', fun)
         return fun
 
     @property
@@ -487,7 +505,8 @@ class CrystalField(object):
             if not islistlike(value):
                 value = [value] * self.NumberOfSpectra
             if len(value) != len(self.Temperature):
-                if self.PhysicalProperty is not None and len(value) == len(self.Temperature) - len(self.PhysicalProperty):
+                if self.PhysicalProperty is not None and len(value) == len(self.Temperature) - len(
+                        self.PhysicalProperty):
                     value = value + [0] * len(self.PhysicalProperty)
                 else:
                     raise RuntimeError('Vector of FWHMs must either have same size as '
@@ -537,7 +556,8 @@ class CrystalField(object):
         else:
             self._resolutionModel = ResolutionModel(value)
         if self._isMultiSpectrum:
-            NumberOfPhysProp = len(self._physprop) if islistlike(self._physprop) else (0 if self._physprop is None else 1)
+            NumberOfPhysProp = len(self._physprop) if islistlike(
+                self._physprop) else (0 if self._physprop is None else 1)
             NSpec = self.NumberOfSpectra - NumberOfPhysProp
             if not self._resolutionModel.multi or self._resolutionModel.NumberOfSpectra != NSpec:
                 raise RuntimeError('Resolution model is expected to have %s functions, found %s' %
@@ -663,13 +683,13 @@ class CrystalField(object):
             # Removes 'negative' temperature, which is a flag for no INS dataset
             tt = [val for val in tt if val > 0]
             pptt = [0 if val.Temperature is None else val.Temperature for val in vlist]
-            self._remakeFunction(list(tt)+pptt)
+            self._remakeFunction(list(tt) + pptt)
             if len(tt) > 0 and len(pptt) > 0:
                 ww += [0] * len(pptt)
             self.FWHM = ww
             ppids = [pp.TypeID for pp in vlist]
-            self.function.setAttributeValue('PhysicalProperties', [0]*len(tt)+ppids)
-            for attribs in [pp.getAttributes(i+len(tt)) for i, pp in enumerate(vlist)]:
+            self.function.setAttributeValue('PhysicalProperties', [0] * len(tt) + ppids)
+            for attribs in [pp.getAttributes(i + len(tt)) for i, pp in enumerate(vlist)]:
                 for item in attribs.items():
                     if 'Lambda' in item[0] or 'Chi0' in item[0]:
                         self.function.setParameter(item[0], item[1])
@@ -682,8 +702,7 @@ class CrystalField(object):
 
     @property
     def isPhysicalPropertyOnly(self):
-        return (not islistlike(self.Temperature) and self.Temperature < 0
-                and self.PhysicalProperty is not None)
+        return (not islistlike(self.Temperature) and self.Temperature < 0 and self.PhysicalProperty is not None)
 
     def ties(self, **kwargs):
         """Set ties on the field parameters.
@@ -930,7 +949,7 @@ class CrystalField(object):
         gj = 2. if (self._nre < 1) else self.lande_g[self._nre - 1]
         gJuB = gj * physical_constants['Bohr magneton in eV/T'][0] * 1000.
         trans = np.multiply(ix, np.conj(ix)) + np.multiply(iy, np.conj(iy)) + np.multiply(iz, np.conj(iz))
-        return trans / (gJuB ** 2)
+        return trans / (gJuB**2)
 
     def plot(self, i=0, workspace=None, ws_index=0, name=None):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
@@ -1014,7 +1033,7 @@ class CrystalField(object):
                 params['ion1.' + bparam] = other[bparam]
             ties = {}
             fixes = []
-            for prefix, obj in {'ion0.':self, 'ion1.':other}.items():
+            for prefix, obj in {'ion0.': self, 'ion1.': other}.items():
                 tiestr = obj.function.getTies()
                 if tiestr:
                     for tiepair in [tie.split('=') for tie in tiestr.split(',')]:
@@ -1028,13 +1047,23 @@ class CrystalField(object):
                     fixes.append(prefix + parName)
             if self._resolutionModel is None:
                 fwhms = [self._getFWHM(x) for x in range(self.NumberOfSpectra)]
-                return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
-                                             FWHM = fwhms, parameters=params, abundances=[1.0, 1.0],
-                                             ties = ties, fixedParameters = fixes)
+                return CrystalFieldMultiSite(Ions=ions,
+                                             Symmetries=symmetries,
+                                             Temperatures=temperatures,
+                                             FWHM=fwhms,
+                                             parameters=params,
+                                             abundances=[1.0, 1.0],
+                                             ties=ties,
+                                             fixedParameters=fixes)
             else:
-                return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
-                                             ResolutionModel=self._resolutionModel, parameters=params,
-                                             abundances=[1.0, 1.0], ties = ties, fixedParameters = fixes)
+                return CrystalFieldMultiSite(Ions=ions,
+                                             Symmetries=symmetries,
+                                             Temperatures=temperatures,
+                                             ResolutionModel=self._resolutionModel,
+                                             parameters=params,
+                                             abundances=[1.0, 1.0],
+                                             ties=ties,
+                                             fixedParameters=fixes)
 
     def __mul__(self, factor):
         ffactor = float(factor)
@@ -1120,8 +1149,12 @@ class CrystalField(object):
         except AttributeError:
             raise RuntimeError('Invalid PhysicalProperties object specified')
 
-        defaultX = [np.linspace(1, 300, 300), np.linspace(1, 300, 300), np.linspace(0, 30, 300),
-                    np.linspace(0, 30, 300)]
+        defaultX = [
+            np.linspace(1, 300, 300),
+            np.linspace(1, 300, 300),
+            np.linspace(0, 30, 300),
+            np.linspace(0, 30, 300)
+        ]
         funstr = self.makePhysicalPropertiesFunction(ppobj)
         if workspace is None:
             xArray = defaultX[typeid - 1]
@@ -1214,12 +1247,19 @@ class CrystalFieldSite(object):
             params['ion1.' + bparam] = other[bparam]
         if self.crystalField.ResolutionModel is None:
             FWHM = [self.crystalField._getFWHM(x) for x in range(self.crystalField.NumberOfSpectra)]
-            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures, FWHM = FWHM,
-                                         abundances=abundances, parameters=params)
+            return CrystalFieldMultiSite(Ions=ions,
+                                         Symmetries=symmetries,
+                                         Temperatures=temperatures,
+                                         FWHM=FWHM,
+                                         abundances=abundances,
+                                         parameters=params)
         else:
-            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
+            return CrystalFieldMultiSite(Ions=ions,
+                                         Symmetries=symmetries,
+                                         Temperatures=temperatures,
                                          ResolutionModel=self.crystalField.ResolutionModel,
-                                         abundances=abundances, parameters=params)
+                                         abundances=abundances,
+                                         parameters=params)
 
 
 #pylint: disable=too-few-public-methods
@@ -1227,9 +1267,7 @@ class CrystalFieldFit(object):
     """
     Object that controls fitting.
     """
-
-    def __init__(self, Model=None, Temperature=None, FWHM=None, InputWorkspace=None,
-                 ResolutionModel=None, **kwargs):
+    def __init__(self, Model=None, Temperature=None, FWHM=None, InputWorkspace=None, ResolutionModel=None, **kwargs):
         self.model = Model
         if Temperature is not None:
             self.model.Temperature = Temperature
@@ -1273,13 +1311,10 @@ class CrystalFieldFit(object):
                 pars = Parameters[ni] if islistlike(Parameters[ni]) else Parameters
                 ion = self.model.Ions[ni]
                 ranges = split2range(Ion=ion, EnergySplitting=EnergySplitting, Parameters=pars)
-                constraints += [('%s<ion%d.%s<%s' % (-bound, ni, parName, bound))
-                                for parName, bound in ranges.items()]
+                constraints += [('%s<ion%d.%s<%s' % (-bound, ni, parName, bound)) for parName, bound in ranges.items()]
         else:
-            ranges = split2range(Ion=self.model.Ion, EnergySplitting=EnergySplitting,
-                                 Parameters=Parameters)
-            constraints = [('%s<%s<%s' % (-bound, parName, bound))
-                           for parName, bound in ranges.items()]
+            ranges = split2range(Ion=self.model.Ion, EnergySplitting=EnergySplitting, Parameters=Parameters)
+            constraints = [('%s<%s<%s' % (-bound, parName, bound)) for parName, bound in ranges.items()]
         self.model.constraints(*constraints)
         if 'Type' not in kwargs or kwargs['Type'] == 'Monte Carlo':
             if 'OutputWorkspace' in kwargs and kwargs['OutputWorkspace'].strip() != '':
@@ -1328,7 +1363,7 @@ class CrystalFieldFit(object):
         if 'CrystalFieldMultiSpectrum' in fun:
             # Hack to ensure that 'PhysicalProperties' attribute is first
             # otherwise it won't set up other attributes properly
-            fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
+            fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)', r'\1\3\2', fun)
         alg = AlgorithmManager.createUnmanaged('EstimateFitParameters')
         alg.initialize()
         alg.setProperty('Function', fun)
@@ -1380,7 +1415,7 @@ class CrystalFieldFit(object):
             else:
                 fun = str(self._function)
         if 'CrystalFieldMultiSpectrum' in fun:
-            fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
+            fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)', r'\1\3\2', fun)
         alg = AlgorithmManager.createUnmanaged('Fit')
         alg.initialize()
         alg.setProperty('Function', fun)

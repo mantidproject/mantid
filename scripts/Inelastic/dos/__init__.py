@@ -10,4 +10,4 @@ load_castep -- Parses a castep file into a file data object
 load_phonon -- Parses a phonon file into a file data object
 """
 
-__all__=['load_castep','load_phonon', 'load_helper']
+__all__ = ['load_castep', 'load_phonon', 'load_helper']

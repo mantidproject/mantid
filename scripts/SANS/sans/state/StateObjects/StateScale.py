@@ -11,7 +11,6 @@ import copy
 from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import SampleShape, SANSFacility
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 #  State
 # ----------------------------------------------------------------------------------------------------------------------
@@ -19,7 +18,6 @@ from sans.state.automatic_setters import automatic_setters
 
 
 class StateScale(metaclass=JsonSerializable):
-
     def __init__(self):
         super(StateScale, self).__init__()
         self.shape = None

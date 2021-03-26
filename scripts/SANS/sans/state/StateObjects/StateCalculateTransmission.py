@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
-
 """State describing the calculation of the transmission for SANS reduction."""
 
 import json
@@ -19,7 +18,6 @@ from sans.state.state_functions import (is_pure_none_or_not_none, validation_mes
 
 
 class StateTransmissionFit(metaclass=JsonSerializable):
-
     def __init__(self):
         super(StateTransmissionFit, self).__init__()
         self.fit_type = FitType.LOGARITHMIC
@@ -40,23 +38,26 @@ class StateTransmissionFit(metaclass=JsonSerializable):
         is_invalid = {}
         if self.fit_type is FitType.POLYNOMIAL and self.polynomial_order == 0:
             entry = validation_message("You can only select a polynomial fit if you set a polynomial order (2 to 6).",
-                                       "Make sure that you select a polynomial order.",
-                                       {"fit_type": self.fit_type,
-                                        "polynomial_order": self.polynomial_order})
+                                       "Make sure that you select a polynomial order.", {
+                                           "fit_type": self.fit_type,
+                                           "polynomial_order": self.polynomial_order
+                                       })
             is_invalid.update(entry)
 
         if not is_pure_none_or_not_none([self.wavelength_low, self.wavelength_high]):
             entry = validation_message("Inconsistent wavelength setting.",
-                                       "Make sure that you have specified both wavelength bounds (or none).",
-                                       {"wavelength_low": self.wavelength_low,
-                                        "wavelength_high": self.wavelength_high})
+                                       "Make sure that you have specified both wavelength bounds (or none).", {
+                                           "wavelength_low": self.wavelength_low,
+                                           "wavelength_high": self.wavelength_high
+                                       })
             is_invalid.update(entry)
 
         if is_not_none_and_first_larger_than_second([self.wavelength_low, self.wavelength_high]):
             entry = validation_message("Incorrect wavelength bounds.",
-                                       "Make sure that lower wavelength bound is smaller then upper bound.",
-                                       {"wavelength_low": self.wavelength_low,
-                                        "wavelength_high": self.wavelength_high})
+                                       "Make sure that lower wavelength bound is smaller then upper bound.", {
+                                           "wavelength_low": self.wavelength_low,
+                                           "wavelength_high": self.wavelength_high
+                                       })
             is_invalid.update(entry)
         if is_invalid:
             raise ValueError("StateTransmissionFit: The provided inputs are illegal. "
@@ -106,8 +107,7 @@ class StateCalculateTransmission(metaclass=JsonSerializable):
         self.background_TOF_roi_start: float = None
         self.background_TOF_roi_stop: float = None
 
-        self.fit = {DataType.CAN.value: StateTransmissionFit(),
-                    DataType.SAMPLE.value: StateTransmissionFit()}
+        self.fit = {DataType.CAN.value: StateTransmissionFit(), DataType.SAMPLE.value: StateTransmissionFit()}
 
     def set_wavelength_step_type(self, val):
         self.wavelength_step_type = val
@@ -168,132 +168,157 @@ class StateCalculateTransmission(metaclass=JsonSerializable):
         has_no_transmission_roi_setting = self.transmission_radius_on_detector is None and \
                                           self.transmission_roi_files is None  # noqa
         if has_no_transmission_monitor_setting and has_no_transmission_roi_setting:
-            entry = validation_message("No transmission settings were specified.",
-                                       "Make sure that transmission settings are specified.",
-                                       {"transmission_monitor": self.transmission_monitor,
-                                        "transmission_radius_on_detector": self.transmission_radius_on_detector,
-                                        "transmission_roi_files": self.transmission_roi_files})
+            entry = validation_message(
+                "No transmission settings were specified.", "Make sure that transmission settings are specified.", {
+                    "transmission_monitor": self.transmission_monitor,
+                    "transmission_radius_on_detector": self.transmission_radius_on_detector,
+                    "transmission_roi_files": self.transmission_roi_files
+                })
             is_invalid.update(entry)
 
         # -----------------
         # Prompt peak
         # -----------------
         if not is_pure_none_or_not_none([self.prompt_peak_correction_min, self.prompt_peak_correction_max]):
-            entry = validation_message("Inconsistent prompt peak setting.",
-                                       "Make sure that you have specified both prompt peak bounds (or none).",
-                                       {"prompt_peak_correction_min": self.prompt_peak_correction_min,
-                                        "prompt_peak_correction_max": self.prompt_peak_correction_max})
+            entry = validation_message(
+                "Inconsistent prompt peak setting.",
+                "Make sure that you have specified both prompt peak bounds (or none).", {
+                    "prompt_peak_correction_min": self.prompt_peak_correction_min,
+                    "prompt_peak_correction_max": self.prompt_peak_correction_max
+                })
             is_invalid.update(entry)
 
         if is_not_none_and_first_larger_than_second([self.prompt_peak_correction_min, self.prompt_peak_correction_max]):
-            entry = validation_message("Incorrect prompt peak bounds.",
-                                       "Make sure that lower prompt peak bound is smaller then upper bound.",
-                                       {"prompt_peak_correction_min": self.prompt_peak_correction_min,
-                                        "prompt_peak_correction_max": self.prompt_peak_correction_max})
+            entry = validation_message(
+                "Incorrect prompt peak bounds.", "Make sure that lower prompt peak bound is smaller then upper bound.",
+                {
+                    "prompt_peak_correction_min": self.prompt_peak_correction_min,
+                    "prompt_peak_correction_max": self.prompt_peak_correction_max
+                })
             is_invalid.update(entry)
 
         # -----------------
         # Wavelength rebin
         # -----------------
         if one_is_none([self.wavelength_low, self.wavelength_high, self.wavelength_step, self.rebin_type]):
-            entry = validation_message("A wavelength entry has not been set.",
-                                       "Make sure that all entries are set.",
-                                       {"wavelength_low": self.wavelength_low,
-                                        "wavelength_high": self.wavelength_high,
-                                        "wavelength_step": self.wavelength_step,
-                                        "wavelength_step_type": self.wavelength_step_type,
-                                        "rebin_type": self.rebin_type})
+            entry = validation_message(
+                "A wavelength entry has not been set.", "Make sure that all entries are set.", {
+                    "wavelength_low": self.wavelength_low,
+                    "wavelength_high": self.wavelength_high,
+                    "wavelength_step": self.wavelength_step,
+                    "wavelength_step_type": self.wavelength_step_type,
+                    "rebin_type": self.rebin_type
+                })
             is_invalid.update(entry)
 
         if self.wavelength_step_type is RangeStepType.NOT_SET:
-            entry = validation_message("A wavelength entry has not been set.",
-                                       "Make sure that all entries are set.",
+            entry = validation_message("A wavelength entry has not been set.", "Make sure that all entries are set.",
                                        {"wavelength_step_type": self.wavelength_step_type})
             is_invalid.update(entry)
 
         if is_not_none_and_first_larger_than_second([self.wavelength_low, self.wavelength_high]):
             entry = validation_message("Incorrect wavelength bounds.",
-                                       "Make sure that lower wavelength bound is smaller then upper bound.",
-                                       {"wavelength_low": self.wavelength_low,
-                                        "wavelength_high": self.wavelength_high})
+                                       "Make sure that lower wavelength bound is smaller then upper bound.", {
+                                           "wavelength_low": self.wavelength_low,
+                                           "wavelength_high": self.wavelength_high
+                                       })
             is_invalid.update(entry)
 
         if self.use_full_wavelength_range:
             if self.wavelength_full_range_low is None or self.wavelength_full_range_high is None:
-                entry = validation_message("Incorrect full wavelength settings.",
-                                           "Make sure that both full wavelength entries have been set.",
-                                           {"wavelength_full_range_low": self.wavelength_full_range_low,
-                                            "wavelength_full_range_high": self.wavelength_full_range_high})
+                entry = validation_message(
+                    "Incorrect full wavelength settings.", "Make sure that both full wavelength entries have been set.",
+                    {
+                        "wavelength_full_range_low": self.wavelength_full_range_low,
+                        "wavelength_full_range_high": self.wavelength_full_range_high
+                    })
                 is_invalid.update(entry)
-            if is_not_none_and_first_larger_than_second([self.wavelength_full_range_low,
-                                                         self.wavelength_full_range_high]):
-                entry = validation_message("Incorrect wavelength bounds.",
-                                           "Make sure that lower full wavelength bound is smaller then upper bound.",
-                                           {"wavelength_full_range_low": self.wavelength_full_range_low,
-                                            "wavelength_full_range_high": self.wavelength_full_range_high})
+            if is_not_none_and_first_larger_than_second(
+                [self.wavelength_full_range_low, self.wavelength_full_range_high]):  # noqa: E125
+                entry = validation_message(
+                    "Incorrect wavelength bounds.",
+                    "Make sure that lower full wavelength bound is smaller then upper bound.", {
+                        "wavelength_full_range_low": self.wavelength_full_range_low,
+                        "wavelength_full_range_high": self.wavelength_full_range_high
+                    })
                 is_invalid.update(entry)
 
         # ----------------------
         # Background correction
         # ----------------------
         if not is_pure_none_or_not_none([self.background_TOF_general_start, self.background_TOF_general_stop]):
-            entry = validation_message("A general background TOF entry has not been set.",
-                                       "Make sure that either all general background TOF entries are set or none.",
-                                       {"background_TOF_general_start": self.background_TOF_general_start,
-                                        "background_TOF_general_stop": self.background_TOF_general_stop})
+            entry = validation_message(
+                "A general background TOF entry has not been set.",
+                "Make sure that either all general background TOF entries are set or none.", {
+                    "background_TOF_general_start": self.background_TOF_general_start,
+                    "background_TOF_general_stop": self.background_TOF_general_stop
+                })
             is_invalid.update(entry)
-        if is_not_none_and_first_larger_than_second([self.background_TOF_general_start,
-                                                     self.background_TOF_general_stop]):
-            entry = validation_message("Incorrect general background TOF bounds.",
-                                       "Make sure that lower general background TOF bound is smaller then upper bound.",
-                                       {"background_TOF_general_start": self.background_TOF_general_start,
-                                        "background_TOF_general_stop": self.background_TOF_general_stop})
+        if is_not_none_and_first_larger_than_second(
+            [self.background_TOF_general_start, self.background_TOF_general_stop]):  # noqa: E125
+            entry = validation_message(
+                "Incorrect general background TOF bounds.",
+                "Make sure that lower general background TOF bound is smaller then upper bound.", {
+                    "background_TOF_general_start": self.background_TOF_general_start,
+                    "background_TOF_general_stop": self.background_TOF_general_stop
+                })
             is_invalid.update(entry)
 
         if not is_pure_none_or_not_none([self.background_TOF_roi_start, self.background_TOF_roi_stop]):
-            entry = validation_message("A ROI background TOF entry has not been set.",
-                                       "Make sure that either all ROI background TOF entries are set or none.",
-                                       {"background_TOF_roi_start": self.background_TOF_roi_start,
-                                        "background_TOF_roi_stop": self.background_TOF_roi_stop})
+            entry = validation_message(
+                "A ROI background TOF entry has not been set.",
+                "Make sure that either all ROI background TOF entries are set or none.", {
+                    "background_TOF_roi_start": self.background_TOF_roi_start,
+                    "background_TOF_roi_stop": self.background_TOF_roi_stop
+                })
             is_invalid.update(entry)
 
-        if is_not_none_and_first_larger_than_second([self.background_TOF_roi_start,
-                                                     self.background_TOF_roi_stop]):
-            entry = validation_message("Incorrect ROI background TOF bounds.",
-                                       "Make sure that lower ROI background TOF bound is smaller then upper bound.",
-                                       {"background_TOF_roi_start": self.background_TOF_roi_start,
-                                        "background_TOF_roi_stop": self.background_TOF_roi_stop})
+        if is_not_none_and_first_larger_than_second([self.background_TOF_roi_start, self.background_TOF_roi_stop]):
+            entry = validation_message(
+                "Incorrect ROI background TOF bounds.",
+                "Make sure that lower ROI background TOF bound is smaller then upper bound.", {
+                    "background_TOF_roi_start": self.background_TOF_roi_start,
+                    "background_TOF_roi_stop": self.background_TOF_roi_stop
+                })
             is_invalid.update(entry)
 
         if not is_pure_none_or_not_none([self.background_TOF_monitor_start, self.background_TOF_monitor_stop]):
-            entry = validation_message("A monitor background TOF entry has not been set.",
-                                       "Make sure that either all monitor background TOF entries are set or none.",
-                                       {"background_TOF_monitor_start": self.background_TOF_monitor_start,
-                                        "background_TOF_monitor_stop": self.background_TOF_monitor_stop})
+            entry = validation_message(
+                "A monitor background TOF entry has not been set.",
+                "Make sure that either all monitor background TOF entries are set or none.", {
+                    "background_TOF_monitor_start": self.background_TOF_monitor_start,
+                    "background_TOF_monitor_stop": self.background_TOF_monitor_stop
+                })
             is_invalid.update(entry)
 
         if self.background_TOF_monitor_start is not None and self.background_TOF_monitor_stop is not None:
             if len(self.background_TOF_monitor_start) != len(self.background_TOF_monitor_stop):
-                entry = validation_message("The monitor background TOF entries have a length mismatch.",
-                                           "Make sure that all monitor background TOF entries have the same length.",
-                                           {"background_TOF_monitor_start": self.background_TOF_monitor_start,
-                                            "background_TOF_monitor_stop": self.background_TOF_monitor_stop})
+                entry = validation_message(
+                    "The monitor background TOF entries have a length mismatch.",
+                    "Make sure that all monitor background TOF entries have the same length.", {
+                        "background_TOF_monitor_start": self.background_TOF_monitor_start,
+                        "background_TOF_monitor_stop": self.background_TOF_monitor_stop
+                    })
                 is_invalid.update(entry)
             for key_start, value_start in list(self.background_TOF_monitor_start.items()):
                 if key_start not in self.background_TOF_monitor_stop:
-                    entry = validation_message("The monitor background TOF had spectrum number mismatch.",
-                                               "Make sure that all monitors have entries for start and stop.",
-                                               {"background_TOF_monitor_start": self.background_TOF_monitor_start,
-                                                "background_TOF_monitor_stop": self.background_TOF_monitor_stop})
+                    entry = validation_message(
+                        "The monitor background TOF had spectrum number mismatch.",
+                        "Make sure that all monitors have entries for start and stop.", {
+                            "background_TOF_monitor_start": self.background_TOF_monitor_start,
+                            "background_TOF_monitor_stop": self.background_TOF_monitor_stop
+                        })
                     is_invalid.update(entry)
                 else:
                     value_stop = self.background_TOF_monitor_stop[key_start]
                     if value_start > value_stop:
-                        entry = validation_message("Incorrect monitor background TOF bounds.",
-                                                   "Make sure that lower monitor background TOF bound is"
-                                                   " smaller then upper bound.",
-                                                   {"background_TOF_monitor_start": self.background_TOF_monitor_start,
-                                                    "background_TOF_monitor_stop": self.background_TOF_monitor_stop})
+                        entry = validation_message(
+                            "Incorrect monitor background TOF bounds.",
+                            "Make sure that lower monitor background TOF bound is"
+                            " smaller then upper bound.", {
+                                "background_TOF_monitor_start": self.background_TOF_monitor_start,
+                                "background_TOF_monitor_stop": self.background_TOF_monitor_stop
+                            })
                         is_invalid.update(entry)
 
         for fit_type in self.fit.values():

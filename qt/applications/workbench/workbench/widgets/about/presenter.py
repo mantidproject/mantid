@@ -23,7 +23,7 @@ class AboutPresenter(object):
     FACILITY = "default.facility"
     INSTRUMENT = "default.instrument"
 
-    def __init__(self, parent, view=None, usage_reporting_verification_view = None):
+    def __init__(self, parent, view=None, usage_reporting_verification_view=None):
         self.view = view if view else AboutView(parent, self, version_str(), release_date().strip())
         self.usage_reporting_verification_view = usage_reporting_verification_view \
             if usage_reporting_verification_view  else UsageReportingVerificationView(parent, self)
@@ -68,17 +68,17 @@ class AboutPresenter(object):
             try:
                 facilityInfo = ConfigService.getFacility(facility)
                 instrumentInfo = ConfigService.getInstrument(instrument)
-                logger.information("Default facility '{0}', instrument '{1}'\n".format(facilityInfo.name(),
-                                                                                       instrumentInfo.name()))
+                logger.information("Default facility '{0}', instrument '{1}'\n".format(
+                    facilityInfo.name(), instrumentInfo.name()))
             except RuntimeError:
                 # failed to find the facility or instrument
-                logger.error("Could not find your default facility '{0}' or instrument '{1}' in facilities.xml, "
-                             + "showing please select again.\n".format(facility, instrument))
+                logger.error("Could not find your default facility '{0}' or instrument '{1}' in facilities.xml, " +
+                             "showing please select again.\n".format(facility, instrument))
                 return True
 
         settings = QSettings()
         settings.beginGroup(AboutPresenter.DO_NOT_SHOW_GROUP)
-        doNotShowUntilNextRelease =int(settings.value(AboutPresenter.DO_NOT_SHOW, '0'))
+        doNotShowUntilNextRelease = int(settings.value(AboutPresenter.DO_NOT_SHOW, '0'))
         lastVersion = settings.value(AboutPresenter.LAST_VERSION, "")
         settings.endGroup()
 

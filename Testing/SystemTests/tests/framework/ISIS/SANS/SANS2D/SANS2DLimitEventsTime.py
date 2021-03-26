@@ -15,7 +15,6 @@ from sans.common.enums import SANSInstrument
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DLimitEventsTime(systemtesting.MantidSystemTest):
-
     def runTest(self):
         SANS2D()
         MaskFile('MaskSANS2DReductionGUI_LimitEventsTime.txt')
@@ -26,4 +25,4 @@ class SANS2DLimitEventsTime(systemtesting.MantidSystemTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-        return '22048rear_1D_1.5_12.5','SANSReductionGUI_LimitEventsTime.nxs'
+        return '22048rear_1D_1.5_12.5', 'SANSReductionGUI_LimitEventsTime.nxs'

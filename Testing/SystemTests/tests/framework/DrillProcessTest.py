@@ -20,12 +20,10 @@ from mantid.simpleapi import mtd, GroupWorkspaces
 from Interface.ui.drill.view.DrillView import *
 from Interface.ui.drill.view.DrillSettingsDialog import *
 
-
 app = QApplication(sys.argv)
 
 
 class DrillProcessSANSTest(systemtesting.MantidSystemTest):
-
     def __init__(self):
         super().__init__()
         config['default.facility'] = 'ILL'
@@ -49,10 +47,8 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
         columnIndex = self.drill.table.columns.index(column)
         y = self.drill.table.rowViewportPosition(row) + 5
         x = self.drill.table.columnViewportPosition(columnIndex) + 5
-        QTest.mouseClick(self.drill.table.viewport(),
-                         Qt.LeftButton, Qt.NoModifier, QPoint(x, y))
-        QTest.mouseDClick(self.drill.table.viewport(),
-                          Qt.LeftButton, Qt.NoModifier, QPoint(x, y))
+        QTest.mouseClick(self.drill.table.viewport(), Qt.LeftButton, Qt.NoModifier, QPoint(x, y))
+        QTest.mouseDClick(self.drill.table.viewport(), Qt.LeftButton, Qt.NoModifier, QPoint(x, y))
         QTest.keyClicks(self.drill.table.viewport().focusWidget(), text)
         QTest.keyClick(self.drill.table.viewport().focusWidget(), Qt.Key_Tab)
 
@@ -73,7 +69,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
             label = form.itemAt(i, QFormLayout.LabelRole).widget().text()
             widget = form.itemAt(i, QFormLayout.FieldRole).widget()
             widgets[label] = widget
-        for name,value in settingValues.items():
+        for name, value in settingValues.items():
             if name in widgets:
                 if isinstance(widgets[name], QLineEdit):
                     QTest.mouseClick(widgets[name], Qt.LeftButton)
@@ -98,12 +94,8 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def runTest(self):
-        sampleRuns = ["2889,2885,2881",
-                      "2887,2883,2879",
-                      "3187,3177,3167"]
-        sampleTransmissionRuns = ["2871",
-                                  "2869",
-                                  "3172"]
+        sampleRuns = ["2889,2885,2881", "2887,2883,2879", "3187,3177,3167"]
+        sampleTransmissionRuns = ["2871", "2869", "3172"]
         beamRuns = "2866,2867+2868,2878"
         transmissionBeamRuns = "2867+2868"
         containerRuns = "2888+2971,2884+2960,2880+2949"
@@ -115,10 +107,12 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
         QTest.mouseClick(self.drill.addrow, Qt.LeftButton)
         QTest.mouseClick(self.drill.addrow, Qt.LeftButton)
 
-        self.editSettings({"SensitivityMaps": "sens-lamp.nxs",
-                           "BeamRadius": "0.05,0.05,0.05",
-                           "CalculateResolution": "MildnerCarpenter",
-                           "TransmissionBeamRadius": "0.05"})
+        self.editSettings({
+            "SensitivityMaps": "sens-lamp.nxs",
+            "BeamRadius": "0.05,0.05,0.05",
+            "CalculateResolution": "MildnerCarpenter",
+            "TransmissionBeamRadius": "0.05"
+        })
 
         self.editCell(0, "SampleRuns", sampleRuns[0])
         self.editCell(0, "SampleTransmissionRuns", sampleTransmissionRuns[0])
@@ -152,9 +146,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
 
         QTest.mouseClick(self.drill.buttonProcessAll, Qt.LeftButton)
 
-        while (("iq_s1" not in mtd)
-               or ("iq_s2" not in mtd)
-               or ("iq_s3" not in mtd)):
+        while (("iq_s1" not in mtd) or ("iq_s2" not in mtd) or ("iq_s3" not in mtd)):
             time.sleep(1)
 
         GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')

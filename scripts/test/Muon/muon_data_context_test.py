@@ -26,7 +26,10 @@ class MuonDataContextTest(unittest.TestCase):
         self.context = MuonDataContext(load_data=self.loaded_data)
         self.context.instrument = 'EMU'
 
-        self.loaded_data.add_data(workspace=self.load_result, run=[self.run_number], filename=self.filename, instrument='EMU')
+        self.loaded_data.add_data(workspace=self.load_result,
+                                  run=[self.run_number],
+                                  filename=self.filename,
+                                  instrument='EMU')
         self.context.current_runs = [[self.run_number]]
         self.context.update_current_data()
 
@@ -39,8 +42,9 @@ class MuonDataContextTest(unittest.TestCase):
 
         self.context.update_current_data()
 
-        self.context.message_notifier.notify_subscribers.assert_called_once_with('MainFieldDirection has changed between'
-                                                                                 ' data sets, click default to reset grouping if required')
+        self.context.message_notifier.notify_subscribers.assert_called_once_with(
+            'MainFieldDirection has changed between'
+            ' data sets, click default to reset grouping if required')
         self.context.current_data['MainFieldDirection'] = 'longitudinal'
 
     def test_that_setting_current_runs_with_mixture_of_transverse_and_longitudanal_runs_raises_warning(self):
@@ -53,7 +57,8 @@ class MuonDataContextTest(unittest.TestCase):
         self.context.current_runs = [[19489], [1]]
 
         self.context.message_notifier.notify_subscribers.assert_called_once_with(
-            'MainFieldDirection changes within current run set:\ntransverse field runs 1\nlongitudinal field runs 19489\n')
+            'MainFieldDirection changes within current run set:\ntransverse field runs 1\nlongitudinal field runs '
+            '19489\n')
 
     def test_is_data_loaded_returns_true_if_data_loaded(self):
         self.assertTrue(self.context.is_data_loaded())
@@ -98,7 +103,7 @@ class MuonDataContextTest(unittest.TestCase):
         multi_period_worspace_list = [MuonWorkspaceWrapper(f'raw_data_{period_index + 1}') for period_index in range(4)]
         load_result = {'OutputWorkspace': multi_period_worspace_list}
         self.loaded_data.add_data(workspace=load_result, run=[84447], filename='workspace_filename', instrument='EMU')
-        self.context._current_runs = [[84447],[19489]]
+        self.context._current_runs = [[84447], [19489]]
 
         is_multi_period = self.context.is_multi_period()
 

@@ -28,19 +28,15 @@ class ContextExampleView(QtWidgets.QWidget):
         self.table.setColumnWidth(3, 100)
         self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setStretchLastSection(True)
-        self.table.setHorizontalHeaderLabels(
-            ("Property;Value 1; Value 2; Value3").split(";"))
+        self.table.setHorizontalHeaderLabels(("Property;Value 1; Value 2; Value3").split(";"))
         # populate table
 
         # row of groups
         table_utils.setRowName(self.table, 0, "Groups")
         group_name = ["a", "b", "c"]
-        self.ws0 = table_utils.addDoubleToTable(
-            self.table, group_name[0], 0, 1)
-        self.ws1 = table_utils.addDoubleToTable(
-            self.table, group_name[1], 0, 2)
-        self.ws2 = table_utils.addDoubleToTable(
-            self.table, group_name[2], 0, 3)
+        self.ws0 = table_utils.addDoubleToTable(self.table, group_name[0], 0, 1)
+        self.ws1 = table_utils.addDoubleToTable(self.table, group_name[1], 0, 2)
+        self.ws2 = table_utils.addDoubleToTable(self.table, group_name[2], 0, 3)
 
         # row to describe a pair
         table_utils.setRowName(self.table, 1, "Pair")
@@ -59,7 +55,7 @@ class ContextExampleView(QtWidgets.QWidget):
         btn.clicked.connect(self.sendUpdateSignal)
         # needed for updating the possible pairs when groups change
         self.table.itemChanged.connect(self.groupChanged)
-                # load values into GUI from context
+        # load values into GUI from context
         self.loadFromContext(context)
 
     # signals
@@ -116,8 +112,7 @@ class ContextExampleView(QtWidgets.QWidget):
         into the context
         """
         context = {}
-        context["Group Names"] = [
-            self.ws0.text(), self.ws1.text(), self.ws2.text()]
+        context["Group Names"] = [self.ws0.text(), self.ws1.text(), self.ws2.text()]
         context["Group dets"] = self.dets
         context["Pair_F"] = str(self.g1.currentText())
         context["Pair_B"] = str(self.g2.currentText())

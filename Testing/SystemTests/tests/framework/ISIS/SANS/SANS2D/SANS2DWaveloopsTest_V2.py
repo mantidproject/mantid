@@ -8,8 +8,8 @@
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from sans.command_interface.ISISCommandInterface import (SANS2D, MaskFile, Gravity, Set1D, AssignSample,
-                                                         TransmissionSample, AssignCan, TransmissionCan,
-                                                         CompWavRanges, UseCompatibilityMode)
+                                                         TransmissionSample, AssignCan, TransmissionCan, CompWavRanges,
+                                                         UseCompatibilityMode)
 from sans.common.enums import SANSInstrument
 
 

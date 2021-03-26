@@ -54,13 +54,13 @@ class V3DTest(unittest.TestCase):
         a = V3D(9.9, 7.6, 0.0)
         self.assertEqual(a.zenith(a), 0.0)
         self.assertAlmostEquals(a.zenith(b), math.pi / 2.0)
-        a = V3D(-1.1, 0.0, 0.0);
+        a = V3D(-1.1, 0.0, 0.0)
         self.assertAlmostEquals(a.zenith(b), math.pi / 2.0)
-        a = V3D(0.0, 0.0, 1.0);
-        self.assertEqual(a.zenith(b), 0.0);
-        a = V3D(1.0, 0.0, 1.0);
+        a = V3D(0.0, 0.0, 1.0)
+        self.assertEqual(a.zenith(b), 0.0)
+        a = V3D(1.0, 0.0, 1.0)
         self.assertAlmostEquals(a.zenith(b), math.pi / 4.0)
-        a = V3D(1.0, 0.0, -1.0);
+        a = V3D(1.0, 0.0, -1.0)
         self.assertAlmostEquals(a.zenith(b), 3.0 * math.pi / 4.0)
 
     def test_scalarprod(self):
@@ -78,24 +78,24 @@ class V3DTest(unittest.TestCase):
         self.assertAlmostEquals(c.Z(), 1.0)
 
     def test_norm(self):
-        p = V3D(1.0, -5.0, 8.0);
+        p = V3D(1.0, -5.0, 8.0)
         self.assertAlmostEquals(p.norm(), math.sqrt(90.0))
 
     def test_norm2(self):
-        p = V3D(1.0, -5.0, 8.0);
+        p = V3D(1.0, -5.0, 8.0)
         self.assertAlmostEquals(p.norm2(), 90.0)
 
     def test_equality_operators_use_value_comparison(self):
         p1 = V3D(1.0, -5.0, 8.0)
         p2 = V3D(1.0, -5.0, 8.0)
-        self.assertEqual(p1,  p2)
+        self.assertEqual(p1, p2)
 
     def test_inequality_operators_use_value_comparison(self):
         p1 = V3D(1.0, -5.0, 8.0)
         p2 = V3D(1.0, -5.0, 8.0)  # different objects, same value
         self.assertFalse(p1 != p2)
         p3 = V3D(1.0, -5.0, 10.0)
-        self.assertNotEqual(p1,  p3)
+        self.assertNotEqual(p1, p3)
 
     def test_directionAngles_rads(self):
         v = V3D(1, 1, 1)

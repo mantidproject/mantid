@@ -40,23 +40,21 @@ def l2q(ws, whichDet, theta, sample_component_name):
 
     sampleLocation = inst.getComponentByName(sample_component_name).getPos()
     detLocation = inst.getComponentByName(whichDet).getPos()
-    sample2detector = detLocation - sampleLocation    # meters
+    sample2detector = detLocation - sampleLocation  # meters
 
-    theta = theta * math.pi / 180.0     # convert to radians
+    theta = theta * math.pi / 180.0  # convert to radians
 
     # Fetch the reference frame to determine the instrument orientation.
     reference_frame = inst.getReferenceFrame()
 
-    sample_to_detector_along_beam = sample2detector.scalar_prod(
-        reference_frame.vecPointingAlongBeam())
+    sample_to_detector_along_beam = sample2detector.scalar_prod(reference_frame.vecPointingAlongBeam())
 
     # calculate new detector position based on angle theta in degrees:
     # Across the beam    (side to side)
     across_offset = 0.0
     up_offset = sample_to_detector_along_beam * \
         math.sin(2.0 * theta)        # Normal to the beam     (up)
-    beam_offset = detLocation.scalar_prod(
-        reference_frame.vecPointingAlongBeam())
+    beam_offset = detLocation.scalar_prod(reference_frame.vecPointingAlongBeam())
 
     coord_args = dict()
     coord_args[reference_frame.pointingAlongBeamAxis()] = beam_offset
@@ -64,15 +62,8 @@ def l2q(ws, whichDet, theta, sample_component_name):
     coord_args[reference_frame.pointingHorizontalAxis()] = across_offset
 
     logger.information('Correcting detector location')
-    MoveInstrumentComponent(
-        ws,
-        ComponentName=whichDet,
-        RelativePosition=False,
-        **coord_args)
+    MoveInstrumentComponent(ws, ComponentName=whichDet, RelativePosition=False, **coord_args)
 
     # Now convert to momentum transfer
-    IvsQ = ConvertUnits(
-        InputWorkspace=ws,
-        OutputWorkspace="IvsQ",
-        Target="MomentumTransfer")
+    IvsQ = ConvertUnits(InputWorkspace=ws, OutputWorkspace="IvsQ", Target="MomentumTransfer")
     return IvsQ

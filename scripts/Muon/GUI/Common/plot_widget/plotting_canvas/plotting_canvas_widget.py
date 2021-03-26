@@ -12,7 +12,6 @@ from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view import Plo
 
 
 class PlottingCanvasWidget(object):
-
     def __init__(self, parent, context):
 
         self._figure_options = QuickEditWidget(parent)

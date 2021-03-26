@@ -11,9 +11,8 @@ class CRISPLoadingTest(LoadAndCheckBase):
     '''
     Test File loading and basic data integrity checks of CRISP data in Mantid.
     '''
-
     def __init__(self):
-        super(self.__class__,self).__init__()
+        super(self.__class__, self).__init__()
         self.disableChecking.append("Instrument")
 
     def get_raw_workspace_filename(self):

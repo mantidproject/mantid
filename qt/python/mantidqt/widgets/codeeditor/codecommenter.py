@@ -8,7 +8,6 @@
 
 
 class CodeCommenter:
-
     def __init__(self, editor):
         self.editor = editor
 
@@ -48,8 +47,7 @@ class CodeCommenter:
         :param selection_idxs: Length 4 list, e.g. [row0, col0, row1, col1]
         """
         line_end_pos = len(self.editor.text().split('\n')[selection_idxs[2]].rstrip())
-        line_selection_idxs = [selection_idxs[0], 0,
-                               selection_idxs[2], line_end_pos]
+        line_selection_idxs = [selection_idxs[0], 0, selection_idxs[2], line_end_pos]
         self.editor.setSelection(*line_selection_idxs)
 
     def _are_comments(self, code_lines):

@@ -15,16 +15,14 @@ from contextlib import contextmanager
 from importlib import import_module
 import warnings
 
-warnings.filterwarnings(action='ignore',
-                        category=DeprecationWarning,
-                        module='.*uic.*')
+warnings.filterwarnings(action='ignore', category=DeprecationWarning, module='.*uic.*')
 
 # 3rd-party modules
-from qtpy import QT_VERSION # noqa
-from qtpy.QtCore import QPoint # noqa
-from qtpy.QtGui import QKeySequence # noqa
+from qtpy import QT_VERSION  # noqa
+from qtpy.QtCore import QPoint  # noqa
+from qtpy.QtGui import QKeySequence  # noqa
 from qtpy.QtWidgets import QAction, QMenu, QDesktopWidget  # noqa
-from qtpy.uic import loadUi, loadUiType # noqa
+from qtpy.uic import loadUi, loadUiType  # noqa
 
 LIB_SUFFIX = 'qt' + QT_VERSION[0]
 
@@ -122,8 +120,13 @@ def widget_updates_disabled(widget):
     widget.setUpdatesEnabled(True)
 
 
-def create_action(parent, text, on_triggered=None, shortcut=None,
-                  shortcut_context=None, icon_name=None, shortcut_visible_in_context_menu=None):
+def create_action(parent,
+                  text,
+                  on_triggered=None,
+                  shortcut=None,
+                  shortcut_context=None,
+                  icon_name=None,
+                  shortcut_visible_in_context_menu=None):
     """Create a QAction based on the give properties
 
     :param parent: The parent object

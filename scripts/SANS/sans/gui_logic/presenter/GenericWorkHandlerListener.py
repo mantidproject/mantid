@@ -11,7 +11,6 @@ class GenericWorkHandlerListener(WorkHandler.WorkListener):
     """
     A concrete class to act as a "listener" for the WorkHandler.
     """
-
     def __init__(self, error_callback, success_callback):
         """
         The callbacks are assigned to the abstract methods of the base class, and are called

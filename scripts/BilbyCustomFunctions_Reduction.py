@@ -30,6 +30,7 @@ def string_boolean(line):
         sys.exit()
     return bool_string
 
+
 ##############################################################################
 
 
@@ -42,6 +43,7 @@ def read_convert_to_float(array_strings):
         print("Check input parameters; binning parameters shall be given in a format left_value, step, right_value.")
         sys.exit()
     return array
+
 
 ##############################################################################
 
@@ -60,6 +62,7 @@ def files_list_reduce(filename):
             parameters.append(row)
     return parameters
 
+
 ##############################################################################
 
 
@@ -75,6 +78,7 @@ def evaluate_files_list(numbers):
         else:
             expanded.append(int(number))
     return expanded
+
 
 ##############################################################################
 
@@ -94,6 +98,7 @@ def files_to_reduce(parameters, evaluate_files):
 
     return files_to_reduce
 
+
 ##############################################################################
 
 
@@ -102,7 +107,7 @@ def strip_NaNs(output_workspace, base_output_name):
 
     data = output_workspace.readY(0)
     start_index = next((index for index in range(len(data)) if not math.isnan(data[index])), None)
-    end_index = next((index for index in range(len(data)-1, -1, -1) if not math.isnan(data[index])), None)
+    end_index = next((index for index in range(len(data) - 1, -1, -1) if not math.isnan(data[index])), None)
 
     q_values = output_workspace.readX(0)
     start_q = q_values[start_index]
@@ -112,26 +117,29 @@ def strip_NaNs(output_workspace, base_output_name):
 
     return base_output_name
 
+
 ##############################################################################
 
 
-def output_header(external_mode, used_wl_range, ws_sample, sample_thickness,
-                  sample_transmission, empty_beam_transmission, blocked_beam, sample_mask, transmission_mask):
+def output_header(external_mode, used_wl_range, ws_sample, sample_thickness, sample_transmission,
+                  empty_beam_transmission, blocked_beam, sample_mask, transmission_mask):
     """  Creates header to be recorded into the output file """
     header = []
 
-    wl_row = 'Velocity selector set wavelength: ' + str(format(float(ws_sample.run().getProperty("wavelength").value), '.3f')) + ' Angstrom'
+    wl_row = 'Velocity selector set wavelength: ' + str(
+        format(float(ws_sample.run().getProperty("wavelength").value), '.3f')) + ' Angstrom'
     header.append(wl_row)
 
     if (external_mode):
-        choppers = 'Double choppers pair: ' + str(int(ws_sample.run().getProperty("master1_chopper_id").value)) + ' and ' \
-                                            + str(int(ws_sample.run().getProperty("master2_chopper_id").value))
+        choppers = 'Double choppers pair: ' + str(int(ws_sample.run().getProperty("master1_chopper_id").value)) + \
+                   ' and '  + str(int(ws_sample.run().getProperty("master2_chopper_id").value))
         header.append(choppers)
         frequency = 'Data defining pulse frequency (equal or slower than the Double pair frequency): ' \
                     + str(format(1e6/float(ws_sample.run().getProperty("period").value), '.2f')) + ' Hz'
         header.append(frequency)
-        wavelength_range = 'Wavelength range used for the data reduction: ' + str(format(float(used_wl_range[0]), '.2f')) + ' to ' \
-                                                                            + str(format(float(used_wl_range[2]), '.2f')) + ' Angstrom'
+        wavelength_range = 'Wavelength range used for the data reduction: '\
+                           + str(format(float(used_wl_range[0]), '.2f')) + ' to ' \
+                           + str(format(float(used_wl_range[2]), '.2f')) + ' Angstrom'
         header.append(wavelength_range)
         resolution_value = float(used_wl_range[1])
         if resolution_value < 0:
@@ -147,7 +155,8 @@ def output_header(external_mode, used_wl_range, ws_sample, sample_thickness,
     l1 = 'L1: ' + str(format(float(ws_sample.run().getProperty("L1").value), '.3f')) + ' m'
     header.append(l1)
 
-    rear_l2_row = 'L2 to rear detector: ' + str(format(float(ws_sample.run().getProperty("L2_det_value").value), '.3f')) + ' m'
+    rear_l2_row = 'L2 to rear detector: ' + str(format(float(ws_sample.run().getProperty("L2_det_value").value),
+                                                       '.3f')) + ' m'
     header.append(rear_l2_row)
 
     curtain_ud_l2_row = 'L2 to horizontal curtains: ' \
@@ -192,10 +201,11 @@ def output_header(external_mode, used_wl_range, ws_sample, sample_thickness,
 
     return header
 
+
 ##############################################################################
 
 
-def get_pixel_size():     # reads current IDF and get pixelsize from there
+def get_pixel_size():  # reads current IDF and get pixelsize from there
     """ To get pixel size for Bilby detectors from the Bilby_Definition.xml file """
 
     from mantid.api import ExperimentInfo
@@ -212,6 +222,7 @@ def get_pixel_size():     # reads current IDF and get pixelsize from there
 
     return pixelsize
 
+
 ##############################################################################
 
 
@@ -225,6 +236,7 @@ def read_csv(filename):
             parameters.append(row)
     return parameters
 
+
 ##############################################################################
 
 
@@ -235,13 +247,14 @@ def attenuation_correction(att_pos, data_before_May_2016):
     if (data_before_May_2016):
         print("You stated data have been collected before May, 2016, i.e. using old attenuators. Please double check.")
         if (att_pos == 2.0 or att_pos == 4.0):
-            print(
-                "Wrong attenuators value; Either data have been collected after May, 2016, or something is wrong with hdf file")
+            print("Wrong attenuators value; Either data have been collected after May, 2016, or something is wrong with"
+                  " hdf file")
             sys.exit()
         scale = attenuation_correction_pre_2016[att_pos]
     else:
         scale = attenuation_correction_post_2016[att_pos]
     return scale
+
 
 ##############################################################################
 
@@ -252,8 +265,8 @@ def wavelengh_slices(wavelength_intervals, binning_wavelength_ini, wav_delta):
     binning_wavelength = []
     if not wavelength_intervals:
         binning_wavelength.append(binning_wavelength_ini)
-        n = 1        # in this case, number of wavelength range intervals always will be 1
-    else:            # reducing data on a several intervals of wavelengths
+        n = 1  # in this case, number of wavelength range intervals always will be 1
+    else:  # reducing data on a several intervals of wavelengths
         wav1 = float(binning_wavelength_ini[0])
         wv_ini_step = float(binning_wavelength_ini[1])
         wav2 = float(binning_wavelength_ini[2])
@@ -262,11 +275,11 @@ def wavelengh_slices(wavelength_intervals, binning_wavelength_ini, wav_delta):
         if (wav1 + wav_delta) > wav2:
             raise ValueError("wav_delta is too large for the upper range of wavelength")
         if math.fmod((wav2 - wav1), wav_delta) == 0.0:  # if reminder is 0
-            n = (wav2 - wav1)/wav_delta
-        else:        # if reminder is greater than 0, to trancate the maximum wavelength in the range
-            n = math.floor((wav2 - wav1)/wav_delta)
-            max_wave_length = wav1 + n*wav_delta
-            print ('\n WARNING: because of your set-up, maximum wavelength to consider \
+            n = (wav2 - wav1) / wav_delta
+        else:  # if reminder is greater than 0, to trancate the maximum wavelength in the range
+            n = math.floor((wav2 - wav1) / wav_delta)
+            max_wave_length = wav1 + n * wav_delta
+            print('\n WARNING: because of your set-up, maximum wavelength to consider \
                 for partial reduction is only %4.2f \n' % max_wave_length)
 
         # number of wavelength range intervals
@@ -276,25 +289,28 @@ def wavelengh_slices(wavelength_intervals, binning_wavelength_ini, wav_delta):
         for i in range(n):
             binning_wavelength_interm_0 = wav1 + wav_delta * i  # left range
             binning_wavelength_interm_2 = binning_wavelength_interm_0 + wav_delta  # right range
-            binning_wavelength_interm = [binning_wavelength_interm_0, binning_wavelength_interm_1, binning_wavelength_interm_2]
+            binning_wavelength_interm = [
+                binning_wavelength_interm_0, binning_wavelength_interm_1, binning_wavelength_interm_2
+            ]
             binning_wavelength.append(binning_wavelength_interm)
-        binning_wavelength.append(binning_wavelength_ini)       # reduce data on the full range
+        binning_wavelength.append(binning_wavelength_ini)  # reduce data on the full range
         n = n + 1  # to include full range
 
     return binning_wavelength, n
+
 
 ##############################################################################
 
 
 def correction_tubes_shift(ws_to_correct, path_to_shifts_file):
-    """ This function moves each tube and then rear panels as a whole as per numbers recorded in the path_to_shifts_file csv file.
-          The values in the file are obtained from fitting of a few data sets collected using different masks.
-          It is a very good idea do not change the file. """
+    """ This function moves each tube and then rear panels as a whole as per numbers recorded in the path_to_shifts_file
+     csv file. The values in the file are obtained from fitting of a few data sets collected using different masks.
+     It is a very good idea do not change the file. """
 
     shifts = []
     shifts = read_csv(path_to_shifts_file)
-        # shall be precisely sevel lines; shifts for rear left, rear right, left, right, top, bottom curtains
-        # [calculated from 296_Cd_lines_setup1 file] + value for symmetrical shift for entire rear panels
+    # shall be precisely sevel lines; shifts for rear left, rear right, left, right, top, bottom curtains
+    # [calculated from 296_Cd_lines_setup1 file] + value for symmetrical shift for entire rear panels
     pixelsize = get_pixel_size()
 
     correct_element_one_stripe("BackDetectorLeft", pixelsize, shifts[0], ws_to_correct)
@@ -308,6 +324,7 @@ def correction_tubes_shift(ws_to_correct, path_to_shifts_file):
     correction_based_on_experiment(ws_to_correct)
 
     return
+
 
 ##############################################################################
 
@@ -323,18 +340,35 @@ def correct_element_one_stripe(panel, pixelsize, shift, ws):
     for ei_pack, t_tube in product(eightpack, tube):
         if (panel == "BackDetectorLeft" or panel == "CurtainLeft"):
             direction = 1.0
-            MoveInstrumentComponent(ws, panel + '/' + ei_pack + '/' + t_tube,  X=0, Y=-float(shift[i])*pixelsize*direction, Z=0)
+            MoveInstrumentComponent(ws,
+                                    panel + '/' + ei_pack + '/' + t_tube,
+                                    X=0,
+                                    Y=-float(shift[i]) * pixelsize * direction,
+                                    Z=0)
         if (panel == "BackDetectorRight" or panel == "CurtainRight"):
             direction = -1.0
-            MoveInstrumentComponent(ws, panel + '/' + ei_pack + '/' + t_tube,  X=0, Y=-float(shift[i])*pixelsize*direction, Z=0)
+            MoveInstrumentComponent(ws,
+                                    panel + '/' + ei_pack + '/' + t_tube,
+                                    X=0,
+                                    Y=-float(shift[i]) * pixelsize * direction,
+                                    Z=0)
         if (panel == "CurtainBottom"):
             direction = 1.0
-            MoveInstrumentComponent(ws, panel + '/' + ei_pack + '/' + t_tube,  X=-float(shift[i])*pixelsize*direction, Y=0, Z=0)
+            MoveInstrumentComponent(ws,
+                                    panel + '/' + ei_pack + '/' + t_tube,
+                                    X=-float(shift[i]) * pixelsize * direction,
+                                    Y=0,
+                                    Z=0)
         if (panel == "CurtainTop"):
             direction = -1.0
-            MoveInstrumentComponent(ws, panel + '/' + ei_pack + '/' + t_tube,  X=-float(shift[i])*pixelsize*direction, Y=0, Z=0)
+            MoveInstrumentComponent(ws,
+                                    panel + '/' + ei_pack + '/' + t_tube,
+                                    X=-float(shift[i]) * pixelsize * direction,
+                                    Y=0,
+                                    Z=0)
         i = i + 1
     return ws
+
 
 ##############################################################################
 
@@ -344,13 +378,14 @@ def move_rear_panels(shift, pixelsize, ws):
 
     panel = "BackDetectorLeft"
     direction = 1.0
-    MoveInstrumentComponent(ws, panel,  X=0, Y=-float(shift)*pixelsize*direction, Z=0)
+    MoveInstrumentComponent(ws, panel, X=0, Y=-float(shift) * pixelsize * direction, Z=0)
 
     panel = "BackDetectorRight"
     direction = -1.0
-    MoveInstrumentComponent(ws, panel,  X=0, Y=-float(shift)*pixelsize*direction, Z=0)
+    MoveInstrumentComponent(ws, panel, X=0, Y=-float(shift) * pixelsize * direction, Z=0)
 
     return ws
+
 
 ##############################################################################
 
@@ -359,32 +394,31 @@ def correction_based_on_experiment(ws_to_correct):
     """ The function to move curtains, based on fits/analysis of a massive set of AgBeh and liquid crystals data
         collected on 6 Oct 2016. Previous Laser tracker data has not picked up these imperfections."""
 
-    MoveInstrumentComponent(ws_to_correct, 'CurtainLeft', X=-5.3/1000, Y=0, Z=13.0/1000)
-    MoveInstrumentComponent(ws_to_correct, 'CurtainRight', X=5.5/1000, Y=0, Z=17.0/1000)
-    MoveInstrumentComponent(ws_to_correct, 'CurtainTop', X=0, Y=-4.0/1000, Z=0)
-    MoveInstrumentComponent(ws_to_correct, 'CurtainBottom', X=0, Y=6.0/1000, Z=0)
-    MoveInstrumentComponent(ws_to_correct, 'BackDetectorRight', X=0, Y=-2.0/1000,  Z=0)
-    MoveInstrumentComponent(ws_to_correct, 'BackDetectorLeft', X=0, Y=-2.0/1000, Z=0)
+    MoveInstrumentComponent(ws_to_correct, 'CurtainLeft', X=-5.3 / 1000, Y=0, Z=13.0 / 1000)
+    MoveInstrumentComponent(ws_to_correct, 'CurtainRight', X=5.5 / 1000, Y=0, Z=17.0 / 1000)
+    MoveInstrumentComponent(ws_to_correct, 'CurtainTop', X=0, Y=-4.0 / 1000, Z=0)
+    MoveInstrumentComponent(ws_to_correct, 'CurtainBottom', X=0, Y=6.0 / 1000, Z=0)
+    MoveInstrumentComponent(ws_to_correct, 'BackDetectorRight', X=0, Y=-2.0 / 1000, Z=0)
+    MoveInstrumentComponent(ws_to_correct, 'BackDetectorLeft', X=0, Y=-2.0 / 1000, Z=0)
 
     return
 
+
 ##############################################################################
-
-
 """ Final detectors' alignement has been done using laser tracker in January, 2016.
     To correct data collected before that, some extra shift hardcoded here, shall be applied """
 
 
-def det_shift_before_2016 (ws_to_correct):
-    shift_curtainl = 0.74/1000
-    shift_curtainr = 6.92/1000
-    shift_curtainu = -7.50/1000
-    shift_curtaind = -1.59/1000
+def det_shift_before_2016(ws_to_correct):
+    shift_curtainl = 0.74 / 1000
+    shift_curtainr = 6.92 / 1000
+    shift_curtainu = -7.50 / 1000
+    shift_curtaind = -1.59 / 1000
 
-    MoveInstrumentComponent(ws_to_correct, 'CurtainLeft',    X = shift_curtainl, Y = 0 , Z = 0)
-    MoveInstrumentComponent(ws_to_correct, 'CurtainRight',  X = shift_curtainr, Y = 0 , Z = 0)
-    MoveInstrumentComponent(ws_to_correct, 'CurtainTop',      X = 0,  Y=shift_curtainu , Z = 0)
-    MoveInstrumentComponent(ws_to_correct, 'CurtainBottom', X = 0,   Y=shift_curtaind , Z = 0)
+    MoveInstrumentComponent(ws_to_correct, 'CurtainLeft', X=shift_curtainl, Y=0, Z=0)
+    MoveInstrumentComponent(ws_to_correct, 'CurtainRight', X=shift_curtainr, Y=0, Z=0)
+    MoveInstrumentComponent(ws_to_correct, 'CurtainTop', X=0, Y=shift_curtainu, Z=0)
+    MoveInstrumentComponent(ws_to_correct, 'CurtainBottom', X=0, Y=shift_curtaind, Z=0)
 
     correction_based_on_experiment(ws_to_correct)
     return ws_to_correct

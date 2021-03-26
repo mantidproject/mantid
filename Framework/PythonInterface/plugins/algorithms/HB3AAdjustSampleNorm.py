@@ -14,7 +14,6 @@ import os
 
 
 class HB3AAdjustSampleNorm(PythonAlgorithm):
-
     def category(self):
         return "Crystal\\Corrections"
 
@@ -34,59 +33,81 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                                                   extensions=[".nxs.h5", ".nxs"],
                                                   action=FileAction.OptionalLoad),
                              doc="Input autoreduced detector scan data files to convert to Q-space.")
-        self.declareProperty(
-            FileProperty(name="VanadiumFile", defaultValue="", extensions=[".nxs"], direction=Direction.Input,
-                         action=FileAction.OptionalLoad),
-            doc="File with Vanadium normalization scan data")
+        self.declareProperty(FileProperty(name="VanadiumFile",
+                                          defaultValue="",
+                                          extensions=[".nxs"],
+                                          direction=Direction.Input,
+                                          action=FileAction.OptionalLoad),
+                             doc="File with Vanadium normalization scan data")
 
         # Alternative WS inputs
-        self.declareProperty("InputWorkspaces", defaultValue="", direction=Direction.Input,
+        self.declareProperty("InputWorkspaces",
+                             defaultValue="",
+                             direction=Direction.Input,
                              doc="Workspace or comma-separated workspace list containing input MDHisto scan data.")
-        self.declareProperty(IMDHistoWorkspaceProperty("VanadiumWorkspace", defaultValue="", direction=Direction.Input,
+        self.declareProperty(IMDHistoWorkspaceProperty("VanadiumWorkspace",
+                                                       defaultValue="",
+                                                       direction=Direction.Input,
                                                        optional=PropertyMode.Optional),
                              doc="MDHisto workspace containing vanadium normalization data")
 
         # Detector adjustment options
-        self.declareProperty("DetectorHeightOffset", defaultValue=0.0, direction=Direction.Input,
+        self.declareProperty("DetectorHeightOffset",
+                             defaultValue=0.0,
+                             direction=Direction.Input,
                              doc="Optional distance (in meters) to move detector height (relative to current position)")
-        self.declareProperty("DetectorDistanceOffset", defaultValue=0.0, direction=Direction.Input,
-                             doc="Optional distance (in meters) to move detector distance (relative to current position)")
+        self.declareProperty(
+            "DetectorDistanceOffset",
+            defaultValue=0.0,
+            direction=Direction.Input,
+            doc="Optional distance (in meters) to move detector distance (relative to current position)")
 
-        self.declareProperty(FloatPropertyWithValue("Wavelength", # EMPTY_DBL so it shows as blank in GUI
-                                                    FloatPropertyWithValue.EMPTY_DBL),
-                             doc="Optional wavelength value to use as backup if one was not found in the sample log")
+        self.declareProperty(
+            FloatPropertyWithValue(
+                "Wavelength",  # EMPTY_DBL so it shows as blank in GUI
+                FloatPropertyWithValue.EMPTY_DBL),
+            doc="Optional wavelength value to use as backup if one was not found in the sample log")
 
         # Which conversion algorithm to use
-        self.declareProperty("OutputAsMDEventWorkspace", defaultValue=True, direction=Direction.Input,
+        self.declareProperty("OutputAsMDEventWorkspace",
+                             defaultValue=True,
+                             direction=Direction.Input,
                              doc="Whether to use ConvertHFIRSCDtoQ for an MDEvent, or ConvertWANDSCDtoQ for an MDHisto")
 
         # MDEvent WS Specific options for ConvertHFIRSCDtoQ
-        self.declareProperty(FloatArrayProperty("MinValues", [-10, -10, -10], FloatArrayLengthValidator(3),
+        self.declareProperty(FloatArrayProperty("MinValues", [-10, -10, -10],
+                                                FloatArrayLengthValidator(3),
                                                 direction=Direction.Input),
                              doc="3 comma separated values, one for each q_sample dimension")
-        self.declareProperty(FloatArrayProperty("MaxValues", [10, 10, 10], FloatArrayLengthValidator(3),
+        self.declareProperty(FloatArrayProperty("MaxValues", [10, 10, 10],
+                                                FloatArrayLengthValidator(3),
                                                 direction=Direction.Input),
                              doc="3 comma separated values, one for each q_sample dimension; must be larger than"
-                                 "those specified in MinValues")
-        self.declareProperty("MergeInputs", defaultValue=False, direction=Direction.Input,
+                             "those specified in MinValues")
+        self.declareProperty("MergeInputs",
+                             defaultValue=False,
+                             direction=Direction.Input,
                              doc="If all inputs should be merged into one MDEvent output workspace")
 
         # MDHisto WS Specific options for ConvertWANDSCDtoQ
-        self.declareProperty(FloatArrayProperty("BinningDim0", [-8.02, 8.02, 401], FloatArrayLengthValidator(3),
-                                                direction=Direction.Input),
-                             "Binning parameters for the 0th dimension. Enter it as a"
-                             "comma-separated list of values with the"
-                             "format: 'minimum,maximum,number_of_bins'.")
-        self.declareProperty(FloatArrayProperty("BinningDim1", [-2.52, 2.52, 126], FloatArrayLengthValidator(3),
-                                                direction=Direction.Input),
-                             "Binning parameters for the 1st dimension. Enter it as a"
-                             "comma-separated list of values with the"
-                             "format: 'minimum,maximum,number_of_bins'.")
-        self.declareProperty(FloatArrayProperty("BinningDim2", [-8.02, 8.02, 401], FloatArrayLengthValidator(3),
-                                                direction=Direction.Input),
-                             "Binning parameters for the 2nd dimension. Enter it as a"
-                             "comma-separated list of values with the"
-                             "format: 'minimum,maximum,number_of_bins'.")
+        self.declareProperty(
+            FloatArrayProperty("BinningDim0", [-8.02, 8.02, 401],
+                               FloatArrayLengthValidator(3),
+                               direction=Direction.Input), "Binning parameters for the 0th dimension. Enter it as a"
+            "comma-separated list of values with the"
+            "format: 'minimum,maximum,number_of_bins'.")
+        self.declareProperty(
+            FloatArrayProperty("BinningDim1", [-2.52, 2.52, 126],
+                               FloatArrayLengthValidator(3),
+                               direction=Direction.Input), "Binning parameters for the 1st dimension. Enter it as a"
+            "comma-separated list of values with the"
+            "format: 'minimum,maximum,number_of_bins'.")
+        self.declareProperty(
+            FloatArrayProperty("BinningDim2", [-8.02, 8.02, 401],
+                               FloatArrayLengthValidator(3),
+                               direction=Direction.Input), "Binning parameters for the 2nd dimension. Enter it as a"
+            "comma-separated list of values with the"
+            "format: 'minimum,maximum,number_of_bins'.")
 
         self.setPropertySettings("Filename", EnabledWhenProperty('InputWorkspaces', PropertyCriterion.IsDefault))
         self.setPropertySettings("VanadiumFile", EnabledWhenProperty('VanadiumWorkspace', PropertyCriterion.IsDefault))
@@ -109,9 +130,11 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.setPropertySettings("BinningDim1", histo_settings)
         self.setPropertySettings("BinningDim2", histo_settings)
 
-        self.declareProperty(
-            WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
-            doc="Output MDWorkspace in Q-space, name is prefix if multiple input files were provided.")
+        self.declareProperty(WorkspaceProperty("OutputWorkspace",
+                                               "",
+                                               optional=PropertyMode.Mandatory,
+                                               direction=Direction.Output),
+                             doc="Output MDWorkspace in Q-space, name is prefix if multiple input files were provided.")
 
     def validateInputs(self):
         issues = dict()
@@ -203,7 +226,11 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             prog.report()
             self.log().information("Processing '{}'".format(in_file))
 
-            SetGoniometer(Workspace=scan, Axis0='omega,0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2='phi,0,1,0,-1', Average=False)
+            SetGoniometer(Workspace=scan,
+                          Axis0='omega,0,1,0,-1',
+                          Axis1='chi,0,0,1,-1',
+                          Axis2='phi,0,1,0,-1',
+                          Average=False)
             # If processing multiple files, append the base name to the given output name
             if has_multiple:
                 if load_files:
@@ -231,22 +258,37 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                 if has_van:
                     van_norm = ReplicateMD(ShapeWorkspace=scan, DataWorkspace=vanws, StoreInADS=False)
                     van_norm = DivideMD(LHSWorkspace=scan, RHSWorkspace=van_norm, StoreInADS=False)
-                    ConvertHFIRSCDtoMDE(InputWorkspace=van_norm, Wavelength=wavelength, MinValues=minvals,
-                                        MaxValues=maxvals, OutputWorkspace=out_ws_name)
+                    ConvertHFIRSCDtoMDE(InputWorkspace=van_norm,
+                                        Wavelength=wavelength,
+                                        MinValues=minvals,
+                                        MaxValues=maxvals,
+                                        OutputWorkspace=out_ws_name)
                     DeleteWorkspace(van_norm)
                 else:
-                    ConvertHFIRSCDtoMDE(InputWorkspace=scan, Wavelength=wavelength, MinValues=minvals,
-                                        MaxValues=maxvals, OutputWorkspace=out_ws_name)
+                    ConvertHFIRSCDtoMDE(InputWorkspace=scan,
+                                        Wavelength=wavelength,
+                                        MinValues=minvals,
+                                        MaxValues=maxvals,
+                                        OutputWorkspace=out_ws_name)
             else:
                 # Convert to Q space and normalize with from the vanadium
                 if has_van:
-                    ConvertWANDSCDtoQ(InputWorkspace=scan, NormalisationWorkspace=vanws, Frame='Q_sample',
-                                      Wavelength=wavelength, NormaliseBy='Monitor', BinningDim0=bin0, BinningDim1=bin1,
+                    ConvertWANDSCDtoQ(InputWorkspace=scan,
+                                      NormalisationWorkspace=vanws,
+                                      Frame='Q_sample',
+                                      Wavelength=wavelength,
+                                      NormaliseBy='Monitor',
+                                      BinningDim0=bin0,
+                                      BinningDim1=bin1,
                                       BinningDim2=bin2,
                                       OutputWorkspace=out_ws_name)
                 else:
-                    ConvertWANDSCDtoQ(InputWorkspace=scan, Frame='Q_sample',
-                                      Wavelength=wavelength, NormaliseBy='Monitor', BinningDim0=bin0, BinningDim1=bin1,
+                    ConvertWANDSCDtoQ(InputWorkspace=scan,
+                                      Frame='Q_sample',
+                                      Wavelength=wavelength,
+                                      NormaliseBy='Monitor',
+                                      BinningDim0=bin0,
+                                      BinningDim1=bin1,
                                       BinningDim2=bin2,
                                       OutputWorkspace=out_ws_name)
             if load_files:

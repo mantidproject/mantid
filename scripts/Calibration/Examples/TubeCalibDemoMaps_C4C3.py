@@ -15,7 +15,6 @@ import tube
 from tube_spec import TubeSpec
 import mantid.simpleapi as mantid
 
-
 # == Set parameters for calibration ==
 
 filename = 'MAP14919.raw'  # Name of calibration run
@@ -48,8 +47,7 @@ print("Created objects needed for calibration.")
 
 # == Get the calibration and put results into calibration table ==
 
-calibrationTable, peakTable = tube.calibrate(CalibInstWS, thisTubeSet, knownPos, funcForm,
-                                             outputPeak=True)
+calibrationTable, peakTable = tube.calibrate(CalibInstWS, thisTubeSet, knownPos, funcForm, outputPeak=True)
 print("Got calibration (new positions of detectors) ")
 
 # == Apply the Calibation ==

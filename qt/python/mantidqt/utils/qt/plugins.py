@@ -48,4 +48,6 @@ def setup_library_paths_win():
 if os.name == 'nt':
     setup_library_paths = setup_library_paths_win
 else:
-    def setup_library_paths(): None
+
+    def setup_library_paths():
+        None

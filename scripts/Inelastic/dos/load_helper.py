@@ -14,14 +14,13 @@ FLOAT_REGEX = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
 #     q-pt=    1    0.000000  0.000000  0.000000      1.0000000000    0.000000  0.000000  1.000000
 PHONON_HEADER_REGEX = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) (?: *(%(s)s)){0,4}" % {'s': FLOAT_REGEX}
 
-
 PHONON_EIGENVEC_REGEX = r"\s*Mode\s+Ion\s+X\s+Y\s+Z\s*"
 
 ###=============Castep Regex strings===============###
 
 # Header regex. Looks for lines in the following format:
 # +  q-pt=    1 (  0.000000  0.000000  0.000000)     1.0000000000              +
-CASTEP_HEADER_REGEX = r" +\+ +q-pt= +\d+ \( *(?: *(%(s)s)) *(%(s)s) *(%(s)s)\) +(%(s)s) +\+" % {'s' : FLOAT_REGEX}
+CASTEP_HEADER_REGEX = r" +\+ +q-pt= +\d+ \( *(?: *(%(s)s)) *(%(s)s) *(%(s)s)\) +(%(s)s) +\+" % {'s': FLOAT_REGEX}
 
 # Data regex. Looks for lines in the following format:
 #     +     1      -0.051481   a          0.0000000  N            0.0000000  N     +

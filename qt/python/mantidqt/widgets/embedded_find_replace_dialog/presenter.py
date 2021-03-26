@@ -93,12 +93,8 @@ class EmbeddedFindReplaceDialog(object):
 
         if not self.find_in_progress:
             options = self.view.get_options()
-            self.find_in_progress = self.editor.findFirst(search_string,
-                                                          options.regex,
-                                                          options.match_case,
-                                                          options.words,
-                                                          options.wrap_around,
-                                                          forwards)
+            self.find_in_progress = self.editor.findFirst(search_string, options.regex, options.match_case,
+                                                          options.words, options.wrap_around, forwards)
         else:
             self.find_in_progress = self.editor.findNext()
 
@@ -148,12 +144,8 @@ class EmbeddedFindReplaceDialog(object):
         self.add_to_field_history(self.view.replace, replaceString)
 
         options = self.view.get_options()
-        self.editor.replaceAll(search_string, replaceString,
-                               options.regex,
-                               options.match_case,
-                               options.words,
-                               options.wrap_around,
-                               True)
+        self.editor.replaceAll(search_string, replaceString, options.regex, options.match_case, options.words,
+                               options.wrap_around, True)
 
     def add_to_field_history(self, field, search_string):
         if field.findText(search_string) == -1:

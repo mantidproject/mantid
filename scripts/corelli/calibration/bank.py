@@ -14,8 +14,8 @@ from corelli.calibration.utils import InputTable, WorkspaceGroupTypes, Workspace
 from mantid import AnalysisDataService, mtd
 from mantid.api import TextAxis, WorkspaceGroup
 from mantid.dataobjects import TableWorkspace, Workspace2D
-from mantid.simpleapi import (CloneWorkspace, CreateEmptyTableWorkspace, CreateWorkspace,
-                              DeleteTableRows, DeleteWorkspaces, GroupWorkspaces, MaskBTP, RenameWorkspace)
+from mantid.simpleapi import (CloneWorkspace, CreateEmptyTableWorkspace, CreateWorkspace, DeleteTableRows,
+                              DeleteWorkspaces, GroupWorkspaces, MaskBTP, RenameWorkspace)
 from Calibration import tube
 from Calibration.tube_spec import TubeSpec
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
@@ -26,7 +26,7 @@ from corelli.calibration.utils import (bank_numbers, PIXELS_PER_TUBE, calculate_
 __all__ = ['calibrate_banks']
 
 
-def sufficient_intensity(input_workspace: WorkspaceTypes, bank_name: str, minimum_intensity:float = 10000) -> bool:
+def sufficient_intensity(input_workspace: WorkspaceTypes, bank_name: str, minimum_intensity: float = 10000) -> bool:
     r"""
     Assert if the average intensity per pixel in the bank surpasses a minimum threshold.
 
@@ -44,8 +44,12 @@ def sufficient_intensity(input_workspace: WorkspaceTypes, bank_name: str, minimu
     return bool(np.mean(workspace.extractY()[workspace_indexes].flatten()) > minimum_intensity)
 
 
-def fit_bank(workspace: WorkspaceTypes, bank_name: str, shadow_height: float = 1000, shadow_width: float = 4,
-             fit_domain: float = 7, minimum_intensity: float = 1000,
+def fit_bank(workspace: WorkspaceTypes,
+             bank_name: str,
+             shadow_height: float = 1000,
+             shadow_width: float = 4,
+             fit_domain: float = 7,
+             minimum_intensity: float = 1000,
              calibration_table: str = 'CalibTable',
              peak_pixel_positions_table: str = 'PeakTable',
              peak_vertical_positions_table: str = 'PeakYTable',
@@ -94,21 +98,27 @@ def fit_bank(workspace: WorkspaceTypes, bank_name: str, shadow_height: float = 1
     # Fit only the inner 14 dips because the extrema wires are too close to the tube tips.
     # The dead zone in the tube tips interferes with the shadow cast by the extrema  wires
     # preventing a good fitting
-    wire_positions_pixels = wire_positions(units='pixels')[1: -1]
+    wire_positions_pixels = wire_positions(units='pixels')[1:-1]
     wire_count = len(wire_positions_pixels)
     peaks_form = [1] * wire_count  # signals we'll be fitting dips (peaks with negative heights)
 
     fit_par = TubeCalibFitParams(wire_positions_pixels, height=peak_height, width=peak_width, margin=fit_domain)
     fit_par.setAutomatic(True)
 
-    tube.calibrate(workspace_name, bank_name, wire_positions(units='meters')[1: -1],
-                   peaks_form, fitPar=fit_par, outputPeak=True, parameters_table_group=parameters_table_group)
+    tube.calibrate(workspace_name,
+                   bank_name,
+                   wire_positions(units='meters')[1:-1],
+                   peaks_form,
+                   fitPar=fit_par,
+                   outputPeak=True,
+                   parameters_table_group=parameters_table_group)
     if calibration_table != 'CalibTable':
         RenameWorkspace(InputWorkspace='CalibTable', OutputWorkspace=calibration_table)
     trim_calibration_table(calibration_table)  # discard X and Z coordinates
     if peak_pixel_positions_table != 'PeakTable':
         RenameWorkspace(InputWorkspace='PeakTable', OutputWorkspace=peak_pixel_positions_table)
-    calculate_peak_y_table(peak_pixel_positions_table, parameters_table_group,
+    calculate_peak_y_table(peak_pixel_positions_table,
+                           parameters_table_group,
                            output_workspace=peak_vertical_positions_table)
 
 
@@ -144,7 +154,7 @@ def collect_bank_fit_results(output_workspace: str,
     :return: reference to the fit results workspace. Return `None` if no fit results are provided
     """
     error_message = 'At least one of the input fit results should be different than None'
-    assert acceptance_summary is not None or parameters_table_group is not None,  error_message
+    assert acceptance_summary is not None or parameters_table_group is not None, error_message
 
     # fit_results_values is a dictionary with entries like this:
     # 'A0': [-0.521, -0.517,..., -0.524]  # one value for each tube in the bank, and so on with A1 and A2 coefficients
@@ -182,8 +192,13 @@ def collect_bank_fit_results(output_workspace: str,
     x_values = list(range(1, 1 + TUBES_IN_BANK))
     y_values = [y for fit_result_values in fit_results_values.values() for y in fit_result_values]
     e_values = [e for fit_result_errors in fit_results_errors.values() for e in fit_result_errors]
-    CreateWorkspace(DataX=x_values, DataY=y_values, DataE=e_values, NSpec=len(fit_result_names),
-                    OutputWorkspace=output_workspace, WorkspaceTitle='Fitting Results', EnableLogging=False)
+    CreateWorkspace(DataX=x_values,
+                    DataY=y_values,
+                    DataE=e_values,
+                    NSpec=len(fit_result_names),
+                    OutputWorkspace=output_workspace,
+                    WorkspaceTitle='Fitting Results',
+                    EnableLogging=False)
     # label each spectrum of the workspace
     axis = TextAxis.create(len(fit_result_names))
     [axis.setLabel(index, fit_result_name) for index, fit_result_name in enumerate(fit_result_names)]
@@ -256,9 +271,13 @@ def criterion_peak_vertical_position(peak_table: InputTable,
         mean, std = np.mean(deviations), np.std(deviations)
         z_scores = np.abs((deviations - mean) / std)
         y_values = np.array([success, deviations, z_scores]).flatten()
-        workspace = CreateWorkspace(x_values, y_values, NSpec=3, OutputWorkspace=summary,
+        workspace = CreateWorkspace(x_values,
+                                    y_values,
+                                    NSpec=3,
+                                    OutputWorkspace=summary,
                                     WorkspaceTitle='Tube deviations from averages taken over the bank',
-                                    YUnitLabel='Pixel Units', EnableLogging=False)
+                                    YUnitLabel='Pixel Units',
+                                    EnableLogging=False)
         labels = ('success', 'deviation', 'Z-score')
         axis = TextAxis.create(len(labels))
         [axis.setLabel(index, label) for index, label in enumerate(labels)]
@@ -330,9 +349,13 @@ def criterion_peak_pixel_position(peak_table: InputTable,
         mean, std = np.mean(deviations), np.std(deviations)
         z_scores = np.abs((deviations - mean) / std)
         y_values = np.array([success, deviations, z_scores]).flatten()
-        workspace = CreateWorkspace(x_values, y_values, NSpec=3, OutputWorkspace=summary,
+        workspace = CreateWorkspace(x_values,
+                                    y_values,
+                                    NSpec=3,
+                                    OutputWorkspace=summary,
                                     WorkspaceTitle='Tube deviations from averages taken over the bank',
-                                    YUnitLabel='Pixel Units', EnableLogging=False)
+                                    YUnitLabel='Pixel Units',
+                                    EnableLogging=False)
         labels = ('success', 'deviation', 'Z-score')
         axis = TextAxis.create(len(labels))
         [axis.setLabel(index, label) for index, label in enumerate(labels)]
@@ -341,8 +364,10 @@ def criterion_peak_pixel_position(peak_table: InputTable,
     return criterion_pass
 
 
-def purge_table(workspace: WorkspaceTypes, calibration_table: TableWorkspace,
-                tubes_fit_success: np.ndarray,  output_table: str = None) -> None:
+def purge_table(workspace: WorkspaceTypes,
+                calibration_table: TableWorkspace,
+                tubes_fit_success: np.ndarray,
+                output_table: str = None) -> None:
     r"""
     Remove the detectorID's corresponding to the failing tubes from the calibration table
 
@@ -455,14 +480,22 @@ def calibrate_bank(workspace: WorkspaceTypes,
     # Fit the tubes in the bank
     peak_table_temp = 'PeakTable' if peak_table is None else peak_table
     peak_y_table_temp = 'PeakYTable' if peak_y_table is None else peak_y_table
-    fit_bank(workspace, bank_name, shadow_height, shadow_width, fit_domain, minimum_intensity,
-             calibration_table=calibration_table, peak_pixel_positions_table=peak_table_temp,
-             peak_vertical_positions_table=peak_y_table_temp, parameters_table_group='parameters_table')
+    fit_bank(workspace,
+             bank_name,
+             shadow_height,
+             shadow_width,
+             fit_domain,
+             minimum_intensity,
+             calibration_table=calibration_table,
+             peak_pixel_positions_table=peak_table_temp,
+             peak_vertical_positions_table=peak_y_table_temp,
+             parameters_table_group='parameters_table')
     # Run the acceptance criterion to determine the failing tubes
     tubes_fit_success = criterion_peak_vertical_position(peak_y_table_temp, summary='acceptance')
     # collect acceptances and polynomial coefficients
     if isinstance(fit_results, str) and len(fit_results) > 0:
-        collect_bank_fit_results(fit_results, acceptance_summary='acceptance',
+        collect_bank_fit_results(fit_results,
+                                 acceptance_summary='acceptance',
                                  parameters_table_group='parameters_table')
     # purge the calibration table of detector ID's with failing tubes
     purge_table(workspace, calibration_table, tubes_fit_success)
@@ -476,7 +509,8 @@ def calibrate_bank(workspace: WorkspaceTypes,
     return mtd[calibration_table], mask_table_workspace
 
 
-def calibrate_banks(workspace: WorkspaceTypes, bank_selection: str,
+def calibrate_banks(workspace: WorkspaceTypes,
+                    bank_selection: str,
                     calibration_group: str = 'calibrations',
                     mask_group: str = 'masks',
                     fit_group: str = 'fits',
@@ -511,8 +545,12 @@ def calibrate_banks(workspace: WorkspaceTypes, bank_selection: str,
     # Calibrate each bank
     calibrations, masks, fits = list(), list(), list()
     for n in bank_numbers(bank_selection):
-        calibration, mask = calibrate_bank(workspace, 'bank' + n, 'calib' + n, 'mask' + n,
-                                           fit_results='fit' + n, **kwargs)
+        calibration, mask = calibrate_bank(workspace,
+                                           'bank' + n,
+                                           'calib' + n,
+                                           'mask' + n,
+                                           fit_results='fit' + n,
+                                           **kwargs)
         fits.append(mtd['fit' + n])
         calibrations.append(calibration)
         if mask is not None:

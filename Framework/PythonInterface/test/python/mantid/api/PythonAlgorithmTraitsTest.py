@@ -10,8 +10,7 @@ such as name, version etc.
 import unittest
 import testhelpers
 
-from mantid.api import (PythonAlgorithm, Algorithm, IAlgorithm,
-                        AlgorithmManager, AlgorithmFactory)
+from mantid.api import (PythonAlgorithm, Algorithm, IAlgorithm, AlgorithmManager, AlgorithmFactory)
 
 ########################### Test classes #####################################
 
@@ -25,7 +24,6 @@ class TestPyAlgDefaultAttrs(PythonAlgorithm):
 
 
 class TestPyAlgOverriddenAttrs(PythonAlgorithm):
-
     def version(self):
         return 2
 
@@ -46,7 +44,6 @@ class TestPyAlgOverriddenAttrs(PythonAlgorithm):
 
 
 class TestPyAlgIsRunningReturnsNonBool(PythonAlgorithm):
-
     def isRunning(self):
         return 1
 
@@ -72,6 +69,7 @@ class CancellableAlg(PythonAlgorithm):
 
     def cancel(self):
         self.is_running = False
+
 
 ###############################################################################
 
@@ -99,9 +97,9 @@ class PythonAlgorithmTest(unittest.TestCase):
         self.assertTrue(isinstance(alg, IAlgorithm))
 
     def test_alg_with_default_attrs(self):
-        testhelpers.assertRaisesNothing(self,AlgorithmManager.createUnmanaged, "TestPyAlgDefaultAttrs")
+        testhelpers.assertRaisesNothing(self, AlgorithmManager.createUnmanaged, "TestPyAlgDefaultAttrs")
         alg = AlgorithmManager.createUnmanaged("TestPyAlgDefaultAttrs")
-        testhelpers.assertRaisesNothing(self,alg.initialize)
+        testhelpers.assertRaisesNothing(self, alg.initialize)
 
         self.assertEqual(alg.name(), "TestPyAlgDefaultAttrs")
         self.assertEqual(alg.version(), 1)
@@ -110,7 +108,7 @@ class PythonAlgorithmTest(unittest.TestCase):
         testhelpers.assertRaisesNothing(self, alg.cancel)
 
     def test_alg_with_overridden_attrs(self):
-        testhelpers.assertRaisesNothing(self,AlgorithmManager.createUnmanaged, "TestPyAlgOverriddenAttrs")
+        testhelpers.assertRaisesNothing(self, AlgorithmManager.createUnmanaged, "TestPyAlgOverriddenAttrs")
         alg = AlgorithmManager.createUnmanaged("TestPyAlgOverriddenAttrs")
         self.assertEqual(alg.name(), "TestPyAlgOverriddenAttrs")
         self.assertEqual(alg.version(), 2)

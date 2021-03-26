@@ -21,21 +21,12 @@ class StateBuilderTest(unittest.TestCase):
 
     def test_builder_forwards_from_user_file_parser(self):
         # These should be without modification
-        unmodified_methods = {"get_all_states",
-                              "get_state_adjustment",
-                              "get_state_calculate_transmission",
-                              "get_state_compatibility",
-                              "get_state_convert_to_q",
-                              "get_state_data",
-                              "get_state_mask",
-                              "get_state_move",
-                              "get_state_normalize_to_monitor",
-                              "get_state_reduction_mode",
-                              "get_state_save",
-                              "get_state_scale",
-                              "get_state_slice_event",
-                              "get_state_wavelength",
-                              "get_state_wavelength_and_pixel_adjustment"}
+        unmodified_methods = {
+            "get_all_states", "get_state_adjustment", "get_state_calculate_transmission", "get_state_compatibility",
+            "get_state_convert_to_q", "get_state_data", "get_state_mask", "get_state_move",
+            "get_state_normalize_to_monitor", "get_state_reduction_mode", "get_state_save", "get_state_scale",
+            "get_state_slice_event", "get_state_wavelength", "get_state_wavelength_and_pixel_adjustment"
+        }
 
         for method_name in unmodified_methods:
             expected_obj = mock.Mock()
@@ -47,8 +38,7 @@ class StateBuilderTest(unittest.TestCase):
             self.assertEqual(returned_obj, expected_obj)
 
     def test_builder_injects_modifications(self):
-        modified_methods = {"get_all_states" : "pack_all_states",
-                            "get_state_scale": "pack_state_scale"}
+        modified_methods = {"get_all_states": "pack_all_states", "get_state_scale": "pack_state_scale"}
 
         for method_name, data_packing_method in modified_methods.items():
             injected_obj = mock.Mock()  # This should be forwarded to the data builder

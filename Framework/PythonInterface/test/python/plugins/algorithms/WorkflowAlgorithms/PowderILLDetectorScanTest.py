@@ -12,7 +12,6 @@ from mantid.simpleapi import PowderILLDetectorScan, config, mtd
 # This is just a light test for the default options.
 # More options are covered by system tests, since it takes too long for a unit test.
 class PowderILLDetectorScanTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         config.appendDataSearchSubDir('ILL/D2B/')
@@ -33,16 +32,16 @@ class PowderILLDetectorScanTest(unittest.TestCase):
         self.assertTrue(isinstance(item, MatrixWorkspace))
         self.assertTrue(item.isHistogramData())
         self.assertTrue(not item.isDistribution())
-        self.assertEqual(item.getNumberHistograms(),1)
-        self.assertEqual(item.blocksize(),2975)
+        self.assertEqual(item.getNumberHistograms(), 1)
+        self.assertEqual(item.blocksize(), 2975)
         xaxis = item.getAxis(0).extractValues()
         xunit = item.getAxis(0).getUnit().label()
-        self.assertEqual(xunit,'degrees')
-        self.assertAlmostEqual(xaxis[0],-0.029,3)
-        self.assertAlmostEqual(xaxis[1],0.021,3)
-        self.assertAlmostEqual(xaxis[-1],148.721,3)
+        self.assertEqual(xunit, 'degrees')
+        self.assertAlmostEqual(xaxis[0], -0.029, 3)
+        self.assertAlmostEqual(xaxis[1], 0.021, 3)
+        self.assertAlmostEqual(xaxis[-1], 148.721, 3)
         spectrumaxis = item.getAxis(1).extractValues()
-        self.assertEqual(spectrumaxis[0],0)
+        self.assertEqual(spectrumaxis[0], 0)
         self.assertTrue(item.getRun())
         self.assertTrue(item.getRun().hasProperty('run_number'))
 
@@ -56,12 +55,12 @@ class PowderILLDetectorScanTest(unittest.TestCase):
         self.assertTrue(isinstance(item, MatrixWorkspace))
         self.assertTrue(item.isHistogramData())
         self.assertTrue(not item.isDistribution())
-        self.assertEqual(item.getNumberHistograms(),1)
-        self.assertEqual(item.blocksize(),3044)
+        self.assertEqual(item.getNumberHistograms(), 1)
+        self.assertEqual(item.blocksize(), 3044)
         xunit = item.getAxis(0).getUnit().label()
-        self.assertEqual(xunit,'degrees')
+        self.assertEqual(xunit, 'degrees')
         spectrumaxis = item.getAxis(1).extractValues()
-        self.assertEqual(spectrumaxis[0],0)
+        self.assertEqual(spectrumaxis[0], 0)
         self.assertTrue(item.getRun())
         self.assertTrue(item.getRun().hasProperty('run_number'))
 

@@ -20,7 +20,7 @@ class LoadAndMerge(PythonAlgorithm):
     _progress = None
 
     def seeAlso(self):
-        return [ "Load","MergeRuns" ]
+        return ["Load", "MergeRuns"]
 
     def name(self):
         return "LoadMergeRuns"
@@ -45,14 +45,17 @@ class LoadAndMerge(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(MultipleFileProperty('Filename'), doc='List of input files')
-        self.declareProperty('LoaderName', defaultValue='Load', validator=StringContainsValidator(['Load']),
+        self.declareProperty('LoaderName',
+                             defaultValue='Load',
+                             validator=StringContainsValidator(['Load']),
                              direction=Direction.InOut,
                              doc='The name of the specific loader. Generic Load by default.')
-        self.declareProperty('LoaderVersion', defaultValue=-1, direction=Direction.InOut,
+        self.declareProperty('LoaderVersion',
+                             defaultValue=-1,
+                             direction=Direction.InOut,
                              doc='The version of the specific loader')
-        self.declareProperty(PropertyManagerProperty('LoaderOptions',dict()),
-                             doc='Options for the specific loader')
-        self.declareProperty(PropertyManagerProperty('MergeRunsOptions',dict()),
+        self.declareProperty(PropertyManagerProperty('LoaderOptions', dict()), doc='Options for the specific loader')
+        self.declareProperty(PropertyManagerProperty('MergeRunsOptions', dict()),
                              doc='Options for merging the metadata')
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace or workspace group.')
@@ -63,7 +66,7 @@ class LoadAndMerge(PythonAlgorithm):
             @param run : the full file path
             @param runnumber : the run number
         """
-        self._progress.report('Loading '+runnumber)
+        self._progress.report('Loading ' + runnumber)
         alg = self._create_fresh_loader()
         alg.setPropertyValue('Filename', run)
         alg.setPropertyValue('OutputWorkspace', runnumber)
@@ -135,8 +138,7 @@ class LoadAndMerge(PythonAlgorithm):
                         # since if the merged is a group workspace,
                         # it's items will be orphaned
                         tmp_merged = '__tmp_' + merged
-                        MergeRuns(InputWorkspaces=[merged, runnumber],
-                                  OutputWorkspace=tmp_merged, **merge_options)
+                        MergeRuns(InputWorkspaces=[merged, runnumber], OutputWorkspace=tmp_merged, **merge_options)
                         DeleteWorkspace(Workspace=runnumber)
                         DeleteWorkspace(Workspace=merged)
                         RenameWorkspace(InputWorkspace=tmp_merged, OutputWorkspace=merged)

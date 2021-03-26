@@ -12,13 +12,12 @@ import numpy as np
 
 
 class CreateWorkspaceTest(unittest.TestCase):
-
     def test_create_with_1D_numpy_array(self):
-        x = np.array([1.,2.,3.,4.])
-        y = np.array([1.,2.,3.])
-        e = np.sqrt(np.array([1.,2.,3.]))
+        x = np.array([1., 2., 3., 4.])
+        y = np.array([1., 2., 3.])
+        e = np.sqrt(np.array([1., 2., 3.]))
 
-        wksp = CreateWorkspace(DataX=x, DataY=y,DataE=e,NSpec=1,UnitX='TOF')
+        wksp = CreateWorkspace(DataX=x, DataY=y, DataE=e, NSpec=1, UnitX='TOF')
         self.assertTrue(isinstance(wksp, MatrixWorkspace))
         self.assertEqual(wksp.getNumberHistograms(), 1)
 
@@ -31,67 +30,77 @@ class CreateWorkspaceTest(unittest.TestCase):
             self.assertEqual(wksp.readE(0)[index], e[index])
             self.assertEqual(wksp.readX(0)[index], x[index])
         # Last X value
-        self.assertEqual(wksp.readX(0)[len(x)-1], x[len(x)-1])
+        self.assertEqual(wksp.readX(0)[len(x) - 1], x[len(x) - 1])
         AnalysisDataService.remove("wksp")
 
     def test_create_with_2D_numpy_array(self):
-        x = np.array([1.,2.,3.,4.])
-        y = np.array([[1.,2.,3.],[4.,5.,6.]])
+        x = np.array([1., 2., 3., 4.])
+        y = np.array([[1., 2., 3.], [4., 5., 6.]])
         e = np.sqrt(y)
 
-        wksp = CreateWorkspace(DataX=x, DataY=y,DataE=e,NSpec=2,UnitX='TOF')
+        wksp = CreateWorkspace(DataX=x, DataY=y, DataE=e, NSpec=2, UnitX='TOF')
         self.assertTrue(isinstance(wksp, MatrixWorkspace))
         self.assertEqual(wksp.getNumberHistograms(), 2)
 
-        for i in [0,1]:
+        for i in [0, 1]:
             for j in range(len(y[0])):
                 self.assertEqual(wksp.readY(i)[j], y[i][j])
                 self.assertEqual(wksp.readE(i)[j], e[i][j])
                 self.assertEqual(wksp.readX(i)[j], x[j])
             # Last X value
-            self.assertEqual(wksp.readX(i)[len(x)-1], x[len(x)-1])
+            self.assertEqual(wksp.readX(i)[len(x) - 1], x[len(x) - 1])
 
         AnalysisDataService.remove("wksp")
 
     def test_with_data_from_other_workspace(self):
         wsname = 'LOQ'
-        x1 = np.array([1.,2.,3.,4.])
-        y1 = np.array([[1.,2.,3.],[4.,5.,6.]])
+        x1 = np.array([1., 2., 3., 4.])
+        y1 = np.array([[1., 2., 3.], [4., 5., 6.]])
         e1 = np.sqrt(y1)
-        loq = CreateWorkspace(DataX=x1, DataY=y1,DataE=e1,NSpec=2,UnitX='Wavelength')
+        loq = CreateWorkspace(DataX=x1, DataY=y1, DataE=e1, NSpec=2, UnitX='Wavelength')
 
         x2 = loq.extractX()
         y2 = loq.extractY()
         e2 = loq.extractE()
 
-        wksp = CreateWorkspace(DataX=x2, DataY=y2,DataE=e2,NSpec=2,UnitX='Wavelength')
+        wksp = CreateWorkspace(DataX=x2, DataY=y2, DataE=e2, NSpec=2, UnitX='Wavelength')
         self.assertTrue(isinstance(wksp, MatrixWorkspace))
         self.assertEqual(wksp.getNumberHistograms(), 2)
 
-        for i in [0,1]:
+        for i in [0, 1]:
             for j in range(len(y2[0])):
                 self.assertEqual(wksp.readY(i)[j], loq.readY(i)[j])
                 self.assertEqual(wksp.readE(i)[j], loq.readE(i)[j])
                 self.assertEqual(wksp.readX(i)[j], loq.readX(i)[j])
             # Last X value
-            self.assertEqual(wksp.readX(i)[len(x2)-1], loq.readX(i)[len(x2)-1])
+            self.assertEqual(wksp.readX(i)[len(x2) - 1], loq.readX(i)[len(x2) - 1])
 
         AnalysisDataService.remove("wksp")
 
     def test_create_with_numerical_vertical_axis_values(self):
-        data = [1.,2.,3.]
-        axis_values = [5,6,7]
-        alg = run_algorithm("CreateWorkspace", DataX=data, DataY=data, NSpec=3,VerticalAxisUnit='MomentumTransfer',
-                            VerticalAxisValues=axis_values,child=True)
+        data = [1., 2., 3.]
+        axis_values = [5, 6, 7]
+        alg = run_algorithm("CreateWorkspace",
+                            DataX=data,
+                            DataY=data,
+                            NSpec=3,
+                            VerticalAxisUnit='MomentumTransfer',
+                            VerticalAxisValues=axis_values,
+                            child=True)
         wksp = alg.getProperty("OutputWorkspace").value
         for i in range(len(axis_values)):
             self.assertEqual(wksp.getAxis(1).getValue(i), axis_values[i])
 
     def test_create_with_numpy_vertical_axis_values(self):
-        data = [1.,2.,3.]
-        axis_values = np.array([6.,7.,8.])
-        alg = run_algorithm("CreateWorkspace", DataX=data, DataY=data, NSpec=3,VerticalAxisUnit='MomentumTransfer',
-                            VerticalAxisValues=axis_values,child=True)
+        data = [1., 2., 3.]
+        axis_values = np.array([6., 7., 8.])
+        alg = run_algorithm("CreateWorkspace",
+                            DataX=data,
+                            DataY=data,
+                            NSpec=3,
+                            VerticalAxisUnit='MomentumTransfer',
+                            VerticalAxisValues=axis_values,
+                            child=True)
         wksp = alg.getProperty("OutputWorkspace").value
         for i in range(len(axis_values)):
             self.assertEqual(wksp.getAxis(1).getValue(i), axis_values[i])

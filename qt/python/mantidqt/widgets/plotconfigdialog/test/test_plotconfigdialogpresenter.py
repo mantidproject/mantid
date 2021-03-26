@@ -10,29 +10,24 @@ import unittest
 from unittest.mock import Mock, call, patch
 
 from matplotlib import use as mpl_use
+
 mpl_use('Agg')  # noqa
 from matplotlib.pyplot import figure, subplots
 
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 
-
 PRESENTER_REF = 'mantidqt.widgets.plotconfigdialog.presenter.'
 
 
 class PlotConfigDialogPresenterTest(unittest.TestCase):
-
     def setUp(self):
-        self.axes_patch = patch(PRESENTER_REF + 'AxesTabWidgetPresenter',
-                                new=Mock())
+        self.axes_patch = patch(PRESENTER_REF + 'AxesTabWidgetPresenter', new=Mock())
         self.axes_mock = self.axes_patch.start()
-        self.curves_patch = patch(PRESENTER_REF + 'CurvesTabWidgetPresenter',
-                                  new=Mock())
+        self.curves_patch = patch(PRESENTER_REF + 'CurvesTabWidgetPresenter', new=Mock())
         self.curves_mock = self.curves_patch.start()
-        self.images_patch = patch(PRESENTER_REF + 'ImagesTabWidgetPresenter',
-                                  new=Mock())
+        self.images_patch = patch(PRESENTER_REF + 'ImagesTabWidgetPresenter', new=Mock())
         self.images_mock = self.images_patch.start()
-        self.legend_patch = patch(PRESENTER_REF + 'LegendTabWidgetPresenter',
-                                  new=Mock())
+        self.legend_patch = patch(PRESENTER_REF + 'LegendTabWidgetPresenter', new=Mock())
         self.legend_mock = self.legend_patch.start()
 
     def tearDown(self):
@@ -52,8 +47,7 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
         presenter = PlotConfigDialogPresenter(fig, mock_view)
         expected_presenter_list = [None, self.axes_mock.return_value, None, None]
         self.assertEqual(expected_presenter_list, presenter.tab_widget_presenters)
-        mock_view.add_tab_widget.assert_called_once_with(
-            (self.axes_mock.return_value.view, 'Axes'))
+        mock_view.add_tab_widget.assert_called_once_with((self.axes_mock.return_value.view, 'Axes'))
 
     def test_correct_tabs_present_axes_and_curve_no_errors(self):
         fig = figure()
@@ -61,13 +55,11 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
         ax.plot([0], [0])
         mock_view = Mock()
         presenter = PlotConfigDialogPresenter(fig, mock_view)
-        expected_presenter_list = [None, self.axes_mock.return_value,
-                                   self.curves_mock.return_value, None]
+        expected_presenter_list = [None, self.axes_mock.return_value, self.curves_mock.return_value, None]
         self.assertEqual(expected_presenter_list, presenter.tab_widget_presenters)
         expected_call_args = [(self.axes_mock.return_value.view, 'Axes'),
                               (self.curves_mock.return_value.view, 'Curves')]
-        self.assert_called_x_times_with(2, expected_call_args,
-                                        mock_view.add_tab_widget)
+        self.assert_called_x_times_with(2, expected_call_args, mock_view.add_tab_widget)
 
     def test_correct_tabs_present_axes_and_curve_with_errors(self):
         fig = figure()
@@ -75,13 +67,11 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
         ax.errorbar([0], [0], yerr=[1])
         mock_view = Mock()
         presenter = PlotConfigDialogPresenter(fig, mock_view)
-        expected_presenter_list = [None, self.axes_mock.return_value,
-                                   self.curves_mock.return_value, None]
+        expected_presenter_list = [None, self.axes_mock.return_value, self.curves_mock.return_value, None]
         self.assertEqual(expected_presenter_list, presenter.tab_widget_presenters)
         expected_call_args = [(self.axes_mock.return_value.view, 'Axes'),
                               (self.curves_mock.return_value.view, 'Curves')]
-        self.assert_called_x_times_with(2, expected_call_args,
-                                        mock_view.add_tab_widget)
+        self.assert_called_x_times_with(2, expected_call_args, mock_view.add_tab_widget)
 
     def test_correct_tabs_present_axes_and_image_colormesh(self):
         fig = figure()
@@ -89,13 +79,11 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
         ax.pcolormesh([[0, 1], [1, 0]])
         mock_view = Mock()
         presenter = PlotConfigDialogPresenter(fig, mock_view)
-        expected_presenter_list = [None, self.axes_mock.return_value,
-                                   None, self.images_mock.return_value]
+        expected_presenter_list = [None, self.axes_mock.return_value, None, self.images_mock.return_value]
         self.assertEqual(expected_presenter_list, presenter.tab_widget_presenters)
         expected_call_args = [(self.axes_mock.return_value.view, 'Axes'),
                               (self.images_mock.return_value.view, 'Images')]
-        self.assert_called_x_times_with(2, expected_call_args,
-                                        mock_view.add_tab_widget)
+        self.assert_called_x_times_with(2, expected_call_args, mock_view.add_tab_widget)
 
     def test_correct_tabs_present_axes_and_image_imshow(self):
         fig = figure()
@@ -103,13 +91,11 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
         ax.imshow([[0, 1], [1, 0]])
         mock_view = Mock()
         presenter = PlotConfigDialogPresenter(fig, mock_view)
-        expected_presenter_list = [None, self.axes_mock.return_value,
-                                   None, self.images_mock.return_value]
+        expected_presenter_list = [None, self.axes_mock.return_value, None, self.images_mock.return_value]
         self.assertEqual(expected_presenter_list, presenter.tab_widget_presenters)
         expected_call_args = [(self.axes_mock.return_value.view, 'Axes'),
                               (self.images_mock.return_value.view, 'Images')]
-        self.assert_called_x_times_with(2, expected_call_args,
-                                        mock_view.add_tab_widget)
+        self.assert_called_x_times_with(2, expected_call_args, mock_view.add_tab_widget)
 
     def test_correct_tabs_present_axes_curves_and_image(self):
         fig = figure()
@@ -119,15 +105,14 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
         ax1.errorbar([0], [0], yerr=[1])
         mock_view = Mock()
         presenter = PlotConfigDialogPresenter(fig, mock_view)
-        expected_presenter_list = [None, self.axes_mock.return_value,
-                                   self.curves_mock.return_value,
-                                   self.images_mock.return_value]
+        expected_presenter_list = [
+            None, self.axes_mock.return_value, self.curves_mock.return_value, self.images_mock.return_value
+        ]
         self.assertEqual(expected_presenter_list, presenter.tab_widget_presenters)
         expected_call_args = [(self.axes_mock.return_value.view, 'Axes'),
                               (self.curves_mock.return_value.view, 'Curves'),
                               (self.images_mock.return_value.view, 'Images')]
-        self.assert_called_x_times_with(3, expected_call_args,
-                                        mock_view.add_tab_widget)
+        self.assert_called_x_times_with(3, expected_call_args, mock_view.add_tab_widget)
 
     def test_correct_tabs_present_axes_curves_and_legend(self):
         fig = figure()
@@ -136,15 +121,14 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
         ax.legend(['Label'])
         mock_view = Mock()
         presenter = PlotConfigDialogPresenter(fig, mock_view)
-        expected_presenter_list = [self.legend_mock.return_value,
-                                   self.axes_mock.return_value,
-                                   self.curves_mock.return_value, None]
+        expected_presenter_list = [
+            self.legend_mock.return_value, self.axes_mock.return_value, self.curves_mock.return_value, None
+        ]
         self.assertEqual(expected_presenter_list, presenter.tab_widget_presenters)
         expected_call_args = [(self.axes_mock.return_value.view, 'Axes'),
                               (self.curves_mock.return_value.view, 'Curves'),
                               (self.legend_mock.return_value.view, 'Legend')]
-        self.assert_called_x_times_with(3, expected_call_args,
-                                        mock_view.add_tab_widget)
+        self.assert_called_x_times_with(3, expected_call_args, mock_view.add_tab_widget)
 
     def test_correct_tabs_present_axes_and_curve_legend_has_no_text(self):
         fig = figure()
@@ -153,13 +137,11 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
         ax.legend()
         mock_view = Mock()
         presenter = PlotConfigDialogPresenter(fig, mock_view)
-        expected_presenter_list = [None, self.axes_mock.return_value,
-                                   self.curves_mock.return_value, None]
+        expected_presenter_list = [None, self.axes_mock.return_value, self.curves_mock.return_value, None]
         self.assertEqual(expected_presenter_list, presenter.tab_widget_presenters)
         expected_call_args = [(self.axes_mock.return_value.view, 'Axes'),
                               (self.curves_mock.return_value.view, 'Curves')]
-        self.assert_called_x_times_with(2, expected_call_args,
-                                        mock_view.add_tab_widget)
+        self.assert_called_x_times_with(2, expected_call_args, mock_view.add_tab_widget)
 
     def test_tabs_present_updated_properties_from_figure_when_apply_clicked(self):
         fig = figure()
@@ -177,10 +159,8 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
 
         presenter.apply_properties()
         mock_manager.assert_has_calls([
-            call.mock_curves_presenter.apply_properties,
-            call.mock_axes_presenter.apply_properties,
-            call.mock_curves_presenter.update_view,
-            call.mock_axes_presenter.update_view
+            call.mock_curves_presenter.apply_properties, call.mock_axes_presenter.apply_properties,
+            call.mock_curves_presenter.update_view, call.mock_axes_presenter.update_view
         ])
 
     def test_forget_tab_from_presenter_sets_presenter_and_view_to_none(self):
@@ -233,7 +213,8 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
         mock_view = Mock()
         presenter = PlotConfigDialogPresenter(fig, mock_view)
         mock_curves_presenter = presenter.tab_widget_presenters[2]
-        mock_curves_presenter.set_curve_from_object.side_effect = ValueError("Curve object does not exist in curves tab")
+        mock_curves_presenter.set_curve_from_object.side_effect = ValueError(
+            "Curve object does not exist in curves tab")
         mock_curves_view, _ = presenter.tab_widget_views[1]
 
         presenter.configure_curves_tab(ax, Mock())

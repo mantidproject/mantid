@@ -22,7 +22,6 @@ class InstrumentViewPresenter(ObservingPresenter):
     Presenter holding the view widget for the InstrumentView.
     It has no model as its an old widget written in C++ with out MVP
     """
-
     def __init__(self, ws, parent=None, window_flags=Qt.Window, ads_observer=None):
         super(InstrumentViewPresenter, self).__init__()
         self.ws_name = str(ws)
@@ -46,6 +45,7 @@ class InstrumentViewPresenter(ObservingPresenter):
     @param new_workspace_name : the name of the new workspace to set
     @param new_window_name : the new title of the window. Optional, if none provided, uses the name of the workspace.
     """
+
     def replace_workspace(self, new_workspace_name, new_window_name=None):
         self.container.replace_workspace(new_workspace_name, new_window_name)
 

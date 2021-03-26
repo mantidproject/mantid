@@ -28,8 +28,7 @@ class LoadWidget(object):
         self.load_widget_view = LoadWidgetView(parent=parent,
                                                load_file_view=self.load_file_view,
                                                load_run_view=self.load_run_view)
-        self.load_widget = LoadWidgetPresenterEA(self.load_widget_view,
-                                                 LoadWidgetModel(loaded_data, context))
+        self.load_widget = LoadWidgetPresenterEA(self.load_widget_view, LoadWidgetModel(loaded_data, context))
 
         self.file_widget = BrowseFileWidgetPresenter(self.load_file_view, BrowseFileWidgetModel(loaded_data, context))
         self.run_widget = LoadRunWidgetPresenterEA(self.load_run_view, LoadRunWidgetModel(loaded_data, context))

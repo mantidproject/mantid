@@ -83,18 +83,17 @@ class DiffractionReductionScripter(BaseReductionScripter):
             f.write(script)
             f.close()
         except IOError as e:
-            print ("Unable to save script to file. Reason: %s." % (str(e)))
+            print("Unable to save script to file. Reason: %s." % (str(e)))
 
         # Export XML file
         autosavexmlfname = os.path.join(self.configDir, "snspowderreduction.xml")
         self.to_xml(autosavexmlfname)
 
         # Information output
-        wbuf = "Reduction script: (script is saved to %s; setup is saved to %s. \n" % (
-            file_name, autosavexmlfname)
+        wbuf = "Reduction script: (script is saved to %s; setup is saved to %s. \n" % (file_name, autosavexmlfname)
         wbuf += script
         wbuf += "\n========== End of Script ==========="
-        print (wbuf)
+        print(wbuf)
 
         return script
 
@@ -163,7 +162,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 # print "Working on run ", str(runnumber), " in file ", datafilename
 
                 # i.  Load meta data only
-                metadatawsname = str(datafilename.split(".")[0]+"_meta")
+                metadatawsname = str(datafilename.split(".")[0] + "_meta")
                 splitwsname = str(datafilename.split(".")[0] + "_splitters")
                 splitinfowsname = str(datafilename.split(".")[0] + "_splitinfo")
 
@@ -182,32 +181,40 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 script += "{}OutputWorkspace = '{}',\n".format(DiffractionReductionScripter.WIDTH, splitwsname)
                 script += "{}InformationWorkspace = '{}',\n".format(DiffractionReductionScripter.WIDTH, splitinfowsname)
                 if filterdict["FilterByTimeMin"] != "":
-                    script += "{}StartTime = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["FilterByTimeMin"])
+                    script += "{}StartTime = '{}',\n".format(DiffractionReductionScripter.WIDTH,
+                                                             filterdict["FilterByTimeMin"])
                 if filterdict["FilterByTimeMax"] != "":
-                    script += "{}StopTime  = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["FilterByTimeMax"])
+                    script += "{}StopTime  = '{}',\n".format(DiffractionReductionScripter.WIDTH,
+                                                             filterdict["FilterByTimeMax"])
 
                 if filterdict["FilterType"] == "ByTime":
                     # Filter by time
-                    script += "{}TimeInterval   = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["LengthOfTimeInterval"])
-                    script += "{}UnitOfTime = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["UnitOfTime"])
-                    script += "{}LogName    = '',\n".format(DiffractionReductionScripter.WIDTH) # intentionally empty
+                    script += "{}TimeInterval   = '{}',\n".format(DiffractionReductionScripter.WIDTH,
+                                                                  filterdict["LengthOfTimeInterval"])
+                    script += "{}UnitOfTime = '{}',\n".format(DiffractionReductionScripter.WIDTH,
+                                                              filterdict["UnitOfTime"])
+                    script += "{}LogName    = '',\n".format(DiffractionReductionScripter.WIDTH)  # intentionally empty
 
                 elif filterdict["FilterType"] == "ByLogValue":
                     # Filter by log value
                     script += "{}LogName = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["LogName"])
                     if filterdict["MinimumLogValue"] != "":
-                        script += "{}MinimumLogValue    = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["MinimumLogValue"])
+                        script += "{}MinimumLogValue    = '{}',\n".format(DiffractionReductionScripter.WIDTH,
+                                                                          filterdict["MinimumLogValue"])
                     if filterdict["MaximumLogValue"] != "":
-                        script += "{}MaximumLogValue    = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["MaximumLogValue"])
-                    script += "{}FilterLogValueByChangingDirection = '{}',\n".format(DiffractionReductionScripter.WIDTH,
-                                                                                     filterdict["FilterLogValueByChangingDirection"])
+                        script += "{}MaximumLogValue    = '{}',\n".format(DiffractionReductionScripter.WIDTH,
+                                                                          filterdict["MaximumLogValue"])
+                    script += "{}FilterLogValueByChangingDirection = '{}',\n".format(
+                        DiffractionReductionScripter.WIDTH, filterdict["FilterLogValueByChangingDirection"])
                     if filterdict["LogValueInterval"] != "":
                         # Filter by log value interval
                         script += "{}LogValueInterval       = '{}',\n".format(DiffractionReductionScripter.WIDTH,
                                                                               filterdict["LogValueInterval"])
-                    script += "{}LogBoundary    = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["LogBoundary"])
+                    script += "{}LogBoundary    = '{}',\n".format(DiffractionReductionScripter.WIDTH,
+                                                                  filterdict["LogBoundary"])
                     if filterdict["TimeTolerance"] != "":
-                        script += "{}TimeTolerance  = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["TimeTolerance"])
+                        script += "{}TimeTolerance  = '{}',\n".format(DiffractionReductionScripter.WIDTH,
+                                                                      filterdict["TimeTolerance"])
                     if filterdict["LogValueTolerance"] != "":
                         script += "{}LogValueTolerance  = '{}',\n".format(DiffractionReductionScripter.WIDTH,
                                                                           filterdict["LogValueTolerance"])
@@ -215,7 +222,8 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 script += ")\n"
 
                 # iii. Data reduction
-                script += self.buildPowderDataReductionScript(runsetupdict, advsetupdict, runnumber, splitwsname, splitinfowsname)
+                script += self.buildPowderDataReductionScript(runsetupdict, advsetupdict, runnumber, splitwsname,
+                                                              splitinfowsname)
 
             # ENDFOR data file names
 
@@ -225,7 +233,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         # ENDIF : do filter
 
-        print ("Script and Save XML to default.")
+        print("Script and Save XML to default.")
 
         return script
 
@@ -274,8 +282,11 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         return datafilenames
 
-    def buildPowderDataReductionScript(self, runsetupdict, advsetupdict,
-                                       runnumber=None, splitwsname=None,
+    def buildPowderDataReductionScript(self,
+                                       runsetupdict,
+                                       advsetupdict,
+                                       runnumber=None,
+                                       splitwsname=None,
                                        splitinfowsname=None):
         """ Build the script to call SNSPowderReduction()
         """
@@ -305,8 +316,10 @@ class DiffractionReductionScripter(BaseReductionScripter):
         # c) all properties
         for propname, propvalue in runsetupdict.items():
             # skip these pseudo-properties
-            if propname in ['DisableBackgroundCorrection', 'DisableVanadiumCorrection',
-                            'DisableVanadiumBackgroundCorrection', 'DoReSampleX']:
+            if propname in [
+                    'DisableBackgroundCorrection', 'DisableVanadiumCorrection', 'DisableVanadiumBackgroundCorrection',
+                    'DoReSampleX'
+            ]:
                 continue
 
             if propvalue == '' or propvalue is None:
@@ -353,7 +366,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         # Facility instrument
         for observer in self._observers:
             observertype = observer._subject.__class__.__name__
-            print ("[ToScript] Observer Type = ", observertype)
+            print("[ToScript] Observer Type = ", observertype)
             if observertype.count("AdvancedWidget") == 1:
                 self.instrument_name = observer._subject._instrument_name
 

@@ -60,8 +60,10 @@ def _create_workspace_for_group_plot(plot_type: SpectraSelection, workspaces: Li
     else:
         x_size = first_blocksize
 
-    matrix_ws = WorkspaceFactory.Instance().create(
-        parent=first_ws, NVectors=number_of_workspaces, XLength=x_size, YLength=first_blocksize)
+    matrix_ws = WorkspaceFactory.Instance().create(parent=first_ws,
+                                                   NVectors=number_of_workspaces,
+                                                   XLength=x_size,
+                                                   YLength=first_blocksize)
 
     matrix_ws.setYUnitLabel(first_ws.YUnitLabel())
 

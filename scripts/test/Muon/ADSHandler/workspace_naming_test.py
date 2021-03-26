@@ -14,18 +14,15 @@ from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 
 
 class WorkspaceNamingTest(unittest.TestCase):
-
     def setUp(self):
         return
 
     def test_getGroupOrPairName(self):
-        self.assertEqual(get_group_or_pair_from_name('MUSR62260; Group; bkwd; Asymmetry; Periods; #1; MA'),
-                         "bkwd")
-        self.assertEqual(get_group_or_pair_from_name('MUSR62260; Group; fwd; Asymmetry; Periods; #2; MA'),
-                         "fwd")
+        self.assertEqual(get_group_or_pair_from_name('MUSR62260; Group; bkwd; Asymmetry; Periods; #1; MA'), "bkwd")
+        self.assertEqual(get_group_or_pair_from_name('MUSR62260; Group; fwd; Asymmetry; Periods; #2; MA'), "fwd")
         self.assertEqual(get_group_or_pair_from_name('MUSR62260; Pair Asym; long; Periods; #1; MA'), "long")
 
-        self.assertEqual(get_group_or_pair_from_name('MUSR62260; PhaseQuad; test_Re_;MA'),"test_Re_")
+        self.assertEqual(get_group_or_pair_from_name('MUSR62260; PhaseQuad; test_Re_;MA'), "test_Re_")
         self.assertEqual(get_group_or_pair_from_name('MUSR62260; Diff; diff; Asymmetry; MA'), "diff")
 
     def test_removeRebinFromName(self):
@@ -79,13 +76,17 @@ class WorkspaceNamingTest(unittest.TestCase):
         context.gui_context.update({'RebinType': 'None'})
         context.data_context.instrument = 'EMU'
 
-        context.data_context._loaded_data.add_data(workspace=load_result, run=[run_number], filename=filename,
+        context.data_context._loaded_data.add_data(workspace=load_result,
+                                                   run=[run_number],
+                                                   filename=filename,
                                                    instrument='EMU')
         context.data_context.current_runs = [[run_number]]
         context.data_context.update_current_data()
 
-        self.assertEqual("EMU19489; PhaseQuad; test_Re; MA", get_pair_phasequad_name(context, "test_Re", "19489",False))
-        self.assertEqual("EMU19489; PhaseQuad; test_Re; Rebin; MA", get_pair_phasequad_name(context, "test_Re", "19489",True))
+        self.assertEqual("EMU19489; PhaseQuad; test_Re; MA",
+                         get_pair_phasequad_name(context, "test_Re", "19489", False))
+        self.assertEqual("EMU19489; PhaseQuad; test_Re; Rebin; MA",
+                         get_pair_phasequad_name(context, "test_Re", "19489", True))
 
     def test_create_fitted_workspace_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
@@ -126,17 +127,14 @@ class WorkspaceNamingTest(unittest.TestCase):
 
         # test formatting
         workspace_name = "MUSR62260_raw_data MA"
-        self.assertEqual(runs, get_run_numbers_as_string_from_workspace_name(
-            workspace_name, instrument))
+        self.assertEqual(runs, get_run_numbers_as_string_from_workspace_name(workspace_name, instrument))
         workspace_name = "MUSR62260; GROUP; fwd; Asymmetry; MA"
-        self.assertEqual(runs, get_run_numbers_as_string_from_workspace_name(
-            workspace_name, instrument))
+        self.assertEqual(runs, get_run_numbers_as_string_from_workspace_name(workspace_name, instrument))
 
         # test multiple run numbers
         runs = "62260-62261,62263"
         workspace_name = "MUSR62260-62261,62263; GROUP; fwd; Asymmetry; MA"
-        self.assertEqual(runs, get_run_numbers_as_string_from_workspace_name(
-            workspace_name, instrument))
+        self.assertEqual(runs, get_run_numbers_as_string_from_workspace_name(workspace_name, instrument))
 
     def test_get_first_run_from_run_string_one_number(self):
         run_string = '62260'

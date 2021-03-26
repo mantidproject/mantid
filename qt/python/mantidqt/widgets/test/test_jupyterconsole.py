@@ -24,7 +24,6 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 @start_qapplication
 class InProcessJupyterConsoleTest(unittest.TestCase):
-
     def test_construction_raises_no_errors(self):
         widget = InProcessJupyterConsole()
         self.assertTrue(hasattr(widget, "kernel_manager"))

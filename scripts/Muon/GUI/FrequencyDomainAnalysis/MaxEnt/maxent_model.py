@@ -9,13 +9,11 @@ from Muon.GUI.Common.validate_errors import validateToErrors
 
 
 class MaxEntWrapper(object):
-
     """
     A class to wrap the different parts
     of the MaxEnt and its preprocessing.
     This keeps the main MaxEnt class simple.
     """
-
     def __init__(self, maxent):
         self.name = "MaxEnt"
         self.model = maxent
@@ -46,13 +44,11 @@ class MaxEntWrapper(object):
 
 
 class MaxEntModel(object):
-
     """
     A simple class which executes
     the relevant algorithms for
     the analysis.
     """
-
     def __init__(self):
         self.name = "MaxEnt"
         self.alg = None
@@ -92,21 +88,16 @@ class MaxEntModel(object):
             self.alg.setProperty(name, value)
         # check for version 1
         if inputs["InputWorkspace"] != "MuonAnalysis" and "MuonAnalysisGrouped" in inputs["InputWorkspace"]:
-            raise ValueError(
-                "Cannot currently generate phase table from this data using CalMuonDetectorPhases")
+            raise ValueError("Cannot currently generate phase table from this data using CalMuonDetectorPhases")
         self.alg.execute()
         name = "DetectorTable"
-        mantid.AnalysisDataService.addOrReplace(
-            inputs[name],
-            self.alg.getProperty(name).value)
+        mantid.AnalysisDataService.addOrReplace(inputs[name], self.alg.getProperty(name).value)
         self.alg = None
 
     def addOutput(self, inputs, alg, name):
 
         if name in inputs:
-            mantid.AnalysisDataService.addOrReplace(
-                inputs[name],
-                alg.getProperty(name).value)
+            mantid.AnalysisDataService.addOrReplace(inputs[name], alg.getProperty(name).value)
         else:
             return
         if mantid.AnalysisDataService.doesExist(self.run):

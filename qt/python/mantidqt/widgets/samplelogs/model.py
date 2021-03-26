@@ -7,24 +7,21 @@
 #  This file is part of the mantid workbench.
 #
 #
-from mantid.kernel import (BoolTimeSeriesProperty, BoolFilteredTimeSeriesProperty,
-                           FloatTimeSeriesProperty, FloatFilteredTimeSeriesProperty,
-                           Int32TimeSeriesProperty, Int32FilteredTimeSeriesProperty,
-                           Int64TimeSeriesProperty, Int64FilteredTimeSeriesProperty,
-                           StringTimeSeriesProperty, StringFilteredTimeSeriesProperty,
-                           logger)
+from mantid.kernel import (BoolTimeSeriesProperty, BoolFilteredTimeSeriesProperty, FloatTimeSeriesProperty,
+                           FloatFilteredTimeSeriesProperty, Int32TimeSeriesProperty, Int32FilteredTimeSeriesProperty,
+                           Int64TimeSeriesProperty, Int64FilteredTimeSeriesProperty, StringTimeSeriesProperty,
+                           StringFilteredTimeSeriesProperty, logger)
 from mantid.api import MultipleExperimentInfos
 from mantid.kernel import PropertyManager
 from qtpy.QtGui import QStandardItemModel, QStandardItem, QColor
 from qtpy.QtCore import Qt
 import numpy as np
 
-TimeSeriesProperties = (BoolTimeSeriesProperty,
-                        FloatTimeSeriesProperty, Int32TimeSeriesProperty,
+TimeSeriesProperties = (BoolTimeSeriesProperty, FloatTimeSeriesProperty, Int32TimeSeriesProperty,
                         Int64TimeSeriesProperty, StringTimeSeriesProperty)
-FilteredTimeSeriesProperties = (BoolFilteredTimeSeriesProperty,
-                                FloatFilteredTimeSeriesProperty, Int32FilteredTimeSeriesProperty,
-                                Int64FilteredTimeSeriesProperty, StringFilteredTimeSeriesProperty)
+FilteredTimeSeriesProperties = (BoolFilteredTimeSeriesProperty, FloatFilteredTimeSeriesProperty,
+                                Int32FilteredTimeSeriesProperty, Int64FilteredTimeSeriesProperty,
+                                StringFilteredTimeSeriesProperty)
 
 DEEP_RED = QColor.fromHsv(0, 180, 255)
 
@@ -67,7 +64,6 @@ class SampleLogsModel():
     """This class stores the workspace object and return log values when
     requested
     """
-
     def __init__(self, ws):
         """Stores three thing:, the workspace, which experiment info number
         to use, and the run object.
@@ -168,15 +164,14 @@ class SampleLogsModel():
         """Checks if logs is plottable. Only Float, Int32 and Int64
         TimeSeriesProperties are plottable at this point.
         """
-        return isinstance(self.get_log(LogName), (FloatTimeSeriesProperty,
-                                                  Int32TimeSeriesProperty,
-                                                  Int64TimeSeriesProperty))
+        return isinstance(self.get_log(LogName),
+                          (FloatTimeSeriesProperty, Int32TimeSeriesProperty, Int64TimeSeriesProperty))
 
-    def get_statistics(self, LogName, filtered = True):
+    def get_statistics(self, LogName, filtered=True):
         """Return the statistics of a particular log"""
         log = self.get_log(LogName)
         if isinstance(log, TimeSeriesProperties):
-            if ((not filtered) and isinstance(log,FilteredTimeSeriesProperties)):
+            if ((not filtered) and isinstance(log, FilteredTimeSeriesProperties)):
                 log = log.unfiltered()
             return log.getStatistics()
 
@@ -188,7 +183,6 @@ class SampleLogsModel():
         """Return a QModel made from the current workspace. This should be set
         onto a QTableView. The searched_key allows for filtering log entries.
         """
-
         def create_table_item(column, itemname, invalid_value_count, log_size, callable, *args):
             item = QStandardItem()
             item.setEditable(False)
@@ -197,7 +191,7 @@ class SampleLogsModel():
                 item.setData(DEEP_RED, Qt.BackgroundRole)
                 item.setToolTip("All of the values in the log are marked invalid, none of them are filtered.")
             elif invalid_value_count > 0:
-                saturation = 10 + (170 * (invalid_value_count/(log_size+invalid_value_count)))
+                saturation = 10 + (170 * (invalid_value_count / (log_size + invalid_value_count)))
                 item.setData(QColor.fromHsv(0, saturation, 255), Qt.BackgroundRole)
                 aux_verb = "is" if invalid_value_count == 1 else "are"
                 item.setToolTip(f"{invalid_value_count}/{log_size+invalid_value_count} of the values in the log"

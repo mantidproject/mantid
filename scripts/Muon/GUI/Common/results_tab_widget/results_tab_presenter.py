@@ -13,22 +13,18 @@ from mantidqt.utils.observer_pattern import GenericObserver
 # magic. See on_new_fit_performed() for more details
 class ResultsTabPresenter(QObject):
     """Controller for the results tab"""
-
     def __init__(self, view, model):
         super(ResultsTabPresenter, self).__init__()
         self.view = view
         self.model = model
-        self.new_fit_performed_observer = GenericObserver(
-            self.on_new_fit_performed)
+        self.new_fit_performed_observer = GenericObserver(self.on_new_fit_performed)
 
         self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
 
         self._init_view()
 
-        self.disable_tab_observer = GenericObserver(lambda: self.view.
-                                                    setEnabled(False))
-        self.enable_tab_observer = GenericObserver(lambda: self.view.
-                                                   setEnabled(True))
+        self.disable_tab_observer = GenericObserver(lambda: self.view.setEnabled(False))
+        self.enable_tab_observer = GenericObserver(lambda: self.view.setEnabled(True))
 
     # callbacks
     def on_results_table_name_edited(self):
@@ -65,12 +61,9 @@ class ResultsTabPresenter(QObject):
     def _init_view(self):
         """Perform any setup for the view that is related to the model"""
         self.view.set_results_table_name(self.model.results_table_name())
-        self.view.results_name_edited.connect(
-            self.on_results_table_name_edited)
-        self.view.output_results_requested.connect(
-            self.on_output_results_request)
-        self.view.function_selection_changed.connect(
-            self.on_function_selection_changed)
+        self.view.results_name_edited.connect(self.on_results_table_name_edited)
+        self.view.output_results_requested.connect(self.on_output_results_request)
+        self.view.function_selection_changed.connect(self.on_function_selection_changed)
         self.view.set_output_results_button_enabled(False)
 
     @Slot()
@@ -107,9 +100,7 @@ class ResultsTabPresenter(QObject):
 
     def _update_logs_view(self):
         """Update the view of logs based on the current model"""
-        self.view.set_log_values(
-            self.model.log_selection(
-                existing_selection=self.view.log_values()))
+        self.view.set_log_values(self.model.log_selection(existing_selection=self.view.log_values()))
 
     def update_view_from_model(self):
         self.on_new_fit_performed()

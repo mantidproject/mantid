@@ -10,15 +10,12 @@ from mantid.plots.legend import convert_color_to_hex
 from matplotlib import rcParams
 from qtpy.QtCore import QRegExp
 from qtpy.QtGui import QColor, QRegExpValidator
-from qtpy.QtWidgets import (QWidget, QLineEdit, QPushButton, QHBoxLayout,
-                            QColorDialog)
-
+from qtpy.QtWidgets import (QWidget, QLineEdit, QPushButton, QHBoxLayout, QColorDialog)
 
 MPL_DEFAULT = convert_color_to_hex(rcParams['lines.color'])
 
 
 class ColorSelector(QWidget):
-
     def __init__(self, initial_color=MPL_DEFAULT, parent=None):
         super(ColorSelector, self).__init__(parent=parent)
 
@@ -55,12 +52,8 @@ class ColorSelector(QWidget):
     def launch_qcolor_dialog(self):
         color_dialog = QColorDialog(self)
         color_dialog.setCurrentColor(QColor(self.get_color()))
-        color_dialog.colorSelected.connect(
-            lambda: self.set_line_edit(color_dialog.selectedColor().name())
-        )
-        color_dialog.accepted.connect(
-            lambda: self.set_prev_color(color_dialog.selectedColor().name())
-        )
+        color_dialog.colorSelected.connect(lambda: self.set_line_edit(color_dialog.selectedColor().name()))
+        color_dialog.accepted.connect(lambda: self.set_prev_color(color_dialog.selectedColor().name()))
         color_dialog.setModal(True)
         color_dialog.show()
 
@@ -75,8 +68,7 @@ class ColorSelector(QWidget):
 
     def update_color_button(self):
         color = self.get_color()
-        self.button.setStyleSheet("border:1px solid #000000;"
-                                  f"background-color: {color}")
+        self.button.setStyleSheet("border:1px solid #000000;" f"background-color: {color}")
         self.button.update()
 
     def convert_three_digit_hex_to_six(self):

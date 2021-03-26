@@ -18,19 +18,19 @@ from numpy import vectorize
 
 def voigtFunction(X, Y):
     Y = abs(Y)
-    S = abs(X)+Y
+    S = abs(X) + Y
     T = Y - (X * 1j)
 
     # Determine values based on value of S
     # REGION 1
     if S >= 15:
-        W = T*0.5641896/(0.5+T*T)
+        W = T * 0.5641896 / (0.5 + T * T)
 
     # REGION 2
     else:
         if S >= 5.5:
-            U = T*T
-            W = T*(1.410474+U*0.5641896)/(0.75+U*(3+U))
+            U = T * T
+            W = T * (1.410474 + U * 0.5641896) / (0.75 + U * (3 + U))
     # REGION 3
         else:
             if Y >= (0.195 * np.abs(X) - 0.176):
@@ -43,12 +43,11 @@ def voigtFunction(X, Y):
                 W = T * (36183.31 - U * (3321.9905 - U * step))
                 step = (9022.228 - U * (2186.181 - U * (364.2191 - U * (61.57037 - U * (1.841439 - U)))))
                 W /= (32066.6 - U * (24322.84 - U * step))
-                W = (np.exp(np.real(U))*np.cos(np.imag(U)) + 0j) - W
+                W = (np.exp(np.real(U)) * np.cos(np.imag(U)) + 0j) - W
     return np.real(W)
 
 
 class PEARLTransVoigt(IFunction1D):
-
     def init(self):
         # Starting parameters as fitted from run PRL111643
         self.declareParameter("Position", 1096.3)
@@ -75,7 +74,7 @@ class PEARLTransVoigt(IFunction1D):
         #
         # Legacy background function included from Transfit v1
         # Define background function
-        bg = bg0 + bg1 ** xvals + bg2 * xvals * xvals
+        bg = bg0 + bg1**xvals + bg2 * xvals * xvals
         # Correct using Beer's law to fit measured absorption, not Xsection
         # np.sqrt(np.log(2)) replaced with 1 as legacy
         width = 1 / gaussFWHM

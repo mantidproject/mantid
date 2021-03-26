@@ -20,7 +20,7 @@ class DetectorInfoTest(unittest.TestCase):
     def setUp(self):
         """ Setup Workspace to use"""
         if self.__class__._ws is None:
-            self.__class__._ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 1, False) # no monitors
+            self.__class__._ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 1, False)  # no monitors
             self.__class__._ws.getSpectrum(0).clearDetectorIDs()
 
     """
@@ -81,7 +81,7 @@ class DetectorInfoTest(unittest.TestCase):
         """ Check equality of detectors """
         info = self._ws.detectorInfo()
         self.assertTrue(info.isEquivalent(info))
-        self.assertEqual(info,  info)
+        self.assertEqual(info, info)
 
     def test_twoTheta(self):
         """ See if the returned value is a double (float in Python). """
@@ -97,22 +97,21 @@ class DetectorInfoTest(unittest.TestCase):
             self.assertEqual(np.arctan2(y, x), info.azimuthal(i))
 
     def test_createWorkspaceAndDetectorInfo(self):
-    	""" Try to create a workspace and see if DetectorInfo object
+        """ Try to create a workspace and see if DetectorInfo object
     		is accessable """
-    	dataX = [1,2,3,4,5]
-    	dataY = [1,2,3,4,5]
-    	workspace = CreateWorkspace(DataX=dataX, DataY=dataY)
-    	info = workspace.detectorInfo()
-    	self.assertEqual(info.size(), 0)
+        dataX = [1, 2, 3, 4, 5]
+        dataY = [1, 2, 3, 4, 5]
+        workspace = CreateWorkspace(DataX=dataX, DataY=dataY)
+        info = workspace.detectorInfo()
+        self.assertEqual(info.size(), 0)
 
     def test_detectorIds(self):
         info = self._ws.detectorInfo()
         ids = info.detectorIDs()
         # Should be read-only
         self.assertFalse(ids.flags.writeable)
-        for a, b in zip(ids, [1,2]):
-            self.assertEqual(a,b)
-
+        for a, b in zip(ids, [1, 2]):
+            self.assertEqual(a, b)
 
     def test_position(self):
         """ Test that the detector's position is returned. """
@@ -178,12 +177,12 @@ class DetectorInfoTest(unittest.TestCase):
     def test_iteration_for_position(self):
         info = self._ws.detectorInfo()
         lastY = None
-        for i,item in enumerate(info):
+        for i, item in enumerate(info):
             pos = item.position
             # See test helper for position construction
             self.assertAlmostEquals(pos.X(), 0)
             self.assertAlmostEquals(pos.Z(), 5)
-            if(lastY):
+            if (lastY):
                 self.assertGreater(pos.Y(), lastY)
             lastY = pos.Y()
 
@@ -199,6 +198,7 @@ class DetectorInfoTest(unittest.TestCase):
 
     The following test cases test around boundary cases for the exposed methods.
     """
+
     def test_isMonitor_extreme(self):
         info = self._ws.detectorInfo()
         with self.assertRaises(OverflowError):
@@ -221,7 +221,6 @@ class DetectorInfoTest(unittest.TestCase):
         with self.assertRaises(OverflowError):
             info.position(-1)
 
-
     """
     ----------------------------------------------------------------------------
     Exceptional Tests
@@ -230,6 +229,7 @@ class DetectorInfoTest(unittest.TestCase):
     Each of the tests below tries to pass invalid parameters to the exposed
     methods and expect an error to be thrown.
     """
+
     def test_size_exceptional(self):
         info = self._ws.detectorInfo()
         with self.assertRaises(TypeError):
@@ -290,6 +290,7 @@ class DetectorInfoTest(unittest.TestCase):
             info.rotation("Zero")
         with self.assertRaises(TypeError):
             info.rotation(0.0)
+
 
 if __name__ == '__main__':
     unittest.main()

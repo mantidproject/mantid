@@ -27,7 +27,6 @@ class HFIRReductionScripter(BaseReductionScripter):
         create a reduction script. Parameters are organized by groups that
         will each have their own UI representation.
     """
-
     def __init__(self, name="BIOSANS", settings=None):
         super(HFIRReductionScripter, self).__init__(name=name)
         self._settings = settings

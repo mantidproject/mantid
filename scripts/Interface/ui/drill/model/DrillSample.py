@@ -7,12 +7,10 @@
 
 
 class DrillSample:
-
     """
     Processing parameters.
     """
     _parameters = None
-
     """
     Name of the output workspace.
     """
@@ -31,7 +29,7 @@ class DrillSample:
         Args:
             parameters (dict(str:str)): parameter key:value pairs
         """
-        self._parameters = {k:v for k,v in parameters.items()}
+        self._parameters = {k: v for k, v in parameters.items()}
 
     def getParameters(self):
         """
@@ -40,7 +38,7 @@ class DrillSample:
         Returns:
             dict(str:str): parameter key:value pairs
         """
-        return {k:v for k,v in self._parameters.items()}
+        return {k: v for k, v in self._parameters.items()}
 
     def getParameter(self, name):
         """

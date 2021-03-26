@@ -69,14 +69,18 @@ def finite_cylinder(centre, radius, height, axis, shape_id='shape'):
 
 def add_cylinder(xml, radius, xcentre, ycentre, shape_id='shape'):
     """Mask the inside of an infinite cylinder on the input workspace."""
-    add_xml_shape(xml, infinite_cylinder([xcentre, ycentre, 0.0], radius, [0, 0, 1], shape_id=shape_id)
-                  + '<algebra val="' + str(shape_id) + '"/>')
+    add_xml_shape(
+        xml,
+        infinite_cylinder([xcentre, ycentre, 0.0], radius, [0, 0, 1], shape_id=shape_id) + '<algebra val="' +
+        str(shape_id) + '"/>')
 
 
 def add_outside_cylinder(xml, radius, xcentre=0.0, ycentre=0.0, shape_id='shape'):
     """Mask out the outside of a cylinder or specified radius """
-    add_xml_shape(xml, infinite_cylinder([xcentre, ycentre, 0.0], radius, [0, 0, 1], shape_id=shape_id)
-                  + '<algebra val="#' + str(shape_id + '"/>'))
+    add_xml_shape(
+        xml,
+        infinite_cylinder([xcentre, ycentre, 0.0], radius, [0, 0, 1], shape_id=shape_id) + '<algebra val="#' +
+        str(shape_id + '"/>'))
 
 
 def create_phi_mask(shape_id, centre, phi_min, phi_max, use_mirror=True):
@@ -132,29 +136,29 @@ def create_line_mask(start_point, length, width, angle):
     :param angle: angle of line in xy-plane in units of degrees
     :return: return xml shape string
     """
-    return finite_cylinder(start_point, width / 2., length, [cos(angle * pi / 180.0), sin(angle * pi / 180.0), 0.0],
-                           "arm")
+    return finite_cylinder(start_point, width / 2., length,
+                           [cos(angle * pi / 180.0), sin(angle * pi / 180.0), 0.0], "arm")
 
 
-def quadrant_xml(centre,rmin,rmax,quadrant):
+def quadrant_xml(centre, rmin, rmax, quadrant):
     cin_id = 'cyl-in'
-    xmlstring = infinite_cylinder(centre, rmin, [0,0,1], cin_id)
+    xmlstring = infinite_cylinder(centre, rmin, [0, 0, 1], cin_id)
     cout_id = 'cyl-out'
-    xmlstring+= infinite_cylinder(centre, rmax, [0,0,1], cout_id)
-    plane1Axis=None
-    plane2Axis=None
+    xmlstring += infinite_cylinder(centre, rmax, [0, 0, 1], cout_id)
+    plane1Axis = None
+    plane2Axis = None
     if quadrant is MaskingQuadrant.LEFT:
-        plane1Axis = [-1,1,0]
-        plane2Axis = [-1,-1,0]
+        plane1Axis = [-1, 1, 0]
+        plane2Axis = [-1, -1, 0]
     elif quadrant is MaskingQuadrant.RIGHT:
-        plane1Axis = [1,-1,0]
-        plane2Axis = [1,1,0]
+        plane1Axis = [1, -1, 0]
+        plane2Axis = [1, 1, 0]
     elif quadrant is MaskingQuadrant.TOP:
-        plane1Axis = [1,1,0]
-        plane2Axis = [-1,1,0]
+        plane1Axis = [1, 1, 0]
+        plane2Axis = [-1, 1, 0]
     elif quadrant is MaskingQuadrant.BOTTOM:
-        plane1Axis = [-1,-1,0]
-        plane2Axis = [1,-1,0]
+        plane1Axis = [-1, -1, 0]
+        plane2Axis = [1, -1, 0]
     else:
         return ''
     p1id = 'pl-a'
@@ -169,5 +173,5 @@ def quadrant_xml(centre,rmin,rmax,quadrant):
     #    for the slice region we don't want to be masked.
     # 3. Create the intersection between 1 and 2. This will provide a three-quarter wedge of the hollow
     #    cylinder.
-    xmlstring += '<algebra val="(#(' + cout_id + ' (#' + cin_id  + ')) : (' + p1id + ':' + p2id + '))"/>\n'
+    xmlstring += '<algebra val="(#(' + cout_id + ' (#' + cin_id + ')) : (' + p1id + ':' + p2id + '))"/>\n'
     return xmlstring

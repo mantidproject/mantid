@@ -14,9 +14,7 @@ class RefRoiTest(systemtesting.MantidSystemTest):
     def runTest(self):
         workspace = Load(Filename="REF_L_119814")
         workspace = Integration(InputWorkspace=workspace)
-        roi = RefRoi(InputWorkspace=workspace,
-                     NXPixel=256, NYPixel=304,
-                     IntegrateY=False, ConvertToQ=False)
+        roi = RefRoi(InputWorkspace=workspace, NXPixel=256, NYPixel=304, IntegrateY=False, ConvertToQ=False)
         roi = Transpose(InputWorkspace=roi)
 
     def validate(self):

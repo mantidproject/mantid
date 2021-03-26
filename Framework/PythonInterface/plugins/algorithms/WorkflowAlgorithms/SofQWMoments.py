@@ -23,12 +23,9 @@ class SofQWMoments(DataProcessorAlgorithm):
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
                              doc="Input workspace to use.")
-        self.declareProperty(name='EnergyMin', defaultValue=-0.5,
-                             doc='Minimum energy for fit. Default=-0.5')
-        self.declareProperty(name='EnergyMax', defaultValue=0.5,
-                             doc='Maximum energy for fit. Default=0.5')
-        self.declareProperty(name='Scale', defaultValue=1.0,
-                             doc='Scale factor to multiply y(Q,w). Default=1.0')
+        self.declareProperty(name='EnergyMin', defaultValue=-0.5, doc='Minimum energy for fit. Default=-0.5')
+        self.declareProperty(name='EnergyMax', defaultValue=0.5, doc='Maximum energy for fit. Default=0.5')
+        self.declareProperty(name='Scale', defaultValue=1.0, doc='Scale factor to multiply y(Q,w). Default=1.0')
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
                              doc="Workspace that includes all calculated moments.")
 

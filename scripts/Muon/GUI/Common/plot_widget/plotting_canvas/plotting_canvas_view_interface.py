@@ -16,7 +16,6 @@ class PlottingViewMeta(type(QtWidgets.QWidget), abc.ABCMeta):
 
 
 class PlottingCanvasViewInterface(metaclass=PlottingViewMeta):
-
     @property
     @abc.abstractmethod
     def num_plotted_workspaces(self):
@@ -121,9 +120,9 @@ class PlottingCanvasViewInterface(metaclass=PlottingViewMeta):
         pass
 
     @abc.abstractmethod
-    def add_enable_autoscale_subscriber(self,observer):
+    def add_enable_autoscale_subscriber(self, observer):
         pass
 
     @abc.abstractmethod
-    def add_disable_autoscale_subscriber(self,observer):
+    def add_disable_autoscale_subscriber(self, observer):
         pass

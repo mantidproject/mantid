@@ -31,7 +31,6 @@ def _get_instrument_property_list(instrument, property_name):
 
 
 class IndirectTransmission(PythonAlgorithm):
-
     def category(self):
         return "Workflow\\MIDAS"
 
@@ -39,30 +38,36 @@ class IndirectTransmission(PythonAlgorithm):
         return "Calculates the scattering & transmission for Indirect Geometry spectrometers."
 
     def PyInit(self):
-        self.declareProperty(name='Instrument', defaultValue='IRIS',
+        self.declareProperty(name='Instrument',
+                             defaultValue='IRIS',
                              validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'BASIS', 'VISION', 'IN16B']),
                              doc='Instrument')
 
-        self.declareProperty(name='Analyser', defaultValue='graphite',
+        self.declareProperty(name='Analyser',
+                             defaultValue='graphite',
                              validator=StringListValidator(['graphite', 'mica', 'fmica', 'silicon']),
                              doc='Analyser')
 
-        self.declareProperty(name='Reflection', defaultValue='002',
+        self.declareProperty(name='Reflection',
+                             defaultValue='002',
                              validator=StringListValidator(['002', '004', '006', '111', '311']),
                              doc='Reflection')
 
-        self.declareProperty(name='ChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
+        self.declareProperty(name='ChemicalFormula',
+                             defaultValue='',
+                             validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
 
-        self.declareProperty(name='DensityType', defaultValue = 'Mass Density',
+        self.declareProperty(name='DensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc = 'Use of Mass density or Number density')
+                             doc='Use of Mass density or Number density')
 
-        self.declareProperty(name='Density', defaultValue=0.1,
+        self.declareProperty(name='Density',
+                             defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3). Default=0.1')
 
-        self.declareProperty(name='Thickness', defaultValue=0.1,
-                             doc='Sample thickness (cm). Default=0.1')
+        self.declareProperty(name='Thickness', defaultValue=0.1, doc='Sample thickness (cm). Default=0.1')
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', "", Direction.Output),
                              doc="The name of the output workspace.")
@@ -79,9 +84,7 @@ class IndirectTransmission(PythonAlgorithm):
 
         # Create an empty instrument workspace
         workspace = '__empty_' + instrument_name
-        CreateSimulationWorkspace(OutputWorkspace=workspace,
-                                  Instrument=instrument_name,
-                                  BinParams='0,0.5,1')
+        CreateSimulationWorkspace(OutputWorkspace=workspace, Instrument=instrument_name, BinParams='0,0.5,1')
 
         # Do some validation on the analyser and reflection
         instrument = mtd[workspace].getInstrument()
@@ -103,7 +106,8 @@ class IndirectTransmission(PythonAlgorithm):
             if reflection not in valid_reflections:
                 # Remove idf/ipf workspace
                 DeleteWorkspace(workspace)
-                raise RuntimeError('Reflection %s not valid for analyser %s on instrument %s' % (reflection, analyser, instrument_name))
+                raise RuntimeError('Reflection %s not valid for analyser %s on instrument %s' %
+                                   (reflection, analyser, instrument_name))
 
         # Load instrument parameter file
         idf_directory = config['instrumentDefinition.directory']
@@ -145,12 +149,16 @@ class IndirectTransmission(PythonAlgorithm):
         table_ws.addColumn("double", "Value")
 
         # Names for each of the output values
-        output_names = ['Wavelength', 'Absorption Xsection', 'Coherent Xsection', 'Incoherent Xsection',
-                        'Total scattering Xsection', 'Number density', 'Thickness', 'Transmission (abs+scatt)', 'Total scattering']
+        output_names = [
+            'Wavelength', 'Absorption Xsection', 'Coherent Xsection', 'Incoherent Xsection',
+            'Total scattering Xsection', 'Number density', 'Thickness', 'Transmission (abs+scatt)', 'Total scattering'
+        ]
 
         # List of the calculated values
-        output_values = [wave, absorption_x_section, coherent_x_section, incoherent_x_section,
-                         scattering_s_section, number_density, thickness, transmission, scattering]
+        output_values = [
+            wave, absorption_x_section, coherent_x_section, incoherent_x_section, scattering_s_section, number_density,
+            thickness, transmission, scattering
+        ]
 
         # Build table of values
         for data in zip(output_names, output_values):
@@ -179,9 +187,7 @@ class IndirectTransmission(PythonAlgorithm):
             # If that fails then get it by taking from group of all detectors
             wsHandle = mtd[workspace]
             spectra_list = list(range(0, wsHandle.getNumberHistograms()))
-            GroupDetectors(InputWorkspace=workspace,
-                           OutputWorkspace=workspace,
-                           SpectraList=spectra_list)
+            GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, SpectraList=spectra_list)
             wsHandle = mtd[workspace]
             det = wsHandle.getDetector(0)
             efixed = wsHandle.getEFixed(det.getID())

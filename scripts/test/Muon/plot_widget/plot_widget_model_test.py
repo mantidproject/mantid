@@ -17,7 +17,6 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 @start_qapplication
 class PlotWidgetModelTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.context = setup_context()
@@ -67,8 +66,7 @@ class PlotWidgetModelTest(unittest.TestCase):
         self.model.get_freq_workspaces_to_plot("fwd", "Frequency Re")
 
         self.assertEquals(self.context.get_names_of_frequency_domain_workspaces_to_fit.call_count, 1)
-        self.context.get_names_of_frequency_domain_workspaces_to_fit.assert_called_once_with("62260", "fwd", True,
-                                                                                             "Re")
+        self.context.get_names_of_frequency_domain_workspaces_to_fit.assert_called_once_with("62260", "fwd", True, "Re")
 
     def test_get_multiple_workspaces_to_plot_freq(self):
         self.context.data_context.current_runs = [[62260], [62261]]
@@ -76,12 +74,11 @@ class PlotWidgetModelTest(unittest.TestCase):
         self.model.get_freq_workspaces_to_plot("fwd", "Frequency Re")
 
         self.assertEquals(self.context.get_names_of_frequency_domain_workspaces_to_fit.call_count, 1)
-        self.context.get_names_of_frequency_domain_workspaces_to_fit.assert_called_once_with("62260, 62261", "fwd",
-                                                                                             True, "Re")
+        self.context.get_names_of_frequency_domain_workspaces_to_fit.assert_called_once_with(
+            "62260, 62261", "fwd", True, "Re")
 
     def test_get_fit_workspaces_to_plot_returns_correctly(self):
-        fit = FitInformation(mock.MagicMock(), 'GaussOsc',
-                             ['MUSR62260; Group; bottom; Asymmetry; MA'],
+        fit = FitInformation(mock.MagicMock(), 'GaussOsc', ['MUSR62260; Group; bottom; Asymmetry; MA'],
                              ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
         expected_workspaces = ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'] * 2
         expected_indices = [1, 2]
@@ -92,8 +89,7 @@ class PlotWidgetModelTest(unittest.TestCase):
         self.assertEqual(expected_indices, indices)
 
     def test_get_fit_workspaces_to_plot_returns_correctly_for_tf_fit(self):
-        fit = FitInformation(mock.MagicMock(), 'GaussOsc',
-                             ['MUSR62260; Group; bottom; Asymmetry; MA'],
+        fit = FitInformation(mock.MagicMock(), 'GaussOsc', ['MUSR62260; Group; bottom; Asymmetry; MA'],
                              ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted' + TF_ASYMMETRY_PREFIX])
         expected_workspaces = ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted' + TF_ASYMMETRY_PREFIX] * 2
         expected_indices = [3, 2]
@@ -104,13 +100,12 @@ class PlotWidgetModelTest(unittest.TestCase):
         self.assertEqual(expected_indices, indices)
 
     def test_get_fit_workspaces_to_plot_returns_correctly_when_plot_diff_is_False(self):
-        fit = FitInformation(mock.MagicMock(), 'GaussOsc',
-                             ['MUSR62260; Group; bottom; Asymmetry; MA'],
+        fit = FitInformation(mock.MagicMock(), 'GaussOsc', ['MUSR62260; Group; bottom; Asymmetry; MA'],
                              ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
         expected_workspaces = ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted']
         expected_indices = [1]
 
-        workspaces, indices = self.model.get_fit_workspace_and_indices(fit,False)
+        workspaces, indices = self.model.get_fit_workspace_and_indices(fit, False)
 
         self.assertEqual(workspaces, expected_workspaces)
         self.assertEqual(expected_indices, indices)

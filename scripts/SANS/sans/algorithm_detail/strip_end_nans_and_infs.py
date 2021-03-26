@@ -24,7 +24,7 @@ def strip_end_nans(workspace, parent_alg=None):
     # Find the index at which the first legal value appears
 
     start_index = next((index for index in range(len(data)) if is_valid_data(data[index])), None)
-    end_index = next((index for index in range(len(data)-1, -1, -1) if is_valid_data(data[index])), None)
+    end_index = next((index for index in range(len(data) - 1, -1, -1) if is_valid_data(data[index])), None)
 
     # If an index was not found then we return the current workspace. This means that all entries are either INFs
     # or NANs.
@@ -48,9 +48,7 @@ def strip_end_nans(workspace, parent_alg=None):
 
     # Crop the workspace in place
     crop_name = "CropWorkspace"
-    crop_options = {"InputWorkspace": workspace,
-                    "XMin": start_q,
-                    "XMax": end_q}
+    crop_options = {"InputWorkspace": workspace, "XMin": start_q, "XMax": end_q}
     crop_alg = create_child_algorithm(parent_alg, crop_name, **crop_options)
     crop_alg.setProperty("OutputWorkspace", EMPTY_NAME)
     crop_alg.execute()

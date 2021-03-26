@@ -19,8 +19,8 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         self.__class__._monitor_ws = self._create_monitor_workspace()
         self.__class__._monitor_ws_group = self._create_monitor_workspace_group()
         self._default_args = {
-            'InputWorkspace' : 'input_ws',
-            'MonitorWorkspace' : 'monitor_ws',
+            'InputWorkspace': 'input_ws',
+            'MonitorWorkspace': 'monitor_ws',
             'OutputWorkspace': 'output',
             'UseNewFilterAlgorithm': True
         }
@@ -32,11 +32,10 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         self._assert_run_algorithm_throws()
 
     def test_missing_monitors(self):
-        self._assert_run_algorithm_throws({'InputWorkspace' : 'input_ws'})
+        self._assert_run_algorithm_throws({'InputWorkspace': 'input_ws'})
 
     def test_missing_output_ws(self):
-        self._assert_run_algorithm_throws({'InputWorkspace' : 'input_ws',
-                                           'MonitorWorkspace' : 'monitor_ws'})
+        self._assert_run_algorithm_throws({'InputWorkspace': 'input_ws', 'MonitorWorkspace': 'monitor_ws'})
 
     def test_default_inputs_return_single_slice(self):
         output = self._assert_run_algorithm_succeeds(self._default_args)
@@ -54,9 +53,10 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         args = self._default_args
         args['TimeInterval'] = 600
         output = self._assert_run_algorithm_succeeds(args)
-        self._check_slices(output, ["output_0_600", "output_600_1200", "output_1200_1800",
-                                    "output_1800_2400", "output_2400_3000", "output_3000_3600",
-                                    "output_3600_4200"])
+        self._check_slices(output, [
+            "output_0_600", "output_600_1200", "output_1200_1800", "output_1800_2400", "output_2400_3000",
+            "output_3000_3600", "output_3600_4200"
+        ])
         self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
         self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
         self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
@@ -70,8 +70,10 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         args['TimeInterval'] = 600
         args['UseNewFilterAlgorithm'] = False
         output = self._assert_run_algorithm_succeeds(args)
-        self._check_slices(output, ["output_0_600.0", "output_600.0_1200.0", "output_1200.0_1800.0",
-                                    "output_1800.0_2400.0", "output_2400.0_3000.0", "output_3000.0_3600.0"])
+        self._check_slices(output, [
+            "output_0_600.0", "output_600.0_1200.0", "output_1200.0_1800.0", "output_1800.0_2400.0",
+            "output_2400.0_3000.0", "output_3000.0_3600.0"
+        ])
         self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
         self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
         self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
@@ -144,9 +146,11 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         output = self._assert_run_algorithm_succeeds(args)
         # Note that default tolerance is half the interval, so we slice +/-10 either side.
         # Also note that empty slices are not included in the output.
-        self._check_slices(output, ["output_Log.proton_charge.From.10.To.30.Value-change-direction:both",
-                                    "output_Log.proton_charge.From.70.To.90.Value-change-direction:both",
-                                    "output_Log.proton_charge.From.90.To.110.Value-change-direction:both"])
+        self._check_slices(output, [
+            "output_Log.proton_charge.From.10.To.30.Value-change-direction:both",
+            "output_Log.proton_charge.From.70.To.90.Value-change-direction:both",
+            "output_Log.proton_charge.From.90.To.110.Value-change-direction:both"
+        ])
         self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[4, 1, 2])
         self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[4, 5, 2])
         self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[6, 10, 4])
@@ -159,8 +163,10 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         # note that empty slices are not output so we have fewer workspaces.
         args['LogValueTolerance'] = 0
         output = self._assert_run_algorithm_succeeds(args)
-        self._check_slices(output, ["output_Log.proton_charge.From.0.To.20.Value-change-direction:both",
-                                    "output_Log.proton_charge.From.80.To.100.Value-change-direction:both"])
+        self._check_slices(output, [
+            "output_Log.proton_charge.From.0.To.20.Value-change-direction:both",
+            "output_Log.proton_charge.From.80.To.100.Value-change-direction:both"
+        ])
         self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[4, 1, 2])
         self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[4, 5, 2])
 
@@ -172,8 +178,9 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         args['MaximumLogValue'] = 100
         args['UseNewFilterAlgorithm'] = False
         output = self._assert_run_algorithm_succeeds(args)
-        self._check_slices(output, ["output_0.0_20.0", "output_20.0_40.0", "output_40.0_60.0",
-                                    "output_60.0_80.0", "output_80.0_100.0"])
+        self._check_slices(
+            output,
+            ["output_0.0_20.0", "output_20.0_40.0", "output_40.0_60.0", "output_60.0_80.0", "output_80.0_100.0"])
         self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[0, 0, 0])
         self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[0, 0, 0])
         self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 0, 0])
@@ -221,8 +228,10 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         args['MinimumLogValue'] = '75'
         args['MaximumLogValue'] = '110'
         output = self._assert_run_algorithm_succeeds(args)
-        self._check_slices(output, ["output_Log.proton_charge.From.65.To.85.Value-change-direction:both",
-                                    "output_Log.proton_charge.From.85.To.105.Value-change-direction:both"])
+        self._check_slices(output, [
+            "output_Log.proton_charge.From.65.To.85.Value-change-direction:both",
+            "output_Log.proton_charge.From.85.To.105.Value-change-direction:both"
+        ])
         self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[4, 5, 2])
         self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[6, 10, 4])
 
@@ -245,13 +254,11 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         group = self._assert_run_algorithm_succeeds(args)
         self.assertEqual(group.getNumberOfEntries(), 3)
         output = group[0]
-        self._check_slices(output, ["ws1_monitor_ws_output_0_600",
-                                    "ws1_monitor_ws_output_600_1200",
-                                    "ws1_monitor_ws_output_1200_1800",
-                                    "ws1_monitor_ws_output_1800_2400",
-                                    "ws1_monitor_ws_output_2400_3000",
-                                    "ws1_monitor_ws_output_3000_3600",
-                                    "ws1_monitor_ws_output_3600_4200"])
+        self._check_slices(output, [
+            "ws1_monitor_ws_output_0_600", "ws1_monitor_ws_output_600_1200", "ws1_monitor_ws_output_1200_1800",
+            "ws1_monitor_ws_output_1800_2400", "ws1_monitor_ws_output_2400_3000", "ws1_monitor_ws_output_3000_3600",
+            "ws1_monitor_ws_output_3600_4200"
+        ])
         self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
         self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
         self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
@@ -268,12 +275,11 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         group = self._assert_run_algorithm_succeeds(args)
         self.assertEqual(group.getNumberOfEntries(), 3)
         output = group[0]
-        self._check_slices(output, ["ws1_monitor_ws_output_0_600.0",
-                                    "ws1_monitor_ws_output_600.0_1200.0",
-                                    "ws1_monitor_ws_output_1200.0_1800.0",
-                                    "ws1_monitor_ws_output_1800.0_2400.0",
-                                    "ws1_monitor_ws_output_2400.0_3000.0",
-                                    "ws1_monitor_ws_output_3000.0_3600.0"])
+        self._check_slices(output, [
+            "ws1_monitor_ws_output_0_600.0", "ws1_monitor_ws_output_600.0_1200.0",
+            "ws1_monitor_ws_output_1200.0_1800.0", "ws1_monitor_ws_output_1800.0_2400.0",
+            "ws1_monitor_ws_output_2400.0_3000.0", "ws1_monitor_ws_output_3000.0_3600.0"
+        ])
         self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
         self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
         self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
@@ -289,13 +295,11 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         group = self._assert_run_algorithm_succeeds(args)
         self.assertEqual(group.getNumberOfEntries(), 3)
         output = group[0]
-        self._check_slices(output, ["ws1_mon1_output_0_600",
-                                    "ws1_mon1_output_600_1200",
-                                    "ws1_mon1_output_1200_1800",
-                                    "ws1_mon1_output_1800_2400",
-                                    "ws1_mon1_output_2400_3000",
-                                    "ws1_mon1_output_3000_3600",
-                                    "ws1_mon1_output_3600_4200"])
+        self._check_slices(output, [
+            "ws1_mon1_output_0_600", "ws1_mon1_output_600_1200", "ws1_mon1_output_1200_1800",
+            "ws1_mon1_output_1800_2400", "ws1_mon1_output_2400_3000", "ws1_mon1_output_3000_3600",
+            "ws1_mon1_output_3600_4200"
+        ])
         self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
         self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
         self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
@@ -313,12 +317,10 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         group = self._assert_run_algorithm_succeeds(args)
         self.assertEqual(group.getNumberOfEntries(), 3)
         output = group[0]
-        self._check_slices(output, ["ws1_mon1_output_0_600.0",
-                                    "ws1_mon1_output_600.0_1200.0",
-                                    "ws1_mon1_output_1200.0_1800.0",
-                                    "ws1_mon1_output_1800.0_2400.0",
-                                    "ws1_mon1_output_2400.0_3000.0",
-                                    "ws1_mon1_output_3000.0_3600.0"])
+        self._check_slices(output, [
+            "ws1_mon1_output_0_600.0", "ws1_mon1_output_600.0_1200.0", "ws1_mon1_output_1200.0_1800.0",
+            "ws1_mon1_output_1800.0_2400.0", "ws1_mon1_output_2400.0_3000.0", "ws1_mon1_output_3000.0_3600.0"
+        ])
         self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
         self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
         self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
@@ -336,7 +338,7 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         mtd.remove('test_monitor_ws_group')
 
     def _create_test_workspace(self):
-        input_ws = CreateSampleWorkspace("Event",BankPixelWidth=1, BinWidth=20000)
+        input_ws = CreateSampleWorkspace("Event", BankPixelWidth=1, BinWidth=20000)
         AddTimeSeriesLog(input_ws, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100)
         AddTimeSeriesLog(input_ws, Name="proton_charge", Time="2010-01-01T00:10:00", Value=100)
         AddTimeSeriesLog(input_ws, Name="proton_charge", Time="2010-01-01T00:20:00", Value=80)
@@ -357,8 +359,12 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         return group
 
     def _create_monitor_workspace(self):
-        monitor_ws = CreateSampleWorkspace(OutputWorkspace='monitor_ws', NumBanks=0, NumMonitors=3,
-                                           BankPixelWidth=1, NumEvents=10000, Random=False)
+        monitor_ws = CreateSampleWorkspace(OutputWorkspace='monitor_ws',
+                                           NumBanks=0,
+                                           NumMonitors=3,
+                                           BankPixelWidth=1,
+                                           NumEvents=10000,
+                                           Random=False)
         return monitor_ws
 
     def _create_monitor_workspace_group(self):
@@ -394,7 +400,7 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         self.assertEqual(mtd.doesExist('output'), False)
 
-    def _assert_run_algorithm_throws(self, args = {}):
+    def _assert_run_algorithm_throws(self, args={}):
         """Run the algorithm with the given args and check it throws"""
         throws = False
         alg = create_algorithm('ReflectometrySliceEventWorkspace', **args)

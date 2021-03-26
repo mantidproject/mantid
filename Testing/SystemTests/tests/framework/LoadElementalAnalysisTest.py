@@ -12,22 +12,21 @@ import numpy as np
 
 
 class LoadElementalAnalysisTest(systemtesting.MantidSystemTest):
-
     def __init__(self):
         super(LoadElementalAnalysisTest, self).__init__()
 
     def requiredFiles(self):
-        return ['ral09999.rooth2010.dat', 'ral09999.rooth2020.dat', 'ral09999.rooth2099.dat',
-                'ral09999.rooth3010.dat', 'ral09999.rooth3020.dat', 'ral09999.rooth3099.dat',
-                'ral09999.rooth4010.dat', 'ral09999.rooth4020.dat', 'ral09999.rooth4099.dat',
-                'ral09999.rooth5010.dat', 'ral09999.rooth5020.dat', 'ral09999.rooth5099.dat']
+        return [
+            'ral09999.rooth2010.dat', 'ral09999.rooth2020.dat', 'ral09999.rooth2099.dat', 'ral09999.rooth3010.dat',
+            'ral09999.rooth3020.dat', 'ral09999.rooth3099.dat', 'ral09999.rooth4010.dat', 'ral09999.rooth4020.dat',
+            'ral09999.rooth4099.dat', 'ral09999.rooth5010.dat', 'ral09999.rooth5020.dat', 'ral09999.rooth5099.dat'
+        ]
 
     def cleanup(self):
         AnalysisDataService.clear()
 
     def runTest(self):
-        ws = LoadElementalAnalysisData(Run='9999',
-                                       GroupWorkspace='9999')
+        ws = LoadElementalAnalysisData(Run='9999', GroupWorkspace='9999')
 
         # Check the Groupworkspace contains 4 Workspaces
         self.assertEqual(AnalysisDataService.retrieve('9999').size(), 4)
@@ -61,8 +60,7 @@ class LoadPartialElementalAnalysisTest(systemtesting.MantidSystemTest):
         AnalysisDataService.clear()
 
     def runTest(self):
-        ws = LoadElementalAnalysisData(Run='2683',
-                                       GroupWorkspace='2683')
+        ws = LoadElementalAnalysisData(Run='2683', GroupWorkspace='2683')
 
         # Check the Groupworkspace contains 2 Workspaces
         self.assertEqual(AnalysisDataService.retrieve('2683').size(), 2)

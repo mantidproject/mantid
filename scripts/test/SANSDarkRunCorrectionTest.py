@@ -34,8 +34,7 @@ def add_log(ws, number_of_times, log_name, start_time):
     return alg_log.getProperty("Workspace").value
 
 
-def create_sample_workspace_with_log(name, x_start, x_end, bin_width,
-                                     log_name, start_time, number_of_times):
+def create_sample_workspace_with_log(name, x_start, x_end, bin_width, log_name, start_time, number_of_times):
     CreateSampleWorkspace(OutputWorkspace=name,
                           NumBanks=1,
                           BankPixelWidth=1,
@@ -102,8 +101,14 @@ def create_real_event_workspace_with_log(name, log_names, start_time, number_of_
 
 # ----- TESTS
 class DarkRunCorrectionTest(unittest.TestCase):
-    def _do_test_dark_run_correction(self, log_name, use_mean, use_time, use_detectors=True,
-                                     use_monitors=False, mon_number=None, use_real_data=False):
+    def _do_test_dark_run_correction(self,
+                                     log_name,
+                                     use_mean,
+                                     use_time,
+                                     use_detectors=True,
+                                     use_monitors=False,
+                                     mon_number=None,
+                                     use_real_data=False):
         # Arrange
         if mon_number is None:
             mon_number = []
@@ -126,16 +131,15 @@ class DarkRunCorrectionTest(unittest.TestCase):
 
         # We either load some data or create sample data
         if use_real_data:
-            ws_scatter = create_real_workspace_with_log("scatter", [log_name],
-                                                        start_time_scatter, number_of_times_scatter)
-            ws_dark = create_real_workspace_with_log("dark", [log_name],
-                                                     start_time_dark_run, number_of_times_dark_run)
+            ws_scatter = create_real_workspace_with_log("scatter", [log_name], start_time_scatter,
+                                                        number_of_times_scatter)
+            ws_dark = create_real_workspace_with_log("dark", [log_name], start_time_dark_run, number_of_times_dark_run)
         else:
-            create_sample_workspace_with_log(ws_scatter_name, x_start, x_end, bin_width,
-                                             log_name, start_time_scatter, number_of_times_scatter)
+            create_sample_workspace_with_log(ws_scatter_name, x_start, x_end, bin_width, log_name, start_time_scatter,
+                                             number_of_times_scatter)
 
-            create_sample_workspace_with_log(ws_dark_name, x_start, x_end, bin_width,
-                                             log_name, start_time_dark_run, number_of_times_dark_run)
+            create_sample_workspace_with_log(ws_dark_name, x_start, x_end, bin_width, log_name, start_time_dark_run,
+                                             number_of_times_dark_run)
             ws_scatter = mtd[ws_scatter_name]
             ws_dark = mtd[ws_dark_name]
 
@@ -191,8 +195,12 @@ class DarkRunCorrectionTest(unittest.TestCase):
         use_monitors = True
         mon_numbers = []
 
-        self._do_test_dark_run_correction(log_name, use_mean, use_time, use_detectors,
-                                          use_monitors, mon_numbers,
+        self._do_test_dark_run_correction(log_name,
+                                          use_mean,
+                                          use_time,
+                                          use_detectors,
+                                          use_monitors,
+                                          mon_numbers,
                                           use_real_data=True)
 
     def test__mean__no_time__one_monitor__no_detectors(self):
@@ -203,8 +211,12 @@ class DarkRunCorrectionTest(unittest.TestCase):
         use_monitors = True
         mon_numbers = [1]
 
-        self._do_test_dark_run_correction(log_name, use_mean, use_time, use_detectors,
-                                          use_monitors, mon_numbers,
+        self._do_test_dark_run_correction(log_name,
+                                          use_mean,
+                                          use_time,
+                                          use_detectors,
+                                          use_monitors,
+                                          mon_numbers,
                                           use_real_data=True)
 
     def test__no_mean__time__one_monitor__detectors(self):
@@ -215,8 +227,12 @@ class DarkRunCorrectionTest(unittest.TestCase):
         use_monitors = True
         mon_numbers = [1]
 
-        self._do_test_dark_run_correction(log_name, use_mean, use_time, use_detectors,
-                                          use_monitors, mon_numbers,
+        self._do_test_dark_run_correction(log_name,
+                                          use_mean,
+                                          use_time,
+                                          use_detectors,
+                                          use_monitors,
+                                          mon_numbers,
                                           use_real_data=True)
 
     def test_no_mean__no_time__all_monitors__detectors(self):
@@ -227,13 +243,16 @@ class DarkRunCorrectionTest(unittest.TestCase):
         use_monitors = True
         mon_numbers = []
 
-        self._do_test_dark_run_correction(log_name, use_mean, use_time, use_detectors,
-                                          use_monitors, mon_numbers,
+        self._do_test_dark_run_correction(log_name,
+                                          use_mean,
+                                          use_time,
+                                          use_detectors,
+                                          use_monitors,
+                                          mon_numbers,
                                           use_real_data=True)
 
 
 class DarkRunNormalizationExtractorTest(unittest.TestCase):
-
     def _do_test_extraction(self, log_name, use_time):
         # Arrange
         x_start = 0
@@ -247,11 +266,11 @@ class DarkRunNormalizationExtractorTest(unittest.TestCase):
         number_of_times_dark_run = 13  # in seconds
 
         ws_scatter_name = "ws_scatter"
-        create_sample_workspace_with_log(ws_scatter_name, x_start, x_end, bin_width,
-                                         log_name, start_time_scatter, number_of_times_scatter)
+        create_sample_workspace_with_log(ws_scatter_name, x_start, x_end, bin_width, log_name, start_time_scatter,
+                                         number_of_times_scatter)
         ws_dark_name = "ws_dark"
-        create_sample_workspace_with_log(ws_dark_name, x_start, x_end, bin_width,
-                                         log_name, start_time_dark_run, number_of_times_dark_run)
+        create_sample_workspace_with_log(ws_dark_name, x_start, x_end, bin_width, log_name, start_time_dark_run,
+                                         number_of_times_dark_run)
         ws_scatter = mtd[ws_scatter_name]
         ws_dark = mtd[ws_dark_name]
 
@@ -306,11 +325,11 @@ class DarkRunNormalizationExtractorTest(unittest.TestCase):
         number_of_times_dark_run = 13  # in seconds
 
         ws_scatter_name = "ws_scatter"
-        create_sample_workspace_with_log(ws_scatter_name, x_start, x_end, bin_width,
-                                         log_name, start_time_scatter, number_of_times_scatter)
+        create_sample_workspace_with_log(ws_scatter_name, x_start, x_end, bin_width, log_name, start_time_scatter,
+                                         number_of_times_scatter)
         ws_dark_name = "ws_dark"
-        create_sample_workspace_with_log(ws_dark_name, x_start, x_end, bin_width,
-                                         log_name, start_time_dark_run, number_of_times_dark_run)
+        create_sample_workspace_with_log(ws_dark_name, x_start, x_end, bin_width, log_name, start_time_dark_run,
+                                         number_of_times_dark_run)
 
         extractor = dc.DarkRunNormalizationExtractor()
         use_time = True

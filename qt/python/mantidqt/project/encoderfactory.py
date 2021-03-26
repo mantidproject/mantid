@@ -30,8 +30,8 @@ class EncoderFactory(object):
         obj_encoders = [encoder for (encoder, compatible) in cls.encoder_dict.values() if compatible(obj, encoder)]
 
         if len(obj_encoders) > 1:
-            raise RuntimeError("EncoderFactory: One or more encoder type claims to work with the passed obj: "
-                               + obj.__class__.__name__)
+            raise RuntimeError("EncoderFactory: One or more encoder type claims to work with the passed obj: " +
+                               obj.__class__.__name__)
         elif len(obj_encoders) == 1:
             return obj_encoders[0]()
         else:

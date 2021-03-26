@@ -13,10 +13,9 @@ from mantid.kernel import Direction, CompositeValidator
 from mantid.simpleapi import CloneWorkspace, MaskDetectors
 
 
-class CorrectTOF (PythonAlgorithm):
+class CorrectTOF(PythonAlgorithm):
     """ Apply time-of-flight correction
     """
-
     def __init__(self):
         PythonAlgorithm.__init__(self)
 
@@ -26,7 +25,7 @@ class CorrectTOF (PythonAlgorithm):
         return "Workflow\\MLZ\\TOFTOF;Transforms\\Axes"
 
     def seeAlso(self):
-        return [ "TOFTOFMergeRuns","TOFTOFCropWorkspace" ]
+        return ["TOFTOFMergeRuns", "TOFTOFCropWorkspace"]
 
     def name(self):
         """ Return name
@@ -42,7 +41,10 @@ class CorrectTOF (PythonAlgorithm):
         validator = CompositeValidator()
         validator.add(WorkspaceUnitValidator("TOF"))
         validator.add(InstrumentValidator())
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input, validator=validator),
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace",
+                                                     "",
+                                                     direction=Direction.Input,
+                                                     validator=validator),
                              doc="Input workspace.")
         self.declareProperty(ITableWorkspaceProperty("EPPTable", "", direction=Direction.Input),
                              doc="Input EPP table. May be produced by FindEPP algorithm.")
@@ -80,10 +82,10 @@ class CorrectTOF (PythonAlgorithm):
         run = inputws.getRun()
         tof1 = float(run.getLogData('TOF1').value)
         wavelength = float(run.getLogData('wavelength').value)
-        velocity = sp.constants.h/(sp.constants.m_n*wavelength*1e-10)   # m/s
+        velocity = sp.constants.h / (sp.constants.m_n * wavelength * 1e-10)  # m/s
         instrument = inputws.getInstrument()
         sample = instrument.getSample()
-        t_fit = np.array(epptable.column('PeakCentre') ) - tof1
+        t_fit = np.array(epptable.column('PeakCentre')) - tof1
         outws = CloneWorkspace(inputws, OutputWorkspace=outws_name)
         # mask detectors with EPP=0
         bad_data = np.where(t_fit <= 0)[0]
@@ -96,7 +98,7 @@ class CorrectTOF (PythonAlgorithm):
             if t_fit[idx] > 0:
                 det = instrument.getDetector(outws.getSpectrum(idx).getDetectorIDs()[0])
                 sdd = det.getDistance(sample)
-                t2_el = sdd*1.0e+6/velocity         # microseconds
+                t2_el = sdd * 1.0e+6 / velocity  # microseconds
                 newX = inputws.readX(idx) + t2_el - t_fit[idx]
                 outws.setX(idx, newX)
 

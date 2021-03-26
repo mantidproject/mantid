@@ -9,6 +9,7 @@
 import unittest
 
 import matplotlib
+
 matplotlib.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 from copy import copy
@@ -42,7 +43,7 @@ class PlotScriptGeneratorColorFillsTest(unittest.TestCase):
 
     def test_get_plot_command_kwargs_from_colourfill_returns_dict_with_correct_properties(self):
         cfill = self.ax.imshow(self.test_ws, **CFILL_KWARGS)
-        self.fig.colorbar(cfill,ax=[self.ax])
+        self.fig.colorbar(cfill, ax=[self.ax])
         plot_commands_dict = _get_plot_command_kwargs_from_colorfill(cfill)
         for key, value in CFILL_KWARGS.items():
             self.assertEqual(value, plot_commands_dict[key])
@@ -51,12 +52,13 @@ class PlotScriptGeneratorColorFillsTest(unittest.TestCase):
         kwargs = copy(CFILL_KWARGS)
         kwargs.update(MANTID_ONLY_KWARGS)
         cfill = self.ax.imshow(self.test_ws, **CFILL_KWARGS)
-        self.fig.colorbar(cfill,ax=[self.ax])
-        output, headers = generate_plot_2d_command(cfill,"axes")
+        self.fig.colorbar(cfill, ax=[self.ax])
+        output, headers = generate_plot_2d_command(cfill, "axes")
         arg_string = convert_args_to_string([self.test_ws], kwargs)
-        expected_command = [f"{CFILL_NAME} = axes.imshow({arg_string})",
-                            f"{CFILL_NAME}.set_norm(plt.Normalize(vmin=",
-                            f"cbar = fig.colorbar({CFILL_NAME}, ax=[axes], pad=0.06)"]
+        expected_command = [
+            f"{CFILL_NAME} = axes.imshow({arg_string})", f"{CFILL_NAME}.set_norm(plt.Normalize(vmin=",
+            f"cbar = fig.colorbar({CFILL_NAME}, ax=[axes], pad=0.06)"
+        ]
         self.assertEqual(len(expected_command), len(output))
         self.assertEqual(len(headers), 0)
         for line_no in range(len(output)):

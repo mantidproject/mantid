@@ -10,13 +10,12 @@ import sys
 
 
 class UnitLabelTest(unittest.TestCase):
-
     def test_UnitLabel_can_be_built_from_simple_string(self):
-      label = UnitLabel("MyLabel")
-      self.assertEqual("MyLabel", label.ascii())
+        label = UnitLabel("MyLabel")
+        self.assertEqual("MyLabel", label.ascii())
 
     def test_UnitLabel_can_be_built_simple_string_and_unicode_object(self):
-        label = UnitLabel("MyLabel", u"\u03bcs","\mu s")
+        label = UnitLabel("MyLabel", u"\u03bcs", "\mu s")
         self.assertEqual("MyLabel", label.ascii())
         self.assertEqual(u"\u03bcs", label.utf8())
         self.assertEqual("\mu s", label.latex())
@@ -29,7 +28,7 @@ class UnitLabelTest(unittest.TestCase):
         self.assertEqual("\mu s", unit_lbl.latex())
 
     def test_str_function_produces_ascii_string_from_label(self):
-        label = UnitLabel("MyLabel", u"\u03bcs","\mu s")
+        label = UnitLabel("MyLabel", u"\u03bcs", "\mu s")
         self.assertTrue(isinstance(str(label), str))
         self.assertEqual("MyLabel", str(label))
 

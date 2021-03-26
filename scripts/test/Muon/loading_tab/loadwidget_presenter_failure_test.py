@@ -63,7 +63,8 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
         self.load_run_model = LoadRunWidgetModel(self.loaded_data, self.context)
 
         self.model = LoadWidgetModel(self.loaded_data, self.context)
-        self.view = LoadWidgetView(parent=self.obj, load_run_view=self.load_run_view,
+        self.view = LoadWidgetView(parent=self.obj,
+                                   load_run_view=self.load_run_view,
                                    load_file_view=self.load_file_view)
 
         self.presenter = LoadWidgetPresenter(view=self.view, model=self.model)

@@ -58,7 +58,6 @@ class Cleanup:
 
 class NameSource:
     """A class to provide names for intermediate workspaces."""
-
     def __init__(self, prefix, cleanupMode):
         """Initialize an instance of the class."""
         self._names = set()
@@ -78,7 +77,6 @@ class Report:
 
     class _Entry:
         """A private class for report entries."""
-
         def __init__(self, text, loggingLevel):
             """Initialize an entry."""
             self._text = text

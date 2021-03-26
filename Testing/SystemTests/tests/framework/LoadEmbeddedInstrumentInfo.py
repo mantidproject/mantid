@@ -21,7 +21,6 @@ from mantid.simpleapi import *
 
 
 class ISISRawHistNexus(systemtesting.MantidSystemTest):
-
     def runTest(self):
         # ISIS raw hist nexus file with A1_window at location (0,3,0)
         Load('MAPS00018314.nxs', OutputWorkspace='MAPS00018314_raw_ISIS_hist')
@@ -31,7 +30,7 @@ class ISISRawHistNexus(systemtesting.MantidSystemTest):
         inst = MAPS00018314_raw_ISIS_hist.getInstrument()
         A1window = inst.getComponentByName('MAPS/A1_window')
 
-        if str(A1window.getPos()) != '[0,3,0]' :
+        if str(A1window.getPos()) != '[0,3,0]':
             return False
 
         return True

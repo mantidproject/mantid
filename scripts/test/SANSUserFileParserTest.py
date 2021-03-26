@@ -105,9 +105,8 @@ class BackCommandParserTest(unittest.TestCase):
         mon_number = 3
         self.do_test_can_parse_correctly(argument, uniform, mean, run_number, is_mon, mon_number)
 
-    def do_test_can_parse_correctly(self, arguments, expected_uniform,
-                                    expected_mean, expected_run_number,
-                                    is_mon, expected_mon_number):
+    def do_test_can_parse_correctly(self, arguments, expected_uniform, expected_mean, expected_run_number, is_mon,
+                                    expected_mon_number):
         # Arrange
         parser = UserFileParser.BackCommandParser()
         # Act

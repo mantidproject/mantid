@@ -20,7 +20,6 @@ import math
 class SaveYDA(PythonAlgorithm):
     """ Save data in yaml/frida 2.0 format from a Workspace2D.
     """
-
     def category(self):
         """Return category
         """
@@ -45,8 +44,11 @@ class SaveYDA(PythonAlgorithm):
         # Workspace must have an Instrument
         wsValidators.add(InstrumentValidator())
 
-        self.declareProperty(MatrixWorkspaceProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input,
-                             validator=wsValidators), doc="Workspace name for input")
+        self.declareProperty(MatrixWorkspaceProperty(name="InputWorkspace",
+                                                     defaultValue="",
+                                                     direction=Direction.Input,
+                                                     validator=wsValidators),
+                             doc="Workspace name for input")
         self.declareProperty(FileProperty(name="Filename", defaultValue="", action=FileAction.Save, extensions=""),
                              doc="The name to use when writing the file")
 
@@ -84,8 +86,8 @@ class SaveYDA(PythonAlgorithm):
 
         # check sample logs exists
         if len(run.getLogData()) == 0:
-            raise NotImplementedError("No sample log data exist in workspace: "
-                                      + self.getPropertyValue("InputWorkspace"))
+            raise NotImplementedError("No sample log data exist in workspace: " +
+                                      self.getPropertyValue("InputWorkspace"))
 
         # save sample log data in lists, commented sequences an commented maps
         # commented sequences and maps are used to keep Data in the order they get inserted
@@ -189,7 +191,7 @@ class SaveYDA(PythonAlgorithm):
             for i in range(nHist):
                 detector = ws.getDetector(i)
                 # convert radians to degrees
-                twoTheta = detector.getTwoTheta(samplePos, beamPos)*180/math.pi
+                twoTheta = detector.getTwoTheta(samplePos, beamPos) * 180 / math.pi
                 twoTheta = round(twoTheta, 14)
                 bin.append(twoTheta)
         elif ax.length() == nHist:
@@ -254,7 +256,7 @@ class SaveYDA(PythonAlgorithm):
         bin = []
 
         for i in range(1, ax.size):
-            axval = round((ax[i]+ax[i-1])/2, 14)
+            axval = round((ax[i] + ax[i - 1]) / 2, 14)
             bin.append(axval)
 
         return bin

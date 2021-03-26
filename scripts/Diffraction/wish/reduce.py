@@ -15,8 +15,12 @@ class Wish:
     NUM_MONITORS = 6
     LAMBDA_RANGE = (0.7, 10.35)
 
-    def __init__(self, cal_directory, output_folder, delete_ws,
-                 user_directory="/archive/ndxwish/Instrument/data/cycle_", absorb=True):
+    def __init__(self,
+                 cal_directory,
+                 output_folder,
+                 delete_ws,
+                 user_directory="/archive/ndxwish/Instrument/data/cycle_",
+                 absorb=True):
         self.absorb = absorb
         self.cal_dir = cal_directory
         self.use_folder = user_directory
@@ -145,12 +149,21 @@ class Wish:
                 label, tmin, tmax = split_string_event(extension)
                 output = output + "_" + label
                 if tmax == "end":
-                    simple.LoadEventNexus(Filename=filename, OutputWorkspace=output, FilterByTimeStart=tmin,
-                                          LoadMonitors='1', MonitorsAsEvents='1', FilterMonByTimeStart=tmin)
+                    simple.LoadEventNexus(Filename=filename,
+                                          OutputWorkspace=output,
+                                          FilterByTimeStart=tmin,
+                                          LoadMonitors='1',
+                                          MonitorsAsEvents='1',
+                                          FilterMonByTimeStart=tmin)
                 else:
-                    simple.LoadEventNexus(Filename=filename, OutputWorkspace=output, FilterByTimeStart=tmin,
-                                          FilterByTimeStop=tmax, LoadMonitors='1', MonitorsAsEvents='1',
-                                          FilterMonByTimeStart=tmin, FilterMonByTimeStop=tmax)
+                    simple.LoadEventNexus(Filename=filename,
+                                          OutputWorkspace=output,
+                                          FilterByTimeStart=tmin,
+                                          FilterByTimeStop=tmax,
+                                          LoadMonitors='1',
+                                          MonitorsAsEvents='1',
+                                          FilterMonByTimeStart=tmin,
+                                          FilterMonByTimeStop=tmax)
                 self.read_event_nexus(number, output, panel)
         else:
             num_1, num_2 = split_run_string(number)
@@ -169,14 +182,21 @@ class Wish:
         else:
             monitor = simple.mtd[monitor_run]
         simple.NormaliseToMonitor(InputWorkspace=output, OutputWorkspace=output + "norm1", MonitorWorkspace=monitor)
-        simple.NormaliseToMonitor(InputWorkspace=output + "norm1", OutputWorkspace=output + "norm2",
-                                  MonitorWorkspace=monitor, IntegrationRangeMin=0.7, IntegrationRangeMax=10.35)
+        simple.NormaliseToMonitor(InputWorkspace=output + "norm1",
+                                  OutputWorkspace=output + "norm2",
+                                  MonitorWorkspace=monitor,
+                                  IntegrationRangeMin=0.7,
+                                  IntegrationRangeMax=10.35)
         simple.DeleteWorkspace(output)
         simple.DeleteWorkspace(output + "norm1")
         simple.RenameWorkspace(InputWorkspace=output + "norm2", OutputWorkspace=output)
         simple.ConvertUnits(InputWorkspace=output, OutputWorkspace=output, Target="TOF", EMode="Elastic")
-        simple.ReplaceSpecialValues(InputWorkspace=output, OutputWorkspace=output, NaNValue=0.0, NaNError=0.0,
-                                    InfinityValue=0.0, InfinityError=0.0)
+        simple.ReplaceSpecialValues(InputWorkspace=output,
+                                    OutputWorkspace=output,
+                                    NaNValue=0.0,
+                                    NaNError=0.0,
+                                    InfinityValue=0.0,
+                                    InfinityError=0.0)
         return output
 
     def load_multi_run_part(self, extension, run, panel):
@@ -184,8 +204,11 @@ class Wish:
         logger.notice("reading filename... {}".format(filename))
         spectra_min, spectra_max = self.return_panel.get(panel)
         output1 = "w{0}-{1}".format(run, panel)
-        simple.LoadRaw(Filename=filename, OutputWorkspace=output1, SpectrumMin=str(spectra_min),
-                       SpectrumMax=str(spectra_max), LoadLogFiles="0")
+        simple.LoadRaw(Filename=filename,
+                       OutputWorkspace=output1,
+                       SpectrumMin=str(spectra_min),
+                       SpectrumMax=str(spectra_max),
+                       LoadLogFiles="0")
         return output1
 
     def read_event_nexus(self, number, output, panel):
@@ -193,7 +216,9 @@ class Wish:
         simple.Rebin(InputWorkspace=output, OutputWorkspace=output, Params='6000,-0.00063,110000')
         simple.ConvertToMatrixWorkspace(output, output)
         spectra_min, spectra_max = self.return_panel.get(panel)
-        simple.CropWorkspace(InputWorkspace=output, OutputWorkspace=output, StartWorkspaceIndex=spectra_min - 6,
+        simple.CropWorkspace(InputWorkspace=output,
+                             OutputWorkspace=output,
+                             StartWorkspaceIndex=spectra_min - 6,
                              EndWorkspaceIndex=spectra_max - 6)
         simple.MaskBins(InputWorkspace=output, OutputWorkspace=output, XMin=99900, XMax=106000)
 
@@ -202,8 +227,12 @@ class Wish:
         cal = "WISH_diff{}"
         if cal.format("_cal") not in simple.mtd:
             simple.LoadDiffCal(filename=self.get_cal(), InstrumentName="WISH", WorkspaceName=cal.format(""))
-        simple.AlignAndFocusPowder(InputWorkspace=work, OutputWorkspace=focus, GroupingWorkspace=cal.format("_group"),
-                                   CalibrationWorkspace=cal.format("_cal"), Dspacing=True, params="-0.00063")
+        simple.AlignAndFocusPowder(InputWorkspace=work,
+                                   OutputWorkspace=focus,
+                                   GroupingWorkspace=cal.format("_group"),
+                                   CalibrationWorkspace=cal.format("_cal"),
+                                   Dspacing=True,
+                                   params="-0.00063")
         simple.ConvertUnits(InputWorkspace=focus, OutputWorkspace=focus, Target="dSpacing")
         if self.deleteWorkspace:
             simple.DeleteWorkspace(work)
@@ -219,8 +248,17 @@ class Wish:
             self.focus_onepanel(work, focus, panel)
             split(focus)
 
-    def process_run(self, number, panel, extension, cycle_vana="09_4", absorb=False, number_density=0.0, scattering=0.0,
-                    attenuation=0.0, height=0.0, radius=0.0):
+    def process_run(self,
+                    number,
+                    panel,
+                    extension,
+                    cycle_vana="09_4",
+                    absorb=False,
+                    number_density=0.0,
+                    scattering=0.0,
+                    attenuation=0.0,
+                    height=0.0,
+                    radius=0.0):
         ws_to_focus = self.read(number, panel, extension)
         if absorb:
             absorption_corrections(attenuation, height, number_density, radius, scattering, ws_to_focus)
@@ -245,21 +283,22 @@ class Wish:
             for panel_i in range(Wish.NUM_PANELS):
                 focused_ws = "w{0}-{1}foc".format(number, panel_i)
                 simple.CropWorkspace(InputWorkspace=focused_ws, OutputWorkspace=focused_ws, XMin=d_min, XMax=d_max)
-                logger.notice("will try to load a vanadium with the name: {}".format(self.get_vanadium
-                                                                                     (panel_i, cycle_vana)))
+                logger.notice("will try to load a vanadium with the name: {}".format(
+                    self.get_vanadium(panel_i, cycle_vana)))
                 self.apply_vanadium_corrections(cycle_vana, panel_i, focused_ws)
                 simple.SaveGSS(InputWorkspace=focused_ws,
                                Filename=save_location.format(number, panel_i, extension, "gss"),
-                               Append=False, Bank=1)
+                               Append=False,
+                               Bank=1)
                 simple.SaveFocusedXYE(focused_ws, save_location.format(number, panel_i, extension, "dat"))
                 simple.SaveNexusProcessed(focused_ws, save_location.format(number, panel_i, extension, "nxs"))
         else:
-            logger.notice("will try to load a vanadium with the name: {}".format(self.get_vanadium
-                                                                                 (panel, cycle_vana)))
+            logger.notice("will try to load a vanadium with the name: {}".format(self.get_vanadium(panel, cycle_vana)))
             self.apply_vanadium_corrections(cycle_vana, panel, focused_ws)
             simple.SaveGSS(InputWorkspace=focused_ws,
                            Filename=save_location.format(number, panel, extension, "gss"),
-                           Append=False, Bank=1)
+                           Append=False,
+                           Bank=1)
             simple.SaveFocusedXYE(focused_ws, save_location.format(number, panel, extension, "dat"))
             simple.SaveNexusProcessed(focused_ws, save_location.format(number, panel, extension, "nxs"))
         return focused_ws
@@ -269,11 +308,13 @@ class Wish:
         simple.RebinToWorkspace(WorkspaceToRebin="vana", WorkspaceToMatch=focused_ws, OutputWorkspace="vana")
         simple.Divide(LHSWorkspace=focused_ws, RHSWorkspace="vana", OutputWorkspace=focused_ws)
         simple.DeleteWorkspace("vana")
-        simple.ConvertUnits(InputWorkspace=focused_ws, OutputWorkspace=focused_ws, Target="TOF",
-                            EMode="Elastic")
-        simple.ReplaceSpecialValues(InputWorkspace=focused_ws, OutputWorkspace=focused_ws, NaNValue=0.0,
+        simple.ConvertUnits(InputWorkspace=focused_ws, OutputWorkspace=focused_ws, Target="TOF", EMode="Elastic")
+        simple.ReplaceSpecialValues(InputWorkspace=focused_ws,
+                                    OutputWorkspace=focused_ws,
+                                    NaNValue=0.0,
                                     NaNError=0.0,
-                                    InfinityValue=0.0, InfinityError=0.0)
+                                    InfinityValue=0.0,
+                                    InfinityError=0.0)
 
     # Create a corrected vanadium (normalise,corrected for attenuation and empty, strip peaks) and
     # save a a nexus processed file.
@@ -306,18 +347,7 @@ class Wish:
         }
         d_min, d_max = panel_crop.get(panel)
         simple.CropWorkspace(InputWorkspace=vanfoc, OutputWorkspace=vanfoc, XMin=d_min, XMax=d_max)
-        spline_coefficient = {
-            1: 120,
-            2: 120,
-            3: 120,
-            4: 130,
-            5: 140,
-            6: 140,
-            7: 130,
-            8: 120,
-            9: 120,
-            10: 120
-        }
+        spline_coefficient = {1: 120, 2: 120, 3: 120, 4: 130, 5: 140, 6: 140, 7: 130, 8: 120, 9: 120, 10: 120}
         simple.SplineBackground(InputWorkspace=vanfoc, OutputWorkspace=vanfoc, NCoeff=spline_coefficient.get(panel))
         smoothing_coefficient = "30" if panel == 3 else "40"
         simple.SmoothData(InputWorkspace=vanfoc, OutputWorkspace=vanfoc, NPoints=smoothing_coefficient)
@@ -345,7 +375,9 @@ class Wish:
             if extension[:9] == "nxs_event":
                 temp = "w{}_monitors".format(number)
                 works = "w{}_monitor4".format(number)
-                simple.Rebin(InputWorkspace=temp, OutputWorkspace=temp, Params='6000,-0.00063,110000',
+                simple.Rebin(InputWorkspace=temp,
+                             OutputWorkspace=temp,
+                             Params='6000,-0.00063,110000',
                              PreserveEvents=False)
                 simple.ExtractSingleSpectrum(InputWorkspace=temp, OutputWorkspace=works, WorkspaceIndex=3)
         else:
@@ -363,14 +395,13 @@ class Wish:
         simple.ConvertUnits(InputWorkspace=works, OutputWorkspace=works, Target="Wavelength", Emode="Elastic")
         lambda_min, lambda_max = Wish.LAMBDA_RANGE
         simple.CropWorkspace(InputWorkspace=works, OutputWorkspace=works, XMin=lambda_min, XMax=lambda_max)
-        ex_regions = np.array([[4.57, 4.76],
-                              [3.87, 4.12],
-                              [2.75, 2.91],
-                              [2.24, 2.50]])
+        ex_regions = np.array([[4.57, 4.76], [3.87, 4.12], [2.75, 2.91], [2.24, 2.50]])
         simple.ConvertToDistribution(works)
 
         for reg in range(0, 4):
-            simple.MaskBins(InputWorkspace=works, OutputWorkspace=works, XMin=ex_regions[reg, 0],
+            simple.MaskBins(InputWorkspace=works,
+                            OutputWorkspace=works,
+                            XMin=ex_regions[reg, 0],
                             XMax=ex_regions[reg, 1])
 
         simple.SplineBackground(InputWorkspace=works, OutputWorkspace=works, WorkspaceIndex=0, NCoeff=spline_terms)
@@ -385,9 +416,19 @@ class Wish:
             self.startup(self.get_cycle(run))
             self.datafile = self.get_file_name(run, "raw")
             for panel in panels:
-                wout = self.process_run(run, panel, "raw", "11_4", absorb=self.absorb, number_density=0.025,
-                                        scattering=5.463, attenuation=2.595, height=4.0, radius=0.55)
-                simple.ConvertUnits(InputWorkspace=wout, OutputWorkspace="{}-d".format(wout), Target="dSpacing",
+                wout = self.process_run(run,
+                                        panel,
+                                        "raw",
+                                        "11_4",
+                                        absorb=self.absorb,
+                                        number_density=0.025,
+                                        scattering=5.463,
+                                        attenuation=2.595,
+                                        height=4.0,
+                                        radius=0.55)
+                simple.ConvertUnits(InputWorkspace=wout,
+                                    OutputWorkspace="{}-d".format(wout),
+                                    Target="dSpacing",
                                     EMode="Elastic")
 
             simple.DeleteWorkspace("WISH_diff_cal")
@@ -400,26 +441,26 @@ class Wish:
                 self.save_combined_panel(run, panel)
 
     def save_combined_panel(self, run, panel):
-        panel_combination = {
-            5: 6,
-            4: 7,
-            3: 8,
-            2: 9,
-            1: 10
-        }
+        panel_combination = {5: 6, 4: 7, 3: 8, 2: 9, 1: 10}
         input_ws1 = "w{0}-{1}foc".format(run, panel)
         input_ws2 = "w{0}-{1}foc".format(run, panel_combination.get(panel))
         combined = "{0}{1}-{2}_{3}foc{4}".format("{0}", run, panel, panel_combination.get(panel), "{1}")
         combined_save = combined.format("", "{}")
         combined_ws = combined.format("w", "")
 
-        simple.RebinToWorkspace(WorkspaceToRebin=input_ws2, WorkspaceToMatch=input_ws1, OutputWorkspace=input_ws2,
+        simple.RebinToWorkspace(WorkspaceToRebin=input_ws2,
+                                WorkspaceToMatch=input_ws1,
+                                OutputWorkspace=input_ws2,
                                 PreserveEvents='0')
         simple.Plus(LHSWorkspace=input_ws1, RHSWorkspace=input_ws2, OutputWorkspace=combined_ws)
-        simple.ConvertUnits(InputWorkspace=combined_ws, OutputWorkspace=combined_ws + "-d", Target="dSpacing",
+        simple.ConvertUnits(InputWorkspace=combined_ws,
+                            OutputWorkspace=combined_ws + "-d",
+                            Target="dSpacing",
                             EMode="Elastic")
 
-        simple.SaveGSS(combined_ws, os.path.join(self.user_directory, combined_save.format("raw.gss")), Append=False,
+        simple.SaveGSS(combined_ws,
+                       os.path.join(self.user_directory, combined_save.format("raw.gss")),
+                       Append=False,
                        Bank=1)
         simple.SaveFocusedXYE(combined_ws, os.path.join(self.user_directory, combined_save.format("raw.dat")))
         simple.SaveNexusProcessed(combined_ws, os.path.join(self.user_directory, combined_save.format("raw.nxs")))
@@ -427,11 +468,17 @@ class Wish:
 
 def absorption_corrections(attenuation, height, number_density, radius, scattering, input_ws):
     simple.ConvertUnits(InputWorkspace=input_ws, OutputWorkspace=input_ws, Target="Wavelength", EMode="Elastic")
-    simple.CylinderAbsorption(InputWorkspace=input_ws, OutputWorkspace="absorptionWS",
-                              CylinderSampleHeight=height, CylinderSampleRadius=radius,
-                              AttenuationXSection=attenuation, ScatteringXSection=scattering,
-                              SampleNumberDensity=number_density, NumberOfSlices="10", NumberOfAnnuli="10",
-                              NumberOfWavelengthPoints="25", ExpMethod="Normal")
+    simple.CylinderAbsorption(InputWorkspace=input_ws,
+                              OutputWorkspace="absorptionWS",
+                              CylinderSampleHeight=height,
+                              CylinderSampleRadius=radius,
+                              AttenuationXSection=attenuation,
+                              ScatteringXSection=scattering,
+                              SampleNumberDensity=number_density,
+                              NumberOfSlices="10",
+                              NumberOfAnnuli="10",
+                              NumberOfWavelengthPoints="25",
+                              ExpMethod="Normal")
     simple.Divide(LHSWorkspace=input_ws, RHSWorkspace="absorptionWS", OutputWorkspace=input_ws)
     simple.DeleteWorkspace("absorptionWS")
     simple.ConvertUnits(InputWorkspace=input_ws, OutputWorkspace=input_ws, Target="TOF", EMode="Elastic")
@@ -465,7 +512,10 @@ def shared_load_files(extension, filename, ws, spectrum_max, spectrum_min, is_mo
     if extension == "nxs":
         simple.Load(Filename=filename, OutputWorkspace=ws, SpectrumMin=spectrum_min, SpectrumMax=spectrum_min)
     else:
-        simple.LoadRaw(Filename=filename, OutputWorkspace=ws, SpectrumMin=spectrum_min, SpectrumMax=spectrum_max,
+        simple.LoadRaw(Filename=filename,
+                       OutputWorkspace=ws,
+                       SpectrumMin=spectrum_min,
+                       SpectrumMax=spectrum_max,
                        LoadLogFiles="0")
     simple.Rebin(InputWorkspace=ws, OutputWorkspace=ws, Params='6000,-0.00063,110000')
     if not is_monitor:

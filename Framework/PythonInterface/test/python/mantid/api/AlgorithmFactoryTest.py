@@ -20,12 +20,11 @@ class NotAnAlgorithm(object):
 
 
 class AlgorithmFactoryTest(unittest.TestCase):
-
     def setUp(self):
         FrameworkManagerImpl.Instance()
 
     def test_get_algorithm_factory_does_not_return_None(self):
-        self.assertNotEqual(AlgorithmFactory, None )
+        self.assertNotEqual(AlgorithmFactory, None)
 
     def test_getDescriptors(self):
 
@@ -44,18 +43,18 @@ class AlgorithmFactoryTest(unittest.TestCase):
         self.assertEqual(1, len(result))
 
     def test_exists_returns_correct_value_for_given_args(self):
-        self.assertTrue(AlgorithmFactory.exists('ConvertUnits')) #any version
-        self.assertTrue(AlgorithmFactory.exists('ConvertUnits', 1)) #any version
-        self.assertTrue(not AlgorithmFactory.exists('ConvertUnits', 100)) #any version
+        self.assertTrue(AlgorithmFactory.exists('ConvertUnits'))  #any version
+        self.assertTrue(AlgorithmFactory.exists('ConvertUnits', 1))  #any version
+        self.assertTrue(not AlgorithmFactory.exists('ConvertUnits', 100))  #any version
 
     def test_get_registered_algs_returns_dictionary_of_known_algorithms(self):
         all_algs = AlgorithmFactory.getRegisteredAlgorithms(True)
-        self.assertTrue( len(all_algs) > 0 )
-        self.assertTrue( 'ConvertUnits' in all_algs )
-        self.assertTrue( 'LoadRaw' in all_algs )
+        self.assertTrue(len(all_algs) > 0)
+        self.assertTrue('ConvertUnits' in all_algs)
+        self.assertTrue('LoadRaw' in all_algs)
         # one versions of LoadRaw
-        self.assertEqual( len(all_algs['LoadRaw']), 1 )
-        self.assertEqual( all_algs['LoadRaw'], [3] )
+        self.assertEqual(len(all_algs['LoadRaw']), 1)
+        self.assertEqual(all_algs['LoadRaw'], [3])
 
     def test_algorithm_subscription_with_valid_object_succeeds(self):
         testhelpers.assertRaisesNothing(self, AlgorithmFactory.subscribe, IsAnAlgorithm)
@@ -67,12 +66,12 @@ class AlgorithmFactoryTest(unittest.TestCase):
         try:
             AlgorithmFactory.enableNotifications()
         except Exception:
-            self.fail( "Algorithm factory class is expected to have a method 'enableNotifications'")
+            self.fail("Algorithm factory class is expected to have a method 'enableNotifications'")
 
         try:
             AlgorithmFactory.disableNotifications()
         except Exception:
-            self.fail( "Algorithm factory class is expected to have a method 'disableNotifications'")
+            self.fail("Algorithm factory class is expected to have a method 'disableNotifications'")
 
 
 if __name__ == '__main__':

@@ -10,10 +10,8 @@ from mantid.simpleapi import VelocityCrossCorrelations
 
 
 class VelocityCrossCorrelationsTest(unittest.TestCase):
-
     def test_simple(self):
-        output_ws = VelocityCrossCorrelations(InputFile = 'trajectories.nc',
-                                              Timestep = '2.0')
+        output_ws = VelocityCrossCorrelations(InputFile='trajectories.nc', Timestep='2.0')
 
         self.assertEqual(output_ws.getNumberHistograms(), 3)
         data_y = output_ws.readY(0)
@@ -24,5 +22,6 @@ class VelocityCrossCorrelationsTest(unittest.TestCase):
         data_y = output_ws.readY(2)
         self.assertAlmostEqual(data_y[0], -8.76322385197998e-05)
 
+
 if __name__ == "__main__":
-	unittest.main()
+    unittest.main()

@@ -24,8 +24,7 @@ from ui.sans_isis.work_handler import WorkHandler
 from mantid.api import (FileFinder)
 from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
 from sans.command_interface.batch_csv_parser import BatchCsvParser
-from sans.common.enums import (ReductionMode, RangeStepType, RowState, SampleShape,
-                               SaveType, SANSInstrument)
+from sans.common.enums import (ReductionMode, RangeStepType, RowState, SampleShape, SaveType, SANSInstrument)
 from sans.gui_logic.gui_common import (add_dir_to_datasearch, get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
                                        SANSGuiPropertiesHandler)
@@ -57,8 +56,11 @@ if PYQT4:
 else:
     from mantid.plots.plotfunctions import get_plot_fig
 
-row_state_to_colour_mapping = {RowState.UNPROCESSED: '#FFFFFF', RowState.PROCESSED: '#d0f4d0',
-                               RowState.ERROR: '#accbff'}
+row_state_to_colour_mapping = {
+    RowState.UNPROCESSED: '#FFFFFF',
+    RowState.PROCESSED: '#d0f4d0',
+    RowState.ERROR: '#accbff'
+}
 
 
 def log_times(func):
@@ -66,7 +68,6 @@ def log_times(func):
     Generic decorator to time the execution of the function and
     print it to the logger.
     """
-
     def run(*args, **kwargs):
         t0 = time.time()
         result = func(*args, **kwargs)
@@ -103,6 +104,7 @@ def disable_model_updates_decorator(f):
     def wrapper(presenter, *args, **kwargs):
         with disable_model_updates(presenter):
             return f(presenter, *args, **kwargs)
+
     return wrapper
 
 
@@ -206,7 +208,13 @@ class RunTabPresenter(PresenterCommon):
         def on_processing_error(self, error):
             self._presenter.on_processing_error(error)
 
-    def __init__(self, facility, model=None, table_model=None, view=None, ):
+    def __init__(
+        self,
+        facility,
+        model=None,
+        table_model=None,
+        view=None,
+    ):
         # We don't have access to state model really at this point
         super(RunTabPresenter, self).__init__(view, None)
 
@@ -225,8 +233,7 @@ class RunTabPresenter(PresenterCommon):
         self._table_model.subscribe_to_model_changes(self)
 
         self._processing = False
-        self.batch_process_runner = BatchProcessRunner(self.notify_progress,
-                                                       self.on_processing_finished,
+        self.batch_process_runner = BatchProcessRunner(self.notify_progress, self.on_processing_finished,
                                                        self.on_processing_error)
 
         # File information for the first input
@@ -263,12 +270,11 @@ class RunTabPresenter(PresenterCommon):
         self._table_model.subscribe_to_model_changes(self._beam_centre_presenter)
 
         # Workspace Diagnostic page presenter
-        self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler,
-                                                                        run_integral, create_state,
+        self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler, run_integral, create_state,
                                                                         self._facility)
         # Adjustment Tab presenter
-        self._settings_adjustment_presenter = SettingsAdjustmentPresenter(
-            model=SettingsAdjustmentModel(), view=self._view)
+        self._settings_adjustment_presenter = SettingsAdjustmentPresenter(model=SettingsAdjustmentModel(),
+                                                                          view=self._view)
         self._common_sub_presenters.append(self._settings_adjustment_presenter)
 
     def default_gui_setup(self):
@@ -280,24 +286,19 @@ class RunTabPresenter(PresenterCommon):
         self._view.set_reduction_modes(reduction_mode_list)
 
         # Set the step type options for wavelength
-        range_step_types = [RangeStepType.LIN.value,
-                            RangeStepType.LOG.value,
-                            RangeStepType.RANGE_LOG.value,
-                            RangeStepType.RANGE_LIN.value]
+        range_step_types = [
+            RangeStepType.LIN.value, RangeStepType.LOG.value, RangeStepType.RANGE_LOG.value,
+            RangeStepType.RANGE_LIN.value
+        ]
         self._view.wavelength_step_type = range_step_types
 
         # Set the geometry options. This needs to include the option to read the sample shape from file.
-        sample_shape = ["Read from file",
-                        SampleShape.CYLINDER,
-                        SampleShape.FLAT_PLATE,
-                        SampleShape.DISC]
+        sample_shape = ["Read from file", SampleShape.CYLINDER, SampleShape.FLAT_PLATE, SampleShape.DISC]
         self._view.sample_shape = sample_shape
 
         # Set the q range
-        self._view.q_1d_step_type = [RangeStepType.LIN.value,
-                                     RangeStepType.LOG.value]
-        self._view.q_xy_step_type = [RangeStepType.LIN.value,
-                                     RangeStepType.LOG.value]
+        self._view.q_1d_step_type = [RangeStepType.LIN.value, RangeStepType.LOG.value]
+        self._view.q_xy_step_type = [RangeStepType.LIN.value, RangeStepType.LOG.value]
 
     def _handle_output_directory_changed(self, new_directory):
         """
@@ -348,8 +349,7 @@ class RunTabPresenter(PresenterCommon):
         self._beam_centre_presenter.set_view(self._view.beam_centre)
 
         # Set the appropriate view for the diagnostic page
-        self._workspace_diagnostic_presenter.set_view(self._view.diagnostic_page,
-                                                      self._view.instrument)
+        self._workspace_diagnostic_presenter.set_view(self._view.diagnostic_page, self._view.instrument)
 
         self._view.setup_layout()
 
@@ -358,19 +358,16 @@ class RunTabPresenter(PresenterCommon):
         self._view.set_out_default_output_mode()
         self._view.set_out_default_save_can()
 
-        self._view.set_hinting_line_edit_for_column(
-            self._table_model.column_name_converter.index('sample_shape'),
-            self._table_model.get_sample_shape_hint_strategy())
+        self._view.set_hinting_line_edit_for_column(self._table_model.column_name_converter.index('sample_shape'),
+                                                    self._table_model.get_sample_shape_hint_strategy())
 
         self._view.set_hinting_line_edit_for_column(
             self._table_model.column_name_converter.index('options_column_model'),
             self._table_model.get_options_hint_strategy())
 
         self._view.gui_properties_handler = SANSGuiPropertiesHandler(
-                                                {"user_file": (self._view.set_out_default_user_file,
-                                                               str)},
-                                                line_edits={"user_file":
-                                                            self._view.user_file_line_edit})
+            {"user_file": (self._view.set_out_default_user_file, str)},
+            line_edits={"user_file": self._view.user_file_line_edit})
         if self._view.get_user_file_path() == '':
             self._view.gui_properties_handler.set_setting("user_file", '')
 
@@ -412,8 +409,7 @@ class RunTabPresenter(PresenterCommon):
             # 4. Populate the model and update sub-presenters
             self._model = StateGuiModel(user_file_items)
             self._model.user_file = user_file_path
-            self._settings_adjustment_presenter.set_model(
-                SettingsAdjustmentModel(all_states=user_file_items))
+            self._settings_adjustment_presenter.set_model(SettingsAdjustmentModel(all_states=user_file_items))
             # 5. Update the views.
             self.update_view_from_model()
             self._beam_centre_presenter.update_centre_positions(self._model)
@@ -433,8 +429,7 @@ class RunTabPresenter(PresenterCommon):
             # If we don't catch all exceptions, SANS can fail to open if last loaded
             # user file contains an error that would not otherwise be caught
             traceback.print_exc()
-            self._on_user_file_load_failure(other_error, "Unknown error in loading user file.",
-                                            use_error_name=True)
+            self._on_user_file_load_failure(other_error, "Unknown error in loading user file.", use_error_name=True)
 
     def _on_user_file_load_failure(self, e, message, use_error_name=False):
         self._setup_instrument_specific_settings(SANSInstrument.NO_INSTRUMENT)
@@ -458,9 +453,8 @@ class RunTabPresenter(PresenterCommon):
 
         try:
             if not os.path.exists(batch_file_path):
-                raise RuntimeError(
-                    "The batch file path {} does not exist. Make sure a valid batch file path"
-                    " has been specified.".format(batch_file_path))
+                raise RuntimeError("The batch file path {} does not exist. Make sure a valid batch file path"
+                                   " has been specified.".format(batch_file_path))
 
             # 2. Read the batch file
             parsed_rows = self._csv_parser.parse_batch_file(batch_file_path)
@@ -540,8 +534,7 @@ class RunTabPresenter(PresenterCommon):
                 if not graph(self.output_graph):
                     newGraph(self.output_graph)
             elif not PYQT4:
-                ax_properties = {'yscale': 'log',
-                                 'xscale': 'log'}
+                ax_properties = {'yscale': 'log', 'xscale': 'log'}
                 fig, _ = get_plot_fig(ax_properties=ax_properties, window_title=self.output_graph)
                 fig.show()
                 self.output_fig = fig
@@ -584,11 +577,8 @@ class RunTabPresenter(PresenterCommon):
             # MantidPlot and Workbench have different approaches to plotting
             output_graph = self.output_graph if PYQT4 else self.output_fig
 
-            self.batch_process_runner.process_states(row_index_pair, self.get_states,
-                                                     self._view.use_optimizations,
-                                                     self._view.output_mode,
-                                                     self._view.plot_results,
-                                                     output_graph,
+            self.batch_process_runner.process_states(row_index_pair, self.get_states, self._view.use_optimizations,
+                                                     self._view.output_mode, self._view.plot_results, output_graph,
                                                      save_can)
 
         except Exception as e:
@@ -807,7 +797,7 @@ class RunTabPresenter(PresenterCommon):
         selected_rows = self._view.get_selected_rows()
 
         empty_row = RowEntries()
-        if len(selected_rows) >= 1 :
+        if len(selected_rows) >= 1:
             self._table_model.insert_row_at(row_index=selected_rows[0] + 1, row_entry=empty_row)
         else:
             self._table_model.append_table_entry(empty_row)
@@ -976,7 +966,7 @@ class RunTabPresenter(PresenterCommon):
     def get_row(self, row_index):
         return self._table_model.get_row(index=row_index)
 
-    def get_state_for_row(self, row_index, file_lookup=True, suppress_warnings=False)->Optional[AllStates]:
+    def get_state_for_row(self, row_index, file_lookup=True, suppress_warnings=False) -> Optional[AllStates]:
         """
         Creates the state for a particular row.
         :param row_index: the row index
@@ -987,12 +977,12 @@ class RunTabPresenter(PresenterCommon):
         :return: a state if the index is valid and there is a state else None
         """
         row_entry = self._table_model.get_row(row_index)
-        states, errors = self.get_states(row_entries=[row_entry], file_lookup=file_lookup,
+        states, errors = self.get_states(row_entries=[row_entry],
+                                         file_lookup=file_lookup,
                                          suppress_warnings=suppress_warnings)
         if not states:
             if not suppress_warnings:
-                self.sans_logger.warning(
-                    "There does not seem to be data for a row {}.".format(row_index))
+                self.sans_logger.warning("There does not seem to be data for a row {}.".format(row_index))
             return None
 
         return states[row_entry].all_states

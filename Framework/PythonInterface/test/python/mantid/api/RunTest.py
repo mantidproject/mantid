@@ -22,8 +22,7 @@ class RunTest(unittest.TestCase):
             run = Run()
             run.addProperty("gd_prtn_chrg", 10.05, True)
             run.addProperty("nspectra", self._nspec, True)
-            run.setStartAndEndTime(DateAndTime("2008-12-18T17:58:38"),
-                                   DateAndTime("2008-12-18T17:59:40"))
+            run.setStartAndEndTime(DateAndTime("2008-12-18T17:58:38"), DateAndTime("2008-12-18T17:59:40"))
             self.__class__._run = run
 
     def test_get_goniometer(self):
@@ -53,8 +52,7 @@ class RunTest(unittest.TestCase):
         def do_spectra_check(nspectra):
             self.assertEqual(type(nspectra.value), int)
             self.assertEqual(nspectra.value, self._nspec)
-            self.assertRaises(RuntimeError,
-                              self._run.getProperty, 'not_a_log')
+            self.assertRaises(RuntimeError, self._run.getProperty, 'not_a_log')
 
         do_spectra_check(self._run.getProperty('nspectra'))
         do_spectra_check(self._run['nspectra'])
@@ -109,9 +107,8 @@ class RunTest(unittest.TestCase):
 
         runstart = run.startTime()
         runstartstr = str(runstart)
-        self.assertEqual(
-            runstartstr, "2008-12-18T17:58:38 "
-        )  # The space at the end is to get around an IPython bug (#8351)
+        self.assertEqual(runstartstr,
+                         "2008-12-18T17:58:38 ")  # The space at the end is to get around an IPython bug (#8351)
         self.assertTrue(isinstance(runstart, DateAndTime))
 
     def test_endtime(self):
@@ -121,9 +118,8 @@ class RunTest(unittest.TestCase):
 
         runend = run.endTime()
         runendstr = str(runend)
-        self.assertEqual(
-            runendstr, "2008-12-18T17:59:40 "
-        )  # The space at the end is to get around an IPython bug (#8351)
+        self.assertEqual(runendstr,
+                         "2008-12-18T17:59:40 ")  # The space at the end is to get around an IPython bug (#8351)
         self.assertTrue(isinstance(runend, DateAndTime))
 
     def test_timestd(self):
@@ -136,8 +132,8 @@ class RunTest(unittest.TestCase):
         temp1 = FloatTimeSeriesProperty("TEMP1")
         vals = np.arange(10) * 2.
         for i in range(10):
-            temp1.addValue(start_time + i*nanosec, vals[i])
-        run.addProperty(temp1.name, temp1,True)
+            temp1.addValue(start_time + i * nanosec, vals[i])
+        run.addProperty(temp1.name, temp1, True)
         # ignore the last value
         expected = vals[:-1].std()
         self.assertEqual(run.getTimeAveragedStd("TEMP1"), expected)

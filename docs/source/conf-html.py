@@ -18,7 +18,7 @@
 # custom.css rather than here.
 html_theme_options = {
     # Navigation bar title.
-    'navbar_title': " ", # deliberate single space so it's not visible
+    'navbar_title': " ",  # deliberate single space so it's not visible
     # Tab name for entire site.
     'navbar_site_name': "Mantid",
     # Add links to the nav bar. Third param of tuple is true to create absolute url.

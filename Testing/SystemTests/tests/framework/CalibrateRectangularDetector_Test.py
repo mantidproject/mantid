@@ -41,32 +41,42 @@ class PG3Calibration(systemtesting.MantidSystemTest):
         savedir = os.path.abspath(os.path.curdir)
 
         # run the actual code
-        output = CalibrateRectangularDetectors(OutputDirectory = savedir, SaveAs = 'calibration', FilterBadPulses = True,
-                                               GroupDetectorsBy = 'All', DiffractionFocusWorkspace = True,
-                                               Binning = '0.5, -0.0004, 2.5',
-                                               MaxOffset=0.01, PeakPositions = '.6866,.7283,.8185,.8920,1.0758,1.2615,2.0599',
-                                               CrossCorrelation = False, RunNumber = 'PG3_2538')
+        output = CalibrateRectangularDetectors(OutputDirectory=savedir,
+                                               SaveAs='calibration',
+                                               FilterBadPulses=True,
+                                               GroupDetectorsBy='All',
+                                               DiffractionFocusWorkspace=True,
+                                               Binning='0.5, -0.0004, 2.5',
+                                               MaxOffset=0.01,
+                                               PeakPositions='.6866,.7283,.8185,.8920,1.0758,1.2615,2.0599',
+                                               CrossCorrelation=False,
+                                               RunNumber='PG3_2538')
 
         if isinstance(output, str):
-            self.saved_cal_file = output.replace('.h5','.cal')
+            self.saved_cal_file = output.replace('.h5', '.cal')
         else:
-            raise NotImplementedError("Output from CalibrateRectangularDetectors is NOT string for calibration file name!")
+            raise NotImplementedError(
+                "Output from CalibrateRectangularDetectors is NOT string for calibration file name!")
 
         # load saved cal file
-        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file,
-                    WorkspaceName="PG3_2538", MakeGroupingWorkspace=False)
-        MaskDetectors(Workspace="PG3_2538_offsets",MaskedWorkspace="PG3_2538_mask")
+        LoadCalFile(InputWorkspace="PG3_2538_calibrated",
+                    CalFileName=self.saved_cal_file,
+                    WorkspaceName="PG3_2538",
+                    MakeGroupingWorkspace=False)
+        MaskDetectors(Workspace="PG3_2538_offsets", MaskedWorkspace="PG3_2538_mask")
         # load golden cal file
-        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_golden.cal",
-                    WorkspaceName="PG3_2538_golden", MakeGroupingWorkspace=False)
-        MaskDetectors(Workspace="PG3_2538_golden_offsets",MaskedWorkspace="PG3_2538_golden_mask")
+        LoadCalFile(InputWorkspace="PG3_2538_calibrated",
+                    CalFileName="PG3_golden.cal",
+                    WorkspaceName="PG3_2538_golden",
+                    MakeGroupingWorkspace=False)
+        MaskDetectors(Workspace="PG3_2538_golden_offsets", MaskedWorkspace="PG3_2538_golden_mask")
 
     def validateMethod(self):
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
         self.tolerance = 2.0e-4
-        return ('PG3_2538_offsets','PG3_2538_golden_offsets')
+        return ('PG3_2538_offsets', 'PG3_2538_golden_offsets')
 
 
 class PG3CCCalibration(systemtesting.MantidSystemTest):
@@ -89,33 +99,44 @@ class PG3CCCalibration(systemtesting.MantidSystemTest):
         savedir = os.path.abspath(os.path.curdir)
 
         # run the actual code
-        output = CalibrateRectangularDetectors(OutputDirectory = savedir, SaveAs = 'calibration', FilterBadPulses = True,
-                                               GroupDetectorsBy = 'All', DiffractionFocusWorkspace = False,
-                                               Binning = '0.5, -0.0004, 2.5',
-                                               MaxOffset=0.01, PeakPositions = '0.7282933,1.261441',DetectorsPeaks = '17,6',
-                                               CrossCorrelation = True, RunNumber = 'PG3_2538')
+        output = CalibrateRectangularDetectors(OutputDirectory=savedir,
+                                               SaveAs='calibration',
+                                               FilterBadPulses=True,
+                                               GroupDetectorsBy='All',
+                                               DiffractionFocusWorkspace=False,
+                                               Binning='0.5, -0.0004, 2.5',
+                                               MaxOffset=0.01,
+                                               PeakPositions='0.7282933,1.261441',
+                                               DetectorsPeaks='17,6',
+                                               CrossCorrelation=True,
+                                               RunNumber='PG3_2538')
 
         if isinstance(output, str):
-            self.saved_cal_file = output.replace('.h5','.cal')
+            self.saved_cal_file = output.replace('.h5', '.cal')
         else:
-            raise NotImplementedError("Output from CalibrateRectangularDetectors is NOT string for calibration file name!")
+            raise NotImplementedError(
+                "Output from CalibrateRectangularDetectors is NOT string for calibration file name!")
 
         # load saved cal file
-        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file,
-                    WorkspaceName="PG3_2538", MakeGroupingWorkspace=False)
-        MaskDetectors(Workspace="PG3_2538_offsets",MaskedWorkspace="PG3_2538_mask")
+        LoadCalFile(InputWorkspace="PG3_2538_calibrated",
+                    CalFileName=self.saved_cal_file,
+                    WorkspaceName="PG3_2538",
+                    MakeGroupingWorkspace=False)
+        MaskDetectors(Workspace="PG3_2538_offsets", MaskedWorkspace="PG3_2538_mask")
         MaskBTP(Workspace="PG3_2538_offsets", Pixel="0,6")
-        MaskBTP(Workspace="PG3_2538_offsets",Tube="0-24,129-153")
+        MaskBTP(Workspace="PG3_2538_offsets", Tube="0-24,129-153")
         # load golden cal file
-        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_goldenCC.cal",
-                    WorkspaceName="PG3_2538_golden", MakeGroupingWorkspace=False)
-        MaskDetectors(Workspace="PG3_2538_golden_offsets",MaskedWorkspace="PG3_2538_golden_mask")
-        MaskBTP(Workspace="PG3_2538_golden_offsets",Pixel="0,6")
-        MaskBTP(Workspace="PG3_2538_golden_offsets",Tube="0-24,129-153")
+        LoadCalFile(InputWorkspace="PG3_2538_calibrated",
+                    CalFileName="PG3_goldenCC.cal",
+                    WorkspaceName="PG3_2538_golden",
+                    MakeGroupingWorkspace=False)
+        MaskDetectors(Workspace="PG3_2538_golden_offsets", MaskedWorkspace="PG3_2538_golden_mask")
+        MaskBTP(Workspace="PG3_2538_golden_offsets", Pixel="0,6")
+        MaskBTP(Workspace="PG3_2538_golden_offsets", Tube="0-24,129-153")
 
     def validateMethod(self):
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
         self.tolerance = 1.0e-4
-        return ('PG3_2538_offsets','PG3_2538_golden_offsets')
+        return ('PG3_2538_offsets', 'PG3_2538_golden_offsets')

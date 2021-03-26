@@ -11,7 +11,6 @@ These modules may define extensions to C++ types, e.g.
 algorithms, fit functions etc.
 """
 
-
 import os as _os
 import sys as _sys
 from traceback import format_exc
@@ -23,20 +22,21 @@ except ImportError:
     # We only use a single function so implement a handwritten compatability
     # class
     import imp as _imp
-    class SourceFileLoader(object):
 
+    class SourceFileLoader(object):
         def __init__(self, name, pathname):
             self._name = name
             self._pathname = pathname
 
         def load_module(self):
             return _imp.load_source(self._name, self._pathname)
+
     #endclass
 
 from . import logger, Logger, config
 
 # String that separates paths (should be in the ConfigService)
-PATH_SEPARATOR=";"
+PATH_SEPARATOR = ";"
 
 
 class PluginLoader(object):
@@ -45,9 +45,11 @@ class PluginLoader(object):
 
     def __init__(self, filepath):
         if not _os.path.isfile(filepath):
-            raise ValueError("PluginLoader expects a single filename. '%s' does not point to an existing file" % filepath)
+            raise ValueError("PluginLoader expects a single filename. '%s' does not point to an existing file" %
+                             filepath)
         if not filepath.endswith(self.extension):
-            raise ValueError("PluginLoader expects a filename ending with .py. '%s' does not have a .py extension" % filepath)
+            raise ValueError("PluginLoader expects a filename ending with .py. '%s' does not have a .py extension" %
+                             filepath)
         self._filepath = filepath
         self._logger = Logger("PluginLoader")
 
@@ -60,10 +62,11 @@ class PluginLoader(object):
             on to the caller
         """
         pathname = self._filepath
-        name = _os.path.basename(pathname) # Including extension
+        name = _os.path.basename(pathname)  # Including extension
         name = _os.path.splitext(name)[0]
         self._logger.debug("Loading python plugin %s" % pathname)
         return SourceFileLoader(name, pathname).load_module()
+
 
 #======================================================================================================================
 # High-level functions to assist with loading
@@ -120,6 +123,7 @@ def find_plugins(top_dir):
 
     return all_plugins, algs
 
+
 #======================================================================================================================
 
 
@@ -144,7 +148,7 @@ def load(path):
     loaded = []
     if type(path) == list:
         loaded += load_from_list(path)
-    elif _os.path.isfile(path) and path.endswith(PluginLoader.extension): # Single file
+    elif _os.path.isfile(path) and path.endswith(PluginLoader.extension):  # Single file
         loaded += load_from_file(path)
     elif _os.path.isdir(path):
         loaded += load_from_dir(path)
@@ -152,6 +156,7 @@ def load(path):
         raise RuntimeError("Unknown type of path found when trying to load plugins: '%s'" % str(path))
 
     return loaded
+
 
 #======================================================================================================================
 
@@ -171,6 +176,7 @@ def load_from_list(paths):
 
     return loaded
 
+
 #======================================================================================================================
 
 
@@ -186,6 +192,7 @@ def load_from_dir(directory):
         loaded += load(filepath)
 
     return loaded
+
 
 #======================================================================================================================
 
@@ -205,6 +212,7 @@ def load_from_file(filepath):
 
     return loaded
 
+
 #======================================================================================================================
 
 
@@ -220,6 +228,7 @@ def load_plugin(plugin_path):
     loader = PluginLoader(plugin_path)
     module = loader.run()
     return module.__name__, module
+
 
 #======================================================================================================================
 
@@ -241,6 +250,7 @@ def sync_attrs(source, attrs, clients):
             if hasattr(plugin, func_name):
                 setattr(plugin, func_name, attr)
 
+
 #======================================================================================================================
 
 
@@ -251,7 +261,7 @@ def contains_algorithm(filename):
     alg_found = True
     try:
         from io import open
-        with open(filename,'r', encoding='UTF-8') as plugin_file:
+        with open(filename, 'r', encoding='UTF-8') as plugin_file:
             # linear search through file
             # looking from the bottom would be better, but searching from the top doesn't appear to
             # affect performance
@@ -264,7 +274,7 @@ def contains_algorithm(filename):
                     break
     except Exception as exc:
         # something wrong with reading the file
-        logger.warning("Error checking plugin content in '{0}'\n{1}".format(filename,str(exc)))
+        logger.warning("Error checking plugin content in '{0}'\n{1}".format(filename, str(exc)))
         alg_found = False
 
     return alg_found

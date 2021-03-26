@@ -10,10 +10,10 @@ from mantid.simpleapi import SingleCrystalDiffuseReduction, Load, AlgorithmManag
 
 class SingleCrystalDiffuseTest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
-        return ["CORELLI_29782.nxs","CORELLI_29792.nxs",
-                "SingleCrystalDiffuseReduction_SA.nxs",
-                "SingleCrystalDiffuseReduction_Flux.nxs",
-                "SingleCrystalDiffuseReduction_UB.mat"]
+        return [
+            "CORELLI_29782.nxs", "CORELLI_29792.nxs", "SingleCrystalDiffuseReduction_SA.nxs",
+            "SingleCrystalDiffuseReduction_Flux.nxs", "SingleCrystalDiffuseReduction_UB.mat"
+        ]
 
     def runTest(self):
         SingleCrystalDiffuseReduction(Filename='CORELLI_29782.nxs,CORELLI_29792.nxs',
@@ -34,19 +34,19 @@ class SingleCrystalDiffuseTest(systemtesting.MantidSystemTest):
         results = 'SCDR_output'
         reference = 'SingleCrystalDiffuseReduction.nxs'
 
-        Load(Filename=reference,OutputWorkspace=reference)
+        Load(Filename=reference, OutputWorkspace=reference)
 
         checker = AlgorithmManager.create("CompareMDWorkspaces")
         checker.setLogging(True)
-        checker.setPropertyValue("Workspace1",results)
-        checker.setPropertyValue("Workspace2",reference)
+        checker.setPropertyValue("Workspace1", results)
+        checker.setPropertyValue("Workspace2", reference)
         checker.setPropertyValue("Tolerance", "1e-7")
 
         checker.execute()
         if checker.getPropertyValue("Equals") != "1":
-            print(" Workspaces do not match, result: ",checker.getPropertyValue("Result"))
+            print(" Workspaces do not match, result: ", checker.getPropertyValue("Result"))
             print(self.__class__.__name__)
-            SaveMD(InputWorkspace=results,Filename=self.__class__.__name__+'-mismatch.nxs')
+            SaveMD(InputWorkspace=results, Filename=self.__class__.__name__ + '-mismatch.nxs')
             return False
 
         return True

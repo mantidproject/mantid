@@ -10,12 +10,10 @@ from Muon.GUI.Common.context_example.context_example_model import ContextExample
 
 
 class ContextExampleWidget(object):
-
     """
         An example of how to use the context with a widget class.
         The widget class exposes the MVP to the rest of the GUI
     """
-
     def __init__(self, context, parent=None):
         model = ContextExampleModel(context)
         sub_context = model.getSubContext()

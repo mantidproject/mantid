@@ -40,7 +40,16 @@ def _choosemarker(markers, index):
 def _clearmath(s):
     """Return string s with special math characters removed."""
     s = s.replace(r'\AA', 'A')
-    for c in ['%', '_', '$', '&',  '\\', '^', '{', '}',]:
+    for c in [
+            '%',
+            '_',
+            '$',
+            '&',
+            '\\',
+            '^',
+            '{',
+            '}',
+    ]:
         s = s.replace(c, '')
     return s
 
@@ -232,8 +241,14 @@ def _plotsinglehistogram(workspaces, labels, style, xscale, yscale):
     for ws, label in zip(workspaces, labels):
         if 'm' in style:
             markerStyle, markerIndex = _choosemarker(markers, markerIndex)
-        axes.errorbar(ws, wkspIndex=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True,
-                      capsize=4, linewidth=1)
+        axes.errorbar(ws,
+                      wkspIndex=0,
+                      linestyle=lineStyle,
+                      marker=markerStyle,
+                      label=label,
+                      distribution=True,
+                      capsize=4,
+                      linewidth=1)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
     if axes.get_yscale() == 'linear':
@@ -313,7 +328,7 @@ def _singledatatitle(workspace):
     wsName = _sanitize(str(workspace))
     title = wsName
     logs = workspace.run()
-    instrument= _instrumentname(logs)
+    instrument = _instrumentname(logs)
     if instrument is not None:
         title = title + ' ' + instrument
     run = _runnumber(logs)
@@ -355,7 +370,7 @@ def _workspacelabel(workspace):
         label = label + r'#{:06d}'.format(run)
     ei = _incidentenergy(logs)
     if ei is not None:
-        label =  label + r' $E_i$ = {:0.2f} meV'.format(ei)
+        label = label + r' $E_i$ = {:0.2f} meV'.format(ei)
     T = _sampletemperature(logs)
     if T is not None:
         T = _applyiftimeseries(T, numpy.mean)
@@ -394,19 +409,17 @@ def defaultrcparams():
 
     :returns: a :class:`dict` of default :mod:`matplotlib` rc parameters needed by :mod:`directtools`
     """
-    params = {
-        'legend.numpoints': 1
-    }
+    params = {'legend.numpoints': 1}
     return params
 
 
 def dynamicsusceptibility(workspace, temperature, outputName=None, zeroEnergyEpsilon=1e-6):
     """Convert :math:`S(Q,E)` to susceptibility :math:`\\chi''(Q,E)`.
 
-    #. If the X units are not in DeltaE, the workspace is transposed
-    #. The Y data in *workspace* is multiplied by :math:`1 - e^{\\Delta E / (kT)}`
-    #. Y data in the bin closest to 0 meV and within -*zeroEnergyEpsilon* < :math:`\\Delta E` < *zeroEnergyEpsilon* is set to 0
-    #. If the input was transposed, transpose the output as well
+     If the X units are not in DeltaE, the workspace is transposed
+     The Y data in *workspace* is multiplied by :math:`1 - e^{\\Delta E / (kT)}`
+     Y data in the bin closest to 0 meV and within -*zeroEnergyEpsilon* < :math:`\\Delta E` < *zeroEnergyEpsilon* is
+     set to 0. If the input was transposed, transpose the output as well
 
     :param workspace: a :math:`S(Q,E)` workspace to convert
     :type workspace: :class:`mantid.api.MatrixWorkspace`
@@ -420,8 +433,8 @@ def dynamicsusceptibility(workspace, temperature, outputName=None, zeroEnergyEps
     """
     workspace = _normws(workspace)
     if not _validate._isSofQW(workspace):
-        raise RuntimeError('Failed to calculate dynamic susceptibility. '
-                           + "The workspace '{}' does not look like a S(Q,E).".format(str(workspace)))
+        raise RuntimeError('Failed to calculate dynamic susceptibility. ' +
+                           "The workspace '{}' does not look like a S(Q,E).".format(str(workspace)))
     horAxis = workspace.getAxis(0)
     horUnit = horAxis.getUnit().unitID()
     doTranspose = horUnit != 'DeltaE'
@@ -430,7 +443,11 @@ def dynamicsusceptibility(workspace, temperature, outputName=None, zeroEnergyEps
     if doTranspose:
         workspace = Transpose(workspace, OutputWorkspace='__transposed_SofQW_', EnableLogging=False)
     c = 1e-3 * constants.e / constants.k / temperature
-    outWS = OneMinusExponentialCor(workspace, OutputWorkspace=outputName, C=c, Operation='Multiply', EnableLogging=False)
+    outWS = OneMinusExponentialCor(workspace,
+                                   OutputWorkspace=outputName,
+                                   C=c,
+                                   Operation='Multiply',
+                                   EnableLogging=False)
     _removesingularity(outWS, zeroEnergyEpsilon)
     if doTranspose:
         outWS = Transpose(outWS, OutputWorkspace=outputName, EnableLogging=False)
@@ -506,9 +523,10 @@ def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True, xscale='lin
         direction = 'Vertical'
     for ws in workspaces:
         if ws.getAxis(axisIndex).getUnit().unitID() != eID:
-            raise RuntimeError("Cannot cut in const E. The workspace '{}' is not in units of energy transfer.".format(str(ws)))
-    figure, axes, cutWSList = plotcuts(direction, workspaces, E, dE, r'$E$', 'meV', style, keepCutWorkspaces,
-                                       xscale, yscale)
+            raise RuntimeError("Cannot cut in const E. The workspace '{}' is not in units of energy transfer.".format(
+                str(ws)))
+    figure, axes, cutWSList = plotcuts(direction, workspaces, E, dE, r'$E$', 'meV', style, keepCutWorkspaces, xscale,
+                                       yscale)
     _profiletitle(workspaces, cutWSList, _singlecutinfo(E, dE), r'$E$', 'meV', axes)
     if len(cutWSList) > 1:
         axes.legend()
@@ -552,7 +570,8 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True, xscale='lin
         direction = 'Horizontal'
     for ws in workspaces:
         if ws.getAxis(axisIndex).getUnit().unitID() != qID:
-            raise RuntimeError("Cannot cut in const Q. The workspace '{}' is not in units of momentum transfer.".format(str(ws)))
+            raise RuntimeError("Cannot cut in const Q. The workspace '{}' is not in units of momentum transfer.".format(
+                str(ws)))
     figure, axes, cutWSList = plotcuts(direction, workspaces, Q, dQ, r'$Q$', r'$\mathrm{\AA}^{-1}$', style,
                                        keepCutWorkspaces, xscale, yscale)
     _profiletitle(workspaces, cutWSList, _singlecutinfo(Q, dQ), r'$Q$', r'$\mathrm{\AA}^{-1}$', axes)
@@ -562,7 +581,16 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True, xscale='lin
     return figure, axes, cutWSList
 
 
-def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', keepCutWorkspaces=True, xscale='linear', yscale='linear'):
+def plotcuts(direction,
+             workspaces,
+             cuts,
+             widths,
+             quantity,
+             unit,
+             style='l',
+             keepCutWorkspaces=True,
+             xscale='linear',
+             yscale='linear'):
     """Cut and plot multiple line profiles.
 
     Creates cut workspaces using :ref:`algm-LineProfile`, then plots the cuts. A list of workspaces,
@@ -614,20 +642,38 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
                 if wsStr == '':
                     wsStr = str(wsCount)
                 quantityStr = _clearmath(quantity)
-                wsName = 'cut_{}_{}={}+-{}'.format(wsStr, quantityStr, cut, width,)
+                wsName = 'cut_{}_{}={}+-{}'.format(
+                    wsStr,
+                    quantityStr,
+                    cut,
+                    width,
+                )
                 if keepCutWorkspaces:
                     cutWSList.append(wsName)
-                line = LineProfile(ws, cut, width, Direction=direction,
-                                   OutputWorkspace=wsName, StoreInADS=keepCutWorkspaces, EnableLogging=False)
+                line = LineProfile(ws,
+                                   cut,
+                                   width,
+                                   Direction=direction,
+                                   OutputWorkspace=wsName,
+                                   StoreInADS=keepCutWorkspaces,
+                                   EnableLogging=False)
                 if ws.isDistribution() and direction == 'Vertical':
                     _denormalizeline(line)
                 if 'm' in style:
                     markerStyle, markerIndex = _choosemarker(markers, markerIndex)
                 realCutCentre, realCutWidth = _cutcentreandwidth(line)
-                label = _label(ws, realCutCentre, realCutWidth, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1,
-                               quantity, unit)
-                axes.errorbar(line, wkspIndex=0, linestyle=lineStyle, marker=markerStyle, label=label,
-                              distribution=True, capsize=4, linewidth=1)
+                label = _label(ws, realCutCentre, realCutWidth,
+                               len(workspaces) == 1,
+                               len(cuts) == 1,
+                               len(widths) == 1, quantity, unit)
+                axes.errorbar(line,
+                              wkspIndex=0,
+                              linestyle=lineStyle,
+                              marker=markerStyle,
+                              label=label,
+                              distribution=True,
+                              capsize=4,
+                              linewidth=1)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
     if axes.get_yscale() == 'linear':
@@ -658,7 +704,8 @@ def plotDOS(workspaces, labels=None, style='l', xscale='linear', yscale='linear'
     for ws in workspaces:
         _validate._singlehistogramordie(ws)
         if not _validate._isDOS(ws):
-            logger.warning("The workspace '{}' does not look like proper DOS data. Trying to plot nonetheless.".format(ws))
+            logger.warning(
+                "The workspace '{}' does not look like proper DOS data. Trying to plot nonetheless.".format(ws))
     if labels is None:
         labels = [_workspacelabel(ws) for ws in workspaces]
     figure, axes = _plotsinglehistogram(workspaces, labels, style, xscale, yscale)
@@ -698,7 +745,15 @@ def plotprofiles(workspaces, labels=None, style='l', xscale='linear', yscale='li
     return figure, axes
 
 
-def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax=None, colormap='jet', colorscale='linear'):
+def plotSofQW(workspace,
+              QMin=0.,
+              QMax=None,
+              EMin=None,
+              EMax=None,
+              VMin=0.,
+              VMax=None,
+              colormap='jet',
+              colorscale='linear'):
     """Plot a 2D :math:`S(Q,E)` workspace.
 
     :param workspace: a workspace to plot
@@ -723,7 +778,8 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
     """
     workspace = _normws(workspace)
     if not _validate._isSofQW(workspace):
-        logger.warning("The workspace '{}' does not look like proper S(Q,W) data. Trying to plot nonetheless.".format(str(workspace)))
+        logger.warning("The workspace '{}' does not look like proper S(Q,W) data. Trying to plot nonetheless.".format(
+            str(workspace)))
     qHorizontal = workspace.getAxis(0).getUnit().name() == 'q'
     isSusceptibility = workspace.YUnitLabel() == 'Dynamic susceptibility'
     figure, axes = subplots()
@@ -918,6 +974,7 @@ class SampleLogs:
         """
         class Log:
             pass
+
         workspace = _normws(workspace)
         properties = workspace.run().getProperties()
         for p in properties:

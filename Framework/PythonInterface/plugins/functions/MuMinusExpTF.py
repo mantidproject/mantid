@@ -11,7 +11,6 @@ import numpy as np
 
 
 class MuMinusExpTF(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
@@ -30,7 +29,7 @@ class MuMinusExpTF(IFunction1D):
         tau = self.getParameterValue("Tau")
         phi = self.getParameterValue("Phi")
         nu = self.getParameterValue("Nu")
-        return N0 * np.exp(- x / tau) * (1 + A * np.exp(- Lambda * x) * np.cos(2 * np.pi * nu * x + phi))
+        return N0 * np.exp(-x / tau) * (1 + A * np.exp(-Lambda * x) * np.cos(2 * np.pi * nu * x + phi))
 
 
 FunctionFactory.subscribe(MuMinusExpTF)

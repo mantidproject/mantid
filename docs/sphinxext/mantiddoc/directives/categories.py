@@ -12,7 +12,7 @@
     creates "index" pages that lists the contents of each category. The display of each
     "index" page is controlled by a jinja2 template.
 """
-from mantiddoc.directives.base import AlgorithmBaseDirective, algorithm_name_and_version #pylint: disable=unused-import
+from mantiddoc.directives.base import AlgorithmBaseDirective, algorithm_name_and_version  #pylint: disable=unused-import
 from sphinx.util.osutil import relative_uri
 import os
 import posixpath
@@ -43,7 +43,7 @@ class LinkItem(object):
           name (str): Display name of document
           location (str): Location of item relative to source directory
         """
-        self.name = str(name).replace("\\\\","/")
+        self.name = str(name).replace("\\\\", "/")
         self.location = location
 
     def __eq__(self, other):
@@ -80,6 +80,7 @@ class LinkItem(object):
             link += ext
         return link
 
+
 # endclass
 
 
@@ -87,9 +88,9 @@ class PageRef(LinkItem):
     """
     Store details of a single page reference
     """
-
     def __init__(self, name, location):
         super(PageRef, self).__init__(name, location)
+
 
 #endclass
 
@@ -131,6 +132,7 @@ class Category(LinkItem):
 
 
 #endclass
+
 
 class CategoriesDirective(AlgorithmBaseDirective):
     """
@@ -267,8 +269,9 @@ class CategoriesDirective(AlgorithmBaseDirective):
                 else:
                     break
                 # remove the last item
-                subcat = Category(categ_name, env.docname, env.doc2path(env.docname)) #create the category with the full name
-                subcat.name=categs.pop() # and then replace it with the last token of the name
+                subcat = Category(categ_name, env.docname,
+                                  env.doc2path(env.docname))  #create the category with the full name
+                subcat.name = categs.pop()  # and then replace it with the last token of the name
                 parent_category = r"\\".join(categs)
 
                 #register the parent category
@@ -282,7 +285,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
             ncategs += 1
         # endfor
 
-        link_rst = "**%s**: " + link_rst.rstrip(" | ") # remove final separator
+        link_rst = "**%s**: " + link_rst.rstrip(" | ")  # remove final separator
         if ncategs == 1:
             link_rst = link_rst % "Category"
         else:
@@ -290,6 +293,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
         #endif
 
         return link_rst
+
     #end def
 
     def register_category(self, categ_name, env):
@@ -304,6 +308,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
 
 #---------------------------------------------------------------------------------
 
+
 def to_unix_style_path(path):
     """
     Replaces any backslashes in the given string with forward slashes
@@ -313,6 +318,7 @@ def to_unix_style_path(path):
       path: A string possibly containing backslashes
     """
     return path.replace("\\", "/").replace("//", "/")
+
 
 #---------------------------------------------------------------------------------
 
@@ -329,10 +335,12 @@ def html_collect_pages(app):
       app: A Sphinx application object
     """
     if not hasattr(app.builder.env, "categories"):
-        return # nothing to do
+        return  # nothing to do
 
     for name, context, template in create_category_pages(app):
         yield (name, context, template)
+
+
 # enddef
 
 
@@ -370,8 +378,8 @@ def create_category_pages(app):
                     .format('../index.html','Algorithms')
 
         # sort subcategories & pages alphabetically
-        context["subcategories"] = sorted(category.subcategories, key = lambda x: x.name)
-        context["pages"] = sorted(category.pages, key = lambda x: x.name)
+        context["subcategories"] = sorted(category.subcategories, key=lambda x: x.name)
+        context["pages"] = sorted(category.pages, key=lambda x: x.name)
         context["outpath"] = category.html_path
 
         #jinja appends .html to output name
@@ -393,6 +401,8 @@ def create_category_pages(app):
 
     #create the top level algorithm category
     yield create_top_algorithm_category(categories)
+
+
 # enddef
 
 #-----------------------------------------------------------------------------------------------------------
@@ -431,9 +441,12 @@ def create_top_algorithm_category(categories):
 
     #split the full list into subsections
     general_categories = all_top_categories
-    technique_categories = extract_matching_categories(general_categories,posixpath.join(category_src_dir, 'techniquecategories') + '.txt')
-    facility_categories = extract_matching_categories(general_categories,posixpath.join(category_src_dir, 'facilitycategories') + '.txt')
-    hidden_categories = extract_matching_categories(general_categories,posixpath.join(category_src_dir, 'hiddencategories') + '.txt')
+    technique_categories = extract_matching_categories(general_categories,
+                                                       posixpath.join(category_src_dir, 'techniquecategories') + '.txt')
+    facility_categories = extract_matching_categories(general_categories,
+                                                      posixpath.join(category_src_dir, 'facilitycategories') + '.txt')
+    hidden_categories = extract_matching_categories(general_categories,
+                                                    posixpath.join(category_src_dir, 'hiddencategories') + '.txt')
 
     # create the page
     top_context = {}
@@ -442,15 +455,15 @@ def create_top_algorithm_category(categories):
     top_context['outpath'] = top_category_html_path_noext + '.html'
     #set the content
     top_context["pages"] = []
-    top_context["generalcategories"] = sorted(general_categories, key = lambda x: x.name)
-    top_context["techniquecategories"] = sorted(technique_categories, key = lambda x: x.name)
-    top_context["facilitycategories"] = sorted(facility_categories, key = lambda x: x.name)
+    top_context["generalcategories"] = sorted(general_categories, key=lambda x: x.name)
+    top_context["techniquecategories"] = sorted(technique_categories, key=lambda x: x.name)
+    top_context["facilitycategories"] = sorted(facility_categories, key=lambda x: x.name)
     top_context["title"] = "Algorithm Contents"
     top_html_path_noext = posixpath.join('algorithms', 'index')
     return (top_html_path_noext, top_context, template)
 
 
-def extract_matching_categories(input_categories,filepath):
+def extract_matching_categories(input_categories, filepath):
     """
     Extract entries with a name matching that included the supplied file.
     the extracted entries are removed from the input list.
@@ -483,12 +496,12 @@ def purge_categories(app, env, docname):
       docname (str): Name of the document
     """
     if not hasattr(env, "categories"):
-        return # nothing to do
+        return  # nothing to do
 
     categories = env.categories
     try:
         name, version = algorithm_name_and_version(docname)
-    except RuntimeError: # not an algorithm page
+    except RuntimeError:  # not an algorithm page
         return
 
     deadref = PageRef(name, docname)
@@ -496,6 +509,7 @@ def purge_categories(app, env, docname):
         pages = category.pages
         if deadref in pages:
             pages.remove(deadref)
+
 
 #------------------------------------------------------------------------------
 

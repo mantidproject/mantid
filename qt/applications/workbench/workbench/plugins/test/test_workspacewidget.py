@@ -35,7 +35,6 @@ SAMPLE_MATERIAL_DIALOG = "mantidqt.widgets.samplematerialdialog.samplematerial_v
 
 @start_qapplication
 class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
-
     @classmethod
     def setUpClass(cls):
         cls.ws_widget = WorkspaceWidget(QMainWindow())
@@ -112,7 +111,10 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
     def test_plot_with_plot_bin(self, mock_plot):
         self.ws_widget._ads.add(self.ws_names[0], self.w_spaces[0])
         self.ws_widget._do_plot_bin([self.ws_names[0]], False, False)
-        mock_plot.assert_called_once_with(mock.ANY, errors=False, overplot=False, wksp_indices=[0],
+        mock_plot.assert_called_once_with(mock.ANY,
+                                          errors=False,
+                                          overplot=False,
+                                          wksp_indices=[0],
                                           plot_kwargs={'axis': MantidAxType.BIN})
 
     @mock.patch('workbench.plugins.workspacewidget.plot_from_names', autospec=True)
@@ -159,7 +161,9 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
     def test_double_click_with_ragged_ws_calls_plot_from_names(self, mock_plot_from_names):
         self.assertTrue(self.w_spaces[5].isRaggedWorkspace())
         self.ws_widget._action_double_click_workspace(self.ws_names[5])
-        mock_plot_from_names.assert_called_once_with([self.ws_names[5]], errors=False, overplot=False,
+        mock_plot_from_names.assert_called_once_with([self.ws_names[5]],
+                                                     errors=False,
+                                                     overplot=False,
                                                      show_colorfill_btn=True)
 
     def test_sample_material_opens_with_single_workspace_name(self):

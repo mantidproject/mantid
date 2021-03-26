@@ -62,7 +62,6 @@ class SpectraSelection(object):
 
 
 class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
-
     @staticmethod
     def get_compatible_workspaces(workspaces):
         matrix_workspaces = []
@@ -140,9 +139,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
                                            QMessageBox.Ok | QMessageBox.Cancel)
             return response == QMessageBox.Ok
         elif selection.plot_type != SpectraSelection.Tiled and number_of_lines_to_plot > 10:
-            response = QMessageBox.warning(self, 'Mantid Workbench', 'You selected {} spectra to plot. Are you sure '
-                                           'you want to plot this many?'.format(number_of_lines_to_plot),
-                                           QMessageBox.Ok | QMessageBox.Cancel)
+            response = QMessageBox.warning(
+                self, 'Mantid Workbench', 'You selected {} spectra to plot. Are you sure '
+                'you want to plot this many?'.format(number_of_lines_to_plot), QMessageBox.Ok | QMessageBox.Cancel)
             return response == QMessageBox.Ok
 
         return True
@@ -153,7 +152,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
         if self._advanced:
             ui.advanced_options_widget = AdvancedPlottingOptionsWidget(parent=self)
-            self.setMinimumSize(300,351)
+            self.setMinimumSize(300, 351)
             ui.layout.replaceWidget(ui.advanced_plots_dummy_widget, ui.advanced_options_widget)
             if len(self._workspaces) > 2:
                 ui.plotType.addItem(SURFACE)
@@ -454,7 +453,7 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
                         if usable_logs[log_name][1]:
                             try:
                                 value = run_object.getPropertyAsSingleValueWithTimeAveragedMean(log_name)
-                            except: # the log doesn't have a numeric value for every workspace so remove it
+                            except:  # the log doesn't have a numeric value for every workspace so remove it
                                 usable_logs.pop(log_name)
                                 continue
                             # Set the bool to whether the value is the same
@@ -525,8 +524,9 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
 
                     if number_of_custom_log_values != number_of_plots:
                         self.ui.logs_valid.show()
-                        self.ui.logs_valid.setToolTip(f"The number of custom log values ({number_of_custom_log_values}) "
-                                                      f"is not equal to the number of plots ({number_of_plots}).")
+                        self.ui.logs_valid.setToolTip(
+                            f"The number of custom log values ({number_of_custom_log_values}) "
+                            f"is not equal to the number of plots ({number_of_plots}).")
 
                         valid_options = False
 
@@ -556,7 +556,6 @@ def parse_selection_str(txt, min_val=None, max_val=None, allowed_values=None):
     :param allowed_values: The list of allowed values, if this is provided then max and min will be ignored
     :returns A list containing each value in the range or None if the string is invalid
     """
-
     def append_if_valid(out, val):
         try:
             val = int(val)

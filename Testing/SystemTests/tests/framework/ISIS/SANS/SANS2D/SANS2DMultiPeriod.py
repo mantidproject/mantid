@@ -17,7 +17,7 @@ from sans.common.enums import SANSInstrument
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DMultiPeriodSingle(systemtesting.MantidSystemTest):
 
-    reduced=''
+    reduced = ''
 
     def runTest(self):
 
@@ -31,18 +31,17 @@ class SANS2DMultiPeriodSingle(systemtesting.MantidSystemTest):
         self.reduced = WavRangeReduction()
 
     def validate(self):
-    # Need to disable checking of the Spectra-Detector map because it isn't
-    # fully saved out to the nexus file (it's limited to the spectra that
-    # are actually present in the saved workspace).
+        # Need to disable checking of the Spectra-Detector map because it isn't
+        # fully saved out to the nexus file (it's limited to the spectra that
+        # are actually present in the saved workspace).
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
 
-        return mtd[self.reduced][6].name(),'SANS2DBatch.nxs'
+        return mtd[self.reduced][6].name(), 'SANS2DBatch.nxs'
 
 
 class SANS2DMultiPeriodBatch(SANS2DMultiPeriodSingle):
-
     def runTest(self):
 
         SANS2D()

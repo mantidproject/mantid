@@ -23,9 +23,9 @@ def _crop_bins(ws, bin_min, bin_max, out):
     y = mtd[ws].extractY()
     e = mtd[ws].extractE()
     x = mtd[ws].extractX()
-    CreateWorkspace(DataX=x[:,bin_min:bin_max],
-                    DataY=y[:,bin_min:bin_max],
-                    DataE=e[:,bin_min:bin_max],
+    CreateWorkspace(DataX=x[:, bin_min:bin_max],
+                    DataY=y[:, bin_min:bin_max],
+                    DataE=e[:, bin_min:bin_max],
                     NSpec=mtd[ws].getNumberHistograms(),
                     OutputWorkspace=out)
 
@@ -48,29 +48,29 @@ def _plus_friendly(ws1, ws2, out):
 
 class PowderILLEfficiency(PythonAlgorithm):
 
-    _out_name = None            # the name of the output workspace
-    _input_files = None         # input files (numor), must be detector scans (to list for D2B, to merge for D20)
-    _calib_file = None          # file containing previously derived calibration constants
-    _progress = None            # progress tracking
-    _method = None              # calibration method
-    _scan_points = None         # number of scan points (time indices)
-    _out_response = None        # the name of the second output workspace with merged response
-    _bin_offset = None          # this holds int(scan step / pixel size)
-    _n_det = None               # number of detector pixels for D20 (=3072)
-    _normalise_to = None        # normalisation option
-    _pixel_range = None         # range of the pixels to derive calibration for D20, e.g. 65,3072
-    _regions_of_interest = None # ROI to normalise to, e.g. 10,50,70,100, typically just one range, used for D20
-    _interpolate = None         # whether to interpolate 2thetas before taking relative ratios (D20)
-    _excluded_ranges = None     # 2theta ranges to exclude when deriving the calibration factor, e.g. -20,0,40,50
-    _live_pixels = None         # holds the list of cells that are not zero counting
-    _derivation_method = ''     # sequential reference (D20) or global reference (D2B)
-    _n_scan_files = None        # number of standard scan files for D2B (~30)
-    _n_scans_per_file = None    # number of scan points in a standard scan for D2B (=25)
-    _n_tubes = None             # number of tubes in D2B (=128)
-    _n_pixels_per_tube = None   # number of pixels per tube in D2B (=128)
-    _n_iterations = None        # number of iterations (=1); used for D2B
-    _pixels_to_trim = None      # number of pixels to trim from top and bottom of tubes for chi2 calculation (D2B)
-    _mask_criterion = None      # the range of efficiency constant values, outside of which they should be set to 0
+    _out_name = None  # the name of the output workspace
+    _input_files = None  # input files (numor), must be detector scans (to list for D2B, to merge for D20)
+    _calib_file = None  # file containing previously derived calibration constants
+    _progress = None  # progress tracking
+    _method = None  # calibration method
+    _scan_points = None  # number of scan points (time indices)
+    _out_response = None  # the name of the second output workspace with merged response
+    _bin_offset = None  # this holds int(scan step / pixel size)
+    _n_det = None  # number of detector pixels for D20 (=3072)
+    _normalise_to = None  # normalisation option
+    _pixel_range = None  # range of the pixels to derive calibration for D20, e.g. 65,3072
+    _regions_of_interest = None  # ROI to normalise to, e.g. 10,50,70,100, typically just one range, used for D20
+    _interpolate = None  # whether to interpolate 2thetas before taking relative ratios (D20)
+    _excluded_ranges = None  # 2theta ranges to exclude when deriving the calibration factor, e.g. -20,0,40,50
+    _live_pixels = None  # holds the list of cells that are not zero counting
+    _derivation_method = ''  # sequential reference (D20) or global reference (D2B)
+    _n_scan_files = None  # number of standard scan files for D2B (~30)
+    _n_scans_per_file = None  # number of scan points in a standard scan for D2B (=25)
+    _n_tubes = None  # number of tubes in D2B (=128)
+    _n_pixels_per_tube = None  # number of pixels per tube in D2B (=128)
+    _n_iterations = None  # number of iterations (=1); used for D2B
+    _pixels_to_trim = None  # number of pixels to trim from top and bottom of tubes for chi2 calculation (D2B)
+    _mask_criterion = None  # the range of efficiency constant values, outside of which they should be set to 0
 
     def _hide(self, name):
         return '__' + self._out_name + '_' + name
@@ -83,7 +83,7 @@ class PowderILLEfficiency(PythonAlgorithm):
                "monochromatic powder diffraction instruments D20 and D2B at ILL."
 
     def seeAlso(self):
-        return [ "PowderILLDetectorScan", "PowderILLParameterScan" ]
+        return ["PowderILLDetectorScan", "PowderILLParameterScan"]
 
     def name(self):
         return "PowderILLEfficiency"
@@ -99,13 +99,15 @@ class PowderILLEfficiency(PythonAlgorithm):
                              defaultValue='Median',
                              validator=StringListValidator(['Median', 'Mean', 'MostLikelyMean']),
                              doc='The method of how the calibration constant of a pixel '
-                                 'is derived from the distribution of ratios.')
+                             'is derived from the distribution of ratios.')
 
-        self.declareProperty(name='DerivationMethod', defaultValue='SequentialSummedReference1D',
+        self.declareProperty(name='DerivationMethod',
+                             defaultValue='SequentialSummedReference1D',
                              validator=StringListValidator(['SequentialSummedReference1D', 'GlobalSummedReference2D']),
                              doc='Choose sequential for D20 (1D detector), global for D2B (2D detector).')
 
-        self.declareProperty(name='InterpolateOverlappingAngles', defaultValue=False,
+        self.declareProperty(name='InterpolateOverlappingAngles',
+                             defaultValue=False,
                              doc='Whether to interpolate scattering angle values in overlapping regions (D20 only).')
 
         self.declareProperty(name='NormaliseTo',
@@ -115,7 +117,7 @@ class PowderILLEfficiency(PythonAlgorithm):
 
         thetaRangeValidator = FloatArrayOrderedPairsValidator()
 
-        self.declareProperty(FloatArrayProperty(name='ROI', values=[0,100.], validator=thetaRangeValidator),
+        self.declareProperty(FloatArrayProperty(name='ROI', values=[0, 100.], validator=thetaRangeValidator),
                              doc='Scattering angle regions of interest for normalisation [degrees].')
 
         normaliseToROI = VisibleWhenProperty('NormaliseTo', PropertyCriterion.IsEqualTo, 'ROI')
@@ -123,7 +125,7 @@ class PowderILLEfficiency(PythonAlgorithm):
 
         self.declareProperty(FloatArrayProperty(name='ExcludedRange', values=[], validator=thetaRangeValidator),
                              doc='Scattering angle regions to exclude from the computation of '
-                                 'relative calibration constants; for example, the beam stop [degrees]. ')
+                             'relative calibration constants; for example, the beam stop [degrees]. ')
 
         pixelRangeValidator = CompositeValidator()
         greaterThanOne = IntArrayBoundedValidator(lower=1)
@@ -134,23 +136,26 @@ class PowderILLEfficiency(PythonAlgorithm):
         pixelRangeValidator.add(lengthTwo)
         pixelRangeValidator.add(orderedPairsValidator)
 
-        self.declareProperty(IntArrayProperty(name='PixelRange', values=[1,3072], validator=pixelRangeValidator),
+        self.declareProperty(IntArrayProperty(name='PixelRange', values=[1, 3072], validator=pixelRangeValidator),
                              doc='Range of the pixel numbers to compute the calibration factors for (D20 only); '
-                                 'for the other pixels outside the range, the factor will be set to 1.')
+                             'for the other pixels outside the range, the factor will be set to 1.')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputResponseWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='Output workspace containing the summed diffraction patterns of all the overlapping pixels.')
+        self.declareProperty(
+            MatrixWorkspaceProperty('OutputResponseWorkspace',
+                                    '',
+                                    optional=PropertyMode.Optional,
+                                    direction=Direction.Output),
+            doc='Output workspace containing the summed diffraction patterns of all the overlapping pixels.')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                                                     direction=Direction.Output),
-                             doc='Output workspace containing the calibration constants (inverse of efficiency) for each pixel.')
+        self.declareProperty(
+            MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
+            doc='Output workspace containing the calibration constants (inverse of efficiency) for each pixel.')
 
         self.declareProperty(name='NumberOfIterations',
                              defaultValue=1,
                              validator=IntBoundedValidator(lower=0, upper=10),
                              doc='Number of iterations to perform (D2B only): 0 means auto; that is, the '
-                                 'iterations will terminate after reaching some Chi2/NdoF.')
+                             'iterations will terminate after reaching some Chi2/NdoF.')
 
         maskCriterionValidator = CompositeValidator()
         arrayLengthTwo = FloatArrayLengthValidator()
@@ -217,7 +222,7 @@ class PowderILLEfficiency(PythonAlgorithm):
             Scale(InputWorkspace=cropped_ws, OutputWorkspace=cropped_ws, Factor=factor)
             Scale(InputWorkspace=last_bins, OutputWorkspace=last_bins, Factor=factor)
             WeightedMean(InputWorkspace1=ref_ws, InputWorkspace2=cropped_ws, OutputWorkspace=ref_ws)
-        ConjoinXRuns(InputWorkspaces=[ref_ws,last_bins], OutputWorkspace=ref_ws)
+        ConjoinXRuns(InputWorkspaces=[ref_ws, last_bins], OutputWorkspace=ref_ws)
         SortXAxis(InputWorkspace=ref_ws, OutputWorkspace=ref_ws)
         x = mtd[ref_ws].readX(0)[self._bin_offset]
         CropWorkspace(InputWorkspace=ref_ws, XMin=x, OutputWorkspace=ref_ws)
@@ -274,16 +279,16 @@ class PowderILLEfficiency(PythonAlgorithm):
             self._exclude_ranges(ratio_ws)
         ratios = mtd[ratio_ws].extractY()
         if tube_index == 0:
-            ratios=ratios[:,0:-self._n_scans_per_file]
+            ratios = ratios[:, 0:-self._n_scans_per_file]
         elif tube_index == self._n_tubes - 1:
-            ratios=ratios[:,self._n_scans_per_file:]
+            ratios = ratios[:, self._n_scans_per_file:]
         factors = np.ones(ratios.shape[0])
         ratios = ma.masked_array(ratios, mask=[ratios == 0])
         ratios = ma.masked_invalid(ratios)
         if self._method == 'Median':
-            factors = np.array(ma.median(ratios, axis = 1))
+            factors = np.array(ma.median(ratios, axis=1))
         elif self._method == 'Mean':
-            factors = np.array(ma.mean(ratios, axis = 1))
+            factors = np.array(ma.mean(ratios, axis=1))
         return factors
 
     def _validate_scan(self, scan_ws):
@@ -312,11 +317,11 @@ class PowderILLEfficiency(PythonAlgorithm):
         y = mtd[raw_ws].extractY()
         e = mtd[raw_ws].extractE()
         x = mtd[raw_ws].getAxis(1).extractValues()
-        shape = [self._n_det+1, self._scan_points]
+        shape = [self._n_det + 1, self._scan_points]
         y_2d = np.reshape(y, shape)
         e_2d = np.reshape(e, shape)
         x_2d = np.reshape(x, shape)
-        CreateWorkspace(DataX=x_2d, DataY=y_2d, DataE=e_2d, NSpec=self._n_det+1, OutputWorkspace=ws_2d)
+        CreateWorkspace(DataX=x_2d, DataY=y_2d, DataE=e_2d, NSpec=self._n_det + 1, OutputWorkspace=ws_2d)
         CopyLogs(InputWorkspace=raw_ws, OutputWorkspace=ws_2d)
 
     def _chi_squared(self, calib_current):
@@ -327,11 +332,11 @@ class PowderILLEfficiency(PythonAlgorithm):
         """
         start = self._pixels_to_trim
         end = self._n_pixels_per_tube - self._pixels_to_trim
-        y = mtd[calib_current].extractY()[:,start:end]
-        diff = (y-1)**2
+        y = mtd[calib_current].extractY()[:, start:end]
+        diff = (y - 1)**2
         chi2 = np.sum(diff)
         ndof = (self._n_pixels_per_tube - 2 * self._pixels_to_trim) * self._n_tubes
-        return chi2/ndof
+        return chi2 / ndof
 
     def _set_input_properties(self):
         """
@@ -366,9 +371,9 @@ class PowderILLEfficiency(PythonAlgorithm):
         self._bin_offset = int(math.ceil(scan_step_in_pixel_numbers))
         self.log().information('Bin offset is: ' + str(self._bin_offset))
         if (abs(self._bin_offset - scan_step_in_pixel_numbers) > 0.1 and not self._interpolate):
-            self.log().warning('Scan step is not an integer multiple of the pixel size: {0:.3f}. '
-                               'Consider checking the option InterpolateOverlappingAngles.'
-                               .format(scan_step_in_pixel_numbers))
+            self.log().warning(
+                'Scan step is not an integer multiple of the pixel size: {0:.3f}. '
+                'Consider checking the option InterpolateOverlappingAngles.'.format(scan_step_in_pixel_numbers))
         if self._pixel_range[1] > self._n_det:
             self.log().warning('Last pixel number provided is larger than total number of pixels. '
                                'Taking the last existing pixel.')
@@ -386,7 +391,7 @@ class PowderILLEfficiency(PythonAlgorithm):
         self._n_tubes = inst.getComponentByName('detectors').nelements()
         self._n_pixels_per_tube = inst.getComponentByName('detectors/tube_1').nelements()
         #self._n_scans_per_file = mtd[raw_ws].getRun().getLogData('ScanSteps').value
-        self._n_scans_per_file = 25 # TODO: In v2 this should be freely variable
+        self._n_scans_per_file = 25  # TODO: In v2 this should be freely variable
         self._scan_points = self._n_scans_per_file * self._n_scan_files
         self.log().information('Number of scan steps is: ' + str(self._scan_points))
         if self._excluded_ranges.any():
@@ -411,8 +416,8 @@ class PowderILLEfficiency(PythonAlgorithm):
         last_cell_first_time_theta = mtd[ws_2d].readX(self._n_det)[0]
         if roi_min < first_cell_last_time_theta or roi_max > last_cell_first_time_theta:
             raise ValueError('Invalid ROI. The region must be fully contained within the detector at any time index. '
-                             'For the given scan configuration, ROI can be within {0} and {1} degrees.'
-                             .format(first_cell_last_time_theta,last_cell_first_time_theta))
+                             'For the given scan configuration, ROI can be within {0} and {1} degrees.'.format(
+                                 first_cell_last_time_theta, last_cell_first_time_theta))
 
     def _normalise_roi(self, ws_2d):
         """
@@ -423,19 +428,19 @@ class PowderILLEfficiency(PythonAlgorithm):
         x = mtd[ws_2d].extractX()
         roi_counts_arr = np.ones(self._scan_points)
         # typically should be number_rois = 1
-        number_rois = int(len(self._regions_of_interest)/2)
+        number_rois = int(len(self._regions_of_interest) / 2)
         starts = self._regions_of_interest[0::2]
         ends = self._regions_of_interest[1::2]
         first_cells = []
         last_cells = []
         for roi in range(number_rois):
-            first_cell = np.argmax(x[...,0]>starts[roi])
+            first_cell = np.argmax(x[..., 0] > starts[roi])
             first_cells.append(first_cell)
-            last_cell = np.argmin(x[...,0]<ends[roi])
+            last_cell = np.argmin(x[..., 0] < ends[roi])
             last_cells.append(last_cell)
         for time_index in range(self._scan_points):
             roi_counts = 0
-            counts = y[...,time_index]
+            counts = y[..., time_index]
             for roi in range(number_rois):
                 first_cell = first_cells[roi] - self._bin_offset * time_index
                 last_cell = last_cells[roi] - self._bin_offset * time_index
@@ -459,10 +464,10 @@ class PowderILLEfficiency(PythonAlgorithm):
         e = np.zeros(size)
         x = np.zeros(size)
         x_2d = mtd[ws_2d].extractX()
-        x[0:self._scan_points] = x_2d[0,...]
+        x[0:self._scan_points] = x_2d[0, ...]
         index = self._scan_points
-        for pixel in range(0,self._n_det-1):
-            x[index:(index+self._bin_offset)] = x_2d[pixel,-self._bin_offset:]
+        for pixel in range(0, self._n_det - 1):
+            x[index:(index + self._bin_offset)] = x_2d[pixel, -self._bin_offset:]
             index += self._bin_offset
         CreateWorkspace(DataX=x, DataY=y, DataE=e, NSpec=1, UnitX='Degrees', OutputWorkspace=response_ws)
 
@@ -476,7 +481,7 @@ class PowderILLEfficiency(PythonAlgorithm):
         constants = mtd[constants_ws].extractY()
         absolute_norm = np.median(constants[self._live_pixels])
         self.log().information('Absolute normalisation constant is: ' + str(absolute_norm))
-        Scale(InputWorkspace=constants_ws, Factor=1./absolute_norm, OutputWorkspace=constants_ws)
+        Scale(InputWorkspace=constants_ws, Factor=1. / absolute_norm, OutputWorkspace=constants_ws)
         for pixel in range(mtd[constants_ws].getNumberHistograms()):
             if not self._live_pixels[pixel]:
                 mtd[constants_ws].dataY(pixel)[0] = 1.
@@ -503,14 +508,14 @@ class PowderILLEfficiency(PythonAlgorithm):
         nreports = int(self._pixel_range[1] - self._pixel_range[0] + 1)
         self._progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
         for det in range(self._pixel_range[0] - 1, self._pixel_range[1]):
-            self._progress.report('Computing the relative calibration factor for pixel #' + str(det+1))
+            self._progress.report('Computing the relative calibration factor for pixel #' + str(det + 1))
             ws = '__det_' + str(det)
             ExtractSingleSpectrum(InputWorkspace=ws_2d, WorkspaceIndex=det, OutputWorkspace=ws)
             SortXAxis(InputWorkspace=ws, OutputWorkspace=ws)
             y = mtd[ws].readY(0)
             x = mtd[ws].readX(0)
             # keep track of dead pixels
-            if np.count_nonzero(y) > self._scan_points/5:
+            if np.count_nonzero(y) > self._scan_points / 5:
                 self._live_pixels[det] = True
 
             if det == self._pixel_range[0] - 1:
@@ -518,7 +523,7 @@ class PowderILLEfficiency(PythonAlgorithm):
             else:
                 ratio_ws = ws + '_ratio'
                 cropped_ws = ws + '_cropped'
-                CropWorkspace(InputWorkspace=ws, OutputWorkspace=cropped_ws, XMax=x[-(self._bin_offset+1)])
+                CropWorkspace(InputWorkspace=ws, OutputWorkspace=cropped_ws, XMax=x[-(self._bin_offset + 1)])
                 ref_bins = mtd[ref_ws].blocksize()
                 current_pixel_bins = mtd[cropped_ws].blocksize()
                 log_message = 'Pixel #{0}: number of bins in reference is {1}, in current cropped is {2}'\
@@ -526,12 +531,16 @@ class PowderILLEfficiency(PythonAlgorithm):
                 self.log().information(log_message)
                 if current_pixel_bins != ref_bins:
                     # after cropping these should always be equal
-                    raise RuntimeError('Unequal number of bins in the reference and the cropped workspace. '+log_message)
+                    raise RuntimeError('Unequal number of bins in the reference and the cropped workspace. ' +
+                                       log_message)
                 if self._interpolate and self._live_pixels[det]:
                     # SplineInterpolation invalidates the errors, so we need to copy them over
                     interp_ws = ws + '_interp'
-                    SplineInterpolation(WorkspaceToInterpolate=cropped_ws, WorkspaceToMatch=ref_ws,
-                                        OutputWorkspace=interp_ws, OutputWorkspaceDeriv="", EnableLogging=False)
+                    SplineInterpolation(WorkspaceToInterpolate=cropped_ws,
+                                        WorkspaceToMatch=ref_ws,
+                                        OutputWorkspace=interp_ws,
+                                        OutputWorkspaceDeriv="",
+                                        EnableLogging=False)
                     mtd[interp_ws].setE(0, mtd[cropped_ws].readE(0))
                     RenameWorkspace(InputWorkspace=interp_ws, OutputWorkspace=cropped_ws)
                 else:
@@ -606,8 +615,12 @@ class PowderILLEfficiency(PythonAlgorithm):
         DeleteWorkspace(mon_ws)
         # only now crop out the monitor spectrum
         CropWorkspace(InputWorkspace=ws_2d, StartWorkspaceIndex=1, OutputWorkspace=ws_2d)
-        ReplaceSpecialValues(InputWorkspace=ws_2d, OutputWorkspace=ws_2d,
-                             NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)
+        ReplaceSpecialValues(InputWorkspace=ws_2d,
+                             OutputWorkspace=ws_2d,
+                             NaNValue=0,
+                             NaNError=0,
+                             InfinityValue=0,
+                             InfinityError=0)
 
         if self._calib_file:
             Multiply(LHSWorkspace=ws_2d, RHSWorkspace=calib_ws, OutputWorkspace=ws_2d)
@@ -628,7 +641,7 @@ class PowderILLEfficiency(PythonAlgorithm):
         for pixel in range(self._n_tubes * self._n_pixels_per_tube):
             start = n_scan_points * pixel
             end = n_scan_points * (pixel + 1) - 2
-            index_range = str(start)+"-"+str(end)+","
+            index_range = str(start) + "-" + str(end) + ","
             ws_index_list += index_range
         ws_index_list = ws_index_list[:-1]
         ExtractSpectra(InputWorkspace=ws, OutputWorkspace=ws, WorkspaceIndexList=ws_index_list)
@@ -651,8 +664,8 @@ class PowderILLEfficiency(PythonAlgorithm):
         self._progress = Progress(self, start=0.0, end=1.0, nreports=self._n_scan_files)
 
         for index, numor in enumerate(self._input_files.split(',')):
-            self._progress.report('Pre-processing detector scan '+numor[-10:-4])
-            ws_name = '__raw_'+str(index)
+            self._progress.report('Pre-processing detector scan ' + numor[-10:-4])
+            ws_name = '__raw_' + str(index)
             numors.append(ws_name)
             LoadILLDiffraction(Filename=numor, OutputWorkspace=ws_name, DataType=data_type)
             self._validate_scan(ws_name)
@@ -665,27 +678,32 @@ class PowderILLEfficiency(PythonAlgorithm):
             ExtractMonitors(InputWorkspace=ws_name, DetectorWorkspace=ws_name)
             ConvertSpectrumAxis(InputWorkspace=ws_name, OrderAxis=False, Target="SignedTheta", OutputWorkspace=ws_name)
             if self._calib_file:
-                ApplyDetectorScanEffCorr(InputWorkspace=ws_name, DetectorEfficiencyWorkspace=calib_ws, OutputWorkspace=ws_name)
+                ApplyDetectorScanEffCorr(InputWorkspace=ws_name,
+                                         DetectorEfficiencyWorkspace=calib_ws,
+                                         OutputWorkspace=ws_name)
 
             n_scan_steps = mtd[ws_name].getRun().getLogData("ScanSteps").value
             if n_scan_steps != self._n_scans_per_file:
-                self.log().warning("Run {0} has {1} scan points instead of {2}.".
-                                   format(numor[-10:-4], n_scan_steps, self._n_scans_per_file))
+                self.log().warning("Run {0} has {1} scan points instead of {2}.".format(
+                    numor[-10:-4], n_scan_steps, self._n_scans_per_file))
                 self._crop_last_time_index(ws_name, n_scan_steps)
 
         if self._calib_file:
             DeleteWorkspace(calib_ws)
 
-        constants = np.ones([self._n_pixels_per_tube,self._n_tubes])
+        constants = np.ones([self._n_pixels_per_tube, self._n_tubes])
         x = np.arange(self._n_tubes)
-        e = np.zeros([self._n_pixels_per_tube,self._n_tubes])
-        CreateWorkspace(DataX=np.tile(x, self._n_pixels_per_tube), DataY=constants, DataE=e,
-                        NSpec=self._n_pixels_per_tube, OutputWorkspace=constants_ws)
+        e = np.zeros([self._n_pixels_per_tube, self._n_tubes])
+        CreateWorkspace(DataX=np.tile(x, self._n_pixels_per_tube),
+                        DataY=constants,
+                        DataE=e,
+                        NSpec=self._n_pixels_per_tube,
+                        OutputWorkspace=constants_ws)
         calib_current = self._hide('current')
         CloneWorkspace(InputWorkspace=constants_ws, OutputWorkspace=calib_current)
 
         iteration = 0
-        chi2_ndof = np.inf # set a large number to start with
+        chi2_ndof = np.inf  # set a large number to start with
         self._pixels_to_trim = 28
         chi2_ndof_threshold = 1.
         inst = mtd[numors[0]].getInstrument()
@@ -696,21 +714,27 @@ class PowderILLEfficiency(PythonAlgorithm):
 
         while iteration < self._n_iterations or (self._n_iterations == 0 and chi2_ndof > chi2_ndof_threshold):
             self._progress = Progress(self, start=0.0, end=1.0, nreports=5)
-            self._progress.report('Starting iteration #'+str(iteration))
+            self._progress.report('Starting iteration #' + str(iteration))
             self._derive_calibration_global(numors)
             Multiply(LHSWorkspace=constants_ws, RHSWorkspace=calib_current, OutputWorkspace=constants_ws)
             chi2_ndof = self._chi_squared(calib_current)
             if iteration != 0:
-                self.log().warning('Iteration {0}: Chi2/NdoF={1} (termination criterion: < {2})'.
-                                   format(iteration, chi2_ndof, chi2_ndof_threshold))
+                self.log().warning('Iteration {0}: Chi2/NdoF={1} (termination criterion: < {2})'.format(
+                    iteration, chi2_ndof, chi2_ndof_threshold))
             iteration += 1
 
         if self._out_response:
             for index in range(self._n_scan_files):
-                ws_name = '__raw_'+str(index)
-                ApplyDetectorScanEffCorr(InputWorkspace=ws_name, DetectorEfficiencyWorkspace=calib_current, OutputWorkspace=ws_name)
-            SumOverlappingTubes(InputWorkspaces=numors, OutputWorkspace=response_ws, MirrorScatteringAngles=False,
-                                CropNegativeScatteringAngles=False, Normalise=True, OutputType="2DTubes")
+                ws_name = '__raw_' + str(index)
+                ApplyDetectorScanEffCorr(InputWorkspace=ws_name,
+                                         DetectorEfficiencyWorkspace=calib_current,
+                                         OutputWorkspace=ws_name)
+            SumOverlappingTubes(InputWorkspaces=numors,
+                                OutputWorkspace=response_ws,
+                                MirrorScatteringAngles=False,
+                                CropNegativeScatteringAngles=False,
+                                Normalise=True,
+                                OutputType="2DTubes")
 
         DeleteWorkspace(ref_ws)
         DeleteWorkspaces(numors)
@@ -739,8 +763,10 @@ class PowderILLEfficiency(PythonAlgorithm):
             e_tubes.append([])
 
         for index in range(self._n_scan_files):
-            ws_name = '__raw_'+str(index)
-            ApplyDetectorScanEffCorr(InputWorkspace=ws_name, DetectorEfficiencyWorkspace=calib_current, OutputWorkspace=ws_name)
+            ws_name = '__raw_' + str(index)
+            ApplyDetectorScanEffCorr(InputWorkspace=ws_name,
+                                     DetectorEfficiencyWorkspace=calib_current,
+                                     OutputWorkspace=ws_name)
             y = mtd[ws_name].extractY()
             e = mtd[ws_name].extractE()
             x = mtd[ws_name].getAxis(1).extractValues()
@@ -748,13 +774,17 @@ class PowderILLEfficiency(PythonAlgorithm):
             x_3d = np.reshape(x, shape)
             e_3d = np.reshape(e, shape)
             for tube in range(self._n_tubes):
-                y_tubes[tube].append(y_3d[tube,:,:])
-                x_tubes[tube].append(x_3d[tube,:,:])
-                e_tubes[tube].append(e_3d[tube,:,:])
+                y_tubes[tube].append(y_3d[tube, :, :])
+                x_tubes[tube].append(x_3d[tube, :, :])
+                e_tubes[tube].append(e_3d[tube, :, :])
 
         self._progress.report('Constructing the global reference')
-        SumOverlappingTubes(InputWorkspaces=numors, OutputWorkspace=ref_ws, MirrorScatteringAngles=False,
-                            CropNegativeScatteringAngles=False, Normalise=True, OutputType="2DTubes")
+        SumOverlappingTubes(InputWorkspaces=numors,
+                            OutputWorkspace=ref_ws,
+                            MirrorScatteringAngles=False,
+                            CropNegativeScatteringAngles=False,
+                            Normalise=True,
+                            OutputType="2DTubes")
 
         to_group = []
         self._progress.report('Preparing the tube responses')
@@ -763,7 +793,11 @@ class PowderILLEfficiency(PythonAlgorithm):
             x_tube = np.concatenate(x_tubes[tube], axis=1)
             e_tube = np.concatenate(e_tubes[tube], axis=1)
             ws_name = "__tube" + str(tube)
-            CreateWorkspace(DataX=x_tube, DataY=y_tube, DataE=e_tube, NSpec=self._n_pixels_per_tube, OutputWorkspace=ws_name)
+            CreateWorkspace(DataX=x_tube,
+                            DataY=y_tube,
+                            DataE=e_tube,
+                            NSpec=self._n_pixels_per_tube,
+                            OutputWorkspace=ws_name)
             SortXAxis(InputWorkspace=ws_name, OutputWorkspace=ws_name)
             to_group.append(ws_name)
         GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=tubes_group)
@@ -772,9 +806,10 @@ class PowderILLEfficiency(PythonAlgorithm):
         self._progress.report('Constructing response ratios')
         for tube in reversed(range(self._n_tubes)):
             itube = self._n_tubes - tube - 1
-            ratio_ws = '__ratio'+str(tube)
-            _crop_bins(ref_ws, itube * self._n_scans_per_file, itube * self._n_scans_per_file + self._scan_points, '__cropped_ref')
-            _divide_friendly('__cropped_ref', '__tube'+str(tube), ratio_ws)
+            ratio_ws = '__ratio' + str(tube)
+            _crop_bins(ref_ws, itube * self._n_scans_per_file, itube * self._n_scans_per_file + self._scan_points,
+                       '__cropped_ref')
+            _divide_friendly('__cropped_ref', '__tube' + str(tube), ratio_ws)
             ratios.append(ratio_ws)
             DeleteWorkspace('__cropped_ref')
         GroupWorkspaces(InputWorkspaces=ratios, OutputWorkspace=ratios_group)
@@ -783,13 +818,17 @@ class PowderILLEfficiency(PythonAlgorithm):
         self._progress.report('Computing the calibration constants')
         Transpose(InputWorkspace=calib_current, OutputWorkspace=calib_current)
         for tube in range(self._n_tubes):
-            coeff = self._compute_relative_factor_2D('__ratio'+str(tube), tube)
+            coeff = self._compute_relative_factor_2D('__ratio' + str(tube), tube)
             mtd[calib_current].setY(tube, coeff)
         Transpose(InputWorkspace=calib_current, OutputWorkspace=calib_current)
         DeleteWorkspace(ratios_group)
 
-        ReplaceSpecialValues(InputWorkspace=calib_current, OutputWorkspace=calib_current,
-                             NaNValue=1, InfinityValue=1, SmallNumberThreshold=0.00001, SmallNumberValue=1)
+        ReplaceSpecialValues(InputWorkspace=calib_current,
+                             OutputWorkspace=calib_current,
+                             NaNValue=1,
+                             InfinityValue=1,
+                             SmallNumberThreshold=0.00001,
+                             SmallNumberValue=1)
 
     def PyExec(self):
         self._set_input_properties()
@@ -802,8 +841,8 @@ class PowderILLEfficiency(PythonAlgorithm):
         if self._calib_file:
             LoadNexusProcessed(Filename=self._calib_file, OutputWorkspace=calib_ws)
 
-        if self._derivation_method == 'SequentialSummedReference1D': # D20
-            self._input_files = self._input_files.replace(',','+')
+        if self._derivation_method == 'SequentialSummedReference1D':  # D20
+            self._input_files = self._input_files.replace(',', '+')
             LoadAndMerge(Filename=self._input_files, OutputWorkspace=raw_ws, LoaderName='LoadILLDiffraction')
             if not mtd[raw_ws].getInstrument().getName().startswith('D20'):
                 DeleteWorkspace(raw_ws)
@@ -811,16 +850,17 @@ class PowderILLEfficiency(PythonAlgorithm):
             self._validate_scan(raw_ws)
             self._configure_sequential(raw_ws)
             self._process_sequential()
-        elif self._derivation_method == 'GlobalSummedReference2D': # D2B
-            self._input_files = self._input_files.replace('+',',')
+        elif self._derivation_method == 'GlobalSummedReference2D':  # D2B
+            self._input_files = self._input_files.replace('+', ',')
             self._n_scan_files = self._input_files.count(',') + 1
             if self._n_scan_files < 2:
                 raise RuntimeError('At least two overlapping scan files needed for the global method')
             self._process_global()
 
         if self._mask_criterion.any():
-            MaskBinsIf(InputWorkspace=constants_ws, OutputWorkspace=constants_ws,
-                       Criterion='y<'+str(self._mask_criterion[0])+'||y>'+str(self._mask_criterion[1]))
+            MaskBinsIf(InputWorkspace=constants_ws,
+                       OutputWorkspace=constants_ws,
+                       Criterion='y<' + str(self._mask_criterion[0]) + '||y>' + str(self._mask_criterion[1]))
 
         # set output workspace[s]
         RenameWorkspace(InputWorkspace=constants_ws, OutputWorkspace=self._out_name)

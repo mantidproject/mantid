@@ -15,12 +15,10 @@ from qtpy.QtCore import Qt, QPoint
 
 from Interface.ui.drill.view.DrillTableWidget import DrillTableWidget
 
-
 app = QApplication(sys.argv)
 
 
 class DrillTableWidgetTest(unittest.TestCase):
-
     def selectCell(self, row, column, modifier):
         # find the middle of the cell
         y = self.table.rowViewportPosition(row) \
@@ -28,8 +26,7 @@ class DrillTableWidgetTest(unittest.TestCase):
         x = self.table.columnViewportPosition(column) \
             + self.table.columnWidth(column) / 2
 
-        QTest.mouseClick(self.table.viewport(),
-                         Qt.LeftButton, modifier, QPoint(x, y))
+        QTest.mouseClick(self.table.viewport(), Qt.LeftButton, modifier, QPoint(x, y))
 
     def selectRow(self, row, modifier):
         # find the middle of the row header
@@ -38,8 +35,7 @@ class DrillTableWidgetTest(unittest.TestCase):
         y = vertical_header.sectionPosition(row) \
             + vertical_header.sectionSize(row) / 2
 
-        QTest.mouseClick(vertical_header.viewport(),
-                         Qt.LeftButton, modifier, QPoint(x, y))
+        QTest.mouseClick(vertical_header.viewport(), Qt.LeftButton, modifier, QPoint(x, y))
 
     def setUp(self):
         self.table = DrillTableWidget()
@@ -120,10 +116,7 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.selectCell(4, 0, Qt.ControlModifier)
         self.selectCell(1, 1, Qt.ControlModifier)
         self.selectCell(2, 2, Qt.ControlModifier)
-        self.assertEqual(self.table.getSelectedCells(), [(0, 0),
-                                                         (4, 0),
-                                                         (1, 1),
-                                                         (2, 2)])
+        self.assertEqual(self.table.getSelectedCells(), [(0, 0), (4, 0), (1, 1), (2, 2)])
 
     def test_getSelectionShape(self):
         self.table.getSelectedCells = mock.Mock()
@@ -258,8 +251,7 @@ class DrillTableWidgetTest(unittest.TestCase):
     def test_setColumnHeaderToolTips(self):
         self.table.setHorizontalHeaderLabels(["label"])
         self.table.setColumnHeaderToolTips(["tooltip"])
-        self.assertEqual(self.table.horizontalHeaderItem(0).toolTip(),
-                         "tooltip")
+        self.assertEqual(self.table.horizontalHeaderItem(0).toolTip(), "tooltip")
 
     def test_setRowLabel(self):
         self.table.setRowLabel(0, "test", False)
@@ -327,8 +319,7 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.table.horizontalHeader = mock.Mock()
         mHeader = self.table.horizontalHeader.return_value
         mHeader.visualIndex.side_effect = [2, 1, 0]
-        self.assertEqual(self.table.getColumnsOrder(),
-                         ["test3", "test2", "test1"])
+        self.assertEqual(self.table.getColumnsOrder(), ["test3", "test2", "test1"])
 
 
 if __name__ == "__main__":

@@ -13,19 +13,17 @@ class PropertyManagerTest(unittest.TestCase):
         test_log_name = "testLog"
         self.assertFalse(PropertyManager.isAnInvalidValuesFilterLog(test_log_name))
         self.assertEqual(PropertyManager.getInvalidValuesFilterLogName(test_log_name),
-          test_log_name + "_invalid_values")
+                         test_log_name + "_invalid_values")
 
-        self.assertTrue(PropertyManager.isAnInvalidValuesFilterLog(
-            PropertyManager.getInvalidValuesFilterLogName(test_log_name)))
+        self.assertTrue(
+            PropertyManager.isAnInvalidValuesFilterLog(PropertyManager.getInvalidValuesFilterLogName(test_log_name)))
 
         # not a valid invalid values log
-        self.assertEqual(
-            PropertyManager.getLogNameFromInvalidValuesFilter(test_log_name), "")
+        self.assertEqual(PropertyManager.getLogNameFromInvalidValuesFilter(test_log_name), "")
         # A valid invalid values log
         self.assertEqual(
             PropertyManager.getLogNameFromInvalidValuesFilter(
-                PropertyManager.getInvalidValuesFilterLogName(test_log_name)),
-            test_log_name)
+                PropertyManager.getInvalidValuesFilterLogName(test_log_name)), test_log_name)
 
     def test_propertymanager_population(self):
         manager = PropertyManager()
@@ -88,11 +86,7 @@ class PropertyManagerTest(unittest.TestCase):
         self.assertTrue(len(manager), 2)
 
     def test_propertymanager_can_be_created_from_dict(self):
-        values = {
-            "int": 5,
-            "float": 20.0,
-            "str": 'a string'
-        }
+        values = {"int": 5, "float": 20.0, "str": 'a string'}
         pmgr = PropertyManager(values)
         self.assertEqual(len(pmgr), 3)
         self.assertEqual(5, pmgr["int"].value)
@@ -101,7 +95,8 @@ class PropertyManagerTest(unittest.TestCase):
 
     def test_propertymanager_cannot_be_created_from_arbitrary_sequence(self):
         with self.assertRaises(Exception):
-            PropertyManager((1,2,3,4,5))
+            PropertyManager((1, 2, 3, 4, 5))
+
 
 if __name__ == "__main__":
     unittest.main()

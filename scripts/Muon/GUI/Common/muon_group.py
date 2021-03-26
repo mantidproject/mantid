@@ -20,8 +20,7 @@ class MuonGroup(object):
     - The number of detectors is stored.
     - The workspace associated to the group can be set, but must be of type MuonWorkspaceWrapper.
     """
-
-    def __init__(self, group_name, detector_ids=(1,), periods=(1,)):
+    def __init__(self, group_name, detector_ids=(1, ), periods=(1, )):
 
         self._group_name = group_name
         self._detector_ids = None
@@ -43,13 +42,14 @@ class MuonGroup(object):
         if isinstance(new_workspace, MuonWorkspaceWrapper):
             self._counts_workspace = new_workspace
         else:
-            raise AttributeError("Attempting to set workspace to type " + str(
-                type(new_workspace)) + " but should be MuonWorkspaceWrapper")
+            raise AttributeError("Attempting to set workspace to type " + str(type(new_workspace)) +
+                                 " but should be MuonWorkspaceWrapper")
 
     """
     Returns the name of the counts workspace for a given run
     if the workspace does not exist will raise a KeyError
     """
+
     def get_counts_workspace_for_run(self, run, rebin):
         if rebin:
             return self._counts_workspace_rebin[MuonRun(run)].workspace_name
@@ -119,7 +119,8 @@ class MuonGroup(object):
         if rebin:
             self._counts_workspace_rebin.update({run_object: MuonWorkspaceWrapper(counts_workspace)})
             self._asymmetry_estimate_rebin.update({run_object: MuonWorkspaceWrapper(asymmetry_workspace)})
-            self._asymmetry_estimate_rebin_unormalised.update({run_object: MuonWorkspaceWrapper(asymmetry_workspace_unnorm)})
+            self._asymmetry_estimate_rebin_unormalised.update(
+                {run_object: MuonWorkspaceWrapper(asymmetry_workspace_unnorm)})
         else:
             self._counts_workspace.update({run_object: MuonWorkspaceWrapper(counts_workspace)})
             self._asymmetry_estimate.update({run_object: MuonWorkspaceWrapper(asymmetry_workspace)})
@@ -144,8 +145,8 @@ class MuonGroup(object):
 
         for run in runs:
             run_object = MuonRun(run)
-            if run_object in self._asymmetry_estimate_rebin and self._asymmetry_estimate_rebin[run_object].workspace_name \
-                    and not self._asymmetry_estimate_rebin[run_object].is_hidden:
+            if run_object in self._asymmetry_estimate_rebin and self._asymmetry_estimate_rebin[run_object]\
+                    .workspace_name and not self._asymmetry_estimate_rebin[run_object].is_hidden:
 
                 workspace_list.append(self._asymmetry_estimate_rebin[run_object].workspace_name)
 
@@ -171,10 +172,8 @@ class MuonGroup(object):
         return None
 
     def get_run_for_workspace(self, workspace_name):
-        for key, value in itertools.chain(self._asymmetry_estimate.items(),
-                                          self._counts_workspace.items(),
-                                          self._asymmetry_estimate_rebin.items(),
-                                          self._counts_workspace_rebin.items()):
+        for key, value in itertools.chain(self._asymmetry_estimate.items(), self._counts_workspace.items(),
+                                          self._asymmetry_estimate_rebin.items(), self._counts_workspace_rebin.items()):
             if value.workspace_name in workspace_name:
                 return key
 
@@ -188,7 +187,6 @@ class MuonGroup(object):
         :return:
 
         """
-
         def _remove_workspace_from_dict_by_name(workspace_name, dictionary):
             set_of_keys_to_remove = set()
             for key, workspace_wrapper in dictionary.items():

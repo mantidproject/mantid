@@ -19,7 +19,6 @@ except ImportError:
 
 
 class AbinsAdvancedParametersTest(unittest.TestCase):
-
     def setUp(self):
         # set up input for Abins
         self._Si2 = "Si2-sc_AbinsAdvancedParameters"
@@ -32,16 +31,23 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                 "final_neutron_energy": 32.0,
                 "cos_scattering_angle": -0.7069,
                 "angles": [135.],
-                'settings': {'forward': {'angles': [135.]}},
+                'settings': {
+                    'forward': {
+                        'angles': [135.]
+                    }
+                },
                 'settings_default': 'forward',
                 "a": 1e-7,
                 "b": 5e-3,
-                "c": 2.5}}
+                "c": 2.5
+            }
+        }
         abins.parameters.hdf_groups = {
             "ab_initio_data": "PhononAB",
             "powder_data": "Powder",
             "crystal_data": "Crystal",
-            "s_data": "S"}
+            "s_data": "S"
+        }
         abins.parameters.sampling = {
             "pkt_per_peak": 50,
             "max_wavenumber": 4100.0,
@@ -49,10 +55,9 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
             "broadening_scheme": "auto",
             "frequencies_threshold": 0.0,
             "s_relative_threshold": 0.001,
-            "s_absolute_threshold": 1e-7}
-        abins.parameters.performance = {
-            "optimal_size": int(5e6),
-            "threads": 1}
+            "s_absolute_threshold": 1e-7
+        }
+        abins.parameters.performance = {"optimal_size": int(5e6), "threads": 1}
 
     def tearDown(self):
         test_helpers.remove_output_files(list_of_names=["AbinsAdvanced"])
@@ -61,17 +66,23 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
     def test_wrong_fwhm(self):
         # fwhm should be positive
         abins.parameters.instruments["fwhm"] = -1.0
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
         # fwhm should be larger than 0
         abins.parameters.instruments["fwhm"] = 0.0
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
         # fwhm should be smaller than 10
         abins.parameters.instruments["fwhm"] = 10.0
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     # Tests for TOSCA parameters
@@ -79,169 +90,231 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
 
         # final energy should be a float not str
         abins.parameters.instruments["TOSCA"]["final_neutron_energy"] = "0"
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
         # final energy should be of float type not integer
         abins.parameters.instruments["TOSCA"]["final_neutron_energy"] = 1
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
         # final energy should be positive
         abins.parameters.instruments["TOSCA"]["final_neutron_energy"] = -1.0
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_tosca_cos_scattering_angle(self):
 
         # cosines of scattering angle is float
         abins.parameters.instruments["TOSCA"]["cos_scattering_angle"] = "0.0334"
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
         # TOSCA_cos_scattering_angle cannot be integer
         abins.parameters.instruments["TOSCA"]["cos_scattering_angle"] = 1
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_tosca_resolution_constant_A(self):
         # TOSCA constant should be float
         abins.parameters.instruments["TOSCA"]["a"] = "wrong"
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_tosca_resolution_constant_B(self):
         abins.parameters.instruments["TOSCA"]["b"] = "wrong"
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_tosca_resolution_constant_C(self):
         abins.parameters.instruments["TOSCA"]["c"] = "wrong"
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     # tests for folders
     def test_wrong_dft_group(self):
         # name should be of type str
         abins.parameters.hdf_groups["ab_initio_data"] = 2
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
         # name of group cannot be an empty string
         abins.parameters.hdf_groups["ab_initio_data"] = ""
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_powder_data_group(self):
         # name should be of type str
         abins.parameters.hdf_groups["powder_data"] = 2
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
         # name of group cannot be an empty string
         abins.parameters.hdf_groups["powder_data"] = ""
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_crystal_data_group(self):
         # name should be of type str
-        abins.parameters.hdf_groups["crystal_data"]= 2
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        abins.parameters.hdf_groups["crystal_data"] = 2
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
         # name of group cannot be an empty string
-        abins.parameters.hdf_groups["crystal_data"]= ""
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        abins.parameters.hdf_groups["crystal_data"] = ""
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_powder_s_data_group(self):
         # name should be of type str
         abins.parameters.hdf_groups["s_data"] = 2
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
         # name of group cannot be an empty string
         abins.parameters.hdf_groups["s_data"] = ""
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     def test_doubled_name(self):
         # Wrong scenario: two groups with the same name
         abins.parameters.hdf_groups["ab_initio_data"] = "NiceName"
-        abins.parameters.hdf_groups["powder_data"]= "NiceName"
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        abins.parameters.hdf_groups["powder_data"] = "NiceName"
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_min_wavenumber(self):
         # minimum wavenumber cannot be negative
         abins.parameters.sampling["min_wavenumber"] = -0.001
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
         # minimum wavenumber cannot be int
         abins.parameters.sampling["min_wavenumber"] = 1
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_max_wavenumber(self):
         # maximum wavenumber cannot be negative
         abins.parameters.sampling["max_wavenumber"] = -0.01
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
         # maximum wavenumber cannot be integer
         abins.parameters.sampling["max_wavenumber"] = 10
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_energy_window(self):
         # min_wavenumber must be smaller than max_wavenumber
         abins.parameters.sampling["min_wavenumber"] = 1000.0
         abins.parameters.sampling["max_wavenumber"] = 10.0
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_s_absolute_threshold(self):
         abins.parameters.sampling["s_absolute_threshold"] = 1
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
         abins.parameters.sampling["s_absolute_threshold"] = -0.01
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
         abins.parameters.sampling["s_absolute_threshold"] = "Wrong value"
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_s_relative_threshold(self):
         abins.parameters.sampling["s_relative_threshold"] = 1
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
         abins.parameters.sampling["s_relative_threshold"] = -0.01
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
         abins.parameters.sampling["s_relative_threshold"] = "Wrong value"
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_optimal_size(self):
         # optimal size cannot be negative
         abins.parameters.performance["optimal_size"] = -10000
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
         # optimal size must be of type int
         abins.parameters.performance["optimal_size"] = 50.0
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+        self.assertRaises(RuntimeError,
+                          Abins,
+                          VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_threads(self):
         if PATHOS_FOUND:
             abins.parameters.performance["threads"] = -1
-            self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
+            self.assertRaises(RuntimeError,
+                              Abins,
+                              VibrationalOrPhononFile=self._Si2 + ".phonon",
                               OutputWorkspace=self._wrk_name)
 
     def test_good_case(self):
@@ -252,6 +325,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         # Builtin cmp has been removed in Python 3
         def _cmp(a, b):
             return (a > b) - (a < b)
+
         self.assertAlmostEqual(0, _cmp(good_names, names))
 
 

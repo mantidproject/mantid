@@ -24,6 +24,5 @@ main_window_view = sans_data_processor_gui.SANSDataProcessorGui(parent, flags)
 
 run_tab_presenter = RunTabPresenter(SANSFacility.ISIS, view=main_window_view)
 
-
 # Show
 main_window_view.show()

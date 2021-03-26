@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, anomalous-backslash-in-string, attribute-defined-outside-init
-
 """
 @author Jose Borreguero, NScD
 @date October 06, 2013
@@ -48,8 +47,7 @@ class StretchedExpFT(IFunction1D):
             F(E) is normalized:
                 \int_{-infty}^{infty} dE F(E) = 1
         """
-        parms, de, energies, fourier = function1Dcommon(
-            self, xvals, **optparms)
+        parms, de, energies, fourier = function1Dcommon(self, xvals, **optparms)
         if parms is None:
             return fourier  # return zeros if parameters not valid
         transform = parms['Height'] * \

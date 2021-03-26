@@ -24,7 +24,7 @@ def run_integral(integral_ranges, mask, integral, detector, state):
     ranges = parse_range(integral_ranges)
     input_workspaces = load_workspace(state)
 
-    is_multi_range = len (ranges) > 1
+    is_multi_range = len(ranges) > 1
 
     output_workspaces = []
     for input_workspace in input_workspaces:
@@ -38,8 +38,8 @@ def run_integral(integral_ranges, mask, integral, detector, state):
 
         x_dim, y_dim = get_detector_size_from_sans_file(state, detector)
 
-        output_workspace = integrate_ranges(ranges, integral, mask, detector, input_workspace_name, input_workspace, x_dim, y_dim,
-                                            is_multi_range)
+        output_workspace = integrate_ranges(ranges, integral, mask, detector, input_workspace_name, input_workspace,
+                                            x_dim, y_dim, is_multi_range)
         plot_graph(output_workspace)
 
         output_workspaces.append(output_workspace)
@@ -47,9 +47,11 @@ def run_integral(integral_ranges, mask, integral, detector, state):
     return output_workspaces
 
 
-def integrate_ranges(ranges, integral, mask, detector, input_workspace_name, input_workspace, x_dim, y_dim, is_multi_range):
+def integrate_ranges(ranges, integral, mask, detector, input_workspace_name, input_workspace, x_dim, y_dim,
+                     is_multi_range):
     for integral_range in ranges:
-        output_workspace = generate_output_workspace_name(integral_range, integral, mask, detector, input_workspace_name)
+        output_workspace = generate_output_workspace_name(integral_range, integral, mask, detector,
+                                                          input_workspace_name)
         output_workspace = run_algorithm(input_workspace, integral_range, integral, output_workspace, x_dim, y_dim)
 
         if is_multi_range:
@@ -69,15 +71,19 @@ def parse_range(range):
 
 
 def load_workspace(state):
-    workspace_to_name = {SANSDataType.SAMPLE_SCATTER: "SampleScatterWorkspace",
-                         SANSDataType.SAMPLE_TRANSMISSION: "SampleTransmissionWorkspace",
-                         SANSDataType.SAMPLE_DIRECT: "SampleDirectWorkspace",
-                         SANSDataType.CAN_SCATTER: "CanScatterWorkspace",
-                         SANSDataType.CAN_TRANSMISSION: "CanTransmissionWorkspace",
-                         SANSDataType.CAN_DIRECT: "CanDirectWorkspace"}
+    workspace_to_name = {
+        SANSDataType.SAMPLE_SCATTER: "SampleScatterWorkspace",
+        SANSDataType.SAMPLE_TRANSMISSION: "SampleTransmissionWorkspace",
+        SANSDataType.SAMPLE_DIRECT: "SampleDirectWorkspace",
+        SANSDataType.CAN_SCATTER: "CanScatterWorkspace",
+        SANSDataType.CAN_TRANSMISSION: "CanTransmissionWorkspace",
+        SANSDataType.CAN_DIRECT: "CanDirectWorkspace"
+    }
 
-    workspace_to_monitor = {SANSDataType.SAMPLE_SCATTER: "SampleScatterMonitorWorkspace",
-                            SANSDataType.CAN_SCATTER: "CanScatterMonitorWorkspace"}
+    workspace_to_monitor = {
+        SANSDataType.SAMPLE_SCATTER: "SampleScatterMonitorWorkspace",
+        SANSDataType.CAN_SCATTER: "CanScatterMonitorWorkspace"
+    }
 
     workspaces, monitors = provide_loaded_data(state, False, workspace_to_name, workspace_to_monitor)
 
@@ -88,9 +94,7 @@ def crop_workspace(component, workspace):
     crop_name = "CropToComponent"
     component_to_crop = DetectorType(component)
     component_to_crop = get_component_name(workspace, component_to_crop)
-    crop_options = {"InputWorkspace": workspace,
-                    "OutputWorkspace": EMPTY_NAME,
-                    "ComponentNames": component_to_crop}
+    crop_options = {"InputWorkspace": workspace, "OutputWorkspace": EMPTY_NAME, "ComponentNames": component_to_crop}
 
     crop_alg = create_unmanaged_algorithm(crop_name, **crop_options)
     crop_alg.execute()
@@ -104,18 +108,32 @@ def run_algorithm(input_workspace, range, integral, output_workspace, x_dim, y_d
     hv_max = range[1]
 
     if integral == IntegralEnum.Horizontal:
-        output_workspace = ConvertAxesToRealSpace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, VerticalAxis='x',
-                                                  HorizontalAxis='y', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
-        output_workspace = SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min,
+        output_workspace = ConvertAxesToRealSpace(InputWorkspace=input_workspace,
+                                                  OutputWorkspace=output_workspace,
+                                                  VerticalAxis='x',
+                                                  HorizontalAxis='y',
+                                                  NumberVerticalBins=int(x_dim),
+                                                  NumberHorizontalBins=int(y_dim))
+        output_workspace = SumSpectra(InputWorkspace=output_workspace,
+                                      OutputWorkspace=output_workspace,
+                                      StartWorkspaceIndex=hv_min,
                                       EndWorkspaceIndex=hv_max)
     elif integral == IntegralEnum.Vertical:
-        output_workspace = ConvertAxesToRealSpace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, VerticalAxis='y',
-                                                  HorizontalAxis='x', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
-        output_workspace = SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min,
+        output_workspace = ConvertAxesToRealSpace(InputWorkspace=input_workspace,
+                                                  OutputWorkspace=output_workspace,
+                                                  VerticalAxis='y',
+                                                  HorizontalAxis='x',
+                                                  NumberVerticalBins=int(x_dim),
+                                                  NumberHorizontalBins=int(y_dim))
+        output_workspace = SumSpectra(InputWorkspace=output_workspace,
+                                      OutputWorkspace=output_workspace,
+                                      StartWorkspaceIndex=hv_min,
                                       EndWorkspaceIndex=hv_max)
     elif integral == IntegralEnum.Time:
-        output_workspace = SumSpectra(InputWorkspace=input_workspace, OutputWorkspace=output_workspace,
-                                      StartWorkspaceIndex=hv_min, EndWorkspaceIndex=hv_max)
+        output_workspace = SumSpectra(InputWorkspace=input_workspace,
+                                      OutputWorkspace=output_workspace,
+                                      StartWorkspaceIndex=hv_min,
+                                      EndWorkspaceIndex=hv_max)
 
     return output_workspace
 
@@ -124,8 +142,7 @@ def generate_output_workspace_name(range, integral, mask, detector, input_worksp
     integral_string = integral.value
     detector_string = detector.value
 
-    return 'Run:{}, Range:{}, Direction:{}, Detector:{}, Mask:{}'.format(input_workspace_name, range,
-                                                                         integral_string,
+    return 'Run:{}, Range:{}, Direction:{}, Detector:{}, Mask:{}'.format(input_workspace_name, range, integral_string,
                                                                          detector_string, mask)
 
 
@@ -153,10 +170,10 @@ def get_detector_size_from_sans_file(state, detector):
         y_dim = get_named_elements_from_ipf_file(instrument_file[1], "high-angle-detector-num-rows",
                                                  float)['high-angle-detector-num-rows']
     else:
-        x_dim = get_named_elements_from_ipf_file(instrument_file[1], "low-angle-detector-num-columns", float)[
-                                                 'low-angle-detector-num-columns']
-        y_dim = get_named_elements_from_ipf_file(instrument_file[1], "low-angle-detector-num-rows", float)[
-                                                 'low-angle-detector-num-rows']
+        x_dim = get_named_elements_from_ipf_file(instrument_file[1], "low-angle-detector-num-columns",
+                                                 float)['low-angle-detector-num-columns']
+        y_dim = get_named_elements_from_ipf_file(instrument_file[1], "low-angle-detector-num-rows",
+                                                 float)['low-angle-detector-num-rows']
 
     return x_dim, y_dim
 

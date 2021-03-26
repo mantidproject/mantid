@@ -35,7 +35,10 @@ class DMOL3Loader(AbInitioLoader):
         """
         data = {}  # container to store read data
 
-        with io.open(self._clerk.get_input_filename(), "rb", ) as dmol3_file:
+        with io.open(
+                self._clerk.get_input_filename(),
+                "rb",
+        ) as dmol3_file:
 
             # Move read file pointer to the last calculation recorded in the .outmol file. First calculation could be
             # geometry optimization. The last calculation in the file is expected to be calculation of vibrational data.
@@ -122,8 +125,12 @@ class DMOL3Loader(AbInitioLoader):
             au2ang = ATOMIC_LENGTH_2_ANGSTROM
             float_type = FLOAT_TYPE
 
-            atoms["atom_{}".format(atom_indx)] = {"symbol": symbol, "mass": atom.mass, "sort": atom_indx,
-                                                  "coord": np.asarray(entries[1:]).astype(dtype=float_type) * au2ang}
+            atoms["atom_{}".format(atom_indx)] = {
+                "symbol": symbol,
+                "mass": atom.mass,
+                "sort": atom_indx,
+                "coord": np.asarray(entries[1:]).astype(dtype=float_type) * au2ang
+            }
 
             atom_indx += 1
 
@@ -144,8 +151,7 @@ class DMOL3Loader(AbInitioLoader):
         zdisp = []
 
         # parse block with frequencies and atomic displacements
-        while not (self._parser.block_end(file_obj=file_obj, msg=end_msgs)
-                   or self._parser.file_end(file_obj=file_obj)):
+        while not (self._parser.block_end(file_obj=file_obj, msg=end_msgs) or self._parser.file_end(file_obj=file_obj)):
 
             self._read_freq_block(file_obj=file_obj, freq=freq)
             self._read_coord_block(file_obj=file_obj, xdisp=xdisp, ydisp=ydisp, zdisp=zdisp)
@@ -189,8 +195,8 @@ class DMOL3Loader(AbInitioLoader):
         # displacements in any normal mode is normalised (equal 1).
         # num_freq, num_atom, dim -> num_freq, num_atom, dim, dim -> num_freq, num_atom -> num_freq
         displacements /= self._norm
-        norm = np.sum(np.trace(np.einsum('lki, lkj->lkij', displacements, displacements.conjugate()),
-                               axis1=2, axis2=3), axis=1)
+        norm = np.sum(np.trace(np.einsum('lki, lkj->lkij', displacements, displacements.conjugate()), axis1=2, axis2=3),
+                      axis=1)
         displacements = np.einsum('ijk, i-> ijk', displacements, 1.0 / np.sqrt(norm))
 
         # displacements[num_atoms, num_freq, dim]

@@ -23,9 +23,9 @@ class ReduceMARIFromFile(ReductionWrapper):
         prop['sample_run'] = 11001
         prop['wb_run'] = 11060
         prop['incident_energy'] = 12
-        prop['energy_bins'] = [-11,0.05,11]
+        prop['energy_bins'] = [-11, 0.05, 11]
 
-       #prop['sum_runs'] = False
+        #prop['sum_runs'] = False
 
         # Absolute units reduction properties.
         prop['monovan_run'] = 11015
@@ -45,16 +45,17 @@ class ReduceMARIFromFile(ReductionWrapper):
         prop['hard_mask_file'] = "mar11015.msk"
         prop['det_cal_file'] = 11060
         prop['save_format'] = ''
-        prop['nullify_negative_signal']=True
+        prop['nullify_negative_signal'] = True
         return prop
-      #
+
+    #
 
     @iliad
-    def reduce(self,input_file=None,output_directory=None):
+    def reduce(self, input_file=None, output_directory=None):
         """Method executes reduction over single file
          Overload only if custom reduction is needed
         """
-        converted_to_energy_transfer_ws = ReductionWrapper.reduce(self,input_file,output_directory)
+        converted_to_energy_transfer_ws = ReductionWrapper.reduce(self, input_file, output_directory)
         #SaveNexus(outWS,Filename = 'MARNewReduction.nxs')
         return converted_to_energy_transfer_ws
 
@@ -74,7 +75,7 @@ class ReduceMARIFromFile(ReductionWrapper):
             # sample run is more then just list of runs, so we use
             # the formalization below to access its methods
             run_num = PropertyManager.sample_run.run_number()
-            name = "RUN{0}atEi{1:<3.2f}meV_One2One".format(run_num ,ei)
+            name = "RUN{0}atEi{1:<3.2f}meV_One2One".format(run_num, ei)
             return name
 
         # Uncomment this to use custom filename function
@@ -83,9 +84,10 @@ class ReduceMARIFromFile(ReductionWrapper):
         #return lambda : custom_name(self.reducer.prop_man)
         # use this method to use standard file name generating function
         return None
+
     #
 
-    def do_preprocessing(self,reducer,ws):
+    def do_preprocessing(self, reducer, ws):
         """ Custom function, applied to each run or every workspace, the run is divided to
             in multirep mode
             Applied after diagnostics but before any further reduction is invoked.
@@ -101,9 +103,10 @@ class ReduceMARIFromFile(ReductionWrapper):
             Must return pointer to the preprocessed workspace
         """
         return ws
+
     #
 
-    def do_postprocessing(self,reducer,ws):
+    def do_postprocessing(self, reducer, ws):
         """ Custom function, applied to each reduced run or every reduced workspace,
             the run is divided into, in multirep mode.
             Applied after reduction is completed but before saving the result.
@@ -125,19 +128,21 @@ class ReduceMARIFromFile(ReductionWrapper):
         """
         return ws
 
-    def __init__(self,web_var_val=None):
+    def __init__(self, web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var_val)
+        ReductionWrapper.__init__(self, 'MAR', web_var_val)
         Mt = MethodType(self.do_preprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, 'do_preprocessing', Mt)
         Mt = MethodType(self.do_postprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, 'do_postprocessing', Mt)
+
+
 #-------------------------------------------------------------------------------------------------#
 #-------------------------------------------------------------------------------------------------#
 #-------------------------------------------------------------------------------------------------#
 
 
-def main(input_file=None,output_directory=None):
+def main(input_file=None, output_directory=None):
     """ This method is used to run code from web service
         and should not be touched except changing the name of the
         particular ReductionWrapper class (e.g. ReduceMARI here)
@@ -149,27 +154,27 @@ def main(input_file=None,output_directory=None):
     """
     # note web variables initialization
     rd = ReduceMARIFromFile(web_var)
-    rd.reduce(input_file,output_directory)
+    rd.reduce(input_file, output_directory)
     # change to the name of the folder to save data to
     return ''
+
 
 #----------------------------------------------------------------------------------------------------------------------
 
 
 class ReduceMARIFromWorkspace(ReductionWrapper):
-
     @MainProperties
     def def_main_properties(self):
         """Define main properties used in reduction """
         prop = {}
-        prop['sample_run'] = Load(Filename='MAR11001.RAW',OutputWorkspace='MAR11001.RAW')
-       # WB workspace
-        prop['wb_run'] = Load(Filename='MAR11060.RAW',OutputWorkspace='MAR11060.RAW')
+        prop['sample_run'] = Load(Filename='MAR11001.RAW', OutputWorkspace='MAR11001.RAW')
+        # WB workspace
+        prop['wb_run'] = Load(Filename='MAR11060.RAW', OutputWorkspace='MAR11060.RAW')
         prop['incident_energy'] = 12
-        prop['energy_bins'] = [-11,0.05,11]
+        prop['energy_bins'] = [-11, 0.05, 11]
 
-      # Absolute units reduction properties.
-        prop['monovan_run'] = Load(Filename='MAR11015.RAW',OutputWorkspace='MAR11015.RAW')
+        # Absolute units reduction properties.
+        prop['monovan_run'] = Load(Filename='MAR11015.RAW', OutputWorkspace='MAR11015.RAW')
         prop['sample_mass'] = 10
         prop['sample_rmm'] = 435.96
 
@@ -185,26 +190,28 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
         prop['map_file'] = "mari_res.map"
         prop['monovan_mapfile'] = "mari_res.map"
         prop['hard_mask_file'] = "mar11015.msk"
-      # MARI calibration uses one of data files defined on instrument.  Here
-      # vanadium run is used for calibration
-      # TODO: Why not workspace?
+        # MARI calibration uses one of data files defined on instrument.  Here
+        # vanadium run is used for calibration
+        # TODO: Why not workspace?
         prop['det_cal_file'] = "11060"
         prop['save_format'] = ''
-        prop['nullify_negative_signal']=True
+        prop['nullify_negative_signal'] = True
         return prop
-      #
+
+    #
 
     @iliad
-    def reduce(self,input_file=None,output_directory=None):
+    def reduce(self, input_file=None, output_directory=None):
         """ Method executes reduction over single file
          Overload only if custom reduction is needed
      """
-        ws = ReductionWrapper.reduce(self,input_file,output_directory)
-     #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
+        ws = ReductionWrapper.reduce(self, input_file, output_directory)
+        #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
         return ws
+
     #
 
-    def do_preprocessing(self,reducer,ws):
+    def do_preprocessing(self, reducer, ws):
         """ Custom function, applied to each run or every workspace, the run is divided to
             in multirep mode
             Applied after diagnostics but before any further reduction is invoked.
@@ -220,9 +227,10 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
             Must return pointer to the preprocessed workspace
         """
         return ws
+
     #
 
-    def do_postprocessing(self,reducer,ws):
+    def do_postprocessing(self, reducer, ws):
         """ Custom function, applied to each reduced run or every reduced workspace,
             the run is divided into, in multirep mode.
             Applied after reduction is completed but before saving the result.
@@ -244,30 +252,31 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
         """
         return ws
 
-    def __init__(self,web_var_val=None):
+    def __init__(self, web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var_val)
+        ReductionWrapper.__init__(self, 'MAR', web_var_val)
         Mt = MethodType(self.do_preprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, 'do_preprocessing', Mt)
         Mt = MethodType(self.do_postprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, 'do_postprocessing', Mt)
+
+
 #----------------------------------------------------------------------------------------------------------------------
 
 
 class ReduceMARIMon2Norm(ReductionWrapper):
-
     @MainProperties
     def def_main_properties(self):
         """ Define main properties used in reduction """
         prop = {}
-        prop['sample_run'] = Load(Filename='MAR11001.RAW',OutputWorkspace='MAR11001.RAW')
-       # WB workspace
-        prop['wb_run'] = Load(Filename='MAR11060.RAW',OutputWorkspace='MAR11060.RAW')
+        prop['sample_run'] = Load(Filename='MAR11001.RAW', OutputWorkspace='MAR11001.RAW')
+        # WB workspace
+        prop['wb_run'] = Load(Filename='MAR11060.RAW', OutputWorkspace='MAR11060.RAW')
         prop['incident_energy'] = 12
-        prop['energy_bins'] = [-11,0.05,11]
+        prop['energy_bins'] = [-11, 0.05, 11]
 
-      # Absolute units reduction properties.
-        prop['monovan_run'] = 11015 #Load(Filename='MAR11015.RAW',OutputWorkspace='MAR11015.RAW')
+        # Absolute units reduction properties.
+        prop['monovan_run'] = 11015  #Load(Filename='MAR11015.RAW',OutputWorkspace='MAR11015.RAW')
         prop['sample_mass'] = 10
         prop['sample_rmm'] = 435.96
         return prop
@@ -282,29 +291,31 @@ class ReduceMARIMon2Norm(ReductionWrapper):
         prop['map_file'] = "mari_res.map"
         prop['monovan_mapfile'] = "mari_res.map"
         prop['hard_mask_file'] = "mar11015.msk"
-      #prop['hardmaskOnly'] ="mar11015.msk"
+        #prop['hardmaskOnly'] ="mar11015.msk"
         prop['normalise_method'] = 'monitor-2'
-      # reduction from workspace currently needs detector_calibration file
-      # MARI calibration uses one of data files defined on instrument.  Here
-      # vanadium run is used for calibration
-      # TODO: Why not workspace?, check it
+        # reduction from workspace currently needs detector_calibration file
+        # MARI calibration uses one of data files defined on instrument.  Here
+        # vanadium run is used for calibration
+        # TODO: Why not workspace?, check it
         prop['det_cal_file'] = "MAR11060.raw"
         prop['save_format'] = []
-        prop['nullify_negative_signal']=True
+        prop['nullify_negative_signal'] = True
         return prop
-      #
+
+    #
 
     @iliad
-    def reduce(self,input_file=None,output_directory=None):
+    def reduce(self, input_file=None, output_directory=None):
         """ Method executes reduction over single file
          Overload only if custom reduction is needed
      """
-        outWS = ReductionWrapper.reduce(self,input_file,output_directory)
-     #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
+        outWS = ReductionWrapper.reduce(self, input_file, output_directory)
+        #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
         return outWS
+
     #
 
-    def do_preprocessing(self,reducer,ws):
+    def do_preprocessing(self, reducer, ws):
         """ Custom function, applied to each run or every workspace, the run is divided to
             in multirep mode
             Applied after diagnostics but before any further reduction is invoked.
@@ -320,9 +331,10 @@ class ReduceMARIMon2Norm(ReductionWrapper):
             Must return pointer to the preprocessed workspace
         """
         return ws
+
     #
 
-    def do_postprocessing(self,reducer,ws):
+    def do_postprocessing(self, reducer, ws):
         """ Custom function, applied to each reduced run or every reduced workspace,
             the run is divided into, in multirep mode.
             Applied after reduction is completed but before saving the result.
@@ -344,13 +356,15 @@ class ReduceMARIMon2Norm(ReductionWrapper):
         """
         return ws
 
-    def __init__(self,web_var_val=None):
+    def __init__(self, web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var_val)
+        ReductionWrapper.__init__(self, 'MAR', web_var_val)
         Mt = MethodType(self.do_preprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, 'do_preprocessing', Mt)
         Mt = MethodType(self.do_postprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, 'do_postprocessing', Mt)
+
+
 #----------------------------------------------------------------------------------------------------------------------
 
 
@@ -359,16 +373,16 @@ class MARIReductionSum(ReductionWrapper):
     def def_main_properties(self):
         """ Define main properties used in reduction """
         prop = {}
-        prop['sample_run'] = [11001,11015]
+        prop['sample_run'] = [11001, 11015]
         prop['wb_run'] = 11060
         prop['incident_energy'] = 11
-        prop['energy_bins'] = [-11,0.05,11]
+        prop['energy_bins'] = [-11, 0.05, 11]
         prop['sum_runs'] = True
 
-      # Absolute units reduction properties.
-       #prop['monovan_run'] = 11015
-       #prop['sample_mass'] = 32.58
-       #prop['sample_rmm'] = 50.9415# 435.96
+        # Absolute units reduction properties.
+        #prop['monovan_run'] = 11015
+        #prop['sample_mass'] = 32.58
+        #prop['sample_rmm'] = 50.9415# 435.96
         return prop
 
     @AdvancedProperties
@@ -381,23 +395,25 @@ class MARIReductionSum(ReductionWrapper):
         prop['map_file'] = "mari_res.map"
         prop['monovan_mapfile'] = "mari_res.map"
         prop['hard_mask_file'] = "mar11015.msk"
-      #prop['det_cal_file'] =11060
+        #prop['det_cal_file'] =11060
         prop['save_format'] = ''
-        prop['nullify_negative_signal']=True
+        prop['nullify_negative_signal'] = True
         return prop
-      #
+
+    #
 
     @iliad
-    def reduce(self,input_file=None,output_directory=None):
+    def reduce(self, input_file=None, output_directory=None):
         """ Method executes reduction over single file
          Overload only if custom reduction is needed
      """
-        ws = ReductionWrapper.reduce(self,input_file,output_directory)
-     #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
+        ws = ReductionWrapper.reduce(self, input_file, output_directory)
+        #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
         return ws
+
     #
 
-    def do_preprocessing(self,reducer,ws):
+    def do_preprocessing(self, reducer, ws):
         """ Custom function, applied to each run or every workspace, the run is divided to
             in multirep mode
             Applied after diagnostics but before any further reduction is invoked.
@@ -413,9 +429,10 @@ class MARIReductionSum(ReductionWrapper):
             Must return pointer to the preprocessed workspace
         """
         return ws
+
     #
 
-    def do_postprocessing(self,reducer,ws):
+    def do_postprocessing(self, reducer, ws):
         """ Custom function, applied to each reduced run or every reduced workspace,
             the run is divided into, in multirep mode.
             Applied after reduction is completed but before saving the result.
@@ -437,30 +454,31 @@ class MARIReductionSum(ReductionWrapper):
         """
         return ws
 
-    def __init__(self,web_var_val=None):
+    def __init__(self, web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var_val)
+        ReductionWrapper.__init__(self, 'MAR', web_var_val)
         Mt = MethodType(self.do_preprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, 'do_preprocessing', Mt)
         Mt = MethodType(self.do_postprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, 'do_postprocessing', Mt)
+
+
 #----------------------------------------------------------------------------------------------------------------------
 
 
 class ReduceMARIMonitorsSeparate(ReductionWrapper):
-
     @MainProperties
     def def_main_properties(self):
         """ Define main properties used in reduction """
         prop = {}
-        prop['sample_run'] = 11001 #
-       # WB workspace Simulate workspace without monitors
-        prop['wb_run'] = Load(Filename='MAR11060.RAW',OutputWorkspace='MAR11060.RAW',LoadMonitors='Exclude')
+        prop['sample_run'] = 11001  #
+        # WB workspace Simulate workspace without monitors
+        prop['wb_run'] = Load(Filename='MAR11060.RAW', OutputWorkspace='MAR11060.RAW', LoadMonitors='Exclude')
         prop['incident_energy'] = 12
-        prop['energy_bins'] = [-11,0.05,11]
+        prop['energy_bins'] = [-11, 0.05, 11]
 
-      # Absolute units reduction properties.
-        prop['monovan_run'] = 11015 #
+        # Absolute units reduction properties.
+        prop['monovan_run'] = 11015  #
         prop['sample_mass'] = 10
         prop['sample_rmm'] = 435.96
 
@@ -476,30 +494,31 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
         prop['map_file'] = "mari_res.map"
         prop['monovan_mapfile'] = "mari_res.map"
         prop['hard_mask_file'] = "mar11015.msk"
-      # MARI calibration uses one of data files defined on instrument.  Here
-      # vanadium run is used for calibration
-      # TODO: Why not workspace?
+        # MARI calibration uses one of data files defined on instrument.  Here
+        # vanadium run is used for calibration
+        # TODO: Why not workspace?
         prop['det_cal_file'] = "11060"
         prop['save_format'] = ''
         prop['load_monitors_with_workspace'] = False
-        prop['nullify_negative_signal']=False
-        prop['mapmask_ref_ws'] = Load(Filename='MAR11001.RAW',
-                                      OutputWorkspace='MAR11001.RAW',LoadMonitors='Include')
+        prop['nullify_negative_signal'] = False
+        prop['mapmask_ref_ws'] = Load(Filename='MAR11001.RAW', OutputWorkspace='MAR11001.RAW', LoadMonitors='Include')
 
         return prop
-      #
+
+    #
 
     @iliad
-    def reduce(self,input_file=None,output_directory=None):
+    def reduce(self, input_file=None, output_directory=None):
         """ Method executes reduction over single file
          Overload only if custom reduction is needed
      """
-        outWS = ReductionWrapper.reduce(self,input_file,output_directory)
-     #SaveNexus(outWS,Filename = 'MARNewReduction.nxs')
+        outWS = ReductionWrapper.reduce(self, input_file, output_directory)
+        #SaveNexus(outWS,Filename = 'MARNewReduction.nxs')
         return outWS
+
     #
 
-    def do_preprocessing(self,reducer,ws):
+    def do_preprocessing(self, reducer, ws):
         """ Custom function, applied to each run or every workspace, the run is divided to
             in multirep mode
             Applied after diagnostics but before any further reduction is invoked.
@@ -515,9 +534,10 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
             Must return pointer to the preprocessed workspace
         """
         return ws
+
     #
 
-    def do_postprocessing(self,reducer,ws):
+    def do_postprocessing(self, reducer, ws):
         """ Custom function, applied to each reduced run or every reduced workspace,
             the run is divided into, in multirep mode.
             Applied after reduction is completed but before saving the result.
@@ -539,13 +559,13 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
         """
         return ws
 
-    def __init__(self,web_var_val=None):
+    def __init__(self, web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var_val)
+        ReductionWrapper.__init__(self, 'MAR', web_var_val)
         Mt = MethodType(self.do_preprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, 'do_preprocessing', Mt)
         Mt = MethodType(self.do_postprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, 'do_postprocessing', Mt)
 
 
 class ReduceMARIAutoEi(ReductionWrapper):
@@ -553,11 +573,11 @@ class ReduceMARIAutoEi(ReductionWrapper):
     def def_main_properties(self):
         """ Define main properties used in reduction """
         prop = {}
-        ws = Load(Filename='MAR11001.RAW',OutputWorkspace='MAR11001')
+        ws = Load(Filename='MAR11001.RAW', OutputWorkspace='MAR11001')
         # Add these log values to simulated workspace to represent real sample logs
-        AddTimeSeriesLog(ws, Name="fermi_delay", Time="2005-01-13T22:55:56", Value=6530 ,DeleteExisting=True)
+        AddTimeSeriesLog(ws, Name="fermi_delay", Time="2005-01-13T22:55:56", Value=6530, DeleteExisting=True)
         AddTimeSeriesLog(ws, Name="fermi_delay", Time="2005-01-14T09:23:34", Value=6530)
-        AddTimeSeriesLog(ws, Name="fermi_speed", Time="2005-01-13T22:55:56", Value=400 ,DeleteExisting=True)
+        AddTimeSeriesLog(ws, Name="fermi_speed", Time="2005-01-13T22:55:56", Value=400, DeleteExisting=True)
         AddTimeSeriesLog(ws, Name="fermi_speed", Time="2005-01-14T09:23:34", Value=400)
         #AddTimeSeriesLog(mon_ws, Name="is_running", Time="2010-01-01T00:00:00", Value=1 ,DeleteExisting=True)
         #AddTimeSeriesLog(mon_ws, Name="is_running", Time="2010-01-01T00:30:00", Value=1 )
@@ -566,9 +586,9 @@ class ReduceMARIAutoEi(ReductionWrapper):
         prop['wb_run'] = 11060
         prop['incident_energy'] = 'auto'
         # Relative energy ranges
-        prop['energy_bins'] = [-11./13.,0.05/13.,11./13.]
+        prop['energy_bins'] = [-11. / 13., 0.05 / 13., 11. / 13.]
 
-       #prop['sum_runs'] = False
+        #prop['sum_runs'] = False
 
         # Absolute units reduction properties.
         prop['monovan_run'] = 11015
@@ -589,16 +609,17 @@ class ReduceMARIAutoEi(ReductionWrapper):
         prop['det_cal_file'] = 11060
         prop['save_format'] = ''
         #prop['check_background'] = False
-        prop['nullify_negative_signal']=True
+        prop['nullify_negative_signal'] = True
         return prop
-      #
+
+    #
 
     @iliad
-    def reduce(self,input_file=None,output_directory=None):
+    def reduce(self, input_file=None, output_directory=None):
         """Method executes reduction over single file
          Overload only if custom reduction is needed
         """
-        converted_to_energy_transfer_ws = ReductionWrapper.reduce(self,input_file,output_directory)
+        converted_to_energy_transfer_ws = ReductionWrapper.reduce(self, input_file, output_directory)
         #SaveNexus(outWS,Filename = 'MARNewReduction.nxs')
         return converted_to_energy_transfer_ws
 
@@ -618,7 +639,7 @@ class ReduceMARIAutoEi(ReductionWrapper):
             # sample run is more then just list of runs, so we use
             # the formalization below to access its methods
             run_num = PropertyManager.sample_run.run_number()
-            name = "RUN{0}atEi{1:<3.2f}meV_One2One".format(run_num ,ei)
+            name = "RUN{0}atEi{1:<3.2f}meV_One2One".format(run_num, ei)
             return name
 
         # Uncomment this to use custom filename function
@@ -627,9 +648,10 @@ class ReduceMARIAutoEi(ReductionWrapper):
         #return lambda : custom_name(self.reducer.prop_man)
         # use this method to use standard file name generating function
         return None
+
     #
 
-    def do_preprocessing(self,reducer,ws):
+    def do_preprocessing(self, reducer, ws):
         """ Custom function, applied to each run or every workspace, the run is divided to
             in multirep mode
             Applied after diagnostics but before any further reduction is invoked.
@@ -645,9 +667,10 @@ class ReduceMARIAutoEi(ReductionWrapper):
             Must return pointer to the preprocessed workspace
         """
         return ws
+
     #
 
-    def do_postprocessing(self,reducer,ws):
+    def do_postprocessing(self, reducer, ws):
         """ Custom function, applied to each reduced run or every reduced workspace,
             the run is divided into, in multirep mode.
             Applied after reduction is completed but before saving the result.
@@ -669,7 +692,7 @@ class ReduceMARIAutoEi(ReductionWrapper):
         """
         return ws
 
-    def eval_absorption_corrections(self,test_ws=None):
+    def eval_absorption_corrections(self, test_ws=None):
         """ The method to evaluate the speed and efficiency of the absorption corrections procedure,
             before applying your corrections to the whole workspace and all sample runs.
 
@@ -695,19 +718,19 @@ class ReduceMARIAutoEi(ReductionWrapper):
         """
 
         # Gain access to the property manager:
-        propman =  rd.reducer.prop_man
+        propman = rd.reducer.prop_man
         # Set up Sample as one of:
         # 1) Cylinder([Chem_formula],[Height,Radius])
         # 2) FlatPlate([Chem_formula],[Height,Width,Thick])
         # 3) HollowCylinder([Chem_formula],[Height,InnerRadius,OuterRadius])
         # 4) Sphere([[Chem_formula],Radius)
         # The units are in cm
-        propman.correct_absorption_on = Cylinder('Fe',[10,2]) # Will be taken from def_advanced_properties
+        propman.correct_absorption_on = Cylinder('Fe', [10, 2])  # Will be taken from def_advanced_properties
         #                                prop['correct_absorption_on'] =  if not defined here
         #
         # Use Monte-Carlo integration.  Take sparse energy points and a few integration attempts
         # to increase initial speed. Increase these numbers to achieve better accuracy.
-        propman.abs_corr_info = {'EventsPerPoint':3000}#,'NumberOfWavelengthPoints':30}
+        propman.abs_corr_info = {'EventsPerPoint': 3000}  #,'NumberOfWavelengthPoints':30}
         # See MonteCarloAbsorption for all possible properties description and possibility to define
         # a sparse instrument for speed.
         #
@@ -716,24 +739,25 @@ class ReduceMARIAutoEi(ReductionWrapper):
         if test_ws is None:
             test_ws = PropertyManager.sample_run.get_workspace()
         # Define spectra list to test absorption on
-        check_spectra = [1,200]
+        check_spectra = [1, 200]
         # Evaluate corrections on the selected spectra of the workspace and the time to obtain
         # the corrections on the whole workspace.
-        corrections,time_to_correct_abs = self.evaluate_abs_corrections(test_ws,check_spectra)
+        corrections, time_to_correct_abs = self.evaluate_abs_corrections(test_ws, check_spectra)
         # When accuracy and speed of the corrections is satisfactory, copy chosen abs_corr_info
         # properties from above to the advanced_porperties area to run in reduction.
         #
         return corrections
 
-    def __init__(self,web_var_val=None):
+    def __init__(self, web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var_val)
+        ReductionWrapper.__init__(self, 'MAR', web_var_val)
         Mt = MethodType(self.do_preprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
+        DirectEnergyConversion.__setattr__(self.reducer, 'do_preprocessing', Mt)
         Mt = MethodType(self.do_postprocessing, self.reducer)
-        DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
-#-------------------------------------------------------------------------------------------------#
+        DirectEnergyConversion.__setattr__(self.reducer, 'do_postprocessing', Mt)
 
+
+#-------------------------------------------------------------------------------------------------#
 
 if __name__ == "__main__":
 
@@ -753,27 +777,27 @@ if __name__ == "__main__":
     rd.def_advanced_properties()
     rd.def_main_properties()
 
-#### uncomment rows below to generate web variables and save then to transfer to ###
+    #### uncomment rows below to generate web variables and save then to transfer to ###
     ## web services.
     run_dir = os.path.dirname(os.path.realpath(__file__))
-    filename = os.path.join(run_dir,'reduce_vars.py')
+    filename = os.path.join(run_dir, 'reduce_vars.py')
     rd.save_web_variables(filename)
 
-#### Set up time interval (sec) for reducer to check for input data file.  ####
+    #### Set up time interval (sec) for reducer to check for input data file.  ####
     #  If this file is not present and this value is 0,reduction fails
     #  if this value >0 the reduction wait until file appears on the data
     #  search path checking after time specified below.
     rd.wait_for_file = 0  # waiting time interval
 
-####get reduction parameters from properties above, override what you want locally ###
-   # and run reduction.  Overriding would have form:
-   # rd.reducer.property_name (from the dictionary above) = new value e.g.
-   # rd.reducer.energy_bins = [-40,2,40]
-   # or
-   ## rd.reducer.sum_runs = False
+    ####get reduction parameters from properties above, override what you want locally ###
+    # and run reduction.  Overriding would have form:
+    # rd.reducer.property_name (from the dictionary above) = new value e.g.
+    # rd.reducer.energy_bins = [-40,2,40]
+    # or
+    ## rd.reducer.sum_runs = False
 
-###### Run reduction over all run numbers or files assigned to ######
-     # sample_run variable
+    ###### Run reduction over all run numbers or files assigned to ######
+    # sample_run variable
 
     # return output workspace only if you are going to do
     # something with it here.  Running range of runs will return the array

@@ -39,9 +39,8 @@ def algorithm_name_and_version(docname):
     if is_alg:
         match = ALG_DOCNAME_RE.match(docname)
         if not match or len(match.groups()) != 2:
-            raise RuntimeError(
-                "Document filename '%s.rst' does not match the expected format: AlgorithmName-vX.rst"
-                % docname)
+            raise RuntimeError("Document filename '%s.rst' does not match the expected format: AlgorithmName-vX.rst" %
+                               docname)
 
         grps = match.groups()
         return (str(grps[0]), int(grps[1]))
@@ -50,9 +49,8 @@ def algorithm_name_and_version(docname):
     if is_fit:
         match = FIT_DOCNAME_RE.match(docname)
         if not match or len(match.groups()) != 1:
-            raise RuntimeError(
-                "Document filename '%s.rst' does not match the expected format: FitFunctionName.rst"
-                % docname)
+            raise RuntimeError("Document filename '%s.rst' does not match the expected format: FitFunctionName.rst" %
+                               docname)
 
         return (str(match.groups()[0]), None)
 

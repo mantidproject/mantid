@@ -16,22 +16,24 @@ from matplotlib.backend_bases import FigureManagerBase
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from workbench.plotting.plotscriptgenerator.fitting import get_fit_cmds, BASE_FIT_COMMAND, BASE_FIT_INCLUDE
 
-EXAMPLE_FIT_PROPERTIES = {'EndX': 1018,
-                          "Function": "name=Lorentzian,Amplitude=22078.3,"
-                                      "PeakCentre=492.226,FWHM=56.265",
-                          "InputWorkspace": "TestWorkspace",
-                          "MaxIterations": 5000,
-                          "Normalise": True,
-                          "Output": "TestWorkspaceOutput",
-                          "OutputCompositeMembers": True, "StartX": 5.6,
-                          "WorkspaceIndex": 4}
+EXAMPLE_FIT_PROPERTIES = {
+    'EndX': 1018,
+    "Function": "name=Lorentzian,Amplitude=22078.3,"
+    "PeakCentre=492.226,FWHM=56.265",
+    "InputWorkspace": "TestWorkspace",
+    "MaxIterations": 5000,
+    "Normalise": True,
+    "Output": "TestWorkspaceOutput",
+    "OutputCompositeMembers": True,
+    "StartX": 5.6,
+    "WorkspaceIndex": 4
+}
 
 # This is an example of whats returned by the method getFitAlgorithmParameters in the FitPropertyBrowser
 EXAMPLE_FIT_ALG_PROPERTIES = json.dumps({'name': 'Fit', 'properties': EXAMPLE_FIT_PROPERTIES, 'version': 1})
 
 
 class PlotScriptGeneratorFittingTest(unittest.TestCase):
-
     def setUp(self):
         self.mock_fig = Mock()
         self.mock_browser = Mock(spec=FitPropertyBrowser)

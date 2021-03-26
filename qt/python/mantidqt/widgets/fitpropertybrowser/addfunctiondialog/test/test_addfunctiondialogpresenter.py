@@ -29,8 +29,7 @@ class AddFunctionDialogPresenterTest(unittest.TestCase):
     def test_add_function_with_placeholder_text_uses_placeholder_if_present(self, mock_view):
         dialog = AddFunctionDialog(view=mock_view)
         with patch.object(mock_view.ui.functionBox.lineEdit(), 'text', lambda: ""):
-            with patch.object(mock_view.ui.functionBox.lineEdit(), 'placeholderText',
-                              lambda: "Gaussian"):
+            with patch.object(mock_view.ui.functionBox.lineEdit(), 'placeholderText', lambda: "Gaussian"):
                 with patch.object(mock_view, 'is_text_in_function_list', lambda x: True):
                     dialog.action_add_function()
                     mock_view.function_added.emit.assert_called_once_with("Gaussian")

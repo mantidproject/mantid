@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import Logger
 
-
 VERBOSE = False
 sans_log = Logger("SANS")
 

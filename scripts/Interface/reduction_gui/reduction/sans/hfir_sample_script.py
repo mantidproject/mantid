@@ -18,14 +18,13 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 # Disable unused import warning
 # pylint: disable=W0611
 try:
-    import mantidplot # noqa
+    import mantidplot  # noqa
     IS_IN_MANTIDPLOT = True
-except(ImportError, ImportWarning):
+except (ImportError, ImportWarning):
     IS_IN_MANTIDPLOT = False
 
 
 class SampleData(BaseScriptElement):
-
     class DirectBeam(BaseScriptElement):
         sample_file = ''
         direct_beam = ''
@@ -48,7 +47,7 @@ class SampleData(BaseScriptElement):
             """
                 Create XML from the current data.
             """
-            xml_out  = "<DirectBeam>\n"
+            xml_out = "<DirectBeam>\n"
             xml_out += "  <sample_file>%s</sample_file>\n" % self.sample_file
             xml_out += "  <direct_beam>%s</direct_beam>\n" % self.direct_beam
             xml_out += "  <beam_radius>%g</beam_radius>\n" % self.beam_radius
@@ -57,7 +56,7 @@ class SampleData(BaseScriptElement):
 
         def find(self, dom):
             element_list = dom.getElementsByTagName("DirectBeam")
-            return len(element_list)>0
+            return len(element_list) > 0
 
         def from_xml(self, dom):
             """
@@ -65,11 +64,12 @@ class SampleData(BaseScriptElement):
                 @param dom: text to read the data from
             """
             element_list = dom.getElementsByTagName("DirectBeam")
-            if len(element_list)>0:
+            if len(element_list) > 0:
                 instrument_dom = element_list[0]
                 self.sample_file = BaseScriptElement.getStringElement(instrument_dom, "sample_file")
                 self.direct_beam = BaseScriptElement.getStringElement(instrument_dom, "direct_beam")
-                self.beam_radius = BaseScriptElement.getFloatElement(instrument_dom, "beam_radius",
+                self.beam_radius = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                     "beam_radius",
                                                                      default=SampleData.DirectBeam.beam_radius)
 
         def from_setup_info(self, xml_str):
@@ -83,7 +83,8 @@ class SampleData(BaseScriptElement):
 
             self.sample_file = BaseScriptElement.getPropertyValue(alg, "TransmissionSampleDataFile", default='')
             self.direct_beam = BaseScriptElement.getPropertyValue(alg, "TransmissionEmptyDataFile", default='')
-            self.beam_radius = BaseScriptElement.getPropertyValue(alg, "TransmissionBeamRadius",
+            self.beam_radius = BaseScriptElement.getPropertyValue(alg,
+                                                                  "TransmissionBeamRadius",
                                                                   default=SampleData.DirectBeam.beam_radius)
 
         def reset(self):
@@ -122,7 +123,7 @@ class SampleData(BaseScriptElement):
             """
                 Create XML from the current data.
             """
-            xml_out  = "<BeamSpreader>\n"
+            xml_out = "<BeamSpreader>\n"
             xml_out += "  <sample_scatt>%s</sample_scatt>\n" % self.sample_scatt
             xml_out += "  <sample_spreader>%s</sample_spreader>\n" % self.sample_spreader
             xml_out += "  <direct_scatt>%s</direct_scatt>\n" % self.direct_scatt
@@ -135,7 +136,7 @@ class SampleData(BaseScriptElement):
 
         def find(self, dom):
             element_list = dom.getElementsByTagName("BeamSpreader")
-            return len(element_list)>0
+            return len(element_list) > 0
 
         def from_xml(self, dom):
             """
@@ -143,16 +144,17 @@ class SampleData(BaseScriptElement):
                 @param dom: text to read the data from
             """
             element_list = dom.getElementsByTagName("BeamSpreader")
-            if len(element_list)>0:
+            if len(element_list) > 0:
                 instrument_dom = element_list[0]
                 self.sample_scatt = BaseScriptElement.getStringElement(instrument_dom, "sample_scatt")
                 self.sample_spreader = BaseScriptElement.getStringElement(instrument_dom, "sample_spreader")
                 self.direct_scatt = BaseScriptElement.getStringElement(instrument_dom, "direct_scatt")
                 self.direct_spreader = BaseScriptElement.getStringElement(instrument_dom, "direct_spreader")
-                self.spreader_trans = BaseScriptElement.getFloatElement(instrument_dom, "spreader_trans",
+                self.spreader_trans = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                        "spreader_trans",
                                                                         default=SampleData.BeamSpreader.spreader_trans)
-                self.spreader_trans_spread = BaseScriptElement.getFloatElement(instrument_dom, "spreader_trans_spread",
-                                                                               default=SampleData.BeamSpreader.spreader_trans_spread)
+                self.spreader_trans_spread = BaseScriptElement.getFloatElement(
+                    instrument_dom, "spreader_trans_spread", default=SampleData.BeamSpreader.spreader_trans_spread)
 
         def from_setup_info(self, xml_str):
             """
@@ -167,10 +169,11 @@ class SampleData(BaseScriptElement):
             self.sample_spreader = BaseScriptElement.getPropertyValue(alg, "TransSampleSpreaderFilename", default='')
             self.direct_scatt = BaseScriptElement.getPropertyValue(alg, "TransDirectScatteringFilename", default='')
             self.direct_spreader = BaseScriptElement.getPropertyValue(alg, "TransDirectSpreaderFilename", default='')
-            self.spreader_trans = BaseScriptElement.getPropertyValue(alg, "SpreaderTransmissionValue",
+            self.spreader_trans = BaseScriptElement.getPropertyValue(alg,
+                                                                     "SpreaderTransmissionValue",
                                                                      default=SampleData.BeamSpreader.spreader_trans)
-            self.spreader_trans_spread = BaseScriptElement.getPropertyValue(alg, "SpreaderTransmissionError",
-                                                                            default=SampleData.BeamSpreader.spreader_trans_spread)
+            self.spreader_trans_spread = BaseScriptElement.getPropertyValue(
+                alg, "SpreaderTransmissionError", default=SampleData.BeamSpreader.spreader_trans_spread)
 
         def reset(self):
             """
@@ -225,17 +228,17 @@ class SampleData(BaseScriptElement):
             script += str(self.calculation_method)
 
         script += "ThetaDependentTransmission(%s)\n" % str(self.theta_dependent)
-        if self.dark_current is not None and len(str(self.dark_current))>0:
+        if self.dark_current is not None and len(str(self.dark_current)) > 0:
             script += "TransmissionDarkCurrent(\"%s\")\n" % str(self.dark_current)
 
         # Data files
-        if len(self.data_files)==0:
+        if len(self.data_files) == 0:
             raise RuntimeError("Trying to generate reduction script without a data file.")
 
         if data_file is None:
             data_file_list = self.get_data_file_list()
             parts = os.path.split(str(data_file_list[0]).strip())
-            if len(parts[0])>0:
+            if len(parts[0]) > 0:
                 script += "DataPath(\"%s\")\n" % parts[0]
             else:
                 script += "#Note: Data path was not found at script generation, will try at run time.\n"
@@ -247,7 +250,7 @@ class SampleData(BaseScriptElement):
                     script += "AppendDataFile([\"%s\"])\n" % f
         else:
             parts = os.path.split(str(data_file).strip())
-            if len(parts[0])>0:
+            if len(parts[0]) > 0:
                 script += "DataPath(\"%s\")\n" % parts[0]
             else:
                 script += "#Note: Data path was not found at script generation, will try at run time.\n"
@@ -273,7 +276,7 @@ class SampleData(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml_out  = "<Transmission>\n"
+        xml_out = "<Transmission>\n"
         xml_out += "  <trans>%g</trans>\n" % self.transmission
         xml_out += "  <trans_spread>%g</trans_spread>\n" % self.transmission_spread
         xml_out += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
@@ -299,16 +302,20 @@ class SampleData(BaseScriptElement):
         dom = xml.dom.minidom.parseString(xml_str)
 
         element_list = dom.getElementsByTagName("Transmission")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             instrument_dom = element_list[0]
-            self.transmission = BaseScriptElement.getFloatElement(instrument_dom, "trans",
+            self.transmission = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                  "trans",
                                                                   default=SampleData.transmission)
-            self.transmission_spread = BaseScriptElement.getFloatElement(instrument_dom, "trans_spread",
+            self.transmission_spread = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                         "trans_spread",
                                                                          default=SampleData.transmission_spread)
-            self.calculate_transmission = BaseScriptElement.getBoolElement(instrument_dom, "calculate_trans",
-                                                                           default = SampleData.calculate_transmission)
-            self.theta_dependent = BaseScriptElement.getBoolElement(instrument_dom, "theta_dependent",
-                                                                    default = SampleData.theta_dependent)
+            self.calculate_transmission = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                           "calculate_trans",
+                                                                           default=SampleData.calculate_transmission)
+            self.theta_dependent = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                    "theta_dependent",
+                                                                    default=SampleData.theta_dependent)
             self.dark_current = BaseScriptElement.getStringElement(instrument_dom, "dark_current")
 
             for m in self.option_list:
@@ -320,13 +327,15 @@ class SampleData(BaseScriptElement):
 
         # Data file section
         element_list = dom.getElementsByTagName("SampleData")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             sample_data_dom = element_list[0]
             self.data_files = BaseScriptElement.getStringList(sample_data_dom, "data_file")
-            self.sample_thickness = BaseScriptElement.getFloatElement(sample_data_dom, "sample_thickness",
+            self.sample_thickness = BaseScriptElement.getFloatElement(sample_data_dom,
+                                                                      "sample_thickness",
                                                                       default=SampleData.sample_thickness)
-            self.separate_jobs = BaseScriptElement.getBoolElement(sample_data_dom, "separate_jobs",
-                                                                  default = SampleData.separate_jobs)
+            self.separate_jobs = BaseScriptElement.getBoolElement(sample_data_dom,
+                                                                  "separate_jobs",
+                                                                  default=SampleData.separate_jobs)
 
     def from_setup_info(self, xml_str):
         """
@@ -338,21 +347,27 @@ class SampleData(BaseScriptElement):
         alg, filename = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
         # Transmission
-        self.transmission = BaseScriptElement.getPropertyValue(alg, "TransmissionValue", default=SampleData.transmission)
-        self.transmission_spread = BaseScriptElement.getPropertyValue(alg, "TransmissionError", default=SampleData.transmission_spread)
+        self.transmission = BaseScriptElement.getPropertyValue(alg,
+                                                               "TransmissionValue",
+                                                               default=SampleData.transmission)
+        self.transmission_spread = BaseScriptElement.getPropertyValue(alg,
+                                                                      "TransmissionError",
+                                                                      default=SampleData.transmission_spread)
         self.dark_current = BaseScriptElement.getPropertyValue(alg, "TransmissionDarkCurrentFile", default='')
-        self.theta_dependent = BaseScriptElement.getPropertyValue(alg, "ThetaDependentTransmission",
-                                                                  default = SampleData.theta_dependent)
-        self.sample_thickness = BaseScriptElement.getPropertyValue(alg, "SampleThickness",
-                                                                   default = SampleData.sample_thickness)
+        self.theta_dependent = BaseScriptElement.getPropertyValue(alg,
+                                                                  "ThetaDependentTransmission",
+                                                                  default=SampleData.theta_dependent)
+        self.sample_thickness = BaseScriptElement.getPropertyValue(alg,
+                                                                   "SampleThickness",
+                                                                   default=SampleData.sample_thickness)
 
         trans_method = BaseScriptElement.getPropertyValue(alg, "TransmissionMethod", default='Value')
 
         self.calculate_transmission = trans_method in ['DirectBeam', 'BeamSpreader']
-        if trans_method=='DirectBeam':
+        if trans_method == 'DirectBeam':
             self.calculation_method = SampleData.DirectBeam()
             self.calculation_method.from_setup_info(xml_str)
-        elif trans_method=='BeamSpreader':
+        elif trans_method == 'BeamSpreader':
             self.calculation_method = SampleData.BeamSpreader()
             self.calculation_method.from_setup_info(xml_str)
 

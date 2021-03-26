@@ -22,14 +22,11 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         return "Correct SANS data with a dark run measurement."
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
-                                                     validator=CommonBinsValidator(),
-                                                     direction=Direction.Input))
-        self.declareProperty(MatrixWorkspaceProperty("DarkRun", "",
-                                                     validator=CommonBinsValidator(),
-                                                     direction=Direction.Input))
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
-                                                     direction = Direction.Output),
+        self.declareProperty(
+            MatrixWorkspaceProperty("InputWorkspace", "", validator=CommonBinsValidator(), direction=Direction.Input))
+        self.declareProperty(
+            MatrixWorkspaceProperty("DarkRun", "", validator=CommonBinsValidator(), direction=Direction.Input))
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              "The corrected SANS workspace.")
         self.declareProperty("NormalizationRatio", 1.0, "Number to scale the dark run in order"
                              "to make it comparable to the SANS run")
@@ -40,12 +37,11 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         self.declareProperty("ApplyToMonitors", False, "If True then we apply the correction to the monitors")
 
         arrvalidator = IntArrayBoundedValidator(lower=0)
-        self.declareProperty(IntArrayProperty("SelectedMonitors", values=[],
-                                              validator=arrvalidator,
-                                              direction=Direction.Input),
-                             "List of selected detector IDs of monitors to which the "
-                             "correction should be applied. If empty, all monitors will "
-                             "be corrected, if ApplyToMonitors has been selected.")
+        self.declareProperty(
+            IntArrayProperty("SelectedMonitors", values=[], validator=arrvalidator, direction=Direction.Input),
+            "List of selected detector IDs of monitors to which the "
+            "correction should be applied. If empty, all monitors will "
+            "be corrected, if ApplyToMonitors has been selected.")
 
     def PyExec(self):
         # Get the workspaces
@@ -63,16 +59,17 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
 
         dark_run_normalized = None
         # Apply normalization. Uniform means here that the time over which the data was measured is uniform, there are
-        # no particular spikes to be expected. In the non-uniform case we assume that it matters, when the data was taken
+        # no particular spikes to be expected. In the non-uniform case we assume that it matters, when the data was
+        # taken
         if do_uniform:
-            dark_run_normalized = self._prepare_uniform_correction(workspace = workspace,
-                                                                   dark_run = dark_run,
-                                                                   normalization_ratio = normalization_ratio,
-                                                                   do_mean = do_mean)
+            dark_run_normalized = self._prepare_uniform_correction(workspace=workspace,
+                                                                   dark_run=dark_run,
+                                                                   normalization_ratio=normalization_ratio,
+                                                                   do_mean=do_mean)
         else:
-            dark_run_normalized = self._prepare_non_uniform_correction(workspace = workspace,
-                                                                       dark_run = dark_run,
-                                                                       normalization_ratio = normalization_ratio)
+            dark_run_normalized = self._prepare_non_uniform_correction(workspace=workspace,
+                                                                       dark_run=dark_run,
+                                                                       normalization_ratio=normalization_ratio)
 
         progress.report("SANSDarkRunBackgroundCorrection: Removing unwanted detectors...")
         # Remove the detectors which are unwanted
@@ -161,7 +158,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         # In addition we need to spread the integrated signal evenly over all bins of the SANS data set.
         # Note that we assume here a workspace with common bins.
         num_bins = len(workspace.dataY(0))
-        scale_factor = normalization_ratio/float(num_bins)
+        scale_factor = normalization_ratio / float(num_bins)
 
         return self._scale_dark_run(dark_run_integrated, scale_factor)
 
@@ -188,7 +185,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         @returns a scaled dark run
         '''
         dark_run_scaled_name = "_dark_run_scaled"
-        alg_scale  = AlgorithmManager.createUnmanaged("Scale")
+        alg_scale = AlgorithmManager.createUnmanaged("Scale")
         alg_scale.initialize()
         alg_scale.setChild(True)
         alg_scale.setProperty("InputWorkspace", dark_run)
@@ -206,11 +203,11 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         @param dark_run_integrated: a dark run with integrated pixels
         @returns an averaged, integrated dark run
         '''
-        dark_run_summed_name= "_summed_spectra"
-        alg_sum  = AlgorithmManager.createUnmanaged("SumSpectra")
+        dark_run_summed_name = "_summed_spectra"
+        alg_sum = AlgorithmManager.createUnmanaged("SumSpectra")
         alg_sum.initialize()
         alg_sum.setChild(True)
-        alg_sum.setProperty("InputWorkspace",  dark_run_integrated)
+        alg_sum.setProperty("InputWorkspace", dark_run_integrated)
         alg_sum.setProperty("OutputWorkspace", dark_run_summed_name)
         alg_sum.execute()
         dark_run_summed = alg_sum.getProperty("OutputWorkspace").value
@@ -219,7 +216,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         # by the number of pixels
         summed_value = dark_run_summed.dataY(0)[0]
         num_pixels = dark_run_integrated.getNumberHistograms()
-        averaged_value = summed_value/float(num_pixels)
+        averaged_value = summed_value / float(num_pixels)
 
         # Apply the averaged value to all pixels. Set values to unity. Don't
         # divide workspaces as this will alter the y unit.
@@ -228,7 +225,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
             dark_run_integrated.dataE(index)[0] = 1.0
 
         # Now that we have a unity workspace multiply with the unit value
-        return self._scale_dark_run(dark_run_integrated,averaged_value)
+        return self._scale_dark_run(dark_run_integrated, averaged_value)
 
     def _remove_unwanted_detectors_and_monitors(self, dark_run):
         # If we want both the monitors and the detectors, then we don't have to do anything
@@ -262,7 +259,6 @@ class DarkRunMonitorAndDetectorRemover(object):
     This class can set detecors or monitors to 0. Either all monitors can be seletected or only
     a single one.
     '''
-
     def __init__(self):
         super(DarkRunMonitorAndDetectorRemover, self).__init__()
 
@@ -279,10 +275,10 @@ class DarkRunMonitorAndDetectorRemover(object):
         for ws_index, dummy_det_id in monitor_list:
             data = dark_run.dataY(ws_index)
             error = dark_run.dataE(ws_index)
-            data = data*0
-            error = error*0
-            dark_run.setY(ws_index,data)
-            dark_run.setE(ws_index,error)
+            data = data * 0
+            error = error * 0
+            dark_run.setY(ws_index, data)
+            dark_run.setE(ws_index, error)
 
         return dark_run
 
@@ -329,7 +325,7 @@ class DarkRunMonitorAndDetectorRemover(object):
         scale_factor = 0.0
         dark_run_scaled_name = "dark_run_scaled"
 
-        alg_scale  = AlgorithmManager.createUnmanaged("Scale")
+        alg_scale = AlgorithmManager.createUnmanaged("Scale")
         alg_scale.initialize()
         alg_scale.setChild(True)
         alg_scale.setProperty("InputWorkspace", dark_run)
@@ -342,11 +338,10 @@ class DarkRunMonitorAndDetectorRemover(object):
         # Reset the monitors which are required. Either we reset all monitors
         # or only a specific set of monitors which was selected by the user.
         if len(selected_monitors) > 0:
-            dark_run = self._set_only_selected_monitors(dark_run, list_dataY, list_dataE,
-                                                        monitor_list, selected_monitors)
+            dark_run = self._set_only_selected_monitors(dark_run, list_dataY, list_dataE, monitor_list,
+                                                        selected_monitors)
         else:
-            dark_run = self._set_all_monitors(dark_run, list_dataY,
-                                              list_dataE, monitor_list)
+            dark_run = self._set_all_monitors(dark_run, list_dataY, list_dataE, monitor_list)
         return dark_run
 
     def set_mixed_monitor_detector_dark_run(self, dark_run, monitor_selection):
@@ -359,7 +354,7 @@ class DarkRunMonitorAndDetectorRemover(object):
         # Get the list of monitor workspace indices
         monitor_list = self.find_monitor_workspace_indices(dark_run)
 
-         # Get the monitor selection
+        # Get the monitor selection
         selection = self._get_selected_monitors(monitor_selection, monitor_list)
 
         # Grab the monitor Y and E values
@@ -369,8 +364,7 @@ class DarkRunMonitorAndDetectorRemover(object):
         dark_run = self.set_pure_detector_dark_run(dark_run)
 
         # Reset the selected monitors
-        return self._set_only_selected_monitors(dark_run, list_dataY, list_dataE,
-                                                monitor_list, selection)
+        return self._set_only_selected_monitors(dark_run, list_dataY, list_dataE, monitor_list, selection)
 
     def _get_selected_monitors(self, monitor_selection, monitor_list):
         '''
@@ -422,10 +416,10 @@ class DarkRunMonitorAndDetectorRemover(object):
             dark_run.setE(ws_index, list_dataE[counter])
             counter += 1
         return dark_run
+
     #pylint: disable=too-many-arguments
 
-    def _set_only_selected_monitors(self, dark_run, list_dataY, list_dataE,
-                                    monitor_list, selected_monitors):
+    def _set_only_selected_monitors(self, dark_run, list_dataY, list_dataE, monitor_list, selected_monitors):
         '''
         Resets indivisual monitors
         @param dark_run: the dark run workspace
@@ -443,9 +437,10 @@ class DarkRunMonitorAndDetectorRemover(object):
             if det_id in selected_monitors:
                 dark_run.setY(ws_index, list_dataY[counter])
                 dark_run.setE(ws_index, list_dataE[counter])
-            counter +=1
+            counter += 1
         return dark_run
-#############################################################################################
 
+
+#############################################################################################
 
 AlgorithmFactory.subscribe(SANSDarkRunBackgroundCorrection)

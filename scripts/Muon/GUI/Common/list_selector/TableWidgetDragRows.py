@@ -32,9 +32,9 @@ class TableWidgetDragRows(QTableWidget):
             drop_row = self.drop_on(event)
 
             rows = sorted(set(item.row() for item in self.selectedItems()))
-            rows_to_move = [
-                [QTableWidgetItem(self.item(row_index, column_index)) for column_index in range(self.columnCount())]
-                for row_index in rows]
+            rows_to_move = [[
+                QTableWidgetItem(self.item(row_index, column_index)) for column_index in range(self.columnCount())
+            ] for row_index in rows]
             for row_index in reversed(rows):
                 self.removeRow(row_index)
                 if row_index < drop_row:
@@ -71,5 +71,5 @@ class TableWidgetDragRows(QTableWidget):
         elif rect.bottom() - pos.y() < margin:
             return True
         # noinspection PyTypeChecker
-        return rect.contains(pos, True) and not (
-            int(self.model().flags(index)) & Qt.ItemIsDropEnabled) and pos.y() >= rect.center().y()
+        return rect.contains(
+            pos, True) and not (int(self.model().flags(index)) & Qt.ItemIsDropEnabled) and pos.y() >= rect.center().y()

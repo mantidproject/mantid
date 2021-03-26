@@ -20,7 +20,8 @@ class ImageIntensity(Enum):
 
 
 class MantidImage(mimage.AxesImage):
-    def __init__(self, ax,
+    def __init__(self,
+                 ax,
                  cmap=None,
                  norm=None,
                  interpolation=None,

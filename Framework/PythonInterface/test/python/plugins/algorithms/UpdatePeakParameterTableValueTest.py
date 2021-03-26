@@ -13,7 +13,6 @@ from mantid.api import AnalysisDataService
 
 
 class UpdatePeakParameterTableValueTest(unittest.TestCase):
-
     def test_updateDouble(self):
         """ Test for update a double value
         """
@@ -32,16 +31,20 @@ class UpdatePeakParameterTableValueTest(unittest.TestCase):
         tablews.addRow(["B", 2.34, "Tie"])
         tablews.addRow(["S", 3.34, "Tie"])
 
-        alg_test = run_algorithm("UpdatePeakParameterTableValue", InputWorkspace=alg_init.getPropertyValue("OutputWorkspace"),
-                Column="Value", ParameterNames=["A"], NewFloatValue=1.00)
+        alg_test = run_algorithm("UpdatePeakParameterTableValue",
+                                 InputWorkspace=alg_init.getPropertyValue("OutputWorkspace"),
+                                 Column="Value",
+                                 ParameterNames=["A"],
+                                 NewFloatValue=1.00)
 
         self.assertTrue(alg_test.isExecuted())
 
         newvalue_A = tablews.cell(0, 1)
 
-        self.assertEqual(newvalue_A,  1.00)
+        self.assertEqual(newvalue_A, 1.00)
 
         return
+
 
 if __name__ == '__main__':
     unittest.main()

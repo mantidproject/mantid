@@ -45,11 +45,11 @@ class ISISIndirectDiffractionReduction(metaclass=ABCMeta):
         self.disableChecking.append('Instrument')
         return self._output_workspace, self.get_reference_file()
 
+
 #-------------------------------------------------------------------------------
 
 
 class IRISDiffspecDiffractionTest(ISISIndirectDiffractionReduction):
-
     def __init__(self):
         ISISIndirectDiffractionReduction.__init__(self)
 
@@ -63,11 +63,11 @@ class IRISDiffspecDiffractionTest(ISISIndirectDiffractionReduction):
     def get_reference_file(self):
         return 'IRISDiffspecDiffractionTest.nxs'
 
+
 #-------------------------------------------------------------------------------
 
 
 class TOSCADiffractionTest(ISISIndirectDiffractionReduction):
-
     def __init__(self):
         ISISIndirectDiffractionReduction.__init__(self)
 
@@ -81,11 +81,11 @@ class TOSCADiffractionTest(ISISIndirectDiffractionReduction):
     def get_reference_file(self):
         return 'TOSCADiffractionTest.nxs'
 
+
 #-------------------------------------------------------------------------------
 
 
 class OSIRISDiffspecDiffractionTest(ISISIndirectDiffractionReduction):
-
     def __init__(self):
         ISISIndirectDiffractionReduction.__init__(self)
 
@@ -99,11 +99,11 @@ class OSIRISDiffspecDiffractionTest(ISISIndirectDiffractionReduction):
     def get_reference_file(self):
         return 'OsirisDiffspecDiffractionTest.nxs'
 
+
 #-------------------------------------------------------------------------------
 
 
 class OSIRISDiffonlyDiffractionTest(systemtesting.MantidSystemTest):
-
     def runTest(self):
         ms.OSIRISDiffractionReduction(OutputWorkspace="OsirisDiffractionTest",
                                       Sample="OSI89813.raw, OSI89814.raw, OSI89815.raw, OSI89816.raw, OSI89817.raw",

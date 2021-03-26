@@ -50,13 +50,15 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         self.declare_common_properties()
 
         # Declare properties specific to 1D
-        self.declareProperty(FileProperty("ExperimentalFile", "",
+        self.declareProperty(FileProperty("ExperimentalFile",
+                                          "",
                                           action=FileAction.OptionalLoad,
                                           direction=Direction.Input,
                                           extensions=["raw", "dat"]),
                              doc="File with the experimental inelastic spectrum to compare.")
 
-        self.declareProperty(name="Scale", defaultValue=1.0,
+        self.declareProperty(name="Scale",
+                             defaultValue=1.0,
                              doc='Scale the intensity by the given factor. Default is no scaling.')
 
         self.declareProperty(name="EnergyUnits",
@@ -67,12 +69,13 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
 
         # Declare Instrument-related properties
         self.declare_instrument_properties(
-            default="TOSCA", choices=ONE_DIMENSIONAL_INSTRUMENTS,
-            multiple_choice_settings=[('Setting', 'settings',
-                                       'Setting choice for this instrument (e.g. monochromator)')],
-                )
+            default="TOSCA",
+            choices=ONE_DIMENSIONAL_INSTRUMENTS,
+            multiple_choice_settings=[('Setting', 'settings', 'Setting choice for this instrument (e.g. monochromator)')
+                                      ],
+        )
 
-    def validateInputs(self) -> Dict[str,str]:
+    def validateInputs(self) -> Dict[str, str]:
         issues = dict()
         issues = self.validate_common_inputs(issues)
         issues.update(self._validate_instrument_settings())
@@ -124,16 +127,21 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
 
         # 4) get atoms for which S should be plotted
         atoms_data = ab_initio_data.get_atoms_data()
-        atom_numbers, atom_symbols = self.get_atom_selection(atoms_data=atoms_data,
-                                                             selection=self._atoms)
+        atom_numbers, atom_symbols = self.get_atom_selection(atoms_data=atoms_data, selection=self._atoms)
         prog_reporter.report("Atoms, for which dynamical structure factors should be plotted, have been determined.")
 
         # 5) create workspaces for atoms in interest
         workspaces = []
-        workspaces.extend(self.create_workspaces(atoms_symbols=atom_symbols, s_data=s_data, atoms_data=atoms_data,
-                                                 max_quantum_order=self._num_quantum_order_events))
-        workspaces.extend(self.create_workspaces(atom_numbers=atom_numbers, s_data=s_data, atoms_data=atoms_data,
-                                                 max_quantum_order=self._num_quantum_order_events))
+        workspaces.extend(
+            self.create_workspaces(atoms_symbols=atom_symbols,
+                                   s_data=s_data,
+                                   atoms_data=atoms_data,
+                                   max_quantum_order=self._num_quantum_order_events))
+        workspaces.extend(
+            self.create_workspaces(atom_numbers=atom_numbers,
+                                   s_data=s_data,
+                                   atoms_data=atoms_data,
+                                   max_quantum_order=self._num_quantum_order_events))
         prog_reporter.report("Workspaces with partial dynamical structure factors have been constructed.")
 
         # 6) Create a workspace with sum of all atoms if required
@@ -177,12 +185,16 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
 
         # only FUNDAMENTALS [data is 2d with one row]
         if s_points.shape[0] == FUNDAMENTALS:
-            self._fill_s_1d_workspace(s_points=s_points[0], workspace=workspace, protons_number=protons_number,
+            self._fill_s_1d_workspace(s_points=s_points[0],
+                                      workspace=workspace,
+                                      protons_number=protons_number,
                                       nucleons_number=nucleons_number)
 
         # total workspaces [data is 1d vector]
         elif len(s_points.shape) == ONE_DIMENSIONAL_SPECTRUM:
-            self._fill_s_1d_workspace(s_points=s_points, workspace=workspace, protons_number=protons_number,
+            self._fill_s_1d_workspace(s_points=s_points,
+                                      workspace=workspace,
+                                      protons_number=protons_number,
                                       nucleons_number=nucleons_number)
 
         # quantum order events (fundamentals  or  overtones + combinations for the given order)
@@ -196,7 +208,9 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
                 wrk_name = workspace + "_" + seed
                 partial_wrk_names.append(wrk_name)
 
-                self._fill_s_1d_workspace(s_points=s_points[n], workspace=wrk_name, protons_number=protons_number,
+                self._fill_s_1d_workspace(s_points=s_points[n],
+                                          workspace=wrk_name,
+                                          protons_number=protons_number,
                                           nucleons_number=nucleons_number)
 
             GroupWorkspaces(InputWorkspaces=partial_wrk_names, OutputWorkspace=workspace)
@@ -210,9 +224,8 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         :param workspace: workspace to be filled with S
         """
         if protons_number is not None:
-            s_points = s_points * self._scale * self.get_cross_section(scattering=self._scale_by_cross_section,
-                                                                       protons_number=protons_number,
-                                                                       nucleons_number=nucleons_number)
+            s_points = s_points * self._scale * self.get_cross_section(
+                scattering=self._scale_by_cross_section, protons_number=protons_number, nucleons_number=nucleons_number)
         dim = 1
         length = s_points.size
 
@@ -266,18 +279,18 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
 
         resolution_const_a = tosca_parameters['a']
         if not isinstance(resolution_const_a, float):
-            raise RuntimeError("Invalid value of constant A for TOSCA (used by the resolution TOSCA function)"
-                               + message_end)
+            raise RuntimeError("Invalid value of constant A for TOSCA (used by the resolution TOSCA function)" +
+                               message_end)
 
         resolution_const_b = tosca_parameters['b']
         if not isinstance(resolution_const_b, float):
-            raise RuntimeError("Invalid value of constant B for TOSCA (used by the resolution TOSCA function)"
-                               + message_end)
+            raise RuntimeError("Invalid value of constant B for TOSCA (used by the resolution TOSCA function)" +
+                               message_end)
 
         resolution_const_c = tosca_parameters['c']
         if not isinstance(resolution_const_c, float):
-            raise RuntimeError("Invalid value of constant C for TOSCA (used by the resolution TOSCA function)"
-                               + message_end)
+            raise RuntimeError("Invalid value of constant C for TOSCA (used by the resolution TOSCA function)" +
+                               message_end)
 
     def _get_properties(self):
         """

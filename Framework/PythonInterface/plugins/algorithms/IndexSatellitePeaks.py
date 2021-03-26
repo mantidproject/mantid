@@ -14,12 +14,11 @@ import mantid.simpleapi as api
 
 
 class IndexSatellitePeaks(PythonAlgorithm):
-
     def category(self):
         return 'Crystal\\Peaks'
 
     def seeAlso(self):
-        return [ "FindSatellitePeaks" ]
+        return ["FindSatellitePeaks"]
 
     def name(self):
         return "IndexSatellitePeaks"
@@ -28,14 +27,10 @@ class IndexSatellitePeaks(PythonAlgorithm):
         return "Algorithm for indexing satellite peaks in superspace"
 
     def PyInit(self):
-        self.declareProperty(IPeaksWorkspaceProperty(name="NuclearPeaks",
-                                                     defaultValue="",
-                                                     direction=Direction.Input),
+        self.declareProperty(IPeaksWorkspaceProperty(name="NuclearPeaks", defaultValue="", direction=Direction.Input),
                              doc="Main integer HKL peaks. Q vectors will be calculated relative to these peaks.")
 
-        self.declareProperty(IPeaksWorkspaceProperty(name="SatellitePeaks",
-                                                     defaultValue="",
-                                                     direction=Direction.Input),
+        self.declareProperty(IPeaksWorkspaceProperty(name="SatellitePeaks", defaultValue="", direction=Direction.Input),
                              doc="Positions of satellite peaks with fractional \
                              HKL coordinates")
 
@@ -46,14 +41,16 @@ class IndexSatellitePeaks(PythonAlgorithm):
                              table workspace with miller indicies h, k, l, m1, \
                              m2, ..., mn.")
 
-        self.declareProperty('Tolerance', 0.3, direction=Direction.Input,
-                             doc="Tolerance on the noise of the q vectors")
+        self.declareProperty('Tolerance', 0.3, direction=Direction.Input, doc="Tolerance on the noise of the q vectors")
 
-        self.declareProperty('NumOfQs', 1, direction=Direction.Input,
-                             doc="Number of independant q vectors")
+        self.declareProperty('NumOfQs', 1, direction=Direction.Input, doc="Number of independant q vectors")
 
-        self.declareProperty('ClusterThreshold', 1.5, direction=Direction.Input,
-                             doc="Threshold for automaticallty deciding on the number of q vectors to use. If NumOfQs found is set then this \
+        self.declareProperty(
+            'ClusterThreshold',
+            1.5,
+            direction=Direction.Input,
+            doc=
+            "Threshold for automaticallty deciding on the number of q vectors to use. If NumOfQs found is set then this \
                              is property is ignored.")
 
     def PyExec(self):
@@ -112,12 +109,10 @@ class IndexSatellitePeaks(PythonAlgorithm):
         :returns: a peaks workspace with the indexed peak data
         """
         # pad to 6 columns so we can assume a (hkl) (mnp) layout
-        hklm = np.pad(hklm, pad_width=(0, 6 - hklm.shape[1]), mode='constant',
-                      constant_values=0)
+        hklm = np.pad(hklm, pad_width=(0, 6 - hklm.shape[1]), mode='constant', constant_values=0)
         indexed = api.CloneWorkspace(fractional_peaks, StoreInADS=False)
         # save modulation vectors. ensure qs has 3 rows
-        qs = np.pad(qs, pad_width=((0, 3 - qs.shape[0]), (0, 0)), mode='constant',
-                    constant_values=0)
+        qs = np.pad(qs, pad_width=((0, 3 - qs.shape[0]), (0, 0)), mode='constant', constant_values=0)
         lattice = fractional_peaks.sample().getOrientedLattice()
         lattice.setModVec1(V3D(*qs[0]))
         lattice.setModVec2(V3D(*qs[1]))

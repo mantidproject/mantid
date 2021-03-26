@@ -283,7 +283,6 @@ class ReductionGUI(QMainWindow):
         """
             Invoke an instrument selection dialog
         """
-
         class InstrDialog(QDialog):
             def __init__(self, instrument_list=None):
                 QDialog.__init__(self)
@@ -291,8 +290,10 @@ class ReductionGUI(QMainWindow):
                 self.instrument_list = instrument_list
                 self.instr_combo.clear()
                 self.facility_combo.clear()
-                facilities = sorted([fac for fac in INSTRUMENT_DICT.keys() if
-                                     any([inst in INSTRUMENT_DICT[fac] for inst in instrument_list])])
+                facilities = sorted([
+                    fac for fac in INSTRUMENT_DICT.keys()
+                    if any([inst in INSTRUMENT_DICT[fac] for inst in instrument_list])
+                ])
                 facilities.reverse()
                 for facility in facilities:
                     self.facility_combo.addItem(facility)
@@ -339,8 +340,7 @@ class ReductionGUI(QMainWindow):
             Executed when the application closes
         """
         if False:
-            reply = QMessageBox.question(self, 'Message',
-                                         "Are you sure you want to quit this application?",
+            reply = QMessageBox.question(self, 'Message', "Are you sure you want to quit this application?",
                                          QMessageBox.Yes, QMessageBox.No)
 
             if reply == QMessageBox.Yes:
@@ -472,8 +472,7 @@ class ReductionGUI(QMainWindow):
         """
             File chooser for loading UI parameters
         """
-        fname = QFileDialog.getOpenFileName(self, "Reduction settings - Choose a settings file",
-                                            self._last_directory,
+        fname = QFileDialog.getOpenFileName(self, "Reduction settings - Choose a settings file", self._last_directory,
                                             "Settings files (*.xml)")
         if not fname:
             return
@@ -514,8 +513,7 @@ class ReductionGUI(QMainWindow):
             fname = self._instrument + '_'
 
         fname = QFileDialog.getSaveFileName(self, "Reduction settings - Save settings",
-                                            self._last_directory + '/' + fname,
-                                            "Settings files (*.xml)")
+                                            self._last_directory + '/' + fname, "Settings files (*.xml)")
         if not fname:
             return
 
@@ -541,8 +539,7 @@ class ReductionGUI(QMainWindow):
         if self._interface is None:
             return
 
-        fname = QFileDialog.getSaveFileName(self, "Mantid Python script - Save script",
-                                            self._last_export_directory,
+        fname = QFileDialog.getSaveFileName(self, "Mantid Python script - Save script", self._last_export_directory,
                                             "Python script (*.py)")
         if not fname:
             return

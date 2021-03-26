@@ -118,7 +118,6 @@ class _AbstractGSASIIRefineFitPeaksTest(systemtesting.MantidSystemTest):
 
 
 class GSASIIRefineFitPeaksRietveldTest(_AbstractGSASIIRefineFitPeaksTest):
-
     def skipTests(self):
         return not self.path_to_gsas()
 
@@ -139,7 +138,6 @@ class GSASIIRefineFitPeaksRietveldTest(_AbstractGSASIIRefineFitPeaksTest):
 
 
 class GSASIIRefineFitPeaksPawleyTest(_AbstractGSASIIRefineFitPeaksTest):
-
     def skipTests(self):
         return not self.path_to_gsas()
 

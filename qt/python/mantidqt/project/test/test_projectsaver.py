@@ -19,7 +19,6 @@ from mantid.simpleapi import CreateSampleWorkspace
 from unittest import mock
 from mantidqt.project import projectsaver
 
-
 project_file_ext = ".mtdproj"
 working_directory = tempfile.mkdtemp()
 working_project_file = os.path.join(working_directory, "temp" + project_file_ext)
@@ -125,12 +124,18 @@ class ProjectSaverTest(unittest.TestCase):
 
         project_saver = projectsaver.ProjectSaver(project_file_ext)
 
-        project_saver.save_project(file_name=working_project_file,
-                                   plots_to_save={1: fig_manager})
+        project_saver.save_project(file_name=working_project_file, plots_to_save={1: fig_manager})
 
-        plots_dict = {u"creationArguments": [], u"axes": [], u"label": u"", u"properties": {u"figWidth": 6.4,
-                                                                                            u"figHeight": 4.8,
-                                                                                            u"dpi": 100.0}}
+        plots_dict = {
+            u"creationArguments": [],
+            u"axes": [],
+            u"label": u"",
+            u"properties": {
+                u"figWidth": 6.4,
+                u"figHeight": 4.8,
+                u"dpi": 100.0
+            }
+        }
 
         f = open(working_project_file, "r")
         file_dict = json.load(f)
@@ -144,9 +149,13 @@ class ProjectSaverTest(unittest.TestCase):
 
         saver.save_project(file_name=working_project_file, project_recovery=False)
 
-        self.assertEqual(pwriter.call_args, mock.call(interfaces_to_save=[], plots_to_save=[],
-                                                      project_file_ext=file_ext, save_location=working_project_file,
-                                                      workspace_names=['ws1']))
+        self.assertEqual(
+            pwriter.call_args,
+            mock.call(interfaces_to_save=[],
+                      plots_to_save=[],
+                      project_file_ext=file_ext,
+                      save_location=working_project_file,
+                      workspace_names=['ws1']))
 
 
 class ProjectWriterTest(unittest.TestCase):
@@ -164,8 +173,10 @@ class ProjectWriterTest(unittest.TestCase):
         workspace_list = []
         plots_to_save = []
         interfaces_to_save = []
-        project_writer = projectsaver.ProjectWriter(save_location=working_project_file, workspace_names=workspace_list,
-                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
+        project_writer = projectsaver.ProjectWriter(save_location=working_project_file,
+                                                    workspace_names=workspace_list,
+                                                    project_file_ext=project_file_ext,
+                                                    plots_to_save=plots_to_save,
                                                     interfaces_to_save=interfaces_to_save)
         workspaces_string = "\"workspaces\": []"
         plots_string = "\"plots\": []"
@@ -181,8 +192,10 @@ class ProjectWriterTest(unittest.TestCase):
         plots_to_save = []
         workspace_list = ["ws1", "ws2", "ws3", "ws4"]
         interfaces_to_save = []
-        project_writer = projectsaver.ProjectWriter(save_location=working_project_file, workspace_names=workspace_list,
-                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
+        project_writer = projectsaver.ProjectWriter(save_location=working_project_file,
+                                                    workspace_names=workspace_list,
+                                                    project_file_ext=project_file_ext,
+                                                    plots_to_save=plots_to_save,
                                                     interfaces_to_save=interfaces_to_save)
         workspaces_string = "\"workspaces\": [\"ws1\", \"ws2\", \"ws3\", \"ws4\"]"
         plots_string = "\"plots\": []"
@@ -197,8 +210,10 @@ class ProjectWriterTest(unittest.TestCase):
         plots_to_save = [{"plots1": {"plot-information": "axes data"}}]
         workspace_list = []
         interfaces_to_save = []
-        project_writer = projectsaver.ProjectWriter(save_location=working_project_file, workspace_names=workspace_list,
-                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
+        project_writer = projectsaver.ProjectWriter(save_location=working_project_file,
+                                                    workspace_names=workspace_list,
+                                                    project_file_ext=project_file_ext,
+                                                    plots_to_save=plots_to_save,
                                                     interfaces_to_save=interfaces_to_save)
         workspaces_string = "\"workspaces\": []"
         plots_string = "\"plots\": [{\"plots1\": {\"plot-information\": \"axes data\"}}]"
@@ -214,8 +229,10 @@ class ProjectWriterTest(unittest.TestCase):
         plots_to_save = [{"plots1": {"plot-information": "axes data"}}]
         workspace_list = ["ws1", "ws2", "ws3", "ws4"]
         interfaces_to_save = []
-        project_writer = projectsaver.ProjectWriter(save_location=working_project_file, workspace_names=workspace_list,
-                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
+        project_writer = projectsaver.ProjectWriter(save_location=working_project_file,
+                                                    workspace_names=workspace_list,
+                                                    project_file_ext=project_file_ext,
+                                                    plots_to_save=plots_to_save,
                                                     interfaces_to_save=interfaces_to_save)
         workspaces_string = "\"workspaces\": [\"ws1\", \"ws2\", \"ws3\", \"ws4\"]"
         plots_string = "\"plots\": [{\"plots1\": {\"plot-information\": \"axes data\"}}]"
@@ -231,8 +248,10 @@ class ProjectWriterTest(unittest.TestCase):
         plots_to_save = []
         workspace_list = []
         interfaces_to_save = [{"interface1": {"interface data": "data"}}]
-        project_writer = projectsaver.ProjectWriter(save_location=working_project_file, workspace_names=workspace_list,
-                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
+        project_writer = projectsaver.ProjectWriter(save_location=working_project_file,
+                                                    workspace_names=workspace_list,
+                                                    project_file_ext=project_file_ext,
+                                                    plots_to_save=plots_to_save,
                                                     interfaces_to_save=interfaces_to_save)
         workspaces_string = "\"workspaces\": []"
         plots_string = "\"plots\": []"

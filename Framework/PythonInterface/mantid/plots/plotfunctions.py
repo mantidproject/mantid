@@ -26,18 +26,46 @@ from mantid.plots import datafunctions, MantidAxes
 # -----------------------------------------------------------------------------
 PROJECTION = 'mantid'
 
-MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
-              'triangle_right': '>', 'tickup': 2, 'hline': '_', 'vline': '|',
-              'pentagon': 'p', 'tri_left': '3', 'caretdown': 7,
-              'caretright (centered at base)': 9, 'tickright': 1,
-              'caretright': 5, 'caretleft': 4, 'tickleft': 0, 'tri_up': '2',
-              'circle': 'o', 'pixel': ',', 'caretleft (centered at base)': 8,
-              'diamond': 'D', 'star': '*', 'hexagon1': 'h', 'octagon': '8',
-              'hexagon2': 'H', 'tri_right': '4', 'x (filled)': 'X',
-              'thin_diamond': 'd', 'tri_down': '1', 'triangle_left': '<',
-              'plus': '+', 'triangle_down': 'v', 'triangle_up': '^', 'x': 'x',
-              'caretup': 6, 'caretup (centered at base)': 10,
-              'caretdown (centered at base)': 11, 'None': 'None'}
+MARKER_MAP = {
+    'square': 's',
+    'plus (filled)': 'P',
+    'point': '.',
+    'tickdown': 3,
+    'triangle_right': '>',
+    'tickup': 2,
+    'hline': '_',
+    'vline': '|',
+    'pentagon': 'p',
+    'tri_left': '3',
+    'caretdown': 7,
+    'caretright (centered at base)': 9,
+    'tickright': 1,
+    'caretright': 5,
+    'caretleft': 4,
+    'tickleft': 0,
+    'tri_up': '2',
+    'circle': 'o',
+    'pixel': ',',
+    'caretleft (centered at base)': 8,
+    'diamond': 'D',
+    'star': '*',
+    'hexagon1': 'h',
+    'octagon': '8',
+    'hexagon2': 'H',
+    'tri_right': '4',
+    'x (filled)': 'X',
+    'thin_diamond': 'd',
+    'tri_down': '1',
+    'triangle_left': '<',
+    'plus': '+',
+    'triangle_down': 'v',
+    'triangle_up': '^',
+    'x': 'x',
+    'caretup': 6,
+    'caretup (centered at base)': 10,
+    'caretdown (centered at base)': 11,
+    'None': 'None'
+}
 
 # -----------------------------------------------------------------------------
 # Decorators
@@ -52,7 +80,6 @@ def manage_workspace_names(func):
     :param func: A plotting function
     :return:
     """
-
     def inner_func(workspaces, *args, **kwargs):
         workspaces = _validate_workspace_names(workspaces)
         return func(workspaces, *args, **kwargs)
@@ -72,7 +99,6 @@ def figure_title(workspaces, fig_num):
     :param fig_num: An integer denoting the figure number
     :return: A title for the figure
     """
-
     def wsname(w):
         return w.name() if hasattr(w, 'name') else w
 
@@ -100,8 +126,9 @@ def plot_md_histo_ws(workspaces, errors=False, overplot=False, fig=None, ax_prop
     # Get figure and Axes
     num_axes = 1
     fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
-    axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend])
-            if not isinstance(ax, MantidAxes) else ax for ax in axes]
+    axes = [
+        MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax for ax in axes
+    ]
 
     # Plot MD
     _do_single_plot_mdhisto_workspace(axes[0], workspaces, errors)
@@ -110,9 +137,19 @@ def plot_md_histo_ws(workspaces, errors=False, overplot=False, fig=None, ax_prop
 
 
 @manage_workspace_names
-def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
-         overplot=False, fig=None, plot_kwargs=None, ax_properties=None,
-         window_title=None, tiled=False, waterfall=False, log_name=None, log_values=None):
+def plot(workspaces,
+         spectrum_nums=None,
+         wksp_indices=None,
+         errors=False,
+         overplot=False,
+         fig=None,
+         plot_kwargs=None,
+         ax_properties=None,
+         window_title=None,
+         tiled=False,
+         waterfall=False,
+         log_name=None,
+         log_values=None):
     """
     Create a figure with a single subplot and for each workspace/index add a
     line plot to the new axes. show() is called before returning the figure instance. A legend
@@ -159,8 +196,9 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
     # Convert to a MantidAxes if it isn't already. Ignore legend since
     # a new one will be drawn later
-    axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax
-            for ax in axes]
+    axes = [
+        MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax for ax in axes
+    ]
 
     assert axes, "No axes are associated with this plot"
 
@@ -198,7 +236,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         fig.canvas.set_window_title(figure_title(workspaces, fig.number))
     else:
         if ax.is_waterfall():
-            for i in range(len(nums)*len(workspaces)):
+            for i in range(len(nums) * len(workspaces)):
                 errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
                 datafunctions.convert_single_line_to_waterfall(ax, len(ax.get_lines()) - (i + 1))
 
@@ -260,8 +298,7 @@ def create_subplots(nplots, fig=None):
     ax0 = fig.add_subplot(gs[0, 0], projection=PROJECTION)
     axes[0] = ax0
     for i in range(1, nplots):
-        axes[i] = fig.add_subplot(gs[i // ncols, i % ncols],
-                                  projection=PROJECTION)
+        axes[i] = fig.add_subplot(gs[i // ncols, i % ncols], projection=PROJECTION)
     axes = axes.reshape(nrows, ncols)
 
     return fig, axes, nrows, ncols
@@ -280,9 +317,9 @@ def raise_if_not_sequence(value, seq_name, element_type=None):
     accepted_types = (list, tuple, range)
     if type(value) not in accepted_types:
         raise ValueError("{} should be a list or tuple, "
-                         "instead found '{}'".format(seq_name,
-                                                     value.__class__.__name__))
+                         "instead found '{}'".format(seq_name, value.__class__.__name__))
     if element_type is not None:
+
         def raise_if_not_type(x):
             if not isinstance(x, element_type):
                 raise ValueError(f"{x} has unexpected type: '{x.__class__.__name__}'")
@@ -350,35 +387,27 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
                 labelright="on" == ConfigService.getString("plots.showLabelsRight").lower(),
                 labeltop="on" == ConfigService.getString("plots.showLabelsTop").lower(),
             )
-            ax.xaxis.set_tick_params(
-                which='major',
-                width=int(ConfigService.getString("plots.ticks.major.width")),
-                length=int(ConfigService.getString("plots.ticks.major.length")),
-                direction=ConfigService.getString("plots.ticks.major.direction").lower()
-            )
-            ax.yaxis.set_tick_params(
-                which='major',
-                width=int(ConfigService.getString("plots.ticks.major.width")),
-                length=int(ConfigService.getString("plots.ticks.major.length")),
-                direction=ConfigService.getString("plots.ticks.major.direction").lower()
-            )
+            ax.xaxis.set_tick_params(which='major',
+                                     width=int(ConfigService.getString("plots.ticks.major.width")),
+                                     length=int(ConfigService.getString("plots.ticks.major.length")),
+                                     direction=ConfigService.getString("plots.ticks.major.direction").lower())
+            ax.yaxis.set_tick_params(which='major',
+                                     width=int(ConfigService.getString("plots.ticks.major.width")),
+                                     length=int(ConfigService.getString("plots.ticks.major.length")),
+                                     direction=ConfigService.getString("plots.ticks.major.direction").lower())
 
         if ConfigService.getString("plots.ShowMinorTicks").lower() == "on":
             for ax in fig.axes:
                 ax.minorticks_on()
 
-                ax.xaxis.set_tick_params(
-                    which='minor',
-                    width=int(ConfigService.getString("plots.ticks.minor.width")),
-                    length=int(ConfigService.getString("plots.ticks.minor.length")),
-                    direction=ConfigService.getString("plots.ticks.minor.direction").lower()
-                )
-                ax.yaxis.set_tick_params(
-                    which='minor',
-                    width=int(ConfigService.getString("plots.ticks.minor.width")),
-                    length=int(ConfigService.getString("plots.ticks.minor.length")),
-                    direction=ConfigService.getString("plots.ticks.minor.direction").lower()
-                )
+                ax.xaxis.set_tick_params(which='minor',
+                                         width=int(ConfigService.getString("plots.ticks.minor.width")),
+                                         length=int(ConfigService.getString("plots.ticks.minor.length")),
+                                         direction=ConfigService.getString("plots.ticks.minor.direction").lower())
+                ax.yaxis.set_tick_params(which='minor',
+                                         width=int(ConfigService.getString("plots.ticks.minor.width")),
+                                         length=int(ConfigService.getString("plots.ticks.minor.length")),
+                                         direction=ConfigService.getString("plots.ticks.minor.direction").lower())
 
         for ax in fig.axes:
             ax.show_minor_gridlines = ConfigService.getString("plots.ShowMinorGridlines").lower() == "on"
@@ -401,12 +430,10 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
 def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled=False, overplot=False):
     """Raises a ValueError if any arguments have the incorrect types"""
     if spectrum_nums is not None and wksp_indices is not None:
-        raise ValueError("Both spectrum_nums and wksp_indices supplied. "
-                         "Please supply only 1.")
+        raise ValueError("Both spectrum_nums and wksp_indices supplied. " "Please supply only 1.")
 
     if tiled and overplot:
-        raise ValueError("Both tiled and overplot flags set to true. "
-                         "Please set only one to true.")
+        raise ValueError("Both tiled and overplot flags set to true. " "Please set only one to true.")
 
     raise_if_not_sequence(workspaces, 'workspaces', MatrixWorkspace)
 

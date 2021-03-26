@@ -9,20 +9,19 @@ from mantid.api import *
 from mantid.kernel import *
 import os
 
-
 # See ticket #14716
+
 
 class CleanFileCache(PythonAlgorithm):
     """ Remove cache files from the cache directory
     """
-
     def category(self):
         """
         """
         return "Workflow\\DataHandling"
 
     def seeAlso(self):
-        return [ "ClearCache" ]
+        return ["ClearCache"]
 
     def name(self):
         """
@@ -46,8 +45,8 @@ class CleanFileCache(PythonAlgorithm):
 
         self.declareProperty(
             "CacheDir", "",
-            "the directory in which the cache file will be created. If nothing is given, default location for cache files will be used",
-            Direction.Input)
+            "the directory in which the cache file will be created. If nothing is given, default location for cache "
+            "files will be used", Direction.Input)
 
         self.declareProperty(
             "AgeInDays", 14,
@@ -61,10 +60,7 @@ class CleanFileCache(PythonAlgorithm):
         # Inputs
         cache_dir = self.getPropertyValue("CacheDir")
         if not cache_dir:
-            cache_dir = os.path.join(
-                ConfigService.getUserPropertiesDir(),
-                "cache"
-                )
+            cache_dir = os.path.join(ConfigService.getUserPropertiesDir(), "cache")
         age = int(self.getPropertyValue("AgeInDays"))
         #
         _run(cache_dir, age)
@@ -76,8 +72,8 @@ def _run(cache_dir, days):
     import re
     import time
     from datetime import timedelta, date
-    rm_date = date.today() - timedelta(days = days)
-    rm_date = time.mktime(rm_date.timetuple()) + 24*60*60
+    rm_date = date.today() - timedelta(days=days)
+    rm_date = time.mktime(rm_date.timetuple()) + 24 * 60 * 60
     for f in glob.glob(os.path.join(cache_dir, "*.nxs")):
         # skip over non-files
         if not os.path.isfile(f):

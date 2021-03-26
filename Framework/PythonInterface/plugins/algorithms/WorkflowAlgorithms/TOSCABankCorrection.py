@@ -26,38 +26,41 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
         return 'Corrects TOSCA reductions where the peaks across banks are not in alignment.'
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty(name='InputWorkspace', defaultValue='',
-                                               direction=Direction.Input),
+        self.declareProperty(WorkspaceProperty(name='InputWorkspace', defaultValue='', direction=Direction.Input),
                              doc='Input reduced workspace')
 
-        self.declareProperty(FloatArrayProperty(name='SearchRange',
-                                                values=[200, 2000]),
+        self.declareProperty(FloatArrayProperty(name='SearchRange', values=[200, 2000]),
                              doc='Range over which to find peaks')
 
-        self.declareProperty(name='PeakPosition', defaultValue='',
-                             doc='Specify a particular peak to use')
+        self.declareProperty(name='PeakPosition', defaultValue='', doc='Specify a particular peak to use')
 
-        self.declareProperty(name='ClosePeakTolerance', defaultValue=20.0,
+        self.declareProperty(name='ClosePeakTolerance',
+                             defaultValue=20.0,
                              doc='Tolerance under which peaks are considered to be the same')
 
-        self.declareProperty(name='PeakFunction', defaultValue='Lorentzian',
+        self.declareProperty(name='PeakFunction',
+                             defaultValue='Lorentzian',
                              validator=StringListValidator(['Lorentzian', 'Gaussian']),
                              doc='Type of peak to search for')
 
-        self.declareProperty(MatrixWorkspaceProperty(name='OutputWorkspace', defaultValue='',
+        self.declareProperty(MatrixWorkspaceProperty(name='OutputWorkspace',
+                                                     defaultValue='',
                                                      direction=Direction.Output),
                              doc='Output corrected workspace')
 
-        self.declareProperty(name='TargetPeakCentre', defaultValue=0.0,
+        self.declareProperty(name='TargetPeakCentre',
+                             defaultValue=0.0,
                              direction=Direction.Output,
                              doc='X position between the centres of the two '
-                                 'selected peaks')
+                             'selected peaks')
 
-        self.declareProperty(name='ScaleFactor1', defaultValue=1.0,
+        self.declareProperty(name='ScaleFactor1',
+                             defaultValue=1.0,
                              direction=Direction.Output,
                              doc='Scale factor for the first bank (histogram 0)')
 
-        self.declareProperty(name='ScaleFactor2', defaultValue=1.0,
+        self.declareProperty(name='ScaleFactor2',
+                             defaultValue=1.0,
                              direction=Direction.Output,
                              doc='Scale factor for the second bank (histogram 1)')
 
@@ -220,15 +223,10 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
                          OutputWorkspace=self._output_ws)
 
         # Recalculate the sum spectra from corrected banks
-        GroupDetectors(InputWorkspace=self._output_ws,
-                       OutputWorkspace='__sum',
-                       SpectraList=[0,1],
-                       Behaviour='Average')
+        GroupDetectors(InputWorkspace=self._output_ws, OutputWorkspace='__sum', SpectraList=[0, 1], Behaviour='Average')
 
         # Add the new sum spectra to the output workspace
-        AppendSpectra(InputWorkspace1=self._output_ws,
-                      InputWorkspace2='__sum',
-                      OutputWorkspace=self._output_ws)
+        AppendSpectra(InputWorkspace1=self._output_ws, InputWorkspace2='__sum', OutputWorkspace=self._output_ws)
 
         DeleteWorkspace('__sum')
 

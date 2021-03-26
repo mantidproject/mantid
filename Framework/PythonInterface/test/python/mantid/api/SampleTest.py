@@ -39,9 +39,7 @@ class SampleTest(unittest.TestCase):
         self.assertEqual(sample.hasCrystalStructure(), False)
         self.assertRaises(RuntimeError, sample.getCrystalStructure)
 
-        cs = CrystalStructure('5.43 5.43 5.43',
-                              'F d -3 m',
-                              'Si 0 0 0 1.0 0.01')
+        cs = CrystalStructure('5.43 5.43 5.43', 'F d -3 m', 'Si 0 0 0 1.0 0.01')
 
         sample.setCrystalStructure(cs)
 
@@ -54,7 +52,6 @@ class SampleTest(unittest.TestCase):
         self.assertEqual(len(cs.getScatterers()), len(cs_from_sample.getScatterers()))
         self.assertEqual(cs.getScatterers()[0], cs_from_sample.getScatterers()[0])
 
-
         sample.clearCrystalStructure()
 
         self.assertEqual(sample.hasCrystalStructure(), False)
@@ -63,7 +60,7 @@ class SampleTest(unittest.TestCase):
     def test_material(self):
         ws = CreateWorkspace(DataX=[1], DataY=[1], StoreInADS=False)
         sample = ws.sample()
-        SetSampleMaterial(ws,"Al2 O3",SampleMassDensity=4, StoreInADS=False)
+        SetSampleMaterial(ws, "Al2 O3", SampleMassDensity=4, StoreInADS=False)
         material = sample.getMaterial()
 
         self.assertAlmostEqual(material.numberDensity, 0.1181, places=4)
@@ -80,8 +77,8 @@ class SampleTest(unittest.TestCase):
         xs1 = atoms[1].neutron()
         # the correct way to calculate for coherent cross section
         # is to average the scattering lengths then convert to a cross section
-        b_real = (xs0['coh_scatt_length_real']*2 + xs1['coh_scatt_length_real']*3) / 5
-        b_imag = (xs0['coh_scatt_length_img']*2 + xs1['coh_scatt_length_img']*3) / 5
+        b_real = (xs0['coh_scatt_length_real'] * 2 + xs1['coh_scatt_length_real'] * 3) / 5
+        b_imag = (xs0['coh_scatt_length_img'] * 2 + xs1['coh_scatt_length_img'] * 3) / 5
         xs = .04 * pi * (b_real * b_real + b_imag * b_imag)
         self.assertAlmostEquals(material.cohScatterXSection(), xs, places=4)
 
@@ -130,6 +127,7 @@ class SampleTest(unittest.TestCase):
         self.assertEqual(a, b)
         b.setThickness(10)
         self.assertNotEqual(a, b)
+
 
 if __name__ == '__main__':
     unittest.main()

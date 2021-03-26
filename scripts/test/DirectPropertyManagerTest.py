@@ -19,7 +19,6 @@ from mantid.simpleapi import *
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
 class DirectPropertyManagerTest(unittest.TestCase):
-
     def __init__(self, methodName):
         self.prop_man = PropertyManager("MAR")
         return super(DirectPropertyManagerTest, self).__init__(methodName)
@@ -149,12 +148,12 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman = self.prop_man
 
         range = propman.norm_mon_integration_range
-        self.assertAlmostEqual(range[0], 1000., 7,
-                               " Default integration min range on MARI should be as described in MARI_Parameters.xml "
-                               "file")
-        self.assertAlmostEqual(range[1], 2000., 7,
-                               " Default integration max range on MAPS should be as described in MARI_Parameters.xml "
-                               "file")
+        self.assertAlmostEqual(
+            range[0], 1000., 7, " Default integration min range on MARI should be as described in MARI_Parameters.xml "
+            "file")
+        self.assertAlmostEqual(
+            range[1], 2000., 7, " Default integration max range on MAPS should be as described in MARI_Parameters.xml "
+            "file")
 
         self.assertEqual(propman.ei_mon_spectra, (2, 3),
                          " Default ei monitors on MARI should be as described in MARI_Parameters.xml file")
@@ -337,8 +336,14 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         self.assertEqual(propman.motor_offset, None)
 
-        sample_ws = CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1,
-                                          NumEvents=10, XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
+        sample_ws = CreateSampleWorkspace(Function='Multiple Peaks',
+                                          NumBanks=4,
+                                          BankPixelWidth=1,
+                                          NumEvents=10,
+                                          XUnit='Energy',
+                                          XMin=3,
+                                          XMax=200,
+                                          BinWidth=0.1)
 
         propman.motor_offset = 10
         psi = PropertyManager.psi.read_psi_from_workspace(sample_ws)
@@ -724,8 +729,14 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue(PropertyManager.incident_energy.multirep_mode())
 
         # create test workspace
-        wsEn = CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=1, BankPixelWidth=2, NumEvents=10000,
-                                     XUnit='Energy', XMin=10, XMax=200, BinWidth=0.1)
+        wsEn = CreateSampleWorkspace(Function='Multiple Peaks',
+                                     NumBanks=1,
+                                     BankPixelWidth=2,
+                                     NumEvents=10000,
+                                     XUnit='Energy',
+                                     XMin=10,
+                                     XMax=200,
+                                     BinWidth=0.1)
         # convert units to TOF to simulate real workspace obtained from experiment
         mon_ws = ConvertUnits(InputWorkspace=wsEn, Target='TOF')
         # find chopper log values would be present in real workspace
@@ -759,7 +770,9 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_ignore_complex_defailts_changes_fom_instrument(self):
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
 
-        SetInstrumentParameter(ws, ParameterName="bkgd_range", Value="bkgd-range-min:bkgd-range-max",
+        SetInstrumentParameter(ws,
+                               ParameterName="bkgd_range",
+                               Value="bkgd-range-min:bkgd-range-max",
                                ParameterType="String")
         SetInstrumentParameter(ws, ParameterName="bkgd-range-min", Value="100.", ParameterType="Number")
         SetInstrumentParameter(ws, ParameterName="bkgd-range-max", Value="200.", ParameterType="Number")
@@ -781,7 +794,9 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_ignore_complex_defailts_single_fom_instrument(self):
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
 
-        SetInstrumentParameter(ws, ParameterName="bkgd_range", Value="bkgd-range-min:bkgd-range-max",
+        SetInstrumentParameter(ws,
+                               ParameterName="bkgd_range",
+                               Value="bkgd-range-min:bkgd-range-max",
                                ParameterType="String")
         SetInstrumentParameter(ws, ParameterName="bkgd-range-min", Value="100.", ParameterType="Number")
         SetInstrumentParameter(ws, ParameterName="bkgd-range-max", Value="200.", ParameterType="Number")
@@ -1200,11 +1215,17 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(propss['SparseInstrument'], True)
 
         # Properties acceptable by MoneCarloAbsorption algorithm
-        propman.abs_corr_info = {'is_mc': True, 'NumberOfWavelengthPoints': 20, 'EventsPerPoint': '200',
-                                 'SeedValue': 31090,
-                                 'Interpolation': 'CSpline', 'SparseInstrument': 'True', 'NumberOfDetectorRows': 20,
-                                 'NumberOfDetectorColumns': '10',
-                                 'MaxScatterPtAttempts': 200}
+        propman.abs_corr_info = {
+            'is_mc': True,
+            'NumberOfWavelengthPoints': 20,
+            'EventsPerPoint': '200',
+            'SeedValue': 31090,
+            'Interpolation': 'CSpline',
+            'SparseInstrument': 'True',
+            'NumberOfDetectorRows': 20,
+            'NumberOfDetectorColumns': '10',
+            'MaxScatterPtAttempts': 200
+        }
 
         propss = propman.abs_corr_info
         self.assertTrue(propss['is_mc'])
@@ -1219,8 +1240,14 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         self.assertDictEqual(propss, rec_prop)
         # Properties acceptable by AbsorptionCorrection algorithm
-        ac_properties = {'ScatterFrom': 'Sample', 'NumberOfWavelengthPoints': 10, 'ExpMethod': 'FastApprox',
-                         'EMode': 'Direct', 'EFixed': 10, 'ElementSize': 2}
+        ac_properties = {
+            'ScatterFrom': 'Sample',
+            'NumberOfWavelengthPoints': 10,
+            'ExpMethod': 'FastApprox',
+            'EMode': 'Direct',
+            'EFixed': 10,
+            'ElementSize': 2
+        }
         ac_properties['is_fast'] = True
         propman.abs_corr_info = str(ac_properties)
 
@@ -1263,11 +1290,10 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_lastrun_log_default(self):
         #
         if platform.startswith("linux"):
-            self.assertEqual(PropertyManager.archive_upload_log_template,
-                             '/archive/NDX{0}/Instrument/logs/lastrun.txt')
+            self.assertEqual(PropertyManager.archive_upload_log_template, '/archive/NDX{0}/Instrument/logs/lastrun.txt')
             log_dir = '/archive/NDXMARI/Instrument/logs/'
         elif platform == "darwin":
-            self.assertEqual(PropertyManager.archive_upload_log_template,'')
+            self.assertEqual(PropertyManager.archive_upload_log_template, '')
             log_dir = ''
         elif platform == "win32":
             self.assertEqual(PropertyManager.archive_upload_log_template,
@@ -1278,10 +1304,9 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         if os.path.isdir(log_dir):
             # in case test server or test machine is connected to the archive
-            self.assertEqual(propman.archive_upload_log_file,
-                             os.path.normpath(log_dir+'lastrun.txt'))
+            self.assertEqual(propman.archive_upload_log_file, os.path.normpath(log_dir + 'lastrun.txt'))
         else:
-            self.assertEqual(propman.archive_upload_log_file,'')
+            self.assertEqual(propman.archive_upload_log_file, '')
 
         test_dir = config.getString('defaultsave.directory')
         test_file = os.path.normpath(test_dir + 'lastrun.txt')
@@ -1290,7 +1315,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         f.close()
 
         propman.archive_upload_log_file = test_file
-        self.assertEqual(propman.archive_upload_log_file,test_file)
+        self.assertEqual(propman.archive_upload_log_file, test_file)
 
         os.remove(test_file)
 

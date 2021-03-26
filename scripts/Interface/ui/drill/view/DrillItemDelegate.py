@@ -53,7 +53,7 @@ class DrillItemDelegate(QItemDelegate):
                 if len(numors) > 1:
                     splittedStr[i] = numors[0] + "..."
                     reduced = True
-            i -=1
+            i -= 1
 
         if i < 0:
             reducable = False

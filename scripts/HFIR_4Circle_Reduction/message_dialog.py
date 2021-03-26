@@ -65,7 +65,7 @@ class MessageDialog(QDialog):
         num_loops = max(len(motor_pos_vec), len(pt_intensity_vec))
 
         for pt in range(num_loops):
-            text += '{0} \t'.format(pt+1)
+            text += '{0} \t'.format(pt + 1)
             if pt < len(pt_intensity_vec):
                 text += '{0} \t'.format(pt_intensity_vec[pt])
             else:

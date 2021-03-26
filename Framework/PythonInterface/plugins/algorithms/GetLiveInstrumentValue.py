@@ -17,25 +17,32 @@ class GetLiveInstrumentValue(DataProcessorAlgorithm):
         return 'Get a live data value from and instrument via EPICS'
 
     def seeAlso(self):
-        return [ "ReflectometryReductionOneLiveData" ]
+        return ["ReflectometryReductionOneLiveData"]
 
     def PyInit(self):
-        instruments = sorted([item.name()
-                              for item in config.getFacility().instruments()])
+        instruments = sorted([item.name() for item in config.getFacility().instruments()])
         instrument = config.getInstrument() if config.getInstrument() in instruments else ''
-        self.declareProperty(name='Instrument', defaultValue=instrument, direction=Direction.Input,
+        self.declareProperty(name='Instrument',
+                             defaultValue=instrument,
+                             direction=Direction.Input,
                              validator=StringListValidator(instruments),
                              doc='Instrument to find live value for.')
 
-        self.declareProperty(name='PropertyType', defaultValue='Run', direction=Direction.Input,
+        self.declareProperty(name='PropertyType',
+                             defaultValue='Run',
+                             direction=Direction.Input,
                              validator=StringListValidator(['Run', 'Block']),
                              doc='The type of property to find')
 
-        self.declareProperty(name='PropertyName', defaultValue='TITLE', direction=Direction.Input,
+        self.declareProperty(name='PropertyName',
+                             defaultValue='TITLE',
+                             direction=Direction.Input,
                              validator=StringMandatoryValidator(),
                              doc='Name of value to find.')
 
-        self.declareProperty(name='Value', defaultValue='', direction=Direction.Output,
+        self.declareProperty(name='Value',
+                             defaultValue='',
+                             direction=Direction.Output,
                              doc='The live value from the instrument, or an empty string if not found')
 
     def PyExec(self):

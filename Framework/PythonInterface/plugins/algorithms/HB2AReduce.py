@@ -4,11 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceProperty,
-                        FileProperty, FileAction, MultipleFileProperty)
-from mantid.kernel import (Direction, IntArrayProperty, FloatTimeSeriesProperty,
-                           StringListValidator, FloatBoundedValidator, EnabledWhenProperty,
-                           PropertyCriterion, Property)
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceProperty, FileProperty, FileAction,
+                        MultipleFileProperty)
+from mantid.kernel import (Direction, IntArrayProperty, FloatTimeSeriesProperty, StringListValidator,
+                           FloatBoundedValidator, EnabledWhenProperty, PropertyCriterion, Property)
 from mantid.simpleapi import (SaveGSSCW, SaveFocusedXYE)
 from mantid import logger
 import numpy as np
@@ -20,10 +19,10 @@ import warnings
 
 class HB2AReduce(PythonAlgorithm):
     _gaps = np.array([
-        0., 2.641, 5.287, 8.042, 10.775, 13.488, 16.129, 18.814, 21.551, 24.236, 26.988, 29.616,
-        32.312, 34.956, 37.749, 40.4, 43.111, 45.839, 48.542, 51.207, 53.938, 56.62, 59.286, 61.994,
-        64.651, 67.352, 70.11, 72.765, 75.492, 78.204, 80.917, 83.563, 86.279, 88.929, 91.657,
-        94.326, 97.074, 99.784, 102.494, 105.174, 107.813, 110.551, 113.25, 115.915
+        0., 2.641, 5.287, 8.042, 10.775, 13.488, 16.129, 18.814, 21.551, 24.236, 26.988, 29.616, 32.312, 34.956, 37.749,
+        40.4, 43.111, 45.839, 48.542, 51.207, 53.938, 56.62, 59.286, 61.994, 64.651, 67.352, 70.11, 72.765, 75.492,
+        78.204, 80.917, 83.563, 86.279, 88.929, 91.657, 94.326, 97.074, 99.784, 102.494, 105.174, 107.813, 110.551,
+        113.25, 115.915
     ])
 
     def category(self):
@@ -39,10 +38,8 @@ class HB2AReduce(PythonAlgorithm):
         return 'Performs data reduction for HB-2A POWDER at HFIR'
 
     def PyInit(self):
-        self.declareProperty(
-            MultipleFileProperty(name="Filename",
-                                 action=FileAction.OptionalLoad,
-                                 extensions=[".dat"]), "Data files to load")
+        self.declareProperty(MultipleFileProperty(name="Filename", action=FileAction.OptionalLoad, extensions=[".dat"]),
+                             "Data files to load")
         condition = EnabledWhenProperty("Filename", PropertyCriterion.IsDefault)
         self.declareProperty('IPTS', Property.EMPTY_INT, "IPTS number to load from")
         self.setPropertySettings("IPTS", condition)
@@ -50,42 +47,34 @@ class HB2AReduce(PythonAlgorithm):
         self.setPropertySettings("Exp", condition)
         self.declareProperty(IntArrayProperty("ScanNumbers", []), 'Scan numbers to load')
         self.setPropertySettings("ScanNumbers", condition)
-        self.declareProperty(
-            FileProperty(name="Vanadium",
-                         defaultValue="",
-                         action=FileAction.OptionalLoad,
-                         extensions=[".dat", ".txt"]),
-            doc="Vanadium file, can be either the vanadium scan file or the reduced vcorr file. "
-            "If not provided the vcorr file adjacent to the data file will be used")
-        self.declareProperty('Normalise', True,
-                             "If False vanadium normalisation will not be performed")
+        self.declareProperty(FileProperty(name="Vanadium",
+                                          defaultValue="",
+                                          action=FileAction.OptionalLoad,
+                                          extensions=[".dat", ".txt"]),
+                             doc="Vanadium file, can be either the vanadium scan file or the reduced vcorr file. "
+                             "If not provided the vcorr file adjacent to the data file will be used")
+        self.declareProperty('Normalise', True, "If False vanadium normalisation will not be performed")
         self.declareProperty(
             IntArrayProperty("ExcludeDetectors", []),
-            doc=
-            "Detectors to exclude. If not provided the HB2A_exp???__exclude_detectors.txt adjacent "
+            doc="Detectors to exclude. If not provided the HB2A_exp???__exclude_detectors.txt adjacent "
             "to the data file will be used if it exist")
         self.declareProperty(
             'DefX', '',
-            "By default the def_x (x-axis) from the file will be used, it can be overridden by setting it here"
-        )
+            "By default the def_x (x-axis) from the file will be used, it can be overridden by setting it here")
         self.declareProperty(
             'IndividualDetectors', False,
-            "If True the workspace will include each anode as a separate spectrum, useful for debugging issues"
-        )
+            "If True the workspace will include each anode as a separate spectrum, useful for debugging issues")
         condition = EnabledWhenProperty("IndividualDetectors", PropertyCriterion.IsDefault)
-        self.declareProperty(
-            'BinData', True,
-            "Data will be binned using BinWidth. If False then all data will be unbinned")
+        self.declareProperty('BinData', True,
+                             "Data will be binned using BinWidth. If False then all data will be unbinned")
         self.setPropertySettings("BinData", condition)
         positiveFloat = FloatBoundedValidator(lower=0., exclusive=True)
         self.declareProperty('BinWidth', 0.05, positiveFloat, "Bin size of the output workspace")
         self.setPropertySettings("BinWidth", condition)
         self.declareProperty('Scale', 1.0, positiveFloat, "The output will be scaled by this value")
         self.declareProperty(
-            WorkspaceProperty("OutputWorkspace",
-                              "",
-                              optional=PropertyMode.Mandatory,
-                              direction=Direction.Output), "Output Workspace")
+            WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
+            "Output Workspace")
         # extend functionality requested by HB2A users
         self.declareProperty(name='SaveData',
                              defaultValue=True,
@@ -96,9 +85,7 @@ class HB2AReduce(PythonAlgorithm):
                              validator=StringListValidator(['XYE', 'GSAS']),
                              doc="Supportted output format: XYE (.dat), GSAS (.gss)")
         self.setPropertySettings('OutputFormat', condition)
-        self.declareProperty(FileProperty(name="OutputDirectory",
-                                          defaultValue="",
-                                          action=FileAction.OptionalDirectory),
+        self.declareProperty(FileProperty(name="OutputDirectory", defaultValue="", action=FileAction.OptionalDirectory),
                              doc="Saving directory for output file")
         self.setPropertySettings('OutputDirectory', condition)
         # group the GUI
@@ -117,13 +104,11 @@ class HB2AReduce(PythonAlgorithm):
                 issues["Filename"] = 'Must specify either Filename or IPTS AND ScanNumbers'
 
             if self.getProperty("Exp").value == Property.EMPTY_INT:
-                exp_list = sorted(e for e in os.listdir('/HFIR/HB2A/IPTS-{0}'.format(ipts))
-                                  if 'exp' in e)
+                exp_list = sorted(e for e in os.listdir('/HFIR/HB2A/IPTS-{0}'.format(ipts)) if 'exp' in e)
                 if len(exp_list) > 1:
                     exps = ','.join(e.replace('exp', '') for e in exp_list)
-                    issues[
-                        "Exp"] = 'Multiple experiments found in IPTS-{}. You must set Exp to one of {}'.format(
-                            ipts, exps)
+                    issues["Exp"] = 'Multiple experiments found in IPTS-{}. You must set Exp to one of {}'.format(
+                        ipts, exps)
 
         # validate output format options
         # Def_x    GSAS    XYE
@@ -140,20 +125,18 @@ class HB2AReduce(PythonAlgorithm):
                     ipts = self.getProperty("IPTS").value
                     exp = self.getProperty("Exp").value
                     if self.getProperty("Exp").value == Property.EMPTY_INT:
-                        exp = int([
-                            e for e in os.listdir('/HFIR/HB2A/IPTS-{0}'.format(ipts)) if 'exp' in e
-                        ][0].replace('exp', ''))
+                        exp = int([e for e in os.listdir('/HFIR/HB2A/IPTS-{0}'.format(ipts))
+                                   if 'exp' in e][0].replace('exp', ''))
                     filenames = [
-                        '/HFIR/HB2A/IPTS-{0}/exp{1}/Datafiles/HB2A_exp{1:04}_scan{2:04}.dat'.format(
-                            ipts, exp, scan) for scan in self.getProperty("ScanNumbers").value
+                        '/HFIR/HB2A/IPTS-{0}/exp{1}/Datafiles/HB2A_exp{1:04}_scan{2:04}.dat'.format(ipts, exp, scan)
+                        for scan in self.getProperty("ScanNumbers").value
                     ]
                 filenames = filenames if isinstance(filenames, list) else [filenames]
                 _target = "# def_x = 2theta"
                 for fn in filenames:
                     with open(fn) as f:
                         if not any([_target in line for line in f.readlines()]):
-                            issues[
-                                'OutputFormat'] = f"{fn} can't be saved to GSAS due to missing header:\n{_target}"
+                            issues['OutputFormat'] = f"{fn} can't be saved to GSAS due to missing header:\n{_target}"
                             break
         return issues
 
@@ -169,8 +152,8 @@ class HB2AReduce(PythonAlgorithm):
                 exp = int([e for e in os.listdir('/HFIR/HB2A/IPTS-{0}'.format(ipts))
                            if 'exp' in e][0].replace('exp', ''))
             filenames = [
-                '/HFIR/HB2A/IPTS-{0}/exp{1}/Datafiles/HB2A_exp{1:04}_scan{2:04}.dat'.format(
-                    ipts, exp, scan) for scan in self.getProperty("ScanNumbers").value
+                '/HFIR/HB2A/IPTS-{0}/exp{1}/Datafiles/HB2A_exp{1:04}_scan{2:04}.dat'.format(ipts, exp, scan)
+                for scan in self.getProperty("ScanNumbers").value
             ]
 
         metadata = None
@@ -199,12 +182,7 @@ class HB2AReduce(PythonAlgorithm):
             names = lines[header].split()[1:]
 
             try:
-                d = np.loadtxt(lines[header:],
-                               ndmin=1,
-                               dtype={
-                                   'names': names,
-                                   'formats': [float] * len(names)
-                               })
+                d = np.loadtxt(lines[header:], ndmin=1, dtype={'names': names, 'formats': [float] * len(names)})
             except (ValueError, IndexError):
                 raise RuntimeError("Could not read {}, file likely malformed".format(filename))
 
@@ -227,17 +205,15 @@ class HB2AReduce(PythonAlgorithm):
         twotheta = twotheta[monitor_mask]
 
         # Get either vcorr file or vanadium data
-        vanadium_count, vanadium_monitor, vcorr = self.get_vanadium(detector_mask, data['m1'][0],
-                                                                    data['colltrans'][0], exp,
-                                                                    indir)
+        vanadium_count, vanadium_monitor, vcorr = self.get_vanadium(detector_mask, data['m1'][0], data['colltrans'][0],
+                                                                    exp, indir)
 
         def_x = self.getProperty("DefX").value
         if not def_x:
             def_x = metadata['def_x']
 
         if def_x not in data.dtype.names:
-            logger.warning(
-                "Could not find {} property in datafile, using 2theta instead".format(def_x))
+            logger.warning("Could not find {} property in datafile, using 2theta instead".format(def_x))
             def_x = '2theta'
 
         if def_x == '2theta':
@@ -254,8 +230,8 @@ class HB2AReduce(PythonAlgorithm):
         else:
             if self.getProperty("BinData").value:
                 # Data binned with bin
-                x, y, e = self.process_binned(counts, x.ravel(), scale, monitor, vanadium_count,
-                                              vanadium_monitor, vcorr)
+                x, y, e = self.process_binned(counts, x.ravel(), scale, monitor, vanadium_count, vanadium_monitor,
+                                              vcorr)
             else:
                 y, e = self.process(counts, scale, monitor, vanadium_count, vanadium_monitor, vcorr)
             NSpec = 1
@@ -279,10 +255,7 @@ class HB2AReduce(PythonAlgorithm):
         if save_data:
             outputdir = self.getProperty("OutputDirectory").value
             outputdir = outputdir if outputdir != "" else f"/HFIR/HB2A/IPTS-{metadata['proposal']}/shared"
-            _outputfunc = {
-                'XYE': SaveFocusedXYE,
-                'GSAS': SaveGSSCW
-            }[self.getProperty('OutputFormat').value]
+            _outputfunc = {'XYE': SaveFocusedXYE, 'GSAS': SaveGSSCW}[self.getProperty('OutputFormat').value]
             _outputext = {
                 "XYE": 'dat',
                 "GSAS": 'gss',
@@ -343,9 +316,8 @@ class HB2AReduce(PythonAlgorithm):
             # colltrans is the collimator position, whether in or out of the beam
             # colltrans = 0 -> IN
             # colltrans = +/-80 -> OUT
-            vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
-                exp, 115 if np.isclose(m1, 0, atol=0.1) else 113,
-                "IN" if np.isclose(colltrans, 0, atol=0.1) else "OUT")
+            vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(exp, 115 if np.isclose(m1, 0, atol=0.1) else 113,
+                                                                  "IN" if np.isclose(colltrans, 0, atol=0.1) else "OUT")
         vcorr_filename = os.path.join(indir, vcorr_filename)
         logger.notice("Using vcorr file: {}".format(vcorr_filename))
         if not os.path.isfile(vcorr_filename):
@@ -353,13 +325,7 @@ class HB2AReduce(PythonAlgorithm):
 
         return None, None, np.genfromtxt(vcorr_filename)[detector_mask]
 
-    def process(self,
-                counts,
-                scale,
-                monitor,
-                vanadium_count=None,
-                vanadium_monitor=None,
-                vcorr=None):
+    def process(self, counts, scale, monitor, vanadium_count=None, vanadium_monitor=None, vcorr=None):
         """Reduce data not binning"""
         old_settings = np.seterr(all='ignore')  # otherwise it will complain about divide by zero
         if vcorr is not None:
@@ -367,26 +333,11 @@ class HB2AReduce(PythonAlgorithm):
             e = np.sqrt(counts) / vcorr[:, np.newaxis] / monitor
         else:
             y = counts / vanadium_count[:, np.newaxis] * vanadium_monitor / monitor
-            e = (
-                np.sqrt(
-                    1 / counts
-                    + 1 / vanadium_count[:, np.newaxis]
-                    + 1 / vanadium_monitor
-                    + 1 / monitor
-                )
-                * y
-            )
+            e = (np.sqrt(1 / counts + 1 / vanadium_count[:, np.newaxis] + 1 / vanadium_monitor + 1 / monitor) * y)
         np.seterr(**old_settings)
         return np.nan_to_num(y * scale), np.nan_to_num(e * scale)
 
-    def process_binned(self,
-                       counts,
-                       x,
-                       scale,
-                       monitor,
-                       vanadium_count=None,
-                       vanadium_monitor=None,
-                       vcorr=None):
+    def process_binned(self, counts, x, scale, monitor, vanadium_count=None, vanadium_monitor=None, vcorr=None):
         """Bin the data"""
         binWidth = self.getProperty("BinWidth").value
         bins = np.arange(x.min(), x.max() + binWidth, binWidth)  # calculate bin boundaries
@@ -411,20 +362,8 @@ class HB2AReduce(PythonAlgorithm):
             y = (counts_binned / vcorr_binned * number_binned / monitor_binned)[1:]
             e = (np.sqrt(1 / counts_binned)[1:]) * y
         else:
-            y = (
-                counts_binned
-                / vanadium_binned
-                * vanadium_monitor_binned
-                / monitor_binned
-            )[1:]
-            e = (
-                np.sqrt(
-                    1 / counts_binned
-                    + 1 / vanadium_binned
-                    + 1 / vanadium_monitor
-                    + 1 / monitor_binned
-                )[1:]
-            ) * y
+            y = (counts_binned / vanadium_binned * vanadium_monitor_binned / monitor_binned)[1:]
+            e = (np.sqrt(1 / counts_binned + 1 / vanadium_binned + 1 / vanadium_monitor + 1 / monitor_binned)[1:]) * y
         np.seterr(**old_settings)
         x = bins
 
@@ -440,15 +379,13 @@ class HB2AReduce(PythonAlgorithm):
 
         # Add correct start and end time
         start_time = np.datetime64(
-            datetime.datetime.strptime(metadata['time'] + ' ' + metadata['date'],
-                                       '%I:%M:%S %p %m/%d/%Y'))
+            datetime.datetime.strptime(metadata['time'] + ' ' + metadata['date'], '%I:%M:%S %p %m/%d/%Y'))
         run.addProperty('start_time', str(start_time), True)
 
         # Create time array for time series logs
         time_array = start_time + np.cumsum(data['time'], dtype=np.int64) * np.timedelta64(1, 's')
         run.addProperty('end_time', str(time_array[-1]), True)
-        run.addProperty('duration', float(
-            (time_array[-1] - time_array[0]) / np.timedelta64(1, 's')), True)
+        run.addProperty('duration', float((time_array[-1] - time_array[0]) / np.timedelta64(1, 's')), True)
 
         # Create time series logs for the scan variables
         for name in data.dtype.names:

@@ -199,19 +199,23 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         y_min = 0
         y_max = raw_det_data.shape[1]
 
-        count_plot = self.add_plot_2d(raw_det_data, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
+        count_plot = self.add_plot_2d(raw_det_data,
+                                      x_min=x_min,
+                                      x_max=x_max,
+                                      y_min=y_min,
+                                      y_max=y_max,
                                       hold_prev_image=False)
         if title is None:
             title = 'No Title'
         self.set_title(title)
 
         if self._myPolygon is not None:
-            print ('[DB...BAT...] Add PATCH')
+            print('[DB...BAT...] Add PATCH')
             self._myCanvas.add_patch(self._myPolygon)
         else:
-            print ('[DB...BAT...] NO PATCH')
+            print('[DB...BAT...] NO PATCH')
 
-        print ('[DB...BAT...AFTER]  ROI Rect: {0}.  2D plot: {1}'.format(self._myPolygon, count_plot))
+        print('[DB...BAT...AFTER]  ROI Rect: {0}.  2D plot: {1}'.format(self._myPolygon, count_plot))
 
         return
 
@@ -254,7 +258,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         Remove the rectangular for region of interest
         :return:
         """
-        print ('[DB...BAT] Try to remove ROI {0}'.format(self._myPolygon))
+        print('[DB...BAT] Try to remove ROI {0}'.format(self._myPolygon))
         if self._myPolygon is not None:
             # polygon is of type matplotlib.patches.Polygon
             self._myPolygon.remove()
@@ -267,7 +271,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
             self._roiEnd = None
 
         else:
-            print ('[NOTICE] Polygon is None.  Nothing to remove')
+            print('[NOTICE] Polygon is None.  Nothing to remove')
 
         return
 

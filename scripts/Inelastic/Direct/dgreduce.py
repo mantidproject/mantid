@@ -25,7 +25,7 @@ def getReducer():
     return Reducer
 
 
-def setup(instname=None,reload=False):
+def setup(instname=None, reload=False):
     """
     setup('mar')
     setup instrument reduction parameters from instname_parameter.xml file
@@ -35,19 +35,19 @@ def setup(instname=None,reload=False):
     """
 
     global Reducer
-    if instname is None :
+    if instname is None:
         instname = config['default.instrument']
 
     if not (Reducer is None or Reducer.prop_man is None):
-        old_name=Reducer.prop_man.instr_name
-        if  old_name.upper()[0:3] == instname.upper()[0:3] :
-            if not reload :
+        old_name = Reducer.prop_man.instr_name
+        if old_name.upper()[0:3] == instname.upper()[0:3]:
+            if not reload:
                 return  # has been already defined
 
-    Reducer = DRC.setup_reducer(instname,reload)
+    Reducer = DRC.setup_reducer(instname, reload)
 
 
-def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=None,second_wb=None,**kwargs):
+def arb_units(wb_run, sample_run, ei_guess, rebin, map_file='default', monovan_run=None, second_wb=None, **kwargs):
     """ One step conversion of run into workspace containing information about energy transfer
     Usage:
     >>arb_units(wb_run,sample_run,ei_guess,rebin)
@@ -62,11 +62,12 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
                 rebin       Rebin parameters
                 mapfile     Mapfile -- if absent/'default' the defaults from IDF are used
                 monovan_run If present will do the absolute units normalization. Number of additional parameters
-                            specified in **kwargs is usually requested for this. If they are absent, program uses defaults,
-                            but the defaults (e.g. sample_mass or sample_rmm ) are usually incorrect for a particular run.
+                            specified in **kwargs is usually requested for this. If they are absent, program uses
+                            defaults, but the defaults (e.g. sample_mass or sample_rmm ) are usually incorrect for a
+                            particular run.
                 arguments   The dictionary containing additional keyword arguments.
-                            The list of allowed additional arguments is defined in InstrName_Parameters.xml file, located in
-                            MantidPlot->View->Preferences->Mantid->Directories->Parameter Definitions
+                            The list of allowed additional arguments is defined in InstrName_Parameters.xml file,
+                            located in MantidPlot->View->Preferences->Mantid->Directories->Parameter Definitions
 
     with run numbers as input:
     >>dgreduce.arb_units(1000,10001,80,[-10,.1,70])  # will run on default instrument
@@ -81,7 +82,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
                ,diag_remove_zero=False,norm_method='current')
 
 
-    type help() for the list of all available keywords. All available keywords are provided in InstName_Parameters.xml file
+    type help() for the list of all available keywords. All available keywords are provided in InstName_Parameters.xml
+     file
 
 
     Some samples are:
@@ -100,15 +102,19 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     bkgd_range       - A list of two numbers indicating the background range (default=instrument defaults)
     diag_van_median_rate_limit_lo      - Lower bound defining outliers as fraction of median value (default = 0.01)
     diag_van_median_rate_limit_hi      - Upper bound defining outliers as fraction of median value (default = 100.)
-    diag_van_median_sigma_lo           - Fraction of median to consider counting low for the white beam diag (default = 0.1)
-    diag_van_median_sigma_hi           - Fraction of median to consider counting high for the white beam diag (default = 1.5)
+    diag_van_median_sigma_lo           - Fraction of median to consider counting low for the white beam diag
+                                         (default = 0.1)
+    diag_van_median_sigma_hi           - Fraction of median to consider counting high for the white beam diag
+                                         (default = 1.5)
     diag_van_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the
                     difference with respect to the median value must also exceed this number of error bars (default=0.0)
     diag_remove_zero                - If true then zeroes in the vanadium data will count as failed (default = True)
     diag_samp_samp_median_sigma_lo  - Fraction of median to consider counting low for the white beam diag (default = 0)
-    diag_samp_samp_median_sigma_hi  - Fraction of median to consider counting high for the white beam diag (default = 2.0)
-    diag_samp_sig                   - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the"
-                                      difference with respect to the median value must also exceed this number of error bars (default=3.3)
+    diag_samp_samp_median_sigma_hi  - Fraction of median to consider counting high for the white beam diag
+                                      (default = 2.0)
+    diag_samp_sig                   - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude
+                                      of the difference with respect to the median value must also exceed this number of
+                                      error bars (default=3.3)
     variation       -The number of medians the ratio of the first/second white beam can deviate from
                      the average by (default=1.1)
     bleed_test      - If true then the CreatePSDBleedMask algorithm is run
@@ -137,6 +143,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     global Reducer
     if Reducer is None or Reducer.instrument is None:
         raise ValueError("instrument has not been defined, call setup(instrument_name) first.")
+
+
 # --------------------------------------------------------------------------------------------------------
 #    Deal with mandatory parameters for this and may be some top level procedures
 # --------------------------------------------------------------------------------------------------------
@@ -144,21 +152,21 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
         Reducer.sample_run = sample_run
         sample_run = None
     try:
-        n,r=funcinspect.lhs_info('both')
-        wksp_out=r[0]
+        n, r = funcinspect.lhs_info('both')
+        wksp_out = r[0]
     except:
         wksp_out = "reduced_ws"
     #
-    res = Reducer.convert_to_energy(wb_run,sample_run,ei_guess,rebin,map_file,monovan_run,second_wb,**kwargs)
+    res = Reducer.convert_to_energy(wb_run, sample_run, ei_guess, rebin, map_file, monovan_run, second_wb, **kwargs)
     #
     results_name = res.name()
     if results_name != wksp_out:
-        RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=wksp_out)
+        RenameWorkspace(InputWorkspace=results_name, OutputWorkspace=wksp_out)
 
     return res
 
 
-def runs_are_equal(ws1,ws2):
+def runs_are_equal(ws1, ws2):
     """Compare two run numbers, provided either as run numbers,
        or as workspaces or as ws names"""
     if ws1 == ws2:
@@ -168,9 +176,9 @@ def runs_are_equal(ws1,ws2):
     def get_run_num(name_or_ws):
         err = None
 
-        if isinstance(name_or_ws,api.MatrixWorkspace):
+        if isinstance(name_or_ws, api.MatrixWorkspace):
             run_num = name_or_ws.getRunNumber()
-        elif name_or_ws in mtd: # this is also throw Boost.Python.ArgumentError error if mtd not accepts it
+        elif name_or_ws in mtd:  # this is also throw Boost.Python.ArgumentError error if mtd not accepts it
             ws = mtd[name_or_ws]
             run_num = ws.getRunNumber()
         else:
@@ -178,6 +186,7 @@ def runs_are_equal(ws1,ws2):
         if err is not None:
             raise AttributeError("Input parameter is neither workspace nor ws name")
         return run_num
+
     #-----------------------------------------------
     try:
         run_num1 = get_run_num(ws1)
@@ -187,11 +196,20 @@ def runs_are_equal(ws1,ws2):
         run_num2 = get_run_num(ws2)
     except AttributeError:
         return False
-    return run_num1==run_num2
+    return run_num1 == run_num2
 
 
-def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,
-              ei_guess,rebin,map_file='default',monovan_mapfile='default',**kwargs):
+def abs_units(wb_for_run,
+              sample_run,
+              monovan_run,
+              wb_for_monovanadium,
+              samp_rmm,
+              samp_mass,
+              ei_guess,
+              rebin,
+              map_file='default',
+              monovan_mapfile='default',
+              **kwargs):
     """
     dgreduce.abs_units(wb_run          Whitebeam run number or file name or workspace
                   sample_run          Sample run run number or file name or workspace
@@ -233,15 +251,19 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
     bkgd_range      - A list of two numbers indicating the background range (default=instrument defaults)
     diag_van_median_rate_limit_lo   - Lower bound defining outliers as fraction of median value (default = 0.01)
     diag_van_median_rate_limit_hi   - Upper bound defining outliers as fraction of median value (default = 100.)
-    diag_van_median_sigma_lo        - Fraction of median to consider counting low for the white beam diag (default = 0.1)
-    diag_van_median_sigma_hi        - Fraction of median to consider counting high for the white beam diag (default = 1.5)
+    diag_van_median_sigma_lo        - Fraction of median to consider counting low for the white beam diag
+                                      (default = 0.1)
+    diag_van_median_sigma_hi        - Fraction of median to consider counting high for the white beam diag
+                                      (default = 1.5)
     diag_van_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the
                     difference with respect to the median value must also exceed this number of error bars (default=0.0)
     diag_remove_zero                - If true then zeros in the vanadium data will count as failed (default = True)
     diag_samp_samp_median_sigma_lo  - Fraction of median to consider counting low for the white beam diag (default = 0)
-    diag_samp_samp_median_sigma_hi  - Fraction of median to consider counting high for the white beam diag (default = 2.0)
-    diag_samp_sig                   - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the"
-                                      difference with respect to the median value must also exceed this number of error bars (default=3.3)
+    diag_samp_samp_median_sigma_hi  - Fraction of median to consider counting high for the white beam diag
+                                      (default = 2.0)
+    diag_samp_sig                   - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of
+                                      the difference with respect to the median value must also exceed this number of
+                                      error bars (default=3.3)
     variation       -The number of medians the ratio of the first/second white beam can deviate from
                     the average by (default=1.1)
     bleed_test      - If true then the CreatePSDBleedMask algorithm is run
@@ -274,36 +296,30 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
     mono_correction_factor=float User specified correction factor for absolute units normalization
     """
 
-    kwargs['monovan_mapfile']    = monovan_mapfile
-    kwargs['sample_mass']        = samp_mass
-    kwargs['sample_rmm']         = samp_rmm
+    kwargs['monovan_mapfile'] = monovan_mapfile
+    kwargs['sample_mass'] = samp_mass
+    kwargs['sample_rmm'] = samp_rmm
 
     if sample_run:
         Reducer.sample_run = sample_run
         sample_run = None
 
     try:
-        n,r=funcinspect.lhs_info('both')
-        results_name=r[0]
+        n, r = funcinspect.lhs_info('both')
+        results_name = r[0]
     except:
         results_name = Reducer.prop_man.get_sample_ws_name()
-    if runs_are_equal(wb_for_run,wb_for_monovanadium):# wb_for_monovanadium property does not accept duplicated workspace
-        wb_for_monovanadium = None        # if this value is none, it is constructed to be equal to wb_for_run
+    if runs_are_equal(wb_for_run,
+                      wb_for_monovanadium):  # wb_for_monovanadium property does not accept duplicated workspace
+        wb_for_monovanadium = None  # if this value is none, it is constructed to be equal to wb_for_run
 
-    wksp_out = arb_units(wb_for_run,sample_run,ei_guess,rebin,map_file,monovan_run,wb_for_monovanadium,**kwargs)
+    wksp_out = arb_units(wb_for_run, sample_run, ei_guess, rebin, map_file, monovan_run, wb_for_monovanadium, **kwargs)
 
-    if  results_name != wksp_out.name():
-        RenameWorkspace(InputWorkspace=wksp_out,OutputWorkspace=results_name)
+    if results_name != wksp_out.name():
+        RenameWorkspace(InputWorkspace=wksp_out, OutputWorkspace=results_name)
 
     return wksp_out
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     pass
- #     unittest.main()
-
-    #help()
-    #help("rubbish")
-
-    #for attr in dir(Reducer):
-    #  print "Reduce.%s = %s" % (attr, getattr(Reducer, attr))

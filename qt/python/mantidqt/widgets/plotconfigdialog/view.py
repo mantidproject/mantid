@@ -14,7 +14,6 @@ from mantidqt.utils.qt import load_ui
 
 
 class PlotConfigDialogView(QDialog):
-
     def __init__(self, parent=None):
         super(PlotConfigDialogView, self).__init__(parent=parent)
 

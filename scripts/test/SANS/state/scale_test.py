@@ -11,11 +11,11 @@ from sans.state.StateObjects.StateData import get_data_builder
 from sans.state.StateObjects.StateScale import get_scale_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 #  State
 # No tests required for the current states
 # ----------------------------------------------------------------------------------------------------------------------
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Builder

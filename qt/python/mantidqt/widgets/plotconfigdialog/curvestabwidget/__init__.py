@@ -16,21 +16,48 @@ from mantid.plots.mantidaxes import MantidAxes
 from mantid.plots.datafunctions import errorbars_hidden
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 
-LINESTYLE_MAP = {'-': 'solid', '--': 'dashed', '-.': 'dashdot', ':': 'dotted',
-                 'None': 'None'}
+LINESTYLE_MAP = {'-': 'solid', '--': 'dashed', '-.': 'dashdot', ':': 'dotted', 'None': 'None'}
 
-MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
-              'triangle_right': '>', 'tickup': 2, 'hline': '_', 'vline': '|',
-              'pentagon': 'p', 'tri_left': '3', 'caretdown': 7,
-              'caretright (centered at base)': 9, 'tickright': 1,
-              'caretright': 5, 'caretleft': 4, 'tickleft': 0, 'tri_up': '2',
-              'circle': 'o', 'pixel': ',', 'caretleft (centered at base)': 8,
-              'diamond': 'D', 'star': '*', 'hexagon1': 'h', 'octagon': '8',
-              'hexagon2': 'H', 'tri_right': '4', 'x (filled)': 'X',
-              'thin_diamond': 'd', 'tri_down': '1', 'triangle_left': '<',
-              'plus': '+', 'triangle_down': 'v', 'triangle_up': '^', 'x': 'x',
-              'caretup': 6, 'caretup (centered at base)': 10,
-              'caretdown (centered at base)': 11, 'None': 'None'}
+MARKER_MAP = {
+    'square': 's',
+    'plus (filled)': 'P',
+    'point': '.',
+    'tickdown': 3,
+    'triangle_right': '>',
+    'tickup': 2,
+    'hline': '_',
+    'vline': '|',
+    'pentagon': 'p',
+    'tri_left': '3',
+    'caretdown': 7,
+    'caretright (centered at base)': 9,
+    'tickright': 1,
+    'caretright': 5,
+    'caretleft': 4,
+    'tickleft': 0,
+    'tri_up': '2',
+    'circle': 'o',
+    'pixel': ',',
+    'caretleft (centered at base)': 8,
+    'diamond': 'D',
+    'star': '*',
+    'hexagon1': 'h',
+    'octagon': '8',
+    'hexagon2': 'H',
+    'tri_right': '4',
+    'x (filled)': 'X',
+    'thin_diamond': 'd',
+    'tri_down': '1',
+    'triangle_left': '<',
+    'plus': '+',
+    'triangle_down': 'v',
+    'triangle_up': '^',
+    'x': 'x',
+    'caretup': 6,
+    'caretup (centered at base)': 10,
+    'caretdown (centered at base)': 11,
+    'None': 'None'
+}
 
 
 def get_ax_from_curve(curve):
@@ -92,7 +119,6 @@ def curve_has_errors(curve):
 
 
 class CurveProperties(dict):
-
     def __init__(self, props):
         self.update(props)
 
@@ -199,13 +225,12 @@ class CurveProperties(dict):
     @staticmethod
     def _get_errorbars_props_from_curve(curve, props):
         """Get a curve's errorbar properties and add to props dict"""
-        props['hide_errors'] = getattr(curve, 'hide_errors',
-                                       errorbars_hidden(curve))
+        props['hide_errors'] = getattr(curve, 'hide_errors', errorbars_hidden(curve))
         # ErrorbarContainer does not have 'errorevery' as an attribute directly
         # So to get this property take from errorbar lines curve
         try:
             barlines = curve[2][0]
-            props['errorevery'] = int(barlines.axes.creation_args[len(barlines.axes.creation_args)-1]['errorevery'])
+            props['errorevery'] = int(barlines.axes.creation_args[len(barlines.axes.creation_args) - 1]['errorevery'])
         except (IndexError, TypeError, KeyError):
             props['errorevery'] = 1
         try:

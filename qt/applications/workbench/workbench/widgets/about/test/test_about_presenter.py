@@ -67,16 +67,14 @@ class AboutPresenterTest(TestCase):
         MockConfigService.getString.return_value = ""
         self.assertTrue(AboutPresenter.should_show_on_startup(),
                         "If the facilty is not set then should_show_on_startup should always be true")
-        MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY),
-                                                      call(AboutPresenter.INSTRUMENT)])
+        MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY), call(AboutPresenter.INSTRUMENT)])
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_should_show_on_startup_invalid_facility(self, MockConfigService):
         MockConfigService.getFacility.side_effect = RuntimeError("Invalid Facility name")
         self.assertTrue(AboutPresenter.should_show_on_startup(),
                         "If the facilty is invalid then should_show_on_startup should always be true")
-        MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY),
-                                                      call(AboutPresenter.INSTRUMENT)])
+        MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY), call(AboutPresenter.INSTRUMENT)])
         MockConfigService.getFacility.assert_has_calls([call("FACILITY1")])
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
@@ -84,34 +82,33 @@ class AboutPresenterTest(TestCase):
         MockConfigService.getInstrument.side_effect = RuntimeError("Invalid Instrument name")
         self.assertTrue(AboutPresenter.should_show_on_startup(),
                         "If the instrument is invalid then should_show_on_startup should always be true")
-        MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY),
-                                                      call(AboutPresenter.INSTRUMENT)])
+        MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY), call(AboutPresenter.INSTRUMENT)])
         MockConfigService.getFacility.assert_has_calls([call("FACILITY1")])
         MockConfigService.getInstrument.assert_has_calls([call("FACILITY1")])
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_should_show_on_startup_do_not_show_same_version(self, MockConfigService):
         version_str = "the same every time"
-        with patch(self.QSETTINGS_CLASSPATH, return_value = FakeQSettings(version_str)):
-            with patch(self.RELEASE_NOTES_URL_CLASSPATH, return_value = version_str):
-                self.assertFalse(AboutPresenter.should_show_on_startup(),
-                                 "If do not show is in Qsettings then should_show_on_startup should always be False"
-                                 + "for the same version")
-        MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY),
-                                                      call(AboutPresenter.INSTRUMENT)])
+        with patch(self.QSETTINGS_CLASSPATH, return_value=FakeQSettings(version_str)):
+            with patch(self.RELEASE_NOTES_URL_CLASSPATH, return_value=version_str):
+                self.assertFalse(
+                    AboutPresenter.should_show_on_startup(),
+                    "If do not show is in Qsettings then should_show_on_startup should always be False" +
+                    "for the same version")
+        MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY), call(AboutPresenter.INSTRUMENT)])
         MockConfigService.getFacility.assert_has_calls([call("FACILITY1")])
         MockConfigService.getInstrument.assert_has_calls([call("FACILITY1")])
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_should_show_on_startup_do_not_show_different_versions(self, MockConfigService):
         version_str = "the same every time"
-        with patch(self.QSETTINGS_CLASSPATH, return_value = FakeQSettings(version_str)):
-            with patch(self.RELEASE_NOTES_URL_CLASSPATH, return_value = "not the " + version_str):
-                self.assertTrue(AboutPresenter.should_show_on_startup(),
-                                "If do not show is in Qsettings then should_show_on_startup should always be True"
-                                + " for different versions")
-        MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY),
-                                                      call(AboutPresenter.INSTRUMENT)])
+        with patch(self.QSETTINGS_CLASSPATH, return_value=FakeQSettings(version_str)):
+            with patch(self.RELEASE_NOTES_URL_CLASSPATH, return_value="not the " + version_str):
+                self.assertTrue(
+                    AboutPresenter.should_show_on_startup(),
+                    "If do not show is in Qsettings then should_show_on_startup should always be True" +
+                    " for different versions")
+        MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY), call(AboutPresenter.INSTRUMENT)])
         MockConfigService.getFacility.assert_has_calls([call("FACILITY1")])
         MockConfigService.getInstrument.assert_has_calls([call("FACILITY1")])
 
@@ -137,31 +134,21 @@ class AboutPresenterTest(TestCase):
         self.assert_connected_once(presenter.view.chkDoNotShowUntilNextRelease,
                                    presenter.view.chkDoNotShowUntilNextRelease.stateChanged)
 
-        self.assert_connected_once(presenter.view.chkAllowUsageData,
-                                   presenter.view.chkAllowUsageData.stateChanged)
+        self.assert_connected_once(presenter.view.chkAllowUsageData, presenter.view.chkAllowUsageData.stateChanged)
 
     def test_setup_button_signals(self):
         presenter = AboutPresenter(None)
 
-        self.assert_connected_once(presenter.view.clbReleaseNotes,
-                                   presenter.view.clbReleaseNotes.clicked)
-        self.assert_connected_once(presenter.view.clbSampleDatasets,
-                                   presenter.view.clbSampleDatasets.clicked)
-        self.assert_connected_once(presenter.view.clbMantidIntroduction,
-                                   presenter.view.clbMantidIntroduction.clicked)
-        self.assert_connected_once(presenter.view.clbPythonIntroduction,
-                                   presenter.view.clbPythonIntroduction.clicked)
-        self.assert_connected_once(presenter.view.clbPythonInMantid,
-                                   presenter.view.clbPythonInMantid.clicked)
-        self.assert_connected_once(presenter.view.clbExtendingMantid,
-                                   presenter.view.clbExtendingMantid.clicked)
-        self.assert_connected_once(presenter.view.pbMUD,
-                                   presenter.view.pbMUD.clicked)
-        self.assert_connected_once(presenter.view.lblPrivacyPolicy,
-                                   presenter.view.lblPrivacyPolicy.linkActivated)
+        self.assert_connected_once(presenter.view.clbReleaseNotes, presenter.view.clbReleaseNotes.clicked)
+        self.assert_connected_once(presenter.view.clbSampleDatasets, presenter.view.clbSampleDatasets.clicked)
+        self.assert_connected_once(presenter.view.clbMantidIntroduction, presenter.view.clbMantidIntroduction.clicked)
+        self.assert_connected_once(presenter.view.clbPythonIntroduction, presenter.view.clbPythonIntroduction.clicked)
+        self.assert_connected_once(presenter.view.clbPythonInMantid, presenter.view.clbPythonInMantid.clicked)
+        self.assert_connected_once(presenter.view.clbExtendingMantid, presenter.view.clbExtendingMantid.clicked)
+        self.assert_connected_once(presenter.view.pbMUD, presenter.view.pbMUD.clicked)
+        self.assert_connected_once(presenter.view.lblPrivacyPolicy, presenter.view.lblPrivacyPolicy.linkActivated)
 
     def test_setup_link_signals(self):
         presenter = AboutPresenter(None)
 
-        self.assert_connected_once(presenter.view.clbReleaseNotes,
-                                   presenter.view.clbReleaseNotes.clicked)
+        self.assert_connected_once(presenter.view.clbReleaseNotes, presenter.view.clbReleaseNotes.clicked)

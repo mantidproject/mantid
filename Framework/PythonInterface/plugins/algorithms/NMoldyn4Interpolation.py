@@ -24,25 +24,20 @@ class NMoldyn4Interpolation(PythonAlgorithm):
 
     def PyInit(self):
 
-        self.declareProperty(WorkspaceProperty(name='InputWorkspace',
-                                               defaultValue='',
-                                               direction=Direction.Input),
+        self.declareProperty(WorkspaceProperty(name='InputWorkspace', defaultValue='', direction=Direction.Input),
                              doc='Simulated workspace')
 
-        self.declareProperty(WorkspaceProperty(name='ReferenceWorkspace',
-                                               defaultValue='',
-                                               direction=Direction.Input),
+        self.declareProperty(WorkspaceProperty(name='ReferenceWorkspace', defaultValue='', direction=Direction.Input),
                              doc='Reference OSIRIS workspace to provide values')
 
-        self.declareProperty(name='EFixed', defaultValue=1.845,
+        self.declareProperty(name='EFixed',
+                             defaultValue=1.845,
                              doc=('EFixed value of OSIRIS data (should be default'
                                   ' in almost all circumstances)'),
                              validator=FloatMandatoryValidator(),
                              direction=Direction.Input)
 
-        self.declareProperty(WorkspaceProperty(name='OutputWorkspace',
-                                               defaultValue='',
-                                               direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty(name='OutputWorkspace', defaultValue='', direction=Direction.Output),
                              doc='Output Workspace of remapped simulation data')
 
     def PyExec(self):
@@ -71,24 +66,24 @@ class NMoldyn4Interpolation(PythonAlgorithm):
         interp_Y = interp_Y.flatten()
         ref_X = np.tile(ref_X, len(ref_Q))
         output_ws = self.getPropertyValue('OutputWorkspace')
-        CreateWorkspace(OutputWorkspace=output_ws, DataX=ref_X, DataY=interp_Y,
-                        NSpec=len(ref_Q), VerticalAxisUnit='MomentumTransfer',
-                        VerticalAxisValues=ref_Q, WorkspaceTitle=output_ws)
+        CreateWorkspace(OutputWorkspace=output_ws,
+                        DataX=ref_X,
+                        DataY=interp_Y,
+                        NSpec=len(ref_Q),
+                        VerticalAxisUnit='MomentumTransfer',
+                        VerticalAxisValues=ref_Q,
+                        WorkspaceTitle=output_ws)
         self.setProperty('OutputWorkspace', output_ws)
 
     def validate_bounds(self, sim_X, ref_X, sim_Q, ref_Q):
         if min(sim_X) > min(ref_X):
-            raise ValueError('Minimum simulated X value is higher than minimum '
-                             'reference X value')
+            raise ValueError('Minimum simulated X value is higher than minimum ' 'reference X value')
         if max(sim_X) < max(ref_X):
-            raise ValueError('Maximum simulated X value is lower than maximum '
-                             'reference X value')
+            raise ValueError('Maximum simulated X value is lower than maximum ' 'reference X value')
         if min(sim_Q) > min(ref_Q):
-            raise ValueError('Minimum simulated Q value is higher than minimum '
-                             'reference Q value')
+            raise ValueError('Minimum simulated Q value is higher than minimum ' 'reference Q value')
         if max(sim_Q) < max(ref_Q):
-            raise ValueError('Maximum simulated Q value is lower than maximum '
-                             'reference Q value')
+            raise ValueError('Maximum simulated Q value is lower than maximum ' 'reference Q value')
         else:
             return
 

@@ -13,7 +13,6 @@ import functools
 
 
 class SeqFittingTabPresenter(object):
-
     def __init__(self, view, model, context):
         self.view = view
         self.model = model
@@ -31,10 +30,8 @@ class SeqFittingTabPresenter(object):
         self.fit_parameter_updated_observer = GenericObserver(self.handle_fit_function_parameter_changed)
         self.fit_parameter_changed_in_view = GenericObserverWithArgPassing(self.handle_updated_fit_parameter_in_table)
         self.selected_sequential_fit_notifier = GenericObservable()
-        self.disable_tab_observer = GenericObserver(lambda: self.view.
-                                                    setEnabled(False))
-        self.enable_tab_observer = GenericObserver(lambda: self.view.
-                                                   setEnabled(True))
+        self.disable_tab_observer = GenericObserver(lambda: self.view.setEnabled(False))
+        self.enable_tab_observer = GenericObserver(lambda: self.view.setEnabled(True))
 
     def create_thread(self, callback):
         self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
@@ -99,10 +96,9 @@ class SeqFittingTabPresenter(object):
         for row in self.selected_rows:
             workspace_names += [self.get_workspaces_for_row_in_fit_table(row)]
 
-        calculation_function = functools.partial(
-            self.model.evaluate_sequential_fit, workspace_names, self.view.use_initial_values_for_fits())
-        self.calculation_thread = self.create_thread(
-            calculation_function)
+        calculation_function = functools.partial(self.model.evaluate_sequential_fit, workspace_names,
+                                                 self.view.use_initial_values_for_fits())
+        self.calculation_thread = self.create_thread(calculation_function)
 
         self.calculation_thread.threadWrapperSetUp(on_thread_start_callback=self.handle_fit_started,
                                                    on_thread_end_callback=self.handle_seq_fit_finished,

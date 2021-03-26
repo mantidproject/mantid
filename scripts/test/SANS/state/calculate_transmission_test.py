@@ -32,17 +32,37 @@ class StateCalculateTransmissionTest(unittest.TestCase):
         state = StateCalculateTransmission()
         if trans_entries is None:
             trans_entries = {}
-        trans_settings = {"transmission_radius_on_detector": 12., "transmission_roi_files": ["test.xml"],
-                          "transmission_mask_files": ["test.xml"], "default_transmission_monitor": 3,
-                          "transmission_monitor": 4, "default_incident_monitor": 1, "incident_monitor": 2,
-                          "prompt_peak_correction_min": 123., "prompt_peak_correction_max": 1234.,
-                          "rebin_type": RebinType.REBIN, "wavelength_low": [1.], "wavelength_high": [2.7],
-                          "wavelength_step": 0.5, "wavelength_step_type": RangeStepType.LIN,
-                          "use_full_wavelength_range": True, "wavelength_full_range_low": 12.,
-                          "wavelength_full_range_high": 434., "background_TOF_general_start": 1.4,
-                          "background_TOF_general_stop": 24.5, "background_TOF_monitor_start": {"1": 123, "2": 123},
-                          "background_TOF_monitor_stop": {"1": 234, "2": 2323}, "background_TOF_roi_start": 12.,
-                          "background_TOF_roi_stop": 123.}
+        trans_settings = {
+            "transmission_radius_on_detector": 12.,
+            "transmission_roi_files": ["test.xml"],
+            "transmission_mask_files": ["test.xml"],
+            "default_transmission_monitor": 3,
+            "transmission_monitor": 4,
+            "default_incident_monitor": 1,
+            "incident_monitor": 2,
+            "prompt_peak_correction_min": 123.,
+            "prompt_peak_correction_max": 1234.,
+            "rebin_type": RebinType.REBIN,
+            "wavelength_low": [1.],
+            "wavelength_high": [2.7],
+            "wavelength_step": 0.5,
+            "wavelength_step_type": RangeStepType.LIN,
+            "use_full_wavelength_range": True,
+            "wavelength_full_range_low": 12.,
+            "wavelength_full_range_high": 434.,
+            "background_TOF_general_start": 1.4,
+            "background_TOF_general_stop": 24.5,
+            "background_TOF_monitor_start": {
+                "1": 123,
+                "2": 123
+            },
+            "background_TOF_monitor_stop": {
+                "1": 234,
+                "2": 2323
+            },
+            "background_TOF_roi_start": 12.,
+            "background_TOF_roi_stop": 123.
+        }
 
         for key, value in list(trans_settings.items()):
             if key in trans_entries:
@@ -50,8 +70,12 @@ class StateCalculateTransmissionTest(unittest.TestCase):
             if value is not None:  # If the value is None, then don't set it
                 setattr(state, key, value)
 
-        fit_settings = {"fit_type": FitType.POLYNOMIAL, "polynomial_order": 1, "wavelength_low": 12.,
-                        "wavelength_high": 232.}
+        fit_settings = {
+            "fit_type": FitType.POLYNOMIAL,
+            "polynomial_order": 1,
+            "wavelength_low": 12.,
+            "wavelength_high": 232.
+        }
         if fit_entries is None:
             fit_entries = {}
         StateCalculateTransmissionTest._set_fit(state, fit_settings, fit_entries, DataType.SAMPLE)
@@ -80,114 +104,264 @@ class StateCalculateTransmissionTest(unittest.TestCase):
         self.assertTrue(isinstance(state, StateCalculateTransmission))
 
     def test_that_raises_when_no_incident_monitor_is_available(self):
-        self.check_bad_and_good_values(bad_trans={"incident_monitor": None, "default_incident_monitor": None},
-                                       good_trans={"incident_monitor": 1, "default_incident_monitor": None})
-        self.check_bad_and_good_values(bad_trans={"incident_monitor": None, "default_incident_monitor": None},
-                                       good_trans={"incident_monitor": 1, "default_incident_monitor": 1})
+        self.check_bad_and_good_values(bad_trans={
+            "incident_monitor": None,
+            "default_incident_monitor": None
+        },
+                                       good_trans={
+                                           "incident_monitor": 1,
+                                           "default_incident_monitor": None
+                                       })
+        self.check_bad_and_good_values(bad_trans={
+            "incident_monitor": None,
+            "default_incident_monitor": None
+        },
+                                       good_trans={
+                                           "incident_monitor": 1,
+                                           "default_incident_monitor": 1
+                                       })
 
     def test_that_raises_when_no_transmission_is_specified(self):
-        self.check_bad_and_good_values(bad_trans={"transmission_monitor": None, "default_transmission_monitor": None,
-                                                  "transmission_radius_on_detector": None,
-                                                  "transmission_roi_files": None},
-                                       good_trans={"transmission_monitor": 4, "default_transmission_monitor": None,
-                                                   "transmission_radius_on_detector": None,
-                                                   "transmission_roi_files": None})
+        self.check_bad_and_good_values(bad_trans={
+            "transmission_monitor": None,
+            "default_transmission_monitor": None,
+            "transmission_radius_on_detector": None,
+            "transmission_roi_files": None
+        },
+                                       good_trans={
+                                           "transmission_monitor": 4,
+                                           "default_transmission_monitor": None,
+                                           "transmission_radius_on_detector": None,
+                                           "transmission_roi_files": None
+                                       })
 
     def test_that_raises_for_inconsistent_prompt_peak(self):
-        self.check_bad_and_good_values(bad_trans={"prompt_peak_correction_min": 1., "prompt_peak_correction_max": None},
-                                       good_trans={"prompt_peak_correction_min": None,
-                                                   "prompt_peak_correction_max": None})
-        self.check_bad_and_good_values(bad_trans={"prompt_peak_correction_min": 1.,
-                                                  "prompt_peak_correction_max": None},
-                                       good_trans={"prompt_peak_correction_min": 1., "prompt_peak_correction_max": 2.})
+        self.check_bad_and_good_values(bad_trans={
+            "prompt_peak_correction_min": 1.,
+            "prompt_peak_correction_max": None
+        },
+                                       good_trans={
+                                           "prompt_peak_correction_min": None,
+                                           "prompt_peak_correction_max": None
+                                       })
+        self.check_bad_and_good_values(bad_trans={
+            "prompt_peak_correction_min": 1.,
+            "prompt_peak_correction_max": None
+        },
+                                       good_trans={
+                                           "prompt_peak_correction_min": 1.,
+                                           "prompt_peak_correction_max": 2.
+                                       })
 
     def test_that_raises_for_lower_bound_larger_than_upper_bound_for_prompt_peak(self):
-        self.check_bad_and_good_values(bad_trans={"prompt_peak_correction_min": 2., "prompt_peak_correction_max": 1.},
-                                       good_trans={"prompt_peak_correction_min": 1., "prompt_peak_correction_max": 2.})
+        self.check_bad_and_good_values(bad_trans={
+            "prompt_peak_correction_min": 2.,
+            "prompt_peak_correction_max": 1.
+        },
+                                       good_trans={
+                                           "prompt_peak_correction_min": 1.,
+                                           "prompt_peak_correction_max": 2.
+                                       })
 
     def test_that_raises_when_not_all_elements_are_set_for_wavelength(self):
-        self.check_bad_and_good_values(bad_trans={"wavelength_low": [1.], "wavelength_high": [2.],
-                                                  "wavelength_step": 0.5, "wavelength_step_type": None},
-                                       good_trans={"wavelength_low": [1.], "wavelength_high": [2.],
-                                                   "wavelength_step": 0.5, "wavelength_step_type": RangeStepType.LIN})
+        self.check_bad_and_good_values(bad_trans={
+            "wavelength_low": [1.],
+            "wavelength_high": [2.],
+            "wavelength_step": 0.5,
+            "wavelength_step_type": None
+        },
+                                       good_trans={
+                                           "wavelength_low": [1.],
+                                           "wavelength_high": [2.],
+                                           "wavelength_step": 0.5,
+                                           "wavelength_step_type": RangeStepType.LIN
+                                       })
 
     def test_that_raises_for_lower_bound_larger_than_upper_bound_for_wavelength(self):
-        self.check_bad_and_good_values(bad_trans={"wavelength_low": [2.], "wavelength_high": [1.],
-                                                  "wavelength_step": 0.5, "wavelength_step_type": RangeStepType.LIN},
-                                       good_trans={"wavelength_low": [1.], "wavelength_high": [2.],
-                                                   "wavelength_step": 0.5, "wavelength_step_type": RangeStepType.LIN})
+        self.check_bad_and_good_values(bad_trans={
+            "wavelength_low": [2.],
+            "wavelength_high": [1.],
+            "wavelength_step": 0.5,
+            "wavelength_step_type": RangeStepType.LIN
+        },
+                                       good_trans={
+                                           "wavelength_low": [1.],
+                                           "wavelength_high": [2.],
+                                           "wavelength_step": 0.5,
+                                           "wavelength_step_type": RangeStepType.LIN
+                                       })
 
     def test_that_raises_for_missing_full_wavelength_entry(self):
-        self.check_bad_and_good_values(bad_trans={"use_full_wavelength_range": True, "wavelength_full_range_low": None,
-                                                  "wavelength_full_range_high": 12.},
-                                       good_trans={"use_full_wavelength_range": True, "wavelength_full_range_low": 11.,
-                                                   "wavelength_full_range_high": 12.})
+        self.check_bad_and_good_values(bad_trans={
+            "use_full_wavelength_range": True,
+            "wavelength_full_range_low": None,
+            "wavelength_full_range_high": 12.
+        },
+                                       good_trans={
+                                           "use_full_wavelength_range": True,
+                                           "wavelength_full_range_low": 11.,
+                                           "wavelength_full_range_high": 12.
+                                       })
 
     def test_that_raises_for_lower_bound_larger_than_upper_bound_for_full_wavelength(self):
-        self.check_bad_and_good_values(bad_trans={"use_full_wavelength_range": True, "wavelength_full_range_low": 2.,
-                                                  "wavelength_full_range_high": 1.},
-                                       good_trans={"use_full_wavelength_range": True, "wavelength_full_range_low": 1.,
-                                                   "wavelength_full_range_high": 2.})
+        self.check_bad_and_good_values(bad_trans={
+            "use_full_wavelength_range": True,
+            "wavelength_full_range_low": 2.,
+            "wavelength_full_range_high": 1.
+        },
+                                       good_trans={
+                                           "use_full_wavelength_range": True,
+                                           "wavelength_full_range_low": 1.,
+                                           "wavelength_full_range_high": 2.
+                                       })
 
     def test_that_raises_for_inconsistent_general_background(self):
-        self.check_bad_and_good_values(bad_trans={"background_TOF_general_start": 1.,
-                                                  "background_TOF_general_stop": None},
-                                       good_trans={"background_TOF_general_start": None,
-                                                   "background_TOF_general_stop": None})
+        self.check_bad_and_good_values(bad_trans={
+            "background_TOF_general_start": 1.,
+            "background_TOF_general_stop": None
+        },
+                                       good_trans={
+                                           "background_TOF_general_start": None,
+                                           "background_TOF_general_stop": None
+                                       })
 
     def test_that_raises_for_lower_bound_larger_than_upper_bound_for_general_background(self):
-        self.check_bad_and_good_values(bad_trans={"background_TOF_general_start": 2.,
-                                                  "background_TOF_general_stop": 1.},
-                                       good_trans={"background_TOF_general_start": 1.,
-                                                   "background_TOF_general_stop": 2.})
+        self.check_bad_and_good_values(bad_trans={
+            "background_TOF_general_start": 2.,
+            "background_TOF_general_stop": 1.
+        },
+                                       good_trans={
+                                           "background_TOF_general_start": 1.,
+                                           "background_TOF_general_stop": 2.
+                                       })
 
     def test_that_raises_for_inconsistent_roi_background(self):
-        self.check_bad_and_good_values(bad_trans={"background_TOF_roi_start": 1.,
-                                                  "background_TOF_roi_stop": None},
-                                       good_trans={"background_TOF_roi_start": None,
-                                                   "background_TOF_roi_stop": None})
+        self.check_bad_and_good_values(bad_trans={
+            "background_TOF_roi_start": 1.,
+            "background_TOF_roi_stop": None
+        },
+                                       good_trans={
+                                           "background_TOF_roi_start": None,
+                                           "background_TOF_roi_stop": None
+                                       })
 
     def test_that_raises_for_lower_bound_larger_than_upper_bound_for_roi_background(self):
-        self.check_bad_and_good_values(bad_trans={"background_TOF_roi_start": 2.,
-                                                  "background_TOF_roi_stop": 1.},
-                                       good_trans={"background_TOF_roi_start": 1.,
-                                                   "background_TOF_roi_stop": 2.})
+        self.check_bad_and_good_values(bad_trans={
+            "background_TOF_roi_start": 2.,
+            "background_TOF_roi_stop": 1.
+        },
+                                       good_trans={
+                                           "background_TOF_roi_start": 1.,
+                                           "background_TOF_roi_stop": 2.
+                                       })
 
     def test_that_raises_for_inconsistent_monitor_background(self):
-        self.check_bad_and_good_values(bad_trans={"background_TOF_monitor_start": {"1": 12., "2": 1.},
-                                                  "background_TOF_monitor_stop": None},
-                                       good_trans={"background_TOF_monitor_start": None,
-                                                   "background_TOF_monitor_stop": None})
+        self.check_bad_and_good_values(bad_trans={
+            "background_TOF_monitor_start": {
+                "1": 12.,
+                "2": 1.
+            },
+            "background_TOF_monitor_stop": None
+        },
+                                       good_trans={
+                                           "background_TOF_monitor_start": None,
+                                           "background_TOF_monitor_stop": None
+                                       })
 
     def test_that_raises_when_lengths_of_monitor_backgrounds_are_different(self):
-        self.check_bad_and_good_values(bad_trans={"background_TOF_monitor_start": {"1": 1., "2": 1.},
-                                                  "background_TOF_monitor_stop": {"1": 2.}},
-                                       good_trans={"background_TOF_monitor_start": {"1": 1., "2": 1.},
-                                                   "background_TOF_monitor_stop": {"1": 2., "2": 2.}})
+        self.check_bad_and_good_values(bad_trans={
+            "background_TOF_monitor_start": {
+                "1": 1.,
+                "2": 1.
+            },
+            "background_TOF_monitor_stop": {
+                "1": 2.
+            }
+        },
+                                       good_trans={
+                                           "background_TOF_monitor_start": {
+                                               "1": 1.,
+                                               "2": 1.
+                                           },
+                                           "background_TOF_monitor_stop": {
+                                               "1": 2.,
+                                               "2": 2.
+                                           }
+                                       })
 
     def test_that_raises_when_monitor_name_mismatch_exists_for_monitor_backgrounds(self):
-        self.check_bad_and_good_values(bad_trans={"background_TOF_monitor_start": {"1": 1., "2": 1.},
-                                                  "background_TOF_monitor_stop": {"1": 2., "3": 2.}},
-                                       good_trans={"background_TOF_monitor_start": {"1": 1., "2": 1.},
-                                                   "background_TOF_monitor_stop": {"1": 2., "2": 2.}})
+        self.check_bad_and_good_values(bad_trans={
+            "background_TOF_monitor_start": {
+                "1": 1.,
+                "2": 1.
+            },
+            "background_TOF_monitor_stop": {
+                "1": 2.,
+                "3": 2.
+            }
+        },
+                                       good_trans={
+                                           "background_TOF_monitor_start": {
+                                               "1": 1.,
+                                               "2": 1.
+                                           },
+                                           "background_TOF_monitor_stop": {
+                                               "1": 2.,
+                                               "2": 2.
+                                           }
+                                       })
 
     def test_that_raises_lower_bound_larger_than_upper_bound_for_monitor_backgrounds(self):
-        self.check_bad_and_good_values(bad_trans={"background_TOF_monitor_start": {"1": 1., "2": 2.},
-                                                  "background_TOF_monitor_stop": {"1": 2., "2": 1.}},
-                                       good_trans={"background_TOF_monitor_start": {"1": 1., "2": 1.},
-                                                   "background_TOF_monitor_stop": {"1": 2., "2": 2.}})
+        self.check_bad_and_good_values(bad_trans={
+            "background_TOF_monitor_start": {
+                "1": 1.,
+                "2": 2.
+            },
+            "background_TOF_monitor_stop": {
+                "1": 2.,
+                "2": 1.
+            }
+        },
+                                       good_trans={
+                                           "background_TOF_monitor_start": {
+                                               "1": 1.,
+                                               "2": 1.
+                                           },
+                                           "background_TOF_monitor_stop": {
+                                               "1": 2.,
+                                               "2": 2.
+                                           }
+                                       })
 
     def test_that_polynomial_order_can_only_be_set_with_polynomial_setting(self):
-        self.check_bad_and_good_values(bad_fit={"fit_type": FitType.POLYNOMIAL, "polynomial_order": 0},
-                                       good_fit={"fit_type": FitType.POLYNOMIAL, "polynomial_order": 4})
+        self.check_bad_and_good_values(bad_fit={
+            "fit_type": FitType.POLYNOMIAL,
+            "polynomial_order": 0
+        },
+                                       good_fit={
+                                           "fit_type": FitType.POLYNOMIAL,
+                                           "polynomial_order": 4
+                                       })
 
     def test_that_raises_for_inconsistent_wavelength_in_fit(self):
-        self.check_bad_and_good_values(bad_trans={"wavelength_low": None, "wavelength_high": [2.]},
-                                       good_trans={"wavelength_low": [1.], "wavelength_high": [2.]})
+        self.check_bad_and_good_values(bad_trans={
+            "wavelength_low": None,
+            "wavelength_high": [2.]
+        },
+                                       good_trans={
+                                           "wavelength_low": [1.],
+                                           "wavelength_high": [2.]
+                                       })
 
     def test_that_raises_for_lower_bound_larger_than_upper_bound_for_wavelength_in_fit(self):
-        self.check_bad_and_good_values(bad_trans={"wavelength_low": [2.], "wavelength_high": [1.]},
-                                       good_trans={"wavelength_low": [1.], "wavelength_high": [2.]})
+        self.check_bad_and_good_values(bad_trans={
+            "wavelength_low": [2.],
+            "wavelength_high": [1.]
+        },
+                                       good_trans={
+                                           "wavelength_low": [1.],
+                                           "wavelength_high": [2.]
+                                       })
 
     def test_convert_step_type_from_RANGE_LIN_to_LIN(self):
         state = StateCalculateTransmission()
@@ -291,9 +465,15 @@ class StateCalculateTransmissionBuilderTest(unittest.TestCase):
         self.assertEqual(state_transmission.background_TOF_general_start, 1.4)
         self.assertEqual(state_transmission.background_TOF_general_stop, 34.4)
         self.assertEqual(
-            len(set(state_transmission.background_TOF_monitor_start.items()) & set({"1": 123, "2": 123}.items())), 2)
+            len(set(state_transmission.background_TOF_monitor_start.items()) & set({
+                "1": 123,
+                "2": 123
+            }.items())), 2)
         self.assertEqual(
-            len(set(state_transmission.background_TOF_monitor_stop.items()) & set({"1": 234, "2": 2323}.items())), 2)
+            len(set(state_transmission.background_TOF_monitor_stop.items()) & set({
+                "1": 234,
+                "2": 2323
+            }.items())), 2)
         self.assertEqual(state_transmission.background_TOF_roi_start, 1.4)
         self.assertEqual(state_transmission.background_TOF_roi_stop, 34.4)
 

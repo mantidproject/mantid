@@ -13,10 +13,11 @@ import traceback
 mantidpath = "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@"
 
 # get a list of all *.egg-link files
-eggfiles = [os.path.join(mantidpath, item)
-            for item in os.listdir(mantidpath)
-            # skip mantidplot looking files
-            if item.endswith('.egg-link') and 'plot' not in item.lower()]
+eggfiles = [
+    os.path.join(mantidpath, item) for item in os.listdir(mantidpath)
+    # skip mantidplot looking files
+    if item.endswith('.egg-link') and 'plot' not in item.lower()
+]
 # directories to add are what are in those files
 pathdirs = []
 for filename in eggfiles:
@@ -28,11 +29,13 @@ for filename in eggfiles:
             pathdirs.append(line)
 pathdirs = list(set(pathdirs))  # get unique directories
 
+
 def die(msg=None):
     if msg:
         print(msg)
     traceback.print_exc()
     exit(1)
+
 
 # modify the running path and check mantid can be loaded in this python
 pathdirs.insert(0, mantidpath)
@@ -48,8 +51,7 @@ except ImportError as e:
         # can find platform path by comparing to (in vanilla python)
         # python -c "import sys, pprint; pprint.pprint(sys.path)"
         found_dlfcn = False
-        for platform_path in ['/usr/lib64/python2.7/plat-linux2/',
-                              '/usr/lib/python2.7/plat-x86_64-linux-gnu']:
+        for platform_path in ['/usr/lib64/python2.7/plat-linux2/', '/usr/lib/python2.7/plat-x86_64-linux-gnu']:
             if os.path.exists(platform_path):
                 print('found "{}" ... adding to system path'.format(platform_path))
                 sys.path.append(platform_path)

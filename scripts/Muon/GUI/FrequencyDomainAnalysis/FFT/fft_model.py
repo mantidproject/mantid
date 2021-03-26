@@ -8,13 +8,11 @@ import mantid.simpleapi as mantid
 
 
 class FFTWrapper(object):
-
     """
     A class to wrap the different parts
     of the FFT and its preprocessing.
     This keeps the main FFT class simple.
     """
-
     def __init__(self, FFT):
         self.name = "FFT"
         self.model = FFT
@@ -68,13 +66,11 @@ class FFTWrapper(object):
 
 
 class FFTModel(object):
-
     """
     A simple class which executes
     the relevant algorithms for
     the analysis.
     """
-
     def __init__(self):
         self.name = "FFT"
         self.alg = None
@@ -147,7 +143,8 @@ class FFTModel(object):
         mantid.MaskDetectors(Workspace=cloned_workspace, DetectorList=inputs['MaskedDetectors'], StoreInADS=False)
         mantid.CropWorkspace(InputWorkspace=cloned_workspace,
                              XMin=inputs['FirstGoodData'],
-                             XMax=inputs['LastGoodData'], OutputWorkspace = 'cropped_workspace_pre_phasequad')
+                             XMax=inputs['LastGoodData'],
+                             OutputWorkspace='cropped_workspace_pre_phasequad')
 
         self.alg = mantid.AlgorithmManager.create("PhaseQuad")
         self.alg.initialize()

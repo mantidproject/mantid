@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import Direction, StringListValidator
 import numpy
-
 '''
 This file contains functions which deal with rounding in algorithms
 such as BinWidthAtX and MedianBinWidth.
@@ -29,8 +28,10 @@ def declare_rounding_property(o):
     rounding.addAllowedValue(ROUNDING_NONE)
     rounding.addAllowedValue(ROUNDING_TEN_TO_INT)
     o.declareProperty(name=PROP_NAME_ROUNDING_MODE,
-                      defaultValue=ROUNDING_NONE, validator=rounding,
-                      direction=Direction.Input, doc='Bin width rounding')
+                      defaultValue=ROUNDING_NONE,
+                      validator=rounding,
+                      direction=Direction.Input,
+                      doc='Bin width rounding')
 
 
 def round(x, mode):

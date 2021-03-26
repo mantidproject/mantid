@@ -11,7 +11,6 @@
     Run pylint on selected Python files/directories.
 """
 
-
 import logging
 from optparse import OptionParser
 import os.path
@@ -40,10 +39,9 @@ class Results(object):
     """
     Keep track of the check pass/failure status
     """
-
     def __init__(self):
         self.totalchecks = 0
-        self.failures = [] #list of module names
+        self.failures = []  #list of module names
 
     @property
     def success(self):
@@ -94,7 +92,7 @@ class Results(object):
         else:
             nfailed = len(self.failures)
             npassed = self.totalchecks - nfailed
-            percentpass = npassed*100.0/self.totalchecks
+            percentpass = npassed * 100.0 / self.totalchecks
             msg = HEADER % (percentpass, nfailed, self.totalchecks)
             msg += "\nChecks of the following modules FAILED:\n\t"
             msg += "\n\t".join(self.failures)
@@ -106,6 +104,7 @@ class Results(object):
         """
         self.totalchecks += other.totalchecks
         self.failures.extend(other.failures)
+
 
 #------------------------------------------------------------------------------
 
@@ -130,6 +129,7 @@ def main(argv):
     else:
         return 1
 
+
 #------------------------------------------------------------------------------
 
 
@@ -142,34 +142,61 @@ def parse_arguments(argv):
     """
     # Setup options
     parser = OptionParser(usage="%prog [options] TARGET")
-    parser.add_option("-b", "--basedir", dest="basedir", metavar="BASEDIR",
+    parser.add_option("-b",
+                      "--basedir",
+                      dest="basedir",
+                      metavar="BASEDIR",
                       help="If provided, use this as the base for all relative paths."
-                           "The default is the current working directory.")
-    parser.add_option("-e", "--exe", dest="exe", metavar="EXEPATH",
+                      "The default is the current working directory.")
+    parser.add_option("-e",
+                      "--exe",
+                      dest="exe",
+                      metavar="EXEPATH",
                       help="If provided, use this as the executable path."
-                           "Default is to simply call 'pylint'")
-    parser.add_option("-f", "--format", dest="format", metavar = "FORMAT",
+                      "Default is to simply call 'pylint'")
+    parser.add_option("-f",
+                      "--format",
+                      dest="format",
+                      metavar="FORMAT",
                       help="If provided, use the given format type "
-                           "[default=%s]." % DEFAULT_PYLINT_FORMAT)
-    parser.add_option("-m", "--mantidpath", dest="mantidpath", metavar="MANTIDPATH",
+                      "[default=%s]." % DEFAULT_PYLINT_FORMAT)
+    parser.add_option("-m",
+                      "--mantidpath",
+                      dest="mantidpath",
+                      metavar="MANTIDPATH",
                       help="If provided, add this to the PYTHONPATH, overriding"
-                           "anything that is currently set.")
-    parser.add_option("-n", "--nofail", action="store_true",dest="nofail",
+                      "anything that is currently set.")
+    parser.add_option("-n",
+                      "--nofail",
+                      action="store_true",
+                      dest="nofail",
                       help="If specified, then script will always return an exit status of 0.")
-    parser.add_option("-r", "--rcfile", dest="rcfile", metavar = "CFG_FILE",
+    parser.add_option("-r",
+                      "--rcfile",
+                      dest="rcfile",
+                      metavar="CFG_FILE",
                       help="If provided, use this configuration file "
-                           "instead of the default one")
-    parser.add_option("-o", "--output", dest="outputdir", metavar="OUTDIR",
+                      "instead of the default one")
+    parser.add_option("-o",
+                      "--output",
+                      dest="outputdir",
+                      metavar="OUTDIR",
                       help="If provided, store the output given directory")
-    parser.add_option("-x", "--exclude", dest="exclude", metavar="EXCLUDES",
+    parser.add_option("-x",
+                      "--exclude",
+                      dest="exclude",
+                      metavar="EXCLUDES",
                       help="If provided, a space-separated list of "
-                           "files/directories to exclude. Relative paths are "
-                           "taken as relative to --basedir")
-    parser.add_option("-j", "--parallel", dest="parallel", metavar="PARALLEL",
-                      help="")
+                      "files/directories to exclude. Relative paths are "
+                      "taken as relative to --basedir")
+    parser.add_option("-j", "--parallel", dest="parallel", metavar="PARALLEL", help="")
 
-    parser.set_defaults(format=DEFAULT_PYLINT_FORMAT, exe=DEFAULT_PYLINT_EXE, nofail=False,
-                        basedir=os.getcwd(), rcfile=DEFAULT_RCFILE, exclude="",
+    parser.set_defaults(format=DEFAULT_PYLINT_FORMAT,
+                        exe=DEFAULT_PYLINT_EXE,
+                        nofail=False,
+                        basedir=os.getcwd(),
+                        rcfile=DEFAULT_RCFILE,
+                        exclude="",
                         parallel=DEFAULT_NPROCS)
 
     options, args = parser.parse_args(argv)
@@ -186,6 +213,7 @@ def parse_arguments(argv):
     options.exclude = options.exclude.split()
 
     return options, args
+
 
 #------------------------------------------------------------------------------
 
@@ -215,14 +243,14 @@ def setup_mantidpath(mantidpath):
                         the 'mantid' module
     """
     # Check for mantid module
-    if not os.path.isfile(os.path.join(mantidpath, "mantid","__init__.py")):
-        raise ValueError("Unable to find mantid python module in '%s'"
-                         % mantidpath)
+    if not os.path.isfile(os.path.join(mantidpath, "mantid", "__init__.py")):
+        raise ValueError("Unable to find mantid python module in '%s'" % mantidpath)
 
     cur_pypath = os.environ.get("PYTHONPATH", "")
     # for subprocesses
     os.environ["PYTHONPATH"] = mantidpath + os.pathsep + cur_pypath
-    sys.path.insert(0, mantidpath) # for current process
+    sys.path.insert(0, mantidpath)  # for current process
+
 
 #------------------------------------------------------------------------------
 
@@ -236,6 +264,7 @@ def create_dir_if_required(path):
     """
     if path and not os.path.exists(path):
         os.makedirs(path)
+
 
 #------------------------------------------------------------------------------
 
@@ -252,12 +281,13 @@ def check_module_imports():
     msg = ""
     #pylint: disable=unused-variable
     try:
-        import mantid # noqa
+        import mantid  # noqa
     except ImportError as exc:
         msg = "Unable to import mantid module: '%s'\n"\
               "Try passing the -m option along with the path to the module"\
                 % str(exc)
     return msg
+
 
 #------------------------------------------------------------------------------
 
@@ -275,6 +305,7 @@ def get_serializer(filename):
     else:
         return open(filename, 'w')
 
+
 #------------------------------------------------------------------------------
 
 
@@ -287,6 +318,7 @@ def cleanup_serializer(serializer):
     """
     if serializer != sys.stdout:
         serializer.close()
+
 
 #------------------------------------------------------------------------------
 
@@ -313,8 +345,7 @@ def run_checks(relpaths, options):
     logging.debug("Parallezing over {0} processes".format(options.parallel))
     for index, target in enumerate(target_paths):
         if options.outputdir:
-            results_path = get_results_path(options.outputdir,
-                                            os.path.relpath(target, options.basedir))
+            results_path = get_results_path(options.outputdir, os.path.relpath(target, options.basedir))
         else:
             # indicates sys.stdout
             results_path = None
@@ -340,6 +371,7 @@ def run_checks(relpaths, options):
     # Get a summary of the failures
     print(results.summary())
     return results.success
+
 
 #------------------------------------------------------------------------------
 
@@ -375,6 +407,7 @@ def get_proc_results(processes, wait=False):
     else:
         return running, results
 
+
 #------------------------------------------------------------------------------
 
 
@@ -408,7 +441,9 @@ def gather_targets(basedir, relpaths, excludes=[]):
             if path.startswith(exclude_path):
                 return False
         return True
+
     return list(filter(include_target, targets))
+
 
 #------------------------------------------------------------------------------
 
@@ -436,8 +471,10 @@ def find_importable_targets(dirpath):
             elif os.path.isdir(abspath):
                 importables.extend(package_walk(abspath))
         return importables
+
     #
     return package_walk(dirpath)
+
 
 #------------------------------------------------------------------------------
 
@@ -453,6 +490,7 @@ def get_results_path(dirname, target):
       An absolute path to a results file
     """
     return os.path.join(dirname, OUTPUT_PREFIX + target.replace("/", "-") + ".log")
+
 
 #------------------------------------------------------------------------------
 
@@ -470,10 +508,12 @@ def start_pylint(srcpath, serializer, options):
       The (proc, srcpath, serializer)
     """
     logging.info("Running pylint on '%s'", srcpath)
-    proc = subp.Popen(build_pylint_cmd(srcpath, options), stdout=serializer,
+    proc = subp.Popen(build_pylint_cmd(srcpath, options),
+                      stdout=serializer,
                       stderr=serializer,
                       cwd=os.path.dirname(srcpath))
     return proc, srcpath, serializer
+
 
 #------------------------------------------------------------------------------
 
@@ -498,8 +538,8 @@ def build_pylint_cmd(srcpath, options):
     cmd.append(os.path.basename(srcpath))
     return cmd
 
-#------------------------------------------------------------------------------
 
+#------------------------------------------------------------------------------
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

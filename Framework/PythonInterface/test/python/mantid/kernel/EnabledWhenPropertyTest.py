@@ -9,7 +9,6 @@ from mantid.kernel import EnabledWhenProperty, PropertyCriterion, LogicOperator
 
 
 class EnabledWhenPropertyTest(unittest.TestCase):
-
     def test_construction_with_name_criterion_only_succeeds(self):
         p = EnabledWhenProperty("OtherProperty", PropertyCriterion.IsDefault)
         self.assertIsNotNone(p)

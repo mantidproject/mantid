@@ -28,7 +28,7 @@ class USANSReduction(PythonAlgorithm):
         return "SANS"
 
     def seeAlso(self):
-        return [ "USANSSimulation" ]
+        return ["USANSSimulation"]
 
     def name(self):
         return "USANSReduction"
@@ -38,8 +38,9 @@ class USANSReduction(PythonAlgorithm):
 
     def PyInit(self):
         arrvalidator = IntArrayBoundedValidator(lower=0)
-        self.declareProperty(IntArrayProperty("RunNumbers", values=[0], validator=arrvalidator,
-                                              direction=Direction.Input), "Runs to reduce")
+        self.declareProperty(
+            IntArrayProperty("RunNumbers", values=[0], validator=arrvalidator, direction=Direction.Input),
+            "Runs to reduce")
         self.declareProperty("EmptyRun", '', "Run number for the empty run")
 
         #TODO: Mask workspace
@@ -63,7 +64,7 @@ class USANSReduction(PythonAlgorithm):
             @param run: run number
         """
         f_list = FileFinder.findRuns("USANS_%s" % run)
-        if len(f_list)>0:
+        if len(f_list) > 0:
             root, ext = os.path.splitext(f_list[0])
             return "%s_monitors%s" % (root, ext)
         else:
@@ -102,8 +103,8 @@ class USANSReduction(PythonAlgorithm):
             Load(Filename='USANS_%s' % item, LoadMonitors=True, OutputWorkspace=ws_name)
 
             # For testing, we may have to load the monitors by hand
-            if not mtd.doesExist(ws_name+'_monitors'):
-                Load(Filename=self._find_monitors(empty_run), OutputWorkspace=ws_name+'_monitors')
+            if not mtd.doesExist(ws_name + '_monitors'):
+                Load(Filename=self._find_monitors(empty_run), OutputWorkspace=ws_name + '_monitors')
 
             # Determine whether we are putting together multiple files or whether
             # we will be looking for scan_index markers.
@@ -111,19 +112,20 @@ class USANSReduction(PythonAlgorithm):
             max_index = 1
             if mtd[ws_name].getRun().hasProperty('scan_index'):
                 scan_index = mtd[ws_name].getRun().getProperty("scan_index").value
-                if len(scan_index)>0:
+                if len(scan_index) > 0:
                     _max_index = scan_index.getStatistics().maximum
-                    if _max_index>0:
+                    if _max_index > 0:
                         max_index = _max_index
                         is_scan = True
 
             # Append the info for when we do the reduction
-            self.data_files.append(self.DataFile(workspace=ws_name,
-                                                 monitor=ws_name+'_monitors',
-                                                 empty='__empty',
-                                                 empty_monitor='__empty_monitors',
-                                                 is_scan=is_scan,
-                                                 max_index=max_index))
+            self.data_files.append(
+                self.DataFile(workspace=ws_name,
+                              monitor=ws_name + '_monitors',
+                              empty='__empty',
+                              empty_monitor='__empty_monitors',
+                              is_scan=is_scan,
+                              max_index=max_index))
             total_points += max_index
 
         return total_points
@@ -133,16 +135,16 @@ class USANSReduction(PythonAlgorithm):
         for point in range(file_info.max_index):
             # If we are in a scan, select the current scan point
             if file_info.is_scan:
-                ws=FilterByLogValue(InputWorkspace=mtd[file_info.workspace],
-                                    LogName='scan_index',
-                                    MinimumValue=point,
-                                    MaximumValue=point,
-                                    LogBoundary='Left')
+                ws = FilterByLogValue(InputWorkspace=mtd[file_info.workspace],
+                                      LogName='scan_index',
+                                      MinimumValue=point,
+                                      MaximumValue=point,
+                                      LogBoundary='Left')
             else:
                 ws = mtd[file_info.workspace]
 
             # Get the two-theta value for this point
-            if ws.getRun().getProperty("two_theta").type=='number':
+            if ws.getRun().getProperty("two_theta").type == 'number':
                 two_theta = ws.getRun().getProperty("two_theta").value
             else:
                 two_theta = ws.getRun().getProperty("two_theta").timeAverageValue()
@@ -151,7 +153,7 @@ class USANSReduction(PythonAlgorithm):
             for i_wl in range(len(self.wl_list)):
                 wl = self.wl_list[i_wl]['wavelength']
                 # Note: TOF value is given by tof = 30.0/0.0039560*wl
-                q = 6.28*math.sin(two_theta)/wl
+                q = 6.28 * math.sin(two_theta) / wl
 
                 # Get I(q) for each wavelength peak
                 i_q = self._get_intensity(mtd[file_info.workspace],
@@ -162,15 +164,13 @@ class USANSReduction(PythonAlgorithm):
                                           tof_max=self.wl_list[i_wl]['t_max'])
                 # Store the reduced data
                 try:
-                    self.q_output[i_wl][point+index_offset] = q
-                    self.iq_output[i_wl][point+index_offset] = i_q.dataY(0)[0]
-                    self.iq_err_output[i_wl][point+index_offset] = i_q.dataE(0)[0]
+                    self.q_output[i_wl][point + index_offset] = q
+                    self.iq_output[i_wl][point + index_offset] = i_q.dataY(0)[0]
+                    self.iq_err_output[i_wl][point + index_offset] = i_q.dataE(0)[0]
                 except:
-                    Logger("USANSReduction").error("Exception caught for "
-                                                   + "%s on peak %s, point %s. Offset=%s" %
+                    Logger("USANSReduction").error("Exception caught for " + "%s on peak %s, point %s. Offset=%s" %
                                                    (file_info.workspace, i_wl, point, index_offset))
-                    Logger("USANSReduction").error("Array: "
-                                                   + "%s x %s    Data: %s" %
+                    Logger("USANSReduction").error("Array: " + "%s x %s    Data: %s" %
                                                    (len(self.wl_list), self.total_points, file_info.max_index))
                     Logger("USANSReduction").error(sys.exc_info()[1])
         return file_info.max_index
@@ -184,7 +184,8 @@ class USANSReduction(PythonAlgorithm):
 
         # Create an array to store the I(q) points
         n_wl = len(self.wl_list)
-        Logger("USANSReduction").notice("USANS reduction for %g peaks with %g point(s) each" % (n_wl, self.total_points))
+        Logger("USANSReduction").notice("USANS reduction for %g peaks with %g point(s) each" %
+                                        (n_wl, self.total_points))
         self.q_output = numpy.zeros(shape=(n_wl, self.total_points))
         self.iq_output = numpy.zeros(shape=(n_wl, self.total_points))
         self.iq_err_output = numpy.zeros(shape=(n_wl, self.total_points))
@@ -205,10 +206,10 @@ class USANSReduction(PythonAlgorithm):
         y_all = []
         e_all = []
 
-        def compare(p1,p2):
-            if p2[0]==p1[0]:
+        def compare(p1, p2):
+            if p2[0] == p1[0]:
                 return 0
-            return -1 if p2[0]>p1[0] else 1
+            return -1 if p2[0] > p1[0] else 1
 
         for i_wl in range(len(self.wl_list)):
             x_all.extend(self.q_output[i_wl])
@@ -219,28 +220,30 @@ class USANSReduction(PythonAlgorithm):
             e = self.iq_err_output[i_wl]
 
             # Sort the I(q) point just in case we got them in the wrong order
-            zipped = list(zip(x,y,e))
+            zipped = list(zip(x, y, e))
             combined = sorted(zipped, compare)
-            x,y,e = list(zip(*combined))
+            x, y, e = list(zip(*combined))
 
             wl = self.wl_list[i_wl]['wavelength']
             CreateWorkspace(DataX=x,
                             DataY=y,
                             DataE=e,
-                            NSpec=1, UnitX='MomentumTransfer',
+                            NSpec=1,
+                            UnitX='MomentumTransfer',
                             OutputWorkspace='iq_%1.2f' % wl)
 
         # Sort the I(q) point just in case we got them in the wrong order
-        zipped = list(zip(x_all,y_all,e_all))
+        zipped = list(zip(x_all, y_all, e_all))
         combined = sorted(zipped, compare)
-        x,y,e = list(zip(*combined))
+        x, y, e = list(zip(*combined))
 
         # Create the combined output workspace
         output_ws_name = self.getPropertyValue("OutputWorkspace")
         out_ws = CreateWorkspace(DataX=x,
                                  DataY=y,
                                  DataE=e,
-                                 NSpec=1, UnitX='MomentumTransfer',
+                                 NSpec=1,
+                                 UnitX='MomentumTransfer',
                                  OutputWorkspace=output_ws_name)
         self.setProperty("OutputWorkspace", out_ws)
 
@@ -252,65 +255,76 @@ class USANSReduction(PythonAlgorithm):
         # Apply mask
 
         # Get the normalized empty run counts in the transmission detector
-        __empty_summed = _execute('SumSpectra', InputWorkspace=str(empty),
-                                  StartWorkspaceIndex=nspecs/2, EndWorkspaceIndex=nspecs-1,
+        __empty_summed = _execute('SumSpectra',
+                                  InputWorkspace=str(empty),
+                                  StartWorkspaceIndex=nspecs / 2,
+                                  EndWorkspaceIndex=nspecs - 1,
                                   OutputWorkspace='__empty_summed')
-        __point = _execute('CropWorkspace', InputWorkspace=__empty_summed,
-                           XMin=tof_min, XMax=tof_max,
+        __point = _execute('CropWorkspace',
+                           InputWorkspace=__empty_summed,
+                           XMin=tof_min,
+                           XMax=tof_max,
                            OutputWorkspace='__point')
-        __empty_count = _execute('Integration', InputWorkspace=__point,
-                                 OutputWorkspace='__empty_count')
-        __point = _execute('CropWorkspace', InputWorkspace=str(empty_monitor),
-                           XMin=tof_min, XMax=tof_max,
+        __empty_count = _execute('Integration', InputWorkspace=__point, OutputWorkspace='__empty_count')
+        __point = _execute('CropWorkspace',
+                           InputWorkspace=str(empty_monitor),
+                           XMin=tof_min,
+                           XMax=tof_max,
                            OutputWorkspace='__point')
-        __empty_monitor_count = _execute('Integration', InputWorkspace=__point,
-                                         OutputWorkspace='__empty_monitor_count')
+        __empty_monitor_count = _execute('Integration', InputWorkspace=__point, OutputWorkspace='__empty_monitor_count')
 
-        __normalized_empty = _execute('Divide', LHSWorkspace=__empty_count,
+        __normalized_empty = _execute('Divide',
+                                      LHSWorkspace=__empty_count,
                                       RHSWorkspace=__empty_monitor_count,
                                       OutputWorkspace='__normalized_empty')
 
         # Get the normalized sample counts in the transmission detector
-        __trans_summed = _execute('SumSpectra', InputWorkspace=sample,
-                                  StartWorkspaceIndex=nspecs/2, EndWorkspaceIndex=nspecs-1,
+        __trans_summed = _execute('SumSpectra',
+                                  InputWorkspace=sample,
+                                  StartWorkspaceIndex=nspecs / 2,
+                                  EndWorkspaceIndex=nspecs - 1,
                                   OutputWorkspace='__trans_summed')
-        __point = _execute('CropWorkspace', InputWorkspace=__trans_summed,
-                           XMin=tof_min, XMax=tof_max,
+        __point = _execute('CropWorkspace',
+                           InputWorkspace=__trans_summed,
+                           XMin=tof_min,
+                           XMax=tof_max,
                            OutputWorkspace='__point')
-        __trans_count = _execute('Integration', InputWorkspace=__point,
-                                 OutputWorkspace='__trans_count')
+        __trans_count = _execute('Integration', InputWorkspace=__point, OutputWorkspace='__trans_count')
 
-        __point = _execute('CropWorkspace', InputWorkspace=sample_monitor,
-                           XMin=tof_min, XMax=tof_max,
+        __point = _execute('CropWorkspace',
+                           InputWorkspace=sample_monitor,
+                           XMin=tof_min,
+                           XMax=tof_max,
                            OutputWorkspace='__point')
         #__monitor_count = _execute('Integration', InputWorkspace=__point,
         #                           OutputWorkspace='__monitor_count')
 
         # The monitor count normalization cancels out when doing the transmission correction
         # of the scattering signal below
-        __normalized_sample_trans = __trans_count#/__monitor_count
+        __normalized_sample_trans = __trans_count  #/__monitor_count
 
         # Transmission workspace
-        transmission = _execute('Divide',  LHSWorkspace=__normalized_sample_trans,
+        transmission = _execute('Divide',
+                                LHSWorkspace=__normalized_sample_trans,
                                 RHSWorkspace=__normalized_empty,
                                 OutputWorkspace='transmission')
 
         # Scattering signal
-        __signal_summed = _execute('SumSpectra', InputWorkspace=sample,
+        __signal_summed = _execute('SumSpectra',
+                                   InputWorkspace=sample,
                                    StartWorkspaceIndex=0,
-                                   EndWorkspaceIndex=nspecs/2,
+                                   EndWorkspaceIndex=nspecs / 2,
                                    OutputWorkspace='__signal_summed')
-        __point = _execute('CropWorkspace', InputWorkspace=__signal_summed,
-                           XMin=tof_min, XMax=tof_max,
+        __point = _execute('CropWorkspace',
+                           InputWorkspace=__signal_summed,
+                           XMin=tof_min,
+                           XMax=tof_max,
                            OutputWorkspace='__point')
-        __signal_count = _execute('Integration', InputWorkspace=__point,
-                                  OutputWorkspace='__signal_count')
+        __signal_count = _execute('Integration', InputWorkspace=__point, OutputWorkspace='__signal_count')
         # The monitor count normalization cancels out when doing the transmission correction
-        __signal = __signal_count#/__monitor_count
+        __signal = __signal_count  #/__monitor_count
 
-        intensity = _execute('Divide', LHSWorkspace=__signal,
-                             RHSWorkspace=transmission,
-                             OutputWorkspace='intensity')
+        intensity = _execute('Divide', LHSWorkspace=__signal, RHSWorkspace=transmission, OutputWorkspace='intensity')
         return intensity
 
 

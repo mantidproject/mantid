@@ -168,7 +168,8 @@ class ProjectRecovery(object):
             return_current_pid = True
             if psutil.pid_exists(pid):
                 try:
-                    return_current_pid = not self._is_mantid_workbench_process(self._make_process_from_pid(pid=pid).cmdline())
+                    return_current_pid = not self._is_mantid_workbench_process(
+                        self._make_process_from_pid(pid=pid).cmdline())
                 except psutil.AccessDenied:
                     # if we can't access the process properties then we assume it is not a mantid process
                     pass
@@ -258,6 +259,7 @@ class ProjectRecovery(object):
             if process_name in EXECUTABLE_NAMES:
                 return True
         return False
+
     ######################################################
     #  Loading
     ######################################################

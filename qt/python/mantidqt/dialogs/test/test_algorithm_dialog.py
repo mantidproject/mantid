@@ -20,7 +20,6 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 
 class AlgorithmDialogMockAlgorithm(PythonAlgorithm):
-
     def category(self):
         return 'Examples'
 
@@ -36,7 +35,6 @@ class AlgorithmDialogMockAlgorithm(PythonAlgorithm):
 
 @start_qapplication
 class TestAlgorithmDialog(unittest.TestCase):
-
     def setUp(self):
         AlgorithmFactory.subscribe(AlgorithmDialogMockAlgorithm)
 

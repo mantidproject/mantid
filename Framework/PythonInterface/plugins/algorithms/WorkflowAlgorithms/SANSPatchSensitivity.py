@@ -19,7 +19,6 @@ class SANSPatchSensitivity(PythonAlgorithm):
        For the masked peaks calculates a regression
 
     """
-
     def category(self):
         return "Workflow\\SANS"
 
@@ -30,21 +29,18 @@ class SANSPatchSensitivity(PythonAlgorithm):
         return "Calculate the detector sensitivity and patch the pixels that are masked in a second workspace. "
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty("InputWorkspace", "",
-                                               direction=Direction.Input),
-                             doc = "Input sensitivity workspace to be patched")
-        self.declareProperty(WorkspaceProperty("PatchWorkspace", "",
-                                               direction=Direction.Input),
-                             doc = "Workspace defining the patch. Masked detectors will be patched.")
-        self.declareProperty("ComponentName", "",
-                             doc="Component Name to apply the patch.")
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "", direction=Direction.Input),
+                             doc="Input sensitivity workspace to be patched")
+        self.declareProperty(WorkspaceProperty("PatchWorkspace", "", direction=Direction.Input),
+                             doc="Workspace defining the patch. Masked detectors will be patched.")
+        self.declareProperty("ComponentName", "", doc="Component Name to apply the patch.")
 
-        self.declareProperty("DegreeOfThePolynomial", defaultValue=1,
+        self.declareProperty("DegreeOfThePolynomial",
+                             defaultValue=1,
                              validator=IntBoundedValidator(0),
                              doc="Degree of the polynomial to fit the patch zone")
 
-        self.declareProperty("OutputMessage", "",
-                             direction=Direction.Output, doc="Output message")
+        self.declareProperty("OutputMessage", "", direction=Direction.Output, doc="Output message")
 
     def PyExec(self):
         in_ws = self.getProperty("InputWorkspace").value
@@ -55,7 +51,7 @@ class SANSPatchSensitivity(PythonAlgorithm):
         number_of_tubes = component.nelements()
 
         for tube_idx in range(number_of_tubes):
-            if component[0].nelements() <=1:
+            if component[0].nelements() <= 1:
                 # Handles EQSANS
                 tube = component[tube_idx][0]
             else:
@@ -100,7 +96,7 @@ class SANSPatchSensitivity(PythonAlgorithm):
         y_to_calculate_fit = []
         e_to_calculate_fit = []
         # Array that will be fit
-        id_to_fit =[]
+        id_to_fit = []
 
         patchDetInfo = patch_ws.detectorInfo()
         inputDetInfo = in_ws.detectorInfo()
@@ -108,7 +104,7 @@ class SANSPatchSensitivity(PythonAlgorithm):
             pixel_in_input_ws = tube_in_input_ws[pixel_idx]
             # ID will be the same in both WS
             detector_id = pixel_in_input_ws.getID()
-            detector_idx = detector_id - 1 # See note on hack below
+            detector_idx = detector_id - 1  # See note on hack below
 
             if patchDetInfo.isMasked(detector_idx):
                 id_to_fit.append(detector_id)
@@ -120,21 +116,22 @@ class SANSPatchSensitivity(PythonAlgorithm):
         degree = self.getProperty("DegreeOfThePolynomial").value
         # Returns coeffcients for the polynomial fit
 
-        if len(id_to_calculate_fit) <= 50 :
-            Logger("SANSPatchSensitivity").warning("Tube %s has not enough data for polyfit." % tube_in_input_ws.getFullName())
+        if len(id_to_calculate_fit) <= 50:
+            Logger("SANSPatchSensitivity").warning("Tube %s has not enough data for polyfit." %
+                                                   tube_in_input_ws.getFullName())
             return
 
-        py =  np.polyfit(id_to_calculate_fit, y_to_calculate_fit, degree)
-        pe =  np.polyfit(id_to_calculate_fit, e_to_calculate_fit, degree)
+        py = np.polyfit(id_to_calculate_fit, y_to_calculate_fit, degree)
+        pe = np.polyfit(id_to_calculate_fit, e_to_calculate_fit, degree)
 
         for id_ in id_to_fit:
             # HUGE hack. There's no detector_id to spectrum_idx possibility
             # spect_idx for biosans / gpsans is detector_id -1
             spec_idx = id_ - 1
-            vy = np.polyval(py,[id_])
-            ve = np.polyval(pe,[id_])
-            in_ws.setY(spec_idx,vy)
-            in_ws.setE(spec_idx,ve)
+            vy = np.polyval(py, [id_])
+            ve = np.polyval(pe, [id_])
+            in_ws.setY(spec_idx, vy)
+            in_ws.setE(spec_idx, ve)
 
 
 AlgorithmFactory.subscribe(SANSPatchSensitivity())

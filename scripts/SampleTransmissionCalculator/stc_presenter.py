@@ -11,7 +11,6 @@ class SampleTransmissionCalculatorPresenter(object):
     """
     The sample transmission calculator interface
     """
-
     def __init__(self, view, model):
         self.view = view
         self.model = model
@@ -44,4 +43,4 @@ class SampleTransmissionCalculatorPresenter(object):
 
     def help_window(self):
         gui_name = 'Sample Transmission Calculator'
-        InterfaceManager().showCustomInterfaceHelp(gui_name,'general')
+        InterfaceManager().showCustomInterfaceHelp(gui_name, 'general')

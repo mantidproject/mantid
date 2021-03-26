@@ -8,8 +8,7 @@ import unittest
 
 from testhelpers import run_algorithm, can_be_instantiated, WorkspaceCreationHelper
 
-from mantid.api import (IEventWorkspace, IEventList, IWorkspaceProperty,
-                        AlgorithmManager)
+from mantid.api import (IEventWorkspace, IEventList, IWorkspaceProperty, AlgorithmManager)
 
 
 class IEventWorkspaceTest(unittest.TestCase):
@@ -48,24 +47,24 @@ class IEventWorkspaceTest(unittest.TestCase):
         el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         TofList = el.getTofs()
-        self.assertEqual(len(TofList), el.getNumberEvents()) #check length
-        self.assertAlmostEquals(TofList[0], 0.5) #first value
+        self.assertEqual(len(TofList), el.getNumberEvents())  #check length
+        self.assertAlmostEquals(TofList[0], 0.5)  #first value
 
     def test_event_list_getWeights(self):
         el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         weightList = el.getWeights()
-        self.assertEqual(len(weightList), el.getNumberEvents()) #check length
-        self.assertAlmostEquals(weightList[0], 1.0) #first value
-        self.assertAlmostEquals(weightList[len(weightList)-1], 1.0) #last value
+        self.assertEqual(len(weightList), el.getNumberEvents())  #check length
+        self.assertAlmostEquals(weightList[0], 1.0)  #first value
+        self.assertAlmostEquals(weightList[len(weightList) - 1], 1.0)  #last value
 
     def test_event_list_getWeightErrors(self):
         el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         weightErrorList = el.getWeightErrors()
-        self.assertEqual(len(weightErrorList), el.getNumberEvents()) #check length
-        self.assertAlmostEquals(weightErrorList[0], 1.0) #first value
-        self.assertAlmostEquals(weightErrorList[len(weightErrorList)-1], 1.0) #last value
+        self.assertEqual(len(weightErrorList), el.getNumberEvents())  #check length
+        self.assertAlmostEquals(weightErrorList[0], 1.0)  #first value
+        self.assertAlmostEquals(weightErrorList[len(weightErrorList) - 1], 1.0)  #last value
 
     def test_deprecated_getEventList(self):
         el = self._test_ws.getEventList(0)

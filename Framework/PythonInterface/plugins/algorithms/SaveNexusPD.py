@@ -17,9 +17,7 @@ except ImportError:
 
 class SaveNexusPD(mantid.api.PythonAlgorithm):
     NX_CLASS = 'NX_class'
-    AXES_DICT = {'tof': 'time-of-flight',
-                 'dspacing': 'd-spacing',
-                 'Q': 'momentum transfer'}
+    AXES_DICT = {'tof': 'time-of-flight', 'dspacing': 'd-spacing', 'Q': 'momentum transfer'}
 
     _dtype = None
     _compressArgs = {}
@@ -31,7 +29,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         return "DataHandling\\Nexus"
 
     def seeAlso(self):
-        return [ "SaveNexus" ]
+        return ["SaveNexus"]
 
     def name(self):
         return "SaveNexusPD"
@@ -56,9 +54,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
             self._compressArgs['compression'] = compression
 
     def PyInit(self):
-        self.declareProperty(mantid.api.WorkspaceProperty('InputWorkspace',
-                                                          '',
-                                                          mantid.kernel.Direction.Input),
+        self.declareProperty(mantid.api.WorkspaceProperty('InputWorkspace', '', mantid.kernel.Direction.Input),
                              "Workspace to save")
         self.declareProperty(mantid.api.FileProperty('OutputFilename',
                                                      '',
@@ -68,18 +64,17 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
 
         group = 'Options'
 
-        self.declareProperty('NXentry', '',
-                             'Overrides the NXentry name from the workspace name')
-        self.declareProperty('DataType', 'float32',
+        self.declareProperty('NXentry', '', 'Overrides the NXentry name from the workspace name')
+        self.declareProperty('DataType',
+                             'float32',
                              StringListValidator(['float32', 'float64']),
                              doc='All data saved will be converted to this type')
-        self.declareProperty('Compression', 'gzip',
+        self.declareProperty('Compression',
+                             'gzip',
                              StringListValidator(['gzip', 'lzf', 'None']),
                              doc='Algorithm for compressing data')
-        self.declareProperty('WriteMomentumTransfer', True,
-                             doc="Add the momentum transfer (Q) axis to the file")
-        self.declareProperty('ProtonChargeUnits', 'uA.hour',
-                             StringListValidator(['uA.hour', 'C', 'pC']))
+        self.declareProperty('WriteMomentumTransfer', True, doc="Add the momentum transfer (Q) axis to the file")
+        self.declareProperty('ProtonChargeUnits', 'uA.hour', StringListValidator(['uA.hour', 'C', 'pC']))
         self.declareProperty('Append', False)
 
         self.setPropertyGroup('NXentry', group)
@@ -114,24 +109,19 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
 
         if self._sourcePos is not None:
             L1 = self._sourcePos.distance(self._sample.getPos())
-            L1 = -1.*abs(L1)  # nexus likes the distance negative
-            temp = nxmoderator.create_dataset('distance', data=[L1],
-                                              dtype=self._dtype)
+            L1 = -1. * abs(L1)  # nexus likes the distance negative
+            temp = nxmoderator.create_dataset('distance', data=[L1], dtype=self._dtype)
             temp.attrs['units'] = 'metre'
 
         return nxinstrument
 
     def _writeY(self, nxdata, wksp, index):
-        temp = nxdata.create_dataset(name='data', data=wksp.readY(index),
-                                     dtype=self._dtype,
-                                     **self._compressArgs)
+        temp = nxdata.create_dataset(name='data', data=wksp.readY(index), dtype=self._dtype, **self._compressArgs)
         temp.attrs['uncertainties'] = 'errors'
         temp.attrs['axes'] = 'dspacing'
         temp.attrs['signal'] = 1
         temp.attrs['units'] = str(wksp.YUnit())
-        nxdata.create_dataset(name='errors', data=wksp.readE(index),
-                              dtype=self._dtype,
-                              **self._compressArgs)
+        nxdata.create_dataset(name='errors', data=wksp.readE(index), dtype=self._dtype, **self._compressArgs)
 
     #pylint: disable=too-many-arguments
     def _writeX(self, nxdata, name, wksp, index, writeDx):
@@ -140,9 +130,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         arr = wksp.readX(index)
         if reverse:
             arr = arr[::-1]  # reverse the array
-        temp = nxdata.create_dataset(name=name, data=arr,
-                                     dtype=self._dtype,
-                                     **self._compressArgs)
+        temp = nxdata.create_dataset(name=name, data=arr, dtype=self._dtype, **self._compressArgs)
         temp.attrs['units'] = units
         temp.attrs['longname'] = self.AXES_DICT[name]
 
@@ -151,10 +139,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
             if reverse:  # reverse the array
                 arr = arr[::-1]
 
-            temp = nxdata.create_dataset(name=name+'_errors',
-                                         data=arr,
-                                         dtype=self._dtype,
-                                         **self._compressArgs)
+            temp = nxdata.create_dataset(name=name + '_errors', data=arr, dtype=self._dtype, **self._compressArgs)
             temp.attrs['units'] = units
 
     def _writeProtonCharge(self, nxentry, wksp):
@@ -175,9 +160,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
             value = value * 3600. * 1.e6
         units = unitsDesired
 
-        field = nxentry.create_dataset('proton_charge',
-                                       data=[value],
-                                       dtype=self._dtype)
+        field = nxentry.create_dataset('proton_charge', data=[value], dtype=self._dtype)
         field.attrs['units'] = units
 
     def _writeDetectorPos(self, nxinstrument, name, detector):
@@ -189,20 +172,16 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
 
         # only continue if there is position information
         L2 = detector.getDistance(self._sample)
-        polar = detector.getTwoTheta(self._sample.getPos(),
-                                     self._sourcePos)  # radians
+        polar = detector.getTwoTheta(self._sample.getPos(), self._sourcePos)  # radians
         azi = detector.getPhi()  # radians
 
-        temp = nxdetector.create_dataset('distance', data=[abs(L2)],
-                                         dtype=self._dtype)
+        temp = nxdetector.create_dataset('distance', data=[abs(L2)], dtype=self._dtype)
         temp.attrs['units'] = 'metre'
 
-        temp = nxdetector.create_dataset('polar_angle', data=[polar],
-                                         dtype=self._dtype)
+        temp = nxdetector.create_dataset('polar_angle', data=[polar], dtype=self._dtype)
         temp.attrs['units'] = 'radian'
 
-        temp = nxdetector.create_dataset('azimuthal_angle', data=[azi],
-                                         dtype=self._dtype)
+        temp = nxdetector.create_dataset('azimuthal_angle', data=[azi], dtype=self._dtype)
         temp.attrs['units'] = 'radian'
 
         return nxdetector
@@ -225,12 +204,10 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
             elif self._sourcePos is not None:
                 wsname = '__SaveNexusPD_%s' % target
                 self._tempNames.append(wsname)
-                temp = api.ConvertUnits(InputWorkspace=wksp,
-                                        OutputWorkspace=wsname,
-                                        Target=target, EMode='Elastic')
+                temp = api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wsname, Target=target, EMode='Elastic')
                 result[i] = temp
             else:
-                pass   # can't ConvertUnits
+                pass  # can't ConvertUnits
         return result
 
     def _determineSourceSample(self, wksp):
@@ -277,8 +254,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
 
             # check for the entry alread existing in append mode
             if append and wkspname in handle.keys():
-                raise IOError("NXentry named '%s' already exists in '%s'" %
-                              (wkspname, filename))
+                raise IOError("NXentry named '%s' already exists in '%s'" % (wkspname, filename))
 
             # create the entry
             nxentry = handle.create_group(wkspname)
@@ -303,14 +279,12 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
                         detector = wksp.getDetector(i)
                     except RuntimeError:
                         detector = None
-                nxdetector = self._writeDetectorPos(nxinstrument, dataname,
-                                                    detector)
+                nxdetector = self._writeDetectorPos(nxinstrument, dataname, detector)
 
                 self._writeY(nxdetector, tof, i)
 
                 # write out axes in the nxdetector
-                for (field, wkspIter) in zip(('tof', 'dspacing', 'Q'),
-                                             (tof, dspacing, momentumtransfer)):
+                for (field, wkspIter) in zip(('tof', 'dspacing', 'Q'), (tof, dspacing, momentumtransfer)):
                     if field in xAxesToWrite:
                         self._writeX(nxdetector, field, wkspIter, i, writeDx)
 

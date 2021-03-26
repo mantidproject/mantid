@@ -44,8 +44,8 @@ class LegendTest(unittest.TestCase):
 
         LegendProperties.create_legend(props=None, ax=ax)
 
-        mock_ConfigService.getString.assert_has_calls([mock.call('plots.legend.Location'),
-                                                       mock.call('plots.legend.FontSize')])
+        mock_ConfigService.getString.assert_has_calls(
+            [mock.call('plots.legend.Location'), mock.call('plots.legend.FontSize')])
         ax.legend.assert_called_once_with(handles=mock.ANY, loc='best', prop={"size": 8.0})
 
 

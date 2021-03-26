@@ -16,7 +16,6 @@ class StrictMock(Mock):
     that have NOT been declared on the mock are called. This prevents spelling errors
     and captures any unexpected calls to the mock.
     """
-
     def __init__(self, *args, **kwargs):
         if "spec_set" not in kwargs:
             # specifies that ANY calls that are not explicitly declared on the mock
@@ -34,7 +33,6 @@ class StrictContextManagerMock(unittest.TestCase):
     The TestCase assertions methods are not extracted into a base class,
     so there is no other way to gain access to them
     """
-
     def __init__(self):
         # does not call the super constructor class - this prevents an error for missing test cases, as
         # none are declared in the class
@@ -63,7 +61,6 @@ class StrictPropertyMock(PropertyMock):
     that the attributes accessed on the return_value object actually exist, and will raise
     AttributeErrors if they don't, thus preventing unexpected calls passing silently.
     """
-
     def __init__(self, *args, **kwargs):
         if "return_value" in kwargs:
             kwargs["spec_set"] = kwargs["return_value"]

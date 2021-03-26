@@ -8,7 +8,6 @@
 #
 #
 
-
 import unittest
 from qtpy.QtWidgets import QInputDialog
 
@@ -18,13 +17,13 @@ from mantidqt.utils.qt.testing import start_qapplication, ModalTester
 
 @start_qapplication
 class TestModalTester(unittest.TestCase):
-
     def test_pass_widget_closed(self):
         def testing_function(widget):
             widget.setTextValue('Hello World!')
             text = widget.textValue()
             self.assertEqual(text, 'Hello World!')
             widget.accept()
+
         tester = ModalTester(QInputDialog, testing_function)
         tester.start()
         self.assertFalse(tester.widget.isVisible())
@@ -36,6 +35,7 @@ class TestModalTester(unittest.TestCase):
             text = widget.textValue()
             self.assertEqual(text, 'STUFF')
             widget.accept()
+
         with patch('traceback.print_exc') as print_exc:
             tester = ModalTester(QInputDialog, testing_function)
             tester.start()
@@ -48,6 +48,7 @@ class TestModalTester(unittest.TestCase):
             widget.setTextValue('Hello World!')
             text = widget.textValue()
             self.assertEqual(text, 'Hello World!')
+
         tester = ModalTester(QInputDialog, testing_function)
         tester.start()
         self.assertFalse(tester.widget.isVisible())
@@ -58,6 +59,7 @@ class TestModalTester(unittest.TestCase):
             widget.setTextValue('Hello World!')
             text = widget.textValue()
             self.assertEqual(text, '')
+
         with patch('traceback.print_exc') as print_exc:
             tester = ModalTester(QInputDialog, testing_function)
             tester.start()
@@ -68,6 +70,7 @@ class TestModalTester(unittest.TestCase):
     def test_exception(self):
         def testing_function(widget):
             raise RuntimeError('')
+
         with patch('traceback.print_exc') as print_exc:
             tester = ModalTester(QInputDialog, testing_function)
             tester.start()
@@ -81,6 +84,7 @@ class TestModalTester(unittest.TestCase):
 
         def testing_function(widget):
             pass
+
         with patch('traceback.print_exc') as print_exc:
             tester = ModalTester(create, testing_function)
             tester.start()

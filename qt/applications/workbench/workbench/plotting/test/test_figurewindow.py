@@ -21,7 +21,6 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 @start_qapplication
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         # Patch the show method on MainWindow so we don't get GUI pop-ups
@@ -32,11 +31,7 @@ class Test(unittest.TestCase):
         axs[0].plot([0, 1], [1, 0])
         axs[1].plot([0, 2], [2, 0])
         cls.fig_window = FigureWindow(cls.fig.canvas)
-        cls.ws = CreateWorkspace(DataX=[0, 3],
-                                 DataY=[3, 0],
-                                 DataE=[1, 1],
-                                 NSpec=1,
-                                 OutputWorkspace='ws')
+        cls.ws = CreateWorkspace(DataX=[0, 3], DataY=[3, 0], DataE=[1, 1], NSpec=1, OutputWorkspace='ws')
 
     @classmethod
     def tearDownClass(cls):
@@ -48,8 +43,8 @@ class Test(unittest.TestCase):
         dpi_ratio = self.fig.canvas.devicePixelRatio() or 1
         # Find the center of the axes and simulate a drop event there
         # Need to use Qt logical pixels to factor in dpi
-        ax_x_centre = (ax.xaxis.clipbox.min[0] + ax.xaxis.clipbox.width*0.5)/dpi_ratio
-        ax_y_centre = (ax.xaxis.clipbox.min[1] + ax.xaxis.clipbox.height*0.5)/dpi_ratio
+        ax_x_centre = (ax.xaxis.clipbox.min[0] + ax.xaxis.clipbox.width * 0.5) / dpi_ratio
+        ax_y_centre = (ax.xaxis.clipbox.min[1] + ax.xaxis.clipbox.height * 0.5) / dpi_ratio
         mock_event = Mock(pos=lambda: Mock(x=lambda: ax_x_centre, y=lambda: ax_y_centre))
         mock_event.mimeData().text.return_value = "ws"
         with patch('workbench.plotting.figurewindow.QMainWindow.dropEvent'):

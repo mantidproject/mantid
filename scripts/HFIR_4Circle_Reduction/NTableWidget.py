@@ -22,8 +22,7 @@ class NTableWidget(QTableWidget):
     for easy application.
     """
     # List of supported cell types (all in lower cases)
-    Supported_Cell_Types = ['checkbox', 'string', 'str', 'integer', 'int',
-                            'float', 'double']
+    Supported_Cell_Types = ['checkbox', 'string', 'str', 'integer', 'int', 'float', 'double']
 
     def __init__(self, parent):
         """
@@ -59,8 +58,7 @@ class NTableWidget(QTableWidget):
                                                 'not a {1}'.format(type_list, type(type_list))
             if len(row_value_list) != len(type_list):
                 raise RuntimeError('If value types are given, then they must have the same '
-                                   'numbers ({0}) and values ({1})'.format(len(row_value_list),
-                                                                           len(type_list)))
+                                   'numbers ({0}) and values ({1})'.format(len(row_value_list), len(type_list)))
         else:
             type_list = self._myColumnTypeList
 
@@ -161,11 +159,9 @@ class NTableWidget(QTableWidget):
         assert isinstance(row_index, int), 'Row index {0} must be an integer'.format(row_index)
         assert isinstance(col_index, int), 'Column index {0} must be an integer'.format(col_index)
         if not 0 <= row_index < self.rowCount():
-            raise RuntimeError('Row index {0} is out of range [0, {1})'
-                               ''.format(row_index, self.rowCount()))
+            raise RuntimeError('Row index {0} is out of range [0, {1})' ''.format(row_index, self.rowCount()))
         if not 0 <= col_index < self.columnCount():
-            raise RuntimeError('Column index {0} is out of range [0, {1})'
-                               ''.format(col_index, self.columnCount()))
+            raise RuntimeError('Column index {0} is out of range [0, {1})' ''.format(col_index, self.columnCount()))
 
         # get cell type
         cell_data_type = self._myColumnTypeList[col_index]
@@ -329,7 +325,7 @@ class NTableWidget(QTableWidget):
         :return:
         """
         num_rows = self.rowCount()
-        for i_row in range(1, num_rows+1):
+        for i_row in range(1, num_rows + 1):
             self.removeRow(num_rows - i_row)
 
         return
@@ -419,8 +415,7 @@ class NTableWidget(QTableWidget):
 
         return
 
-    def select_rows_by_column_value(self, column_index, target_value, value_tolerance,
-                                    keep_current_selection):
+    def select_rows_by_column_value(self, column_index, target_value, value_tolerance, keep_current_selection):
         """
         select row
         :param column_index:
@@ -447,7 +442,8 @@ class NTableWidget(QTableWidget):
             if isinstance(target_value, str) and value_i == target_value:
                 # in case of string
                 self.update_cell_value(i_row, self._colIndexSelect, True)
-            elif (isinstance(target_value, float) or isinstance(target_value, int)) and abs(value_i - target_value) < value_tolerance:
+            elif (isinstance(target_value, float)
+                  or isinstance(target_value, int)) and abs(value_i - target_value) < value_tolerance:
                 # in case of integer or float, then test with consideration of tolerance
                 self.update_cell_value(i_row, self._colIndexSelect, True)
         # END-FOR

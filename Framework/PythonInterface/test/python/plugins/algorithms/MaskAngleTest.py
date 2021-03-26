@@ -12,36 +12,35 @@ from numpy import *
 
 
 class MaskAngleTest(unittest.TestCase):
-
     def testMaskAngle(self):
-        w=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
-        AnalysisDataService.add('w',w)
-        masklist = MaskAngle(w,MinAngle=10,MaxAngle=20)
+        w = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30, 5, False, False)
+        AnalysisDataService.add('w', w)
+        masklist = MaskAngle(w, MinAngle=10, MaxAngle=20)
         detInfo = w.detectorInfo()
         for i in arange(w.getNumberHistograms()):
-            if (i<9) or (i>18):
+            if (i < 9) or (i > 18):
                 self.assertFalse(detInfo.isMasked(int(i)))
             else:
                 self.assertTrue(detInfo.isMasked(int(i)))
         DeleteWorkspace(w)
-        self.assertTrue(array_equal(masklist,arange(10)+10))
+        self.assertTrue(array_equal(masklist, arange(10) + 10))
 
     def testMaskAnglePhi(self):
-        w=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
-        AnalysisDataService.add('w',w)
-        MaskAngle(w,0,45,Angle='Phi')
+        w = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30, 5, False, False)
+        AnalysisDataService.add('w', w)
+        MaskAngle(w, 0, 45, Angle='Phi')
         detInfo = w.detectorInfo()
         for i in arange(w.getNumberHistograms()):
-            if i==0:
+            if i == 0:
                 self.assertTrue(detInfo.isMasked(int(i)))
             else:
                 self.assertFalse(detInfo.isMasked(int(i)))
         DeleteWorkspace(w)
 
     def testMaskAngleInPlane(self):
-        w_inplane = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
-        AnalysisDataService.add('w_inplane',w_inplane)
-        MaskAngle(w_inplane,-5,5,Angle='InPlane')
+        w_inplane = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30, 5, False, False)
+        AnalysisDataService.add('w_inplane', w_inplane)
+        MaskAngle(w_inplane, -5, 5, Angle='InPlane')
         detInfo = w_inplane.detectorInfo()
         print('num spectra = {}'.format(w_inplane.getNumberHistograms()))
         for i in arange(w_inplane.getNumberHistograms()):
@@ -50,10 +49,10 @@ class MaskAngleTest(unittest.TestCase):
         DeleteWorkspace(w_inplane)
 
     def testGroupMaskAngle(self):
-        ws1=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
-        AnalysisDataService.add('ws1GMA',ws1)
-        ws2=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
-        AnalysisDataService.add('ws2GMA',ws2)
+        ws1 = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30, 5, False, False)
+        AnalysisDataService.add('ws1GMA', ws1)
+        ws2 = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30, 5, False, False)
+        AnalysisDataService.add('ws2GMA', ws2)
 
         group = GroupWorkspaces(['ws1GMA', 'ws2GMA'])
         MaskAngle(group, 10, 20)
@@ -61,7 +60,7 @@ class MaskAngleTest(unittest.TestCase):
         for w in group:
             detInfo = w.detectorInfo()
             for i in arange(w.getNumberHistograms()):
-                if(i<9) or (i>18):
+                if (i < 9) or (i > 18):
                     self.assertFalse(detInfo.isMasked(int(i)))
                 else:
                     self.assertTrue(detInfo.isMasked(int(i)))
@@ -69,9 +68,9 @@ class MaskAngleTest(unittest.TestCase):
         DeleteWorkspace(group)
 
     def testFailNoInstrument(self):
-        w1=CreateWorkspace(arange(5),arange(5))
+        w1 = CreateWorkspace(arange(5), arange(5))
         try:
-            MaskAngle(w1,10,20)
+            MaskAngle(w1, 10, 20)
             self.fail("Should not have got here. Should throw because no instrument.")
         except (RuntimeError, ValueError):
             pass
@@ -79,10 +78,10 @@ class MaskAngleTest(unittest.TestCase):
             DeleteWorkspace(w1)
 
     def testGroupFailNoInstrument(self):
-        ws1=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
-        AnalysisDataService.add('ws1GFNI',ws1)
+        ws1 = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30, 5, False, False)
+        AnalysisDataService.add('ws1GFNI', ws1)
         ws2 = CreateWorkspace(arange(5), arange(5))
-        AnalysisDataService.add('ws2GFNI',ws2)
+        AnalysisDataService.add('ws2GFNI', ws2)
 
         group = GroupWorkspaces(['ws1GFNI', 'ws2GFNI'])
 
@@ -95,31 +94,32 @@ class MaskAngleTest(unittest.TestCase):
             DeleteWorkspace(group)
 
     def testFailLimits(self):
-        w2=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
-        AnalysisDataService.add('w2',w2)
-        w3=CloneWorkspace('w2')
-        w4=CloneWorkspace('w2')
+        w2 = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30, 5, False, False)
+        AnalysisDataService.add('w2', w2)
+        w3 = CloneWorkspace('w2')
+        w4 = CloneWorkspace('w2')
         try:
-            MaskAngle(w2,-100,20)
+            MaskAngle(w2, -100, 20)
             self.fail("Should not have got here. Wrong angle.")
         except RuntimeError:
             pass
         finally:
             DeleteWorkspace('w2')
         try:
-            MaskAngle(w3,10,200)
+            MaskAngle(w3, 10, 200)
             self.fail("Should not have got here. Wrong angle.")
         except ValueError:
             pass
         finally:
             DeleteWorkspace('w3')
         try:
-            MaskAngle(w4,100,20)
+            MaskAngle(w4, 100, 20)
             self.fail("Should not have got here. Wrong angle.")
         except RuntimeError:
             pass
         finally:
             DeleteWorkspace('w4')
+
 
 if __name__ == '__main__':
     unittest.main()

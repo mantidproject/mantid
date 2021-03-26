@@ -9,7 +9,6 @@ from mantid.kernel import UnitFactory, UnitFactoryImpl, Unit
 
 
 class UnitFactoryTest(unittest.TestCase):
-
     def test_alias_is_of_type_UnitFactoryImpl(self):
         self.assertTrue(isinstance(UnitFactory, UnitFactoryImpl))
 
@@ -18,8 +17,7 @@ class UnitFactoryTest(unittest.TestCase):
         self.assertTrue(isinstance(energy, Unit))
 
     def test_unknown_unit_raises_error(self):
-        self.assertRaises(RuntimeError, UnitFactory.create,
-                          "NotAUnit")
+        self.assertRaises(RuntimeError, UnitFactory.create, "NotAUnit")
 
     def test_keys_returns_a_non_empty_python_list_of_unit_keys(self):
         known_units = UnitFactory.getKeys()
@@ -27,14 +25,15 @@ class UnitFactoryTest(unittest.TestCase):
         self.assertEqual(type(known_units), list)
         # Check length is at least the known core units
         # but allow for others to be added
-        core_units = ['Empty', 'Label', 'TOF', 'Wavelength','Energy',
-                      'Energy_inWavenumber', 'dSpacing', 'MomentumTransfer',
-                      'QSquared', 'DeltaE', 'DeltaE_inWavenumber',
-                      'DeltaE_inFrequency', 'Momentum', 'dSpacingPerpendicular']
+        core_units = [
+            'Empty', 'Label', 'TOF', 'Wavelength', 'Energy', 'Energy_inWavenumber', 'dSpacing', 'MomentumTransfer',
+            'QSquared', 'DeltaE', 'DeltaE_inWavenumber', 'DeltaE_inFrequency', 'Momentum', 'dSpacingPerpendicular'
+        ]
         self.assertLessEqual(len(core_units), len(known_units))
 
         for unit in core_units:
             self.assertTrue(unit in known_units, "%s unit not found in UnitFactory keys" % unit)
+
 
 if __name__ == '__main__':
     unittest.main()

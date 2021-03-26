@@ -15,10 +15,10 @@ import os
 
 
 def do_cleanup():
-    Files = ["BioSANS_test_data_reduction.log",
-             "BioSANS_test_data_Iq.xml",
-             "BioSANS_test_data_Iq.txt",
-             "BioSANS_test_data_Iqxy.dat"]
+    Files = [
+        "BioSANS_test_data_reduction.log", "BioSANS_test_data_Iq.xml", "BioSANS_test_data_Iq.txt",
+        "BioSANS_test_data_Iqxy.dat"
+    ]
     for filename in Files:
         absfile = FileFinder.getFullPath(filename)
         if os.path.exists(absfile):
@@ -27,7 +27,6 @@ def do_cleanup():
 
 
 class HFIREffAPIv2(systemtesting.MantidSystemTest):
-
     def cleanup(self):
         do_cleanup()
         return True
@@ -37,7 +36,7 @@ class HFIREffAPIv2(systemtesting.MantidSystemTest):
             System test for sensitivity correction
         """
         configI = ConfigService.Instance()
-        configI["facilityName"]='HFIR'
+        configI["facilityName"] = 'HFIR'
         GPSANS()
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
@@ -57,7 +56,6 @@ class HFIREffAPIv2(systemtesting.MantidSystemTest):
 
 
 class HFIRSensitivityDirectBeamCenter(systemtesting.MantidSystemTest):
-
     def cleanup(self):
         do_cleanup()
         return True
@@ -67,14 +65,13 @@ class HFIRSensitivityDirectBeamCenter(systemtesting.MantidSystemTest):
             System test for sensitivity correction
         """
         configI = ConfigService.Instance()
-        configI["facilityName"]='HFIR'
+        configI["facilityName"] = 'HFIR'
         GPSANS()
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         SetTransmission(0.51944, 0.011078)
-        SensitivityCorrection("BioSANS_flood_data.xml",
-                              dark_current="BioSANS_dark_current.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml", dark_current="BioSANS_dark_current.xml")
         SensitivityDirectBeamCenter("BioSANS_empty_trans.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce1D()
@@ -89,7 +86,6 @@ class HFIRSensitivityDirectBeamCenter(systemtesting.MantidSystemTest):
 
 
 class HFIRSensitivityScatteringBeamCenter(systemtesting.MantidSystemTest):
-
     def cleanup(self):
         do_cleanup()
         return True
@@ -99,14 +95,13 @@ class HFIRSensitivityScatteringBeamCenter(systemtesting.MantidSystemTest):
             System test for sensitivity correction
         """
         configI = ConfigService.Instance()
-        configI["facilityName"]='HFIR'
+        configI["facilityName"] = 'HFIR'
         GPSANS()
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         SetTransmission(0.51944, 0.011078)
-        SensitivityCorrection("BioSANS_flood_data.xml",
-                              dark_current="BioSANS_dark_current.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml", dark_current="BioSANS_dark_current.xml")
         SensitivityScatteringBeamCenter("BioSANS_test_data.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce1D()

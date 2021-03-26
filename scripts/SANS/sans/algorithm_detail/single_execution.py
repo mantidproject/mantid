@@ -8,15 +8,14 @@ import os
 import sys
 
 from mantid.kernel import mpisetup
-from sans.algorithm_detail.bundles import (EventSliceSettingBundle, OutputBundle,
-                                           OutputPartsBundle, OutputTransmissionBundle)
+from sans.algorithm_detail.bundles import (EventSliceSettingBundle, OutputBundle, OutputPartsBundle,
+                                           OutputTransmissionBundle)
 from sans.algorithm_detail.merge_reductions import (MergeFactory, is_sample, is_can)
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DetectorType, ReductionMode, OutputParts, TransmissionType)
 from sans.common.general_functions import (create_child_algorithm, get_reduced_can_workspace_from_ads,
-                                           get_transmission_workspaces_from_ads,
-                                           write_hash_into_reduced_can_workspace)
+                                           get_transmission_workspaces_from_ads, write_hash_into_reduced_can_workspace)
 from sans.state.Serializer import Serializer
 
 
@@ -111,13 +110,12 @@ def run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle):
                                             output_workspace_count=output_workspace_count,
                                             output_workspace_norm=output_workspace_norm)
 
-    output_transmission_bundle = OutputTransmissionBundle(state=reduction_setting_bundle.state,
-                                                          data_type=reduction_setting_bundle.data_type,
-                                                          calculated_transmission_workspace=
-                                                          output_calculated_transmission_workspace,
-                                                          unfitted_transmission_workspace=
-                                                          output_unfitted_transmission_workspace,
-                                                          )
+    output_transmission_bundle = OutputTransmissionBundle(
+        state=reduction_setting_bundle.state,
+        data_type=reduction_setting_bundle.data_type,
+        calculated_transmission_workspace=output_calculated_transmission_workspace,
+        unfitted_transmission_workspace=output_unfitted_transmission_workspace,
+    )
     return output_bundle, output_parts_bundle, output_transmission_bundle
 
 
@@ -171,11 +169,11 @@ def run_core_reduction(reduction_alg, reduction_setting_bundle):
                                             output_workspace_count=output_workspace_count,
                                             output_workspace_norm=output_workspace_norm)
 
-    output_transmission_bundle = OutputTransmissionBundle(state=reduction_setting_bundle.state,
-                                                          data_type=reduction_setting_bundle.data_type,
-                                                          calculated_transmission_workspace=output_calculated_transmission_workspace,
-                                                          unfitted_transmission_workspace=output_unfitted_transmission_workspace
-                                                          )
+    output_transmission_bundle = OutputTransmissionBundle(
+        state=reduction_setting_bundle.state,
+        data_type=reduction_setting_bundle.data_type,
+        calculated_transmission_workspace=output_calculated_transmission_workspace,
+        unfitted_transmission_workspace=output_unfitted_transmission_workspace)
     return output_bundle, output_parts_bundle, output_transmission_bundle
 
 
@@ -197,10 +195,10 @@ def get_final_output_workspaces(output_bundles, parent_alg):
     final_output_workspaces = {}
     for reduction_mode, output_bundles in reduction_mode_vs_output_bundles.items():
         # Find the sample and the can in the data collection
-        output_sample_workspace = next((output_bundle.output_workspace for output_bundle in output_bundles
-                                        if is_sample(output_bundle)), None)
-        output_can_workspace = next((output_bundle.output_workspace for output_bundle in output_bundles
-                                     if is_can(output_bundle)), None)
+        output_sample_workspace = next(
+            (output_bundle.output_workspace for output_bundle in output_bundles if is_sample(output_bundle)), None)
+        output_can_workspace = next(
+            (output_bundle.output_workspace for output_bundle in output_bundles if is_can(output_bundle)), None)
         # Perform the can subtraction
         if output_can_workspace is not None:
             final_output_workspace = perform_can_subtraction(output_sample_workspace, output_can_workspace, parent_alg)
@@ -228,9 +226,7 @@ def perform_can_subtraction(sample, can, parent_alg):
     :return: the subtracted workspace.
     """
     subtraction_name = "Minus"
-    subtraction_options = {"LHSWorkspace": sample,
-                           "RHSWorkspace": can,
-                           "OutputWorkspace": EMPTY_NAME}
+    subtraction_options = {"LHSWorkspace": sample, "RHSWorkspace": can, "OutputWorkspace": EMPTY_NAME}
     subtraction_alg = create_child_algorithm(parent_alg, subtraction_name, **subtraction_options)
     subtraction_alg.execute()
     output_workspace = subtraction_alg.getProperty("OutputWorkspace").value
@@ -324,7 +320,8 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
 
     :param reduction_alg: a handle to the SANSReductionCore algorithm
     :param reduction_setting_bundle: a ReductionSettingBundle tuple.
-    :param event_slice_optimisation: An optional bool. If true then run run_core_event_slice_reduction, else run_core_reduction.
+    :param event_slice_optimisation: An optional bool. If true then run run_core_event_slice_reduction, else
+    run_core_reduction.
     :return: a reduced workspace, a partial output workspace for the counts, a partial workspace for the normalization.
     """
     state = reduction_setting_bundle.state
@@ -336,15 +333,20 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
     output_calculated_transmission_workspace, output_unfitted_transmission_workspace = \
         get_transmission_workspaces_from_ads(state, reduction_mode)
     # Set the results on the output bundle
-    output_bundle = OutputBundle(state=state, data_type=data_type, reduction_mode=reduction_mode,
+    output_bundle = OutputBundle(state=state,
+                                 data_type=data_type,
+                                 reduction_mode=reduction_mode,
                                  output_workspace=reduced_can_workspace)
-    output_parts_bundle = OutputPartsBundle(state=state, data_type=data_type, reduction_mode=reduction_mode,
+    output_parts_bundle = OutputPartsBundle(state=state,
+                                            data_type=data_type,
+                                            reduction_mode=reduction_mode,
                                             output_workspace_count=reduced_can_workspace_count,
                                             output_workspace_norm=reduced_can_workspace_norm)
-    output_transmission_bundle = OutputTransmissionBundle(state=reduction_setting_bundle.state, data_type=data_type,
-                                                          calculated_transmission_workspace=output_calculated_transmission_workspace,
-                                                          unfitted_transmission_workspace=output_unfitted_transmission_workspace
-                                                          )
+    output_transmission_bundle = OutputTransmissionBundle(
+        state=reduction_setting_bundle.state,
+        data_type=data_type,
+        calculated_transmission_workspace=output_calculated_transmission_workspace,
+        unfitted_transmission_workspace=output_unfitted_transmission_workspace)
     # The logic table for the recalculation of the partial outputs is:
     # | output_parts | reduced_can_workspace_count is None |  reduced_can_workspace_norm is None | Recalculate |
     # ----------------------------------------------------------------------------------------------------------
@@ -357,15 +359,16 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
     # |  True        |        False                        |           True                      |    True     |
     # |  True        |        False                        |           False                     |    False    |
 
-    is_invalid_partial_workspaces = ((output_parts_bundle.output_workspace_count is None
-                                      and output_parts_bundle.output_workspace_norm is not None)
-                                     or (output_parts_bundle.output_workspace_count is not None
-                                         and output_parts_bundle.output_workspace_norm is None))
+    is_invalid_partial_workspaces = (
+        (output_parts_bundle.output_workspace_count is None and output_parts_bundle.output_workspace_norm is not None)
+        or
+        (output_parts_bundle.output_workspace_count is not None and output_parts_bundle.output_workspace_norm is None))
     is_invalid_transmission_workspaces = (output_transmission_bundle.calculated_transmission_workspace is None
                                           or output_transmission_bundle.unfitted_transmission_workspace is None)
     partial_output_require_reload = output_parts and is_invalid_partial_workspaces
 
-    must_reload = output_bundle.output_workspace is None or partial_output_require_reload or is_invalid_transmission_workspaces
+    must_reload = output_bundle.output_workspace is None or partial_output_require_reload or \
+                  is_invalid_transmission_workspaces
     if 'boost.mpi' in sys.modules:
         # In MPI runs the result is only present on rank 0 (result of Q1D2 integration),
         # so the reload flag must be broadcasted from rank 0.
@@ -388,10 +391,11 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
                                                   reduction_mode=reduction_mode)
         if output_transmission_bundle.calculated_transmission_workspace is not None and \
                 output_transmission_bundle.unfitted_transmission_workspace is not None:
-            write_hash_into_reduced_can_workspace(state=output_transmission_bundle.state,
-                                                  workspace=output_transmission_bundle.calculated_transmission_workspace,
-                                                  partial_type=TransmissionType.CALCULATED,
-                                                  reduction_mode=reduction_mode)
+            write_hash_into_reduced_can_workspace(
+                state=output_transmission_bundle.state,
+                workspace=output_transmission_bundle.calculated_transmission_workspace,
+                partial_type=TransmissionType.CALCULATED,
+                reduction_mode=reduction_mode)
             write_hash_into_reduced_can_workspace(state=output_transmission_bundle.state,
                                                   workspace=output_transmission_bundle.unfitted_transmission_workspace,
                                                   partial_type=TransmissionType.UNFITTED,

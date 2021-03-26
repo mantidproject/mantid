@@ -17,8 +17,8 @@ from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from qtpy.QtCore import Qt, QTimer, Signal
-from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter,
-                            QStatusBar, QVBoxLayout, QWidget)
+from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter, QStatusBar, QVBoxLayout,
+                            QWidget)
 
 # local imports
 from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
@@ -49,7 +49,6 @@ class SliceViewerCanvas(ScrollZoomMixin, MantidFigureCanvas):
 
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
-
     def __init__(self, presenter, dims_info, can_normalise, parent=None, conf=None):
         super().__init__(parent)
 
@@ -77,9 +76,8 @@ class SliceViewerDataView(QWidget):
 
         self.image_info_widget = ImageInfoWidget(self)
         self.track_cursor = QCheckBox("Track Cursor", self)
-        self.track_cursor.setToolTip(
-            "Update the image readout table when the cursor is over the plot. "
-            "If unticked the table will update only when the plot is clicked")
+        self.track_cursor.setToolTip("Update the image readout table when the cursor is over the plot. "
+                                     "If unticked the table will update only when the plot is clicked")
         md_type = dims_info[0]['type'].startswith('MD')
         if md_type:
             self.colorbar_layout.addWidget(self.image_info_widget, alignment=Qt.AlignCenter)
@@ -182,8 +180,7 @@ class SliceViewerDataView(QWidget):
                                      1,
                                      1,
                                      1,
-                                     grid_helper=GridHelperCurveLinear(
-                                         (transform.tr, transform.inv_tr)))
+                                     grid_helper=GridHelperCurveLinear((transform.tr, transform.inv_tr)))
         # don't redraw on zoom as the data is rebinned and has to be redrawn again anyway
         self.enable_zoom_on_mouse_scroll(redraw=False)
         self.set_grid_on()

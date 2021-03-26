@@ -36,8 +36,13 @@ def group_workspaces(input_workspaces, group_name):
 
 
 def create_workspace(x_data, y_data, e_data, number_of_histograms, y_label, output_name):
-    CreateWorkspace(DataX=x_data, DataY=y_data, DataE=e_data, NSpec=number_of_histograms, YUnitLabel=y_label,
-                    OutputWorkspace=output_name, EnableLogging=False)
+    CreateWorkspace(DataX=x_data,
+                    DataY=y_data,
+                    DataE=e_data,
+                    NSpec=number_of_histograms,
+                    YUnitLabel=y_label,
+                    OutputWorkspace=output_name,
+                    EnableLogging=False)
 
 
 class IndirectQuickRun(DataProcessorAlgorithm):
@@ -70,51 +75,49 @@ class IndirectQuickRun(DataProcessorAlgorithm):
 
     def PyInit(self):
         # Input properties
-        self.declareProperty(StringArrayProperty(name='InputFiles'),
-                             doc='A comma separated list of run numbers.')
+        self.declareProperty(StringArrayProperty(name='InputFiles'), doc='A comma separated list of run numbers.')
 
         # Instrument configuration properties
-        self.declareProperty(name='Instrument', defaultValue='',
+        self.declareProperty(name='Instrument',
+                             defaultValue='',
                              validator=StringListValidator(['IRIS', 'OSIRIS']),
                              doc='Instrument used during run.')
-        self.declareProperty(name='Analyser', defaultValue='',
+        self.declareProperty(name='Analyser',
+                             defaultValue='',
                              validator=StringListValidator(['graphite', 'mica', 'fmica']),
                              doc='Analyser bank used during run.')
-        self.declareProperty(name='Reflection', defaultValue='',
+        self.declareProperty(name='Reflection',
+                             defaultValue='',
                              validator=StringListValidator(['002', '004', '006']),
                              doc='Reflection number for instrument setup during run.')
 
-        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],
+        self.declareProperty(IntArrayProperty(name='SpectraRange',
+                                              values=[0, 1],
                                               validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of spectra number to use.')
-        self.declareProperty(FloatArrayProperty(name='ElasticRange',
-                                                validator=FloatArrayLengthValidator(2)),
+        self.declareProperty(FloatArrayProperty(name='ElasticRange', validator=FloatArrayLengthValidator(2)),
                              doc='Energy range for the elastic component.')
-        self.declareProperty(FloatArrayProperty(name='InelasticRange',
-                                                validator=FloatArrayLengthValidator(2)),
+        self.declareProperty(FloatArrayProperty(name='InelasticRange', validator=FloatArrayLengthValidator(2)),
                              doc='Energy range for the inelastic component.')
-        self.declareProperty(FloatArrayProperty(name='TotalRange',
-                                                validator=FloatArrayLengthValidator(2)),
+        self.declareProperty(FloatArrayProperty(name='TotalRange', validator=FloatArrayLengthValidator(2)),
                              doc='Energy range for the total energy component.')
 
-        self.declareProperty(name='SampleEnvironmentLogName', defaultValue='sample',
+        self.declareProperty(name='SampleEnvironmentLogName',
+                             defaultValue='sample',
                              doc='Name of the sample environment log entry')
 
         sample_environment_log_values = ['last_value', 'average']
-        self.declareProperty('SampleEnvironmentLogValue', 'last_value',
+        self.declareProperty('SampleEnvironmentLogValue',
+                             'last_value',
                              StringListValidator(sample_environment_log_values),
                              doc='Value selection of the sample environment log entry')
 
-        self.declareProperty(name='MSDFit', defaultValue=False,
-                             doc='Perform an MSDFit.')
+        self.declareProperty(name='MSDFit', defaultValue=False, doc='Perform an MSDFit.')
 
-        self.declareProperty(name='WidthFit', defaultValue=False,
-                             doc='Perform a 2 peak width Fit.')
+        self.declareProperty(name='WidthFit', defaultValue=False, doc='Perform a 2 peak width Fit.')
 
-        self.declareProperty(name='Plot', defaultValue=False,
-                             doc='Switch Plot Off/On')
-        self.declareProperty(name='Save', defaultValue=False,
-                             doc='Switch Save result to nxs file Off/On')
+        self.declareProperty(name='Plot', defaultValue=False, doc='Switch Plot Off/On')
+        self.declareProperty(name='Save', defaultValue=False, doc='Switch Save result to nxs file Off/On')
 
     def validateInputs(self):
         """
@@ -177,7 +180,7 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         self._data_files = []
         self._format_runs(runs)
         first_file = self._data_files[0]
-        last_file = self._data_files[len(self._data_files)-1]
+        last_file = self._data_files[len(self._data_files) - 1]
 
         self._analyser = self.getPropertyValue('Analyser')
         self._reflection = self.getPropertyValue('Reflection')
@@ -201,8 +204,9 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         self._save = self.getProperty('Save').value
 
         # Get the IPF filename
-        self._ipf_filename = os.path.join(config['instrumentDefinition.directory'],
-                                          self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml')
+        self._ipf_filename = os.path.join(
+            config['instrumentDefinition.directory'],
+            self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml')
         logger.information('Instrument parameter file: %s' % self._ipf_filename)
 
     def PyExec(self):
@@ -246,10 +250,13 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         """
         Group the output workspaces from the ElasticWindowScan algorithm.
         """
-        suffixes = ['_el_elf', '_inel_elf', '_total_elf', '_el_elt', '_inel_elt', '_total_elt', '_el_eq1', '_inel_eq1',
-                    '_total_eq1', '_el_eq2', '_inel_eq2', '_total_eq2']
-        energy_window_scan_workspaces = [self._scan_ws + suffix for suffix in suffixes
-                                         if exists_in_ads(self._scan_ws + suffix)]
+        suffixes = [
+            '_el_elf', '_inel_elf', '_total_elf', '_el_elt', '_inel_elt', '_total_elt', '_el_eq1', '_inel_eq1',
+            '_total_eq1', '_el_eq2', '_inel_eq2', '_total_eq2'
+        ]
+        energy_window_scan_workspaces = [
+            self._scan_ws + suffix for suffix in suffixes if exists_in_ads(self._scan_ws + suffix)
+        ]
 
         group_workspaces(energy_window_scan_workspaces, self._scan_ws + '_q')
 
@@ -267,22 +274,25 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         x = mtd[input_workspace_names[0]].readX(0)
 
         # Perform the two peak fits on the input workspaces
-        result_workspaces, chi_workspaces, run_numbers = self._perform_two_peak_fits(input_workspace_names, x[0],
-                                                                                     x[len(x) - 1])
+        result_workspaces, chi_workspaces, run_numbers = self._perform_two_peak_fits(
+            input_workspace_names, x[0], x[len(x) - 1])
 
         # Find the units of the x axis
         x_axis_is_temperature = len(input_workspace_names) == len(self._temperatures)
 
         # Create the width workspace
         width_name = self._output_ws + '_Width1'
-        self._create_width_workspace(result_workspaces, self._temperatures, run_numbers, width_name, x_axis_is_temperature)
+        self._create_width_workspace(result_workspaces, self._temperatures, run_numbers, width_name,
+                                     x_axis_is_temperature)
 
         # Create the diffusion workspace
         diffusion_name = self._output_ws + '_Diffusion'
-        self._create_diffusion_workspace(mtd[width_name], self._temperatures, run_numbers, diffusion_name, x_axis_is_temperature)
+        self._create_diffusion_workspace(mtd[width_name], self._temperatures, run_numbers, diffusion_name,
+                                         x_axis_is_temperature)
 
         # Group the width fit workspaces
-        group_workspaces(result_workspaces + chi_workspaces + [width_name] + [diffusion_name], self._output_ws + '_Width_Fit')
+        group_workspaces(result_workspaces + chi_workspaces + [width_name] + [diffusion_name],
+                         self._output_ws + '_Width_Fit')
 
     def _perform_two_peak_fits(self, workspace_names, x_min, x_max):
         result_workspaces = []
@@ -291,7 +301,7 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         for workspace_name in workspace_names:
             number_of_histograms = mtd[workspace_name].getNumberHistograms()
 
-            progress_tracker = Progress(self, 0.3, 1.0, number_of_histograms+1)
+            progress_tracker = Progress(self, 0.3, 1.0, number_of_histograms + 1)
             progress_tracker.report('Finding temperature for {0}...'.format(workspace_name))
 
             if self._temperatures is None:
@@ -302,10 +312,7 @@ class IndirectQuickRun(DataProcessorAlgorithm):
 
             for index in range(number_of_histograms):
                 progress_tracker.report('Fitting {0}-sp{1}...'.format(workspace_name, index))
-                IndirectTwoPeakFit(SampleWorkspace=workspace_name,
-                                   EnergyMin=x_min,
-                                   EnergyMax=x_max,
-                                   OutputName=result)
+                IndirectTwoPeakFit(SampleWorkspace=workspace_name, EnergyMin=x_min, EnergyMax=x_max, OutputName=result)
 
             result_workspaces.append(result + '_Result')
             chi_workspaces.append(result + '_ChiSq')
@@ -331,7 +338,8 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         width_workspace.replaceAxis(1, axis)
         width_workspace.setYUnitLabel("Temperature")
 
-    def _create_diffusion_workspace(self, width_workspace, temperatures, run_numbers, output_name, x_axis_is_temperature):
+    def _create_diffusion_workspace(self, width_workspace, temperatures, run_numbers, output_name,
+                                    x_axis_is_temperature):
         x_data = []
         y_data = []
         e_data = []
@@ -340,7 +348,8 @@ class IndirectQuickRun(DataProcessorAlgorithm):
             y = width_workspace.readY(index)
             e = width_workspace.readE(index)
             # The slice here is to make the plot versus number less cluttered/messy when using 5 or more digits.
-            x_data.append(float(temperatures[index])) if x_axis_is_temperature else x_data.append(float(run_numbers[index][-3:]))
+            x_data.append(float(temperatures[index])) if x_axis_is_temperature else x_data.append(
+                float(run_numbers[index][-3:]))
             # The 5th spectrum is taken here as only a single data point is needed for the fit and the first is often
             # unreliable.
             y_data.append(y[5] / x[5])
@@ -388,9 +397,11 @@ class IndirectQuickRun(DataProcessorAlgorithm):
             save_workspace(self._scan_ws + '_red_Width1', save_directory + self._scan_ws + '_red_Width1.nxs')
 
     def _plot_output(self):
-        workspace_names = [self._scan_ws + '_el_eq1', self._scan_ws + '_inel_eq1', self._scan_ws + '_total_eq1',
-                           self._scan_ws + '_el_eq2', self._scan_ws + '_inel_eq2', self._scan_ws + '_total_eq2',
-                           self._scan_ws + '_eisf']
+        workspace_names = [
+            self._scan_ws + '_el_eq1', self._scan_ws + '_inel_eq1', self._scan_ws + '_total_eq1',
+            self._scan_ws + '_el_eq2', self._scan_ws + '_inel_eq2', self._scan_ws + '_total_eq2',
+            self._scan_ws + '_eisf'
+        ]
         try:
             from mantidplot import plotSpectrum
             for workspace_name in workspace_names:
@@ -402,7 +413,7 @@ class IndirectQuickRun(DataProcessorAlgorithm):
                 plotSpectrum(self._output_ws + '_Diffusion', 0, error_bars=True)
         except ImportError:
             from mantidqt.plotting.functions import plot
-            plot(workspace_names, wksp_indices=[0]*len(workspace_names), errors=True)
+            plot(workspace_names, wksp_indices=[0] * len(workspace_names), errors=True)
             if self._msd_fit:
                 plot([self._scan_ws + '_msd'], wksp_indices=[1], errors=True)
             if self._width_fit:
@@ -413,7 +424,7 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         for run in runs:
             if '-' in run:
                 a, b = run.split('-')
-                run_list.extend(range(int(a), int(b)+1))
+                run_list.extend(range(int(a), int(b) + 1))
             else:
                 run_list.append(int(run))
         for idx in run_list:

@@ -5,37 +5,37 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import SetBeam, SetSample, MonteCarloAbsorption, GroupWorkspaces
-from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
-                        PropertyMode, Progress, WorkspaceGroupProperty, mtd)
-from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
-                           Direction, logger, FloatBoundedValidator, FloatMandatoryValidator)
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress,
+                        WorkspaceGroupProperty, mtd)
+from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator, Direction, logger,
+                           FloatBoundedValidator, FloatMandatoryValidator)
 
 
 class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
     # Sample variables
-    _sample_ws_name=None
-    _sample_chemical_formula=None
-    _sample_density_type=None
-    _sample_density=None
-    _sample_height=None
-    _sample_width=None
-    _sample_thickness=None
-    _sample_angle=None
+    _sample_ws_name = None
+    _sample_chemical_formula = None
+    _sample_density_type = None
+    _sample_density = None
+    _sample_height = None
+    _sample_width = None
+    _sample_thickness = None
+    _sample_angle = None
 
     # Container variables
-    _can_ws_name=None
-    _use_can_corrections=None
-    _can_chemical_formula=None
-    _can_density_type=None
-    _can_density=None
-    _can_front_thickness=None
-    _can_back_thickness=None
-    _can_scale=None
+    _can_ws_name = None
+    _use_can_corrections = None
+    _can_chemical_formula = None
+    _can_density_type = None
+    _can_density = None
+    _can_front_thickness = None
+    _can_back_thickness = None
+    _can_scale = None
 
-    _output_ws=None
-    _abs_ws=None
-    _ass_ws=None
-    _acc_ws=None
+    _output_ws = None
+    _abs_ws = None
+    _ass_ws = None
+    _acc_ws = None
 
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
@@ -50,66 +50,82 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         # Sample
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
                              doc='Sample workspace')
-        self.declareProperty(name='SampleChemicalFormula', defaultValue='',
+        self.declareProperty(name='SampleChemicalFormula',
+                             defaultValue='',
                              validator=StringMandatoryValidator(),
                              doc='Chemical formula for the sample')
-        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
+        self.declareProperty(name='SampleDensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass density or Number density')
-        self.declareProperty(name='SampleDensity', defaultValue=0.1,
+        self.declareProperty(name='SampleDensity',
+                             defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
-        self.declareProperty(name='SampleHeight', defaultValue=1.0,
+        self.declareProperty(name='SampleHeight',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample height')
-        self.declareProperty(name='SampleWidth', defaultValue=1.0,
+        self.declareProperty(name='SampleWidth',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample width')
-        self.declareProperty(name='SampleThickness', defaultValue=0.5,
+        self.declareProperty(name='SampleThickness',
+                             defaultValue=0.5,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample thickness')
-        self.declareProperty(name='SampleAngle', defaultValue=0.0,
+        self.declareProperty(name='SampleAngle',
+                             defaultValue=0.0,
                              validator=FloatMandatoryValidator(),
                              doc='Sample angle')
 
         # Container
-        self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '', optional=PropertyMode.Optional,
+        self.declareProperty(MatrixWorkspaceProperty('CanWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
                                                      direction=Direction.Input),
                              doc='Container workspace')
-        self.declareProperty(name='UseCanCorrections', defaultValue=False,
-                             doc='Use can corrections in subtraction')
-        self.declareProperty(name='CanChemicalFormula', defaultValue='',
-                             doc='Chemical formula for the Container')
-        self.declareProperty(name='CanDensityType', defaultValue='Mass Density',
+        self.declareProperty(name='UseCanCorrections', defaultValue=False, doc='Use can corrections in subtraction')
+        self.declareProperty(name='CanChemicalFormula', defaultValue='', doc='Chemical formula for the Container')
+        self.declareProperty(name='CanDensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass density or Number density')
-        self.declareProperty(name='CanDensity', defaultValue=0.1,
+        self.declareProperty(name='CanDensity',
+                             defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
-        self.declareProperty(name='CanFrontThickness', defaultValue=0.1,
+        self.declareProperty(name='CanFrontThickness',
+                             defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Can front thickness')
-        self.declareProperty(name='CanBackThickness', defaultValue=0.1,
+        self.declareProperty(name='CanBackThickness',
+                             defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Can back thickness')
-        self.declareProperty(name='CanScaleFactor', defaultValue=1.0,
+        self.declareProperty(name='CanScaleFactor',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Scale factor to multiply can data')
 
         # Beam size
-        self.declareProperty(name='BeamHeight', defaultValue=1.0,
+        self.declareProperty(name='BeamHeight',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Height of the beam (cm)')
-        self.declareProperty(name='BeamWidth', defaultValue=1.0,
+        self.declareProperty(name='BeamWidth',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Width of the beam (cm)')
 
         # General
-        self.declareProperty(name='NumberWavelengths', defaultValue=10,
+        self.declareProperty(name='NumberWavelengths',
+                             defaultValue=10,
                              validator=IntBoundedValidator(1),
                              doc='Number of wavelengths for calculation')
 
-        self.declareProperty(name='Events', defaultValue=1000,
+        self.declareProperty(name='Events',
+                             defaultValue=1000,
                              validator=IntBoundedValidator(0),
                              doc='Number of neutron events')
 
@@ -117,7 +133,9 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output corrected workspace')
 
-        self.declareProperty(WorkspaceGroupProperty('CorrectionsWorkspace', '', direction=Direction.Output,
+        self.declareProperty(WorkspaceGroupProperty('CorrectionsWorkspace',
+                                                    '',
+                                                    direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
                              doc='The workspace group to save correction factors')
 
@@ -139,24 +157,27 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         convert_unit_alg.execute()
         mtd.addOrReplace(sample_wave_ws, convert_unit_alg.getProperty("OutputWorkspace").value)
 
-        SetBeam(sample_wave_ws,
-                Geometry={'Shape': 'Slit',
-                          'Width': self._beam_width,
-                          'Height': self._beam_height})
+        SetBeam(sample_wave_ws, Geometry={'Shape': 'Slit', 'Width': self._beam_width, 'Height': self._beam_height})
 
         if self._sample_density_type == 'Mass Density':
-            sample_mat_list = {'ChemicalFormula': self._sample_chemical_formula,
-                               'SampleMassDensity': self._sample_density}
+            sample_mat_list = {
+                'ChemicalFormula': self._sample_chemical_formula,
+                'SampleMassDensity': self._sample_density
+            }
         if self._sample_density_type == 'Number Density':
-            sample_mat_list = {'ChemicalFormula': self._sample_chemical_formula,
-                               'SampleNumberDensity': self._sample_density}
+            sample_mat_list = {
+                'ChemicalFormula': self._sample_chemical_formula,
+                'SampleNumberDensity': self._sample_density
+            }
         SetSample(sample_wave_ws,
-                  Geometry={'Shape': 'FlatPlate',
-                            'Width': self._sample_width,
-                            'Height': self._sample_height,
-                            'Thick': self._sample_thickness,
-                            'Center': [0., 0., 0.],
-                            'Angle': self._sample_angle},
+                  Geometry={
+                      'Shape': 'FlatPlate',
+                      'Width': self._sample_width,
+                      'Height': self._sample_height,
+                      'Thick': self._sample_thickness,
+                      'Center': [0., 0., 0.],
+                      'Angle': self._sample_angle
+                  },
                   Material=sample_mat_list)
 
         prog.report('Calculating sample corrections')
@@ -206,25 +227,33 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                 divide_alg.execute()
 
                 if self._sample_density_type == 'Mass Density':
-                    container_mat_list = {'ChemicalFormula': self._can_chemical_formula,
-                                          'SampleMassDensity': self._can_density}
+                    container_mat_list = {
+                        'ChemicalFormula': self._can_chemical_formula,
+                        'SampleMassDensity': self._can_density
+                    }
                 if self._sample_density_type == 'Number Density':
-                    container_mat_list = {'ChemicalFormula': self._can_chemical_formula,
-                                          'SampleNumberDensity': self._can_density}
+                    container_mat_list = {
+                        'ChemicalFormula': self._can_chemical_formula,
+                        'SampleNumberDensity': self._can_density
+                    }
 
                 SetBeam(can1_wave_ws,
-                        Geometry={'Shape': 'Slit',
-                                  'Width': self._beam_width,
-                                  'Height': self._beam_height})
+                        Geometry={
+                            'Shape': 'Slit',
+                            'Width': self._beam_width,
+                            'Height': self._beam_height
+                        })
 
                 offset_front = 0.5 * (self._can_front_thickness + self._sample_thickness)
                 SetSample(can1_wave_ws,
-                          Geometry={'Shape': 'FlatPlate',
-                                    'Width': self._sample_width,
-                                    'Height': self._sample_height,
-                                    'Thick': self._can_front_thickness,
-                                    'Center': [0., 0., -offset_front],
-                                    'Angle': self._sample_angle},
+                          Geometry={
+                              'Shape': 'FlatPlate',
+                              'Width': self._sample_width,
+                              'Height': self._sample_height,
+                              'Thick': self._can_front_thickness,
+                              'Center': [0., 0., -offset_front],
+                              'Angle': self._sample_angle
+                          },
                           Material=container_mat_list)
 
                 MonteCarloAbsorption(InputWorkspace=can1_wave_ws,
@@ -234,18 +263,22 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                                      Interpolation='CSpline')
 
                 SetBeam(can2_wave_ws,
-                        Geometry={'Shape': 'Slit',
-                                  'Width': self._beam_width,
-                                  'Height': self._beam_height})
+                        Geometry={
+                            'Shape': 'Slit',
+                            'Width': self._beam_width,
+                            'Height': self._beam_height
+                        })
 
                 offset_back = 0.5 * (self._can_back_thickness + self._sample_thickness)
                 SetSample(can2_wave_ws,
-                          Geometry={'Shape': 'FlatPlate',
-                                    'Width': self._sample_width,
-                                    'Height': self._sample_height,
-                                    'Thick': self._can_back_thickness,
-                                    'Center': [0., 0., offset_back],
-                                    'Angle': self._sample_angle},
+                          Geometry={
+                              'Shape': 'FlatPlate',
+                              'Width': self._sample_width,
+                              'Height': self._sample_height,
+                              'Thick': self._can_back_thickness,
+                              'Center': [0., 0., offset_back],
+                              'Angle': self._sample_angle
+                          },
                           Material=container_mat_list)
 
                 MonteCarloAbsorption(InputWorkspace=can2_wave_ws,
@@ -308,12 +341,9 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
 
         prog.report('Recording sample logs')
         sample_log_workspaces = [self._output_ws, self._ass_ws]
-        sample_logs = [('sample_shape', 'flatplate'),
-                       ('sample_filename', self._sample_ws_name),
-                       ('sample_height', self._sample_height),
-                       ('sample_width', self._sample_width),
-                       ('sample_thickness', self._sample_thickness),
-                       ('sample_angle', self._sample_angle)]
+        sample_logs = [('sample_shape', 'flatplate'), ('sample_filename', self._sample_ws_name),
+                       ('sample_height', self._sample_height), ('sample_width', self._sample_width),
+                       ('sample_thickness', self._sample_thickness), ('sample_angle', self._sample_angle)]
 
         if self._can_ws_name is not None:
             sample_logs.append(('container_filename', self._can_ws_name))
@@ -343,9 +373,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                 delete_alg.setProperty("Workspace", self._acc_ws)
                 delete_alg.execute()
         else:
-            GroupWorkspaces(InputWorkspaces=group,
-                            OutputWorkspace=self._abs_ws,
-                            EnableLogging=False)
+            GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=self._abs_ws, EnableLogging=False)
             self.setProperty('CorrectionsWorkspace', self._abs_ws)
 
     def _setup(self):

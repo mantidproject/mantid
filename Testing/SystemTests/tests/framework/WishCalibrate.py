@@ -24,7 +24,6 @@ class WishCalibration(systemtesting.MantidSystemTest):
     """
     Runs the WISH calibration script and checks the result produced is sane
     """
-
     def __init__(self):
         super(WishCalibration, self).__init__()
         self.calibration_table = None
@@ -102,8 +101,13 @@ class WishCalibration(systemtesting.MantidSystemTest):
         idealTube.setArray(peak_positions)
 
         # First calibrate all of the detectors
-        calibrationTable, peaks = tube.calibrate(ws, spec, peak_positions, funcForm, margin=15,
-                                                 outputPeak=True, fitPar=fitPar)
+        calibrationTable, peaks = tube.calibrate(ws,
+                                                 spec,
+                                                 peak_positions,
+                                                 funcForm,
+                                                 margin=15,
+                                                 outputPeak=True,
+                                                 fitPar=fitPar)
         self.calibration_table = calibrationTable
 
         def findBadPeakFits(peaksTable, threshold=10):
@@ -175,8 +179,10 @@ class WishCalibration(systemtesting.MantidSystemTest):
                 tube_dets, _ = spec.getTube(index)
                 getPoints(ws, idealTube.getFunctionalForms(), fitPar, tube_dets)
                 tube_ws = mantid.mtd['TubePlot']
-                fit_ws = mantid.FindPeaks(InputWorkspace=tube_ws, WorkspaceIndex=0,
-                                          PeakPositions=fitPar.getPeaks(), PeaksList='RefittedPeaks')
+                fit_ws = mantid.FindPeaks(InputWorkspace=tube_ws,
+                                          WorkspaceIndex=0,
+                                          PeakPositions=fitPar.getPeaks(),
+                                          PeaksList='RefittedPeaks')
                 centers = [row['centre'] for row in fit_ws]
                 detIDList, detPosList = getCalibratedPixelPositions(ws, centers, idealTube.getArray(), tube_dets)
 

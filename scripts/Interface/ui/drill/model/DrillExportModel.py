@@ -18,22 +18,18 @@ import os
 
 
 class DrillExportModel:
-
     """
     Dictionnary containing algorithms and activation state.
     """
     _exportAlgorithms = None
-
     """
     ThreadPool to run export algorithms asynchronously.
     """
     _pool = None
-
     """
     Dictionnary of all the exports (dict(str:set(str))).
     """
     _exports = None
-
     """
     Dictionnary of the successful exports (dict(str:set(str))).
     """
@@ -46,9 +42,7 @@ class DrillExportModel:
         Args:
             acquisitionMode (str): acquisition mode
         """
-        self._exportAlgorithms = {k:v
-                for k,v
-                in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
+        self._exportAlgorithms = {k: v for k, v in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
         self._pool = DrillAlgorithmPool()
         self._pool.signals.taskError.connect(self._onTaskError)
         self._pool.signals.taskSuccess.connect(self._onTaskSuccess)
@@ -173,8 +167,7 @@ class DrillExportModel:
         if wsName not in self._successExports:
             return
         filenames = ", ".join(self._successExports[wsName])
-        logger.notice("Successful export of workspace {} to {}"
-                      .format(wsName, filenames))
+        logger.notice("Successful export of workspace {} to {}".format(wsName, filenames))
         del self._successExports[wsName]
 
     def run(self, sample):
@@ -204,28 +197,24 @@ class DrillExportModel:
             return
 
         tasks = list()
-        for algo,active in self._exportAlgorithms.items():
+        for algo, active in self._exportAlgorithms.items():
             if not active:
                 continue
             if not self._validCriteria(outputWs, algo):
                 logger.notice("Export of sample {} with {} was skipped "
-                              "because workspaces are not compatible."
-                              .format(outputWs, algo))
+                              "because workspaces are not compatible.".format(outputWs, algo))
                 continue
 
             for wsName in mtd.getObjectNames(contain=workspaceName):
                 if isinstance(mtd[wsName], WorkspaceGroup):
                     continue
 
-                filename = os.path.join(
-                        exportPath,
-                        wsName + RundexSettings.EXPORT_ALGO_EXTENSION[algo])
+                filename = os.path.join(exportPath, wsName + RundexSettings.EXPORT_ALGO_EXTENSION[algo])
                 name = wsName + ":" + filename
                 if wsName not in self._exports:
                     self._exports[wsName] = set()
                 self._exports[wsName].add(filename)
-                task = DrillTask(name, algo, InputWorkspace=wsName,
-                                 FileName=filename)
+                task = DrillTask(name, algo, InputWorkspace=wsName, FileName=filename)
                 tasks.append(task)
 
         self._pool.addProcesses(tasks)

@@ -24,15 +24,17 @@ from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.simpleapi import CreateMDHistoWorkspace
 from mantid.kernel import config
 from mantid.plots import MantidAxes
-from mantid.plots.plotfunctions import (figure_title, manage_workspace_names,
-                                        plot, plot_md_histo_ws)
+from mantid.plots.plotfunctions import (figure_title, manage_workspace_names, plot, plot_md_histo_ws)
 
-
-PLOT_OPTIONS = {"plots.ShowMinorTicks": "off", "plots.ShowMinorGridlines": "off",
-                "plots.ShowLegend": "off", "plots.line.Width": 5,
-                "plots.marker.Style": "None",
-                "plots.marker.Size": 5,
-                "plots.ShowTitle": "off"}
+PLOT_OPTIONS = {
+    "plots.ShowMinorTicks": "off",
+    "plots.ShowMinorGridlines": "off",
+    "plots.ShowLegend": "off",
+    "plots.line.Width": 5,
+    "plots.marker.Style": "None",
+    "plots.marker.Size": 5,
+    "plots.ShowTitle": "off"
+}
 
 
 class MockConfigService(object):
@@ -62,8 +64,10 @@ class FunctionsTest(unittest.TestCase):
 
     def setUp(self):
         if self._test_ws is None:
-            self.__class__._test_ws = WorkspaceFactory.Instance().create(
-                "Workspace2D", NVectors=2, YLength=5, XLength=5)
+            self.__class__._test_ws = WorkspaceFactory.Instance().create("Workspace2D",
+                                                                         NVectors=2,
+                                                                         YLength=5,
+                                                                         XLength=5)
         if self._test_md_ws is None:
             self._test_md_ws = CreateMDHistoWorkspace(SignalInput='1,2,3,4,2,1',
                                                       ErrorInput='1,1,1,1,1,1',
@@ -88,8 +92,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual("fake-5", figure_title(FakeWorkspace("fake"), 5))
 
     def test_figure_title_with_workspace_list(self):
-        self.assertEqual("fake-10", figure_title((FakeWorkspace("fake"),
-                                                  FakeWorkspace("nextfake")), 10))
+        self.assertEqual("fake-10", figure_title((FakeWorkspace("fake"), FakeWorkspace("nextfake")), 10))
 
     def test_figure_title_with_empty_list_raises_assertion(self):
         with self.assertRaises(AssertionError):
@@ -181,7 +184,7 @@ class FunctionsTest(unittest.TestCase):
     def test_setting_waterfall_to_true_makes_waterfall_plot(self):
         fig = plt.figure()
         ws = self._test_ws
-        plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
+        plot([ws], wksp_indices=[0, 1], fig=fig, waterfall=True)
         ax = plt.gca()
 
         self.assertTrue(ax.is_waterfall())
@@ -204,7 +207,7 @@ class FunctionsTest(unittest.TestCase):
     def test_overplotting_onto_waterfall_plot_maintains_waterfall(self):
         fig = plt.figure()
         ws = self._test_ws
-        plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
+        plot([ws], wksp_indices=[0, 1], fig=fig, waterfall=True)
         # Overplot one of the same lines.
         plot([ws], wksp_indices=[0], fig=fig, overplot=True)
         ax = plt.gca()
@@ -221,8 +224,9 @@ class FunctionsTest(unittest.TestCase):
         ax.set_waterfall_fill(True)
         plot([ws], wksp_indices=[0], fig=fig, overplot=True)
 
-        fills = [collection for collection in ax.collections
-                 if isinstance(collection, matplotlib.collections.PolyCollection)]
+        fills = [
+            collection for collection in ax.collections if isinstance(collection, matplotlib.collections.PolyCollection)
+        ]
 
         self.assertEqual(len(fills), 3)
 
@@ -234,8 +238,10 @@ class FunctionsTest(unittest.TestCase):
         ws = self._test_md_ws
         plot_md_histo_ws([ws], fig=fig, overplot=True)
         ax = plt.gca()
-        self.assertEqual(len(ax.lines), 2, msg=f'With overplot on an existing fig, there shall be 2 lines,'
-                                               f'but not {len(ax.lines)} lines.')
+        self.assertEqual(len(ax.lines),
+                         2,
+                         msg=f'With overplot on an existing fig, there shall be 2 lines,'
+                         f'but not {len(ax.lines)} lines.')
 
     # ------------- Failure tests -------------
     def test_that_manage_workspace_names_raises_on_mix_of_workspaces_and_names(self):
@@ -258,6 +264,7 @@ class FunctionsTest(unittest.TestCase):
             self.assertEqual(ax.get_xlabel(), err_ax.get_xlabel())
             # Compare title
             self.assertEqual(ax.get_title(), err_ax.get_title())
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -124,16 +124,18 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         Loads data from hdf file. After data is loaded it is put into AbinsData object.
         :returns: object of type AbinsData
         """
-        data = self._clerk.load(list_of_datasets=["frequencies", "weights", "k_vectors",
-                                                  "atomic_displacements", "unit_cell", "atoms"])
+        data = self._clerk.load(
+            list_of_datasets=["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell", "atoms"])
         datasets = data["datasets"]
 
-        loaded_data = {"frequencies": datasets["frequencies"],
-                       "weights": datasets["weights"],
-                       "k_vectors": datasets["k_vectors"],
-                       "atomic_displacements": datasets["atomic_displacements"],
-                       "unit_cell": datasets["unit_cell"],
-                       "atoms": datasets["atoms"]}
+        loaded_data = {
+            "frequencies": datasets["frequencies"],
+            "weights": datasets["weights"],
+            "k_vectors": datasets["k_vectors"],
+            "atomic_displacements": datasets["atomic_displacements"],
+            "unit_cell": datasets["unit_cell"],
+            "atoms": datasets["atoms"]
+        }
 
         return self._rearrange_data(data=loaded_data)
 
@@ -145,16 +147,16 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         :returns: Returns an object of type AbinsData
         """
 
-        k_points = abins.KpointsData(#      1D [k] (one entry corresponds to weight of one k-point)
-                                     weights=data["weights"],
-                                     # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
-                                     k_vectors=data["k_vectors"],
-                                     # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
-                                     frequencies=data["frequencies"],
-                                     # 4D array [k][atom_n][freq][3] (one entry corresponds to
-                                     # one coordinate for atom atom_n, frequency  freq and k-point k )
-                                     atomic_displacements=data["atomic_displacements"],
-                                     unit_cell=data["unit_cell"])
+        k_points = abins.KpointsData(  #      1D [k] (one entry corresponds to weight of one k-point)
+            weights=data["weights"],
+            # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
+            k_vectors=data["k_vectors"],
+            # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
+            frequencies=data["frequencies"],
+            # 4D array [k][atom_n][freq][3] (one entry corresponds to
+            # one coordinate for atom atom_n, frequency  freq and k-point k )
+            atomic_displacements=data["atomic_displacements"],
+            unit_cell=data["unit_cell"])
 
         atoms = abins.AtomsData(data["atoms"])
         return abins.AbinsData(k_points_data=k_points, atoms_data=atoms)
@@ -202,8 +204,9 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         num_atoms = len(atoms)
         eps = MASS_EPS
         if approximate:
-            isotopes_found = [abs(round(atoms["atom_%s" % i]["mass"]) - round(masses[i])) > eps
-                              for i in range(num_atoms)]
+            isotopes_found = [
+                abs(round(atoms["atom_%s" % i]["mass"]) - round(masses[i])) > eps for i in range(num_atoms)
+            ]
         else:
             isotopes_found = [abs(atoms["atom_%s" % i]["mass"] - masses[i]) > eps for i in range(num_atoms)]
 

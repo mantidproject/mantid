@@ -1,4 +1,3 @@
-
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
@@ -151,15 +150,18 @@ class TestCorelliDatabase(unittest.TestCase):
         combined_table = combine_spatial_banks(self.ws_group)
         combined_dict = combined_table.toDict()
 
-        expected_dict = {'Detector ID': [28672, 28673, 28674, 28675, 28676, 28677, 28678, 28679,
-                                         28700, 28701, 28702, 28703, 28704, 28705, 28706, 28707],
-                         'Detector Y Coordinate': [-1.24976368, -1.24624257, -1.2427214, -1.23920016, -1.25976368,
-                                                   -1.25624257, -1.25272140, -1.24920016, -1.15114787, -1.14762493,
-                                                   -1.2427214, -1.23920016, -1.16114787, -1.17762493, -1.28272140,
-                                                   -1.29920016]
-                         }
+        expected_dict = {
+            'Detector ID': [
+                28672, 28673, 28674, 28675, 28676, 28677, 28678, 28679, 28700, 28701, 28702, 28703, 28704, 28705, 28706,
+                28707
+            ],
+            'Detector Y Coordinate': [
+                -1.24976368, -1.24624257, -1.2427214, -1.23920016, -1.25976368, -1.25624257, -1.25272140, -1.24920016,
+                -1.15114787, -1.14762493, -1.2427214, -1.23920016, -1.16114787, -1.17762493, -1.28272140, -1.29920016
+            ]
+        }
 
-        self.assertEqual(expected_dict['Detector ID'], combined_dict['Detector ID'] )
+        self.assertEqual(expected_dict['Detector ID'], combined_dict['Detector ID'])
 
         for i, expected_array in enumerate(expected_dict['Detector Y Coordinate']):
             self.assertAlmostEqual(expected_array, combined_dict['Detector Y Coordinate'][i])
@@ -228,8 +230,8 @@ class TestCorelliDatabase(unittest.TestCase):
 
         # Save only one table of each type, passing workspaces
         database = tempfile.TemporaryDirectory()
-        save_calibration_set(self.cases['124023_banks_14_15'], database.name,
-                             mtd['calib14'], mtd['mask14'], mtd['fit14'])
+        save_calibration_set(self.cases['124023_banks_14_15'], database.name, mtd['calib14'], mtd['mask14'],
+                             mtd['fit14'])
         for ct in ('calibration', 'mask', 'fit'):  # table type
             assert path.exists(path.join(database.name, 'bank014', f'{ct}_corelli_bank014_20200109.nxs.h5'))
         database.cleanup()
@@ -261,22 +263,30 @@ class TestCorelliDatabase(unittest.TestCase):
 
         # list of expected group_ws components as dictionaries
         expected = []
-        expected.append({'Detector ID': [28672, 28673, 28674, 28675],
-                         'Detector Y Coordinate': [-1.24976368, -1.24624257, -1.24272140, -1.23920016]})
+        expected.append({
+            'Detector ID': [28672, 28673, 28674, 28675],
+            'Detector Y Coordinate': [-1.24976368, -1.24624257, -1.24272140, -1.23920016]
+        })
 
-        expected.append({'Detector ID': [28676, 28677, 28678, 28679],
-                         'Detector Y Coordinate': [-1.25976368, -1.25624257, -1.25272140, -1.24920016]})
+        expected.append({
+            'Detector ID': [28676, 28677, 28678, 28679],
+            'Detector Y Coordinate': [-1.25976368, -1.25624257, -1.25272140, -1.24920016]
+        })
 
-        expected.append({'Detector ID': [28700, 28701, 28702, 28703],
-                         'Detector Y Coordinate': [-1.15114787, -1.14762493, -1.24272140, -1.23920016]})
+        expected.append({
+            'Detector ID': [28700, 28701, 28702, 28703],
+            'Detector Y Coordinate': [-1.15114787, -1.14762493, -1.24272140, -1.23920016]
+        })
         # bank 40 from '20200601'
-        expected.append({'Detector ID': [28704, 28705, 28706, 28707],
-                         'Detector Y Coordinate': [-1.16114787, -1.17762493, -1.28272140, -1.29920016]})
+        expected.append({
+            'Detector ID': [28704, 28705, 28706, 28707],
+            'Detector Y Coordinate': [-1.16114787, -1.17762493, -1.28272140, -1.29920016]
+        })
 
         for b, ws in enumerate(group_ws):
 
             table_dict = ws.toDict()
-            self.assertEqual(expected[b]['Detector ID'], table_dict['Detector ID'] )
+            self.assertEqual(expected[b]['Detector ID'], table_dict['Detector ID'])
 
             for i, expected_array in enumerate(expected[b]['Detector Y Coordinate']):
                 self.assertAlmostEqual(expected_array, table_dict['Detector Y Coordinate'][i])
@@ -336,7 +346,6 @@ class TestCorelliDatabase(unittest.TestCase):
           3.1 create a workspace with the following day-stamps and see which (in any) calibration is selected
              20200101, 20200401, 20200601, 20200801, 20201201
         """
-
         @contextmanager
         def mock_database(day_stamps: List[int]):
             r"""create a database with mock calibration files"""

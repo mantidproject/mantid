@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
-
 """ SANSConvertToWavelengthAndRebin algorithm converts to wavelength units and performs a rebin."""
 
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
@@ -27,33 +26,45 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
 
     def PyInit(self):
         # Workspace which is to be masked
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace",
+                                                     '',
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Input),
                              doc='The workspace which is to be converted to wavelength')
 
-        self.declareProperty('WavelengthLow', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
+        self.declareProperty('WavelengthLow',
+                             defaultValue=Property.EMPTY_DBL,
+                             direction=Direction.Input,
                              doc='The low value of the wavelength binning.')
-        self.declareProperty('WavelengthHigh', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
+        self.declareProperty('WavelengthHigh',
+                             defaultValue=Property.EMPTY_DBL,
+                             direction=Direction.Input,
                              doc='The high value of the wavelength binning.')
-        self.declareProperty('WavelengthStep', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
+        self.declareProperty('WavelengthStep',
+                             defaultValue=Property.EMPTY_DBL,
+                             direction=Direction.Input,
                              doc='The step size of the wavelength binning.')
 
         # Step type
-        allowed_step_types = StringListValidator([RangeStepType.LOG.value,
-                                                  RangeStepType.LIN.value])
-        self.declareProperty('WavelengthStepType', RangeStepType.LIN.value,
-                             validator=allowed_step_types, direction=Direction.Input,
+        allowed_step_types = StringListValidator([RangeStepType.LOG.value, RangeStepType.LIN.value])
+        self.declareProperty('WavelengthStepType',
+                             RangeStepType.LIN.value,
+                             validator=allowed_step_types,
+                             direction=Direction.Input,
                              doc='The step type for rebinning.')
 
         # Rebin type
-        allowed_rebin_methods = StringListValidator([RebinType.REBIN.value,
-                                                     RebinType.INTERPOLATING_REBIN.value])
-        self.declareProperty("RebinMode", RebinType.REBIN.value,
-                             validator=allowed_rebin_methods, direction=Direction.Input,
+        allowed_rebin_methods = StringListValidator([RebinType.REBIN.value, RebinType.INTERPOLATING_REBIN.value])
+        self.declareProperty("RebinMode",
+                             RebinType.REBIN.value,
+                             validator=allowed_rebin_methods,
+                             direction=Direction.Input,
                              doc="The method which is to be applied to the rebinning.")
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Output),
                              doc='The output workspace.')
 
     def PyExec(self):
@@ -69,12 +80,9 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
         rebin_type = RebinType(self.getProperty("RebinMode").value)
         rebin_string = self._get_rebin_string(workspace)
         if rebin_type is RebinType.REBIN:
-            rebin_options = {"InputWorkspace": workspace,
-                             "PreserveEvents": True,
-                             "Params": rebin_string}
+            rebin_options = {"InputWorkspace": workspace, "PreserveEvents": True, "Params": rebin_string}
         else:
-            rebin_options = {"InputWorkspace": workspace,
-                             "Params": rebin_string}
+            rebin_options = {"InputWorkspace": workspace, "Params": rebin_string}
 
         # Perform the rebin
         progress.report("Performing rebin.")
@@ -90,8 +98,10 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
         wavelength_low = self.getProperty("WavelengthLow").value
         wavelength_high = self.getProperty("WavelengthHigh").value
         if wavelength_low is not None and wavelength_high is not None and wavelength_low > wavelength_high:
-            errors.update({"WavelengthLow": "The lower wavelength setting needs to be smaller "
-                                            "than the higher wavelength setting."})
+            errors.update({
+                "WavelengthLow": "The lower wavelength setting needs to be smaller "
+                "than the higher wavelength setting."
+            })
 
         if wavelength_low is not None and wavelength_low < 0:
             errors.update({"WavelengthLow": "The wavelength cannot be smaller than 0."})
@@ -112,8 +122,7 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
 
     def _convert_units_to_wavelength(self, workspace):
         convert_name = "ConvertUnits"
-        convert_options = {"InputWorkspace": workspace,
-                           "Target": "Wavelength"}
+        convert_options = {"InputWorkspace": workspace, "Target": "Wavelength"}
         convert_alg = create_unmanaged_algorithm(convert_name, **convert_options)
         convert_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
         convert_alg.setProperty("OutputWorkspace", workspace)

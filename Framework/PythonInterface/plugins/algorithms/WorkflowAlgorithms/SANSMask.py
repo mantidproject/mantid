@@ -17,7 +17,6 @@ class SANSMask(PythonAlgorithm):
     """
         Normalise detector counts by the sample thickness
     """
-
     def category(self):
         return "Workflow\\SANS"
 
@@ -29,48 +28,32 @@ class SANSMask(PythonAlgorithm):
 
     def PyInit(self):
         facilities = ["SNS", "HFIR"]
-        self.declareProperty("Facility", "SNS",
-                             StringListValidator(facilities),
+        self.declareProperty("Facility", "SNS", StringListValidator(facilities),
                              "Facility to which the SANS instrument belongs")
 
-        self.declareProperty(
-            MatrixWorkspaceProperty(
-                "Workspace",
-                "",
-                direction=Direction.InOut),
-            "Workspace to apply the mask to")
+        self.declareProperty(MatrixWorkspaceProperty("Workspace", "", direction=Direction.InOut),
+                             "Workspace to apply the mask to")
 
-        self.declareProperty(IntArrayProperty("MaskedDetectorList", values=[],
-                                              direction=Direction.Input),
+        self.declareProperty(IntArrayProperty("MaskedDetectorList", values=[], direction=Direction.Input),
                              "List of detector IDs to be masked")
 
-        self.declareProperty(
-            IntArrayProperty(
-                "MaskedEdges",
-                values=[0, 0, 0, 0],
-                direction=Direction.Input),
-            "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high")
+        self.declareProperty(IntArrayProperty("MaskedEdges", values=[0, 0, 0, 0], direction=Direction.Input),
+                             "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high")
 
-        self.declareProperty(
-            "MaskedComponent",
-            "",
-            doc="Component Name to mask Edges or Front/Back. Consult the IDF!")
+        self.declareProperty("MaskedComponent", "", doc="Component Name to mask Edges or Front/Back. Consult the IDF!")
 
-        self.declareProperty(
-            "MaskedFullComponent",
-            "",
-            doc="Component Name to mask ALL of it. Consult the IDF!")
+        self.declareProperty("MaskedFullComponent", "", doc="Component Name to mask ALL of it. Consult the IDF!")
 
         sides = ["None", "Front", "Back"]
-        self.declareProperty("MaskedSide", "None",
-                             StringListValidator(sides),
+        self.declareProperty("MaskedSide", "None", StringListValidator(sides),
                              "Side of the detector to which to apply the mask")
 
-        self.declareProperty("OutputMessage", "",
-                             direction=Direction.Output, doc="Output message")
+        self.declareProperty("OutputMessage", "", direction=Direction.Output, doc="Output message")
 
-        self.declareProperty(MatrixWorkspaceProperty("MaskedWorkspace", "",
-                             direction=Direction.Input, optional=PropertyMode.Optional),
+        self.declareProperty(MatrixWorkspaceProperty("MaskedWorkspace",
+                                                     "",
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
                              doc="Workspace to copy the mask from; is passed straight to MaskDetectors")
 
     def PyExec(self):
@@ -88,12 +71,11 @@ class SANSMask(PythonAlgorithm):
         edges = self.getProperty("MaskedEdges").value
         if len(edges) == 4:
             if facility.upper() == "HFIR":
-                masked_ids = hfir_instrument.get_masked_ids(
-                    edges[0], edges[1], edges[2], edges[3], workspace, component_name)
+                masked_ids = hfir_instrument.get_masked_ids(edges[0], edges[1], edges[2], edges[3], workspace,
+                                                            component_name)
                 self._mask_ids(list(masked_ids), workspace)
             else:
-                masked_pixels = sns_instrument.get_masked_pixels(
-                    edges[0], edges[1], edges[2], edges[3], workspace)
+                masked_pixels = sns_instrument.get_masked_pixels(edges[0], edges[1], edges[2], edges[3], workspace)
                 self._mask_pixels(masked_pixels, workspace, facility)
 
         # Mask a list of detectors
@@ -104,9 +86,7 @@ class SANSMask(PythonAlgorithm):
         # Mask component: Note that edges cannot be masked
         component_name = self.getProperty("MaskedFullComponent").value
         if component_name:
-            Logger("SANSMask").debug(
-                "Masking FULL component named %s." %
-                component_name)
+            Logger("SANSMask").debug("Masking FULL component named %s." % component_name)
             self._mask_component(workspace, component_name)
 
         masked_ws = self.getPropertyValue("MaskedWorkspace")
@@ -119,15 +99,11 @@ class SANSMask(PythonAlgorithm):
         if len(pixel_list) > 0:
             # Transform the list of pixels into a list of Mantid detector IDs
             if facility.upper() == "HFIR":
-                masked_detectors = hfir_instrument.get_detector_from_pixel(
-                    pixel_list)
+                masked_detectors = hfir_instrument.get_detector_from_pixel(pixel_list)
             else:
-                masked_detectors = sns_instrument.get_detector_from_pixel(
-                    pixel_list, workspace)
+                masked_detectors = sns_instrument.get_detector_from_pixel(pixel_list, workspace)
             # Mask the pixels by passing the list of IDs
-            api.MaskDetectors(
-                Workspace=workspace,
-                DetectorList=masked_detectors)
+            api.MaskDetectors(Workspace=workspace, DetectorList=masked_detectors)
 
     def _mask_ids(self, id_list, workspace):
         # There is some error with the id_list and np.long64
@@ -144,8 +120,7 @@ class SANSMask(PythonAlgorithm):
                 if len(item) > 0:
                     c = item.strip().split(' ')
                     if len(c) == 4:
-                        rectangular_masks.append(
-                            [int(c[0]), int(c[2]), int(c[1]), int(c[3])])
+                        rectangular_masks.append([int(c[0]), int(c[2]), int(c[1]), int(c[3])])
             masked_pixels = []
             for rec in rectangular_masks:
                 try:
@@ -153,9 +128,7 @@ class SANSMask(PythonAlgorithm):
                         for iy in range(rec[2], rec[3] + 1):
                             masked_pixels.append([ix, iy])
                 except:
-                    Logger("SANSMask").error(
-                        "Badly defined mask from configuration file: %s" %
-                        str(rec))
+                    Logger("SANSMask").error("Badly defined mask from configuration file: %s" % str(rec))
                     Logger("SANSMask").error(str(sys.exc_info()[1]))
             self._mask_pixels(masked_pixels, workspace, facility)
 
@@ -181,12 +154,14 @@ class SANSMask(PythonAlgorithm):
             component = instrument.getComponentByName(component_name)
             if component.type() == 'RectangularDetector':
                 # id's at the bottom on every pixel
-                ids_at_the_bottom = list(range(side_to_mask * component.idstep() + component.idstart(),
-                                               component.idstart() + component.idstep() * component.nelements(),
-                                               component.idstep() * 2))
+                ids_at_the_bottom = list(
+                    range(side_to_mask * component.idstep() + component.idstart(),
+                          component.idstart() + component.idstep() * component.nelements(),
+                          component.idstep() * 2))
                 ids = [list(range(i, i + component.idstep())) for i in ids_at_the_bottom]
                 ids = [item for sublist in ids for item in sublist]  # flat list
-            elif component.type() == 'CompAssembly' or component.type() == 'ObjCompAssembly' or component.type() == 'DetectorComponent':
+            elif component.type() == 'CompAssembly' or component.type() == 'ObjCompAssembly' or component.type(
+            ) == 'DetectorComponent':
                 number_of_tubes = component.nelements()
                 number_of_pixels_per_tube = component[0].nelements()
                 idx_at_the_bottom = list(range(side_to_mask, number_of_tubes, 2))
@@ -198,14 +173,11 @@ class SANSMask(PythonAlgorithm):
         else:  # I'm at SNS
             if not instrument.hasParameter("number-of-x-pixels") \
                     and not workspace.getInstrument().hasParameter("number-of-y-pixels"):
-                Logger("SANSMask").error(
-                    "Could not find number of pixels: skipping side masking")
+                Logger("SANSMask").error("Could not find number of pixels: skipping side masking")
                 return
 
-            nx = int(workspace.getInstrument().getNumberParameter(
-                "number-of-x-pixels")[0])
-            ny = int(workspace.getInstrument().getNumberParameter(
-                "number-of-y-pixels")[0])
+            nx = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
+            ny = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
             id_side = []
 
             for iy in range(ny):
@@ -222,8 +194,7 @@ class SANSMask(PythonAlgorithm):
         try:
             component = instrument.getComponentByName(component_name)
         except:
-            Logger("SANSMask").error(
-                "Component not valid! %s" % component_name)
+            Logger("SANSMask").error("Component not valid! %s" % component_name)
             return
 
         masked_detectors = []
@@ -231,13 +202,13 @@ class SANSMask(PythonAlgorithm):
             id_min = component.minDetectorID()
             id_max = component.maxDetectorID()
             masked_detectors = list(range(id_min, id_max + 1))
-        elif component.type() == 'CompAssembly' or component.type() == 'ObjCompAssembly' or component.type() == 'DetectorComponent':
+        elif component.type() == 'CompAssembly' or component.type() == 'ObjCompAssembly' or component.type(
+        ) == 'DetectorComponent':
             ids_gen = self.__get_ids_for_assembly(component)
             masked_detectors = list(ids_gen)
         else:
-            Logger("SANSMask").error(
-                "Mask not applied. Component not valid: %s of type %s." %
-                (component.getName(), component.type()))
+            Logger("SANSMask").error("Mask not applied. Component not valid: %s of type %s." %
+                                     (component.getName(), component.type()))
 
         api.MaskDetectors(Workspace=workspace, DetectorList=masked_detectors)
 

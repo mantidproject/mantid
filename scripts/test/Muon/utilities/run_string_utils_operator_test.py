@@ -9,7 +9,6 @@ import unittest
 
 
 class RunStringUtilsIncrementAndDecrementRunLists(unittest.TestCase):
-
     def test_cannot_increment_or_decrement_by_zero_or_negative_numbers(self):
         run_list = [1, 2, 3, 4, 5]
         self.assertEqual(utils.increment_run_list(run_list, 0), run_list)
@@ -48,7 +47,6 @@ class RunStringUtilsIncrementAndDecrementRunLists(unittest.TestCase):
 
 
 class RunStringUtilsIncrementAndDecrementRunStrings(unittest.TestCase):
-
     def test_cannot_increment_or_decrement_run_string_by_zero_or_negative_numbers(self):
         run_string = "1-5"
         self.assertEqual(utils.increment_run_string(run_string, 0), run_string)

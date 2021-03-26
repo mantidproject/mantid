@@ -10,7 +10,6 @@ from mantid.kernel import V3D
 
 
 class BoundingBoxTest(unittest.TestCase):
-
     def test_default_construction_is_allowed(self):
         box = BoundingBox()
         self.assertTrue(isinstance(box, BoundingBox))
@@ -21,19 +20,20 @@ class BoundingBoxTest(unittest.TestCase):
         self.assertTrue(isinstance(box, BoundingBox))
 
     def test_properties_are_correct(self):
-        bbox = BoundingBox (1.0, 2.0, 3.0, -1.0, -2.0, -3.0)
-        self.assertEqual(bbox.minPoint(), V3D(-1.0,-2.0,-3.0))
-        self.assertEqual(bbox.maxPoint(), V3D(1.0,2.0,3.0))
-        self.assertEqual(bbox.centrePoint(), V3D(0.0,0.0,0.0))
-        self.assertEqual(bbox.width(), V3D(2.0,4.0,6.0))
+        bbox = BoundingBox(1.0, 2.0, 3.0, -1.0, -2.0, -3.0)
+        self.assertEqual(bbox.minPoint(), V3D(-1.0, -2.0, -3.0))
+        self.assertEqual(bbox.maxPoint(), V3D(1.0, 2.0, 3.0))
+        self.assertEqual(bbox.centrePoint(), V3D(0.0, 0.0, 0.0))
+        self.assertEqual(bbox.width(), V3D(2.0, 4.0, 6.0))
 
     def test_point_inside(self):
         box = BoundingBox(1.0, 2.0, 3.0, -1.0, -2.0, -3.0)
-        self.assertTrue(box.isPointInside(V3D(0.0,0.0,0.0)))
+        self.assertTrue(box.isPointInside(V3D(0.0, 0.0, 0.0)))
 
     def test_doesLineIntersect(self):
-        bbox  = BoundingBox(4.1, 4.1, 4.1, -4.1, -4.1, -4.1)
-        self.assertTrue(bbox.doesLineIntersect(V3D(-6.0,0.0,0.0), V3D(1.0,0.0,0.0)))
+        bbox = BoundingBox(4.1, 4.1, 4.1, -4.1, -4.1, -4.1)
+        self.assertTrue(bbox.doesLineIntersect(V3D(-6.0, 0.0, 0.0), V3D(1.0, 0.0, 0.0)))
+
 
 if __name__ == '__main__':
     unittest.main()

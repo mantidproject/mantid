@@ -5,9 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
-                        WorkspaceGroup, WorkspaceGroupProperty, ITableWorkspaceProperty,
-                        Progress, PropertyMode)
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroup,
+                        WorkspaceGroupProperty, ITableWorkspaceProperty, Progress, PropertyMode)
 from mantid.kernel import Direction
 from mantid.simpleapi import *
 
@@ -35,31 +34,23 @@ class ResNorm(PythonAlgorithm):
         return 2
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('ResolutionWorkspace', '',
-                                                     direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('ResolutionWorkspace', '', direction=Direction.Input),
                              doc='Workspace containing resolution')
 
-        self.declareProperty(MatrixWorkspaceProperty('VanadiumWorkspace', '',
-                                                     direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('VanadiumWorkspace', '', direction=Direction.Input),
                              doc='Workspace containing reduction of vanadium run')
 
-        self.declareProperty(name='EnergyMin',
-                             defaultValue=-0.2,
-                             doc='Minimum energy for fit. Default=-0.2')
+        self.declareProperty(name='EnergyMin', defaultValue=-0.2, doc='Minimum energy for fit. Default=-0.2')
 
-        self.declareProperty(name='EnergyMax',
-                             defaultValue=0.2,
-                             doc='Maximum energy for fit. Default=0.2')
+        self.declareProperty(name='EnergyMax', defaultValue=0.2, doc='Maximum energy for fit. Default=0.2')
 
-        self.declareProperty(name='CreateOutput',
-                             defaultValue=False,
-                             doc='Create additional fitting output')
+        self.declareProperty(name='CreateOutput', defaultValue=False, doc='Create additional fitting output')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                                                    direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Fitted parameter output')
 
-        self.declareProperty(ITableWorkspaceProperty('OutputWorkspaceTable', '',
+        self.declareProperty(ITableWorkspaceProperty('OutputWorkspaceTable',
+                                                     '',
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Output),
                              doc='Table workspace of fit parameters')
@@ -105,8 +96,7 @@ class ResNorm(PythonAlgorithm):
                                          Target='ElasticQ',
                                          EMode='Indirect')
         else:
-            van_ws = CloneWorkspace(InputWorkspace=self._van_ws,
-                                    OutputWorkspace='__ResNorm_vanadium')
+            van_ws = CloneWorkspace(InputWorkspace=self._van_ws, OutputWorkspace='__ResNorm_vanadium')
 
         num_hist = van_ws.getNumberHistograms()
 
@@ -126,7 +116,10 @@ class ResNorm(PythonAlgorithm):
         out_name = '%sResNorm_Fit' % (base_name[:-3])
         function = 'name=TabulatedFunction,Workspace=%s,Scaling=1,Shift=0,XScaling=1,ties=(Shift=0)' % self._van_ws
 
-        plot_peaks = self.createChildAlgorithm(name='PlotPeakByLogValue', startProgress=0.02, endProgress=0.94, enableLogging=True)
+        plot_peaks = self.createChildAlgorithm(name='PlotPeakByLogValue',
+                                               startProgress=0.02,
+                                               endProgress=0.94,
+                                               enableLogging=True)
         plot_peaks.setProperty('Input', input_str)
         plot_peaks.setProperty('OutputWorkspace', out_name)
         plot_peaks.setProperty('Function', function)
@@ -138,15 +131,14 @@ class ResNorm(PythonAlgorithm):
         plot_peaks.execute()
         fit_params = plot_peaks.getProperty('OutputWorkspace').value
 
-        params = {'XScaling':'Stretch', 'Scaling':'Intensity'}
+        params = {'XScaling': 'Stretch', 'Scaling': 'Intensity'}
         result_workspaces = []
         prog_process = Progress(self, start=0.94, end=1.0, nreports=3)
         for param_name, output_name in params.items():
             result_workspaces.append(self._process_fit_params(fit_params, param_name, v_values, v_unit, output_name))
             prog_process.report('Processing Fit data')
 
-        GroupWorkspaces(InputWorkspaces=result_workspaces,
-                        OutputWorkspace=self._out_ws)
+        GroupWorkspaces(InputWorkspaces=result_workspaces, OutputWorkspace=self._out_ws)
         self.setProperty('OutputWorkspace', self._out_ws)
 
         DeleteWorkspace(padded_res_ws)
@@ -167,8 +159,7 @@ class ResNorm(PythonAlgorithm):
         """
 
         norm_res_ws = '__ResNorm_unityres'
-        NormaliseToUnity(InputWorkspace=self._res_ws_clone,
-                         OutputWorkspace=norm_res_ws)
+        NormaliseToUnity(InputWorkspace=self._res_ws_clone, OutputWorkspace=norm_res_ws)
 
         ws_name = '%s' % (self._res_ws_clone)
 
@@ -177,9 +168,7 @@ class ResNorm(PythonAlgorithm):
             if idx == 0:
                 input_ws_1 = norm_res_ws
 
-            AppendSpectra(InputWorkspace1=input_ws_1,
-                          InputWorkspace2=norm_res_ws,
-                          OutputWorkspace=ws_name)
+            AppendSpectra(InputWorkspace1=input_ws_1, InputWorkspace2=norm_res_ws, OutputWorkspace=ws_name)
 
         DeleteWorkspace(norm_res_ws)
 

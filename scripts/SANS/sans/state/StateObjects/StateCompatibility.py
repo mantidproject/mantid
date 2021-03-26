@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
-
 """State which governs the SANS compatibility mode. This is not part of the reduction itself and should be removed
    once the transition to the new reducer is satisfactory and complete. This feature allows users to have the
    two reduction approaches produce the exact same results. If the results are different then that is a hint
@@ -17,7 +16,6 @@ import copy
 from sans.state.JsonSerializable import JsonSerializable
 
 from sans.common.enums import SANSFacility
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 # State

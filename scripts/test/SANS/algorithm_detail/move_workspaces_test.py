@@ -102,8 +102,10 @@ class MoveSans2DMonitor(unittest.TestCase):
 
         self.assertTrue(isinstance(z_pos_mon_4_before, float))
 
-        zoom_class.move_initial(workspace=workspace, coordinates=coordinates,
-                                component=component, is_transmission_workspace=is_transmission_workspace)
+        zoom_class.move_initial(workspace=workspace,
+                                coordinates=coordinates,
+                                component=component,
+                                is_transmission_workspace=is_transmission_workspace)
 
         z_pos_mon_4_after = get_monitor_pos(ws=workspace, monitor_spectrum_no=4, inst_info=inst_info)
 
@@ -128,8 +130,10 @@ class MoveSans2DMonitor(unittest.TestCase):
 
         self.assertTrue(isinstance(z_pos_mon_4_before, float))
 
-        zoom_class.move_initial(workspace=workspace, coordinates=coordinates,
-                                component=component, is_transmission_workspace=is_transmission_workspace)
+        zoom_class.move_initial(workspace=workspace,
+                                coordinates=coordinates,
+                                component=component,
+                                is_transmission_workspace=is_transmission_workspace)
 
         z_pos_mon_4_after = get_monitor_pos(ws=workspace, monitor_spectrum_no=4, inst_info=inst_info)
 
@@ -189,8 +193,10 @@ class MoveZoomMonitors(unittest.TestCase):
         self.assertTrue(isinstance(z_pos_mon_4_before, float))
         self.assertTrue(isinstance(z_pos_mon_5_before, float))
 
-        zoom_class.move_initial(workspace=workspace, coordinates=coordinates,
-                                component=component, is_transmission_workspace=is_transmission_workspace)
+        zoom_class.move_initial(workspace=workspace,
+                                coordinates=coordinates,
+                                component=component,
+                                is_transmission_workspace=is_transmission_workspace)
 
         # Monitor 4 shifts relative to itself rather than the rear detector on ZOOM
         z_pos_mon_4_after = get_monitor_pos(ws=workspace, monitor_spectrum_no=4, inst_info=inst_info)
@@ -219,8 +225,10 @@ class MoveZoomMonitors(unittest.TestCase):
         self.assertTrue(isinstance(z_pos_mon_4_before, float))
         self.assertTrue(isinstance(z_pos_mon_5_before, float))
 
-        zoom_class.move_initial(workspace=workspace, coordinates=coordinates,
-                                component=component, is_transmission_workspace=is_transmission_workspace)
+        zoom_class.move_initial(workspace=workspace,
+                                coordinates=coordinates,
+                                component=component,
+                                is_transmission_workspace=is_transmission_workspace)
 
         # Monitor 4 shifts relative to itself rather than the rear detector on ZOOM
         z_pos_mon_4_after = get_monitor_pos(ws=workspace, monitor_spectrum_no=4, inst_info=inst_info)
@@ -249,8 +257,10 @@ class MoveZoomMonitors(unittest.TestCase):
         self.assertTrue(isinstance(z_pos_mon_4_before, float))
         self.assertTrue(isinstance(z_pos_mon_5_before, float))
 
-        zoom_class.move_initial(workspace=workspace, coordinates=coordinates,
-                                component=component, is_transmission_workspace=is_transmission_workspace)
+        zoom_class.move_initial(workspace=workspace,
+                                coordinates=coordinates,
+                                component=component,
+                                is_transmission_workspace=is_transmission_workspace)
 
         z_pos_mon_4_after = get_monitor_pos(ws=workspace, monitor_spectrum_no=4, inst_info=inst_info)
         z_pos_mon_5_after = get_monitor_pos(ws=workspace, monitor_spectrum_no=5, inst_info=inst_info)

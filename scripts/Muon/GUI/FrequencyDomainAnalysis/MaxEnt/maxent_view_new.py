@@ -11,7 +11,6 @@ from Muon.GUI.Common.message_box import warning
 
 
 class MaxEntView(QtWidgets.QWidget):
-
     """
     The view for the MaxEnt widget. This
     creates the look of the widget
@@ -38,8 +37,7 @@ class MaxEntView(QtWidgets.QWidget):
         self.table.setColumnWidth(1, 300)
         self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setStretchLastSection(True)
-        self.table.setHorizontalHeaderLabels(
-            ("MaxEnt Property;Value").split(";"))
+        self.table.setHorizontalHeaderLabels(("MaxEnt Property;Value").split(";"))
         table_utils.setTableHeaders(self.table)
 
         # populate table
@@ -55,20 +53,16 @@ class MaxEntView(QtWidgets.QWidget):
         self.dead_box = table_utils.addCheckBoxToTable(self.table, True, 2)
 
         table_utils.setRowName(self.table, 3, "Output phase table")
-        self.output_phase_box = table_utils.addCheckBoxToTable(
-            self.table, False, 3)
+        self.output_phase_box = table_utils.addCheckBoxToTable(self.table, False, 3)
 
         table_utils.setRowName(self.table, 4, "Output deadtimes")
-        self.output_dead_box = table_utils.addCheckBoxToTable(
-            self.table, False, 4)
+        self.output_dead_box = table_utils.addCheckBoxToTable(self.table, False, 4)
 
         table_utils.setRowName(self.table, 5, "Output reconstructed data")
-        self.output_data_box = table_utils.addCheckBoxToTable(
-            self.table, False, 5)
+        self.output_data_box = table_utils.addCheckBoxToTable(self.table, False, 5)
 
         table_utils.setRowName(self.table, 6, "Output phase convergence")
-        self.output_phase_evo_box = table_utils.addCheckBoxToTable(
-            self.table, False, 6)
+        self.output_phase_evo_box = table_utils.addCheckBoxToTable(self.table, False, 6)
 
         self.table.resizeRowsToContents()
 
@@ -86,8 +80,7 @@ class MaxEntView(QtWidgets.QWidget):
         self.tableA.verticalHeader().setVisible(False)
         self.tableA.horizontalHeader().setStretchLastSection(True)
 
-        self.tableA.setHorizontalHeaderLabels(
-            ("Advanced Property;Value").split(";"))
+        self.tableA.setHorizontalHeaderLabels(("Advanced Property;Value").split(";"))
         table_utils.setTableHeaders(self.tableA)
 
         table_utils.setRowName(self.tableA, 0, "Maximum entropy constant (A)")
@@ -103,8 +96,7 @@ class MaxEntView(QtWidgets.QWidget):
         self.outer_loop = table_utils.addSpinBoxToTable(self.tableA, 10, 3)
 
         table_utils.setRowName(self.tableA, 4, "Double pulse data")
-        self.double_pulse_box = table_utils.addCheckBoxToTable(
-            self.tableA, False, 4)
+        self.double_pulse_box = table_utils.addCheckBoxToTable(self.tableA, False, 4)
 
         table_utils.setRowName(self.tableA, 5, "Number of data points")
         self.N_points = table_utils.addComboToTable(self.tableA, 5, options)

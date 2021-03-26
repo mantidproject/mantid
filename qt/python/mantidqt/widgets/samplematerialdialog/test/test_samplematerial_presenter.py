@@ -18,7 +18,6 @@ from mantidqt.widgets.samplematerialdialog.samplematerial_presenter import Sampl
 
 @start_qapplication
 class SampleMaterialPresenterTest(unittest.TestCase):
-
     def setUp(self):
         # Create a workspace and change the sample material to non-trivial values.
         workspace_name = "testWS"

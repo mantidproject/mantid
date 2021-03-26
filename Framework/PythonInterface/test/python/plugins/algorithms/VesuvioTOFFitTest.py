@@ -34,7 +34,8 @@ class VesuvioTOFFitTest(unittest.TestCase):
         profiles = "function=GramCharlier,width=[2, 5, 7],hermite_coeffs=[1, 0, 0],k_free=0,sears_flag=1;"\
                    "function=Gaussian,width=10;function=Gaussian,width=13;function=Gaussian,width=30;"
 
-        alg = self._create_algorithm(InputWorkspace=self._test_ws, WorkspaceIndex=0,
+        alg = self._create_algorithm(InputWorkspace=self._test_ws,
+                                     WorkspaceIndex=0,
                                      Masses=[1.0079, 16, 27, 133],
                                      MassProfiles=profiles,
                                      IntensityConstraints="[0,1,0,-4]")
@@ -63,13 +64,13 @@ class VesuvioTOFFitTest(unittest.TestCase):
         self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec2, peak_height_spec2))
         self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec2, bin_index_spec2))
 
-
     def test_single_run_index0_kfixed_no_background_with_ties(self):
         profiles = "function=GramCharlier,width=[2, 5, 7],hermite_coeffs=[1, 0, 0],k_free=0,sears_flag=1;"\
                    "function=Gaussian,width=10;function=Gaussian,width=13;function=Gaussian,width=30;"
         ties = "f2.Intensity=f3.Intensity"
 
-        alg = self._create_algorithm(InputWorkspace=self._test_ws, WorkspaceIndex=0,
+        alg = self._create_algorithm(InputWorkspace=self._test_ws,
+                                     WorkspaceIndex=0,
                                      Masses=[1.0079, 16, 27, 133],
                                      MassProfiles=profiles,
                                      Ties=ties,
@@ -82,12 +83,12 @@ class VesuvioTOFFitTest(unittest.TestCase):
         # Ensure the value of the f2.Intensity and f3.Intensity fit parameters are tied
         self.assertAlmostEqual(f2_intensity['Value'], f3_intensity['Value'])
 
-
     def test_single_run_produces_correct_output_workspace_index1_kfixed_no_background(self):
         profiles = "function=GramCharlier,width=[2, 5, 7],hermite_coeffs=[1, 0, 0],k_free=0,sears_flag=1;"\
                    "function=Gaussian,width=10;function=Gaussian,width=13;function=Gaussian,width=30;"
 
-        alg = self._create_algorithm(InputWorkspace=self._test_ws, WorkspaceIndex=1,
+        alg = self._create_algorithm(InputWorkspace=self._test_ws,
+                                     WorkspaceIndex=1,
                                      Masses=[1.0079, 16, 27, 133],
                                      MassProfiles=profiles,
                                      IntensityConstraints="[0,1,0,-4]")
@@ -116,13 +117,13 @@ class VesuvioTOFFitTest(unittest.TestCase):
         self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec2, peak_height_spec2))
         self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec2, bin_index_spec2))
 
-
     def test_single_run_produces_correct_output_workspace_index0_kfixed_including_background(self):
         profiles = "function=GramCharlier,width=[2, 5, 7],hermite_coeffs=[1, 0, 0],k_free=0,sears_flag=1;"\
                    "function=Gaussian,width=10;function=Gaussian,width=13;function=Gaussian,width=30;"
         background = "function=Polynomial,order=3"
 
-        alg = self._create_algorithm(InputWorkspace=self._test_ws, WorkspaceIndex=0,
+        alg = self._create_algorithm(InputWorkspace=self._test_ws,
+                                     WorkspaceIndex=0,
                                      Masses=[1.0079, 16.0, 27.0, 133.0],
                                      MassProfiles=profiles,
                                      Background=background,
@@ -156,14 +157,12 @@ class VesuvioTOFFitTest(unittest.TestCase):
             self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec2, peak_height_spec2))
             self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec2, bin_index_spec2))
 
-
     # -------------- Failure cases ------------------
 
     def test_empty_masses_raises_error(self):
         alg = self._create_algorithm()
 
-        self.assertRaises(ValueError, alg.setProperty,
-                          "Masses", [])
+        self.assertRaises(ValueError, alg.setProperty, "Masses", [])
 
     def test_empty_functions_raises_error(self):
         alg = self._create_algorithm()
@@ -194,12 +193,12 @@ class VesuvioTOFFitTest(unittest.TestCase):
         peak_bin = np.argmax(y_data)
         return peak_height, peak_bin
 
-
-    def _equal_within_tolerance(self, expected, actual, tolerance = 0.01):
+    def _equal_within_tolerance(self, expected, actual, tolerance=0.01):
         """
         Ensures the expected value matches the actual value within a tolerance (default 0.01)
         """
         return abs(expected - actual) < tolerance
+
 
 if __name__ == "__main__":
     unittest.main()

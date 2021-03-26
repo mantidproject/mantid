@@ -10,8 +10,8 @@ from .lagrangeinstrument import LagrangeInstrument
 from .toscainstrument import ToscaInstrument
 from .instrument import Instrument
 
-instruments = {"lagrange": LagrangeInstrument,
-               "tosca": ToscaInstrument}
+instruments = {"lagrange": LagrangeInstrument, "tosca": ToscaInstrument}
+
 
 def get_instrument(name: str, **kwargs) -> Instrument:
     """Instantiate a named Instrument
@@ -38,10 +38,8 @@ def get_instrument(name: str, **kwargs) -> Instrument:
         return instrument_factory(**kwargs)
 
     elif name not in ALL_INSTRUMENTS:
-        raise ValueError(f'Unknown instrument: "{name}". Known instruments: '
-                         + ', '.join(ALL_INSTRUMENTS))
+        raise ValueError(f'Unknown instrument: "{name}". Known instruments: ' + ', '.join(ALL_INSTRUMENTS))
     else:
-        raise NotImplementedError(
-            f"Instrument {name} is defined in abins.constants, but was not "
-            "accessible from abins.instruments.get_instrument(). "
-            "Please report this error to the Mantid team.")
+        raise NotImplementedError(f"Instrument {name} is defined in abins.constants, but was not "
+                                  "accessible from abins.instruments.get_instrument(). "
+                                  "Please report this error to the Mantid team.")

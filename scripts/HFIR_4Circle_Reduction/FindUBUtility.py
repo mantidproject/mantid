@@ -31,7 +31,7 @@ class AddScansForUBDialog(QDialog):
         self._myParent = parent
 
         # set up UI
-        ui_path =  "AddUBPeaksDialog.ui"
+        ui_path = "AddUBPeaksDialog.ui"
         self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
         # initialize widgets
@@ -167,8 +167,8 @@ class SelectUBMatrixScansDialog(QDialog):
 
         # get the output file name
         file_filter = 'Text Files (*.dat);;All Files (*.*)'
-        file_name = QFileDialog.getSaveFileName(self, 'File to export selected scans',
-                                                self._myParent.working_directory, file_filter)
+        file_name = QFileDialog.getSaveFileName(self, 'File to export selected scans', self._myParent.working_directory,
+                                                file_filter)
         if not file_name:
             return
         if isinstance(file_name, tuple):
@@ -209,9 +209,8 @@ class SelectUBMatrixScansDialog(QDialog):
 
             if self.ui.checkBox_wavelength.isChecked():
                 # wave length selection
-                status, ret_obj = guiutility.parse_float_editors([self.ui.lineEdit_wavelength,
-                                                                  self.ui.lineEdit_wavelengthTolerance],
-                                                                 allow_blank=False)
+                status, ret_obj = guiutility.parse_float_editors(
+                    [self.ui.lineEdit_wavelength, self.ui.lineEdit_wavelengthTolerance], allow_blank=False)
                 if status:
                     wave_length, wave_length_tol = ret_obj
                     select_args['wavelength'] = wave_length

@@ -14,7 +14,6 @@ from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 
 
 class SurfaceContourPlotsTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.workspaces = []
@@ -40,7 +39,8 @@ class SurfaceContourPlotsTest(unittest.TestCase):
         self.assertTrue(isinstance(ws, MatrixWorkspace))
 
     def test_create_workspace_for_group_plot_raises_error_if_list_of_workspaces_is_empty(self):
-        self.assertRaises(RuntimeError, _create_workspace_for_group_plot,
+        self.assertRaises(RuntimeError,
+                          _create_workspace_for_group_plot,
                           plot_type=SpectraSelection.Contour,
                           workspaces=[],
                           plot_index=0,
@@ -55,7 +55,8 @@ class SurfaceContourPlotsTest(unittest.TestCase):
 
         workspaces = self.workspaces + [ws]
 
-        self.assertRaises(RuntimeError, _create_workspace_for_group_plot,
+        self.assertRaises(RuntimeError,
+                          _create_workspace_for_group_plot,
                           plot_type=SpectraSelection.Contour,
                           workspaces=workspaces,
                           plot_index=0,
@@ -67,7 +68,8 @@ class SurfaceContourPlotsTest(unittest.TestCase):
 
         workspaces = self.workspaces + [table]
 
-        self.assertRaises(RuntimeError, _create_workspace_for_group_plot,
+        self.assertRaises(RuntimeError,
+                          _create_workspace_for_group_plot,
                           plot_type=SpectraSelection.Contour,
                           workspaces=workspaces,
                           plot_index=0,
@@ -75,7 +77,8 @@ class SurfaceContourPlotsTest(unittest.TestCase):
                           custom_log_values=[])
 
     def test_create_workspace_for_group_plot_raises_error_when_workspace_index_is_too_high(self):
-        self.assertRaises(RuntimeError, _create_workspace_for_group_plot,
+        self.assertRaises(RuntimeError,
+                          _create_workspace_for_group_plot,
                           plot_type=SpectraSelection.Contour,
                           workspaces=self.workspaces,
                           plot_index=5,

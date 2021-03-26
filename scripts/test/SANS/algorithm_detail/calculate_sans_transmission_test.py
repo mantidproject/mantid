@@ -42,21 +42,21 @@ def get_expected_for_spectrum_n(data_workspace, selected_workspace_index, value_
     lambda_after_unit_conversion = [(time * 1e-6) * h / distance_source_detector / mass * 1e10 for time in times]
     expected_lambda = [2., 4., 6., 8.]
     if selected_workspace_index == 0:
-        expected_signal = [0.,
-                           abs(lambda_after_unit_conversion[1] - expected_lambda[2])
-                           / abs(lambda_after_unit_conversion[1] - lambda_after_unit_conversion[2]) * value_array[1],
-
-                           (abs(expected_lambda[3] - expected_lambda[2])
-                            / abs(lambda_after_unit_conversion[1] - lambda_after_unit_conversion[2])) * value_array[1]]
+        expected_signal = [
+            0.,
+            abs(lambda_after_unit_conversion[1] - expected_lambda[2]) /
+            abs(lambda_after_unit_conversion[1] - lambda_after_unit_conversion[2]) * value_array[1],
+            (abs(expected_lambda[3] - expected_lambda[2]) /
+             abs(lambda_after_unit_conversion[1] - lambda_after_unit_conversion[2])) * value_array[1]
+        ]
     else:
-        expected_signal = [1. * value_array[1] + abs(lambda_after_unit_conversion[2] - expected_lambda[1])
-                           / abs(lambda_after_unit_conversion[2] - lambda_after_unit_conversion[3]) * value_array[2],
-
-                           abs(lambda_after_unit_conversion[3] - expected_lambda[1])
-                           / abs(lambda_after_unit_conversion[2] - lambda_after_unit_conversion[3]) * value_array[2]
-                           + 1. * value_array[3],
-
-                           0.]
+        expected_signal = [
+            1. * value_array[1] + abs(lambda_after_unit_conversion[2] - expected_lambda[1]) /
+            abs(lambda_after_unit_conversion[2] - lambda_after_unit_conversion[3]) * value_array[2],
+            abs(lambda_after_unit_conversion[3] - expected_lambda[1]) /
+            abs(lambda_after_unit_conversion[2] - lambda_after_unit_conversion[3]) * value_array[2] +
+            1. * value_array[3], 0.
+        ]
 
     return np.array(expected_lambda), np.array(expected_signal)
 
@@ -81,18 +81,37 @@ class CalculateSansTransmissionTest(unittest.TestCase):
         DeleteWorkspace(self.loq_ws)
 
     # Function is too complex, but it can be tided when state is tamed
-    @staticmethod  # noqa: C901
-    def _get_state(transmission_radius_on_detector=None, transmission_roi_files=None, transmission_mask_files=None,  # noqa: C901
-                   transmission_monitor=None, incident_monitor=None, rebin_type=None, wavelength_low=None,
-                   wavelength_high=None, wavelength_step=None, wavelength_step_type=None,
-                   use_full_wavelength_range=None,
-                   wavelength_full_range_low=None, wavelength_full_range_high=None, prompt_peak_correction_min=None,
-                   prompt_peak_correction_max=None, background_TOF_general_start=None, background_TOF_general_stop=None,
-                   background_TOF_monitor_start=None, background_TOF_monitor_stop=None, background_TOF_roi_start=None,
-                   background_TOF_roi_stop=None, sample_fit_type=None, sample_polynomial_order=None,
-                   sample_wavelength_low=None, sample_wavelength_high=None, can_fit_type=None,
-                   can_polynomial_order=None,
-                   can_wavelength_low=None, can_wavelength_high=None):
+    @staticmethod
+    def _get_state(  # noqa: C901
+            transmission_radius_on_detector=None,
+            transmission_roi_files=None,
+            transmission_mask_files=None,
+            transmission_monitor=None,
+            incident_monitor=None,
+            rebin_type=None,
+            wavelength_low=None,
+            wavelength_high=None,
+            wavelength_step=None,
+            wavelength_step_type=None,
+            use_full_wavelength_range=None,
+            wavelength_full_range_low=None,
+            wavelength_full_range_high=None,
+            prompt_peak_correction_min=None,
+            prompt_peak_correction_max=None,
+            background_TOF_general_start=None,
+            background_TOF_general_stop=None,
+            background_TOF_monitor_start=None,
+            background_TOF_monitor_stop=None,
+            background_TOF_roi_start=None,
+            background_TOF_roi_stop=None,
+            sample_fit_type=None,
+            sample_polynomial_order=None,
+            sample_wavelength_low=None,
+            sample_wavelength_high=None,
+            can_fit_type=None,
+            can_polynomial_order=None,
+            can_wavelength_low=None,
+            can_wavelength_high=None):
         test_director = TestDirector()
         state = test_director.construct()
         instrument = state.data.instrument
@@ -190,8 +209,8 @@ class CalculateSansTransmissionTest(unittest.TestCase):
                                    state_adjustment_calculate_transmission=state.adjustment.calculate_transmission)
         return workspace, unfitted
 
-    def _do_assert(self, transmission_workspace, direct_workspace, unfitted_workspace, fitted_workspace,
-                   trans_incident, trans_trans, direct_incident, direct_trans):
+    def _do_assert(self, transmission_workspace, direct_workspace, unfitted_workspace, fitted_workspace, trans_incident,
+                   trans_trans, direct_incident, direct_trans):
         # Perform background correction, conversion to wavelength and rebinning
         trans_incident_background_corrected = np.array(trans_incident) - trans_incident[0]
         trans_trans_background_corrected = np.array(trans_trans) - trans_trans[0]
@@ -202,8 +221,8 @@ class CalculateSansTransmissionTest(unittest.TestCase):
                                                                                    trans_incident_background_corrected)
         trans_lambda, trans_signal = get_expected_for_spectrum_n(transmission_workspace, 2,
                                                                  trans_trans_background_corrected)
-        direct_incident_lambda, direct_incident_signal = get_expected_for_spectrum_n(direct_workspace, 0,
-                                                                                     direct_incident_background_corrected)
+        direct_incident_lambda, direct_incident_signal = get_expected_for_spectrum_n(
+            direct_workspace, 0, direct_incident_background_corrected)
         direct_lambda, direct_signal = get_expected_for_spectrum_n(direct_workspace, 2,
                                                                    direct_trans_background_corrected)
 
@@ -230,13 +249,18 @@ class CalculateSansTransmissionTest(unittest.TestCase):
 
     def test_that_calculates_transmission_for_general_background_and_no_prompt_peak(self):
         # Arrange
-        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.REBIN, wavelength_low=2.,
-                                                         wavelength_high=8., wavelength_step=2.,
+        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.REBIN,
+                                                         wavelength_low=2.,
+                                                         wavelength_high=8.,
+                                                         wavelength_step=2.,
                                                          wavelength_step_type=RangeStepType.LIN,
                                                          background_TOF_general_start=5000.,
-                                                         background_TOF_general_stop=10000., incident_monitor=1,
-                                                         transmission_monitor=3, sample_fit_type=FitType.LINEAR,
-                                                         sample_polynomial_order=0, sample_wavelength_low=2.,
+                                                         background_TOF_general_stop=10000.,
+                                                         incident_monitor=1,
+                                                         transmission_monitor=3,
+                                                         sample_fit_type=FitType.LINEAR,
+                                                         sample_polynomial_order=0,
+                                                         sample_wavelength_low=2.,
                                                          sample_wavelength_high=8.)
         # Get a test monitor workspace with 4 bins where the first bin is the back ground
         trans_incident = [20., 220., 210., 230.]
@@ -253,11 +277,12 @@ class CalculateSansTransmissionTest(unittest.TestCase):
         direct_workspace = self._prepare_workspace(workspace=direct_workspace, data=data_direct)
 
         fitted_workspace, unfitted_workspace = CalculateSansTransmissionTest._run_test(transmission_workspace,
-                                                                                       direct_workspace, state,
+                                                                                       direct_workspace,
+                                                                                       state,
                                                                                        is_sample=True)
         # Assert
-        self._do_assert(transmission_workspace, direct_workspace, unfitted_workspace, fitted_workspace,
-                        trans_incident, trans_trans, direct_incident, direct_trans)
+        self._do_assert(transmission_workspace, direct_workspace, unfitted_workspace, fitted_workspace, trans_incident,
+                        trans_trans, direct_incident, direct_trans)
 
     def test_that_calculates_transmission_for_monitor_specific_background_and_prompt_peak_for_can(self):
         # Arrange
@@ -266,8 +291,10 @@ class CalculateSansTransmissionTest(unittest.TestCase):
         fix_for_remove_bins = 1e-6
         background_TOF_monitor_start = {str(incident_spectrum): 5000., str(transmission_spectrum): 5000.}
         background_TOF_monitor_stop = {str(incident_spectrum): 10000., str(transmission_spectrum): 10000.}
-        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.REBIN, wavelength_low=2.,
-                                                         wavelength_high=8., wavelength_step=2.,
+        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.REBIN,
+                                                         wavelength_low=2.,
+                                                         wavelength_high=8.,
+                                                         wavelength_step=2.,
                                                          wavelength_step_type=RangeStepType.LIN,
                                                          prompt_peak_correction_min=15000. + fix_for_remove_bins,
                                                          prompt_peak_correction_max=20000.,
@@ -276,7 +303,8 @@ class CalculateSansTransmissionTest(unittest.TestCase):
                                                          incident_monitor=incident_spectrum,
                                                          transmission_monitor=transmission_spectrum,
                                                          can_fit_type=FitType.LINEAR,
-                                                         can_polynomial_order=0, can_wavelength_low=2.,
+                                                         can_polynomial_order=0,
+                                                         can_wavelength_low=2.,
                                                          can_wavelength_high=8.)
         # Get a test monitor workspace with 4 bins where the first bin is the back ground
         trans_incident = [20., 220., 210000000., 220.]
@@ -293,7 +321,8 @@ class CalculateSansTransmissionTest(unittest.TestCase):
 
         # Act
         fitted_workspace, unfitted_workspace = CalculateSansTransmissionTest._run_test(transmission_workspace,
-                                                                                       direct_workspace, state,
+                                                                                       direct_workspace,
+                                                                                       state,
                                                                                        is_sample=False)
         # Assert
         trans_incident[2] = trans_incident[3]
@@ -301,28 +330,33 @@ class CalculateSansTransmissionTest(unittest.TestCase):
         direct_incident[2] = direct_incident[3]
         direct_trans[2] = direct_trans[3]
 
-        self._do_assert(transmission_workspace, direct_workspace, unfitted_workspace, fitted_workspace,
-                        trans_incident, trans_trans, direct_incident, direct_trans)
+        self._do_assert(transmission_workspace, direct_workspace, unfitted_workspace, fitted_workspace, trans_incident,
+                        trans_trans, direct_incident, direct_trans)
 
     def test_that_can_get_transmission_for_region_of_interest_radius(self):
         # This test picks the monitor detector ids based on a radius around the centre of the detector. This is much
         # more tricky to test here and in principle the main tests should be happening in the actual
         # CalculateTransmission algorithm.
-        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.REBIN, wavelength_low=2.,
-                                                         wavelength_high=8., wavelength_step=2.,
+        state = CalculateSansTransmissionTest._get_state(rebin_type=RebinType.REBIN,
+                                                         wavelength_low=2.,
+                                                         wavelength_high=8.,
+                                                         wavelength_step=2.,
                                                          wavelength_step_type=RangeStepType.LIN,
                                                          background_TOF_general_start=5000.,
-                                                         background_TOF_general_stop=10000., incident_monitor=1,
+                                                         background_TOF_general_stop=10000.,
+                                                         incident_monitor=1,
                                                          transmission_radius_on_detector=0.01,
                                                          sample_fit_type=FitType.LINEAR,
-                                                         sample_polynomial_order=0, sample_wavelength_low=2.,
+                                                         sample_polynomial_order=0,
+                                                         sample_wavelength_low=2.,
                                                          sample_wavelength_high=8.)
         # Gets the full workspace
         transmission_workspace = CloneWorkspace(self.loq_ws)
         direct_workspace = CloneWorkspace(self.loq_ws)
 
         fitted_workspace, unfitted_workspace = CalculateSansTransmissionTest._run_test(transmission_workspace,
-                                                                                       direct_workspace, state,
+                                                                                       direct_workspace,
+                                                                                       state,
                                                                                        is_sample=True)
         self.assertEqual(fitted_workspace.getNumberHistograms(), 1)
 

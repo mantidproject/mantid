@@ -36,8 +36,7 @@ class LegendTabWidgetPresenter:
             lambda: self.view.set_transparency_spin_box(self.view.get_transparency_slider_value()))
         self.view.hide_legend_check_box.stateChanged.connect(
             lambda: self.hide_legend_ticked(not self.view.get_hide_legend()))
-        self.view.hide_box_check_box.stateChanged.connect(
-            lambda: self.hide_box_ticked(not self.view.get_hide_box()))
+        self.view.hide_box_check_box.stateChanged.connect(lambda: self.hide_box_ticked(not self.view.get_hide_box()))
         self.view.advanced_options_push_button.clicked.connect(self.show_advanced_options)
         self.view.advanced_options.rejected.connect(self.advanced_options_cancelled)
 
@@ -65,7 +64,7 @@ class LegendTabWidgetPresenter:
 
         # Converts alpha value (opacity value between 0 and 1) to transparency percentage.
         if int(matplotlib.__version__[0]) >= 2:
-            transparency = int(100 - (legend_props.transparency*100))
+            transparency = int(100 - (legend_props.transparency * 100))
             self.view.set_transparency_spin_box(transparency)
             self.view.set_transparency_slider(transparency)
         self.view.set_entries_font(legend_props.entries_font)

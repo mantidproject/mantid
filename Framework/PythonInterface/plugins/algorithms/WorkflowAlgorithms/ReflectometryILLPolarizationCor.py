@@ -7,8 +7,8 @@
 
 import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, mtd, WorkspaceGroupProperty)
-from mantid.kernel import (CompositeValidator, Direction, StringArrayLengthValidator, StringArrayMandatoryValidator, StringArrayProperty,
-                           StringListValidator)
+from mantid.kernel import (CompositeValidator, Direction, StringArrayLengthValidator, StringArrayMandatoryValidator,
+                           StringArrayProperty, StringListValidator)
 from mantid.simpleapi import (LoadILLPolarizationFactors, PolarizationEfficiencyCor, RebinToWorkspace)
 
 
@@ -26,7 +26,6 @@ class SubalgLogging:
 
 
 class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
-
     def category(self):
         """Return algorithm's categories."""
         return 'ILL\\Reflectometry;Workflow\\Reflectometry'
@@ -41,7 +40,10 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
 
     def seeAlso(self):
         """Return a list of related algorithm names."""
-        return ['ReflectometryILLConvertToQ', 'ReflectometryILLPreprocess', 'ReflectometryILLSumForeground', 'ReflectometryILLAutoProcess']
+        return [
+            'ReflectometryILLConvertToQ', 'ReflectometryILLPreprocess', 'ReflectometryILLSumForeground',
+            'ReflectometryILLAutoProcess'
+        ]
 
     def version(self):
         """Return the version of the algorithm."""
@@ -70,13 +72,9 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
         mandatoryInputWorkspaces = CompositeValidator()
         mandatoryInputWorkspaces.add(StringArrayMandatoryValidator())
         mandatoryInputWorkspaces.add(StringArrayLengthValidator(1, 4))
-        self.declareProperty(StringArrayProperty(Prop.INPUT_WS,
-                                                 values=[],
-                                                 validator=mandatoryInputWorkspaces),
+        self.declareProperty(StringArrayProperty(Prop.INPUT_WS, values=[], validator=mandatoryInputWorkspaces),
                              doc='A set of polarized workspaces, in wavelength.')
-        self.declareProperty(WorkspaceGroupProperty(Prop.OUTPUT_WS,
-                                                    defaultValue='',
-                                                    direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty(Prop.OUTPUT_WS, defaultValue='', direction=Direction.Output),
                              doc='A group of polarization efficiency corrected workspaces.')
         self.declareProperty(Prop.SUBALG_LOGGING,
                              defaultValue=SubalgLogging.OFF,
@@ -86,33 +84,27 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
                              defaultValue=utils.Cleanup.ON,
                              validator=StringListValidator([utils.Cleanup.ON, utils.Cleanup.OFF]),
                              doc='Enable or disable intermediate workspace cleanup.')
-        self.declareProperty(FileProperty(Prop.EFFICIENCY_FILE,
-                                          defaultValue='',
-                                          action=FileAction.Load),
+        self.declareProperty(FileProperty(Prop.EFFICIENCY_FILE, defaultValue='', action=FileAction.Load),
                              doc='A file containing the polarization efficiency factors.')
 
     def _commonBinning(self, wss):
         """Rebin all workspaces in wss to the first one."""
         for i in range(1, len(wss)):
-            RebinToWorkspace(
-                WorkspaceToRebin=wss[i],
-                OutputWorkspace=wss[i],
-                WorkspaceToMatch=wss[0],
-                EnableLogging=self._subalgLogging
-            )
+            RebinToWorkspace(WorkspaceToRebin=wss[i],
+                             OutputWorkspace=wss[i],
+                             WorkspaceToMatch=wss[0],
+                             EnableLogging=self._subalgLogging)
         return wss
 
     def _correct(self, wss, effWS):
         """Return a workspace group containing the polarization efficiency corrected workspaces."""
         flippers = self._flipperConfiguration(wss)
         corrWSsName = self.getPropertyValue(Prop.OUTPUT_WS)
-        corrWSs = PolarizationEfficiencyCor(
-            InputWorkspaces=wss,
-            OutputWorkspace=corrWSsName,
-            Flippers=flippers,
-            Efficiencies=effWS,
-            EnableLogging=self._subalgLogging
-        )
+        corrWSs = PolarizationEfficiencyCor(InputWorkspaces=wss,
+                                            OutputWorkspace=corrWSsName,
+                                            Flippers=flippers,
+                                            Efficiencies=effWS,
+                                            EnableLogging=self._subalgLogging)
         for ws in wss:
             self._cleanup.cleanup(ws)
         return corrWSs
@@ -121,12 +113,10 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
         """Load the polarization efficiencies, return efficiency factor workspace."""
         filename = self.getProperty(Prop.EFFICIENCY_FILE).value
         effWSName = self._names.withSuffix('efficiencies')
-        effWS = LoadILLPolarizationFactors(
-            Filename=filename,
-            OutputWorkspace=effWSName,
-            WavelengthReference=refWS,
-            EnableLogging=self._subalgLogging
-        )
+        effWS = LoadILLPolarizationFactors(Filename=filename,
+                                           OutputWorkspace=effWSName,
+                                           WavelengthReference=refWS,
+                                           EnableLogging=self._subalgLogging)
         self._cleanup.cleanupLater(effWS)
         return effWS
 
@@ -154,7 +144,8 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
                     isAnalyzer.append(False)
                 flippers.append(int(run.getProperty('fl1.value').value))
             if isAnalyzer[0] != isAnalyzer[1]:
-                raise RuntimeError('Analyzer config mismatch: one of the input workspaces has analyzer on, the other off.')
+                raise RuntimeError(
+                    'Analyzer config mismatch: one of the input workspaces has analyzer on, the other off.')
             isAnalyzer = isAnalyzer[0]
             if flippers[0] == 1:
                 # Reorder workspaces as expected by PolarizationEfficiencyCor.

@@ -366,26 +366,39 @@ class TestFittingDataModel(unittest.TestCase):
     def test_update_fit(self, mock_ads, mock_create_fit_tables, mock_estimate_difc):
         mock_table = mock.MagicMock()
         mock_table.toDict.return_value = {
-            'Name': ['f0.Height', 'f0.PeakCentre', 'f0.Sigma', 'f1.Height', 'f1.PeakCentre', 'f1.Sigma',
-                     'Cost function value'],
+            'Name': [
+                'f0.Height', 'f0.PeakCentre', 'f0.Sigma', 'f1.Height', 'f1.PeakCentre', 'f1.Sigma',
+                'Cost function value'
+            ],
             'Value': [11.0, 38837.0, 54.0, 10.0, 33638.0, 51.0, 1.0],
-            'Error': [1.0, 10.0, 2.0, 1.0, 10.0, 2.0, 0.0]}
+            'Error': [1.0, 10.0, 2.0, 1.0, 10.0, 2.0, 0.0]
+        }
         mock_ads.retrieve.return_value = mock_table
         mock_estimate_difc.return_value = 16
         func_str = 'name=Gaussian,Height=11,PeakCentre=38837,Sigma=54;name=Gaussian,Height=10,PeakCentre=33638,Sigma=51'
-        fitprop = {'name': 'Fit', 'properties': {'ConvolveMembers': True, 'EndX': 52000,
-                                                 'Function': func_str,
-                                                 'InputWorkspace': "name1", 'Output': "name1",
-                                                 'OutputCompositeMembers': True, 'StartX': 50000}, 'version': 1}
+        fitprop = {
+            'name': 'Fit',
+            'properties': {
+                'ConvolveMembers': True,
+                'EndX': 52000,
+                'Function': func_str,
+                'InputWorkspace': "name1",
+                'Output': "name1",
+                'OutputCompositeMembers': True,
+                'StartX': 50000
+            },
+            'version': 1
+        }
         args = [fitprop, ['Gaussian_PeakCentre']]
         self.model.update_fit(args)
 
         self.assertEqual(self.model._fit_results['name1']['model'], func_str)
-        self.assertEqual(self.model._fit_results['name1']['results'], {'Gaussian_Height': [[11.0, 1.0], [10.0, 1.0]],
-                                                                       'Gaussian_PeakCentre': [[38837.0, 10.0],
-                                                                                               [33638.0, 10.0]],
-                                                                       'Gaussian_Sigma': [[54.0, 2.0],
-                                                                                          [51.0, 2.0]]})
+        self.assertEqual(
+            self.model._fit_results['name1']['results'], {
+                'Gaussian_Height': [[11.0, 1.0], [10.0, 1.0]],
+                'Gaussian_PeakCentre': [[38837.0, 10.0], [33638.0, 10.0]],
+                'Gaussian_Sigma': [[54.0, 2.0], [51.0, 2.0]]
+            })
         self.assertEqual(self.model._fit_results['name1']['dpeaks'],
                          {'Gaussian_PeakCentre': [[2427.3125, 0.625], [2102.375, 0.625]]})
         mock_create_fit_tables.assert_called_once()
@@ -402,14 +415,18 @@ class TestFittingDataModel(unittest.TestCase):
         self.model._log_workspaces.name.return_value = 'some_log'
         func_str = 'name=Gaussian,Height=11,PeakCentre=38837,Sigma=54;name=Gaussian,Height=10,PeakCentre=33638,Sigma=51'
         self.model._fit_results = dict()
-        self.model._fit_results['name1'] = {'model': func_str,
-                                            'results': {'Gaussian_Height': [[11.0, 1.0], [10.0, 1.0]],
-                                                        'Gaussian_PeakCentre': [[38837.0, 10.0],
-                                                                                [33638.0, 10.0]],
-                                                        'Gaussian_Sigma': [[54.0, 2.0],
-                                                                           [51.0, 2.0]]},
-                                            'dpeaks': {'Gaussian_PeakCentre': [[2427.3125, 0.625], [2102.375, 0.625]]},
-                                            'costFunction': 1.0}
+        self.model._fit_results['name1'] = {
+            'model': func_str,
+            'results': {
+                'Gaussian_Height': [[11.0, 1.0], [10.0, 1.0]],
+                'Gaussian_PeakCentre': [[38837.0, 10.0], [33638.0, 10.0]],
+                'Gaussian_Sigma': [[54.0, 2.0], [51.0, 2.0]]
+            },
+            'dpeaks': {
+                'Gaussian_PeakCentre': [[2427.3125, 0.625], [2102.375, 0.625]]
+            },
+            'costFunction': 1.0
+        }
         return mock_ws_list, mock_create_table, mock_create_ws
 
     @patch(data_model_path + '.FittingDataModel.write_table_row')
@@ -417,20 +434,19 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".CreateEmptyTableWorkspace")
     @patch(data_model_path + ".CreateWorkspace")
     def test_create_fit_tables(self, mock_create_ws, mock_create_table, mock_groupws, mock_writerow):
-        mock_ws_list, mock_create_table, mock_create_ws = self.setup_test_create_fit_tables(mock_create_ws,
-                                                                                            mock_create_table,
-                                                                                            mock_groupws)
+        mock_ws_list, mock_create_table, mock_create_ws = self.setup_test_create_fit_tables(
+            mock_create_ws, mock_create_table, mock_groupws)
 
         mock_peak_centre_params = ['Gaussian_PeakCentre']
         self.model.create_fit_tables(mock_peak_centre_params)
 
         # test the workspaces were created and added to fit_workspaces
-        self.assertEqual(self.model._fit_workspaces, (mock_ws_list + [mock_create_table.return_value,
-                                                                      mock_create_table.return_value]))
+        self.assertEqual(self.model._fit_workspaces,
+                         (mock_ws_list + [mock_create_table.return_value, mock_create_table.return_value]))
         # test the table stores the correct function strings (empty string if no function present)
-        mock_writerow.assert_any_call(mock_create_table.return_value,
-                                      ['name1', self.model._fit_results['name1']['costFunction'],
-                                       self.model._fit_results['name1']['model']], 0)
+        mock_writerow.assert_any_call(
+            mock_create_table.return_value,
+            ['name1', self.model._fit_results['name1']['costFunction'], self.model._fit_results['name1']['model']], 0)
         mock_writerow.assert_any_call(mock_create_table.return_value, ['', nan, ''], 1)  # name2 has no entry
         # check the matrix workspaces corresponding to the fit parameters
         ws_names = [mock_create_ws.mock_calls[iws][2]['OutputWorkspace'] for iws in range(0, 3)]  # 3 params in gauss
@@ -457,38 +473,41 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".CreateEmptyTableWorkspace")
     @patch(data_model_path + ".CreateWorkspace")
     def test_create_fit_tables_different_funcs(self, mock_create_ws, mock_create_table, mock_groupws, mock_writerow):
-        mock_ws_list, mock_create_table, mock_create_ws = self.setup_test_create_fit_tables(mock_create_ws,
-                                                                                            mock_create_table,
-                                                                                            mock_groupws)
+        mock_ws_list, mock_create_table, mock_create_ws = self.setup_test_create_fit_tables(
+            mock_create_ws, mock_create_table, mock_groupws)
         mock_ws_list.append(mock.MagicMock())  # adding an additional parameter into model for name2
         func_str2 = self.model._fit_results['name1']['model'] + ';name=FlatBackground,A0=1'
-        self.model._fit_results['name2'] = {'model': func_str2,
-                                            'results': dict(self.model._fit_results['name1']['results'],
-                                                            FlatBackground_A0=[[1.0, 0.1]]),
-                                            'dpeaks': {'Gaussian_PeakCentre': [[38837.0, 10.0],
-                                                                               [33638.0, 10.0]]},
-                                            'costFunction': 2.0}
+        self.model._fit_results['name2'] = {
+            'model': func_str2,
+            'results': dict(self.model._fit_results['name1']['results'], FlatBackground_A0=[[1.0, 0.1]]),
+            'dpeaks': {
+                'Gaussian_PeakCentre': [[38837.0, 10.0], [33638.0, 10.0]]
+            },
+            'costFunction': 2.0
+        }
 
         mock_peak_centre_params = ['Gaussian_PeakCentre', 'Lorentzian_PeakCentre']
         self.model.create_fit_tables(mock_peak_centre_params)
 
         # test the workspaces were created and added to fit_workspaces
-        self.assertEqual(self.model._fit_workspaces, mock_ws_list
-                         + [mock_create_table.return_value, mock_create_table.return_value])
+        self.assertEqual(self.model._fit_workspaces,
+                         mock_ws_list + [mock_create_table.return_value, mock_create_table.return_value])
         # check that the dspacing peaks tables have been made
         mock_create_table.assert_any_call(OutputWorkspace='Gaussian_PeakCentre_dSpacing')
         # test the table stores the correct function strings (empty string if no function present)
-        mock_writerow.assert_any_call(mock_create_table.return_value,
-                                      ['name1', self.model._fit_results['name1']['costFunction'],
-                                       self.model._fit_results['name1']['model']], 0)
-        mock_writerow.assert_any_call(mock_create_table.return_value,
-                                      ['name2', self.model._fit_results['name2']['costFunction'],
-                                       self.model._fit_results['name2']['model']], 1)
+        mock_writerow.assert_any_call(
+            mock_create_table.return_value,
+            ['name1', self.model._fit_results['name1']['costFunction'], self.model._fit_results['name1']['model']], 0)
+        mock_writerow.assert_any_call(
+            mock_create_table.return_value,
+            ['name2', self.model._fit_results['name2']['costFunction'], self.model._fit_results['name2']['model']], 1)
         # check the matrix workspaces corresponding to the fit parameters
         ws_names = [mock_create_ws.mock_calls[iws][2]['OutputWorkspace'] for iws in range(0, 4)]  # 4 unique params
         # get list of all unique params across both models
-        param_names = list(set(list(self.model._fit_results['name1']['results'].keys()) + list(
-            self.model._fit_results['name2']['results'].keys())))
+        param_names = list(
+            set(
+                list(self.model._fit_results['name1']['results'].keys()) +
+                list(self.model._fit_results['name2']['results'].keys())))
         # test only table for unique parameter
         self.assertEqual(sorted(ws_names), sorted(param_names))
 
@@ -497,9 +516,8 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".CreateEmptyTableWorkspace")
     @patch(data_model_path + ".CreateWorkspace")
     def test_create_fit_tables_different_peaks(self, mock_create_ws, mock_create_table, mock_groupws, mock_write_row):
-        mock_ws_list, mock_create_table, mock_create_ws = self.setup_test_create_fit_tables(mock_create_ws,
-                                                                                            mock_create_table,
-                                                                                            mock_groupws)
+        mock_ws_list, mock_create_table, mock_create_ws = self.setup_test_create_fit_tables(
+            mock_create_ws, mock_create_table, mock_groupws)
         mock_create_table.return_value = mock.MagicMock()
         mock_ws_list.append(mock.MagicMock())
         self.model._fit_results['name1']['results']['Lorentzian_PeakCentre'] = [[999, 100]]

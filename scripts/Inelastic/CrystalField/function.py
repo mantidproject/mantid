@@ -48,7 +48,6 @@ class FunctionAttributes(object):
 
 class Function(object):
     """A helper object that simplifies getting and setting parameters of a simple named function."""
-
     def __init__(self, name_or_function, **kwargs):
         """
         Initialise new instance.
@@ -227,7 +226,6 @@ class PeaksFunction(object):
     """A helper object that simplifies getting and setting parameters of a composite function
     containing multiple peaks of the same spectrum.
     """
-
     def __init__(self, function, prefix, first_index):
         """
         Constructor.
@@ -325,7 +323,6 @@ class Background(object):
     """Object representing spectrum background: a sum of a central peak and a
     background.
     """
-
     def __init__(self, peak=None, background=None, functions=[]):
         """
         Initialise new instance.
@@ -391,7 +388,8 @@ class ResolutionModel:
                     to tabulate the functions such that linear interpolation between the
                     tabulated points has this accuracy. If not given a default value is used.
         """
-        errmsg = 'Resolution model must be either a tuple of two arrays, a function, PyChop object or list of one of these'
+        errmsg = 'Resolution model must be either a tuple of two arrays, a function, PyChop object or list of one of ' \
+                 'these'
         self.multi = False
         if hasattr(model, '__call__'):
             self.model = self._makeModel(model, xstart, xend, accuracy)
@@ -405,8 +403,7 @@ class ResolutionModel:
             self.model = model
         elif hasattr(model, '__len__'):
             if len(model) == 0:
-                raise RuntimeError('Resolution model cannot be initialised with an empty iterable %s' %
-                                   str(model))
+                raise RuntimeError('Resolution model cannot be initialised with an empty iterable %s' % str(model))
             if hasattr(model[0], '__call__'):
                 self.model = [self._makeModel(m, xstart, xend, accuracy) for m in model]
             elif hasattr(model[0], 'model'):
@@ -461,8 +458,7 @@ class ResolutionModel:
 
     def _makeModel(self, model, xstart, xend, accuracy):
         if xstart is None or xend is None:
-            raise RuntimeError('The x-range must be provided to ResolutionModel via '
-                               'xstart and xend parameters.')
+            raise RuntimeError('The x-range must be provided to ResolutionModel via ' 'xstart and xend parameters.')
         import numpy as np
         if accuracy is None:
             accuracy = self.default_accuracy
@@ -538,8 +534,8 @@ class PhysicalProperties(object):
         self._hdir = [0., 0., 1.]
         self._hmag = 1.
         self._physpropTemperature = 1.
-        self._lambda = 0.    # Exchange parameter (for susceptibility only)
-        self._chi0 = 0.      # Residual/background susceptibility (for susceptibility only)
+        self._lambda = 0.  # Exchange parameter (for susceptibility only)
+        self._chi0 = 0.  # Residual/background susceptibility (for susceptibility only)
         self._typeid = self._str2id(typeid) if isinstance(typeid, str) else int(typeid)
         try:
             initialiser = getattr(self, 'init' + str(self._typeid))
@@ -591,7 +587,8 @@ class PhysicalProperties(object):
 
     @property
     def Inverse(self):
-        return self._suscInverseFlag if (self._typeid == self.SUSCEPTIBILITY or self._typeid == self.MAGNETICMOMENT) else None
+        return self._suscInverseFlag if (self._typeid == self.SUSCEPTIBILITY
+                                         or self._typeid == self.MAGNETICMOMENT) else None
 
     @Inverse.setter
     def Inverse(self, value):
@@ -685,8 +682,9 @@ class PhysicalProperties(object):
 
     def toString(self):
         """Create function initialisation string"""
-        types = ['CrystalFieldHeatCapacity', 'CrystalFieldSusceptibility',
-                 'CrystalFieldMagnetisation', 'CrystalFieldMoment']
+        types = [
+            'CrystalFieldHeatCapacity', 'CrystalFieldSusceptibility', 'CrystalFieldMagnetisation', 'CrystalFieldMoment'
+        ]
         out = 'name=%s' % (types[self._typeid - 1])
         if self._typeid != self.HEATCAPACITY:
             out += ',Unit=%s' % (self._physpropUnit)
@@ -696,7 +694,7 @@ class PhysicalProperties(object):
                 out += ',Hdir=(%s)' % (','.join([str(hh) for hh in self._hdir]))
             if self._typeid == self.MAGNETISATION:
                 out += ',Temperature=%s' % (self._physpropTemperature)
-            else:            # either susceptibility or M(T)
+            else:  # either susceptibility or M(T)
                 out += ',inverse=%s' % (1 if self._suscInverseFlag else 0)
                 out += (',Hmag=%s' % (self._hmag)) if self._typeid == self.MAGNETISATION else ''
                 if self._typeid == self.SUSCEPTIBILITY and self._lambda != 0:
@@ -714,7 +712,7 @@ class PhysicalProperties(object):
             if 'powder' in self._hdir:
                 out['powder%s' % (dataset)] = 1
             else:
-                out['Hdir%s' % (dataset)] = [float(hh) for hh in self._hdir] # needs to be list
+                out['Hdir%s' % (dataset)] = [float(hh) for hh in self._hdir]  # needs to be list
             if self._typeid != self.MAGNETISATION:  # either susceptibility or M(T)
                 out['inverse%s' % (dataset)] = 1 if self._suscInverseFlag else 0
                 if self._typeid == self.MAGNETICMOMENT:

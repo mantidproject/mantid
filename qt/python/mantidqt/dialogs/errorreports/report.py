@@ -14,8 +14,7 @@ from mantidqt.utils.qt import load_ui
 
 from .details import MoreDetailsDialog
 
-DEFAULT_PLAIN_TEXT = (
-    """Please enter any additional information about your problems. (Max 3200 characters)
+DEFAULT_PLAIN_TEXT = ("""Please enter any additional information about your problems. (Max 3200 characters)
 
 For example:
     Error messages on the screen
@@ -69,8 +68,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.nonIDShareButton.clicked.connect(self.nonIDShare)
         self.noShareButton.clicked.connect(self.noShare)
 
-        self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint
-                            | QtCore.Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowModality(QtCore.Qt.ApplicationModal)
 
         # Dialog window to show more details of the crash to the user.
@@ -80,18 +78,15 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.quit_signal.emit()
 
     def fullShare(self):
-        self.action.emit(self.continue_working, 0, self.input_name, self.input_email,
-                         self.input_text)
+        self.action.emit(self.continue_working, 0, self.input_name, self.input_email, self.input_text)
         self.close()
 
     def nonIDShare(self):
-        self.action.emit(self.continue_working, 1, self.input_name, self.input_email,
-                         self.input_text)
+        self.action.emit(self.continue_working, 1, self.input_name, self.input_email, self.input_text)
         self.close()
 
     def noShare(self):
-        self.action.emit(self.continue_working, 2, self.input_name, self.input_email,
-                         self.input_text)
+        self.action.emit(self.continue_working, 2, self.input_name, self.input_email, self.input_text)
         self.close()
 
     def get_simple_line_edit_field(self, expected_type, line_edit):
@@ -100,8 +95,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         return expected_type(value_as_string) if value_as_string else ''
 
     def set_plain_text_edit_field(self):
-        self.input_text = self.get_plain_text_edit_field(text_edit="input_free_text",
-                                                         expected_type=str)
+        self.input_text = self.get_plain_text_edit_field(text_edit="input_free_text", expected_type=str)
 
     def get_plain_text_edit_field(self, text_edit, expected_type):
         gui_element = getattr(self, text_edit)

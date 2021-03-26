@@ -18,8 +18,7 @@ class FindPeaksAutomaticTest(unittest.TestCase):
     data_ws = None
     peak_guess_table = None
     peak_table_header = [
-        'centre', 'error centre', 'height', 'error height', 'sigma', 'error sigma', 'area',
-        'error area'
+        'centre', 'error centre', 'height', 'error height', 'sigma', 'error sigma', 'area', 'error area'
     ]
     alg_instance = None
     x_values = None
@@ -28,8 +27,8 @@ class FindPeaksAutomaticTest(unittest.TestCase):
     def setUp(self):
         # Creating two peaks on an exponential background with gaussian noise
         self.x_values = np.linspace(0, 100, 1001)
-        self.centre =  [25, 75]
-        self.height =  [35, 20]
+        self.centre = [25, 75]
+        self.height = [35, 20]
         self.width = [10, 5]
         self.y_values = self.gaussian(self.x_values, self.centre[0], self.height[0], self.width[0])
 
@@ -50,13 +49,10 @@ class FindPeaksAutomaticTest(unittest.TestCase):
         ]
 
         # Generating a workspace with the data and a flat background
-        self.raw_ws = CreateWorkspace(DataX=self.x_values,
-                                      DataY=self.y_values,
-                                      OutputWorkspace='raw_ws')
+        self.raw_ws = CreateWorkspace(DataX=self.x_values, DataY=self.y_values, OutputWorkspace='raw_ws')
         self.data_ws = CreateWorkspace(DataX=np.concatenate((self.x_values, self.x_values)),
                                        DataY=np.concatenate((self.y_values, self.background)),
-                                       DataE=np.sqrt(
-                                           np.concatenate((self.y_values, self.background))),
+                                       DataE=np.sqrt(np.concatenate((self.y_values, self.background))),
                                        NSpec=2,
                                        OutputWorkspace='data_ws')
 
@@ -100,14 +96,14 @@ class FindPeaksAutomaticTest(unittest.TestCase):
 
     def assertPeakFound(self, peak_params, centre, height, sigma, tolerance=0.01):
         if not np.isclose(peak_params['centre'], centre, rtol=tolerance):
-            raise Exception('Expected {}, got {}. Difference greater than tolerance {}'
-                            .format(centre, peak_params['centre'], tolerance))
+            raise Exception('Expected {}, got {}. Difference greater than tolerance {}'.format(
+                centre, peak_params['centre'], tolerance))
         if not np.isclose(peak_params['height'], height, rtol=tolerance):
-            raise Exception('Expected {}, got {}. Difference greater than tolerance {}'
-                            .format(height, peak_params['height'], tolerance))
+            raise Exception('Expected {}, got {}. Difference greater than tolerance {}'.format(
+                height, peak_params['height'], tolerance))
         if not np.isclose(peak_params['sigma'], sigma, rtol=tolerance):
-            raise Exception('Expected {}, got {}. Difference greater than tolerance {}'
-                            .format(sigma, peak_params['sigma'], tolerance))
+            raise Exception('Expected {}, got {}. Difference greater than tolerance {}'.format(
+                sigma, peak_params['sigma'], tolerance))
 
     def test_algorithm_with_no_input_workspace_raises_exception(self):
         with self.assertRaises(RuntimeError):
@@ -115,23 +111,16 @@ class FindPeaksAutomaticTest(unittest.TestCase):
 
     def test_algorithm_with_negative_acceptance_threshold_throws(self):
         with self.assertRaises(ValueError):
-            FindPeaksAutomatic(InputWorkspace=self.data_ws,
-                               AcceptanceThreshold=-0.1,
-                               PlotPeaks=False)
+            FindPeaksAutomatic(InputWorkspace=self.data_ws, AcceptanceThreshold=-0.1, PlotPeaks=False)
 
     def test_algorithm_with_invalid_spectrum_number(self):
         #tests that a float spectrum number throws an error
         with self.assertRaises(TypeError):
-            FindPeaksAutomatic(InputWorkspace=self.data_ws,
-                               PlotPeaks=False,
-                               SpectrumNumber = 3.4)
+            FindPeaksAutomatic(InputWorkspace=self.data_ws, PlotPeaks=False, SpectrumNumber=3.4)
 
         #tests that a negative integer throws an error
         with self.assertRaises(ValueError):
-            FindPeaksAutomatic(InputWorkspace=self.data_ws,
-                               PlotPeaks=False,
-                               SpectrumNumber = -1 )
-
+            FindPeaksAutomatic(InputWorkspace=self.data_ws, PlotPeaks=False, SpectrumNumber=-1)
 
     def test_algorithm_with_negative_smooth_window_throws(self):
         with self.assertRaises(ValueError):
@@ -166,29 +155,29 @@ class FindPeaksAutomaticTest(unittest.TestCase):
         centre = np.array([[25, 75], [10, 60]], dtype=float)
         height = np.array([[35, 20], [40, 50]], dtype=float)
         width = np.array([[10, 5], [8, 6]], dtype=float)
-        y_values = np.array(
-            [self.gaussian(x_values[0], centre[0, 0], height[0, 0], width[0, 0]),
-             self.gaussian(x_values[1], centre[1, 0], height[1, 0], width[1, 0])])
+        y_values = np.array([
+            self.gaussian(x_values[0], centre[0, 0], height[0, 0], width[0, 0]),
+            self.gaussian(x_values[1], centre[1, 0], height[1, 0], width[1, 0])
+        ])
 
-        y_values += np.array(
-            [self.gaussian(x_values[0], centre[0, 1], height[0, 1], width[0, 1]),
-             self.gaussian(x_values[1], centre[1, 1], height[1, 1], width[1, 1])])
+        y_values += np.array([
+            self.gaussian(x_values[0], centre[0, 1], height[0, 1], width[0, 1]),
+            self.gaussian(x_values[1], centre[1, 1], height[1, 1], width[1, 1])
+        ])
         background = 10 * np.ones(x_values.shape)
         y_values += background
 
-        raw_ws = CreateWorkspace(DataX=x_values,
-                                      DataY=y_values,
-                                      OutputWorkspace='raw_ws',NSpec = 2)
+        raw_ws = CreateWorkspace(DataX=x_values, DataY=y_values, OutputWorkspace='raw_ws', NSpec=2)
 
         FindPeaksAutomatic(
             InputWorkspace=raw_ws,
-            SpectrumNumber = 2,
+            SpectrumNumber=2,
             SmoothWindow=500,
             EstimatePeakSigma=6,
             MinPeakSigma=3,
             MaxPeakSigma=15,
         )
-        peak_table  = mtd['{}_{}'.format(raw_ws.getName(), 'properties')]
+        peak_table = mtd['{}_{}'.format(raw_ws.getName(), 'properties')]
         print(peak_table.row(1))
         self.assertPeakFound(peak_table.row(0), 10, 40, 8)
         self.assertPeakFound(peak_table.row(1), 60, 50, 6)
@@ -198,27 +187,28 @@ class FindPeaksAutomaticTest(unittest.TestCase):
         centre = np.array([[25, 75], [10, 60]], dtype=float)
         height = np.array([[35, 20], [40, 50]], dtype=float)
         width = np.array([[10, 5], [8, 6]], dtype=float)
-        y_values = np.array(
-            [self.gaussian(x_values[0], centre[0, 0], height[0, 0], width[0, 0]),
-             self.gaussian(x_values[1], centre[1, 0], height[1, 0], width[1, 0])])
+        y_values = np.array([
+            self.gaussian(x_values[0], centre[0, 0], height[0, 0], width[0, 0]),
+            self.gaussian(x_values[1], centre[1, 0], height[1, 0], width[1, 0])
+        ])
 
-        y_values += np.array(
-            [self.gaussian(x_values[0], centre[0, 1], height[0, 1], width[0, 1]),
-             self.gaussian(x_values[1], centre[1, 1], height[1, 1], width[1, 1])])
+        y_values += np.array([
+            self.gaussian(x_values[0], centre[0, 1], height[0, 1], width[0, 1]),
+            self.gaussian(x_values[1], centre[1, 1], height[1, 1], width[1, 1])
+        ])
         background = 10 * np.ones(x_values.shape)
         y_values += background
 
-        raw_ws = CreateWorkspace(DataX=x_values,
-                                      DataY=y_values,
-                                      OutputWorkspace='raw_ws',NSpec = 2)
+        raw_ws = CreateWorkspace(DataX=x_values, DataY=y_values, OutputWorkspace='raw_ws', NSpec=2)
         with self.assertRaises(RuntimeError):
             FindPeaksAutomatic(
                 InputWorkspace=raw_ws,
-                SpectrumNumber = 3,
+                SpectrumNumber=3,
                 SmoothWindow=500,
                 EstimatePeakSigma=6,
                 MinPeakSigma=3,
-                MaxPeakSigma=15,)
+                MaxPeakSigma=15,
+            )
 
     def test_algorithm_does_not_create_temporary_workspaces(self):
         FindPeaksAutomatic(self.raw_ws)
@@ -277,9 +267,8 @@ class FindPeaksAutomaticTest(unittest.TestCase):
         np.testing.assert_equal(self.y_values, self.alg_instance.erosion(self.y_values, 0))
 
     def test_erosion_calls_single_erosion_the_correct_number_of_times(self, ):
-        with mock.patch(
-                'plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.FindPeaksAutomatic._single_erosion'
-        ) as mock_single_erosion:
+        with mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.FindPeaksAutomatic._single_erosion'
+                        ) as mock_single_erosion:
             times = len(self.y_values)
             win_size = 2
             call_list = []
@@ -295,9 +284,8 @@ class FindPeaksAutomaticTest(unittest.TestCase):
         np.testing.assert_equal(self.y_values, self.alg_instance.dilation(self.y_values, 0))
 
     def test_dilation_calls_single_erosion_the_correct_number_of_times(self):
-        with mock.patch(
-                'plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.FindPeaksAutomatic._single_dilation'
-        ) as mock_single_dilation:
+        with mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.FindPeaksAutomatic._single_dilation'
+                        ) as mock_single_dilation:
             times = len(self.y_values)
             win_size = 2
             call_list = []
@@ -310,8 +298,7 @@ class FindPeaksAutomaticTest(unittest.TestCase):
             mock_single_dilation.assert_has_calls(call_list, any_order=True)
 
     @mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.FindPeaksAutomatic.erosion')
-    @mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.FindPeaksAutomatic.dilation'
-                )
+    @mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.FindPeaksAutomatic.dilation')
     def test_opening_calls_correct_functions_in_correct_order(self, mock_dilation, mock_erosion):
         win_size = 3
 
@@ -326,8 +313,7 @@ class FindPeaksAutomaticTest(unittest.TestCase):
     @mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.FindPeaksAutomatic.opening')
     @mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.FindPeaksAutomatic.dilation')
     @mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.FindPeaksAutomatic.erosion')
-    def test_average_calls_right_functions_in_right_order(self, mock_erosion, mock_dilation,
-                                                          mock_opening):
+    def test_average_calls_right_functions_in_right_order(self, mock_erosion, mock_dilation, mock_opening):
         win_size = 3
 
         self.alg_instance.average(self.y_values, win_size)
@@ -360,8 +346,7 @@ class FindPeaksAutomaticTest(unittest.TestCase):
             self.assertAlmostEqual(peak_guess_table.row(i)['centre'], self.x_values[pid], 5)
 
     def test_find_good_peaks_calls_fit_gaussian_peaks_twice_if_no_peaks_given(self):
-        with mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.FitGaussianPeaks'
-                        ) as mock_fit:
+        with mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.FitGaussianPeaks') as mock_fit:
             tmp_table = CreateEmptyTableWorkspace()
             tmp_table.addColumn(type='float', name='chi2')
             tmp_table.addColumn(type='float', name='poisson')
@@ -378,8 +363,7 @@ class FindPeaksAutomaticTest(unittest.TestCase):
         raise ValueError('Index = %d' % idx)
 
     def test_find_good_peaks_selects_correct_column_for_error(self):
-        with mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.FitGaussianPeaks'
-                        ) as mock_fit:
+        with mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.FitGaussianPeaks') as mock_fit:
             mock_table = mock.Mock()
             mock_table.column.side_effect = self._table_side_effect
             mock_fit.return_value = None, None, mock_table
@@ -409,15 +393,13 @@ class FindPeaksAutomaticTest(unittest.TestCase):
         self.assertEqual(0, refit_peak_table.rowCount())
         self.assertEqual(refit_peak_table.getColumnNames(), peak_table.getColumnNames())
 
-        self.assertPeakFound(peak1, self.centre[0], self.height[0]+10, self.width[0], 0.05)
-        self.assertPeakFound(peak2, self.centre[1], self.height[1]+10, self.width[1], 0.05)
+        self.assertPeakFound(peak1, self.centre[0], self.height[0] + 10, self.width[0], 0.05)
+        self.assertPeakFound(peak2, self.centre[1], self.height[1] + 10, self.width[1], 0.05)
 
     def test_find_peaks_is_called_if_scipy_version_higher_1_1_0(self):
         mock_scipy = mock.MagicMock()
         mock_scipy.__version__ = '1.1.0'
-        mock_scipy.signal.find_peaks.return_value = (self.peakids, {
-            'prominences': self.peakids
-        })
+        mock_scipy.signal.find_peaks.return_value = (self.peakids, {'prominences': self.peakids})
         with mock.patch.dict('sys.modules', scipy=mock_scipy):
             self.alg_instance.process(self.x_values,
                                       self.y_values,
@@ -436,9 +418,7 @@ class FindPeaksAutomaticTest(unittest.TestCase):
     def test_find_peaks_cwt_is_called_if_scipy_version_lower_1_1_0(self):
         mock_scipy = mock.MagicMock()
         mock_scipy.__version__ = '1.0.0'
-        mock_scipy.signal.find_peaks.return_value = (self.peakids, {
-            'prominences': self.peakids
-        })
+        mock_scipy.signal.find_peaks.return_value = (self.peakids, {'prominences': self.peakids})
         with mock.patch.dict('sys.modules', scipy=mock_scipy):
             self.alg_instance.process(self.x_values,
                                       self.y_values,
@@ -455,8 +435,7 @@ class FindPeaksAutomaticTest(unittest.TestCase):
             self.assertEqual(1, mock_scipy.signal.find_peaks_cwt.call_count)
 
     def test_process_calls_find_good_peaks(self):
-        with mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.CreateWorkspace'
-                        ) as mock_create_ws:
+        with mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.CreateWorkspace') as mock_create_ws:
             mock_create_ws.return_value = self.data_ws
             self.alg_instance.find_good_peaks = mock.Mock()
 
@@ -485,8 +464,7 @@ class FindPeaksAutomaticTest(unittest.TestCase):
                                                                 peak_width_estimate=5)
 
     def test_process_returns_the_return_value_of_find_good_peaks(self):
-        with mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.CreateWorkspace'
-                        ) as mock_create_ws:
+        with mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.CreateWorkspace') as mock_create_ws:
             mock_create_ws.return_value = self.data_ws
             win_size = 500
 

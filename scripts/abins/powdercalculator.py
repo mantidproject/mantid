@@ -38,8 +38,7 @@ class PowderCalculator:
 
         self._masses = np.asarray([atoms_data[atom]["mass"] for atom in range(len(atoms_data))])
 
-        self._clerk = abins.IO(input_filename=filename,
-                               group_name=abins.parameters.hdf_groups['powder_data'])
+        self._clerk = abins.IO(input_filename=filename, group_name=abins.parameters.hdf_groups['powder_data'])
 
     def _calculate_powder(self) -> abins.PowderData:
         """
@@ -84,8 +83,7 @@ class PowderCalculator:
         factor = np.einsum('ij,j->ij', 1.0 / masses, CONSTANT / self._frequencies[k])
 
         # b_tensors[num_atoms, num_freq, dim, dim]
-        b_tensors = np.einsum('ijkl,ij->ijkl',
-                              np.einsum('lki, lkj->lkij', disp, disp.conjugate()).real, factor)
+        b_tensors = np.einsum('ijkl,ij->ijkl', np.einsum('lki, lkj->lkij', disp, disp.conjugate()).real, factor)
 
         # Replace tensor values close to zero with a small finite value.
         # Not clear why this is done; we never divide by these values?
@@ -140,7 +138,8 @@ class PowderCalculator:
         """
         data = self._clerk.load(list_of_datasets=["powder_data"])
         powder_data = abins.PowderData(**data["datasets"]["powder_data"],
-                                       num_atoms=data["datasets"]["powder_data"]["b_tensors"][str(GAMMA_POINT)].shape[0])
+                                       num_atoms=data["datasets"]["powder_data"]["b_tensors"][str(
+                                           GAMMA_POINT)].shape[0])
 
         return powder_data
 

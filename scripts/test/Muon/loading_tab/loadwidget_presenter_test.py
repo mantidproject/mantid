@@ -74,6 +74,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         def setGroupAndPairsToEmptyList(grouping_context):
             grouping_context._groups = []
             grouping_context._pairs = []
+
         self.group_context.reset_group_and_pairs_to_default = mock.MagicMock(
             side_effect=setGroupAndPairsToEmptyList(self.group_context))
 
@@ -87,8 +88,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         return {'OutputWorkspace': [MuonWorkspaceWrapper(workspace_mock)], 'MainFieldDirection': 'transverse'}
 
     def mock_loading_from_browse(self, workspace, filename, run):
-        self.load_file_view.show_file_browser_and_return_selection = mock.Mock(
-            return_value=[filename])
+        self.load_file_view.show_file_browser_and_return_selection = mock.Mock(return_value=[filename])
         self.load_mock.return_value = (workspace, run, filename, False)
         self.load_run_mock.return_value = (workspace, run, filename, False)
 
@@ -106,8 +106,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.load_run_mock.return_value = (workspace, run, filename, False)
         self.load_mock.return_value = (workspace, run, filename, False)
 
-        self.load_file_view.get_file_edit_text = mock.Mock(
-            return_value=filename)
+        self.load_file_view.get_file_edit_text = mock.Mock(return_value=filename)
 
     def mock_disabling_buttons_in_run_and_file_widget(self):
         self.load_run_view.disable_load_buttons = mock.Mock()

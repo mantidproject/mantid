@@ -34,10 +34,8 @@ class POLDIFitPeaks1DTest(systemtesting.MantidSystemTest):
             Load(Filename="%s_reference.nxs" % (dataFile), OutputWorkspace=dataFile)
 
     def runPeakSearch(self, filenames, deleteList):
-        for dataFile,deleteRowList in zip(filenames, deleteList):
-            PoldiPeakSearch(InputWorkspace=dataFile,
-                            MinimumPeakSeparation=8,
-                            OutputWorkspace="%s_Peaks" % (dataFile))
+        for dataFile, deleteRowList in zip(filenames, deleteList):
+            PoldiPeakSearch(InputWorkspace=dataFile, MinimumPeakSeparation=8, OutputWorkspace="%s_Peaks" % (dataFile))
 
             for deleteRows in deleteRowList:
                 DeleteTableRows(TableWorkspace="%s_Peaks" % (dataFile), Rows=deleteRows)
@@ -48,24 +46,27 @@ class POLDIFitPeaks1DTest(systemtesting.MantidSystemTest):
 
     def runPoldiFitPeaks1D(self, filenames, versions):
         for dataFile, version in zip(filenames, versions):
-            args = {"InputWorkspace": dataFile,
-                    "FwhmMultiples": 4,
-                    "PoldiPeakTable": "%s_Peaks" % (dataFile),
-                    "OutputWorkspace": "%s_Peaks_Refined" % (dataFile),
-                    "FitPlotsWorkspace": "%s_FitPlots" % (dataFile),
-                    "Version": version}
+            args = {
+                "InputWorkspace": dataFile,
+                "FwhmMultiples": 4,
+                "PoldiPeakTable": "%s_Peaks" % (dataFile),
+                "OutputWorkspace": "%s_Peaks_Refined" % (dataFile),
+                "FitPlotsWorkspace": "%s_FitPlots" % (dataFile),
+                "Version": version
+            }
 
             if version == 2:
                 args["AllowedOverlap"] = 0.1
 
             PoldiFitPeaks1D(**args)
 
-  # This test makes sure that:
-  #  - standard deviations of position and relative fwhm are acceptably small (indicates reasonable fit)
-  #  - refined peak positions are within one standard deviation of reference results obtained from existing program
-  #  - fwhms do not deviate too much from reference results
-  #  - currently, only the first 10 peaks are compared (as in the peak search test)
     def analyseResults(self, filenames, versions):
+        # This test makes sure that:
+        #  - standard deviations of position and relative fwhm are acceptably small (indicates reasonable fit)
+        #  - refined peak positions are within one standard deviation of reference results obtained from existing
+        #    program
+        #  - fwhms do not deviate too much from reference results
+        #  - currently, only the first 10 peaks are compared (as in the peak search test)
         for dataFile, version in zip(filenames, versions):
             calculatedPeaks = mtd["%s_Peaks_Refined" % (dataFile)]
             referencePeaks = mtd["%s_reference_1DFit" % (dataFile)]
@@ -80,7 +81,7 @@ class POLDIFitPeaks1DTest(systemtesting.MantidSystemTest):
             referenceFwhms = [float(x) for x in referencePeaks.column(1)]
 
             for i in range(10):
-          # extract position and fwhm with uncertainties
+                # extract position and fwhm with uncertainties
                 position = [positions[i], positionErrors[i]]
                 fwhm = [fwhms[i], fwhmErrors[i]]
 
@@ -89,13 +90,15 @@ class POLDIFitPeaks1DTest(systemtesting.MantidSystemTest):
                 self.assertTrue(self.positionAcceptable(position))
                 self.assertTrue(self.fwhmAcceptable(fwhm))
 
-          # find closest reference peak
+                # find closest reference peak
                 deltas = np.array([np.abs(position[0] - x) for x in referencePositions])
 
                 self.assertDelta(deltas.min(), 0.0, self.versionDeltas[version])
                 minIndex = deltas.argmin()
 
-                self.assertTrue(self.uncertainValueEqualsReference(position, referencePositions[minIndex], self.errorMultiplier[version]))
+                self.assertTrue(
+                    self.uncertainValueEqualsReference(position, referencePositions[minIndex],
+                                                       self.errorMultiplier[version]))
                 self.assertDelta(fwhm[0], referenceFwhms[minIndex], self.versionDeltas[version])
 
     def positionAcceptable(self, position):

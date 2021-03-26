@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
 """ Main view for the ISIS SANS reduction interface.
 """
 
@@ -20,13 +19,11 @@ from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import jobtreeview, manageuserdirectories
 from reduction_gui.reduction.scripter import execute_script
-from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
-                               RangeStepType, ReductionMode, FitType)
-from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
-                                       get_reduction_mode_strings_for_gui,
-                                       get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS,
-                                       load_file, load_property, set_setting,
-                                       get_instrument_from_gui_selection)
+from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument, RangeStepType,
+                               ReductionMode, FitType)
+from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection, get_reduction_mode_strings_for_gui,
+                                       get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file,
+                                       load_property, set_setting, get_instrument_from_gui_selection)
 from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.models.SumRunsModel import SumRunsModel
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
@@ -40,17 +37,17 @@ Ui_SansDataProcessorWindow, _ = load_ui(__file__, "sans_data_processor_window.ui
 # ----------------------------------------------------------------------------------------------------------------------
 # Gui Classes
 # ----------------------------------------------------------------------------------------------------------------------
-class SANSDataProcessorGui(QMainWindow,
-                           Ui_SansDataProcessorWindow):
+class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
     data_processor_table = None
     INSTRUMENTS = None
     VARIABLE = "Variable"
 
     # This dictates the order displayed on the GUI
-    COLUMN_NAMES = ["Sample Scatter", "Sample Transmission", "Sample Direct",
-                    "Can Scatter", "Can Transmission", "Can Direct", "Output Name", "User File",
-                    "Sample Thickness", "Options", "Sample Shape", "Sample Height", "Sample Width",
-                    "SSP", "STP", "SDP", "CSP", "CTP", "CDP"]
+    COLUMN_NAMES = [
+        "Sample Scatter", "Sample Transmission", "Sample Direct", "Can Scatter", "Can Transmission", "Can Direct",
+        "Output Name", "User File", "Sample Thickness", "Options", "Sample Shape", "Sample Height", "Sample Width",
+        "SSP", "STP", "SDP", "CSP", "CTP", "CDP"
+    ]
 
     MULTI_PERIOD_COLUMNS = ["SSP", "STP", "SDP", "CSP", "CTP", "CDP"]
 
@@ -58,7 +55,6 @@ class SANSDataProcessorGui(QMainWindow,
         """
         Defines the elements which a presenter can listen to in this View
         """
-
         @abstractmethod
         def on_user_file_load(self):
             pass
@@ -182,10 +178,9 @@ class SANSDataProcessorGui(QMainWindow,
         self._has_monitor_5 = False
 
         # Instrument
-        SANSDataProcessorGui.INSTRUMENTS = ",".join(item.value for item in [SANSInstrument.SANS2D,
-                                                                            SANSInstrument.LOQ,
-                                                                            SANSInstrument.LARMOR,
-                                                                            SANSInstrument.ZOOM])
+        SANSDataProcessorGui.INSTRUMENTS = ",".join(
+            item.value
+            for item in [SANSInstrument.SANS2D, SANSInstrument.LOQ, SANSInstrument.LARMOR, SANSInstrument.ZOOM])
 
         self._column_index_map = None
 
@@ -232,8 +227,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     def add_listener(self, listener):
         if not isinstance(listener, SANSDataProcessorGui.RunTabListener):
-            raise ValueError(
-                "The listener is not of type RunTabListener but rather {}".format(type(listener)))
+            raise ValueError("The listener is not of type RunTabListener but rather {}".format(type(listener)))
         self._settings_listeners.append(listener)
 
     def clear_listeners(self):
@@ -291,8 +285,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.multi_period_check_box.stateChanged.connect(self._on_multi_period_selection)
         self.sample_geometry_checkbox.stateChanged.connect(self._on_sample_geometry_selection)
 
-        self.wavelength_step_type_combo_box.currentIndexChanged.connect(
-            self._on_wavelength_step_type_changed)
+        self.wavelength_step_type_combo_box.currentIndexChanged.connect(self._on_wavelength_step_type_changed)
 
         self.process_selected_button.clicked.connect(self._process_selected_clicked)
         self.process_all_button.clicked.connect(self._process_all_clicked)
@@ -310,18 +303,13 @@ class SANSDataProcessorGui(QMainWindow,
         # Settings tabs
         # --------------------------------------------------------------------------------------------------------------
         self.reset_all_fields_to_default()
-        self.pixel_adjustment_det_1_push_button.clicked.connect(
-            self._on_load_pixel_adjustment_det_1)
-        self.pixel_adjustment_det_2_push_button.clicked.connect(
-            self._on_load_pixel_adjustment_det_2)
-        self.wavelength_adjustment_det_1_push_button.clicked.connect(
-            self._on_load_wavelength_adjustment_det_1)
-        self.wavelength_adjustment_det_2_push_button.clicked.connect(
-            self._on_load_wavelength_adjustment_det_2)
+        self.pixel_adjustment_det_1_push_button.clicked.connect(self._on_load_pixel_adjustment_det_1)
+        self.pixel_adjustment_det_2_push_button.clicked.connect(self._on_load_pixel_adjustment_det_2)
+        self.wavelength_adjustment_det_1_push_button.clicked.connect(self._on_load_wavelength_adjustment_det_1)
+        self.wavelength_adjustment_det_2_push_button.clicked.connect(self._on_load_wavelength_adjustment_det_2)
 
         # Set the merge settings
-        self.reduction_mode_combo_box.currentIndexChanged.connect(
-            self._on_reduction_mode_selection_has_changed)
+        self.reduction_mode_combo_box.currentIndexChanged.connect(self._on_reduction_mode_selection_has_changed)
         self._on_reduction_mode_selection_has_changed()  # Disable the merge settings initially
 
         # Mask file input settings
@@ -331,17 +319,14 @@ class SANSDataProcessorGui(QMainWindow,
         self.manage_directories_button.clicked.connect(self._on_manage_directories)
 
         # Set the q step type settings
-        self.q_1d_step_type_combo_box.currentIndexChanged.connect(
-            self._on_q_1d_step_type_has_changed)
+        self.q_1d_step_type_combo_box.currentIndexChanged.connect(self._on_q_1d_step_type_has_changed)
         self._on_q_1d_step_type_has_changed()
 
-        self.q_xy_step_type_combo_box.currentIndexChanged.connect(
-            self._on_q_xy_step_type_has_changed)
+        self.q_xy_step_type_combo_box.currentIndexChanged.connect(self._on_q_xy_step_type_has_changed)
         self._on_q_xy_step_type_has_changed()
 
         # Set the q resolution aperture shape settings
-        self.q_resolution_shape_combo_box.currentIndexChanged.connect(
-            self._on_q_resolution_shape_has_changed)
+        self.q_resolution_shape_combo_box.currentIndexChanged.connect(self._on_q_resolution_shape_has_changed)
         self.q_resolution_group_box.toggled.connect(self._on_q_resolution_shape_has_changed)
         self._on_q_resolution_shape_has_changed()
 
@@ -350,22 +335,17 @@ class SANSDataProcessorGui(QMainWindow,
         self._on_fit_selection_has_changed()
 
         # Set the transmission polynomial order
-        self.fit_sample_fit_type_combo_box.currentIndexChanged.connect(
-            self._on_transmission_fit_type_has_changed)
-        self.fit_can_fit_type_combo_box.currentIndexChanged.connect(
-            self._on_transmission_fit_type_has_changed)
+        self.fit_sample_fit_type_combo_box.currentIndexChanged.connect(self._on_transmission_fit_type_has_changed)
+        self.fit_can_fit_type_combo_box.currentIndexChanged.connect(self._on_transmission_fit_type_has_changed)
         self._on_transmission_fit_type_has_changed()
 
         # Set the transmission target
-        self.transmission_target_combo_box.currentIndexChanged.connect(
-            self._on_transmission_target_has_changed)
+        self.transmission_target_combo_box.currentIndexChanged.connect(self._on_transmission_target_has_changed)
         self._on_transmission_target_has_changed()
 
         # Roi and Mask files
-        self.transmission_roi_files_push_button.clicked.connect(
-            self._on_load_transmission_roi_files)
-        self.transmission_mask_files_push_button.clicked.connect(
-            self._on_load_transmission_mask_files)
+        self.transmission_roi_files_push_button.clicked.connect(self._on_load_transmission_roi_files)
+        self.transmission_mask_files_push_button.clicked.connect(self._on_load_transmission_mask_files)
 
         # Q Resolution
         self.q_resolution_moderator_file_push_button.clicked.connect(self._on_load_moderator_file)
@@ -431,8 +411,7 @@ class SANSDataProcessorGui(QMainWindow,
         border_color = "black"
         border_opacity = 255
         is_editable = True
-        return jobtreeview.Cell(text, background_color, border_thickness,
-                                border_color, border_opacity, is_editable)
+        return jobtreeview.Cell(text, background_color, border_thickness, border_color, border_opacity, is_editable)
 
     def row(self, path):
         return jobtreeview.RowLocation(path)
@@ -478,8 +457,7 @@ class SANSDataProcessorGui(QMainWindow,
         row = row_location.rowRelativeToParent()
         row_obj = self._convert_to_row_state(self.get_row(row_location))
 
-        self._call_settings_listeners(
-            lambda listener: listener.on_data_changed(row, row_obj))
+        self._call_settings_listeners(lambda listener: listener.on_data_changed(row, row_obj))
 
     def _row_inserted(self, row_location):
         if row_location.depth() > 1:
@@ -571,8 +549,8 @@ class SANSDataProcessorGui(QMainWindow,
         Load the user file
         """
         # Load the user file
-        load_file(self.user_file_line_edit, "TOML Files (*.toml, *.TOML);; Text Files (*.txt)",
-                  self.__generic_settings, self.__path_key, self.get_user_file_path)
+        load_file(self.user_file_line_edit, "TOML Files (*.toml, *.TOML);; Text Files (*.txt)", self.__generic_settings,
+                  self.__path_key, self.get_user_file_path)
 
         # Set full user file path for default loading
         self.gui_properties_handler.set_setting("user_file", self.get_user_file_path())
@@ -709,29 +687,29 @@ class SANSDataProcessorGui(QMainWindow,
         self.output_directory_location.setText("{}".format(out_file_directory))
 
     def _on_load_pixel_adjustment_det_1(self):
-        load_file(self.pixel_adjustment_det_1_line_edit, "*.*", self.__generic_settings,
-                  self.__path_key, self.get_pixel_adjustment_det_1)
+        load_file(self.pixel_adjustment_det_1_line_edit, "*.*", self.__generic_settings, self.__path_key,
+                  self.get_pixel_adjustment_det_1)
 
     def get_pixel_adjustment_det_1(self):
         return str(self.pixel_adjustment_det_1_line_edit.text())
 
     def _on_load_pixel_adjustment_det_2(self):
-        load_file(self.pixel_adjustment_det_2_line_edit, "*.*", self.__generic_settings,
-                  self.__path_key, self.get_pixel_adjustment_det_2)
+        load_file(self.pixel_adjustment_det_2_line_edit, "*.*", self.__generic_settings, self.__path_key,
+                  self.get_pixel_adjustment_det_2)
 
     def get_pixel_adjustment_det_2(self):
         return str(self.pixel_adjustment_det_2_line_edit.text())
 
     def _on_load_wavelength_adjustment_det_1(self):
-        load_file(self.wavelength_adjustment_det_1_line_edit, "*.*", self.__generic_settings,
-                  self.__path_key, self.get_wavelength_adjustment_det_1)
+        load_file(self.wavelength_adjustment_det_1_line_edit, "*.*", self.__generic_settings, self.__path_key,
+                  self.get_wavelength_adjustment_det_1)
 
     def get_wavelength_adjustment_det_1(self):
         return str(self.wavelength_adjustment_det_1_line_edit.text())
 
     def _on_load_wavelength_adjustment_det_2(self):
-        load_file(self.wavelength_adjustment_det_2_line_edit, "*.*", self.__generic_settings,
-                  self.__path_key, self.get_wavelength_adjustment_det_2)
+        load_file(self.wavelength_adjustment_det_2_line_edit, "*.*", self.__generic_settings, self.__path_key,
+                  self.get_wavelength_adjustment_det_2)
 
     def get_wavelength_adjustment_det_2(self):
         return str(self.wavelength_adjustment_det_2_line_edit.text())
@@ -868,22 +846,22 @@ class SANSDataProcessorGui(QMainWindow,
         return str(self.transmission_roi_files_line_edit.text())
 
     def _on_load_transmission_roi_files(self):
-        load_file(self.transmission_roi_files_line_edit, "*.*", self.__generic_settings,
-                  self.__path_key, self.get_transmission_roi_files)
+        load_file(self.transmission_roi_files_line_edit, "*.*", self.__generic_settings, self.__path_key,
+                  self.get_transmission_roi_files)
 
     def get_transmission_mask_files(self):
         return str(self.transmission_mask_files_line_edit.text())
 
     def _on_load_transmission_mask_files(self):
-        load_file(self.transmission_mask_files_line_edit, "*.*", self.__generic_settings,
-                  self.__path_key, self.get_transmission_mask_files)
+        load_file(self.transmission_mask_files_line_edit, "*.*", self.__generic_settings, self.__path_key,
+                  self.get_transmission_mask_files)
 
     def get_moderator_file(self):
         return str(self.q_resolution_moderator_file_line_edit.text())
 
     def _on_load_moderator_file(self):
-        load_file(self.q_resolution_moderator_file_line_edit, "*.*", self.__generic_settings,
-                  self.__path_key, self.get_moderator_file)
+        load_file(self.q_resolution_moderator_file_line_edit, "*.*", self.__generic_settings, self.__path_key,
+                  self.get_moderator_file)
 
     def get_mask_file(self):
         return str(self.mask_file_input_line_edit.text())
@@ -892,16 +870,15 @@ class SANSDataProcessorGui(QMainWindow,
         manageuserdirectories.ManageUserDirectories.openManageUserDirectories()
 
     def _on_load_mask_file(self):
-        load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
-                  self.__mask_file_input_path_key, self.get_mask_file)
+        load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings, self.__mask_file_input_path_key,
+                  self.get_mask_file)
 
     def _on_mask_file_add(self):
         self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
 
     def _on_multi_period_selection(self):
         UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Multiple Period Toggled"], False)
-        self._call_settings_listeners(
-            lambda listener: listener.on_multi_period_selection(self.is_multi_period_view()))
+        self._call_settings_listeners(lambda listener: listener.on_multi_period_selection(self.is_multi_period_view()))
 
     def _on_sample_geometry_selection(self):
         UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Sample Geometry Toggled"], False)
@@ -1098,8 +1075,7 @@ class SANSDataProcessorGui(QMainWindow,
         elif self.output_mode_both_radio_button.isChecked():
             return OutputMode.BOTH
         else:
-            self.gui_logger.warning(
-                "The output format was not specified. Defaulting to saving to memory only.")
+            self.gui_logger.warning("The output format was not specified. Defaulting to saving to memory only.")
             return OutputMode.PUBLISH_TO_ADS
 
     @output_mode.setter
@@ -1189,8 +1165,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def merge_scale(self):
-        return self.get_simple_line_edit_field(line_edit="merged_scale_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="merged_scale_line_edit", expected_type=float)
 
     @merge_scale.setter
     def merge_scale(self, value):
@@ -1199,8 +1174,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def merge_shift(self):
-        return self.get_simple_line_edit_field(line_edit="merged_shift_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="merged_shift_line_edit", expected_type=float)
 
     @merge_shift.setter
     def merge_shift(self, value):
@@ -1225,25 +1199,21 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def merge_q_range_start(self):
-        return self.get_simple_line_edit_field(line_edit="merged_q_range_start_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="merged_q_range_start_line_edit", expected_type=float)
 
     @merge_q_range_start.setter
     def merge_q_range_start(self, value):
         if value is not None:
-            self.update_simple_line_edit_field(line_edit="merged_q_range_start_line_edit",
-                                               value=value)
+            self.update_simple_line_edit_field(line_edit="merged_q_range_start_line_edit", value=value)
 
     @property
     def merge_q_range_stop(self):
-        return self.get_simple_line_edit_field(line_edit="merged_q_range_stop_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="merged_q_range_stop_line_edit", expected_type=float)
 
     @merge_q_range_stop.setter
     def merge_q_range_stop(self, value):
         if value is not None:
-            self.update_simple_line_edit_field(line_edit="merged_q_range_stop_line_edit",
-                                               value=value)
+            self.update_simple_line_edit_field(line_edit="merged_q_range_stop_line_edit", value=value)
 
     @property
     def merge_mask(self):
@@ -1255,8 +1225,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def merge_max(self):
-        return self.get_simple_line_edit_field(line_edit="merged_max_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="merged_max_line_edit", expected_type=float)
 
     @merge_max.setter
     def merge_max(self, value):
@@ -1265,8 +1234,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def merge_min(self):
-        return self.get_simple_line_edit_field(line_edit="merged_min_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="merged_min_line_edit", expected_type=float)
 
     @merge_min.setter
     def merge_min(self, value):
@@ -1305,13 +1273,11 @@ class SANSDataProcessorGui(QMainWindow,
 
     @wavelength_step_type.setter
     def wavelength_step_type(self, value):
-        self.update_gui_combo_box(value=value, expected_type=RangeStepType,
-                                  combo_box="wavelength_step_type_combo_box")
+        self.update_gui_combo_box(value=value, expected_type=RangeStepType, combo_box="wavelength_step_type_combo_box")
 
     @property
     def wavelength_min(self):
-        return self.get_simple_line_edit_field(line_edit="wavelength_min_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="wavelength_min_line_edit", expected_type=float)
 
     @wavelength_min.setter
     def wavelength_min(self, value):
@@ -1319,8 +1285,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def wavelength_max(self):
-        return self.get_simple_line_edit_field(line_edit="wavelength_max_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="wavelength_max_line_edit", expected_type=float)
 
     @wavelength_max.setter
     def wavelength_max(self, value):
@@ -1328,8 +1293,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def wavelength_step(self):
-        return self.get_simple_line_edit_field(line_edit="wavelength_step_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="wavelength_step_line_edit", expected_type=float)
 
     @wavelength_step.setter
     def wavelength_step(self, value):
@@ -1348,8 +1312,7 @@ class SANSDataProcessorGui(QMainWindow,
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def absolute_scale(self):
-        return self.get_simple_line_edit_field(line_edit="absolute_scale_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="absolute_scale_line_edit", expected_type=float)
 
     @absolute_scale.setter
     def absolute_scale(self, value):
@@ -1374,8 +1337,7 @@ class SANSDataProcessorGui(QMainWindow,
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def normalization_incident_monitor(self):
-        return self.get_simple_line_edit_field(line_edit="monitor_normalization_line_edit",
-                                               expected_type=int)
+        return self.get_simple_line_edit_field(line_edit="monitor_normalization_line_edit", expected_type=int)
 
     @normalization_incident_monitor.setter
     def normalization_incident_monitor(self, value):
@@ -1394,8 +1356,7 @@ class SANSDataProcessorGui(QMainWindow,
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def transmission_incident_monitor(self):
-        return self.get_simple_line_edit_field(line_edit="transmission_line_edit",
-                                               expected_type=int)
+        return self.get_simple_line_edit_field(line_edit="transmission_line_edit", expected_type=int)
 
     @transmission_incident_monitor.setter
     def transmission_incident_monitor(self, value):
@@ -1411,28 +1372,23 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def transmission_roi_files(self):
-        return self.get_simple_line_edit_field(line_edit="transmission_roi_files_line_edit",
-                                               expected_type=str)
+        return self.get_simple_line_edit_field(line_edit="transmission_roi_files_line_edit", expected_type=str)
 
     @transmission_roi_files.setter
     def transmission_roi_files(self, value):
-        self.update_simple_line_edit_field(line_edit="transmission_roi_files_line_edit",
-                                           value=value)
+        self.update_simple_line_edit_field(line_edit="transmission_roi_files_line_edit", value=value)
 
     @property
     def transmission_mask_files(self):
-        return self.get_simple_line_edit_field(line_edit="transmission_mask_files_line_edit",
-                                               expected_type=str)
+        return self.get_simple_line_edit_field(line_edit="transmission_mask_files_line_edit", expected_type=str)
 
     @transmission_mask_files.setter
     def transmission_mask_files(self, value):
-        self.update_simple_line_edit_field(line_edit="transmission_mask_files_line_edit",
-                                           value=value)
+        self.update_simple_line_edit_field(line_edit="transmission_mask_files_line_edit", value=value)
 
     @property
     def transmission_radius(self):
-        return self.get_simple_line_edit_field(line_edit="transmission_radius_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="transmission_radius_line_edit", expected_type=float)
 
     @transmission_radius.setter
     def transmission_radius(self, value):
@@ -1440,8 +1396,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def transmission_monitor(self):
-        return self.get_simple_line_edit_field(line_edit="transmission_monitor_line_edit",
-                                               expected_type=int)
+        return self.get_simple_line_edit_field(line_edit="transmission_monitor_line_edit", expected_type=int)
 
     @transmission_monitor.setter
     def transmission_monitor(self, value):
@@ -1449,8 +1404,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def transmission_mn_4_shift(self):
-        return self.get_simple_line_edit_field(line_edit="transmission_mn_4_shift_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="transmission_mn_4_shift_line_edit", expected_type=float)
 
     @transmission_mn_4_shift.setter
     def transmission_mn_4_shift(self, value):
@@ -1458,8 +1412,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def transmission_mn_5_shift(self):
-        return self.get_simple_line_edit_field(line_edit="transmission_mn_5_shift_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="transmission_mn_5_shift_line_edit", expected_type=float)
 
     @transmission_mn_5_shift.setter
     def transmission_mn_5_shift(self, value):
@@ -1497,8 +1450,7 @@ class SANSDataProcessorGui(QMainWindow,
         if value is None:
             self.fit_sample_fit_type_combo_box.setCurrentIndex(0)
         else:
-            self.update_gui_combo_box(value=value, expected_type=FitType,
-                                      combo_box="fit_sample_fit_type_combo_box")
+            self.update_gui_combo_box(value=value, expected_type=FitType, combo_box="fit_sample_fit_type_combo_box")
 
     @property
     def transmission_can_fit_type(self):
@@ -1513,8 +1465,7 @@ class SANSDataProcessorGui(QMainWindow,
         if value is None:
             self.fit_sample_fit_type_combo_box.setCurrentIndex(0)
         else:
-            self.update_gui_combo_box(value=value, expected_type=FitType,
-                                      combo_box="fit_can_fit_type_combo_box")
+            self.update_gui_combo_box(value=value, expected_type=FitType, combo_box="fit_can_fit_type_combo_box")
 
     @staticmethod
     def _set_polynomial_order(spin_box, value):
@@ -1543,43 +1494,35 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def transmission_sample_wavelength_min(self):
-        return self.get_simple_line_edit_field(line_edit="fit_sample_wavelength_min_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="fit_sample_wavelength_min_line_edit", expected_type=float)
 
     @transmission_sample_wavelength_min.setter
     def transmission_sample_wavelength_min(self, value):
-        self.update_simple_line_edit_field(line_edit="fit_sample_wavelength_min_line_edit",
-                                           value=value)
+        self.update_simple_line_edit_field(line_edit="fit_sample_wavelength_min_line_edit", value=value)
 
     @property
     def transmission_sample_wavelength_max(self):
-        return self.get_simple_line_edit_field(line_edit="fit_sample_wavelength_max_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="fit_sample_wavelength_max_line_edit", expected_type=float)
 
     @transmission_sample_wavelength_max.setter
     def transmission_sample_wavelength_max(self, value):
-        self.update_simple_line_edit_field(line_edit="fit_sample_wavelength_max_line_edit",
-                                           value=value)
+        self.update_simple_line_edit_field(line_edit="fit_sample_wavelength_max_line_edit", value=value)
 
     @property
     def transmission_can_wavelength_min(self):
-        return self.get_simple_line_edit_field(line_edit="fit_can_wavelength_min_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="fit_can_wavelength_min_line_edit", expected_type=float)
 
     @transmission_can_wavelength_min.setter
     def transmission_can_wavelength_min(self, value):
-        self.update_simple_line_edit_field(line_edit="fit_can_wavelength_min_line_edit",
-                                           value=value)
+        self.update_simple_line_edit_field(line_edit="fit_can_wavelength_min_line_edit", value=value)
 
     @property
     def transmission_can_wavelength_max(self):
-        return self.get_simple_line_edit_field(line_edit="fit_can_wavelength_max_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="fit_can_wavelength_max_line_edit", expected_type=float)
 
     @transmission_can_wavelength_max.setter
     def transmission_can_wavelength_max(self, value):
-        self.update_simple_line_edit_field(line_edit="fit_can_wavelength_max_line_edit",
-                                           value=value)
+        self.update_simple_line_edit_field(line_edit="fit_can_wavelength_max_line_edit", value=value)
 
     @property
     def transmission_sample_use_wavelength(self):
@@ -1602,43 +1545,35 @@ class SANSDataProcessorGui(QMainWindow,
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def pixel_adjustment_det_1(self):
-        return self.get_simple_line_edit_field(line_edit="pixel_adjustment_det_1_line_edit",
-                                               expected_type=str)
+        return self.get_simple_line_edit_field(line_edit="pixel_adjustment_det_1_line_edit", expected_type=str)
 
     @pixel_adjustment_det_1.setter
     def pixel_adjustment_det_1(self, value):
-        self.update_simple_line_edit_field(line_edit="pixel_adjustment_det_1_line_edit",
-                                           value=value)
+        self.update_simple_line_edit_field(line_edit="pixel_adjustment_det_1_line_edit", value=value)
 
     @property
     def pixel_adjustment_det_2(self):
-        return self.get_simple_line_edit_field(line_edit="pixel_adjustment_det_2_line_edit",
-                                               expected_type=str)
+        return self.get_simple_line_edit_field(line_edit="pixel_adjustment_det_2_line_edit", expected_type=str)
 
     @pixel_adjustment_det_2.setter
     def pixel_adjustment_det_2(self, value):
-        self.update_simple_line_edit_field(line_edit="pixel_adjustment_det_2_line_edit",
-                                           value=value)
+        self.update_simple_line_edit_field(line_edit="pixel_adjustment_det_2_line_edit", value=value)
 
     @property
     def wavelength_adjustment_det_1(self):
-        return self.get_simple_line_edit_field(line_edit="wavelength_adjustment_det_1_line_edit",
-                                               expected_type=str)
+        return self.get_simple_line_edit_field(line_edit="wavelength_adjustment_det_1_line_edit", expected_type=str)
 
     @wavelength_adjustment_det_1.setter
     def wavelength_adjustment_det_1(self, value):
-        self.update_simple_line_edit_field(line_edit="wavelength_adjustment_det_1_line_edit",
-                                           value=value)
+        self.update_simple_line_edit_field(line_edit="wavelength_adjustment_det_1_line_edit", value=value)
 
     @property
     def wavelength_adjustment_det_2(self):
-        return self.get_simple_line_edit_field(line_edit="wavelength_adjustment_det_2_line_edit",
-                                               expected_type=str)
+        return self.get_simple_line_edit_field(line_edit="wavelength_adjustment_det_2_line_edit", expected_type=str)
 
     @wavelength_adjustment_det_2.setter
     def wavelength_adjustment_det_2(self, value):
-        self.update_simple_line_edit_field(line_edit="wavelength_adjustment_det_2_line_edit",
-                                           value=value)
+        self.update_simple_line_edit_field(line_edit="wavelength_adjustment_det_2_line_edit", value=value)
 
     # ==================================================================================================================
     # ==================================================================================================================
@@ -1696,8 +1631,7 @@ class SANSDataProcessorGui(QMainWindow,
             # Set to the default
             self.q_1d_step_type_combo_box.setCurrentIndex(0)
         else:
-            self.update_gui_combo_box(value=value, expected_type=RangeStepType,
-                                      combo_box="q_1d_step_type_combo_box")
+            self.update_gui_combo_box(value=value, expected_type=RangeStepType, combo_box="q_1d_step_type_combo_box")
             # Set the list
             if isinstance(value, list):
                 gui_element = self.q_1d_step_type_combo_box
@@ -1736,8 +1670,7 @@ class SANSDataProcessorGui(QMainWindow,
             # Set to the default
             self.q_xy_step_type_combo_box.setCurrentIndex(0)
         else:
-            self.update_gui_combo_box(value=value, expected_type=RangeStepType,
-                                      combo_box="q_xy_step_type_combo_box")
+            self.update_gui_combo_box(value=value, expected_type=RangeStepType, combo_box="q_xy_step_type_combo_box")
 
             if isinstance(value, list):
                 gui_element = self.q_xy_step_type_combo_box
@@ -1750,8 +1683,7 @@ class SANSDataProcessorGui(QMainWindow,
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def gravity_extra_length(self):
-        return self.get_simple_line_edit_field(line_edit="gravity_extra_length_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="gravity_extra_length_line_edit", expected_type=float)
 
     @gravity_extra_length.setter
     def gravity_extra_length(self, value):
@@ -1785,8 +1717,7 @@ class SANSDataProcessorGui(QMainWindow,
     @property
     def q_resolution_source_a(self):
         # We expected a current index 0 (since this is a circular aperture)
-        return self._get_q_resolution_aperture(current_index=0,
-                                               line_edit="q_resolution_source_a_line_edit")
+        return self._get_q_resolution_aperture(current_index=0, line_edit="q_resolution_source_a_line_edit")
 
     @q_resolution_source_a.setter
     def q_resolution_source_a(self, value):
@@ -1794,8 +1725,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def q_resolution_sample_a(self):
-        return self._get_q_resolution_aperture(current_index=0,
-                                               line_edit="q_resolution_sample_a_line_edit")
+        return self._get_q_resolution_aperture(current_index=0, line_edit="q_resolution_sample_a_line_edit")
 
     @q_resolution_sample_a.setter
     def q_resolution_sample_a(self, value):
@@ -1803,8 +1733,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def q_resolution_source_h(self):
-        return self._get_q_resolution_aperture(current_index=1,
-                                               line_edit="q_resolution_source_h_line_edit")
+        return self._get_q_resolution_aperture(current_index=1, line_edit="q_resolution_source_h_line_edit")
 
     @q_resolution_source_h.setter
     def q_resolution_source_h(self, value):
@@ -1812,8 +1741,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def q_resolution_sample_h(self):
-        return self._get_q_resolution_aperture(current_index=1,
-                                               line_edit="q_resolution_sample_h_line_edit")
+        return self._get_q_resolution_aperture(current_index=1, line_edit="q_resolution_sample_h_line_edit")
 
     @q_resolution_sample_h.setter
     def q_resolution_sample_h(self, value):
@@ -1821,8 +1749,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def q_resolution_source_w(self):
-        return self._get_q_resolution_aperture(current_index=1,
-                                               line_edit="q_resolution_source_w_line_edit")
+        return self._get_q_resolution_aperture(current_index=1, line_edit="q_resolution_source_w_line_edit")
 
     @q_resolution_source_w.setter
     def q_resolution_source_w(self, value):
@@ -1830,8 +1757,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def q_resolution_sample_w(self):
-        return self._get_q_resolution_aperture(current_index=1,
-                                               line_edit="q_resolution_sample_w_line_edit")
+        return self._get_q_resolution_aperture(current_index=1, line_edit="q_resolution_sample_w_line_edit")
 
     @q_resolution_sample_w.setter
     def q_resolution_sample_w(self, value):
@@ -1839,8 +1765,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def q_resolution_delta_r(self):
-        return self.get_simple_line_edit_field(line_edit="q_resolution_delta_r_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="q_resolution_delta_r_line_edit", expected_type=float)
 
     @q_resolution_delta_r.setter
     def q_resolution_delta_r(self, value):
@@ -1848,29 +1773,24 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def q_resolution_collimation_length(self):
-        return self.get_simple_line_edit_field(
-            line_edit="q_resolution_collimation_length_line_edit",
-            expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="q_resolution_collimation_length_line_edit",
+                                               expected_type=float)
 
     @q_resolution_collimation_length.setter
     def q_resolution_collimation_length(self, value):
-        self.update_simple_line_edit_field(line_edit="q_resolution_collimation_length_line_edit",
-                                           value=value)
+        self.update_simple_line_edit_field(line_edit="q_resolution_collimation_length_line_edit", value=value)
 
     @property
     def q_resolution_moderator_file(self):
-        return self.get_simple_line_edit_field(line_edit="q_resolution_moderator_file_line_edit",
-                                               expected_type=str)
+        return self.get_simple_line_edit_field(line_edit="q_resolution_moderator_file_line_edit", expected_type=str)
 
     @q_resolution_moderator_file.setter
     def q_resolution_moderator_file(self, value):
-        self.update_simple_line_edit_field(line_edit="q_resolution_moderator_file_line_edit",
-                                           value=value)
+        self.update_simple_line_edit_field(line_edit="q_resolution_moderator_file_line_edit", value=value)
 
     @property
     def r_cut(self):
-        return self.get_simple_line_edit_field(line_edit="r_cut_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="r_cut_line_edit", expected_type=float)
 
     @r_cut.setter
     def r_cut(self, value):
@@ -1878,8 +1798,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def w_cut(self):
-        return self.get_simple_line_edit_field(line_edit="w_cut_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="w_cut_line_edit", expected_type=float)
 
     @w_cut.setter
     def w_cut(self, value):
@@ -1896,8 +1815,7 @@ class SANSDataProcessorGui(QMainWindow,
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def phi_limit_min(self):
-        return self.get_simple_line_edit_field(line_edit="phi_limit_min_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="phi_limit_min_line_edit", expected_type=float)
 
     @phi_limit_min.setter
     def phi_limit_min(self, value):
@@ -1905,8 +1823,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def phi_limit_max(self):
-        return self.get_simple_line_edit_field(line_edit="phi_limit_max_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="phi_limit_max_line_edit", expected_type=float)
 
     @phi_limit_max.setter
     def phi_limit_max(self, value):
@@ -1925,8 +1842,7 @@ class SANSDataProcessorGui(QMainWindow,
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def radius_limit_min(self):
-        return self.get_simple_line_edit_field(line_edit="radius_limit_min_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="radius_limit_min_line_edit", expected_type=float)
 
     @radius_limit_min.setter
     def radius_limit_min(self, value):
@@ -1934,8 +1850,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @property
     def radius_limit_max(self):
-        return self.get_simple_line_edit_field(line_edit="radius_limit_max_line_edit",
-                                               expected_type=float)
+        return self.get_simple_line_edit_field(line_edit="radius_limit_max_line_edit", expected_type=float)
 
     @radius_limit_max.setter
     def radius_limit_max(self, value):
@@ -1993,8 +1908,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.q_1d_min_line_edit.setValidator(double_validator)
         self.q_1d_max_line_edit.setValidator(double_validator)
         self.q_1d_step_line_edit.setValidator(positive_double_validator)
-        self.q_xy_max_line_edit.setValidator(
-            positive_double_validator)  # Yes, this should be positive!
+        self.q_xy_max_line_edit.setValidator(positive_double_validator)  # Yes, this should be positive!
         self.q_xy_step_line_edit.setValidator(positive_double_validator)
 
         self.r_cut_line_edit.setValidator(positive_double_validator)

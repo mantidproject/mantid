@@ -22,8 +22,7 @@ class IndirectInstrument(Instrument, abins.FrequencyPowderGenerator):
 
     def get_angles(self):
         parameters = abins.parameters.instruments[self._name]
-        if ('settings' in parameters
-                and 'angles' in parameters['settings'][self.get_setting()]):
+        if ('settings' in parameters and 'angles' in parameters['settings'][self.get_setting()]):
             return parameters['settings'][self.get_setting()]['angles']
         else:
             return parameters['angles']
@@ -53,7 +52,7 @@ class IndirectInstrument(Instrument, abins.FrequencyPowderGenerator):
 
         k2_i = (input_data + parameters['final_neutron_energy']) * WAVENUMBER_TO_INVERSE_A
         k2_f = parameters['final_neutron_energy'] * WAVENUMBER_TO_INVERSE_A
-        result = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * cos_scattering_angle
+        result = k2_i + k2_f - 2 * (k2_i * k2_f)**0.5 * cos_scattering_angle
         return result
 
     @classmethod
@@ -108,6 +107,5 @@ class IndirectInstrument(Instrument, abins.FrequencyPowderGenerator):
 
         sigma = self.get_sigma(frequencies)
 
-        points_freq, broadened_spectrum = broaden_spectrum(frequencies, bins, s_dft,
-                                                           sigma, scheme=selected_scheme)
+        points_freq, broadened_spectrum = broaden_spectrum(frequencies, bins, s_dft, sigma, scheme=selected_scheme)
         return points_freq, broadened_spectrum

@@ -175,7 +175,6 @@ def get_instrument_paths_for_sans_file(file_name=None, file_information=None):
     :param file_information: a file_information object. either this or the file_name has to be specified.
     :return: the IDF path and the IPF path
     """
-
     def get_file_location(path):
         return os.path.dirname(path)
 
@@ -643,9 +642,20 @@ def get_number_of_periods_for_raw(file_name):
 
 def get_date_for_raw(file_name):
     def get_month(month_string):
-        month_conversion = {"JAN": "01", "FEB": "02", "MAR": "03", "APR": "04",
-                            "MAY": "05", "JUN": "06", "JUL": "07", "AUG": "08",
-                            "SEP": "09", "OCT": "10", "NOV": "11", "DEC": "12"}
+        month_conversion = {
+            "JAN": "01",
+            "FEB": "02",
+            "MAR": "03",
+            "APR": "04",
+            "MAY": "05",
+            "JUN": "06",
+            "JUL": "07",
+            "AUG": "08",
+            "SEP": "09",
+            "OCT": "10",
+            "NOV": "11",
+            "DEC": "12"
+        }
         month_upper = month_string.upper()
         if month_upper in month_conversion:
             return month_conversion[month_upper]
@@ -805,8 +815,8 @@ class SANSFileInformation(metaclass=ABCMeta):
         if not run_number:
             run_number = self._get_run_number_from_file(self._full_file_name)
             self.logger.warning(
-                "Could not parse run number from filename, using the run number direct set in the file which is {0}"
-                .format(run_number))
+                "Could not parse run number from filename, using the run number direct set in the file which is {0}".
+                format(run_number))
 
         return int(run_number)
 

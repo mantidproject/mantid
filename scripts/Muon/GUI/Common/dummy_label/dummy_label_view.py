@@ -8,7 +8,6 @@ from qtpy import QtWidgets
 
 
 class DummyLabelView(QtWidgets.QWidget):
-
     def __init__(self, subcontext, parent=None):
         super(DummyLabelView, self).__init__(parent)
         self.grid = QtWidgets.QGridLayout(self)

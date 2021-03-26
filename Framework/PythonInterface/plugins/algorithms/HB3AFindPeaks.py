@@ -4,34 +4,26 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import (AlgorithmFactory, WorkspaceProperty,
-                        PythonAlgorithm, PropertyMode, ADSValidator, WorkspaceGroup,
-                        MultipleExperimentInfos)
-from mantid.kernel import (Direction, EnabledWhenProperty,
-                           FloatPropertyWithValue, PropertyCriterion, StringListValidator,
-                           StringArrayProperty)
-from mantid.simpleapi import (DeleteWorkspace, FindPeaksMD,
-                              FindUBUsingFFT,
-                              FindUBUsingLatticeParameters,
-                              IndexPeaks, ShowPossibleCells,
-                              SelectCellOfType,
-                              OptimizeLatticeForCellType,
-                              AnalysisDataService,
-                              CreatePeaksWorkspace,
-                              CombinePeaksWorkspaces, CopySample,
-                              GroupWorkspaces)
+from mantid.api import (AlgorithmFactory, WorkspaceProperty, PythonAlgorithm, PropertyMode, ADSValidator,
+                        WorkspaceGroup, MultipleExperimentInfos)
+from mantid.kernel import (Direction, EnabledWhenProperty, FloatPropertyWithValue, PropertyCriterion,
+                           StringListValidator, StringArrayProperty)
+from mantid.simpleapi import (DeleteWorkspace, FindPeaksMD, FindUBUsingFFT, FindUBUsingLatticeParameters, IndexPeaks,
+                              ShowPossibleCells, SelectCellOfType, OptimizeLatticeForCellType, AnalysisDataService,
+                              CreatePeaksWorkspace, CombinePeaksWorkspaces, CopySample, GroupWorkspaces)
 from mantid.dataobjects import MDHistoWorkspace
 import numpy as np
 
 
 class HB3AFindPeaks(PythonAlgorithm):
-
     def category(self):
         return "Crystal\\Peaks;Crystal\\UBMatrix"
 
     def seeAlso(self):
-        return ["FindPeaksMD", "OptimizeLatticeForCellType", "FindUBUsingFFT", "SelectCellOfType", "IndexPeaks",
-                "HB3AAdjustSampleNorm", "HB3APredictPeaks", "HB3AIntegratePeaks"]
+        return [
+            "FindPeaksMD", "OptimizeLatticeForCellType", "FindUBUsingFFT", "SelectCellOfType", "IndexPeaks",
+            "HB3AAdjustSampleNorm", "HB3APredictPeaks", "HB3AIntegratePeaks"
+        ]
 
     def name(self):
         return "HB3AFindPeaks"
@@ -64,18 +56,24 @@ class HB3AFindPeaks(PythonAlgorithm):
         # Some of the options to pass through to FindPeaksMD (options like CalculateGoniometerForCW, FlipX, etc are
         # assumed to be True)
         self.declareProperty("MaxPeaks", 1000, doc="Maximum number of peaks to find.")
-        self.declareProperty("PeakDistanceThreshold", 0.25, doc="Threshold distance for rejecting peaks that are found "
-                                                                "to be too close from each other")
+        self.declareProperty("PeakDistanceThreshold",
+                             0.25,
+                             doc="Threshold distance for rejecting peaks that are found "
+                             "to be too close from each other")
         # Having this number too low will likely cause FindUBUsingFFT to fail since not enough peaks will be found
-        self.declareProperty("DensityThresholdFactor", 2000.0,
+        self.declareProperty("DensityThresholdFactor",
+                             2000.0,
                              doc="Scaling factor which the overall signal density will be multiplied by to determine "
-                                 "a threshold for determining peaks.")
+                             "a threshold for determining peaks.")
 
-        self.declareProperty("Wavelength", FloatPropertyWithValue.EMPTY_DBL,
+        self.declareProperty("Wavelength",
+                             FloatPropertyWithValue.EMPTY_DBL,
                              doc="Wavelength value to use only if one was not found in the sample log")
 
         # Lattice parameter validators from same as FindUBUsingLatticeParameters
-        self.declareProperty("UseLattice", False, direction=Direction.Input,
+        self.declareProperty("UseLattice",
+                             False,
+                             direction=Direction.Input,
                              doc="Whether to refine UB matrix based on given lattice parameters")
 
         self.declareProperty("LatticeA", FloatPropertyWithValue.EMPTY_DBL, doc="The a value of the lattice")
@@ -85,8 +83,11 @@ class HB3AFindPeaks(PythonAlgorithm):
         self.declareProperty("LatticeBeta", FloatPropertyWithValue.EMPTY_DBL, doc="The beta value of the lattice")
         self.declareProperty("LatticeGamma", FloatPropertyWithValue.EMPTY_DBL, doc="The gamma value of the lattice")
 
-        self.declareProperty(WorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output,
-                                               optional=PropertyMode.Mandatory), doc="Output peaks workspace")
+        self.declareProperty(WorkspaceProperty("OutputWorkspace",
+                                               defaultValue="",
+                                               direction=Direction.Output,
+                                               optional=PropertyMode.Mandatory),
+                             doc="Output peaks workspace")
 
         lattice_params = ["LatticeA", "LatticeB", "LatticeC", "LatticeAlpha", "LatticeBeta", "LatticeGamma"]
         for param in lattice_params:
@@ -201,7 +202,13 @@ class HB3AFindPeaks(PythonAlgorithm):
                 CombinePeaksWorkspaces(peaks_ws_name, peak_ws, OutputWorkspace=peaks_ws_name)
 
         if lattice:
-            FindUBUsingLatticeParameters(PeaksWorkspace=peaks_ws_name, a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma)
+            FindUBUsingLatticeParameters(PeaksWorkspace=peaks_ws_name,
+                                         a=a,
+                                         b=b,
+                                         c=c,
+                                         alpha=alpha,
+                                         beta=beta,
+                                         gamma=gamma)
         else:
             FindUBUsingFFT(PeaksWorkspace=peaks_ws_name, MinD=3, MaxD=20)
 

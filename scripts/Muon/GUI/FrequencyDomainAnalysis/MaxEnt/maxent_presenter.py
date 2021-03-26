@@ -12,11 +12,9 @@ raw_data = "_raw_data"
 
 
 class MaxEntPresenter(object):
-
     """
     This class links the MaxEnt model to the GUI
     """
-
     def __init__(self, view, alg, load):
         self.view = view
         self.alg = alg
@@ -54,8 +52,7 @@ class MaxEntPresenter(object):
         if run != "None":
             final_options.append(run)
         self.view.addItems(final_options)
-        start = int(
-            math.ceil(math.log(self.load.getNPoints()) / math.log(2.0)))
+        start = int(math.ceil(math.log(self.load.getNPoints()) / math.log(2.0)))
         values = [str(2**k) for k in range(start, 21)]
         self.view.addNPoints(values)
 
@@ -167,11 +164,9 @@ class MaxEntPresenter(object):
     def cleanOutputsForVersion2(self, inputs):
         inputs["InputWorkspace"] = self.view.getInputWS()
         keys = [
-            "OutputWorkspace",
-            "OutputPhaseTable",
-            "OutputDeadTimeTable",
-            "PhaseConvergenceTable",
-            "ReconstructedSpectra"]
+            "OutputWorkspace", "OutputPhaseTable", "OutputDeadTimeTable", "PhaseConvergenceTable",
+            "ReconstructedSpectra"
+        ]
         for output in keys:
             if output in inputs:
                 inputs[output] = inputs[output][1:]

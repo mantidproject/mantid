@@ -16,8 +16,13 @@ class SANSBatchReduction(object):
     def __init__(self):
         super(SANSBatchReduction, self).__init__()
 
-    def __call__(self, states, use_optimizations=True, output_mode=OutputMode.PUBLISH_TO_ADS, plot_results = False,
-                 output_graph='', save_can=False):
+    def __call__(self,
+                 states,
+                 use_optimizations=True,
+                 output_mode=OutputMode.PUBLISH_TO_ADS,
+                 plot_results=False,
+                 output_graph='',
+                 save_can=False):
         """
         This is the start of any reduction.
 
@@ -95,8 +100,17 @@ class SANSCentreFinder(object):
     def __init__(self):
         super(SANSCentreFinder, self).__init__()
 
-    def __call__(self, state, r_min = 60, r_max = 280, max_iter = 20, x_start = 0.0, y_start = 0.0,
-                 tolerance = 1.251e-4, find_direction = FindDirectionEnum.ALL, reduction_method = True, verbose=False,
+    def __call__(self,
+                 state,
+                 r_min=60,
+                 r_max=280,
+                 max_iter=20,
+                 x_start=0.0,
+                 y_start=0.0,
+                 tolerance=1.251e-4,
+                 find_direction=FindDirectionEnum.ALL,
+                 reduction_method=True,
+                 verbose=False,
                  component=DetectorType.LAB):
         """
         This is the start of the beam centre finder algorithm.
@@ -121,9 +135,11 @@ class SANSCentreFinder(object):
             return self._execute_mass_method(state, r_min, max_iter, x_start, y_start, tolerance, component)
 
     @staticmethod
-    def _execute_reduction_method(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction, verbose, component):
+    def _execute_reduction_method(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction, verbose,
+                                  component):
         # Perform the beam centre finder algorithm
-        return centre_finder_new(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction, verbose, component)
+        return centre_finder_new(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction, verbose,
+                                 component)
 
     @staticmethod
     def _execute_mass_method(state, r_min, max_iter, xstart, ystart, tolerance, component):
@@ -142,20 +158,17 @@ class SANSCentreFinder(object):
                                "The provided type is {0}".format(type(state)))
 
         if not isinstance(r_min, float):
-            raise RuntimeError("The minimum radius has to be a float. The provided type is"
-                               " {0}".format(type(r_min)))
+            raise RuntimeError("The minimum radius has to be a float. The provided type is" " {0}".format(type(r_min)))
 
         if not isinstance(r_max, float):
-            raise RuntimeError("The maximum radius has to be a float. The provided type is"
-                               " {0}".format(type(r_max)))
+            raise RuntimeError("The maximum radius has to be a float. The provided type is" " {0}".format(type(r_max)))
 
         if not isinstance(xstart, float):
             raise RuntimeError("The x starting position has to be a float. The provided type is"
                                " {0}".format(type(xstart)))
 
         if not isinstance(tolerance, float):
-            raise RuntimeError("The tolerance has to be a float. The provided type is"
-                               " {0}".format(type(tolerance)))
+            raise RuntimeError("The tolerance has to be a float. The provided type is" " {0}".format(type(tolerance)))
 
         if not isinstance(max_iter, int):
             raise RuntimeError("The iteration number must be an integer. The provided type is"

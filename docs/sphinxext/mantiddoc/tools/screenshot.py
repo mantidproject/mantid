@@ -65,10 +65,7 @@ def algorithm_screenshot(name: str, directory: str, version: int = -1, ext: str 
 
 
 @_ensure_qapplication_started
-def custominterface_screenshot(name: str,
-                               directory: str,
-                               ext: str = ".png",
-                               widget_name: str = None):
+def custominterface_screenshot(name: str, directory: str, ext: str = ".png", widget_name: str = None):
     """
     Takes a snapshot of a custom interface and saves it as an image
     named "name.png"

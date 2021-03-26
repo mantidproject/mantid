@@ -37,7 +37,9 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
         self.group_pair_context = self.context.group_pair_context
         self.data_context.instrument = 'EMU'
 
-        self.loaded_data.add_data(workspace=self.load_result, run=[self.run_number], filename=self.filename,
+        self.loaded_data.add_data(workspace=self.load_result,
+                                  run=[self.run_number],
+                                  filename=self.filename,
                                   instrument='EMU')
         self.data_context.current_runs = [[self.run_number]]
         self.data_context.update_current_data()
@@ -53,8 +55,8 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
         self.context.calculate_all_pairs()
         self.context.show_all_pairs()
         CreateWorkspace([0], [0], OutputWorkspace='EMU19489; PhaseQuad; PhaseTable EMU19489')
-        self.context.phase_context.add_phase_quad(
-            MuonWorkspaceWrapper('EMU19489; PhaseQuad; PhaseTable EMU19489'), '19489')
+        self.context.phase_context.add_phase_quad(MuonWorkspaceWrapper('EMU19489; PhaseQuad; PhaseTable EMU19489'),
+                                                  '19489')
 
     def test_window(self):
         self.assertEquals("Frequency Domain Analysis", self.context.window_title)
@@ -62,27 +64,28 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
     def test_get_workspace_names_returns_no_time_domain_workspaces(self):
         self.populate_ADS()
         workspace_list = self.context.get_names_of_workspaces_to_fit('19489', 'fwd, bwd, long', True)
-        self.assertEqual(Counter(workspace_list),
-                         Counter())
+        self.assertEqual(Counter(workspace_list), Counter())
 
     def test_get_workspace_names_returns_nothing_if_no_parameters_passed(self):
         self.populate_ADS()
-        workspace_list = self.context.get_names_of_workspaces_to_fit(freq = "All")
+        workspace_list = self.context.get_names_of_workspaces_to_fit(freq="All")
 
         self.assertEqual(workspace_list, [])
 
     def test_get_workspaces_names_copes_with_no_freq_runs(self):
         self.populate_ADS()
-        workspace_list = self.context.get_names_of_workspaces_to_fit(runs='19489', group_and_pair='fwd, bwd, long, random, wrong',
-                                                                     phasequad=True, freq="All")
+        workspace_list = self.context.get_names_of_workspaces_to_fit(runs='19489',
+                                                                     group_and_pair='fwd, bwd, long, random, wrong',
+                                                                     phasequad=True,
+                                                                     freq="All")
 
-        self.assertEqual(Counter(workspace_list),
-                         Counter([]))
+        self.assertEqual(Counter(workspace_list), Counter([]))
 
     def test_call_freq_workspace_names(self):
         self.context.get_names_of_frequency_domain_workspaces_to_fit = mock.Mock()
         self.context.get_names_of_workspaces_to_fit(runs='19489', group_and_pair='fwd, bwd', freq="All")
-        self.context.get_names_of_frequency_domain_workspaces_to_fit.assert_called_once_with(runs='19489', group_and_pair='fwd, bwd',
+        self.context.get_names_of_frequency_domain_workspaces_to_fit.assert_called_once_with(runs='19489',
+                                                                                             group_and_pair='fwd, bwd',
                                                                                              frequency_type="All")
 
 

@@ -10,7 +10,7 @@ from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 
 
-def normalize_to_monitor( state_adjustment_normalize_to_monitor, workspace, scale_factor=1.0):
+def normalize_to_monitor(state_adjustment_normalize_to_monitor, workspace, scale_factor=1.0):
     normalize_to_monitor_state = state_adjustment_normalize_to_monitor
 
     # 1. Extract the spectrum of the incident monitor
@@ -45,10 +45,12 @@ def _scale(workspace, factor):
     :return: a scaled workspace.
     """
     scale_name = "Scale"
-    scale_options = {"InputWorkspace": workspace,
-                     "OutputWorkspace": EMPTY_NAME,
-                     "Factor": factor,
-                     "Operation": "Multiply"}
+    scale_options = {
+        "InputWorkspace": workspace,
+        "OutputWorkspace": EMPTY_NAME,
+        "Factor": factor,
+        "Operation": "Multiply"
+    }
     scale_alg = create_unmanaged_algorithm(scale_name, **scale_options)
     scale_alg.execute()
     return scale_alg.getProperty("OutputWorkspace").value
@@ -65,9 +67,7 @@ def _extract_monitor(workspace, spectrum_number):
     """
     workspace_index = workspace.getIndexFromSpectrumNumber(spectrum_number)
     extract_name = "ExtractSingleSpectrum"
-    extract_options = {"InputWorkspace": workspace,
-                       "OutputWorkspace": EMPTY_NAME,
-                       "WorkspaceIndex": workspace_index}
+    extract_options = {"InputWorkspace": workspace, "OutputWorkspace": EMPTY_NAME, "WorkspaceIndex": workspace_index}
     extract_alg = create_unmanaged_algorithm(extract_name, **extract_options)
     extract_alg.execute()
     return extract_alg.getProperty("OutputWorkspace").value
@@ -91,13 +91,16 @@ def _perform_prompt_peak_correction(workspace, normalize_to_monitor_state):
     prompt_peak_correction_enabled = normalize_to_monitor_state.prompt_peak_correction_enabled
     # We perform only a prompt peak correction if the start and stop values of the bins we want to remove,
     # were explicitly set. Some instruments require it, others don't.
-    if prompt_peak_correction_enabled and prompt_peak_correction_start is not None and prompt_peak_correction_stop is not None:
+    if prompt_peak_correction_enabled and prompt_peak_correction_start is not None \
+            and prompt_peak_correction_stop is not None:
         remove_name = "RemoveBins"
-        remove_options = {"InputWorkspace": workspace,
-                          "OutputWorkspace": EMPTY_NAME,
-                          "XMin": prompt_peak_correction_start,
-                          "XMax": prompt_peak_correction_stop,
-                          "Interpolation": "Linear"}
+        remove_options = {
+            "InputWorkspace": workspace,
+            "OutputWorkspace": EMPTY_NAME,
+            "XMin": prompt_peak_correction_start,
+            "XMax": prompt_peak_correction_stop,
+            "Interpolation": "Linear"
+        }
         remove_alg = create_unmanaged_algorithm(remove_name, **remove_options)
         remove_alg.execute()
         workspace = remove_alg.getProperty("OutputWorkspace").value
@@ -133,11 +136,13 @@ def _perform_flat_background_correction(workspace, normalize_to_monitor_state):
     # Only if a TOF range was set, do we have to perform a correction
     if start_tof and stop_tof:
         flat_name = "CalculateFlatBackground"
-        flat_options = {"InputWorkspace": workspace,
-                        "OutputWorkspace": EMPTY_NAME,
-                        "StartX": start_tof,
-                        "EndX": stop_tof,
-                        "Mode": "Mean"}
+        flat_options = {
+            "InputWorkspace": workspace,
+            "OutputWorkspace": EMPTY_NAME,
+            "StartX": start_tof,
+            "EndX": stop_tof,
+            "Mode": "Mean"
+        }
         flat_alg = create_unmanaged_algorithm(flat_name, **flat_options)
         flat_alg.execute()
         workspace = flat_alg.getProperty("OutputWorkspace").value
@@ -158,12 +163,14 @@ def _convert_to_wavelength(workspace, normalize_to_monitor_state):
     wavelength_step_type = normalize_to_monitor_state.wavelength_step_type_lin_log
     wavelength_rebin_mode = normalize_to_monitor_state.rebin_type
     convert_name = "SANSConvertToWavelengthAndRebin"
-    convert_options = {"InputWorkspace": workspace,
-                       "WavelengthLow": wavelength_low,
-                       "WavelengthHigh": wavelength_high,
-                       "WavelengthStep": wavelength_step,
-                       "WavelengthStepType": wavelength_step_type.value,
-                       "RebinMode": wavelength_rebin_mode.value}
+    convert_options = {
+        "InputWorkspace": workspace,
+        "WavelengthLow": wavelength_low,
+        "WavelengthHigh": wavelength_high,
+        "WavelengthStep": wavelength_step,
+        "WavelengthStepType": wavelength_step_type.value,
+        "RebinMode": wavelength_rebin_mode.value
+    }
 
     convert_alg = create_unmanaged_algorithm(convert_name, **convert_options)
     convert_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)

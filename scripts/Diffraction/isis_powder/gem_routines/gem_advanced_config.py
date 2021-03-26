@@ -8,30 +8,26 @@ import copy
 
 from isis_powder.routines.common import ADVANCED_CONFIG as COMMON_ADVANCED_CONFIG
 
-
 absorption_correction_params = {
     # These are read directly by the generate absorb corrections functions instead of being parsed.
     # Therefore they cannot be overridden using basic config files or keyword arguments.
     "cylinder_sample_height": 4.0,
     "cylinder_sample_radius": 0.4,
     "cylinder_position": [0., 0., 0.],
-
     "chemical_formula": "V0.9486 Nb0.0514",  # V 94.86% Nb 5.14%
     "number_density": 0.071
 }
 
-gem_adv_config_params = {
-    "raw_tof_cropping_values": (500, 20000),
-    "spline_coefficient": 30
-}
+gem_adv_config_params = {"raw_tof_cropping_values": (500, 20000), "spline_coefficient": 30}
 
-focused_cropping_values = [(550, 19900),  # Bank 1
-                           (550, 19900),  # Bank 2
-                           (550, 19900),  # Bank 3
-                           (550, 19900),  # Bank 4
-                           (550, 19480),  # Bank 5
-                           (550, 17980)  # Bank 6
-                           ]
+focused_cropping_values = [
+    (550, 19900),  # Bank 1
+    (550, 19900),  # Bank 2
+    (550, 19900),  # Bank 3
+    (550, 19900),  # Bank 4
+    (550, 19480),  # Bank 5
+    (550, 17980)  # Bank 6
+]
 
 texture_focused_cropping_values = [(448, 29344), (390, 19225), (390, 18673), (438, 28501), (534, 21483), (528, 21255),
                                    (530, 21509), (531, 21563), (531, 21541), (530, 21423), (528, 21295), (520, 20910),
@@ -61,14 +57,14 @@ texture_focused_cropping_values = [(448, 29344), (390, 19225), (390, 18673), (43
                                    (600, 16813), (600, 16822), (600, 16825), (600, 16808), (600, 16799), (600, 16819),
                                    (600, 16794), (600, 16828), (600, 16822), (600, 16827)]
 
-
-vanadium_cropping_values = [(510, 19997),  # Bank 1
-                            (510, 19997),  # Bank 2
-                            (510, 19997),  # Bank 3
-                            (510, 19997),  # Bank 4
-                            (510, 19500),  # Bank 5
-                            (510, 18000)  # Bank 6
-                            ]
+vanadium_cropping_values = [
+    (510, 19997),  # Bank 1
+    (510, 19997),  # Bank 2
+    (510, 19997),  # Bank 3
+    (510, 19997),  # Bank 4
+    (510, 19500),  # Bank 5
+    (510, 18000)  # Bank 6
+]
 
 texture_vanadium_cropping_values = [(75, 34933), (65, 22887), (65, 22230), (73, 33929), (89, 25575), (88, 25304),
                                     (89, 25606), (89, 25671), (89, 25644), (89, 25504), (88, 25351), (87, 24893),
@@ -98,19 +94,23 @@ texture_vanadium_cropping_values = [(75, 34933), (65, 22887), (65, 22230), (73, 
                                     (100, 20015), (100, 20026), (100, 20030), (100, 20010), (100, 19999), (100, 20023),
                                     (100, 19993), (100, 20034), (100, 20026), (100, 20033)]
 
-texture_mode_on = {"focused_cropping_values": texture_focused_cropping_values,
-                   "vanadium_cropping_values": texture_vanadium_cropping_values,
-                   "grouping_file_name": "offsets_xie_test_2.cal",
-                   "save_maud": True,
-                   "save_maud_calib": True,
-                   "save_gda": True}
+texture_mode_on = {
+    "focused_cropping_values": texture_focused_cropping_values,
+    "vanadium_cropping_values": texture_vanadium_cropping_values,
+    "grouping_file_name": "offsets_xie_test_2.cal",
+    "save_maud": True,
+    "save_maud_calib": True,
+    "save_gda": True
+}
 
-texture_mode_off ={"focused_cropping_values": focused_cropping_values,
-                   "vanadium_cropping_values": vanadium_cropping_values,
-                   "grouping_file_name": "GEM_Instrument_grouping.cal",
-                   "save_maud": False,
-                   "save_maud_calib": False,
-                   "save_gda": False}
+texture_mode_off = {
+    "focused_cropping_values": focused_cropping_values,
+    "vanadium_cropping_values": vanadium_cropping_values,
+    "grouping_file_name": "GEM_Instrument_grouping.cal",
+    "save_maud": False,
+    "save_maud_calib": False,
+    "save_gda": False
+}
 
 calibration_params = {
     "create_cal_rebin_1_params": "100,-0.0006,19950",

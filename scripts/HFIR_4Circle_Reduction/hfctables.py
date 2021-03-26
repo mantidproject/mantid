@@ -9,7 +9,7 @@ import numpy
 import sys
 from HFIR_4Circle_Reduction import fourcircle_utility
 from HFIR_4Circle_Reduction import guiutility
-from qtpy import QtCore   # noqa
+from qtpy import QtCore  # noqa
 import math
 import HFIR_4Circle_Reduction.NTableWidget as tableBase
 import os
@@ -19,11 +19,7 @@ class KShiftTableWidget(tableBase.NTableWidget):
     """ Extended table widget for show the K-shift vectors set to the output Fullprof file
     """
     # Table set up
-    TableSetup = [('Index', 'int'),
-                  ('Kx', 'float'),
-                  ('Ky', 'float'),
-                  ('Kz', 'float'),
-                  ('Selected', 'checkbox')]
+    TableSetup = [('Index', 'int'), ('Kx', 'float'), ('Ky', 'float'), ('Kz', 'float'), ('Selected', 'checkbox')]
 
     def __init__(self, parent):
         """
@@ -144,26 +140,11 @@ class PeaksIntegrationSpreadSheet(tableBase.NTableWidget):
     Note: all the intensities shown below are corrected by by Lorentzian and absorption if either of them is
           calculated and applied.
     """
-    Table_Setup = [('Scan', 'int'),
-                   ('HKL (S)', 'str'),
-                   ('HKL (C)', 'str'),
-                   ('Mask', 'str'),
-                   ('Intensity (R)', 'float'),
-                   ('Error (R)', 'float'),
-                   ('Intensity 2', 'float'),
-                   ('Error (2)', 'float'),
-                   ('Intensity (G)', 'float'),
-                   ('Error (G)', 'float'),
-                   ('Lorentz', 'float'),
-                   ('Bkgd (E)', 'float'),
-                   ('Bkgd (G)', 'float'),
-                   ('Sigma', 'float'),
-                   ('A', 'float'),
-                   ('Motor Name', 'str'),
-                   ('Motor Step', 'float'),
-                   ('K-shift', 'str'),
-                   ('Absorption', 'float')
-                   ]
+    Table_Setup = [('Scan', 'int'), ('HKL (S)', 'str'), ('HKL (C)', 'str'), ('Mask', 'str'), ('Intensity (R)', 'float'),
+                   ('Error (R)', 'float'), ('Intensity 2', 'float'), ('Error (2)', 'float'), ('Intensity (G)', 'float'),
+                   ('Error (G)', 'float'), ('Lorentz', 'float'), ('Bkgd (E)', 'float'), ('Bkgd (G)', 'float'),
+                   ('Sigma', 'float'), ('A', 'float'), ('Motor Name', 'str'), ('Motor Step', 'float'),
+                   ('K-shift', 'str'), ('Absorption', 'float')]
 
     def __init__(self, parent):
         """
@@ -292,10 +273,7 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
     """
     Extended table widget for studying peak integration of a single scan on various Pts.
     """
-    Table_Setup = [('Pt', 'int'),
-                   ('Raw', 'float'),
-                   ('Masked', 'float'),
-                   ('Selected', 'checkbox')]
+    Table_Setup = [('Pt', 'int'), ('Raw', 'float'), ('Masked', 'float'), ('Selected', 'checkbox')]
 
     def __init__(self, parent):
         """
@@ -471,7 +449,6 @@ class UBMatrixTable(tableBase.NTableWidget):
     """
     Extended table for UB matrix
     """
-
     def __init__(self, parent):
         """
 
@@ -583,19 +560,21 @@ class ProcessTableWidget(tableBase.NTableWidget):
     """
     Extended table for peaks used to process scans including peak integration, scan merging and etc.
     """
-    TableSetup = [('Scan', 'int'),
-                  ('Status', 'str'),
-                  ('Intensity', 'float'),
-                  ('F2', 'float'),  # Lorenzian corrected
-                  ('F2 Error', 'float'),
-                  ('Integrate', 'str'),  # integration type, Gaussian fit / simple summation
-                  ('Mask', 'str'),  # '' for no mask
-                  ('HKL', 'str'),
-                  ('Motor', 'str'),
-                  ('Motor Step', 'str'),
-                  ('Wavelength', 'float'),
-                  ('K-Index', 'int'),
-                  ('Select', 'checkbox')]
+    TableSetup = [
+        ('Scan', 'int'),
+        ('Status', 'str'),
+        ('Intensity', 'float'),
+        ('F2', 'float'),  # Lorenzian corrected
+        ('F2 Error', 'float'),
+        ('Integrate', 'str'),  # integration type, Gaussian fit / simple summation
+        ('Mask', 'str'),  # '' for no mask
+        ('HKL', 'str'),
+        ('Motor', 'str'),
+        ('Motor Step', 'str'),
+        ('Wavelength', 'float'),
+        ('K-Index', 'int'),
+        ('Select', 'checkbox')
+    ]
 
     def __init__(self, parent):
         """
@@ -648,8 +627,21 @@ class ProcessTableWidget(tableBase.NTableWidget):
         wave_length = 0
         hkl = ''
 
-        new_row = [scan_number, status, intensity, corr_int, error, integrate_type, mask,  # peak_center,
-                   hkl, motor_name, motor_step, wave_length, 0, False]
+        new_row = [
+            scan_number,
+            status,
+            intensity,
+            corr_int,
+            error,
+            integrate_type,
+            mask,  # peak_center,
+            hkl,
+            motor_name,
+            motor_step,
+            wave_length,
+            0,
+            False
+        ]
 
         return new_row
 
@@ -688,9 +680,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
         self.append_row(new_row)
 
         # set peak intensity
-        row_number = self.rowCount()-1
-        self.set_peak_intensity(row_number=row_number, peak_intensity=intensity,
-                                corrected_intensity=intensity, standard_error=math.sqrt(abs(intensity)),
+        row_number = self.rowCount() - 1
+        self.set_peak_intensity(row_number=row_number,
+                                peak_intensity=intensity,
+                                corrected_intensity=intensity,
+                                standard_error=math.sqrt(abs(intensity)),
                                 integrate_method='single-pt')
 
         # ROI: use the unused workspace column for this information
@@ -1016,7 +1010,8 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :param peak_intensity:
         :param corrected_intensity:
         :param standard_error:
-        :param integrate_method: must be '', simple or gaussian for simple counts summation or Gaussian fit, respectively
+        :param integrate_method: must be '', simple or gaussian for simple counts summation or Gaussian fit,
+        respectively
         :return:
         """
         # check requirements
@@ -1110,15 +1105,8 @@ class ScanSurveyTable(tableBase.NTableWidget):
     """
     Extended table widget for peak integration
     """
-    Table_Setup = [('Scan', 'int'),
-                   ('Max Counts Pt', 'int'),
-                   ('Max Counts', 'float'),
-                   ('H', 'float'),
-                   ('K', 'float'),
-                   ('L', 'float'),
-                   ('Q-range', 'float'),
-                   ('Sample Temp', 'float'),
-                   ('2theta', 'float'),
+    Table_Setup = [('Scan', 'int'), ('Max Counts Pt', 'int'), ('Max Counts', 'float'), ('H', 'float'), ('K', 'float'),
+                   ('L', 'float'), ('Q-range', 'float'), ('Sample Temp', 'float'), ('2theta', 'float'),
                    ('Selected', 'checkbox')]
 
     def __init__(self, parent):
@@ -1142,8 +1130,7 @@ class ScanSurveyTable(tableBase.NTableWidget):
 
         return
 
-    def filter_and_sort(self, start_scan, end_scan, min_counts, max_counts,
-                        sort_by_column, sort_order):
+    def filter_and_sort(self, start_scan, end_scan, min_counts, max_counts, sort_by_column, sort_order):
         """
         Filter the survey table and sort
         Note: it might not be efficient here because the table will be refreshed twice
@@ -1373,19 +1360,21 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
     """
     Extended QTable for integration on single Pt with previously calculated FWHM
     """
-    Table_Setup = [('Scan', 'int'),
-                   ('Pt', 'int'),
-                   ('HKL', 'str'),
-                   ('PeakHeight', 'float'),
-                   ('2theta', 'float'),
-                   ('FWHM', 'float'),
-                   ('Intensity', 'float'),
-                   ('Pt-Sigma', 'float'),
-                   ('Pt-I', 'float'),
-                   ('Pt-B', 'float'),
-                   ('ROI', 'str'),  # name of ROI used to integrate counts on detector (single measurement)
-                   ('Reference Scans', 'str'),
-                   ('Selected', 'checkbox')]
+    Table_Setup = [
+        ('Scan', 'int'),
+        ('Pt', 'int'),
+        ('HKL', 'str'),
+        ('PeakHeight', 'float'),
+        ('2theta', 'float'),
+        ('FWHM', 'float'),
+        ('Intensity', 'float'),
+        ('Pt-Sigma', 'float'),
+        ('Pt-I', 'float'),
+        ('Pt-B', 'float'),
+        ('ROI', 'str'),  # name of ROI used to integrate counts on detector (single measurement)
+        ('Reference Scans', 'str'),
+        ('Selected', 'checkbox')
+    ]
 
     def __init__(self, parent):
         """
@@ -1430,8 +1419,8 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         assert isinstance(two_theta, float), '2theta {0} must be a float'
 
         # add a new row to the table
-        status, error_msg = self.append_row([scan_number, pt_number, hkl_str, 0., two_theta, 0., 0., 0., 0., 0., '', '',
-                                             False])
+        status, error_msg = self.append_row(
+            [scan_number, pt_number, hkl_str, 0., two_theta, 0., 0., 0., 0., 0., '', '', False])
         if not status:
             raise RuntimeError(error_msg)
 
@@ -1439,7 +1428,7 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         self._pt_row_dict[scan_number, pt_number] = self.rowCount() - 1
 
         # set scan editable
-        item_i = self.item(self.rowCount()-1, self._ref_scans_index)
+        item_i = self.item(self.rowCount() - 1, self._ref_scans_index)
         item_i.setFlags(item_i.flags() | QtCore.Qt.ItemIsEditable)
 
         return
@@ -1669,15 +1658,17 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
     Extended table for peaks used to calculate UB matrix
     """
     # UB peak information table
-    UB_Peak_Table_Setup = [('Scan', 'int'),
-                           ('Pt', 'int'),
-                           ('Spice HKL', 'str'),
-                           ('Calculated HKL', 'str'),
-                           ('Q-Sample', 'str'),
-                           ('Selected', 'checkbox'),
-                           ('m1', 'float'),
-                           ('Wavelength', 'float'),  # wave length
-                           ('Error', 'float')]
+    UB_Peak_Table_Setup = [
+        ('Scan', 'int'),
+        ('Pt', 'int'),
+        ('Spice HKL', 'str'),
+        ('Calculated HKL', 'str'),
+        ('Q-Sample', 'str'),
+        ('Selected', 'checkbox'),
+        ('m1', 'float'),
+        ('Wavelength', 'float'),  # wave length
+        ('Error', 'float')
+    ]
 
     def __init__(self, parent):
         """
@@ -1870,8 +1861,12 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
         return error_message
 
-    def select_scans(self, select_all=False, nuclear_peaks=False, hkl_tolerance=None,
-                     wave_length=None, wave_length_tolerance=None):
+    def select_scans(self,
+                     select_all=False,
+                     nuclear_peaks=False,
+                     hkl_tolerance=None,
+                     wave_length=None,
+                     wave_length_tolerance=None):
         """
         select scans in the UB matrix table
         :param select_all:
@@ -1890,7 +1885,9 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
             if nuclear_peaks:
                 self.select_nuclear_peak_rows(hkl_tolerance)
             if wave_length_tolerance is not None:
-                self.select_rows_by_column_value(self._colIndexWavelength, wave_length, wave_length_tolerance,
+                self.select_rows_by_column_value(self._colIndexWavelength,
+                                                 wave_length,
+                                                 wave_length_tolerance,
                                                  keep_current_selection=True)
         else:
             raise RuntimeError('Must pick up one option to do filter.')

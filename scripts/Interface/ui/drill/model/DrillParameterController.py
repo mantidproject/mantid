@@ -18,7 +18,6 @@ class DrillParameter:
     """
     Class that defines a parameter to be checked.
     """
-
     def __init__(self, name, value, sample):
         """
         Create a parameter by giving its name, value and the sample to which it
@@ -99,7 +98,6 @@ class DrillParameterController(threading.Thread):
     Class that checks algorithm parameters. It runs in a separate daemon
     thread.
     """
-
     def __init__(self, algName):
         """
         Create a controller for a specific algorithm.
@@ -152,7 +150,7 @@ class DrillParameterController(threading.Thread):
                     try:
                         self._alg.setProperty(p.name, defaultValue)
                     except:
-                        pass # in case of mandatory parameter
+                        pass  # in case of mandatory parameter
                     self._signals.okParam.emit(p)
                 except Exception as e:
                     p.errorMsg = str(e)

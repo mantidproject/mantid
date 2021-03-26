@@ -16,7 +16,7 @@ try:
     __mtd_version = '.'.join(__mtd_version.split(".")[:2])
 except ImportError:  # mantid not found
     __mtd_version = ''
-    __mtd_bin_dir=''
+    __mtd_bin_dir = ''
 
 
 def set_matplotlib_backend():
@@ -84,9 +84,12 @@ def __get_collection_file(collection_file: str) -> str:
     return os.path.abspath(collection_file)
 
 
-def show_interface_help(mantidplot_name, assistant_process, area: str='',
-                        collection_file: str='',
-                        qt_url: str='', external_url: str=""):
+def show_interface_help(mantidplot_name,
+                        assistant_process,
+                        area: str = '',
+                        collection_file: str = '',
+                        qt_url: str = '',
+                        external_url: str = ""):
     ''' Shows the help page for a custom interface
     @param mantidplot_name: used by showCustomInterfaceHelp
     @param assistant_process: needs to be started/closed from outside (see example below)
@@ -118,7 +121,7 @@ def show_interface_help(mantidplot_name, assistant_process, area: str='',
         # try using built-in help in mantid
         import mantidqt
         mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp(mantidplot_name, area)
-    except: #(ImportError, ModuleNotFoundError) raises the wrong type of error
+    except:  #(ImportError, ModuleNotFoundError) raises the wrong type of error
         # built-in help failed, try external qtassistant then give up and launch a browser
 
         # cleanup previous version
@@ -132,18 +135,19 @@ def show_interface_help(mantidplot_name, assistant_process, area: str='',
         collection_file = __get_collection_file(collection_file)
         if os.path.isfile(helpapp) and os.path.isfile(collection_file):
             # try to find the collection file and launch qtassistant
-            args = ['-enableRemoteControl',
-                    '-collectionFile', collection_file,
-                    '-showUrl', __to_qthelp_url(mantidplot_name, area, qt_url)]
+            args = [
+                '-enableRemoteControl', '-collectionFile', collection_file, '-showUrl',
+                __to_qthelp_url(mantidplot_name, area, qt_url)
+            ]
 
             assistant_process.close()
             assistant_process.waitForFinished()
             assistant_process.start(helpapp, args)
         else:
             # give up and upen a URL in default browser
-            openUrl=QtGui.QDesktopServices.openUrl
-            sysenv=QtCore.QProcessEnvironment.systemEnvironment()
-            ldp=sysenv.value('LD_PRELOAD')
+            openUrl = QtGui.QDesktopServices.openUrl
+            sysenv = QtCore.QProcessEnvironment.systemEnvironment()
+            ldp = sysenv.value('LD_PRELOAD')
             if ldp:
                 del os.environ['LD_PRELOAD']
 
@@ -151,4 +155,4 @@ def show_interface_help(mantidplot_name, assistant_process, area: str='',
             openUrl(__to_external_url(mantidplot_name, area, external_url))
 
             if ldp:
-                os.environ['LD_PRELOAD']=ldp
+                os.environ['LD_PRELOAD'] = ldp

@@ -48,8 +48,7 @@ def parse_phonon_file(file_name, record_eigenvectors):
                 q_vectors.append(q_vector)
 
                 # Parse block of frequencies
-                for line_data in _parse_phonon_freq_block(f_handle,
-                                                          file_data['num_branches']):
+                for line_data in _parse_phonon_freq_block(f_handle, file_data['num_branches']):
                     for data_list, item in zip(data_lists, line_data):
                         data_list.append(item)
 
@@ -57,9 +56,7 @@ def parse_phonon_file(file_name, record_eigenvectors):
             if vector_match:
                 if record_eigenvectors:
                     # Parse eigenvectors for partial dos
-                    vectors = _parse_phonon_eigenvectors(f_handle,
-                                                         file_data['num_ions'],
-                                                         file_data['num_branches'])
+                    vectors = _parse_phonon_eigenvectors(f_handle, file_data['num_ions'], file_data['num_branches'])
                     eigenvectors.append(vectors)
                 else:
                     # Skip over eigenvectors
@@ -79,11 +76,12 @@ def parse_phonon_file(file_name, record_eigenvectors):
         'ir_intensities': ir_intensities,
         'raman_intensities': raman_intensities,
         'weights': warray,
-        'q_vectors':q_vectors,
+        'q_vectors': q_vectors,
         'eigenvectors': eigenvectors
-        })
+    })
 
     return file_data, element_isotope
+
 
 #----------------------------------------------------------------------------------------
 
@@ -133,6 +131,7 @@ def _parse_phonon_file_header(f_handle):
                 raise IOError("Failed to parse file. Invalid file header.")
             return file_data
 
+
 #----------------------------------------------------------------------------------------
 
 
@@ -147,6 +146,7 @@ def _parse_phonon_freq_block(f_handle, num_branches):
         line_data = line.strip().split()[1:]
         line_data = [float(x) for x in line_data]
         yield line_data
+
 
 #----------------------------------------------------------------------------------------
 
@@ -167,6 +167,7 @@ def _parse_phonon_unit_cell_vectors(f_handle):
 
     return np.array(data)
 
+
 #----------------------------------------------------------------------------------------
 
 
@@ -184,5 +185,6 @@ def _parse_phonon_eigenvectors(f_handle, num_ions, num_branches):
         vectors.append(vector_componets)
 
     return np.asarray(vectors)
+
 
 #----------------------------------------------------------------------------------------

@@ -18,7 +18,7 @@ class ISISPowderGemOutputTest(unittest.TestCase):
 
     _folders_to_remove = set()
     CHECK_AGAINST = "BANK 1 100  25 RALF  -12266  96  -12266 -0.022 ALT                              \n"
-    GROUPING_SCHEME = [1,2]
+    GROUPING_SCHEME = [1, 2]
     IPF_FILE = "GEM_PF1_PROFILE.IPF"
 
     def _find_file_or_die(self, name):
@@ -32,23 +32,23 @@ class ISISPowderGemOutputTest(unittest.TestCase):
             try:
                 shutil.rmtree(folder)
             except OSError as exc:
-                warnings.warn("Could not remove folder at \"{}\"\n"
-                              "Error message:\n{}".format(folder, exc))
+                warnings.warn("Could not remove folder at \"{}\"\n" "Error message:\n{}".format(folder, exc))
 
     def test_valid_save(self):
         path_to_ipf = self._find_file_or_die(self.IPF_FILE)
         temp_file_path = tempfile.mkdtemp()
         self._folders_to_remove.add(temp_file_path)
-        wsgroup =[]
+        wsgroup = []
         for i in range(2):
-            wsgroup.append(mantid.CreateSampleWorkspace(OutputWorkspace=str(i),
-                                                        NumBanks=1,
-                                                        BankPixelWidth=1,
-                                                        XMin=-0.5,
-                                                        XMax=0.5,
-                                                        BinWidth=0.01,
-                                                        XUnit='DSpacing',
-                                                        StoreInADS=True))
+            wsgroup.append(
+                mantid.CreateSampleWorkspace(OutputWorkspace=str(i),
+                                             NumBanks=1,
+                                             BankPixelWidth=1,
+                                             XMin=-0.5,
+                                             XMax=0.5,
+                                             BinWidth=0.01,
+                                             XUnit='DSpacing',
+                                             StoreInADS=True))
 
         gem_output_test_ws_group = mantid.GroupWorkspaces(wsgroup)
         gem_output.save_gda(d_spacing_group=gem_output_test_ws_group,

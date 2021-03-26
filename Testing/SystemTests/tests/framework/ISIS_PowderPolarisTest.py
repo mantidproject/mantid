@@ -61,10 +61,10 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         splined_ws, unsplined_ws = self.calibration_results
-        for ws in splined_ws+unsplined_ws:
+        for ws in splined_ws + unsplined_ws:
             self.assertEqual(ws.sample().getMaterial().name(), 'V')
-        return (unsplined_ws.name(), "ISIS_Powder-POLARIS00098533_unsplined.nxs",
-                splined_ws.name(), "ISIS_Powder-POLARIS00098533_splined.nxs")
+        return (unsplined_ws.name(), "ISIS_Powder-POLARIS00098533_unsplined.nxs", splined_ws.name(),
+                "ISIS_Powder-POLARIS00098533_splined.nxs")
 
     def cleanup(self):
         try:
@@ -91,8 +91,7 @@ class FocusTest(systemtesting.MantidSystemTest):
     def validate(self):
         # check output files as expected
         def generate_error_message(expected_file, output_dir):
-            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir,
-                                                                  os.listdir(output_dir))
+            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
 
         def assert_output_file_exists(directory, filename):
             self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
@@ -164,11 +163,7 @@ class TotalScatteringTest(systemtesting.MantidSystemTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
         # After rebin this is at X index 37
-        expected_peak_values = [-0.00365,
-                                0.18790,
-                                0.38707,
-                                0.37882,
-                                0.72237]
+        expected_peak_values = [-0.00365, 0.18790, 0.38707, 0.37882, 0.72237]
         for index, ws in enumerate(self.pdf_output):
             self.assertAlmostEqual(ws.dataY(0)[37], expected_peak_values[index], places=3)
 
@@ -281,8 +276,14 @@ class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 3.11435, places=3)
 
 
-def run_total_scattering(run_number, merge_banks, q_lims=None, delta_q=None, delta_r=None, pdf_type="G(r)",
-                         freq_params=None, lorch_filter=True):
+def run_total_scattering(run_number,
+                         merge_banks,
+                         q_lims=None,
+                         delta_q=None,
+                         delta_r=None,
+                         pdf_type="G(r)",
+                         freq_params=None,
+                         lorch_filter=True):
     pdf_inst_obj = setup_inst_object(mode="PDF")
     return pdf_inst_obj.create_total_scattering_pdf(run_number=run_number,
                                                     merge_banks=merge_banks,
@@ -295,8 +296,11 @@ def run_total_scattering(run_number, merge_banks, q_lims=None, delta_q=None, del
 
 
 def _gen_required_files():
-    required_run_numbers = ["98531", "98532",  # create_van : PDF mode
-                            "98533"]  # File to focus (Si)
+    required_run_numbers = [
+        "98531",
+        "98532",  # create_van : PDF mode
+        "98533"
+    ]  # File to focus (Si)
 
     # Generate file names of form "INSTxxxxx.nxs"
     input_files = [os.path.join(input_dir, (inst_name + "000" + number + ".nxs")) for number in required_run_numbers]
@@ -311,8 +315,7 @@ def run_vanadium_calibration():
     pdf_inst_obj = setup_inst_object(mode="PDF")
 
     # Run create vanadium twice to ensure we get two different output splines / files
-    pdf_inst_obj.create_vanadium(first_cycle_run_no=vanadium_run,
-                                 do_absorb_corrections=True, multiple_scattering=False)
+    pdf_inst_obj.create_vanadium(first_cycle_run_no=vanadium_run, do_absorb_corrections=True, multiple_scattering=False)
 
     # Check the spline looks good and was saved
     if not os.path.exists(spline_path):
@@ -335,8 +338,11 @@ def run_focus():
     shutil.copy(original_splined_path, spline_path)
 
     inst_object = setup_inst_object(mode="PDF")
-    return inst_object.focus(run_number=run_number, input_mode="Individual", do_van_normalisation=True,
-                             do_absorb_corrections=False, sample_empty=sample_empty,
+    return inst_object.focus(run_number=run_number,
+                             input_mode="Individual",
+                             do_van_normalisation=True,
+                             do_absorb_corrections=False,
+                             sample_empty=sample_empty,
                              sample_empty_scale=sample_empty_scale)
 
 
@@ -351,8 +357,11 @@ def run_focus_no_chopper(run_number):
     shutil.copy(original_splined_path, spline_path)
 
     inst_object = setup_inst_object(None)
-    return inst_object.focus(run_number=run_number, input_mode="Individual", do_van_normalisation=True,
-                             do_absorb_corrections=False, sample_empty=sample_empty,
+    return inst_object.focus(run_number=run_number,
+                             input_mode="Individual",
+                             do_van_normalisation=True,
+                             do_absorb_corrections=False,
+                             sample_empty=sample_empty,
                              sample_empty_scale=sample_empty_scale)
 
 
@@ -363,11 +372,16 @@ def setup_mantid_paths():
 def setup_inst_object(mode):
     user_name = "Test"
     if mode:
-        inst_obj = Polaris(user_name=user_name, calibration_mapping_file=calibration_map_path,
-                           calibration_directory=calibration_dir, output_directory=output_dir, mode=mode)
+        inst_obj = Polaris(user_name=user_name,
+                           calibration_mapping_file=calibration_map_path,
+                           calibration_directory=calibration_dir,
+                           output_directory=output_dir,
+                           mode=mode)
     else:
-        inst_obj = Polaris(user_name=user_name, calibration_mapping_file=calibration_map_path,
-                           calibration_directory=calibration_dir, output_directory=output_dir)
+        inst_obj = Polaris(user_name=user_name,
+                           calibration_mapping_file=calibration_map_path,
+                           calibration_directory=calibration_dir,
+                           output_directory=output_dir)
 
     sample_details = SampleDetails(height=4.0, radius=0.2985, center=[0, 0, 0], shape='cylinder')
     sample_details.set_material(chemical_formula='Si')
@@ -384,4 +398,4 @@ def _try_delete(path):
         else:
             os.remove(path)
     except OSError:
-        print ("Could not delete output file at: ", path)
+        print("Could not delete output file at: ", path)

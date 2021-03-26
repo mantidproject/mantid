@@ -13,7 +13,6 @@ from mantid.kernel import Direction
 
 
 class PythonAlgorithmWorkspacePropertyTest(unittest.TestCase):
-
     def _do_test(self, classtype):
         """Perform the test for the given type
 
@@ -22,12 +21,14 @@ class PythonAlgorithmWorkspacePropertyTest(unittest.TestCase):
         class WorkspaceProperties(PythonAlgorithm):
 
             _testdocstring = 'This is a workspace property'
+
             def PyInit(self):
                 self.declareProperty(classtype("NoDocString", "", Direction.Input))
                 self.declareProperty(classtype("WithDocString", "", Direction.Input), self._testdocstring)
 
             def PyExec(self):
                 pass
+
         #######################################################
         alg = WorkspaceProperties()
         alg.initialize()
@@ -45,6 +46,7 @@ class PythonAlgorithmWorkspacePropertyTest(unittest.TestCase):
         """Runs test for a general WorkspaceProperty
         """
         self._do_test(WorkspaceProperty)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -48,9 +48,7 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         # Ensure detector position does not change when no offsets are given
         orig = LoadMD("HB3A_data.nxs", LoadHistory=False)
         orig_pos = orig.getExperimentInfo(0).getInstrument().getDetector(1).getPos()
-        result = HB3AAdjustSampleNorm(InputWorkspaces=orig,
-                                      DetectorHeightOffset=0.0,
-                                      DetectorDistanceOffset=0.0)
+        result = HB3AAdjustSampleNorm(InputWorkspaces=orig, DetectorHeightOffset=0.0, DetectorDistanceOffset=0.0)
         new_pos = result.getExperimentInfo(0).getInstrument().getDetector(1).getPos()
 
         # Verify detector adjustment
@@ -61,8 +59,12 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
     def testInputFail(self):
         signal = range(0, 1000)
         error = range(0, 1000)
-        samplews = CreateMDHistoWorkspace(Dimensionality=3, SignalInput=signal, ErrorInput=error,
-                                          Extents='-3,3,-3,3,-3,3', NumberOfBins='10,10,10', Names='x,y,z',
+        samplews = CreateMDHistoWorkspace(Dimensionality=3,
+                                          SignalInput=signal,
+                                          ErrorInput=error,
+                                          Extents='-3,3,-3,3,-3,3',
+                                          NumberOfBins='10,10,10',
+                                          Names='x,y,z',
                                           Units='MomentumTransfer,EnergyTransfer,EnergyTransfer')
 
         # A MDHisto WS with no experiment info should fail

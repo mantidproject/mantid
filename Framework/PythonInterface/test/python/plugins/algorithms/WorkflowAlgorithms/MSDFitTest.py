@@ -17,8 +17,12 @@ class MSDFitTest(unittest.TestCase):
 
         sample = CreateSampleWorkspace(Function='User Defined',
                                        UserDefinedFunction='name=ExpDecay,Height=1,Lifetime=6',
-                                       NumBanks=5, BankPixelWidth=1, XUnit='QSquared', XMin=0.0,
-                                       XMax=5.0, BinWidth=0.1)
+                                       NumBanks=5,
+                                       BankPixelWidth=1,
+                                       XUnit='QSquared',
+                                       XMin=0.0,
+                                       XMax=5.0,
+                                       BinWidth=0.1)
         self._ws = sample
 
     def _validate_workspaces(self, msd_ws, param_ws, fit_ws):
@@ -47,10 +51,7 @@ class MSDFitTest(unittest.TestCase):
         Tests a basic run providing the MSD workspace as output.
         """
 
-        MSDFit(InputWorkspace=self._ws,
-               XStart=0.0, XEnd=5.0,
-               SpecMin=0, SpecMax=4,
-               OutputWorkspace='msd')
+        MSDFit(InputWorkspace=self._ws, XStart=0.0, XEnd=5.0, SpecMin=0, SpecMax=4, OutputWorkspace='msd')
 
         self.assertTrue(mtd.doesExist('msd_Parameters'), 'Should have a parameter WS with the default name')
         self.assertTrue(mtd.doesExist('msd_Workspaces'), 'Should have a fit WS with the default name')
@@ -61,9 +62,7 @@ class MSDFitTest(unittest.TestCase):
         Tests a basic run providing names of all output workspaces.
         """
 
-        msd, param, fit = MSDFit(InputWorkspace=self._ws,
-                                 XStart=0.0, XEnd=5.0,
-                                 SpecMin=0, SpecMax=4)
+        msd, param, fit = MSDFit(InputWorkspace=self._ws, XStart=0.0, XEnd=5.0, SpecMin=0, SpecMax=4)
 
         self._validate_workspaces(msd, param, fit)
 
@@ -73,9 +72,7 @@ class MSDFitTest(unittest.TestCase):
         """
 
         with self.assertRaises(RuntimeError):
-            msd, param, fit = MSDFit(InputWorkspace=self._ws,
-                                     XStart=0.0, XEnd=5.0,
-                                     SpecMin=-1, SpecMax=0)
+            msd, param, fit = MSDFit(InputWorkspace=self._ws, XStart=0.0, XEnd=5.0, SpecMin=-1, SpecMax=0)
 
     def test_fail_spec_min(self):
         """
@@ -85,8 +82,10 @@ class MSDFitTest(unittest.TestCase):
         self.assertRaises(RuntimeError,
                           MSDFit,
                           InputWorkspace=self._ws,
-                          XStart=0.0, XEnd=5.0,
-                          SpecMin=0, SpecMax=20,
+                          XStart=0.0,
+                          XEnd=5.0,
+                          SpecMin=0,
+                          SpecMax=20,
                           OutputWorkspace='msd')
 
     def test_fail_spec_range(self):
@@ -97,8 +96,10 @@ class MSDFitTest(unittest.TestCase):
         self.assertRaises(RuntimeError,
                           MSDFit,
                           InputWorkspace=self._ws,
-                          XStart=0.0, XEnd=5.0,
-                          SpecMin=1, SpecMax=0,
+                          XStart=0.0,
+                          XEnd=5.0,
+                          SpecMin=1,
+                          SpecMax=0,
                           OutputWorkspace='msd')
 
     def test_fail_x_range(self):
@@ -109,8 +110,10 @@ class MSDFitTest(unittest.TestCase):
         self.assertRaises(RuntimeError,
                           MSDFit,
                           InputWorkspace=self._ws,
-                          XStart=10.0, XEnd=5.0,
-                          SpecMin=0, SpecMax=0,
+                          XStart=10.0,
+                          XEnd=5.0,
+                          SpecMin=0,
+                          SpecMax=0,
                           OutputWorkspace='msd')
 
     def test_fail_x_range_ws(self):
@@ -121,8 +124,10 @@ class MSDFitTest(unittest.TestCase):
         self.assertRaises(RuntimeError,
                           MSDFit,
                           InputWorkspace=self._ws,
-                          XStart=0.0, XEnd=20.0,
-                          SpecMin=0, SpecMax=0,
+                          XStart=0.0,
+                          XEnd=20.0,
+                          SpecMin=0,
+                          SpecMax=0,
                           OutputWorkspace='msd')
 
 

@@ -40,7 +40,7 @@ class DataSeries(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        _xml  = "<DataSeries>\n"
+        _xml = "<DataSeries>\n"
         for item in self.data_sets:
             _xml += item.to_xml()
         _xml += "</DataSeries>\n"
@@ -56,22 +56,22 @@ class DataSeries(BaseScriptElement):
         self.data_sets = []
         dom = xml.dom.minidom.parseString(xml_str)
 
-#        # Get Mantid version
-#        mtd_version = BaseScriptElement.getMantidBuildVersion(dom)
+        #        # Get Mantid version
+        #        mtd_version = BaseScriptElement.getMantidBuildVersion(dom)
 
         self._data_class = REFLDataSets
         element_list = dom.getElementsByTagName("Data")
-        if len(element_list)==0:
+        if len(element_list) == 0:
             element_list = dom.getElementsByTagName("RefLData")
 
-        if len(element_list)>0:
+        if len(element_list) > 0:
             for item in element_list:
                 if item is not None:
                     data_set = self._data_class()
                     data_set.from_xml_element(item)
                     self.data_sets.append(data_set)
 
-        if len(self.data_sets)==0:
+        if len(self.data_sets) == 0:
             self.data_sets = [self._data_class()]
 
     def reset(self):

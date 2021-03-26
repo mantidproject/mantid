@@ -69,13 +69,14 @@ def parse_castep_file(file_name, ir_or_raman):
         'ir_intensities': ir_intensities,
         'raman_intensities': raman_intensities,
         'weights': warray,
-        'q_vectors':q_vectors
-        })
+        'q_vectors': q_vectors
+    })
 
     if len(bonds) > 0:
         file_data['bonds'] = bonds
 
     return file_data
+
 
 #----------------------------------------------------------------------------------------
 
@@ -103,6 +104,7 @@ def _parse_castep_file_header(f_handle):
         if num_species > 0 and file_data['num_ions'] > 0:
             file_data['num_branches'] = num_species * file_data['num_ions']
             return file_data
+
 
 #----------------------------------------------------------------------------------------
 
@@ -135,6 +137,7 @@ def _parse_castep_freq_block(f_handle, num_branches, ir_or_raman):
 
 #----------------------------------------------------------------------------------------
 
+
 def _find_castep_freq_block(f_handle, data_regex):
     """
     Find the start of the frequency block in a .castep file.
@@ -154,6 +157,7 @@ def _find_castep_freq_block(f_handle, data_regex):
             f_handle.seek(pos)
             return
 
+
 #----------------------------------------------------------------------------------------
 
 
@@ -172,5 +176,6 @@ def _parse_castep_bond(bond_match):
     bond['length'] = float(bond_match.group(6))
 
     return bond
+
 
 #----------------------------------------------------------------------------------------

@@ -123,8 +123,7 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model = StateGuiModel(state)
         self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
         state_gui_model.reduction_dimensionality = ReductionDimensionality.TWO_DIM
-        self.assertEqual(state_gui_model.all_states.reduction.reduction_dimensionality,
-                         ReductionDimensionality.TWO_DIM)
+        self.assertEqual(state_gui_model.all_states.reduction.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event binning for compatibility mode
@@ -494,8 +493,10 @@ class StateGuiModelTest(unittest.TestCase):
         state.convert_to_q.q_resolution_delta_r = 0.1 / 1000.
         state.mask.radius_min = 12. / 1000.
         state.mask.radius_max = 13. / 1000.
-        state.move.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
-                                DetectorType.HAB.value: StateMoveDetectors()}
+        state.move.detectors = {
+            DetectorType.LAB.value: StateMoveDetectors(),
+            DetectorType.HAB.value: StateMoveDetectors()
+        }
         state.move.detectors[DetectorType.LAB.value].sample_centre_pos1 = 21.5 / 1000.
         state.move.detectors[DetectorType.LAB.value].sample_centre_pos2 = 17.8 / 1000.
         state.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = 25.1 / 1000.

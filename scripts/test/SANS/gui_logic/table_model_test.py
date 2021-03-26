@@ -92,17 +92,18 @@ class TableModelTest(unittest.TestCase):
             "WavelengthMin": 'The min value of the wavelength when converting from TOF.',
             "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
             "PhiMin": 'The min angle of the detector to accept.'
-                      ' Anti-clockwise from horizontal.',
+            ' Anti-clockwise from horizontal.',
             "PhiMax": 'The max angle of the detector to accept.'
-                      ' Anti-clockwise from horizontal.',
+            ' Anti-clockwise from horizontal.',
             "UseMirror": 'True or False. Whether or not to accept phi angle'
-                         ' in opposing quadrant',
+            ' in opposing quadrant',
             "MergeScale": 'The scale applied to the HAB when merging',
             "MergeShift": 'The shift applied to the HAB when merging',
             "EventSlices": 'The event slices to reduce.'
-                           ' The format is the same as for the event slices'
-                           ' box in settings, however if a comma separated list is given '
-                           'it must be enclosed in quotes'})
+            ' The format is the same as for the event slices'
+            ' box in settings, however if a comma separated list is given '
+            'it must be enclosed in quotes'
+        })
 
         self.assertEqual(expected_hint_strategy, hint_strategy)
 

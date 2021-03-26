@@ -11,8 +11,8 @@ from enum import Enum
 
 # Constants
 DEFAULT_TABLE_NAME = 'ResultsTable'
-ALLOWED_NON_TIME_SERIES_LOGS = ("run_number", "run_start", "run_end", "group",
-                                "period", "sample_temp", "sample_magn_field")
+ALLOWED_NON_TIME_SERIES_LOGS = ("run_number", "run_start", "run_end", "group", "period", "sample_temp",
+                                "sample_magn_field")
 ERROR_COL_SUFFIX = 'Error'
 # This is not a particularly robust way of ignoring this as it
 # depends on how Fit chooses to output the name of that value
@@ -37,7 +37,6 @@ class TableColumnType(Enum):
 class ResultsTabModel(object):
     """Captures the data and operations
     for the results tab"""
-
     def __init__(self, fitting_context):
         """
         Construct a model around the given FitContext object
@@ -131,20 +130,15 @@ class ResultsTabModel(object):
         [(workspace, fit_position),...]
         It is assumed this is not empty and ordered as it should be displayed.
         """
-        self._raise_error_on_incompatible_selection(log_selection,
-                                                    results_selection)
+        self._raise_error_on_incompatible_selection(log_selection, results_selection)
         all_fits = self._fit_context.fit_list
-        results_table = self._create_empty_results_table(
-            log_selection, results_selection, all_fits)
+        results_table = self._create_empty_results_table(log_selection, results_selection, all_fits)
         for _, position in results_selection:
             fit = all_fits[position]
             fit_parameters = fit.parameters
-            row_dict = {
-                WORKSPACE_NAME_COL: fit_parameters.parameter_workspace_name
-            }
+            row_dict = {WORKSPACE_NAME_COL: fit_parameters.parameter_workspace_name}
             row_dict = self._add_logs_to_table(row_dict, fit, log_selection)
-            results_table.addRow(
-                self._add_parameters_to_table(row_dict, fit_parameters))
+            results_table.addRow(self._add_parameters_to_table(row_dict, fit_parameters))
 
         ads.Instance().addOrReplace(self.results_table_name(), results_table)
         return results_table
@@ -175,15 +169,11 @@ class ResultsTabModel(object):
         for param_name in fit_parameters.names():
             row_dict.update({param_name: fit_parameters.value(param_name)})
             if _param_error_should_be_displayed(param_name):
-                row_dict.update({
-                    _error_column_name(param_name):
-                    fit_parameters.error(param_name)
-                })
+                row_dict.update({_error_column_name(param_name): fit_parameters.error(param_name)})
 
         return row_dict
 
-    def _raise_error_on_incompatible_selection(self, log_selection,
-                                               results_selection):
+    def _raise_error_on_incompatible_selection(self, log_selection, results_selection):
         """If the selected results cannot be displayed together then raise an error
 
         :param log_selection: See create_results_output
@@ -193,8 +183,7 @@ class ResultsTabModel(object):
         self._raise_if_log_selection_invalid(log_selection, results_selection)
         self._raise_if_result_selection_is_invalid(results_selection)
 
-    def _raise_if_log_selection_invalid(self, log_selection,
-                                        results_selection):
+    def _raise_if_log_selection_invalid(self, log_selection, results_selection):
         """
         Raise a RuntimeError if the log selection is invalid.
         :param results_selection: The selected fit results
@@ -209,8 +198,8 @@ class ResultsTabModel(object):
                 if not fit.has_log(log_name):
                     missing.append(log_name)
             if missing:
-                missing_msg.append("  Fit '{}' is missing the logs {}".format(
-                    fit.parameters.parameter_workspace_name, missing))
+                missing_msg.append("  Fit '{}' is missing the logs {}".format(fit.parameters.parameter_workspace_name,
+                                                                              missing))
         if missing_msg:
             raise RuntimeError("The logs for each selected fit do not match:\n" + "\n".join(missing_msg))
 
@@ -220,17 +209,12 @@ class ResultsTabModel(object):
         :param results_selection: The selected fit results
         """
         all_fits = self._fit_context.fit_list
-        nparams_selected = [
-            len(all_fits[position].parameters)
-            for _, position in results_selection
-        ]
+        nparams_selected = [len(all_fits[position].parameters) for _, position in results_selection]
         if nparams_selected[1:] != nparams_selected[:-1]:
             msg = "The number of parameters for each selected fit does not match:\n"
-            for (_, position), nparams in zip(results_selection,
-                                              nparams_selected):
+            for (_, position), nparams in zip(results_selection, nparams_selected):
                 fit = all_fits[position]
-                msg += "  {}: {}\n".format(
-                    fit.parameters.parameter_workspace_name, nparams)
+                msg += "  {}: {}\n".format(fit.parameters.parameter_workspace_name, nparams)
             raise RuntimeError(msg)
 
     def _create_empty_results_table(self, log_selection, results_selection, all_fits):
@@ -273,11 +257,10 @@ class ResultsTabModel(object):
         for name in parameters.names():
             table.addColumn('float', name, TableColumnType.Y.value)
             if _param_error_should_be_displayed(name):
-                table.addColumn('float', _error_column_name(name),
-                                TableColumnType.YErr.value)
+                table.addColumn('float', _error_column_name(name), TableColumnType.YErr.value)
                 # The error column will be the most recent one added (columnCount-1) and is corresponding value will be
                 # the second to last (columnCount-2).
-                table.setLinkedYCol(table.columnCount()-1, table.columnCount()-2)
+                table.setLinkedYCol(table.columnCount() - 1, table.columnCount() - 2)
         return table
 
     def on_new_fit_performed(self):

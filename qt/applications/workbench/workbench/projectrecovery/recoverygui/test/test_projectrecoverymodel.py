@@ -129,8 +129,7 @@ class ProjectRecoveryModelTest(unittest.TestCase):
         self.assertEqual([checkpoints[1].replace("T", " "), "6", "No"], self.prm.rows[0])
 
     def test_get_number_of_checkpoints(self):
-        self.assertEqual(int(ConfigService.getString(NO_OF_CHECKPOINTS_KEY)),
-                         self.prm.get_number_of_checkpoints())
+        self.assertEqual(int(ConfigService.getString(NO_OF_CHECKPOINTS_KEY)), self.prm.get_number_of_checkpoints())
 
     def test_update_checkpoint_tried(self):
         checkpoints = os.listdir(self.pid)

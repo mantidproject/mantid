@@ -46,16 +46,24 @@ def CalibrateWish(RunNumber, PanelNumber):
     # Get the calibration and put it into the calibration table
 
     # calibrate the lower tubes
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, lower_tube, funcForm,
-                                                 rangeList=list(range(0, 76)), outputPeak=True)
+    calibrationTable, peakTable = tube.calibrate(CalibInstWS,
+                                                 CalibratedComponent,
+                                                 lower_tube,
+                                                 funcForm,
+                                                 rangeList=list(range(0, 76)),
+                                                 outputPeak=True)
 
     # calibrate the upper tubes
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, upper_tube, funcForm,
-                                                 rangeList=list(range(76, 152)),
-                                                 calibTable=calibrationTable,
-                                                 # give the calibration table to append data
-                                                 outputPeak=peakTable  # give peak table to append data
-                                                 )
+    calibrationTable, peakTable = tube.calibrate(
+        CalibInstWS,
+        CalibratedComponent,
+        upper_tube,
+        funcForm,
+        rangeList=list(range(76, 152)),
+        calibTable=calibrationTable,
+        # give the calibration table to append data
+        outputPeak=peakTable  # give peak table to append data
+    )
 
     print("Got calibration (new positions of detectors)")
 
@@ -66,7 +74,8 @@ def CalibrateWish(RunNumber, PanelNumber):
     # == Save workspace ==
     # uncomment these lines to save the workspace
     # nexusName = "TubeCalibDemoWish" + PanelNumber + "Result.nxs"
-    # mantid.SaveNexusProcessed(CalibInstWS, 'TubeCalibDemoWishResult.nxs', "Result of Running TubeCalibWishMerlin_Simple.py")
+    # mantid.SaveNexusProcessed(CalibInstWS, 'TubeCalibDemoWishResult.nxs', "Result of Running
+    # TubeCalibWishMerlin_Simple.py")
     # print("saved calibrated workspace (CalibInstWS) into Nexus file", nexusName)
 
     # == Reset default instrument ==

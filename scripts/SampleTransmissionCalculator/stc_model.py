@@ -9,7 +9,6 @@ import numpy as np
 
 
 class SampleTransmissionCalculatorModel(object):
-
     @staticmethod
     def calculate(input_dict):
         output_key = {}
@@ -21,13 +20,11 @@ class SampleTransmissionCalculatorModel(object):
             # multiple binning
             binning = input_dict['multiple_bin']
 
-        transmission_ws = CalculateSampleTransmission(
-            WavelengthRange=binning,
-            ChemicalFormula=input_dict['chemical_formula'],
-            DensityType=input_dict['density_type'],
-            density=input_dict['density'],
-            thickness=input_dict['thickness']
-        )
+        transmission_ws = CalculateSampleTransmission(WavelengthRange=binning,
+                                                      ChemicalFormula=input_dict['chemical_formula'],
+                                                      DensityType=input_dict['density_type'],
+                                                      density=input_dict['density'],
+                                                      thickness=input_dict['thickness'])
         output_key['x'] = transmission_ws.dataX(0)
         output_key['y'] = transmission_ws.dataY(0)
         output_key['scattering'] = transmission_ws.dataY(1)[0]
@@ -62,9 +59,9 @@ class SampleTransmissionCalculatorModel(object):
                     bin_list = [float(i) for i in bin_list]
                     if len(bin_list) % 2 == 1 and len(bin_list) != 1:
                         for i in range(len(bin_list) // 2):
-                            if bin_list[0+2*i] < 0.0 or bin_list[1+2*i] <= 0.0 or bin_list[2+2*i] <= 0.0:
+                            if bin_list[0 + 2 * i] < 0.0 or bin_list[1 + 2 * i] <= 0.0 or bin_list[2 + 2 * i] <= 0.0:
                                 validation['histogram'] = 'Histogram must be greater than zero.'
-                            if bin_list[2+2*i] <= bin_list[0+2*i]:
+                            if bin_list[2 + 2 * i] <= bin_list[0 + 2 * i]:
                                 validation['histogram'] = 'Upper histogram edge must be greater than the lower bin.'
                     else:
                         validation['histogram'] = 'Histogram requires an odd number of values.'

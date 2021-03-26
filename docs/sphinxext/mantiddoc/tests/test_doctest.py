@@ -11,8 +11,8 @@ from mantiddoc.doctest import DocTestOutputParser, TestCaseReport, TestSuiteRepo
 
 import unittest
 
-class TestCaseReportTest(unittest.TestCase):
 
+class TestCaseReportTest(unittest.TestCase):
     def test_report_stores_expected_attributes_about_test(self):
         name = "DummyTest"
         classname = "DummySuite"
@@ -50,15 +50,16 @@ class TestCaseReportTest(unittest.TestCase):
         self.assertTrue(report.failed)
         self.assertFalse(report.passed)
 
+
 #------------------------------------------------------------------------------
 
-class TestSuiteReportTest(unittest.TestCase):
 
+class TestSuiteReportTest(unittest.TestCase):
     def test_report_stores_expected_attributes_about_test(self):
         name = "DummySuite"
         package = "tests"
         testcases = [TestCaseReport("doctests", "DummyTest", "failed")]
-        report =  TestSuiteReport(name, testcases, package)
+        report = TestSuiteReport(name, testcases, package)
 
         self.assertEqual(name, report.name)
         self.assertEqual(package, report.package)
@@ -74,20 +75,23 @@ class TestSuiteReportTest(unittest.TestCase):
     #========================= Failure cases ==================================
 
     def test_report_raises_error_with_empty_tests_cases_list(self):
-        self.assertRaises(ValueError, self.__createDummyReport, empty = True)
+        self.assertRaises(ValueError, self.__createDummyReport, empty=True)
 
     #========================= Helpers ========================================
 
-    def __createDummyReport(self, empty = False):
+    def __createDummyReport(self, empty=False):
         name = "DummySuite"
         package = "tests"
         if empty:
             testcases = []
         else:
-            testcases = [TestCaseReport("doctests", "DummyTest", "failed"),
-                         TestCaseReport("doctests", "DummyTest2", "")]
+            testcases = [
+                TestCaseReport("doctests", "DummyTest", "failed"),
+                TestCaseReport("doctests", "DummyTest2", "")
+            ]
 
         return TestSuiteReport(name, testcases, package)
+
 
 #------------------------------------------------------------------------------
 
@@ -236,10 +240,10 @@ Doctest summary
     0 failures in cleanup code
 """
 
-class DocTestOutputParserTest(unittest.TestCase):
 
+class DocTestOutputParserTest(unittest.TestCase):
     def test_all_passed_gives_expected_results(self):
-        parser = DocTestOutputParser(ALL_PASS_EX, isfile = False)
+        parser = DocTestOutputParser(ALL_PASS_EX, isfile=False)
 
         self.assertTrue(hasattr(parser, "testsuite"))
         suite = parser.testsuite
@@ -255,7 +259,7 @@ class DocTestOutputParserTest(unittest.TestCase):
             self.assertEqual("docs.algorithms/AllPassed", case.classname)
 
     def test_pass_with_cleanup_fail_parse_correctly(self):
-        parser = DocTestOutputParser(TEST_PASS_CLEANUP_FAIL, isfile = False)
+        parser = DocTestOutputParser(TEST_PASS_CLEANUP_FAIL, isfile=False)
 
         self.assertTrue(hasattr(parser, "testsuite"))
         suite = parser.testsuite
@@ -272,7 +276,7 @@ class DocTestOutputParserTest(unittest.TestCase):
             self.assertEqual("docs.algorithms/TestPassedCleanupFail", case.classname)
 
     def test_all_failed_gives_expected_results(self):
-        parser = DocTestOutputParser(ALL_FAIL_EX, isfile = False)
+        parser = DocTestOutputParser(ALL_FAIL_EX, isfile=False)
 
         self.assertTrue(hasattr(parser, "testsuite"))
         suite = parser.testsuite
@@ -283,7 +287,7 @@ class DocTestOutputParserTest(unittest.TestCase):
         cases = suite.testcases
         expected_names = ["Ex2[31]", "Ex1"]
         expected_errors = [
-"""File "algorithms/AllFailed.rst", line 127, in Ex2[31]
+            """File "algorithms/AllFailed.rst", line 127, in Ex2[31]
 Failed example:
     print "Multi-line failed"
     print "test"
@@ -291,15 +295,15 @@ Expected:
     No match
 Got:
     Multi-line failed
-    test""", # second error
-"""File "algorithms/AllFailed.rst", line 111, in Ex1
+    test""",  # second error
+            """File "algorithms/AllFailed.rst", line 111, in Ex1
 Failed example:
     print "Single line failed test"
 Expected:
     No match
 Got:
     Single line failed test"""
-]
+        ]
         # test
         for idx, case in enumerate(cases):
             self.assertTrue(case.failed)
@@ -308,7 +312,7 @@ Got:
             self.assertEqual("docs.algorithms/AllFailed", case.classname)
 
     def test_mix_pass_fail_gives_expected_results(self):
-        parser = DocTestOutputParser(MIX_PASSFAIL_EX, isfile = False)
+        parser = DocTestOutputParser(MIX_PASSFAIL_EX, isfile=False)
 
         self.assertTrue(hasattr(parser, "testsuite"))
         suite = parser.testsuite
@@ -318,22 +322,24 @@ Got:
 
         cases = suite.testcases
         expected_names = ["Ex3", "default", "default", "Ex1"]
-        expected_errors = ["", "", #two passes
-"""File "algorithms/MixPassFail.rst", line 143, in default
+        expected_errors = [
+            "",
+            "",  #two passes
+            """File "algorithms/MixPassFail.rst", line 143, in default
 Failed example:
     print "A failed test"
 Expected:
     Not a success
 Got:
     A failed test""",
-"""File "algorithms/MixPassFail.rst", line 159, in Ex1
+            """File "algorithms/MixPassFail.rst", line 159, in Ex1
 Failed example:
     print "Second failed test"
 Expected:
     Not a success again
 Got:
     Second failed test"""
-]
+        ]
         # test
         for idx, case in enumerate(cases):
             expected_fail = (expected_errors[idx] != "")
@@ -343,9 +349,9 @@ Got:
             self.assertEqual("docs.algorithms/MixPassFail", case.classname)
 
     def test_multi_document_text(self):
-        multi_doc = "\n".join(ALL_PASS_EX.splitlines()[:-6]) # hack off summary
+        multi_doc = "\n".join(ALL_PASS_EX.splitlines()[:-6])  # hack off summary
         multi_doc += ALL_FAIL_EX
-        parser = DocTestOutputParser(multi_doc, isfile = False)
+        parser = DocTestOutputParser(multi_doc, isfile=False)
 
         self.assertTrue(hasattr(parser, "testsuite"))
         suite = parser.testsuite
@@ -355,8 +361,7 @@ Got:
     #========================= Failure cases ==================================
 
     def test_no_document_start_gives_valueerror(self):
-        self.assertRaises(ValueError, DocTestOutputParser,
-                          "----------\n 1 items passed", isfile = False)
+        self.assertRaises(ValueError, DocTestOutputParser, "----------\n 1 items passed", isfile=False)
 
     def test_no_location_for_test_failure_gives_valueerror(self):
         fail_ex_noloc = ALL_FAIL_EX.splitlines()
@@ -364,16 +369,15 @@ Got:
         fail_ex_noloc.pop(3)
         fail_ex_noloc = "\n".join(fail_ex_noloc)
 
-        self.assertRaises(ValueError, DocTestOutputParser, fail_ex_noloc,
-                          isfile = False)
+        self.assertRaises(ValueError, DocTestOutputParser, fail_ex_noloc, isfile=False)
 
     def test_no_overall_summary_for_document_gives_valueerror(self):
         fail_ex_nosum = ALL_FAIL_EX.splitlines()
         fail_ex_nosum.pop(26)
         fail_ex_nosum = "\n".join(fail_ex_nosum)
 
-        self.assertRaises(ValueError, DocTestOutputParser, fail_ex_nosum,
-                          isfile = False)
+        self.assertRaises(ValueError, DocTestOutputParser, fail_ex_nosum, isfile=False)
+
 
 #------------------------------------------------------------------------------
 

@@ -10,7 +10,6 @@ from mantid.kernel import Direction
 
 
 class FilePropertyTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManagerImpl.Instance()
@@ -45,7 +44,8 @@ class FilePropertyTest(unittest.TestCase):
         alg.initialize()
         prop = alg.getProperty("Filename")
         self.assertEqual(type(prop), FileProperty)
-        self.assertTrue('value' in dir(prop)) # Do we have a value method
+        self.assertTrue('value' in dir(prop))  # Do we have a value method
+
 
 if __name__ == '__main__':
     unittest.main()

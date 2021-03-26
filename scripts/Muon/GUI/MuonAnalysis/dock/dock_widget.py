@@ -15,7 +15,6 @@ from Muon.GUI.Common.muon_context.muon_context import *
 
 
 class DockWidget(QtWidgets.QWidget):
-
     """
     This is a special case of the widget class structure.
     Normally we would only store the presenter and would
@@ -24,7 +23,6 @@ class DockWidget(QtWidgets.QWidget):
     So this class simply wraps the dock (view) and
     populates it
     """
-
     def __init__(self, context, parent=None):
         super(DockWidget, self).__init__(parent)
 

@@ -26,5 +26,5 @@ class ToscaInstrument(IndirectInstrument):
         a = cls.parameters['a']
         b = cls.parameters['b']
         c = cls.parameters['c']
-        sigma = a * frequencies ** 2 + b * frequencies + c
+        sigma = a * frequencies**2 + b * frequencies + c
         return sigma

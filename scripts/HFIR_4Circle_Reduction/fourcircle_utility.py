@@ -22,7 +22,6 @@ from mantid.api import AnalysisDataService
 
 __author__ = 'wzz'
 
-
 NUM_DET_ROW = 256
 
 
@@ -173,14 +172,13 @@ def get_hb3a_wavelength(m1_motor_pos):
         'Motor m1\'s position {0} must be a float but not {1}.'.format(m1_motor_pos, type(m1_motor_pos))
 
     # hard-coded HB3A m1 position and wavelength mapping
-    m1_pos_list = [(-25.870, 1.003),
-                   (-39.170, 1.5424)]
+    m1_pos_list = [(-25.870, 1.003), (-39.170, 1.5424)]
 
     motor_pos_tolerance = 0.2
 
     for m1_tup in m1_pos_list:
         this_pos = m1_tup[0]
-        if abs(m1_motor_pos-this_pos) < motor_pos_tolerance:
+        if abs(m1_motor_pos - this_pos) < motor_pos_tolerance:
             return m1_tup[1]
     # END-FOR
 
@@ -348,7 +346,7 @@ def parse_int_array(int_array_str):
                 if ret_status is False:
                     break
             # END_FOR(i)
-            integer_list.extend(range(temp_list[0], temp_list[1]+1))
+            integer_list.extend(range(temp_list[0], temp_list[1] + 1))
 
         else:
             # Undefined situation
@@ -384,8 +382,7 @@ def get_det_xml_file_name(instrument_name, exp_number, scan_number, pt_number):
     assert isinstance(pt_number, int), 'Pt number must be an int but not %s.' % str(type(pt_number))
 
     # get name
-    xml_file_name = '%s_exp%d_scan%04d_%04d.xml' % (instrument_name, exp_number,
-                                                    scan_number, pt_number)
+    xml_file_name = '%s_exp%d_scan%04d_%04d.xml' % (instrument_name, exp_number, scan_number, pt_number)
 
     return xml_file_name
 
@@ -434,8 +431,8 @@ def get_spice_file_url(server_url, instrument_name, exp_number, scan_number):
     assert isinstance(server_url, str) and isinstance(instrument_name, str)
     assert isinstance(exp_number, int) and isinstance(scan_number, int)
 
-    file_url = '%sexp%d/Datafiles/%s_exp%04d_scan%04d.dat' % (server_url, exp_number,
-                                                              instrument_name, exp_number, scan_number)
+    file_url = '%sexp%d/Datafiles/%s_exp%04d_scan%04d.dat' % (server_url, exp_number, instrument_name, exp_number,
+                                                              scan_number)
 
     return file_url
 
@@ -474,7 +471,10 @@ def get_raw_data_workspace_name(exp_number, scan_number, pt_number):
     return ws_name
 
 
-def get_integrated_peak_ws_name(exp_number, scan_number, pt_list, mask=False,
+def get_integrated_peak_ws_name(exp_number,
+                                scan_number,
+                                pt_list,
+                                mask=False,
                                 normalized_by_monitor=False,
                                 normalized_by_time=False):
     """
@@ -525,7 +525,7 @@ def get_log_data(spice_table, log_name):
         raise KeyError('Log name %s does not exist in SPICE table.' % log_name)
 
     num_rows = spice_table.rowCount()
-    log_vector = numpy.ndarray((num_rows,), 'float')
+    log_vector = numpy.ndarray((num_rows, ), 'float')
     for i in range(num_rows):
         log_vector[i] = spice_table.cell(i, log_col_index)
 
@@ -548,7 +548,7 @@ def get_step_motor_parameters(log_value_vector):
     assert len(step_vector) > 0, 'Log value vector size = %d. Step vector size = 0 is not allowed.' \
                                  '' % len(log_value_vector)
     step_dev = numpy.std(step_vector)
-    step = sum(step_vector)/len(step_vector)
+    step = sum(step_vector) / len(step_vector)
 
     return std_dev, step, step_dev
 
@@ -572,8 +572,7 @@ def get_merged_md_name(instrument_name, exp_no, scan_no, pt_list):
     if len(pt_list) == 0:
         raise RuntimeError('Pt number list {0} cannot be empty.', pt_list)
 
-    merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_MD' % (instrument_name, exp_no, scan_no,
-                                                     pt_list[0], pt_list[-1])
+    merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_MD' % (instrument_name, exp_no, scan_no, pt_list[0], pt_list[-1])
 
     return merged_ws_name
 
@@ -598,8 +597,7 @@ def get_merged_hkl_md_name(instrument_name, exp_no, scan_no, pt_list):
     if len(pt_list) == 0:
         raise RuntimeWarning('Pt list cannot be empty.')
 
-    merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_HKL_MD' % (instrument_name, exp_no, scan_no,
-                                                         pt_list[0], pt_list[-1])
+    merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_HKL_MD' % (instrument_name, exp_no, scan_no, pt_list[0], pt_list[-1])
 
     return merged_ws_name
 
@@ -627,9 +625,7 @@ def get_peak_ws_name(exp_number, scan_number, pt_number_list):
     assert isinstance(exp_number, int) and isinstance(scan_number, int)
     assert isinstance(pt_number_list, list) and len(pt_number_list) > 0
 
-    ws_name = 'Peak_Exp%d_Scan%d_Pt%d_%d' % (exp_number, scan_number,
-                                             pt_number_list[0],
-                                             pt_number_list[-1])
+    ws_name = 'Peak_Exp%d_Scan%d_Pt%d_%d' % (exp_number, scan_number, pt_number_list[0], pt_number_list[-1])
 
     return ws_name
 
@@ -765,9 +761,7 @@ def convert_hkl_to_integer(index_h, index_k, index_l, magnetic_tolerance=0.2):
     index_k_r = round_miller_index(index_k, magnetic_tolerance)
     index_l_r = round_miller_index(index_l, magnetic_tolerance)
 
-    round_error = math.sqrt((index_h - index_h_r) ** 2
-                            + (index_k - index_k_r) ** 2
-                            + (index_l - index_l_r) ** 2)
+    round_error = math.sqrt((index_h - index_h_r)**2 + (index_k - index_k_r)**2 + (index_l - index_l_r)**2)
 
     return (index_h_r, index_k_r, index_l_r), round_error
 
@@ -943,11 +937,13 @@ def pre_processed_record_make(scan_number, file_name, distance, center_x, center
     :param wave_length:
     :return: a dictionary
     """
-    record = {'Scan': scan_number,
-              'MD': file_name,
-              'DetSampleDistance': distance,
-              'Center': (center_x, center_y),
-              'WaveLength': wave_length}
+    record = {
+        'Scan': scan_number,
+        'MD': file_name,
+        'DetSampleDistance': distance,
+        'Center': (center_x, center_y),
+        'WaveLength': wave_length
+    }
 
     return record
 

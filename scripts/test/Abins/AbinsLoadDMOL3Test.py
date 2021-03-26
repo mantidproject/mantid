@@ -11,7 +11,6 @@ import abins.test_helpers
 
 
 class AbinsLoadDMOL3Test(unittest.TestCase, abins.input.Tester):
-
     def tearDown(self):
         abins.test_helpers.remove_output_files(list_of_names=["LoadDMOL3"])
 

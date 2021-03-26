@@ -100,8 +100,12 @@ class ClipPeaksTest(unittest.TestCase):
         basews = AnalysisDataService.retrieve("Baseline")
         peakws = AnalysisDataService.retrieve("PeakData")
 
-        clippedws = ClipPeaks(peakws, LLSCorrection=True, IncreasingWindow=False, SmoothingRange=10,
-                              WindowSize=10, OutputWorkspace="clipout")
+        clippedws = ClipPeaks(peakws,
+                              LLSCorrection=True,
+                              IncreasingWindow=False,
+                              SmoothingRange=10,
+                              WindowSize=10,
+                              OutputWorkspace="clipout")
 
         # Validate by subtracting peak clip results with baseline function
         np.testing.assert_allclose(clippedws.extractY(), basews.extractY(), rtol=self.tolerance)
@@ -115,8 +119,12 @@ class ClipPeaksTest(unittest.TestCase):
         basews = AnalysisDataService.retrieve("Baseline")
         peakws = AnalysisDataService.retrieve("PeakData")
 
-        clippedws = ClipPeaks(peakws, LLSCorrection=True, IncreasingWindow=True, SmoothingRange=10,
-                              WindowSize=10, OutputWorkspace="clipout")
+        clippedws = ClipPeaks(peakws,
+                              LLSCorrection=True,
+                              IncreasingWindow=True,
+                              SmoothingRange=10,
+                              WindowSize=10,
+                              OutputWorkspace="clipout")
 
         # Validate by subtracting peak clip results with baseline function
         np.testing.assert_allclose(clippedws.extractY(), basews.extractY(), rtol=self.tolerance)
@@ -130,13 +138,18 @@ class ClipPeaksTest(unittest.TestCase):
         basews = AnalysisDataService.retrieve("Baseline")
         peakws = AnalysisDataService.retrieve("PeakData")
 
-        clippedws = ClipPeaks(peakws, LLSCorrection=False, IncreasingWindow=False, SmoothingRange=10,
-                              WindowSize=10, OutputWorkspace="clipout")
+        clippedws = ClipPeaks(peakws,
+                              LLSCorrection=False,
+                              IncreasingWindow=False,
+                              SmoothingRange=10,
+                              WindowSize=10,
+                              OutputWorkspace="clipout")
 
         # Validate by subtracting peak clip results with baseline function
         np.testing.assert_allclose(clippedws.extractY(), basews.extractY(), rtol=self.tolerance)
 
         DeleteWorkspaces(WorkspaceList=["Baseline", "PeakData", "clipout"])
+
 
 if __name__ == '__main__':
     unittest.main()

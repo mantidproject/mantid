@@ -11,11 +11,8 @@ from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
 
 
 class MaxEntModelTest(unittest.TestCase):
-
     def setUp(self):
-        self.model = mock.create_autospec(
-            maxent_model.MaxEntModel,
-            spec_set=True)
+        self.model = mock.create_autospec(maxent_model.MaxEntModel, spec_set=True)
         self.model.setRun = mock.Mock()
         self.model.MaxEntAlg = mock.Mock()
         self.model.makePhaseTable = mock.Mock()

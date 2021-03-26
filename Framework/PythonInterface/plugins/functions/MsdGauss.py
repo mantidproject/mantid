@@ -14,9 +14,9 @@ import numpy as np
 
 from mantid.api import IFunction1D, FunctionFactory
 
-
 # For a Gaussian distribution the elastic intensity is proportional to exp(-(msd*Q^2)/6)
 # where the mean square displacement msd = <r^2>.
+
 
 class MsdGauss(IFunction1D):
     def category(self):
@@ -32,7 +32,7 @@ class MsdGauss(IFunction1D):
         msd = self.getParameterValue("Msd")
 
         xvals = np.array(xvals)
-        intensity = height * np.exp((-msd * xvals**2)/6)
+        intensity = height * np.exp((-msd * xvals**2) / 6)
 
         return intensity
 
@@ -41,9 +41,9 @@ class MsdGauss(IFunction1D):
         msd = self.getParameterValue("Msd")
 
         for i, x in enumerate(xvals):
-            e = math.exp((-msd * x**2)/6)
+            e = math.exp((-msd * x**2) / 6)
             jacobian.set(i, 0, e)
-            jacobian.set(i, 1, -((x**2)/6) * e * height)
+            jacobian.set(i, 1, -((x**2) / 6) * e * height)
             i += 1
 
 

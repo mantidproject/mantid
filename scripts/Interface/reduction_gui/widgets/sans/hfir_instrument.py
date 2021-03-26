@@ -123,7 +123,8 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.detector_offset_edit.setValidator(QDoubleValidator(self._summary.detector_offset_edit))
         self._summary.sample_dist_edit.setValidator(QDoubleValidator(self._summary.sample_dist_edit))
         self._summary.sample_si_dist_edit.setValidator(QDoubleValidator(self._summary.sample_si_dist_edit))
-        self._summary.total_detector_distance_edit.setValidator(QDoubleValidator(self._summary.total_detector_distance_edit))
+        self._summary.total_detector_distance_edit.setValidator(
+            QDoubleValidator(self._summary.total_detector_distance_edit))
         self._summary.wavelength_edit.setValidator(QDoubleValidator(self._summary.wavelength_edit))
         self._summary.wavelength_spread_edit.setValidator(QDoubleValidator(self._summary.wavelength_spread_edit))
         self._summary.n_q_bins_edit.setValidator(QIntValidator(self._summary.n_q_bins_edit))
@@ -267,7 +268,7 @@ class SANSInstrumentWidget(BaseWidget):
 #             self._summary.sample_dist_chk.setChecked(not is_checked)
 #             self._summary.sample_dist_edit.setEnabled(not is_checked)
 
-        # Keep track of current value so we can restore it if the check box is clicked again
+# Keep track of current value so we can restore it if the check box is clicked again
 #         if self._sample_detector_distance_supplied != is_checked:
 #             current_value = util._check_and_get_float_line_edit(self._summary.sample_dist_edit)
 #             self._summary.sample_dist_edit.setText(str(self._sample_detector_distance))
@@ -284,6 +285,8 @@ class SANSInstrumentWidget(BaseWidget):
 
     def _total_dist_clicked(self, is_checked):
         self._summary.total_detector_distance_edit.setEnabled(is_checked)
+
+
 #
 #         if is_checked:
 #             self._summary.total_detector_distance_chk.setChecked(not is_checked)
@@ -353,34 +356,31 @@ class SANSInstrumentWidget(BaseWidget):
 
         # Detector offset input
         # is_enabled, stored_value, chk_widget, edit_widget, suppl_value=None, suppl_edit=None
-#         self._prepare_field(state.detector_offset != 0,
-#                             state.detector_offset,
-#                             self._summary.detector_offset_chk,
-#                             self._summary.detector_offset_edit)
-#
-#         # Sample-detector distance
-#         self._prepare_field(state.sample_detector_distance != 0,
-#                             state.sample_detector_distance,
-#                             self._summary.sample_dist_chk,
-#                             self._summary.sample_dist_edit)
-#
+        #         self._prepare_field(state.detector_offset != 0,
+        #                             state.detector_offset,
+        #                             self._summary.detector_offset_chk,
+        #                             self._summary.detector_offset_edit)
+        #
+        #         # Sample-detector distance
+        #         self._prepare_field(state.sample_detector_distance != 0,
+        #                             state.sample_detector_distance,
+        #                             self._summary.sample_dist_chk,
+        #                             self._summary.sample_dist_edit)
+        #
         util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0)
         util._check_and_get_float_line_edit(self._summary.sample_si_dist_edit, min=-0.0001)
         util._check_and_get_float_line_edit(self._summary.detector_offset_edit, min=-0.0001)
         util._check_and_get_float_line_edit(self._summary.total_detector_distance_edit, min=0)
-#         if self._sample_detector_distance is None:
-#             self._sample_detector_distance = state.sample_detector_distance
-#         self._sample_detector_distance_supplied = self._summary.sample_dist_chk.isChecked()
-#
-#         # Sample-detector distance takes precedence over offset if both are non-zero
-#         self._sample_dist_clicked(self._summary.sample_dist_chk.isChecked())
+        #         if self._sample_detector_distance is None:
+        #             self._sample_detector_distance = state.sample_detector_distance
+        #         self._sample_detector_distance_supplied = self._summary.sample_dist_chk.isChecked()
+        #
+        #         # Sample-detector distance takes precedence over offset if both are non-zero
+        #         self._sample_dist_clicked(self._summary.sample_dist_chk.isChecked())
 
         # Wavelength value
-        self._prepare_field(state.wavelength != 0,
-                            state.wavelength,
-                            self._summary.wavelength_chk,
-                            self._summary.wavelength_edit,
-                            state.wavelength_spread,
+        self._prepare_field(state.wavelength != 0, state.wavelength, self._summary.wavelength_chk,
+                            self._summary.wavelength_edit, state.wavelength_spread,
                             self._summary.wavelength_spread_edit)
         if self._wavelength is None:
             self._wavelength = state.wavelength
@@ -456,19 +456,19 @@ class SANSInstrumentWidget(BaseWidget):
         m.scaling_beam_diam = util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
         m.manual_beam_diam = self._summary.beamstop_chk.isChecked()
 
-#         ## If total detector distance is checked, ignore the other 3 distances:
-#         if self._summary.total_detector_distance_chk.isChecked():
-#             m.sample_total_distance = util._check_and_get_float_line_edit(self._summary.total_detector_distance_edit)
-#         else:
-#             # Detector offset input
-#             if self._summary.detector_offset_chk.isChecked():
-#                 m.detector_offset = util._check_and_get_float_line_edit(self._summary.detector_offset_edit)
-#             # Sample-detector distance
-#             if self._summary.sample_dist_chk.isChecked():
-#                 m.sample_detector_distance = util._check_and_get_float_line_edit(self._summary.sample_dist_edit)
-#             # Sample-Si-window
-#             if self._summary.sample_si_dist_chk.isChecked():
-#                 m.sample_si_window_distance = util._check_and_get_float_line_edit(self._summary.sample_si_dist_edit)
+        #         ## If total detector distance is checked, ignore the other 3 distances:
+        #         if self._summary.total_detector_distance_chk.isChecked():
+        #             m.sample_total_distance = util._check_and_get_float_line_edit(self._summary.total_detector_distance_edit)
+        #         else:
+        #             # Detector offset input
+        #             if self._summary.detector_offset_chk.isChecked():
+        #                 m.detector_offset = util._check_and_get_float_line_edit(self._summary.detector_offset_edit)
+        #             # Sample-detector distance
+        #             if self._summary.sample_dist_chk.isChecked():
+        #                 m.sample_detector_distance = util._check_and_get_float_line_edit(self._summary.sample_dist_edit)
+        #             # Sample-Si-window
+        #             if self._summary.sample_si_dist_chk.isChecked():
+        #                 m.sample_si_window_distance = util._check_and_get_float_line_edit(self._summary.sample_si_dist_edit)
 
         # Workaround:
         # Offset is not used

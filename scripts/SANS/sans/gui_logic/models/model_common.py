@@ -11,7 +11,7 @@ from sans.state.AllStates import AllStates
 
 
 class ModelCommon(metaclass=ABCMeta):
-    def __init__(self, all_states : AllStates):
+    def __init__(self, all_states: AllStates):
         if all_states is None:
             self._all_states = AllStates()
             self._instrument = SANSInstrument.NO_INSTRUMENT

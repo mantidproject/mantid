@@ -12,7 +12,6 @@ from mantidqt.utils.testing.mocks.mock_qt import MockQtEvent
 
 
 class ObservingViewTest(unittest.TestCase):
-
     def setUp(self):
         self.view = MockObservingView(None)
 

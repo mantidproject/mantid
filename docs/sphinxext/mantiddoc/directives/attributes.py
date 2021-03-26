@@ -4,10 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantiddoc.directives.properties import PropertiesDirective #pylint: disable=unused-import
+from mantiddoc.directives.properties import PropertiesDirective  #pylint: disable=unused-import
+
 
 class AttributesDirective(PropertiesDirective):
-
     """
     Outputs the given fit function's properties into a ReST formatted table.
     """
@@ -30,7 +30,7 @@ class AttributesDirective(PropertiesDirective):
         will describe a single attribute as a semicolon separated list
         Name;Type;Default;Description
         """
-        if self.algorithm_version() is None: # This is an IFunction
+        if self.algorithm_version() is None:  # This is an IFunction
             ifunc = self.create_mantid_ifunction(self.algorithm_name())
             if ifunc.nAttributes() <= 0:
                 return False
@@ -59,6 +59,7 @@ class AttributesDirective(PropertiesDirective):
 
         self.add_rst(self._build_table(header, attributes))
         return True
+
 
 def setup(app):
     """

@@ -9,7 +9,6 @@ import unittest
 from isis_reflectometry import settings
 
 from mantid.simpleapi import *
-
 '''
 RAII Test helper class. Equivalent to the ScopedFileHelper.
 
@@ -55,9 +54,7 @@ if not skipAllTests():
     '''
     Test suite for the Settings
     '''
-
     class SettingsTest(unittest.TestCase):
-
         def test_avalid_file(self):
             fileObject = TempFile(contents=b"<SettingList><Setting name='test_setting'>test</Setting></SettingList>",
                                   extension=".xml")
@@ -109,6 +106,7 @@ if not skipAllTests():
             configuration = settings.Settings(fileObject.pathToFile())
             self.assertEqual(configuration.get_named_setting('a'), '1')
             self.assertRaises(KeyError, configuration.get_named_setting, 'b')
+
 
 if __name__ == '__main__':
     unittest.main()

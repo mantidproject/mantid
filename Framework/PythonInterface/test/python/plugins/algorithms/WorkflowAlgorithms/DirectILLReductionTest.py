@@ -246,24 +246,14 @@ class DirectILLReductionTest(unittest.TestCase):
 
 
 def _add_natural_angle_step_parameter(ws, step=1.0):
-    kwargs = {
-        'Workspace': ws,
-        'ParameterName': 'natural-angle-step',
-        'ParameterType': 'Number',
-        'Value': str(step)
-    }
+    kwargs = {'Workspace': ws, 'ParameterName': 'natural-angle-step', 'ParameterType': 'Number', 'Value': str(step)}
     run_algorithm('SetInstrumentParameter', **kwargs)
 
 
 def _groupingTestDetectors(ws):
     """Mask detectors for detector grouping tests."""
     indexBegin = 63105  # Detector at L2 and at 2theta = 40.6.
-    kwargs = {
-        'Workspace': ws,
-        'StartWorkspaceIndex': 0,
-        'EndWorkspaceIndex': indexBegin - 1,
-        'child': True
-    }
+    kwargs = {'Workspace': ws, 'StartWorkspaceIndex': 0, 'EndWorkspaceIndex': indexBegin - 1, 'child': True}
     run_algorithm('MaskDetectors', **kwargs)
     spectrumInfo = ws.spectrumInfo()
     reference2Theta1 = spectrumInfo.twoTheta(indexBegin)
@@ -274,19 +264,12 @@ def _groupingTestDetectors(ws):
         twoTheta = spectrumInfo.twoTheta(i)
         if abs(reference2Theta1 - twoTheta) >= tolerance and abs(reference2Theta2 - twoTheta) >= tolerance:
             mask.append(i)
-    kwargs = {
-        'Workspace': ws,
-        'WorkspaceIndexList': mask,
-        'child': True
-    }
+    kwargs = {'Workspace': ws, 'WorkspaceIndexList': mask, 'child': True}
     run_algorithm('MaskDetectors', **kwargs)
-    kwargs = {
-        'Workspace': ws,
-        'StartWorkspaceIndex': indexBegin + 10000,
-        'child': True
-    }
+    kwargs = {'Workspace': ws, 'StartWorkspaceIndex': indexBegin + 10000, 'child': True}
     run_algorithm('MaskDetectors', **kwargs)
     return ws
+
 
 if __name__ == '__main__':
     unittest.main()

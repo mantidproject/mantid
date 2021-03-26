@@ -64,8 +64,10 @@ class PlotSettings(object):
     AXES_Y_POSITION = ['Left', 'Right']
     AXES_X_POSITION = ['Bottom', 'Top']
     TICK_DIRECTION = ['In', 'Out', 'InOut']
-    LEGEND_LOCATION_LIST = ['best', 'upper right', 'center right', 'lower right', 'lower center', 'lower left',
-                            'center left', 'upper left', 'upper center']
+    LEGEND_LOCATION_LIST = [
+        'best', 'upper right', 'center right', 'lower right', 'lower center', 'lower left', 'center left', 'upper left',
+        'upper center'
+    ]
 
     def __init__(self, parent, view=None, model=None):
         self.view = view if view else PlotsSettingsView(parent, self)
@@ -158,12 +160,14 @@ class PlotSettings(object):
         self.view.minor_ticks_width.setValue(minor_ticks_width)
 
         if major_ticks_direction in self.TICK_DIRECTION:
-            self.view.major_ticks_direction.setCurrentIndex(self.view.major_ticks_direction.findText(major_ticks_direction))
+            self.view.major_ticks_direction.setCurrentIndex(
+                self.view.major_ticks_direction.findText(major_ticks_direction))
         else:
             self.view.major_ticks_direction.setCurrentIndex(0)
 
         if minor_ticks_direction in self.TICK_DIRECTION:
-            self.view.minor_ticks_direction.setCurrentIndex(self.view.minor_ticks_direction.findText(minor_ticks_direction))
+            self.view.minor_ticks_direction.setCurrentIndex(
+                self.view.minor_ticks_direction.findText(minor_ticks_direction))
         else:
             self.view.minor_ticks_direction.setCurrentIndex(0)
 

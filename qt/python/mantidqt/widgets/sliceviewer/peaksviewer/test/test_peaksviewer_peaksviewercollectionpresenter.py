@@ -32,9 +32,7 @@ def create_mock_peaks_workspace(name="peaks"):
     return mock
 
 
-@patch(
-    "mantidqt.widgets.sliceviewer.peaksviewer.presenter.create_peaksviewermodel",
-    new_callable=FakePeaksModelFactory)
+@patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.create_peaksviewermodel", new_callable=FakePeaksModelFactory)
 class PeaksViewerCollectionPresenterTest(unittest.TestCase):
 
     # -------------------- success tests -----------------------------
@@ -55,13 +53,11 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
         presenter = PeaksViewerCollectionPresenter(MagicMock())
         presenter.append_peaksworkspace(names[0])
 
-        mock_create_model.assert_called_once_with(names[0],
-                                                  PeaksViewerCollectionPresenter.FG_COLORS[0],
+        mock_create_model.assert_called_once_with(names[0], PeaksViewerCollectionPresenter.FG_COLORS[0],
                                                   PeaksViewerCollectionPresenter.DEFAULT_BG_COLOR)
         mock_create_model.reset_mock()
         presenter.append_peaksworkspace(names[1])
-        mock_create_model.assert_called_once_with(names[1],
-                                                  PeaksViewerCollectionPresenter.FG_COLORS[1],
+        mock_create_model.assert_called_once_with(names[1], PeaksViewerCollectionPresenter.FG_COLORS[1],
                                                   PeaksViewerCollectionPresenter.DEFAULT_BG_COLOR)
 
     def test_remove_removes_named_workspace(self, mock_create_model):
@@ -77,8 +73,7 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
     def test_notify_called_for_each_subpresenter(self, mock_create_model):
         presenter = PeaksViewerCollectionPresenter(MagicMock())
 
-        with patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.PeaksViewerPresenter"
-                   ) as presenter_mock:
+        with patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.PeaksViewerPresenter") as presenter_mock:
             presenter_mock.side_effect = [MagicMock(), MagicMock()]
             child_presenters = [presenter.append_peaksworkspace(f'peaks_{i}') for i in range(2)]
             presenter.notify(PeaksViewerPresenter.Event.OverlayPeaks)

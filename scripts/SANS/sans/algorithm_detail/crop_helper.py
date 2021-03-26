@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-
 """ Helpers for CropToComponent for SANS."""
 from sans.common.general_functions import convert_instrument_and_detector_type_to_bank_name
 from sans.common.enums import SANSInstrument

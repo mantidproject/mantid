@@ -16,17 +16,17 @@ class SaveHKLCWTest(unittest.TestCase):
         self._tmp_directory = tempfile.gettempdir()
         self._ws_name = 'SaveHKLCWTest'
         CreateSampleWorkspace(OutputWorkspace=self._ws_name)
-        peaks = CreatePeaksWorkspace(self._ws_name, NumberOfPeaks=0, OutputWorkspace=self._ws_name+"_peaks")
+        peaks = CreatePeaksWorkspace(self._ws_name, NumberOfPeaks=0, OutputWorkspace=self._ws_name + "_peaks")
         SetUB(peaks)
         peaks.addPeak(peaks.createPeakHKL([1, 1, 1]))
         peaks.addPeak(peaks.createPeakHKL([1, -1, 1]))
 
     def tearDown(self):
-        DeleteWorkspace(self._ws_name, self._ws_name+"_peaks")
+        DeleteWorkspace(self._ws_name, self._ws_name + "_peaks")
 
     def testSaveHKL(self):
-        output_file = os.path.join(self._tmp_directory, self._ws_name+'.hkl')
-        SaveHKLCW(self._ws_name+"_peaks", output_file)
+        output_file = os.path.join(self._tmp_directory, self._ws_name + '.hkl')
+        SaveHKLCW(self._ws_name + "_peaks", output_file)
 
         with open(output_file, 'r') as f:
             lines = f.readlines()
@@ -39,8 +39,8 @@ class SaveHKLCWTest(unittest.TestCase):
         self.assertEqual(lines[4], '   1  -1   1    0.00    0.00   1\n')
 
     def testSaveHKL_no_header(self):
-        output_file = os.path.join(self._tmp_directory, self._ws_name+'_no_header.hkl')
-        SaveHKLCW(self._ws_name+"_peaks", output_file, Header=False)
+        output_file = os.path.join(self._tmp_directory, self._ws_name + '_no_header.hkl')
+        SaveHKLCW(self._ws_name + "_peaks", output_file, Header=False)
 
         with open(output_file, 'r') as f:
             lines = f.readlines()
@@ -50,8 +50,8 @@ class SaveHKLCWTest(unittest.TestCase):
         self.assertEqual(lines[1], '   1  -1   1    0.00    0.00   1\n')
 
     def testSaveHKL_direction_cosines(self):
-        output_file = os.path.join(self._tmp_directory, self._ws_name+'_dc.hkl')
-        SaveHKLCW(self._ws_name+"_peaks", output_file, DirectionCosines=True)
+        output_file = os.path.join(self._tmp_directory, self._ws_name + '_dc.hkl')
+        SaveHKLCW(self._ws_name + "_peaks", output_file, DirectionCosines=True)
 
         with open(output_file, 'r') as f:
             lines = f.readlines()
@@ -64,8 +64,8 @@ class SaveHKLCWTest(unittest.TestCase):
         self.assertEqual(lines[4], '   1  -1   1    0.00    0.00   1-1.00000 0.33333 0.00000 0.66667 0.00000-0.66667\n')
 
     def testSaveHKL_direction_cosines_no_header(self):
-        output_file = os.path.join(self._tmp_directory, self._ws_name+'_dc_no_header.hkl')
-        SaveHKLCW(self._ws_name+"_peaks", output_file, DirectionCosines=True, Header=False)
+        output_file = os.path.join(self._tmp_directory, self._ws_name + '_dc_no_header.hkl')
+        SaveHKLCW(self._ws_name + "_peaks", output_file, DirectionCosines=True, Header=False)
 
         with open(output_file, 'r') as f:
             lines = f.readlines()

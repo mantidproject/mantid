@@ -10,12 +10,20 @@ import sys
 from Muon.GUI.Common import message_box
 
 group_table_columns = {0: 'group_name', 2: 'to_analyse', 3: 'detector_ids', 4: 'number_of_detectors', 1: 'periods'}
-inverse_group_table_columns = {'group_name': 0, 'to_analyse': 2,  'detector_ids': 3,  'number_of_detectors': 4, 'periods': 1}
-table_column_flags = {'group_name': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
-                      'to_analyse': QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled,
-                      'detector_ids': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable,
-                      'number_of_detectors': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
-                      'periods': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable}
+inverse_group_table_columns = {
+    'group_name': 0,
+    'to_analyse': 2,
+    'detector_ids': 3,
+    'number_of_detectors': 4,
+    'periods': 1
+}
+table_column_flags = {
+    'group_name': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+    'to_analyse': QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled,
+    'detector_ids': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable,
+    'number_of_detectors': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+    'periods': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
+}
 
 
 class GroupingTableView(QtWidgets.QWidget):
@@ -118,7 +126,8 @@ class GroupingTableView(QtWidgets.QWidget):
 
     def set_up_table(self):
         self.grouping_table.setColumnCount(5)
-        self.grouping_table.setHorizontalHeaderLabels(["Group Name", "Periods", "Analyse (plot/fit)", "Detector IDs", "N Detectors"])
+        self.grouping_table.setHorizontalHeaderLabels(
+            ["Group Name", "Periods", "Analyse (plot/fit)", "Detector IDs", "N Detectors"])
         header = self.grouping_table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
@@ -156,7 +165,7 @@ class GroupingTableView(QtWidgets.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
     # Adding / removing table entries
     # ------------------------------------------------------------------------------------------------------------------
-    def add_entry_to_table(self, row_entries, color = (255, 255, 255), tooltip=''):
+    def add_entry_to_table(self, row_entries, color=(255, 255, 255), tooltip=''):
         assert len(row_entries) == self.grouping_table.columnCount()
         row_position = self.grouping_table.rowCount()
         self.grouping_table.insertRow(row_position)
@@ -180,7 +189,7 @@ class GroupingTableView(QtWidgets.QWidget):
 
     def get_selected_group_names_and_indexes(self):
         indexes = self._get_selected_row_indices()
-        return [[str(self.grouping_table.item(i, 0).text()),i] for i in indexes]
+        return [[str(self.grouping_table.item(i, 0).text()), i] for i in indexes]
 
     def remove_group_by_index(self, index):
         self.grouping_table.removeRow(index)

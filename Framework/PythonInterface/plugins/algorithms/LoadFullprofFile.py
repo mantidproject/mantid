@@ -8,6 +8,7 @@
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory,\
     FileProperty, FileAction, MatrixWorkspaceProperty
 from mantid.kernel import Direction
+
 _OUTPUTLEVEL = "NOOUTPUT"
 
 
@@ -24,7 +25,7 @@ class LoadFullprofFile(PythonAlgorithm):
         return "Diffraction\\DataHandling"
 
     def seeAlso(self):
-        return [ "LoadFullprofResolution" ]
+        return ["LoadFullprofResolution"]
 
     def name(self):
         """
@@ -39,7 +40,7 @@ class LoadFullprofFile(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        self.declareProperty(FileProperty("Filename","", FileAction.Load, ['.hkl', '.prf', '.dat']),
+        self.declareProperty(FileProperty("Filename", "", FileAction.Load, ['.hkl', '.prf', '.dat']),
                              "Name of [http://www.ill.eu/sites/fullprof/ Fullprof] .hkl or .prf file.")
 
         #self.declareProperty("Bank", 1, "Bank ID for output if there are more than one bank in .irf file.")
@@ -65,7 +66,7 @@ class LoadFullprofFile(PythonAlgorithm):
             self._dataWS = self._makeEmptyDataWorkspace()
         elif fpfilename.lower().endswith(".prf") is True:
             # (.prf) file
-            self._tableWS, self._dataWS= self._loadFullprofPrfFile(fpfilename)
+            self._tableWS, self._dataWS = self._loadFullprofPrfFile(fpfilename)
         elif fpfilename.lower().endswith(".dat") is True:
             # (.dat) file: Fullprof data file
             self._tableWS, self._dataWS = self._loadFullprofDataFile(fpfilename)
@@ -137,7 +138,7 @@ class LoadFullprofFile(PythonAlgorithm):
             if len(terms) >= 13:
                 fwhm = float(terms[12])
             elif len(terms) >= 9:
-                fwhm = math.sqrt(sigma2)*2.0
+                fwhm = math.sqrt(sigma2) * 2.0
 
             dkey = (h, k, l)
 
@@ -149,7 +150,8 @@ class LoadFullprofFile(PythonAlgorithm):
             if fwhm < 1.0E-5:
                 # Peak width is too small/annihilated peak
                 if _OUTPUTLEVEL == "INFORMATION":
-                    self.log.information("Peak (%d, %d, %d) has an unreasonable small FWHM.  Peak does not exist. " % (h, k, l))
+                    self.log.information("Peak (%d, %d, %d) has an unreasonable small FWHM.  Peak does not exist. " %
+                                         (h, k, l))
                 continue
 
             hkldict[dkey] = {}
@@ -185,8 +187,10 @@ class LoadFullprofFile(PythonAlgorithm):
         # 2. Add rows
         for hkl in sorted(hkldict.keys()):
             pardict = hkldict[hkl]
-            tablews.addRow([hkl[0], hkl[1], hkl[2], pardict["alpha"], pardict["beta"],
-                            pardict["sigma2"], pardict["gamma2"], pardict["FWHM"], 1.0])
+            tablews.addRow([
+                hkl[0], hkl[1], hkl[2], pardict["alpha"], pardict["beta"], pardict["sigma2"], pardict["gamma2"],
+                pardict["FWHM"], 1.0
+            ])
         # ENDFOR
 
         return tablews
@@ -212,7 +216,7 @@ class LoadFullprofFile(PythonAlgorithm):
         for i in range(datasize):
             for j in range(4):
                 dataws.dataX(j)[i] = data[i][0]
-                dataws.dataY(j)[i] = data[i][j+1]
+                dataws.dataY(j)[i] = data[i][j + 1]
                 dataws.dataE(j)[i] = 1.0
 
         return (tablews, dataws)
@@ -248,13 +252,13 @@ class LoadFullprofFile(PythonAlgorithm):
             b = float(terms[1])
             c = float(terms[2])
             alpha = float(terms[3])
-            beta  = float(terms[4])
+            beta = float(terms[4])
             gamma = float(terms[5])
             infodict["A"] = float(a)
             infodict["B"] = float(b)
             infodict["C"] = float(c)
             infodict["Alpha"] = float(alpha)
-            infodict["Beta"]  = float(beta )
+            infodict["Beta"] = float(beta)
             infodict["Gamma"] = float(gamma)
         #if infoline.count("SPGR:") == 1:
         #    terms = infoline.split("SPGR:")
@@ -265,7 +269,7 @@ class LoadFullprofFile(PythonAlgorithm):
         firstline = -1
         for i in range(1, len(lines)):
             if lines[i].count("Yobs-Ycal") > 0:
-                firstline = i+1
+                firstline = i + 1
                 #dataheader = lines[i].strip()
                 break
 
@@ -283,7 +287,7 @@ class LoadFullprofFile(PythonAlgorithm):
         count = 0
         for i in range(firstline, len(lines)):
             line = lines[i].strip()
-            if len(line) == 0: # empty line
+            if len(line) == 0:  # empty line
                 continue
 
             if line.count(")") == 0 and line.count("(") == 0:
@@ -293,7 +297,7 @@ class LoadFullprofFile(PythonAlgorithm):
                     self.log().warning("Pure data line %d (%s) has irregular number of data points" % (i, line))
                     continue
 
-                x    = float(terms[0])
+                x = float(terms[0])
                 yobs = float(terms[1])
                 ycal = float(terms[2])
                 ydif = float(terms[3])
@@ -317,7 +321,7 @@ class LoadFullprofFile(PythonAlgorithm):
                 else:
                     # Mixed line: least number of items: data(5) + TOF+hkl = 9
 
-                    x    = float(terms[0])
+                    x = float(terms[0])
                     yobs = float(terms[1])
                     ycal = float(terms[2])
                     ydif = float(terms[3])
@@ -393,11 +397,11 @@ class LoadFullprofFile(PythonAlgorithm):
                 print("%d-th line '%s' is not a data line" % (i, line))
                 continue
 
-            numpts = numitems/3
+            numpts = numitems / 3
             for j in range(numpts):
-                x = float(terms[j*3])
-                y = float(terms[j*3+1])
-                e = float(terms[j*3+2])
+                x = float(terms[j * 3])
+                y = float(terms[j * 3 + 1])
+                e = float(terms[j * 3 + 2])
 
                 vecx.append(x)
                 vecy.append(y)
@@ -406,7 +410,8 @@ class LoadFullprofFile(PythonAlgorithm):
         # ENDFOR (i)
 
         # Check
-        self.log().notice("Expected to read %d data points; Exactly read %d data points. " % (numdata*numlines, len(vecx)))
+        self.log().notice("Expected to read %d data points; Exactly read %d data points. " %
+                          (numdata * numlines, len(vecx)))
 
         # Create output workspaces
         tablews = WorkspaceFactory.createTable()

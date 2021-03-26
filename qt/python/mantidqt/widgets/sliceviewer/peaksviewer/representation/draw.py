@@ -30,8 +30,7 @@ def _get_factory(peak_shape):
         return _PEAK_REPRESENTATION_FACTORY[shape_name.lower()]
     except KeyError:
         from mantid.kernel import logger
-        logger.warning(
-            f"An {shape_name} shape is not yet supported. Only the peak center will be shown.")
+        logger.warning(f"An {shape_name} shape is not yet supported. Only the peak center will be shown.")
         return NonIntegratedPeakRepresentation
 
 
@@ -47,5 +46,4 @@ def draw_peak_representation(peak_origin, peak_shape, slice_info, painter, fg_co
     :param bg_color: A str representing the color of the background region if applicable
     :returns: A collection of drawn objects or None if nothing is visible
     """
-    return _get_factory(peak_shape).draw(peak_origin, peak_shape, slice_info, painter, fg_color,
-                                         bg_color)
+    return _get_factory(peak_shape).draw(peak_origin, peak_shape, slice_info, painter, fg_color, bg_color)

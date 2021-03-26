@@ -34,8 +34,7 @@ def convert_str_to_matrix(matrix_str, matrix_shape):
     matrix_str = matrix_str.replace(',', ' ')
     matrix_str = matrix_str.replace('\n', ' ')
     matrix_terms = matrix_str.split()
-    assert len(matrix_terms) == 9, 'Matrix string split into %s with %d terms.' % (str(matrix_terms),
-                                                                                   len(matrix_terms))
+    assert len(matrix_terms) == 9, 'Matrix string split into %s with %d terms.' % (str(matrix_terms), len(matrix_terms))
 
     # create matrix/ndarray and check dimension
     assert matrix_shape[0] * matrix_shape[1] == len(matrix_terms)
@@ -111,7 +110,7 @@ def map_to_color(data_array, base_color, change_color_flag):
         elif num_changes == 2:
             step_list = (value / num_steps_color, value % num_steps_color, 0)
         else:
-            num_steps_color_sq = num_steps_color*num_steps_color
+            num_steps_color_sq = num_steps_color * num_steps_color
             d_2 = value / num_steps_color_sq
             r_2 = value % num_steps_color_sq  # r_2 is for residue of d_2
             d_1 = r_2 / num_steps_color
@@ -160,7 +159,7 @@ def map_to_color(data_array, base_color, change_color_flag):
     assert num_changes > 0, 'No color to change!'
 
     # find out number of steps per color
-    num_steps_color = int(math.pow(float(max(data_array)), 1./num_changes)+0.5)
+    num_steps_color = int(math.pow(float(max(data_array)), 1. / num_changes) + 0.5)
 
     # calculate
     for array_index in range(array_size):
@@ -232,15 +231,15 @@ def parse_integer_list(array_str, expected_size=None):
             elif num_dash == 2 and int_str.startswith('-'):
                 terms = int_str[1:].split('-')
                 try:
-                    start_value = int(terms[0])*-1
+                    start_value = int(terms[0]) * -1
                     end_value = int(terms[1])
                 except ValueError:
                     raise RuntimeError('Unable to parse %s due to value error' % int_str)
             elif num_dash == 3:
                 terms = int_str.split('-')
                 try:
-                    start_value = -1*int(terms[1])
-                    end_value = -1*int(terms[3])
+                    start_value = -1 * int(terms[1])
+                    end_value = -1 * int(terms[3])
                 except ValueError:
                     raise RuntimeError('Unable to parse %s due to value error' % int_str)
                 except IndexError:
@@ -248,7 +247,7 @@ def parse_integer_list(array_str, expected_size=None):
             else:
                 raise RuntimeError('Unable to parse %s due to value error' % int_str)
 
-            integer_list.extend(range(start_value, end_value+1))
+            integer_list.extend(range(start_value, end_value + 1))
     # END-FOR
 
     # check size
@@ -404,8 +403,7 @@ class GetValueDialog(QDialog):
         # layout.addWidget(self.datetime)
 
         # OK and Cancel buttons
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
-                                   QtCore.Qt.Horizontal, self)
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, QtCore.Qt.Horizontal, self)
 
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
@@ -456,6 +454,8 @@ class GetValueDialog(QDialog):
         self.info_line.setPlainText(message)
 
         return
+
+
 # END-DEF-CLASS
 
 
@@ -501,6 +501,8 @@ class DisplayDialog(QDialog):
         self.message_edit.setPlainText(message)
 
         return
+
+
 # END-DEF-CLASS
 
 
@@ -534,7 +536,7 @@ def get_value_from_dialog(parent, title, details, label_name='Equation'):
 
     # launch and get result
     result = dialog.exec_()
-    print ('Method get_value_from_dialog: returned result is {}'.format(result))
+    print('Method get_value_from_dialog: returned result is {}'.format(result))
     if result is False:
         return None
 

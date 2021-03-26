@@ -14,7 +14,6 @@ class QtAssertionsHelper(object):
     - Checking the number of connections a QObject has on a signal
     - Finding the object by objectName and asserting the connections
     """
-
     def assert_connected(self, owner, signal, times):
         self.assertEqual(times, owner.receivers(signal))
 

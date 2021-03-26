@@ -22,18 +22,18 @@ regex_old_style = re.compile(
     + r"(.*mantid\>.*?($|(?=\*\/))){0,1}"  # optional change history line
     + r"(.*http://doxygen.mantidproject.org.*?($|(?=\*\/))){0,1}",
     # optional code doc line
-
     re.IGNORECASE | re.DOTALL | re.MULTILINE)
 # new style statement, year in group 1
 regex_new_style = re.compile(r"^\W*Mantid.{0,100}?(\d{4}).{100,300}?SPDX - License - Identifier.*?$[\s]*",
                              re.IGNORECASE | re.DOTALL | re.MULTILINE)
 # Other copyright statement
-regex_other_style = re.compile(r"^.*?Copyright\s.{0,200}?(\d{4}).{0,400}?$",
-                               re.IGNORECASE | re.MULTILINE)
+regex_other_style = re.compile(r"^.*?Copyright\s.{0,200}?(\d{4}).{0,400}?$", re.IGNORECASE | re.MULTILINE)
 
 # lines to skip when determining where to put the copyright statement (they must be from the start of the file)
-regex_lines_to_skip = [re.compile(r"^#!.*?$[\s]*", re.MULTILINE),  # shebang line
-                       re.compile(r"^# -\*- coding: .+?$", re.MULTILINE)]  # encoding definition
+regex_lines_to_skip = [
+    re.compile(r"^#!.*?$[\s]*", re.MULTILINE),  # shebang line
+    re.compile(r"^# -\*- coding: .+?$", re.MULTILINE)
+]  # encoding definition
 
 # Finds empty C++ multiline comments
 regex_empty_comments = re.compile(r"(\/\*)[\/\s\*]{0,1000}?(\*\/)", re.MULTILINE)
@@ -47,13 +47,15 @@ excluded_files = [".cmake.in", ".desktop.in", ".rb.in", ".py.in", "systemtest.in
 # python file exxtensions
 python_file_extensions = [".py"]
 # extensions to ignore, don't even report these
-exts_to_ignore = [".txt", ".pyc", ".sh", ".template", ".png", ".odg", ".md",
-                  ".doxyfile", ".properties", ".pbs", ".rst", ".md5", ".xml",
-                  ".dot", ".ui", ".jpg", ".png", ".svg"]
+exts_to_ignore = [
+    ".txt", ".pyc", ".sh", ".template", ".png", ".odg", ".md", ".doxyfile", ".properties", ".pbs", ".rst", ".md5",
+    ".xml", ".dot", ".ui", ".jpg", ".png", ".svg"
+]
 # manually edit these files
-manually_editable_files = ["Testing/SystemTests/scripts/systemtest.in",
-                           "Testing/SystemTests/scripts/systemtest.bat.in",
-                           "installers/MacInstaller/Info.plist.in"]
+manually_editable_files = [
+    "Testing/SystemTests/scripts/systemtest.in", "Testing/SystemTests/scripts/systemtest.bat.in",
+    "installers/MacInstaller/Info.plist.in"
+]
 
 # global reporting dictionaries
 report_new_statements_updated = {}
@@ -63,14 +65,14 @@ report_new_statement_current = {}
 report_unrecognized_statement = {}
 report_unmatched_files = {}
 
-reporting_dictionaries = {"new_statements_updated.txt": report_new_statements_updated,
-                          "old_statements_updated.txt": report_old_statements_updated,
-                          "new_statements_added.txt": report_new_statement_added,
-                          "new_statements_current.txt": report_new_statement_current,
-                          "unrecognized_statement.txt": report_unrecognized_statement,
-                          "unmatched_files.txt": report_unmatched_files
-                          }
-
+reporting_dictionaries = {
+    "new_statements_updated.txt": report_new_statements_updated,
+    "old_statements_updated.txt": report_old_statements_updated,
+    "new_statements_added.txt": report_new_statement_added,
+    "new_statements_current.txt": report_new_statement_current,
+    "unrecognized_statement.txt": report_unrecognized_statement,
+    "unmatched_files.txt": report_unmatched_files
+}
 
 ######################################################################################################################
 # Functions
@@ -85,7 +87,7 @@ def get_copyright(year, comment_prefix="//"):
 {0} Copyright &copy; {1} ISIS Rutherford Appleton Laboratory UKRI,
 {0}   NScD Oak Ridge National Laboratory, European Spallation Source,
 {0}   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-{0} SPDX - License - Identifier: GPL - 3.0 +""".format(comment_prefix,year)
+{0} SPDX - License - Identifier: GPL - 3.0 +""".format(comment_prefix, year)
 
 
 def process_file_tree(path):
@@ -141,8 +143,8 @@ def process_file(filename):
 
     # load file text
     file_text = ""
-    with open (filename, "r", encoding="utf-8") as myfile:
-        file_text=myfile.read()
+    with open(filename, "r", encoding="utf-8") as myfile:
+        file_text = myfile.read()
 
     # find old style statement - remove and replace
     match_old = regex_old_style.search(file_text)
@@ -187,7 +189,7 @@ def process_file(filename):
 
     if not dry_run:
         #save file text
-        with open (filename, "w", encoding="utf-8") as myfile:
+        with open(filename, "w", encoding="utf-8") as myfile:
             myfile.write(file_text)
 
 
@@ -230,12 +232,9 @@ def remove_text_section(text, start, end):
 
 # Set up command line arguments
 parser = argparse.ArgumentParser(description='Updates copyright statements in Python and C++.')
-parser.add_argument("-i", "--input", type=str,
-                    help="The root path for files")
-parser.add_argument("-d", "--dryrun", help="Process and report on changes without altering files",
-                    action="store_true")
-parser.add_argument("-n", "--noreport", help="Suppress the writing of reporting files",
-                    action="store_true")
+parser.add_argument("-i", "--input", type=str, help="The root path for files")
+parser.add_argument("-d", "--dryrun", help="Process and report on changes without altering files", action="store_true")
+parser.add_argument("-n", "--noreport", help="Suppress the writing of reporting files", action="store_true")
 args = parser.parse_args()
 
 # Handle the arguments
@@ -253,7 +252,7 @@ if not args.noreport:
     for reporting_filename, reporting_dict in reporting_dictionaries.items():
         with open(reporting_filename, "w") as reporting_file:
             for key, value in reporting_dict.items():
-                reporting_file.write("{0}\t{1}{2}".format(key,value,os.linesep))
+                reporting_file.write("{0}\t{1}{2}".format(key, value, os.linesep))
 
 # Final comments
 print()

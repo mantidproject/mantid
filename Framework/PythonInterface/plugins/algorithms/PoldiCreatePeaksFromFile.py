@@ -15,7 +15,6 @@ import os
 
 class PoldiCompound(object):
     """Small helper class to handle the results from PoldiCrystalFileParser."""
-
     def __init__(self, name, elements):
         self._spacegroup = ""
         self._atomString = ""
@@ -50,6 +49,7 @@ class PoldiCompound(object):
 def raiseParseErrorException(message):
     raise ParseException(message)
 
+
 # pylint: disable=too-many-instance-attributes
 
 
@@ -79,7 +79,6 @@ class PoldiCrystalFileParser(object):
     in the file. These are then processed by PoldiCreatePeaksFromFile to generate arguments
     for calling PoldiCreatePeaksFromCell.
     """
-
     def __init__(self):
         self.elementSymbol = Word(alphas, min=1, max=2).setFailAction(
             lambda o, s, loc, token: raiseParseErrorException("Element symbol must be one or two characters."))
@@ -97,23 +96,24 @@ class PoldiCrystalFileParser(object):
         self.groupOpener = Suppress(Literal('{'))
         self.groupCloser = Suppress(Literal('}'))
 
-        self.atomsGroup = Group(CaselessLiteral("atoms") + self.keyValueSeparator
-                                + self.groupOpener + delimitedList(self.atomLine, delim=lineEnd) + self.groupCloser)
+        self.atomsGroup = Group(
+            CaselessLiteral("atoms") + self.keyValueSeparator + self.groupOpener +
+            delimitedList(self.atomLine, delim=lineEnd) + self.groupCloser)
 
-        self.unitCell = Group(CaselessLiteral("lattice") + self.keyValueSeparator + delimitedList(
-            self.floatNumber, delim=White()))
+        self.unitCell = Group(
+            CaselessLiteral("lattice") + self.keyValueSeparator + delimitedList(self.floatNumber, delim=White()))
 
-        self.spaceGroup = Group(CaselessLiteral("spacegroup") + self.keyValueSeparator + Word(
-            alphanums + "-" + ' ' + '/'))
+        self.spaceGroup = Group(
+            CaselessLiteral("spacegroup") + self.keyValueSeparator + Word(alphanums + "-" + ' ' + '/'))
 
-        self.compoundContent = Each([self.atomsGroup, self.unitCell, self.spaceGroup]).setFailAction(
-            lambda o, s, loc, token: raiseParseErrorException(
-                "One of 'Lattice', 'SpaceGroup', 'Atoms' is missing or contains errors."))
+        self.compoundContent = Each([self.atomsGroup, self.unitCell,
+                                     self.spaceGroup]).setFailAction(lambda o, s, loc, token: raiseParseErrorException(
+                                         "One of 'Lattice', 'SpaceGroup', 'Atoms' is missing or contains errors."))
 
         self.compoundName = Word(alphanums + '_')
 
-        self.compound = Group(self.compoundName + Optional(self.whiteSpace)
-                              + self.groupOpener + self.compoundContent + self.groupCloser)
+        self.compound = Group(self.compoundName + Optional(self.whiteSpace) + self.groupOpener + self.compoundContent +
+                              self.groupCloser)
 
         self.comment = Suppress(Literal('#') + restOfLine)
 
@@ -137,13 +137,13 @@ class PoldiCrystalFileParser(object):
 
 
 class PoldiCreatePeaksFromFile(PythonAlgorithm):
-    _parser=None
+    _parser = None
 
     def category(self):
         return "SINQ\\Poldi"
 
     def seeAlso(self):
-        return [ "PoldiCreatePeaksFromCell" ]
+        return ["PoldiCreatePeaksFromCell"]
 
     def name(self):
         return "PoldiLoadCrystalData"
@@ -153,25 +153,19 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
                 "with the expected reflections.")
 
     def PyInit(self):
-        self.declareProperty(
-            FileProperty(name="InputFile",
-                         defaultValue="",
-                         action=FileAction.Load,
-                         extensions=["dat"]),
-            doc="A file with POLDI crystal data.")
+        self.declareProperty(FileProperty(name="InputFile", defaultValue="", action=FileAction.Load,
+                                          extensions=["dat"]),
+                             doc="A file with POLDI crystal data.")
 
-        self.declareProperty("LatticeSpacingMin", 0.5,
-                             direction=Direction.Input,
-                             doc="Lowest allowed lattice spacing.")
+        self.declareProperty("LatticeSpacingMin", 0.5, direction=Direction.Input, doc="Lowest allowed lattice spacing.")
 
-        self.declareProperty("LatticeSpacingMax", 0.0,
+        self.declareProperty("LatticeSpacingMax",
+                             0.0,
                              direction=Direction.Input,
                              doc="Largest allowed lattice spacing.")
 
-        self.declareProperty(
-            WorkspaceProperty(name="OutputWorkspace",
-                              defaultValue="", direction=Direction.Output),
-            doc="WorkspaceGroup with reflection tables.")
+        self.declareProperty(WorkspaceProperty(name="OutputWorkspace", defaultValue="", direction=Direction.Output),
+                             doc="WorkspaceGroup with reflection tables.")
 
         self._parser = PoldiCrystalFileParser()
 
@@ -190,8 +184,8 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
             # If two compounds have the same name, a warning is written to the log.
             for compound in compounds:
                 if compound.getName() in workspaces:
-                    self.log().warning("A compound with the name '" + compound.getName()
-                                       + "' has already been created. Please check the file '" + crystalFileName + "'")
+                    self.log().warning("A compound with the name '" + compound.getName() +
+                                       "' has already been created. Please check the file '" + crystalFileName + "'")
                 else:
                     workspaces.append(self._createPeaksFromCell(compound, dMin, dMax))
 

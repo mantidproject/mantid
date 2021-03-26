@@ -17,9 +17,10 @@ from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string,
 BASE_CREATE_LINE_COMMAND = "plot({})"
 BASE_ERRORBAR_COMMAND = "errorbar({})"
 PLOT_KWARGS = [
-    'alpha', 'color', 'drawstyle', 'fillstyle', 'label', 'linestyle', 'linewidth', 'marker',
-    'markeredgecolor', 'markeredgewidth', 'markerfacecolor', 'markerfacecoloralt', 'markersize',
-    'markevery', 'solid_capstyle', 'solid_joinstyle', 'visible', 'zorder']
+    'alpha', 'color', 'drawstyle', 'fillstyle', 'label', 'linestyle', 'linewidth', 'marker', 'markeredgecolor',
+    'markeredgewidth', 'markerfacecolor', 'markerfacecoloralt', 'markersize', 'markevery', 'solid_capstyle',
+    'solid_joinstyle', 'visible', 'zorder'
+]
 
 mpl_default_kwargs = {
     'alpha': None,
@@ -133,14 +134,16 @@ def _get_mantid_specific_plot_kwargs(artist):
         return dict()
     sample_log_plot_details = ax.get_artists_sample_log_plot_details(artist)
     if sample_log_plot_details is None:
-        plot_kwargs = {"wkspIndex": ax.get_artists_workspace_and_workspace_index(artist)[1],
-                       "distribution": not ax.get_artist_normalization_state(artist)}
+        plot_kwargs = {
+            "wkspIndex": ax.get_artists_workspace_and_workspace_index(artist)[1],
+            "distribution": not ax.get_artist_normalization_state(artist)
+        }
         ax_type = ax.creation_args[0].get('axis', None)
         if ax_type:
             plot_kwargs["axis"] = ax_type
         return plot_kwargs
     else:
-        sample_log_details_map =  {'LogName': sample_log_plot_details[0]}
+        sample_log_details_map = {'LogName': sample_log_plot_details[0]}
         if sample_log_plot_details[1] is not None:
             sample_log_details_map['Filtered'] = sample_log_plot_details[1]
         if sample_log_plot_details[2] is not None:

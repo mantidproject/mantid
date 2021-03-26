@@ -11,10 +11,7 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
     """
     Extended table widget for scans to process
     """
-    TableSetup = [('Scan', 'int'),
-                  ('Status', 'str'),
-                  ('File', 'str'),
-                  ('Note', 'str')]
+    TableSetup = [('Scan', 'int'), ('Status', 'str'), ('File', 'str'), ('Note', 'str')]
 
     def __init__(self, parent):
         """
@@ -107,7 +104,7 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
         assert isinstance(row_number, int), 'Row number {0} must be an integer.'.format(row_number)
         status = str(status)
         if not isinstance(status, str):
-            print ('[DB] status is an instance of {0}.'.format(type(status)))
+            print('[DB] status is an instance of {0}.'.format(type(status)))
 
         self.update_cell_value(row_number, self._iColStatus, status)
 

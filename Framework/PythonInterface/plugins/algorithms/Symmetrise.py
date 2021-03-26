@@ -10,10 +10,9 @@ import numpy as np
 
 import mantid.simpleapi as ms
 from mantid import logger, mtd
-from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
-                        ITableWorkspaceProperty, PropertyMode, WorkspaceFactory, Progress)
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty,
+                        PropertyMode, WorkspaceFactory, Progress)
 from mantid.kernel import Direction, IntArrayProperty
-
 
 # pylint: disable=too-many-instance-attributes
 
@@ -36,8 +35,7 @@ class Symmetrise(PythonAlgorithm):
         return 'Make asymmetric workspace data symmetric.'
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', Direction.Input),
-                             doc='Sample to run with')
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', Direction.Input), doc='Sample to run with')
 
         self.declareProperty(IntArrayProperty(name='SpectraRange'),
                              doc='Range of spectra to symmetrise (defaults to entire range if not set)')
@@ -45,11 +43,11 @@ class Symmetrise(PythonAlgorithm):
         self.declareProperty('XMin', 0.0, doc='X value marking lower limit of curve to copy')
         self.declareProperty('XMax', 0.0, doc='X value marking upper limit of curve to copy')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                                                     Direction.Output), doc='Name to call the output workspace.')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
+                             doc='Name to call the output workspace.')
 
-        self.declareProperty(ITableWorkspaceProperty('OutputPropertiesTable', '',
-                                                     Direction.Output, PropertyMode.Optional),
+        self.declareProperty(ITableWorkspaceProperty('OutputPropertiesTable', '', Direction.Output,
+                                                     PropertyMode.Optional),
                              doc='Name to call the properties output table workspace.')
 
     # pylint: disable=too-many-locals
@@ -93,13 +91,13 @@ class Symmetrise(PythonAlgorithm):
 
         logger.information('Sample array length = %d' % sample_array_len)
 
-        logger.information('Positive X min at i=%d, x=%f'
-                           % (self._positive_min_index, sample_x[self._positive_min_index]))
-        logger.information('Negative X min at i=%d, x=%f'
-                           % (self._negative_min_index, sample_x[self._negative_min_index]))
+        logger.information('Positive X min at i=%d, x=%f' %
+                           (self._positive_min_index, sample_x[self._positive_min_index]))
+        logger.information('Negative X min at i=%d, x=%f' %
+                           (self._negative_min_index, sample_x[self._negative_min_index]))
 
-        logger.information('Positive X max at i=%d, x=%f'
-                           % (self._positive_max_index, sample_x[self._positive_max_index]))
+        logger.information('Positive X max at i=%d, x=%f' %
+                           (self._positive_max_index, sample_x[self._positive_max_index]))
 
         logger.information('New array length = %d' % new_array_len)
         logger.information('Output array LR split index = %d' % output_cut_index)
@@ -282,8 +280,10 @@ class Symmetrise(PythonAlgorithm):
         props_table.addColumn('int', 'PositiveXMinIndex')
         props_table.addColumn('int', 'PositiveXMaxIndex')
 
-        props_table.addRow([int(self._negative_min_index), int(self._positive_min_index),
-                            int(self._positive_max_index)])
+        props_table.addRow(
+            [int(self._negative_min_index),
+             int(self._positive_min_index),
+             int(self._positive_max_index)])
 
         self.setProperty('OutputPropertiesTable', self._props_output_workspace)
 

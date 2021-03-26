@@ -34,8 +34,8 @@ def mask_ws(ws_to_mask, xstart, xend):
         logger.debug('No masking due to x bin >= len(x_values) - 1!: {0}'.format(xend))
 
     if xstart > 0 and xend < len(x_values) - 1:
-        logger.information('Bins out of range {0} {1} [Unit of X-axis] are masked'.format
-                           (x_values[int(xstart)],x_values[int(xend) + 1]))
+        logger.information('Bins out of range {0} {1} [Unit of X-axis] are masked'.format(
+            x_values[int(xstart)], x_values[int(xend) + 1]))
 
 
 class MatchPeaks(PythonAlgorithm):
@@ -57,12 +57,11 @@ class MatchPeaks(PythonAlgorithm):
         return "Transforms"
 
     def summary(self):
-        return 'Circular shifts (numpy.roll) the data of the input workspace to align peaks without modifying the x-axis.'
+        return 'Circular shifts (numpy.roll) the data of the input workspace to align peaks without modifying the ' \
+               'x-axis.'
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace',
-                                                     defaultValue='',
-                                                     direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', defaultValue='', direction=Direction.Input),
                              doc='Input workspace')
 
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace2',
@@ -77,17 +76,13 @@ class MatchPeaks(PythonAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='Input workspace to align peaks with')
 
-        self.declareProperty('MaskBins',
-                             defaultValue=False,
-                             doc='Whether to mask shifted bins')
+        self.declareProperty('MaskBins', defaultValue=False, doc='Whether to mask shifted bins')
 
         self.declareProperty('MatchInput2ToCenter',
                              defaultValue=False,
                              doc='Match peaks such that InputWorkspace2 would be centered')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace',
-                                                     defaultValue='',
-                                                     direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', defaultValue='', direction=Direction.Output),
                              doc='Shifted output workspace')
 
         self.declareProperty(ITableWorkspaceProperty('BinRangeTable',
@@ -95,8 +90,8 @@ class MatchPeaks(PythonAlgorithm):
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
                              doc='Table workspace that contains two values defining a range. '
-                                 'Bins outside this range are overflown out of range due to circular shift'
-                                 'and can be masked.')
+                             'Bins outside this range are overflown out of range due to circular shift'
+                             'and can be masked.')
 
     def setUp(self):
         self._input_ws = self.getPropertyValue('InputWorkspace')
@@ -109,16 +104,22 @@ class MatchPeaks(PythonAlgorithm):
         self._match_option = self.getProperty('MatchInput2ToCenter').value
 
         if self._input_ws:
-            ReplaceSpecialValues(InputWorkspace = self._input_ws, OutputWorkspace = self._input_ws,
-                                 NaNValue = 0, InfinityValue = 0)
+            ReplaceSpecialValues(InputWorkspace=self._input_ws,
+                                 OutputWorkspace=self._input_ws,
+                                 NaNValue=0,
+                                 InfinityValue=0)
 
         if self._input_2_ws:
-            ReplaceSpecialValues(InputWorkspace = self._input_2_ws, OutputWorkspace = self._input_2_ws,
-                                 NaNValue = 0, InfinityValue = 0)
+            ReplaceSpecialValues(InputWorkspace=self._input_2_ws,
+                                 OutputWorkspace=self._input_2_ws,
+                                 NaNValue=0,
+                                 InfinityValue=0)
 
         if self._input_3_ws:
-            ReplaceSpecialValues(InputWorkspace = self._input_3_ws, OutputWorkspace = self._input_3_ws,
-                                 NaNValue = 0, InfinityValue = 0)
+            ReplaceSpecialValues(InputWorkspace=self._input_3_ws,
+                                 OutputWorkspace=self._input_3_ws,
+                                 NaNValue=0,
+                                 InfinityValue=0)
 
     def validateInputs(self):
         issues = dict()
@@ -281,10 +282,9 @@ class MatchPeaks(PythonAlgorithm):
 
             else:
                 # do not shift
-                logger.debug('Both the fit and the max are outside the trusted range. '
-                             'Do not shift the spectrum.')
+                logger.debug('Both the fit and the max are outside the trusted range. ' 'Do not shift the spectrum.')
 
-            logger.debug('Spectrum {0} will be shifted to bin {1}'.format(i,peak_bin[i]))
+            logger.debug('Spectrum {0} will be shifted to bin {1}'.format(i, peak_bin[i]))
 
         DeleteWorkspace(fit_table)
 

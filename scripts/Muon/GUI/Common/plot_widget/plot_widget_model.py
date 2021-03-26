@@ -15,7 +15,6 @@ FREQ_PLOT_TYPE = "Frequency "
 
 
 class PlotWidgetModel(object):
-
     def __init__(self, context):
         self.context = context
 
@@ -114,12 +113,13 @@ class PlotWidgetModel(object):
                     self.context.data_context.current_runs)
             else:
                 workspace_list = self.context.group_pair_context[
-                    current_group_pair].get_asymmetry_workspace_names_rebinned(
-                    self.context.data_context.current_runs)
+                    current_group_pair].get_asymmetry_workspace_names_rebinned(self.context.data_context.current_runs)
 
             if plot_type == COUNTS_PLOT_TYPE:
-                workspace_list = [item.replace(ASYMMETRY_PLOT_TYPE, COUNTS_PLOT_TYPE)
-                                  for item in workspace_list if ASYMMETRY_PLOT_TYPE in item]
+                workspace_list = [
+                    item.replace(ASYMMETRY_PLOT_TYPE, COUNTS_PLOT_TYPE) for item in workspace_list
+                    if ASYMMETRY_PLOT_TYPE in item
+                ]
 
             return workspace_list
         except AttributeError:

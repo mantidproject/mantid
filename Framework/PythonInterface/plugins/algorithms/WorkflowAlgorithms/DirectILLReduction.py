@@ -7,8 +7,8 @@
 
 import DirectILL_common as common
 import ILL_utilities as utils
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
-                        MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator, MatrixWorkspaceProperty,
+                        Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, FloatBoundedValidator, Property,
                            RebinParamsValidator, StringListValidator)
 from mantid.simpleapi import (BinWidthAtX, ConvertSpectrumAxis, ConvertToDistribution, ConvertUnits, CorrectKiKf,
@@ -33,10 +33,7 @@ def _absoluteUnits(ws, vanaWS, wsNames, wsCleanup, report, algorithmLogging):
         raise RuntimeError('Invalid absolute units normalisation factor: {}'.format(factor))
     report.notice('Absolute units scaling factor: {}'.format(factor))
     scaledWSName = wsNames.withSuffix('absolute_units')
-    scaledWS = Scale(InputWorkspace=ws,
-                     OutputWorkspace=scaledWSName,
-                     Factor=factor,
-                     EnableLogging=algorithmLogging)
+    scaledWS = Scale(InputWorkspace=ws, OutputWorkspace=scaledWSName, Factor=factor, EnableLogging=algorithmLogging)
     wsCleanup.cleanup(ws)
     return scaledWS
 
@@ -45,9 +42,7 @@ def _defaultEnergyBinning(ws, algorithmLogging):
     """Create common (but nonequidistant) binning for a DeltaE workspace."""
     xs = ws.extractX()
     minXIndex = numpy.nanargmin(xs[:, 0])
-    dx = BinWidthAtX(InputWorkspace=ws,
-                     X=0.0,
-                     EnableLogging=algorithmLogging)
+    dx = BinWidthAtX(InputWorkspace=ws, X=0.0, EnableLogging=algorithmLogging)
     lastX = numpy.max(xs[:, -1])
     binCount = ws.blocksize()
     borders = list()
@@ -113,8 +108,8 @@ def _paramGroupsToEdges(groups):
             beginX = params.pop(0)
             while params:
                 if len(params) < 2:
-                    raise RuntimeError('Error in ' + common.PROP_REBINNING_W
-                                       + ': not enough numbers to form the binning.')
+                    raise RuntimeError('Error in ' + common.PROP_REBINNING_W +
+                                       ': not enough numbers to form the binning.')
                 dx = params.pop(0)
                 endX = params.pop(0)
                 x = beginX
@@ -186,8 +181,7 @@ def _medianDeltaTheta(ws):
     thetas = list()
     spectrumInfo = ws.spectrumInfo()
     for i in range(ws.getNumberHistograms()):
-        if (not spectrumInfo.isMasked(i) and spectrumInfo.hasDetectors(i)
-                and not spectrumInfo.isMonitor(i)):
+        if (not spectrumInfo.isMasked(i) and spectrumInfo.hasDetectors(i) and not spectrumInfo.isMonitor(i)):
             det = ws.getDetector(i)
             twoTheta = ws.detectorTwoTheta(det)
             thetas.append(twoTheta)
@@ -204,8 +198,8 @@ def _minMaxQ(ws):
     minW = xs[0] * 1e-3 * constants.e  # in Joules
     maxEf = Ei - minW
     # In Ånströms
-    maxQ = numpy.sqrt(2.0 * constants.m_n / constants.hbar**2
-                      * (Ei + maxEf - 2 * numpy.sqrt(Ei * maxEf) * -1.0)) * 1e-10
+    maxQ = numpy.sqrt(2.0 * constants.m_n / constants.hbar**2 *
+                      (Ei + maxEf - 2 * numpy.sqrt(Ei * maxEf) * -1.0)) * 1e-10
     minQ = 0.0
     return (minQ, maxQ)
 
@@ -213,16 +207,12 @@ def _minMaxQ(ws):
 def _rebin(ws, params, wsNames, algorithmLogging):
     """Rebin a workspace."""
     rebinnedWSName = wsNames.withSuffix('rebinned')
-    rebinnedWS = Rebin(InputWorkspace=ws,
-                       OutputWorkspace=rebinnedWSName,
-                       Params=params,
-                       EnableLogging=algorithmLogging)
+    rebinnedWS = Rebin(InputWorkspace=ws, OutputWorkspace=rebinnedWSName, Params=params, EnableLogging=algorithmLogging)
     return rebinnedWS
 
 
 class DirectILLReduction(DataProcessorAlgorithm):
     """A data reduction workflow algorithm for the direct geometry TOF spectrometers at ILL."""
-
     def __init__(self):
         """Initialize an instance of the algorithm."""
         DataProcessorAlgorithm.__init__(self)
@@ -232,8 +222,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return common.CATEGORIES
 
     def seeAlso(self):
-        return [ "DirectILLApplySelfShielding","DirectILLCollectData",
-                 "DirectILLDiagnostics","DirectILLIntegrateVanadium","DirectILLSelfShielding" ]
+        return [
+            "DirectILLApplySelfShielding", "DirectILLCollectData", "DirectILLDiagnostics", "DirectILLIntegrateVanadium",
+            "DirectILLSelfShielding"
+        ]
 
     def name(self):
         """Return the algorithm's name."""
@@ -310,50 +302,39 @@ class DirectILLReduction(DataProcessorAlgorithm):
         validRebinParams = RebinParamsValidator(AllowEmpty=True)
 
         # Properties.
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=common.PROP_INPUT_WS,
-            defaultValue='',
-            validator=inputWorkspaceValidator,
-            direction=Direction.Input),
-            doc='A workspace to reduce.')
-        self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
-                                               defaultValue='',
-                                               direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty(name=common.PROP_INPUT_WS,
+                                                     defaultValue='',
+                                                     validator=inputWorkspaceValidator,
+                                                     direction=Direction.Input),
+                             doc='A workspace to reduce.')
+        self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS, defaultValue='', direction=Direction.Output),
                              doc='The reduced S(Q, DeltaE) workspace.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
                              defaultValue=utils.Cleanup.ON,
-                             validator=StringListValidator([
-                                 utils.Cleanup.ON,
-                                 utils.Cleanup.OFF]),
+                             validator=StringListValidator([utils.Cleanup.ON, utils.Cleanup.OFF]),
                              direction=Direction.Input,
                              doc='What to do with intermediate workspaces.')
         self.declareProperty(name=common.PROP_SUBALG_LOGGING,
                              defaultValue=common.SUBALG_LOGGING_OFF,
-                             validator=StringListValidator([
-                                 common.SUBALG_LOGGING_OFF,
-                                 common.SUBALG_LOGGING_ON]),
+                             validator=StringListValidator([common.SUBALG_LOGGING_OFF, common.SUBALG_LOGGING_ON]),
                              direction=Direction.Input,
                              doc='Enable or disable subalgorithms to print in the logs.')
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=common.PROP_VANA_WS,
-            defaultValue='',
-            validator=inputWorkspaceValidator,
-            direction=Direction.Input,
-            optional=PropertyMode.Optional),
-            doc='An integrated vanadium workspace.')
+        self.declareProperty(MatrixWorkspaceProperty(name=common.PROP_VANA_WS,
+                                                     defaultValue='',
+                                                     validator=inputWorkspaceValidator,
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='An integrated vanadium workspace.')
         self.declareProperty(name=common.PROP_ABSOLUTE_UNITS,
                              defaultValue=common.ABSOLUTE_UNITS_OFF,
-                             validator=StringListValidator([
-                                 common.ABSOLUTE_UNITS_OFF,
-                                 common.ABSOLUTE_UNITS_ON]),
+                             validator=StringListValidator([common.ABSOLUTE_UNITS_OFF, common.ABSOLUTE_UNITS_ON]),
                              direction=Direction.Input,
                              doc='Enable or disable normalisation to absolute units.')
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=common.PROP_DIAGNOSTICS_WS,
-            defaultValue='',
-            direction=Direction.Input,
-            optional=PropertyMode.Optional),
-            doc='Detector diagnostics workspace for masking.')
+        self.declareProperty(MatrixWorkspaceProperty(name=common.PROP_DIAGNOSTICS_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='Detector diagnostics workspace for masking.')
         self.declareProperty(name=common.PROP_GROUPING_ANGLE_STEP,
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
@@ -369,19 +350,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
         self.setPropertyGroup(common.PROP_BINNING_PARAMS_Q, PROPGROUP_REBINNING)
         self.declareProperty(name=common.PROP_TRANSPOSE_SAMPLE_OUTPUT,
                              defaultValue=common.TRANSPOSING_ON,
-                             validator=StringListValidator([
-                                 common.TRANSPOSING_ON,
-                                 common.TRANSPOSING_OFF]),
+                             validator=StringListValidator([common.TRANSPOSING_ON, common.TRANSPOSING_OFF]),
                              direction=Direction.Input,
                              doc='Enable or disable ' + common.PROP_OUTPUT_WS + ' transposing.')
-        self.declareProperty(WorkspaceProperty(
-            name=common.PROP_OUTPUT_THETA_W_WS,
-            defaultValue='',
-            direction=Direction.Output,
-            optional=PropertyMode.Optional),
-            doc='Output workspace for reduced S(theta, DeltaE).')
-        self.setPropertyGroup(common.PROP_OUTPUT_THETA_W_WS,
-                              common.PROPGROUP_OPTIONAL_OUTPUT)
+        self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_THETA_W_WS,
+                                               defaultValue='',
+                                               direction=Direction.Output,
+                                               optional=PropertyMode.Optional),
+                             doc='Output workspace for reduced S(theta, DeltaE).')
+        self.setPropertyGroup(common.PROP_OUTPUT_THETA_W_WS, common.PROPGROUP_OPTIONAL_OUTPUT)
 
     def validateInputs(self):
         """Check for issues with user input."""
@@ -389,7 +366,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
         eBinParamProp = self.getProperty(common.PROP_REBINNING_PARAMS_W)
         eBinProp = self.getProperty(common.PROP_REBINNING_W)
         if not eBinParamProp.isDefault and not eBinProp.isDefault:
-            issues[common.PROP_REBINNING_W] = 'Cannot be specified at the same time with ' + common.PROP_REBINNING_PARAMS_W + '.'
+            issues[
+                common.
+                PROP_REBINNING_W] = 'Cannot be specified at the same time with ' + common.PROP_REBINNING_PARAMS_W + '.'
         return issues
 
     def _applyDiagnostics(self, mainWS):
@@ -397,15 +376,12 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if self.getProperty(common.PROP_DIAGNOSTICS_WS).isDefault:
             return mainWS
         diagnosticsWS = self.getProperty(common.PROP_DIAGNOSTICS_WS).value
-        MaskDetectors(Workspace=mainWS,
-                      MaskedWorkspace=diagnosticsWS,
-                      EnableLogging=self._subalgLogging)
+        MaskDetectors(Workspace=mainWS, MaskedWorkspace=diagnosticsWS, EnableLogging=self._subalgLogging)
         return mainWS
 
     def _convertToDistribution(self, mainWS):
         """Convert the workspace into a distribution."""
-        ConvertToDistribution(Workspace=mainWS,
-                              EnableLogging=self._subalgLogging)
+        ConvertToDistribution(Workspace=mainWS, EnableLogging=self._subalgLogging)
         return mainWS
 
     def _convertTOFToDeltaE(self, mainWS):
@@ -538,8 +514,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # The mask is later respected by the detector grouping
         # to get the normalisation right also in the non-overlapping regions.
         if mainWS.getInstrument().getName() in ['IN5', 'PANTHER']:
-            rebinnedWS = MaskNonOverlappingBins(InputWorkspace=rebinnedWS, ComparisonWorkspace=mainWS, RaggedInputs='Ragged',
-                                                OutputWorkspace=rebinnedWS.name(), MaskPartiallyOverlapping=True)
+            rebinnedWS = MaskNonOverlappingBins(InputWorkspace=rebinnedWS,
+                                                ComparisonWorkspace=mainWS,
+                                                RaggedInputs='Ragged',
+                                                OutputWorkspace=rebinnedWS.name(),
+                                                MaskPartiallyOverlapping=True)
         self._cleanup.cleanup(mainWS)
         return rebinnedWS
 
@@ -550,7 +529,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             qMin, qMax = _minMaxQ(mainWS)
             dq = _deltaQ(mainWS)
             e = numpy.ceil(-numpy.log10(dq)) + 1
-            dq = (5. * ((dq*10**e) // 5 + 1.))*10**-e
+            dq = (5. * ((dq * 10**e) // 5 + 1.)) * 10**-e
             params = [qMin, dq, qMax]
             self._report.notice('Binned momentum transfer axis to bin width {0} A-1.'.format(dq))
         else:

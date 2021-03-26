@@ -10,6 +10,7 @@ from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
 
 if platform.system() == "Windows":
+
     class BayesStretchTest(unittest.TestCase):
 
         _res_ws = None
@@ -21,10 +22,8 @@ if platform.system() == "Windows":
         def setUp(self):
             self._res_ws = Load(Filename='irs26173_graphite002_res.nxs',
                                 OutputWorkspace='__BayesStretchTest_Resolution')
-            self._sample_ws = Load(Filename='irs26176_graphite002_red.nxs',
-                                OutputWorkspace='__BayesStretchTest_Sample')
+            self._sample_ws = Load(Filename='irs26176_graphite002_red.nxs', OutputWorkspace='__BayesStretchTest_Sample')
             self._num_hists = self._sample_ws.getNumberHistograms()
-
 
         def tearDown(self):
             """
@@ -33,18 +32,15 @@ if platform.system() == "Windows":
             DeleteWorkspace(self._sample_ws)
             DeleteWorkspace(self._res_ws)
 
-
 #----------------------------------Algorithm tests----------------------------------------
 
         def test_Simple_Run(self):
             """
             Test Lorentzian fit for BayesStretch
             """
-            fit_group, contour = BayesStretch(SampleWorkspace=self._sample_ws,
-                                              ResolutionWorkspace=self._res_ws)
+            fit_group, contour = BayesStretch(SampleWorkspace=self._sample_ws, ResolutionWorkspace=self._res_ws)
             self._validate_shape(contour, fit_group)
             self._validate_value(contour, fit_group)
-
 
 #-------------------------------- Failure cases ------------------------------------------
 
@@ -72,7 +68,6 @@ if platform.system() == "Windows":
                               ResolutionWorkspace=self._res_ws,
                               EMax=10)
 
-
 #--------------------------------Validate results-----------------------------------------
 
         def _validate_shape(self, contour, fit_group):
@@ -93,7 +88,6 @@ if platform.system() == "Windows":
             self.assertEqual(fit_group.getItem(0).blocksize(), 50)
             self.assertEqual(fit_group.getItem(1).getNumberHistograms(), self._num_hists)
             self.assertEqual(fit_group.getItem(1).blocksize(), 30)
-
 
         def _validate_value(self, contour, fit_group):
             """
@@ -121,6 +115,5 @@ if platform.system() == "Windows":
             self.assertAlmostEqual(fit_ws_beta.dataY(0)[21], 0., places=tol_places)
             self.assertAlmostEqual(fit_ws_beta.dataY(0)[22], 0., places=tol_places)
 
-
-    if __name__=="__main__":
+    if __name__ == "__main__":
         unittest.main()

@@ -8,12 +8,10 @@
 #
 #
 
-
 import unittest
 
 
 class ImportTest(unittest.TestCase):
-
     def test_import_workbench(self):
         import workbench  # noqa
 

@@ -82,8 +82,7 @@ class PeaksViewerPresenterTest(unittest.TestCase):
 
         self.assertEqual(2, self.mock_view.painter.remove.call_count)
 
-    def test_slice_point_changed_clears_old_peaks_and_overlays_visible(
-            self, mock_peaks_list_presenter):
+    def test_slice_point_changed_clears_old_peaks_and_overlays_visible(self, mock_peaks_list_presenter):
         centers = ((1, 2, 3), (4, 5, 3.01))
         slice_info = create_slice_info(centers, slice_value=3, slice_width=5)
         test_model = create_peaks_viewer_model(centers, fg_color="r")

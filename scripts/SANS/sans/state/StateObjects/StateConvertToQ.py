@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
-
 """State describing the conversion to momentum transfer"""
 
 import json
@@ -17,13 +16,12 @@ from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (is_pure_none_or_not_none, is_not_none_and_first_larger_than_second,
                                         validation_message)
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
 
-class StateConvertToQ(metaclass=JsonSerializable):
 
+class StateConvertToQ(metaclass=JsonSerializable):
     def __init__(self):
         super(StateConvertToQ, self).__init__()
         self.reduction_dimensionality = ReductionDimensionality.ONE_DIM
@@ -68,23 +66,26 @@ class StateConvertToQ(metaclass=JsonSerializable):
         # 1D Q settings
         if not is_pure_none_or_not_none([self.q_min, self.q_max]):
             entry = validation_message("The q boundaries for the 1D reduction are inconsistent.",
-                                       "Make sure that both q boundaries are set (or none).",
-                                       {"q_min": self.q_min,
-                                        "q_max": self.q_max})
+                                       "Make sure that both q boundaries are set (or none).", {
+                                           "q_min": self.q_min,
+                                           "q_max": self.q_max
+                                       })
             is_invalid.update(entry)
         if is_not_none_and_first_larger_than_second([self.q_min, self.q_max]):
             entry = validation_message("Incorrect q bounds for 1D reduction.",
-                                       "Make sure that the lower q bound is smaller than the upper q bound.",
-                                       {"q_min": self.q_min,
-                                        "q_max": self.q_max})
+                                       "Make sure that the lower q bound is smaller than the upper q bound.", {
+                                           "q_min": self.q_min,
+                                           "q_max": self.q_max
+                                       })
             is_invalid.update(entry)
 
         if self.reduction_dimensionality is ReductionDimensionality.ONE_DIM:
             if self.q_min is None or self.q_max is None:
                 entry = validation_message("Q bounds not set for 1D reduction.",
-                                           "Make sure to set the q boundaries when using a 1D reduction.",
-                                           {"q_min": self.q_min,
-                                            "q_max": self.q_max})
+                                           "Make sure to set the q boundaries when using a 1D reduction.", {
+                                               "q_min": self.q_min,
+                                               "q_max": self.q_max
+                                           })
                 is_invalid.update(entry)
 
         if self.q_1d_rebin_string is not None:
@@ -103,40 +104,47 @@ class StateConvertToQ(metaclass=JsonSerializable):
         if self.reduction_dimensionality is ReductionDimensionality.TWO_DIM:
             if self.q_xy_max is None or self.q_xy_step is None:
                 entry = validation_message("Q bounds not set for 2D reduction.",
-                                           "Make sure that the q_max value bound and the step for the 2D reduction.",
-                                           {"q_xy_max": self.q_xy_max,
-                                            "q_xy_step": self.q_xy_step})
+                                           "Make sure that the q_max value bound and the step for the 2D reduction.", {
+                                               "q_xy_max": self.q_xy_max,
+                                               "q_xy_step": self.q_xy_step
+                                           })
                 is_invalid.update(entry)
 
         # Q Resolution settings
         if self.use_q_resolution:
             if not is_pure_none_or_not_none([self.q_resolution_a1, self.q_resolution_a2]):
                 entry = validation_message("Inconsistent circular geometry.",
-                                           "Make sure that both diameters for the circular apertures are set.",
-                                           {"q_resolution_a1": self.q_resolution_a1,
-                                            "q_resolution_a2": self.q_resolution_a2})
+                                           "Make sure that both diameters for the circular apertures are set.", {
+                                               "q_resolution_a1": self.q_resolution_a1,
+                                               "q_resolution_a2": self.q_resolution_a2
+                                           })
                 is_invalid.update(entry)
-            if not is_pure_none_or_not_none([self.q_resolution_h1, self.q_resolution_h2, self.q_resolution_w1,
-                                             self.q_resolution_w2]):
-                entry = validation_message("Inconsistent rectangular geometry.",
-                                           "Make sure that both diameters for the circular apertures are set.",
-                                           {"q_resolution_h1": self.q_resolution_h1,
-                                            "q_resolution_h2": self.q_resolution_h2,
-                                            "q_resolution_w1": self.q_resolution_w1,
-                                            "q_resolution_w2": self.q_resolution_w2})
+            if not is_pure_none_or_not_none(
+                [self.q_resolution_h1, self.q_resolution_h2, self.q_resolution_w1, self.q_resolution_w2]):  # noqa: E125
+                entry = validation_message(
+                    "Inconsistent rectangular geometry.",
+                    "Make sure that both diameters for the circular apertures are set.", {
+                        "q_resolution_h1": self.q_resolution_h1,
+                        "q_resolution_h2": self.q_resolution_h2,
+                        "q_resolution_w1": self.q_resolution_w1,
+                        "q_resolution_w2": self.q_resolution_w2
+                    })
                 is_invalid.update(entry)
 
-            if all(element is None for element in [self.q_resolution_a1, self.q_resolution_a2, self.q_resolution_w1,
-                                                   self.q_resolution_w2, self.q_resolution_h1, self.q_resolution_h2]):
-                entry = validation_message("Aperture is undefined.",
-                                           "Make sure that you set the geometry for a circular or a "
-                                           "rectangular aperture.",
-                                           {"q_resolution_a1": self.q_resolution_a1,
-                                            "q_resolution_a2": self.q_resolution_a2,
-                                            "q_resolution_h1": self.q_resolution_h1,
-                                            "q_resolution_h2": self.q_resolution_h2,
-                                            "q_resolution_w1": self.q_resolution_w1,
-                                            "q_resolution_w2": self.q_resolution_w2})
+            if all(element is None for element in [
+                    self.q_resolution_a1, self.q_resolution_a2, self.q_resolution_w1, self.q_resolution_w2,
+                    self.q_resolution_h1, self.q_resolution_h2
+            ]):
+                entry = validation_message(
+                    "Aperture is undefined.", "Make sure that you set the geometry for a circular or a "
+                    "rectangular aperture.", {
+                        "q_resolution_a1": self.q_resolution_a1,
+                        "q_resolution_a2": self.q_resolution_a2,
+                        "q_resolution_h1": self.q_resolution_h1,
+                        "q_resolution_h2": self.q_resolution_h2,
+                        "q_resolution_w1": self.q_resolution_w1,
+                        "q_resolution_w2": self.q_resolution_w2
+                    })
                 is_invalid.update(entry)
             if self.moderator_file is None:
                 entry = validation_message("Missing moderator file.",

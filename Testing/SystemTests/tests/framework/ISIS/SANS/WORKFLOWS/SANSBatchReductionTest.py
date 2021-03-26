@@ -21,7 +21,6 @@ from sans.common.general_functions import create_unmanaged_algorithm
 from sans.sans_batch import SANSBatchReduction
 from sans.state.StateObjects.StateData import get_data_builder
 
-
 # -----------------------------------------------
 # Tests for the SANSBatchReduction algorithm
 # -----------------------------------------------
@@ -30,7 +29,6 @@ from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapt
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANSBatchReductionTest(unittest.TestCase):
-
     def _run_batch_reduction(self, states, use_optimizations=False):
         batch_reduction_alg = SANSBatchReduction()
         batch_reduction_alg(states, use_optimizations, OutputMode.PUBLISH_TO_ADS)
@@ -38,8 +36,7 @@ class SANSBatchReductionTest(unittest.TestCase):
     def _compare_workspace(self, workspace, reference_file_name):
         # Load the reference file
         load_name = "LoadNexusProcessed"
-        load_options = {"Filename": reference_file_name,
-                        "OutputWorkspace": EMPTY_NAME}
+        load_options = {"Filename": reference_file_name, "OutputWorkspace": EMPTY_NAME}
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
         load_alg.execute()
         reference_workspace = load_alg.getProperty("OutputWorkspace").value
@@ -49,8 +46,7 @@ class SANSBatchReductionTest(unittest.TestCase):
                            MantidSystemTest.mismatchWorkspaceName(reference_file_name))
 
         save_name = "SaveNexus"
-        save_options = {"Filename": f_name,
-                        "InputWorkspace": workspace}
+        save_options = {"Filename": f_name, "InputWorkspace": workspace}
         save_alg = create_unmanaged_algorithm(save_name, **save_options)
 
         # Compare reference file with the output_workspace
@@ -58,17 +54,19 @@ class SANSBatchReductionTest(unittest.TestCase):
         # We need to disable the sample -- Not clear why yet
         # operation how many entries can be found in the sample logs
         compare_name = "CompareWorkspaces"
-        compare_options = {"Workspace1": workspace,
-                           "Workspace2": reference_workspace,
-                           "Tolerance": 1e-6,
-                           "CheckInstrument": False,
-                           "CheckSample": False,
-                           "ToleranceRelErr": True,
-                           "CheckAllData": True,
-                           "CheckMasking": True,
-                           "CheckType": True,
-                           "CheckAxes": True,
-                           "CheckSpectraMap": True}
+        compare_options = {
+            "Workspace1": workspace,
+            "Workspace2": reference_workspace,
+            "Tolerance": 1e-6,
+            "CheckInstrument": False,
+            "CheckSample": False,
+            "ToleranceRelErr": True,
+            "CheckAllData": True,
+            "CheckMasking": True,
+            "CheckType": True,
+            "CheckAxes": True,
+            "CheckSpectraMap": True
+        }
         compare_alg = create_unmanaged_algorithm(compare_name, **compare_options)
         compare_alg.setChild(False)
         compare_alg.execute()
@@ -95,8 +93,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         data_info = data_builder.build()
 
         user_filename = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
-        user_file_director = UserFileReaderAdapter(file_information=file_information,
-                                                   user_file_name=user_filename)
+        user_file_director = UserFileReaderAdapter(file_information=file_information, user_file_name=user_filename)
         # Get the rest of the state from the user file
         state = user_file_director.get_all_states(file_information=file_information)
 
@@ -133,8 +130,7 @@ class SANSBatchReductionTest(unittest.TestCase):
 
         # Get the rest of the state from the user file
         user_filename = "MASKSANS2Doptions.091A"
-        user_file_director = UserFileReaderAdapter(file_information=file_information,
-                                                   user_file_name=user_filename)
+        user_file_director = UserFileReaderAdapter(file_information=file_information, user_file_name=user_filename)
         state = user_file_director.get_all_states(file_information=file_information)
         # Set the reduction mode to LAB
         state.reduction.reduction_mode = ReductionMode.LAB
@@ -173,14 +169,13 @@ class SANSBatchReductionTest(unittest.TestCase):
 
         # Get the rest of the state from the user file
         user_filename = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
-        user_file_director = UserFileReaderAdapter(file_information=file_information,
-                                                   user_file_name=user_filename)
+        user_file_director = UserFileReaderAdapter(file_information=file_information, user_file_name=user_filename)
         state = user_file_director.get_all_states(file_information=file_information)
         # Set the reduction mode to LAB
         state.reduction.reduction_mode = ReductionMode.LAB
         state.compatibility.use_compatibility_mode = True  # COMPATIBILITY BEGIN -- Remove when appropriate
-        state.slice.start_time = [1.0,3.0]
-        state.slice.end_time = [3.0,5.0]
+        state.slice.start_time = [1.0, 3.0]
+        state.slice.end_time = [3.0, 5.0]
         state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
         state.data = data_info
 
@@ -189,7 +184,9 @@ class SANSBatchReductionTest(unittest.TestCase):
         self._run_batch_reduction(states, use_optimizations=False)
 
         expected_workspaces = ["34484_rear_1D_1.75_16.5_t1.00_T3.00", "34484_rear_1D_1.75_16.5_t3.00_T5.00"]
-        reference_file_names = ["SANS2D_event_slice_referance_t1.00_T3.00.nxs", "SANS2D_event_slice_referance_t3.00_T5.00.nxs"]
+        reference_file_names = [
+            "SANS2D_event_slice_referance_t1.00_T3.00.nxs", "SANS2D_event_slice_referance_t3.00_T5.00.nxs"
+        ]
 
         for element, reference_file in zip(expected_workspaces, reference_file_names):
             self.assertTrue(AnalysisDataService.doesExist(element))
@@ -217,8 +214,7 @@ class SANSBatchReductionTest(unittest.TestCase):
 
         # Get the rest of the state from the user file
         user_filename = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
-        user_file_director = UserFileReaderAdapter(file_information=file_information,
-                                                   user_file_name=user_filename)
+        user_file_director = UserFileReaderAdapter(file_information=file_information, user_file_name=user_filename)
         state = user_file_director.get_all_states(file_information=file_information)
 
         # Set the reduction mode to LAB
@@ -227,8 +223,8 @@ class SANSBatchReductionTest(unittest.TestCase):
         state.compatibility.use_compatibility_mode = True  # COMPATIBILITY BEGIN -- Remove when appropriate
         state.data = data_info
 
-        start = [1.0,2.0]
-        end = [2.0,3.0]
+        start = [1.0, 2.0]
+        end = [2.0, 3.0]
         state.wavelength.wavelength_low = start
         state.wavelength.wavelength_high = end
 
@@ -246,8 +242,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         self._run_batch_reduction(states, use_optimizations=False)
 
         expected_workspaces = ["34484_rear_1D_1.0_2.0", "34484_rear_1D_2.0_3.0"]
-        reference_file_names = ["SANS2D_wavelength_range_1.0_2.0.nxs",
-                                "SANS2D_wavelength_range_2.0_3.0.nxs"]
+        reference_file_names = ["SANS2D_wavelength_range_1.0_2.0.nxs", "SANS2D_wavelength_range_2.0_3.0.nxs"]
 
         for element, reference_file in zip(expected_workspaces, reference_file_names):
             self.assertTrue(AnalysisDataService.doesExist(element))
@@ -272,8 +267,7 @@ class SANSBatchReductionTest(unittest.TestCase):
 
         # Get the rest of the state from the user file
         user_filename = "MASKSANS2Doptions.091A"
-        user_file_director = UserFileReaderAdapter(file_information=file_information,
-                                                   user_file_name=user_filename)
+        user_file_director = UserFileReaderAdapter(file_information=file_information, user_file_name=user_filename)
         state = user_file_director.get_all_states(file_information=file_information)
         # Set the reduction mode to LAB
         state.reduction.reduction_mode = ReductionMode.LAB
@@ -302,9 +296,10 @@ class SANSBatchReductionTest(unittest.TestCase):
 
         # Assert
         # We only assert that the expected workspaces exist on the ADS
-        expected_workspaces = ["5512_p1rear_1D_1.0_2.0Phi-45.0_45.0_t1.00_T3.00", "5512_p1rear_1D_1.0_2.0Phi-45.0_45.0_t3.00_T5.00",
-                               "5512_p1rear_1D_1.0_3.0Phi-45.0_45.0_t1.00_T3.00", "5512_p1rear_1D_1.0_3.0Phi-45.0_45.0_t3.00_T5.00"
-                               ]
+        expected_workspaces = [
+            "5512_p1rear_1D_1.0_2.0Phi-45.0_45.0_t1.00_T3.00", "5512_p1rear_1D_1.0_2.0Phi-45.0_45.0_t3.00_T5.00",
+            "5512_p1rear_1D_1.0_3.0Phi-45.0_45.0_t1.00_T3.00", "5512_p1rear_1D_1.0_3.0Phi-45.0_45.0_t3.00_T5.00"
+        ]
         for element in expected_workspaces:
             self.assertTrue(AnalysisDataService.doesExist(element))
 

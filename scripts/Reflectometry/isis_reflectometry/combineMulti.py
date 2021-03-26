@@ -10,10 +10,21 @@ from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
 
 
-def combineDataMulti(wksp_list, output_wksp, beg_overlap, end_overlap, Qmin, Qmax, binning, scale_high=1,
-                     scale_factor=-1.0, which_period=1, keep=0, scale_right=True):
+def combineDataMulti(wksp_list,
+                     output_wksp,
+                     beg_overlap,
+                     end_overlap,
+                     Qmin,
+                     Qmax,
+                     binning,
+                     scale_high=1,
+                     scale_factor=-1.0,
+                     which_period=1,
+                     keep=0,
+                     scale_right=True):
     """
-    Function stitches multiple workspaces together. Workspaces should have an X-axis in mod Q, and the Spectrum axis as I/I0
+    Function stitches multiple workspaces together. Workspaces should have an X-axis in mod Q, and the Spectrum axis as
+    I/I0
 
     wksp_list: A list of workspaces to stitch together
     ouput_wksp: output workspace name
@@ -52,8 +63,16 @@ def combineDataMulti(wksp_list, output_wksp, beg_overlap, end_overlap, Qmin, Qma
             overlapLow = beg_overlap[i + 1]
             overlapHigh = end_overlap[i]
         print("Iteration", i)
-        currentSum, scale_factor = stitch2(currentSum, mtd[wksp_list[i + 1]], currentSum.name(), overlapLow,
-                                           overlapHigh, Qmin, Qmax, binning, scale_high, scale_right=scale_right)
+        currentSum, scale_factor = stitch2(currentSum,
+                                           mtd[wksp_list[i + 1]],
+                                           currentSum.name(),
+                                           overlapLow,
+                                           overlapHigh,
+                                           Qmin,
+                                           Qmax,
+                                           binning,
+                                           scale_high,
+                                           scale_right=scale_right)
     RenameWorkspace(InputWorkspace=currentSum.name(), OutputWorkspace=output_wksp)
 
     # Remove any existing workspaces from the workspace list.
@@ -67,7 +86,16 @@ def combineDataMulti(wksp_list, output_wksp, beg_overlap, end_overlap, Qmin, Qma
     return mtd[output_wksp]
 
 
-def stitch2(ws1, ws2, output_ws_name, begoverlap, endoverlap, Qmin, Qmax, binning, scalehigh=True, scalefactor=-1.0,
+def stitch2(ws1,
+            ws2,
+            output_ws_name,
+            begoverlap,
+            endoverlap,
+            Qmin,
+            Qmax,
+            binning,
+            scalehigh=True,
+            scalefactor=-1.0,
             scale_right=True):
     """
     Function stitches two workspaces together and returns a stitched workspace along with the scale factor
@@ -90,17 +118,30 @@ def stitch2(ws1, ws2, output_ws_name, begoverlap, endoverlap, Qmin, Qmax, binnin
         manual_scalefactor = False
         scalefactor = 1.0
     # Internally use the Stitch1D algorithm.
-    outputs = Stitch1D(LHSWorkspace=ws1, RHSWorkspace=ws2,
-                       OutputWorkspace=output_ws_name, StartOverlap=begoverlap, EndOverlap=endoverlap,
+    outputs = Stitch1D(LHSWorkspace=ws1,
+                       RHSWorkspace=ws2,
+                       OutputWorkspace=output_ws_name,
+                       StartOverlap=begoverlap,
+                       EndOverlap=endoverlap,
                        UseManualScaleFactor=manual_scalefactor,
-                       ManualScaleFactor=scalefactor, Params="%f,%f,%f" % (Qmin, binning, Qmax),
+                       ManualScaleFactor=scalefactor,
+                       Params="%f,%f,%f" % (Qmin, binning, Qmax),
                        ScaleRHSWorkspace=scale_right)
 
     return outputs
 
 
-def combine2(wksp1, wksp2, outputwksp, begoverlap, endoverlap, Qmin, Qmax, binning, scalehigh=True, scalefactor=-1.0
-             , scale_right=True):
+def combine2(wksp1,
+             wksp2,
+             outputwksp,
+             begoverlap,
+             endoverlap,
+             Qmin,
+             Qmax,
+             binning,
+             scalehigh=True,
+             scalefactor=-1.0,
+             scale_right=True):
     """
     Function stitches two workspaces together and returns a stitched workspace name along with the scale factor
 
@@ -122,10 +163,14 @@ def combine2(wksp1, wksp2, outputwksp, begoverlap, endoverlap, Qmin, Qmax, binni
         manual_scalefactor = False
         scalefactor = 1.0
     # Internally use the Stitch1D algorithm.
-    outputs = Stitch1D(LHSWorkspace=mtd[wksp1], RHSWorkspace=mtd[wksp2],
-                       OutputWorkspace=outputwksp, StartOverlap=begoverlap, EndOverlap=endoverlap,
+    outputs = Stitch1D(LHSWorkspace=mtd[wksp1],
+                       RHSWorkspace=mtd[wksp2],
+                       OutputWorkspace=outputwksp,
+                       StartOverlap=begoverlap,
+                       EndOverlap=endoverlap,
                        UseManualScaleFactor=manual_scalefactor,
-                       ManualScaleFactor=scalefactor, Params="%f,%f,%f" % (Qmin, binning, Qmax),
+                       ManualScaleFactor=scalefactor,
+                       Params="%f,%f,%f" % (Qmin, binning, Qmax),
                        ScaleRHSWorkspace=scale_right)
 
     outscalefactor = outputs[1]

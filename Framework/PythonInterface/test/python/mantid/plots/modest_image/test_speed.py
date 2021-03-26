@@ -14,7 +14,6 @@ import numpy as np
 
 from mantid.plots.modest_image import ModestImage
 
-
 x, y = np.mgrid[0:40000, 0:1000]
 data = np.sin(x / 10.) * np.cos(y / 30.)
 
@@ -38,8 +37,7 @@ def setup(img_cls):
 
 
 def report(label, t0, t1, niter):
-    print('%15s: %i ms per operation' % (label,
-                                         (t1 - t0) * 1000 / niter))
+    print('%15s: %i ms per operation' % (label, (t1 - t0) * 1000 / niter))
 
 
 def time_draw(img_cls, repeat=5):

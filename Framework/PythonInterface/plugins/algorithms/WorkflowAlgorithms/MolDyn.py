@@ -23,24 +23,22 @@ class MolDyn(PythonAlgorithm):
         return 'Imports and processes simulated functions from nMOLDYN.'
 
     def PyInit(self):
-        self.declareProperty('Data', '',
-                             validator=StringMandatoryValidator(),
-                             doc='')
+        self.declareProperty('Data', '', validator=StringMandatoryValidator(), doc='')
 
-        self.declareProperty(StringArrayProperty('Functions'),
-                             doc='A list of function to load')
+        self.declareProperty(StringArrayProperty('Functions'), doc='A list of function to load')
 
         self.declareProperty(WorkspaceProperty('Resolution', '', Direction.Input, PropertyMode.Optional),
                              doc='Resolution workspace')
 
-        self.declareProperty(name='MaxEnergy', defaultValue=Property.EMPTY_DBL,
+        self.declareProperty(name='MaxEnergy',
+                             defaultValue=Property.EMPTY_DBL,
                              doc='Crop the result spectra at a given energy (leave blank for no crop)')
 
-        self.declareProperty(name='SymmetriseEnergy', defaultValue=False,
+        self.declareProperty(name='SymmetriseEnergy',
+                             defaultValue=False,
                              doc='Symmetrise functions in energy about x=0')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
-                             doc='Output workspace name')
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output), doc='Output workspace name')
 
     def validateInputs(self):
         issues = dict()
@@ -100,10 +98,7 @@ class MolDyn(PythonAlgorithm):
                     # as the Symmetrise algorithm will do this
                     if symmetrise:
                         # Symmetrise the sample workspace in x=0
-                        Symmetrise(InputWorkspace=ws_name,
-                                   XMin=0,
-                                   XMax=max_energy,
-                                   OutputWorkspace=ws_name)
+                        Symmetrise(InputWorkspace=ws_name, XMin=0, XMax=max_energy, OutputWorkspace=ws_name)
 
                     elif max_energy_param != Property.EMPTY_DBL:
                         CropWorkspace(InputWorkspace=ws_name,
@@ -167,8 +162,7 @@ class MolDyn(PythonAlgorithm):
         num_res_hist = mtd[res_ws_name].getNumberHistograms()
 
         logger.notice('Creating resolution workspace.')
-        logger.information('Sample has %d spectra\nResolution has %d spectra'
-                           % (num_sample_hist, num_res_hist))
+        logger.information('Sample has %d spectra\nResolution has %d spectra' % (num_sample_hist, num_res_hist))
 
         # If the sample workspace has more spectra than the resolution then copy the first spectra
         # to make a workspace with equal spectra count to sample
@@ -207,13 +201,10 @@ class MolDyn(PythonAlgorithm):
         @param function_ws_name The workspace name for the function to convolute
         """
 
-        logger.notice('Convoluting sample %s with resolution %s'
-                      % (function_ws_name, resolution_ws))
+        logger.notice('Convoluting sample %s with resolution %s' % (function_ws_name, resolution_ws))
 
         # Convolve the symmetrised sample with the resolution
-        ConvolveWorkspaces(OutputWorkspace=function_ws_name,
-                           Workspace1=function_ws_name,
-                           Workspace2=resolution_ws)
+        ConvolveWorkspaces(OutputWorkspace=function_ws_name, Workspace1=function_ws_name, Workspace2=resolution_ws)
 
     def _plot_spectra(self, ws_name):
         """

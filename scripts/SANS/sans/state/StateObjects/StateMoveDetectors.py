@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods, too-many-instance-attributes
-
 """State for moving workspaces."""
 
 import copy
@@ -15,10 +14,10 @@ from sans.common.enums import (CanonicalCoordinates, SANSInstrument, DetectorTyp
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
+
 
 class StateMoveDetectors(metaclass=JsonSerializable):
     def __init__(self):
@@ -64,8 +63,7 @@ class StateMoveLOQ(StateMove):
         self.center_position = 317.5 / 1000.  # : Float
 
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
-                          DetectorType.HAB.value: StateMoveDetectors()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetectors(), DetectorType.HAB.value: StateMoveDetectors()}
 
     def validate(self):
         # No validation of the descriptors on this level, let potential exceptions from detectors "bubble" up
@@ -91,8 +89,7 @@ class StateMoveSANS2D(StateMove):
         self.monitor_4_offset = 0.0  # : Float
 
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
-                          DetectorType.HAB.value: StateMoveDetectors()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetectors(), DetectorType.HAB.value: StateMoveDetectors()}
 
     def validate(self):
         super(StateMoveSANS2D, self).validate()
@@ -134,8 +131,7 @@ class StateMoveNoInst(StateMove):
         self.monitor_4_offset = 0.0  # : Float
 
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
-                          DetectorType.HAB.value: StateMoveDetectors()}
+        self.detectors = {DetectorType.LAB.value: StateMoveDetectors(), DetectorType.HAB.value: StateMoveDetectors()}
 
     def validate(self):
         pass

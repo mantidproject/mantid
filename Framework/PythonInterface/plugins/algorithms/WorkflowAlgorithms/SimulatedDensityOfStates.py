@@ -43,53 +43,59 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
     def PyInit(self):
         # Declare properties
-        self.declareProperty(FileProperty('CASTEPFile', '',
-                                          action=FileAction.OptionalLoad,
-                                          extensions = ["castep"]),
+        self.declareProperty(FileProperty('CASTEPFile', '', action=FileAction.OptionalLoad, extensions=["castep"]),
                              doc='Filename of the CASTEP file.')
 
-        self.declareProperty(FileProperty('PHONONFile', '',
-                                          action=FileAction.OptionalLoad,
-                                          extensions = ["phonon"]),
+        self.declareProperty(FileProperty('PHONONFile', '', action=FileAction.OptionalLoad, extensions=["phonon"]),
                              doc='Filename of the PHONON file.')
 
-        self.declareProperty(name='Function',defaultValue='Gaussian',
+        self.declareProperty(name='Function',
+                             defaultValue='Gaussian',
                              validator=StringListValidator(['Gaussian', 'Lorentzian']),
                              doc="Type of function to fit to peaks.")
 
-        self.declareProperty(name='PeakWidth', defaultValue='10.0',
+        self.declareProperty(name='PeakWidth',
+                             defaultValue='10.0',
                              doc='Set Gaussian/Lorentzian FWHM for broadening. Default is 10')
 
-        self.declareProperty(name='SpectrumType', defaultValue='DOS',
-                             validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active', 'BondTable']),
+        self.declareProperty(name='SpectrumType',
+                             defaultValue='DOS',
+                             validator=StringListValidator(
+                                 ['IonTable', 'DOS', 'IR_Active', 'Raman_Active', 'BondTable']),
                              doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
 
-        self.declareProperty(name='CalculateIonIndices', defaultValue=False,
+        self.declareProperty(name='CalculateIonIndices',
+                             defaultValue=False,
                              doc="Calculates the individual index of all Ions in the simulated data.")
 
-        self.declareProperty(name='StickHeight', defaultValue=0.01,
-                             doc='Intensity of peaks in stick diagram.')
+        self.declareProperty(name='StickHeight', defaultValue=0.01, doc='Intensity of peaks in stick diagram.')
 
-        self.declareProperty(name='Scale', defaultValue=1.0,
+        self.declareProperty(name='Scale',
+                             defaultValue=1.0,
                              doc='Scale the intesity by the given factor. Default is no scaling.')
 
-        self.declareProperty(name='BinWidth', defaultValue=1.0,
+        self.declareProperty(name='BinWidth',
+                             defaultValue=1.0,
                              doc='Set histogram resolution for binning (eV or cm**-1). Default is 1')
 
-        self.declareProperty(name='Temperature', defaultValue=300.0,
+        self.declareProperty(name='Temperature',
+                             defaultValue=300.0,
                              doc='Temperature to use (in raman spectrum modelling). Default is 300')
 
-        self.declareProperty(name='ZeroThreshold', defaultValue=3.0,
+        self.declareProperty(name='ZeroThreshold',
+                             defaultValue=3.0,
                              doc='Ignore frequencies below the this threshold. Default is 3.0')
 
         self.declareProperty(StringArrayProperty('Ions', Direction.Input),
                              doc="List of Ions to use to calculate partial density of states."
-                                 "If left blank, total density of states will be calculated")
+                             "If left blank, total density of states will be calculated")
 
-        self.declareProperty(name='SumContributions', defaultValue=False,
+        self.declareProperty(name='SumContributions',
+                             defaultValue=False,
                              doc="Sum the partial density of states into a single workspace.")
 
-        self.declareProperty(name='ScaleByCrossSection', defaultValue='None',
+        self.declareProperty(name='ScaleByCrossSection',
+                             defaultValue='None',
                              validator=StringListValidator(['None', 'Total', 'Incoherent', 'Coherent']),
                              doc="Sum the partial density of states by the scattering cross section.")
 
@@ -270,16 +276,11 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self._convert_to_cartesian_coordinates(unit_cell, ions)
 
         for ion in ions:
-            ion_table.addRow([ion['species'],
-                              ion['index'],
-                              ion['bond_number'],
-                              ion['fract_coord'][0],
-                              ion['fract_coord'][1],
-                              ion['fract_coord'][2],
-                              ion['cartesian_coord'][0],
-                              ion['cartesian_coord'][1],
-                              ion['cartesian_coord'][2],
-                              ion['isotope_number']])
+            ion_table.addRow([
+                ion['species'], ion['index'], ion['bond_number'], ion['fract_coord'][0], ion['fract_coord'][1],
+                ion['fract_coord'][2], ion['cartesian_coord'][0], ion['cartesian_coord'][1], ion['cartesian_coord'][2],
+                ion['isotope_number']
+            ])
 
     def _create_bond_table(self, bonds):
         """
@@ -298,12 +299,10 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         bond_table.addColumn('float', 'Population')
 
         for bond in bonds:
-            bond_table.addRow([bond['atom_a'][0],
-                               bond['atom_a'][1],
-                               bond['atom_b'][0],
-                               bond['atom_b'][1],
-                               bond['length'],
-                               bond['population']])
+            bond_table.addRow([
+                bond['atom_a'][0], bond['atom_a'][1], bond['atom_b'][0], bond['atom_b'][1], bond['length'],
+                bond['population']
+            ])
 
     def _calculate_partial_dos(self, ions, frequencies, eigenvectors, weights):
         """
@@ -327,7 +326,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                     ion_identifier = ion['species'] + str(ion['index'])
                     partial_ions[ion_identifier] = ion['index']
 
-        partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors, weights)
+        partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors,
+                                                                               weights)
 
         if self.getProperty('SumContributions').value:
             # Discard the partial workspaces
@@ -343,7 +343,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             # Sort workspaces
             if calc_ion_index:
                 # Sort by index after '_'
-                partial_ws_names.sort(key=lambda item: (int(item[(item.rfind('_')+1):])))
+                partial_ws_names.sort(key=lambda item: (int(item[(item.rfind('_') + 1):])))
             group = ','.join(partial_ws_names)
             s_api.GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
 
@@ -359,7 +359,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         for ion in set([i['species'] for i in ions]):
             all_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
 
-        partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(all_ions, frequencies, eigenvectors, weights)
+        partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(all_ions, frequencies, eigenvectors,
+                                                                               weights)
 
         # Discard the partial workspaces
         for partial_ws in partial_workspaces:
@@ -393,10 +394,12 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         if PEAK_WIDTH_ENERGY_FLAG in self._peak_width:
             try:
-                peak_widths = np.fromiter([eval(self._peak_width.replace(PEAK_WIDTH_ENERGY_FLAG, str(energies[p])))
-                                           for p in peaks], dtype=float)
+                peak_widths = np.fromiter(
+                    [eval(self._peak_width.replace(PEAK_WIDTH_ENERGY_FLAG, str(energies[p]))) for p in peaks],
+                    dtype=float)
             except SyntaxError:
-                raise ValueError('Invalid peak width function (must be either a decimal or function containing "energy")')
+                raise ValueError(
+                    'Invalid peak width function (must be either a decimal or function containing "energy")')
             peak_widths = np.abs(peak_widths)
             logger.debug('Peak widths: %s' % (str(peak_widths)))
         else:
@@ -422,7 +425,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 gamma_by_2 = width / 2
                 for l in range(-n_lorentz, n_lorentz):
                     if index + l > 0:
-                        dos[index + l] += hist[index] * gamma_by_2 / (l ** 2 + gamma_by_2 ** 2) / math.pi
+                        dos[index + l] += hist[index] * gamma_by_2 / (l**2 + gamma_by_2**2) / math.pi
 
         return dos
 
@@ -476,12 +479,10 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             element_index = ion_name
             if match:
                 element_index = ion_name[:match.start()]
-            chemical, ws_suffix = self._parse_chemical_and_ws_name(ion_name,
-                                                                   self._element_isotope[element_index])
+            chemical, ws_suffix = self._parse_chemical_and_ws_name(ion_name, self._element_isotope[element_index])
             partial_ws_name += ws_suffix
 
-            s_api.SetSampleMaterial(InputWorkspace=self._out_ws_name,
-                                    ChemicalFormula=chemical)
+            s_api.SetSampleMaterial(InputWorkspace=self._out_ws_name, ChemicalFormula=chemical)
 
             # Multiply intensity by scatttering cross section
             if self._scale_by_cross_section == 'Incoherent':
@@ -493,15 +494,15 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             if self._scale_by_cross_section != 'None':
                 scale_alg = self.createChildAlgorithm('Scale')
-                scale_alg.setProperty('InputWorkspace',self._out_ws_name)
-                scale_alg.setProperty('OutputWorkspace',self._out_ws_name)
-                scale_alg.setProperty('Operation','Multiply')
+                scale_alg.setProperty('InputWorkspace', self._out_ws_name)
+                scale_alg.setProperty('OutputWorkspace', self._out_ws_name)
+                scale_alg.setProperty('Operation', 'Multiply')
                 scale_alg.setProperty('Factor', scattering_x_section)
                 scale_alg.execute()
 
             rename_alg = self.createChildAlgorithm('RenameWorkspace')
-            rename_alg.setProperty('InputWorkspace',self._out_ws_name)
-            rename_alg.setProperty('OutputWorkspace',partial_ws_name)
+            rename_alg.setProperty('InputWorkspace', self._out_ws_name)
+            rename_alg.setProperty('OutputWorkspace', partial_ws_name)
             rename_alg.execute()
             partial_workspaces.append(rename_alg.getProperty('OutputWorkspace').value)
 
@@ -528,8 +529,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         # Otherwise just repackage the WS we have as the total
         else:
-            s_api.CloneWorkspace(InputWorkspace=partial_workspaces[0],
-                                 OutputWorkspace=total_workspace)
+            s_api.CloneWorkspace(InputWorkspace=partial_workspaces[0], OutputWorkspace=total_workspace)
 
         logger.debug('Partial workspaces: ' + str(partial_workspaces))
         logger.debug('Summed workspace: ' + str(total_workspace))
@@ -556,7 +556,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             chemical = ion_name.split(':')[0]
             # Parse isotope to rounded int
             chemical_formula = '(' + chemical + str(int(round(isotope))) + ')'
-            ws_name_suffix = chemical + '('  + str(int(round(isotope))) + ')' + element_index
+            ws_name_suffix = chemical + '(' + str(int(round(isotope))) + ')' + element_index
             return chemical_formula, ws_name_suffix
         # If the chemical has an index
         if match:
@@ -650,16 +650,16 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         scale = self.getProperty('Scale').value
         if scale != 1:
             scale_alg = self.createChildAlgorithm('Scale')
-            scale_alg.setProperty('InputWorkspace',out_ws)
-            scale_alg.setProperty('OutputWorkspace',out_ws)
-            scale_alg.setProperty('Operation','Multiply')
+            scale_alg.setProperty('InputWorkspace', out_ws)
+            scale_alg.setProperty('OutputWorkspace', out_ws)
+            scale_alg.setProperty('Operation', 'Multiply')
             scale_alg.setProperty('Factor', scale)
             scale_alg.execute()
 
         bin_width = self.getProperty('BinWidth').value
         if bin_width != 1:
-            x_min = out_ws.readX(0)[0] - (bin_width/2.0)
-            x_max = out_ws.readX(0)[-1] + (bin_width/2.0)
+            x_min = out_ws.readX(0)[0] - (bin_width / 2.0)
+            x_max = out_ws.readX(0)[-1] + (bin_width / 2.0)
             rebin_param = "%f, %f, %f" % (x_min, bin_width, x_max)
             out_ws = s_api.Rebin(Inputworkspace=out_ws, Params=rebin_param, OutputWorkspace=out_ws)
 
@@ -697,7 +697,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         # cm(-1) => K conversion
         cm1_to_K = scipy.constants.codata.value('inverse meter-kelvin relationship') * 100
 
-        factor = (math.pow((2 * math.pi / laser_wavelength), 4) * planck) / (8 * math.pi ** 2 * 45) * 1e12
+        factor = (math.pow((2 * math.pi / laser_wavelength), 4) * planck) / (8 * math.pi**2 * 45) * 1e12
         x_sections = np.zeros(frequencies.size)
 
         # Use only the first set of frequencies and ignore small values

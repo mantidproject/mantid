@@ -12,7 +12,6 @@ from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import D
 
 
 class InstrumentWidgetPresenter(HomeTabSubWidget):
-
     @staticmethod
     def dead_time_from_data_text(dead_times):
         mean = sum(dead_times) / len(dead_times)
@@ -192,8 +191,8 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
     def handle_dead_time_browse_clicked(self):
         """User selects the option to Browse for a nexus file to load dead times from."""
-        filename = self._view.show_file_browser_and_return_selection(
-            filter_for_extensions(['nxs']), [''], multiple_files=False)[0]
+        filename = self._view.show_file_browser_and_return_selection(filter_for_extensions(['nxs']), [''],
+                                                                     multiple_files=False)[0]
 
         if filename == '':
             return

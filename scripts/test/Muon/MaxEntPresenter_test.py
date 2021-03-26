@@ -49,36 +49,36 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.thread = mock.create_autospec(thread_model.ThreadModel)
 
     def test_connects(self):
-        self.assertEqual(1,self.view.cancelSignal.connect.call_count)
+        self.assertEqual(1, self.view.cancelSignal.connect.call_count)
         self.view.cancelSignal.connect.assert_called_with(self.presenter.cancel)
 
-        self.assertEqual(1,self.view.maxEntButtonSignal.connect.call_count)
+        self.assertEqual(1, self.view.maxEntButtonSignal.connect.call_count)
         self.view.maxEntButtonSignal.connect.assert_called_with(self.presenter.handleMaxEntButton)
 
     def test_activate(self):
         self.presenter.activate()
-        self.assertEqual(1,self.view.activateCalculateButton.call_count)
+        self.assertEqual(1, self.view.activateCalculateButton.call_count)
 
     def test_deactivate(self):
         self.presenter.deactivate()
-        self.assertEqual(1,self.view.deactivateCalculateButton.call_count)
+        self.assertEqual(1, self.view.deactivateCalculateButton.call_count)
 
     def test_clear(self):
         self.presenter.clear()
 
-        self.assertEqual(2,self.view.addItems.call_count)
-        self.assertEqual(2,self.view.update_phase_table_combo.call_count)
-        self.assertRaises(KeyError,lambda: self.presenter.get_parameters_for_maxent_calculation()['InputPhaseTable'])
+        self.assertEqual(2, self.view.addItems.call_count)
+        self.assertEqual(2, self.view.update_phase_table_combo.call_count)
+        self.assertRaises(KeyError, lambda: self.presenter.get_parameters_for_maxent_calculation()['InputPhaseTable'])
 
     def test_cancel(self):
         self.presenter.maxent_alg = self.model
 
         self.presenter.cancel()
 
-        self.assertEqual(1,self.model.cancel.call_count)
+        self.assertEqual(1, self.model.cancel.call_count)
 
     def test_maxent_button(self):
-        self.presenter.createThread = lambda *args:self.thread
+        self.presenter.createThread = lambda *args: self.thread
         self.presenter.calculation_started_notifier = mock.MagicMock()
 
         self.presenter.handleMaxEntButton()

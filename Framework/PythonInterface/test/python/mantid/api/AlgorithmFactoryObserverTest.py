@@ -14,7 +14,6 @@ from unittest import mock
 
 
 class ToyAlgorithm(PythonAlgorithm):
-
     def category(self):
         return "Examples"
 
@@ -26,7 +25,6 @@ class ToyAlgorithm(PythonAlgorithm):
 
 
 class AnotherToyAlgorithm(PythonAlgorithm):
-
     def category(self):
         return "Examples"
 
@@ -56,27 +54,30 @@ class AlgorithmFactoryObserverTest(unittest.TestCase):
     def test_updateHandle_is_not_called_by_when_notifications_disabled(self):
         self.fake_class.observeUpdate(True)
         self._alg_factory.subscribe(ToyAlgorithm)
-        self.assertTrue(self.fake_class.updateHandle.call_count == 0,
-                        "Did not expect updateHandle to be called unless notifications are explicitly enabled "
-                        "in AlgorithmFactory. updateHandle was "
-                        "called {} times.".format(self.fake_class.updateHandle.call_count))
+        self.assertTrue(
+            self.fake_class.updateHandle.call_count == 0,
+            "Did not expect updateHandle to be called unless notifications are explicitly enabled "
+            "in AlgorithmFactory. updateHandle was "
+            "called {} times.".format(self.fake_class.updateHandle.call_count))
 
     def test_updateHandle_is_called(self):
         self.fake_class.observeUpdate(True)
         self._alg_factory.enableNotifications()
         self._alg_factory.subscribe(ToyAlgorithm)
         self._alg_factory.subscribe(AnotherToyAlgorithm)
-        self.assertTrue(self.fake_class.updateHandle.call_count == 2,
-                        "Subscribed two algorithms, so expected updateHandle to be called twice when notifications"
-                        " are explicitly enabled in AlgorithmFactory. updateHandle was "
-                        "called {} times.".format(self.fake_class.updateHandle.call_count))
+        self.assertTrue(
+            self.fake_class.updateHandle.call_count == 2,
+            "Subscribed two algorithms, so expected updateHandle to be called twice when notifications"
+            " are explicitly enabled in AlgorithmFactory. updateHandle was "
+            "called {} times.".format(self.fake_class.updateHandle.call_count))
 
     def test_updateHandle_is_not_called_if_not_observing_update(self):
         self._alg_factory.enableNotifications()
         self._alg_factory.subscribe(ToyAlgorithm)
-        self.assertTrue(self.fake_class.updateHandle.call_count == 0,
-                        "Expected updateHandle not to be called when observeUpdate is False. "
-                        "updateHandle was called {} times.".format(self.fake_class.updateHandle.call_count))
+        self.assertTrue(
+            self.fake_class.updateHandle.call_count == 0,
+            "Expected updateHandle not to be called when observeUpdate is False. "
+            "updateHandle was called {} times.".format(self.fake_class.updateHandle.call_count))
 
 
 if __name__ == "__main__":

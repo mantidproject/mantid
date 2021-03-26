@@ -7,7 +7,6 @@
 
 
 class ContextExamplePresenter(object):
-
     def __init__(self, view, model):
         self._model = model
         self._view = view

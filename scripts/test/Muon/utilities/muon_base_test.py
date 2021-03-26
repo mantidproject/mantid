@@ -13,7 +13,6 @@ class MuonBaseTest(unittest.TestCase):
     """
         The MuonBase object encapsulates the basic information that describes a group or pair:
     """
-
     def test_cannot_initialize_without_name(self):
         with self.assertRaises(TypeError):
             MuonBase()

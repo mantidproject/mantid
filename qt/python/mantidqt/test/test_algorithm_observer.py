@@ -10,7 +10,6 @@ from mantid.api import AlgorithmObserver, AlgorithmManager, AlgorithmFactory, Py
 
 
 class MockAlgorithm(PythonAlgorithm):
-
     def category(self):
         return 'Tests'
 
@@ -30,7 +29,6 @@ AlgorithmFactory.subscribe(MockAlgorithm)
 
 
 class MockObserver(AlgorithmObserver):
-
     def __init__(self):
         super(MockObserver, self).__init__()
         self.finish_handled = False
@@ -47,7 +45,6 @@ class MockObserver(AlgorithmObserver):
 
 
 class MockObserverStarting(AlgorithmObserver):
-
     def __init__(self):
         super(MockObserverStarting, self).__init__()
         self.starting_handled = False
@@ -57,7 +54,6 @@ class MockObserverStarting(AlgorithmObserver):
 
 
 class TestAlgorithmObserver(unittest.TestCase):
-
     def test_starting_handle(self):
         observer = MockObserverStarting()
         observer.observeStarting()

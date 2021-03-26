@@ -33,57 +33,61 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
         return "Create elastic window scans for sample changer"
 
     def PyInit(self):
-        self.declareProperty(name='Instrument', defaultValue='IRIS',
+        self.declareProperty(name='Instrument',
+                             defaultValue='IRIS',
                              validator=StringListValidator(['IRIS', 'OSIRIS']),
                              doc='The name of the instrument.')
-        self.declareProperty(name='Analyser', defaultValue='',
+        self.declareProperty(name='Analyser',
+                             defaultValue='',
                              validator=StringListValidator(['graphite', 'mica', 'fmica']),
                              doc='The analyser bank used during run.')
-        self.declareProperty(name='Reflection', defaultValue='',
+        self.declareProperty(name='Reflection',
+                             defaultValue='',
                              validator=StringListValidator(['002', '004', '006']),
                              doc='Reflection number for instrument setup during run.')
 
-        self.declareProperty(name="FirstRun", defaultValue=-1,
+        self.declareProperty(name="FirstRun",
+                             defaultValue=-1,
                              validator=IntBoundedValidator(lower=0),
                              doc="First Sample run-number.")
-        self.declareProperty(name='LastRun', defaultValue=-1,
+        self.declareProperty(name='LastRun',
+                             defaultValue=-1,
                              validator=IntBoundedValidator(lower=0),
                              doc="Last Sample run-number.")
-        self.declareProperty(name='NumberSamples', defaultValue=-1,
+        self.declareProperty(name='NumberSamples',
+                             defaultValue=-1,
                              validator=IntBoundedValidator(lower=0),
                              doc="Increment for run-number.")
 
-        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],
-                                              validator=IntArrayLengthValidator(2)),
+        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1], validator=IntArrayLengthValidator(2)),
                              doc='Comma separated range of spectra numbers to use.')
-        self.declareProperty(FloatArrayProperty(name='ElasticRange',
-                                                validator=FloatArrayLengthValidator(2)),
+        self.declareProperty(FloatArrayProperty(name='ElasticRange', validator=FloatArrayLengthValidator(2)),
                              doc='Energy range for the elastic component.')
-        self.declareProperty(FloatArrayProperty(name='InelasticRange',
-                                                validator=FloatArrayLengthValidator(2)),
+        self.declareProperty(FloatArrayProperty(name='InelasticRange', validator=FloatArrayLengthValidator(2)),
                              doc='Energy range for the inelastic component.')
-        self.declareProperty(FloatArrayProperty(name='TotalRange',
-                                                validator=FloatArrayLengthValidator(2)),
+        self.declareProperty(FloatArrayProperty(name='TotalRange', validator=FloatArrayLengthValidator(2)),
                              doc='Energy range for the total energy component.')
 
-        self.declareProperty(name='SampleEnvironmentLogName', defaultValue='Position',
+        self.declareProperty(name='SampleEnvironmentLogName',
+                             defaultValue='Position',
                              doc='Name of the sample environment log entry')
 
         sample_environment_log_values = ['last_value', 'average']
-        self.declareProperty('SampleEnvironmentLogValue', 'last_value',
+        self.declareProperty('SampleEnvironmentLogValue',
+                             'last_value',
                              StringListValidator(sample_environment_log_values),
                              doc='Value selection of the sample environment log entry')
 
-        self.declareProperty(name='MSDFit', defaultValue=False,
+        self.declareProperty(name='MSDFit',
+                             defaultValue=False,
                              doc='Perform an MSDFit. Do not use with GroupingMethod as "All"')
 
-        self.declareProperty(name='WidthFit', defaultValue=False,
+        self.declareProperty(name='WidthFit',
+                             defaultValue=False,
                              doc='Perform a 2 peak width Fit. Do not use with GroupingMethod as "All"')
 
-        self.declareProperty(name='Plot', defaultValue=False,
-                             doc='True to plot the output data.')
-        self.declareProperty(name='Save', defaultValue=False,
-                             doc='True to save the output data.')
+        self.declareProperty(name='Plot', defaultValue=False, doc='True to plot the output data.')
+        self.declareProperty(name='Save', defaultValue=False, doc='True to save the output data.')
 
     def validateInputs(self):
         from IndirectReductionCommon import get_ipf_parameters_from_run
@@ -105,9 +109,10 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
             if 'spectra-min' in spectra_parameters and 'spectra-max' in spectra_parameters:
                 if self._spectra_range[0] < spectra_parameters['spectra-min'] or \
                         self._spectra_range[1] > spectra_parameters['spectra-max']:
-                    issues['SpectraRange'] = 'The spectra range must be between {0} and {1} for the {2} instrument'.format(
-                        str(int(spectra_parameters['spectra-min'])), str(int(spectra_parameters['spectra-max'])),
-                        self._instrument_name)
+                    issues[
+                        'SpectraRange'] = 'The spectra range must be between {0} and {1} for the {2} instrument'.format(
+                            str(int(spectra_parameters['spectra-min'])), str(int(spectra_parameters['spectra-max'])),
+                            self._instrument_name)
 
         return issues
 

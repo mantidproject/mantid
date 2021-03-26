@@ -8,7 +8,6 @@
 #
 #
 
-
 import unittest
 
 from mantidqt.utils.qt.testing import start_qapplication
@@ -17,7 +16,6 @@ from mantidqt.widgets.messagedisplay import MessageDisplay, Priority
 
 @start_qapplication
 class MessageDisplayTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.unix_path = '/path/to/MyScript.py'
@@ -72,8 +70,7 @@ class MessageDisplayTest(unittest.TestCase):
     def test_that_changing_current_tab_hides_output_from_previous_tab_and_shows_output_from_the_new(self):
         self.display.setActiveScript(self.unix_path)
         self.display.show_active_script()
-        self._simulate_scripts_printing({self.unix_path: ["Message 1"],
-                                         self.win_path: ["Message 2"]})
+        self._simulate_scripts_printing({self.unix_path: ["Message 1"], self.win_path: ["Message 2"]})
         self.assertIn("Message 1", self._get_message_window_contents())
         self.assertNotIn("Message 2", self._get_message_window_contents())
         self.display.current_tab_changed(self.win_path)
@@ -83,8 +80,7 @@ class MessageDisplayTest(unittest.TestCase):
     def test_that_new_notices_from_script_are_not_displayed_if_showAllScript_and_showActiveScriptOutput_are_False(self):
         self.display.setShowAllScriptOutput(False)
         self.display.setShowActiveScriptOutput(False)
-        self._simulate_scripts_printing({self.unix_path: ["Message 1"],
-                                         self.win_path: ["Message 2"]})
+        self._simulate_scripts_printing({self.unix_path: ["Message 1"], self.win_path: ["Message 2"]})
         self.assertNotIn("Message 1", self._get_message_window_contents())
         self.assertNotIn("Message 2", self._get_message_window_contents())
 
@@ -131,16 +127,14 @@ class MessageDisplayTest(unittest.TestCase):
         self.assertNotIn(err_msg, self._get_message_window_contents())
 
     def test_that_hide_all_scripts_hides_all_script_messages(self):
-        self._simulate_scripts_printing({self.unix_path: ["Message 1"],
-                                         self.win_path: ["Message 2"]})
+        self._simulate_scripts_printing({self.unix_path: ["Message 1"], self.win_path: ["Message 2"]})
         self.display.hide_all_scripts()
         self.assertNotIn("Message 1", self._get_message_window_contents())
         self.assertNotIn("Message 2", self._get_message_window_contents())
 
     def test_that_if_hide_all_script_selected_no_new_script_output_is_displayed(self):
         self.display.hide_all_scripts()
-        self._simulate_scripts_printing({self.unix_path: ["Message 1"],
-                                         self.win_path: ["Message 2"]})
+        self._simulate_scripts_printing({self.unix_path: ["Message 1"], self.win_path: ["Message 2"]})
         self.assertNotIn("Message 1", self._get_message_window_contents())
         self.assertNotIn("Message 2", self._get_message_window_contents())
 
@@ -163,8 +157,7 @@ class MessageDisplayTest(unittest.TestCase):
         for action in menu.actions():
             if action_text in action.iconText():
                 return action
-        self.fail("Could not find action with text '{}' in menu '{}'."
-                  "".format(action_text, menu))
+        self.fail("Could not find action with text '{}' in menu '{}'." "".format(action_text, menu))
 
     def _simulate_script_executions(self, paths):
         for path in paths:

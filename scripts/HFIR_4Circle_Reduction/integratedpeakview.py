@@ -49,7 +49,7 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         :return:
         """
         min_y, max_y = self.getYLimit()
-        self._bkgdIndicatorID = self.add_horizontal_indicator(y=min_y+0.5*(max_y-min_y), color='red')
+        self._bkgdIndicatorID = self.add_horizontal_indicator(y=min_y + 0.5 * (max_y - min_y), color='red')
 
         return
 
@@ -107,7 +107,7 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         :return:
         """
         # plot data
-        self._rawDataID = self.add_plot_1d(vec_x, vec_y,  color='blue')
+        self._rawDataID = self.add_plot_1d(vec_x, vec_y, color='blue')
         self.set_smart_y_limit(vec_y)
 
         return
@@ -235,9 +235,16 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
         :param annotation_list:
         :return:
         """
-        self._currentDataID = self.add_plot_1d(vec_x=vec_x, vec_y=vec_y, y_err=vec_e, annotation_list=annotation_list,
-                                               color='red', label=title, x_label=label_x, y_label=label_y,
-                                               marker='.', line_style='--')
+        self._currentDataID = self.add_plot_1d(vec_x=vec_x,
+                                               vec_y=vec_y,
+                                               y_err=vec_e,
+                                               annotation_list=annotation_list,
+                                               color='red',
+                                               label=title,
+                                               x_label=label_x,
+                                               y_label=label_y,
+                                               marker='.',
+                                               line_style='--')
 
         return
 
@@ -313,8 +320,12 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
         :param update_plot: flag to update the plot (call draw)
         :return:
         """
-        self._rawDataID = self.add_plot_1d(vec_x, vec_y, x_label='pixel', label=label,
-                                           color='blue', update_plot=update_plot)
+        self._rawDataID = self.add_plot_1d(vec_x,
+                                           vec_y,
+                                           x_label='pixel',
+                                           label=label,
+                                           color='blue',
+                                           update_plot=update_plot)
         self.set_smart_y_limit(vec_y)
 
         return
@@ -369,12 +380,22 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
 
         # add the line
         if vec_fwhm is not None:
-            self._2thetaFwhmID = self.add_plot_1d(vec_2theta, vec_fwhm, x_label='$2\theta$', y_label='FWHM',
-                                                  color='black', update_plot=True, label='Observed')
+            self._2thetaFwhmID = self.add_plot_1d(vec_2theta,
+                                                  vec_fwhm,
+                                                  x_label='$2\theta$',
+                                                  y_label='FWHM',
+                                                  color='black',
+                                                  update_plot=True,
+                                                  label='Observed')
 
         if vec_model is not None:
-            self._2thetaModelID = self.add_plot_1d(vec_2theta, vec_model, x_label='$2\theta$', y_label='FWHM',
-                                                   color='blue', update_plot=True, label='Model')
+            self._2thetaModelID = self.add_plot_1d(vec_2theta,
+                                                   vec_model,
+                                                   x_label='$2\theta$',
+                                                   y_label='FWHM',
+                                                   color='blue',
+                                                   update_plot=True,
+                                                   label='Model')
 
         return
 

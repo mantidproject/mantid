@@ -30,9 +30,10 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
                              "Workspace with focussed spectra")
 
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
-                             "Workspace to contain the estimated background (one for each spectrum in the "
-                             "InputWorkspace)")
+        self.declareProperty(
+            MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
+            "Workspace to contain the estimated background (one for each spectrum in the "
+            "InputWorkspace)")
 
         self.declareProperty(
             name="NIterations",
@@ -40,8 +41,8 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
             direction=Direction.Input,
             validator=IntBoundedValidator(lower=1),
             doc="Number of iterations of the smoothing procedure to perform. Too few iterations and the background will"
-                " be enhanced in the peak regions. Too many iterations and the background will be unrealistically"
-                " low and not catch the rising edge at low TOF/d-spacing (typical values are in range 20-100).")
+            " be enhanced in the peak regions. Too many iterations and the background will be unrealistically"
+            " low and not catch the rising edge at low TOF/d-spacing (typical values are in range 20-100).")
 
         self.declareProperty(
             name="XWindow",
@@ -49,12 +50,14 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
             direction=Direction.Input,
             validator=FloatBoundedValidator(lower=0.0),
             doc="Extent of the convolution window in the x-axis for all spectra. A reasonable value is about 4-8 times"
-                " the FWHM of a typical peak/feature to be suppressed (default is reasonable for TOF spectra). This is "
-                "converted to an odd number of points using the median bin width of each spectra.")
+            " the FWHM of a typical peak/feature to be suppressed (default is reasonable for TOF spectra). This is "
+            "converted to an odd number of points using the median bin width of each spectra.")
 
-        self.declareProperty('ApplyFilterSG', True, direction=Direction.Input,
+        self.declareProperty('ApplyFilterSG',
+                             True,
+                             direction=Direction.Input,
                              doc='Apply a Savitzky–Golay filter with a linear polynomial over the same XWindow before'
-                                 ' the iterative smoothing procedure (recommended for noisy data)')
+                             ' the iterative smoothing procedure (recommended for noisy data)')
 
     def validateInputs(self):
         issues = dict()

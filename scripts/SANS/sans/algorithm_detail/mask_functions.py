@@ -11,9 +11,8 @@ from enum import Enum
 from sans.common.enums import (DetectorType, SANSInstrument)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 
-
 detector_shape_bundle = namedtuple("detector_shape_bundle", 'rectangular_shape, width, height, '
-                                                            'number_of_pixels_override')
+                                   'number_of_pixels_override')
 geometry_bundle = namedtuple("geometry_bundle", 'shape, first_low_angle_spec_number')
 
 
@@ -62,7 +61,9 @@ def get_geometry_information(ipf_path, detector_type):
         else:
             number_of_pixels_override = None
 
-        return detector_shape_bundle(rectangular_shape=rectangular_shape, width=width, height=height,
+        return detector_shape_bundle(rectangular_shape=rectangular_shape,
+                                     width=width,
+                                     height=height,
                                      number_of_pixels_override=number_of_pixels_override)
 
     # Determine the prefix for the detector
@@ -74,9 +75,9 @@ def get_geometry_information(ipf_path, detector_type):
         raise RuntimeError("MaskingParser: Tyring to get information for unknown "
                            "detector {0}".format(str(detector_type)))
 
-    search_items_for_detectors = ["num-columns",
-                                  "non-rectangle-width", "num-rows",
-                                  "non-rectangle-height", "num-pixels"]
+    search_items_for_detectors = [
+        "num-columns", "non-rectangle-width", "num-rows", "non-rectangle-height", "num-pixels"
+    ]
     search_items = [prefix + item for item in search_items_for_detectors]
     search_items.append("first-low-angle-spec-number")
 
@@ -97,8 +98,7 @@ def get_geometry_information(ipf_path, detector_type):
                                          non_rectangle_height=found_items[prefix + "non-rectangle-height"],
                                          num_pixels=found_items[prefix + "num-pixels"])
 
-    return geometry_bundle(shape=shape,
-                           first_low_angle_spec_number=found_items["first-low-angle-spec-number"])
+    return geometry_bundle(shape=shape, first_low_angle_spec_number=found_items["first-low-angle-spec-number"])
 
 
 class SpectraBlock(object):
@@ -178,8 +178,8 @@ class SpectraBlock(object):
         elif self._detector_orientation == DetectorOrientation.VERTICAL:
             start_spectrum = base_spectrum_number + x_lower * detector_dimension + y_lower
             for x in range(detector_dimension - 1, detector_dimension - x_dim - 1, -1):
-                output.extend((start_spectrum + ((detector_dimension - x - 1) * detector_dimension) + y
-                               for y in range(0, y_dim)))
+                output.extend(
+                    (start_spectrum + ((detector_dimension - x - 1) * detector_dimension) + y for y in range(0, y_dim)))
         elif self._detector_orientation == DetectorOrientation.ROTATED:
             # This is the horizontal one rotated so need to map the x_low and y_low to their rotated versions
             start_spectrum = base_spectrum_number + y_lower * detector_dimension + x_lower

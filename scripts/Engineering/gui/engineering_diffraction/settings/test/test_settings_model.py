@@ -37,8 +37,13 @@ class SettingsModelTest(unittest.TestCase):
     @patch(dir_path + "settings_model.get_setting")
     def test_get_settings_dict(self, get_setting_mock):
         get_setting_mock.return_value = "value"
-        self.assertEqual(self.model.get_settings_dict({"name1": str, "name2": str}),
-                         {'name1': 'value', 'name2': 'value'})
+        self.assertEqual(self.model.get_settings_dict({
+            "name1": str,
+            "name2": str
+        }), {
+            'name1': 'value',
+            'name2': 'value'
+        })
         self.assertEqual(get_setting_mock.call_count, 2)
         get_setting_mock.assert_any_call("CustomInterfaces", "EngineeringDiffraction2/", "name1", return_type=str)
         get_setting_mock.assert_any_call("CustomInterfaces", "EngineeringDiffraction2/", "name2", return_type=str)

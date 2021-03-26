@@ -25,8 +25,8 @@ def rel_err_less_delta(val, ref, epsilon):
         return False
     check = (abs((ref - val) / ref) < epsilon)
     if not check:
-        print("Value '{0}' differs from reference '{1}' by more than required epsilon '{2}' (relative)"
-              .format(val, ref, epsilon))
+        print("Value '{0}' differs from reference '{1}' by more than required epsilon '{2}' (relative)".format(
+            val, ref, epsilon))
 
     return check
 
@@ -39,8 +39,7 @@ class EnginXFocusWithVanadiumCorrection(systemtesting.MantidSystemTest):
         # unit tests) are still the same results as we get from the actual calculations
         self._precalc_van_ws = LoadNexus(Filename='ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs',
                                          OutputWorkspace='ENGIN-X_vanadium_curves_test_ws')
-        self._precalc_van_integ_tbl = LoadNexus(Filename=
-                                                'ENGINX_precalculated_vanadium_run000236516_integration.nxs',
+        self._precalc_van_integ_tbl = LoadNexus(Filename='ENGINX_precalculated_vanadium_run000236516_integration.nxs',
                                                 OutputWorkspace='ENGIN-X_vanadium_integ_test_ws')
 
         self.van_bank_curves_name = 'enginx_van_bank_curves'
@@ -64,10 +63,7 @@ class EnginXFocusWithVanadiumCorrection(systemtesting.MantidSystemTest):
                                 OutCurvesWorkspace=self.van_bank_curves_name)
 
         # do all calculations from raw data
-        EnggFocus(InputWorkspace=long_calib_ws,
-                  VanadiumWorkspace=van_ws,
-                  Bank='1',
-                  OutputWorkspace=self.out_ws_name)
+        EnggFocus(InputWorkspace=long_calib_ws, VanadiumWorkspace=van_ws, Bank='1', OutputWorkspace=self.out_ws_name)
 
         # Now with pre-calculated curves and integration values. This makes sure that these do not
         # change too much AND the final results do not change too much as a result
@@ -113,10 +109,11 @@ class EnginXFocusWithVanadiumCorrection(systemtesting.MantidSystemTest):
 
         delta = 1e-5
         for i in range(0, len(simul)):
-            self.assertTrue(rel_err_less_delta(simul[i], precalc_curve_simul[i], delta),
-                            "Relative difference bigger than acceptable error (%f) when comparing bin %d "
-                            "against bank curves previously fitted. got: %f where I expect: %f" %
-                            (delta, i, simul[i], precalc_curve_simul[i]))
+            self.assertTrue(
+                rel_err_less_delta(simul[i], precalc_curve_simul[i], delta),
+                "Relative difference bigger than acceptable error (%f) when comparing bin %d "
+                "against bank curves previously fitted. got: %f where I expect: %f" %
+                (delta, i, simul[i], precalc_curve_simul[i]))
 
         # === check the integration table against the previously saved integration table ===
         integ_tbl = mtd[self.van_integ_name]
@@ -138,11 +135,12 @@ class EnginXFocusWithVanadiumCorrection(systemtesting.MantidSystemTest):
         focussed_sp = out_ws.readY(0)
         focussed_sp_precalc = out_precalc_ws.readY(0)
         for i in range(0, out_ws.blocksize()):
-            self.assertTrue(rel_err_less_delta(simul[i], precalc_curve_simul[i], delta),
-                            "Relative difference bigger than accepted delta (%f) when comparing bin %d "
-                            "of the focussed spectrum against the focussed spectrum obtained using bank curves "
-                            "and spectra integration values pre-calculated. Got: %f where I expected: %f" %
-                            (delta, i, focussed_sp[i], focussed_sp_precalc[i]))
+            self.assertTrue(
+                rel_err_less_delta(simul[i], precalc_curve_simul[i],
+                                   delta), "Relative difference bigger than accepted delta (%f) when comparing bin %d "
+                "of the focussed spectrum against the focussed spectrum obtained using bank curves "
+                "and spectra integration values pre-calculated. Got: %f where I expected: %f" %
+                (delta, i, focussed_sp[i], focussed_sp_precalc[i]))
 
     def cleanup(self):
         mtd.remove(self.out_ws_name)
@@ -189,8 +187,8 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
                                                     VanadiumWorkspace=van_ws,
                                                     Bank='1',
                                                     ExpectedPeaks='0.855618487, 0.956610, 1.104599, '
-                                                                  '1.352852, 1.562138, 1.631600, '
-                                                                  '1.913221, 2.705702376, 3.124277511')
+                                                    '1.352852, 1.562138, 1.631600, '
+                                                    '1.913221, 2.705702376, 3.124277511')
 
         # to protect against 'invalidated' variables with algorithm input/output workspaces
         self.pos_table = positions
@@ -201,20 +199,21 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
                                                              VanadiumWorkspace=van_ws,
                                                              Bank='1',
                                                              ExpectedPeaks='0.855618487, 0.956610, 1.104599, '
-                                                                           '1.352852, 1.562138, 1.631600, '
-                                                                           '1.913221, 2.705702376, 3.124277511',
+                                                             '1.352852, 1.562138, 1.631600, '
+                                                             '1.913221, 2.705702376, 3.124277511',
                                                              DetectorPositions=self.pos_table)
         self.peaks = tbl.column('dSpacing')
         self.peaks_fitted = tbl.column('X0')
 
         # Bank 2
-        self.difa_b2, self.difc_b2, self.zero_b2, tbl_b2 = EnggCalibrate(InputWorkspace=long_calib_ws,
-                                                                         VanadiumWorkspace=van_ws,
-                                                                         Bank='2',
-                                                                         ExpectedPeaks='0.855618487, 0.956610, 1.104599, '
-                                                                                       '1.352852, 1.562138, 1.631600, '
-                                                                                       '1.913221, 2.705702376, 3.124277511',
-                                                                         DetectorPositions=self.pos_table)
+        self.difa_b2, self.difc_b2, self.zero_b2, tbl_b2 = EnggCalibrate(
+            InputWorkspace=long_calib_ws,
+            VanadiumWorkspace=van_ws,
+            Bank='2',
+            ExpectedPeaks='0.855618487, 0.956610, 1.104599, '
+            '1.352852, 1.562138, 1.631600, '
+            '1.913221, 2.705702376, 3.124277511',
+            DetectorPositions=self.pos_table)
         self.peaks_b2 = tbl_b2.column('dSpacing')
         self.peaks_fitted_b2 = tbl_b2.column('X0')
 
@@ -272,8 +271,8 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
             self.assertTrue(rel_err_less_delta(self.difc, 18421.3974, exdelta_special),
                             "difc parameter for bank 1 is not what was expected, got: %f" % self.difc)
             if "darwin" != sys.platform:
-                self.assertTrue(abs(self.zero) < 40,
-                                "zero parameter for bank 1 is not what was expected, got: %f" % self.zero)
+                self.assertTrue(
+                    abs(self.zero) < 40, "zero parameter for bank 1 is not what was expected, got: %f" % self.zero)
 
             # Bank 2
             self.assertTrue(rel_err_less_delta(self.difa_b2, 0.6237, exdelta_special),
@@ -281,8 +280,9 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
             self.assertTrue(rel_err_less_delta(self.difc_b2, 18390.3083, exdelta_special),
                             "difc parameter for bank 2 is not what was expected, got: %f" % self.difc_b2)
             if "darwin" != sys.platform:
-                self.assertTrue(abs(self.zero_b2) < 20,
-                                "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
+                self.assertTrue(
+                    abs(self.zero_b2) < 20,
+                    "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
         else:
             self.assertTrue(rel_err_less_delta(self.pos_table.cell(100, 3), 1.5633, single_spectrum_delta))
             # DIFA column
@@ -299,16 +299,17 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
                                 "difa parameter for bank 1 is not what was expected, got: %f" % self.difa)
                 self.assertTrue(rel_err_less_delta(self.difc, 18421.3974, exdelta_special),
                                 "difc parameter for bank 1 is not what was expected, got: %f" % self.difc)
-                self.assertTrue(abs(self.zero) < 40,
-                                "zero parameter for bank 1 is not what was expected, got: %f" % self.zero)
+                self.assertTrue(
+                    abs(self.zero) < 40, "zero parameter for bank 1 is not what was expected, got: %f" % self.zero)
 
                 # Bank 2
                 self.assertTrue(rel_err_less_delta(self.difa_b2, 0.6237, exdelta_special),
                                 "difa parameter for bank 2 is not what was expected, got: %f" % self.difa_b2)
                 self.assertTrue(rel_err_less_delta(self.difc_b2, 18390.3083, exdelta_special),
                                 "difc parameter for bank 2 is not what was expected, got: %f" % self.difc_b2)
-                self.assertTrue(abs(self.zero_b2) < 20,
-                                "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
+                self.assertTrue(
+                    abs(self.zero_b2) < 20,
+                    "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
             else:
                 # Bank 1
                 self.assertTrue(rel_err_less_delta(self.difa, 2.3265842459, exdelta_special),
@@ -316,8 +317,8 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
                 self.assertTrue(rel_err_less_delta(self.difc, 18440.5718578, exdelta_special),
                                 "difc parameter for bank 1 is not what was expected, got: %f" % self.difc)
                 if "darwin" != sys.platform:
-                    self.assertTrue(abs(self.zero) < 40,
-                                    "zero parameter for bank 1 is not what was expected, got: %f" % self.zero)
+                    self.assertTrue(
+                        abs(self.zero) < 40, "zero parameter for bank 1 is not what was expected, got: %f" % self.zero)
 
                 # Bank 2
                 self.assertTrue(rel_err_less_delta(self.difa_b2, 3.9220236519, exdelta_special),
@@ -325,8 +326,9 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
                 self.assertTrue(rel_err_less_delta(self.difc_b2, 18382.7105215, exdelta_special),
                                 "difc parameter for bank 2 is not what was expected, got: %f" % self.difc_b2)
                 if "darwin" != sys.platform:
-                    self.assertTrue(abs(self.zero_b2) < 10,
-                                    "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
+                    self.assertTrue(
+                        abs(self.zero_b2) < 10,
+                        "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
 
         # === peaks used to fit the difc and zero parameters ===
         expected_peaks = [0.855618487, 0.95661, 1.104599, 1.352852, 1.562138, 1.6316, 2.705702376]

@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from mantid.kernel import *
-from mantid.api import (WorkspaceProperty,DataProcessorAlgorithm, AlgorithmFactory,
-                        mtd, Progress)
+from mantid.api import (WorkspaceProperty, DataProcessorAlgorithm, AlgorithmFactory, mtd, Progress)
 from mantid.simpleapi import *
 import numpy as np
 
@@ -25,15 +24,11 @@ class SwapWidths(DataProcessorAlgorithm):
         return 'Creates a calibration workspace in energy trnasfer for IN16B.'
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty('InputWorkspace', '',
-                                               direction=Direction.Input),
-                             doc='Input workspace')
+        self.declareProperty(WorkspaceProperty('InputWorkspace', '', direction=Direction.Input), doc='Input workspace')
 
-        self.declareProperty(name='SwapPoint', defaultValue=1,
-                             doc='Swap point')
+        self.declareProperty(name='SwapPoint', defaultValue=1, doc='Swap point')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                                               direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace')
 
     def PyExec(self):
@@ -58,23 +53,23 @@ class SwapWidths(DataProcessorAlgorithm):
         prog_workflow.report("Calculating swap points")
         x_axis_1 = width1_x
         y_axis_1 = width1_y[:self._swap_point]
-        y_axis_1 = np.append(y_axis_1,width2_y[self._swap_point:])
+        y_axis_1 = np.append(y_axis_1, width2_y[self._swap_point:])
         error_1 = width1_e[:self._swap_point]
-        error_1 = np.append(error_1,width2_e[self._swap_point:])
+        error_1 = np.append(error_1, width2_e[self._swap_point:])
         x_axis_2 = width2_x
         y_axis_2 = width2_y[:self._swap_point]
-        y_axis_2 = np.append(y_axis_2,width1_y[self._swap_point:])
+        y_axis_2 = np.append(y_axis_2, width1_y[self._swap_point:])
         error_2 = width2_e[:self._swap_point]
-        error_2 = np.append(error_2,width1_e[self._swap_point:])
+        error_2 = np.append(error_2, width1_e[self._swap_point:])
 
         prog_workflow.report("Appending new points after swap")
-        dataX = x_axis_1                              #create data for WS
+        dataX = x_axis_1  #create data for WS
         dataY = y_axis_1
         dataE = error_1
-        dataX = np.append(dataX,x_axis_2)
-        dataY = np.append(dataY,y_axis_2)
-        dataE = np.append(dataE,error_2)
-        names = label_1 + ', ' + label_2           #names for WS
+        dataX = np.append(dataX, x_axis_2)
+        dataY = np.append(dataY, y_axis_2)
+        dataE = np.append(dataE, error_2)
+        names = label_1 + ', ' + label_2  #names for WS
         prog_workflow.report("Create new workspace with correct values")
         CreateWorkspace(OutputWorkspace=self._output_ws,
                         DataX=dataX,
@@ -103,6 +98,7 @@ class SwapWidths(DataProcessorAlgorithm):
         for idx in range(nvals):
             if label == text_axis.label(idx):
                 return idx
+
     # If we reach here we didn't find it
         raise LookupError("Label '%s' not found on text axis" % label)
 

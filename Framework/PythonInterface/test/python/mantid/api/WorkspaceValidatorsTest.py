@@ -10,21 +10,18 @@
 import unittest
 import testhelpers
 from mantid.kernel import IValidator
-from mantid.api import (WorkspaceUnitValidator, HistogramValidator,
-                        RawCountValidator, CommonBinsValidator,
-                        SpectraAxisValidator, NumericAxisValidator,
-                        InstrumentValidator, MDFrameValidator,
+from mantid.api import (WorkspaceUnitValidator, HistogramValidator, RawCountValidator, CommonBinsValidator,
+                        SpectraAxisValidator, NumericAxisValidator, InstrumentValidator, MDFrameValidator,
                         OrientedLatticeValidator)
 
 
 class WorkspaceValidatorsTest(unittest.TestCase):
-
     def test_WorkspaceUnitValidator_construction(self):
         """
             Test that the WorkspaceUnitValidator can be constructed
             with a single string
         """
-        testhelpers.assertRaisesNothing(self, WorkspaceUnitValidator,"DeltaE")
+        testhelpers.assertRaisesNothing(self, WorkspaceUnitValidator, "DeltaE")
         self.assertRaises(Exception, WorkspaceUnitValidator)
 
     def test_CommonBinsValidator_construction(self):
@@ -87,6 +84,7 @@ class WorkspaceValidatorsTest(unittest.TestCase):
             with no args
         """
         testhelpers.assertRaisesNothing(self, OrientedLatticeValidator)
+
 
 if __name__ == '__main__':
     unittest.main()

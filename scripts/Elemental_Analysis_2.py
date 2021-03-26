@@ -20,9 +20,8 @@ if 'elemental_analysis_2' in globals():
     except RuntimeError:
         is_hidden = True
     if not is_hidden:
-        elemental_analysis.setWindowState(
-            elemental_analysis.windowState(
-            ) & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+        elemental_analysis.setWindowState(elemental_analysis.windowState() & ~QtCore.Qt.WindowMinimized
+                                          | QtCore.Qt.WindowActive)
         elemental_analysis.activateWindow()
     else:
         elemental_analysis = ElementalAnalysisGui()

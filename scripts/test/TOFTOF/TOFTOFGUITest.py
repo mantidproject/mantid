@@ -55,10 +55,12 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         scriptElement.ecFactor = 0.9
 
         # data runs: [(runs,comment, temperature), ...]
-        scriptElement.dataRuns = [
-            [unicode('TOFTOFTestdata.nxs'), unicode('H2O 21C'), OptionalFloat(None)],
-            [unicode('TOFTOFTestdata.nxs'), unicode('H2O 34C'), OptionalFloat(34.0)]
-        ]
+        scriptElement.dataRuns = [[unicode('TOFTOFTestdata.nxs'),
+                                   unicode('H2O 21C'),
+                                   OptionalFloat(None)],
+                                  [unicode('TOFTOFTestdata.nxs'),
+                                   unicode('H2O 34C'),
+                                   OptionalFloat(34.0)]]
 
         # additional parameters
         scriptElement.binEon = True

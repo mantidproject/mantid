@@ -85,7 +85,7 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         self.assertEqual(len(expected_spectra), len(masked_spectra),
                          "{} does not equal {}".format(len(expected_spectra), len(masked_spectra)))
         for expected, actual in zip(sorted(expected_spectra), sorted(masked_spectra)):
-            self.assertEqual(expected,  actual, "{} does not equal {}".format(expected, actual))
+            self.assertEqual(expected, actual, "{} does not equal {}".format(expected, actual))
 
     def _do_assert_non_masked(self, workspace, expected_spectra):
         # Remove duplicate masks from expected
@@ -95,7 +95,7 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         self.assertEqual(len(expected_spectra), len(non_masked_spectra),
                          "Expected length {}, got length {}".format(len(expected_spectra), len(non_masked_spectra)))
         for expected, actual in zip(sorted(expected_spectra), sorted(non_masked_spectra)):
-            self.assertEqual(expected,  actual)
+            self.assertEqual(expected, actual)
 
     @staticmethod
     def _build_data_info():
@@ -130,7 +130,7 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         # e.g. [(50*512 + 9(monitors)] + x in range(0, 512)
         single_horizontal_strip_masks = [50, 53]
         for single_horizontal_strip_mask in single_horizontal_strip_masks:
-            expected_spectra.extend(((single_horizontal_strip_mask*512 + 9) + x for x in range(0, 512)))
+            expected_spectra.extend(((single_horizontal_strip_mask * 512 + 9) + x for x in range(0, 512)))
 
         # Detector-specific range horizontal strip mask
         # The horizontal range will be evaluated for SANS2D on the LAB as:
@@ -138,23 +138,23 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         range_horizontal_strip_start = [62, 67]
         range_horizontal_strip_stop = [64, 70]
         for start, stop in zip(range_horizontal_strip_start, range_horizontal_strip_stop):
-            expected_spectra.extend(((start*512 + 9) + y*512 + x for y in range(0, stop - start + 1)
-                                     for x in range(0, 512)))
+            expected_spectra.extend(
+                ((start * 512 + 9) + y * 512 + x for y in range(0, stop - start + 1) for x in range(0, 512)))
 
         # Detector-specific single vertical strip mask
         # The vertical strip will be evaluated for SANS2D on the LAB as:
         # e.g. [(45 + 9(monitors)] + y*512  for y in range(0, 120)]
         single_vertical_strip_masks = [45, 89]
         for single_vertical_strip_mask in single_vertical_strip_masks:
-            expected_spectra.extend(((single_vertical_strip_mask + 9) + y*512 for y in range(0, 120)))
+            expected_spectra.extend(((single_vertical_strip_mask + 9) + y * 512 for y in range(0, 120)))
 
         # Detector-specific range vertical strip mask
         # The vertical range will be evaluated for SANS2D on the LAB as:
         range_vertical_strip_start = [99]
         range_vertical_strip_stop = [102]
         for start, stop in zip(range_vertical_strip_start, range_vertical_strip_stop):
-            expected_spectra.extend(((start_elem + 9) + y * 512 for start_elem in range(start, stop + 1)
-                                     for y in range(0, 120)))
+            expected_spectra.extend(
+                ((start_elem + 9) + y * 512 for start_elem in range(start, stop + 1) for y in range(0, 120)))
 
         mask_builder.set_single_spectra_on_detector(single_spectra)
         mask_builder.set_spectrum_range_on_detector(spectrum_range_start, spectrum_range_stop)
@@ -192,9 +192,9 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         block_vertical_start = [45, 87]
         block_vertical_stop = [48, 91]
 
-        for h_start, h_stop, v_start, v_stop in zip(block_horizontal_start, block_horizontal_stop,
-                                                    block_vertical_start, block_vertical_stop):
-            expected_spectra.extend(((h_start*512 + 9) + y*512 + x for y in range(0, h_stop - h_start + 1)
+        for h_start, h_stop, v_start, v_stop in zip(block_horizontal_start, block_horizontal_stop, block_vertical_start,
+                                                    block_vertical_stop):
+            expected_spectra.extend(((h_start * 512 + 9) + y * 512 + x for y in range(0, h_stop - h_start + 1)
                                      for x in range(v_start, v_stop + 1)))
 
         mask_builder.set_LAB_block_horizontal_start(block_horizontal_start)
@@ -225,7 +225,7 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         block_cross_horizontal = [12, 17]
         block_cross_vertical = [49, 67]
         for h, v in zip(block_cross_horizontal, block_cross_vertical):
-            expected_spectra.extend([h*512 + 9 + v])
+            expected_spectra.extend([h * 512 + 9 + v])
 
         mask_builder.set_LAB_block_cross_horizontal(block_cross_horizontal)
         mask_builder.set_LAB_block_cross_vertical(block_cross_vertical)
@@ -321,9 +321,9 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         tof_spectra_11_masked = workspace.getSpectrum(11).getTofs()
         # Spectrum 10
         # Three events should have been removed
-        self.assertEqual(len(tof_spectra_10_masked),  len(tof_spectra_10_original) - 3)
+        self.assertEqual(len(tof_spectra_10_masked), len(tof_spectra_10_original) - 3)
         # One event should have been removed
-        self.assertEqual(len(tof_spectra_11_masked),  len(tof_spectra_11_original) - 1)
+        self.assertEqual(len(tof_spectra_11_masked), len(tof_spectra_11_original) - 1)
 
         # Make sure that there are no elements
         for start, stop in zip(bin_mask_general_start, bin_mask_general_stop):
@@ -361,7 +361,7 @@ class MaskSansWorkspaceTest(unittest.TestCase):
 
         # Spectrum 23813
         # Five events should have been removed
-        self.assertEqual(len(tof_spectra_23813_masked),  len(tof_spectra_23813_original) - 5)
+        self.assertEqual(len(tof_spectra_23813_masked), len(tof_spectra_23813_original) - 5)
 
         # Make sure that there are no elements
         for start, stop in zip(bin_mask_start, bin_mask_stop):
@@ -412,7 +412,8 @@ class MaskSansWorkspaceTest(unittest.TestCase):
 
         state.instrument_info = StateInstrumentInfo.build_from_data_info(data_info)
 
-        returned_data = SANSLoad(SANSState=Serializer.to_json(state), SampleScatterWorkspace="mask_sans_ws",
+        returned_data = SANSLoad(SANSState=Serializer.to_json(state),
+                                 SampleScatterWorkspace="mask_sans_ws",
                                  SampleScatterMonitorWorkspace="dummy")
 
         workspace = returned_data[0]
@@ -435,8 +436,8 @@ class MaskSansWorkspaceTest(unittest.TestCase):
 
         # Expected_spectra, again the tubes are shifted and that will produce the slightly strange masking
         expected_spectra = []
-        expected_spectra.extend((512*59 + 9 + x for x in range(0, 257)))
-        expected_spectra.extend((512*60 + 9 + x for x in range(0, 255)))
+        expected_spectra.extend((512 * 59 + 9 + x for x in range(0, 257)))
+        expected_spectra.extend((512 * 60 + 9 + x for x in range(0, 255)))
 
         mask_builder.set_beam_stop_arm_width(beam_stop_arm_width)
         mask_builder.set_beam_stop_arm_angle(beam_stop_arm_angle)
@@ -507,8 +508,10 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         radius_max = 10.
 
         expected_spectra = []
-        expected_spectra.extend([30469, 30470, 30471, 30472, 30473, 30474, 30475, 30476, 30477, 30980,
-                                 30981, 30982, 30983, 30984, 30985, 30986, 30987, 30988])
+        expected_spectra.extend([
+            30469, 30470, 30471, 30472, 30473, 30474, 30475, 30476, 30477, 30980, 30981, 30982, 30983, 30984, 30985,
+            30986, 30987, 30988
+        ])
         mask_builder.set_radius_min(radius_min)
         mask_builder.set_radius_max(radius_max)
 

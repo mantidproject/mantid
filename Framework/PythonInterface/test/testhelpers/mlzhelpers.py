@@ -17,18 +17,18 @@ def create_fake_dns_workspace(wsname, angle=-7.53, flipper='ON', dataY=None, loa
         @param loadinstrument  If True api.LoadInstrument will be executed, needed for DNSMergeRuns
     """
     ndet = 24
-    dataX = np.zeros(2*ndet)
+    dataX = np.zeros(2 * ndet)
     dataX.fill(4.2 + 0.00001)
     dataX[::2] -= 0.000002
     if dataY is None:
         dataY = np.ones(ndet)
     dataE = np.sqrt(dataY)
     # create workspace
-    api.CreateWorkspace(OutputWorkspace=wsname, DataX=dataX, DataY=dataY,
-                        DataE=dataE, NSpec=ndet, UnitX="Wavelength")
+    api.CreateWorkspace(OutputWorkspace=wsname, DataX=dataX, DataY=dataY, DataE=dataE, NSpec=ndet, UnitX="Wavelength")
     outws = api.mtd[wsname]
     p_names = 'deterota,wavelength,slit_i_left_blade_position,slit_i_right_blade_position,normalized,\
             slit_i_lower_blade_position,slit_i_upper_blade_position,polarisation,polarisation_comment,flipper'
+
     p_values = str(angle) + ',4.2,10,10,duration,5,20,x,7a,' + flipper
     api.AddSampleLogMultiple(Workspace=outws, LogNames=p_names, LogValues=p_values, ParseType=True)
     # rotate instrument component

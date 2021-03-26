@@ -23,11 +23,27 @@ class DNSComputeDetEffCorrCoefsTest(unittest.TestCase):
     def setUp(self):
         dataY = np.zeros(24)
         dataY.fill(1.5)
-        self.sfbkgrws = create_fake_dns_workspace('sfbkgrws', dataY=dataY, flipper='ON', angle=-7.53, loadinstrument=True)
-        self.nsfbkgrws = create_fake_dns_workspace('nsfbkgrws', dataY=dataY, flipper='OFF', angle=-7.53, loadinstrument=True)
+        self.sfbkgrws = create_fake_dns_workspace('sfbkgrws',
+                                                  dataY=dataY,
+                                                  flipper='ON',
+                                                  angle=-7.53,
+                                                  loadinstrument=True)
+        self.nsfbkgrws = create_fake_dns_workspace('nsfbkgrws',
+                                                   dataY=dataY,
+                                                   flipper='OFF',
+                                                   angle=-7.53,
+                                                   loadinstrument=True)
         dataY = np.linspace(2, 13.5, 24)
-        self.sfvanaws = create_fake_dns_workspace('sfvanaws', dataY=dataY, flipper='ON', angle=-7.53, loadinstrument=True)
-        self.nsfvanaws = create_fake_dns_workspace('nsfvanaws', dataY=dataY, flipper='OFF', angle=-7.53, loadinstrument=True)
+        self.sfvanaws = create_fake_dns_workspace('sfvanaws',
+                                                  dataY=dataY,
+                                                  flipper='ON',
+                                                  angle=-7.53,
+                                                  loadinstrument=True)
+        self.nsfvanaws = create_fake_dns_workspace('nsfvanaws',
+                                                   dataY=dataY,
+                                                   flipper='OFF',
+                                                   angle=-7.53,
+                                                   loadinstrument=True)
 
     def tearDown(self):
         for wks in [self.sfvanaws, self.nsfvanaws, self.sfbkgrws, self.nsfbkgrws]:
@@ -37,15 +53,17 @@ class DNSComputeDetEffCorrCoefsTest(unittest.TestCase):
         outputWorkspaceName = "DNSComputeDetCorrCoefsTest_Test1"
         vanalist = [self.sfvanaws.name(), self.nsfvanaws.name()]
         bglist = [self.sfbkgrws.name(), self.nsfbkgrws.name()]
-        alg_test = run_algorithm("DNSComputeDetEffCorrCoefs", VanadiumWorkspaces=vanalist,
-                                 BackgroundWorkspaces=bglist, OutputWorkspace=outputWorkspaceName)
+        alg_test = run_algorithm("DNSComputeDetEffCorrCoefs",
+                                 VanadiumWorkspaces=vanalist,
+                                 BackgroundWorkspaces=bglist,
+                                 OutputWorkspace=outputWorkspaceName)
 
         self.assertTrue(alg_test.isExecuted())
         # check whether the data are correct
         ws = AnalysisDataService.retrieve(outputWorkspaceName)
         # dimensions
         self.assertEqual(24, ws.getNumberHistograms())
-        self.assertEqual(2,  ws.getNumDims())
+        self.assertEqual(2, ws.getNumDims())
         # reference data
         refdata = np.linspace(0.08, 1.92, 24)
         # data array
@@ -58,8 +76,11 @@ class DNSComputeDetEffCorrCoefsTest(unittest.TestCase):
         outputWorkspaceName = "DNSComputeDetCorrCoefsTest_Test2"
         vanalist = [self.sfvanaws.name(), self.nsfvanaws.name()]
         bglist = [self.sfbkgrws.name(), self.nsfbkgrws.name()]
-        self.assertRaises(RuntimeError, DNSComputeDetEffCorrCoefs, VanadiumWorkspaces=bglist,
-                          BackgroundWorkspaces=vanalist, OutputWorkspace=outputWorkspaceName)
+        self.assertRaises(RuntimeError,
+                          DNSComputeDetEffCorrCoefs,
+                          VanadiumWorkspaces=bglist,
+                          BackgroundWorkspaces=vanalist,
+                          OutputWorkspace=outputWorkspaceName)
         return
 
     def test_DNSVanadiumCorrection_Masked(self):
@@ -69,18 +90,20 @@ class DNSComputeDetEffCorrCoefsTest(unittest.TestCase):
         MaskDetectors(self.sfvanaws, DetectorList=[1])
         MaskDetectors(self.nsfvanaws, DetectorList=[1])
 
-        alg_test = run_algorithm("DNSComputeDetEffCorrCoefs", VanadiumWorkspaces=vanalist,
-                                 BackgroundWorkspaces=bglist, OutputWorkspace=outputWorkspaceName)
+        alg_test = run_algorithm("DNSComputeDetEffCorrCoefs",
+                                 VanadiumWorkspaces=vanalist,
+                                 BackgroundWorkspaces=bglist,
+                                 OutputWorkspace=outputWorkspaceName)
 
         self.assertTrue(alg_test.isExecuted())
         # check whether the data are correct
         ws = AnalysisDataService.retrieve(outputWorkspaceName)
         # dimensions
         self.assertEqual(24, ws.getNumberHistograms())
-        self.assertEqual(2,  ws.getNumDims())
+        self.assertEqual(2, ws.getNumDims())
         # reference data
-        refdata = np.linspace(1.0, 24, 24)/13.0
-        refdata[0] = 0      # detector is masked
+        refdata = np.linspace(1.0, 24, 24) / 13.0
+        refdata[0] = 0  # detector is masked
         # data array
         for i in range(24):
             self.assertAlmostEqual(refdata[i], ws.readY(i))
@@ -100,8 +123,10 @@ class DNSComputeDetEffCorrCoefsTest(unittest.TestCase):
         nsfbg2 = create_fake_dns_workspace('nsfbg2', dataY=dataY, flipper='OFF', angle=-8.54, loadinstrument=True)
         bggroupsf = GroupWorkspaces([self.sfbkgrws, sfbg2])
         bggroupnsf = GroupWorkspaces([self.nsfbkgrws, nsfbg2])
-        alg_test = run_algorithm("DNSComputeDetEffCorrCoefs", VanadiumWorkspaces=[vanagroupsf, vanagroupnsf],
-                                 BackgroundWorkspaces=[bggroupsf, bggroupnsf], OutputWorkspace=outputWorkspaceName)
+        alg_test = run_algorithm("DNSComputeDetEffCorrCoefs",
+                                 VanadiumWorkspaces=[vanagroupsf, vanagroupnsf],
+                                 BackgroundWorkspaces=[bggroupsf, bggroupnsf],
+                                 OutputWorkspace=outputWorkspaceName)
 
         self.assertTrue(alg_test.isExecuted())
         # check whether the data are correct
@@ -113,8 +138,8 @@ class DNSComputeDetEffCorrCoefsTest(unittest.TestCase):
         # dimensions
         self.assertEqual(24, res1.getNumberHistograms())
         self.assertEqual(24, res2.getNumberHistograms())
-        self.assertEqual(2,  res1.getNumDims())
-        self.assertEqual(2,  res2.getNumDims())
+        self.assertEqual(2, res1.getNumDims())
+        self.assertEqual(2, res2.getNumDims())
         # reference data
         refdata = np.linspace(0.08, 1.92, 24)
         # data array
@@ -125,7 +150,6 @@ class DNSComputeDetEffCorrCoefsTest(unittest.TestCase):
         for wsname in wslist:
             run_algorithm("DeleteWorkspace", Workspace=wsname)
         return
-
 
 
 if __name__ == '__main__':

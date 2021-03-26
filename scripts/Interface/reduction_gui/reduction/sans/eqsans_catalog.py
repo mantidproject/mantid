@@ -9,7 +9,7 @@
     Data catalog for EQSANS
 """
 from reduction_gui.reduction.sans.data_cat import DataCatalog as BaseCatalog
-from reduction_gui.reduction.sans.data_cat import DataSet,  DataType
+from reduction_gui.reduction.sans.data_cat import DataSet, DataType
 from reduction_gui.reduction.scripter import execute_script
 import re
 import datetime
@@ -30,11 +30,11 @@ except:
 
 
 class EQSANSDataType(DataType):
-    TABLE_NAME="eqsans_datatype"
+    TABLE_NAME = "eqsans_datatype"
 
 
 class EQSANSDataSet(DataSet):
-    TABLE_NAME="eqsans_dataset"
+    TABLE_NAME = "eqsans_dataset"
     data_type_cls = EQSANSDataType
 
     def __init__(self, run_number, title, run_start, duration, sdd):
@@ -44,7 +44,8 @@ class EQSANSDataSet(DataSet):
     def load_meta_data(cls, file_path, outputWorkspace):
         try:
             if IN_MANTIDPLOT:
-                script = "LoadEventNexus(Filename='%s', OutputWorkspace='%s', MetaDataOnly=True)" % (file_path, outputWorkspace)
+                script = "LoadEventNexus(Filename='%s', OutputWorkspace='%s', MetaDataOnly=True)" % (file_path,
+                                                                                                     outputWorkspace)
                 execute_script(script)
                 if not AnalysisDataService.doesExist(outputWorkspace):
                     return False
@@ -91,19 +92,19 @@ class EQSANSDataSet(DataSet):
                 return -1
 
         runno = read_prop("run_number")
-        if runno=="":
+        if runno == "":
             runno = run
 
         title = read_prop("run_title")
         t_str = read_prop("start_time")
         # Get rid of the training microseconds
         toks = t_str.split('.')
-        if len(toks)>=2:
-            t_str=toks[0]
+        if len(toks) >= 2:
+            t_str = toks[0]
         t = datetime.datetime.strptime(t_str, '%Y-%m-%dT%H:%M:%S')
         # TZ offset
-        offset = datetime.datetime.now()-datetime.datetime.utcnow()
-        t = t+offset
+        offset = datetime.datetime.now() - datetime.datetime.utcnow()
+        t = t + offset
         run_start = t.strftime('%y-%m-%d %H:%M')
 
         duration = read_prop("duration")

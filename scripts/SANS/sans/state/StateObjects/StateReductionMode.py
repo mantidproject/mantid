@@ -8,8 +8,7 @@
 
 import json
 
-from sans.common.enums import (ReductionMode, ReductionDimensionality,
-                               FitModeForMerge)
+from sans.common.enums import (ReductionMode, ReductionDimensionality, FitModeForMerge)
 from sans.state.JsonSerializable import JsonSerializable
 
 
@@ -39,9 +38,10 @@ class StateReductionMode(metaclass=JsonSerializable):
         is_invalid = {}
         if self.merge_max and self.merge_min:
             if self.merge_min > self.merge_max:
-                is_invalid.update({"StateReduction": "The minimum of the merge"
-                                                     " region is greater than"
-                                                     " the maximum."})
+                is_invalid.update(
+                    {"StateReduction": "The minimum of the merge"
+                     " region is greater than"
+                     " the maximum."})
 
         if is_invalid:
             raise ValueError("StateReduction: The provided inputs are illegal."

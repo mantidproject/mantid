@@ -14,12 +14,10 @@ from .DrillSample import DrillSample
 
 
 class DrillRundexIO:
-
     """
     Name of the file where the data will be read or saved.
     """
     _filename = str()
-
     """
     Drill model. Used to set and get the data.
     """
@@ -56,24 +54,20 @@ class DrillRundexIO:
             try:
                 json_data = json.load(json_file)
             except Exception as ex:
-                logger.error("Wrong file format for: {0}"
-                             .format(self._filename))
+                logger.error("Wrong file format for: {0}".format(self._filename))
                 logger.error(str(ex))
                 raise ex
 
-        if ((RundexSettings.MODE_JSON_KEY not in json_data)
-                or (RundexSettings.INSTRUMENT_JSON_KEY not in json_data)):
+        if ((RundexSettings.MODE_JSON_KEY not in json_data) or (RundexSettings.INSTRUMENT_JSON_KEY not in json_data)):
             logger.error("Unable to load {0}".format(self._filename))
-            raise ValueError("Json mandatory fields '{0}' or '{1}' not found."
-                             .format(RundexSettings.CYCLE_JSON_KEY,
-                                     RundexSettings.INSTRUMENT_JSON_KEY))
+            raise ValueError("Json mandatory fields '{0}' or '{1}' not found.".format(
+                RundexSettings.CYCLE_JSON_KEY, RundexSettings.INSTRUMENT_JSON_KEY))
 
         drill.setInstrument(json_data[RundexSettings.INSTRUMENT_JSON_KEY])
         drill.setAcquisitionMode(json_data[RundexSettings.MODE_JSON_KEY])
 
         # cycle number and experiment id
-        if ((RundexSettings.CYCLE_JSON_KEY in json_data)
-                and (RundexSettings.EXPERIMENT_JSON_KEY in json_data)):
+        if ((RundexSettings.CYCLE_JSON_KEY in json_data) and (RundexSettings.EXPERIMENT_JSON_KEY in json_data)):
             cycle = json_data[RundexSettings.CYCLE_JSON_KEY]
             exp = json_data[RundexSettings.EXPERIMENT_JSON_KEY]
             drill.setCycleAndExperiment(cycle, exp)
@@ -91,8 +85,7 @@ class DrillRundexIO:
             drill.setSettings(settings)
         else:
             logger.warning("No global settings found when importing {0}. "
-                           "Default settings will be used."
-                           .format(self._filename))
+                           "Default settings will be used.".format(self._filename))
 
         # export settings
         if (RundexSettings.EXPORT_JSON_KEY in json_data):
@@ -103,8 +96,7 @@ class DrillRundexIO:
                     exportModel.activateAlgorithm(algo)
 
         # samples
-        if ((RundexSettings.SAMPLES_JSON_KEY in json_data)
-                and (json_data[RundexSettings.SAMPLES_JSON_KEY])):
+        if ((RundexSettings.SAMPLES_JSON_KEY in json_data) and (json_data[RundexSettings.SAMPLES_JSON_KEY])):
             for sampleJson in json_data[RundexSettings.SAMPLES_JSON_KEY]:
                 # for backward compatibility
                 if "CustomOptions" in sampleJson:
@@ -114,8 +106,7 @@ class DrillRundexIO:
                 sample.setParameters(sampleJson)
                 drill.addSample(-1, sample)
         else:
-            logger.warning("No sample found when importing {0}."
-                           .format(self._filename))
+            logger.warning("No sample found when importing {0}.".format(self._filename))
 
         # groups
         if "SamplesGroups" in json_data and json_data["SamplesGroups"]:
@@ -152,8 +143,7 @@ class DrillRundexIO:
         # export settings
         exportModel = drill.getExportModel()
         if exportModel:
-            algos = [algo for algo in exportModel.getAlgorithms()
-                     if exportModel.isAlgorithmActivated(algo)]
+            algos = [algo for algo in exportModel.getAlgorithms() if exportModel.isAlgorithmActivated(algo)]
             json_data[RundexSettings.EXPORT_JSON_KEY] = algos
 
         # samples
@@ -161,14 +151,13 @@ class DrillRundexIO:
         if samples:
             json_data[RundexSettings.SAMPLES_JSON_KEY] = list()
             for sample in samples:
-                json_data[RundexSettings.SAMPLES_JSON_KEY].append(
-                        sample.getParameters())
+                json_data[RundexSettings.SAMPLES_JSON_KEY].append(sample.getParameters())
 
         # groups
         groups = drill.getSamplesGroups()
         if groups:
             json_data["SamplesGroups"] = dict()
-        for k,v in groups.items():
+        for k, v in groups.items():
             json_data["SamplesGroups"][k] = list(v)
         masters = drill.getMasterSamples()
         if masters:

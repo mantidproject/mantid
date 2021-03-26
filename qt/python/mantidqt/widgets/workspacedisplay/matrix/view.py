@@ -39,7 +39,6 @@ class MatrixWorkspaceTableView(QTableView):
 
 
 class MatrixWorkspaceDisplayView(QTabWidget):
-
     def __init__(self, presenter, parent=None, window_flags=Qt.Window):
         super(MatrixWorkspaceDisplayView, self).__init__(parent)
 
@@ -190,27 +189,32 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         overplot_bin_with_errors_action.setEnabled(can_overplot())
         separator = QAction(self)
         separator.setSeparator(True)
-        list(map(context_menu.addAction, [plot_bin_action, plot_bin_with_errors_action, separator,
-                                          overplot_bin_action, overplot_bin_with_errors_action]))
+        list(
+            map(context_menu.addAction, [
+                plot_bin_action, plot_bin_with_errors_action, separator, overplot_bin_action,
+                overplot_bin_with_errors_action
+            ]))
 
     def setup_plot_spectrum_actions(self, context_menu, table):
         plot_spectrum_action = QAction(self.GRAPH_ICON, "Plot spectrum (values only)", self)
         plot_spectrum_action.triggered.connect(partial(self.presenter.action_plot_spectrum, table))
-        plot_spectrum_with_errors_action = QAction(self.GRAPH_ICON, "Plot spectrum (values + errors)",
-                                                   self)
+        plot_spectrum_with_errors_action = QAction(self.GRAPH_ICON, "Plot spectrum (values + errors)", self)
         plot_spectrum_with_errors_action.triggered.connect(
             partial(self.presenter.action_plot_spectrum_with_errors, table))
         overplot_spectrum_action = QAction(self.GRAPH_ICON, "Overplot spectrum (values only)", self)
         overplot_spectrum_action.triggered.connect(partial(self.presenter.action_overplot_spectrum, table))
         overplot_spectrum_with_errors_action = QAction(self.GRAPH_ICON, "Overplot spectrum (values + errors)", self)
-        overplot_spectrum_with_errors_action.triggered.connect(partial(
-            self.presenter.action_overplot_spectrum_with_errors, table))
+        overplot_spectrum_with_errors_action.triggered.connect(
+            partial(self.presenter.action_overplot_spectrum_with_errors, table))
         overplot_spectrum_action.setEnabled(can_overplot())
         overplot_spectrum_with_errors_action.setEnabled(can_overplot())
         separator = QAction(self)
         separator.setSeparator(True)
-        list(map(context_menu.addAction, [plot_spectrum_action, plot_spectrum_with_errors_action, separator,
-                                          overplot_spectrum_action, overplot_spectrum_with_errors_action]))
+        list(
+            map(context_menu.addAction, [
+                plot_spectrum_action, plot_spectrum_with_errors_action, separator, overplot_spectrum_action,
+                overplot_spectrum_with_errors_action
+            ]))
 
     def setup_copy_bin_actions(self, context_menu, table):
         copy_bin_values = QAction(self.COPY_ICON, "Copy", self)
@@ -223,8 +227,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
 
     def setup_copy_spectrum_actions(self, context_menu, table):
         copy_spectrum_values = QAction(self.COPY_ICON, "Copy", self)
-        copy_spectrum_values.triggered.connect(
-            partial(self.presenter.action_copy_spectrum_values, table))
+        copy_spectrum_values.triggered.connect(partial(self.presenter.action_copy_spectrum_values, table))
         copy_spectrum_to_table = QAction(self.TABLE_ICON, "Copy spectrum to table", self)
         copy_spectrum_to_table.triggered.connect(partial(self.presenter.action_copy_spectrum_to_table, table))
         separator = QAction(self)

@@ -397,8 +397,7 @@ class TestLARMORCommand(unittest.TestCase):
         command_iface.Clean()
         selected_idf = "LARMOR_Definition_NONEXIST.xml"
         # Act + Assert
-        self.assertFalse(command_iface.LARMOR(selected_idf),
-                         "A non existent idf path should return false")
+        self.assertFalse(command_iface.LARMOR(selected_idf), "A non existent idf path should return false")
 
 
 class TestMaskFile(unittest.TestCase):
@@ -441,8 +440,7 @@ class SANSCommandInterfaceGetAndSetBackgroundCorrectionSettings(unittest.TestCas
         command_iface.Clean()
         command_iface.LOQ()
         # Act
-        command_iface.set_background_correction(run_number, is_time,
-                                                is_mon, is_mean, mon_numbers)
+        command_iface.set_background_correction(run_number, is_time, is_mon, is_mean, mon_numbers)
         # Assert
         self._do_test_correct_setting(run_number, is_time, is_mon, is_mean, mon_numbers)
 

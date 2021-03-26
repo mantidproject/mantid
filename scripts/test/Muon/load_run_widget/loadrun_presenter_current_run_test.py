@@ -17,7 +17,6 @@ from Muon.GUI.Common.thread_model import ThreadModel, ThreadModelWorker
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication, QWidget
 
-
 # this class is required to keep track of error signal emissions since the output is garbage collected by the time
 # we reach the equal assertion
 
@@ -27,7 +26,7 @@ class MockSignalHandler(object):
         self.call_count = 0
 
     def signalReceived(self):
-        self.call_count+=1
+        self.call_count += 1
 
 
 @start_qapplication
@@ -95,8 +94,8 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
     @run_test_with_and_without_threading
     def test_load_current_run_loads_run_into_model(self):
         workspace = self.create_fake_workspace()
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "currentRun.nxs"
-                                                                                       , False))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234,
+                                                                                       "currentRun.nxs", False))
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)
 

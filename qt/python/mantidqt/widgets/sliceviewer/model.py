@@ -33,7 +33,6 @@ class WS_TYPE(Enum):
 
 class SliceViewerModel:
     """Store the workspace to be plotted. Can be MatrixWorkspace, MDEventWorkspace or MDHistoWorkspace"""
-
     def __init__(self, ws):
         # reference to the workspace requested to be viewed
         self._ws = ws
@@ -122,8 +121,9 @@ class SliceViewerModel:
         Check if the given workspace can multiple BinMD calls.
         """
         ws_type = self.get_ws_type()
-        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(
-            0) and self._get_ws().getOriginalWorkspace(0).getNumDims() == self._get_ws().getNumDims())
+        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(0)
+                                          and self._get_ws().getOriginalWorkspace(0).getNumDims()
+                                          == self._get_ws().getNumDims())
 
     def get_ws_name(self) -> str:
         """Return the name of the workspace being viewed"""
@@ -176,11 +176,9 @@ class SliceViewerModel:
         :param transpose: If true then transpose the data before returning
         """
         if transpose:
-            return np.ma.masked_invalid(
-                self.get_ws_MDE(slicepoint, bin_params, limits).getSignalArray().squeeze()).T
+            return np.ma.masked_invalid(self.get_ws_MDE(slicepoint, bin_params, limits).getSignalArray().squeeze()).T
         else:
-            return np.ma.masked_invalid(
-                self.get_ws_MDE(slicepoint, bin_params, limits).getSignalArray().squeeze())
+            return np.ma.masked_invalid(self.get_ws_MDE(slicepoint, bin_params, limits).getSignalArray().squeeze())
 
     def get_dim_limits(self, slicepoint, transpose):
         """
@@ -265,9 +263,8 @@ class SliceViewerModel:
                                                    x_proj=proj_matrix[:, display_indices[0]],
                                                    y_proj=proj_matrix[:, display_indices[1]])
 
-    def export_roi_to_workspace_mdevent(self, slicepoint: Sequence[Optional[float]],
-                                        bin_params: Sequence[float], limits: tuple,
-                                        transpose: bool):
+    def export_roi_to_workspace_mdevent(self, slicepoint: Sequence[Optional[float]], bin_params: Sequence[float],
+                                        limits: tuple, transpose: bool):
         """
         Export 2D roi to a separate workspace.
         :param slicepoint: ND sequence of either None or float. A float defines the point
@@ -289,9 +286,8 @@ class SliceViewerModel:
 
         return f'ROI created: {self._roi_name}'
 
-    def export_cuts_to_workspace_mdevent(self, slicepoint: Sequence[Optional[float]],
-                                         bin_params: Sequence[float], limits: tuple,
-                                         transpose: bool, cut: str):
+    def export_cuts_to_workspace_mdevent(self, slicepoint: Sequence[Optional[float]], bin_params: Sequence[float],
+                                         limits: tuple, transpose: bool, cut: str):
         """
         Export 1D cuts in the X/Y direction for the extent.
         :param slicepoint: ND sequence of either None or float. A float defines the point
@@ -331,9 +327,8 @@ class SliceViewerModel:
 
         return help_msg
 
-    def export_roi_to_workspace_mdhisto(self, slicepoint: Sequence[Optional[float]],
-                                        bin_params: Sequence[float], limits: tuple,
-                                        transpose: bool):
+    def export_roi_to_workspace_mdhisto(self, slicepoint: Sequence[Optional[float]], bin_params: Sequence[float],
+                                        limits: tuple, transpose: bool):
         """
         Export 2D ROI to a workspace.
         :param slicepoint: ND sequence of either None or float. A float defines the point
@@ -363,9 +358,8 @@ class SliceViewerModel:
 
         return f'ROI created: {self._roi_name}'
 
-    def export_cuts_to_workspace_mdhisto(self, slicepoint: Sequence[Optional[float]],
-                                         bin_params: Sequence[float], limits: tuple,
-                                         transpose: bool, cut: str):
+    def export_cuts_to_workspace_mdhisto(self, slicepoint: Sequence[Optional[float]], bin_params: Sequence[float],
+                                         limits: tuple, transpose: bool, cut: str):
         """
         Export 1D cuts in the X/Y direction for the extent.
         :param slicepoint: ND sequence of either None or float. A float defines the point
@@ -402,8 +396,7 @@ class SliceViewerModel:
 
         return help_msg
 
-    def export_cuts_to_workspace_matrix(self, slicepoint, bin_params, limits: tuple,
-                                        transpose: bool, cut: str):
+    def export_cuts_to_workspace_matrix(self, slicepoint, bin_params, limits: tuple, transpose: bool, cut: str):
         """
         Export 1D cuts in the X/Y direction for the extent. Signature matches other export functions.
         slicepoint, bin_params are unused
@@ -429,8 +422,7 @@ class SliceViewerModel:
 
         return help_msg
 
-    def export_roi_to_workspace_matrix(self, slicepoint, bin_params, limits: tuple,
-                                       transpose: bool):
+    def export_roi_to_workspace_matrix(self, slicepoint, bin_params, limits: tuple, transpose: bool):
         """
         Export 2D region as a workspace. Signature matches other export functions
         slicepoint, bin_params are unused
@@ -444,8 +436,7 @@ class SliceViewerModel:
         extract_roi_matrix(self._get_ws(), *limits[0], *limits[1], transpose, self._roi_name)
         return f'ROI created: {self._roi_name}'
 
-    def export_pixel_cut_to_workspace_md(self, slicepoint, bin_params, pos: tuple, transpose: bool,
-                                         axis: str):
+    def export_pixel_cut_to_workspace_md(self, slicepoint, bin_params, pos: tuple, transpose: bool, axis: str):
         """
         Export a single row/column as a workspace. Signature matches other export functions
         slicepoint, bin_params are unused
@@ -459,13 +450,10 @@ class SliceViewerModel:
         deltax, deltay = workspace.getDimension(xindex).getBinWidth(), \
             workspace.getDimension(yindex).getBinWidth()
         xpos, ypos = pos
-        limits = (xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ypos - 0.5 * deltay,
-                                                              ypos + 0.5 * deltay)
-        return self.export_cuts_to_workspace_mdevent(slicepoint, bin_params, limits, transpose,
-                                                     axis)
+        limits = (xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ypos - 0.5 * deltay, ypos + 0.5 * deltay)
+        return self.export_cuts_to_workspace_mdevent(slicepoint, bin_params, limits, transpose, axis)
 
-    def export_pixel_cut_to_workspace_matrix(self, slicepoint, bin_params, pos: tuple,
-                                             transpose: bool, axis: str):
+    def export_pixel_cut_to_workspace_matrix(self, slicepoint, bin_params, pos: tuple, transpose: bool, axis: str):
         """
         Export a single row/column as a workspace. Signature matches other export functions
         slicepoint, bin_params are unused
@@ -518,8 +506,7 @@ class SliceViewerModel:
 
 
 # private functions
-def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
-                          bin_params: Optional[Sequence[float]],
+def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]], bin_params: Optional[Sequence[float]],
                           limits: tuple) -> Tuple[dict, int, int]:
     """
     Return a sequence of 2-tuples defining the limits for MDEventWorkspace binning

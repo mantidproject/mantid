@@ -30,7 +30,7 @@ class RunSelectorWidget(QtWidgets.QWidget, Ui_RunSelectorWidget):
         self.runList.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
     def show_file_picker(self, extensions, search_directories):
-        assert(len(extensions) > 0)
+        assert (len(extensions) > 0)
         previous_directories = self._previous_directory_settings()
         default_directory = search_directories[0]
         directory = self._previous_or_default_directory(previous_directories, default_directory)
@@ -59,8 +59,7 @@ class RunSelectorWidget(QtWidgets.QWidget, Ui_RunSelectorWidget):
         manageuserdirectories.ManageUserDirectories.openManageUserDirectories()
 
     def run_not_found(self):
-        QtWidgets.QMessageBox.warning(self, "Run Not Found!",
-                                      "Could not find one or more of the runs specified.")
+        QtWidgets.QMessageBox.warning(self, "Run Not Found!", "Could not find one or more of the runs specified.")
 
     def invalid_run_query(self, message):
         QtWidgets.QMessageBox.warning(self, "Invalid Run Query!", message)
@@ -69,8 +68,7 @@ class RunSelectorWidget(QtWidgets.QWidget, Ui_RunSelectorWidget):
         return str(self.runLineEdit.text())
 
     def selected_runs(self):
-        selected = [runModel.row() for runModel in
-                    self.runList.selectedIndexes()]
+        selected = [runModel.row() for runModel in self.runList.selectedIndexes()]
         return selected
 
     def draw_runs(self, runs):

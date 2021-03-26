@@ -36,8 +36,7 @@ class AddFunctionDialogPresenterTest(unittest.TestCase):
 
         self.assertTrue(view is not None)
         self.assertEqual(len(self.TEST_FUNCTION_NAMES), view.ui.functionBox.count())
-        self.assertEqual(self.TEST_FUNCTION_NAMES[1],
-                         view.ui.functionBox.lineEdit().placeholderText())
+        self.assertEqual(self.TEST_FUNCTION_NAMES[1], view.ui.functionBox.lineEdit().placeholderText())
 
     def test_pressing_return_in_box_activates_completer(self):
         view = AddFunctionDialogView(function_names=self.TEST_FUNCTION_NAMES)

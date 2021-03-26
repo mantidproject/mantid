@@ -12,9 +12,18 @@ from sans.user_file.toml_parsers.toml_v1_schema import TomlSchemaV1Validator
 
 class SchemaV1ValidatorTest(unittest.TestCase):
     def test_paths_build_for_nested_dict(self):
-        test_grid = [({"A": None}, ["A"]),
-                     ({"A": {"B": None}}, ["A.B"]),
-                     ({"A": {"B": None, "C": None}}, ["A.B", "A.C"])]
+        test_grid = [({
+            "A": None
+        }, ["A"]), ({
+            "A": {
+                "B": None
+            }
+        }, ["A.B"]), ({
+            "A": {
+                "B": None,
+                "C": None
+            }
+        }, ["A.B", "A.C"])]
 
         for test_in, expected in test_grid:
             output = TomlSchemaV1Validator._build_nested_keys(test_in)
@@ -55,8 +64,17 @@ class SchemaV1ValidatorTest(unittest.TestCase):
             obj.validate()
 
     def test_valid_key_accepted(self):
-        expected_valid_examples = [{"instrument": {"name": mock.NonCallableMock()}},
-                                   {"instrument": {"configuration": {"sample_offset": 1.0}}}]
+        expected_valid_examples = [{
+            "instrument": {
+                "name": mock.NonCallableMock()
+            }
+        }, {
+            "instrument": {
+                "configuration": {
+                    "sample_offset": 1.0
+                }
+            }
+        }]
 
         for i in expected_valid_examples:
             obj = TomlSchemaV1Validator(i)

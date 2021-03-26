@@ -24,33 +24,32 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
     inherit from 'DataProcessorMainPresenter' directly and provide the required implementations,
     but multiple inheritance does not seem to be fully supported, hence we need this extra class.
     """
-
     def __init__(self, gui):
         super(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresenter, self).__init__()
         self.gui = gui
 
-    def getPreprocessingOptions(self, group = 0):
+    def getPreprocessingOptions(self, group=0):
         """
         Return global pre-processing options as a dict of key:value pairs
         """
-        result = {"AnalysisMode":"PointDetectorAnalysis"}
+        result = {"AnalysisMode": "PointDetectorAnalysis"}
         return result
 
-    def getProcessingOptions(self, group = 0):
+    def getProcessingOptions(self, group=0):
         """
         Return global processing options as a dict of key:value pairs.
         """
-        result = {"AnalysisMode":"PointDetectorAnalysis", "WavelengthMin":"1.5"}
+        result = {"AnalysisMode": "PointDetectorAnalysis", "WavelengthMin": "1.5"}
         return result
 
-    def getPostprocessingOptionsAsString(self, group = 0):
+    def getPostprocessingOptionsAsString(self, group=0):
         """
         Return global post-processing options as a string.
         The string must be a sequence of key=value separated by ','.
         """
         return "Params='0.03, -0.04, 0.6'"
 
-    def notifyADSChanged(self, workspace_list, group = 0):
+    def notifyADSChanged(self, workspace_list, group=0):
         """
         The widget will call this method when something changes in the ADS.
         The argument is the list of table workspaces that can be loaded into
@@ -121,19 +120,20 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_DataProcessorWindow):
         # the whitelist above
         # Additionally (not specified here) a blacklist of properties can be specified as the third
         # argument. These properties will not appear in the 'Options' column when typing
-        alg = MantidQt.MantidWidgets.DataProcessor.ProcessingAlgorithm('ReflectometryReductionOneAuto','IvsQ_binned_, IvsQ_, IvsLam_','')
+        alg = MantidQt.MantidWidgets.DataProcessor.ProcessingAlgorithm('ReflectometryReductionOneAuto',
+                                                                       'IvsQ_binned_, IvsQ_, IvsLam_', '')
 
         # Post-processing algorithm (optional, but functionality not well tested when not supplied)
         # Algorithm to post-process runs belonging to the same group
         # First argument is the name of the algorithm
         # Second argument is the prefix to be added to the name of the post-processed workspace
         # Third argument is a black list of properties to hide if a hinting line edit is added to the interface
-        post_alg = MantidQt.MantidWidgets.DataProcessor.PostprocessingAlgorithm(
-                'Stitch1DMany', 'IvsQ_', 'InputWorkspaces, OutputWorkspaces')
+        post_alg = MantidQt.MantidWidgets.DataProcessor.PostprocessingAlgorithm('Stitch1DMany', 'IvsQ_',
+                                                                                'InputWorkspaces, OutputWorkspaces')
 
         # The table widget
         self.data_processor_table = MantidQt.MantidWidgets.DataProcessor.QDataProcessorWidget(
-                whitelist, preprocess_map, alg, post_alg, self)
+            whitelist, preprocess_map, alg, post_alg, self)
 
         # A main presenter
         # Needed to supply global options for pre-processing/processing/post-processing to the widget
@@ -160,30 +160,50 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_DataProcessorWindow):
         self.menuFile.clear()
 
         # Actions that go in the 'Edit' menu
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.ProcessCommand(self.data_processor_table), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.ExpandCommand(self.data_processor_table), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.PlotRowCommand(self.data_processor_table), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.PlotGroupCommand(self.data_processor_table), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.AppendRowCommand(self.data_processor_table), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.AppendGroupCommand(self.data_processor_table), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.GroupRowsCommand(self.data_processor_table), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.CopySelectedCommand(self.data_processor_table), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.CutSelectedCommand(self.data_processor_table), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.PasteSelectedCommand(self.data_processor_table), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.ClearSelectedCommand(self.data_processor_table), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.DeleteRowCommand(self.data_processor_table), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.DeleteGroupCommand(self.data_processor_table), self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.ProcessCommand(self.data_processor_table),
+                            self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.ExpandCommand(self.data_processor_table),
+                            self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.PlotRowCommand(self.data_processor_table),
+                            self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.PlotGroupCommand(self.data_processor_table),
+                            self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.AppendRowCommand(self.data_processor_table),
+                            self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.AppendGroupCommand(self.data_processor_table),
+                            self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.GroupRowsCommand(self.data_processor_table),
+                            self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.CopySelectedCommand(self.data_processor_table),
+                            self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.CutSelectedCommand(self.data_processor_table),
+                            self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.PasteSelectedCommand(self.data_processor_table),
+                            self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.ClearSelectedCommand(self.data_processor_table),
+                            self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.DeleteRowCommand(self.data_processor_table),
+                            self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.DeleteGroupCommand(self.data_processor_table),
+                            self.menuEdit)
 
         # Actions that go in the 'File' menu
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.OpenTableCommand(self.data_processor_table), self.menuFile, workspace_list)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.NewTableCommand(self.data_processor_table), self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.SaveTableCommand(self.data_processor_table), self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.SaveTableAsCommand(self.data_processor_table), self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.ImportTableCommand(self.data_processor_table), self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.ExportTableCommand(self.data_processor_table), self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.OptionsCommand(self.data_processor_table), self.menuFile)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.OpenTableCommand(self.data_processor_table),
+                            self.menuFile, workspace_list)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.NewTableCommand(self.data_processor_table),
+                            self.menuFile)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.SaveTableCommand(self.data_processor_table),
+                            self.menuFile)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.SaveTableAsCommand(self.data_processor_table),
+                            self.menuFile)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.ImportTableCommand(self.data_processor_table),
+                            self.menuFile)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.ExportTableCommand(self.data_processor_table),
+                            self.menuFile)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.OptionsCommand(self.data_processor_table),
+                            self.menuFile)
 
-    def _create_action(self, command, menu, workspace_list = None):
+    def _create_action(self, command, menu, workspace_list=None):
         """
         Create an action from a given Command and add it to a given menu
         A 'workspace_list' can be provided but it is only intended to be used with OpenTableCommand.

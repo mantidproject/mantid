@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-
 """
 System test for MDNorm
 """
@@ -15,27 +14,24 @@ import systemtesting
 
 class MDNormCORELLITest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
-        return ["CORELLI_29782.nxs","CORELLI_29792.nxs",
-                "SingleCrystalDiffuseReduction_SA.nxs",
-                "SingleCrystalDiffuseReduction_Flux.nxs",
-                "SingleCrystalDiffuseReduction_UB.mat"]
+        return [
+            "CORELLI_29782.nxs", "CORELLI_29792.nxs", "SingleCrystalDiffuseReduction_SA.nxs",
+            "SingleCrystalDiffuseReduction_Flux.nxs", "SingleCrystalDiffuseReduction_UB.mat"
+        ]
 
     def runTest(self):
         Load(Filename='CORELLI_29782.nxs', OutputWorkspace='data')
         Load(Filename='SingleCrystalDiffuseReduction_SA.nxs', OutputWorkspace='SolidAngle')
-        Load(Filename='SingleCrystalDiffuseReduction_Flux.nxs', OutputWorkspace= 'Flux')
+        Load(Filename='SingleCrystalDiffuseReduction_Flux.nxs', OutputWorkspace='Flux')
         MaskDetectors(Workspace='data', MaskedWorkspace='SolidAngle')
-        ConvertUnits(InputWorkspace='data',OutputWorkspace='data',Target='Momentum')
-        CropWorkspaceForMDNorm(InputWorkspace='data',
-                               XMin=2.5,
-                               XMax=10,
-                               OutputWorkspace='data')
-        LoadIsawUB(InputWorkspace='data',Filename='SingleCrystalDiffuseReduction_UB.mat')
-        SetGoniometer(Workspace='data',Axis0='BL9:Mot:Sample:Axis1,0,1,0,1')
-        min_vals,max_vals=ConvertToMDMinMaxGlobal(InputWorkspace='data',
-                                                  QDimensions='Q3D',
-                                                  dEAnalysisMode='Elastic',
-                                                  Q3DFrames='Q')
+        ConvertUnits(InputWorkspace='data', OutputWorkspace='data', Target='Momentum')
+        CropWorkspaceForMDNorm(InputWorkspace='data', XMin=2.5, XMax=10, OutputWorkspace='data')
+        LoadIsawUB(InputWorkspace='data', Filename='SingleCrystalDiffuseReduction_UB.mat')
+        SetGoniometer(Workspace='data', Axis0='BL9:Mot:Sample:Axis1,0,1,0,1')
+        min_vals, max_vals = ConvertToMDMinMaxGlobal(InputWorkspace='data',
+                                                     QDimensions='Q3D',
+                                                     dEAnalysisMode='Elastic',
+                                                     Q3DFrames='Q')
         ConvertToMD(InputWorkspace='data',
                     QDimensions='Q3D',
                     dEAnalysisMode='Elastic',
@@ -43,7 +39,7 @@ class MDNormCORELLITest(systemtesting.MantidSystemTest):
                     OutputWorkspace='md',
                     MinValues=min_vals,
                     MaxValues=max_vals)
-        RecalculateTrajectoriesExtents(InputWorkspace= 'md', OutputWorkspace='md')
+        RecalculateTrajectoriesExtents(InputWorkspace='md', OutputWorkspace='md')
         DeleteWorkspace('data')
 
         MDNorm(InputWorkspace='md',
@@ -64,7 +60,8 @@ class MDNormCORELLITest(systemtesting.MantidSystemTest):
                OutputNormalizationWorkspace='normMD')
 
         # Check that we test these problematic cases
-        self.assertRaises(ValueError, mantid.simpleapi.MDNorm,
+        self.assertRaises(ValueError,
+                          mantid.simpleapi.MDNorm,
                           InputWorkspace='md',
                           SolidAngleWorkspace='SolidAngle',
                           FluxWorkspace='Flux',
@@ -83,7 +80,8 @@ class MDNormCORELLITest(systemtesting.MantidSystemTest):
                           OutputWorkspace='result',
                           OutputDataWorkspace='dataMD',
                           OutputNormalizationWorkspace='normMD')
-        self.assertRaises(ValueError, mantid.simpleapi.MDNorm,
+        self.assertRaises(ValueError,
+                          mantid.simpleapi.MDNorm,
                           InputWorkspace='md',
                           SolidAngleWorkspace='SolidAngle',
                           FluxWorkspace='Flux',
@@ -102,7 +100,8 @@ class MDNormCORELLITest(systemtesting.MantidSystemTest):
                           OutputWorkspace='result',
                           OutputDataWorkspace='dataMD',
                           OutputNormalizationWorkspace='normMD')
-        self.assertRaises(RuntimeError, mantid.simpleapi.MDNorm,
+        self.assertRaises(RuntimeError,
+                          mantid.simpleapi.MDNorm,
                           InputWorkspace='md',
                           SolidAngleWorkspace='SolidAngle',
                           FluxWorkspace='Flux',
@@ -121,7 +120,8 @@ class MDNormCORELLITest(systemtesting.MantidSystemTest):
                           OutputWorkspace='result',
                           OutputDataWorkspace='dataMD',
                           OutputNormalizationWorkspace='normMD')
-        self.assertRaises(ValueError, mantid.simpleapi.MDNorm,
+        self.assertRaises(ValueError,
+                          mantid.simpleapi.MDNorm,
                           InputWorkspace='md',
                           SolidAngleWorkspace='SolidAngle',
                           FluxWorkspace='Flux',
@@ -145,4 +145,4 @@ class MDNormCORELLITest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-7
-        return 'result','MDNormCORELLI.nxs'
+        return 'result', 'MDNormCORELLI.nxs'

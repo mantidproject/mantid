@@ -25,23 +25,24 @@ class LARMORMultiPeriodAddEventFiles(systemtesting.MantidSystemTest):
         Detector("DetectorBench")
         MaskFile('USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt')
         Gravity(True)
-        add_runs( ('13065', '13065') ,'LARMOR', 'nxs', lowMem=True)
+        add_runs(('13065', '13065'), 'LARMOR', 'nxs', lowMem=True)
 
         AssignSample('13065-add.nxs')
         WavRangeReduction(2, 4, DefaultTrans)
 
         # Clean up
-        to_clean = ["13065_sans_nxs",
-                    "13065p1rear_1D_2.0_4.0_incident_monitor",
-                    "13065p2rear_1D_2.0_4.0_incident_monitor",
-                    "13065p3rear_1D_2.0_4.0_incident_monitor",
-                    "13065p4rear_1D_2.0_4.0_incident_monitor",
-                    "80tubeCalibration_1-05-2015_r3157-3160"]
+        to_clean = [
+            "13065_sans_nxs", "13065p1rear_1D_2.0_4.0_incident_monitor", "13065p2rear_1D_2.0_4.0_incident_monitor",
+            "13065p3rear_1D_2.0_4.0_incident_monitor", "13065p4rear_1D_2.0_4.0_incident_monitor",
+            "80tubeCalibration_1-05-2015_r3157-3160"
+        ]
         for workspace in to_clean:
             DeleteWorkspace(workspace)
 
-        paths = [os.path.join(config['defaultsave.directory'],'LARMOR00013065-add.nxs'),
-                 os.path.join(config['defaultsave.directory'],'SANS2D00013065.log')]  # noqa
+        paths = [
+            os.path.join(config['defaultsave.directory'], 'LARMOR00013065-add.nxs'),
+            os.path.join(config['defaultsave.directory'], 'SANS2D00013065.log')
+        ]  # noqa
         for path in paths:
             if os.path.exists(path):
                 os.remove(path)
@@ -54,4 +55,4 @@ class LARMORMultiPeriodAddEventFiles(systemtesting.MantidSystemTest):
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Axes')
 
-        return "13065p1rear_1D_2.0_4.0" , "LARMORMultiPeriodAddEventFiles.nxs"
+        return "13065p1rear_1D_2.0_4.0", "LARMORMultiPeriodAddEventFiles.nxs"

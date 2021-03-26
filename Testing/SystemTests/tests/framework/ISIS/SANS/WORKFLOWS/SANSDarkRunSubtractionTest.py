@@ -91,8 +91,8 @@ class DarkRunSubtractionTest(unittest.TestCase):
         # Act + Assert
         scatter_workspace, monitor_workspace = self._do_test_valid(settings, is_input_event)
 
-        expected_num_spectr_ws = 20 - 9  + 1
-        self.assertEqual(scatter_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have 10 spectra")
+        expected_num_spectr_ws = 20 - 9 + 1
+        self.assertEqual(scatter_workspace.getNumberHistograms(), expected_num_spectr_ws, "Should have 10 spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
@@ -100,7 +100,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         self.assertFalse(np.greater(y, 1e-14).any(), "Detector entries should all be 0")
 
         # The monitors should not be affected, but we only have data in ws_index 0-3
-        self.assertTrue(monitor_workspace.extractY()[:,0:3].any(), "Monitor entries should not all be 0")
+        self.assertTrue(monitor_workspace.extractY()[:, 0:3].any(), "Monitor entries should not all be 0")
 
     def test_that_subtracts_with_correct_single_dark_run_and_multiple_settings(self):
         # Arrange
@@ -113,22 +113,20 @@ class DarkRunSubtractionTest(unittest.TestCase):
         use_time_2 = False
         use_mean_2 = False
         use_mon_2 = True
-        mon_number_2 = [2] # We are selecting detector ID 2 this corresponds to workspace index 1
+        mon_number_2 = [2]  # We are selecting detector ID 2 this corresponds to workspace index 1
         ws_index2 = [1]
 
         settings = []
-        setting1 = self._get_dark_run_settings_object(run_number, use_time_1, use_mean_1,
-                                                      use_mon_1, mon_number_1)
-        setting2 = self._get_dark_run_settings_object(run_number, use_time_2, use_mean_2,
-                                                      use_mon_2, mon_number_2)
+        setting1 = self._get_dark_run_settings_object(run_number, use_time_1, use_mean_1, use_mon_1, mon_number_1)
+        setting2 = self._get_dark_run_settings_object(run_number, use_time_2, use_mean_2, use_mon_2, mon_number_2)
         settings.append(setting1)
         settings.append(setting2)
 
         # Act + Assert
         scatter_workspace, monitor_workspace = self._do_test_valid(settings)
 
-        expected_num_spectr_ws = 20 - 9 + 1 # Total number of spectra in the original workspace from 9 to 245798
-        self.assertEqual(scatter_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have 8 spectra")
+        expected_num_spectr_ws = 20 - 9 + 1  # Total number of spectra in the original workspace from 9 to 245798
+        self.assertEqual(scatter_workspace.getNumberHistograms(), expected_num_spectr_ws, "Should have 8 spectra")
 
         # Expect all entries to be 0 except for monitor 0. We selected monitor 1 and all detectors
         # for the subtraction. Hence only moniotr 0 would have been spared.
@@ -136,7 +134,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         y = scatter_workspace.extractY()
         self.assertFalse(np.greater(y, 1e-14).any(), "Detector entries should all be 0")
 
-        for i in [0,2,3]:
+        for i in [0, 2, 3]:
             self.assertTrue(monitor_workspace.dataY(i).any(), "Monitor entries should not all be 0")
 
         for i in ws_index2:
@@ -152,9 +150,13 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Create added workspace and have it saved out
         import SANSadd2
-        SANSadd2.add_runs(('SANS2D00028827_removed_spectra.nxs','SANS2D00028797_removed_spectra.nxs'),'SANS2DTUBES', '.nxs',
-                          rawTypes=('.add','.raw','.s*'), lowMem=False,
-                          saveAsEvent=True, isOverlay = False)
+        SANSadd2.add_runs(('SANS2D00028827_removed_spectra.nxs', 'SANS2D00028797_removed_spectra.nxs'),
+                          'SANS2DTUBES',
+                          '.nxs',
+                          rawTypes=('.add', '.raw', '.s*'),
+                          lowMem=False,
+                          saveAsEvent=True,
+                          isOverlay=False)
         run_number = r'SANS2D00028797_removed_spectra-add.nxs'
         settings = []
         setting = self._get_dark_run_settings_object(run_number, use_time, use_mean, use_mon, mon_number)
@@ -164,31 +166,35 @@ class DarkRunSubtractionTest(unittest.TestCase):
         is_event_ws = True
         scatter_workspace, monitor_workspace = self._do_test_valid(settings, is_event_ws, run_number)
         expected_num_spectr_ws = 20 - 9 + 1
-        self.assertEqual(scatter_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have 8 spectra")
+        self.assertEqual(scatter_workspace.getNumberHistograms(), expected_num_spectr_ws, "Should have 8 spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
         y = scatter_workspace.extractY()
         self.assertFalse(np.greater(y, 1e-14).any(), "Detector entries should all be 0")
         # The monitors should not be affected, but we only have data in ws_index 0-3
-        for i in [0,3]:
+        for i in [0, 3]:
             self.assertTrue(monitor_workspace.dataY(i).any(), "Monitor entries should not all be 0")
 
-        os.remove(os.path.join(config['defaultsave.directory'],run_number))
+        os.remove(os.path.join(config['defaultsave.directory'], run_number))
 
     def test_that_subtracts_correct_added_file_type_when_only_monitor_subtracted(self):
         # Arrange
         use_time = False
         use_mean = False
         use_mon = True
-        mon_number = [2] # We are selecting detector ID 2 this corresponds to workspace index 1
+        mon_number = [2]  # We are selecting detector ID 2 this corresponds to workspace index 1
         ws_index = [1]
 
         # Create added workspace and have it saved out
         import SANSadd2
-        SANSadd2.add_runs(('SANS2D00028827_removed_spectra.nxs','SANS2D00028797_removed_spectra.nxs'),'SANS2DTUBES', '.nxs',
-                          rawTypes=('.add','.raw','.s*'), lowMem=False,
-                          saveAsEvent=True, isOverlay = False)
+        SANSadd2.add_runs(('SANS2D00028827_removed_spectra.nxs', 'SANS2D00028797_removed_spectra.nxs'),
+                          'SANS2DTUBES',
+                          '.nxs',
+                          rawTypes=('.add', '.raw', '.s*'),
+                          lowMem=False,
+                          saveAsEvent=True,
+                          isOverlay=False)
         run_number = r'SANS2D00028797_removed_spectra-add.nxs'
         settings = []
         setting = self._get_dark_run_settings_object(run_number, use_time, use_mean, use_mon, mon_number)
@@ -198,8 +204,8 @@ class DarkRunSubtractionTest(unittest.TestCase):
         is_event_ws = True
         scatter_workspace, monitor_workspace = self._do_test_valid(settings, is_event_ws, run_number)
 
-        expected_num_spectr_ws = 20 - 9 + 1 # Total number of spectra in the original workspace from 9 to 245798
-        self.assertEqual(scatter_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have 8 spectra")
+        expected_num_spectr_ws = 20 - 9 + 1  # Total number of spectra in the original workspace from 9 to 245798
+        self.assertEqual(scatter_workspace.getNumberHistograms(), expected_num_spectr_ws, "Should have 8 spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
@@ -208,15 +214,16 @@ class DarkRunSubtractionTest(unittest.TestCase):
         self.assertTrue(scatter_workspace.extractY().any(), "There should be some detectors which are not zero")
 
         # The monitors should not be affected, but we only have data in ws_index 0-3
-        for i in [0,2,3]:
-            self.assertTrue(monitor_workspace.dataY(i).any(), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
+        for i in [0, 2, 3]:
+            self.assertTrue(
+                monitor_workspace.dataY(i).any(), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
 
         # Monitor 2 (workspace index 1 should be 0
         for i in ws_index:
             y = monitor_workspace.dataY(i)
             self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should  all be 0")
 
-        os.remove(os.path.join(config['defaultsave.directory'],run_number))
+        os.remove(os.path.join(config['defaultsave.directory'], run_number))
 
     def test_that_subtracts_correct_for_histo_input_workspace(self):
         # Arrange
@@ -236,7 +243,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         scatter_workspace, monitor_workspace = self._do_test_valid(settings, is_event_input, run_number)
 
         expected_num_spectr_ws = 20 - 9 + 1
-        self.assertEqual(scatter_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have 8 spectra")
+        self.assertEqual(scatter_workspace.getNumberHistograms(), expected_num_spectr_ws, "Should have 8 spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
@@ -245,8 +252,9 @@ class DarkRunSubtractionTest(unittest.TestCase):
         self.assertTrue(scatter_workspace.extractY().any(), "There should be some detectors which are not zero")
 
         # The monitors should not be affected, but we only have data in ws_index 0-3
-        for i in [0,2,3]:
-            self.assertTrue(monitor_workspace.dataY(i).any(), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
+        for i in [0, 2, 3]:
+            self.assertTrue(
+                monitor_workspace.dataY(i).any(), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
 
         # Monitor 1 should be 0
         for i in ws_index:
@@ -266,27 +274,29 @@ class DarkRunSubtractionTest(unittest.TestCase):
         setting = self._get_dark_run_settings_object(run_number, use_time, use_mean, use_mon, mon_number)
         settings.append(setting)
 
-        trans_ids = [1,2,3,4]
+        trans_ids = [1, 2, 3, 4]
 
         # Act + Assert
         transmission_workspace = self._do_test_valid_transmission(settings, trans_ids)
 
         expected_num_spectr_ws = len(trans_ids)
-        self.assertEqual(transmission_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have 4 spectra")
+        self.assertEqual(transmission_workspace.getNumberHistograms(), expected_num_spectr_ws, "Should have 4 spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
 
         # We only have monitors in our transmission file, monitor 2 should be 0
-        for i in [0,2,3]:
-            self.assertTrue(transmission_workspace.dataY(i).any(), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
+        for i in [0, 2, 3]:
+            self.assertTrue(
+                transmission_workspace.dataY(i).any(), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
 
         # Monitor2 should be 0
         for i in ws_index:
             y = transmission_workspace.dataY(i)
             self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should  all be 0")
 
-    def test_that_subtracts_nothing_when_selecting_detector_subtraction_for_transmission_workspace_with_only_monitors(self):
+    def test_that_subtracts_nothing_when_selecting_detector_subtraction_for_transmission_workspace_with_only_monitors(
+            self):
         # Arrange
         use_time = False
         use_mean = False
@@ -298,21 +308,22 @@ class DarkRunSubtractionTest(unittest.TestCase):
         setting = self._get_dark_run_settings_object(run_number, use_time, use_mean, use_mon, mon_number)
         settings.append(setting)
 
-        trans_ids = [1,2,3,4]
+        trans_ids = [1, 2, 3, 4]
 
         # Act + Assert
         transmission_workspace = self._do_test_valid_transmission(settings, trans_ids)
 
         expected_num_spectr_ws = len(trans_ids)
-        self.assertEqual(transmission_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have 4 spectra")
+        self.assertEqual(transmission_workspace.getNumberHistograms(), expected_num_spectr_ws, "Should have 4 spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
 
         # We only have monitors in our transmission file
-        for i in [0,1,2,3]:
-            self.assertTrue(transmission_workspace.dataY(i).any(),
-                            ("Monitor1, Monitor2, Monitor3 and Monitor4 entries should not all be 0"))
+        for i in [0, 1, 2, 3]:
+            self.assertTrue(
+                transmission_workspace.dataY(i).any(),
+                ("Monitor1, Monitor2, Monitor3 and Monitor4 entries should not all be 0"))
 
     def test_that_subtracts_monitors_and_detectors_for_transmission_workspace_with_monitors_and_detectors(self):
         # Arrange
@@ -336,7 +347,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         setting2 = self._get_dark_run_settings_object(run_number2, use_time2, use_mean2, use_mon2, mon_number2)
         settings.append(setting2)
 
-        monitor_ids = [1,2,3,4]
+        monitor_ids = [1, 2, 3, 4]
         trans_ids = monitor_ids
         detector_ids = list(range(1100000, 1100010))
         trans_ids.extend(detector_ids)
@@ -344,15 +355,17 @@ class DarkRunSubtractionTest(unittest.TestCase):
         # Act + Assert
         transmission_workspace = self._do_test_valid_transmission(settings, trans_ids)
 
-        expected_num_spectr_ws = len(trans_ids) # monitors + detectors
-        self.assertEqual(transmission_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have the same number of spectra")
+        expected_num_spectr_ws = len(trans_ids)  # monitors + detectors
+        self.assertEqual(transmission_workspace.getNumberHistograms(), expected_num_spectr_ws,
+                         "Should have the same number of spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
 
         # We only have monitors in our transmission file, monitor 1 should be 0
-        for i in [0,2,3]:
-            self.assertTrue(transmission_workspace.dataY(i).any(), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
+        for i in [0, 2, 3]:
+            self.assertTrue(
+                transmission_workspace.dataY(i).any(), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
 
         # Monitor 2 should be set to 0
         for i in ws_index2:
@@ -360,7 +373,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
             self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should be 0")
 
         # Detectors should be set to 0
-        detector_indices = list(range(4,14))
+        detector_indices = list(range(4, 14))
         for i in detector_indices:
             y = transmission_workspace.dataY(i)
             self.assertFalse(np.greater(y, 1e-14).any(), "All detectors entries should be 0")
@@ -378,7 +391,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         setting = self._get_dark_run_settings_object(run_number, use_time, use_mean, use_mon, mon_number)
         settings.append(setting)
 
-        monitor_ids = [1,2,3,4]
+        monitor_ids = [1, 2, 3, 4]
         trans_ids = monitor_ids
         detector_ids = list(range(1100000, 1100010))
         trans_ids.extend(detector_ids)
@@ -386,15 +399,17 @@ class DarkRunSubtractionTest(unittest.TestCase):
         # Act + Assert
         transmission_workspace = self._do_test_valid_transmission(settings, trans_ids)
 
-        expected_num_spectr_ws = len(trans_ids) # monitors + detectors
-        self.assertEqual(transmission_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have all spectra")
+        expected_num_spectr_ws = len(trans_ids)  # monitors + detectors
+        self.assertEqual(transmission_workspace.getNumberHistograms(), expected_num_spectr_ws,
+                         "Should have all spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
 
         # We only have monitors in our transmission file, monitor 1 should be 0
-        for i in [0,2,3]:
-            self.assertTrue(transmission_workspace.dataY(i).any(), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
+        for i in [0, 2, 3]:
+            self.assertTrue(
+                transmission_workspace.dataY(i).any(), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
 
         # Monitor 2 should be set to 0
         for i in ws_index:
@@ -405,7 +420,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         self.assertTrue(transmission_workspace.extractY().any(), "There should be some detectors which are not zero")
 
     #------- HELPER Methods
-    def _do_test_valid(self, settings, is_input_event= True, run_number = None) :
+    def _do_test_valid(self, settings, is_input_event=True, run_number=None):
         # Arrange
         dark_run_subtractor = DarkRunSubtraction()
         for setting in settings:
@@ -421,7 +436,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Execute the dark_run_subtractor - let exceptions flow to help track down errors
         start_spec = 9
-        end_spec = 20 # Full spectrum length
+        end_spec = 20  # Full spectrum length
         scatter_workspace, monitor_workspace = dark_run_subtractor.execute(scatter_workspace, monitor_workspace,
                                                                            start_spec, end_spec, is_input_event)
 
@@ -445,13 +460,13 @@ class DarkRunSubtractionTest(unittest.TestCase):
         # Provide an event file from the system test data repo
         return "SANS2D00028827_removed_spectra.nxs"
 
-    def _get_sample_workspaces(self, run_number = None):
+    def _get_sample_workspaces(self, run_number=None):
         monitor_ws = None
         file_path = None
         ws_name = None
         sample_ws = None
         if run_number is not None:
-            file_path, ws_name= getFileAndName(run_number)
+            file_path, ws_name = getFileAndName(run_number)
             alg_load = AlgorithmManager.createUnmanaged("LoadNexusProcessed")
             alg_load.initialize()
             alg_load.setChild(True)
@@ -461,7 +476,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
             alg_load.execute()
             sample_ws = alg_load.getProperty("OutputWorkspace").value
         else:
-            file_path, ws_name= getFileAndName(self._get_dark_file())
+            file_path, ws_name = getFileAndName(self._get_dark_file())
             alg_load = AlgorithmManager.createUnmanaged("Load")
             alg_load.initialize()
             alg_load.setChild(True)
@@ -510,7 +525,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
     def _get_sample_workspace_histo(self):
         # Load the event workspace and the monitor workspace. Rebin the event to the monitor
         # and conjoin them
-        file_path, ws_name= getFileAndName(self._get_dark_file())
+        file_path, ws_name = getFileAndName(self._get_dark_file())
         alg_load = AlgorithmManager.createUnmanaged("LoadEventNexus")
         alg_load.initialize()
         alg_load.setChild(True)
@@ -565,7 +580,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         trans_ws = None
         file_path = None
 
-        file_path, ws_name= getFileAndName(self._get_dark_file())
+        file_path, ws_name = getFileAndName(self._get_dark_file())
         alg_load = AlgorithmManager.createUnmanaged("LoadEventNexus")
         alg_load.initialize()
         alg_load.setChild(True)
@@ -604,7 +619,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         trans_ws = alg_conjoined.getProperty("InputWorkspace1").value
 
         # And now extract all the required trans ids
-        extracted_name  = "extracted"
+        extracted_name = "extracted"
         alg_extract = AlgorithmManager.createUnmanaged("ExtractSpectra")
         alg_extract.initialize()
         alg_extract.setChild(True)
@@ -614,14 +629,9 @@ class DarkRunSubtractionTest(unittest.TestCase):
         alg_extract.execute()
         return alg_extract.getProperty("OutputWorkspace").value
 
-    def _get_dark_run_settings_object(self, run, time, mean,
-                                      use_mon, mon_number):
+    def _get_dark_run_settings_object(self, run, time, mean, use_mon, mon_number):
         # This is what would be coming from a parsed user file
-        return DarkRunSettings(mon = use_mon,
-                               run_number = run,
-                               time = time,
-                               mean = mean,
-                               mon_number = mon_number)
+        return DarkRunSettings(mon=use_mon, run_number=run, time=time, mean=mean, mon_number=mon_number)
 
 
 class DarkRunSubtractionTestSystemTest(systemtesting.MantidSystemTest):

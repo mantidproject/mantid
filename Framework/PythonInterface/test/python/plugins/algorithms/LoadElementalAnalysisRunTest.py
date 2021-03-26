@@ -11,7 +11,6 @@ from mantid.simpleapi import AlgorithmManager, LoadElementalAnalysisData
 
 
 class LoadElementalAnalysisRunTest(unittest.TestCase):
-
     def test_incorrect_run_number(self):
         alg = AlgorithmManager.create('LoadElementalAnalysisData')
         alg.setChild(True)

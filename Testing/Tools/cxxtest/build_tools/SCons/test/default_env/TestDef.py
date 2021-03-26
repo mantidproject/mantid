@@ -5,10 +5,5 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 expect_success = True
-type           = 'scons'
-links = {
-        'cxxtest': '../../../../',
-        'src'    : '../../../../test/'
-        }
-
-
+type = 'scons'
+links = {'cxxtest': '../../../../', 'src': '../../../../test/'}

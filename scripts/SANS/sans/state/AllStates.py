@@ -26,17 +26,16 @@ from sans.state.StateObjects.StateWavelength import StateWavelength
 from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 from sans.state.automatic_setters import automatic_setters
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
 
-class AllStates(metaclass=JsonSerializable):
 
+class AllStates(metaclass=JsonSerializable):
     def __init__(self):
 
         super(AllStates, self).__init__()
-        self.data : StateData = StateData()
+        self.data: StateData = StateData()
         self.move: StateMove = StateMove()
         self.instrument_info: StateInstrumentInfo = StateInstrumentInfo()
         self.reduction: StateReductionMode = StateReductionMode()

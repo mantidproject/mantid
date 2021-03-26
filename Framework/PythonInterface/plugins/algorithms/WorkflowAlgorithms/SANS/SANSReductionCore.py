@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-
 """ SANSReductionCore algorithm runs the sequence of reduction steps which are necessary to reduce a data set."""
 
 from SANSReductionCoreBase import SANSReductionCoreBase
@@ -79,8 +78,7 @@ class SANSReductionCore(SANSReductionCoreBase):
         progress.report("Moving ...")
 
         workspace = self._move(state=state, workspace=workspace, component=component_as_string)
-        monitor_workspace = self._move(state=state, workspace=monitor_workspace,
-                                       component=component_as_string)
+        monitor_workspace = self._move(state=state, workspace=monitor_workspace, component=component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Apply masking (pixel masking and time masking)
@@ -95,8 +93,7 @@ class SANSReductionCore(SANSReductionCoreBase):
         workspace = self._convert_to_wavelength(state=state, workspace=workspace)
         # Convert and rebin the dummy workspace to get correct bin flags
         if use_dummy_workspace:
-            dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace,
-                                             DetectorType(component_as_string))
+            dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace, DetectorType(component_as_string))
             dummy_mask_workspace = self._convert_to_wavelength(state=state, workspace=dummy_mask_workspace)
 
         # --------------------------------------------------------------------------------------------------------------

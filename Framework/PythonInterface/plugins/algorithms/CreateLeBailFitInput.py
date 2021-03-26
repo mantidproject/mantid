@@ -8,20 +8,20 @@
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
+
 _OUTPUTLEVEL = "NOOUTPUT"
 
 
 class CreateLeBailFitInput(PythonAlgorithm):
     """ Create the input TableWorkspaces for LeBail Fitting
     """
-
     def category(self):
         """
         """
         return "Diffraction\\Fitting;Utility\\Workspaces"
 
     def seeAlso(self):
-        return [ "LeBailFit" ]
+        return ["LeBailFit"]
 
     def name(self):
         """
@@ -34,7 +34,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        self.declareProperty(FileProperty("ReflectionsFile","", FileAction.OptionalLoad, ['.hkl']),
+        self.declareProperty(FileProperty("ReflectionsFile", "", FileAction.OptionalLoad, ['.hkl']),
                              "Name of [http://www.ill.eu/sites/fullprof/ Fullprof] .hkl file that contains the peaks.")
 
         self.declareProperty(FileProperty("FullprofParameterFile", "", FileAction.Load, ['.irf']),
@@ -44,12 +44,15 @@ class CreateLeBailFitInput(PythonAlgorithm):
                              "Generate Bragg reflections other than reading a Fullprof .irf file. ")
 
         arrvalidator = IntArrayBoundedValidator(lower=0)
-        self.declareProperty(IntArrayProperty("MaxHKL", values=[12, 12, 12], validator=arrvalidator,
-                                              direction=Direction.Input), "Maximum reflection (HKL) to generate")
+        self.declareProperty(
+            IntArrayProperty("MaxHKL", values=[12, 12, 12], validator=arrvalidator, direction=Direction.Input),
+            "Maximum reflection (HKL) to generate")
 
         self.declareProperty("Bank", 1, "Bank ID for output if there are more than one bank in .irf file.")
 
-        self.declareProperty("LatticeConstant", -0.0, validator=FloatBoundedValidator(lower=1.0E-9),
+        self.declareProperty("LatticeConstant",
+                             -0.0,
+                             validator=FloatBoundedValidator(lower=1.0E-9),
                              doc="Lattice constant for cubic crystal.")
 
         self.declareProperty(ITableWorkspaceProperty("InstrumentParameterWorkspace", "", Direction.Output),
@@ -95,10 +98,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
         dummywsname = "Foo%d" % (rand)
         hklwsname = self.getPropertyValue("BraggPeakParameterWorkspace")
 
-        api.LoadFullprofFile(
-            Filename=hklfilename,
-            PeakParameterWorkspace = hklwsname,
-            OutputWorkspace = dummywsname)
+        api.LoadFullprofFile(Filename=hklfilename, PeakParameterWorkspace=hklwsname, OutputWorkspace=dummywsname)
 
         hklws = AnalysisDataService.retrieve(hklwsname)
         if hklws is None:
@@ -128,9 +128,9 @@ class CreateLeBailFitInput(PythonAlgorithm):
         # 2. Create an empty workspace
         tablews = WorkspaceFactory.createTable()
 
-        tablews.addColumn("str",    "Name")
+        tablews.addColumn("str", "Name")
         tablews.addColumn("double", "Value")
-        tablews.addColumn("str",    "FitOrTie")
+        tablews.addColumn("str", "FitOrTie")
         tablews.addColumn("double", "Min")
         tablews.addColumn("double", "Max")
         tablews.addColumn("double", "StepSize")
@@ -146,7 +146,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
 
         # 4. Extra Lattice parameter
         latticepar = float(self.getPropertyValue("LatticeConstant"))
-        tablews.addRow(["LatticeConstant", latticepar,  "tie", -1.0E200, 1.0E200, 1.0])
+        tablews.addRow(["LatticeConstant", latticepar, "tie", -1.0E200, 1.0E200, 1.0])
 
         # 5. Clean
         api.DeleteWorkspace(Workspace=irfwsname)
@@ -169,7 +169,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
         for h in range(0, max_m):
             for k in range(h, max_m):
                 for l in range(k, max_m):
-                    dsq = h*h + k*k + l*l
+                    dsq = h * h + k * k + l * l
                     if dsq <= max_hkl_sq:
                         if (dsq in hkldict) is False:
                             hkldict[dsq] = []

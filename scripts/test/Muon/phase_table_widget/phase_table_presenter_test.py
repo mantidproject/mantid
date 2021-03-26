@@ -62,10 +62,15 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         result = self.presenter.create_parameters_for_cal_muon_phase_algorithm()
 
-        self.assertEqual(result,
-                         {'BackwardSpectra': [2, 4, 6, 8, 10], 'FirstGoodData': 0.1, 'ForwardSpectra': [1, 3, 5, 7, 9],
-                          'InputWorkspace': workspace_name, 'LastGoodData': 15,
-                          'DetectorTable': 'input_workspace_name; PhaseTable; fwd; bwd'})
+        self.assertEqual(
+            result, {
+                'BackwardSpectra': [2, 4, 6, 8, 10],
+                'FirstGoodData': 0.1,
+                'ForwardSpectra': [1, 3, 5, 7, 9],
+                'InputWorkspace': workspace_name,
+                'LastGoodData': 15,
+                'DetectorTable': 'input_workspace_name; PhaseTable; fwd; bwd'
+            })
 
     def test_correctly_retrieves_workspace_names_associsated_to_current_runs(self):
         self.view.set_input_combo_box = mock.MagicMock()
@@ -116,8 +121,8 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.update_view_from_model()
         run_algorithm_mock.side_effect = RuntimeError('CalMuonDetectorPhases has failed')
         self.presenter.add_phase_table_to_ADS = mock.MagicMock()
-        self.presenter.calculate_base_name_and_group = mock.MagicMock(
-            return_value=('MUSR22222_raw_data_period_1', 'MUSR22222 PhaseTable'))
+        self.presenter.calculate_base_name_and_group = mock.MagicMock(return_value=('MUSR22222_raw_data_period_1',
+                                                                                    'MUSR22222 PhaseTable'))
 
         self.presenter.update_current_run_list()
         self.presenter.handle_calulate_phase_table_clicked()
@@ -208,7 +213,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
     def test_handle_add_phasequad_button_no_name(self):
         self.view.set_phase_table_combo_box(["Table"])
-        self.view.enter_pair_name = mock.Mock(return_value = None)
+        self.view.enter_pair_name = mock.Mock(return_value=None)
         self.presenter.create_phase_quad_calculation_thread = mock.MagicMock()
 
         self.presenter.handle_add_phasequad_button_clicked()
@@ -217,7 +222,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
     def test_handle_add_phasequad_button(self):
         self.view.set_phase_table_combo_box(["Table"])
         self.presenter.validate_pair_name = mock.Mock(return_value=True)
-        self.view.enter_pair_name = mock.Mock(return_value = "test")
+        self.view.enter_pair_name = mock.Mock(return_value="test")
         self.presenter.create_phase_quad_calculation_thread = mock.MagicMock()
 
         self.presenter.handle_add_phasequad_button_clicked()
@@ -231,8 +236,14 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         self.context.group_pair_context.add_pair_to_selected_pairs.assert_any_call("test_Re_")
         self.context.group_pair_context.add_pair_to_selected_pairs.assert_any_call("test_Im_")
-        self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_any_call({"is_added":True, "name":"test_Re_"})
-        self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_any_call({"is_added":True, "name":"test_Im_"})
+        self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_any_call({
+            "is_added": True,
+            "name": "test_Re_"
+        })
+        self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_any_call({
+            "is_added": True,
+            "name": "test_Im_"
+        })
 
     def test_handle_first_good_data_too_small(self):
         self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")

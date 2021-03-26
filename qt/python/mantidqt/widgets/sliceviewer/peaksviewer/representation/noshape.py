@@ -46,8 +46,7 @@ class NonIntegratedPeakRepresentation():
             if effective_radius > cls.VIEW_FRACTION * deltax:
                 view_radius = cls.VIEW_FRACTION * deltax
 
-            painted = Painted(painter,
-                              (painter.cross(x, y, view_radius, alpha=alpha, color=fg_color), ),
+            painted = Painted(painter, (painter.cross(x, y, view_radius, alpha=alpha, color=fg_color), ),
                               effective_bbox)
 
         return painted

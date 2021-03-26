@@ -11,6 +11,7 @@ from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 
 if platform.system() == "Windows":
+
     class BayesQuasiTest(unittest.TestCase):
 
         _res_ws = None
@@ -20,15 +21,12 @@ if platform.system() == "Windows":
         _num_hists = None
 
         def setUp(self):
-            self._res_ws = Load(Filename='irs26173_graphite002_res.nxs',
-                                OutputWorkspace='__BayesQuasiTest_Resolution')
-            self._sample_ws = Load(Filename='irs26176_graphite002_red.nxs',
-                                OutputWorkspace='__BayesQuasiTest_Sample')
+            self._res_ws = Load(Filename='irs26173_graphite002_res.nxs', OutputWorkspace='__BayesQuasiTest_Resolution')
+            self._sample_ws = Load(Filename='irs26176_graphite002_red.nxs', OutputWorkspace='__BayesQuasiTest_Sample')
             self._resnorm_ws = Load(Filename='irs26173_graphite002_ResNorm.nxs',
-                                OutputWorkspace='irs26173_graphite002_ResNorm')
+                                    OutputWorkspace='irs26173_graphite002_ResNorm')
             self._num_bins = self._sample_ws.blocksize()
             self._num_hists = self._sample_ws.getNumberHistograms()
-
 
         def tearDown(self):
             """
@@ -38,7 +36,6 @@ if platform.system() == "Windows":
             DeleteWorkspace(self._res_ws)
             DeleteWorkspace(self._resnorm_ws)
 
-
 #----------------------------------Algorithm tests----------------------------------------
 
         def test_QLr_Run(self):
@@ -46,51 +43,28 @@ if platform.system() == "Windows":
             Test Lorentzian fit for BayesQuasi
             """
             fit_group, result, prob = BayesQuasi(Program='QL',
-                                              SampleWorkspace=self._sample_ws,
-                                              ResolutionWorkspace=self._res_ws,
-                                              MinRange=-0.547607,
-                                              MaxRange=0.543216,
-                                              SampleBins=1,
-                                              ResolutionBins=1,
-                                              Elastic=False,
-                                              Background='Sloping',
-                                              FixedWidth=False,
-                                              UseResNorm=False,
-                                              WidthFile='',
-                                              Loop=True)
+                                                 SampleWorkspace=self._sample_ws,
+                                                 ResolutionWorkspace=self._res_ws,
+                                                 MinRange=-0.547607,
+                                                 MaxRange=0.543216,
+                                                 SampleBins=1,
+                                                 ResolutionBins=1,
+                                                 Elastic=False,
+                                                 Background='Sloping',
+                                                 FixedWidth=False,
+                                                 UseResNorm=False,
+                                                 WidthFile='',
+                                                 Loop=True)
             self._validate_QLr_shape(result, prob, fit_group)
             self._validate_Qlr_value(result, prob, fit_group)
-
 
         def test_QSe_Run(self):
             """
             Test Stretched Exponential fit for BayesQuasi
             """
             fit_group, result = BayesQuasi(Program='QSe',
-                                      SampleWorkspace=self._sample_ws,
-                                      ResolutionWorkspace=self._res_ws,
-                                      MinRange=-0.547607,
-                                      MaxRange=0.543216,
-                                      SampleBins=1,
-                                      ResolutionBins=1,
-                                      Elastic=False,
-                                      Background='Sloping',
-                                      FixedWidth=False,
-                                      UseResNorm=False,
-                                      WidthFile='',
-                                      Loop=True)
-            self._validate_QSe_shape(result, fit_group)
-            self._validate_QSe_value(result, fit_group)
-
-
-        def test_run_with_resNorm_file(self):
-            """
-            Test a simple lorentzian fit with a ResNorm file
-            """
-            fit_group, result, prob = BayesQuasi(Program='QL',
                                            SampleWorkspace=self._sample_ws,
                                            ResolutionWorkspace=self._res_ws,
-                                           ResNormWorkspace=self._resnorm_ws,
                                            MinRange=-0.547607,
                                            MaxRange=0.543216,
                                            SampleBins=1,
@@ -98,9 +72,30 @@ if platform.system() == "Windows":
                                            Elastic=False,
                                            Background='Sloping',
                                            FixedWidth=False,
-                                           UseResNorm=True,
+                                           UseResNorm=False,
                                            WidthFile='',
                                            Loop=True)
+            self._validate_QSe_shape(result, fit_group)
+            self._validate_QSe_value(result, fit_group)
+
+        def test_run_with_resNorm_file(self):
+            """
+            Test a simple lorentzian fit with a ResNorm file
+            """
+            fit_group, result, prob = BayesQuasi(Program='QL',
+                                                 SampleWorkspace=self._sample_ws,
+                                                 ResolutionWorkspace=self._res_ws,
+                                                 ResNormWorkspace=self._resnorm_ws,
+                                                 MinRange=-0.547607,
+                                                 MaxRange=0.543216,
+                                                 SampleBins=1,
+                                                 ResolutionBins=1,
+                                                 Elastic=False,
+                                                 Background='Sloping',
+                                                 FixedWidth=False,
+                                                 UseResNorm=True,
+                                                 WidthFile='',
+                                                 Loop=True)
             self._validate_QLr_shape(result, prob, fit_group)
             self._validate_QLr_value_with_resnorm(result, prob, fit_group)
 
@@ -147,12 +142,11 @@ if platform.system() == "Windows":
             self.assertEqual(group.getNumberOfEntries(), self._sample_ws.getNumberHistograms())
 
             # Test sub workspaces
-            for i in range (group.getNumberOfEntries()):
+            for i in range(group.getNumberOfEntries()):
                 sub_ws = group.getItem(i)
                 self.assertTrue(isinstance(sub_ws, MatrixWorkspace))
                 self.assertEqual(sub_ws.getNumberHistograms(), 7)
                 self.assertEqual(sub_ws.getAxis(0).getUnit().unitID(), 'DeltaE')
-
 
         def _validate_Qlr_value(self, result, probability, group):
             """
@@ -185,7 +179,6 @@ if platform.system() == "Windows":
             self.assertEqual(round(sub_ws.dataY(2)[0], 5), -0.00638)
             self.assertEqual(round(sub_ws.dataY(3)[0], 5), 0.01614)
             self.assertEqual(round(sub_ws.dataY(4)[0], 5), -0.00926)
-
 
         def _validate_QLr_value_with_resnorm(self, result, probability, group):
             """
@@ -239,12 +232,11 @@ if platform.system() == "Windows":
             self.assertEqual(group.getNumberOfEntries(), self._sample_ws.getNumberHistograms())
 
             # Test sub workspaces
-            for i in range (group.getNumberOfEntries()):
+            for i in range(group.getNumberOfEntries()):
                 sub_ws = group.getItem(i)
                 self.assertTrue(isinstance(sub_ws, MatrixWorkspace))
                 self.assertEqual(sub_ws.getNumberHistograms(), 3)
                 self.assertEqual(sub_ws.getAxis(0).getUnit().unitID(), 'DeltaE')
-
 
         def _validate_QSe_value(self, result, group):
             """
@@ -283,10 +275,9 @@ if platform.system() == "Windows":
             e_data2 = np.append(self._sample_ws.readE(1), 0)
             e_data = np.concatenate((e_data1, e_data2), axis=0)
             sample = CreateWorkspace(x_data, y_data, e_data, NSpec=2, ParentWorkspace=self._sample_ws)
-            sample.getSpectrum(0).setDetectorID(1);
-            sample.getSpectrum(1).setDetectorID(2);
+            sample.getSpectrum(0).setDetectorID(1)
+            sample.getSpectrum(1).setDetectorID(2)
             return sample
 
-
-    if __name__=="__main__":
+    if __name__ == "__main__":
         unittest.main()

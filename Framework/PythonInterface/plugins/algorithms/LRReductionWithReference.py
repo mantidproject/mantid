@@ -20,39 +20,14 @@ from mantid.simpleapi import \
 # from LiquidsReflectometryReduction to copy properties here
 LR_ALG_FOR_PROPS = "LiquidsReflectometryReduction"
 PROPS_TO_COPY = [
-    'RunNumbers',
-    'InputWorkspace',
-    'NormalizationRunNumber',
-    'SignalPeakPixelRange',
-    'SubtractSignalBackground',
-    'SignalBackgroundPixelRange',
-    'NormFlag',
-    'NormPeakPixelRange',
-    'SubtractNormBackground',
-    'NormBackgroundPixelRange',
-    'LowResDataAxisPixelRangeFlag',
-    'LowResDataAxisPixelRange',
-    'LowResNormAxisPixelRangeFlag',
-    'LowResNormAxisPixelRange',
-    'TOFRange',
-    'TOFRangeFlag',
-    'QMin',
-    'QStep',
-    'AngleOffset',
-    'AngleOffsetError',
-    'OutputWorkspace',
-    'ApplyScalingFactor',
-    'ScalingFactorFile',
-    'SlitTolerance',
-    'SlitsWidthFlag',
-    'IncidentMediumSelected',
-    'GeometryCorrectionFlag',
-    'FrontSlitName',
-    'BackSlitName',
-    'TOFSteps',
-    'CropFirstAndLastPoints',
-    'ApplyPrimaryFraction',
-    'PrimaryFractionRange']
+    'RunNumbers', 'InputWorkspace', 'NormalizationRunNumber', 'SignalPeakPixelRange', 'SubtractSignalBackground',
+    'SignalBackgroundPixelRange', 'NormFlag', 'NormPeakPixelRange', 'SubtractNormBackground',
+    'NormBackgroundPixelRange', 'LowResDataAxisPixelRangeFlag', 'LowResDataAxisPixelRange',
+    'LowResNormAxisPixelRangeFlag', 'LowResNormAxisPixelRange', 'TOFRange', 'TOFRangeFlag', 'QMin', 'QStep',
+    'AngleOffset', 'AngleOffsetError', 'OutputWorkspace', 'ApplyScalingFactor', 'ScalingFactorFile', 'SlitTolerance',
+    'SlitsWidthFlag', 'IncidentMediumSelected', 'GeometryCorrectionFlag', 'FrontSlitName', 'BackSlitName', 'TOFSteps',
+    'CropFirstAndLastPoints', 'ApplyPrimaryFraction', 'PrimaryFractionRange'
+]
 
 
 class LRReductionWithReference(DataProcessorAlgorithm):
@@ -70,12 +45,11 @@ class LRReductionWithReference(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.copyProperties(LR_ALG_FOR_PROPS, PROPS_TO_COPY)
-        self.declareProperty("Refl1DModelParameters", "",
-                             doc="JSON string for Refl1D theoretical model parameters")
+        self.declareProperty("Refl1DModelParameters", "", doc="JSON string for Refl1D theoretical model parameters")
 
     def PyExec(self):
         try:
-            import refl1d # noqa: F401
+            import refl1d  # noqa: F401
         except ImportError:
             err_msg = 'Refl1D not installed, unable to run this algorithm'
             raise RuntimeError(err_msg)
@@ -86,40 +60,39 @@ class LRReductionWithReference(DataProcessorAlgorithm):
             kwargs[prop] = self.getProperty(prop).value
 
         # Process the reference normalization run
-        norm_wksp = LiquidsReflectometryReduction(
-            RunNumbers=[kwargs['NormalizationRunNumber']],
-            InputWorkspace='',
-            NormalizationRunNumber=kwargs['NormalizationRunNumber'],
-            SignalPeakPixelRange=kwargs['NormPeakPixelRange'],
-            SubtractSignalBackground=kwargs['SubtractNormBackground'],
-            SignalBackgroundPixelRange=kwargs['NormBackgroundPixelRange'],
-            NormFlag=False,
-            NormPeakPixelRange=kwargs['NormPeakPixelRange'],
-            SubtractNormBackground=kwargs['SubtractNormBackground'],
-            NormBackgroundPixelRange=kwargs['NormBackgroundPixelRange'],
-            LowResDataAxisPixelRangeFlag=kwargs['LowResNormAxisPixelRangeFlag'],
-            LowResDataAxisPixelRange=kwargs['LowResNormAxisPixelRange'],
-            LowResNormAxisPixelRangeFlag=kwargs['LowResNormAxisPixelRangeFlag'],
-            LowResNormAxisPixelRange=kwargs['LowResNormAxisPixelRange'],
-            TOFRange=kwargs['TOFRange'],
-            TOFRangeFlag=kwargs['TOFRangeFlag'],
-            QMin=kwargs['QMin'],
-            QStep=kwargs['QStep'],
-            AngleOffset=kwargs['AngleOffset'],
-            AngleOffsetError=kwargs['AngleOffsetError'],
-            OutputWorkspace=kwargs['OutputWorkspace'],
-            ApplyScalingFactor=False,
-            ScalingFactorFile=kwargs['ScalingFactorFile'],
-            SlitTolerance=kwargs['SlitTolerance'],
-            SlitsWidthFlag=kwargs['SlitsWidthFlag'],
-            IncidentMediumSelected=kwargs['IncidentMediumSelected'],
-            GeometryCorrectionFlag=kwargs['GeometryCorrectionFlag'],
-            FrontSlitName=kwargs['FrontSlitName'],
-            BackSlitName=kwargs['BackSlitName'],
-            TOFSteps=kwargs['TOFSteps'],
-            CropFirstAndLastPoints=kwargs['CropFirstAndLastPoints'],
-            ApplyPrimaryFraction=kwargs['ApplyPrimaryFraction'],
-            PrimaryFractionRange=kwargs['PrimaryFractionRange'])
+        norm_wksp = LiquidsReflectometryReduction(RunNumbers=[kwargs['NormalizationRunNumber']],
+                                                  InputWorkspace='',
+                                                  NormalizationRunNumber=kwargs['NormalizationRunNumber'],
+                                                  SignalPeakPixelRange=kwargs['NormPeakPixelRange'],
+                                                  SubtractSignalBackground=kwargs['SubtractNormBackground'],
+                                                  SignalBackgroundPixelRange=kwargs['NormBackgroundPixelRange'],
+                                                  NormFlag=False,
+                                                  NormPeakPixelRange=kwargs['NormPeakPixelRange'],
+                                                  SubtractNormBackground=kwargs['SubtractNormBackground'],
+                                                  NormBackgroundPixelRange=kwargs['NormBackgroundPixelRange'],
+                                                  LowResDataAxisPixelRangeFlag=kwargs['LowResNormAxisPixelRangeFlag'],
+                                                  LowResDataAxisPixelRange=kwargs['LowResNormAxisPixelRange'],
+                                                  LowResNormAxisPixelRangeFlag=kwargs['LowResNormAxisPixelRangeFlag'],
+                                                  LowResNormAxisPixelRange=kwargs['LowResNormAxisPixelRange'],
+                                                  TOFRange=kwargs['TOFRange'],
+                                                  TOFRangeFlag=kwargs['TOFRangeFlag'],
+                                                  QMin=kwargs['QMin'],
+                                                  QStep=kwargs['QStep'],
+                                                  AngleOffset=kwargs['AngleOffset'],
+                                                  AngleOffsetError=kwargs['AngleOffsetError'],
+                                                  OutputWorkspace=kwargs['OutputWorkspace'],
+                                                  ApplyScalingFactor=False,
+                                                  ScalingFactorFile=kwargs['ScalingFactorFile'],
+                                                  SlitTolerance=kwargs['SlitTolerance'],
+                                                  SlitsWidthFlag=kwargs['SlitsWidthFlag'],
+                                                  IncidentMediumSelected=kwargs['IncidentMediumSelected'],
+                                                  GeometryCorrectionFlag=kwargs['GeometryCorrectionFlag'],
+                                                  FrontSlitName=kwargs['FrontSlitName'],
+                                                  BackSlitName=kwargs['BackSlitName'],
+                                                  TOFSteps=kwargs['TOFSteps'],
+                                                  CropFirstAndLastPoints=kwargs['CropFirstAndLastPoints'],
+                                                  ApplyPrimaryFraction=kwargs['ApplyPrimaryFraction'],
+                                                  PrimaryFractionRange=kwargs['PrimaryFractionRange'])
 
         # Calculate the theoretical reflectivity for normalization using Refl1D
         q = norm_wksp.readX(0)
@@ -127,11 +100,10 @@ class LRReductionWithReference(DataProcessorAlgorithm):
         model_dict = json.loads(model_json)
         model_reflectivity = self.calculate_reflectivity(model_dict, q)
 
-        model_wksp = CreateWorkspace(
-            DataX=q,
-            DataY=model_reflectivity,
-            DataE=np.zeros(len(q)),
-            UnitX=norm_wksp.getAxis(0).getUnit().unitID())
+        model_wksp = CreateWorkspace(DataX=q,
+                                     DataY=model_reflectivity,
+                                     DataE=np.zeros(len(q)),
+                                     UnitX=norm_wksp.getAxis(0).getUnit().unitID())
 
         # Calculate the incident flux ( measured / model) for reference
         incident_flux = Divide(norm_wksp, model_wksp)
@@ -187,19 +159,15 @@ class LRReductionWithReference(DataProcessorAlgorithm):
         dq = q_resolution * q
         # The QProbe object represents the beam
         probe = QProbe(q, dq, data=(zeros, zeros))
-        sample = Slab(
-            material=SLD(name='back', rho=model_description['back_sld']),
-            interface=model_description['back_roughness'])
+        sample = Slab(material=SLD(name='back', rho=model_description['back_sld']),
+                      interface=model_description['back_roughness'])
 
         # Add each layer
         for i, layer in enumerate(model_description['layers']):
-            sample = sample | Slab(material=SLD(name='layer%s' % i,
-                                                rho=layer['sld'],
-                                                irho=layer['isld']),
+            sample = sample | Slab(material=SLD(name='layer%s' % i, rho=layer['sld'], irho=layer['isld']),
                                    thickness=layer['thickness'],
                                    interface=layer['roughness'])
-        sample = sample | Slab(material=SLD(name='front',
-                                            rho=model_description['front_sld']))
+        sample = sample | Slab(material=SLD(name='front', rho=model_description['front_sld']))
         probe.background = Parameter(value=model_description['background'], name='background')
         expt = Experiment(probe=probe, sample=sample)
         q, r = expt.reflectivity()

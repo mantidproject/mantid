@@ -88,7 +88,7 @@ class AbsoluteUnitsScript(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml =  "<AbsoluteUnits>\n"
+        xml = "<AbsoluteUnits>\n"
         xml += "  <do_absolute_units>%s</do_absolute_units>\n" % self.do_absolute_units
         xml += "  <absunits_vanadium>%s</absunits_vanadium>\n" % self.absunits_vanadium
         xml += "  <grouping_file>%s</grouping_file>\n" % self.grouping_file
@@ -114,7 +114,7 @@ class AbsoluteUnitsScript(BaseScriptElement):
         """
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("AbsoluteUnits")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             instrument_dom = element_list[0]
             self.find_bad_detectors = BaseScriptElement.getBoolElement(instrument_dom,
                                                                        "do_absolute_units",
@@ -125,9 +125,8 @@ class AbsoluteUnitsScript(BaseScriptElement):
             self.grouping_file = BaseScriptElement.getStringElement(instrument_dom,
                                                                     "grouping_file",
                                                                     default=AbsoluteUnitsScript.grouping_file)
-            self.absunits_detector_vanadium = BaseScriptElement.getStringElement(instrument_dom,
-                                                                                 "absunits_detector_vanadium",
-                                                                                 default=AbsoluteUnitsScript.absunits_detector_vanadium)
+            self.absunits_detector_vanadium = BaseScriptElement.getStringElement(
+                instrument_dom, "absunits_detector_vanadium", default=AbsoluteUnitsScript.absunits_detector_vanadium)
             self.incident_energy = BaseScriptElement.getStringElement(instrument_dom,
                                                                       "incident_energy",
                                                                       default=AbsoluteUnitsScript.incident_energy)
@@ -146,21 +145,17 @@ class AbsoluteUnitsScript(BaseScriptElement):
             self.sample_rmm = BaseScriptElement.getFloatElement(instrument_dom,
                                                                 "sample_rmm",
                                                                 default=AbsoluteUnitsScript.sample_rmm)
-            self.absunits_median_test_out_low = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                                  "median_test_out_low",
-                                                                                  default=AbsoluteUnitsScript.absunits_median_test_out_low)
-            self.absunits_median_test_out_high = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                                   "median_test_out_high",
-                                                                                   default=AbsoluteUnitsScript.absunits_median_test_out_high)# noqa
-            self.absunits_median_test_low = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                              "median_test_low",
-                                                                              default=AbsoluteUnitsScript.absunits_median_test_low)
-            self.absunits_median_test_high = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                               "median_test_high",
-                                                                               default=AbsoluteUnitsScript.absunits_median_test_high)
-            self.absunits_errorbar_criterion = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                                 "errorbar_criterion",
-                                                                                 default=AbsoluteUnitsScript.absunits_errorbar_criterion)
+            self.absunits_median_test_out_low = BaseScriptElement.getFloatElement(
+                instrument_dom, "median_test_out_low", default=AbsoluteUnitsScript.absunits_median_test_out_low)
+            self.absunits_median_test_out_high = BaseScriptElement.getFloatElement(
+                instrument_dom, "median_test_out_high",
+                default=AbsoluteUnitsScript.absunits_median_test_out_high)  # noqa
+            self.absunits_median_test_low = BaseScriptElement.getFloatElement(
+                instrument_dom, "median_test_low", default=AbsoluteUnitsScript.absunits_median_test_low)
+            self.absunits_median_test_high = BaseScriptElement.getFloatElement(
+                instrument_dom, "median_test_high", default=AbsoluteUnitsScript.absunits_median_test_high)
+            self.absunits_errorbar_criterion = BaseScriptElement.getFloatElement(
+                instrument_dom, "errorbar_criterion", default=AbsoluteUnitsScript.absunits_errorbar_criterion)
 
     def reset(self):
         """

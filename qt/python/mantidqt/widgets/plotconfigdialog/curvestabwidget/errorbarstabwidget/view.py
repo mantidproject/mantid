@@ -14,22 +14,16 @@ from mantidqt.utils.qt import load_ui
 
 
 class ErrorbarsTabWidgetView(QWidget):
-
     def __init__(self, parent=None):
         super(ErrorbarsTabWidgetView, self).__init__(parent=parent)
 
-        self.ui = load_ui(__file__,
-                          'curves_tab_errorbars_tab.ui',
-                          baseinstance=self)
+        self.ui = load_ui(__file__, 'curves_tab_errorbars_tab.ui', baseinstance=self)
         self.color_selector_widget = ColorSelector(parent=self)
-        self.layout.replaceWidget(self.color_dummy_widget,
-                                  self.color_selector_widget)
+        self.layout.replaceWidget(self.color_dummy_widget, self.color_selector_widget)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         # Disable errorbar fields when they are hidden
-        self.hide_errorbars_tickbox.stateChanged.connect(
-            lambda: self.set_fields_enabled(not self.get_hide())
-        )
+        self.hide_errorbars_tickbox.stateChanged.connect(lambda: self.set_fields_enabled(not self.get_hide()))
 
     def get_hide(self):
         return self.hide_errorbars_tickbox.checkState() == Qt.Checked

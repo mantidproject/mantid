@@ -28,8 +28,7 @@ class ILLIndirectReductionFWSTest(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'IN16B'
         config.appendDataSearchSubDir('ILL/IN16B/')
 
-        self.params = {'Tolerance':1e-3,
-                       'CheckInstrument':False}
+        self.params = {'Tolerance': 1e-3, 'CheckInstrument': False}
 
     def tearDown(self):
         config['default.facility'] = self.facility
@@ -38,11 +37,12 @@ class ILLIndirectReductionFWSTest(systemtesting.MantidSystemTest):
 
     def requiredFiles(self):
 
-        return ["165944.nxs", "165945.nxs", "165946.nxs", "165947.nxs", "165948.nxs",
-                "165949.nxs", "165950.nxs", "165951.nxs", "165952.nxs", "165953.nxs",
-                "143720.nxs", "143721.nxs", "143722.nxs", "143723.nxs", "143724.nxs",
-                "143725.nxs", "143726.nxs", "143727.nxs", "143728.nxs", "143729.nxs",
-                "140678.nxs", "140679.nxs", "140680.nxs", "140681.nxs", "140682.nxs"]
+        return [
+            "165944.nxs", "165945.nxs", "165946.nxs", "165947.nxs", "165948.nxs", "165949.nxs", "165950.nxs",
+            "165951.nxs", "165952.nxs", "165953.nxs", "143720.nxs", "143721.nxs", "143722.nxs", "143723.nxs",
+            "143724.nxs", "143725.nxs", "143726.nxs", "143727.nxs", "143728.nxs", "143729.nxs", "140678.nxs",
+            "140679.nxs", "140680.nxs", "140681.nxs", "140682.nxs"
+        ]
 
     def runTest(self):
 
@@ -62,14 +62,14 @@ class ILLIndirectReductionFWSTest(systemtesting.MantidSystemTest):
         # test EFWS+IFWS mixed
         IndirectILLReductionFWS(Run="165944:165953", SortXAxis=True, OutputWorkspace="ifws")
 
-        LoadNexusProcessed(Filename="ILLIN16B_FWS.nxs",OutputWorkspace="ref")
+        LoadNexusProcessed(Filename="ILLIN16B_FWS.nxs", OutputWorkspace="ref")
 
-        result = CompareWorkspaces(Workspace1='ifws_red',Workspace2='ref',**self.params)
+        result = CompareWorkspaces(Workspace1='ifws_red', Workspace2='ref', **self.params)
 
         if result[0]:
             self.assertTrue(result[0])
         else:
-            self.assertTrue(result[0],"Mismatch in IFWS: " + result[1].row(0)['Message'])
+            self.assertTrue(result[0], "Mismatch in IFWS: " + result[1].row(0)['Message'])
 
     def _run_efws(self):
         # test EFWS with sum/interpolate options with background and calibration
@@ -81,9 +81,9 @@ class ILLIndirectReductionFWSTest(systemtesting.MantidSystemTest):
                                 SortXAxis=True,
                                 OutputWorkspace="efws")
 
-        LoadNexusProcessed(Filename="ILLIN16B_EFWS.nxs",OutputWorkspace="ref")
+        LoadNexusProcessed(Filename="ILLIN16B_EFWS.nxs", OutputWorkspace="ref")
 
-        result = CompareWorkspaces(Workspace1='efws_0.0_red',Workspace2='ref',**self.params)
+        result = CompareWorkspaces(Workspace1='efws_0.0_red', Workspace2='ref', **self.params)
 
         if result[0]:
             self.assertTrue(result[0])
@@ -110,8 +110,8 @@ class ILLIndirectReductionFWSTest(systemtesting.MantidSystemTest):
         if result[0]:
             self.assertTrue(result[0])
         else:
-            self.assertTrue(result[0], "Sum/interpolate should be the same for one point: "
-                            + result[1].row(0)['Message'])
+            self.assertTrue(result[0],
+                            "Sum/interpolate should be the same for one point: " + result[1].row(0)['Message'])
 
     def _run_efws_mirror_sense(self):
         # this tests the EFWS in mirror mode: data in 140680 is indeed split to two wings,

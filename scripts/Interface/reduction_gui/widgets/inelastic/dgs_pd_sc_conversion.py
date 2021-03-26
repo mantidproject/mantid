@@ -22,8 +22,7 @@ class PdAndScConversionWidget(BaseWidget):
     name = "Powder and SC"
 
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
-        super(PdAndScConversionWidget, self).__init__(parent, state, settings,
-                                                      data_type=data_type)
+        super(PdAndScConversionWidget, self).__init__(parent, state, settings, data_type=data_type)
 
         class PdAndScConversionFrame(QtGui.QFrame, ui.inelastic.ui_dgs_pd_sc_conversion.Ui_PdScConversionFrame):
             def __init__(self, parent=None):
@@ -50,10 +49,8 @@ class PdAndScConversionWidget(BaseWidget):
         self._save_powder_nxs_state(self._content.save_procnexus_cb.isChecked())
 
         # Connections
-        self.connect(self._content.save_procnexus_save, QtCore.SIGNAL("clicked()"),
-                     self._save_powder_nxs_save)
-        self.connect(self._content.save_procnexus_cb, QtCore.SIGNAL("toggled(bool)"),
-                     self._save_powder_nxs_state)
+        self.connect(self._content.save_procnexus_save, QtCore.SIGNAL("clicked()"), self._save_powder_nxs_save)
+        self.connect(self._content.save_procnexus_cb, QtCore.SIGNAL("toggled(bool)"), self._save_powder_nxs_state)
 
         # Validate widgets
         self._connect_validated_lineedit(self._content.q_low_edit)
@@ -91,12 +88,9 @@ class PdAndScConversionWidget(BaseWidget):
             @param state: PdAndScConversionScript object
         """
         self._content.powder_gb.setChecked(state.do_pd_convert)
-        self._check_and_set_lineedit_content(self._content.q_low_edit,
-                                             state.pd_q_range_low)
-        self._check_and_set_lineedit_content(self._content.q_width_edit,
-                                             state.pd_q_range_width)
-        self._check_and_set_lineedit_content(self._content.q_high_edit,
-                                             state.pd_q_range_high)
+        self._check_and_set_lineedit_content(self._content.q_low_edit, state.pd_q_range_low)
+        self._check_and_set_lineedit_content(self._content.q_width_edit, state.pd_q_range_width)
+        self._check_and_set_lineedit_content(self._content.q_high_edit, state.pd_q_range_high)
         self._content.save_procnexus_cb.setChecked(state.save_powder_nxs)
         self._content.save_procnexus_edit.setText(state.save_powder_nxs_file)
 

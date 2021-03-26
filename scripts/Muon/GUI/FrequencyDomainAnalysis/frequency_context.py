@@ -9,7 +9,6 @@ from mantid import AnalysisDataService
 
 
 class MaxEnt(object):
-
     def __init__(self, run, ws_freq):
         self.run = run
         self.ws_freq = ws_freq
@@ -31,17 +30,15 @@ class FFT(object):
             self.Im_run = Im_run
 
 
-FREQUENCY_EXTENSIONS ={"MOD":"mod", "RE":"Re", "IM":"Im", "MAXENT":"MaxEnt", "FFT":"FFT All" }
+FREQUENCY_EXTENSIONS = {"MOD": "mod", "RE": "Re", "IM": "Im", "MAXENT": "MaxEnt", "FFT": "FFT All"}
 
 
 class FrequencyContext(object):
-
     """
     A simple class for identifing the current run
     and it can return the name, run and instrument.
     The current run is the same as the one in MuonAnalysis
     """
-
     def __init__(self):
         self._maxEnt_freq = {}
         self._FFT_freq = {}
@@ -88,7 +85,7 @@ class FrequencyContext(object):
                         names.append(name)
         if frequency_type == "All":
             return names
-        elif frequency_type ==FREQUENCY_EXTENSIONS["FFT"]:
+        elif frequency_type == FREQUENCY_EXTENSIONS["FFT"]:
             return [name for name in names if FREQUENCY_EXTENSIONS["MAXENT"] not in name]
         else:
             output = []

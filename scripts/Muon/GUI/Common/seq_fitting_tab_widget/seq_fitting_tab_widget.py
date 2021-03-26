@@ -16,10 +16,10 @@ class SeqFittingTabWidget(object):
         self.seq_fitting_tab_presenter = SeqFittingTabPresenter(self.seq_fitting_tab_view, self.seq_fitting_tab_model,
                                                                 context)
 
-        self.seq_fitting_tab_view.setup_slot_for_fit_selected_button(self.seq_fitting_tab_presenter.
-                                                                     handle_fit_selected_pressed)
-        self.seq_fitting_tab_view.setup_slot_for_sequential_fit_button(self.seq_fitting_tab_presenter.
-                                                                       handle_sequential_fit_pressed)
+        self.seq_fitting_tab_view.setup_slot_for_fit_selected_button(
+            self.seq_fitting_tab_presenter.handle_fit_selected_pressed)
+        self.seq_fitting_tab_view.setup_slot_for_sequential_fit_button(
+            self.seq_fitting_tab_presenter.handle_sequential_fit_pressed)
 
         self.seq_fitting_tab_view.fit_table.set_slot_for_parameter_changed(
             self.seq_fitting_tab_presenter.handle_updated_fit_parameter_in_table)

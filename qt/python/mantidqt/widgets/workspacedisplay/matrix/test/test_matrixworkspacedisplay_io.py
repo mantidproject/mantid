@@ -13,7 +13,6 @@ from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.widgets.workspacedisplay.matrix.io import MatrixWorkspaceDisplayDecoder, MatrixWorkspaceDisplayEncoder
 from mantidqt.widgets.workspacedisplay.matrix import StatusBarView, MatrixWorkspaceDisplay
 
-
 MATRIXWORKSPACEDISPLAY_DICT = {"workspace": "ws"}
 
 

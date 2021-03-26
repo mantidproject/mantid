@@ -8,6 +8,7 @@ from qtpy import QtCore, QtWidgets
 from matplotlib.figure import Figure
 from mantidqt.utils.qt import load_ui
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+
 Ui_sample_transmission, _ = load_ui(__file__, "SampleTransmission.ui")
 
 
@@ -74,4 +75,4 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
         self.thickness_err.setText('')
 
     def set_error_indicator(self, error_key):
-        getattr(self, error_key+'_err').setText('*')
+        getattr(self, error_key + '_err').setText('*')

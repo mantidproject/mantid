@@ -15,7 +15,6 @@ EXPECTED_EXT = '.expected'
 
 
 class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
-
     @staticmethod
     def _test_clones():
         r"""Test latest definition files for certain sets of instrument names are actually the same
@@ -94,8 +93,7 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
             print("SUMMARY OF FAILED FILES")
             for filename in failed:
                 print(filename)
-            raise RuntimeError("Failed to load %d of %d files"
-                               % (len(failed), len(files)))
+            raise RuntimeError("Failed to load %d of %d files" % (len(failed), len(files)))
         else:
             print("Successfully loaded %d files" % len(files))
         print(files)

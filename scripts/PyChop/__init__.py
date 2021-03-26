@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=line-too-long, invalid-name
-
 """
 Module containing classes to calculate the flux and resolution of direct geometry neutron time-of-flight spectrometers.
 At present, the subclasses understand the ISIS instruments 'LET', 'MAPS', 'MARI' and 'MERLIN'.

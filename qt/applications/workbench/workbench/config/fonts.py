@@ -32,10 +32,10 @@ def is_ubuntu():
 
 
 # Plain-text fonts
-MONOSPACE = ['Consolas', 'Monospace', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono',
-             'Andale Mono', 'Liberation Mono', 'Courier New',
-             'Courier', 'monospace', 'Fixed', 'Terminal']
-
+MONOSPACE = [
+    'Consolas', 'Monospace', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Andale Mono', 'Liberation Mono',
+    'Courier New', 'Courier', 'monospace', 'Fixed', 'Terminal'
+]
 
 # Define reasonable point sizes on various OSes
 if sys.platform == 'darwin':
@@ -48,7 +48,6 @@ elif is_ubuntu():
     PT_SIZE = 11
 else:
     PT_SIZE = 9
-
 
 # Cached font for this system
 _TEXT_FONT_CACHE = None

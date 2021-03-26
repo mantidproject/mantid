@@ -11,7 +11,6 @@ from unittest import mock
 
 
 class MuonPhasequadTest(unittest.TestCase):
-
     def test_name(self):
         phasequad = MuonPhasequad("test", "table")
         self.assertEqual(phasequad.name, "test")

@@ -34,7 +34,11 @@ class SANSILLIntegrationTest(unittest.TestCase):
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_monochromatic_with_wedges(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', NumberOfWedges=2, WedgeWorkspace='wedges', CalculateResolution='MildnerCarpenter')
+        SANSILLIntegration(InputWorkspace='sample',
+                           OutputWorkspace='iq',
+                           NumberOfWedges=2,
+                           WedgeWorkspace='wedges',
+                           CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 88)
         self.assertTrue(mtd['iq'].hasDx(0))
@@ -47,51 +51,74 @@ class SANSILLIntegrationTest(unittest.TestCase):
             self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_monochromatic_cake(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputType='I(Phi,Q)', NumberOfWedges=36, CalculateResolution='MildnerCarpenter')
+        SANSILLIntegration(InputWorkspace='sample',
+                           OutputWorkspace='iq',
+                           OutputType='I(Phi,Q)',
+                           NumberOfWedges=36,
+                           CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'], 36)
         self.assertEqual(mtd['iq'].blocksize(), 88)
         azimuth_axis = mtd['iq'].getAxis(1)
         self.assertTrue(azimuth_axis.isNumeric())
-        self.assertEqual(len(azimuth_axis),36)
+        self.assertEqual(len(azimuth_axis), 36)
         self.assertEqual(azimuth_axis.getUnit().unitID(), "Phi")
         for phi in range(36):
             self.assertTrue(mtd['iq'].hasDx(phi))
 
     def test_monochromatic_2D(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputType='I(Qx,Qy)', MaxQxy=0.03, DeltaQ=0.001)
+        SANSILLIntegration(InputWorkspace='sample',
+                           OutputWorkspace='iq',
+                           OutputType='I(Qx,Qy)',
+                           MaxQxy=0.03,
+                           DeltaQ=0.001)
         self._check_output(mtd['iq'], 60)
         self.assertEqual(mtd['iq'].blocksize(), 60)
         qy_axis = mtd['iq'].getAxis(1)
         self.assertTrue(qy_axis.isNumeric())
-        self.assertEqual(len(qy_axis),61)
+        self.assertEqual(len(qy_axis), 61)
         self.assertEqual(qy_axis.getUnit().unitID(), "MomentumTransfer")
 
     def test_with_bin_width(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=-0.1, CalculateResolution='MildnerCarpenter')
+        SANSILLIntegration(InputWorkspace='sample',
+                           OutputWorkspace='iq',
+                           OutputBinning=-0.1,
+                           CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 51)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_with_bin_range(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=[0.001,0.03], CalculateResolution='MildnerCarpenter')
+        SANSILLIntegration(InputWorkspace='sample',
+                           OutputWorkspace='iq',
+                           OutputBinning=[0.001, 0.03],
+                           CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 73)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_with_bin_width_and_range(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=[0.001,-0.1,0.03], CalculateResolution='MildnerCarpenter')
+        SANSILLIntegration(InputWorkspace='sample',
+                           OutputWorkspace='iq',
+                           OutputBinning=[0.001, -0.1, 0.03],
+                           CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_custom_binning(self):
-        binning = [0.001,0.005,0.006,0.01,0.016]
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=binning, CalculateResolution='MildnerCarpenter')
+        binning = [0.001, 0.005, 0.006, 0.01, 0.016]
+        SANSILLIntegration(InputWorkspace='sample',
+                           OutputWorkspace='iq',
+                           OutputBinning=binning,
+                           CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 2)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_resolution_binning(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', DefaultQBinning='ResolutionBased', CalculateResolution='MildnerCarpenter')
+        SANSILLIntegration(InputWorkspace='sample',
+                           OutputWorkspace='iq',
+                           DefaultQBinning='ResolutionBased',
+                           CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 37)
         self.assertTrue(mtd['iq'].hasDx(0))
@@ -104,7 +131,7 @@ class SANSILLIntegrationTest(unittest.TestCase):
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 162)
 
-    def _check_output(self, ws, spectra = 1):
+    def _check_output(self, ws, spectra=1):
         self.assertTrue(ws)
         self.assertTrue(isinstance(ws, MatrixWorkspace))
         self.assertTrue(ws.isHistogramData())
@@ -114,6 +141,7 @@ class SANSILLIntegrationTest(unittest.TestCase):
         self.assertTrue(ws.getInstrument())
         self.assertTrue(ws.getRun())
         self.assertTrue(ws.getHistory())
+
 
 if __name__ == '__main__':
     unittest.main()

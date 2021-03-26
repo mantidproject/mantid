@@ -26,7 +26,7 @@ except ModuleNotFoundError:
     from packaging import version
     if version.parse(setuptools.__version__) >= version.parse("49.0.0"):
         raise EnvironmentError("Setup tools is v49 or greater. This is likely causing the Mantid import to fail. See \n"
-                                "https://github.com/mantidproject/mantid/issues/29010")
+                               "https://github.com/mantidproject/mantid/issues/29010")
 
 import datetime
 import difflib
@@ -59,7 +59,7 @@ def linux_distro_description():
     try:
         lsb_descr = subprocess.check_output('lsb_release --description', shell=True,
                                             stderr=subprocess.STDOUT).decode('utf-8')
-        return lsb_descr.strip()[len('Description:')+1:].strip()
+        return lsb_descr.strip()[len('Description:') + 1:].strip()
     except subprocess.CalledProcessError as exc:
         return f'Unknown distribution: lsb_release -d failed {exc}'
 
@@ -68,16 +68,14 @@ def linux_distro_description():
 TESTING_FRAMEWORK_DIR = santize_backslash(os.path.dirname(os.path.realpath(__file__)))
 # Path to PythonInterface/test directory for testhelpers module
 FRAMEWORK_PYTHONINTERFACE_TEST_DIR = santize_backslash(
-    os.path.realpath(
-        os.path.join(TESTING_FRAMEWORK_DIR, "..", "..", "..", "..", "Framework", "PythonInterface",
-                     "test")))
+    os.path.realpath(os.path.join(TESTING_FRAMEWORK_DIR, "..", "..", "..", "..", "Framework", "PythonInterface",
+                                  "test")))
 # Indicates the child process trying to run the tests had an error
 TESTING_PROC_FAILURE_CODE = 255
 
 if not os.path.exists(FRAMEWORK_PYTHONINTERFACE_TEST_DIR):
     raise ImportError(
-        "Expected 'Framework/PythonInterface/test' to be found at '{}' but it wasn'target. Has the directory moved?"
-    )
+        "Expected 'Framework/PythonInterface/test' to be found at '{}' but it wasn'target. Has the directory moved?")
 
 
 #########################################################################
@@ -215,8 +213,7 @@ class MantidSystemTest(unittest.TestCase):
         # Check if memory is available
         MB_avail = MemoryStats().availMem() / (1024.)
         if (MB_avail < required):
-            print("Insufficient memory available to run test! %g MB available, need %g MB." %
-                  (MB_avail, required))
+            print("Insufficient memory available to run test! %g MB available, need %g MB." % (MB_avail, required))
             sys.exit(TestRunner.SKIP_TEST)
 
     def execute(self):
@@ -351,11 +348,9 @@ class MantidSystemTest(unittest.TestCase):
         if not checker.getProperty("Result").value:
             print(self.__class__.__name__)
             if mismatchName:
-                SaveNexus(InputWorkspace=valNames[0],
-                          Filename=self.__class__.__name__ + mismatchName + '-mismatch.nxs')
+                SaveNexus(InputWorkspace=valNames[0], Filename=self.__class__.__name__ + mismatchName + '-mismatch.nxs')
             else:
-                SaveNexus(InputWorkspace=valNames[0],
-                          Filename=self.__class__.__name__ + '-mismatch.nxs')
+                SaveNexus(InputWorkspace=valNames[0], Filename=self.__class__.__name__ + '-mismatch.nxs')
             return False
 
         return True
@@ -490,6 +485,7 @@ class MantidSystemTest(unittest.TestCase):
         name = reference_filename.split('.')[0]
         return name + '-mismatch.nxs'
 
+
 #########################################################################
 # A class to store the results of a test
 #########################################################################
@@ -543,8 +539,7 @@ class ResultReporter(object):
         pass
 
     def dispatchResults(self, result, number_of_completed_tests):
-        raise NotImplementedError(
-            '"dispatchResults(self, result)" should be overridden in a derived class')
+        raise NotImplementedError('"dispatchResults(self, result)" should be overridden in a derived class')
 
     def printResultsToConsole(self, result, number_of_completed_tests):
         '''
@@ -555,25 +550,22 @@ class ResultReporter(object):
         else:
             console_output = ''
             if self._quiet:
-                percentage = int(
-                    float(number_of_completed_tests) * 100.0 / float(self._total_number_of_tests))
+                percentage = int(float(number_of_completed_tests) * 100.0 / float(self._total_number_of_tests))
                 if len(result._results) < 6:
                     time_taken = " -- "
                 else:
                     time_taken = result._results[6][1]
-                console_output += '[{:>3d}%] {:>3d}/{:>3d} : '.format(percentage,
-                                                                      number_of_completed_tests,
+                console_output += '[{:>3d}%] {:>3d}/{:>3d} : '.format(percentage, number_of_completed_tests,
                                                                       self._total_number_of_tests)
-                console_output += '{:.<{}} ({}: {}s)'.format(result.name + " ",
-                                                             self._maximum_name_length + 2,
+                console_output += '{:.<{}} ({}: {}s)'.format(result.name + " ", self._maximum_name_length + 2,
                                                              result.status, time_taken)
-            if ((self._output_on_failure and (result.status != 'success') and
-                 (result.status != 'skipped')) or (not self._quiet)):
+            if ((self._output_on_failure and (result.status != 'success') and (result.status != 'skipped'))
+                    or (not self._quiet)):
                 nstars = 80
                 console_output += '\n' + ('*' * nstars) + '\n'
                 print_list = [
-                    'test_name', 'filename', 'test_date', 'host_name', 'environment', 'status',
-                    'time_taken', 'memory footprint increase', 'output', 'err'
+                    'test_name', 'filename', 'test_date', 'host_name', 'environment', 'status', 'time_taken',
+                    'memory footprint increase', 'output', 'err'
                 ]
                 for key in print_list:
                     key_not_found = True
@@ -642,11 +634,7 @@ class TestRunner(object):
 
     def spawnSubProcess(self, cmd):
         '''Spawn a new process and run the given command within it'''
-        proc = subprocess.Popen(cmd,
-                                shell=True,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT,
-                                bufsize=-1)
+        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=-1)
         std_out, _ = proc.communicate()
         return proc.returncode, std_out
 
@@ -739,8 +727,7 @@ class TestSuite(object):
 
     def execute(self, runner, exclude_in_pr_builds):
         if self._test_cls_name is not None:
-            script = TestScript(self._test_dir, self._modname, self._test_cls_name,
-                                exclude_in_pr_builds)
+            script = TestScript(self._test_dir, self._modname, self._test_cls_name, exclude_in_pr_builds)
             # Start the new process and wait until it finishes
             retcode, output = runner.start(script)
         else:
@@ -967,8 +954,7 @@ class TestManager(object):
                                 # has been found
                                 if not check.search(line[i]):
                                     key = line[i + 1:indx] + ext
-                                    if (key not in files_required_by_test_module[modkey]) and (
-                                            key != ext):
+                                    if (key not in files_required_by_test_module[modkey]) and (key != ext):
                                         files_required_by_test_module[modkey].append(key)
                                         data_file_lock_status[key] = False
                                     break
@@ -1049,8 +1035,7 @@ class TestManager(object):
         loaded, tests = [], []
         for filepath in entries:
             if filepath.endswith('.py'):
-                module_loaded, module_tests = self.loadTestsFromModule(
-                    os.path.join(test_dir, filepath))
+                module_loaded, module_tests = self.loadTestsFromModule(os.path.join(test_dir, filepath))
                 loaded.append(module_loaded)
                 tests.extend(module_tests)
 
@@ -1076,8 +1061,7 @@ class TestManager(object):
                     continue
                 if self.isValidTestClass(value):
                     test_name = key
-                    tests.append(
-                        TestSuite(self._runner.getTestDir(), modname, test_name, filename))
+                    tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
             module_loaded = True
         except Exception:
             print("Error importing module '{}':".format(modname))
@@ -1109,12 +1093,7 @@ class TestManager(object):
 # Class to handle the environment
 #########################################################################
 class MantidFrameworkConfig:
-    def __init__(self,
-                 sourceDir=None,
-                 data_dirs="",
-                 save_dir="",
-                 loglevel='information',
-                 archivesearch=False):
+    def __init__(self, sourceDir=None, data_dirs="", save_dir="", loglevel='information', archivesearch=False):
         self.__sourceDir = self.__locateSourceDir(sourceDir)
 
         # add location of system tests
@@ -1288,14 +1267,12 @@ def using_gsl_v1():
 # and finds the next element that has a 0 value). This aims to have all
 # threads end calculation approximately at the same time.
 #########################################################################
-def testThreadsLoop(mtdconf, options, tests_dict, tests_lock, tests_left, res_array,
-                    stat_dict, total_number_of_tests, maximum_name_length, tests_done,
-                    process_number, lock, required_files_dict, locked_files_dict):
+def testThreadsLoop(mtdconf, options, tests_dict, tests_lock, tests_left, res_array, stat_dict, total_number_of_tests,
+                    maximum_name_length, tests_done, process_number, lock, required_files_dict, locked_files_dict):
     try:
-        testThreadsLoopImpl(mtdconf, options, tests_dict, tests_lock, tests_left,
-                            res_array, stat_dict, total_number_of_tests, maximum_name_length,
-                            tests_done, process_number, lock, required_files_dict,
-                            locked_files_dict)
+        testThreadsLoopImpl(mtdconf, options, tests_dict, tests_lock, tests_left, res_array, stat_dict,
+                            total_number_of_tests, maximum_name_length, tests_done, process_number, lock,
+                            required_files_dict, locked_files_dict)
         exit_code = 0
     except Exception as exc:
         import traceback
@@ -1306,9 +1283,9 @@ def testThreadsLoop(mtdconf, options, tests_dict, tests_lock, tests_left, res_ar
     sys.exit(exit_code)
 
 
-def testThreadsLoopImpl(mtdconf, options, tests_dict, tests_lock, tests_left, res_array,
-                        stat_dict, total_number_of_tests, maximum_name_length, tests_done,
-                        process_number, lock, required_files_dict, locked_files_dict):
+def testThreadsLoopImpl(mtdconf, options, tests_dict, tests_lock, tests_left, res_array, stat_dict,
+                        total_number_of_tests, maximum_name_length, tests_done, process_number, lock,
+                        required_files_dict, locked_files_dict):
     reporter = XmlResultReporter(showSkipped=options.showskipped,
                                  total_number_of_tests=total_number_of_tests,
                                  maximum_name_length=maximum_name_length)

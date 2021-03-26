@@ -38,9 +38,10 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         self.declareProperty(tableprop, "TableWorkspace containing peak profile parameters")
 
         colchoices = ["Value", "FitOrTie", "Min", "Max", "StepSize"]
-        self.declareProperty("Column", "Value", mantid.kernel.StringListValidator(colchoices),
-                             "Column name of the cell to have value updated.  Choices include 'FitOrTie', "
-                             + "'Max', 'Min', 'StepSize' and 'Value'")
+        self.declareProperty(
+            "Column", "Value", mantid.kernel.StringListValidator(colchoices),
+            "Column name of the cell to have value updated.  Choices include 'FitOrTie', " +
+            "'Max', 'Min', 'StepSize' and 'Value'")
 
         rowprop = mantid.kernel.IntArrayProperty("Rows", [])
         self.declareProperty(rowprop, "List of row numbers of the cell to have value updated")
@@ -86,8 +87,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         if colname in colnamedict:
             icolumn = colnamedict[colname]
         else:
-            raise NotImplementedError("Column name %s does not exist in TableWorkspace %s"
-                                      % (colname, tableWS.name()))
+            raise NotImplementedError("Column name %s does not exist in TableWorkspace %s" % (colname, tableWS.name()))
 
         # 3. Set value
         if colname in ["FitOrTie", "Name"]:
@@ -124,7 +124,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
 
         Return: List of row numbers (integer), a negative value might exit to represent a non-existing parameter name
         """
-        rownumbers= []
+        rownumbers = []
 
         # 1. make case insensitive
         parnametofit = parametername.lower()
@@ -189,7 +189,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         colnames = tablews.getColumnNames()
         self.tableColNames = colnames
         colnamedict = {}
-        for ic in range( len(colnames) ):
+        for ic in range(len(colnames)):
             colnamedict[colnames[ic]] = ic
 
         # 2. Check validity of workspace

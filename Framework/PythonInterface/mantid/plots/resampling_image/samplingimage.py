@@ -49,8 +49,7 @@ class SamplingImage(MantidImage):
         self._resize_cid, self._xlim_cid, self._ylim_cid = None, None, None
         self._resample_required = True
         self._full_extent = extent
-        self.orig_shape = (workspace.getDimension(0).getNBins(),
-                           workspace.getDimension(1).getNBins())
+        self.orig_shape = (workspace.getDimension(0).getNBins(), workspace.getDimension(1).getNBins())
         self._xbins, self._ybins = 100, 100
         self.origin = origin
         self._update_maxpooling_option()
@@ -92,8 +91,7 @@ class SamplingImage(MantidImage):
             self._resample_required = True
 
     def _calculate_bins_from_extent(self):
-        bbox = self.get_window_extent().transformed(
-            self.axes.get_figure().dpi_scale_trans.inverted())
+        bbox = self.get_window_extent().transformed(self.axes.get_figure().dpi_scale_trans.inverted())
         dpi = self.axes.get_figure().dpi
         xbins = int(np.ceil(bbox.width * dpi))
         ybins = int(np.ceil(bbox.height * dpi))
@@ -149,8 +147,8 @@ class SamplingImage(MantidImage):
         If the workspace is large, or ragged, we skip this maxpooling step and set the option as False
         """
         axis = self.ws.getAxis(1)
-        self._maxpooling = (self.ws.getNumberHistograms() <= MAX_HISTOGRAMS and axis.isSpectra() and
-                            not self.ws.isRaggedWorkspace())
+        self._maxpooling = (self.ws.getNumberHistograms() <= MAX_HISTOGRAMS and axis.isSpectra()
+                            and not self.ws.isRaggedWorkspace())
 
 
 def imshow_sampling(axes,
@@ -187,10 +185,8 @@ def imshow_sampling(axes,
     kwargs.pop('distribution', None)
 
     if not extent:
-        x0, x1, y0, y1 = (workspace.getDimension(0).getMinimum(),
-                          workspace.getDimension(0).getMaximum(),
-                          workspace.getDimension(1).getMinimum(),
-                          workspace.getDimension(1).getMaximum())
+        x0, x1, y0, y1 = (workspace.getDimension(0).getMinimum(), workspace.getDimension(0).getMaximum(),
+                          workspace.getDimension(1).getMinimum(), workspace.getDimension(1).getMaximum())
         if isinstance(workspace, MatrixWorkspace) and not workspace.isCommonBins():
             # for MatrixWorkspace the x extent obtained from dimension 0 corresponds to the first spectrum
             # this is not correct in case of ragged workspaces, where we need to obtain the global xmin and xmax

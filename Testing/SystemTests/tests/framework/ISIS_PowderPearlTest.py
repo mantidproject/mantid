@@ -129,8 +129,7 @@ class FocusTest(systemtesting.MantidSystemTest):
     def validate(self):
         # check output files as expected
         def generate_error_message(expected_file, output_dir):
-            return "Unable to find {} in {}\nContents={}".format(expected_file, output_dir,
-                                                                 os.listdir(output_dir))
+            return "Unable to find {} in {}\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
 
         def assert_output_file_exists(directory, filename):
             self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
@@ -166,8 +165,12 @@ class FocusLongThenShortTest(systemtesting.MantidSystemTest):
         # Gen vanadium calibration first
         setup_mantid_paths()
         inst_object = setup_inst_object(tt_mode="tt88", focus_mode="Trans")
-        inst_object.focus(run_number=98507, vanadium_normalisation=False, do_absorb_corrections=False,
-                          long_mode=True, perform_attenuation=False, tt_mode="tt70")
+        inst_object.focus(run_number=98507,
+                          vanadium_normalisation=False,
+                          do_absorb_corrections=False,
+                          long_mode=True,
+                          perform_attenuation=False,
+                          tt_mode="tt70")
         self.focus_results = run_focus(inst_object, tt_mode="tt70", subtract_empty=True)
 
         # Make sure that inst settings reverted to the default after focus
@@ -177,8 +180,7 @@ class FocusLongThenShortTest(systemtesting.MantidSystemTest):
     def validate(self):
         # check output files as expected
         def generate_error_message(expected_file, output_dir):
-            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir,
-                                                                  os.listdir(output_dir))
+            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
 
         def assert_output_file_exists(directory, filename):
             self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
@@ -287,9 +289,13 @@ class CreateCalTest(systemtesting.MantidSystemTest):
 
 
 def _gen_required_files():
-    required_run_numbers = ["98472", "98485",  # create_van
-                            "98507", "98472_splined",  # Focus (Si)
-                            "98494"]  # create_cal (Ce)
+    required_run_numbers = [
+        "98472",
+        "98485",  # create_van
+        "98507",
+        "98472_splined",  # Focus (Si)
+        "98494"
+    ]  # create_cal (Ce)
 
     # Generate file names of form "INSTxxxxx.nxs" - PEARL requires 000 padding
     input_files = [os.path.join(input_dir, (inst_name + "000" + number + ".nxs")) for number in required_run_numbers]
@@ -319,17 +325,27 @@ def run_focus(inst_object, tt_mode, subtract_empty):
     original_splined_path = os.path.join(input_dir, splined_file_name)
     shutil.copy(original_splined_path, spline_path)
 
-    return inst_object.focus(run_number=run_number, vanadium_normalisation=True, do_absorb_corrections=False,
-                             perform_attenuation=True, attenuation_file='ZTA',
-                             attenuation_files=[{"name": "ZTA", "path": attenuation_path}], tt_mode=tt_mode,
+    return inst_object.focus(run_number=run_number,
+                             vanadium_normalisation=True,
+                             do_absorb_corrections=False,
+                             perform_attenuation=True,
+                             attenuation_file='ZTA',
+                             attenuation_files=[{
+                                 "name": "ZTA",
+                                 "path": attenuation_path
+                             }],
+                             tt_mode=tt_mode,
                              subtract_empty_instrument=subtract_empty)
 
 
 def run_focus_with_absorb_corrections():
     run_number = 98507
     inst_object = setup_inst_object(tt_mode="tt70", focus_mode="Trans")
-    return inst_object.focus(run_number=run_number, vanadium_normalisation=False, perform_attenuation=False,
-                             do_absorb_corrections=True, long_mode=False)
+    return inst_object.focus(run_number=run_number,
+                             vanadium_normalisation=False,
+                             perform_attenuation=False,
+                             do_absorb_corrections=True,
+                             long_mode=False)
 
 
 def setup_mantid_paths():
@@ -337,8 +353,12 @@ def setup_mantid_paths():
 
 
 def setup_inst_object(tt_mode, focus_mode):
-    inst_obj = Pearl(user_name=user_name, calibration_mapping_file=calibration_map_path, long_mode=False,
-                     calibration_directory=calibration_dir, output_directory=output_dir, tt_mode=tt_mode,
+    inst_obj = Pearl(user_name=user_name,
+                     calibration_mapping_file=calibration_map_path,
+                     long_mode=False,
+                     calibration_directory=calibration_dir,
+                     output_directory=output_dir,
+                     tt_mode=tt_mode,
                      focus_mode=focus_mode)
     return inst_obj
 
@@ -351,4 +371,4 @@ def _try_delete(path):
         else:
             os.remove(path)
     except OSError:
-        print ("Could not delete output file at: ", path)
+        print("Could not delete output file at: ", path)

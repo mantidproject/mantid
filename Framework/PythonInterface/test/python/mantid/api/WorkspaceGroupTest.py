@@ -11,10 +11,13 @@ from mantid.api import mtd, WorkspaceGroup, MatrixWorkspace, AnalysisDataService
 
 
 class WorkspaceGroupTest(unittest.TestCase):
-
     def create_matrix_workspace_in_ADS(self, name):
-        run_algorithm('CreateWorkspace', OutputWorkspace=name,
-                      DataX=[1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+        run_algorithm('CreateWorkspace',
+                      OutputWorkspace=name,
+                      DataX=[1., 2., 3.],
+                      DataY=[2., 3.],
+                      DataE=[2., 3.],
+                      UnitX='TOF')
 
     def create_group_via_GroupWorkspace_algorithm(self):
         self.create_matrix_workspace_in_ADS("First")
@@ -152,10 +155,18 @@ class WorkspaceGroupTest(unittest.TestCase):
         mtd.remove(str(group))
 
     def test_complex_binary_operations_with_group_do_not_leave_temporary_workspaces_in_ADS(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='grouped_1', DataX=[1., 2., 3.], DataY=[2., 3.],
-                      DataE=[2., 3.], UnitX='TOF')
-        run_algorithm('CreateWorkspace', OutputWorkspace='grouped_2', DataX=[1., 2., 3.], DataY=[2., 3.],
-                      DataE=[2., 3.], UnitX='TOF')
+        run_algorithm('CreateWorkspace',
+                      OutputWorkspace='grouped_1',
+                      DataX=[1., 2., 3.],
+                      DataY=[2., 3.],
+                      DataE=[2., 3.],
+                      UnitX='TOF')
+        run_algorithm('CreateWorkspace',
+                      OutputWorkspace='grouped_2',
+                      DataX=[1., 2., 3.],
+                      DataY=[2., 3.],
+                      DataE=[2., 3.],
+                      UnitX='TOF')
         run_algorithm('GroupWorkspaces', InputWorkspaces='grouped_1,grouped_2', OutputWorkspace='grouped')
 
         w1 = (mtd['grouped'] * 0.0) + 1.0

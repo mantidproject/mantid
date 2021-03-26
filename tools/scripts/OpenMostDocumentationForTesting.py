@@ -48,8 +48,7 @@ def open_urls(list_of_urls, delay=1):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument(
-        '-d', '--open-tab-delay', type=int, help="Delay between each new page tab in seconds.", default=1)
+parser.add_argument('-d', '--open-tab-delay', type=int, help="Delay between each new page tab in seconds.", default=1)
 args = parser.parse_args()
 
 all_urls = []
@@ -75,8 +74,7 @@ mantid_kernel_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/ni
                                                "index.html")
 mantid_geometry_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/geometry/"
                                                  "index.html")
-mantid_api_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/api/"
-                                            "index.html")
+mantid_api_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/api/" "index.html")
 # Only one
 mantid_plots_urls = ["http://docs.mantidproject.org/nightly/api/python/mantid/plots/index.html"]
 

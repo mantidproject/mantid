@@ -15,7 +15,6 @@ class ProjectSaveDialogPresenter:
     project they are saving and choose between saving all workspaces or altered
     workspaces only.
     """
-
     def __init__(self, project, conf=None, view=None):
         """
         Create a presenter for the dialog for saving a project.

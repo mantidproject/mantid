@@ -74,9 +74,10 @@ class ProjectRecoveryTest(unittest.TestCase):
                          os.path.join(ConfigService.getAppDataDirectory(), "workbench-recovery"))
         self.assertEqual(self.pr.recovery_directory_hostname,
                          os.path.join(ConfigService.getAppDataDirectory(), "workbench-recovery", socket.gethostname()))
-        self.assertEqual(self.pr.recovery_directory_pid,
-                         os.path.join(ConfigService.getAppDataDirectory(), "workbench-recovery", socket.gethostname(),
-                                      str(os.getpid())))
+        self.assertEqual(
+            self.pr.recovery_directory_pid,
+            os.path.join(ConfigService.getAppDataDirectory(), "workbench-recovery", socket.gethostname(),
+                         str(os.getpid())))
         self.assertEqual(self.pr.recovery_order_workspace_history_file,
                          os.path.join(ConfigService.getAppDataDirectory(), "ordered_recovery.py"))
 
@@ -193,8 +194,8 @@ class ProjectRecoveryTest(unittest.TestCase):
         self.pr._recovery_directory_pid = self.working_directory
         self.pr._remove_directory_and_directory_trees = mock.MagicMock()
 
-        for ii in range(0, self.pr.maximum_num_checkpoints+1):
-            os.mkdir(os.path.join(self.working_directory, "dir"+str(ii)))
+        for ii in range(0, self.pr.maximum_num_checkpoints + 1):
+            os.mkdir(os.path.join(self.working_directory, "dir" + str(ii)))
             time.sleep(0.01)
 
         self.pr.remove_oldest_checkpoints()
@@ -248,8 +249,10 @@ class ProjectRecoveryTest(unittest.TestCase):
 
     def _repair_checkpoints_assertions(self, checkpoint1, checkpoint2, pid, pid2):
         # None of the checkpoints should exist after the call. Thus the PID folder should be deleted and thus ignored.
-        directory_removal_calls = [mock.call(os.path.join(self.pr.recovery_directory_hostname, '200000')),
-                                   mock.call(os.path.join(self.pr.recovery_directory_hostname, "1000000", "check1"))]
+        directory_removal_calls = [
+            mock.call(os.path.join(self.pr.recovery_directory_hostname, '200000')),
+            mock.call(os.path.join(self.pr.recovery_directory_hostname, "1000000", "check1"))
+        ]
 
         self.pr._remove_directory_and_directory_trees.assert_has_calls(directory_removal_calls)
 

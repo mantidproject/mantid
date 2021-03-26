@@ -17,6 +17,7 @@ from mantid.plots._compatability import plotSpectrum
 from mantid.api import AnalysisDataService
 from LargeScaleStructures.data_stitching import DataSet, Stitcher, RangeSelector
 from reduction_gui.reduction.scripter import BaseScriptElement
+
 Ui_Frame, _ = load_ui(__file__, '../../../ui/stitcher.ui')
 
 
@@ -128,6 +129,7 @@ class StitcherWidget(BaseWidget):
         self._content.high_q_combo.insertItem(0, "")
         self.populate_combobox(self._content.high_q_combo)
         self._content.high_q_combo.setEditable(True)
+
         # pylint: disable = no-self-argument
 
         class ShowEventFilter(QObject):
@@ -195,6 +197,7 @@ class StitcherWidget(BaseWidget):
             User requested to select range common to data sets 1 and 2
         """
         if self._low_q_data is not None:
+
             def call_back(minmax):
                 self._content.low_min_edit.setText("%-6.3g" % minmax[0])
                 self._content.low_max_edit.setText("%-6.3g" % minmax[1])
@@ -211,6 +214,7 @@ class StitcherWidget(BaseWidget):
             User requested to select range common to data sets 2 and 3
         """
         if self._medium_q_data is not None:
+
             def call_back(minmax):
                 self._content.medium_min_edit.setText("%-6.3g" % minmax[0])
                 self._content.medium_max_edit.setText("%-6.3g" % minmax[1])
@@ -243,8 +247,7 @@ class StitcherWidget(BaseWidget):
         self._content.high_scale_edit.setText("1.0")
         self._referenceID = 2
 
-    def update_data(self, dataset_control, min_control, max_control,
-                    scale_control):
+    def update_data(self, dataset_control, min_control, max_control, scale_control):
         """
             Update a data set
 
@@ -265,8 +268,9 @@ class StitcherWidget(BaseWidget):
             except (AttributeError, ImportError, NameError, TypeError, ValueError, Warning):
                 data_object = None
                 util.set_valid(dataset_control.lineEdit(), False)
-                QMessageBox.warning(self, "Error loading file",
-                                          "Could not load %s.\nMake sure you pick the XML output from the reduction." % file_in)
+                QMessageBox.warning(
+                    self, "Error loading file",
+                    "Could not load %s.\nMake sure you pick the XML output from the reduction." % file_in)
                 return
             if min_control is not None and max_control is not None \
                     and (len(min_control.text()) == 0 or len(max_control.text()) == 0):
@@ -293,30 +297,23 @@ class StitcherWidget(BaseWidget):
         """
             Update Low-Q data set
         """
-        self._low_q_data = self.update_data(self._content.low_q_combo,
-                                            self._content.low_min_edit,
-                                            self._content.low_max_edit,
-                                            self._content.low_scale_edit)
+        self._low_q_data = self.update_data(self._content.low_q_combo, self._content.low_min_edit,
+                                            self._content.low_max_edit, self._content.low_scale_edit)
         self._low_q_modified = False
 
     def _update_medium_q(self, _ws=None):
         """
             Update Medium-Q data set
         """
-        self._medium_q_data = self.update_data(self._content.medium_q_combo,
-                                               self._content.medium_min_edit,
-                                               self._content.medium_max_edit,
-                                               self._content.medium_scale_edit)
+        self._medium_q_data = self.update_data(self._content.medium_q_combo, self._content.medium_min_edit,
+                                               self._content.medium_max_edit, self._content.medium_scale_edit)
         self._medium_q_modified = False
 
     def _update_high_q(self, _ws=None):
         """
             Update High-Q data set
         """
-        self._high_q_data = self.update_data(self._content.high_q_combo,
-                                             None,
-                                             None,
-                                             self._content.high_scale_edit)
+        self._high_q_data = self.update_data(self._content.high_q_combo, None, None, self._content.high_scale_edit)
         self._high_q_modified = False
 
         file_in = str(self._content.high_q_combo.lineEdit().text())
@@ -329,8 +326,9 @@ class StitcherWidget(BaseWidget):
             except (AttributeError, ImportError, NameError, TypeError, ValueError, Warning):
                 self._high_q_data = None
                 util.set_valid(self._content.high_q_combo.lineEdit(), False)
-                QMessageBox.warning(self, "Error loading file",
-                                          "Could not load %s.\nMake sure you pick the XML output from the reduction." % file_in)
+                QMessageBox.warning(
+                    self, "Error loading file",
+                    "Could not load %s.\nMake sure you pick the XML output from the reduction." % file_in)
                 return
             self._content.high_scale_edit.setText("1.0")
             util.set_valid(self._content.high_q_combo.lineEdit(), True)
@@ -347,7 +345,7 @@ class StitcherWidget(BaseWidget):
             self._output_dir = os.path.expanduser("~")
         FileName = QFileDialog.getOpenFileName(self, title, self._output_dir,
                                                "Reduced txt files (*.txt);; All files (*)")
-        if isinstance(FileName,tuple):
+        if isinstance(FileName, tuple):
             FileName = FileName[0]
         fname = QFileInfo(FileName).filePath()
         if fname:
@@ -498,9 +496,7 @@ class StitcherWidget(BaseWidget):
         if self._stitcher is not None:
             if not os.path.isdir(self._output_dir):
                 self._output_dir = os.path.expanduser("~")
-            fname = QFileDialog.getSaveFileName(self, "Save combined I(Q)",
-                                                      self._output_dir,
-                                                      "Data Files (*.xml)")
+            fname = QFileDialog.getSaveFileName(self, "Save combined I(Q)", self._output_dir, "Data Files (*.xml)")
             if not fname:
                 return
             if isinstance(fname, tuple):

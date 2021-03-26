@@ -10,31 +10,29 @@ from qtpy import QtCore, QtWidgets
 from mantidqt.utils.observer_pattern import GenericObservable
 
 if is_pyqt5():
-    from matplotlib.backends.backend_qt5agg import (
-        NavigationToolbar2QT as NavigationToolbar)
+    from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
 else:
-    from matplotlib.backends.backend_qt4agg import (
-        NavigationToolbar2QT as NavigationToolbar)
+    from matplotlib.backends.backend_qt4agg import (NavigationToolbar2QT as NavigationToolbar)
 
 
 class PlotToolbar(NavigationToolbar):
-
     def __init__(self, figure_canvas, parent=None):
-        self.toolitems = (('Home', 'Reset original view', 'mdi.home', 'home'),
-                          ('Back', 'Back to previous view', 'mdi.arrow-left', 'back'),
-                          ('Forward', 'Forward to next view', 'mdi.arrow-right', 'forward'),
-                          (None, None, None, None),
-                          ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan'),
-                          ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom'),
-                          (None, None, None, None),
-                          ('Show major','Show major gridlines','mdi.grid-large','show_major_gridlines'),
-                          ('Show minor','Show minor gridlines','mdi.grid','show_minor_gridlines' ),
-                          (None, None, None, None),
-                          ('Subplots', 'Edit subplots', 'mdi.settings', 'configure_subplots'),
-                          ('Save', 'Save the figure', 'mdi.content-save', 'save_figure'),
-                          (None, None, None, None),
-                          ('Show/hide legend', 'Toggles the legend on/off', None, 'toggle_legend'),
-                          )
+        self.toolitems = (
+            ('Home', 'Reset original view', 'mdi.home', 'home'),
+            ('Back', 'Back to previous view', 'mdi.arrow-left', 'back'),
+            ('Forward', 'Forward to next view', 'mdi.arrow-right', 'forward'),
+            (None, None, None, None),
+            ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan'),
+            ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom'),
+            (None, None, None, None),
+            ('Show major', 'Show major gridlines', 'mdi.grid-large', 'show_major_gridlines'),
+            ('Show minor', 'Show minor gridlines', 'mdi.grid', 'show_minor_gridlines'),
+            (None, None, None, None),
+            ('Subplots', 'Edit subplots', 'mdi.settings', 'configure_subplots'),
+            ('Save', 'Save the figure', 'mdi.content-save', 'save_figure'),
+            (None, None, None, None),
+            ('Show/hide legend', 'Toggles the legend on/off', None, 'toggle_legend'),
+        )
         self.is_major_grid_on = False
         self.is_minor_grid_on = False
         NavigationToolbar.__init__(self, figure_canvas, parent=parent)
@@ -59,8 +57,9 @@ class PlotToolbar(NavigationToolbar):
         if self.coordinates:
             self.locLabel = QtWidgets.QLabel("", self)
             self.locLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTop)
-            self.locLabel.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
-                                                                                    QtWidgets.QSizePolicy.Ignored)))
+            self.locLabel.setSizePolicy(
+                QtWidgets.QSizePolicy(
+                    QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Ignored)))
             labelAction = self.addWidget(self.locLabel)
             labelAction.setVisible(True)
 
@@ -82,7 +81,7 @@ class PlotToolbar(NavigationToolbar):
             self.is_major_grid_on = False
         else:
             for ax in self.canvas.figure.get_axes():
-                ax.grid(True , color='black')
+                ax.grid(True, color='black')
             self.is_major_grid_on = True
         self.canvas.draw()
 
@@ -121,10 +120,8 @@ class PlotToolbar(NavigationToolbar):
             self.mode = ''
 
         if self._active:
-            self._idPress = self.canvas.mpl_connect('button_press_event',
-                                                    self.press_zoom)
-            self._idRelease = self.canvas.mpl_connect('button_release_event',
-                                                      self.release_zoom)
+            self._idPress = self.canvas.mpl_connect('button_press_event', self.press_zoom)
+            self._idRelease = self.canvas.mpl_connect('button_release_event', self.release_zoom)
             self.mode = 'zoom rect'
             self.canvas.widgetlock(self)
         else:
@@ -156,10 +153,8 @@ class PlotToolbar(NavigationToolbar):
             self.mode = ''
 
         if self._active:
-            self._idPress = self.canvas.mpl_connect(
-                'button_press_event', self.press_pan)
-            self._idRelease = self.canvas.mpl_connect(
-                'button_release_event', self.release_pan)
+            self._idPress = self.canvas.mpl_connect('button_press_event', self.press_pan)
+            self._idRelease = self.canvas.mpl_connect('button_release_event', self.release_pan)
             self.mode = 'pan/zoom'
             self.canvas.widgetlock(self)
         else:

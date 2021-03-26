@@ -32,8 +32,7 @@ class MedianBinWidth(PythonAlgorithm):
         '''
         Return algorithm's summary.
         '''
-        return ("Calculates the average of workspace's histograms'"
-                " median bin widths.")
+        return ("Calculates the average of workspace's histograms'" " median bin widths.")
 
     def version(self):
         '''
@@ -45,12 +44,11 @@ class MedianBinWidth(PythonAlgorithm):
         '''
         Declares algorithm's properties.
         '''
-        self.declareProperty(
-            MatrixWorkspaceProperty(name=self._PROP_INPUT_WS,
-                                    defaultValue='',
-                                    validator=HistogramValidator(),
-                                    direction=Direction.Input),
-            doc='The workspace containing the input data')
+        self.declareProperty(MatrixWorkspaceProperty(name=self._PROP_INPUT_WS,
+                                                     defaultValue='',
+                                                     validator=HistogramValidator(),
+                                                     direction=Direction.Input),
+                             doc='The workspace containing the input data')
         roundinghelper.declare_rounding_property(self)
         self.declareProperty(self._PROP_BIN_WIDTH,
                              defaultValue=0.0,
@@ -62,8 +60,7 @@ class MedianBinWidth(PythonAlgorithm):
         Averages the median bin widths of the input workspace.
         '''
         inputWs = self.getProperty(self._PROP_INPUT_WS).value
-        roundingMode = self.getProperty(
-            roundinghelper.PROP_NAME_ROUNDING_MODE).value
+        roundingMode = self.getProperty(roundinghelper.PROP_NAME_ROUNDING_MODE).value
         xs = inputWs.extractX()
         dxs = numpy.diff(xs)
         medians = numpy.median(dxs, axis=1)

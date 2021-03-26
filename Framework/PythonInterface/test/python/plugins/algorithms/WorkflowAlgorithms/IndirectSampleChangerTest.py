@@ -19,7 +19,6 @@ def get_ads_workspace(workspace_name):
 
 
 class IndirectSampleChangerTest(unittest.TestCase):
-
     def setUp(self):
         self._first_run = 72462
         self._last_run = 72465
@@ -80,24 +79,45 @@ class IndirectSampleChangerTest(unittest.TestCase):
         self.assertEqual(round(msd_ws.readY(1)[2], 7), 0.5845778)
 
     def test_that_IndirectSampleChanger_will_raise_an_error_when_given_run_numbers_in_the_wrong_order(self):
-        self.assertRaises(RuntimeError, IndirectSampleChanger,
-                          FirstRun=self._last_run, LastRun=self._first_run, NumberSamples=self._number_samples,
-                          Instrument=self._instrument, Analyser=self._analyser, Reflection=self._reflection,
-                          SpectraRange=self._spectra_range, ElasticRange=self._elastic_range,
-                          InelasticRange=self._inelastic_range, TotalRange=self._total_range)
+        self.assertRaises(RuntimeError,
+                          IndirectSampleChanger,
+                          FirstRun=self._last_run,
+                          LastRun=self._first_run,
+                          NumberSamples=self._number_samples,
+                          Instrument=self._instrument,
+                          Analyser=self._analyser,
+                          Reflection=self._reflection,
+                          SpectraRange=self._spectra_range,
+                          ElasticRange=self._elastic_range,
+                          InelasticRange=self._inelastic_range,
+                          TotalRange=self._total_range)
 
     def test_that_IndirectSampleChanger_will_raise_an_error_when_given_more_samples_tan_runs(self):
-        self.assertRaises(RuntimeError, IndirectSampleChanger,
-                          FirstRun=self._first_run, LastRun=self._last_run, NumberSamples=5, Instrument=self._instrument,
-                          Analyser=self._analyser, Reflection=self._reflection, SpectraRange=self._spectra_range,
-                          ElasticRange=self._elastic_range, InelasticRange=self._inelastic_range,
+        self.assertRaises(RuntimeError,
+                          IndirectSampleChanger,
+                          FirstRun=self._first_run,
+                          LastRun=self._last_run,
+                          NumberSamples=5,
+                          Instrument=self._instrument,
+                          Analyser=self._analyser,
+                          Reflection=self._reflection,
+                          SpectraRange=self._spectra_range,
+                          ElasticRange=self._elastic_range,
+                          InelasticRange=self._inelastic_range,
                           TotalRange=self._total_range)
 
     def _execute_IndirectSampleChanger(self):
-        IndirectSampleChanger(FirstRun=self._first_run, LastRun=self._last_run, NumberSamples=self._number_samples,
-                              Instrument=self._instrument, Analyser=self._analyser, Reflection=self._reflection,
-                              SpectraRange=self._spectra_range, ElasticRange=self._elastic_range,
-                              InelasticRange=self._inelastic_range, TotalRange=self._total_range, MSDFit=self._msd_fit,
+        IndirectSampleChanger(FirstRun=self._first_run,
+                              LastRun=self._last_run,
+                              NumberSamples=self._number_samples,
+                              Instrument=self._instrument,
+                              Analyser=self._analyser,
+                              Reflection=self._reflection,
+                              SpectraRange=self._spectra_range,
+                              ElasticRange=self._elastic_range,
+                              InelasticRange=self._inelastic_range,
+                              TotalRange=self._total_range,
+                              MSDFit=self._msd_fit,
                               WidthFit=self._width_fit)
 
 

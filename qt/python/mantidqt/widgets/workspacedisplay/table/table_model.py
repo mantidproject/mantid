@@ -116,8 +116,7 @@ class TableModel(QAbstractTableModel):
     def _update_row_batch_size(self):
         num_data_columns = self._data_model.get_number_of_columns()
         if num_data_columns > 0:
-            self._row_batch_size = max(int(BATCH_SIZE/num_data_columns),
-                                       MINIMUM_BATCH_SIZE_ROWS)
+            self._row_batch_size = max(int(BATCH_SIZE / num_data_columns), MINIMUM_BATCH_SIZE_ROWS)
         else:
             self._row_batch_size = MINIMUM_BATCH_SIZE_ROWS
 

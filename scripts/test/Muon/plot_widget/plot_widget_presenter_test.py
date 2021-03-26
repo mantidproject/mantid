@@ -20,14 +20,12 @@ from mantid import AnalysisDataService
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateWorkspace
 
-workspace_list = ['MUSR62260; Group; bottom; Asymmetry; MA',
-                  'MUSR62261; Group; bottom; Asymmetry; MA']
+workspace_list = ['MUSR62260; Group; bottom; Asymmetry; MA', 'MUSR62261; Group; bottom; Asymmetry; MA']
 indices = [0, 0]
 
 
 @start_qapplication
 class PlotWidgetPresenterCommonTest(unittest.TestCase):
-
     def setUp(self):
         self.context = mock.MagicMock()
         self.model = mock.Mock(spec=PlotWidgetModel)
@@ -44,7 +42,9 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
 
         self.model.get_workspace_list_and_indices_to_plot.return_value = [workspace_list, indices]
 
-        self.presenter = PlotWidgetPresenterCommon(view=self.view, model=self.model, context=self.context,
+        self.presenter = PlotWidgetPresenterCommon(view=self.view,
+                                                   model=self.model,
+                                                   context=self.context,
                                                    figure_presenter=self.figure_presenter,
                                                    get_selected_fit_workspaces=self.get_selected_fit_workspaces(),
                                                    external_plotting_view=self.external_plotting_view,
@@ -66,7 +66,8 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
 
         self.figure_presenter.plot_workspaces.assert_called_once_with(workspace_list,
                                                                       indices,
-                                                                      hold_on=autoscale, autoscale=hold_on)
+                                                                      hold_on=autoscale,
+                                                                      autoscale=hold_on)
 
     def test_plot_selected_calls_model_correctly(self):
         self.view.is_raw_plot.return_value = True
@@ -131,8 +132,7 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         self.model.counts_plot = "Counts"
         self.presenter.handle_plot_type_changed()
 
-        self.view.warning_popup.assert_called_once_with(
-            'Pair workspaces have no counts workspace, plotting Asymmetry')
+        self.view.warning_popup.assert_called_once_with('Pair workspaces have no counts workspace, plotting Asymmetry')
         self.figure_presenter.plot_workspaces.assert_not_called()
         self.model.get_workspace_list_and_indices_to_plot.assert_not_called()
 
@@ -183,11 +183,11 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
 
         self.presenter.handle_use_raw_workspaces_changed()
 
-        self.model.get_workspace_list_and_indices_to_plot.assert_called_once_with(False,
-                                                                                  "Asymmetry")
+        self.model.get_workspace_list_and_indices_to_plot.assert_called_once_with(False, "Asymmetry")
         self.figure_presenter.plot_workspaces.assert_called_once_with(workspace_list,
                                                                       indices,
-                                                                      hold_on=False, autoscale=False)
+                                                                      hold_on=False,
+                                                                      autoscale=False)
 
     def test_group_added_to_analysis_correctly_calls_plot(self):
         group_name = "fwd"
@@ -198,11 +198,13 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
 
         self.presenter.handle_added_group_or_pair_to_plot(group_name)
 
-        self.model.get_workspace_and_indices_for_group_or_pair.assert_called_once_with(group_name, is_raw=True,
+        self.model.get_workspace_and_indices_for_group_or_pair.assert_called_once_with(group_name,
+                                                                                       is_raw=True,
                                                                                        plot_type="Asymmetry")
 
-        self.figure_presenter.plot_workspaces.assert_called_once_with([workspace_list[0]],
-                                                                      [0], hold_on=True, autoscale=False)
+        self.figure_presenter.plot_workspaces.assert_called_once_with([workspace_list[0]], [0],
+                                                                      hold_on=True,
+                                                                      autoscale=False)
 
     def test_group_added_to_analysis_correctly_sets_up_new_tiled_plot_if_tiled_by_group(self):
         group_name = "fwd"
@@ -225,7 +227,8 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
 
         self.presenter.handle_removed_group_or_pair_to_plot(group_name)
 
-        self.model.get_workspace_and_indices_for_group_or_pair.assert_called_once_with(group_name, is_raw=True,
+        self.model.get_workspace_and_indices_for_group_or_pair.assert_called_once_with(group_name,
+                                                                                       is_raw=True,
                                                                                        plot_type="Asymmetry")
         self.figure_presenter.remove_workspace_names_from_plot.assert_called_with([workspace_list[0]])
 
@@ -248,8 +251,7 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         self.figure_presenter.create_single_plot.assert_called_once()
 
     def test_handle_plot_selected_fits_correctly_calls_plot(self):
-        fit = FitInformation(mock.MagicMock(), 'GaussOsc',
-                             ['MUSR62260; Group; bottom; Asymmetry; MA'],
+        fit = FitInformation(mock.MagicMock(), 'GaussOsc', ['MUSR62260; Group; bottom; Asymmetry; MA'],
                              ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
 
         self.model.get_fit_workspace_and_indices.return_value = [["MUSR62260; Group; bottom; Asymmetry; MA; Fitted"],
@@ -262,12 +264,13 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
 
         self.presenter.handle_plot_selected_fits([fit_information])
 
-        self.figure_presenter.plot_workspaces.assert_called_once_with(expected_workspace_list, expected_indices,
-                                                                      hold_on=False, autoscale=False)
+        self.figure_presenter.plot_workspaces.assert_called_once_with(expected_workspace_list,
+                                                                      expected_indices,
+                                                                      hold_on=False,
+                                                                      autoscale=False)
 
     def test_handle_plot_selected_fits_correctly_calls_model(self):
-        fit = FitInformation(mock.MagicMock(), 'GaussOsc',
-                             ['MUSR62260; Group; bottom; Asymmetry; MA'],
+        fit = FitInformation(mock.MagicMock(), 'GaussOsc', ['MUSR62260; Group; bottom; Asymmetry; MA'],
                              ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted'])
 
         self.model.get_fit_workspace_and_indices.return_value = [["MUSR62260; Group; bottom; Asymmetry; MA; Fitted"],

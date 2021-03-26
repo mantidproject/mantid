@@ -11,7 +11,6 @@ import numpy as np
 
 
 class CombGaussLorentzKT(IFunction1D):
-
     def category(self):
         return "Muon\\MuonGeneric"
 
@@ -24,7 +23,8 @@ class CombGaussLorentzKT(IFunction1D):
         A0 = self.getParameterValue("A0")
         Lambda = self.getParameterValue("Lambda")
         Sigma = self.getParameterValue("Sigma")
-        return A0 * ((1./3.) + (2./3.) * (1.-(Sigma * x) ** 2 - Lambda * x) * np.exp(-0.5*(Sigma * x) ** 2-Lambda * x))
+        return A0 * ((1. / 3.) + (2. / 3.) * (1. - (Sigma * x)**2 - Lambda * x) * np.exp(-0.5 *
+                                                                                         (Sigma * x)**2 - Lambda * x))
 
 
 FunctionFactory.subscribe(CombGaussLorentzKT)

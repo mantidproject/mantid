@@ -16,7 +16,6 @@ from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
 
 
 class PlotSelectorModelTest(unittest.TestCase):
-
     def side_effect_manager(self, plot_number):
         if plot_number == 42:
             return self.figure_manager

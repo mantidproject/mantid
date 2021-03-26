@@ -18,7 +18,6 @@ class PeaksWorkspaceSelectorModel():
     """Data model for selecting PeaksWorkspaces from an object capable of providing
     a access to the available list of workspaces.
     """
-
     def __init__(self, workspace_provider, checked_names=None):
         """
         :param workspace_provider: An object allowing access to available workspaces
@@ -51,7 +50,6 @@ class PeaksWorkspaceSelectorPresenter():
     """Present the list of available PeaksWorkspaces to the user and allow them
     to select them.
     """
-
     def __init__(self, view, model):
         """
         :param view: A view to present the information in the model

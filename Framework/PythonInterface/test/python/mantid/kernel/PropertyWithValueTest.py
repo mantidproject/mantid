@@ -45,12 +45,7 @@ class PropertyWithValueTest(unittest.TestCase):
 
     def test_getproperty_value_returns_derived_type(self):
         data = [1.0, 2.0, 3.0]
-        alg = run_algorithm('CreateWorkspace',
-                            DataX=data,
-                            DataY=data,
-                            NSpec=1,
-                            UnitX='Wavelength',
-                            child=True)
+        alg = run_algorithm('CreateWorkspace', DataX=data, DataY=data, NSpec=1, UnitX='Wavelength', child=True)
         wksp = alg.getProperty("OutputWorkspace").value
         self.assertTrue(isinstance(wksp, MatrixWorkspace))
 
@@ -137,8 +132,7 @@ class PropertyWithValueTest(unittest.TestCase):
 
     def test_set_property_raises_type_error_when_a_list_contains_multiple_types(self):
         values = [2, 3, 4.0, 5, 6]
-        self.assertRaises(TypeError, self._mask_dets.setProperty, "WorkspaceIndexList",
-                          values)  #size_t
+        self.assertRaises(TypeError, self._mask_dets.setProperty, "WorkspaceIndexList", values)  #size_t
 
     def test_set_property_of_vector_double_succeeds_with_numpy_array_of_float_type(self):
         self._do_vector_double_numpy_test()

@@ -39,9 +39,7 @@ class AdvancedSetupWidget(BaseWidget):
             """
             def __init__(self, parent=None):
                 QFrame.__init__(self, parent)
-                self.ui = load_ui(__file__,
-                                  '../../../ui/diffraction/diffraction_adv_setup.ui',
-                                  baseinstance=self)
+                self.ui = load_ui(__file__, '../../../ui/diffraction/diffraction_adv_setup.ui', baseinstance=self)
 
         self._content = AdvancedSetFrame(self)
         self._layout.addWidget(self._content)
@@ -130,8 +128,7 @@ class AdvancedSetupWidget(BaseWidget):
         # Handler for events
         # TODO - Need to add an event handler for the change of instrument and facility
 
-        self._content.material_help_button.clicked.connect(
-            functools.partial(self._show_concept_help, "Materials"))
+        self._content.material_help_button.clicked.connect(functools.partial(self._show_concept_help, "Materials"))
         self._content.absorption_help_button.clicked.connect(
             functools.partial(self._show_concept_help, "AbsorptionAndMultipleScattering"))
 
@@ -149,8 +146,8 @@ class AdvancedSetupWidget(BaseWidget):
             @param state: RunSetupScript object
         """
 
-        self._content.pushdatapos_combo.setCurrentIndex(
-            self._content.pushdatapos_combo.findText(state.pushdatapositive))
+        self._content.pushdatapos_combo.setCurrentIndex(self._content.pushdatapos_combo.findText(
+            state.pushdatapositive))
         self._content.unwrap_edit.setText(str(state.unwrapref))
         self._content.lowres_edit.setText(str(state.lowresref))
         self._content.removepromptwidth_edit.setText(str(state.removepropmppulsewidth))
@@ -250,16 +247,13 @@ class AdvancedSetupWidget(BaseWidget):
         class HelpDialog(QDialog):
             def __init__(self, parent=None):
                 QDialog.__init__(self, parent)
-                self.ui = load_ui(__file__,
-                                  '../../../ui/diffraction/diffraction_info.ui',
-                                  baseinstance=self)
+                self.ui = load_ui(__file__, '../../../ui/diffraction/diffraction_info.ui', baseinstance=self)
 
         dialog = HelpDialog(self)
         dialog.exec_()
 
     def _show_concept_help(self, concept):
-        InterfaceManager().showHelpPage('qthelp://org.sphinx.mantidproject/doc/'
-                                        f'concepts/{concept}.html')
+        InterfaceManager().showHelpPage('qthelp://org.sphinx.mantidproject/doc/' f'concepts/{concept}.html')
 
     def _syncStripVanPeakWidgets(self, stripvanpeak):
         """ Synchronize the other widgets with vanadium peak
@@ -274,14 +268,13 @@ class AdvancedSetupWidget(BaseWidget):
             self._content.sampleformula_edit.setToolTip("")
             self._content.sampleformula_edit.setStyleSheet("QLineEdit{}")
         except ValueError as e:
-            self._content.sampleformula_edit.setToolTip(
-                str(e).replace("MaterialBuilder::setFormula() - ", ""))
+            self._content.sampleformula_edit.setToolTip(str(e).replace("MaterialBuilder::setFormula() - ", ""))
             self._content.sampleformula_edit.setStyleSheet("QLineEdit{background:salmon;}")
 
     def _calculate_packing_fraction(self):
         try:
-            self._content.packingfraction_edit.setText('{:.5f}'.format(MaterialBuilder().setFormula(
-                self._content.sampleformula_edit.text()).setNumberDensity(
+            self._content.packingfraction_edit.setText('{:.5f}'.format(
+                MaterialBuilder().setFormula(self._content.sampleformula_edit.text()).setNumberDensity(
                     float(self._content.numberdensity_edit.text())).setMassDensity(
                         float(self._content.massdensity_edit.text())).build().packingFraction))
         except ValueError:  # boost.python.ArgumentError are not catchable

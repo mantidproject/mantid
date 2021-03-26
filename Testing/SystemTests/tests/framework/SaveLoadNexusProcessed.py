@@ -59,26 +59,28 @@ class SaveLoadNexusProcessedTestBase(systemtesting.MantidSystemTest, metaclass=A
 
 
 class SaveLoadNexusProcessedBasicTest(SaveLoadNexusProcessedTestBase):
-
     def createTestWorkspace(self):
-        CreateSampleWorkspace(OutputWorkspace=self.test_ws_name, Function='Flat background',
-                              BankPixelWidth=1, XMax=15,
-                              BinWidth=0.75, NumBanks=4)
-        MaskBins(InputWorkspace=self.test_ws_name, OutputWorkspace=self.test_ws_name,
-                 XMin=0, XMax=2, SpectraList='0')
-        MaskBins(InputWorkspace=self.test_ws_name, OutputWorkspace=self.test_ws_name,
-                 XMin=0, XMax=1.5, SpectraList='1')
+        CreateSampleWorkspace(OutputWorkspace=self.test_ws_name,
+                              Function='Flat background',
+                              BankPixelWidth=1,
+                              XMax=15,
+                              BinWidth=0.75,
+                              NumBanks=4)
+        MaskBins(InputWorkspace=self.test_ws_name, OutputWorkspace=self.test_ws_name, XMin=0, XMax=2, SpectraList='0')
+        MaskBins(InputWorkspace=self.test_ws_name, OutputWorkspace=self.test_ws_name, XMin=0, XMax=1.5, SpectraList='1')
 
     def savedFilename(self):
         return 'tmp_saveload_nexusprocessed_maskbins'
 
 
 class SaveLoadNexusProcessedMaskWorkspaceTest(SaveLoadNexusProcessedTestBase):
-
     def createTestWorkspace(self):
-        CreateSampleWorkspace(OutputWorkspace=self.test_ws_name, Function='Flat background',
-                              BankPixelWidth=1, XMax=15,
-                              BinWidth=0.75, NumBanks=4)
+        CreateSampleWorkspace(OutputWorkspace=self.test_ws_name,
+                              Function='Flat background',
+                              BankPixelWidth=1,
+                              XMax=15,
+                              BinWidth=0.75,
+                              NumBanks=4)
         MaskDetectors(Workspace=self.test_ws_name, WorkspaceIndexList=[1, 3])
         ExtractMask(InputWorkspace=self.test_ws_name, OutputWorkspace=self.test_ws_name)
 
@@ -92,12 +94,9 @@ class SaveLoadNexusProcessedMaskWorkspaceTest(SaveLoadNexusProcessedTestBase):
 
 
 class SaveLoadNexusProcessedEmptySampleNameTest(SaveLoadNexusProcessedTestBase):
-
     def createTestWorkspace(self):
-        CreateSampleWorkspace(OutputWorkspace=self.test_ws_name,
-                              BankPixelWidth=1, XMax=15.,
-                              BinWidth=15., NumBanks=1)
-        assert(mtd[self.test_ws_name].sample().getName() == '')
+        CreateSampleWorkspace(OutputWorkspace=self.test_ws_name, BankPixelWidth=1, XMax=15., BinWidth=15., NumBanks=1)
+        assert (mtd[self.test_ws_name].sample().getName() == '')
 
     def savedFilename(self):
         return 'tmp_saveload_nexusprocessed_emptysamplename'
@@ -107,7 +106,6 @@ class SaveLoadNexusProcessedEmptySampleNameTest(SaveLoadNexusProcessedTestBase):
 
 
 class SaveLoadNexusProcessedNoDetectorsSpectraNumbersTest(SaveLoadNexusProcessedTestBase):
-
     def createTestWorkspace(self):
         ws = CreateWorkspace([0.], [-1., -2., -3.], NSpec=3, StoreInADS=False)
         ExtractSingleSpectrum(ws, 1, OutputWorkspace=self.test_ws_name)

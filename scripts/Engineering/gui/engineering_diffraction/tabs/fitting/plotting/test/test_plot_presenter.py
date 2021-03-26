@@ -54,9 +54,11 @@ class FittingPlotPresenterTest(unittest.TestCase):
     @mock.patch(dir_path + '.Fit')
     def test_do_sequential_fit(self, mock_fit):
         ws_list = ['ws1', 'ws2']
-        fun_str_list = ['name=Gaussian,Height=11,PeakCentre=30000,Sigma=40',  # initial
-                        'name=Gaussian,Height=10,PeakCentre=35000,Sigma=50',  # fit result of ws1
-                        'name=Gaussian,Height=9,PeakCentre=40000,Sigma=60']  # fit result of ws2
+        fun_str_list = [
+            'name=Gaussian,Height=11,PeakCentre=30000,Sigma=40',  # initial
+            'name=Gaussian,Height=10,PeakCentre=35000,Sigma=50',  # fit result of ws1
+            'name=Gaussian,Height=9,PeakCentre=40000,Sigma=60'
+        ]  # fit result of ws2
         in_fun_str = iter(fun_str_list[0:-1])
         self.view.read_fitprop_from_browser.return_value = {'properties': {'Function': next(in_fun_str)}}
         mock_fit_output = [mock.MagicMock(), mock.MagicMock()]

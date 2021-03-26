@@ -7,7 +7,6 @@
 
 
 class DummyLabelModel(object):
-
     def __init__(self, context, key):
         self._context = context
         self._key = key

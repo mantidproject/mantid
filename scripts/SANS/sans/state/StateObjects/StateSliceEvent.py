@@ -14,10 +14,10 @@ from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)
 from sans.common.enums import SANSFacility
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
+
 
 class StateSliceEvent(metaclass=JsonSerializable):
     def __init__(self):
@@ -31,19 +31,20 @@ class StateSliceEvent(metaclass=JsonSerializable):
         is_invalid = dict()
 
         if not is_pure_none_or_not_none([self.start_time, self.end_time]):
-            entry = validation_message("Missing slice times",
-                                       "Makes sure that either both or none are set.",
-                                       {"start_time": self.start_time,
-                                        "end_time": self.end_time})
+            entry = validation_message("Missing slice times", "Makes sure that either both or none are set.", {
+                "start_time": self.start_time,
+                "end_time": self.end_time
+            })
             is_invalid.update(entry)
 
         if self.start_time and self.end_time:
             # The length of start_time and end_time needs to be identical
             if len(self.start_time) != len(self.end_time):
                 entry = validation_message("Bad relation of start and end",
-                                           "Makes sure that the start time is smaller than the end time.",
-                                           {"start_time": self.start_time,
-                                            "end_time": self.end_time})
+                                           "Makes sure that the start time is smaller than the end time.", {
+                                               "start_time": self.start_time,
+                                               "end_time": self.end_time
+                                           })
                 is_invalid.update(entry)
 
             # Each entry in start_time and end_time must be a float
@@ -52,17 +53,19 @@ class StateSliceEvent(metaclass=JsonSerializable):
                     for element1, element2 in zip(self.start_time, self.end_time):
                         if not isinstance(element1, float) or not isinstance(element2, float):
                             entry = validation_message("Bad relation of start and end time entries",
-                                                       "The elements need to be floats.",
-                                                       {"start_time": self.start_time,
-                                                        "end_time": self.end_time})
+                                                       "The elements need to be floats.", {
+                                                           "start_time": self.start_time,
+                                                           "end_time": self.end_time
+                                                       })
                             is_invalid.update(entry)
 
             # Check that end_time is not smaller than start_time
             if not is_smaller(self.start_time, self.end_time):
                 entry = validation_message("Start time larger than end time.",
-                                           "Make sure that the start time is not smaller than the end time.",
-                                           {"start_time": self.start_time,
-                                            "end_time": self.end_time})
+                                           "Make sure that the start time is not smaller than the end time.", {
+                                               "start_time": self.start_time,
+                                               "end_time": self.end_time
+                                           })
                 is_invalid.update(entry)
 
         if is_invalid:

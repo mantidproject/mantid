@@ -13,7 +13,6 @@ import numpy as np
 
 
 class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
-
     def name(self):
         return 'TotScatCalculateSelfScattering  CalculateSelfScatteringCorrection'
 
@@ -33,19 +32,15 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
         return 1
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
-                             doc='Raw workspace.')
+        self.declareProperty(WorkspaceProperty('InputWorkspace', '', direction=Direction.Input), doc='Raw workspace.')
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Focused corrected workspace.')
-        self.declareProperty(FileProperty("CalFileName", "",
-                                          direction=Direction.Input,
-                                          action=FileAction.Load),
+        self.declareProperty(FileProperty("CalFileName", "", direction=Direction.Input, action=FileAction.Load),
                              doc='File path for the instrument calibration file.')
-        self.declareProperty(name='SampleGeometry', defaultValue={},
-                             doc='Geometry of the sample material.')
-        self.declareProperty(name='SampleMaterial', defaultValue={},
-                             doc='Chemical formula for the sample material.')
-        self.declareProperty(name='CrystalDensity', defaultValue=0.0,
+        self.declareProperty(name='SampleGeometry', defaultValue={}, doc='Geometry of the sample material.')
+        self.declareProperty(name='SampleMaterial', defaultValue={}, doc='Chemical formula for the sample material.')
+        self.declareProperty(name='CrystalDensity',
+                             defaultValue=0.0,
                              doc='The crystalographic density of the material.')
 
     def PyExec(self):
@@ -54,9 +49,7 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
         sample_material = self.getPropertyValue('SampleMaterial')
         cal_file_name = self.getPropertyValue('CalFileName')
         crystal_density = self.getPropertyValue('CrystalDensity')
-        SetSample(InputWorkspace=raw_ws,
-                  Geometry=sample_geometry,
-                  Material=sample_material)
+        SetSample(InputWorkspace=raw_ws, Geometry=sample_geometry, Material=sample_material)
         # find the closest monitor to the sample for incident spectrum
         raw_spec_info = raw_ws.spectrumInfo()
         incident_index = None
@@ -95,12 +88,14 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
             grouping = cal_workspace.dataY(i)
             if grouping[0] > 0:
                 n_pixel[int(grouping[0] - 1)] += 1
-        correction_ws = CreateWorkspace(DataY=n_pixel, DataX=[0, 1],
+        correction_ws = CreateWorkspace(DataY=n_pixel,
+                                        DataX=[0, 1],
                                         NSpec=self_scattering_correction.getNumberHistograms())
         self_scattering_correction = Divide(LHSWorkspace=self_scattering_correction, RHSWorkspace=correction_ws)
         ConvertToDistribution(Workspace=self_scattering_correction)
         self_scattering_correction = ConvertUnits(InputWorkspace=self_scattering_correction,
-                                                  Target="MomentumTransfer", EMode='Elastic')
+                                                  Target="MomentumTransfer",
+                                                  EMode='Elastic')
         DeleteWorkspace('cal_workspace_group')
         DeleteWorkspace(correction_ws)
         DeleteWorkspace(fit_spectra)

@@ -21,8 +21,7 @@ import numpy as np
 
 # local imports
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
-from .cursor import (CursorTracker, MoveMouseCursorUp, MoveMouseCursorDown, MoveMouseCursorLeft,
-                     MoveMouseCursorRight)
+from .cursor import (CursorTracker, MoveMouseCursorUp, MoveMouseCursorDown, MoveMouseCursorLeft, MoveMouseCursorRight)
 
 # Limits for X/Y axes
 Limits = Tuple[Tuple[float, float], Tuple[float, float]]
@@ -382,12 +381,8 @@ class RectangleSelectionLinePlot(KeyHandler):
 
         arr, (xmin, xmax, ymin, ymax), (imin, jmin) = cinfo_click
         _, __, (imax, jmax) = cinfo_release
-        plotter.plot_x_line(
-            np.linspace(xmin, xmax, arr.shape[1])[jmin:jmax],
-            np.sum(arr[imin:imax, jmin:jmax], axis=0))
-        plotter.plot_y_line(
-            np.linspace(ymin, ymax, arr.shape[0])[imin:imax],
-            np.sum(arr[imin:imax, jmin:jmax], axis=1))
+        plotter.plot_x_line(np.linspace(xmin, xmax, arr.shape[1])[jmin:jmax], np.sum(arr[imin:imax, jmin:jmax], axis=0))
+        plotter.plot_y_line(np.linspace(ymin, ymax, arr.shape[0])[imin:imax], np.sum(arr[imin:imax, jmin:jmax], axis=1))
         plotter.update_line_plot_limits()
         plotter.redraw()
 

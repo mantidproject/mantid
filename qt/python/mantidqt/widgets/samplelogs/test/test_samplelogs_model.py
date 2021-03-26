@@ -14,7 +14,6 @@ import unittest
 
 
 class SampleLogsModelTest(unittest.TestCase):
-
     def test_model(self):
         ws = Load('ENGINX00228061')
         model = SampleLogsModel(ws)
@@ -51,10 +50,10 @@ class SampleLogsModelTest(unittest.TestCase):
         self.assertEqual(itemModel.horizontalHeaderItem(2).text(), "Value")
         self.assertEqual(itemModel.horizontalHeaderItem(3).text(), "Units")
         self.assertEqual(itemModel.rowCount(), 46)
-        self.assertEqual(itemModel.item(0,0).text(), "C6_MASTER_FREQUENCY")
-        self.assertEqual(itemModel.item(0,1).text(), "float series")
-        self.assertEqual(itemModel.item(0,2).text(), "50.0 (2 entries)")
-        self.assertEqual(itemModel.item(0,3).text(), "Hz")
+        self.assertEqual(itemModel.item(0, 0).text(), "C6_MASTER_FREQUENCY")
+        self.assertEqual(itemModel.item(0, 1).text(), "float series")
+        self.assertEqual(itemModel.item(0, 2).text(), "50.0 (2 entries)")
+        self.assertEqual(itemModel.item(0, 3).text(), "Hz")
 
     def test_model_no_time_series_logs(self):
         #test with some reactor based data without time series logs
@@ -100,10 +99,10 @@ class SampleLogsModelTest(unittest.TestCase):
         self.assertFalse(model.get_is_log_filtered("period"))
         self.assertFalse(model.get_is_log_filtered("current_period"))
 
-        stats = model.get_statistics("raw_uah_log", filtered = True)
-        self.assertAlmostEqual(stats.maximum, 193.333,3)
-        stats = model.get_statistics("raw_uah_log", filtered = False)
-        self.assertAlmostEqual(stats.maximum, 194.296,3)
+        stats = model.get_statistics("raw_uah_log", filtered=True)
+        self.assertAlmostEqual(stats.maximum, 193.333, 3)
+        stats = model.get_statistics("raw_uah_log", filtered=False)
+        self.assertAlmostEqual(stats.maximum, 194.296, 3)
 
         self.assertFalse(model.isMD())
 
@@ -142,15 +141,15 @@ class SampleLogsModelTest(unittest.TestCase):
         self.assertEqual(len(log_names), 48)
         invalid_logs = model.get_logs_with_invalid_data()
         self.assertEqual(2, len(invalid_logs.keys()))
-        self.assertIn('cryo_temp1',invalid_logs.keys())
+        self.assertIn('cryo_temp1', invalid_logs.keys())
         self.assertEqual(1, invalid_logs['cryo_temp1'])
-        self.assertIn('cryo_temp2',invalid_logs.keys())
+        self.assertIn('cryo_temp2', invalid_logs.keys())
         self.assertEqual(-1, invalid_logs['cryo_temp2'])
 
         hidden_logs = model.get_hidden_logs()
         self.assertEqual(2, len(hidden_logs))
-        self.assertIn('cryo_temp1_invalid_values',hidden_logs)
-        self.assertIn('cryo_temp2_invalid_values',hidden_logs)
+        self.assertIn('cryo_temp1_invalid_values', hidden_logs)
+        self.assertIn('cryo_temp2_invalid_values', hidden_logs)
 
     def test_get_value_for_filtered(self):
         # Checks that table values and plot log stats agree, even when filtered.
@@ -165,32 +164,37 @@ class SampleLogsModelTest(unittest.TestCase):
         self.assertEqual(get_value(all_logs[31]), '{} (1 entry)'.format(model.get_statistics('cryo_temp1').maximum))
 
         # Fully invalid log with multiple entries (not affected by filtering)
-        self.assertEqual(get_value(all_logs[33]), '({} entries)'.format(all_logs[32].size())) # cryo_temp2
+        self.assertEqual(get_value(all_logs[33]), '({} entries)'.format(all_logs[32].size()))  # cryo_temp2
 
         # Valid log with one entry filtered by status, with a differently valued entry unfiltered
-        self.assertEqual(get_value(all_logs[16]), '{} (1 entry)'.format(model.get_statistics('C6_SLAVE_FREQUENCY').mean))
-        self.assertEqual(get_value(all_logs[16]), '{} (1 entry)'.format(model.get_statistics('C6_SLAVE_FREQUENCY').maximum))
+        self.assertEqual(get_value(all_logs[16]),
+                         '{} (1 entry)'.format(model.get_statistics('C6_SLAVE_FREQUENCY').mean))
+        self.assertEqual(get_value(all_logs[16]),
+                         '{} (1 entry)'.format(model.get_statistics('C6_SLAVE_FREQUENCY').maximum))
 
         # Valid log with one entry filtered by status, with another same valued entries unfiltered
-        self.assertEqual(get_value(all_logs[25]), '{} (1 entry)'.format(model.get_statistics('SECI_OUT_OF_RANGE_BLOCK').mean))
-        self.assertEqual(get_value(all_logs[25]), '{} (1 entry)'.format(model.get_statistics('SECI_OUT_OF_RANGE_BLOCK').maximum))
+        self.assertEqual(get_value(all_logs[25]),
+                         '{} (1 entry)'.format(model.get_statistics('SECI_OUT_OF_RANGE_BLOCK').mean))
+        self.assertEqual(get_value(all_logs[25]),
+                         '{} (1 entry)'.format(model.get_statistics('SECI_OUT_OF_RANGE_BLOCK').maximum))
 
         # Valid log with 2 identical value entries
         self.assertEqual(get_value(all_logs[21]), '{} (2 entries)'.format(model.get_statistics('C9_SLAVE_PHASE').mean))
-        self.assertEqual(get_value(all_logs[21]), '{} (2 entries)'.format(model.get_statistics('C9_SLAVE_PHASE').maximum))
+        self.assertEqual(get_value(all_logs[21]),
+                         '{} (2 entries)'.format(model.get_statistics('C9_SLAVE_PHASE').maximum))
 
         # Valid log with 4 identical value entries
         self.assertEqual(get_value(all_logs[38]), '{} (4 entries)'.format(model.get_statistics('x').mean))
         self.assertEqual(get_value(all_logs[38]), '{} (4 entries)'.format(model.get_statistics('x').maximum))
 
         # Valid log with multiple different value entries
-        self.assertEqual(get_value(all_logs[29]), '({} entries)'.format(all_logs[29].size())) # cryo_Sample
+        self.assertEqual(get_value(all_logs[29]), '({} entries)'.format(all_logs[29].size()))  # cryo_Sample
 
     def test_get_value_for_unfiltered(self):
         # Checks that filtered_value works for unfiltered logs, e.g. at SNS
 
         ws_T = Load('Training_Exercise3a_SNS.nxs')
-        ws_C = Load('CNCS_7860_event.nxs') # Has no single entries
+        ws_C = Load('CNCS_7860_event.nxs')  # Has no single entries
 
         run_T = ws_T.getRun()
         all_logs_T = run_T.getLogData()
@@ -202,14 +206,17 @@ class SampleLogsModelTest(unittest.TestCase):
 
         # Valid log with one entry
         self.assertEqual(get_value(all_logs_T[2]), '{} (1 entry)'.format(model_T.get_statistics('ChopperStatus1').mean))
-        self.assertEqual(get_value(all_logs_T[2]), '{} (1 entry)'.format(model_T.get_statistics('ChopperStatus1').maximum))
+        self.assertEqual(get_value(all_logs_T[2]),
+                         '{} (1 entry)'.format(model_T.get_statistics('ChopperStatus1').maximum))
 
         # Valid log with 2 identical value entries
-        self.assertEqual(get_value(all_logs_C[2]), '{} (2 entries)'.format(model_C.get_statistics('ChopperStatus1').mean))
-        self.assertEqual(get_value(all_logs_C[2]), '{} (2 entries)'.format(model_C.get_statistics('ChopperStatus1').maximum))
+        self.assertEqual(get_value(all_logs_C[2]),
+                         '{} (2 entries)'.format(model_C.get_statistics('ChopperStatus1').mean))
+        self.assertEqual(get_value(all_logs_C[2]),
+                         '{} (2 entries)'.format(model_C.get_statistics('ChopperStatus1').maximum))
 
         # Valid log with multiple different value entries
-        self.assertEqual(get_value(all_logs_C[13]), '({} entries)'.format(all_logs_C[13].size())) # Phase2
+        self.assertEqual(get_value(all_logs_C[13]), '({} entries)'.format(all_logs_C[13].size()))  # Phase2
 
     def test_filter_logs_with_search_key(self):
         # Checks that the logs are filtered correctly

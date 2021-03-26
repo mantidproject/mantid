@@ -23,8 +23,7 @@ class LoadNMoldyn4Ascii1DTest(unittest.TestCase):
         self.assertTrue(isinstance(workspace, MatrixWorkspace))
         self.assertEqual(workspace.getNumberHistograms(), 1)
         self.assertEqual(workspace.blocksize(), 999)
-        self.assertEqual(str(workspace.getAxis(0).getUnit().unitID()),
-                         'Energy_inWavenumber')
+        self.assertEqual(str(workspace.getAxis(0).getUnit().unitID()), 'Energy_inWavenumber')
 
     def _validate_dos_total_convolution(self, workspace):
         data_y = workspace.readY(0)
@@ -118,6 +117,7 @@ class LoadNMoldyn4Ascii1DTest(unittest.TestCase):
                           LoadNMoldyn4Ascii1D,
                           Directory=self._data_directory,
                           OutputWorkspace='__LoadNMoldyn4Ascii1D_test')
+
 
 if __name__ == '__main__':
     unittest.main()

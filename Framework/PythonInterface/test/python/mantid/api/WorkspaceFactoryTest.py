@@ -5,19 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.api import (WorkspaceFactory, WorkspaceFactoryImpl, MatrixWorkspace,
-                    ITableWorkspace, IPeaksWorkspace)
+from mantid.api import (WorkspaceFactory, WorkspaceFactoryImpl, MatrixWorkspace, ITableWorkspace, IPeaksWorkspace)
 
 
 class WorkspaceFactoryTest(unittest.TestCase):
-
-
     def test_WorkspaceFactory_isinstance_of_WorkspaceFactoryImpl(self):
         self.assertTrue(isinstance(WorkspaceFactory, WorkspaceFactoryImpl))
 
     def _create_clean_workspace(self, nhist, xlength, ylength):
-        return WorkspaceFactory.create("Workspace2D", NVectors=nhist,
-                                       XLength=xlength, YLength=ylength)
+        return WorkspaceFactory.create("Workspace2D", NVectors=nhist, XLength=xlength, YLength=ylength)
 
     def _verify(self, wksp, nhist, xlength, ylength, wsId="Workspace2D"):
         self.assertTrue(isinstance(wksp, MatrixWorkspace))

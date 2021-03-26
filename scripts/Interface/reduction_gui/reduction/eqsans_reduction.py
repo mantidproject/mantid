@@ -27,7 +27,6 @@ class EQSANSReductionScripter(BaseReductionScripter):
         create a reduction script. Parameters are organized by groups that
         will each have their own UI representation.
     """
-
     def __init__(self, name="EQSANS", settings=None):
         super(EQSANSReductionScripter, self).__init__(name=name)
         self._settings = settings
@@ -76,7 +75,7 @@ class EQSANSReductionScripter(BaseReductionScripter):
         data_options = None
         for item in self._observers:
             state = item.state()
-            if state is not None and state.__class__.__name__=="DataSets":
+            if state is not None and state.__class__.__name__ == "DataSets":
                 data_options = state
 
         if data_options is None or data_options.separate_jobs is False:
@@ -99,7 +98,7 @@ class EQSANSReductionScripter(BaseReductionScripter):
 
             for item in self._observers:
                 if item.state() is not None:
-                    if item.state().__class__.__name__=="DataSets":
+                    if item.state().__class__.__name__ == "DataSets":
                         script += item.state().to_script(data_file=data_file)
                     else:
                         script += str(item.state())

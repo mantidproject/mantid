@@ -20,26 +20,27 @@ size = comm.Get_size()
 
 print "Running on rank %d of %d" % (rank, size)
 
-eventfile="../../../../../Test/AutoTestData/CNCS_7860_event.nxs"
-wksp="partial"
-binning="40e3, 100, 70e3"
+eventfile = "../../../../../Test/AutoTestData/CNCS_7860_event.nxs"
+wksp = "partial"
+binning = "40e3, 100, 70e3"
 
 Load(Filename=eventfile, OutputWorkspace=wksp)
 
 # Find which chunk to process
 w = mtd[wksp]
 chunk = w.getNumberHistograms() / size
-startWI = rank*chunk
+startWI = rank * chunk
 endWI = startWI + chunk - 1
 
 # Do some processing (something silly for now)
-SumSpectra(InputWorkspace=wksp, OutputWorkspace=wksp, StartWorkspaceIndex="%d"%startWI, EndWorkspaceIndex="%d"%endWI)
+SumSpectra(InputWorkspace=wksp,
+           OutputWorkspace=wksp,
+           StartWorkspaceIndex="%d" % startWI,
+           EndWorkspaceIndex="%d" % endWI)
 Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
-
 
 # BroadcastWorkspace(InputWorkspace=van,OutputWorkspace="Vanadium",BroadcasterRank=len(runs))
 GatherWorkspaces(InputWorkspace=wksp, OutputWorkspace="total")
 
 if rank == 0:
-    SaveNexus(InputWorkspace="total",Filename="mpi.nxs")
-
+    SaveNexus(InputWorkspace="total", Filename="mpi.nxs")

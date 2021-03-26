@@ -25,8 +25,7 @@ class CompareSampleLogsTest(unittest.TestCase):
     def test_workspaces_different_logs(self):
         wslist = [self.ws1, self.ws2]
         lognames = 'deterota,wavelength,polarisation,flipper,qqq'
-        alg_test = run_algorithm("CompareSampleLogs", InputWorkspaces=wslist, SampleLogs=lognames,
-                                 Tolerance=0.01)
+        alg_test = run_algorithm("CompareSampleLogs", InputWorkspaces=wslist, SampleLogs=lognames, Tolerance=0.01)
         self.assertTrue(alg_test.isExecuted())
         # check for the returned value
         result = alg_test.getProperty('Result').value
@@ -35,8 +34,7 @@ class CompareSampleLogsTest(unittest.TestCase):
     def test_groups_same_logs(self):
         GroupWorkspaces([self.ws1, self.ws2], OutputWorkspace='group')
         lognames = 'wavelength,polarisation'
-        alg_test = run_algorithm("CompareSampleLogs", InputWorkspaces='group', SampleLogs=lognames,
-                                 Tolerance=0.01)
+        alg_test = run_algorithm("CompareSampleLogs", InputWorkspaces='group', SampleLogs=lognames, Tolerance=0.01)
         self.assertTrue(alg_test.isExecuted())
         result = alg_test.getProperty('Result').value
         self.assertEqual('', result)
@@ -45,7 +43,9 @@ class CompareSampleLogsTest(unittest.TestCase):
         AddSampleLog(self.ws1, 'chopper_speed', '14000', 'String')
         AddSampleLog(self.ws2, 'chopper_speed', '14009', 'Number')
         wslist = [self.ws1, self.ws2]
-        alg_test = run_algorithm("CompareSampleLogs", InputWorkspaces=wslist, SampleLogs='chopper_speed',
+        alg_test = run_algorithm("CompareSampleLogs",
+                                 InputWorkspaces=wslist,
+                                 SampleLogs='chopper_speed',
                                  Tolerance=10.0)
         self.assertTrue(alg_test.isExecuted())
         result = alg_test.getProperty('Result').value
@@ -55,7 +55,9 @@ class CompareSampleLogsTest(unittest.TestCase):
         AddSampleLog(self.ws1, 'chopper_speed', '14000.0', 'String')
         AddSampleLog(self.ws2, 'chopper_speed', '1400q', 'String')
         wslist = [self.ws1, self.ws2]
-        alg_test = run_algorithm("CompareSampleLogs", InputWorkspaces=wslist, SampleLogs='chopper_speed',
+        alg_test = run_algorithm("CompareSampleLogs",
+                                 InputWorkspaces=wslist,
+                                 SampleLogs='chopper_speed',
                                  Tolerance=10.0)
         self.assertTrue(alg_test.isExecuted())
         result = alg_test.getProperty('Result').value
@@ -66,6 +68,7 @@ class CompareSampleLogsTest(unittest.TestCase):
             DeleteWorkspace('ws1')
         if AnalysisDataService.doesExist('ws2'):
             DeleteWorkspace('ws2')
+
 
 if __name__ == "__main__":
     unittest.main()

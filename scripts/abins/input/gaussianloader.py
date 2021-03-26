@@ -36,7 +36,10 @@ class GAUSSIANLoader(AbInitioLoader):
 
         data = {}  # container to store read data
 
-        with io.open(self._clerk.get_input_filename(), "rb", ) as gaussian_file:
+        with io.open(
+                self._clerk.get_input_filename(),
+                "rb",
+        ) as gaussian_file:
 
             # create dummy lattice vectors
             self._generates_lattice_vectors(data=data)
@@ -85,8 +88,12 @@ class GAUSSIANLoader(AbInitioLoader):
             z_number = int(entries[1])
             atom = Atom(z_number=z_number)
             coord = np.asarray([float(i) for i in entries[3:6]])
-            atoms["atom_{}".format(atom_indx)] = {"symbol": atom.symbol, "mass": atom.mass, "sort": atom_indx,
-                                                  "coord": coord}
+            atoms["atom_{}".format(atom_indx)] = {
+                "symbol": atom.symbol,
+                "mass": atom.mass,
+                "sort": atom_indx,
+                "coord": coord
+            }
 
             atom_indx += 1
         self.check_isotopes_substitution(atoms=atoms, masses=masses_from_file, approximate=True)

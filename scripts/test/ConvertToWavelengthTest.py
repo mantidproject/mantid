@@ -13,7 +13,6 @@ class ConvertToWavelengthTest(unittest.TestCase):
     """
     Test the convert to wavelength type.
     """
-
     def test_construction_from_single_ws(self):
         ws = CreateWorkspace(DataY=[1, 2, 3], DataX=[1, 2, 3])
         converter = ConvertToWavelength(ws)
@@ -135,9 +134,13 @@ class ConvertToWavelengthTest(unittest.TestCase):
         ws = Load(Filename='INTER00013460')
         converter = ConvertToWavelength(ws)
 
-        monitor_ws, detector_ws = converter.convert(wavelength_min=0.0, wavelength_max=10.0,
-                                                    detector_workspace_indexes=(2, 4), monitor_workspace_index=0,
-                                                    correct_monitor=True, bg_min=2.0, bg_max=8.0)
+        monitor_ws, detector_ws = converter.convert(wavelength_min=0.0,
+                                                    wavelength_max=10.0,
+                                                    detector_workspace_indexes=(2, 4),
+                                                    monitor_workspace_index=0,
+                                                    correct_monitor=True,
+                                                    bg_min=2.0,
+                                                    bg_max=8.0)
 
         self.assertEqual(1, monitor_ws.getNumberHistograms(), "Wrong number of spectra in monitor workspace")
         self.assertEqual(3, detector_ws.getNumberHistograms(), "Wrong number of spectra in detector workspace")

@@ -10,17 +10,13 @@ import systemtesting
 
 
 def load_files():
-    md_workspace = Load(Filename="WISH_md_small.nxs",
-                        OutputWorkspace='md_workspace')
-    main_peaks = Load(Filename="WISH_peak_hkl_small.nxs",
-                      OutputWorkspace='main_peaks')
-    satellite_peaks = Load(Filename="WISH_peak_hkl_frac_small.nxs",
-                           OutputWorkspace='satellite_peaks')
+    md_workspace = Load(Filename="WISH_md_small.nxs", OutputWorkspace='md_workspace')
+    main_peaks = Load(Filename="WISH_peak_hkl_small.nxs", OutputWorkspace='main_peaks')
+    satellite_peaks = Load(Filename="WISH_peak_hkl_frac_small.nxs", OutputWorkspace='satellite_peaks')
     return md_workspace, main_peaks, satellite_peaks
 
 
 class FindSatellitePeaksTestFixedNumQ(systemtesting.MantidSystemTest):
-
     def requiredFiles(self):
         return ["WISH_md_small.nxs", "WISH_peak_hkl_small.nxs", "WISH_peak_hkl_frac_small.nxs"]
 
@@ -36,15 +32,17 @@ class FindSatellitePeaksTestFixedNumQ(systemtesting.MantidSystemTest):
 
         k = 2
 
-        self._satellites_refined = FindSatellitePeaks(NuclearPeaks=main_peaks, SatellitePeaks=satellite_peaks, MDWorkspace=md_workspace,
-                                                      NumOfQs=k, **fixed_params)
+        self._satellites_refined = FindSatellitePeaks(NuclearPeaks=main_peaks,
+                                                      SatellitePeaks=satellite_peaks,
+                                                      MDWorkspace=md_workspace,
+                                                      NumOfQs=k,
+                                                      **fixed_params)
 
     def validate(self):
         return self._satellites_refined.name(), 'refine_satellites_fixed_q_test.nxs'
 
 
 class FindSatellitePeaksTestAutoFindQ(systemtesting.MantidSystemTest):
-
     def requiredFiles(self):
         return ["WISH_md_small.nxs", "WISH_peak_hkl_small.nxs", "WISH_peak_hkl_frac_small.nxs"]
 
@@ -59,8 +57,11 @@ class FindSatellitePeaksTestAutoFindQ(systemtesting.MantidSystemTest):
         }
 
         threshold = 1.0
-        self._satellites_refined = FindSatellitePeaks(NuclearPeaks=main_peaks, SatellitePeaks=satellite_peaks, MDWorkspace=md_workspace,
-                                                      ClusterThreshold=threshold, **fixed_params)
+        self._satellites_refined = FindSatellitePeaks(NuclearPeaks=main_peaks,
+                                                      SatellitePeaks=satellite_peaks,
+                                                      MDWorkspace=md_workspace,
+                                                      ClusterThreshold=threshold,
+                                                      **fixed_params)
 
     def validate(self):
         return self._satellites_refined.name(), 'refine_satellites_auto_q_test.nxs'

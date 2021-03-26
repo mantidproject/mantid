@@ -39,4 +39,4 @@ class SANS2DMultiPeriodSingleTest(systemtesting.MantidSystemTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-        return AnalysisDataService[self.reduced][6].name(),'SANS2DBatch.nxs'
+        return AnalysisDataService[self.reduced][6].name(), 'SANS2DBatch.nxs'

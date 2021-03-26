@@ -55,8 +55,9 @@ class MuonFreqContextTest(unittest.TestCase):
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_IM, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_MOD, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
 
-        self.assertCountEqual(list(self.context._FFT_freq.keys()),
-                              [FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD, FFT_NAME_RE_2, FFT_NAME_RE_MOD])
+        self.assertCountEqual(
+            list(self.context._FFT_freq.keys()),
+            [FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD, FFT_NAME_RE_2, FFT_NAME_RE_MOD])
         self.assertEquals(self.context._FFT_freq[FFT_NAME_COMPLEX_RE].Re_run, "62260")
         self.assertEquals(self.context._FFT_freq[FFT_NAME_COMPLEX_RE].Re, "top")
         self.assertEquals(self.context._FFT_freq[FFT_NAME_COMPLEX_RE].Im, "fwd")
@@ -64,27 +65,36 @@ class MuonFreqContextTest(unittest.TestCase):
 
     def test_get_freq_names_maxEnt(self):
         output = self.context.get_frequency_workspace_names(run_list=[["62260", "62261", "62262"]],
-                                                            group=["fwd", "top"], pair=[],
+                                                            group=["fwd", "top"],
+                                                            pair=[],
                                                             frequency_type="MaxEnt")
         self.assertEquals(output, ["MUSR62260_raw_data FD; MaxEnt"])
 
     def test_get_freq_names_FFT_no_Im_all_parts(self):
-        output = self.context.get_frequency_workspace_names(run_list=[["62260"]], group=["fwd", "top"], pair=[],
+        output = self.context.get_frequency_workspace_names(run_list=[["62260"]],
+                                                            group=["fwd", "top"],
+                                                            pair=[],
                                                             frequency_type="FFT All")
         self.assertCountEqual(output, [FFT_NAME_RE_2, FFT_NAME_RE_MOD])
 
     def test_get_freq_names_FFT_no_Im_Re_parts(self):
-        output = self.context.get_frequency_workspace_names(run_list=[["62260"]], group=["fwd", "top"], pair=[],
+        output = self.context.get_frequency_workspace_names(run_list=[["62260"]],
+                                                            group=["fwd", "top"],
+                                                            pair=[],
                                                             frequency_type="Re")
         self.assertCountEqual(output, [FFT_NAME_RE_2])
 
     def test_get_freq_names_FFT_no_Im_Mod_parts(self):
-        output = self.context.get_frequency_workspace_names(run_list=[["62260"]], group=["fwd", "top"], pair=[],
+        output = self.context.get_frequency_workspace_names(run_list=[["62260"]],
+                                                            group=["fwd", "top"],
+                                                            pair=[],
                                                             frequency_type="Mod")
         self.assertCountEqual(output, [FFT_NAME_RE_MOD])
 
     def test_get_freq_names_FFT_no_Im_Im_parts(self):
-        output = self.context.get_frequency_workspace_names(run_list=[["62260"]], group=["fwd", "top"], pair=[],
+        output = self.context.get_frequency_workspace_names(run_list=[["62260"]],
+                                                            group=["fwd", "top"],
+                                                            pair=[],
                                                             frequency_type="Im")
         self.assertCountEqual(output, [])
 
@@ -93,8 +103,10 @@ class MuonFreqContextTest(unittest.TestCase):
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_IM, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_MOD, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
 
-        output = self.context.get_frequency_workspace_names(run_list=[["62261", "62262"]], group=["fwd", "top"],
-                                                            pair=[], frequency_type="FFT All")
+        output = self.context.get_frequency_workspace_names(run_list=[["62261", "62262"]],
+                                                            group=["fwd", "top"],
+                                                            pair=[],
+                                                            frequency_type="FFT All")
         self.assertCountEqual(output, [FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD])
 
     def test_get_freq_names_FFT_group(self):
@@ -102,7 +114,9 @@ class MuonFreqContextTest(unittest.TestCase):
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_IM, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_MOD, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
 
-        output = self.context.get_frequency_workspace_names(run_list=[["62260"]], group=["top"], pair=[],
+        output = self.context.get_frequency_workspace_names(run_list=[["62260"]],
+                                                            group=["top"],
+                                                            pair=[],
                                                             frequency_type="FFT All")
         self.assertCountEqual(output, [FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD])
 
@@ -111,10 +125,14 @@ class MuonFreqContextTest(unittest.TestCase):
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_IM, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_MOD, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
 
-        output = self.context.get_frequency_workspace_names(run_list=[[62260], [62261]], group=["fwd"], pair=[],
+        output = self.context.get_frequency_workspace_names(run_list=[[62260], [62261]],
+                                                            group=["fwd"],
+                                                            pair=[],
                                                             frequency_type="All")
-        self.assertCountEqual(output, [FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD, FFT_NAME_RE_2,
-                                       FFT_NAME_RE_MOD, "MUSR62260_raw_data FD; MaxEnt"])
+        self.assertCountEqual(output, [
+            FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD, FFT_NAME_RE_2, FFT_NAME_RE_MOD,
+            "MUSR62260_raw_data FD; MaxEnt"
+        ])
 
 
 if __name__ == '__main__':

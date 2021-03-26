@@ -9,7 +9,6 @@
 #
 from mantidqt.utils.qt import import_qt, toQSettings
 
-
 _AlgorithmInputHistory = import_qt('._common', 'mantidqt', 'AlgorithmInputHistory')
 
 

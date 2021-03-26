@@ -15,9 +15,7 @@ from sans.common.enums import (RangeStepType)
 
 def provide_workspace(is_event=True):
     sample_name = "CreateSampleWorkspace"
-    sample_options = {"OutputWorkspace": "dummy",
-                      "NumBanks": 1,
-                      "BankPixelWidth": 2}
+    sample_options = {"OutputWorkspace": "dummy", "NumBanks": 1, "BankPixelWidth": 2}
     if is_event:
         sample_options.update({"WorkspaceType": "Event"})
     else:
@@ -29,20 +27,21 @@ def provide_workspace(is_event=True):
 
 
 class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
 
     def test_that_event_workspace_and_interpolating_rebin_raises(self):
         workspace = provide_workspace(is_event=True)
-        convert_options = {"InputWorkspace": workspace,
-                           "OutputWorkspace": EMPTY_NAME,
-                           "RebinMode": "InterpolatingRebin",
-                           "WavelengthLow": 1.0,
-                           "WavelengthHigh": 3.0,
-                           "WavelengthStep": 1.5,
-                           "WavelengthStepType":  RangeStepType.LIN.value}
+        convert_options = {
+            "InputWorkspace": workspace,
+            "OutputWorkspace": EMPTY_NAME,
+            "RebinMode": "InterpolatingRebin",
+            "WavelengthLow": 1.0,
+            "WavelengthHigh": 3.0,
+            "WavelengthStep": 1.5,
+            "WavelengthStepType": RangeStepType.LIN.value
+        }
         convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
         had_run_time_error = False
         try:
@@ -53,13 +52,15 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
 
     def test_that_negative_wavelength_values_raise(self):
         workspace = provide_workspace(is_event=True)
-        convert_options = {"InputWorkspace": workspace,
-                           "OutputWorkspace": EMPTY_NAME,
-                           "RebinMode": "Rebin",
-                           "WavelengthLow": -1.0,
-                           "WavelengthHigh": 3.0,
-                           "WavelengthStep": 1.5,
-                           "WavelengthStepType":  RangeStepType.LOG.value}
+        convert_options = {
+            "InputWorkspace": workspace,
+            "OutputWorkspace": EMPTY_NAME,
+            "RebinMode": "Rebin",
+            "WavelengthLow": -1.0,
+            "WavelengthHigh": 3.0,
+            "WavelengthStep": 1.5,
+            "WavelengthStepType": RangeStepType.LOG.value
+        }
         convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
         had_run_time_error = False
         try:
@@ -70,13 +71,15 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
 
     def test_that_lower_wavelength_larger_than_higher_wavelength_raises(self):
         workspace = provide_workspace(is_event=True)
-        convert_options = {"InputWorkspace": workspace,
-                           "OutputWorkspace": EMPTY_NAME,
-                           "RebinMode": "Rebin",
-                           "WavelengthLow":  4.0,
-                           "WavelengthHigh": 3.0,
-                           "WavelengthStep": 1.5,
-                           "WavelengthStepType":  RangeStepType.LOG.value}
+        convert_options = {
+            "InputWorkspace": workspace,
+            "OutputWorkspace": EMPTY_NAME,
+            "RebinMode": "Rebin",
+            "WavelengthLow": 4.0,
+            "WavelengthHigh": 3.0,
+            "WavelengthStep": 1.5,
+            "WavelengthStepType": RangeStepType.LOG.value
+        }
         convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
         had_run_time_error = False
         try:
@@ -87,13 +90,15 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
 
     def test_that_event_workspace_with_conversion_is_still_event_workspace(self):
         workspace = provide_workspace(is_event=True)
-        convert_options = {"InputWorkspace": workspace,
-                           "OutputWorkspace": EMPTY_NAME,
-                           "RebinMode": "Rebin",
-                           "WavelengthLow": 1.0,
-                           "WavelengthHigh": 10.0,
-                           "WavelengthStep": 1.0,
-                           "WavelengthStepType": RangeStepType.LIN.value}
+        convert_options = {
+            "InputWorkspace": workspace,
+            "OutputWorkspace": EMPTY_NAME,
+            "RebinMode": "Rebin",
+            "WavelengthLow": 1.0,
+            "WavelengthHigh": 10.0,
+            "WavelengthStep": 1.0,
+            "WavelengthStepType": RangeStepType.LIN.value
+        }
         convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
         convert_alg.execute()
         self.assertTrue(convert_alg.isExecuted())
@@ -101,22 +106,24 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
         self.assertTrue(isinstance(output_workspace, EventWorkspace))
         # Check the rebinning part
         data_x0 = output_workspace.dataX(0)
-        self.assertEqual(len(data_x0),  10)
-        self.assertEqual(data_x0[0],  1.0)
-        self.assertEqual(data_x0[-1],  10.0)
+        self.assertEqual(len(data_x0), 10)
+        self.assertEqual(data_x0[0], 1.0)
+        self.assertEqual(data_x0[-1], 10.0)
         # Check the units part
         axis0 = output_workspace.getAxis(0)
         unit = axis0.getUnit()
-        self.assertEqual(unit.unitID(),  "Wavelength")
+        self.assertEqual(unit.unitID(), "Wavelength")
 
     def test_that_not_setting_upper_bound_takes_it_from_original_value(self):
         workspace = provide_workspace(is_event=True)
-        convert_options = {"InputWorkspace": workspace,
-                           "OutputWorkspace": EMPTY_NAME,
-                           "RebinMode": "Rebin",
-                           "WavelengthLow": 1.0,
-                           "WavelengthStep": 1.0,
-                           "WavelengthStepType": RangeStepType.LIN.value}
+        convert_options = {
+            "InputWorkspace": workspace,
+            "OutputWorkspace": EMPTY_NAME,
+            "RebinMode": "Rebin",
+            "WavelengthLow": 1.0,
+            "WavelengthStep": 1.0,
+            "WavelengthStepType": RangeStepType.LIN.value
+        }
         convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
         convert_alg.execute()
         self.assertTrue(convert_alg.isExecuted())
@@ -125,14 +132,14 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
 
         # Check the rebinning part
         data_x0 = output_workspace.dataX(0)
-        self.assertEqual(data_x0[0],  1.0)
+        self.assertEqual(data_x0[0], 1.0)
         expected_upper_bound = 5.27471197274
-        self.assertEqual(round(data_x0[-1],11), expected_upper_bound)
+        self.assertEqual(round(data_x0[-1], 11), expected_upper_bound)
 
         # Check the units part
         axis0 = output_workspace.getAxis(0)
         unit = axis0.getUnit()
-        self.assertEqual(unit.unitID(),  "Wavelength")
+        self.assertEqual(unit.unitID(), "Wavelength")
 
 
 if __name__ == '__main__':

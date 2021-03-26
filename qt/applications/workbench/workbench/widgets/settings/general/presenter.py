@@ -163,8 +163,10 @@ class GeneralSettings(object):
 
     def load_current_setting_values(self):
         self.view.prompt_save_on_close.setChecked(bool(CONF.get(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value)))
-        self.view.prompt_save_editor_modified.setChecked(bool(CONF.get(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value)))
-        self.view.prompt_deleting_workspaces.setChecked(bool(CONF.get(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value)))
+        self.view.prompt_save_editor_modified.setChecked(
+            bool(CONF.get(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value)))
+        self.view.prompt_deleting_workspaces.setChecked(
+            bool(CONF.get(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value)))
 
         # compare lower-case, because MantidPlot will save it as lower case,
         # but Python will have the bool's first letter capitalised
@@ -172,9 +174,11 @@ class GeneralSettings(object):
         pr_time_between_recovery = int(ConfigService.getString(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value))
         pr_number_checkpoints = int(ConfigService.getString(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value))
         use_notifications_setting = ("on" == ConfigService.getString(GeneralProperties.USE_NOTIFICATIONS.value).lower())
-        crystallography_convention = ("Crystallography" == ConfigService.getString(GeneralProperties.CRYSTALLOGRAPY_CONV.value))
+        crystallography_convention = ("Crystallography" == ConfigService.getString(
+            GeneralProperties.CRYSTALLOGRAPY_CONV.value))
         use_open_gl = ("on" == ConfigService.getString(GeneralProperties.OPENGL.value).lower())
-        invisible_workspaces = ("true" == ConfigService.getString(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value).lower())
+        invisible_workspaces = ("true" == ConfigService.getString(
+            GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value).lower())
 
         self.view.project_recovery_enabled.setChecked(pr_enabled)
         self.view.time_between_recovery.setValue(pr_time_between_recovery)
@@ -194,7 +198,8 @@ class GeneralSettings(object):
         ConfigService.setString(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value, str(value))
 
     def action_crystallography_convention(self, state):
-        ConfigService.setString(GeneralProperties.CRYSTALLOGRAPY_CONV.value, "Crystallography" if state == Qt.Checked else "Inelastic")
+        ConfigService.setString(GeneralProperties.CRYSTALLOGRAPY_CONV.value,
+                                "Crystallography" if state == Qt.Checked else "Inelastic")
 
     def action_instrument_changed(self, new_instrument):
         current_value = ConfigService.getString(GeneralProperties.INSTRUMENT.value)

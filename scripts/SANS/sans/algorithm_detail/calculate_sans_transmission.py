@@ -54,10 +54,14 @@ def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculat
     # 2. Clean transmission data
 
     data_type = DataType(data_type_str)
-    transmission_ws = _get_corrected_wavelength_workspace(transmission_ws, all_detector_ids,
-                                                          calculate_transmission_state, data_type=data_type)
-    direct_ws = _get_corrected_wavelength_workspace(direct_ws, all_detector_ids,
-                                                    calculate_transmission_state, data_type=data_type)
+    transmission_ws = _get_corrected_wavelength_workspace(transmission_ws,
+                                                          all_detector_ids,
+                                                          calculate_transmission_state,
+                                                          data_type=data_type)
+    direct_ws = _get_corrected_wavelength_workspace(direct_ws,
+                                                    all_detector_ids,
+                                                    calculate_transmission_state,
+                                                    data_type=data_type)
 
     # 3. Fit
     output_workspace, unfitted_transmission_workspace = \
@@ -68,10 +72,9 @@ def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculat
     return output_workspace, unfitted_transmission_workspace
 
 
-def _perform_fit(transmission_workspace, direct_workspace,
-                 transmission_roi_detector_ids, transmission_monitor_detector_id,
-                 incident_monitor_detector_id,
-                 calculate_transmission_state, data_type):
+def _perform_fit(transmission_workspace, direct_workspace, transmission_roi_detector_ids,
+                 transmission_monitor_detector_id, incident_monitor_detector_id, calculate_transmission_state,
+                 data_type):
     """
     This performs the actual transmission calculation.
 
@@ -93,12 +96,14 @@ def _perform_fit(transmission_workspace, direct_workspace,
     rebin_params = str(wavelength_low) + "," + str(wavelength_step) + "," + str(wavelength_high)
 
     trans_name = "CalculateTransmission"
-    trans_options = {"SampleRunWorkspace": transmission_workspace,
-                     "DirectRunWorkspace": direct_workspace,
-                     "OutputWorkspace": EMPTY_NAME,
-                     "IncidentBeamMonitor": incident_monitor_detector_id,
-                     "RebinParams": rebin_params,
-                     "OutputUnfittedData": True}
+    trans_options = {
+        "SampleRunWorkspace": transmission_workspace,
+        "DirectRunWorkspace": direct_workspace,
+        "OutputWorkspace": EMPTY_NAME,
+        "IncidentBeamMonitor": incident_monitor_detector_id,
+        "RebinParams": rebin_params,
+        "OutputUnfittedData": True
+    }
 
     # If we have a region of interest we use it else we use the transmission monitor
 
@@ -191,9 +196,7 @@ def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_trans
     # that we have to exclude unused spectra as the interpolation runs into
     # problems if we don't.
     extract_name = "ExtractSpectra"
-    extract_options = {"InputWorkspace": workspace,
-                       "OutputWorkspace": EMPTY_NAME,
-                       "DetectorList": detector_ids}
+    extract_options = {"InputWorkspace": workspace, "OutputWorkspace": EMPTY_NAME, "DetectorList": detector_ids}
     extract_alg = create_unmanaged_algorithm(extract_name, **extract_options)
     extract_alg.execute()
     workspace = extract_alg.getProperty("OutputWorkspace").value
@@ -209,8 +212,8 @@ def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_trans
     prompt_peak_correction_min = calculate_transmission_state.prompt_peak_correction_min
     prompt_peak_correction_max = calculate_transmission_state.prompt_peak_correction_max
     prompt_peak_correction_enabled = calculate_transmission_state.prompt_peak_correction_enabled
-    workspace = _perform_prompt_peak_correction(workspace, prompt_peak_correction_min,
-                                                prompt_peak_correction_max, prompt_peak_correction_enabled)
+    workspace = _perform_prompt_peak_correction(workspace, prompt_peak_correction_min, prompt_peak_correction_max,
+                                                prompt_peak_correction_enabled)
 
     # ---------------------------------------
     # Perform the flat background correction
@@ -225,12 +228,9 @@ def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_trans
     background_tof_monitor_stop = calculate_transmission_state.background_TOF_monitor_stop
     background_tof_general_start = calculate_transmission_state.background_TOF_general_start
     background_tof_general_stop = calculate_transmission_state.background_TOF_general_stop
-    workspace = apply_flat_background_correction_to_monitors(workspace,
-                                                             workspace_indices_of_monitors,
-                                                             background_tof_monitor_start,
-                                                             background_tof_monitor_stop,
-                                                             background_tof_general_start,
-                                                             background_tof_general_stop)
+    workspace = apply_flat_background_correction_to_monitors(workspace, workspace_indices_of_monitors,
+                                                             background_tof_monitor_start, background_tof_monitor_stop,
+                                                             background_tof_general_start, background_tof_general_stop)
 
     # Detector flat background correction
     flat_background_correction_start = calculate_transmission_state.background_TOF_roi_start
@@ -259,12 +259,14 @@ def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_trans
     wavelength_step_type = calculate_transmission_state.wavelength_step_type_lin_log
 
     convert_name = "SANSConvertToWavelengthAndRebin"
-    convert_options = {"InputWorkspace": workspace,
-                       "WavelengthLow": wavelength_low,
-                       "WavelengthHigh": wavelength_high,
-                       "WavelengthStep": wavelength_step,
-                       "WavelengthStepType": wavelength_step_type.value,
-                       "RebinMode": rebin_type.value}
+    convert_options = {
+        "InputWorkspace": workspace,
+        "WavelengthLow": wavelength_low,
+        "WavelengthHigh": wavelength_high,
+        "WavelengthStep": wavelength_step,
+        "WavelengthStepType": wavelength_step_type.value,
+        "RebinMode": rebin_type.value
+    }
     convert_alg = create_unmanaged_algorithm(convert_name, **convert_options)
     convert_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
     convert_alg.setProperty("OutputWorkspace", workspace)
@@ -288,10 +290,12 @@ def _perform_prompt_peak_correction(workspace, prompt_peak_correction_min, promp
     if prompt_peak_correction_enabled and prompt_peak_correction_min is not None and \
             prompt_peak_correction_max is not None:  # noqa
         remove_name = "RemoveBins"
-        remove_options = {"InputWorkspace": workspace,
-                          "XMin": prompt_peak_correction_min,
-                          "XMax": prompt_peak_correction_max,
-                          "Interpolation": "Linear"}
+        remove_options = {
+            "InputWorkspace": workspace,
+            "XMin": prompt_peak_correction_min,
+            "XMax": prompt_peak_correction_max,
+            "Interpolation": "Linear"
+        }
         remove_alg = create_unmanaged_algorithm(remove_name, **remove_options)
         remove_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
         remove_alg.setProperty("OutputWorkspace", workspace)

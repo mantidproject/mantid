@@ -124,7 +124,7 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         # LAB as linear function y=x+0
         create_alg.setProperty('DataY', range(0, 9))
         create_alg.execute()
-        lab_workspace= create_alg.getProperty('OutputWorkspace').value
+        lab_workspace = create_alg.getProperty('OutputWorkspace').value
 
         alg = AlgorithmManager.create('SANSFitShiftScale')
         alg.setChild(True)
@@ -159,7 +159,7 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         # LAB as linear function y=x+0
         create_alg.setProperty('DataY', range(0, 9))
         create_alg.execute()
-        lab_workspace= create_alg.getProperty('OutputWorkspace').value
+        lab_workspace = create_alg.getProperty('OutputWorkspace').value
 
         alg = AlgorithmManager.create('SANSFitShiftScale')
         alg.setChild(True)
@@ -178,7 +178,7 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         self.assertEqual(out_scale_factor, 1.0)
         self.assertEqual(out_shift_factor, -5.0)
 
-    def do_test_scale_both(self, hab_range, min_x = 0.0, max_x = 1000.0):
+    def do_test_scale_both(self, hab_range, min_x=0.0, max_x=1000.0):
         create_alg = AlgorithmManager.create('CreateWorkspace')
         create_alg.setChild(True)
         create_alg.initialize()
@@ -232,7 +232,7 @@ class SANSFitShiftScaleTest(unittest.TestCase):
     def test_scale_both_with_q_range(self):
         hab_range = list(range(5, 14))
         hab_range[0] = 15000
-        self.do_test_scale_both(hab_range, min_x = 1, max_x = 10)
+        self.do_test_scale_both(hab_range, min_x=1, max_x=10)
         hab_range = list(range(5, 14))
         hab_range[8] = 15000
         self.do_test_scale_both(hab_range, min_x=0, max_x=6)
@@ -265,29 +265,29 @@ class TestErrorTransferFromModelToData(unittest.TestCase):
 
     def test_that_error_is_transferred(self):
         # Arrange
-        x1 = [1,2,3,4,5,6,7,8,9]
-        x2 = [1,2,3,4,5,6,7,8,9]
-        y1 = [2,2,2,2,2,2,2,2]
-        y2 = [2,2,2,2,2,2,2,2]
-        e1 = [1,1,1,1,1,1,1,1]
-        e2 = [2,2,2,2,2,2,2,2]
-        front, rear = self._createWorkspace(x1,y1, e1, x2, y2, e2)
+        x1 = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        x2 = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        y1 = [2, 2, 2, 2, 2, 2, 2, 2]
+        y2 = [2, 2, 2, 2, 2, 2, 2, 2]
+        e1 = [1, 1, 1, 1, 1, 1, 1, 1]
+        e2 = [2, 2, 2, 2, 2, 2, 2, 2]
+        front, rear = self._createWorkspace(x1, y1, e1, x2, y2, e2)
 
         x_min = 3
         x_max = 7
         # Act
         error_correction = ErrorTransferFromModelToData()
-        f_return, r_return = error_correction.get_error_corrected(front, rear,x_min, x_max)
+        f_return, r_return = error_correction.get_error_corrected(front, rear, x_min, x_max)
 
         # Assert
         self.assertEqual(5, len(f_return.dataX(0)))
         self.assertEqual(5, len(r_return.dataX(0)))
 
-        expected_errors_in_rear = [np.sqrt(5),np.sqrt(5),np.sqrt(5),np.sqrt(5)]
-        self.assertEqual(expected_errors_in_rear[0],  r_return.dataE(0)[0])
-        self.assertEqual(expected_errors_in_rear[1],  r_return.dataE(0)[1])
-        self.assertEqual(expected_errors_in_rear[2],  r_return.dataE(0)[2])
-        self.assertEqual(expected_errors_in_rear[3],  r_return.dataE(0)[3])
+        expected_errors_in_rear = [np.sqrt(5), np.sqrt(5), np.sqrt(5), np.sqrt(5)]
+        self.assertEqual(expected_errors_in_rear[0], r_return.dataE(0)[0])
+        self.assertEqual(expected_errors_in_rear[1], r_return.dataE(0)[1])
+        self.assertEqual(expected_errors_in_rear[2], r_return.dataE(0)[2])
+        self.assertEqual(expected_errors_in_rear[3], r_return.dataE(0)[3])
 
 
 if __name__ == '__main__':

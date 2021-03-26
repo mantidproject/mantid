@@ -23,7 +23,6 @@ class ReduceMARI(ReductionWrapper):
     # -------------------------------------------------------------------------------------------------#
     @MainProperties
     def def_main_properties(self):
-
         """ Define main properties used in reduction """
         prop = {}
         prop['sample_run'] = 11001
@@ -98,7 +97,6 @@ class ReduceMARI(ReductionWrapper):
         """ Method executes reduction over single file
           Modify only if custom pre or post-processing is needed, namely:
       """
-
         """
         Define custom preprocessing procedure, to be applied to the whole
         run, obtained from the instrument before diagnostics is applied
@@ -121,7 +119,6 @@ class ReduceMARI(ReductionWrapper):
       """
 
         WS = ReductionWrapper.reduce(self, input_file, output_directory)
-
         """ Defined custrom post-processing procedure, in the way, similar to
       the preprocessing procedure, using the WS pointer, returned by the reduction procedure
       above. If the run is reduced in multirep mode, the WS is the list of the reduced
@@ -183,7 +180,6 @@ class ReduceMARI(ReductionWrapper):
           In addition to that, example of accessing complex reduction properties
           Simple reduction properties can be accessed as e.g.: value= prop_man.sum_runs
         """
-
         def custom_name(prop_man):
             """Sample function which builds filename from
               incident energy and run number and adds some auxiliary information

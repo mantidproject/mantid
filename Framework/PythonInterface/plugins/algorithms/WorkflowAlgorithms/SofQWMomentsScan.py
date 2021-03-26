@@ -46,70 +46,71 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
 
     def PyInit(self):
         # Input properties
-        self.declareProperty(StringArrayProperty(name='InputFiles'),
-                             doc='Comma separated list of input files')
+        self.declareProperty(StringArrayProperty(name='InputFiles'), doc='Comma separated list of input files')
 
-        self.declareProperty(name='LoadLogFiles', defaultValue=True,
-                             doc='Load log files when loading runs')
+        self.declareProperty(name='LoadLogFiles', defaultValue=True, doc='Load log files when loading runs')
 
-        self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '',
+        self.declareProperty(WorkspaceProperty('CalibrationWorkspace',
+                                               '',
                                                direction=Direction.Input,
                                                optional=PropertyMode.Optional),
                              doc='Workspace containing calibration data')
 
         # Instrument configuration properties
-        self.declareProperty(name='Instrument', defaultValue='',
+        self.declareProperty(name='Instrument',
+                             defaultValue='',
                              validator=StringListValidator(['IRIS', 'OSIRIS']),
                              doc='Instrument used during run.')
-        self.declareProperty(name='Analyser', defaultValue='',
+        self.declareProperty(name='Analyser',
+                             defaultValue='',
                              validator=StringListValidator(['graphite', 'mica', 'fmica']),
                              doc='Analyser bank used during run.')
-        self.declareProperty(name='Reflection', defaultValue='',
+        self.declareProperty(name='Reflection',
+                             defaultValue='',
                              validator=StringListValidator(['002', '004', '006']),
                              doc='Reflection number for instrument setup during run.')
-        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],
+        self.declareProperty(IntArrayProperty(name='SpectraRange',
+                                              values=[0, 1],
                                               validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of spectra number to use.')
 
         range_val = FloatArrayLengthValidator(3)
 
-        self.declareProperty(FloatArrayProperty(name='QRange',
-                                                validator=range_val),
+        self.declareProperty(FloatArrayProperty(name='QRange', validator=range_val),
                              doc='Range of background to subtract from raw data in time of flight. Start, Width, End')
-        self.declareProperty(FloatArrayProperty(name='EnergyRange',
-                                                validator=range_val),
+        self.declareProperty(FloatArrayProperty(name='EnergyRange', validator=range_val),
                              doc='Range of background to subtract from raw data in time of flight. Start, Width, End')
-        self.declareProperty(name='DetailedBalance', defaultValue=Property.EMPTY_DBL,
+        self.declareProperty(name='DetailedBalance',
+                             defaultValue=Property.EMPTY_DBL,
                              doc='Apply the detailed balance correction')
 
         # Spectra grouping options
-        self.declareProperty(name='GroupingMethod', defaultValue='Individual',
+        self.declareProperty(name='GroupingMethod',
+                             defaultValue='Individual',
                              validator=StringListValidator(['Individual', 'All', 'File', 'Workspace', 'IPF']),
                              doc='Method used to group spectra.')
-        self.declareProperty(WorkspaceProperty('GroupingWorkspace', '',
+        self.declareProperty(WorkspaceProperty('GroupingWorkspace',
+                                               '',
                                                direction=Direction.Input,
                                                optional=PropertyMode.Optional),
                              doc='Workspace containing spectra grouping.')
-        self.declareProperty(FileProperty('MapFile', '',
-                                          action=FileAction.OptionalLoad,
-                                          extensions=['.map']),
+        self.declareProperty(FileProperty('MapFile', '', action=FileAction.OptionalLoad, extensions=['.map']),
                              doc='File containing spectra grouping.')
 
-        self.declareProperty(name='SampleEnvironmentLogName', defaultValue='sample',
+        self.declareProperty(name='SampleEnvironmentLogName',
+                             defaultValue='sample',
                              doc='Name of the sample environment log entry')
 
         sampEnvLogVal_type = ['last_value', 'average']
-        self.declareProperty('SampleEnvironmentLogValue', 'last_value',
+        self.declareProperty('SampleEnvironmentLogValue',
+                             'last_value',
                              StringListValidator(sampEnvLogVal_type),
                              doc='Value selection of the sample environment log entry')
 
         # Output properties
-        self.declareProperty('ReducedWorkspace', defaultValue='Reduced',
-                             doc='The output reduced workspace.')
-        self.declareProperty('SqwWorkspace', defaultValue='Sqw',
-                             doc='The output Sqw workspace.')
-        self.declareProperty(name='MomentWorkspace', defaultValue='Moment',
-                             doc='The output Moment workspace.')
+        self.declareProperty('ReducedWorkspace', defaultValue='Reduced', doc='The output reduced workspace.')
+        self.declareProperty('SqwWorkspace', defaultValue='Sqw', doc='The output Sqw workspace.')
+        self.declareProperty(name='MomentWorkspace', defaultValue='Moment', doc='The output Moment workspace.')
 
     def PyExec(self):
 
@@ -140,10 +141,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
         scan_alg.execute()
         logger.information('ReducedWorkspace : %s' % self._red_ws)
 
-        Rebin(InputWorkspace=self._red_ws,
-              OutputWorkspace=self._red_ws,
-              Params=self._energy_range,
-              EnableLogging=False)
+        Rebin(InputWorkspace=self._red_ws, OutputWorkspace=self._red_ws, Params=self._energy_range, EnableLogging=False)
 
         input_workspace_names = mtd[self._red_ws].getNames()
 
@@ -384,8 +382,9 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
             self._sum_files = False
 
         # Get the IPF filename
-        self._ipf_filename = os.path.join(config['instrumentDefinition.directory'],
-                                          self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml')
+        self._ipf_filename = os.path.join(
+            config['instrumentDefinition.directory'],
+            self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml')
         logger.information('Instrument parameter file: %s' % self._ipf_filename)
 
         # Warn when grouping options are to be ignored
@@ -418,9 +417,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
         if self._sample_log_name in run:
             # Look for temperature in logs in workspace
             tmp = run[self._sample_log_name].value
-            value_action = {'last_value': lambda x: x[len(x) - 1],
-                            'average': lambda x: x.mean()
-                            }
+            value_action = {'last_value': lambda x: x[len(x) - 1], 'average': lambda x: x.mean()}
             temp = value_action[self._sample_log_value](tmp)
             logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
             return temp

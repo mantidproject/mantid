@@ -10,7 +10,6 @@ import sys
 import os
 
 
-
 # ====================================================================================
 def getSourceDir():
     """Returns the location of the source code."""
@@ -50,19 +49,22 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Generates a HTML report using the Mantid System Tests results database')
 
-    parser.add_argument('--path', dest='path',
-                        default="./Report",
-                        help='Path to the output HTML. Default "./Report".')
+    parser.add_argument('--path', dest='path', default="./Report", help='Path to the output HTML. Default "./Report".')
 
-    parser.add_argument('--x_field', dest='x_field',
+    parser.add_argument('--x_field',
+                        dest='x_field',
                         default="revision",
                         help="Field to use as the x-axis. Default: 'revision'. Other possibilities: 'date'.")
 
-    parser.add_argument('dbfile', metavar='DBFILE', type=str, nargs='+',
+    parser.add_argument('dbfile',
+                        metavar='DBFILE',
+                        type=str,
+                        nargs='+',
                         default=["./MantidSystemTests.db"],
                         help='Required: Path to the SQL database file(s).')
 
-    parser.add_argument('--plotting', dest='plotting',
+    parser.add_argument('--plotting',
+                        dest='plotting',
                         default="plotly",
                         help='Plotting toolkit to generate the plots. Options=["plotly", "matplotlib"]')
 

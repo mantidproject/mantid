@@ -15,7 +15,6 @@ from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 def _catch_exceptions(func):
     """Catch all exceptions in method and print a traceback to stderr"""
-
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -29,7 +28,6 @@ def _catch_exceptions(func):
 
 
 class SliceViewerADSObserver(AnalysisDataServiceObserver):
-
     def __init__(self, on_replace, on_rename, on_clear, on_delete):
         super(SliceViewerADSObserver, self).__init__()
 

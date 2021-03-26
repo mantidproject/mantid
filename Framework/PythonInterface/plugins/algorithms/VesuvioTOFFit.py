@@ -19,7 +19,6 @@ _FIT_MODES = ("bank", "spectrum")
 
 
 class VesuvioTOFFit(VesuvioBase):
-
     def summary(self):
         return "Processes runs for Vesuvio at ISIS"
 
@@ -28,38 +27,46 @@ class VesuvioTOFFit(VesuvioBase):
 
     def PyInit(self):
         # Inputs
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
-                             doc="Input TOF workspace")
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input), doc="Input TOF workspace")
 
         float_length_validator = FloatArrayLengthValidator()
         float_length_validator.setLengthMin(1)
-        self.declareProperty(FloatArrayProperty("Masses", float_length_validator),
-                             doc="Mass values for fitting")
+        self.declareProperty(FloatArrayProperty("Masses", float_length_validator), doc="Mass values for fitting")
 
-        self.declareProperty("MassProfiles", "", StringMandatoryValidator(),
+        self.declareProperty("MassProfiles",
+                             "",
+                             StringMandatoryValidator(),
                              doc="Functions used to approximate mass profile. "
-                                 "The format is function=Function1Name,param1=val1,"
-                                 "param2=val2;function=Function2Name,param3=val3,param4=val4")
+                             "The format is function=Function1Name,param1=val1,"
+                             "param2=val2;function=Function2Name,param3=val3,param4=val4")
 
         # ----- Optional ------
-        self.declareProperty("WorkspaceIndex", 0, IntBoundedValidator(lower=0),
+        self.declareProperty("WorkspaceIndex",
+                             0,
+                             IntBoundedValidator(lower=0),
                              doc="Workspace index for fit. [Default=0]")
-        self.declareProperty("Background", "",
+        self.declareProperty("Background",
+                             "",
                              doc="Function used to fit the background. "
-                                 "The format is function=FunctionName,param1=val1,param2=val2")
-        self.declareProperty("IntensityConstraints", "",
+                             "The format is function=FunctionName,param1=val1,param2=val2")
+        self.declareProperty("IntensityConstraints",
+                             "",
                              doc="A semi-colon separated list of intensity constraints defined "
-                                 "as lists e.g [0,1,0,-4];[1,0,-2,0]")
+                             "as lists e.g [0,1,0,-4];[1,0,-2,0]")
 
-        self.declareProperty("Ties", "",
-                             doc="A string representing the ties to be applied to the fit")
+        self.declareProperty("Ties", "", doc="A string representing the ties to be applied to the fit")
 
-        self.declareProperty("FitMode", "bank", StringListValidator(list(_FIT_MODES)),
+        self.declareProperty("FitMode",
+                             "bank",
+                             StringListValidator(list(_FIT_MODES)),
                              doc="Fit either bank-by-bank or detector-by-detector")
 
-        self.declareProperty("MaxIterations", 5000, IntBoundedValidator(lower=0),
+        self.declareProperty("MaxIterations",
+                             5000,
+                             IntBoundedValidator(lower=0),
                              doc="Maximum number of fitting iterations")
-        self.declareProperty("Minimizer", "Levenberg-Marquardt,AbsError=1e-08,RelError=1e-08",
+        self.declareProperty("Minimizer",
+                             "Levenberg-Marquardt,AbsError=1e-08,RelError=1e-08",
                              doc="String defining the minimizer")
 
         # Outputs
@@ -67,8 +74,7 @@ class VesuvioTOFFit(VesuvioBase):
                              doc="The name of the fitted workspaces.")
         self.declareProperty(ITableWorkspaceProperty("FitParameters", "", Direction.Output),
                              doc="The name of the fitted parameter workspaces.")
-        self.declareProperty("Chi2", 0.0, direction=Direction.Output,
-                             doc="The value of the Chi-Squared.")
+        self.declareProperty("Chi2", 0.0, direction=Direction.Output, doc="The value of the Chi-Squared.")
 
     def PyExec(self):
         """PyExec is defined by base. It sets the instrument and calls this method
@@ -125,8 +131,11 @@ class VesuvioTOFFit(VesuvioBase):
             if user_ties != "":
                 ties = ties + ',' + user_ties
 
-            _, params, fitted_data = self._do_fit(function_str, data_ws, workspace_index,
-                                                  constraints, ties,
+            _, params, fitted_data = self._do_fit(function_str,
+                                                  data_ws,
+                                                  workspace_index,
+                                                  constraints,
+                                                  ties,
                                                   max_iter=self.getProperty("MaxIterations").value)
 
             # Run second time using standard CompositeFunction & no constraints matrix to
@@ -135,9 +144,12 @@ class VesuvioTOFFit(VesuvioBase):
 
         function_str = fit_options.create_function_str(param_values)
         max_iter = 0 if simulation else 1
-        reduced_chi_square, _, _= self._do_fit(function_str, data_ws,
-                                               workspace_index, constraints,
-                                               ties, max_iter=max_iter)
+        reduced_chi_square, _, _ = self._do_fit(function_str,
+                                                data_ws,
+                                                workspace_index,
+                                                constraints,
+                                                ties,
+                                                max_iter=max_iter)
 
         return reduced_chi_square, params, fitted_data
 
@@ -152,8 +164,11 @@ class VesuvioTOFFit(VesuvioBase):
         # we would have to either implement a another wrapper to translate or write another
         # Polynomial.
         # The simplest option is to put the data in seconds here and then put it back afterward
-        data_ws = self._execute_child_alg("ScaleX", InputWorkspace=data_ws, OutputWorkspace=data_ws,
-                                          Operation='Multiply', Factor=1e-06)
+        data_ws = self._execute_child_alg("ScaleX",
+                                          InputWorkspace=data_ws,
+                                          OutputWorkspace=data_ws,
+                                          Operation='Multiply',
+                                          Factor=1e-06)
 
         outputs = self._execute_child_alg("Fit",
                                           Function=function_str,
@@ -176,11 +191,16 @@ class VesuvioTOFFit(VesuvioBase):
         else:
             logger.warning(result_log_str)
 
-        fitted_data = self._execute_child_alg("ScaleX", InputWorkspace=fitted_data,
+        fitted_data = self._execute_child_alg("ScaleX",
+                                              InputWorkspace=fitted_data,
                                               OutputWorkspace=fitted_data,
-                                              Operation='Multiply', Factor=1e06)
-        data_ws = self._execute_child_alg("ScaleX", InputWorkspace=data_ws, OutputWorkspace=data_ws,
-                                          Operation='Multiply', Factor=1e06)
+                                              Operation='Multiply',
+                                              Factor=1e06)
+        data_ws = self._execute_child_alg("ScaleX",
+                                          InputWorkspace=data_ws,
+                                          OutputWorkspace=data_ws,
+                                          Operation='Multiply',
+                                          Factor=1e06)
 
         return reduced_chi_squared, params, fitted_data
 

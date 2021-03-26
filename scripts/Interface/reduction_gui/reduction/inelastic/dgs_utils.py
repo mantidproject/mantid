@@ -8,7 +8,7 @@ import os
 
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot # noqa
+    import mantidplot  # noqa
     from mantid.kernel import config
     from mantid.api import AnalysisDataService
     from mantid.simpleapi import LoadEmptyInstrument
@@ -37,7 +37,7 @@ class InstrumentParameters(object):
             idf_files = glob.glob(idf_pattern)
             emptyInst = LoadEmptyInstrument(Filename=str(idf_files[0]))
             InstrumentParameters._instrument = emptyInst.getInstrument()
-            AnalysisDataService.remove(str(emptyInst)) # Don't need to keep workspace
+            AnalysisDataService.remove(str(emptyInst))  # Don't need to keep workspace
 
     def _self_check(self):
         if self._instrument is None:
@@ -57,11 +57,11 @@ class InstrumentParameters(object):
             val = self._instrument.getBoolParameter(name)
         elif type_name == "string":
             val = self._instrument.getStringParameter(name)
-            if val[0] == "None" :
+            if val[0] == "None":
                 return None
-        elif type_name == "int" :
+        elif type_name == "int":
             val = self._instrument.getIntParameter(name)
-        else :
+        else:
             return default
         try:
             return val[0]
@@ -76,6 +76,6 @@ class InstrumentParameters(object):
             return default
 
         param = self.get_parameter(parname)
-        if param < 0 :
+        if param < 0:
             return False
         return bool(param)

@@ -18,9 +18,10 @@ class SampleDetails(object):
             self._shape_type = "cylinder"
             warning = "Failed to supply parameter \"shape\" to SampleDetails - defaulting to \"cylinder\""
             print("WARNING: {}".format(warning))  # Show warning in script window
-            logger.warning(warning)               # Show warning in Mantid logging area
+            logger.warning(warning)  # Show warning in Mantid logging area
 
-        center = common.dictionary_key_helper(dictionary=kwargs, key="center",
+        center = common.dictionary_key_helper(dictionary=kwargs,
+                                              key="center",
                                               exception_msg=property_err_string.format("center"))
         SampleDetails._validate_center(center)
         self._center = [float(i) for i in center]  # List of X, Y, Z position
@@ -45,9 +46,10 @@ class SampleDetails(object):
         self.material_object = None
 
     def set_material(self, **kwargs):
-        chemical_formula = common.dictionary_key_helper(dictionary=kwargs, key="chemical_formula",
+        chemical_formula = common.dictionary_key_helper(dictionary=kwargs,
+                                                        key="chemical_formula",
                                                         exception_msg="The following argument is required but was not"
-                                                                      " passed: chemical_formula")
+                                                        " passed: chemical_formula")
         number_density = common.dictionary_key_helper(dictionary=kwargs, key="number_density", throws=False)
         crystal_density = common.dictionary_key_helper(dictionary=kwargs, key="crystal_density", throws=False)
 
@@ -57,14 +59,17 @@ class SampleDetails(object):
                                " have not been set they can be modified with 'set_material_properties()'. Otherwise"
                                " to change the material call 'reset_sample_material()'")
 
-        self.material_object = _Material(chemical_formula=chemical_formula, number_density=number_density,
+        self.material_object = _Material(chemical_formula=chemical_formula,
+                                         number_density=number_density,
                                          crystal_density=crystal_density)
 
     def set_material_properties(self, **kwargs):
         err_msg = "The following argument is required but was not set or passed: "
-        absorption_cross_section = common.dictionary_key_helper(dictionary=kwargs, key="absorption_cross_section",
+        absorption_cross_section = common.dictionary_key_helper(dictionary=kwargs,
+                                                                key="absorption_cross_section",
                                                                 exception_msg=err_msg + "absorption_cross_section")
-        scattering_cross_section = common.dictionary_key_helper(dictionary=kwargs, key="scattering_cross_section",
+        scattering_cross_section = common.dictionary_key_helper(dictionary=kwargs,
+                                                                key="scattering_cross_section",
                                                                 exception_msg=err_msg + "scattering_cross_section")
         if self.material_object is None:
             raise RuntimeError("The material has not been set (or reset). Please set it by calling"
@@ -213,9 +218,11 @@ class _Material(object):
 class _Cylinder(object):
     def __init__(self, kwargs):
         # By using kwargs we get a better error than "init takes n arguments"
-        height = common.dictionary_key_helper(dictionary=kwargs, key="height",
+        height = common.dictionary_key_helper(dictionary=kwargs,
+                                              key="height",
                                               exception_msg=property_err_string.format("height"))
-        radius = common.dictionary_key_helper(dictionary=kwargs, key="radius",
+        radius = common.dictionary_key_helper(dictionary=kwargs,
+                                              key="radius",
                                               exception_msg=property_err_string.format("radius"))
 
         _Cylinder._validate_constructor_inputs(height=height, radius=radius)
@@ -243,17 +250,25 @@ class _Cylinder(object):
 class _Slab(object):
     def __init__(self, kwargs):
         # By using kwargs we get a better error than "init takes n arguments"
-        thickness = common.dictionary_key_helper(dictionary=kwargs, key="thickness",
+        thickness = common.dictionary_key_helper(dictionary=kwargs,
+                                                 key="thickness",
                                                  exception_msg=property_err_string.format("thickness"))
-        width = common.dictionary_key_helper(dictionary=kwargs, key="width",
+        width = common.dictionary_key_helper(dictionary=kwargs,
+                                             key="width",
                                              exception_msg=property_err_string.format("width"))
-        height = common.dictionary_key_helper(dictionary=kwargs, key="height",
+        height = common.dictionary_key_helper(dictionary=kwargs,
+                                              key="height",
                                               exception_msg=property_err_string.format("height"))
-        angle = common.dictionary_key_helper(dictionary=kwargs, key="angle",
+        angle = common.dictionary_key_helper(dictionary=kwargs,
+                                             key="angle",
                                              exception_msg=property_err_string.format("angle"))
 
-        SampleDetails.validate_constructor_inputs({"thickness": thickness, "width": width, "height": height,
-                                                  "angle": angle})
+        SampleDetails.validate_constructor_inputs({
+            "thickness": thickness,
+            "width": width,
+            "height": height,
+            "angle": angle
+        })
         self.thickness = float(thickness)
         self.width = float(width)
         self.height = float(height)
@@ -269,17 +284,16 @@ def _check_value_is_physical(property_name, value):
     value = _check_can_convert_to_float(property_name=property_name, value=value)
 
     if value <= 0 or math.isnan(value):
-        raise ValueError("The value set for {} was: {} which is impossible for a physical object".format(property_name,
-                                                                                                         original_value
-                                                                                                         ))
+        raise ValueError("The value set for {} was: {} which is impossible for a physical object".format(
+            property_name, original_value))
 
 
 def _check_can_convert_to_float(property_name, value):
     original_value = value
     value = convert_to_float(value)
     if value is None:
-        raise ValueError("Could not convert the {} to a number. The input was: '{}'".format(property_name,
-                                                                                            original_value))
+        raise ValueError("Could not convert the {} to a number. The input was: '{}'".format(
+            property_name, original_value))
     return value
 
 

@@ -23,7 +23,7 @@ except ImportError:
 class SaveNexusPDTest(unittest.TestCase):
     def saveFilePath(self, wkspname):
         dataDir = mantid.config.getString('defaultsave.directory')
-        return os.path.join(dataDir, wkspname+'.h5')
+        return os.path.join(dataDir, wkspname + '.h5')
 
     def cleanup(self, filename, wkspname):
         if os.path.exists(filename):
@@ -77,8 +77,7 @@ class SaveNexusPDTest(unittest.TestCase):
         if not withInstrument:
             return
         keys = nxitem.keys()
-        for fieldname in ['distance',
-                          'azimuthal_angle', 'polar_angle']:
+        for fieldname in ['distance', 'azimuthal_angle', 'polar_angle']:
             self.assertTrue(fieldname in keys)
 
     def check(self, filename, withInstrument):
@@ -107,17 +106,15 @@ class SaveNexusPDTest(unittest.TestCase):
 
     def _createOneSpectrum(self, wkspname):
         x = np.arange(300, 16667, 15.)
-        y = np.random.random(len(x)-1)  # histogram
+        y = np.random.random(len(x) - 1)  # histogram
         e = np.sqrt(y)
 
-        CreateWorkspace(OutputWorkspace=wkspname,
-                        DataX=x, DataY=y, DataE=e, NSpec=1,
-                        UnitX='TOF',
-                        YUnitlabel="stuff")
+        CreateWorkspace(OutputWorkspace=wkspname, DataX=x, DataY=y, DataE=e, NSpec=1, UnitX='TOF', YUnitlabel="stuff")
 
     def _createMultiSpectra(self, wkspname):
         wksp = WCH.create2DWorkspaceWithFullInstrument(30, 5, False, False)
         AnalysisDataService.add(wkspname, wksp)
+
 
 if __name__ == '__main__':
     unittest.main()

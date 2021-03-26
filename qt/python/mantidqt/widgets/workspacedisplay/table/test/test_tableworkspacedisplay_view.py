@@ -18,7 +18,6 @@ from mantidqt.widgets.workspacedisplay.table.table_model import BATCH_SIZE
 
 @start_qapplication
 class TableWorkspaceDisplayViewQtTest(unittest.TestCase, QtWidgetFinder):
-
     def test_window_deleted_correctly(self):
         ws = CreateEmptyTableWorkspace()
 
@@ -48,7 +47,6 @@ class TableWorkspaceDisplayViewQtTest(unittest.TestCase, QtWidgetFinder):
 
 @start_qapplication
 class TableWorkspaceDisplayViewTest(unittest.TestCase):
-
     def test_gui_updated_when_row_added_from_dictionary_standard(self):
         ws = CreateEmptyTableWorkspace()
         ws.addColumn("double", "test_col")

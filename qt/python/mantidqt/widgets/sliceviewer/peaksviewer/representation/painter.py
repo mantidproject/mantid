@@ -22,7 +22,6 @@ class EllipticalShell(Patch):
     """
     Elliptical shell patch.
     """
-
     def __str__(self):
         return f"EllipticalShell(center={self.center}, width={self.width}, height={self.height}, " \
                f"frac_thick={self.frac_thick}, angle={self.angle})"
@@ -86,15 +85,13 @@ class MplPainter():
     """
     Implementation of a PeakPainter that uses matplotlib to draw
     """
-
     def __init__(self, view):
         """
         :param view: An object defining an axes property.
         """
         self._view = view
         if not hasattr(self._view, "ax"):
-            raise ValueError("Expected to find an 'ax' attribute on the view. Found {}.".format(
-                type(view)))
+            raise ValueError("Expected to find an 'ax' attribute on the view. Found {}.".format(type(view)))
 
     @property
     def axes(self):
@@ -127,8 +124,8 @@ class MplPainter():
         :param half_width: Half-width of cross
         :param kwargs: Additional matplotlib properties to pass to the call
         """
-        verts = ((x - half_width, y + half_width), (x + half_width, y - half_width),
-                 (x + half_width, y + half_width), (x - half_width, y - half_width))
+        verts = ((x - half_width, y + half_width), (x + half_width, y - half_width), (x + half_width, y + half_width),
+                 (x - half_width, y - half_width))
         codes = (Path.MOVETO, Path.LINETO, Path.MOVETO, Path.LINETO)
         return self.axes.add_patch(PathPatch(Path(verts, codes), **kwargs))
 
@@ -153,8 +150,7 @@ class MplPainter():
         :param angle: Angle in degrees w.r.t X axis
         :param kwargs: Additional matplotlib properties to pass to the call
         """
-        return self.axes.add_patch(
-            EllipticalShell((x, y), outer_width, outer_height, frac_thick, angle, **kwargs))
+        return self.axes.add_patch(EllipticalShell((x, y), outer_width, outer_height, frac_thick, angle, **kwargs))
 
     def shell(self, x, y, outer_radius, thick, **kwargs):
         """Draw a wedge on the Axes
@@ -164,8 +160,7 @@ class MplPainter():
         :param thick: The thickness of the shell
         :param kwargs: Additional matplotlib properties to pass to the call
         """
-        return self.axes.add_patch(
-            Wedge((x, y), outer_radius, theta1=0.0, theta2=360., width=thick, **kwargs))
+        return self.axes.add_patch(Wedge((x, y), outer_radius, theta1=0.0, theta2=360., width=thick, **kwargs))
 
     def bbox(self, artist):
         """Determine the lower-left and upper-right coordinates of
@@ -182,7 +177,6 @@ class MplPainter():
 
 class Painted():
     """Combine a collection of artists with the painter that created them"""
-
     def __init__(self, painter, artists, effective_bbox=None):
         """
         :param painter: A reference to the painter responsible for

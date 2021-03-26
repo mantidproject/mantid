@@ -31,35 +31,29 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
         return 'Diffraction\\Reduction'
 
     def seeAlso(self):
-        return [ "ISISIndirectDiffractionReduction" ]
+        return ["ISISIndirectDiffractionReduction"]
 
     def summary(self):
         return ('Performs diffraction reduction for VESUVIO. This algorithm is deprecated (April-2017).')
 
     def PyInit(self):
-        self.declareProperty(StringArrayProperty('InputFiles'),
-                             doc='Comma separated list of input files.')
+        self.declareProperty(StringArrayProperty('InputFiles'), doc='Comma separated list of input files.')
 
-        self.declareProperty(FileProperty('InstrumentParFile', '',
-                                          action=FileAction.Load,
-                                          extensions=['.dat', '.par']),
+        self.declareProperty(FileProperty('InstrumentParFile', '', action=FileAction.Load, extensions=['.dat', '.par']),
                              doc='PAR file containing instrument definition.')
 
-        self.declareProperty(name='SumFiles', defaultValue=False,
-                             doc='Enabled to sum spectra from each input file.')
+        self.declareProperty(name='SumFiles', defaultValue=False, doc='Enabled to sum spectra from each input file.')
 
-        self.declareProperty(IntArrayProperty('SpectraRange', [3, 198]),
-                             doc='Range of spectra to use.')
+        self.declareProperty(IntArrayProperty('SpectraRange', [3, 198]), doc='Range of spectra to use.')
 
-        self.declareProperty(name='RebinParam', defaultValue='',
-                             doc='Rebin parameters.')
+        self.declareProperty(name='RebinParam', defaultValue='', doc='Rebin parameters.')
 
-        self.declareProperty(name='GroupingPolicy', defaultValue='All',
+        self.declareProperty(name='GroupingPolicy',
+                             defaultValue='All',
                              validator=StringListValidator(['All', 'Individual', 'IPF']),
                              doc='Selects the type of detector grouping to be used.')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                                                    direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Group name for the result workspaces.')
 
     def validateInputs(self):
@@ -87,17 +81,9 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
 
         warnings.warn("This algorithm is depreciated (April-2017). Please use ISISIndirectDiffractionReduction")
 
-        from IndirectReductionCommon import (load_files,
-                                             get_multi_frame_rebin,
-                                             identify_bad_detectors,
-                                             unwrap_monitor,
-                                             process_monitor_efficiency,
-                                             scale_monitor,
-                                             scale_detectors,
-                                             rebin_reduction,
-                                             group_spectra,
-                                             fold_chopped,
-                                             rename_reduction)
+        from IndirectReductionCommon import (load_files, get_multi_frame_rebin, identify_bad_detectors, unwrap_monitor,
+                                             process_monitor_efficiency, scale_monitor, scale_detectors,
+                                             rebin_reduction, group_spectra, fold_chopped, rename_reduction)
 
         self._setup()
 
@@ -129,8 +115,7 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
                 workspaces = [c_ws_name]
 
             # Process rebinning for framed data
-            rebin_string_2, num_bins = get_multi_frame_rebin(c_ws_name,
-                                                             self._rebin_string)
+            rebin_string_2, num_bins = get_multi_frame_rebin(c_ws_name, self._rebin_string)
 
             masked_detectors = identify_bad_detectors(workspaces[0])
 
@@ -155,21 +140,13 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
                 DeleteWorkspace(monitor_ws_name)
 
                 # Convert to dSpacing
-                ConvertUnits(InputWorkspace=ws_name,
-                             OutputWorkspace=ws_name,
-                             Target='dSpacing',
-                             EMode='Elastic')
+                ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='dSpacing', EMode='Elastic')
 
                 # Handle rebinning
-                rebin_reduction(ws_name,
-                                self._rebin_string,
-                                rebin_string_2,
-                                num_bins)
+                rebin_reduction(ws_name, self._rebin_string, rebin_string_2, num_bins)
 
                 # Group spectra
-                group_spectra(ws_name,
-                              masked_detectors,
-                              self._grouping_method)
+                group_spectra(ws_name, masked_detectors, self._grouping_method)
 
             if is_multi_frame:
                 fold_chopped(c_ws_name)
@@ -180,8 +157,7 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
         output_workspace_names = [rename_reduction(ws_name, self._sum_files) for ws_name in self._workspace_names]
 
         # Group result workspaces
-        GroupWorkspaces(InputWorkspaces=output_workspace_names,
-                        OutputWorkspace=self._output_ws)
+        GroupWorkspaces(InputWorkspaces=output_workspace_names, OutputWorkspace=self._output_ws)
 
         self.setProperty('OutputWorkspace', self._output_ws)
 

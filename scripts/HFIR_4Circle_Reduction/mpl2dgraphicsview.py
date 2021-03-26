@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0901,R0902,too-many-branches,C0302
 import os
 import numpy as np
 from qtpy.QtWidgets import (QWidget, QVBoxLayout, QSizePolicy)
@@ -19,7 +18,6 @@ class Mpl2dGraphicsView(QWidget):
     """ A combined graphics view including matplotlib canvas and
     a navigation tool bar for 2D image specifically
     """
-
     def __init__(self, parent):
         """ Initialization
         """
@@ -168,7 +166,6 @@ class Qt4Mpl2dCanvas(FigureCanvas):
     """  A customized Qt widget for matplotlib 2D image.
     It can be used to replace GraphicsView
     """
-
     def __init__(self, parent):
         """  Initialization
         """
@@ -176,7 +173,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         self.fig = Figure()
         self.fig.patch.set_facecolor('white')
 
-        self.axes = self.fig.add_subplot(111) # return: matplotlib.axes.AxesSubplot
+        self.axes = self.fig.add_subplot(111)  # return: matplotlib.axes.AxesSubplot
 
         # Initialize parent class and set parent
         FigureCanvas.__init__(self, self.fig)
@@ -236,9 +233,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         self.axes.hold(hold_prev)
 
         # show image
-        img_plot = self.axes.imshow(array2d,
-                                    extent=[x_min, x_max, y_min, y_max],
-                                    interpolation='none')
+        img_plot = self.axes.imshow(array2d, extent=[x_min, x_max, y_min, y_max], interpolation='none')
         self._currentArray2D = array2d
 
         # set y ticks as an option:
@@ -381,10 +376,12 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         """ A dirty hack to flush the image
         """
         w, h = self.get_width_height()
-        self.resize(w+1, h)
+        self.resize(w + 1, h)
         self.resize(w, h)
 
         return
+
+
 # END-OF-CLASS (MplGraphicsView)
 
 

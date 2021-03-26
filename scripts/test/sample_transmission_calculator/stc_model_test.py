@@ -41,12 +41,11 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
             'thickness': 0.1
         }
         model.calculate(input_dict)
-        alg_mock.assert_called_with(
-            WavelengthRange='0.0,0.1,10.0',
-            ChemicalFormula='C',
-            DensityType='Number Density',
-            density=0.1,
-            thickness=0.1)
+        alg_mock.assert_called_with(WavelengthRange='0.0,0.1,10.0',
+                                    ChemicalFormula='C',
+                                    DensityType='Number Density',
+                                    density=0.1,
+                                    thickness=0.1)
 
     @patch('SampleTransmissionCalculator.stc_model.CalculateSampleTransmission')
     def test_calculate_uses_single_binning_when_type_set_to_multiple(self, alg_mock):
@@ -63,12 +62,11 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
             'thickness': 0.1
         }
         model.calculate(input_dict)
-        alg_mock.assert_called_with(
-            WavelengthRange='0.0,0.1,20.0',
-            ChemicalFormula='C',
-            DensityType='Number Density',
-            density=0.1,
-            thickness=0.1)
+        alg_mock.assert_called_with(WavelengthRange='0.0,0.1,20.0',
+                                    ChemicalFormula='C',
+                                    DensityType='Number Density',
+                                    density=0.1,
+                                    thickness=0.1)
 
     def test_validate_correct(self):
         input_dict = {

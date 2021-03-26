@@ -43,16 +43,13 @@ __date__ = "26/01/2017"
 _logger = logging.getLogger(__name__)
 
 #             Symbol  Atomic Number   col row  name  mass subcategory
-_elements = [("H", 1, 1, 1, "hydrogen", 1.00800, "diatomic nonmetal"),
-             ("He", 2, 18, 1, "helium", 4.0030, "noble gas"),
+_elements = [("H", 1, 1, 1, "hydrogen", 1.00800, "diatomic nonmetal"), ("He", 2, 18, 1, "helium", 4.0030, "noble gas"),
              ("Li", 3, 1, 2, "lithium", 6.94000, "alkali metal"),
              ("Be", 4, 2, 2, "beryllium", 9.01200, "alkaline earth metal"),
-             ("B", 5, 13, 2, "boron", 10.8110, "metalloid"),
-             ("C", 6, 14, 2, "carbon", 12.0100, "polyatomic nonmetal"),
+             ("B", 5, 13, 2, "boron", 10.8110, "metalloid"), ("C", 6, 14, 2, "carbon", 12.0100, "polyatomic nonmetal"),
              ("N", 7, 15, 2, "nitrogen", 14.0080, "diatomic nonmetal"),
              ("O", 8, 16, 2, "oxygen", 16.0000, "diatomic nonmetal"),
-             ("F", 9, 17, 2, "fluorine", 19.0000, "diatomic nonmetal"),
-             ("Ne", 10, 18, 2, "neon", 20.1830, "noble gas"),
+             ("F", 9, 17, 2, "fluorine", 19.0000, "diatomic nonmetal"), ("Ne", 10, 18, 2, "neon", 20.1830, "noble gas"),
              ("Na", 11, 1, 3, "sodium", 22.9970, "alkali metal"),
              ("Mg", 12, 2, 3, "magnesium", 24.3200, "alkaline earth metal"),
              ("Al", 13, 13, 3, "aluminium", 26.9700, "post transition metal"),
@@ -60,8 +57,7 @@ _elements = [("H", 1, 1, 1, "hydrogen", 1.00800, "diatomic nonmetal"),
              ("P", 15, 15, 3, "phosphorus", 30.9750, "polyatomic nonmetal"),
              ("S", 16, 16, 3, "sulphur", 32.0660, "polyatomic nonmetal"),
              ("Cl", 17, 17, 3, "chlorine", 35.4570, "diatomic nonmetal"),
-             ("Ar", 18, 18, 3, "argon", 39.9440, "noble gas"),
-             ("K", 19, 1, 4, "potassium", 39.1020, "alkali metal"),
+             ("Ar", 18, 18, 3, "argon", 39.9440, "noble gas"), ("K", 19, 1, 4, "potassium", 39.1020, "alkali metal"),
              ("Ca", 20, 2, 4, "calcium", 40.0800, "alkaline earth metal"),
              ("Sc", 21, 3, 4, "scandium", 44.9600, "transition metal"),
              ("Ti", 22, 4, 4, "titanium", 47.9000, "transition metal"),
@@ -74,12 +70,10 @@ _elements = [("H", 1, 1, 1, "hydrogen", 1.00800, "diatomic nonmetal"),
              ("Cu", 29, 11, 4, "copper", 63.5400, "transition metal"),
              ("Zn", 30, 12, 4, "zinc", 65.3800, "transition metal"),
              ("Ga", 31, 13, 4, "gallium", 69.7200, "post transition metal"),
-             ("Ge", 32, 14, 4, "germanium", 72.5900, "metalloid"),
-             ("As", 33, 15, 4, "arsenic", 74.9200, "metalloid"),
+             ("Ge", 32, 14, 4, "germanium", 72.5900, "metalloid"), ("As", 33, 15, 4, "arsenic", 74.9200, "metalloid"),
              ("Se", 34, 16, 4, "selenium", 78.9600, "polyatomic nonmetal"),
              ("Br", 35, 17, 4, "bromine", 79.9200, "diatomic nonmetal"),
-             ("Kr", 36, 18, 4, "krypton", 83.8000, "noble gas"),
-             ("Rb", 37, 1, 5, "rubidium", 85.4800, "alkali metal"),
+             ("Kr", 36, 18, 4, "krypton", 83.8000, "noble gas"), ("Rb", 37, 1, 5, "rubidium", 85.4800, "alkali metal"),
              ("Sr", 38, 2, 5, "strontium", 87.6200, "alkaline earth metal"),
              ("Y", 39, 3, 5, "yttrium", 88.9050, "transition metal"),
              ("Zr", 40, 4, 5, "zirconium", 91.2200, "transition metal"),
@@ -93,26 +87,20 @@ _elements = [("H", 1, 1, 1, "hydrogen", 1.00800, "diatomic nonmetal"),
              ("Cd", 48, 12, 5, "cadmium", 112.410, "transition metal"),
              ("In", 49, 13, 5, "indium", 114.820, "post transition metal"),
              ("Sn", 50, 14, 5, "tin", 118.690, "post transition metal"),
-             ("Sb", 51, 15, 5, "antimony", 121.760, "metalloid"),
-             ("Te", 52, 16, 5, "tellurium", 127.600, "metalloid"),
-             ("I", 53, 17, 5, "iodine", 126.910, "diatomic nonmetal"),
-             ("Xe", 54, 18, 5, "xenon", 131.300, "noble gas"),
+             ("Sb", 51, 15, 5, "antimony", 121.760, "metalloid"), ("Te", 52, 16, 5, "tellurium", 127.600, "metalloid"),
+             ("I", 53, 17, 5, "iodine", 126.910, "diatomic nonmetal"), ("Xe", 54, 18, 5, "xenon", 131.300, "noble gas"),
              ("Cs", 55, 1, 6, "caesium", 132.910, "alkali metal"),
              ("Ba", 56, 2, 6, "barium", 137.360, "alkaline earth metal"),
-             ("La", 57, 3, 6, "lanthanum", 138.920, "lanthanide"),
-             ("Ce", 58, 4, 9, "cerium", 140.130, "lanthanide"),
+             ("La", 57, 3, 6, "lanthanum", 138.920, "lanthanide"), ("Ce", 58, 4, 9, "cerium", 140.130, "lanthanide"),
              ("Pr", 59, 5, 9, "praseodymium", 140.920, "lanthanide"),
              ("Nd", 60, 6, 9, "neodymium", 144.270, "lanthanide"),
-             ("Pm", 61, 7, 9, "promethium", 147.000, "lanthanide"),
-             ("Sm", 62, 8, 9, "samarium", 150.350, "lanthanide"),
-             ("Eu", 63, 9, 9, "europium", 152.000, "lanthanide"),
-             ("Gd", 64, 10, 9, "gadolinium", 157.260, "lanthanide"),
-             ("Tb", 65, 11, 9, "terbium", 158.930, "lanthanide"),
-             ("Dy", 66, 12, 9, "dysprosium", 162.510, "lanthanide"),
-             ("Ho", 67, 13, 9, "holmium", 164.940, "lanthanide"),
-             ("Er", 68, 14, 9, "erbium", 167.270, "lanthanide"),
-             ("Tm", 69, 15, 9, "thulium", 168.940, "lanthanide"),
-             ("Yb", 70, 16, 9, "ytterbium", 173.040, "lanthanide"),
+             ("Pm", 61, 7, 9, "promethium", 147.000, "lanthanide"), ("Sm", 62, 8, 9, "samarium", 150.350, "lanthanide"),
+             ("Eu", 63, 9, 9, "europium", 152.000, "lanthanide"), ("Gd", 64, 10, 9, "gadolinium", 157.260,
+                                                                   "lanthanide"),
+             ("Tb", 65, 11, 9, "terbium", 158.930, "lanthanide"), ("Dy", 66, 12, 9, "dysprosium", 162.510,
+                                                                   "lanthanide"),
+             ("Ho", 67, 13, 9, "holmium", 164.940, "lanthanide"), ("Er", 68, 14, 9, "erbium", 167.270, "lanthanide"),
+             ("Tm", 69, 15, 9, "thulium", 168.940, "lanthanide"), ("Yb", 70, 16, 9, "ytterbium", 173.040, "lanthanide"),
              ("Lu", 71, 17, 9, "lutetium", 174.990, "lanthanide"),
              ("Hf", 72, 4, 6, "hafnium", 178.500, "transition metal"),
              ("Ta", 73, 5, 6, "tantalum", 180.950, "transition metal"),
@@ -127,31 +115,22 @@ _elements = [("H", 1, 1, 1, "hydrogen", 1.00800, "diatomic nonmetal"),
              ("Pb", 82, 14, 6, "lead", 207.210, "post transition metal"),
              ("Bi", 83, 15, 6, "bismuth", 209.000, "post transition metal"),
              ("Po", 84, 16, 6, "polonium", 209.000, "post transition metal"),
-             ("At", 85, 17, 6, "astatine", 210.000, "metalloid"),
-             ("Rn", 86, 18, 6, "radon", 222.000, "noble gas"),
+             ("At", 85, 17, 6, "astatine", 210.000, "metalloid"), ("Rn", 86, 18, 6, "radon", 222.000, "noble gas"),
              ("Fr", 87, 1, 7, "francium", 223.000, "alkali metal"),
              ("Ra", 88, 2, 7, "radium", 226.000, "alkaline earth metal"),
-             ("Ac", 89, 3, 7, "actinium", 227.000, "actinide"),
-             ("Th", 90, 4, 10, "thorium", 232.000, "actinide"),
-             ("Pa", 91, 5, 10, "proactinium", 231.03588, "actinide"),
-             ("U", 92, 6, 10, "uranium", 238.070, "actinide"),
-             ("Np", 93, 7, 10, "neptunium", 237.000, "actinide"),
-             ("Pu", 94, 8, 10, "plutonium", 239.100, "actinide"),
-             ("Am", 95, 9, 10, "americium", 243, "actinide"),
-             ("Cm", 96, 10, 10, "curium", 247, "actinide"),
-             ("Bk", 97, 11, 10, "berkelium", 247, "actinide"),
-             ("Cf", 98, 12, 10, "californium", 251, "actinide"),
-             ("Es", 99, 13, 10, "einsteinium", 252, "actinide"),
-             ("Fm", 100, 14, 10, "fermium", 257, "actinide"),
-             ("Md", 101, 15, 10, "mendelevium", 258, "actinide"),
-             ("No", 102, 16, 10, "nobelium", 259, "actinide"),
+             ("Ac", 89, 3, 7, "actinium", 227.000, "actinide"), ("Th", 90, 4, 10, "thorium", 232.000, "actinide"),
+             ("Pa", 91, 5, 10, "proactinium", 231.03588, "actinide"), ("U", 92, 6, 10, "uranium", 238.070, "actinide"),
+             ("Np", 93, 7, 10, "neptunium", 237.000, "actinide"), ("Pu", 94, 8, 10, "plutonium", 239.100, "actinide"),
+             ("Am", 95, 9, 10, "americium", 243, "actinide"), ("Cm", 96, 10, 10, "curium", 247, "actinide"),
+             ("Bk", 97, 11, 10, "berkelium", 247, "actinide"), ("Cf", 98, 12, 10, "californium", 251, "actinide"),
+             ("Es", 99, 13, 10, "einsteinium", 252, "actinide"), ("Fm", 100, 14, 10, "fermium", 257, "actinide"),
+             ("Md", 101, 15, 10, "mendelevium", 258, "actinide"), ("No", 102, 16, 10, "nobelium", 259, "actinide"),
              ("Lr", 103, 17, 10, "lawrencium", 262, "actinide"),
              ("Rf", 104, 4, 7, "rutherfordium", 261, "transition metal"),
              ("Db", 105, 5, 7, "dubnium", 262, "transition metal"),
              ("Sg", 106, 6, 7, "seaborgium", 266, "transition metal"),
              ("Bh", 107, 7, 7, "bohrium", 264, "transition metal"),
-             ("Hs", 108, 8, 7, "hassium", 269, "transition metal"),
-             ("Mt", 109, 9, 7, "meitnerium", 268)]
+             ("Hs", 108, 8, 7, "hassium", 269, "transition metal"), ("Mt", 109, 9, 7, "meitnerium", 268)]
 
 
 class PeriodicTableItem(object):
@@ -255,11 +234,11 @@ def _correct_with_peak_data_file():
         if data_element is not None and data_element['A'] is not None:
             if abs(data_element['A'] - element[5]) > 1e-6:
                 if len(element) > 6:
-                    _elements[i] = (element[0], data_element['Z'], element[2], element[3],
-                                    element[4], data_element['A'], element[6])
+                    _elements[i] = (element[0], data_element['Z'], element[2], element[3], element[4],
+                                    data_element['A'], element[6])
                 else:
-                    _elements[i] = (element[0], data_element['Z'], element[2], element[3],
-                                    element[4], data_element['A'])
+                    _elements[i] = (element[0], data_element['Z'], element[2], element[3], element[4],
+                                    data_element['A'])
 
 
 _correct_with_peak_data_file()
@@ -292,8 +271,7 @@ class _ElementButton(QtWidgets.QPushButton):
         self.setFlat(True)
         self.setCheckable(False)
 
-        self.setSizePolicy(
-            QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding))
+        self.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding))
 
         self.selected = False
         self.current = False
@@ -371,10 +349,7 @@ class _ElementButton(QtWidgets.QPushButton):
     def paintEvent(self, pEvent):
         # get button geometry
         widgGeom = self.rect()
-        paintGeom = QtCore.QRect(widgGeom.left() + 1,
-                                 widgGeom.top() + 1,
-                                 widgGeom.width() - 2,
-                                 widgGeom.height() - 2)
+        paintGeom = QtCore.QRect(widgGeom.left() + 1, widgGeom.top() + 1, widgGeom.width() - 2, widgGeom.height() - 2)
 
         # paint background color
         painter = QtGui.QPainter(self)
@@ -720,8 +695,8 @@ class PeriodicList(QtWidgets.QTreeWidget):
 
         self.setRootIsDecorated(0)
         self.itemClicked.connect(self._selectionChanged)
-        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection if single else QtWidgets.
-                              QAbstractItemView.ExtendedSelection)
+        self.setSelectionMode(
+            QtWidgets.QAbstractItemView.SingleSelection if single else QtWidgets.QAbstractItemView.ExtendedSelection)
         self._fill_widget(elements)
         self.resizeColumnToContents(0)
         self.resizeColumnToContents(1)
@@ -759,10 +734,7 @@ class PeriodicList(QtWidgets.QTreeWidget):
 
         :return: Selected elements
         :rtype: List[PeriodicTableItem]"""
-        return [
-            _default_table_items[idx] for idx in range(len(self.tree_items))
-            if self.tree_items[idx].isSelected()
-        ]
+        return [_default_table_items[idx] for idx in range(len(self.tree_items)) if self.tree_items[idx].isSelected()]
 
     # setSelection is a bad name (name of a QTreeWidget method)
     def setSelectedElements(self, symbolList):

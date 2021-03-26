@@ -65,8 +65,8 @@ class Instrument:
         if isinstance(angle, float):
             self._angle = angle
         else:
-            raise ValueError("Invalid value of a detector angle (%s, type(%s) = %s; should be float)."
-                             % (angle, angle, type(angle)))
+            raise ValueError("Invalid value of a detector angle (%s, type(%s) = %s; should be float)." %
+                             (angle, angle, type(angle)))
 
     def __str__(self):
         return self._name
@@ -122,9 +122,9 @@ class Instrument:
                     default = parameters['settings_default']
                     logger.notice(f'Using default setting "{default}" for instrument "{self.get_name()}"')
                     return default
-                raise ValueError(f'{self.get_name()} instrument does not have a default setting, '
-                                 + 'and no setting was specified. Accepted settings: '
-                                 + ', '.join(parameters['settings'].keys()))
+                raise ValueError(f'{self.get_name()} instrument does not have a default setting, ' +
+                                 'and no setting was specified. Accepted settings: ' +
+                                 ', '.join(parameters['settings'].keys()))
 
             downcased_settings = {s.lower(): s for s in parameters['settings']}
             if setting.lower() in downcased_settings:
@@ -132,5 +132,4 @@ class Instrument:
 
             else:
                 raise ValueError(f'Setting "{setting}" is unknown for instrument {self.get_name()}. '
-                                 'Supported settings: '
-                                 + ', '.join(sorted(parameters['settings'].keys())))
+                                 'Supported settings: ' + ', '.join(sorted(parameters['settings'].keys())))

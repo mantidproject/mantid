@@ -5,8 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
-from mantid.api import (PythonAlgorithm, AlgorithmFactory,
-                        WorkspaceUnitValidator, MatrixWorkspaceProperty,
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, WorkspaceUnitValidator, MatrixWorkspaceProperty,
                         WorkspaceProperty, WorkspaceFactory)
 from mantid.kernel import (Direction, StringListValidator, logger)
 
@@ -46,15 +45,15 @@ class PDConvertReciprocalSpace(PythonAlgorithm):
         Declare properties
         """
         allowed_units = WorkspaceUnitValidator("MomentumTransfer")
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace",
+                                                     "",
                                                      direction=Direction.Input,
                                                      validator=allowed_units),
                              doc="Input workspace with units of momentum transfer")
         functions = [SQ, FQ, FKQ, DCS]
         self.declareProperty("From", SQ, StringListValidator(functions), "Function type in the input workspace")
         self.declareProperty("To", SQ, StringListValidator(functions), "Function type in the output workspace")
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                                               direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace')
 
     def validateInputs(self):
@@ -97,15 +96,35 @@ class PDConvertReciprocalSpace(PythonAlgorithm):
             logger.warning('The input and output functions are the same. Nothing to be done')
             return
         c = Converter()
-        transformation = {SQ: {FQ: c.S_to_F, FKQ: c.S_to_FK, DCS: c.S_to_DCS},
-                          FQ: {SQ: c.F_to_S, FKQ: c.F_to_FK, DCS: c.F_to_DCS},
-                          FKQ: {SQ: c.FK_to_S, FQ: c.FK_to_F, DCS: c.FK_to_DCS},
-                          DCS: {SQ: c.DCS_to_S, FQ: c.DCS_to_F, FKQ: c.DCS_to_FK}}
+        transformation = {
+            SQ: {
+                FQ: c.S_to_F,
+                FKQ: c.S_to_FK,
+                DCS: c.S_to_DCS
+            },
+            FQ: {
+                SQ: c.F_to_S,
+                FKQ: c.F_to_FK,
+                DCS: c.F_to_DCS
+            },
+            FKQ: {
+                SQ: c.FK_to_S,
+                FQ: c.FK_to_F,
+                DCS: c.FK_to_DCS
+            },
+            DCS: {
+                SQ: c.DCS_to_S,
+                FQ: c.DCS_to_F,
+                FKQ: c.DCS_to_FK
+            }
+        }
 
         if input_ws.sample().getMaterial():
-            sample_kwargs = {"<b_coh>^2": input_ws.sample().getMaterial().cohScatterLengthSqrd(),
-                             "<b_tot^2>": input_ws.sample().getMaterial().totalScatterLengthSqrd(),
-                             "rho": input_ws.sample().getMaterial().numberDensity}
+            sample_kwargs = {
+                "<b_coh>^2": input_ws.sample().getMaterial().cohScatterLengthSqrd(),
+                "<b_tot^2>": input_ws.sample().getMaterial().totalScatterLengthSqrd(),
+                "rho": input_ws.sample().getMaterial().numberDensity
+            }
         else:
             sample_kwargs = dict()
 

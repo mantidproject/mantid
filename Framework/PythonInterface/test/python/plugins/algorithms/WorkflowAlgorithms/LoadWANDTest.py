@@ -9,12 +9,11 @@ import unittest
 
 
 class LoadWANDTest(unittest.TestCase):
-
     def test(self):
         ws = LoadWAND('HB2C_7000.nxs.h5', Grouping='2x2')
         self.assertTrue(ws)
         self.assertEqual(ws.blocksize(), 1)
-        self.assertEqual(ws.getNumberHistograms(), 1966080//4)
+        self.assertEqual(ws.getNumberHistograms(), 1966080 // 4)
         self.assertEqual(ws.readY(257775), 4)
         self.assertEqual(ws.run().getProtonCharge(), 907880)
         self.assertAlmostEqual(ws.run().getGoniometer().getEulerAngles()[0], -142.6)
@@ -27,11 +26,11 @@ class LoadWANDTest(unittest.TestCase):
         self.assertTrue(ws.detectorInfo().isMasked(1))
         self.assertFalse(ws.detectorInfo().isMasked(2))
         self.assertTrue(ws.detectorInfo().isMasked(512))
-        self.assertTrue(ws.detectorInfo().isMasked(480*512*8-256))
-        self.assertFalse(ws.detectorInfo().isMasked(480*512*8-256-512*6))
+        self.assertTrue(ws.detectorInfo().isMasked(480 * 512 * 8 - 256))
+        self.assertFalse(ws.detectorInfo().isMasked(480 * 512 * 8 - 256 - 512 * 6))
 
         # Check x dimension
-        x=ws.getXDimension()
+        x = ws.getXDimension()
         self.assertEqual(x.name, 'Wavelength')
         self.assertEqual(x.getNBins(), 1)
         self.assertEqual(x.getNBoundaries(), 2)

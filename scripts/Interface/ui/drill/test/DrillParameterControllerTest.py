@@ -13,19 +13,16 @@ from Interface.ui.drill.model.DrillParameterController \
 
 
 class DrillParameterControllerTest(unittest.TestCase):
-
     def setUp(self):
         # mock sapi
-        patch = mock.patch(
-                'Interface.ui.drill.model.DrillParameterController.sapi')
+        patch = mock.patch('Interface.ui.drill.model.DrillParameterController.sapi')
         self.mSapi = patch.start()
         self.addCleanup(patch.stop)
 
         self.controller = DrillParameterController("test")
 
     def test_signals(self):
-        self.assertTrue(isinstance(self.controller.signals,
-                                   DrillControllerSignals))
+        self.assertTrue(isinstance(self.controller.signals, DrillControllerSignals))
 
     def test_addParameter(self):
         p = DrillParameter("name", "value", 0)

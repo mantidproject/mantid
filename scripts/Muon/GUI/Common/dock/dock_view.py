@@ -8,7 +8,6 @@ from qtpy import QtWidgets, QtCore
 
 
 class DockView(QtWidgets.QMainWindow):
-
     def __init__(self, parent=None):
         super(DockView, self).__init__(parent)
         self.widgets = []
@@ -32,17 +31,15 @@ class DockView(QtWidgets.QMainWindow):
         for j in range(2, len(self.docks), 1):
             self.tabifyDockWidget(self.docks[0], self.docks[j])
         # put tabs on the top of the page
-        self.setTabPosition(
-            QtCore.Qt.LeftDockWidgetArea,
-            QtWidgets.QTabWidget.North)
+        self.setTabPosition(QtCore.Qt.LeftDockWidgetArea, QtWidgets.QTabWidget.North)
         # open to first tab
         self.docks[0].show()
         self.docks[0].raise_()
 
     def keepDocksOpen(self):
         for j in range(0, len(self.docks), 1):
-            self.docks[j].setFeatures(
-                QtWidgets.QDockWidget.DockWidgetClosable and QtWidgets.QDockWidget.DockWidgetFloatable)
+            self.docks[j].setFeatures(QtWidgets.QDockWidget.DockWidgetClosable
+                                      and QtWidgets.QDockWidget.DockWidgetFloatable)
 
     def closeEvent(self, event):
         for j in range(len(self.docks) - 1, -1, -1):

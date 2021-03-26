@@ -5,9 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import Direction
-from mantid.api import (PythonAlgorithm, AlgorithmFactory, FileAction,
-                        FileProperty, WorkspaceProperty, MatrixWorkspaceProperty,
-                        PropertyMode, WorkspaceFactory, AnalysisDataService)
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, FileAction, FileProperty, WorkspaceProperty,
+                        MatrixWorkspaceProperty, PropertyMode, WorkspaceFactory, AnalysisDataService)
 from mantid.simpleapi import LoadInstrument, AddSampleLogMultiple, SetGoniometer
 from mantid.simpleapi import ExtractSpectra, MaskDetectors, RemoveMaskedSpectra
 from mantid.simpleapi import RotateInstrumentComponent
@@ -42,20 +41,20 @@ class LoadEXED(PythonAlgorithm):
         One for the detectors and another for the monitor."""
 
     def PyInit(self):
-        self.declareProperty(FileProperty(name="Filename", defaultValue="",
-                                          action=FileAction.Load,
-                                          extensions=["raw"]),
+        self.declareProperty(FileProperty(name="Filename", defaultValue="", action=FileAction.Load, extensions=["raw"]),
                              doc="Data file produced by egraph.")
 
-        self.declareProperty(FileProperty(name="InstrumentXML", defaultValue="",
+        self.declareProperty(FileProperty(name="InstrumentXML",
+                                          defaultValue="",
                                           action=FileAction.OptionalLoad,
                                           extensions=["xml"]),
                              doc="Instrument definition file. If no file is specified, the default idf is used.")
 
-        self.declareProperty('AngleOverride', -255.0,
+        self.declareProperty('AngleOverride',
+                             -255.0,
                              doc="Rotation angle (degrees) of the EXED magnet."
-                                 "\nThis should be read from the data file!\n"
-                                 "Only change the value if the file has an incomplete header!")
+                             "\nThis should be read from the data file!\n"
+                             "Only change the value if the file has an incomplete header!")
 
         self.declareProperty(MatrixWorkspaceProperty(name="OutputWorkspace",
                                                      defaultValue="",
@@ -91,8 +90,7 @@ class LoadEXED(PythonAlgorithm):
         # CreateWorkspace(OutputWorkspace=wsn,DataX=xdata,DataY=ydata,DataE=edata,
         #                NSpec=nrows,UnitX='TOF',WorkspaceTitle='Data',YUnitLabel='Counts')
         nr, nc = ydata.shape
-        ws = WorkspaceFactory.create("Workspace2D", NVectors=nr,
-                                     XLength=nc + 1, YLength=nc)
+        ws = WorkspaceFactory.create("Workspace2D", NVectors=nr, XLength=nc + 1, YLength=nc)
         for i in range(nrows):
             ws.setX(i, xdata)
             ws.setY(i, ydata[i])
@@ -113,8 +111,10 @@ class LoadEXED(PythonAlgorithm):
             ws.getSpectrum(i).setDetectorID(det_udet[i])
         # Sample_logs the header values are written into the sample logs
         log_names = [str(sl.encode('ascii', 'ignore').decode()) for sl in parms_dict.keys()]
-        log_values = [str(sl.encode('ascii', 'ignore').decode()) if isinstance(sl, UnicodeType) else str(sl) for sl in
-                      parms_dict.values()]
+        log_values = [
+            str(sl.encode('ascii', 'ignore').decode()) if isinstance(sl, UnicodeType) else str(sl)
+            for sl in parms_dict.values()
+        ]
         for i in range(len(log_values)):
             if ('nan' in log_values[i]) or ('NaN' in log_values[i]):
                 log_values[i] = '-1.0'
@@ -210,8 +210,8 @@ class LoadEXED(PythonAlgorithm):
                 self.log().information("OMEGA_MAG read as " + str(parms_dict['phi']))
         else:
             parms_dict['phi'] = str(self.override_angle)
-            self.log().warning(
-                "OMEGA_MAG taken from user input, not from the file. Current value: " + str(parms_dict['phi']))
+            self.log().warning("OMEGA_MAG taken from user input, not from the file. Current value: " +
+                               str(parms_dict['phi']))
         return parms_dict, det_udet, det_count, det_tbc, data
 
     def struct_data_read(self, fin, nrows, data_type='i', byte_size=4):

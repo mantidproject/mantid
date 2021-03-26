@@ -28,10 +28,7 @@ class PeaksWorkspaceSelectorModelTest(unittest.TestCase):
         self.assertEqual([], name_status)
 
     def test_zero_peaks_workspaces_gives_empty_names_list(self):
-        contents = {
-            "matrix": create_autospec(MatrixWorkspace),
-            "table": create_autospec(ITableWorkspace)
-        }
+        contents = {"matrix": create_autospec(MatrixWorkspace), "table": create_autospec(ITableWorkspace)}
         model = PeaksWorkspaceSelectorModel(self._create_mock_ads(contents))
 
         name_status = model.names_and_statuses()
@@ -54,10 +51,7 @@ class PeaksWorkspaceSelectorModelTest(unittest.TestCase):
             self.assertTrue(name in peaks_names)
 
     def test_default_check_status_false(self):
-        contents = {
-            "peaks1": create_autospec(IPeaksWorkspace),
-            "peaks2": create_autospec(IPeaksWorkspace)
-        }
+        contents = {"peaks1": create_autospec(IPeaksWorkspace), "peaks2": create_autospec(IPeaksWorkspace)}
         model = PeaksWorkspaceSelectorModel(self._create_mock_ads(contents))
 
         name_status = model.names_and_statuses()
@@ -66,10 +60,7 @@ class PeaksWorkspaceSelectorModelTest(unittest.TestCase):
             self.assertFalse(check_status)
 
     def test_supplied_names_checked_by_default(self):
-        contents = {
-            "peaks1": create_autospec(IPeaksWorkspace),
-            "peaks2": create_autospec(IPeaksWorkspace)
-        }
+        contents = {"peaks1": create_autospec(IPeaksWorkspace), "peaks2": create_autospec(IPeaksWorkspace)}
         checked = ["peaks2"]
         model = PeaksWorkspaceSelectorModel(self._create_mock_ads(contents), checked)
 

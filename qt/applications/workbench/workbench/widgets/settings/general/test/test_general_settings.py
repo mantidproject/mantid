@@ -67,8 +67,7 @@ class GeneralSettingsTest(unittest.TestCase):
         self.assert_connected_once(presenter.view.crystallography_convention,
                                    presenter.view.crystallography_convention.stateChanged)
 
-        self.assert_connected_once(presenter.view.use_open_gl,
-                                   presenter.view.use_open_gl.stateChanged)
+        self.assert_connected_once(presenter.view.use_open_gl, presenter.view.use_open_gl.stateChanged)
 
         self.assert_connected_once(presenter.view.show_invisible_workspaces,
                                    presenter.view.show_invisible_workspaces.stateChanged)
@@ -91,10 +90,8 @@ class GeneralSettingsTest(unittest.TestCase):
     def test_setup_general_group_signals(self):
         presenter = GeneralSettings(None)
 
-        self.assert_connected_once(presenter.view.main_font,
-                                   presenter.view.main_font.clicked)
-        self.assert_connected_once(presenter.view.window_behaviour,
-                                   presenter.view.window_behaviour.currentTextChanged)
+        self.assert_connected_once(presenter.view.main_font, presenter.view.main_font.clicked)
+        self.assert_connected_once(presenter.view.window_behaviour, presenter.view.window_behaviour.currentTextChanged)
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_facility_changed(self, mock_ConfigService):
@@ -181,17 +178,21 @@ class GeneralSettingsTest(unittest.TestCase):
         GeneralSettings(None)
 
         # calls().__bool__() are the calls to bool() on the retrieved value from ConfigService.getString
-        mock_CONF.get.assert_has_calls([call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value),
-                                        call().__bool__(),
-                                        call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value),
-                                        call().__bool__()])
+        mock_CONF.get.assert_has_calls([
+            call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value),
+            call().__bool__(),
+            call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value),
+            call().__bool__()
+        ])
 
-        mock_ConfigService.getString.assert_has_calls([call(GeneralProperties.PR_RECOVERY_ENABLED.value),
-                                                       call(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value),
-                                                       call(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value),
-                                                       call(GeneralProperties.USE_NOTIFICATIONS.value),
-                                                       call(GeneralProperties.CRYSTALLOGRAPY_CONV.value),
-                                                       call(GeneralProperties.OPENGL.value)])
+        mock_ConfigService.getString.assert_has_calls([
+            call(GeneralProperties.PR_RECOVERY_ENABLED.value),
+            call(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value),
+            call(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value),
+            call(GeneralProperties.USE_NOTIFICATIONS.value),
+            call(GeneralProperties.CRYSTALLOGRAPY_CONV.value),
+            call(GeneralProperties.OPENGL.value)
+        ])
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_project_recovery_enabled(self, mock_ConfigService):

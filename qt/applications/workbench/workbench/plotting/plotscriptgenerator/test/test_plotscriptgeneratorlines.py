@@ -9,6 +9,7 @@
 import unittest
 
 import matplotlib
+
 matplotlib.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 from copy import copy
@@ -18,10 +19,8 @@ from mantid.plots.utility import MantidAxType
 from unittest.mock import Mock, patch
 from mantid.simpleapi import CreateWorkspace, AddTimeSeriesLog
 from workbench.plotting.plotscriptgenerator.lines import (_get_plot_command_kwargs_from_line2d,
-                                                          _get_errorbar_specific_plot_kwargs,
-                                                          generate_plot_command,
-                                                          get_plot_command_kwargs,
-                                                          _get_mantid_specific_plot_kwargs)
+                                                          _get_errorbar_specific_plot_kwargs, generate_plot_command,
+                                                          get_plot_command_kwargs, _get_mantid_specific_plot_kwargs)
 
 from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string
 
@@ -43,13 +42,7 @@ LINE2D_KWARGS = {
     'visible': False,
     'zorder': 1.4,
 }
-ERRORBAR_ONLY_KWARGS = {
-    'ecolor': '#ff0000',
-    'elinewidth': 1.6,
-    'capsize': 1.7,
-    'capthick': 1.8,
-    'barsabove': True
-}
+ERRORBAR_ONLY_KWARGS = {'ecolor': '#ff0000', 'elinewidth': 1.6, 'capsize': 1.7, 'capthick': 1.8, 'barsabove': True}
 ERRORBAR_KWARGS = copy(LINE2D_KWARGS)
 ERRORBAR_KWARGS.update(ERRORBAR_ONLY_KWARGS)
 MANTID_ONLY_KWARGS = {'wkspIndex': 0, 'distribution': True}
@@ -89,8 +82,7 @@ class PlotScriptGeneratorLinesTest(unittest.TestCase):
         kwargs.update(MANTID_ONLY_KWARGS)
         line = self.ax.plot(self.test_ws, **kwargs)[0]
         output = generate_plot_command(line)
-        expected_command = ("plot({}, {})".format(self.test_ws.name(),
-                                                  convert_args_to_string(None, kwargs)))
+        expected_command = ("plot({}, {})".format(self.test_ws.name(), convert_args_to_string(None, kwargs)))
         self.assertEqual(expected_command, output)
 
     def test_generate_plot_command_returns_correct_string_for_sample_log(self):
@@ -103,8 +95,7 @@ class PlotScriptGeneratorLinesTest(unittest.TestCase):
         AddTimeSeriesLog(self.test_ws, Name="my_log", Time="2010-01-01T00:50:00", Value=100.2)
         line = self.ax.plot(self.test_ws, **kwargs)[0]
         output = generate_plot_command(line)
-        expected_command = ("plot({}, {})".format(self.test_ws.name(),
-                                                  convert_args_to_string(None, kwargs)))
+        expected_command = ("plot({}, {})".format(self.test_ws.name(), convert_args_to_string(None, kwargs)))
         self.assertEqual(expected_command, output)
 
     def test_generate_mantid_plot_kwargs_returns_correctly_for_plot_bin(self):
@@ -133,8 +124,7 @@ class PlotScriptGeneratorLinesTest(unittest.TestCase):
         kwargs.update(MANTID_ONLY_KWARGS)
         err_cont = self.ax.errorbar(self.test_ws, **kwargs)
         output = generate_plot_command(err_cont)
-        expected_command = ("errorbar({}, {})".format(self.test_ws.name(),
-                                                      convert_args_to_string(None, kwargs)))
+        expected_command = ("errorbar({}, {})".format(self.test_ws.name(), convert_args_to_string(None, kwargs)))
         self.assertEqual(expected_command, output)
 
     @patch(GET_MANTID_PLOT_KWARGS)

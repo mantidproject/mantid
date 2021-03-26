@@ -12,7 +12,6 @@ from qtpy import QtWidgets
 
 
 class MaxEntWidget(QtWidgets.QWidget):
-
     def __init__(self, load, parent=None):
         super(MaxEntWidget, self).__init__(parent)
         view = MaxEntView(parent)

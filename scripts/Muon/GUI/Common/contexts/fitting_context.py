@@ -40,7 +40,6 @@ def _create_unique_param_lookup(parameter_workspace, global_parameters):
     :param parameter_workspace: A raw parameter table from Fit
     :param global_parameters: A list of global parameters(if any)
     """
-
     def is_in(unique_params, param_name):
         # return 2-tuple(already exists, is_global)
         if not global_parameters:
@@ -69,8 +68,7 @@ def _create_unique_param_lookup(parameter_workspace, global_parameters):
         name = row[NAME_COL]
         exists, is_global = is_in(unique_params, name)
         if not exists:
-            parameter = Parameter(name, row[VALUE_COL], row[ERRORS_COL],
-                                  is_global)
+            parameter = Parameter(name, row[VALUE_COL], row[ERRORS_COL], is_global)
             unique_params[parameter.pretty_name] = parameter
 
     return _move_globals_to_front(unique_params)
@@ -82,13 +80,11 @@ def _move_globals_to_front(unique_params):
     :param unique_params: An list containing the current parameters in the original order
     :return: The updated parameters list reordered
     """
-    return OrderedDict(
-        sorted(unique_params.items(), key=lambda x: not x[1].is_global))
+    return OrderedDict(sorted(unique_params.items(), key=lambda x: not x[1].is_global))
 
 
 class Parameter(object):
     """Hold single parameter from a fit"""
-
     def __init__(self, raw_name, value, error, isglobal):
         """
         :param raw_name: The raw name of the parameter from Fit. The first "fx." prefix
@@ -125,7 +121,6 @@ class Parameter(object):
 
 class FitParameters(object):
     """Data-object encapsulating fit parameters for a single fit"""
-
     def __init__(self, parameter_workspace, global_parameters=None):
         """
         Initialize the fit parameters from a workspace
@@ -133,8 +128,7 @@ class FitParameters(object):
         """
         self._parameter_workspace = parameter_workspace
         self._global_parameters = global_parameters if global_parameters is not None else []
-        self._unique_params = _create_unique_param_lookup(
-            parameter_workspace, global_parameters)
+        self._unique_params = _create_unique_param_lookup(parameter_workspace, global_parameters)
 
     def __eq__(self, other):
         return self._parameter_workspace == other._parameter_workspace and \
@@ -176,7 +170,6 @@ class FitParameters(object):
 
 class FitInformation(object):
     """Data-object encapsulating a single fit"""
-
     def __init__(self,
                  parameter_workspace,
                  fit_function_name,
@@ -193,13 +186,11 @@ class FitInformation(object):
         :param global_parameters: An optional list of parameters
         that were tied together during the fit
         """
-        self._fit_parameters = FitParameters(parameter_workspace,
-                                             global_parameters)
+        self._fit_parameters = FitParameters(parameter_workspace, global_parameters)
         self.fit_function_name = fit_function_name
-        self.input_workspaces = [input_workspace] if isinstance(
-            input_workspace, str) else input_workspace
-        self.output_workspace_names = [output_workspace_names] if isinstance(
-            output_workspace_names, str) else output_workspace_names
+        self.input_workspaces = [input_workspace] if isinstance(input_workspace, str) else input_workspace
+        self.output_workspace_names = [output_workspace_names] if isinstance(output_workspace_names,
+                                                                             str) else output_workspace_names
 
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
@@ -270,10 +261,7 @@ class FitInformation(object):
                 except ValueError:
                     return prop.valueAsStr
 
-        values = [
-            value_from_workspace(wksp_name)
-            for wksp_name in self.output_workspace_names
-        ]
+        values = [value_from_workspace(wksp_name) for wksp_name in self.output_workspace_names]
         try:
             return np.mean(values)
         except TypeError:
@@ -292,7 +280,6 @@ class FittingContext(object):
        - parameters
        - function names
     """
-
     def __init__(self, fit_list=None):
         self.fit_list = fit_list if fit_list is not None else []
         # Register callbacks with this object to observe when new fits
@@ -324,8 +311,7 @@ class FittingContext(object):
         See FitInformation constructor for details are arguments.
         """
         self.add_fit(
-            FitInformation(parameter_workspace, fit_function_name,
-                           input_workspace, output_workspace_names,
+            FitInformation(parameter_workspace, fit_function_name, input_workspace, output_workspace_names,
                            global_parameters))
 
     def add_fit(self, fit):
@@ -366,8 +352,7 @@ class FittingContext(object):
         """
         return list(set([fit.fit_function_name for fit in self.fit_list]))
 
-    def find_output_workspaces_for_input_workspace_name(
-            self, input_workspace_name):
+    def find_output_workspaces_for_input_workspace_name(self, input_workspace_name):
         """
         Find the fits in the list whose input workspace matches
         :param input_workspace_name: The name of the input_workspace
@@ -381,8 +366,7 @@ class FittingContext(object):
 
         return workspace_list
 
-    def find_fit_for_input_workspace_list_and_function(
-            self, input_workspace_list, fit_function_name):
+    def find_fit_for_input_workspace_list_and_function(self, input_workspace_list, fit_function_name):
         """
         Find the fit in the list whose input workspace matches the input workspace list
         and the specified fit function name
@@ -426,9 +410,7 @@ class FittingContext(object):
         FitInformation.log_names
         :return: A list of names of logs
         """
-        return [
-            name for fit in self.fit_list for name in fit.log_names(filter_fn)
-        ]
+        return [name for fit in self.fit_list for name in fit.log_names(filter_fn)]
 
     def clear(self):
         fits_to_remove = self.fit_list.copy()

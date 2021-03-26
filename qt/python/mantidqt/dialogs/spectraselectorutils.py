@@ -46,8 +46,10 @@ def get_spectra_selection(workspaces, parent_widget=None, show_colorfill_btn=Fal
         selection.wksp_indices = [0]
         return selection
     else:
-        selection_dlg = SpectraSelectionDialog(workspaces, parent=parent_widget,
-                                               show_colorfill_btn=show_colorfill_btn, overplot=overplot,
+        selection_dlg = SpectraSelectionDialog(workspaces,
+                                               parent=parent_widget,
+                                               show_colorfill_btn=show_colorfill_btn,
+                                               overplot=overplot,
                                                advanced=advanced)
         res = selection_dlg.exec_()
         if res == SpectraSelectionDialog.Rejected:

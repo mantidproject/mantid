@@ -13,14 +13,11 @@ from collections import OrderedDict
 from numpy import array
 
 from unittest.mock import patch, Mock
-from workbench.plotting.plotscriptgenerator.utils import (convert_args_to_string,
-                                                          get_plotted_workspaces_names,
-                                                          clean_variable_name,
-                                                          generate_workspace_retrieval_commands)
+from workbench.plotting.plotscriptgenerator.utils import (convert_args_to_string, get_plotted_workspaces_names,
+                                                          clean_variable_name, generate_workspace_retrieval_commands)
 
 
 class PlotScriptGeneratorUtilsTest(unittest.TestCase):
-
     def test_convert_args_to_string_returns_correct_string(self):
         kwargs_dict = OrderedDict({
             'key0': 'val0',
@@ -39,10 +36,7 @@ class PlotScriptGeneratorUtilsTest(unittest.TestCase):
         self.assertEqual(expected_str, convert_args_to_string(None, kwargs_dict))
 
     def test_get_plotted_workspace_names_returns_list_of_workspace_names(self):
-        mock_axes = [
-            Mock(tracked_workspaces={'test_ws': None}),
-            Mock(tracked_workspaces={'test_ws1': None})
-        ]
+        mock_axes = [Mock(tracked_workspaces={'test_ws': None}), Mock(tracked_workspaces={'test_ws1': None})]
         mock_fig = Mock(get_axes=lambda: mock_axes)
         plotted_workspaces = get_plotted_workspaces_names(mock_fig)
         self.assertEqual(['test_ws', 'test_ws1'], sorted(plotted_workspaces))

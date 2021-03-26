@@ -13,7 +13,6 @@ from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 
 @start_qapplication
 class LoadRunWidgetViewTest(unittest.TestCase):
-
     def setUp(self):
         self.view = LoadRunWidgetView()
         self.view.run_edit.insert('')

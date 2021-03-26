@@ -20,8 +20,14 @@ class FlatPlatePaalmanPingsCorrectionTest(systemtesting.MantidSystemTest):
         for i in range(18):
             ws.setX(i, val[i, :])
 
-    def do_FlatPlatePaalmanPingsTest(self, ws, ws_can, mode, name, sample_thickness = 0.2, can_front_thickness=0.05,
-                                     can_back_thickness = 0.05):
+    def do_FlatPlatePaalmanPingsTest(self,
+                                     ws,
+                                     ws_can,
+                                     mode,
+                                     name,
+                                     sample_thickness=0.2,
+                                     can_front_thickness=0.05,
+                                     can_back_thickness=0.05):
         """
         The output workspaces in the system tests were verified by Miguel Gonzalez gonzalezm@ill.fr.
 
@@ -35,13 +41,20 @@ class FlatPlatePaalmanPingsCorrectionTest(systemtesting.MantidSystemTest):
         :param mode: Direct, Indirect, Elastic or Efixed
         :return: Nothing
         """
-        FPPP_Result = FlatPlatePaalmanPingsCorrection(SampleWorkspace=ws, Emode=mode, Efixed=2.08,
+        FPPP_Result = FlatPlatePaalmanPingsCorrection(SampleWorkspace=ws,
+                                                      Emode=mode,
+                                                      Efixed=2.08,
                                                       SampleChemicalFormula='V',
-                                                      SampleDensity=0.0704565, SampleDensityType='Number Density',
-                                                      SampleThickness=sample_thickness, SampleAngle=-45,
-                                                      CanWorkspace=ws_can, CanChemicalFormula='Ti',
-                                                      CanDensity=0.0567, CanDensityType='Number Density',
-                                                      CanFrontThickness=can_front_thickness, CanBackThickness=can_back_thickness)
+                                                      SampleDensity=0.0704565,
+                                                      SampleDensityType='Number Density',
+                                                      SampleThickness=sample_thickness,
+                                                      SampleAngle=-45,
+                                                      CanWorkspace=ws_can,
+                                                      CanChemicalFormula='Ti',
+                                                      CanDensity=0.0567,
+                                                      CanDensityType='Number Density',
+                                                      CanFrontThickness=can_front_thickness,
+                                                      CanBackThickness=can_back_thickness)
 
         LoadNexusProcessed(Filename="FlatPlatePaalmanPings_" + name + ".nxs", OutputWorkspace='ref')
         result = CompareWorkspaces(Workspace1=FPPP_Result, Workspace2='ref', Tolerance=1e-6, CheckInstrument=False)

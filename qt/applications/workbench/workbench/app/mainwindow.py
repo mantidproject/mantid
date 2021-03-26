@@ -24,8 +24,7 @@ from workbench.widgets.settings.presenter import SettingsPresenter
 # -----------------------------------------------------------------------------
 from qtpy.QtCore import (QEventLoop, Qt, QPoint, QSize)  # noqa
 from qtpy.QtGui import (QColor, QFontDatabase, QGuiApplication, QIcon, QPixmap)  # noqa
-from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog, QMainWindow,
-                            QSplashScreen, QMessageBox)  # noqa
+from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog, QMainWindow, QSplashScreen, QMessageBox)  # noqa
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
 from mantidqt.interfacemanager import InterfaceManager  # noqa
 from mantidqt.widgets import manageuserdirectories  # noqa
@@ -40,7 +39,7 @@ from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 from workbench.utils.windowfinder import find_all_windows_that_are_savable  # noqa
 from workbench.utils.workspacehistorygeneration import get_all_workspace_history_from_ads  # noqa
 from workbench.projectrecovery.projectrecovery import ProjectRecovery  # noqa
-from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu # noqa
+from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu  # noqa
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback  # noqa
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall  # noqa
 from workbench.config import get_window_config
@@ -58,15 +57,13 @@ def _get_splash_image():
     # the proportion of the whole window size for the splash screen
     splash_screen_scaling = 0.25
     return QPixmap(':/images/MantidSplashScreen_4k.jpg').scaled(int(width * splash_screen_scaling),
-                                                                int(height * splash_screen_scaling),
-                                                                Qt.KeepAspectRatio,
+                                                                int(height * splash_screen_scaling), Qt.KeepAspectRatio,
                                                                 Qt.SmoothTransformation)
 
 
 SPLASH = QSplashScreen(_get_splash_image(), Qt.WindowStaysOnTopHint)
 SPLASH.show()
-SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft
-                   | Qt.AlignAbsolute, QColor(Qt.black))
+SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft | Qt.AlignAbsolute, QColor(Qt.black))
 # The event loop has not started - force event processing
 QApplication.processEvents(QEventLoop.AllEvents)
 
@@ -214,8 +211,7 @@ class MainWindow(QMainWindow):
         if not self.splash:
             return
         if msg:
-            self.splash.showMessage(msg, Qt.AlignBottom | Qt.AlignLeft | Qt.AlignAbsolute,
-                                    QColor(Qt.black))
+            self.splash.showMessage(msg, Qt.AlignBottom | Qt.AlignLeft | Qt.AlignAbsolute, QColor(Qt.black))
         QApplication.processEvents(QEventLoop.AllEvents)
 
     def create_menus(self):
@@ -227,36 +223,21 @@ class MainWindow(QMainWindow):
     def create_actions(self):
         # --- general application menu options --
         # file menu
-        action_open = create_action(self,
-                                    "Open Script",
-                                    on_triggered=self.open_file,
-                                    shortcut="Ctrl+O")
+        action_open = create_action(self, "Open Script", on_triggered=self.open_file, shortcut="Ctrl+O")
         action_load_project = create_action(self, "Open Project", on_triggered=self.load_project)
-        action_save_script = create_action(self,
-                                           "Save Script",
-                                           on_triggered=self.save_script,
-                                           shortcut="Ctrl+S")
-        action_save_script_as = create_action(self,
-                                              "Save Script as...",
-                                              on_triggered=self.save_script_as)
+        action_save_script = create_action(self, "Save Script", on_triggered=self.save_script, shortcut="Ctrl+S")
+        action_save_script_as = create_action(self, "Save Script as...", on_triggered=self.save_script_as)
         action_generate_ws_script = create_action(self,
                                                   "Generate Recovery Script",
                                                   on_triggered=self.generate_script_from_workspaces)
         action_save_project = create_action(self, "Save Project", on_triggered=self.save_project)
-        action_save_project_as = create_action(self,
-                                               "Save Project as...",
-                                               on_triggered=self.save_project_as)
+        action_save_project_as = create_action(self, "Save Project as...", on_triggered=self.save_project_as)
         action_manage_directories = create_action(self,
                                                   "Manage User Directories",
                                                   on_triggered=self.open_manage_directories)
-        action_script_repository = create_action(self,
-                                                 "Script Repository",
-                                                 on_triggered=self.open_script_repository)
+        action_script_repository = create_action(self, "Script Repository", on_triggered=self.open_script_repository)
         action_settings = create_action(self, "Settings", on_triggered=self.open_settings_window)
-        action_quit = create_action(self,
-                                    "&Quit",
-                                    on_triggered=self.close,
-                                    shortcut="Ctrl+Q")
+        action_quit = create_action(self, "&Quit", on_triggered=self.close, shortcut="Ctrl+Q")
         action_clear_all_memory = create_action(self,
                                                 "Clear All Memory",
                                                 on_triggered=self.clear_all_memory_action,
@@ -267,9 +248,9 @@ class MainWindow(QMainWindow):
 
         self.file_menu_actions = [
             action_open, action_load_project, None, action_save_script, action_save_script_as,
-            menu_recently_closed_scripts, action_generate_ws_script, None, action_save_project,
-            action_save_project_as, None, action_settings, None, action_manage_directories, None,
-            action_script_repository, None, action_clear_all_memory, None, action_quit
+            menu_recently_closed_scripts, action_generate_ws_script, None, action_save_project, action_save_project_as,
+            None, action_settings, None, action_manage_directories, None, action_script_repository, None,
+            action_clear_all_memory, None, action_quit
         ]
 
         # view menu
@@ -290,22 +271,17 @@ class MainWindow(QMainWindow):
                                            on_triggered=self.open_mantid_help,
                                            shortcut='F1',
                                            shortcut_context=Qt.ApplicationShortcut)
-        action_algorithm_descriptions = create_action(
-            self, 'Algorithm Descriptions', on_triggered=self.open_algorithm_descriptions_help)
-        action_mantid_concepts = create_action(self,
-                                               "Mantid Concepts",
-                                               on_triggered=self.open_mantid_concepts_help)
-        action_mantid_homepage = create_action(self,
-                                               "Mantid Homepage",
-                                               on_triggered=self.open_mantid_homepage)
-        action_mantid_forum = create_action(self,
-                                            "Mantid Forum",
-                                            on_triggered=self.open_mantid_forum)
+        action_algorithm_descriptions = create_action(self,
+                                                      'Algorithm Descriptions',
+                                                      on_triggered=self.open_algorithm_descriptions_help)
+        action_mantid_concepts = create_action(self, "Mantid Concepts", on_triggered=self.open_mantid_concepts_help)
+        action_mantid_homepage = create_action(self, "Mantid Homepage", on_triggered=self.open_mantid_homepage)
+        action_mantid_forum = create_action(self, "Mantid Forum", on_triggered=self.open_mantid_forum)
         action_about = create_action(self, "About Mantid Workbench", on_triggered=self.open_about)
 
         self.help_menu_actions = [
-            action_mantid_help, action_mantid_concepts, action_algorithm_descriptions, None,
-            action_mantid_homepage, action_mantid_forum, None, action_about
+            action_mantid_help, action_mantid_concepts, action_algorithm_descriptions, None, action_mantid_homepage,
+            action_mantid_forum, None, action_about
         ]
 
     def create_widget_actions(self):
@@ -374,8 +350,8 @@ class MainWindow(QMainWindow):
                             lambda checked_py, script=script: self.launch_custom_python_gui(script))
                     else:
                         action = submenu.addAction(name)
-                        action.triggered.connect(lambda checked_cpp, name=name, key=key: self.
-                                                 launch_custom_cpp_gui(name, key))
+                        action.triggered.connect(
+                            lambda checked_cpp, name=name, key=key: self.launch_custom_cpp_gui(name, key))
         # these register scripts contain code to register encoders and decoders to work with project save before the
         # corresponding interface has been initialised. This is a temporary measure pending harmonisation of cpp/python
         # interfaces
@@ -455,17 +431,13 @@ class MainWindow(QMainWindow):
         for item in layout_keys:
             layout_options.append(self.create_load_layout_action(item, layout_dict[item]))
         layout_options.append(None)
-        action_settings = create_action(self,
-                                        "Settings",
-                                        on_triggered=self.open_settings_layout_window)
+        action_settings = create_action(self, "Settings", on_triggered=self.open_settings_layout_window)
         layout_options.append(action_settings)
 
         add_actions(self.view_menu_layouts, layout_options)
 
     def create_load_layout_action(self, layout_name, layout):
-        action_load_layout = create_action(self,
-                                           layout_name,
-                                           on_triggered=lambda: self.restoreState(layout))
+        action_load_layout = create_action(self, layout_name, on_triggered=lambda: self.restoreState(layout))
         return action_load_layout
 
     def prep_window_for_reset(self):
@@ -528,8 +500,7 @@ class MainWindow(QMainWindow):
             for column in widgets_layout:
                 for i in range(len(column) - 1):
                     first_row, second_row = column[i], column[i + 1]
-                    self.splitDockWidget(first_row[0].dockwidget, second_row[0].dockwidget,
-                                         Qt.Vertical)
+                    self.splitDockWidget(first_row[0].dockwidget, second_row[0].dockwidget, Qt.Vertical)
             # and finally tabify those in the same position
             for column in widgets_layout:
                 for row in column:
@@ -646,8 +617,8 @@ class MainWindow(QMainWindow):
         Creates Question QMessageBox to check user wants to clear all memory
         when action is pressed from file menu
         """
-        msg = QMessageBox(QMessageBox.Question,
-                          "Clear All", "All workspaces and windows will be removed.\nAre you sure?")
+        msg = QMessageBox(QMessageBox.Question, "Clear All",
+                          "All workspaces and windows will be removed.\nAre you sure?")
         msg.addButton(QMessageBox.Ok)
         msg.addButton(QMessageBox.Cancel)
         msg.setWindowIcon(QIcon(':/images/MantidIcon.ico'))

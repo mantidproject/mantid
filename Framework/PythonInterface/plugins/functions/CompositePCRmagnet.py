@@ -11,7 +11,6 @@ import numpy as np
 
 
 class CompositePCRmagnet(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 

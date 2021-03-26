@@ -33,7 +33,6 @@ class IdealTube(object):
     * :meth:`~ideal_tube.IdealTube.getFunctionalForms`
 
    """
-
     def __init__(self):
         """
         Create empty instance
@@ -41,7 +40,7 @@ class IdealTube(object):
         self.positions = np.empty(0, dtype=float)  # position of the points in metres
         self.functionalForms = []  # function form of points 1=peak 2=edge. peaks assumed if [].
 
-    def setArray (self, array):
+    def setArray(self, array):
         """
        Construct an ideal tube directly from an array of positions
 
@@ -54,7 +53,7 @@ class IdealTube(object):
         """Define the functional form for the peaks"""
         self.functionalForms = form
 
-    def setPositionsAndForm (self, pos, form):
+    def setPositionsAndForm(self, pos, form):
         """
        Construct and ideal tube directly from an array of positions and functional forms
 
@@ -76,11 +75,13 @@ class IdealTube(object):
 
         """
         #Construct Ideal tube for 3 point calibration of MERLIN standard tube (code could be put into a function)
-        pixelLen = activeTubeLen/1024  # Pixel length
+        pixelLen = activeTubeLen / 1024  # Pixel length
 
         # we then convert idealAP, idealCP and idealBP to Y coordinates and put into ideal tube array
-        self.positions = np.array([idealAP*pixelLen - activeTubeLen/2,
-                                   idealCP*pixelLen - activeTubeLen/2, idealBP*pixelLen - activeTubeLen/2])
+        self.positions = np.array([
+            idealAP * pixelLen - activeTubeLen / 2, idealCP * pixelLen - activeTubeLen / 2,
+            idealBP * pixelLen - activeTubeLen / 2
+        ])
         self.functionalForms = [2, 1, 2]
 
     def getArray(self):

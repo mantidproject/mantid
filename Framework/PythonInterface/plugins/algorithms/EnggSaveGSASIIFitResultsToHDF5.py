@@ -63,15 +63,18 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
 
         refine_sigma = self.getProperty(self.PROP_REFINE_SIGMA).value
         if refine_sigma:
-            issues.update(self._wrong_number_warning_dict(self.PROP_SIGMA, num_runs,
-                                                          " when {} is True".format(self.PROP_REFINE_SIGMA)))
+            issues.update(
+                self._wrong_number_warning_dict(self.PROP_SIGMA, num_runs,
+                                                " when {} is True".format(self.PROP_REFINE_SIGMA)))
         refine_gamma = self.getProperty(self.PROP_REFINE_GAMMA).value
         if refine_gamma:
-            issues.update(self._wrong_number_warning_dict(self.PROP_GAMMA, num_runs,
-                                                          " when {} is True".format(self.PROP_REFINE_GAMMA)))
+            issues.update(
+                self._wrong_number_warning_dict(self.PROP_GAMMA, num_runs,
+                                                " when {} is True".format(self.PROP_REFINE_GAMMA)))
         if num_runs > 1:
-            issues.update(self._wrong_number_warning_dict(self.PROP_RUN_NUMBERS, num_runs,
-                                                          " when saving multiple refinement results"))
+            issues.update(
+                self._wrong_number_warning_dict(self.PROP_RUN_NUMBERS, num_runs,
+                                                " when saving multiple refinement results"))
 
         return issues
 
@@ -79,49 +82,54 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
         self.declareProperty(StringArrayProperty(name=self.PROP_LATTICE_PARAMS),
                              doc="Table workspace containing lattice parameters")
 
-        self.declareProperty(IntArrayProperty(name=self.PROP_RUN_NUMBERS),
-                             doc="The run number of each fitted run")
+        self.declareProperty(IntArrayProperty(name=self.PROP_RUN_NUMBERS), doc="The run number of each fitted run")
 
         self.declareProperty(IntArrayProperty(name=self.PROP_BANKIDS),
                              doc="Bank IDs of the workspaces a fit was run on "
-                                 "(1 for each workspace, in order. 1 for North, 2 for South)")
+                             "(1 for each workspace, in order. 1 for North, 2 for South)")
 
-        self.declareProperty(name=self.PROP_REFINEMENT_METHOD, defaultValue=self.PAWLEY_REFINEMENT,
+        self.declareProperty(name=self.PROP_REFINEMENT_METHOD,
+                             defaultValue=self.PAWLEY_REFINEMENT,
                              validator=StringListValidator([self.PAWLEY_REFINEMENT, self.RIETVELD_REFINEMENT]),
                              doc="Which refinement method was used")
 
-        self.declareProperty(name=self.PROP_XMIN, defaultValue=0.0,
-                             doc="Minimum TOF value used for refinement")
+        self.declareProperty(name=self.PROP_XMIN, defaultValue=0.0, doc="Minimum TOF value used for refinement")
 
-        self.declareProperty(name=self.PROP_XMAX, defaultValue=0.0,
-                             doc="Maximum TOF value used for refinement")
+        self.declareProperty(name=self.PROP_XMAX, defaultValue=0.0, doc="Maximum TOF value used for refinement")
 
-        self.declareProperty(name=self.PROP_PAWLEY_DMIN, defaultValue=0.0,
+        self.declareProperty(name=self.PROP_PAWLEY_DMIN,
+                             defaultValue=0.0,
                              doc="Minimum d spacing used for Pawley refinement")
 
-        self.declareProperty(name=self.PROP_PAWLEY_NEGATIVE_WEIGHT, defaultValue=0.0,
+        self.declareProperty(name=self.PROP_PAWLEY_NEGATIVE_WEIGHT,
+                             defaultValue=0.0,
                              doc="Negative weight penalty used in Pawley refinement")
 
-        self.declareProperty(name=self.PROP_REFINE_SIGMA, defaultValue=False,
+        self.declareProperty(name=self.PROP_REFINE_SIGMA,
+                             defaultValue=False,
                              doc="Whether to sigma profile coefficient was refined")
 
-        self.declareProperty(name=self.PROP_REFINE_GAMMA, defaultValue=False,
+        self.declareProperty(name=self.PROP_REFINE_GAMMA,
+                             defaultValue=False,
                              doc="Whether gamma profile coefficient was refined")
 
         self.declareProperty(FloatArrayProperty(name=self.PROP_SIGMA),
                              doc="GSAS-II profile coefficient sigma, "
-                                 "one for each run (or none if sigma wasn't refined)")
+                             "one for each run (or none if sigma wasn't refined)")
 
         self.declareProperty(FloatArrayProperty(name=self.PROP_GAMMA),
                              doc="GSAS-II profile coefficient gamma, "
-                                 "one for each run (or none if gamma wasn't refined)")
+                             "one for each run (or none if gamma wasn't refined)")
 
         self.declareProperty(FloatArrayProperty(name=self.PROP_RWP),
                              doc="Weighted profile R-factor, 'goodness-of-fit' measure. "
-                                 "One for each run")
+                             "One for each run")
 
-        self.declareProperty(FileProperty(name=self.PROP_FILENAME, defaultValue="", action=FileAction.Save,
-                                          extensions=[".hdf5", ".h5", ".hdf"]), doc="HDF5 file to save to")
+        self.declareProperty(FileProperty(name=self.PROP_FILENAME,
+                                          defaultValue="",
+                                          action=FileAction.Save,
+                                          extensions=[".hdf5", ".h5", ".hdf"]),
+                             doc="HDF5 file to save to")
 
     def PyExec(self):
         output_file_name = self.getProperty(self.PROP_FILENAME).value
@@ -152,8 +160,11 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
                 self._save_lattice_params(fit_results_group, lattice_params_ws=mtd[ws_name])
                 self._save_rwp(fit_results_group, rwp=rwps[i])
                 self._save_profile_coefficients(fit_results_group,
-                                                refine_sigma=refine_sigma, refine_gamma=refine_gamma,
-                                                sigmas=sigmas, gammas=gammas, index=i)
+                                                refine_sigma=refine_sigma,
+                                                refine_gamma=refine_gamma,
+                                                sigmas=sigmas,
+                                                gammas=gammas,
+                                                index=i)
 
     def _wrong_number_warning_dict(self, prop_name, num_runs, condition=""):
         prop = self.getProperty(prop_name).value
@@ -184,11 +195,9 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
     def _save_refinement_params(self, results_group):
         refinement_params_group = results_group.create_group(name=self.REFINEMENT_PARAMS_GROUP_NAME)
 
-        mandatory_properties = {self.PROP_REFINEMENT_METHOD,
-                                self.PROP_REFINE_SIGMA,
-                                self.PROP_REFINE_GAMMA,
-                                self.PROP_XMIN,
-                                self.PROP_XMAX}
+        mandatory_properties = {
+            self.PROP_REFINEMENT_METHOD, self.PROP_REFINE_SIGMA, self.PROP_REFINE_GAMMA, self.PROP_XMIN, self.PROP_XMAX
+        }
 
         for prop_name in mandatory_properties:
             self._copy_property_to_dataset(refinement_params_group, prop_name)

@@ -18,8 +18,7 @@ from mantid.api import AnalysisDataService as ADS, IMDEventWorkspace  # noqa
 from mantid.dataobjects import MDHistoWorkspace, MaskWorkspace  # noqa
 from mantidqt.project import workspacesaver
 from unittest import mock
-from mantid.simpleapi import (CreateSampleWorkspace, CreateMDHistoWorkspace, LoadMD, LoadMask, MaskDetectors,  # noqa
-                              ExtractMask, GroupWorkspaces)  # noqa
+from mantid.simpleapi import (CreateSampleWorkspace, CreateMDHistoWorkspace, LoadMD, GroupWorkspaces)
 
 
 class WorkspaceSaverTest(unittest.TestCase):
@@ -61,8 +60,12 @@ class WorkspaceSaverTest(unittest.TestCase):
 
     def test_when_MDWorkspace_is_in_ADS(self):
         ws_saver = workspacesaver.WorkspaceSaver(self.working_directory)
-        ws1 = CreateMDHistoWorkspace(SignalInput='1,2,3,4,5,6,7,8,9', ErrorInput='1,1,1,1,1,1,1,1,1',
-                                     Dimensionality='2', Extents='-1,1,-1,1', NumberOfBins='3,3', Names='A,B',
+        ws1 = CreateMDHistoWorkspace(SignalInput='1,2,3,4,5,6,7,8,9',
+                                     ErrorInput='1,1,1,1,1,1,1,1,1',
+                                     Dimensionality='2',
+                                     Extents='-1,1,-1,1',
+                                     NumberOfBins='3,3',
+                                     Names='A,B',
                                      Units='U,T')
         ws1_name = "ws1"
 
@@ -88,8 +91,9 @@ class WorkspaceSaverTest(unittest.TestCase):
         ws_saver.save_workspaces(["group2"])
 
         self.assertListEqual(["group1", "group2", "ws1", "ws2", "ws3", "ws4"], ADS.getObjectNames())
-        logger.warning.assert_called_with(u'Couldn\'t save workspace in project: "group2" because SaveNexusProcessed-v1: '
-                                          u'NeXus files do not support nested groups of groups')
+        logger.warning.assert_called_with(
+            u'Couldn\'t save workspace in project: "group2" because SaveNexusProcessed-v1: '
+            u'NeXus files do not support nested groups of groups')
 
     def _load_MDWorkspace_and_test_it(self, save_name):
         filename = self.working_directory + '/' + save_name + ".nxs"

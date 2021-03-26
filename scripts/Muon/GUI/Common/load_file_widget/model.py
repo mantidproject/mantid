@@ -11,7 +11,6 @@ import Muon.GUI.Common.utilities.load_utils as load_utils
 
 
 class BrowseFileWidgetModel(object):
-
     def __init__(self, loaded_data_store=MuonLoadData(), context=None):
         # Temporary list of filenames used for load thread
         self._filenames = []
@@ -59,7 +58,10 @@ class BrowseFileWidgetModel(object):
                 instrument_from_workspace = "PSI"
 
             self._loaded_data_store.remove_data(run=[run])
-            self._loaded_data_store.add_data(run=[run], workspace=ws, filename=filename, instrument=instrument_from_workspace)
+            self._loaded_data_store.add_data(run=[run],
+                                             workspace=ws,
+                                             filename=filename,
+                                             instrument=instrument_from_workspace)
         if failed_files:
             message = load_utils.exception_message_for_failed_files(failed_files)
             raise ValueError(message)
@@ -90,7 +92,8 @@ class BrowseFileWidgetModel(object):
         return self._loaded_data_store.get_data(**kwargs)
 
     def get_instrument_from_latest_run(self):
-        instrument = self._loaded_data_store.get_latest_data()['workspace']['OutputWorkspace'][0].workspace.getInstrument().getName()
+        instrument = self._loaded_data_store.get_latest_data(
+        )['workspace']['OutputWorkspace'][0].workspace.getInstrument().getName()
         if instrument:
             return instrument
         else:

@@ -45,12 +45,11 @@ from workbench.plotting.plothelppages import PlotHelpPages
 
 
 def _replace_workspace_name_in_string(old_name, new_name, string):
-    return re.sub(rf'\b{old_name}\b', new_name, string)
+    return re.sub(r'\b{}\b'.format(old_name), new_name, string)
 
 
 def _catch_exceptions(func):
     """Catch all exceptions in method and print a traceback to stderr"""
-
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -151,8 +150,8 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
                     ax.wsName = newName
                 ax.make_legend()
             ax.set_title(_replace_workspace_name_in_string(oldName, newName, ax.get_title()))
-        self.canvas.set_window_title(
-            _replace_workspace_name_in_string(oldName, newName, self.canvas.get_window_title()))
+        self.canvas.set_window_title(_replace_workspace_name_in_string(oldName, newName,
+                                                                       self.canvas.get_window_title()))
         self.canvas.draw()
 
 
@@ -170,7 +169,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         The qt.QMainWindow
 
     """
-
     def __init__(self, canvas, num):
         assert QAppThreadCall.is_qapp_thread(
         ), "FigureManagerWorkbench cannot be created outside of the QApplication thread"
@@ -213,20 +211,14 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.sig_copy_to_clipboard_triggered.connect(self.copy_to_clipboard)
             self.toolbar.sig_plot_options_triggered.connect(self.launch_plot_options)
             self.toolbar.sig_plot_help_triggered.connect(self.launch_plot_help)
-            self.toolbar.sig_generate_plot_script_clipboard_triggered.connect(
-                self.generate_plot_script_clipboard)
-            self.toolbar.sig_generate_plot_script_file_triggered.connect(
-                self.generate_plot_script_file)
+            self.toolbar.sig_generate_plot_script_clipboard_triggered.connect(self.generate_plot_script_clipboard)
+            self.toolbar.sig_generate_plot_script_file_triggered.connect(self.generate_plot_script_file)
             self.toolbar.sig_home_clicked.connect(self.set_figure_zoom_to_display_all)
-            self.toolbar.sig_waterfall_reverse_order_triggered.connect(
-                self.waterfall_reverse_line_order)
-            self.toolbar.sig_waterfall_offset_amount_triggered.connect(
-                self.launch_waterfall_offset_options)
-            self.toolbar.sig_waterfall_fill_area_triggered.connect(
-                self.launch_waterfall_fill_area_options)
+            self.toolbar.sig_waterfall_reverse_order_triggered.connect(self.waterfall_reverse_line_order)
+            self.toolbar.sig_waterfall_offset_amount_triggered.connect(self.launch_waterfall_offset_options)
+            self.toolbar.sig_waterfall_fill_area_triggered.connect(self.launch_waterfall_fill_area_options)
             self.toolbar.sig_waterfall_conversion.connect(self.update_toolbar_waterfall_plot)
-            self.toolbar.sig_change_line_collection_colour_triggered.connect(
-                self.change_line_collection_colour)
+            self.toolbar.sig_change_line_collection_colour_triggered.connect(self.change_line_collection_colour)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -367,8 +359,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 # The grid toggle function for 3D plots doesn't let you choose between major and minor lines.
                 ax.grid(on)
             else:
-                which = 'both' if hasattr(
-                    ax, 'show_minor_gridlines') and ax.show_minor_gridlines else 'major'
+                which = 'both' if hasattr(ax, 'show_minor_gridlines') and ax.show_minor_gridlines else 'major'
                 ax.grid(on, which=which)
         canvas.draw_idle()
 
@@ -509,7 +500,6 @@ def new_figure_manager(num, *args, **kwargs):
 
 def new_figure_manager_given_figure(num, figure):
     """Create a new manager from a num & figure """
-
     def _new_figure_manager_given_figure_impl(num: int, figure):
         """Create a new figure manager instance for the given figure.
         Forces all public and non-dunder method calls onto the QApplication thread.

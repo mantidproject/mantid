@@ -16,16 +16,12 @@ from mantidqt.widgets.plotconfigdialog.colorselector import ColorSelector
 
 
 class AxesTabWidgetView(QWidget):
-
     def __init__(self, parent=None):
         super(AxesTabWidgetView, self).__init__(parent=parent)
 
-        self.ui = load_ui(__file__,
-                          'axes_tab_widget.ui',
-                          baseinstance=self)
+        self.ui = load_ui(__file__, 'axes_tab_widget.ui', baseinstance=self)
         self.color_selector_widget = ColorSelector(parent=self)
-        self.color_selector_layout.replaceWidget(self.color_selector_dummy_widget,
-                                                 self.color_selector_widget)
+        self.color_selector_layout.replaceWidget(self.color_selector_dummy_widget, self.color_selector_widget)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         # QTabBar cannot be created in QTDesigner

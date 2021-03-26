@@ -15,7 +15,8 @@ from mantid.kernel import logger
 class Polaris(AbstractInst):
     def __init__(self, **kwargs):
         self._inst_settings = instrument_settings.InstrumentSettings(
-            param_map=polaris_param_mapping.attr_mapping, adv_conf_dict=polaris_advanced_config.get_all_adv_variables(),
+            param_map=polaris_param_mapping.attr_mapping,
+            adv_conf_dict=polaris_advanced_config.get_all_adv_variables(),
             kwargs=kwargs)
 
         super(Polaris, self).__init__(user_name=self._inst_settings.user_name,
@@ -75,27 +76,32 @@ class Polaris(AbstractInst):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         kwarg_name = "sample"
         sample_details_obj = common.dictionary_key_helper(
-            dictionary=kwargs, key=kwarg_name,
+            dictionary=kwargs,
+            key=kwarg_name,
             exception_msg="The argument containing sample details was not found. Please"
-                          " set the following argument: " + kwarg_name)
+            " set the following argument: " + kwarg_name)
         self._sample_details = sample_details_obj
 
     # Overrides
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         if self._is_vanadium:
             return polaris_algs.calculate_van_absorb_corrections(
-                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
+                ws_to_correct=ws_to_correct,
+                multiple_scattering=self._inst_settings.multiple_scattering,
                 is_vanadium=self._is_vanadium)
         else:
             return absorb_corrections.run_cylinder_absorb_corrections(
-                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
-                sample_details_obj=self._sample_details, is_vanadium=self._is_vanadium)
+                ws_to_correct=ws_to_correct,
+                multiple_scattering=self._inst_settings.multiple_scattering,
+                sample_details_obj=self._sample_details,
+                is_vanadium=self._is_vanadium)
 
     def _crop_banks_to_user_tof(self, focused_banks):
         return common.crop_banks_using_crop_list(focused_banks, self._inst_settings.focused_cropping_values)
 
     def _crop_raw_to_expected_tof_range(self, ws_to_crop):
-        cropped_ws = common.crop_in_tof(ws_to_crop=ws_to_crop, x_min=self._inst_settings.raw_data_crop_values[0],
+        cropped_ws = common.crop_in_tof(ws_to_crop=ws_to_crop,
+                                        x_min=self._inst_settings.raw_data_crop_values[0],
                                         x_max=self._inst_settings.raw_data_crop_values[1])
         return cropped_ws
 

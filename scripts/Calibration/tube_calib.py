@@ -69,8 +69,8 @@ def create_tube_calibration_ws_by_ws_index_list(integrated_workspace, output_wor
     # For some reason plotSpectrum is not recognised, but instead we can plot this workspace afterwards.
 
 
-# Return the udet number and [x,y,z] position of the detector (or virtual detector) corresponding to spectra spectra_number
-# Thanks to Pascal Manuel for this function
+# Return the udet number and [x,y,z] position of the detector (or virtual detector) corresponding to spectra
+# spectra_number. Thanks to Pascal Manuel for this function
 def get_detector_pos(work_handle, spectra_number):
     udet = work_handle.getDetector(spectra_number)
     return udet.getID(), udet.getPos()
@@ -126,7 +126,10 @@ def fit_edges(fit_par, index, ws, output_ws):
         start = max(centre - inner_edge, 0)
         end = min(centre + outer_edge, right_limit)
         edgeMode = 1
-    Fit(InputWorkspace=ws, Function=fit_end_erfc_params(centre, end_grad * edgeMode), StartX=str(start), EndX=str(end),
+    Fit(InputWorkspace=ws,
+        Function=fit_end_erfc_params(centre, end_grad * edgeMode),
+        StartX=str(start),
+        EndX=str(end),
         Output=output_ws)
     return 1  # peakIndex (center) -> parameter B of EndERFC
 
@@ -169,11 +172,10 @@ def fit_gaussian(fit_par, index, ws, output_ws):
         start = max(centre - margin, 0)
         end = min(centre + margin, right_limit)
 
-        fit_msg = 'name=LinearBackground,A0=%f;name=Gaussian,Height=%f,PeakCentre=%f,Sigma=%f' % (
-                  background, height, centre, width)
+        fit_msg = 'name=LinearBackground,A0=%f;name=Gaussian,Height=%f,PeakCentre=%f,Sigma=%f' % (background, height,
+                                                                                                  centre, width)
 
-        Fit(InputWorkspace=ws, Function=fit_msg,
-            StartX=str(start), EndX=str(end), Output=output_ws)
+        Fit(InputWorkspace=ws, Function=fit_msg, StartX=str(start), EndX=str(end), Output=output_ws)
 
         peak_index = 3
 
@@ -187,11 +189,17 @@ def fit_gaussian(fit_par, index, ws, output_ws):
         # fit the input data as a linear background + gaussian fit
         # it was seen that the best result for static general fitParamters,
         # is to divide the values in two fitting steps
-        Fit(InputWorkspace=ws, Function='name=LinearBackground,A0=%f' % background,
-            StartX=str(start), EndX=str(end), Output='Z1')
+        Fit(InputWorkspace=ws,
+            Function='name=LinearBackground,A0=%f' % background,
+            StartX=str(start),
+            EndX=str(end),
+            Output='Z1')
         Fit(InputWorkspace='Z1_Workspace',
             Function='name=Gaussian,Height=%f,PeakCentre=%f,Sigma=%f' % (height, centre, width),
-            WorkspaceIndex=2, StartX=str(start), EndX=str(end), Output=output_ws)
+            WorkspaceIndex=2,
+            StartX=str(start),
+            EndX=str(end),
+            Output=output_ws)
         CloneWorkspace(output_ws + '_Workspace', OutputWorkspace='gauss_' + str(index))
         peak_index = 1
 
@@ -327,8 +335,8 @@ def correct_tube_to_ideal_tube(tube_points: List,
 
     # Check the arguments
     if len(tube_points) != len(ideal_tube_points):
-        print("Number of points in tube {0} must equal number of points in ideal tube {1}".
-              format(len(tube_points), len(ideal_tube_points)))
+        print("Number of points in tube {0} must equal number of points in ideal tube {1}".format(
+            len(tube_points), len(ideal_tube_points)))
         return x_result
 
     # Filter out rogue slit points
@@ -354,8 +362,11 @@ def correct_tube_to_ideal_tube(tube_points: List,
     # Fit quadratic to ideal tube points
     CreateWorkspace(dataX=used_tube_points, dataY=used_ideal_tube_points, OutputWorkspace="PolyFittingWorkspace")
     try:
-        Fit(InputWorkspace="PolyFittingWorkspace", Function='name=Polynomial,n=%d' % polin_fit, StartX=str(0.0),
-            EndX=str(n_detectors), Output="QF")
+        Fit(InputWorkspace="PolyFittingWorkspace",
+            Function='name=Polynomial,n=%d' % polin_fit,
+            StartX=str(0.0),
+            EndX=str(n_detectors),
+            Output="QF")
     except:
         print("Fit failed")
         return []
@@ -417,8 +428,12 @@ def getCalibratedPixelPositions(input_workspace: WorkspaceInput,
         return det_IDs, det_positions
 
     # Correct positions of detectors in tube by quadratic fit. If so requested, store the table of fit parameters
-    pixels = correct_tube_to_ideal_tube(tube_positions, ideal_tube_positions, n_dets, test_mode=peak_test_mode,
-                                        polin_fit=polin_fit, parameters_table=parameters_table)
+    pixels = correct_tube_to_ideal_tube(tube_positions,
+                                        ideal_tube_positions,
+                                        n_dets,
+                                        test_mode=peak_test_mode,
+                                        polin_fit=polin_fit,
+                                        parameters_table=parameters_table)
     if len(pixels) != n_dets:
         print("Tube correction failed.")
         return det_IDs, det_positions
@@ -497,11 +512,12 @@ def read_peak_file(file_name):
 
 ### THESE FUNCTIONS NEXT SHOULD BE THE ONLY FUNCTIONS THE USER CALLS FROM THIS FILE
 
+
 def getCalibration(input_workspace: Union[str, Workspace2D],
                    tubeSet: TubeSpec,
                    calibTable: TableWorkspace,
                    fitPar: TubeCalibFitParams,
-                   iTube:IdealTube,
+                   iTube: IdealTube,
                    peaksTable: TableWorkspace,
                    overridePeaks: Dict[int, List[Any]] = dict(),
                    excludeShortTubes: float = 0.0,
@@ -592,8 +608,12 @@ def getCalibration(input_workspace: Union[str, Workspace2D],
         else:
             parameters_table = f'{parameters_table_group}_{i}'
             parameters_tables.append(parameters_table)
-        det_id_list, det_position_list = getCalibratedPixelPositions(ws, actual_tube, iTube.getArray(), wht,
-                                                                     peaksTestMode, polinFit,
+        det_id_list, det_position_list = getCalibratedPixelPositions(ws,
+                                                                     actual_tube,
+                                                                     iTube.getArray(),
+                                                                     wht,
+                                                                     peaksTestMode,
+                                                                     polinFit,
                                                                      parameters_table=parameters_table)
         # save the detector positions to calibTable
         if len(det_id_list) == len(wht):  # We have corrected positions
@@ -602,18 +622,17 @@ def getCalibration(input_workspace: Union[str, Workspace2D],
                 calibTable.addRow(next_row)
 
     if len(all_skipped) > 0:
-        print("%i histogram(s) were excluded from the calibration since they did not have an assigned detector." % len(
-            all_skipped))
+        print("%i histogram(s) were excluded from the calibration since they did not have an assigned detector." %
+              len(all_skipped))
 
     # Create the WorkspaceGroup containing the fit parameters tables
     if len(parameters_tables) > 0:
         GroupWorkspaces(InputWorkspaces=parameters_tables, OutputWorkspace=parameters_table_group)
 
     # Delete temporary workspaces used in the calibration
-    for ws_name in ('TubePlot', 'CalibPoint_NormalisedCovarianceMatrix',
-                    'CalibPoint_NormalisedCovarianceMatrix', 'CalibPoint_NormalisedCovarianceMatrix',
-                    'CalibPoint_Parameters', 'CalibPoint_Workspace', 'PolyFittingWorkspace',
-                    'QF_NormalisedCovarianceMatrix', 'QF_Parameters', 'QF_Workspace',
+    for ws_name in ('TubePlot', 'CalibPoint_NormalisedCovarianceMatrix', 'CalibPoint_NormalisedCovarianceMatrix',
+                    'CalibPoint_NormalisedCovarianceMatrix', 'CalibPoint_Parameters', 'CalibPoint_Workspace',
+                    'PolyFittingWorkspace', 'QF_NormalisedCovarianceMatrix', 'QF_Parameters', 'QF_Workspace',
                     'Z1_Workspace', 'Z1_Parameters', 'Z1_NormalisedCovarianceMatrix'):
         try:
             DeleteWorkspace(ws_name)

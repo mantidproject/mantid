@@ -31,8 +31,7 @@ class Mode(object):
 
 class SANSStitch(ParallelDataProcessorAlgorithm):
     def _make_mode_map(self):
-        return {'ShiftOnly': Mode.ShiftOnly, 'ScaleOnly': Mode.ScaleOnly,
-                'Both': Mode.BothFit, 'None': Mode.NoneFit}
+        return {'ShiftOnly': Mode.ShiftOnly, 'ScaleOnly': Mode.ScaleOnly, 'Both': Mode.BothFit, 'None': Mode.NoneFit}
 
     def category(self):
         return 'SANS'
@@ -41,72 +40,103 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
         return 'Stitch the high angle and low angle banks of a workspace together'
 
     def PyInit(self):
-        self.declareProperty(
-            MatrixWorkspaceProperty('HABCountsSample', '', optional=PropertyMode.Mandatory, direction=Direction.Input),
-            doc='High angle bank sample workspace in Q')
+        self.declareProperty(MatrixWorkspaceProperty('HABCountsSample',
+                                                     '',
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Input),
+                             doc='High angle bank sample workspace in Q')
 
-        self.declareProperty(
-            MatrixWorkspaceProperty('HABNormSample', '', optional=PropertyMode.Mandatory, direction=Direction.Input),
-            doc='High angle bank normalization workspace in Q')
+        self.declareProperty(MatrixWorkspaceProperty('HABNormSample',
+                                                     '',
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Input),
+                             doc='High angle bank normalization workspace in Q')
 
-        self.declareProperty(
-            MatrixWorkspaceProperty('LABCountsSample', '', optional=PropertyMode.Mandatory, direction=Direction.Input),
-            doc='Low angle bank sample workspace in Q')
+        self.declareProperty(MatrixWorkspaceProperty('LABCountsSample',
+                                                     '',
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Input),
+                             doc='Low angle bank sample workspace in Q')
 
-        self.declareProperty(
-            MatrixWorkspaceProperty('LABNormSample', '', optional=PropertyMode.Mandatory, direction=Direction.Input),
-            doc='Low angle bank normalization workspace in Q')
+        self.declareProperty(MatrixWorkspaceProperty('LABNormSample',
+                                                     '',
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Input),
+                             doc='Low angle bank normalization workspace in Q')
 
         self.declareProperty('ProcessCan', defaultValue=False, direction=Direction.Input, doc='Process the can')
 
-        self.declareProperty(
-            MatrixWorkspaceProperty('HABCountsCan', '', optional=PropertyMode.Optional, direction=Direction.Input),
-            doc='High angle bank sample workspace in Q')
+        self.declareProperty(MatrixWorkspaceProperty('HABCountsCan',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
+                             doc='High angle bank sample workspace in Q')
 
-        self.declareProperty(
-            MatrixWorkspaceProperty('HABNormCan', '', optional=PropertyMode.Optional, direction=Direction.Input),
-            doc='High angle bank normalization workspace in Q')
+        self.declareProperty(MatrixWorkspaceProperty('HABNormCan',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
+                             doc='High angle bank normalization workspace in Q')
 
-        self.declareProperty(
-            MatrixWorkspaceProperty('LABCountsCan', '', optional=PropertyMode.Optional, direction=Direction.Input),
-            doc='Low angle bank sample workspace in Q')
+        self.declareProperty(MatrixWorkspaceProperty('LABCountsCan',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
+                             doc='Low angle bank sample workspace in Q')
 
-        self.declareProperty(
-            MatrixWorkspaceProperty('LABNormCan', '', optional=PropertyMode.Optional, direction=Direction.Input),
-            doc='Low angle bank normalization workspace in Q')
+        self.declareProperty(MatrixWorkspaceProperty('LABNormCan',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
+                             doc='Low angle bank normalization workspace in Q')
 
         allowedModes = StringListValidator(list(self._make_mode_map().keys()))
 
-        self.declareProperty('Mode', 'None', validator=allowedModes, direction=Direction.Input,
+        self.declareProperty('Mode',
+                             'None',
+                             validator=allowedModes,
+                             direction=Direction.Input,
                              doc='What to fit. Free parameter(s).')
 
-        self.declareProperty('ScaleFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
+        self.declareProperty('ScaleFactor',
+                             defaultValue=Property.EMPTY_DBL,
+                             direction=Direction.Input,
                              doc='Optional scaling factor')
 
-        self.declareProperty('ShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
+        self.declareProperty('ShiftFactor',
+                             defaultValue=Property.EMPTY_DBL,
+                             direction=Direction.Input,
                              doc='Optional shift factor')
 
-        self.declareProperty('FitMin', defaultValue=0.0, direction=Direction.Input,
-                             doc = 'Optional minimum q for fit')
+        self.declareProperty('FitMin', defaultValue=0.0, direction=Direction.Input, doc='Optional minimum q for fit')
 
-        self.declareProperty('FitMax', defaultValue=1000.0, direction=Direction.Input,
-                             doc = 'Optional maximum q for fit')
+        self.declareProperty('FitMax', defaultValue=1000.0, direction=Direction.Input, doc='Optional maximum q for fit')
 
-        self.declareProperty('MergeMask', defaultValue = False, direction = Direction.Input,
+        self.declareProperty('MergeMask',
+                             defaultValue=False,
+                             direction=Direction.Input,
                              doc='Controls whether the user has manually specified the merge region')
 
-        self.declareProperty('MergeMin', defaultValue=0.0, direction=Direction.Input,
+        self.declareProperty('MergeMin',
+                             defaultValue=0.0,
+                             direction=Direction.Input,
                              doc='The minimum of the merge region in q')
 
-        self.declareProperty('MergeMax', defaultValue=1000.0, direction=Direction.Input,
+        self.declareProperty('MergeMax',
+                             defaultValue=1000.0,
+                             direction=Direction.Input,
                              doc='The maximum of the merge region in q')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Stitched high and low Q 1-D data')
 
-        self.declareProperty('OutScaleFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
+        self.declareProperty('OutScaleFactor',
+                             defaultValue=Property.EMPTY_DBL,
+                             direction=Direction.Output,
                              doc='Applied scale factor')
-        self.declareProperty('OutShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
+        self.declareProperty('OutShiftFactor',
+                             defaultValue=Property.EMPTY_DBL,
+                             direction=Direction.Output,
                              doc='Applied shift factor')
 
         self.setPropertyGroup("Mode", 'Fitting')
@@ -225,7 +255,7 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
             end_x = x_vals[stop]
         else:
             end_x = x_vals[stop + 1]
-        return self._crop_to_x_range(ws=ws,x_min=start_x, x_max=end_x)
+        return self._crop_to_x_range(ws=ws, x_min=start_x, x_max=end_x)
 
     def _run_fit(self, q_high_angle, q_low_angle, scale_factor, shift_factor, fit_min, fit_max):
         fit_alg = self.createChildAlgorithm("SANSFitShiftScale")
@@ -239,7 +269,7 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
         fit_alg.execute()
         scale_factor_fit = fit_alg.getProperty("OutScaleFactor").value
         shift_factor_fit = fit_alg.getProperty("OutShiftFactor").value
-        return  scale_factor_fit, shift_factor_fit
+        return scale_factor_fit, shift_factor_fit
 
     def _check_bins(self, merge_min, merge_max, cF, cR):
         if cF.yIndexOfX(merge_min) == cR.yIndexOfX(merge_max):
@@ -340,8 +370,8 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
         fit_max = self.getProperty('FitMax').value
 
         if not mode == Mode.NoneFit:
-            scale_factor, shift_factor = self._run_fit(q_high_angle, q_low_angle,
-                                                       scale_factor, shift_factor, fit_min, fit_max)
+            scale_factor, shift_factor = self._run_fit(q_high_angle, q_low_angle, scale_factor, shift_factor, fit_min,
+                                                       fit_max)
 
         min_q = min(min(q_high_angle.dataX(0)), min(q_low_angle.dataX(0)))
         max_q = max(max(q_high_angle.dataX(0)), max(q_low_angle.dataX(0)))
@@ -356,7 +386,11 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
             cR, cF, nR, nF = self._apply_user_mask_ranges(cF, cR, nR, nF, merge_min, merge_max)
 
         # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
-        merged_q = self._calculate_merged_q(cF=cF, nF=nF, cR=cR, nR=nR, scale_factor=scale_factor,
+        merged_q = self._calculate_merged_q(cF=cF,
+                                            nF=nF,
+                                            cR=cR,
+                                            nR=nR,
+                                            scale_factor=scale_factor,
                                             shift_factor=shift_factor)
 
         if self.getProperty('ProcessCan').value:
@@ -370,7 +404,10 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
                                                                               merge_max)
 
             # Calculate merged q for the can
-            merged_q_can = self._calculate_merged_q_can(cF=cF_can, nF=nF_can, cR=cR_can, nR=nR_can,
+            merged_q_can = self._calculate_merged_q_can(cF=cF_can,
+                                                        nF=nF_can,
+                                                        cR=cR_can,
+                                                        nR=nR_can,
                                                         scale_factor=scale_factor)
 
             # Subtract it from the sample
@@ -471,8 +508,7 @@ class QErrorCorrectionForMergedWorkspaces(object):
         q_res_buffer = np.multiply(q_res, counts)
         return q_res_buffer
 
-    def correct_q_resolution_for_merged(self, count_ws_front, count_ws_rear,
-                                        output_ws, scale):
+    def correct_q_resolution_for_merged(self, count_ws_front, count_ws_rear, output_ws, scale):
         """
         We need to transfer the DX error values from the original workspaces to the merged worksapce.
         We have:
@@ -511,12 +547,12 @@ class QErrorCorrectionForMergedWorkspaces(object):
             return
 
         # Get everything for the FRONT detector
-        q_res_front_norm_free = self._multiply_q_resolution_by_counts(q_resolution_front,counts_front)
+        q_res_front_norm_free = self._multiply_q_resolution_by_counts(q_resolution_front, counts_front)
         q_res_front_norm_free = q_res_front_norm_free * scale
         counts_front = counts_front * scale
 
         # Get everything for the REAR detector
-        q_res_rear_norm_free = self._multiply_q_resolution_by_counts(q_resolution_rear,counts_rear)
+        q_res_rear_norm_free = self._multiply_q_resolution_by_counts(q_resolution_rear, counts_rear)
 
         # Now add and divide
         new_q_res = np.add(q_res_front_norm_free, q_res_rear_norm_free)

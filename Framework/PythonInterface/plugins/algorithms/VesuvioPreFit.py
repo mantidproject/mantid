@@ -12,7 +12,6 @@ from vesuvio.base import VesuvioBase
 
 
 class VesuvioPreFit(VesuvioBase):
-
     def summary(self):
         return "Apply preprocessing steps to loaded vesuvio data"
 
@@ -27,12 +26,14 @@ class VesuvioPreFit(VesuvioBase):
                              doc="Input TOF workspace from LoadVesuvio")
 
         smooth_opts = ["Neighbour", "None"]
-        self.declareProperty("Smoothing", smooth_opts[0], StringListValidator(smooth_opts),
+        self.declareProperty("Smoothing",
+                             smooth_opts[0],
+                             StringListValidator(smooth_opts),
                              doc="Defines the smoothing method.")
-        self.declareProperty("SmoothingOptions", "NPoints=3",
-                             doc="Override the default smoothing options")
+        self.declareProperty("SmoothingOptions", "NPoints=3", doc="Override the default smoothing options")
 
-        self.declareProperty("BadDataError", 1.0e6,
+        self.declareProperty("BadDataError",
+                             1.0e6,
                              doc="Mask any data point with an error greater than this value. Set to 0 to turn it off")
 
         # Outputs
@@ -62,8 +63,7 @@ class VesuvioPreFit(VesuvioBase):
             return self._execute_child_alg("CloneWorkspace", InputWorkspace=data)
         elif smoothing == "Neighbour":
             npts = int(options[-1])
-            return self._execute_child_alg("SmoothData", InputWorkspace=data,
-                                           NPoints=npts)
+            return self._execute_child_alg("SmoothData", InputWorkspace=data, NPoints=npts)
 
     def _mask_bad_data(self, data):
         error_threshold = self.getProperty("BadDataError").value
@@ -74,7 +74,7 @@ class VesuvioPreFit(VesuvioBase):
         if len(errors.shape) != 2:
             raise RuntimeError("Expected 2D array of errors, found %dD" % len(errors.shape))
 
-        indices = np.where(errors > error_threshold) # Indices in 2D matrix where errors above threshold
+        indices = np.where(errors > error_threshold)  # Indices in 2D matrix where errors above threshold
         # The output is a tuple of 2 arrays where the indices from each array are paired to
         # give the correct index in the original 2D array.
         for ws_index, pt_index in zip(indices[0], indices[1]):

@@ -34,7 +34,8 @@ class VesuvioPreFitTest(unittest.TestCase):
 
     def test_smooth_uses_requested_number_of_points(self):
         alg = self._create_algorithm(InputWorkspace=self._test_ws,
-                                     Smoothing="Neighbour", SmoothingOptions="NPoints=3",
+                                     Smoothing="Neighbour",
+                                     SmoothingOptions="NPoints=3",
                                      BadDataError=-1)
         alg.execute()
         output_ws = alg.getProperty("OutputWorkspace").value
@@ -61,13 +62,11 @@ class VesuvioPreFitTest(unittest.TestCase):
         self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec2, peak_height_spec2))
         self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec2, bin_index_spec2))
 
-
     def test_mask_only_masks_over_threshold(self):
         err_start = self._test_ws.readE(1)[-1]
         self._test_ws.dataE(1)[-1] = 1.5e6
 
-        alg = self._create_algorithm(InputWorkspace=self._test_ws,
-                                     Smoothing="None", BadDataError=1.0e6)
+        alg = self._create_algorithm(InputWorkspace=self._test_ws, Smoothing="None", BadDataError=1.0e6)
         alg.execute()
         self._test_ws.dataE(1)[-1] = err_start
         output_ws = alg.getProperty("OutputWorkspace").value
@@ -100,8 +99,7 @@ class VesuvioPreFitTest(unittest.TestCase):
     # -------------- Failure cases ------------------
 
     def test_invalid_smooth_opt_raises_error_on_validate(self):
-        alg = self._create_algorithm(InputWorkspace=self._test_ws,
-                                     Smoothing="Neighbour", SmoothingOptions="npts=3")
+        alg = self._create_algorithm(InputWorkspace=self._test_ws, Smoothing="Neighbour", SmoothingOptions="npts=3")
         self.assertRaises(RuntimeError, alg.execute)
 
     # -------------- Helpers --------------------
@@ -115,14 +113,12 @@ class VesuvioPreFitTest(unittest.TestCase):
             alg.setProperty(key, value)
         return alg
 
-
     def _get_peak_height_and_bin_index(self, y_data):
         peak_height = np.amax(y_data)
         peak_bin = np.argmax(y_data)
         return peak_height, peak_bin
 
-
-    def _equal_within_tolerance(self, expected, actual, tolerance = 0.01):
+    def _equal_within_tolerance(self, expected, actual, tolerance=0.01):
         """
         Ensures the expected value matches the actual value within a tolerance (default 0.01)
         """

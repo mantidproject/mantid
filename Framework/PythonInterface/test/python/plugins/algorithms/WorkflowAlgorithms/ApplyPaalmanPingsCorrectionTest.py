@@ -7,14 +7,12 @@
 import unittest
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import (CreateWorkspace, Load, ConvertUnits,
-                              SplineInterpolation, ApplyPaalmanPingsCorrection,
+from mantid.simpleapi import (CreateWorkspace, Load, ConvertUnits, SplineInterpolation, ApplyPaalmanPingsCorrection,
                               DeleteWorkspace, GroupWorkspaces, CloneWorkspace)
 import numpy
 
 
 class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
-
     def setUp(self):
         """
         Create sample workspaces.
@@ -25,14 +23,8 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         can_ws = Load('irs26173_graphite002_red.nxs')
 
         # Convert sample and can to wavelength
-        sample_ws = ConvertUnits(InputWorkspace=sample_ws,
-                                 Target='Wavelength',
-                                 EMode='Indirect',
-                                 EFixed=1.845)
-        can_ws = ConvertUnits(InputWorkspace=can_ws,
-                              Target='Wavelength',
-                              EMode='Indirect',
-                              EFixed=1.845)
+        sample_ws = ConvertUnits(InputWorkspace=sample_ws, Target='Wavelength', EMode='Indirect', EFixed=1.845)
+        can_ws = ConvertUnits(InputWorkspace=can_ws, Target='Wavelength', EMode='Indirect', EFixed=1.845)
 
         self._sample_ws = sample_ws
         self._can_ws = can_ws
@@ -92,15 +84,15 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
             return any([is_factor(workspace, factor) for factor in factors])
 
         filtered_corr = filter(is_factor_workspace, corrections)
-        cloned_corr = [CloneWorkspace(InputWorkspace=correction,
-                                      OutputWorkspace=correction.name() + "_clone")
-                       for correction in filtered_corr]
+        cloned_corr = [
+            CloneWorkspace(InputWorkspace=correction, OutputWorkspace=correction.name() + "_clone")
+            for correction in filtered_corr
+        ]
         correction_names = [correction.name() for correction in cloned_corr]
         return GroupWorkspaces(InputWorkspaces=correction_names, OutputWorkspace="factor_group")
 
     def test_can_subtraction(self):
-        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
-                                           CanWorkspace=self._can_ws)
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws, CanWorkspace=self._can_ws)
 
         self._verify_workspace(corr, 'can_subtraction')
 
@@ -119,8 +111,7 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         self._verify_workspace(corr, 'can_subtraction')
 
     def test_sample_corrections_only(self):
-        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
-                                           CorrectionsWorkspace=self._corrections_ws)
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws, CorrectionsWorkspace=self._corrections_ws)
 
         self._verify_workspace(corr, 'sample_corrections_only')
 
@@ -143,7 +134,7 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
                                            CorrectionsWorkspace=self._corrections_ws,
                                            CanWorkspace=self._can_ws,
-                                           CanShiftFactor = 0.03)
+                                           CanShiftFactor=0.03)
 
         self._verify_workspace(corr, 'sample_and_can_corrections')
 
@@ -153,20 +144,17 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
                                            CorrectionsWorkspace=two_corrections,
                                            CanWorkspace=self._can_ws,
-                                           CanShiftFactor = 0.03)
+                                           CanShiftFactor=0.03)
         DeleteWorkspace(two_corrections)
         self._verify_workspace(corr, 'sample_and_can_corrections')
 
     def test_container_input_workspace_not_unintentionally_rebinned(self):
         xs = numpy.array([0.0, 1.0, 0.0, 1.1])
         ys = numpy.array([2.2, 3.3])
-        sample_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2,
-                                   UnitX='Wavelength')
+        sample_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2, UnitX='Wavelength')
         ys = numpy.array([0.11, 0.22])
-        container_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2,
-                                      UnitX='Wavelength')
-        corrected = ApplyPaalmanPingsCorrection(SampleWorkspace=sample_1,
-                                                CanWorkspace=container_1)
+        container_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2, UnitX='Wavelength')
+        corrected = ApplyPaalmanPingsCorrection(SampleWorkspace=sample_1, CanWorkspace=container_1)
         numHisto = container_1.getNumberHistograms()
         for i in range(numHisto):
             container_xs = container_1.readX(i)
@@ -179,12 +167,10 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
     def test_container_rebinning_enabled(self):
         xs = numpy.array([0.0, 1.0, 0.0, 1.1])
         ys = numpy.array([2.2, 3.3])
-        sample_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2,
-                                   UnitX='Wavelength')
+        sample_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2, UnitX='Wavelength')
         xs = numpy.array([-1.0, 0.0, 1.0, 2.0, -1.0, 0.0, 1.0, 2.0])
         ys = numpy.array([0.101, 0.102, 0.103, 0.104, 0.105, 0.106])
-        container_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2,
-                                      UnitX='Wavelength')
+        container_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2, UnitX='Wavelength')
         corrected = ApplyPaalmanPingsCorrection(SampleWorkspace=sample_1,
                                                 CanWorkspace=container_1,
                                                 RebinCanToSample=True)
@@ -196,12 +182,10 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
     def test_container_rebinning_disabled(self):
         xs = numpy.array([0.0, 1.0, 0.0, 1.1])
         ys = numpy.array([2.2, 3.3])
-        sample_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2,
-                                   UnitX='Wavelength')
+        sample_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2, UnitX='Wavelength')
         xs = numpy.array([-1.0, 0.0, 1.0, 2.0, -1.0, 0.0, 1.0, 2.0])
         ys = numpy.array([0.101, 0.102, 0.103, 0.104, 0.105, 0.106])
-        container_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2,
-                                      UnitX='Wavelength')
+        container_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2, UnitX='Wavelength')
         corrected_ws_name = 'corrected_workspace'
         kwargs = {
             'SampleWorkspace': sample_1,
@@ -219,7 +203,8 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         Load(Filename='ILL/IN16B/mc-abs-corr-q.nxs', OutputWorkspace='fws_corrections_ass')
         GroupWorkspaces(InputWorkspaces=['fws_corrections_ass'], OutputWorkspace='fws_corrections')
         in_ws = Load(Filename='ILL/IN16B/fapi-fws-q.nxs', OutputWorkspace='fapi')
-        out_ws = ApplyPaalmanPingsCorrection(SampleWorkspace=in_ws[0], CorrectionsWorkspace='fws_corrections',
+        out_ws = ApplyPaalmanPingsCorrection(SampleWorkspace=in_ws[0],
+                                             CorrectionsWorkspace='fws_corrections',
                                              OutputWorkspace='wsfapicorr')
         self.assertTrue(out_ws)
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
@@ -231,13 +216,9 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         Load(Filename='ILL/IN16B/mc-abs-corr-q.nxs', OutputWorkspace='fws_corrections_ass')
         GroupWorkspaces(InputWorkspaces=['fws_corrections_ass'], OutputWorkspace='fws_corrections')
         in_ws = Load(Filename='ILL/IN16B/fapi-fws-q.nxs', OutputWorkspace='fapi')
-        kwargs = {
-            'SampleWorkspace': in_ws,
-            'CorrectionsWorkspace': 'fws_corrections',
-            'OutputWorkspaced': 'wsfapicorr'
-        }
+        kwargs = {'SampleWorkspace': in_ws, 'CorrectionsWorkspace': 'fws_corrections', 'OutputWorkspaced': 'wsfapicorr'}
         self.assertRaises(RuntimeError, ApplyPaalmanPingsCorrection, **kwargs)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()

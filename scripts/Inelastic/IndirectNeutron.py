@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,too-many-arguments, redefined-builtin, too-many-locals
-
 """
 Force for ILL backscattering raw
 """
@@ -21,8 +20,8 @@ from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt, getEfix
 
 MTD_PLOT = import_mantidplot()
 
-
 #  Routines for Ascii file of raw data
+
 
 def Iblock(a, first):  # read Ascii block of Integers
     line1 = a[first]
@@ -222,8 +221,7 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
         eOut.append(em[mm] / 10.0)
     xMon.append(2 * xMon[new - 1] - xMon[new - 2])
     monWS = '__Mon'
-    CreateWorkspace(OutputWorkspace=monWS, DataX=xMon, DataY=yOut, DataE=eOut,
-                    Nspec=1, UnitX='DeltaE')
+    CreateWorkspace(OutputWorkspace=monWS, DataX=xMon, DataY=yOut, DataE=eOut, Nspec=1, UnitX='DeltaE')
     #
     _Qaxis = ''
     xDat = []
@@ -233,8 +231,8 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
     for n in range(0, nsp):
         next, _xd, yd, ed = ReadIbackGroup(asc, next)
         tot.append(sum(yd))
-        logger.information('Spectrum ' + str(n + 1) + ' at angle ' + str(theta[n])
-                           + ' ; Total counts = ' + str(sum(yd)))
+        logger.information('Spectrum ' + str(n + 1) + ' at angle ' + str(theta[n]) + ' ; Total counts = ' +
+                           str(sum(yd)))
         for m in range(0, new + 1):
             mm = m + imin
             xDat.append(xMon[m])
@@ -246,10 +244,8 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
         _Qaxis += str(theta[n])
     ascWS = fname + '_' + ana + refl + '_asc'
     outWS = fname + '_' + ana + refl + '_red'
-    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
-                    Nspec=nsp, UnitX='DeltaE')
-    Divide(LHSWorkspace=ascWS, RHSWorkspace=monWS, OutputWorkspace=ascWS,
-           AllowDifferentNumberSpectra=True)
+    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat, Nspec=nsp, UnitX='DeltaE')
+    Divide(LHSWorkspace=ascWS, RHSWorkspace=monWS, OutputWorkspace=ascWS, AllowDifferentNumberSpectra=True)
     DeleteWorkspace(monWS)  # delete monitor WS
     InstrParas(ascWS, instr, ana, refl)
     RunParas(ascWS, instr, run, title)
@@ -271,6 +267,7 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
 
 
 # Routines for Inx ascii file
+
 
 def ReadInxGroup(asc, n, lgrp):  # read ascii x,y,e
     x = []
@@ -335,8 +332,7 @@ def InxStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):
         ns += 1
     ascWS = fname + '_' + ana + refl + '_inx'
     outWS = fname + '_' + ana + refl + '_red'
-    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
-                    Nspec=ns, UnitX='DeltaE')
+    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat, Nspec=ns, UnitX='DeltaE')
     InstrParas(ascWS, instr, ana, refl)
     efixed = RunParas(ascWS, instr, 0, title)
     pi4 = 4.0 * math.pi
@@ -365,19 +361,18 @@ def InxStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):
 
 # General routines
 
+
 def RejectZero(inWS, tot):
     nin = mtd[inWS].getNumberHistograms()  # no. of hist/groups in sam
     nout = 0
     outWS = inWS[:-3] + 'red'
     for n in range(0, nin):
         if tot[n] > 0:
-            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',
-                                  WorkspaceIndex=n)
+            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp', WorkspaceIndex=n)
             if nout == 0:
                 RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
             else:
-                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',
-                                  CheckOverlapping=False)
+                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp', CheckOverlapping=False)
             nout += 1
         else:
             logger.information('** spectrum ' + str(n + 1) + ' rejected')
@@ -407,13 +402,11 @@ def UseMap(inWS, map):
     outWS = inWS[:-3] + 'red'
     for n in range(0, nin):
         if map[n] == 1:
-            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',
-                                  WorkspaceIndex=n)
+            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp', WorkspaceIndex=n)
             if nout == 0:
                 RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
             else:
-                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',
-                                  CheckOverlapping=False)
+                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp', CheckOverlapping=False)
             nout += 1
             logger.information('** spectrum ' + str(n + 1) + ' mapped')
         else:
@@ -445,8 +438,7 @@ def ChangeAngles(inWS, instr, theta):
         handle.write(str(n + 1) + '   ' + str(theta[n]) + "\n")
         logger.information('Spectrum ' + str(n + 1) + ' = ' + str(theta[n]))
     handle.close()
-    UpdateInstrumentFromFile(Workspace=inWS, Filename=path, MoveMonitors=False, IgnorePhi=False,
-                             AsciiHeader=head)
+    UpdateInstrumentFromFile(Workspace=inWS, Filename=path, MoveMonitors=False, IgnorePhi=False, AsciiHeader=head)
 
 
 def InstrParas(ws, instr, ana, refl):
@@ -479,6 +471,7 @@ def RunParas(ascWS, _instr, run, title):
 
 # IN13 routines
 # These routines are specific to loading data for the ILL IN13 instrument
+
 
 def IN13Start(instr, run, ana, refl, _rejectZ, _useM, _mapPath, Plot, Save):  # Ascii start routine
     StartTime('IN13')
@@ -599,11 +592,9 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
             xDq = np.append(xDq, sorted_Q)
             yDq = np.append(yDq, y1Dq)
             eDq = np.append(eDq, e1Dq)
-    CreateWorkspace(OutputWorkspace=ascWS, DataX=xData, DataY=yData, DataE=eData,
-                    Nspec=3, UnitX='MomentumTransfer')
+    CreateWorkspace(OutputWorkspace=ascWS, DataX=xData, DataY=yData, DataE=eData, Nspec=3, UnitX='MomentumTransfer')
     IN13Paras(ascWS, run, title, wave)
-    CreateWorkspace(OutputWorkspace=outWS, DataX=xDq, DataY=yDq, DataE=eDq,
-                    Nspec=3, UnitX='MomentumTransfer')
+    CreateWorkspace(OutputWorkspace=outWS, DataX=xDq, DataY=yDq, DataE=eDq, Nspec=3, UnitX='MomentumTransfer')
     IN13Paras(outWS, run, title, wave)
     if Save:
         opath = os.path.join(workdir, outWS + '.nxs')

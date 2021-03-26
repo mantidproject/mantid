@@ -4,8 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import (SimpleShapeMonteCarloAbsorption, Load, ConvertUnits,
-                              CompareWorkspaces, SetSampleMaterial,
+from mantid.simpleapi import (SimpleShapeMonteCarloAbsorption, Load, ConvertUnits, CompareWorkspaces, SetSampleMaterial,
                               DeleteWorkspace)
 import unittest
 
@@ -14,34 +13,28 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         red_ws = Load('irs26176_graphite002_red.nxs')
-        red_ws = ConvertUnits(
-            InputWorkspace=red_ws,
-            Target='Wavelength',
-            EMode='Indirect',
-            EFixed=1.845)
+        red_ws = ConvertUnits(InputWorkspace=red_ws, Target='Wavelength', EMode='Indirect', EFixed=1.845)
 
         self._red_ws = red_ws
 
-        self._arguments = {'ChemicalFormula': 'H2-O',
-                           'DensityType': 'Mass Density',
-                           'Density': 1.0,
-                           'EventsPerPoint': 50,
-                           'BeamHeight': 3.5,
-                           'BeamWidth': 4.0,
-                           'Height': 2.0}
+        self._arguments = {
+            'ChemicalFormula': 'H2-O',
+            'DensityType': 'Mass Density',
+            'Density': 1.0,
+            'EventsPerPoint': 50,
+            'BeamHeight': 3.5,
+            'BeamWidth': 4.0,
+            'Height': 2.0
+        }
 
         self._annulus_arguments = self._arguments.copy()
-        self._annulus_arguments.update({
-            'InputWorkspace': self._red_ws,
-            'Shape': 'Annulus',
-            'OuterRadius': 2.0
-        })
+        self._annulus_arguments.update({'InputWorkspace': self._red_ws, 'Shape': 'Annulus', 'OuterRadius': 2.0})
 
         __corrected_flat_plate = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
-                                                    Shape='FlatPlate',
-                                                    Width=2.0,
-                                                    Thickness=2.0,
-                                                    **self._arguments)
+                                                                 Shape='FlatPlate',
+                                                                 Width=2.0,
+                                                                 Thickness=2.0,
+                                                                 **self._arguments)
 
         # store the basic flat plate workspace so it can be compared with
         # others
@@ -81,10 +74,7 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
         # Test cylinder shape
 
         kwargs = self._arguments
-        corrected = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
-                                                    Shape='Cylinder',
-                                                    Radius=2.0,
-                                                    **kwargs)
+        corrected = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws, Shape='Cylinder', Radius=2.0, **kwargs)
 
         self._test_corrections_workspace(corrected)
 
@@ -92,8 +82,7 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
         # Test annulus shape
 
         kwargs = self._annulus_arguments
-        corrected = SimpleShapeMonteCarloAbsorption(InnerRadius=1.0,
-                                                    **kwargs)
+        corrected = SimpleShapeMonteCarloAbsorption(InnerRadius=1.0, **kwargs)
 
         self._test_corrections_workspace(corrected)
 
@@ -113,16 +102,11 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                                                         **kwargs)
 
         # _corrected_flat_plate is with mass density 1.0
-        CompareWorkspaces(
-            self._corrected_flat_plate,
-            corrected_num,
-            Tolerance=1e-6)
+        CompareWorkspaces(self._corrected_flat_plate, corrected_num, Tolerance=1e-6)
         DeleteWorkspace(corrected_num)
 
     def test_material_already_defined(self):
-        SetSampleMaterial(InputWorkspace=self._red_ws,
-                          ChemicalFormula='H2-O',
-                          SampleMassDensity=1.0)
+        SetSampleMaterial(InputWorkspace=self._red_ws, ChemicalFormula='H2-O', SampleMassDensity=1.0)
 
         corrected = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
                                                     MaterialAlreadyDefined=True,
@@ -136,20 +120,13 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                                                     MaxScatterPtAttempts=10)
 
         self._test_corrections_workspace(corrected)
-        CompareWorkspaces(
-            self._corrected_flat_plate,
-            corrected,
-            Tolerance=1e-6)
+        CompareWorkspaces(self._corrected_flat_plate, corrected, Tolerance=1e-6)
 
     def test_ILL_reduced(self):
 
         ill_red_ws = Load('ILL/IN16B/091515_red.nxs')
 
-        ill_red_ws = ConvertUnits(
-            ill_red_ws,
-            Target='Wavelength',
-            EMode='Indirect',
-            EFixed=1.845)
+        ill_red_ws = ConvertUnits(ill_red_ws, Target='Wavelength', EMode='Indirect', EFixed=1.845)
 
         kwargs = self._arguments
         corrected = SimpleShapeMonteCarloAbsorption(InputWorkspace=ill_red_ws,
@@ -192,8 +169,7 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                                                            IncoherentXSection=56.052,
                                                            AttenuationXSection=0.222)
 
-        self.assertTrue(CompareWorkspaces(
-            self._corrected_flat_plate, output_workspace, Tolerance=1e-2)[0])
+        self.assertTrue(CompareWorkspaces(self._corrected_flat_plate, output_workspace, Tolerance=1e-2)[0])
 
     def test_max_scatter_point_attempts_similar(self):
         """
@@ -208,8 +184,7 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                                                            MaxScatterPtAttempts=3000,
                                                            **kwargs)
 
-        matching, _ = CompareWorkspaces(
-            self._corrected_flat_plate, output_workspace, Tolerance=1e-6)
+        matching, _ = CompareWorkspaces(self._corrected_flat_plate, output_workspace, Tolerance=1e-6)
         self.assertEqual(matching, True)
 
     # TODO: add test for powder diffraction data
@@ -217,17 +192,19 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
     # ------------------------------------- Failure Cases --------------------
 
     def test_no_chemical_formula_or_cross_sections_causes_an_error(self):
-        kwargs = {'InputWorkspace': self._red_ws,
-                  'MaterialAlreadyDefined': False,
-                  'DensityType': 'Mass Density',
-                  'Density': 1.0,
-                  'EventsPerPoint': 200,
-                  'BeamHeight': 3.5,
-                  'BeamWidth': 4.0,
-                  'Height': 2.0,
-                  'Shape': 'FlatPlate',
-                  'Width': 1.4,
-                  'Thickness': 2.1}
+        kwargs = {
+            'InputWorkspace': self._red_ws,
+            'MaterialAlreadyDefined': False,
+            'DensityType': 'Mass Density',
+            'Density': 1.0,
+            'EventsPerPoint': 200,
+            'BeamHeight': 3.5,
+            'BeamWidth': 4.0,
+            'Height': 2.0,
+            'Shape': 'FlatPlate',
+            'Width': 1.4,
+            'Thickness': 2.1
+        }
 
         with self.assertRaises(RuntimeError):
             SimpleShapeMonteCarloAbsorption(**kwargs)
@@ -236,14 +213,16 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
         # If the shape is flat plate but the relevant parameters haven't been entered this should throw
         # relevant params are Height, Width, Thickness
 
-        kwargs = {'InputWorkspace': self._red_ws,
-                  'ChemicalFormula': 'H2-O',
-                  'DensityType': 'Mass Density',
-                  'Density': 1.0,
-                  'EventsPerPoint': 200,
-                  'BeamHeight': 3.5,
-                  'BeamWidth': 4.0,
-                  'Shape': 'FlatPlate'}
+        kwargs = {
+            'InputWorkspace': self._red_ws,
+            'ChemicalFormula': 'H2-O',
+            'DensityType': 'Mass Density',
+            'Density': 1.0,
+            'EventsPerPoint': 200,
+            'BeamHeight': 3.5,
+            'BeamWidth': 4.0,
+            'Shape': 'FlatPlate'
+        }
 
         with self.assertRaises(RuntimeError):
             SimpleShapeMonteCarloAbsorption(**kwargs)
@@ -251,17 +230,19 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
     def test_not_in_wavelength(self):
         red_ws_not_wavelength = Load('irs26176_graphite002_red.nxs')
 
-        kwargs = {'InputWorkspace': red_ws_not_wavelength,
-                  'ChemicalFormula': 'H2-O',
-                  'DensityType': 'Mass Density',
-                  'Density': 1.0,
-                  'EventsPerPoint': 200,
-                  'BeamHeight': 3.5,
-                  'BeamWidth': 4.0,
-                  'Height': 2.0,
-                  'Shape': 'FlatPlate',
-                  'Width': 1.4,
-                  'Thickness': 2.1}
+        kwargs = {
+            'InputWorkspace': red_ws_not_wavelength,
+            'ChemicalFormula': 'H2-O',
+            'DensityType': 'Mass Density',
+            'Density': 1.0,
+            'EventsPerPoint': 200,
+            'BeamHeight': 3.5,
+            'BeamWidth': 4.0,
+            'Height': 2.0,
+            'Shape': 'FlatPlate',
+            'Width': 1.4,
+            'Thickness': 2.1
+        }
 
         with self.assertRaises(RuntimeError):
             SimpleShapeMonteCarloAbsorption(**kwargs)

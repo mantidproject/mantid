@@ -7,13 +7,14 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__  import absolute_import
+from __future__ import absolute_import
 
 # std imports
 from unittest import TestCase, main
 
 # thirdparty imports
 import matplotlib
+
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,7 +24,6 @@ from mantidqt.plotting.figuretype import figure_type, FigureType
 
 
 class FigureTypeTest(TestCase):
-
     def test_figure_type_empty_figure_returns_empty(self):
         self.assertEqual(FigureType.Empty, figure_type(plt.figure()))
 

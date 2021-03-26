@@ -11,7 +11,6 @@ import numpy as np
 
 
 class PCRmagnetZFKT(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
@@ -29,7 +28,8 @@ class PCRmagnetZFKT(IFunction1D):
         gmu = 2 * np.pi * 0.01355342
         w = H0 * gmu
         x = x - Toff
-        return A0 * (1./3 + 2./3 * np.exp(- (delta * x) ** 2 / 2) * (np.cos(w * x) - (delta) ** 2 * x / w * np.sin(w * x)))
+        return A0 * (1. / 3 + 2. / 3 * np.exp(-(delta * x)**2 / 2) * (np.cos(w * x) -
+                                                                      (delta)**2 * x / w * np.sin(w * x)))
 
 
 FunctionFactory.subscribe(PCRmagnetZFKT)

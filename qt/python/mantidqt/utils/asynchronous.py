@@ -24,9 +24,7 @@ class TaskExitCode(IntEnum):
 
 
 class AsyncTask(threading.Thread):
-    def __init__(self, target, args=(), kwargs=None,
-                 success_cb=None, error_cb=None,
-                 finished_cb=None):
+    def __init__(self, target, args=(), kwargs=None, success_cb=None, error_cb=None, finished_cb=None):
         """
         Runs a task asynchronously. Exit code is set on task finish/error.
 
@@ -81,8 +79,7 @@ class AsyncTask(threading.Thread):
         """Cancel an asynchronous execution"""
         # Implementation is based on
         # https://stackoverflow.com/questions/5019436/python-how-to-terminate-a-blocking-thread
-        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.ident),
-                                                   ctypes.py_object(KeyboardInterrupt))
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.ident), ctypes.py_object(KeyboardInterrupt))
         #now try and cancel the running algorithm
         alg = IAlgorithm._algorithmInThread(self.ident)
         if alg is not None:
@@ -91,7 +88,13 @@ class AsyncTask(threading.Thread):
 
 
 class BlockingAsyncTaskWithCallback(AsyncTask):
-    def __init__(self, target, args=(), kwargs=None, success_cb=None, error_cb=None, blocking_cb=None,
+    def __init__(self,
+                 target,
+                 args=(),
+                 kwargs=None,
+                 success_cb=None,
+                 error_cb=None,
+                 blocking_cb=None,
                  period_secs=0.05):
         """Run the target in a separate thread and block the calling thread
         until execution is complete,the calling thread is blocked, except that
@@ -149,8 +152,7 @@ class BlockingAsyncTaskWithCallback(AsyncTask):
         """Cancel an asynchronous execution"""
         # Implementation is based on
         # https://stackoverflow.com/questions/5019436/python-how-to-terminate-a-blocking-thread
-        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.task.ident),
-                                                   ctypes.py_object(KeyboardInterrupt))
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.task.ident), ctypes.py_object(KeyboardInterrupt))
         #now try and cancel the running algorithm
         alg = IAlgorithm._algorithmInThread(self.task.ident)
         if alg is not None:
@@ -161,7 +163,6 @@ class BlockingAsyncTaskWithCallback(AsyncTask):
 class AsyncTaskResult(object):
     """Object describing the execution of an asynchronous task
     """
-
     def __init__(self, elapsed_time):
         self.elapsed_time = elapsed_time
         self.timestamp = time.ctime()
@@ -170,7 +171,6 @@ class AsyncTaskResult(object):
 class AsyncTaskSuccess(AsyncTaskResult):
     """Object describing the successful execution of an asynchronous task
     """
-
     def __init__(self, elapsed_time, output):
         super(AsyncTaskSuccess, self).__init__(elapsed_time)
         self.output = output
@@ -183,7 +183,6 @@ class AsyncTaskSuccess(AsyncTaskResult):
 class AsyncTaskFailure(AsyncTaskResult):
     """Object describing the failed execution of an asynchronous task
     """
-
     @staticmethod
     def from_excinfo(elapsed_time):
         """
@@ -195,8 +194,7 @@ class AsyncTaskFailure(AsyncTaskResult):
         :return: A new AsyncTaskFailure object
         """
         exc_type, exc_value, exc_tb = sys.exc_info()
-        return AsyncTaskFailure(elapsed_time, exc_type, exc_value,
-                                exc_tb)
+        return AsyncTaskFailure(elapsed_time, exc_type, exc_value, exc_tb)
 
     def __init__(self, elapsed_time, exc_type, exc_value, stack):
         super(AsyncTaskFailure, self).__init__(elapsed_time)

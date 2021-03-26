@@ -17,8 +17,7 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
             temp_save_dir = os.getcwd()
         base_name = 'batch_test_file_'
         file_names = []
-        minimal_user_file = ("LOQ\n"
-                             "L/QXY 0 0.2 0.0125/lin\n")
+        minimal_user_file = ("LOQ\n" "L/QXY 0 0.2 0.0125/lin\n")
         for element in range(0, amount):
             file_name = os.path.join(temp_save_dir, base_name + str(element) + '.txt')
             file_names.append(file_name)
@@ -63,8 +62,8 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
                                   original_settings=original_settings,
                                   original_prop_man_settings=original_prop_man_settings)
         # Assert
-        self.assertTrue(str(ReductionSingleton().reference()) != reducer_address,
-                        ("The physical reducer should change."))
+        self.assertTrue(
+            str(ReductionSingleton().reference()) != reducer_address, ("The physical reducer should change."))
         self.assertEqual(ReductionSingleton().user_settings.filename, original_user_file,
                          ("The reducer should use the original user file,"
                           "since we don't provide a valid new user file."))
@@ -87,8 +86,8 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
                                   original_settings=original_settings,
                                   original_prop_man_settings=original_prop_man_settings)
         # Assert
-        self.assertTrue(str(ReductionSingleton().reference()) != reducer_address,
-                        "The physical reducer should not change.")
+        self.assertTrue(
+            str(ReductionSingleton().reference()) != reducer_address, "The physical reducer should not change.")
         self.assertEqual(ReductionSingleton().user_settings.filename, new_user_file,
                          "The reducer should use the new user file.")
         # Clean up
@@ -132,8 +131,7 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
                                   original_settings=original_settings,
                                   original_prop_man_settings=original_prop_man_settings)
         # Assert
-        self.assertTrue(str(ReductionSingleton().reference()) == reducer_address,
-                        "The physical reducer should change.")
+        self.assertTrue(str(ReductionSingleton().reference()) == reducer_address, "The physical reducer should change.")
         self.assertEqual(ReductionSingleton().user_settings.filename, current_user_file,
                          "The reducer should use the current user file.")
         # Clean up
@@ -155,8 +153,8 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
                                   original_settings=original_settings,
                                   original_prop_man_settings=original_prop_man_settings)
         # Assert
-        self.assertTrue(str(ReductionSingleton().reference()) == reducer_address,
-                        "The physical reducer should not change.")
+        self.assertTrue(
+            str(ReductionSingleton().reference()) == reducer_address, "The physical reducer should not change.")
         self.assertEqual(ReductionSingleton().user_settings.filename, current_user_file,
                          "The reducer should use the current user file.")
         # Clean up

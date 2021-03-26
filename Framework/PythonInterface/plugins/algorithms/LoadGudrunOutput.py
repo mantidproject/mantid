@@ -4,8 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import (FileProperty, WorkspaceProperty, PythonAlgorithm,
-                        AlgorithmFactory, FileAction, PropertyMode)
+from mantid.api import (FileProperty, WorkspaceProperty, PythonAlgorithm, AlgorithmFactory, FileAction, PropertyMode)
 from mantid.kernel import Direction
 from mantid.simpleapi import LoadAscii, CreateWorkspace
 
@@ -13,7 +12,6 @@ import itertools
 
 
 class LoadGudrunOutput(PythonAlgorithm):
-
     def name(self):
         return 'LoadGudrunOutput'
 
@@ -24,18 +22,17 @@ class LoadGudrunOutput(PythonAlgorithm):
         return 'Loads the common outputs created from Gudrun'
 
     def PyInit(self):
-        self.declareProperty(FileProperty(name='InputFile', defaultValue='', action=FileAction.Load,
-                                          extensions=[".dcs01",
-                                                      ".mdsc01",
-                                                      ".mint01",
-                                                      ".mdor01",
-                                                      ".mgor01"]),
+        self.declareProperty(FileProperty(name='InputFile',
+                                          defaultValue='',
+                                          action=FileAction.Load,
+                                          extensions=[".dcs01", ".mdsc01", ".mint01", ".mdor01", ".mgor01"]),
                              doc="Gudrun output file to be loaded.")
-        self.declareProperty(WorkspaceProperty(name='OutputWorkspace', defaultValue='',
+        self.declareProperty(WorkspaceProperty(name='OutputWorkspace',
+                                               defaultValue='',
                                                direction=Direction.Output,
                                                optional=PropertyMode.Optional),
                              doc="If No OutputWorkspace is provided, then the workpsace name "
-                                 "will be obtained from the meta data in the input file.")
+                             "will be obtained from the meta data in the input file.")
 
     def PyExec(self):
         input_file = self.getProperty('InputFile').value
@@ -102,11 +99,7 @@ class LoadGudrunOutput(PythonAlgorithm):
             data_rows = [self.format_data_row(line.split(" ")) for line in gudrun_file.readlines()[first_data_line:]]
         x_data, y_data, e_data = self.create_2d_data_arrays(data_rows)
         n_spec = int((len(data_rows[0]) - 1) / 2)
-        CreateWorkspace(OutputWorkspace=output_workspace,
-                        DataX=x_data,
-                        DataY=y_data,
-                        DataE=e_data,
-                        NSpec=n_spec)
+        CreateWorkspace(OutputWorkspace=output_workspace, DataX=x_data, DataY=y_data, DataE=e_data, NSpec=n_spec)
 
     def format_data_row(self, data_row):
         """
@@ -135,11 +128,11 @@ class LoadGudrunOutput(PythonAlgorithm):
             for row_index in range(1, len(data_row)):
                 if row_index % 2 == 1:
                     # y_data
-                    data_array_index = int((row_index/2.0)-0.5)
+                    data_array_index = int((row_index / 2.0) - 0.5)
                     y_data[data_array_index].append(float(data_row[row_index]))
                 else:
                     # e_data
-                    data_array_index = int((row_index/2.0)-1.0)
+                    data_array_index = int((row_index / 2.0) - 1.0)
                     e_data[data_array_index].append(float(data_row[row_index]))
         # collapse 2d lists
         y_data = list(itertools.chain.from_iterable(y_data))

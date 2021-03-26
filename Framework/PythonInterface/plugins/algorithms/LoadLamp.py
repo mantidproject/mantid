@@ -23,7 +23,8 @@ class LoadLamp(PythonAlgorithm):
         return 'Loads HDF files exported from LAMP program at the ILL'
 
     def PyInit(self):
-        self.declareProperty(FileProperty(name="InputFile", defaultValue="", action=FileAction.Load, extensions=["hdf"]))
+        self.declareProperty(FileProperty(name="InputFile", defaultValue="", action=FileAction.Load,
+                                          extensions=["hdf"]))
         self.declareProperty(WorkspaceProperty(name="OutputWorkspace", defaultValue="", direction=Direction.Output))
 
     def PyExec(self):
@@ -47,8 +48,13 @@ class LoadLamp(PythonAlgorithm):
                 if x.ndim == 1:
                     x = numpy.tile(x, nspec)
 
-        CreateWorkspace(DataX=x, DataY=data, DataE=errors, NSpec=nspec, VerticalAxisUnit='Label',
-                        VerticalAxisValues=y, OutputWorkspace=output_ws)
+        CreateWorkspace(DataX=x,
+                        DataY=data,
+                        DataE=errors,
+                        NSpec=nspec,
+                        VerticalAxisUnit='Label',
+                        VerticalAxisValues=y,
+                        OutputWorkspace=output_ws)
 
         if logs:
             log_names = []
@@ -65,7 +71,7 @@ class LoadLamp(PythonAlgorithm):
                 try:
                     AddSampleLogMultiple(Workspace=output_ws, LogNames=log_names, LogValues=log_values)
                 except RuntimeError as e:
-                    self.log().warning('Unable to set the sample logs, reason: '+str(e))
+                    self.log().warning('Unable to set the sample logs, reason: ' + str(e))
 
         self.setProperty('OutputWorkspace', output_ws)
 

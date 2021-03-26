@@ -13,12 +13,11 @@ from mantid.kernel import *
 
 
 class Mean(PythonAlgorithm):
-
     def category(self):
         return "Arithmetic"
 
     def seeAlso(self):
-        return [ "MostLikelyMean","WeightedMean","WeightedMeanOfWorkspace" ]
+        return ["MostLikelyMean", "WeightedMean", "WeightedMeanOfWorkspace"]
 
     def name(self):
         return "Mean"
@@ -29,7 +28,9 @@ class Mean(PythonAlgorithm):
     def PyInit(self):
         mustHaveWorkspaceNames = StringMandatoryValidator()
 
-        self.declareProperty("Workspaces", "", validator=mustHaveWorkspaceNames,
+        self.declareProperty("Workspaces",
+                             "",
+                             validator=mustHaveWorkspaceNames,
                              direction=Direction.Input,
                              doc="Input workspaces. Comma separated workspace names")
 
@@ -47,11 +48,11 @@ class Mean(PythonAlgorithm):
             name = workspaces[index].strip()
             ws2 = mtd[name]
             if not self._are_workspaces_compatible(ws1, ws2):
-                issues["workspaces"]="Input Workspaces are not the same shape."
+                issues["workspaces"] = "Input Workspaces are not the same shape."
                 # cannot run the next test if this fails
                 return issues
-            for spectra in range(0,nSpectra):
-                if not numpy.allclose(ws1.readX(spectra) ,ws2.readX(spectra)):
+            for spectra in range(0, nSpectra):
+                if not numpy.allclose(ws1.readX(spectra), ws2.readX(spectra)):
                     issues["Workspaces"] = "The data should have the same order for x values. Sort your data first"
         return issues
 

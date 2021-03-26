@@ -23,14 +23,13 @@ def do_cleanup():
 
 
 class EQSANSBeamCenter(systemtesting.MantidSystemTest):
-
     def cleanup(self):
         do_cleanup()
         return True
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='SNS'
+        configI["facilityName"] = 'SNS'
         EQSANS(False)
         AppendDataFile("EQSANS_4061_event.nxs")
         NoSolidAngle()
@@ -43,10 +42,14 @@ class EQSANSBeamCenter(systemtesting.MantidSystemTest):
         DirectBeamCenter("EQSANS_1466_event.nxs")
         Reduce()
         # Scale up to match correct scaling. The reference data is off by a factor 10.0
-        Scale(InputWorkspace="EQSANS_4061_event_frame2_Iq", Factor=10.0,
-              Operation='Multiply', OutputWorkspace="EQSANS_4061_event_frame2_Iq")
-        Scale(InputWorkspace="EQSANS_4061_event_frame2_Iq", Factor=277.781,
-              Operation='Multiply', OutputWorkspace="EQSANS_4061_event_frame2_Iq")
+        Scale(InputWorkspace="EQSANS_4061_event_frame2_Iq",
+              Factor=10.0,
+              Operation='Multiply',
+              OutputWorkspace="EQSANS_4061_event_frame2_Iq")
+        Scale(InputWorkspace="EQSANS_4061_event_frame2_Iq",
+              Factor=277.781,
+              Operation='Multiply',
+              OutputWorkspace="EQSANS_4061_event_frame2_Iq")
 
     def validate(self):
         # Be more tolerant with the output, mainly because of the errors.
@@ -60,14 +63,13 @@ class EQSANSBeamCenter(systemtesting.MantidSystemTest):
 
 
 class EQSANSBeamCenterEvent(EQSANSBeamCenter):
-
     def cleanup(self):
         do_cleanup()
         return True
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='SNS'
+        configI["facilityName"] = 'SNS'
         EQSANS(True)
         AppendDataFile("EQSANS_4061_event.nxs")
         NoSolidAngle()
@@ -80,7 +82,11 @@ class EQSANSBeamCenterEvent(EQSANSBeamCenter):
         DirectBeamCenter("EQSANS_1466_event.nxs")
         Reduce()
         # Scale up to match correct scaling. The reference data is off by a factor 10.0
-        Scale(InputWorkspace="EQSANS_4061_event_frame2_Iq", Factor=10.0,
-              Operation='Multiply', OutputWorkspace="EQSANS_4061_event_frame2_Iq")
-        Scale(InputWorkspace="EQSANS_4061_event_frame2_Iq", Factor=277.781,
-              Operation='Multiply', OutputWorkspace="EQSANS_4061_event_frame2_Iq")
+        Scale(InputWorkspace="EQSANS_4061_event_frame2_Iq",
+              Factor=10.0,
+              Operation='Multiply',
+              OutputWorkspace="EQSANS_4061_event_frame2_Iq")
+        Scale(InputWorkspace="EQSANS_4061_event_frame2_Iq",
+              Factor=277.781,
+              Operation='Multiply',
+              OutputWorkspace="EQSANS_4061_event_frame2_Iq")

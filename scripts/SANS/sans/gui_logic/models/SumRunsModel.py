@@ -39,18 +39,17 @@ class SumRunsModel(object):
         file_name = base_file_name + '.nxs'
         monitors_file_name = base_file_name + '_monitors.nxs'
 
-        SANSadd2.add_runs(
-            tuple(run_selection),
-            settings.instrument(),
-            lowMem=True,
-            binning=binning,
-            isOverlay=overlay_event_workspaces,
-            saveAsEvent=save_as_event,
-            time_shifts=additional_time_shifts,
-            outFile=file_name,
-            outFile_monitors=monitors_file_name,
-            save_directory=settings.save_directory,
-            estimate_logs=True)
+        SANSadd2.add_runs(tuple(run_selection),
+                          settings.instrument(),
+                          lowMem=True,
+                          binning=binning,
+                          isOverlay=overlay_event_workspaces,
+                          saveAsEvent=save_as_event,
+                          time_shifts=additional_time_shifts,
+                          outFile=file_name,
+                          outFile_monitors=monitors_file_name,
+                          save_directory=settings.save_directory,
+                          estimate_logs=True)
 
     def _run_selection_as_path_list(self, run_selection):
         return [run.file_path() for run in run_selection]

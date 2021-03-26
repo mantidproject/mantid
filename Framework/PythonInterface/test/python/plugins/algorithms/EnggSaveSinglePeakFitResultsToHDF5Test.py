@@ -17,11 +17,12 @@ from testhelpers import run_algorithm
 class EnggSaveSinglePeakFitResultsToHDF5Test(unittest.TestCase):
 
     ALG_NAME = "EnggSaveSinglePeakFitResultsToHDF5"
-    FIT_PARAMS = ["dSpacing", "A0", "A0_Err", "A1", "A1_Err", "X0", "X0_Err",
-                  "A", "A_Err", "B", "B_Err", "S", "S_Err", "I", "I_Err", "Chi"]
+    FIT_PARAMS = [
+        "dSpacing", "A0", "A0_Err", "A1", "A1_Err", "X0", "X0_Err", "A", "A_Err", "B", "B_Err", "S", "S_Err", "I",
+        "I_Err", "Chi"
+    ]
     FIT_RESULTS_TABLE_NAME = "FitResults"
-    TEMP_FILE_NAME = os.path.join(tempfile.gettempdir(),
-                                  "EnggSaveSinglePeakFitResultsToHDF5Test.hdf5")
+    TEMP_FILE_NAME = os.path.join(tempfile.gettempdir(), "EnggSaveSinglePeakFitResultsToHDF5Test.hdf5")
 
     def tearDown(self):
         try:
@@ -39,10 +40,7 @@ class EnggSaveSinglePeakFitResultsToHDF5Test(unittest.TestCase):
             peaks.append(self._create_random_peak_row())
 
         input_ws = self._create_fit_results_table(peaks)
-        test_alg = run_algorithm(self.ALG_NAME,
-                                 InputWorkspaces=[input_ws],
-                                 BankIDs=[1],
-                                 Filename=self.TEMP_FILE_NAME)
+        test_alg = run_algorithm(self.ALG_NAME, InputWorkspaces=[input_ws], BankIDs=[1], Filename=self.TEMP_FILE_NAME)
 
         self.assertTrue(test_alg.isExecuted())
 
@@ -59,17 +57,11 @@ class EnggSaveSinglePeakFitResultsToHDF5Test(unittest.TestCase):
     def test_saveToExistingFileDoesNotOverwrite(self):
         peaks1 = self._create_random_peak_row()
         table_ws1 = self._create_fit_results_table([peaks1])
-        run_algorithm(self.ALG_NAME,
-                      InputWorkspaces=[table_ws1],
-                      BankIDs=[1],
-                      Filename=self.TEMP_FILE_NAME)
+        run_algorithm(self.ALG_NAME, InputWorkspaces=[table_ws1], BankIDs=[1], Filename=self.TEMP_FILE_NAME)
 
         peaks2 = self._create_random_peak_row()
         table_ws2 = self._create_fit_results_table([peaks2])
-        run_algorithm(self.ALG_NAME,
-                      InputWorkspaces=[table_ws2],
-                      BankIDs=[2],
-                      Filename=self.TEMP_FILE_NAME)
+        run_algorithm(self.ALG_NAME, InputWorkspaces=[table_ws2], BankIDs=[2], Filename=self.TEMP_FILE_NAME)
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             self.assertTrue("Bank 1" in output_file)
@@ -111,6 +103,7 @@ class EnggSaveSinglePeakFitResultsToHDF5Test(unittest.TestCase):
 
     def _create_random_peak_row(self):
         return [random.random() for _ in self.FIT_PARAMS]
+
 
 if __name__ == "__main__":
     unittest.main()

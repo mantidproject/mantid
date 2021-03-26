@@ -9,19 +9,16 @@ import random
 import string
 from typing import List, Optional, Union
 
-from mantid.api import (
-    AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, WorkspaceProperty, mtd, Progress, TextAxis,
-    Workspace, WorkspaceGroup, WorkspaceUnitValidator)
+from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, WorkspaceProperty, mtd, Progress,
+                        TextAxis, Workspace, WorkspaceGroup, WorkspaceUnitValidator)
 from mantid.dataobjects import TableWorkspace, Workspace2D
-from mantid.simpleapi import (
-    CalculateDIFC, CloneWorkspace, CopyInstrumentParameters, ConvertUnits, CreateEmptyTableWorkspace,
-    CreateGroupingWorkspace, CreateWorkspace, DeleteWorkspace, GroupDetectors, GroupWorkspaces, Multiply,
-    MoveInstrumentComponent, PDCalibration, Rebin)
+from mantid.simpleapi import (CalculateDIFC, CloneWorkspace, CopyInstrumentParameters, ConvertUnits,
+                              CreateEmptyTableWorkspace, CreateGroupingWorkspace, CreateWorkspace, DeleteWorkspace,
+                              GroupDetectors, GroupWorkspaces, Multiply, MoveInstrumentComponent, PDCalibration, Rebin)
 from mantid.kernel import Direction, EnabledWhenProperty, logger, PropertyCriterion, StringArrayProperty
 
 
-def unique_workspace_name(n: int = 5, prefix: Optional[str] = '',
-                          suffix: Optional[str] = ''):
+def unique_workspace_name(n: int = 5, prefix: Optional[str] = '', suffix: Optional[str] = ''):
     r"""
     Create a random sequence of `n` lowercase characters that is guaranteed
     not to collide with the name of any existing Mantid workspace registered
@@ -53,11 +50,11 @@ def temp_workspace_generator(temp_workspaces):
         name = unique_workspace_name()
         temp_workspaces.append(name)
         return name
+
     return inner_function
 
 
-def insert_bank_numbers(input_workspace: Union[str, Workspace2D],
-                        grouping_workspace: Union[str, WorkspaceGroup]):
+def insert_bank_numbers(input_workspace: Union[str, Workspace2D], grouping_workspace: Union[str, WorkspaceGroup]):
     r"""
     Label each spectra according to each bank number
 
@@ -84,8 +81,10 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
     #: - Xposition, YPosition, ZPosition: location of the instrument component in the lab frame (units in meters)
     #: - XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle: direction cosines and rotation angle
     #: (in degress) defining a rotation in the lab frame that orients the instrument component
-    adjustment_items = ['ComponentName', 'Xposition', 'Yposition', 'Zposition',
-                        'XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine', 'RotationAngle']
+    adjustment_items = [
+        'ComponentName', 'Xposition', 'Yposition', 'Zposition', 'XdirectionCosine', 'YdirectionCosine',
+        'ZdirectionCosine', 'RotationAngle'
+    ]
 
     def name(self):
         return "CorelliPowderCalibrationCreate"
@@ -109,12 +108,12 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            WorkspaceProperty('InputWorkspace', '',
-                              direction=Direction.Input,
-                              validator=WorkspaceUnitValidator('TOF')),
+            WorkspaceProperty('InputWorkspace', '', direction=Direction.Input, validator=WorkspaceUnitValidator('TOF')),
             doc='Powder event data, ideally from a highly symmetric space group',
         )
-        self.declareProperty(name='OutputWorkspacesPrefix', defaultValue='pdcal_', direction=Direction.Input,
+        self.declareProperty(name='OutputWorkspacesPrefix',
+                             defaultValue='pdcal_',
+                             direction=Direction.Input,
                              doc="Prefix to be added to output workspaces")
 
         # PDCalibration properties exposed, grouped
@@ -123,15 +122,15 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         [self.setPropertyGroup(name, 'PDCalibration') for name in property_names]
 
         # "Source Position" properties
-        self.declareProperty(name='FixSource', defaultValue=True,
-                             doc="Fix source's distance from the sample")
-        self.declareProperty(name='SourceToSampleDistance', defaultValue=20.004,
+        self.declareProperty(name='FixSource', defaultValue=True, doc="Fix source's distance from the sample")
+        self.declareProperty(name='SourceToSampleDistance',
+                             defaultValue=20.004,
                              doc='Set this value for a fixed distance from source to sample, in meters')
-        self.setPropertySettings('SourceToSampleDistance',
-                                 EnabledWhenProperty("FixSource", PropertyCriterion.IsDefault))
-        self.declareProperty(name='AdjustSource', defaultValue=False,
-                             doc='Adjust Z-coordinate of the source')
-        self.declareProperty(name='SourceMaxTranslation', defaultValue=0.1,
+        self.setPropertySettings('SourceToSampleDistance', EnabledWhenProperty("FixSource",
+                                                                               PropertyCriterion.IsDefault))
+        self.declareProperty(name='AdjustSource', defaultValue=False, doc='Adjust Z-coordinate of the source')
+        self.declareProperty(name='SourceMaxTranslation',
+                             defaultValue=0.1,
                              doc='Maximum adjustment of source position along the beam (Z) axis (m)')
         self.setPropertySettings("SourceMaxTranslation",
                                  EnabledWhenProperty("AdjustSource", PropertyCriterion.IsNotDefault))
@@ -141,9 +140,11 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         # AlignComponents properties
         self.declareProperty(StringArrayProperty('ComponentList', values=self._banks, direction=Direction.Input),
                              doc='Comma separated list on banks to refine')
-        self.declareProperty(name='ComponentMaxTranslation', defaultValue=0.02,
+        self.declareProperty(name='ComponentMaxTranslation',
+                             defaultValue=0.02,
                              doc='Maximum translation of each component along either of the X, Y, Z axes (m)')
-        self.declareProperty(name='ComponentMaxRotation', defaultValue=3.0,
+        self.declareProperty(name='ComponentMaxRotation',
+                             defaultValue=3.0,
                              doc='Maximum rotation of each component along either of the X, Y, Z axes (deg)')
         property_names = ['ComponentList', 'ComponentMaxTranslation', 'ComponentMaxRotation']
         [self.setPropertyGroup(name, 'AlignComponents') for name in property_names]
@@ -191,16 +192,13 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
         # Find the peak centers in TOF units, for the peaks found at each pixel
         peak_centers_in_tof = prefix_output + 'PDCalibration_diagnostics_tof'
-        self.centers_in_tof(prefix_output + 'PDCalibration_diagnostics_dspacing',
-                            difc_table, peak_centers_in_tof)
+        self.centers_in_tof(prefix_output + 'PDCalibration_diagnostics_dspacing', difc_table, peak_centers_in_tof)
         mtd[diagnostics_workspaces].add(peak_centers_in_tof)
 
         # Find the Histogram of peak deviations (in d-spacing units)
         # for each bank, using the original instrument geometry
-        self.histogram_peak_deviations(prefix_output + 'PDCalibration_diagnostics_tof',
-                                       input_workspace,
-                                       prefix_output + 'peak_deviations_original',
-                                       grouping_workspace)
+        self.histogram_peak_deviations(prefix_output + 'PDCalibration_diagnostics_tof', input_workspace,
+                                       prefix_output + 'peak_deviations_original', grouping_workspace)
         adjustment_diagnostics.append(prefix_output + 'peak_deviations_original')
 
         # repeat with percent peak deviations for each bank, using the adjusted instrument geometry
@@ -229,7 +227,9 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
                           AdjustmentsTable=adjustments_table_name,
                           FitSourcePosition=True,
                           FitSamplePosition=False,
-                          Zposition=True, MinZPosition=-dz, MaxZPosition=dz)
+                          Zposition=True,
+                          MinZPosition=-dz,
+                          MaxZPosition=dz)
             self.run_algorithm('AlignComponents', 0.1, 0.2, **kwargs)
         else:
             # Impose the fixed position of the source and save into the adjustments table
@@ -247,12 +247,24 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
                       FitSourcePosition=False,
                       FitSamplePosition=False,
                       ComponentList=self.getProperty('ComponentList').value,
-                      Xposition=True, MinXPosition=-dt, MaxXPosition=dt,
-                      Yposition=True, MinYPosition=-dt, MaxYPosition=dt,
-                      Zposition=True, MinZPosition=-dt, MaxZPosition=dt,
-                      AlphaRotation=True, MinAlphaRotation=-dr, MaxAlphaRotation=dr,
-                      BetaRotation=True, MinBetaRotation=-dr, MaxBetaRotation=dr,
-                      GammaRotation=True, MinGammaRotation=-dr, MaxGammaRotation=dr,
+                      Xposition=True,
+                      MinXPosition=-dt,
+                      MaxXPosition=dt,
+                      Yposition=True,
+                      MinYPosition=-dt,
+                      MaxYPosition=dt,
+                      Zposition=True,
+                      MinZPosition=-dt,
+                      MaxZPosition=dt,
+                      AlphaRotation=True,
+                      MinAlphaRotation=-dr,
+                      MaxAlphaRotation=dr,
+                      BetaRotation=True,
+                      MinBetaRotation=-dr,
+                      MaxBetaRotation=dr,
+                      GammaRotation=True,
+                      MinGammaRotation=-dr,
+                      MaxGammaRotation=dr,
                       EulerConvention='YXZ')
         self.run_algorithm('AlignComponents', 0.2, 0.97, **kwargs)
         progress.report('AlignComponents has been applied')
@@ -273,10 +285,8 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
         # Find the Histogram of peak deviations (in d-spacing units)
         # for each bank, using the adjusted instrument geometry
-        self.histogram_peak_deviations(prefix_output + 'PDCalibration_diagnostics_tof',
-                                       input_workspace,
-                                       prefix_output + 'peak_deviations_adjusted',
-                                       grouping_workspace)
+        self.histogram_peak_deviations(prefix_output + 'PDCalibration_diagnostics_tof', input_workspace,
+                                       prefix_output + 'peak_deviations_adjusted', grouping_workspace)
         adjustment_diagnostics.append(prefix_output + 'peak_deviations_adjusted')
 
         # repeat with percent peak deviations for each bank, using the adjusted instrument geometry
@@ -306,7 +316,8 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         @param soft_crash : log an error but do not raise an exception
         """
         algorithm_align = self.createChildAlgorithm(name=name,
-                                                    startProgress=start_progress, endProgress=end_progress,
+                                                    startProgress=start_progress,
+                                                    endProgress=end_progress,
                                                     enableLogging=True)
         [algorithm_align.setProperty(name, value) for name, value in kwargs.items()]
         try:
@@ -318,7 +329,8 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
                 raise err.__class__(err)
         logger.notice(f'{name} has executed')
 
-    def _append_second_to_first(self, first: Union[str, TableWorkspace],
+    def _append_second_to_first(self,
+                                first: Union[str, TableWorkspace],
                                 second: Union[str, TableWorkspace],
                                 delete_second: bool = True):
         r"""
@@ -346,19 +358,25 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
         # Initialize the table of adjustments for the source
         table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
-        item_types = ['str',
-                      'double', 'double', 'double',
-                      'double', 'double', 'double', 'double']
-        item_names = ['ComponentName', 'Xposition', 'Yposition', 'Zposition',
-                      'XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine', 'RotationAngle']
+        item_types = ['str', 'double', 'double', 'double', 'double', 'double', 'double', 'double']
+        item_names = [
+            'ComponentName', 'Xposition', 'Yposition', 'Zposition', 'XdirectionCosine', 'YdirectionCosine',
+            'ZdirectionCosine', 'RotationAngle'
+        ]
         for column_name, column_type in zip(item_names, item_types):
             table.addColumn(name=column_name, type=column_type)
 
         # Add the appropriate row in the table for the source
-        table.addRow([source_name,
-                      0.0, 0.0, z_position,  # new position for the source
-                      0.0, 0.0, 0.0,  # no rotation axis
-                      0.0])  # no rotation angle
+        table.addRow([
+            source_name,
+            0.0,
+            0.0,
+            z_position,  # new position for the source
+            0.0,
+            0.0,
+            0.0,  # no rotation axis
+            0.0
+        ])  # no rotation angle
         return table
 
     @staticmethod
@@ -391,7 +409,8 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
         return output
 
-    def fitted_in_dspacing(self, fitted_in_tof: Union[str, Workspace2D],
+    def fitted_in_dspacing(self,
+                           fitted_in_tof: Union[str, Workspace2D],
                            workspace_with_instrument: Union[str, Workspace],
                            output_workspace: str,
                            dspacing_bin_width: float = 0.001,
@@ -421,16 +440,17 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         dspacing_extra = 1.0  # 1 Angstrom
         dspacing_min = max(0, min(peak_centers_reference) - dspacing_extra)
         dspacing_max = max(peak_centers_reference) + dspacing_extra
-        Rebin(InputWorkspace=output_workspace, OutputWorkspace=output_workspace,
+        Rebin(InputWorkspace=output_workspace,
+              OutputWorkspace=output_workspace,
               Params=[dspacing_min, dspacing_bin_width, dspacing_max])  # bin width is 0.001 Angstroms
         # Optional groping into banks
         if grouping_workspace is not None:
-            GroupDetectors(InputWorkspace=output_workspace, OutputWorkspace=output_workspace,
+            GroupDetectors(InputWorkspace=output_workspace,
+                           OutputWorkspace=output_workspace,
                            CopyGroupingFromWorkspace=grouping_workspace)
-            insert_bank_numbers(output_workspace, grouping_workspace) # label each spectrum with the bank number
+            insert_bank_numbers(output_workspace, grouping_workspace)  # label each spectrum with the bank number
 
-    def centers_in_tof(self, centers_in_dspacing: Union[str, TableWorkspace],
-                       difc: Union[str, TableWorkspace],
+    def centers_in_tof(self, centers_in_dspacing: Union[str, TableWorkspace], difc: Union[str, TableWorkspace],
                        output_workspace: str):
         r"""
         Convert the peak centers in dSpacing units (Angstroms) to TOF units (microseconds)
@@ -501,7 +521,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
             # switch to percent deviations if so required
             if percent_deviations is True:
                 tof_dict[column] *= 100 / dspacing_reference
-            tof_dict[column] = tof_dict[column].tolist() # cast to list
+            tof_dict[column] = tof_dict[column].tolist()  # cast to list
 
         # Extract the group ID's, which typically corresponds to bank numbers
         # grouping_workspace_y contain the group ID (bank number) of each pixel
@@ -533,15 +553,17 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         spectra = spectra = np.array(list(histograms.values())).flatten()  # single list needed
         unit_x = 'dSpacing' if percent_deviations is False else 'Empty'
         title_prefix = 'Peak ' if percent_deviations is False else 'Percent peak '
-        CreateWorkspace(DataX=bins, DataY=spectra, NSpec=len(group_ids), UnitX=unit_x,
+        CreateWorkspace(DataX=bins,
+                        DataY=spectra,
+                        NSpec=len(group_ids),
+                        UnitX=unit_x,
                         WorkspaceTitle=title_prefix + 'Peak deviations per pixel group',
                         OutputWorkspace=output_workspace)
-        insert_bank_numbers(output_workspace, grouping_workspace) # label each spectrum with the bank number
+        insert_bank_numbers(output_workspace, grouping_workspace)  # label each spectrum with the bank number
 
     @staticmethod
     def peak_deviations_summarize(original_workspace: Union[str, Workspace2D],
-                                  adjusted_workspace: Union[str, Workspace2D],
-                                  output_workspace: str) -> None:
+                                  adjusted_workspace: Union[str, Workspace2D], output_workspace: str) -> None:
         r"""
         Basic statistics from the histograms of peak deviations
 

@@ -20,7 +20,6 @@ class Porod(IFunction1D):
 
         I(q) = C/q^4 + background
     """
-
     def category(self):
         return "SANS"
 

@@ -12,12 +12,13 @@ import systemtesting
 from mantid.kernel import ConfigService
 from tempfile import NamedTemporaryFile
 
-
 TEST_MESSAGE = "Hello Mantid!"
 
-EXECUTABLE_SWITCHER = {"linux": ["launch_mantidworkbench.sh", "mantidworkbench"],
-                       "darwin": ["MantidWorkbench", "MantidWorkbenchNightly", "MantidWorkbenchUnstable"],
-                       "win32": ["MantidWorkbench.exe"]}
+EXECUTABLE_SWITCHER = {
+    "linux": ["launch_mantidworkbench.sh", "mantidworkbench"],
+    "darwin": ["MantidWorkbench", "MantidWorkbenchNightly", "MantidWorkbenchUnstable"],
+    "win32": ["MantidWorkbench.exe"]
+}
 
 
 def get_mantid_executables_for_platform(platform):
@@ -66,7 +67,8 @@ class WorkbenchStartupTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         process = subprocess.Popen([self._executable, "--execute", self._test_script, "--quit"],
-                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
 
         # Wait for the process to finish execution, and assert it was successfully
         self.assertTrue(process.wait() == 0)

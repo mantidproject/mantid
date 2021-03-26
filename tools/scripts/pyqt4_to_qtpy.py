@@ -14,8 +14,7 @@ def parse_old_style_connect(qt_old_line, linenum):
     step1 = step1.replace(' ', '')
     terms = step1.split(',')
     if len(terms) != 3:
-        raise RuntimeError('This is not right! L{1} {0}'.format(qt_old_line,
-                                                                linenum))
+        raise RuntimeError('This is not right! L{1} {0}'.format(qt_old_line, linenum))
 
     # leading whitespace
     whitespace = ' ' * (len(qt_old_line) - len(qt_old_line.lstrip(' ')))
@@ -77,59 +76,60 @@ def convert_signal_connect(cmd, linenum):
     return '{0}{1}.{2}.connect({3})\n'.format(whitespace, widget_name, signal_call, handler_method)
 
 
-QT4_TO_QTPY_FIXES = {'QtCore.QEventLoop': ('qtpy.QtCore', 'QEventLoop'),
-                     'QtCore.QFile': ('qtpy.QtCore', 'QFile'),
-                     'QtCore.QFileInfo': ('qtpy.QtCore', 'QFileInfo'),
-                     'QtCore.QProcess': ('qtpy.QtCore', 'QProcess'),
-                     'QtCore.QRegExp': ('qtpy.QtCore', 'QRegExp'),
-                     'QtCore.QSize':  ('qtpy.QtCore', 'QSize'),
-                     'QtCore.QSettings': ('qtpy.QtCore', 'QSettings'),
-                     'QtCore.QThread':  ('qtpy.QtCore', 'QThread'),
-                     'QtCore.QUrl': ('qtpy.QtCore', 'QUrl'),
-                     'QtGui.QAction': ('qtpy.QtWidgets', 'QAction'),
-                     'QtGui.QAbstractItemView': ('qtpy.QtWidgets', 'QAbstractItemView'),
-                     'QtGui.QApplication': ('qtpy.QtWidgets', 'QApplication'),
-                     'QtGui.QBrush': ('qtpy.QtGui', 'QBrush'),
-                     'QtGui.QButtonGroup': ('qtpy.QtWidgets', 'QButtonGroup'),
-                     'QtGui.QCheckBox': ('qtpy.QtWidgets', 'QCheckBox'),
-                     'QtGui.QColor': ('qtpy.QtGui', 'QColor'),
-                     'QtGui.QComboBox': ('qtpy.QtWidgets', 'QComboBox'),
-                     'QtGui.QCursor': ('qtpy.QtGui', 'QCursor'),
-                     'QtGui.QDesktopServices': ('qtpy.QGui', 'QDesktopServices'),
-                     'QtGui.QDialog': ('qtpy.QtWidgets', 'QDialog'),
-                     'QtGui.QDoubleValidator': ('qtpy.QtGui', 'QDoubleValidator'),
-                     'QtGui.QDoubleSpinBox': ('qtpy.QtWidgets', 'QDoubleSpinBox'),
-                     'QtGui.QFileDialog': ('qtpy.QtWidgets', 'QFileDialog'),
-                     'QtGui.QFont': ('qtpy.QtGui', 'QFont'),
-                     'QtGui.QFrame': ('qtpy.QtWidgets', 'QFrame'),
-                     'QtGui.QGridLayout': ('qtpy.QtWidgets', 'QGridLayout'),
-                     'QtGui.QGroupBox': ('qtpy.QtWidgets', 'QGroupBox'),
-                     'QtGui.QHeaderView': ('qtpy.QtWidgets', 'QHeaderView'),
-                     'QtGui.QHBoxLayout': ('qtpy.QtWidgets', 'QHBoxLayout'),
-                     'QtGui.QIntValidator': ('qtpy.QtGui', 'QIntValidator'),
-                     'QtGui.QMenu': ('qtpy.QtWidgets', 'QMenu'),
-                     'QtGui.QLabel': ('qtpy.QtWidgets', 'QLabel'),
-                     'QtGui.QLineEdit': ('qtpy.QtWidgets', 'QLineEdit'),
-                     'QtGui.QMainWindow': ('qtpy.QtWidgets', 'QMainWindow'),
-                     'QtGui.QPalette': ('qtpy.QtGui', 'QPalette'),
-                     'QtGui.QMessageBox': ('qtpy.QtWidgets', 'QMessageBox'),
-                     'QtGui.QPushButton': ('qtpy.QtWidgets', 'QPushButton'),
-                     'QtGui.QRegExpValidator': ('qtpy.QtGui', 'QRegExpValidator'),
-                     'QtGui.QRadioButton': ('qtpy.QtWidgets', 'QRadioButton'),
-                     'QtGui.QScrollBar': ('qtpy.QtWidgets', 'QScrollBar'),
-                     'QtGui.QStandardItem': ('qtpy.QtGui', 'QStandardItem'),
-                     'QtGui.QStatusBar': ('qtpy.QtWidgets', 'QStatusBar'),
-                     'QtGui.QStyleFactory': ('qtpy.QtWidgets', 'QStyleFactory'),
-                     'QtGui.QTableWidgetSelectionRange': ('qtpy.QtWidgets', 'QTableWidgetSelectionRange'),
-                     'QtGui.QTreeView': ('qtpy.QtWidgets', 'QTreeView'),
-                     'QtGui.QSizePolicy': ('qtpy.QtWidgets', 'QSizePolicy'),
-                     'QtGui.QSpacerItem': ('qtpy.QtWidgets', 'QSpacerItem'),
-                     'QtGui.QTableWidgetItem': ('qtpy.QtWidgets', 'QTableWidgetItem'),
-                     'QtGui.QTabWidget': ('qtpy.QtWidgets', 'QTabWidget'),
-                     'QtGui.QTextEdit': ('qtpy.QtWidgets', 'QTextEdit'),
-                     'QtGui.QVBoxLayout': ('qtpy.QtWidgets', 'QVBoxLayout'),
-                     'QtGui.QWidget': ('qtpy.QtWidgets', 'QWidget'),
-                     }
+QT4_TO_QTPY_FIXES = {
+    'QtCore.QEventLoop': ('qtpy.QtCore', 'QEventLoop'),
+    'QtCore.QFile': ('qtpy.QtCore', 'QFile'),
+    'QtCore.QFileInfo': ('qtpy.QtCore', 'QFileInfo'),
+    'QtCore.QProcess': ('qtpy.QtCore', 'QProcess'),
+    'QtCore.QRegExp': ('qtpy.QtCore', 'QRegExp'),
+    'QtCore.QSize': ('qtpy.QtCore', 'QSize'),
+    'QtCore.QSettings': ('qtpy.QtCore', 'QSettings'),
+    'QtCore.QThread': ('qtpy.QtCore', 'QThread'),
+    'QtCore.QUrl': ('qtpy.QtCore', 'QUrl'),
+    'QtGui.QAction': ('qtpy.QtWidgets', 'QAction'),
+    'QtGui.QAbstractItemView': ('qtpy.QtWidgets', 'QAbstractItemView'),
+    'QtGui.QApplication': ('qtpy.QtWidgets', 'QApplication'),
+    'QtGui.QBrush': ('qtpy.QtGui', 'QBrush'),
+    'QtGui.QButtonGroup': ('qtpy.QtWidgets', 'QButtonGroup'),
+    'QtGui.QCheckBox': ('qtpy.QtWidgets', 'QCheckBox'),
+    'QtGui.QColor': ('qtpy.QtGui', 'QColor'),
+    'QtGui.QComboBox': ('qtpy.QtWidgets', 'QComboBox'),
+    'QtGui.QCursor': ('qtpy.QtGui', 'QCursor'),
+    'QtGui.QDesktopServices': ('qtpy.QGui', 'QDesktopServices'),
+    'QtGui.QDialog': ('qtpy.QtWidgets', 'QDialog'),
+    'QtGui.QDoubleValidator': ('qtpy.QtGui', 'QDoubleValidator'),
+    'QtGui.QDoubleSpinBox': ('qtpy.QtWidgets', 'QDoubleSpinBox'),
+    'QtGui.QFileDialog': ('qtpy.QtWidgets', 'QFileDialog'),
+    'QtGui.QFont': ('qtpy.QtGui', 'QFont'),
+    'QtGui.QFrame': ('qtpy.QtWidgets', 'QFrame'),
+    'QtGui.QGridLayout': ('qtpy.QtWidgets', 'QGridLayout'),
+    'QtGui.QGroupBox': ('qtpy.QtWidgets', 'QGroupBox'),
+    'QtGui.QHeaderView': ('qtpy.QtWidgets', 'QHeaderView'),
+    'QtGui.QHBoxLayout': ('qtpy.QtWidgets', 'QHBoxLayout'),
+    'QtGui.QIntValidator': ('qtpy.QtGui', 'QIntValidator'),
+    'QtGui.QMenu': ('qtpy.QtWidgets', 'QMenu'),
+    'QtGui.QLabel': ('qtpy.QtWidgets', 'QLabel'),
+    'QtGui.QLineEdit': ('qtpy.QtWidgets', 'QLineEdit'),
+    'QtGui.QMainWindow': ('qtpy.QtWidgets', 'QMainWindow'),
+    'QtGui.QPalette': ('qtpy.QtGui', 'QPalette'),
+    'QtGui.QMessageBox': ('qtpy.QtWidgets', 'QMessageBox'),
+    'QtGui.QPushButton': ('qtpy.QtWidgets', 'QPushButton'),
+    'QtGui.QRegExpValidator': ('qtpy.QtGui', 'QRegExpValidator'),
+    'QtGui.QRadioButton': ('qtpy.QtWidgets', 'QRadioButton'),
+    'QtGui.QScrollBar': ('qtpy.QtWidgets', 'QScrollBar'),
+    'QtGui.QStandardItem': ('qtpy.QtGui', 'QStandardItem'),
+    'QtGui.QStatusBar': ('qtpy.QtWidgets', 'QStatusBar'),
+    'QtGui.QStyleFactory': ('qtpy.QtWidgets', 'QStyleFactory'),
+    'QtGui.QTableWidgetSelectionRange': ('qtpy.QtWidgets', 'QTableWidgetSelectionRange'),
+    'QtGui.QTreeView': ('qtpy.QtWidgets', 'QTreeView'),
+    'QtGui.QSizePolicy': ('qtpy.QtWidgets', 'QSizePolicy'),
+    'QtGui.QSpacerItem': ('qtpy.QtWidgets', 'QSpacerItem'),
+    'QtGui.QTableWidgetItem': ('qtpy.QtWidgets', 'QTableWidgetItem'),
+    'QtGui.QTabWidget': ('qtpy.QtWidgets', 'QTabWidget'),
+    'QtGui.QTextEdit': ('qtpy.QtWidgets', 'QTextEdit'),
+    'QtGui.QVBoxLayout': ('qtpy.QtWidgets', 'QVBoxLayout'),
+    'QtGui.QWidget': ('qtpy.QtWidgets', 'QWidget'),
+}
 
 
 def convertToQtPy(command, linenum):
@@ -143,8 +143,7 @@ def convertToQtPy(command, linenum):
                 imports[import_mod] = items
                 command = command.replace(old_txt, new_txt)
         if ('QtCore' in command or 'QtGui' in command) and 'import' not in command:
-            sys.stderr.write('L{} Found unknown qt call: "{}"\n'.format(linenum,
-                                                                        command.strip()))
+            sys.stderr.write('L{} Found unknown qt call: "{}"\n'.format(linenum, command.strip()))
     except UnicodeDecodeError:
         pass  # would have already been an issue
     return command, imports
@@ -157,8 +156,8 @@ def read_and_convert_pyqt4_functions(filename):
     with open(filename, 'r') as handle:
         for linenum, line in enumerate(handle):
             # editors count from 1
-            line = convert_signal_connect(line, linenum+1)
-            line, imports_for_line = convertToQtPy(line, linenum+1)
+            line = convert_signal_connect(line, linenum + 1)
+            line, imports_for_line = convertToQtPy(line, linenum + 1)
             for key, values in imports_for_line.items():
                 items = imports.get(key, set())
                 for item in values:

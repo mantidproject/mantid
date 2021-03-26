@@ -81,7 +81,7 @@ class SpaceGroupBuilder(object):
     def _getCleanSpaceGroupSymbol(self, rawSpaceGroupSymbol):
         # Remove :1 and :H from the symbol. Those are not required at the moment because they are the default.
         # Also substitute 'R' and 'Z' endings used by ICSD to indicate alternative origin choice or settings
-        mappings = {':[1Hh]':'', ' S$':'', ' H$':'', ' Z$':' :2', ' R$':' :r'}
+        mappings = {':[1Hh]': '', ' S$': '', ' H$': '', ' Z$': ' :2', ' R$': ' :r'}
         for k, v in mappings.items():
             rawSpaceGroupSymbol = re.sub(k, v, rawSpaceGroupSymbol)
         return rawSpaceGroupSymbol.strip()
@@ -108,18 +108,18 @@ class UnitCellBuilder(object):
     For testing purposes, dictionaries with the appropriate data can
     be passed in as well, so the source of the parsed data is replaceable.
     """
-
     def __init__(self, cifData=None):
         if cifData is not None:
             self.unitCell = self._getUnitCell(cifData)
 
     def _getUnitCell(self, cifData):
-        unitCellComponents = ['_cell_length_a', '_cell_length_b', '_cell_length_c',
-                              '_cell_angle_alpha', '_cell_angle_beta', '_cell_angle_gamma']
+        unitCellComponents = [
+            '_cell_length_a', '_cell_length_b', '_cell_length_c', '_cell_angle_alpha', '_cell_angle_beta',
+            '_cell_angle_gamma'
+        ]
 
-        unitCellValueMap = dict([(str(x), removeErrorEstimateFromNumber(str(cifData[x]))) if x in cifData.keys()
-                                 else (str(x), None) for x in
-                                 unitCellComponents])
+        unitCellValueMap = dict([(str(x), removeErrorEstimateFromNumber(str(cifData[x]))) if x in cifData.keys() else
+                                 (str(x), None) for x in unitCellComponents])
 
         if unitCellValueMap['_cell_length_a'] is None:
             raise RuntimeError('The a-parameter of the unit cell is not specified in the supplied CIF.\n'
@@ -128,11 +128,15 @@ class UnitCellBuilder(object):
         replacementMap = {
             '_cell_length_b': str(unitCellValueMap['_cell_length_a']),
             '_cell_length_c': str(unitCellValueMap['_cell_length_a']),
-            '_cell_angle_alpha': '90.0', '_cell_angle_beta': '90.0', '_cell_angle_gamma': '90.0'}
+            '_cell_angle_alpha': '90.0',
+            '_cell_angle_beta': '90.0',
+            '_cell_angle_gamma': '90.0'
+        }
 
         unitCellValues = [
-            unitCellValueMap[str(key)] if unitCellValueMap[str(key)] is not None else replacementMap[str(key)] for key
-            in unitCellComponents]
+            unitCellValueMap[str(key)] if unitCellValueMap[str(key)] is not None else replacementMap[str(key)]
+            for key in unitCellComponents
+        ]
 
         return ' '.join(unitCellValues)
 
@@ -144,7 +148,6 @@ class AtomListBuilder(object):
     For testing purposes, dictionaries with the appropriate data can
     be passed in as well, so the source of the parsed data is replaceable.
     """
-
     def __init__(self, cifData=None, unitCell=None):
         if cifData is not None:
             self.atomList = self._getAtoms(cifData, unitCell)
@@ -160,12 +163,12 @@ class AtomListBuilder(object):
 
         atomLines = []
         for atomLabel in labels:
-            stringAtomLine = [str(x) for x in (
-                atomSymbols[atomLabel], atomCoordinates[atomLabel], occupancies[atomLabel], isotropicUs[atomLabel]) if
-                              x is not None]
+            stringAtomLine = [
+                str(x) for x in (atomSymbols[atomLabel], atomCoordinates[atomLabel], occupancies[atomLabel],
+                                 isotropicUs[atomLabel]) if x is not None
+            ]
 
-            cleanLine = [stringAtomLine[0]] + [removeErrorEstimateFromNumber(x) for x in
-                                               list(stringAtomLine[1:])]
+            cleanLine = [stringAtomLine[0]] + [removeErrorEstimateFromNumber(x) for x in list(stringAtomLine[1:])]
             atomLines.append(' '.join(cleanLine))
 
         return ';'.join(atomLines)
@@ -174,7 +177,8 @@ class AtomListBuilder(object):
         try:
             return cifData['_atom_site_label']
         except KeyError:
-            # If there are no atomic coordinates specified, there is really no point in continuing with replacement labels.
+            # If there are no atomic coordinates specified, there is really no point in continuing with replacement
+            # labels.
             if '_atom_site_fract_x' not in cifData.keys():
                 raise RuntimeError(
                     'Too much information missing from CIF-file. Does it contain a loop_ that defines atoms?')
@@ -186,14 +190,12 @@ class AtomListBuilder(object):
 
         for field in coordinateFields:
             if field not in cifData.keys():
-                raise RuntimeError(
-                    'Mandatory field {0} not found in CIF-file.'
-                    'Please check the atomic position definitions.'.format(field))
+                raise RuntimeError('Mandatory field {0} not found in CIF-file.'
+                                   'Please check the atomic position definitions.'.format(field))
 
         # Return a dict like { 'label1': 'x y z', 'label2': 'x y z' }
-        return dict(
-            [(label, ' '.join([removeErrorEstimateFromNumber(c) for c in (x, y, z)])) for label, x, y, z in
-             zip(labels, *[cifData[field] for field in coordinateFields])])
+        return dict([(label, ' '.join([removeErrorEstimateFromNumber(c) for c in (x, y, z)]))
+                     for label, x, y, z in zip(labels, *[cifData[field] for field in coordinateFields])])
 
     def _getOccupancies(self, cifData, labels):
         occupancyField = '_atom_site_occupancy'
@@ -207,16 +209,15 @@ class AtomListBuilder(object):
         return dict(list(zip(labels, occupancies)))
 
     def _getAtomSymbols(self, cifData, labels):
-        rawAtomSymbols = [cifData[x] for x in ['_atom_site_type_symbol', '_atom_site_label'] if x in
-                          cifData.keys()]
+        rawAtomSymbols = [cifData[x] for x in ['_atom_site_type_symbol', '_atom_site_label'] if x in cifData.keys()]
 
         if len(rawAtomSymbols) == 0:
             raise RuntimeError('Cannot determine atom types, both _atom_site_type_symbol and _atom_site_label are '
                                'missing.')
 
-        # Return a dict like { 'label1': 'Element1', ... } extracted from either _atom_site_type_symbol or _atom_site_label
-        return dict(
-            [(label, self._getCleanAtomSymbol(x)) for label, x in zip(labels, rawAtomSymbols[0])])
+        # Return a dict like { 'label1': 'Element1', ... } extracted from either _atom_site_type_symbol or
+        # _atom_site_label
+        return dict([(label, self._getCleanAtomSymbol(x)) for label, x in zip(labels, rawAtomSymbols[0])])
 
     def _getCleanAtomSymbol(self, atomSymbol):
         nonCharacterRe = re.compile('[^a-z]', re.IGNORECASE)
@@ -269,13 +270,15 @@ class AtomListBuilder(object):
     def _getAnisotropicParametersU(self, cifData, labels):
         # Try to extract U or if that fails, B.
         try:
-            return self._getTensors(cifData, labels,
-                                    ['_atom_site_aniso_u_11', '_atom_site_aniso_u_12', '_atom_site_aniso_u_13',
-                                     '_atom_site_aniso_u_22', '_atom_site_aniso_u_23', '_atom_site_aniso_u_33'])
+            return self._getTensors(cifData, labels, [
+                '_atom_site_aniso_u_11', '_atom_site_aniso_u_12', '_atom_site_aniso_u_13', '_atom_site_aniso_u_22',
+                '_atom_site_aniso_u_23', '_atom_site_aniso_u_33'
+            ])
         except RuntimeError:
-            bTensors = self._getTensors(cifData, labels,
-                                        ['_atom_site_aniso_b_11', '_atom_site_aniso_b_12', '_atom_site_aniso_b_13',
-                                         '_atom_site_aniso_b_22', '_atom_site_aniso_b_23', '_atom_site_aniso_b_33'])
+            bTensors = self._getTensors(cifData, labels, [
+                '_atom_site_aniso_b_11', '_atom_site_aniso_b_12', '_atom_site_aniso_b_13', '_atom_site_aniso_b_22',
+                '_atom_site_aniso_b_23', '_atom_site_aniso_b_33'
+            ])
             return dict([(label, convertBtoU(bTensor)) for label, bTensor in bTensors.items()])
 
     def _get_ansitropic_labels(self, cifData):
@@ -295,8 +298,8 @@ class AtomListBuilder(object):
                 values.append([getFloatOrNone(removeErrorEstimateFromNumber(x)) for x in cifData[key]])
 
         # Return a 3x3-matrix for each label based on the assumption that u_j,i == u_i,j
-        return dict([(label, np.array([[u11, u12, u13], [u12, u22, u23], [u13, u23, u33]])) for
-                     label, u11, u12, u13, u22, u23, u33 in zip(labels, *values)])
+        return dict([(label, np.array([[u11, u12, u13], [u12, u22, u23], [u13, u23, u33]]))
+                     for label, u11, u12, u13, u22, u23, u33 in zip(labels, *values)])
 
     def _getMetricDependentWeights(self, unitCell):
         metricTensor = unitCell.getG()
@@ -315,23 +318,24 @@ class CrystalStructureBuilder(object):
     This helper class simplifies the creation of CrystalStructure-objects from CIF-files. It uses the helper classes
     defined above.
     """
-
     def __init__(self, cif_data=None):
         if cif_data is not None:
             self.spaceGroup = SpaceGroupBuilder(cif_data).spaceGroup
             self.unitCell = UnitCellBuilder(cif_data).unitCell
 
-            self.atoms = AtomListBuilder(cif_data, UnitCell(*[float(removeErrorEstimateFromNumber(x)) for x in
-                                                              self.unitCell.split()])).atomList
+            self.atoms = AtomListBuilder(
+                cif_data, UnitCell(*[float(removeErrorEstimateFromNumber(x)) for x in self.unitCell.split()])).atomList
 
     def getCrystalStructure(self):
         return CrystalStructure(self.unitCell, self.spaceGroup, self.atoms)
 
 
 class UBMatrixBuilder(object):
-    ub_matrix_keys = ['_diffrn_orient_matrix_ub_11', '_diffrn_orient_matrix_ub_12', '_diffrn_orient_matrix_ub_13',
-                      '_diffrn_orient_matrix_ub_21', '_diffrn_orient_matrix_ub_22', '_diffrn_orient_matrix_ub_23',
-                      '_diffrn_orient_matrix_ub_31', '_diffrn_orient_matrix_ub_32', '_diffrn_orient_matrix_ub_33']
+    ub_matrix_keys = [
+        '_diffrn_orient_matrix_ub_11', '_diffrn_orient_matrix_ub_12', '_diffrn_orient_matrix_ub_13',
+        '_diffrn_orient_matrix_ub_21', '_diffrn_orient_matrix_ub_22', '_diffrn_orient_matrix_ub_23',
+        '_diffrn_orient_matrix_ub_31', '_diffrn_orient_matrix_ub_32', '_diffrn_orient_matrix_ub_33'
+    ]
 
     def __init__(self, cif_data=None):
         if cif_data is not None:
@@ -357,22 +361,19 @@ class LoadCIF(PythonAlgorithm):
         return "LoadCIF"
 
     def summary(self):
-        return "This algorithm loads a CIF file using the PyCifRW package and assigns a CrystalStructure to the sample of the workspace."
+        return "This algorithm loads a CIF file using the PyCifRW package and assigns a CrystalStructure to the" \
+               "sample of the workspace."
 
     def PyInit(self):
-        self.declareProperty(
-            WorkspaceProperty(name='Workspace',
-                              defaultValue='', direction=Direction.InOut),
-            doc='Workspace into which the crystal structure is placed.')
+        self.declareProperty(WorkspaceProperty(name='Workspace', defaultValue='', direction=Direction.InOut),
+                             doc='Workspace into which the crystal structure is placed.')
 
-        self.declareProperty(
-            FileProperty(name='InputFile',
-                         defaultValue='',
-                         action=FileAction.Load,
-                         extensions=['cif']),
-            doc='A CIF file containing a crystal structure.')
+        self.declareProperty(FileProperty(name='InputFile', defaultValue='', action=FileAction.Load,
+                                          extensions=['cif']),
+                             doc='A CIF file containing a crystal structure.')
 
-        self.declareProperty('LoadUBMatrix', False,
+        self.declareProperty('LoadUBMatrix',
+                             False,
                              direction=Direction.Input,
                              doc='Load UB-matrix from CIF file if available.')
 

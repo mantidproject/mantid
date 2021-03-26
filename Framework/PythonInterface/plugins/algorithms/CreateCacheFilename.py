@@ -10,13 +10,12 @@ from mantid.kernel import *
 import mantid
 import os
 
-
 # See ticket #14716
+
 
 class CreateCacheFilename(PythonAlgorithm):
     """ Create cache filename
     """
-
     def category(self):
         """
         """
@@ -37,13 +36,12 @@ class CreateCacheFilename(PythonAlgorithm):
         """
         # this is the requirement of using this plugin
         # is there a place to register that?
-        self.declareProperty("PropertyManager", "", "Name of a property manager from which properties are extracted from")
-        self.declareProperty(
-            StringArrayProperty("Properties", Direction.Input),
-            "A list of property names to be included")
-        self.declareProperty(
-            StringArrayProperty("OtherProperties", Direction.Input),
-            "A list of key=value strings for other properties not in the property manager")
+        self.declareProperty("PropertyManager", "",
+                             "Name of a property manager from which properties are extracted from")
+        self.declareProperty(StringArrayProperty("Properties", Direction.Input),
+                             "A list of property names to be included")
+        self.declareProperty(StringArrayProperty("OtherProperties", Direction.Input),
+                             "A list of key=value strings for other properties not in the property manager")
         self.declareProperty("Prefix", "", "prefix for the output file name")
         self.declareProperty(
             FileProperty(name='CacheDir', defaultValue='', action=FileAction.OptionalDirectory),
@@ -100,10 +98,7 @@ class CreateCacheFilename(PythonAlgorithm):
         if prop_manager:
             props = matched(list(prop_manager.keys()), props)
             # create the list of key=value strings
-            kvpairs = [
-                '%s=%s' % (prop, prop_manager.getPropertyValue(prop))
-                for prop in props
-            ]
+            kvpairs = ['%s=%s' % (prop, prop_manager.getPropertyValue(prop)) for prop in props]
         else:
             kvpairs = []
         kvpairs += other_props
@@ -115,7 +110,7 @@ class CreateCacheFilename(PythonAlgorithm):
 
     def _calculate(self, prop_manager, props, other_props, prefix, cache_dir):
         s = self._get_signature(prop_manager, props, other_props)
-        h = _hash(s)   # sha1 hash
+        h = _hash(s)  # sha1 hash
         if prefix:
             fn = "%s_%s.nxs" % (prefix, h)  # filename
         else:

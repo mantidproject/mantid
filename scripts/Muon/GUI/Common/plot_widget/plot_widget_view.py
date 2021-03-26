@@ -14,7 +14,6 @@ ui_plotting_view, _ = load_ui(__file__, "plotting_widget_view.ui")
 
 
 class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_view):
-
     @staticmethod
     def warning_popup(message):
         message_box.warning(str(message))
@@ -22,7 +21,7 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setupUi(self)
-        self.setMinimumSize(600,600)
+        self.setMinimumSize(600, 600)
         self.setEnabled(False)
 
     def show_plot_diff(self):
@@ -119,7 +118,7 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
         """
         self.tiled_plot_checkbox.stateChanged.connect(slot)
 
-    def on_plot_diff_checkbox_changed(self,slot):
+    def on_plot_diff_checkbox_changed(self, slot):
         """
         Connect the plot difference checkbox to the input slot
         """

@@ -10,10 +10,8 @@ from mantid.dataobjects import Workspace2D
 
 
 class PlottingCanvasPresenterInterface(abc.ABC):
-
     @abc.abstractmethod
-    def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int],
-                        hold_on: bool, autoscale: bool):
+    def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int], hold_on: bool, autoscale: bool):
         """Plots the input workspace names and indices in the figure window
         If hold_on is True the existing workspaces plotted in the figure are kept
         :param workspace_names: List of workspace names.
@@ -96,6 +94,6 @@ class PlottingCanvasPresenterInterface(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def set_plot_range(self, range : List[float]):
+    def set_plot_range(self, range: List[float]):
         """Sets the x range of all the plots"""
         pass

@@ -57,12 +57,16 @@ class CalibrationPresenter(object):
             if not self.validate_path():
                 return
             filename = self.view.get_path_filename()
-            instrument, vanadium_file, sample_file = self.model.load_existing_gsas_parameters(
-                filename)
+            instrument, vanadium_file, sample_file = self.model.load_existing_gsas_parameters(filename)
             self.pending_calibration.set_calibration(vanadium_file, sample_file, instrument)
             self.set_current_calibration()
 
-    def start_calibration_worker(self, vanadium_path, sample_path, plot_output, rb_num, bank=None,
+    def start_calibration_worker(self,
+                                 vanadium_path,
+                                 sample_path,
+                                 plot_output,
+                                 rb_num,
+                                 bank=None,
                                  spectrum_numbers=None):
         """
         Calibrate the data in a separate thread so as to not freeze the GUI.
@@ -73,14 +77,13 @@ class CalibrationPresenter(object):
         :param bank: Optional parameter to crop by bank.
         :param spectrum_numbers: Optional parameter to crop by spectrum number.
         """
-        self.worker = AsyncTask(self.model.create_new_calibration, (vanadium_path, sample_path),
-                                {
-                                "plot_output": plot_output,
-                                "instrument": self.instrument,
-                                "rb_num": rb_num,
-                                "bank": bank,
-                                "spectrum_numbers": spectrum_numbers
-                                },
+        self.worker = AsyncTask(self.model.create_new_calibration, (vanadium_path, sample_path), {
+            "plot_output": plot_output,
+            "instrument": self.instrument,
+            "rb_num": rb_num,
+            "bank": bank,
+            "spectrum_numbers": spectrum_numbers
+        },
                                 error_cb=self._on_error,
                                 success_cb=self._on_success)
         self.pending_calibration.set_calibration(vanadium_path, sample_path, self.instrument)

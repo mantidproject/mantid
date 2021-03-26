@@ -40,7 +40,6 @@ DEFAULT_CONTOUR_LEVELS = 2
 DEFAULT_CONTOUR_COLOUR = 'k'
 DEFAULT_CONTOUR_WIDTH = 0.5
 
-
 # -----------------------------------------------------------------------------
 # 'Public' Functions
 # -----------------------------------------------------------------------------
@@ -98,8 +97,12 @@ def plot_md_ws_from_names(names, errors, overplot, fig=None):
 
     # Plot for various cases
     if len(workspaces) > 0:
-        return plot_md_histo_ws(workspaces, errors=errors, overplot=overplot, fig=fig,
-                                ax_properties=None, window_title=None)
+        return plot_md_histo_ws(workspaces,
+                                errors=errors,
+                                overplot=overplot,
+                                fig=fig,
+                                ax_properties=None,
+                                window_title=None)
 
 
 def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False, advanced=False):
@@ -120,7 +123,9 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
 
     try:
         # Get selected spectra from all MatrixWorkspaces
-        selection = get_spectra_selection(workspaces, show_colorfill_btn=show_colorfill_btn, overplot=overplot,
+        selection = get_spectra_selection(workspaces,
+                                          show_colorfill_btn=show_colorfill_btn,
+                                          overplot=overplot,
                                           advanced=advanced)
     except Exception as exc:
         LOGGER.warning(format(str(exc)))
@@ -163,11 +168,16 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
         return plot_surface_or_contour(selection.plot_type, int(plot_index), selection.axis_name, selection.log_name,
                                        selection.custom_log_values, workspaces)
     else:
-        return plot(selection.workspaces, spectrum_nums=selection.spectra,
+        return plot(selection.workspaces,
+                    spectrum_nums=selection.spectra,
                     wksp_indices=selection.wksp_indices,
-                    errors=errors, overplot=overplot, fig=fig, tiled=selection.plot_type == selection.Tiled,
+                    errors=errors,
+                    overplot=overplot,
+                    fig=fig,
+                    tiled=selection.plot_type == selection.Tiled,
                     waterfall=selection.plot_type == selection.Waterfall,
-                    log_name=selection.log_name, log_values=log_values)
+                    log_name=selection.log_name,
+                    log_values=log_values)
 
 
 def pcolormesh_from_names(names, fig=None, ax=None):
@@ -186,8 +196,7 @@ def pcolormesh_from_names(names, fig=None, ax=None):
             fig.show()
             return fig
         else:
-            return pcolormesh(AnalysisDataService.retrieveWorkspaces(names, unrollGroups=True),
-                              fig=fig)
+            return pcolormesh(AnalysisDataService.retrieveWorkspaces(names, unrollGroups=True), fig=fig)
     except Exception as exc:
         LOGGER.warning(format(str(exc)))
         return None
@@ -283,8 +292,12 @@ def pcolormesh_on_axis(ax, ws, normalize_by_bin_width=None):
     ax.set_title(ws.name())
     scale = _get_colorbar_scale()
     if use_imshow(ws):
-        pcm = ax.imshow(ws, cmap=ConfigService.getString("plots.images.Colormap"), aspect='auto', origin='lower',
-                        norm=scale(), normalize_by_bin_width=normalize_by_bin_width)
+        pcm = ax.imshow(ws,
+                        cmap=ConfigService.getString("plots.images.Colormap"),
+                        aspect='auto',
+                        origin='lower',
+                        norm=scale(),
+                        normalize_by_bin_width=normalize_by_bin_width)
         # remove normalize_by_bin_width from cargs if present so that this can be toggled in future
         for cargs in pcm.axes.creation_args:
             cargs.pop('normalize_by_bin_width')
@@ -350,9 +363,7 @@ def plot_contour(workspaces, fig=None):
         fig = pcolormesh(workspaces, fig)
         ax = fig.get_axes()[0]
 
-        ax.contour(ws, levels=DEFAULT_CONTOUR_LEVELS,
-                   colors=DEFAULT_CONTOUR_COLOUR,
-                   linewidths=DEFAULT_CONTOUR_WIDTH)
+        ax.contour(ws, levels=DEFAULT_CONTOUR_LEVELS, colors=DEFAULT_CONTOUR_COLOUR, linewidths=DEFAULT_CONTOUR_WIDTH)
 
         fig.show()
 

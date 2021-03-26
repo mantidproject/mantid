@@ -19,8 +19,8 @@ class DirectILLSelfShieldingTest(unittest.TestCase):
     def setUp(self):
         if DirectILLSelfShieldingTest._TEST_WS is None:
             bkgLevel = 0.0
-            DirectILLSelfShieldingTest._TEST_WS = illhelpers.create_poor_mans_in5_workspace(bkgLevel,
-                                                                                            illhelpers.default_test_detectors)
+            DirectILLSelfShieldingTest._TEST_WS = illhelpers.create_poor_mans_in5_workspace(
+                bkgLevel, illhelpers.default_test_detectors)
         tempMonitorWSName = 'monitors'
         kwargs = {
             'InputWorkspace': DirectILLSelfShieldingTest._TEST_WS,
@@ -28,9 +28,7 @@ class DirectILLSelfShieldingTest(unittest.TestCase):
             'MonitorWorkspace': tempMonitorWSName
         }
         run_algorithm('ExtractMonitors', **kwargs)
-        kwargs = {
-            'Workspace': tempMonitorWSName
-        }
+        kwargs = {'Workspace': tempMonitorWSName}
         run_algorithm('DeleteWorkspace', **kwargs)
 
     def tearDown(self):
@@ -59,11 +57,7 @@ class DirectILLSelfShieldingTest(unittest.TestCase):
     def testOutputHasCommonBinningWithInput(self):
         self._setDefaultSample(self._TEST_WS_NAME)
         outWSName = 'correctionWS'
-        kwargs = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'rethrow': True
-        }
+        kwargs = {'InputWorkspace': self._TEST_WS_NAME, 'OutputWorkspace': outWSName, 'rethrow': True}
         run_algorithm('DirectILLSelfShielding', **kwargs)
         self.assertTrue(mtd.doesExist(outWSName))
         inWS = mtd[self._TEST_WS_NAME]
@@ -74,21 +68,9 @@ class DirectILLSelfShieldingTest(unittest.TestCase):
         assert_almost_equal(xs, originalXs[:, :])
 
     def _setDefaultSample(self, wsName):
-        geometry = {
-            'Shape': 'Cylinder',
-            'Height': 8.0,
-            'Radius': 2.0,
-            'Center': [0.0, 0.0, 0.0]
-        }
-        material = {
-            'ChemicalFormula': 'V',
-            'SampleNumberDensity': 0.1
-        }
-        kwargs = {
-            'InputWorkspace': wsName,
-            'Geometry': geometry,
-            'Material': material
-        }
+        geometry = {'Shape': 'Cylinder', 'Height': 8.0, 'Radius': 2.0, 'Center': [0.0, 0.0, 0.0]}
+        material = {'ChemicalFormula': 'V', 'SampleNumberDensity': 0.1}
+        kwargs = {'InputWorkspace': wsName, 'Geometry': geometry, 'Material': material}
         run_algorithm('SetSample', **kwargs)
 
 

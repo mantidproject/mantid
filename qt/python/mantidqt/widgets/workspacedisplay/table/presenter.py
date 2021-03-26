@@ -22,13 +22,14 @@ from mantidqt.widgets.workspacedisplay.table.presenter_batch import TableWorkspa
 from mantidqt.widgets.workspacedisplay.table.presenter_standard import TableWorkspaceDataPresenterStandard
 from mantidqt.widgets.workspacedisplay.table.table_model import TableModel
 from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
-from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import (QStandardItem, create_table_item,  # noqa: F401
-                                                                         RevertibleItem)  # noqa: F401
+from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import (
+    QStandardItem,
+    create_table_item,  # noqa: F401
+    RevertibleItem)  # noqa: F401
 
 
 class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
-    A_LOT_OF_THINGS_TO_PLOT_MESSAGE = (
-        "You selected {} spectra to plot. Are you sure you want to plot that many?")
+    A_LOT_OF_THINGS_TO_PLOT_MESSAGE = ("You selected {} spectra to plot. Are you sure you want to plot that many?")
     TOO_MANY_SELECTED_FOR_X = ("Too many columns are selected to use as X. Please select only 1.")
     TOO_MANY_SELECTED_TO_SORT = ("Too many columns are selected to sort by. Please select only 1.")
     TOO_MANY_SELECTED_FOR_PLOT = ("Too many columns are selected to plot. Please select only 1.")
@@ -38,28 +39,27 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
     ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE = "Unknown error occurred: {}"
     TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE = "Too many selected to set as Y Error"
     CANNOT_PLOT_AGAINST_SELF_MESSAGE = "Cannot plot column against itself."
-    NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE = (
-        "Column '{}' does not have an associated Y error column."
-        "\n\nPlease set it by doing: Right click on column ->"
-        " Set error for Y -> The label shown on the Y column")
+    NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE = ("Column '{}' does not have an associated Y error column."
+                                             "\n\nPlease set it by doing: Right click on column ->"
+                                             " Set error for Y -> The label shown on the Y column")
     PLOT_FUNCTION_ERROR_MESSAGE = "One or more of the columns being plotted contain invalid data for Matplotlib.\n\nError message:\n{}"
     INVALID_DATA_WINDOW_TITLE = "Invalid data - Mantid Workbench"
     COLUMN_DISPLAY_LABEL = "Column {}"
 
     def __init__(
-            self,
-            ws,
-            parent=None,
-            window_flags=Qt.Window,
-            plot=None,
-            model=None,
-            view=None,
-            name=None,
-            ads_observer=None,
-            container=None,
-            window_width=600,
-            window_height=400,
-            batch=False,
+        self,
+        ws,
+        parent=None,
+        window_flags=Qt.Window,
+        plot=None,
+        model=None,
+        view=None,
+        name=None,
+        ads_observer=None,
+        container=None,
+        window_width=600,
+        window_height=400,
+        batch=False,
     ):
         """
         Creates a display for the provided workspace.
@@ -117,8 +117,8 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
     def _create_table_batch(self, ws, parent, window_flags, view, model):
         model = model if model is not None else TableWorkspaceDisplayModel(ws)
         table_model = TableModel(parent=parent, data_model=model)
-        view = view if view else TableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags,
-                                                           table_model=table_model)
+        view = view if view else TableWorkspaceDisplayView(
+            presenter=self, parent=parent, window_flags=window_flags, table_model=table_model)
         self.presenter = TableWorkspaceDataPresenterBatch(model, view)
         return view, model
 
@@ -196,9 +196,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             return
 
         stats = self.presenter.model.get_statistics(selected_columns)
-        TableWorkspaceDisplay(stats,
-                              parent=self.parent,
-                              name="Column Statistics of {}".format(self.name))
+        TableWorkspaceDisplay(stats, parent=self.parent, name="Column Statistics of {}".format(self.name))
 
     def action_hide_selected(self):
         try:

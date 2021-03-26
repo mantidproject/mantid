@@ -11,7 +11,6 @@ from mantid.api import *
 
 
 class StatisticsOfTableWorkspaceTest(unittest.TestCase):
-
     def test_basic(self):
         """
         Tests for a table workspace containing all floats.

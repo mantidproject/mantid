@@ -14,7 +14,6 @@ from workbench.plotting.figuremanager import MantidFigureCanvas, FigureManagerWo
 
 @start_qapplication
 class FigureManagerWorkbenchTest(unittest.TestCase):
-
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_construction(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread

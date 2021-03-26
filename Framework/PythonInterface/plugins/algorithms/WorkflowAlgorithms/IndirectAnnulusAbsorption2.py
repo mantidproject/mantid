@@ -5,36 +5,36 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import SetBeam, SetSample, MonteCarloAbsorption, GroupWorkspaces
-from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
-                        PropertyMode, Progress, WorkspaceGroupProperty, mtd)
-from mantid.kernel import (StringMandatoryValidator, Direction, logger, IntBoundedValidator,
-                           FloatBoundedValidator, StringListValidator)
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress,
+                        WorkspaceGroupProperty, mtd)
+from mantid.kernel import (StringMandatoryValidator, Direction, logger, IntBoundedValidator, FloatBoundedValidator,
+                           StringListValidator)
 
 
 class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
     # Sample variables
-    _sample_ws_name=''
-    _sample_chemical_formula=''
-    _sample_density_type=None
-    _sample_density=0.0
-    _sample_inner_radius=0.0
-    _sample_outer_radius=0.0
+    _sample_ws_name = ''
+    _sample_chemical_formula = ''
+    _sample_density_type = None
+    _sample_density = 0.0
+    _sample_inner_radius = 0.0
+    _sample_outer_radius = 0.0
 
     # Container variables
-    _can_ws_name=''
-    _can_chemical_formula=''
-    _can_density_type=None
-    _can_density=0.0
-    _can_inner_radius=0.0
-    _can_outer_radius=0.0
-    _use_can_corrections=False
-    _can_scale=0.0
+    _can_ws_name = ''
+    _can_chemical_formula = ''
+    _can_density_type = None
+    _can_density = 0.0
+    _can_inner_radius = 0.0
+    _can_outer_radius = 0.0
+    _use_can_corrections = False
+    _can_scale = 0.0
 
-    _output_ws=None
-    _ass_ws=None
-    _abs_ws=None
-    _acc_ws=None
-    _events=0
+    _output_ws = None
+    _ass_ws = None
+    _abs_ws = None
+    _acc_ws = None
+    _events = 0
 
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
@@ -50,60 +50,78 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
                              doc='Sample workspace.')
 
-        self.declareProperty(name='SampleChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
+        self.declareProperty(name='SampleChemicalFormula',
+                             defaultValue='',
+                             validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
-        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
+        self.declareProperty(name='SampleDensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass density or Number density')
-        self.declareProperty(name='SampleDensity', defaultValue=0.1,
+        self.declareProperty(name='SampleDensity',
+                             defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
-        self.declareProperty(name='SampleInnerRadius', defaultValue=0.23,
+        self.declareProperty(name='SampleInnerRadius',
+                             defaultValue=0.23,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample radius')
-        self.declareProperty(name='SampleOuterRadius', defaultValue=0.27,
+        self.declareProperty(name='SampleOuterRadius',
+                             defaultValue=0.27,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample radius')
-        self.declareProperty(name='SampleHeight', defaultValue=1.0,
+        self.declareProperty(name='SampleHeight',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample height')
 
         # Container options
-        self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '', optional=PropertyMode.Optional,
+        self.declareProperty(MatrixWorkspaceProperty('CanWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
                                                      direction=Direction.Input),
                              doc='Container workspace.')
-        self.declareProperty(name='UseCanCorrections', defaultValue=False,
+        self.declareProperty(name='UseCanCorrections',
+                             defaultValue=False,
                              doc='Use Container corrections in subtraction')
-        self.declareProperty(name='CanChemicalFormula', defaultValue='',
-                             doc='Chemical formula for the Container')
-        self.declareProperty(name='CanDensityType', defaultValue='Mass Density',
+        self.declareProperty(name='CanChemicalFormula', defaultValue='', doc='Chemical formula for the Container')
+        self.declareProperty(name='CanDensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Container density type.')
-        self.declareProperty(name='CanDensity', defaultValue=1.0,
+        self.declareProperty(name='CanDensity',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container number density')
-        self.declareProperty(name='CanInnerRadius', defaultValue=0.19,
+        self.declareProperty(name='CanInnerRadius',
+                             defaultValue=0.19,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container inner radius')
-        self.declareProperty(name='CanOuterRadius', defaultValue=0.35,
+        self.declareProperty(name='CanOuterRadius',
+                             defaultValue=0.35,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container outer radius')
-        self.declareProperty(name='CanScaleFactor', defaultValue=1.0,
+        self.declareProperty(name='CanScaleFactor',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Scale factor to multiply Container data')
 
         # Beam size
-        self.declareProperty(name='BeamHeight', defaultValue=1.0,
+        self.declareProperty(name='BeamHeight',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Height of the beam (cm)')
-        self.declareProperty(name='BeamWidth', defaultValue=1.0,
+        self.declareProperty(name='BeamWidth',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Width of the beam (cm)')
 
         # General options
-        self.declareProperty(name='NumberWavelengths', defaultValue=10,
+        self.declareProperty(name='NumberWavelengths',
+                             defaultValue=10,
                              validator=IntBoundedValidator(1),
                              doc='Number of wavelengths for calculation')
-        self.declareProperty(name='Events', defaultValue=1000,
+        self.declareProperty(name='Events',
+                             defaultValue=1000,
                              validator=IntBoundedValidator(0),
                              doc='Number of neutron events')
 
@@ -111,7 +129,9 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output corrected workspace.')
 
-        self.declareProperty(WorkspaceGroupProperty('CorrectionsWorkspace', '', direction=Direction.Output,
+        self.declareProperty(WorkspaceGroupProperty('CorrectionsWorkspace',
+                                                    '',
+                                                    direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
                              doc='The corrections workspace for scattering and absorptions in sample.')
 
@@ -137,24 +157,27 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         logger.information('Sample thickness: ' + str(sample_thickness))
 
         prog.report('Calculating sample corrections')
-        SetBeam(sample_wave_ws,
-                Geometry={'Shape': 'Slit',
-                          'Width': self._beam_width,
-                          'Height': self._beam_height})
+        SetBeam(sample_wave_ws, Geometry={'Shape': 'Slit', 'Width': self._beam_width, 'Height': self._beam_height})
 
         if self._sample_density_type == 'Mass Density':
-            sample_mat_list = {'ChemicalFormula': self._sample_chemical_formula,
-                               'SampleMassDensity': self._sample_density}
+            sample_mat_list = {
+                'ChemicalFormula': self._sample_chemical_formula,
+                'SampleMassDensity': self._sample_density
+            }
         if self._sample_density_type == 'Number Density':
-            sample_mat_list = {'ChemicalFormula': self._sample_chemical_formula,
-                               'SampleNumberDensity': self._sample_density}
+            sample_mat_list = {
+                'ChemicalFormula': self._sample_chemical_formula,
+                'SampleNumberDensity': self._sample_density
+            }
         SetSample(sample_wave_ws,
-                  Geometry={'Shape': 'HollowCylinder',
-                            'Height': self._sample_height,
-                            'InnerRadius': self._sample_inner_radius,
-                            'OuterRadius': self._sample_outer_radius,
-                            'Center': [0., 0., 0.],
-                            'Axis': 1},
+                  Geometry={
+                      'Shape': 'HollowCylinder',
+                      'Height': self._sample_height,
+                      'InnerRadius': self._sample_inner_radius,
+                      'OuterRadius': self._sample_outer_radius,
+                      'Center': [0., 0., 0.],
+                      'Axis': 1
+                  },
                   Material=sample_mat_list)
 
         prog.report('Calculating sample corrections')
@@ -209,24 +232,32 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                 divide_alg.execute()
 
                 if self._sample_density_type == 'Mass Density':
-                    container_mat_list = {'ChemicalFormula': self._can_chemical_formula,
-                                          'SampleMassDensity': self._can_density}
+                    container_mat_list = {
+                        'ChemicalFormula': self._can_chemical_formula,
+                        'SampleMassDensity': self._can_density
+                    }
                 if self._sample_density_type == 'Number Density':
-                    container_mat_list = {'ChemicalFormula': self._can_chemical_formula,
-                                          'SampleNumberDensity': self._can_density}
+                    container_mat_list = {
+                        'ChemicalFormula': self._can_chemical_formula,
+                        'SampleNumberDensity': self._can_density
+                    }
 
                 SetBeam(can1_wave_ws,
-                        Geometry={'Shape': 'Slit',
-                                  'Width': self._beam_width,
-                                  'Height': self._beam_height})
+                        Geometry={
+                            'Shape': 'Slit',
+                            'Width': self._beam_width,
+                            'Height': self._beam_height
+                        })
 
                 SetSample(can1_wave_ws,
-                          Geometry={'Shape': 'HollowCylinder',
-                                    'Height': float(self._sample_height),
-                                    'InnerRadius': float(self._can_inner_radius),
-                                    'OuterRadius': float(self._sample_inner_radius),
-                                    'Center': [0., 0., 0.],
-                                    'Axis': 1},
+                          Geometry={
+                              'Shape': 'HollowCylinder',
+                              'Height': float(self._sample_height),
+                              'InnerRadius': float(self._can_inner_radius),
+                              'OuterRadius': float(self._sample_inner_radius),
+                              'Center': [0., 0., 0.],
+                              'Axis': 1
+                          },
                           Material=container_mat_list)
 
                 MonteCarloAbsorption(InputWorkspace=can1_wave_ws,
@@ -236,17 +267,21 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                                      Interpolation='CSpline')
 
                 SetBeam(can2_wave_ws,
-                        Geometry={'Shape': 'Slit',
-                                  'Width': self._beam_width,
-                                  'Height': self._beam_height})
+                        Geometry={
+                            'Shape': 'Slit',
+                            'Width': self._beam_width,
+                            'Height': self._beam_height
+                        })
 
                 SetSample(can2_wave_ws,
-                          Geometry={'Shape': 'HollowCylinder',
-                                    'Height': float(self._sample_height),
-                                    'InnerRadius': float(self._sample_outer_radius),
-                                    'OuterRadius': float(self._can_outer_radius),
-                                    'Center': [0., 0., 0.],
-                                    'Axis': 1},
+                          Geometry={
+                              'Shape': 'HollowCylinder',
+                              'Height': float(self._sample_height),
+                              'InnerRadius': float(self._sample_outer_radius),
+                              'OuterRadius': float(self._can_outer_radius),
+                              'Center': [0., 0., 0.],
+                              'Axis': 1
+                          },
                           Material=container_mat_list)
 
                 MonteCarloAbsorption(InputWorkspace=can2_wave_ws,
@@ -309,12 +344,9 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
 
         prog.report('Recording sample logs')
         sample_log_workspaces = [self._output_ws, self._ass_ws]
-        sample_logs = [('sample_shape', 'annulus'),
-                       ('sample_filename', self._sample_ws_name),
-                       ('sample_inner', self._sample_inner_radius),
-                       ('sample_outer', self._sample_outer_radius),
-                       ('can_inner', self._can_inner_radius),
-                       ('can_outer', self._can_outer_radius)]
+        sample_logs = [('sample_shape', 'annulus'), ('sample_filename', self._sample_ws_name),
+                       ('sample_inner', self._sample_inner_radius), ('sample_outer', self._sample_outer_radius),
+                       ('can_inner', self._can_inner_radius), ('can_outer', self._can_outer_radius)]
 
         if self._can_ws_name is not None:
             sample_logs.append(('container_filename', self._can_ws_name))
@@ -344,9 +376,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                 delete_alg.setProperty("Workspace", self._acc_ws)
                 delete_alg.execute()
         else:
-            GroupWorkspaces(InputWorkspaces=group,
-                            OutputWorkspace=self._abs_ws,
-                            EnableLogging=False)
+            GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=self._abs_ws, EnableLogging=False)
             self.setProperty('CorrectionsWorkspace', self._abs_ws)
 
     def _setup(self):

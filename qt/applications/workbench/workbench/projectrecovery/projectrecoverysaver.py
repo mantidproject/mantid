@@ -16,24 +16,20 @@ from mantid.kernel import logger, UsageService
 from mantidqt.project.projectsaver import ProjectSaver
 from workbench.utils.windowfinder import find_all_windows_that_are_savable
 
-
 # To ignore an algorithm in project recovery please put it's name here, this is done to stop these algorithm
 # calls from being saved. e.g. MonitorLiveData is ignored because StartLiveData is the only one that is needed
 # to restart this workspace.
-ALGS_TO_IGNORE = ["MonitorLiveData", "EnggSaveGSASIIFitResultsToHDF5",
-                  "EnggSaveSinglePeakFitResultsToHDF5", "ExampleSaveAscii", "SANSSave",
-                  "SaveAscii", "SaveBankScatteringAngles", "SaveCSV", "SaveCalFile", "SaveCanSAS1D",
-                  "SaveDaveGrp", "SaveDetectorsGrouping", "SaveDiffCal", "SaveDiffFittingAscii",
-                  "SaveDspacemap", "SaveFITS", "SaveFocusedXYE", "SaveFullprofResolution", "SaveGDA",
-                  "SaveGEMMAUDParamFile", "SaveGSASInstrumentFile", "SaveGSS", "SaveHKL",
-                  "SaveISISNexus", "SaveIsawDetCal", "SaveIsawPeaks",
-                  "SaveIsawQvector", "SaveIsawUB", "SaveLauenorm", "SaveMD", "SaveMDWorkspaceToVTK",
-                  "SaveMask", "SaveNISTDAT", "SaveNXSPE", "SaveNXTomo", "SaveNXcanSAS", "SaveNexus",
-                  "SaveNexusPD", "SaveNexusProcessed", "SaveOpenGenieAscii", "SavePAR", "SavePDFGui",
-                  "SavePHX", "SaveParameterFile", "SavePlot1D", "SavePlot1DAsJson", "SaveRKH",
-                  "SaveReflections",
-                  "SaveReflectometryAscii", "SaveSESANS", "SaveSPE", "SaveTBL", "SaveToSNSHistogramNexus",
-                  "SaveVTK", "SaveVulcanGSS", "SaveYDA", "SaveZODS"]
+ALGS_TO_IGNORE = [
+    "MonitorLiveData", "EnggSaveGSASIIFitResultsToHDF5", "EnggSaveSinglePeakFitResultsToHDF5", "ExampleSaveAscii",
+    "SANSSave", "SaveAscii", "SaveBankScatteringAngles", "SaveCSV", "SaveCalFile", "SaveCanSAS1D", "SaveDaveGrp",
+    "SaveDetectorsGrouping", "SaveDiffCal", "SaveDiffFittingAscii", "SaveDspacemap", "SaveFITS", "SaveFocusedXYE",
+    "SaveFullprofResolution", "SaveGDA", "SaveGEMMAUDParamFile", "SaveGSASInstrumentFile", "SaveGSS", "SaveHKL",
+    "SaveISISNexus", "SaveIsawDetCal", "SaveIsawPeaks", "SaveIsawQvector", "SaveIsawUB", "SaveLauenorm", "SaveMD",
+    "SaveMDWorkspaceToVTK", "SaveMask", "SaveNISTDAT", "SaveNXSPE", "SaveNXTomo", "SaveNXcanSAS", "SaveNexus",
+    "SaveNexusPD", "SaveNexusProcessed", "SaveOpenGenieAscii", "SavePAR", "SavePDFGui", "SavePHX", "SaveParameterFile",
+    "SavePlot1D", "SavePlot1DAsJson", "SaveRKH", "SaveReflections", "SaveReflectometryAscii", "SaveSESANS", "SaveSPE",
+    "SaveTBL", "SaveToSNSHistogramNexus", "SaveVTK", "SaveVulcanGSS", "SaveYDA", "SaveZODS"
+]
 
 # If you want to ignore an algorithms' property, then add to the string below in the format:
 # "AlgorithmName + PropertyName". The final string should look like "a + b , c + d, ...".
@@ -168,8 +164,11 @@ class ProjectRecoverySaver(object):
             interfaces_list = find_all_windows_that_are_savable()
 
         file_name = os.path.join(directory, (os.path.basename(directory) + self.pr.recovery_file_ext))
-        project_saver.save_project(file_name=file_name, workspace_to_save=None, plots_to_save=plots,
-                                   interfaces_to_save=interfaces_list, project_recovery=False)
+        project_saver.save_project(file_name=file_name,
+                                   workspace_to_save=None,
+                                   plots_to_save=plots,
+                                   interfaces_to_save=interfaces_list,
+                                   project_recovery=False)
 
     def _add_lock_file(self, directory):
         """

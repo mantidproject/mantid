@@ -22,18 +22,18 @@ from mantid.simpleapi import (AppendSpectra, ConjoinWorkspaces, DeleteWorkspace,
 
 from vesuvio.loading import VesuvioLoadHelper, VesuvioTOFFitInput
 
-
 # --------------------------------------------------------------------------------
 # Functions
 # --------------------------------------------------------------------------------
 
+
 def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     # Retrieve vesuvio input data
-    vesuvio_loader = VesuvioLoadHelper(flags['diff_mode'], flags['fit_mode'],
-                                       flags['ip_file'], flags.get('bin_parameters', None),
+    vesuvio_loader = VesuvioLoadHelper(flags['diff_mode'], flags['fit_mode'], flags['ip_file'],
+                                       flags.get('bin_parameters', None),
                                        _extract_bool_from_flags('load_log_files', flags))
-    vesuvio_input = VesuvioTOFFitInput(runs, flags.get('container_runs', None),
-                                       flags.get('spectra', None), vesuvio_loader)
+    vesuvio_input = VesuvioTOFFitInput(runs, flags.get('container_runs', None), flags.get('spectra', None),
+                                       vesuvio_loader)
 
     if flags.get('ms_enabled', True):
         hydrogen_constraints = flags['ms_flags'].pop("HydrogenConstraints", None)
@@ -46,15 +46,14 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
 
     intensity_string = _create_intensity_constraint_str(flags['intensity_constraints'])
 
-    fit_helper = VesuvioTOFFitHelper(_create_background_str(flags.get('background', None)),
-                                     intensity_string, _create_user_defined_ties_str(flags['masses']),
+    fit_helper = VesuvioTOFFitHelper(_create_background_str(flags.get('background', None)), intensity_string,
+                                     _create_user_defined_ties_str(flags['masses']),
                                      flags.get('max_fit_iterations', 5000), flags['fit_minimizer'])
 
     corrections_helper = VesuvioCorrectionsHelper(_extract_bool_from_flags('gamma_correct', flags, False),
                                                   _extract_bool_from_flags('ms_enabled', flags),
                                                   flags.get('fixed_gamma_scaling', 0.0),
-                                                  flags.get('fixed_container_scaling', 0.0),
-                                                  intensity_string)
+                                                  flags.get('fixed_container_scaling', 0.0), intensity_string)
 
     create_mass_profile = _mass_profile_generator(MaterialBuilder())
     profiles = [create_mass_profile(profile) for profile in flags['masses']]
@@ -63,19 +62,18 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
 
     fit_namer = VesuvioFitNamer.from_vesuvio_input(vesuvio_input, flags['fit_mode'])
 
-    vesuvio_fit_routine = VesuvioTOFFitRoutine(ms_helper, fit_helper, corrections_helper,
-                                               mass_profile_collection, fit_namer)
-    vesuvio_output, result, exit_iteration = vesuvio_fit_routine(vesuvio_input, iterations, convergence_threshold,
-                                                                 _extract_bool_from_flags('output_verbose_corrections',
-                                                                                          flags, False),
-                                                                 _extract_bool_from_flags('calculate_caad', flags,
-                                                                                          False)
-                                                                 )
+    vesuvio_fit_routine = VesuvioTOFFitRoutine(ms_helper, fit_helper, corrections_helper, mass_profile_collection,
+                                               fit_namer)
+    vesuvio_output, result, exit_iteration = vesuvio_fit_routine(
+        vesuvio_input, iterations, convergence_threshold,
+        _extract_bool_from_flags('output_verbose_corrections', flags, False),
+        _extract_bool_from_flags('calculate_caad', flags, False))
     result = result if len(result) > 1 else result[0]
     return result, vesuvio_output.fit_parameters_workspace, vesuvio_output.chi2_values, exit_iteration
 
 
 # -----------------------------------------------------------------------------------------
+
 
 class VesuvioTOFFitRoutine(object):
     """
@@ -89,7 +87,6 @@ class VesuvioTOFFitRoutine(object):
                                      and profiles.
         _fit_mode                    The fit mode to use in the fitting routine.
     """
-
     def __init__(self, ms_helper, fit_helper, corrections_helper, mass_profile_collection, fit_namer):
         self._ms_helper = ms_helper
         self._fit_helper = fit_helper
@@ -102,9 +99,8 @@ class VesuvioTOFFitRoutine(object):
             raise ValueError('Must perform at least one iteration')
 
         # Creation of a fit routine iteration
-        tof_iteration = VesuvioTOFFitRoutineIteration(self._ms_helper, self._fit_helper,
-                                                      self._corrections_helper, self._fit_namer,
-                                                      self._mass_profile_collection)
+        tof_iteration = VesuvioTOFFitRoutineIteration(self._ms_helper, self._fit_helper, self._corrections_helper,
+                                                      self._fit_namer, self._mass_profile_collection)
 
         update_filter = ignore_hydrogen_filter if vesuvio_input.using_back_scattering_spectra else None
         exit_iteration = 0
@@ -131,8 +127,7 @@ class VesuvioTOFFitRoutine(object):
                 print("Cost function change: {0}".format(cost_function_change))
 
                 if cost_function_change <= convergence_threshold:
-                    print("Stopped at iteration {0} due to minimal change in cost function"
-                          .format(exit_iteration))
+                    print("Stopped at iteration {0} due to minimal change in cost function".format(exit_iteration))
                     break
 
             _add_parameters_to_ads(vesuvio_output, self._fit_namer)
@@ -151,6 +146,7 @@ class VesuvioTOFFitRoutine(object):
 
 # ------------------------------------------------------------------------------------------------------
 
+
 class VesuvioTOFFitRoutineIteration(object):
     """
     A class for executing a single iteration of the Vesuvio TOF Fit Routine, from a
@@ -165,7 +161,6 @@ class VesuvioTOFFitRoutineIteration(object):
                                      and profiles.
         _fit_mode                    The fit mode to use in the fitting routine.
     """
-
     def __init__(self, ms_helper, fit_helper, corrections_helper, fit_namer, mass_profile_collection):
         self._ms_corrections_args = ms_helper.to_dict()
         self._fit_helper = fit_helper
@@ -174,8 +169,7 @@ class VesuvioTOFFitRoutineIteration(object):
         self._mass_profile_collection = mass_profile_collection
 
     def __call__(self, vesuvio_input, iteration, verbose_output=False):
-        vesuvio_output = VesuvioTOFFitOutput(lambda index:
-                                             vesuvio_input.sample_data.getSpectrum(index).getSpectrumNo())
+        vesuvio_output = VesuvioTOFFitOutput(lambda index: vesuvio_input.sample_data.getSpectrum(index).getSpectrumNo())
 
         if vesuvio_input.using_back_scattering_spectra:
             fit_profile_collection = self._mass_profile_collection.filter(ignore_hydrogen_filter)
@@ -257,6 +251,7 @@ class VesuvioTOFFitRoutineIteration(object):
 
 # ------------------------------------------------------------------------------------------------------
 
+
 class VesuvioMSHelper(object):
     """
     A helper class for storing and manipulating the multiple scattering parameters of
@@ -275,9 +270,16 @@ class VesuvioMSHelper(object):
         _num_events         The number of scattering events to simulate
         _smooth_neighbours
     """
-
-    def __init__(self, BeamRadius=2.5, SampleHeight=5.0, SampleWidth=5.0, SampleDepth=5.0,
-                 SampleDensity=1.0, Seed=123456789, NumScatters=3, NumRuns=10, NumEvents=50000,
+    def __init__(self,
+                 BeamRadius=2.5,
+                 SampleHeight=5.0,
+                 SampleWidth=5.0,
+                 SampleDepth=5.0,
+                 SampleDensity=1.0,
+                 Seed=123456789,
+                 NumScatters=3,
+                 NumRuns=10,
+                 NumEvents=50000,
                  SmoothNeighbours=3):
         self._beam_radius = BeamRadius
         self._sample_height = SampleHeight
@@ -300,20 +302,23 @@ class VesuvioMSHelper(object):
         self._hydrogen_constraints.extend(constraints)
 
     def to_dict(self):
-        return {"BeamRadius": self._beam_radius,
-                "SampleHeight": self._sample_height,
-                "SampleWidth": self._sample_width,
-                "SampleDepth": self._sample_depth,
-                "SampleDensity": self._sample_density,
-                "Seed": self._seed,
-                "NumScatters": self._num_scatters,
-                "NumRuns": self._num_runs,
-                "NumEvents": self._num_events,
-                "SmoothNeighbours": self._smooth_neighbours,
-                "HydrogenConstraints": self._hydrogen_constraints.to_dict()}
+        return {
+            "BeamRadius": self._beam_radius,
+            "SampleHeight": self._sample_height,
+            "SampleWidth": self._sample_width,
+            "SampleDepth": self._sample_depth,
+            "SampleDensity": self._sample_density,
+            "Seed": self._seed,
+            "NumScatters": self._num_scatters,
+            "NumRuns": self._num_runs,
+            "NumEvents": self._num_events,
+            "SmoothNeighbours": self._smooth_neighbours,
+            "HydrogenConstraints": self._hydrogen_constraints.to_dict()
+        }
 
 
 # -----------------------------------------------------------------------------------------
+
 
 class VesuvioTOFFitHelper(object):
     """
@@ -327,7 +332,6 @@ class VesuvioTOFFitHelper(object):
                                  a peak using the minimizer
         _minimizer               The minimizer to use in the fit
     """
-
     def __init__(self, background, intensity_constraints, ties, max_iterations, minimizer):
         self._background = background
         self._intensity_constraints = intensity_constraints
@@ -346,6 +350,7 @@ class VesuvioTOFFitHelper(object):
 
 # -----------------------------------------------------------------------------------------
 
+
 class VesuvioCorrectionsHelper(object):
     """
     A helper class for executing VesuvioCorrections.
@@ -360,9 +365,8 @@ class VesuvioCorrectionsHelper(object):
         _intensity_constraints  The intensity constraints to use in the corrections
                                 calculation
     """
-
-    def __init__(self, gamma_correct, multiple_scattering, gamma_background_scale,
-                 container_scale, intensity_constraints):
+    def __init__(self, gamma_correct, multiple_scattering, gamma_background_scale, container_scale,
+                 intensity_constraints):
         self._gamma_correct = gamma_correct
         self._multiple_scattering = multiple_scattering
         self._gamma_background_scale = gamma_background_scale
@@ -380,6 +384,7 @@ class VesuvioCorrectionsHelper(object):
 
 # -----------------------------------------------------------------------------------------
 
+
 class VesuvioConstraints(object):
     """
     A class for parsing and storing a set of constraints for the Vesuvio Fit Routine
@@ -389,7 +394,6 @@ class VesuvioConstraints(object):
         _parser         The parser to be used
         _constraints    The set of parsed constraints
     """
-
     def __init__(self, name, parser):
         self._name = name
         self._parser = parser
@@ -419,6 +423,7 @@ class VesuvioConstraints(object):
 
 
 # -----------------------------------------------------------------------------------------
+
 
 class MassProfile(object):
     def __init__(self, symbol, mass, function, width, **parameters):
@@ -453,6 +458,7 @@ class MassProfile(object):
 
 # -----------------------------------------------------------------------------------------
 
+
 class MassProfileCollection(object):
     def __init__(self, profiles):
         self._profiles = profiles
@@ -486,11 +492,14 @@ class MassProfileCollection(object):
 
 # -----------------------------------------------------------------------------------------
 
+
 class MassProfileCollection2D(object):
     def __init__(self, collections):
         self._collections = collections
-        self._index_to_symbol_map = {str(index): profile.symbol for index, profile in
-                                     enumerate(self._collections[0]) if profile.symbol is not None}
+        self._index_to_symbol_map = {
+            str(index): profile.symbol
+            for index, profile in enumerate(self._collections[0]) if profile.symbol is not None
+        }
 
     @classmethod
     def from_collection(cls, collection, size=1):
@@ -523,8 +532,16 @@ class MassProfileCollection2D(object):
 
 
 class VesuvioFitNamer(object):
-    def __init__(self, sample_runs, suffix_prefix, index_to_spectrum, index_to_string,
-                 iteration=0, index=0, iteration_string="", index_string="", suffix=""):
+    def __init__(self,
+                 sample_runs,
+                 suffix_prefix,
+                 index_to_spectrum,
+                 index_to_string,
+                 iteration=0,
+                 index=0,
+                 iteration_string="",
+                 index_string="",
+                 suffix=""):
         self._sample_runs = sample_runs
         self._suffix_prefix = suffix_prefix
         self._index_to_spectrum = index_to_spectrum
@@ -632,6 +649,7 @@ class VesuvioFitNamer(object):
 
 # -----------------------------------------------------------------------------------------
 
+
 class VesuvioTOFFitOutput(object):
     def __init__(self, get_spectrum):
         self._prefit_parameters = []
@@ -700,6 +718,7 @@ class VesuvioTOFFitOutput(object):
 # Private Functions
 # --------------------------------------------------------------------------------
 
+
 def _mass_profile_generator(material_builder):
     def generator(mass_input):
         return _create_mass_profile(material_builder, mass_input)
@@ -719,8 +738,7 @@ def _extract_mass_function(mass_input):
     mass_function = mass_input.pop('function', None)
 
     if mass_function is None:
-        raise RuntimeError('Invalid mass specified - ' + str(mass_input)
-                           + " - no function was given.")
+        raise RuntimeError('Invalid mass specified - ' + str(mass_input) + " - no function was given.")
     return mass_function
 
 
@@ -731,14 +749,13 @@ def _extract_mass_value(material_builder, mass_input):
         symbol = mass_input.get('symbol', None)
 
         if symbol is None:
-            raise RuntimeError('Invalid mass specified - ' + str(mass_input)
-                               + " - either 'value' or 'symbol' must be given.")
+            raise RuntimeError('Invalid mass specified - ' + str(mass_input) +
+                               " - either 'value' or 'symbol' must be given.")
 
         try:
             mass_value = material_builder.setFormula(symbol).build().relativeMolecularMass()
         except BaseException as exc:
-            raise RuntimeError('Error when parsing mass - ' + str(mass_input) + ": "
-                               + "\n" + str(exc))
+            raise RuntimeError('Error when parsing mass - ' + str(mass_input) + ": " + "\n" + str(exc))
     return mass_value
 
 
@@ -775,8 +792,8 @@ def _create_background_str(background_flags):
 
 
 def _create_function_str(function, **parameters):
-    parameter_string = ",".join(["{0}={1}".format(key, value) for key, value in parameters.items()
-                                 if value is not None])
+    parameter_string = ",".join(
+        ["{0}={1}".format(key, value) for key, value in parameters.items() if value is not None])
     return "function=" + function + "," + parameter_string
 
 
@@ -828,9 +845,7 @@ def _merge_table_workspaces(table_workspaces, create_name):
 
 def _create_parameter_workspace(num_spec, param_table):
     num_params = param_table.rowCount()
-    param_workspace = WorkspaceFactory.Instance().create("Workspace2D",
-                                                         num_params, num_spec,
-                                                         num_spec)
+    param_workspace = WorkspaceFactory.Instance().create("Workspace2D", num_params, num_spec, num_spec)
     x_axis = TextAxis.create(num_spec)
     param_workspace.replaceAxis(0, x_axis)
 
@@ -854,8 +869,9 @@ def _conjoin_groups(workspace_groups):
 
     if len(workspace_groups) > 1:
         for workspace_group in workspace_groups[1:]:
-            conjoined_workspaces = [_conjoin(conjoined, workspace) for conjoined, workspace
-                                    in zip(conjoined_workspaces, workspace_group)]
+            conjoined_workspaces = [
+                _conjoin(conjoined, workspace) for conjoined, workspace in zip(conjoined_workspaces, workspace_group)
+            ]
     return conjoined_workspaces
 
 
@@ -873,8 +889,11 @@ def _append_all(workspaces):
 
 
 def _append(workspace1, workspace2):
-    return AppendSpectra(InputWorkspace1=workspace1, InputWorkspace2=workspace2,
-                         OutputWorkspace="__appended", StoreInADS=False, EnableLogging=False)
+    return AppendSpectra(InputWorkspace1=workspace1,
+                         InputWorkspace2=workspace2,
+                         OutputWorkspace="__appended",
+                         StoreInADS=False,
+                         EnableLogging=False)
 
 
 def _update_output(vesuvio_output, prefit_result, corrections_result, fit_result):
@@ -895,8 +914,7 @@ def _change_in_cost_function(previous_output, current_output):
 
 def _add_fit_output_to_ads(vesuvio_output, fit_namer):
     if vesuvio_output.fit_output_workspaces:
-        return GroupWorkspaces(InputWorkspaces=[workspace.name() for workspace
-                                                in vesuvio_output.fit_output_workspaces],
+        return GroupWorkspaces(InputWorkspaces=[workspace.name() for workspace in vesuvio_output.fit_output_workspaces],
                                OutputWorkspace=fit_namer.fit_output_group_name)
     return None
 
@@ -948,18 +966,24 @@ def _add_and_group_caad(fit_namer, vesuvio_input, suffices, normalised_workspace
 
 def _compute_caad(fit_workspaces):
     indices = _get_caad_indices(fit_workspaces[0])
-    normalised_workspaces = [_normalise_by_integral(_extract_spectra(workspace, indices))
-                             for workspace in fit_workspaces]
+    normalised_workspaces = [
+        _normalise_by_integral(_extract_spectra(workspace, indices)) for workspace in fit_workspaces
+    ]
 
     number_of_spectrum = normalised_workspaces[0].getNumberHistograms()
-    normalised_workspaces = [[ExtractSingleSpectrum(InputWorkspace=workspace, OutputWorkspace="__extracted",
-                                                    WorkspaceIndex=index, StoreInADS=False, EnableLogging=True)
-                              for workspace in normalised_workspaces] for index in range(number_of_spectrum)]
+    normalised_workspaces = [[
+        ExtractSingleSpectrum(InputWorkspace=workspace,
+                              OutputWorkspace="__extracted",
+                              WorkspaceIndex=index,
+                              StoreInADS=False,
+                              EnableLogging=True) for workspace in normalised_workspaces
+    ] for index in range(number_of_spectrum)]
     normalised_workspaces = [_append_all(workspaces) for workspaces in normalised_workspaces]
 
-    summed_workspaces = [SumSpectra(InputWorkspace=workspace, OutputWorkspace="__summed",
-                                    StoreInADS=False, EnableLogging=False)
-                         for workspace in normalised_workspaces]
+    summed_workspaces = [
+        SumSpectra(InputWorkspace=workspace, OutputWorkspace="__summed", StoreInADS=False, EnableLogging=False)
+        for workspace in normalised_workspaces
+    ]
     return normalised_workspaces, summed_workspaces, indices
 
 
@@ -980,15 +1004,23 @@ def _is_valid_for_caad(label):
 
 
 def _extract_spectra(workspace, indices):
-    return ExtractSpectra(InputWorkspace=workspace, WorkspaceIndexList=indices,
-                          OutputWorkspace="__extracted", StoreInADS=False, EnableLogging=False)
+    return ExtractSpectra(InputWorkspace=workspace,
+                          WorkspaceIndexList=indices,
+                          OutputWorkspace="__extracted",
+                          StoreInADS=False,
+                          EnableLogging=False)
 
 
 def _normalise_by_integral(workspace):
-    integrated = Integration(InputWorkspace=workspace, OutputWorkspace="__integral",
-                             StoreInADS=False, EnableLogging=False)
-    return Divide(LHSWorkspace=workspace, RHSWorkspace=integrated,
-                  OutputWorkspace="__divided", StoreInADS=False, EnableLogging=False)
+    integrated = Integration(InputWorkspace=workspace,
+                             OutputWorkspace="__integral",
+                             StoreInADS=False,
+                             EnableLogging=False)
+    return Divide(LHSWorkspace=workspace,
+                  RHSWorkspace=integrated,
+                  OutputWorkspace="__divided",
+                  StoreInADS=False,
+                  EnableLogging=False)
 
 
 def _extract_bool_from_flags(key, flags, default=True):
@@ -1004,8 +1036,7 @@ def _parse_hydrogen_constraint(constraint):
     symbol = constraint.pop("symbol", None)
 
     if symbol is None:
-        raise RuntimeError("Invalid hydrogen constraint: "
-                           + str(constraint) + " - No symbol provided")
+        raise RuntimeError("Invalid hydrogen constraint: " + str(constraint) + " - No symbol provided")
     return {symbol: constraint}
 
 

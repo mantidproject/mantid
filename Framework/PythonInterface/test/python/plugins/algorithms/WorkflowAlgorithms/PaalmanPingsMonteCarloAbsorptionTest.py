@@ -25,10 +25,20 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
         Load('MAR21335_Ei60meV.nxs', OutputWorkspace='direct_ws')
         Load('irs26176_graphite002_red.nxs', OutputWorkspace='geoms_ws')
         # set this workspace to have defined sample and can geometries to test the preset option
-        SetSample('geoms_ws', Geometry={'Shape': 'Cylinder', 'Height': 4.0, 'Radius': 2.0, 'Center': [0., 0., 0.]},
+        SetSample('geoms_ws',
+                  Geometry={
+                      'Shape': 'Cylinder',
+                      'Height': 4.0,
+                      'Radius': 2.0,
+                      'Center': [0., 0., 0.]
+                  },
                   Material={'ChemicalFormula': 'Ni'},
-                  ContainerGeometry={'Shape': 'HollowCylinder', 'Height': 4.0, 'InnerRadius': 2.0,
-                                     'OuterRadius': 3.5})
+                  ContainerGeometry={
+                      'Shape': 'HollowCylinder',
+                      'Height': 4.0,
+                      'InnerRadius': 2.0,
+                      'OuterRadius': 3.5
+                  })
 
     def setUp(self):
         self._red_ws = mtd['red_ws']
@@ -42,17 +52,21 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
         self._expected_hist = 10
         self._expected_blocksize = 1905
 
-        self._arguments = {'SampleChemicalFormula': 'H2-O',
-                           'SampleDensityType': 'Mass Density',
-                           'SampleDensity': 1.0,
-                           'EventsPerPoint': 200,
-                           'BeamHeight': 3.5,
-                           'BeamWidth': 4.0,
-                           'Height': 2.0}
+        self._arguments = {
+            'SampleChemicalFormula': 'H2-O',
+            'SampleDensityType': 'Mass Density',
+            'SampleDensity': 1.0,
+            'EventsPerPoint': 200,
+            'BeamHeight': 3.5,
+            'BeamWidth': 4.0,
+            'Height': 2.0
+        }
 
-        self._container_args = {'ContainerChemicalFormula': 'Al',
-                                'ContainerDensityType': 'Mass Density',
-                                'ContainerDensity': 1.0}
+        self._container_args = {
+            'ContainerChemicalFormula': 'Al',
+            'ContainerDensityType': 'Mass Density',
+            'ContainerDensity': 1.0
+        }
         self._test_arguments = dict()
 
     @classmethod
@@ -77,9 +91,7 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
         test_func(shape='Preset', sample_ws=self._geoms_ws)
 
     def _preset_without_override_material_test(self, test_func):
-        self._arguments = {'EventsPerPoint': 200,
-                           'BeamHeight': 3.5,
-                           'BeamWidth': 4.0}
+        self._arguments = {'EventsPerPoint': 200, 'BeamHeight': 3.5, 'BeamWidth': 4.0}
         test_func(shape='Preset', sample_ws=self._geoms_ws)
 
     def _material_with_cross_section_test(self, test_func):
@@ -131,9 +143,7 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
 
         arguments = self._arguments.copy()
         arguments.update(self._test_arguments)
-        corrected = PaalmanPingsMonteCarloAbsorption(InputWorkspace=sample_ws,
-                                                     Shape=shape,
-                                                     **arguments)
+        corrected = PaalmanPingsMonteCarloAbsorption(InputWorkspace=sample_ws, Shape=shape, **arguments)
         self._test_corrections_workspaces(corrected, spectrum_axis, with_container)
 
     def _run_correction_with_container_test(self, shape, sample_ws=None):

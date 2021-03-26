@@ -5,14 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,deprecated-module
-from mantiddoc.directives.base import AlgorithmBaseDirective #pylint: disable=unused-import
+from mantiddoc.directives.base import AlgorithmBaseDirective  #pylint: disable=unused-import
 import re
 from string import punctuation
+
 SUBSTITUTE_REF_RE = re.compile(r'\|(.+?)\|')
 
 
 class PropertiesDirective(AlgorithmBaseDirective):
-
     """
     Outputs the given algorithm's properties into a ReST formatted table.
     """
@@ -30,7 +30,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
         """
         Populates the ReST table with algorithm properties.
         """
-        if self.algorithm_version() is None: # This is an IFunction
+        if self.algorithm_version() is None:  # This is an IFunction
             ifunc = self.create_mantid_ifunction(self.algorithm_name())
             if ifunc.numParams() <= 0:
                 return False
@@ -42,14 +42,10 @@ class PropertiesDirective(AlgorithmBaseDirective):
             header = ('Name', 'Default', 'Description')
 
             for i in range(ifunc.numParams()):
-                properties.append((ifunc.parameterName(i),
-                                   str(ifunc.getParameterValue(i)),
-                                   ifunc.paramDescription(i)
-                                  ))
+                properties.append((ifunc.parameterName(i), str(ifunc.getParameterValue(i)), ifunc.paramDescription(i)))
             self.add_rst(self.make_header("Properties (fitting parameters)"))
-        else: # this is an Algorithm
-            alg = self.create_mantid_algorithm(self.algorithm_name(),
-                                               self.algorithm_version())
+        else:  # this is an Algorithm
+            alg = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version())
             alg_properties = alg.getProperties()
             if len(alg_properties) == 0:
                 return False
@@ -66,25 +62,21 @@ class PropertiesDirective(AlgorithmBaseDirective):
 
             #dictionary to convert from property type to link to category page (where possible)
             property_type_dict = {
-                "Workspace":":ref:`Workspace <Workspace>`",
-                "Workspace2D":":ref:`Workspace2D <Workspace2D>`",
-                "EventWorkspace":":ref:`EventWorkspace <EventWorkspace>`",
-                "MatrixWorkspace":":ref:`MatrixWorkspace <MatrixWorkspace>`",
-                "GroupWorkspace":":ref:`GroupWorkspace <WorkspaceGroup>`",
-                "MDEventWorkspace":":ref:`MDEventWorkspace <MDWorkspace>`",
-                "MDHistoWorkspace":":ref:`MDHistoWorkspace <MDHistoWorkspace>`",
-                "TableWorkspace":":ref:`TableWorkspace <Table Workspaces>`"
+                "Workspace": ":ref:`Workspace <Workspace>`",
+                "Workspace2D": ":ref:`Workspace2D <Workspace2D>`",
+                "EventWorkspace": ":ref:`EventWorkspace <EventWorkspace>`",
+                "MatrixWorkspace": ":ref:`MatrixWorkspace <MatrixWorkspace>`",
+                "GroupWorkspace": ":ref:`GroupWorkspace <WorkspaceGroup>`",
+                "MDEventWorkspace": ":ref:`MDEventWorkspace <MDWorkspace>`",
+                "MDHistoWorkspace": ":ref:`MDHistoWorkspace <MDHistoWorkspace>`",
+                "TableWorkspace": ":ref:`TableWorkspace <Table Workspaces>`"
             }
 
             for prop in alg_properties:
                 # Append a tuple of properties to the list.
-                properties.append((
-                    str(prop.name),
-                    str(direction_string[prop.direction]),
-                    property_type_dict.get(str(prop.type),str(prop.type)),
-                    str(self._get_default_prop(prop)),
-                    self._create_property_description_string(prop)
-                    ))
+                properties.append((str(prop.name), str(direction_string[prop.direction]),
+                                   property_type_dict.get(str(prop.type), str(prop.type)),
+                                   str(self._get_default_prop(prop)), self._create_property_description_string(prop)))
 
             self.add_rst(self.make_header("Properties"))
         self.add_rst(self._build_table(header, properties))
@@ -108,15 +100,13 @@ class PropertiesDirective(AlgorithmBaseDirective):
         # properties format correctly.
         # Added 10 to the length to ensure if table_content is 0 that
         # the table is still displayed.
-        col_sizes = [max( (len(row[i] * 10) + 10) for row in table_content)
-                     for i in range(len(header_content))]
+        col_sizes = [max((len(row[i] * 10) + 10) for row in table_content) for i in range(len(header_content))]
 
         # Use the column widths as a means to formatting columns.
-        formatter = ' '.join('{%d:<%d}' % (index,col) for index, col in enumerate(col_sizes))
+        formatter = ' '.join('{%d:<%d}' % (index, col) for index, col in enumerate(col_sizes))
         # Add whitespace to each column. This depends on the values returned by
         # col_sizes.
-        table_content_formatted = [
-            formatter.format(*item) for item in table_content]
+        table_content_formatted = [formatter.format(*item) for item in table_content]
         # Create a separator for each column
         separator = formatter.format(*['=' * col for col in col_sizes])
         # Build the table.
@@ -188,7 +178,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
         # Replace nonprintable characters with their printable
         # representations, such as \n, \t, ...
         defaultstr = repr(defaultstr)[1:-1]
-        defaultstr = defaultstr.replace('\\','\\\\')
+        defaultstr = defaultstr.replace('\\', '\\\\')
 
         # A special case for single-character default values (e.g. + or *, see MuonLoad). We don't
         # want them to be interpreted as list items.
@@ -251,7 +241,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
             if isFileExts:
                 prefixString = " Allowed extensions: "
             #put a space in between entries to allow the line to break
-            allowedValueString = allowedValueString.replace("','","', '")
+            allowedValueString = allowedValueString.replace("','", "', '")
             desc += prefixString + allowedValueString
 
         return self._escape_subsitution_refs(desc)
@@ -263,6 +253,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
         """
         def repl(match):
             return r'\|' + match.group(1) + r'\|'
+
         return SUBSTITUTE_REF_RE.sub(repl, desc)
 
 

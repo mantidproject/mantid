@@ -32,10 +32,14 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         self._mock_get_icon.return_value = QIcon()
         self.addCleanup(patcher.stop)
         if self._single_spec_ws is None:
-            self.__class__._single_spec_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=1,
-                                                                                XLength=1, YLength=1)
-            self.__class__._multi_spec_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=200,
-                                                                               XLength=1, YLength=1)
+            self.__class__._single_spec_ws = WorkspaceFactory.Instance().create("Workspace2D",
+                                                                                NVectors=1,
+                                                                                XLength=1,
+                                                                                YLength=1)
+            self.__class__._multi_spec_ws = WorkspaceFactory.Instance().create("Workspace2D",
+                                                                               NVectors=200,
+                                                                               XLength=1,
+                                                                               YLength=1)
         SpectraSelectionDialog._check_number_of_plots = mock.Mock(return_value=True)
 
         spectraselectordialog.RED_ASTERISK = None
@@ -57,8 +61,7 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         self.assertEqual("valid range: 0-199", dlg._ui.wkspIndices.placeholderText())
 
     def test_filling_workspace_details_multiple_workspaces_of_same_size(self):
-        workspaces = [self._multi_spec_ws,
-                      self._multi_spec_ws]
+        workspaces = [self._multi_spec_ws, self._multi_spec_ws]
         dlg = SpectraSelectionDialog(workspaces)
         self.assertEqual("valid range: 1-200", dlg._ui.specNums.placeholderText())
         self.assertEqual("valid range: 0-199", dlg._ui.wkspIndices.placeholderText())
@@ -76,7 +79,7 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         for i in range(10):
             gappy_ws.getSpectrum(i).setSpectrumNo(1 + i)
         for i in range(10, 16):
-            gappy_ws.getSpectrum(i).setSpectrumNo(1 + (2*i))
+            gappy_ws.getSpectrum(i).setSpectrumNo(1 + (2 * i))
         for i in range(17, 20):
             gappy_ws.getSpectrum(i).setSpectrumNo(1 + i)
         for i in range(20, gappy_ws.getNumberHistograms()):
@@ -89,7 +92,7 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         gappy_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=50, XLength=1, YLength=1)
         for i in range(20):
             gappy_ws.getSpectrum(i).setSpectrumNo(1 + i)
-        for i in range(20,gappy_ws.getNumberHistograms()):
+        for i in range(20, gappy_ws.getNumberHistograms()):
             gappy_ws.getSpectrum(i).setSpectrumNo(161 + i)
         dlg = SpectraSelectionDialog([gappy_ws, self._multi_spec_ws])
         self.assertEqual("valid range: 1-20, 181-200", dlg._ui.specNums.placeholderText())
@@ -159,8 +162,7 @@ class SpectraSelectionDialogTest(unittest.TestCase):
 
     def test_parse_selection_str_mix_number_range_spaces(self):
         s = '1-3, 5,8,10, 11 ,12-14 , 15 -16, 16- 19'
-        self.assertEqual([1, 2, 3, 5, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
-                         parse_selection_str(s, 1, 20))
+        self.assertEqual([1, 2, 3, 5, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], parse_selection_str(s, 1, 20))
 
     def test_construction_with_non_MatrixWorkspace_type_removes_non_MatrixWorkspaces_from_list(self):
         table = WorkspaceFactory.Instance().createTable()

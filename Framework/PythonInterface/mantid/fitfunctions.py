@@ -46,7 +46,7 @@ class FunctionWrapper(object):
                 for keya in atts:
                     self.fun.setAttributeValue(keya, atts[keya])
             elif self.fun.hasAttribute(key):
-                 self.fun.setAttributeValue(key, kwargs[key])
+                self.fun.setAttributeValue(key, kwargs[key])
 
         # Then deal with parameters
         for key in kwargs:
@@ -89,7 +89,7 @@ class FunctionWrapper(object):
         else:
             self.__dict__[key] = value  # initialize self.key
 
-    def __getitem__ (self, name):
+    def __getitem__(self, name):
         """
         Called from array-like access on RHS
 
@@ -105,7 +105,7 @@ class FunctionWrapper(object):
             else:
                 raise AttributeError("Parameter %s not found" % name)
 
-    def __setitem__ (self, name, value):
+    def __setitem__(self, name, value):
         """
         Called from array-like access on LHS
 
@@ -119,14 +119,14 @@ class FunctionWrapper(object):
         else:
             self.fun.setParameter(name, value)
 
-    def __str__ (self):
+    def __str__(self):
         """
         Return string giving contents of function.
         Used in unit tests.
         """
         return str(self.fun)
 
-    def __add__ (self, other):
+    def __add__(self, other):
         """
         Implement + operator for composite function
 
@@ -137,7 +137,7 @@ class FunctionWrapper(object):
             sum = sum.flatten()
         return sum
 
-    def __mul__ (self, other):
+    def __mul__(self, other):
         """
         Implement * operator for product function
 
@@ -162,7 +162,7 @@ class FunctionWrapper(object):
             # If the input is a workspace, simply return the output workspace.
             return self._execute_algorithm('EvaluateFunction', Function=self.fun, InputWorkspace=x)
 
-        list_input =  isinstance(x, list)
+        list_input = isinstance(x, list)
         numpy_input = isinstance(x, np.ndarray)
         if numpy_input:
             # If the input is a numpy array reshape into 1D array, saving
@@ -224,24 +224,24 @@ class FunctionWrapper(object):
                 if type(ws) == type('string'):
                     ws = mtd[ws]
             if key == "workspaceIndex":
-                 workspaceIndex = kwargs[key]
-                 if workspaceIndex > 0:
-                     extractSpectrum = True
+                workspaceIndex = kwargs[key]
+                if workspaceIndex > 0:
+                    extractSpectrum = True
             if key == "xValues":
-                 xvals = kwargs[key]
-                 haveXValues = True
+                xvals = kwargs[key]
+                haveXValues = True
             if key == "startX":
-                 xMin = kwargs[key]
-                 haveStartX = True
+                xMin = kwargs[key]
+                haveStartX = True
             if key == "endX":
-                 xMax = kwargs[key]
-                 haveEndX = True
+                xMax = kwargs[key]
+                haveEndX = True
             if key == "nSteps":
-                 nSteps = kwargs[key]
-                 if nSteps < 1:
+                nSteps = kwargs[key]
+                if nSteps < 1:
                     raise RuntimeError("nSteps must be at least 1")
             if key == "name":
-                 plotName = kwargs[key]
+                plotName = kwargs[key]
 
         if haveStartX and haveEndX:
             if xMin >= xMax:
@@ -266,14 +266,14 @@ class FunctionWrapper(object):
             if not haveEndX:
                 raise RuntimeError("endX must be defined if no workspace or xValues are defined.")
             else:
-                raise RuntimeError("insufficient plotting arguments") # Should not occur.
+                raise RuntimeError("insufficient plotting arguments")  # Should not occur.
 
         outWs = self(spectrumWs)
         vals = outWs.readY(1)
-        function = CreateWorkspace( DataX=xvals, DataY=vals, OutputWorkspace=plotName)
-        plot(plotName,0)
+        function = CreateWorkspace(DataX=xvals, DataY=vals, OutputWorkspace=plotName)
+        plot(plotName, 0)
 
-    def tie (self, *args, **kwargs):
+    def tie(self, *args, **kwargs):
         """
         Add ties.
 
@@ -317,14 +317,13 @@ class FunctionWrapper(object):
         for i in range(0, self.fun.numParams()):
             self.fun.removeTie(self.getParameterName(i))
 
-
     def constrain(self, expressions):
         """
         Add constraints
 
         :param expressions: string of tie expressions
         """
-        self.fun.addConstraints( expressions )
+        self.fun.addConstraints(expressions)
 
     def unconstrain(self, name):
         """
@@ -389,7 +388,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
     """
     Wrapper class for Composite Fitting Function
     """
-    def __init__ (self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Called when creating an instance
 
@@ -417,7 +416,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
         :param kwargs: any parameters or attributes that must be passed to the
                        composite function itself.
         """
-        if len(args) == 1 and  not isinstance(args[0], FunctionWrapper):
+        if len(args) == 1 and not isinstance(args[0], FunctionWrapper):
             # We have a composite function to wrap
             self.fun = args[0]
         else:
@@ -448,9 +447,9 @@ class CompositeFunctionWrapper(FunctionWrapper):
         get composite parameter name of parameter of
         given name of member function of given index
         """
-        return "f"+str(index)+"."+name
+        return "f" + str(index) + "." + name
 
-    def getIndexOfFunction (self, name):
+    def getIndexOfFunction(self, name):
         """
         get index of function specified by name,
         such as "LinearBackground" for the only
@@ -493,7 +492,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
         index = self.getIndexOfFunction(name)
         return self[index]
 
-    def __getitem__ (self, nameorindex):
+    def __getitem__(self, nameorindex):
         """
         get function of specified index or parameter of specified name
         called for array-like access on RHS.
@@ -509,7 +508,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
             raise AttributeError("Parameter %s not found" % nameorindex)
         item = comp[nameorindex]
         if isinstance(item, float):
-            return  item
+            return item
         elif item.name() == "CompositeFunction":
             return CompositeFunctionWrapper(item)
         elif item.name() == "ProductFunction":
@@ -519,7 +518,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
         else:
             return FunctionWrapper(item)
 
-    def __setitem__ (self, name, newValue):
+    def __setitem__(self, name, newValue):
         """
         Called from array-like access on LHS
 
@@ -529,12 +528,12 @@ class CompositeFunctionWrapper(FunctionWrapper):
         :param newValue: new value for item
         """
         comp = self.fun
-        if isinstance( newValue, FunctionWrapper):
+        if isinstance(newValue, FunctionWrapper):
             comp[name] = newValue.fun
         else:
             comp[name] = newValue
 
-    def __iadd__ (self, other):
+    def __iadd__(self, other):
         """
         Implement += operator.
 
@@ -545,17 +544,17 @@ class CompositeFunctionWrapper(FunctionWrapper):
         self.fun.add(other.fun)
         return self
 
-    def __delitem__ (self, index):
-       """
+    def __delitem__(self, index):
+        """
        Delete item of given index from composite function.
 
        **It should not be called directly.**
 
        :param index: index of item
        """
-       self.fun.__delitem__(index)
+        self.fun.__delitem__(index)
 
-    def __len__ (self):
+    def __len__(self):
         """
         Return number of items in composite function.
         Implement len() function.
@@ -575,9 +574,9 @@ class CompositeFunctionWrapper(FunctionWrapper):
         :param name: name of parameter
         """
         expr = self.getCompositeParameterName(name, 0)
-        self.tie({self.getCompositeParameterName(name, i): expr for i in range(1,len(self)) })
+        self.tie({self.getCompositeParameterName(name, i): expr for i in range(1, len(self))})
 
-    def fixAll (self, name):
+    def fixAll(self, name):
         """
         Fix all parameters with the given local name.
         Every member function must have a parameter of this name.
@@ -587,7 +586,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
         for f in self:
             f.fix(name)
 
-    def constrainAll (self, expressions):
+    def constrainAll(self, expressions):
         """
         Constrain all parameters according local names in expressions.
 
@@ -602,14 +601,14 @@ class CompositeFunctionWrapper(FunctionWrapper):
                 except:
                     pass
 
-    def unconstrainAll (self, name):
+    def unconstrainAll(self, name):
         """
         Unconstrain all parameters of given local name.
 
         :param name: local name of parameter
         """
         for i in range(0, len(self)):
-            if isinstance( self[i], CompositeFunctionWrapper ):
+            if isinstance(self[i], CompositeFunctionWrapper):
                 self[i].unconstrainAll(name)
             else:
                 try:
@@ -617,7 +616,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
                 except:
                     pass
 
-    def untieAll (self, name):
+    def untieAll(self, name):
         """
         Untie all parameters with the given local name.
         Every member function must have a parameter of this name.
@@ -627,7 +626,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
         for i in range(0, len(self)):
             self.untie(self.getCompositeParameterName(name, i))
 
-    def flatten (self):
+    def flatten(self):
         """
         Return composite function, equal to self, but with
         every composite function within replaced by
@@ -642,20 +641,20 @@ class CompositeFunctionWrapper(FunctionWrapper):
         # If there are no composite functions, do nothing
         needToFlatten = False
         for i in range(0, len(self)):
-            if not needToFlatten and isinstance(self[i],CompositeFunctionWrapper):
+            if not needToFlatten and isinstance(self[i], CompositeFunctionWrapper):
                 needToFlatten = True
 
         if not needToFlatten:
             return self
 
         # Now we know there is a composite function.
-        if isinstance(self,ProductFunctionWrapper):
+        if isinstance(self, ProductFunctionWrapper):
             flatSelf = ProductFunctionWrapper()
         else:
             flatSelf = CompositeFunctionWrapper()
 
         for i in range(0, len(self)):
-            if isinstance(self[i],CompositeFunctionWrapper):
+            if isinstance(self[i], CompositeFunctionWrapper):
                 currentFunction = self[i].flatten()
                 for j in range(0, len(currentFunction)):
                     flatSelf.fun.add(currentFunction[j].fun)
@@ -669,7 +668,7 @@ class ProductFunctionWrapper(CompositeFunctionWrapper):
     """
     Wrapper class for Product Fitting Function
     """
-    def __init__ (self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Called when creating an instance
 
@@ -688,7 +687,7 @@ class ConvolutionWrapper(CompositeFunctionWrapper):
     """
     Wrapper class for Convolution Fitting Function
     """
-    def __init__ (self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Called when creating an instance
 
@@ -707,7 +706,7 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
     """
     Wrapper class for Multidomain Fitting Function
     """
-    def __init__ (self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Called when creating an instance
 
@@ -738,7 +737,7 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
             self.fun.setDomainIndex(i, i)
 
     @property
-    def nDomains (self):
+    def nDomains(self):
         """
         Return number of domains
         """
@@ -750,7 +749,7 @@ _name_to_constructor_map = {
     'ProductFunction': ProductFunctionWrapper,
     'Convolution': ConvolutionWrapper,
     'MultiDomainFunction': MultiDomainFunctionWrapper,
-    }
+}
 
 # Some functions need to be excluded from wrapping, eg
 # if there is an algorithm with the same name.
@@ -765,6 +764,7 @@ def _create_wrapper_function(name):
 
     :param name: name of fake function
     """
+
     # ------------------------------------------------------------------------------------------------
     def wrapper_function(*args, **kwargs):
         return FunctionWrapper.wrap(name, *args, **kwargs)

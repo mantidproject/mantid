@@ -12,7 +12,6 @@ import unittest
 from unittest import mock
 from workbench.projectrecovery.recoverygui.projectrecoverypresenter import ProjectRecoveryPresenter
 
-
 PATCH_PROJECT_RECOVERY_VIEW = 'workbench.projectrecovery.recoverygui.projectrecoverypresenter.ProjectRecoveryWidgetView'
 PATCH_PROJECT_RECOVERY_MODEL = 'workbench.projectrecovery.recoverygui.projectrecoverypresenter.ProjectRecoveryModel'
 PATCH_PROJECT_RECOVERY_FAILURE_VIEW = \

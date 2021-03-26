@@ -17,7 +17,8 @@ from qtpy.QtWidgets import QApplication
 
 
 def create_test_workspace(workspace_name, ragged=False):
-    CreateWorkspace([0, 1, 2, 3, 4, 2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 3, 4, 5, 6, 7], NSpec=2,
+    CreateWorkspace([0, 1, 2, 3, 4, 2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 3, 4, 5, 6, 7],
+                    NSpec=2,
                     OutputWorkspace=workspace_name)
     if ragged:
         CreateWorkspace([1, 2, 3, 4], [1, 2, 3, 4], NSpec=1, OutputWorkspace='__temp1')

@@ -16,7 +16,6 @@ for filename in glob.glob("*.py"):
     if 'PythonAlgorithm' in open(filename).read():
         print(filename)
 
-
 #os.chdir("LiveData/src")
 #for file in glob.glob("*.cpp"):
 #    #print file

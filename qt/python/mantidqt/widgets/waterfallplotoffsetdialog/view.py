@@ -14,7 +14,6 @@ from mantidqt.utils.qt import load_ui
 
 
 class WaterfallPlotOffsetDialogView(QDialog):
-
     def __init__(self, parent=None):
         super(WaterfallPlotOffsetDialogView, self).__init__(parent=parent)
 

@@ -23,22 +23,16 @@ class SANS2DReductionGUIAddedFiles(sansgui.SANS2DGUIReduction):
 
         # add files (SAMPLE and CAN)
         import SANSadd2
-        SANSadd2.add_runs(('22048','22048'),'SANS2D', '.nxs',
-                          rawTypes=('.add','.raw','.s*'), lowMem=False)
-        SANSadd2.add_runs(('22023','22023'),'SANS2D', '.nxs',
-                          rawTypes=('.add','.raw','.s*'), lowMem=False)
+        SANSadd2.add_runs(('22048', '22048'), 'SANS2D', '.nxs', rawTypes=('.add', '.raw', '.s*'), lowMem=False)
+        SANSadd2.add_runs(('22023', '22023'), 'SANS2D', '.nxs', rawTypes=('.add', '.raw', '.s*'), lowMem=False)
 
         # load values:
-        i.SetCentre('155.45','-169.6','rear')
-        i.SetCentre('155.45','-169.6','front')
-        i.AssignSample(r'SANS2D00022048-add.nxs',
-                       reload = True, period = 1)
-        i.AssignCan(r'SANS2D00022023-add.nxs',
-                    reload = True, period = 1)
-        i.TransmissionSample(r'SANS2D00022041.nxs', r'SANS2D00022024.nxs',
-                             period_t=1, period_d=1)
-        i.TransmissionCan(r'SANS2D00022024.nxs', r'SANS2D00022024.nxs',
-                          period_t=1, period_d=1)
+        i.SetCentre('155.45', '-169.6', 'rear')
+        i.SetCentre('155.45', '-169.6', 'front')
+        i.AssignSample(r'SANS2D00022048-add.nxs', reload=True, period=1)
+        i.AssignCan(r'SANS2D00022023-add.nxs', reload=True, period=1)
+        i.TransmissionSample(r'SANS2D00022041.nxs', r'SANS2D00022024.nxs', period_t=1, period_d=1)
+        i.TransmissionCan(r'SANS2D00022024.nxs', r'SANS2D00022024.nxs', period_t=1, period_d=1)
 
         self.checkAfterLoad()
 
@@ -59,7 +53,7 @@ class SANS2DReductionGUIAddedFiles(sansgui.SANS2DGUIReduction):
         self.tolerance_is_rel_err = True
         self.tolerance = 0.35
         self.disableChecking.append('Instrument')
-        return "trans_test_rear","SANSReductionGUI.nxs"
+        return "trans_test_rear", "SANSReductionGUI.nxs"
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
@@ -75,15 +69,23 @@ class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
 
         # add files (SAMPLE and CAN)
         import SANSadd2
-        SANSadd2.add_runs(('28827','28797'),'SANS2DTUBES', '.nxs',
-                          rawTypes=('.add','.raw','.s*'), lowMem=False,
-                          saveAsEvent=True, isOverlay = True)
-        SANSadd2.add_runs(('28823','28793'),'SANS2DTUBES', '.nxs',
-                          rawTypes=('.add','.raw','.s*'), lowMem=False,
-                          saveAsEvent=True, isOverlay = True)
+        SANSadd2.add_runs(('28827', '28797'),
+                          'SANS2DTUBES',
+                          '.nxs',
+                          rawTypes=('.add', '.raw', '.s*'),
+                          lowMem=False,
+                          saveAsEvent=True,
+                          isOverlay=True)
+        SANSadd2.add_runs(('28823', '28793'),
+                          'SANS2DTUBES',
+                          '.nxs',
+                          rawTypes=('.add', '.raw', '.s*'),
+                          lowMem=False,
+                          saveAsEvent=True,
+                          isOverlay=True)
 
-        i.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
-        i.AssignCan(r'SANS2D00028793-add.nxs', reload = True)
+        i.AssignSample(r'SANS2D00028797-add.nxs', reload=True)
+        i.AssignCan(r'SANS2D00028793-add.nxs', reload=True)
         i.TransmissionSample(r'SANS2D00028808.nxs', r'SANS2D00028784.nxs')
         i.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
 
@@ -101,8 +103,8 @@ class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
         for ws in mtd.getObjectNames():
             DeleteWorkspace(Workspace=ws)
         # Delete the stored files
-        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028793-add.nxs'))
-        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028797-add.nxs'))
+        os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028793-add.nxs'))
+        os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028797-add.nxs'))
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
@@ -117,17 +119,27 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShift(sansgui.SANS2DGUIReduction):
         i.Set1D()
 
         # add files (SAMPLE and CAN)
-        time_shifts=[1]
+        time_shifts = [1]
         import SANSadd2
-        SANSadd2.add_runs(('28827','28797'),'SANS2DTUBES', '.nxs',
-                          rawTypes=('.add','.raw','.s*'), lowMem=False,
-                          saveAsEvent=True, isOverlay = True, time_shifts = time_shifts)
-        SANSadd2.add_runs(('28823','28793'),'SANS2DTUBES', '.nxs',
-                          rawTypes=('.add','.raw','.s*'), lowMem=False,
-                          saveAsEvent=True, isOverlay = True, time_shifts = time_shifts)
+        SANSadd2.add_runs(('28827', '28797'),
+                          'SANS2DTUBES',
+                          '.nxs',
+                          rawTypes=('.add', '.raw', '.s*'),
+                          lowMem=False,
+                          saveAsEvent=True,
+                          isOverlay=True,
+                          time_shifts=time_shifts)
+        SANSadd2.add_runs(('28823', '28793'),
+                          'SANS2DTUBES',
+                          '.nxs',
+                          rawTypes=('.add', '.raw', '.s*'),
+                          lowMem=False,
+                          saveAsEvent=True,
+                          isOverlay=True,
+                          time_shifts=time_shifts)
 
-        i.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
-        i.AssignCan(r'SANS2D00028793-add.nxs', reload = True)
+        i.AssignSample(r'SANS2D00028797-add.nxs', reload=True)
+        i.AssignCan(r'SANS2D00028793-add.nxs', reload=True)
         i.TransmissionSample(r'SANS2D00028808.nxs', r'SANS2D00028784.nxs')
         i.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
 
@@ -147,8 +159,8 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShift(sansgui.SANS2DGUIReduction):
         for ws in mtd.getObjectNames():
             DeleteWorkspace(Workspace=ws)
         # Delete the stored files
-        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028793-add.nxs'))
-        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028797-add.nxs'))
+        os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028793-add.nxs'))
+        os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028797-add.nxs'))
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
@@ -164,15 +176,23 @@ class SANS2DAddedEventFilesWithoutOverlay(sansgui.SANS2DGUIReduction):
 
         # add files (SAMPLE and CAN)
         import SANSadd2
-        SANSadd2.add_runs(('28827','28797'),'SANS2DTUBES', '.nxs',
-                          rawTypes=('.add','.raw','.s*'), lowMem=False,
-                          saveAsEvent=True, isOverlay = False)
-        SANSadd2.add_runs(('28823','28793'),'SANS2DTUBES', '.nxs',
-                          rawTypes=('.add','.raw','.s*'), lowMem=False,
-                          saveAsEvent=True, isOverlay = False)
+        SANSadd2.add_runs(('28827', '28797'),
+                          'SANS2DTUBES',
+                          '.nxs',
+                          rawTypes=('.add', '.raw', '.s*'),
+                          lowMem=False,
+                          saveAsEvent=True,
+                          isOverlay=False)
+        SANSadd2.add_runs(('28823', '28793'),
+                          'SANS2DTUBES',
+                          '.nxs',
+                          rawTypes=('.add', '.raw', '.s*'),
+                          lowMem=False,
+                          saveAsEvent=True,
+                          isOverlay=False)
 
-        i.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
-        i.AssignCan(r'SANS2D00028793-add.nxs', reload = True)
+        i.AssignSample(r'SANS2D00028797-add.nxs', reload=True)
+        i.AssignCan(r'SANS2D00028793-add.nxs', reload=True)
         i.TransmissionSample(r'SANS2D00028808.nxs', r'SANS2D00028784.nxs')
         i.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
 
@@ -192,8 +212,8 @@ class SANS2DAddedEventFilesWithoutOverlay(sansgui.SANS2DGUIReduction):
         for ws in mtd.getObjectNames():
             DeleteWorkspace(Workspace=ws)
         # Delete the stored files
-        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028793-add.nxs'))
-        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028797-add.nxs'))
+        os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028793-add.nxs'))
+        os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028797-add.nxs'))
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
@@ -208,13 +228,13 @@ class SANS2DAddedEventFilesWithoutOverlayWithISISCommandInterface(sansgui.SANS2D
         i.Set1D()
 
         # add files (SAMPLE and CAN) using the ISISCommandInterface
-        runs_sample = ('28827','28797')
-        i.AddRuns(runs_sample, instrument = 'SANS2DTUBES', saveAsEvent=True)
-        runs_can = ('28823','28793')
-        i.AddRuns(runs_can, instrument = 'SANS2DTUBES', saveAsEvent=True)
+        runs_sample = ('28827', '28797')
+        i.AddRuns(runs_sample, instrument='SANS2DTUBES', saveAsEvent=True)
+        runs_can = ('28823', '28793')
+        i.AddRuns(runs_can, instrument='SANS2DTUBES', saveAsEvent=True)
 
-        i.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
-        i.AssignCan(r'SANS2D00028793-add.nxs', reload = True)
+        i.AssignSample(r'SANS2D00028797-add.nxs', reload=True)
+        i.AssignCan(r'SANS2D00028793-add.nxs', reload=True)
         i.TransmissionSample(r'SANS2D00028808.nxs', r'SANS2D00028784.nxs')
         i.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
 
@@ -234,8 +254,8 @@ class SANS2DAddedEventFilesWithoutOverlayWithISISCommandInterface(sansgui.SANS2D
         for ws in mtd.getObjectNames():
             DeleteWorkspace(Workspace=ws)
         # Delete the stored files
-        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028793-add.nxs'))
-        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028797-add.nxs'))
+        os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028793-add.nxs'))
+        os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028797-add.nxs'))
 
 
 if __name__ == "__main__":

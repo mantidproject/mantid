@@ -11,7 +11,6 @@ from sans.state.StateObjects.StateData import (get_data_builder)
 from sans.state.StateObjects.StateSave import (get_save_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # No tests required
@@ -44,9 +43,9 @@ class StateReductionBuilderTest(unittest.TestCase):
         state = builder.build()
 
         # Assert
-        self.assertEqual(state.user_specified_output_name,  user_specified_output_name)
-        self.assertEqual(state.zero_free_correction,  zero_free_correction)
-        self.assertEqual(state.file_format,  file_format)
+        self.assertEqual(state.user_specified_output_name, user_specified_output_name)
+        self.assertEqual(state.zero_free_correction, zero_free_correction)
+        self.assertEqual(state.file_format, file_format)
 
 
 if __name__ == '__main__':

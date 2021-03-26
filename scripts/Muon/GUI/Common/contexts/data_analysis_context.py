@@ -8,20 +8,24 @@ from Muon.GUI.Common.contexts.muon_context import MuonContext
 
 
 class DataAnalysisContext(MuonContext):
-    def __init__(self, muon_data_context=None, muon_gui_context=None,
-                 muon_group_context=None, fitting_context=None, muon_phase_context=None):
-        super().__init__(muon_data_context=muon_data_context, muon_gui_context=muon_gui_context,
-                         muon_group_context=muon_group_context, fitting_context=fitting_context, muon_phase_context=muon_phase_context)
+    def __init__(self,
+                 muon_data_context=None,
+                 muon_gui_context=None,
+                 muon_group_context=None,
+                 fitting_context=None,
+                 muon_phase_context=None):
+        super().__init__(muon_data_context=muon_data_context,
+                         muon_gui_context=muon_gui_context,
+                         muon_group_context=muon_group_context,
+                         fitting_context=fitting_context,
+                         muon_phase_context=muon_phase_context)
         self.workspace_suffix = ' MA'
         self.base_directory = 'Muon Data'
 
-    def get_names_of_workspaces_to_fit(
-            self, runs='', group_and_pair='', rebin=False, freq="None"):
-        return self.get_names_of_time_domain_workspaces_to_fit(
-            runs=runs, group_and_pair=group_and_pair, rebin=rebin)
+    def get_names_of_workspaces_to_fit(self, runs='', group_and_pair='', rebin=False, freq="None"):
+        return self.get_names_of_time_domain_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair, rebin=rebin)
 
-    def get_names_of_time_domain_workspaces_to_fit(
-            self, runs='', group_and_pair='', rebin=False):
+    def get_names_of_time_domain_workspaces_to_fit(self, runs='', group_and_pair='', rebin=False):
         group, pair = self.get_group_and_pair(group_and_pair)
 
         if runs.find(',') != -1 or runs.find('-') != -1:
@@ -29,10 +33,8 @@ class DataAnalysisContext(MuonContext):
             runs = 'All'
         run_list = self.get_runs(runs)
 
-        group_names = self.group_pair_context.get_group_workspace_names(
-            run_list, group, rebin)
-        pair_names = self.group_pair_context.get_pair_workspace_names(
-            run_list, pair, rebin)
+        group_names = self.group_pair_context.get_group_workspace_names(run_list, group, rebin)
+        pair_names = self.group_pair_context.get_pair_workspace_names(run_list, pair, rebin)
 
         return group_names + pair_names
 

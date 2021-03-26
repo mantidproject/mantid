@@ -12,13 +12,12 @@ from mantid.api import MatrixWorkspace, WorkspaceGroup
 
 class NormaliseSpectraTest(unittest.TestCase):
 
-    _positive ='1,2,3,4,5'
-    _negative ='-5,-4,-3,-2,-1'
-    _zeros ='0,0,0,0,0'
-    _mixed ='-2,-1,0,1,2'
+    _positive = '1,2,3,4,5'
+    _negative = '-5,-4,-3,-2,-1'
+    _zeros = '0,0,0,0,0'
+    _mixed = '-2,-1,0,1,2'
 
-
-#----------------------------------Algorithm tests----------------------------------------
+    #----------------------------------Algorithm tests----------------------------------------
 
     def test_one_hist_positive(self):
         in_ws = self._create_workspace(1, 'test', self._positive)
@@ -27,13 +26,11 @@ class NormaliseSpectraTest(unittest.TestCase):
 
     def test_one_hist_negative(self):
         in_ws = self._create_workspace(1, 'test', self._negative)
-        self.assertRaises(RuntimeError,  NormaliseSpectra,
-                          InputWorkspace=in_ws, OutputWorkspace='out_ws')
+        self.assertRaises(RuntimeError, NormaliseSpectra, InputWorkspace=in_ws, OutputWorkspace='out_ws')
 
     def test_one_hist_zeros(self):
         in_ws = self._create_workspace(1, 'test', self._zeros)
-        self.assertRaises(RuntimeError,  NormaliseSpectra,
-                          InputWorkspace=in_ws, OutputWorkspace='out_ws')
+        self.assertRaises(RuntimeError, NormaliseSpectra, InputWorkspace=in_ws, OutputWorkspace='out_ws')
 
     def test_one_hist_mixed(self):
         in_ws = self._create_workspace(1, 'test', self._mixed)
@@ -60,7 +57,9 @@ class NormaliseSpectraTest(unittest.TestCase):
         for i in range(len(y_data)):
             self.assertGreaterEqual(y_data[i], lower_boundary)
 
+
 #--------------------------------Helper Functions-----------------------------------------
+
     def _create_workspace(self, nhists, out_name, data_string):
         """
         Creates a basic Matrixworkspace
@@ -70,10 +69,8 @@ class NormaliseSpectraTest(unittest.TestCase):
             data += data_string
             if i != (nhists - 1):
                 data += ','
-        CreateWorkspace(OutputWorkspace=out_name, DataX=data,
-                        DataY=data, DataE=data, Nspec=nhists)
+        CreateWorkspace(OutputWorkspace=out_name, DataX=data, DataY=data, DataE=data, Nspec=nhists)
         return mtd[out_name]
 
-
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()

@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
-
 """ Finds the beam centre for SANS"""
 
 import numpy as np
@@ -27,7 +26,6 @@ from sans.state.Serializer import Serializer
 
 
 class SANSBeamCentreFinder(DataProcessorAlgorithm):
-
     def category(self):
         return 'SANS\\BeamCentreFinder'
 
@@ -39,46 +37,62 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         # INPUT
         # ----------
         # Workspace which is to be cropped
-        self.declareProperty('SANSState', '',
-                             doc='A JSON string which fulfills the SANSState contract.')
+        self.declareProperty('SANSState', '', doc='A JSON string which fulfills the SANSState contract.')
 
-        self.declareProperty(MatrixWorkspaceProperty("SampleScatterWorkspace", '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("SampleScatterWorkspace",
+                                                     '',
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Input),
                              doc='The sample scatter data')
 
-        self.declareProperty(MatrixWorkspaceProperty("SampleScatterMonitorWorkspace", '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("SampleScatterMonitorWorkspace",
+                                                     '',
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Input),
                              doc='The sample scatter monitor data')
 
-        self.declareProperty(MatrixWorkspaceProperty("SampleTransmissionWorkspace", '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("SampleTransmissionWorkspace",
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
                              doc='The sample transmission data')
 
-        self.declareProperty(MatrixWorkspaceProperty("SampleDirectWorkspace", '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("SampleDirectWorkspace",
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
                              doc='The sample direct data')
 
-        self.declareProperty(MatrixWorkspaceProperty("CanScatterWorkspace", '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("CanScatterWorkspace",
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
                              doc='The can scatter data')
 
-        self.declareProperty(MatrixWorkspaceProperty("CanScatterMonitorWorkspace", '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("CanScatterMonitorWorkspace",
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
                              doc='The can scatter monitor data')
 
-        self.declareProperty(MatrixWorkspaceProperty("CanTransmissionWorkspace", '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("CanTransmissionWorkspace",
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
                              doc='The can transmission data')
 
-        self.declareProperty(MatrixWorkspaceProperty("CanDirectWorkspace", '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("CanDirectWorkspace",
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
                              doc='The can direct data')
 
         # The component, i.e. HAB or LAB
-        allowed_detectors = StringListValidator([DetectorType.LAB.value,
-                                                 DetectorType.HAB.value])
-        self.declareProperty("Component", DetectorType.LAB.value,
-                             validator=allowed_detectors, direction=Direction.Input,
+        allowed_detectors = StringListValidator([DetectorType.LAB.value, DetectorType.HAB.value])
+        self.declareProperty("Component",
+                             DetectorType.LAB.value,
+                             validator=allowed_detectors,
+                             direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
         self.declareProperty("Iterations", 10, direction=Direction.Input, doc="The maximum number of iterations.")
@@ -93,10 +107,14 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
         self.declareProperty('Tolerance', 0.0001251, direction=Direction.Input, doc="The search tolerance")
 
-        self.declareProperty('Direction', FindDirectionEnum.ALL.value, direction=Direction.Input,
+        self.declareProperty('Direction',
+                             FindDirectionEnum.ALL.value,
+                             direction=Direction.Input,
                              doc="The search direction is an enumerable which can be either All, LeftRight or UpDown")
 
-        self.declareProperty('Verbose', False, direction=Direction.Input,
+        self.declareProperty('Verbose',
+                             False,
+                             direction=Direction.Input,
                              doc="Whether to keep workspaces from each iteration in ADS.")
 
         # ----------
@@ -104,9 +122,13 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         # ----------
         # Workspace which is to be cropped
 
-        self.declareProperty('Centre1', 0.0, direction=Direction.Output,
+        self.declareProperty('Centre1',
+                             0.0,
+                             direction=Direction.Output,
                              doc="The centre position found in the first dimension")
-        self.declareProperty('Centre2', 0.0, direction=Direction.Output,
+        self.declareProperty('Centre2',
+                             0.0,
+                             direction=Direction.Output,
                              doc="The centre position found in the second dimension")
 
     def PyExec(self):
@@ -176,8 +198,11 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             tb_results = self._calculate_residuals(sample_quartiles[MaskingQuadrant.TOP],
                                                    sample_quartiles[MaskingQuadrant.BOTTOM])
 
-            self._print_results(lr_results=lr_results, tb_results=tb_results,
-                                centre_lr=centre_lr, centre_tb=centre_tb, iteration=i)
+            self._print_results(lr_results=lr_results,
+                                tb_results=tb_results,
+                                centre_lr=centre_lr,
+                                centre_tb=centre_tb,
+                                iteration=i)
 
             diff_left_right.append(lr_results.total_residual)
             diff_top_bottom.append(tb_results.total_residual)
@@ -188,9 +213,9 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 # have we stepped across the y-axis that goes through the beam center?
                 if diff_left_right[i] > diff_left_right[i - 1]:
                     # yes with stepped across the middle, reverse direction and half the step size
-                    position_lr_step = - position_lr_step / 2
+                    position_lr_step = -position_lr_step / 2
                 if diff_top_bottom[i] > diff_top_bottom[i - 1]:
-                    position_tb_step = - position_tb_step / 2
+                    position_tb_step = -position_tb_step / 2
 
                 if (diff_left_right[i] + diff_top_bottom[i]) < (diff_left_right[i - 1] + diff_top_bottom[i - 1]) or \
                         self.state.compatibility.use_compatibility_mode:
@@ -233,25 +258,27 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                                                         direct_workspace=self.sample_direct,
                                                         scatter_monitor_workspace=self.sample_scatter_monitor,
                                                         data_type="Sample",
-                                                        centre1=centre1, centre2=centre2)
+                                                        centre1=centre1,
+                                                        centre2=centre2)
         if self.can_scatter:
             can_quartiles = self._run_quartile_reduction(scatter_workspace=self.can_scatter,
                                                          transmission_workspace=self.can_transmission,
                                                          direct_workspace=self.can_direct,
                                                          data_type="Can",
                                                          scatter_monitor_workspace=self.can_scatter_monitor,
-                                                         centre1=centre1, centre2=centre2)
+                                                         centre1=centre1,
+                                                         centre2=centre2)
             for key in sample_quartiles:
                 sample_quartiles[key] = perform_can_subtraction(sample_quartiles[key], can_quartiles[key], self)
         return sample_quartiles
 
     def get_position_steps(self, state):
         instrument_file = get_instrument_paths_for_sans_file(state.data.sample_scatter)
-        position_1_step = get_named_elements_from_ipf_file(
-            instrument_file[1], ["centre-finder-step-size"], float)['centre-finder-step-size']
+        position_1_step = get_named_elements_from_ipf_file(instrument_file[1], ["centre-finder-step-size"],
+                                                           float)['centre-finder-step-size']
         try:
-            position_2_step = get_named_elements_from_ipf_file(
-                instrument_file[1], ["centre-finder-step-size2"], float)['centre-finder-step-size2']
+            position_2_step = get_named_elements_from_ipf_file(instrument_file[1], ["centre-finder-step-size2"],
+                                                               float)['centre-finder-step-size2']
         except:
             position_2_step = position_1_step
 
@@ -311,8 +338,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         workspace = self.getProperty(workspace_name).value
         if workspace:
             clone_name = "CloneWorkspace"
-            clone_options = {"InputWorkspace": workspace,
-                             "OutputWorkspace": EMPTY_NAME}
+            clone_options = {"InputWorkspace": workspace, "OutputWorkspace": EMPTY_NAME}
             clone_alg = create_child_algorithm(self, clone_name, **clone_options)
             clone_alg.execute()
             return clone_alg.getProperty("OutputWorkspace").value
@@ -324,29 +350,35 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         serialized_state = self.getProperty("SANSState").value
 
         algorithm_name = "SANSBeamCentreFinderCore"
-        alg_options = {"ScatterWorkspace": scatter_workspace,
-                       "ScatterMonitorWorkspace": scatter_monitor_workspace,
-                       "TransmissionWorkspace": transmission_workspace,
-                       "DirectWorkspace": direct_workspace,
-                       "Component": self.component,
-                       "SANSState": serialized_state,
-                       "DataType": data_type,
-                       "Centre1": centre1,
-                       "Centre2": centre2,
-                       "OutputWorkspaceLeft": EMPTY_NAME,
-                       "OutputWorkspaceRight": EMPTY_NAME,
-                       "OutputWorkspaceTop": EMPTY_NAME,
-                       "OutputWorkspaceBottom": EMPTY_NAME,
-                       "RMax": self.r_max,
-                       "RMin": self.r_min}
+        alg_options = {
+            "ScatterWorkspace": scatter_workspace,
+            "ScatterMonitorWorkspace": scatter_monitor_workspace,
+            "TransmissionWorkspace": transmission_workspace,
+            "DirectWorkspace": direct_workspace,
+            "Component": self.component,
+            "SANSState": serialized_state,
+            "DataType": data_type,
+            "Centre1": centre1,
+            "Centre2": centre2,
+            "OutputWorkspaceLeft": EMPTY_NAME,
+            "OutputWorkspaceRight": EMPTY_NAME,
+            "OutputWorkspaceTop": EMPTY_NAME,
+            "OutputWorkspaceBottom": EMPTY_NAME,
+            "RMax": self.r_max,
+            "RMin": self.r_min
+        }
         alg = create_child_algorithm(self, algorithm_name, **alg_options)
         alg.execute()
         out_left = strip_end_nans(alg.getProperty("OutputWorkspaceLeft").value, self)
         out_right = strip_end_nans(alg.getProperty("OutputWorkspaceRight").value, self)
         out_top = strip_end_nans(alg.getProperty("OutputWorkspaceTop").value, self)
         out_bottom = strip_end_nans(alg.getProperty("OutputWorkspaceBottom").value, self)
-        return {MaskingQuadrant.LEFT: out_left, MaskingQuadrant.RIGHT: out_right, MaskingQuadrant.TOP: out_top,
-                MaskingQuadrant.BOTTOM: out_bottom}
+        return {
+            MaskingQuadrant.LEFT: out_left,
+            MaskingQuadrant.RIGHT: out_right,
+            MaskingQuadrant.TOP: out_top,
+            MaskingQuadrant.BOTTOM: out_bottom
+        }
 
     def _get_component(self, workspace):
         component = DetectorType(self.component)
@@ -385,7 +417,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
         self.logger.information("Beam Centre Diff: {0}".format(residue))
 
-        return _ResidualsDetails(mismatched_points=mismatched_points, num_points_considered=len(A_vals_dict),
+        return _ResidualsDetails(mismatched_points=mismatched_points,
+                                 num_points_considered=len(A_vals_dict),
                                  total_residual=residue)
 
     def _get_progress(self):

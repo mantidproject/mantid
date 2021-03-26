@@ -14,7 +14,6 @@ from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 
 @start_qapplication
 class PythonFileInterpreterTest(unittest.TestCase):
-
     def test_construction(self):
         w = PythonFileInterpreter()
         self.assertTrue("Status: Idle", w.status.currentMessage())
@@ -41,18 +40,15 @@ class PythonFileInterpreterTest(unittest.TestCase):
         self.assertTrue("Status: Idle", w.status.currentMessage())
 
     def test_clear_key_binding(self):
-        test_cases = {'Ctrl+A': None, 'Shift+A': ValueError,
-                      'Ctrl+AAA': ValueError, 'Ctrl+Shift+A': ValueError}
+        test_cases = {'Ctrl+A': None, 'Shift+A': ValueError, 'Ctrl+AAA': ValueError, 'Ctrl+Shift+A': ValueError}
         w = PythonFileInterpreter()
         for key_combo, expected_result in test_cases.items():
-            fail_msg = ("Failed on case '{}' with expected result '{}'"
-                        "".format(key_combo, expected_result))
+            fail_msg = ("Failed on case '{}' with expected result '{}'" "".format(key_combo, expected_result))
             if expected_result is ValueError:
                 with self.assertRaises(expected_result, msg=fail_msg):
                     w.clear_key_binding(key_combo)
             else:
-                self.assertEqual(w.clear_key_binding(key_combo), None,
-                                 msg=fail_msg)
+                self.assertEqual(w.clear_key_binding(key_combo), None, msg=fail_msg)
 
     def test_variables_reset(self):
         w = PythonFileInterpreter(content='x=\'this is a string\'\r\nprint(x)')

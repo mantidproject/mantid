@@ -120,9 +120,13 @@ class ScriptRunner(object):
                 self.error = e
 
 
-def open_in_window(widget_or_name, script, attach_debugger=True, pause=0,
-                   close_on_finish=False, is_cli=False, in_workbench=False):
-
+def open_in_window(widget_or_name,
+                   script,
+                   attach_debugger=True,
+                   pause=0,
+                   close_on_finish=False,
+                   is_cli=False,
+                   in_workbench=False):
     """
     Displays a widget in a window.
     :param widget_or_name: A widget to display.

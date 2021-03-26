@@ -10,18 +10,17 @@ from IndirectReductionCommon import load_files
 
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import (AddSampleLog, AlignDetectors, CloneWorkspace, CropWorkspace, DeleteWorkspace,
-                              Divide, DiffractionFocussing, MergeRuns, NormaliseByCurrent, RebinToWorkspace,
+from mantid.simpleapi import (AddSampleLog, AlignDetectors, CloneWorkspace, CropWorkspace, DeleteWorkspace, Divide,
+                              DiffractionFocussing, MergeRuns, NormaliseByCurrent, RebinToWorkspace,
                               ReplaceSpecialValues)
 
-
 # pylint: disable=too-few-public-methods
+
 
 class DRange(object):
     """
     A class to represent a dRange.
     """
-
     def __init__(self, lower, upper):
         self._range = [lower, upper]
 
@@ -62,7 +61,6 @@ class DRangeToWorkspaceMap(object):
     A "wrapper" class for a map, which maps workspaces from their corresponding
     time regimes.
     """
-
     def __init__(self):
         self._map = {}
 
@@ -82,9 +80,12 @@ class DRangeToWorkspaceMap(object):
             self.add_workspace(workspace)
 
         if combinator is not None:
-            self._map = {d_range: CloneWorkspace(InputWorkspace=combinator(ws_list), OutputWorkspace="combined",
-                                                 StoreInADS=False)
-                         for d_range, ws_list in self._map.items()}
+            self._map = {
+                d_range: CloneWorkspace(InputWorkspace=combinator(ws_list),
+                                        OutputWorkspace="combined",
+                                        StoreInADS=False)
+                for d_range, ws_list in self._map.items()
+            }
 
     def add_workspace(self, workspace):
         """
@@ -105,6 +106,7 @@ class DRangeToWorkspaceMap(object):
         if d_range not in self._map:
             self._map[d_range] = [workspace]
         else:
+
             def x_range_differs(x):
                 return x.readX(0)[-1] != workspace.readX(0)[-1]
 
@@ -118,8 +120,7 @@ class DRangeToWorkspaceMap(object):
 
         :param morphism:    The morphism to apply.
         """
-        self._map = {d_range: morphism(d_range, workspace)
-                     for d_range, workspace in self._map.items()}
+        self._map = {d_range: morphism(d_range, workspace) for d_range, workspace in self._map.items()}
 
     def combine(self, d_range_map, combinator):
         """
@@ -268,8 +269,7 @@ def get_intersection_of_ranges(range_list):
     range_combos = itertools.combinations(range_list, 2)
 
     # Retrieve all intersections
-    intersections = (find_intersection_of_ranges(range_pair[0], range_pair[1])
-                     for range_pair in range_combos)
+    intersections = (find_intersection_of_ranges(range_pair[0], range_pair[1]) for range_pair in range_combos)
 
     # Filter out None type intersections
     intersections = filter(lambda intersection: intersection is not None, intersections)
@@ -326,10 +326,12 @@ def rebin_to_smallest(*workspaces):
         if idx == smallest_idx:
             rebinned_workspaces.append(workspace)
         else:
-            rebinned_workspaces.append(RebinToWorkspace(WorkspaceToRebin=workspace,
-                                                        WorkspaceToMatch=smallest_ws,
-                                                        OutputWorkspace="rebinned",
-                                                        StoreInADS=False, EnableLogging=False))
+            rebinned_workspaces.append(
+                RebinToWorkspace(WorkspaceToRebin=workspace,
+                                 WorkspaceToMatch=smallest_ws,
+                                 OutputWorkspace="rebinned",
+                                 StoreInADS=False,
+                                 EnableLogging=False))
 
     return rebinned_workspaces
 
@@ -346,7 +348,8 @@ def rebin_and_subtract(minuend_workspace, subtrahend_workspace):
     return minuend_workspace - RebinToWorkspace(WorkspaceToRebin=subtrahend_workspace,
                                                 WorkspaceToMatch=minuend_workspace,
                                                 OutputWorkspace="rebinned_container",
-                                                StoreInADS=False, EnableLogging=False)
+                                                StoreInADS=False,
+                                                EnableLogging=False)
 
 
 def divide_workspace(dividend_workspace, divisor_workspace):
@@ -359,12 +362,17 @@ def divide_workspace(dividend_workspace, divisor_workspace):
     :return:                   The dividend workspace / the divisor workspace.
     """
     dividend_ws, divisor_ws = rebin_to_smallest(dividend_workspace, divisor_workspace)
-    divided_ws = Divide(LHSWorkspace=dividend_ws, RHSWorkspace=divisor_ws,
-                        OutputWorkspace="divided", StoreInADS=False, EnableLogging=False)
+    divided_ws = Divide(LHSWorkspace=dividend_ws,
+                        RHSWorkspace=divisor_ws,
+                        OutputWorkspace="divided",
+                        StoreInADS=False,
+                        EnableLogging=False)
     return ReplaceSpecialValues(InputWorkspace=divided_ws,
-                                NaNValue=0.0, InfinityValue=0.0,
+                                NaNValue=0.0,
+                                InfinityValue=0.0,
                                 OutputWorkspace="removed_special",
-                                StoreInADS=False, EnableLogging=False)
+                                StoreInADS=False,
+                                EnableLogging=False)
 
 
 def rebin_and_average(ws_list):
@@ -399,26 +407,30 @@ def diffraction_calibrator(calibration_file):
     :param calibration_file:    The calibration file to use.
     :return:                    A diffraction calibrator.
     """
-
     def calibrator(d_range, workspace):
         normalised = NormaliseByCurrent(InputWorkspace=workspace,
                                         OutputWorkspace="normalised_sample",
-                                        StoreInADS=False, EnableLogging=False)
+                                        StoreInADS=False,
+                                        EnableLogging=False)
 
         aligned = AlignDetectors(InputWorkspace=normalised,
                                  CalibrationFile=calibration_file,
                                  OutputWorkspace="aligned_sample",
-                                 StoreInADS=False, EnableLogging=False)
+                                 StoreInADS=False,
+                                 EnableLogging=False)
 
         focussed = DiffractionFocussing(InputWorkspace=aligned,
                                         GroupingFileName=calibration_file,
                                         OutputWorkspace="focussed_sample",
-                                        StoreInADS=False, EnableLogging=False)
+                                        StoreInADS=False,
+                                        EnableLogging=False)
 
         return CropWorkspace(InputWorkspace=focussed,
-                             XMin=d_range[0], XMax=d_range[1],
+                             XMin=d_range[0],
+                             XMax=d_range[1],
                              OutputWorkspace="calibrated_sample",
-                             StoreInADS=False, EnableLogging=False)
+                             StoreInADS=False,
+                             EnableLogging=False)
 
     return calibrator
 
@@ -434,10 +446,13 @@ def create_loader(ipf_filename, minimum_spectrum, maximum_spectrum, load_logs, l
     :param load_opts:           The additional load options.
     :return:                    A loader.
     """
-
     def loader(runs):
-        return load_files(runs, ipf_filename, minimum_spectrum, maximum_spectrum,
-                          load_logs=load_logs, load_opts=load_opts)
+        return load_files(runs,
+                          ipf_filename,
+                          minimum_spectrum,
+                          maximum_spectrum,
+                          load_logs=load_logs,
+                          load_opts=load_opts)
 
     return loader
 
@@ -451,7 +466,6 @@ def create_drange_map_generator(runs_loader, combinator, delete_runs=True):
     :param delete_runs: If true, deletes the loaded runs after addition to the drange map.
     :return:            A drange map generator.
     """
-
     def generator(runs, transform):
         drange_map = DRangeToWorkspaceMap()
         workspace_names, _, _ = runs_loader(runs)
@@ -486,7 +500,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         return 'Diffraction\\Reduction'
 
     def seeAlso(self):
-        return [ "ISISIndirectDiffractionReduction" ]
+        return ["ISISIndirectDiffractionReduction"]
 
     def summary(self):
         return "This Python algorithm performs the operations necessary for the reduction of diffraction data " + \
@@ -497,32 +511,27 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         runs_desc = 'The list of run numbers that are part of the sample run. ' + \
                     'There should be five of these in most cases. Enter them as comma separated values.'
 
-        self.declareProperty(StringArrayProperty('Sample'),
-                             doc=runs_desc)
+        self.declareProperty(StringArrayProperty('Sample'), doc=runs_desc)
 
-        self.declareProperty(StringArrayProperty('Vanadium'),
-                             doc=runs_desc)
+        self.declareProperty(StringArrayProperty('Vanadium'), doc=runs_desc)
 
-        self.declareProperty(StringArrayProperty('Container'),
-                             doc=runs_desc)
+        self.declareProperty(StringArrayProperty('Container'), doc=runs_desc)
 
-        self.declareProperty('ContainerScaleFactor', 1.0,
-                             doc='Factor by which to scale the container')
+        self.declareProperty('ContainerScaleFactor', 1.0, doc='Factor by which to scale the container')
 
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.Load),
-                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and '
-                                 + '[[DiffractionFocussing]] child algorithms.')
+                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and ' +
+                             '[[DiffractionFocussing]] child algorithms.')
 
         self.declareProperty('SpectraMin', 3, doc='Minimum Spectrum to Load from (Must be more than 3)')
 
         self.declareProperty('SpectraMax', 962, doc='Maximum Spectrum to Load from file (Must be less than 962)')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
-                             doc="Name to give the output workspace. If no name is provided, "
-                                 + "one will be generated based on the run numbers.")
+                             doc="Name to give the output workspace. If no name is provided, " +
+                             "one will be generated based on the run numbers.")
 
-        self.declareProperty(name='LoadLogFiles', defaultValue=True,
-                             doc='Load log files when loading runs')
+        self.declareProperty(name='LoadLogFiles', defaultValue=True, doc='Load log files when loading runs')
 
         self._cal = None
         self._output_ws_name = None
@@ -565,8 +574,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Load all sample, vanadium files
         ipf_file_name = 'OSIRIS_diffraction_diffonly_Parameters.xml'
         load_opts = {"DeleteMonitors": True}
-        load_runs = create_loader(ipf_file_name, self._spec_min, self._spec_max,
-                                  self._load_logs, load_opts)
+        load_runs = create_loader(ipf_file_name, self._spec_min, self._spec_max, self._load_logs, load_opts)
         drange_map_generator = create_drange_map_generator(load_runs, rebin_and_average)
 
         # Create a sample drange map from the sample runs
@@ -609,7 +617,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             # Merge the sample files into one.
             output_ws = MergeRuns(InputWorkspaces=temp_ws_names,
                                   OutputWorkspace="merged_sample_runs",
-                                  StoreInADS=False, EnableLogging=False)
+                                  StoreInADS=False,
+                                  EnableLogging=False)
             delete_workspaces(temp_ws_names)
         elif len(result_map) == 1:
             output_ws = list(result_map.values())[0]
@@ -626,8 +635,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             mtd.addOrReplace(self._output_ws_name, output_ws)
 
         d_ranges = sorted(result_map.keys())
-        AddSampleLog(Workspace=output_ws, LogName="D-Ranges",
-                     LogText=", ".join(map(str, d_ranges)))
+        AddSampleLog(Workspace=output_ws, LogName="D-Ranges", LogText=", ".join(map(str, d_ranges)))
 
         # Create scalar data to cope with where merge has combined overlapping data.
         intersections = get_intersection_of_ranges(d_ranges)

@@ -16,8 +16,12 @@ failed_string = "Failed to converge after 500 iterations"
 changes_too_small_string = "Changes in parameter value are too small"
 success_string = "success"
 no_fit_string = "No fit"
-fit_status_strings = {"failed_string": failed_string, "changes_too_small_string": changes_too_small_string,
-                      "success_string": success_string, "no_fit_string": no_fit_string}
+fit_status_strings = {
+    "failed_string": failed_string,
+    "changes_too_small_string": changes_too_small_string,
+    "success_string": success_string,
+    "no_fit_string": no_fit_string
+}
 
 
 class SequentialTableWidgetTest(unittest.TestCase):

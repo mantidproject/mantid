@@ -42,12 +42,11 @@ class SANS2DMultiPeriodSingleTest_V2(systemtesting.MantidSystemTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-        return AnalysisDataService[self.reduced][6].name(),'SANS2DBatch.nxs'
+        return AnalysisDataService[self.reduced][6].name(), 'SANS2DBatch.nxs'
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DMultiPeriodBatchTest_V2(SANS2DMultiPeriodSingleTest_V2):
-
     def runTest(self):
         UseCompatibilityMode()
         SANS2D()

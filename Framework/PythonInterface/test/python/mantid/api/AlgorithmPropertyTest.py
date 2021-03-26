@@ -10,7 +10,6 @@ from mantid.kernel import Direction
 
 
 class AlgorithmPropertyTest(unittest.TestCase):
-
     def test_construction_with_name_produces_input_property(self):
         prop = AlgorithmProperty("TestProperty")
 

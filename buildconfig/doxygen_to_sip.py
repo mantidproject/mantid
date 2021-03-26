@@ -6,6 +6,7 @@ import os
 import sys
 from optparse import OptionParser
 
+
 #----------------------------------------------------------
 def findInSubdirectory(filename, subdirectory=''):
     if subdirectory:
@@ -17,9 +18,9 @@ def findInSubdirectory(filename, subdirectory=''):
             return os.path.join(root, filename)
     return None
 
+
 def find_cpp_file(basedir, classname):
     return findInSubdirectory(classname + ".cpp", basedir)
-
 
 
 #----------------------------------------------------------
@@ -37,7 +38,7 @@ def grab_doxygen(cppfile, method):
         line = lines[i].strip()
         if line.startswith(method):
             # Go backwards above the class to grab the doxygen
-            for j in range(i-1, -1, -1):
+            for j in range(i - 1, -1, -1):
                 out.insert(0, lines[j])
                 # Stop when you reach the start of the comment "/**"
                 if lines[j].strip().startswith('/**'):
@@ -60,7 +61,7 @@ def start_python_doc_section(out, line, look_for, section_header):
     # Add the 'Args:' line.
     if line.strip().startswith(look_for):
         # Add a blank line if there isn't one
-        if len(out)>0:
+        if len(out) > 0:
             if out[-1].strip() != "":
                 out.append("    ")
         out.append(section_header)
@@ -117,6 +118,7 @@ def doxygen_to_docstring(doxygen, method):
     out.append("")
     return out
 
+
 #----------------------------------------------------------
 def process_sip(filename):
     """ Reads an input .sip file and finds methods from
@@ -155,25 +157,24 @@ def process_sip(filename):
 
             dirtext += "\n\n__dir__() for %s\nreturn [" % classname
 
-
         if classname != "":
             # We are within a real class
             if line.endswith(";"):
                 # Within a function declaration
                 n = line.find(')')
                 if n > 0:
-                    method = line[0:n+1]
+                    method = line[0:n + 1]
                     n = method.find(' ')
 
                     # Find the name of the method (for the __dir__ method)
-                    methodname = method[n+1:]
+                    methodname = method[n + 1:]
                     n2 = methodname.find('(')
                     methodname = methodname[0:n2]
                     dirtext += '"%s", ' % methodname
 
                     # Make the string like this:
                     # "void ClassName::method(arguments)"
-                    method = method[0:n+1] + classname + "::" + method[n+1:]
+                    method = method[0:n + 1] + classname + "::" + method[n + 1:]
 
                     # Now extract the doxygen
                     doxygen = grab_doxygen(classcpp, method)
@@ -186,24 +187,20 @@ def process_sip(filename):
 
 
 #----------------------------------------------------------
-if __name__=="__main__":
+if __name__ == "__main__":
 
-    parser = OptionParser(description=
-"""Automatically adds Docstring directives to an input .sip file.
+    parser = OptionParser(description="""Automatically adds Docstring directives to an input .sip file.
 REQUIREMENTS:
 - All method declarations in the sip file must be on one line.
 - The cpp file must be = to ClassName.cpp
 - The method declaration must match exactly the sip entry.
 - The Doxygen must be just before the method in the .cpp file.
 """)
-    parser.add_option('-i', metavar='SIPFILE', dest="sipfile",
-                        help='The .sip input file')
+    parser.add_option('-i', metavar='SIPFILE', dest="sipfile", help='The .sip input file')
 
-    parser.add_option('-o', metavar='OUTPUTFILE', dest="outputfile",
-                        help='The name of the output file')
+    parser.add_option('-o', metavar='OUTPUTFILE', dest="outputfile", help='The name of the output file')
 
-    parser.add_option('-d', metavar='DIRFILE', dest="dirfile",
-                        help='The name of the file containing __dir__ methods')
+    parser.add_option('-d', metavar='DIRFILE', dest="dirfile", help='The name of the file containing __dir__ methods')
 
     (options, args) = parser.parse_args()
 
@@ -226,5 +223,3 @@ REQUIREMENTS:
         f = open(options.dirfile, 'w')
         f.write(dirtext)
         f.close()
-
-

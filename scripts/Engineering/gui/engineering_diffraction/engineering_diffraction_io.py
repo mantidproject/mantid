@@ -10,8 +10,14 @@ from Engineering.gui.engineering_diffraction.engineering_diffraction import Engi
 
 IO_VERSION = 1
 
-SETTINGS_KEYS_TYPES = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool, "logs": str,
-                       "primary_log": str, "sort_ascending": bool}
+SETTINGS_KEYS_TYPES = {
+    "save_location": str,
+    "full_calibration": str,
+    "recalc_vanadium": bool,
+    "logs": str,
+    "primary_log": str,
+    "sort_ascending": bool
+}
 
 
 class EngineeringDiffractionUIAttributes(object):

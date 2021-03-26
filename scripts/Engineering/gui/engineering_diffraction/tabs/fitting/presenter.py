@@ -18,10 +18,8 @@ class FittingPresenter(object):
         self.seq_fit_started_observer = GenericObserverWithArgPassing(self.disable_view)
         self.seq_fit_done_observer = GenericObserverWithArgPassing(self.enable_view)
 
-        self.data_widget.presenter.plot_removed_notifier.add_subscriber(
-            self.plot_widget.workspace_removed_observer)
-        self.data_widget.presenter.plot_added_notifier.add_subscriber(
-            self.plot_widget.workspace_added_observer)
+        self.data_widget.presenter.plot_removed_notifier.add_subscriber(self.plot_widget.workspace_removed_observer)
+        self.data_widget.presenter.plot_added_notifier.add_subscriber(self.plot_widget.workspace_added_observer)
         self.data_widget.presenter.all_plots_removed_notifier.add_subscriber(
             self.plot_widget.all_workspaces_removed_observer)
         self.data_widget.presenter.seq_fit_started_notifier.add_subscriber(self.seq_fit_started_observer)

@@ -189,8 +189,7 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
         self.last_good_data_item = table_utils.addDoubleToTable(self.phase_table_options_table, 15.0, 4)
 
         table_utils.setRowName(self.phase_table_options_table, 5, "Output fit information")
-        self.output_fit_info_box = table_utils.addCheckBoxToTable(
-            self.phase_table_options_table, False, 5)
+        self.output_fit_info_box = table_utils.addCheckBoxToTable(self.phase_table_options_table, False, 5)
 
         self.phase_table_options_table.resizeRowsToContents()
 

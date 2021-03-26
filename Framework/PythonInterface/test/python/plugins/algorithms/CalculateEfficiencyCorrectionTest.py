@@ -49,9 +49,7 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
     def checkResults(self, eventCheck=False, xsection="AttenuationXSection"):
         # Check results
 
-        Multiply(LHSWorkspace=self._input_wksp,
-                 RHSWorkspace=self._correction_wksp,
-                 OutputWorkspace=self._output_wksp)
+        Multiply(LHSWorkspace=self._input_wksp, RHSWorkspace=self._correction_wksp, OutputWorkspace=self._output_wksp)
         output_wksp = AnalysisDataService.retrieve(self._output_wksp)
 
         self.assertEqual(output_wksp.getAxis(0).getUnit().unitID(), 'Wavelength')
@@ -72,10 +70,16 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
 
         # Create an exponentially decaying function in wavelength to simulate
         # measured sample
-        CreateSampleWorkspace(WorkspaceType="Event", Function="User Defined",
+        CreateSampleWorkspace(WorkspaceType="Event",
+                              Function="User Defined",
                               UserDefinedFunction="name=ExpDecay, Height=100, Lifetime=4",
-                              Xmin=0.2, Xmax=4.0, BinWidth=0.01, XUnit="Wavelength",
-                              NumEvents=10000, NumBanks=1, BankPixelWidth=1,
+                              Xmin=0.2,
+                              Xmax=4.0,
+                              BinWidth=0.01,
+                              XUnit="Wavelength",
+                              NumEvents=10000,
+                              NumBanks=1,
+                              BankPixelWidth=1,
                               OutputWorkspace=self._input_wksp)
 
         # Calculate the efficiency correction
@@ -92,11 +96,18 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
 
         # Create an exponentially decaying function in wavelength to simulate
         # measured sample
-        tmp_wksp = CreateSampleWorkspace(WorkspaceType="Event", Function="User Defined",
+        tmp_wksp = CreateSampleWorkspace(WorkspaceType="Event",
+                                         Function="User Defined",
                                          UserDefinedFunction="name=ExpDecay, Height=100, Lifetime=4",
-                                         Xmin=0.2, Xmax=4.0, BinWidth=0.01, XUnit="Wavelength",
-                                         NumEvents=10000, NumBanks=1, BankPixelWidth=1,
-                                         OutputWorkspace=self._input_wksp, StoreInADS=False)
+                                         Xmin=0.2,
+                                         Xmax=4.0,
+                                         BinWidth=0.01,
+                                         XUnit="Wavelength",
+                                         NumEvents=10000,
+                                         NumBanks=1,
+                                         BankPixelWidth=1,
+                                         OutputWorkspace=self._input_wksp,
+                                         StoreInADS=False)
 
         # Calculate the efficiency correction
         alg_test = run_algorithm("CalculateEfficiencyCorrection",
@@ -192,8 +203,8 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
         self.checkResults()
 
     def testCalculateEfficiencyCorrectionEfficiencyWithWavelength(self):
-        efficiency=self._efficiency2_forAbsXS['Efficiency']
-        wavelength=self._efficiency2_forAbsXS['Wavelength']
+        efficiency = self._efficiency2_forAbsXS['Efficiency']
+        wavelength = self._efficiency2_forAbsXS['Wavelength']
         alg_test = run_algorithm("CalculateEfficiencyCorrection",
                                  InputWorkspace=self._input_wksp,
                                  ChemicalFormula=self._chemical_formula,
@@ -205,8 +216,8 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
         self.checkResults()
 
     def testCalculateEfficiencyCorrectionEfficiencyWithWavelengthWithWaveRange(self):
-        efficiency=self._efficiency2_forAbsXS['Efficiency']
-        wavelength=self._efficiency2_forAbsXS['Wavelength']
+        efficiency = self._efficiency2_forAbsXS['Efficiency']
+        wavelength = self._efficiency2_forAbsXS['Wavelength']
         alg_test = run_algorithm("CalculateEfficiencyCorrection",
                                  WavelengthRange=self._wavelengths,
                                  ChemicalFormula=self._chemical_formula,
@@ -310,8 +321,8 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
         self.checkResults(xsection="TotalXSection")
 
     def testCalculateEfficiencyCorrectionEfficiencyWithWavelengthWithTotalXS(self):
-        efficiency=self._efficiency2_forTotalXS['Efficiency']
-        wavelength=self._efficiency2_forTotalXS['Wavelength']
+        efficiency = self._efficiency2_forTotalXS['Efficiency']
+        wavelength = self._efficiency2_forTotalXS['Wavelength']
         alg_test = run_algorithm("CalculateEfficiencyCorrection",
                                  InputWorkspace=self._input_wksp,
                                  ChemicalFormula=self._chemical_formula,
@@ -324,8 +335,8 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
         self.checkResults(xsection="TotalXSection")
 
     def testCalculateEfficiencyCorrectionEfficiencyWithWavelengthWithTotalXSWithWaveRange(self):
-        efficiency=self._efficiency2_forTotalXS['Efficiency']
-        wavelength=self._efficiency2_forTotalXS['Wavelength']
+        efficiency = self._efficiency2_forTotalXS['Efficiency']
+        wavelength = self._efficiency2_forTotalXS['Wavelength']
         alg_test = run_algorithm("CalculateEfficiencyCorrection",
                                  WavelengthRange=self._wavelengths,
                                  ChemicalFormula=self._chemical_formula,
@@ -349,16 +360,13 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
     # Invalid checks
     def testCalculateEfficiencyCorretionInvalidStoreADSCheck(self):
         self.cleanup()
-        corr_wksp = CalculateEfficiencyCorrection(
-                                 WavelengthRange=self._wavelengths,
-                                 Alpha=self._alpha,
-                                 StoreInADS=False)
+        corr_wksp = CalculateEfficiencyCorrection(WavelengthRange=self._wavelengths,
+                                                  Alpha=self._alpha,
+                                                  StoreInADS=False)
         self.assertFalse(AnalysisDataService.doesExist(corr_wksp.name()))
 
     def testCalculateEfficiencyCorretionInvalidInput(self):
-        self.assertRaises(RuntimeError,
-                          CalculateEfficiencyCorrection,
-                          OutputWorkspace=self._output_wksp)
+        self.assertRaises(RuntimeError, CalculateEfficiencyCorrection, OutputWorkspace=self._output_wksp)
 
     def testCalculateEfficiencyCorretionInvalidTooManyInputs(self):
         self.assertRaises(RuntimeError,

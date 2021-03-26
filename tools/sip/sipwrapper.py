@@ -97,8 +97,7 @@ def generated_filepath(output_dir, spec_filename):
     :return: The full path to the generated file
     """
     modulename, _ = os.path.splitext(os.path.basename(spec_filename))
-    return os.path.join(
-        output_dir, GENERATED_FILENAME_TEMPLATE.format(modulename=modulename, extension=EXTENSION))
+    return os.path.join(output_dir, GENERATED_FILENAME_TEMPLATE.format(modulename=modulename, extension=EXTENSION))
 
 
 def sanitize_generated_module(generated_module_filepath):

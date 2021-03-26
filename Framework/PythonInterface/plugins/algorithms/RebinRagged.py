@@ -33,10 +33,8 @@ class RebinRagged(PythonAlgorithm):
             MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
             "output workspace",
         )
-        self.declareProperty(FloatArrayProperty("XMin"),
-                             "minimum x values with NaN meaning no minimum")
-        self.declareProperty(FloatArrayProperty("XMax"),
-                             "maximum x values with NaN meaning no maximum")
+        self.declareProperty(FloatArrayProperty("XMin"), "minimum x values with NaN meaning no minimum")
+        self.declareProperty(FloatArrayProperty("XMax"), "maximum x values with NaN meaning no maximum")
         self.declareProperty(FloatArrayProperty("Delta"), "step parameter for rebin")
         self.declareProperty("PreserveEvents", True, "False converts event workspaces to histograms")
 
@@ -166,7 +164,7 @@ class RebinRagged(PythonAlgorithm):
                     Rebin(InputWorkspace=name,
                           OutputWorkspace=name,
                           Params=(xmin, delta, xmax),
-                          PreserveEvents = preserveEvents,
+                          PreserveEvents=preserveEvents,
                           startProgress=progStart,
                           endProgress=(progStart + progStep),
                           EnableLogging=False)

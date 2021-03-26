@@ -245,15 +245,15 @@ class LRPeakSelection(PythonAlgorithm):
         pf = PeakFinderDerivation(workspace, back_offset=0)
         [left_max, right_min] = pf.low_res
         # Process left-end data
-        pf.ydata = workspace.dataY(0)[0: left_max]
+        pf.ydata = workspace.dataY(0)[0:left_max]
         pf.xdata = np.arange(len(pf.ydata))
         pf.compute()
         left_clocking = pf.low_resolution_range()[0]
 
-        pf.ydata = workspace.dataY(0)[right_min: -1]
+        pf.ydata = workspace.dataY(0)[right_min:-1]
         pf.xdata = np.arange(len(pf.ydata))
         pf.compute()
-        right_clocking = pf.low_resolution_range()[1]+right_min
+        right_clocking = pf.low_resolution_range()[1] + right_min
 
         return [left_clocking, right_clocking]
 

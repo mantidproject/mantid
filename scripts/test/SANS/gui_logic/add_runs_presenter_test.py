@@ -353,7 +353,8 @@ class AddRunsDefaultSettingsTest(unittest.TestCase):
     def setUp(self):
         mock_parent_view = mock.Mock()
         mock_parent_view.instrument = SANSInstrument.LOQ
-        self.presenter = AddRunsPagePresenter(parent_view=mock_parent_view, sum_runs_model=mock.Mock(),
+        self.presenter = AddRunsPagePresenter(parent_view=mock_parent_view,
+                                              sum_runs_model=mock.Mock(),
                                               view=mock.Mock())
 
     def test_that_presenter_calls_properties_handler_to_update_directory_on_directory_changed(self):
@@ -376,10 +377,10 @@ class AddRunsDefaultSettingsTest(unittest.TestCase):
         output_dir = self.presenter.set_output_directory("")
         ConfigService["defaultsave.directory"] = ""
 
-        self.assertEqual(output_dir, default_dir,
-                         "Because directory input was an empty string, we expected the output directory "
-                         "to use the default save directory {} instead. "
-                         "Directory actually used was {}".format(default_dir, output_dir))
+        self.assertEqual(
+            output_dir, default_dir, "Because directory input was an empty string, we expected the output directory "
+            "to use the default save directory {} instead. "
+            "Directory actually used was {}".format(default_dir, output_dir))
         self.assertEqual(self.presenter.save_directory, default_dir)
 
     def test_that_if_output_directory_is_not_empty_it_is_used(self):

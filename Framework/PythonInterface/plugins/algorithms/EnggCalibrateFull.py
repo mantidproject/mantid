@@ -19,7 +19,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         return "Diffraction\\Engineering"
 
     def seeAlso(self):
-        return [ "EnggCalibrate" ]
+        return ["EnggCalibrate"]
 
     def name(self):
         return "EnggCalibrateFull"
@@ -31,19 +31,17 @@ class EnggCalibrateFull(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut),
                              "Workspace with the calibration run to use. The calibration will be applied on it.")
 
-        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
-                                                     PropertyMode.Optional),
+        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input, PropertyMode.Optional),
                              "Workspace with the Vanadium (correction and calibration) run.")
 
-        self.declareProperty(ITableWorkspaceProperty('VanIntegrationWorkspace', '',
-                                                     Direction.Input, PropertyMode.Optional),
+        self.declareProperty(ITableWorkspaceProperty('VanIntegrationWorkspace', '', Direction.Input,
+                                                     PropertyMode.Optional),
                              doc='Results of integrating the spectra of a Vanadium run, with one column '
                              '(integration result) and one row per spectrum. This can be used in '
                              'combination with OutVanadiumCurveFits from a previous execution and '
                              'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
 
-        self.declareProperty(MatrixWorkspaceProperty('VanCurvesWorkspace', '', Direction.Input,
-                                                     PropertyMode.Optional),
+        self.declareProperty(MatrixWorkspaceProperty('VanCurvesWorkspace', '', Direction.Input, PropertyMode.Optional),
                              doc='A workspace2D with the fitting workspaces corresponding to '
                              'the instrument banks. This workspace has three spectra per bank, as produced '
                              'by the algorithm Fit. This is meant to be used as an alternative input '
@@ -70,13 +68,17 @@ class EnggCalibrateFull(PythonAlgorithm):
                              "fitting back-to-back exponential functions, the 'X0' column has the fitted "
                              "peak center.")
 
-        self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
+        self.declareProperty("Bank",
+                             '',
+                             StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
                              doc="Which bank to calibrate: It can be specified as 1 or 2, or "
                              "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
                              "for a more flexible alternative to select specific detectors")
 
-        self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
+        self.declareProperty(self.INDICES_PROP_NAME,
+                             '',
+                             direction=Direction.Input,
                              doc='Sets the spectrum numbers for the detectors '
                              'that should be considered in the calibration (all others will be '
                              'ignored). This option cannot be used together with Bank, as they overlap. '
@@ -92,7 +94,9 @@ class EnggCalibrateFull(PythonAlgorithm):
                              "(OutDetPosTable).")
 
         # The default value of '-0.0005' is borrowed from OG routines
-        self.declareProperty('RebinBinWidth', defaultValue='-0.0005', direction=Direction.Input,
+        self.declareProperty('RebinBinWidth',
+                             defaultValue='-0.0005',
+                             direction=Direction.Input,
                              doc="Before calculating the calibrated positions (fitting peaks) this algorithms "
                              "re-bins the input sample data using a single bin width parameter. This option is"
                              "to change the default bin width which is set to the value traditionally used for "
@@ -106,8 +110,10 @@ class EnggCalibrateFull(PythonAlgorithm):
                                                 direction=Direction.Input),
                              doc="A list of dSpacing values where peaks are expected.")
 
-        self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
-                                          action=FileAction.OptionalLoad,extensions = [".csv"]),
+        self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",
+                                          defaultValue="",
+                                          action=FileAction.OptionalLoad,
+                                          extensions=[".csv"]),
                              doc="Load from file a list of dSpacing values to be translated into TOF to "
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
@@ -125,7 +131,8 @@ class EnggCalibrateFull(PythonAlgorithm):
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         in_wks = self.getProperty('Workspace').value
-        wks_indices = EnggUtils.get_ws_indices_from_input_properties(in_wks, self.getProperty('Bank').value,
+        wks_indices = EnggUtils.get_ws_indices_from_input_properties(in_wks,
+                                                                     self.getProperty('Bank').value,
                                                                      self.getProperty(self.INDICES_PROP_NAME).value)
 
         van_wks = self.getProperty("VanadiumWorkspace").value
@@ -201,8 +208,8 @@ class EnggCalibrateFull(PythonAlgorithm):
             det_phi = det.getPhi()
             old_pos = det.getPos()
 
-            pos_tbl.addRow([det.getID(), old_pos, new_pos, new_L2, det_2Theta, det_phi,
-                            new_L2-old_L2, difa, difc, tzero])
+            pos_tbl.addRow(
+                [det.getID(), old_pos, new_pos, new_L2, det_2Theta, det_phi, new_L2 - old_L2, difa, difc, tzero])
 
             # fitted parameter details as a string for every peak for one detector
             peaks_details = self._build_peaks_details_string(fitted_peaks_table)
@@ -223,7 +230,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         """
         alg = self.createChildAlgorithm('EnggFitPeaks')
         alg.setProperty('InputWorkspace', ws)
-        alg.setProperty('WorkspaceIndex', ws_index) # There should be only one index anyway
+        alg.setProperty('WorkspaceIndex', ws_index)  # There should be only one index anyway
         alg.setProperty('ExpectedPeaks', expected_peaks_d)
         alg.execute()
 
@@ -312,7 +319,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         import json
         all_dict = {}
         for row_idx, row_txt in enumerate(fitted_params_tbl):
-            all_dict[row_idx+1] = row_txt
+            all_dict[row_idx + 1] = row_txt
 
         return json.dumps(all_dict)
 

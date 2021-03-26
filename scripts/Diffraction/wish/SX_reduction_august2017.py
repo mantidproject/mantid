@@ -22,8 +22,8 @@ def SaveFullprofSX(Pklist, filename):
         for j, k in enumerate(w):
             for i in range(0, k.rowCount()):
                 ratio = k.row(i)['Intens'] / (k.row(i)['SigInt'] + 0.001)
-                if k.row(i)['Wavelength'] >= 1.1 and k.row(i)['Intens'] > 0 and ratio > 3.0 and k.row(i)[
-                    'DSpacing'] >= 1.0:
+                if k.row(i)['Wavelength'] >= 1.1 and k.row(i)['Intens'] > 0 and ratio > 3.0 and k.row(
+                        i)['DSpacing'] >= 1.0:
                     d = (k.row(i)['h'], k.row(i)['k'], k.row(i)['l'], k.row(i)['Intens'], k.row(i)['SigInt'], j + 1,
                          k.row(i)['Wavelength'])
                     s = "%4i%4i%4i%12.2f%12.2f%5i%10.4f" % d
@@ -34,7 +34,8 @@ def SaveFullprofSX(Pklist, filename):
 def ProcessVana(rnum, cycle):
     # Preparation of the V/Nd sphere run for SX normalization
     mantid.LoadRaw(Filename='/archive/NDXWISH/Instrument/data/cycle_' + cycle + '/WISH000' + str(rnum) + '.raw',
-                   OutputWorkspace='Vana', LoadMonitors='Separate')
+                   OutputWorkspace='Vana',
+                   LoadMonitors='Separate')
     mantid.CropWorkspace(InputWorkspace='Vana', OutputWorkspace='Vana', XMin=6000, XMax=99000)
     mantid.NormaliseByCurrent(InputWorkspace='Vana', OutputWorkspace='Vana')
     mantid.ConvertUnits(InputWorkspace='Vana', OutputWorkspace='Vana', Target='Wavelength')
@@ -44,7 +45,10 @@ def ProcessVana(rnum, cycle):
     <radius val="0.0025"/>
     </sphere>'''
     mantid.CreateSampleShape('Vana', shape)
-    mantid.SetSampleMaterial('Vana', SampleNumberDensity=0.0719, ScatteringXSection=5.197, AttenuationXSection=4.739,
+    mantid.SetSampleMaterial('Vana',
+                             SampleNumberDensity=0.0719,
+                             ScatteringXSection=5.197,
+                             AttenuationXSection=4.739,
                              ChemicalFormula='V0.95 Nb0.05')
     mantid.AbsorptionCorrection(InputWorkspace='Vana', OutputWorkspace='Abs_corr', ElementSize=0.5)
     # SphericalAbsorption(InputWorkspace='WISH00038428', OutputWorkspace='Abs_corr_sphere', SphericalSampleRadius=0.25)
@@ -64,24 +68,35 @@ def ProcessVana(rnum, cycle):
 
 def Norm_data(rnum, cycle):
     # Load and normalize SX data
-    mantid.LoadRaw(
-        Filename='/archive/Instruments$/NDXWISH/Instrument/data/cycle_' + cycle + '/WISH000' + str(rnum) + '.raw',
-        OutputWorkspace='WISH000' + str(rnum), LoadMonitors='Separate')
+    mantid.LoadRaw(Filename='/archive/Instruments$/NDXWISH/Instrument/data/cycle_' + cycle + '/WISH000' + str(rnum) +
+                   '.raw',
+                   OutputWorkspace='WISH000' + str(rnum),
+                   LoadMonitors='Separate')
     # ConvertToEventWorkspace(InputWorkspace='WISH000'+str(rnum), OutputWorkspace='WISH000'+str(rnum))
-    mantid.CropWorkspace(InputWorkspace='WISH000' + str(rnum), OutputWorkspace='WISH000' + str(i), XMin=6000,
+    mantid.CropWorkspace(InputWorkspace='WISH000' + str(rnum),
+                         OutputWorkspace='WISH000' + str(i),
+                         XMin=6000,
                          XMax=99000)
-    mantid.ConvertUnits(InputWorkspace='WISH000' + str(rnum), OutputWorkspace='WISH000' + str(rnum),
+    mantid.ConvertUnits(InputWorkspace='WISH000' + str(rnum),
+                        OutputWorkspace='WISH000' + str(rnum),
                         Target='Wavelength')
     mantid.NormaliseByCurrent(InputWorkspace='WISH000' + str(rnum), OutputWorkspace='WISH000' + str(rnum))
     # normalize By vanadium PredictPeaks
-    mantid.CropWorkspace(InputWorkspace='WISH000' + str(rnum), OutputWorkspace='WISH000' + str(rnum), XMin=0.75,
+    mantid.CropWorkspace(InputWorkspace='WISH000' + str(rnum),
+                         OutputWorkspace='WISH000' + str(rnum),
+                         XMin=0.75,
                          XMax=9.3)
-    mantid.RebinToWorkspace(WorkspaceToRebin='Vana_smoot1', WorkspaceToMatch='WISH000' + str(rnum),
+    mantid.RebinToWorkspace(WorkspaceToRebin='Vana_smoot1',
+                            WorkspaceToMatch='WISH000' + str(rnum),
                             OutputWorkspace='Vana_smoot1')
     mantid.Divide(LHSWorkspace='WISH000' + str(rnum), RHSWorkspace='Vana_smoot1', OutputWorkspace='WISH000' + str(rnum))
     # remove spike in the data above 1e15 and -1e15
-    mantid.ReplaceSpecialValues(InputWorkspace='WISH000' + str(rnum), OutputWorkspace='WISH000' + str(rnum), NaNValue=0,
-                                InfinityValue=0, BigNumberThreshold=1e15, SmallNumberThreshold=-1e15)
+    mantid.ReplaceSpecialValues(InputWorkspace='WISH000' + str(rnum),
+                                OutputWorkspace='WISH000' + str(rnum),
+                                NaNValue=0,
+                                InfinityValue=0,
+                                BigNumberThreshold=1e15,
+                                SmallNumberThreshold=-1e15)
     # Convert to Diffraction MD and Lorentz Correction
     mantid.ConvertToDiffractionMDWorkspace(InputWorkspace='WISH000' + str(rnum),
                                            OutputWorkspace='WISH000' + str(rnum) + '_MD',
@@ -90,53 +105,77 @@ def Norm_data(rnum, cycle):
 
 def Find_Peaks(rnum, long_cell, threshold, MaxPeaks, centroid_radius, edge_pixel):
     mantid.PeakDistanceThreshold = 0.9 * 3.14 / long_cell
-    mantid.FindPeaksMD(InputWorkspace='WISH000' + str(rnum) + '_MD', PeakDistanceThreshold=PeakDistanceThreshold,
-                       MaxPeaks=MaxPeaks, DensityThresholdFactor=threshold,
-                       OutputWorkspace='WISH000' + str(rnum) + '_find_peaks', EdgePixels=edge_pixel)
-    mantid.CentroidPeaksMD(InputWorkspace='WISH000' + str(rnum) + '_MD', PeakRadius=centroid_radius,
+    mantid.FindPeaksMD(InputWorkspace='WISH000' + str(rnum) + '_MD',
+                       PeakDistanceThreshold=PeakDistanceThreshold,
+                       MaxPeaks=MaxPeaks,
+                       DensityThresholdFactor=threshold,
+                       OutputWorkspace='WISH000' + str(rnum) + '_find_peaks',
+                       EdgePixels=edge_pixel)
+    mantid.CentroidPeaksMD(InputWorkspace='WISH000' + str(rnum) + '_MD',
+                           PeakRadius=centroid_radius,
                            PeaksWorkspace='WISH000' + str(rnum) + '_find_peaks',
                            OutputWorkspace='WISH000' + str(rnum) + '_find_peaks')
 
 
 def Find_UB_FFT(rnum, MinD, MaxD, Tolerance, Centering, CellType):
-    mantid.FindUBUsingFFT(PeaksWorkspace='WISH000' + str(rnum) + '_find_peaks', MinD=MinD, MaxD=MaxD,
+    mantid.FindUBUsingFFT(PeaksWorkspace='WISH000' + str(rnum) + '_find_peaks',
+                          MinD=MinD,
+                          MaxD=MaxD,
                           Tolerance=Tolerance)
-    mantid.SelectCellOfType(PeaksWorkspace='WISH000' + str(rnum) + '_find_peaks', Centering=Centering, Apply=True,
+    mantid.SelectCellOfType(PeaksWorkspace='WISH000' + str(rnum) + '_find_peaks',
+                            Centering=Centering,
+                            Apply=True,
                             CellType=CellType)
     # OptimizeCrystalPlacement(PeaksWorkspace='WISH000'+str(rnum)+'_find_peaks', ModifiedPeaksWorkspace='WISH000'
     # +str(rnum)+'_find_peaks', AdjustSampleOffsets=True)
-    mantid.OptimizeLatticeForCellType(PeaMinWavelengthksWorkspace='WISH000' + str(rnum) + '_find_peaks', Apply=True,
-                                      CellType=CellType, Tolerance=Tolerance)
+    mantid.OptimizeLatticeForCellType(PeaMinWavelengthksWorkspace='WISH000' + str(rnum) + '_find_peaks',
+                                      Apply=True,
+                                      CellType=CellType,
+                                      Tolerance=Tolerance)
 
 
 def Find_UB_Latt(rnum, a, b, c, alpha, beta, gamma, Tolerance, Centering, CellType):
-    mantid.FindUBUsingLatticeParameters('WISH000' + str(rnum) + '_find_peaks', a=a, b=b, c=c, alpha=alpha, beta=beta,
+    mantid.FindUBUsingLatticeParameters('WISH000' + str(rnum) + '_find_peaks',
+                                        a=a,
+                                        b=b,
+                                        c=c,
+                                        alpha=alpha,
+                                        beta=beta,
                                         gamma=gamma)
-    mantid.SelectCellOfType(PeaksWorkspace='WISH000' + str(rnum) + '_find_peaks', Centering=Centering, Apply=True,
+    mantid.SelectCellOfType(PeaksWorkspace='WISH000' + str(rnum) + '_find_peaks',
+                            Centering=Centering,
+                            Apply=True,
                             CellType=CellType)
     # OptimizeCrystalPlacement(PeaksWorkspace='WISH000'+str(rnum)+'_find_peaks', ModifiedPeaksWorkspace='WISH000'
     # +str(rnum)+'_find_peaks', AdjustSampleOffsets=True)
-    mantid.OptimizeLatticeForCellType(PeaksWorkspace='WISH000' + str(rnum) + '_find_peaks', Apply=True,
+    mantid.OptimizeLatticeForCellType(PeaksWorkspace='WISH000' + str(rnum) + '_find_peaks',
+                                      Apply=True,
                                       CellType=CellType,
                                       Tolerance=Tolerance)
 
 
 def Predict_peak(rnum, MinWavelength, MinDSpacing, centroid_radius, ReflectionCondition):
-    PredictPeaks(InputWorkspace='WISH000' + str(rnum) + '_find_peaks', WavelengthMin=MinWavelength,
-                 MinDSpacing=MinDSpacing, ReflectionCondition=ReflectionCondition,
+    PredictPeaks(InputWorkspace='WISH000' + str(rnum) + '_find_peaks',
+                 WavelengthMin=MinWavelength,
+                 MinDSpacing=MinDSpacing,
+                 ReflectionCondition=ReflectionCondition,
                  OutputWorkspace='WISH000' + str(rnum) + '_peaks')
-    CentroidPeaksMD(InputWorkspace='WISH000' + str(rnum) + '_MD', PeakRadius=centroid_radius,
-                    PeaksWorkspace='WISH000' + str(rnum) + '_peaks', OutputWorkspace='WISH000' + str(rnum) + '_peaks')
+    CentroidPeaksMD(InputWorkspace='WISH000' + str(rnum) + '_MD',
+                    PeakRadius=centroid_radius,
+                    PeaksWorkspace='WISH000' + str(rnum) + '_peaks',
+                    OutputWorkspace='WISH000' + str(rnum) + '_peaks')
 
 
 def Integrate_elips(rnum, RegionRadius, Scale, wDir, MinDSpacing, MinWavelength, UseOnePercentBackgroundCorrection):
     CloneWorkspace(InputWorkspace='WISH000' + str(rnum), OutputWorkspace='WISH000' + str(rnum) + '_Lorentz')
-    ConvertUnits(InputWorkspace='WISH000' + str(rnum) + '_Lorentz', OutputWorkspace='WISH000' + str(rnum) + '_Lorentz',
+    ConvertUnits(InputWorkspace='WISH000' + str(rnum) + '_Lorentz',
+                 OutputWorkspace='WISH000' + str(rnum) + '_Lorentz',
                  Target='Wavelength')
     LorentzCorrection(InputWorkspace='WISH000' + str(rnum) + '_Lorentz',
                       OutputWorkspace='WISH000' + str(rnum) + '_Lorentz')
     IntegrateEllipsoidsTwoStep(InputWorkspace='WISH000' + str(rnum) + '_Lorentz',
-                               PeaksWorkspace='WISH000' + str(rnum) + '_peaks', RegionRadius=RegionRadius,
+                               PeaksWorkspace='WISH000' + str(rnum) + '_peaks',
+                               RegionRadius=RegionRadius,
                                OutputWorkspace='WISH000' + str(rnum) + '_elips_' + str(RegionRadius),
                                UseOnePercentBackgroundCorrection=UseOnePercentBackgroundCorrection)
     # SaveHKL(InputWorkspace='WISH000'+str(rnum)+'elips_'+str(RegionRadius), ScalePeaks=Scale, Filename=wDir+str(rnum)+
@@ -210,18 +249,27 @@ for i in range(38423, 38427):
         Predict_peak(i, MinWavelength, MinDSpacing, centroid_radius, ReflectionCondition)
     if Integrate_predicted == 2:
         CloneWorkspace(InputWorkspace='WISH000' + str(i) + '_find_peaks', OutputWorkspace='WISH000' + str(i) + '_peaks')
-    PeakIntensityVsRadius(InputWorkspace='WISH000' + str(i) + '_MD', PeaksWorkspace='WISH000' + str(i) + '_peaks',
-                          RadiusEnd=RadiusEnd, NumSteps=NumSteps, BackgroundInnerFactor=1, BackgroundOuterFactor=1.5,
+    PeakIntensityVsRadius(InputWorkspace='WISH000' + str(i) + '_MD',
+                          PeaksWorkspace='WISH000' + str(i) + '_peaks',
+                          RadiusEnd=RadiusEnd,
+                          NumSteps=NumSteps,
+                          BackgroundInnerFactor=1,
+                          BackgroundOuterFactor=1.5,
                           OutputWorkspace='WISH000' + str(i) + '_Peaks_vs_radius')
 
 r_int = [0.15]
 for i in range(38222, 38227):
     for j in r_int:
         # integrate with peak radius r_int
-        IntegratePeaksMD(InputWorkspace='WISH000' + str(i) + '_MD', PeakRadius=j, BackgroundInnerRadius=1.5 * j,
-                         BackgroundOuterRadius=1.7 * j, PeaksWorkspace='WISH000' + str(i) + '_peaks',
-                         OutputWorkspace='WISH000' + str(i) + '_MD_int_rad_' + str(j), ReplaceIntensity=False,
-                         IntegrateIfOnEdge=False, UseOnePercentBackgroundCorrection=UseOnePercentBackgroundCorrection)
+        IntegratePeaksMD(InputWorkspace='WISH000' + str(i) + '_MD',
+                         PeakRadius=j,
+                         BackgroundInnerRadius=1.5 * j,
+                         BackgroundOuterRadius=1.7 * j,
+                         PeaksWorkspace='WISH000' + str(i) + '_peaks',
+                         OutputWorkspace='WISH000' + str(i) + '_MD_int_rad_' + str(j),
+                         ReplaceIntensity=False,
+                         IntegrateIfOnEdge=False,
+                         UseOnePercentBackgroundCorrection=UseOnePercentBackgroundCorrection)
         # Save HKL
         # SaveHKL(InputWorkspace='WISH000' +str(i)+'_MD_int_rad_'+str(j), ScalePeaks=0.001, Filename=wDir+str(i)+
         # '_rad_'+str(j)+'.hkl',MinDSpacing=0.5,MinWavelength=1.2)
@@ -231,4 +279,6 @@ for i in range(38423, 38425):
     for j in r_int:
         Integrate_elips(i, j, 1, wDir, MinDSpacing, MinWavelength, UseOnePercentBackgroundCorrection)
 
-SaveFullprofSX(['WISH00038222_elips_0.15', ], wDir + 'NaCl_Coll_38222_elips_bkg_corr.int')
+SaveFullprofSX([
+    'WISH00038222_elips_0.15',
+], wDir + 'NaCl_Coll_38222_elips_bkg_corr.int')

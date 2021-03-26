@@ -73,16 +73,17 @@ class CreateSANSAdjustmentWorkspaces(object):
                 calculated_transmission_workspace=calculated_trans_ws,
                 monitor_normalization_workspace=monitor_normalization_workspace)
 
-        to_return = {"wavelength_adj": wavelength_adjustment_workspace,
-                     "pixel_adj": pixel_length_adjustment_workspace,
-                     "wavelength_pixel_adj": wavelength_and_pixel_adj_workspace,
-                     "calculated_trans_ws": calculated_trans_ws,
-                     "unfitted_trans_ws": unfitted_transmission_workspace}
+        to_return = {
+            "wavelength_adj": wavelength_adjustment_workspace,
+            "pixel_adj": pixel_length_adjustment_workspace,
+            "wavelength_pixel_adj": wavelength_and_pixel_adj_workspace,
+            "calculated_trans_ws": calculated_trans_ws,
+            "unfitted_trans_ws": unfitted_transmission_workspace
+        }
 
         return to_return
 
-    def _get_wavelength_and_pixel_adjustment_workspaces(self,
-                                                        monitor_normalization_workspace,
+    def _get_wavelength_and_pixel_adjustment_workspaces(self, monitor_normalization_workspace,
                                                         calculated_transmission_workspace):
         component = self._component
 
@@ -100,9 +101,9 @@ class CreateSANSAdjustmentWorkspaces(object):
     def _get_monitor_normalization_workspace(self, monitor_ws):
         scale_factor = self._slice_event_factor
 
-        ws = normalize_to_monitor(
-            state_adjustment_normalize_to_monitor=self._state.normalize_to_monitor,
-            workspace=monitor_ws, scale_factor=scale_factor)
+        ws = normalize_to_monitor(state_adjustment_normalize_to_monitor=self._state.normalize_to_monitor,
+                                  workspace=monitor_ws,
+                                  scale_factor=scale_factor)
 
         return ws
 
@@ -120,8 +121,10 @@ class CreateSANSAdjustmentWorkspaces(object):
             calc_trans_state = self._state.calculate_transmission
 
             fitted_data, unfitted_data = calculate_transmission(
-                data_type_str=data_type, state_adjustment_calculate_transmission=calc_trans_state,
-                transmission_ws=transmission_ws, direct_ws=direct_ws)
+                data_type_str=data_type,
+                state_adjustment_calculate_transmission=calc_trans_state,
+                transmission_ws=transmission_ws,
+                direct_ws=direct_ws)
         return fitted_data, unfitted_data
 
     def _get_wide_angle_correction_workspace(self, sample_data, calculated_transmission_workspace):
@@ -130,9 +133,11 @@ class CreateSANSAdjustmentWorkspaces(object):
         workspace = None
         if wide_angle_correction and sample_data and calculated_transmission_workspace:
             wide_angle_name = "SANSWideAngleCorrection"
-            wide_angle_options = {"SampleData": sample_data,
-                                  "TransmissionData": calculated_transmission_workspace,
-                                  "OutputWorkspace": EMPTY_NAME}
+            wide_angle_options = {
+                "SampleData": sample_data,
+                "TransmissionData": calculated_transmission_workspace,
+                "OutputWorkspace": EMPTY_NAME
+            }
             wide_angle_alg = create_unmanaged_algorithm(wide_angle_name, **wide_angle_options)
             wide_angle_alg.execute()
             workspace = wide_angle_alg.getProperty("OutputWorkspace").value

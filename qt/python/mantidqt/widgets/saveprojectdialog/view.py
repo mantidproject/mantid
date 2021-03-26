@@ -14,7 +14,6 @@ from mantidqt.utils.qt import load_ui
 
 
 class ProjectSaveDialogView(QDialog):
-
     def __init__(self):
         super(ProjectSaveDialogView, self).__init__()
 

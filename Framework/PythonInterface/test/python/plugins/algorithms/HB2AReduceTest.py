@@ -16,9 +16,7 @@ class HB2AReduceTest(unittest.TestCase):
         self._default_save_directory = tempfile.gettempdir()
 
     def test_IndividualDetectors(self):
-        HB2AReduce_ws = HB2AReduce('HB2A_exp0666_scan0024.dat',
-                                   IndividualDetectors=True,
-                                   SaveData=False)
+        HB2AReduce_ws = HB2AReduce('HB2A_exp0666_scan0024.dat', IndividualDetectors=True, SaveData=False)
         self.assertTrue(HB2AReduce_ws)
         self.assertEqual(HB2AReduce_ws.getNumberHistograms(), 44)
         self.assertEqual(HB2AReduce_ws.blocksize(), 121)
@@ -45,8 +43,7 @@ class HB2AReduceTest(unittest.TestCase):
         HB2AReduce_ws.delete()
 
     def test_TwoFiles(self):
-        HB2AReduce_ws = HB2AReduce('HB2A_exp0666_scan0024.dat,HB2A_exp0666_scan0025.dat',
-                                   SaveData=False)
+        HB2AReduce_ws = HB2AReduce('HB2A_exp0666_scan0024.dat,HB2A_exp0666_scan0025.dat', SaveData=False)
         self.assertTrue(HB2AReduce_ws)
         self.assertEqual(HB2AReduce_ws.getNumberHistograms(), 1)
         self.assertEqual(HB2AReduce_ws.blocksize(), 2439)
@@ -55,9 +52,7 @@ class HB2AReduceTest(unittest.TestCase):
         HB2AReduce_ws.delete()
 
     def test_Vanadium(self):
-        HB2AReduce_ws = HB2AReduce('HB2A_exp0666_scan0024.dat',
-                                   Vanadium='HB2A_exp0644_scan0018.dat',
-                                   SaveData=False)
+        HB2AReduce_ws = HB2AReduce('HB2A_exp0666_scan0024.dat', Vanadium='HB2A_exp0644_scan0018.dat', SaveData=False)
         self.assertTrue(HB2AReduce_ws)
         self.assertEqual(HB2AReduce_ws.getNumberHistograms(), 1)
         self.assertEqual(HB2AReduce_ws.blocksize(), 2439)
@@ -66,9 +61,7 @@ class HB2AReduceTest(unittest.TestCase):
         HB2AReduce_ws.delete()
 
     def test_ExcludeDetectors(self):
-        HB2AReduce_ws = HB2AReduce('HB2A_exp0666_scan0024.dat',
-                                   ExcludeDetectors='1-20,40-42',
-                                   SaveData=False)
+        HB2AReduce_ws = HB2AReduce('HB2A_exp0666_scan0024.dat', ExcludeDetectors='1-20,40-42', SaveData=False)
         self.assertTrue(HB2AReduce_ws)
         self.assertEqual(HB2AReduce_ws.getNumberHistograms(), 1)
         self.assertEqual(HB2AReduce_ws.blocksize(), 1360)
@@ -98,8 +91,7 @@ class HB2AReduceTest(unittest.TestCase):
             OutputDirectory=self._default_save_directory,
         )
         self.assertTrue(HB2AReduce_ws)
-        self.assertTrue(
-            os.path.exists(os.path.join(self._default_save_directory, f"{HB2AReduce_ws}.dat")))
+        self.assertTrue(os.path.exists(os.path.join(self._default_save_directory, f"{HB2AReduce_ws}.dat")))
         # Test for saving GSAS data file.
         HB2AReduce_ws = HB2AReduce(
             'HB2A_exp0735_scan0016.dat',
@@ -109,8 +101,7 @@ class HB2AReduceTest(unittest.TestCase):
             OutputDirectory=self._default_save_directory,
         )
         self.assertTrue(HB2AReduce_ws)
-        self.assertTrue(
-            os.path.exists(os.path.join(self._default_save_directory, f"{HB2AReduce_ws}.gss")))
+        self.assertTrue(os.path.exists(os.path.join(self._default_save_directory, f"{HB2AReduce_ws}.gss")))
         HB2AReduce_ws.delete()
 
 

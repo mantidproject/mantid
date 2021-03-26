@@ -35,18 +35,15 @@ from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, CurveProperties
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
-from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor,
-                                                 SingleMarkerEditor, GlobalMarkerEditor,
-                                                 ColorbarAxisEditor, ZAxisEditor, LegendEditor)
+from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor, SingleMarkerEditor,
+                                                 GlobalMarkerEditor, ColorbarAxisEditor, ZAxisEditor, LegendEditor)
 from workbench.plotting.style import VALID_LINE_STYLE, VALID_COLORS
 from workbench.plotting.toolbar import ToolbarStateManager
 
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
-AXES_SCALE_MENU_OPTS = OrderedDict(
-    [("Lin x/Lin y", ("linear", "linear")), ("Log x/Log y", ("log", "log")),
-     ("Lin x/Log y", ("linear", "log")), ("Log x/Lin y", ("log", "linear"))])
-COLORBAR_SCALE_MENU_OPTS = OrderedDict(
-    [("Linear", Normalize), ("Log", LogNorm)])
+AXES_SCALE_MENU_OPTS = OrderedDict([("Lin x/Lin y", ("linear", "linear")), ("Log x/Log y", ("log", "log")),
+                                    ("Lin x/Log y", ("linear", "log")), ("Log x/Lin y", ("log", "linear"))])
+COLORBAR_SCALE_MENU_OPTS = OrderedDict([("Linear", Normalize), ("Log", LogNorm)])
 
 
 @contextmanager
@@ -148,8 +145,7 @@ class FigureInteraction(object):
                     marker.set_move_cursor(Qt.ClosedHandCursor, x_pos, y_pos)
                 marker.mouse_move_start(x_pos, y_pos)
 
-        if (event.button == canvas.buttond.get(Qt.RightButton)
-                and not self.toolbar_manager.is_tool_active()):
+        if (event.button == canvas.buttond.get(Qt.RightButton) and not self.toolbar_manager.is_tool_active()):
             if not marker_selected:
                 self._show_context_menu(event)
             else:
@@ -251,11 +247,9 @@ class FigureInteraction(object):
                 move_and_show(LabelEditor(canvas, ax.xaxis.label))
             elif ax.yaxis.label.contains(event)[0]:
                 move_and_show(LabelEditor(canvas, ax.yaxis.label))
-            elif (ax.xaxis.contains(event)[0]
-                  or any(tick.contains(event)[0] for tick in ax.get_xticklabels())):
+            elif (ax.xaxis.contains(event)[0] or any(tick.contains(event)[0] for tick in ax.get_xticklabels())):
                 move_and_show(XAxisEditor(canvas, ax))
-            elif (ax.yaxis.contains(event)[0]
-                  or any(tick.contains(event)[0] for tick in ax.get_yticklabels())):
+            elif (ax.yaxis.contains(event)[0] or any(tick.contains(event)[0] for tick in ax.get_yticklabels())):
                 if type(ax) == Axes:
                     move_and_show(ColorbarAxisEditor(canvas, ax))
                 else:
@@ -263,8 +257,7 @@ class FigureInteraction(object):
             elif hasattr(ax, 'zaxis'):
                 if ax.zaxis.label.contains(event)[0]:
                     move_and_show(LabelEditor(canvas, ax.zaxis.label))
-                elif (ax.zaxis.contains(event)[0]
-                      or any(tick.contains(event)[0] for tick in ax.get_zticklabels())):
+                elif (ax.zaxis.contains(event)[0] or any(tick.contains(event)[0] for tick in ax.get_zticklabels())):
                     move_and_show(ZAxisEditor(canvas, ax))
             elif ax.get_legend() is not None and ax.get_legend().contains(event)[0]:
                 # We have to set the legend as non draggable else we hold onto the legend
@@ -400,8 +393,7 @@ class FigureInteraction(object):
         norm_menu = QMenu("Normalization", menu)
         norm_actions_group = QActionGroup(norm_menu)
         none_action = norm_menu.addAction('None', lambda: self._set_normalization_none(ax))
-        norm_action = norm_menu.addAction('Bin Width',
-                                          lambda: self._set_normalization_bin_width(ax))
+        norm_action = norm_menu.addAction('Bin Width', lambda: self._set_normalization_bin_width(ax))
         for action in [none_action, norm_action]:
             norm_actions_group.addAction(action)
             action.setCheckable(True)
@@ -451,12 +443,16 @@ class FigureInteraction(object):
             return
 
         error_bars_menu = QMenu(self.ERROR_BARS_MENU_TEXT, menu)
-        error_bars_menu.addAction(self.SHOW_ERROR_BARS_BUTTON_TEXT,
-                                  partial(self.errors_manager.update_plot_after,
-                                          self.errors_manager.toggle_all_errors, ax, make_visible=True))
-        error_bars_menu.addAction(self.HIDE_ERROR_BARS_BUTTON_TEXT,
-                                  partial(self.errors_manager.update_plot_after,
-                                          self.errors_manager.toggle_all_errors, ax, make_visible=False))
+        error_bars_menu.addAction(
+            self.SHOW_ERROR_BARS_BUTTON_TEXT,
+            partial(self.errors_manager.update_plot_after, self.errors_manager.toggle_all_errors, ax,
+                    make_visible=True))
+        error_bars_menu.addAction(
+            self.HIDE_ERROR_BARS_BUTTON_TEXT,
+            partial(self.errors_manager.update_plot_after,
+                    self.errors_manager.toggle_all_errors,
+                    ax,
+                    make_visible=False))
         menu.addMenu(error_bars_menu)
 
         self.errors_manager.active_lines = self.errors_manager.get_curves_from_ax(ax)
@@ -471,14 +467,17 @@ class FigureInteraction(object):
                 curve_props = CurveProperties.from_curve(line)
                 # Add lines without errors first, lines with errors are appended later. Read docstring for more info
                 if not isinstance(line, ErrorbarContainer):
-                    action = error_bars_menu.addAction(line.get_label(), partial(
-                        self.errors_manager.update_plot_after, self.errors_manager.toggle_error_bars_for, ax, line))
+                    action = error_bars_menu.addAction(
+                        line.get_label(),
+                        partial(self.errors_manager.update_plot_after, self.errors_manager.toggle_error_bars_for, ax,
+                                line))
                     action.setCheckable(True)
                     action.setChecked(not curve_props.hide_errors)
                 else:
-                    add_later.append((line.get_label(), partial(
-                        self.errors_manager.update_plot_after, self.errors_manager.toggle_error_bars_for, ax, line),
-                                      not curve_props.hide_errors))
+                    add_later.append(
+                        (line.get_label(),
+                         partial(self.errors_manager.update_plot_after, self.errors_manager.toggle_error_bars_for, ax,
+                                 line), not curve_props.hide_errors))
 
         for label, function, visible in add_later:
             action = error_bars_menu.addAction(label, function)
@@ -498,10 +497,10 @@ class FigureInteraction(object):
         marker_action_group = QActionGroup(marker_menu)
         x0, x1 = event.inaxes.get_xlim()
         y0, y1 = event.inaxes.get_ylim()
-        horizontal = marker_menu.addAction(
-            "Horizontal", lambda: self._add_horizontal_marker(event.ydata, y0, y1, event.inaxes))
-        vertical = marker_menu.addAction(
-            "Vertical", lambda: self._add_vertical_marker(event.xdata, x0, x1, event.inaxes))
+        horizontal = marker_menu.addAction("Horizontal",
+                                           lambda: self._add_horizontal_marker(event.ydata, y0, y1, event.inaxes))
+        vertical = marker_menu.addAction("Vertical",
+                                         lambda: self._add_vertical_marker(event.xdata, x0, x1, event.inaxes))
         edit = marker_menu.addAction("Edit", lambda: self._global_edit_markers())
 
         for action in [horizontal, vertical, edit]:
@@ -518,10 +517,10 @@ class FigureInteraction(object):
 
         plot_type_menu = QMenu("Plot Type", menu)
         plot_type_action_group = QActionGroup(plot_type_menu)
-        standard = plot_type_menu.addAction("1D", lambda: self._change_plot_type(
-            ax, plot_type_action_group.checkedAction()))
-        waterfall = plot_type_menu.addAction("Waterfall", lambda: self._change_plot_type(
-            ax, plot_type_action_group.checkedAction()))
+        standard = plot_type_menu.addAction("1D",
+                                            lambda: self._change_plot_type(ax, plot_type_action_group.checkedAction()))
+        waterfall = plot_type_menu.addAction("Waterfall",
+                                             lambda: self._change_plot_type(ax, plot_type_action_group.checkedAction()))
 
         for action in [waterfall, standard]:
             plot_type_action_group.addAction(action)
@@ -542,13 +541,11 @@ class FigureInteraction(object):
 
     def _global_edit_markers(self):
         """Open a window that allows editing of all currently plotted markers"""
-
         def move_and_show(editor):
             editor.move(QCursor.pos())
             editor.exec_()
 
-        move_and_show(
-            GlobalMarkerEditor(self.canvas, self.markers, self.valid_lines, self.valid_colors))
+        move_and_show(GlobalMarkerEditor(self.canvas, self.markers, self.valid_lines, self.valid_colors))
 
     def _get_free_marker_name(self):
         """
@@ -591,16 +588,15 @@ class FigureInteraction(object):
         """
         if name is None:
             name = self._get_free_marker_name()
-        marker = SingleMarker(
-            self.canvas,
-            color,
-            y_pos,
-            lower,
-            upper,
-            name=name,
-            marker_type='YSingle',
-            line_style=line_style,
-            axis=axis)
+        marker = SingleMarker(self.canvas,
+                              color,
+                              y_pos,
+                              lower,
+                              upper,
+                              name=name,
+                              marker_type='YSingle',
+                              line_style=line_style,
+                              axis=axis)
         marker.add_name()
         marker.redraw()
         self.markers.append(marker)
@@ -624,16 +620,15 @@ class FigureInteraction(object):
         """
         if name is None:
             name = self._get_free_marker_name()
-        marker = SingleMarker(
-            self.canvas,
-            color,
-            x_pos,
-            lower,
-            upper,
-            name=name,
-            marker_type='XSingle',
-            line_style=line_style,
-            axis=axis)
+        marker = SingleMarker(self.canvas,
+                              color,
+                              x_pos,
+                              lower,
+                              upper,
+                              name=name,
+                              marker_type='XSingle',
+                              line_style=line_style,
+                              axis=axis)
         marker.add_name()
         marker.redraw()
         self.markers.append(marker)
@@ -652,16 +647,13 @@ class FigureInteraction(object):
         """
         Open a dialog window to edit the marker properties (position, name, line style, colour)
         """
-
         def move_and_show(editor):
             editor.move(QCursor.pos())
             editor.exec_()
 
         used_names = [str(_marker.name) for _marker in self.markers]
         QApplication.restoreOverrideCursor()
-        move_and_show(
-            SingleMarkerEditor(self.canvas, marker, self.valid_lines, self.valid_colors,
-                               used_names))
+        move_and_show(SingleMarkerEditor(self.canvas, marker, self.valid_lines, self.valid_colors, used_names))
 
     def _set_hover_cursor(self, x_pos, y_pos):
         """
@@ -802,14 +794,12 @@ class FigureInteraction(object):
                 arg_set['distribution'] = is_normalized
                 arg_set_copy = copy(arg_set)
                 [
-                    arg_set_copy.pop(key)
-                    for key in ['function', 'workspaces', 'autoscale_on_update', 'norm']
+                    arg_set_copy.pop(key) for key in ['function', 'workspaces', 'autoscale_on_update', 'norm']
                     if key in arg_set_copy.keys()
                 ]
                 if 'specNum' not in arg_set:
                     if 'wkspIndex' in arg_set:
-                        arg_set['specNum'] = workspace.getSpectrum(
-                            arg_set.pop('wkspIndex')).getSpectrumNo()
+                        arg_set['specNum'] = workspace.getSpectrum(arg_set.pop('wkspIndex')).getSpectrumNo()
                     else:
                         raise RuntimeError("No spectrum number associated with plot of "
                                            "workspace '{}'".format(workspace.name()))

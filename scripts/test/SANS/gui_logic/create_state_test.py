@@ -51,8 +51,9 @@ class GuiCommonTest(unittest.TestCase):
         states, errors = create_states(self.state_gui_model, row_entries=rows, facility=SANSFacility.ISIS)
 
         self.assertEqual(len(states), 1)
-        self.gui_state_director_instance.create_state.assert_called_once_with(
-            mock_row_entry, file_lookup=mock.ANY, row_user_file=expected_user_file)
+        self.gui_state_director_instance.create_state.assert_called_once_with(mock_row_entry,
+                                                                              file_lookup=mock.ANY,
+                                                                              row_user_file=expected_user_file)
         thickness_mock.assert_called()
 
 

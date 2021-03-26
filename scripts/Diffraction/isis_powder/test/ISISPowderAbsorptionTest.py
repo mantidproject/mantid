@@ -11,14 +11,15 @@ from isis_powder.routines import absorb_corrections, SampleDetails
 
 
 class ISISPowderAbsorptionTest(unittest.TestCase):
-
     def test_sample_is_set_correctly(self):
         sample_details = SampleDetails(height=4.0, radius=0.25, center=[0., 0., 0.], shape="cylinder")
         sample_details.set_material(chemical_formula="V")
 
         ws = mantid.CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1)
-        ws = absorb_corrections.run_cylinder_absorb_corrections(ws_to_correct=ws, multiple_scattering=False,
-                                                                sample_details_obj=sample_details, is_vanadium=True)
+        ws = absorb_corrections.run_cylinder_absorb_corrections(ws_to_correct=ws,
+                                                                multiple_scattering=False,
+                                                                sample_details_obj=sample_details,
+                                                                is_vanadium=True)
 
         self.assertAlmostEqual(ws.dataY(0)[2], 1.16864808, delta=1e-8)
         self.assertAlmostEqual(ws.dataY(0)[5], 1.16872761, delta=1e-8)

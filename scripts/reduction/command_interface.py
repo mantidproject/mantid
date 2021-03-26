@@ -67,6 +67,7 @@ class ReductionSingleton(object):
         """ Delegate access to implementation """
         return setattr(self.__instance, attr, value)
 
+
 ## List of user commands ######################################################
 
 

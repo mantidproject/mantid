@@ -212,8 +212,11 @@ class SANSInstrumentWidget(BaseWidget):
     def _mask_plot_clicked(self):
         ws_name = os.path.basename(str(self._summary.mask_edit.text()))
         self.mask_ws = "__mask_%s" % ws_name
-        self.show_instrument(self._summary.mask_edit.text, workspace=self.mask_ws, tab=2,
-                             reload=self.mask_reload, mask=self._masked_detectors)
+        self.show_instrument(self._summary.mask_edit.text,
+                             workspace=self.mask_ws,
+                             tab=2,
+                             reload=self.mask_reload,
+                             mask=self._masked_detectors)
         self._masked_detectors = []
         self.mask_reload = False
 
@@ -245,9 +248,8 @@ class SANSInstrumentWidget(BaseWidget):
 
     def _output_dir_browse(self):
         output_dir = QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
-                                                            os.path.expanduser('~'),
-                                                            QFileDialog.ShowDirsOnly
-                                                            | QFileDialog.DontResolveSymlinks)
+                                                      os.path.expanduser('~'), QFileDialog.ShowDirsOnly
+                                                      | QFileDialog.DontResolveSymlinks)
         if not output_dir:
             return
         if isinstance(output_dir, tuple):
@@ -359,16 +361,12 @@ class SANSInstrumentWidget(BaseWidget):
         self._scale_clicked(self._summary.scale_chk.isChecked())
 
         # Detector offset input
-        self._prepare_field(state.detector_offset != 0,
-                            state.detector_offset,
-                            self._summary.detector_offset_chk,
+        self._prepare_field(state.detector_offset != 0, state.detector_offset, self._summary.detector_offset_chk,
                             self._summary.detector_offset_edit)
 
         # Sample-detector distance
-        self._prepare_field(state.sample_detector_distance != 0,
-                            state.sample_detector_distance,
-                            self._summary.sample_dist_chk,
-                            self._summary.sample_dist_edit)
+        self._prepare_field(state.sample_detector_distance != 0, state.sample_detector_distance,
+                            self._summary.sample_dist_chk, self._summary.sample_dist_edit)
         util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0)
         if self._sample_detector_distance is None:
             self._sample_detector_distance = state.sample_detector_distance
@@ -419,7 +417,7 @@ class SANSInstrumentWidget(BaseWidget):
         # Output directory
         self._summary.select_output_dir_radio.setChecked(not state.use_data_directory)
         self._summary.use_data_dir_radio.setChecked(state.use_data_directory)
-        if len(state.output_directory.strip())>0:
+        if len(state.output_directory.strip()) > 0:
             self._summary.output_dir_edit.setText(str(state.output_directory))
         else:
             self._summary.output_dir_edit.setText(str(os.path.expanduser('~')))
@@ -507,5 +505,6 @@ class SANSInstrumentWidget(BaseWidget):
             def __init__(self, parent=None):
                 QDialog.__init__(self, parent)
                 self.ui = load_ui(__file__, '../../../ui/sans/eqsans_info.ui', baseinstance=self)
+
         dialog = HelpDialog(self)
         dialog.exec_()

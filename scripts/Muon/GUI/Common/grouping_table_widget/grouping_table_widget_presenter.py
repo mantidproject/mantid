@@ -11,22 +11,23 @@ from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import inverse_group_table_columns
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import RowValid
 
-
 maximum_number_of_groups = 20
 
-
 # Row colours specified in RGB. i.e. (255, 0, 0) is red and (255, 255, 0) is yellow.
-row_colors = {RowValid.invalid_for_all_runs: (255, 0, 0), RowValid.valid_for_some_runs: (255, 255, 0),
-              RowValid.valid_for_all_runs: (255, 255, 255)}
+row_colors = {
+    RowValid.invalid_for_all_runs: (255, 0, 0),
+    RowValid.valid_for_some_runs: (255, 255, 0),
+    RowValid.valid_for_all_runs: (255, 255, 255)
+}
 
-
-row_tooltips = {RowValid.invalid_for_all_runs: 'Warning: group periods invalid for all runs',
-                RowValid.valid_for_some_runs: 'Warning: group periods invalid for some runs',
-                RowValid.valid_for_all_runs: ''}
+row_tooltips = {
+    RowValid.invalid_for_all_runs: 'Warning: group periods invalid for all runs',
+    RowValid.valid_for_some_runs: 'Warning: group periods invalid for some runs',
+    RowValid.valid_for_all_runs: ''
+}
 
 
 class GroupingTablePresenter(object):
-
     def __init__(self, view, model):
         self._view = view
         self._model = model
@@ -123,8 +124,12 @@ class GroupingTablePresenter(object):
     def add_group_to_view(self, group, state, color, tooltip):
         self._view.disable_updates()
         assert isinstance(group, MuonGroup)
-        entry = [str(group.name), run_utils.run_list_to_string(group.periods), state, run_utils.run_list_to_string(group.detectors, False),
-                 str(group.n_detectors)]
+        entry = [
+            str(group.name),
+            run_utils.run_list_to_string(group.periods), state,
+            run_utils.run_list_to_string(group.detectors, False),
+            str(group.n_detectors)
+        ]
         self._view.add_entry_to_table(entry, color, tooltip)
         self._view.enable_updates()
 
@@ -152,13 +157,13 @@ class GroupingTablePresenter(object):
         for name, index in group_names:
             used_by = self._model.check_group_in_use(name)
             if used_by:
-                warnings+=used_by+"\n"
+                warnings += used_by + "\n"
             else:
                 safe_to_rm.append([index, name])
         for index, name in reversed(safe_to_rm):
             self._model.remove_group_from_analysis(name)
             self._view.remove_group_by_index(index)
-        self._model.remove_groups_by_name([name for _,name in safe_to_rm])
+        self._model.remove_groups_by_name([name for _, name in safe_to_rm])
         if warnings:
             self._view.warning_popup(warnings)
 
@@ -184,7 +189,8 @@ class GroupingTablePresenter(object):
         if col == inverse_group_table_columns['to_analyse']:
             update_model = False
             self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, group_name)
-        if col == inverse_group_table_columns['periods'] and self.validate_periods(changed_item.text()) == RowValid.invalid_for_all_runs:
+        if col == inverse_group_table_columns['periods'] and self.validate_periods(
+                changed_item.text()) == RowValid.invalid_for_all_runs:
             self._view.warning_popup("One or more of the periods specified missing from all runs")
             update_model = False
 

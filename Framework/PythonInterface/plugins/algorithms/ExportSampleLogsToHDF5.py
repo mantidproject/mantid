@@ -27,15 +27,19 @@ class ExportSampleLogsToHDF5(PythonAlgorithm):
         return "Export a workspace's sample logs to HDF5 format"
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty(name=self.PROP_INPUT_WS, defaultValue="",
+        self.declareProperty(MatrixWorkspaceProperty(name=self.PROP_INPUT_WS,
+                                                     defaultValue="",
                                                      direction=Direction.Input),
                              doc="The workspace containing sample logs to be exported")
 
         self.declareProperty(StringArrayProperty(name=self.PROP_BLACKLIST, direction=Direction.Input),
                              doc="A list of any sample logs that should not be included in the HDF5 file")
 
-        self.declareProperty(FileProperty(name=self.PROP_FILENAME, defaultValue="", action=FileAction.Save,
-                                          extensions=[".hdf5", ".h5", ".hdf"]), doc="HDF5 file to save to")
+        self.declareProperty(FileProperty(name=self.PROP_FILENAME,
+                                          defaultValue="",
+                                          action=FileAction.Save,
+                                          extensions=[".hdf5", ".h5", ".hdf"]),
+                             doc="HDF5 file to save to")
 
     def PyExec(self):
         output_file_name = self.getProperty(self.PROP_FILENAME).value
@@ -50,8 +54,9 @@ class ExportSampleLogsToHDF5(PythonAlgorithm):
             run = input_ws.run()
             blacklist = self.getProperty(self.PROP_BLACKLIST).value
 
-            log_properties = [prop for prop in run.getProperties()
-                              if prop.name not in blacklist and not self._ignore_property(prop)]
+            log_properties = [
+                prop for prop in run.getProperties() if prop.name not in blacklist and not self._ignore_property(prop)
+            ]
 
             for log_property in log_properties:
                 property_dtype = log_property.dtype()
@@ -59,7 +64,9 @@ class ExportSampleLogsToHDF5(PythonAlgorithm):
                 if log_value is None:
                     continue
 
-                log_dataset = sample_logs_group.create_dataset(name=log_property.name, shape=(1,), dtype=property_dtype,
+                log_dataset = sample_logs_group.create_dataset(name=log_property.name,
+                                                               shape=(1, ),
+                                                               dtype=property_dtype,
                                                                data=[log_value])
                 log_dataset.attrs["Units"] = log_property.units
 

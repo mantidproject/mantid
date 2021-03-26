@@ -11,7 +11,6 @@ EXAMPLE_COLOR_QUEUE = ["C" + str(i) for i in range(10)]
 
 
 class PlotColorQueueTest(unittest.TestCase):
-
     def setUp(self):
         self.color_queue = ColorQueue(EXAMPLE_COLOR_QUEUE)
 

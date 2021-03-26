@@ -21,7 +21,7 @@ class TimeSeriesPropertyTest(unittest.TestCase):
     def setUp(self):
         if self._test_ws is not None:
             return
-        alg = run_algorithm('CreateWorkspace', DataX=[1,2,3,4,5], DataY=[1,2,3,4,5],NSpec=1, child=True)
+        alg = run_algorithm('CreateWorkspace', DataX=[1, 2, 3, 4, 5], DataY=[1, 2, 3, 4, 5], NSpec=1, child=True)
         ws = alg.getProperty("OutputWorkspace").value
         run = ws.run()
 
@@ -31,33 +31,34 @@ class TimeSeriesPropertyTest(unittest.TestCase):
         temp1 = FloatTimeSeriesProperty("TEMP1")
         tempvalue = -0.00161
         for i in range(self._ntemp):
-            temp1.addValue(start_time + i*nanosec, tempvalue)
-        run.addProperty(temp1.name, temp1,True)
+            temp1.addValue(start_time + i * nanosec, tempvalue)
+        run.addProperty(temp1.name, temp1, True)
 
         # === Int type ===
         raw_frames = Int64TimeSeriesProperty("raw_frames")
-        values = [17,1436,2942,4448,5955,7461]
+        values = [17, 1436, 2942, 4448, 5955, 7461]
         for value in values:
-            raw_frames.addValue(start_time + i*nanosec, value)
-        run.addProperty(raw_frames.name, raw_frames,True)
+            raw_frames.addValue(start_time + i * nanosec, value)
+        run.addProperty(raw_frames.name, raw_frames, True)
 
         # === String type ===
         icp_event = temp1 = StringTimeSeriesProperty("icp_event")
-        values = ['CHANGE_PERIOD 1','START_COLLECTION PERIOD 1 GF 0 RF 0 GUAH 0.000000',
-                  'BEGIN','STOP_COLLECTION PERIOD 1 GF 1053 RF 1053 GUAH 0.000000 DUR 22']
+        values = [
+            'CHANGE_PERIOD 1', 'START_COLLECTION PERIOD 1 GF 0 RF 0 GUAH 0.000000', 'BEGIN',
+            'STOP_COLLECTION PERIOD 1 GF 1053 RF 1053 GUAH 0.000000 DUR 22'
+        ]
         for value in values:
-            icp_event.addValue(start_time + i*nanosec, value)
-        run.addProperty(icp_event.name, icp_event,True)
+            icp_event.addValue(start_time + i * nanosec, value)
+        run.addProperty(icp_event.name, icp_event, True)
 
         # === Boolean type ===
         period_1 = temp1 = BoolTimeSeriesProperty("period 1")
         values = [True]
         for value in values:
-            period_1.addValue(start_time + i*nanosec, value)
-        run.addProperty(period_1.name, period_1,True)
+            period_1.addValue(start_time + i * nanosec, value)
+        run.addProperty(period_1.name, period_1, True)
 
         self.__class__._test_ws = ws
-
 
     def test_time_series_double_can_be_extracted(self):
         log_series = self._test_ws.getRun()["TEMP1"]
@@ -108,6 +109,7 @@ class TimeSeriesPropertyTest(unittest.TestCase):
         self.assertTrue(hasattr(stats, 'standard_deviation'))
         self.assertTrue(hasattr(stats, 'time_mean'))
         self.assertTrue(hasattr(stats, 'time_standard_deviation'))
+
 
 if __name__ == '__main__':
     unittest.main()

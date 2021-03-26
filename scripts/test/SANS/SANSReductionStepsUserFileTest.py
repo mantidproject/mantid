@@ -17,13 +17,13 @@ class SANSReductionStepsUserFileTest(unittest.TestCase):
         # Arrange
         start = 1000
         end = 2000
-        line = 'BACK/TRANS'+ str(start) +' ' + str(end)
+        line = 'BACK/TRANS' + str(start) + ' ' + str(end)
         command_iface.Clean()
         command_iface.LOQ()
         user_file = reduction_steps.UserFile()
 
         # Act
-        user_file.read_line(line = line, reducer = ReductionSingleton())
+        user_file.read_line(line=line, reducer=ReductionSingleton())
         start_TOF_ROI, end_TOF_ROI = ReductionSingleton().inst.get_TOFs_for_ROI()
 
         # Assert
@@ -33,13 +33,13 @@ class SANSReductionStepsUserFileTest(unittest.TestCase):
     def test_parse_line_for_back_trans_does_not_set_for_single_times(self):
         # Arrange
         start = 1000
-        line = 'BACK/TRANS'+ str(start)
+        line = 'BACK/TRANS' + str(start)
         command_iface.Clean()
         command_iface.LOQ()
         user_file = reduction_steps.UserFile()
 
         # Act
-        user_file.read_line(line = line, reducer = ReductionSingleton())
+        user_file.read_line(line=line, reducer=ReductionSingleton())
         start_TOF_ROI, end_TOF_ROI = ReductionSingleton().inst.get_TOFs_for_ROI()
 
         # Assert
@@ -54,7 +54,7 @@ class SANSReductionStepsUserFileTest(unittest.TestCase):
         user_file = reduction_steps.UserFile()
 
         # Act
-        user_file.read_line(line = line, reducer = ReductionSingleton())
+        user_file.read_line(line=line, reducer=ReductionSingleton())
         merge_Range = ReductionSingleton().instrument.getDetector('FRONT').mergeRange
 
         # Assert
@@ -70,7 +70,7 @@ class SANSReductionStepsUserFileTest(unittest.TestCase):
         user_file = reduction_steps.UserFile()
 
         # Act
-        user_file.read_line(line = line, reducer = ReductionSingleton())
+        user_file.read_line(line=line, reducer=ReductionSingleton())
         merge_Range = ReductionSingleton().instrument.getDetector('FRONT').mergeRange
 
         # Assert
@@ -86,7 +86,7 @@ class SANSReductionStepsUserFileTest(unittest.TestCase):
         user_file = reduction_steps.UserFile()
 
         # Act
-        user_file.read_line(line = line, reducer = ReductionSingleton())
+        user_file.read_line(line=line, reducer=ReductionSingleton())
         merge_Range = ReductionSingleton().instrument.getDetector('FRONT').mergeRange
 
         # Assert
@@ -174,25 +174,27 @@ class TestQResolutionInUserFile(unittest.TestCase):
         lcollim_val = 7
         delta_r_val = 8
         on_off_val = True
-        values = ["QRESOL/A1=" + str(a1_val), "QRESOL/A2  =" + str(a2_val), "QRESOL/H1  =" + str(h1_val),
-                  "QRESOL/W1 =" + str(w1_val), "QRESOL/H2=" + str(h2_val), "QRESOL/W2=  " + str(w2_val),
-                  "QRESOL/LCOLLIM=  " + str(lcollim_val),"QRESOL/LCOLLIM=  " + str(lcollim_val),
-                  "QRESOL/DELTAR=  " + str(delta_r_val),"QRESOL/ ON"]
+        values = [
+            "QRESOL/A1=" + str(a1_val), "QRESOL/A2  =" + str(a2_val), "QRESOL/H1  =" + str(h1_val),
+            "QRESOL/W1 =" + str(w1_val), "QRESOL/H2=" + str(h2_val), "QRESOL/W2=  " + str(w2_val),
+            "QRESOL/LCOLLIM=  " + str(lcollim_val), "QRESOL/LCOLLIM=  " + str(lcollim_val),
+            "QRESOL/DELTAR=  " + str(delta_r_val), "QRESOL/ ON"
+        ]
 
         # Act
         for value in values:
             user_file.read_line(value, reducer)
 
         # Assert
-        self.assertEqual(reducer.to_Q.a1,a1_val/1000., "Should be the input in meters")
-        self.assertEqual(reducer.to_Q.a2,a2_val/1000., "Should be the input in meters")
-        self.assertEqual(reducer.to_Q.h1,h1_val/1000., "Should be the input in meters")
-        self.assertEqual(reducer.to_Q.h2,h2_val/1000., "Should be the input in meters")
-        self.assertEqual(reducer.to_Q.w1,w1_val/1000., "Should be the input in meters")
-        self.assertEqual(reducer.to_Q.w2,w2_val/1000., "Should be the input in meters")
-        self.assertEqual(reducer.to_Q.delta_r,delta_r_val/1000., "Should be the input in meters")
-        self.assertEqual(reducer.to_Q.collim,lcollim_val, "Should be the input in meters")
-        self.assertEqual(reducer.to_Q.on_off,on_off_val, "Should be set to True")
+        self.assertEqual(reducer.to_Q.a1, a1_val / 1000., "Should be the input in meters")
+        self.assertEqual(reducer.to_Q.a2, a2_val / 1000., "Should be the input in meters")
+        self.assertEqual(reducer.to_Q.h1, h1_val / 1000., "Should be the input in meters")
+        self.assertEqual(reducer.to_Q.h2, h2_val / 1000., "Should be the input in meters")
+        self.assertEqual(reducer.to_Q.w1, w1_val / 1000., "Should be the input in meters")
+        self.assertEqual(reducer.to_Q.w2, w2_val / 1000., "Should be the input in meters")
+        self.assertEqual(reducer.to_Q.delta_r, delta_r_val / 1000., "Should be the input in meters")
+        self.assertEqual(reducer.to_Q.collim, lcollim_val, "Should be the input in meters")
+        self.assertEqual(reducer.to_Q.on_off, on_off_val, "Should be set to True")
 
     def test_that_non_float_type_for_a1_causes_error_warning(self):
         # Arrange
@@ -203,7 +205,7 @@ class TestQResolutionInUserFile(unittest.TestCase):
         # Act
         error = user_file._read_q_resolution_line(value, reducer)
         # Assert
-        self.assertNotEqual(error,  None)
+        self.assertNotEqual(error, None)
 
 
 if __name__ == "__main__":

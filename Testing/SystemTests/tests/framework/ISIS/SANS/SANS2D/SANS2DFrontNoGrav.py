@@ -14,7 +14,6 @@ from sans.common.enums import SANSInstrument
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DFrontNoGrav(systemtesting.MantidSystemTest):
-
     def runTest(self):
 
         SANS2D()
@@ -31,7 +30,7 @@ class SANS2DFrontNoGrav(systemtesting.MantidSystemTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-        return '2500front_1D_4.6_12.85','SANS2DFrontNoGrav.nxs'
+        return '2500front_1D_4.6_12.85', 'SANS2DFrontNoGrav.nxs'
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
@@ -52,4 +51,4 @@ class SANS2DWithExtraLengthGravity(systemtesting.MantidSystemTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-        return '2500front_1D_4.6_12.85','SANS2DWithExtraLengthGravity.nxs'
+        return '2500front_1D_4.6_12.85', 'SANS2DWithExtraLengthGravity.nxs'

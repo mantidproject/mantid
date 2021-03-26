@@ -14,7 +14,6 @@ class CompareSampleLogs(PythonAlgorithm):
     """
     Compares specified sample logs for a given list of workspaces
     """
-
     def __init__(self):
         """
         Init
@@ -30,7 +29,7 @@ class CompareSampleLogs(PythonAlgorithm):
         return "Utility\\Workspaces"
 
     def seeAlso(self):
-        return [ "CompareWorkspaces","CheckForSampleLogs","CopySample" ]
+        return ["CompareWorkspaces", "CheckForSampleLogs", "CopySample"]
 
     def name(self):
         """
@@ -43,16 +42,20 @@ class CompareSampleLogs(PythonAlgorithm):
 
     def PyInit(self):
         validator = StringArrayLengthValidator()
-        validator.setLengthMin(1)   # one group may be given
-        self.declareProperty(StringArrayProperty(name="InputWorkspaces", direction=Direction.Input, validator=validator),
+        validator.setLengthMin(1)  # one group may be given
+        self.declareProperty(StringArrayProperty(name="InputWorkspaces", direction=Direction.Input,
+                                                 validator=validator),
                              doc="Comma separated list of workspaces or groups of workspaces.")
 
         self.declareProperty(StringArrayProperty(name="SampleLogs", direction=Direction.Input, validator=validator),
                              doc="Comma separated list of sample logs to compare.")
-        self.declareProperty("Tolerance", 1e-3, validator=FloatBoundedValidator(lower=1e-7),
+        self.declareProperty("Tolerance",
+                             1e-3,
+                             validator=FloatBoundedValidator(lower=1e-7),
                              doc="Tolerance for comparison of numeric values.")
-        self.declareProperty("Result", "A string that will be empty if all the logs match, "
-                             "otherwise will contain a comma separated list of  not matching logs", Direction.Output)
+        self.declareProperty(
+            "Result", "A string that will be empty if all the logs match, "
+            "otherwise will contain a comma separated list of  not matching logs", Direction.Output)
 
         return
 
@@ -148,8 +151,8 @@ class CompareSampleLogs(PythonAlgorithm):
                         properties.append(curprop.value)
 
                     else:
-                        message = "Comparison of " + str(curprop.type) + " properties is not yet supported. Property " +\
-                            prop + " in the workspace " + wsname
+                        message = "Comparison of " + str(curprop.type) + " properties is not yet supported. Property " \
+                                  + prop + " in the workspace " + wsname
                         self.log().warning(message)
 
             # sometimes numbers are presented as strings

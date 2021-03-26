@@ -11,7 +11,6 @@ from sans.common.log_tagger import (has_tag, set_tag, get_tag, has_hash, set_has
 
 
 class SANSLogTaggerTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()

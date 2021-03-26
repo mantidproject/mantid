@@ -10,7 +10,6 @@ from mantid.api import *
 
 
 class AddSampleLogMultipleTest(unittest.TestCase):
-
     def setUp(self):
         """
         Crates a small sample workspace to test with.
@@ -22,13 +21,11 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                               BinWidth=1)
         self._workspace = mtd['__AddSampleLogMultiple_test']
 
-
     def tearDown(self):
         """
         Removes sample workspaces.
         """
         DeleteWorkspace(self._workspace)
-
 
     def _validate_sample_logs(self, names, values, types, units=None):
         """
@@ -41,8 +38,8 @@ class AddSampleLogMultipleTest(unittest.TestCase):
         """
         logs = self._workspace.getRun().getProperties()
         matched_logs = list()
-        if units==None:
-            units=['']*len(names)
+        if units == None:
+            units = [''] * len(names)
 
         for log in logs:
             if log.name in names:
@@ -55,7 +52,6 @@ class AddSampleLogMultipleTest(unittest.TestCase):
 
         self.assertEqual(matched_logs, names)
 
-
     def test_strings(self):
         """
         Tests adding multiple strings.
@@ -64,12 +60,9 @@ class AddSampleLogMultipleTest(unittest.TestCase):
         values = ['one', 'two', 'three']
         types = ['string', 'string', 'string']
 
-        AddSampleLogMultiple(Workspace=self._workspace,
-                             LogNames=names,
-                             LogValues=values)
+        AddSampleLogMultiple(Workspace=self._workspace, LogNames=names, LogValues=values)
 
         self._validate_sample_logs(names, values, types)
-
 
     def test_strings_with_types(self):
         """
@@ -83,11 +76,9 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                              LogNames=names,
                              LogValues=values,
                              ParseType=False,
-                             LogTypes=types
-                             )
+                             LogTypes=types)
 
         self._validate_sample_logs(names, values, types)
-
 
     def test_strings_and_numbers(self):
         """
@@ -97,12 +88,9 @@ class AddSampleLogMultipleTest(unittest.TestCase):
         values = ['one', 'two', 'three', 4, 5.5, 6e2]
         types = ['string', 'string', 'string', 'number', 'number', 'number']
 
-        AddSampleLogMultiple(Workspace=self._workspace,
-                             LogNames=names,
-                             LogValues=values)
+        AddSampleLogMultiple(Workspace=self._workspace, LogNames=names, LogValues=values)
 
         self._validate_sample_logs(names, values, types)
-
 
     def test_strings_and_numbers(self):
         """
@@ -120,7 +108,6 @@ class AddSampleLogMultipleTest(unittest.TestCase):
 
         self._validate_sample_logs(names, values, types)
 
-
     def test_units(self):
         """
         Test validation for wrong number of units
@@ -130,11 +117,8 @@ class AddSampleLogMultipleTest(unittest.TestCase):
         units = ['unit_a', 'unit_b', 'unit_c']
         types = ['string', 'string', 'string']
 
-        AddSampleLogMultiple(Workspace=self._workspace,
-                             LogNames=names,
-                             LogValues=values,
-                             LogUnits=units)
-        self._validate_sample_logs(names, values, types,units)
+        AddSampleLogMultiple(Workspace=self._workspace, LogNames=names, LogValues=values, LogUnits=units)
+        self._validate_sample_logs(names, values, types, units)
 
     def test_validation_wrong_units(self):
         """
@@ -164,7 +148,6 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                           LogNames=names,
                           LogValues=values)
 
-
     def test_validation_no_values(self):
         """
         Test validation for no log values.
@@ -178,7 +161,6 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                           LogNames=names,
                           LogValues=values)
 
-
     def test_validation_differing_counts(self):
         """
         Test validation for differing numbers of log names and log values.
@@ -191,7 +173,6 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                           Workspace=self._workspace,
                           LogNames=names,
                           LogValues=values)
-
 
     def test_validation_differing_types(self):
         """
@@ -208,7 +189,6 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                           ParseType=True,
                           LogTypes=types)
 
-
     def test_validation_differing_types(self):
         """
         Test validation for differing numbers of log names and log types.
@@ -224,7 +204,6 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                           LogValues=values,
                           ParseType=False,
                           LogTypes=types)
-
 
     def test_validation_invalid_types(self):
         """

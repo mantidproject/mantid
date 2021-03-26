@@ -33,9 +33,7 @@ def move_component(workspace, offsets, component_to_move, is_relative=True):
     :return:
     """
     move_name = "MoveInstrumentComponent"
-    move_options = {"Workspace": workspace,
-                    "ComponentName": component_to_move,
-                    "RelativePosition": is_relative}
+    move_options = {"Workspace": workspace, "ComponentName": component_to_move, "RelativePosition": is_relative}
     for key, value in list(offsets.items()):
         if key is CanonicalCoordinates.X:
             move_options.update({"X": value})
@@ -61,9 +59,7 @@ def rotate_component(workspace, angle, direction, component_to_rotate):
     :return:
     """
     rotate_name = "RotateInstrumentComponent"
-    rotate_options = {"Workspace": workspace,
-                      "ComponentName": component_to_rotate,
-                      "RelativeRotation": "1"}
+    rotate_options = {"Workspace": workspace, "ComponentName": component_to_rotate, "RelativeRotation": "1"}
     for key, value in list(direction.items()):
         if key is CanonicalCoordinates.X:
             rotate_options.update({"X": value})
@@ -156,8 +152,7 @@ def apply_standard_displacement(inst_info, workspace, coordinates, component):
     # Get the detector name
     component_name = inst_info.detector_names[component].detector_name
     # Offset
-    offset = {CanonicalCoordinates.X: coordinates[0],
-              CanonicalCoordinates.Y: coordinates[1]}
+    offset = {CanonicalCoordinates.X: coordinates[0], CanonicalCoordinates.Y: coordinates[1]}
     move_component(workspace, offset, component_name)
 
 
@@ -210,12 +205,14 @@ def set_selected_components_to_original_position(workspace, component_names):
         if base_position != moved_position:
             if move_alg is None:
                 move_alg_name = "MoveInstrumentComponent"
-                move_alg_options = {"Workspace": workspace,
-                                    "RelativePosition": False,
-                                    "ComponentName": component_name,
-                                    "X": base_position[0],
-                                    "Y": base_position[1],
-                                    "Z": base_position[2]}
+                move_alg_options = {
+                    "Workspace": workspace,
+                    "RelativePosition": False,
+                    "ComponentName": component_name,
+                    "X": base_position[0],
+                    "Y": base_position[1],
+                    "Z": base_position[2]
+                }
                 move_alg = create_unmanaged_algorithm(move_alg_name, **move_alg_options)
             else:
                 move_alg.setProperty("ComponentName", component_name)
@@ -231,20 +228,22 @@ def set_selected_components_to_original_position(workspace, component_names):
             if not is_zero_axis(axis):
                 if rot_alg is None:
                     rot_alg_name = "RotateInstrumentComponent"
-                    rot_alg_options = {"Workspace": workspace,
-                                       "RelativeRotation": True,
-                                       "ComponentName": component_name,
-                                       "X": axis[0],
-                                       "Y": axis[1],
-                                       "Z": axis[2],
-                                       "Angle": -1*angle}
+                    rot_alg_options = {
+                        "Workspace": workspace,
+                        "RelativeRotation": True,
+                        "ComponentName": component_name,
+                        "X": axis[0],
+                        "Y": axis[1],
+                        "Z": axis[2],
+                        "Angle": -1 * angle
+                    }
                     rot_alg = create_unmanaged_algorithm(rot_alg_name, **rot_alg_options)
                 else:
                     rot_alg.setProperty("ComponentName", component_name)
                     rot_alg.setProperty("X", axis[0])
                     rot_alg.setProperty("Y", axis[1])
                     rot_alg.setProperty("Z", axis[2])
-                    rot_alg.setProperty("Angle", -1*angle)
+                    rot_alg.setProperty("Angle", -1 * angle)
                 rot_alg.execute()
 
 
@@ -307,7 +306,9 @@ def move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, inst_info, workspace, coo
 
         log_names = [lab_detector_z_tag]
         log_types = [float]
-        log_values = get_single_valued_logs_from_workspace(workspace, log_names, log_types,
+        log_values = get_single_valued_logs_from_workspace(workspace,
+                                                           log_names,
+                                                           log_types,
                                                            convert_from_millimeter_to_meter=True)
 
         lab_detector_z = move_info.lab_detector_z \
@@ -325,9 +326,7 @@ def move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, inst_info, workspace, coo
     y_shift = -coordinates[1]
 
     z_shift = (lab_detector_z + lab_detector.z_translation_correction) - lab_detector_default_sd_m
-    offset = {CanonicalCoordinates.X: x_shift,
-              CanonicalCoordinates.Y: y_shift,
-              CanonicalCoordinates.Z: z_shift}
+    offset = {CanonicalCoordinates.X: x_shift, CanonicalCoordinates.Y: y_shift, CanonicalCoordinates.Z: z_shift}
     move_component(workspace, offset, detector_name)
 
 
@@ -422,20 +421,23 @@ class SANSMoveSANS2D(SANSMove):
         # Perform rotation a y tilt correction. This tilt rotates around the instrument axis / around the X-AXIS!
         y_tilt_correction = detector.y_tilt_correction
         if y_tilt_correction != 0.0:
-            y_tilt_correction_direction = {CanonicalCoordinates.X: 1.0,
-                                           CanonicalCoordinates.Y: 0.0,
-                                           CanonicalCoordinates.Z: 0.0}
+            y_tilt_correction_direction = {
+                CanonicalCoordinates.X: 1.0,
+                CanonicalCoordinates.Y: 0.0,
+                CanonicalCoordinates.Z: 0.0
+            }
             rotate_component(workspace, y_tilt_correction, y_tilt_correction_direction, detector_name)
 
         # Perform rotation a x tilt correction. This tilt rotates around the instrument axis / around the Z-AXIS!
         x_tilt_correction = detector.x_tilt_correction
         if x_tilt_correction != 0.0:
-            x_tilt_correction_direction = {CanonicalCoordinates.X: 0.0,
-                                           CanonicalCoordinates.Y: 0.0,
-                                           CanonicalCoordinates.Z: 1.0}
+            x_tilt_correction_direction = {
+                CanonicalCoordinates.X: 0.0,
+                CanonicalCoordinates.Y: 0.0,
+                CanonicalCoordinates.Z: 1.0
+            }
             rotate_component(workspace, x_tilt_correction, x_tilt_correction_direction, detector_name)
 
-# pylint: disable=too-many-locals
     def _move_high_angle_bank(self, workspace, coordinates):
         # Get FRONT_DET_X, FRONT_DET_Z, FRONT_DET_ROT, REAR_DET_X
 
@@ -446,7 +448,9 @@ class SANSMoveSANS2D(SANSMove):
 
         log_names = [hab_detector_x_tag, hab_detector_z_tag, hab_detector_rotation_tag, lab_detector_x_tag]
         log_types = [float, float, float, float]
-        log_values = get_single_valued_logs_from_workspace(workspace, log_names, log_types,
+        log_values = get_single_valued_logs_from_workspace(workspace,
+                                                           log_names,
+                                                           log_types,
                                                            convert_from_millimeter_to_meter=True)
 
         move_info = self.move_state
@@ -481,31 +485,26 @@ class SANSMoveSANS2D(SANSMove):
         # Perform rotation of around the Y-AXIS. This is more complicated as the high angle bank detector is
         # offset.
         rotation_angle = (-hab_detector_rotation - hab_detector.rotation_correction)
-        rotation_direction = {CanonicalCoordinates.X: 0.0,
-                              CanonicalCoordinates.Y: 1.0,
-                              CanonicalCoordinates.Z: 0.0}
+        rotation_direction = {CanonicalCoordinates.X: 0.0, CanonicalCoordinates.Y: 1.0, CanonicalCoordinates.Z: 0.0}
         rotate_component(workspace, rotation_angle, rotation_direction, detector_name)
 
         # Add translational corrections
         x = coordinates[0]
         y = coordinates[1]
         lab_detector = move_info.detectors[DetectorType.LAB.value]
-        rotation_in_radians = math.pi * (hab_detector_rotation + hab_detector.rotation_correction)/180.
+        rotation_in_radians = math.pi * (hab_detector_rotation + hab_detector.rotation_correction) / 180.
 
-        x_shift = ((lab_detector_x + lab_detector.x_translation_correction
-                    - hab_detector_x - hab_detector.x_translation_correction
-                    - hab_detector.side_correction*(1.0 - math.cos(rotation_in_radians))
-                    + (hab_detector_radius + hab_detector.radius_correction)*(math.sin(rotation_in_radians)))
-                   - hab_detector_default_x_m - x)
+        x_shift = ((lab_detector_x + lab_detector.x_translation_correction - hab_detector_x -
+                    hab_detector.x_translation_correction - hab_detector.side_correction *
+                    (1.0 - math.cos(rotation_in_radians)) + (hab_detector_radius + hab_detector.radius_correction) *
+                    (math.sin(rotation_in_radians))) - hab_detector_default_x_m - x)
 
         y_shift = hab_detector.y_translation_correction - y
-        z_shift = (hab_detector_z + hab_detector.z_translation_correction
-                   + (hab_detector_radius + hab_detector.radius_correction) * (1.0 - math.cos(rotation_in_radians))
-                   - hab_detector.side_correction * math.sin(rotation_in_radians)) - hab_detector_default_sd_m
+        z_shift = (hab_detector_z + hab_detector.z_translation_correction +
+                   (hab_detector_radius + hab_detector.radius_correction) * (1.0 - math.cos(rotation_in_radians)) -
+                   hab_detector.side_correction * math.sin(rotation_in_radians)) - hab_detector_default_sd_m
 
-        offset = {CanonicalCoordinates.X: x_shift,
-                  CanonicalCoordinates.Y: y_shift,
-                  CanonicalCoordinates.Z: z_shift}
+        offset = {CanonicalCoordinates.X: x_shift, CanonicalCoordinates.Y: y_shift, CanonicalCoordinates.Z: z_shift}
 
         move_component(workspace, offset, detector_name)
 
@@ -515,11 +514,12 @@ class SANSMoveSANS2D(SANSMove):
 
     def _move_monitor_n(self, workspace, monitor_spectrum_number):
         # Only monitor 4 can be moved for SANS2D
-        assert(monitor_spectrum_number == 4)
+        assert (monitor_spectrum_number == 4)
 
         move_info = self.move_state
         assert isinstance(move_info, StateMoveSANS2D)
-        move_backstop_monitor(ws=workspace, inst_info=self.inst_state,
+        move_backstop_monitor(ws=workspace,
+                              inst_info=self.inst_state,
                               monitor_spectrum_number=monitor_spectrum_number,
                               monitor_offset=move_info.monitor_4_offset)
 
@@ -582,14 +582,15 @@ class SANSMoveLOQ(SANSMove):
                 component_name = self.inst_state.detector_names[detector].detector_name
 
                 # Shift the detector by the the input amount
-                offset = {CanonicalCoordinates.X: x_shift,
-                          CanonicalCoordinates.Y: y_shift}
+                offset = {CanonicalCoordinates.X: x_shift, CanonicalCoordinates.Y: y_shift}
                 move_component(workspace, offset, component_name)
 
                 # Shift the detector according to the corrections of the detector under investigation
-                offset_from_corrections = {CanonicalCoordinates.X: move_info.detectors[detector].x_translation_correction,
-                                           CanonicalCoordinates.Y: move_info.detectors[detector].y_translation_correction,
-                                           CanonicalCoordinates.Z: move_info.detectors[detector].z_translation_correction}
+                offset_from_corrections = {
+                    CanonicalCoordinates.X: move_info.detectors[detector].x_translation_correction,
+                    CanonicalCoordinates.Y: move_info.detectors[detector].y_translation_correction,
+                    CanonicalCoordinates.Z: move_info.detectors[detector].z_translation_correction
+                }
                 move_component(workspace, offset_from_corrections, component_name)
 
     def do_move_with_elementary_displacement(self, workspace, coordinates, component):
@@ -624,14 +625,12 @@ class SANSMoveLARMOROldStyle(SANSMove):
         # Shift the low-angle bank detector in the y direction
         y_shift = -coordinates[1]
         coordinates_for_only_y = [0.0, y_shift]
-        apply_standard_displacement(self.inst_state, workspace, coordinates_for_only_y,
-                                    DetectorType.LAB.value)
+        apply_standard_displacement(self.inst_state, workspace, coordinates_for_only_y, DetectorType.LAB.value)
 
         # Shift the low-angle bank detector in the x direction
         x_shift = -coordinates[0]
         coordinates_for_only_x = [x_shift, 0.0]
-        apply_standard_displacement(self.inst_state, workspace, coordinates_for_only_x,
-                                    DetectorType.LAB.value)
+        apply_standard_displacement(self.inst_state, workspace, coordinates_for_only_x, DetectorType.LAB.value)
 
     def do_move_with_elementary_displacement(self, workspace, coordinates, component):
         # For LOQ we only have to coordinates
@@ -668,9 +667,7 @@ class SANSMoveLARMORNewStyle(SANSMove):
         detector_name = inst_info.detector_names[component].detector_name
         # Note that the angle definition for the bench in LARMOR and in Mantid seem to have a different handedness
         total_angle = bench_rotation - angle
-        direction = {CanonicalCoordinates.X: 0.0,
-                     CanonicalCoordinates.Y: 1.0,
-                     CanonicalCoordinates.Z: 0.0}
+        direction = {CanonicalCoordinates.X: 0.0, CanonicalCoordinates.Y: 1.0, CanonicalCoordinates.Z: 0.0}
         rotate_component(workspace, total_angle, direction, detector_name)
 
     def do_move_initial(self, workspace, coordinates, component, is_transmission_workspace):
@@ -688,8 +685,7 @@ class SANSMoveLARMORNewStyle(SANSMove):
         # Shift the low-angle bank detector in the y direction
         y_shift = -coordinates[1]
         coordinates_for_only_y = [0.0, y_shift]
-        apply_standard_displacement(self.inst_state, workspace, coordinates_for_only_y,
-                                    DetectorType.LAB.value)
+        apply_standard_displacement(self.inst_state, workspace, coordinates_for_only_y, DetectorType.LAB.value)
 
         # Shift the low-angle bank detector in the x direction
         angle = coordinates[0]
@@ -701,8 +697,7 @@ class SANSMoveLARMORNewStyle(SANSMove):
         bench_rotation = move_info.bench_rotation \
             if log_values[bench_rot_tag] is None else log_values[bench_rot_tag]
 
-        self._rotate_around_y_axis(self.inst_state, workspace, angle,
-                                   DetectorType.LAB.value, bench_rotation)
+        self._rotate_around_y_axis(self.inst_state, workspace, angle, DetectorType.LAB.value, bench_rotation)
 
     def do_move_with_elementary_displacement(self, workspace, coordinates, component):
         # For LOQ we only have to coordinates
@@ -731,8 +726,11 @@ class SANSMoveLARMORNewStyle(SANSMove):
 class SANSMoveZOOM(SANSMove):
     def _move_low_angle_bank(self, workspace, coordinates):
         assert isinstance(self.move_state, StateMoveZOOM)
-        move_low_angle_bank_for_SANS2D_and_ZOOM(self.move_state, self.inst_state, workspace,
-                                                coordinates, use_rear_det_z=False)
+        move_low_angle_bank_for_SANS2D_and_ZOOM(self.move_state,
+                                                self.inst_state,
+                                                workspace,
+                                                coordinates,
+                                                use_rear_det_z=False)
 
     def _move_monitor_n(self, workspace):
         """
@@ -743,12 +741,14 @@ class SANSMoveZOOM(SANSMove):
         # Apply monitor 4 offset
         move_info = self.move_state
         assert isinstance(move_info, StateMoveZOOM)
-        move_monitor(ws=workspace, inst_info=self.inst_state,
+        move_monitor(ws=workspace,
+                     inst_info=self.inst_state,
                      monitor_offset=move_info.monitor_4_offset,
                      monitor_spectrum_number=4)
 
         # Apply monitor 5 offset
-        move_backstop_monitor(ws=workspace, inst_info=self.inst_state,
+        move_backstop_monitor(ws=workspace,
+                              inst_info=self.inst_state,
                               monitor_offset=move_info.monitor_5_offset,
                               monitor_spectrum_number=5)
 

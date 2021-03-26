@@ -30,7 +30,6 @@ def enter_diff_name_side_effect():
 
 @start_qapplication
 class DifferenceTablePresenterTest(unittest.TestCase):
-
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QWidget()
@@ -148,7 +147,7 @@ class DifferenceTablePresenterTest(unittest.TestCase):
         # Add an extra group so we can remove one and keep a diff
         group = MuonGroup(group_name="group_2", detector_ids=[2])
         self.model.add_group(group)
-        self.presenter.group_widget.handle_add_diff_button_clicked(group_1='group_0',group_2='group_2')
+        self.presenter.group_widget.handle_add_diff_button_clicked(group_1='group_0', group_2='group_2')
 
         self.group_context.remove_group('group_1')
         self.presenter.update_view_from_model()
@@ -166,7 +165,7 @@ class DifferenceTablePresenterTest(unittest.TestCase):
         self.get_group_1_selector_from_diff(0).setCurrentIndex(1)
 
         self.assertEqual(1, self.presenter.group_view.on_cell_changed.call_count)
-        self.assertEqual((0,2), self.presenter.group_view.on_cell_changed.call_args_list[0][0])
+        self.assertEqual((0, 2), self.presenter.group_view.on_cell_changed.call_args_list[0][0])
 
     def test_adding_new_group_does_not_change_current_selection(self):
         self.add_two_groups()

@@ -113,10 +113,8 @@ class Project(AnalysisDataServiceObserver):
         Offers up a overwriting QMessageBox giving the option to overwrite a project, and returns the reply.
         :return: QMessaageBox.Yes or QMessageBox.No or QMessageBox.Cancel; The value is the value selected by the user.
         """
-        return QMessageBox().question(None, "Overwrite project?",
-                                      "Would you like to overwrite the selected project?",
-                                      QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
-                                      QMessageBox.Yes)
+        return QMessageBox().question(None, "Overwrite project?", "Would you like to overwrite the selected project?",
+                                      QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
 
     def _save_file_dialog(self):
         return open_a_file_dialog(accept_mode=QFileDialog.AcceptSave,
@@ -146,8 +144,10 @@ class Project(AnalysisDataServiceObserver):
 
                 interfaces_to_save = self.interface_populating_function()
                 project_saver = ProjectSaver(self.project_file_ext)
-                project_saver.save_project(file_name=self.last_project_location, workspace_to_save=workspaces_to_save,
-                                           plots_to_save=plots_to_save, interfaces_to_save=interfaces_to_save)
+                project_saver.save_project(file_name=self.last_project_location,
+                                           workspace_to_save=workspaces_to_save,
+                                           plots_to_save=plots_to_save,
+                                           interfaces_to_save=interfaces_to_save)
                 self.__saved = True
         finally:
             self.__is_saving = False
@@ -193,8 +193,9 @@ class Project(AnalysisDataServiceObserver):
         plots_copy = plots.copy()
         for i, plot in plots_copy.items():
             # check that every axes only uses workspaces that are being saved, otherwise delete the plot
-            if not all(all(ws in workspaces for ws in ax.tracked_workspaces if isinstance(ax, MantidAxes))
-                       for ax in plot.canvas.figure.axes):
+            if not all(
+                    all(ws in workspaces for ws in ax.tracked_workspaces if isinstance(ax, MantidAxes))
+                    for ax in plot.canvas.figure.axes):
                 del plots[i]
 
         return plots
@@ -239,12 +240,14 @@ class Project(AnalysisDataServiceObserver):
 
     def _load(self, file_name):
         project_loader = ProjectLoader(self.project_file_ext)
-        task = BlockingAsyncTaskWithCallback(target=project_loader.load_project, args=[file_name],
+        task = BlockingAsyncTaskWithCallback(target=project_loader.load_project,
+                                             args=[file_name],
                                              blocking_cb=QApplication.processEvents)
         task.start()
 
     def _load_file_dialog(self):
-        return open_a_file_dialog(accept_mode=QFileDialog.AcceptOpen, file_mode=QFileDialog.ExistingFile,
+        return open_a_file_dialog(accept_mode=QFileDialog.AcceptOpen,
+                                  file_mode=QFileDialog.ExistingFile,
                                   file_filter="Project files ( *" + " *".join(self.valid_file_exts) + ")")
 
     def offer_save(self, parent):
@@ -271,8 +274,7 @@ class Project(AnalysisDataServiceObserver):
         if self.prompt_save_on_close:
             return QMessageBox.question(parent, 'Unsaved Project',
                                         "The project is currently unsaved. Would you like to "
-                                        "save before closing?",
-                                        QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+                                        "save before closing?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
                                         QMessageBox.Yes)
         else:
             return QMessageBox.No

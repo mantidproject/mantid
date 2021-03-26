@@ -18,8 +18,8 @@ class CalculateFluxTest(unittest.TestCase):
         ws = CreateSampleWorkspace(XUnit="Wavelength", NumBanks=1, Function="One Peak")
         shape = FindDetectorsInShape(Workspace=ws,
                                      ShapeXML='<infinite-cylinder id="asbsolute_scale">'
-                                              '<centre x="0.0" y="0.0" z="0.0" /> <axis x="0.0" y="0.0" z="1.0" />'
-                                              '<radius val="0.05" /></infinite-cylinder>')
+                                     '<centre x="0.0" y="0.0" z="0.0" /> <axis x="0.0" y="0.0" z="1.0" />'
+                                     '<radius val="0.05" /></infinite-cylinder>')
         self.pixels_in_shape = len(shape)
 
     def tearDown(self):
@@ -37,6 +37,7 @@ class CalculateFluxTest(unittest.TestCase):
         expectation[50] = self.pixels_in_shape * 10.3
         reality = mtd["flux"].readY(0)
         testhelpers.assert_almost_equal(reality, expectation, decimal=6)
+
 
 if __name__ == "__main__":
     unittest.main()

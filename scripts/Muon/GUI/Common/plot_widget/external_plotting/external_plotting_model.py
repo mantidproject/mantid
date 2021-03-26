@@ -16,7 +16,6 @@ class PlotInformation(NamedTuple):
 
 
 class ExternalPlottingModel(object):
-
     def get_plotted_workspaces_and_indices_from_axes(self, axes) -> List[PlotInformation]:
         plotted_data = []
         for i, axis in enumerate(axes):
@@ -24,6 +23,6 @@ class ExternalPlottingModel(object):
             for artist in artists:
                 is_normalised = axis.get_artist_normalization_state(artist)
                 workspace, index = axis.get_artists_workspace_and_spec_num(artist)
-                plotted_data.append(PlotInformation(workspace=workspace, specNum=index, axis=i,
-                                                    normalised=is_normalised))
+                plotted_data.append(
+                    PlotInformation(workspace=workspace, specNum=index, axis=i, normalised=is_normalised))
         return plotted_data

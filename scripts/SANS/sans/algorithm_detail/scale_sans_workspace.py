@@ -32,15 +32,13 @@ def _multiply_by_abs_scale(instrument, state_scale, workspace):
         scale_factor /= rescale_to_colette
 
     single_valued_name = "CreateSingleValuedWorkspace"
-    single_valued_options = {"OutputWorkspace": EMPTY_NAME,
-                             "DataValue": scale_factor}
+    single_valued_options = {"OutputWorkspace": EMPTY_NAME, "DataValue": scale_factor}
     single_valued_alg = create_unmanaged_algorithm(single_valued_name, **single_valued_options)
     single_valued_alg.execute()
     single_valued_workspace = single_valued_alg.getProperty("OutputWorkspace").value
 
     multiply_name = "Multiply"
-    multiply_options = {"LHSWorkspace": workspace,
-                        "RHSWorkspace": single_valued_workspace}
+    multiply_options = {"LHSWorkspace": workspace, "RHSWorkspace": single_valued_workspace}
     multiply_alg = create_unmanaged_algorithm(multiply_name, **multiply_options)
     multiply_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
     multiply_alg.setProperty("OutputWorkspace", workspace)
@@ -53,15 +51,13 @@ def _divide_by_sample_volume(workspace, scale_info):
     volume = _get_volume(scale_info)
 
     single_valued_name = "CreateSingleValuedWorkspace"
-    single_valued_options = {"OutputWorkspace": EMPTY_NAME,
-                             "DataValue": volume}
+    single_valued_options = {"OutputWorkspace": EMPTY_NAME, "DataValue": volume}
     single_valued_alg = create_unmanaged_algorithm(single_valued_name, **single_valued_options)
     single_valued_alg.execute()
     single_valued_workspace = single_valued_alg.getProperty("OutputWorkspace").value
 
     divide_name = "Divide"
-    divide_options = {"LHSWorkspace": workspace,
-                      "RHSWorkspace": single_valued_workspace}
+    divide_options = {"LHSWorkspace": workspace, "RHSWorkspace": single_valued_workspace}
     divide_alg = create_unmanaged_algorithm(divide_name, **divide_options)
     divide_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
     divide_alg.setProperty("OutputWorkspace", workspace)

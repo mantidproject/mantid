@@ -15,7 +15,6 @@ class SANSSubtract(PythonAlgorithm):
     """
         I(Q) subtraction
     """
-
     def category(self):
         """
             Return category
@@ -23,7 +22,7 @@ class SANSSubtract(PythonAlgorithm):
         return "SANS"
 
     def seeAlso(self):
-        return [ "SANSStitch","SANSFitShiftScale" ]
+        return ["SANSStitch", "SANSFitShiftScale"]
 
     def name(self):
         """
@@ -38,15 +37,17 @@ class SANSSubtract(PythonAlgorithm):
         """
             Declare properties
         """
-        self.declareProperty('DataDistribution', '', direction = Direction.Input,
+        self.declareProperty('DataDistribution',
+                             '',
+                             direction=Direction.Input,
                              doc='Name of the input workspace or file path')
-        self.declareProperty('Background', '', direction = Direction.Input,
+        self.declareProperty('Background',
+                             '',
+                             direction=Direction.Input,
                              doc='Name of the background workspace or file path')
-        self.declareProperty("ScaleFactor", 1., FloatBoundedValidator(),
-                             doc="Scaling factor [Default: 1]")
-        self.declareProperty("Constant", 0., FloatBoundedValidator(),
-                             doc="Additive constant [Default:0]")
-        self.declareProperty(FileProperty("OutputDirectory","", FileAction.OptionalDirectory),
+        self.declareProperty("ScaleFactor", 1., FloatBoundedValidator(), doc="Scaling factor [Default: 1]")
+        self.declareProperty("Constant", 0., FloatBoundedValidator(), doc="Additive constant [Default:0]")
+        self.declareProperty(FileProperty("OutputDirectory", "", FileAction.OptionalDirectory),
                              doc="Directory to write the output files in [optional]")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
                              doc="Workspace containing data from detectors")
@@ -158,20 +159,20 @@ class SANSSubtract(PythonAlgorithm):
         self.setProperty("OutputWorkspace", output)
 
         # Save the output to disk as needed
-        if len(output_dir)>0:
+        if len(output_dir) > 0:
             root_name, _ = os.path.splitext(data_ws_name)
             op = mantid.api.AlgorithmManager.createUnmanaged('SaveCanSAS1D')
             op.initialize()
             op.setChild(True)
             op.setProperty("InputWorkspace", output)
-            op.setProperty("Filename", os.path.join(output_dir, root_name+'_corr.xml'))
+            op.setProperty("Filename", os.path.join(output_dir, root_name + '_corr.xml'))
             op.setProperty("RadiationSource", "Spallation Neutron Source")
             op.execute()
 
             op = mantid.api.AlgorithmManager.createUnmanaged("SaveAscii")
             op.initialize()
             op.setChild(True)
-            op.setProperty("Filename", os.path.join(output_dir, root_name+'_corr.txt'))
+            op.setProperty("Filename", os.path.join(output_dir, root_name + '_corr.txt'))
             op.setProperty("InputWorkspace", output)
             op.setProperty("Separator", "Tab")
             op.setProperty("CommentIndicator", "# ")

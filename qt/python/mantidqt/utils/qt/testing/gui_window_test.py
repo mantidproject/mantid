@@ -94,10 +94,10 @@ def mouse_click(widget, pos, button=Qt.LeftButton):
 
 
 def skipIf(test, reason):
-
     def wrap(method):
         def wrapper(self):
             pass
+
         if test:
             print('Skip {name}. Reason: {reason}'.format(name=method.__name__, reason=reason), file=sys.stderr)
             if inspect.isclass(method):
@@ -111,7 +111,6 @@ def skipIf(test, reason):
 
 
 class GuiTestBase(object):
-
     def _call_test_method(self, w):
         self.widget = w
         if hasattr(self, self.call_method):
@@ -142,14 +141,17 @@ class GuiTestBase(object):
 
     def run_test(self, method='call', pause=0, close_on_finish=True, attach_debugger=False):
         self.call_method = method
-        open_in_window(self.create_widget, self._call_test_method, attach_debugger=attach_debugger, pause=pause,
+        open_in_window(self.create_widget,
+                       self._call_test_method,
+                       attach_debugger=attach_debugger,
+                       pause=pause,
                        close_on_finish=close_on_finish)
 
     def get_child(self, child_class, name):
         children = self.widget.findChildren(child_class, name)
         if len(children) == 0:
-            raise RuntimeError("Widget doesn't have children of type {0} with name {1}.".format(child_class.__name__,
-                                                                                                name))
+            raise RuntimeError("Widget doesn't have children of type {0} with name {1}.".format(
+                child_class.__name__, name))
         return children[0]
 
     @staticmethod
@@ -220,7 +222,6 @@ def is_test_method(value):
 
 
 class GuiWindowTest(TestCase, GuiTestBase):
-
     @classmethod
     def make_test_wrapper(cls, wrapped_name, skip):
         def wrapper(self):
@@ -243,7 +244,6 @@ class GuiWindowTest(TestCase, GuiTestBase):
 
 
 class MultiTestRunner(object):
-
     def __init__(self, methods):
         self.methods = methods
 
@@ -253,7 +253,6 @@ class MultiTestRunner(object):
 
 
 class WorkbenchGuiTest(GuiWindowTest):
-
     @classmethod
     def make_test_wrapper(cls, wrapped_name, skip):
         def wrapper(self):

@@ -67,8 +67,10 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
         return self.check_vanRecalc.isChecked()
 
     def get_checked_logs(self):
-        return ','.join([self.log_list.item(ilog).text() for ilog in range(self.log_list.count()) if
-                         self.log_list.item(ilog).checkState() == QtCore.Qt.Checked])
+        return ','.join([
+            self.log_list.item(ilog).text() for ilog in range(self.log_list.count())
+            if self.log_list.item(ilog).checkState() == QtCore.Qt.Checked
+        ])
 
     def get_primary_log(self):
         return self.primary_log.currentText()

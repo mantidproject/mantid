@@ -12,14 +12,13 @@ from mantid.simpleapi import (AnalysisDataService, ConjoinWorkspaces, CreateWork
 
 
 class MatchAndMergeWorkspacesTest(unittest.TestCase):
-
     def setUp(self):
         ws_list = []
         for i in range(5):
-            ws_name = 'ws_' + str(i+1)
-            data_x = np.arange(i, (i+1)*10+0.1, 0.1)
-            data_y = np.arange(i, (i+1)*10, 0.1)
-            data_e = np.arange(i, (i+1)*10, 0.1)
+            ws_name = 'ws_' + str(i + 1)
+            data_x = np.arange(i, (i + 1) * 10 + 0.1, 0.1)
+            data_y = np.arange(i, (i + 1) * 10, 0.1)
+            data_e = np.arange(i, (i + 1) * 10, 0.1)
             CreateWorkspace(OutputWorkspace=ws_name, DataX=data_x, DataY=data_y, DataE=data_e)
             ws_list.append(ws_name)
         GroupWorkspaces(InputWorkspaces=ws_list, OutputWorkspace='ws_group')
@@ -57,9 +56,7 @@ class MatchAndMergeWorkspacesTest(unittest.TestCase):
         x_min = np.array([2, 5, 10, 15, 20])
         x_max = np.array([10, 20, 30, 40, 45])
         ws_group = AnalysisDataService.retrieve('ws_group')
-        ConjoinWorkspaces(InputWorkspace1=ws_group[3],
-                          InputWorkspace2=ws_group[4],
-                          CheckOverlapping=False)
+        ConjoinWorkspaces(InputWorkspace1=ws_group[3], InputWorkspace2=ws_group[4], CheckOverlapping=False)
         ws_list = [ws_group[0], ws_group[1], ws_group[2], ws_group[3]]
         ws_merged = MatchAndMergeWorkspaces(InputWorkspaces=ws_list, XMin=x_min, XMax=x_max)
         self.assertIsInstance(ws_merged, MatrixWorkspace)

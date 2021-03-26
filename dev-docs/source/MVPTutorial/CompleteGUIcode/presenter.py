@@ -7,7 +7,6 @@
 
 
 class Presenter(object):
-
     def __init__(self, view, colours):
         self.view = view
         self.view.setColours(colours)

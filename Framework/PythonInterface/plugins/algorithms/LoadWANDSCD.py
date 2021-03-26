@@ -4,21 +4,22 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceProperty, Progress, MultipleFileProperty, FileAction, mtd
+from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceProperty, Progress, \
+    MultipleFileProperty, FileAction, mtd
 from mantid.kernel import Direction, Property, IntArrayProperty, StringListValidator, FloatTimeSeriesProperty
-from mantid.simpleapi import LoadEventNexus, RemoveLogs, DeleteWorkspace, ConvertToMD, Rebin, CreateGroupingWorkspace, GroupDetectors, SetUB
+from mantid.simpleapi import LoadEventNexus, RemoveLogs, DeleteWorkspace, ConvertToMD, Rebin, CreateGroupingWorkspace, \
+    GroupDetectors, SetUB
 import numpy as np
 import h5py
 import re
 
 
 class LoadWANDSCD(PythonAlgorithm):
-
     def category(self):
         return 'DataHandling\\Nexus'
 
     def seeAlso(self):
-        return [ "ConvertWANDSCDtoQ" ]
+        return ["ConvertWANDSCDtoQ"]
 
     def name(self):
         return 'LoadWANDSCD'
@@ -27,16 +28,15 @@ class LoadWANDSCD(PythonAlgorithm):
         return 'Load WAND single crystal data into a detector space vs rotation MDHisto'
 
     def PyInit(self):
-        self.declareProperty(MultipleFileProperty(name="Filename", action=FileAction.OptionalLoad,
-                                                  extensions=[".nxs.h5"]),
-                             "Files to load")
+        self.declareProperty(
+            MultipleFileProperty(name="Filename", action=FileAction.OptionalLoad, extensions=[".nxs.h5"]),
+            "Files to load")
         self.declareProperty('IPTS', Property.EMPTY_INT, "IPTS number to load from")
         self.declareProperty(IntArrayProperty("RunNumbers", []), 'Run numbers to load')
         self.declareProperty("Grouping", 'None', StringListValidator(['None', '2x2', '4x4']), "Group pixels")
-        self.declareProperty(WorkspaceProperty("OutputWorkspace", "",
-                                               optional=PropertyMode.Mandatory,
-                                               direction=Direction.Output),
-                             "Output Workspace")
+        self.declareProperty(
+            WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
+            "Output Workspace")
 
     def validateInputs(self):
         issues = dict()
@@ -52,7 +52,10 @@ class LoadWANDSCD(PythonAlgorithm):
 
         if not runs:
             ipts = self.getProperty("IPTS").value
-            runs = ['/HFIR/HB2C/IPTS-{}/nexus/HB2C_{}.nxs.h5'.format(ipts, run) for run in self.getProperty("RunNumbers").value]
+            runs = [
+                '/HFIR/HB2C/IPTS-{}/nexus/HB2C_{}.nxs.h5'.format(ipts, run)
+                for run in self.getProperty("RunNumbers").value
+            ]
 
         grouping = self.getProperty("Grouping").value
         if grouping == 'None':
@@ -60,7 +63,7 @@ class LoadWANDSCD(PythonAlgorithm):
         else:
             grouping = 2 if grouping == '2x2' else 4
 
-        x_dim = 480*8 // grouping
+        x_dim = 480 * 8 // grouping
         y_dim = 512 // grouping
 
         number_of_runs = len(runs)
@@ -72,22 +75,22 @@ class LoadWANDSCD(PythonAlgorithm):
         run_number_array = []
         monitor_count_array = []
 
-        progress = Progress(self, 0.0, 1.0, number_of_runs+3)
+        progress = Progress(self, 0.0, 1.0, number_of_runs + 3)
 
         for n, run in enumerate(runs):
-            progress.report('Loading: '+run)
+            progress.report('Loading: ' + run)
             with h5py.File(run, 'r') as f:
-                bc = np.zeros((512*480*8),dtype=np.int64)
+                bc = np.zeros((512 * 480 * 8), dtype=np.int64)
                 for b in range(8):
-                    bc += np.bincount(f['/entry/bank'+str(b+1)+'_events/event_id'].value,minlength=512*480*8)
-                bc = bc.reshape((480*8, 512))
+                    bc += np.bincount(f['/entry/bank' + str(b + 1) + '_events/event_id'].value, minlength=512 * 480 * 8)
+                bc = bc.reshape((480 * 8, 512))
                 if grouping == 2:
-                    bc = bc[::2,::2]+bc[1::2,::2]+bc[::2,1::2]+bc[1::2,1::2]
+                    bc = bc[::2, ::2] + bc[1::2, ::2] + bc[::2, 1::2] + bc[1::2, 1::2]
                 elif grouping == 4:
-                    bc = (bc[::4,::4]    + bc[1::4,::4]  + bc[2::4,::4]  + bc[3::4,::4]
-                          + bc[::4,1::4] + bc[1::4,1::4] + bc[2::4,1::4] + bc[3::4,1::4]
-                          + bc[::4,2::4] + bc[1::4,2::4] + bc[2::4,2::4] + bc[3::4,2::4]
-                          + bc[::4,3::4] + bc[1::4,3::4] + bc[2::4,3::4] + bc[3::4,3::4])
+                    bc = (bc[::4, ::4] + bc[1::4, ::4] + bc[2::4, ::4] + bc[3::4, ::4] + bc[::4, 1::4] +
+                          bc[1::4, 1::4] + bc[2::4, 1::4] + bc[3::4, 1::4] + bc[::4, 2::4] + bc[1::4, 2::4] +
+                          bc[2::4, 2::4] + bc[3::4, 2::4] + bc[::4, 3::4] + bc[1::4, 3::4] + bc[2::4, 3::4] +
+                          bc[3::4, 3::4])
                 data_array[n] = bc
                 s1_array.append(f['/entry/DASlogs/HB2C:Mot:s1.RBV/average_value'].value[0])
                 duration_array.append(float(f['/entry/duration'].value[0]))
@@ -99,8 +102,9 @@ class LoadWANDSCD(PythonAlgorithm):
         createWS_alg.setProperty("SignalInput", data_array)
         createWS_alg.setProperty("ErrorInput", np.sqrt(data_array))
         createWS_alg.setProperty("Dimensionality", 3)
-        createWS_alg.setProperty("Extents", '0.5,{},0.5,{},0.5,{}'.format(y_dim+0.5, x_dim+0.5, number_of_runs+0.5))
-        createWS_alg.setProperty("NumberOfBins", '{},{},{}'.format(y_dim,x_dim,number_of_runs))
+        createWS_alg.setProperty("Extents", '0.5,{},0.5,{},0.5,{}'.format(y_dim + 0.5, x_dim + 0.5,
+                                                                          number_of_runs + 0.5))
+        createWS_alg.setProperty("NumberOfBins", '{},{},{}'.format(y_dim, x_dim, number_of_runs))
         createWS_alg.setProperty("Names", 'y,x,scanIndex')
         createWS_alg.setProperty("Units", 'bin,bin,number')
         createWS_alg.execute()
@@ -116,20 +120,18 @@ class LoadWANDSCD(PythonAlgorithm):
                    'run_title,start_time,experiment_identifier,HB2C:CS:CrystalAlign:UBMatrix',
                    EnableLogging=False)
 
-        time_ns_array = _tmp_ws.run().startTime().totalNanoseconds() + np.append(0, np.cumsum(duration_array)*1e9)[:-1]
+        time_ns_array = _tmp_ws.run().startTime().totalNanoseconds() + np.append(0,
+                                                                                 np.cumsum(duration_array) * 1e9)[:-1]
 
         try:
-            ub = np.array(re.findall(r'-?\d+\.*\d*', _tmp_ws.run().getProperty('HB2C:CS:CrystalAlign:UBMatrix').value[0]),
-                          dtype=np.float).reshape(3,3)
-            sgl = np.deg2rad(_tmp_ws.run().getProperty('HB2C:Mot:sgl.RBV').value[0]) # 'HB2C:Mot:sgl.RBV,1,0,0,-1'
-            sgu = np.deg2rad(_tmp_ws.run().getProperty('HB2C:Mot:sgu.RBV').value[0]) # 'HB2C:Mot:sgu.RBV,0,0,1,-1'
-            sgl_a = np.array([[           1,            0,           0],
-                              [           0,  np.cos(sgl), np.sin(sgl)],
-                              [           0, -np.sin(sgl), np.cos(sgl)]])
-            sgu_a = np.array([[ np.cos(sgu),  np.sin(sgu),           0],
-                              [-np.sin(sgu),  np.cos(sgu),           0],
-                              [           0,            0,           1]])
-            UB = sgl_a.dot(sgu_a).dot(ub) # Apply the Goniometer tilts to the UB matrix
+            ub = np.array(re.findall(r'-?\d+\.*\d*',
+                                     _tmp_ws.run().getProperty('HB2C:CS:CrystalAlign:UBMatrix').value[0]),
+                          dtype=np.float).reshape(3, 3)
+            sgl = np.deg2rad(_tmp_ws.run().getProperty('HB2C:Mot:sgl.RBV').value[0])  # 'HB2C:Mot:sgl.RBV,1,0,0,-1'
+            sgu = np.deg2rad(_tmp_ws.run().getProperty('HB2C:Mot:sgu.RBV').value[0])  # 'HB2C:Mot:sgu.RBV,0,0,1,-1'
+            sgl_a = np.array([[1, 0, 0], [0, np.cos(sgl), np.sin(sgl)], [0, -np.sin(sgl), np.cos(sgl)]])
+            sgu_a = np.array([[np.cos(sgu), np.sin(sgu), 0], [-np.sin(sgu), np.cos(sgu), 0], [0, 0, 1]])
+            UB = sgl_a.dot(sgu_a).dot(ub)  # Apply the Goniometer tilts to the UB matrix
             SetUB(_tmp_ws, UB=UB, EnableLogging=False)
         except (RuntimeError, ValueError):
             SetUB(_tmp_ws, EnableLogging=False)
@@ -138,12 +140,12 @@ class LoadWANDSCD(PythonAlgorithm):
             _tmp_group, _, _ = CreateGroupingWorkspace(InputWorkspace=_tmp_ws, EnableLogging=False)
 
             group_number = 0
-            for x in range(0,480*8,grouping):
-                for y in range(0,512,grouping):
+            for x in range(0, 480 * 8, grouping):
+                for y in range(0, 512, grouping):
                     group_number += 1
                     for j in range(grouping):
                         for i in range(grouping):
-                            _tmp_group.dataY(y+i+(x+j)*512)[0] = group_number
+                            _tmp_group.dataY(y + i + (x + j) * 512)[0] = group_number
 
             _tmp_ws = GroupDetectors(InputWorkspace=_tmp_ws, CopyGroupingFromWorkspace=_tmp_group, EnableLogging=False)
             DeleteWorkspace(_tmp_group, EnableLogging=False)
@@ -151,9 +153,13 @@ class LoadWANDSCD(PythonAlgorithm):
         progress.report('Adding logs')
 
         # Hack: ConvertToMD is needed so that a deep copy of the ExperimentInfo can happen
-        # outWS.addExperimentInfo(_tmp_ws) # This doesn't work but should, when you delete `ws` `outWS` also loses it's ExperimentInfo
+        # outWS.addExperimentInfo(_tmp_ws) # This doesn't work but should, when you delete `ws` `outWS` also loses it's
+        # ExperimentInfo
         _tmp_ws = Rebin(_tmp_ws, '0,1,2', EnableLogging=False)
-        _tmp_ws = ConvertToMD(_tmp_ws, dEAnalysisMode='Elastic', EnableLogging=False, PreprocDetectorsWS='__PreprocessedDetectorsWS')
+        _tmp_ws = ConvertToMD(_tmp_ws,
+                              dEAnalysisMode='Elastic',
+                              EnableLogging=False,
+                              PreprocDetectorsWS='__PreprocessedDetectorsWS')
 
         preprocWS = mtd['__PreprocessedDetectorsWS']
         twotheta = preprocWS.column(2)

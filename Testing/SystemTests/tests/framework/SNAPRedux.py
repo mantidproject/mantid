@@ -24,11 +24,13 @@ def getSaveDir():
 
 
 def do_cleanup():
-    Files = [os.path.join('d_spacing', 'SNAP_34172_2_4_Grouping.dat'),
-             os.path.join('gsas', 'SNAP_34172_2_4_Grouping.gsa'),
-             os.path.join('fullprof', 'SNAP_34172_2_4_Grouping-0.dat'),
-             os.path.join('fullprof', 'SNAP_34172_2_4_Grouping-1.dat'),
-             os.path.join('nexus', 'SNAP_34172_2_4_Grouping.nxs')]
+    Files = [
+        os.path.join('d_spacing', 'SNAP_34172_2_4_Grouping.dat'),
+        os.path.join('gsas', 'SNAP_34172_2_4_Grouping.gsa'),
+        os.path.join('fullprof', 'SNAP_34172_2_4_Grouping-0.dat'),
+        os.path.join('fullprof', 'SNAP_34172_2_4_Grouping-1.dat'),
+        os.path.join('nexus', 'SNAP_34172_2_4_Grouping.nxs')
+    ]
     savedir = getSaveDir()
     for filename in Files:
         absfile = os.path.join(savedir, filename)
@@ -57,16 +59,21 @@ class SNAP_short(systemtesting.MantidSystemTest):
 
     def runTest(self):
         # run the actual code
-        SNAPReduce(RunNumbers='34172', Masking='Horizontal', Binning='0.7,-0.004,5.5',
-                   Normalization='Extracted from Data', PeakClippingWindowSize=7,
-                   SmoothingRange=5, GroupDetectorsBy='2_4 Grouping',
-                   SaveData=True, OutputDirectory=getSaveDir())
+        SNAPReduce(RunNumbers='34172',
+                   Masking='Horizontal',
+                   Binning='0.7,-0.004,5.5',
+                   Normalization='Extracted from Data',
+                   PeakClippingWindowSize=7,
+                   SmoothingRange=5,
+                   GroupDetectorsBy='2_4 Grouping',
+                   SaveData=True,
+                   OutputDirectory=getSaveDir())
 
     def validate(self):
         self.tolerance = 1.0e-2
         self.disableChecking.append('Instrument')  # doesn't validate correctly
         # default validation of workspace to processed nexus is right
-        return ('SNAP_34172_2_4_Grouping_nor','SNAP_34172_2_4_Grouping_nor.nxs')
+        return ('SNAP_34172_2_4_Grouping_nor', 'SNAP_34172_2_4_Grouping_nor.nxs')
 
 
 class SNAP_short_detcal(systemtesting.MantidSystemTest):
@@ -84,26 +91,30 @@ class SNAP_short_detcal(systemtesting.MantidSystemTest):
 
     def runTest(self):
         # run the actual code
-        SNAPReduce(RunNumbers='34172', Masking='Horizontal', Binning='0.7,-0.004,5.5',
-                   Calibration='DetCal File', DetCalFilename='SNAP_34172.DetCal',
-                   Normalization='Extracted from Data', PeakClippingWindowSize=7,
-                   SmoothingRange=5, GroupDetectorsBy='2_4 Grouping',
-                   SaveData=True, OutputDirectory=getSaveDir())
+        SNAPReduce(RunNumbers='34172',
+                   Masking='Horizontal',
+                   Binning='0.7,-0.004,5.5',
+                   Calibration='DetCal File',
+                   DetCalFilename='SNAP_34172.DetCal',
+                   Normalization='Extracted from Data',
+                   PeakClippingWindowSize=7,
+                   SmoothingRange=5,
+                   GroupDetectorsBy='2_4 Grouping',
+                   SaveData=True,
+                   OutputDirectory=getSaveDir())
 
     def validate(self):
         self.tolerance = 1.0e-2
         self.disableChecking.append('Instrument')  # doesn't validate correctly
         # default validation of workspace to processed nexus is right
-        return ('SNAP_34172_2_4_Grouping_nor','SNAP_34172_2_4_Grouping_nor.nxs')
+        return ('SNAP_34172_2_4_Grouping_nor', 'SNAP_34172_2_4_Grouping_nor.nxs')
 
 
 class Simple(systemtesting.MantidSystemTest):
     # this test is very similar to AlignAndFocusPowderFromFilesTest.ChunkingCompare
     def runTest(self):
         # 11MB file
-        kwargs = {'RunNumbers':'45874',
-                  'GroupDetectorsBy':'Banks',
-                  'Binning':(.5,-.004,7)}
+        kwargs = {'RunNumbers': '45874', 'GroupDetectorsBy': 'Banks', 'Binning': (.5, -.004, 7)}
 
         # create grouping for two output spectra
         CreateGroupingWorkspace(InstrumentFilename='SNAP_Definition.xml',

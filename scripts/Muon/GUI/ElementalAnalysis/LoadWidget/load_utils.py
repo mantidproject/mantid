@@ -20,7 +20,7 @@ num_files_per_detector = 3
 class LModel(object):
     def __init__(self):
         self.run = 0
-        self.num_loaded_detectors =OrderedDict()
+        self.num_loaded_detectors = OrderedDict()
         self.loaded_runs = OrderedDict()
         self.last_loaded_runs = []
 
@@ -138,8 +138,10 @@ def create_merged_workspace(workspace_list):
 
         # create single ws for the merged data, use original ws as a template
         template_ws = next(ws for ws in workspace_list if ws is not None)
-        merged_ws = mantid.WorkspaceFactory.create(mantid.mtd[template_ws], NVectors=num_files_per_detector,
-                                                   XLength=max_num_bins, YLength=max_num_bins)
+        merged_ws = mantid.WorkspaceFactory.create(mantid.mtd[template_ws],
+                                                   NVectors=num_files_per_detector,
+                                                   XLength=max_num_bins,
+                                                   YLength=max_num_bins)
 
         # create a merged workspace based on every entry from workspace list
         for i in range(0, num_files_per_detector):

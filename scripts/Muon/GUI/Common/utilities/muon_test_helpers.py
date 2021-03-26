@@ -8,7 +8,6 @@
 
 class IteratorWithException:
     """Wraps a simple iterable (i.e. list) so that it throws a ValueError on a particular index."""
-
     def __init__(self, iterable, throw_on_index):
         self.max = len(iterable)
         self.iterable = iter(iterable)

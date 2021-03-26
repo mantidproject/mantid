@@ -9,28 +9,26 @@ import unittest
 from unittest import mock
 from sans.common.enums import (SANSInstrument, ReductionMode)
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_reduction_selection,
-                                       get_string_for_gui_from_reduction_mode,
-                                       get_batch_file_dir_from_path,
-                                       add_dir_to_datasearch,
-                                       remove_dir_from_datasearch,
-                                       SANSGuiPropertiesHandler, get_reduction_mode_from_gui_selection)
+                                       get_string_for_gui_from_reduction_mode, get_batch_file_dir_from_path,
+                                       add_dir_to_datasearch, remove_dir_from_datasearch, SANSGuiPropertiesHandler,
+                                       get_reduction_mode_from_gui_selection)
 
 
 class GuiCommonTest(unittest.TestCase):
     def _assert_same(self, collection1, collection2):
         for element1, element2 in zip(collection1, collection2):
-            self.assertEqual(element1,  element2)
+            self.assertEqual(element1, element2)
 
     def _assert_same_map(self, map1, map2):
-        self.assertEqual(len(map1),  len(map2))
+        self.assertEqual(len(map1), len(map2))
 
         for key, value in map1.items():
             self.assertTrue(key in map2)
-            self.assertEqual(map1[key],  map2[key])
+            self.assertEqual(map1[key], map2[key])
 
     def run_reduction_mode_string_case(self, instrument, reduction_mode, reduction_mode_string):
         setting = get_string_for_gui_from_reduction_mode(reduction_mode, instrument)
-        self.assertEqual(setting,  reduction_mode_string)
+        self.assertEqual(setting, reduction_mode_string)
 
     def test_that_gets_reduction_mode_string_for_gui(self):
         sans_settings = get_reduction_mode_strings_for_gui(SANSInstrument.SANS2D)
@@ -47,19 +45,32 @@ class GuiCommonTest(unittest.TestCase):
 
     def test_that_gets_correct_reduction_selection(self):
         sans_settings = get_reduction_selection(SANSInstrument.SANS2D)
-        self._assert_same_map(sans_settings, {ReductionMode.LAB: "rear", ReductionMode.HAB: "front",
-                                              ReductionMode.MERGED: "Merged", ReductionMode.ALL: "All"})
+        self._assert_same_map(sans_settings, {
+            ReductionMode.LAB: "rear",
+            ReductionMode.HAB: "front",
+            ReductionMode.MERGED: "Merged",
+            ReductionMode.ALL: "All"
+        })
 
         loq_settings = get_reduction_selection(SANSInstrument.LOQ)
-        self._assert_same_map(loq_settings, {ReductionMode.LAB: "main-detector", ReductionMode.HAB: "Hab",
-                                             ReductionMode.MERGED: "Merged", ReductionMode.ALL: "All"})
+        self._assert_same_map(
+            loq_settings, {
+                ReductionMode.LAB: "main-detector",
+                ReductionMode.HAB: "Hab",
+                ReductionMode.MERGED: "Merged",
+                ReductionMode.ALL: "All"
+            })
 
         larmor_settings = get_reduction_selection(SANSInstrument.LARMOR)
         self._assert_same_map(larmor_settings, {ReductionMode.LAB: "DetectorBench"})
 
         default_settings = get_reduction_selection(SANSInstrument.NO_INSTRUMENT)
-        self._assert_same_map(default_settings, {ReductionMode.LAB: "LAB", ReductionMode.HAB: "HAB",
-                                                 ReductionMode.MERGED: "Merged", ReductionMode.ALL: "All"})
+        self._assert_same_map(default_settings, {
+            ReductionMode.LAB: "LAB",
+            ReductionMode.HAB: "HAB",
+            ReductionMode.MERGED: "Merged",
+            ReductionMode.ALL: "All"
+        })
 
     def test_that_can_get_reduction_mode_string(self):
         self.run_reduction_mode_string_case(SANSInstrument.SANS2D, ReductionMode.LAB, "rear")

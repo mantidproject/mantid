@@ -60,7 +60,7 @@ def _create_XML_subElement_for_diffs(root_node, diffs):
     return diff_nodes
 
 
-def save_grouping_to_XML(groups,  pairs, diffs, filename, save=True, description=''):
+def save_grouping_to_XML(groups, pairs, diffs, filename, save=True, description=''):
     """
     Save a set of muon group and pair parameters to XML format file. Fewer checks are performed
     than with the XML loading.
@@ -125,8 +125,7 @@ def load_grouping_from_XML(filename):
 
     for i, group_name in enumerate(group_names):
         period = periods[i] if periods and i < len(periods) else [1]
-        groups += [MuonGroup(group_name=group_name,
-                             detector_ids=group_ids[i], periods=period)]
+        groups += [MuonGroup(group_name=group_name, detector_ids=group_ids[i], periods=period)]
 
     for i, pair_name in enumerate(pair_names):
         if pair_periods:
@@ -134,11 +133,13 @@ def load_grouping_from_XML(filename):
         else:
             pair_periods_converted = [1]
 
-        pairs += [MuonPair(pair_name=pair_name,
-                           forward_group_name=pair_groups[i][0],
-                           backward_group_name=pair_groups[i][1],
-                           alpha=pair_alphas[i],
-                           periods=pair_periods_converted)]
+        pairs += [
+            MuonPair(pair_name=pair_name,
+                     forward_group_name=pair_groups[i][0],
+                     backward_group_name=pair_groups[i][1],
+                     alpha=pair_alphas[i],
+                     periods=pair_periods_converted)
+        ]
 
     for i, diff_name in enumerate(diff_names):
         if diff_periods:
@@ -169,8 +170,11 @@ def _get_diffs_from_XML(root):
     for child in root:
         if child.tag == "diff":
             names += [child.attrib['name']]
-            groups += [[child.find('positive').attrib['val'], child.find('negative').attrib['val'],
-                        child.find('group-or-pair').attrib['val']]]
+            groups += [[
+                child.find('positive').attrib['val'],
+                child.find('negative').attrib['val'],
+                child.find('group-or-pair').attrib['val']
+            ]]
             periods += [child.find('periods').attrib['val']]
     return names, groups, periods
 

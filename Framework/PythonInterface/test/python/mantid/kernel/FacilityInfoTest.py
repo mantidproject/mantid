@@ -10,7 +10,6 @@ import pytz
 
 
 class FacilityInfoTest(unittest.TestCase):
-
     def test_construction_raies_an_error(self):
         self.assertRaises(RuntimeError, FacilityInfo)
 
@@ -27,7 +26,7 @@ class FacilityInfoTest(unittest.TestCase):
         self.assertEqual(test_facility.preferredExtension(), ".nxs")
         self.assertEqual(len(test_facility.archiveSearch()), 1)
         self.assertGreater(len(test_facility.instruments()), 30)
-        self.assertTrue(len(test_facility.instruments("Neutron Diffraction"))> 10)
+        self.assertTrue(len(test_facility.instruments("Neutron Diffraction")) > 10)
         self.assertTrue(isinstance(test_facility.instrument("WISH"), InstrumentInfo))
         self.assertEqual(test_facility.timezone(), "Europe/London")
 
@@ -35,10 +34,11 @@ class FacilityInfoTest(unittest.TestCase):
         # verify that all of the timezones can get converted by pytz
         for facility in ConfigService.getFacilities():
             if len(facility.timezone()) == 0:
-                continue # don't test empty strings
+                continue  # don't test empty strings
             tz = pytz.timezone(facility.timezone())
             print(facility.name(), tz)
             self.assertEqual(str(tz), facility.timezone())
+
 
 if __name__ == '__main__':
     unittest.main()

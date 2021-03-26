@@ -110,13 +110,13 @@ class PeaksIntegrationReportDialog(QDialog):
                 k_shift = peak_integration_summary[scan_number]['K-vector']
                 absorption_correction = peak_integration_summary[scan_number]['Absorption Correction']
 
-                self.ui.tableWidget_spreadsheet.add_scan_information(scan_number, spice_hkl, calculated_hkl,
-                                                                     mask_name, intensity1, error1, intensity2, error2,
-                                                                     intensity3, error3, lorentz_factor, estimated_bkgd,
-                                                                     gauss_bkgd, gauss_sigma, gauss_a, motor_name,
-                                                                     motor_step, k_shift, absorption_correction)
+                self.ui.tableWidget_spreadsheet.add_scan_information(scan_number, spice_hkl, calculated_hkl, mask_name,
+                                                                     intensity1, error1, intensity2, error2, intensity3,
+                                                                     error3, lorentz_factor, estimated_bkgd, gauss_bkgd,
+                                                                     gauss_sigma, gauss_a, motor_name, motor_step,
+                                                                     k_shift, absorption_correction)
             except KeyError as key_err:
-                print ('ERROR: Unable to add scan {0} to report due to {1}'.format(scan_number, key_err))
+                print('ERROR: Unable to add scan {0} to report due to {1}'.format(scan_number, key_err))
 
         # END-FOR
 

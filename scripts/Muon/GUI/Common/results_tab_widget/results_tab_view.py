@@ -90,8 +90,7 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
         Set the fit function in the QComboBox
         """
         if PYQT4:
-            self.fit_function_selector.setCurrentIndex(
-                self.fit_function_selector.findText(function))
+            self.fit_function_selector.setCurrentIndex(self.fit_function_selector.findText(function))
         else:
             self.fit_function_selector.setCurrentText(function)
 
@@ -132,23 +131,16 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
         """Setup the layout of the view"""
         self.setupUi(self)
 
-        self.log_selector_presenter = _create_empty_list_selector(
-            self, LOG_SELECTOR_COL0_WIDTH)
-        self.log_value_layout.addWidget(self.log_selector_presenter.view,
-                                        *FIT_SELECTOR_GRID_POS)
-        self.fit_selector_presenter = _create_empty_list_selector(
-            self, FIT_SELECTOR_COL0_WIDTH)
-        self.fit_layout.addWidget(self.fit_selector_presenter.view,
-                                  *LOG_SELECTOR_GRID_POS)
+        self.log_selector_presenter = _create_empty_list_selector(self, LOG_SELECTOR_COL0_WIDTH)
+        self.log_value_layout.addWidget(self.log_selector_presenter.view, *FIT_SELECTOR_GRID_POS)
+        self.fit_selector_presenter = _create_empty_list_selector(self, FIT_SELECTOR_COL0_WIDTH)
+        self.fit_layout.addWidget(self.fit_selector_presenter.view, *LOG_SELECTOR_GRID_POS)
 
     def _init_signals(self):
         """Connect internal signals to external notifiers"""
-        self.fit_function_selector.currentIndexChanged.connect(
-            self.function_selection_changed)
-        self.results_name_editor.editingFinished.connect(
-            self.results_name_edited)
-        self.output_results_table_btn.clicked.connect(
-            self.output_results_requested)
+        self.fit_function_selector.currentIndexChanged.connect(self.function_selection_changed)
+        self.results_name_editor.editingFinished.connect(self.results_name_edited)
+        self.output_results_table_btn.clicked.connect(self.output_results_requested)
 
 
 # Private helper functions

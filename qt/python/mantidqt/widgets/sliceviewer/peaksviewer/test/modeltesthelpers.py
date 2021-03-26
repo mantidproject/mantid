@@ -57,10 +57,7 @@ def create_mock_peak(center):
     return peak
 
 
-def create_slice_info(transform_side_effect,
-                      slice_value,
-                      slice_width,
-                      frame=SpecialCoordinateSystem.QLab):
+def create_slice_info(transform_side_effect, slice_value, slice_width, frame=SpecialCoordinateSystem.QLab):
     slice_info = MagicMock()
     slice_info.frame = frame
     slice_info.transform.side_effect = transform_side_effect

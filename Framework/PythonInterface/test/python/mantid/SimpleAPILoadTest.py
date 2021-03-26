@@ -13,7 +13,6 @@ from mantid.api import mtd, MatrixWorkspace, WorkspaceGroup
 
 
 class SimpleAPILoadTest(unittest.TestCase):
-
     def tearDown(self):
         """Clear up after each test"""
         mtd.clear()
@@ -57,7 +56,7 @@ class SimpleAPILoadTest(unittest.TestCase):
 
     def test_Load_call_with_other_args_executes_correctly(self):
         try:
-            raw = Load('IRS21360.raw',SpectrumMax=1)
+            raw = Load('IRS21360.raw', SpectrumMax=1)
         except RuntimeError:
             self.fail("Load with a filename and extra args should not raise an exception")
         self.assertEqual(1, raw.getNumberHistograms())
@@ -68,21 +67,21 @@ class SimpleAPILoadTest(unittest.TestCase):
 
     def test_Load_call_with_args_that_do_not_apply_executes_correctly(self):
         try:
-            raw = Load('IRS21360.raw',SpectrumMax=1,Append=True)
+            raw = Load('IRS21360.raw', SpectrumMax=1, Append=True)
         except RuntimeError:
             self.fail("Load with a filename and extra args should not raise an exception")
         self.assertEqual(1, raw.getNumberHistograms())
 
     def test_Load_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided(self):
         wsname = 'test_Load_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided'
-        wkspace = Load('IRS21360.raw',OutputWorkspace=wsname)
-        self.assertTrue( wsname in mtd )
+        wkspace = Load('IRS21360.raw', OutputWorkspace=wsname)
+        self.assertTrue(wsname in mtd)
 
     def test_Load_accepts_EnableLogging_keyword(self):
         # The test here is that the algorithm runs without falling over about the EnableLogging keyword being a property
         wsname = 'test_Load_accepts_EnableLogging_keyword'
-        Load('IRS21360.raw',OutputWorkspace=wsname, EnableLogging=False)
-        self.assertTrue( wsname in mtd )
+        Load('IRS21360.raw', OutputWorkspace=wsname, EnableLogging=False)
+        self.assertTrue(wsname in mtd)
 
     def _do_name_check(self, wkspace, expected_name):
         self.assertEqual(wkspace.name(), expected_name)
@@ -92,6 +91,7 @@ class SimpleAPILoadTest(unittest.TestCase):
         magicws = Load('IRS21360.raw', EnableLogging=False, StoreInADS=False)
         self.assertFalse('magicws' in mtd)
         self.assertTrue(magicws)
+
 
 if __name__ == '__main__':
     unittest.main()

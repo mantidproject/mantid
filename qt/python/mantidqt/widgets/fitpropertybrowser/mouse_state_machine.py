@@ -13,7 +13,6 @@ class StateMachine(object):
     """
     A state machine implementation to control mouse interaction with the peak editing tool.
     """
-
     def __init__(self, tool):
         self.tool = tool
         self.state = MoveMarkersState(self)
@@ -60,7 +59,6 @@ class MoveMarkersState(object):
     """
     A state that controls marker movement.
     """
-
     def __init__(self, machine):
         self.machine = machine
         self.tool = machine.tool
@@ -90,7 +88,6 @@ class AddPeakState(object):
     """
     A state that controls adding a new peak.
     """
-
     def __init__(self, machine):
         self.machine = machine
         self.tool = machine.tool

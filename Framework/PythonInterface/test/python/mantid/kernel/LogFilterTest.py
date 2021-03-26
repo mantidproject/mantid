@@ -10,9 +10,8 @@ from mantid.kernel import LogFilter, FloatTimeSeriesProperty, BoolTimeSeriesProp
 
 
 class LogFilterTest(unittest.TestCase):
-
     def test_addFilter_filters_log(self):
-        height_log = FloatTimeSeriesProperty("height_log");
+        height_log = FloatTimeSeriesProperty("height_log")
         height_log.addValue("2008-Jun-17 11:10:44", -0.86526)
         height_log.addValue("2008-Jun-17 11:10:45", -1.17843)
         height_log.addValue("2008-Jun-17 11:10:47", -1.27995)
@@ -20,7 +19,7 @@ class LogFilterTest(unittest.TestCase):
         height_log.addValue("2008-Jun-17 11:20:16", -1.87435)
         height_log.addValue("2008-Jun-17 11:20:17", -2.70547)
         height_log.addValue("2008-Jun-17 11:20:19", -2.99125)
-        height_log.addValue("2008-Jun-17 11:20:20", -3);
+        height_log.addValue("2008-Jun-17 11:20:20", -3)
         height_log.addValue("2008-Jun-17 11:20:27", -2.98519)
         height_log.addValue("2008-Jun-17 11:20:29", -2.68904)
 
@@ -36,11 +35,12 @@ class LogFilterTest(unittest.TestCase):
         period_log.addValue("2008-Jun-17 11:12:21", True)
         period_log.addValue("2008-Jun-17 11:12:32", False)
 
-        self.assertEqual(height_log.size(), 10);
+        self.assertEqual(height_log.size(), 10)
         filter = LogFilter(height_log)
         filter.addFilter(period_log)
         filtered = filter.data()
         self.assertEqual(filtered.size(), 1)
+
 
 if __name__ == '__main__':
     unittest.main()

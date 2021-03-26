@@ -42,9 +42,13 @@ class CreateSANSAdjustmentWorkspacesTest(unittest.TestCase):
 
     def _get_sample_monitor_data(self, value):
         name = "test_monitor_workspace"
-        monitor_workspace = CreateSampleWorkspace(OutputWorkspace=name, NumBanks=0, NumMonitors=8,
-                                                  XMin=self.test_tof_min, XMax=self.test_tof_max,
-                                                  BinWidth=self.test_tof_width, StoreInADS=False)
+        monitor_workspace = CreateSampleWorkspace(OutputWorkspace=name,
+                                                  NumBanks=0,
+                                                  NumMonitors=8,
+                                                  XMin=self.test_tof_min,
+                                                  XMax=self.test_tof_max,
+                                                  BinWidth=self.test_tof_width,
+                                                  StoreInADS=False)
 
         for hist in range(monitor_workspace.getNumberHistograms()):
             data_y = monitor_workspace.dataY(hist)
@@ -56,11 +60,14 @@ class CreateSANSAdjustmentWorkspacesTest(unittest.TestCase):
 
     def _get_sample_data(self):
         name = "test_workspace"
-        workspace = CreateSampleWorkspace(OutputWorkspace=name, NumBanks=1, NumMonitors=1,
+        workspace = CreateSampleWorkspace(OutputWorkspace=name,
+                                          NumBanks=1,
+                                          NumMonitors=1,
                                           XMin=self.test_wav_min,
                                           XMax=self.test_wav_max,
                                           BinWidth=self.test_wav_width,
-                                          XUnit="Wavelength", StoreInADS=False)
+                                          XUnit="Wavelength",
+                                          StoreInADS=False)
 
         return workspace
 
@@ -82,7 +89,8 @@ class CreateSANSAdjustmentWorkspacesTest(unittest.TestCase):
         component = DetectorType.LAB.value if is_lab else DetectorType.HAB.value
 
         alg = CreateSANSAdjustmentWorkspaces(state_adjustment=state.adjustment,
-                                             component=component, data_type=data_type)
+                                             component=component,
+                                             data_type=data_type)
         returned = alg.create_sans_adjustment_workspaces(direct_ws=direct_data,
                                                          monitor_ws=sample_monitor_data,
                                                          transmission_ws=transmission_data,

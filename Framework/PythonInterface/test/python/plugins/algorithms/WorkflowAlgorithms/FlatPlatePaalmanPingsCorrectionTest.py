@@ -36,10 +36,7 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
                                                   XMax=7.9,
                                                   BinWidth=0.1)
 
-        SetInstrumentParameter(Workspace=sample_empty_unit,
-                               ParameterName='Efixed',
-                               ParameterType='Number',
-                               Value='5.')
+        SetInstrumentParameter(Workspace=sample_empty_unit, ParameterName='Efixed', ParameterType='Number', Value='5.')
 
         self._sample_empty_unit = sample_empty_unit
 
@@ -77,12 +74,10 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
         test_ws = mtd[ws_name]
 
         # Check workspace is in wavelength
-        self.assertEqual(test_ws.getAxis(0).getUnit().unitID(),
-                         'Wavelength')
+        self.assertEqual(test_ws.getAxis(0).getUnit().unitID(), 'Wavelength')
 
         # Check it has the same number of spectra as the sample
-        self.assertEqual(test_ws.getNumberHistograms(),
-                         self._sample_ws.getNumberHistograms())
+        self.assertEqual(test_ws.getNumberHistograms(), self._sample_ws.getNumberHistograms())
 
         # Check it has X binning matching sample workspace
         self.assertEqual(test_ws.blocksize(), self._sample_ws.blocksize())
@@ -314,7 +309,7 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
         for workspace in mtd[self._corrections_ws_name]:
             self.assertEqual(workspace.blocksize(), 1)
             run = workspace.getRun()
-            self.assertEqual(run.getLogData('emode').value,'Efixed')
+            self.assertEqual(run.getLogData('emode').value, 'Efixed')
             self.assertAlmostEqual(run.getLogData('efixed').value, 5.)
 
     def test_efixed_override(self):
@@ -330,8 +325,9 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
         for workspace in mtd[self._corrections_ws_name]:
             self.assertEqual(workspace.blocksize(), 1)
             run = workspace.getRun()
-            self.assertEqual(run.getLogData('emode').value,'Efixed')
+            self.assertEqual(run.getLogData('emode').value, 'Efixed')
             self.assertAlmostEqual(run.getLogData('efixed').value, 7.5)
+
 
 if __name__ == "__main__":
     unittest.main()

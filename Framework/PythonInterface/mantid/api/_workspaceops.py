@@ -11,7 +11,6 @@
     It is intended for internal use.
 """
 
-
 import inspect as _inspect
 import sys
 
@@ -29,15 +28,13 @@ def attach_binary_operators_to_workspace():
         Attaches the common binary operators
         to the Workspace class
     """
-
     def add_operator_func(attr, algorithm, inplace, reverse):
         # Wrapper for the function call
         def op_wrapper(self, other):
             # Get the result variable to know what to call the output
             result_info = lhs_info()
             # Pass off to helper
-            return _do_binary_operation(algorithm, self, other, result_info,
-                                        inplace, reverse)
+            return _do_binary_operation(algorithm, self, other, result_info, inplace, reverse)
 
         op_wrapper.__name__ = attr
         setattr(Workspace, attr, op_wrapper)
@@ -127,7 +124,6 @@ def attach_unary_operators_to_workspace():
         Attaches the common unary operators
         to the Workspace class
     """
-
     def add_operator_func(attr, algorithm):
         # Wrapper for the function call
         def op_wrapper(self):
@@ -140,9 +136,7 @@ def attach_unary_operators_to_workspace():
         setattr(Workspace, attr, op_wrapper)
 
     # Binary operations that workspaces are aware of
-    operations = {
-        'NotMD': '__invert__'
-    }
+    operations = {'NotMD': '__invert__'}
     # Loop through and add each one in turn
     for alg, attributes in operations.items():
         if type(attributes) == str: attributes = [attributes]
@@ -197,7 +191,6 @@ def _do_unary_operation(op, self, lhs_vars):
 # ------------------------------------------------------------------------------
 def attach_tableworkspaceiterator():
     """Attaches the iterator code to a table workspace."""
-
     def __iter_method(self):
         class ITableWorkspaceIter(object):
             def __init__(self, wksp):
@@ -231,7 +224,6 @@ def attach_func_as_method(name, func_obj, self_param_name, algm_name, workspace_
         :param workspace_types: A list of string names of a workspace types. If None, then it is attached
                               to the general Workspace type. Default=None
     """
-
     def _method_impl(self, *args, **kwargs):
         # Map the calling object to the requested parameter
         kwargs[self_param_name] = self
@@ -242,8 +234,7 @@ def attach_func_as_method(name, func_obj, self_param_name, algm_name, workspace_
         return func_obj(*args, **kwargs)
 
     # ------------------------------------------------------------------
-    customise_func(_method_impl, func_obj.__name__,
-                   LazyMethodSignature(alg_name=algm_name), func_obj.__doc__)
+    customise_func(_method_impl, func_obj.__name__, LazyMethodSignature(alg_name=algm_name), func_obj.__doc__)
 
     if workspace_types or len(workspace_types) > 0:
         from mantid import api

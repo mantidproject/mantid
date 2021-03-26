@@ -44,15 +44,17 @@ COMPONENT_XML_MINIMAL = """      <location x="%(x)f" y="%(y)f" z="%(z)f" name="%
 
 class ExportGeometry(PythonAlgorithm):
     _eulerCon = None
-    _eulerXML={"X":'axis-x="1" axis-y="0" axis-z="0" val="',
-               "Y":'axis-x="0" axis-y="1" axis-z="0" val="',
-               "Z":'axis-x="0" axis-y="0" axis-z="1" val="'}
+    _eulerXML = {
+        "X": 'axis-x="1" axis-y="0" axis-z="0" val="',
+        "Y": 'axis-x="0" axis-y="1" axis-z="0" val="',
+        "Z": 'axis-x="0" axis-y="0" axis-z="1" val="'
+    }
 
     def category(self):
         return "Utility\\Instrument"
 
     def seeAlso(self):
-        return [ "LoadInstrument" ]
+        return ["LoadInstrument"]
 
     def name(self):
         return "ExportGeometry"
@@ -61,21 +63,19 @@ class ExportGeometry(PythonAlgorithm):
         return "Extract components from larger in-memory instrument, save as IDF style xml"
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty("InputWorkspace", "",
+        self.declareProperty(WorkspaceProperty("InputWorkspace",
+                                               "",
                                                validator=InstrumentValidator(),
                                                direction=Direction.Input),
                              doc="Workspace containing the instrument to be exported")
-        eulerConventions = ["ZXZ", "XYX", "YZY", "ZYZ", "XZX", "YXY",
-                            "XYZ", "YZX", "ZXY", "XZY", "ZYX", "YXZ"]
-        self.declareProperty(name="EulerConvention", defaultValue="YZY",
+        eulerConventions = ["ZXZ", "XYX", "YZY", "ZYZ", "XZX", "YXY", "XYZ", "YZX", "ZXY", "XZY", "ZYX", "YXZ"]
+        self.declareProperty(name="EulerConvention",
+                             defaultValue="YZY",
                              validator=StringListValidator(eulerConventions),
                              doc="Euler angles convention used when writing angles.")
-        self.declareProperty(StringArrayProperty("Components",
-                                                 direction=Direction.Input),
+        self.declareProperty(StringArrayProperty("Components", direction=Direction.Input),
                              doc="Comma separated list of instrument component names to export")
-        self.declareProperty(FileProperty(name="Filename",
-                                          defaultValue="",
-                                          action=FileAction.Save,
+        self.declareProperty(FileProperty(name="Filename", defaultValue="", action=FileAction.Save,
                                           extensions=[".xml"]),
                              doc="Save file")
 
@@ -90,8 +90,9 @@ class ExportGeometry(PythonAlgorithm):
         if len(components) <= 0:
             issues['Components'] = "Must supply components"
         else:
-            components = [component for component in components
-                          if wksp.getInstrument().getComponentByName(component) is None]
+            components = [
+                component for component in components if wksp.getInstrument().getComponentByName(component) is None
+            ]
             if len(components) > 0:
                 issues['Components'] = "Instrument has no component \"" \
                                        + ','.join(components) + "\""
@@ -106,10 +107,10 @@ class ExportGeometry(PythonAlgorithm):
 
         angles = component.getRotation().getEulerAngles(self._eulerCon)
         info['alpha'] = angles[0]
-        info['beta']  = angles[1]
+        info['beta'] = angles[1]
         info['gamma'] = angles[2]
         info['alpha_string'] = self._eulerXML[self._eulerCon[0]] + str(angles[0])
-        info['beta_string']  = self._eulerXML[self._eulerCon[1]] + str(angles[1])
+        info['beta_string'] = self._eulerXML[self._eulerCon[1]] + str(angles[1])
         info['gamma_string'] = self._eulerXML[self._eulerCon[2]] + str(angles[2])
 
     def __writexmlSource(self, handle, instrument):

@@ -14,7 +14,6 @@ from mantid.api import IFunction1D, FunctionFactory
 
 
 class FickDiffusion(IFunction1D):
-
     def category(self):
         return "QuasiElastic"
 
@@ -23,12 +22,12 @@ class FickDiffusion(IFunction1D):
         self.declareParameter("D", 1.0, 'Diffusion constant')
 
     def function1D(self, xvals):
-        return self.getParameterValue("D")*xvals*xvals
+        return self.getParameterValue("D") * xvals * xvals
 
     def functionDeriv1D(self, xvals, jacobian):
         i = 0
         for x in xvals:
-            jacobian.set(i, 0, 2.0*x)
+            jacobian.set(i, 0, 2.0 * x)
             i += 1
 
 

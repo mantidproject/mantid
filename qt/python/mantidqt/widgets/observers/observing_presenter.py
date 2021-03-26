@@ -16,7 +16,6 @@ class ObservingPresenter(object):
     The presenter that is inheriting this must initialise a model and a view,
     that implement the methods required in the functions below.
     """
-
     def clear_observer(self):
         """
         If the observer is not cleared here then the C++ object is never freed,

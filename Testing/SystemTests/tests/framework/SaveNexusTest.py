@@ -15,52 +15,26 @@ temp_dir = tempfile.gettempdir()
 EXPECTED_EXT = '.expected'
 
 # files blacklisted
-duplicate_bank_names = [
-    "MAPS_Definition.xml",
-    "MAPS_Definition_2017_06_02.xml"
-    ]
+duplicate_bank_names = ["MAPS_Definition.xml", "MAPS_Definition_2017_06_02.xml"]
 duplicate_monitor_names = [
-    "HET_Definition_old.xml",
-    "MARI_Definition.xml",
-    "MARI_Definition_19900101_20160911.xml",
-    "MERLIN_Definition.xml",
-    "MERLIN_Definition_2017_02.xml",
-    "MERLIN_Definition_2018_03.xml",
-    "MERLIN_Definition_after2013_4.xml",
-    "NIM_Definition.xml",
-    "POLARIS_Definition_115.xml",
-    "POLARIS_Definition_121.xml",
-    "SANDALS_Definition.xml"
-    ]
+    "HET_Definition_old.xml", "MARI_Definition.xml", "MARI_Definition_19900101_20160911.xml", "MERLIN_Definition.xml",
+    "MERLIN_Definition_2017_02.xml", "MERLIN_Definition_2018_03.xml", "MERLIN_Definition_after2013_4.xml",
+    "NIM_Definition.xml", "POLARIS_Definition_115.xml", "POLARIS_Definition_121.xml", "SANDALS_Definition.xml"
+]
 no_source = ["ARGUS_Definition.xml"]
 sample_not_at_origin = [
-    "CRISP_Definition.xml",
-    "CRISP_Definition_2018.xml",
-    "IMAT_Definition_2015.xml",
-    "LARMOR_Definition.xml",
-    "LARMOR_Definition_19000000-20150317.xml",
-    "LARMOR_Definition_20150429_20180602.xml",
-    "LARMOR_Definition_8tubes.xml",
-    "LARMOR_Definition_SEMSANS.xml",
-    "LOQ_Definition_20010430-20020226.xml",
-    "LOQ_Definition_20020226-.xml",
-    "LOQ_Definition_20121016-.xml",
-    "LOQ_Definition_20151016.xml",
-    "LOQ_trans_Definition.xml",
-    "LOQ_trans_Definition_M4.xml",
-    "POLREF_Definition.xml",
-    "POLREF_Definition_2016.xml",
-    "SANS2D_Definition.xml",
-    "SANS2D_Definition_Tubes.xml",
-    "V20_IMAGING_Definition.xml",
-    "ZOOM_Definition.xml"
+    "CRISP_Definition.xml", "CRISP_Definition_2018.xml", "IMAT_Definition_2015.xml", "LARMOR_Definition.xml",
+    "LARMOR_Definition_19000000-20150317.xml", "LARMOR_Definition_20150429_20180602.xml",
+    "LARMOR_Definition_8tubes.xml", "LARMOR_Definition_SEMSANS.xml", "LOQ_Definition_20010430-20020226.xml",
+    "LOQ_Definition_20020226-.xml", "LOQ_Definition_20121016-.xml", "LOQ_Definition_20151016.xml",
+    "LOQ_trans_Definition.xml", "LOQ_trans_Definition_M4.xml", "POLREF_Definition.xml", "POLREF_Definition_2016.xml",
+    "SANS2D_Definition.xml", "SANS2D_Definition_Tubes.xml", "V20_IMAGING_Definition.xml", "ZOOM_Definition.xml"
 ]
 known_error_files = duplicate_bank_names + duplicate_monitor_names + no_source + sample_not_at_origin
 direc = config['instrumentDefinition.directory']
 
 
 class LoadAndSaveLotsOfInstruments(object):
-
     def __getDataFileList__(self):
         # get a list of directories to look in
         print("Looking for instrument definition files in: %s" % direc)
@@ -122,7 +96,7 @@ class LoadAndSaveLotsOfInstruments(object):
 
         # final say on whether or not it 'worked'
         print("----------------------------------------")
-        if set(failed) != set(known_error_files) :
+        if set(failed) != set(known_error_files):
             newfound_errors = list(set(failed) - set(known_error_files))
             for file in newfound_errors:
                 print("Failed: '%s'" % file)

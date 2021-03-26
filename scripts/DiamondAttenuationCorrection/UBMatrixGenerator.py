@@ -33,10 +33,10 @@ def getMANTIDpkds(filename):
 
         hkl[i - 1] = elem[2], elem[3], elem[4]
         d[i - 1] = elem[8]
-        q[i - 1] = float(elem[15].replace('[', '')
-                         ), float(elem[16]), float(elem[17].replace(']', ''))
+        q[i - 1] = float(elem[15].replace('[', '')), float(elem[16]), float(elem[17].replace(']', ''))
 
     return hkl, d, q
+
 
 # Generate all permutations (including negative) for given hkl
 
@@ -45,6 +45,7 @@ def plusAndMinusPermutations(items):
     for p in itt.permutations(items):
         for signs in itt.product([-1, 1], repeat=len(items)):
             yield [a * sign for a, sign in zip(p, signs)]
+
 
 # Identify equivalent reflections
 
@@ -84,6 +85,7 @@ def m3mEquiv(hkl_input, tog):
 
     return eqvs
 
+
 # Match equivalent reflections
 
 
@@ -93,8 +95,7 @@ def EquivMatch(refh, hkl, gam, tol):
     nmatch = 0
     for i in range(len(AllEqv)):
         h1 = AllEqv[i]
-        bet = np.degrees(np.arccos(np.dot(refh, h1)
-                                   / (np.linalg.norm(refh) * np.linalg.norm(h1))))
+        bet = np.degrees(np.arccos(np.dot(refh, h1) / (np.linalg.norm(refh) * np.linalg.norm(h1))))
         dif = np.abs(bet - gam)
         if dif <= tol:
             match[i] = 1
@@ -125,10 +126,8 @@ lattice vectors
 
 
 def Jacobsen(h1, Xm_1, h2, Xm_2):
-    alp = np.degrees(np.arccos(np.dot(h1, h2)
-                               / (np.linalg.norm(h1) * np.linalg.norm(h2))))
-    bet = np.degrees(np.arccos(np.dot(Xm_1, Xm_2)
-                               / (np.linalg.norm(Xm_1) * np.linalg.norm(Xm_2))))
+    alp = np.degrees(np.arccos(np.dot(h1, h2) / (np.linalg.norm(h1) * np.linalg.norm(h2))))
+    bet = np.degrees(np.arccos(np.dot(Xm_1, Xm_2) / (np.linalg.norm(Xm_1) * np.linalg.norm(Xm_2))))
     if ((alp - bet)**2) > 1:
         print('check your indexing!')
 
@@ -152,6 +151,7 @@ def Jacobsen(h1, Xm_1, h2, Xm_2):
 
     return UB
 
+
 # Guess Miller indices based on d-spacing
 
 
@@ -161,8 +161,7 @@ def guessIndx(d, tol):
     dref = np.array([2.0593, 1.2611, 1.0754, 0.8917, 0.8183, 0.7281])
     # note, by default assume that diamond a / a * axis is close to parallel to beam, therefore, h index
     # will be negative for all reflections
-    href = np.array([[-1, 1, 1], [-2, 2, 0], [-3, 1, 1],
-                     [-4, 0, 0], [-3, 3, 1], [-4, 2, 2]])
+    href = np.array([[-1, 1, 1], [-2, 2, 0], [-3, 1, 1], [-4, 0, 0], [-3, 3, 1], [-4, 2, 2]])
 
     h = np.zeros((len(d), 3))
     for i in range(len(d)):
@@ -198,16 +197,14 @@ def UBMatrixGen(fileName):
     print('First guess at indexing\n')
     print('REF | h k l | d-spac(A)')
     for i in range(N):
-        print('{0:0.0f}    {1:0.0f} {2:0.0f} {3:0.0f}     {4:0.3f}'.format(
-            i, h[i][0], h[i][1], h[i][2], d[i]))
+        print('{0:0.0f}    {1:0.0f} {2:0.0f} {3:0.0f}     {4:0.3f}'.format(i, h[i][0], h[i][1], h[i][2], d[i]))
 
     nref1 = int(input('Choose one reference reflection: '))
 
     print('REF | h k l | obs|  calc')
     beta = np.zeros(N)
     for i in range(N):
-        beta[i] = np.degrees(np.arccos(
-            np.dot(q[nref1], q[i]) / (np.linalg.norm(q[nref1]) * np.linalg.norm(q[i]))))
+        beta[i] = np.degrees(np.arccos(np.dot(q[nref1], q[i]) / (np.linalg.norm(q[nref1]) * np.linalg.norm(q[i]))))
         if i == nref1:
             print('{0:0.0f} |   {1:0.0f} {2:0.0f} {3:0.0f}   |  {4:0.3f}|  0.0| REFERENCE'.format(
                 i, h[i][0], h[i][1], h[i][2], beta[i]))
@@ -220,8 +217,8 @@ def UBMatrixGen(fileName):
                 print('{0:0.0f} |   {1:0.0f} {2:0.0f} {3:0.0f} |    {4:0.3f}'.format(
                     i, h[i][0], h[i][1], h[i][2], beta[i]))
             else:  # % there is an hkl at a matching angle
-                calcang = np.degrees(np.arccos(
-                    np.dot(hklA, hklhit[0]) / (np.linalg.norm(hklA) * np.linalg.norm(hklhit[0]))))
+                calcang = np.degrees(
+                    np.arccos(np.dot(hklA, hklhit[0]) / (np.linalg.norm(hklA) * np.linalg.norm(hklhit[0]))))
                 h[i] = hklhit[0]
                 print('{0:0.0f} |   {1:0.0f} {2:0.0f} {3:0.0f} |    {4:0.3f} | {5:0.3f}'.format(
                     i, h[i][0], h[i][1], h[i][2], beta[i], calcang))
@@ -241,18 +238,16 @@ def UBMatrixGen(fileName):
     tol = float(input('Enter tolerance for accepting index: '))
     print('REF | h k l | obs|  calc')
     nindexed1 = 0
-    for i in range(N):   # decide if reflection is indexed to being within an integer by less then the tolerance
+    for i in range(N):  # decide if reflection is indexed to being within an integer by less then the tolerance
         # difference with nearst integer
         dif = np.abs(hindx[i] - np.round(hindx[i]))
         if np.sum(dif) <= 3 * tol:  # all indices within tolerance
             h[i] = np.round(hindx[i])
-            print('{0:0.0f} |   {1:0.0f} {2:0.0f} {3:0.0f} | '.format(
-                i, hindx[i][0], hindx[i][1], hindx[i][2]))
+            print('{0:0.0f} |   {1:0.0f} {2:0.0f} {3:0.0f} | '.format(i, hindx[i][0], hindx[i][1], hindx[i][2]))
             nindexed1 += 1
             ublab[i] = 1
         else:
-            print('{0:0.0f} |   {1:0.0f} {2:0.0f} {3:0.0f} | '.format(
-                i, hindx[i][0], hindx[i][1], hindx[i][2]))
+            print('{0:0.0f} |   {1:0.0f} {2:0.0f} {3:0.0f} | '.format(i, hindx[i][0], hindx[i][1], hindx[i][2]))
             ublab[i] = 2
     print('{0:0.0f} reflections indexed!'.format(nindexed1))
     nsub = N - nindexed1
@@ -261,8 +256,8 @@ def UBMatrixGen(fileName):
         print('not enough remaining reflections to index second diamond :(')
     else:
         k = np.where(ublab == 2)
-        hsub = np.array(h[k])   # a list of unindexed h
-        qsub = np.array(q[k])   # and their q - vectors
+        hsub = np.array(h[k])  # a list of unindexed h
+        qsub = np.array(q[k])  # and their q - vectors
         d = np.array(d)
         dsub = d[k]
 
@@ -270,35 +265,32 @@ def UBMatrixGen(fileName):
         print('Remaining unindexed reflections:')
         print(' REF|  h  k  l| d-spac(A)')
         for i in range(nsub):
-            print('{0:0.0f}    {1:0.0f} {2:0.0f} {3:0.0f}     {4:0.3f}'.format(
-                i, hsub[i][0], hsub[i][1], hsub[i][2], dsub[i]))
+            print('{0:0.0f}    {1:0.0f} {2:0.0f} {3:0.0f}     {4:0.3f}'.format(i, hsub[i][0], hsub[i][1], hsub[i][2],
+                                                                               dsub[i]))
 
         nref1 = int(input('Choose one reference reflection: '))
 
         for i in range(nsub):
-            beta[i] = np.degrees(np.arccos(np.dot(qsub[nref1], qsub[
-                                 i]) / (np.linalg.norm(qsub[nref1]) * np.linalg.norm(qsub[i]))))
+            beta[i] = np.degrees(
+                np.arccos(np.dot(qsub[nref1], qsub[i]) / (np.linalg.norm(qsub[nref1]) * np.linalg.norm(qsub[i]))))
             if i == nref1:
-                print('{0:0.0f} |   {1:0.0f} {2:0.0f} {3:0.0f}   |  {4:0.3f}|  0.0| REFERENCE'.format(i, hsub[i][0], hsub[i][1],
-                                                                                                      hsub[i][2], beta[i]))
+                print('{0:0.0f} |   {1:0.0f} {2:0.0f} {3:0.0f}   |  {4:0.3f}|  0.0| REFERENCE'.format(
+                    i, hsub[i][0], hsub[i][1], hsub[i][2], beta[i]))
             else:
                 # check for possible index suggestion
                 hklA = hsub[nref1]
                 hklB = hsub[i]
                 hklhit = EquivMatch(hklA, hklB, beta[i], 1.0)
                 if np.linalg.norm(hklhit) == 0:
-                    print('{0:0.0f} |   {1:0.0f} {2:0.0f} {3:0.0f} |    {4:0.3f}'.format(i, hsub[i][0], hsub[i][1], hsub[i][2],
-                                                                                         beta[i]))
+                    print('{0:0.0f} |   {1:0.0f} {2:0.0f} {3:0.0f} |    {4:0.3f}'.format(
+                        i, hsub[i][0], hsub[i][1], hsub[i][2], beta[i]))
                 else:  # % there is an hkl at a matching angle
-                    calcang = np.degrees(np.arccos(
-                        np.dot(hklA, hklhit[0]) / (np.linalg.norm(hklA) * np.linalg.norm(hklhit[0]))))
+                    calcang = np.degrees(
+                        np.arccos(np.dot(hklA, hklhit[0]) / (np.linalg.norm(hklA) * np.linalg.norm(hklhit[0]))))
                     h[i] = hklhit[0]
-                    print('{0:0.0f} |   {1:0.0f} {2:0.0f} {3:0.0f} |    {4:0.3f} | {5:0.3f}'.format(i, hsub[i][0], hsub[i][1],
-                                                                                                    hsub[i][
-                                                                                                        2], beta[i],
-                                                                                                    calcang))
-        nref2 = int(
-            input('Choose a second reflection to use for indexing: '))
+                    print('{0:0.0f} |   {1:0.0f} {2:0.0f} {3:0.0f} |    {4:0.3f} | {5:0.3f}'.format(
+                        i, hsub[i][0], hsub[i][1], hsub[i][2], beta[i], calcang))
+        nref2 = int(input('Choose a second reflection to use for indexing: '))
 
     h1 = hsub[nref1]
     q1 = qsub[nref1]

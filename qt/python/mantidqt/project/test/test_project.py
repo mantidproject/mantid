@@ -51,8 +51,7 @@ class ProjectTest(unittest.TestCase):
             try:
                 shutil.rmtree(folder)
             except OSError as exc:
-                warnings.warn("Could not remove folder at \"{}\"\n"
-                              "Error message:\n{}".format(folder, exc))
+                warnings.warn("Could not remove folder at \"{}\"\n" "Error message:\n{}".format(folder, exc))
         self._folders_to_remove.clear()
 
     def test_save_calls_save_as_when_last_location_is_not_none(self):
@@ -191,16 +190,16 @@ class ProjectTest(unittest.TestCase):
 
     def test_large_file_dialog_appears_for_large_file(self):
         CreateSampleWorkspace(OutputWorkspace="ws1")
-        self.project._get_project_size = mock.MagicMock(return_value=
-                                                        int(ConfigService.getString("projectSaving.warningSize")) + 1)
+        self.project._get_project_size = mock.MagicMock(
+            return_value=int(ConfigService.getString("projectSaving.warningSize")) + 1)
         self.project._offer_large_size_confirmation = mock.MagicMock()
         self.project._save()
         self.assertEqual(self.project._offer_large_size_confirmation.call_count, 1)
 
     def test_large_file_dialog_does_not_appear_for_small_file(self):
         CreateSampleWorkspace(OutputWorkspace="ws1")
-        self.project._get_project_size = mock.MagicMock(return_value=
-                                                        int(ConfigService.getString("projectSaving.warningSize")) - 1)
+        self.project._get_project_size = mock.MagicMock(
+            return_value=int(ConfigService.getString("projectSaving.warningSize")) - 1)
         self.project._offer_large_size_confirmation = mock.MagicMock()
         self.project._save()
         self.assertEqual(self.project._offer_large_size_confirmation.call_count, 0)
@@ -292,8 +291,8 @@ class ProjectTest(unittest.TestCase):
 
             figure_managers[i] = fig_manager
 
-        filtered_figure_managers = self.project._filter_plots_with_unaltered_workspaces(
-            plots=figure_managers, workspaces=[workspaces[0]])
+        filtered_figure_managers = self.project._filter_plots_with_unaltered_workspaces(plots=figure_managers,
+                                                                                        workspaces=[workspaces[0]])
 
         self.assertEqual(len(filtered_figure_managers), 1)
 

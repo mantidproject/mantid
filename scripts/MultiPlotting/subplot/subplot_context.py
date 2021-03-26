@@ -38,8 +38,7 @@ class subplotContext(object):
         y_range = self._subplot.get_ylim()
         if label.in_x_range(x_range):
             self._labels[label.text] = self._subplot.annotate(label.text,
-                                                              xy=(label.get_xval(x_range),
-                                                                  label.get_yval(y_range)),
+                                                              xy=(label.get_xval(x_range), label.get_yval(y_range)),
                                                               xycoords="axes fraction",
                                                               rotation=label.rotation)
 

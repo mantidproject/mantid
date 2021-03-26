@@ -9,15 +9,13 @@
 from unittest.mock import MagicMock
 
 # 3rd party imports
-from mantid.api import (MatrixWorkspace, IMDEventWorkspace, IMDHistoWorkspace,
-                        SpecialCoordinateSystem)
+from mantid.api import (MatrixWorkspace, IMDEventWorkspace, IMDHistoWorkspace, SpecialCoordinateSystem)
 from mantid.geometry import IMDDimension
 import numpy as np
 
 
-def create_mock_histoworkspace(ndims: int, coords: SpecialCoordinateSystem, extents: tuple,
-                               signal: np.array, error: np.array, nbins: tuple, names: tuple,
-                               units: tuple, isq: tuple):
+def create_mock_histoworkspace(ndims: int, coords: SpecialCoordinateSystem, extents: tuple, signal: np.array,
+                               error: np.array, nbins: tuple, names: tuple, units: tuple, isq: tuple):
     """
     :param ndims: The number of dimensions
     :param coords: MD coordinate system
@@ -35,8 +33,8 @@ def create_mock_histoworkspace(ndims: int, coords: SpecialCoordinateSystem, exte
     return add_dimensions(ws, names, isq, extents, nbins, units)
 
 
-def create_mock_mdeventworkspace(ndims: int, coords: SpecialCoordinateSystem, extents: tuple,
-                                 names: tuple, units: tuple, isq: tuple):
+def create_mock_mdeventworkspace(ndims: int, coords: SpecialCoordinateSystem, extents: tuple, names: tuple,
+                                 units: tuple, isq: tuple):
     """
     :param ndims: The number of dimensions
     :param coords: MD coordinate system
@@ -49,11 +47,7 @@ def create_mock_mdeventworkspace(ndims: int, coords: SpecialCoordinateSystem, ex
     return add_dimensions(ws, names, isq, extents, nbins=(1, ) * ndims, units=units)
 
 
-def create_mock_matrixworkspace(x_axis: tuple,
-                                y_axis: tuple,
-                                distribution: bool,
-                                names: tuple,
-                                units: tuple = None):
+def create_mock_matrixworkspace(x_axis: tuple, y_axis: tuple, distribution: bool, names: tuple, units: tuple = None):
     """
     :param x_axis: X axis values
     :param y_axis: Y axis values
@@ -104,12 +98,7 @@ def create_mock_workspace(ws_type,
     return ws
 
 
-def add_dimensions(mock_ws,
-                   names,
-                   isq,
-                   extents: tuple = None,
-                   nbins: tuple = None,
-                   units: tuple = None):
+def add_dimensions(mock_ws, names, isq, extents: tuple = None, nbins: tuple = None, units: tuple = None):
     """
     :param mock_ws: An existing mock workspace object
     :param names: The name of each dimension

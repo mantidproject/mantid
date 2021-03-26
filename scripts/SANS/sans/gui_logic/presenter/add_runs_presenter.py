@@ -26,7 +26,7 @@ class AddRunsFilenameManager(object):
         if isinstance(inst, str):
             self.instrument_string = inst
         else:
-            assert(isinstance(inst, Enum))
+            assert (isinstance(inst, Enum))
             self.instrument_string = inst.value
 
     def make_filename(self, runs):
@@ -74,8 +74,8 @@ class AddRunsPagePresenter(object):
         self.save_directory = ""
         self._connect_to_view(view)
 
-        self.gui_properties_handler = SANSGuiPropertiesHandler({"add_runs_output_directory": (self.set_output_directory,
-                                                                                              str)})
+        self.gui_properties_handler = SANSGuiPropertiesHandler(
+            {"add_runs_output_directory": (self.set_output_directory, str)})
 
     def _init_sub_presenters(self, view):
         self._run_selector_presenter = self._init_run_selector_presenter(view.run_selector_view(),
@@ -100,9 +100,7 @@ class AddRunsPagePresenter(object):
             binning_type = BinningType.CUSTOM
         summation_settings = SummationSettingsModel(binning_type)
         summation_settings.bin_settings = DEFAULT_BIN_SETTINGS
-        return SummationSettingsPresenter(summation_settings,
-                                          summation_settings_view,
-                                          parent_view)
+        return SummationSettingsPresenter(summation_settings, summation_settings_view, parent_view)
 
     def _get_filename_manager(self):
         # Separate call so AddRunsFilesnameManager can be mocked out.
@@ -179,8 +177,7 @@ class AddRunsPagePresenter(object):
 
         if self._output_directory_is_not_empty(settings):
             self._view.disable_sum()
-            self._sum_runs_model(run_selection, settings,
-                                 self._sum_base_file_name(run_selection))
+            self._sum_runs_model(run_selection, settings, self._sum_base_file_name(run_selection))
         else:
             self._view.no_save_directory()
 

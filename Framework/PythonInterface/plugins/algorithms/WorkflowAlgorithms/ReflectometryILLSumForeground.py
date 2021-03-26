@@ -39,7 +39,6 @@ class SubalgLogging:
 
 
 class ReflectometryILLSumForeground(DataProcessorAlgorithm):
-
     def category(self):
         """Return algorithm's categories."""
         return 'ILL\\Reflectometry;Workflow\\Reflectometry'
@@ -54,8 +53,10 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
 
     def seeAlso(self):
         """Return a list of related algorithm names."""
-        return ['ReflectometryILLConvertToQ', 'ReflectometryILLPolarizationCor',
-                'ReflectometryILLPreprocess', 'ReflectometryILLAutoProcess']
+        return [
+            'ReflectometryILLConvertToQ', 'ReflectometryILLPolarizationCor', 'ReflectometryILLPreprocess',
+            'ReflectometryILLAutoProcess'
+        ]
 
     def version(self):
         """Return the version of the algorithm."""
@@ -96,62 +97,43 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         threeNonnegativeInts.add(nonnegativeInts)
         nonnegativeFloatArray = FloatArrayBoundedValidator(lower=0.)
         inWavelength = WorkspaceUnitValidator('Wavelength')
-        self.declareProperty(
-            MatrixWorkspaceProperty(
-                Prop.INPUT_WS,
-                defaultValue='',
-                direction=Direction.Input,
-                validator=inWavelength),
-            doc='A reflected beam workspace (units wavelength).')
-        self.declareProperty(
-            MatrixWorkspaceProperty(
-                Prop.OUTPUT_WS,
-                defaultValue='',
-                direction=Direction.Output),
-            doc='The summed foreground workspace.')
-        self.declareProperty(
-            Prop.SUBALG_LOGGING,
-            defaultValue=SubalgLogging.OFF,
-            validator=StringListValidator([SubalgLogging.OFF, SubalgLogging.ON]),
-            doc='Enable or disable child algorithm logging.')
-        self.declareProperty(
-            Prop.CLEANUP,
-            defaultValue=utils.Cleanup.ON,
-            validator=StringListValidator([utils.Cleanup.ON, utils.Cleanup.OFF]),
-            doc='Enable or disable intermediate workspace cleanup.')
-        self.declareProperty(
-            Prop.SUM_TYPE,
-            defaultValue=SumType.IN_LAMBDA,
-            validator=StringListValidator([SumType.IN_LAMBDA, SumType.IN_Q]),
-            doc='Type of summation to perform.')
-        self.declareProperty(
-            MatrixWorkspaceProperty(
-                Prop.DIRECT_FOREGROUND_WS,
-                defaultValue='',
-                direction=Direction.Input,
-                optional=PropertyMode.Optional,
-                validator=inWavelength),
-            doc='Summed direct beam workspace (units wavelength).')
-        self.declareProperty(
-            IntArrayProperty(
-                Prop.FOREGROUND_INDICES,
-                values=[Property.EMPTY_INT, Property.EMPTY_INT, Property.EMPTY_INT],
-                validator=threeNonnegativeInts),
-            doc='A three element array of foreground start, centre and end workspace indices.')
-        self.declareProperty(
-            MatrixWorkspaceProperty(
-                Prop.DIRECT_WS,
-                defaultValue='',
-                direction=Direction.Input,
-                optional=PropertyMode.Optional,
-                validator=inWavelength),
-            doc='The (not summed) direct beam workspace (units wavelength).')
-        self.declareProperty(
-            FloatArrayProperty(
-                Prop.WAVELENGTH_RANGE,
-                values=[0.],
-                validator=nonnegativeFloatArray),
-            doc='The wavelength bounds.')
+        self.declareProperty(MatrixWorkspaceProperty(Prop.INPUT_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     validator=inWavelength),
+                             doc='A reflected beam workspace (units wavelength).')
+        self.declareProperty(MatrixWorkspaceProperty(Prop.OUTPUT_WS, defaultValue='', direction=Direction.Output),
+                             doc='The summed foreground workspace.')
+        self.declareProperty(Prop.SUBALG_LOGGING,
+                             defaultValue=SubalgLogging.OFF,
+                             validator=StringListValidator([SubalgLogging.OFF, SubalgLogging.ON]),
+                             doc='Enable or disable child algorithm logging.')
+        self.declareProperty(Prop.CLEANUP,
+                             defaultValue=utils.Cleanup.ON,
+                             validator=StringListValidator([utils.Cleanup.ON, utils.Cleanup.OFF]),
+                             doc='Enable or disable intermediate workspace cleanup.')
+        self.declareProperty(Prop.SUM_TYPE,
+                             defaultValue=SumType.IN_LAMBDA,
+                             validator=StringListValidator([SumType.IN_LAMBDA, SumType.IN_Q]),
+                             doc='Type of summation to perform.')
+        self.declareProperty(MatrixWorkspaceProperty(Prop.DIRECT_FOREGROUND_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional,
+                                                     validator=inWavelength),
+                             doc='Summed direct beam workspace (units wavelength).')
+        self.declareProperty(IntArrayProperty(Prop.FOREGROUND_INDICES,
+                                              values=[Property.EMPTY_INT, Property.EMPTY_INT, Property.EMPTY_INT],
+                                              validator=threeNonnegativeInts),
+                             doc='A three element array of foreground start, centre and end workspace indices.')
+        self.declareProperty(MatrixWorkspaceProperty(Prop.DIRECT_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional,
+                                                     validator=inWavelength),
+                             doc='The (not summed) direct beam workspace (units wavelength).')
+        self.declareProperty(FloatArrayProperty(Prop.WAVELENGTH_RANGE, values=[0.], validator=nonnegativeFloatArray),
+                             doc='The wavelength bounds.')
 
     def validateInputs(self):
         """Validate the algorithm's input properties."""
@@ -165,7 +147,10 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         else:
             directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
             if directWS.getNumberHistograms() != 1:
-                issues[Prop.DIRECT_FOREGROUND_WS] = 'The workspace should have only a single histogram. Was foreground summation forgotten?'
+                issues[
+                    Prop.
+                    DIRECT_FOREGROUND_WS] = 'The workspace should have only a single histogram. Was foreground ' \
+                                            'summation forgotten?'
             if self.getProperty(Prop.DIRECT_WS).isDefault:
                 issues[Prop.DIRECT_WS] = 'The direct beam workspace is needed for processing the reflected workspace.'
         wRange = self.getProperty(Prop.WAVELENGTH_RANGE).value
@@ -183,18 +168,17 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         instrumentName = common.instrumentName(ws)
         pixelSize = common.pixelSize(instrumentName)
         detResolution = common.detectorResolution()
-        ReflectometryBeamStatistics(
-            ReflectedBeamWorkspace=ws,
-            ReflectedForeground=reflectedForeground,
-            DirectLineWorkspace=directWS,
-            DirectForeground=directForeground,
-            PixelSize=pixelSize,
-            DetectorResolution=detResolution,
-            FirstSlitName='slit2',
-            FirstSlitSizeSampleLog=common.SampleLogs.SLIT2WIDTH,
-            SecondSlitName='slit3',
-            SecondSlitSizeSampleLog=common.SampleLogs.SLIT3WIDTH,
-            EnableLogging=self._subalgLogging)
+        ReflectometryBeamStatistics(ReflectedBeamWorkspace=ws,
+                                    ReflectedForeground=reflectedForeground,
+                                    DirectLineWorkspace=directWS,
+                                    DirectForeground=directForeground,
+                                    PixelSize=pixelSize,
+                                    DetectorResolution=detResolution,
+                                    FirstSlitName='slit2',
+                                    FirstSlitSizeSampleLog=common.SampleLogs.SLIT2WIDTH,
+                                    SecondSlitName='slit3',
+                                    SecondSlitSizeSampleLog=common.SampleLogs.SLIT3WIDTH,
+                                    EnableLogging=self._subalgLogging)
 
     def _applyWavelengthRange(self, ws):
         """Cut wavelengths outside the wavelength range from a TOF workspace."""
@@ -203,11 +187,10 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         if len(wRange) == 2:
             rangeProp['XMax'] = wRange[1]
         croppedWSName = self._names.withSuffix('cropped')
-        croppedWS = CropWorkspace(
-            InputWorkspace=ws,
-            OutputWorkspace=croppedWSName,
-            EnableLogging=self._subalgLogging,
-            **rangeProp)
+        croppedWS = CropWorkspace(InputWorkspace=ws,
+                                  OutputWorkspace=croppedWSName,
+                                  EnableLogging=self._subalgLogging,
+                                  **rangeProp)
         self._cleanup.cleanup(ws)
         return croppedWS
 
@@ -220,11 +203,10 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         ws = self._rebinToDirect(ws)
         directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
         reflectivityWSName = self._names.withSuffix('reflectivity')
-        reflectivityWS = Divide(
-            LHSWorkspace=ws,
-            RHSWorkspace=directWS,
-            OutputWorkspace=reflectivityWSName,
-            EnableLogging=self._subalgLogging)
+        reflectivityWS = Divide(LHSWorkspace=ws,
+                                RHSWorkspace=directWS,
+                                OutputWorkspace=reflectivityWSName,
+                                EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
         reflectivityWS.setYUnit('Reflectivity')
         reflectivityWS.setYUnitLabel('Reflectivity')
@@ -263,11 +245,10 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         """Rebin ws to direct foreground."""
         directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
         rebinnedWSName = self._names.withSuffix('rebinned')
-        rebinnedWS = RebinToWorkspace(
-            WorkspaceToRebin=ws,
-            WorkspaceToMatch=directWS,
-            OutputWorkspace=rebinnedWSName,
-            EnableLogging=self._subalgLogging)
+        rebinnedWS = RebinToWorkspace(WorkspaceToRebin=ws,
+                                      WorkspaceToMatch=directWS,
+                                      OutputWorkspace=rebinnedWSName,
+                                      EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
         return rebinnedWS
 
@@ -277,11 +258,10 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         sumIndices = [i for i in range(foreground[0], foreground[2] + 1)]
         beamPosIndex = foreground[1]
         foregroundWSName = self._names.withSuffix('grouped')
-        foregroundWS = ExtractSingleSpectrum(
-            InputWorkspace=ws,
-            OutputWorkspace=foregroundWSName,
-            WorkspaceIndex=beamPosIndex,
-            EnableLogging=self._subalgLogging)
+        foregroundWS = ExtractSingleSpectrum(InputWorkspace=ws,
+                                             OutputWorkspace=foregroundWSName,
+                                             WorkspaceIndex=beamPosIndex,
+                                             EnableLogging=self._subalgLogging)
         maxIndex = ws.getNumberHistograms() - 1
         foregroundYs = foregroundWS.dataY(0)
         foregroundEs = foregroundWS.dataE(0)
@@ -292,16 +272,14 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             if i < 0 or i > maxIndex:
                 self.log().warning('Foreground partially out of the workspace.')
             addeeWSName = self._names.withSuffix('addee')
-            addeeWS = ExtractSingleSpectrum(
-                InputWorkspace=ws,
-                OutputWorkspace=addeeWSName,
-                WorkspaceIndex=i,
-                EnableLogging=self._subalgLogging)
-            addeeWS = RebinToWorkspace(
-                WorkspaceToRebin=addeeWS,
-                WorkspaceToMatch=foregroundWS,
-                OutputWorkspace=addeeWSName,
-                EnableLogging=self._subalgLogging)
+            addeeWS = ExtractSingleSpectrum(InputWorkspace=ws,
+                                            OutputWorkspace=addeeWSName,
+                                            WorkspaceIndex=i,
+                                            EnableLogging=self._subalgLogging)
+            addeeWS = RebinToWorkspace(WorkspaceToRebin=addeeWS,
+                                       WorkspaceToMatch=foregroundWS,
+                                       OutputWorkspace=addeeWSName,
+                                       EnableLogging=self._subalgLogging)
             ys = addeeWS.readY(0)
             foregroundYs += ys
             es = addeeWS.readE(0)
@@ -316,14 +294,14 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         """
         This needs to be called after having summed the foreground but before transfering to momentum transfer.
         This needs to be called in both coherent and incoherent cases, regardless the angle calibration option.
-        The reason for this is that up to this point is the fractional workspace index that correponds to the calibrated 2theta.
-        However the momentum transfer calculation, which normally comes after summing the foreground,
+        The reason for this is that up to this point is the fractional workspace index that correponds to the calibrated
+        2theta. However the momentum transfer calculation, which normally comes after summing the foreground,
         takes the 2theta from the spectrumInfo of the summed foreground workspace.
         Hence this code below translated the detector by the difference of the
         fractional and integer foreground centre along the detector plane.
         It also applies local rotation so that the detector continues to face the sample.
-        Note that this translation has nothing to do with the difference of foreground centres in direct and reflected beams,
-        which is handled already in pre-process algorithm.
+        Note that this translation has nothing to do with the difference of foreground centres in direct and reflected
+        beams, which is handled already in pre-process algorithm.
         Here it's only about the difference of the fractional and integer foreground centre of the reflected beam
         with already calibrated angle no matter the option.
         Note also, that this could probably be avoided, if the loader placed
@@ -355,24 +333,20 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 mx = 0.0
                 my = xvsy
                 rotationAxis = [-1, 0, 0]
-            MoveInstrumentComponent(
-                Workspace=summedForeground,
-                ComponentName='detector',
-                X=mx,
-                Y=my,
-                Z=mz,
-                RelativePosition=True
-            )
+            MoveInstrumentComponent(Workspace=summedForeground,
+                                    ComponentName='detector',
+                                    X=mx,
+                                    Y=my,
+                                    Z=mz,
+                                    RelativePosition=True)
             angle_corr = numpy.arctan2(dist, l2) * 180 / numpy.pi
-            RotateInstrumentComponent(
-                Workspace=summedForeground,
-                ComponentName='detector',
-                X=rotationAxis[0],
-                Y=rotationAxis[1],
-                Z=rotationAxis[2],
-                Angle=angle_corr,
-                RelativeRotation=True
-            )
+            RotateInstrumentComponent(Workspace=summedForeground,
+                                      ComponentName='detector',
+                                      X=rotationAxis[0],
+                                      Y=rotationAxis[1],
+                                      Z=rotationAxis[2],
+                                      Angle=angle_corr,
+                                      RelativeRotation=True)
         return summedForeground
 
     def _sumForegroundInQ(self, ws):
@@ -382,13 +356,12 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         linePosition = ws.run().getProperty(common.SampleLogs.LINE_POSITION).value
         isFlatSample = not ws.run().getProperty('beam_stats.bent_sample').value
         sumWSName = self._names.withSuffix('summed_in_Q')
-        sumWS = ReflectometrySumInQ(
-            InputWorkspace=ws,
-            OutputWorkspace=sumWSName,
-            InputWorkspaceIndexSet=sumIndices,
-            BeamCentre=linePosition,
-            FlatSample=isFlatSample,
-            EnableLogging=self._subalgLogging)
+        sumWS = ReflectometrySumInQ(InputWorkspace=ws,
+                                    OutputWorkspace=sumWSName,
+                                    InputWorkspaceIndexSet=sumIndices,
+                                    BeamCentre=linePosition,
+                                    FlatSample=isFlatSample,
+                                    EnableLogging=self._subalgLogging)
         sumWS = self._correctForFractionalForegroundCentre(ws, sumWS)
         self._cleanup.cleanup(ws)
         return sumWS

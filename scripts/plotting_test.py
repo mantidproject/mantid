@@ -18,7 +18,6 @@ import mantid.simpleapi as mantid
 
 
 class plotTestGui(QtGui.QMainWindow):
-
     def __init__(self, parent=None):
         super(plotTestGui, self).__init__(parent)
         self._context = PlottingContext()
@@ -35,20 +34,13 @@ class plotTestGui(QtGui.QMainWindow):
         self.test.plot("test", ws, spec_num=22)
         # defines position of label
         dummy = Label("dummy", 10.1, False, 0.9, True, rotation=-90)
-        dummy2 = Label(
-            "protected",
-            5.1,
-            False,
-            0.9,
-            True,
-            rotation=-90,
-            protected=True)
+        dummy2 = Label("protected", 5.1, False, 0.9, True, rotation=-90, protected=True)
         dummy3 = Label("just annotate", 14.1, False, 0.9, True)
         # defines position of line
 
         # need to add methods to add just a label
-                # need to add_vline with a name and if protected but no
-                # annotation
+        # need to add_vline with a name and if protected but no
+        # annotation
 
         self.test.add_vline_and_annotate("test", 10, dummy)
         self.test.add_vline_and_annotate("test", 5, dummy2)

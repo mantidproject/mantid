@@ -15,7 +15,6 @@ import os
 
 
 class EQSANSProcessedEff(systemtesting.MantidSystemTest):
-
     def cleanup(self):
         absfile = FileFinder.getFullPath("EQSANS_1466_event_reduction.log")
         if os.path.exists(absfile):
@@ -27,7 +26,7 @@ class EQSANSProcessedEff(systemtesting.MantidSystemTest):
             System test for sensitivity correction
         """
         configI = ConfigService.Instance()
-        configI["facilityName"]='SNS'
+        configI["facilityName"] = 'SNS'
         EQSANS(False)
         AppendDataFile("EQSANS_1466_event.nxs")
         SolidAngle()
@@ -39,8 +38,10 @@ class EQSANSProcessedEff(systemtesting.MantidSystemTest):
         TotalChargeNormalization(normalize_to_beam=False)
         SensitivityCorrection("EQSANS_sensitivity.nxs")
         Reduce1D()
-        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=277.781,
-              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")
+        Scale(InputWorkspace="EQSANS_1466_event_Iq",
+              Factor=277.781,
+              Operation='Multiply',
+              OutputWorkspace="EQSANS_1466_event_Iq")
 
     def validate(self):
         # Be more tolerant with the output, mainly because of the errors.

@@ -17,11 +17,7 @@ class MuonPair(MuonBasePair):
     - The balance parameter is stored and modifiable.
     - The workspace associated to the pair can be set, but must be of type MuonWorkspaceWrapper.
     """
-
-    def __init__(self, pair_name,
-                 forward_group_name="",
-                 backward_group_name="",
-                 alpha=1.0, periods=[1]):
+    def __init__(self, pair_name, forward_group_name="", backward_group_name="", alpha=1.0, periods=[1]):
         super().__init__(pair_name, periods)
         self._forward_group_name = forward_group_name
         self._backward_group_name = backward_group_name

@@ -11,7 +11,6 @@ from mantid.api import WorkspaceGroup, MatrixWorkspace
 
 
 class SANSILLAutoProcessTest(unittest.TestCase):
-
     def setUp(self):
         config.appendDataSearchSubDir("ILL/D11/")
         self._facility = config["default.facility"]
@@ -28,86 +27,86 @@ class SANSILLAutoProcessTest(unittest.TestCase):
         self.assertRaises(RuntimeError, SANSILLAutoProcess)
 
     def test_noOutputWs(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462")
+        self.assertRaises(RuntimeError, SANSILLAutoProcess, SampleRuns="010462")
 
     def test_wrongAbsorberDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
+        self.assertRaises(RuntimeError,
+                          SANSILLAutoProcess,
                           SampleRuns="010462",
                           AbsorberRuns="010462,010462",
                           OutputWorkspace="ws")
 
     def test_wrongBeamDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
+        self.assertRaises(RuntimeError,
+                          SANSILLAutoProcess,
                           SampleRuns="010462",
                           BeamRuns="010462,010462",
                           OutputWorkspace="ws")
 
     def test_wrongContainerDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
+        self.assertRaises(RuntimeError,
+                          SANSILLAutoProcess,
                           SampleRuns="010462",
                           ContainerRuns="010462,010462",
                           OutputWorkspace="ws")
 
     def test_wrongMaskDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
+        self.assertRaises(RuntimeError,
+                          SANSILLAutoProcess,
                           SampleRuns="010462",
                           MaskFiles="010462,010462",
                           OutputWorkspace="ws")
 
     def test_wrongReferenceDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
+        self.assertRaises(RuntimeError,
+                          SANSILLAutoProcess,
                           SampleRuns="010462",
                           ReferenceFiles="010462,010462",
                           OutputWorkspace="ws")
 
     def test_wrongSensivityDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
+        self.assertRaises(RuntimeError,
+                          SANSILLAutoProcess,
                           SampleRuns="010462",
                           SensitivityMaps="010462,010462",
                           OutputWorkspace="ws")
 
     def test_wrongFluxDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
+        self.assertRaises(RuntimeError,
+                          SANSILLAutoProcess,
                           SampleRuns="010462",
                           FluxRuns="010462,010462",
                           OutputWorkspace="ws")
 
     def test_wrongParametersDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462",
-                          MaxQxy="1,1",
-                          OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462",
-                          DeltaQ="1,1",
-                          OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
-                          SampleRuns="010462",
-                          BeamRadius="1,1",
-                          OutputWorkspace="ws")
+        self.assertRaises(RuntimeError, SANSILLAutoProcess, SampleRuns="010462", MaxQxy="1,1", OutputWorkspace="ws")
+        self.assertRaises(RuntimeError, SANSILLAutoProcess, SampleRuns="010462", DeltaQ="1,1", OutputWorkspace="ws")
+        self.assertRaises(RuntimeError, SANSILLAutoProcess, SampleRuns="010462", BeamRadius="1,1", OutputWorkspace="ws")
 
     def test_wrongTransmissionDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
+        self.assertRaises(RuntimeError,
+                          SANSILLAutoProcess,
                           SampleRuns="010462,010462",
                           SampleTransmissionRuns="010462,010462",
                           OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
+        self.assertRaises(RuntimeError,
+                          SANSILLAutoProcess,
                           SampleRuns="010462,010462",
                           ContainerTransmissionRuns="010462,010462",
                           OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
+        self.assertRaises(RuntimeError,
+                          SANSILLAutoProcess,
                           SampleRuns="010462,010462",
                           TransmissionBeamRuns="010462,010462",
                           OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess,
+        self.assertRaises(RuntimeError,
+                          SANSILLAutoProcess,
                           SampleRuns="010462,010462",
                           TransmissionAbsorberRuns="010462,010462",
                           OutputWorkspace="ws")
 
     def test_flux(self):
-        ws = SANSILLAutoProcess(SampleRuns="010462",
-                                FluxRuns='010462')
+        ws = SANSILLAutoProcess(SampleRuns="010462", FluxRuns='010462')
 
         self.assertTrue(isinstance(ws, WorkspaceGroup))
 

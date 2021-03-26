@@ -9,13 +9,8 @@ from mantid.simpleapi import HFIRSANS2Wavelength, CreateWorkspace, AddSampleLog,
 
 
 class HFIRSANS2WavelengthTest(unittest.TestCase):
-
     def setUp(self):
-        ws = CreateWorkspace(DataX='1,11,111,1,11,111',
-                             DataY='2,22,22,22',
-                             DataE='1,5,5,5',
-                             UnitX="TOF",
-                             NSpec=2)
+        ws = CreateWorkspace(DataX='1,11,111,1,11,111', DataY='2,22,22,22', DataE='1,5,5,5', UnitX="TOF", NSpec=2)
         AddSampleLog(ws, LogName='wavelength', LogText='6.5', LogType='Number Series')
         AddSampleLog(ws, LogName='wavelength_spread', LogText='0.1', LogType='Number Series')
 

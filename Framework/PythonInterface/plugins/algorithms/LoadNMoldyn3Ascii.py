@@ -27,6 +27,7 @@ def _find_starts(data, c, l1):
             break
     return line
 
+
 #==============================================================================
 
 
@@ -37,6 +38,7 @@ def _find_tab_starts(data, c, l1):
             line = l
             break
     return line
+
 
 #==============================================================================
 
@@ -49,6 +51,7 @@ def _find_ends(data, c, l1):
             break
     return line
 
+
 #==============================================================================
 
 
@@ -58,6 +61,7 @@ def _make_list(a, l1, l2):
         data += a[m]
         alist = data.split(',')
     return alist
+
 
 #==============================================================================
 
@@ -86,6 +90,7 @@ def _cdl_find_dimensions(data):
 
     return num_q, num_t, num_f
 
+
 #==============================================================================
 
 
@@ -96,7 +101,7 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
     _functions = None
     _out_ws = None
 
-#-------------------------------------------------------------------------------
+    #-------------------------------------------------------------------------------
 
     def category(self):
         return 'Inelastic\\DataHandling;Simulation'
@@ -109,16 +114,12 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
 #-------------------------------------------------------------------------------
 
     def PyInit(self):
-        self.declareProperty(FileProperty('Filename', '',
-                                          action=FileAction.Load,
-                                          extensions=['.cdl', '.dat']),
+        self.declareProperty(FileProperty('Filename', '', action=FileAction.Load, extensions=['.cdl', '.dat']),
                              doc='File path for data')
 
-        self.declareProperty(StringArrayProperty('Functions'),
-                             doc='Names of functions to attempt to load from file')
+        self.declareProperty(StringArrayProperty('Functions'), doc='Names of functions to attempt to load from file')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                                               direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace name')
 
 #-------------------------------------------------------------------------------
@@ -317,8 +318,7 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
 
             output_ws_list.append(function_ws_name)
 
-        out_ws = GroupWorkspaces(InputWorkspaces=output_ws_list,
-                                 OutputWorkspace=self._out_ws)
+        out_ws = GroupWorkspaces(InputWorkspaces=output_ws_list, OutputWorkspace=self._out_ws)
 
         return out_ws
 
@@ -346,7 +346,8 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
 
                 # Data line (if not comment)
                 elif line.strip()[0] != '#':
-                    line_values = np.array([ast.literal_eval(t.strip()) if 'nan' not in t.lower() else np.nan for t in line.split()])
+                    line_values = np.array(
+                        [ast.literal_eval(t.strip()) if 'nan' not in t.lower() else np.nan for t in line.split()])
                     data.append(line_values)
 
         if x_axis is None or v_axis is None:
@@ -356,9 +357,9 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
 
         # Get axis and Y values
         data = np.swapaxes(np.array(data), 0, 1)
-        x_axis_values = data[0,1:]
-        v_axis_values = data[1:,0]
-        y_values = np.ravel(data[1:,1:])
+        x_axis_values = data[0, 1:]
+        v_axis_values = data[1:, 0]
+        y_values = np.ravel(data[1:, 1:])
 
         # Create the workspace
 
@@ -422,7 +423,8 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
 
                 # Data line (if not comment)
                 elif line.strip()[0] != '#':
-                    line_values = np.array([ast.literal_eval(t.strip()) if 'nan' not in t.lower() else np.nan for t in line.split()])
+                    line_values = np.array(
+                        [ast.literal_eval(t.strip()) if 'nan' not in t.lower() else np.nan for t in line.split()])
                     data.append(line_values)
 
         if x_axis is None or y_axis is None:
@@ -432,8 +434,8 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
 
         # Get axis and Y values
         data = np.array(data)
-        x_axis_values = data[:,0]
-        y_values = data[:,1]
+        x_axis_values = data[:, 0]
+        y_values = data[:, 1]
 
         # Create the workspace
         wks = CreateWorkspace(OutputWorkspace=self._out_ws,
@@ -447,8 +449,8 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
 
         return wks
 
-#==============================================================================
 
+#==============================================================================
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(LoadNMoldyn3Ascii)

@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-
 """ SANSSingleReduction algorithm performs a single reduction."""
 
 from SANSSingleReductionBase import SANSSingleReductionBase
@@ -29,22 +28,32 @@ class SANSSingleReduction(SANSSingleReductionBase):
         return 'Performs a single reduction of SANS data.'
 
     def _declare_output_properties(self):
-        self.declareProperty('OutScaleFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
+        self.declareProperty('OutScaleFactor',
+                             defaultValue=Property.EMPTY_DBL,
+                             direction=Direction.Output,
                              doc='Applied scale factor.')
 
-        self.declareProperty('OutShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
+        self.declareProperty('OutShiftFactor',
+                             defaultValue=Property.EMPTY_DBL,
+                             direction=Direction.Output,
                              doc='Applied shift factor.')
 
         # This breaks our flexibility with the reduction mode. We need to check if we can populate this based on
         # the available reduction modes for the state input. TODO: check if this is possible
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLAB', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLAB',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The output workspace for the low-angle bank.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHAB', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHAB',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The output workspace for the high-angle bank.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceMerged', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceMerged',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The output workspace for the merged reduction.')
         self.setPropertyGroup("OutScaleFactor", 'Output')
         self.setPropertyGroup("OutShiftFactor", 'Output')
@@ -53,29 +62,45 @@ class SANSSingleReduction(SANSSingleReductionBase):
         self.setPropertyGroup("OutputWorkspaceMerged", 'Output')
 
         # CAN output
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABCan', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABCan',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The can output workspace for the low-angle bank, provided there is one.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABCan', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABCan',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The can output workspace for the high-angle bank, provided there is one.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABSample', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABSample',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The sample output workspace for the low-angle bank, provided there is one.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABSample', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABSample',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The sample output workspace for the high-angle bank, provided there is one')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceCalculatedTransmission', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceCalculatedTransmission',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The calculated transmission workspace')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceUnfittedTransmission', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceUnfittedTransmission',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The unfitted transmission workspace')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceCalculatedTransmissionCan', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceCalculatedTransmissionCan',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The calculated transmission workspace for the can')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceUnfittedTransmissionCan', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceUnfittedTransmissionCan',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The unfitted transmission workspace for the can')
         self.setPropertyGroup("OutputWorkspaceLABCan", 'Can Output')
         self.setPropertyGroup("OutputWorkspaceHABCan", 'Can Output')
@@ -83,17 +108,25 @@ class SANSSingleReduction(SANSSingleReductionBase):
         self.setPropertyGroup("OutputWorkspaceHABSample", 'Can Output')
 
         # Output CAN Count and Norm for optimizations
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABCanNorm', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABCanNorm',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The can norm output workspace for the low-angle bank, provided there is one.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABCanCount', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABCanCount',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The can count output workspace for the low-angle bank, provided there is one.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABCanCount', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABCanCount',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The can count output workspace for the high-angle bank, provided there is one.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABCanNorm', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABCanNorm',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The can norm output workspace for the high-angle bank, provided there is one.')
 
         self.setPropertyGroup("OutputWorkspaceLABCanCount", 'Opt Output')
@@ -288,7 +321,8 @@ class SANSSingleReduction(SANSSingleReductionBase):
                 if does_can_workspace_exist_on_ads(calculated_transmission_workspace):
                     # The workspace is cloned here because the transmission runs are diagnostic output so even though
                     # the values already exist they need to be labelled seperately for each reduction.
-                    calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace, StoreInADS=False)
+                    calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace,
+                                                                       StoreInADS=False)
                 if does_can_workspace_exist_on_ads(unfitted_transmission_workspace):
                     unfitted_transmission_workspace = CloneWorkspace(unfitted_transmission_workspace, StoreInADS=False)
                 if fit_performed:

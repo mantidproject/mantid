@@ -33,8 +33,7 @@ def get_axes_names_dict(fig, curves_only=False, images_only=False):
     :param images_only: Bool. If True only add axes to dict if it contains an image
     """
     if curves_only and images_only:
-        return ValueError("Only one of 'curves_only' and 'images_only' may be "
-                          "True.")
+        return ValueError("Only one of 'curves_only' and 'images_only' may be " "True.")
     axes_names = {}
     for ax in fig.get_axes():
         if ax not in [img.axes for img in get_colorbars_from_fig(fig)]:
@@ -57,8 +56,7 @@ def curve_in_figure(fig):
 
 def image_in_ax(ax):
     """Return True if there's an image in the Axes object"""
-    if len(ax.images) > 0 or any(isinstance(collection, QuadMesh)
-                                 for collection in ax.collections):
+    if len(ax.images) > 0 or any(isinstance(collection, QuadMesh) for collection in ax.collections):
         return True
     return False
 

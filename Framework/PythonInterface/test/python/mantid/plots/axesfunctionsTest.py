@@ -16,12 +16,11 @@ import mantid.api
 import mantid.plots.axesfunctions as funcs
 from mantid.plots.utility import MantidAxType
 from mantid.kernel import config
-from mantid.simpleapi import (CreateWorkspace, CreateEmptyTableWorkspace, DeleteWorkspace,
-                              CreateMDHistoWorkspace, ConjoinWorkspaces, AddTimeSeriesLog, CloneWorkspace)
+from mantid.simpleapi import (CreateWorkspace, CreateEmptyTableWorkspace, DeleteWorkspace, CreateMDHistoWorkspace,
+                              ConjoinWorkspaces, AddTimeSeriesLog, CloneWorkspace)
 
 
 class PlotFunctionsTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.g1da = config['graph1d.autodistribution']
@@ -110,8 +109,8 @@ class PlotFunctionsTest(unittest.TestCase):
     def test_1d_bin_numeric_axis(self):
         fig, ax = plt.subplots()
         x_axis = mantid.api.NumericAxis.create(2)
-        x_axis.setValue(0,3.)
-        x_axis.setValue(1,5.)
+        x_axis.setValue(0, 3.)
+        x_axis.setValue(1, 5.)
         ws_local = CloneWorkspace(self.ws2d_histo, StoreInADS=False)
         ws_local.replaceAxis(1, x_axis)
         funcs.plot(ax, ws_local, 'rs', specNum=1, axis=MantidAxType.BIN)
@@ -119,9 +118,9 @@ class PlotFunctionsTest(unittest.TestCase):
     def test_1d_bin_binedge_axis(self):
         fig, ax = plt.subplots()
         x_axis = mantid.api.BinEdgeAxis.create(3)
-        x_axis.setValue(0,3.)
-        x_axis.setValue(1,5.)
-        x_axis.setValue(2,7.)
+        x_axis.setValue(0, 3.)
+        x_axis.setValue(1, 5.)
+        x_axis.setValue(2, 7.)
         ws_local = CloneWorkspace(self.ws2d_histo, StoreInADS=False)
         ws_local.replaceAxis(1, x_axis)
         funcs.plot(ax, ws_local, 'rs', specNum=1, axis=MantidAxType.BIN)
@@ -291,6 +290,7 @@ class PlotFunctionsTest(unittest.TestCase):
         x, y, dy, dx, indices, axis, kwargs = funcs._get_data_for_plot(ax, self.ws_spec, kwargs)
         self.assertTrue(np.array_equal([1, 2, 3], x))
         self.assertTrue(np.array_equal([2., 4., 2.], y))
+
 
 if __name__ == '__main__':
     unittest.main()

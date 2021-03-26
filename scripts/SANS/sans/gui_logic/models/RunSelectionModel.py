@@ -7,7 +7,7 @@
 
 
 class RunSelectionModel(object):
-    def __init__(self, on_change, runs = None):
+    def __init__(self, on_change, runs=None):
         self._on_change = on_change
         self._runs = runs if runs is not None else []
         self.on_change()

@@ -18,12 +18,10 @@ from mantidqt.interfacemanager import InterfaceManager
 class DrillExportDialog(QDialog):
 
     UI_FILENAME = "ui/export.ui"
-
     """
     Export presenter.
     """
     _presenter = None
-
     """
     Dictionnary of algorithm names and their corresponding QCheckBox.
     """
@@ -41,9 +39,7 @@ class DrillExportDialog(QDialog):
         uic.loadUi(os.path.join(self.here, self.UI_FILENAME), self)
         self.okButton.clicked.connect(self.accept)
         self.cancelButton.clicked.connect(self.reject)
-        self.applyButton.clicked.connect(
-                lambda : self.accepted.emit()
-                )
+        self.applyButton.clicked.connect(lambda: self.accepted.emit())
         self._widgets = dict()
 
     def setPresenter(self, presenter):
@@ -70,10 +66,8 @@ class DrillExportDialog(QDialog):
             helpButton = QToolButton(self)
             helpButton.setText('...')
             helpButton.setIcon(icons.get_icon("mdi.help"))
-            helpButton.clicked.connect(
-                    lambda _, a=algorithms[i]: InterfaceManager().showHelpPage(
-                        "qthelp://org.mantidproject/doc/algorithms/{}.html"
-                        .format(a)))
+            helpButton.clicked.connect(lambda _, a=algorithms[i]: InterfaceManager().showHelpPage(
+                "qthelp://org.mantidproject/doc/algorithms/{}.html".format(a)))
             self.algoList.addWidget(helpButton, i, 1, Qt.AlignRight)
 
     def setAlgorithmCheckStates(self, states):
@@ -84,7 +78,7 @@ class DrillExportDialog(QDialog):
             sates (dict(str:bool)): for each algorithm name, a bool to set its
                                     check state
         """
-        for a,s in states.items():
+        for a, s in states.items():
             if a in self._widgets:
                 self._widgets[a].setChecked(s)
 
@@ -96,4 +90,4 @@ class DrillExportDialog(QDialog):
             dict(str:bool): for each algorithm name, a bool to set its check
                             state
         """
-        return {a:w.isChecked() for a,w in self._widgets.items()}
+        return {a: w.isChecked() for a, w in self._widgets.items()}

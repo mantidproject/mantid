@@ -102,10 +102,10 @@ class SampleSetupWidget(BaseWidget):
         self._content.sample_edit = mantidqtpython.MantidQt.API.FileFinderWidget()
         # Unfortunately, can only use live if default instrument = gui-set instrument
         if self._instrument_name == config.getInstrument().name():
-            self._content.sample_edit.setProperty("liveButton","Show")
-        self._content.sample_edit.setProperty("multipleFiles",True)
-        self._content.sample_edit.setProperty("algorithmAndProperty","Load|Filename")
-        self._content.sample_edit.setProperty("label",labeltext)
+            self._content.sample_edit.setProperty("liveButton", "Show")
+        self._content.sample_edit.setProperty("multipleFiles", True)
+        self._content.sample_edit.setProperty("algorithmAndProperty", "Load|Filename")
+        self._content.sample_edit.setProperty("label", labeltext)
         self._content.sample_edit.setLabelMinWidth(self._content.sample_label.minimumWidth())
         self._content.horizontalLayout.addWidget(self._content.sample_edit)
         self._content.horizontalLayout.addItem(spacer)
@@ -133,7 +133,7 @@ class SampleSetupWidget(BaseWidget):
 
     def _validate_edit(self, ctrl=None):
         is_valid = True
-        if "isValid" in dir(ctrl): # For mwRunFiles widget
+        if "isValid" in dir(ctrl):  # For mwRunFiles widget
             if not ctrl.isValid():
                 is_valid = False
         else:
@@ -163,9 +163,8 @@ class SampleSetupWidget(BaseWidget):
 
     def _savedir_browse(self):
         save_dir = QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
-                                                          os.path.expanduser('~'),
-                                                          QFileDialog.ShowDirsOnly
-                                                          | QFileDialog.DontResolveSymlinks)
+                                                    os.path.expanduser('~'), QFileDialog.ShowDirsOnly
+                                                    | QFileDialog.DontResolveSymlinks)
         if not save_dir:
             return
         if isinstance(save_dir, tuple):
@@ -181,13 +180,11 @@ class SampleSetupWidget(BaseWidget):
             self._content.sample_edit.setUserInput(state.sample_file)
             self._content.sample_edit.liveButtonSetChecked(state.live_button)
         else:
-            self._check_and_set_lineedit_content(self._content.sample_edit,
-                                                 state.sample_file)
+            self._check_and_set_lineedit_content(self._content.sample_edit, state.sample_file)
         self._content.output_ws_edit.setText(state.output_wsname)
         self._content.detcal_edit.setText(state.detcal_file)
         if "SNS" != self._facility_name:
-            self._check_and_set_lineedit_content(self._content.ei_guess_edit,
-                                                 state.incident_energy_guess)
+            self._check_and_set_lineedit_content(self._content.ei_guess_edit, state.incident_energy_guess)
         self._content.use_ei_guess_chkbox.setChecked(state.use_ei_guess)
         self._content.tzero_guess_edit.setText(str(state.tzero_guess))
         self._content.monitor1_specid_edit.setText(str(state.monitor1_specid))
@@ -235,7 +232,7 @@ class SampleSetupWidget(BaseWidget):
         """
         return self._livebuttonwidget
 
-    def live_button_toggled_actions(self,checked):
+    def live_button_toggled_actions(self, checked):
         if checked:
             self._old_ei_guess_state = self._content.use_ei_guess_chkbox.isChecked()
             self._content.use_ei_guess_chkbox.setChecked(True)

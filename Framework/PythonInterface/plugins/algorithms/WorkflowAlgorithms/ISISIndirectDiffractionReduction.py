@@ -72,62 +72,59 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         return 'Performs a diffraction reduction for a set of raw run files for an ISIS indirect spectrometer'
 
     def seeAlso(self):
-        return [ "AlignDetectors","DiffractionFocussing","SNSPowderReduction" ]
+        return ["AlignDetectors", "DiffractionFocussing", "SNSPowderReduction"]
 
         # ------------------------------------------------------------------------------
 
     def PyInit(self):
-        self.declareProperty(StringArrayProperty(name='InputFiles'),
-                             doc='Comma separated list of input files.')
+        self.declareProperty(StringArrayProperty(name='InputFiles'), doc='Comma separated list of input files.')
 
         self.declareProperty(StringArrayProperty(name='ContainerFiles'),
                              doc='Comma separated list of input files for the empty container runs.')
 
-        self.declareProperty('ContainerScaleFactor', 1.0,
-                             doc='Factor by which to scale the container runs.')
+        self.declareProperty('ContainerScaleFactor', 1.0, doc='Factor by which to scale the container runs.')
 
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.OptionalLoad),
-                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and '
-                                 + '[[DiffractionFocussing]] child algorithms.')
+                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and ' +
+                             '[[DiffractionFocussing]] child algorithms.')
 
-        self.declareProperty(FileProperty('InstrumentParFile', '',
+        self.declareProperty(FileProperty('InstrumentParFile',
+                                          '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['.dat', '.par']),
                              doc='PAR file containing instrument definition. For VESUVIO only')
 
-        self.declareProperty(StringArrayProperty(name='VanadiumFiles'),
-                             doc='Comma separated array of vanadium runs')
+        self.declareProperty(StringArrayProperty(name='VanadiumFiles'), doc='Comma separated array of vanadium runs')
 
-        self.declareProperty(name='SumFiles', defaultValue=False,
-                             doc='Enabled to sum spectra from each input file.')
+        self.declareProperty(name='SumFiles', defaultValue=False, doc='Enabled to sum spectra from each input file.')
 
-        self.declareProperty(name='LoadLogFiles', defaultValue=True,
-                             doc='Load log files when loading runs')
+        self.declareProperty(name='LoadLogFiles', defaultValue=True, doc='Load log files when loading runs')
 
-        self.declareProperty(name='Instrument', defaultValue='IRIS',
+        self.declareProperty(name='Instrument',
+                             defaultValue='IRIS',
                              validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'VESUVIO']),
                              doc='Instrument used for run')
 
-        self.declareProperty(name='Mode', defaultValue='diffspec',
+        self.declareProperty(name='Mode',
+                             defaultValue='diffspec',
                              validator=StringListValidator(['diffspec', 'diffonly']),
                              doc='Diffraction mode used')
 
-        self.declareProperty(IntArrayProperty(name='SpectraRange'),
-                             doc='Range of spectra to use.')
+        self.declareProperty(IntArrayProperty(name='SpectraRange'), doc='Range of spectra to use.')
 
-        self.declareProperty(name='RebinParam', defaultValue='',
-                             doc='Rebin parameters.')
+        self.declareProperty(name='RebinParam', defaultValue='', doc='Rebin parameters.')
 
-        self.declareProperty(name='GroupingPolicy', defaultValue='All',
+        self.declareProperty(name='GroupingPolicy',
+                             defaultValue='All',
                              validator=StringListValidator(['All', 'Individual', 'Workspace', 'IPF']),
                              doc='Selects the type of detector grouping to be used.')
-        self.declareProperty(WorkspaceProperty('GroupingWorkspace', '',
+        self.declareProperty(WorkspaceProperty('GroupingWorkspace',
+                                               '',
                                                direction=Direction.Input,
                                                optional=PropertyMode.Optional),
                              doc='Workspace containing spectra grouping.')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                                                    direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Group name for the result workspaces.')
 
     # ------------------------------------------------------------------------------
@@ -174,16 +171,9 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
 
-        from IndirectReductionCommon import (get_multi_frame_rebin,
-                                             identify_bad_detectors,
-                                             unwrap_monitor,
-                                             process_monitor_efficiency,
-                                             scale_monitor,
-                                             scale_detectors,
-                                             rebin_reduction,
-                                             group_spectra,
-                                             fold_chopped,
-                                             rename_reduction)
+        from IndirectReductionCommon import (get_multi_frame_rebin, identify_bad_detectors, unwrap_monitor,
+                                             process_monitor_efficiency, scale_monitor, scale_detectors,
+                                             rebin_reduction, group_spectra, fold_chopped, rename_reduction)
 
         self._setup()
 
@@ -228,8 +218,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 workspaces = [c_ws_name]
 
             # Process rebinning for framed data
-            rebin_string_2, num_bins = get_multi_frame_rebin(c_ws_name,
-                                                             self._rebin_string)
+            rebin_string_2, num_bins = get_multi_frame_rebin(c_ws_name, self._rebin_string)
 
             masked_detectors = identify_bad_detectors(workspaces[0])
 
@@ -239,9 +228,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
                 # Subtract empty container if there is one
                 if self._container_workspace is not None:
-                    Minus(LHSWorkspace=ws_name,
-                          RHSWorkspace=self._container_workspace,
-                          OutputWorkspace=ws_name)
+                    Minus(LHSWorkspace=ws_name, RHSWorkspace=self._container_workspace, OutputWorkspace=ws_name)
 
                 if self._vanadium_ws:
                     van_ws_name = self._vanadium_ws[index]
@@ -271,7 +258,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                          WorkspaceToMatch=ws_name,
                                          OutputWorkspace=van_ws_name)
 
-                    replacement_value = 0.1*find_minimum_non_zero_y_in_workspace(van_ws)
+                    replacement_value = 0.1 * find_minimum_non_zero_y_in_workspace(van_ws)
                     logger.information('Replacing zeros in {0} with {1}.'.format(van_ws_name, replacement_value))
                     ReplaceSpecialValues(InputWorkspace=van_ws_name,
                                          SmallNumberThreshold=0.0000001,
@@ -302,16 +289,10 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 DeleteWorkspace(monitor_ws_name)
 
                 # Convert to dSpacing
-                ConvertUnits(InputWorkspace=ws_name,
-                             OutputWorkspace=ws_name,
-                             Target='dSpacing',
-                             EMode='Elastic')
+                ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='dSpacing', EMode='Elastic')
 
                 # Handle rebinning
-                rebin_reduction(ws_name,
-                                self._rebin_string,
-                                rebin_string_2,
-                                num_bins)
+                rebin_reduction(ws_name, self._rebin_string, rebin_string_2, num_bins)
 
                 # Group spectra
                 group_spectra(ws_name,
@@ -334,8 +315,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         output_workspace_names = [rename_reduction(ws_name, self._sum_files) for ws_name in self._workspace_names]
 
         # Group result workspaces
-        GroupWorkspaces(InputWorkspaces=output_workspace_names,
-                        OutputWorkspace=self._output_ws)
+        GroupWorkspaces(InputWorkspaces=output_workspace_names, OutputWorkspace=self._output_ws)
 
         self.setProperty('OutputWorkspace', self._output_ws)
 
@@ -390,12 +370,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         """
         if self._cal_file != '':
             for ws_name in self._workspace_names:
-                AlignDetectors(InputWorkspace=ws_name,
-                               OutputWorkspace=ws_name,
-                               CalibrationFile=self._cal_file)
-                DiffractionFocussing(InputWorkspace=ws_name,
-                                     OutputWorkspace=ws_name,
-                                     GroupingFileName=self._cal_file)
+                AlignDetectors(InputWorkspace=ws_name, OutputWorkspace=ws_name, CalibrationFile=self._cal_file)
+                DiffractionFocussing(InputWorkspace=ws_name, OutputWorkspace=ws_name, GroupingFileName=self._cal_file)
 
     def _load_and_scale_container(self, scale_factor, load_opts):
         """

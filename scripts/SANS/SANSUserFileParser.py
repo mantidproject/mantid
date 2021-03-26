@@ -35,21 +35,23 @@ class BackCommandParser(object):
         # Parse results
         self._use_mean = None
         self._use_time = None
-        self._mon = False # This is not being parsed by the standard chain
+        self._mon = False  # This is not being parsed by the standard chain
         self._run_number = None
         self._mon_number = None
 
         # Key - method mapping
-        self._method_map = {''.join(self._first_level_keys_standard): self._evaluate_uniform,
-                            ''.join(self._first_level_keys_special): self._evaluate_mon,
-                            ''.join(self._uniform_key): self._evaluate_uniform,
-                            ''.join(self._mean_key):self._evaluate_mean,
-                            ''.join(self._run_key):self._evaluate_run}
+        self._method_map = {
+            ''.join(self._first_level_keys_standard): self._evaluate_uniform,
+            ''.join(self._first_level_keys_special): self._evaluate_mon,
+            ''.join(self._uniform_key): self._evaluate_uniform,
+            ''.join(self._mean_key): self._evaluate_mean,
+            ''.join(self._run_key): self._evaluate_run
+        }
 
     def _reset_parse_results(self):
         self._use_mean = None
         self._use_time = None
-        self._mon = False # This is not being parsed by the standard chain
+        self._mon = False  # This is not being parsed by the standard chain
         self._run_number = None
         self._mon_number = None
 
@@ -68,8 +70,7 @@ class BackCommandParser(object):
             self._use_mean = False
         else:
             raise RuntimeError("BackCommandParser: Cannot parse the MEAN/TOF value. "
-                               "Read in " + argument + ". "
-                               + "Make sure it is set correctly.")
+                               "Read in " + argument + ". " + "Make sure it is set correctly.")
 
     def _evaluate_uniform(self, argument):
         '''
@@ -83,8 +84,7 @@ class BackCommandParser(object):
             self._use_time = False
         else:
             raise RuntimeError("BackCommandParser: Cannot parse the TIME/UAMP value. "
-                               "Read in " + argument + ". "
-                               + "Make sure it is set correctly.")
+                               "Read in " + argument + ". " + "Make sure it is set correctly.")
 
     def _evaluate_run(self, argument):
         '''
@@ -94,12 +94,11 @@ class BackCommandParser(object):
         '''
         if not argument.startswith(self._run_key[0]):
             raise RuntimeError("BackCommandParser: Cannot parse the RUN= value. "
-                               "Read in " + argument + ". "
-                               + "Make sure it is set correctly.")
+                               "Read in " + argument + ". " + "Make sure it is set correctly.")
 
         # Remove the Run= part and take the rest as the run parameter. At this point we cannot
         # check if it is a valid run
-        self._run_number  = argument.replace(self._run_key[0], "")
+        self._run_number = argument.replace(self._run_key[0], "")
 
     def _evaluate_mon(self, argument):
         '''
@@ -108,16 +107,15 @@ class BackCommandParser(object):
         @param argument: string to investigate
         @raise RuntimeError: If the argument cannot be parsed correctly
         '''
-        if argument == self._first_level_keys_special[0]: # Check if MON
+        if argument == self._first_level_keys_special[0]:  # Check if MON
             self._mon = True
         elif re.match(self._first_level_keys_special[1], argument):
             self._mon = True
             mon_number = argument.replace("M", "")
-            self._mon_number=int(mon_number)
+            self._mon_number = int(mon_number)
         else:
             raise RuntimeError("BackCommandParser: Cannot parse the MON value. "
-                               "Read in " + argument + ". "
-                               + "Make sure it is set correctly.")
+                               "Read in " + argument + ". " + "Make sure it is set correctly.")
 
     def can_attempt_to_parse(self, arguments):
         '''
@@ -153,7 +151,8 @@ class BackCommandParser(object):
 
         if argument[0] == self._first_level_keys_special[0] and argument[1].startswith(self._special_chain[1][0]):
             can_parse = True
-        elif re.match(self._first_level_keys_special[1], argument[0]) and argument[1].startswith(self._special_chain[1][0]):
+        elif re.match(self._first_level_keys_special[1], argument[0]) and argument[1].startswith(
+                self._special_chain[1][0]):
             can_parse = True
 
         return can_parse
@@ -202,11 +201,11 @@ class BackCommandParser(object):
         self._parse(arguments)
 
         # Now pass the arguments back in a defined format
-        setting =  DarkRunSettings(mon = self._mon,
-                                   run_number = self._run_number,
-                                   time = self._use_time,
-                                   mean = self._use_mean,
-                                   mon_number = self._mon_number)
+        setting = DarkRunSettings(mon=self._mon,
+                                  run_number=self._run_number,
+                                  time=self._use_time,
+                                  mean=self._use_mean,
+                                  mon_number=self._mon_number)
 
         # Reset the parse results just in case we want to use it again
         self._reset_parse_results()
@@ -222,12 +221,11 @@ class BackCommandParser(object):
         to_parse = self._prepare_argument(arguments)
 
         if not self.can_attempt_to_parse(arguments):
-            raise RuntimeError("BackCommandParser: Cannot parse provided arguments."
-                               "They are not compatible")
+            raise RuntimeError("BackCommandParser: Cannot parse provided arguments." "They are not compatible")
 
         index = 0
         for element in to_parse:
             key = self._evaluation_chain[index]
             evaluation_method = self._get_method(key)
             evaluation_method(element)
-            index +=  1
+            index += 1

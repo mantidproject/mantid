@@ -11,7 +11,6 @@ import tempfile
 
 
 class LoadGudrunOutputTest(unittest.TestCase):
-
     def setUp(self):
         self.file_name = 'POLARIS00097947-min{}01'
 

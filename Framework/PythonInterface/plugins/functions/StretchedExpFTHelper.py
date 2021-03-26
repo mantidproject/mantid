@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, anomalous-backslash-in-string, attribute-defined-outside-init
-
 """
 @author Jose Borreguero, NScD
 @date July 19, 2017
@@ -55,10 +54,11 @@ def functionDeriv1D(function, xvals, jacobian):
         return
     f0 = function.function1D(xvals)
     # Add these quantities to original parameter values
-    dp = {'Tau': 1.0,  # change by 1ps
-          'Beta': 0.01,
-          'Centre': 0.0001  # change by 0.1 micro-eV
-          }
+    dp = {
+        'Tau': 1.0,  # change by 1ps
+        'Beta': 0.01,
+        'Centre': 0.0001  # change by 0.1 micro-eV
+    }
     for name in dp.keys():
         pp = copy.copy(p)
         pp[name] += dp[name]
@@ -100,10 +100,12 @@ def validateParams(function):
     return {'Height': height, 'Tau': tau, 'Beta': beta, 'Centre': Centre}
 
 
-surrogates = {'fillJacobian': fillJacobian,
-              'functionDeriv1D': functionDeriv1D,
-              'init': init,
-              'validateParams': validateParams, }
+surrogates = {
+    'fillJacobian': fillJacobian,
+    'functionDeriv1D': functionDeriv1D,
+    'init': init,
+    'validateParams': validateParams,
+}
 
 
 def surrogate(method):
@@ -142,21 +144,19 @@ def function1Dcommon(function, xvals, refine_factor=16, **optparms):
     dt = 0.5 * planck_constant / erange  # spacing in time
     tmax = planck_constant / de  # maximum reciprocal time
     # round to an upper power of two
-    nt = 2 ** (1 + int(np.log(tmax / dt) / np.log(2)))
+    nt = 2**(1 + int(np.log(tmax / dt) / np.log(2)))
     sampled_times = dt * np.arange(-nt, nt)
-    decay = np.exp(-(np.abs(sampled_times) / p['Tau']) ** p['Beta'])
+    decay = np.exp(-(np.abs(sampled_times) / p['Tau'])**p['Beta'])
     # The Fourier transform introduces an extra factor exp(i*pi*E/de),
     # which amounts to alternating sign every time E increases by de,
     # the energy bin width. Thus, we take the absolute value
     fourier = np.abs(fft(decay).real)  # notice the reverse of decay array
     fourier /= fourier[0]  # set maximum to unity
     # Normalize the integral in energies to unity
-    fourier *= 2*p['Tau']*gamma(1./p['Beta']) / (p['Beta']*planck_constant)
+    fourier *= 2 * p['Tau'] * gamma(1. / p['Beta']) / (p['Beta'] * planck_constant)
     # symmetrize to negative energies
-    fourier = np.concatenate(
-        [fourier[nt:], fourier[:nt]])  # increasing ordering
+    fourier = np.concatenate([fourier[nt:], fourier[:nt]])  # increasing ordering
     # Find energy values corresponding to the fourier values
     energies = planck_constant * fftfreq(2 * nt, d=dt)  # standard ordering
-    energies = np.concatenate(
-        [energies[nt:], energies[:nt]])  # increasing ordering
+    energies = np.concatenate([energies[nt:], energies[:nt]])  # increasing ordering
     return p, de, energies, fourier

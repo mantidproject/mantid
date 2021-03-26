@@ -19,12 +19,11 @@ class HB3AIntegratePeaksTest(unittest.TestCase):
     def setUpClass(cls):
         # Create the workspaces needed for each test
         HB3AAdjustSampleNorm(Filename=cls._files, MergeInputs=True, OutputWorkspace="merged")
-        HB3AFindPeaks(InputWorkspace=mtd["merged"],
-                      CellType="Orthorhombic",
-                      Centering="F",
-                      OutputWorkspace="peaks")
+        HB3AFindPeaks(InputWorkspace=mtd["merged"], CellType="Orthorhombic", Centering="F", OutputWorkspace="peaks")
 
-        IntegratePeaksMD(InputWorkspace=mtd["merged"], PeaksWorkspace=mtd["peaks"], PeakRadius=0.25,
+        IntegratePeaksMD(InputWorkspace=mtd["merged"],
+                         PeaksWorkspace=mtd["peaks"],
+                         PeakRadius=0.25,
                          OutputWorkspace="int_peaksmd")
 
     @classmethod
@@ -33,8 +32,10 @@ class HB3AIntegratePeaksTest(unittest.TestCase):
 
     def test_integrate_peaks(self):
         # Test with no Lorentz correction - output should be identical to IntegratePeaksMD
-        int_peaks = HB3AIntegratePeaks(InputWorkspace=mtd["merged"], PeaksWorkspace=mtd["peaks"],
-                                       PeakRadius=0.25, ApplyLorentz=False)
+        int_peaks = HB3AIntegratePeaks(InputWorkspace=mtd["merged"],
+                                       PeaksWorkspace=mtd["peaks"],
+                                       PeakRadius=0.25,
+                                       ApplyLorentz=False)
         self.assertEqual(mtd['int_peaksmd'].getNumberPeaks(), int_peaks.getNumberPeaks())
 
         self.assertTrue(int_peaks.hasIntegratedPeaks())
@@ -48,8 +49,7 @@ class HB3AIntegratePeaksTest(unittest.TestCase):
 
     def test_integrate_peaks_lorentz(self):
         # Make sure that this algorithm gives similar results to IntegratePeaksMD
-        int_peaks = HB3AIntegratePeaks(InputWorkspace=mtd["merged"], PeaksWorkspace=mtd["peaks"],
-                                       PeakRadius=0.25)
+        int_peaks = HB3AIntegratePeaks(InputWorkspace=mtd["merged"], PeaksWorkspace=mtd["peaks"], PeakRadius=0.25)
 
         # Verify that both have the same number of peaks
         self.assertEqual(mtd['int_peaksmd'].getNumberPeaks(), int_peaks.getNumberPeaks())
@@ -68,14 +68,22 @@ class HB3AIntegratePeaksTest(unittest.TestCase):
         fileout = os.path.join(test_dir, "integrated_peaks_shelx")
 
         # Test SHELX output
-        HB3AIntegratePeaks(InputWorkspace=mtd["merged"], PeaksWorkspace=mtd["peaks"],
-                           PeakRadius=0.25, OutputFormat="SHELX", OutputFile=fileout, OutputWorkspace="int_peaks")
+        HB3AIntegratePeaks(InputWorkspace=mtd["merged"],
+                           PeaksWorkspace=mtd["peaks"],
+                           PeakRadius=0.25,
+                           OutputFormat="SHELX",
+                           OutputFile=fileout,
+                           OutputWorkspace="int_peaks")
         self.assertTrue(os.path.exists(fileout))
 
         # Test Fullprof output
         fileout = os.path.join(test_dir, "integrated_peaks_fullprof")
-        HB3AIntegratePeaks(InputWorkspace=mtd["merged"], PeaksWorkspace=mtd["peaks"],
-                           PeakRadius=0.25, OutputFormat="Fullprof", OutputFile=fileout, OutputWorkspace="int_peaks")
+        HB3AIntegratePeaks(InputWorkspace=mtd["merged"],
+                           PeaksWorkspace=mtd["peaks"],
+                           PeakRadius=0.25,
+                           OutputFormat="Fullprof",
+                           OutputFile=fileout,
+                           OutputWorkspace="int_peaks")
         self.assertTrue(os.path.exists(fileout))
 
         shutil.rmtree(test_dir)

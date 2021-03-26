@@ -88,8 +88,7 @@ class SampleSetupScript(BaseScriptElement):
         if self.et_range_low != SampleSetupScript.et_range_low or \
            self.et_range_width != SampleSetupScript.et_range_width or \
            self.et_range_high != SampleSetupScript.et_range_high:
-            script += "EnergyTransferRange=\"%s,%s,%s\",\n" % (self.et_range_low,
-                                                               self.et_range_width,
+            script += "EnergyTransferRange=\"%s,%s,%s\",\n" % (self.et_range_low, self.et_range_width,
                                                                self.et_range_high)
         if self.et_is_distribution != SampleSetupScript.et_is_distribution:
             script += "SofPhiEIsDistribution=%s,\n" % self.et_is_distribution
@@ -155,9 +154,8 @@ class SampleSetupScript(BaseScriptElement):
             self.relocate_dets = BaseScriptElement.getBoolElement(instrument_dom,
                                                                   "relocate_dets",
                                                                   default=SampleSetupScript.relocate_dets)
-            self.incident_energy_guess = BaseScriptElement.getStringElement(instrument_dom,
-                                                                            "incident_energy_guess",
-                                                                            default=SampleSetupScript.incident_energy_guess)
+            self.incident_energy_guess = BaseScriptElement.getStringElement(
+                instrument_dom, "incident_energy_guess", default=SampleSetupScript.incident_energy_guess)
             self.use_ei_guess = BaseScriptElement.getBoolElement(instrument_dom,
                                                                  "use_ei_guess",
                                                                  default=SampleSetupScript.use_ei_guess)

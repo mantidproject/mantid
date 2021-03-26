@@ -16,7 +16,6 @@ from mantid.simpleapi import (ComputeCalibrationCoefVan, MaskDetectorsIf)
 
 class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
     """A workflow algorithm which integrates the vanadium data."""
-
     def __init__(self):
         """Initialize an instance of the algorithm."""
         DataProcessorAlgorithm.__init__(self)
@@ -26,7 +25,7 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
         return common.CATEGORIES
 
     def seeAlso(self):
-        return [ "DirectILLReduction" ]
+        return ["DirectILLReduction"]
 
     def name(self):
         """Return the algorithm's name."""
@@ -65,52 +64,43 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
         positiveFloat = FloatBoundedValidator(lower=0)
 
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=common.PROP_INPUT_WS,
-            defaultValue='',
-            validator=inputWorkspaceValidator,
-            optional=PropertyMode.Mandatory,
-            direction=Direction.Input),
-            doc='A workspace to be integrated.')
-        self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
-                                               defaultValue='',
-                                               direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty(name=common.PROP_INPUT_WS,
+                                                     defaultValue='',
+                                                     validator=inputWorkspaceValidator,
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Input),
+                             doc='A workspace to be integrated.')
+        self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS, defaultValue='', direction=Direction.Output),
                              doc='The integrated workspace.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
                              defaultValue=utils.Cleanup.ON,
-                             validator=StringListValidator([
-                                 utils.Cleanup.ON,
-                                 utils.Cleanup.OFF]),
+                             validator=StringListValidator([utils.Cleanup.ON, utils.Cleanup.OFF]),
                              direction=Direction.Input,
                              doc='What to do with intermediate workspaces.')
         self.declareProperty(name=common.PROP_SUBALG_LOGGING,
                              defaultValue=common.SUBALG_LOGGING_OFF,
-                             validator=StringListValidator([
-                                 common.SUBALG_LOGGING_OFF,
-                                 common.SUBALG_LOGGING_ON]),
+                             validator=StringListValidator([common.SUBALG_LOGGING_OFF, common.SUBALG_LOGGING_ON]),
                              direction=Direction.Input,
                              doc='Enable or disable subalgorithms to ' + 'print in the logs.')
-        self.declareProperty(ITableWorkspaceProperty(
-            name=common.PROP_EPP_WS,
-            defaultValue='',
-            direction=Direction.Input,
-            optional=PropertyMode.Mandatory),
-            doc='Table workspace containing results from the FindEPP algorithm.')
+        self.declareProperty(ITableWorkspaceProperty(name=common.PROP_EPP_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Mandatory),
+                             doc='Table workspace containing results from the FindEPP algorithm.')
         self.declareProperty(name=common.PROP_DWF_CORRECTION,
                              defaultValue=common.DWF_ON,
-                             validator=StringListValidator([
-                                 common.DWF_ON,
-                                 common.DWF_OFF]),
+                             validator=StringListValidator([common.DWF_ON, common.DWF_OFF]),
                              direction=Direction.Input,
-                             doc='Enable or disable the correction for the Debye-Waller factor for ' + common.PROP_OUTPUT_WS + '.')
+                             doc='Enable or disable the correction for the Debye-Waller factor for ' +
+                             common.PROP_OUTPUT_WS + '.')
         self.declareProperty(name=common.PROP_TEMPERATURE,
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc='Vanadium temperature in Kelvin for Debye-Waller correction, '
-                                 + 'overrides the default value from the sample logs.')
-        self.setPropertySettings(common.PROP_TEMPERATURE, EnabledWhenProperty(common.PROP_DWF_CORRECTION,
-                                                                              PropertyCriterion.IsDefault))
+                             doc='Vanadium temperature in Kelvin for Debye-Waller correction, ' +
+                             'overrides the default value from the sample logs.')
+        self.setPropertySettings(common.PROP_TEMPERATURE,
+                                 EnabledWhenProperty(common.PROP_DWF_CORRECTION, PropertyCriterion.IsDefault))
 
     def _inputWS(self):
         """Return the raw input workspace."""

@@ -21,8 +21,7 @@ class CursorTrackerTest(unittest.TestCase):
 
         canvas = self.mock_axes.figure.canvas
         canvas.mpl_connect.assert_has_calls(
-            (call('motion_notify_event',
-                  tracker.on_mouse_move), call('axes_leave_event', tracker.on_mouse_leave)),
+            (call('motion_notify_event', tracker.on_mouse_move), call('axes_leave_event', tracker.on_mouse_leave)),
             any_order=True)
 
     def test_construction_subscribes_to_expected_events_if_autoconnect_True(self):
@@ -30,8 +29,7 @@ class CursorTrackerTest(unittest.TestCase):
 
         canvas = self.mock_axes.figure.canvas
         canvas.mpl_connect.assert_has_calls(
-            (call('motion_notify_event',
-                  tracker.on_mouse_move), call('axes_leave_event', tracker.on_mouse_leave)),
+            (call('motion_notify_event', tracker.on_mouse_move), call('axes_leave_event', tracker.on_mouse_leave)),
             any_order=True)
 
     def test_on_mouse_move_notifies_if_inaxes(self):

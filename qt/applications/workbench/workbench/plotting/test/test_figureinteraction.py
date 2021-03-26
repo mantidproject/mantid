@@ -7,7 +7,6 @@
 #  This file is part of the mantid workbench.
 #
 
-
 # system imports
 import unittest
 
@@ -33,25 +32,22 @@ from workbench.plotting.figureinteraction import FigureInteraction, LogNorm
 
 @start_qapplication
 class FigureInteractionTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
-        cls.ws = CreateWorkspace(
-            DataX=np.array([10, 20, 30], dtype=np.float64),
-            DataY=np.array([2, 3], dtype=np.float64),
-            DataE=np.array([0.02, 0.02], dtype=np.float64),
-            Distribution=False,
-            UnitX='Wavelength',
-            YUnitLabel='Counts',
-            OutputWorkspace='ws')
-        cls.ws1 = CreateWorkspace(
-            DataX=np.array([11, 21, 31], dtype=np.float64),
-            DataY=np.array([3, 4], dtype=np.float64),
-            DataE=np.array([0.03, 0.03], dtype=np.float64),
-            Distribution=False,
-            UnitX='Wavelength',
-            YUnitLabel='Counts',
-            OutputWorkspace='ws1')
+        cls.ws = CreateWorkspace(DataX=np.array([10, 20, 30], dtype=np.float64),
+                                 DataY=np.array([2, 3], dtype=np.float64),
+                                 DataE=np.array([0.02, 0.02], dtype=np.float64),
+                                 Distribution=False,
+                                 UnitX='Wavelength',
+                                 YUnitLabel='Counts',
+                                 OutputWorkspace='ws')
+        cls.ws1 = CreateWorkspace(DataX=np.array([11, 21, 31], dtype=np.float64),
+                                  DataY=np.array([3, 4], dtype=np.float64),
+                                  DataE=np.array([0.03, 0.03], dtype=np.float64),
+                                  Distribution=False,
+                                  UnitX='Wavelength',
+                                  YUnitLabel='Counts',
+                                  OutputWorkspace='ws1')
         # initialises the QApplication
         super(cls, FigureInteractionTest).setUpClass()
 
@@ -98,28 +94,21 @@ class FigureInteractionTest(unittest.TestCase):
         interactor.disconnect()
         self.assertEqual(interactor.nevents, canvas.mpl_disconnect.call_count)
 
-    @patch('workbench.plotting.figureinteraction.QMenu',
-           autospec=True)
-    @patch('workbench.plotting.figureinteraction.figure_type',
-           autospec=True)
-    def test_right_click_gives_no_context_menu_for_empty_figure(self, mocked_figure_type,
-                                                                mocked_qmenu):
+    @patch('workbench.plotting.figureinteraction.QMenu', autospec=True)
+    @patch('workbench.plotting.figureinteraction.figure_type', autospec=True)
+    def test_right_click_gives_no_context_menu_for_empty_figure(self, mocked_figure_type, mocked_qmenu):
         fig_manager = self._create_mock_fig_manager_to_accept_right_click()
         interactor = FigureInteraction(fig_manager)
         mouse_event = self._create_mock_right_click()
         mocked_figure_type.return_value = FigureType.Empty
 
-        with patch.object(interactor.toolbar_manager, 'is_tool_active',
-                          lambda: False):
+        with patch.object(interactor.toolbar_manager, 'is_tool_active', lambda: False):
             interactor.on_mouse_button_press(mouse_event)
             self.assertEqual(0, mocked_qmenu.call_count)
 
-    @patch('workbench.plotting.figureinteraction.QMenu',
-           autospec=True)
-    @patch('workbench.plotting.figureinteraction.figure_type',
-           autospec=True)
-    def test_right_click_gives_context_menu_for_color_plot(self, mocked_figure_type,
-                                                           mocked_qmenu):
+    @patch('workbench.plotting.figureinteraction.QMenu', autospec=True)
+    @patch('workbench.plotting.figureinteraction.figure_type', autospec=True)
+    def test_right_click_gives_context_menu_for_color_plot(self, mocked_figure_type, mocked_qmenu):
         fig_manager = self._create_mock_fig_manager_to_accept_right_click()
         interactor = FigureInteraction(fig_manager)
         mouse_event = self._create_mock_right_click()
@@ -133,16 +122,16 @@ class FigureInteractionTest(unittest.TestCase):
         qmenu_call4 = MagicMock()
         mocked_qmenu.side_effect = [qmenu_call1, qmenu_call2, qmenu_call3, qmenu_call4]
 
-        with patch('workbench.plotting.figureinteraction.QActionGroup',
-                   autospec=True):
-            with patch.object(interactor.toolbar_manager, 'is_tool_active',
-                              lambda: False):
+        with patch('workbench.plotting.figureinteraction.QActionGroup', autospec=True):
+            with patch.object(interactor.toolbar_manager, 'is_tool_active', lambda: False):
                 interactor.on_mouse_button_press(mouse_event)
                 self.assertEqual(0, qmenu_call1.addAction.call_count)
-                expected_qmenu_calls = [call(),
-                                        call("Axes", qmenu_call1),
-                                        call("Normalization", qmenu_call1),
-                                        call("Color bar", qmenu_call1)]
+                expected_qmenu_calls = [
+                    call(),
+                    call("Axes", qmenu_call1),
+                    call("Normalization", qmenu_call1),
+                    call("Color bar", qmenu_call1)
+                ]
                 self.assertEqual(expected_qmenu_calls, mocked_qmenu.call_args_list)
                 # 4 actions in Axes submenu
                 self.assertEqual(4, qmenu_call2.addAction.call_count)
@@ -151,12 +140,9 @@ class FigureInteractionTest(unittest.TestCase):
                 # 2 actions in Colorbar submenu
                 self.assertEqual(2, qmenu_call4.addAction.call_count)
 
-    @patch('workbench.plotting.figureinteraction.QMenu',
-           autospec=True)
-    @patch('workbench.plotting.figureinteraction.figure_type',
-           autospec=True)
-    def test_right_click_gives_context_menu_for_plot_without_fit_enabled(self, mocked_figure_type,
-                                                                         mocked_qmenu_cls):
+    @patch('workbench.plotting.figureinteraction.QMenu', autospec=True)
+    @patch('workbench.plotting.figureinteraction.figure_type', autospec=True)
+    def test_right_click_gives_context_menu_for_plot_without_fit_enabled(self, mocked_figure_type, mocked_qmenu_cls):
         fig_manager = self._create_mock_fig_manager_to_accept_right_click()
         fig_manager.fit_browser.tool = None
         interactor = FigureInteraction(fig_manager)
@@ -174,18 +160,18 @@ class FigureInteractionTest(unittest.TestCase):
         qmenu_call4 = MagicMock()
         mocked_qmenu_cls.side_effect = [qmenu_call1, qmenu_call2, qmenu_call3, qmenu_call4]
 
-        with patch('workbench.plotting.figureinteraction.QActionGroup',
-                   autospec=True):
-            with patch.object(interactor.toolbar_manager, 'is_tool_active',
-                              lambda: False):
+        with patch('workbench.plotting.figureinteraction.QActionGroup', autospec=True):
+            with patch.object(interactor.toolbar_manager, 'is_tool_active', lambda: False):
                 with patch.object(interactor, 'add_error_bars_menu', MagicMock()):
                     interactor.on_mouse_button_press(mouse_event)
                     self.assertEqual(0, qmenu_call1.addSeparator.call_count)
                     self.assertEqual(0, qmenu_call1.addAction.call_count)
-                    expected_qmenu_calls = [call(),
-                                            call("Axes", qmenu_call1),
-                                            call("Normalization", qmenu_call1),
-                                            call("Markers", qmenu_call1)]
+                    expected_qmenu_calls = [
+                        call(),
+                        call("Axes", qmenu_call1),
+                        call("Normalization", qmenu_call1),
+                        call("Markers", qmenu_call1)
+                    ]
                     self.assertEqual(expected_qmenu_calls, mocked_qmenu_cls.call_args_list)
                     # 4 actions in Axes submenu
                     self.assertEqual(4, qmenu_call2.addAction.call_count)
@@ -209,8 +195,7 @@ class FigureInteractionTest(unittest.TestCase):
         if int(matplotlib.__version__[0]) < 2:
             errors = False
 
-        fig = plot([self.ws], spectrum_nums=[1], errors=errors,
-                   plot_kwargs={'distribution': True})
+        fig = plot([self.ws], spectrum_nums=[1], errors=errors, plot_kwargs={'distribution': True})
         mock_canvas = MagicMock(figure=fig)
         fig_manager_mock = MagicMock(canvas=mock_canvas)
         fig_interactor = FigureInteraction(fig_manager_mock)
@@ -223,11 +208,17 @@ class FigureInteractionTest(unittest.TestCase):
 
     def test_normalization_toggle_with_no_autoscale_on_update_no_errors(self):
         self._test_toggle_normalization(errorbars_on=False,
-                                        plot_kwargs={'distribution': True, 'autoscale_on_update': False})
+                                        plot_kwargs={
+                                            'distribution': True,
+                                            'autoscale_on_update': False
+                                        })
 
     def test_normalization_toggle_with_no_autoscale_on_update_with_errors(self):
         self._test_toggle_normalization(errorbars_on=True,
-                                        plot_kwargs={'distribution': True, 'autoscale_on_update': False})
+                                        plot_kwargs={
+                                            'distribution': True,
+                                            'autoscale_on_update': False
+                                        })
 
     def test_add_error_bars_menu(self):
         self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
@@ -434,10 +425,12 @@ class FigureInteractionTest(unittest.TestCase):
                     self.interactor.on_mouse_button_press(mouse_event)
                     self.assertEqual(0, qmenu_call1.addSeparator.call_count)
                     self.assertEqual(0, qmenu_call1.addAction.call_count)
-                    expected_qmenu_calls = [call(),
-                                            call(marker1.name, qmenu_call1),
-                                            call(marker2.name, qmenu_call1),
-                                            call(marker3.name, qmenu_call1)]
+                    expected_qmenu_calls = [
+                        call(),
+                        call(marker1.name, qmenu_call1),
+                        call(marker2.name, qmenu_call1),
+                        call(marker3.name, qmenu_call1)
+                    ]
                     self.assertEqual(expected_qmenu_calls, mocked_qmenu_cls.call_args_list)
                     # 2 Actions in marker menu
                     self.assertEqual(2, qmenu_call2.addAction.call_count)
@@ -450,7 +443,11 @@ class FigureInteractionTest(unittest.TestCase):
         data = MagicMock()
         axis = MagicMock()
         self.interactor._add_horizontal_marker(data, y0, y1, axis)
-        expected_call = call(self.interactor.canvas, '#2ca02c', data, y0, y1,
+        expected_call = call(self.interactor.canvas,
+                             '#2ca02c',
+                             data,
+                             y0,
+                             y1,
                              name='marker 0',
                              marker_type='YSingle',
                              line_style='dashed',
@@ -465,7 +462,11 @@ class FigureInteractionTest(unittest.TestCase):
         data = MagicMock()
         axis = MagicMock()
         self.interactor._add_vertical_marker(data, x0, x1, axis)
-        expected_call = call(self.interactor.canvas, '#2ca02c', data, x0, x1,
+        expected_call = call(self.interactor.canvas,
+                             '#2ca02c',
+                             data,
+                             x0,
+                             x1,
                              name='marker 0',
                              marker_type='XSingle',
                              line_style='dashed',
@@ -499,11 +500,9 @@ class FigureInteractionTest(unittest.TestCase):
     @patch('workbench.plotting.figureinteraction.QApplication')
     def test_edit_marker_opens_correct_editor(self, mock_qapp, mock_editor):
         marker = MagicMock()
-        expected_call = [call(self.interactor.canvas,
-                              marker,
-                              self.interactor.valid_lines,
-                              self.interactor.valid_colors,
-                              [])]
+        expected_call = [
+            call(self.interactor.canvas, marker, self.interactor.valid_lines, self.interactor.valid_colors, [])
+        ]
 
         self.interactor._edit_marker(marker)
 
@@ -514,9 +513,9 @@ class FigureInteractionTest(unittest.TestCase):
     def test_global_edit_marker_opens_correct_editor(self, mock_editor):
         marker = MagicMock()
         self.interactor.markers = [marker]
-        expected_call = [call(self.interactor.canvas, [marker],
-                              self.interactor.valid_lines,
-                              self.interactor.valid_colors)]
+        expected_call = [
+            call(self.interactor.canvas, [marker], self.interactor.valid_lines, self.interactor.valid_colors)
+        ]
 
         self.interactor._global_edit_markers()
 
@@ -613,8 +612,8 @@ class FigureInteractionTest(unittest.TestCase):
         fig_interactor = FigureInteraction(fig_manager_mock)
         fig_interactor._toggle_normalization(fig.axes[0])
 
-        self.assertTrue(all(convert_color_to_hex(col.get_color()[0]) == "#ff9900"
-                            for col in fig.get_axes()[0].collections))
+        self.assertTrue(
+            all(convert_color_to_hex(col.get_color()[0]) == "#ff9900" for col in fig.get_axes()[0].collections))
 
     def test_toggle_normalisation_applies_to_all_images_if_one_colorbar(self):
         fig = pcolormesh([self.ws, self.ws])
@@ -634,7 +633,6 @@ class FigureInteractionTest(unittest.TestCase):
         self.assertFalse(fig.axes[0].tracked_workspaces['ws'][0].is_normalized)
         self.assertFalse(fig.axes[1].tracked_workspaces['ws'][0].is_normalized)
 
- # Private methods
     def _create_mock_fig_manager_to_accept_right_click(self):
         fig_manager = MagicMock()
         canvas = MagicMock()
@@ -643,13 +641,12 @@ class FigureInteractionTest(unittest.TestCase):
         return fig_manager
 
     def _create_mock_right_click(self):
-        mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections = [], creation_args = [{}]))
+        mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections=[], creation_args=[{}]))
         type(mouse_event).button = PropertyMock(return_value=3)
         return mouse_event
 
     def _test_toggle_normalization(self, errorbars_on, plot_kwargs):
-        fig = plot([self.ws], spectrum_nums=[1], errors=errorbars_on,
-                   plot_kwargs=plot_kwargs)
+        fig = plot([self.ws], spectrum_nums=[1], errors=errorbars_on, plot_kwargs=plot_kwargs)
         mock_canvas = MagicMock(figure=fig)
         fig_manager_mock = MagicMock(canvas=mock_canvas)
         fig_interactor = FigureInteraction(fig_manager_mock)

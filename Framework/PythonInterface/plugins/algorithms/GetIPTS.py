@@ -24,16 +24,14 @@ class GetIPTS(PythonAlgorithm):
 
         for name in ['SNS', 'HFIR']:
             facility = ConfigService.getFacility(name)
-            facilityInstruments = sorted([item.shortName()
-                                          for item in facility.instruments()
-                                          if item != 'DAS'])
+            facilityInstruments = sorted([item.shortName() for item in facility.instruments() if item != 'DAS'])
             instruments.extend(facilityInstruments)
 
         return instruments
 
     def findFile(self, instrument, runnumber):
         # start with run and check the five before it
-        runIds = list(range(runnumber, runnumber-6, -1))
+        runIds = list(range(runnumber, runnumber - 6, -1))
         # check for one after as well
         runIds.append(runnumber + 1)
 
@@ -52,8 +50,7 @@ class GetIPTS(PythonAlgorithm):
                 pass  # just keep looking
 
         # failed to find any is an error
-        raise RuntimeError("Cannot find IPTS directory for '%s'"
-                           % runnumber)
+        raise RuntimeError("Cannot find IPTS directory for '%s'" % runnumber)
 
     def getIPTSLocal(self, instrument, runnumber):
         filename = self.findFile(instrument, runnumber)
@@ -61,25 +58,22 @@ class GetIPTS(PythonAlgorithm):
         # convert to the path to the proposal
         location = filename.find('IPTS')
         if location <= 0:
-            raise RuntimeError("Failed to determine IPTS directory "
-                               + "from path '%s'" % filename)
+            raise RuntimeError("Failed to determine IPTS directory " + "from path '%s'" % filename)
         location = filename.find('/', location)
-        direc = filename[0:location+1]
+        direc = filename[0:location + 1]
         return direc
 
     def PyInit(self):
-        self.declareProperty('RunNumber', defaultValue=0,
+        self.declareProperty('RunNumber',
+                             defaultValue=0,
                              direction=Direction.Input,
                              validator=IntBoundedValidator(lower=1),
                              doc="Extracts the IPTS number for a run")
 
         instruments = self.getValidInstruments()
-        self.declareProperty('Instrument', '',
-                             StringListValidator(instruments),
-                             "Empty uses default instrument")
+        self.declareProperty('Instrument', '', StringListValidator(instruments), "Empty uses default instrument")
 
-        self.declareProperty('Directory', '',
-                             direction=Direction.Output)
+        self.declareProperty('Directory', '', direction=Direction.Output)
 
     def PyExec(self):
         instrument = self.getProperty('Instrument').value

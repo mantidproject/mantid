@@ -54,4 +54,4 @@ class SANS2DWithExtraLengthGravityTest_V2(systemtesting.MantidSystemTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-        return '2500_front_1D_4.6_12.85','SANS2DWithExtraLengthGravity.nxs'
+        return '2500_front_1D_4.6_12.85', 'SANS2DWithExtraLengthGravity.nxs'

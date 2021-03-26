@@ -30,16 +30,15 @@ except:
 
 
 class HFIRDataType(DataType):
-    TABLE_NAME="hfir_datatype"
+    TABLE_NAME = "hfir_datatype"
 
 
 class HFIRDataSet(DataSet):
-    TABLE_NAME="hfir_dataset"
+    TABLE_NAME = "hfir_dataset"
     data_type_cls = HFIRDataType
 
     def __init__(self, run_number, title, run_start, duration, sdd):
-        super(HFIRDataSet, self).__init__(run_number, title, run_start,
-                                          duration, sdd)
+        super(HFIRDataSet, self).__init__(run_number, title, run_start, duration, sdd)
 
     @classmethod
     def load_meta_data(cls, file_path, outputWorkspace):
@@ -61,7 +60,7 @@ class HFIRDataSet(DataSet):
             Return a DB handle for the given file, such as a run number
         """
         handle = os.path.splitext(os.path.basename(file_path))[0]
-        if handle=="":
+        if handle == "":
             return None
         return handle
 

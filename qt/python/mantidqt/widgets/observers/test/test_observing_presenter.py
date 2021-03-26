@@ -50,14 +50,14 @@ class ObservingPresenterTest(unittest.TestCase):
     @with_presenter()
     def test_replace_workspace(self, presenter):
         new_name = "xax"
-        ws=""
+        ws = ""
         presenter.replace_workspace(new_name, ws)
         presenter.container.replace_signal.emit.assert_called_once_with(new_name, ws)
 
     @with_presenter(workspaces_are_equal=False)
     def test_not_replacing_workspace_with_invalid_name(self, presenter):
         new_name = "xax"
-        ws=""
+        ws = ""
         presenter.replace_workspace(new_name, ws)
         self.assertNotCalled(presenter.container.replace_signal.emit)
 

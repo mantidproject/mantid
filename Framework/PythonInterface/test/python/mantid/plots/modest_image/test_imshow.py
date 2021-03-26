@@ -8,6 +8,7 @@
 import unittest
 import numpy as np
 import matplotlib
+
 matplotlib.use("agg")
 import matplotlib.pyplot as plt
 
@@ -47,9 +48,10 @@ class ImshowTest(unittest.TestCase):
     def check_artist_props(self, art1, art2):
         """Assert that properties of two artists are equal"""
 
-        props = ['alpha', 'clim', 'clip_on', 'clip_path',
-                 'interpolation', 'rasterized',
-                 'resample', 'snap', 'url', 'visible', 'zorder']
+        props = [
+            'alpha', 'clim', 'clip_on', 'clip_path', 'interpolation', 'rasterized', 'resample', 'snap', 'url',
+            'visible', 'zorder'
+        ]
         self.check_props(art1, art2, props)
 
     def test_imshow_creates_modest_image(self):
@@ -76,6 +78,7 @@ class ImshowTest(unittest.TestCase):
 
         self.check_artist_props(artist1, artist2)
         self.check_axes_props(ax1, ax2)
+
 
 if __name__ == '__main__':
     unittest.main()

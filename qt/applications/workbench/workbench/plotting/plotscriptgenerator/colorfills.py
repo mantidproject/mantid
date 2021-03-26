@@ -15,18 +15,12 @@ from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string,
 BASE_IMSHOW_COMMAND = "imshow"
 BASE_PCOLORMESH_COMMAND = "pcolormesh"
 CFILL_NAME = "cfill"
-PLOT_KWARGS = [
-    'alpha', 'label', 'zorder']
+PLOT_KWARGS = ['alpha', 'label', 'zorder']
 
-mpl_default_kwargs = {
-    'alpha': None,
-    'label': '',
-    'zorder': 0,
-    'interpolation': 'nearest'
-}
+mpl_default_kwargs = {'alpha': None, 'label': '', 'zorder': 0, 'interpolation': 'nearest'}
 
 
-def generate_plot_2d_command(artist,ax_object_var):
+def generate_plot_2d_command(artist, ax_object_var):
     lines = []
     pos_args = get_plot_command_pos_args(artist)
     kwargs = get_plot_command_kwargs(artist)
@@ -51,9 +45,12 @@ def get_colorbar(artist, image_name, ax_object_var):
             headers.append('from matplotlib.ticker import LogLocator')
             lines.append(f"{CFILL_NAME}.set_norm(LogNorm(vmin={artist.colorbar.vmin}, vmax={artist.colorbar.vmax}))")
             lines.append('# If no ticks appear on the color bar remove the subs argument inside the LogLocator below')
-            lines.append(f"cbar = fig.colorbar({image_name}, ax=[{ax_object_var}], ticks=LogLocator(subs=np.arange(1, 10)), pad=0.06)")
+            lines.append(
+                f"cbar = fig.colorbar({image_name}, ax=[{ax_object_var}], ticks=LogLocator(subs=np.arange(1, 10)), "
+                f"pad=0.06)")
         else:
-            lines.append(f"{CFILL_NAME}.set_norm(plt.Normalize(vmin={artist.colorbar.vmin}, vmax={artist.colorbar.vmax}))")
+            lines.append(
+                f"{CFILL_NAME}.set_norm(plt.Normalize(vmin={artist.colorbar.vmin}, vmax={artist.colorbar.vmax}))")
             lines.append(f"cbar = fig.colorbar({image_name}, ax=[{ax_object_var}], pad=0.06)")
 
         try:
@@ -91,7 +88,7 @@ def _remove_kwargs_if_default(kwargs):
 
 def _get_plot_command_kwargs_from_colorfill(artist):
     props = {key: artist.properties()[key] for key in PLOT_KWARGS}
-    props ['cmap'] = artist.colorbar.cmap.name
+    props['cmap'] = artist.colorbar.cmap.name
     if isinstance(artist, AxesImage):
         props['aspect'] = artist.properties()['aspect'] if 'aspect' in artist.properties().keys() else 'auto'
         props['origin'] = artist.properties()['origin'] if 'origin' in artist.properties().keys() else 'lower'
@@ -104,6 +101,4 @@ def _get_mantid_specific_plot_kwargs(artist):
     ax = artist.axes
     if artist not in ax.get_tracked_artists():
         return dict()
-    return {
-        'distribution': not ax.get_artist_normalization_state(artist)
-    }
+    return {'distribution': not ax.get_artist_normalization_state(artist)}

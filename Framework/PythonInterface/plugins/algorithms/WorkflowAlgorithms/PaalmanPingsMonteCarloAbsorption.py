@@ -78,22 +78,27 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                              doc='Workspace with the measurement of the sample [in a container].')
 
         # Monte Carlo Options
-        self.declareProperty(name='EventsPerPoint', defaultValue=1000,
+        self.declareProperty(name='EventsPerPoint',
+                             defaultValue=1000,
                              validator=IntBoundedValidator(0),
                              doc='Number of neutron events')
-        self.declareProperty(name='Interpolation', defaultValue='Linear',
-                             validator=StringListValidator(
-                                 ['Linear', 'CSpline']),
+        self.declareProperty(name='Interpolation',
+                             defaultValue='Linear',
+                             validator=StringListValidator(['Linear', 'CSpline']),
                              doc='Type of interpolation')
-        self.declareProperty(name='MaxScatterPtAttempts', defaultValue=5000,
+        self.declareProperty(name='MaxScatterPtAttempts',
+                             defaultValue=5000,
                              validator=IntBoundedValidator(0),
                              doc='Maximum number of tries made to generate a scattering point')
-        self.declareProperty(name='SparseInstrument', defaultValue=False,
+        self.declareProperty(name='SparseInstrument',
+                             defaultValue=False,
                              doc='Whether to spatially approximate the instrument for faster calculation.')
-        self.declareProperty(name='NumberOfDetectorRows', defaultValue=3,
+        self.declareProperty(name='NumberOfDetectorRows',
+                             defaultValue=3,
                              validator=IntBoundedValidator(lower=3),
                              doc='Number of detector rows in the detector grid of the sparse instrument.')
-        self.declareProperty(name='NumberOfDetectorColumns', defaultValue=2,
+        self.declareProperty(name='NumberOfDetectorColumns',
+                             defaultValue=2,
                              validator=IntBoundedValidator(lower=2),
                              doc='Number of detector columns in the detector grid of the sparse instrument.')
 
@@ -109,10 +114,12 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('MaxScatterPtAttempts', 'Monte Carlo Options')
 
         # Beam Options
-        self.declareProperty(name='BeamHeight', defaultValue=1.0,
+        self.declareProperty(name='BeamHeight',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Height of the beam (cm)')
-        self.declareProperty(name='BeamWidth', defaultValue=1.0,
+        self.declareProperty(name='BeamWidth',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Width of the beam (cm)')
 
@@ -120,7 +127,8 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('BeamWidth', 'Beam Options')
 
         # Shape Options
-        self.declareProperty(name='Shape', defaultValue='Preset',
+        self.declareProperty(name='Shape',
+                             defaultValue='Preset',
                              validator=StringListValidator(['Preset', 'FlatPlate', 'Cylinder', 'Annulus']),
                              doc='Geometric shape of the sample environment')
 
@@ -134,7 +142,9 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         flat_plate_visible = VisibleWhenProperty(preset_condition, flat_plate_condition, LogicOperator.Or)
 
         # height is common to all shapes, and should be the same for sample and container
-        self.declareProperty('Height', defaultValue=0.0, validator=FloatBoundedValidator(0.0),
+        self.declareProperty('Height',
+                             defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
                              doc='Height of the sample environment (cm)')
         self.setPropertySettings('Height', not_preset_condition)
 
@@ -143,15 +153,17 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
 
         # Sample Shape
         # Flat Plate
-        self.declareProperty(name='SampleWidth', defaultValue=0.0,
+        self.declareProperty(name='SampleWidth',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Width of the sample environment (cm)')
-        self.declareProperty(name='SampleThickness', defaultValue=0.0,
+        self.declareProperty(name='SampleThickness',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Thickness of the sample environment (cm)')
-        self.declareProperty(name='SampleCenter', defaultValue=0.0,
-                             doc='Center of the sample environment')
-        self.declareProperty(name='SampleAngle', defaultValue=0.0,
+        self.declareProperty(name='SampleCenter', defaultValue=0.0, doc='Center of the sample environment')
+        self.declareProperty(name='SampleAngle',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Angle of the sample environment with respect to the beam (degrees)')
 
@@ -170,7 +182,8 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('SampleAngle', 'Sample Shape')
 
         # Cylinder
-        self.declareProperty(name='SampleRadius', defaultValue=0.0,
+        self.declareProperty(name='SampleRadius',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Radius of the sample environment (cm)')
 
@@ -178,10 +191,12 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('SampleRadius', 'Sample Shape')
 
         # Annulus
-        self.declareProperty(name='SampleInnerRadius', defaultValue=0.0,
+        self.declareProperty(name='SampleInnerRadius',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Inner radius of the sample environment (cm)')
-        self.declareProperty(name='SampleOuterRadius', defaultValue=0.0,
+        self.declareProperty(name='SampleOuterRadius',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Outer radius of the sample environment (cm)')
 
@@ -192,27 +207,34 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('SampleOuterRadius', 'Sample Shape')
 
         # Sample Material
-        self.declareProperty(name='SampleChemicalFormula', defaultValue='',
+        self.declareProperty(name='SampleChemicalFormula',
+                             defaultValue='',
                              doc='Chemical formula for the sample material')
-        self.declareProperty(name='SampleCoherentXSection', defaultValue=0.0,
+        self.declareProperty(name='SampleCoherentXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The coherent cross-section for the sample material in barns. To be used instead of '
-                                 'Chemical Formula.')
-        self.declareProperty(name='SampleIncoherentXSection', defaultValue=0.0,
+                             'Chemical Formula.')
+        self.declareProperty(name='SampleIncoherentXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The incoherent cross-section for the sample material in barns. To be used instead of '
-                                 'Chemical Formula.')
-        self.declareProperty(name='SampleAttenuationXSection', defaultValue=0.0,
+                             'Chemical Formula.')
+        self.declareProperty(name='SampleAttenuationXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The absorption cross-section for the sample material in barns. To be used instead of '
-                                 'Chemical Formula.')
-        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
+                             'Chemical Formula.')
+        self.declareProperty(name='SampleDensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass density or Number density for the sample.')
-        self.declareProperty(name='SampleNumberDensityUnit', defaultValue='Atoms',
+        self.declareProperty(name='SampleNumberDensityUnit',
+                             defaultValue='Atoms',
                              validator=StringListValidator(['Atoms', 'Formula Units']),
                              doc='Choose which units SampleDensity refers to. Allowed values: [Atoms, Formula Units]')
-        self.declareProperty(name='SampleDensity', defaultValue=0.0,
+        self.declareProperty(name='SampleDensity',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The value for the sample Mass density (g/cm^3) or Number density (1/Angstrom^3).')
 
@@ -225,10 +247,12 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('SampleDensity', 'Sample Material')
 
         # Flat Plate
-        self.declareProperty(name='ContainerFrontThickness', defaultValue=0.0,
+        self.declareProperty(name='ContainerFrontThickness',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Front thickness of the container environment (cm)')
-        self.declareProperty(name='ContainerBackThickness', defaultValue=0.0,
+        self.declareProperty(name='ContainerBackThickness',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Back thickness of the container environment (cm)')
 
@@ -240,7 +264,8 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('ContainerBackThickness', 'Container Shape')
 
         # Cylinder
-        self.declareProperty(name='ContainerRadius', defaultValue=0.0,
+        self.declareProperty(name='ContainerRadius',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Outer radius of the sample environment (cm)')
 
@@ -248,10 +273,12 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('ContainerRadius', 'Container Shape')
 
         # Annulus
-        self.declareProperty(name='ContainerInnerRadius', defaultValue=0.0,
+        self.declareProperty(name='ContainerInnerRadius',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Inner radius of the container environment (cm)')
-        self.declareProperty(name='ContainerOuterRadius', defaultValue=0.0,
+        self.declareProperty(name='ContainerOuterRadius',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Outer radius of the container environment (cm)')
 
@@ -262,27 +289,35 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('ContainerOuterRadius', 'Container Shape')
 
         # Container Material
-        self.declareProperty(name='ContainerChemicalFormula', defaultValue='',
+        self.declareProperty(name='ContainerChemicalFormula',
+                             defaultValue='',
                              doc='Chemical formula for the container material')
-        self.declareProperty(name='ContainerCoherentXSection', defaultValue=0.0,
+        self.declareProperty(name='ContainerCoherentXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The coherent cross-section for the can material in barns. To be used instead of '
-                                 'Chemical Formula.')
-        self.declareProperty(name='ContainerIncoherentXSection', defaultValue=0.0,
+                             'Chemical Formula.')
+        self.declareProperty(name='ContainerIncoherentXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The incoherent cross-section for the can material in barns. To be used instead of '
-                                 'Chemical Formula.')
-        self.declareProperty(name='ContainerAttenuationXSection', defaultValue=0.0,
+                             'Chemical Formula.')
+        self.declareProperty(name='ContainerAttenuationXSection',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The absorption cross-section for the can material in barns. To be used instead of '
-                                 'Chemical Formula.')
-        self.declareProperty(name='ContainerDensityType', defaultValue='Mass Density',
+                             'Chemical Formula.')
+        self.declareProperty(name='ContainerDensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass density or Number density for the container.')
-        self.declareProperty(name='ContainerNumberDensityUnit', defaultValue='Atoms',
-                             validator=StringListValidator(['Atoms', 'Formula Units']),
-                             doc='Choose which units ContainerDensity refers to. Allowed values: [Atoms, Formula Units]')
-        self.declareProperty(name='ContainerDensity', defaultValue=0.0,
+        self.declareProperty(
+            name='ContainerNumberDensityUnit',
+            defaultValue='Atoms',
+            validator=StringListValidator(['Atoms', 'Formula Units']),
+            doc='Choose which units ContainerDensity refers to. Allowed values: [Atoms, Formula Units]')
+        self.declareProperty(name='ContainerDensity',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='The value for the container Mass density (g/cm^3) or Number density (1/Angstrom^3).')
 
@@ -318,8 +353,10 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         elif self._is_override_sample_material_only:
             # in this instance, setsample will not be called again so this material change only needs to happen once
             self._set_sample_material_only(input_wave_ws)
-        monte_carlo_alg = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
-                                                    startProgress=0, endProgress=progess_steps)
+        monte_carlo_alg = self.createChildAlgorithm("MonteCarloAbsorption",
+                                                    enableLogging=True,
+                                                    startProgress=0,
+                                                    endProgress=progess_steps)
         self._set_algorithm_properties(monte_carlo_alg, self._monte_carlo_kwargs)
         monte_carlo_alg.setProperty("InputWorkspace", input_wave_ws)
         monte_carlo_alg.setProperty("OutputWorkspace", self._ass_ws_name)
@@ -333,8 +370,10 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         if self._has_can:
             if self._override_shape:
                 self._set_sample(input_wave_ws, ['Sample', 'Container'])
-            monte_carlo_alg_ssc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
-                                                            startProgress=progess_steps, endProgress=2*progess_steps)
+            monte_carlo_alg_ssc = self.createChildAlgorithm("MonteCarloAbsorption",
+                                                            enableLogging=True,
+                                                            startProgress=progess_steps,
+                                                            endProgress=2 * progess_steps)
             self._set_algorithm_properties(monte_carlo_alg_ssc, self._monte_carlo_kwargs)
             monte_carlo_alg_ssc.setProperty("InputWorkspace", input_wave_ws)
             monte_carlo_alg_ssc.setProperty("OutputWorkspace", self._assc_ws_name)
@@ -346,8 +385,10 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
 
             if self._override_shape:
                 self._set_sample(input_wave_ws, ['Container'])
-            monte_carlo_alg_cc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
-                                                           startProgress=2*progess_steps, endProgress=3*progess_steps)
+            monte_carlo_alg_cc = self.createChildAlgorithm("MonteCarloAbsorption",
+                                                           enableLogging=True,
+                                                           startProgress=2 * progess_steps,
+                                                           endProgress=3 * progess_steps)
             self._set_algorithm_properties(monte_carlo_alg_cc, self._monte_carlo_kwargs)
             monte_carlo_alg_cc.setProperty("InputWorkspace", input_wave_ws)
             monte_carlo_alg_cc.setProperty("OutputWorkspace", self._acc_ws_name)
@@ -359,8 +400,10 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
 
             if self._override_shape:
                 self._set_sample(input_wave_ws, ['Sample', 'Container'])
-            monte_carlo_alg_csc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
-                                                            startProgress=3*progess_steps, endProgress=1.)
+            monte_carlo_alg_csc = self.createChildAlgorithm("MonteCarloAbsorption",
+                                                            enableLogging=True,
+                                                            startProgress=3 * progess_steps,
+                                                            endProgress=1.)
             self._set_algorithm_properties(monte_carlo_alg_csc, self._monte_carlo_kwargs)
             monte_carlo_alg_csc.setProperty("InputWorkspace", input_wave_ws)
             monte_carlo_alg_csc.setProperty("OutputWorkspace", self._acsc_ws_name)
@@ -378,9 +421,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
 
         set_beam_alg = self.createChildAlgorithm("SetBeam", enableLogging=False)
         set_beam_alg.setProperty("InputWorkspace", ws)
-        set_beam_alg.setProperty("Geometry", {'Shape': 'Slit',
-                                              'Width': self._beam_width,
-                                              'Height': self._beam_height})
+        set_beam_alg.setProperty("Geometry", {'Shape': 'Slit', 'Width': self._beam_width, 'Height': self._beam_height})
         set_beam_alg.execute()
 
     def _set_sample_material_only(self, ws):
@@ -464,11 +505,12 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
     def _set_material_dict(self, name):
         def get_attribute(attr_name):
             return getattr(self, "_" + name + "_" + attr_name)
+
         material_dict = dict()
         if get_attribute('chemical_formula'):
             material_dict['ChemicalFormula'] = get_attribute('chemical_formula')
         elif (get_attribute('attenuation_cross_section') != 0 or get_attribute('coherent_cross_section') != 0
-                or get_attribute('incoherent_cross_section') != 0):
+              or get_attribute('incoherent_cross_section') != 0):
             material_dict['CoherentXSection'] = get_attribute('coherent_cross_section')
             material_dict['IncoherentXSection'] = get_attribute('incoherent_cross_section')
             material_dict['AttenuationXSection'] = get_attribute('attenuation_cross_section')
@@ -500,12 +542,14 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self._beam_height = self.getProperty('BeamHeight').value
         self._beam_width = self.getProperty('BeamWidth').value
 
-        self._monte_carlo_kwargs = {'EventsPerPoint': self.getProperty('EventsPerPoint').value,
-                                    'Interpolation': self.getProperty('Interpolation').value,
-                                    'MaxScatterPtAttempts': self.getProperty('MaxScatterPtAttempts').value,
-                                    'SparseInstrument': self.getProperty('SparseInstrument').value,
-                                    'NumberOfDetectorRows': self.getProperty('NumberOfDetectorRows').value,
-                                    'NumberOfDetectorColumns': self.getProperty('NumberOfDetectorColumns').value}
+        self._monte_carlo_kwargs = {
+            'EventsPerPoint': self.getProperty('EventsPerPoint').value,
+            'Interpolation': self.getProperty('Interpolation').value,
+            'MaxScatterPtAttempts': self.getProperty('MaxScatterPtAttempts').value,
+            'SparseInstrument': self.getProperty('SparseInstrument').value,
+            'NumberOfDetectorRows': self.getProperty('NumberOfDetectorRows').value,
+            'NumberOfDetectorColumns': self.getProperty('NumberOfDetectorColumns').value
+        }
 
         self._sample_unit = self._input_ws.getAxis(0).getUnit().unitID()
         if self._sample_unit == 'dSpacing':
@@ -627,7 +671,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         # Direct instruments don't use the Efixed instrument parameter
         # The GetEi algorithm calculates and saves the Ei value to this sample log
         if self._input_ws.run().hasProperty('Ei'):
-            return  self._input_ws.getRun().getProperty('Ei').value
+            return self._input_ws.getRun().getProperty('Ei').value
 
         raise ValueError('No Efixed parameter found')
 

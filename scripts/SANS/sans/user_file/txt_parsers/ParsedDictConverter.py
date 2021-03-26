@@ -81,7 +81,9 @@ class ParsedDictConverter(IStateParser):
         state = self._all_states.adjustment.calculate_transmission if self._all_states else\
             get_calculate_transmission(instrument=self._instrument)
 
-        self._set_single_entry(state, "transmission_radius_on_detector", TransId.RADIUS,
+        self._set_single_entry(state,
+                               "transmission_radius_on_detector",
+                               TransId.RADIUS,
                                apply_to_value=_convert_mm_to_m)
 
         # List of transmission roi files
@@ -144,8 +146,9 @@ class ParsedDictConverter(IStateParser):
             sample = state.fit[DataType.SAMPLE.value]
 
             # 1 Fit type settings
-            clear_settings = [item for item in fit_general if item.data_type is None
-                              and item.fit_type is FitType.NO_FIT]
+            clear_settings = [
+                item for item in fit_general if item.data_type is None and item.fit_type is FitType.NO_FIT
+            ]
 
             if clear_settings:
                 clear_settings = clear_settings[-1]
@@ -154,8 +157,9 @@ class ParsedDictConverter(IStateParser):
                 can.fit_type = clear_settings.fit_type
 
             # 2. General settings
-            general_settings = [item for item in fit_general if item.data_type is None
-                                and item.fit_type is not FitType.NO_FIT]
+            general_settings = [
+                item for item in fit_general if item.data_type is None and item.fit_type is not FitType.NO_FIT
+            ]
             if general_settings:
                 general_settings = general_settings[-1]
 
@@ -288,8 +292,8 @@ class ParsedDictConverter(IStateParser):
             pos2 = mask_line.y
             if angle is None or width is None:
                 raise RuntimeError("UserFileStateDirector: You specified a line mask without an angle or a width."
-                                   "The parameters were: width {0}; angle {1}; x {2}; y {3}".format(width, angle,
-                                                                                                    pos1, pos2))
+                                   "The parameters were: width {0}; angle {1}; x {2}; y {3}".format(
+                                       width, angle, pos1, pos2))
             pos1 = 0.0 if pos1 is None else pos1
             pos2 = 0.0 if pos2 is None else pos2
 
@@ -741,8 +745,9 @@ class ParsedDictConverter(IStateParser):
         # ---------------------------
         if SetId.CENTRE in self._input_dict:
             beam_centres = self._input_dict[SetId.CENTRE]
-            beam_centres_for_lab = [beam_centre for beam_centre in beam_centres if beam_centre.detector_type
-                                    is DetectorType.LAB]
+            beam_centres_for_lab = [
+                beam_centre for beam_centre in beam_centres if beam_centre.detector_type is DetectorType.LAB
+            ]
             for beam_centre in beam_centres_for_lab:
                 pos1 = beam_centre.pos1
                 pos2 = beam_centre.pos2
@@ -756,8 +761,9 @@ class ParsedDictConverter(IStateParser):
 
         if SetId.CENTRE_HAB in self._input_dict:
             beam_centres = self._input_dict[SetId.CENTRE_HAB]
-            beam_centres_for_hab = [beam_centre for beam_centre in beam_centres if beam_centre.detector_type
-                                    is DetectorType.HAB]
+            beam_centres_for_hab = [
+                beam_centre for beam_centre in beam_centres if beam_centre.detector_type is DetectorType.HAB
+            ]
             for beam_centre in beam_centres_for_hab:
                 state_builder.set_HAB_sample_centre_pos1(state_builder.convert_pos1(beam_centre.pos1))
                 state_builder.set_HAB_sample_centre_pos2(state_builder.convert_pos2(beam_centre.pos2))
@@ -979,8 +985,8 @@ class ParsedDictConverter(IStateParser):
             # 2. As an already parsed rebin array, ie min, step, max
             # 3. As a string. Note that this includes custom commands.
             if isinstance(event_slices, simple_range):
-                start, stop = get_ranges_for_rebin_setting(event_slices.start, event_slices.stop,
-                                                           event_slices.step, event_slices.step_type)
+                start, stop = get_ranges_for_rebin_setting(event_slices.start, event_slices.stop, event_slices.step,
+                                                           event_slices.step_type)
             elif isinstance(event_slices, rebin_string_values):
                 start, stop = get_ranges_for_rebin_array(event_slices.value)
             else:

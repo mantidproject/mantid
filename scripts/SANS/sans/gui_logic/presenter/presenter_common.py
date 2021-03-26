@@ -31,17 +31,17 @@ class PresenterCommon(metaclass=ABCMeta):
         pass
 
     def set_view(self, view):
-        assert(view is not None)
+        assert (view is not None)
         self._view = view
 
     def set_model(self, model):
-        assert(model is not None)
+        assert (model is not None)
         self._model = model
 
     def _set_on_state_model(self, attribute_name):
         self._set_on_custom_model(attribute_name, self._model)
 
-    def _set_on_view(self, attribute_name, decimal_places = None):
+    def _set_on_view(self, attribute_name, decimal_places=None):
         self._set_on_view_to_custom_view(attribute_name, self._view, decimal_places)
 
     def _set_on_custom_model(self, attribute_name, model):
@@ -55,5 +55,5 @@ class PresenterCommon(metaclass=ABCMeta):
         if attribute is None or attribute == "":
             return
         if decimal_places:
-            attribute = round(attribute,decimal_places)
+            attribute = round(attribute, decimal_places)
         setattr(view, attribute_name, attribute)

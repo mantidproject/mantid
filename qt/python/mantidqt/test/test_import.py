@@ -5,14 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-
 import unittest
 
 
 class ImportTest(unittest.TestCase):
-
     def test_import(self):
-        import mantidqt # noqa
+        import mantidqt  # noqa
 
 
 if __name__ == "__main__":

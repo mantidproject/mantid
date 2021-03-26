@@ -30,10 +30,10 @@ class GridSpecTest(unittest.TestCase):
         self.assertEqual(result, None)
 
     def test_returnType(self):
-        gridspec = GridSpec(1,1)
+        gridspec = GridSpec(1, 1)
         self.engine = gridspecEngine()
         result = self.engine.getGridSpec(1)
-        self.assertEqual(type(result),type(gridspec))
+        self.assertEqual(type(result), type(gridspec))
 
 
 if __name__ == "__main__":

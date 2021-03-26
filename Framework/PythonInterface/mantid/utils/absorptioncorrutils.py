@@ -7,8 +7,8 @@
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import Logger, Property, PropertyManager
 from mantid.simpleapi import (AbsorptionCorrection, DeleteWorkspace, Divide, Load, Multiply,
-                              PaalmanPingsAbsorptionCorrection, PreprocessDetectorsToMD,
-                              RenameWorkspace, SetSample, SaveNexusProcessed, UnGroupWorkspace, mtd)
+                              PaalmanPingsAbsorptionCorrection, PreprocessDetectorsToMD, RenameWorkspace, SetSample,
+                              SaveNexusProcessed, UnGroupWorkspace, mtd)
 import mantid.simpleapi
 import numpy as np
 import os
@@ -63,8 +63,7 @@ def __get_cache_name(meta_wksp_name, abs_method, cache_dirs=[], prefix_name=""):
     if meta_wksp_name in mtd:
         ws = mtd[meta_wksp_name]
     else:
-        raise ValueError(
-            f"Cannot find workspace {meta_wksp_name} to extract meta data for hashing, aborting")
+        raise ValueError(f"Cannot find workspace {meta_wksp_name} to extract meta data for hashing, aborting")
 
     # requires cache_dir
     cache_filenames = []
@@ -86,16 +85,15 @@ def __get_cache_name(meta_wksp_name, abs_method, cache_dirs=[], prefix_name=""):
 
         # use mantid build-in alg to generate the cache filename and sha1
         ascii_hash = ""
-        for cache_dir in cache_dirs :
+        for cache_dir in cache_dirs:
 
-            ascii_name, ascii_hash = mantid.simpleapi.CreateCacheFilename(
-              Prefix=prefix_name,
-              OtherProperties=property_string,
-              CacheDir=cache_dir)
+            ascii_name, ascii_hash = mantid.simpleapi.CreateCacheFilename(Prefix=prefix_name,
+                                                                          OtherProperties=property_string,
+                                                                          CacheDir=cache_dir)
 
-            cache_filenames.append( ascii_name )
+            cache_filenames.append(ascii_name)
 
-    return cache_filenames,  ascii_hash
+    return cache_filenames, ascii_hash
 
 
 def __load_cached_data(cache_files, sha1, abs_method="", prefix_name=""):
@@ -134,7 +132,7 @@ def __load_cached_data(cache_files, sha1, abs_method="", prefix_name=""):
 
     # step_2: load from disk if either is not found in memory
     if (not found_abs_wksp_sample) or (not found_abs_wksp_container):
-        for candidate in cache_files :
+        for candidate in cache_files:
             if os.path.exists(candidate):
                 wsntmp = "tmpwsg"
                 Load(Filename=candidate, OutputWorkspace=wsntmp)
@@ -153,7 +151,7 @@ def __load_cached_data(cache_files, sha1, abs_method="", prefix_name=""):
     if mtd.doesExist(abs_wksp_container):
         found_abs_wksp_container = mtd[abs_wksp_container].run()["absSHA1"].value == sha1
 
-    return found_abs_wksp_sample, found_abs_wksp_container, abs_wksp_sample, abs_wksp_container, cache_files[ 0 ]
+    return found_abs_wksp_sample, found_abs_wksp_container, abs_wksp_sample, abs_wksp_container, cache_files[0]
 
 
 # NOTE:
@@ -199,11 +197,10 @@ def abs_cache(func):
         #         baseon given kwargs
         cache_prefix = __get_instrument_name(wksp_name)
 
-        cache_filenames, ascii_hash = __get_cache_name(
-            wksp_name,
-            abs_method,
-            cache_dirs=cache_dirs,
-            prefix_name=cache_prefix)
+        cache_filenames, ascii_hash = __get_cache_name(wksp_name,
+                                                       abs_method,
+                                                       cache_dirs=cache_dirs,
+                                                       prefix_name=cache_prefix)
 
         # step_2: try load the cached data from disk
         found_sample, found_container, abs_wksp_sample, abs_wksp_container, cache_filename = __load_cached_data(
@@ -237,9 +234,7 @@ def abs_cache(func):
                 # save to disk
                 SaveNexusProcessed(InputWorkspace=abs_wksp_sample, Filename=cache_filename)
                 if abs_wksp_container != "":
-                    SaveNexusProcessed(InputWorkspace=abs_wksp_container,
-                                       Filename=cache_filename,
-                                       Append=True)
+                    SaveNexusProcessed(InputWorkspace=abs_wksp_container, Filename=cache_filename, Append=True)
 
                 return abs_wksp_sample, abs_wksp_container
 
@@ -401,15 +396,9 @@ def calc_absorption_corr_using_wksp(
                              ElementSize=element_size)
         return absName + '_ass', absName + '_acc'
     elif abs_method == "FullPaalmanPings":
-        PaalmanPingsAbsorptionCorrection(donor_wksp,
-                                         OutputWorkspace=absName,
-                                         ElementSize=element_size)
-        Multiply(LHSWorkspace=absName + '_acc',
-                 RHSWorkspace=absName + '_assc',
-                 OutputWorkspace=absName + '_ac')
-        Divide(LHSWorkspace=absName + '_ac',
-               RHSWorkspace=absName + '_acsc',
-               OutputWorkspace=absName + '_ac')
+        PaalmanPingsAbsorptionCorrection(donor_wksp, OutputWorkspace=absName, ElementSize=element_size)
+        Multiply(LHSWorkspace=absName + '_acc', RHSWorkspace=absName + '_assc', OutputWorkspace=absName + '_ac')
+        Divide(LHSWorkspace=absName + '_ac', RHSWorkspace=absName + '_acsc', OutputWorkspace=absName + '_ac')
         return absName + '_assc', absName + '_ac'
     else:
         raise ValueError("Unrecognized absorption correction method '{}'".format(abs_method))
@@ -452,10 +441,8 @@ def create_absorption_input(
     absName = metaws
     if metaws is None:
         absName = '__{}_abs'.format(_getBasename(filename))
-        allowed_log = " ".join([
-            'SampleFormula', 'SampleDensity', "BL11A:CS:ITEMS:HeightInContainerUnits",
-            "SampleContainer"
-        ])
+        allowed_log = " ".join(
+            ['SampleFormula', 'SampleDensity', "BL11A:CS:ITEMS:HeightInContainerUnits", "SampleContainer"])
         Load(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True, AllowList=allowed_log)
 
     # first attempt to get the wavelength range from the properties file
@@ -477,9 +464,7 @@ def create_absorption_input(
             instr = mtd[absName].getInstrument()
             L1 = instr.getSource().getDistance(instr.getSample())
             # determine L2 range
-            PreprocessDetectorsToMD(InputWorkspace=absName,
-                                    OutputWorkspace=absName + '_dets',
-                                    GetMaskState=False)
+            PreprocessDetectorsToMD(InputWorkspace=absName, OutputWorkspace=absName + '_dets', GetMaskState=False)
             L2 = mtd[absName + '_dets'].column('L2')
             Lmin = np.min(L2) + L1
             Lmax = np.max(L2) + L1
@@ -516,8 +501,8 @@ def create_absorption_input(
     if material is not None:
         if (not material['ChemicalFormula']) and ("SampleFormula" in absorptionWS.run()):
             material['ChemicalFormula'] = absorptionWS.run()['SampleFormula'].lastValue().strip()
-        if ("SampleMassDensity" not in material
-                or not material['SampleMassDensity']) and ("SampleDensity" in absorptionWS.run()):
+        if ("SampleMassDensity" not in material or not material['SampleMassDensity']) and ("SampleDensity"
+                                                                                           in absorptionWS.run()):
             if (absorptionWS.run()['SampleDensity'].lastValue() !=
                     1.0) and (absorptionWS.run()['SampleDensity'].lastValue() != 0.0):
                 material['SampleMassDensity'] = absorptionWS.run()['SampleDensity'].lastValue()
@@ -536,18 +521,15 @@ def create_absorption_input(
             elif absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue() == "cm":
                 conversion = 1.0
             else:
-                raise ValueError(
-                    "HeightInContainerUnits expects cm or mm; specified units not recognized: ",
-                    absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue())
+                raise ValueError("HeightInContainerUnits expects cm or mm; specified units not recognized: ",
+                                 absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue())
 
-            geometry['Height'] = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue(
-            ) * conversion
+            geometry['Height'] = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue() * conversion
 
     # Set container if not set
     if environment is not None:
         if environment['Container'] == "":
-            environment['Container'] = absorptionWS.run()['SampleContainer'].lastValue().replace(
-                " ", "")
+            environment['Container'] = absorptionWS.run()['SampleContainer'].lastValue().replace(" ", "")
 
     # Make sure one is set before calling SetSample
     if material or geometry or environment is not None:
@@ -567,7 +549,4 @@ def setup_sample(donor_ws, material, geometry, environment):
     """
 
     # Set the material, geometry, and container info
-    SetSample(InputWorkspace=donor_ws,
-              Material=material,
-              Geometry=geometry,
-              Environment=environment)
+    SetSample(InputWorkspace=donor_ws, Material=material, Geometry=geometry, Environment=environment)

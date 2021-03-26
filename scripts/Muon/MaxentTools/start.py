@@ -17,18 +17,13 @@ def START(npts, PULSES_npulse, RUNDATA_res, MAXPAGE_n, TZERO_fine, mylog):
     # WARNING, ISIS specific constants here!
     hpulsew = .05  # subject to accelerator tune, pulse slicers, etc
     pulse2t = .324  # at 800MeV, different at 700MeV
-    if(PULSES_npulse == 1):
+    if (PULSES_npulse == 1):
         pulse2t = 0.0
     fperchan = 1. / (RUNDATA_res * float(npts) * 2.)
     ww = np.arange(MAXPAGE_n) * fperchan * 2. * math.pi
     # GW(I) is parabolic proton pulse ft GW(0)=1
-    gw = (
-        3 / hpulsew) * (
-        np.sin(
-            ww * hpulsew) / (
-                hpulsew**2 * ww**3) - np.cos(
-                    ww * hpulsew) / (
-                        hpulsew * ww**2))  # may throw warning about div/0 at i=0
+    gw = (3 / hpulsew) * (np.sin(ww * hpulsew) / (hpulsew**2 * ww**3) - np.cos(ww * hpulsew) /
+                          (hpulsew * ww**2))  # may throw warning about div/0 at i=0
     gw[0] = 1.0
     aa = gw / (1 + (ww * Tpion)**2)
     PULSESHAPE_convolr = aa * \

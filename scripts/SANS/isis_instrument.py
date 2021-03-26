@@ -102,7 +102,6 @@ class DetectorBank(object):
             Stores the dimensions of the detector, normally this is a square
             which is easy, but it can have a hole in it which is harder!
         """
-
         def __init__(self, width, height, isRect=True, n_pixels=None):
             """
                 Sets the dimensions of the detector
@@ -121,7 +120,8 @@ class DetectorBank(object):
                     self._n_pixels = self._width * self._height
                 else:
                     raise AttributeError(
-                        'Number of pixels in the detector unknown, you must state the number of pixels for non-rectangular detectors')
+                        'Number of pixels in the detector unknown, you must state the number of pixels for non-rectangular detectors'
+                    )
 
         def width(self):
             """
@@ -166,7 +166,6 @@ class DetectorBank(object):
             collected on front and rear bank on the same 'level' before e.g. merging
             such data
         """
-
         def __init__(self, scale=1.0, shift=0.0, fitScale=False, fitShift=False, qMin=None, qMax=None):
             """
                 @param scale: Default to 1.0. Value to multiply data with
@@ -197,7 +196,8 @@ class DetectorBank(object):
         self._names = {
             'uni': det_type,
             'long': instr.getStringParameter(det_type + '-detector-name')[0],
-            'short': instr.getStringParameter(det_type + '-detector-short-name')[0]}
+            'short': instr.getStringParameter(det_type + '-detector-short-name')[0]
+        }
         # the bank is often also referred to by its location, as seen by the sample
         if det_type.startswith('low'):
             position = 'rear'
@@ -376,7 +376,8 @@ class DetectorBank(object):
 
         if not self._shape.isRectangle():
             sanslog.warning(
-                'Attempting to block rows or columns in a non-rectangular detector, this is likely to give unexpected results!')
+                'Attempting to block rows or columns in a non-rectangular detector, this is likely to give unexpected results!'
+            )
 
         output = ''
         if self._orientation == 'Horizontal':
@@ -405,7 +406,8 @@ class DetectorBank(object):
     _ORIENTED = {
         'Horizontal': None,  # most runs have the detectors in this state
         'Vertical': None,
-        'Rotated': None}
+        'Rotated': None
+    }
 
     def set_orien(self, orien):
         """
@@ -430,19 +432,20 @@ class DetectorBank(object):
             wki = mtd[input_name]
             # Is it really necessary to crop?
             if wki.getNumberHistograms() != self.last_spec_num - self.get_first_spec_num() + 1:
-                CropWorkspace(InputWorkspace=input_name, OutputWorkspace=output_name,
+                CropWorkspace(InputWorkspace=input_name,
+                              OutputWorkspace=output_name,
                               StartWorkspaceIndex=self.get_first_spec_num() - 1,
                               EndWorkspaceIndex=self.last_spec_num - 1)
         except:
-            raise ValueError('Can not find spectra for %s in the workspace %s [%d,%d]\nException:'
-                             % (self.name(), input_name, self.get_first_spec_num(), self.last_spec_num)
-                             + str(sys.exc_info()))
+            raise ValueError('Can not find spectra for %s in the workspace %s [%d,%d]\nException:' %
+                             (self.name(), input_name, self.get_first_spec_num(), self.last_spec_num) +
+                             str(sys.exc_info()))
 
 
 class ISISInstrument(BaseInstrument):
     lowAngDetSet = None
 
-    def __init__(self, filename=None, m4_instrument_component_name = None):
+    def __init__(self, filename=None, m4_instrument_component_name=None):
         """
             Reads the instrument definition xml file
             @param filename: the name of the instrument definition file to read
@@ -453,8 +456,7 @@ class ISISInstrument(BaseInstrument):
         self.idf_path = self._definition_file
 
         # the spectrum with this number is used to normalize the workspace data
-        self._incid_monitor = int(self.definition.getNumberParameter(
-            'default-incident-monitor-spectrum')[0])
+        self._incid_monitor = int(self.definition.getNumberParameter('default-incident-monitor-spectrum')[0])
         self.cen_find_step = float(self.definition.getNumberParameter('centre-finder-step-size')[0])
         # see if a second step size is defined. If not set the second value to the first for compatibility
         # logger.warning("Trying to find centre-finder-step-size2")
@@ -515,8 +517,7 @@ class ISISInstrument(BaseInstrument):
         self.BENCH_ROT = 0.0
 
         # spectrum number of the monitor used to as the incidient in the transmission calculations
-        self.default_trans_spec = int(self.definition.getNumberParameter(
-            'default-transmission-monitor-spectrum')[0])
+        self.default_trans_spec = int(self.definition.getNumberParameter('default-transmission-monitor-spectrum')[0])
         self.incid_mon_4_trans_calc = self._incid_monitor
 
         isis = config.getFacility('ISIS')
@@ -744,7 +745,9 @@ class ISISInstrument(BaseInstrument):
             Move the sample object to the location set in the logs or user settings file
             @param ws: the workspace containing the sample to move
         """
-        MoveInstrumentComponent(Workspace=ws, ComponentName='some-sample-holder', Z=self.SAMPLE_Z_CORR,
+        MoveInstrumentComponent(Workspace=ws,
+                                ComponentName='some-sample-holder',
+                                Z=self.SAMPLE_Z_CORR,
                                 RelativePosition=True)
 
         for i in list(self.monitor_zs.keys()):
@@ -755,15 +758,19 @@ class ISISInstrument(BaseInstrument):
             z_loc = mon.getPos().getZ()
             # now the relative move
             offset = (self.monitor_zs[i] / 1000.) - z_loc
-            MoveInstrumentComponent(Workspace=ws, ComponentName=component, Z=offset,
-                                    RelativePosition=True)
+            MoveInstrumentComponent(Workspace=ws, ComponentName=component, Z=offset, RelativePosition=True)
 
     def move_components(self, ws, beamX, beamY):
         """Define how to move the bank to position beamX and beamY must be implemented"""
         raise RuntimeError("Not Implemented")
 
-    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2,
-                                                    coord1_scale_factor=1., coord2_scale_factor=1.,
+    def elementary_displacement_of_single_component(self,
+                                                    workspace,
+                                                    component_name,
+                                                    coord1,
+                                                    coord2,
+                                                    coord1_scale_factor=1.,
+                                                    coord2_scale_factor=1.,
                                                     relative_displacement=True):
         """
         A simple elementary displacement of a single component.
@@ -933,8 +940,7 @@ class LOQ(ISISInstrument):
         self._m4_monitor_name = "monitor4"
         super(LOQ, self).__init__(idf_path, self._m4_monitor_name)
         # relates the numbers of the monitors to their names in the instrument definition file
-        self.monitor_names = {1: 'monitor1',
-                              2: 'monitor2'}
+        self.monitor_names = {1: 'monitor1', 2: 'monitor2'}
 
         if self.has_m4_monitor:
             self.monitor_names.update({self._m4_det_id: self._m4_monitor_name})
@@ -968,8 +974,11 @@ class LOQ(ISISInstrument):
 
         # centralize the bank to the centre
         if other_centre:
-            dummy_centre, centre_shift = self.move_components(ws_name, beamcentre[0], beamcentre[1],
-                                                              xbeam_other=other_centre[0], ybeam_other=other_centre[1])
+            dummy_centre, centre_shift = self.move_components(ws_name,
+                                                              beamcentre[0],
+                                                              beamcentre[1],
+                                                              xbeam_other=other_centre[0],
+                                                              ybeam_other=other_centre[1])
         else:
             dummy_centre, centre_shift = self.move_components(ws_name, beamcentre[0], beamcentre[1])
         return centre_shift
@@ -989,23 +998,35 @@ class LOQ(ISISInstrument):
         yshift = (317.5 / 1000.) - ybeam
         MoveInstrumentComponent(Workspace=ws,
                                 ComponentName=self.cur_detector().name(),
-                                X=xshift, Y=yshift, RelativePosition="1")
+                                X=xshift,
+                                Y=yshift,
+                                RelativePosition="1")
         if ybeam_other and xbeam_other:
             xshift_other = (317.5 / 1000.) - xbeam_other
             yshift_other = (317.5 / 1000.) - ybeam_other
             MoveInstrumentComponent(Workspace=ws,
                                     ComponentName=self.other_detector().name(),
-                                    X=xshift_other, Y=yshift_other, RelativePosition="1")
+                                    X=xshift_other,
+                                    Y=yshift_other,
+                                    RelativePosition="1")
         # Have a separate move for x_corr, y_coor and z_coor just to make it more obvious in the
         # history, and to expert users what is going on
         det = self.cur_detector()
         det_other = self.other_detector()
         if det.x_corr != 0.0 or det.y_corr != 0.0 or det.z_corr != 0.0:
-            MoveInstrumentComponent(Workspace=ws, ComponentName=det.name(), X=det.x_corr / 1000.0,
-                                    Y=det.y_corr / 1000.0, Z=det.z_corr / 1000.0, RelativePosition="1")
+            MoveInstrumentComponent(Workspace=ws,
+                                    ComponentName=det.name(),
+                                    X=det.x_corr / 1000.0,
+                                    Y=det.y_corr / 1000.0,
+                                    Z=det.z_corr / 1000.0,
+                                    RelativePosition="1")
             if ybeam_other and xbeam_other:
-                MoveInstrumentComponent(Workspace=ws, ComponentName=det_other.name(), X=det_other.x_corr / 1000.0,
-                                        Y=det_other.y_corr / 1000.0, Z=det_other.z_corr / 1000.0, RelativePosition="1")
+                MoveInstrumentComponent(Workspace=ws,
+                                        ComponentName=det_other.name(),
+                                        X=det_other.x_corr / 1000.0,
+                                        Y=det_other.y_corr / 1000.0,
+                                        Z=det_other.z_corr / 1000.0,
+                                        RelativePosition="1")
             xshift = xshift + det.x_corr / 1000.0
             yshift = yshift + det.y_corr / 1000.0
 
@@ -1015,8 +1036,13 @@ class LOQ(ISISInstrument):
 
         return [xshift, yshift], [xshift, yshift]
 
-    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2,
-                                                    coord1_scale_factor=1., coord2_scale_factor=1.,
+    def elementary_displacement_of_single_component(self,
+                                                    workspace,
+                                                    component_name,
+                                                    coord1,
+                                                    coord2,
+                                                    coord1_scale_factor=1.,
+                                                    coord2_scale_factor=1.,
                                                     relative_displacement=True):
         """
         A simple elementary displacement of a single component.
@@ -1101,10 +1127,7 @@ class SANS2D(ISISInstrument):
         # The user can set the distance between monitor 4 and the rear detector in millimetres, should be negative
         self.monitor_4_offset = None
         # relates the numbers of the monitors to their names in the instrument definition file
-        self.monitor_names = {1: 'monitor1',
-                              2: 'monitor2',
-                              3: 'monitor3',
-                              self._m4_det_id: self._m4_monitor_name}
+        self.monitor_names = {1: 'monitor1', 2: 'monitor2', 3: 'monitor3', self._m4_det_id: self._m4_monitor_name}
 
     def set_up_for_run(self, base_runno):
         """
@@ -1156,8 +1179,7 @@ class SANS2D(ISISInstrument):
         # get these variables from the workspace run
         run_info = mtd[str(ws_name)].run()
         ind = 0
-        for name in ('Front_Det_Z', 'Front_Det_X', 'Front_Det_Rot',
-                     'Rear_Det_Z', 'Rear_Det_X'):
+        for name in ('Front_Det_Z', 'Front_Det_X', 'Front_Det_Rot', 'Rear_Det_Z', 'Rear_Det_X'):
             try:
                 var = run_info.get(name).value
                 if hasattr(var, '__iter__'):
@@ -1209,7 +1231,11 @@ class SANS2D(ISISInstrument):
         # Since RotateInstrumentComponent will only rotate about the centre of the detector, we have to to the rest here.
         # rotate front detector according to value in log file and correction value provided in user file
         rotateDet = (-FRONT_DET_ROT - frontDet.rot_corr)
-        RotateInstrumentComponent(Workspace=ws, ComponentName=self.getDetector('front').name(), X="0.", Y="1.0", Z="0.",
+        RotateInstrumentComponent(Workspace=ws,
+                                  ComponentName=self.getDetector('front').name(),
+                                  X="0.",
+                                  Y="1.0",
+                                  Z="0.",
                                   Angle=rotateDet)
         RotRadians = math.pi * (FRONT_DET_ROT + frontDet.rot_corr) / 180.
         # The rear detector is translated to the beam position using the beam centre coordinates in the user file.
@@ -1222,21 +1248,24 @@ class SANS2D(ISISInstrument):
         # this inserts *(1.0-math.cos(RotRadians)) into xshift, and
         # - frontDet.side_corr*math.sin(RotRadians) into zshift.
         # (Note we may yet need to introduce further corrections for parallax errors in the detectors, which may be wavelength dependent!)
-        xshift = (REAR_DET_X + rearDet.x_corr - frontDet.x_corr - FRONT_DET_X - frontDet.side_corr * (
-            1 - math.cos(RotRadians)) + (self.FRONT_DET_RADIUS + frontDet.radius_corr)
-                  * math.sin(RotRadians)) / 1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
+        xshift = (REAR_DET_X + rearDet.x_corr - frontDet.x_corr - FRONT_DET_X - frontDet.side_corr *
+                  (1 - math.cos(RotRadians)) + (self.FRONT_DET_RADIUS + frontDet.radius_corr) *
+                  math.sin(RotRadians)) / 1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
         yshift = (frontDet.y_corr / 1000. - ybeam)
         # Note don't understand the comment below (9/1/12 these are comments from the original python code,
         # you may remove them if you like!)
         # default in instrument description is 23.281m - 4.000m from sample at 19,281m !
         # need to add ~58mm to det1 to get to centre of detector, before it is rotated.
         # 21/3/12 RKH add .radius_corr
-        zshift = (FRONT_DET_Z + frontDet.z_corr + (self.FRONT_DET_RADIUS + frontDet.radius_corr) * (
-            1 - math.cos(RotRadians)) - frontDet.side_corr * math.sin(RotRadians)) / 1000.
+        zshift = (FRONT_DET_Z + frontDet.z_corr + (self.FRONT_DET_RADIUS + frontDet.radius_corr) *
+                  (1 - math.cos(RotRadians)) - frontDet.side_corr * math.sin(RotRadians)) / 1000.
         zshift -= self.FRONT_DET_DEFAULT_SD_M
         MoveInstrumentComponent(Workspace=ws,
                                 ComponentName=self.getDetector('front').name(),
-                                X=xshift, Y=yshift, Z=zshift, RelativePosition="1")
+                                X=xshift,
+                                Y=yshift,
+                                Z=zshift,
+                                RelativePosition="1")
 
         # deal with rear detector
 
@@ -1245,10 +1274,18 @@ class SANS2D(ISISInstrument):
         # ytilt rotates about x axis, xtilt rotates about z axis
         # NOTE the beam centre coordinates may change
         if rearDet.y_tilt != 0.0:
-            RotateInstrumentComponent(Workspace=ws, ComponentName=rearDet.name(), X="1.", Y="0.", Z="0.",
+            RotateInstrumentComponent(Workspace=ws,
+                                      ComponentName=rearDet.name(),
+                                      X="1.",
+                                      Y="0.",
+                                      Z="0.",
                                       Angle=rearDet.y_tilt)
         if rearDet.x_tilt != 0.0:
-            RotateInstrumentComponent(Workspace=ws, ComponentName=rearDet.name(), X="0.", Y="0.", Z="1.",
+            RotateInstrumentComponent(Workspace=ws,
+                                      ComponentName=rearDet.name(),
+                                      X="0.",
+                                      Y="0.",
+                                      Z="1.",
                                       Angle=rearDet.x_tilt)
 
         xshift = -xbeam
@@ -1256,7 +1293,11 @@ class SANS2D(ISISInstrument):
         zshift = (REAR_DET_Z + rearDet.z_corr) / 1000.
         zshift -= self.REAR_DET_DEFAULT_SD_M
         sanslog.notice("Setup move " + str(xshift * 1000.) + " " + str(yshift * 1000.) + " " + str(zshift * 1000.))
-        MoveInstrumentComponent(Workspace=ws, ComponentName=rearDet.name(), X=xshift, Y=yshift, Z=zshift,
+        MoveInstrumentComponent(Workspace=ws,
+                                ComponentName=rearDet.name(),
+                                X=xshift,
+                                Y=yshift,
+                                Z=zshift,
                                 RelativePosition="1")
 
         self.move_all_components(ws)
@@ -1275,8 +1316,7 @@ class SANS2D(ISISInstrument):
             monitor_4_offset = self.monitor_4_offset / 1000.
             z_new = det_z + monitor_4_offset
             z_move = z_new - z_orig
-            MoveInstrumentComponent(Workspace=ws, ComponentName=component, Z=z_move,
-                                    RelativePosition=True)
+            MoveInstrumentComponent(Workspace=ws, ComponentName=component, Z=z_move, RelativePosition=True)
             sanslog.notice('Monitor 4 is at z = ' + str(z_new))
 
         # Are these returned values used anywhere?
@@ -1293,8 +1333,13 @@ class SANS2D(ISISInstrument):
 
         return beam_cen, det_cen
 
-    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2,
-                                                    coord1_scale_factor=1., coord2_scale_factor=1.,
+    def elementary_displacement_of_single_component(self,
+                                                    workspace,
+                                                    component_name,
+                                                    coord1,
+                                                    coord2,
+                                                    coord1_scale_factor=1.,
+                                                    coord2_scale_factor=1.,
                                                     relative_displacement=True):
         """
         A simple elementary displacement of a single component.
@@ -1423,8 +1468,8 @@ class SANS2D(ISISInstrument):
         corr_names = ['Front_Det_Z', 'Front_Det_X', 'Front_Det_Rot', 'Rear_Det_Z', 'Rear_Det_X']
         for i in range(0, len(existing_values)):
             if math.fabs(existing_values[i] - new_values[i]) > 5e-04:
-                sanslog.warning('values differ between sample and can runs: Sample ' + corr_names[i] + ' = ' + str(
-                    existing_values[i]) + ', can value is ' + str(new_values[i]))
+                sanslog.warning('values differ between sample and can runs: Sample ' + corr_names[i] + ' = ' +
+                                str(existing_values[i]) + ', can value is ' + str(new_values[i]))
                 errors += 1
 
                 self.append_marked(corr_names[i])
@@ -1492,7 +1537,7 @@ class LARMOR(ISISInstrument):
         # The detector ID for the M4 monitor
         self._m4_det_id = 4
         self._m4_monitor_name = "monitor4"
-        super(LARMOR,self).__init__(idf_path, self._m4_monitor_name)
+        super(LARMOR, self).__init__(idf_path, self._m4_monitor_name)
         self._marked_dets = []
         # set to true once the detector positions have been moved to the locations given in the sample logs
         self.corrections_applied = False
@@ -1641,8 +1686,8 @@ class LARMOR(ISISInstrument):
         corr_names = ['Bench_Rot']
         for i in range(0, len(existing_values)):
             if math.fabs(existing_values[i] - new_values[i]) > 5e-04:
-                sanslog.warning('values differ between sample and can runs: Sample ' + corr_names[i] + ' = ' + str(
-                    existing_values[i]) + ', can value is ' + str(new_values[i]))
+                sanslog.warning('values differ between sample and can runs: Sample ' + corr_names[i] + ' = ' +
+                                str(existing_values[i]) + ', can value is ' + str(new_values[i]))
                 errors += 1
 
                 self.append_marked(corr_names[i])
@@ -1677,8 +1722,10 @@ class LARMOR(ISISInstrument):
         MoveInstrumentComponent(ws, ComponentName=detBench.name(), X=xshift, Y=yshift, Z=zshift)
 
         # Deal with the angle value
-        self._rotate_around_y_axis(workspace=ws, component_name=detBench.name(),
-                                   x_beam=xbeam, x_scale_factor=XSF,
+        self._rotate_around_y_axis(workspace=ws,
+                                   component_name=detBench.name(),
+                                   x_beam=xbeam,
+                                   x_scale_factor=XSF,
                                    bench_rotation=BENCH_ROT)
 
         # Set the beam centre position afte the move
@@ -1688,8 +1735,13 @@ class LARMOR(ISISInstrument):
         # beam centre, translation, new beam position
         return [0.0, 0.0], [-xbeam, -ybeam]
 
-    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2,
-                                                    coord1_scale_factor=1., coord2_scale_factor=1.,
+    def elementary_displacement_of_single_component(self,
+                                                    workspace,
+                                                    component_name,
+                                                    coord1,
+                                                    coord2,
+                                                    coord1_scale_factor=1.,
+                                                    coord2_scale_factor=1.,
                                                     relative_displacement=True):
         """
         A simple elementary displacement of a single component.
@@ -1808,9 +1860,10 @@ class LARMOR(ISISInstrument):
                 if isSample:
                     run = ws_ref.run()
                     if not run.hasProperty("Bench_Rot"):
-                        additional_message = ("The Bench_Rot entry seems to be missing. There might be "
-                                              "an issue with your data acquisition. Make sure that the sample_log entry "
-                                              "Bench_Rot is available.")
+                        additional_message = (
+                            "The Bench_Rot entry seems to be missing. There might be "
+                            "an issue with your data acquisition. Make sure that the sample_log entry "
+                            "Bench_Rot is available.")
                     else:
                         additional_message = ""
 

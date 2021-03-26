@@ -11,7 +11,6 @@ from mantid.kernel import *
 
 
 class LRSubtractAverageBackground(PythonAlgorithm):
-
     def category(self):
         return "Reflectometry\\SNS"
 
@@ -25,19 +24,22 @@ class LRSubtractAverageBackground(PythonAlgorithm):
         return "Liquids Reflectometer background subtraction using the average on each side of the peak."
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty("InputWorkspace", "",Direction.Input), "The workspace to check.")
-        self.declareProperty(IntArrayProperty("PeakRange", [150, 160],
-                                              IntArrayLengthValidator(2), direction=Direction.Input),
-                             "Pixel range defining the reflectivity peak")
-        self.declareProperty(IntArrayProperty("BackgroundRange", [147, 163],
-                                              IntArrayLengthValidator(2), direction=Direction.Input),
-                             "Pixel range defining the outer range of the background on each side of the peak")
-        self.declareProperty(IntArrayProperty("LowResolutionRange", [94, 160],
-                                              IntArrayLengthValidator(2), direction=Direction.Input),
-                             "Pixel range defining the low-resolution axis to integrate over")
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "", Direction.Input), "The workspace to check.")
+        self.declareProperty(
+            IntArrayProperty("PeakRange", [150, 160], IntArrayLengthValidator(2), direction=Direction.Input),
+            "Pixel range defining the reflectivity peak")
+        self.declareProperty(
+            IntArrayProperty("BackgroundRange", [147, 163], IntArrayLengthValidator(2), direction=Direction.Input),
+            "Pixel range defining the outer range of the background on each side of the peak")
+        self.declareProperty(
+            IntArrayProperty("LowResolutionRange", [94, 160], IntArrayLengthValidator(2), direction=Direction.Input),
+            "Pixel range defining the low-resolution axis to integrate over")
         self.declareProperty("SumPeak", False, doc="If True, the resulting peak will be summed")
         detector_list = ["2D-Detector", "LinearDetector"]
-        self.declareProperty("TypeOfDetector", "2D-Detector", StringListValidator(detector_list), doc="The type of detector used")
+        self.declareProperty("TypeOfDetector",
+                             "2D-Detector",
+                             StringListValidator(detector_list),
+                             doc="The type of detector used")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output), "The workspace to check.")
 
     def PyExec(self):
@@ -78,7 +80,8 @@ class LRSubtractAverageBackground(PythonAlgorithm):
 
         left_bck = None
         if peak_min > bck_min:
-            left_bck = RefRoi(InputWorkspace=workspace, IntegrateY=False,
+            left_bck = RefRoi(InputWorkspace=workspace,
+                              IntegrateY=False,
                               NXPixel=number_of_pixels_x,
                               NYPixel=number_of_pixels_y,
                               ConvertToQ=False,
@@ -86,12 +89,14 @@ class LRSubtractAverageBackground(PythonAlgorithm):
                               XPixelMax=x_max,
                               YPixelMin=bck_min,
                               YPixelMax=peak_min - 1,
-                              ErrorWeighting = True,
-                              SumPixels=True, NormalizeSum=True)
+                              ErrorWeighting=True,
+                              SumPixels=True,
+                              NormalizeSum=True)
 
         right_bck = None
         if peak_max < bck_max:
-            right_bck = RefRoi(InputWorkspace=workspace, IntegrateY=False,
+            right_bck = RefRoi(InputWorkspace=workspace,
+                               IntegrateY=False,
                                NXPixel=number_of_pixels_x,
                                NYPixel=number_of_pixels_y,
                                ConvertToQ=False,
@@ -99,8 +104,9 @@ class LRSubtractAverageBackground(PythonAlgorithm):
                                XPixelMax=x_max,
                                YPixelMin=peak_max + 1,
                                YPixelMax=bck_max,
-                               ErrorWeighting = True,
-                               SumPixels=True, NormalizeSum=True)
+                               ErrorWeighting=True,
+                               SumPixels=True,
+                               NormalizeSum=True)
 
         if right_bck is not None and left_bck is not None:
             average = (left_bck + right_bck) / 2.0
@@ -109,7 +115,8 @@ class LRSubtractAverageBackground(PythonAlgorithm):
         elif left_bck is not None:
             average = left_bck
         else:
-            average = RefRoi(InputWorkspace=workspace, IntegrateY=False,
+            average = RefRoi(InputWorkspace=workspace,
+                             IntegrateY=False,
                              NXPixel=number_of_pixels_x,
                              NYPixel=number_of_pixels_y,
                              ConvertToQ=False,
@@ -117,12 +124,14 @@ class LRSubtractAverageBackground(PythonAlgorithm):
                              XPixelMax=x_max,
                              YPixelMin=bck_min,
                              YPixelMax=bck_max,
-                             ErrorWeighting = True,
-                             SumPixels=True, NormalizeSum=True)
+                             ErrorWeighting=True,
+                             SumPixels=True,
+                             NormalizeSum=True)
 
         output_name = self.getPropertyValue("OutputWorkspace")
         # Integrate over the low-res direction
-        output = RefRoi(InputWorkspace=workspace, IntegrateY=False,
+        output = RefRoi(InputWorkspace=workspace,
+                        IntegrateY=False,
                         NXPixel=number_of_pixels_x,
                         NYPixel=number_of_pixels_y,
                         XPixelMin=x_min,

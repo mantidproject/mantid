@@ -14,9 +14,10 @@ from isis_powder.routines.run_details import create_run_details_object, get_cal_
 def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering):
     absorb_dict = hrpd_advanced_config.absorption_correction_params
     sample_details_obj = absorb_corrections.create_vanadium_sample_details_obj(config_dict=absorb_dict)
-    ws_to_correct = absorb_corrections.run_cylinder_absorb_corrections(
-        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering, sample_details_obj=sample_details_obj,
-        is_vanadium=True)
+    ws_to_correct = absorb_corrections.run_cylinder_absorb_corrections(ws_to_correct=ws_to_correct,
+                                                                       multiple_scattering=multiple_scattering,
+                                                                       sample_details_obj=sample_details_obj,
+                                                                       is_vanadium=True)
     return ws_to_correct
 
 
@@ -38,9 +39,14 @@ def calculate_slab_absorb_corrections(ws_to_correct, sample_details_obj):
         raise RuntimeError("The material for this sample has not been set yet. Please call"
                            " set_material on the SampleDetails object to set the material")
 
-    geometry_json = {"Shape": "FlatPlate", "Thick": sample_details_obj.thickness(), "Width": sample_details_obj.width(),
-                     "Height": sample_details_obj.height(), "Center": sample_details_obj.center(),
-                     "Angle": sample_details_obj.angle()}
+    geometry_json = {
+        "Shape": "FlatPlate",
+        "Thick": sample_details_obj.thickness(),
+        "Width": sample_details_obj.width(),
+        "Height": sample_details_obj.height(),
+        "Center": sample_details_obj.center(),
+        "Angle": sample_details_obj.angle()
+    }
     material = sample_details_obj.material_object
     # See SetSampleMaterial for documentation on this dictionary
     material_json = {"ChemicalFormula": material.chemical_formula}
@@ -57,12 +63,13 @@ def calculate_slab_absorb_corrections(ws_to_correct, sample_details_obj):
 
     # HRPDSlabCanAbsorption must be completed in units of wavelength - convert if needed, than convert back afterwards
     if previous_units != ws_units.wavelength:
-        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
+        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct,
+                                            OutputWorkspace=ws_to_correct,
                                             Target=ws_units.wavelength)
     # set element size based on thickness
     sample_thickness = sample_details_obj.thickness()
     # half and convert cm to mm 5=(0.5*10)
-    element_size = 5.*sample_thickness
+    element_size = 5. * sample_thickness
     # limit number of wavelength points as for small samples the number of elements can be required to be quite large
     if sample_thickness < 0.1:  # 1mm
         nlambda = 100
@@ -72,12 +79,14 @@ def calculate_slab_absorb_corrections(ws_to_correct, sample_details_obj):
                                                   Thickness=sample_thickness,
                                                   ElementSize=element_size,
                                                   NumberOfWavelengthPoints=nlambda)
-    ws_to_correct = mantid.Divide(LHSWorkspace=ws_to_correct, RHSWorkspace=absorb_factors,
+    ws_to_correct = mantid.Divide(LHSWorkspace=ws_to_correct,
+                                  RHSWorkspace=absorb_factors,
                                   OutputWorkspace=ws_to_correct)
     mantid.DeleteWorkspace(Workspace=absorb_factors)
 
     if previous_units != ws_units.wavelength:
-        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
+        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct,
+                                            OutputWorkspace=ws_to_correct,
                                             Target=previous_units)
 
     return ws_to_correct
@@ -94,12 +103,14 @@ def get_run_details(run_number_string, inst_settings, is_vanadium):
 
     grouping_file_name = inst_settings.grouping_file_name
 
-    return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
-                                     is_vanadium_run=is_vanadium, empty_run_number=empty_run,
-                                     vanadium_string=vanadium_run, grouping_file_name=grouping_file_name)
+    return create_run_details_object(run_number_string=run_number_string,
+                                     inst_settings=inst_settings,
+                                     is_vanadium_run=is_vanadium,
+                                     empty_run_number=empty_run,
+                                     vanadium_string=vanadium_run,
+                                     grouping_file_name=grouping_file_name)
 
 
 def _get_run_numbers_for_key(tof_dict, key):
     err_message = "this must be under 'coupled' or 'decoupled' and the time of flight window eg 10-110."
-    return common.cal_map_dictionary_key_helper(tof_dict, key=key,
-                                                append_to_error_message=err_message)
+    return common.cal_map_dictionary_key_helper(tof_dict, key=key, append_to_error_message=err_message)

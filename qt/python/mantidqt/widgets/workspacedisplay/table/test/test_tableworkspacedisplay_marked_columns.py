@@ -21,7 +21,6 @@ class ReferenceHolder:
 
 
 class MarkedColumnsTest(unittest.TestCase):
-
     def test_add_x(self):
         mc = MarkedColumns()
         self.execute_add(mc.add_x, mc.as_x)
@@ -89,8 +88,7 @@ class MarkedColumnsTest(unittest.TestCase):
     def test_add_already_marked(self):
         mc = MarkedColumns()
 
-        relevant_funcs = [ReferenceHolder(mc.add_x, mc.as_x),
-                          ReferenceHolder(mc.add_y, mc.as_y)]
+        relevant_funcs = [ReferenceHolder(mc.add_x, mc.as_x), ReferenceHolder(mc.add_y, mc.as_y)]
         all_combinations = permutations(relevant_funcs, 2)
 
         for combination in all_combinations:
@@ -306,7 +304,7 @@ class MarkedColumnsTest(unittest.TestCase):
         mc = MarkedColumns()
         mc.add_y(0)
         mc.add_y(1)
-        mc.add_y_err(ErrorColumn(2,1))
+        mc.add_y_err(ErrorColumn(2, 1))
 
         expected = [(0, '[Y0]'), (1, '[Y1]'), (2, '[Y1_YErr]')]
         self.assertEqual(expected, mc.build_labels())

@@ -8,6 +8,7 @@ import os
 from mantid.api import FileFinder
 from Muon.GUI.Common.message_box import warning
 from qtpy import PYQT4, QtWidgets
+
 allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI", "ARGUS", "PSI"]
 allowed_extensions = ["nxs", "bin"]
 FILE_SEP = os.sep
@@ -118,22 +119,20 @@ def parse_user_input_to_files(input_text, extensions=allowed_extensions):
     return filenames
 
 
-def show_file_browser_and_return_selection(
-        parent, file_filter, search_directories, multiple_files=False):
+def show_file_browser_and_return_selection(parent, file_filter, search_directories, multiple_files=False):
     default_directory = search_directories[0]
     if multiple_files:
         if PYQT4:
-            chosen_files = QtWidgets.QFileDialog.getOpenFileNames(
-                parent, "Select files", default_directory, file_filter)
+            chosen_files = QtWidgets.QFileDialog.getOpenFileNames(parent, "Select files", default_directory,
+                                                                  file_filter)
         else:
-            chosen_files, _filter = QtWidgets.QFileDialog.getOpenFileNames(
-                parent, "Select files", default_directory, file_filter)
+            chosen_files, _filter = QtWidgets.QFileDialog.getOpenFileNames(parent, "Select files", default_directory,
+                                                                           file_filter)
         return [str(chosen_file) for chosen_file in chosen_files]
     else:
         if PYQT4:
-            chosen_file = QtWidgets.QFileDialog.getOpenFileName(
-                parent, "Select file", default_directory, file_filter)
+            chosen_file = QtWidgets.QFileDialog.getOpenFileName(parent, "Select file", default_directory, file_filter)
         else:
-            chosen_file, _filter = QtWidgets.QFileDialog.getOpenFileName(
-                parent, "Select file", default_directory, file_filter)
+            chosen_file, _filter = QtWidgets.QFileDialog.getOpenFileName(parent, "Select file", default_directory,
+                                                                         file_filter)
         return [str(chosen_file)]

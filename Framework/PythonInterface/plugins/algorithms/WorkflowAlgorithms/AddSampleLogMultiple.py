@@ -11,7 +11,6 @@ from mantid.api import *
 
 
 class AddSampleLogMultiple(PythonAlgorithm):
-
     def category(self):
         return 'DataHandling\\Logs'
 
@@ -25,17 +24,13 @@ class AddSampleLogMultiple(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty('Workspace', '', direction=Direction.InOut),
                              doc='Workspace to add logs to')
 
-        self.declareProperty(StringArrayProperty('LogNames', ''),
-                             doc='Comma separated list of log names')
+        self.declareProperty(StringArrayProperty('LogNames', ''), doc='Comma separated list of log names')
 
-        self.declareProperty(StringArrayProperty('LogValues', ''),
-                             doc='Comma separated list of log values')
+        self.declareProperty(StringArrayProperty('LogValues', ''), doc='Comma separated list of log values')
 
-        self.declareProperty(StringArrayProperty('LogUnits', ''),
-                             doc='Comma separated list of log units')
+        self.declareProperty(StringArrayProperty('LogUnits', ''), doc='Comma separated list of log units')
 
-        self.declareProperty('ParseType', True,
-                             doc='Determine the value type by parsing the string')
+        self.declareProperty('ParseType', True, doc='Determine the value type by parsing the string')
 
         self.declareProperty(StringArrayProperty('LogTypes', ''),
                              doc='Comma separated list of types the log values will be.')
@@ -49,7 +44,7 @@ class AddSampleLogMultiple(PythonAlgorithm):
         log_types = self.getProperty('LogTypes').value
 
         if len(log_units) == 0:
-            log_units = [""]*len(log_names)
+            log_units = [""] * len(log_names)
 
         for idx in range(0, len(log_names)):
             # Get the name, value, and unit
@@ -113,7 +108,7 @@ class AddSampleLogMultiple(PythonAlgorithm):
         if num_names > 0 and num_types != 0 and num_types != num_names:
             issues['LogTypes'] = 'Number of log types must be 0 or match the number of log names'
 
-        allowed_types = ['String','Number', 'Number Series']
+        allowed_types = ['String', 'Number', 'Number Series']
         for value in log_types:
             if value not in allowed_types:
                 issues['LogTypes'] = '{} is not an allowed log type'.format(value)

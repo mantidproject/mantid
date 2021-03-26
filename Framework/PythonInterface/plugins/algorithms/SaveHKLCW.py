@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import numpy as np
-from mantid.api import (AlgorithmFactory, PythonAlgorithm, FileAction, FileProperty,
-                        IPeaksWorkspaceProperty)
+from mantid.api import (AlgorithmFactory, PythonAlgorithm, FileAction, FileProperty, IPeaksWorkspaceProperty)
 from mantid.kernel import Direction, logger
 
 
@@ -37,10 +36,7 @@ class SaveHKLCW(PythonAlgorithm):
                                           extensions=['hkl', 'int'],
                                           direction=Direction.Input),
                              doc='Output File.')
-        self.declareProperty('Header',
-                             True,
-                             direction=Direction.Input,
-                             doc='If to include the header in the output')
+        self.declareProperty('Header', True, direction=Direction.Input, doc='If to include the header in the output')
         self.declareProperty('DirectionCosines',
                              False,
                              direction=Direction.Input,
@@ -62,9 +58,7 @@ class SaveHKLCW(PythonAlgorithm):
                     f.write("(3i4,2f8.2,i4)\n")
                 wavelengths = [p.getWavelength() for p in peak_ws]
                 if np.std(wavelengths) > 0.01:
-                    logger.warning(
-                        "Large variation of wavelengths, this doesn't look like constant wavelength"
-                    )
+                    logger.warning("Large variation of wavelengths, this doesn't look like constant wavelength")
                 wavelength = np.mean([p.getWavelength() for p in peak_ws])
                 f.write(f"{wavelength:.5f}  0   0\n")
 
@@ -83,13 +77,13 @@ class SaveHKLCW(PythonAlgorithm):
                     dir_cos_1 = np.dot(RU.T, q_reverse_incident)
                     dir_cos_2 = np.dot(RU.T, q_diffracted)
                     f.write(
-                        "{:4.0f}{:4.0f}{:4.0f}{:8.2f}{:8.2f}{:4d}{:8.5f}{:8.5f}{:8.5f}{:8.5f}{:8.5f}{:8.5f}\n"
-                        .format(p.getH(), p.getK(), p.getL(), p.getIntensity(),
-                                p.getSigmaIntensity(), 1, dir_cos_1[0], dir_cos_2[0], dir_cos_1[1],
-                                dir_cos_2[1], dir_cos_1[2], dir_cos_2[2]))
+                        "{:4.0f}{:4.0f}{:4.0f}{:8.2f}{:8.2f}{:4d}{:8.5f}{:8.5f}{:8.5f}{:8.5f}{:8.5f}{:8.5f}\n".format(
+                            p.getH(), p.getK(), p.getL(), p.getIntensity(), p.getSigmaIntensity(), 1, dir_cos_1[0],
+                            dir_cos_2[0], dir_cos_1[1], dir_cos_2[1], dir_cos_1[2], dir_cos_2[2]))
                 else:
-                    f.write("{:4.0f}{:4.0f}{:4.0f}{:8.2f}{:8.2f}{:4d}\n".format(
-                        p.getH(), p.getK(), p.getL(), p.getIntensity(), p.getSigmaIntensity(), 1))
+                    f.write("{:4.0f}{:4.0f}{:4.0f}{:8.2f}{:8.2f}{:4d}\n".format(p.getH(), p.getK(), p.getL(),
+                                                                                p.getIntensity(), p.getSigmaIntensity(),
+                                                                                1))
 
 
 AlgorithmFactory.subscribe(SaveHKLCW)

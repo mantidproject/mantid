@@ -30,17 +30,15 @@ class SpaceGroupFactoryTest(systemtesting.MantidSystemTest):
         # There are some space groups which have new names in the latest tables, they will be included in the
         # test when aliases are available.
         # Note: avoiding assertLess() for now, not available in Python < 2.7 (rhel6)
-        self.assertTrue(len(self.notChecked) < 25,
-                        'Some space groups were not checked: ' + str(self.notChecked))
+        self.assertTrue(len(self.notChecked) < 25, 'Some space groups were not checked: ' + str(self.notChecked))
 
     def checkSpaceGroup(self, symbol):
         group = SpaceGroupFactory.createSpaceGroup(symbol)
 
         self.checkPointGroupOfSpaceGroup(group)
 
-        self.assertTrue(group.isGroup(),
-                        ("Space group " + str(group.getNumber()) + " (" + symbol + ") does not "
-                                                                                   "fulfill group axioms"))
+        self.assertTrue(group.isGroup(), ("Space group " + str(group.getNumber()) + " (" + symbol + ") does not "
+                                          "fulfill group axioms"))
 
         groupOperations = set(group.getSymmetryOperationStrings())
 
@@ -50,10 +48,10 @@ class SpaceGroupFactoryTest(systemtesting.MantidSystemTest):
             differenceOne = groupOperations - referenceOperations
             differenceTwo = referenceOperations - groupOperations
 
-            self.assertTrue(len(differenceOne) == 0,
-                            "Problem in space group " + str(group.getNumber()) + " (" + symbol + ")")
-            self.assertTrue(len(differenceTwo) == 0,
-                            "Problem in space group " + str(group.getNumber()) + " (" + symbol + ")")
+            self.assertTrue(
+                len(differenceOne) == 0, "Problem in space group " + str(group.getNumber()) + " (" + symbol + ")")
+            self.assertTrue(
+                len(differenceTwo) == 0, "Problem in space group " + str(group.getNumber()) + " (" + symbol + ")")
             self.assertTrue(groupOperations == referenceOperations,
                             "Problem in space group " + str(group.getNumber()) + " (" + symbol + ")")
         else:
@@ -70,7 +68,7 @@ class SpaceGroupFactoryTest(systemtesting.MantidSystemTest):
         self.assertFalse(
             set(onlyMatrices.getSymmetryOperationStrings()).isdisjoint(pointGroup.getSymmetryOperationStrings()),
             ("Point group of space group " + spaceGroup.getHMSymbol() + " does not match group obtained from"
-                                                                        " matrices of symmetry operations."))
+             " matrices of symmetry operations."))
 
     def loadReferenceData(self):
         # Reference data, generated using sginfo (http://cci.lbl.gov/sginfo/)
@@ -91,7 +89,6 @@ class SpaceGroupFactoryTest(systemtesting.MantidSystemTest):
 
                 spaceGroups[currentGroup] = set()
             else:
-                spaceGroups[currentGroup].add(
-                        SymmetryOperationFactory.createSymOp(currentLine.strip()).getIdentifier())
+                spaceGroups[currentGroup].add(SymmetryOperationFactory.createSymOp(currentLine.strip()).getIdentifier())
 
         return spaceGroups

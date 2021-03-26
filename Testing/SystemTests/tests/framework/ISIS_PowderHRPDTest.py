@@ -14,7 +14,6 @@ from mantid import config
 
 from isis_powder import HRPD, SampleDetails
 
-
 DIRS = config['datasearch.directories'].split(';')
 user_name = "Test"
 cycle_number = "16_5"
@@ -61,8 +60,7 @@ class CreateVanadiumNoSolidAngleTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 0.05  # Required for difference in spline data between operating systems
-        return self.calibration_results.name(
-        ), "ISIS_Powder-HRPD-VanSplined_66031_hrpd_new_072_01_corr.cal.nxs"
+        return self.calibration_results.name(), "ISIS_Powder-HRPD-VanSplined_66031_hrpd_new_072_01_corr.cal.nxs"
 
     def cleanup(self):
         try:
@@ -89,8 +87,7 @@ class FocusNoSolidAngleTest(systemtesting.MantidSystemTest):
     def validate(self):
         # check output files as expected
         def generate_error_message(expected_file, output_dir):
-            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir,
-                                                                  os.listdir(output_dir))
+            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
 
         def assert_output_file_exists(directory, filename):
             self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
@@ -111,15 +108,12 @@ class FocusNoSolidAngleTest(systemtesting.MantidSystemTest):
             assert_output_file_exists(output_dat_dir, d_filename)
             # looks like dSpacing data
             self.assertTrue(0.20 < first_x_value(os.path.join(output_dat_dir, d_filename)) < 0.8,
-                            msg="First D value={}".format(
-                                first_x_value(os.path.join(output_dat_dir, d_filename))))
+                            msg="First D value={}".format(first_x_value(os.path.join(output_dat_dir, d_filename))))
             tof_filename = 'hrpd66063_b{}_TOF.dat'.format(bankno)
             assert_output_file_exists(output_dat_dir, tof_filename)
             # looks like TOF data
-            self.assertTrue(
-                9700 < first_x_value(os.path.join(output_dat_dir, tof_filename)) < 10500,
-                msg="First TOF value={}".format(
-                    first_x_value(os.path.join(output_dat_dir, tof_filename))))
+            self.assertTrue(9700 < first_x_value(os.path.join(output_dat_dir, tof_filename)) < 10500,
+                            msg="First TOF value={}".format(first_x_value(os.path.join(output_dat_dir, tof_filename))))
 
         if platform.system() == "Darwin":  # OSX requires higher tolerance for splines
             self.tolerance = 0.47
@@ -168,9 +162,7 @@ class VanadiumAndFocusWithSolidAngleTest(systemtesting.MantidSystemTest):
 
 def _gen_required_files():
     required_run_numbers = gen_required_run_numbers()
-    input_files = [
-        os.path.join(input_dir, (inst_name + number + ".raw")) for number in required_run_numbers
-    ]
+    input_files = [os.path.join(input_dir, (inst_name + number + ".raw")) for number in required_run_numbers]
     input_files.append(calibration_map_path)
     return input_files
 
@@ -194,8 +186,7 @@ def run_vanadium_calibration(do_solid_angle_corrections):
 
     # Check the spline looks good and was saved
     if not os.path.exists(spline_path):
-        raise RuntimeError(
-            "Could not find output spline at the following path: {}".format(spline_path))
+        raise RuntimeError("Could not find output spline at the following path: {}".format(spline_path))
     splined_ws = mantid.Load(Filename=spline_path)
 
     return splined_ws

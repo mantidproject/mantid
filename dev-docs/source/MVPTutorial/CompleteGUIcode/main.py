@@ -12,7 +12,6 @@ import model_colour
 import model_data
 import master_view
 import master_presenter
-
 """
 A wrapper class for setting the main window
 """

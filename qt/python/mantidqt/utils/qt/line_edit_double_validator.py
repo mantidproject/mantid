@@ -15,7 +15,6 @@ class LineEditDoubleValidator(QDoubleValidator):
     A class for validating a line edit for entering doubles in decimal format or e notation. It catches invalid input
     such as empty strings and broken e notation, and then resets the value in the line edit to the last valid value.
     """
-
     def __init__(self, line_edit, initial_value):
         """Create a line edit double validator."""
         super(LineEditDoubleValidator, self).__init__(None)

@@ -35,7 +35,6 @@ class SANSProcessedEventWorkspaceInFile(systemtesting.MantidSystemTest):
     Check if a processed nexus file is correctly detected to contain
     an event workspace.
     '''
-
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)
         self._success = False
@@ -45,7 +44,7 @@ class SANSProcessedEventWorkspaceInFile(systemtesting.MantidSystemTest):
         base_name = "processed_event"
         filename = create_file_name(base_name)
         ws = CreateSampleWorkspace("Event")
-        SaveNexusProcessed(InputWorkspace=ws, Filename = filename)
+        SaveNexusProcessed(InputWorkspace=ws, Filename=filename)
         # Act
         can_load = can_load_as_event_workspace(filename)
         # Assert
@@ -66,7 +65,6 @@ class SANSProcessedHistoWorkspaceInFile(systemtesting.MantidSystemTest):
     Check if a processed nexus file is correctly detected to contain
     a histo workspace.
     '''
-
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)
         self._success = False
@@ -76,7 +74,7 @@ class SANSProcessedHistoWorkspaceInFile(systemtesting.MantidSystemTest):
         base_name = "processed_histo"
         filename = create_file_name(base_name)
         ws = CreateSampleWorkspace()
-        SaveNexusProcessed(InputWorkspace=ws, Filename = filename)
+        SaveNexusProcessed(InputWorkspace=ws, Filename=filename)
         # Act
         can_load = can_load_as_event_workspace(filename)
         # Assert

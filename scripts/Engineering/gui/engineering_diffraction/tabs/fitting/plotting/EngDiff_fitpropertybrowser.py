@@ -22,7 +22,6 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
     A wrapper around python FitPropertyBrowser altered for
     engineering diffraction UI
     """
-
     def __init__(self, canvas, toolbar_manager, parent=None):
         super(EngDiffFitPropertyBrowser, self).__init__(canvas, toolbar_manager, parent)
         self.fit_notifier = GenericObservable()
@@ -54,13 +53,17 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         :return: dict in style of self.getFitAlgorithmParameters()
         """
         try:
-            fitprop = {'properties': {'InputWorkspace': self.workspaceName(),
-                                      'Output': self.outputName(),
-                                      'StartX': self.startX(),
-                                      'EndX': self.endX(),
-                                      'Function': self.getFunctionString(),
-                                      'ConvolveMembers': True,
-                                      'OutputCompositeMembers': True}}
+            fitprop = {
+                'properties': {
+                    'InputWorkspace': self.workspaceName(),
+                    'Output': self.outputName(),
+                    'StartX': self.startX(),
+                    'EndX': self.endX(),
+                    'Function': self.getFunctionString(),
+                    'ConvolveMembers': True,
+                    'OutputCompositeMembers': True
+                }
+            }
             exclude = self.getExcludeRange()
             if exclude:
                 fitprop['properties']['Exclude'] = [int(s) for s in exclude.split(',')]

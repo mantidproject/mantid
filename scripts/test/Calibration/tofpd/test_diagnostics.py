@@ -12,14 +12,16 @@ from Calibration.tofpd import diagnostics
 
 class TestDiagnostics(unittest.TestCase):
 
-    PEAK=1.2615
+    PEAK = 1.2615
 
     @classmethod
     def setUpClass(cls):
         LoadNexusProcessed(Filename="VULCAN_192227_diagnostics.nxs", OutputWorkspace="diagtest")
         UnGroupWorkspace("diagtest")
-        cls.workspaces = ["diag_dspacing", "diag_fitted", "diag_fitparam", "strain", "single_strain", "difference",
-                          "single_diff", "center_tof"]
+        cls.workspaces = [
+            "diag_dspacing", "diag_fitted", "diag_fitparam", "strain", "single_strain", "difference", "single_diff",
+            "center_tof"
+        ]
 
     @classmethod
     def tearDownClass(cls) -> None:

@@ -13,20 +13,20 @@ from xml.dom import minidom
 def convertToVTU(infile, outpath):
 
     #first need to find some things from the file
-    datafile = open(infile,'r')
-    datalist=[]
-    planelist=[]
+    datafile = open(infile, 'r')
+    datalist = []
+    planelist = []
     npoints = 0
     for line in datafile:
         numbers = line.split()
-        if len(numbers) != 4 :
+        if len(numbers) != 4:
             continue
-        if npoints == 0 :
+        if npoints == 0:
             curz = numbers[2]
-        if numbers[2] != curz :
+        if numbers[2] != curz:
             datalist.append(planelist)
             curz = numbers[2]
-            planelist=[]
+            planelist = []
         planelist.append(numbers)
         npoints += 1
 
@@ -39,8 +39,8 @@ def convertToVTU(infile, outpath):
 
     vtkfile = doc.createElement("VTKFile")
     doc.appendChild(vtkfile)
-    vtkfile.setAttribute("type","UnstructuredGrid")
-    vtkfile.setAttribute("version","0.1")
+    vtkfile.setAttribute("type", "UnstructuredGrid")
+    vtkfile.setAttribute("version", "0.1")
     vtkfile.setAttribute("byte_order", "LittleEndian")
 
     ugrid = doc.createElement("UnstructuredGrid")
@@ -48,8 +48,8 @@ def convertToVTU(infile, outpath):
     piece = doc.createElement("Piece")
     ugrid.appendChild(piece)
 
-    piece.setAttribute( "NumberOfPoints", str(npoints))
-    piece.setAttribute( "NumberOfCells",  str(ncells))
+    piece.setAttribute("NumberOfPoints", str(npoints))
+    piece.setAttribute("NumberOfCells", str(ncells))
 
     # First the PointData element
     point_data = doc.createElement("PointData")
@@ -60,7 +60,7 @@ def convertToVTU(infile, outpath):
     point_data.appendChild(data_array)
     data_array.setAttribute("type", "Float32")
     data_array.setAttribute("Name", "Intensity")
-    data_array.setAttribute("format","ascii")
+    data_array.setAttribute("format", "ascii")
 
     for plane in datalist:
         for point in plane:
@@ -75,10 +75,10 @@ def convertToVTU(infile, outpath):
     points.appendChild(data_array)
     data_array.setAttribute("type", "Float32")
     data_array.setAttribute("NumberOfComponents", "3")
-    data_array.setAttribute("format","ascii")
+    data_array.setAttribute("format", "ascii")
     for plane in datalist:
         for point in plane:
-            txt = doc.createTextNode(str(point[0]) + " " + str(point[1]) + " " +str(point[2]))
+            txt = doc.createTextNode(str(point[0]) + " " + str(point[1]) + " " + str(point[2]))
             data_array.appendChild(txt)
 
     cells = doc.createElement("Cells")
@@ -88,7 +88,7 @@ def convertToVTU(infile, outpath):
     cells.appendChild(data_array)
     data_array.setAttribute("type", "Int32")
     data_array.setAttribute("Name", "connectivity")
-    data_array.setAttribute("format","ascii")
+    data_array.setAttribute("format", "ascii")
 
     i = 0
     for plane in datalist:
@@ -101,7 +101,7 @@ def convertToVTU(infile, outpath):
     cells.appendChild(data_array)
     data_array.setAttribute("type", "Int32")
     data_array.setAttribute("Name", "offsets")
-    data_array.setAttribute("format","ascii")
+    data_array.setAttribute("format", "ascii")
 
     i = 0
     for plane in datalist:
@@ -113,7 +113,7 @@ def convertToVTU(infile, outpath):
     cells.appendChild(data_array)
     data_array.setAttribute("type", "Int32")
     data_array.setAttribute("Name", "types")
-    data_array.setAttribute("format","ascii")
+    data_array.setAttribute("format", "ascii")
 
     for plane in datalist:
         txt = doc.createTextNode("4")
@@ -121,8 +121,8 @@ def convertToVTU(infile, outpath):
 
     #print doc.toprettyxml(newl="\n")
     shortname = infile.split('/')
-    name = outpath + shortname[len(shortname)-1] + ".vtu"
-    handle = open(name,'w')
+    name = outpath + shortname[len(shortname) - 1] + ".vtu"
+    handle = open(name, 'w')
     doc.writexml(handle, newl="\n")
     handle.close()
 
@@ -137,8 +137,8 @@ def writeParallelVTU(files, prefix):
 
     vtkfile = doc.createElement("VTKFile")
     doc.appendChild(vtkfile)
-    vtkfile.setAttribute("type","PUnstructuredGrid")
-    vtkfile.setAttribute("version","0.1")
+    vtkfile.setAttribute("type", "PUnstructuredGrid")
+    vtkfile.setAttribute("version", "0.1")
     vtkfile.setAttribute("byte_order", "LittleEndian")
 
     pugrid = doc.createElement("PUnstructuredGrid")
@@ -147,28 +147,29 @@ def writeParallelVTU(files, prefix):
 
     ppointdata = doc.createElement("PPointData")
     pugrid.appendChild(ppointdata)
-    ppointdata.setAttribute("Scalars","Intensity")
+    ppointdata.setAttribute("Scalars", "Intensity")
 
     data_array = doc.createElement("PDataArray")
     ppointdata.appendChild(data_array)
-    data_array.setAttribute("type","Float32")
-    data_array.setAttribute("Name","Intensity")
+    data_array.setAttribute("type", "Float32")
+    data_array.setAttribute("Name", "Intensity")
 
     ppoints = doc.createElement("PPoints")
     pugrid.appendChild(ppoints)
     data_array = doc.createElement("PDataArray")
     ppoints.appendChild(data_array)
-    data_array.setAttribute("type","Float32")
-    data_array.setAttribute("NumberOfComponents","3")
+    data_array.setAttribute("type", "Float32")
+    data_array.setAttribute("NumberOfComponents", "3")
 
     for name in files:
         piece = doc.createElement("Piece")
         pugrid.appendChild(piece)
-        piece.setAttribute("Source",name + ".vtu")
+        piece.setAttribute("Source", name + ".vtu")
+
 
 #    print doc.toprettyxml(newl="\n")
     filename = prefix + files[0].split('.')[0] + ".pvtu"
-#    print filename
-    handle = open(filename,'w')
+    #    print filename
+    handle = open(filename, 'w')
     doc.writexml(handle, newl="\n")
     handle.close()

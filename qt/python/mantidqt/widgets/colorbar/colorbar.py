@@ -208,8 +208,7 @@ class ColorbarWidget(QWidget):
                 self.powerscale_value = float(self.powerscale.text())
             return PowerNorm(gamma=self.powerscale_value, vmin=cmin, vmax=cmax)
         elif NORM_OPTS[idx] == "SymmetricLog10":
-            return SymLogNorm(1e-8 if cmin is None else max(1e-8, abs(cmin) * 1e-3),
-                              vmin=cmin, vmax=cmax)
+            return SymLogNorm(1e-8 if cmin is None else max(1e-8, abs(cmin) * 1e-3), vmin=cmin, vmax=cmax)
         elif NORM_OPTS[idx] == "Log":
             cmin = MIN_LOG_VALUE if cmin is not None and cmin <= 0 else cmin
             return LogNorm(vmin=cmin, vmax=cmax)
@@ -323,8 +322,7 @@ class ColorbarWidget(QWidget):
         if mappable.get_array() is not None:
             if np.any(mappable.get_array() <= 0):
                 self.norm.model().item(index, 0).setEnabled(False)
-                self.norm.setItemData(index, "Log scale is disabled for non-positive data",
-                                      Qt.ToolTipRole)
+                self.norm.setItemData(index, "Log scale is disabled for non-positive data", Qt.ToolTipRole)
                 if isinstance(mappable.norm, LogNorm):
                     mappable.norm = self._create_linear_normalize_object()
                     self.norm.blockSignals(True)

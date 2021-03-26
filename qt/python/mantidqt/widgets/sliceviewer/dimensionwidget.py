@@ -7,8 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
-from qtpy.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QSlider,
-                            QDoubleSpinBox, QSpinBox)
+from qtpy.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QSlider, QDoubleSpinBox, QSpinBox)
 from qtpy.QtCore import Qt, Signal
 from enum import Enum
 
@@ -119,16 +118,13 @@ class DimensionWidget(QWidget):
         dimension and are in the same positions as the list returned from get_slicepoint
         """
         return [
-            None if d.get_state() in (State.X, State.Y) else
-            (d.spinbox.minimum(), d.spinbox.maximum()) for d in self.dims
+            None if d.get_state() in (State.X, State.Y) else (d.spinbox.minimum(), d.spinbox.maximum())
+            for d in self.dims
         ]
 
     def get_bin_params(self):
         try:
-            return [
-                d.get_bins() if d.get_state() in (State.X, State.Y) else d.get_thickness()
-                for d in self.dims
-            ]
+            return [d.get_bins() if d.get_state() in (State.X, State.Y) else d.get_thickness() for d in self.dims]
         except AttributeError:
             return None
 

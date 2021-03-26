@@ -16,9 +16,8 @@ import os
 
 import subprocess
 
-
 project = 'PyWorkflowAlg'
-algorithmList = 'allAlgorithmsIn'+project+'.txt'
+algorithmList = 'allAlgorithmsIn' + project + '.txt'
 
 allAlgs = [line.strip() for line in open(algorithmList)]
 #os.chdir(project+"/src")
@@ -26,13 +25,7 @@ os.chdir('PythonInterface/plugins/algorithms/WorkflowAlgorithms')
 for line in allAlgs:
     #print line
     fullline = line
-    args = [
-        'git', 'log',
-        '--pretty=short',
-        '--format="%aN"',
-        '--follow',
-        line
-    ]
+    args = ['git', 'log', '--pretty=short', '--format="%aN"', '--follow', line]
 
     authors = subprocess.check_output(args).replace('"', '').split('\n')
     authors = set(authors)
@@ -59,7 +52,7 @@ for line in allAlgs:
 #authors = authors - set([''])
 
 #for author in authors:
-    #print author
+#print author
 #    fullline = fullline + ", " + author
 
 #print fullline

@@ -72,6 +72,5 @@ class PointGroupTest(unittest.TestCase):
         self.assertEqual(pg.getHMSymbol(), newPg.getHMSymbol())
 
 
-
 if __name__ == '__main__':
     unittest.main()

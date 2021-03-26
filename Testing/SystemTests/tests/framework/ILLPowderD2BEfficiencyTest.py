@@ -11,7 +11,6 @@ import numpy as np
 
 
 class ILLPowderD2BEfficiencyTest(systemtesting.MantidSystemTest):
-
     def __init__(self):
         super(ILLPowderD2BEfficiencyTest, self).__init__()
         self.setUp()
@@ -30,9 +29,9 @@ class ILLPowderD2BEfficiencyTest(systemtesting.MantidSystemTest):
     def testAutoMasking(self):
         PowderILLEfficiency(CalibrationRun='532008,532009',
                             DerivationMethod='GlobalSummedReference2D',
-                            ExcludedRange=[-5,10],
+                            ExcludedRange=[-5, 10],
                             OutputWorkspace='masked',
-                            MaskCriterion=[0.3,3])
+                            MaskCriterion=[0.3, 3])
         data = mtd['masked'].extractY().flatten()
         data = data[np.nonzero(data)]
         coeff_max = data.max()
@@ -46,10 +45,10 @@ class ILLPowderD2BEfficiencyTest(systemtesting.MantidSystemTest):
 
         PowderILLEfficiency(CalibrationRun='532008,532009',
                             DerivationMethod='GlobalSummedReference2D',
-                            ExcludedRange=[-5,10],
+                            ExcludedRange=[-5, 10],
                             OutputWorkspace='calib',
                             OutputResponseWorkspace='response')
-        GroupWorkspaces(InputWorkspaces=['calib','response'], OutputWorkspace='group')
+        GroupWorkspaces(InputWorkspaces=['calib', 'response'], OutputWorkspace='group')
 
     def validate(self):
         self.tolerance = 0.01

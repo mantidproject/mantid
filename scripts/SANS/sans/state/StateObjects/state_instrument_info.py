@@ -36,8 +36,7 @@ class StateInstrumentInfo(metaclass=JsonSerializable):
         return inst_info
 
     def __init__(self):
-        self.detector_names = {DetectorType.LAB.value: DetectorNames(),
-                               DetectorType.HAB.value: DetectorNames()}
+        self.detector_names = {DetectorType.LAB.value: DetectorNames(), DetectorType.HAB.value: DetectorNames()}
         self.monitor_names: Dict[str, str] = dict()
         self.idf_path: str = ""
 
@@ -70,10 +69,8 @@ def _set_detector_names(state: StateInstrumentInfo, ipf_path, invalid_detector_t
 
     lab_keyword = DetectorType.LAB.value
     hab_keyword = DetectorType.HAB.value
-    detector_names = {lab_keyword: "low-angle-detector-name",
-                      hab_keyword: "high-angle-detector-name"}
-    detector_names_short = {lab_keyword: "low-angle-detector-short-name",
-                            hab_keyword: "high-angle-detector-short-name"}
+    detector_names = {lab_keyword: "low-angle-detector-name", hab_keyword: "high-angle-detector-name"}
+    detector_names_short = {lab_keyword: "low-angle-detector-short-name", hab_keyword: "high-angle-detector-short-name"}
 
     names_to_search = []
     names_to_search.extend(list(detector_names.values()))

@@ -17,17 +17,17 @@ class CrystalFieldPythonInterface(MantidSystemTest):
         This test only checks that the syntax of all the commands are still valid.
         Unit tests for the individual functions / fitting procedure check for correctness.
     """
-
     def my_create_ws(self, outwsname, x, y):
-        jitter = (np.random.rand(np.shape(y)[0])-0.5)*np.max(y)/100
-        CreateWorkspace(x, y + jitter, y*0+np.max(y)/100, Distribution=True, OutputWorkspace=outwsname)
+        jitter = (np.random.rand(np.shape(y)[0]) - 0.5) * np.max(y) / 100
+        CreateWorkspace(x, y + jitter, y * 0 + np.max(y) / 100, Distribution=True, OutputWorkspace=outwsname)
         return mtd[outwsname]
 
     def my_func(self, en):
-        return (25-en)**(1.5) / 200 + 0.1
+        return (25 - en)**(1.5) / 200 + 0.1
 
     def runTest(self):
-        from CrystalField import CrystalField, CrystalFieldFit, CrystalFieldMultiSite, Background, Function, ResolutionModel
+        from CrystalField import CrystalField, CrystalFieldFit, CrystalFieldMultiSite, Background, Function, \
+            ResolutionModel
 
         cf = CrystalField('Ce', 'C2v')
         cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770)
@@ -71,8 +71,15 @@ class CrystalFieldPythonInterface(MantidSystemTest):
         cf.peaks.param[1]['FWHM'] = 2.0
         cf.peaks.param[2]['FWHM'] = 0.01
 
-        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
-                          Temperature=44.0, FWHM=1.1)
+        cf = CrystalField('Ce',
+                          'C2v',
+                          B20=0.37737,
+                          B22=3.9770,
+                          B40=-0.031787,
+                          B42=-0.11611,
+                          B44=-0.12544,
+                          Temperature=44.0,
+                          FWHM=1.1)
         cf.background = Background(peak=Function('Gaussian', Height=10, Sigma=1),
                                    background=Function('LinearBackground', A0=1.0, A1=0.01))
         h = cf.background.peak.param['Height']
@@ -122,8 +129,15 @@ class CrystalFieldPythonInterface(MantidSystemTest):
 
         # ---------------------------
 
-        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
-                          Temperature=[44.0, 50], FWHM=[1.1, 0.9])
+        cf = CrystalField('Ce',
+                          'C2v',
+                          B20=0.37737,
+                          B22=3.9770,
+                          B40=-0.031787,
+                          B42=-0.11611,
+                          B44=-0.12544,
+                          Temperature=[44.0, 50],
+                          FWHM=[1.1, 0.9])
         cf.PeakShape = 'Lorentzian'
         cf.peaks[0].param[0]['FWHM'] = 1.11
         cf.peaks[1].param[1]['FWHM'] = 1.12
@@ -144,7 +158,7 @@ class CrystalFieldPythonInterface(MantidSystemTest):
         cf.peaks[1].tieAll('FWHM=2*f1.FWHM', 2, 5)
         cf.peaks[0].constrainAll('FWHM < 2.2', 1, 4)
 
-        rm = ResolutionModel([self.my_func, marires.getResolution], 0, 100, accuracy = 0.01)
+        rm = ResolutionModel([self.my_func, marires.getResolution], 0, 100, accuracy=0.01)
         cf.ResolutionModel = rm
 
         # Calculate second spectrum, use the generated x-values
@@ -152,7 +166,7 @@ class CrystalFieldPythonInterface(MantidSystemTest):
         # Calculate second spectrum, use the first spectrum of a workspace
         sp = cf.getSpectrum(1, 'CrystalField_Ce')
         # Calculate first spectrum, use the i-th spectrum of a workspace
-        i=0
+        i = 0
         sp = cf.getSpectrum(0, 'CrystalField_Ce', i)
 
         print(cf.function)
@@ -165,7 +179,14 @@ class CrystalFieldPythonInterface(MantidSystemTest):
         ws = 'CrystalField_Ce'
         ws1 = 'CrystalField_Ce'
         ws2 = 'CrystalField_Ce'
-        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544, Temperature=5)
+        cf = CrystalField('Ce',
+                          'C2v',
+                          B20=0.37737,
+                          B22=3.9770,
+                          B40=-0.031787,
+                          B42=-0.11611,
+                          B44=-0.12544,
+                          Temperature=5)
 
         # In case of a single spectrum (ws is a workspace)
         fit = CrystalFieldFit(Model=cf, InputWorkspace=ws)
@@ -175,12 +196,19 @@ class CrystalFieldPythonInterface(MantidSystemTest):
         cf.Temperature = [5, 50]
         fit.fit()
 
-        params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
-                  'Temperature': [44.0, 50], 'FWHM': [1.1, 0.9]}
+        params = {
+            'B20': 0.377,
+            'B22': 3.9,
+            'B40': -0.03,
+            'B42': -0.116,
+            'B44': -0.125,
+            'Temperature': [44.0, 50],
+            'FWHM': [1.1, 0.9]
+        }
         cf1 = CrystalField('Ce', 'C2v', **params)
         cf2 = CrystalField('Pr', 'C2v', **params)
         cfms = cf1 + cf2
-        cf = 2*cf1 + cf2
+        cf = 2 * cf1 + cf2
 
         cfms = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0], FWHMs=[1.1])
         cfms['ion0.B40'] = -0.031
@@ -190,19 +218,47 @@ class CrystalFieldPythonInterface(MantidSystemTest):
         print(b)
         print(cfms.function)
 
-        cfms = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0], FWHMs=[1.1],
-                                     parameters={'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion1.B40':-0.031787,
-                                                 'ion1.B42':-0.11611, 'ion1.B44':-0.12544})
-        cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2v', Temperatures=[20], FWHMs=[1.0],
-                                     Background='name=Gaussian,Height=0,PeakCentre=1,Sigma=0;name=LinearBackground,A0=0,A1=0')
-        cfms = CrystalFieldMultiSite(Ions=['Ce'], Symmetries=['C2v'], Temperatures=[50], FWHMs=[0.9],
-                                     Background=LinearBackground(A0=1.0), BackgroundPeak=Gaussian(Height=10, Sigma=0.3))
-        cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2v', Temperatures=[20], FWHMs=[1.0],
-                                     Background= Gaussian(PeakCentre=1) + LinearBackground())
-        cfms = CrystalFieldMultiSite(Ions=['Ce','Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44, 50], FWHMs=[1.1, 0.9],
-                                     Background=FlatBackground(), BackgroundPeak=Gaussian(Height=10, Sigma=0.3),
-                                     parameters={'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion1.B40':-0.031787,
-                                                 'ion1.B42':-0.11611, 'ion1.B44':-0.12544})
+        cfms = CrystalFieldMultiSite(Ions=['Ce', 'Pr'],
+                                     Symmetries=['C2v', 'C2v'],
+                                     Temperatures=[44.0],
+                                     FWHMs=[1.1],
+                                     parameters={
+                                         'ion0.B20': 0.37737,
+                                         'ion0.B22': 3.9770,
+                                         'ion1.B40': -0.031787,
+                                         'ion1.B42': -0.11611,
+                                         'ion1.B44': -0.12544
+                                     })
+        cfms = CrystalFieldMultiSite(
+            Ions='Ce',
+            Symmetries='C2v',
+            Temperatures=[20],
+            FWHMs=[1.0],
+            Background='name=Gaussian,Height=0,PeakCentre=1,Sigma=0;name=LinearBackground,A0=0,A1=0')
+        cfms = CrystalFieldMultiSite(Ions=['Ce'],
+                                     Symmetries=['C2v'],
+                                     Temperatures=[50],
+                                     FWHMs=[0.9],
+                                     Background=LinearBackground(A0=1.0),
+                                     BackgroundPeak=Gaussian(Height=10, Sigma=0.3))
+        cfms = CrystalFieldMultiSite(Ions='Ce',
+                                     Symmetries='C2v',
+                                     Temperatures=[20],
+                                     FWHMs=[1.0],
+                                     Background=Gaussian(PeakCentre=1) + LinearBackground())
+        cfms = CrystalFieldMultiSite(Ions=['Ce', 'Pr'],
+                                     Symmetries=['C2v', 'C2v'],
+                                     Temperatures=[44, 50],
+                                     FWHMs=[1.1, 0.9],
+                                     Background=FlatBackground(),
+                                     BackgroundPeak=Gaussian(Height=10, Sigma=0.3),
+                                     parameters={
+                                         'ion0.B20': 0.37737,
+                                         'ion0.B22': 3.9770,
+                                         'ion1.B40': -0.031787,
+                                         'ion1.B42': -0.11611,
+                                         'ion1.B44': -0.12544
+                                     })
         cfms.ties({'sp0.bg.f0.Height': 10.1})
         cfms.constraints('sp0.bg.f0.Sigma > 0.1')
         cfms.constraints('ion0.sp0.pk1.FWHM < 2.2')
@@ -210,9 +266,20 @@ class CrystalFieldPythonInterface(MantidSystemTest):
 
         # --------------------------
 
-        params = {'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion1.B40':-0.031787, 'ion1.B42':-0.11611, 'ion1.B44':-0.12544}
-        cf = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0, 50.0],
-                                   FWHMs=[1.0, 1.0], ToleranceIntensity=6.0, ToleranceEnergy=1.0,  FixAllPeaks=True,
+        params = {
+            'ion0.B20': 0.37737,
+            'ion0.B22': 3.9770,
+            'ion1.B40': -0.031787,
+            'ion1.B42': -0.11611,
+            'ion1.B44': -0.12544
+        }
+        cf = CrystalFieldMultiSite(Ions=['Ce', 'Pr'],
+                                   Symmetries=['C2v', 'C2v'],
+                                   Temperatures=[44.0, 50.0],
+                                   FWHMs=[1.0, 1.0],
+                                   ToleranceIntensity=6.0,
+                                   ToleranceEnergy=1.0,
+                                   FixAllPeaks=True,
                                    parameters=params)
 
         cf.fix('ion0.BmolX', 'ion0.BmolY', 'ion0.BmolZ', 'ion0.BextX', 'ion0.BextY', 'ion0.BextZ', 'ion0.B40',
@@ -228,21 +295,42 @@ class CrystalFieldPythonInterface(MantidSystemTest):
 
         print(chi2)
 
-        cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2', Temperatures=[25], FWHMs=[1.0], PeakShape='Gaussian',
-                                     BmolX=1.0, B40=-0.02)
+        cfms = CrystalFieldMultiSite(Ions='Ce',
+                                     Symmetries='C2',
+                                     Temperatures=[25],
+                                     FWHMs=[1.0],
+                                     PeakShape='Gaussian',
+                                     BmolX=1.0,
+                                     B40=-0.02)
         print(str(cfms.function).split(',')[0])
 
         # --------------------------
 
         # Create some crystal field data
-        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
-                              Temperature=44.0, FWHM=1.1)
+        origin = CrystalField('Ce',
+                              'C2v',
+                              B20=0.37737,
+                              B22=3.9770,
+                              B40=-0.031787,
+                              B42=-0.11611,
+                              B44=-0.12544,
+                              Temperature=44.0,
+                              FWHM=1.1)
         x, y = origin.getSpectrum()
         ws = makeWorkspace(x, y)
 
         # Define a CrystalField object with parameters slightly shifted.
-        cf = CrystalField('Ce', 'C2v', B20=0, B22=0, B40=0, B42=0, B44=0,
-                          Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 100], [1, 1]), FWHMVariation=0)
+        cf = CrystalField('Ce',
+                          'C2v',
+                          B20=0,
+                          B22=0,
+                          B40=0,
+                          B42=0,
+                          B44=0,
+                          Temperature=44.0,
+                          FWHM=1.0,
+                          ResolutionModel=([0, 100], [1, 1]),
+                          FWHMVariation=0)
 
         # Set any ties on the field parameters.
         cf.ties(B20=0.37737)
@@ -272,16 +360,17 @@ class CrystalFieldPythonInterface(MantidSystemTest):
 
         from CrystalField import PointCharge
         from mantid.geometry import CrystalStructure
-        perovskite_structure = CrystalStructure('4 4 4 90 90 90', 'P m -3 m', 'Ce 0 0 0 1 0; Al 0.5 0.5 0.5 1 0; O 0.5 0.5 0 1 0')
-        cubic_pc_model = PointCharge(perovskite_structure, 'Ce', Charges={'Ce':3, 'Al':3, 'O':-2}, MaxDistance=7.5)
+        perovskite_structure = CrystalStructure('4 4 4 90 90 90', 'P m -3 m',
+                                                'Ce 0 0 0 1 0; Al 0.5 0.5 0.5 1 0; O 0.5 0.5 0 1 0')
+        cubic_pc_model = PointCharge(perovskite_structure, 'Ce', Charges={'Ce': 3, 'Al': 3, 'O': -2}, MaxDistance=7.5)
 
-        cubic_pc_model = PointCharge(perovskite_structure, 'Ce', Charges={'Ce':3, 'Al':3, 'O':-2}, Neighbour=2)
+        cubic_pc_model = PointCharge(perovskite_structure, 'Ce', Charges={'Ce': 3, 'Al': 3, 'O': -2}, Neighbour=2)
         print(cubic_pc_model)
 
         cif_pc_model = PointCharge('Sm2O3.cif')
         print(cif_pc_model.getIons())
 
-        cif_pc_model.Charges = {'O1':-2, 'O2':-2, 'Sm1':3, 'Sm2':3, 'Sm3':3}
+        cif_pc_model.Charges = {'O1': -2, 'O2': -2, 'Sm1': 3, 'Sm2': 3, 'Sm3': 3}
         cif_pc_model.IonLabel = 'Sm2'
         cif_pc_model.Neighbour = 1
         cif_blm = cif_pc_model.calculate()
@@ -290,7 +379,7 @@ class CrystalFieldPythonInterface(MantidSystemTest):
         print(bad_pc_model.Neighbour)
         print(bad_pc_model.MaxDistance)
 
-        cif_pc_model.Charges = {'O':-2, 'Sm':3}
+        cif_pc_model.Charges = {'O': -2, 'Sm': 3}
         cif_blm = cif_pc_model.calculate()
         print(cif_blm)
 
@@ -303,14 +392,14 @@ class CrystalFieldPythonInterface(MantidSystemTest):
         # --------------------------
 
         cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, Temperature=44.0)
-        Cv = cf.getHeatCapacity()       # Calculates Cv(T) for 1<T<300K in 1K steps  (default)
+        Cv = cf.getHeatCapacity()  # Calculates Cv(T) for 1<T<300K in 1K steps  (default)
 
-        T = np.arange(1,900,5)
-        Cv = cf.getHeatCapacity(T)      # Calculates Cv(T) for specified values of T (1 to 900K in 5K steps here)
+        T = np.arange(1, 900, 5)
+        Cv = cf.getHeatCapacity(T)  # Calculates Cv(T) for specified values of T (1 to 900K in 5K steps here)
 
         # Temperatures from a single spectrum workspace
         ws = CreateWorkspace(T, T, T)
-        Cv = cf.getHeatCapacity(ws)     # Use the x-values of a workspace as the temperatures
+        Cv = cf.getHeatCapacity(ws)  # Use the x-values of a workspace as the temperatures
         ws_cp = CreateWorkspace(*Cv)
 
         # Temperatures from a multi-spectrum workspace
@@ -322,11 +411,11 @@ class CrystalFieldPythonInterface(MantidSystemTest):
         chi_v_cgs = cf.getSusceptibility(T, Hdir=[1, 1, 0], Unit='SI')
         chi_v_bohr = cf.getSusceptibility(T, Unit='bohr')
         print(type([chi_v, chi_v_powder, chi_v_cgs, chi_v_bohr]))
-        moment_t = cf.getMagneticMoment(Temperature=T, Hdir=[1, 1, 1], Hmag=0.1) # Calcs M(T) with at 0.1T field||[111]
+        moment_t = cf.getMagneticMoment(Temperature=T, Hdir=[1, 1, 1], Hmag=0.1)  # Calcs M(T) with at 0.1T field||[111]
         H = np.linspace(0, 30, 121)
-        moment_h = cf.getMagneticMoment(Hmag=H, Hdir='powder', Temperature=10)   # Calcs M(H) at 10K for powder sample
-        moment_SI = cf.getMagneticMoment(H, [1, 1, 1], Unit='SI')         # M(H) in Am^2/mol at 1K for H||[111]
-        moment_cgs = cf.getMagneticMoment(100, Temperature=T, Unit='cgs') # M(T) in emu/mol in a field of 100G || [001]
+        moment_h = cf.getMagneticMoment(Hmag=H, Hdir='powder', Temperature=10)  # Calcs M(H) at 10K for powder sample
+        moment_SI = cf.getMagneticMoment(H, [1, 1, 1], Unit='SI')  # M(H) in Am^2/mol at 1K for H||[111]
+        moment_cgs = cf.getMagneticMoment(100, Temperature=T, Unit='cgs')  # M(T) in emu/mol in a field of 100G || [001]
         print(type([moment_t, moment_h, moment_SI, moment_cgs]))
 
         # --------------------------
@@ -334,12 +423,18 @@ class CrystalFieldPythonInterface(MantidSystemTest):
         from CrystalField import CrystalField, CrystalFieldFit, PhysicalProperties
         # Fits a heat capacity dataset - you must have subtracted the phonon contribution by some method already
         # and the data must be in J/mol/K.
-        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+        cf = CrystalField('Ce',
+                          'C2v',
+                          B20=0.37737,
+                          B22=3.9770,
+                          B40=-0.031787,
+                          B42=-0.11611,
+                          B44=-0.12544,
                           PhysicalProperty=PhysicalProperties('Cv'))
         fitcv = CrystalFieldFit(Model=cf, InputWorkspace=ws)
         fitcv.fit()
 
-        params = {'B20':0.37737, 'B22':3.9770, 'B40':-0.031787, 'B42':-0.11611, 'B44':-0.12544}
+        params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544}
         cf = CrystalField('Ce', 'C2v', **params)
         cf.PhysicalProperty = PhysicalProperties('Cv')
         fitcv = CrystalFieldFit(Model=cf, InputWorkspace=ws)
@@ -367,15 +462,24 @@ class CrystalFieldPythonInterface(MantidSystemTest):
 
         # Pregenerate the required workspaces
         for tt in [10, 44, 50]:
-            cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544, Temperature=tt, FWHM=0.5)
+            cf = CrystalField('Ce',
+                              'C2v',
+                              B20=0.37737,
+                              B22=3.9770,
+                              B40=-0.031787,
+                              B42=-0.11611,
+                              B44=-0.12544,
+                              Temperature=tt,
+                              FWHM=0.5)
             x, y = cf.getSpectrum()
-            self.my_create_ws('ws_ins_'+str(tt)+'K', x, y)
+            self.my_create_ws('ws_ins_' + str(tt) + 'K', x, y)
         ws_ins_10K = mtd['ws_ins_10K']
         ws_ins_44K = mtd['ws_ins_44K']
         ws_ins_50K = mtd['ws_ins_50K']
         ws_cp = self.my_create_ws('ws_cp', *cf.getHeatCapacity())
-        ws_chi = self.my_create_ws('ws_chi', *cf.getSusceptibility(np.linspace(1,300,100), Hdir='powder', Unit='cgs'))
-        ws_mag = self.my_create_ws('ws_mag', *cf.getMagneticMoment(Hmag=np.linspace(0, 30, 100), Hdir=[1,1,1], Unit='bohr', Temperature=5))
+        ws_chi = self.my_create_ws('ws_chi', *cf.getSusceptibility(np.linspace(1, 300, 100), Hdir='powder', Unit='cgs'))
+        ws_mag = self.my_create_ws(
+            'ws_mag', *cf.getMagneticMoment(Hmag=np.linspace(0, 30, 100), Hdir=[1, 1, 1], Unit='bohr', Temperature=5))
 
         # --------------------------
 
@@ -391,7 +495,15 @@ class CrystalFieldPythonInterface(MantidSystemTest):
         PPCv = PhysicalProperties('Cv')
         PPchi = PhysicalProperties('susc', 'powder', Unit='cgs')
         PPMag = PhysicalProperties('M(H)', [1, 1, 1], 5, 'bohr')
-        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
-                          Temperature=[44.0, 50], FWHM=[1.1, 0.9], PhysicalProperty=[PPCv, PPchi, PPMag] )
+        cf = CrystalField('Ce',
+                          'C2v',
+                          B20=0.37737,
+                          B22=3.9770,
+                          B40=-0.031787,
+                          B42=-0.11611,
+                          B44=-0.12544,
+                          Temperature=[44.0, 50],
+                          FWHM=[1.1, 0.9],
+                          PhysicalProperty=[PPCv, PPchi, PPMag])
         fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws_ins_44K, ws_ins_50K, ws_cp, ws_chi, ws_mag])
         fit.fit()

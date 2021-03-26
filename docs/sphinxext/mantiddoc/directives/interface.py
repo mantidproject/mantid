@@ -64,9 +64,7 @@ class InterfaceDirective(BaseDirective):
 
         # Generate image
         from mantiddoc.tools.screenshot import custominterface_screenshot
-        return custominterface_screenshot(self.interface_name(),
-                                          screenshots_dir,
-                                          widget_name=widget_name)
+        return custominterface_screenshot(self.interface_name(), screenshots_dir, widget_name=widget_name)
 
     def _insert_screenshot_link(self, picture, align=None, width=None):
         """

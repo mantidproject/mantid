@@ -11,10 +11,8 @@ from matplotlib.legend import Legend
 from mantid.plots.mantidaxes import MantidAxes
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from workbench.config import DEFAULT_SCRIPT_CONTENT
-from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
-                                                         generate_axis_label_commands,
-                                                         generate_set_title_command,
-                                                         generate_axis_scale_commands,
+from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands, generate_axis_label_commands,
+                                                         generate_set_title_command, generate_axis_scale_commands,
                                                          generate_tick_commands)
 from workbench.plotting.plotscriptgenerator.figure import generate_subplots_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
@@ -63,7 +61,7 @@ def generate_script(fig, exclude_headers=False):
             continue
         ax_object_var = get_axes_object_variable(ax)
         if axes_type(ax) in [FigureType.Image]:
-            colormap_lines, colormap_headers = get_plot_2d_cmd(ax, ax_object_var) # ax.imshow or pcolormesh
+            colormap_lines, colormap_headers = get_plot_2d_cmd(ax, ax_object_var)  # ax.imshow or pcolormesh
             plot_commands.extend(colormap_lines)
             plot_headers.extend(colormap_headers)
         else:
@@ -106,8 +104,7 @@ def get_plot_cmds(ax, ax_object_var):
     """Get commands such as axes.plot or axes.errorbar"""
     cmds = []
     for artist in sorted_lines_in(ax, ax.get_tracked_artists()):
-        cmds.append("{ax_obj}.{cmd}".format(ax_obj=ax_object_var,
-                                            cmd=generate_plot_command(artist)))
+        cmds.append("{ax_obj}.{cmd}".format(ax_obj=ax_object_var, cmd=generate_plot_command(artist)))
     return cmds
 
 
@@ -115,7 +112,7 @@ def get_plot_2d_cmd(ax, ax_object_var):
     """Get commands such as imshow or pcolormesh"""
     cmds = []
     for artist in ax.get_tracked_artists():
-        cmds.extend(generate_plot_2d_command(artist,ax_object_var))
+        cmds.extend(generate_plot_2d_command(artist, ax_object_var))
     return cmds
 
 
@@ -147,8 +144,9 @@ def get_title_cmds(ax, ax_object_var):
 def get_legend_cmds(ax, ax_object_var):
     """Get command axes.set_legend"""
     if ax.legend_:
-        return ["{ax_obj}.legend().{draggable_method}".format(ax_obj=ax_object_var,
-                                                              draggable_method=SET_DRAGGABLE_METHOD)]
+        return [
+            "{ax_obj}.legend().{draggable_method}".format(ax_obj=ax_object_var, draggable_method=SET_DRAGGABLE_METHOD)
+        ]
     return []
 
 

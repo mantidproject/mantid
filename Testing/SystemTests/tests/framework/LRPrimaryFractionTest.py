@@ -20,10 +20,9 @@ class LRPrimaryFractionTest(systemtesting.MantidSystemTest):
     def validate(self):
         ref = [0.887220655191, 0.00257167461136]
         for i in range(2):
-            if abs(self.scaling_factor[i]-ref[i])>0.00001:
-                logger.error("Output did not match [%s +- %s]: got [%s +- %s]" % (ref[0], ref[1],
-                                                                                  self.scaling_factor[0],
-                                                                                  self.scaling_factor[1]))
+            if abs(self.scaling_factor[i] - ref[i]) > 0.00001:
+                logger.error("Output did not match [%s +- %s]: got [%s +- %s]" %
+                             (ref[0], ref[1], self.scaling_factor[0], self.scaling_factor[1]))
                 return False
         return True
 
@@ -33,16 +32,14 @@ class LRPrimaryFractionWithRangeTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         workspace = LoadEventNexus(Filename="REF_L_119816")
-        self.scaling_factor = LRPrimaryFraction(InputWorkspace=workspace,
-                                                SignalRange=[120, 190])
+        self.scaling_factor = LRPrimaryFraction(InputWorkspace=workspace, SignalRange=[120, 190])
 
     def validate(self):
         ref = [0.970345598555, 0.00524646496021]
         for i in range(2):
-            if abs(self.scaling_factor[i]-ref[i])>0.00001:
-                logger.error("Output did not match [%s +- %s]: got [%s +- %s]" % (ref[0], ref[1],
-                                                                                  self.scaling_factor[0],
-                                                                                  self.scaling_factor[1]))
+            if abs(self.scaling_factor[i] - ref[i]) > 0.00001:
+                logger.error("Output did not match [%s +- %s]: got [%s +- %s]" %
+                             (ref[0], ref[1], self.scaling_factor[0], self.scaling_factor[1]))
                 return False
         return True
 
@@ -76,13 +73,11 @@ class ApplyToReducedDataTest(systemtesting.MantidSystemTest):
                                       SlitsWidthFlag=True,
                                       CropFirstAndLastPoints=False,
                                       ApplyPrimaryFraction=True,
-                                      PrimaryFractionRange=[120,190],
+                                      PrimaryFractionRange=[120, 190],
                                       OutputWorkspace='reflectivity_119816')
 
-        ws_fraction = CreateSingleValuedWorkspace(DataValue=0.970345598555,
-                                                  ErrorValue=0.00524646496021)
-        Divide(LHSWorkspace='reflectivity_119816', RHSWorkspace=ws_fraction,
-               OutputWorkspace='reflectivity_119816')
+        ws_fraction = CreateSingleValuedWorkspace(DataValue=0.970345598555, ErrorValue=0.00524646496021)
+        Divide(LHSWorkspace='reflectivity_119816', RHSWorkspace=ws_fraction, OutputWorkspace='reflectivity_119816')
 
     def validate(self):
         # Because we a re-using the reference data from another test,
@@ -91,7 +86,7 @@ class ApplyToReducedDataTest(systemtesting.MantidSystemTest):
         self.tolerance = 0.00001
         data_e = mtd["reflectivity_119816"].dataE(0)
         data_e[0] = 1.0
-        data_e[len(data_e)-1] = 1.0
+        data_e[len(data_e) - 1] = 1.0
 
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')

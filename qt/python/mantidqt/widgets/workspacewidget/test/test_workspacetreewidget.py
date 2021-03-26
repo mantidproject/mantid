@@ -17,7 +17,6 @@ import sip
 @start_qapplication
 class WorkspaceWidgetTest(unittest.TestCase):
     """Minimal testing as it is exported from C++"""
-
     def test_widget_creation(self):
         widget = WorkspaceTreeWidget()
         self.assertNotEqual(widget, None)

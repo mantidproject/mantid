@@ -13,7 +13,6 @@ def _catch_exceptions(func):
     """
     Catch all exceptions in method and print a traceback to stderr
     """
-
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:

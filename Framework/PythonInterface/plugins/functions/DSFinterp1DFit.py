@@ -39,10 +39,9 @@ class DSFinterp1DFit(IFunction1D):
 
     def init(self):
         '''Declare parameters and attributes that participate in the fitting'''
-    # Active fitting parameters
+        # Active fitting parameters
         self.declareParameter('Intensity', 1.0, 'Intensity')
-        self.declareParameter('TargetParameter', 1.0,
-                              'Target value of the structure factor parameter')
+        self.declareParameter('TargetParameter', 1.0, 'Target value of the structure factor parameter')
 
         self.declareAttribute('InputWorkspaces', '')
         self.declareAttribute('LoadErrors', False)
@@ -51,7 +50,7 @@ class DSFinterp1DFit(IFunction1D):
         self.declareAttribute('LocalRegression', True)
         self.declareAttribute('RegressionType', 'quadratic')
         self.declareAttribute('RegressionWindow', 6)
-    # "private" attributes associated to the declare function attributes
+        # "private" attributes associated to the declare function attributes
         self._InputWorkspaces = None
         self._LoadErrors = None
         self._WorkspaceIndex = None
@@ -64,7 +63,7 @@ class DSFinterp1DFit(IFunction1D):
         self._RegressionTypes = set(['linear', 'quadratic'])
         self._RegressionWindow = None
         self._minWindow = {'linear': 3, 'quadratic': 4}
-    # channelgroup to interpolate values
+        # channelgroup to interpolate values
         self._channelgroup = None
         self._xvalues = None  # energies of the channels
 
@@ -96,8 +95,7 @@ class DSFinterp1DFit(IFunction1D):
         '''Check parameters within expected range'''
         intensity = self.getParameterValue('Intensity')
         if intensity <= 0:
-            message = 'Parameter Intensity in DSFinterp1DFit must be positive. Got {0} instead'.format(
-                intensity)
+            message = 'Parameter Intensity in DSFinterp1DFit must be positive. Got {0} instead'.format(intensity)
             logger.error(message)
             return None
         f = self.getParameterValue('TargetParameter')
@@ -133,8 +131,8 @@ class DSFinterp1DFit(IFunction1D):
                 raise ValueError(message)
             # check the regression type is valid
             if self._RegressionType not in self._RegressionTypes:
-                message = 'Regression type {0} not implemented. choose one of {1}'.format(self._RegressionType,
-                                                                                          ', '.join(self._RegressionTypes))
+                message = 'Regression type {0} not implemented. choose one of {1}'.format(
+                    self._RegressionType, ', '.join(self._RegressionTypes))
                 logger.error(message)
                 raise NotImplementedError(message)
             # check the regression window is appropriate for the regression type selected
@@ -145,11 +143,10 @@ class DSFinterp1DFit(IFunction1D):
                 logger.error(message)
                 raise ValueError(message)
             # Initialize the energies of the channels with the first of the input workspaces
-            self._xvalues = numpy.copy(
-                mtd[self._InputWorkspaces[0]].dataX(self._WorkspaceIndex))
+            self._xvalues = numpy.copy(mtd[self._InputWorkspaces[0]].dataX(self._WorkspaceIndex))
             if len(self._xvalues) == 1 + len(mtd[self._InputWorkspaces[0]].dataY(self._WorkspaceIndex)):
                 # Deal with histogram data
-                self._xvalues = (self._xvalues[1:]+self._xvalues[:-1])/2.0
+                self._xvalues = (self._xvalues[1:] + self._xvalues[:-1]) / 2.0
             # Initialize the channel group
             nf = len(self._ParameterValues)
             # Load the InputWorkspaces into a group of dynamic structure factors
@@ -158,12 +155,10 @@ class DSFinterp1DFit(IFunction1D):
             dsfgroup = DsfGroup()
             for idsf in range(nf):
                 dsf = Dsf()
-                dsf.SetIntensities(
-                    mtd[self._InputWorkspaces[idsf]].dataY(self._WorkspaceIndex))
+                dsf.SetIntensities(mtd[self._InputWorkspaces[idsf]].dataY(self._WorkspaceIndex))
                 dsf.errors = None  # do not incorporate error data
                 if self._LoadErrors:
-                    dsf.SetErrors(mtd[self._InputWorkspaces[idsf]].dataE(
-                        self._WorkspaceIndex))
+                    dsf.SetErrors(mtd[self._InputWorkspaces[idsf]].dataE(self._WorkspaceIndex))
                 dsf.SetFvalue(self._ParameterValues[idsf])
                 dsfgroup.InsertDsf(dsf)
             # Create the interpolator
@@ -171,16 +166,17 @@ class DSFinterp1DFit(IFunction1D):
             self._channelgroup = ChannelGroup()
             self._channelgroup.InitFromDsfGroup(dsfgroup)
             if self._LocalRegression:
-                self._channelgroup.InitializeInterpolator(
-                    running_regr_type=self._RegressionType, windowlength=self._RegressionWindow)
+                self._channelgroup.InitializeInterpolator(running_regr_type=self._RegressionType,
+                                                          windowlength=self._RegressionWindow)
             else:
                 self._channelgroup.InitializeInterpolator(windowlength=0)
         # channel group has been initialized, so evaluate the interpolator
         dsf = self._channelgroup(p['TargetParameter'])
         # Linear interpolation between the energies of the channels and the xvalues we require
         # NOTE: interpolator evaluates to zero for any of the xvals outside of the domain defined by self._xvalues
-        intensities_interpolator = scipy.interpolate.interp1d(
-            self._xvalues, p['Intensity']*dsf.intensities, kind='linear')
+        intensities_interpolator = scipy.interpolate.interp1d(self._xvalues,
+                                                              p['Intensity'] * dsf.intensities,
+                                                              kind='linear')
         return intensities_interpolator(xvals)  # can we pass by reference?
 
 
@@ -190,5 +186,5 @@ try:
     import dsfinterp  # noqa
     FunctionFactory.subscribe(DSFinterp1DFit)
 except ImportError:
-    logger.debug('Failed to subscribe fit function DSFinterp1DFit. '
-                 + 'Python package dsfinterp may be missing (https://pypi.python.org/pypi/dsfinterp)')
+    logger.debug('Failed to subscribe fit function DSFinterp1DFit. ' +
+                 'Python package dsfinterp may be missing (https://pypi.python.org/pypi/dsfinterp)')

@@ -167,7 +167,9 @@ class BeamCentrePresenter(object):
 
     def set_on_view(self, attribute_name, state_model):
         attribute = getattr(state_model, attribute_name)
-        if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
+        if attribute or isinstance(
+                attribute, bool
+        ):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
             setattr(self._view, attribute_name, attribute)
 
     def _validate_radius_values(self):

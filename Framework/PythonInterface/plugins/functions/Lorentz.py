@@ -20,7 +20,6 @@ class Lorentz(IFunction1D):
 
         I(q) = scale / ( 1 + q^2 L^2 ) + background
     """
-
     def category(self):
         return "SANS"
 
@@ -46,12 +45,10 @@ class Lorentz(IFunction1D):
         """
         i = 0
         for x in xvals:
-            jacobian.set(
-                i, 0, 1.0 / (1.0 + np.power(x*self.getParameterValue('Length'), 2)))
-            denom = math.pow(
-                1.0 + math.pow(x*self.getParameterValue('Length'), 2), -2)
-            jacobian.set(i, 1, -2.0 * self.getParameterValue("Scale")
-                         * x * x * self.getParameterValue('Length') * denom)
+            jacobian.set(i, 0, 1.0 / (1.0 + np.power(x * self.getParameterValue('Length'), 2)))
+            denom = math.pow(1.0 + math.pow(x * self.getParameterValue('Length'), 2), -2)
+            jacobian.set(i, 1,
+                         -2.0 * self.getParameterValue("Scale") * x * x * self.getParameterValue('Length') * denom)
             jacobian.set(i, 2, 1.0)
             i += 1
 

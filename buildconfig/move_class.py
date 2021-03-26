@@ -23,7 +23,7 @@ def move_one(subproject, classname, newproject, newclassname, oldfilename, newfi
     # Move the file
     try:
         cmd = "mv " + oldfilename + " " + newfilename
-        cmd = cmd.replace("\\","/")
+        cmd = cmd.replace("\\", "/")
         if not args.no_vcs:
             cmd = "git " + cmd
         print("Running:", cmd)
@@ -53,7 +53,6 @@ def move_one(subproject, classname, newproject, newclassname, oldfilename, newfi
         print(err)
 
 
-
 #======================================================================
 def move_all(subproject, classname, newproject, newclassname, args):
 
@@ -65,7 +64,8 @@ def move_all(subproject, classname, newproject, newclassname, args):
     sourcefile = os.path.join(basedir, "src/" + args.source_subfolder + classname + ".cpp")
     testfile = os.path.join(basedir, "test/" + classname + "Test.h")
 
-    newheaderfile = os.path.join(newbasedir, "inc/" + new_header_folder + "/" + args.dest_subfolder + newclassname + ".h")
+    newheaderfile = os.path.join(newbasedir,
+                                 "inc/" + new_header_folder + "/" + args.dest_subfolder + newclassname + ".h")
     newsourcefile = os.path.join(newbasedir, "src/" + args.dest_subfolder + newclassname + ".cpp")
     newtestfile = os.path.join(newbasedir, "test/" + args.dest_subfolder + newclassname + "Test.h")
 
@@ -95,43 +95,65 @@ def move_all(subproject, classname, newproject, newclassname, args):
     print("   Files were added to Framework/{}/CMakeLists.txt !".format(newproject))
     print()
 
+
 #======================================================================
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Utility to move a Mantid class from one project to another. '
                                      'Please note, you may still have more fixes to do to get compilation!')
-    parser.add_argument('subproject', metavar='SUBPROJECT', type=str,
+    parser.add_argument('subproject',
+                        metavar='SUBPROJECT',
+                        type=str,
                         help='The subproject under Framework/; e.g. Kernel')
-    parser.add_argument('classname', metavar='CLASSNAME', type=str,
-                        help='Name of the class to move')
-    parser.add_argument('newproject', metavar='NEWPROJECT', type=str,
+    parser.add_argument('classname', metavar='CLASSNAME', type=str, help='Name of the class to move')
+    parser.add_argument('newproject',
+                        metavar='NEWPROJECT',
+                        type=str,
                         help='Name of the project to which to move the class.')
-    parser.add_argument('newclassname', metavar='NEWCLASSNAME', type=str,
-                        help='Name of the new class.')
-    parser.add_argument('--force', dest='force', action='store_const',
-                        const=True, default=False,
+    parser.add_argument('newclassname', metavar='NEWCLASSNAME', type=str, help='Name of the new class.')
+    parser.add_argument('--force',
+                        dest='force',
+                        action='store_const',
+                        const=True,
+                        default=False,
                         help='Force overwriting existing files. Use with caution!')
-    parser.add_argument('--no-vcs', dest='no_vcs', action='store_const',const=True,
+    parser.add_argument('--no-vcs',
+                        dest='no_vcs',
+                        action='store_const',
+                        const=True,
                         default=False,
                         help='Can be used to move a class that is not yet under version control. Default: False')
-    parser.add_argument('--no-header', dest='header', action='store_const',
-                        const=False, default=True,
+    parser.add_argument('--no-header',
+                        dest='header',
+                        action='store_const',
+                        const=False,
+                        default=True,
                         help="Don't move the header file")
-    parser.add_argument('--no-test', dest='test', action='store_const',
-                        const=False, default=True,
+    parser.add_argument('--no-test',
+                        dest='test',
+                        action='store_const',
+                        const=False,
+                        default=True,
                         help="Don't move the test file")
-    parser.add_argument('--no-cpp', dest='cpp', action='store_const',
-                        const=False, default=True,
+    parser.add_argument('--no-cpp',
+                        dest='cpp',
+                        action='store_const',
+                        const=False,
+                        default=True,
                         help="Don't move the cpp file")
-    parser.add_argument('--source-subfolder', dest='source_subfolder',
-                        default="",
-                        help='The source is in a subfolder below the main part of the project, e.g. Geometry/Instrument.')
-    parser.add_argument('--dest-subfolder', dest='dest_subfolder',
-                        default="",
-                        help='The destination is in a subfolder below the main part of the project, e.g. Geometry/Instrument.')
-    parser.add_argument('--project', dest='project',
+    parser.add_argument(
+        '--source-subfolder',
+        dest='source_subfolder',
+        default="",
+        help='The source is in a subfolder below the main part of the project, e.g. Geometry/Instrument.')
+    parser.add_argument(
+        '--dest-subfolder',
+        dest='dest_subfolder',
+        default="",
+        help='The destination is in a subfolder below the main part of the project, e.g. Geometry/Instrument.')
+    parser.add_argument('--project',
+                        dest='project',
                         default="Framework",
                         help='The project in which this goes. Default: Framework. Can be MantidQt')
-
 
     args = parser.parse_args()
     subproject = args.subproject

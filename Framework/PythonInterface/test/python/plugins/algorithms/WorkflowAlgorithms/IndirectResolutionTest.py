@@ -10,7 +10,6 @@ from mantid.simpleapi import IndirectResolution
 
 
 class IndirectResolutionTest(unittest.TestCase):
-
     def test_simple(self):
         res_ws = IndirectResolution(InputFiles='IRS26173.raw',
                                     Instrument='IRIS',
@@ -56,5 +55,6 @@ class IndirectResolutionTest(unittest.TestCase):
         #testing current period because it's in the log files
         self.assertTrue(res_ws.run().getProperty('current_period').value, 1)
 
+
 if __name__ == "__main__":
-	unittest.main()
+    unittest.main()

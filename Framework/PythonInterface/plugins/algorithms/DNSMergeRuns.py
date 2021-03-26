@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import mantid.simpleapi as api
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,  WorkspaceGroup
+from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroup
 from mantid.kernel import Direction, StringArrayProperty, StringListValidator, V3D, StringArrayLengthValidator
 import numpy as np
 
@@ -16,9 +16,10 @@ class DNSMergeRuns(PythonAlgorithm):
     This algorithm is written for the DNS @ MLZ,
     but can be adjusted for other instruments if needed.
     """
-    properties_to_compare = ['omega', 'slit_i_left_blade_position',
-                             'slit_i_right_blade_position', 'slit_i_lower_blade_position',
-                             'slit_i_upper_blade_position', 'polarisation', 'polarisation_comment', 'flipper']
+    properties_to_compare = [
+        'omega', 'slit_i_left_blade_position', 'slit_i_right_blade_position', 'slit_i_lower_blade_position',
+        'slit_i_upper_blade_position', 'polarisation', 'polarisation_comment', 'flipper'
+    ]
 
     def __init__(self):
         """
@@ -36,7 +37,7 @@ class DNSMergeRuns(PythonAlgorithm):
         return 'Workflow\\MLZ\\DNS'
 
     def seeAlso(self):
-        return [ "LoadDNSLegacy" ]
+        return ["LoadDNSLegacy"]
 
     def name(self):
         """
@@ -50,14 +51,16 @@ class DNSMergeRuns(PythonAlgorithm):
     def PyInit(self):
 
         validator = StringArrayLengthValidator()
-        validator.setLengthMin(1)                               # group of workspaces may be given
+        validator.setLengthMin(1)  # group of workspaces may be given
 
         self.declareProperty(StringArrayProperty(name="WorkspaceNames", direction=Direction.Input, validator=validator),
                              doc="List of Workspace names to merge.")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              doc="A workspace name to save the merged data.")
         H_AXIS = ["2theta", "|Q|", "d-Spacing"]
-        self.declareProperty("HorizontalAxis", "2theta", StringListValidator(H_AXIS),
+        self.declareProperty("HorizontalAxis",
+                             "2theta",
+                             StringListValidator(H_AXIS),
                              doc="X axis in the merged workspace")
         return
 
@@ -153,10 +156,10 @@ class DNSMergeRuns(PythonAlgorithm):
             data[:, 0] = np.round(np.degrees(data[:, 0]), 2)
             unitx = "Degrees"
         elif self.xaxis == "|Q|":
-            data[:, 0] = np.fabs(4.0*np.pi*np.sin(0.5*data[:, 0])/wavelength)
+            data[:, 0] = np.fabs(4.0 * np.pi * np.sin(0.5 * data[:, 0]) / wavelength)
             unitx = "MomentumTransfer"
         elif self.xaxis == "d-Spacing":
-            data[:, 0] = np.fabs(0.5*wavelength/np.sin(0.5*data[:, 0]))
+            data[:, 0] = np.fabs(0.5 * wavelength / np.sin(0.5 * data[:, 0]))
             unitx = "dSpacing"
         else:
             message = "The value for X axis " + self.xaxis + " is invalid! Cannot merge."
@@ -164,8 +167,11 @@ class DNSMergeRuns(PythonAlgorithm):
             raise RuntimeError(message)
 
         data_sorted = data[np.argsort(data[:, 0])]
-        api.CreateWorkspace(dataX=data_sorted[:, 0], dataY=data_sorted[:, 1], dataE=data_sorted[:, 2],
-                            UnitX=unitx, OutputWorkspace=self.outws_name)
+        api.CreateWorkspace(dataX=data_sorted[:, 0],
+                            dataY=data_sorted[:, 1],
+                            dataE=data_sorted[:, 2],
+                            UnitX=unitx,
+                            OutputWorkspace=self.outws_name)
         outws = api.AnalysisDataService.retrieve(self.outws_name)
         # assume that all input workspaces have the same YUnits and YUnitLabel
         wks = api.AnalysisDataService.retrieve(self.workspace_names[0])

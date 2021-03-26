@@ -60,7 +60,7 @@ def FixEi(ei):
 
 def CalculateEi(guess=None):
     alg = AlgorithmManager.create("InelasticCalcEi")
-    alg.setProperty("EiGuess",guess)
+    alg.setProperty("EiGuess", guess)
     ReductionSingleton().set_ei_calculator(alg)
 
 

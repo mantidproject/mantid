@@ -85,7 +85,7 @@ class ComponentInfoTest(unittest.TestCase):
     def test_setPosition(self):
         """ Test that the component's position can be set correctly. """
         info = self._ws.componentInfo()
-        pos = V3D(0,0,0)
+        pos = V3D(0, 0, 0)
         info.setPosition(0, pos)
         retPos = info.position(0)
         self.assertEqual(pos, retPos)
@@ -93,7 +93,7 @@ class ComponentInfoTest(unittest.TestCase):
     def test_setRotation(self):
         """ Test that the component's rotation can be set correctly. """
         info = self._ws.componentInfo()
-        quat = Quat(0,0,0,0)
+        quat = Quat(0, 0, 0, 0)
         info.setRotation(0, quat)
         retQuat = info.rotation(0)
         self.assertEqual(quat, retQuat)
@@ -109,7 +109,7 @@ class ComponentInfoTest(unittest.TestCase):
         ws_other = CloneWorkspace(self._ws)
         info_other = ws_other.componentInfo()
         self.assertEqual(info.hasEquivalentSource(info_other), True)
-        info_other.setPosition(info.source(), info.sourcePosition() + V3D(1.-6, 0, 0))
+        info_other.setPosition(info.source(), info.sourcePosition() + V3D(1. - 6, 0, 0))
         self.assertEqual(info.hasEquivalentSource(info_other), False)
 
     def test_hasSample(self):
@@ -123,7 +123,7 @@ class ComponentInfoTest(unittest.TestCase):
         ws_other = CloneWorkspace(self._ws)
         info_other = ws_other.componentInfo()
         self.assertEqual(info.hasEquivalentSample(info_other), True)
-        info_other.setPosition(info.sample(), info.samplePosition() + V3D(1.-6, 0, 0))
+        info_other.setPosition(info.sample(), info.samplePosition() + V3D(1. - 6, 0, 0))
         self.assertEqual(info.hasEquivalentSample(info_other), False)
 
     def test_source(self):
@@ -134,7 +134,7 @@ class ComponentInfoTest(unittest.TestCase):
     def test_sample(self):
         """ Check if a sample component is returned """
         info = self._ws.componentInfo()
-        self.assertEqual(type(info.sample()) , int)
+        self.assertEqual(type(info.sample()), int)
 
     def test_sourcePosition(self):
         """ Check that the source postition is a V3D object """
@@ -181,7 +181,7 @@ class ComponentInfoTest(unittest.TestCase):
     def test_setScaleFactor(self):
         """ Set the scale factor """
         info = self._ws.componentInfo()
-        sf = V3D(0,0,0)
+        sf = V3D(0, 0, 0)
         info.setScaleFactor(0, sf)
         self.assertEqual(info.scaleFactor(0), sf)
 
@@ -197,8 +197,8 @@ class ComponentInfoTest(unittest.TestCase):
 
     def test_createWorkspaceAndComponentInfo(self):
         """ Try to create a workspace and see if ComponentInfo object is accessable """
-        dataX = [1,2,3,4,5]
-        dataY = [1,2,3,4,5]
+        dataX = [1, 2, 3, 4, 5]
+        dataY = [1, 2, 3, 4, 5]
         workspace = CreateWorkspace(DataX=dataX, DataY=dataY)
         info = workspace.componentInfo()
         self.assertEqual(info.size(), 1)
@@ -213,6 +213,7 @@ class ComponentInfoTest(unittest.TestCase):
         info = self._ws.componentInfo()
         with self.assertRaises(ValueError):
             info.indexOfAny('fictitious')
+
     """
     ----------------------------------------------------------------------------
     Extreme Tests
@@ -268,13 +269,13 @@ class ComponentInfoTest(unittest.TestCase):
 
     def test_setPosition_extreme(self):
         info = self._ws.componentInfo()
-        pos = V3D(0,0,0)
+        pos = V3D(0, 0, 0)
         with self.assertRaises(OverflowError):
             info.setPosition(-1, pos)
 
     def test_setRotation_extreme(self):
         info = self._ws.componentInfo()
-        quat = Quat(0,0,0,0)
+        quat = Quat(0, 0, 0, 0)
         with self.assertRaises(OverflowError):
             info.setRotation(-1, quat)
 
@@ -315,7 +316,7 @@ class ComponentInfoTest(unittest.TestCase):
 
     def test_setScaleFactor_extreme(self):
         info = self._ws.componentInfo()
-        sf = V3D(0,0,0)
+        sf = V3D(0, 0, 0)
         with self.assertRaises(OverflowError):
             info.setScaleFactor(-1, sf)
 
@@ -332,7 +333,6 @@ class ComponentInfoTest(unittest.TestCase):
             info.shape(-1)
         self.assertEqual(type(info.shape(0)), CSGObject)
         self.assertEqual(type(info.shape(5)), CSGObject)
-
 
     """
     ----------------------------------------------------------------------------
@@ -399,13 +399,13 @@ class ComponentInfoTest(unittest.TestCase):
 
     def test_setPosition_exceptional(self):
         info = self._ws.componentInfo()
-        pos = [0,0,0]
+        pos = [0, 0, 0]
         with self.assertRaises(TypeError):
             info.setPosition(0, pos)
 
     def test_setRotation_exceptional(self):
         info = self._ws.componentInfo()
-        rot = [0,0,0,0]
+        rot = [0, 0, 0, 0]
         with self.assertRaises(TypeError):
             info.setRotation(0, rot)
 
@@ -481,7 +481,7 @@ class ComponentInfoTest(unittest.TestCase):
 
     def test_setScaleFactor_exceptional(self):
         info = self._ws.componentInfo()
-        sf = V3D(0,0,0)
+        sf = V3D(0, 0, 0)
         with self.assertRaises(TypeError):
             info.setScaleFactor("1", sf)
         with self.assertRaises(TypeError):
@@ -535,8 +535,8 @@ class ComponentInfoTest(unittest.TestCase):
         root = next(it)
         for root in it:
             continue
-        self.assertEqual(root.index, info.root()) # sanity check
-        self.assertTrue(np.array_equal(root.children, np.array([0,1,2,3,4], dtype='uint64')))
+        self.assertEqual(root.index, info.root())  # sanity check
+        self.assertTrue(np.array_equal(root.children, np.array([0, 1, 2, 3, 4], dtype='uint64')))
 
     def test_detectorsInSubtree_via_iterator(self):
         info = self._ws.componentInfo()
@@ -544,11 +544,11 @@ class ComponentInfoTest(unittest.TestCase):
         first_det = next(it)
         self.assertEqual(type(first_det.detectorsInSubtree), np.ndarray)
         # For detectors, only contain own index
-        self.assertTrue(np.array_equal(first_det.detectorsInSubtree,np.array([0], dtype='uint64')))
+        self.assertTrue(np.array_equal(first_det.detectorsInSubtree, np.array([0], dtype='uint64')))
         root = next(it)
         for root in it:
             continue
-        self.assertTrue(np.array_equal(root.detectorsInSubtree, np.array([0,1], dtype='uint64')))
+        self.assertTrue(np.array_equal(root.detectorsInSubtree, np.array([0, 1], dtype='uint64')))
 
     def test_componentsInSubtree_via_iterator(self):
         info = self._ws.componentInfo()
@@ -556,11 +556,13 @@ class ComponentInfoTest(unittest.TestCase):
         first_det = next(it)
         self.assertEqual(type(first_det.detectorsInSubtree), np.ndarray)
         # For detectors, only contain own index
-        self.assertTrue(np.array_equal(first_det.componentsInSubtree,np.array([0], dtype='uint64')))
+        self.assertTrue(np.array_equal(first_det.componentsInSubtree, np.array([0], dtype='uint64')))
         root = next(it)
         for root in it:
             continue
         # All component indices expected including self
-        self.assertTrue(np.array_equal(root.componentsInSubtree, np.array([0,1,2,3,4,5], dtype='uint64')))
+        self.assertTrue(np.array_equal(root.componentsInSubtree, np.array([0, 1, 2, 3, 4, 5], dtype='uint64')))
+
+
 if __name__ == '__main__':
     unittest.main()

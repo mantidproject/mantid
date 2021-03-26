@@ -21,7 +21,6 @@ class MockWorkspaceWidget(QWidget):
     in a `with MockWorkspaceWidget() as widget` statement it will
     mark delete itself on exiting the context.
     """
-
     def __init__(self):
         super(MockWorkspaceWidget, self).__init__(None)
         self.workspacewidget = MagicMock()

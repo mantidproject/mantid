@@ -10,13 +10,9 @@ from mantid.api import AnalysisDataService
 
 
 class LoadMultipleGSSTest(unittest.TestCase):
-
     def test_LoadMultipleGSSTest(self):
         # Set up
-        alg_test = run_algorithm("LoadMultipleGSS",
-                                 FilePrefix = "PG3",
-                                 RunNumbers = [11485,11486],
-                                 Directory  = "")
+        alg_test = run_algorithm("LoadMultipleGSS", FilePrefix="PG3", RunNumbers=[11485, 11486], Directory="")
         # Execute
         self.assertTrue(alg_test.isExecuted())
 
@@ -25,6 +21,7 @@ class LoadMultipleGSSTest(unittest.TestCase):
             wksp = AnalysisDataService.retrieve(name)
             self.assertNotEqual(wksp, None)
             AnalysisDataService.remove(name)
+
 
 if __name__ == '__main__':
     unittest.main()

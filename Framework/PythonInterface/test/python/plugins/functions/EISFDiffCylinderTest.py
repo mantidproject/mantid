@@ -10,7 +10,6 @@ from MsdTestHelper import (is_registered, check_output, do_a_fit)
 
 
 class EISFDiffCylinderTest(unittest.TestCase):
-
     def test_function_has_been_registered(self):
         status, msg = is_registered('EISFDiffCylinder')
         if not status:
@@ -20,8 +19,7 @@ class EISFDiffCylinderTest(unittest.TestCase):
         input = [0.01, 0.1, 1.0, 10.0]
         expected = [9.9364527e-01, 9.7341655e-01, 9.6591907e-02, 3.9967863e-06]
         tolerance = 1.0e-05
-        status, output = check_output('EISFDiffCylinder', input, expected,
-                                      tolerance, A=1.0, R=3.5)
+        status, output = check_output('EISFDiffCylinder', input, expected, tolerance, A=1.0, R=3.5)
         if not status:
             msg = 'Computed output {} from input {} unequal to expected: {}'
             self.fail(msg.format(*[str(a) for a in (output, input, expected)]))
@@ -34,13 +32,15 @@ class EISFDiffCylinderTest(unittest.TestCase):
         fixes = (['A', 'R'], ['A', 'L'])
         for (guess, fix) in zip(guesses, fixes):
             status, fit = do_a_fit(np.arange(0.1, 2.2, 0.2),
-                                   'EISFDiffCylinder', guess=guess, fixes=fix,
-                                   target=target, atol=0.01)
+                                   'EISFDiffCylinder',
+                                   guess=guess,
+                                   fixes=fix,
+                                   target=target,
+                                   atol=0.01)
             if not status:
                 msg_p = 'param {} target value was {}, obtained = {}'
-                msg = '\n'.join([msg_p.format(*[p, target[p], fit.Function[p]])
-                                for p in target])
-                self.fail('\n'+msg)
+                msg = '\n'.join([msg_p.format(*[p, target[p], fit.Function[p]]) for p in target])
+                self.fail('\n' + msg)
 
 
 if __name__ == '__main__':

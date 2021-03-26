@@ -29,7 +29,7 @@ from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
 @start_qapplication
 class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
-        while(thread_model._thread.isRunning()):
+        while (thread_model._thread.isRunning()):
             QApplication.sendPostedEvents()
             time.sleep(0.1)
         QApplication.sendPostedEvents()
@@ -46,7 +46,8 @@ class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
         self.load_file_model = BrowseFileWidgetModel(self.loaded_data, self.context)
         self.load_run_model = LoadRunWidgetModel(self.loaded_data, self.context)
 
-        self.view = LoadWidgetView(parent=self.obj, load_file_view=self.load_file_view,
+        self.view = LoadWidgetView(parent=self.obj,
+                                   load_file_view=self.load_file_view,
                                    load_run_view=self.load_run_view)
         self.presenter = LoadWidgetPresenter(self.view, LoadWidgetModel(self.loaded_data, self.context))
         self.presenter.set_load_file_widget(BrowseFileWidgetPresenter(self.load_file_view, self.load_file_model))
@@ -87,8 +88,7 @@ class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
 
     def test_that_loading_multiple_files_via_browse_sets_model_and_interface_correctly(self):
-        self.load_file_view.show_file_browser_and_return_selection = mock.Mock(
-            return_value=self.filenames)
+        self.load_file_view.show_file_browser_and_return_selection = mock.Mock(return_value=self.filenames)
 
         self.presenter.load_file_widget.on_browse_button_clicked()
         self.wait_for_thread(self.presenter.load_file_widget._load_thread)

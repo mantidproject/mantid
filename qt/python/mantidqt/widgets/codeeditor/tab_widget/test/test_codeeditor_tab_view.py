@@ -39,7 +39,6 @@ class MockMultiFileInterpreter(QWidget):
 
 @start_qapplication
 class CodeEditorTabWidgetTest(unittest.TestCase, QtWidgetFinder, QtAssertionsHelper):
-
     def test_deleted_on_close(self):
         mock_mfp = MockMultiFileInterpreter()
         view = CodeEditorTabWidget(mock_mfp)

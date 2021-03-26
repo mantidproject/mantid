@@ -13,16 +13,21 @@ import numpy as np
 try:
     from scipy.special import spherical_jn
 
-    def j1(z): return spherical_jn(1, z)
+    def j1(z):
+        return spherical_jn(1, z)
 
-    def j1d(z): return spherical_jn(1, z, derivative=True)
+    def j1d(z):
+        return spherical_jn(1, z, derivative=True)
 except ImportError:
     # spherical_jn removed from scipy >= 1.0.0
     from scipy.special import sph_jn
 
-    def j1(z): return sph_jn(1, z)[0][1]
+    def j1(z):
+        return sph_jn(1, z)[0][1]
 
-    def j1d(z): return sph_jn(1, z)[1][1]
+    def j1d(z):
+        return sph_jn(1, z)[1][1]
+
 
 from mantid.api import IFunction1D, FunctionFactory
 
@@ -77,7 +82,7 @@ class EISFDiffSphere(IFunction1D):
         i = 0
         for x in xvals:
             z = radius * x
-            j = j1(z)/z
+            j = j1(z) / z
             jacobian.set(i, 0, np.square(3 * j))
             jacobian.set(i, 1, amplitude * 2 * 9 * j * (j1d(z) - j) / radius)
             i += 1

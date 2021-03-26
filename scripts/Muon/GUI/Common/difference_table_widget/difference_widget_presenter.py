@@ -8,12 +8,10 @@ from Muon.GUI.Common.difference_table_widget.difference_table_widget_presenter i
 from Muon.GUI.Common.difference_table_widget.difference_table_widget_view import DifferenceTableView
 from Muon.GUI.Common.difference_table_widget.difference_widget_view import DifferenceView
 
-
 diff_columns = ['diff_name', 'to_analyse', 'group_1', 'group_2']
 
 
 class DifferencePresenter(object):
-
     def __init__(self, model):
         self.model = model
         self.group_view = DifferenceTableView()

@@ -20,12 +20,8 @@ from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 DEBUG_MODE = False
 
-EXPORT_TYPES = [
-    ('Export to EPS', '.eps'),
-    ('Export to PDF', '.pdf'),
-    ('Export to PNG', '.png'),
-    ('Export to SVG', '.svg')
-]
+EXPORT_TYPES = [('Export to EPS', '.eps'), ('Export to PDF', '.pdf'), ('Export to PNG', '.png'),
+                ('Export to SVG', '.svg')]
 
 
 class Column(IntEnum):
@@ -483,12 +479,13 @@ class PlotSelectorView(QWidget):
         order = self.table_widget.horizontalHeader().sortIndicatorOrder()
         column = self.table_widget.horizontalHeader().sortIndicatorSection()
 
-        sort_order_map = {Qt.AscendingOrder: 'Ascending',
-                          Qt.DescendingOrder: 'Descending'}
+        sort_order_map = {Qt.AscendingOrder: 'Ascending', Qt.DescendingOrder: 'Descending'}
 
-        sort_type_map = {Column.Number.value: 'Number',
-                         Column.Name.value: 'Name',
-                         Column.LastActive.value: 'Last Active'}
+        sort_type_map = {
+            Column.Number.value: 'Number',
+            Column.Name.value: 'Name',
+            Column.LastActive.value: 'Last Active'
+        }
 
         order_string = sort_order_map.get(order)
         column_string = sort_type_map.get(column)
@@ -605,7 +602,6 @@ class PlotNameWidget(QWidget):
     This widget is added to the table widget to support the renaming
     and close buttons, as well as the direct renaming functionality.
     """
-
     def __init__(self, presenter, plot_number, parent=None):
         super(PlotNameWidget, self).__init__(parent)
 
@@ -753,7 +749,6 @@ class HumanReadableSortItem(QTableWidgetItem):
     instead of
       [Figure 1, Figure 2, Figure 20, Figure 3]
     """
-
     def __init__(self, *args, **kwargs):
         super(HumanReadableSortItem, self).__init__(*args, **kwargs)
         self.role = Qt.DisplayRole

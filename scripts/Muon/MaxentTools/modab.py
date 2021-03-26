@@ -12,16 +12,7 @@ from Muon.MaxentTools.zft import ZFT
 # params ngroups, npts inferred from size of datum
 
 
-def MODAB(
-     hists,
-     datum,
-     sigma,
-     MISSCHANNELS_mm,
-     MAXPAGE_f,
-     PULSESHAPE_convol,
-     DETECT_e,
-     SAVETIME_I2,
-     mylog):
+def MODAB(hists, datum, sigma, MISSCHANNELS_mm, MAXPAGE_f, PULSESHAPE_convol, DETECT_e, SAVETIME_I2, mylog):
     npts, ngroups = datum.shape
     zr, zi = ZFT(MAXPAGE_f, PULSESHAPE_convol, DETECT_e, SAVETIME_I2)
     DETECT_a = np.zeros([ngroups])
@@ -29,7 +20,7 @@ def MODAB(
     # SENSE_phi=np.zeros([ngroups])
     # AMPS_amp=np.zeros([ngroups])
     for j in range(ngroups):
-        if(hists[j] != 0):
+        if (hists[j] != 0):
             x = zr / sigma[:, j]
             y = zi / sigma[:, j]
             s11 = np.sum(x**2)

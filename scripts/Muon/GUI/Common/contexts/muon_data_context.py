@@ -47,8 +47,7 @@ def construct_empty_pair(group_names, pair_names, pair_index=0):
     else:
         group1 = None
         group2 = None
-    return MuonPair(pair_name=new_pair_name,
-                    forward_group_name=group1, backward_group_name=group2, alpha=1.0)
+    return MuonPair(pair_name=new_pair_name, forward_group_name=group1, backward_group_name=group2, alpha=1.0)
 
 
 class MuonDataContext(object):
@@ -130,8 +129,8 @@ class MuonDataContext(object):
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their default values
 
-        if self.current_data['MainFieldDirection'] and self.current_data['MainFieldDirection'] != self._main_field_direction\
-                and self._main_field_direction:
+        if self.current_data['MainFieldDirection'] and self.current_data['MainFieldDirection'] \
+                != self._main_field_direction and self._main_field_direction:
             self.message_notifier.notify_subscribers('MainFieldDirection has changed between'
                                                      ' data sets, click default to reset grouping if required')
         self._main_field_direction = self.current_data['MainFieldDirection']
@@ -165,11 +164,14 @@ class MuonDataContext(object):
 
     def loaded_workspace_as_group(self, run):
         if self.is_multi_period():
-            workspace_list = [wrapper._workspace_name for wrapper in self._loaded_data.get_data(
-                run=run, instrument=self.instrument)['workspace']['OutputWorkspace']]
+            workspace_list = [
+                wrapper._workspace_name for wrapper in self._loaded_data.get_data(run=run, instrument=self.instrument)
+                ['workspace']['OutputWorkspace']
+            ]
             return GroupWorkspaces(InputWorkspaces=workspace_list, OutputWorkspace='__temp_group')
         else:
-            return self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'][0].workspace
+            return self._loaded_data.get_data(run=run,
+                                              instrument=self.instrument)['workspace']['OutputWorkspace'][0].workspace
 
     @property
     def num_detectors(self):
@@ -188,7 +190,8 @@ class MuonDataContext(object):
     def num_points(self):
         workspace_lengths = []
         for run in self.current_runs:
-            workspace = self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'][0].workspace
+            workspace = self._loaded_data.get_data(
+                run=run, instrument=self.instrument)['workspace']['OutputWorkspace'][0].workspace
             workspace_lengths.append(len(workspace.readX(0)))
 
         if workspace_lengths:

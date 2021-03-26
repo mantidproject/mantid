@@ -7,8 +7,4 @@
 
 from mantidqt.utils.qt import import_qt
 
-WorkspaceSelector = import_qt(
-        '..._common',
-        'mantidqt.widgets.workspaceselector',
-        'WorkspaceSelector'
-        )
+WorkspaceSelector = import_qt('..._common', 'mantidqt.widgets.workspaceselector', 'WorkspaceSelector')

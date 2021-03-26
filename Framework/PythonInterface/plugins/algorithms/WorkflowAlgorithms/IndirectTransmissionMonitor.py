@@ -22,7 +22,8 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         return "Workflow\\Inelastic;Inelastic\\Indirect"
 
     def summary(self):
-        return "Calculates the sample transmission using the raw data files of the sample and its background or container."
+        return "Calculates the sample transmission using the raw data files of the sample and its background or " \
+               "container."
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
@@ -151,13 +152,10 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         # Fill bad (dip) in spectrum
         RemoveBins(InputWorkspace=out_ws,
                    OutputWorkspace=out_ws,
-                   Xmin=join-0.001,
-                   Xmax=join+0.001,
+                   Xmin=join - 0.001,
+                   Xmax=join + 0.001,
                    Interpolation="Linear")
-        FFTSmooth(InputWorkspace=out_ws,
-                  OutputWorkspace=out_ws,
-                  WorkspaceIndex=0,
-                  IgnoreXBins=True)
+        FFTSmooth(InputWorkspace=out_ws, OutputWorkspace=out_ws, WorkspaceIndex=0, IgnoreXBins=True)
 
         DeleteWorkspace(input_ws)
 
@@ -191,19 +189,14 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         if spec_tcb_start == mon_tcb_start:
             mon_ws = self._unwrap_mon('__m1')  # unwrap the monitor spectrum and convert to wavelength
-            RenameWorkspace(InputWorkspace=mon_ws,
-                            OutputWorkspace='__Mon1')
+            RenameWorkspace(InputWorkspace=mon_ws, OutputWorkspace='__Mon1')
         else:
-            ConvertUnits(InputWorkspace='__m1',
-                         OutputWorkspace='__Mon1',
-                         Target="Wavelength")
+            ConvertUnits(InputWorkspace='__m1', OutputWorkspace='__Mon1', Target="Wavelength")
 
         mon_ws = ws_basename + '_' + file_type
 
         if monitor_2_idx is not None:
-            ConvertUnits(InputWorkspace='__m2',
-                         OutputWorkspace='__Mon2',
-                         Target="Wavelength")
+            ConvertUnits(InputWorkspace='__m2', OutputWorkspace='__Mon2', Target="Wavelength")
             DeleteWorkspace('__m2')
 
             x_in = mtd['__Mon1'].readX(0)
@@ -217,23 +210,15 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
             wmin = max(xmin1, xmin2)
             wmax = min(xmax1, xmax2)
 
-            CropWorkspace(InputWorkspace='__Mon1',
-                          OutputWorkspace='__Mon1',
-                          XMin=wmin,
-                          XMax=wmax)
-            RebinToWorkspace(WorkspaceToRebin='__Mon2',
-                             WorkspaceToMatch='__Mon1',
-                             OutputWorkspace='__Mon2')
-            Divide(LHSWorkspace='__Mon2',
-                   RHSWorkspace='__Mon1',
-                   OutputWorkspace=mon_ws)
+            CropWorkspace(InputWorkspace='__Mon1', OutputWorkspace='__Mon1', XMin=wmin, XMax=wmax)
+            RebinToWorkspace(WorkspaceToRebin='__Mon2', WorkspaceToMatch='__Mon1', OutputWorkspace='__Mon2')
+            Divide(LHSWorkspace='__Mon2', RHSWorkspace='__Mon1', OutputWorkspace=mon_ws)
 
             DeleteWorkspace('__Mon1')
             DeleteWorkspace('__Mon2')
 
         else:
-            RenameWorkspace(InputWorkspace='__Mon1',
-                            OutputWorkspace=mon_ws)
+            RenameWorkspace(InputWorkspace='__Mon1', OutputWorkspace=mon_ws)
 
 
 # Register algorithm with Mantid

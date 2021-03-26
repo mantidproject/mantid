@@ -65,7 +65,7 @@ def load_scd_fullprof_intensity_file(file_name):
     num_k_vector = 0
     k_index = 0
     error_buffer = ''
-    reflection_dict = dict()   # key: 3-tuple as (h, k, l)
+    reflection_dict = dict()  # key: 3-tuple as (h, k, l)
     for line_index, raw_line in enumerate(raw_lines):
         # clean the line
         line = raw_line.strip()
@@ -128,18 +128,15 @@ def convert_to_peak_dict_list(refection_dict):
     # loop around all HKL
     for hkl in sorted(refection_dict.keys()):
         intensity, sigma = refection_dict[hkl]
-        peak_dict = {'hkl': hkl,
-                     'kindex': 0,
-                     'intensity': intensity,
-                     'sigma': sigma}
+        peak_dict = {'hkl': hkl, 'kindex': 0, 'intensity': intensity, 'sigma': sigma}
 
         peak_dict_list.append(peak_dict)
 
     return peak_dict_list
 
 
-def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dict_list, fp_file_name,
-                               with_absorption, high_precision):
+def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dict_list, fp_file_name, with_absorption,
+                               high_precision):
     """
     Purpose: Export integrated peaks to single crystal diffraction Fullprof file
     Requirements:
@@ -218,8 +215,8 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
     # peak intensities
     for i_peak, peak_dict in enumerate(peak_dict_list):
         # check
-        assert isinstance(peak_dict, dict), '%d-th peak must be a dictionary but not %s.' % (i_peak,
-                                                                                             str(type(peak_dict)))
+        assert isinstance(peak_dict,
+                          dict), '%d-th peak must be a dictionary but not %s.' % (i_peak, str(type(peak_dict)))
         for key in ['hkl', 'kindex', 'intensity', 'sigma']:
             assert key in peak_dict, '%d-th peak dictionary does not have required key %s.' % (i_peak, key)
 
@@ -239,7 +236,7 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
             k_index = 0
 
         # remove the magnetic k-shift vector from HKL
-        part1 = '%4d%4d%4d' % (nearest_int(m_h-k_x), nearest_int(m_k-k_y), nearest_int(m_l-k_z))
+        part1 = '%4d%4d%4d' % (nearest_int(m_h - k_x), nearest_int(m_k - k_y), nearest_int(m_l - k_z))
 
         # k index
         if is_magnetic:

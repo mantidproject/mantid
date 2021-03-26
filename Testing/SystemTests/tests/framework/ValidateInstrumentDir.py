@@ -12,14 +12,12 @@ import os
 from mantid import config
 import systemtesting
 
-
 # Constants
 FILE_TO_TEST = None  # "MARI_Definition.xml"
 INSTRUMENT_DIR = config['instrumentDefinition.directory']
 
 
 class ValidateXML(object):
-
     def skipTests(self):
         try:
             import lxml  # noqa
@@ -67,17 +65,14 @@ class ValidateXML(object):
             print("SUMMARY OF FAILED FILES")
             for filename in failed:
                 print(filename)
-            raise RuntimeError("Failed Validation for %d of %d files"
-                               % (len(failed), len(files)))
+            raise RuntimeError("Failed Validation for %d of %d files" % (len(failed), len(files)))
         else:
             print("Successfully Validated %d files" % len(files))
 
 
 class ValidateInstrumentDefinitionFiles(ValidateXML, systemtesting.MantidSystemTest):
-
     def xsdpath(self):
-        return os.path.join(INSTRUMENT_DIR, "Schema", "IDF", "1.0",
-                            "IDFSchema.xsd")
+        return os.path.join(INSTRUMENT_DIR, "Schema", "IDF", "1.0", "IDFSchema.xsd")
 
     def filelist(self):
         print("Looking for instrument definition files in: %s" % INSTRUMENT_DIR)
@@ -85,10 +80,8 @@ class ValidateInstrumentDefinitionFiles(ValidateXML, systemtesting.MantidSystemT
 
 
 class ValidateParameterFiles(ValidateXML, systemtesting.MantidSystemTest):
-
     def xsdpath(self):
-        return os.path.join(INSTRUMENT_DIR, "Schema", "ParameterFile", "1.0",
-                            "ParameterFileSchema.xsd")
+        return os.path.join(INSTRUMENT_DIR, "Schema", "ParameterFile", "1.0", "ParameterFileSchema.xsd")
 
     def filelist(self):
         print("Looking for instrument definition files in: %s" % INSTRUMENT_DIR)
@@ -96,20 +89,16 @@ class ValidateParameterFiles(ValidateXML, systemtesting.MantidSystemTest):
 
 
 class ValidateFacilitiesFile(ValidateXML, systemtesting.MantidSystemTest):
-
     def xsdpath(self):
-        return os.path.join(INSTRUMENT_DIR, "Schema", "Facilities", "1.0",
-                            "FacilitiesSchema.xsd")
+        return os.path.join(INSTRUMENT_DIR, "Schema", "Facilities", "1.0", "FacilitiesSchema.xsd")
 
     def filelist(self):
         return [os.path.join(INSTRUMENT_DIR, 'Facilities.xml')]
 
 
 class ValidateGroupingFiles(ValidateXML, systemtesting.MantidSystemTest):
-
     def xsdpath(self):
-        return os.path.join(INSTRUMENT_DIR, "Schema", "Grouping", "1.0",
-                            "GroupingSchema.xsd")
+        return os.path.join(INSTRUMENT_DIR, "Schema", "Grouping", "1.0", "GroupingSchema.xsd")
 
     def filelist(self):
         grouping_dir = os.path.join(INSTRUMENT_DIR, "Grouping")

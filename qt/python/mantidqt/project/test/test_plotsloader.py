@@ -7,6 +7,7 @@
 #  This file is part of the mantidqt package
 #
 import matplotlib
+
 matplotlib.use('AGG')
 
 import unittest  # noqa
@@ -30,37 +31,63 @@ class PlotsLoaderTest(unittest.TestCase):
         self.plots_loader = PlotsLoader()
         plt.plot = mock.MagicMock()
         mantid.plots.axesfunctions.plot = mock.MagicMock()
-        self.dictionary = {u'legend': {u'exists': False}, u'lines': [],
-                           u'properties': {u'axisOn': True, u'bounds': (0.0, 0.0, 0.0, 0.0), u'dynamic': True,
-                                           u'frameOn': True, u'visible': True,
-                                           u'xAxisProperties': {u'fontSize': 10.0,
-                                                                u'gridStyle': {u'gridOn': False},
-                                                                u'majorTickFormat': None,
-                                                                u'majorTickFormatter': 'ScalarFormatter',
-                                                                u'majorTickLocator': 'AutoLocator',
-                                                                u'majorTickLocatorValues': None,
-                                                                u'minorTickFormat': None,
-                                                                u'minorTickFormatter': 'NullFormatter',
-                                                                u'minorTickLocator': 'NullLocator',
-                                                                u'minorTickLocatorValues': None,
-                                                                u'position': u'Bottom',
-                                                                u'visible': True},
-                                           u'xAxisScale': u'linear', u'xLim': (0.0, 1.0),
-                                           u'yAxisProperties': {u'fontSize': 10.0,
-                                                                u'gridStyle': {u'gridOn': False},
-                                                                u'majorTickFormat': None,
-                                                                u'majorTickFormatter': 'ScalarFormatter',
-                                                                u'majorTickLocator': 'AutoLocator',
-                                                                u'majorTickLocatorValues': None,
-                                                                u'minorTickFormat': None,
-                                                                u'minorTickFormatter': 'NullFormatter',
-                                                                u'minorTickLocator': 'NullLocator',
-                                                                u'minorTickLocatorValues': None,
-                                                                u'position': u'Left',
-                                                                u'visible': True},
-                                           u'yAxisScale': u'linear', u'yLim': (0.0, 1.0), u'showMinorGrid': False,
-                                           u"xAutoScale":False, u"yAutoScale":False},
-                           u'textFromArtists': {}, u'texts': [], u'title': u'', u'xAxisTitle': u'', u'yAxisTitle': u''}
+        self.dictionary = {
+            u'legend': {
+                u'exists': False
+            },
+            u'lines': [],
+            u'properties': {
+                u'axisOn': True,
+                u'bounds': (0.0, 0.0, 0.0, 0.0),
+                u'dynamic': True,
+                u'frameOn': True,
+                u'visible': True,
+                u'xAxisProperties': {
+                    u'fontSize': 10.0,
+                    u'gridStyle': {
+                        u'gridOn': False
+                    },
+                    u'majorTickFormat': None,
+                    u'majorTickFormatter': 'ScalarFormatter',
+                    u'majorTickLocator': 'AutoLocator',
+                    u'majorTickLocatorValues': None,
+                    u'minorTickFormat': None,
+                    u'minorTickFormatter': 'NullFormatter',
+                    u'minorTickLocator': 'NullLocator',
+                    u'minorTickLocatorValues': None,
+                    u'position': u'Bottom',
+                    u'visible': True
+                },
+                u'xAxisScale': u'linear',
+                u'xLim': (0.0, 1.0),
+                u'yAxisProperties': {
+                    u'fontSize': 10.0,
+                    u'gridStyle': {
+                        u'gridOn': False
+                    },
+                    u'majorTickFormat': None,
+                    u'majorTickFormatter': 'ScalarFormatter',
+                    u'majorTickLocator': 'AutoLocator',
+                    u'majorTickLocatorValues': None,
+                    u'minorTickFormat': None,
+                    u'minorTickFormatter': 'NullFormatter',
+                    u'minorTickLocator': 'NullLocator',
+                    u'minorTickLocatorValues': None,
+                    u'position': u'Left',
+                    u'visible': True
+                },
+                u'yAxisScale': u'linear',
+                u'yLim': (0.0, 1.0),
+                u'showMinorGrid': False,
+                u"xAutoScale": False,
+                u"yAutoScale": False
+            },
+            u'textFromArtists': {},
+            u'texts': [],
+            u'title': u'',
+            u'xAxisTitle': u'',
+            u'yAxisTitle': u''
+        }
 
     def test_load_plots_does_the_right_calls(self):
         self.plots_loader.make_fig = mock.MagicMock()
@@ -72,11 +99,25 @@ class PlotsLoaderTest(unittest.TestCase):
     def test_make_fig_makes_the_right_calls(self, pass_func):
         ws = Workspace2D()
         ADS.add("ws", ws)
-        plot_dict = {"label": "plot", "creationArguments": [[
-            {"workspaces": "ws", "wkspIndex": 0},
-            {"function": "axhline", "args": [10, 0, 1], "kwargs": {}},
-            {"function": "axvline", "args": [], "kwargs": {"x": 0, "ymin": 0, "ymax": 1}}
-        ]]}
+        plot_dict = {
+            "label": "plot",
+            "creationArguments": [[{
+                "workspaces": "ws",
+                "wkspIndex": 0
+            }, {
+                "function": "axhline",
+                "args": [10, 0, 1],
+                "kwargs": {}
+            }, {
+                "function": "axvline",
+                "args": [],
+                "kwargs": {
+                    "x": 0,
+                    "ymin": 0,
+                    "ymax": 1
+                }
+            }]]
+        }
         self.plots_loader.workspace_plot_func = mock.MagicMock()
         self.plots_loader.plot_func = mock.MagicMock()
         self.plots_loader.restore_figure_data = mock.MagicMock()
@@ -124,14 +165,14 @@ class PlotsLoaderTest(unittest.TestCase):
 
     def test_update_properties_limits_autoscale(self):
         dic = self.dictionary[u"properties"]
-        dic.update({"xAutoScale":True, "yAutoScale":True})
+        dic.update({"xAutoScale": True, "yAutoScale": True})
         mock_ax = mock.Mock()
 
         plots_loader = self.plots_loader
         with mock.patch.object(plots_loader, "update_axis", mock.Mock()):
             plots_loader.update_properties(mock_ax, dic)
 
-        mock_ax.autoscale.assert_has_calls([mock.call(True, axis="x"),mock.call(True, axis="y")])
+        mock_ax.autoscale.assert_has_calls([mock.call(True, axis="x"), mock.call(True, axis="y")])
         mock_ax.set_xlim.assert_not_called()
         mock_ax.set_xlim.assert_not_called()
 
@@ -140,14 +181,35 @@ class PlotsLoaderTest(unittest.TestCase):
         ax = matplotlib.axes.Axes(fig=fig, rect=[0, 0, 0, 0])
         ax.text = mock.MagicMock()
 
-        self.plots_loader.create_text_from_dict(ax=ax, dic={"text": "text", "position": (1, 1), "useTeX": 1,
-                                                            "style": {"alpha": 1, "textSize": 1, "color": 1,
-                                                                      "hAlign": 1, "vAlign": 1, "rotation": 1,
-                                                                      "zOrder": 1}})
+        self.plots_loader.create_text_from_dict(ax=ax,
+                                                dic={
+                                                    "text": "text",
+                                                    "position": (1, 1),
+                                                    "useTeX": 1,
+                                                    "style": {
+                                                        "alpha": 1,
+                                                        "textSize": 1,
+                                                        "color": 1,
+                                                        "hAlign": 1,
+                                                        "vAlign": 1,
+                                                        "rotation": 1,
+                                                        "zOrder": 1
+                                                    }
+                                                })
         self.assertEqual(ax.text.call_count, 1)
-        ax.text.assert_called_once_with(fontdict={u'zorder': 1, u'fontsize': 1, u'color': 1, u'alpha': 1,
-                                                  u'rotation': 1, u'verticalalignment': 1, u'usetex': 1,
-                                                  u'horizontalalignment': 1}, s=u'text', x=1, y=1)
+        ax.text.assert_called_once_with(fontdict={
+            u'zorder': 1,
+            u'fontsize': 1,
+            u'color': 1,
+            u'alpha': 1,
+            u'rotation': 1,
+            u'verticalalignment': 1,
+            u'usetex': 1,
+            u'horizontalalignment': 1
+        },
+                                        s=u'text',
+                                        x=1,
+                                        y=1)
 
     @mock.patch("matplotlib.figure.Figure.show")
     def test_load_plot_from_dict(self, pass_func):

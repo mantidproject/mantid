@@ -13,17 +13,15 @@ from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
 class QuickEditView(QtWidgets.QWidget):
     error_signal = QtCore.Signal(object)
 
-    def __init__(self, subcontext, parent=None, auto_btn = False):
+    def __init__(self, subcontext, parent=None, auto_btn=False):
         super(QuickEditView, self).__init__(parent)
 
         button_layout = QtWidgets.QHBoxLayout()
         self.plot_selector = QtWidgets.QComboBox()
         self.plot_selector.setEditable(True)
-        self.plot_selector.completer().setCompletionMode(
-            QtWidgets.QCompleter.PopupCompletion)
+        self.plot_selector.completer().setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
         if qtpy.PYQT5:
-            self.plot_selector.completer().setFilterMode(
-                QtCore.Qt.MatchContains)
+            self.plot_selector.completer().setFilterMode(QtCore.Qt.MatchContains)
 
         self.plot_selector.addItem("All")
         self.plot_selector.setEditable(False)

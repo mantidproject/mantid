@@ -21,7 +21,6 @@ from corelli.calibration.utils import TUBES_IN_BANK
 
 
 class TestBank(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         r"""
@@ -42,8 +41,8 @@ class TestBank(unittest.TestCase):
                 data_dir = path.join(directory, 'CORELLI', 'calibration')
                 break
         cls.cases = dict()
-        for bank_case in ('123454_bank58', '124018_bank45', '123555_bank20', '123455_bank20',
-                          '124023_bank10', '124023_bank14', '124023_bank15', '124023_banks_10_15'):
+        for bank_case in ('123454_bank58', '124018_bank45', '123555_bank20', '123455_bank20', '124023_bank10',
+                          '124023_bank14', '124023_bank15', '124023_banks_10_15'):
             workspace = 'CORELLI_' + bank_case
             LoadNexusProcessed(Filename=path.join(data_dir, workspace + '.nxs'), OutputWorkspace=workspace)
             cls.cases[bank_case] = workspace
@@ -57,6 +56,7 @@ class TestBank(unittest.TestCase):
             detectors_ids = table.column(0)
             assert begin not in detectors_ids
             assert end not in detectors_ids
+
         # sneak in a class method, make sure it's loaded before any tests is executed
         cls.assert_missing_tube = assert_missing_tube
 
@@ -143,8 +143,10 @@ class TestBank(unittest.TestCase):
 
         # check for the summary workspace
         fit_bank(self.cases['123455_bank20'], 'bank20')
-        criterion_peak_vertical_position('PeakYTable', summary='summary',
-                                         zscore_threshold=2.5, deviation_threshold=0.0035)
+        criterion_peak_vertical_position('PeakYTable',
+                                         summary='summary',
+                                         zscore_threshold=2.5,
+                                         deviation_threshold=0.0035)
         assert AnalysisDataService.doesExist('summary')
         workspace = mtd['summary']
         axis = workspace.getAxis(1)
@@ -215,7 +217,8 @@ class TestBank(unittest.TestCase):
 
         # tube11 is not working at all. Thus, purge only one tube
         fit_bank(self.cases['124018_bank45'], 'bank45')
-        tube_fit_success = criterion_peak_vertical_position('PeakYTable', zscore_threshold=2.5,
+        tube_fit_success = criterion_peak_vertical_position('PeakYTable',
+                                                            zscore_threshold=2.5,
                                                             deviation_threshold=0.0035)
         unpurged_row_count = mtd['CalibTable'].rowCount()
         purge_table(self.cases['124018_bank45'], 'CalibTable', tube_fit_success)
@@ -232,7 +235,8 @@ class TestBank(unittest.TestCase):
 
         # tube11 is not working at all. Thus, mask this tube
         fit_bank(self.cases['124018_bank45'], 'bank45')
-        tube_fit_success = criterion_peak_vertical_position('PeakTable', zscore_threshold=2.5,
+        tube_fit_success = criterion_peak_vertical_position('PeakTable',
+                                                            zscore_threshold=2.5,
                                                             deviation_threshold=0.0035)
         mask_bank('bank45', tube_fit_success, 'masked_tubes')
         detector_ids = mtd['masked_tubes'].column(0)
@@ -241,7 +245,8 @@ class TestBank(unittest.TestCase):
 
         # tubes 3, 8, and 13 have very faint wire shadows. Thus, mask these tubes
         fit_bank(self.cases['124023_bank14'], 'bank14')
-        tube_fit_success = criterion_peak_vertical_position('PeakTable', zscore_threshold=2.5,
+        tube_fit_success = criterion_peak_vertical_position('PeakTable',
+                                                            zscore_threshold=2.5,
                                                             deviation_threshold=0.0035)
         mask_bank('bank14', tube_fit_success, 'masked_tubes')
         detector_ids = mtd['masked_tubes'].column(0)
@@ -249,15 +254,16 @@ class TestBank(unittest.TestCase):
         DeleteWorkspaces(['CalibTable', 'masked_tubes', 'PeakTable', 'PeakYTable', 'ParametersTable'])
 
     def test_collect_bank_fit_results(self):
-
         def spectra_labels(workspace_name):
             workspace = mtd[str(workspace_name)]
             axis = workspace.getAxis(1)
             return [axis.label(spectrum_index) for spectrum_index in range(workspace.getNumberHistograms())]
 
         fit_bank(self.cases['123455_bank20'], 'bank20', parameters_table_group='parameters_tables')
-        criterion_peak_vertical_position('PeakTable', summary='summary',
-                                         zscore_threshold=2.5, deviation_threshold=0.0035)
+        criterion_peak_vertical_position('PeakTable',
+                                         summary='summary',
+                                         zscore_threshold=2.5,
+                                         deviation_threshold=0.0035)
 
         with self.assertRaises(AssertionError) as exception_info:
             collect_bank_fit_results('fit_results', acceptance_summary=None, parameters_table_group=None)
@@ -275,13 +281,16 @@ class TestBank(unittest.TestCase):
         for coefficient_idx in range(3):  # we have three polynomial coefficients
             for tube_idx in range(TUBES_IN_BANK):
                 self.assertAlmostEqual(mtd['fit_results'].readY(coefficient_idx)[tube_idx],
-                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Value'], delta=1e-6)
+                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Value'],
+                                       delta=1e-6)
                 self.assertAlmostEqual(mtd['fit_results'].readE(coefficient_idx)[tube_idx],
-                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Error'], delta=1e-6)
+                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Error'],
+                                       delta=1e-6)
         DeleteWorkspaces(['fit_results'])
 
         # collect both acceptance criteria and polynomial coefficients
-        collect_bank_fit_results('fit_results', acceptance_summary='summary',
+        collect_bank_fit_results('fit_results',
+                                 acceptance_summary='summary',
                                  parameters_table_group='parameters_tables')
         assert spectra_labels('fit_results') == ['success', 'deviation', 'Z-score', 'A0', 'A1', 'A2']
         for spectrum_idx in [0, 1, 2]:
@@ -290,9 +299,11 @@ class TestBank(unittest.TestCase):
         for coefficient_idx, spectrum_idx in [(0, 3), (1, 4), (2, 5)]:  # we have three polynomial coefficients
             for tube_idx in range(TUBES_IN_BANK):
                 self.assertAlmostEqual(mtd['fit_results'].readY(spectrum_idx)[tube_idx],
-                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Value'], delta=1e-6)
+                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Value'],
+                                       delta=1e-6)
                 self.assertAlmostEqual(mtd['fit_results'].readE(spectrum_idx)[tube_idx],
-                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Error'], delta=1e-6)
+                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Error'],
+                                       delta=1e-6)
         DeleteWorkspaces(['CalibTable', 'fit_results', 'parameters_tables', 'PeakTable', 'PeakYTable', 'summary'])
 
     def test_calibrate_bank(self):

@@ -14,15 +14,16 @@ from sans.test_helper.mock_objects import (create_run_tab_presenter_mock)
 
 
 class BeamCentrePresenterTest(unittest.TestCase):
-
     def setUp(self):
-        self.parent_presenter = create_run_tab_presenter_mock(use_fake_state = False)
+        self.parent_presenter = create_run_tab_presenter_mock(use_fake_state=False)
         self.view = create_mock_beam_centre_tab()
         self.WorkHandler = mock.MagicMock()
         self.BeamCentreModel = mock.MagicMock()
         self.SANSCentreFinder = mock.MagicMock()
-        self.presenter = BeamCentrePresenter(self.parent_presenter, self.SANSCentreFinder,
-                                             work_handler=self.WorkHandler, beam_centre_model=self.BeamCentreModel)
+        self.presenter = BeamCentrePresenter(self.parent_presenter,
+                                             self.SANSCentreFinder,
+                                             work_handler=self.WorkHandler,
+                                             beam_centre_model=self.BeamCentreModel)
         self.presenter.connect_signals = mock.Mock()
         self.presenter.set_view(self.view)
 
@@ -30,7 +31,8 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.presenter.on_run_clicked()
 
         self.assertEqual(self.presenter._work_handler.process.call_count, 1)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][1],  self.presenter._beam_centre_model.find_beam_centre)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][1],
+                         self.presenter._beam_centre_model.find_beam_centre)
 
     def test_that_on_run_clicked_updates_model_from_view(self):
         self.view.left_right = False

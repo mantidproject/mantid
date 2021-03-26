@@ -21,7 +21,6 @@ from sans.common.general_functions import create_unmanaged_algorithm
 from sans.gui_logic.models.diagnostics_page_model import run_integral
 from sans.common.file_information import SANSFileInformationFactory
 
-
 # -----------------------------------------------
 # Tests for the SANSDiagnosticPage
 # -----------------------------------------------
@@ -32,8 +31,7 @@ class SANSDiagnosticPageTest(unittest.TestCase):
     def _compare_workspace(self, workspace, reference_file_name):
         # Load the reference file
         load_name = "LoadNexusProcessed"
-        load_options = {"Filename": reference_file_name,
-                        "OutputWorkspace": EMPTY_NAME}
+        load_options = {"Filename": reference_file_name, "OutputWorkspace": EMPTY_NAME}
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
         load_alg.execute()
         reference_workspace = load_alg.getProperty("OutputWorkspace").value
@@ -43,8 +41,7 @@ class SANSDiagnosticPageTest(unittest.TestCase):
                               'SANS_temp_single_core_reduction_testout.nxs')
 
         save_name = "SaveNexus"
-        save_options = {"Filename": f_name,
-                        "InputWorkspace": workspace}
+        save_options = {"Filename": f_name, "InputWorkspace": workspace}
         save_alg = create_unmanaged_algorithm(save_name, **save_options)
         save_alg.execute()
         load_alg.setProperty("Filename", f_name)
@@ -58,17 +55,19 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         # We need to disable the sample -- since the sample has been modified (more logs are being written)
         # operation how many entries can be found in the sample logs
         compare_name = "CompareWorkspaces"
-        compare_options = {"Workspace1": ws,
-                           "Workspace2": reference_workspace,
-                           "Tolerance": 1e-6,
-                           "CheckInstrument": False,
-                           "CheckSample": False,
-                           "ToleranceRelErr": True,
-                           "CheckAllData": True,
-                           "CheckMasking": True,
-                           "CheckType": True,
-                           "CheckAxes": True,
-                           "CheckSpectraMap": True}
+        compare_options = {
+            "Workspace1": ws,
+            "Workspace2": reference_workspace,
+            "Tolerance": 1e-6,
+            "CheckInstrument": False,
+            "CheckSample": False,
+            "ToleranceRelErr": True,
+            "CheckAllData": True,
+            "CheckMasking": True,
+            "CheckType": True,
+            "CheckAxes": True,
+            "CheckSpectraMap": True
+        }
         compare_alg = create_unmanaged_algorithm(compare_name, **compare_options)
         compare_alg.setChild(False)
         compare_alg.execute()
@@ -91,8 +90,7 @@ class SANSDiagnosticPageTest(unittest.TestCase):
 
         # Get the rest of the state from the user file
         user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
-        user_file_director = UserFileReaderAdapter(file_information=file_information,
-                                                   user_file_name=user_file)
+        user_file_director = UserFileReaderAdapter(file_information=file_information, user_file_name=user_file)
         state = user_file_director.get_all_states(file_information=file_information)
         state.compatibility.use_compatibility_mode = True
         state.adjustment.calibration = "TUBE_SANS2D_BOTH_31681_25Sept15.nxs"
@@ -117,8 +115,7 @@ class SANSDiagnosticPageTest(unittest.TestCase):
 
         # Get the rest of the state from the user file
         user_file = "USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt"
-        user_file_director = UserFileReaderAdapter(file_information=file_information,
-                                                   user_file_name=user_file)
+        user_file_director = UserFileReaderAdapter(file_information=file_information, user_file_name=user_file)
         state = user_file_director.get_all_states(file_information=file_information)
         state.adjustment.calibration = "80tubeCalibration_1-05-2015_r3157-3160.nxs"
         state.data = data_state

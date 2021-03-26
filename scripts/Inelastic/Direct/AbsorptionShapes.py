@@ -60,7 +60,7 @@ class anAbsorptionShape(object):
     # absorption shapes factory
     _Defined_Shapes = {}
 
-    def __init__(self,MaterialValue=None):
+    def __init__(self, MaterialValue=None):
         # environment according to existing definitions of the environment
         self._Environment = {}
         # default sample material (formula)
@@ -70,9 +70,10 @@ class anAbsorptionShape(object):
         self._ShapeDescription = {}
 
         # the workspace used for testing correct properties settings
-        rhash = random.randint(1,100000)
-        self._testWorkspace = CreateSampleWorkspace(OutputWorkspace=
-            '_adsShape_' + str(rhash),NumBanks=1,BankPixelWidth=1) # noqa: E127
+        rhash = random.randint(1, 100000)
+        self._testWorkspace = CreateSampleWorkspace(OutputWorkspace='_adsShape_' + str(rhash),
+                                                    NumBanks=1,
+                                                    BankPixelWidth=1)  # noqa: E127
 
         if MaterialValue is not None:
             self.material = MaterialValue
@@ -82,13 +83,15 @@ class anAbsorptionShape(object):
         # some shapes have axis, some does not. This to distinguish between them and
         # make default axis specific to instrument
         self._shape_has_axis = False
-       # Property describes if a shape axis direction have been changed.
+        # Property describes if a shape axis direction have been changed.
         # Some instruments (e.g. MARI) have non-standart default axis directions
-        self._axis_is_default=True
+        self._axis_is_default = True
+
     #
 
     def __del__(self):
         DeleteWorkspace(self._testWorkspace)
+
     #
 
     def __str__(self):
@@ -102,30 +105,28 @@ class anAbsorptionShape(object):
         return self._Material
 
     @material.setter
-    def material(self,value):
+    def material(self, value):
         if value is None:
             self._Material = {}
             return
         if isinstance(value, str):
             value = [value]
-        if isinstance(value,(list,tuple)):
+        if isinstance(value, (list, tuple)):
             if len(value) == 2:
-                self._Material = {'ChemicalFormula':value[0],'SampleNumberDensity':float(value[1])}
+                self._Material = {'ChemicalFormula': value[0], 'SampleNumberDensity': float(value[1])}
             elif len(value) == 1:
-                self._Material = {'ChemicalFormula':value[0]}
+                self._Material = {'ChemicalFormula': value[0]}
             else:
-                raise TypeError(
-                    '*** If material is defined by list or tuple,'
-                    ' it may consist of 1 or 2 members,'
-                    ' defining the material formula and the material number density')
-        elif isinstance(value,dict):
-            for key,val in value.items():
+                raise TypeError('*** If material is defined by list or tuple,'
+                                ' it may consist of 1 or 2 members,'
+                                ' defining the material formula and the material number density')
+        elif isinstance(value, dict):
+            for key, val in value.items():
                 self._Material[key] = val
         else:
-            raise TypeError(
-                '*** Material accepts only list or tuple containing up to 2 values'
-                ' corresponding to material formula and material number density'
-                ' or dictionary with keys, recognized by SetSampleMaterial algorithm')
+            raise TypeError('*** Material accepts only list or tuple containing up to 2 values'
+                            ' corresponding to material formula and material number density'
+                            ' or dictionary with keys, recognized by SetSampleMaterial algorithm')
         #
         Mater_properties = self._Material
         if 'ChemicalFormula' in Mater_properties:
@@ -133,10 +134,10 @@ class anAbsorptionShape(object):
                 raise TypeError('*** The chemical formula for the material must be described by a string')
         # Test if the material property are recognized by SetSampleMaterial
         # algorithm.
-        SetSampleMaterial(self._testWorkspace,**Mater_properties)
+        SetSampleMaterial(self._testWorkspace, **Mater_properties)
 
     #
-    def correct_absorption(self,ws,*args,**kwargs):
+    def correct_absorption(self, ws, *args, **kwargs):
         """ The generic method, which switches between fast and Monte-Carlo absorption corrections
         depending on the type and properties variable provided as second input
 
@@ -149,7 +150,7 @@ class anAbsorptionShape(object):
         1) absorption-corrected workspace
         2) if two output arguments are provided, second would be workspace with absorption corrections coefficients
         """
-        n_outputs,var_names = funcinspect.lhs_info('both')
+        n_outputs, var_names = funcinspect.lhs_info('both')
 
         if args is None or len(args) == 0:
             if kwargs is None:
@@ -161,49 +162,48 @@ class anAbsorptionShape(object):
             if corr_properties is None:
                 corr_properties = {}
             else:
-                if not isinstance(corr_properties,dict):
-                    raise TypeError(
-                        '*** Second non-keyword argument of the correct_absorption routine'
-                        ' (if present) should be a dictionary containing '
-                        ' additional parameters for selected AbsorptionCorrections algorithm')
+                if not isinstance(corr_properties, dict):
+                    raise TypeError('*** Second non-keyword argument of the correct_absorption routine'
+                                    ' (if present) should be a dictionary containing '
+                                    ' additional parameters for selected AbsorptionCorrections algorithm')
 
-        correction_base_ws = ConvertUnits(ws,'Wavelength',EMode='Direct')
+        correction_base_ws = ConvertUnits(ws, 'Wavelength', EMode='Direct')
         Mater_properties = self._Material
-        SetSampleMaterial(correction_base_ws,**Mater_properties)
+        SetSampleMaterial(correction_base_ws, **Mater_properties)
 
         if self._shape_has_axis:
             self._check_MARI_axis_(ws)
 
         if self._CanSetSample:
             shape_description = self._ShapeDescription
-            SetSample(correction_base_ws,Geometry=shape_description)
+            SetSample(correction_base_ws, Geometry=shape_description)
 
         mc_corrections = corr_properties.pop('is_mc', False)
-        fast_corrections = corr_properties.pop('is_fast',False)
-        if  not(mc_corrections or fast_corrections) or (mc_corrections and fast_corrections):
-            fast_corrections = False # Case when both keys are true or false reverts to default
+        fast_corrections = corr_properties.pop('is_fast', False)
+        if not (mc_corrections or fast_corrections) or (mc_corrections and fast_corrections):
+            fast_corrections = False  # Case when both keys are true or false reverts to default
 
         if fast_corrections:
             #raise RuntimeError('Analytical absorption corrections are not currently implemented in Direct mode')
-            abs_corrections = self._fast_abs_corrections(correction_base_ws,corr_properties)
+            abs_corrections = self._fast_abs_corrections(correction_base_ws, corr_properties)
         else:
-            abs_corrections = self._mc_abs_corrections(correction_base_ws,corr_properties)
+            abs_corrections = self._mc_abs_corrections(correction_base_ws, corr_properties)
 
-        abs_corrections = ConvertUnits(abs_corrections,'DeltaE',EMode='Direct')
+        abs_corrections = ConvertUnits(abs_corrections, 'DeltaE', EMode='Direct')
         ws = ws / abs_corrections
 
         DeleteWorkspace(correction_base_ws)
         if ws.name() != var_names[0]:
-            RenameWorkspace(ws,var_names[0])
+            RenameWorkspace(ws, var_names[0])
         if n_outputs == 1:
             #DeleteWorkspace(abs_corrections)
             return ws
         elif n_outputs == 2:
             if abs_corrections.name() != var_names[1]:
-                RenameWorkspace(abs_corrections,var_names[1])
-            return (ws,abs_corrections)
+                RenameWorkspace(abs_corrections, var_names[1])
+            return (ws, abs_corrections)
 
-    def _fast_abs_corrections(self,correction_base_ws,kwarg={}):
+    def _fast_abs_corrections(self, correction_base_ws, kwarg={}):
         """ Method to correct absorption on a shape using fast (Numerical Integration) method
             if such method is available for the shape
 
@@ -216,11 +216,11 @@ class anAbsorptionShape(object):
         Returns:
             workspace with absorption corrections.
         """
-        adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kwarg)
+        adsrbtn_correctios = AbsorptionCorrection(correction_base_ws, **kwarg)
         return adsrbtn_correctios
 
     #
-    def _mc_abs_corrections(self,correction_base_ws,kwarg={}):
+    def _mc_abs_corrections(self, correction_base_ws, kwarg={}):
         """ Method to correct absorption on a shape using Mont-Carlo integration
         Inputs:
          ws     -- workspace to correct. Should be in the units of wavelength
@@ -231,7 +231,7 @@ class anAbsorptionShape(object):
         Returns:
             workspace with absorption corrections.
         """
-        adsrbtn_correctios = MonteCarloAbsorption(correction_base_ws,**kwarg)
+        adsrbtn_correctios = MonteCarloAbsorption(correction_base_ws, **kwarg)
         return adsrbtn_correctios
 
     #
@@ -247,25 +247,23 @@ class anAbsorptionShape(object):
                 'HollowCylinder':HollowCylinder(),'Sphere':   Sphere()}  # noqa: E127
 
         if not isinstance(str_val, str):
-            raise ValueError(
-                'The input of the "from_str" function should be a string representing a diary.'
-                ' Actually it is: {0}'.format(type(str_val)))
+            raise ValueError('The input of the "from_str" function should be a string representing a diary.'
+                             ' Actually it is: {0}'.format(type(str_val)))
         str_list = str_val.split('!')
         shape_par = ast.literal_eval(str_list[0])
         mater_par = ast.literal_eval(str_list[1])
 
-        the_shape_id = shape_par.pop('Shape',None)
+        the_shape_id = shape_par.pop('Shape', None)
         if the_shape_id is None:
-            raise ValueError(
-                'The input of the "from_str" function = {0} but does not contain the '
-                'Shape description e.g. the Key Shape:ShapeName'.format(str_val))
+            raise ValueError('The input of the "from_str" function = {0} but does not contain the '
+                             'Shape description e.g. the Key Shape:ShapeName'.format(str_val))
         theShape = anAbsorptionShape._Defined_Shapes[the_shape_id]
         theShape.material = mater_par
         theShape.shape = shape_par
         return theShape
 
     #
-    def _set_list_property(self,value,shape_name,mandatory_prop_list,opt_prop_list,opt_val_list):
+    def _set_list_property(self, value, shape_name, mandatory_prop_list, opt_prop_list, opt_val_list):
         """ General function to build list property for various absorption corrections algorithms
             taking it from various forms of users input and converting it into standard key-value
             dictionary.
@@ -277,55 +275,54 @@ class anAbsorptionShape(object):
             value = [value]
         n_elements = len(value)
         if n_elements < len(mandatory_prop_list):
-            raise TypeError(
-                '*** {0} shape parameter needes at least {1} imput parameters namely: {2}'
-                .format(shape_name,len(mandatory_prop_list),mandatory_prop_list))
+            raise TypeError('*** {0} shape parameter needes at least {1} imput parameters namely: {2}'.format(
+                shape_name, len(mandatory_prop_list), mandatory_prop_list))
 
-        shape_dict = {'Shape':shape_name}
+        shape_dict = {'Shape': shape_name}
         all_prop = mandatory_prop_list + opt_prop_list
-        if isinstance(value,(list,tuple)):
-            for i in range(0,n_elements):
+        if isinstance(value, (list, tuple)):
+            for i in range(0, n_elements):
                 val = value[i]
-                if isinstance(val,(list,tuple)):
+                if isinstance(val, (list, tuple)):
                     val = [float(x) for x in val]
                 else:
                     val = float(val)
                 shape_dict[all_prop[i]] = val
-        elif isinstance(value,dict):
-            for key,val in value.items():
-                if isinstance(val,(list,tuple)):
+        elif isinstance(value, dict):
+            for key, val in value.items():
+                if isinstance(val, (list, tuple)):
                     val = [float(x) for x in val]
                 else:
                     val = float(val)
                 shape_dict[key] = val
         else:
-            raise TypeError(
-                '*** {0} shape parameter accepts only list or tuple containing from {1} to {2}'
-                ' values corresponding to the {0} parameters: {3} or the dictionary with these,'
-                ' as recognized by SetSample algorithm Geometry property'.
-                format( shape_name,len(mandatory_prop_list),len(all_prop),all_prop))
+            raise TypeError('*** {0} shape parameter accepts only list or tuple containing from {1} to {2}'
+                            ' values corresponding to the {0} parameters: {3} or the dictionary with these,'
+                            ' as recognized by SetSample algorithm Geometry property'.format(
+                                shape_name, len(mandatory_prop_list), len(all_prop), all_prop))
         #
         if 'Axis' in shape_dict:
             self._axis_is_default = False
-        for ik in range(0,len(opt_prop_list)):
+        for ik in range(0, len(opt_prop_list)):
             if not opt_prop_list[ik] in shape_dict:
                 opt_val = opt_val_list[ik]
-                if isinstance(opt_val,types.FunctionType):
+                if isinstance(opt_val, types.FunctionType):
                     shape_dict[opt_prop_list[ik]] = opt_val(shape_dict)
                 else:
                     shape_dict[opt_prop_list[ik]] = opt_val
 
         return shape_dict
+
     #
 
-    def _check_MARI_axis_(self,workspace):
+    def _check_MARI_axis_(self, workspace):
         """ method verifies, if default axis needs to be changed for MARI"""
         if self._axis_is_default:
             instrument = workspace.getInstrument()
             instr_name = instrument.getName()
             short_n = instr_name[0:3]
             if short_n.lower() == 'mar':
-                self._ShapeDescription['Axis'] = [1.,0.,0.]
+                self._ShapeDescription['Axis'] = [1., 0., 0.]
 
 
 ##---------------------------------------------------------------------------------------------------
@@ -358,9 +355,9 @@ class Cylinder(anAbsorptionShape):
     Correct absorption on the defined cylinder using Monte-Carlo Absorption algorithm:
     ws = ads.correct_absorption(ws,{is_mc:True,AdditionalMonte-Carlo Absorption parameters});
     """
-    def __init__(self,Material=None,CylinderParams=None):
+    def __init__(self, Material=None, CylinderParams=None):
 
-        anAbsorptionShape.__init__(self,Material)
+        anAbsorptionShape.__init__(self, Material)
         self.shape = CylinderParams
         self._shape_has_axis = True
 
@@ -369,37 +366,41 @@ class Cylinder(anAbsorptionShape):
         return self._ShapeDescription
 
     @shape.setter
-    def shape(self,value):
-        shape_dict = self._set_list_property(value,
-             'Cylinder',['Height','Radius'],         # noqa
-            ['Axis','Center'],[[0.,1.,0.],[0.,0.,0.]])  # noqa
+    def shape(self, value):
+        shape_dict = self._set_list_property(
+            value,
+            'Cylinder',
+            ['Height', 'Radius'],  # noqa
+            ['Axis', 'Center'],
+            [[0., 1., 0.], [0., 0., 0.]])  # noqa
 
         self._ShapeDescription = shape_dict
 
         if len(shape_dict) != 0:
             # Test if the shape property is recognized by CreateSampleShape
             # algorithm.
-            SetSample(self._testWorkspace,Geometry=shape_dict)
+            SetSample(self._testWorkspace, Geometry=shape_dict)
+
     #
 
-    def _fast_abs_corrections(self,correction_base_ws,kwarg={}):
+    def _fast_abs_corrections(self, correction_base_ws, kwarg={}):
         """ Method to correct absorption on a shape using fast (Numerical Integration) method
         """
         kw = kwarg.copy()
-        elem_size = kw.pop('NumberOfSlices',None)
+        elem_size = kw.pop('NumberOfSlices', None)
         if elem_size is not None:
             shape_dic = self.shape
-            n_slices = int(shape_dic['Height']/elem_size)
-            if n_slices <1:
+            n_slices = int(shape_dic['Height'] / elem_size)
+            if n_slices < 1:
                 n_slices = 1
-            n_annul  = int(shape_dic['Radius']*2*3.1415926/elem_size)
+            n_annul = int(shape_dic['Radius'] * 2 * 3.1415926 / elem_size)
             if n_annul < 1:
                 n_annul = 1
             kw['NumberOfSlices'] = n_slices
             kw['NumberOfAnnuli'] = n_annul
         if 'Emode' not in kw:
             kw['Emode'] = 'Direct'
-        adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kw)
+        adsrbtn_correctios = AbsorptionCorrection(correction_base_ws, **kw)
         return adsrbtn_correctios
 
 
@@ -440,9 +441,9 @@ class FlatPlate(anAbsorptionShape):
     Correct absorption on the defined Plate using Monte-Carlo Absorption algorithm:
     ws = ads.correct_absorption(ws,{'is_mc':True,AdditionalMonte-Carlo Absorption parameters});
     """
-    def __init__(self,Material=None,PlateParams=None):
+    def __init__(self, Material=None, PlateParams=None):
 
-        anAbsorptionShape.__init__(self,Material)
+        anAbsorptionShape.__init__(self, Material)
         self.shape = PlateParams
 
     @property
@@ -450,29 +451,28 @@ class FlatPlate(anAbsorptionShape):
         return self._ShapeDescription
 
     @shape.setter
-    def shape(self,value):
-        shape_dict = self._set_list_property(value,
-            'FlatPlate',['Height','Width','Thick'],
-            ['Center','Angle'],[[0.,0.,0.],0.])  # noqa: E127
+    def shape(self, value):
+        shape_dict = self._set_list_property(value, 'FlatPlate', ['Height', 'Width', 'Thick'], ['Center', 'Angle'],
+                                             [[0., 0., 0.], 0.])  # noqa: E127
 
         self._ShapeDescription = shape_dict
 
         if len(shape_dict) != 0:
             # Test if the shape property is recognized by CreateSampleShape
             # algorithm.
-            SetSample(self._testWorkspace,Geometry=shape_dict)
+            SetSample(self._testWorkspace, Geometry=shape_dict)
 
     #
-    def _fast_abs_corrections(self,correction_base_ws,kwarg={}):
+    def _fast_abs_corrections(self, correction_base_ws, kwarg={}):
         """ Method to correct absorption on the FlatPlate using fast (Numerical Integration) method
         """
         kw = kwarg.copy()
-        prop_dict = {'Height':'SampleHeight','Width':'SampleWidth','Thick':'SampleThickness'}
-        for key,val in prop_dict.items():
+        prop_dict = {'Height': 'SampleHeight', 'Width': 'SampleWidth', 'Thick': 'SampleThickness'}
+        for key, val in prop_dict.items():
             kw[val] = self._ShapeDescription[key]
         if 'Emode' not in kw:
             kw['Emode'] = 'Direct'
-        adsrbtn_correctios = FlatPlateAbsorption(correction_base_ws,**kw)
+        adsrbtn_correctios = FlatPlateAbsorption(correction_base_ws, **kw)
         return adsrbtn_correctios
 
 
@@ -507,12 +507,13 @@ class HollowCylinder(anAbsorptionShape):
     Correct absorption on the defined cylinder using Monte-Carlo Absorption algorithm:
     ws = ads.correct_absorption(ws,{is_mc:True,AdditionalMonte-Carlo Absorption parameters});
     """
-    def __init__(self,Material=None,CylinderParams=None):
+    def __init__(self, Material=None, CylinderParams=None):
 
-        anAbsorptionShape.__init__(self,Material)
+        anAbsorptionShape.__init__(self, Material)
         self.shape = CylinderParams
         self._CanSetSample = False
         self._shape_has_axis = True
+
     #
 
     @property
@@ -520,11 +521,9 @@ class HollowCylinder(anAbsorptionShape):
         return self._ShapeDescription
 
     @shape.setter
-    def shape(self,value):
-        shape_dict = self._set_list_property(value,
-            'HollowCylinder',
-            ['Height','InnerRadius','OuterRadius'],
-            ['Axis','Center'],[[0.,1.,0.],[0.,0.,0.]])  # noqa: E127
+    def shape(self, value):
+        shape_dict = self._set_list_property(value, 'HollowCylinder', ['Height', 'InnerRadius', 'OuterRadius'],
+                                             ['Axis', 'Center'], [[0., 1., 0.], [0., 0., 0.]])  # noqa: E127
         #
         self._ShapeDescription = shape_dict
         if len(shape_dict) != 0:
@@ -533,7 +532,7 @@ class HollowCylinder(anAbsorptionShape):
             self._add_xml_hollow_cylinder(self._testWorkspace)
 
     #
-    def _add_xml_hollow_cylinder(self,ws):
+    def _add_xml_hollow_cylinder(self, ws):
         # xml shape is normaly defined in meters
         sample_xml_template = """<hollow-cylinder id="HOLL_CYL">
             <centre-of-bottom-base x="{0}" y="{1}" z="{2}" />
@@ -541,7 +540,7 @@ class HollowCylinder(anAbsorptionShape):
             <inner-radius val="{6}" />
             <outer-radius val="{7}" />
             <height val="{8}" />
-         </hollow-cylinder>"""""
+         </hollow-cylinder>""" ""
         shape_dic = self._ShapeDescription
         Cenr = [c * 0.01 for c in shape_dic['Center']]
         Axis = shape_dic['Axis']
@@ -551,21 +550,21 @@ class HollowCylinder(anAbsorptionShape):
                                        0.01 * shape_dic['InnerRadius'],
                                        0.01 * shape_dic['OuterRadius'],
                                        0.01 * shape_dic['Height'])
-        CreateSampleShape(ws,sample_shape)
+        CreateSampleShape(ws, sample_shape)
 
     #
-    def _fast_abs_corrections(self,correction_base_ws,kwarg={}):
+    def _fast_abs_corrections(self, correction_base_ws, kwarg={}):
         """ Method to correct absorption on the HollowCylinder using fast (Numerical Integration) method
         """
         self._add_xml_hollow_cylinder(correction_base_ws)
 
         if 'Emode' not in kwarg:
             kwarg['Emode'] = 'Direct'
-        adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kwarg)
+        adsrbtn_correctios = AbsorptionCorrection(correction_base_ws, **kwarg)
         return adsrbtn_correctios
 
     #
-    def _mc_abs_corrections(self,correction_base_ws,kwarg={}):
+    def _mc_abs_corrections(self, correction_base_ws, kwarg={}):
         """ Method to correct absorption on the HollowCylinder using Monte-Carlo integration
         Inputs:
          ws     -- workspace to correct. Should be in the units of wavelength
@@ -576,7 +575,7 @@ class HollowCylinder(anAbsorptionShape):
             workspace with absorption corrections.
         """
         self._add_xml_hollow_cylinder(correction_base_ws)
-        adsrbtn_correctios = MonteCarloAbsorption(correction_base_ws,**kwarg)
+        adsrbtn_correctios = MonteCarloAbsorption(correction_base_ws, **kwarg)
         return adsrbtn_correctios
 
 
@@ -614,9 +613,9 @@ class Sphere(anAbsorptionShape):
     Correct absorption on the defined Sphere using Monte-Carlo Absorption algorithm:
     ws = ads.correct_absorption(ws,{'is_mc':True,AdditionalMonte-Carlo Absorption parameters});
     """
-    def __init__(self,Material=None,SphereParams=None):
+    def __init__(self, Material=None, SphereParams=None):
 
-        anAbsorptionShape.__init__(self,Material)
+        anAbsorptionShape.__init__(self, Material)
         self.shape = SphereParams
         self._CanSetSample = False
 
@@ -627,10 +626,8 @@ class Sphere(anAbsorptionShape):
 
     #
     @shape.setter
-    def shape(self,value):
-        shape_dict = self._set_list_property(value,
-            'Sphere',['Radius'],
-            ['Center'],[[0.,0.,0.]])  # noqa: E127
+    def shape(self, value):
+        shape_dict = self._set_list_property(value, 'Sphere', ['Radius'], ['Center'], [[0., 0., 0.]])  # noqa: E127
 
         self._ShapeDescription = shape_dict
         if len(shape_dict) != 0:
@@ -638,21 +635,21 @@ class Sphere(anAbsorptionShape):
             # algorithm.
             self._add_xml_sphere(self._testWorkspace)
 
-    def _add_xml_sphere(self,ws):
+    def _add_xml_sphere(self, ws):
         # xml shape is normaly defined in meters
         sample_xml_template = """<sphere id="WHOLE_SPHERE">
             <centre x="{0}" y="{1}" z="{2}" />
             <radius val="{3}" />
-         </sphere>"""""
+         </sphere>""" ""
         shape_dic = self._ShapeDescription
         Cenr = [c * 0.01 for c in shape_dic['Center']]
         sample_shape = \
             sample_xml_template.format(Cenr[0],Cenr[1],Cenr[2],
                                        0.01 * shape_dic['Radius'])
-        CreateSampleShape(ws,sample_shape)
+        CreateSampleShape(ws, sample_shape)
 
     #
-    def _fast_abs_corrections(self,correction_base_ws,kwarg={}):
+    def _fast_abs_corrections(self, correction_base_ws, kwarg={}):
         """ Method to correct absorption on the Sphere using fast (Numerical Integration) method
             (Analytical integration) method.
             If the method is invoked without parameters, optimized SphericalAbsorption algorithm is
@@ -663,15 +660,16 @@ class Sphere(anAbsorptionShape):
         if 'Emode' not in kwarg:
             kw['Emode'] = 'Direct'
         if kw['Emode'].lower() == 'elastic':
-            adsrbtn_correctios = SphericalAbsorption(
-                correction_base_ws,SphericalSampleRadius=self._ShapeDescription['Radius'])
+            adsrbtn_correctios = SphericalAbsorption(correction_base_ws,
+                                                     SphericalSampleRadius=self._ShapeDescription['Radius'])
         else:
             self._add_xml_sphere(correction_base_ws)
-            adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kw)
+            adsrbtn_correctios = AbsorptionCorrection(correction_base_ws, **kw)
         return adsrbtn_correctios
+
     #
 
-    def _mc_abs_corrections(self,correction_base_ws,kwarg={}):
+    def _mc_abs_corrections(self, correction_base_ws, kwarg={}):
         """ Method to correct absorption on the Sphere using Monte-Carlo integration
         Inputs:
          ws     -- workspace to correct. Should be in the units of wavelength
@@ -682,7 +680,7 @@ class Sphere(anAbsorptionShape):
             workspace with absorption corrections.
         """
         self._add_xml_sphere(correction_base_ws)
-        adsrbtn_correctios = MonteCarloAbsorption(correction_base_ws,**kwarg)
+        adsrbtn_correctios = MonteCarloAbsorption(correction_base_ws, **kwarg)
         return adsrbtn_correctios
 
 

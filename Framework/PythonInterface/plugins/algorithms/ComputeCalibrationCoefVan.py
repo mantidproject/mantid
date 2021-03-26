@@ -4,8 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import (PythonAlgorithm, AlgorithmFactory,
-                        MatrixWorkspaceProperty, Progress, InstrumentValidator,
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress, InstrumentValidator,
                         ITableWorkspaceProperty)
 from mantid.kernel import Direction, FloatBoundedValidator, FloatTimeSeriesProperty, Property
 import numpy as np
@@ -17,16 +16,15 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
     """Calculate coefficients to normalize by Vanadium and correct Debye
        Waller factor
     """
-
     def __init__(self):
         """
         Init
         """
         PythonAlgorithm.__init__(self)
         self.vanaws = None
-        self.defaultT = 293.0       # K, default temperature if not given
-        self.Mvan = 50.942          # [g/mol], Vanadium molar mass
-        self.DebyeT = 389.0         # K, Debye temperature for Vanadium
+        self.defaultT = 293.0  # K, default temperature if not given
+        self.Mvan = 50.942  # [g/mol], Vanadium molar mass
+        self.DebyeT = 389.0  # K, Debye temperature for Vanadium
 
     def category(self):
         """Return category."""
@@ -42,24 +40,20 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
 
     def PyInit(self):
         """Declare properties."""
-        self.declareProperty(MatrixWorkspaceProperty(
-                             "VanadiumWorkspace", "",
-                             direction=Direction.Input,
-                             validator=InstrumentValidator()),
-                             "Input Vanadium workspace")
-        self.declareProperty(ITableWorkspaceProperty("EPPTable", "",
-                             direction=Direction.Input),
+        self.declareProperty(
+            MatrixWorkspaceProperty("VanadiumWorkspace", "", direction=Direction.Input,
+                                    validator=InstrumentValidator()), "Input Vanadium workspace")
+        self.declareProperty(ITableWorkspaceProperty("EPPTable", "", direction=Direction.Input),
                              ("Input EPP table. May be produced by FindEPP " + "algorithm."))
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
-                             direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              ("Name the workspace that will contain the " + "calibration coefficients"))
-        self.declareProperty("Temperature",
-                             defaultValue=Property.EMPTY_DBL,
-                             validator=FloatBoundedValidator(lower=0.0),
-                             direction=Direction.Input,
-                             doc=("Temperature during the experiment (in "
-                                  + "Kelvins) if temperature is not given in the sample logs "
-                                  + "or needs to be overriden."))
+        self.declareProperty(
+            "Temperature",
+            defaultValue=Property.EMPTY_DBL,
+            validator=FloatBoundedValidator(lower=0.0),
+            direction=Direction.Input,
+            doc=("Temperature during the experiment (in " + "Kelvins) if temperature is not given in the sample logs " +
+                 "or needs to be overriden."))
         self.declareProperty("EnableDWF", True, "Enable or disable the Debye-Waller correction.")
 
     def validateInputs(self):
@@ -74,8 +68,8 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
             try:
                 float(run.getProperty('wavelength').value)
             except ValueError:
-                issues['VanadiumWorkspace'] = ("Invalid value for " + "wavelength sample log. "
-                                               + "Wavelength must be a number.")
+                issues['VanadiumWorkspace'] = ("Invalid value for " + "wavelength sample log. " +
+                                               "Wavelength must be a number.")
 
         table = self.getProperty("EPPTable").value
         if table.rowCount() != inws.getNumberHistograms():
@@ -100,9 +94,9 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
             temperatureLogName = instrument.getStringParameter(LOG_ENTRY)[0]
         run = self.vanaws.getRun()
         if not run.hasProperty(temperatureLogName):
-            self.log().warning("No Temperature given and the 'temperature' " + "sample log is not present in "
-                               + self.vanaws.name()
-                               + ". T = {}K is assumed for Debye-Waller factor.".format(self.defaultT))
+            self.log().warning("No Temperature given and the 'temperature' " + "sample log is not present in " +
+                               self.vanaws.name() +
+                               ". T = {}K is assumed for Debye-Waller factor.".format(self.defaultT))
             return self.defaultT
         try:
             temperature = run.getProperty(temperatureLogName)
@@ -112,9 +106,8 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
                 temperature = float(temperature.value)
             return temperature
         except ValueError as err:
-            self.log().warning("Error of getting temperature from the "
-                               + "sample log " + err + ". T = {}K is assumed ".format(self.defaultT)
-                               + "for Debye-Waller factor.")
+            self.log().warning("Error of getting temperature from the " + "sample log " + err +
+                               ". T = {}K is assumed ".format(self.defaultT) + "for Debye-Waller factor.")
             return self.defaultT
 
     def PyExec(self):
@@ -165,8 +158,8 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         # Wavelength, Angstrom
         wlength = float(run.getLogData('wavelength').value)
         # Vanadium mass, kg
-        mass_vana = 0.001*self.Mvan/sp.constants.N_A
-        temp_ratio = temperature/self.DebyeT
+        mass_vana = 0.001 * self.Mvan / sp.constants.N_A
+        temp_ratio = temperature / self.DebyeT
 
         if temp_ratio < 1.e-3:
             integral = 0.5
@@ -176,7 +169,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
 
         msd = 3.*sp.constants.hbar**2 / \
             (2.*mass_vana*sp.constants.k * self.DebyeT)*integral*1.e20
-        return np.exp(-msd*(4.*sp.pi*sp.sin(thetasort)/wlength)**2)
+        return np.exp(-msd * (4. * sp.pi * sp.sin(thetasort) / wlength)**2)
 
 
 # Register algorithm with Mantid.

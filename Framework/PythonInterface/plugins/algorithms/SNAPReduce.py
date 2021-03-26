@@ -23,8 +23,7 @@ class SNAPReduce(DataProcessorAlgorithm):
 
     def get_IPTS_Local(self, run):
         if self.IPTS_dir is None:
-            self.IPTS_dir = GetIPTS(Instrument='SNAP',
-                                    RunNumber=str(run))
+            self.IPTS_dir = GetIPTS(Instrument='SNAP', RunNumber=str(run))
 
         return self.IPTS_dir
 
@@ -39,8 +38,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         for i in range(len(data)):
             temp = 0
             ave = 0
-            for r in range(max(0, i - int(order / 2)),
-                           min(i + int(order / 2), len(data) - 1) + 1):
+            for r in range(max(0, i - int(order / 2)), min(i + int(order / 2), len(data) - 1) + 1):
                 temp = temp + (factor - abs(r - i)) * data[r]
                 ave = ave + factor - abs(r - i)
             sm[i] = temp / ave
@@ -103,9 +101,7 @@ class SNAPReduce(DataProcessorAlgorithm):
     def _exportWorkspace(self, propName, wkspName):
         if wkspName and mtd.doesExist(wkspName):
             if not self.existsProperty(propName):
-                self.declareProperty(WorkspaceProperty(propName,
-                                                       wkspName,
-                                                       Direction.Output))
+                self.declareProperty(WorkspaceProperty(propName, wkspName, Direction.Output))
             self.log().debug('Exporting workspace through property "{}"={}'.format(propName, wkspName))
             self.setProperty(propName, wkspName)
 
@@ -114,101 +110,99 @@ class SNAPReduce(DataProcessorAlgorithm):
 
     def PyInit(self):
         validator = IntArrayBoundedValidator(lower=0)
-        self.declareProperty(IntArrayProperty("RunNumbers", values=[0], direction=Direction.Input,
-                                              validator=validator),
+        self.declareProperty(IntArrayProperty("RunNumbers", values=[0], direction=Direction.Input, validator=validator),
                              "Run numbers to process, comma separated")
-        self.declareProperty('Background', Property.EMPTY_INT,
-                             doc='Background to subtract from each individual run')
+        self.declareProperty('Background', Property.EMPTY_INT, doc='Background to subtract from each individual run')
 
-        self.declareProperty("LiveData", False,
-                             "Read live data - requires a saved run in the current IPTS "
-                             + "with the same Instrument configuration as the live run")
+        self.declareProperty(
+            "LiveData", False, "Read live data - requires a saved run in the current IPTS " +
+            "with the same Instrument configuration as the live run")
 
-        mask = ["None", "Horizontal", "Vertical",
-                "Masking Workspace", "Custom - xml masking file"]
-        self.declareProperty("Masking", "None", StringListValidator(mask),
-                             "Mask to be applied to the data")
+        mask = ["None", "Horizontal", "Vertical", "Masking Workspace", "Custom - xml masking file"]
+        self.declareProperty("Masking", "None", StringListValidator(mask), "Mask to be applied to the data")
 
-        self.declareProperty(WorkspaceProperty("MaskingWorkspace", "",
-                                               Direction.Input, PropertyMode.Optional),
+        self.declareProperty(WorkspaceProperty("MaskingWorkspace", "", Direction.Input, PropertyMode.Optional),
                              "The workspace containing the mask.")
 
-        self.declareProperty(FileProperty(name="MaskingFilename", defaultValue="",
+        self.declareProperty(FileProperty(name="MaskingFilename",
+                                          defaultValue="",
                                           direction=Direction.Input,
                                           action=FileAction.OptionalLoad),
                              doc="The file containing the xml mask.")
 
-        self.declareProperty(name="Calibration", defaultValue="Convert Units",
-                             validator=StringListValidator(
-                                 ['Convert Units', 'Calibration File', 'DetCal File']),
+        self.declareProperty(name="Calibration",
+                             defaultValue="Convert Units",
+                             validator=StringListValidator(['Convert Units', 'Calibration File', 'DetCal File']),
                              direction=Direction.Input,
                              doc="The type of conversion to d_spacing to be used.")
 
-        self.declareProperty(FileProperty(name="CalibrationFilename", defaultValue="",
+        self.declareProperty(FileProperty(name="CalibrationFilename",
+                                          defaultValue="",
                                           extensions=['.h5', '.cal'],
                                           direction=Direction.Input,
                                           action=FileAction.OptionalLoad),
                              doc="The calibration file to convert to d_spacing.")
 
-        self.declareProperty(MultipleFileProperty(name='DetCalFilename',
-                                                  extensions=['.detcal'], action=FileAction.OptionalLoad),
-                             'ISAW DetCal file')
+        self.declareProperty(
+            MultipleFileProperty(name='DetCalFilename', extensions=['.detcal'], action=FileAction.OptionalLoad),
+            'ISAW DetCal file')
 
         self.declareProperty(FloatArrayProperty("Binning", [0.5, -0.004, 7.0]),
                              "Min, Step, and Max of d-space bins.  Logarithmic binning is used if Step is negative.")
 
-        nor_corr = ["None", "From Workspace",
-                    "From Processed Nexus", "Extracted from Data"]
-        self.declareProperty("Normalization", nor_corr[0], StringListValidator(nor_corr),
-                             "If needed what type of input to use as normalization, Extracted from "
-                             + "Data uses a background determination that is peak independent.This "
-                             + "implemantation can be tested in algorithm SNAP Peak Clipping Background")
+        nor_corr = ["None", "From Workspace", "From Processed Nexus", "Extracted from Data"]
+        self.declareProperty(
+            "Normalization", nor_corr[0], StringListValidator(nor_corr),
+            "If needed what type of input to use as normalization, Extracted from " +
+            "Data uses a background determination that is peak independent.This " +
+            "implemantation can be tested in algorithm SNAP Peak Clipping Background")
 
-        self.declareProperty(FileProperty(name="NormalizationFilename", defaultValue="",
+        self.declareProperty(FileProperty(name="NormalizationFilename",
+                                          defaultValue="",
                                           direction=Direction.Input,
                                           action=FileAction.OptionalLoad),
                              doc="The file containing the processed nexus for normalization.")
 
-        self.declareProperty(WorkspaceProperty("NormalizationWorkspace", "",
-                                               Direction.Input, PropertyMode.Optional),
+        self.declareProperty(WorkspaceProperty("NormalizationWorkspace", "", Direction.Input, PropertyMode.Optional),
                              "The workspace containing the normalization data.")
 
-        self.declareProperty("PeakClippingWindowSize", 10,
-                             "Read live data - requires a saved run in the current "
-                             + "IPTS with the same Instrumnet configuration")
+        self.declareProperty(
+            "PeakClippingWindowSize", 10,
+            "Read live data - requires a saved run in the current " + "IPTS with the same Instrumnet configuration")
 
-        self.declareProperty("SmoothingRange", 10,
-                             "Read live data - requires a saved run in the "
-                             + "current IPTS with the same Instrumnet configuration")
+        self.declareProperty(
+            "SmoothingRange", 10,
+            "Read live data - requires a saved run in the " + "current IPTS with the same Instrumnet configuration")
 
         grouping = ["All", "Column", "Banks", "Modules", "2_4 Grouping"]
-        self.declareProperty("GroupDetectorsBy", grouping[0], StringListValidator(grouping),
-                             "Detector groups to use for future focussing: "
-                             + "All detectors as one group, Groups (East,West for "
-                             + "SNAP), Columns for SNAP, detector banks")
+        self.declareProperty(
+            "GroupDetectorsBy", grouping[0], StringListValidator(grouping),
+            "Detector groups to use for future focussing: " + "All detectors as one group, Groups (East,West for " +
+            "SNAP), Columns for SNAP, detector banks")
 
         self.declareProperty("MaxChunkSize", 16.,
                              "Specify maximum Gbytes of file to read in one chunk. Zero reads the whole file at once.")
 
         mode = ["Set-Up", "Production"]
-        self.declareProperty("ProcessingMode", mode[1], StringListValidator(mode),
-                             "Set-Up Mode is used for establishing correct parameters. Production "
-                             + "Mode only Normalized workspace is kept for each run.")
+        self.declareProperty(
+            "ProcessingMode", mode[1], StringListValidator(mode),
+            "Set-Up Mode is used for establishing correct parameters. Production " +
+            "Mode only Normalized workspace is kept for each run.")
 
         final_units = ['dSpacing', 'MomentumTransfer', 'Wavelength']
         self.declareProperty("FinalUnits", final_units[0], StringListValidator(final_units),
                              "Units to convert the data to at the end of processing")
 
-        self.declareProperty(name="OptionalPrefix", defaultValue="",
+        self.declareProperty(name="OptionalPrefix",
+                             defaultValue="",
                              direction=Direction.Input,
                              doc="Optional Prefix to be added to workspaces and output filenames")
 
-        self.declareProperty("SaveData", False,
-                             "Save data in the following formats: Ascii- "
-                             + "d-spacing ,Nexus Processed,GSAS and Fullprof")
+        self.declareProperty(
+            "SaveData", False,
+            "Save data in the following formats: Ascii- " + "d-spacing ,Nexus Processed,GSAS and Fullprof")
 
-        self.declareProperty(FileProperty(name="OutputDirectory", defaultValue="",
-                                          action=FileAction.OptionalDirectory),
+        self.declareProperty(FileProperty(name="OutputDirectory", defaultValue="", action=FileAction.OptionalDirectory),
                              doc='Default value is proposal shared directory')
 
     def validateInputs(self):
@@ -224,8 +218,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         elif masking in ("Custom - xml masking file"):
             filename = self.getProperty("MaskingFilename").value
             if len(filename) <= 0:
-                issues[
-                    "MaskingFilename"] = "Masking=\"%s\" requires a filename" % masking
+                issues["MaskingFilename"] = "Masking=\"%s\" requires a filename" % masking
         elif masking == "Masking Workspace":
             mask_workspace = self.getPropertyValue("MaskingWorkspace")
             if mask_workspace is None or len(mask_workspace) <= 0:
@@ -309,10 +302,9 @@ class SNAPReduce(DataProcessorAlgorithm):
             if group == '2_4 Grouping':
                 group = '2_4_Grouping'
 
-            if not metaWS :
+            if not metaWS:
                 metaWS = self._loadMetaWS(runnumber)
-            CreateGroupingWorkspace(InputWorkspace=metaWS, GroupDetectorsBy=real_name,
-                                    OutputWorkspace=group)
+            CreateGroupingWorkspace(InputWorkspace=metaWS, GroupDetectorsBy=real_name, OutputWorkspace=group)
             progress.report('create grouping')
         else:
             progress.report()
@@ -332,8 +324,13 @@ class SNAPReduce(DataProcessorAlgorithm):
             n_histo = peak_clip_WS.getNumberHistograms()
 
             for h in range(n_histo):
-                peak_clip_WS.setY(h, self.peak_clip(peak_clip_WS.readY(h), win=window, decrese=True,
-                                                    LLS=True, smooth_window=smooth_range))
+                peak_clip_WS.setY(
+                    h,
+                    self.peak_clip(peak_clip_WS.readY(h),
+                                   win=window,
+                                   decrese=True,
+                                   LLS=True,
+                                   smooth_window=smooth_range))
             return str(peak_clip_WS)
         else:  # other values are already held in normWS
             return normWS
@@ -350,35 +347,34 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         self.log().notice('Writing to \'' + saveDir + '\'')
 
-        SaveNexusProcessed(InputWorkspace=outputWksp,
-                           Filename=os.path.join(saveDir, 'nexus', basename + '.nxs'))
-        SaveAscii(InputWorkspace=outputWksp,
-                  Filename=os.path.join(saveDir, 'd_spacing', basename + '.dat'))
-        ConvertUnits(InputWorkspace=outputWksp, OutputWorkspace='WS_tof',
-                     Target="TOF", AlignBins=False)
+        SaveNexusProcessed(InputWorkspace=outputWksp, Filename=os.path.join(saveDir, 'nexus', basename + '.nxs'))
+        SaveAscii(InputWorkspace=outputWksp, Filename=os.path.join(saveDir, 'd_spacing', basename + '.dat'))
+        ConvertUnits(InputWorkspace=outputWksp, OutputWorkspace='WS_tof', Target="TOF", AlignBins=False)
 
         # GSAS and FullProf require data in time-of-flight
         SaveGSS(InputWorkspace='WS_tof',
                 Filename=os.path.join(saveDir, 'gsas', basename + '.gsa'),
-                Format='SLOG', SplitFiles=False, Append=False, ExtendedHeader=True)
+                Format='SLOG',
+                SplitFiles=False,
+                Append=False,
+                ExtendedHeader=True)
         SaveFocusedXYE(InputWorkspace='WS_tof',
-                       Filename=os.path.join(
-                           saveDir, 'fullprof', basename + '.dat'),
-                       SplitFiles=True, Append=False)
+                       Filename=os.path.join(saveDir, 'fullprof', basename + '.dat'),
+                       SplitFiles=True,
+                       Append=False)
         DeleteWorkspace(Workspace='WS_tof')
 
     def _loadMetaWS(self, runnumber):
         # currently only event nexus files are supported
         wsname = '__meta_SNAP_{}'.format(runnumber)
-        LoadEventNexus(Filename='SNAP' + str(runnumber), OutputWorkspace=wsname,
-                       MetaDataOnly=True, LoadLogs=False)
+        LoadEventNexus(Filename='SNAP' + str(runnumber), OutputWorkspace=wsname, MetaDataOnly=True, LoadLogs=False)
         return wsname
 
     def _alignAndFocus(self, filename, wkspname, detCalFilename, withUnfocussed, progStart, progDelta):
         # create the unfocussed name
         if withUnfocussed:
             unfocussed = wkspname.replace('_red', '')
-            unfocussed = unfocussed+'_d'
+            unfocussed = unfocussed + '_d'
         else:
             unfocussed = ''
 
@@ -386,32 +382,36 @@ class SNAPReduce(DataProcessorAlgorithm):
         if detCalFilename:
             progEnd = progStart + .45 * progDelta
             # have to load and override the instrument here
-            Load(Filename=filename, OutputWorkspace=wkspname,
-                 startProgress=progStart, endProgress=progEnd)
+            Load(Filename=filename, OutputWorkspace=wkspname, startProgress=progStart, endProgress=progEnd)
             progStart = progEnd
             progEnd += .45 * progDelta
 
             LoadIsawDetCal(InputWorkspace=wkspname, Filename=detCalFilename)
 
-            AlignAndFocusPowder(InputWorkspace=wkspname, OutputWorkspace=wkspname,
-                                UnfocussedWorkspace=unfocussed,  # can be empty string
-                                startProgress=progStart,
-                                endProgress=progEnd,
-                                **self.alignAndFocusArgs)
+            AlignAndFocusPowder(
+                InputWorkspace=wkspname,
+                OutputWorkspace=wkspname,
+                UnfocussedWorkspace=unfocussed,  # can be empty string
+                startProgress=progStart,
+                endProgress=progEnd,
+                **self.alignAndFocusArgs)
             progStart = progEnd
         else:
             progEnd = progStart + .9 * progDelta
             # pass all of the work to the child algorithm
-            AlignAndFocusPowderFromFiles(Filename=filename, OutputWorkspace=wkspname ,
-                                         MaxChunkSize=self.chunkSize,
-                                         UnfocussedWorkspace=unfocussed,  # can be empty string
-                                         startProgress=progStart,
-                                         endProgress=progEnd,
-                                         **self.alignAndFocusArgs)
+            AlignAndFocusPowderFromFiles(
+                Filename=filename,
+                OutputWorkspace=wkspname,
+                MaxChunkSize=self.chunkSize,
+                UnfocussedWorkspace=unfocussed,  # can be empty string
+                startProgress=progStart,
+                endProgress=progEnd,
+                **self.alignAndFocusArgs)
             progStart = progEnd
 
         progEnd = progStart + .1 * progDelta
-        NormaliseByCurrent(InputWorkspace=wkspname, OutputWorkspace=wkspname,
+        NormaliseByCurrent(InputWorkspace=wkspname,
+                           OutputWorkspace=wkspname,
                            startProgress=progStart,
                            endProgress=progEnd)
 
@@ -424,13 +424,14 @@ class SNAPReduce(DataProcessorAlgorithm):
         self.chunkSize = self.getProperty('MaxChunkSize').value
 
         # default arguments for AlignAndFocusPowder
-        self.alignAndFocusArgs = {'Tmin': 0,
-                                  'TMax': 50000,
-                                  'RemovePromptPulseWidth': 1600,
-                                  'PreserveEvents': False,
-                                  'Dspacing': True,  # binning parameters in d-space
-                                  'Params': self.getProperty("Binning").value,
-                                  }
+        self.alignAndFocusArgs = {
+            'Tmin': 0,
+            'TMax': 50000,
+            'RemovePromptPulseWidth': 1600,
+            'PreserveEvents': False,
+            'Dspacing': True,  # binning parameters in d-space
+            'Params': self.getProperty("Binning").value,
+        }
 
         # workspace for loading metadata only to be used in LoadDiffCal and
         # CreateGroupingWorkspace
@@ -444,7 +445,8 @@ class SNAPReduce(DataProcessorAlgorithm):
             LoadDiffCal(Filename=self.getPropertyValue("CalibrationFilename"),
                         WorkspaceName='SNAP',
                         InputWorkspace=metaWS,
-                        MakeGroupingWorkspace=False, MakeMaskWorkspace=False)
+                        MakeGroupingWorkspace=False,
+                        MakeMaskWorkspace=False)
             self.alignAndFocusArgs['CalibrationWorkspace'] = 'SNAP_cal'
         elif calib == 'DetCal File':
             detcalFile = ','.join(self.getProperty('DetCalFilename').value)
@@ -476,7 +478,7 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         Tag = 'SNAP'
         progStart = .25
-        progDelta = (1.-progStart)/len(in_Runs)
+        progDelta = (1. - progStart) / len(in_Runs)
 
         # --------------------------- PROCESS BACKGROUND ----------------------
         if not self.getProperty('Background').isDefault:
@@ -485,10 +487,11 @@ class SNAPReduce(DataProcessorAlgorithm):
             background = 'SNAP_{}'.format(self.getProperty('Background').value)
             self.log().notice("processing run background {}".format(background))
             background, unfocussedBkgd = self._alignAndFocus(background,
-                                                             background+'_bkgd_red',
+                                                             background + '_bkgd_red',
                                                              detCalFilename=detcalFile,
                                                              withUnfocussed=(Process_Mode == 'Set-Up'),
-                                                             progStart=progStart, progDelta=progDelta)
+                                                             progStart=progStart,
+                                                             progDelta=progDelta)
         else:
             background = None
             unfocussedBkgd = ''
@@ -508,7 +511,8 @@ class SNAPReduce(DataProcessorAlgorithm):
                                                         basename + '_red',
                                                         detCalFilename=detcalFile,
                                                         withUnfocussed=(Process_Mode == 'Set-Up'),
-                                                        progStart=progStart, progDelta=progDelta*.5)
+                                                        progStart=progStart,
+                                                        progDelta=progDelta * .5)
             progStart += .5 * progDelta
 
             # subtract the background if it was supplied
@@ -518,39 +522,40 @@ class SNAPReduce(DataProcessorAlgorithm):
                 # intentionally don't subtract the unfocussed workspace since it hasn't been normalized by counting time
 
             # the rest takes up .25 percent of the run processing
-            progress = Progress(self, progStart, progStart+.25*progDelta, 2)
+            progress = Progress(self, progStart, progStart + .25 * progDelta, 2)
 
             # AlignAndFocusPowder leaves the data in time-of-flight
             ConvertUnits(InputWorkspace=redWS, OutputWorkspace=redWS, Target='dSpacing', EMode='Elastic')
 
             # Edit instrument geometry to make final workspace smaller on disk
-            det_table = PreprocessDetectorsToMD(Inputworkspace=redWS,
-                                                OutputWorkspace='__SNAP_det_table')
+            det_table = PreprocessDetectorsToMD(Inputworkspace=redWS, OutputWorkspace='__SNAP_det_table')
             polar = np.degrees(det_table.column('TwoTheta'))
             azi = np.degrees(det_table.column('Azimuthal'))
-            EditInstrumentGeometry(Workspace=redWS, L2=det_table.column('L2'),
-                                   Polar=polar, Azimuthal=azi)
+            EditInstrumentGeometry(Workspace=redWS, L2=det_table.column('L2'), Polar=polar, Azimuthal=azi)
             mtd.remove('__SNAP_det_table')
             progress.report('simplify geometry')
 
             # AlignAndFocus doesn't necessarily rebin the data correctly
             if Process_Mode == "Set-Up":
-                Rebin(InputWorkspace=unfocussedWksp, Params=self.alignAndFocusArgs['Params'],
+                Rebin(InputWorkspace=unfocussedWksp,
+                      Params=self.alignAndFocusArgs['Params'],
                       Outputworkspace=unfocussedWksp)
                 if background:
-                    Rebin(InputWorkspace=unfocussedBkgd, Params=self.alignAndFocusArgs['Params'],
+                    Rebin(InputWorkspace=unfocussedBkgd,
+                          Params=self.alignAndFocusArgs['Params'],
                           Outputworkspace=unfocussedBkgd)
             # normalize the data as requested
             normalizationWS = self._generateNormalization(redWS, norm, normalizationWS)
             normalizedWS = None
             if normalizationWS is not None:
                 normalizedWS = basename + '_nor'
-                Divide(LHSWorkspace=redWS, RHSWorkspace=normalizationWS,
-                       OutputWorkspace=normalizedWS)
+                Divide(LHSWorkspace=redWS, RHSWorkspace=normalizationWS, OutputWorkspace=normalizedWS)
                 ReplaceSpecialValues(Inputworkspace=normalizedWS,
                                      OutputWorkspace=normalizedWS,
-                                     NaNValue='0', NaNError='0',
-                                     InfinityValue='0', InfinityError='0')
+                                     NaNValue='0',
+                                     NaNError='0',
+                                     InfinityValue='0',
+                                     InfinityError='0')
                 progress.report('normalized')
             else:
                 progress.report()
@@ -569,7 +574,9 @@ class SNAPReduce(DataProcessorAlgorithm):
             self._save(runnumber, basename, outputWksp)
 
             # set workspace as an output so it gets history
-            ConvertUnits(InputWorkspace=str(outputWksp), OutputWorkspace=str(outputWksp), Target=finalUnits,
+            ConvertUnits(InputWorkspace=str(outputWksp),
+                         OutputWorkspace=str(outputWksp),
+                         Target=finalUnits,
                          EMode='Elastic')
             self._exportWorkspace('OutputWorkspace_' + str(outputWksp), outputWksp)
 
@@ -577,14 +584,17 @@ class SNAPReduce(DataProcessorAlgorithm):
             if Process_Mode != "Production":
                 propprefix = 'OutputWorkspace_{:d}_'.format(i)
                 propNames = [propprefix + it for it in ['d', 'norm', 'normalizer']]
-                wkspNames = ['%s_%s_d' % (new_Tag, runnumber),
-                             basename + '_red',
-                             '%s_%s_normalizer' % (new_Tag, runnumber)]
+                wkspNames = [
+                    '%s_%s_d' % (new_Tag, runnumber), basename + '_red',
+                    '%s_%s_normalizer' % (new_Tag, runnumber)
+                ]
                 for (propName, wkspName) in zip(propNames, wkspNames):
                     self._exportWorkspace(propName, wkspName)
 
         if background:
-            ConvertUnits(InputWorkspace=str(background), OutputWorkspace=str(background), Target=finalUnits,
+            ConvertUnits(InputWorkspace=str(background),
+                         OutputWorkspace=str(background),
+                         Target=finalUnits,
                          EMode='Elastic')
             prefix = 'OutputWorkspace_{}'.format(len(in_Runs))
             propNames = [prefix + it for it in ['', '_d']]

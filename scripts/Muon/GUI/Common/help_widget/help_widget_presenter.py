@@ -8,7 +8,6 @@ from Muon.GUI.Common.help_widget.help_widget_view import HelpWidgetView
 
 
 class HelpWidgetPresenter(object):
-
     def __init__(self, view):
         self._view = view
 

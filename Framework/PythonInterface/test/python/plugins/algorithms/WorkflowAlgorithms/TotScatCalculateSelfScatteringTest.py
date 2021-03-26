@@ -10,14 +10,15 @@ from isis_powder import SampleDetails
 
 
 class TotScatCalculateSelfScatteringTest(unittest.TestCase):
-
     def setUp(self):
         sample_details = SampleDetails(height=4.0, radius=0.2985, center=[0, 0, 0], shape='cylinder')
         sample_details.set_material(chemical_formula='Si')
-        self.geometry = {'Shape': 'Cylinder',
-                         'Height': sample_details.height(),
-                         'Radius': sample_details.radius(),
-                         'Center': sample_details.center()}
+        self.geometry = {
+            'Shape': 'Cylinder',
+            'Height': sample_details.height(),
+            'Radius': sample_details.radius(),
+            'Center': sample_details.center()
+        }
 
         material = sample_details.material_object
         material_json = {'ChemicalFormula': material.chemical_formula}

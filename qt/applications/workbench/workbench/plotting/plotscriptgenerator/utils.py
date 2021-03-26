@@ -31,8 +31,7 @@ def convert_value_to_arg_string(value):
     if isinstance(value, dict):
         kv_pairs = []
         for key, val in value.items():
-            kv_pairs.append("{}: {}".format(convert_value_to_arg_string(key),
-                                            convert_value_to_arg_string(val)))
+            kv_pairs.append("{}: {}".format(convert_value_to_arg_string(key), convert_value_to_arg_string(val)))
         return "{{{}}}".format(', '.join(kv_pairs))
     if isinstance(value, (float, np.float)):
         return str(round_to_sig_figs(value, 5))
@@ -76,8 +75,7 @@ def clean_variable_name(name):
 
 def sorted_lines_in(ax, artists):
     lines = ax.get_lines()
-    err_containers = [cont for cont in ax.containers
-                      if isinstance(cont, ErrorbarContainer)]
+    err_containers = [cont for cont in ax.containers if isinstance(cont, ErrorbarContainer)]
     sorted_lines = []
     for line in lines + err_containers:
         if line in artists:

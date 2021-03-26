@@ -20,10 +20,10 @@ from scipy import constants
 
 # Some global constants
 SIGMA2FWHM = 2 * np.sqrt(2 * np.log(2))
-SIGMA2FWHMSQ = SIGMA2FWHM ** 2
-E2V = np.sqrt((constants.e / 1000) * 2 / constants.neutron_mass) # v = E2V * sqrt(E)    veloc in m/s, E in meV
-E2L = 1.e23 * constants.h**2 / (2 * constants.m_n * constants.e) # lam = sqrt(E2L / E)  lam in Angst, E in meV
-E2K = constants.e * 2 * constants.m_n / constants.hbar**2 / 1e23 # k = sqrt(E2K * E)    k in 1/Angst, E in meV
+SIGMA2FWHMSQ = SIGMA2FWHM**2
+E2V = np.sqrt((constants.e / 1000) * 2 / constants.neutron_mass)  # v = E2V * sqrt(E)    veloc in m/s, E in meV
+E2L = 1.e23 * constants.h**2 / (2 * constants.m_n * constants.e)  # lam = sqrt(E2L / E)  lam in Angst, E in meV
+E2K = constants.e * 2 * constants.m_n / constants.hbar**2 / 1e23  # k = sqrt(E2K * E)    k in 1/Angst, E in meV
 
 
 def wrap_attributes(obj, inval, allowed_var_names):
@@ -49,7 +49,8 @@ def _check_input(self, *args):
     defval = [self.ei, self.frequency]
     retval = [defval[i] if args[i] is None else args[i] for i in range(min([len(defval), len(args)]))]
     if [v for v in retval if v is None]:
-        raise ValueError('%s has not been specified.' % (vtype[[i for i in range(len(retval)) if retval[i] is None][0]]))
+        raise ValueError('%s has not been specified.' % (vtype[[i
+                                                                for i in range(len(retval)) if retval[i] is None][0]]))
     return tuple(retval) if len(retval) > 1 else retval[0]
 
 
@@ -59,18 +60,18 @@ def soft_hat(x, p):
     ! For rescaling t-mod at low energy to account for broader moderator term
     """
     x = np.array(x)
-    sig2fwhh = np.sqrt(8*np.log(2))
+    sig2fwhh = np.sqrt(8 * np.log(2))
     height, grad, x1, x2 = tuple(p[:4])
-    sig1, sig2 = tuple(np.abs(p[4:6]/sig2fwhh))
+    sig1, sig2 = tuple(np.abs(p[4:6] / sig2fwhh))
     # linearly interpolate sig for x1<x<x2
-    sig = ((x2-x)*sig1-(x1-x)*sig2)/(x2-x1)
+    sig = ((x2 - x) * sig1 - (x1 - x) * sig2) / (x2 - x1)
     if np.shape(sig):
         sig[x < x1] = sig1
         sig[x > x2] = sig2
     # calculate blurred hat function with gradient
-    e1 = (x1-x) / (np.sqrt(2)*sig)
-    e2 = (x2-x) / (np.sqrt(2)*sig)
-    y = (erf(e2)-erf(e1)) * ((height+grad*(x-(x2+x1)/2))/2)
+    e1 = (x1 - x) / (np.sqrt(2) * sig)
+    e2 = (x2 - x) / (np.sqrt(2) * sig)
+    y = (erf(e2) - erf(e1)) * ((height + grad * (x - (x2 + x1) / 2)) / 2)
     y = y + 1
     return y
 
@@ -106,10 +107,11 @@ class ChopperSystem(object):
     Class which represents a set (list) of choppers in a line
     """
 
-    __allowed_var_names = ['name', 'chop_sam', 'sam_det', 'aperture_width', 'aperture_height', 'choppers', 'variants',
-                           'frequency_matrix', 'constant_frequencies', 'max_frequencies', 'default_frequencies',
-                           'source_rep', 'n_frame', 'emission_time', 'overlap_ei_frac', 'ei_limits',
-                           'flux_ref_slot', 'flux_ref_freq', 'frequency_names']
+    __allowed_var_names = [
+        'name', 'chop_sam', 'sam_det', 'aperture_width', 'aperture_height', 'choppers', 'variants', 'frequency_matrix',
+        'constant_frequencies', 'max_frequencies', 'default_frequencies', 'source_rep', 'n_frame', 'emission_time',
+        'overlap_ei_frac', 'ei_limits', 'flux_ref_slot', 'flux_ref_freq', 'frequency_names'
+    ]
 
     def __init__(self, inval=None):
         # Default values
@@ -149,33 +151,36 @@ class ChopperSystem(object):
                 self.isFermi = True
                 self.idxFermi = idx
                 self.packages = {key: FermiChopper(val) for key, val in list(chopper['packages'].items())}
-                self.nslot.append(1)    # Assume Fermi chopper is curved, will not transmit PI pulse.
+                self.nslot.append(1)  # Assume Fermi chopper is curved, will not transmit PI pulse.
                 self.slot_ang_pos.append(None)
                 self.slot_width.append(10.)
                 self.guide_width.append(10.)
                 self.radius.append(290.)
                 self.numDisk.append(1)
             else:
-                self.nslot.append(
-                    chopper['nslot'] if ('nslot' in chopper and chopper['nslot']) else len(chopper['slot_ang_pos']))
+                self.nslot.append(chopper['nslot'] if (
+                    'nslot' in chopper and chopper['nslot']) else len(chopper['slot_ang_pos']))
                 self.slot_ang_pos.append(chopper['slot_ang_pos'] if ('slot_ang_pos' in chopper) else None)
                 self.slot_width.append(chopper['slot_width'])
                 self.guide_width.append(chopper['guide_width'])
                 self.radius.append(chopper['radius'])
                 self.numDisk.append(2 if ('isDouble' in chopper and chopper['isDouble']) else 1)
-                self.isPhaseIndependent.append(
-                    True if ('isPhaseIndependent' in chopper and chopper['isPhaseIndependent']) else False)
+                self.isPhaseIndependent.append(True if (
+                    'isPhaseIndependent' in chopper and chopper['isPhaseIndependent']) else False)
                 self.defaultPhase.append(chopper['defaultPhase'] if 'defaultPhase' in chopper else None)
-                self.phaseNames.append(chopper['phaseName'] if 'phaseName' in chopper else 'Chopper %d phase delay time' % (idx))
+                self.phaseNames.append(chopper['phaseName'] if 'phaseName' in
+                                       chopper else 'Chopper %d phase delay time' % (idx))
         if not any(self.slot_ang_pos):
             self.slot_ang_pos = None
         self.isPhaseIndependent = [ii for ii in range(len(self.isPhaseIndependent)) if self.isPhaseIndependent[ii]]
         self.defaultPhase = [self.defaultPhase[ii] for ii in self.isPhaseIndependent]
         self.phaseNames = [self.phaseNames[ii] for ii in self.isPhaseIndependent]
-        source_rep = self.source_rep if (not hasattr(self, 'n_frame') or self.n_frame == 1) else [self.source_rep, self.n_frame]
-        self._instpar = [self.distance, self.nslot, self.slot_ang_pos, self.slot_width, self.guide_width, self.radius,
-                         self.numDisk, self.sam_det, self.chop_sam, source_rep, self.emission_time,
-                         self.overlap_ei_frac, self.isPhaseIndependent]
+        source_rep = self.source_rep if (not hasattr(self, 'n_frame')
+                                         or self.n_frame == 1) else [self.source_rep, self.n_frame]
+        self._instpar = [
+            self.distance, self.nslot, self.slot_ang_pos, self.slot_width, self.guide_width, self.radius, self.numDisk,
+            self.sam_det, self.chop_sam, source_rep, self.emission_time, self.overlap_ei_frac, self.isPhaseIndependent
+        ]
         if self.isFermi:
             self.package = list(self.packages.keys())[0]
 
@@ -193,7 +198,9 @@ class ChopperSystem(object):
             self._variant_defaults[key] = copy.deepcopy(getattr(self, key))
         if '_variant' not in self.__dict__:
             self._default_variant = list(self.variants.keys())[0]
-            warnings.warn('No default variants defined. Using ''%s'' as default' % (self._default_variant), SyntaxWarning)
+            warnings.warn('No default variants defined. Using '
+                          '%s'
+                          ' as default' % (self._default_variant), SyntaxWarning)
             self.variant = self._default_variant
 
     # Define getters/setters here to be backwards compatible with old PyChop2. Actually use properties underneath
@@ -273,7 +280,7 @@ class ChopperSystem(object):
         if frequency:
             oldfreq = self.freq
             self.setFrequency(frequency)
-        Eis, _,  _, lines, chop_times = tuple(self._MulpyRepDriver(Ei_in, calc_res=False))
+        Eis, _, _, lines, chop_times = tuple(self._MulpyRepDriver(Ei_in, calc_res=False))
         if frequency:
             self.setFrequency(oldfreq)
         modSamDist = self.distance[-1] + self.chop_sam
@@ -291,7 +298,7 @@ class ChopperSystem(object):
         plt.plot(limits, [totDist, totDist], c='k', linewidth=2.)
         for i in range(len(lines)):
             x0 = (-lines[i][0][1] / lines[i][0][0] - lines[i][1][1] / lines[i][1][0]) / 2.
-            x1 = ((modSamDist-lines[i][0][1]) / lines[i][0][0] + (modSamDist-lines[i][1][1]) / lines[i][1][0]) / 2.
+            x1 = ((modSamDist - lines[i][0][1]) / lines[i][0][0] + (modSamDist - lines[i][1][1]) / lines[i][1][0]) / 2.
             if (np.abs(x0) > 500):
                 if first_rep:
                     continue
@@ -299,16 +306,20 @@ class ChopperSystem(object):
             else:
                 maincolor = 'b'
             plt.plot([x0, x1], [0, modSamDist], c=maincolor)
-            x2 = ((totDist-lines[i][0][1]) / lines[i][0][0] + (totDist-lines[i][1][1]) / lines[i][1][0]) / 2.
+            x2 = ((totDist - lines[i][0][1]) / lines[i][0][0] + (totDist - lines[i][1][1]) / lines[i][1][0]) / 2.
             lineM = totDist / (x2 - x0)
             plt.plot([x1, x2], [modSamDist, totDist], c=maincolor)
-            newline = [lineM * np.sqrt(1 + self.overlap_ei_frac), modSamDist - lineM * np.sqrt(1 + self.overlap_ei_frac) * x1]
-            x3 = (totDist-newline[1]) / (newline[0])
+            newline = [
+                lineM * np.sqrt(1 + self.overlap_ei_frac), modSamDist - lineM * np.sqrt(1 + self.overlap_ei_frac) * x1
+            ]
+            x3 = (totDist - newline[1]) / (newline[0])
             plt.plot([x1, x3], [modSamDist, totDist], c='r')
-            newline = [lineM * np.sqrt(1 - self.overlap_ei_frac), modSamDist - lineM * np.sqrt(1 - self.overlap_ei_frac) * x1]
-            x4 = (totDist-newline[1]) / (newline[0])
+            newline = [
+                lineM * np.sqrt(1 - self.overlap_ei_frac), modSamDist - lineM * np.sqrt(1 - self.overlap_ei_frac) * x1
+            ]
+            x4 = (totDist - newline[1]) / (newline[0])
             plt.plot([x1, x4], [modSamDist, totDist], c='r')
-            plt.text(x2, totDist+0.2, "{:3.1f}".format(Eis[i]))
+            plt.text(x2, totDist + 0.2, "{:3.1f}".format(Eis[i]))
         if h_plt is None:
             plt.xlim(0, xmax)
             plt.xlabel(r'TOF ($\mu$sec)')
@@ -333,7 +344,8 @@ class ChopperSystem(object):
             return (wd[0]**2, wd[1]**2) if squared else wd
 
     def getDistances(self):
-        """ Returns the (mod->final_chop, aperture->final, chop->sam, sam->det, mod-first_chop) distances for instrument """
+        """ Returns the (mod->final_chop, aperture->final, chop->sam, sam->det, mod-first_chop) distances for
+        instrument """
         mod_chop = self.choppers[-1]['distance']
         ap_chop = self.choppers[-1]['aperture_distance'] if ('aperture_distance' in self.choppers[-1]) else mod_chop
         return (mod_chop, ap_chop, self.chop_sam, self.sam_det, self.choppers[0]['distance'])
@@ -344,12 +356,12 @@ class ChopperSystem(object):
         freq = frequency if frequency is not None else self._long_frequency[-1]
         if self.isFermi:
             x0, x1 = (self.choppers[-1]['distance'], self.chop_sam)
-            magic = (84403.06 / x0 / (x1 + x0))          # Some magical conversion factor (??)
-            fudge = self.packages[self.package].fluxcorr # A chopper package dependent fudge factor
+            magic = (84403.06 / x0 / (x1 + x0))  # Some magical conversion factor (??)
+            fudge = self.packages[self.package].fluxcorr  # A chopper package dependent fudge factor
             return self.packages[self.package].getTransmission(Ei, freq) * magic / fudge
         else:
             # For disk choppers, transmission goes quadratic with freq at high resolution, linear at low
-            freqdep = (self.flux_ref_freq / freq)**2 if hires else  (self.flux_ref_freq / freq)
+            freqdep = (self.flux_ref_freq / freq)**2 if hires else (self.flux_ref_freq / freq)
             return (self.slot_width[-1] / self.flux_ref_slot) * freqdep
 
     def setNFrame(self, value):
@@ -357,7 +369,8 @@ class ChopperSystem(object):
         self._instpar[9] = [self.source_rep, value]
 
     def _get_state(self, Ei_in=None):
-        return hash((self.variant, self.package, tuple(self.frequency), tuple(self.phase), Ei_in if Ei_in else self.ei, self.n_frame))
+        return hash((self.variant, self.package, tuple(self.frequency), tuple(self.phase), Ei_in if Ei_in else self.ei,
+                     self.n_frame))
 
     def _removeLowIntensityReps(self, Eis, lines, Ei=None):
         # Removes reps with Ei where there are no neutrons
@@ -376,14 +389,16 @@ class ChopperSystem(object):
         """Private method to calculate resolution for given Ei from chopper opening times"""
         Ei = _check_input(self, Ei_in)
         if '_saved_state' not in self.__dict__ or (self._saved_state[0] != self._get_state(Ei)):
-            Eis, all_times, chop_times, lastChopDist, lines = MulpyRep.calcChopTimes(Ei, self._long_frequency, self._instpar, self.phase)
+            Eis, all_times, chop_times, lastChopDist, lines = MulpyRep.calcChopTimes(
+                Ei, self._long_frequency, self._instpar, self.phase)
             Eis, lines = self._removeLowIntensityReps(Eis, lines, Ei)
             self._saved_state = [self._get_state(Ei), Eis, chop_times, lastChopDist, lines, all_times]
         else:
             Eis, chop_times, lastChopDist, lines, all_times = tuple(self._saved_state[1:])
         if calc_res:
             res_el, percent, chop_width, mod_width = MulpyRep.calcRes(Eis, chop_times, lastChopDist, self.chop_sam,
-                                                                      self.sam_det, self.guide_width[-1], self.slot_width[-1])
+                                                                      self.sam_det, self.guide_width[-1],
+                                                                      self.slot_width[-1])
             return res_el, percent, chop_width, mod_width
         else:
             return [Eis, chop_times, lastChopDist, lines, all_times]
@@ -447,8 +462,9 @@ class ChopperSystem(object):
         if value not in self.packages.keys():
             ky = [k for k in self.packages.keys() if value.upper() == k.upper()]
             if not ky:
-                raise ValueError('Fermi package ''%s'' not recognised. Allowed values are: %s'
-                                 % (value, ', '.join(self.packages.keys())))
+                raise ValueError('Fermi package '
+                                 '%s'
+                                 ' not recognised. Allowed values are: %s' % (value, ', '.join(self.packages.keys())))
             else:
                 value = ky[0]
         self._package = value
@@ -473,8 +489,9 @@ class ChopperSystem(object):
         if value not in self.variants.keys():
             ky = [k for k in self.variants.keys() if value.upper() == k.upper()]
             if not ky:
-                raise ValueError('Variant ''%s'' not recognised. Allowed values are: %s'
-                                 % (value, ', '.join(self.variants.keys())))
+                raise ValueError('Variant '
+                                 '%s'
+                                 ' not recognised. Allowed values are: %s' % (value, ', '.join(self.variants.keys())))
             else:
                 value = ky[0]
         for prop in self.variants[value]:
@@ -509,14 +526,17 @@ class Moderator(object):
     Class which represents a neutron moderator
     """
 
-    __allowed_var_names = ['name', 'imod', 'ch_mod', 'mod_pars', 'mod_scale_fn', 'mod_scale_par', 'theta',
-                           'source_rep', 'n_frame', 'emission_time', 'measured_flux', 'measured_width']
+    __allowed_var_names = [
+        'name', 'imod', 'ch_mod', 'mod_pars', 'mod_scale_fn', 'mod_scale_par', 'theta', 'source_rep', 'n_frame',
+        'emission_time', 'measured_flux', 'measured_width'
+    ]
 
     def __init__(self, inval=None):
         wrap_attributes(self, inval, self.__allowed_var_names)
         if hasattr(self, 'measured_flux') and self.measured_flux:
             if 'scale_factor' in self.measured_flux:
-                self.measured_flux['flux'] = np.array(self.measured_flux['flux']) * float(self.measured_flux['scale_factor'])
+                self.measured_flux['flux'] = np.array(self.measured_flux['flux']) * float(
+                    self.measured_flux['scale_factor'])
             idx = np.argsort(self.measured_flux['wavelength'])
             wavelength = np.array(self.measured_flux['wavelength'])[idx]
             flux = np.array(self.measured_flux['flux'])[idx]
@@ -594,7 +614,9 @@ class Moderator(object):
         """ Interpolates flux from a table of measured flux """
         if not hasattr(self, 'flux_interp'):
             raise AttributeError('This instrument does not have a table of measured flux')
-        wavelength = [min(max(l, self.fmn), self.fmx) for l in np.sqrt(E2L / np.array(Ei if hasattr(Ei, '__len__') else [Ei]))]
+        wavelength = [
+            min(max(l, self.fmn), self.fmx) for l in np.sqrt(E2L / np.array(Ei if hasattr(Ei, '__len__') else [Ei]))
+        ]
         return self.flux_interp(wavelength)
 
     @property
@@ -643,10 +665,10 @@ class Detector(object):
 
     def getWidthSquared(self, Ei, en=0):
         """ Returns the squared time FWHM due to the detector in s^2 """
-        return self.getWidth(Ei, en) ** 2
+        return self.getWidth(Ei, en)**2
 
     def getWidth(self, Ei, en=0):
-        return Chop.detect2(1., 1., np.sqrt(E2K * (Ei-en)), self.idet, self.dd)[3] * SIGMA2FWHM
+        return Chop.detect2(1., 1., np.sqrt(E2K * (Ei - en)), self.idet, self.dd)[3] * SIGMA2FWHM
 
     @property
     def phi_deg(self):
@@ -660,8 +682,10 @@ class Instrument(object):
 
     __allowed_var_names = ['name', 'sample', 'chopper_system', 'moderator', 'detector']
 
-    __child_methods = ['setChopper', 'getChopper', 'setFrequency', 'getFrequency', 'setEi', 'getEi',
-                       'getAllowedEi', 'plotMultiRepFrame', 'getChopperNames', 'isFermi']
+    __child_methods = [
+        'setChopper', 'getChopper', 'setFrequency', 'getFrequency', 'setEi', 'getEi', 'getAllowedEi',
+        'plotMultiRepFrame', 'getChopperNames', 'isFermi'
+    ]
 
     __child_properties = ['package', 'variant', 'frequency', 'phase', 'ei', 'tjit', 'emin', 'emax']
 
@@ -704,9 +728,12 @@ class Instrument(object):
         for method in self.__child_methods:
             setattr(self, method, getattr(self.chopper_system, method))
         for prop in self.__child_properties:
-            setattr(type(self), prop,
-                    property(lambda obj, prop=prop, self=self: ChopperSystem.__dict__[prop].__get__(self.chopper_system, ChopperSystem),
-                             lambda obj, val, prop=prop, self=self: ChopperSystem.__dict__[prop].__set__(self.chopper_system, val)))
+            setattr(
+                type(self), prop,
+                property(lambda obj, prop=prop, self=self: ChopperSystem.__dict__[prop].__get__(
+                    self.chopper_system, ChopperSystem),
+                         lambda obj, val, prop=prop, self=self: ChopperSystem.__dict__[prop].__set__(
+                             self.chopper_system, val)))
         # Now reset default chopper/variant and frequency
         if chopper or freq:
             self.setChopper(chopper if chopper else self.getChopper(), freq if freq else self.frequency)
@@ -743,7 +770,7 @@ class Instrument(object):
         except ValueError:
             return None
         widths[1]['Energy'] = (2 * E2V * np.sqrt(Ei**3 * widths[0])) / self.chopper_system.sam_det
-        return {k: v if 'Energy' in k else np.sqrt(v)*1e6 for k, v in list(widths[1].items())}
+        return {k: v if 'Energy' in k else np.sqrt(v) * 1e6 for k, v in list(widths[1].items())}
 
     def getMultiWidths(self, Ei_in=None, frequency=None):
         """ Returns the time FWHM of different components for each possible rep (Ei) in seconds"""
@@ -764,7 +791,8 @@ class Instrument(object):
         van = getResolution(etrans, ei, omega)
 
         Inputs:
-            etrans - list of numpy array of energy transfers to calculate for (meV) [default: linspace(0.05Ei, 0.95Ei, 19)]
+            etrans - list of numpy array of energy transfers to calculate for (meV)
+                     [default: linspace(0.05Ei, 0.95Ei, 19)]
             ei - incident energy in meV [default: preset energy]
             omega - chopper frequency in Hz  [default: preset frequency]
 
@@ -774,10 +802,11 @@ class Instrument(object):
         Ei = _check_input(self.chopper_system, Ei_in)
         # If not set, sets energy transfers to values to compare exactly to RAE's original implementation.
         if Etrans is None:
-            Etrans = np.linspace(0.05*Ei, 0.95*Ei+0.05*0.05*Ei, 19, endpoint=True)
+            Etrans = np.linspace(0.05 * Ei, 0.95 * Ei + 0.05 * 0.05 * Ei, 19, endpoint=True)
         Etrans = np.array(Etrans if np.shape(Etrans) else [Etrans])
         if len(np.where(Etrans > Ei)[0]) > 0:
-            warnings.warn('Cannot calculate for energy transfer greater than Ei (physically negative neutron energies!)')
+            warnings.warn(
+                'Cannot calculate for energy transfer greater than Ei (physically negative neutron energies!)')
         Etrans[np.where(Etrans >= Ei)] = np.nan
         v_van, _, _ = self.getVanVar(Ei, frequency, Etrans)
         x2 = self.chopper_system.sam_det
@@ -808,8 +837,8 @@ class Instrument(object):
         # For Disk chopper spectrometers, the opening times of the first chopper can be the effective moderator time
         if tsqchp[1] is not None:
             frac_dist = 1 - (xm / x0)
-            tsmeff = tsqmod * frac_dist**2   # Effective moderator time at first chopper
-            x0 -= xm                         # Propagate from first chopper, not from moderator (after rescaling tmod)
+            tsmeff = tsqmod * frac_dist**2  # Effective moderator time at first chopper
+            x0 -= xm  # Propagate from first chopper, not from moderator (after rescaling tmod)
             tsqmod = tsmeff if (tsqchp[1] > tsmeff) else tsqchp[1]
         tsqchp = tsqchp[0]
         tsqmodchop = np.array([tsqmod, tsqchp, x0])

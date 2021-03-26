@@ -28,12 +28,10 @@ class ISISMuonAnalysisGrouping(systemtesting.MantidSystemTest, metaclass=ABCMeta
         - x_min: Float value of the minimum x.
         - x_max: Float value of the maximum x.
     """
-
     @abstractmethod
     def get_reference_file(self):
         """Returns the name of the reference file to compare against"""
-        raise NotImplementedError("Implmenent get_reference_file to return "
-                                  "the name of the file to compare against.")
+        raise NotImplementedError("Implmenent get_reference_file to return " "the name of the file to compare against.")
 
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
@@ -44,18 +42,18 @@ class ISISMuonAnalysisGrouping(systemtesting.MantidSystemTest, metaclass=ABCMeta
 
         self._validate_properties()
 
-        outputWS = (self.instr_name + str(self.sample_run) )
+        outputWS = (self.instr_name + str(self.sample_run))
 
-      # Load
-        LoadMuonNexus(Filename=self.file_name, OutputWorkspace='MuonAnalysis' )
+        # Load
+        LoadMuonNexus(Filename=self.file_name, OutputWorkspace='MuonAnalysis')
 
-      # Group, Crop, Clone
+        # Group, Crop, Clone
         if self.period_data:
             GroupDetectors(InputWorkspace='MuonAnalysis_1', OutputWorkspace=outputWS, MapFile=self.map_name)
         else:
             GroupDetectors(InputWorkspace='MuonAnalysis', OutputWorkspace=outputWS, MapFile=self.map_name)
         CropWorkspace(InputWorkspace=outputWS, OutputWorkspace=outputWS, XMin=self.x_min, XMax=self.x_max)
-        CloneWorkspace(InputWorkspace=outputWS, OutputWorkspace=(outputWS + '_Raw') )
+        CloneWorkspace(InputWorkspace=outputWS, OutputWorkspace=(outputWS + '_Raw'))
         GroupWorkspaces(InputWorkspaces=outputWS + ',' + outputWS + '_Raw', OutputWorkspace='MuonGroup')
 
         if self.logs:
@@ -92,8 +90,8 @@ class ISISMuonAnalysisGrouping(systemtesting.MantidSystemTest, metaclass=ABCMeta
 
 #------------------------- ARGUS group fwd test -------------------------------------------------
 
-class ARGUSAnalysisFromFile(ISISMuonAnalysisGrouping):
 
+class ARGUSAnalysisFromFile(ISISMuonAnalysisGrouping):
     def __init__(self):
         ISISMuonAnalysisGrouping.__init__(self)
         self.file_name = 'argus0044309.nxs'
@@ -112,8 +110,8 @@ class ARGUSAnalysisFromFile(ISISMuonAnalysisGrouping):
 
 #------------------------- EMU group fwd test -------------------------------------------------
 
-class EMUAnalysisFromFile(ISISMuonAnalysisGrouping):
 
+class EMUAnalysisFromFile(ISISMuonAnalysisGrouping):
     def __init__(self):
         ISISMuonAnalysisGrouping.__init__(self)
         self.file_name = 'emu00031895.nxs'
@@ -132,8 +130,8 @@ class EMUAnalysisFromFile(ISISMuonAnalysisGrouping):
 
 #------------------------- HiFi group 0 test -------------------------------------------------
 
-class HiFiAnalysisFromFile(ISISMuonAnalysisGrouping):
 
+class HiFiAnalysisFromFile(ISISMuonAnalysisGrouping):
     def __init__(self):
         ISISMuonAnalysisGrouping.__init__(self)
         self.file_name = 'hifi00038401.nxs'
@@ -152,8 +150,8 @@ class HiFiAnalysisFromFile(ISISMuonAnalysisGrouping):
 
 #------------------------- MuSR Group 1 test -------------------------------------------------
 
-class MuSRAnalysisFromFile(ISISMuonAnalysisGrouping):
 
+class MuSRAnalysisFromFile(ISISMuonAnalysisGrouping):
     def __init__(self):
         ISISMuonAnalysisGrouping.__init__(self)
         self.file_name = 'MUSR00015192.nxs'

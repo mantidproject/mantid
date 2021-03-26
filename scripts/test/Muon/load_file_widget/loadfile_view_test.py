@@ -13,7 +13,6 @@ from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
 
 @start_qapplication
 class LoadFileWidgetViewTest(unittest.TestCase):
-
     def setUp(self):
         self.view = BrowseFileWidgetView()
 

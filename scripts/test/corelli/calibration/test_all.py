@@ -9,7 +9,6 @@ import unittest
 
 
 class TestAll(unittest.TestCase):
-
     @staticmethod
     def find_missing(package):
         missing = set(n for n in package.__all__ if getattr(package, n, None) is None)

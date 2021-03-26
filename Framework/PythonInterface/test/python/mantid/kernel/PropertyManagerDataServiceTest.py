@@ -10,7 +10,6 @@ from mantid.kernel import PropertyManager, PropertyManagerDataService
 
 
 class PropertyManagerDataServiceTest(unittest.TestCase):
-
     def test_add_existing_mgr_object(self):
         name = "PropertyManagerDataServiceTest_test_add_existing_mgr_object"
         values = {'key': 100.5}
@@ -41,6 +40,7 @@ class PropertyManagerDataServiceTest(unittest.TestCase):
         pmgr = pmds[name]
         self.assertEqual(value2['key2'], pmgr['key2'].value)
         pmds.remove(name)
+
 
 if __name__ == "__main__":
     unittest.main()

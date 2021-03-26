@@ -17,8 +17,7 @@ class CropHelperTest(unittest.TestCase):
     def _get_workspace(self, file_name):
         full_file_name = FileFinder.findRuns(file_name)[0]
         load_name = "Load"
-        load_options = {"Filename": full_file_name,
-                        "OutputWorkspace": EMPTY_NAME}
+        load_options = {"Filename": full_file_name, "OutputWorkspace": EMPTY_NAME}
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
         load_alg.execute()
         return load_alg.getProperty("OutputWorkspace").value

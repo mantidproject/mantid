@@ -11,7 +11,6 @@ import unittest
 
 
 class MedianBinWidthTest(unittest.TestCase):
-
     def _make_algorithm_params(self, ws, rounding='None'):
         return {
             'InputWorkspace': ws,
@@ -40,8 +39,7 @@ class MedianBinWidthTest(unittest.TestCase):
         DeleteWorkspace(ws)
 
     def test_average_over_multiple_histograms(self):
-        binWidths = numpy.array([0.5, 0.5, 2.3, 2.3, 2.3, 6.5,
-                                 0.4, 1.3, 0.4, 1.3, 2.5, 1.3])
+        binWidths = numpy.array([0.5, 0.5, 2.3, 2.3, 2.3, 6.5, 0.4, 1.3, 0.4, 1.3, 2.5, 1.3])
         xs1 = self._make_boundaries(-6.6, binWidths[:6])
         xs2 = self._make_boundaries(99.6, binWidths[6:])
         xs = numpy.concatenate((xs1, xs2))
@@ -69,8 +67,7 @@ class MedianBinWidthTest(unittest.TestCase):
         ys = numpy.zeros(len(xs))
         ws = CreateWorkspace(DataX=xs, DataY=ys, Distribution=True)
         params = self._make_algorithm_params(ws)
-        self.assertRaises(ValueError, testhelpers.create_algorithm,
-                          'BinWidthAtX', **params)
+        self.assertRaises(ValueError, testhelpers.create_algorithm, 'BinWidthAtX', **params)
         DeleteWorkspace(ws)
 
     def test_positive_output_even_if_descending_x(self):
@@ -82,6 +79,7 @@ class MedianBinWidthTest(unittest.TestCase):
         expectedBinWidth = 50.0
         self.assertAlmostEqual(binWidth, expectedBinWidth)
         DeleteWorkspace(ws)
+
 
 if __name__ == "__main__":
     unittest.main()

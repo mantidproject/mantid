@@ -15,7 +15,6 @@ from sans.common.enums import SANSInstrument
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DWaveloops(systemtesting.MantidSystemTest):
-
     def runTest(self):
 
         SANS2D()
@@ -34,6 +33,6 @@ class SANS2DWaveloops(systemtesting.MantidSystemTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-    # testing one of the workspaces that is produced, best not to choose the
-    # first one in produced by the loop as this is the least error prone
+        # testing one of the workspaces that is produced, best not to choose the
+        # first one in produced by the loop as this is the least error prone
         return '992rear_1D_7.0_11.0', 'SANS2DWaveloops.nxs'

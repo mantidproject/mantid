@@ -14,16 +14,12 @@ from mantidqt.utils.qt import load_ui
 
 
 class LineTabWidgetView(QWidget):
-
     def __init__(self, parent=None):
         super(LineTabWidgetView, self).__init__(parent=parent)
 
-        self.ui = load_ui(__file__,
-                          'curves_tab_line_tab.ui',
-                          baseinstance=self)
+        self.ui = load_ui(__file__, 'curves_tab_line_tab.ui', baseinstance=self)
         self.color_selector_widget = ColorSelector(parent=self)
-        self.grid_layout.replaceWidget(self.color_selector_dummy_widget,
-                                       self.color_selector_widget)
+        self.grid_layout.replaceWidget(self.color_selector_dummy_widget, self.color_selector_widget)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
     def get_style(self):

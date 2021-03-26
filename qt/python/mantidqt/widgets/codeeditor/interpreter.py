@@ -35,14 +35,16 @@ SPACE_CHAR = " "
 
 
 class EditorIO(object):
-
     def __init__(self, editor, confirm_on_exit=True):
         self.editor = editor
         self.confirm_on_exit = confirm_on_exit
 
     def ask_for_filename(self):
-        filename = open_a_file_dialog(parent=self.editor, default_suffix=".py", file_filter="Python Files (*.py)",
-                                      accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.AnyFile)
+        filename = open_a_file_dialog(parent=self.editor,
+                                      default_suffix=".py",
+                                      file_filter="Python Files (*.py)",
+                                      accept_mode=QFileDialog.AcceptSave,
+                                      file_mode=QFileDialog.AnyFile)
         if filename is not None and os.path.isdir(filename):
             # Set value to None as, we do not want to be saving a directory, it is possible to receive a directory
             filename = None
@@ -64,7 +66,8 @@ class EditorIO(object):
         the operation should be cancelled
         """
         if prompt_for_confirm:
-            button = QMessageBox.question(self.editor, "",
+            button = QMessageBox.question(self.editor,
+                                          "",
                                           "Save changes to document before closing?",
                                           buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel),
                                           defaultButton=QMessageBox.Cancel)
@@ -97,8 +100,7 @@ class EditorIO(object):
                 f.write(self.editor.text())
             self.editor.setModified(False)
         except IOError as exc:
-            QMessageBox.warning(self.editor, "",
-                                "Error while saving '{}': {}".format(filename, str(exc)))
+            QMessageBox.warning(self.editor, "", "Error while saving '{}': {}".format(filename, str(exc)))
             return False
         else:
             return True
@@ -111,8 +113,7 @@ class PythonFileInterpreter(QWidget):
     sig_exec_error = Signal(object)
     sig_exec_success = Signal(object)
 
-    def __init__(self, font=None, content=None, filename=None,
-                 parent=None):
+    def __init__(self, font=None, content=None, filename=None, parent=None):
         """
         :param font: A reference to the font to be used by the editor. If not supplied use the system default
         :param content: An optional string of content to pass to the editor
@@ -326,7 +327,8 @@ class PythonFileInterpreterPresenter(QObject):
         self.view.set_status_message(RUNNING_STATUS_MSG)
         return self.model.execute_async(code_str=code_str,
                                         line_offset=self._code_start_offset,
-                                        filename=self.view.filename, blocking=blocking)
+                                        filename=self.view.filename,
+                                        blocking=blocking)
 
     def _get_code_for_execution(self, ignore_selection):
         editor = self.view.editor
@@ -365,8 +367,7 @@ class PythonFileInterpreterPresenter(QObject):
 
     def _finish(self, success, task_result):
         status = 'successfully' if success else 'with errors'
-        status_message = self._create_status_msg(status, task_result.timestamp,
-                                                 task_result.elapsed_time)
+        status_message = self._create_status_msg(status, task_result.timestamp, task_result.elapsed_time)
         self.view.set_status_message(status_message)
         self.view.set_editor_readonly(False)
         self.is_executing = False

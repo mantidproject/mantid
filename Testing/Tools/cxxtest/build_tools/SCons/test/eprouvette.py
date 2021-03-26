@@ -14,7 +14,7 @@ from copy import copy
 from subprocess import check_call, CalledProcessError, PIPE
 
 options = None
-args    = []
+args = []
 available_types = set(['scons'])
 tool_stdout = PIPE
 
@@ -33,28 +33,31 @@ def main():
     # option parsing
     parser = OptionParser(usage)
 
-    parser.set_defaults(
-            action='run',
-            verbose=True)
+    parser.set_defaults(action='run', verbose=True)
 
-    parser.add_option("-c", "--clean",
-            action='store_const', const='clean', dest='action',
-            help="deletes any generated files in the tests")
+    parser.add_option("-c",
+                      "--clean",
+                      action='store_const',
+                      const='clean',
+                      dest='action',
+                      help="deletes any generated files in the tests")
     parser.add_option("--run",
-            action='store_const', const='run', dest='action',
-            help="sets up the environment, compiles and runs the tests")
-    parser.add_option("-v", "--verbose",
-            action='store_true', dest='verbose',
-            help="spew out more details")
-    parser.add_option("-q", "--quiet",
-            action='store_false', dest='verbose',
-            help="spew out only success/failure of tests")
+                      action='store_const',
+                      const='run',
+                      dest='action',
+                      help="sets up the environment, compiles and runs the tests")
+    parser.add_option("-v", "--verbose", action='store_true', dest='verbose', help="spew out more details")
+    parser.add_option("-q",
+                      "--quiet",
+                      action='store_false',
+                      dest='verbose',
+                      help="spew out only success/failure of tests")
     parser.add_option("--target-dir",
-            dest='target_dir', action='store', default='./',
-            help='target directory to look for tests in. default: %default')
-    parser.add_option("--debug",
-            dest='debug', action='store_true', default=False,
-            help='turn on debug output.')
+                      dest='target_dir',
+                      action='store',
+                      default='./',
+                      help='target directory to look for tests in. default: %default')
+    parser.add_option("--debug", dest='debug', action='store_true', default=False, help='turn on debug output.')
 
     (options, args) = parser.parse_args()
 
@@ -147,11 +150,7 @@ def run_test(t):
 
 def read_opts(t):
     """Read the test options and return them."""
-    opts = {
-            'expect_success' : True,
-            'type'           : 'scons',
-            'links'          : {}
-            }
+    opts = {'expect_success': True, 'type': 'scons', 'links': {}}
     exec(open(join(t, "TestDef.py")), opts)
     return opts
 
@@ -162,7 +161,7 @@ def setup_env(t, opts):
     links = opts['links']
     for link in links:
         frm = links[link]
-        to  = join(t, link)
+        to = join(t, link)
         debug("Symlinking {0} to {1}".format(frm, to))
         if islink(to):
             os.unlink(to)
@@ -173,7 +172,7 @@ def teardown_env(t, opts):
     """Remove all files generated for the test."""
     links = opts['links']
     for link in links:
-        to  = join(t, link)
+        to = join(t, link)
         debug('removing link {0}'.format(to))
         os.unlink(to)
 
@@ -183,7 +182,7 @@ def clean_test(t):
     opts = read_opts(t)
     notice("cleaning test {0}".format(t))
     if opts['type'] == 'scons':
-        setup_env(t, opts) # scons needs the environment links to work
+        setup_env(t, opts)  # scons needs the environment links to work
         clean_scons(t, opts)
     teardown_env(t, opts)
 
@@ -211,12 +210,13 @@ def run_scons(t, opts):
         check_call(['scons', '.'], stdout=tool_stdout)
         check_call(['scons', 'check'], stdout=tool_stdout)
     except CalledProcessError as e:
-        os.chdir(cwd) # clean up
+        os.chdir(cwd)  # clean up
         raise e
     os.chdir(cwd)
+
 
 if __name__ == "__main__":
     main()
 
 if not options.verbose:
-    print() # quiet doesn't output newlines.
+    print()  # quiet doesn't output newlines.

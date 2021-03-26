@@ -135,15 +135,12 @@ class FigureErrorsManager(object):
         """
         remove_curve_from_ax(curve)
         if isinstance(curve, Line2D):
-            [plot_kwargs.pop(arg, None) for arg in
-             ['capsize', 'capthick', 'ecolor', 'elinewidth', 'errorevery']]
-            new_curve = ax.plot(curve.get_xdata(), curve.get_ydata(),
-                                **plot_kwargs)[0]
+            [plot_kwargs.pop(arg, None) for arg in ['capsize', 'capthick', 'ecolor', 'elinewidth', 'errorevery']]
+            new_curve = ax.plot(curve.get_xdata(), curve.get_ydata(), **plot_kwargs)[0]
         elif isinstance(curve, ErrorbarContainer):
             # Because of "error every" option, we need to store the original
             # error bar data on the curve or we will lose data on re-plotting
-            x, y, xerr, yerr = getattr(curve, 'errorbar_data',
-                                       get_data_from_errorbar_container(curve))
+            x, y, xerr, yerr = getattr(curve, 'errorbar_data', get_data_from_errorbar_container(curve))
             new_curve = ax.errorbar(x, y, xerr=xerr, yerr=yerr, **plot_kwargs)
             setattr(new_curve, 'errorbar_data', [x, y, xerr, yerr])
         else:

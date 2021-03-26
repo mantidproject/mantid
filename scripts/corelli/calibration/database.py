@@ -13,7 +13,7 @@ import pathlib
 import re
 from typing import List, Optional, Tuple, Union
 
-from mantid.dataobjects import EventWorkspace, TableWorkspace,  Workspace2D
+from mantid.dataobjects import EventWorkspace, TableWorkspace, Workspace2D
 from mantid.api import mtd, Workspace, WorkspaceGroup
 from mantid.kernel import logger
 from mantid.simpleapi import CreateEmptyTableWorkspace, SaveNexusProcessed, LoadNexusProcessed
@@ -49,8 +49,10 @@ def init_corelli_table(name: Optional[str] = None, table_type='calibration') -> 
     table: TableWorkspace = CreateEmptyTableWorkspace(OutputWorkspace=name) if name else CreateEmptyTableWorkspace()
 
     # expected columns declarations (column_type, column_name) for each type of calibration table
-    column_declarations = {'calibration': [('int', 'Detector ID'), ('double', 'Detector Y Coordinate')],
-                           'mask': [('int', 'Detector ID')]}
+    column_declarations = {
+        'calibration': [('int', 'Detector ID'), ('double', 'Detector Y Coordinate')],
+        'mask': [('int', 'Detector ID')]
+    }
     for column_type, colum_name in column_declarations[table_type]:
         table.addColumn(type=column_type, name=colum_name)
     return table
@@ -128,7 +130,10 @@ def save_manifest_file(database_path: str,
     return filename
 
 
-def save_bank_table(data: Workspace, bank_id: int, database_path: str, date: str,
+def save_bank_table(data: Workspace,
+                    bank_id: int,
+                    database_path: str,
+                    date: str,
                     table_type: str = 'calibration') -> None:
     """
     Function that saves a bank calibrated TableWorkspace into a single HDF5 file
@@ -152,7 +157,7 @@ def save_calibration_set(input_workspace: InputWorkspaceTypes,
                          database_path: str,
                          calibrations: CalibrationInputSetTypes,
                          masks: Optional[CalibrationInputSetTypes] = None,
-                         fits: Optional[CalibrationInputSetTypes] = None) ->None:
+                         fits: Optional[CalibrationInputSetTypes] = None) -> None:
     r"""
     Save one or more calibration workspaces to the database.
 
@@ -212,7 +217,9 @@ def save_calibration_set(input_workspace: InputWorkspaceTypes,
         if workspace_group(input_set) is not None:
             return [(str(w), extract_bank_number(str(w))) for w in workspace_group(input_set)]
         # the input set contains only one workspace
-        return [(str(input_set), extract_bank_number(str(input_set))), ]
+        return [
+            (str(input_set), extract_bank_number(str(input_set))),
+        ]
 
     for input_set, table_type in [(calibrations, 'calibration'), (masks, 'mask'), (fits, 'fit')]:
         if input_set is None:  # case of no 'masks' or no 'fits'
@@ -382,8 +389,7 @@ def verify_date_format(function_name: str, date: Union[int, str]) -> None:
         raise ValueError('date in function ' + function_name + ' ' + str(date) + ' is not YYYYMMDD')
 
 
-def new_corelli_calibration(database_path: str,
-                            date: Optional[str] = None) -> Tuple[str, str, str]:
+def new_corelli_calibration(database_path: str, date: Optional[str] = None) -> Tuple[str, str, str]:
     r"""
     Generate a Corelli calibration set of files for a given day stamp, or for today if no day stamp is given.
 
@@ -448,7 +454,9 @@ def new_corelli_calibration(database_path: str,
 
         if table_type == 'calibration':
             logger.notice('** Creating and saving the manifest file')
-            file_paths['manifest'] = save_manifest_file(database_path, bank_numbers, day_stamps,
+            file_paths['manifest'] = save_manifest_file(database_path,
+                                                        bank_numbers,
+                                                        day_stamps,
                                                         manifest_day_stamp=last_day_stamp)
 
     return [file_paths[x] for x in ('calibration', 'mask', 'manifest')]

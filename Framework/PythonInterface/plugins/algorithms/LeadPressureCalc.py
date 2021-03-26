@@ -24,11 +24,11 @@ def calculate_pressure(d_spacing, temp):
     k00p = 5.3925  # K' at (0)
     e = 0.00111  # K' fit parameter
     k00pp = -0.3272  # K'' at (0)
-    v_calc = (np.sqrt(3) * d_spacing) ** 3  # unit cell volume (A^3)
+    v_calc = (np.sqrt(3) * d_spacing)**3  # unit cell volume (A^3)
     ltemp = temp - 300
 
-    v_quad = (v00 + a * ltemp + b * (ltemp ** 2))
-    k_quad = (k00 + c * ltemp + d * (ltemp ** 2))
+    v_quad = (v00 + a * ltemp + b * (ltemp**2))
+    k_quad = (k00 + c * ltemp + d * (ltemp**2))
     factor = k00p + e * temp
 
     return 1.5 * k_quad * (((v_calc / v_quad) ** (-2 / 3)) - 1) * (1 + ((v_calc / v_quad) ** (-2 / 3) - 1)) ** (5 / 2) \
@@ -38,7 +38,6 @@ def calculate_pressure(d_spacing, temp):
 
 
 class LeadPressureCalc(PythonAlgorithm):
-
     def category(self):
         return "Diffraction\\Calibration"
 
@@ -66,7 +65,7 @@ class LeadPressureCalc(PythonAlgorithm):
                              defaultValue=0.0,
                              validator=FloatBoundedValidator(lower=0),
                              doc="Optional: search for (111) position for a given pressure (GPa) and temperature, "
-                                 "leave at default value to disable.")
+                             "leave at default value to disable.")
         self.declareProperty(ITableWorkspaceProperty(name='OutputWorkspace',
                                                      direction=Direction.Output,
                                                      defaultValue='LeadPressureCalcResults'),
@@ -111,9 +110,14 @@ class LeadPressureCalc(PythonAlgorithm):
             ws.addColumn(type='double', name="Pressure Target (GPa)")
             ws.addColumn(type='double', name="Pressure difference (GPa)")
             ws.addColumn(type='double', name="dSpacing found (A)")
-            row = {"Input dSpacing-111 (A)": d_spacing, "Temperature (K)": temp, "Calculated Pressure (GPa)": p_calc,
-                   "Pressure Target (GPa)": p_target, "Pressure difference (GPa)": diff,
-                   "dSpacing found (A)": found_d}
+            row = {
+                "Input dSpacing-111 (A)": d_spacing,
+                "Temperature (K)": temp,
+                "Calculated Pressure (GPa)": p_calc,
+                "Pressure Target (GPa)": p_target,
+                "Pressure difference (GPa)": diff,
+                "dSpacing found (A)": found_d
+            }
         else:
             self.log().notice("dSpacing corresponding to the Target Pressure and Temperature given not found in range"
                               " 2-2.95. Please try different parameters.")

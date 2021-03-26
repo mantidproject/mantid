@@ -42,24 +42,19 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                'for ILL indirect geometry data, instrument IN16B.'
 
     def seeAlso(self):
-        return [ "IndirectILLReductionFWS","IndirectILLEnergyTransfer" ]
+        return ["IndirectILLReductionFWS", "IndirectILLEnergyTransfer"]
 
     def name(self):
         return "IndirectILLReductionQENS"
 
     def PyInit(self):
 
-        self.declareProperty(MultipleFileProperty('Run', extensions=['nxs']),
-                             doc='Run number(s) of sample run(s).')
+        self.declareProperty(MultipleFileProperty('Run', extensions=['nxs']), doc='Run number(s) of sample run(s).')
 
-        self.declareProperty(MultipleFileProperty('BackgroundRun',
-                                                  action=FileAction.OptionalLoad,
-                                                  extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('BackgroundRun', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='Run number(s) of background (empty can) run(s).')
 
-        self.declareProperty(MultipleFileProperty('CalibrationRun',
-                                                  action=FileAction.OptionalLoad,
-                                                  extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('CalibrationRun', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='Run number(s) of vanadium calibration run(s).')
 
         self.declareProperty(MultipleFileProperty('CalibrationBackgroundRun',
@@ -67,57 +62,57 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                                                   extensions=['nxs']),
                              doc='Run number(s) of background (empty can) run(s) for vanadium run.')
 
-        self.declareProperty(MultipleFileProperty('AlignmentRun',
-                                                  action=FileAction.OptionalLoad,
-                                                  extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('AlignmentRun', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='Run number(s) of vanadium run(s) used for '
-                                 'peak alignment for UnmirrorOption=[5, 7]')
+                             'peak alignment for UnmirrorOption=[5, 7]')
 
-        self.declareProperty(name='SumRuns',
+        self.declareProperty(name='SumRuns', defaultValue=False, doc='Whether to sum all the input runs.')
+
+        self.declareProperty(name='CropDeadMonitorChannels',
                              defaultValue=False,
-                             doc='Whether to sum all the input runs.')
-
-        self.declareProperty(name='CropDeadMonitorChannels', defaultValue=False,
                              doc='Whether or not to exclude the first and last few channels '
-                                 'with 0 monitor count in the energy transfer formula.')
+                             'with 0 monitor count in the energy transfer formula.')
 
-        self.declareProperty(name='UnmirrorOption', defaultValue=6,
+        self.declareProperty(name='UnmirrorOption',
+                             defaultValue=6,
                              validator=IntBoundedValidator(lower=0, upper=7),
                              doc='Unmirroring options : \n'
-                                 '0 no unmirroring\n'
-                                 '1 sum of left and right\n'
-                                 '2 left\n'
-                                 '3 right\n'
-                                 '4 shift right according to left and sum\n'
-                                 '5 like 4, but use alignment run for peak positions\n'
-                                 '6 center both left and right at zero and sum\n'
-                                 '7 like 6, but use alignment run for peak positions')
+                             '0 no unmirroring\n'
+                             '1 sum of left and right\n'
+                             '2 left\n'
+                             '3 right\n'
+                             '4 shift right according to left and sum\n'
+                             '5 like 4, but use alignment run for peak positions\n'
+                             '6 center both left and right at zero and sum\n'
+                             '7 like 6, but use alignment run for peak positions')
 
-        self.declareProperty(name='BackgroundScalingFactor', defaultValue=1.,
+        self.declareProperty(name='BackgroundScalingFactor',
+                             defaultValue=1.,
                              validator=FloatBoundedValidator(lower=0),
                              doc='Scaling factor for background subtraction')
 
-        self.declareProperty(name='CalibrationBackgroundScalingFactor', defaultValue=1.,
+        self.declareProperty(name='CalibrationBackgroundScalingFactor',
+                             defaultValue=1.,
                              validator=FloatBoundedValidator(lower=0),
                              doc='Scaling factor for background subtraction for vanadium calibration')
 
-        self.declareProperty(name='CalibrationPeakRange', defaultValue=[-0.003,0.003],
+        self.declareProperty(name='CalibrationPeakRange',
+                             defaultValue=[-0.003, 0.003],
                              validator=FloatArrayMandatoryValidator(),
                              doc='Peak range for integration over calibration file peak (in mev)')
 
-        self.declareProperty(FileProperty('MapFile', '',
-                                          action=FileAction.OptionalLoad,
-                                          extensions=['map','xml']),
+        self.declareProperty(FileProperty('MapFile', '', action=FileAction.OptionalLoad, extensions=['map', 'xml']),
                              doc='Filename of the detector grouping map file to use. \n'
-                                 'By default all the pixels will be summed per each tube. \n'
-                                 'Use .map or .xml file (see GroupDetectors documentation) '
-                                 'only if different range is needed for each tube.')
+                             'By default all the pixels will be summed per each tube. \n'
+                             'Use .map or .xml file (see GroupDetectors documentation) '
+                             'only if different range is needed for each tube.')
 
-        self.declareProperty(name='ManualPSDIntegrationRange',defaultValue=[1,128],
+        self.declareProperty(name='ManualPSDIntegrationRange',
+                             defaultValue=[1, 128],
                              doc='Integration range of vertical pixels in each PSD tube. \n'
-                                 'By default all the pixels will be summed per each tube. \n'
-                                 'Use this option if the same range (other than default) '
-                                 'is needed for all the tubes.')
+                             'By default all the pixels will be summed per each tube. \n'
+                             'Use this option if the same range (other than default) '
+                             'is needed for all the tubes.')
 
         self.declareProperty(name='Analyser',
                              defaultValue='silicon',
@@ -129,15 +124,16 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                              validator=StringListValidator(['111', '311']),
                              doc='Analyser reflection.')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                                                    direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Group name for the reduced workspace(s).')
 
-        self.declareProperty(name='SpectrumAxis', defaultValue='SpectrumNumber',
+        self.declareProperty(name='SpectrumAxis',
+                             defaultValue='SpectrumNumber',
                              validator=StringListValidator(['SpectrumNumber', '2Theta', 'Q', 'Q2']),
                              doc='The spectrum axis conversion target.')
 
-        self.declareProperty(name='DiscardSingleDetectors', defaultValue=False,
+        self.declareProperty(name='DiscardSingleDetectors',
+                             defaultValue=False,
                              doc='Whether to discard the spectra of single detectors.')
 
     def validateInputs(self):
@@ -166,10 +162,11 @@ class IndirectILLReductionQENS(PythonAlgorithm):
     def setUp(self):
 
         self._sample_file = self.getPropertyValue('Run')
-        self._alignment_file = self.getPropertyValue('AlignmentRun').replace(',', '+') # automatic summing
-        self._background_file = self.getPropertyValue('BackgroundRun').replace(',', '+') # automatic summing
-        self._calibration_file = self.getPropertyValue('CalibrationRun').replace(',', '+') # automatic summing
-        self._background_calib_files = self.getPropertyValue('CalibrationBackgroundRun').replace(',', '+') # automatic summing
+        self._alignment_file = self.getPropertyValue('AlignmentRun').replace(',', '+')  # automatic summing
+        self._background_file = self.getPropertyValue('BackgroundRun').replace(',', '+')  # automatic summing
+        self._calibration_file = self.getPropertyValue('CalibrationRun').replace(',', '+')  # automatic summing
+        self._background_calib_files = self.getPropertyValue('CalibrationBackgroundRun').replace(
+            ',', '+')  # automatic summing
         self._sum_all_runs = self.getProperty('SumRuns').value
         self._unmirror_option = self.getProperty('UnmirrorOption').value
         self._back_scaling = self.getProperty('BackgroundScalingFactor').value
@@ -243,7 +240,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
             raise RuntimeError('None of the {0} runs are of QENS type.'
                                'Check the files or reduction type.'.format(label))
         else:
-            self.log().information('Filtered {0} runs are: {0} \\n'.format(label,files.replace(',','\\n')))
+            self.log().information('Filtered {0} runs are: {0} \\n'.format(label, files.replace(',', '\\n')))
 
         return files
 
@@ -252,7 +249,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         Filters all the lists of input files needed for the reduction.
         '''
 
-        self._sample_file = self._filter_files(self._sample_file,'sample')
+        self._sample_file = self._filter_files(self._sample_file, 'sample')
 
         if self._background_file:
             self._background_file = self._filter_files(self._background_file, 'background')
@@ -274,13 +271,13 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         @throws RuntimeError :: on non-positive integral found
         '''
 
-        tmp_int = '__tmp_int'+ws
-        Integration(InputWorkspace=ws,OutputWorkspace=tmp_int)
+        tmp_int = '__tmp_int' + ws
+        Integration(InputWorkspace=ws, OutputWorkspace=tmp_int)
 
         for item in mtd[tmp_int]:
             for index in range(item.getNumberHistograms()):
                 if item.readY(index)[0] <= 0:
-                    self.log().warning('Negative or 0 integral in spectrum #{0} {1}'.format(index,message))
+                    self.log().warning('Negative or 0 integral in spectrum #{0} {1}'.format(index, message))
 
         DeleteWorkspace(tmp_int)
 
@@ -291,31 +288,37 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self._filter_all_input_files()
 
         if self._background_file:
-            background = '__background_'+self._red_ws
-            IndirectILLEnergyTransfer(Run = self._background_file, OutputWorkspace = background, **self._common_args)
-            Scale(InputWorkspace=background ,Factor=self._back_scaling,OutputWorkspace=background)
+            background = '__background_' + self._red_ws
+            IndirectILLEnergyTransfer(Run=self._background_file, OutputWorkspace=background, **self._common_args)
+            Scale(InputWorkspace=background, Factor=self._back_scaling, OutputWorkspace=background)
 
         if self._calibration_file:
-            calibration = '__calibration_'+self._red_ws
-            IndirectILLEnergyTransfer(Run = self._calibration_file, OutputWorkspace = calibration, **self._common_args)
+            calibration = '__calibration_' + self._red_ws
+            IndirectILLEnergyTransfer(Run=self._calibration_file, OutputWorkspace=calibration, **self._common_args)
 
             if self._background_calib_files:
-                back_calibration = '__calibration_back_'+self._red_ws
-                IndirectILLEnergyTransfer(Run = self._background_calib_files, OutputWorkspace = back_calibration, **self._common_args)
-                Scale(InputWorkspace=back_calibration, Factor=self._back_calib_scaling, OutputWorkspace=back_calibration)
+                back_calibration = '__calibration_back_' + self._red_ws
+                IndirectILLEnergyTransfer(Run=self._background_calib_files,
+                                          OutputWorkspace=back_calibration,
+                                          **self._common_args)
+                Scale(InputWorkspace=back_calibration,
+                      Factor=self._back_calib_scaling,
+                      OutputWorkspace=back_calibration)
                 Minus(LHSWorkspace=calibration, RHSWorkspace=back_calibration, OutputWorkspace=calibration)
 
             # MatchPeaks does not play nicely with the ws groups
             for ws in mtd[calibration]:
-                MatchPeaks(InputWorkspace=ws.getName(), OutputWorkspace=ws.getName(), MaskBins=True, BinRangeTable = '')
+                MatchPeaks(InputWorkspace=ws.getName(), OutputWorkspace=ws.getName(), MaskBins=True, BinRangeTable='')
 
-            Integration(InputWorkspace=calibration,RangeLower=self._peak_range[0],RangeUpper=self._peak_range[1],
+            Integration(InputWorkspace=calibration,
+                        RangeLower=self._peak_range[0],
+                        RangeUpper=self._peak_range[1],
                         OutputWorkspace=calibration)
-            self._warn_negative_integral(calibration,'in calibration run.')
+            self._warn_negative_integral(calibration, 'in calibration run.')
 
         if self._unmirror_option == 5 or self._unmirror_option == 7:
-            alignment = '__alignment_'+self._red_ws
-            IndirectILLEnergyTransfer(Run = self._alignment_file, OutputWorkspace = alignment, **self._common_args)
+            alignment = '__alignment_' + self._red_ws
+            IndirectILLEnergyTransfer(Run=self._alignment_file, OutputWorkspace=alignment, **self._common_args)
 
         runs = self._sample_file.split(',')
 
@@ -336,18 +339,18 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         if self._unmirror_option == 5 or self._unmirror_option == 7:
             DeleteWorkspace(alignment)
 
-        GroupWorkspaces(InputWorkspaces=self._ws_list,OutputWorkspace=self._red_ws)
+        GroupWorkspaces(InputWorkspaces=self._ws_list, OutputWorkspace=self._red_ws)
 
         for ws in mtd[self._red_ws]:
             if ws.getRun().hasProperty("NormalisedTo"):
                 if ws.getRun().getLogData("NormalisedTo").value == "Monitor":
                     ws.setDistribution(True)
             # unhide the final workspaces, i.e. remove __ prefix
-            RenameWorkspace(InputWorkspace=ws,OutputWorkspace=ws.getName()[2:])
+            RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws.getName()[2:])
 
-        self.setProperty('OutputWorkspace',self._red_ws)
+        self.setProperty('OutputWorkspace', self._red_ws)
 
-    def _reduce_run(self,run):
+    def _reduce_run(self, run):
         '''
         Reduces the given (single or summed multiple) run
         @param run :: run path
@@ -367,18 +370,18 @@ class IndirectILLReductionQENS(PythonAlgorithm):
 
         ws += '_' + self._red_ws
 
-        back_ws = '__background_'+self._red_ws
+        back_ws = '__background_' + self._red_ws
 
-        calib_ws = '__calibration_'+self._red_ws
+        calib_ws = '__calibration_' + self._red_ws
 
-        IndirectILLEnergyTransfer(Run = run, OutputWorkspace = ws, **self._common_args)
+        IndirectILLEnergyTransfer(Run=run, OutputWorkspace=ws, **self._common_args)
 
         wings = mtd[ws].getNumberOfEntries()
 
         if self._background_file:
             if wings == mtd[back_ws].getNumberOfEntries():
                 Minus(LHSWorkspace=ws, RHSWorkspace=back_ws, OutputWorkspace=ws)
-                self._warn_negative_integral(ws,'after background subtraction.')
+                self._warn_negative_integral(ws, 'after background subtraction.')
             else:
                 raise RuntimeError('Inconsistent mirror sense in background run. Unable to perform subtraction.')
 
@@ -389,7 +392,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
             else:
                 raise RuntimeError('Inconsistent mirror sense in calibration run. Unable to perform calibration.')
 
-        self._perform_unmirror(ws,runnumber)
+        self._perform_unmirror(ws, runnumber)
 
         # register to reduced runs list
         self._ws_list.append(ws)
@@ -407,10 +410,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         for wing in range(mtd[ws].getNumberOfEntries()):
             sample = mtd[ws].getItem(wing).getName()
             integral = mtd[calib_ws].getItem(wing).getName()
-            scale = numpy.max(mtd[integral].extractY()[:,0])
-            self.log().information("Wing {0} will be scaled up with {1} after calibration"
-                                   .format(wing,scale))
-            Scale(InputWorkspace=sample,Factor=scale,OutputWorkspace=sample,Operation='Multiply')
+            scale = numpy.max(mtd[integral].extractY()[:, 0])
+            self.log().information("Wing {0} will be scaled up with {1} after calibration".format(wing, scale))
+            Scale(InputWorkspace=sample, Factor=scale, OutputWorkspace=sample, Operation='Multiply')
 
     def _perform_unmirror(self, ws, run):
         '''
@@ -427,27 +429,30 @@ class IndirectILLReductionQENS(PythonAlgorithm):
 
         wings = mtd[ws].getNumberOfEntries()
 
-        self.log().information('Unmirroring workspace {0} with option {1}'
-                               .format(ws,self._unmirror_option))
+        self.log().information('Unmirroring workspace {0} with option {1}'.format(ws, self._unmirror_option))
 
-        alignment = '__alignment_'+self._red_ws
+        alignment = '__alignment_' + self._red_ws
 
         # make sure the sample and alignment runs have the same mirror sense for unmirror 5,7
         if self._unmirror_option == 5 or self._unmirror_option == 7:
             if wings != mtd[alignment].getNumberOfEntries():
                 raise RuntimeError('Inconsistent mirror sense in alignment run. Unable to perform unmirror.')
 
-        if wings == 1:   # one wing
+        if wings == 1:  # one wing
 
             name = mtd[ws].getItem(0).getName()
 
             if self._unmirror_option < 6:  # do unmirror 0, i.e. nothing
-                CloneWorkspace(InputWorkspace = name, OutputWorkspace = outname)
+                CloneWorkspace(InputWorkspace=name, OutputWorkspace=outname)
             elif self._unmirror_option == 6:
-                MatchPeaks(InputWorkspace = name, OutputWorkspace = outname, MaskBins = True, BinRangeTable = '')
+                MatchPeaks(InputWorkspace=name, OutputWorkspace=outname, MaskBins=True, BinRangeTable='')
             elif self._unmirror_option == 7:
-                MatchPeaks(InputWorkspace = name, InputWorkspace2 = mtd[alignment].getItem(0).getName(),
-                           MatchInput2ToCenter = True, OutputWorkspace = outname, MaskBins = True, BinRangeTable = '')
+                MatchPeaks(InputWorkspace=name,
+                           InputWorkspace2=mtd[alignment].getItem(0).getName(),
+                           MatchInput2ToCenter=True,
+                           OutputWorkspace=outname,
+                           MaskBins=True,
+                           BinRangeTable='')
 
         elif wings == 2:  # two wing
 
@@ -466,11 +471,11 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                                    "0, 2 or 3 or switch off the CropDeadMonitorChannels.")
 
             if self._unmirror_option == 0:
-                left_out = '__'+run+'_'+self._red_ws+'_left'
-                right_out = '__'+run+'_'+self._red_ws+'_right'
+                left_out = '__' + run + '_' + self._red_ws + '_left'
+                right_out = '__' + run + '_' + self._red_ws + '_right'
                 CloneWorkspace(InputWorkspace=left, OutputWorkspace=left_out)
                 CloneWorkspace(InputWorkspace=right, OutputWorkspace=right_out)
-                GroupWorkspaces(InputWorkspaces=[left_out,right_out],OutputWorkspace=outname)
+                GroupWorkspaces(InputWorkspaces=[left_out, right_out], OutputWorkspace=outname)
             elif self._unmirror_option == 1:
                 Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=outname)
                 Scale(InputWorkspace=outname, OutputWorkspace=outname, Factor=0.5)
@@ -479,40 +484,53 @@ class IndirectILLReductionQENS(PythonAlgorithm):
             elif self._unmirror_option == 3:
                 CloneWorkspace(InputWorkspace=right, OutputWorkspace=outname)
             elif self._unmirror_option == 4:
-                bin_range_table = '__um4_'+right
-                MatchPeaks(InputWorkspace=right, InputWorkspace2=left, OutputWorkspace=right,
-                           MaskBins = True, BinRangeTable = bin_range_table)
+                bin_range_table = '__um4_' + right
+                MatchPeaks(InputWorkspace=right,
+                           InputWorkspace2=left,
+                           OutputWorkspace=right,
+                           MaskBins=True,
+                           BinRangeTable=bin_range_table)
                 mask_min = mtd[bin_range_table].row(0)['MinBin']
                 mask_max = mtd[bin_range_table].row(0)['MaxBin']
                 DeleteWorkspace(bin_range_table)
             elif self._unmirror_option == 5:
                 bin_range_table = '__um5_' + right
-                MatchPeaks(InputWorkspace=right, InputWorkspace2=mtd[alignment].getItem(0).getName(),
-                           InputWorkspace3=mtd[alignment].getItem(1).getName(), OutputWorkspace=right,
-                           MaskBins = True, BinRangeTable = bin_range_table)
+                MatchPeaks(InputWorkspace=right,
+                           InputWorkspace2=mtd[alignment].getItem(0).getName(),
+                           InputWorkspace3=mtd[alignment].getItem(1).getName(),
+                           OutputWorkspace=right,
+                           MaskBins=True,
+                           BinRangeTable=bin_range_table)
                 mask_min = mtd[bin_range_table].row(0)['MinBin']
                 mask_max = mtd[bin_range_table].row(0)['MaxBin']
                 DeleteWorkspace(bin_range_table)
             elif self._unmirror_option == 6:
                 bin_range_table_left = '__um6_' + left
                 bin_range_table_right = '__um6_' + right
-                MatchPeaks(InputWorkspace=left, OutputWorkspace=left, MaskBins = True,
-                           BinRangeTable = bin_range_table_left)
-                MatchPeaks(InputWorkspace=right, OutputWorkspace=right, MaskBins = True,
+                MatchPeaks(InputWorkspace=left, OutputWorkspace=left, MaskBins=True, BinRangeTable=bin_range_table_left)
+                MatchPeaks(InputWorkspace=right,
+                           OutputWorkspace=right,
+                           MaskBins=True,
                            BinRangeTable=bin_range_table_right)
-                mask_min = max(mtd[bin_range_table_left].row(0)['MinBin'],mtd[bin_range_table_right].row(0)['MinBin'])
-                mask_max = min(mtd[bin_range_table_left].row(0)['MaxBin'],mtd[bin_range_table_right].row(0)['MaxBin'])
+                mask_min = max(mtd[bin_range_table_left].row(0)['MinBin'], mtd[bin_range_table_right].row(0)['MinBin'])
+                mask_max = min(mtd[bin_range_table_left].row(0)['MaxBin'], mtd[bin_range_table_right].row(0)['MaxBin'])
                 DeleteWorkspace(bin_range_table_left)
                 DeleteWorkspace(bin_range_table_right)
             elif self._unmirror_option == 7:
                 bin_range_table_left = '__um7_' + left
                 bin_range_table_right = '__um7_' + right
-                MatchPeaks(InputWorkspace=left, InputWorkspace2=mtd[alignment].getItem(0).getName(),
-                           OutputWorkspace=left,MatchInput2ToCenter=True,
-                           MaskBins = True, BinRangeTable=bin_range_table_left)
-                MatchPeaks(InputWorkspace=right, InputWorkspace2=mtd[alignment].getItem(1).getName(),
-                           OutputWorkspace=right, MatchInput2ToCenter=True,
-                           MaskBins = True, BinRangeTable=bin_range_table_right)
+                MatchPeaks(InputWorkspace=left,
+                           InputWorkspace2=mtd[alignment].getItem(0).getName(),
+                           OutputWorkspace=left,
+                           MatchInput2ToCenter=True,
+                           MaskBins=True,
+                           BinRangeTable=bin_range_table_left)
+                MatchPeaks(InputWorkspace=right,
+                           InputWorkspace2=mtd[alignment].getItem(1).getName(),
+                           OutputWorkspace=right,
+                           MatchInput2ToCenter=True,
+                           MaskBins=True,
+                           BinRangeTable=bin_range_table_right)
                 mask_min = max(mtd[bin_range_table_left].row(0)['MinBin'], mtd[bin_range_table_right].row(0)['MinBin'])
                 mask_max = min(mtd[bin_range_table_left].row(0)['MaxBin'], mtd[bin_range_table_right].row(0)['MaxBin'])
                 DeleteWorkspace(bin_range_table_left)
@@ -524,7 +542,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 self._mask(outname, mask_min, mask_max)
 
         DeleteWorkspace(ws)
-        RenameWorkspace(InputWorkspace=outname,OutputWorkspace=ws)
+        RenameWorkspace(InputWorkspace=outname, OutputWorkspace=ws)
 
 
 # Register algorithm with Mantid

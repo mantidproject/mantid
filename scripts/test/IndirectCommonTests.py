@@ -52,8 +52,7 @@ class IndirectCommonTests(unittest.TestCase):
 
         ws_name = indirect_common.getWSprefix(ws)
 
-        self.assertEqual(ws_name, 'irs1_graphite002_',
-                         "The workspace prefix does not match the expected value")
+        self.assertEqual(ws_name, 'irs1_graphite002_', "The workspace prefix does not match the expected value")
 
     def test_getWSprefix_ILL(self):
         config['default.facility'] = 'ILL'
@@ -61,16 +60,14 @@ class IndirectCommonTests(unittest.TestCase):
 
         ws_name = indirect_common.getWSprefix(ws)
 
-        self.assertEqual(ws_name, 'in16b_1_',
-                         "The workspace prefix does not match the expected value")
+        self.assertEqual(ws_name, 'in16b_1_', "The workspace prefix does not match the expected value")
 
     def test_getEFixed(self):
         ws = CreateSampleWorkspace()
         ws = self.load_instrument(ws, 'IRIS')
 
         e_fixed = indirect_common.getEfixed(ws.name())
-        self.assertEqual(e_fixed, 1.8450,
-                         "The EFixed value does not match the expected value")
+        self.assertEqual(e_fixed, 1.8450, "The EFixed value does not match the expected value")
 
     def test_getEFixed_failure(self):
         ws = CreateSampleWorkspace()
@@ -88,8 +85,9 @@ class IndirectCommonTests(unittest.TestCase):
 
     def test_createQaxis(self):
         ws = self.make_dummy_QENS_workspace()
-        expected_result = [0.48372274526965614, 0.5253047207470043, 0.5667692111215948, 0.6079351677527526,
-                           0.6487809073399486]
+        expected_result = [
+            0.48372274526965614, 0.5253047207470043, 0.5667692111215948, 0.6079351677527526, 0.6487809073399486
+        ]
         actual_result = indirect_common.createQaxis(ws)
         self.assert_lists_almost_match(expected_result, actual_result)
 
@@ -102,8 +100,9 @@ class IndirectCommonTests(unittest.TestCase):
     def test_GetThetaQ(self):
         ws = self.make_dummy_QENS_workspace()
         expected_theta_result = [29.700000000000006, 32.32, 34.949999999999996, 37.58, 40.209999999999994]
-        expected_Q_result = [0.48372274526965625, 0.5253047207470042, 0.5667692111215948, 0.6079351677527525,
-                             0.6487809073399485]
+        expected_Q_result = [
+            0.48372274526965625, 0.5253047207470042, 0.5667692111215948, 0.6079351677527525, 0.6487809073399485
+        ]
         actual_theta_result, actual_Q_result = indirect_common.GetThetaQ(ws)
         self.assert_lists_almost_match(expected_theta_result, actual_theta_result)
         self.assert_lists_almost_match(expected_Q_result, actual_Q_result)
@@ -305,30 +304,29 @@ class IndirectCommonTests(unittest.TestCase):
         actual_row_count = mtd[workspace].rowCount()
         actual_column_count = mtd[workspace].columnCount()
         self.assertEqual(expected_row_count, actual_row_count,
-                         "Number of rows does not match expected (%d != %d)"
-                         % (expected_row_count, actual_row_count))
-        self.assertEqual(expected_column_count, actual_column_count,
-                         "Number of columns does not match expected (%d != %d)"
-                         % (expected_column_count, actual_column_count))
+                         "Number of rows does not match expected (%d != %d)" % (expected_row_count, actual_row_count))
+        self.assertEqual(
+            expected_column_count, actual_column_count,
+            "Number of columns does not match expected (%d != %d)" % (expected_column_count, actual_column_count))
 
     def assert_matrix_workspace_dimensions(self, workspace, expected_num_histograms, expected_blocksize):
         actual_blocksize = mtd[workspace].blocksize()
         actual_num_histograms = mtd[workspace].getNumberHistograms()
-        self.assertEqual(actual_num_histograms, expected_num_histograms,
-                         "Number of histograms does not match expected (%d != %d)"
-                         % (expected_num_histograms, actual_num_histograms))
-        self.assertEqual(expected_blocksize, actual_blocksize,
-                         "Workspace blocksize does not match expected (%d != %d)"
-                         % (expected_blocksize, actual_blocksize))
+        self.assertEqual(
+            actual_num_histograms, expected_num_histograms, "Number of histograms does not match expected (%d != %d)" %
+            (expected_num_histograms, actual_num_histograms))
+        self.assertEqual(
+            expected_blocksize, actual_blocksize,
+            "Workspace blocksize does not match expected (%d != %d)" % (expected_blocksize, actual_blocksize))
 
     def assert_logs_match_expected(self, workspace, expected_logs):
         run = mtd[workspace].getRun()
         for log_name, log_value in expected_logs.items():
-            self.assertTrue(run.hasProperty(log_name),
-                            "The log %s is missing from the workspace" % log_name)
-            self.assertEqual(str(run.getProperty(log_name).value), str(log_value),
-                             "The expected value of log %s did not match (%s != %s)" %
-                             (log_name, str(log_value), run.getProperty(log_name).value))
+            self.assertTrue(run.hasProperty(log_name), "The log %s is missing from the workspace" % log_name)
+            self.assertEqual(
+                str(run.getProperty(log_name).value), str(log_value),
+                "The expected value of log %s did not match (%s != %s)" %
+                (log_name, str(log_value), run.getProperty(log_name).value))
 
     # -----------------------------------------------------------
     # Test helper functions
@@ -341,8 +339,12 @@ class IndirectCommonTests(unittest.TestCase):
         ws = CreateWorkspace(OutputWorkspace=output_name, DataX='1,2,3,4,5', DataY='0,0,2,0,0')
         return ws.name()
 
-    def make_dummy_QENS_workspace(self, output_name="ws", instrument_name='IRIS',
-                                  analyser='graphite', reflection='002', add_logs=True):
+    def make_dummy_QENS_workspace(self,
+                                  output_name="ws",
+                                  instrument_name='IRIS',
+                                  analyser='graphite',
+                                  reflection='002',
+                                  add_logs=True):
         """ Make a workspace that looks like QENS data """
         ws = CreateSampleWorkspace(OutputWorkspace=output_name)
         self.load_instrument(ws, instrument_name, analyser, reflection)
@@ -374,8 +376,13 @@ class IndirectCommonTests(unittest.TestCase):
         function = "name=LinearBackground, A0=0, A1=0;"
         function += "name=Gaussian, Sigma=0.1, PeakCentre=0, Height=10;"
         multi_domain_function, fit_kwargs = self.make_multi_domain_function(ws, function)
-        Fit(Function=multi_domain_function, InputWorkspace=ws, WorkspaceIndex=0,
-            Output=table_name, CreateOutput=True, MaxIterations=0, **fit_kwargs)
+        Fit(Function=multi_domain_function,
+            InputWorkspace=ws,
+            WorkspaceIndex=0,
+            Output=table_name,
+            CreateOutput=True,
+            MaxIterations=0,
+            **fit_kwargs)
         return table_name + "_Parameters"
 
     def load_instrument(self, ws, instrument, analyser='graphite', reflection='002'):
@@ -384,8 +391,7 @@ class IndirectCommonTests(unittest.TestCase):
 
         if config['default.facility'] != 'ILL':
             parameter_file_name = '%s_%s_%s_Parameters.xml' % (instrument, analyser, reflection)
-            ipf = os.path.join(config['instrumentDefinition.directory'],
-                               parameter_file_name)
+            ipf = os.path.join(config['instrumentDefinition.directory'], parameter_file_name)
             LoadParameterFile(ws, Filename=ipf)
 
         return ws

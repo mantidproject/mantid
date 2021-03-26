@@ -25,7 +25,6 @@ TREAT_LOG_NEGATIVE_VALUES = 'clip'
 class PropertiesEditorBase(QDialog):
     """Base class for all dialogs responsible for providing
     access to change figure properties by clicking on the canvas"""
-
     def __init__(self, ui_file, canvas):
         """
         :param canvas: A reference to the canvas to be updated
@@ -59,14 +58,12 @@ class PropertiesEditorBase(QDialog):
 
 
 class LabelEditorModel(object):
-
     def __init__(self, label_text):
         self.label_text = label_text
 
 
 class LabelEditor(PropertiesEditorBase):
     """Provides a dialog box to edit a single label"""
-
     def __init__(self, canvas, target):
         """
         :param target: A reference to the label being edited
@@ -93,14 +90,12 @@ class LabelEditor(PropertiesEditorBase):
 
 
 class LegendEditorModel(object):
-
     def __init__(self, label_text):
         self.label_text = label_text
 
 
 class LegendEditor(PropertiesEditorBase):
     """Provides a dialog box to edit a legend label"""
-
     def __init__(self, canvas, target, target_curve):
         """
         :param target: A reference to the label being edited
@@ -138,7 +133,6 @@ class AxisEditorModel(object):
 
 
 class AxisEditor(PropertiesEditorBase):
-
     def __init__(self, canvas, axes, axis_id):
         """
 
@@ -235,28 +229,24 @@ class AxisEditor(PropertiesEditorBase):
 
 
 class XAxisEditor(AxisEditor):
-
     def __init__(self, canvas, axes):
         super(XAxisEditor, self).__init__(canvas, axes, 'x')
         self.create_model()
 
 
 class YAxisEditor(AxisEditor):
-
     def __init__(self, canvas, axes):
         super(YAxisEditor, self).__init__(canvas, axes, 'y')
         self.create_model()
 
 
 class ZAxisEditor(AxisEditor):
-
     def __init__(self, canvas, axes):
         super(ZAxisEditor, self).__init__(canvas, axes, 'z')
         self.create_model()
 
 
 class ColorbarAxisEditor(AxisEditor):
-
     def __init__(self, canvas, axes):
         super(ColorbarAxisEditor, self).__init__(canvas, axes, 'y')
 
@@ -353,8 +343,7 @@ class MarkerEditor(QWidget):
         if new_name == "":
             raise RuntimeError("Marker names cannot be empty")
         if new_name in self.used_names and new_name != old_name:
-            raise RuntimeError("Marker names cannot be duplicated.\n Another marker is named '{}'"
-                               .format(new_name))
+            raise RuntimeError("Marker names cannot be duplicated.\n Another marker is named '{}'".format(new_name))
         try:
             marker.set_name(new_name)
         except:

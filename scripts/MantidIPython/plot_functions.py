@@ -23,12 +23,9 @@ def _plot_with_options(axes_option, workspace, options_list, plot_number):
     """
     ws_plot = ConvertToPointData(workspace)
     if options_list['errorbars']:
-        axes_option.errorbar(ws_plot.readX(0), ws_plot.readY(0),
-                             yerr=ws_plot.readE(0), label=workspace.name())
+        axes_option.errorbar(ws_plot.readX(0), ws_plot.readY(0), yerr=ws_plot.readE(0), label=workspace.name())
     else:
-        axes_option.plot(ws_plot.readX(0),
-                         ws_plot.readY(0),
-                         label=workspace.name())
+        axes_option.plot(ws_plot.readX(0), ws_plot.readY(0), label=workspace.name())
 
     axes_option.grid(options_list['grid'])
     axes_option.set_xscale(options_list['xScale'])
@@ -96,8 +93,9 @@ def _process_arguments(input_args, input_kwargs):
     """
     Build a dictionary of plotting options
     """
-    key_list = ['title', 'grid', 'legend', 'legendLocation',
-                'xScale', 'yScale', 'xLimits', 'yLimits', 'sharedAxes', 'errorbars']
+    key_list = [
+        'title', 'grid', 'legend', 'legendLocation', 'xScale', 'yScale', 'xLimits', 'yLimits', 'sharedAxes', 'errorbars'
+    ]
     default_values = ['', True, True, 1, 'log', 'log', 'auto', 'auto', True, 'True']
 
     # Fill ops with the default values

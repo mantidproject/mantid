@@ -8,7 +8,6 @@ import pythonTSV as TSVHelper
 
 
 class group(object):
-
     def __init__(self, name="", dets=[]):
         self._name = name
         self._dets = dets

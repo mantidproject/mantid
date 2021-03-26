@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, anomalous-backslash-in-string, attribute-defined-outside-init
-
 """
 @author Jose Borreguero, NScD
 @date June 01, 2017
@@ -57,18 +56,17 @@ class PrimStretchedExpFT(IFunction1D):
         :return: P(bin_boundaries[i+1])- P(bin_boundaries[i]), the difference of the primitive
         """
         rf = 16
-        parms, de, energies, fourier = function1Dcommon(
-            self, xvals, rf=rf, **optparms)
+        parms, de, energies, fourier = function1Dcommon(self, xvals, rf=rf, **optparms)
         if parms is None:
             return fourier  # return zeros if parameters not valid
-        denergies = (energies[-1] - energies[0]) / (len(energies)-1)
+        denergies = (energies[-1] - energies[0]) / (len(energies) - 1)
         # Find bin boundaries
-        boundaries = (xvals[1:]+xvals[:-1])/2  # internal bin boundaries
+        boundaries = (xvals[1:] + xvals[:-1]) / 2  # internal bin boundaries
         # external lower boundary
-        boundaries = np.insert(boundaries, 0, 2*xvals[0]-boundaries[0])
+        boundaries = np.insert(boundaries, 0, 2 * xvals[0] - boundaries[0])
         # external upper boundary
-        boundaries = np.append(boundaries, 2*xvals[-1]-boundaries[-1])
-        primitive = np.cumsum(fourier) * (denergies / (rf*de))  # running Riemann sum
+        boundaries = np.append(boundaries, 2 * xvals[-1] - boundaries[-1])
+        primitive = np.cumsum(fourier) * (denergies / (rf * de))  # running Riemann sum
         transform = np.interp(boundaries[1:] - parms['Centre'], energies, primitive) - \
             np.interp(boundaries[:-1] - parms['Centre'], energies, primitive)
         return transform * parms['Height']

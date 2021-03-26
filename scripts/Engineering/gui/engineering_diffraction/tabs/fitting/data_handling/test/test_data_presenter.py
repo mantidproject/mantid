@@ -51,8 +51,7 @@ class FittingDataPresenterTest(unittest.TestCase):
 
         self.presenter.on_load_clicked(xunit="TOF")
 
-        mock_worker.assert_called_with("mocked model method",
-                                       ("/a/file/to/load.txt, /another/one.nxs", "TOF"),
+        mock_worker.assert_called_with("mocked model method", ("/a/file/to/load.txt, /another/one.nxs", "TOF"),
                                        error_cb=self.presenter._on_worker_error,
                                        finished_cb=self.presenter._emit_enable_load_button_signal,
                                        success_cb=self.presenter._on_worker_success)
@@ -162,8 +161,10 @@ class FittingDataPresenterTest(unittest.TestCase):
         model_dict = {"name1": self.ws1, "name2": self.ws2}
         self.model.get_loaded_workspaces.return_value = model_dict
         # lambda function to replace dict with new key and same ordering as before
-        self.model.update_workspace_name = lambda old, new: model_dict.update(
-            {(key if key != old else new): val for key, val in (list(model_dict.items()), model_dict.clear())[0]})
+        self.model.update_workspace_name = lambda old, new: model_dict.update({(key if key != old else new): val
+                                                                               for key, val in
+                                                                               (list(model_dict.items()),
+                                                                                model_dict.clear())[0]})
         self.presenter.row_numbers = {"name1": 0, "name2": 1}
         self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
@@ -178,8 +179,10 @@ class FittingDataPresenterTest(unittest.TestCase):
         model_dict = {"name1": self.ws1, "name2": self.ws2}
         self.model.get_loaded_workspaces.return_value = model_dict
         # lambda function to replace dict with new key and same ordering as before
-        self.model.update_workspace_name = lambda old, new: model_dict.update(
-            {(key if key != old else new): val for key, val in (list(model_dict.items()), model_dict.clear())[0]})
+        self.model.update_workspace_name = lambda old, new: model_dict.update({(key if key != old else new): val
+                                                                               for key, val in
+                                                                               (list(model_dict.items()),
+                                                                                model_dict.clear())[0]})
         self.presenter.row_numbers = {"name1": 0, "name2": 1}
         self.presenter.all_plots_removed_notifier = mock.MagicMock()
 

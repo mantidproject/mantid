@@ -27,20 +27,21 @@ class HFIRSANSReduction(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty('Filename', '', doc='List of input file paths')
-        self.declareProperty('ReductionProperties', '__sans_reduction_properties', validator=StringMandatoryValidator(),
+        self.declareProperty('ReductionProperties',
+                             '__sans_reduction_properties',
+                             validator=StringMandatoryValidator(),
                              doc='Property manager name for the reduction')
         self.declareProperty('OutputWorkspace', '', doc='Reduced workspace')
         self.declareProperty('OutputMessage', '', direction=Direction.Output, doc='Output message')
 
-    def _multiple_load(self, data_file, workspace,
-                       property_manager, property_manager_name):
+    def _multiple_load(self, data_file, workspace, property_manager, property_manager_name):
         # Check whether we have a list of files that need merging
         #   Make sure we process a list of files written as a string
         def _load_data(filename, output_ws):
             if not property_manager.existsProperty("LoadAlgorithm"):
                 raise RuntimeError("SANS reduction not set up properly: missing load algorithm")
-            p=property_manager.getProperty("LoadAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
+            p = property_manager.getProperty("LoadAlgorithm")
+            alg = Algorithm.fromString(p.valueAsStr)
             alg.setProperty("Filename", filename)
             alg.setProperty("OutputWorkspace", output_ws)
             if alg.existsProperty("ReductionProperties"):
@@ -63,7 +64,7 @@ class HFIRSANSReduction(PythonAlgorithm):
             monitor = 0.0
             timer = 0.0
             for i in range(len(data_file)):
-                if i==0:
+                if i == 0:
                     output_str += _load_data(data_file[i], workspace)
                     # Use the first file location as the default output directory
                     head, dummy_tail = os.path.split(data_file[0])
@@ -71,9 +72,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                         self.default_output_dir = head
                 else:
                     output_str += _load_data(data_file[i], '__tmp_wksp')
-                    api.Plus(LHSWorkspace=workspace,
-                             RHSWorkspace='__tmp_wksp',
-                             OutputWorkspace=workspace)
+                    api.Plus(LHSWorkspace=workspace, RHSWorkspace='__tmp_wksp', OutputWorkspace=workspace)
                     # Get the monitor and timer values
                     ws = AnalysisDataService.retrieve('__tmp_wksp')
                     monitor += ws.getRun().getProperty("monitor").value
@@ -114,17 +113,16 @@ class HFIRSANSReduction(PythonAlgorithm):
         output_msg = ""
         # Find the beam center
         if "SANSBeamFinderAlgorithm" in property_list:
-            p=property_manager.getProperty("SANSBeamFinderAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
+            p = property_manager.getProperty("SANSBeamFinderAlgorithm")
+            alg = Algorithm.fromString(p.valueAsStr)
             if alg.existsProperty("ReductionProperties"):
                 alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
             if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value+'\n'
+                output_msg += alg.getProperty("OutputMessage").value + '\n'
 
         # Load the sample data
-        msg = self._multiple_load(filename, output_ws,
-                                  property_manager, property_manager_name)
+        msg = self._multiple_load(filename, output_ws, property_manager, property_manager_name)
         output_msg += "Loaded %s\n" % filename
         output_msg += msg
 
@@ -137,8 +135,8 @@ class HFIRSANSReduction(PythonAlgorithm):
         if "TransmissionBeamCenterAlgorithm" in property_list:
             # Execute the beam finding algorithm and set the beam
             # center for the transmission calculation
-            p=property_manager.getProperty("TransmissionBeamCenterAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
+            p = property_manager.getProperty("TransmissionBeamCenterAlgorithm")
+            alg = Algorithm.fromString(p.valueAsStr)
             if alg.existsProperty("ReductionProperties"):
                 alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
@@ -146,8 +144,8 @@ class HFIRSANSReduction(PythonAlgorithm):
             beam_center_y = alg.getProperty("FoundBeamCenterY").value
 
         if "TransmissionAlgorithm" in property_list:
-            p=property_manager.getProperty("TransmissionAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
+            p = property_manager.getProperty("TransmissionAlgorithm")
+            alg = Algorithm.fromString(p.valueAsStr)
             alg.setProperty("InputWorkspace", output_ws)
             alg.setProperty("OutputWorkspace", output_ws)
 
@@ -176,14 +174,13 @@ class HFIRSANSReduction(PythonAlgorithm):
                     property_manager.declareProperty("MeasuredTransmissionError", meas_err)
 
             if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value+'\n'
+                output_msg += alg.getProperty("OutputMessage").value + '\n'
 
         # Process background data
         if "BackgroundFiles" in property_list:
             background = property_manager.getProperty("BackgroundFiles").value
             background_ws = "__background_%s" % output_ws
-            msg = self._multiple_load(background, background_ws,
-                                      property_manager, property_manager_name)
+            msg = self._multiple_load(background, background_ws, property_manager, property_manager_name)
             bck_msg = "Loaded background %s\n" % background
             bck_msg += msg
 
@@ -195,8 +192,8 @@ class HFIRSANSReduction(PythonAlgorithm):
             if "BckTransmissionBeamCenterAlgorithm" in property_list:
                 # Execute the beam finding algorithm and set the beam
                 # center for the transmission calculation
-                p=property_manager.getProperty("BckTransmissionBeamCenterAlgorithm")
-                alg=Algorithm.fromString(p.valueAsStr)
+                p = property_manager.getProperty("BckTransmissionBeamCenterAlgorithm")
+                alg = Algorithm.fromString(p.valueAsStr)
                 if alg.existsProperty("ReductionProperties"):
                     alg.setProperty("ReductionProperties", property_manager_name)
                 alg.execute()
@@ -205,10 +202,10 @@ class HFIRSANSReduction(PythonAlgorithm):
 
             # Background transmission correction
             if "BckTransmissionAlgorithm" in property_list:
-                p=property_manager.getProperty("BckTransmissionAlgorithm")
-                alg=Algorithm.fromString(p.valueAsStr)
+                p = property_manager.getProperty("BckTransmissionAlgorithm")
+                alg = Algorithm.fromString(p.valueAsStr)
                 alg.setProperty("InputWorkspace", background_ws)
-                alg.setProperty("OutputWorkspace", '__'+background_ws+"_reduced")
+                alg.setProperty("OutputWorkspace", '__' + background_ws + "_reduced")
 
                 if alg.existsProperty("BeamCenterX") \
                         and alg.existsProperty("BeamCenterY") \
@@ -235,19 +232,17 @@ class HFIRSANSReduction(PythonAlgorithm):
                         property_manager.declareProperty("MeasuredBckTransmissionError", meas_err)
 
                 if alg.existsProperty("OutputMessage"):
-                    output_msg += alg.getProperty("OutputMessage").value+'\n'
-                background_ws = '__'+background_ws+'_reduced'
+                    output_msg += alg.getProperty("OutputMessage").value + '\n'
+                background_ws = '__' + background_ws + '_reduced'
 
             # Subtract background
             api.RebinToWorkspace(WorkspaceToRebin=background_ws,
                                  WorkspaceToMatch=output_ws,
-                                 OutputWorkspace=background_ws+'_rebin',
+                                 OutputWorkspace=background_ws + '_rebin',
                                  PreserveEvents=False)
-            api.Minus(LHSWorkspace=output_ws,
-                      RHSWorkspace=background_ws,
-                      OutputWorkspace=output_ws)
+            api.Minus(LHSWorkspace=output_ws, RHSWorkspace=background_ws, OutputWorkspace=output_ws)
 
-            bck_msg = bck_msg.replace('\n','\n   |')
+            bck_msg = bck_msg.replace('\n', '\n   |')
             output_msg += "Background subtracted [%s]%s\n" % (background_ws, bck_msg)
 
         # Absolute scale correction
@@ -260,45 +255,44 @@ class HFIRSANSReduction(PythonAlgorithm):
         iq_output = None
         if "IQAlgorithm" in property_list:
             iq_output = self.getPropertyValue("OutputWorkspace")
-            iq_output = iq_output+'_Iq'
-            p=property_manager.getProperty("IQAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
+            iq_output = iq_output + '_Iq'
+            p = property_manager.getProperty("IQAlgorithm")
+            alg = Algorithm.fromString(p.valueAsStr)
             alg.setProperty("InputWorkspace", output_ws)
             alg.setProperty("OutputWorkspace", iq_output)
             alg.setProperty("ReductionProperties", property_manager_name)
             if alg.existsProperty("WedgeWorkspace"):
-                alg.setProperty("WedgeWorkspace", iq_output+'_wedges')
+                alg.setProperty("WedgeWorkspace", iq_output + '_wedges')
             alg.execute()
             if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value+'\n'
+                output_msg += alg.getProperty("OutputMessage").value + '\n'
 
         # Compute I(qx,qy)
         iqxy_output = None
         if "IQXYAlgorithm" in property_list:
             iq_output_name = self.getPropertyValue("OutputWorkspace")
-            iqxy_output = iq_output_name+'_Iqxy'
-            p=property_manager.getProperty("IQXYAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
+            iqxy_output = iq_output_name + '_Iqxy'
+            p = property_manager.getProperty("IQXYAlgorithm")
+            alg = Algorithm.fromString(p.valueAsStr)
             alg.setProperty("InputWorkspace", output_ws)
             alg.setProperty("OutputWorkspace", iq_output_name)
             if alg.existsProperty("ReductionProperties"):
                 alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
             if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value+'\n'
+                output_msg += alg.getProperty("OutputMessage").value + '\n'
 
         # Verify output directory and save data
         output_dir = ''
         if "OutputDirectory" in property_list:
             output_dir = property_manager.getProperty("OutputDirectory").value
-        if len(output_dir)==0:
+        if len(output_dir) == 0:
             output_dir = self.default_output_dir
 
         if os.path.isdir(output_dir):
-            output_msg += self._save_output(iq_output, iqxy_output,
-                                            output_dir, property_manager)
+            output_msg += self._save_output(iq_output, iqxy_output, output_dir, property_manager)
             Logger("HFIRSANSReduction").notice("Output saved in %s" % output_dir)
-        elif len(output_dir)>0:
+        elif len(output_dir) > 0:
             msg = "Output directory doesn't exist: %s\n" % output_dir
             Logger("HFIRSANSReduction").error(msg)
 
@@ -330,16 +324,16 @@ class HFIRSANSReduction(PythonAlgorithm):
             if "SensitivityBeamCenterAlgorithm" in property_list:
                 # Execute the beam finding algorithm and set the beam
                 # center for the transmission calculation
-                p=property_manager.getProperty("SensitivityBeamCenterAlgorithm")
-                alg=Algorithm.fromString(p.valueAsStr)
+                p = property_manager.getProperty("SensitivityBeamCenterAlgorithm")
+                alg = Algorithm.fromString(p.valueAsStr)
                 if alg.existsProperty("ReductionProperties"):
                     alg.setProperty("ReductionProperties", property_manager_name)
                 alg.execute()
                 beam_center_x = alg.getProperty("FoundBeamCenterX").value
                 beam_center_y = alg.getProperty("FoundBeamCenterY").value
 
-            p=property_manager.getProperty("SensitivityAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
+            p = property_manager.getProperty("SensitivityAlgorithm")
+            alg = Algorithm.fromString(p.valueAsStr)
             alg.setProperty("InputWorkspace", workspace)
             alg.setProperty("OutputWorkspace", workspace)
 
@@ -354,7 +348,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                 alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
             if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value+'\n'
+                output_msg += alg.getProperty("OutputMessage").value + '\n'
 
             # Store sensitivity beam center so that we can access it later
             if beam_center_x is not None and beam_center_y is not None:
@@ -381,8 +375,8 @@ class HFIRSANSReduction(PythonAlgorithm):
             output_workspace = workspace
 
         if property_manager.existsProperty(algorithm_name):
-            p=property_manager.getProperty(algorithm_name)
-            alg=Algorithm.fromString(p.valueAsStr)
+            p = property_manager.getProperty(algorithm_name)
+            alg = Algorithm.fromString(p.valueAsStr)
             if alg.existsProperty("InputWorkspace"):
                 alg.setProperty("InputWorkspace", workspace)
                 if alg.existsProperty("OutputWorkspace"):
@@ -393,7 +387,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                 alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
             if alg.existsProperty("OutputMessage"):
-                output_msg = alg.getProperty("OutputMessage").value+'\n'
+                output_msg = alg.getProperty("OutputMessage").value + '\n'
         return output_msg
 
     def _save_output(self, iq_output, iqxy_output, output_dir, property_manager):
@@ -415,19 +409,19 @@ class HFIRSANSReduction(PythonAlgorithm):
                     if os.path.isfile(process_file):
                         proc = open(process_file, 'r')
                         proc_xml = "<SASprocessnote>\n%s</SASprocessnote>\n" % proc.read()
-                    elif len(process_file)>0:
+                    elif len(process_file) > 0:
                         Logger("HFIRSANSReduction").error("Could not read %s\n" % process_file)
                 if property_manager.existsProperty("SetupAlgorithm"):
                     setup_info = property_manager.getProperty("SetupAlgorithm").value
                     proc_xml += "\n<SASprocessnote>\n<Reduction>\n"
-                        # The instrument name refers to the UI, which is named BIOSANS for all HFIR SANS
+                    # The instrument name refers to the UI, which is named BIOSANS for all HFIR SANS
                     proc_xml += "  <instrument_name>BIOSANS</instrument_name>\n"
                     proc_xml += "  <SetupInfo>%s</SetupInfo>\n" % setup_info
                     filename = self.getProperty("Filename").value
                     proc_xml += "  <Filename>%s</Filename>\n" % filename
                     proc_xml += "</Reduction>\n</SASprocessnote>\n"
 
-                filename = os.path.join(output_dir, iq_ws+'.txt')
+                filename = os.path.join(output_dir, iq_ws + '.txt')
 
                 alg = AlgorithmManager.create("SaveAscii")
                 alg.initialize()
@@ -440,7 +434,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                 alg.setProperty("WriteSpectrumID", False)
                 alg.execute()
 
-                filename = os.path.join(output_dir, iq_ws+'.xml')
+                filename = os.path.join(output_dir, iq_ws + '.xml')
                 alg = AlgorithmManager.create("SaveCanSAS1D")
                 alg.initialize()
                 alg.setChild(True)
@@ -464,7 +458,7 @@ class HFIRSANSReduction(PythonAlgorithm):
         # Save I(Qx,Qy)
         if iqxy_output is not None:
             if AnalysisDataService.doesExist(iqxy_output):
-                filename = os.path.join(output_dir, iqxy_output+'.dat')
+                filename = os.path.join(output_dir, iqxy_output + '.dat')
                 alg = AlgorithmManager.create("SaveNISTDAT")
                 alg.initialize()
                 alg.setChild(True)
@@ -478,7 +472,7 @@ class HFIRSANSReduction(PythonAlgorithm):
 
         return output_msg
 
-#############################################################################################
 
+#############################################################################################
 
 AlgorithmFactory.subscribe(HFIRSANSReduction)

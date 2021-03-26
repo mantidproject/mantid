@@ -24,7 +24,6 @@ from matplotlib.container import ErrorbarContainer
 MPLVersionInfo = collections.namedtuple("MPLVersionInfo", ("major", "minor", "patch"))
 MATPLOTLIB_VERSION_INFO = MPLVersionInfo._make(map(int, mpl_version_str.split(".")))
 
-
 # Use the correct draggable method based on the matplotlib version
 if hasattr(Legend, "set_draggable"):
     SET_DRAGGABLE_METHOD = "set_draggable"
@@ -113,8 +112,7 @@ def get_colormap_names():
 
 
 def get_errorbar_containers(ax):
-    return [e_cont for e_cont in ax.containers
-            if isinstance(e_cont, ErrorbarContainer)]
+    return [e_cont for e_cont in ax.containers if isinstance(e_cont, ErrorbarContainer)]
 
 
 def get_autoscale_limits(ax, axis):
@@ -127,7 +125,7 @@ def get_autoscale_limits(ax, axis):
     axis_min, axis_max = getattr(ax.dataLim, 'interval{}'.format(axis))
     ax_margin = getattr(ax, '_{}margin'.format(axis))
     if ax_margin > 0:
-        padding = (axis_max - axis_min)*ax_margin
+        padding = (axis_max - axis_min) * ax_margin
         return axis_min - padding, axis_max + padding
     if not ax._tight:
         locator = getattr(ax, '{}axis'.format(axis)).get_major_locator()
@@ -167,16 +165,15 @@ def zoom_axis(ax, coord, x_or_y, factor):
     :param float factor: The factor by which to zoom in, a factor less than 1 zooms out
     """
     if x_or_y.lower() not in ['x', 'y']:
-        raise ValueError("Can only zoom on axis 'x' or 'y'. Found '{}'."
-                         "".format(x_or_y))
+        raise ValueError("Can only zoom on axis 'x' or 'y'. Found '{}'." "".format(x_or_y))
     get_lims = getattr(ax, "get_{}lim".format(x_or_y.lower()))
     set_lims = getattr(ax, "set_{}lim".format(x_or_y.lower()))
 
     ax_min, ax_max = get_lims()
     dist_to_min = coord - ax_min
     dist_to_max = ax_max - coord
-    new_ax_min = coord - dist_to_min/factor
-    new_ax_max = coord + dist_to_max/factor
+    new_ax_min = coord - dist_to_min / factor
+    new_ax_max = coord + dist_to_max / factor
 
     set_lims((new_ax_min, new_ax_max))
     return new_ax_min, new_ax_max
@@ -212,6 +209,7 @@ def get_single_workspace_log_value(ws_index, *, log_values=None, matrix_ws=None,
             return 0
 
         return log_values[ws_index]
+
 
 def colormap_as_plot_color(number_colors: int, colormap_name: str = 'viridis', cmap=None):
     if not cmap:

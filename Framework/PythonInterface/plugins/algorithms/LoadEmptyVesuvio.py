@@ -14,7 +14,7 @@ WKSP_PROP = "OutputWorkspace"
 INST_PAR_PROP = "InstrumentParFile"
 
 # Instrument parameter headers. Key in the dictionary is the number of columns in the file
-IP_HEADERS = {5:"spectrum,theta,t0,-,R", 6:"spectrum,-,theta,t0,-,R"}
+IP_HEADERS = {5: "spectrum,theta,t0,-,R", 6: "spectrum,-,theta,t0,-,R"}
 
 # Child Algorithm logging
 _LOGGING_ = False
@@ -23,7 +23,6 @@ _LOGGING_ = False
 
 
 class LoadEmptyVesuvio(PythonAlgorithm):
-
     def summary(self):
         return "Loads an empty workspace containing the Vesuvio instrument at ISIS."
 #----------------------------------------------------------------------------------------
@@ -35,15 +34,15 @@ class LoadEmptyVesuvio(PythonAlgorithm):
 #----------------------------------------------------------------------------------------
 
     def seeAlso(self):
-        return [ "LoadVesuvio" ]
+        return ["LoadVesuvio"]
 
 #----------------------------------------------------------------------------------------
+
     def PyInit(self):
-        self.declareProperty(FileProperty(INST_PAR_PROP, "", action=FileAction.OptionalLoad,
-                                          extensions=["dat"]),
+        self.declareProperty(FileProperty(INST_PAR_PROP, "", action=FileAction.OptionalLoad, extensions=["dat"]),
                              doc="An optional IP file. If provided the values are used to correct "
-                                 "the default instrument values and attach the t0 values to each "
-                                 "detector")
+                             "the default instrument values and attach the t0 values to each "
+                             "detector")
 
         self.declareProperty(WorkspaceProperty(WKSP_PROP, "", Direction.Output),
                              doc="The name of the output workspace.")
@@ -114,14 +113,14 @@ class LoadEmptyVesuvio(PythonAlgorithm):
         """
         ipfile = open(ip_filename, "r")
         first_line = ipfile.readline()
-        columns = first_line.split() # splits on whitespace characters
+        columns = first_line.split()  # splits on whitespace characters
         try:
             return IP_HEADERS[len(columns)]
         except KeyError:
             raise ValueError("Unknown format for IP file. Currently support 5/6 column "
                              "variants. ncols=%d" % (len(columns)))
 
-#----------------------------------------------------------------------------------------
 
+#----------------------------------------------------------------------------------------
 
 AlgorithmFactory.subscribe(LoadEmptyVesuvio)

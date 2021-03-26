@@ -15,7 +15,7 @@ def _gaussian(x, height, x0, sigma):
     """Return a point in the gaussian curve."""
     x = x - x0
     sigma2 = 2 * sigma * sigma
-    return height * numpy.exp(- x * x / sigma2)
+    return height * numpy.exp(-x * x / sigma2)
 
 
 def _fillTemplateReflectometryWorkspace(ws, XUnit='TOF'):
@@ -25,8 +25,8 @@ def _fillTemplateReflectometryWorkspace(ws, XUnit='TOF'):
     templateXs = numpy.array(numpy.arange(-300., 55000., binWidth))
     nBins = len(templateXs) - 1
     xs = numpy.tile(templateXs, nHistograms)
-    ys = numpy.zeros(nHistograms*nBins)
-    es = numpy.zeros(nHistograms*nBins)
+    ys = numpy.zeros(nHistograms * nBins)
+    es = numpy.zeros(nHistograms * nBins)
     kwargs = {
         'OutputWorkspace': 'unused_',
         'DataX': xs,
@@ -56,9 +56,9 @@ def _fillTemplateTOFWorkspace(templateWS, bkgLevel):
     binWidth = 2.63
     elasticIndex = int(nBins / 3)
     monitorElasticIndex = int(nBins / 2)
-    xs = numpy.empty(nHistograms*(nBins+1))
-    ys = numpy.empty(nHistograms*nBins)
-    es = numpy.empty(nHistograms*nBins)
+    xs = numpy.empty(nHistograms * (nBins + 1))
+    ys = numpy.empty(nHistograms * nBins)
+    es = numpy.empty(nHistograms * nBins)
     spectrumInfo = templateWS.spectrumInfo()
     instrument = templateWS.getInstrument()
     l1 = spectrumInfo.l1()
@@ -67,37 +67,29 @@ def _fillTemplateTOFWorkspace(templateWS, bkgLevel):
     tofBegin = tofElastic - elasticIndex * binWidth
     monitorSampleDistance = 0.5
     tofElasticMonitor = tofBegin + monitorElasticIndex * binWidth
-    tofMonitorDetector = UnitConversion.run('Energy', 'TOF', E_i, monitorSampleDistance, l2, 0.0,
-                                            DeltaEModeType.Direct, 0.0)
+    tofMonitorDetector = UnitConversion.run('Energy', 'TOF', E_i, monitorSampleDistance, l2, 0.0, DeltaEModeType.Direct,
+                                            0.0)
     elasticPeakSigma = nBins * binWidth * 0.03
     elasticPeakHeight = 1723.0
     bkgMonitor = 1
 
     def fillBins(histogramIndex, elasticTOF, elasticPeakHeight, bkgLevel):
-        xIndexOffset = histogramIndex*(nBins+1)
-        yIndexOffset = histogramIndex*nBins
+        xIndexOffset = histogramIndex * (nBins + 1)
+        yIndexOffset = histogramIndex * nBins
         xs[xIndexOffset] = tofBegin - binWidth / 2
         for binIndex in range(nBins):
             x = tofBegin + binIndex * binWidth
-            xs[xIndexOffset+binIndex+1] = x + binWidth / 2
-            y = round(_gaussian(x, elasticPeakHeight, elasticTOF,
-                                elasticPeakSigma)) + bkgLevel
-            ys[yIndexOffset+binIndex] = y
-            es[yIndexOffset+binIndex] = numpy.sqrt(y)
+            xs[xIndexOffset + binIndex + 1] = x + binWidth / 2
+            y = round(_gaussian(x, elasticPeakHeight, elasticTOF, elasticPeakSigma)) + bkgLevel
+            ys[yIndexOffset + binIndex] = y
+            es[yIndexOffset + binIndex] = numpy.sqrt(y)
 
     for histogramIndex in range(0, nHistograms - 1):
         trueL2 = spectrumInfo.l2(histogramIndex)
         trueTOF = UnitConversion.run('Energy', 'TOF', E_i, l1, trueL2, 0.0, DeltaEModeType.Direct, 0.0)
         fillBins(histogramIndex, trueTOF, elasticPeakHeight, bkgLevel)
     fillBins(nHistograms - 1, tofElasticMonitor, 1623 * elasticPeakHeight, bkgMonitor)
-    kwargs = {
-        'DataX': xs,
-        'DataY': ys,
-        'DataE': es,
-        'NSpec': nHistograms,
-        'ParentWorkspace': templateWS,
-        'child': True
-    }
+    kwargs = {'DataX': xs, 'DataY': ys, 'DataE': es, 'NSpec': nHistograms, 'ParentWorkspace': templateWS, 'child': True}
     alg = run_algorithm('CreateWorkspace', **kwargs)
     ws = alg.getProperty('OutputWorkspace').value
     ws.getAxis(0).setUnit('TOF')
@@ -154,10 +146,7 @@ def add_slit_configuration_D17(ws, slit2Width, slit3Width):
 
 
 def create_poor_mans_d17_workspace():
-    kwargs = {
-        'InstrumentName': 'D17',
-        'child': True
-    }
+    kwargs = {'InstrumentName': 'D17', 'child': True}
     alg = run_algorithm('LoadEmptyInstrument', **kwargs)
     ws = alg.getProperty('OutputWorkspace').value
     ws = _fillTemplateReflectometryWorkspace(ws)
@@ -165,16 +154,10 @@ def create_poor_mans_d17_workspace():
 
 
 def create_poor_mans_in5_workspace(bkgLevel, removeDetectors):
-    kwargs = {
-        'InstrumentName': 'IN5',
-        'child': True
-    }
+    kwargs = {'InstrumentName': 'IN5', 'child': True}
     alg = run_algorithm('LoadEmptyInstrument', **kwargs)
     ws = removeDetectors(alg.getProperty('OutputWorkspace').value)
-    kwargs = {
-        'InputWorkspace': ws,
-        'child': True
-    }
+    kwargs = {'InputWorkspace': ws, 'child': True}
     alg = run_algorithm('RemoveMaskedSpectra', **kwargs)
     ws = alg.getProperty('OutputWorkspace').value
     ws = _fillTemplateTOFWorkspace(ws, bkgLevel)
@@ -186,11 +169,7 @@ def default_test_detectors(ws):
     for i in range(513):
         if i % 10 != 0:
             mask.append(i)
-    kwargs = {
-        'Workspace': ws,
-        'DetectorList': mask,
-        'child': True
-    }
+    kwargs = {'Workspace': ws, 'DetectorList': mask, 'child': True}
     run_algorithm('MaskDetectors', **kwargs)
     kwargs = {
         'Workspace': ws,
@@ -212,14 +191,7 @@ def refl_rotate_detector(ws, angle):
     angle = numpy.deg2rad(angle)
     z = r * numpy.cos(angle)
     y = r * numpy.sin(angle)
-    args = {
-        'Workspace': ws,
-        'ComponentName': 'detector',
-        'X': 0.,
-        'Y': y,
-        'Z': z,
-        'RelativePosition': False
-    }
+    args = {'Workspace': ws, 'ComponentName': 'detector', 'X': 0., 'Y': y, 'Z': z, 'RelativePosition': False}
     run_algorithm('MoveInstrumentComponent', **args)
     args = {
         'Workspace': ws,

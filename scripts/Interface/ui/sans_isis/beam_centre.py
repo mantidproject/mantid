@@ -17,8 +17,10 @@ from sans.gui_logic.gui_common import get_detector_from_gui_selection, \
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
+
     def _fromUtf8(s):
         return s
+
 
 Ui_BeamCentre, _ = load_ui(__file__, "beam_centre.ui")
 
@@ -54,7 +56,7 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
 
         # At the moment we only track how many times this is opened, if it's popular
         # we can track individual feature usage at a later date
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Beam Centre Tab"], False)
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Beam Centre Tab"], False)
 
     def _setup_log_widget(self):
         self.log_widget = messagedisplay.MessageDisplay(parent=self.groupBox_2)

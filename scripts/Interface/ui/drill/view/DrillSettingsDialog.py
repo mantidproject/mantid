@@ -47,63 +47,44 @@ class DrillSetting(QObject):
             if (settingType == "files"):
                 self._widget.allowMultipleFiles(True)
             self._widget.setLabelText("")
-            self._widget.fileInspectionFinished.connect(
-                    lambda : self.fileChecked.emit(self._widget.isValid())
-                    )
+            self._widget.fileInspectionFinished.connect(lambda: self.fileChecked.emit(self._widget.isValid()))
             self._setter = self._widget.setUserInput
             self._getter = self._widget.getUserInput
 
         if (settingType == "workspace"):
             self._widget = WorkspaceSelector()
             self._widget.setOptional(True)
-            self._widget.currentTextChanged.connect(
-                    lambda t : self.valueChanged.emit(name)
-                    )
+            self._widget.currentTextChanged.connect(lambda t: self.valueChanged.emit(name))
             self._setter = self._widget.setCurrentText
             self._getter = self._widget.currentText
 
         elif (settingType == "combobox"):
             self._widget = QComboBox()
             self._widget.addItems(values)
-            self._widget.currentTextChanged.connect(
-                    lambda t : self.valueChanged.emit(name)
-                    )
+            self._widget.currentTextChanged.connect(lambda t: self.valueChanged.emit(name))
             self._setter = self._widget.setCurrentText
             self._getter = self._widget.currentText
 
         elif (settingType == "bool"):
             self._widget = QCheckBox()
-            self._widget.stateChanged.connect(
-                    lambda s : self.valueChanged.emit(name)
-                    )
+            self._widget.stateChanged.connect(lambda s: self.valueChanged.emit(name))
             self._setter = self._widget.setChecked
             self._getter = self._widget.isChecked
 
         elif (settingType == "floatArray") or (settingType == "intArray"):
             self._widget = QLineEdit()
-            self._widget.editingFinished.connect(
-                    lambda : self.valueChanged.emit(name)
-                    )
-            self._setter = lambda v : self._widget.setText(','.join(str(e)
-                                                           for e in v))
+            self._widget.editingFinished.connect(lambda: self.valueChanged.emit(name))
+            self._setter = lambda v: self._widget.setText(','.join(str(e) for e in v))
 
             if (settingType == "floatArray"):
-                self._getter = (
-                        lambda : [float(v)
-                                  for v in self._widget.text().split(',')
-                                  if v])
+                self._getter = (lambda: [float(v) for v in self._widget.text().split(',') if v])
             else:
-                self._getter = (
-                        lambda : [int(v)
-                                  for v in self._widget.text().split(',')
-                                  if v])
+                self._getter = (lambda: [int(v) for v in self._widget.text().split(',') if v])
 
         elif (settingType == "string"):
             self._widget = QLineEdit()
-            self._widget.editingFinished.connect(
-                    lambda : self.valueChanged.emit(name)
-                    )
-            self._setter = lambda v : self._widget.setText(str(v))
+            self._widget.editingFinished.connect(lambda: self.valueChanged.emit(name))
+            self._setter = lambda v: self._widget.setText(str(v))
             self._getter = self._widget.text
 
     @property
@@ -168,9 +149,7 @@ class DrillSettingsDialog(QDialog):
         uic.loadUi(os.path.join(self.here, self.ui_filename), self)
         self.okButton.clicked.connect(self.accept)
         self.cancelButton.clicked.connect(self.reject)
-        self.applyButton.clicked.connect(
-                lambda : self.accepted.emit()
-                )
+        self.applyButton.clicked.connect(lambda: self.accepted.emit())
 
         # widgets
         self.settings = dict()
@@ -192,9 +171,7 @@ class DrillSettingsDialog(QDialog):
             label = QLabel(n, self)
             self.settings[n] = DrillSetting(n, values[n], types[n], doc[n])
             self.settings[n].valueChanged.connect(self.onValueChanged)
-            self.settings[n].fileChecked.connect(
-                    lambda v, n=n : self.onSettingValidation(n, v)
-                    )
+            self.settings[n].fileChecked.connect(lambda v, n=n: self.onSettingValidation(n, v))
 
             widget = self.settings[n].widget
             widget.setToolTip(doc[n])
@@ -212,8 +189,7 @@ class DrillSettingsDialog(QDialog):
             self.getSettingValue(setting)
             self.valueChanged.emit(setting)
         except:
-            self.onSettingValidation(setting, False, "Unable to parse the "
-                                     "value. Check the input")
+            self.onSettingValidation(setting, False, "Unable to parse the " "value. Check the input")
 
     def setSettings(self, settings):
         """
@@ -281,8 +257,7 @@ class DrillSettingsDialog(QDialog):
                 self.okButton.setDisabled(False)
                 self.applyButton.setDisabled(False)
         else:
-            self.settings[name].widget.setStyleSheet(
-                    "QLineEdit {background-color: #3fff0000;}")
+            self.settings[name].widget.setStyleSheet("QLineEdit {background-color: #3fff0000;}")
             if msg is not None:
                 self.settings[name].widget.setToolTip(msg)
             else:

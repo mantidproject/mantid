@@ -22,28 +22,30 @@ class SANSSaveTest(unittest.TestCase):
     @staticmethod
     def _get_sample_workspace(with_zero_errors, convert_to_numeric_axis=False):
         create_name = "CreateSimulationWorkspace"
-        create_options = {"Instrument": "LARMOR",
-                          "BinParams": '1,10,1000',
-                          "UnitX": 'MomentumTransfer',
-                          "OutputWorkspace": EMPTY_NAME}
+        create_options = {
+            "Instrument": "LARMOR",
+            "BinParams": '1,10,1000',
+            "UnitX": 'MomentumTransfer',
+            "OutputWorkspace": EMPTY_NAME
+        }
         create_alg = create_unmanaged_algorithm(create_name, **create_options)
         create_alg.execute()
         workspace = create_alg.getProperty("OutputWorkspace").value
 
         crop_name = "CropWorkspace"
-        crop_options = {"InputWorkspace": workspace,
-                        "OutputWorkspace": EMPTY_NAME,
-                        "EndWorkspaceIndex": 0}
+        crop_options = {"InputWorkspace": workspace, "OutputWorkspace": EMPTY_NAME, "EndWorkspaceIndex": 0}
         crop_alg = create_unmanaged_algorithm(crop_name, **crop_options)
         crop_alg.execute()
         workspace = crop_alg.getProperty("OutputWorkspace").value
 
         if convert_to_numeric_axis:
             convert_name = "ConvertSpectrumAxis"
-            convert_options = {"InputWorkspace": workspace,
-                               "OutputWorkspace": EMPTY_NAME,
-                               "Target": 'ElasticQ',
-                               "EFixed": 1}
+            convert_options = {
+                "InputWorkspace": workspace,
+                "OutputWorkspace": EMPTY_NAME,
+                "Target": 'ElasticQ',
+                "EFixed": 1
+            }
             convert_alg = create_unmanaged_algorithm(convert_name, **convert_options)
             convert_alg.execute()
             workspace = convert_alg.getProperty("OutputWorkspace").value
@@ -67,19 +69,21 @@ class SANSSaveTest(unittest.TestCase):
         workspace = SANSSaveTest._get_sample_workspace(with_zero_errors=False, convert_to_numeric_axis=True)
         file_name = os.path.join(mantid.config.getString('defaultsave.directory'), 'sample_sans_save_file')
         save_name = "SANSSave"
-        save_options = {"InputWorkspace": workspace,
-                        "Filename": file_name,
-                        "UseZeroErrorFree": False,
-                        "Nexus": False,
-                        "CanSAS": False,
-                        "NXCanSAS": True,
-                        "NistQxy": False,
-                        "RKH": False,
-                        "CSV": False,
-                        "SampleTransmissionRunNumber": "5",
-                        "SampleDirectRunNumber": "6",
-                        "CanScatterRunNumber": "7",
-                        "CanDirectRunNumber": "8"}
+        save_options = {
+            "InputWorkspace": workspace,
+            "Filename": file_name,
+            "UseZeroErrorFree": False,
+            "Nexus": False,
+            "CanSAS": False,
+            "NXCanSAS": True,
+            "NistQxy": False,
+            "RKH": False,
+            "CSV": False,
+            "SampleTransmissionRunNumber": "5",
+            "SampleDirectRunNumber": "6",
+            "CanScatterRunNumber": "7",
+            "CanDirectRunNumber": "8"
+        }
         try:
             create_unmanaged_algorithm(save_name, **save_options)
         except RuntimeError:
@@ -91,15 +95,17 @@ class SANSSaveTest(unittest.TestCase):
         file_name = os.path.join(mantid.config.getString('defaultsave.directory'), 'sample_sans_save_file')
         use_zero_errors_free = False
         save_name = "SANSSave"
-        save_options = {"InputWorkspace": workspace,
-                        "Filename": file_name,
-                        "UseZeroErrorFree": use_zero_errors_free,
-                        "Nexus": True,
-                        "CanSAS": True,
-                        "NXCanSAS": True,
-                        "NistQxy": True,
-                        "RKH": True,
-                        "CSV": True}
+        save_options = {
+            "InputWorkspace": workspace,
+            "Filename": file_name,
+            "UseZeroErrorFree": use_zero_errors_free,
+            "Nexus": True,
+            "CanSAS": True,
+            "NXCanSAS": True,
+            "NistQxy": True,
+            "RKH": True,
+            "CSV": True
+        }
         save_alg = create_unmanaged_algorithm(save_name, **save_options)
 
         # Act
@@ -107,11 +113,13 @@ class SANSSaveTest(unittest.TestCase):
         self.assertTrue(save_alg.isExecuted())
 
         # Assert
-        expected_files = ["sample_sans_save_file.xml", "sample_sans_save_file.txt", "sample_sans_save_file_nistqxy.dat",
-                          "sample_sans_save_file.h5", "sample_sans_save_file.nxs",
-                          "sample_sans_save_file.csv"]
-        expected_full_file_names = [os.path.join(mantid.config.getString('defaultsave.directory'), elem)
-                                    for elem in expected_files]
+        expected_files = [
+            "sample_sans_save_file.xml", "sample_sans_save_file.txt", "sample_sans_save_file_nistqxy.dat",
+            "sample_sans_save_file.h5", "sample_sans_save_file.nxs", "sample_sans_save_file.csv"
+        ]
+        expected_full_file_names = [
+            os.path.join(mantid.config.getString('defaultsave.directory'), elem) for elem in expected_files
+        ]
         for file_name in expected_full_file_names:
             self._assert_that_file_exists(file_name)
 
@@ -125,15 +133,17 @@ class SANSSaveTest(unittest.TestCase):
         file_name = os.path.join(mantid.config.getString('defaultsave.directory'), 'sample_sans_save_file')
         use_zero_errors_free = False
         save_name = "SANSSave"
-        save_options = {"InputWorkspace": workspace,
-                        "Filename": file_name,
-                        "UseZeroErrorFree": use_zero_errors_free,
-                        "Nexus": False,
-                        "CanSAS": False,
-                        "NXCanSAS": False,
-                        "NistQxy": True,
-                        "RKH": False,
-                        "CSV": False}
+        save_options = {
+            "InputWorkspace": workspace,
+            "Filename": file_name,
+            "UseZeroErrorFree": use_zero_errors_free,
+            "Nexus": False,
+            "CanSAS": False,
+            "NXCanSAS": False,
+            "NistQxy": True,
+            "RKH": False,
+            "CSV": False
+        }
         save_alg = create_unmanaged_algorithm(save_name, **save_options)
         save_alg.setRethrows(True)
         # Act
@@ -150,15 +160,17 @@ class SANSSaveTest(unittest.TestCase):
         file_name = os.path.join(mantid.config.getString('defaultsave.directory'), 'sample_sans_save_file')
         use_zero_errors_free = True
         save_name = "SANSSave"
-        save_options = {"InputWorkspace": workspace,
-                        "Filename": file_name,
-                        "UseZeroErrorFree": use_zero_errors_free,
-                        "Nexus": False,
-                        "CanSAS": False,
-                        "NXCanSAS": False,
-                        "NistQxy": False,
-                        "RKH": False,
-                        "CSV": False}
+        save_options = {
+            "InputWorkspace": workspace,
+            "Filename": file_name,
+            "UseZeroErrorFree": use_zero_errors_free,
+            "Nexus": False,
+            "CanSAS": False,
+            "NXCanSAS": False,
+            "NistQxy": False,
+            "RKH": False,
+            "CSV": False
+        }
         save_alg = create_unmanaged_algorithm(save_name, **save_options)
         save_alg.setRethrows(True)
         # Act
@@ -175,15 +187,17 @@ class SANSSaveTest(unittest.TestCase):
         file_name = os.path.join(mantid.config.getString('defaultsave.directory'), 'sample_sans_save_file')
         use_zero_errors_free = True
         save_name = "SANSSave"
-        save_options = {"InputWorkspace": workspace,
-                        "Filename": file_name,
-                        "UseZeroErrorFree": use_zero_errors_free,
-                        "Nexus": True,
-                        "CanSAS": False,
-                        "NXCanSAS": False,
-                        "NistQxy": False,
-                        "RKH": False,
-                        "CSV": False}
+        save_options = {
+            "InputWorkspace": workspace,
+            "Filename": file_name,
+            "UseZeroErrorFree": use_zero_errors_free,
+            "Nexus": True,
+            "CanSAS": False,
+            "NXCanSAS": False,
+            "NistQxy": False,
+            "RKH": False,
+            "CSV": False
+        }
         save_alg = create_unmanaged_algorithm(save_name, **save_options)
 
         # Act
@@ -192,8 +206,7 @@ class SANSSaveTest(unittest.TestCase):
         file_name = os.path.join(mantid.config.getString('defaultsave.directory'), "sample_sans_save_file.nxs")
 
         load_name = "LoadNexusProcessed"
-        load_options = {"Filename": file_name,
-                        "OutputWorkspace": EMPTY_NAME}
+        load_options = {"Filename": file_name, "OutputWorkspace": EMPTY_NAME}
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
         load_alg.execute()
         reloaded_workspace = load_alg.getProperty("OutputWorkspace").value

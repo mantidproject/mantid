@@ -4,21 +4,16 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import (AlgorithmFactory, FileAction, FileProperty,
-                        PythonAlgorithm, PropertyMode, ADSValidator,
+from mantid.api import (AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, PropertyMode, ADSValidator,
                         WorkspaceGroup, WorkspaceProperty, MultipleExperimentInfos)
 from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator, StringArrayProperty
-from mantid.simpleapi import (DeleteWorkspace, IntegratePeaksMD,
-                              SaveHKL, SaveReflections,
-                              CreatePeaksWorkspace, CopySample,
-                              AnalysisDataService,
-                              CombinePeaksWorkspaces)
+from mantid.simpleapi import (DeleteWorkspace, IntegratePeaksMD, SaveHKL, SaveReflections, CreatePeaksWorkspace,
+                              CopySample, AnalysisDataService, CombinePeaksWorkspaces)
 from mantid.dataobjects import PeaksWorkspace
 import numpy as np
 
 
 class HB3AIntegratePeaks(PythonAlgorithm):
-
     def category(self):
         return "Crystal\\Integration"
 
@@ -40,30 +35,42 @@ class HB3AIntegratePeaks(PythonAlgorithm):
                              doc="Peaks workspace containing peaks to integrate")
 
         positive_val = FloatBoundedValidator(lower=0.0)
-        self.declareProperty("PeakRadius", defaultValue=1.0, validator=positive_val,
+        self.declareProperty("PeakRadius",
+                             defaultValue=1.0,
+                             validator=positive_val,
                              doc="Fixed radius around each peak position in which to integrate"
-                                 " (same units as input workspace) ")
+                             " (same units as input workspace) ")
 
-        self.declareProperty("BackgroundInnerRadius", defaultValue=0.0, validator=positive_val,
+        self.declareProperty("BackgroundInnerRadius",
+                             defaultValue=0.0,
+                             validator=positive_val,
                              doc="Inner radius used to evaluate the peak background")
-        self.declareProperty("BackgroundOuterRadius", defaultValue=0.0, validator=positive_val,
+        self.declareProperty("BackgroundOuterRadius",
+                             defaultValue=0.0,
+                             validator=positive_val,
                              doc="Outer radius used to evaluate the peak background")
 
-        self.declareProperty("ApplyLorentz", defaultValue=True,
+        self.declareProperty("ApplyLorentz",
+                             defaultValue=True,
                              doc="Whether the Lorentz correction should be applied to the integrated peaks")
 
         formats = StringListValidator()
         formats.addAllowedValue("SHELX")
         formats.addAllowedValue("Fullprof")
-        self.declareProperty("OutputFormat", defaultValue="SHELX", validator=formats,
+        self.declareProperty("OutputFormat",
+                             defaultValue="SHELX",
+                             validator=formats,
                              doc="Save direction cosines in HKL, or the fullprof format")
 
-        self.declareProperty(FileProperty(name="OutputFile", defaultValue="",
+        self.declareProperty(FileProperty(name="OutputFile",
+                                          defaultValue="",
                                           direction=Direction.Input,
                                           action=FileAction.OptionalSave),
                              doc="Filepath to save the integrated peaks workspace in HKL format")
 
-        self.declareProperty(WorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output,
+        self.declareProperty(WorkspaceProperty("OutputWorkspace",
+                                               defaultValue="",
+                                               direction=Direction.Output,
                                                optional=PropertyMode.Mandatory),
                              doc="Output peaks workspace (copy of input with updated peak intensities)")
 

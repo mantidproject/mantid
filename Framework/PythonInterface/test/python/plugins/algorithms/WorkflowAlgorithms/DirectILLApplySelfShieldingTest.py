@@ -97,11 +97,7 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
     def testNoOperationClonesInputWorkspace(self):
         ws = self._cloneTestWorkspace()
         outWSName = 'outWS'
-        algProperties = {
-            'InputWorkspace': self._TEST_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'rethrow': True
-        }
+        algProperties = {'InputWorkspace': self._TEST_WS_NAME, 'OutputWorkspace': outWSName, 'rethrow': True}
         run_algorithm('DirectILLApplySelfShielding', **algProperties)
         # If the previous run didn't clone the input workspace, the two later
         # calls will be triggered to use 'outWS' as the input.
@@ -136,10 +132,10 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
             wsName = self._TEST_WS_NAME
         tempName = 'temp_testWS_'
         mtd.addOrReplace(tempName, self._testIN5WS)
-        ws = CloneWorkspace(InputWorkspace=tempName,
-                            OutputWorkspace=wsName)
+        ws = CloneWorkspace(InputWorkspace=tempName, OutputWorkspace=wsName)
         mtd.remove(tempName)
         return ws
+
 
 if __name__ == '__main__':
     unittest.main()

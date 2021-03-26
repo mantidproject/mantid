@@ -23,16 +23,12 @@ class HomeTabWidget(object):
         self.run_info_view = HomeRunInfoWidgetView(parent)
 
         # keep a handle to the presenters of sub-widgets
-        self.instrument_widget = InstrumentWidgetPresenter(self.inst_view,
-                                                           InstrumentWidgetModel(context=context))
-        self.run_info_widget = HomeRunInfoWidgetPresenter(self.run_info_view,
-                                                          HomeRunInfoWidgetModel(context=context))
-        self.home_tab_view = HomeTabView(parent=parent,
-                                         widget_list=[self.inst_view,
-                                                      self.run_info_view])
+        self.instrument_widget = InstrumentWidgetPresenter(self.inst_view, InstrumentWidgetModel(context=context))
+        self.run_info_widget = HomeRunInfoWidgetPresenter(self.run_info_view, HomeRunInfoWidgetModel(context=context))
+        self.home_tab_view = HomeTabView(parent=parent, widget_list=[self.inst_view, self.run_info_view])
         self.home_tab_model = HomeTabModel(context=context)
-        self.home_tab_widget = HomeTabPresenter(self.home_tab_view, self.home_tab_model,
-                                                subwidgets=[self.instrument_widget,
-                                                            self.run_info_widget])
+        self.home_tab_widget = HomeTabPresenter(self.home_tab_view,
+                                                self.home_tab_model,
+                                                subwidgets=[self.instrument_widget, self.run_info_widget])
 
         context.update_view_from_model_notifier.add_subscriber(self.home_tab_widget.update_view_from_model_observer)

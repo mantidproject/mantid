@@ -32,18 +32,22 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         self._expected_blocksize = 1905
         self._indirect_fws_ws = mtd['indirect_fws_ws']
 
-        self._arguments = {'SampleChemicalFormula': 'H2-O',
-                           'SampleDensityType': 'Mass Density',
-                           'SampleDensity': 1.0,
-                           'EventsPerPoint': 200,
-                           'BeamHeight': 3.5,
-                           'BeamWidth': 4.0,
-                           'Height': 2.0 }
+        self._arguments = {
+            'SampleChemicalFormula': 'H2-O',
+            'SampleDensityType': 'Mass Density',
+            'SampleDensity': 1.0,
+            'EventsPerPoint': 200,
+            'BeamHeight': 3.5,
+            'BeamWidth': 4.0,
+            'Height': 2.0
+        }
 
-        self._container_args = {'ContainerWorkspace':self._container_ws,
-                                'ContainerChemicalFormula':'Al',
-                                'ContainerDensityType':'Mass Density',
-                                'ContainerDensity':1.0 }
+        self._container_args = {
+            'ContainerWorkspace': self._container_ws,
+            'ContainerChemicalFormula': 'Al',
+            'ContainerDensityType': 'Mass Density',
+            'ContainerDensity': 1.0
+        }
         self._test_arguments = dict()
 
     @classmethod
@@ -87,9 +91,7 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
 
         arguments = self._arguments.copy()
         arguments.update(self._test_arguments)
-        corrected = CalculateMonteCarloAbsorption(SampleWorkspace=sample_ws,
-                                                  Shape=shape,
-                                                  **arguments)
+        corrected = CalculateMonteCarloAbsorption(SampleWorkspace=sample_ws, Shape=shape, **arguments)
         self._test_corrections_workspaces(corrected, spectrum_axis)
 
     def _run_correction_with_container_test(self, shape):

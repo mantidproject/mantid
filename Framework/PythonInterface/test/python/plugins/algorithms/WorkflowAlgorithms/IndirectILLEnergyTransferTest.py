@@ -7,18 +7,14 @@
 import os
 import unittest
 from mantid.simpleapi import *
-from mantid.api import MatrixWorkspace,WorkspaceGroup
+from mantid.api import MatrixWorkspace, WorkspaceGroup
 from mantid import config
 
 
 class IndirectILLEnergyTransferTest(unittest.TestCase):
 
-    _runs = dict([('one_wing_QENS', '090661'),
-                  ('one_wing_EFWS', '083072'),
-                  ('one_wing_IFWS', '083073'),
-                  ('two_wing_QENS', '136558-136559'),
-                  ('two_wing_EFWS', '143720'),
-                  ('two_wing_IFWS', '170300'),
+    _runs = dict([('one_wing_QENS', '090661'), ('one_wing_EFWS', '083072'), ('one_wing_IFWS', '083073'),
+                  ('two_wing_QENS', '136558-136559'), ('two_wing_EFWS', '143720'), ('two_wing_IFWS', '170300'),
                   ('bats', '215962')])
 
     # cache the def instrument and data search dirs
@@ -50,29 +46,30 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         grouping_filename = instrument.getStringParameter('Workflow.GroupingFile')[0]
         DeleteWorkspace(ws)
 
-        args = {'Run': self._runs['two_wing_QENS'],
-                'MapFile': os.path.join(config['groupingFiles.directory'], grouping_filename),
-                'CropDeadMonitorChannels': True,
-                'OutputWorkspace': 'red'}
+        args = {
+            'Run': self._runs['two_wing_QENS'],
+            'MapFile': os.path.join(config['groupingFiles.directory'], grouping_filename),
+            'CropDeadMonitorChannels': True,
+            'OutputWorkspace': 'red'
+        }
 
         IndirectILLEnergyTransfer(**args)
 
         self._check_workspace_group(mtd['red'], 2, 18, 1017)
         deltaE = mtd['red'][0].readX(0)
         bsize = mtd['red'][0].blocksize()
-        self.assertAlmostEquals(deltaE[bsize//2], 0, 4)
+        self.assertAlmostEquals(deltaE[bsize // 2], 0, 4)
         self.assertTrue(deltaE[-1] > -deltaE[0])
 
     def test_one_wing_QENS(self):
         # tests one wing QENS with PSD range
-        args = {'Run': self._runs['one_wing_QENS'],
-                'ManualPSDIntegrationRange': [20,100]}
+        args = {'Run': self._runs['one_wing_QENS'], 'ManualPSDIntegrationRange': [20, 100]}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 18, 1024)
 
         deltaE = res[0].readX(0)
         bsize = res[0].blocksize()
-        self.assertEquals(deltaE[bsize//2], 0)
+        self.assertEquals(deltaE[bsize // 2], 0)
         self.assertTrue(deltaE[-1] > -deltaE[0])
 
     def test_one_wing_EFWS(self):
@@ -111,8 +108,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         self._check_workspace_group(res, 1, 18, 1121)
 
     def test_psd_tubes_only(self):
-        args = {'Run': self._runs['one_wing_QENS'],
-                'DiscardSingleDetectors': True}
+        args = {'Run': self._runs['one_wing_QENS'], 'DiscardSingleDetectors': True}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 16, 1024)
 
@@ -120,7 +116,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
 
         self.assertTrue(isinstance(wsgroup, WorkspaceGroup))
 
-        self.assertEquals(wsgroup.getNumberOfEntries(),nentries)
+        self.assertEquals(wsgroup.getNumberOfEntries(), nentries)
 
         item = wsgroup.getItem(0)
 
@@ -128,13 +124,14 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
 
         self.assertEqual(item.getAxis(0).getUnit().unitID(), "DeltaE")
 
-        self.assertEquals(item.getNumberHistograms(),nspectra)
+        self.assertEquals(item.getNumberHistograms(), nspectra)
 
         self.assertEquals(item.blocksize(), nbins)
 
         self.assertTrue(item.getSampleDetails())
 
         self.assertTrue(item.getHistory().lastAlgorithm())
+
 
 if __name__ == '__main__':
     unittest.main()

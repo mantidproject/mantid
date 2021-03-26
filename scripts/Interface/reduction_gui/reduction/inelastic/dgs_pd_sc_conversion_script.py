@@ -34,8 +34,7 @@ class PdAndScConversionScript(BaseScriptElement):
             if self.pd_q_range_low != PdAndScConversionScript.pd_q_range_low or \
                self.pd_q_range_width != PdAndScConversionScript.pd_q_range_width or \
                self.pd_q_range_high != PdAndScConversionScript.pd_q_range_high:
-                script += "PowderMomTransferRange=\"%s,%s,%s\",\n" % (self.pd_q_range_low,
-                                                                      self.pd_q_range_width,
+                script += "PowderMomTransferRange=\"%s,%s,%s\",\n" % (self.pd_q_range_low, self.pd_q_range_width,
                                                                       self.pd_q_range_high)
             if not self.save_powder_nxs:
                 script += "SavePowderNexusFile=%s,\n" % self.save_powder_nxs
@@ -52,7 +51,7 @@ class PdAndScConversionScript(BaseScriptElement):
         xml += "  <do_powder_conversion>%s</do_powder_conversion>\n" % str(self.do_pd_convert)
         xml += "  <powder_q_range>\n"
         xml += "    <low>%s</low>\n" % self.pd_q_range_low
-        xml += "    <width>%s</width>\n"  % self.pd_q_range_width
+        xml += "    <width>%s</width>\n" % self.pd_q_range_width
         xml += "    <high>%s</high>\n" % self.pd_q_range_high
         xml += "  </powder_q_range>\n"
         xml += "  <save_powder_nexus>%s</save_powder_nexus>\n" % str(self.save_powder_nxs)
@@ -68,7 +67,7 @@ class PdAndScConversionScript(BaseScriptElement):
         """
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("PdAndScConversion")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             instrument_dom = element_list[0]
             self.do_pd_convert = BaseScriptElement.getBoolElement(instrument_dom,
                                                                   "do_powder_conversion",
@@ -85,9 +84,8 @@ class PdAndScConversionScript(BaseScriptElement):
             self.save_powder_nxs = BaseScriptElement.getBoolElement(instrument_dom,
                                                                     "save_powder_nexus",
                                                                     default=PdAndScConversionScript.save_powder_nxs)
-            self.save_powder_nxs_file = BaseScriptElement.getStringElement(instrument_dom,
-                                                                           "save_powder_nexus_filename",
-                                                                           default=PdAndScConversionScript.save_powder_nxs_file)
+            self.save_powder_nxs_file = BaseScriptElement.getStringElement(
+                instrument_dom, "save_powder_nexus_filename", default=PdAndScConversionScript.save_powder_nxs_file)
 
     def reset(self):
         self.do_pd_convert = PdAndScConversionScript.do_pd_convert

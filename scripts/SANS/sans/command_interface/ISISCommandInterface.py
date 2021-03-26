@@ -17,17 +17,15 @@ from sans.command_interface.batch_csv_parser import BatchCsvParser
 from sans.command_interface.command_interface_functions import (print_message, warning_message)
 from sans.command_interface.command_interface_state_director import (CommandInterfaceStateDirector, DataCommand,
                                                                      DataCommandId, NParameterCommand,
-                                                                     NParameterCommandId,
-                                                                     FitData)
+                                                                     NParameterCommandId, FitData)
 from sans.common.constants import ALL_PERIODS
-from sans.common.enums import (DetectorType, FitType, RangeStepType, ReductionDimensionality,
-                               ReductionMode, SANSFacility, SaveType, OutputMode, FindDirectionEnum)
+from sans.common.enums import (DetectorType, FitType, RangeStepType, ReductionDimensionality, ReductionMode,
+                               SANSFacility, SaveType, OutputMode, FindDirectionEnum)
 from sans.common.file_information import (find_sans_file, find_full_file_path)
 from sans.common.general_functions import (convert_bank_name_to_detector_type_isis, get_output_name,
                                            is_part_of_reduced_output_workspace_group)
 from sans.gui_logic.models.RowEntries import RowEntries
 from sans.sans_batch import SANSBatchReduction, SANSCentreFinder
-
 
 # Disable plotting if running outside Mantidplot
 try:
@@ -41,7 +39,6 @@ except (Exception, Warning):
 # Globals
 # ----------------------------------------------------------------------------------------------------------------------
 DefaultTrans = True
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 # CommandInterfaceStateDirector global instance
@@ -67,6 +64,7 @@ def deprecated(obj):
                             "contact the member of the Mantid team responsible "
                             "for ISIS SANS.".format(obj_desc))
             return obj(*args, **kwargs)
+
         return print_warning_wrapper
 
     # Add a @deprecated decorator to each of the member functions in the class
@@ -104,11 +102,11 @@ def LOQ(idf_path='LOQ_Definition_20020226-.xml'):
     config['default.instrument'] = 'LOQ'
 
 
-def LARMOR(idf_path = None):
+def LARMOR(idf_path=None):
     config['default.instrument'] = 'LARMOR'
 
 
-def ZOOM(idf_path = None):
+def ZOOM(idf_path=None):
     config['default.instrument'] = 'ZOOM'
 
 
@@ -209,8 +207,7 @@ def AssignCan(can_run, reload=True, period=ALL_PERIODS):
     director.add_command(data_command)
 
 
-def TransmissionSample(sample, direct, reload=True,
-                       period_t=ALL_PERIODS, period_d=ALL_PERIODS):
+def TransmissionSample(sample, direct, reload=True, period_t=ALL_PERIODS, period_d=ALL_PERIODS):
     """
     Specify the transmission and direct runs for the sample.
 
@@ -234,7 +231,8 @@ def TransmissionSample(sample, direct, reload=True,
     direct_file_name = find_sans_file(direct)
 
     # Set the command
-    trans_command = DataCommand(command_id=DataCommandId.SAMPLE_TRANSMISSION, file_name=trans_file_name,
+    trans_command = DataCommand(command_id=DataCommandId.SAMPLE_TRANSMISSION,
+                                file_name=trans_file_name,
                                 period=period_t)
     direct_command = DataCommand(command_id=DataCommandId.SAMPLE_DIRECT, file_name=direct_file_name, period=period_d)
     director.add_command(trans_command)
@@ -310,8 +308,7 @@ def UseCompatibilityMode():
     """
     Sets the compatibility mode to True
     """
-    set_2d_command = NParameterCommand(command_id=NParameterCommandId.COMPATIBILITY_MODE,
-                                       values=[True])
+    set_2d_command = NParameterCommand(command_id=NParameterCommandId.COMPATIBILITY_MODE, values=[True])
     director.add_command(set_2d_command)
 
 
@@ -394,9 +391,8 @@ def SetMonitorSpectrum(specNum, interp=False):
     """
     specNum = int(specNum)
     is_trans = False
-    monitor_spectrum_command = NParameterCommand(command_id=NParameterCommandId.INCIDENT_SPECTRUM, values=[specNum,
-                                                                                                           interp,
-                                                                                                           is_trans])
+    monitor_spectrum_command = NParameterCommand(command_id=NParameterCommandId.INCIDENT_SPECTRUM,
+                                                 values=[specNum, interp, is_trans])
     director.add_command(monitor_spectrum_command)
 
 
@@ -507,8 +503,8 @@ def set_save(save_algorithms, save_as_zero_error_free):
     @param save_algorithms: A list of SaveType enums.
     @param save_as_zero_error_free: True if a zero error correction should be performed.
     """
-    save_command = NParameterCommand(command_id=NParameterCommandId.SAVE, values=[save_algorithms,
-                                                                                  save_as_zero_error_free])
+    save_command = NParameterCommand(command_id=NParameterCommandId.SAVE,
+                                     values=[save_algorithms, save_as_zero_error_free])
     director.add_command(save_command)
 
 
@@ -575,8 +571,8 @@ def TransFit(mode, lambdamin=None, lambdamax=None, selector='BOTH'):
 
     # Configure fit settings
     polynomial_order = polynomial_order if polynomial_order is not None else 0
-    fit_command = NParameterCommand(command_id=NParameterCommandId.CENTRE, values=[fit_data, lambdamin, lambdamax,
-                                                                                   fit_type, polynomial_order])
+    fit_command = NParameterCommand(command_id=NParameterCommandId.CENTRE,
+                                    values=[fit_data, lambdamin, lambdamax, fit_type, polynomial_order])
     director.add_command(fit_command)
 
 
@@ -670,9 +666,8 @@ def SetFrontDetRescaleShift(scale=1.0, shift=0.0, fitScale=False, fitShift=False
         qMax = float(qMax)
 
     print_message('Set front detector rescale/shift values to {0} and {1}'.format(scale, shift))
-    front_command = NParameterCommand(command_id=NParameterCommandId.FRONT_DETECTOR_RESCALE, values=[scale, shift,
-                                                                                                     fitScale, fitShift,
-                                                                                                     qMin, qMax])
+    front_command = NParameterCommand(command_id=NParameterCommandId.FRONT_DETECTOR_RESCALE,
+                                      values=[scale, shift, fitScale, fitShift, qMin, qMax])
     director.add_command(front_command)
 
 
@@ -708,22 +703,26 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side, xtilt=0.0, ytilt=0.0):
     xtilt = float(xtilt)
     ytilt = float(ytilt)
 
-    print_message("SetDetectorOffsets(" + str(bank) + ', ' + str(x)
-                  + ',' + str(y) + ',' + str(z) + ',' + str(rot)
-                  + ',' + str(radius) + ',' + str(side) + ',' + str(xtilt) + ',' + str(ytilt) + ')')
+    print_message("SetDetectorOffsets(" + str(bank) + ', ' + str(x) + ',' + str(y) + ',' + str(z) + ',' + str(rot) +
+                  ',' + str(radius) + ',' + str(side) + ',' + str(xtilt) + ',' + str(ytilt) + ')')
     detector_type = convert_bank_name_to_detector_type_isis(bank)
-    detector_offsets = NParameterCommand(command_id=NParameterCommandId.DETECTOR_OFFSETS, values=[detector_type,
-                                                                                                  x, y, z,
-                                                                                                  rot, radius, side,
-                                                                                                  xtilt, ytilt])
+    detector_offsets = NParameterCommand(command_id=NParameterCommandId.DETECTOR_OFFSETS,
+                                         values=[detector_type, x, y, z, rot, radius, side, xtilt, ytilt])
     director.add_command(detector_offsets)
 
 
 # --------------------------------------------
 # Commands which actually kick off a reduction
 # --------------------------------------------
-def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None,
-                      resetSetup=True, out_fit_settings=None, output_name=None, output_mode=OutputMode.PUBLISH_TO_ADS,
+def WavRangeReduction(wav_start=None,
+                      wav_end=None,
+                      full_trans_wav=None,
+                      name_suffix=None,
+                      combineDet=None,
+                      resetSetup=True,
+                      out_fit_settings=None,
+                      output_name=None,
+                      output_mode=OutputMode.PUBLISH_TO_ADS,
                       use_reduction_mode_as_suffix=False):
     """
         Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics
@@ -786,14 +785,15 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
     # Save options
     if output_name is not None:
-        director.add_command(NParameterCommand(command_id=NParameterCommandId.USER_SPECIFIED_OUTPUT_NAME,
-                                               values=[output_name]))
+        director.add_command(
+            NParameterCommand(command_id=NParameterCommandId.USER_SPECIFIED_OUTPUT_NAME, values=[output_name]))
     if name_suffix is not None:
-        director.add_command(NParameterCommand(command_id=NParameterCommandId.USER_SPECIFIED_OUTPUT_NAME_SUFFIX,
-                                               values=[name_suffix]))
+        director.add_command(
+            NParameterCommand(command_id=NParameterCommandId.USER_SPECIFIED_OUTPUT_NAME_SUFFIX, values=[name_suffix]))
     if use_reduction_mode_as_suffix:
-        director.add_command(NParameterCommand(command_id=NParameterCommandId.USE_REDUCTION_MODE_AS_SUFFIX,
-                                               values=[use_reduction_mode_as_suffix]))
+        director.add_command(
+            NParameterCommand(command_id=NParameterCommandId.USE_REDUCTION_MODE_AS_SUFFIX,
+                              values=[use_reduction_mode_as_suffix]))
 
     # Get the states
     state = director.process_commands()
@@ -816,14 +816,23 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     return output_workspace_base_name
 
 
-def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=False,  # noqa
-                centreit=False, reducer=None, combineDet=None, save_as_zero_error_free=False):  # noqa
+def BatchReduce(  # noqa: C901
+        filename,
+        format,
+        plotresults=False,
+        saveAlgs=None,
+        verbose=False,
+        centreit=False,
+        reducer=None,
+        combineDet=None,
+        save_as_zero_error_free=False):
     """
         @param filename: the CSV file with the list of runs to analyse
         @param format: type of file to load, nxs for Nexus, etc.
-        @param plotresults: if true and this function is run from Mantidplot a graph will be created for the results of each reduction
-        @param saveAlgs: this named algorithm will be passed the name of the results workspace and filename (default = 'SaveRKH').
-            Pass a tuple of strings to save to multiple file formats
+        @param plotresults: if true and this function is run from Mantidplot a graph will be created for the results of
+        each reduction
+        @param saveAlgs: this named algorithm will be passed the name of the results workspace and filename
+        (default = 'SaveRKH'). Pass a tuple of strings to save to multiple file formats
         @param verbose: set to true to write more information to the log (default=False)
         @param centreit: do centre finding (default=False)
         @param reducer: if to use the command line (default) or GUI reducer object
@@ -892,8 +901,10 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
             sample_transmission = parsed_batch_entry.sample_transmission
             sample_transmission_period = parsed_batch_entry.sample_transmission_period
 
-            TransmissionSample(sample=sample_transmission, direct=sample_direct,
-                               period_t=sample_transmission_period, period_d=sample_direct_period)
+            TransmissionSample(sample=sample_transmission,
+                               direct=sample_direct,
+                               period_t=sample_transmission_period,
+                               period_d=sample_direct_period)
 
         # Can scatter
         if parsed_batch_entry.can_scatter:
@@ -908,8 +919,10 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
             can_direct = parsed_batch_entry.can_direct
             can_direct_period = parsed_batch_entry.can_direct_period
 
-            TransmissionCan(can=can_transmission, direct=can_direct,
-                            period_t=can_transmission_period, period_d=can_direct_period)
+            TransmissionCan(can=can_transmission,
+                            direct=can_direct,
+                            period_t=can_transmission_period,
+                            period_d=can_direct_period)
 
         # Name of the output. We need to modify the name according to the setup of the old reduction mechanism
         output_name = parsed_batch_entry.output_name
@@ -923,7 +936,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
             set_save(save_algorithms=save_algs, save_as_zero_error_free=save_as_zero_error_free)
 
         # Run the reduction for a single
-        reduced_workspace_name = WavRangeReduction(combineDet=combineDet, output_name=output_name,
+        reduced_workspace_name = WavRangeReduction(combineDet=combineDet,
+                                                   output_name=output_name,
                                                    output_mode=output_mode,
                                                    use_reduction_mode_as_suffix=use_reduction_mode_as_suffix)
 
@@ -972,9 +986,8 @@ def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
 
     if not isinstance(wavelens, list) or len(wavelens) < 2:
         if not isinstance(wavelens, tuple):
-            raise RuntimeError(
-                'Error CompWavRanges() requires a list of wavelengths between which '
-                'reductions will be performed.')
+            raise RuntimeError('Error CompWavRanges() requires a list of wavelengths between which '
+                               'reductions will be performed.')
 
     # Perform a reduction over the full wavelength range which was specified
     reduced_workspace_names = []
@@ -982,14 +995,18 @@ def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
     for index in range(len(wavelens)):
         wavelens[index] = float(wavelens[index])
 
-    full_reduction_name = WavRangeReduction(wav_start=wavelens[0], wav_end=wavelens[- 1],
-                                            combineDet=combineDet, resetSetup=False)
+    full_reduction_name = WavRangeReduction(wav_start=wavelens[0],
+                                            wav_end=wavelens[-1],
+                                            combineDet=combineDet,
+                                            resetSetup=False)
     reduced_workspace_names.append(full_reduction_name)
 
     # Reduce each wavelength slice
     for i in range(0, len(wavelens) - 1):
-        reduced_workspace_name = WavRangeReduction(wav_start=wavelens[i], wav_end=wavelens[i + 1],
-                                                   combineDet=combineDet, resetSetup=False)
+        reduced_workspace_name = WavRangeReduction(wav_start=wavelens[i],
+                                                   wav_end=wavelens[i + 1],
+                                                   combineDet=combineDet,
+                                                   resetSetup=False)
         reduced_workspace_names.append(reduced_workspace_name)
 
     if plot and mantidplot:
@@ -1026,8 +1043,14 @@ def PhiRanges(phis, plot=True):
     return reduced_workspace_names[0]
 
 
-def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1.251e-4,
-                   find_direction=FindDirectionEnum.ALL, reduction_method=True):
+def FindBeamCentre(rlow,
+                   rupp,
+                   MaxIter=10,
+                   xstart=None,
+                   ystart=None,
+                   tolerance=1.251e-4,
+                   find_direction=FindDirectionEnum.ALL,
+                   reduction_method=True):
     state = director.process_commands()
     """
     Finds the beam centre position.
@@ -1044,8 +1067,8 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     if not xstart:
         xstart = state.move.detectors['LAB'].sample_centre_pos1
     elif config['default.instrument'] == 'LARMOR':
-        # This is to maintain compatibility with how this function worked in the old Interface so that legacy scripts still
-        # function
+        # This is to maintain compatibility with how this function worked in the old Interface so that legacy scripts
+        # still function
         xstart = xstart * 1000
     if not ystart:
         ystart = state.move.detectors['LAB'].sample_centre_pos2
@@ -1057,9 +1080,9 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     if config['default.instrument'] == 'LARMOR':
         SetCentre(centre['pos1'], 1000 * centre['pos2'], bank='rear')
     else:
-        SetCentre(1000*centre['pos1'], 1000*centre['pos2'], bank='rear')
+        SetCentre(1000 * centre['pos1'], 1000 * centre['pos2'], bank='rear')
     if 'HAB' in state.move.detectors:
-        SetCentre(1000*centre['pos1'], 1000*centre['pos2'], bank='front')
+        SetCentre(1000 * centre['pos1'], 1000 * centre['pos2'], bank='front')
 
     return centre
 
@@ -1092,8 +1115,15 @@ def PlotResult(workspace, canvas=None):
         print_message('Plot functions are not available, is this being run from outside Mantidplot?')
 
 
-def AddRuns(runs, instrument='sans2d', saveAsEvent=False, binning="Monitors", isOverlay=False, time_shifts=None,
-            defType='.nxs', rawTypes=('.raw', '.s*', 'add', '.RAW'), lowMem=False):
+def AddRuns(runs,
+            instrument='sans2d',
+            saveAsEvent=False,
+            binning="Monitors",
+            isOverlay=False,
+            time_shifts=None,
+            defType='.nxs',
+            rawTypes=('.raw', '.s*', 'add', '.RAW'),
+            lowMem=False):
     '''
     Method to expose the add_runs functionality for custom scripting.
     @param runs: a list with the requested run numbers
@@ -1104,9 +1134,9 @@ def AddRuns(runs, instrument='sans2d', saveAsEvent=False, binning="Monitors", is
                     string list with the same format that is used for the Rebin algorithm. This property is ignored
                     when saving as event data.
     @param isOverlay: sets if the the overlay mechanism should be used when the saveAsEvent flag is set
-    @param time_shifts: provides additional time shifts if the isOverlay flag is specified. The time shifts are specified
-                        in a string list. Either time_shifts is not used or a list with times in secomds. Note that there
-                        has to be one entry fewer than the number of workspaces to add.
+    @param time_shifts: provides additional time shifts if the isOverlay flag is specified. The time shifts are
+                        specified in a string list. Either time_shifts is not used or a list with times in secomds. Note
+                        that there has to be one entry fewer than the number of workspaces to add.
     @param defType: the file type
     @param rawTypes: the raw types
     @param lowMem: if the lowMem option should be used

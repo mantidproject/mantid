@@ -34,8 +34,7 @@ class WorkspaceHistoryGenerationTest(unittest.TestCase):
 
         self.assertEquals(len(history_list), 1)
         commands = generate_commands(history_list[0])
-        self.assertEquals(commands[0],
-                          "CreateSampleWorkspace(OutputWorkspace='ws')")
+        self.assertEquals(commands[0], "CreateSampleWorkspace(OutputWorkspace='ws')")
 
     def test_guarantee_unique_lines(self):
         CreateSampleWorkspace(OutputWorkspace="ws")

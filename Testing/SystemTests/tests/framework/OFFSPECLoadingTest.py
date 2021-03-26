@@ -12,7 +12,6 @@ class OFFSPECLoadingTest(LoadAndCheckBase):
     '''
     Test File loading and basic data integrity checks of OFFSPEC data in Mantid.
     '''
-
     def get_raw_workspace_filename(self):
         return "OFFSPEC00010791.raw"
 

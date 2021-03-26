@@ -58,7 +58,7 @@ class DataDownloadDialog(QDialog):
             self._myControl = None
             self._myControl = parent.controller
         except AttributeError as att_err:
-            print (att_err)
+            print(att_err)
 
         # experiment number
         self._expNumber = None

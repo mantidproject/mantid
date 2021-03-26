@@ -12,21 +12,18 @@ class DrillAlgorithmPoolSignals(QObject):
     """
     Signals that the pool could send.
     """
-
     """
     Sent when a task starts.
     Args:
         str: the name of the task.
     """
     taskStarted = Signal(str)
-
     """
     Sent when a task ends with success.
     Args:
         str: the name of the task
     """
     taskSuccess = Signal(str)
-
     """
     Sent when a task ends with an error.
     Args:
@@ -34,14 +31,12 @@ class DrillAlgorithmPoolSignals(QObject):
         str: the error message
     """
     taskError = Signal(str, str)
-
     """
     Sent when the global progress of the pool is updated.
     Args:
         int: progress in percent
     """
     progressUpdate = Signal(int)
-
     """
     Sent when all the tasks are done.
     """

@@ -20,7 +20,6 @@ class LoadUtils(object):
     and it can return the name, run and instrument.
     The current run is the same as the one in MuonAnalysis
     """
-
     def __init__(self, parent=None):
         exists, tmpWS = self.MuonAnalysisExists()
         if exists:
@@ -129,31 +128,30 @@ def run_LoadInstrument(parameter_dict):
 def __default_workspace():
     default_instrument = get_default_instrument()
     workspace = api.WorkspaceFactoryImpl.Instance().create("Workspace2D", 2, 10, 10)
-    workspace = run_LoadInstrument(
-        {"Workspace": workspace,
-         "RewriteSpectraMap": True,
-         "InstrumentName": default_instrument})
+    workspace = run_LoadInstrument({
+        "Workspace": workspace,
+        "RewriteSpectraMap": True,
+        "InstrumentName": default_instrument
+    })
     return MuonWorkspaceWrapper(workspace)
 
 
 # Dictionary of (property name):(property value) pairs to put into Load algorithm
 # NOT including "OutputWorkspace" and "Filename"
-DEFAULT_INPUTS = {
-    "DeadTimeTable": "__notUsed",
-    "DetectorGroupingTable": "__notUsed"}
+DEFAULT_INPUTS = {"DeadTimeTable": "__notUsed", "DetectorGroupingTable": "__notUsed"}
 # List of property names to be extracted from the result of the Load algorithm
-DEFAULT_OUTPUTS = ["OutputWorkspace",
-                   "DeadTimeTable",
-                   "DetectorGroupingTable",
-                   "TimeZero",
-                   "FirstGoodData",
-                   "MainFieldDirection"]
+DEFAULT_OUTPUTS = [
+    "OutputWorkspace", "DeadTimeTable", "DetectorGroupingTable", "TimeZero", "FirstGoodData", "MainFieldDirection"
+]
 # List of default values for the DEFAULT_OUTPUTS list
-DEFAULT_OUTPUT_VALUES = [[__default_workspace()],
-                         None,  # api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
-                         api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
-                         0.0,
-                         0.0, "Unknown direction"]
+DEFAULT_OUTPUT_VALUES = [
+    [__default_workspace()],
+    None,  # api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
+    api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
+    0.0,
+    0.0,
+    "Unknown direction"
+]
 
 
 def is_workspace_group(workspace):
@@ -192,9 +190,7 @@ def load_dead_time_from_filename(filename):
     return dead_times
 
 
-def load_workspace_from_filename(filename,
-                                 input_properties=DEFAULT_INPUTS,
-                                 output_properties=DEFAULT_OUTPUTS):
+def load_workspace_from_filename(filename, input_properties=DEFAULT_INPUTS, output_properties=DEFAULT_OUTPUTS):
     try:
         alg, psi_data = create_load_algorithm(filename, input_properties)
         alg.execute()
@@ -261,6 +257,7 @@ def create_load_algorithm(filename, property_dictionary):
 def _get_algorithm_properties(alg, property_dict):
     def _get_non_None_value(alg, key):
         return alg.getProperty(key).value if alg.getProperty(key).value is not None else alg.getProperty(key).valueAsStr
+
     return {key: _get_non_None_value(alg, key) for key in alg.keys() if key in property_dict}
 
 
@@ -286,19 +283,28 @@ def combine_loaded_runs(model, run_list, delete_added=False):
         CloneWorkspace(InputWorkspace=workspace.workspace.name(), OutputWorkspace=running_total_item)
         for run in run_list[1:]:
             ws = model._loaded_data_store.get_data(run=[run])["workspace"]["OutputWorkspace"][index].workspace
-            Plus(LHSWorkspace=running_total_item, RHSWorkspace=ws, AllowDifferentNumberSpectra=False, OutputWorkspace=running_total_item)
+            Plus(LHSWorkspace=running_total_item,
+                 RHSWorkspace=ws,
+                 AllowDifferentNumberSpectra=False,
+                 OutputWorkspace=running_total_item)
 
         running_total.append(running_total_item)
 
-    return_ws_actual = {key: return_ws[key] for key in ['MainFieldDirection', 'TimeZero', 'FirstGoodData',
-                                                        'DeadTimeTable', 'DetectorGroupingTable']}
-    return_ws_actual["OutputWorkspace"] = [MuonWorkspaceWrapper(running_total_period) for running_total_period in
-                                           running_total]
+    return_ws_actual = {
+        key: return_ws[key]
+        for key in ['MainFieldDirection', 'TimeZero', 'FirstGoodData', 'DeadTimeTable', 'DetectorGroupingTable']
+    }
+    return_ws_actual["OutputWorkspace"] = [
+        MuonWorkspaceWrapper(running_total_period) for running_total_period in running_total
+    ]
     return_ws_actual['DataDeadTimeTable'] = CloneWorkspace(InputWorkspace=return_ws['DataDeadTimeTable'],
-                                                           OutputWorkspace=return_ws['DataDeadTimeTable'] + 'CoAdd').name()
+                                                           OutputWorkspace=return_ws['DataDeadTimeTable'] +
+                                                           'CoAdd').name()
     model._loaded_data_store.remove_data(run=flatten_run_list(run_list), instrument=model._data_context.instrument)
-    model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws_actual,
-                                      filename="Co-added", instrument=model._data_context.instrument)
+    model._loaded_data_store.add_data(run=flatten_run_list(run_list),
+                                      workspace=return_ws_actual,
+                                      filename="Co-added",
+                                      instrument=model._data_context.instrument)
 
 
 def flatten_run_list(run_list):

@@ -9,7 +9,6 @@ from mantid.simpleapi import mtd, PEARLTransfit
 
 
 class PEARLTransfitTest(unittest.TestCase):
-
     def tearDown(self):
         mtd.clear()
 

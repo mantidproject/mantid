@@ -10,7 +10,6 @@ from mantid.kernel import V3D
 
 
 class SymmetryOperationTest(unittest.TestCase):
-
     def test_creation(self):
         self.assertRaises(RuntimeError, SymmetryOperationFactory.createSymOp, "none")
 

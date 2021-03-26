@@ -18,7 +18,6 @@ import re
 
 
 class FittingTabPresenter(object):
-
     def __init__(self, view, model, context):
         self.view = view
         self.model = model
@@ -45,25 +44,19 @@ class FittingTabPresenter(object):
         self.fit_type_changed_notifier = GenericObservable()
         self.selected_single_fit_notifier = GenericObservable()
 
-        self.gui_context_observer = GenericObserverWithArgPassing(
-            self.handle_gui_changes_made)
-        self.selected_group_pair_observer = GenericObserver(
-            self.handle_selected_group_pair_changed)
-        self.selected_plot_type_observer = GenericObserverWithArgPassing(
-            self.handle_selected_plot_type_changed)
-        self.input_workspace_observer = GenericObserver(
-            self.handle_new_data_loaded)
+        self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
+        self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
+        self.selected_plot_type_observer = GenericObserverWithArgPassing(self.handle_selected_plot_type_changed)
+        self.input_workspace_observer = GenericObserver(self.handle_new_data_loaded)
 
         self.disable_tab_observer = GenericObserver(self.disable_view)
         self.enable_tab_observer = GenericObserver(self.enable_view)
         self.instrument_changed_observer = GenericObserver(self.instrument_changed)
 
-        self.update_view_from_model_observer = GenericObserverWithArgPassing(
-            self.update_view_from_model)
+        self.update_view_from_model_observer = GenericObserverWithArgPassing(self.update_view_from_model)
 
         self.initialise_model_options()
-        self.double_pulse_observer = GenericObserverWithArgPassing(
-            self.handle_double_pulse_set)
+        self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_double_pulse_set)
         self.model.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
 
         self.view.setEnabled(False)
@@ -168,8 +161,7 @@ class FittingTabPresenter(object):
 
         self.view.undo_fit_button.setEnabled(False)
         if self.view.is_simul_fit:
-            self.view.workspace_combo_box_label.setText(
-                'Display parameters for')
+            self.view.workspace_combo_box_label.setText('Display parameters for')
             self.view.enable_simul_fit_options()
             self.view.switch_to_simultaneous()
             self._update_stored_fit_functions()
@@ -181,7 +173,8 @@ class FittingTabPresenter(object):
             self._update_stored_fit_functions()
             self.view.disable_simul_fit_options()
 
-        self.update_model_from_view(fit_function=self._fit_function[0], fit_type=self._get_fit_type(),
+        self.update_model_from_view(fit_function=self._fit_function[0],
+                                    fit_type=self._get_fit_type(),
                                     fit_by=self.view.simultaneous_fit_by)
         self.fit_type_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()
@@ -329,8 +322,8 @@ class FittingTabPresenter(object):
         self.view.plot_guess_checkbox.setChecked(False)
 
         groups_only = self.check_workspaces_are_tf_asymmetry_compliant(self.selected_data)
-        if (
-                not groups_only and self.view.tf_asymmetry_mode) or not self.view.fit_object and self.view.tf_asymmetry_mode:
+        if (not groups_only
+                and self.view.tf_asymmetry_mode) or not self.view.fit_object and self.view.tf_asymmetry_mode:
             self.view.tf_asymmetry_mode = False
 
             self.view.warning_popup('Can only fit groups in tf asymmetry mode and need a function defined')
@@ -380,10 +373,7 @@ class FittingTabPresenter(object):
     def get_parameters_for_tf_function_calculation(self, fit_function):
         mode = 'Construct' if self.view.tf_asymmetry_mode else 'Extract'
         workspace_list = self.selected_data if self.view.is_simul_fit else [self.view.display_workspace]
-        return {'InputFunction': fit_function,
-                'WorkspaceList': workspace_list,
-                'Mode': mode,
-                'CopyTies': False}
+        return {'InputFunction': fit_function, 'WorkspaceList': workspace_list, 'Mode': mode, 'CopyTies': False}
 
     def handle_function_parameter_changed(self):
         if not self.view.is_simul_fit:
@@ -437,13 +427,9 @@ class FittingTabPresenter(object):
         try:
             workspaces = self.get_fit_input_workspaces()
             self._number_of_fits_cached += 1
-            calculation_function = functools.partial(
-                self.model.evaluate_single_fit, workspaces)
-            self.calculation_thread = self.create_thread(
-                calculation_function)
-            self.calculation_thread.threadWrapperSetUp(self.handle_started,
-                                                       self.handle_finished,
-                                                       self.handle_error)
+            calculation_function = functools.partial(self.model.evaluate_single_fit, workspaces)
+            self.calculation_thread = self.create_thread(calculation_function)
+            self.calculation_thread.threadWrapperSetUp(self.handle_started, self.handle_finished, self.handle_error)
             self.calculation_thread.start()
 
         except ValueError as error:
@@ -453,10 +439,8 @@ class FittingTabPresenter(object):
     def clear_and_reset_gui_state(self):
         self.view.set_datasets_in_function_browser(self.selected_data)
 
-        self._fit_status = [None] * len(
-            self.selected_data) if self.selected_data else [None]
-        self._fit_chi_squared = [0.0] * len(
-            self.selected_data) if self.selected_data else [0.0]
+        self._fit_status = [None] * len(self.selected_data) if self.selected_data else [None]
+        self._fit_chi_squared = [0.0] * len(self.selected_data) if self.selected_data else [0.0]
         if self.view.fit_object:
             self._fit_function = [func.clone() for func in self._get_fit_function()]
         else:
@@ -471,10 +455,8 @@ class FittingTabPresenter(object):
         self.update_fit_status_information_in_view()
 
     def clear_fit_information(self):
-        self._fit_status = [None] * len(
-            self.selected_data) if self.selected_data else [None]
-        self._fit_chi_squared = [0.0] * len(
-            self.selected_data) if self.selected_data else [0.0]
+        self._fit_status = [None] * len(self.selected_data) if self.selected_data else [None]
+        self._fit_chi_squared = [0.0] * len(self.selected_data) if self.selected_data else [0.0]
         self.update_fit_status_information_in_view()
         self.view.undo_fit_button.setEnabled(False)
 
@@ -499,10 +481,10 @@ class FittingTabPresenter(object):
         selected_runs, selected_groups_and_pairs = self._get_selected_runs_and_groups_for_fitting()
         selected_workspaces = []
         for grp_and_pair in selected_groups_and_pairs:
-            selected_workspaces += self.context.get_names_of_workspaces_to_fit(
-                runs=selected_runs,
-                group_and_pair=grp_and_pair,
-                rebin=not self.view.fit_to_raw, freq=freq)
+            selected_workspaces += self.context.get_names_of_workspaces_to_fit(runs=selected_runs,
+                                                                               group_and_pair=grp_and_pair,
+                                                                               rebin=not self.view.fit_to_raw,
+                                                                               freq=freq)
 
         selected_workspaces = list(set(self._check_data_exists(selected_workspaces)))
         if len(selected_workspaces) > 1:  # sort the list to preserve order
@@ -519,8 +501,12 @@ class FittingTabPresenter(object):
             else:
                 # extract runs from workspace
                 ws_list = self.context.data_context.current_data["OutputWorkspace"]
-                run_numbers = [str(get_run_numbers_as_string_from_workspace_name(
-                    ws.workspace_name, self.context.data_context.instrument)) for ws in ws_list]
+                run_numbers = [
+                    str(
+                        get_run_numbers_as_string_from_workspace_name(ws.workspace_name,
+                                                                      self.context.data_context.instrument))
+                    for ws in ws_list
+                ]
             run_numbers.sort()
             simul_choices = run_numbers
         elif self.view.simultaneous_fit_by == "Group/Pair":
@@ -591,23 +577,19 @@ class FittingTabPresenter(object):
     def reset_start_time_to_first_good_data_value(self):
         self._start_x = [self.retrieve_first_good_data_from_run_name(run_name) for run_name in self.selected_data] if \
             self.selected_data else [0.0]
-        self._end_x = [self.view.end_time] * len(
-            self.selected_data) if self.selected_data else [15.0]
-        self.view.start_time = self.start_x[0] if 0 < len(
-            self.start_x) else 0.0
+        self._end_x = [self.view.end_time] * len(self.selected_data) if self.selected_data else [15.0]
+        self.view.start_time = self.start_x[0] if 0 < len(self.start_x) else 0.0
         self.view.end_time = self.end_x[0] if 0 < len(self.end_x) else 15.0
 
     def update_fit_status_information_in_view(self):
         current_index = self._fit_function_index()
-        self.view.update_with_fit_outputs(self._fit_function[current_index],
-                                          self._fit_status[current_index],
+        self.view.update_with_fit_outputs(self._fit_function[current_index], self._fit_status[current_index],
                                           self._fit_chi_squared[current_index])
         self.view.update_global_fit_state(self._fit_status, current_index)
 
     def update_view_from_model(self, workspace_removed=None):
         if workspace_removed:
-            self.selected_data = [
-                item for item in self.selected_data if item != workspace_removed]
+            self.selected_data = [item for item in self.selected_data if item != workspace_removed]
         else:
             self.selected_data = []
 
@@ -615,12 +597,18 @@ class FittingTabPresenter(object):
         self.model.update_model_fit_options(**kwargs)
 
     def initialise_model_options(self):
-        fitting_options = {"fit_function": self._fit_function[0], "startX": self.start_x[0], "endX": self.end_x[0],
-                           "minimiser": self.view.minimizer, "evaluation_type": self.view.evaluation_type,
-                           "fit_to_raw": self.view.fit_to_raw, "fit_type": self._get_fit_type(),
-                           "fit_by": self.view.simultaneous_fit_by,
-                           "global_parameters": self.view.get_global_parameters(),
-                           "tf_asymmetry_mode": self.view.tf_asymmetry_mode}
+        fitting_options = {
+            "fit_function": self._fit_function[0],
+            "startX": self.start_x[0],
+            "endX": self.end_x[0],
+            "minimiser": self.view.minimizer,
+            "evaluation_type": self.view.evaluation_type,
+            "fit_to_raw": self.view.fit_to_raw,
+            "fit_type": self._get_fit_type(),
+            "fit_by": self.view.simultaneous_fit_by,
+            "global_parameters": self.view.get_global_parameters(),
+            "tf_asymmetry_mode": self.view.tf_asymmetry_mode
+        }
         self.model.update_model_fit_options(**fitting_options)
 
     def _get_fit_type(self):

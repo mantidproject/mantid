@@ -112,6 +112,7 @@ class MassProfile(object):
 
         return value
 
+
 # --------------------------------------------------------------------------------
 # Gaussian profile
 # --------------------------------------------------------------------------------
@@ -135,10 +136,7 @@ class GaussianMassProfile(MassProfile):
         except ValueError:
             width = cls._parse_float(func_str, "width")
 
-        params = {
-            'width': width,
-            'mass': mass
-        }
+        params = {'width': width, 'mass': mass}
 
         return GaussianMassProfile(**params)
 
@@ -180,6 +178,7 @@ class GaussianMassProfile(MassProfile):
         constraints += "{0}Intensity > 0.0".format(param_prefix)
         return constraints
 
+
 # --------------------------------------------------------------------------------
 # MultivariateGaussian profile
 # --------------------------------------------------------------------------------
@@ -190,7 +189,7 @@ class MultivariateGaussianMassProfile(MassProfile):
     cfunction = "MultivariateGaussianComptonProfile"
     integration_steps = 64
 
-    def __init__(self, width, mass, sigma_x = 1.0, sigma_y = 1.0, sigma_z = 1.0):
+    def __init__(self, width, mass, sigma_x=1.0, sigma_y=1.0, sigma_z=1.0):
         super(MultivariateGaussianMassProfile, self).__init__(width, mass)
 
         self._sigma_x = sigma_x
@@ -265,6 +264,7 @@ class MultivariateGaussianMassProfile(MassProfile):
         ties_str = "{0}Mass={1:f}".format(param_prefix, self.mass)
         return ties_str
 
+
 # --------------------------------------------------------------------------------
 # GramCharlier profile
 # --------------------------------------------------------------------------------
@@ -292,9 +292,7 @@ class GramCharlierMassProfile(MassProfile):
         if not func_str.startswith(profile_prefix):
             raise TypeError("GramCharlier function string should start with 'function=GramCharlier,'")
 
-        key_names = [("width", cls._parse_list),
-                     ("hermite_coeffs", cls._parse_list),
-                     ("k_free", cls._parse_bool_flag),
+        key_names = [("width", cls._parse_list), ("hermite_coeffs", cls._parse_list), ("k_free", cls._parse_bool_flag),
                      ("sears_flag", cls._parse_bool_flag)]
 
         # Possible key names:
@@ -349,16 +347,16 @@ class GramCharlierMassProfile(MassProfile):
             for item in collection:
                 _str += " " + str(item)
             return _str.lstrip()
+
         hermite_str = to_space_sep_str(self.hermite_co)
 
-        fitting_str = "name={0},Mass={1:f},HermiteCoeffs={2},Width={3:f}".format(self.cfunction,
-                                                                                 self.mass, hermite_str,
+        fitting_str = "name={0},Mass={1:f},HermiteCoeffs={2},Width={3:f}".format(self.cfunction, self.mass, hermite_str,
                                                                                  def_width)
         if vals_provided:
             par_names = ["FSECoeff"]
             for i, coeff in enumerate(self.hermite_co):
                 if coeff > 0:
-                    par_names.append("C_{0}".format(2*i))
+                    par_names.append("C_{0}".format(2 * i))
             for par_name in par_names:
                 fitting_str += ",{0}={1:f}".format(par_name, param_vals[param_prefix + par_name])
         else:
@@ -383,7 +381,7 @@ class GramCharlierMassProfile(MassProfile):
         # All coefficients should be greater than zero
         for i, coeff in enumerate(self.hermite_co):
             if coeff > 0:
-                constraints += "{0}C_{1} > 0.0,".format(param_prefix, 2*i)
+                constraints += "{0}C_{1} > 0.0,".format(param_prefix, 2 * i)
         return constraints.rstrip(",")
 
     def create_ties_str(self, param_prefix=""):
@@ -410,6 +408,7 @@ class GramCharlierMassProfile(MassProfile):
 # --------------------------------------------------------------------------------
 # Factory function
 # --------------------------------------------------------------------------------
+
 
 def create_from_str(func_str, mass):
     """Try and parse the function string to give the required profile function

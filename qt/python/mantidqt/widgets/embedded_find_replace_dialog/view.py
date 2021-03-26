@@ -32,17 +32,17 @@ class EmbeddedFindReplaceDialogView(DialogBase, DialogForm):
 
         self.presenter = presenter
 
-        self.hide_find_replace = create_action(self, '',
-                                               on_triggered=self.presenter.hide,
-                                               shortcut=Qt.Key_Escape)
+        self.hide_find_replace = create_action(self, '', on_triggered=self.presenter.hide, shortcut=Qt.Key_Escape)
         self.addAction(self.hide_find_replace)
 
-        self.enter_to_search = create_action(self, '',
+        self.enter_to_search = create_action(self,
+                                             '',
                                              on_triggered=self.presenter.action_next,
                                              shortcut=[Qt.Key_Return, Qt.Key_Enter])
         self.addAction(self.enter_to_search)
 
-        self.shift_enter_to_search_backwards = create_action(self, '',
+        self.shift_enter_to_search_backwards = create_action(self,
+                                                             '',
                                                              on_triggered=self.presenter.action_previous,
                                                              shortcut=["Shift+Enter", "Shift+Return"])
         self.addAction(self.shift_enter_to_search_backwards)

@@ -21,8 +21,6 @@ import sqlresults
 import numpy as np
 
 
-
-
 #########################################################################
 #########################################################################
 def envAsString():
@@ -45,9 +43,8 @@ class TestResult(object):
     '''
     Stores the results of each test so that they can be reported later.
     '''
-
     def __init__(self,
-                 date = datetime.datetime.now(),
+                 date=datetime.datetime.now(),
                  name="",
                  type="system",
                  host=platform.uname()[1],
@@ -80,7 +77,6 @@ class TestResult(object):
         self.data["log_contents"] = log_contents
         self.data["variables"] = variables
 
-
     def get_logarchive_filename(self):
         "Return a bare filename that will hold the archived log contents"
         s = str(self.data["date"])
@@ -100,6 +96,3 @@ class TestResult(object):
 
     def __str__(self):
         return str(self.data)
-
-
-

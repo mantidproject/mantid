@@ -17,7 +17,6 @@ except NameError:
 
 
 class TOFTOFScriptElementTest(unittest.TestCase):
-
     @staticmethod
     def setMinimumValidInputs(scriptElement):
         scriptElement.reset()
@@ -163,10 +162,12 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         self.scriptElement.ecFactor = 0.9
 
         # data runs: [(runs,comment, temperature), ...]
-        self.scriptElement.dataRuns = [
-            [unicode('TOFTOFTestdata.nxs'), unicode('H2O 21C'), OptionalFloat(None)],
-            [unicode('TOFTOFTestdata.nxs'), unicode('H2O 34C'), OptionalFloat(34.0)]
-        ]
+        self.scriptElement.dataRuns = [[unicode('TOFTOFTestdata.nxs'),
+                                        unicode('H2O 21C'),
+                                        OptionalFloat(None)],
+                                       [unicode('TOFTOFTestdata.nxs'),
+                                        unicode('H2O 34C'),
+                                        OptionalFloat(34.0)]]
 
         self.scriptElement.maskDetectors = '1,2'
 
@@ -211,46 +212,138 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         # [(inputDict, causesException=True), ...]
         modifiedValues = [
             ({}, False),
-
-            ({'correctTof': TOFTOFScriptElement.CORR_TOF_VAN}, True),
-            ({'correctTof': TOFTOFScriptElement.CORR_TOF_VAN, 'vanRuns': '0:2', 'vanCmnt': 'vanComment'}, False),
-
-            ({'subtractECVan': True, 'vanRuns': '', 'vanCmnt': 'vanComment', 'ecRuns': '3:5'}, True),
-            ({'subtractECVan': True, 'vanRuns': '', 'vanCmnt': '', 'ecRuns': '3:5'}, True),
-            ({'subtractECVan': True, 'vanRuns': '0:2', 'vanCmnt': 'vanComment', 'ecRuns': ''}, True),
-            ({'subtractECVan': True, 'vanRuns': '0:2', 'vanCmnt': 'vanComment', 'ecRuns': '3:5'}, False),
-
+            ({
+                'correctTof': TOFTOFScriptElement.CORR_TOF_VAN
+            }, True),
+            ({
+                'correctTof': TOFTOFScriptElement.CORR_TOF_VAN,
+                'vanRuns': '0:2',
+                'vanCmnt': 'vanComment'
+            }, False),
+            ({
+                'subtractECVan': True,
+                'vanRuns': '',
+                'vanCmnt': 'vanComment',
+                'ecRuns': '3:5'
+            }, True),
+            ({
+                'subtractECVan': True,
+                'vanRuns': '',
+                'vanCmnt': '',
+                'ecRuns': '3:5'
+            }, True),
+            ({
+                'subtractECVan': True,
+                'vanRuns': '0:2',
+                'vanCmnt': 'vanComment',
+                'ecRuns': ''
+            }, True),
+            ({
+                'subtractECVan': True,
+                'vanRuns': '0:2',
+                'vanCmnt': 'vanComment',
+                'ecRuns': '3:5'
+            }, False),
             ({}, False),
-            ({'binEon': True, 'binEstart': 1.0, 'binEstep': 0.1, 'binEend': 1.0}, True),
-            ({'binEon': True, 'binEstart': 0.0, 'binEstep': 2.0, 'binEend': 1.0}, True),
-            ({'binEon': True, 'binEstart': 0.0, 'binEstep': 0.0, 'binEend': 1.0}, True),
-            ({'binEon': True, 'binEstart': 0.0, 'binEstep': -0.1, 'binEend': 1.0}, True),
-            ({'binEon': False, 'binEstart': 0.0, 'binEstep': -0.1, 'binEend': 1.0}, False),
-
-            ({'binQon': True, 'binQstart': 1.0, 'binQstep': 0.1, 'binQend': 1.0}, True),
-            ({'binQon': True, 'binQstart': 0.0, 'binQstep': 2.0, 'binQend': 1.0}, True),
-            ({'binQon': True, 'binQstart': 0.0, 'binQstep': 0.0, 'binQend': 1.0}, True),
-            ({'binQon': True, 'binQstart': 0.0, 'binQstep': -0.1, 'binQend': 1.0}, True),
-            ({'binQon': False, 'binQstart': 1.0, 'binQstep': 0.1, 'binQend': 1.0}, False),
-
-            ({'dataRuns': []}, True),
-
-            ({'dataRuns': [[unicode('0:5'), unicode(''), OptFloat(None)]]}, True),
-            ({'dataRuns': [
-                [unicode('0:5'), unicode('Comment for Run 0:5'), OptFloat(None)],
-                [unicode('6:7'), unicode(''), OptFloat(None)]
-            ]}, True),
-            ({'dataRuns': [
-                [unicode('0:5'), unicode(''), OptFloat(None)],
-                [unicode('6:7'), unicode('Comment for Run 6:7'), OptFloat(None)]
-            ]}, True),
-
-            ({'vanRuns': '0:2', 'vanCmnt': ''}, True),
-            ({'vanRuns': '0:2', 'vanCmnt': 'Comment for Vanadium'}, False),
-
-            ({'saveSofTWNxspe': True, 'saveSofTWAscii': True, 'saveDir': ''}, True),
-            ({'saveSofTWNexus': True, 'saveSofQWNexus': False, 'saveDir': ''}, True),
-            ({'saveSofQWNexus': True, 'saveSofQWAscii': True, 'saveDir': '/some/SaveDir/'}, False),
+            ({
+                'binEon': True,
+                'binEstart': 1.0,
+                'binEstep': 0.1,
+                'binEend': 1.0
+            }, True),
+            ({
+                'binEon': True,
+                'binEstart': 0.0,
+                'binEstep': 2.0,
+                'binEend': 1.0
+            }, True),
+            ({
+                'binEon': True,
+                'binEstart': 0.0,
+                'binEstep': 0.0,
+                'binEend': 1.0
+            }, True),
+            ({
+                'binEon': True,
+                'binEstart': 0.0,
+                'binEstep': -0.1,
+                'binEend': 1.0
+            }, True),
+            ({
+                'binEon': False,
+                'binEstart': 0.0,
+                'binEstep': -0.1,
+                'binEend': 1.0
+            }, False),
+            ({
+                'binQon': True,
+                'binQstart': 1.0,
+                'binQstep': 0.1,
+                'binQend': 1.0
+            }, True),
+            ({
+                'binQon': True,
+                'binQstart': 0.0,
+                'binQstep': 2.0,
+                'binQend': 1.0
+            }, True),
+            ({
+                'binQon': True,
+                'binQstart': 0.0,
+                'binQstep': 0.0,
+                'binQend': 1.0
+            }, True),
+            ({
+                'binQon': True,
+                'binQstart': 0.0,
+                'binQstep': -0.1,
+                'binQend': 1.0
+            }, True),
+            ({
+                'binQon': False,
+                'binQstart': 1.0,
+                'binQstep': 0.1,
+                'binQend': 1.0
+            }, False),
+            ({
+                'dataRuns': []
+            }, True),
+            ({
+                'dataRuns': [[unicode('0:5'), unicode(''), OptFloat(None)]]
+            }, True),
+            ({
+                'dataRuns': [[unicode('0:5'), unicode('Comment for Run 0:5'),
+                              OptFloat(None)], [unicode('6:7'), unicode(''),
+                                                OptFloat(None)]]
+            }, True),
+            ({
+                'dataRuns': [[unicode('0:5'), unicode(''), OptFloat(None)],
+                             [unicode('6:7'), unicode('Comment for Run 6:7'),
+                              OptFloat(None)]]
+            }, True),
+            ({
+                'vanRuns': '0:2',
+                'vanCmnt': ''
+            }, True),
+            ({
+                'vanRuns': '0:2',
+                'vanCmnt': 'Comment for Vanadium'
+            }, False),
+            ({
+                'saveSofTWNxspe': True,
+                'saveSofTWAscii': True,
+                'saveDir': ''
+            }, True),
+            ({
+                'saveSofTWNexus': True,
+                'saveSofQWNexus': False,
+                'saveDir': ''
+            }, True),
+            ({
+                'saveSofQWNexus': True,
+                'saveSofQWAscii': True,
+                'saveDir': '/some/SaveDir/'
+            }, False),
         ]
 
         def executeSubTest(inputs, shouldThrow):

@@ -21,10 +21,14 @@ from mantid.dataobjects import Workspace2D
 
 
 class PlotWidgetPresenterCommon(HomeTabSubWidget):
-
-    def __init__(self, view: PlotWidgetViewInterface, model: PlotWidgetModel, context,
-                 figure_presenter: PlottingCanvasPresenterInterface, get_selected_fit_workspaces,
-                 external_plotting_view=None, external_plotting_model=None):
+    def __init__(self,
+                 view: PlotWidgetViewInterface,
+                 model: PlotWidgetModel,
+                 context,
+                 figure_presenter: PlottingCanvasPresenterInterface,
+                 get_selected_fit_workspaces,
+                 external_plotting_view=None,
+                 external_plotting_model=None):
         """
         :param view: A reference to the QWidget object for plotting
         :param model: A reference to a model which contains the plotting logic
@@ -100,17 +104,15 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         if self.context.gui_context['PlotMode'] == PlotMode.Data:
             self.handle_data_updated(autoscale=autoscale)
         elif self.context.gui_context['PlotMode'] == PlotMode.Fitting:  # Plot the displayed workspace
-            self.handle_plot_selected_fits(
-                self._get_selected_fit_workspaces(), autoscale
-            )
+            self.handle_plot_selected_fits(self._get_selected_fit_workspaces(), autoscale)
 
-    def handle_plot_mode_changed(self, plot_mode : PlotMode):
+    def handle_plot_mode_changed(self, plot_mode: PlotMode):
         if isinstance(self.context, FrequencyDomainAnalysisContext):
             self.handle_plot_mode_changed_for_frequency_domain_analysis(plot_mode)
         else:
             self.handle_plot_mode_changed_for_muon_analysis(plot_mode)
 
-    def handle_plot_mode_changed_for_muon_analysis(self, plot_mode : PlotMode):
+    def handle_plot_mode_changed_for_muon_analysis(self, plot_mode: PlotMode):
         if plot_mode == self.context.gui_context['PlotMode']:
             return
 
@@ -132,7 +134,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
 
         self._figure_presenter.autoscale_y_axes()
 
-    def handle_plot_mode_changed_for_frequency_domain_analysis(self, plot_mode : PlotMode):
+    def handle_plot_mode_changed_for_frequency_domain_analysis(self, plot_mode: PlotMode):
         if plot_mode == self.context.gui_context['PlotMode']:
             return
 
@@ -243,8 +245,8 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             self._view.set_raw_checkbox_state(True)
             self._view.warning_popup('No rebin options specified')
             return
-        workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
-                                                                                     self._view.get_plot_type())
+        workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(
+            self._view.is_raw_plot(), self._view.get_plot_type())
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
         self.update_plot()
 
@@ -324,8 +326,8 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         if fit_information_list:
             for fit_information in fit_information_list:
                 fit = fit_information.fit
-                fit_workspaces, fit_indices = self._model.get_fit_workspace_and_indices(fit,with_diff)
-                workspace_list += self.match_raw_selection(fit_information.input_workspaces,raw) + fit_workspaces
+                fit_workspaces, fit_indices = self._model.get_fit_workspace_and_indices(fit, with_diff)
+                workspace_list += self.match_raw_selection(fit_information.input_workspaces, raw) + fit_workspaces
                 indices += [0] * len(fit_information.input_workspaces) + fit_indices
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=autoscale)
 
@@ -340,7 +342,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             if plot_raw and not fit_raw_data:
                 ws_list.append(remove_rebin_from_name(workspace_name))
             # raw data but want binned plot
-            elif not plot_raw and  fit_raw_data:
+            elif not plot_raw and fit_raw_data:
                 ws_list.append(add_rebin_to_name(workspace_name))
             else:
                 ws_list.append(workspace_name)
@@ -360,8 +362,8 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         :param autoscale: Whether to autoscale the graph
         :param hold_on: Whether to keep previous plots
         """
-        workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
-                                                                                     self._view.get_plot_type())
+        workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(
+            self._view.is_raw_plot(), self._view.get_plot_type())
 
         if workspace_list:
             self._view.setEnabled(True)
@@ -373,7 +375,6 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         if len(self.context.group_pair_context.selected_pairs) != 0 and \
                 self._view.get_plot_type() == self._model.counts_plot:
             self._view.set_plot_type(self._model.asymmetry_plot)
-            self._view.warning_popup(
-                'Pair workspaces have no counts workspace, plotting Asymmetry')
+            self._view.warning_popup('Pair workspaces have no counts workspace, plotting Asymmetry')
             return True
         return False

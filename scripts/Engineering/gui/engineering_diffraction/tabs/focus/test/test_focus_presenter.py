@@ -110,15 +110,12 @@ class FocusPresenterTest(unittest.TestCase):
 
     @patch(tab_path + ".presenter.create_error_message")
     def test_validate_with_invalid_calibration(self, create_error):
-        self.presenter.current_calibration = CalibrationInfo(vanadium_path=None,
-                                                             sample_path=None,
-                                                             instrument=None)
+        self.presenter.current_calibration = CalibrationInfo(vanadium_path=None, sample_path=None, instrument=None)
         self.view.is_searching.return_value = False
 
         self.presenter._validate()
-        create_error.assert_called_with(
-            self.presenter.view,
-            "Create or Load a calibration via the Calibration tab before focusing.")
+        create_error.assert_called_with(self.presenter.view,
+                                        "Create or Load a calibration via the Calibration tab before focusing.")
 
     @patch(tab_path + ".presenter.check_workspaces_exist")
     @patch(tab_path + ".presenter.create_error_message")

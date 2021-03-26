@@ -15,11 +15,11 @@ from mantidqt.widgets import instrumentselector
 REFERENCE_HEIGHT = 642
 REFERENCE_WIDTH = 745
 REFERENCE_ASPECT_RATIO = REFERENCE_WIDTH / REFERENCE_HEIGHT
-WIDESCREEN_ASPECT_RATIO = 16/9
+WIDESCREEN_ASPECT_RATIO = 16 / 9
 
 
 class AboutView(QDialog):
-    def __init__(self, parent, presenter, version_text, date_text = None):
+    def __init__(self, parent, presenter, version_text, date_text=None):
         super(AboutView, self).__init__(parent)
         self.background_pixmap = QPixmap(':/images/First_use_Background.png')
         self.mantid_pixmap = QPixmap(':/images/mantid_smaller.png')
@@ -44,17 +44,15 @@ class AboutView(QDialog):
     def paintEvent(self, event):
         scaled_background = self.background_pixmap.scaled(self.rescale_w(self.background_pixmap.width()),
                                                           self.rescale_h(self.background_pixmap.height()),
-                                                          Qt.KeepAspectRatio,
-                                                          Qt.SmoothTransformation)
+                                                          Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
         scaled_mantid = self.mantid_pixmap.scaled(self.rescale_w(self.mantid_pixmap.width()),
-                                                  self.rescale_h(self.mantid_pixmap.height()),
-                                                  Qt.KeepAspectRatio,
+                                                  self.rescale_h(self.mantid_pixmap.height()), Qt.KeepAspectRatio,
                                                   Qt.SmoothTransformation)
         qp = QPainter()
         qp.begin(self)
         qp.drawPixmap(0, 0, scaled_background)
-        qp.drawPixmap(self.width() - scaled_mantid.width(), self.height()-scaled_mantid.height(), scaled_mantid)
+        qp.drawPixmap(self.width() - scaled_mantid.width(), self.height() - scaled_mantid.height(), scaled_mantid)
         qp.end()
 
     def determine_dialog_dimensions(self):
@@ -63,7 +61,7 @@ class AboutView(QDialog):
 
         screen = None
         try:
-            if hasattr(QGuiApplication,"screenAt"):
+            if hasattr(QGuiApplication, "screenAt"):
                 screen = QGuiApplication.screenAt(self.parent().geometry().center())
             else:
                 # get the screen from the last top level window
@@ -82,7 +80,7 @@ class AboutView(QDialog):
             width = int(screen_width * window_scaling)
 
             # also calculate the intended width but using the hieght and a standard screen aspect ratio
-            width_by_height= int(screen_height * WIDESCREEN_ASPECT_RATIO * window_scaling)
+            width_by_height = int(screen_height * WIDESCREEN_ASPECT_RATIO * window_scaling)
             # take the smaller of the width from the screen width and height
             if width_by_height < width:
                 width = width_by_height
@@ -103,7 +101,7 @@ class AboutView(QDialog):
         return int(value * (self.height() / REFERENCE_HEIGHT))
 
     def setupUI(self):
-        width, height  = self.determine_dialog_dimensions()
+        width, height = self.determine_dialog_dimensions()
 
         self.setMinimumSize(width, height)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -128,7 +126,7 @@ QCommandLinkButton:hover {{
 
         # version label section at th etop
         parent_layout = QVBoxLayout()
-        parent_layout.addSpacerItem(QSpacerItem(self.rescale_w(20),self.rescale_h(70),vPolicy=QSizePolicy.Fixed))
+        parent_layout.addSpacerItem(QSpacerItem(self.rescale_w(20), self.rescale_h(70), vPolicy=QSizePolicy.Fixed))
         self.lbl_version.setText("version ")
         self.lbl_version.setIndent(self.rescale_w(115))
         self.lbl_version.setStyleSheet(f"""color: rgb(215, 215, 215);
@@ -136,8 +134,8 @@ font: {self.rescale_w(28)}pt;
 font-weight: bold;
 font-size: {self.rescale_w(28)}px""")
         parent_layout.addWidget(self.lbl_version)
-        parent_layout.addSpacerItem(QSpacerItem(self.rescale_w(20),self.rescale_h(40),
-                                                vPolicy=QSizePolicy.MinimumExpanding))
+        parent_layout.addSpacerItem(
+            QSpacerItem(self.rescale_w(20), self.rescale_h(40), vPolicy=QSizePolicy.MinimumExpanding))
 
         # split into the two columns
         two_box_layout = QHBoxLayout()
@@ -155,8 +153,7 @@ font-size: {self.rescale_w(28)}px""")
                                        ':/images/Notepad-Bloc-notes-icon-48x48.png')
         left_layout.addWidget(self.clb_release_notes)
         # sample datasets
-        self.setup_command_link_button(self.clb_sample_datasets, "Sample Datasets",
-                                       ':/images/download-icon-48x48.png')
+        self.setup_command_link_button(self.clb_sample_datasets, "Sample Datasets", ':/images/download-icon-48x48.png')
         left_layout.addWidget(self.clb_sample_datasets)
         # Tutorials Label
         lbl_tutorials = QLabel()
@@ -172,8 +169,7 @@ font-size: {self.rescale_w(28)}px""")
                                        ':/images/Python-icon-48x48.png')
         left_layout.addWidget(self.clb_python_introduction)
         # Python in Mantid
-        self.setup_command_link_button(self.clb_python_in_mantid, "Python In Mantid",
-                                       ':/images/Circle_cog_48x48.png')
+        self.setup_command_link_button(self.clb_python_in_mantid, "Python In Mantid", ':/images/Circle_cog_48x48.png')
         left_layout.addWidget(self.clb_python_in_mantid)
         # Extending Mantid with python
         self.setup_command_link_button(self.clb_extending_mantid, "Extending Mantid with Python",
@@ -200,9 +196,7 @@ QGroupBox QComboBox{{
 font: {self.rescale_w(12)}px;
 """)
         grp_personal_setup_layout = QVBoxLayout()
-        grp_personal_setup_layout.setContentsMargins(self.rescale_w(9),
-                                                     self.rescale_h(1),
-                                                     self.rescale_w(9),
+        grp_personal_setup_layout.setContentsMargins(self.rescale_w(9), self.rescale_h(1), self.rescale_w(9),
                                                      self.rescale_h(9))
         grp_personal_setup_layout.setSpacing(0)
         grp_personal_setup.setLayout(grp_personal_setup_layout)
@@ -244,7 +238,7 @@ font: {self.rescale_w(12)}px;
                                         r'Privacy Policy</span></a></p></body></html>')
         self.lbl_privacy_policy.setOpenExternalLinks(False)
         usagelayout.addWidget(self.lbl_privacy_policy)
-        personal_setup_form_layout.addRow(lbl_allow_usage_data,usagelayout)
+        personal_setup_form_layout.addRow(lbl_allow_usage_data, usagelayout)
         grp_personal_setup_layout.addLayout(personal_setup_form_layout)
         right_layout.addWidget(grp_personal_setup)
         right_layout.addSpacerItem(QSpacerItem(self.rescale_w(20), self.rescale_h(40), vPolicy=QSizePolicy.Expanding))
@@ -257,15 +251,15 @@ font: {self.rescale_w(12)}px;
         icon_layout_top.addWidget(self.create_label_with_image(112, 50, ':/images/ISIS_Logo_Transparent.gif'))
         icon_layout_top.addSpacerItem(QSpacerItem(self.rescale_w(10), self.rescale_h(20), hPolicy=QSizePolicy.Fixed))
         icon_layout_top.addWidget(self.create_label_with_image(94, 50, ':/images/ess_logo_transparent_small.png'))
-        icon_layout_top.addSpacerItem(QSpacerItem(self.rescale_w(40), 20,hPolicy=QSizePolicy.Expanding))
+        icon_layout_top.addSpacerItem(QSpacerItem(self.rescale_w(40), 20, hPolicy=QSizePolicy.Expanding))
         right_layout.addLayout(icon_layout_top)
         # Row two
         icon_layout_middle = QHBoxLayout()
         icon_layout_middle.setContentsMargins(0, self.rescale_h(10), 0, 0)
         icon_layout_middle.setSpacing(0)
         icon_layout_middle.addWidget(self.create_label_with_image(200, 30, ':/images/Ornl_hfir_sns_logo_small.png'))
-        icon_layout_middle.addSpacerItem(QSpacerItem(self.rescale_w(40), self.rescale_h(20),
-                                                     hPolicy=QSizePolicy.Expanding))
+        icon_layout_middle.addSpacerItem(
+            QSpacerItem(self.rescale_w(40), self.rescale_h(20), hPolicy=QSizePolicy.Expanding))
         right_layout.addLayout(icon_layout_middle)
         # Row three
         icon_layout_bottom = QHBoxLayout()
@@ -276,8 +270,8 @@ font: {self.rescale_w(12)}px;
         icon_layout_bottom.addWidget(self.create_label_with_image(50, 50, ':/images/ILL_logo.png'))
         icon_layout_bottom.addSpacerItem(QSpacerItem(self.rescale_w(10), self.rescale_h(20), hPolicy=QSizePolicy.Fixed))
         icon_layout_bottom.addWidget(self.create_label_with_image(92, 50, ':/images/CSNS_Logo_Short.png'))
-        icon_layout_bottom.addSpacerItem(QSpacerItem(self.rescale_w(40), self.rescale_h(20),
-                                                     hPolicy=QSizePolicy.Expanding))
+        icon_layout_bottom.addSpacerItem(
+            QSpacerItem(self.rescale_w(40), self.rescale_h(20), hPolicy=QSizePolicy.Expanding))
         right_layout.addLayout(icon_layout_bottom)
 
         # end the two box layout
@@ -291,9 +285,9 @@ font: {self.rescale_w(12)}px;
         do_not_show_layout = QVBoxLayout()
         do_not_show_layout.setContentsMargins(self.rescale_w(15), 0, 0, 0)
         do_not_show_layout.setSpacing(self.rescale_w(2))
-        do_not_show_layout.addSpacerItem(QSpacerItem(1,self.rescale_h(1), vPolicy=QSizePolicy.Expanding))
+        do_not_show_layout.addSpacerItem(QSpacerItem(1, self.rescale_h(1), vPolicy=QSizePolicy.Expanding))
         lbl_update = QLabel()
-        lbl_update.setMinimumSize(self.rescale_w(400),0)
+        lbl_update.setMinimumSize(self.rescale_w(400), 0)
         lbl_update.setStyleSheet("color: rgb(25,125,25);")
         lbl_update.setText('You can revisit this dialog by selecting "About" on the Help menu.')
         lbl_update.setAlignment(Qt.AlignBottom)
@@ -302,19 +296,19 @@ font: {self.rescale_w(12)}px;
         do_not_show_checkbox_layout = QHBoxLayout()
         self.chk_do_not_show_until_next_release.setChecked(True)
         do_not_show_checkbox_layout.addWidget(self.chk_do_not_show_until_next_release)
-        do_not_show_checkbox_layout.addSpacerItem(QSpacerItem(self.rescale_w(10), self.rescale_h(2),
-                                                              hPolicy=QSizePolicy.Fixed))
+        do_not_show_checkbox_layout.addSpacerItem(
+            QSpacerItem(self.rescale_w(10), self.rescale_h(2), hPolicy=QSizePolicy.Fixed))
         lbl_do_not_show = QLabel()
         lbl_do_not_show.setStyleSheet("color: rgb(25,125,25);")
         lbl_do_not_show.setText('Do not show again until next release')
         do_not_show_checkbox_layout.addWidget(lbl_do_not_show)
-        do_not_show_checkbox_layout.addSpacerItem(QSpacerItem(self.rescale_w(40),10, hPolicy=QSizePolicy.Expanding))
+        do_not_show_checkbox_layout.addSpacerItem(QSpacerItem(self.rescale_w(40), 10, hPolicy=QSizePolicy.Expanding))
         do_not_show_layout.addLayout(do_not_show_checkbox_layout)
         footer_layout.addLayout(do_not_show_layout)
 
         # Close button
         close_button_layout = QVBoxLayout()
-        close_button_layout.addSpacerItem(QSpacerItem(20,self.rescale_h(15), vPolicy=QSizePolicy.Expanding))
+        close_button_layout.addSpacerItem(QSpacerItem(20, self.rescale_h(15), vPolicy=QSizePolicy.Expanding))
         self.pb_close.setText("Close")
         self.pb_close.setDefault(True)
         close_button_layout.addWidget(self.pb_close)
@@ -340,8 +334,7 @@ font: {self.rescale_w(12)}px;
         return label_with_image
 
     def customize_layout(self, version_text, date_text):
-        self.setWindowTitle(self.windowTitle() + " "
-                            + version_text)
+        self.setWindowTitle(self.windowTitle() + " " + version_text)
         version_label = version_text
         # add a date if it is an official release
         if date_text and len(version_text) < 10:

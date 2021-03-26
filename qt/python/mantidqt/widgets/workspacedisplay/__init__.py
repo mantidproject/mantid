@@ -8,6 +8,5 @@
 # 3rdparty imports
 from qtpy import PYQT4
 
-
 if PYQT4:
     raise ImportError("Workspace display requires Qt >= v5")

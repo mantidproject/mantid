@@ -58,8 +58,7 @@ class EISFDiffCylinder(IFunction1D):
         a = np.square(np.where(z < 1e-9, 1 - z * z / 6, np.sin(z) / z))
         z = radius * np.outer(x, self.sin_theta)
         #  EISF on cylinder cross-section (diffusion on a disc)
-        b = np.square(np.where(z < 1e-6, 1 - z * z / 10,
-                               3 * (np.sin(z) - z * np.cos(z)) / (z * z * z)))
+        b = np.square(np.where(z < 1e-6, 1 - z * z / 10, 3 * (np.sin(z) - z * np.cos(z)) / (z * z * z)))
         # integrate in theta
         eisf = self.d_theta * np.sum(self.sin_theta * a * b, axis=1)
         return self.getParameterValue('A') * eisf

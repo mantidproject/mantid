@@ -49,8 +49,7 @@ def is_string(value):
 def gen_name(element, name):
     msg = None
     if not is_string(element):
-        msg = "'{}' expected element to be 'str', found '{}' instead".format(
-            str(element), type(element))
+        msg = "'{}' expected element to be 'str', found '{}' instead".format(str(element), type(element))
     if not is_string(name):
         msg = "'{}' expected name to be 'str', found '{}' instead".format(str(name), type(name))
 
@@ -159,9 +158,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         if element in self.used_colors:
             return self.used_colors[element]
 
-        occurrences = [
-            list(self.used_colors.values()).count('C{}'.format(i)) for i in range(self.num_colors)
-        ]
+        occurrences = [list(self.used_colors.values()).count('C{}'.format(i)) for i in range(self.num_colors)]
 
         color_index = occurrences.index(min(occurrences))
 
@@ -390,10 +387,9 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         try:
             self._generate_element_widgets()
         except ValueError:
-            message_box.warning(
-                'The file does not contain correctly formatted data, resetting to default data file.'
-                'See "https://docs.mantidproject.org/nightly/interfaces/'
-                'Muon%20Elemental%20Analysis.html" for more information.')
+            message_box.warning('The file does not contain correctly formatted data, resetting to default data file.'
+                                'See "https://docs.mantidproject.org/nightly/interfaces/'
+                                'Muon%20Elemental%20Analysis.html" for more information.')
             self.ptable.set_peak_datafile(None)
             self._generate_element_widgets()
 
@@ -478,11 +474,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     def uncheck_detectors_if_no_line_plotted(self):
         last_run = self.load_widget.last_loaded_run()
-        if not any([
-            self.lines.total.isChecked(),
-            self.lines.prompt.isChecked(),
-            self.lines.delayed.isChecked()
-        ]):
+        if not any([self.lines.total.isChecked(), self.lines.prompt.isChecked(), self.lines.delayed.isChecked()]):
             for i, detector in enumerate(self.detectors.detectors):
                 if i < self.load_widget.get_run_num_loaded_detectors(last_run):
                     detector.setEnabled(False)

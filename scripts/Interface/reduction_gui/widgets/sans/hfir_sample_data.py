@@ -25,7 +25,6 @@ class DirectBeam(BaseWidget):
     """
         Widget for the direct beam transmission calculation options.
     """
-
     def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
         super(DirectBeam, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
 
@@ -104,7 +103,6 @@ class BeamSpreader(BaseWidget):
     """
         Widget for the beam spreader transmission calculation options.
     """
-
     def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
         super(BeamSpreader, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
 
@@ -129,7 +127,8 @@ class BeamSpreader(BaseWidget):
         """
         # Validators
         self._content.spreader_trans_edit.setValidator(QDoubleValidator(self._content.spreader_trans_edit))
-        self._content.spreader_trans_spread_edit.setValidator(QDoubleValidator(self._content.spreader_trans_spread_edit))
+        self._content.spreader_trans_spread_edit.setValidator(QDoubleValidator(
+            self._content.spreader_trans_spread_edit))
 
         # Connections
         self._content.sample_scatt_browse.clicked.connect(self._sample_scatt_browse)
@@ -291,16 +290,16 @@ class SampleDataWidget(BaseWidget):
         #   Check whether we are updating the data file
         data_files = self._get_data_files()
         current_file = ''
-        if len(data_files)>0:
+        if len(data_files) > 0:
             current_file = data_files[0].strip()
 
         self._content.data_file_edit.setText(str(';'.join(state.data_files)))
-        if len(state.data_files)>0:
+        if len(state.data_files) > 0:
             self._settings.last_file = state.data_files[0]
             self._settings.last_data_ws = ''
 
             # Store the location of the loaded file
-            if len(state.data_files[0])>0:
+            if len(state.data_files[0]) > 0:
                 (folder, _) = os.path.split(state.data_files[0])
                 self._settings.data_path = folder
                 if current_file != state.data_files[0].strip():
@@ -322,7 +321,7 @@ class SampleDataWidget(BaseWidget):
         m.theta_dependent = self._content.theta_dep_chk.isChecked()
         m.dark_current = self._content.dark_current_edit.text()
 
-        m.calculation_method=self._method_box.get_state()
+        m.calculation_method = self._method_box.get_state()
 
         # Data file
         m.data_files = self._get_data_files()
@@ -333,11 +332,11 @@ class SampleDataWidget(BaseWidget):
         #   Check whether we are updating the data file
         data_files = self._get_data_files()
         current_file = ''
-        if len(data_files)>0:
+        if len(data_files) > 0:
             current_file = data_files[0].strip()
 
         fname = self.data_browse_dialog(multi=True)
-        if fname and len(fname)>0:
+        if fname and len(fname) > 0:
             self._content.data_file_edit.setText(';'.join(fname))
             self._settings.last_file = fname[0]
             self._settings.last_data_ws = ''
@@ -346,7 +345,7 @@ class SampleDataWidget(BaseWidget):
 
     def _data_file_plot(self):
         data_files = self._get_data_files()
-        if len(data_files)>0:
+        if len(data_files) > 0:
             self.show_instrument(data_files[0])
 
     def _dark_current_browse(self):
@@ -359,16 +358,24 @@ class SampleDataWidget(BaseWidget):
             state = self._last_direct_state
         if isinstance(self._method_box, BeamSpreader):
             self._last_spreader_state = self._method_box.get_state()
-        self._replace_method(DirectBeam(self, state=state, settings=self._settings,
-                                        data_type=self._data_type, data_proxy=self._data_proxy))
+        self._replace_method(
+            DirectBeam(self,
+                       state=state,
+                       settings=self._settings,
+                       data_type=self._data_type,
+                       data_proxy=self._data_proxy))
 
     def _beam_spreader(self, state=None):
         if state is None:
             state = self._last_spreader_state
         if isinstance(self._method_box, DirectBeam):
             self._last_direct_state = self._method_box.get_state()
-        self._replace_method(BeamSpreader(self, state=state, settings=self._settings,
-                                          data_type=self._data_type, data_proxy=self._data_proxy))
+        self._replace_method(
+            BeamSpreader(self,
+                         state=state,
+                         settings=self._settings,
+                         data_type=self._data_type,
+                         data_proxy=self._data_proxy))
 
     def _replace_method(self, widget):
         if self._method_box is not None:
@@ -408,10 +415,10 @@ class SampleDataWidget(BaseWidget):
         sdd = util._check_and_get_float_line_edit(self._content.sample_dist_edit, min=0.0)
         self._settings.emit_key_value("sample_detector_distance", str(sdd))
 
-        value  = util._check_and_get_float_line_edit(self._content.sample_dist_offset_edit, min=0.0)
+        value = util._check_and_get_float_line_edit(self._content.sample_dist_offset_edit, min=0.0)
         self._settings.emit_key_value("sample_detector_distance_offset", str(value))
 
-        value  = util._check_and_get_float_line_edit(self._content.sample_si_window_dist_edit, min=0.0)
+        value = util._check_and_get_float_line_edit(self._content.sample_si_window_dist_edit, min=0.0)
         self._settings.emit_key_value("sample_si_window_distance", str(value))
 
         wavelength = util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)
@@ -429,12 +436,12 @@ class SampleDataWidget(BaseWidget):
             return
 
         data_files = self._get_data_files()
-        if len(data_files)<1:
+        if len(data_files) < 1:
             return
         fname = data_files[0]
-        if len(str(fname).strip())>0:
+        if len(str(fname).strip()) > 0:
             dataproxy = self._data_proxy(fname)
-            if len(dataproxy.errors)>0:
+            if len(dataproxy.errors) > 0:
                 #QMessageBox.warning(self, "Error", dataproxy.errors[0])
                 return
 

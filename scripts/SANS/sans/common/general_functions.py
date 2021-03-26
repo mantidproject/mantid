@@ -16,8 +16,7 @@ import numpy as np
 from mantid.api import (AlgorithmManager, AnalysisDataService, isSameWorkspaceObject)
 from sans.common.constant_containers import (SANSInstrument_enum_list, SANSInstrument_string_list,
                                              SANSInstrument_string_as_key_NoInstrument)
-from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, EMPTY_NAME,
-                                   REDUCED_CAN_TAG)
+from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, EMPTY_NAME, REDUCED_CAN_TAG)
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
 from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ReductionMode,
                                SANSFacility, DataType, TransmissionType, SANSInstrument)
@@ -170,11 +169,9 @@ def get_input_workspace_as_copy_if_not_same_as_output_workspace(alg):
     :param alg: a handle to the algorithm which has a InputWorkspace property and a OutputWorkspace property
     :return: a workspace
     """
-
     def _clone_input(_ws):
         clone_name = "CloneWorkspace"
-        clone_options = {"InputWorkspace": _ws,
-                         "OutputWorkspace": EMPTY_NAME}
+        clone_options = {"InputWorkspace": _ws, "OutputWorkspace": EMPTY_NAME}
         clone_alg = create_unmanaged_algorithm(clone_name, **clone_options)
         clone_alg.execute()
         return clone_alg.getProperty("OutputWorkspace").value
@@ -347,7 +344,6 @@ def parse_diagnostic_settings(string_to_parse):
   70 ,
   vec[7] is a vector containing element 71,73,75
   """
-
     def _does_match(compiled_regex, line):
         return compiled_regex.match(line) is not None
 
@@ -396,8 +392,8 @@ def parse_diagnostic_settings(string_to_parse):
 
     multiple_entry_pattern = re.compile("\\s*" + number + "\\s*" + r':' + "\\s*" + number + "\\s*")
 
-    simple_range_with_step_pattern = re.compile(
-        "\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*" + r':' + "\\s*")
+    simple_range_with_step_pattern = re.compile("\\s*" + number + "\\s*"
+                                                r'-' + "\\s*" + number + "\\s*" + r':' + "\\s*")
 
     slice_settings = string_to_parse.split(',')
 
@@ -431,8 +427,8 @@ def parse_diagnostic_settings(string_to_parse):
 class EventSliceParser(object):
     number = r'(\d+(?:\.\d+)?(?:[eE][+-]\d+)?)'  # float without sign
     simple_slice_pattern = re.compile("\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*")
-    slice_range_pattern = re.compile("\\s*" + number + "\\s*" + r':' + "\\s*" + number + "\\s*"
-                                     + r':' + "\\s*" + number)
+    slice_range_pattern = re.compile("\\s*" + number + "\\s*" + r':' + "\\s*" + number + "\\s*" + r':' + "\\s*" +
+                                     number)
     full_range_pattern = re.compile("\\s*" + "(<|>)" + "\\s*" + number + "\\s*")
 
     range_marker = re.compile("[><]")
@@ -641,8 +637,7 @@ def get_ranges_for_rebin_array(rebin_array):
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions related to workspace names
 # ----------------------------------------------------------------------------------------------------------------------
-def get_standard_output_workspace_name(state, reduction_data_type,
-                                       include_slice_limits=True, custom_run_name=None):
+def get_standard_output_workspace_name(state, reduction_data_type, include_slice_limits=True, custom_run_name=None):
     """
     Creates the name of the output workspace from a state object.
 
@@ -724,12 +719,12 @@ def get_standard_output_workspace_name(state, reduction_data_type,
         end_time_as_string = ""
 
     # Piece it all together
-    output_workspace_name = (short_run_number_as_string + period_as_string + detector_name_short
-                             + dimensionality_as_string + wavelength_range_string + phi_limits_as_string
-                             + start_time_as_string + end_time_as_string)
+    output_workspace_name = (short_run_number_as_string + period_as_string + detector_name_short +
+                             dimensionality_as_string + wavelength_range_string + phi_limits_as_string +
+                             start_time_as_string + end_time_as_string)
 
-    output_workspace_base_name = (short_run_number_as_string + detector_name_short + dimensionality_as_string
-                                  + phi_limits_as_string)
+    output_workspace_base_name = (short_run_number_as_string + detector_name_short + dimensionality_as_string +
+                                  phi_limits_as_string)
 
     return output_workspace_name, output_workspace_base_name
 
@@ -758,14 +753,17 @@ def get_transmission_output_name(state, data_type=DataType.SAMPLE, multi_reducti
     if multi_reduction_type and fitted:
         if multi_reduction_type["wavelength_range"]:
             wavelength = state.wavelength
-            wavelength_range_string = "_" + str(wavelength.wavelength_low[0]) + "_" + str(
-                wavelength.wavelength_high[0])
+            wavelength_range_string = "_" + str(wavelength.wavelength_low[0]) + "_" + str(wavelength.wavelength_high[0])
             output_name += wavelength_range_string
 
     return output_name, output_base_name
 
 
-def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_type=None,
+def get_output_name(state,
+                    reduction_mode,
+                    is_group,
+                    suffix="",
+                    multi_reduction_type=None,
                     event_slice_optimisation=False):
     # Get the external settings from the save state
     save_info = state.save
@@ -802,8 +800,7 @@ def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_
 
         if multi_reduction_type["wavelength_range"]:
             wavelength = state.wavelength
-            wavelength_range_string = "_" + str(wavelength.wavelength_low[0]) + "_" + str(
-                wavelength.wavelength_high[0])
+            wavelength_range_string = "_" + str(wavelength.wavelength_low[0]) + "_" + str(wavelength.wavelength_high[0])
             output_name += wavelength_range_string
 
     # Add a suffix if the user has specified one
@@ -887,7 +884,6 @@ def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
     :param partial_type: if it is a partial type, then it needs to be specified here.
     :return: the hash of the state
     """
-
     def remove_sample_related_information(full_state):
         state_to_hash = deepcopy(full_state)
 

@@ -17,7 +17,7 @@ from mantidqt.utils.qt.testing.gui_window_test import (GuiWindowTest, not_on_win
 from mantidqt.widgets.functionbrowser import FunctionBrowser
 
 skip = unittest.skipIf(not_on_windows(), "It works on windows. I cannot spend too much time trying to "
-                                         "fix the other platforms.")
+                       "fix the other platforms.")
 
 
 class TestFunctionBrowser(GuiWindowTest):
@@ -50,7 +50,7 @@ class TestFunctionBrowser(GuiWindowTest):
 
 def function_browser_test(multi=False):
     def wrapper(fun):
-        cls = type(fun.__name__, (TestFunctionBrowser,), dict(test=fun, is_multi=multi))
+        cls = type(fun.__name__, (TestFunctionBrowser, ), dict(test=fun, is_multi=multi))
         return skip(cls)
 
     return wrapper
@@ -62,12 +62,10 @@ def dummy_test(multi=False):
 
 function_browser_test_ = function_browser_test
 
-
 # function_browser_test = dummy_test
 
 
 class BrowserUser(QObject):
-
     def __init__(self, browser):
         super(BrowserUser, self).__init__()
         self.structure_changed = MagicMock()

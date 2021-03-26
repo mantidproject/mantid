@@ -25,8 +25,12 @@ class PlusMDTest(systemtesting.MantidSystemTest):
 
     def compare_binned(self, wsname):
         """ Compare the given workspace to the previously-binned original """
-        BinMD(InputWorkspace=wsname,AlignedDim0='Q_lab_x, -3, 3, 100',AlignedDim1='Q_lab_y, -3, 3, 100',
-              AlignedDim2='Q_lab_z, -3, 3, 100',ForceOrthogonal='1',OutputWorkspace="test_binned")
+        BinMD(InputWorkspace=wsname,
+              AlignedDim0='Q_lab_x, -3, 3, 100',
+              AlignedDim1='Q_lab_y, -3, 3, 100',
+              AlignedDim2='Q_lab_z, -3, 3, 100',
+              ForceOrthogonal='1',
+              OutputWorkspace="test_binned")
         AlgorithmManager.Instance().clear()
         ws = mtd["test_binned"]
         EqualToMD(LHSWorkspace=ws, RHSWorkspace=self.original_binned, OutputWorkspace='comparison')
@@ -43,34 +47,38 @@ class PlusMDTest(systemtesting.MantidSystemTest):
         self.cleanup()
 
         # Load then convert to Q in the lab frame
-        LoadEventNexus(Filename=r'CNCS_7860_event.nxs',OutputWorkspace='cncs_nxs')
+        LoadEventNexus(Filename=r'CNCS_7860_event.nxs', OutputWorkspace='cncs_nxs')
 
         ConvertToDiffractionMDWorkspace(InputWorkspace='cncs_nxs', OutputWorkspace='cncs_original', SplitInto=2)
         SaveMD(InputWorkspace='cncs_original', Filename=barefilename)
 
-        self.assertDelta( mtd['cncs_original'].getNPoints(), 112266, 1)
-        BinMD(InputWorkspace='cncs_original',AlignedDim0='Q_lab_x, -3, 3, 100',AlignedDim1='Q_lab_y, -3, 3, 100',
-              AlignedDim2='Q_lab_z, -3, 3, 100',ForceOrthogonal='1',OutputWorkspace='cncs_original_binned')
+        self.assertDelta(mtd['cncs_original'].getNPoints(), 112266, 1)
+        BinMD(InputWorkspace='cncs_original',
+              AlignedDim0='Q_lab_x, -3, 3, 100',
+              AlignedDim1='Q_lab_y, -3, 3, 100',
+              AlignedDim2='Q_lab_z, -3, 3, 100',
+              ForceOrthogonal='1',
+              OutputWorkspace='cncs_original_binned')
         # Scale by 2 to account for summing
         self.original_binned = mtd['cncs_original_binned']
         self.original_binned *= 2
 
         # Load into memory
-        LoadMD(Filename='cncs.nxs',FileBackEnd='0',Memory='100',OutputWorkspace='cncs_mem')
+        LoadMD(Filename='cncs.nxs', FileBackEnd='0', Memory='100', OutputWorkspace='cncs_mem')
 
         # ======== Mem + Mem ===========
-        LoadMD(Filename='cncs.nxs',FileBackEnd='0',OutputWorkspace='cncs_mem2')
+        LoadMD(Filename='cncs.nxs', FileBackEnd='0', OutputWorkspace='cncs_mem2')
         PlusMD(LHSWorkspace="cncs_mem2", RHSWorkspace="cncs_mem", OutputWorkspace="cncs_mem2")
-        self.assertDelta( mtd['cncs_mem2'].getNPoints(), 112266*2, 1)
+        self.assertDelta(mtd['cncs_mem2'].getNPoints(), 112266 * 2, 1)
         self.compare_binned('cncs_mem2')
         DeleteWorkspace('cncs_mem2')
 
         # ======== File + mem, with write buffer ===========
-        LoadMD(Filename='cncs.nxs',FileBackEnd='1',Memory='100',OutputWorkspace='cncs_file')
+        LoadMD(Filename='cncs.nxs', FileBackEnd='1', Memory='100', OutputWorkspace='cncs_file')
         PlusMD(LHSWorkspace="cncs_file", RHSWorkspace="cncs_mem", OutputWorkspace="cncs_file")
         self.compare_binned('cncs_file')
         SaveMD("cncs_file", UpdateFileBackEnd="1")
-        self.assertDelta( mtd['cncs_file'].getNPoints(), 112266*2, 1)
+        self.assertDelta(mtd['cncs_file'].getNPoints(), 112266 * 2, 1)
         self.compare_binned('cncs_file')
         DeleteWorkspace('cncs_file')
 
@@ -78,10 +86,10 @@ class PlusMDTest(systemtesting.MantidSystemTest):
         SaveMD(InputWorkspace='cncs_original', Filename='cncs.nxs')
 
         # ======== File + mem, with a small write buffer (only 1MB) ========
-        LoadMD(Filename='cncs.nxs',FileBackEnd='1',Memory='1',OutputWorkspace='cncs_file_small_buffer')
+        LoadMD(Filename='cncs.nxs', FileBackEnd='1', Memory='1', OutputWorkspace='cncs_file_small_buffer')
         PlusMD(LHSWorkspace="cncs_file_small_buffer", RHSWorkspace="cncs_mem", OutputWorkspace="cncs_file_small_buffer")
         SaveMD("cncs_file_small_buffer", UpdateFileBackEnd="1")
-        self.assertDelta( mtd['cncs_file_small_buffer'].getNPoints(), 112266*2, 1)
+        self.assertDelta(mtd['cncs_file_small_buffer'].getNPoints(), 112266 * 2, 1)
         self.compare_binned('cncs_file_small_buffer')
         DeleteWorkspace('cncs_file_small_buffer')
 
@@ -89,10 +97,10 @@ class PlusMDTest(systemtesting.MantidSystemTest):
         SaveMD(InputWorkspace='cncs_original', Filename='cncs.nxs')
 
         # ========  File + mem, without a write buffer ========
-        LoadMD(Filename='cncs.nxs',FileBackEnd='1',Memory='0',OutputWorkspace='cncs_file_nobuffer')
+        LoadMD(Filename='cncs.nxs', FileBackEnd='1', Memory='0', OutputWorkspace='cncs_file_nobuffer')
         PlusMD(LHSWorkspace="cncs_file_nobuffer", RHSWorkspace="cncs_mem", OutputWorkspace="cncs_file_nobuffer")
         SaveMD("cncs_file_nobuffer", UpdateFileBackEnd="1")
-        self.assertDelta( mtd['cncs_file_nobuffer'].getNPoints(), 112266*2, 1)
+        self.assertDelta(mtd['cncs_file_nobuffer'].getNPoints(), 112266 * 2, 1)
         self.compare_binned('cncs_file_nobuffer')
         DeleteWorkspace('cncs_file_nobuffer')
 
@@ -100,11 +108,11 @@ class PlusMDTest(systemtesting.MantidSystemTest):
         SaveMD(InputWorkspace='cncs_original', Filename='cncs.nxs')
 
         # ======== File + mem to a new (cloned) file ========
-        LoadMD(Filename='cncs.nxs',FileBackEnd='1',Memory='100',OutputWorkspace='cncs_file')
+        LoadMD(Filename='cncs.nxs', FileBackEnd='1', Memory='100', OutputWorkspace='cncs_file')
         PlusMD(LHSWorkspace="cncs_file", RHSWorkspace="cncs_mem", OutputWorkspace="cncs_added")
         SaveMD("cncs_added", UpdateFileBackEnd="1")
         self.compare_binned('cncs_added')
-        self.assertDelta( mtd['cncs_added'].getNPoints(), 112266*2, 1)
+        self.assertDelta(mtd['cncs_added'].getNPoints(), 112266 * 2, 1)
 
         # Make sure we delete the workspaces so the file handles are freed
         workspaces_to_delete = ["cncs_file", "cncs_mem", "cncs_added"]
@@ -135,6 +143,7 @@ class PlusMDTest(systemtesting.MantidSystemTest):
             except OSError:
                 Logger.get("MDWorkspaceTests").notice("Failed to remove %s" % self._saved_filename)
 
+
 ###############################################################################
 
 
@@ -148,31 +157,42 @@ class MergeMDTest(systemtesting.MantidSystemTest):
         for filename in self._saved_filenames:
             filenames_string += filename + ','
 
-        filenames_string = filenames_string[:-1] # Remove trailing comma
+        filenames_string = filenames_string[:-1]  # Remove trailing comma
 
         return filenames_string
 
     def runTest(self):
         configI = ConfigService.Instance()
 
-        LoadEventNexus(Filename='CNCS_7860_event.nxs',
-                       OutputWorkspace='CNCS_7860_event_NXS',CompressTolerance=0.1)
+        LoadEventNexus(Filename='CNCS_7860_event.nxs', OutputWorkspace='CNCS_7860_event_NXS', CompressTolerance=0.1)
 
         for omega in range(0, 5):
             print("Starting omega %03d degrees" % omega)
-            CreateMDWorkspace(Dimensions='3',Extents='-5,5,-5,5,-5,5',Names='Q_sample_x,Q_sample_y,Q__sample_z',
-                              Units='A,A,A',SplitInto='3',SplitThreshold='200',MaxRecursionDepth='3',
-                              MinRecursionDepth='3', OutputWorkspace='CNCS_7860_event_MD')
+            CreateMDWorkspace(Dimensions='3',
+                              Extents='-5,5,-5,5,-5,5',
+                              Names='Q_sample_x,Q_sample_y,Q__sample_z',
+                              Units='A,A,A',
+                              SplitInto='3',
+                              SplitThreshold='200',
+                              MaxRecursionDepth='3',
+                              MinRecursionDepth='3',
+                              OutputWorkspace='CNCS_7860_event_MD')
 
             # Convert events to MD events
             AddSampleLog("CNCS_7860_event_NXS", "omega", "%s.0" % omega, "Number Series")
             AddSampleLog("CNCS_7860_event_NXS", "chi", "%s" % 0.0, "Number Series")
             AddSampleLog("CNCS_7860_event_NXS", "phi", "%s" % 0.0, "Number Series")
             # V2 of ConvertToDiffractionMD needs Goniometer to be set on workspace.
-            SetGoniometer(Workspace='CNCS_7860_event_NXS',Axis0='omega,0,0,1,1',Axis1='chi,1,0,0,1',Axis2='phi,0,1,0,1')
+            SetGoniometer(Workspace='CNCS_7860_event_NXS',
+                          Axis0='omega,0,0,1,1',
+                          Axis1='chi,1,0,0,1',
+                          Axis2='phi,0,1,0,1')
 
-            ConvertToDiffractionMDWorkspace(InputWorkspace='CNCS_7860_event_NXS',OutputWorkspace='CNCS_7860_event_MD',
-                                            OutputDimensions='Q (sample frame)',LorentzCorrection='1', Append=True)
+            ConvertToDiffractionMDWorkspace(InputWorkspace='CNCS_7860_event_NXS',
+                                            OutputWorkspace='CNCS_7860_event_MD',
+                                            OutputDimensions='Q (sample frame)',
+                                            LorentzCorrection='1',
+                                            Append=True)
 
             barefilename = "CNCS_7860_event_rotated_%03d.nxs" % omega
             filename = os.path.join(configI["defaultsave.directory"], barefilename)
@@ -184,7 +204,7 @@ class MergeMDTest(systemtesting.MantidSystemTest):
         self._saved_filenames.append(filename)
 
         # 5 times the number of events in the output workspace.
-        self.assertDelta( mtd['merged'].getNPoints(), 553035, 1)
+        self.assertDelta(mtd['merged'].getNPoints(), 553035, 1)
 
     def doValidation(self):
         # If we reach here, no validation failed

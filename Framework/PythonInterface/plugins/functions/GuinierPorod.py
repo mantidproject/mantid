@@ -20,7 +20,6 @@ class GuinierPorod(IFunction1D):
 
         See Hammouda, J. Appl. Cryst. (2010) 43, 716-719
     """
-
     def category(self):
         return "SANS"
 
@@ -60,11 +59,12 @@ class GuinierPorod(IFunction1D):
         n = 3.0 - s
         if self._boundary_conditions(qval):
             return 0.0
-        q1 = math.sqrt((m-s)*n/2.0)/Rg
+        q1 = math.sqrt((m - s) * n / 2.0) / Rg
         if qval < q1:
-            return math.pow(qval, -s)*math.exp((-qval*qval*Rg*Rg)/n)
+            return math.pow(qval, -s) * math.exp((-qval * qval * Rg * Rg) / n)
         else:
-            return math.pow(qval, -m)*math.pow(Rg, s-m)*math.exp((s-m)/2.0)*math.pow((m-s)*n/2.0, (m-s)/2.0)
+            return math.pow(qval, -m) * math.pow(Rg, s - m) * math.exp((s - m) / 2.0) * math.pow((m - s) * n / 2.0,
+                                                                                                 (m - s) / 2.0)
 
     def _first_derivative_dim(self, qval):
         """
@@ -77,8 +77,8 @@ class GuinierPorod(IFunction1D):
         n = 3.0 - s
         if self._boundary_conditions(qval):
             return 1.0
-        q1 = math.sqrt((m-s)*n/2.0)/Rg
-        qrg = qval*qval*Rg*Rg
+        q1 = math.sqrt((m - s) * n / 2.0) / Rg
+        qrg = qval * qval * Rg * Rg
         if qval < q1:
             return -math.exp(-qrg/n)*math.pow(qval, -s)*math.log(qval) \
                 - math.exp(-qrg/n)*math.pow(qval, -s)*qrg/n/n
@@ -86,7 +86,8 @@ class GuinierPorod(IFunction1D):
             result = (2.0*s-m-3.0)/(2.0*(3.0-s)) - \
                 0.5*(math.log(m-s)+math.log(3-s))
             result += math.log(Rg) + math.log(2.0) + 1.0
-            return result * math.pow(qval, -m) * math.pow(Rg, s-m) * math.exp((s-m)/2.0) * math.pow((m-s)*n/2.0, (m-s)/2.0)
+            return result * math.pow(qval, -m) * math.pow(Rg, s - m) * math.exp((s - m) / 2.0) * math.pow(
+                (m - s) * n / 2.0, (m - s) / 2.0)
 
     def _first_derivative_m(self, qval):
         """
@@ -102,13 +103,14 @@ class GuinierPorod(IFunction1D):
         n = 3.0 - s
         if self._boundary_conditions(qval):
             return 1.0
-        q1 = math.sqrt((m-s)*n/2.0)/Rg
+        q1 = math.sqrt((m - s) * n / 2.0) / Rg
         if qval < q1:
             return 0.0
         else:
             result = -math.log(qval) - math.log(Rg) - math.log(2.0) - 1.0
-            result += ((math.log(m-s)+math.log(3-s))/2.0 + 0.5)
-            return result * math.pow(qval, -m) * math.pow(Rg, s-m) * math.exp((s-m)/2.0) * math.pow((m-s)*n/2.0, (m-s)/2.0)
+            result += ((math.log(m - s) + math.log(3 - s)) / 2.0 + 0.5)
+            return result * math.pow(qval, -m) * math.pow(Rg, s - m) * math.exp((s - m) / 2.0) * math.pow(
+                (m - s) * n / 2.0, (m - s) / 2.0)
 
     def _first_derivative_rg(self, qval):
         """
@@ -121,13 +123,13 @@ class GuinierPorod(IFunction1D):
         n = 3.0 - s
         if self._boundary_conditions(qval):
             return 1.0
-        q1 = math.sqrt((m-s)*n/2.0)/Rg
-        qrg = qval*qval*Rg*Rg
+        q1 = math.sqrt((m - s) * n / 2.0) / Rg
+        qrg = qval * qval * Rg * Rg
         if qval < q1:
-            return -2.0*Rg*math.pow(qval, -s)*math.exp(-qrg/n)*qval*qval/n
+            return -2.0 * Rg * math.pow(qval, -s) * math.exp(-qrg / n) * qval * qval / n
         else:
-            return math.pow(qval, -m)*math.exp((s-m)/2.0)*math.pow(((m-s)*n/2.0),
-                                                                   ((m-s)/2.0))*(s-m)*math.pow(Rg, (s-m-1))
+            return math.pow(qval, -m) * math.exp((s - m) / 2.0) * math.pow(
+                ((m - s) * n / 2.0), ((m - s) / 2.0)) * (s - m) * math.pow(Rg, (s - m - 1))
 
     def function1D(self, xvals):
         """

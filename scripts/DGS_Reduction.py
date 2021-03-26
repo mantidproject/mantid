@@ -18,7 +18,8 @@ if 'workbench' in sys.modules:
 else:
     parent, flags = None, None
 
-reducer = ReductionGUI(parent, flags, instrument_list=["ARCS", "CNCS", "HYSPEC", "MAPS",
-                                                       "MARI", "MERLIN", "SEQUOIA", "TOFTOF"])
+reducer = ReductionGUI(parent,
+                       flags,
+                       instrument_list=["ARCS", "CNCS", "HYSPEC", "MAPS", "MARI", "MERLIN", "SEQUOIA", "TOFTOF"])
 if reducer.setup_layout(load_last=True):
     reducer.show()

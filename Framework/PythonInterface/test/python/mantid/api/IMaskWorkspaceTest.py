@@ -10,9 +10,8 @@ from testhelpers import run_algorithm, WorkspaceCreationHelper
 
 
 class IMaskWorkspaceTest(unittest.TestCase):
-
     def test_MaskWorkspace_Is_Retrievable(self):
-        dummy_ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 102, False) # no monitors
+        dummy_ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 102, False)  # no monitors
         ws_name = "dummy"
         AnalysisDataService.add(ws_name, dummy_ws)
         run_algorithm('MaskDetectors', Workspace=ws_name, WorkspaceIndexList=1)

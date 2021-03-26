@@ -15,10 +15,10 @@ import os
 
 
 def do_cleanup():
-    Files = ["BioSANS_test_data_reduction.log",
-             "BioSANS_test_data_Iq.xml",
-             "BioSANS_test_data_Iq.txt",
-             "BioSANS_test_data_Iqxy.dat"]
+    Files = [
+        "BioSANS_test_data_reduction.log", "BioSANS_test_data_Iq.xml", "BioSANS_test_data_Iq.txt",
+        "BioSANS_test_data_Iqxy.dat"
+    ]
     for filename in Files:
         absfile = FileFinder.getFullPath(filename)
         if os.path.exists(absfile):
@@ -27,14 +27,13 @@ def do_cleanup():
 
 
 class HFIRBackground(systemtesting.MantidSystemTest):
-
     def cleanup(self):
         do_cleanup()
         return True
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='HFIR'
+        configI["facilityName"] = 'HFIR'
         GPSANS()
         SetSampleDetectorDistance(6000)
         SetBeamCenter(16, 95)
@@ -53,14 +52,13 @@ class HFIRBackground(systemtesting.MantidSystemTest):
 
 
 class HFIRBackgroundTransmission(systemtesting.MantidSystemTest):
-
     def cleanup(self):
         do_cleanup()
         return True
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='HFIR'
+        configI["facilityName"] = 'HFIR'
         GPSANS()
         SetSampleDetectorDistance(6000)
         AppendDataFile("BioSANS_test_data.xml")
@@ -79,14 +77,13 @@ class HFIRBackgroundTransmission(systemtesting.MantidSystemTest):
 
 
 class HFIRBackgroundDirectBeamTrans(systemtesting.MantidSystemTest):
-
     def cleanup(self):
         do_cleanup()
         return True
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='HFIR'
+        configI["facilityName"] = 'HFIR'
         GPSANS()
         SetSampleDetectorDistance(6000)
         AppendDataFile("BioSANS_test_data.xml")
@@ -107,14 +104,13 @@ class HFIRBackgroundDirectBeamTrans(systemtesting.MantidSystemTest):
 
 
 class HFIRBackgroundBeamSpreaderTrans(systemtesting.MantidSystemTest):
-
     def cleanup(self):
         do_cleanup()
         return True
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='HFIR'
+        configI["facilityName"] = 'HFIR'
         GPSANS()
         SetSampleDetectorDistance(6000)
         AppendDataFile("BioSANS_test_data.xml")
@@ -138,14 +134,13 @@ class HFIRBackgroundBeamSpreaderTrans(systemtesting.MantidSystemTest):
 
 
 class HFIRBackgroundTransDarkCurrent(systemtesting.MantidSystemTest):
-
     def cleanup(self):
         do_cleanup()
         return True
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='HFIR'
+        configI["facilityName"] = 'HFIR'
         GPSANS()
         SetSampleDetectorDistance(6000)
         AppendDataFile("BioSANS_test_data.xml")
@@ -167,14 +162,13 @@ class HFIRBackgroundTransDarkCurrent(systemtesting.MantidSystemTest):
 
 
 class HFIRBackgroundDirectBeamTransDC(systemtesting.MantidSystemTest):
-
     def cleanup(self):
         do_cleanup()
         return True
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='HFIR'
+        configI["facilityName"] = 'HFIR'
         GPSANS()
         SetSampleDetectorDistance(6000)
         AppendDataFile("BioSANS_test_data.xml")

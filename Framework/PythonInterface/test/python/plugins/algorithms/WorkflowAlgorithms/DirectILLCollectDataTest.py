@@ -215,5 +215,6 @@ class DirectILLCollectDataTest(unittest.TestCase):
         E_fixed = outWS.getInstrument().getNumberParameter('Efixed')[0]
         assert_almost_equal(E_fixed, 77.17, 2)
 
+
 if __name__ == '__main__':
     unittest.main()

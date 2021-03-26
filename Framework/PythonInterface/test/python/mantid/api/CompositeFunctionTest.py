@@ -9,7 +9,6 @@ from mantid.api import FrameworkManagerImpl, FunctionFactory, CompositeFunction,
 
 
 class CompositeFunctionTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManagerImpl.Instance()

@@ -53,21 +53,14 @@ def _pcolormesh_nonortho(axes, workspace, nonortho_tr, *args, **kwargs):
     transpose = kwargs.pop('transpose', False)
     (normalization, kwargs) = get_normalization(workspace, **kwargs)
     indices, kwargs = get_indices(workspace, **kwargs)
-    x, y, z = get_md_data2d_bin_bounds(workspace,
-                                       indices=indices,
-                                       normalization=normalization,
-                                       transpose=transpose)
+    x, y, z = get_md_data2d_bin_bounds(workspace, indices=indices, normalization=normalization, transpose=transpose)
     X, Y = numpy.meshgrid(x, y)
     xx, yy = nonortho_tr(X, Y)
     _setLabels2D(axes, workspace, indices, transpose)
     return axes.pcolormesh(xx, yy, z, *args, **kwargs)
 
 
-def _setLabels1D(axes,
-                 workspace,
-                 indices=None,
-                 normalize_by_bin_width=True,
-                 axis=MantidAxType.SPECTRUM):
+def _setLabels1D(axes, workspace, indices=None, normalize_by_bin_width=True, axis=MantidAxType.SPECTRUM):
     '''
     helper function to automatically set axes labels for 1D plots
     '''
@@ -77,12 +70,7 @@ def _setLabels1D(axes,
     axes.set_ylabel(labels[0])
 
 
-def _setLabels2D(axes,
-                 workspace,
-                 indices=None,
-                 transpose=False,
-                 xscale=None,
-                 normalize_by_bin_width=True):
+def _setLabels2D(axes, workspace, indices=None, transpose=False, xscale=None, normalize_by_bin_width=True):
     '''
     helper function to automatically set axes labels for 2D plots
     '''
@@ -110,8 +98,7 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
     else:
         axis = MantidAxType(kwargs.pop("axis", MantidAxType.SPECTRUM))
         normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, axes, **kwargs)
-        workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(
-            workspace, axis, **kwargs)
+        workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(workspace, axis, **kwargs)
         if axis == MantidAxType.BIN:
             x, y, dy, dx = get_bins(workspace, workspace_index, with_dy)
             vertical_axis = workspace.getAxis(1)
@@ -120,15 +107,14 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
                 values = vertical_axis.extractValues()
                 if isinstance(vertical_axis, mantid.api.BinEdgeAxis):
                     # for bin edge axis we have one more edge than content
-                    values = (values[0:-1] + values[1:])/2.
+                    values = (values[0:-1] + values[1:]) / 2.
                 x = values
             if isinstance(vertical_axis, mantid.api.SpectraAxis):
                 spectrum_numbers = workspace.getSpectrumNumbers()
                 x = [spectrum_numbers[i] for i in x]
 
         elif axis == MantidAxType.SPECTRUM:
-            x, y, dy, dx = get_spectrum(workspace, workspace_index, normalize_by_bin_width, with_dy,
-                                        with_dx)
+            x, y, dy, dx = get_spectrum(workspace, workspace_index, normalize_by_bin_width, with_dy, with_dx)
         else:
             raise ValueError("Axis {} is not a valid axis number.".format(axis))
         indices = None
@@ -163,11 +149,7 @@ def _plot_impl(axes, workspace, args, kwargs):
         kwargs['normalize_by_bin_width'] = normalize_by_bin_width
         x, y, _, _, indices, axis, kwargs = _get_data_for_plot(axes, workspace, kwargs)
         if kwargs.pop('update_axes_labels', True):
-            _setLabels1D(axes,
-                         workspace,
-                         indices,
-                         normalize_by_bin_width=normalize_by_bin_width,
-                         axis=axis)
+            _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width, axis=axis)
     kwargs.pop('normalize_by_bin_width', None)
     return x, y, args, kwargs
 
@@ -264,17 +246,9 @@ def errorbar(axes, workspace, *args, **kwargs):
     dimension
     """
     normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, axes, **kwargs)
-    x, y, dy, dx, indices, axis, kwargs = _get_data_for_plot(axes,
-                                                             workspace,
-                                                             kwargs,
-                                                             with_dy=True,
-                                                             with_dx=False)
+    x, y, dy, dx, indices, axis, kwargs = _get_data_for_plot(axes, workspace, kwargs, with_dy=True, with_dx=False)
     if kwargs.pop('update_axes_labels', True):
-        _setLabels1D(axes,
-                     workspace,
-                     indices,
-                     normalize_by_bin_width=normalize_by_bin_width,
-                     axis=axis)
+        _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width, axis=axis)
     kwargs.pop('normalize_by_bin_width', None)
 
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
@@ -359,10 +333,7 @@ def contour(axes, workspace, *args, **kwargs):
         _setLabels2D(axes, workspace, indices, transpose)
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        (x, y, z) = get_matrix_2d_data(workspace,
-                                       distribution,
-                                       histogram2D=False,
-                                       transpose=transpose)
+        (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=transpose)
         _setLabels2D(axes, workspace, transpose=transpose)
     return axes.contour(x, y, z, *args, **kwargs)
 
@@ -401,10 +372,7 @@ def contourf(axes, workspace, *args, **kwargs):
         _setLabels2D(axes, workspace, indices, transpose)
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        (x, y, z) = get_matrix_2d_data(workspace,
-                                       distribution,
-                                       histogram2D=False,
-                                       transpose=transpose)
+        (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=transpose)
         _setLabels2D(axes, workspace, transpose=transpose)
     return axes.contourf(x, y, z, *args, **kwargs)
 
@@ -496,14 +464,8 @@ def pcolor(axes, workspace, *args, **kwargs):
             kwargs['pcolortype'] = ''
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
-            (x, y, z) = get_matrix_2d_data(workspace,
-                                           distribution,
-                                           histogram2D=True,
-                                           transpose=transpose)
-            _setLabels2D(axes,
-                         workspace,
-                         transpose=transpose,
-                         normalize_by_bin_width=normalize_by_bin_width)
+            (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
+            _setLabels2D(axes, workspace, transpose=transpose, normalize_by_bin_width=normalize_by_bin_width)
     return axes.pcolor(x, y, z, *args, **kwargs)
 
 
@@ -547,14 +509,8 @@ def pcolorfast(axes, workspace, *args, **kwargs):
             kwargs['pcolortype'] = 'fast'
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
-            (x, y, z) = get_matrix_2d_data(workspace,
-                                           distribution,
-                                           histogram2D=True,
-                                           transpose=transpose)
-        _setLabels2D(axes,
-                     workspace,
-                     transpose=transpose,
-                     normalize_by_bin_width=normalize_by_bin_width)
+            (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
+        _setLabels2D(axes, workspace, transpose=transpose, normalize_by_bin_width=normalize_by_bin_width)
     return axes.pcolorfast(x, y, z, *args, **kwargs)
 
 
@@ -598,14 +554,8 @@ def pcolormesh(axes, workspace, *args, **kwargs):
             kwargs['pcolortype'] = 'mesh'
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
-            (x, y, z) = get_matrix_2d_data(workspace,
-                                           distribution,
-                                           histogram2D=True,
-                                           transpose=transpose)
-        _setLabels2D(axes,
-                     workspace,
-                     transpose=transpose,
-                     normalize_by_bin_width=normalize_by_bin_width)
+            (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
+        _setLabels2D(axes, workspace, transpose=transpose, normalize_by_bin_width=normalize_by_bin_width)
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
 
@@ -651,11 +601,9 @@ def imshow(axes, workspace, *args, **kwargs):
         (aligned, kwargs) = check_resample_to_regular_grid(workspace, **kwargs)
         (normalize_by_bin_width, kwargs) = get_normalize_by_bin_width(workspace, axes, **kwargs)
         kwargs['normalize_by_bin_width'] = normalize_by_bin_width
-        _setLabels2D(axes,
-                     workspace,
-                     transpose=transpose,
-                     normalize_by_bin_width=normalize_by_bin_width)
+        _setLabels2D(axes, workspace, transpose=transpose, normalize_by_bin_width=normalize_by_bin_width)
         return samplingimage.imshow_sampling(axes, workspace=workspace, *args, **kwargs)
+
 
 def tripcolor(axes, workspace, *args, **kwargs):
     '''
@@ -694,10 +642,7 @@ def tripcolor(axes, workspace, *args, **kwargs):
         _setLabels2D(axes, workspace, indices, transpose)
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        (x, y, z) = get_matrix_2d_data(workspace,
-                                       distribution,
-                                       histogram2D=False,
-                                       transpose=transpose)
+        (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=transpose)
         _setLabels2D(axes, workspace, transpose=transpose)
     return axes.tripcolor(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
 
@@ -740,10 +685,7 @@ def tricontour(axes, workspace, *args, **kwargs):
         _setLabels2D(axes, workspace, indices, transpose)
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        (x, y, z) = get_matrix_2d_data(workspace,
-                                       distribution,
-                                       histogram2D=False,
-                                       transpose=transpose)
+        (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=transpose)
         _setLabels2D(axes, workspace, transpose=transpose)
     # tricontour segfaults if many z values are not finite
     # https://github.com/matplotlib/matplotlib/issues/10167
@@ -795,10 +737,7 @@ def tricontourf(axes, workspace, *args, **kwargs):
         _setLabels2D(axes, workspace, indices, transpose)
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        (x, y, z) = get_matrix_2d_data(workspace,
-                                       distribution,
-                                       histogram2D=False,
-                                       transpose=transpose)
+        (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=transpose)
         _setLabels2D(axes, workspace, transpose=transpose)
     # tricontourf segfaults if many z values are not finite
     # https://github.com/matplotlib/matplotlib/issues/10167

@@ -30,13 +30,11 @@ class WorkHandler(object):
      The process ID identifies (uniquely) each instance of a Worker; but the caller also defines
      an ID which is then used to identify the Worker through the API.
     """
-
     class WorkListener(metaclass=ABCMeta):
         """
         This abstract base class defines methods which must be overriden and which
         handle responses to certain worker actions such as raised errors, or completion.
         """
-
         def __init__(self):
             pass
 
@@ -56,8 +54,7 @@ class WorkHandler(object):
 
     def _add_listener(self, listener, process_id, id):
         if not isinstance(listener, self.WorkListener):
-            raise ValueError("The listener is not of type "
-                             "WorkListener but rather {}".format(type(listener)))
+            raise ValueError("The listener is not of type " "WorkListener but rather {}".format(type(listener)))
         self._listener.update({process_id: {'id': id, 'listener': listener}})
 
     @Slot()

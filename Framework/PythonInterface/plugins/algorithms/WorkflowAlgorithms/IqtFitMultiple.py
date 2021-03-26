@@ -36,42 +36,49 @@ class IqtFitMultiple(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                              doc='The _iqt.nxs InputWorkspace used by the algorithm')
 
-        self.declareProperty(FunctionProperty(name='Function',direction=Direction.InOut),
+        self.declareProperty(FunctionProperty(name='Function', direction=Direction.InOut),
                              doc='The function to use in fitting')
 
-        self.declareProperty(name='FitType', defaultValue='',
-                             doc='The type of fit being carried out')
+        self.declareProperty(name='FitType', defaultValue='', doc='The type of fit being carried out')
 
-        self.declareProperty(name='StartX', defaultValue=0.0,
+        self.declareProperty(name='StartX',
+                             defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc="The first value for X")
 
-        self.declareProperty(name='EndX', defaultValue=0.2,
+        self.declareProperty(name='EndX',
+                             defaultValue=0.2,
                              validator=FloatBoundedValidator(0.0),
                              doc="The last value for X")
 
-        self.declareProperty(name='SpecMin', defaultValue=0,
+        self.declareProperty(name='SpecMin',
+                             defaultValue=0,
                              validator=IntBoundedValidator(0),
                              doc='Minimum spectra in the workspace to fit')
 
-        self.declareProperty(name='SpecMax', defaultValue=1,
+        self.declareProperty(name='SpecMax',
+                             defaultValue=1,
                              validator=IntBoundedValidator(0),
                              doc='Maximum spectra in the workspace to fit')
 
-        self.declareProperty(name='Minimizer', defaultValue='Levenberg-Marquardt',
+        self.declareProperty(name='Minimizer',
+                             defaultValue='Levenberg-Marquardt',
                              doc='The minimizer to use in fitting')
 
-        self.declareProperty(name="MaxIterations", defaultValue=500,
+        self.declareProperty(name="MaxIterations",
+                             defaultValue=500,
                              validator=IntBoundedValidator(0),
                              doc="The Maximum number of iterations for the fit")
 
-        self.declareProperty(name='ConstrainIntensities', defaultValue=False,
+        self.declareProperty(name='ConstrainIntensities',
+                             defaultValue=False,
                              doc="If the Intensities should be constrained during the fit")
 
-        self.declareProperty(name='ExtractMembers', defaultValue=False,
+        self.declareProperty(name='ExtractMembers',
+                             defaultValue=False,
                              doc="If true, then each member of the fit will be extracted, into their "
-                                 "own workspace. These workspaces will have a histogram for each spectrum "
-                                 "(Q-value) and will be grouped.")
+                             "own workspace. These workspaces will have a histogram for each spectrum "
+                             "(Q-value) and will be grouped.")
 
         self.declareProperty(MatrixWorkspaceProperty('OutputResultWorkspace', '', direction=Direction.Output),
                              doc='The output workspace containing the results of the fit data')
@@ -125,8 +132,7 @@ class IqtFitMultiple(PythonAlgorithm):
         self._fit_group_name = self.getPropertyValue('OutputWorkspaceGroup')
 
     def PyExec(self):
-        from IndirectCommon import (convertToElasticQ,
-                                    transposeFitParametersTable)
+        from IndirectCommon import (convertToElasticQ, transposeFitParametersTable)
 
         setup_prog = Progress(self, start=0.0, end=0.1, nreports=4)
         setup_prog.report('generating output name')
@@ -221,8 +227,13 @@ class IqtFitMultiple(PythonAlgorithm):
         mtd.addOrReplace(self._result_name, result_workspace)
 
         # create and add sample logs
-        sample_logs = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type[:-2],
-                       'intensities_constrained': self._intensities_constrained, 'beta_constrained': True}
+        sample_logs = {
+            'start_x': self._start_x,
+            'end_x': self._end_x,
+            'fit_type': self._fit_type[:-2],
+            'intensities_constrained': self._intensities_constrained,
+            'beta_constrained': True
+        }
 
         conclusion_prog.report('Copying sample logs')
         copy_log_alg = self.createChildAlgorithm("CopyLogs", enableLogging=False)

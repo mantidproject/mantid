@@ -13,7 +13,6 @@ import numpy as np
 class POLDIFitPeaks2DTest(systemtesting.MantidSystemTest):
     """The system test currently checks that the calculation of 2D spectra
     works correctly."""
-
     def runTest(self):
         dataFiles = ["poldi2013n006904"]
 
@@ -37,7 +36,9 @@ class POLDIFitPeaks2DTest(systemtesting.MantidSystemTest):
         for dataFile in filenames:
             Load(Filename="%s_2d_reference_Spectrum.nxs" % (dataFile),
                  OutputWorkspace="%s_2d_reference_Spectrum" % (dataFile))
-            LoadInstrument(Workspace="%s_2d_reference_Spectrum" % (dataFile), InstrumentName="POLDI", RewriteSpectraMap=True)
+            LoadInstrument(Workspace="%s_2d_reference_Spectrum" % (dataFile),
+                           InstrumentName="POLDI",
+                           RewriteSpectraMap=True)
             Load(Filename="%s_1d_reference_Spectrum.nxs" % (dataFile),
                  OutputWorkspace="%s_1d_reference_Spectrum" % (dataFile))
 
@@ -45,7 +46,8 @@ class POLDIFitPeaks2DTest(systemtesting.MantidSystemTest):
         for dataFile in filenames:
             PoldiFitPeaks2D(InputWorkspace="%s_2d_reference_Spectrum" % (dataFile),
                             PoldiPeakWorkspace="%s_reference_Peaks" % (dataFile),
-                            FitConstantBackground=False, FitLinearBackground=False,
+                            FitConstantBackground=False,
+                            FitLinearBackground=False,
                             RefinedPoldiPeakWorkspace="%s_refined_Peaks" % (dataFile),
                             OutputWorkspace="%s_2d_calculated_Spectrum" % (dataFile),
                             Calculated1DSpectrum="%s_1d_calculated_Spectrum" % (dataFile),
@@ -105,7 +107,8 @@ class POLDIFitPeaks2DPawleyTest(systemtesting.MantidSystemTest):
 
         DeleteTableRows("peaks_ref_indexed_si_refs", "8-30")
 
-        fit2d, fit1d, peaks_ref_2d, cell = PoldiFitPeaks2D('si_data_6904', 'peaks_ref_indexed_si_refs',
+        fit2d, fit1d, peaks_ref_2d, cell = PoldiFitPeaks2D('si_data_6904',
+                                                           'peaks_ref_indexed_si_refs',
                                                            PawleyFit=True,
                                                            MaximumIterations=100)
 
@@ -137,11 +140,13 @@ class POLDIFitPeaks2DIntegratedIntensities(systemtesting.MantidSystemTest):
 
         # Run the same analysis twice, once with integrated and once with maximum intensities
         # Since a Gaussian is used, the integration can be checked numerically.
-        fit2d, fit1d, peaks_ref_2d = PoldiFitPeaks2D('si_data_6904', peaks_ref,
+        fit2d, fit1d, peaks_ref_2d = PoldiFitPeaks2D('si_data_6904',
+                                                     peaks_ref,
                                                      OutputIntegratedIntensities=False,
                                                      MaximumIterations=100)
 
-        fit2d, fit1d, peaks_ref_2d_integrated = PoldiFitPeaks2D('si_data_6904', peaks_ref,
+        fit2d, fit1d, peaks_ref_2d_integrated = PoldiFitPeaks2D('si_data_6904',
+                                                                peaks_ref,
                                                                 OutputIntegratedIntensities=True,
                                                                 MaximumIterations=100)
 

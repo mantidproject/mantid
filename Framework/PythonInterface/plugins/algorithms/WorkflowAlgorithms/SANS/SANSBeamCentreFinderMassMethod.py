@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
-
 """ Finds the beam centre for SANS"""
 
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
@@ -34,15 +33,18 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         # INPUT
         # ----------
         # Workspace which is to be cropped
-        self.declareProperty('SANSState', '',
-                             doc='A JSON string which fulfills the SANSState contract.')
+        self.declareProperty('SANSState', '', doc='A JSON string which fulfills the SANSState contract.')
 
-        self.declareProperty(MatrixWorkspaceProperty("SampleScatterWorkspace", '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("SampleScatterWorkspace",
+                                                     '',
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Input),
                              doc='The sample scatter data')
 
-        self.declareProperty(MatrixWorkspaceProperty('SampleScatterMonitorWorkspace', '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('SampleScatterMonitorWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Input),
                              doc='The scatter monitor workspace. This workspace only condtains monitors.')
 
         self.declareProperty("Centre1", 0.0, direction=Direction.InOut)
@@ -54,10 +56,11 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
 
         self.declareProperty('Iterations', 10, direction=Direction.Input)
 
-        allowed_detectors = StringListValidator([DetectorType.LAB.value,
-                                                 DetectorType.HAB.value])
-        self.declareProperty("Component", DetectorType.LAB.value,
-                             validator=allowed_detectors, direction=Direction.Input,
+        allowed_detectors = StringListValidator([DetectorType.LAB.value, DetectorType.HAB.value])
+        self.declareProperty("Component",
+                             DetectorType.LAB.value,
+                             validator=allowed_detectors,
+                             direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
     def PyExec(self):
@@ -78,10 +81,8 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         component_as_string = self.getProperty("Component").value
 
         # Set test centre
-        state.move.detectors[component_as_string].sample_centre_pos1 = self.getProperty(
-            "Centre1").value
-        state.move.detectors[component_as_string].sample_centre_pos2 = self.getProperty(
-            "Centre2").value
+        state.move.detectors[component_as_string].sample_centre_pos1 = self.getProperty("Centre1").value
+        state.move.detectors[component_as_string].sample_centre_pos2 = self.getProperty("Centre2").value
 
         progress = self._get_progress()
 
@@ -106,8 +107,7 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Event slicing ...")
         monitor_scatter_date = self._get_monitor_workspace()
-        scatter_data, monitor_scatter_date, slice_event_factor = self._slice(state, scatter_data,
-                                                                             monitor_scatter_date,
+        scatter_data, monitor_scatter_date, slice_event_factor = self._slice(state, scatter_data, monitor_scatter_date,
                                                                              'Sample')
 
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -125,19 +125,23 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
             # Rebin to monitor workspace
             if compatibility.time_rebin_string:
                 rebin_name = "Rebin"
-                rebin_option = {"InputWorkspace": scatter_data,
-                                "Params": compatibility.time_rebin_string,
-                                "OutputWorkspace": EMPTY_NAME,
-                                "PreserveEvents": False}
+                rebin_option = {
+                    "InputWorkspace": scatter_data,
+                    "Params": compatibility.time_rebin_string,
+                    "OutputWorkspace": EMPTY_NAME,
+                    "PreserveEvents": False
+                }
                 rebin_alg = create_child_algorithm(self, rebin_name, **rebin_option)
                 rebin_alg.execute()
                 scatter_data = rebin_alg.getProperty("OutputWorkspace").value
             else:
                 rebin_name = "RebinToWorkspace"
-                rebin_option = {"WorkspaceToRebin": scatter_data,
-                                "WorkspaceToMatch": monitor_scatter_date,
-                                "OutputWorkspace": EMPTY_NAME,
-                                "PreserveEvents": False}
+                rebin_option = {
+                    "WorkspaceToRebin": scatter_data,
+                    "WorkspaceToMatch": monitor_scatter_date,
+                    "OutputWorkspace": EMPTY_NAME,
+                    "PreserveEvents": False
+                }
                 rebin_alg = create_child_algorithm(self, rebin_name, **rebin_option)
                 rebin_alg.execute()
                 scatter_data = rebin_alg.getProperty("OutputWorkspace").value
@@ -177,12 +181,14 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
 
     def _run_center_of_mass_position(self, scatter_workspace, centre1, centre2, r_min, tolerance):
         algorithm_name = "FindCenterOfMassPosition"
-        alg_options = {"InputWorkspace": scatter_workspace,
-                       "CenterX": centre1,
-                       "CenterY": centre2,
-                       "BeamRadius": r_min,
-                       "Tolerance": tolerance,
-                       "DirectBeam": False}
+        alg_options = {
+            "InputWorkspace": scatter_workspace,
+            "CenterX": centre1,
+            "CenterY": centre2,
+            "BeamRadius": r_min,
+            "Tolerance": tolerance,
+            "DirectBeam": False
+        }
         alg = create_child_algorithm(self, algorithm_name, **alg_options)
         alg.execute()
 
@@ -195,9 +201,11 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         component_to_crop = DetectorType(component)
         component_to_crop = get_component_name(scatter_workspace, component_to_crop)
 
-        crop_options = {"InputWorkspace": scatter_workspace,
-                        "OutputWorkspace": EMPTY_NAME,
-                        "ComponentNames": component_to_crop}
+        crop_options = {
+            "InputWorkspace": scatter_workspace,
+            "OutputWorkspace": EMPTY_NAME,
+            "ComponentNames": component_to_crop
+        }
 
         crop_alg = create_child_algorithm(self, alg_name, **crop_options)
         crop_alg.execute()
@@ -206,8 +214,10 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         return output_workspace
 
     def _slice(self, state, workspace, monitor_workspace, data_type_as_string):
-        returned = slice_sans_event(state_slice=state.slice, input_ws=workspace,
-                                    input_ws_monitor=monitor_workspace, data_type_str=data_type_as_string)
+        returned = slice_sans_event(state_slice=state.slice,
+                                    input_ws=workspace,
+                                    input_ws_monitor=monitor_workspace,
+                                    data_type_str=data_type_as_string)
 
         workspace = returned["OutputWorkspace"]
         monitor_workspace = returned["OutputWorkspaceMonitor"]
@@ -217,11 +227,13 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
     def _move(self, state, workspace, component, is_transmission=False):
         # First we set the workspace to zero, since it might have been moved around by the user in the ADS
         # Second we use the initial move to bring the workspace into the correct position
-        move_component(state=state, component_name='',
-                       workspace=workspace, move_type=MoveTypes.RESET_POSITION)
+        move_component(state=state, component_name='', workspace=workspace, move_type=MoveTypes.RESET_POSITION)
 
-        move_component(component_name=component, state=state, workspace=workspace,
-                       is_transmission_workspace=is_transmission, move_type=MoveTypes.INITIAL_MOVE)
+        move_component(component_name=component,
+                       state=state,
+                       workspace=workspace,
+                       is_transmission_workspace=is_transmission,
+                       move_type=MoveTypes.INITIAL_MOVE)
         return workspace
 
     def _mask(self, state, workspace, component):
@@ -232,13 +244,15 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         wavelength_state = state.wavelength
 
         wavelength_name = "SANSConvertToWavelengthAndRebin"
-        wavelength_options = {"InputWorkspace": workspace,
-                              "OutputWorkspace": EMPTY_NAME,
-                              "WavelengthLow": wavelength_state.wavelength_low[0],
-                              "WavelengthHigh": wavelength_state.wavelength_high[0],
-                              "WavelengthStep": wavelength_state.wavelength_step,
-                              "WavelengthStepType": wavelength_state.wavelength_step_type_lin_log.value,
-                              "RebinMode": wavelength_state.rebin_type.value}
+        wavelength_options = {
+            "InputWorkspace": workspace,
+            "OutputWorkspace": EMPTY_NAME,
+            "WavelengthLow": wavelength_state.wavelength_low[0],
+            "WavelengthHigh": wavelength_state.wavelength_high[0],
+            "WavelengthStep": wavelength_state.wavelength_step,
+            "WavelengthStepType": wavelength_state.wavelength_step_type_lin_log.value,
+            "RebinMode": wavelength_state.rebin_type.value
+        }
 
         wavelength_alg = create_child_algorithm(self, wavelength_name, **wavelength_options)
         wavelength_alg.execute()
@@ -252,10 +266,12 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
     def _convert_to_histogram(self, workspace):
         if isinstance(workspace, IEventWorkspace):
             convert_name = "RebinToWorkspace"
-            convert_options = {"WorkspaceToRebin": workspace,
-                               "WorkspaceToMatch": workspace,
-                               "OutputWorkspace": "OutputWorkspace",
-                               "PreserveEvents": False}
+            convert_options = {
+                "WorkspaceToRebin": workspace,
+                "WorkspaceToMatch": workspace,
+                "OutputWorkspace": "OutputWorkspace",
+                "PreserveEvents": False
+            }
             convert_alg = create_child_algorithm(self, convert_name, **convert_options)
             convert_alg.execute()
             workspace = convert_alg.getProperty("OutputWorkspace").value
@@ -275,8 +291,7 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
 
     def _get_cloned_workspace(self, workspace):
         clone_name = "CloneWorkspace"
-        clone_options = {"InputWorkspace": workspace,
-                         "OutputWorkspace": EMPTY_NAME}
+        clone_options = {"InputWorkspace": workspace, "OutputWorkspace": EMPTY_NAME}
         clone_alg = create_child_algorithm(self, clone_name, **clone_options)
         clone_alg.execute()
         return clone_alg.getProperty("OutputWorkspace").value

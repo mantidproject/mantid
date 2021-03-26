@@ -21,7 +21,8 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
             del foo
 
     def test_user_missing_attribute_prints_enum_values(self):
-        param_entry = param_map_entry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name",
+        param_entry = param_map_entry.ParamMapEntry(ext_name="user_facing_name",
+                                                    int_name="script_facing_name",
                                                     enum_class=SampleEnum)
         inst_settings_obj = instrument_settings.InstrumentSettings(param_map=[param_entry])
 
@@ -58,7 +59,8 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
 
         with warnings.catch_warnings(record=True) as warning_capture:
             warnings.simplefilter("always")
-            inst_settings_obj = instrument_settings.InstrumentSettings(param_map=[param_entry], kwargs=keyword_args,
+            inst_settings_obj = instrument_settings.InstrumentSettings(param_map=[param_entry],
+                                                                       kwargs=keyword_args,
                                                                        adv_conf_dict=adv_config)
 
             self.assertRegex(str(warning_capture[-1].message), "which was previously set to")
@@ -124,8 +126,7 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
         self.assertEqual(inst_settings_obj.script_facing_name, expected_value)
 
         # Next check that any attributes that a mixed dictionary contains are added
-        mixed_dict = {"some_random_name2": example_dict,
-                      "user_facing_name2": expected_value * 2}
+        mixed_dict = {"some_random_name2": example_dict, "user_facing_name2": expected_value * 2}
 
         second_inst_settings_obj = instrument_settings.InstrumentSettings(param_map=param_entries,
                                                                           adv_conf_dict=mixed_dict)
@@ -134,14 +135,14 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
         self.assertEqual(second_inst_settings_obj.script_facing_name2, expected_value * 2)
 
     def test_check_enum_check_and_set_works(self):
-        param_entry = param_map_entry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name",
+        param_entry = param_map_entry.ParamMapEntry(ext_name="user_facing_name",
+                                                    int_name="script_facing_name",
                                                     enum_class=SampleEnum)
 
         # First test we cannot set it to a different value
         incorrect_value_dict = {"user_facing_name": "wrong"}
         with self.assertRaisesRegex(ValueError, "The user specified value: 'wrong' is unknown"):
-            instrument_settings.InstrumentSettings(param_map=[param_entry],
-                                                   adv_conf_dict=incorrect_value_dict)
+            instrument_settings.InstrumentSettings(param_map=[param_entry], adv_conf_dict=incorrect_value_dict)
 
         # Check that we can set a known good enum
         good_value_dict = {"user_facing_name": SampleEnum.a_bar}
@@ -155,16 +156,18 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
 
     def test_param_map_rejects_enum_missing_friendly_name(self):
         # Check that is the friendly name is not set it is correctly detected
-        with self.assertRaisesRegex(RuntimeError,
-                                    "'enum_friendly_name' was not set. Please contact development team."):
-            param_map_entry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name",
+        with self.assertRaisesRegex(RuntimeError, "'enum_friendly_name' was not set. Please contact development team."):
+            param_map_entry.ParamMapEntry(ext_name="user_facing_name",
+                                          int_name="script_facing_name",
                                           enum_class=BadSampleEnum)
 
     def test_optional_attribute_works(self):
-        optional_param_entry = param_map_entry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name",
+        optional_param_entry = param_map_entry.ParamMapEntry(ext_name="user_facing_name",
+                                                             int_name="script_facing_name",
                                                              optional=True)
 
-        param_entry = param_map_entry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name",
+        param_entry = param_map_entry.ParamMapEntry(ext_name="user_facing_name",
+                                                    int_name="script_facing_name",
                                                     optional=False)
 
         # Check that not passing an optional and trying to access it works correctly

@@ -10,7 +10,6 @@ import Muon.GUI.Common.utilities.load_utils as load_utils
 
 class LoadRunWidgetModel(object):
     """Stores info on all currently loaded workspaces"""
-
     def __init__(self, loaded_data_store=MuonLoadData(), context=None):
         # Used with load thread
         self._filenames = []
@@ -36,7 +35,9 @@ class LoadRunWidgetModel(object):
                 failed_files += [(filename, error)]
                 continue
             self._loaded_data_store.remove_data(run=[run])
-            self._loaded_data_store.add_data(run=[run], workspace=ws, filename=filename,
+            self._loaded_data_store.add_data(run=[run],
+                                             workspace=ws,
+                                             filename=filename,
                                              instrument=self._data_context.instrument)
         if failed_files:
             message = "The requested run could not be found. This could be due to: \n - The run does not yet exist." \

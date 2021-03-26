@@ -30,7 +30,6 @@ def enter_diff_name_side_effect():
 
 @start_qapplication
 class DifferenceWidgetPresenterTest(unittest.TestCase):
-
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QWidget()

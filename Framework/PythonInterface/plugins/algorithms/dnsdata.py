@@ -14,7 +14,6 @@ class DNSdata(object):
     this class describes the DNS data structure
     will be used for DNS data read-in and write-out routines
     """
-
     def __init__(self):
         self.title = ""
         self.experiment_number = ""
@@ -23,8 +22,8 @@ class DNSdata(object):
         self.end_time = ""
         self.duration = 0
         self.deterota = 0
-        self.wavelength = None          # Angstrom
-        self.incident_energy = None     # meV
+        self.wavelength = None  # Angstrom
+        self.incident_energy = None  # meV
         self.ndet = 24
         self.sample_name = ""
         self.userid = ""
@@ -33,7 +32,7 @@ class DNSdata(object):
         self.coil_status = ""
         self.befilter_status = ""
         self.notes = ""
-        self.monochromator_angle = None         # degree
+        self.monochromator_angle = None  # degree
         self.monochromator_position = None
         self.huber = None
         self.cradle_lower = None
@@ -53,9 +52,9 @@ class DNSdata(object):
         self.b_coil_current = None
         self.c_coil_current = None
         self.z_coil_current = None
-        self.temp1 = None       # T1
-        self.temp2 = None       # T2
-        self.tsp = None      # T_setpoint
+        self.temp1 = None  # T1
+        self.temp2 = None  # T2
+        self.tsp = None  # T_setpoint
         self.tof_channel_number = None
         self.tof_channel_width = None
         self.tof_delay_time = None
@@ -131,7 +130,7 @@ class DNSdata(object):
             # assume theta is give in degree, lambda in nm
             line = b2splitted[2].split()
             self.monochromator_angle = float(line[2])
-            self.wavelength = float(line[3])*10.0
+            self.wavelength = float(line[3]) * 10.0
             self.incident_energy = float(line[4])
 
             # parse block 3 (motors position)
@@ -201,7 +200,7 @@ class DNSdata(object):
             b7splitted = [s.strip() for s in blocks[7].split('#')]
             # duration
             line = b7splitted[2].split()
-            self.duration = float(line[1])   # assume seconds
+            self.duration = float(line[1])  # assume seconds
             # for transition period data some other timer can be used
             if 'timer' in b7splitted[4]:
                 line = b7splitted[4].split()

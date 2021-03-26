@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 import math
-
 """
    a,b: arrays
    n : size (to use)
@@ -16,20 +15,19 @@ import math
 
 def CHOSOL_old(a, b, n):
 
-    assert(n == 3)
-    assert(a.shape == (3, 3))
-    assert(b.shape == (3,))
+    assert (n == 3)
+    assert (a.shape == (3, 3))
+    assert (b.shape == (3, ))
     L = np.zeros([n, n])
     L[0, 0] = math.sqrt(a[0, 0])
     for i in range(1, n):
         L[i, 0] = a[i, 0] / L[0, 0]
         for j in range(1, i + 1):
             z = a[i, j] - np.dot(L[i, :j], L[j, :j])
-            if(z < 0):
-                raise UserWarning(
-                    "trapped a negative square root in CHOSOL_old")
+            if (z < 0):
+                raise UserWarning("trapped a negative square root in CHOSOL_old")
                 z = 1.E-10
-            if(j == i):
+            if (j == i):
                 L[i, j] = math.sqrt(z)
             else:
                 L[i, j] = z / L[j, j]
@@ -45,6 +43,7 @@ def CHOSOL_old(a, b, n):
         z = np.dot(L[i + 1:n, i], x[i + 1:n])
         x[i] = (bl[i] - z) / L[i, i]
     return x
+
 
 # solves ax=b by Cholesky decomposition
 # only uses lower half of array a
@@ -65,11 +64,10 @@ def CHOSOL(a, b, mylog):
             L[i, 0] = a[i, 0] / L[0, 0]
             for j in range(1, i + 1):
                 z = a[i, j] - np.dot(L[i, :j], L[j, :j])
-                if(z < 0):
-                    mylog.warning(
-                        "trapped a negative square root in CHOSOL backup code")
+                if (z < 0):
+                    mylog.warning("trapped a negative square root in CHOSOL backup code")
                     z = 1.E-10
-                if(j == i):
+                if (j == i):
                     L[i, j] = math.sqrt(z)
                 else:
                     L[i, j] = z / L[j, j]

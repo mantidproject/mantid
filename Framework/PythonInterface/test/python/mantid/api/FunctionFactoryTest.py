@@ -14,19 +14,16 @@ class TestFunctionNoAttrs(IFunction1D):
 
 
 class TestFunctionOnlyInit(IFunction1D):
-
     def init(self):
-       pass
+        pass
 
 
 class TestFunctionOnlyFunction1D(IFunction1D):
-
     def function1D(self, xvals):
         pass
 
 
 class TestFunctionCorrectForm(IFunction1D):
-
     def init(self):
         pass
 
@@ -35,7 +32,6 @@ class TestFunctionCorrectForm(IFunction1D):
 
 
 class FunctionFactoryTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManagerImpl.Instance()
@@ -45,13 +41,13 @@ class FunctionFactoryTest(unittest.TestCase):
 
     def test_get_functions(self):
         all_funcs = FunctionFactory.getFunctionNames()
-        self.assertTrue( len(all_funcs) > 0 )
+        self.assertTrue(len(all_funcs) > 0)
         self.assertTrue("Gaussian" in all_funcs)
 
     def test_get_Gaussian(self):
         name = "Gaussian"
         func = FunctionFactory.createFunction(name)
-        self.assertEqual(func.name(),  name)
+        self.assertEqual(func.name(), name)
         self.assertGreater(len(func.__repr__()), len(name))
         self.assertTrue("Peak" in func.categories())
 
@@ -65,11 +61,13 @@ class FunctionFactoryTest(unittest.TestCase):
     def test_function_subscription_of_non_class_type_raises_error(self):
         def not_a_fit_function(*args, **kwargs):
             pass
+
         self.assertRaises(ValueError, FunctionFactory.subscribe, not_a_fit_function)
 
     def test_function_subscription_of_class_without_IFunction_base_raises_error(self):
         class NotAFitFunction(object):
             pass
+
         self.assertRaises(ValueError, FunctionFactory.subscribe, NotAFitFunction)
 
     def test_function_subscription_without_required_attrs_fails(self):
@@ -82,7 +80,7 @@ class FunctionFactoryTest(unittest.TestCase):
         nfuncs_orig = len(FunctionFactory.getFunctionNames())
         FunctionFactory.subscribe(TestFunctionCorrectForm)
         new_funcs = FunctionFactory.getFunctionNames()
-        self.assertEqual(nfuncs_orig+1, len(new_funcs))
+        self.assertEqual(nfuncs_orig + 1, len(new_funcs))
         self.assertTrue("TestFunctionCorrectForm" in new_funcs)
 
     def test_function_existing_function_can_be_unsubscribed(self):

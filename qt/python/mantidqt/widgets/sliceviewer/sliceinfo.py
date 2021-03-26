@@ -35,7 +35,6 @@ class SliceInfo:
         nonortho_transform: An optional transform object defining tr/inv_tr methods
                             to transform to rectilinear system and back.
     """
-
     def __init__(self,
                  *,
                  frame: SpecialCoordinateSystem,
@@ -45,8 +44,8 @@ class SliceInfo:
                  qflags: Sequence[bool],
                  nonortho_transform: Optional[Any] = None):
         assert len(point) == len(qflags)
-        assert 3 >= sum(1 for i in filter(
-            lambda x: x is True, qflags)), "A maximum of 3 spatial dimensions can be specified"
+        assert 3 >= sum(
+            1 for i in filter(lambda x: x is True, qflags)), "A maximum of 3 spatial dimensions can be specified"
         self.frame = frame
         self.slicepoint = point
         self.range = range
@@ -83,8 +82,7 @@ class SliceInfo:
         and Z is the out of place coordinate
         :param point: A 3D point in the slice frame
         """
-        return np.array((*self._axes_tr(point[self._display_x], point[self._display_y]),
-                         point[self._display_z]))
+        return np.array((*self._axes_tr(point[self._display_x], point[self._display_y]), point[self._display_z]))
 
     # private api
     def _init(self, transpose: bool, qflags: Sequence[bool]):
@@ -110,8 +108,8 @@ class SliceInfo:
         if transpose:
             x_index, y_index = y_index, x_index
 
-        self._nonorthogonal_axes_supported = (self.frame == SpecialCoordinateSystem.HKL
-                                              and qflags[x_index] and qflags[y_index])
+        self._nonorthogonal_axes_supported = (self.frame == SpecialCoordinateSystem.HKL and qflags[x_index]
+                                              and qflags[y_index])
 
         if z_index is not None:
             self._slicevalue_z = self.slicepoint[z_index]

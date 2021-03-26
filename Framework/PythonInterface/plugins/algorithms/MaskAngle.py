@@ -15,14 +15,13 @@ import numpy
 class MaskAngle(mantid.api.PythonAlgorithm):
     """ Mask detectors between specified angles based on angle type required
     """
-
     def category(self):
         """ Mantid required
         """
         return "Transforms\\Masking"
 
     def seeAlso(self):
-        return [ "MaskDetectors" ]
+        return ["MaskDetectors"]
 
     def name(self):
         """ Mantid require
@@ -35,19 +34,25 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         return "Algorithm to mask detectors with scattering angles in a given interval (in degrees)."
 
     def PyInit(self):
-        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.Input),
+        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "", direction=mantid.kernel.Direction.Input),
                              "Input workspace")
 
-        angleValidator=mantid.kernel.FloatBoundedValidator()
-        angleValidator.setBounds(-180.,180.)
-        self.declareProperty(name="MinAngle", defaultValue=0.0, validator=angleValidator,
-                             direction=mantid.kernel.Direction.Input, doc="Angles above MinAngle are going to be masked")
-        self.declareProperty(name="MaxAngle", defaultValue=180.0, validator=angleValidator,
-                             direction=mantid.kernel.Direction.Input, doc="Angles below MaxAngle are going to be masked")
-        self.declareProperty('Angle', 'TwoTheta',
-                             mantid.kernel.StringListValidator(['TwoTheta', 'Phi', 'InPlane']),
+        angleValidator = mantid.kernel.FloatBoundedValidator()
+        angleValidator.setBounds(-180., 180.)
+        self.declareProperty(name="MinAngle",
+                             defaultValue=0.0,
+                             validator=angleValidator,
+                             direction=mantid.kernel.Direction.Input,
+                             doc="Angles above MinAngle are going to be masked")
+        self.declareProperty(name="MaxAngle",
+                             defaultValue=180.0,
+                             validator=angleValidator,
+                             direction=mantid.kernel.Direction.Input,
+                             doc="Angles below MaxAngle are going to be masked")
+        self.declareProperty('Angle', 'TwoTheta', mantid.kernel.StringListValidator(['TwoTheta', 'Phi', 'InPlane']),
                              'Which angle to use')
-        self.declareProperty(mantid.kernel.IntArrayProperty(name="MaskedDetectors", direction=mantid.kernel.Direction.Output),
+        self.declareProperty(mantid.kernel.IntArrayProperty(name="MaskedDetectors",
+                                                            direction=mantid.kernel.Direction.Output),
                              doc="List of detector masked, with scattering angles between MinAngle and MaxAngle")
 
     def validateInputs(self):
@@ -98,7 +103,7 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         ws = self.getProperty("Workspace").value
         ttmin = numpy.radians(self.getProperty("MinAngle").value)
         ttmax = numpy.radians(self.getProperty("MaxAngle").value)
-        if ttmin > ttmax :
+        if ttmin > ttmax:
             raise ValueError("MinAngle > MaxAngle, please check angle range for masking")
 
         angle_phi = self.getProperty('Angle').value == 'Phi'
@@ -115,16 +120,16 @@ class MaskAngle(mantid.api.PythonAlgorithm):
                 elif angle_in_plane:
                     val = self._get_in_plane(spectrum.position)
                 else:  # Two theta
-                    val =spectrum.twoTheta
+                    val = spectrum.twoTheta
 
-                if val>= ttmin and val<= ttmax:
+                if val >= ttmin and val <= ttmax:
                     detectors = spectrum.spectrumDefinition
                     for j in range(len(detectors)):
                         masked_ids.append(det_ids[detectors[j][0]])
         if not masked_ids:
             self.log().information("no detectors within this range")
         else:
-            mantid.simpleapi.MaskDetectors(Workspace=ws,DetectorList=numpy.array(masked_ids))
+            mantid.simpleapi.MaskDetectors(Workspace=ws, DetectorList=numpy.array(masked_ids))
         self.setProperty("MaskedDetectors", numpy.array(masked_ids))
 
 

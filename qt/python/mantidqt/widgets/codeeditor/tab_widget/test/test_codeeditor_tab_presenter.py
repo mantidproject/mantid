@@ -20,7 +20,6 @@ class MockCodeEditorTab(MockQWidget):
     Represents a single tab within the TabView.
     Contains an editor that would display the code
     """
-
     def __init__(self):
         super(MockCodeEditorTab, self).__init__()
         self.editor = MockCodeEditor()
@@ -30,7 +29,6 @@ class MockCodeEditorTabView(MockQWidget):
     """
     Represents the QTabView used to contain all tabs
     """
-
     def __init__(self):
         super(MockCodeEditorTabView, self).__init__()
         self.last_tab_clicked = StrictPropertyMock()

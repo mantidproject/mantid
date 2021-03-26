@@ -15,7 +15,6 @@ import traceback
 
 class ErrorFormatter(object):
     """Formats errors to strings"""
-
     def format(self, exc_type, exc_value, stack):
         """
         Produce a formatted error message for the given

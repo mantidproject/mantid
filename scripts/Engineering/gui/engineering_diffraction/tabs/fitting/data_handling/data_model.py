@@ -78,11 +78,9 @@ class FittingDataModel(object):
                             self._bg_params[ws_name] = []
                         self._last_added.append(ws_name)
                     else:
-                        logger.warning(
-                            f"Invalid number of spectra in workspace {ws_name}. Skipping loading of file.")
+                        logger.warning(f"Invalid number of spectra in workspace {ws_name}. Skipping loading of file.")
                 except RuntimeError as e:
-                    logger.error(
-                        f"Failed to load file: {filename}. Error: {e}. \n Continuing loading of other files.")
+                    logger.error(f"Failed to load file: {filename}. Error: {e}. \n Continuing loading of other files.")
             else:
                 logger.warning(f"File {ws_name} has already been loaded")
         self.update_log_workspace_group()
@@ -137,8 +135,13 @@ class FittingDataModel(object):
             self._log_values[ws_name] = dict()
         # add run info
         run = ws.getRun()
-        row = [ws.getInstrument().getFullName(), ws.getRunNumber(), run.getProperty('bankid').value,
-               run.getProtonCharge(), ws.getTitle()]
+        row = [
+            ws.getInstrument().getFullName(),
+            ws.getRunNumber(),
+            run.getProperty('bankid').value,
+            run.getProtonCharge(),
+            ws.getTitle()
+        ]
         self.write_table_row(ADS.retrieve("run_info"), row, irow)
         # add log data - loop over existing log workspaces not logs in settings as these might have changed
         for log in self._log_names:
@@ -151,8 +154,7 @@ class FittingDataModel(object):
                         avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False)
                     except RuntimeError:
                         # sometimes happens in old data if proton_charge log called something different
-                        logger.warning(
-                            f"Average value of log {log} could not be calculated for file {ws.name()}")
+                        logger.warning(f"Average value of log {log} could not be calculated for file {ws.name()}")
                 else:
                     logger.warning(f"File {ws.name()} does not contain log {log}")
                 self._log_values[ws_name][log] = [avg, stdev]
@@ -181,8 +183,10 @@ class FittingDataModel(object):
 
     def get_ws_sorted_by_primary_log(self):
         ws_list = list(self._loaded_workspaces.keys())
-        tof_ws_inds = [ind for ind, ws in enumerate(ws_list) if
-                       self._loaded_workspaces[ws].getAxis(0).getUnit().caption() == 'Time-of-flight']
+        tof_ws_inds = [
+            ind for ind, ws in enumerate(ws_list)
+            if self._loaded_workspaces[ws].getAxis(0).getUnit().caption() == 'Time-of-flight'
+        ]
         primary_log = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
                                   "primary_log")
         sort_ascending = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
@@ -199,7 +203,7 @@ class FittingDataModel(object):
         return ws_list_tof
 
     def update_fit(self, args):
-        fit_props, peak_centre_params = ([],) * 2
+        fit_props, peak_centre_params = ([], ) * 2
         for arg in args:
             if isinstance(arg, dict):
                 fit_props.append(arg)
@@ -214,8 +218,9 @@ class FittingDataModel(object):
             fnames = [x.split('=')[-1] for x in findall('name=[^,]*', fit_prop['properties']['Function'])]
             # get num params for each function (first elem empty as str begins with 'name=')
             # need to remove ties and constraints which are enclosed in ()
-            nparams = [s.count('=') for s in
-                       sub(r'=\([^)]*\)', '', fit_prop['properties']['Function']).split('name=')[1:]]
+            nparams = [
+                s.count('=') for s in sub(r'=\([^)]*\)', '', fit_prop['properties']['Function']).split('name=')[1:]
+            ]
             params_dict = ADS.retrieve(fit_prop['properties']['Output'] + '_Parameters').toDict()
             # loop over rows in output workspace to get value and error for each parameter
             istart = 0
@@ -223,13 +228,13 @@ class FittingDataModel(object):
                 for iparam in range(0, nparams[ifunc]):
                     irow = istart + iparam
                     key = '_'.join([fname, params_dict['Name'][irow].split('.')[-1]])  # funcname_param
-                    self._fit_results[wsname]['results'][key].append([
-                        params_dict['Value'][irow], params_dict['Error'][irow]])
+                    self._fit_results[wsname]['results'][key].append(
+                        [params_dict['Value'][irow], params_dict['Error'][irow]])
                     if key in peak_centre_params:
                         # division by difc is a temporary estimation of conversion to dspacing, working on the
                         # assumption that difa = tzero = 0 until we're able to get these values from the ws
-                        self._fit_results[wsname]['dpeaks'][key].append([
-                            params_dict['Value'][irow], params_dict['Error'][irow]])
+                        self._fit_results[wsname]['dpeaks'][key].append(
+                            [params_dict['Value'][irow], params_dict['Error'][irow]])
                 istart += nparams[ifunc]
             # append the cost function value (in this case always chisq/DOF) as don't let user change cost func
             # always last row in parameters table
@@ -362,15 +367,21 @@ class FittingDataModel(object):
             logger.notice("Background workspace already calculated")
 
     def estimate_background(self, ws_name, niter, xwindow, doSGfilter):
-        ws_bg = EnggEstimateFocussedBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name + "_bg",
-                                               NIterations=niter, XWindow=xwindow, ApplyFilterSG=doSGfilter)
+        ws_bg = EnggEstimateFocussedBackground(InputWorkspace=ws_name,
+                                               OutputWorkspace=ws_name + "_bg",
+                                               NIterations=niter,
+                                               XWindow=xwindow,
+                                               ApplyFilterSG=doSGfilter)
         return ws_bg
 
     def plot_background_figure(self, ws_name):
         ws = self._loaded_workspaces[ws_name]
         ws_bgsub = self._bg_sub_workspaces[ws_name]
         if ws_bgsub:
-            fig, ax = subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [2, 1]},
+            fig, ax = subplots(2,
+                               1,
+                               sharex=True,
+                               gridspec_kw={'height_ratios': [2, 1]},
                                subplot_kw={'projection': 'mantid'})
             bg = Minus(LHSWorkspace=ws_name, RHSWorkspace=ws_bgsub, StoreInADS=False)
             ax[0].plot(ws, 'x')

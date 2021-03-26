@@ -31,16 +31,16 @@ def get_expected_for_spectrum_1_case(monitor_workspace, selected_detector):
     times = monitor_workspace.dataX(0)
     lambda_after_unit_conversion = [(time * 1e-6) * h / distance_source_detector / mass * 1e10 for time in times]
     expected_lambda = [2., 4., 6., 8.]
-    expected_signal = [abs(lambda_after_unit_conversion[1] - expected_lambda[1])
-                       / abs(lambda_after_unit_conversion[1] - lambda_after_unit_conversion[2]) * 90,
-
-                       abs(lambda_after_unit_conversion[2] - expected_lambda[1])
-                       / abs(lambda_after_unit_conversion[1] - lambda_after_unit_conversion[2]) * 90
-                       + abs(lambda_after_unit_conversion[2] - expected_lambda[2])
-                       / abs(lambda_after_unit_conversion[2] - lambda_after_unit_conversion[3]) * 90,
-
-                       abs(lambda_after_unit_conversion[3] - expected_lambda[2])
-                       / abs(lambda_after_unit_conversion[2] - lambda_after_unit_conversion[3]) * 90 + 90]
+    expected_signal = [
+        abs(lambda_after_unit_conversion[1] - expected_lambda[1]) /
+        abs(lambda_after_unit_conversion[1] - lambda_after_unit_conversion[2]) * 90,
+        abs(lambda_after_unit_conversion[2] - expected_lambda[1]) /
+        abs(lambda_after_unit_conversion[1] - lambda_after_unit_conversion[2]) * 90 +
+        abs(lambda_after_unit_conversion[2] - expected_lambda[2]) /
+        abs(lambda_after_unit_conversion[2] - lambda_after_unit_conversion[3]) * 90,
+        abs(lambda_after_unit_conversion[3] - expected_lambda[2]) /
+        abs(lambda_after_unit_conversion[2] - lambda_after_unit_conversion[3]) * 90 + 90
+    ]
     return expected_lambda, expected_signal
 
 
@@ -58,9 +58,13 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
         return ws
 
     @staticmethod
-    def _get_state(background_TOF_general_start=None, background_TOF_general_stop=None,
-                   background_TOF_monitor_start=None, background_TOF_monitor_stop=None, incident_monitor=None,
-                   prompt_peak_correction_min=None, prompt_peak_correction_max=None):
+    def _get_state(background_TOF_general_start=None,
+                   background_TOF_general_stop=None,
+                   background_TOF_monitor_start=None,
+                   background_TOF_monitor_stop=None,
+                   incident_monitor=None,
+                   prompt_peak_correction_min=None,
+                   prompt_peak_correction_max=None):
         test_director = TestDirector()
         state = test_director.construct()
 
@@ -111,7 +115,8 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
 
     @staticmethod
     def _run_test(workspace, state, scale=1.0):
-        output_ws = normalize_to_monitor(workspace=workspace, scale_factor=scale,
+        output_ws = normalize_to_monitor(workspace=workspace,
+                                         scale_factor=scale,
                                          state_adjustment_normalize_to_monitor=state.adjustment.normalize_to_monitor)
         return output_ws
 

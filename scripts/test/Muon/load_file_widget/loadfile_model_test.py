@@ -14,7 +14,6 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 @start_qapplication
 class LoadFileWidgetModelTest(unittest.TestCase):
-
     def setUp(self):
         setup_context_for_tests(self)
         self.data_context.instrument = 'EMU'

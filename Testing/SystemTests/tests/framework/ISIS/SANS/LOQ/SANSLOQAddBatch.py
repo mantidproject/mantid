@@ -33,22 +33,22 @@ class SANSAddBatch(systemtesting.MantidSystemTest):
         return True
 
     def runTest(self):
-    #here we are testing the LOQ setup
+        #here we are testing the LOQ setup
         ici.LOQ()
-    #rear detector
+        #rear detector
         ici.Detector("main-detector-bank")
-    #test batch mode, although only the analysis from the last line is checked
-    # Find the file , this should really be in the BatchReduce reduction step
+        #test batch mode, although only the analysis from the last line is checked
+        # Find the file , this should really be in the BatchReduce reduction step
 
-        f = open(self.csv_file,'w')
-        print("sample_sans,99630-add,output_as, %s"%self.output_file, file=f)
+        f = open(self.csv_file, 'w')
+        print("sample_sans,99630-add,output_as, %s" % self.output_file, file=f)
         f.close()
         runnum = '99630'
-        sansadd.add_runs((runnum, runnum),'LOQ','.RAW')
+        sansadd.add_runs((runnum, runnum), 'LOQ', '.RAW')
 
         ici.Set1D()
         ici.MaskFile('MASK.094AA')
-        batch.BatchReduce(self.csv_file, 'nxs', plotresults=False, saveAlgs={'SaveNexus':'nxs'})
+        batch.BatchReduce(self.csv_file, 'nxs', plotresults=False, saveAlgs={'SaveNexus': 'nxs'})
 
         print(' reduction without')
 
@@ -64,21 +64,21 @@ class SANSAddBatch(systemtesting.MantidSystemTest):
         self.result = ici.WavRangeReduction()
 
     def validate(self):
-    # Need to disable checking of the Spectra-Detector map because it isn't
-    # fully saved out to the nexus file (it's limited to the spectra that
-    # are actually present in the saved workspace).
+        # Need to disable checking of the Spectra-Detector map because it isn't
+        # fully saved out to the nexus file (it's limited to the spectra that
+        # are actually present in the saved workspace).
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-        self.tolerance = 1.0e-10 #almost ZERO!
+        self.tolerance = 1.0e-10  #almost ZERO!
         print('validating', self.result, self.output_file)
-        return self.result,self.output_file+'.nxs'
+        return self.result, self.output_file + '.nxs'
 
     def __del__(self):
-      # remove all created files.
+        # remove all created files.
         defaultsave = config['defaultsave.directory']
-        for file_name in ['LOQ99630-add.nxs', self.output_file+'.nxs', self.csv_file ]:
+        for file_name in ['LOQ99630-add.nxs', self.output_file + '.nxs', self.csv_file]:
             try:
-                os.remove(os.path.join(defaultsave,file_name))
+                os.remove(os.path.join(defaultsave, file_name))
             except:
                 pass

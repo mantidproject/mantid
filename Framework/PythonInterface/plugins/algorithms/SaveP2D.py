@@ -32,66 +32,32 @@ class SaveP2D(PythonAlgorithm):
 
     def PyInit(self):
         # Input file
-        self.declareProperty(WorkspaceProperty('Workspace',
-                                               '',
-                                               direction=Direction.Input),
+        self.declareProperty(WorkspaceProperty('Workspace', '', direction=Direction.Input),
                              doc='Workspace that should be used.')
         # Output File
-        self.declareProperty(FileProperty('OutputFile',
-                                          '',
-                                          action=FileAction.Save,
-                                          direction=Direction.Input),
+        self.declareProperty(FileProperty('OutputFile', '', action=FileAction.Save, direction=Direction.Input),
                              doc='Output File for ".p2d" Data.')
         # Manipulating Data ranges
-        self.declareProperty(
-            'RemoveNaN',
-            True,
-            direction=Direction.Input,
-            doc='Remove DataPoints with NaN as intensity value')
-        self.declareProperty(
-            'RemoveNegatives',
-            True,
-            direction=Direction.Input,
-            doc='Remove data points with negative intensity values')
-        self.declareProperty(
-            'CutData',
-            False,
-            direction=Direction.Input,
-            doc=
-            'Use the following inputs to limit data in Theta, lambda, d and dp'
-        )
-        self.declareProperty('TthMin',
-                             50,
+        self.declareProperty('RemoveNaN',
+                             True,
                              direction=Direction.Input,
-                             doc='Minimum for tth values')
-        self.declareProperty('TthMax',
-                             120,
+                             doc='Remove DataPoints with NaN as intensity value')
+        self.declareProperty('RemoveNegatives',
+                             True,
                              direction=Direction.Input,
-                             doc='Maximum  for tth values')
-        self.declareProperty('LambdaMin',
-                             0.3,
+                             doc='Remove data points with negative intensity values')
+        self.declareProperty('CutData',
+                             False,
                              direction=Direction.Input,
-                             doc='Minimum  for lambda values')
-        self.declareProperty('LambdaMax',
-                             1.1,
-                             direction=Direction.Input,
-                             doc='Maximum  for lambda values')
-        self.declareProperty('DMin',
-                             0.11,
-                             direction=Direction.Input,
-                             doc='Minimum  for d values')
-        self.declareProperty('DMax',
-                             1.37,
-                             direction=Direction.Input,
-                             doc='Maximum  for d values')
-        self.declareProperty('DpMin',
-                             0.48,
-                             direction=Direction.Input,
-                             doc='Minimum  for dp values')
-        self.declareProperty('DpMax',
-                             1.76,
-                             direction=Direction.Input,
-                             doc='Maximum  for dp values')
+                             doc='Use the following inputs to limit data in Theta, lambda, d and dp')
+        self.declareProperty('TthMin', 50, direction=Direction.Input, doc='Minimum for tth values')
+        self.declareProperty('TthMax', 120, direction=Direction.Input, doc='Maximum  for tth values')
+        self.declareProperty('LambdaMin', 0.3, direction=Direction.Input, doc='Minimum  for lambda values')
+        self.declareProperty('LambdaMax', 1.1, direction=Direction.Input, doc='Maximum  for lambda values')
+        self.declareProperty('DMin', 0.11, direction=Direction.Input, doc='Minimum  for d values')
+        self.declareProperty('DMax', 1.37, direction=Direction.Input, doc='Maximum  for d values')
+        self.declareProperty('DpMin', 0.48, direction=Direction.Input, doc='Minimum  for dp values')
+        self.declareProperty('DpMax', 1.76, direction=Direction.Input, doc='Maximum  for dp values')
 
     def set_data_bounds(self):
         self.lambdaMin = self.getProperty('LambdaMin').value
@@ -119,9 +85,7 @@ class SaveP2D(PythonAlgorithm):
     def check_tth_bounds(self, thkl):
         return self.tthMin < thkl < self.tthMax
 
-# Create output file
     def PyExec(self):
-
         def wo_real(x):
             return np.real(lambertw(np.exp(x), 0))
 
@@ -144,9 +108,8 @@ class SaveP2D(PythonAlgorithm):
             # Create File header with additional information
             of.write('#Title: ' + Data.getTitle() + "\n")
             of.write('#Inst: ' + Data.getInstrument().getName() + ".prm\n")
-            binning = form.format(
-                Data.getDimension(0).getBinWidth()) + ' ' + form.format(
-                    Data.getDimension(1).getBinWidth()) + "\n"
+            binning = form.format(Data.getDimension(0).getBinWidth()) + ' ' + form.format(
+                Data.getDimension(1).getBinWidth()) + "\n"
             of.write('#Binning: ddperp' + binning)
             of.write('#Bank: 1\n')
             of.write('#2theta   lambda   d-value   dp-value   counts\n')

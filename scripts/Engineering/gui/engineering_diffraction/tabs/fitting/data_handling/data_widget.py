@@ -21,8 +21,8 @@ class FittingDataWidget(object):
         self.model = FittingDataModel()
         self.presenter = FittingDataPresenter(self.model, self.view)
 
-        self.ads_observer = FittingADSObserver(self.remove_workspace, self.clear_workspaces,
-                                               self.replace_workspace, self.rename_workspace)
+        self.ads_observer = FittingADSObserver(self.remove_workspace, self.clear_workspaces, self.replace_workspace,
+                                               self.rename_workspace)
 
     def get_loaded_workspaces(self):
         return self.presenter.get_loaded_workspaces()

@@ -118,12 +118,15 @@ class LoadRunWidgetPresenter(object):
         except IndexError as err:
             self._view.warning_popup(err.args[0])
             return
-        file_names = [file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
-                      for new_run in self.run_list if not self._model.get_data(run=[new_run])]
+        file_names = [
+            file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
+            for new_run in self.run_list if not self._model.get_data(run=[new_run])
+        ]
         if file_names:
             self.load_runs(file_names)
         else:
             self.on_loading_finished()
+
     # ------------------------------------------------------------------------------------------------------------------
     # Loading from current run button
     # ------------------------------------------------------------------------------------------------------------------
@@ -224,9 +227,7 @@ class LoadRunWidgetPresenter(object):
         self.on_loading_start()
 
         self._load_thread = self.create_load_thread()
-        self._load_thread.threadWrapperSetUp(self.disable_loading,
-                                             finished_callback,
-                                             self.error_callback)
+        self._load_thread.threadWrapperSetUp(self.disable_loading, finished_callback, self.error_callback)
         self._load_thread.loadData(filenames)
         self._load_thread.start()
 
@@ -265,7 +266,8 @@ class LoadRunWidgetPresenter(object):
             self.update_view_from_model(run_list)
             self._view.notify_loading_finished()
         except ValueError:
-            self._view.warning_popup('Attempting to co-add data with different time bins. This is not currently supported.')
+            self._view.warning_popup(
+                'Attempting to co-add data with different time bins. This is not currently supported.')
             self._view.reset_run_edit_from_cache()
         except RuntimeError as error:
             self._view.warning_popup(error)
@@ -275,7 +277,6 @@ class LoadRunWidgetPresenter(object):
             self.enable_notifier.notify_subscribers()
 
     class DisableEditingNotifier(Observable):
-
         def __init__(self, outer):
             Observable.__init__(self)
             self.outer = outer  # handle to containing class
@@ -284,7 +285,6 @@ class LoadRunWidgetPresenter(object):
             Observable.notify_subscribers(self, *args, **kwargs)
 
     class EnableEditingNotifier(Observable):
-
         def __init__(self, outer):
             Observable.__init__(self)
             self.outer = outer  # handle to containing class

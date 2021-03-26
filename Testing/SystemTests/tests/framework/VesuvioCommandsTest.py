@@ -16,8 +16,8 @@ from mantid.simpleapi import *
 from vesuvio.commands import fit_tof
 from vesuvio.instrument import *
 
-
 # =====================================Helper Function=================================
+
 
 def _make_names_unique(names):
     name_count = dict()
@@ -56,8 +56,14 @@ def _create_test_flags(background, multivariate=False):
     if multivariate:
         mass1 = {'value': 1.0079, 'function': 'MultivariateGaussian', 'SigmaX': 5, 'SigmaY': 5, 'SigmaZ': 5}
     else:
-        mass1 = {'value': 1.0079, 'function': 'GramCharlier', 'width': [2, 5, 7],
-                 'hermite_coeffs': [1, 0, 0], 'k_free': 0, 'sears_flag': 1}
+        mass1 = {
+            'value': 1.0079,
+            'function': 'GramCharlier',
+            'width': [2, 5, 7],
+            'hermite_coeffs': [1, 0, 0],
+            'k_free': 0,
+            'sears_flag': 1
+        }
     mass2 = {'value': 16.0, 'function': 'Gaussian', 'width': 10}
     mass3 = {'value': 27.0, 'function': 'Gaussian', 'width': 13}
     mass4 = {'value': 133.0, 'function': 'Gaussian', 'width': 30}
@@ -86,7 +92,8 @@ def _equal_within_tolerance(self, expected, actual, tolerance=0.05):
     """
     tolerance_value = expected * tolerance
     abs_difference = abs(expected - actual)
-    self.assertLessEqual(abs_difference, abs(tolerance_value),
+    self.assertLessEqual(abs_difference,
+                         abs(tolerance_value),
                          msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected, actual, tolerance))
 
 
@@ -102,8 +109,7 @@ def _get_peak_height_and_index(workspace, ws_index):
     return peak_height, peak_bin
 
 
-def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
-                       fit_mode='spectra', rebin_params=None):
+def load_and_crop_data(runs, spectra, ip_file, diff_mode='single', fit_mode='spectra', rebin_params=None):
     """
     @param runs The string giving the runs to load
     @param spectra A list of spectra to load
@@ -139,10 +145,15 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
     else:
         diff_mode = "SingleDifference"
 
-    kwargs = {"Filename": runs,
-              "Mode": diff_mode, "InstrumentParFile": ip_file,
-              "SpectrumList": spectra, "SumSpectra": sum_spectra,
-              "OutputWorkspace": output_name, "StoreInADS": False}
+    kwargs = {
+        "Filename": runs,
+        "Mode": diff_mode,
+        "InstrumentParFile": ip_file,
+        "SpectrumList": spectra,
+        "SumSpectra": sum_spectra,
+        "OutputWorkspace": output_name,
+        "StoreInADS": False
+    }
     full_range = LoadVesuvio(**kwargs)
     tof_data = CropWorkspace(InputWorkspace=full_range,
                              XMin=instrument.tof_range[0],
@@ -151,10 +162,7 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
                              StoreInADS=False)
 
     if rebin_params is not None:
-        tof_data = Rebin(InputWorkspace=tof_data,
-                         OutputWorkspace=output_name,
-                         Params=rebin_params,
-                         StoreInADS=False)
+        tof_data = Rebin(InputWorkspace=tof_data, OutputWorkspace=output_name, Params=rebin_params, StoreInADS=False)
 
     return tof_data
 
@@ -219,7 +227,6 @@ class FitSingleSpectrumBivariateGaussianTiesTest(systemtesting.MantidSystemTest)
     This test ties SigmaX to SigmaY making the multivariate gaussian
     a Bivariate Gaussian
     """
-
     def excludeInPullRequests(self):
         return True
 
@@ -486,7 +493,8 @@ class CalculateCumulativeAngleAveragedData(systemtesting.MantidSystemTest):
         exit_iteration = self._fit_results[3]
         self.assertTrue(isinstance(exit_iteration, int))
 
-        functions = ['GramCharlierComptonProfile', 'GaussianComptonProfile',
-                     'GaussianComptonProfile', 'GaussianComptonProfile']
+        functions = [
+            'GramCharlierComptonProfile', 'GaussianComptonProfile', 'GaussianComptonProfile', 'GaussianComptonProfile'
+        ]
         _test_caad_workspace(self, '15039-15045_CAAD_normalised_iteration_' + str(exit_iteration), functions)
         _test_caad_workspace(self, '15039-15045_CAAD_sum_iteration_' + str(exit_iteration), functions)

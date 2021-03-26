@@ -12,7 +12,6 @@ import unittest
 
 
 class BinWidthAtXTest(unittest.TestCase):
-
     def _make_algorithm_params(self, ws, x, rounding='None'):
         return {
             'InputWorkspace': ws,
@@ -90,8 +89,7 @@ class BinWidthAtXTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=xs, DataY=ys)
         X = -0.3
         params = self._make_algorithm_params(ws, X)
-        self.assertRaises(ValueError, testhelpers.create_algorithm,
-                          'BinWidthAtX', **params)
+        self.assertRaises(ValueError, testhelpers.create_algorithm, 'BinWidthAtX', **params)
         DeleteWorkspace(ws)
 
     def test_positive_output_even_if_descending_x(self):
@@ -103,6 +101,7 @@ class BinWidthAtXTest(unittest.TestCase):
         expectedBinWidth = 20.0
         self.assertAlmostEqual(binWidth, expectedBinWidth)
         DeleteWorkspace(ws)
+
 
 if __name__ == "__main__":
     unittest.main()

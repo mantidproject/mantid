@@ -99,9 +99,8 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
     root = ET.Element('resource')
     root.set('xmlns', 'http://datacite.org/schema/kernel-3')
     root.set('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
-    root.set('xsi:schemaLocation', 'http://datacite.org/schema/kernel-3 ht'
-             + 'tp://schema.datacite.org/meta/kernel-3'
-             + '/metadata.xsd')
+    root.set('xsi:schemaLocation',
+             'http://datacite.org/schema/kernel-3 ht' + 'tp://schema.datacite.org/meta/kernel-3' + '/metadata.xsd')
 
     # "The identifier is a unique string that identifies a resource." In our
     # case, the actual DOI. "Format should be '10.1234/foo'."
@@ -139,11 +138,7 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
 
     # "Subject, keyword, classification code, or key phrase describing the
     # resource."
-    subject_text_list = [
-        'Neutron Scattering',
-        'Muon Spin Resonance',
-        'Data Analysis'
-    ]
+    subject_text_list = ['Neutron Scattering', 'Muon Spin Resonance', 'Data Analysis']
     subjects = ET.SubElement(root, 'subjects')
     for subject_text in subject_text_list:
         ET.SubElement(subjects, 'subject').text = subject_text
@@ -170,9 +165,7 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
     if relationships:
         related_identifiers = ET.SubElement(root, 'relatedIdentifiers')
     for doi, relation_type in relationships.items():
-        related_identifier = ET.SubElement(
-            related_identifiers, 'relatedIdentifier'
-        )
+        related_identifier = ET.SubElement(related_identifiers, 'relatedIdentifier')
         related_identifier.text = doi
         related_identifier.set('relatedIdentifierType', 'DOI')
         related_identifier.set('relationType', relation_type)
@@ -214,13 +207,19 @@ def _http_request(body, method, url, options, content_type=None):
 
     args = [
         'curl',
-        '--user', options.username + ':' + options.password,
+        '--user',
+        options.username + ':' + options.password,
         # The bodies of HTTP messages must be encoded:
-        '--data', body,
-        '--request', method,
+        '--data',
+        body,
+        '--request',
+        method,
     ]
     if content_type is not None:
-        args.extend(['--header', content_type, ])
+        args.extend([
+            '--header',
+            content_type,
+        ])
 
     if 'http_proxy' in os.environ:
         args.extend(['--proxy', os.environ['http_proxy']])
@@ -247,23 +246,16 @@ def delete_doi(base, doi, options):
     and points the DOI to a "DOI invalid" page.
     '''
     print("\nAttempting to delete the meta data for:" + doi)
-    result = _http_request(
-        body='',
-        method='DELETE',
-        url=base + "metadata/" + doi,
-        options=options
-    )
+    result = _http_request(body='', method='DELETE', url=base + "metadata/" + doi, options=options)
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
         raise RuntimeError('Deleting metadata unsuccessful.  Quitting.')
 
     print("\nAttempting to point " + doi + " to invalid page.")
-    result = _http_request(
-        body='doi=' + doi + '\n' + 'url=' + INVALID_URL,
-        method="PUT",
-        url=base + "doi/" + doi,
-        options=options
-    )
+    result = _http_request(body='doi=' + doi + '\n' + 'url=' + INVALID_URL,
+                           method="PUT",
+                           url=base + "doi/" + doi,
+                           options=options)
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
         raise RuntimeError('Pointing DOI to invalid page was unsuccessful.')
@@ -275,13 +267,11 @@ def create_or_update_metadata(xml_form, base, doi, options):
     already exists, then it will simply be updated.
     '''
     print("\nAttempting to create / update metadata:")
-    result = _http_request(
-        body=xml_form,
-        method="POST",
-        url=base + "metadata",
-        options=options,
-        content_type=XML_CONTENT_HEADER
-    )
+    result = _http_request(body=xml_form,
+                           method="POST",
+                           url=base + "metadata",
+                           options=options,
+                           content_type=XML_CONTENT_HEADER)
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
         raise RuntimeError('Creation/updating metadata unsuccessful.  Quitting.')
@@ -295,13 +285,11 @@ def create_or_update_doi(base, doi, destination, options):
     print("\nAttempting to create / update the following DOI:")
     print('DOI = ' + doi)
     print('URL = ' + destination)
-    result = _http_request(
-        body='doi=' + doi + '\n' + 'url=' + destination,
-        method="PUT",
-        url=base + "doi/" + doi,
-        options=options,
-        content_type=XML_CONTENT_HEADER
-    )
+    result = _http_request(body='doi=' + doi + '\n' + 'url=' + destination,
+                           method="PUT",
+                           url=base + "doi/" + doi,
+                           options=options,
+                           content_type=XML_CONTENT_HEADER)
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
         raise RuntimeError('Creation/updating DOI unsuccessful.  Quitting.')
@@ -315,12 +303,7 @@ def check_if_doi_exists(base, doi, destination, options):
     server is unrecognised, or if there is no response at all.
     '''
     print("\nChecking if \"" + base + "doi/" + doi + "\" DOI exists.")
-    result = _http_request(
-        body=b'',
-        method='GET',
-        url=base + "doi/" + doi,
-        options=options
-    )
+    result = _http_request(body=b'', method='GET', url=base + "doi/" + doi, options=options)
 
     if result[0] == 'DOI not found' or result[0] == INVALID_URL:
         print("\"" + doi + "\" does not exist")
@@ -329,8 +312,7 @@ def check_if_doi_exists(base, doi, destination, options):
         print("DOI found.")
         return True
     else:
-        raise RuntimeError(
-            "Unexpected result back from server: \"" + result[0] + "\"")
+        raise RuntimeError("Unexpected result back from server: \"" + result[0] + "\"")
 
 
 def check_for_curl():
@@ -352,8 +334,7 @@ def check_for_curl():
         raise RuntimeError('This script requires that cURL be installed and available on the PATH.')
 
 
-def get_urls_for_doi(version_str, shortened_version_str,
-                     prev_version_str, shortened_prev_version_str):
+def get_urls_for_doi(version_str, shortened_version_str, prev_version_str, shortened_prev_version_str):
     # Beginning with v3.6.0 the release notes moved to docs.mantidproject.org but
     # the transition happened after the release so the following rules apply
     #  - all versions 3.7.0 & above have release notes on a versioned url at docs.mantidproject.org
@@ -428,8 +409,8 @@ def run(args):
     if args.main:
         destination = 'http://www.mantidproject.org'
     else:
-        destination, prev_destination = get_urls_for_doi(version_str, shortened_version_str,
-                                                         prev_version_str, shortened_prev_version_str)
+        destination, prev_destination = get_urls_for_doi(version_str, shortened_version_str, prev_version_str,
+                                                         shortened_prev_version_str)
 
     if args.test:
         server_url_base = 'https://mds.test.datacite.org/'
@@ -456,24 +437,14 @@ def run(args):
         create_or_update_doi(server_url_base, doi, destination, args)
     # Else it's an incremental-release DOI that we need to make.
     else:
-        has_previous_version = check_if_doi_exists(
-            server_url_base,
-            prev_doi,
-            prev_destination,
-            args
-        )
+        has_previous_version = check_if_doi_exists(server_url_base, prev_doi, prev_destination, args)
 
         relationships = {main_doi: 'IsPartOf'}
         if has_previous_version:
             relationships[prev_doi] = 'IsNewVersionOf'
 
         creator_name_list = authors.authors_under_git_tag(tag)
-        xml_form = build_xml_form(
-            doi,
-            relationships,
-            creator_name_list,
-            version_str
-        )
+        xml_form = build_xml_form(doi, relationships, creator_name_list, version_str)
 
         # Create/update the metadata and DOI.
         create_or_update_metadata(xml_form, server_url_base, doi, args)
@@ -482,25 +453,12 @@ def run(args):
         # Create/update the metadata and DOI of the previous version, if it
         # was found to have a DOI.
         if has_previous_version:
-            prev_relationships = {
-                main_doi: 'IsPartOf',
-                doi: 'IsPreviousVersionOf'
-            }
+            prev_relationships = {main_doi: 'IsPartOf', doi: 'IsPreviousVersionOf'}
 
             prev_creator_name_list = authors.authors_under_git_tag(prev_tag)
-            prev_xml_form = build_xml_form(
-                prev_doi,
-                prev_relationships,
-                prev_creator_name_list,
-                prev_version_str
-            )
+            prev_xml_form = build_xml_form(prev_doi, prev_relationships, prev_creator_name_list, prev_version_str)
 
-            create_or_update_metadata(
-                prev_xml_form,
-                server_url_base,
-                prev_doi,
-                args
-            )
+            create_or_update_metadata(prev_xml_form, server_url_base, prev_doi, args)
 
     # Print out a custom success message, depending on the initial options.
     if not args.test:
@@ -532,50 +490,31 @@ def run(args):
 if __name__ == "__main__":
     check_for_curl()
 
-    parser = argparse.ArgumentParser(
-        description="Script to generate the DOI needed for a Mantid release."
-    )
+    parser = argparse.ArgumentParser(description="Script to generate the DOI needed for a Mantid release.")
 
     # REQUIRED
-    parser.add_argument(
-        'version',
-        type=str,
-        help='Version of Mantid whose DOI is to be created/updated in the form "major.minor.patch"'
-    )
-    parser.add_argument(
-        '--username',
-        type=str,
-        required=True,
-        help='Username to access DOI API.'
-    )
+    parser.add_argument('version',
+                        type=str,
+                        help='Version of Mantid whose DOI is to be created/updated in the form "major.minor.patch"')
+    parser.add_argument('--username', type=str, required=True, help='Username to access DOI API.')
 
     # OPTIONAL
-    parser.add_argument(
-        '--password',
-        type=str,
-        help='Password for the server. If missing then a prompt is displayed requesting input'
-    )
-    parser.add_argument(
-        '--test',
-        action='store_true',
-        help='Send submissions to the test server to trial run the script.'
-    )
-    parser.add_argument(
-        '--debug',
-        action='store_true',
-        help='Turn debug mode on.  Basically, makes cURL more talkative.'
-    )
-    parser.add_argument(
-        '--main',
-        action='store_true',
-        help='Create the "main" DOI for Mantid.  Once it is created, this '
-             + 'will only have to run again if it needs to be updated.'
-    )
-    parser.add_argument(
-        '--delete',
-        action='store_true',
-        help='Delete ("make inactive") the DOI metadata with the given '
-             + 'details.  Note that this does NOT delete the DOI.'
-    )
+    parser.add_argument('--password',
+                        type=str,
+                        help='Password for the server. If missing then a prompt is displayed requesting input')
+    parser.add_argument('--test',
+                        action='store_true',
+                        help='Send submissions to the test server to trial run the script.')
+    parser.add_argument('--debug',
+                        action='store_true',
+                        help='Turn debug mode on.  Basically, makes cURL more talkative.')
+    parser.add_argument('--main',
+                        action='store_true',
+                        help='Create the "main" DOI for Mantid.  Once it is created, this ' +
+                        'will only have to run again if it needs to be updated.')
+    parser.add_argument('--delete',
+                        action='store_true',
+                        help='Delete ("make inactive") the DOI metadata with the given ' +
+                        'details.  Note that this does NOT delete the DOI.')
 
     run(parser.parse_args())

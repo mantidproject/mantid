@@ -92,26 +92,32 @@ class BatchCsvParser(object):
 
         # Non-optional (i.e. expected) fields
         # Try to keep the order found in the GUI back outwards
-        return [BatchFileKeywords.SAMPLE_SCATTER.value, pack_period(row.sample_scatter, row.sample_scatter_period),
+        return [
+            BatchFileKeywords.SAMPLE_SCATTER.value,
+            pack_period(row.sample_scatter, row.sample_scatter_period),
+            BatchFileKeywords.SAMPLE_TRANSMISSION.value,
+            pack_period(row.sample_transmission, row.sample_transmission_period),
+            BatchFileKeywords.SAMPLE_DIRECT.value,
+            pack_period(row.sample_direct, row.sample_direct_period),
+            BatchFileKeywords.CAN_SCATTER.value,
+            pack_period(row.can_scatter, row.can_scatter_period),
+            BatchFileKeywords.CAN_TRANSMISSION.value,
+            pack_period(row.can_transmission, row.can_transmission_period),
+            BatchFileKeywords.CAN_DIRECT.value,
+            pack_period(row.can_direct, row.can_direct_period),
+            BatchFileKeywords.OUTPUT.value,
+            pack_val(row.output_name),
+            BatchFileKeywords.USER_FILE.value,
+            pack_val(row.user_file),
+            BatchFileKeywords.SAMPLE_THICKNESS.value,
+            pack_val(row.sample_thickness),
 
-                BatchFileKeywords.SAMPLE_TRANSMISSION.value, pack_period(row.sample_transmission,
-                                                                         row.sample_transmission_period),
-                BatchFileKeywords.SAMPLE_DIRECT.value, pack_period(row.sample_direct, row.sample_direct_period),
-
-                BatchFileKeywords.CAN_SCATTER.value, pack_period(row.can_scatter, row.can_scatter_period),
-
-                BatchFileKeywords.CAN_TRANSMISSION.value, pack_period(row.can_transmission,
-                                                                      row.can_transmission_period),
-                BatchFileKeywords.CAN_DIRECT.value, pack_period(row.can_direct, row.can_direct_period),
-
-                BatchFileKeywords.OUTPUT.value, pack_val(row.output_name),
-                BatchFileKeywords.USER_FILE.value, pack_val(row.user_file),
-                BatchFileKeywords.SAMPLE_THICKNESS.value, pack_val(row.sample_thickness),
-
-                # Optional but pack them anyway for completeness
-                BatchFileKeywords.SAMPLE_HEIGHT.value, pack_val(row.sample_height),
-                BatchFileKeywords.SAMPLE_WIDTH.value, pack_val(row.sample_width)
-                ]
+            # Optional but pack them anyway for completeness
+            BatchFileKeywords.SAMPLE_HEIGHT.value,
+            pack_val(row.sample_height),
+            BatchFileKeywords.SAMPLE_WIDTH.value,
+            pack_val(row.sample_width)
+        ]
 
     def _parse_csv_row(self, row, row_number):
         # Clean all elements of the row

@@ -13,9 +13,8 @@ import numpy as np
 
 import SANSUtility as su
 from mantid.api import (mtd, WorkspaceGroup, AlgorithmManager, AnalysisDataService, FileFinder)
-from mantid.kernel import (DateAndTime, time_duration, FloatTimeSeriesProperty,
-                           BoolTimeSeriesProperty, StringTimeSeriesProperty,
-                           StringPropertyWithValue, V3D, Quat)
+from mantid.kernel import (DateAndTime, time_duration, FloatTimeSeriesProperty, BoolTimeSeriesProperty,
+                           StringTimeSeriesProperty, StringPropertyWithValue, V3D, Quat)
 # Need to import mantid before we import SANSUtility
 from mantid.simpleapi import *
 
@@ -51,8 +50,14 @@ def addSampleLogEntry(log_name, ws, start_time, extra_time_shift, make_linear=Fa
         AddTimeSeriesLog(ws, Name=log_name, Time=date.__str__().strip(), Value=val)
 
 
-def provide_event_ws_with_entries(name, start_time, number_events=0, extra_time_shift=0.0, proton_charge=True,
-                                  proton_charge_empty=False, log_names=None, make_linear=False):
+def provide_event_ws_with_entries(name,
+                                  start_time,
+                                  number_events=0,
+                                  extra_time_shift=0.0,
+                                  proton_charge=True,
+                                  proton_charge_empty=False,
+                                  log_names=None,
+                                  make_linear=False):
     # Create the event workspace
     ws = CreateSampleWorkspace(WorkspaceType='Event', NumEvents=number_events, OutputWorkspace=name)
 
@@ -73,18 +78,25 @@ def provide_event_ws_with_entries(name, start_time, number_events=0, extra_time_
 
 
 def provide_event_ws_custom(name, start_time, extra_time_shift=0.0, proton_charge=True, proton_charge_empty=False):
-    return provide_event_ws_with_entries(name=name, start_time=start_time,
-                                         number_events=100, extra_time_shift=extra_time_shift,
-                                         proton_charge=proton_charge, proton_charge_empty=proton_charge_empty)
+    return provide_event_ws_with_entries(name=name,
+                                         start_time=start_time,
+                                         number_events=100,
+                                         extra_time_shift=extra_time_shift,
+                                         proton_charge=proton_charge,
+                                         proton_charge_empty=proton_charge_empty)
 
 
 def provide_event_ws(name, start_time, extra_time_shift):
-    return provide_event_ws_custom(name=name, start_time=start_time, extra_time_shift=extra_time_shift,
+    return provide_event_ws_custom(name=name,
+                                   start_time=start_time,
+                                   extra_time_shift=extra_time_shift,
                                    proton_charge=True)
 
 
 def provide_event_ws_wo_proton_charge(name, start_time, extra_time_shift):
-    return provide_event_ws_custom(name=name, start_time=start_time, extra_time_shift=extra_time_shift,
+    return provide_event_ws_custom(name=name,
+                                   start_time=start_time,
+                                   extra_time_shift=extra_time_shift,
                                    proton_charge=False)
 
 
@@ -97,7 +109,9 @@ def provide_histo_workspace_with_one_spectrum(ws_name, x_start, x_end, bin_width
                           BinWidth=bin_width)
 
 
-def provide_workspace_with_x_errors(workspace_name, use_xerror=True, nspec=1,
+def provide_workspace_with_x_errors(workspace_name,
+                                    use_xerror=True,
+                                    nspec=1,
                                     x_in=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                                     y_in=[2, 2, 2, 2, 2, 2, 2, 2, 2],
                                     e_in=[1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -110,12 +124,7 @@ def provide_workspace_with_x_errors(workspace_name, use_xerror=True, nspec=1,
         y = y + y_in
         e = e + e_in
 
-    CreateWorkspace(DataX=x,
-                    DataY=y,
-                    DataE=e,
-                    NSpec=nspec,
-                    UnitX="MomentumTransfer",
-                    OutputWorkspace=workspace_name)
+    CreateWorkspace(DataX=x, DataY=y, DataE=e, NSpec=nspec, UnitX="MomentumTransfer", OutputWorkspace=workspace_name)
     if use_xerror:
         ws = mtd[workspace_name]
         for hists in range(0, nspec):
@@ -125,52 +134,6 @@ def provide_workspace_with_x_errors(workspace_name, use_xerror=True, nspec=1,
 
 # This test does not pass and was not used before 1/4/2015. SansUtilitytests was disabled.
 class SANSUtilityTest(unittest.TestCase):
-
-    # def checkValues(self, list1, list2):
-
-    #    def _check_single_values( v1, v2):
-    #        self.assertAlmostEqual(v1, v2)
-
-    #    self.assertEqual(len(list1), len(list2))
-    #    for v1,v2 in zip(list1, list2):
-    #        start_1,stop_1 = v1
-    #        start_2, stop_2 = v2
-    #        _check_single_values(start_1, start_2)
-    #        _check_single_values(stop_1, stop_2)
-
-    # def test_checkValues(self):
-    #    """sanity check to ensure that the others will work correctly"""
-    #    values = [
-    #        [[1,2],],
-    #        [[None, 3],[4, None]],
-    #    ]
-    #    for singlevalues in values:
-    #        self.checkValues(singlevalues, singlevalues)
-
-    # def test_parse_strings(self):
-    #    inputs = { '1-2':[[1,2]],         # single period syntax  min < x < max
-    #               '1.3-5.6':[[1.3,5.6]], # float
-    #               '1-2,3-4':[[1,2],[3,4]],# more than one slice
-    #               '>1':[[1, -1]],       # just lower bound
-    #               '<5':[[-1, 5]],      # just upper bound
-    #               '<5,8-9': [[-1, 5], [8,9]],
-    #               '1:2:5': [[1,3], [3,5]] # syntax: start, step, stop
-    #        }
-
-    #    for (k, v) in inputs.items():
-    #        self.checkValues(su.sliceParser(k),v)
-
-    # def test_accept_spaces(self):
-    #    self.checkValues(su.sliceParser("1 - 2, 3 - 4"), [[1,2],[3,4]])
-
-    # def test_invalid_values_raise(self):
-    #    invalid_strs = ["5>6", ":3:", "MAX<min"]
-    #    for val in invalid_strs:
-    #        self.assertRaises(SyntaxError, su.sliceParser, val)
-
-    # def test_empty_string_is_valid(self):
-    #    self.checkValues(su.sliceParser(""), [[-1,-1]])
-
     def test_extract_spectra(self):
         mtd.clear()
 
@@ -267,10 +230,10 @@ class TestBundleAddedEventDataFilesToGroupWorkspaceFile(unittest.TestCase):
 
 
 class TestLoadingAddedEventWorkspaceNameParsing(unittest.TestCase):
-
     def do_test_load_check(self, event_name, monitor_name):
         out_name = 'out_ws'
-        provide_group_workspace_for_added_event_data(event_ws_name=event_name, monitor_ws_name=monitor_name,
+        provide_group_workspace_for_added_event_data(event_ws_name=event_name,
+                                                     monitor_ws_name=monitor_name,
                                                      out_ws_name=out_name)
         out_ws = mtd[out_name]
         self.assertTrue(su.check_child_ws_for_name_and_type_for_added_eventdata(out_ws))
@@ -340,7 +303,8 @@ class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
         event_name_expect = out_ws_name
         monitor_name_expect = out_ws_name + self._appendix
 
-        provide_group_workspace_for_added_event_data(event_ws_name=event_name, monitor_ws_name=monitor_name,
+        provide_group_workspace_for_added_event_data(event_ws_name=event_name,
+                                                     monitor_ws_name=monitor_name,
                                                      out_ws_name=out_ws_name)
         out_ws_group = mtd[out_ws_name]
 
@@ -439,7 +403,12 @@ class AddOperationTest(unittest.TestCase):
         adder.add(ws1, ws2, out_ws_name, 0)
         out_ws = mtd[out_ws_name]
         # Assert
-        self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift=0.0,
+        self.compare_added_workspaces(ws1,
+                                      ws2,
+                                      out_ws,
+                                      start_time_1,
+                                      start_time_2,
+                                      extra_time_shift=0.0,
                                       isOverlay=isOverlay)
 
     def test_two_files_are_added_correctly_for_overlay_on_and_inverted_times(self):
@@ -458,7 +427,12 @@ class AddOperationTest(unittest.TestCase):
         adder.add(ws1, ws2, out_ws_name, 0)
         out_ws = mtd[out_ws_name]
         # Assert
-        self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift=0.0,
+        self.compare_added_workspaces(ws1,
+                                      ws2,
+                                      out_ws,
+                                      start_time_1,
+                                      start_time_2,
+                                      extra_time_shift=0.0,
                                       isOverlay=isOverlay)
 
     def test_two_files_are_added_correctly_for_overlay_off(self):
@@ -477,7 +451,12 @@ class AddOperationTest(unittest.TestCase):
         adder.add(ws1, ws2, out_ws_name, 0)
         out_ws = mtd[out_ws_name]
         # Assert
-        self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift=0.0,
+        self.compare_added_workspaces(ws1,
+                                      ws2,
+                                      out_ws,
+                                      start_time_1,
+                                      start_time_2,
+                                      extra_time_shift=0.0,
                                       isOverlay=isOverlay)
 
     def test_two_files_are_added_correctly_with_time_shift(self):
@@ -497,7 +476,12 @@ class AddOperationTest(unittest.TestCase):
         adder.add(ws1, ws2, out_ws_name, 0)
         out_ws = mtd[out_ws_name]
         # Assert
-        self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift=time_shift,
+        self.compare_added_workspaces(ws1,
+                                      ws2,
+                                      out_ws,
+                                      start_time_1,
+                                      start_time_2,
+                                      extra_time_shift=time_shift,
                                       isOverlay=isOverlay)
 
     def test_multiple_files_are_overlayed_correctly(self):
@@ -522,7 +506,12 @@ class AddOperationTest(unittest.TestCase):
         out_ws2 = mtd[out_ws_name2]
         out_ws = mtd[out_ws_name]
         # Assert
-        self.compare_added_workspaces(out_ws, ws2, out_ws2, start_time_1, start_time_2, extra_time_shift=0.0,
+        self.compare_added_workspaces(out_ws,
+                                      ws2,
+                                      out_ws2,
+                                      start_time_1,
+                                      start_time_2,
+                                      extra_time_shift=0.0,
                                       isOverlay=isOverlay)
 
     def test_that_bad_proton_charges_are_estimated_correctly(self):
@@ -560,8 +549,7 @@ class AddOperationTest(unittest.TestCase):
         ws = CreateSampleWorkspace(WorkspaceType='Event', NumEvents=0, OutputWorkspace="ws")
 
         # Add sample logs, including 1 bad proton charge
-        for time, val in zip(["1900-01-01T00:00:00", "2019-01-01T00:00:00", "2019-01-01T01:00:00"],
-                             [0, 10, 12]):
+        for time, val in zip(["1900-01-01T00:00:00", "2019-01-01T00:00:00", "2019-01-01T01:00:00"], [0, 10, 12]):
             date = DateAndTime(time)
             AddTimeSeriesLog(ws, Name="proton_charge", Time=date.__str__().strip(), Value=val)
         return ws
@@ -637,12 +625,16 @@ class TestOverlayWorkspaces(unittest.TestCase):
         out_ws_name = 'out_ws'
 
         start_time_1 = "2010-01-01T00:00:00"
-        event_ws_1 = provide_event_ws_custom(name=names[0], start_time=start_time_1, extra_time_shift=0.0,
+        event_ws_1 = provide_event_ws_custom(name=names[0],
+                                             start_time=start_time_1,
+                                             extra_time_shift=0.0,
                                              proton_charge=False)
 
         # Extra shift in seconds
         start_time_2 = "2012-01-01T00:00:00"
-        event_ws_2 = provide_event_ws_custom(name=names[1], start_time=start_time_2, extra_time_shift=0.0,
+        event_ws_2 = provide_event_ws_custom(name=names[1],
+                                             start_time=start_time_2,
+                                             extra_time_shift=0.0,
                                              proton_charge=False)
 
         # Act and Assert
@@ -693,8 +685,16 @@ class TestTimeShifter(unittest.TestCase):
 
 class TestZeroErrorFreeWorkspace(unittest.TestCase):
     def _setup_workspace(self, name, type):
-        ws = CreateSampleWorkspace(OutputWorkspace=name, WorkspaceType=type, Function='One Peak', NumBanks=1,
-                                   BankPixelWidth=2, NumEvents=0, XMin=0.5, XMax=1, BinWidth=1, PixelSpacing=1,
+        ws = CreateSampleWorkspace(OutputWorkspace=name,
+                                   WorkspaceType=type,
+                                   Function='One Peak',
+                                   NumBanks=1,
+                                   BankPixelWidth=2,
+                                   NumEvents=0,
+                                   XMin=0.5,
+                                   XMax=1,
+                                   BinWidth=1,
+                                   PixelSpacing=1,
                                    BankDistanceFromSample=1)
         if type == 'Histogram':
             errors = ws.dataE
@@ -851,12 +851,12 @@ class TestRenameMonitorsForMultiPeriodEventData(unittest.TestCase):
         su.rename_monitors_for_multiperiod_event_data(ws_mon_group, ws_group, self.monitor_appendix)
 
         # Assert
-        self.assertEqual(ws_mon_1.name(), ws_1.name() + self.monitor_appendix,
-                         "Monitors should be renamed to xxxx_monitors")
-        self.assertEqual(ws_mon_2.name(), ws_2.name() + self.monitor_appendix,
-                         "Monitors should be renamed to xxxx_monitors")
-        self.assertEqual(ws_mon_3.name(), ws_3.name() + self.monitor_appendix,
-                         "Monitors should be renamed to xxxx_monitors")
+        self.assertEqual(ws_mon_1.name(),
+                         ws_1.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
+        self.assertEqual(ws_mon_2.name(),
+                         ws_2.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
+        self.assertEqual(ws_mon_3.name(),
+                         ws_3.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
 
         # Clean up
         for element in mtd.getObjectNames():
@@ -1019,7 +1019,7 @@ class TestExtractionOfQRange(unittest.TestCase):
         self._delete_workspace(front_name)
         self._delete_workspace(rear_name)
 
-    def test_that_correct_q_range_is_extracted_when_no_rescaleAndShift_is_applied_and_front_detector_data_lies_within_rear_detector_data(
+    def test_q_range_is_extracted_when_no_rescaleAndShift_is_applied_and_front_detector_data_within_rear_detector_data(
             self):
         # Arrange
         front_q_min = 10
@@ -1067,16 +1067,8 @@ class TestExtractionOfQRange(unittest.TestCase):
 
 class TestErrorPropagationFitAndRescale(unittest.TestCase):
     def _createWorkspace(self, x1, y1, err1, x2, y2, err2):
-        front = CreateWorkspace(DataX=x1,
-                                DataY=y1,
-                                DataE=err1,
-                                NSpec=1,
-                                UnitX="MomentumTransfer")
-        rear = CreateWorkspace(DataX=x2,
-                               DataY=y2,
-                               DataE=err2,
-                               NSpec=1,
-                               UnitX="MomentumTransfer")
+        front = CreateWorkspace(DataX=x1, DataY=y1, DataE=err1, NSpec=1, UnitX="MomentumTransfer")
+        rear = CreateWorkspace(DataX=x2, DataY=y2, DataE=err2, NSpec=1, UnitX="MomentumTransfer")
         return front, rear
 
     def test_that_error_is_transferred(self):
@@ -1356,20 +1348,29 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
         log_names = ['good_uah_log', 'good_frames', 'new_series']
         start_time_1 = "2010-01-01T00:00:00"
         proton_charge_1 = 10.2
-        lhs = provide_event_ws_with_entries(names[0], start_time_1, extra_time_shift=0.0,
-                                            log_names=log_names, make_linear=True)
+        lhs = provide_event_ws_with_entries(names[0],
+                                            start_time_1,
+                                            extra_time_shift=0.0,
+                                            log_names=log_names,
+                                            make_linear=True)
         self._add_single_log(lhs, "gd_prtn_chrg", proton_charge_1)
 
         start_time_2 = "2010-01-01T00:00:12"
         proton_charge_2 = 30.2
-        rhs = provide_event_ws_with_entries(names[1], start_time_2, extra_time_shift=0.0,
-                                            log_names=log_names, make_linear=True)
+        rhs = provide_event_ws_with_entries(names[1],
+                                            start_time_2,
+                                            extra_time_shift=0.0,
+                                            log_names=log_names,
+                                            make_linear=True)
         self._add_single_log(rhs, "gd_prtn_chrg", proton_charge_2)
 
         start_time_3 = "2010-02-01T00:00:00"
         proton_charge_3 = 20.2
-        out = provide_event_ws_with_entries(names[2], start_time_3, extra_time_shift=0.0,
-                                            log_names=log_names, make_linear=True)
+        out = provide_event_ws_with_entries(names[2],
+                                            start_time_3,
+                                            extra_time_shift=0.0,
+                                            log_names=log_names,
+                                            make_linear=True)
         self._add_single_log(out, "gd_prtn_chrg", proton_charge_3)
 
         out_ref = CloneWorkspace(InputWorkspace=out)
@@ -1409,21 +1410,30 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
         log_names = ['good_uah_log', 'good_frames', 'new_series']
         start_time_1 = "2010-01-01T00:00:00"
         proton_charge_1 = 10.2
-        lhs = provide_event_ws_with_entries(names[0], start_time_1, extra_time_shift=0.0,
-                                            log_names=log_names, make_linear=True)
+        lhs = provide_event_ws_with_entries(names[0],
+                                            start_time_1,
+                                            extra_time_shift=0.0,
+                                            log_names=log_names,
+                                            make_linear=True)
         self._add_single_log(lhs, "gd_prtn_chrg", proton_charge_1)
 
         # The rhs workspace should have an overlap time of about 5s
         start_time_2 = "2010-01-01T00:00:05"
         proton_charge_2 = 19.2
-        rhs = provide_event_ws_with_entries(names[1], start_time_2, extra_time_shift=0.0,
-                                            log_names=log_names, make_linear=True)
+        rhs = provide_event_ws_with_entries(names[1],
+                                            start_time_2,
+                                            extra_time_shift=0.0,
+                                            log_names=log_names,
+                                            make_linear=True)
         self._add_single_log(rhs, "gd_prtn_chrg", proton_charge_2)
 
         start_time_3 = "2010-02-01T00:00:00"
         proton_charge_3 = 30.2
-        out = provide_event_ws_with_entries(names[2], start_time_3, extra_time_shift=0.0,
-                                            log_names=log_names, make_linear=True)
+        out = provide_event_ws_with_entries(names[2],
+                                            start_time_3,
+                                            extra_time_shift=0.0,
+                                            log_names=log_names,
+                                            make_linear=True)
         self._add_single_log(out, "gd_prtn_chrg", proton_charge_3)
 
         out_ref = CloneWorkspace(InputWorkspace=out)
@@ -1464,21 +1474,30 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
 
         start_time_1 = "2010-01-01T00:00:00"
         proton_charge_1 = 10.2
-        lhs = provide_event_ws_with_entries(names[0], start_time_1, extra_time_shift=0.0,
-                                            log_names=log_names, make_linear=True)
+        lhs = provide_event_ws_with_entries(names[0],
+                                            start_time_1,
+                                            extra_time_shift=0.0,
+                                            log_names=log_names,
+                                            make_linear=True)
         self._add_single_log(lhs, "gd_prtn_chrg", proton_charge_1)
 
         # The rhs workspace should have an overlap time of about 5s
         start_time_2 = "2010-01-01T00:00:20"
         proton_charge_2 = 18.2
-        rhs = provide_event_ws_with_entries(names[1], start_time_2, extra_time_shift=0.0,
-                                            log_names=log_names, make_linear=True)
+        rhs = provide_event_ws_with_entries(names[1],
+                                            start_time_2,
+                                            extra_time_shift=0.0,
+                                            log_names=log_names,
+                                            make_linear=True)
         self._add_single_log(rhs, "gd_prtn_chrg", proton_charge_2)
 
         start_time_3 = "2010-02-01T00:00:00"
         proton_charge_3 = 80.2
-        out = provide_event_ws_with_entries(names[2], start_time_3, extra_time_shift=0.0,
-                                            log_names=log_names, make_linear=True)
+        out = provide_event_ws_with_entries(names[2],
+                                            start_time_3,
+                                            extra_time_shift=0.0,
+                                            log_names=log_names,
+                                            make_linear=True)
         self._add_single_log(out, "gd_prtn_chrg", proton_charge_3)
 
         out_ref = CloneWorkspace(InputWorkspace=out)
@@ -1520,13 +1539,19 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
         log_names = ['good_uah_log', 'good_frames', 'new_series']
 
         start_time = "2010-01-01T00:00:00"
-        in_ws = provide_event_ws_with_entries(names[0], start_time, extra_time_shift=0.0,
-                                              log_names=log_names, make_linear=False)
+        in_ws = provide_event_ws_with_entries(names[0],
+                                              start_time,
+                                              extra_time_shift=0.0,
+                                              log_names=log_names,
+                                              make_linear=False)
         self._add_single_log(in_ws, "gd_prtn_chrg", in_ws.getRun().getProperty("good_uah_log").value[-1])
 
         start_time = "2010-02-01T00:10:00"
-        out_ws = provide_event_ws_with_entries(names[2], start_time, extra_time_shift=0.0,
-                                               log_names=log_names, make_linear=True)
+        out_ws = provide_event_ws_with_entries(names[2],
+                                               start_time,
+                                               extra_time_shift=0.0,
+                                               log_names=log_names,
+                                               make_linear=True)
         self._add_single_log(out_ws, "gd_prtn_chrg", out_ws.getRun().getProperty("good_uah_log").value[-1])
 
         out_ref = CloneWorkspace(InputWorkspace=out_ws)
@@ -1708,8 +1733,14 @@ class TestSelectNewDetector(unittest.TestCase):
 
 class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
     def _create_sample_workspace(self, name='ws'):
-        ws = CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, NumEvents=1,
-                                   XMin=1, XMax=14, BinWidth=2, OutputWorkspace=name)
+        ws = CreateSampleWorkspace(Function='Flat background',
+                                   NumBanks=1,
+                                   BankPixelWidth=1,
+                                   NumEvents=1,
+                                   XMin=1,
+                                   XMax=14,
+                                   BinWidth=2,
+                                   OutputWorkspace=name)
 
         return ws
 
@@ -1730,10 +1761,20 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
             AnalysisDataService.remove("test_merged")
 
     def test_for_a_group_workspace_renames_entire_group(self):
-        workspace_t0_T1 = CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, NumEvents=1,
-                                                XMin=1, XMax=14, BinWidth=2)
-        workspace_t1_T2 = CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, NumEvents=1,
-                                                XMin=1, XMax=14, BinWidth=2)
+        workspace_t0_T1 = CreateSampleWorkspace(Function='Flat background',
+                                                NumBanks=1,
+                                                BankPixelWidth=1,
+                                                NumEvents=1,
+                                                XMin=1,
+                                                XMax=14,
+                                                BinWidth=2)
+        workspace_t1_T2 = CreateSampleWorkspace(Function='Flat background',
+                                                NumBanks=1,
+                                                BankPixelWidth=1,
+                                                NumEvents=1,
+                                                XMin=1,
+                                                XMax=14,
+                                                BinWidth=2)
         workspace_name = 'workspace'
         GroupWorkspaces(InputWorkspaces=[workspace_t0_T1, workspace_t1_T2], OutputWorkspace=workspace_name)
 

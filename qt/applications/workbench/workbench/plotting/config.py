@@ -21,10 +21,7 @@ from .globalfiguremanager import GlobalFigureManager
 MPL_BACKEND = 'module://workbench.plotting.backend_workbench'
 
 # Our style defaults
-DEFAULT_RCPARAMS = {
-    'figure.facecolor': 'w',
-    'figure.max_open_warning': 200
-}
+DEFAULT_RCPARAMS = {'figure.facecolor': 'w', 'figure.max_open_warning': 200}
 
 
 def initialize_matplotlib():

@@ -12,15 +12,13 @@ import numpy as np
 
 
 class LinkedUBs_Test(systemtesting.MantidSystemTest):
-
     def runTest(self):
 
         ws1 = LoadRaw(Filename='SXD30904.raw.md5', OutputWorkspace='SXD30904')
 
         ws2 = LoadRaw(Filename='SXD30905.raw.md5', OutputWorkspace='SXD30905')
 
-        UB1 = np.array([[0.00099434,  0.17716870, -0.00397909],
-                        [0.17703120, -0.00117345, -0.00800899],
+        UB1 = np.array([[0.00099434, 0.17716870, -0.00397909], [0.17703120, -0.00117345, -0.00800899],
                         [-0.00803319, -0.00393000, -0.17699037]])
 
         SetUB(ws1, UB=UB1)
@@ -33,9 +31,12 @@ class LinkedUBs_Test(systemtesting.MantidSystemTest):
                      ReflectionCondition='All-face centred',
                      OutputWorkspace='SXD30905_predict_peaks')
 
-        FindSXPeaks(InputWorkspace=ws2, PeakFindingStrategy='AllPeaks',
-                    ResolutionStrategy='AbsoluteResolution', XResolution=0.2,
-                    PhiResolution=2, TwoThetaResolution=2,
+        FindSXPeaks(InputWorkspace=ws2,
+                    PeakFindingStrategy='AllPeaks',
+                    ResolutionStrategy='AbsoluteResolution',
+                    XResolution=0.2,
+                    PhiResolution=2,
+                    TwoThetaResolution=2,
                     OutputWorkspace='SXD30905_find_peaks')
 
         # linkedUBs
@@ -63,9 +64,8 @@ class LinkedUBs_Test(systemtesting.MantidSystemTest):
                   LinkedPredictedPeaks='SXD30905_linked_peaks_predicted',
                   DeleteWorkspace=False)
 
-        UB2 = np.array([[0.00588768, -0.15971797,  0.07655954],
-                        [0.17702963,  0.0028714,  -0.00762388],
-                        [0.0056306,   0.07673189,  0.15964452]])
+        UB2 = np.array([[0.00588768, -0.15971797, 0.07655954], [0.17702963, 0.0028714, -0.00762388],
+                        [0.0056306, 0.07673189, 0.15964452]])
 
         linked_peaks = mtd['SXD30905_linked_peaks']
         linked_UB = linked_peaks.sample().getOrientedLattice().getUB()
@@ -76,8 +76,7 @@ class LinkedUBs_Test(systemtesting.MantidSystemTest):
         for i in range(len(diff)):
             for j in range(len(diff)):
                 if abs(diff[i, j]) > 1e-7:
-                    raise Exception(
-                      "More than 1e-7 difference between UB matrices")
+                    raise Exception("More than 1e-7 difference between UB matrices")
 
     def doValidation(self):
         # If we reach here, no validation failed

@@ -8,7 +8,6 @@ from qtpy import QtWidgets
 
 
 class LoadWidgetView(QtWidgets.QWidget):
-
     def __init__(self, parent=None, load_run_view=None, load_file_view=None):
         super(LoadWidgetView, self).__init__(parent)
 

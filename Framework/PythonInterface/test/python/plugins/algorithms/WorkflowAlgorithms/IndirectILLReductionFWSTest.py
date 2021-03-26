@@ -40,8 +40,7 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
     def test_two_wing(self):
 
-        args = {'Run': self._run_two_wing_mixed,
-                'OutputWorkspace': 'out'}
+        args = {'Run': self._run_two_wing_mixed, 'OutputWorkspace': 'out'}
 
         alg_test = run_algorithm('IndirectILLReductionFWS', **args)
 
@@ -53,14 +52,13 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
         runs_log2 = mtd['out_red'].getItem(1).getRun().getLogData('ReducedRunsList').value
 
-        self.assertEqual(runs_log1,'170299,170301,170303',"Reduced runs list mismatch.")
+        self.assertEqual(runs_log1, '170299,170301,170303', "Reduced runs list mismatch.")
 
-        self.assertEqual(runs_log2,'170300,170302,170304',"Reduced runs list mismatch.")
+        self.assertEqual(runs_log2, '170300,170302,170304', "Reduced runs list mismatch.")
 
     def test_one_wing(self):
 
-        args = {'Run': self._run_one_wing_mixed,
-                'OutputWorkspace': 'out'}
+        args = {'Run': self._run_one_wing_mixed, 'OutputWorkspace': 'out'}
 
         alg_test = run_algorithm('IndirectILLReductionFWS', **args)
 
@@ -70,9 +68,7 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
     def test_omega_scan(self):
 
-        args = {'Run': self._observable_omega,
-                'Observable': 'SamS_Rot.value',
-                'OutputWorkspace': 'out'}
+        args = {'Run': self._observable_omega, 'Observable': 'SamS_Rot.value', 'OutputWorkspace': 'out'}
 
         alg_test = run_algorithm('IndirectILLReductionFWS', **args)
 
@@ -84,8 +80,7 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
     def test_ifws_monitor_peaks(self):
 
-        args = {'Run': '170304',
-                'OutputWorkspace': 'out'}
+        args = {'Run': '170304', 'OutputWorkspace': 'out'}
 
         alg_test = run_algorithm('IndirectILLReductionFWS', **args)
 
@@ -103,9 +98,7 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
     def test_ifws_manual_peaks(self):
 
-        args = {'Run': '170304',
-                'ManualInelasticPeakChannels': [3, 507],
-                'OutputWorkspace': 'out'}
+        args = {'Run': '170304', 'ManualInelasticPeakChannels': [3, 507], 'OutputWorkspace': 'out'}
 
         alg_test = run_algorithm('IndirectILLReductionFWS', **args)
 
@@ -127,26 +120,22 @@ class IndirectILLReductionFWS(unittest.TestCase):
                         "{0} should be a group workspace".format(wsgroup.getName()))
 
         self.assertEqual(wsgroup.getNumberOfEntries(), nentries,
-                          "{0} should contain {1} workspaces".format(wsgroup.getName(), nentries))
+                         "{0} should contain {1} workspaces".format(wsgroup.getName(), nentries))
 
         item = wsgroup.getItem(0)
 
         name = item.name()
 
-        self.assertTrue(isinstance(item, MatrixWorkspace),
-                        "{0} should be a matrix workspace".format(name))
+        self.assertTrue(isinstance(item, MatrixWorkspace), "{0} should be a matrix workspace".format(name))
 
-        self.assertEqual(item.getNumberHistograms(), nspectra,
-                          "{0} should contain {1} spectra".format(name, nspectra))
+        self.assertEqual(item.getNumberHistograms(), nspectra, "{0} should contain {1} spectra".format(name, nspectra))
 
-        self.assertEqual(item.blocksize(), nbins,
-                          "{0} should contain {1} bins".format(name, nbins))
+        self.assertEqual(item.blocksize(), nbins, "{0} should contain {1} bins".format(name, nbins))
 
-        self.assertTrue(item.getSampleDetails(),
-                        "{0} should have sample logs".format(name))
+        self.assertTrue(item.getSampleDetails(), "{0} should have sample logs".format(name))
 
-        self.assertTrue(item.getHistory().lastAlgorithm(),
-                        "{0} should have history".format(name))
+        self.assertTrue(item.getHistory().lastAlgorithm(), "{0} should have history".format(name))
+
 
 if __name__ == "__main__":
     unittest.main()

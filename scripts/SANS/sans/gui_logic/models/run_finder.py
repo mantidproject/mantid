@@ -15,8 +15,7 @@ class SummableRunFinder(object):
     def find_all_from_query(self, query_string):
         try:
             results = FileFinder.findRuns(query_string)
-            return ('', [self.find_from_file_path(file_path)
-                         for file_path in results])
+            return ('', [self.find_from_file_path(file_path) for file_path in results])
         except RuntimeError:
             return ('', [])
         except ValueError as ex:
@@ -24,9 +23,7 @@ class SummableRunFinder(object):
 
     def find_from_file_path(self, file_path):
         file = self._file_info_for_path(file_path)
-        return SummableRunFile(file_path,
-                               self._display_name(file),
-                               self._is_event_mode(file))
+        return SummableRunFile(file_path, self._display_name(file), self._is_event_mode(file))
 
     def _file_info_for_path(self, file_path):
         return self._file_info_source.create_sans_file_information(file_path)

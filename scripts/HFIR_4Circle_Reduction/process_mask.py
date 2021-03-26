@@ -89,7 +89,7 @@ def get_region_of_interest(mask_ws_name):
 
     # find upper right corner
     upper_right_corner = None
-    for ir in range(size_y-1, -1, -1):
+    for ir in range(size_y - 1, -1, -1):
         if mask_matrix[ir].min() == 0:
             ur_row = ir
             ret_value = numpy.where(mask_matrix[ir] == 0)
@@ -169,8 +169,7 @@ class RegionOfInterest(object):
             raise RuntimeError('Workspace {0} does not exist in ADS.')
         workspace = ADS.retrieve(ws_name)
         if workspace.id() != 'MaskWorkspace':
-            raise RuntimeError('Workspace {0} is not a MaskWorkspace but a {1}'
-                               ''.format(ws_name, workspace.id()))
+            raise RuntimeError('Workspace {0} is not a MaskWorkspace but a {1}' ''.format(ws_name, workspace.id()))
 
         self._maskWorkspaceName = ws_name
 

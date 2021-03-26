@@ -23,24 +23,18 @@ Pairs = "pairs"
 
 
 class MuonContext(object):
-
     def __init__(self, name):
         self._name = name
         self.common_context = OrderedDict()
         self.common_context[Tab2Text] = "boo-start up"
         self.common_context[HelpText] = "Help_dummy"
         self.common_context[LoadText] = "load_dummy"
-        self.common_context[Groups] = [group_object.group(
-                                       "fwd", [1, 2]),
-                                       group_object.group("bwd", [3, 4, 5]),
-                                       group_object.group("top", [1, 2, 3, 4, 5])]
-        self.common_context[
-            Pairs] = [
-                pair_object.pair(
-                    "test_pair",
-                    "fwd",
-                    "bwd",
-                    0.9)]
+        self.common_context[Groups] = [
+            group_object.group("fwd", [1, 2]),
+            group_object.group("bwd", [3, 4, 5]),
+            group_object.group("top", [1, 2, 3, 4, 5])
+        ]
+        self.common_context[Pairs] = [pair_object.pair("test_pair", "fwd", "bwd", 0.9)]
 
     def set(self, key, value):
         self.common_context[key] = value
@@ -115,8 +109,7 @@ class MuonContext(object):
         for key in keys:
             value = self.common_context[key]
             try:
-                self.common_context[
-                    key] = TSVHelper.loadFromTSV(load, key, value)
+                self.common_context[key] = TSVHelper.loadFromTSV(load, key, value)
             except:
                 self.customLoad(load, key, value)
                 pass

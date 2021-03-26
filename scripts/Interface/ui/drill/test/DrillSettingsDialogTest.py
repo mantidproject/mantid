@@ -13,15 +13,12 @@ from qtpy.QtWidgets import QApplication
 
 from Interface.ui.drill.view.DrillSettingsDialog import DrillSettingsDialog
 
-
 app = QApplication(sys.argv)
 
 
 class DrillSettingsDialogTest(unittest.TestCase):
-
     def setUp(self):
-        patch = mock.patch(
-                'Interface.ui.drill.view.DrillSettingsDialog.DrillSetting')
+        patch = mock.patch('Interface.ui.drill.view.DrillSettingsDialog.DrillSetting')
         self.mSetting = patch.start()
         self.addCleanup(patch.stop)
 
@@ -36,8 +33,7 @@ class DrillSettingsDialogTest(unittest.TestCase):
         self.assertEqual(self.dialog.settings, {})
         self.dialog.initWidgets({"name": "type"}, {"name": []}, {"name": "doc"})
         self.mSetting.assert_called_once_with("name", [], "type", "doc")
-        self.assertDictEqual(self.dialog.settings,
-                             {"name": self.mSetting.return_value})
+        self.assertDictEqual(self.dialog.settings, {"name": self.mSetting.return_value})
         self.mSetting.return_value.valueChanged.connect.assert_called_once()
         self.dialog.formLayout.addRow.assert_called_once()
 

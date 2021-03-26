@@ -32,8 +32,15 @@ class DetectorWidget(BaseWidget):
     ## Widget name
     name = "Detector"
 
-    def __init__(self, parent=None, state=None, settings=None, show_transmission=True, data_type=None,
-                 data_proxy=None, use_sample_dc=False, options_callback=None):
+    def __init__(self,
+                 parent=None,
+                 state=None,
+                 settings=None,
+                 show_transmission=True,
+                 data_type=None,
+                 data_proxy=None,
+                 use_sample_dc=False,
+                 options_callback=None):
         super(DetectorWidget, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
 
         class DetFrame(QFrame):
@@ -142,7 +149,10 @@ class DetectorWidget(BaseWidget):
     def _draw_patch(self):
         if self._has_instrument_view:
             self.show_instrument(self._content.sensitivity_file_edit.text,
-                                 workspace=self.patch_ws, tab=2, reload=True, data_proxy=None)
+                                 workspace=self.patch_ws,
+                                 tab=2,
+                                 reload=True,
+                                 data_proxy=None)
 
     def _create_sensitivity(self):
         # Get patch information
@@ -153,7 +163,7 @@ class DetectorWidget(BaseWidget):
         try:
             reduction_table_ws = self.options_callback()
             filename = self._content.sensitivity_file_edit.text()
-            script  = "ComputeSensitivity(Filename='%s',\n" % filename
+            script = "ComputeSensitivity(Filename='%s',\n" % filename
             script += "                   ReductionProperties='%s',\n" % reduction_table_ws
             script += "                   OutputWorkspace='sensitivity',\n"
             script += "                   PatchWorkspace='%s')\n" % patch_ws
@@ -230,7 +240,7 @@ class DetectorWidget(BaseWidget):
         self._sensitivity_clicked(self._content.sensitivity_chk.isChecked())
         self._use_sample_center_changed(self._content.use_sample_center_checkbox.isChecked())
 
-        if len(popup_warning)>0:
+        if len(popup_warning) > 0:
             QMessageBox.warning(self, "Turn ON advanced interface", popup_warning)
 
     def get_state(self):

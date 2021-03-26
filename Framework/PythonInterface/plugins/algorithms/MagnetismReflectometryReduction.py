@@ -22,8 +22,8 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
     """
         Workflow algorithm to reduce REF_M data
     """
-    number_of_pixels_x=0
-    number_of_pixels_y=0
+    number_of_pixels_x = 0
+    number_of_pixels_y = 0
     _tof_range = None
 
     def category(self):
@@ -48,51 +48,64 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
     def PyInit(self):
         """ Initialization """
-        self.declareProperty(WorkspaceProperty("InputWorkspace", "",
-                                               Direction.Input, PropertyMode.Optional),
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "", Direction.Input, PropertyMode.Optional),
                              "Optionally, we can provide a scattering workspace directly")
         self.declareProperty("NormalizationRunNumber", 0, "Run number of the normalization run to use")
-        self.declareProperty(WorkspaceProperty("NormalizationWorkspace", "",
-                                               Direction.Input, PropertyMode.Optional),
+        self.declareProperty(WorkspaceProperty("NormalizationWorkspace", "", Direction.Input, PropertyMode.Optional),
                              "Optionally, we can provide a normalization workspace directly")
-        self.declareProperty(IntArrayProperty("SignalPeakPixelRange", [123, 137],
-                                              IntArrayLengthValidator(2), direction=Direction.Input),
-                             "Pixel range defining the data peak")
-        self.declareProperty("SubtractSignalBackground", True,
+        self.declareProperty(
+            IntArrayProperty("SignalPeakPixelRange", [123, 137], IntArrayLengthValidator(2), direction=Direction.Input),
+            "Pixel range defining the data peak")
+        self.declareProperty("SubtractSignalBackground",
+                             True,
                              doc='If true, the background will be subtracted from the data peak')
-        self.declareProperty(IntArrayProperty("SignalBackgroundPixelRange", [123, 137],
-                                              IntArrayLengthValidator(2), direction=Direction.Input),
-                             "Pixel range defining the background. Default:(123,137)")
+        self.declareProperty(
+            IntArrayProperty("SignalBackgroundPixelRange", [123, 137],
+                             IntArrayLengthValidator(2),
+                             direction=Direction.Input), "Pixel range defining the background. Default:(123,137)")
         self.declareProperty("ApplyNormalization", True, doc="If true, the data will be normalized")
-        self.declareProperty(IntArrayProperty("NormPeakPixelRange", [127, 133],
-                                              IntArrayLengthValidator(2), direction=Direction.Input),
-                             "Pixel range defining the normalization peak")
-        self.declareProperty("SubtractNormBackground", True,
+        self.declareProperty(
+            IntArrayProperty("NormPeakPixelRange", [127, 133], IntArrayLengthValidator(2), direction=Direction.Input),
+            "Pixel range defining the normalization peak")
+        self.declareProperty("SubtractNormBackground",
+                             True,
                              doc="If true, the background will be subtracted from the normalization peak")
-        self.declareProperty(IntArrayProperty("NormBackgroundPixelRange", [127, 137],
-                                              IntArrayLengthValidator(2), direction=Direction.Input),
-                             "Pixel range defining the background for the normalization")
-        self.declareProperty("CutLowResDataAxis", True,
-                             doc="If true, the low resolution direction of the data will be cropped according "
-                                 + "to the lowResDataAxisPixelRange property")
-        self.declareProperty(IntArrayProperty("LowResDataAxisPixelRange", [115, 210],
-                                              IntArrayLengthValidator(2), direction=Direction.Input),
-                             "Pixel range to use in the low resolution direction of the data")
-        self.declareProperty("CutLowResNormAxis", True,
-                             doc="If true, the low resolution direction of the normalization run will be cropped "
-                                 + "according to the LowResNormAxisPixelRange property")
-        self.declareProperty(IntArrayProperty("LowResNormAxisPixelRange", [115, 210],
-                                              IntArrayLengthValidator(2), direction=Direction.Input),
-                             "Pixel range to use in the low resolution direction of the normalizaion run")
-        self.declareProperty(FloatArrayProperty("TimeAxisRange", [0., 340000.],
-                                                FloatArrayLengthValidator(2), direction=Direction.Input),
-                             "TOF/wavelength range to use with detector binning")
-        self.declareProperty("UseWLTimeAxis", False,
-                             doc="For const-Q, if true, wavelength will be used as the time axis, otherwise TOF is used")
-        self.declareProperty("ErrorWeightedBackground", True,
+        self.declareProperty(
+            IntArrayProperty("NormBackgroundPixelRange", [127, 137],
+                             IntArrayLengthValidator(2),
+                             direction=Direction.Input), "Pixel range defining the background for the normalization")
+        self.declareProperty("CutLowResDataAxis",
+                             True,
+                             doc="If true, the low resolution direction of the data will be cropped according " +
+                             "to the lowResDataAxisPixelRange property")
+        self.declareProperty(
+            IntArrayProperty("LowResDataAxisPixelRange", [115, 210],
+                             IntArrayLengthValidator(2),
+                             direction=Direction.Input),
+            "Pixel range to use in the low resolution direction of the data")
+        self.declareProperty("CutLowResNormAxis",
+                             True,
+                             doc="If true, the low resolution direction of the normalization run will be cropped " +
+                             "according to the LowResNormAxisPixelRange property")
+        self.declareProperty(
+            IntArrayProperty("LowResNormAxisPixelRange", [115, 210],
+                             IntArrayLengthValidator(2),
+                             direction=Direction.Input),
+            "Pixel range to use in the low resolution direction of the normalizaion run")
+        self.declareProperty(
+            FloatArrayProperty("TimeAxisRange", [0., 340000.], FloatArrayLengthValidator(2), direction=Direction.Input),
+            "TOF/wavelength range to use with detector binning")
+        self.declareProperty(
+            "UseWLTimeAxis",
+            False,
+            doc="For const-Q, if true, wavelength will be used as the time axis, otherwise TOF is used")
+        self.declareProperty("ErrorWeightedBackground",
+                             True,
                              doc="If true, use an error weighted average for the background estimate")
-        self.declareProperty("CutTimeAxis", True,
-                             doc="If true, the TOF/wavelength dimension will be cropped according to the TimeAxisRange property")
+        self.declareProperty(
+            "CutTimeAxis",
+            True,
+            doc="If true, the TOF/wavelength dimension will be cropped according to the TimeAxisRange property")
         self.declareProperty("RoundUpPixel", True, doc="If True, round up pixel position of the specular reflectivity")
         self.declareProperty("UseSANGLE", False, doc="If True, use SANGLE as the scattering angle")
         self.declareProperty("SpecularPixel", 180.0, doc="Pixel position of the specular reflectivity")
@@ -100,11 +113,14 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         self.declareProperty("QMin", 0.005, doc="Minimum Q-value")
         self.declareProperty("QStep", 0.02, doc="Step size in Q. Enter a negative value to get a log scale")
         self.declareProperty("AngleOffset", 0.0, doc="angle offset (rad)")
-        self.declareProperty("TimeAxisStep", 40.0,
-                             doc="Binning step size for the time axis. TOF for detector binning, wavelength for constant Q")
+        self.declareProperty(
+            "TimeAxisStep",
+            40.0,
+            doc="Binning step size for the time axis. TOF for detector binning, wavelength for constant Q")
         self.declareProperty("CropFirstAndLastPoints", True, doc="If true, we crop the first and last points")
         self.declareProperty("CleanupBadData", True, doc="If true, we crop the points consistent with R=0")
-        self.declareProperty("ConstQTrim", 0.5,
+        self.declareProperty("ConstQTrim",
+                             0.5,
                              doc="With const-Q binning, cut Q bins with contributions fewer than ConstQTrim of WL bins")
         self.declareProperty("SampleLength", 10.0, doc="Length of the sample in mm")
         self.declareProperty("ConstantQBinning", False, doc="If true, we convert to Q before summing")
@@ -132,9 +148,8 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         for workspace in self.load_data():
             try:
                 logger.notice("Processing %s" % str(workspace))
-                data_cropped = self.process_data(workspace,
-                                                 crop_request, low_res_range,
-                                                 dataPeakRange, bck_request, dataBackRange)
+                data_cropped = self.process_data(workspace, crop_request, low_res_range, dataPeakRange, bck_request,
+                                                 dataBackRange)
 
                 # Normalization
                 if perform_normalization:
@@ -142,15 +157,22 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                         norm_summed = self.process_direct_beam(data_cropped)
 
                     # Normalize the data
-                    normalized_data = Divide(LHSWorkspace=data_cropped, RHSWorkspace=norm_summed,
-                                             OutputWorkspace=str(data_cropped)+'_normalized')
+                    normalized_data = Divide(LHSWorkspace=data_cropped,
+                                             RHSWorkspace=norm_summed,
+                                             OutputWorkspace=str(data_cropped) + '_normalized')
 
-                    AddSampleLog(Workspace=normalized_data, LogName='normalization_run', LogText=str(norm_summed.getRunNumber()))
-                    AddSampleLog(Workspace=normalized_data, LogName='normalization_file_path',
+                    AddSampleLog(Workspace=normalized_data,
+                                 LogName='normalization_run',
+                                 LogText=str(norm_summed.getRunNumber()))
+                    AddSampleLog(Workspace=normalized_data,
+                                 LogName='normalization_file_path',
                                  LogText=norm_summed.getRun().getProperty("Filename").value)
                     norm_dirpix = norm_summed.getRun().getProperty('DIRPIX').getStatistics().mean
-                    AddSampleLog(Workspace=normalized_data, LogName='normalization_dirpix',
-                                 LogText=str(norm_dirpix), LogType='Number', LogUnit='pixel')
+                    AddSampleLog(Workspace=normalized_data,
+                                 LogName='normalization_dirpix',
+                                 LogText=str(norm_dirpix),
+                                 LogType='Number',
+                                 LogUnit='pixel')
 
                     # Avoid leaving trash behind
                     AnalysisDataService.remove(str(data_cropped))
@@ -159,8 +181,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                     AddSampleLog(Workspace=normalized_data, LogName='normalization_run', LogText="None")
 
                 # At this point, the workspace should be considered a distribution of points
-                point_data = ConvertToPointData(InputWorkspace=normalized_data,
-                                                OutputWorkspace=str(workspace)+'_')
+                point_data = ConvertToPointData(InputWorkspace=normalized_data, OutputWorkspace=str(workspace) + '_')
                 # Avoid leaving trash behind
                 AnalysisDataService.remove(str(normalized_data))
 
@@ -183,10 +204,9 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                 logger.error(str(sys.exc_info()[1]))
 
         # Prepare output workspace group
-        if len(output_list)>1:
+        if len(output_list) > 1:
             output_wsg = self.getPropertyValue("OutputWorkspace")
-            GroupWorkspaces(InputWorkspaces=output_list,
-                            OutputWorkspace=output_wsg)
+            GroupWorkspaces(InputWorkspaces=output_list, OutputWorkspace=output_wsg)
             self.setProperty("OutputWorkspace", output_wsg)
         else:
             self.setProperty("OutputWorkspace", output_list[0])
@@ -265,8 +285,11 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         bck_request = self.getProperty("SubtractNormBackground").value
 
         norm_cropped = self.process_data(ws_event_norm,
-                                         crop_request, low_res_range,
-                                         normPeakRange, bck_request, normBackRange,
+                                         crop_request,
+                                         low_res_range,
+                                         normPeakRange,
+                                         bck_request,
+                                         normBackRange,
                                          rebin_to_ws=data_cropped)
         # Avoid leaving trash behind (remove only if we loaded the data)
         if self.getProperty("NormalizationWorkspace").value is None:
@@ -281,24 +304,33 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # Extract the x-pixel vs TOF data
         signal = workspace.extractY()
         signal_err = workspace.extractE()
-        signal=np.flipud(signal)
-        signal_err=np.flipud(signal_err)
+        signal = np.flipud(signal)
+        signal_err = np.flipud(signal_err)
 
         theta = self.calculate_scattering_angle(workspace)
-        two_theta_degrees = 2.0*theta*180.0/math.pi
-        AddSampleLog(Workspace=workspace, LogName='two_theta', LogText=str(two_theta_degrees),
-                     LogType='Number', LogUnit='degree')
+        two_theta_degrees = 2.0 * theta * 180.0 / math.pi
+        AddSampleLog(Workspace=workspace,
+                     LogName='two_theta',
+                     LogText=str(two_theta_degrees),
+                     LogType='Number',
+                     LogUnit='degree')
 
         # Get an array with the center wavelength value for each bin
         wl_values = workspace.readX(0)
 
-        AddSampleLog(Workspace=workspace, LogName='lambda_min', LogText=str(wl_values[0]),
-                     LogType='Number', LogUnit='Angstrom')
-        AddSampleLog(Workspace=workspace, LogName='lambda_max', LogText=str(wl_values[-1]),
-                     LogType='Number', LogUnit='Angstrom')
+        AddSampleLog(Workspace=workspace,
+                     LogName='lambda_min',
+                     LogText=str(wl_values[0]),
+                     LogType='Number',
+                     LogUnit='Angstrom')
+        AddSampleLog(Workspace=workspace,
+                     LogName='lambda_max',
+                     LogText=str(wl_values[-1]),
+                     LogType='Number',
+                     LogUnit='Angstrom')
 
-        x_pixel_map = np.mgrid[peak[0]:peak[1]+1, 0:len(wl_values)]
-        x_pixel_map = x_pixel_map[0,:,:]
+        x_pixel_map = np.mgrid[peak[0]:peak[1] + 1, 0:len(wl_values)]
+        x_pixel_map = x_pixel_map[0, :, :]
 
         pixel_width = float(workspace.getInstrument().getNumberParameter("pixel-width")[0]) / 1000.0
         det_distance = workspace.getRun()['SampleDetDis'].getStatistics().mean
@@ -309,25 +341,31 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         round_up = self.getProperty("RoundUpPixel").value
         ref_pix = self.getProperty("SpecularPixel").value
         if round_up:
-            x_distance=(x_pixel_map-np.round(ref_pix)) * pixel_width
+            x_distance = (x_pixel_map - np.round(ref_pix)) * pixel_width
         else:
             # We offset by 0.5 pixels because the reference pixel is given as
             # a fractional position relative to the start of a pixel, whereas the pixel map
             # assumes the center of each pixel.
-            x_distance=(x_pixel_map-ref_pix-0.5) * pixel_width
+            x_distance = (x_pixel_map - ref_pix - 0.5) * pixel_width
 
-        theta_f = np.arcsin(x_distance/det_distance)/2.0
+        theta_f = np.arcsin(x_distance / det_distance) / 2.0
 
         # Calculate Qx, Qz for each pixel
-        LL,TT = np.meshgrid(wl_values, theta_f[:,0])
+        LL, TT = np.meshgrid(wl_values, theta_f[:, 0])
 
-        qz=4*math.pi/LL * np.sin(theta + TT) * np.cos(TT)
+        qz = 4 * math.pi / LL * np.sin(theta + TT) * np.cos(TT)
         qz = qz.T
 
-        AddSampleLog(Workspace=workspace, LogName='q_min', LogText=str(np.min(qz)),
-                     LogType='Number', LogUnit='1/Angstrom')
-        AddSampleLog(Workspace=workspace, LogName='q_max', LogText=str(np.max(qz)),
-                     LogType='Number', LogUnit='1/Angstrom')
+        AddSampleLog(Workspace=workspace,
+                     LogName='q_min',
+                     LogText=str(np.min(qz)),
+                     LogType='Number',
+                     LogUnit='1/Angstrom')
+        AddSampleLog(Workspace=workspace,
+                     LogName='q_max',
+                     LogText=str(np.max(qz)),
+                     LogType='Number',
+                     LogUnit='1/Angstrom')
 
         # Transform q values to q indices
         q_min_input = self.getProperty("QMin").value
@@ -340,12 +378,12 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             n_q_values = int((np.max(qz) - q_min_input) / q_step)
             axis_z = np.linspace(q_min_input, np.max(qz), n_q_values)
         else:
-            n_q_values = int((np.log10(np.max(qz))-np.log10(q_min_input)) / np.log10(1.0-q_step))
-            axis_z = np.array([q_min_input * (1.0-q_step)**i for i in range(n_q_values)])
+            n_q_values = int((np.log10(np.max(qz)) - np.log10(q_min_input)) / np.log10(1.0 - q_step))
+            axis_z = np.array([q_min_input * (1.0 - q_step)**i for i in range(n_q_values)])
 
-        refl = np.zeros(len(axis_z)-1)
-        refl_err = np.zeros(len(axis_z)-1)
-        signal_n = np.zeros(len(axis_z)-1)
+        refl = np.zeros(len(axis_z) - 1)
+        refl_err = np.zeros(len(axis_z) - 1)
+        signal_n = np.zeros(len(axis_z) - 1)
 
         err_count = 0
         for tof in range(qz.shape[0]):
@@ -356,11 +394,11 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             z_inds -= 1
 
             for ix in range(signal.shape[0]):
-                if z_inds[ix]<len(axis_z)-1 and z_inds[ix]>=0 and not np.isnan(signal[ix][tof]):
+                if z_inds[ix] < len(axis_z) - 1 and z_inds[ix] >= 0 and not np.isnan(signal[ix][tof]):
                     refl[z_inds[ix]] += signal[ix][tof]
                     refl_err[z_inds[ix]] += signal_err[ix][tof] * signal_err[ix][tof]
                     signal_n[z_inds[ix]] += 1.0
-                elif signal[ix][tof]>0:
+                elif signal[ix][tof] > 0:
                     err_count += 1
         logger.notice("Ignored pixels: %s" % err_count)
 
@@ -376,9 +414,12 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                 refl[i] = 0.0
                 refl_err[i] = 0.0
 
-        name_output_ws = str(workspace)+'_reflectivity' #self.getPropertyValue("OutputWorkspace")
-        q_rebin = CreateWorkspace(DataX=axis_z, DataY=refl, DataE=refl_err,
-                                  ParentWorkspace=workspace, OutputWorkspace=name_output_ws)
+        name_output_ws = str(workspace) + '_reflectivity'  #self.getPropertyValue("OutputWorkspace")
+        q_rebin = CreateWorkspace(DataX=axis_z,
+                                  DataY=refl,
+                                  DataE=refl_err,
+                                  ParentWorkspace=workspace,
+                                  OutputWorkspace=name_output_ws)
 
         # At this point we still have a histogram, and we need to convert to point data
         q_rebin = ConvertToPointData(InputWorkspace=q_rebin, OutputWorkspace=name_output_ws)
@@ -399,11 +440,14 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
         # Get scattering angle theta
         theta = self.calculate_scattering_angle(workspace)
-        two_theta_degrees = 2.0*theta*180.0/math.pi
-        AddSampleLog(Workspace=workspace, LogName='two_theta', LogText=str(two_theta_degrees),
-                     LogType='Number', LogUnit='degree')
+        two_theta_degrees = 2.0 * theta * 180.0 / math.pi
+        AddSampleLog(Workspace=workspace,
+                     LogName='two_theta',
+                     LogText=str(two_theta_degrees),
+                     LogType='Number',
+                     LogUnit='degree')
 
-        q_workspace = SumSpectra(InputWorkspace = workspace)
+        q_workspace = SumSpectra(InputWorkspace=workspace)
         q_workspace.getAxis(0).setUnit("MomentumTransfer")
 
         # Get the distance fromthe moderator to the detector
@@ -426,31 +470,42 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
         q_min_from_data = constant / self._tof_range[1]
         q_max_from_data = constant / self._tof_range[0]
-        AddSampleLog(Workspace=q_workspace, LogName='q_min', LogText=str(q_min_from_data),
-                     LogType='Number', LogUnit='1/Angstrom')
-        AddSampleLog(Workspace=q_workspace, LogName='q_max', LogText=str(q_max_from_data),
-                     LogType='Number', LogUnit='1/Angstrom')
+        AddSampleLog(Workspace=q_workspace,
+                     LogName='q_min',
+                     LogText=str(q_min_from_data),
+                     LogType='Number',
+                     LogUnit='1/Angstrom')
+        AddSampleLog(Workspace=q_workspace,
+                     LogName='q_max',
+                     LogText=str(q_max_from_data),
+                     LogType='Number',
+                     LogUnit='1/Angstrom')
 
         tof_to_lambda = 1.0e4 * h / (m * source_detector_distance)
         lambda_min = tof_to_lambda * self._tof_range[0]
         lambda_max = tof_to_lambda * self._tof_range[1]
-        AddSampleLog(Workspace=q_workspace, LogName='lambda_min', LogText=str(lambda_min),
-                     LogType='Number', LogUnit='Angstrom')
-        AddSampleLog(Workspace=q_workspace, LogName='lambda_max', LogText=str(lambda_max),
-                     LogType='Number', LogUnit='Angstrom')
+        AddSampleLog(Workspace=q_workspace,
+                     LogName='lambda_min',
+                     LogText=str(lambda_min),
+                     LogType='Number',
+                     LogUnit='Angstrom')
+        AddSampleLog(Workspace=q_workspace,
+                     LogName='lambda_max',
+                     LogText=str(lambda_max),
+                     LogType='Number',
+                     LogUnit='Angstrom')
 
         data_x = q_workspace.dataX(0)
         for i in range(len(data_x)):
             data_x[i] = constant / data_x[i]
         q_workspace = SortXAxis(InputWorkspace=q_workspace, OutputWorkspace=str(q_workspace))
 
-        name_output_ws = str(workspace)+'_reflectivity'
+        name_output_ws = str(workspace) + '_reflectivity'
         do_q_rebin = self.getProperty("FinalRebin").value
 
         if do_q_rebin:
             try:
-                q_rebin = Rebin(InputWorkspace=q_workspace, Params=q_range,
-                                OutputWorkspace=name_output_ws)
+                q_rebin = Rebin(InputWorkspace=q_workspace, Params=q_range, OutputWorkspace=name_output_ws)
                 AnalysisDataService.remove(str(q_workspace))
             except:
                 logger.error("Could not rebin with %s" % str(q_range))
@@ -459,8 +514,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # If we either didn't want to rebin or we failed to rebin,
         # rename the reflectivity workspace and proceed with it.
         if not do_q_rebin:
-            q_rebin = RenameWorkspace(InputWorkspace=q_workspace,
-                                      OutputWorkspace=name_output_ws)
+            q_rebin = RenameWorkspace(InputWorkspace=q_workspace, OutputWorkspace=name_output_ws)
 
         return q_rebin
 
@@ -470,18 +524,16 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             @param q_rebin: reflectivity workspace
         """
         # Replace NaNs by zeros
-        q_rebin = ReplaceSpecialValues(InputWorkspace=q_rebin,
-                                       OutputWorkspace=str(q_rebin),
-                                       NaNValue=0.0, NaNError=0.0)
+        q_rebin = ReplaceSpecialValues(InputWorkspace=q_rebin, OutputWorkspace=str(q_rebin), NaNValue=0.0, NaNError=0.0)
         # Crop to non-zero values
         data_y = q_rebin.readY(0)
         low_q = None
         high_q = None
         for i in range(len(data_y)):
-            if low_q is None and abs(data_y[i])>0:
+            if low_q is None and abs(data_y[i]) > 0:
                 low_q = i
-            if high_q is None and abs(data_y[len(data_y)-1-i])>0:
-                high_q = len(data_y)-1-i
+            if high_q is None and abs(data_y[len(data_y) - 1 - i]) > 0:
+                high_q = len(data_y) - 1 - i
             if low_q is not None and high_q is not None:
                 break
 
@@ -495,7 +547,8 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             data_x = q_rebin.readX(0)
             q_rebin = CropWorkspace(InputWorkspace=q_rebin,
                                     OutputWorkspace=str(q_rebin),
-                                    XMin=data_x[low_q], XMax=data_x[high_q])
+                                    XMin=data_x[low_q],
+                                    XMax=data_x[high_q])
         elif cleanup:
             logger.error("Data is all zeros. Check your TOF ranges.")
 
@@ -530,20 +583,20 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             s1_dist = -2600.
             s2_dist = -2019.
             s3_dist = -714.
-        slits =[[ws.getRun().getProperty("S1HWidth").getStatistics().mean, s1_dist],
-                [ws.getRun().getProperty("S2HWidth").getStatistics().mean, s2_dist],
-                [ws.getRun().getProperty("S3HWidth").getStatistics().mean, s3_dist]]
-        theta = ws.getRun().getProperty("two_theta").value/2.0 * np.pi / 180.0
-        res=[]
-        s_width=sample_length*np.sin(theta)
+        slits = [[ws.getRun().getProperty("S1HWidth").getStatistics().mean, s1_dist],
+                 [ws.getRun().getProperty("S2HWidth").getStatistics().mean, s2_dist],
+                 [ws.getRun().getProperty("S3HWidth").getStatistics().mean, s3_dist]]
+        theta = ws.getRun().getProperty("two_theta").value / 2.0 * np.pi / 180.0
+        res = []
+        s_width = sample_length * np.sin(theta)
         for width, dist in slits:
             # Calculate the maximum opening angle dTheta
             if s_width > 0.:
-                d_theta = np.arctan((s_width/2.*(1.+width/s_width))/dist)*2.
+                d_theta = np.arctan((s_width / 2. * (1. + width / s_width)) / dist) * 2.
             else:
-                d_theta = np.arctan(width/2./dist)*2.
+                d_theta = np.arctan(width / 2. / dist) * 2.
             # The standard deviation for a uniform angle distribution is delta/sqrt(12)
-            res.append(d_theta*0.28867513)
+            res.append(d_theta * 0.28867513)
 
         # Wavelength uncertainty
         lambda_min = ws.getRun().getProperty("lambda_min").value
@@ -555,7 +608,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         dwl = (lambda_max - lambda_min) / len(data_x) / np.sqrt(12.0)
         for i in range(len(data_x)):
             dq_theta = data_x[i] * dq_over_q
-            dq_wl = data_x[i]**2 * dwl / (4.0*np.pi*np.sin(theta))
+            dq_wl = data_x[i]**2 * dwl / (4.0 * np.pi * np.sin(theta))
             data_dx[i] = np.sqrt(dq_theta**2 + dq_wl**2)
 
         return ws
@@ -571,8 +624,10 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         dirpix_overwrite = self.getProperty("DirectPixelOverwrite").value
         dangle0_overwrite = self.getProperty("DAngle0Overwrite").value
 
-        _theta = MRGetTheta(Workspace=ws_event_data, AngleOffset=angle_offset,
-                            UseSANGLE=use_sangle, SpecularPixel=ref_pix,
+        _theta = MRGetTheta(Workspace=ws_event_data,
+                            AngleOffset=angle_offset,
+                            UseSANGLE=use_sangle,
+                            SpecularPixel=ref_pix,
                             DirectPixelOverwrite=dirpix_overwrite,
                             DAngle0Overwrite=dangle0_overwrite)
 
@@ -623,8 +678,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             tof_min = ws_event_data.getTofMin()
             if tof_min > self._tof_range[1] or tof_max < self._tof_range[0]:
                 error_msg = "Requested range does not match data for %s: " % str(ws_event_data)
-                error_msg += "[%g, %g] found [%g, %g]" % (self._tof_range[0], self._tof_range[1],
-                                                          tof_min, tof_max)
+                error_msg += "[%g, %g] found [%g, %g]" % (self._tof_range[0], self._tof_range[1], tof_min, tof_max)
                 raise RuntimeError(error_msg)
 
     def write_meta_data(self, workspace):
@@ -637,49 +691,94 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
         # Data
         data_peak_range = self.getProperty("SignalPeakPixelRange").value
-        AddSampleLog(Workspace=workspace, LogName='scatt_peak_min', LogText=str(data_peak_range[0]),
-                     LogType='Number', LogUnit='pixel')
-        AddSampleLog(Workspace=workspace, LogName='scatt_peak_max', LogText=str(data_peak_range[1]),
-                     LogType='Number', LogUnit='pixel')
+        AddSampleLog(Workspace=workspace,
+                     LogName='scatt_peak_min',
+                     LogText=str(data_peak_range[0]),
+                     LogType='Number',
+                     LogUnit='pixel')
+        AddSampleLog(Workspace=workspace,
+                     LogName='scatt_peak_max',
+                     LogText=str(data_peak_range[1]),
+                     LogType='Number',
+                     LogUnit='pixel')
 
         data_bg_range = self.getProperty("SignalBackgroundPixelRange").value
-        AddSampleLog(Workspace=workspace, LogName='scatt_bg_min', LogText=str(data_bg_range[0]),
-                     LogType='Number', LogUnit='pixel')
-        AddSampleLog(Workspace=workspace, LogName='scatt_bg_max', LogText=str(data_bg_range[1]),
-                     LogType='Number', LogUnit='pixel')
+        AddSampleLog(Workspace=workspace,
+                     LogName='scatt_bg_min',
+                     LogText=str(data_bg_range[0]),
+                     LogType='Number',
+                     LogUnit='pixel')
+        AddSampleLog(Workspace=workspace,
+                     LogName='scatt_bg_max',
+                     LogText=str(data_bg_range[1]),
+                     LogType='Number',
+                     LogUnit='pixel')
 
         low_res_range = self.getProperty("LowResDataAxisPixelRange").value
-        AddSampleLog(Workspace=workspace, LogName='scatt_low_res_min', LogText=str(low_res_range[0]),
-                     LogType='Number', LogUnit='pixel')
-        AddSampleLog(Workspace=workspace, LogName='scatt_low_res_max', LogText=str(low_res_range[1]),
-                     LogType='Number', LogUnit='pixel')
+        AddSampleLog(Workspace=workspace,
+                     LogName='scatt_low_res_min',
+                     LogText=str(low_res_range[0]),
+                     LogType='Number',
+                     LogUnit='pixel')
+        AddSampleLog(Workspace=workspace,
+                     LogName='scatt_low_res_max',
+                     LogText=str(low_res_range[1]),
+                     LogType='Number',
+                     LogUnit='pixel')
 
         specular_pixel = self.getProperty("SpecularPixel").value
-        AddSampleLog(Workspace=workspace, LogName='specular_pixel', LogText=str(specular_pixel),
-                     LogType='Number', LogUnit='pixel')
+        AddSampleLog(Workspace=workspace,
+                     LogName='specular_pixel',
+                     LogText=str(specular_pixel),
+                     LogType='Number',
+                     LogUnit='pixel')
 
         # Direct beam runs
         data_peak_range = self.getProperty("NormPeakPixelRange").value
-        AddSampleLog(Workspace=workspace, LogName='norm_peak_min', LogText=str(data_peak_range[0]),
-                     LogType='Number', LogUnit='pixel')
-        AddSampleLog(Workspace=workspace, LogName='norm_peak_max', LogText=str(data_peak_range[1]),
-                     LogType='Number', LogUnit='pixel')
+        AddSampleLog(Workspace=workspace,
+                     LogName='norm_peak_min',
+                     LogText=str(data_peak_range[0]),
+                     LogType='Number',
+                     LogUnit='pixel')
+        AddSampleLog(Workspace=workspace,
+                     LogName='norm_peak_max',
+                     LogText=str(data_peak_range[1]),
+                     LogType='Number',
+                     LogUnit='pixel')
 
         data_bg_range = self.getProperty("NormBackgroundPixelRange").value
-        AddSampleLog(Workspace=workspace, LogName='norm_bg_min', LogText=str(data_bg_range[0]),
-                     LogType='Number', LogUnit='pixel')
-        AddSampleLog(Workspace=workspace, LogName='norm_bg_max', LogText=str(data_bg_range[1]),
-                     LogType='Number', LogUnit='pixel')
+        AddSampleLog(Workspace=workspace,
+                     LogName='norm_bg_min',
+                     LogText=str(data_bg_range[0]),
+                     LogType='Number',
+                     LogUnit='pixel')
+        AddSampleLog(Workspace=workspace,
+                     LogName='norm_bg_max',
+                     LogText=str(data_bg_range[1]),
+                     LogType='Number',
+                     LogUnit='pixel')
 
         low_res_range = self.getProperty("LowResNormAxisPixelRange").value
-        AddSampleLog(Workspace=workspace, LogName='norm_low_res_min', LogText=str(low_res_range[0]),
-                     LogType='Number', LogUnit='pixel')
-        AddSampleLog(Workspace=workspace, LogName='norm_low_res_max', LogText=str(low_res_range[1]),
-                     LogType='Number', LogUnit='pixel')
+        AddSampleLog(Workspace=workspace,
+                     LogName='norm_low_res_min',
+                     LogText=str(low_res_range[0]),
+                     LogType='Number',
+                     LogUnit='pixel')
+        AddSampleLog(Workspace=workspace,
+                     LogName='norm_low_res_max',
+                     LogText=str(low_res_range[1]),
+                     LogType='Number',
+                     LogUnit='pixel')
 
     #pylint: disable=too-many-arguments
-    def process_data(self, workspace, crop_low_res, low_res_range,
-                     peak_range, subtract_background, background_range, rebin_to_ws=None):
+    def process_data(self,
+                     workspace,
+                     crop_low_res,
+                     low_res_range,
+                     peak_range,
+                     subtract_background,
+                     background_range,
+                     rebin_to_ws=None):
         """
             Common processing for both sample data and normalization.
             :param workspace: event workspace to process
@@ -706,8 +805,10 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
         if constant_q_binning and convert_first:
             # Convert to wavelength
-            workspace = ConvertUnits(InputWorkspace=workspace, Target="Wavelength",
-                                     AlignBins=True, ConvertFromPointData=False,
+            workspace = ConvertUnits(InputWorkspace=workspace,
+                                     Target="Wavelength",
+                                     AlignBins=True,
+                                     ConvertFromPointData=False,
                                      OutputWorkspace="%s_histo" % str(workspace))
 
         # Rebin either to the specified parameter or to the given workspace
@@ -724,13 +825,16 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                     _range[0] = tof_step
             else:
                 _range = self._tof_range
-            workspace = Rebin(InputWorkspace=workspace, Params=[_range[0], tof_step, _range[1]],
+            workspace = Rebin(InputWorkspace=workspace,
+                              Params=[_range[0], tof_step, _range[1]],
                               OutputWorkspace="%s_histo" % str(workspace))
 
         if constant_q_binning and not convert_first:
             # Convert to wavelength
-            workspace = ConvertUnits(InputWorkspace=workspace, Target="Wavelength",
-                                     AlignBins=True, ConvertFromPointData=False,
+            workspace = ConvertUnits(InputWorkspace=workspace,
+                                     Target="Wavelength",
+                                     AlignBins=True,
+                                     ConvertFromPointData=False,
                                      OutputWorkspace="%s_histo" % str(workspace))
 
         # Integrate over low resolution range
@@ -738,11 +842,12 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         low_res_max = self.number_of_pixels_y
         if crop_low_res:
             low_res_min = int(low_res_range[0])
-            low_res_max = min(int(low_res_range[1]), self.number_of_pixels_y-1)
+            low_res_max = min(int(low_res_range[1]), self.number_of_pixels_y - 1)
 
         # Subtract background
         if subtract_background:
-            average = RefRoi(InputWorkspace=workspace, IntegrateY=True,
+            average = RefRoi(InputWorkspace=workspace,
+                             IntegrateY=True,
                              NXPixel=self.number_of_pixels_x,
                              NYPixel=self.number_of_pixels_y,
                              ConvertToQ=False,
@@ -750,25 +855,33 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                              XPixelMax=int(background_range[1]),
                              YPixelMin=low_res_min,
                              YPixelMax=low_res_max,
-                             ErrorWeighting = error_weighted_bck,
-                             SumPixels=True, NormalizeSum=True)
+                             ErrorWeighting=error_weighted_bck,
+                             SumPixels=True,
+                             NormalizeSum=True)
 
-            signal = RefRoi(InputWorkspace=workspace, IntegrateY=True,
+            signal = RefRoi(InputWorkspace=workspace,
+                            IntegrateY=True,
                             NXPixel=self.number_of_pixels_x,
                             NYPixel=self.number_of_pixels_y,
-                            ConvertToQ=False, YPixelMin=low_res_min, YPixelMax=low_res_max,
+                            ConvertToQ=False,
+                            YPixelMin=low_res_min,
+                            YPixelMax=low_res_max,
                             OutputWorkspace="signal_%s" % str(workspace))
-            subtracted = Minus(LHSWorkspace=signal, RHSWorkspace=average,
+            subtracted = Minus(LHSWorkspace=signal,
+                               RHSWorkspace=average,
                                OutputWorkspace="subtracted_%s" % str(workspace))
             AnalysisDataService.remove(str(average))
             AnalysisDataService.remove(str(signal))
         else:
             # If we don't subtract the background, we still have to integrate
             # over the low resolution axis
-            subtracted = RefRoi(InputWorkspace=workspace, IntegrateY=True,
+            subtracted = RefRoi(InputWorkspace=workspace,
+                                IntegrateY=True,
                                 NXPixel=self.number_of_pixels_x,
                                 NYPixel=self.number_of_pixels_y,
-                                ConvertToQ=False, YPixelMin=low_res_min, YPixelMax=low_res_max,
+                                ConvertToQ=False,
+                                YPixelMin=low_res_min,
+                                YPixelMax=low_res_max,
                                 OutputWorkspace="subtracted_%s" % str(workspace))
 
         # Normalize by current proton charge
@@ -781,11 +894,11 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # Crop to only the selected peak region
         cropped = CropWorkspace(InputWorkspace=subtracted,
                                 StartWorkspaceIndex=max(0, int(peak_range[0])),
-                                EndWorkspaceIndex=min(int(peak_range[1]), self.number_of_pixels_x-1),
+                                EndWorkspaceIndex=min(int(peak_range[1]), self.number_of_pixels_x - 1),
                                 OutputWorkspace="%s_cropped" % str(subtracted))
 
         if rebin_to_ws is not None:
-            cropped = SumSpectra(InputWorkspace = cropped)
+            cropped = SumSpectra(InputWorkspace=cropped)
 
         # Avoid leaving trash behind
         AnalysisDataService.remove(str(workspace))

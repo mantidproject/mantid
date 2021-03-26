@@ -15,13 +15,13 @@ import json
 import random
 import string
 import mantid.simpleapi as sapi
-from mantid.api import (mtd, PythonAlgorithm, AlgorithmFactory, FileProperty,
-                        FileAction, AnalysisDataService, ExperimentInfo)
-from mantid.kernel import (IntArrayProperty, StringListValidator,
-                           FloatArrayProperty, EnabledWhenProperty,
-                           Direction, PropertyCriterion)
+from mantid.api import (mtd, PythonAlgorithm, AlgorithmFactory, FileProperty, FileAction, AnalysisDataService,
+                        ExperimentInfo)
+from mantid.kernel import (IntArrayProperty, StringListValidator, FloatArrayProperty, EnabledWhenProperty, Direction,
+                           PropertyCriterion)
 from mantid import config as mantid_config
 from os.path import join as pjoin
+
 temp_prefix = '_ti_'  # marks a workspace as temporary
 
 
@@ -70,7 +70,7 @@ def tws(marker=''):
     -------
     str
     """
-    return unique_workspace_name(prefix=temp_prefix, suffix='_'+marker)
+    return unique_workspace_name(prefix=temp_prefix, suffix='_' + marker)
 
 
 @contextmanager
@@ -136,30 +136,36 @@ DEFAULT_CONFIG_DIR = mantid_config['instrumentDefinition.directory']
 # BASIS allows two possible reflections, with associated default properties
 # pylint: disable=line-too-long
 REFLECTIONS_DICT = {
-    'silicon_111': {'name': 'silicon_111',
-                    'energy_bins': [-150, 0.4, 500],  # micro-eV
-                    'q_bins': [0.3, 0.2, 1.9],  # inverse Angst
-                    'banks': 'bank1,bank3,bank4',
-                    'mask_file': 'BASIS_Mask_default_111.xml',
-                    'default_energy': 2.0826,  # meV
-                    'vanadium_bins': [-0.0034, 0.068, 0.0034],
-                    'vanadium_wav_range': [6.20, 6.33]},
-    'silicon_333': {'name': 'silicon_333',
-                    'energy_bins': [-1500, 3.2, 5000],
-                    'q_bins': [0.9, 0.2, 5.7],
-                    'banks': 'bank1,bank3,bank4',
-                    'mask_file': 'BASIS_Mask_default_333.xml',
-                    'default_energy': 18.7434,
-                    'vanadium_bins': [-0.0333, 0.0666, 0.0333],
-                    'vanadium_wav_range': [2.080, 2.108]},
-    'silicon_311': {'name': 'silicon_311',
-                    'energy_bins': [-740, 1.6, 740],
-                    'q_bins': [0.5, 0.2, 3.7],
-                    'banks': 'bank2',
-                    'mask_file': 'BASIS_Mask_default_311.xml',
-                    'default_energy': 7.6368,  # meV
-                    'vanadium_bins': [-0.015, 0.030, 0.015],
-                    'vanadium_wav_range': [3.263, 3.295]}
+    'silicon_111': {
+        'name': 'silicon_111',
+        'energy_bins': [-150, 0.4, 500],  # micro-eV
+        'q_bins': [0.3, 0.2, 1.9],  # inverse Angst
+        'banks': 'bank1,bank3,bank4',
+        'mask_file': 'BASIS_Mask_default_111.xml',
+        'default_energy': 2.0826,  # meV
+        'vanadium_bins': [-0.0034, 0.068, 0.0034],
+        'vanadium_wav_range': [6.20, 6.33]
+    },
+    'silicon_333': {
+        'name': 'silicon_333',
+        'energy_bins': [-1500, 3.2, 5000],
+        'q_bins': [0.9, 0.2, 5.7],
+        'banks': 'bank1,bank3,bank4',
+        'mask_file': 'BASIS_Mask_default_333.xml',
+        'default_energy': 18.7434,
+        'vanadium_bins': [-0.0333, 0.0666, 0.0333],
+        'vanadium_wav_range': [2.080, 2.108]
+    },
+    'silicon_311': {
+        'name': 'silicon_311',
+        'energy_bins': [-740, 1.6, 740],
+        'q_bins': [0.5, 0.2, 3.7],
+        'banks': 'bank2',
+        'mask_file': 'BASIS_Mask_default_311.xml',
+        'default_energy': 7.6368,  # meV
+        'vanadium_bins': [-0.015, 0.030, 0.015],
+        'vanadium_wav_range': [3.263, 3.295]
+    }
 }
 
 # pylint: disable=too-many-instance-attributes
@@ -236,82 +242,71 @@ class BASISReduction(PythonAlgorithm):
 
         self.declareProperty('RunNumbers', '', 'Sample run numbers')
         self.declareProperty('DoIndividual', False, 'Do each run individually')
-        self.declareProperty('ExcludeTimeSegment', '',
-                             'Exclude a contigous time segment; '
-                             + 'Examples: "71546:0-60" filter run 71546 from '
-                             + 'start to 60 seconds, "71546:300-600", '
-                             + '"71546:120-end" from 120s to the end of the run')
+        self.declareProperty(
+            'ExcludeTimeSegment', '',
+            'Exclude a contigous time segment; ' + 'Examples: "71546:0-60" filter run 71546 from ' +
+            'start to 60 seconds, "71546:300-600", ' + '"71546:120-end" from 120s to the end of the run')
         help_doc = """Only retain events occurring within a time segment.
 Examples: 71546:0-3600 only retains events from the first hour of run 71546.
 71546:3600-7200 retain only the second hour. 71546:7200-end retain events after
 the first two hours"""
         self.declareProperty('RetainTimeSegment', '', help_doc)
         grouping_type = ['None', 'Low-Resolution', 'By-Tube']
-        self.declareProperty('GroupDetectors', 'None',
-                             StringListValidator(grouping_type),
+        self.declareProperty('GroupDetectors', 'None', StringListValidator(grouping_type),
                              'Switch for grouping detectors')
         #
         #  Normalization selector
         #
         title_flux_normalization = 'Flux Normalization'
-        self.declareProperty('DoFluxNormalization', True,
+        self.declareProperty('DoFluxNormalization',
+                             True,
                              direction=Direction.Input,
                              doc='Do we normalize data by incoming flux?')
         self.setPropertyGroup('DoFluxNormalization', title_flux_normalization)
-        if_flux_normalization = EnabledWhenProperty('DoFluxNormalization',
-                                                    PropertyCriterion.IsDefault)
+        if_flux_normalization = EnabledWhenProperty('DoFluxNormalization', PropertyCriterion.IsDefault)
         default_flux_normalization = self._flux_normalization_types[0]
-        self.declareProperty('FluxNormalizationType',
-                             default_flux_normalization,
-                             StringListValidator(
-                                 self._flux_normalization_types),
-                             'Flux Normalization Type')
-        self.setPropertySettings('FluxNormalizationType',
-                                 if_flux_normalization)
-        self.setPropertyGroup('FluxNormalizationType',
-                              title_flux_normalization)
+        self.declareProperty('FluxNormalizationType', default_flux_normalization,
+                             StringListValidator(self._flux_normalization_types), 'Flux Normalization Type')
+        self.setPropertySettings('FluxNormalizationType', if_flux_normalization)
+        self.setPropertyGroup('FluxNormalizationType', title_flux_normalization)
 
-        self.declareProperty('NormalizeToFirst', False, 'Normalize spectra '
-                             + 'to intensity of spectrum with lowest Q?')
+        self.declareProperty('NormalizeToFirst', False,
+                             'Normalize spectra ' + 'to intensity of spectrum with lowest Q?')
         #
         # Properties affected by the reflection selected
         #
         titleReflection = 'Reflection Selector'
         available_reflections = sorted(REFLECTIONS_DICT.keys())
         default_reflection = REFLECTIONS_DICT['silicon_111']
-        self.declareProperty('ReflectionType', default_reflection['name'],
-                             StringListValidator(available_reflections),
-                             'Analyzer. Documentation lists typical \
+        self.declareProperty(
+            'ReflectionType', default_reflection['name'], StringListValidator(available_reflections),
+            'Analyzer. Documentation lists typical \
                              associated property values.')
         self.setPropertyGroup('ReflectionType', titleReflection)
-        self.declareProperty(FloatArrayProperty('EnergyBins',
-                                                default_reflection['energy_bins'],
-                                                direction=Direction.Input),
-                             'Energy transfer binning scheme (in ueV)')
+        self.declareProperty(
+            FloatArrayProperty('EnergyBins', default_reflection['energy_bins'], direction=Direction.Input),
+            'Energy transfer binning scheme (in ueV)')
         self.setPropertyGroup('EnergyBins', titleReflection)
-        self.declareProperty(FloatArrayProperty('MomentumTransferBins',
-                                                default_reflection['q_bins'],
-                                                direction=Direction.Input),
-                             'Momentum transfer binning scheme')
+        self.declareProperty(
+            FloatArrayProperty('MomentumTransferBins', default_reflection['q_bins'], direction=Direction.Input),
+            'Momentum transfer binning scheme')
         self.setPropertyGroup('MomentumTransferBins', titleReflection)
-        self.declareProperty(FileProperty(name='MaskFile', defaultValue='',
-                                          action=FileAction.OptionalLoad,
-                                          extensions=['.xml']),
-                             'See documentation for latest mask files.')
+        self.declareProperty(
+            FileProperty(name='MaskFile', defaultValue='', action=FileAction.OptionalLoad, extensions=['.xml']),
+            'See documentation for latest mask files.')
         self.setPropertyGroup('MaskFile', titleReflection)
 
         # Properties setting the division by vanadium
         titleDivideByVanadium = 'Normalization by Vanadium'
-        self.declareProperty('DivideByVanadium', False,
+        self.declareProperty('DivideByVanadium',
+                             False,
                              direction=Direction.Input,
                              doc='Do we normalize by the vanadium intensity?')
         self.setPropertyGroup('DivideByVanadium', titleDivideByVanadium)
-        ifDivideByVanadium = EnabledWhenProperty('DivideByVanadium',
-                                                 PropertyCriterion.IsNotDefault)
+        ifDivideByVanadium = EnabledWhenProperty('DivideByVanadium', PropertyCriterion.IsNotDefault)
 
         normalization_types = ['by Q slice', 'by detector ID']
-        self.declareProperty('NormalizationType', 'by Q slice',
-                             StringListValidator(normalization_types),
+        self.declareProperty('NormalizationType', 'by Q slice', StringListValidator(normalization_types),
                              'Select a Vanadium normalization')
         self.setPropertySettings('NormalizationType', ifDivideByVanadium)
         self.setPropertyGroup('NormalizationType', titleDivideByVanadium)
@@ -322,17 +317,19 @@ the first two hours"""
 
         # Properties setting the saving of NSXPE file
         title_nxspe = 'Save to NXSPE'
-        self.declareProperty('SaveNXSPE', False, direction=Direction.Input,
-                             doc='Do we save to NXSPE format?')
-        nxspe_enabled = EnabledWhenProperty('SaveNXSPE',
-                                            PropertyCriterion.IsNotDefault)
+        self.declareProperty('SaveNXSPE', False, direction=Direction.Input, doc='Do we save to NXSPE format?')
+        nxspe_enabled = EnabledWhenProperty('SaveNXSPE', PropertyCriterion.IsNotDefault)
         self.setPropertyGroup('SaveNXSPE', title_nxspe)
-        self.declareProperty('PsiAngleLog', 'SE50Rot', direction=Direction.Input,
+        self.declareProperty('PsiAngleLog',
+                             'SE50Rot',
+                             direction=Direction.Input,
                              doc='name of entry in the logs storing the psi \
                              angle')
         self.setPropertySettings('PsiAngleLog', nxspe_enabled)
         self.setPropertyGroup('PsiAngleLog', title_nxspe)
-        self.declareProperty('PsiOffset', 0.0, direction=Direction.Input,
+        self.declareProperty('PsiOffset',
+                             0.0,
+                             direction=Direction.Input,
                              doc='add this quantity to the psi angle stored \
                              in the log')
         self.setPropertySettings('PsiOffset', nxspe_enabled)
@@ -340,24 +337,30 @@ the first two hours"""
 
         # Aditional output properties
         titleAddionalOutput = 'Additional Output'
-        self.declareProperty('OutputSusceptibility', False,
+        self.declareProperty('OutputSusceptibility',
+                             False,
                              direction=Direction.Input,
                              doc='Output dynamic susceptibility (Xqw)')
         self.setPropertyGroup('OutputSusceptibility', titleAddionalOutput)
-        self.declareProperty('OutputPowderSpectrum', False,
+        self.declareProperty('OutputPowderSpectrum',
+                             False,
                              direction=Direction.Input,
                              doc='Output S(Q) and S(theta) powder diffraction')
         self.setPropertyGroup('OutputPowderSpectrum', titleAddionalOutput)
-        self.declareProperty('RemoveTemporaryWorkspaces', True, direction=Direction.Input,
+        self.declareProperty('RemoveTemporaryWorkspaces',
+                             True,
+                             direction=Direction.Input,
                              doc='Remove temporary workspaces and files')
         self.setPropertyGroup('RemoveTemporaryWorkspaces', titleAddionalOutput)
 
     # pylint: disable=too-many-branches
     def PyExec(self):
         # Facility and database configuration
-        config_new_options = {'default.facility': 'SNS',
-                              'default.instrument': 'BASIS',
-                              'datasearch.searcharchive': 'On'}
+        config_new_options = {
+            'default.facility': 'SNS',
+            'default.instrument': 'BASIS',
+            'datasearch.searcharchive': 'On'
+        }
         #
         # implement with ContextDecorator after python2 is deprecated)
         #
@@ -380,8 +383,8 @@ the first two hours"""
         # micro-eV to mili-eV
         self._etBins = 1.E-03 * self.getProperty('EnergyBins').value
         self._qBins = self.getProperty('MomentumTransferBins').value
-        self._qBins[0] -= self._qBins[1]/2.0  # leftmost bin boundary
-        self._qBins[2] += self._qBins[1]/2.0  # rightmost bin boundary
+        self._qBins[0] -= self._qBins[1] / 2.0  # leftmost bin boundary
+        self._qBins[2] += self._qBins[1] / 2.0  # rightmost bin boundary
 
         self._maskFile = self.getProperty('MaskFile').value
         maskfile = self.getProperty('MaskFile').value
@@ -405,13 +408,10 @@ the first two hours"""
             self._maskFile = self._reflection['mask_file']
 
         self._maskWs = tws('BASIS_MASK')
-        sapi.LoadMask(Instrument='BASIS',
-                      OutputWorkspace=self._maskWs,
-                      InputFile=self._maskFile)
+        sapi.LoadMask(Instrument='BASIS', OutputWorkspace=self._maskWs, InputFile=self._maskFile)
 
         # Work around length issue
-        _dMask = sapi.ExtractMask(InputWorkspace=self._maskWs,
-                                  OutputWorkspace=tws('ExtractMask'))
+        _dMask = sapi.ExtractMask(InputWorkspace=self._maskWs, OutputWorkspace=tws('ExtractMask'))
         self._dMask = _dMask[1]
 
         #
@@ -435,28 +435,24 @@ the first two hours"""
             # This rebin integrates counts onto a histogram of a single bin
             if self._normalizationType == 'by detector ID':
                 self._normRange = [normRange[0], bin_width, normRange[1]]
-                sapi.Rebin(InputWorkspace=normWs,
-                           OutputWorkspace=normWs,
-                           Params=self._normRange)
+                sapi.Rebin(InputWorkspace=normWs, OutputWorkspace=normWs, Params=self._normRange)
                 self._normWs = normWs
             # Detectors outside limits are substituted by MedianDetectorTest
             self._normMask = tws('BASIS_NORM_MASK')
-            sapi.FindDetectorsOutsideLimits(InputWorkspace=normWs,
-                                            LowThreshold=1.0*bin_width,
-                                            # no count events outside ranges
-                                            RangeLower=normRange[0],
-                                            RangeUpper=normRange[1],
-                                            OutputWorkspace=self._normMask)
+            sapi.FindDetectorsOutsideLimits(
+                InputWorkspace=normWs,
+                LowThreshold=1.0 * bin_width,
+                # no count events outside ranges
+                RangeLower=normRange[0],
+                RangeUpper=normRange[1],
+                OutputWorkspace=self._normMask)
             # additional reduction steps when normalizing by Q slice
             if self._normalizationType == 'by Q slice':
-                self._normWs = self._group_and_SofQW(normWs, normWs,
-                                                     self._etBins,
-                                                     isSample=False)
+                self._normWs = self._group_and_SofQW(normWs, normWs, self._etBins, isSample=False)
         #
         #  Process the sample
         #
-        self._run_list = self._get_runs(self.getProperty('RunNumbers').value,
-                                        doIndiv=self._doIndiv)
+        self._run_list = self._get_runs(self.getProperty('RunNumbers').value, doIndiv=self._doIndiv)
         for run_set in self._run_list:
             self._samWs = tws(self._make_run_name(run_set[0]))
             self._sum_and_calibrate(run_set, self._samWs)
@@ -464,20 +460,14 @@ the first two hours"""
             # Divide by Vanadium detector ID, if pertinent
             if self._normalizationType == 'by detector ID':
                 # Mask detectors with low Vanadium signal before dividing
-                sapi.MaskDetectors(Workspace=self._samWs,
-                                   MaskedWorkspace=self._normMask)
-                sapi.Divide(LHSWorkspace=self._samWs,
-                            RHSWorkspace=self._normWs,
-                            OutputWorkspace=self._samWs)
+                sapi.MaskDetectors(Workspace=self._samWs, MaskedWorkspace=self._normMask)
+                sapi.Divide(LHSWorkspace=self._samWs, RHSWorkspace=self._normWs, OutputWorkspace=self._samWs)
             # additional reduction steps
             prefix = self._make_run_name(run_set[0])
-            self._samSqwWs = self._group_and_SofQW(self._samWs, prefix,
-                                                   self._etBins, isSample=True)
+            self._samSqwWs = self._group_and_SofQW(self._samWs, prefix, self._etBins, isSample=True)
             # Divide by Vanadium Q slice, if pertinent
             if self._normalizationType == 'by Q slice':
-                sapi.Divide(LHSWorkspace=self._samSqwWs,
-                            RHSWorkspace=self._normWs,
-                            OutputWorkspace=self._samSqwWs)
+                sapi.Divide(LHSWorkspace=self._samSqwWs, RHSWorkspace=self._normWs, OutputWorkspace=self._samSqwWs)
             # Clear mask from reduced file. Needed for binary operations
             # involving this S(Q,w)
             sapi.ClearMaskFlag(Workspace=self._samSqwWs)
@@ -487,27 +477,21 @@ the first two hours"""
 
             # Transform the vertical axis (Q) to point data
             # Q-values are in X-axis now
-            sapi.Transpose(InputWorkspace=self._samSqwWs,
-                           OutputWorkspace=self._samSqwWs)
+            sapi.Transpose(InputWorkspace=self._samSqwWs, OutputWorkspace=self._samSqwWs)
             # from histo to point
-            sapi.ConvertToPointData(InputWorkspace=self._samSqwWs,
-                                    OutputWorkspace=self._samSqwWs)
+            sapi.ConvertToPointData(InputWorkspace=self._samSqwWs, OutputWorkspace=self._samSqwWs)
             # Q-values back to vertical axis
-            sapi.Transpose(InputWorkspace=self._samSqwWs,
-                           OutputWorkspace=self._samSqwWs)
+            sapi.Transpose(InputWorkspace=self._samSqwWs, OutputWorkspace=self._samSqwWs)
             self.serialize_in_log(self._samSqwWs)  # store the call
             # Output Dave and Nexus files
             extension = '_divided.dat' if self._doNorm else '.dat'
             dave_grp_filename = self._make_run_name(self._samWsRun, False) + \
                 extension
-            sapi.SaveDaveGrp(Filename=dave_grp_filename,
-                             InputWorkspace=self._samSqwWs,
-                             ToMicroEV=True)
+            sapi.SaveDaveGrp(Filename=dave_grp_filename, InputWorkspace=self._samSqwWs, ToMicroEV=True)
             extension = '_divided_sqw.nxs' if self._doNorm else '_sqw.nxs'
             processed_filename = self._make_run_name(self._samWsRun, False) + \
                 extension
-            sapi.SaveNexus(Filename=processed_filename,
-                           InputWorkspace=self._samSqwWs)
+            sapi.SaveNexus(Filename=processed_filename, InputWorkspace=self._samSqwWs)
 
             # additional output
             if self.getProperty('OutputSusceptibility').value is True:
@@ -524,8 +508,7 @@ the first two hours"""
                                   Efixed=self._reflection['default_energy'])
                 self.serialize_in_log(samXqsWs)
                 susceptibility_filename = processed_filename.replace('sqw', 'Xqw')
-                sapi.SaveNexus(Filename=susceptibility_filename,
-                               InputWorkspace=samXqsWs)
+                sapi.SaveNexus(Filename=susceptibility_filename, InputWorkspace=samXqsWs)
             if self.getProperty('OutputPowderSpectrum').value:
                 self.generatePowderSpectrum()
 
@@ -613,11 +596,9 @@ the first two hours"""
         """
         self.load_single_run(run_set[0], sam_ws)
         for run in run_set[1:]:
-            ws_name = tws('sum_runs_'+run)
+            ws_name = tws('sum_runs_' + run)
             self.load_single_run(run, ws_name)
-            sapi.Plus(LHSWorkspace=sam_ws,
-                      RHSWorkspace=ws_name,
-                      OutputWorkspace=sam_ws)
+            sapi.Plus(LHSWorkspace=sam_ws, RHSWorkspace=ws_name, OutputWorkspace=sam_ws)
 
     def load_single_run(self, run, name):
         r"""
@@ -637,9 +618,7 @@ the first two hours"""
         EventsWorkspace
         """
 
-        kwargs = dict(Filename=self._make_run_file(run),
-                      BankName=self._reflection['banks'],
-                      OutputWorkspace=name)
+        kwargs = dict(Filename=self._make_run_file(run), BankName=self._reflection['banks'], OutputWorkspace=name)
         if str(run) + ':' in self.getProperty('RetainTimeSegment').value:
             kwargs.update(self._retainEvents(run))
         sapi.LoadEventNexus(**kwargs)
@@ -657,15 +636,11 @@ the first two hours"""
         mon_ws: str
             Name of output workspace
         """
-        sapi.LoadNexusMonitors(Filename=self._make_run_file(run_set[0]),
-                               OutputWorkspace=mon_ws)
+        sapi.LoadNexusMonitors(Filename=self._make_run_file(run_set[0]), OutputWorkspace=mon_ws)
         for run in run_set[1:]:
-            ws_name = tws('sum_monitors_'+run)
-            sapi.LoadNexusMonitors(Filename=self._make_run_file(run),
-                                   OutputWorkspace=ws_name)
-            sapi.Plus(LHSWorkspace=mon_ws,
-                      RHSWorkspace=ws_name,
-                      OutputWorkspace=mon_ws)
+            ws_name = tws('sum_monitors_' + run)
+            sapi.LoadNexusMonitors(Filename=self._make_run_file(run), OutputWorkspace=ws_name)
+            sapi.Plus(LHSWorkspace=mon_ws, RHSWorkspace=ws_name, OutputWorkspace=mon_ws)
 
     def _generate_flux_spectrum(self, run_set, sam_ws):
         r"""
@@ -691,23 +666,19 @@ the first two hours"""
             self._sum_monitors(run_set, flux_ws)
             rpf = self._elucidate_reflection_parameter_file(sam_ws)
             sapi.LoadParameterFile(Workspace=flux_ws, Filename=rpf)
-            sapi.ModeratorTzeroLinear(InputWorkspace=flux_ws,
-                                      OutputWorkspace=flux_ws)
-            sapi.Rebin(InputWorkspace=flux_ws,
-                       OutputWorkspace=flux_ws,
-                       Params='10',  # 10 microseconds TOF bin width
-                       PreserveEvents=False)
-            sapi.ConvertUnits(InputWorkspace=flux_ws,
-                              OutputWorkspace=flux_ws,
-                              Target='Wavelength')
+            sapi.ModeratorTzeroLinear(InputWorkspace=flux_ws, OutputWorkspace=flux_ws)
+            sapi.Rebin(
+                InputWorkspace=flux_ws,
+                OutputWorkspace=flux_ws,
+                Params='10',  # 10 microseconds TOF bin width
+                PreserveEvents=False)
+            sapi.ConvertUnits(InputWorkspace=flux_ws, OutputWorkspace=flux_ws, Target='Wavelength')
             sapi.OneMinusExponentialCor(InputWorkspace=flux_ws,
                                         OutputWorkspace=flux_ws,
                                         C='0.20749999999999999',
                                         C1='0.001276')
-            sapi.Scale(InputWorkspace=flux_ws, OutputWorkspace=flux_ws,
-                       Factor='1e-06')
-            sapi.Rebin(InputWorkspace=flux_ws, OutputWorkspace=flux_ws,
-                       Params=flux_binning)
+            sapi.Scale(InputWorkspace=flux_ws, OutputWorkspace=flux_ws, Factor='1e-06')
+            sapi.Rebin(InputWorkspace=flux_ws, OutputWorkspace=flux_ws, Params=flux_binning)
         else:
             ws = mtd[sam_ws].getRun()
             if self._flux_normalization_type == 'Proton Charge':
@@ -720,8 +691,7 @@ the first two hours"""
             x = np.arange(flux_binning[0], flux_binning[2], flux_binning[1])
             y = f[self._flux_normalization_type] * \
                 aggregate_flux * np.ones(len(x) - 1)
-            _flux_ws = sapi.CreateWorkspace(OutputWorkspace=flux_ws, DataX=x,
-                                            DataY=y, UnitX='Wavelength')
+            _flux_ws = sapi.CreateWorkspace(OutputWorkspace=flux_ws, DataX=x, DataY=y, UnitX='Wavelength')
             _flux_ws.setYUnit(mtd[sam_ws].YUnit())
         return flux_ws
 
@@ -729,8 +699,7 @@ the first two hours"""
         sapi.MaskDetectors(Workspace=sam_ws, DetectorList=self._dMask)
         rpf = self._elucidate_reflection_parameter_file(sam_ws)
         sapi.LoadParameterFile(Workspace=sam_ws, Filename=rpf)
-        sapi.ModeratorTzeroLinear(InputWorkspace=sam_ws,
-                                  OutputWorkspace=sam_ws)
+        sapi.ModeratorTzeroLinear(InputWorkspace=sam_ws, OutputWorkspace=sam_ws)
         sapi.ConvertUnits(InputWorkspace=sam_ws,
                           OutputWorkspace=sam_ws,
                           Target='Wavelength',
@@ -738,11 +707,8 @@ the first two hours"""
                           EFixed=self._reflection['default_energy'])
         if self._flux_normalization_type is not None:
             flux_ws = self._generate_flux_spectrum(run_set, sam_ws)
-            sapi.RebinToWorkspace(WorkspaceToRebin=sam_ws,
-                                  WorkspaceToMatch=flux_ws,
-                                  OutputWorkspace=sam_ws)
-            sapi.Divide(LHSWorkspace=sam_ws, RHSWorkspace=flux_ws,
-                        OutputWorkspace=sam_ws)
+            sapi.RebinToWorkspace(WorkspaceToRebin=sam_ws, WorkspaceToMatch=flux_ws, OutputWorkspace=sam_ws)
+            sapi.Divide(LHSWorkspace=sam_ws, RHSWorkspace=flux_ws, OutputWorkspace=sam_ws)
 
     def _sum_and_calibrate(self, run_set, wsName):
         """
@@ -792,9 +758,7 @@ the first two hours"""
                          OutputWorkspace=wsName,
                          EMode='Indirect',
                          EFixed=self._reflection['default_energy'])
-        sapi.Rebin(InputWorkspace=wsName,
-                   OutputWorkspace=wsName,
-                   Params=etRebins)
+        sapi.Rebin(InputWorkspace=wsName, OutputWorkspace=wsName, Params=etRebins)
         if self._groupDetOpt != 'None':
             if self._groupDetOpt == 'Low-Resolution':
                 grp_file = 'BASIS_Grouping_LR.xml'
@@ -804,10 +768,7 @@ the first two hours"""
             # location to search paths
             if self._overrideMask:
                 mantid_config.appendDataSearchDir(DEFAULT_MASK_GROUP_DIR)
-                sapi.GroupDetectors(InputWorkspace=wsName,
-                                    OutputWorkspace=wsName,
-                                    MapFile=grp_file,
-                                    Behaviour='Sum')
+                sapi.GroupDetectors(InputWorkspace=wsName, OutputWorkspace=wsName, MapFile=grp_file, Behaviour='Sum')
 
         # Output NXSPE file (must be done before transforming the
         # vertical axis to point data)
@@ -839,9 +800,7 @@ the first two hours"""
                     OutputWorkspace=wsSqwName)
         # Rebin the vanadium within the elastic line
         if not isSample:
-            sapi.Rebin(InputWorkspace=wsSqwName,
-                       OutputWorkspace=wsSqwName,
-                       Params=self._reflection['vanadium_bins'])
+            sapi.Rebin(InputWorkspace=wsSqwName, OutputWorkspace=wsSqwName, Params=self._reflection['vanadium_bins'])
         return wsSqwName
 
     def _ScaleY(self, wsName):
@@ -856,10 +815,7 @@ the first two hours"""
         """
         workspace = sapi.mtd[wsName]
         maximumYvalue = workspace.dataY(0).max()
-        sapi.Scale(InputWorkspace=wsName,
-                   OutputWorkspace=wsName,
-                   Factor=1./maximumYvalue,
-                   Operation='Multiply')
+        sapi.Scale(InputWorkspace=wsName, OutputWorkspace=wsName, Factor=1. / maximumYvalue, Operation='Multiply')
 
     def generateSplitterWorkspace(self, fragment):
         r"""
@@ -899,7 +855,7 @@ the first two hours"""
             name of the workspace to filter
         """
         for run_fragment in self.getProperty('ExcludeTimeSegment').value.split(','):
-            if run+':' in run_fragment:
+            if run + ':' in run_fragment:
                 self.generateSplitterWorkspace(run_fragment.split(':')[1])
                 sapi.FilterEvents(InputWorkspace=ws_name,
                                   SplitterWorkspace='splitter',
@@ -908,8 +864,7 @@ the first two hours"""
                                   OutputWorkspaceIndexedFrom1=True,
                                   RelativeTime=True)
                 sapi.UnGroupWorkspace('splitted')
-                sapi.RenameWorkspace(InputWorkspace='splitted_0',
-                                     OutputWorkspace=ws_name)
+                sapi.RenameWorkspace(InputWorkspace='splitted_0', OutputWorkspace=ws_name)
                 break
 
     def _retainEvents(self, run):
@@ -928,8 +883,7 @@ the first two hours"""
             if str(run) + ':' in run_fragment:
                 a, b = run_fragment.split(':')[1].split('-')
                 b = inf if 'end' in b else float(b)
-                return dict(FilterByTimeStart=float(a),
-                            FilterByTimeStop=float(b))
+                return dict(FilterByTimeStart=float(a), FilterByTimeStop=float(b))
         raise RuntimeError('Run {} not in RetainTimeSegment '.format(run))
 
     def serialize_in_log(self, ws_name):
@@ -946,16 +900,16 @@ the first two hours"""
             if isinstance(value, np.ndarray):
                 return value.tolist()
             return value
+
         if self._as_json is None:
             self._as_json = json.loads(str(self))
             # Force serialization of the following properties even if having
             # their default values
-            forced = {name: jsonify(self.getProperty(name).value)
-                      for name in ('DoIndividual', 'DoFluxNormalization',
-                                   'FluxNormalizationType', 'NormalizeToFirst',
-                                   'ReflectionType', 'EnergyBins',
-                                   'MomentumTransferBins', 'MaskFile',
-                                   'DivideByVanadium')}
+            forced = {
+                name: jsonify(self.getProperty(name).value)
+                for name in ('DoIndividual', 'DoFluxNormalization', 'FluxNormalizationType', 'NormalizeToFirst',
+                             'ReflectionType', 'EnergyBins', 'MomentumTransferBins', 'MaskFile', 'DivideByVanadium')
+            }
             self._as_json['properties'].update(forced)
         r = mtd[ws_name].mutableRun()
         r.addProperty('asString', json.dumps(self._as_json), True)
@@ -978,22 +932,16 @@ the first two hours"""
         prefix = 'BASIS_{}_Parameters'.format(self._reflection['name'])
         instr_directories = [DEFAULT_CONFIG_DIR]
         start_date = str(mtd[ws_name].getRun().startTime()).strip()
-        parm_files = ExperimentInfo.getResourceFilenames(prefix,
-                                                         ['xml'],
-                                                         instr_directories,
-                                                         start_date)
+        parm_files = ExperimentInfo.getResourceFilenames(prefix, ['xml'], instr_directories, start_date)
         parm_file = parm_files[0]  # first in the list is the most appropriate
         # store selected parameter file in the logs
-        mtd[ws_name].getRun().addProperty('reflParmFile',
-                                          os.path.basename(parm_file), True)
+        mtd[ws_name].getRun().addProperty('reflParmFile', os.path.basename(parm_file), True)
         return parm_file
 
     def generatePowderSpectrum(self):
         r"""Call BASISPowderReduction to generate a powder spectrum"""
-        powder_reducer = self.createChildAlgorithm("BASISPowderDiffraction",
-                                                   enableLogging=False)
-        for prop in ('RunNumbers', 'DoFluxNormalization',
-                     'FluxNormalizationType'):
+        powder_reducer = self.createChildAlgorithm("BASISPowderDiffraction", enableLogging=False)
+        for prop in ('RunNumbers', 'DoFluxNormalization', 'FluxNormalizationType'):
             powder_reducer.setProperty(prop, self.getProperty(prop).value)
         # This may go later into a input property
         powder_reducer.setProperty('MomentumTransferBins', [0.1, 0.02, 4.0])
@@ -1005,10 +953,8 @@ the first two hours"""
         else:
             suffix = '_sq'
 
-        first_run = re.compile('^([0-9]+)').search(
-            self.getProperty('RunNumbers').value).group(0)
-        powder_reducer.setProperty('OutputWorkspace',
-                                   self._make_run_name(first_run) + suffix)
+        first_run = re.compile('^([0-9]+)').search(self.getProperty('RunNumbers').value).group(0)
+        powder_reducer.setProperty('OutputWorkspace', self._make_run_name(first_run) + suffix)
         powder_reducer.execute()
 
 

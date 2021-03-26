@@ -13,8 +13,10 @@ from sans.gui_logic.gui_common import (load_file, GENERIC_SETTINGS)
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
+
     def _fromUtf8(s):
         return s
+
 
 Ui_DiagnosticsPage, _ = load_ui(__file__, "diagnostics_page.ui")
 
@@ -96,8 +98,7 @@ class DiagnosticsPage(QtWidgets.QWidget, Ui_DiagnosticsPage):
         self._call_diagnostics_page_listeners(lambda listener: listener.on_time_clicked())
 
     def _on_browse_clicked(self):
-        load_file(self.run_input_line_edit, "*.*", self.__generic_settings, self.__path_key,
-                  self.get_file_path)
+        load_file(self.run_input_line_edit, "*.*", self.__generic_settings, self.__path_key, self.get_file_path)
 
         # Notify presenters
         self._call_diagnostics_page_listeners(lambda listener: listener.on_browse_clicked())

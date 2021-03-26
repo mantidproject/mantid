@@ -36,17 +36,17 @@ class SANSILLReductionTest(unittest.TestCase):
 
     def test_absorber(self):
         SANSILLReduction(Run='010462', ProcessAs='Absorber', OutputWorkspace='Cd')
-        self._check_output(mtd['Cd'], True, 1, 128*128+2)
+        self._check_output(mtd['Cd'], True, 1, 128 * 128 + 2)
         self._check_process_flag(mtd['Cd'], 'Absorber')
 
     def test_beam(self):
         SANSILLReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Db', FluxOutputWorkspace='Fl')
-        self._check_output(mtd['Db'], True, 1, 128*128+2)
+        self._check_output(mtd['Db'], True, 1, 128 * 128 + 2)
         self._check_process_flag(mtd['Db'], 'Beam')
         run = mtd['Db'].getRun()
         self.assertAlmostEqual(run.getLogData('BeamCenterX').value, 0.0048, delta=1e-4)
         self.assertAlmostEqual(run.getLogData('BeamCenterY').value, -0.0027, delta=1e-4)
-        self._check_output(mtd['Fl'], False, 1, 128*128+2)
+        self._check_output(mtd['Fl'], False, 1, 128 * 128 + 2)
         self._check_process_flag(mtd['Fl'], 'Beam')
         self.assertAlmostEqual(mtd['Fl'].readY(0)[0], 6628249, delta=1)
         self.assertAlmostEqual(mtd['Fl'].readE(0)[0], 8566, delta=1)
@@ -60,38 +60,37 @@ class SANSILLReductionTest(unittest.TestCase):
 
     def test_container(self):
         SANSILLReduction(Run='010460', ProcessAs='Container', OutputWorkspace='can')
-        self._check_output(mtd['can'], True, 1, 128*128+2)
+        self._check_output(mtd['can'], True, 1, 128 * 128 + 2)
         self._check_process_flag(mtd['can'], 'Container')
 
     def test_reference(self):
         SANSILLReduction(Run='010453', ProcessAs='Sample', SensitivityOutputWorkspace='sens', OutputWorkspace='water')
-        self._check_output(mtd['water'], True, 1, 128*128+2)
-        self._check_output(mtd['sens'], False, 1, 128*128+2)
+        self._check_output(mtd['water'], True, 1, 128 * 128 + 2)
+        self._check_output(mtd['sens'], False, 1, 128 * 128 + 2)
         self._check_process_flag(mtd['water'], 'Sample')
         self._check_process_flag(mtd['sens'], 'Sensitivity')
 
     def test_sample(self):
-        SANSILLReduction(Run='010569', ProcessAs='Sample',
-                         OutputWorkspace='sample')
-        self._check_output(mtd['sample'], True, 1, 128*128+2)
+        SANSILLReduction(Run='010569', ProcessAs='Sample', OutputWorkspace='sample')
+        self._check_output(mtd['sample'], True, 1, 128 * 128 + 2)
         self._check_process_flag(mtd['sample'], 'Sample')
 
     def test_absorber_tof(self):
         # D33 VTOF
         # actually this is a container run, not an absorber, but is fine for this test
         SANSILLReduction(Run='093409', ProcessAs='Absorber', OutputWorkspace='absorber')
-        self._check_output(mtd['absorber'], True, 30, 256*256+2)
+        self._check_output(mtd['absorber'], True, 30, 256 * 256 + 2)
         self._check_process_flag(mtd['absorber'], 'Absorber')
 
     def test_beam_tof(self):
         # D33 VTOF
         SANSILLReduction(Run='093406', ProcessAs='Beam', OutputWorkspace='beam', FluxOutputWorkspace='flux')
-        self._check_output(mtd['beam'], True, 30, 256*256+2)
+        self._check_output(mtd['beam'], True, 30, 256 * 256 + 2)
         self._check_process_flag(mtd['beam'], 'Beam')
         run = mtd['beam'].getRun()
         self.assertAlmostEqual(run.getLogData('BeamCenterX').value, 0.0025, delta=1e-4)
         self.assertAlmostEqual(run.getLogData('BeamCenterY').value, 0.0009, delta=1e-4)
-        self._check_output(mtd['flux'], False, 30, 256*256+2)
+        self._check_output(mtd['flux'], False, 30, 256 * 256 + 2)
         self._check_process_flag(mtd['flux'], 'Beam')
 
     def test_transmission_tof(self):
@@ -104,18 +103,17 @@ class SANSILLReductionTest(unittest.TestCase):
         # D33 VTOF
         # this is actually a sample run, not water, but is fine for this test
         SANSILLReduction(Run='093410', ProcessAs='Sample', OutputWorkspace='ref')
-        self._check_output(mtd['ref'], True, 30, 256*256+2)
+        self._check_output(mtd['ref'], True, 30, 256 * 256 + 2)
         self._check_process_flag(mtd['ref'], 'Sample')
 
     def test_sample_tof(self):
         # D33 VTOF, Pluronic F127
         SANSILLReduction(Run='093410', ProcessAs='Sample', OutputWorkspace='sample')
-        self._check_output(mtd['sample'], True, 30, 256*256+2)
+        self._check_output(mtd['sample'], True, 30, 256 * 256 + 2)
         self._check_process_flag(mtd['sample'], 'Sample')
 
     def test_sample_thickness(self):
-        SANSILLReduction(Run='010569', ProcessAs='Sample', SampleThickness=-1,
-                         OutputWorkspace='sample')
+        SANSILLReduction(Run='010569', ProcessAs='Sample', SampleThickness=-1, OutputWorkspace='sample')
         a = mtd["sample"].getHistory().lastAlgorithm()
         thickness = a.getProperty("SampleThickness").value
         self.assertEqual(thickness, 0.1)
@@ -139,6 +137,7 @@ class SANSILLReductionTest(unittest.TestCase):
             self.assertTrue(ws.getRun().hasProperty('qmax'))
             self.assertTrue(ws.getRun().hasProperty('l2'))
             self.assertTrue(ws.getRun().hasProperty('collimation.actual_position'))
+
 
 if __name__ == '__main__':
     unittest.main()

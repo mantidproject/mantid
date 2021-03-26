@@ -58,11 +58,15 @@ class TiledPlotsTest(TestCase):
 
     def setUp(self):
         if self._test_ws is None:
-            self.__class__._test_ws = WorkspaceFactory.Instance().create(
-                "Workspace2D", NVectors=2, YLength=5, XLength=5)
+            self.__class__._test_ws = WorkspaceFactory.Instance().create("Workspace2D",
+                                                                         NVectors=2,
+                                                                         YLength=5,
+                                                                         XLength=5)
         if self._test_ws_2 is None:
-            self.__class__._test_ws_2 = WorkspaceFactory.Instance().create(
-                "Workspace2D", NVectors=2, YLength=5, XLength=5)
+            self.__class__._test_ws_2 = WorkspaceFactory.Instance().create("Workspace2D",
+                                                                           NVectors=2,
+                                                                           YLength=5,
+                                                                           XLength=5)
 
         AnalysisDataService.addOrReplace('test_ws', self._test_ws)
         AnalysisDataService.addOrReplace('test_ws_2', self._test_ws_2)
@@ -143,8 +147,12 @@ class TiledPlotsTest(TestCase):
         workspaces = ['test_ws', 'test_ws_2']
         fig = self._create_plot(names=workspaces, errors=True, overplot=False)
 
-        fig = self._create_plot(names=['test_ws'], errors=True, overplot=fig.axes[1], wksp_indices=[0, 1],
-                                plot_type=SpectraSelection.Individual, fig=fig)
+        fig = self._create_plot(names=['test_ws'],
+                                errors=True,
+                                overplot=fig.axes[1],
+                                wksp_indices=[0, 1],
+                                plot_type=SpectraSelection.Individual,
+                                fig=fig)
 
         self.assertEqual(len(fig.axes), 2)
         self.assertEqual(list(fig.axes[0].tracked_workspaces.keys()), ['test_ws'])

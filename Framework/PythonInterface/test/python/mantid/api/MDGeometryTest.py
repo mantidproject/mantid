@@ -22,9 +22,11 @@ class MDGeometryTest(unittest.TestCase):
     def setUp(self):
         if self._test_mdws is None:
             signal = 3.0
-            self.__class__._test_mdws = WorkspaceCreationHelper.makeFakeMDHistoWorkspace(signal, self._test_ndims) # A type of MDGeometry
+            self.__class__._test_mdws = WorkspaceCreationHelper.makeFakeMDHistoWorkspace(
+                signal, self._test_ndims)  # A type of MDGeometry
 
 #====================== Success cases ==================================================
+
     def test_numDims_returns_expected_number(self):
         self.assertEqual(self._test_ndims, self._test_mdws.getNumDims())
 
@@ -32,11 +34,11 @@ class MDGeometryTest(unittest.TestCase):
         self.assertEqual(self._test_ndims, self._test_mdws.getNumNonIntegratedDims())
 
     def test_getDimension_by_index_returns_IMDDimension_object_for_valid_index(self):
-        dimension =  self._test_mdws.getDimension(0) # positional
+        dimension = self._test_mdws.getDimension(0)  # positional
         self._check_is_dimension_with_id(dimension, "x")
 
     def test_getDimension_by_id_returns_IMDDimension_object(self):
-        dimension =  self._test_mdws.getDimensionWithId("y")
+        dimension = self._test_mdws.getDimensionWithId("y")
         self._check_is_dimension_with_id(dimension, "y")
 
     def test_getDimensionIndexByName_returns_correct_index_for_valid_name(self):
@@ -88,13 +90,13 @@ class MDGeometryTest(unittest.TestCase):
 
     def test_original_workspace_access(self):
         self.assertFalse(self._test_mdws.hasOriginalWorkspace(0))
-        self.assertEqual(0,self._test_mdws.numOriginalWorkspaces())
-        self.assertRaises(RuntimeError,self._test_mdws.getOriginalWorkspace, 0)
+        self.assertEqual(0, self._test_mdws.numOriginalWorkspaces())
+        self.assertRaises(RuntimeError, self._test_mdws.getOriginalWorkspace, 0)
 
 #====================== Failure cases ==================================================
 
     def test_getDimension_by_index_raises_RuntimeError_for_invalid_index(self):
-        self.assertRaises(RuntimeError, self._test_mdws.getDimension, index=self._test_ndims+1)
+        self.assertRaises(RuntimeError, self._test_mdws.getDimension, index=self._test_ndims + 1)
 
     def test_getDimension_by_id_raises_ValueError_for_invalid_id(self):
         self.assertRaises(ValueError, self._test_mdws.getDimensionWithId, id="test")
@@ -106,13 +108,14 @@ class MDGeometryTest(unittest.TestCase):
         self.assertRaises(RuntimeError, self._test_mdws.getDimensionIndexById, id="NOTANID")
 
     def test_getBasisVector_raises_ValueError_for_invalid_index(self):
-        self.assertRaises(ValueError, self._test_mdws.getBasisVector, index=self._test_ndims+1)
+        self.assertRaises(ValueError, self._test_mdws.getBasisVector, index=self._test_ndims + 1)
+
 
 #========================================================================================
 
     def _check_is_dimension_with_id(self, dimension, expected_id):
         self.assertTrue(isinstance(dimension, IMDDimension))
-        self.assertEqual(expected_id,dimension.getDimensionId())
+        self.assertEqual(expected_id, dimension.getDimensionId())
 
 if __name__ == '__main__':
     unittest.main()

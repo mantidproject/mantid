@@ -24,7 +24,6 @@ ORIGINAL_STDERR = sys.stderr
 
 
 class LogMessageDisplay(PluginWidget):
-
     def __init__(self, parent):
         super(LogMessageDisplay, self).__init__(parent)
 

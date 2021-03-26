@@ -9,7 +9,6 @@ from mantidqt.utils.testing.mocks.mock_qt import MockQSelectionModel
 
 
 class MockSequentialTableView(object):
-
     def __init__(self):
         self.setItemDelegateForColumn = mock.MagicMock()
         self.blockSignals = mock.MagicMock()

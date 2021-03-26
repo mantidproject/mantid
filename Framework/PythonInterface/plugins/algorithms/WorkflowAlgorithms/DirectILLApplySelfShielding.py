@@ -8,7 +8,7 @@
 import DirectILL_common as common
 import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator, MatrixWorkspaceProperty,
-                        Progress, PropertyMode,  WorkspaceProperty, WorkspaceUnitValidator)
+                        Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, StringListValidator)
 from mantid.simpleapi import (CloneWorkspace, Divide, Minus, Scale)
 
@@ -32,7 +32,6 @@ def _subtractEC(ws, ecWS, ecScaling, wsNames, wsCleanup, algorithmLogging):
 
 class DirectILLApplySelfShielding(DataProcessorAlgorithm):
     """A data reduction workflow algorithm for the direct geometry TOF spectrometers at ILL."""
-
     def __init__(self):
         """Initialize an instance of the algorithm."""
         DataProcessorAlgorithm.__init__(self)
@@ -42,7 +41,7 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
         return common.CATEGORIES
 
     def seeAlso(self):
-        return [ 'DirectILLReduction', 'DirectILLApplySelfShielding' ]
+        return ['DirectILLReduction', 'DirectILLApplySelfShielding']
 
     def name(self):
         """Return the algorithm's name."""
@@ -89,54 +88,44 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
         mustBePositive = FloatBoundedValidator(lower=0)
 
         # Properties.
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=common.PROP_INPUT_WS,
-            defaultValue='',
-            validator=inputWorkspaceValidator,
-            direction=Direction.Input),
-            doc='A workspace to which to apply the corrections.')
-        self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
-                                               defaultValue='',
-                                               direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty(name=common.PROP_INPUT_WS,
+                                                     defaultValue='',
+                                                     validator=inputWorkspaceValidator,
+                                                     direction=Direction.Input),
+                             doc='A workspace to which to apply the corrections.')
+        self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS, defaultValue='', direction=Direction.Output),
                              doc='The corrected workspace.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
                              defaultValue=utils.Cleanup.ON,
-                             validator=StringListValidator([
-                                 utils.Cleanup.ON,
-                                 utils.Cleanup.OFF]),
+                             validator=StringListValidator([utils.Cleanup.ON, utils.Cleanup.OFF]),
                              direction=Direction.Input,
                              doc='What to do with intermediate workspaces.')
         self.declareProperty(name=common.PROP_SUBALG_LOGGING,
                              defaultValue=common.SUBALG_LOGGING_OFF,
-                             validator=StringListValidator([
-                                 common.SUBALG_LOGGING_OFF,
-                                 common.SUBALG_LOGGING_ON]),
+                             validator=StringListValidator([common.SUBALG_LOGGING_OFF, common.SUBALG_LOGGING_ON]),
                              direction=Direction.Input,
                              doc='Enable or disable subalgorithms to print in the logs.')
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=common.PROP_EC_WS,
-            defaultValue='',
-            validator=inputWorkspaceValidator,
+        self.declareProperty(MatrixWorkspaceProperty(name=common.PROP_EC_WS,
+                                                     defaultValue='',
+                                                     validator=inputWorkspaceValidator,
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='An empty container workspace for subtraction from the input workspace.')
+        self.declareProperty(
+            name=common.PROP_EC_SCALING,
+            defaultValue=1.0,
+            validator=mustBePositive,
             direction=Direction.Input,
-            optional=PropertyMode.Optional),
-            doc='An empty container workspace for subtraction from the input workspace.')
-        self.declareProperty(name=common.PROP_EC_SCALING,
-                             defaultValue=1.0,
-                             validator=mustBePositive,
-                             direction=Direction.Input,
-                             doc='A multiplier (transmission, if no self shielding is applied) for the empty container.')
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=common.PROP_SELF_SHIELDING_CORRECTION_WS,
-            defaultValue='',
-            direction=Direction.Input,
-            optional=PropertyMode.Optional),
-            doc='A workspace containing the self shielding correction factors.')
+            doc='A multiplier (transmission, if no self shielding is applied) for the empty container.')
+        self.declareProperty(MatrixWorkspaceProperty(name=common.PROP_SELF_SHIELDING_CORRECTION_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='A workspace containing the self shielding correction factors.')
 
     def _cloneOnly(self, mainWS):
         cloneWSName = self._names.withSuffix('cloned_only')
-        cloneWS = CloneWorkspace(InputWorkspace=mainWS,
-                                 OutputWorkspace=cloneWSName,
-                                 EnableLogging=self._subalgLogging)
+        cloneWS = CloneWorkspace(InputWorkspace=mainWS, OutputWorkspace=cloneWSName, EnableLogging=self._subalgLogging)
         return cloneWS
 
     def _applyCorrections(self, mainWS):

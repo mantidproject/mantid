@@ -9,6 +9,7 @@ from testhelpers import create_algorithm
 from mantid.simpleapi import CreateWorkspace, EnggEstimateFocussedBackground, DeleteWorkspace
 import numpy as np
 
+
 def mgauss(x, p):
     """
     make gaussian peaks
@@ -20,11 +21,11 @@ def mgauss(x, p):
     sig = p[2::3]
     y = np.zeros(x.shape)
     for ii in range(0, ngauss):
-        y += ht[ii] * np.exp(-0.5 * ((np.array(x) - cen[ii]) / sig[ii]) ** 2)
+        y += ht[ii] * np.exp(-0.5 * ((np.array(x) - cen[ii]) / sig[ii])**2)
     return y
 
-class EnggEstimateFocussedBackground_Test(unittest.TestCase):
 
+class EnggEstimateFocussedBackground_Test(unittest.TestCase):
     def setUp(self):
         # create some fairly realistic fake data with peaks and background
         x = np.linspace(0, 160, 401)
@@ -36,7 +37,7 @@ class EnggEstimateFocussedBackground_Test(unittest.TestCase):
             mask[(x > cens[ipk] - 4) & (x < cens[ipk] + 4)] = False  # mask points at peak for comparing bg residuals
         pin += [3, 80, 20]  # broad peak as background
         y = mgauss(x, pin)
-        self.ws = CreateWorkspace(OutputWorkspace = 'ws', DataX=x, DataY=y + np.random.normal(y, 0.2 * np.sqrt(y)))
+        self.ws = CreateWorkspace(OutputWorkspace='ws', DataX=x, DataY=y + np.random.normal(y, 0.2 * np.sqrt(y)))
         self.mask = mask
 
     def tearDown(self):
@@ -59,6 +60,7 @@ class EnggEstimateFocussedBackground_Test(unittest.TestCase):
         # test too large a window
         with self.assertRaises(RuntimeError):
             EnggEstimateFocussedBackground(InputWorkspace='ws', OutputWorkspace='ws_bg', NIterations=20, XWindow=200)
+
 
 if __name__ == '__main__':
     unittest.main()

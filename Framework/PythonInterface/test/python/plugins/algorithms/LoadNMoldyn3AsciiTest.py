@@ -15,7 +15,6 @@ class LoadNMoldyn3AsciiTest(unittest.TestCase):
     _cdl_filename = 'NaF_DISF.cdl'
     _dat_filename = 'WSH_test.dat'
 
-
     def test_load_fqt_from_cdl(self):
         """
         Load an F(Q, t) function from an nMOLDYN 3 .cdl file
@@ -37,7 +36,6 @@ class LoadNMoldyn3AsciiTest(unittest.TestCase):
         units = iqt_ws.getAxis(0).getUnit().unitID()
         self.assertEqual(units, 'TOF')
 
-
     def test_load_sqw_from_cdl(self):
         """
         Load an S(Q, w) function from an nMOLDYN 3 .cdl file
@@ -57,13 +55,11 @@ class LoadNMoldyn3AsciiTest(unittest.TestCase):
         units = sqw_ws.getAxis(0).getUnit().unitID()
         self.assertEqual(units, 'Energy')
 
-
     def test_load_dos_from_dat(self):
         """
         Load a density of states from an nMOLDYN 3 .dat file.
         """
-        moldyn_ws = LoadNMoldyn3Ascii(Filename='CDOS_Croco_total_10K.dat',
-                                      OutputWorkspace='__LoadNMoldyn3Ascii_test')
+        moldyn_ws = LoadNMoldyn3Ascii(Filename='CDOS_Croco_total_10K.dat', OutputWorkspace='__LoadNMoldyn3Ascii_test')
 
         self.assertTrue(isinstance(moldyn_ws, MatrixWorkspace))
         self.assertTrue(moldyn_ws.getNumberHistograms(), 1)
@@ -71,13 +67,11 @@ class LoadNMoldyn3AsciiTest(unittest.TestCase):
         self.assertEqual(moldyn_ws.getAxis(0).getUnit().label(), 'THz')
         self.assertEqual(moldyn_ws.YUnitLabel(), 'dos-total vs frequency')
 
-
     def test_load_from_dat(self):
         """
         Load a function from an nMOLDYN 3 .dat file
         """
-        moldyn_ws = LoadNMoldyn3Ascii(Filename=self._dat_filename,
-                                      OutputWorkspace='__LoadNMoldyn3Ascii_test')
+        moldyn_ws = LoadNMoldyn3Ascii(Filename=self._dat_filename, OutputWorkspace='__LoadNMoldyn3Ascii_test')
 
         self.assertTrue(isinstance(moldyn_ws, MatrixWorkspace))
         self.assertTrue(moldyn_ws.getNumberHistograms(), 12)
@@ -88,7 +82,6 @@ class LoadNMoldyn3AsciiTest(unittest.TestCase):
         if os.path.exists(path):
             os.remove(path)
 
-
     def test_function_validation_cdl(self):
         """
         Tests that the algorithm cannot be run when no functions are specified
@@ -98,7 +91,6 @@ class LoadNMoldyn3AsciiTest(unittest.TestCase):
                           LoadNMoldyn3Ascii,
                           Filename=self._cdl_filename,
                           OutputWorkspace='__LoadNMoldyn3Ascii_test')
-
 
     def test_function_validation_dat(self):
         """

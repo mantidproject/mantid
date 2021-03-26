@@ -20,8 +20,9 @@ except ImportError:
 VERSION = "1.0"
 
 # elements not to put in the output file
-BANNED = ['n', 'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg',
-          'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn', 'Uuq', 'Uuh']
+BANNED = [
+    'n', 'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn', 'Uuq', 'Uuh'
+]
 
 DELIMITOR_START = "// ---------- START DO NOT EDIT AREA----------"
 DELIMITOR_STOP = "// ---------- END DO NOT EDIT AREA----------"
@@ -87,7 +88,7 @@ def readExisting(filename):
 
     # return the results
     before = "".join(lines[:index_start])
-    after = "".join(lines[index_stop+1:])
+    after = "".join(lines[index_stop + 1:])
     return (before, after)
 
 
@@ -97,8 +98,7 @@ if __name__ == "__main__":
     info.append("Generate a source file (.cpp) with the supplied filename. The")
     info.append("source file will contain all of the information necessary for")
     info.append("the atoms and their isotopes.")
-    parser = optparse.OptionParser("usage: %prog [options] <filename>",
-                                   None, optparse.Option, VERSION, 'error',
+    parser = optparse.OptionParser("usage: %prog [options] <filename>", None, optparse.Option, VERSION, 'error',
                                    " ".join(info))
     (options, args) = parser.parse_args()
 
@@ -115,8 +115,8 @@ if __name__ == "__main__":
     # setup the file for the elements and isotopes
     print("writing information to %s" % filename)
     handle = open(filename, 'w')
-    handle.write(code_before) # write out what was before the delimitor
-    handle.write(DELIMITOR_START+"\n")
+    handle.write(code_before)  # write out what was before the delimitor
+    handle.write(DELIMITOR_START + "\n")
     handle.write("/// @cond\n")
 
     # write the elements and isotopes
@@ -124,7 +124,7 @@ if __name__ == "__main__":
     spanTable = []
     for element in periodictable.elements:
         if element.symbol not in BANNED:
-            spanTable.append([len(atomNames),len(element._isotopes.keys())+1])
+            spanTable.append([len(atomNames), len(element._isotopes.keys()) + 1])
         atomNames.extend(writeElement(handle, element))
     handle.write("/// @endcond\n")
     handle.write("\n")
@@ -134,8 +134,8 @@ if __name__ == "__main__":
     numAtoms = len(atomNames)
     handle.write("static std::array<Atom, %d> ATOMS_ARRAY = {{\n" % numAtoms)
     for i in range(0, numAtoms, 10):
-        handle.write(", ".join(atomNames[i:i+10]))
-        if i+10 < numAtoms:
+        handle.write(", ".join(atomNames[i:i + 10]))
+        if i + 10 < numAtoms:
             handle.write(",")
         handle.write("\n")
     handle.write("}};\n")
@@ -148,7 +148,7 @@ if __name__ == "__main__":
             handle.write(",")
         handle.write("\n")
     handle.write("}};\n")
-    handle.write(DELIMITOR_STOP+"\n")
+    handle.write(DELIMITOR_STOP + "\n")
 
     # write out what was after the delimitor
     handle.write(code_after)

@@ -10,8 +10,7 @@ import os
 import testhelpers
 import unittest
 
-from mantid.kernel import (ConfigService, ConfigServiceImpl, config,
-                           std_vector_str, FacilityInfo, InstrumentInfo)
+from mantid.kernel import (ConfigService, ConfigServiceImpl, config, std_vector_str, FacilityInfo, InstrumentInfo)
 
 
 class ConfigServiceTest(unittest.TestCase):
@@ -48,13 +47,14 @@ class ConfigServiceTest(unittest.TestCase):
         names = config.getFacilityNames()
 
         self.assertGreater(len(names), 0)
-        self.assertEqual(len(names),len(facilities))
+        self.assertEqual(len(names), len(facilities))
         for i in range(len(names)):
-            self.assertEqual(names[i],facilities[i].name())
+            self.assertEqual(names[i], facilities[i].name())
 
     def test_update_and_set_facility(self):
         self.assertFalse("TEST" in config.getFacilityNames())
-        ConfigService.updateFacilities(os.path.join(ConfigService.getInstrumentDirectory(),"unit_testing/UnitTestFacilities.xml"))
+        ConfigService.updateFacilities(
+            os.path.join(ConfigService.getInstrumentDirectory(), "unit_testing/UnitTestFacilities.xml"))
         ConfigService.setFacility("TEST")
         self.assertEqual(config.getFacility().name(), "TEST")
         self.assertRaises(RuntimeError, config.getFacility, "SNS")
@@ -74,7 +74,7 @@ class ConfigServiceTest(unittest.TestCase):
         old_value = fncall
         config.setString(test_prop, "1")
         self.assertEqual(config.getString(test_prop), "1")
-        config[test_prop] =  "2"
+        config[test_prop] = "2"
         self.assertEqual(config.getString(test_prop), "2")
 
         config.setString(test_prop, old_value)
@@ -106,7 +106,6 @@ class ConfigServiceTest(unittest.TestCase):
         # test with single string
         do_test(';'.join(new_path_list))
 
-
     def test_appending_paths(self):
         new_path_list = self._setup_test_areas()
         try:
@@ -116,7 +115,7 @@ class ConfigServiceTest(unittest.TestCase):
         finally:
             self._clean_up_test_areas()
 
-        self.assertEqual(num_of_dirs+1, len(updated_paths))
+        self.assertEqual(num_of_dirs + 1, len(updated_paths))
 
     def test_setting_log_channel_levels(self):
         testhelpers.assertRaisesNothing(self, config.setLogLevel, 4, True)
@@ -128,41 +127,60 @@ class ConfigServiceTest(unittest.TestCase):
         doc_filename = os.path.abspath(doc_filename)
 
         # read in the user documentation
-        print ('Parsing', doc_filename)
+        print('Parsing', doc_filename)
         documented_keys = []
         with open(doc_filename) as handle:
             text = handle.read()
 
         # these will be ignored - the list should get shorter over time
-        hidden_prefixes = ['CheckMantidVersion.DownloadURL',  # shouldn't be changed by users
-                           'CheckMantidVersion.GitHubReleaseURL', # shouldn't be changed by users
-                           'UpdateInstrumentDefinitions.URL', # shouldn't be changed by users
-                           'docs.html.root', # shouldn't be changed by users
-                           'errorreports.rooturl', # shouldn't be changed by users
-                           'usagereports.rooturl', # shouldn't be changed by users
-                           'workspace.sendto.SansView.arguments', 'workspace.sendto.SansView.saveusing', # related to SASview in menu
-                           'workspace.sendto.SansView.target', 'workspace.sendto.SansView.visible', # related to SASview in menu
-                           'workspace.sendto.name.SansView', # related to SASview in menu
-                           'catalog.oncat.token.accessToken', 'catalog.oncat.token.expiresIn', 'catalog.oncat.token.refreshToken', 'catalog.oncat.token.scope', 'catalog.oncat.token.tokenType', # Shouldn't be changed by users.
+        hidden_prefixes = [
+            'CheckMantidVersion.DownloadURL',  # shouldn't be changed by users
+            'CheckMantidVersion.GitHubReleaseURL',  # shouldn't be changed by users
+            'UpdateInstrumentDefinitions.URL',  # shouldn't be changed by users
+            'docs.html.root',  # shouldn't be changed by users
+            'errorreports.rooturl',  # shouldn't be changed by users
+            'usagereports.rooturl',  # shouldn't be changed by users
+            'workspace.sendto.SansView.arguments',
+            'workspace.sendto.SansView.saveusing',  # related to SASview in menu
+            'workspace.sendto.SansView.target',
+            'workspace.sendto.SansView.visible',  # related to SASview in menu
+            'workspace.sendto.name.SansView',  # related to SASview in menu
+            'catalog.oncat.token.accessToken',
+            'catalog.oncat.token.expiresIn',
+            'catalog.oncat.token.refreshToken',
+            'catalog.oncat.token.scope',
+            'catalog.oncat.token.tokenType',  # Shouldn't be changed by users.
 
-                           ########## TODO should be documented!
-                           'filefinder.casesensitive',
-                           'graph1d.autodistribution',
-                           'groupingFiles.directory',
-                           'icatDownload.directory', 'icatDownload.mountPoint',
-                           'instrument.view.geometry',
-                           'interfaces.categories.hidden',
-                           'loading.multifile', 'loading.multifilelimit',
-                           'maskFiles.directory',
-                           'pythonalgorithms.refresh.allowed',
-                           'sliceviewer.nonorthogonal',
+            ########## TODO should be documented!
+            'filefinder.casesensitive',
+            'graph1d.autodistribution',
+            'groupingFiles.directory',
+            'icatDownload.directory',
+            'icatDownload.mountPoint',
+            'instrument.view.geometry',
+            'interfaces.categories.hidden',
+            'loading.multifile',
+            'loading.multifilelimit',
+            'maskFiles.directory',
+            'pythonalgorithms.refresh.allowed',
+            'sliceviewer.nonorthogonal',
 
-                           ########## TODO should these be documented?
-                           'curvefitting.defaultPeak', 'curvefitting.findPeaksFWHM', 'curvefitting.findPeaksTolerance', 'curvefitting.guiExclude',
-                           'logging.channels.consoleChannel.class', 'logging.channels.consoleChannel.formatter', 'logging.formatters.f1.class', 'logging.formatters.f1.pattern', 'logging.formatters.f1.times', 'logging.loggers.root.channel.channel1', 'logging.loggers.root.channel.class',
-                           'MantidOptions.ReusePlotInstances',
-                           'mantidqt.python_interfaces', 'mantidqt.python_interfaces_directory'
-                           ]
+            ########## TODO should these be documented?
+            'curvefitting.defaultPeak',
+            'curvefitting.findPeaksFWHM',
+            'curvefitting.findPeaksTolerance',
+            'curvefitting.guiExclude',
+            'logging.channels.consoleChannel.class',
+            'logging.channels.consoleChannel.formatter',
+            'logging.formatters.f1.class',
+            'logging.formatters.f1.pattern',
+            'logging.formatters.f1.times',
+            'logging.loggers.root.channel.channel1',
+            'logging.loggers.root.channel.class',
+            'MantidOptions.ReusePlotInstances',
+            'mantidqt.python_interfaces',
+            'mantidqt.python_interfaces_directory'
+        ]
 
         # create the list of things
         undocumented = []
@@ -180,7 +198,6 @@ class ConfigServiceTest(unittest.TestCase):
         # everything should be documented
         if len(undocumented) > 0:
             raise AssertionError('{} undocumented properties: {}'.format(len(undocumented), undocumented))
-
 
     def _setup_test_areas(self):
         """Create a new data search path string
@@ -212,6 +229,7 @@ class ConfigServiceTest(unittest.TestCase):
                 os.rmdir(p)
             except OSError:
                 pass
+
 
 if __name__ == '__main__':
     unittest.main()

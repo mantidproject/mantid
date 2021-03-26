@@ -11,7 +11,6 @@ from mantid.simpleapi import *
 
 
 class ExampleRedStep(PythonAlgorithm):
-
     def name(self):
         return "ExampleRedStep"
 
@@ -29,11 +28,11 @@ class ExampleRedStep(PythonAlgorithm):
         alg.setPropertyValue("OutputWorkspace", output_ws)
         alg.execute()
 
+
 #AlgorithmFactory.subscribe(ExampleRedStep)
 
 
 class ExampleLoader(PythonAlgorithm):
-
     def name(self):
         return "ExampleLoader"
 

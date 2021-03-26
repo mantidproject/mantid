@@ -181,7 +181,7 @@ class DifferenceTableView(QtWidgets.QWidget):
     def get_table_item_text(self, row, col):
         if diff_columns[col] == "group_1" or diff_columns[col] == "group_2":
             return str(self.diff_table.cellWidget(row, col).currentText())
-        else: # columns without widgets
+        else:  # columns without widgets
             return str(self.diff_table.item(row, col).text())
 
     # ------------------------------------------------------------------------------------------------------------------

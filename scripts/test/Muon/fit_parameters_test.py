@@ -13,11 +13,7 @@ from Muon.GUI.Common.contexts.fitting_context import FitParameters
 
 def create_test_fit_parameters(test_parameters, global_parameters=None):
     # needs to look like a standard fit table
-    fit_table = [{
-        'Name': name,
-        'Value': value,
-        'Error': error
-    } for name, (value, error) in test_parameters.items()]
+    fit_table = [{'Name': name, 'Value': value, 'Error': error} for name, (value, error) in test_parameters.items()]
 
     parameter_workspace = mock.MagicMock()
     parameter_workspace.workspace.__iter__.return_value = fit_table
@@ -54,45 +50,33 @@ class FitParametersTest(unittest.TestCase):
         self.assertNotEqual(fit_params1, fit_params2)
 
     def test_length_returns_all_params_with_no_globals(self):
-        test_parameters = OrderedDict([('Height', (10., 0.4)), ('A0', (1,
-                                                                       0.01)),
-                                       ('Cost function', (0.1, 0.))])
+        test_parameters = OrderedDict([('Height', (10., 0.4)), ('A0', (1, 0.01)), ('Cost function', (0.1, 0.))])
         fit_params = create_test_fit_parameters(test_parameters)
 
         self.assertEqual(3, len(fit_params))
 
     def test_length_returns_unique_params_with_globals(self):
-        test_parameters = OrderedDict([('f0.Height', (10., 0.4)),
-                                       ('f0.A0', (1, 0.01)),
-                                       ('f1.Height', (10., 0.4)),
-                                       ('f1.A0', (2, 0.001)),
-                                       ('Cost function', (0.1, 0.))])
-        fit_params = create_test_fit_parameters(
-            test_parameters, global_parameters=['Height'])
+        test_parameters = OrderedDict([('f0.Height', (10., 0.4)), ('f0.A0', (1, 0.01)), ('f1.Height', (10., 0.4)),
+                                       ('f1.A0', (2, 0.001)), ('Cost function', (0.1, 0.))])
+        fit_params = create_test_fit_parameters(test_parameters, global_parameters=['Height'])
 
         self.assertEqual(4, len(fit_params))
 
-    def test_names_value_error_returns_all_expected_values_with_no_globals(
-            self):
-        test_parameters = OrderedDict([('f0.Height', (10., 0.4)),
-                                       ('f0.A0', (1, 0.01)),
-                                       ('Cost function', (0.1, 0.))])
+    def test_names_value_error_returns_all_expected_values_with_no_globals(self):
+        test_parameters = OrderedDict([('f0.Height', (10., 0.4)), ('f0.A0', (1, 0.01)), ('Cost function', (0.1, 0.))])
         fit_params = create_test_fit_parameters(test_parameters)
 
         self.assertEqual(list(test_parameters.keys()), fit_params.names())
         self.assertEqual(3, len(fit_params))
         for index, name in enumerate(fit_params.names()):
-            self.assertEqual(
-                test_parameters[name][0],
-                fit_params.value(name),
-                msg="Mismatch in error for parameter" + name)
-            self.assertEqual(
-                test_parameters[name][1],
-                fit_params.error(name),
-                msg="Mismatch in error for parameter" + name)
+            self.assertEqual(test_parameters[name][0],
+                             fit_params.value(name),
+                             msg="Mismatch in error for parameter" + name)
+            self.assertEqual(test_parameters[name][1],
+                             fit_params.error(name),
+                             msg="Mismatch in error for parameter" + name)
 
-    def test_names_return_globals_first_with_simultaneous_prefixes_stripped_for_single_fn(
-            self):
+    def test_names_return_globals_first_with_simultaneous_prefixes_stripped_for_single_fn(self):
         # Make some parameters that look like a simultaneous fit of 2 data sets
         test_parameters = OrderedDict([
             ('f0.Height', (10., 0.4)),
@@ -104,16 +88,12 @@ class FitParametersTest(unittest.TestCase):
             ('Cost function', (0.1, 0.)),
         ])
         global_parameters = ['A0', 'Sigma']
-        fit_params = create_test_fit_parameters(test_parameters,
-                                                global_parameters)
+        fit_params = create_test_fit_parameters(test_parameters, global_parameters)
 
-        expected_keys = [
-            'A0', 'Sigma', 'f0.Height', 'f1.Height', 'Cost function'
-        ]
+        expected_keys = ['A0', 'Sigma', 'f0.Height', 'f1.Height', 'Cost function']
         self.assertEqual(expected_keys, fit_params.names())
 
-    def test_names_return_globals_first_with_simultaneous_prefixes_stripped_for_composite_fn(
-            self):
+    def test_names_return_globals_first_with_simultaneous_prefixes_stripped_for_composite_fn(self):
         # Make some parameters that look like a simultaneous fit of 2 data sets where parameters
         # could be called the same thing in each function. The values are irrelevant for this test
         test_parameters = OrderedDict([
@@ -130,12 +110,10 @@ class FitParametersTest(unittest.TestCase):
             ('Cost function', (0.1, 0.)),
         ])
         global_parameters = ['f0.A0']
-        fit_params = create_test_fit_parameters(test_parameters,
-                                                global_parameters)
+        fit_params = create_test_fit_parameters(test_parameters, global_parameters)
 
         expected_keys = [
-            'f0.A0', 'f0.f0.A1', 'f0.f1.A0', 'f0.f1.A1', 'f1.f0.A1',
-            'f1.f1.A0', 'f1.f1.A1', 'Cost function'
+            'f0.A0', 'f0.f0.A1', 'f0.f1.A0', 'f0.f1.A1', 'f1.f0.A1', 'f1.f1.A0', 'f1.f1.A1', 'Cost function'
         ]
         self.assertEqual(expected_keys, fit_params.names())
 
@@ -149,8 +127,7 @@ class FitParametersTest(unittest.TestCase):
         ])
         global_parameters = ['Height']
         # Make some parameters that look like a simultaneous fit
-        fit_params = create_test_fit_parameters(test_parameters,
-                                                global_parameters)
+        fit_params = create_test_fit_parameters(test_parameters, global_parameters)
 
         expected_keys = ['Height', 'f0.A0', 'f1.A0', 'Cost function']
         self.assertEqual(expected_keys, fit_params.names())
@@ -159,14 +136,12 @@ class FitParametersTest(unittest.TestCase):
                 orig_name = 'f0.Height'
             else:
                 orig_name = name
-            self.assertEqual(
-                test_parameters[orig_name][0],
-                fit_params.value(name),
-                msg="Mismatch in error for parameter" + name)
-            self.assertEqual(
-                test_parameters[orig_name][1],
-                fit_params.error(name),
-                msg="Mismatch in error for parameter" + name)
+            self.assertEqual(test_parameters[orig_name][0],
+                             fit_params.value(name),
+                             msg="Mismatch in error for parameter" + name)
+            self.assertEqual(test_parameters[orig_name][1],
+                             fit_params.error(name),
+                             msg="Mismatch in error for parameter" + name)
 
 
 if __name__ == '__main__':

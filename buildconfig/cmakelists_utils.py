@@ -22,8 +22,8 @@ def find_basedir(project, subproject):
     """
     header_folder = "Mantid" + subproject
     if project == "MantidQt": header_folder = "MantidQt" + subproject
-    scriptdir = os.path.split(__file__)[0] #Folder of Code/Build
-    codedir = os.path.split(scriptdir)[0] #Folder of Code/
+    scriptdir = os.path.split(__file__)[0]  #Folder of Code/Build
+    codedir = os.path.split(scriptdir)[0]  #Folder of Code/
     basedir = os.path.join(codedir, project, subproject)
     return (basedir, header_folder)
 
@@ -100,7 +100,7 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
     lines.append("set(" + cmake_tag)
     for file in files:
         lines.append("    " + file)
-    lines[-1] += ")" # close the parentheses
+    lines[-1] += ")"  # close the parentheses
     lines += lines_after
 
     return lines
@@ -111,7 +111,7 @@ def fix_cmake_format(subproject):
     """ Just fix the CMAKE format"""
     cmake_path = os.path.join(os.path.curdir, "Framework/" + subproject + "/CMakeLists.txt")
     source = open(cmake_path).read()
-    lines = source.split("\n");
+    lines = source.split("\n")
     lines = redo_cmake_section(lines, "SRC_FILES", "")
     lines = redo_cmake_section(lines, "INC_FILES", "")
     lines = redo_cmake_section(lines, "TEST_FILES", "")
@@ -121,17 +121,18 @@ def fix_cmake_format(subproject):
     f.write(text)
     f.close()
 
+
 #======================================================================
 
 
 def fix_all_cmakes():
     """ Fix all cmake files """
-    projects = ["Algorithms", "DataObjects", "MDAlgorithms", "API",
-                       "Geometry", "CurveFitting", "ICat", "MDEvents",
-                       "DataHandling", "Kernel", "Nexus", "Crystal"]
+    projects = [
+        "Algorithms", "DataObjects", "MDAlgorithms", "API", "Geometry", "CurveFitting", "ICat", "MDEvents",
+        "DataHandling", "Kernel", "Nexus", "Crystal"
+    ]
     for proj in projects:
         fix_cmake_format(proj)
-
 
 
 #======================================================================
@@ -147,7 +148,7 @@ def add_to_cmake(subproject, classname, args, subfolder):
     cmake_path = os.path.join(basedir, "CMakeLists.txt")
 
     source = open(cmake_path).read()
-    lines = source.split("\n");
+    lines = source.split("\n")
     if args.header:
         lines = redo_cmake_section(lines, "INC_FILES", "inc/" + header_folder + "/" + subfolder + classname + ".h")
     if args.cpp:
@@ -168,11 +169,11 @@ def remove_from_cmake(subproject, classname, args, subfolder):
     cmake_path = os.path.join(basedir, "CMakeLists.txt")
 
     source = open(cmake_path).read()
-    lines = source.split("\n");
+    lines = source.split("\n")
     if args.header:
-        lines = redo_cmake_section(lines, "INC_FILES", "",  "inc/" + header_folder + "/"+ subfolder + classname + ".h")
+        lines = redo_cmake_section(lines, "INC_FILES", "", "inc/" + header_folder + "/" + subfolder + classname + ".h")
     if args.cpp:
-        lines = redo_cmake_section(lines, "SRC_FILES", "",  "src/" + subfolder + classname + ".cpp")
+        lines = redo_cmake_section(lines, "SRC_FILES", "", "src/" + subfolder + classname + ".cpp")
     if args.test:
         lines = redo_cmake_section(lines, "TEST_FILES", "", classname + "Test.h")
 

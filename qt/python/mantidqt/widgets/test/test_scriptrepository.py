@@ -8,7 +8,6 @@
 #
 #
 
-
 import unittest
 
 from mantidqt.widgets.scriptrepository import ScriptRepositoryView
@@ -18,7 +17,6 @@ from mantidqt.utils.qt.testing import start_qapplication
 @start_qapplication
 class ScriptRepositoryTest(unittest.TestCase):
     """Minimal testing as it is exported from C++"""
-
     def test_widget_creation(self):
         display = ScriptRepositoryView()
         self.assertNotEqual(display, None)

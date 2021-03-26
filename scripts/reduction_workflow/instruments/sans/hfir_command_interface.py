@@ -22,15 +22,17 @@ from mantid.simpleapi import Load
 
 # The following imports allow users to import this file and have all functionality automatically imported
 # Do not remove these imports as it will break user scripts which rely on them
-from reduction_workflow.command_interface import (OutputPath, Reduce1D, Reduce,  # noqa: F401
-                                                  AppendDataFile, ClearDataFiles)
+from reduction_workflow.command_interface import (
+    OutputPath,
+    Reduce1D,
+    Reduce,  # noqa: F401
+    AppendDataFile,
+    ClearDataFiles)
 
 
 def BIOSANS():
     Clear()
-    ReductionSingleton().set_instrument("BIOSANS",
-                                        "SetupHFIRReduction",
-                                        "HFIRSANSReduction")
+    ReductionSingleton().set_instrument("BIOSANS", "SetupHFIRReduction", "HFIRSANSReduction")
     TimeNormalization()
     SolidAngle()
     AzimuthalAverage()
@@ -38,9 +40,7 @@ def BIOSANS():
 
 def GPSANS():
     Clear()
-    ReductionSingleton().set_instrument("GPSANS",
-                                        "SetupHFIRReduction",
-                                        "HFIRSANSReduction")
+    ReductionSingleton().set_instrument("GPSANS", "SetupHFIRReduction", "HFIRSANSReduction")
     TimeNormalization()
     SolidAngle()
     AzimuthalAverage()
@@ -53,20 +53,14 @@ def DataPath(path):
 
 
 def DirectBeamCenter(datafile):
-    datafile = find_data(
-        datafile,
-        instrument=ReductionSingleton().get_instrument())
-    ReductionSingleton().reduction_properties[
-        "BeamCenterMethod"] = "DirectBeam"
+    datafile = find_data(datafile, instrument=ReductionSingleton().get_instrument())
+    ReductionSingleton().reduction_properties["BeamCenterMethod"] = "DirectBeam"
     ReductionSingleton().reduction_properties["BeamCenterFile"] = datafile
 
 
 def ScatteringBeamCenter(datafile, beam_radius=3.0):
-    datafile = find_data(
-        datafile,
-        instrument=ReductionSingleton().get_instrument())
-    ReductionSingleton().reduction_properties[
-        "BeamCenterMethod"] = "Scattering"
+    datafile = find_data(datafile, instrument=ReductionSingleton().get_instrument())
+    ReductionSingleton().reduction_properties["BeamCenterMethod"] = "Scattering"
     ReductionSingleton().reduction_properties["BeamRadius"] = beam_radius
     ReductionSingleton().reduction_properties["BeamCenterFile"] = datafile
 
@@ -89,31 +83,18 @@ def NoNormalization():
     ReductionSingleton().reduction_properties["Normalisation"] = "None"
 
 
-def SensitivityCorrection(
-        flood_data,
-        min_sensitivity=0.5,
-        max_sensitivity=1.5,
-        dark_current=None,
-        use_sample_dc=False):
-    flood_data = find_data(
-        flood_data,
-        instrument=ReductionSingleton().get_instrument())
+def SensitivityCorrection(flood_data, min_sensitivity=0.5, max_sensitivity=1.5, dark_current=None, use_sample_dc=False):
+    flood_data = find_data(flood_data, instrument=ReductionSingleton().get_instrument())
     if dark_current is not None:
-        dark_current = find_data(
-            dark_current,
-            instrument=ReductionSingleton().get_instrument())
+        dark_current = find_data(dark_current, instrument=ReductionSingleton().get_instrument())
 
     ReductionSingleton().reduction_properties["SensitivityFile"] = flood_data
-    ReductionSingleton().reduction_properties[
-        "MinEfficiency"] = min_sensitivity
-    ReductionSingleton().reduction_properties[
-        "MaxEfficiency"] = max_sensitivity
+    ReductionSingleton().reduction_properties["MinEfficiency"] = min_sensitivity
+    ReductionSingleton().reduction_properties["MaxEfficiency"] = max_sensitivity
     if dark_current is not None:
-        ReductionSingleton().reduction_properties[
-            "SensitivityDarkCurrentFile"] = dark_current
+        ReductionSingleton().reduction_properties["SensitivityDarkCurrentFile"] = dark_current
     elif "SensitivityDarkCurrentFile" in ReductionSingleton().reduction_properties:
-        del ReductionSingleton().reduction_properties[
-            "SensitivityDarkCurrentFile"]
+        del ReductionSingleton().reduction_properties["SensitivityDarkCurrentFile"]
     if "SensitivityBeamCenterX" in ReductionSingleton().reduction_properties:
         del ReductionSingleton().reduction_properties["SensitivityBeamCenterX"]
     if "SensitivityBeamCenterY" in ReductionSingleton().reduction_properties:
@@ -122,32 +103,22 @@ def SensitivityCorrection(
 
 
 def SetSensitivityBeamCenter(x, y):
-    ReductionSingleton().reduction_properties[
-        "SensitivityBeamCenterMethod"] = "Value"
+    ReductionSingleton().reduction_properties["SensitivityBeamCenterMethod"] = "Value"
     ReductionSingleton().reduction_properties["SensitivityBeamCenterX"] = x
     ReductionSingleton().reduction_properties["SensitivityBeamCenterY"] = y
 
 
 def SensitivityDirectBeamCenter(datafile):
-    datafile = find_data(
-        datafile,
-        instrument=ReductionSingleton().get_instrument())
-    ReductionSingleton().reduction_properties[
-        "SensitivityBeamCenterMethod"] = "DirectBeam"
-    ReductionSingleton().reduction_properties[
-        "SensitivityBeamCenterFile"] = datafile
+    datafile = find_data(datafile, instrument=ReductionSingleton().get_instrument())
+    ReductionSingleton().reduction_properties["SensitivityBeamCenterMethod"] = "DirectBeam"
+    ReductionSingleton().reduction_properties["SensitivityBeamCenterFile"] = datafile
 
 
 def SensitivityScatteringBeamCenter(datafile, beam_radius=3.0):
-    datafile = find_data(
-        datafile,
-        instrument=ReductionSingleton().get_instrument())
-    ReductionSingleton().reduction_properties[
-        "SensitivityBeamCenterMethod"] = "Scattering"
-    ReductionSingleton().reduction_properties[
-        "SensitivityBeamCenterRadius"] = beam_radius
-    ReductionSingleton().reduction_properties[
-        "SensitivityBeamCenterFile"] = datafile
+    datafile = find_data(datafile, instrument=ReductionSingleton().get_instrument())
+    ReductionSingleton().reduction_properties["SensitivityBeamCenterMethod"] = "Scattering"
+    ReductionSingleton().reduction_properties["SensitivityBeamCenterRadius"] = beam_radius
+    ReductionSingleton().reduction_properties["SensitivityBeamCenterFile"] = datafile
 
 
 def NoSensitivityCorrection():
@@ -156,9 +127,7 @@ def NoSensitivityCorrection():
 
 
 def DarkCurrent(datafile):
-    datafile = find_data(
-        datafile,
-        instrument=ReductionSingleton().get_instrument())
+    datafile = find_data(datafile, instrument=ReductionSingleton().get_instrument())
     ReductionSingleton().reduction_properties["DarkCurrentFile"] = datafile
 
 
@@ -177,14 +146,13 @@ def NoSolidAngle():
     ReductionSingleton().reduction_properties["SolidAngleCorrection"] = False
 
 
-def AzimuthalAverage(
-        binning=None,
-        suffix="_Iq",
-        error_weighting=False,
-        n_bins=100,
-        n_subpix=1,
-        log_binning=False,
-        align_log_with_decades=False):
+def AzimuthalAverage(binning=None,
+                     suffix="_Iq",
+                     error_weighting=False,
+                     n_bins=100,
+                     n_subpix=1,
+                     log_binning=False,
+                     align_log_with_decades=False):
     # Suffix is no longer used but kept for backward compatibility
     ReductionSingleton().reduction_properties["DoAzimuthalAverage"] = True
     if binning is not None:
@@ -194,10 +162,8 @@ def AzimuthalAverage(
     ReductionSingleton().reduction_properties["IQNumberOfBins"] = n_bins
     ReductionSingleton().reduction_properties["IQLogBinning"] = log_binning
     ReductionSingleton().reduction_properties["NumberOfSubpixels"] = n_subpix
-    ReductionSingleton().reduction_properties[
-        "ErrorWeighting"] = error_weighting
-    ReductionSingleton().reduction_properties[
-        "IQAlignLogWithDecades"] = align_log_with_decades
+    ReductionSingleton().reduction_properties["ErrorWeighting"] = error_weighting
+    ReductionSingleton().reduction_properties["IQAlignLogWithDecades"] = align_log_with_decades
 
 
 def NoTransmission():
@@ -210,130 +176,81 @@ def NoTransmission():
     if "TransmissionBeamRadius" in ReductionSingleton().reduction_properties:
         del ReductionSingleton().reduction_properties["TransmissionBeamRadius"]
     if "TransmissionSampleDataFile" in ReductionSingleton().reduction_properties:
-        del ReductionSingleton().reduction_properties[
-            "TransmissionSampleDataFile"]
+        del ReductionSingleton().reduction_properties["TransmissionSampleDataFile"]
     if "TransmissionEmptyDataFile" in ReductionSingleton().reduction_properties:
-        del ReductionSingleton().reduction_properties[
-            "TransmissionEmptyDataFile"]
+        del ReductionSingleton().reduction_properties["TransmissionEmptyDataFile"]
     if "ThetaDependentTransmission" in ReductionSingleton().reduction_properties:
-        del ReductionSingleton().reduction_properties[
-            "ThetaDependentTransmission"]
+        del ReductionSingleton().reduction_properties["ThetaDependentTransmission"]
 
 
 def SetTransmission(trans, error, theta_dependent=True):
     ReductionSingleton().reduction_properties["TransmissionMethod"] = "Value"
     ReductionSingleton().reduction_properties["TransmissionValue"] = trans
     ReductionSingleton().reduction_properties["TransmissionError"] = error
-    ReductionSingleton().reduction_properties[
-        "ThetaDependentTransmission"] = theta_dependent
+    ReductionSingleton().reduction_properties["ThetaDependentTransmission"] = theta_dependent
 
 
-def DirectBeamTransmission(
-        sample_file,
-        empty_file,
-        beam_radius=3.0,
-        theta_dependent=True,
-        use_sample_dc=True):
-    sample_file = find_data(
-        sample_file,
-        instrument=ReductionSingleton().get_instrument())
-    empty_file = find_data(
-        empty_file,
-        instrument=ReductionSingleton().get_instrument())
-    ReductionSingleton().reduction_properties[
-        "TransmissionMethod"] = "DirectBeam"
-    ReductionSingleton().reduction_properties[
-        "TransmissionBeamRadius"] = beam_radius
-    ReductionSingleton().reduction_properties[
-        "TransmissionSampleDataFile"] = sample_file
-    ReductionSingleton().reduction_properties[
-        "TransmissionEmptyDataFile"] = empty_file
-    ReductionSingleton().reduction_properties[
-        "ThetaDependentTransmission"] = theta_dependent
-    ReductionSingleton().reduction_properties[
-        "TransmissionUseSampleDC"] = use_sample_dc
+def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True, use_sample_dc=True):
+    sample_file = find_data(sample_file, instrument=ReductionSingleton().get_instrument())
+    empty_file = find_data(empty_file, instrument=ReductionSingleton().get_instrument())
+    ReductionSingleton().reduction_properties["TransmissionMethod"] = "DirectBeam"
+    ReductionSingleton().reduction_properties["TransmissionBeamRadius"] = beam_radius
+    ReductionSingleton().reduction_properties["TransmissionSampleDataFile"] = sample_file
+    ReductionSingleton().reduction_properties["TransmissionEmptyDataFile"] = empty_file
+    ReductionSingleton().reduction_properties["ThetaDependentTransmission"] = theta_dependent
+    ReductionSingleton().reduction_properties["TransmissionUseSampleDC"] = use_sample_dc
 
 
 def TransmissionDarkCurrent(dark_current=None):
     if dark_current is not None:
-        dark_current = find_data(
-            dark_current,
-            instrument=ReductionSingleton().get_instrument())
-        ReductionSingleton().reduction_properties[
-            "TransmissionDarkCurrentFile"] = dark_current
+        dark_current = find_data(dark_current, instrument=ReductionSingleton().get_instrument())
+        ReductionSingleton().reduction_properties["TransmissionDarkCurrentFile"] = dark_current
     elif "TransmissionDarkCurrentFile" in ReductionSingleton().reduction_properties:
-        del ReductionSingleton().reduction_properties[
-            "TransmissionDarkCurrentFile"]
+        del ReductionSingleton().reduction_properties["TransmissionDarkCurrentFile"]
 
 
 def ThetaDependentTransmission(theta_dependence=True):
-    ReductionSingleton().reduction_properties[
-        "ThetaDependentTransmission"] = theta_dependence
+    ReductionSingleton().reduction_properties["ThetaDependentTransmission"] = theta_dependence
 
 
-def BeamSpreaderTransmission(
-        sample_spreader,
-        direct_spreader,
-        sample_scattering,
-        direct_scattering,
-        spreader_transmission=1.0,
-        spreader_transmission_err=0.0,
-        theta_dependent=True):
-    sample_spreader = find_data(
-        sample_spreader,
-        instrument=ReductionSingleton().get_instrument())
-    direct_spreader = find_data(
-        direct_spreader,
-        instrument=ReductionSingleton().get_instrument())
-    sample_scattering = find_data(
-        sample_scattering,
-        instrument=ReductionSingleton().get_instrument())
-    direct_scattering = find_data(
-        direct_scattering,
-        instrument=ReductionSingleton().get_instrument())
+def BeamSpreaderTransmission(sample_spreader,
+                             direct_spreader,
+                             sample_scattering,
+                             direct_scattering,
+                             spreader_transmission=1.0,
+                             spreader_transmission_err=0.0,
+                             theta_dependent=True):
+    sample_spreader = find_data(sample_spreader, instrument=ReductionSingleton().get_instrument())
+    direct_spreader = find_data(direct_spreader, instrument=ReductionSingleton().get_instrument())
+    sample_scattering = find_data(sample_scattering, instrument=ReductionSingleton().get_instrument())
+    direct_scattering = find_data(direct_scattering, instrument=ReductionSingleton().get_instrument())
 
-    ReductionSingleton().reduction_properties[
-        "TransmissionMethod"] = "BeamSpreader"
-    ReductionSingleton().reduction_properties[
-        "TransSampleSpreaderFilename"] = sample_spreader
-    ReductionSingleton().reduction_properties[
-        "TransDirectSpreaderFilename"] = direct_spreader
-    ReductionSingleton().reduction_properties[
-        "TransSampleScatteringFilename"] = sample_scattering
-    ReductionSingleton().reduction_properties[
-        "TransDirectScatteringFilename"] = direct_scattering
-    ReductionSingleton().reduction_properties[
-        "SpreaderTransmissionValue"] = spreader_transmission
-    ReductionSingleton().reduction_properties[
-        "SpreaderTransmissionError"] = spreader_transmission_err
-    ReductionSingleton().reduction_properties[
-        "ThetaDependentTransmission"] = theta_dependent
+    ReductionSingleton().reduction_properties["TransmissionMethod"] = "BeamSpreader"
+    ReductionSingleton().reduction_properties["TransSampleSpreaderFilename"] = sample_spreader
+    ReductionSingleton().reduction_properties["TransDirectSpreaderFilename"] = direct_spreader
+    ReductionSingleton().reduction_properties["TransSampleScatteringFilename"] = sample_scattering
+    ReductionSingleton().reduction_properties["TransDirectScatteringFilename"] = direct_scattering
+    ReductionSingleton().reduction_properties["SpreaderTransmissionValue"] = spreader_transmission
+    ReductionSingleton().reduction_properties["SpreaderTransmissionError"] = spreader_transmission_err
+    ReductionSingleton().reduction_properties["ThetaDependentTransmission"] = theta_dependent
 
 
 def SetTransmissionBeamCenter(x, y):
-    ReductionSingleton().reduction_properties[
-        "TransmissionBeamCenterMethod"] = "Value"
+    ReductionSingleton().reduction_properties["TransmissionBeamCenterMethod"] = "Value"
     ReductionSingleton().reduction_properties["TransmissionBeamCenterX"] = x
     ReductionSingleton().reduction_properties["TransmissionBeamCenterY"] = y
 
 
 def TransmissionDirectBeamCenter(datafile):
-    datafile = find_data(
-        datafile,
-        instrument=ReductionSingleton().get_instrument())
-    ReductionSingleton().reduction_properties[
-        "TransmissionBeamCenterMethod"] = "DirectBeam"
-    ReductionSingleton().reduction_properties[
-        "TransmissionBeamCenterFile"] = datafile
+    datafile = find_data(datafile, instrument=ReductionSingleton().get_instrument())
+    ReductionSingleton().reduction_properties["TransmissionBeamCenterMethod"] = "DirectBeam"
+    ReductionSingleton().reduction_properties["TransmissionBeamCenterFile"] = datafile
 
 
 def Background(datafile):
     if isinstance(datafile, list):
         datafile = ','.join(datafile)
-    find_data(
-        datafile,
-        instrument=ReductionSingleton().get_instrument(),
-        allow_multiple=True)
+    find_data(datafile, instrument=ReductionSingleton().get_instrument(), allow_multiple=True)
     ReductionSingleton().reduction_properties["BackgroundFiles"] = datafile
 
 
@@ -349,129 +266,83 @@ def NoBckTransmission():
     if "BckTransmissionMethod" in ReductionSingleton().reduction_properties:
         del ReductionSingleton().reduction_properties["BckTransmissionMethod"]
     if "BckTransmissionBeamRadius" in ReductionSingleton().reduction_properties:
-        del ReductionSingleton().reduction_properties[
-            "BckTransmissionBeamRadius"]
+        del ReductionSingleton().reduction_properties["BckTransmissionBeamRadius"]
     if "BckTransmissionSampleDataFile" in ReductionSingleton().reduction_properties:
-        del ReductionSingleton().reduction_properties[
-            "BckTransmissionSampleDataFile"]
+        del ReductionSingleton().reduction_properties["BckTransmissionSampleDataFile"]
     if "BckTransmissionEmptyDataFile" in ReductionSingleton().reduction_properties:
-        del ReductionSingleton().reduction_properties[
-            "BckTransmissionEmptyDataFile"]
+        del ReductionSingleton().reduction_properties["BckTransmissionEmptyDataFile"]
     if "BckThetaDependentTransmission" in ReductionSingleton().reduction_properties:
-        del ReductionSingleton().reduction_properties[
-            "BckThetaDependentTransmission"]
+        del ReductionSingleton().reduction_properties["BckThetaDependentTransmission"]
 
 
 def SetBckTransmission(trans, error, theta_dependent=True):
-    ReductionSingleton().reduction_properties[
-        "BckTransmissionMethod"] = "Value"
+    ReductionSingleton().reduction_properties["BckTransmissionMethod"] = "Value"
     ReductionSingleton().reduction_properties["BckTransmissionValue"] = trans
     ReductionSingleton().reduction_properties["BckTransmissionError"] = error
-    ReductionSingleton().reduction_properties[
-        "BckThetaDependentTransmission"] = theta_dependent
+    ReductionSingleton().reduction_properties["BckThetaDependentTransmission"] = theta_dependent
 
 
-def BckDirectBeamTransmission(
-        sample_file,
-        empty_file,
-        beam_radius=3.0,
-        theta_dependent=True):
-    sample_file = find_data(
-        sample_file,
-        instrument=ReductionSingleton().get_instrument())
-    empty_file = find_data(
-        empty_file,
-        instrument=ReductionSingleton().get_instrument())
-    ReductionSingleton().reduction_properties[
-        "BckTransmissionMethod"] = "DirectBeam"
-    ReductionSingleton().reduction_properties[
-        "BckTransmissionBeamRadius"] = beam_radius
-    ReductionSingleton().reduction_properties[
-        "BckTransmissionSampleDataFile"] = sample_file
-    ReductionSingleton().reduction_properties[
-        "BckTransmissionEmptyDataFile"] = empty_file
-    ReductionSingleton().reduction_properties[
-        "BckThetaDependentTransmission"] = theta_dependent
+def BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True):
+    sample_file = find_data(sample_file, instrument=ReductionSingleton().get_instrument())
+    empty_file = find_data(empty_file, instrument=ReductionSingleton().get_instrument())
+    ReductionSingleton().reduction_properties["BckTransmissionMethod"] = "DirectBeam"
+    ReductionSingleton().reduction_properties["BckTransmissionBeamRadius"] = beam_radius
+    ReductionSingleton().reduction_properties["BckTransmissionSampleDataFile"] = sample_file
+    ReductionSingleton().reduction_properties["BckTransmissionEmptyDataFile"] = empty_file
+    ReductionSingleton().reduction_properties["BckThetaDependentTransmission"] = theta_dependent
 
 
-def BckBeamSpreaderTransmission(
-        sample_spreader,
-        direct_spreader,
-        sample_scattering,
-        direct_scattering,
-        spreader_transmission=1.0,
-        spreader_transmission_err=0.0,
-        theta_dependent=True):
-    sample_spreader = find_data(
-        sample_spreader,
-        instrument=ReductionSingleton().get_instrument())
-    direct_spreader = find_data(
-        direct_spreader,
-        instrument=ReductionSingleton().get_instrument())
-    sample_scattering = find_data(
-        sample_scattering,
-        instrument=ReductionSingleton().get_instrument())
-    direct_scattering = find_data(
-        direct_scattering,
-        instrument=ReductionSingleton().get_instrument())
+def BckBeamSpreaderTransmission(sample_spreader,
+                                direct_spreader,
+                                sample_scattering,
+                                direct_scattering,
+                                spreader_transmission=1.0,
+                                spreader_transmission_err=0.0,
+                                theta_dependent=True):
+    sample_spreader = find_data(sample_spreader, instrument=ReductionSingleton().get_instrument())
+    direct_spreader = find_data(direct_spreader, instrument=ReductionSingleton().get_instrument())
+    sample_scattering = find_data(sample_scattering, instrument=ReductionSingleton().get_instrument())
+    direct_scattering = find_data(direct_scattering, instrument=ReductionSingleton().get_instrument())
 
-    ReductionSingleton().reduction_properties[
-        "BckTransmissionMethod"] = "BeamSpreader"
-    ReductionSingleton().reduction_properties[
-        "BckTransSampleSpreaderFilename"] = sample_spreader
-    ReductionSingleton().reduction_properties[
-        "BckTransDirectSpreaderFilename"] = direct_spreader
-    ReductionSingleton().reduction_properties[
-        "BckTransSampleScatteringFilename"] = sample_scattering
-    ReductionSingleton().reduction_properties[
-        "BckTransDirectScatteringFilename"] = direct_scattering
-    ReductionSingleton().reduction_properties[
-        "BckSpreaderTransmissionValue"] = spreader_transmission
-    ReductionSingleton().reduction_properties[
-        "BckSpreaderTransmissionError"] = spreader_transmission_err
-    ReductionSingleton().reduction_properties[
-        "BckThetaDependentTransmission"] = theta_dependent
+    ReductionSingleton().reduction_properties["BckTransmissionMethod"] = "BeamSpreader"
+    ReductionSingleton().reduction_properties["BckTransSampleSpreaderFilename"] = sample_spreader
+    ReductionSingleton().reduction_properties["BckTransDirectSpreaderFilename"] = direct_spreader
+    ReductionSingleton().reduction_properties["BckTransSampleScatteringFilename"] = sample_scattering
+    ReductionSingleton().reduction_properties["BckTransDirectScatteringFilename"] = direct_scattering
+    ReductionSingleton().reduction_properties["BckSpreaderTransmissionValue"] = spreader_transmission
+    ReductionSingleton().reduction_properties["BckSpreaderTransmissionError"] = spreader_transmission_err
+    ReductionSingleton().reduction_properties["BckThetaDependentTransmission"] = theta_dependent
 
 
 def SetBckTransmissionBeamCenter(x, y):
-    ReductionSingleton().reduction_properties[
-        "BckTransmissionBeamCenterMethod"] = "Value"
+    ReductionSingleton().reduction_properties["BckTransmissionBeamCenterMethod"] = "Value"
     ReductionSingleton().reduction_properties["BckTransmissionBeamCenterX"] = x
     ReductionSingleton().reduction_properties["BckTransmissionBeamCenterY"] = y
 
 
 def BckTransmissionDirectBeamCenter(datafile):
-    ReductionSingleton().reduction_properties[
-        "BckTransmissionBeamCenterMethod"] = "DirectBeam"
-    ReductionSingleton().reduction_properties[
-        "BckTransmissionBeamCenterFile"] = datafile
+    ReductionSingleton().reduction_properties["BckTransmissionBeamCenterMethod"] = "DirectBeam"
+    ReductionSingleton().reduction_properties["BckTransmissionBeamCenterFile"] = datafile
 
 
 def BckTransmissionDarkCurrent(dark_current=None):
     if dark_current is not None:
-        dark_current = find_data(
-            dark_current,
-            instrument=ReductionSingleton().get_instrument())
-        ReductionSingleton().reduction_properties[
-            "BckTransmissionDarkCurrentFile"] = dark_current
+        dark_current = find_data(dark_current, instrument=ReductionSingleton().get_instrument())
+        ReductionSingleton().reduction_properties["BckTransmissionDarkCurrentFile"] = dark_current
     elif "BckTransmissionDarkCurrentFile" in ReductionSingleton().reduction_properties:
-        del ReductionSingleton().reduction_properties[
-            "BckTransmissionDarkCurrentFile"]
+        del ReductionSingleton().reduction_properties["BckTransmissionDarkCurrentFile"]
 
 
 def BckThetaDependentTransmission(theta_dependence=True):
-    ReductionSingleton().reduction_properties[
-        "BckThetaDependentTransmission"] = theta_dependence
+    ReductionSingleton().reduction_properties["BckThetaDependentTransmission"] = theta_dependence
 
 
 def SetSampleDetectorOffset(distance):
-    ReductionSingleton().reduction_properties[
-        "SampleDetectorDistanceOffset"] = distance
+    ReductionSingleton().reduction_properties["SampleDetectorDistanceOffset"] = distance
 
 
 def SetSampleDetectorDistance(distance):
-    ReductionSingleton().reduction_properties[
-        "SampleDetectorDistance"] = distance
+    ReductionSingleton().reduction_properties["SampleDetectorDistance"] = distance
 
 
 def SetWavelength(wavelength, spread):
@@ -497,8 +368,7 @@ def SaveIqAscii(reducer=None, process=''):
 
 def SaveIq(output_dir=None, process=''):
     if output_dir is not None:
-        ReductionSingleton().reduction_properties[
-            "OutputDirectory"] = output_dir
+        ReductionSingleton().reduction_properties["OutputDirectory"] = output_dir
     ReductionSingleton().reduction_properties["ProcessInfo"] = process
 
 
@@ -522,18 +392,15 @@ def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0, component_name=""):
     Mask edges of a component_name
     By default is the main detector for both GPSANS and BioSans
     '''
-    ReductionSingleton().reduction_properties["MaskedEdges"] = [
-        nx_low, nx_high, ny_low, ny_high]
-    ReductionSingleton().reduction_properties[
-        "MaskedComponent"] = component_name
+    ReductionSingleton().reduction_properties["MaskedEdges"] = [nx_low, nx_high, ny_low, ny_high]
+    ReductionSingleton().reduction_properties["MaskedComponent"] = component_name
 
 
 def MaskComponent(component_name):
     '''
     Masks a full component by name
     '''
-    ReductionSingleton().reduction_properties[
-        "MaskedFullComponent"] = component_name
+    ReductionSingleton().reduction_properties["MaskedFullComponent"] = component_name
 
 
 def MaskRectangle(x_min, x_max, y_min, y_max):
@@ -547,11 +414,9 @@ def MaskRectangle(x_min, x_max, y_min, y_max):
 
 def MaskDetectors(det_list):
     if "MaskedDetectorList" in ReductionSingleton().reduction_properties:
-        ReductionSingleton().reduction_properties[
-            "MaskedDetectorList"].extend(det_list)
+        ReductionSingleton().reduction_properties["MaskedDetectorList"].extend(det_list)
     else:
-        ReductionSingleton().reduction_properties[
-            "MaskedDetectorList"] = det_list
+        ReductionSingleton().reduction_properties["MaskedDetectorList"] = det_list
 
 
 def MaskDetectorSide(side_to_mask=None):
@@ -567,21 +432,12 @@ def SetAbsoluteScale(factor):
     ReductionSingleton().reduction_properties["AbsoluteScalingFactor"] = factor
 
 
-def SetDirectBeamAbsoluteScale(
-        direct_beam,
-        beamstop_diameter=0.0,
-        attenuator_trans=1.0,
-        apply_sensitivity=False):
-    ReductionSingleton().reduction_properties[
-        "AbsoluteScaleMethod"] = "ReferenceData"
-    ReductionSingleton().reduction_properties[
-        "AbsoluteScalingReferenceFilename"] = direct_beam
-    ReductionSingleton().reduction_properties[
-        "AbsoluteScalingBeamDiameter"] = beamstop_diameter
-    ReductionSingleton().reduction_properties[
-        "AbsoluteScalingAttenuatorTrans"] = attenuator_trans
-    ReductionSingleton().reduction_properties[
-        "AbsoluteScalingApplySensitivity"] = apply_sensitivity
+def SetDirectBeamAbsoluteScale(direct_beam, beamstop_diameter=0.0, attenuator_trans=1.0, apply_sensitivity=False):
+    ReductionSingleton().reduction_properties["AbsoluteScaleMethod"] = "ReferenceData"
+    ReductionSingleton().reduction_properties["AbsoluteScalingReferenceFilename"] = direct_beam
+    ReductionSingleton().reduction_properties["AbsoluteScalingBeamDiameter"] = beamstop_diameter
+    ReductionSingleton().reduction_properties["AbsoluteScalingAttenuatorTrans"] = attenuator_trans
+    ReductionSingleton().reduction_properties["AbsoluteScalingApplySensitivity"] = apply_sensitivity
 
 
 def DivideByThickness(thickness=1.0):
@@ -589,8 +445,7 @@ def DivideByThickness(thickness=1.0):
         if "SampleThickness" in ReductionSingleton().reduction_properties:
             del ReductionSingleton().reduction_properties["SampleThickness"]
     else:
-        ReductionSingleton().reduction_properties[
-            "SampleThickness"] = thickness
+        ReductionSingleton().reduction_properties["SampleThickness"] = thickness
 
 
 def SetWedges(number_of_wedges=2, wedge_angle=30.0, wedge_offset=0.0):
@@ -600,14 +455,12 @@ def SetWedges(number_of_wedges=2, wedge_angle=30.0, wedge_offset=0.0):
         @param wedge_angle: augular opening of each wedge, in degrees
         @param wedge_offset: angular offset for the wedges, in degrees
     """
-    ReductionSingleton().reduction_properties[
-        "NumberOfWedges"] = number_of_wedges
+    ReductionSingleton().reduction_properties["NumberOfWedges"] = number_of_wedges
     ReductionSingleton().reduction_properties["WedgeAngle"] = wedge_angle
     ReductionSingleton().reduction_properties["WedgeOffset"] = wedge_offset
 
 
-def Stitch(data_list=None, q_min=None, q_max=None, output_workspace=None,
-           scale=None, save_output=False):
+def Stitch(data_list=None, q_min=None, q_max=None, output_workspace=None, scale=None, save_output=False):
     """
         Stitch a set of SANS data sets
 
@@ -629,13 +482,7 @@ def Stitch(data_list=None, q_min=None, q_max=None, output_workspace=None,
     if data_list is None:
         data_list = []
     from LargeScaleStructures.data_stitching import stitch
-    stitch(
-        data_list,
-        q_min=q_min,
-        q_max=q_max,
-        output_workspace=output_workspace,
-        scale=scale,
-        save_output=save_output)
+    stitch(data_list, q_min=q_min, q_max=q_max, output_workspace=output_workspace, scale=scale, save_output=save_output)
 
 
 def beam_center_gravitational_drop(beam_center_file, sdd=1.13):
@@ -654,7 +501,7 @@ def beam_center_gravitational_drop(beam_center_file, sdd=1.13):
         neutron_mass = 1.674927211e-27
         gravity = 9.80665
         h_planck = 6.62606896e-34
-        l_2 = (gravity * neutron_mass**2 / (2.0 * h_planck**2 )) * path_length**2
+        l_2 = (gravity * neutron_mass**2 / (2.0 * h_planck**2)) * path_length**2
         return wavelength**2 * l_2
 
     # Get beam center used in the previous reduction
@@ -683,7 +530,8 @@ def beam_center_gravitational_drop(beam_center_file, sdd=1.13):
     y_pixel_size = y_pixel_size_mm * 1e-3  # In meters
     distance_detector1 = i.getComponentByName("detector1").getPos()[2]
     path_length = distance_detector1 - sdd
-    Logger("CommandInterface").debug("SDD detector1 = %.3f meters. SDD for wing = %.3f meters." % (distance_detector1, sdd))
+    Logger("CommandInterface").debug("SDD detector1 = %.3f meters. SDD for wing = %.3f meters." %
+                                     (distance_detector1, sdd))
     Logger("CommandInterface").debug("Path length for gravitational drop = %.3f meters." % (path_length))
     r = ws.run()
     wavelength = r.getProperty("wavelength").value
@@ -695,5 +543,6 @@ def beam_center_gravitational_drop(beam_center_file, sdd=1.13):
     # x pixel -> drop
     drop_in_pixels = drop / y_pixel_size
     new_beam_center_y = beam_center_y + drop_in_pixels
-    Logger("CommandInterface").information("Beam Center after:   [%.2f, %.2f] pixels" % (beam_center_x, new_beam_center_y))
+    Logger("CommandInterface").information("Beam Center after:   [%.2f, %.2f] pixels" %
+                                           (beam_center_x, new_beam_center_y))
     return beam_center_x, new_beam_center_y

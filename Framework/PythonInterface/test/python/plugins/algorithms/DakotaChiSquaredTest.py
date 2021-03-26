@@ -9,7 +9,6 @@ from mantid import AnalysisDataServiceImpl, config, simpleapi
 
 
 class DakotaChiSquaredTest(unittest.TestCase):
-
     def makeFiles(self):
         simpleapi.CreateWorkspace(OutputWorkspace='data', DataX='1,2,3,4,5', DataY='1,0,1,4,4', DataE='1,0,1,2,2')
         simpleapi.CreateWorkspace(OutputWorkspace='sim', DataX='1,2,3,4,5', DataY='1,1,1,1,1', DataE='0,0,0,0,0')

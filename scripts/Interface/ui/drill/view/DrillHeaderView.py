@@ -15,25 +15,23 @@ class DrillHeaderView(QHeaderView):
     button is added in each section header to allow the user to fold and unfold
     it.
     """
-    BUTTON_TEXT_FOLDED = "+"    # push button text when the section is folded
+    BUTTON_TEXT_FOLDED = "+"  # push button text when the section is folded
     BUTTON_TEXT_UNFOLDED = "-"  # push button text when the section is unfolded
-    BUTTON_SIZE = 15            # size of the squared folding button
+    BUTTON_SIZE = 15  # size of the squared folding button
 
     def __init__(self, parent=None):
         super(DrillHeaderView, self).__init__(Qt.Horizontal, parent)
         self.setDefaultAlignment(Qt.AlignLeft)
         self.buttonsRectangles = dict()
         self.sectionsFolded = dict()  # folded columns indexes
-        self.sectionsTexts = dict()   # folded columns text
-        self.sectionsSizes = dict()   # folded columns original size
-        self.buttonPressed = None     # currently pressed button, used for release
+        self.sectionsTexts = dict()  # folded columns text
+        self.sectionsSizes = dict()  # folded columns original size
+        self.buttonPressed = None  # currently pressed button, used for release
 
         # set the minimum section size
-        cellMargin = self.style().pixelMetric(QStyle.PM_FocusFrameHMargin,
-                                              None, self)
+        cellMargin = self.style().pixelMetric(QStyle.PM_FocusFrameHMargin, None, self)
         minCellSize = self.fontMetrics().width("....") + 2 * cellMargin + 1
-        headerMargin = self.style().pixelMetric(QStyle.PM_HeaderMargin,
-                                                None, self)
+        headerMargin = self.style().pixelMetric(QStyle.PM_HeaderMargin, None, self)
         minHeaderSize = self.BUTTON_SIZE + 2 * headerMargin + 1
         self.setMinimumSectionSize(max(minCellSize, minHeaderSize))
 
@@ -139,19 +137,15 @@ class DrillHeaderView(QHeaderView):
 
         # button
         margin = self.style().pixelMetric(QStyle.PM_HeaderMargin, None, self)
-        self.buttonsRectangles[logicalIndex] = QRect(0, 0,
-                                                     self.BUTTON_SIZE,
-                                                     self.BUTTON_SIZE)
+        self.buttonsRectangles[logicalIndex] = QRect(0, 0, self.BUTTON_SIZE, self.BUTTON_SIZE)
         if (self.BUTTON_SIZE % 2) == 0:
-            self.buttonsRectangles[logicalIndex].moveCenter(rect.center()
-                                                            - QPoint(1, 1))
+            self.buttonsRectangles[logicalIndex].moveCenter(rect.center() - QPoint(1, 1))
         else:
             self.buttonsRectangles[logicalIndex].moveCenter(rect.center())
 
         # if the section is not folded, the button is right aligned
         if not self.isSectionFolded(logicalIndex):
-            self.buttonsRectangles[logicalIndex].moveRight(
-                    rect.right() - margin - 1)
+            self.buttonsRectangles[logicalIndex].moveRight(rect.right() - margin - 1)
 
         opt = QStyleOptionToolButton()
         opt.rect = self.buttonsRectangles[logicalIndex]

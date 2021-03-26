@@ -9,5 +9,4 @@
 #
 from mantidqt.utils.qt import import_qt
 
-
 UserSubWindowFactory = import_qt('._common', 'mantidqt', 'UserSubWindowFactory')

@@ -18,7 +18,6 @@ from qtpy.QtCore import Qt
 
 
 class MockConfigService(object):
-
     def __init__(self):
         self.setString = StrictMock()
         self.getString = Mock(return_value='')
@@ -27,22 +26,22 @@ class MockConfigService(object):
 class MockQTreeWidgetParentItem(MockQWidget):
     def __init__(self):
         self.addChild = StrictMock()
-        self.childCount = Mock(return_value = 0)
+        self.childCount = Mock(return_value=0)
         self.setCheckState = Mock()
-        self.parent = Mock(return_value = False)
-        self.childCount = Mock(return_value = 1)
-        self.child = Mock(return_value = MockQTreeWidgetChildItem(self))
+        self.parent = Mock(return_value=False)
+        self.childCount = Mock(return_value=1)
+        self.child = Mock(return_value=MockQTreeWidgetChildItem(self))
 
 
 class MockQTreeWidgetChildItem(MockQWidget):
     def __init__(self, parent=None):
         self.addChild = StrictMock()
-        self.childCount = Mock(return_value = 0)
+        self.childCount = Mock(return_value=0)
         self.setCheckState = Mock()
         self.checkState = Mock()
-        self.parent = Mock(return_value = parent)
-        self.childCount = Mock(return_value = 0)
-        self.child = Mock(return_value = False)
+        self.parent = Mock(return_value=parent)
+        self.childCount = Mock(return_value=0)
+        self.child = Mock(return_value=False)
 
 
 class MockQTreeWidget(MockQWidget):
@@ -50,8 +49,8 @@ class MockQTreeWidget(MockQWidget):
         self.clear = StrictMock()
         self.setHeaderLabel = StrictMock()
         self.addTopLevelItem = StrictMock()
-        self.topLevelItemCount = Mock(return_value = 3)
-        self.topLevelItem = StrictMock(return_value = MockQTreeWidgetParentItem())
+        self.topLevelItemCount = Mock(return_value=3)
+        self.topLevelItem = StrictMock(return_value=MockQTreeWidgetParentItem())
         self.itemClicked = Mock()
         self.itemChanged = Mock()
 
@@ -68,15 +67,17 @@ class MockMainWindow(MockQWidget):
         self.interface_list = ['Direct', 'Indirect', 'Muon', 'Reflectometry', 'SANS']
 
 
-algorithm_and_states = {'Arithmetic' : False,
-                        'Arithmetic\\Errors' : True,
-                        'Arithmetic\\FFT' : False,
-                        'ISIS' : False,
-                        'Workflow' : True,
-                        'Workflow\\Diffraction\\DataHandling' : True,
-                        'Workflow\\Diffraction' : True}
+algorithm_and_states = {
+    'Arithmetic': False,
+    'Arithmetic\\Errors': True,
+    'Arithmetic\\FFT': False,
+    'ISIS': False,
+    'Workflow': True,
+    'Workflow\\Diffraction\\DataHandling': True,
+    'Workflow\\Diffraction': True
+}
 
-mock_get_category_and_state = Mock(return_value = algorithm_and_states)
+mock_get_category_and_state = Mock(return_value=algorithm_and_states)
 
 
 @start_qapplication
@@ -127,7 +128,7 @@ class CategoriesSettingsTest(unittest.TestCase):
         mock_view = MockCategoriesView()
         presenter = CategoriesSettings(None, mock_view)
         hidden_algorthim_string = [i for i in sorted(algorithm_and_states.keys()) if algorithm_and_states[i] is True]
-        presenter._create_hidden_categories_string = Mock(return_value = hidden_algorthim_string)
+        presenter._create_hidden_categories_string = Mock(return_value=hidden_algorthim_string)
         # reset any effects from the constructor
         mock_ConfigService.setString.reset_mock()
 

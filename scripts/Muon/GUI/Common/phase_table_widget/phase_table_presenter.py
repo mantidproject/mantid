@@ -66,8 +66,7 @@ class PhaseTablePresenter(object):
         self.calculation_thread = self.create_calculation_thread()
 
         self.calculation_thread.threadWrapperSetUp(self.handle_phase_table_calculation_started,
-                                                   self.handle_calculation_success,
-                                                   self.handle_calculation_error)
+                                                   self.handle_calculation_success, self.handle_calculation_error)
 
         self.calculation_thread.start()
 
@@ -81,12 +80,10 @@ class PhaseTablePresenter(object):
 
     def validate_pair_name(self, text):
         if text in self.context.group_pair_context.pairs:
-            self.view.warning_popup(
-                "Groups and pairs (including phasequads) must have unique names")
+            self.view.warning_popup("Groups and pairs (including phasequads) must have unique names")
             return False
         if not re.match(valid_name_regex, text):
-            self.view.warning_popup(
-                "Phasequad names should only contain digits, characters and _")
+            self.view.warning_popup("Phasequad names should only contain digits, characters and _")
             return False
         return True
 
@@ -118,12 +115,9 @@ class PhaseTablePresenter(object):
     def calculate_phase_quad(self):
         self.context.group_pair_context.add_phasequad(self._phasequad_obj)
 
-        self.context.calculate_phasequads(
-            self._phasequad_obj.name, self._phasequad_obj)
-        self.phase_quad_calculation_complete_notifier.notify_subscribers(
-            self._phasequad_obj.Re.name)
-        self.phase_quad_calculation_complete_notifier.notify_subscribers(
-            self._phasequad_obj.Im.name)
+        self.context.calculate_phasequads(self._phasequad_obj.name, self._phasequad_obj)
+        self.phase_quad_calculation_complete_notifier.notify_subscribers(self._phasequad_obj.Re.name)
+        self.phase_quad_calculation_complete_notifier.notify_subscribers(self._phasequad_obj.Im.name)
 
     def handle_phasequad_calculation_success(self):
         self.enable_editing_notifier.notify_subscribers()
@@ -136,15 +130,12 @@ class PhaseTablePresenter(object):
 
         for name in names:
             if pair_added:
-                self.context.group_pair_context.add_pair_to_selected_pairs(
-                    name)
+                self.context.group_pair_context.add_pair_to_selected_pairs(name)
             else:
-                self.context.group_pair_context.remove_pair_from_selected_pairs(
-                    name)
+                self.context.group_pair_context.remove_pair_from_selected_pairs(name)
 
             group_info = {'is_added': pair_added, 'name': name}
-            self.selected_phasequad_changed_notifier.notify_subscribers(
-                group_info)
+            self.selected_phasequad_changed_notifier.notify_subscribers(group_info)
         self._phasequad_obj = None
 
     def handle_calculation_started(self):
@@ -175,7 +166,8 @@ class PhaseTablePresenter(object):
             if self.view.output_fit_information else '__NotUsed'
 
         self.current_alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
-        detector_table, fitting_information = run_CalMuonDetectorPhases(parameters, self.current_alg, fitting_workspace_name)
+        detector_table, fitting_information = run_CalMuonDetectorPhases(parameters, self.current_alg,
+                                                                        fitting_workspace_name)
         self.current_alg = None
 
         self.add_phase_table_to_ADS(detector_table)
@@ -243,8 +235,7 @@ class PhaseTablePresenter(object):
         self._validate_data_changed(self.view.last_good_time, "Last Good Data")
 
     def _validate_data_changed(self, data, string):
-        run = float(get_run_number_from_workspace_name(self.view.input_workspace,
-                                                       self.context.data_context.instrument))
+        run = float(get_run_number_from_workspace_name(self.view.input_workspace, self.context.data_context.instrument))
         last_good_time = self.context.last_good_data([run])
         first_good_time = self.context.first_good_data([run])
 

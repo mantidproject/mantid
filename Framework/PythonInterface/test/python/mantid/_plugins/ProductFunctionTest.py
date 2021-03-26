@@ -14,7 +14,6 @@ from mantid._plugins import ProductFunction
 
 
 class ProductFunctionTest(unittest.TestCase):
-
     def test_type(self):
         p = FunctionFactory.createFunction("ProductFunction")
         self.assertTrue(isinstance(p, ProductFunction))

@@ -130,8 +130,7 @@ class MultiPythonFileInterpreter(QWidget):
             # Or the default (0) if this is the very first tab
             current_zoom = self.zoom_level
 
-        interpreter = PythonFileInterpreter(font, content, filename=filename,
-                                            parent=self)
+        interpreter = PythonFileInterpreter(font, content, filename=filename, parent=self)
 
         interpreter.editor.zoomTo(current_zoom)
 
@@ -153,7 +152,7 @@ class MultiPythonFileInterpreter(QWidget):
         interpreter.editor.setFocus()
         if content is not None:
             line_count = content.count(linesep)
-            interpreter.editor.setCursorPosition(line_count,0)
+            interpreter.editor.setCursorPosition(line_count, 0)
         return tab_idx
 
     def abort_current(self):

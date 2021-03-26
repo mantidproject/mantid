@@ -7,24 +7,20 @@
 from numpy import array
 
 general_params = {
-    "monitor_mask_regions": array([[3.45, 2.96, 2.1,  1.73],
-                                   [3.7,  3.2,  2.26, 1.98]]),
+    "monitor_mask_regions": array([[3.45, 2.96, 2.1, 1.73], [3.7, 3.2, 2.26, 1.98]]),
     "monitor_spectrum_number": 1,
-
     "generate_absorb_corrections": False,
-
     "file_names": {
-         "vanadium_absorb_filename": "pearl_absorp_sphere_10mm_newinst2_long.nxs",
-         "tt88_grouping_filename": "pearl_group_12_1_TT88.cal",
-         "tt70_grouping_filename": "pearl_group_12_1_TT70.cal",
-         "tt35_grouping_filename": "pearl_group_12_1_TT35.cal",
-         "nxs_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}.nxs",
-         "gss_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}.gsas",
-         "dat_files_directory": "",
-         "tof_xye_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}_tof.xye",
-         "dspacing_xye_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}_d.xye"
+        "vanadium_absorb_filename": "pearl_absorp_sphere_10mm_newinst2_long.nxs",
+        "tt88_grouping_filename": "pearl_group_12_1_TT88.cal",
+        "tt70_grouping_filename": "pearl_group_12_1_TT70.cal",
+        "tt35_grouping_filename": "pearl_group_12_1_TT35.cal",
+        "nxs_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}.nxs",
+        "gss_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}.gsas",
+        "dat_files_directory": "",
+        "tof_xye_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}_tof.xye",
+        "dspacing_xye_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}_d.xye"
     },
-
     "subtract_empty_instrument": True,
     "focused_bin_widths": [
         # Note you want these to be negative for logarithmic (dt / t) binning
@@ -66,7 +62,7 @@ long_mode_off_params = {
         (1500, 19900),  # Bank 11
         (1500, 19900),  # Bank 12
         (1500, 19900),  # Bank 13
-        (1500, 19900)   # Bank 14
+        (1500, 19900)  # Bank 14
     ],
     "monitor_spline_coefficient": 20,
     "spline_coefficient": 60
@@ -94,7 +90,7 @@ long_mode_on_params = {
         (20300, 38830),  # Bank 11
         (20300, 38830),  # Bank 12
         (20300, 38830),  # Bank 13
-        (20300, 38830)   # Bank 14
+        (20300, 38830)  # Bank 14
     ],
     "monitor_spline_coefficient": 20,
     "spline_coefficient": 5
@@ -121,46 +117,40 @@ variable_help = {
     "long_mode_<on/off>_params": {
         "file_names": {
             "vanadium_absorb_filename": "Takes the name of the calculated vanadium absorption corrections. This file "
-                                        " must be located in the top level of the calibration folder",
-
+            " must be located in the top level of the calibration folder",
             "tt88_grouping_filename": "The name of the .cal file that defines the grouping of detectors in banks for "
-                                      "TT88. This file must be located in the top level of the calibration folder.",
-
+            "TT88. This file must be located in the top level of the calibration folder.",
             "tt70_grouping_filename": "The name of the .cal file that defines the grouping of detectors in banks for "
-                                      "TT70. This file must be located in the top level of the calibration folder.",
-
+            "TT70. This file must be located in the top level of the calibration folder.",
             "tt35_grouping_filename": "The name of the .cal file that defines the grouping of detectors in banks for "
-                                      "TT35. This file must be located in the top level of the calibration folder.",
+            "TT35. This file must be located in the top level of the calibration folder.",
         },
-
         "monitor_lambda_crop_range": "The range in wavelength to crop a monitor workspace to before calculating "
-                                     "the current normalisation",
+        "the current normalisation",
         "monitor_integration_range": "The minimum and maximum values to consider whilst integrating the monitor "
-                                     "workspace",
+        "workspace",
         "raw_data_tof_cropping": "The crop values for to apply when loading raw data. This step is applied before any "
-                                 "processing takes place. This is to crop from 40,000 microseconds in the "
-                                 "raw data to 20,000 microseconds worth of data",
+        "processing takes place. This is to crop from 40,000 microseconds in the "
+        "raw data to 20,000 microseconds worth of data",
         "focused_cropping_values": "These values are used to determine the TOF range to crop a focused (not Vanadium "
-                                   "calibration) workspace to. These are applied on a bank by bank basis. They must "
-                                   "be less than the values specified for raw_data_tof_cropping.",
+        "calibration) workspace to. These are applied on a bank by bank basis. They must "
+        "be less than the values specified for raw_data_tof_cropping.",
         "monitor_spline_coefficient": "The coefficient to use whilst calculating a spline from the monitor."
-                                      "workspace. This is used to normalise the workspace current.",
+        "workspace. This is used to normalise the workspace current.",
         "spline_coefficient": "The coefficient to use whilst calculating a spline for each bank during "
-                              "a vanadium calibration."
+        "a vanadium calibration."
     },
-
     "general_params": {
         "monitor_spectrum_number": "The spectrum number the monitor is located at in the workspace",
     },
-
     "calibration_params": {
         "create_cal_rebin_1_params": "The parameters for the first rebin step used to create a calibration file",
         "create_cal_rebin_2_params": "The parameters for the second rebin step used to create a calibration file",
         "cross_corr_reference_spectra": "The Workspace Index of the spectra to correlate all other spectra against",
         "cross_corr_ws_index_min": "The workspace index of the first member of the range of spectra to cross-correlate "
-                                   "against",
+        "against",
         "cross_corr_ws_index_max": "The workspace index of the last member of the range of spectra to cross-correlate "
-                                   "against",
+        "against",
         "cross_corr_x_min": "The starting point of the region to be cross correlated",
         "cross_corr_x_max": "The ending point of the region to be cross correlated",
         "get_det_offsets_step": "Step size used to bin d-spacing data in GetDetectorOffsets",

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.kernel import DateAndTime
-from mantid.geometry import(Component, Detector, Instrument, ObjComponent, ReferenceFrame)
+from mantid.geometry import (Component, Detector, Instrument, ObjComponent, ReferenceFrame)
 from testhelpers import can_be_instantiated, WorkspaceCreationHelper
 
 
@@ -54,6 +54,7 @@ class InstrumentTest(unittest.TestCase):
         inst = self.__testws.getInstrument()
         base_inst = inst.getBaseInstrument()
         self.assertEqual("testInst", base_inst.getName())
+
 
 if __name__ == '__main__':
     unittest.main()

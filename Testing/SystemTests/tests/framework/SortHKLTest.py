@@ -20,10 +20,7 @@ class HKLStatisticsTestMixin(object):
 
         self._space_groups = ['Pm-3m', 'P4_mmm', 'Pmmm', 'Im-3m', 'Fm-3m', 'I4_mmm', 'Cmmm', 'Immm', 'Fmmm']
 
-        self._centering_map = {'P': 'Primitive',
-                               'I': 'Body centred',
-                               'F': 'All-face centred',
-                               'C': 'C-face centred'}
+        self._centering_map = {'P': 'Primitive', 'I': 'Body centred', 'F': 'All-face centred', 'C': 'C-face centred'}
 
         self._base_directory = 'SortHKL/'
         self._template_hkl = 'reflections_{0}.hkl'
@@ -39,10 +36,7 @@ class HKLStatisticsTestMixin(object):
 
             # Mantid functions don't seem to like unicode so the dict is re-written
             ub_parameters.update(
-                dict(
-                    [(str(x), y if isinstance(y, float) else str(y))
-                     for x, y in raw_ub_parameters.items()]
-                ))
+                dict([(str(x), y if isinstance(y, float) else str(y)) for x, y in raw_ub_parameters.items()]))
 
         return ub_parameters
 
@@ -64,8 +58,8 @@ class HKLStatisticsTestMixin(object):
         return PointGroupFactory.createPointGroup(space_group[1:].replace('_', '/'))
 
     def _load_reference_statistics(self, space_group):
-        filename = FileFinder.Instance().getFullPath(
-            self._base_directory + self._template_statistics.format(space_group))
+        filename = FileFinder.Instance().getFullPath(self._base_directory +
+                                                     self._template_statistics.format(space_group))
 
         lines = []
         with open(filename, 'r') as statistics_file:
@@ -100,7 +94,6 @@ class SortHKLTest(HKLStatisticsTestMixin, systemtesting.MantidSystemTest):
     [1] SORTAV: ftp://ftp.hwi.buffalo.edu/pub/Blessing/Drear/sortav.use
         (and references therein).
     '''
-
     def runTest(self):
         self._init_test_data()
         self.test_SortHKLStatistics()
@@ -131,8 +124,7 @@ class SortHKLTest(HKLStatisticsTestMixin, systemtesting.MantidSystemTest):
         self.assertEqual(round(statistics['Multiplicity'], 1), round(reference_statistics['<N>'], 1))
         self.assertEqual(round(statistics['Rpim'], 2), round(100.0 * reference_statistics['Rm'], 2))
         self.assertEqual(statistics['No. of Unique Reflections'], int(reference_statistics['Nunique']))
-        self.assertDelta(round(statistics['Data Completeness'], 1), round(reference_statistics['Completeness'], 1),
-                         0.5)
+        self.assertDelta(round(statistics['Data Completeness'], 1), round(reference_statistics['Completeness'], 1), 0.5)
 
     def _check_sorted_hkls_consistency(self, sorted_hkls, space_group):
         peaks = [sorted_hkls.getPeak(i) for i in range(sorted_hkls.getNumberPeaks())]

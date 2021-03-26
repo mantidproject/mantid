@@ -28,44 +28,57 @@ class Mode(object):
 
 class SANSFitShiftScale(ParallelDataProcessorAlgorithm):
     def _make_mode_map(self):
-        return {'ShiftOnly': Mode.ShiftOnly, 'ScaleOnly': Mode.ScaleOnly,
-                'Both': Mode.BothFit, 'None': Mode.NoneFit}
+        return {'ShiftOnly': Mode.ShiftOnly, 'ScaleOnly': Mode.ScaleOnly, 'Both': Mode.BothFit, 'None': Mode.NoneFit}
 
     def category(self):
         return 'SANS'
 
     def summary(self):
-        return 'Fits the high angle workspace and to the low angle bank workspace and provides the required shift and scale'
+        return 'Fits the high angle workspace and to the low angle bank workspace and provides the required shift and' \
+               ' scale'
 
     def PyInit(self):
-        self.declareProperty(
-            MatrixWorkspaceProperty('HABWorkspace', '', optional=PropertyMode.Mandatory, direction=Direction.Input),
-            doc='High angle bank workspace in Q')
+        self.declareProperty(MatrixWorkspaceProperty('HABWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Input),
+                             doc='High angle bank workspace in Q')
 
-        self.declareProperty(
-            MatrixWorkspaceProperty('LABWorkspace', '', optional=PropertyMode.Mandatory, direction=Direction.Input),
-            doc='Low angle bank workspace in Q')
+        self.declareProperty(MatrixWorkspaceProperty('LABWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Input),
+                             doc='Low angle bank workspace in Q')
 
         allowedModes = StringListValidator(list(self._make_mode_map().keys()))
 
-        self.declareProperty('Mode', 'None', validator=allowedModes, direction=Direction.Input,
+        self.declareProperty('Mode',
+                             'None',
+                             validator=allowedModes,
+                             direction=Direction.Input,
                              doc='What to fit. Free parameter(s).')
 
-        self.declareProperty('ScaleFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
+        self.declareProperty('ScaleFactor',
+                             defaultValue=Property.EMPTY_DBL,
+                             direction=Direction.Input,
                              doc='Optional scaling factor')
 
-        self.declareProperty('ShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
+        self.declareProperty('ShiftFactor',
+                             defaultValue=Property.EMPTY_DBL,
+                             direction=Direction.Input,
                              doc='Optional shift factor')
 
-        self.declareProperty('FitMin', defaultValue=0.0, direction=Direction.Input,
-                             doc='Optional minimum q for fit')
+        self.declareProperty('FitMin', defaultValue=0.0, direction=Direction.Input, doc='Optional minimum q for fit')
 
-        self.declareProperty('FitMax', defaultValue=1000.0, direction=Direction.Input,
-                             doc='Optional maximum q for fit')
+        self.declareProperty('FitMax', defaultValue=1000.0, direction=Direction.Input, doc='Optional maximum q for fit')
 
-        self.declareProperty('OutScaleFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
+        self.declareProperty('OutScaleFactor',
+                             defaultValue=Property.EMPTY_DBL,
+                             direction=Direction.Output,
                              doc='Applied scale factor')
-        self.declareProperty('OutShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
+        self.declareProperty('OutShiftFactor',
+                             defaultValue=Property.EMPTY_DBL,
+                             direction=Direction.Output,
                              doc='Applied shift factor')
 
     def PyExec(self):
@@ -84,8 +97,13 @@ class SANSFitShiftScale(ParallelDataProcessorAlgorithm):
             fit_max = max(lab.dataX(0))
 
         if not mode == Mode.NoneFit:
-            shift_factor, scale_factor = self._determine_factors(hab, lab, mode, scale=scale_factor, shift=shift_factor,
-                                                                 fit_min = fit_min, fit_max = fit_max)
+            shift_factor, scale_factor = self._determine_factors(hab,
+                                                                 lab,
+                                                                 mode,
+                                                                 scale=scale_factor,
+                                                                 shift=shift_factor,
+                                                                 fit_min=fit_min,
+                                                                 fit_max=fit_max)
 
         self.setProperty('OutScaleFactor', scale_factor)
         self.setProperty('OutShiftFactor', shift_factor)
@@ -150,15 +168,18 @@ class SANSFitShiftScale(ParallelDataProcessorAlgorithm):
         constant_x_shift_and_scale = ', f0.Shift=0.0, f0.XScaling=1.0'
 
         # Determine the StartQ and EndQ values
-        q_min, q_max = self._get_start_q_and_end_q_values(rear_data=q_low_angle, front_data=q_high_angle,
-                                                          fit_min = fit_min, fit_max = fit_max)
+        q_min, q_max = self._get_start_q_and_end_q_values(rear_data=q_low_angle,
+                                                          front_data=q_high_angle,
+                                                          fit_min=fit_min,
+                                                          fit_max=fit_max)
 
-        # We need to transfer the errors from the front data to the rear data, as we are using the the front data as a model, but
-        # we want to take into account the errors of both workspaces.
+        # We need to transfer the errors from the front data to the rear data, as we are using the the front data as a
+        # model, but we want to take into account the errors of both workspaces.
         error_correction = ErrorTransferFromModelToData()
         front_data_corrected, rear_data_corrected = error_correction.get_error_corrected(rear_data=q_low_angle,
                                                                                          front_data=q_high_angle,
-                                                                                         q_min=q_min, q_max=q_max)
+                                                                                         q_min=q_min,
+                                                                                         q_max=q_max)
 
         # The front_data_corrected data set is used as the fit model. Setting the IgnoreInvalidData on the Fit algorithm
         # will not have any ignore Nans in the model, but only in the data. Hence this will lead to unreadable
@@ -174,8 +195,7 @@ class SANSFitShiftScale(ParallelDataProcessorAlgorithm):
         front_data_corrected = AnalysisDataService.addOrReplace('front_data_corrected', front_data_corrected)
         front_in_ads = AnalysisDataService.retrieve('front_data_corrected')
 
-        function = 'name=TabulatedFunction, Workspace="' + str(
-            front_in_ads.name()) + '"' + ";name=FlatBackground"
+        function = 'name=TabulatedFunction, Workspace="' + str(front_in_ads.name()) + '"' + ";name=FlatBackground"
 
         fit = self.createChildAlgorithm('Fit')
         fit.setProperty('Function', function)
@@ -257,7 +277,6 @@ class ErrorTransferFromModelToData(object):
     Handles the error transfer from the model workspace to the
     data workspace
     '''
-
     def __init__(self):
         super(ErrorTransferFromModelToData, self).__init__()
 

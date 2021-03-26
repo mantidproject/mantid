@@ -77,7 +77,7 @@ class InstrumentInterface(object):
 
             #TODO: change this to signals and slots mechanism
         """
-        if len(self.widgets)>0:
+        if len(self.widgets) > 0:
             QMessageBox.warning(self.widgets[0], title, message)
 
     def load_last_reduction(self):
@@ -162,8 +162,7 @@ class InstrumentInterface(object):
         except:
             return False
 
-    def cluster_submit(self, user, pwd, resource=None,
-                       nodes=4, cores_per_node=4, job_name=None):
+    def cluster_submit(self, user, pwd, resource=None, nodes=4, cores_per_node=4, job_name=None):
         """
             Pass the interface data to the scripter for parallel reduction
         """
@@ -184,7 +183,7 @@ class InstrumentInterface(object):
                 self._warning("Reduction Parameters Incomplete", msg)
                 self._error_report(traceback.format_exc())
         else:
-            self._warning("Runtime error","You cannot send live data to cluster")
+            self._warning("Runtime error", "You cannot send live data to cluster")
 
     #pylint: disable=bare-except
     def reduce(self):
@@ -286,7 +285,7 @@ class InstrumentInterface(object):
         """
         return self.is_live_enabled() and self._livebuttonwidget.liveButtonIsChecked()
 
-    def live_button_toggled(self,checked):
+    def live_button_toggled(self, checked):
         """
             Called as a slot when the live button is pressed to make any necessary settings
             to other widgets.

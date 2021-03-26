@@ -21,10 +21,8 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
         livepath = '/SNS/%s/shared/live/' % instrument
         filenames = os.listdir(livepath)
 
-        filenames = [name for name in filenames
-                     if name.startswith(instrument)]
-        filenames = [name for name in filenames
-                     if name.endswith('_live_neutron_event.dat')]
+        filenames = [name for name in filenames if name.startswith(instrument)]
+        filenames = [name for name in filenames if name.endswith('_live_neutron_event.dat')]
 
         if len(filenames) <= 0:
             raise RuntimeError("Failed to find live file for '%s'" % instrument)
@@ -37,11 +35,9 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
             runNumber = "%s_%d_live" % (instrument, runNumber)
             self.log().information('Looking for ' + runNumber)
 
-            filenames = [name for name in filenames
-                         if runNumber in name]
+            filenames = [name for name in filenames if runNumber in name]
             if len(filenames) <= 0:
-                raise RuntimeError("Failed to find live file '%s'"
-                                   % runNumber)
+                raise RuntimeError("Failed to find live file '%s'" % runNumber)
 
         return os.path.join(livepath, filenames[-1])
 
@@ -61,8 +57,7 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
         direc = os.path.join(iptsdir, 'data')
 
         filenames = os.listdir(direc)
-        filenames = [name for name in filenames
-                     if name.endswith('_event.nxs')]
+        filenames = [name for name in filenames if name.endswith('_event.nxs')]
 
         if len(filenames) <= 0:
             raise RuntimeError("Failed to find existing nexus file in '%s'" % iptsdir)
@@ -72,33 +67,29 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
         return os.path.join(direc, filenames[-1])
 
     def PyInit(self):
-        instruments = ['BSS', 'SNAP', 'REF_M', 'CNCS', 'EQSANS', 'VULCAN',
-                       'VENUS', 'MANDI', 'TOPAZ', 'ARCS']
-        self.declareProperty('Instrument', '',
-                             StringListValidator(instruments),
-                             'Empty uses default instrument')
+        instruments = ['BSS', 'SNAP', 'REF_M', 'CNCS', 'EQSANS', 'VULCAN', 'VENUS', 'MANDI', 'TOPAZ', 'ARCS']
+        self.declareProperty('Instrument', '', StringListValidator(instruments), 'Empty uses default instrument')
 
         runValidator = IntBoundedValidator()
         runValidator.setLower(1)
-        self.declareProperty('RunNumber', Property.EMPTY_INT, runValidator,
+        self.declareProperty('RunNumber',
+                             Property.EMPTY_INT,
+                             runValidator,
                              doc='Live run number to use (Optional, Default=most recent)')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                                               direction=Direction.Output))
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output))
 
         self.declareProperty('NormalizeByCurrent', True, 'Normalize by current')
 
-        self.declareProperty('LoadLogs', True,
-                             'Attempt to load logs from an existing file')
+        self.declareProperty('LoadLogs', True, 'Attempt to load logs from an existing file')
 
-        self.declareProperty(FileProperty('LogFilename', '',
+        self.declareProperty(FileProperty('LogFilename',
+                                          '',
                                           direction=Direction.Input,
                                           action=FileAction.OptionalLoad,
                                           extensions=['_event.nxs']),
                              doc='File containing logs to use (Optional)')
-        self.setPropertySettings('LogFilename',
-                                 EnabledWhenProperty('LoadLogs',
-                                                     PropertyCriterion.IsDefault))
+        self.setPropertySettings('LogFilename', EnabledWhenProperty('LoadLogs', PropertyCriterion.IsDefault))
 
     def PyExec(self):
         instrument = self.getProperty('Instrument').value
@@ -107,21 +98,18 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
 
         self.log().notice("Loading '%s'" % eventFilename)
         wkspName = self.getPropertyValue('OutputWorkspace')
-        LoadEventPreNexus(EventFilename=eventFilename,
-                          OutputWorkspace=wkspName)
+        LoadEventPreNexus(EventFilename=eventFilename, OutputWorkspace=wkspName)
 
         # let people know what was just loaded
         wksp = mtd[wkspName]
         instrument = str(wksp.getInstrument().getName())
         runNumber = int(wksp.run()['run_number'].value)
         startTime = str(wksp.run().startTime())
-        self.log().information('Loaded %s live run %d - starttime=%s'
-                               % (instrument, runNumber, startTime))
+        self.log().information('Loaded %s live run %d - starttime=%s' % (instrument, runNumber, startTime))
 
         if self.getProperty('NormalizeByCurrent').value:
             self.log().information('Normalising by current')
-            NormaliseByCurrent(InputWorkspace=wkspName,
-                               Outputworkspace=wkspName)
+            NormaliseByCurrent(InputWorkspace=wkspName, Outputworkspace=wkspName)
 
         if self.getProperty('LoadLogs').value:
             logFilename = self.findLogfile(instrument, runNumber)
@@ -130,8 +118,7 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
                 LoadNexusLogs(Workspace=wkspName, Filename=logFilename)
                 wksp = mtd[wkspName]
                 instrFilename = wksp.getInstrumentFilename(instrument, startTime)
-                LoadInstrument(Workspace=wkspName, Filename=instrFilename,
-                               RewriteSpectraMap=True)
+                LoadInstrument(Workspace=wkspName, Filename=instrFilename, RewriteSpectraMap=True)
 
         # gets rid of many simple DAS errors
         FilterByXValue(InputWorkspace=wkspName, XMin=1)

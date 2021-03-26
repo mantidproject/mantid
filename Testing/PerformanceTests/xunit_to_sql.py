@@ -31,6 +31,7 @@ variables = ""
 revision = 0
 commitid = ''
 
+
 def handle_testcase(case, suite_name):
     """ Handle one test case and save it to DB"""
     # Build the full name (Project.Suite.Case)
@@ -44,24 +45,24 @@ def handle_testcase(case, suite_name):
     except:
         cpu_fraction = 0.0
 
-
-    tr = TestResult(date = datetime.datetime.now(),
-                 name=name,
-                 type="performance",
-                 host=platform.uname()[1],
-                 environment=envAsString(),
-                 runner="ctest",
-                 revision=revision,
-                 commitid=commitid,
-                 runtime=time,
-                 cpu_fraction=cpu_fraction,
-                 success=True,
-                 status="",
-                 log_contents="",
-                 variables=variables)
+    tr = TestResult(date=datetime.datetime.now(),
+                    name=name,
+                    type="performance",
+                    host=platform.uname()[1],
+                    environment=envAsString(),
+                    runner="ctest",
+                    revision=revision,
+                    commitid=commitid,
+                    runtime=time,
+                    cpu_fraction=cpu_fraction,
+                    success=True,
+                    status="",
+                    log_contents="",
+                    variables=variables)
     #print tr.data
     # Now report it to SQL
     sql_reporter.dispatchResults(tr)
+
 
 def handle_suite(suite):
     """ Handle all the test cases in a suite """
@@ -84,21 +85,34 @@ def convert_xml(filename):
 #====================================================================================
 if __name__ == "__main__":
     # Parse the command line
-    parser = argparse.ArgumentParser(description='Add the contents of Xunit-style XML test result files to a SQL database.')
+    parser = argparse.ArgumentParser(
+        description='Add the contents of Xunit-style XML test result files to a SQL database.')
 
-    parser.add_argument('--db', dest='db',
-                        default="./MantidPerformanceTests.db",
-                        help='Full path to the SQLite database holding the results (default "./MantidPerformanceTests.db"). The database will be created if it does not exist.')
+    parser.add_argument(
+        '--db',
+        dest='db',
+        default="./MantidPerformanceTests.db",
+        help=
+        'Full path to the SQLite database holding the results (default "./MantidPerformanceTests.db"). The database will be created if it does not exist.'
+    )
 
-    parser.add_argument('--variables', dest='variables',
-                        default="",
-                        help='Optional string of comma-separated "VAR1NAME=VALUE,VAR2NAME=VALUE2" giving some parameters used, e.g. while building.')
+    parser.add_argument(
+        '--variables',
+        dest='variables',
+        default="",
+        help=
+        'Optional string of comma-separated "VAR1NAME=VALUE,VAR2NAME=VALUE2" giving some parameters used, e.g. while building.'
+    )
 
-    parser.add_argument('--commit', dest='commitid',
+    parser.add_argument('--commit',
+                        dest='commitid',
                         default="",
                         help='Commit ID of the current build (a 40-character SHA string).')
 
-    parser.add_argument('xmlpath', metavar='XMLPATH', type=str, nargs='+',
+    parser.add_argument('xmlpath',
+                        metavar='XMLPATH',
+                        type=str,
+                        nargs='+',
                         default="",
                         help='Required: Path to the Xunit XML files.')
 
@@ -129,5 +143,3 @@ if __name__ == "__main__":
     # Convert each file
     for file in xmlfiles:
         convert_xml(file)
-
-

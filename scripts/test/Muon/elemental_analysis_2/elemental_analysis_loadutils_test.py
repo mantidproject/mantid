@@ -35,6 +35,7 @@ class EAFileUtilsTest(unittest.TestCase):
 
         self.model._loaded_data_store.add_data(run=[run], workspace=grpws)
         self.model._data_context.run_info_update(run_results)
+
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS
     # ------------------------------------------------------------------------------------------------------------------

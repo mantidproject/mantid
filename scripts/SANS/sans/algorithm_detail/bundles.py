@@ -17,12 +17,13 @@ from collections import namedtuple
 # 6. A handle to the scatter monitor workspace (sample or can)
 # 7. A handle to the transmission workspace (sample or can)
 # 8. A handle to the direct workspace (sample or can)
-ReductionSettingBundle = namedtuple('ReductionSettingBundle', 'state, data_type, reduction_mode, '
-                                                              'output_parts, '
-                                                              'scatter_workspace, '
-                                                              'scatter_monitor_workspace, '
-                                                              'transmission_workspace, '
-                                                              'direct_workspace')
+ReductionSettingBundle = namedtuple(
+    'ReductionSettingBundle', 'state, data_type, reduction_mode, '
+    'output_parts, '
+    'scatter_workspace, '
+    'scatter_monitor_workspace, '
+    'transmission_workspace, '
+    'direct_workspace')
 
 # The MergeBundle contains:
 # 1. Handle to a merged workspace
@@ -44,15 +45,17 @@ OutputBundle = namedtuple('OutputBundle', 'state, data_type, reduction_mode, out
 # 4. Handle to the partial output workspace which contains the counts.
 # 5. Handle to the partial output workspace which contains the normalization.
 OutputPartsBundle = namedtuple('OutputPartsBundle', 'state, data_type, reduction_mode, '
-                                                    'output_workspace_count, output_workspace_norm')
+                               'output_workspace_count, output_workspace_norm')
 
-OutputTransmissionBundle = namedtuple('OutputTransmissionBundle', 'state, data_type, calculated_transmission_workspace,'
-                                                                  ' unfitted_transmission_workspace')
+OutputTransmissionBundle = namedtuple(
+    'OutputTransmissionBundle', 'state, data_type, calculated_transmission_workspace,'
+    ' unfitted_transmission_workspace')
 
 # Bundles for event slice data
-EventSliceSettingBundle = namedtuple('EventSliceSettingBundle', 'state, data_type, reduction_mode, '
-                                                                'output_parts, scatter_workspace, '
-                                                                'dummy_mask_workspace, '
-                                                                'scatter_monitor_workspace, '
-                                                                'direct_workspace, '
-                                                                'transmission_workspace')
+EventSliceSettingBundle = namedtuple(
+    'EventSliceSettingBundle', 'state, data_type, reduction_mode, '
+    'output_parts, scatter_workspace, '
+    'dummy_mask_workspace, '
+    'scatter_monitor_workspace, '
+    'direct_workspace, '
+    'transmission_workspace')

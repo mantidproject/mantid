@@ -15,7 +15,6 @@ class LiquidsReflectometryReductionWithBackgroundPreciseTest(systemtesting.Manti
         This test checks that the new liquids reflectometer reduction code
         always produces the same results.
     """
-
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")

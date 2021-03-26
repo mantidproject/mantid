@@ -25,7 +25,6 @@ from mantid.dataobjects import EventWorkspace, MDHistoWorkspace, Workspace2D
 from mantid.plots.legend import convert_color_to_hex
 from mantid.plots.utility import MantidAxType
 
-
 # Helper functions for data extraction from a Mantid workspace and plot functionality
 # These functions are common between axesfunctions.py and axesfunctions3D.py
 
@@ -35,15 +34,14 @@ from mantid.plots.utility import MantidAxType
 
 
 def validate_args(*args, **kwargs):
-    return len(args) > 0 and (isinstance(args[0], EventWorkspace) or
-                              isinstance(args[0], Workspace2D) or
-                              isinstance(args[0], MDHistoWorkspace) or
-                              isinstance(args[0], MultipleExperimentInfos) and "LogName" in kwargs)
+    return len(args) > 0 and (isinstance(args[0], EventWorkspace) or isinstance(args[0], Workspace2D) or isinstance(
+        args[0], MDHistoWorkspace) or isinstance(args[0], MultipleExperimentInfos) and "LogName" in kwargs)
 
 
 # ====================================================
 # Data extraction and manipulation
 # ====================================================
+
 
 def get_distribution(workspace, **kwargs):
     """
@@ -85,8 +83,7 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
             current_artists = None
 
         if current_artists:
-            current_normalization = any(
-                [artist[0].is_normalized for artist in current_artists])
+            current_normalization = any([artist[0].is_normalized for artist in current_artists])
             normalization = current_normalization
         else:
             normalization = mantid.kernel.config['graph1d.autodistribution'].lower() == 'on'
@@ -136,8 +133,8 @@ def get_indices(md_workspace, **kwargs):
 
     if indices and 'label' not in kwargs:
         ws_name = md_workspace.name()
-        labels = '; '.join('{0}={1:.4}'.format(md_workspace.getDimension(n).name,
-                                               (md_workspace.getDimension(n).getX(indices[n]) +
+        labels = '; '.join('{0}={1:.4}'.format(
+            md_workspace.getDimension(n).name, (md_workspace.getDimension(n).getX(indices[n]) +
                                                 md_workspace.getDimension(n).getX(indices[n] + 1)) / 2)
                            for n in range(md_workspace.getNumDims()) if indices[n] != slice(None))
         if ws_name:
@@ -240,14 +237,14 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
         try:
             workspace_index = workspace.getIndexFromSpectrumNumber(int(spectrum_number))
         except RuntimeError:
-            raise RuntimeError(
-                'Spectrum Number {0} not found in workspace {1}'.format(spectrum_number, workspace.name()))
+            raise RuntimeError('Spectrum Number {0} not found in workspace {1}'.format(
+                spectrum_number, workspace.name()))
     elif axis == MantidAxType.SPECTRUM:  # Only get a spectrum number if we're traversing the spectra
         try:
             spectrum_number = workspace.getSpectrum(workspace_index).getSpectrumNo()
         except RuntimeError:
-            raise RuntimeError(
-                'Workspace index {0} not found in workspace {1}'.format(workspace_index, workspace.name()))
+            raise RuntimeError('Workspace index {0} not found in workspace {1}'.format(
+                workspace_index, workspace.name()))
 
     return workspace_index, spectrum_number, kwargs
 
@@ -361,8 +358,9 @@ def get_bin_indices(workspace):
     except:
         return range(total_range)
 
-    monitors_indices = [index for index in range(total_range)
-                        if spectrum_info.hasDetectors(index) and spectrum_info.isMonitor(index)]
+    monitors_indices = [
+        index for index in range(total_range) if spectrum_info.hasDetectors(index) and spectrum_info.isMonitor(index)
+    ]
     monitor_count = len(monitors_indices)
 
     # If possible, ie the detectors' indices are continuous, we return a range.
@@ -456,8 +454,7 @@ def boundaries_from_points(input_array):
         raise ValueError('could not extend array with no elements')
     if len(input_array) == 1:
         return np.array([input_array[0] - 0.5, input_array[0] + 0.5])
-    return np.concatenate(([(3 * input_array[0] - input_array[1]) * 0.5],
-                           (input_array[1:] + input_array[:-1]) * 0.5,
+    return np.concatenate(([(3 * input_array[0] - input_array[1]) * 0.5], (input_array[1:] + input_array[:-1]) * 0.5,
                            [(3 * input_array[-1] - input_array[-2]) * 0.5]))
 
 
@@ -468,8 +465,15 @@ def common_x(arr):
     return np.all(arr == arr[0, :], axis=(1, 0))
 
 
-def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, transpose=False,
-                         extent=None, xbins=100, ybins=100, spec_info=None, maxpooling=False):
+def get_matrix_2d_ragged(workspace,
+                         normalize_by_bin_width,
+                         histogram2D=False,
+                         transpose=False,
+                         extent=None,
+                         xbins=100,
+                         ybins=100,
+                         spec_info=None,
+                         maxpooling=False):
     if spec_info is None:
         try:
             spec_info = workspace.spectrumInfo()
@@ -516,7 +520,11 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
         x_centers = mantid.plots.datafunctions.points_from_boundaries(x_edges)
         y = np.linspace(y_low, y_high, int(ybins))
 
-    counts = interpolate_y_data(workspace, x_centers, y, normalize_by_bin_width, spectrum_info=spec_info,
+    counts = interpolate_y_data(workspace,
+                                x_centers,
+                                y,
+                                normalize_by_bin_width,
+                                spectrum_info=spec_info,
                                 maxpooling=maxpooling)
 
     if histogram2D and extent is not None:
@@ -555,8 +563,9 @@ def _workspace_indices_maxpooling(y_bins, workspace):
     workspace_indices = []
     for y_range in pairwise(y_bins):
         try:
-            workspace_range = range(workspace.getAxis(1).indexOfValue(np.math.floor(y_range[0])),
-                                    workspace.getAxis(1).indexOfValue(np.math.ceil(y_range[1])))
+            workspace_range = range(
+                workspace.getAxis(1).indexOfValue(np.math.floor(y_range[0])),
+                workspace.getAxis(1).indexOfValue(np.math.ceil(y_range[1])))
             workspace_index = workspace_range[np.argmax(summed_spectra[workspace_range])]
             workspace_indices.append(workspace_index)
         except IndexError:
@@ -590,16 +599,20 @@ def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=No
             counts[index, :] = counts[index - 1]
             continue
         previous_index = workspace_index
-        if not (spectrum_info and spectrum_info.hasDetectors(workspace_index) and spectrum_info.isMonitor(
-                workspace_index)):
-            centers, ztmp, _, _ = get_spectrum(workspace, workspace_index,
+        if not (spectrum_info and spectrum_info.hasDetectors(workspace_index)
+                and spectrum_info.isMonitor(workspace_index)):
+            centers, ztmp, _, _ = get_spectrum(workspace,
+                                               workspace_index,
                                                normalize_by_bin_width=normalize_by_bin_width,
-                                               withDy=False, withDx=False)
-            interpolation_function = interp1d(centers, ztmp, kind='nearest', bounds_error=False,
+                                               withDy=False,
+                                               withDx=False)
+            interpolation_function = interp1d(centers,
+                                              ztmp,
+                                              kind='nearest',
+                                              bounds_error=False,
                                               fill_value="extrapolate")
             # only set values in the range of workspace
-            x_range = np.where((x >= workspace.readX(workspace_index)[0]) &
-                               (x <= workspace.readX(workspace_index)[-1]))
+            x_range = np.where((x >= workspace.readX(workspace_index)[0]) & (x <= workspace.readX(workspace_index)[-1]))
             # set values outside x data to nan
             counts[index, x_range] = interpolation_function(x[x_range])
     counts = np.ma.masked_invalid(counts, copy=False)
@@ -752,6 +765,7 @@ def check_resample_to_regular_grid(ws, **kwargs):
 # extract logs
 # ====================================================
 
+
 def get_sample_log(workspace, **kwargs):
     LogName = kwargs.pop('LogName')
     ExperimentInfo = kwargs.pop('ExperimentInfo', 0)
@@ -768,8 +782,7 @@ def get_sample_log(workspace, **kwargs):
     except UnicodeDecodeError as exc:
         mantid.kernel.logger.warning("Error retrieving units for log {}: {}".format(LogName, str(exc)))
         units = "unknown"
-    if not isinstance(tsp, (mantid.kernel.FloatTimeSeriesProperty,
-                            mantid.kernel.Int32TimeSeriesProperty,
+    if not isinstance(tsp, (mantid.kernel.FloatTimeSeriesProperty, mantid.kernel.Int32TimeSeriesProperty,
                             mantid.kernel.Int64TimeSeriesProperty)):
         raise RuntimeError('This function can only plot Float or Int TimeSeriesProperties objects')
     Filtered = kwargs.pop('Filtered', True)
@@ -832,8 +845,7 @@ def get_axes_labels(workspace, indices=None, normalize_by_bin_width=True, use_la
                 if indices[n] == slice(None):
                     dims.append(d)
                 else:
-                    title += '{0}={1:.4}; '.format(d.name,
-                                                   (d.getX(indices[n]) + d.getX(indices[n] + 1)) / 2)
+                    title += '{0}={1:.4}; '.format(d.name, (d.getX(indices[n]) + d.getX(indices[n] + 1)) / 2)
         for d in dims:
             axis_title = d.name.replace('DeltaE', r'$\Delta E$')
             axis_unit = d.getUnits().replace('Angstrom^-1', r'$\AA^{-1}$')
@@ -844,8 +856,7 @@ def get_axes_labels(workspace, indices=None, normalize_by_bin_width=True, use_la
         axes_labels.append(title.strip())
     else:
         # For matrix workspaces, return a tuple of ``(YUnit, <other units>)``
-        axes_labels = [workspace.YUnitLabel(useLatex=use_latex,
-                                            plotAsDistribution=normalize_by_bin_width)]
+        axes_labels = [workspace.YUnitLabel(useLatex=use_latex, plotAsDistribution=normalize_by_bin_width)]
         for index in range(workspace.axes()):
             axis = workspace.getAxis(index)
             unit = axis.getUnit()
@@ -1027,7 +1038,7 @@ def apply_waterfall_offset_to_errorbars(ax, line, amount_to_move_x, amount_to_mo
         # Find the ErrorbarContainer that corresponds to the current line.
         if isinstance(container, ErrorbarContainer) and container[0] == line:
             # Shift the data line and the errorbar caps
-            for line in (container[0],) + container[1]:
+            for line in (container[0], ) + container[1]:
                 line.set_xdata(line.get_xdata() + amount_to_move_x)
                 line.set_ydata(line.get_ydata() + amount_to_move_y)
 
@@ -1221,8 +1232,9 @@ def get_images_from_figure(figure):
 
     all_images = []
     for ax in axes:
-        all_images += ax.images + [col for col in ax.collections if isinstance(col, QuadMesh)
-                                   or isinstance(col, Poly3DCollection)]
+        all_images += ax.images + [
+            col for col in ax.collections if isinstance(col, QuadMesh) or isinstance(col, Poly3DCollection)
+        ]
 
     # remove any colorbar images
     colorbars = [img.colorbar.solids for img in all_images if img.colorbar]

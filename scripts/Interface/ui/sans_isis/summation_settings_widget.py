@@ -36,11 +36,7 @@ class SummationSettingsWidget(QtWidgets.QWidget, Ui_SummationSettingsWidget):
         self._setupBinningTypes()
 
     def _setupBinningTypes(self):
-        binningTypes = [
-            'Use custom binning',
-            'Use binning from monitors',
-            'Save as event data'
-        ]
+        binningTypes = ['Use custom binning', 'Use binning from monitors', 'Save as event data']
         for binningType in binningTypes:
             self.binningType.addItem(binningType)
 
@@ -87,11 +83,9 @@ class SummationSettingsWidget(QtWidgets.QWidget, Ui_SummationSettingsWidget):
         if settings.has_overlay_event_workspaces():
             self.overlayEventWorkspacesCheckbox.setVisible(True)
             should_be_checked = settings.is_overlay_event_workspaces_enabled()
-            set_checked_without_signal(
-                self.overlayEventWorkspacesCheckbox, should_be_checked)
+            set_checked_without_signal(self.overlayEventWorkspacesCheckbox, should_be_checked)
         else:
-            set_checked_without_signal(
-                self.overlayEventWorkspacesCheckbox, False)
+            set_checked_without_signal(self.overlayEventWorkspacesCheckbox, False)
             self.overlayEventWorkspacesCheckbox.setVisible(False)
 
     def _draw_binning_type(self, settings):

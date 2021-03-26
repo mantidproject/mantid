@@ -12,7 +12,6 @@ from sans.user_file.toml_parsers.toml_reader import TomlReader
 
 
 class TomlParserTest(unittest.TestCase):
-
     def get_mocked_reader(self, mocked_return):
         self.mocked_reader = mock.Mock(spec=TomlReader)
         self.mocked_reader.get_user_file_dict.return_value = mocked_return

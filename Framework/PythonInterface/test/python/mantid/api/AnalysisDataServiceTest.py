@@ -6,13 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from testhelpers import run_algorithm
-from mantid.api import (AnalysisDataService, AnalysisDataServiceImpl,
-                        FrameworkManagerImpl, MatrixWorkspace)
+from mantid.api import (AnalysisDataService, AnalysisDataServiceImpl, FrameworkManagerImpl, MatrixWorkspace)
 from mantid import mtd
 
 
 class AnalysisDataServiceTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManagerImpl.Instance()
@@ -38,8 +36,8 @@ class AnalysisDataServiceTest(unittest.TestCase):
         """
             Run create workspace storing the output in the named workspace
         """
-        data = [1.0,2.0,3.0]
-        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', child=True)
+        data = [1.0, 2.0, 3.0]
+        alg = run_algorithm('CreateWorkspace', DataX=data, DataY=data, NSpec=1, UnitX='Wavelength', child=True)
         AnalysisDataService.addOrReplace(wsname, alg.getProperty("OutputWorkspace").value)
 
     def test_contains(self):
@@ -66,16 +64,16 @@ class AnalysisDataServiceTest(unittest.TestCase):
         self.assertEqual(len(AnalysisDataService), current_len - 1)
 
     def test_add_raises_error_if_name_exists(self):
-        data = [1.0,2.0,3.0]
-        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', child=True)
+        data = [1.0, 2.0, 3.0]
+        alg = run_algorithm('CreateWorkspace', DataX=data, DataY=data, NSpec=1, UnitX='Wavelength', child=True)
         name = "testws"
         ws = alg.getProperty("OutputWorkspace").value
         AnalysisDataService.addOrReplace(name, ws)
         self.assertRaises(RuntimeError, AnalysisDataService.add, name, ws)
 
     def test_addOrReplace_replaces_workspace_with_existing_name(self):
-        data = [1.0,2.0,3.0]
-        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', child=True)
+        data = [1.0, 2.0, 3.0]
+        alg = run_algorithm('CreateWorkspace', DataX=data, DataY=data, NSpec=1, UnitX='Wavelength', child=True)
         name = "testws"
         ws = alg.getProperty("OutputWorkspace").value
         AnalysisDataService.add(name, ws)
@@ -119,8 +117,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
         for name in ws_names:
             self._run_createws(name)
         group_name = 'group1'
-        _ = run_algorithm('GroupWorkspaces', InputWorkspaces=ws_names,
-                          OutputWorkspace=group_name)
+        _ = run_algorithm('GroupWorkspaces', InputWorkspaces=ws_names, OutputWorkspace=group_name)
 
         workspaces = AnalysisDataService.retrieveWorkspaces([group_name], True)
         self.assertEqual(2, len(workspaces))
@@ -136,7 +133,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
         ws_handle = AnalysisDataService[wsname]
         succeeded = False
         try:
-            ws_handle.id() # Should be okay
+            ws_handle.id()  # Should be okay
             succeeded = True
         except RuntimeError:
             pass

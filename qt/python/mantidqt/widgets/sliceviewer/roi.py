@@ -17,7 +17,6 @@ def on_except_leave_ads_unchanged(func):
     from from the ADS that were added during the wrapped function call.
     The exception raised in the wrapper is reraised.
     """
-
     def wrapper(*args, **kwargs):
         ads = AnalysisDataService.Instance()
         names_before = set(ads.getObjectNames())
@@ -55,17 +54,14 @@ def extract_matrix_cuts_spectra_axis(workspace: MatrixWorkspace,
     """
     # if the value is half way in a spectrum then include it
     tmp_crop_region = '__tmp_sv_region_extract'
-    roi = _extract_roi_spectra_axis(workspace, xmin, xmax, ymin, ymax, tmp_crop_region,
-                                    log_algorithm_calls)
+    roi = _extract_roi_spectra_axis(workspace, xmin, xmax, ymin, ymax, tmp_crop_region, log_algorithm_calls)
     # perform ycut first so xcut can reuse tmp workspace for rebinning if necessary
     if ycut_name:
-        Rebin(
-            InputWorkspace=roi,
-            OutputWorkspace=ycut_name,
-            Params=[xmin, xmax - xmin, xmax],
-            EnableLogging=log_algorithm_calls)
-        Transpose(
-            InputWorkspace=ycut_name, OutputWorkspace=ycut_name, EnableLogging=log_algorithm_calls)
+        Rebin(InputWorkspace=roi,
+              OutputWorkspace=ycut_name,
+              Params=[xmin, xmax - xmin, xmax],
+              EnableLogging=log_algorithm_calls)
+        Transpose(InputWorkspace=ycut_name, OutputWorkspace=ycut_name, EnableLogging=log_algorithm_calls)
 
     if xcut_name:
         if not roi.isCommonBins():
@@ -103,18 +99,15 @@ def extract_cuts_matrix(workspace: MatrixWorkspace,
     """
     tmp_crop_region = '__tmp_sv_region_extract'
     transpose = False
-    roi = extract_roi_matrix(workspace, xmin, xmax, ymin, ymax, transpose, tmp_crop_region,
-                             log_algorithm_calls)
+    roi = extract_roi_matrix(workspace, xmin, xmax, ymin, ymax, transpose, tmp_crop_region, log_algorithm_calls)
 
     # perform ycut first so xcut can reuse tmp workspace for rebinning if necessary
     if ycut_name:
-        Rebin(
-            InputWorkspace=roi,
-            OutputWorkspace=ycut_name,
-            Params=[xmin, xmax - xmin, xmax],
-            EnableLogging=log_algorithm_calls)
-        Transpose(
-            InputWorkspace=ycut_name, OutputWorkspace=ycut_name, EnableLogging=log_algorithm_calls)
+        Rebin(InputWorkspace=roi,
+              OutputWorkspace=ycut_name,
+              Params=[xmin, xmax - xmin, xmax],
+              EnableLogging=log_algorithm_calls)
+        Transpose(InputWorkspace=ycut_name, OutputWorkspace=ycut_name, EnableLogging=log_algorithm_calls)
 
     if xcut_name:
         if not roi.isCommonBins():
@@ -151,11 +144,9 @@ def extract_roi_matrix(workspace: MatrixWorkspace,
     """
     yaxis = workspace.getAxis(1)
     if yaxis.isSpectra():
-        roi = _extract_roi_spectra_axis(workspace, xmin, xmax, ymin, ymax, roi_name,
-                                        log_algorithm_calls)
+        roi = _extract_roi_spectra_axis(workspace, xmin, xmax, ymin, ymax, roi_name, log_algorithm_calls)
     elif yaxis.isNumeric():
-        roi = _extract_roi_numeric_axis(workspace, xmin, xmax, ymin, ymax, roi_name,
-                                        log_algorithm_calls)
+        roi = _extract_roi_numeric_axis(workspace, xmin, xmax, ymin, ymax, roi_name, log_algorithm_calls)
     else:
         raise RuntimeError("Unknown vertical axis type")
 
@@ -234,14 +225,13 @@ def _extract_region(workspace: MatrixWorkspace,
         # rebin to a common grid using the resolution from the spectrum
         # with the lowest resolution to avoid overbinning
         workspace = _rebin_to_common_grid(workspace, None, None, log_algorithm_calls)
-    return ExtractSpectra(
-        InputWorkspace=workspace,
-        OutputWorkspace=name,
-        XMin=xmin,
-        XMax=xmax,
-        StartWorkspaceIndex=indexmin,
-        EndWorkspaceIndex=indexmax,
-        EnableLogging=log_algorithm_calls)
+    return ExtractSpectra(InputWorkspace=workspace,
+                          OutputWorkspace=name,
+                          XMin=xmin,
+                          XMax=xmax,
+                          StartWorkspaceIndex=indexmin,
+                          EndWorkspaceIndex=indexmax,
+                          EnableLogging=log_algorithm_calls)
 
 
 def _index_range_spectraaxis(workspace: MatrixWorkspace, ymin: float, ymax: float):
@@ -273,8 +263,7 @@ def _index_range_numericaxis(workspace: MatrixWorkspace, ymin: float, ymax: floa
             int(np.searchsorted(yaxis_values, ymax))
 
 
-def _rebin_to_common_grid(workspace: MatrixWorkspace, xmin: float, xmax: float,
-                          log_algorithm_calls: bool):
+def _rebin_to_common_grid(workspace: MatrixWorkspace, xmin: float, xmax: float, log_algorithm_calls: bool):
     """
     Assuming the workspace is ragged, rebin it to a common grid with the range
     given. The resolution is computed by taking the largest bin size in the
@@ -288,8 +277,4 @@ def _rebin_to_common_grid(workspace: MatrixWorkspace, xmin: float, xmax: float,
         params = [delta]
     else:
         params = [xmin, delta, xmax]
-    return Rebin(
-        InputWorkspace=workspace,
-        OutputWorkspace=workspace,
-        Params=params,
-        EnableLogging=log_algorithm_calls)
+    return Rebin(InputWorkspace=workspace, OutputWorkspace=workspace, Params=params, EnableLogging=log_algorithm_calls)

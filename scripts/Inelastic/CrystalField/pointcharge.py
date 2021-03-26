@@ -15,46 +15,79 @@ class PointCharge(object):
     """
 
     # Expectation values of the radial wavefunction <r^n> for n=2, 4, 6 respectively. From McPhase/Cfield (P. Fabi)
-    rns = {'Ce':[1.309, 3.964, 23.31],
-           'Pr':[1.1963, 3.3335, 18.353],
-           'Nd':[1.114, 2.910, 15.03],
-           'Pm':[1.0353, 2.5390, 12.546],
-           'Sm':[0.9743, 2.260, 10.55],
-           'Eu':[0.9175, 2.020, 9.039],
-           'Gd':[0.8671, 1.820, 7.831],
-           'Tb':[0.8220, 1.651, 6.852],
-           'Dy':[0.7814, 1.505, 6.048],
-           'Ho':[0.7446, 1.379, 5.379],
-           'Er':[0.7111, 1.270, 4.816],
-           'Tm':[0.6804, 1.174, 4.340],
-           'Yb':[0.6522, 1.089, 3.932]}
+    rns = {
+        'Ce': [1.309, 3.964, 23.31],
+        'Pr': [1.1963, 3.3335, 18.353],
+        'Nd': [1.114, 2.910, 15.03],
+        'Pm': [1.0353, 2.5390, 12.546],
+        'Sm': [0.9743, 2.260, 10.55],
+        'Eu': [0.9175, 2.020, 9.039],
+        'Gd': [0.8671, 1.820, 7.831],
+        'Tb': [0.8220, 1.651, 6.852],
+        'Dy': [0.7814, 1.505, 6.048],
+        'Ho': [0.7446, 1.379, 5.379],
+        'Er': [0.7111, 1.270, 4.816],
+        'Tm': [0.6804, 1.174, 4.340],
+        'Yb': [0.6522, 1.089, 3.932]
+    }
 
     # Normalisation factors (pre-factors) of the tesseral harmonics. From McPhase.
-    Zlm = [[1/np.sqrt(4*np.pi)],
-           [np.sqrt(3./4/np.pi), np.sqrt(3./4/np.pi)],
-           [np.sqrt(5./np.pi)/4, np.sqrt(15./np.pi)/2, np.sqrt(15./np.pi)/4],
-           [np.sqrt(7./16/np.pi), np.sqrt(21./32/np.pi), np.sqrt(105./16/np.pi), np.sqrt(35./32/np.pi)],
-           [3./np.sqrt(np.pi)/16, 3.*np.sqrt(5./2/np.pi)/4, 3.*np.sqrt(5./np.pi)/8,
-            3.*np.sqrt(70./np.pi)/8, 3.*np.sqrt(35./np.pi)/16],
-           [np.sqrt(11./256/np.pi), np.sqrt(165./256/np.pi), np.sqrt(1155./64/np.pi),
-            np.sqrt(385./512/np.pi), np.sqrt(3465./256/np.pi), np.sqrt(693./512/np.pi)],
-           [np.sqrt(13/np.pi)/32, np.sqrt(273./4/np.pi)/8, np.sqrt(2730./np.pi)/64, np.sqrt(2730./np.pi)/32,
-            21.*np.sqrt(13./7/np.pi)/32, np.sqrt(9009./512/np.pi), 231.*np.sqrt(26./231/np.pi)/64]]
+    Zlm = [[1 / np.sqrt(4 * np.pi)], [np.sqrt(3. / 4 / np.pi), np.sqrt(3. / 4 / np.pi)],
+           [np.sqrt(5. / np.pi) / 4, np.sqrt(15. / np.pi) / 2,
+            np.sqrt(15. / np.pi) / 4],
+           [np.sqrt(7. / 16 / np.pi),
+            np.sqrt(21. / 32 / np.pi),
+            np.sqrt(105. / 16 / np.pi),
+            np.sqrt(35. / 32 / np.pi)],
+           [
+               3. / np.sqrt(np.pi) / 16, 3. * np.sqrt(5. / 2 / np.pi) / 4, 3. * np.sqrt(5. / np.pi) / 8,
+               3. * np.sqrt(70. / np.pi) / 8, 3. * np.sqrt(35. / np.pi) / 16
+           ],
+           [
+               np.sqrt(11. / 256 / np.pi),
+               np.sqrt(165. / 256 / np.pi),
+               np.sqrt(1155. / 64 / np.pi),
+               np.sqrt(385. / 512 / np.pi),
+               np.sqrt(3465. / 256 / np.pi),
+               np.sqrt(693. / 512 / np.pi)
+           ],
+           [
+               np.sqrt(13 / np.pi) / 32,
+               np.sqrt(273. / 4 / np.pi) / 8,
+               np.sqrt(2730. / np.pi) / 64,
+               np.sqrt(2730. / np.pi) / 32, 21. * np.sqrt(13. / 7 / np.pi) / 32,
+               np.sqrt(9009. / 512 / np.pi), 231. * np.sqrt(26. / 231 / np.pi) / 64
+           ]]
 
     # Stevens factor for trivalent rare-earths. From McPhase/Cfield (P. Fabi)
-    theta = {'Ce':[-2./5/7, 2./3/3/5/7, 0],
-             'Pr':[-2.*2*13/3/3/5/5/11, -2.*2/3/3/5/11/11, 2.*2*2*2*17/3/3/3/3/5/7/11/11/13],
-             'Nd':[-7./3/3/11/11, -2.*2*2*17/3/3/3/11/11/11/13, -5.*17*19/3/3/3/7/11/11/11/13/13],
-             'Pm':[ 2.*7/3/5/11/11, 2.*2*2*7*17/3/3/3/5/11/11/11/13, 2.*2*2*17*19/3/3/3/7/11/11/11/13/13],
-             'Sm':[ 13./3/3/5/7, 2.*13/3/3/3/5/7/11, 0],
-             'Eu':[ 0, 0, 0],
-             'Gd':[ 0, 0, 0],
-             'Tb':[-1./3/3/11, 2./3/3/3/5/11/11, -1./3/3/3/3/7/11/11/13],
-             'Dy':[-2./3/3/5/7, -2.*2*2/3/3/3/5/7/11/13, 2.*2/3/3/3/7/11/11/13/13],
-             'Ho':[-1./2/3/3/5/5, -1./2/3/5/7/11/13, -5./3/3/3/7/11/11/13/13],
-             'Er':[ 2.*2/3/3/5/5/7, 2./3/3/5/7/11/13, 2.*2*2/3/3/3/7/11/11/13/13],
-             'Tm':[ 1./3/3/11, 2.*2*2/3/3/3/3/5/11/11, -5./3/3/3/3/7/11/11/13],
-             'Yb':[ 2./3/3/7, -2./3/5/7/11, 2.*2/3/3/3/7/11/13] }
+    theta = {
+        'Ce': [-2. / 5 / 7, 2. / 3 / 3 / 5 / 7, 0],
+        'Pr': [
+            -2. * 2 * 13 / 3 / 3 / 5 / 5 / 11, -2. * 2 / 3 / 3 / 5 / 11 / 11,
+            2. * 2 * 2 * 2 * 17 / 3 / 3 / 3 / 3 / 5 / 7 / 11 / 11 / 13
+        ],
+        'Nd': [
+            -7. / 3 / 3 / 11 / 11, -2. * 2 * 2 * 17 / 3 / 3 / 3 / 11 / 11 / 11 / 13,
+            -5. * 17 * 19 / 3 / 3 / 3 / 7 / 11 / 11 / 11 / 13 / 13
+        ],
+        'Pm': [
+            2. * 7 / 3 / 5 / 11 / 11, 2. * 2 * 2 * 7 * 17 / 3 / 3 / 3 / 5 / 11 / 11 / 11 / 13,
+            2. * 2 * 2 * 17 * 19 / 3 / 3 / 3 / 7 / 11 / 11 / 11 / 13 / 13
+        ],
+        'Sm': [13. / 3 / 3 / 5 / 7, 2. * 13 / 3 / 3 / 3 / 5 / 7 / 11, 0],
+        'Eu': [0, 0, 0],
+        'Gd': [0, 0, 0],
+        'Tb': [-1. / 3 / 3 / 11, 2. / 3 / 3 / 3 / 5 / 11 / 11, -1. / 3 / 3 / 3 / 3 / 7 / 11 / 11 / 13],
+        'Dy': [
+            -2. / 3 / 3 / 5 / 7, -2. * 2 * 2 / 3 / 3 / 3 / 5 / 7 / 11 / 13, 2. * 2 / 3 / 3 / 3 / 7 / 11 / 11 / 13 / 13
+        ],
+        'Ho': [-1. / 2 / 3 / 3 / 5 / 5, -1. / 2 / 3 / 5 / 7 / 11 / 13, -5. / 3 / 3 / 3 / 7 / 11 / 11 / 13 / 13],
+        'Er': [
+            2. * 2 / 3 / 3 / 5 / 5 / 7, 2. / 3 / 3 / 5 / 7 / 11 / 13, 2. * 2 * 2 / 3 / 3 / 3 / 7 / 11 / 11 / 13 / 13
+        ],
+        'Tm': [1. / 3 / 3 / 11, 2. * 2 * 2 / 3 / 3 / 3 / 3 / 5 / 11 / 11, -5. / 3 / 3 / 3 / 3 / 7 / 11 / 11 / 13],
+        'Yb': [2. / 3 / 3 / 7, -2. / 3 / 5 / 7 / 11, 2. * 2 / 3 / 3 / 3 / 7 / 11 / 13]
+    }
 
     def __init__(self, *args, **kwargs):
         """
@@ -85,18 +118,18 @@ class PointCharge(object):
             arguments may be set later using the "dot" notation: e.g.
             pc = PointCharge('file.cif'); pc.IonLabel = 'Yb'; pc.Charges = {'Yb':3, 'O':-2}
         """
-        self._cryst = None       # Mantid CrystalStructure object, from either LoadCIF, a workspace or direct input
-        self._ligands = None     # List of ligands. Calculated by .getLigands() or entered directly
-        self._charges = None     # Dictionary of ion labels and associated charges
-        self._ionlabel = None    # Label of the magnetic ion
-        self._ion = None         # Name of the magnetic ion (if different from the label, e.g. different element)
-        self._maxdistance = None # Outer distance of shell within which to compute charges
-        self._neighbour = None   # Nth level of nearest neighbour ions within which to compute charges
-        self._atoms = None       # A list of all the inequivalent sites by their unique labels and coordinates
+        self._cryst = None  # Mantid CrystalStructure object, from either LoadCIF, a workspace or direct input
+        self._ligands = None  # List of ligands. Calculated by .getLigands() or entered directly
+        self._charges = None  # Dictionary of ion labels and associated charges
+        self._ionlabel = None  # Label of the magnetic ion
+        self._ion = None  # Name of the magnetic ion (if different from the label, e.g. different element)
+        self._maxdistance = None  # Outer distance of shell within which to compute charges
+        self._neighbour = None  # Nth level of nearest neighbour ions within which to compute charges
+        self._atoms = None  # A list of all the inequivalent sites by their unique labels and coordinates
         # Parse args / kwargs
         argname = ['Structure', 'IonLabel', 'Charges', 'Ion', 'MaxDistance', 'Neighbour']
-        argdict = {'MaxDistance':5.}
-        for ind in range(0, (len(argname) if len(args)>len(argname) else len(args))):
+        argdict = {'MaxDistance': 5.}
+        for ind in range(0, (len(argname) if len(args) > len(argname) else len(args))):
             argdict[argname[ind]] = args[ind]
         for ind in kwargs.keys():
             if ind in argname:
@@ -108,8 +141,17 @@ class PointCharge(object):
         if 'Neighbour' in kwargs.keys():
             if 'MaxDistance' in kwargs.keys():
                 del argdict['Neighbour']
-                warnings.warn('Both ''Neighbour'' and ''MaxDistance'' arguments given. '
-                              'Using ''MaxDistance'', ignoring ''Neighbour''', RuntimeWarning)
+                warnings.warn(
+                    'Both '
+                    'Neighbour'
+                    ' and '
+                    'MaxDistance'
+                    ' arguments given. '
+                    'Using '
+                    'MaxDistance'
+                    ', ignoring '
+                    'Neighbour'
+                    '', RuntimeWarning)
             else:
                 del argdict['MaxDistance']
         # Determines if user gave CIF file or workspace or ligands, and populates other attributes.
@@ -137,9 +179,9 @@ class PointCharge(object):
                     self._cryst = self._copyCrystalStructure(mtd[structure].sample().getCrystalStructure())
                     self._getUniqueAtoms()
                 except RuntimeError:
-                    raise ValueError('Workspace ''%s'' has no valid CrystalStructure' % (structure))
+                    raise ValueError('Workspace ' '%s' ' has no valid CrystalStructure' % (structure))
             else:
-                tmpws = CreateWorkspace(1, 1, OutputWorkspace='_tempPointCharge_'+str(uuid.uuid4())[:8])
+                tmpws = CreateWorkspace(1, 1, OutputWorkspace='_tempPointCharge_' + str(uuid.uuid4())[:8])
                 try:
                     LoadCIF(tmpws, structure)
                     # Attached CrystalStructure object gets destroyed when workspace is deleted
@@ -153,8 +195,10 @@ class PointCharge(object):
         elif isinstance(structure, list):
             if (len(structure) == 4 and all([isinstance(x, (int, float)) for x in structure])):
                 structure = [structure]
-            if (all([isinstance(x, list) and (len(x) == 4)
-                     and all([isinstance(y, (int, float)) for y in x]) for x in structure])):
+            if (all([
+                    isinstance(x, list) and (len(x) == 4) and all([isinstance(y, (int, float)) for y in x])
+                    for x in structure
+            ])):
                 self._ligands = structure
             else:
                 raise ValueError('Incorrect ligands direct input. Must be a 4-element list or a list '
@@ -170,7 +214,7 @@ class PointCharge(object):
                 self._cryst = self._copyCrystalStructure(structure.sample().getCrystalStructure())
                 self._getUniqueAtoms()
             except RuntimeError:
-                raise ValueError('Workspace ''%s'' has no valid CrystalStructure' % (structure.name()))
+                raise ValueError('Workspace ' '%s' ' has no valid CrystalStructure' % (structure.name()))
 
     def _getUniqueAtoms(self):
         """Gets a list of unique ion names for each non-equivalent ion in the unit cell"""
@@ -187,7 +231,7 @@ class PointCharge(object):
 
     def _checkHasStructure(self, warnName=None):
         if self._atoms is None:
-            parwarn = ('Ignoring parameter ''%s''.' % (warnName)) if warnName else ''
+            parwarn = ('Ignoring parameter ' '%s' '.' % (warnName)) if warnName else ''
             warnings.warn('No structure has been set. %s' % (parwarn), RuntimeWarning)
             return False
         return True
@@ -209,7 +253,7 @@ class PointCharge(object):
         if self._checkHasStructure(warnName='Charges'):
             if value is None:
                 if not isinstance(charge, dict):
-                    raise ValueError('Argument ''charge'' must be a dictionary')
+                    raise ValueError('Argument ' 'charge' ' must be a dictionary')
                 self._charges = charge
             else:
                 if self._charges is None:
@@ -242,7 +286,12 @@ class PointCharge(object):
             try:
                 self._neighbour = int(value)
                 if np.abs(self._neighbour - float(value)) > 1.e-6:
-                    warnings.warn('Neighbour value ''%s'' not an integer, rounded to ''%s''' % (value, self._neighbour), RuntimeWarning)
+                    warnings.warn(
+                        'Neighbour value '
+                        '%s'
+                        ' not an integer, rounded to '
+                        '%s'
+                        '' % (value, self._neighbour), RuntimeWarning)
                 if self._maxdistance is not None:
                     self._maxdistance = None
             except ValueError:
@@ -256,7 +305,11 @@ class PointCharge(object):
     @IonLabel.setter
     def IonLabel(self, value):
         if (self._atoms is not None) and (value not in self._atoms.keys()) and (self._ligands is None):
-            raise ValueError('IonLabel ''%s'' not in list of atoms: ''%s''.' % (value, ','.join(self._atoms.keys())))
+            raise ValueError('IonLabel '
+                             '%s'
+                             ' not in list of atoms: '
+                             '%s'
+                             '.' % (value, ','.join(self._atoms.keys())))
         self._ionlabel = value
 
     @property
@@ -268,7 +321,7 @@ class PointCharge(object):
     def Ion(self, value):
         ion = value[0].upper() + value[1].lower()
         if ion not in self.theta.keys():
-            raise ValueError('Ion ''%s'' not in list of known ions: ''%s''.' % (value, ','.join(self.theta.keys())))
+            raise ValueError('Ion ' '%s' ' not in list of known ions: ' '%s' '.' % (value, ','.join(self.theta.keys())))
         self._ion = ion
 
     def getIons(self):
@@ -277,19 +330,19 @@ class PointCharge(object):
 
     def _getBlm(self, q, x, y, z, r, PreFact, rn, thetak):
         # Converts from Cartesian to polars: c==cos, s==sin, t==theta, fi==phi
-        xy = x*x + y*y
-        ct = z/r
+        xy = x * x + y * y
+        ct = z / r
         ct2 = ct * ct
-        st = np.sqrt(xy)/r
+        st = np.sqrt(xy) / r
         st2 = st * st
-        if xy==0:
+        if xy == 0:
             sfi = 0
             cfi = 0
         else:
-            sfi = y/np.sqrt(xy)
-            cfi = x/np.sqrt(xy)
+            sfi = y / np.sqrt(xy)
+            cfi = x / np.sqrt(xy)
 
-        Blm = [ [ 0 for _ in range(4*l+5) ] for l in range(3) ]
+        Blm = [[0 for _ in range(4 * l + 5)] for l in range(3)]
 
         # These are the tesseral harmonics
         #  - see e.g. https://en.wikipedia.org/wiki/Table_of_spherical_harmonics#Real_spherical_harmonics
@@ -307,10 +360,13 @@ class PointCharge(object):
         Blm[1][5] = PreFact[4][1]**2 * st * cfi * ct * (7 * ct2 - 3)
         Blm[1][6] = PreFact[4][2]**2 * (7 * ct2 - 1) * st2 * (cfi * cfi - sfi * sfi)
         Blm[1][7] = PreFact[4][3]**2 * ct * st * st2 * (cfi * cfi * cfi - 3 * cfi * sfi * sfi)
-        Blm[1][8] = PreFact[4][4]**2 * st2 * st2 * (cfi * cfi * cfi * cfi - 6 * cfi * cfi * sfi * sfi + sfi * sfi * sfi * sfi)
+        Blm[1][8] = PreFact[4][4]**2 * st2 * st2 * (cfi * cfi * cfi * cfi - 6 * cfi * cfi * sfi * sfi +
+                                                    sfi * sfi * sfi * sfi)
 
-        Blm[2][0] = PreFact[6][6]**2 * st2 * st2 * st2 * (6 * pow(cfi, 5) * sfi - 20 * pow(cfi, 3) * pow(sfi, 3) + 6 * cfi * pow(sfi, 5))
-        Blm[2][1] = PreFact[6][5]**2 * ct * st * st2 * st2 * (5 * cfi * cfi * cfi * cfi * sfi - 10 * cfi * cfi * pow(sfi, 3) + pow(sfi, 5))
+        Blm[2][0] = PreFact[6][6]**2 * st2 * st2 * st2 * (6 * pow(cfi, 5) * sfi - 20 * pow(cfi, 3) * pow(sfi, 3) +
+                                                          6 * cfi * pow(sfi, 5))
+        Blm[2][1] = PreFact[6][5]**2 * ct * st * st2 * st2 * (5 * cfi * cfi * cfi * cfi * sfi -
+                                                              10 * cfi * cfi * pow(sfi, 3) + pow(sfi, 5))
         Blm[2][2] = PreFact[6][4]**2 * (11 * ct2 - 1) * 4 * st2 * st2 * (cfi * cfi * cfi * sfi - cfi * sfi * sfi * sfi)
         Blm[2][3] = PreFact[6][3]**2 * (11 * ct * ct2 - 3 * ct) * st2 * st * (3 * cfi * cfi * sfi - sfi * sfi * sfi)
         Blm[2][4] = PreFact[6][2]**2 * 2 * st2 * sfi * cfi * (16 * ct2 * ct2 - 16 * ct2 * st2 + st2 * st2)
@@ -319,16 +375,19 @@ class PointCharge(object):
         Blm[2][7] = PreFact[6][1]**2 * ct * st * cfi * (33 * ct2 * ct2 - 30 * ct2 + 5)
         Blm[2][8] = PreFact[6][2]**2 * (16 * ct2 * ct2 - 16 * ct2 * st2 + st2 * st2) * st2 * (cfi * cfi - sfi * sfi)
         Blm[2][9] = PreFact[6][3]**2 * (11 * ct * ct2 - 3 * ct) * st2 * st * (cfi * cfi * cfi - 3 * cfi * sfi * sfi)
-        Blm[2][10]= PreFact[6][4]**2 * (11 * ct2 - 1) * st2 * st2 * (cfi * cfi * cfi * cfi - 6 * cfi * cfi * sfi * sfi + pow(sfi, 4))
-        Blm[2][11]= PreFact[6][5]**2 * ct * st * st2 * st2 * (pow(cfi, 5) - 10 * pow(cfi, 3) * sfi * sfi + 5 * cfi * pow(sfi, 4))
-        Blm[2][12]= PreFact[6][6]**2 * pow(st2, 3) * (pow(cfi, 6) - 15 * pow(cfi, 4) * sfi**2 + 15 * cfi**2 * pow(sfi, 4) - pow(sfi, 6))
+        Blm[2][10] = PreFact[6][4]**2 * (11 * ct2 - 1) * st2 * st2 * (cfi * cfi * cfi * cfi -
+                                                                      6 * cfi * cfi * sfi * sfi + pow(sfi, 4))
+        Blm[2][11] = PreFact[6][5]**2 * ct * st * st2 * st2 * (pow(cfi, 5) - 10 * pow(cfi, 3) * sfi * sfi +
+                                                               5 * cfi * pow(sfi, 4))
+        Blm[2][12] = PreFact[6][6]**2 * pow(
+            st2, 3) * (pow(cfi, 6) - 15 * pow(cfi, 4) * sfi**2 + 15 * cfi**2 * pow(sfi, 4) - pow(sfi, 6))
 
         Q_e = constants.physical_constants['atomic unit of charge'][0]
-        eps0= constants.physical_constants['electric constant'][0]
-        a0  = constants.physical_constants['Bohr radius'][0]*1e10      # Want a0 in Angstrom
+        eps0 = constants.physical_constants['electric constant'][0]
+        a0 = constants.physical_constants['Bohr radius'][0] * 1e10  # Want a0 in Angstrom
         # Factor including e^2 factor for potential energy and Coulomb's constant and conversion from J to meV
         # Note that q below is the charge on the ligand ion in units of |e|, so we need the e^2 factor.
-        energyfactor = pow(Q_e,2) * (1./4/np.pi/eps0) / (Q_e/1000.)
+        energyfactor = pow(Q_e, 2) * (1. / 4 / np.pi / eps0) / (Q_e / 1000.)
 
         # The expression for the point charge crystal field parameter is:
         #
@@ -339,9 +398,9 @@ class PointCharge(object):
         # where the term in the square brackets is the electric potential due to the point charge neighbour.
 
         for l in range(3):
-            rl = pow(r, 2*l+2) / pow(a0, 2*l+2)
-            for m in range(4*(l+1)+1):
-                Blm[l][m] *= -(4.*np.pi/(l*4+5)) * q / (r*1.e-10) / rl * rn[l] * thetak[l] * energyfactor
+            rl = pow(r, 2 * l + 2) / pow(a0, 2 * l + 2)
+            for m in range(4 * (l + 1) + 1):
+                Blm[l][m] *= -(4. * np.pi / (l * 4 + 5)) * q / (r * 1.e-10) / rl * rn[l] * thetak[l] * energyfactor
 
         return Blm
 
@@ -368,11 +427,11 @@ class PointCharge(object):
                 try:
                     charges[name] = self._charges[re.match('^[A-z]+', name).group(0)]
                 except (KeyError, AttributeError):
-                    warnstr = 'Atom type ''%s'' in structure not in list of charges. Assuming q=0' % (name)
+                    warnstr = 'Atom type ' '%s' ' in structure not in list of charges. Assuming q=0' % (name)
                     warnings.warn(warnstr, RuntimeWarning)
                     charges[name] = 0.
         if self._ionlabel not in pos.keys():
-            raise RuntimeError('Magnetic ion ''%s'' not found in structure' % (self._ionlabel))
+            raise RuntimeError('Magnetic ion ' '%s' ' not found in structure' % (self._ionlabel))
         # Construct a large enough supercell such that we can be sure to find all neighbours of the magnetic
         # ion up to the desired shell / distance.
         if dist < 0:
@@ -387,15 +446,15 @@ class PointCharge(object):
         nmax = [int(val) for val in np.ceil(np.abs(dist) * 1.5 * np.sqrt(np.sum(invrtoijk**2, 1)))]
         for r0 in pos[self._ionlabel]:
             entries = []
-            for i1 in range(-nmax[0], nmax[0]+1):
-                for i2 in range(-nmax[1], nmax[1]+1):
-                    for i3 in range(-nmax[2], nmax[2]+1):
+            for i1 in range(-nmax[0], nmax[0] + 1):
+                for i2 in range(-nmax[1], nmax[1] + 1):
+                    for i3 in range(-nmax[2], nmax[2] + 1):
                         r1 = r0 + np.array([i1, i2, i3])
                         for name, rns in pos.items():
                             for rn in rns:
                                 rvec = np.array(np.matrix(r1 - rn) * rtoijk)[0]
                                 r = np.linalg.norm(rvec)
-                                if (r > 0) and (r < (dist if dist > 0 else r+1)):
+                                if (r > 0) and (r < (dist if dist > 0 else r + 1)):
                                     entries.append([r, charges[name], rvec[0], rvec[1], rvec[2]])
         if dist < 0:
             rlist = np.sort(np.unique([ent[0] for ent in entries]))
@@ -408,7 +467,7 @@ class PointCharge(object):
         try:
             return ion[0].upper() + ion[1].lower()
         except (TypeError, IndexError):
-            raise ValueError('Invalid value of IonLabel or Ion ''%s''.' % (ion))
+            raise ValueError('Invalid value of IonLabel or Ion ' '%s' '.' % (ion))
 
     def _getDist(self):
         return self._maxdistance if self._maxdistance else -self._neighbour
@@ -427,10 +486,10 @@ class PointCharge(object):
             x = ligands[n][1]
             y = ligands[n][2]
             z = ligands[n][3]
-            r = np.sqrt(x*x + y*y + z*z)
+            r = np.sqrt(x * x + y * y + z * z)
             nBlm = self._getBlm(q, x, y, z, r, self.Zlm, self.rns[ion], self.theta[ion])
             for l in range(3):
-                for m in range(4*(l+1)+1):
+                for m in range(4 * (l + 1) + 1):
                     Blm[Blms[l][m]] += nBlm[l][m]
         # Removes parameters which are zero
         for lm in [key for key in Blm.keys() if np.abs(Blm[key]) < 1.e-10]:

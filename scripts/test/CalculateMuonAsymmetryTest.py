@@ -34,10 +34,14 @@ class SingleDomainDoublePulseFitTest(unittest.TestCase):
         tf_function = ConvertFitFunctionForMuonTFAsymmetry(InputFunction=innerFunction,
                                                            WorkspaceList=['ws_to_normalise'])
 
-        CalculateMuonAsymmetry(MaxIterations=100, EnableDoublePulse=True, PulseOffset=delta,
+        CalculateMuonAsymmetry(MaxIterations=100,
+                               EnableDoublePulse=True,
+                               PulseOffset=delta,
                                UnNormalizedWorkspaceList='unnormalised_workspace',
                                ReNormalizedWorkspaceList='ws_to_normalise',
-                               OutputFitWorkspace='DoublePulseFit', StartX=0, InputFunction=str(tf_function),
+                               OutputFitWorkspace='DoublePulseFit',
+                               StartX=0,
+                               InputFunction=str(tf_function),
                                Minimizer='Levenberg-Marquardt')
 
         double_parameter_workspace = AnalysisDataService.retrieve('DoublePulseFit_Parameters')

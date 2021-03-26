@@ -24,7 +24,8 @@ def create_calibration(calibration_runs, instrument, offset_file_name, grouping_
     :param cross_correlate_params: Parameters for CrossCorrelate (as a dictionary PropertyName: PropertyValue)
     :param get_det_offset_params: Parameters for GetDetectorOffsets (as a dictionary PropertyName: PropertyValue)
     """
-    input_ws_list = common.load_current_normalised_ws_list(run_number_string=calibration_runs, instrument=instrument,
+    input_ws_list = common.load_current_normalised_ws_list(run_number_string=calibration_runs,
+                                                           instrument=instrument,
                                                            input_batching=INPUT_BATCHING.Summed)
 
     input_ws = input_ws_list[0]
@@ -49,7 +50,8 @@ def adjust_calibration(calibration_runs, instrument, offset_file_name, grouping_
     :param get_det_offset_params: Parameters for GetDetectorOffsets (as a dictionary PropertyName: PropertyValue)
     :param original_cal: path to calibration file to adjust
     """
-    input_ws_list = common.load_current_normalised_ws_list(run_number_string=calibration_runs, instrument=instrument,
+    input_ws_list = common.load_current_normalised_ws_list(run_number_string=calibration_runs,
+                                                           instrument=instrument,
                                                            input_batching=INPUT_BATCHING.Summed)
 
     input_ws = input_ws_list[0]
@@ -83,17 +85,19 @@ def _calibration_processing(calibration_dir, calibration_runs, cross_correlate_p
 
     # Offsets workspace must be referenced as string so it can be deleted, as simpleapi doesn't recognise it as a ws
     offsets_ws_name = "offsets"
-    mantid.GetDetectorOffsets(InputWorkspace=cross_correlated, GroupingFileName=offset_file,
-                              OutputWorkspace=offsets_ws_name, **get_det_offset_params)
+    mantid.GetDetectorOffsets(InputWorkspace=cross_correlated,
+                              GroupingFileName=offset_file,
+                              OutputWorkspace=offsets_ws_name,
+                              **get_det_offset_params)
     rebinned_tof = mantid.ConvertUnits(InputWorkspace=rebinned, Target="TOF")
     aligned = mantid.AlignDetectors(InputWorkspace=rebinned_tof, CalibrationFile=offset_file)
     grouping_file = os.path.join(calibration_dir, grouping_file_name)
-    focused = mantid.DiffractionFocussing(InputWorkspace=aligned, GroupingFileName=grouping_file,
-                                          OutputWorkspace=instrument._generate_output_file_name(calibration_runs)
-                                          + "_grouped")
+    focused = mantid.DiffractionFocussing(InputWorkspace=aligned,
+                                          GroupingFileName=grouping_file,
+                                          OutputWorkspace=instrument._generate_output_file_name(calibration_runs) +
+                                          "_grouped")
     print("Saved cal file to " + offset_file)
-    common.remove_intermediate_workspace([calibration_ws, rebinned, cross_correlated, rebinned_tof,
-                                          offsets_ws_name])
+    common.remove_intermediate_workspace([calibration_ws, rebinned, cross_correlated, rebinned_tof, offsets_ws_name])
     return focused
 
 
@@ -101,12 +105,24 @@ def _adjust_cal_file(original_cal, generated_cal):
     origin_ws = "origin{}"
     gen_ws = "newCal{}"
     out_ws = "adjusted_cal"
-    mantid.LoadCalFile(InstrumentName="Gem", MakeGroupingWorkspace=False, MakeMaskWorkspace=False,
-                       MakeOffsetsWorkspace=True, WorkspaceName=origin_ws.format(''), CalFilename=original_cal)
-    mantid.LoadCalFile(InstrumentName="Gem", MakeGroupingWorkspace=False, MakeMaskWorkspace=False,
-                       MakeOffsetsWorkspace=True, WorkspaceName=gen_ws.format(''), CalFilename=generated_cal)
-    mantid.Plus(LHSWorkspace=origin_ws.format("_offsets"), RHSWorkspace=gen_ws.format("_offsets"),
+    mantid.LoadCalFile(InstrumentName="Gem",
+                       MakeGroupingWorkspace=False,
+                       MakeMaskWorkspace=False,
+                       MakeOffsetsWorkspace=True,
+                       WorkspaceName=origin_ws.format(''),
+                       CalFilename=original_cal)
+    mantid.LoadCalFile(InstrumentName="Gem",
+                       MakeGroupingWorkspace=False,
+                       MakeMaskWorkspace=False,
+                       MakeOffsetsWorkspace=True,
+                       WorkspaceName=gen_ws.format(''),
+                       CalFilename=generated_cal)
+    mantid.Plus(LHSWorkspace=origin_ws.format("_offsets"),
+                RHSWorkspace=gen_ws.format("_offsets"),
                 OutputWorkspace=out_ws)
     mantid.SaveCalFile(OffsetsWorkspace=out_ws, Filename=generated_cal)
-    common.remove_intermediate_workspace([origin_ws.format("_offsets"), gen_ws.format("_offsets"),
-                                          origin_ws.format("_cal"), gen_ws.format("_cal")])
+    common.remove_intermediate_workspace(
+        [origin_ws.format("_offsets"),
+         gen_ws.format("_offsets"),
+         origin_ws.format("_cal"),
+         gen_ws.format("_cal")])

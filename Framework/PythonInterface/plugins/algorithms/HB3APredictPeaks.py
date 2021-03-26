@@ -11,7 +11,6 @@ import numpy as np
 
 
 class HB3APredictPeaks(PythonAlgorithm):
-
     def category(self):
         return "Crystal\\Peaks;Crystal\\UBMatrix"
 
@@ -22,37 +21,42 @@ class HB3APredictPeaks(PythonAlgorithm):
         return "HB3APredictPeaks"
 
     def summary(self):
-        return 'Given a MD workspace in Q-space, and an optional workspace for UB, predict the peaks covering for that data'
+        return 'Given a MD workspace in Q-space, and an optional workspace for UB, predict the peaks covering for ' \
+               'that data'
 
     def PyInit(self):
-        self.declareProperty(IMDWorkspaceProperty("InputWorkspace", defaultValue="", optional=PropertyMode.Mandatory,
+        self.declareProperty(IMDWorkspaceProperty("InputWorkspace",
+                                                  defaultValue="",
+                                                  optional=PropertyMode.Mandatory,
                                                   direction=Direction.Input),
                              doc="Input MD workspace (in Q-space) to use for peak prediction")
 
-        self.declareProperty(IPeaksWorkspaceProperty("UBWorkspace", defaultValue="", optional=PropertyMode.Optional,
-                                                     direction=Direction.Input),
-                             doc="PeaksWorkspace with UB matrix to use, if non is provided the UB from the InputWorkspace is used")
+        self.declareProperty(
+            IPeaksWorkspaceProperty("UBWorkspace",
+                                    defaultValue="",
+                                    optional=PropertyMode.Optional,
+                                    direction=Direction.Input),
+            doc="PeaksWorkspace with UB matrix to use, if non is provided the UB from the InputWorkspace is used")
 
         self.declareProperty(name="ReflectionCondition",
                              defaultValue="Primitive",
                              direction=Direction.Input,
-                             validator=StringListValidator(
-                                 ["Primitive",
-                                  "C-face centred",
-                                  "A-face centred",
-                                  "B-face centred",
-                                  "Body centred",
-                                  "All-face centred",
-                                  "Rhombohedrally centred, obverse",
-                                  "Rhombohedrally centred, reverse",
-                                  "Hexagonally centred, reverse"]),
+                             validator=StringListValidator([
+                                 "Primitive", "C-face centred", "A-face centred", "B-face centred", "Body centred",
+                                 "All-face centred", "Rhombohedrally centred, obverse",
+                                 "Rhombohedrally centred, reverse", "Hexagonally centred, reverse"
+                             ]),
                              doc="Reflection condition for Predicted Peaks.")
 
-        self.declareProperty("Wavelength", FloatPropertyWithValue.EMPTY_DBL,
+        self.declareProperty("Wavelength",
+                             FloatPropertyWithValue.EMPTY_DBL,
                              doc="Wavelength value to use only if one was not found in the sample log")
 
-        self.declareProperty(IPeaksWorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output,
-                                                     optional=PropertyMode.Mandatory), doc="Output peaks workspace")
+        self.declareProperty(IPeaksWorkspaceProperty("OutputWorkspace",
+                                                     defaultValue="",
+                                                     direction=Direction.Output,
+                                                     optional=PropertyMode.Mandatory),
+                             doc="Output peaks workspace")
 
     def validateInputs(self):
         issues = dict()
@@ -131,8 +135,7 @@ class HB3APredictPeaks(PythonAlgorithm):
         # temporary set UB on workspace if one is provided by UBWorkspace
         tmp_ws_name = '__HB3APredictPeaks_UB_tmp'
         if ub_ws is not None:
-            input_ws = CloneMDWorkspace(InputWorkspace=input_ws,
-                                        OutputWorkspace=tmp_ws_name)
+            input_ws = CloneMDWorkspace(InputWorkspace=input_ws, OutputWorkspace=tmp_ws_name)
             CopySample(InputWorkspace=ub_ws,
                        OutputWorkspace=tmp_ws_name,
                        CopyName=False,

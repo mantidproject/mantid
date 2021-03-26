@@ -6,15 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 from Muon.MaxentTools.zft import ZFT
-
 """
      Works with the dead time data
 """
 
 
-def DEADFIT(
-            datum, sigma, datt, DETECT_a, DETECT_b, DETECT_d, DETECT_e, RUNDATA_res, RUNDATA_frames, RUNDATA_fnorm, RUNDATA_hists,
-            MAXPAGE_n, MAXPAGE_f, PULSESHAPE_convol, SAVETIME_I2, mylog):
+def DEADFIT(datum, sigma, datt, DETECT_a, DETECT_b, DETECT_d, DETECT_e, RUNDATA_res, RUNDATA_frames, RUNDATA_fnorm,
+            RUNDATA_hists, MAXPAGE_n, MAXPAGE_f, PULSESHAPE_convol, SAVETIME_I2, mylog):
     (npts, ngroups) = datt.shape
 
     zr, zi = ZFT(MAXPAGE_f, PULSESHAPE_convol, DETECT_e, SAVETIME_I2)

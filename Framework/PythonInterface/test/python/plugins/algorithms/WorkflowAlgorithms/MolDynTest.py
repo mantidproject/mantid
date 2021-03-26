@@ -12,29 +12,23 @@ from mantid.api import *
 
 
 class MolDynTest(unittest.TestCase):
-
     def test_load_version3_cdl(self):
         """
         Load a function from a nMOLDYN 3 .cdl file
         """
 
-        moldyn_group = MolDyn(Data='NaF_DISF.cdl',
-                              Functions=['Sqw-total'],
-                              OutputWorkspace='__LoadNMoldyn3Ascii_test')
+        moldyn_group = MolDyn(Data='NaF_DISF.cdl', Functions=['Sqw-total'], OutputWorkspace='__LoadNMoldyn3Ascii_test')
 
         self.assertTrue(isinstance(moldyn_group, WorkspaceGroup))
-
 
     def test_load_version3_dat(self):
         """
         Load a function from an nMOLDYN 3 .dat file
         """
 
-        moldyn_ws = MolDyn(Data='WSH_test.dat',
-                           OutputWorkspace='__LoadNMoldyn3Ascii_test')
+        moldyn_ws = MolDyn(Data='WSH_test.dat', OutputWorkspace='__LoadNMoldyn3Ascii_test')
 
         self.assertTrue(isinstance(moldyn_ws, MatrixWorkspace))
-
 
     def test_load_version4(self):
         """
@@ -46,18 +40,13 @@ class MolDynTest(unittest.TestCase):
         unit_test_data_dir = [p for p in data_dirs if 'UnitTest' in p][0]
         data_directory = os.path.join(unit_test_data_dir, 'nmoldyn4_data')
 
-        function_ws = MolDyn(Data=data_directory,
-                             Functions=['fqt_total'],
-                             OutputWorkspace='__LoadNMoldyn4Ascii_test')
+        function_ws = MolDyn(Data=data_directory, Functions=['fqt_total'], OutputWorkspace='__LoadNMoldyn4Ascii_test')
 
         self.assertTrue(isinstance(function_ws, WorkspaceGroup))
 
-
     def test_loadSqwWithEMax(self):
         # Load an Sqw function from a nMOLDYN file
-        moldyn_group = MolDyn(Data='NaF_DISF.cdl',
-                              Functions=['Sqw-total'],
-                              MaxEnergy="1.0")
+        moldyn_group = MolDyn(Data='NaF_DISF.cdl', Functions=['Sqw-total'], MaxEnergy="1.0")
 
         self.assertTrue(isinstance(moldyn_group, WorkspaceGroup))
         self.assertEqual(len(moldyn_group), 1)
@@ -70,12 +59,9 @@ class MolDynTest(unittest.TestCase):
         # Check that it is less that what was passed to algorithm
         self.assertLessEqual(x_max, 1.0)
 
-
     def test_loadSqwWithSymm(self):
         # Load an Sqw function from a nMOLDYN file
-        moldyn_group = MolDyn(Data='NaF_DISF.cdl',
-                              Functions=['Sqw-total'],
-                              SymmetriseEnergy=True)
+        moldyn_group = MolDyn(Data='NaF_DISF.cdl', Functions=['Sqw-total'], SymmetriseEnergy=True)
 
         self.assertTrue(isinstance(moldyn_group, WorkspaceGroup))
         self.assertEqual(len(moldyn_group), 1)
@@ -88,7 +74,6 @@ class MolDynTest(unittest.TestCase):
 
         # abs(min) should equal abs(max)
         self.assertEqual(x_max, -x_min)
-
 
     def test_loadSqwWithRes(self):
         # Create a sample workspace thet looks like an instrument resolution

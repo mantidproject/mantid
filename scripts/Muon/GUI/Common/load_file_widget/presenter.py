@@ -13,7 +13,6 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 
 
 class BrowseFileWidgetPresenter(object):
-
     def __init__(self, view, model):
         self._view = view
         self._model = model
@@ -30,8 +29,7 @@ class BrowseFileWidgetPresenter(object):
         self._view.on_browse_clicked(self.on_browse_button_clicked)
         self._view.on_file_edit_changed(self.handle_file_changed_by_user)
 
-        self.updated_file_path = GenericObserverWithArgPassing(
-             self.set_file_edit_directory)
+        self.updated_file_path = GenericObserverWithArgPassing(self.set_file_edit_directory)
 
     def show(self):
         self._view.show()
@@ -113,8 +111,7 @@ class BrowseFileWidgetPresenter(object):
             return
         self._view.notify_loading_started()
         self._load_thread = self.create_load_thread()
-        self._load_thread.threadWrapperSetUp(self.disable_loading,
-                                             self.handle_load_thread_finished,
+        self._load_thread.threadWrapperSetUp(self.disable_loading, self.handle_load_thread_finished,
                                              self.handle_load_error)
         self._load_thread.loadData(filenames)
         self._load_thread.start()
@@ -138,16 +135,19 @@ class BrowseFileWidgetPresenter(object):
             self._model.instrument = instrument_from_workspace
 
         if self._multiple_files and self._multiple_file_mode == "Co-Add":
-            file_list = [filename for filename in self.filenames if
-                         self._model.get_data(filename=filename, instrument=self._model._data_context.instrument)]
+            file_list = [
+                filename for filename in self.filenames
+                if self._model.get_data(filename=filename, instrument=self._model._data_context.instrument)
+            ]
             run_list_to_add = [self._model.get_data(filename=filename)['run'][0] for filename in file_list]
-            run_list = [
-                [self._model.get_data(filename=filename)['run'][0] for filename in file_list]]
+            run_list = [[self._model.get_data(filename=filename)['run'][0] for filename in file_list]]
             load_utils.combine_loaded_runs(self._model, run_list_to_add)
 
         else:
-            file_list = [filename for filename in self.filenames if
-                         self._model._loaded_data_store.get_data(filename=filename, instrument=self._model.instrument)]
+            file_list = [
+                filename for filename in self.filenames
+                if self._model._loaded_data_store.get_data(filename=filename, instrument=self._model.instrument)
+            ]
             run_list = [self._model.get_data(filename=filename)['run'] for filename in file_list]
 
         self.set_file_edit(file_list)

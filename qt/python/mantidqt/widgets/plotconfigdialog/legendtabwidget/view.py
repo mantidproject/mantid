@@ -16,25 +16,19 @@ from mantidqt.widgets.plotconfigdialog.legendtabwidget.advancedlegendoptionsdial
 
 
 class LegendTabWidgetView(QWidget):
-
     def __init__(self, parent=None):
         super(LegendTabWidgetView, self).__init__(parent=parent)
 
-        self.ui = load_ui(__file__,
-                          'legend_tab.ui',
-                          baseinstance=self)
+        self.ui = load_ui(__file__, 'legend_tab.ui', baseinstance=self)
         self.background_color_selector_widget = ColorSelector(parent=self)
         self.edge_color_selector_widget = ColorSelector(parent=self)
         self.title_color_selector_widget = ColorSelector(parent=self)
         self.entries_color_selector_widget = ColorSelector(parent=self)
         self.grid_layout.replaceWidget(self.background_color_selector_dummy_widget,
                                        self.background_color_selector_widget)
-        self.grid_layout.replaceWidget(self.edge_color_selector_dummy_widget,
-                                       self.edge_color_selector_widget)
-        self.grid_layout.replaceWidget(self.entries_color_selector_dummy_widget,
-                                       self.entries_color_selector_widget)
-        self.grid_layout.replaceWidget(self.title_color_selector_dummy_widget,
-                                       self.title_color_selector_widget)
+        self.grid_layout.replaceWidget(self.edge_color_selector_dummy_widget, self.edge_color_selector_widget)
+        self.grid_layout.replaceWidget(self.entries_color_selector_dummy_widget, self.entries_color_selector_widget)
+        self.grid_layout.replaceWidget(self.title_color_selector_dummy_widget, self.title_color_selector_widget)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self.advanced_options = AdvancedLegendOptionsView(self)

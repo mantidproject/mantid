@@ -13,7 +13,6 @@ from mantid.kernel import Direction, FloatArrayProperty, FloatArrayBoundedValida
 
 
 class DetectorFloodWeighting(DataProcessorAlgorithm):
-
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
 
@@ -25,11 +24,15 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
 
     def PyInit(self):
 
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
-                                                     direction=Direction.Input, validator=WorkspaceUnitValidator("Wavelength")),
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace',
+                                                     '',
+                                                     direction=Direction.Input,
+                                                     validator=WorkspaceUnitValidator("Wavelength")),
                              doc='Flood weighting measurement')
-        self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace', '',
-                                                     direction=Direction.Input, optional=PropertyMode.Optional,
+        self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace',
+                                                     '',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional,
                                                      validator=WorkspaceUnitValidator("Wavelength")),
                              doc='Flood weighting measurement')
 
@@ -37,11 +40,13 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty('Bands', [], direction=Direction.Input, validator=validator),
                              doc='Wavelength bands to use. Single pair min to max.')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                                                     direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Normalized flood weighting measurement')
 
-        self.declareProperty("SolidAngleCorrection", True, direction=Direction.Input, doc="Perform final solid angle correction")
+        self.declareProperty("SolidAngleCorrection",
+                             True,
+                             direction=Direction.Input,
+                             doc="Perform final solid angle correction")
 
     def validateInputs(self):
         """
@@ -53,16 +58,16 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
 
         if not any(bands):
             issues['Bands'] = 'Bands must be supplied'
-            return issues # Abort early. Do not continue
+            return issues  # Abort early. Do not continue
 
-        if not len(bands)%2 == 0:
+        if not len(bands) % 2 == 0:
             issues['Bands'] = 'Even number of Bands boundaries expected'
-            return issues # Abort early. Do not continue
+            return issues  # Abort early. Do not continue
 
-        all_limits=list()
+        all_limits = list()
         for i in range(0, len(bands), 2):
             lower = bands[i]
-            upper = bands[i+1]
+            upper = bands[i + 1]
             limits = np.arange(lower, upper)
             unique = set(limits)
             for existing_lims in all_limits:
@@ -77,9 +82,13 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         trans_ws = self.getProperty('TransmissionWorkspace').value
         if trans_ws:
             if not trans_ws.getNumberHistograms() == input_ws.getNumberHistograms():
-                issues['TransmissionWorkspace'] = 'Transmission should have same number of histograms as flood input workspace'
+                issues[
+                    'TransmissionWorkspace'] = 'Transmission should have same number of histograms as flood input ' \
+                                               'workspace'
             if not trans_ws.blocksize() == input_ws.blocksize():
-                issues['TransmissionWorkspace'] = 'Transmission workspace should be rebinned the same as the flood input workspace'
+                issues[
+                    'TransmissionWorkspace'] = 'Transmission workspace should be rebinned the same as the flood input' \
+                                               ' workspace'
 
         return issues
 
@@ -102,11 +111,11 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         accumulated_output = None
         for i in range(0, len(bands), 2):
             lower = bands[i]
-            upper = bands[i+1]
+            upper = bands[i + 1]
             step = upper - lower
             rebin = self.createChildAlgorithm("Rebin")
             rebin.setProperty("Params", [lower, step, upper])
-            rebin.setProperty("InputWorkspace", in_ws) # Always integrating the same input workspace
+            rebin.setProperty("InputWorkspace", in_ws)  # Always integrating the same input workspace
             rebin.execute()
             integrated = rebin.getProperty("OutputWorkspace").value
             if accumulated_output:
@@ -118,7 +127,7 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
 
     def PyExec(self):
 
-        progress = Progress(self, 0, 1, 4) # Four coarse steps
+        progress = Progress(self, 0, 1, 4)  # Four coarse steps
 
         in_ws = self.getProperty('InputWorkspace').value
         trans_ws = self.getProperty('TransmissionWorkspace').value
@@ -130,7 +139,7 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         progress.report()
 
         # Perform solid angle correction. Calculate solid angle then divide through.
-        normalized=accumulated_output
+        normalized = accumulated_output
         if self.getProperty("SolidAngleCorrection").value:
             solidAngle = self.createChildAlgorithm("SolidAngle")
             solidAngle.setProperty("InputWorkspace", accumulated_output)

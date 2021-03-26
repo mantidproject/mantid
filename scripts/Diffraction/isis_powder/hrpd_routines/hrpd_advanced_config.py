@@ -15,30 +15,15 @@ absorption_correction_params = {
 
 # Default cropping values are 5% off each end
 
-window_10_50_params = {
-    "vanadium_tof_cropping": (0.05, 0.95),
-    "focused_cropping_values": (0.05, 0.95)
-}
+window_10_50_params = {"vanadium_tof_cropping": (0.05, 0.95), "focused_cropping_values": (0.05, 0.95)}
 
-window_10_110_params = {
-    "vanadium_tof_cropping": (0.05, 0.95),
-    "focused_cropping_values": (0.05, 0.95)
-}
+window_10_110_params = {"vanadium_tof_cropping": (0.05, 0.95), "focused_cropping_values": (0.05, 0.95)}
 
-window_30_130_params = {
-    "vanadium_tof_cropping": (0.05, 0.95),
-    "focused_cropping_values": (0.05, 0.95)
-}
+window_30_130_params = {"vanadium_tof_cropping": (0.05, 0.95), "focused_cropping_values": (0.05, 0.95)}
 
-window_100_200_params = {
-    "vanadium_tof_cropping": (0.05, 0.95),
-    "focused_cropping_values": (0.05, 0.95)
-}
+window_100_200_params = {"vanadium_tof_cropping": (0.05, 0.95), "focused_cropping_values": (0.05, 0.95)}
 
-window_180_280_params = {
-    "vanadium_tof_cropping": (0.05, 0.95),
-    "focused_cropping_values": (0.05, 0.95)
-}
+window_180_280_params = {"vanadium_tof_cropping": (0.05, 0.95), "focused_cropping_values": (0.05, 0.95)}
 
 file_names = {
     "vanadium_peaks_masking_file": "VanaPeaks.dat",

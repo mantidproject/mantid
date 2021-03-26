@@ -10,7 +10,6 @@ from mantid.api import ExperimentInfo
 
 
 class MultipleExperimentInfoTest(unittest.TestCase):
-
     def test_information_access(self):
         signal = 2.0
         ndims = 1
@@ -18,5 +17,6 @@ class MultipleExperimentInfoTest(unittest.TestCase):
         expinfo = expt_ws.getExperimentInfo(0)
         self.assertTrue(isinstance(expinfo, ExperimentInfo))
         self.assertEqual(1, expt_ws.getNumExperimentInfo())
+
 
 if __name__ == '__main__': unittest.main()

@@ -19,7 +19,6 @@ class DrillTableWidget(QTableWidget):
     Widget based on QTableWidget, used in the DrILL interface. It mainly binds
     the custom header and delegate and expose some useful functions.
     """
-
     def __init__(self, parent=None):
         super(DrillTableWidget, self).__init__(parent)
         self._disabled = False
@@ -32,8 +31,7 @@ class DrillTableWidget(QTableWidget):
         self.setItemDelegate(delegate)
 
         # set the default row height to fit a text
-        margin = self.style().pixelMetric(QStyle.PM_FocusFrameVMargin,
-                                          None, self)
+        margin = self.style().pixelMetric(QStyle.PM_FocusFrameVMargin, None, self)
         minSize = self.fontMetrics().height() + 2 * margin
         self.verticalHeader().setDefaultSectionSize(minSize)
 
@@ -173,9 +171,8 @@ class DrillTableWidget(QTableWidget):
             if (header.isSectionHidden(i.column())):
                 continue
             cellsLi.append((i.row(), i.column()))
-            cellsVi.append((self.visualRow(i.row()),
-                          self.visualColumn(i.column())))
-        return sorted(cellsLi, key=lambda i : cellsVi[cellsLi.index(i)][1])
+            cellsVi.append((self.visualRow(i.row()), self.visualColumn(i.column())))
+        return sorted(cellsLi, key=lambda i: cellsVi[cellsLi.index(i)][1])
 
     def getSelectionShape(self):
         """
@@ -254,8 +251,7 @@ class DrillTableWidget(QTableWidget):
             return
         n_rows = self.rowCount()
         n_columns = self.columnCount()
-        if ((row < 0) or (row >= n_rows)
-                or (column < 0) or (column >= n_columns)):
+        if ((row < 0) or (row >= n_rows) or (column < 0) or (column >= n_columns)):
             return
         cell = QTableWidgetItem(contents)
         self.setItem(row, column, cell)

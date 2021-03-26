@@ -8,7 +8,6 @@
 are for use in unit tests only!
 """
 
-
 from distutils.version import LooseVersion
 
 # Import mantid to set MANTIDPATH for any ConfigService call that may be done
@@ -57,11 +56,11 @@ def create_algorithm(name, **kwargs):
     if name == 'Load' and 'Filename' in kwargs:
         alg.setPropertyValue('Filename', kwargs['Filename'])
         del kwargs['Filename']
-    if 'child'in kwargs:
+    if 'child' in kwargs:
         alg.setChild(True)
         del kwargs['child']
         if 'OutputWorkspace' in alg:
-            alg.setPropertyValue("OutputWorkspace","UNUSED_NAME_FOR_CHILD")
+            alg.setPropertyValue("OutputWorkspace", "UNUSED_NAME_FOR_CHILD")
     if 'rethrow' in kwargs:
         alg.setRethrows(True)
         del kwargs['rethrow']
@@ -84,8 +83,8 @@ def assertRaisesNothing(testobj, callable, *args, **kwargs):
     try:
         return callable(*args, **kwargs)
     except Exception as exc:
-        testobj.fail("Assertion error. An exception was caught where none was expected in %s. Message: %s"
-                     % (callable.__name__, str(exc)))
+        testobj.fail("Assertion error. An exception was caught where none was expected in %s. Message: %s" %
+                     (callable.__name__, str(exc)))
 
 
 def can_be_instantiated(cls):
@@ -110,7 +109,8 @@ def can_be_instantiated(cls):
 if LooseVersion(numpy.__version__) >= LooseVersion("1.9.0"):
     assert_almost_equal = numpy.testing.assert_almost_equal
 else:
-    def assert_almost_equal(actual,desired,decimal=7,err_msg='',verbose=True):
+
+    def assert_almost_equal(actual, desired, decimal=7, err_msg='', verbose=True):
         """
         Raises an AssertionError if two items are not equal up to desired
         precision.
@@ -166,8 +166,7 @@ else:
         __tracebackhide__ = True  # Hide traceback for py.test
         from numpy.core import ndarray
         from numpy.lib import iscomplexobj, real, imag
-        from numpy.testing.utils import (assert_array_almost_equal, build_err_msg,
-                                         gisfinite, gisnan)
+        from numpy.testing.utils import (assert_array_almost_equal, build_err_msg, gisfinite, gisnan)
 
         # Handle complex numbers: separate into real/imag to handle
         # nan/inf/negative zero correctly
@@ -179,8 +178,7 @@ else:
 
         def _build_err_msg():
             header = ('Arrays are not almost equal to %d decimals' % decimal)
-            return build_err_msg([actual, desired], err_msg, verbose=verbose,
-                                 header=header)
+            return build_err_msg([actual, desired], err_msg, verbose=verbose, header=header)
 
         if usecomplex:
             if iscomplexobj(actual):

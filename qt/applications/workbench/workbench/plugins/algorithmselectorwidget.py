@@ -14,13 +14,11 @@ from qtpy.QtWidgets import QVBoxLayout
 from mantidqt.widgets.algorithmselector import AlgorithmSelectorWidget
 from workbench.plugins.base import PluginWidget
 
-
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
 
 class AlgorithmSelector(PluginWidget):
     """Provides an algorithm selector widget for selecting algorithms to run"""
-
     def __init__(self, parent):
         super(AlgorithmSelector, self).__init__(parent)
 

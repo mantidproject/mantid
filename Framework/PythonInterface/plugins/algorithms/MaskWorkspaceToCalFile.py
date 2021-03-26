@@ -16,6 +16,7 @@ class QueryFlag(object):
     def isMasked(self, specInfo, index, dummy_yValue):
         return specInfo.isMasked(index)
 
+
 #pylint: disable=too-few-public-methods
 
 
@@ -25,13 +26,14 @@ class QueryValue(object):
 
 
 class MaskWorkspaceToCalFile(PythonAlgorithm):
-
     def category(self):
         return "DataHandling\\Text;Diffraction\\DataHandling;Diffraction\\Masking"
 
     def seeAlso(self):
-        return [ "ReadGroupsFromFile","CreateDummyCalFile","CreateCalFileByNames",
-                 "AlignDetectors","DiffractionFocussing","LoadCalFile","SaveCalFile","MergeCalFiles" ]
+        return [
+            "ReadGroupsFromFile", "CreateDummyCalFile", "CreateCalFileByNames", "AlignDetectors",
+            "DiffractionFocussing", "LoadCalFile", "SaveCalFile", "MergeCalFiles"
+        ]
 
     def name(self):
         return "MaskWorkspaceToCalFile"
@@ -42,8 +44,9 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
                              "The workspace containing the Masking to extract.")
-        self.declareProperty(FileProperty(name="OutputFile",defaultValue="",
-                                          action=FileAction.Save,extensions=['cal']), "The file for the results.")
+        self.declareProperty(
+            FileProperty(name="OutputFile", defaultValue="", action=FileAction.Save, extensions=['cal']),
+            "The file for the results.")
 
         self.declareProperty("Invert", False, "If True, masking is inverted in the input workspace. Default: False")
 
@@ -67,10 +70,10 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
         if invert:
             masking_flag, not_masking_flag = not_masking_flag, masking_flag
 
-        calFile = open(outputFileName,"w")
+        calFile = open(outputFileName, "w")
         #write a header
         instrumentName = inputWorkspace.getInstrument().getName()
-        calFile.write('# '+instrumentName+' detector file\n')
+        calFile.write('# ' + instrumentName + ' detector file\n')
         calFile.write('# Format: number      UDET       offset       select    group\n')
         #save the grouping
         specInfo = inputWorkspace.spectrumInfo()
@@ -78,7 +81,7 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
             try:
                 det = inputWorkspace.getDetector(i)
                 y_value = inputWorkspace.readY(i)[0]
-                if mask_query.isMasked(specInfo, i, y_value): #check if masked
+                if mask_query.isMasked(specInfo, i, y_value):  #check if masked
                     group = masking_flag
                 else:
                     group = not_masking_flag
@@ -88,18 +91,18 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
                 except AttributeError:
                     detIDs = [det.getID()]
                 for did in detIDs:
-                    calFile.write(self.FormatLine(i,did,0.0,group,group))
+                    calFile.write(self.FormatLine(i, did, 0.0, group, group))
             except RuntimeError:
                 # no detector for this spectra
                 pass
         calFile.close()
 
     #pylint: disable=too-many-arguments
-    def FormatLine(self,number,UDET,offset,select,group):
-        line = "{0:9d}{1:16d}{2:16.7f}{3:9d}{4:9d}\n".format(number,UDET,offset,select,group)
+    def FormatLine(self, number, UDET, offset, select, group):
+        line = "{0:9d}{1:16d}{2:16.7f}{3:9d}{4:9d}\n".format(number, UDET, offset, select, group)
         return line
 
-#############################################################################################
 
+#############################################################################################
 
 AlgorithmFactory.subscribe(MaskWorkspaceToCalFile())

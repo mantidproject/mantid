@@ -29,7 +29,9 @@ class StitchingTest(unittest.TestCase):
         """
             Test the stitching call
         """
-        data_stitching.stitch(['ws1', 'ws2'], [70, ], [100], output_workspace='scaled_ws')
+        data_stitching.stitch(['ws1', 'ws2'], [
+            70,
+        ], [100], output_workspace='scaled_ws')
         x_out = mtd['scaled_ws'].dataY(0)
         # Stitching will scale ws2 to ws1, so the output workspace should line up
         # with ws1, which should have an average value of about 10.

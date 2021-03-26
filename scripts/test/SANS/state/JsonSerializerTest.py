@@ -9,7 +9,6 @@ import unittest
 from mantid.api import Algorithm
 from enum import Enum
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------------
 # Test the typed parameters
@@ -157,15 +156,15 @@ class JsonSerializerTest(unittest.TestCase):
         property_manager = fake.getProperty("Args").value
 
         # Assert
-        self.assertEqual(type(serialized),  str)
+        self.assertEqual(type(serialized), str)
         state_2 = Serializer.from_json(property_manager)
 
         # The direct sub state
         self.assertEqual(state.sub_state_1.float_list_parameter, state_2.sub_state_1.float_list_parameter)
 
         # The regular parameters
-        self.assertEqual(state_2.float_parameter,  23.)
-        self.assertEqual(state_2.positive_float_with_none_parameter,  234.)
+        self.assertEqual(state_2.float_parameter, 23.)
+        self.assertEqual(state_2.positive_float_with_none_parameter, 234.)
 
 
 if __name__ == '__main__':

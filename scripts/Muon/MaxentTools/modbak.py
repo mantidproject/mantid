@@ -8,23 +8,13 @@ import numpy as np
 from Muon.MaxentTools.zft import ZFT
 
 
-def MODBAK(
-     hists,
-     datum,
-     sigma,
-     DETECT_a,
-     DETECT_b,
-     DETECT_e,
-     DETECT_d,
-     MAXPAGE_f,
-     PULSESHAPE_convol,
-     SAVETIME_I2,
-     mylog):
+def MODBAK(hists, datum, sigma, DETECT_a, DETECT_b, DETECT_e, DETECT_d, MAXPAGE_f, PULSESHAPE_convol, SAVETIME_I2,
+           mylog):
     npts, ngroups = datum.shape
     DETECT_c = np.zeros([ngroups])
     zr, zi = ZFT(MAXPAGE_f, PULSESHAPE_convol, DETECT_e, SAVETIME_I2)
     for j in range(ngroups):
-        if(hists[j] != 0):
+        if (hists[j] != 0):
             isigsq = np.where(sigma[:, j] > 1.E3, 0.0, sigma[:, j]**-2)
             diff = datum[:, j] - (DETECT_a[j] * zr + DETECT_b[j] * zi)
             s = np.sum(diff * DETECT_e * isigsq)

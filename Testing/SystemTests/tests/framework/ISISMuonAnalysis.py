@@ -31,12 +31,10 @@ class ISISMuonAnalysis(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         - rebin_fixed: Optional boolean to tell if the rebinning is in fixed steps.
         - rebin_params: A string containing the rebin parameters. See wiki rebin for more info.
     """
-
     @abstractmethod
     def get_reference_file(self):
         """Returns the name of the reference file to compare against"""
-        raise NotImplementedError("Implmenent get_reference_file to return "
-                                  "the name of the file to compare against.")
+        raise NotImplementedError("Implmenent get_reference_file to return " "the name of the file to compare against.")
 
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
@@ -47,39 +45,39 @@ class ISISMuonAnalysis(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
         self._validate_properties()
 
-        outputWS = (self.instr_name + str(self.sample_run) )
+        outputWS = (self.instr_name + str(self.sample_run))
 
-      # Load
-        LoadMuonNexus(Filename=self.file_name, OutputWorkspace='MuonAnalysis' )
+        # Load
+        LoadMuonNexus(Filename=self.file_name, OutputWorkspace='MuonAnalysis')
 
-      # Group, Crop, Clone
+        # Group, Crop, Clone
         if self.period_data:
             GroupDetectors(InputWorkspace='MuonAnalysis_1', OutputWorkspace=outputWS, MapFile=self.map_name)
         else:
             GroupDetectors(InputWorkspace='MuonAnalysis', OutputWorkspace=outputWS, MapFile=self.map_name)
         CropWorkspace(InputWorkspace=outputWS, OutputWorkspace=outputWS, XMin=self.x_min, XMax=self.x_max)
-        CloneWorkspace(InputWorkspace=outputWS, OutputWorkspace=(outputWS + '_Raw') )
+        CloneWorkspace(InputWorkspace=outputWS, OutputWorkspace=(outputWS + '_Raw'))
 
-      # Rebin then...
-        if self.rebin :
+        # Rebin then...
+        if self.rebin:
 
             ws = mtd[outputWS]
-            binSize = ws.dataX(0)[1]-ws.dataX(0)[0]
+            binSize = ws.dataX(0)[1] - ws.dataX(0)[0]
             firstX = ws.dataX(0)[0]
             lastX = ws.dataX(0)[ws.blocksize()]
 
             if self.rebin_fixed:
-                Rebin(InputWorkspace=outputWS, OutputWorkspace=outputWS, Params=str(binSize*float(self.rebin_params) ) )
+                Rebin(InputWorkspace=outputWS, OutputWorkspace=outputWS, Params=str(binSize * float(self.rebin_params)))
             else:
                 Rebin(InputWorkspace=outputWS, OutputWorkspace=outputWS, Params=self.rebin_params)
 
-            numberOfFullBunchedBins = math.floor((lastX - firstX) / binSize )
+            numberOfFullBunchedBins = math.floor((lastX - firstX) / binSize)
 
-        # ...Crop
+            # ...Crop
             if numberOfFullBunchedBins > 0:
-                lastX = firstX + numberOfFullBunchedBins*binSize
+                lastX = firstX + numberOfFullBunchedBins * binSize
                 lastX_str = '%.15f' % lastX
-                CropWorkspace(InputWorkspace=outputWS, OutputWorkspace=outputWS, XMax=lastX_str )
+                CropWorkspace(InputWorkspace=outputWS, OutputWorkspace=outputWS, XMax=lastX_str)
 
         GroupWorkspaces(InputWorkspaces=outputWS + ',' + outputWS + '_Raw', OutputWorkspace='MuonGroup')
 
@@ -109,8 +107,8 @@ class ISISMuonAnalysis(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
 #------------------------- ARGUS tests -------------------------------------------------
 
-class ARGUSAnalysisFromFile(ISISMuonAnalysis):
 
+class ARGUSAnalysisFromFile(ISISMuonAnalysis):
     def __init__(self):
         ISISMuonAnalysis.__init__(self)
         self.file_name = 'argus0044309.nxs'
@@ -131,8 +129,8 @@ class ARGUSAnalysisFromFile(ISISMuonAnalysis):
 
 #------------------------- EMU tests -------------------------------------------------
 
-class EMUAnalysisFromFile(ISISMuonAnalysis):
 
+class EMUAnalysisFromFile(ISISMuonAnalysis):
     def __init__(self):
         ISISMuonAnalysis.__init__(self)
         self.file_name = 'emu00031895.nxs'
@@ -151,8 +149,8 @@ class EMUAnalysisFromFile(ISISMuonAnalysis):
 
 #------------------------- HiFi tests -------------------------------------------------
 
-class HiFiAnalysisFromFile(ISISMuonAnalysis):
 
+class HiFiAnalysisFromFile(ISISMuonAnalysis):
     def __init__(self):
         ISISMuonAnalysis.__init__(self)
         self.file_name = 'hifi00038401.nxs'
@@ -173,8 +171,8 @@ class HiFiAnalysisFromFile(ISISMuonAnalysis):
 
 #------------------------- MuSR tests -------------------------------------------------
 
-class MuSRAnalysisFromFile(ISISMuonAnalysis):
 
+class MuSRAnalysisFromFile(ISISMuonAnalysis):
     def __init__(self):
         ISISMuonAnalysis.__init__(self)
         self.file_name = 'MUSR00015192.nxs'

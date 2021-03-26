@@ -10,10 +10,8 @@ from mantid.simpleapi import VelocityAutoCorrelations
 
 
 class VelocityAutoCorrelationsTest(unittest.TestCase):
-
     def test_simple(self):
-        output_ws = VelocityAutoCorrelations(InputFile = 'trajectories.nc',
-                                              Timestep = '2.0')
+        output_ws = VelocityAutoCorrelations(InputFile='trajectories.nc', Timestep='2.0')
 
         self.assertEqual(output_ws.getNumberHistograms(), 2)
         data_y = output_ws.readY(0)
@@ -22,5 +20,6 @@ class VelocityAutoCorrelationsTest(unittest.TestCase):
         data_y = output_ws.readY(1)
         self.assertAlmostEqual(data_y[0], 0.000247266521347895)
 
+
 if __name__ == "__main__":
-	unittest.main()
+    unittest.main()

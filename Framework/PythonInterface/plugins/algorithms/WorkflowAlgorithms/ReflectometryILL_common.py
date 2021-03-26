@@ -69,7 +69,7 @@ def chopperOpeningAngle(sampleLogs, instrumentName):
 def chopperPairDistance(sampleLogs, instrumentName):
     """Return the gap between the two choppers."""
     if instrumentName == 'D17':
-        return sampleLogs.getProperty('Distance.ChopperGap').value # in [m]
+        return sampleLogs.getProperty('Distance.ChopperGap').value  # in [m]
     else:
         return sampleLogs.getProperty('ChopperSetting.distSeparationChopperPair').value * 1e-3
 
@@ -91,6 +91,7 @@ def correctForChopperOpenings(ws, directWS, names, cleanup, logging):
         chopperPeriod = 60. / chopperSpeed(logs, instrumentName)
         openingAngle = chopperOpeningAngle(logs, instrumentName)
         return chopperGap * constants.m_n / constants.h / chopperPeriod * Xs * 1e-10 + openingAngle / 360.
+
     instrumentName = ws.getInstrument().getName()
     Xs = ws.readX(0)
     if ws.isHistogramData():
@@ -98,19 +99,17 @@ def correctForChopperOpenings(ws, directWS, names, cleanup, logging):
     reflectedOpening = opening(instrumentName, ws.run(), Xs)
     directOpening = opening(instrumentName, directWS.run(), Xs)
     corFactorWSName = names.withSuffix('chopper_opening_correction_factors')
-    corFactorWS = CreateWorkspace(
-        OutputWorkspace=corFactorWSName,
-        DataX=ws.readX(0),
-        DataY= directOpening / reflectedOpening,
-        UnitX=ws.getAxis(0).getUnit().unitID(),
-        ParentWorkspace=ws,
-        EnableLogging=logging)
+    corFactorWS = CreateWorkspace(OutputWorkspace=corFactorWSName,
+                                  DataX=ws.readX(0),
+                                  DataY=directOpening / reflectedOpening,
+                                  UnitX=ws.getAxis(0).getUnit().unitID(),
+                                  ParentWorkspace=ws,
+                                  EnableLogging=logging)
     correctedWSName = names.withSuffix('corrected_by_chopper_opening')
-    correctedWS = Multiply(
-        LHSWorkspace=ws,
-        RHSWorkspace=corFactorWS,
-        OutputWorkspace=correctedWSName,
-        EnableLogging=logging)
+    correctedWS = Multiply(LHSWorkspace=ws,
+                           RHSWorkspace=corFactorWS,
+                           OutputWorkspace=correctedWSName,
+                           EnableLogging=logging)
     cleanup.cleanup(corFactorWS)
     cleanup.cleanup(ws)
     return correctedWS
@@ -242,7 +241,6 @@ class WSCleanup:
 
 class WSNameSource:
     """A class to provide names for intermediate workspaces."""
-
     def __init__(self, prefix, cleanupMode):
         """Initialize an instance of the class."""
         self._names = set()

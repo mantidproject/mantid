@@ -82,8 +82,7 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(0.017172642169849039, evs_raw.readY(131)[1188], places=DIFF_PLACES)
         self.assertAlmostEqual(0.063124106780391834, evs_raw.readE(131)[1188], places=DIFF_PLACES)
 
-        self._verify_correct_parameters_loaded(evs_raw, forward_scatter=False,
-                                               diff_mode=diff_mode)
+        self._verify_correct_parameters_loaded(evs_raw, forward_scatter=False, diff_mode=diff_mode)
 
     def test_monitors_loaded_into_ADS_when_monitor_load_is_true_for_back_scattering(self):
         diff_mode = "SingleDifference"
@@ -146,8 +145,7 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(0.056426592449087654, evs_raw.readY(131)[1188], places=DIFF_PLACES)
         self.assertAlmostEqual(0.070774572171486652, evs_raw.readE(131)[1188], places=DIFF_PLACES)
 
-        self._verify_correct_parameters_loaded(evs_raw, forward_scatter=False,
-                                               diff_mode=diff_mode)
+        self._verify_correct_parameters_loaded(evs_raw, forward_scatter=False, diff_mode=diff_mode)
 
     def test_load_with_forward_scattering_spectra_produces_correct_workspace(self):
         diff_mode = "SingleDifference"
@@ -160,8 +158,7 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(-0.030129475930755989, evs_raw.readY(63)[1188], places=DIFF_PLACES)
         self.assertAlmostEqual(0.23849110331150025, evs_raw.readE(0)[1], places=DIFF_PLACES)
 
-        self._verify_correct_parameters_loaded(evs_raw, forward_scatter=True,
-                                               diff_mode=diff_mode)
+        self._verify_correct_parameters_loaded(evs_raw, forward_scatter=True, diff_mode=diff_mode)
 
     def test_consecutive_runs_with_back_scattering_spectra_gives_expected_numbers(self):
         self._run_load("14188-14190", "3-134", "DoubleDifference")
@@ -228,7 +225,7 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(-0.4157, param[0], places=4)
 
     def test_sumspectra_set_to_true_gives_single_spectra_summed_over_all_inputs(self):
-        self._run_load("14188", "135-142", "SingleDifference","IP0005.dat",sum_runs=True)
+        self._run_load("14188", "135-142", "SingleDifference", "IP0005.dat", sum_runs=True)
         evs_raw = mtd[self.ws_name]
 
         # Verify
@@ -241,7 +238,7 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(0.10617318614513051, evs_raw.readE(0)[-1], places=DIFF_PLACES)
 
     def test_sumspectra_with_multiple_groups_gives_number_output_spectra_as_input_groups(self):
-        self._run_load("14188", "135-148;152-165", "SingleDifference","IP0005.dat",sum_runs=True)
+        self._run_load("14188", "135-148;152-165", "SingleDifference", "IP0005.dat", sum_runs=True)
         evs_raw = mtd[self.ws_name]
 
         # Verify
@@ -256,10 +253,8 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(0.676913729914, evs_raw.readE(1)[0], places=DIFF_PLACES)
 
         # Spectrum numbers
-        self._verify_spectra_numbering(evs_raw.getSpectrum(0), 135,
-                                       range(3101,3115))
-        self._verify_spectra_numbering(evs_raw.getSpectrum(1), 152,
-                                       range(3118,3132))
+        self._verify_spectra_numbering(evs_raw.getSpectrum(0), 135, range(3101, 3115))
+        self._verify_spectra_numbering(evs_raw.getSpectrum(1), 152, range(3118, 3132))
 
     def test_sumspectra_set_to_true_gives_single_spectra_summed_over_all_inputs_with_foil_in(self):
         self._run_load("14188", "3-15", "FoilIn", "IP0005.dat", sum_runs=True)
@@ -274,8 +269,7 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(705.49415305869115, evs_raw.readE(0)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(45.519226706964169, evs_raw.readE(0)[-1], places=DIFF_PLACES)
 
-        self._verify_spectra_numbering(evs_raw.getSpectrum(0), 3,
-                                       range(2101,2114))
+        self._verify_spectra_numbering(evs_raw.getSpectrum(0), 3, range(2101, 2114))
 
     def test_sumspectra_with_multiple_groups_gives_number_output_spectra_as_input_groups_with_foil_in(self):
         self._run_load("14188", "3-15;30-50", "FoilIn", "IP0005.dat", sum_runs=True)
@@ -292,10 +286,8 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(705.49415305869115, evs_raw.readE(0)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(1154.4747723532116, evs_raw.readE(1)[0], places=DIFF_PLACES)
 
-        self._verify_spectra_numbering(evs_raw.getSpectrum(0), 3,
-                                       range(2101,2114))
-        self._verify_spectra_numbering(evs_raw.getSpectrum(1), 30,
-                                       list(range(2128,2145)) + list(range(2201,2205)))
+        self._verify_spectra_numbering(evs_raw.getSpectrum(0), 3, range(2101, 2114))
+        self._verify_spectra_numbering(evs_raw.getSpectrum(1), 30, list(range(2128, 2145)) + list(range(2201, 2205)))
 
     def _verify_spectra_numbering(self, spectrum, expected_no, expected_ids):
         self.assertEqual(expected_no, spectrum.getSpectrumNo())
@@ -306,8 +298,7 @@ class VesuvioTests(unittest.TestCase):
     def _verify_correct_parameters_loaded(self, workspace, forward_scatter, diff_mode):
         nhist = workspace.getNumberHistograms()
         for i in range(nhist):
-            self._verify_correct_detector_parameters(workspace.getDetector(i),
-                                                     forward_scatter, diff_mode)
+            self._verify_correct_detector_parameters(workspace.getDetector(i), forward_scatter, diff_mode)
 
     def _verify_correct_detector_parameters(self, detector, forward_scatter, diff_mode):
         # resolution
@@ -340,9 +331,13 @@ class VesuvioTests(unittest.TestCase):
                 self.assertAlmostEqual(hwhm_lorentz, 141.2, places=tol_places)
 
     def _run_load(self, runs, spectra, diff_opt, ip_file="", sum_runs=False, load_mon=False, do_size_check=True):
-        ms.LoadVesuvio(Filename=runs,OutputWorkspace=self.ws_name,
-                       SpectrumList=spectra,Mode=diff_opt,InstrumentParFile=ip_file,
-                       SumSpectra=sum_runs, LoadMonitors=load_mon)
+        ms.LoadVesuvio(Filename=runs,
+                       OutputWorkspace=self.ws_name,
+                       SpectrumList=spectra,
+                       Mode=diff_opt,
+                       InstrumentParFile=ip_file,
+                       SumSpectra=sum_runs,
+                       LoadMonitors=load_mon)
 
         self._do_ads_check(self.ws_name)
 
@@ -361,6 +356,7 @@ class VesuvioTests(unittest.TestCase):
                 return len(elements)
             else:
                 return 1
+
         if do_size_check:
             self._do_size_check(self.ws_name, expected_size())
 
@@ -374,57 +370,89 @@ class VesuvioTests(unittest.TestCase):
         self.assertTrue(name in mtd)
         self.assertTrue(isinstance(mtd[name], MatrixWorkspace))
 
-    def _do_size_check(self,name, expected_nhist):
+    def _do_size_check(self, name, expected_nhist):
         loaded_data = mtd[name]
         self.assertEqual(expected_nhist, loaded_data.getNumberHistograms())
 
     #================== Failure cases ================================
 
     def test_run_range_bad_order_raises_error(self):
-        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188-14187",
-                          OutputWorkspace=self.ws_name)
+        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188-14187", OutputWorkspace=self.ws_name)
 
     def test_missing_spectra_property_raises_error(self):
-        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
-                          OutputWorkspace=self.ws_name)
+        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188", OutputWorkspace=self.ws_name)
 
     def test_load_with_invalid_spectra_raises_error(self):
-        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
-                          OutputWorkspace=self.ws_name, SpectrumList="200")
+        self.assertRaises(RuntimeError,
+                          ms.LoadVesuvio,
+                          Filename="14188",
+                          OutputWorkspace=self.ws_name,
+                          SpectrumList="200")
 
     def test_load_with_spectra_that_are_just_monitors_raises_error(self):
-        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
-                          OutputWorkspace=self.ws_name, SpectrumList="1")
-        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
-                          OutputWorkspace=self.ws_name, SpectrumList="1-2")
+        self.assertRaises(RuntimeError,
+                          ms.LoadVesuvio,
+                          Filename="14188",
+                          OutputWorkspace=self.ws_name,
+                          SpectrumList="1")
+        self.assertRaises(RuntimeError,
+                          ms.LoadVesuvio,
+                          Filename="14188",
+                          OutputWorkspace=self.ws_name,
+                          SpectrumList="1-2")
 
     def test_load_with_spectra_mixed_from_forward_backward_raises_error(self):
-        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
+        self.assertRaises(RuntimeError,
+                          ms.LoadVesuvio,
+                          Filename="14188",
                           Mode="SingleDifference",
-                          OutputWorkspace=self.ws_name, SpectrumList="135,134")
-        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
+                          OutputWorkspace=self.ws_name,
+                          SpectrumList="135,134")
+        self.assertRaises(RuntimeError,
+                          ms.LoadVesuvio,
+                          Filename="14188",
                           Mode="SingleDifference",
-                          OutputWorkspace=self.ws_name, SpectrumList="3,134,136,198")
-        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
+                          OutputWorkspace=self.ws_name,
+                          SpectrumList="3,134,136,198")
+        self.assertRaises(RuntimeError,
+                          ms.LoadVesuvio,
+                          Filename="14188",
                           Mode="SingleDifference",
-                          OutputWorkspace=self.ws_name, SpectrumList="20-50,180-192")
+                          OutputWorkspace=self.ws_name,
+                          SpectrumList="20-50,180-192")
 
     def test_load_with_invalid_difference_option_raises_error(self):
-        self.assertRaises(ValueError, ms.LoadVesuvio, Filename="14188",
-                          OutputWorkspace=self.ws_name, Mode="Unknown",SpectrumList="3-134")
+        self.assertRaises(ValueError,
+                          ms.LoadVesuvio,
+                          Filename="14188",
+                          OutputWorkspace=self.ws_name,
+                          Mode="Unknown",
+                          SpectrumList="3-134")
 
     def test_load_with_difference_option_not_applicable_to_current_spectra_raises_error(self):
-        self.assertRaises(ValueError, ms.LoadVesuvio, Filename="14188",
-                          OutputWorkspace=self.ws_name, Mode="",SpectrumList="3-134")
+        self.assertRaises(ValueError,
+                          ms.LoadVesuvio,
+                          Filename="14188",
+                          OutputWorkspace=self.ws_name,
+                          Mode="",
+                          SpectrumList="3-134")
 
     def test_forward_scattering_spectra_with_double_difference_mode_raises_error(self):
-        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
+        self.assertRaises(RuntimeError,
+                          ms.LoadVesuvio,
+                          Filename="14188",
                           Mode="DoubleDifference",
-                          OutputWorkspace=self.ws_name, SpectrumList="140-150")
+                          OutputWorkspace=self.ws_name,
+                          SpectrumList="140-150")
 
     def test_raising_error_removes_temporary_raw_workspaces(self):
-        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188,14199", # Second run is invalid
-                          OutputWorkspace=self.ws_name, Mode="SingleDifference",SpectrumList="3-134")
+        self.assertRaises(
+            RuntimeError,
+            ms.LoadVesuvio,
+            Filename="14188,14199",  # Second run is invalid
+            OutputWorkspace=self.ws_name,
+            Mode="SingleDifference",
+            SpectrumList="3-134")
 
         self._do_test_temp_raw_workspaces_not_left_around()
 
@@ -435,6 +463,7 @@ class VesuvioTests(unittest.TestCase):
 
 #====================================================================================
 
+
 class LoadVesuvioTest(systemtesting.MantidSystemTest):
 
     _success = False
@@ -443,7 +472,7 @@ class LoadVesuvioTest(systemtesting.MantidSystemTest):
         self._success = False
         # Custom code to create and run this single test suite
         suite = unittest.TestSuite()
-        suite.addTest( unittest.makeSuite(VesuvioTests, "test") )
+        suite.addTest(unittest.makeSuite(VesuvioTests, "test"))
         runner = unittest.TextTestRunner()
         # Run using either runner
         res = runner.run(suite)

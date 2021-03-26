@@ -60,14 +60,14 @@ class ExamplePeakFunction(IPeakFunction):
         height = self.getParameterValue("Height")
         peak_centre = self.getParameterValue("PeakCentre")
         sigma = self.getParameterValue("Sigma")
-        weight = math.pow(1./sigma, 2)
+        weight = math.pow(1. / sigma, 2)
 
         # Here you can use the NTerms attr if required by
         #   using self._nterms: see setAttributeValue below or
         #   accessing the attribute each time directly nterms = self.getAttributeValue("NTerms") but this is much slower
 
-        offset_sq = np.square(xvals-peak_centre)
-        out = height*np.exp(-0.5*offset_sq*weight)
+        offset_sq = np.square(xvals - peak_centre)
+        out = height * np.exp(-0.5 * offset_sq * weight)
         return out
 
     def functionDerivLocal(self, xvals, jacobian):
@@ -82,17 +82,17 @@ class ExamplePeakFunction(IPeakFunction):
         height = self.getParameterValue("Height")
         peak_centre = self.getParameterValue("PeakCentre")
         sigma = self.getParameterValue("Sigma")
-        weight = math.pow(1./sigma, 2)
+        weight = math.pow(1. / sigma, 2)
 
         # X index
         i = 0
         for x in xvals:
-            diff = x-peak_centre
-            exp_term = math.exp(-0.5*diff*diff*weight)
+            diff = x - peak_centre
+            exp_term = math.exp(-0.5 * diff * diff * weight)
             jacobian.set(i, 0, exp_term)
-            jacobian.set(i, 1, diff*height*exp_term*weight)
+            jacobian.set(i, 1, diff * height * exp_term * weight)
             # derivative with respect to weight not sigma
-            jacobian.set(i, 2, -0.5*diff*diff*height*exp_term)
+            jacobian.set(i, 2, -0.5 * diff * diff * height * exp_term)
             i += 1
 
     def setAttributeValue(self, name, value):
@@ -114,7 +114,7 @@ class ExamplePeakFunction(IPeakFunction):
         """
         param_value = self.getParameterValue(index)
         if index == 2:  # Sigma. Actually fit to 1/(sigma^2) for stability
-            return 1./math.pow(param_value, 2)
+            return 1. / math.pow(param_value, 2)
         else:
             return param_value
 
@@ -126,7 +126,7 @@ class ExamplePeakFunction(IPeakFunction):
         """
         param_value = value
         if index == 2:
-            param_value = math.sqrt(math.fabs(1.0/value))
+            param_value = math.sqrt(math.fabs(1.0 / value))
         else:
             param_value = value
         # Final explicit arugment is required to be false here by framework
@@ -134,7 +134,7 @@ class ExamplePeakFunction(IPeakFunction):
 
         param_value = self.getParameterValue(index)
         if index == 2:  # Sigma. Actually fit to 1/(sigma^2) for stability
-            return math.pow(1./param_value, 2)
+            return math.pow(1. / param_value, 2)
         else:
             return param_value
 
@@ -152,13 +152,13 @@ class ExamplePeakFunction(IPeakFunction):
         simple case it is just the centre value but it can be any combination
         of parameters
         """
-        return self. getParameterValue("Height")
+        return self.getParameterValue("Height")
 
     def fwhm(self):
         """
         Return what should be considered the 'fwhm' of this function.
         """
-        return 2.0*math.sqrt(2.0*math.log(2.0))*self.getParameterValue("Sigma")
+        return 2.0 * math.sqrt(2.0 * math.log(2.0)) * self.getParameterValue("Sigma")
 
     def setCentre(self, new_centre):
         """
@@ -179,7 +179,7 @@ class ExamplePeakFunction(IPeakFunction):
         Called by an external entity, probably a GUI, in response to a user guessing
         the height.
         """
-        sigma = new_fwhm/(2.0*math.sqrt(2.0*math.log(2.0)))
+        sigma = new_fwhm / (2.0 * math.sqrt(2.0 * math.log(2.0)))
         self.setParameter("Sigma", sigma)
 
 

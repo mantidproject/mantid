@@ -14,8 +14,8 @@ from isis_reflectometry import combineMulti
 class ReflectometryQuickCombineMulti(systemtesting.MantidSystemTest):
     """
     This is a system test for the top-level CombineMulti routines. Quick is the name given to the
-    ISIS reflectometry reduction scripts. CombineMulti is used for stitching together runs converted Into I/I0 vs |Q| taken at
-    different incident angles (and hence covering different Q-ranges)
+    ISIS reflectometry reduction scripts. CombineMulti is used for stitching together runs converted Into I/I0 vs |Q|
+    taken at different incident angles (and hence covering different Q-ranges)
     """
 
     __stitchedWorkspaceName = "stitched_13460_13462"
@@ -37,7 +37,7 @@ class ReflectometryQuickCombineMulti(systemtesting.MantidSystemTest):
         return mtd[str(runNumber) + '_IvsQ']
 
     def createBinningParam(self, low, step, high):
-        return "%f,%f,%f" %(low, step, high)
+        return "%f,%f,%f" % (low, step, high)
 
     def runTest(self):
         step = 0.040
@@ -47,11 +47,17 @@ class ReflectometryQuickCombineMulti(systemtesting.MantidSystemTest):
         run2QHigh = 0.300
 
         # Create IvsQ workspaces
-        IvsQ1 = self.doQuickOnRun(runNumber=13460, transmissionNumbers=[13463,13464], instrument='INTER', incidentAngle=0.7)
+        IvsQ1 = self.doQuickOnRun(runNumber=13460,
+                                  transmissionNumbers=[13463, 13464],
+                                  instrument='INTER',
+                                  incidentAngle=0.7)
         IvsQ1Binned = Rebin(InputWorkspace=IvsQ1, Params=self.createBinningParam(run1QLow, -step, run1QHigh))
 
         # Create IvsQ workspaces
-        IvsQ2 = self.doQuickOnRun(runNumber=13462, transmissionNumbers=[13463,13464], instrument='INTER', incidentAngle=2.3)
+        IvsQ2 = self.doQuickOnRun(runNumber=13462,
+                                  transmissionNumbers=[13463, 13464],
+                                  instrument='INTER',
+                                  incidentAngle=2.3)
         IvsQ2Binned = Rebin(InputWorkspace=IvsQ2, Params=self.createBinningParam(run2QLow, -step, run2QHigh))
 
         # Perform the stitching
@@ -60,4 +66,4 @@ class ReflectometryQuickCombineMulti(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return self.__stitchedWorkspaceName,'QuickStitchedReferenceResult.nxs'
+        return self.__stitchedWorkspaceName, 'QuickStitchedReferenceResult.nxs'

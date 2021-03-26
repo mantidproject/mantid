@@ -50,11 +50,11 @@ class SANSCatalogWidget(BaseWidget):
             settings = GeneralSettings()
         self._settings = settings
 
-       # Connect do UI data update
+        # Connect do UI data update
         self._settings.data_updated.connect(self._data_updated)
 
     def initialize_content(self):
-        self.copyAction = QAction("Copy",  self)
+        self.copyAction = QAction("Copy", self)
         self.copyAction.setShortcut("Ctrl+C")
         self.addAction(self.copyAction)
 
@@ -104,7 +104,7 @@ class SANSCatalogWidget(BaseWidget):
 
     def copyCells(self):
         indices = self._content.data_set_table.selectedIndexes()
-        if len(indices)==0:
+        if len(indices) == 0:
             return
 
         col_count = self._content.data_set_table.columnCount()
@@ -116,10 +116,10 @@ class SANSCatalogWidget(BaseWidget):
         selected_text = ""
         for row in rows:
             for i in range(col_count):
-                data = self._content.data_set_table.item(row,i)
+                data = self._content.data_set_table.item(row, i)
                 if data is not None:
                     selected_text += str(data.text())
-                if i<col_count-1:
+                if i < col_count - 1:
                     selected_text += '\t'
             selected_text += '\n'
 
@@ -136,7 +136,7 @@ class SANSCatalogWidget(BaseWidget):
         # Stretch the columns evenly
         h = self._content.data_set_table.horizontalHeader()
         h.setSectionResizeMode(1)
-        h.setSectionResizeMode(1,0)
+        h.setSectionResizeMode(1, 0)
 
         if self._catalog_cls is not None:
             dc = self._catalog_cls()
@@ -179,8 +179,7 @@ class SANSCatalogWidget(BaseWidget):
         self._content.data_set_table.resizeColumnsToContents()
 
     def _browse_directory(self):
-        direc = QFileDialog.getExistingDirectory(self, "Open Directory",
-                                                 self._settings.data_path)
+        direc = QFileDialog.getExistingDirectory(self, "Open Directory", self._settings.data_path)
         if not direc:
             return
         if isinstance(direc, tuple):

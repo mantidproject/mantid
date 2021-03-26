@@ -62,11 +62,12 @@ def main(argv):
         module=test_module,
         # We've processed the test source so don't let unittest try to reparse it
         # This forces it to load the tests from the supplied module
-        argv=(argv[0],),
+        argv=(argv[0], ),
         # these make sure that some options that are not applicable
         # remain hidden from the help menu.
-        failfast=False, buffer=False, catchbreak=False
-    )
+        failfast=False,
+        buffer=False,
+        catchbreak=False)
 
 
 def module_name(pathname):
@@ -88,7 +89,7 @@ def result_class(pathname):
     directory_path, _ = os.path.split(pathname)
     directory_name = os.path.relpath(directory_path, os.path.dirname(directory_path))
     class_ = GroupedNameTestResult
-    class_.testcase_prefix = "python." +  directory_name + "."
+    class_.testcase_prefix = "python." + directory_name + "."
     return class_
 
 

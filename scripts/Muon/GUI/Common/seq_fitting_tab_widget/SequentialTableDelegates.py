@@ -9,14 +9,15 @@ from qtpy.QtGui import QPalette, QColor
 from qtpy import QtCore
 
 orange = QColor(255, 165, 0)
-FIT_STATUSES = {"No fit": QtCore.Qt.black,
-                "Success": QtCore.Qt.green,
-                "Changes too small": orange,
-                "Failed": QtCore.Qt.red}
+FIT_STATUSES = {
+    "No fit": QtCore.Qt.black,
+    "Success": QtCore.Qt.green,
+    "Changes too small": orange,
+    "Failed": QtCore.Qt.red
+}
 
 
 class FitQualityDelegate(QtWidgets.QStyledItemDelegate):
-
     def __init__(self, parent):
         super(FitQualityDelegate, self).__init__(parent)
 

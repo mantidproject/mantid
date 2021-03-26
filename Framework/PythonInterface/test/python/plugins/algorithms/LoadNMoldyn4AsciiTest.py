@@ -17,14 +17,12 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
     Note that the test files used here are not axactly in the same format as
     what nMoldyn produces as CMake can't handle files with brackets or commas.
     """
-
     def setUp(self):
         # This test requires the directory to be provided, this is in the
         # UnitTest directory so do get this from the serch directories
         data_dirs = config['datasearch.directories'].split(';')
         unit_test_data_dir = [p for p in data_dirs if 'UnitTest' in p][0]
         self._data_directory = os.path.join(unit_test_data_dir, 'nmoldyn4_data')
-
 
     def _validate_fqt_ws(self, workspace):
         """
@@ -38,7 +36,6 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
         self.assertEqual(str(workspace.getAxis(0).getUnit().unitID()), 'TOF')
         self.assertEqual(str(workspace.getAxis(1).getUnit().unitID()), 'MomentumTransfer')
 
-
     def _validate_sqf_ws(self, workspace):
         """
         Validates a workspace containing an S(Q, f) function.
@@ -50,7 +47,6 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
         self.assertEqual(workspace.blocksize(), 199)
         self.assertEqual(str(workspace.getAxis(0).getUnit().unitID()), 'Energy')
         self.assertEqual(str(workspace.getAxis(1).getUnit().unitID()), 'MomentumTransfer')
-
 
     def test_load_single_fqt_function(self):
         """
@@ -64,7 +60,6 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
         self.assertTrue(function_wsg.contains('fqt_total'))
         self._validate_fqt_ws(mtd['fqt_total'])
 
-
     def test_load_single_sqf_function(self):
         """
         Tests loading a single S(Q, f) function.
@@ -76,7 +71,6 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
         self.assertEqual(len(function_wsg), 1)
         self.assertTrue(function_wsg.contains('sqf_total'))
         self._validate_sqf_ws(mtd['sqf_total'])
-
 
     def test_load_multiple_functions_list_short_name(self):
         """
@@ -93,7 +87,6 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
         self._validate_sqf_ws(mtd['sqf_total'])
         self._validate_fqt_ws(mtd['fqt_total'])
 
-
     def test_load_multiple_functions_list_full_name(self):
         """
         Tests loading multiple functions from a data directory giving the full
@@ -108,7 +101,6 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
         self.assertTrue(function_wsg.contains('fqt_total'))
         self._validate_sqf_ws(mtd['sqf_total'])
         self._validate_fqt_ws(mtd['fqt_total'])
-
 
     def test_load_multiple_functions_string_short_name(self):
         """
@@ -125,7 +117,6 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
         self._validate_sqf_ws(mtd['sqf_total'])
         self._validate_fqt_ws(mtd['fqt_total'])
 
-
     def test_load_multiple_functions_some_skipped(self):
         """
         Tests loading multiple functions from a data directory where some
@@ -141,7 +132,6 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
         self._validate_sqf_ws(mtd['sqf_total'])
         self._validate_fqt_ws(mtd['fqt_total'])
 
-
     def test_load_all_functions_skipped(self):
         """
         Tests error handling when all functions could not be loaded.
@@ -151,7 +141,6 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
                           Directory=self._data_directory,
                           Functions=['sqw_total', 'sqw_H'],
                           OutputWorkspace='__LoadNMoldyn4Ascii_test')
-
 
     def test_fail_on_no_functions(self):
         """

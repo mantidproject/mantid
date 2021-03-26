@@ -92,6 +92,7 @@ class SettingsAdjustmentModel(ModelCommon):
         adj_files = self._all_states.adjustment.wavelength_and_pixel_adjustment.adjustment_files
         if DetectorType.HAB.value in adj_files:
             adj_files[DetectorType.HAB.value].wavelength_adjustment_file = value
+
     # ------------------------------------------------------------------------------------------------------------------
     # Transmission Fitting
     # ------------------------------------------------------------------------------------------------------------------

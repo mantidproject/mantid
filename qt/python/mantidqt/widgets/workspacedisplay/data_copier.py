@@ -9,7 +9,6 @@ from qtpy import QtGui
 from qtpy.QtWidgets import QMessageBox
 
 from mantidqt.widgets.workspacedisplay.user_notifier import UserNotifier
-
 """
 This module contains the common copying functionality between
 the MatrixWorkspaceDisplay and the TableWorkspaceDisplay.

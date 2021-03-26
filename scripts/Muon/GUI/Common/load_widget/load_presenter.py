@@ -43,14 +43,12 @@ class LoadPresenter(object):
 
     def load_run(self):
         self.load_thread = self.new_thread(self.load_model)
-        self.load_thread.threadWrapperSetUp(
-            self.disable_buttons, self.end_load_thread)
+        self.load_thread.threadWrapperSetUp(self.disable_buttons, self.end_load_thread)
         self.load_thread.start()
 
     def co_add_run(self):
         self.co_thread = self.new_thread(self.co_model)
-        self.co_thread.threadWrapperSetUp(
-            self.disable_buttons, self.end_co_thread)
+        self.co_thread.threadWrapperSetUp(self.disable_buttons, self.end_co_thread)
         self.co_thread.start()
 
     def disable_buttons(self):

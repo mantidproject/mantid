@@ -19,7 +19,6 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 @start_qapplication
 class LoadFileWidgetPresenterTest(unittest.TestCase):
     def run_test_with_and_without_threading(test_function):
-
         def run_twice(self):
             test_function(self)
             self.setUp()

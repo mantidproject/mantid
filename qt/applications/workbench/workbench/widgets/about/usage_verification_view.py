@@ -42,12 +42,12 @@ class UsageReportingVerificationView(QDialog):
         labelQuestion.linkActivated.connect(presenter.action_open_external_link)
 
         labelInformation = QLabel(self)
-        labelInformation.setText("All usage data is anonymous and untraceable.\n"
-                                 + "We use the usage data to inform the future development of Mantid.\n"
-                                 + "If you click \"Yes\" aspects you need risk being deprecated in \n"
-                                 + "future versions if we think they are not used.\n\n"
-                                 + "Are you sure you still want to disable reporting usage data?\n"
-                                 + "Please click \"No\".")
+        labelInformation.setText("All usage data is anonymous and untraceable.\n" +
+                                 "We use the usage data to inform the future development of Mantid.\n" +
+                                 "If you click \"Yes\" aspects you need risk being deprecated in \n" +
+                                 "future versions if we think they are not used.\n\n" +
+                                 "Are you sure you still want to disable reporting usage data?\n" +
+                                 "Please click \"No\".")
         textLayout.addWidget(labelInformation)
 
         buttonLayout = QHBoxLayout()
@@ -69,4 +69,4 @@ class UsageReportingVerificationView(QDialog):
         parentLayout.addLayout(textLayout)
 
         self.setLayout(parentLayout)
-        self.setMinimumSize(498,161)
+        self.setMinimumSize(498, 161)

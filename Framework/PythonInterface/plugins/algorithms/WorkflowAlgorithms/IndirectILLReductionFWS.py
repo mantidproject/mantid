@@ -45,24 +45,19 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                'for ILL indirect geometry data, instrument IN16B.'
 
     def seeAlso(self):
-        return [ "IndirectILLReductionQENS","IndirectILLEnergyTransfer" ]
+        return ["IndirectILLReductionQENS", "IndirectILLEnergyTransfer"]
 
     def name(self):
         return "IndirectILLReductionFWS"
 
     def PyInit(self):
 
-        self.declareProperty(MultipleFileProperty('Run', extensions=['nxs']),
-                             doc='Run number(s) of sample run(s).')
+        self.declareProperty(MultipleFileProperty('Run', extensions=['nxs']), doc='Run number(s) of sample run(s).')
 
-        self.declareProperty(MultipleFileProperty('BackgroundRun',
-                                                  action=FileAction.OptionalLoad,
-                                                  extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('BackgroundRun', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='Run number(s) of background (empty can) run(s).')
 
-        self.declareProperty(MultipleFileProperty('CalibrationRun',
-                                                  action=FileAction.OptionalLoad,
-                                                  extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('CalibrationRun', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='Run number(s) of vanadium calibration run(s).')
 
         self.declareProperty(MultipleFileProperty('CalibrationBackgroundRun',
@@ -74,21 +69,21 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                              defaultValue='sample.temperature',
                              doc='Scanning observable, a Sample Log entry\n')
 
-        self.declareProperty(name='SortXAxis',
-                             defaultValue=False,
-                             doc='Whether or not to sort the x-axis\n')
+        self.declareProperty(name='SortXAxis', defaultValue=False, doc='Whether or not to sort the x-axis\n')
 
-        self.declareProperty(name='BackgroundScalingFactor', defaultValue=1.,
+        self.declareProperty(name='BackgroundScalingFactor',
+                             defaultValue=1.,
                              validator=FloatBoundedValidator(lower=0),
                              doc='Scaling factor for background subtraction')
 
-        self.declareProperty(name='CalibrationBackgroundScalingFactor', defaultValue=1.,
+        self.declareProperty(name='CalibrationBackgroundScalingFactor',
+                             defaultValue=1.,
                              validator=FloatBoundedValidator(lower=0),
                              doc='Scaling factor for background subtraction for vanadium calibration')
 
         self.declareProperty(name='BackgroundOption',
                              defaultValue='Sum',
-                             validator=StringListValidator(['Sum','Interpolate']),
+                             validator=StringListValidator(['Sum', 'Interpolate']),
                              doc='Whether to sum or interpolate the background runs.')
 
         self.declareProperty(name='CalibrationOption',
@@ -101,19 +96,18 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                              validator=StringListValidator(['Sum', 'Interpolate']),
                              doc='Whether to sum or interpolate the background run for calibration runs.')
 
-        self.declareProperty(FileProperty('MapFile', '',
-                                          action=FileAction.OptionalLoad,
-                                          extensions=['map','xml']),
+        self.declareProperty(FileProperty('MapFile', '', action=FileAction.OptionalLoad, extensions=['map', 'xml']),
                              doc='Filename of the detector grouping map file to use. \n'
-                                 'By default all the pixels will be summed per each tube. \n'
-                                 'Use .map or .xml file (see GroupDetectors documentation) '
-                                 'only if different range is needed for each tube.')
+                             'By default all the pixels will be summed per each tube. \n'
+                             'Use .map or .xml file (see GroupDetectors documentation) '
+                             'only if different range is needed for each tube.')
 
-        self.declareProperty(name='ManualPSDIntegrationRange',defaultValue=[1,128],
+        self.declareProperty(name='ManualPSDIntegrationRange',
+                             defaultValue=[1, 128],
                              doc='Integration range of vertical pixels in each PSD tube. \n'
-                                 'By default all the pixels will be summed per each tube. \n'
-                                 'Use this option if the same range (other than default) '
-                                 'is needed for all the tubes.')
+                             'By default all the pixels will be summed per each tube. \n'
+                             'Use this option if the same range (other than default) '
+                             'is needed for all the tubes.')
 
         self.declareProperty(name='Analyser',
                              defaultValue='silicon',
@@ -125,22 +119,24 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                              validator=StringListValidator(['111', '311']),
                              doc='Analyser reflection.')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                                                    direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace group')
 
-        self.declareProperty(name='SpectrumAxis', defaultValue='SpectrumNumber',
+        self.declareProperty(name='SpectrumAxis',
+                             defaultValue='SpectrumNumber',
                              validator=StringListValidator(['SpectrumNumber', '2Theta', 'Q', 'Q2']),
                              doc='The spectrum axis conversion target.')
 
-        self.declareProperty(name='DiscardSingleDetectors', defaultValue=False,
+        self.declareProperty(name='DiscardSingleDetectors',
+                             defaultValue=False,
                              doc='Whether to discard the spectra of single detectors.')
 
-        self.declareProperty(name='ManualInelasticPeakChannels', defaultValue=[-1,-1],
+        self.declareProperty(name='ManualInelasticPeakChannels',
+                             defaultValue=[-1, -1],
                              doc='The channel indices for the inelastic peak positions in the beginning '
-                                 'and in the end of the spectra; by default the maxima of the monitor '
-                                 'spectrum will be used for this. The intensities will be integrated symmetrically '
-                                 'around each peak.')
+                             'and in the end of the spectra; by default the maxima of the monitor '
+                             'spectrum will be used for this. The intensities will be integrated symmetrically '
+                             'around each peak.')
 
     def validateInputs(self):
 
@@ -247,8 +243,9 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             if peak_channels[1] >= blocksize:
                 raise RuntimeError('Manual peak channel {0} is out of range {1}'.format(peak_channels[1], blocksize))
             else:
-                AddSampleLogMultiple(Workspace=ws, LogNames=['ManualInelasticLeftPeak', 'ManualInelasticRightPeak'],
-                                     LogValues=str(peak_channels[0])+','+str(peak_channels[1]))
+                AddSampleLogMultiple(Workspace=ws,
+                                     LogNames=['ManualInelasticLeftPeak', 'ManualInelasticRightPeak'],
+                                     LogValues=str(peak_channels[0]) + ',' + str(peak_channels[1]))
                 return peak_channels
         run = mtd[ws].getRun()
         if not run.hasProperty('MonitorLeftPeak') or not run.hasProperty('MonitorRightPeak'):
@@ -271,10 +268,11 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             x_values = item.readX(0)
             int1 = '__int1_' + ws
             int2 = '__int2_' + ws
-            Integration(InputWorkspace=ws, OutputWorkspace=int1,
-                        RangeLower=x_values[0], RangeUpper=x_values[2*imin])
-            Integration(InputWorkspace=ws, OutputWorkspace=int2,
-                        RangeLower=x_values[-2*(size-imax)], RangeUpper=x_values[-1])
+            Integration(InputWorkspace=ws, OutputWorkspace=int1, RangeLower=x_values[0], RangeUpper=x_values[2 * imin])
+            Integration(InputWorkspace=ws,
+                        OutputWorkspace=int2,
+                        RangeLower=x_values[-2 * (size - imax)],
+                        RangeUpper=x_values[-1])
             Plus(LHSWorkspace=int1, RHSWorkspace=int2, OutputWorkspace=ws)
             DeleteWorkspace(int1)
             DeleteWorkspace(int2)
@@ -287,7 +285,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         if mtd[groupws].getNumberOfEntries() == 2:  # two wings, sum
             left = mtd[groupws].getItem(0).name()
             right = mtd[groupws].getItem(1).name()
-            left_right_sum = '__sum_'+groupws
+            left_right_sum = '__sum_' + groupws
 
             left_monitor = mtd[left].getRun().getLogData('MonitorIntegral').value
             right_monitor = mtd[right].getRun().getLogData('MonitorIntegral').value
@@ -317,7 +315,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         self.setUp()
 
         # total number of (unsummed) runs
-        total = self._sample_files.count(',')+self._background_files.count(',')+self._calibration_files.count(',')
+        total = self._sample_files.count(',') + self._background_files.count(',') + self._calibration_files.count(',')
 
         self._progress = Progress(self, start=0.0, end=1.0, nreports=total)
 
@@ -369,9 +367,9 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
             DeleteWorkspace(self._red_ws + '_' + self._CALIBRATION)
 
-        self.log().debug('Run files map is :'+str(self._all_runs))
+        self.log().debug('Run files map is :' + str(self._all_runs))
 
-        self.setProperty('OutputWorkspace',self._red_ws)
+        self.setProperty('OutputWorkspace', self._red_ws)
 
     def _reduce_multiple_runs(self, files, label):
         '''
@@ -456,7 +454,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                     axis = mtd[ws].readX(0)
                     start = axis[0]
                     end = axis[-1]
-                    integration_range = end-start
+                    integration_range = end - start
                     params = [start, integration_range, end]
                     Rebin(InputWorkspace=ws, OutputWorkspace=ws, Params=params)
 
@@ -515,7 +513,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                 sample_ws = self._insert_energy_value(self._red_ws, energy, self._SAMPLE)
                 calib_ws = sample_ws + '_' + self._CALIBRATION
                 Divide(LHSWorkspace=sample_ws, RHSWorkspace=calib_ws, OutputWorkspace=sample_ws)
-                self._scale_calibration(sample_ws,calib_ws)
+                self._scale_calibration(sample_ws, calib_ws)
             else:
                 self.log().warning('No calibration can be performed for doppler energy of {0} microEV, '
                                    'since no calibration run was provided for the same energy value.'.format(energy))
@@ -529,12 +527,12 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         '''
 
         if mtd[calib].blocksize() == 1:
-            scale = np.max(mtd[calib].extractY()[:,0])
-            Scale(InputWorkspace=sample,Factor=scale,OutputWorkspace=sample,Operation='Multiply')
+            scale = np.max(mtd[calib].extractY()[:, 0])
+            Scale(InputWorkspace=sample, Factor=scale, OutputWorkspace=sample, Operation='Multiply')
         else:
             # here calib and sample have the same size already
             for column in range(mtd[sample].blocksize()):
-                scale = np.max(mtd[calib].extractY()[:,column])
+                scale = np.max(mtd[calib].extractY()[:, column])
                 for spectrum in range(mtd[sample].getNumberHistograms()):
                     mtd[sample].dataY(spectrum)[column] *= scale
                     mtd[sample].dataE(spectrum)[column] *= scale
@@ -553,7 +551,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         pattern = '%Y-%m-%dT%H:%M:%S'
 
-        for i,ws in enumerate(ws_list):
+        for i, ws in enumerate(ws_list):
 
             log = mtd[ws].getRun().getLogData(self._observable)
             value = log.value

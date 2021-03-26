@@ -10,7 +10,6 @@ from mantid.api import *
 
 
 class TimeSliceTest(unittest.TestCase):
-
     def test_basic(self):
         """
         Test to ensure that algorithm completes succesfully.
@@ -24,7 +23,6 @@ class TimeSliceTest(unittest.TestCase):
 
         self.assertTrue(mtd.doesExist('SliceTestOut'))
         self.assertTrue(mtd.doesExist('iris26173_slice'))
-
 
     def test_suffix(self):
         """
@@ -40,7 +38,6 @@ class TimeSliceTest(unittest.TestCase):
 
         self.assertTrue(mtd.doesExist('iris26173_graphite002_slice'))
 
-
     def test_validation_peak_range_order(self):
         """
         Tests validation of the PeakRange property.
@@ -54,7 +51,6 @@ class TimeSliceTest(unittest.TestCase):
                           BackgroundRange=[59000, 61500],
                           OutputNameSuffix='_graphite002_slice',
                           OutputWorkspace='SliceTestOut')
-
 
     def test_validation_peak_range_count(self):
         """
@@ -70,7 +66,6 @@ class TimeSliceTest(unittest.TestCase):
                           OutputNameSuffix='_graphite002_slice',
                           OutputWorkspace='SliceTestOut')
 
-
     def test_validation_background_range_order(self):
         """
         Tests validation of the BackgroundRange property.
@@ -84,7 +79,6 @@ class TimeSliceTest(unittest.TestCase):
                           BackgroundRange=[61500, 59000],
                           OutputNameSuffix='_graphite002_slice',
                           OutputWorkspace='SliceTestOut')
-
 
     def test_validation_peak_range_count(self):
         """

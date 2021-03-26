@@ -68,11 +68,16 @@ class CRYSTALLoader(AbInitioLoader):
 
         # put data into Abins data structure
         data = {}
-        self._create_atoms_data(data=data, coord_lines=coord_lines[:self._num_atoms],
+        self._create_atoms_data(data=data,
+                                coord_lines=coord_lines[:self._num_atoms],
                                 atoms_masses=masses[:self._num_atoms])
-        self._create_kpoints_data(data=data, freq=freq, atomic_displacements=coordinates,
-                                  atomic_coordinates=coord_lines[:self._num_atoms], weights=weights,
-                                  k_coordinates=k_coordinates, unit_cell=lattice_vectors)
+        self._create_kpoints_data(data=data,
+                                  freq=freq,
+                                  atomic_displacements=coordinates,
+                                  atomic_coordinates=coord_lines[:self._num_atoms],
+                                  weights=weights,
+                                  k_coordinates=k_coordinates,
+                                  unit_cell=lattice_vectors)
 
         # save data to hdf file
         self.save_ab_initio_data(data=data)
@@ -233,16 +238,21 @@ class CRYSTALLoader(AbInitioLoader):
                     while not self._parser.file_end(file_obj=file_obj):
 
                         self._read_freq_block(file_obj=file_obj, freq=partial_freq)
-                        self._read_coord_block(file_obj=file_obj, xdisp=real_partial_xdisp,
-                                               ydisp=real_partial_ydisp, zdisp=real_partial_zdisp, part="real")
+                        self._read_coord_block(file_obj=file_obj,
+                                               xdisp=real_partial_xdisp,
+                                               ydisp=real_partial_ydisp,
+                                               zdisp=real_partial_zdisp,
+                                               part="real")
                         if self._parser.block_end(file_obj=file_obj, msg=["IMAGINARY"]):
                             break
 
                     while not self._parser.file_end(file_obj=file_obj):
 
                         self._read_freq_block(file_obj=file_obj, freq=partial_freq, append=False)
-                        self._read_coord_block(file_obj=file_obj, xdisp=complex_partial_xdisp,
-                                               ydisp=complex_partial_ydisp, zdisp=complex_partial_zdisp,
+                        self._read_coord_block(file_obj=file_obj,
+                                               xdisp=complex_partial_xdisp,
+                                               ydisp=complex_partial_ydisp,
+                                               zdisp=complex_partial_zdisp,
                                                part="imaginary")
 
                         if self._parser.block_end(file_obj=file_obj, msg=["DISPERSION K POINT NUMBER"]):
@@ -393,13 +403,22 @@ class CRYSTALLoader(AbInitioLoader):
 
             atom = Atom(symbol=symbol)
             data["atoms"]["atom_{}".format(i)] = {
-                "symbol": symbol, "mass": atom.mass, "sort": i,
-                "coord": np.asarray(l[3:6]).astype(dtype=FLOAT_TYPE)}
+                "symbol": symbol,
+                "mass": atom.mass,
+                "sort": i,
+                "coord": np.asarray(l[3:6]).astype(dtype=FLOAT_TYPE)
+            }
 
         self.check_isotopes_substitution(atoms=data["atoms"], masses=atoms_masses, approximate=True)
 
-    def _create_kpoints_data(self, data=None, freq=None, atomic_displacements=None, atomic_coordinates=None,
-                             weights=None, k_coordinates=None, unit_cell=None):
+    def _create_kpoints_data(self,
+                             data=None,
+                             freq=None,
+                             atomic_displacements=None,
+                             atomic_coordinates=None,
+                             weights=None,
+                             k_coordinates=None,
+                             unit_cell=None):
         """
         Creates Python dictionary with k-points data which can  be easily converted to AbinsData object.
         :param data: Python dictionary to which found k-points data should be added
@@ -415,10 +434,11 @@ class CRYSTALLoader(AbInitioLoader):
 
         #     b) Extract atomic displacements, normalize them and put them into data dictionary
         # Extract
-        all_k_atomic_disp = [self._create_kpoint_data(freq=freq[k],
-                                                      atomic_displacements=atomic_displacements[k],
-                                                      atomic_coordinates=atomic_coordinates)
-                             for k in range(self._num_k)]
+        all_k_atomic_disp = [
+            self._create_kpoint_data(freq=freq[k],
+                                     atomic_displacements=atomic_displacements[k],
+                                     atomic_coordinates=atomic_coordinates) for k in range(self._num_k)
+        ]
 
         # normalise
         all_k_atomic_disp = np.asarray(all_k_atomic_disp)
@@ -426,7 +446,8 @@ class CRYSTALLoader(AbInitioLoader):
 
         # [num_k ,num_freq, num_atoms, dim] -> [num_k, num_freq, num_atoms, dim, dim] -> [num_k, num_freq, num_atoms]
         temp1 = np.trace(np.einsum("mlki, mlkj->mlkij", all_k_atomic_disp, all_k_atomic_disp.conjugate()),
-                         axis1=3, axis2=4)
+                         axis1=3,
+                         axis2=4)
         temp2 = np.einsum("mij, j->mij", temp1, masses)
 
         # [num_k, num_freq, num_atoms] -> [num_k, num_freq]
@@ -473,18 +494,23 @@ class CRYSTALLoader(AbInitioLoader):
 
             # Parse blocks with default row width (6)
             if row_num <= num_displacements / (default_row_width * num_coordinates) - 1:
-                displacements.extend(self.create_kpoints_data_helper(atomic_displacements=atomic_displacements,
-                                                                     atomic_coordinates=atomic_coordinates, row=row_num,
-                                                                     column=column_num))
+                displacements.extend(
+                    self.create_kpoints_data_helper(atomic_displacements=atomic_displacements,
+                                                    atomic_coordinates=atomic_coordinates,
+                                                    row=row_num,
+                                                    column=column_num))
 
             # At this point we have parsed all the modes that are
             # part of blocks of 6 in the crystal output; now we need to
             # consider the other blocks
             elif num_displacements % default_row_width != 0:
                 current_row_width = num_displacements % default_row_width
-                displacements.extend(self.create_kpoints_data_helper(atomic_displacements=atomic_displacements,
-                                                                     atomic_coordinates=atomic_coordinates, row=row_num,
-                                                                     column=column_num, row_width=current_row_width))
+                displacements.extend(
+                    self.create_kpoints_data_helper(atomic_displacements=atomic_displacements,
+                                                    atomic_coordinates=atomic_coordinates,
+                                                    row=row_num,
+                                                    column=column_num,
+                                                    row_width=current_row_width))
 
         # Reshape displacements so that Abins can use it to create its internal data objects
         # num_atoms: number of atoms in the system
@@ -501,7 +527,11 @@ class CRYSTALLoader(AbInitioLoader):
 
         return displacements
 
-    def create_kpoints_data_helper(self, atomic_displacements=None, atomic_coordinates=None, row=None, column=None,
+    def create_kpoints_data_helper(self,
+                                   atomic_displacements=None,
+                                   atomic_coordinates=None,
+                                   row=None,
+                                   column=None,
                                    row_width=6):
         """
         Extracts atomic displacements for the given row and column.
@@ -532,11 +562,11 @@ class CRYSTALLoader(AbInitioLoader):
     def _read_masses_from_file(self, file_obj):
         masses = []
         pos = file_obj.tell()
-        self._parser.find_first(file_obj=file_obj,
-                                msg="ATOMS ISOTOPIC MASS (AMU) FOR FREQUENCY CALCULATION ")
+        self._parser.find_first(file_obj=file_obj, msg="ATOMS ISOTOPIC MASS (AMU) FOR FREQUENCY CALCULATION ")
         file_obj.readline()  # blank line
-        end_message = ["INFORMATION", "*******************************************************************************",
-                       "GAMMA"]
+        end_message = [
+            "INFORMATION", "*******************************************************************************", "GAMMA"
+        ]
 
         for i, item in enumerate(end_message):
             end_message[i] = bytes(item, "utf8")

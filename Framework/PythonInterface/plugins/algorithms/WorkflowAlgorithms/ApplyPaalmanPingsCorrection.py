@@ -38,19 +38,21 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
                              doc='Name for the input Sample workspace.')
 
-        self.declareProperty(WorkspaceGroupProperty('CorrectionsWorkspace', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(WorkspaceGroupProperty('CorrectionsWorkspace',
+                                                    '',
+                                                    optional=PropertyMode.Optional,
+                                                    direction=Direction.Input),
                              doc='Name for the input Corrections workspace.')
 
-        self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('CanWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
                              doc='Name for the input Can workspace.')
 
-        self.declareProperty(name='CanScaleFactor', defaultValue=1.0,
-                             doc='Factor to scale the can data')
+        self.declareProperty(name='CanScaleFactor', defaultValue=1.0, doc='Factor to scale the can data')
 
-        self.declareProperty(name='CanShiftFactor', defaultValue=0.0,
-                             doc='Amount by which to shift the container data')
+        self.declareProperty(name='CanShiftFactor', defaultValue=0.0, doc='Amount by which to shift the container data')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output corrections workspace.')
@@ -106,10 +108,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             can_base = self.getPropertyValue("CanWorkspace")
             can_base = can_base[:can_base.index('_')]
             prog_corr.report('Adding container filename')
-            AddSampleLog(Workspace=output_workspace,
-                         LogName='container_filename',
-                         LogType='String',
-                         LogText=can_base)
+            AddSampleLog(Workspace=output_workspace, LogName='container_filename', LogType='String', LogText=can_base)
 
         prog_wrkflow = Progress(self, 0.6, 1.0, nreports=5)
         # Record the container scale factor
@@ -130,10 +129,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         # Record the type of corrections applied
         prog_wrkflow.report('Adding correction type')
-        AddSampleLog(Workspace=output_workspace,
-                     LogName='corrections_type',
-                     LogType='String',
-                     LogText=correction_type)
+        AddSampleLog(Workspace=output_workspace, LogName='corrections_type', LogType='String', LogText=correction_type)
 
         # Add original sample as log entry
         sam_base = self.getPropertyValue("SampleWorkspace")
@@ -141,10 +137,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         if '_' in sam_base:
             sam_base = sam_base[:sam_base.index('_')]
             prog_wrkflow.report('Adding sample filename')
-            AddSampleLog(Workspace=output_workspace,
-                         LogName='sample_filename',
-                         LogType='String',
-                         LogText=sam_base)
+            AddSampleLog(Workspace=output_workspace, LogName='sample_filename', LogType='String', LogText=sam_base)
 
         # Convert Units back to original
         emode = str(output_workspace.getEMode())
@@ -183,8 +176,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 corrections_issues = []
 
                 for factor in self._factors:
-                    if not any(factor in correction_name for correction_name
-                               in self._corrections_workspace.getNames()):
+                    if not any(factor in correction_name for correction_name in self._corrections_workspace.getNames()):
                         corrections_issues.append(factor + " workspace not present in corrections workspace group.\n")
 
                 if corrections_issues:
@@ -246,7 +238,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         return ScaleX(InputWorkspace=workspace,
                       Factor=shift_factor,
                       OutputWorkspace="__shifted",
-                      Operation="Add", StoreInADS=False)
+                      Operation="Add",
+                      StoreInADS=False)
 
     def _convert_units_wavelength(self, workspace):
         unit = workspace.getAxis(0).getUnit().unitID()
@@ -270,8 +263,10 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
     def _convert_units(self, workspace, target, emode, efixed):
         return ConvertUnits(InputWorkspace=workspace,
                             OutputWorkspace="__units_converted",
-                            Target=target, EMode=emode,
-                            EFixed=efixed, StoreInADS=False)
+                            Target=target,
+                            EMode=emode,
+                            EFixed=efixed,
+                            StoreInADS=False)
 
     def _get_e_fixed(self, workspace):
         from IndirectCommon import getEfixed
@@ -305,9 +300,11 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         @return Full name of workspace (None if not found)
         """
         if factor_type == 'ass':
+
             def predicate(workspace_name):
                 return factor_type in workspace_name and 'assc' not in workspace_name
         else:
+
             def predicate(workspace_name):
                 return factor_type in workspace_name
 
@@ -343,9 +340,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         :param workspace:   The workspace to clone.
         :return:            A clone of the specified workspace.
         """
-        return CloneWorkspace(InputWorkspace=workspace,
-                              OutputWorkspace="cloned",
-                              StoreInADS=False)
+        return CloneWorkspace(InputWorkspace=workspace, OutputWorkspace="cloned", StoreInADS=False)
 
     def _correct_sample(self, sample_workspace, a_ss_workspace):
         """
@@ -363,8 +358,10 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         logger.information('Correcting sample and container')
 
-        factor_workspaces_wavelength = {factor: self._convert_units_wavelength(workspace) for factor, workspace
-                                        in factor_workspaces.items()}
+        factor_workspaces_wavelength = {
+            factor: self._convert_units_wavelength(workspace)
+            for factor, workspace in factor_workspaces.items()
+        }
 
         if self._rebin_container_ws:
             container_workspace = RebinToWorkspace(WorkspaceToRebin=container_workspace,

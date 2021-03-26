@@ -15,11 +15,11 @@ class IndexPeaksTest(unittest.TestCase):
     The purpose of the testing is to ensure the Python bindning works
     with various different input arguments.
     """
-
     def test_exec_with_different_args(self):
         # load data
         Load(
-            Filename="test_index_satellite_peaks.integrate", OutputWorkspace="test",
+            Filename="test_index_satellite_peaks.integrate",
+            OutputWorkspace="test",
         )
         FindUBUsingIndexedPeaks(PeaksWorkspace="test")
 

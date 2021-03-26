@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty    # , WorkspaceUnitValidator
+from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty  # , WorkspaceUnitValidator
 from mantid.kernel import Direction
 import mantid.simpleapi as api
 
@@ -12,7 +12,6 @@ import mantid.simpleapi as api
 class TOFTOFCropWorkspace(PythonAlgorithm):
     """ Crop empty time channels
     """
-
     def __init__(self):
         PythonAlgorithm.__init__(self)
 
@@ -22,7 +21,7 @@ class TOFTOFCropWorkspace(PythonAlgorithm):
         return "Workflow\\MLZ\\TOFTOF;Transforms\\Splitting"
 
     def seeAlso(self):
-        return [ "TOFTOFMergeRuns","CorrectTOF" ]
+        return ["TOFTOFMergeRuns", "CorrectTOF"]
 
     def name(self):
         """ Return summary
@@ -39,8 +38,7 @@ class TOFTOFCropWorkspace(PythonAlgorithm):
         # self.declareProperty(WorkspaceProperty("InputWorkspace", "", direction=Direction.Input,
         #                                       validator=WorkspaceUnitValidator('TOF')),
         #                     doc="Input workspace.")
-        self.declareProperty(WorkspaceProperty("InputWorkspace", "", direction=Direction.Input),
-                             doc="Input workspace.")
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "", direction=Direction.Input), doc="Input workspace.")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              doc="Name of the workspace that will contain the results")
         return
@@ -74,7 +72,7 @@ class TOFTOFCropWorkspace(PythonAlgorithm):
         full_channels = float(run.getLogData('full_channels').value)
         tof1 = float(run.getLogData('TOF1').value)
 
-        outputws = api.CropWorkspace(inputws, XMin=0., XMax=full_channels*channel_width + tof1, StoreInADS=False)
+        outputws = api.CropWorkspace(inputws, XMin=0., XMax=full_channels * channel_width + tof1, StoreInADS=False)
         self.setProperty("OutputWorkspace", outputws)
 
 

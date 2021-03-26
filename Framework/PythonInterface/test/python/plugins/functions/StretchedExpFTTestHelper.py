@@ -10,7 +10,7 @@ from scipy import constants
 from mantid.simpleapi import Fit, CreateWorkspace, SaveNexus, SaveAscii, EvaluateFunction
 from mantid.api import mtd, FunctionFactory
 
-planck_constant = constants.Planck/constants.e*1E15  # meV*psec
+planck_constant = constants.Planck / constants.e * 1E15  # meV*psec
 
 
 def createData(functor, startX=-0.1, endX=0.5, de=0.0004):
@@ -21,11 +21,10 @@ def createData(functor, startX=-0.1, endX=0.5, de=0.0004):
     """
     energies = np.arange(startX, endX, de)
     data = functor(energies)
-    background = 0.01*max(data)
+    background = 0.01 * max(data)
     data += background
-    errorBars = data*0.1
-    return CreateWorkspace(energies, data, errorBars, UnitX='DeltaE',
-                           OutputWorkspace="data")
+    errorBars = data * 0.1
+    return CreateWorkspace(energies, data, errorBars, UnitX='DeltaE', OutputWorkspace="data")
 
 
 def cleanFit():
@@ -90,18 +89,18 @@ def do_fit(tg, fString, shape):
     if 'Gaussian' in shape:
         E0 = planck_constant / tg['tau']
         # Analytical Fourier transform of exp(-(t/tau)**2)
-        functor = lambda E: np.sqrt(np.pi) / E0 * np.exp(-(np.pi*E/E0) ** 2)
+        functor = lambda E: np.sqrt(np.pi) / E0 * np.exp(-(np.pi * E / E0)**2)
     elif 'Lorentzian' in shape:
         hwhm = planck_constant / (2 * np.pi * tg['tau'])
         # Analytical Fourier transform of exp(-t/tau)
-        functor = lambda E: (1.0 / np.pi) * hwhm / (hwhm ** 2 + E ** 2)
+        functor = lambda E: (1.0 / np.pi) * hwhm / (hwhm**2 + E**2)
     if 'Integrated' in shape:
         # when testing function PrimStretchedExpFT
         def ifunctor(E):
             """Numerical integral of the functor within each energy bin"""
-            de = (E[-1]-E[0]) / (len(E)-1.0)  # energy spacing
+            de = (E[-1] - E[0]) / (len(E) - 1.0)  # energy spacing
             rf = 100  # make the energy domain a grid 100 times finer
-            efine = np.arange(E[0]-de, E[-1]+2*de, de/rf)
+            efine = np.arange(E[0] - de, E[-1] + 2 * de, de / rf)
             values = functor(efine)  # evaluate on the finer grid
             primitive = np.cumsum(values) / rf  # cummulative sum, giving the integral
             # bb are bin boundaries delimiting bins of width de and centered at the E values
@@ -110,6 +109,7 @@ def do_fit(tg, fString, shape):
             bb = np.append(bb, 2 * E[-1] - bb[-1])  # external upper bin boundary
             # return the integral over each energy bin
             return np.interp(bb[1:], efine, primitive) - np.interp(bb[:-1], efine, primitive)
+
         createData(ifunctor)
     else:
         # when testing function StretchedExpFT

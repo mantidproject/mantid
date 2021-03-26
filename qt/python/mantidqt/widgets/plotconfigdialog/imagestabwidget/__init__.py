@@ -13,7 +13,6 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
 class ImageProperties(dict):
-
     def __init__(self, props):
         self.update(props)
 

@@ -11,7 +11,6 @@ from MsdTestHelper import (is_registered, check_output, do_a_fit)
 
 
 class ModOscTest(unittest.TestCase):
-
     def test_function_has_been_registered(self):
         status, msg = is_registered("ModOsc")
         if not status:
@@ -19,7 +18,7 @@ class ModOscTest(unittest.TestCase):
 
     def test_function_output(self):
         input = [0.0, 4.0, 8.0, 12.0]
-        expected = [0.933962026044940,0.0630575696651452, -0.141595984565378, -0.00124998969353344]
+        expected = [0.933962026044940, 0.0630575696651452, -0.141595984565378, -0.00124998969353344]
         tolerance = 1.0e-05
         status, output = check_output("ModOsc", input, expected, tolerance, A0=1.0, Freq=0.1, ModFreq=0.2, Phi=0.3)
         if not status:

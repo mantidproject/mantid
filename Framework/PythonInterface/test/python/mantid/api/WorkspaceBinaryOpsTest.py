@@ -38,5 +38,6 @@ class WorkspaceBinaryOpsTest(unittest.TestCase):
         ws_ads += 1
         self.assertTrue(mtd.doesExist('ws_ads'))
 
+
 if __name__ == '__main__':
     unittest.main()

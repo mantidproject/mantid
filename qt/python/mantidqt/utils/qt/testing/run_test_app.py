@@ -29,11 +29,13 @@ import sys
 from gui_test_runner import open_in_window
 
 parser = argparse.ArgumentParser()
-parser.add_argument("widget", help="A qualified name of a widget to open for testing. The name must contain the "
-                                   "python module where the widget is defined, eg mypackage.mymodule.MyWidget")
-parser.add_argument("--script", help="A qualified name of a python function to run to test the widget."
-                                     " The function must take a single argument - the widget."
-                                     " The name must contain the python module where the function is defined,"
-                                     " eg somepackage.somemodule.test_my_widget")
+parser.add_argument("widget",
+                    help="A qualified name of a widget to open for testing. The name must contain the "
+                    "python module where the widget is defined, eg mypackage.mymodule.MyWidget")
+parser.add_argument("--script",
+                    help="A qualified name of a python function to run to test the widget."
+                    " The function must take a single argument - the widget."
+                    " The name must contain the python module where the function is defined,"
+                    " eg somepackage.somemodule.test_my_widget")
 args = parser.parse_args()
 sys.exit(open_in_window(args.widget, args.script, is_cli=True))

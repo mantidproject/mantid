@@ -37,34 +37,30 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         instruments = ['CRISP', 'INTER', 'OFFSPEC', 'POLREF', 'SURF']
         defaultInstrument = str(config.getInstrument())
         defaultInstrument = defaultInstrument if defaultInstrument in instruments else instruments[0]
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
-                                                     direction=Direction.Input))
-        self.declareProperty(name='Instrument', defaultValue=defaultInstrument, direction=Direction.Input,
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input))
+        self.declareProperty(name='Instrument',
+                             defaultValue=defaultInstrument,
+                             direction=Direction.Input,
                              validator=StringListValidator(instruments),
                              doc='Instrument to find live value for.')
-        self.declareProperty(name='GetLiveValueAlgorithm', defaultValue='GetLiveInstrumentValue',
+        self.declareProperty(name='GetLiveValueAlgorithm',
+                             defaultValue='GetLiveInstrumentValue',
                              direction=Direction.Input,
                              doc='The algorithm to use to get live values from the instrument')
 
         self._child_properties = [
-            'FirstTransmissionRunList','SecondTransmissionRunList',
-            'SliceWorkspace', 'NumberOfSlices',
-            'SummationType', 'ReductionType', 'IncludePartialBins',
-            'AnalysisMode', 'ProcessingInstructions', 'CorrectDetectors',
-            'DetectorCorrectionType', 'WavelengthMin', 'WavelengthMax', 'I0MonitorIndex',
-            'MonitorBackgroundWavelengthMin', 'MonitorBackgroundWavelengthMax',
-            'MonitorIntegrationWavelengthMin', 'MonitorIntegrationWavelengthMax',
-            'NormalizeByIntegratedMonitors',
-            'SubtractBackground', 'BackgroundProcessingInstructions',
-            'BackgroundCalculationMethod', 'DegreeOfPolynomial', 'CostFunction',
-            'Params', 'StartOverlap', 'EndOverlap',
-            'ScaleRHSWorkspace', 'TransmissionProcessingInstructions',
-            'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
-            'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax',
-            'ScaleFactor', 'PolarizationAnalysis',
-            'FloodCorrection', 'FloodWorkspace', 'Debug',
-            'TimeInterval', 'LogValueInterval', 'LogName', 'UseNewFilterAlgorithm',
-            'ReloadInvalidWorkspaces', 'GroupTOFWorkspaces', 'OutputWorkspace']
+            'FirstTransmissionRunList', 'SecondTransmissionRunList', 'SliceWorkspace', 'NumberOfSlices',
+            'SummationType', 'ReductionType', 'IncludePartialBins', 'AnalysisMode', 'ProcessingInstructions',
+            'CorrectDetectors', 'DetectorCorrectionType', 'WavelengthMin', 'WavelengthMax', 'I0MonitorIndex',
+            'MonitorBackgroundWavelengthMin', 'MonitorBackgroundWavelengthMax', 'MonitorIntegrationWavelengthMin',
+            'MonitorIntegrationWavelengthMax', 'NormalizeByIntegratedMonitors', 'SubtractBackground',
+            'BackgroundProcessingInstructions', 'BackgroundCalculationMethod', 'DegreeOfPolynomial', 'CostFunction',
+            'Params', 'StartOverlap', 'EndOverlap', 'ScaleRHSWorkspace', 'TransmissionProcessingInstructions',
+            'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1', 'MomentumTransferMin', 'MomentumTransferStep',
+            'MomentumTransferMax', 'ScaleFactor', 'PolarizationAnalysis', 'FloodCorrection', 'FloodWorkspace', 'Debug',
+            'TimeInterval', 'LogValueInterval', 'LogName', 'UseNewFilterAlgorithm', 'ReloadInvalidWorkspaces',
+            'GroupTOFWorkspaces', 'OutputWorkspace'
+        ]
         self.copyProperties('ReflectometryISISLoadAndProcess', self._child_properties)
 
     def PyExec(self):
@@ -103,16 +99,14 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
     def _setup_instrument(self):
         """Sets the instrument name and loads the instrument on the workspace"""
         self._instrument = self.getProperty('Instrument').value
-        LoadInstrument(Workspace=self._in_ws_name, RewriteSpectraMap=True,
-                       InstrumentName=self._instrument)
+        LoadInstrument(Workspace=self._in_ws_name, RewriteSpectraMap=True, InstrumentName=self._instrument)
 
     def _setup_sample_logs(self, liveValues):
         """Set up the sample logs based on live values from the instrument"""
         logNames = [key for key in liveValues]
         logValues = [liveValues[key].value for key in liveValues]
         logUnits = [liveValues[key].unit for key in liveValues]
-        AddSampleLogMultiple(Workspace=self._in_ws_name, LogNames=logNames,
-                             LogValues=logValues, LogUnits=logUnits)
+        AddSampleLogMultiple(Workspace=self._in_ws_name, LogNames=logNames, LogValues=logValues, LogUnits=logUnits)
 
     def _setup_slits(self, liveValues):
         """Set up instrument parameters for the slits"""
@@ -142,8 +136,8 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
                 try:
                     liveValue.value = self._get_block_value_from_instrument(name)
                 except:
-                    self.log().information("Failed to get value " + name
-                                           + " from the instrument; trying " + liveValue.alternative_name)
+                    self.log().information("Failed to get value " + name + " from the instrument; trying " +
+                                           liveValue.alternative_name)
                     liveValue.value = \
                         self._get_block_value_from_instrument(liveValue.alternative_name)
         # check we have all we need
@@ -152,9 +146,11 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
 
     def _live_value_list(self):
         """Get the list of required live value names and their unit type"""
-        liveValues = {self._theta_name(): LiveValue(None, 'deg', self._alternative_theta_name()),
-                      self._s1vg_name(): LiveValue(None, 'm', self._alternative_s1vg_name()),
-                      self._s2vg_name(): LiveValue(None, 'm', self._alternative_s2vg_name())}
+        liveValues = {
+            self._theta_name(): LiveValue(None, 'deg', self._alternative_theta_name()),
+            self._s1vg_name(): LiveValue(None, 'm', self._alternative_s1vg_name()),
+            self._s2vg_name(): LiveValue(None, 'm', self._alternative_s2vg_name())
+        }
         return liveValues
 
     def _theta_name(self):

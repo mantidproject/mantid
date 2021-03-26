@@ -8,12 +8,20 @@
 
 class TubeCalibFitParams(object):
 
-# This class is to take the fitting method and parameters for fitting the peaks created by the calibration slits etc
-# and to deliver them to TubeCalib, so it can fit the peaks appropriately
+    # This class is to take the fitting method and parameters for fitting the peaks created by the calibration slits etc
+    # and to deliver them to TubeCalib, so it can fit the peaks appropriately
 
-# Author: Karl Palmen ISIS
+    # Author: Karl Palmen ISIS
 
-    def __init__(self, peaks, height=1000.0, width=30.0, threePointMethod=False, outEdge=30.0,  inEdge=50.0, edgeGrad=6.0, margin=15):
+    def __init__(self,
+                 peaks,
+                 height=1000.0,
+                 width=30.0,
+                 threePointMethod=False,
+                 outEdge=30.0,
+                 inEdge=50.0,
+                 edgeGrad=6.0,
+                 margin=15):
         """
         Holds the parameters needed for fitting the positions of the peaks formed by the slits or edges.
 
@@ -22,7 +30,8 @@ class TubeCalibFitParams(object):
         :param peaks: expected positions of the peaks in pixels
         :param height: expect height of peaks
         :param width: expected width (sigma for Gaussian fitting) of peaks
-        :param threePointMethod: True if three point method is used (first and last peaks are the extreme ends of very wide peaks).
+        :param threePointMethod: True if three point method is used (first and last peaks are the extreme ends of very
+        wide peaks).
         :param margin: defines the region around the peak that will be considered for fitting
 
         This class has also an attribute, called automatic, accessed through
@@ -33,8 +42,8 @@ class TubeCalibFitParams(object):
         The function :func:`~tube_calib.getCalibration` of :mod:`tube_calib` needs such an object.
         """
         # Peaks
-        self.height = height*1.0
-        self.width = width*1.0
+        self.height = height * 1.0
+        self.width = width * 1.0
         self.peaks = peaks
         # Margin
         self.margin = margin
@@ -71,5 +80,6 @@ class TubeCalibFitParams(object):
         return self.automatic
 
     def __str__(self):
-        return ('peaks'+str(self.peaks)+'height'+str(self.height)+'width'+str(self.width)+'margin'
-                + str(self.margin)+'outedge'+str(self.outEdge)+'inedge'+str(self.inEdge)+'edgegrad'+str(self.edgeGrad))
+        return ('peaks' + str(self.peaks) + 'height' + str(self.height) + 'width' + str(self.width) + 'margin' +
+                str(self.margin) + 'outedge' + str(self.outEdge) + 'inedge' + str(self.inEdge) + 'edgegrad' +
+                str(self.edgeGrad))

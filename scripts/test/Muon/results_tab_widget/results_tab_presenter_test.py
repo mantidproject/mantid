@@ -32,16 +32,12 @@ class ResultsTabPresenterTest(unittest.TestCase):
         self.mock_model.results_table_name.return_value = 'default_table'
 
         presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
-        self.mock_view.set_results_table_name.assert_called_once_with(
-            'default_table')
+        self.mock_view.set_results_table_name.assert_called_once_with('default_table')
         self.mock_view.function_selection_changed.connect.assert_called_once_with(
             presenter.on_function_selection_changed)
-        self.mock_view.results_name_edited.connect.assert_called_once_with(
-            presenter.on_results_table_name_edited)
-        self.mock_view.output_results_requested.connect.assert_called_once_with(
-            presenter.on_output_results_request)
-        self.mock_view.set_output_results_button_enabled.assert_called_once_with(
-            False)
+        self.mock_view.results_name_edited.connect.assert_called_once_with(presenter.on_results_table_name_edited)
+        self.mock_view.output_results_requested.connect.assert_called_once_with(presenter.on_output_results_request)
+        self.mock_view.set_output_results_button_enabled.assert_called_once_with(False)
 
     def test_editing_results_name_updates_model_value(self):
         new_name = 'edited_name'
@@ -50,8 +46,7 @@ class ResultsTabPresenterTest(unittest.TestCase):
         presenter.on_results_table_name_edited()
 
         self.mock_view.results_table_name.assert_called_once_with()
-        self.mock_model.set_results_table_name.assert_called_once_with(
-            new_name)
+        self.mock_model.set_results_table_name.assert_called_once_with(new_name)
 
     def test_changing_function_selection(self):
         new_name = 'func 2'
@@ -63,8 +58,7 @@ class ResultsTabPresenterTest(unittest.TestCase):
         self.mock_view.selected_fit_function.assert_called_once_with()
         self.mock_model.set_selected_fit_function.assert_called_once_with(new_name)
 
-    def test_adding_new_fit_to_existing_fits_preserves_current_selections(
-            self):
+    def test_adding_new_fit_to_existing_fits_preserves_current_selections(self):
         orig_ws_list_state = ['ws1', 'ws3']
         final_ws_list_state = ['ws1', 'ws3']
         test_functions = ['func1', 'func2']
@@ -80,18 +74,12 @@ class ResultsTabPresenterTest(unittest.TestCase):
 
         self.mock_model.fit_functions.assert_called_once_with()
         self.mock_model.fit_selection.assert_called_once_with(orig_ws_list_state)
-        self.mock_view.set_fit_function_names.assert_called_once_with(
-            test_functions)
-        self.mock_view.set_fit_result_workspaces.assert_called_once_with(
-            final_ws_list_state)
-        self.mock_view.set_output_results_button_enabled.assert_called_once_with(
-            True)
+        self.mock_view.set_fit_function_names.assert_called_once_with(test_functions)
+        self.mock_view.set_fit_result_workspaces.assert_called_once_with(final_ws_list_state)
+        self.mock_view.set_output_results_button_enabled.assert_called_once_with(True)
 
     def test_adding_new_fit_updates_log_values(self):
-        existing_selection = {
-            'run_number': [0, False, True],
-            'run_start': [1, True, True]
-        }
+        existing_selection = {'run_number': [0, False, True], 'run_start': [1, True, True]}
         self.mock_view.log_values.return_value = existing_selection
         final_selection = {
             'run_number': [0, False, True],
@@ -107,8 +95,7 @@ class ResultsTabPresenterTest(unittest.TestCase):
         presenter.on_new_fit_performed()
 
         self.mock_view.log_values.assert_called_once_with()
-        self.mock_model.log_selection.assert_called_once_with(
-            existing_selection=existing_selection)
+        self.mock_model.log_selection.assert_called_once_with(existing_selection=existing_selection)
         final_selection = {
             'run_number': [0, False, True],
             'run_start': [1, True, True],
@@ -127,8 +114,7 @@ class ResultsTabPresenterTest(unittest.TestCase):
 
         presenter.on_output_results_request()
 
-        self.mock_model.create_results_table.assert_called_once_with(
-            log_selection, fit_selection)
+        self.mock_model.create_results_table.assert_called_once_with(log_selection, fit_selection)
 
     def test_results_table_request_with_empty_results_does_nothing(self):
         self.mock_view.selected_result_workspaces.return_value = []

@@ -20,8 +20,10 @@ class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
         ConvertWANDSCDtoQTest_Q = ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQTest_data',
                                                     NormalisationWorkspace='ConvertWANDSCDtoQTest_norm')
 
-        ConvertWANDSCDtoQTest_peaks = FindPeaksMD(InputWorkspace=ConvertWANDSCDtoQTest_Q, PeakDistanceThreshold=2,
-                                                  CalculateGoniometerForCW=True, Wavelength=1.488)
+        ConvertWANDSCDtoQTest_peaks = FindPeaksMD(InputWorkspace=ConvertWANDSCDtoQTest_Q,
+                                                  PeakDistanceThreshold=2,
+                                                  CalculateGoniometerForCW=True,
+                                                  Wavelength=1.488)
 
         self.assertEqual(ConvertWANDSCDtoQTest_peaks.getNumberPeaks(), 14)
 
@@ -35,7 +37,7 @@ class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
 
         SetUB('ConvertWANDSCDtoQTest_data',
               UB="-2.7315243158024499e-17,1.7706197424726486e-01,-9.2794248657701375e-03,"
-                 "1.773049645390071e-01,0.,0.,1.2303228382369809e-17,-9.2794248657701254e-03,-1.7706197424726489e-01")
+              "1.773049645390071e-01,0.,0.,1.2303228382369809e-17,-9.2794248657701254e-03,-1.7706197424726489e-01")
 
         ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQTest_data',
                           NormalisationWorkspace='ConvertWANDSCDtoQTest_norm',

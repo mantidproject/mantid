@@ -46,10 +46,9 @@ class DPDFreduction(api.PythonAlgorithm):
         titleInputOptions = "Input"
         self.declareProperty('RunNumbers', '', 'Sample run numbers')
         self.setPropertyGroup("RunNumbers", titleInputOptions)
-        self.declareProperty(api.FileProperty(name='Vanadium', defaultValue='',
-                                              action=api.FileAction.OptionalLoad,
-                                              extensions=['.nxs']),
-                             'Preprocessed white-beam vanadium file.')
+        self.declareProperty(
+            api.FileProperty(name='Vanadium', defaultValue='', action=api.FileAction.OptionalLoad, extensions=['.nxs']),
+            'Preprocessed white-beam vanadium file.')
         self.setPropertyGroup("Vanadium", titleInputOptions)
         self.declareProperty('EmptyCanRunNumbers', '', 'Empty can run numbers')
         self.setPropertyGroup("EmptyCanRunNumbers", titleInputOptions)
@@ -57,33 +56,24 @@ class DPDFreduction(api.PythonAlgorithm):
         # Configuration parameters
         titleConfigurationOptions = "Configuration"
 
-        e_validator = kapi.FloatArrayLengthValidator(1,3)
-        self.declareProperty(kapi.FloatArrayProperty('EnergyBins', [1.5],
-                                                     validator=e_validator),
+        e_validator = kapi.FloatArrayLengthValidator(1, 3)
+        self.declareProperty(kapi.FloatArrayProperty('EnergyBins', [1.5], validator=e_validator),
                              'Energy transfer binning scheme (in meV)')
         self.setPropertyGroup("EnergyBins", titleConfigurationOptions)
 
         q_validator = kapi.FloatArrayLengthValidator(0, 3)
-        self.declareProperty(kapi.FloatArrayProperty('MomentumTransferBins',
-                                                     list(),
-                                                     validator=q_validator),
+        self.declareProperty(kapi.FloatArrayProperty('MomentumTransferBins', list(), validator=q_validator),
                              'Momentum transfer binning scheme (in inverse Angstroms)')
         self.setPropertyGroup("MomentumTransferBins", titleConfigurationOptions)
 
-        self.declareProperty('NormalizeSlices', False,
-                             'Do we normalize each slice?',
-                             direction=kapi.Direction.Input)
+        self.declareProperty('NormalizeSlices', False, 'Do we normalize each slice?', direction=kapi.Direction.Input)
         self.setPropertyGroup("NormalizeSlices", titleConfigurationOptions)
 
         # Ouptut parameters
         titleOuptutOptions = "Output"
-        self.declareProperty('CleanWorkspaces', True,
-                             'Do we clean intermediate steps?',
-                             direction=kapi.Direction.Input)
+        self.declareProperty('CleanWorkspaces', True, 'Do we clean intermediate steps?', direction=kapi.Direction.Input)
         self.setPropertyGroup("CleanWorkspaces", titleOuptutOptions)
-        self.declareProperty(api.MatrixWorkspaceProperty('OutputWorkspace',
-                                                         'S_Q_E_sliced',
-                                                         kapi.Direction.Output),
+        self.declareProperty(api.MatrixWorkspaceProperty('OutputWorkspace', 'S_Q_E_sliced', kapi.Direction.Output),
                              "Output workspace")
         self.setPropertyGroup("OutputWorkspace", titleOuptutOptions)
 
@@ -122,7 +112,7 @@ class DPDFreduction(api.PythonAlgorithm):
         return issues
 
     #pylint: disable=too-many-locals, too-many-branches
-    def PyExec(self): # noqa
+    def PyExec(self):  # noqa
         self._runs = self.getProperty('RunNumbers').value
         self._vanfile = self.getProperty('Vanadium').value
         self._ecruns = self.getProperty('EmptyCanRunNumbers').value
@@ -197,8 +187,8 @@ class DPDFreduction(api.PythonAlgorithm):
             ws_ec_data = sapi.mtd[wn_ec_data]
             ec_Ei = ws_ec_data.getRun()['EnergyRequest'].getStatistics().mean
             if abs(Ei - ec_Ei) > Ei_std:
-                raise RuntimeError('Empty can runs were obtained at a significant'
-                                   + ' different incident energy than the sample runs')
+                raise RuntimeError('Empty can runs were obtained at a significant' +
+                                   ' different incident energy than the sample runs')
 
         # Obtain energy range. If user did not supply a triad
         # [Estart, Ewidth, Eend] but only Ewidth, then estimate
@@ -254,8 +244,7 @@ class DPDFreduction(api.PythonAlgorithm):
                 # Ei and the final energy was Ei+dE.
                 dE = self._ebins[1]
                 self._qbins.append(numpy.sqrt((Ei + dE) / ENERGY_TO_WAVEVECTOR) - numpy.sqrt(Ei / ENERGY_TO_WAVEVECTOR))
-            mins, maxs = sapi.ConvertToMDMinMaxLocal(wn_reduced, Qdimensions='|Q|',
-                                                     dEAnalysisMode='Direct')
+            mins, maxs = sapi.ConvertToMDMinMaxLocal(wn_reduced, Qdimensions='|Q|', dEAnalysisMode='Direct')
             self._qbins.insert(0, mins[0])  # prepend minimum Q
             self._qbins.append(maxs[0])  # append maximum Q
 
@@ -278,23 +267,19 @@ class DPDFreduction(api.PythonAlgorithm):
         # Group detectors according to theta angle for the sample runs
         group_file_os_handle, group_file_name = mkstemp(suffix='.xml')
         group_file_handle = os.fdopen(group_file_os_handle, 'w')
-        sapi.GenerateGroupingPowder(InputWorkspace=wn_reduced, AngleStep=dtheta,
-                                    GroupingFilename=group_file_name)
+        sapi.GenerateGroupingPowder(InputWorkspace=wn_reduced, AngleStep=dtheta, GroupingFilename=group_file_name)
         group_file_handle.close()
-        sapi.GroupDetectors(InputWorkspace=wn_reduced, MapFile=group_file_name,
-                            OutputWorkspace=wn_ste)
+        sapi.GroupDetectors(InputWorkspace=wn_reduced, MapFile=group_file_name, OutputWorkspace=wn_ste)
         # Group detectors according to theta angle for the emtpy can run
         if self._ecruns:
-            sapi.GroupDetectors(InputWorkspace=wn_ec_reduced, MapFile=group_file_name,
-                                OutputWorkspace=wn_ec_ste)
+            sapi.GroupDetectors(InputWorkspace=wn_ec_reduced, MapFile=group_file_name, OutputWorkspace=wn_ec_ste)
             # Subtract the empty can from the can+sample
             sapi.Minus(LHSWorkspace=wn_ste, RHSWorkspace=wn_ec_ste, OutputWorkspace=wn_ste)
 
         # Normalize by the vanadium intensity, but before that we need S(theta)
         # for the vanadium. Recall every detector has all energies into a single
         # bin, so we get S(theta) instead of S(theta,E)
-        sapi.GroupDetectors(InputWorkspace=wn_van, MapFile=group_file_name,
-                            OutputWorkspace=wn_van_st)
+        sapi.GroupDetectors(InputWorkspace=wn_van, MapFile=group_file_name, OutputWorkspace=wn_van_st)
         # Divide by vanadium. Make sure it is integrated in the energy domain
         sapi.Integration(wn_van_st, OutputWorkspace=wn_van_st)
         sapi.Divide(wn_ste, wn_van_st, OutputWorkspace=wn_sten)
@@ -302,7 +287,7 @@ class DPDFreduction(api.PythonAlgorithm):
 
         # Temporary file generated by GenerateGroupingPowder to be removed
         os.remove(group_file_name)  # no need for this file
-        os.remove(os.path.splitext(group_file_name)[0]+".par")
+        os.remove(os.path.splitext(group_file_name)[0] + ".par")
 
         max_i_theta = 0.0
         min_i_theta = 0.0
@@ -324,14 +309,13 @@ class DPDFreduction(api.PythonAlgorithm):
         # Scan a range of theta angles and apply interpolation to those theta angles
         # with considerably low intensity (gaps)
         delta_theta = max_i_theta - min_i_theta
-        gaps = self._findGaps(wn_sten, int(min_i_theta+0.1*delta_theta), int(max_i_theta-0.1*delta_theta))
+        gaps = self._findGaps(wn_sten, int(min_i_theta + 0.1 * delta_theta), int(max_i_theta - 0.1 * delta_theta))
         sapi.CloneWorkspace(InputWorkspace=wn_sten, OutputWorkspace=wn_steni)
         for gap in gaps:
             self._interpolate(wn_steni, gap)  # interpolate this gap
 
         # Convert S(theta,E) to S(Q,E), then rebin in |Q| and E to MD workspace
-        sapi.ConvertToMD(InputWorkspace=wn_steni, QDimensions='|Q|',
-                         dEAnalysisMode='Direct', OutputWorkspace=wn_sqe)
+        sapi.ConvertToMD(InputWorkspace=wn_steni, QDimensions='|Q|', dEAnalysisMode='Direct', OutputWorkspace=wn_sqe)
         Qmin = self._qbins[0]
         Qmax = self._qbins[-1]
         dQ = self._qbins[1]
@@ -340,8 +324,11 @@ class DPDFreduction(api.PythonAlgorithm):
         Ei_max = self._ebins[-1]
         dE = self._ebins[1]
         deltaErange = 'DeltaE,{0},{1},{2}'.format(Ei_min, Ei_max, int((Ei_max - Ei_min) / dE))
-        sapi.BinMD(InputWorkspace=wn_sqe, AxisAligned=1, AlignedDim0=Qrange,
-                   AlignedDim1=deltaErange, OutputWorkspace=wn_sqeb)
+        sapi.BinMD(InputWorkspace=wn_sqe,
+                   AxisAligned=1,
+                   AlignedDim0=Qrange,
+                   AlignedDim1=deltaErange,
+                   OutputWorkspace=wn_sqeb)
 
         # Slice the data by transforming to a Matrix2Dworkspace,
         # with deltaE along the vertical axis
@@ -368,15 +355,15 @@ class DPDFreduction(api.PythonAlgorithm):
 
         # Clean up workspaces from intermediate steps
         if self._clean:
-            for name in (wn_van, wn_reduced, wn_ste, wn_van_st, wn_sten,
-                         wn_steni, wn_sqe, wn_sqeb, wn_sqesn, 'PreprocessedDetectorsWS'):
+            for name in (wn_van, wn_reduced, wn_ste, wn_van_st, wn_sten, wn_steni, wn_sqe, wn_sqeb, wn_sqesn,
+                         'PreprocessedDetectorsWS'):
                 if sapi.mtd.doesExist(name):
                     sapi.DeleteWorkspace(name)
 
         # Ouput some info as a Notice in the log
         ebins = ', '.join(['{0:.2f}'.format(x) for x in self._ebins])
         qbins = ', '.join(['{0:.2f}'.format(x) for x in self._qbins])
-        tbins = '{0:.2f} {1:.2f} {2:.2f}'.format(min_i_theta*dtheta, dtheta, max_i_theta*dtheta)
+        tbins = '{0:.2f} {1:.2f} {2:.2f}'.format(min_i_theta * dtheta, dtheta, max_i_theta * dtheta)
         message = '\n******  SOME OUTPUT INFORMATION ***' + \
                   '\nEnergy bins: ' + ebins + \
                   '\nQ bins: ' + qbins + \
@@ -407,10 +394,12 @@ class DPDFreduction(api.PythonAlgorithm):
             sapi.Load(Filename=files[0], LoadMonitors=True, OutputWorkspace=data_name)
             monitor_name = data_name + '_monitors'
             for file in files[1:]:
-                sapi.Load(Filename=file, LoadMonitors=True, OutputWorkspace=data_name+'_tmp')
-                sapi.Plus(LHSWorkspace=data_name, RHSWorkspace=data_name+'_tmp', OutputWorkspace=data_name)
-                sapi.Plus(LHSWorkspace=monitor_name, RHSWorkspace=data_name + '_tmp_monitors', OutputWorkspace=monitor_name)
-            sapi.DeleteWorkspace(data_name+'_tmp')
+                sapi.Load(Filename=file, LoadMonitors=True, OutputWorkspace=data_name + '_tmp')
+                sapi.Plus(LHSWorkspace=data_name, RHSWorkspace=data_name + '_tmp', OutputWorkspace=data_name)
+                sapi.Plus(LHSWorkspace=monitor_name,
+                          RHSWorkspace=data_name + '_tmp_monitors',
+                          OutputWorkspace=monitor_name)
+            sapi.DeleteWorkspace(data_name + '_tmp')
         if sapi.mtd[data_name].getInstrument().getName() not in ('ARCS'):
             raise NotImplementedError("This algorithm works only for ARCS instrument")
 
@@ -435,13 +424,17 @@ class DPDFreduction(api.PythonAlgorithm):
         # split the high_zero_fraction indexes into chunks of consecutive indexes
         #  Example: if high_zero_fraction=[3,7,8,9,11,15,16], then we split into [3],[7,8,9], [11], [15,16]
         gaps = list()  # intensity gaps, because high zero fraction means low overall intensity
-        gap = [numpy.asscalar(high_zero_fraction[0]), ]
+        gap = [
+            numpy.asscalar(high_zero_fraction[0]),
+        ]
         for index in range(1, len(high_zero_fraction)):
             if high_zero_fraction[index] - high_zero_fraction[index - 1] == 1:
                 gap.append(numpy.asscalar(high_zero_fraction[index]))  # two consecutive indexes
             else:
                 gaps.append(gap)
-                gap = [numpy.asscalar(high_zero_fraction[index]), ]
+                gap = [
+                    numpy.asscalar(high_zero_fraction[index]),
+                ]
         gaps.append(gap)  # final dangling gap has to be appended
         return gaps  # a list of lists
 

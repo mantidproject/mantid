@@ -11,7 +11,6 @@ from qtpy.QtWidgets import (QFileDialog, QMainWindow, QMessageBox, QSlider, QVBo
 from qtpy.QtGui import (QDoubleValidator, QDesktopServices)  # noqa
 from qtpy.QtCore import QUrl
 
-
 import mantid
 import mantid.simpleapi as api
 import mantid.kernel
@@ -245,7 +244,7 @@ class MainWindow(QMainWindow):
 
             # Move the vertical line
             xlim = self.ui.mainplot.get_xlim()
-            newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
+            newx = xlim[0] + newx * (xlim[1] - xlim[0]) * 0.01
             leftx = [newx, newx]
             lefty = self.ui.mainplot.get_ylim()
             setp(self.leftslideline, xdata=leftx, ydata=lefty)
@@ -273,7 +272,7 @@ class MainWindow(QMainWindow):
             newtime0 = float(inps)
 
         # Convert to integer slide value
-        ileftvalue = int((newtime0-xlim[0])/(xlim[1] - xlim[0])*100)
+        ileftvalue = int((newtime0 - xlim[0]) / (xlim[1] - xlim[0]) * 100)
         debug_msg = "iLeftSlide = %s" % str(ileftvalue)
         Logger("Filter_Events").debug(debug_msg)
 
@@ -293,9 +292,8 @@ class MainWindow(QMainWindow):
             resetT = False
 
         if resetT is True:
-            newtime0 = xlim[0] + ileftvalue*(xlim[1]-xlim[0])*0.01
-        info_msg = 'Corrected iLeftSlide = {} (vs. right = {})'.format(ileftvalue,
-                                                                       self._rightSlideValue)
+            newtime0 = xlim[0] + ileftvalue * (xlim[1] - xlim[0]) * 0.01
+        info_msg = 'Corrected iLeftSlide = {} (vs. right = {})'.format(ileftvalue, self._rightSlideValue)
         Logger("Filter_Events").information(info_msg)
 
         # Move the slide bar (left)
@@ -323,7 +321,7 @@ class MainWindow(QMainWindow):
             self._rightSlideValue = newx
 
             xlim = self.ui.mainplot.get_xlim()
-            newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
+            newx = xlim[0] + newx * (xlim[1] - xlim[0]) * 0.01
             leftx = [newx, newx]
             lefty = self.ui.mainplot.get_ylim()
             setp(self.rightslideline, xdata=leftx, ydata=lefty)
@@ -351,7 +349,7 @@ class MainWindow(QMainWindow):
             newtimef = float(inps)
 
         # Convert to integer slide value
-        irightvalue = int((newtimef-xlim[0])/(xlim[1] - xlim[0])*100)
+        irightvalue = int((newtimef - xlim[0]) / (xlim[1] - xlim[0]) * 100)
         Logger("Filter_Events").information('iRightSlide = {}'.format(irightvalue))
 
         # Return if no change
@@ -368,7 +366,7 @@ class MainWindow(QMainWindow):
             resetT = False
 
         if resetT is True:
-            newtimef = xlim[0] + irightvalue*(xlim[1]-xlim[0])*0.01
+            newtimef = xlim[0] + irightvalue * (xlim[1] - xlim[0]) * 0.01
 
         # Move the slide bar (right)
         self._rightSlideValue = irightvalue
@@ -391,8 +389,7 @@ class MainWindow(QMainWindow):
         Triggered by a change in Qt Widget.  NO EVENT is required.
         """
         inewy = self.ui.verticalSlider_2.value()
-        debug_msg = 'LowerSlFider is set with value {} vs. class variable {}'.format(inewy,
-                                                                                     self._lowerSlideValue)
+        debug_msg = 'LowerSlFider is set with value {} vs. class variable {}'.format(inewy, self._lowerSlideValue)
         Logger("Filter_Events").debug(debug_msg)
 
         # Return with no change
@@ -411,7 +408,7 @@ class MainWindow(QMainWindow):
 
         # Move the lower vertical bar
         ylim = self.ui.mainplot.get_ylim()
-        newy = ylim[0] + inewy*(ylim[1] - ylim[0])*0.01
+        newy = ylim[0] + inewy * (ylim[1] - ylim[0]) * 0.01
         lowerx = self.ui.mainplot.get_xlim()
         lowery = [newy, newy]
         setp(self.lowerslideline, xdata=lowerx, ydata=lowery)
@@ -440,7 +437,7 @@ class MainWindow(QMainWindow):
             newminY = float(self.ui.lineEdit_5.text())
 
         # Convert to integer slide value
-        iminlogval = int((newminY-ylim[0])/(ylim[1] - ylim[0])*100)
+        iminlogval = int((newminY - ylim[0]) / (ylim[1] - ylim[0]) * 100)
         Logger("Filter_Events").debug('ilowerSlide = {}'.format(iminlogval))
 
         # Return if no change
@@ -455,7 +452,7 @@ class MainWindow(QMainWindow):
             resetL = False
 
         if resetL is True:
-            newminY = ylim[0] + iminlogval * (ylim[1]-ylim[0]) * 0.01
+            newminY = ylim[0] + iminlogval * (ylim[1] - ylim[0]) * 0.01
 
         # Move the vertical line
         lowerx = self.ui.mainplot.get_xlim()
@@ -496,7 +493,7 @@ class MainWindow(QMainWindow):
         # Move the upper value bar: upperx and uppery are
         # real value (float but not (0,100)) of the figure
         ylim = self.ui.mainplot.get_ylim()
-        newy = ylim[0] + inewy*(ylim[1] - ylim[0])*0.01
+        newy = ylim[0] + inewy * (ylim[1] - ylim[0]) * 0.01
         upperx = self.ui.mainplot.get_xlim()
         uppery = [newy, newy]
         setp(self.upperslideline, xdata=upperx, ydata=uppery)
@@ -523,7 +520,7 @@ class MainWindow(QMainWindow):
             newmaxY = float(inps)
 
         # Convert to integer slide value
-        imaxlogval = int((newmaxY-ylim[0])/(ylim[1] - ylim[0])*100)
+        imaxlogval = int((newmaxY - ylim[0]) / (ylim[1] - ylim[0]) * 100)
         debug_msg = 'iUpperSlide = {}'.format(imaxlogval)
         Logger("Filter_Events").debug(debug_msg)
 
@@ -561,8 +558,8 @@ class MainWindow(QMainWindow):
     def browse_File(self):
         """ Open a file dialog to get file
         """
-        filename = QFileDialog.getOpenFileName(self, 'Input File Dialog',
-                                               self._defaultdir, "Data (*.nxs *.dat);;All files (*)")
+        filename = QFileDialog.getOpenFileName(self, 'Input File Dialog', self._defaultdir,
+                                               "Data (*.nxs *.dat);;All files (*)")
         if isinstance(filename, tuple):
             filename = filename[0]
 
@@ -668,7 +665,7 @@ class MainWindow(QMainWindow):
 
         duration = stat.duration
         mean = stat.mean
-        freq = float(numentries)/float(duration)
+        freq = float(numentries) / float(duration)
 
         self.ui.label_mean.show()
         self.ui.label_meanvalue.show()
@@ -840,17 +837,18 @@ class MainWindow(QMainWindow):
             tf = datetime.datetime.strptime(runstop, "%Y-%m-%dT%H:%M:%S")
 
             # Calculate
-            dt = tf-t0
-            timeduration = dt.days*3600*24 + dt.seconds
+            dt = tf - t0
+            timeduration = dt.days * 3600 * 24 + dt.seconds
 
-            timeres = float(timeduration)/MAXTIMEBINSIZE
+            timeres = float(timeduration) / MAXTIMEBINSIZE
             if timeres < 1.0:
                 timeres = 1.0
 
             sumwsname = '_Summed_{}'.format(wksp)
             if AnalysisDataService.doesExist(sumwsname) is False:
                 sumws = api.SumSpectra(InputWorkspace=wksp, OutputWorkspace=sumwsname)
-                sumws = api.RebinByPulseTimes(InputWorkspace=sumws, OutputWorkspace=sumwsname,
+                sumws = api.RebinByPulseTimes(InputWorkspace=sumws,
+                                              OutputWorkspace=sumwsname,
                                               Params='{}'.format(timeres))
                 sumws = api.ConvertToPointData(InputWorkspace=sumws, OutputWorkspace=sumwsname)
             else:
@@ -879,10 +877,10 @@ class MainWindow(QMainWindow):
         # Reset slide
         newslidery = [min(vecy), max(vecy)]
 
-        newleftx = xmin + (xmax-xmin)*self._leftSlideValue*0.01
+        newleftx = xmin + (xmax - xmin) * self._leftSlideValue * 0.01
         setp(self.leftslideline, xdata=[newleftx, newleftx], ydata=newslidery)
 
-        newrightx = xmin + (xmax-xmin)*self._rightSlideValue*0.01
+        newrightx = xmin + (xmax - xmin) * self._rightSlideValue * 0.01
         setp(self.rightslideline, xdata=[newrightx, newrightx], ydata=newslidery)
         self.canvas.draw()
 
@@ -1013,7 +1011,8 @@ class MainWindow(QMainWindow):
                          SpectrumWithoutDetector=how2skip,
                          SplitSampleLogs=splitsamplelog,
                          OutputWorkspaceIndexedFrom1=startfrom1,
-                         OutputTOFCorrectionWorkspace='TOFCorrTable', **kwargs)
+                         OutputTOFCorrectionWorkspace='TOFCorrTable',
+                         **kwargs)
 
     def showHideEi(self):
         """
@@ -1073,10 +1072,9 @@ class MainWindow(QMainWindow):
     def helpClicked(self):
         try:
             import mantidqt
-            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp("Filter Events","utility")
+            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp("Filter Events", "utility")
         except ImportError:
-            url = ("http://docs.mantidproject.org/nightly/interfaces/{}.html"
-                   "".format("Filter Events"))
+            url = ("http://docs.mantidproject.org/nightly/interfaces/{}.html" "".format("Filter Events"))
             QDesktopServices.openUrl(QUrl(url))
 
     def _resetGUI(self, resetfilerun=False):

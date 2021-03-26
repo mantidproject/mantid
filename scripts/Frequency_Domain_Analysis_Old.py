@@ -17,19 +17,19 @@ from Muon.GUI.Common import message_box
 
 
 class FrequencyDomainAnalysisGui(QtGui.QMainWindow):
-    def __init__(self,parent=None):
-        super(FrequencyDomainAnalysisGui,self).__init__(parent)
+    def __init__(self, parent=None):
+        super(FrequencyDomainAnalysisGui, self).__init__(parent)
 
         load = load_utils.LoadUtils()
         if not load.MuonAnalysisExists:
             return
-        self.transform = TransformWidget(load, FFTWidget, MaxEntWidget, parent = self)
+        self.transform = TransformWidget(load, FFTWidget, MaxEntWidget, parent=self)
 
         self.setCentralWidget(self.transform.widget)
         self.setWindowTitle("Frequency Domain Analysis")
 
     # cancel algs if window is closed
-    def closeEvent(self,event):
+    def closeEvent(self, event):
         self.transform.closeEvent(event)
 
 
@@ -43,8 +43,8 @@ def qapp():
 
 app = qapp()
 try:
-    ex= FrequencyDomainAnalysisGui()
-    ex.resize(700,700)
+    ex = FrequencyDomainAnalysisGui()
+    ex.resize(700, 700)
     ex.show()
     app.exec_()
 except RuntimeError as error:

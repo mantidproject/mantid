@@ -87,7 +87,6 @@ class MockQModelIndexSibling:
 
 
 class MockQModelIndex:
-
     def __init__(self, row, column):
         self.row = Mock(return_value=row)
         self.column = Mock(return_value=column)

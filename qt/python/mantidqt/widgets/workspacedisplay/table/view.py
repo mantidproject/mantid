@@ -11,8 +11,8 @@ from functools import partial
 from qtpy import QtGui
 from qtpy.QtCore import QVariant, Qt, Signal, Slot
 from qtpy.QtGui import QKeySequence, QStandardItemModel
-from qtpy.QtWidgets import (QAction, QHeaderView, QItemEditorFactory, QMenu, QMessageBox,
-                            QStyledItemDelegate, QTableView)
+from qtpy.QtWidgets import (QAction, QHeaderView, QItemEditorFactory, QMenu, QMessageBox, QStyledItemDelegate,
+                            QTableView)
 
 import mantidqt.icons
 from mantidqt.widgets.workspacedisplay.table.plot_type import PlotType
@@ -137,19 +137,16 @@ class TableWorkspaceDisplayView(QTableView):
         plot_line.triggered.connect(partial(self.presenter.action_plot, PlotType.LINEAR))
 
         plot_line_with_yerr = QAction("Line with Y Errors", plot)
-        plot_line_with_yerr.triggered.connect(
-            partial(self.presenter.action_plot, PlotType.LINEAR_WITH_ERR))
+        plot_line_with_yerr.triggered.connect(partial(self.presenter.action_plot, PlotType.LINEAR_WITH_ERR))
 
         plot_scatter = QAction("Scatter", plot)
         plot_scatter.triggered.connect(partial(self.presenter.action_plot, PlotType.SCATTER))
 
         plot_scatter_with_yerr = QAction("Scatter with Y Errors", plot)
-        plot_scatter_with_yerr.triggered.connect(
-            partial(self.presenter.action_plot, PlotType.SCATTER_WITH_ERR))
+        plot_scatter_with_yerr.triggered.connect(partial(self.presenter.action_plot, PlotType.SCATTER_WITH_ERR))
 
         plot_line_and_points = QAction("Line + Symbol", plot)
-        plot_line_and_points.triggered.connect(
-            partial(self.presenter.action_plot, PlotType.LINE_AND_SYMBOL))
+        plot_line_and_points.triggered.connect(partial(self.presenter.action_plot, PlotType.LINE_AND_SYMBOL))
 
         plot.addAction(plot_line)
         plot.addAction(plot_line_with_yerr)
@@ -206,8 +203,7 @@ class TableWorkspaceDisplayView(QTableView):
 
                 # label_index here holds the index in the LABEL (multiple Y columns have labels Y0, Y1, YN...)
                 # this is NOT the same as the column relative to the WHOLE table
-                set_as_y_err.triggered.connect(
-                    partial(self.presenter.action_set_as_y_err, related_y_column))
+                set_as_y_err.triggered.connect(partial(self.presenter.action_set_as_y_err, related_y_column))
                 menu_set_as_y_err.addAction(set_as_y_err)
             menu_main.addMenu(menu_set_as_y_err)
 

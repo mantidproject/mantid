@@ -49,8 +49,7 @@ class FocusModelTest(unittest.TestCase):
         self.model.focus_run(["305761"], banks, False, "ENGINX", "0", None)
 
         self.assertEqual(len(banks), run_focus.call_count)
-        run_focus.assert_called_with("mocked_sample",
-                                     "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + banks[-1],
+        run_focus.assert_called_with("mocked_sample", "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + banks[-1],
                                      "test_wsp", "test_wsp", banks[-1], None)
 
     @patch(file_path + ".FocusModel._output_sample_logs")
@@ -66,8 +65,7 @@ class FocusModelTest(unittest.TestCase):
         self.model.focus_run(["305761"], None, False, "ENGINX", "0", spectra)
 
         self.assertEqual(1, run_focus.call_count)
-        run_focus.assert_called_with("mocked_sample",
-                                     "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "cropped",
+        run_focus.assert_called_with("mocked_sample", "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "cropped",
                                      "test_wsp", "test_wsp", None, None, spectra)
 
     @patch(file_path + ".FocusModel._output_sample_logs")
@@ -77,8 +75,7 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    def test_focus_plotted_when_checked(self, fetch_van, load_focus, run_focus, plot_focus, output,
-                                        ads, logs):
+    def test_focus_plotted_when_checked(self, fetch_van, load_focus, run_focus, plot_focus, output, ads, logs):
         ads.doesExist.return_value = True
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
         banks = ["1", "2"]
@@ -95,8 +92,7 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    def test_focus_not_plotted_when_not_checked(self, fetch_van, load_focus, run_focus, plot_focus,
-                                                output, ads, logs):
+    def test_focus_not_plotted_when_not_checked(self, fetch_van, load_focus, run_focus, plot_focus, output, ads, logs):
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
         banks = ["1", "2"]
         load_focus.return_value = "mocked_sample"
@@ -109,11 +105,9 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".SaveNexus")
     def test_save_output_files_with_no_RB_number(self, nexus, gss, xye):
         mocked_workspace = "mocked-workspace"
-        output_file = path.join(path_handling.get_output_path(), "Focus",
-                                "ENGINX_123_bank_North.nxs")
+        output_file = path.join(path_handling.get_output_path(), "Focus", "ENGINX_123_bank_North.nxs")
 
-        self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
-                                mocked_workspace, None)
+        self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North", mocked_workspace, None)
 
         self.assertEqual(1, nexus.call_count)
         self.assertEqual(1, gss.call_count)
@@ -124,8 +118,8 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".SaveGSS")
     @patch(file_path + ".SaveNexus")
     def test_save_output_files_with_RB_number(self, nexus, gss, xye):
-        self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
-                                "mocked-workspace", "An Experiment Number")
+        self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North", "mocked-workspace",
+                                "An Experiment Number")
         self.assertEqual(nexus.call_count, 2)
         self.assertEqual(gss.call_count, 2)
         self.assertEqual(xye.call_count, 2)
@@ -165,12 +159,10 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".SaveNexus")
     def test_last_path_updates_with_no_RB_number(self, nexus, gss, xye):
         mocked_workspace = "mocked-workspace"
-        output_file = path.join(path_handling.get_output_path(), "Focus",
-                                "ENGINX_123_bank_North.nxs")
+        output_file = path.join(path_handling.get_output_path(), "Focus", "ENGINX_123_bank_North.nxs")
 
         self.model._last_path_ws = 'ENGINX_123_bank_North.nxs'
-        self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
-                                mocked_workspace, None)
+        self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North", mocked_workspace, None)
 
         self.assertEqual(self.model._last_path, output_file)
 
@@ -183,8 +175,7 @@ class FocusModelTest(unittest.TestCase):
         output_file = path.join(path_handling.get_output_path(), "User", rb_num, "Focus", "ENGINX_123_bank_North.nxs")
 
         self.model._last_path_ws = 'ENGINX_123_bank_North.nxs'
-        self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
-                                mocked_workspace, rb_num)
+        self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North", mocked_workspace, rb_num)
 
         self.assertEqual(self.model._last_path, output_file)
 

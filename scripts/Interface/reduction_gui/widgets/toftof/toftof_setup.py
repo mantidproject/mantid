@@ -12,7 +12,9 @@ TOFTOF reduction workflow gui.
 """
 from qtpy.QtCore import (Qt)  # noqa
 from qtpy.QtGui import (QDoubleValidator)  # noqa
-from qtpy.QtWidgets import (QButtonGroup, QCheckBox, QDoubleSpinBox, QFileDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLayout, QLineEdit, QPushButton, QRadioButton, QSizePolicy, QSpacerItem, QWidget, QVBoxLayout)  # noqa
+from qtpy.QtWidgets import (QButtonGroup, QCheckBox, QDoubleSpinBox, QFileDialog, QGridLayout, QGroupBox, QHBoxLayout,
+                            QLabel, QLayout, QLineEdit, QPushButton, QRadioButton, QSizePolicy, QSpacerItem, QWidget,
+                            QVBoxLayout)  # noqa
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement, OptionalFloat
 from reduction_gui.widgets.data_table_view import DataTableView, DataTableModel
@@ -42,10 +44,10 @@ class TOFTOFSetupWidget(BaseWidget):
             if col == 2:
                 return OptionalFloat(text)
             else:
-                return text # just return the value, it is already str.
+                return text  # just return the value, it is already str.
 
     # tooltips
-    TIP_prefix  = ''
+    TIP_prefix = ''
     TIP_dataDir = ''
     TIP_saveDir = ''
     TIP_btnDataDir = ''
@@ -105,11 +107,11 @@ class TOFTOFSetupWidget(BaseWidget):
         return dirname
 
     def __init__(self, settings):
-        BaseWidget.__init__(self, settings = settings)
+        BaseWidget.__init__(self, settings=settings)
 
         inf = float('inf')
 
-        def set_spin(spin, minVal = -inf, maxVal = +inf, decimals = 3):
+        def set_spin(spin, minVal=-inf, maxVal=+inf, decimals=3):
             spin.setRange(minVal, maxVal)
             spin.setDecimals(decimals)
             spin.setSingleStep(0.01)
@@ -123,6 +125,7 @@ class TOFTOFSetupWidget(BaseWidget):
             """enables widget, when value of all widgets evaluates to true"""
             def setEnabled():
                 widget.setEnabled(all(w.isChecked() for w in widgets))
+
             for w in widgets:
                 w.toggled.connect(setEnabled)
             return widget
@@ -133,33 +136,33 @@ class TOFTOFSetupWidget(BaseWidget):
             return edit
 
         # ui data elements
-        self.prefix    = tip(QLineEdit(), self.TIP_prefix)
-        self.dataDir   = tip(QLineEdit(), self.TIP_dataDir)
-        self.saveDir   = tip(QLineEdit(), self.TIP_saveDir)
+        self.prefix = tip(QLineEdit(), self.TIP_prefix)
+        self.dataDir = tip(QLineEdit(), self.TIP_dataDir)
+        self.saveDir = tip(QLineEdit(), self.TIP_saveDir)
 
-        self.vanRuns   = tip(QLineEdit(), self.TIP_vanRuns)
-        self.vanCmnt   = tip(QLineEdit(), self.TIP_vanCmnt)
-        self.vanTemp   = tip(DoubleEdit(), self.TIP_vanTemp)
+        self.vanRuns = tip(QLineEdit(), self.TIP_vanRuns)
+        self.vanCmnt = tip(QLineEdit(), self.TIP_vanCmnt)
+        self.vanTemp = tip(DoubleEdit(), self.TIP_vanTemp)
 
-        self.ecRuns    = tip(SmallQLineEdit(), self.TIP_ecRuns)
-        self.ecTemp    = tip(DoubleEdit(), self.TIP_ecTemp)
-        self.ecFactor  = tip(QDoubleSpinBox(), self.TIP_ecFactor)
+        self.ecRuns = tip(SmallQLineEdit(), self.TIP_ecRuns)
+        self.ecTemp = tip(DoubleEdit(), self.TIP_ecTemp)
+        self.ecFactor = tip(QDoubleSpinBox(), self.TIP_ecFactor)
 
         set_spin(self.ecFactor, 0, 1)
 
-        self.binEon    = tip(QCheckBox(),      self.TIP_binEon)
+        self.binEon = tip(QCheckBox(), self.TIP_binEon)
         self.binEstart = setEnabled(tip(QDoubleSpinBox(), self.TIP_binEstart), self.binEon)
-        self.binEstep  = setEnabled(tip(QDoubleSpinBox(), self.TIP_binEstep),  self.binEon)
-        self.binEend   = setEnabled(tip(QDoubleSpinBox(), self.TIP_binEend),   self.binEon)
+        self.binEstep = setEnabled(tip(QDoubleSpinBox(), self.TIP_binEstep), self.binEon)
+        self.binEend = setEnabled(tip(QDoubleSpinBox(), self.TIP_binEend), self.binEon)
 
         set_spin(self.binEstart)
-        set_spin(self.binEstep, decimals = 4)
+        set_spin(self.binEstep, decimals=4)
         set_spin(self.binEend)
 
-        self.binQon    = setEnabled(tip(QCheckBox(),      self.TIP_binQon),    self.binEon)
+        self.binQon = setEnabled(tip(QCheckBox(), self.TIP_binQon), self.binEon)
         self.binQstart = setEnabled(tip(QDoubleSpinBox(), self.TIP_binQstart), self.binEon, self.binQon)
-        self.binQstep  = setEnabled(tip(QDoubleSpinBox(), self.TIP_binQstep),  self.binEon, self.binQon)
-        self.binQend   = setEnabled(tip(QDoubleSpinBox(), self.TIP_binQend),   self.binEon, self.binQon)
+        self.binQstep = setEnabled(tip(QDoubleSpinBox(), self.TIP_binQstep), self.binEon, self.binQon)
+        self.binQend = setEnabled(tip(QDoubleSpinBox(), self.TIP_binQend), self.binEon, self.binQon)
 
         set_spin(self.binQstart)
         set_spin(self.binQstep)
@@ -168,36 +171,37 @@ class TOFTOFSetupWidget(BaseWidget):
         self.maskDetectors = tip(QLineEdit(), self.TIP_maskDetectors)
 
         headers = ('Data runs', 'Comment', 'T (K)')
-        self.dataRunsView = tip(DataTableView(self, headers, TOFTOFSetupWidget.TofTofDataTableModel), self.TIP_dataRunsView)
+        self.dataRunsView = tip(DataTableView(self, headers, TOFTOFSetupWidget.TofTofDataTableModel),
+                                self.TIP_dataRunsView)
         self.dataRunsView.horizontalHeader().setStretchLastSection(True)
         self.dataRunsView.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.runDataModel = self.dataRunsView.model()
 
         # ui controls
-        self.btnDataDir          = tip(QPushButton('Browse'), self.TIP_btnDataDir)
-        self.btnSaveDir          = tip(QPushButton('Browse'), self.TIP_btnSaveDir)
+        self.btnDataDir = tip(QPushButton('Browse'), self.TIP_btnDataDir)
+        self.btnSaveDir = tip(QPushButton('Browse'), self.TIP_btnSaveDir)
 
-        self.chkSubtractECVan    = tip(QCheckBox('Subtract empty can from vanadium'), self.TIP_chkSubtractECVan)
-        self.vanEcFactor         = setEnabled(tip(QDoubleSpinBox(), self.TIP_vanEcFactor), self.chkSubtractECVan)
+        self.chkSubtractECVan = tip(QCheckBox('Subtract empty can from vanadium'), self.TIP_chkSubtractECVan)
+        self.vanEcFactor = setEnabled(tip(QDoubleSpinBox(), self.TIP_vanEcFactor), self.chkSubtractECVan)
         set_spin(self.vanEcFactor, 0, 1)
-        self.chkReplaceNaNs      = setEnabled(tip(QCheckBox(u'Replace special values in S(Q, ω) with 0'), self.TIP_chkReplaceNaNs),
-                                              self.binEon)
-        self.chkCreateDiff       = setEnabled(tip(QCheckBox('Create diffractograms'), self.TIP_chkCreateDiff), self.binEon)
-        self.chkKeepSteps        = tip(QCheckBox('Keep intermediate steps'), self.TIP_chkKeepSteps)
+        self.chkReplaceNaNs = setEnabled(
+            tip(QCheckBox(u'Replace special values in S(Q, ω) with 0'), self.TIP_chkReplaceNaNs), self.binEon)
+        self.chkCreateDiff = setEnabled(tip(QCheckBox('Create diffractograms'), self.TIP_chkCreateDiff), self.binEon)
+        self.chkKeepSteps = tip(QCheckBox('Keep intermediate steps'), self.TIP_chkKeepSteps)
 
-        self.chkSofTWNxspe       = setEnabled(tip(QCheckBox('NXSPE'), self.TIP_chkNxspe), self.binEon)
-        self.chkSofTWNexus       = tip(QCheckBox('NeXus'), self.TIP_chkNexus)
-        self.chkSofTWAscii       = tip(QCheckBox('Ascii'), self.TIP_chkAscii)
+        self.chkSofTWNxspe = setEnabled(tip(QCheckBox('NXSPE'), self.TIP_chkNxspe), self.binEon)
+        self.chkSofTWNexus = tip(QCheckBox('NeXus'), self.TIP_chkNexus)
+        self.chkSofTWAscii = tip(QCheckBox('Ascii'), self.TIP_chkAscii)
 
-        self.chkSofQWNexus       = setEnabled(tip(QCheckBox('NeXus'), self.TIP_chkNexus), self.binEon, self.binQon)
-        self.chkSofQWAscii       = setEnabled(tip(QCheckBox('Ascii'), self.TIP_chkAscii), self.binEon, self.binQon)
+        self.chkSofQWNexus = setEnabled(tip(QCheckBox('NeXus'), self.TIP_chkNexus), self.binEon, self.binQon)
+        self.chkSofQWAscii = setEnabled(tip(QCheckBox('Ascii'), self.TIP_chkAscii), self.binEon, self.binQon)
 
-        self.rbtNormaliseNone    = tip(QRadioButton('none'), self.TIP_rbtNormaliseNone)
+        self.rbtNormaliseNone = tip(QRadioButton('none'), self.TIP_rbtNormaliseNone)
         self.rbtNormaliseMonitor = tip(QRadioButton('to monitor'), self.TIP_rbtNormaliseMonitor)
-        self.rbtNormaliseTime    = tip(QRadioButton('to time'), self.TIP_rbtNormaliseTime)
+        self.rbtNormaliseTime = tip(QRadioButton('to time'), self.TIP_rbtNormaliseTime)
 
-        self.rbtCorrectTOFNone   = tip(QRadioButton('none'), self.TIP_rbtCorrectTOFNone)
-        self.rbtCorrectTOFVan    = tip(QRadioButton('vanadium'), self.TIP_rbtCorrectTOFVan)
+        self.rbtCorrectTOFNone = tip(QRadioButton('none'), self.TIP_rbtCorrectTOFNone)
+        self.rbtCorrectTOFVan = tip(QRadioButton('vanadium'), self.TIP_rbtCorrectTOFVan)
         self.rbtCorrectTOFSample = tip(QRadioButton('sample'), self.TIP_rbtCorrectTOFSample)
 
         # ui layout
@@ -228,11 +232,11 @@ class TOFTOFSetupWidget(BaseWidget):
         self.gbSave.setCheckable(True)
 
         gbDataDir = QGroupBox('Data search directory')
-        gbPrefix  = QGroupBox('Workspace prefix')
+        gbPrefix = QGroupBox('Workspace prefix')
         gbOptions = QGroupBox('Options')
-        gbInputs  = QGroupBox('Inputs')
+        gbInputs = QGroupBox('Inputs')
         gbBinning = QGroupBox('Binning')
-        gbData    = QGroupBox('Data')
+        gbData = QGroupBox('Data')
 
         box = QVBoxLayout()
         self._layout.addLayout(box)
@@ -240,21 +244,21 @@ class TOFTOFSetupWidget(BaseWidget):
         box.addLayout(hbox(vbox(gbDataDir, gbInputs, gbBinning, gbOptions, 1), vbox(gbPrefix, gbData, self.gbSave)))
 
         gbDataDir.setLayout(hbox(self.dataDir, self.btnDataDir))
-        gbPrefix.setLayout(hbox(self.prefix,))
+        gbPrefix.setLayout(hbox(self.prefix, ))
 
         grid = QGridLayout()
-        grid.addWidget(self.chkSubtractECVan,   0, 0, 1, 4)
-        grid.addWidget(label('Normalise','tip'),1, 0)
-        grid.addWidget(self.rbtNormaliseNone,   1, 1)
-        grid.addWidget(self.rbtNormaliseMonitor,1, 2)
-        grid.addWidget(self.rbtNormaliseTime,   1, 3)
-        grid.addWidget(QLabel('Correct TOF'),   2, 0)
-        grid.addWidget(self.rbtCorrectTOFNone,  2, 1)
-        grid.addWidget(self.rbtCorrectTOFVan,   2, 2)
-        grid.addWidget(self.rbtCorrectTOFSample,2, 3)
-        grid.addWidget(self.chkReplaceNaNs,   3, 0, 1, 4)
-        grid.addWidget(self.chkCreateDiff,    4, 0, 1, 4)
-        grid.addWidget(self.chkKeepSteps,     5, 0, 1, 4)
+        grid.addWidget(self.chkSubtractECVan, 0, 0, 1, 4)
+        grid.addWidget(label('Normalise', 'tip'), 1, 0)
+        grid.addWidget(self.rbtNormaliseNone, 1, 1)
+        grid.addWidget(self.rbtNormaliseMonitor, 1, 2)
+        grid.addWidget(self.rbtNormaliseTime, 1, 3)
+        grid.addWidget(QLabel('Correct TOF'), 2, 0)
+        grid.addWidget(self.rbtCorrectTOFNone, 2, 1)
+        grid.addWidget(self.rbtCorrectTOFVan, 2, 2)
+        grid.addWidget(self.rbtCorrectTOFSample, 2, 3)
+        grid.addWidget(self.chkReplaceNaNs, 3, 0, 1, 4)
+        grid.addWidget(self.chkCreateDiff, 4, 0, 1, 4)
+        grid.addWidget(self.chkKeepSteps, 5, 0, 1, 4)
         grid.setColumnStretch(4, 1)
 
         gbOptions.setLayout(grid)
@@ -271,37 +275,37 @@ class TOFTOFSetupWidget(BaseWidget):
 
         grid = QGridLayout()
         grid.addWidget(QLabel('Vanadium runs'), 0, 0)
-        grid.addWidget(self.vanRuns,            0, 1, 1, 3)
-        grid.addWidget(QLabel('Van. comment'),  1, 0)
-        grid.addWidget(self.vanCmnt,            1, 1, 1, 1)
+        grid.addWidget(self.vanRuns, 0, 1, 1, 3)
+        grid.addWidget(QLabel('Van. comment'), 1, 0)
+        grid.addWidget(self.vanCmnt, 1, 1, 1, 1)
         grid.addLayout(hbox(QLabel('EC factor'), self.vanEcFactor), 1, 2, 1, 1)
-        grid.addLayout(hbox(QLabel('T (K)'), self.vanTemp),         1, 3)
-        grid.addWidget(QLabel('Empty can runs'),2, 0)
-        grid.addWidget(self.ecRuns,             2, 1, 1, 1)
+        grid.addLayout(hbox(QLabel('T (K)'), self.vanTemp), 1, 3)
+        grid.addWidget(QLabel('Empty can runs'), 2, 0)
+        grid.addWidget(self.ecRuns, 2, 1, 1, 1)
         grid.addLayout(hbox(QLabel('EC factor'), self.ecFactor), 2, 2, 1, 1)
-        grid.addLayout(hbox(QLabel('T (K)'), self.ecTemp),         2, 3)
-        grid.addWidget(QLabel('Mask detectors'),3, 0)
-        grid.addWidget(self.maskDetectors,      3, 1, 1, 3)
+        grid.addLayout(hbox(QLabel('T (K)'), self.ecTemp), 2, 3)
+        grid.addWidget(QLabel('Mask detectors'), 3, 0)
+        grid.addWidget(self.maskDetectors, 3, 1, 1, 3)
 
         gbInputs.setLayout(grid)
 
         grid = QGridLayout()
-        grid.addWidget(QLabel('on'),            0, 1)
-        grid.addWidget(QLabel('start'),         0, 2)
-        grid.addWidget(QLabel('step'),          0, 3)
-        grid.addWidget(QLabel('end'),           0, 4)
+        grid.addWidget(QLabel('on'), 0, 1)
+        grid.addWidget(QLabel('start'), 0, 2)
+        grid.addWidget(QLabel('step'), 0, 3)
+        grid.addWidget(QLabel('end'), 0, 4)
 
-        grid.addWidget(QLabel('Energy'),        1, 0)
-        grid.addWidget(self.binEon,             1, 1)
-        grid.addWidget(self.binEstart,          1, 2)
-        grid.addWidget(self.binEstep,           1, 3)
-        grid.addWidget(self.binEend,            1, 4)
+        grid.addWidget(QLabel('Energy'), 1, 0)
+        grid.addWidget(self.binEon, 1, 1)
+        grid.addWidget(self.binEstart, 1, 2)
+        grid.addWidget(self.binEstep, 1, 3)
+        grid.addWidget(self.binEend, 1, 4)
 
-        grid.addWidget(QLabel('Q'),             2, 0)
-        grid.addWidget(self.binQon,             2, 1)
-        grid.addWidget(self.binQstart,          2, 2)
-        grid.addWidget(self.binQstep,           2, 3)
-        grid.addWidget(self.binQend,            2, 4)
+        grid.addWidget(QLabel('Q'), 2, 0)
+        grid.addWidget(self.binQon, 2, 1)
+        grid.addWidget(self.binQstart, 2, 2)
+        grid.addWidget(self.binQstep, 2, 3)
+        grid.addWidget(self.binQend, 2, 4)
 
         for col in (0, 2, 3, 4):
             grid.setColumnStretch(col, 1)
@@ -312,16 +316,16 @@ class TOFTOFSetupWidget(BaseWidget):
 
         grid = QGridLayout()
         saveDirGroup = hbox(self.saveDir, self.btnSaveDir)
-        grid.addWidget(QLabel('Directory'),   0, 0)
-        grid.addLayout(saveDirGroup,          0, 1, 1, 4)
-        grid.addWidget(setEnabled(QLabel(u'S(Q, ω):'), self.binEon),   1, 0)
-        grid.addWidget(self.chkSofQWNexus,    1, 1)
-        grid.addWidget(self.chkSofQWAscii,    1, 2)
-        grid.addItem(QSpacerItem(5, 5, hPolicy=QSizePolicy.Expanding),    1, 4)
-        grid.addWidget(QLabel(u'S(2θ, ω):'),   2, 0)
-        grid.addWidget(self.chkSofTWNexus,    2, 1)
-        grid.addWidget(self.chkSofTWAscii,    2, 2)
-        grid.addWidget(self.chkSofTWNxspe,    2, 3)
+        grid.addWidget(QLabel('Directory'), 0, 0)
+        grid.addLayout(saveDirGroup, 0, 1, 1, 4)
+        grid.addWidget(setEnabled(QLabel(u'S(Q, ω):'), self.binEon), 1, 0)
+        grid.addWidget(self.chkSofQWNexus, 1, 1)
+        grid.addWidget(self.chkSofQWAscii, 1, 2)
+        grid.addItem(QSpacerItem(5, 5, hPolicy=QSizePolicy.Expanding), 1, 4)
+        grid.addWidget(QLabel(u'S(2θ, ω):'), 2, 0)
+        grid.addWidget(self.chkSofTWNexus, 2, 1)
+        grid.addWidget(self.chkSofTWAscii, 2, 2)
+        grid.addWidget(self.chkSofTWNxspe, 2, 3)
 
         self.gbSave.setLayout(grid)
 
@@ -353,41 +357,41 @@ class TOFTOFSetupWidget(BaseWidget):
         def is_checked(checkBox):
             return checkBox.isChecked() and checkBox.isEnabled()
 
-        elem.facility_name   = self._settings.facility_name
+        elem.facility_name = self._settings.facility_name
         elem.instrument_name = self._settings.instrument_name
 
-        elem.prefix         = line_text(self.prefix)
-        elem.dataDir        = line_text(self.dataDir)
+        elem.prefix = line_text(self.prefix)
+        elem.dataDir = line_text(self.dataDir)
 
-        elem.vanRuns        = line_text(self.vanRuns)
-        elem.vanCmnt        = line_text(self.vanCmnt)
-        elem.vanTemp        = OptionalFloat(line_text(self.vanTemp))
-        elem.vanEcFactor    = self.vanEcFactor.value()
+        elem.vanRuns = line_text(self.vanRuns)
+        elem.vanCmnt = line_text(self.vanCmnt)
+        elem.vanTemp = OptionalFloat(line_text(self.vanTemp))
+        elem.vanEcFactor = self.vanEcFactor.value()
 
-        elem.ecRuns         = line_text(self.ecRuns)
-        elem.ecTemp         = OptionalFloat(line_text(self.ecTemp))
-        elem.ecFactor       = self.ecFactor.value()
+        elem.ecRuns = line_text(self.ecRuns)
+        elem.ecTemp = OptionalFloat(line_text(self.ecTemp))
+        elem.ecFactor = self.ecFactor.value()
 
-        elem.dataRuns       = self.runDataModel.tableData
+        elem.dataRuns = self.runDataModel.tableData
 
-        elem.binEon         = is_checked(self.binEon)
-        elem.binEstart      = self.binEstart.value()
-        elem.binEstep       = self.binEstep.value()
-        elem.binEend        = self.binEend.value()
+        elem.binEon = is_checked(self.binEon)
+        elem.binEstart = self.binEstart.value()
+        elem.binEstep = self.binEstep.value()
+        elem.binEend = self.binEend.value()
 
-        elem.binQon         = is_checked(self.binQon)
-        elem.binQstart      = self.binQstart.value()
-        elem.binQstep       = self.binQstep.value()
-        elem.binQend        = self.binQend.value()
+        elem.binQon = is_checked(self.binQon)
+        elem.binQstart = self.binQstart.value()
+        elem.binQstep = self.binQstep.value()
+        elem.binQend = self.binQend.value()
 
-        elem.maskDetectors  = line_text(self.maskDetectors)
+        elem.maskDetectors = line_text(self.maskDetectors)
 
-        elem.subtractECVan  = is_checked(self.chkSubtractECVan)
-        elem.replaceNaNs    = is_checked(self.chkReplaceNaNs)
-        elem.createDiff     = is_checked(self.chkCreateDiff)
-        elem.keepSteps      = is_checked(self.chkKeepSteps)
+        elem.subtractECVan = is_checked(self.chkSubtractECVan)
+        elem.replaceNaNs = is_checked(self.chkReplaceNaNs)
+        elem.createDiff = is_checked(self.chkCreateDiff)
+        elem.keepSteps = is_checked(self.chkKeepSteps)
 
-        elem.saveDir        = line_text(self.saveDir)
+        elem.saveDir = line_text(self.saveDir)
         elem.saveSofTWNxspe = is_checked(self.chkSofTWNxspe)
         elem.saveSofTWNexus = is_checked(self.chkSofTWNexus)
         elem.saveSofTWAscii = is_checked(self.chkSofTWAscii)
@@ -449,8 +453,7 @@ class TOFTOFSetupWidget(BaseWidget):
         self.chkSofQWNexus.setChecked(elem.saveSofQWNexus)
         self.chkSofQWAscii.setChecked(elem.saveSofQWAscii)
         self.gbSave.setChecked(
-            any((elem.saveSofTWNxspe, elem.saveSofTWNexus,
-                 elem.saveSofTWAscii, elem.saveSofQWNexus,
+            any((elem.saveSofTWNxspe, elem.saveSofTWNexus, elem.saveSofTWAscii, elem.saveSofQWNexus,
                  elem.saveSofQWAscii)))
 
         if elem.normalise == elem.NORM_MONITOR:
@@ -466,6 +469,7 @@ class TOFTOFSetupWidget(BaseWidget):
             self.rbtCorrectTOFSample.setChecked(True)
         else:
             self.rbtCorrectTOFNone.setChecked(True)
+
 
 #-------------------------------------------------------------------------------
 # eof

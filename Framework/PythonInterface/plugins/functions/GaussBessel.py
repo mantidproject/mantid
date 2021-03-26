@@ -12,15 +12,13 @@ import scipy.special as sp
 
 
 class GaussBessel(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.2, 'Amplitude')
         self.declareParameter("Freq", 0.5, 'ZF Frequency (MHz)')
-        self.declareParameter(
-            "Sigma", 0.2, 'Gaussian relaxation for oscillatory component')
+        self.declareParameter("Sigma", 0.2, 'Gaussian relaxation for oscillatory component')
         self.declareParameter("Phi", 0.0, 'Phase (rad)')
 
     def function1D(self, x):
@@ -29,7 +27,7 @@ class GaussBessel(IFunction1D):
         sigma = self.getParameterValue("Sigma")
         phi = self.getParameterValue("Phi")
         omega = 2 * np.pi * Freq
-        return A0 * (1. / 3. + 2. / 3. * sp.j0(omega * x + phi) * np.exp(- 0.5 * (sigma * x) ** 2))
+        return A0 * (1. / 3. + 2. / 3. * sp.j0(omega * x + phi) * np.exp(-0.5 * (sigma * x)**2))
 
 
 FunctionFactory.subscribe(GaussBessel)

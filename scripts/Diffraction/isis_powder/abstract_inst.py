@@ -28,9 +28,7 @@ class AbstractInst(object):
         try:
             self._inst_prefix_short = config.getInstrument(inst_prefix).shortName()
         except RuntimeError:
-            logger.warning(
-                "Unknown instrument {}. Setting short prefix equal to full prefix".format(
-                    inst_prefix))
+            logger.warning("Unknown instrument {}. Setting short prefix equal to full prefix".format(inst_prefix))
             self._inst_prefix_short = inst_prefix
         self._output_dir = output_dir
         self._is_vanadium = None
@@ -58,15 +56,9 @@ class AbstractInst(object):
         """
         self._is_vanadium = True
         run_details = self._get_run_details(run_number_string)
-        return calibrate.create_van(instrument=self,
-                                    run_details=run_details,
-                                    absorb=do_absorb_corrections)
+        return calibrate.create_van(instrument=self, run_details=run_details, absorb=do_absorb_corrections)
 
-    def _focus(self,
-               run_number_string,
-               do_van_normalisation,
-               do_absorb_corrections,
-               sample_details=None):
+    def _focus(self, run_number_string, do_van_normalisation, do_absorb_corrections, sample_details=None):
         """
         Focuses the user specified run - should be called by the concrete instrument
         :param run_number_string: The run number(s) to be processed
@@ -137,8 +129,7 @@ class AbstractInst(object):
                 :param ws_to_correct: A reference vanadium workspace to match the binning of or correct
                 :return: A workspace containing the corrections
                 """
-        raise NotImplementedError(
-            "apply_absorb_corrections Not implemented for this instrument yet")
+        raise NotImplementedError("apply_absorb_corrections Not implemented for this instrument yet")
 
     def _generate_output_file_name(self, run_number_string):
         """
@@ -156,11 +147,9 @@ class AbstractInst(object):
         :return: The splined vanadium workspaces as a list
         """
         if self._inst_settings.masking_file_name is not None:
-            masking_file_path = os.path.join(self.calibration_dir,
-                                             self._inst_settings.masking_file_name)
+            masking_file_path = os.path.join(self.calibration_dir, self._inst_settings.masking_file_name)
             bragg_mask_list = common.read_masking_file(masking_file_path)
-            focused_vanadium_banks = common.apply_bragg_peaks_masking(focused_vanadium_banks,
-                                                                      mask_list=bragg_mask_list)
+            focused_vanadium_banks = common.apply_bragg_peaks_masking(focused_vanadium_banks, mask_list=bragg_mask_list)
         output = common.spline_workspaces(focused_vanadium_spectra=focused_vanadium_banks,
                                           num_splines=self._inst_settings.spline_coeff)
         return output
@@ -250,12 +239,11 @@ class AbstractInst(object):
         :param output_mode: Optional - Sets additional saving/grouping behaviour depending on the instrument
         :return: d-spacing group of the processed output workspaces
         """
-        d_spacing_group, tof_group = common_output.split_into_tof_d_spacing_groups(
-            run_details=run_details, processed_spectra=processed_spectra)
-        common_output.save_focused_data(
-            d_spacing_group=d_spacing_group,
-            tof_group=tof_group,
-            output_paths=self._generate_out_file_paths(run_details=run_details))
+        d_spacing_group, tof_group = common_output.split_into_tof_d_spacing_groups(run_details=run_details,
+                                                                                   processed_spectra=processed_spectra)
+        common_output.save_focused_data(d_spacing_group=d_spacing_group,
+                                        tof_group=tof_group,
+                                        output_paths=self._generate_out_file_paths(run_details=run_details))
 
         return d_spacing_group, tof_group
 
@@ -295,11 +283,9 @@ class AbstractInst(object):
         output_directory = os.path.abspath(os.path.expanduser(output_directory))
         dat_files_directory = output_directory
         if self._inst_settings.dat_files_directory:
-            dat_files_directory = os.path.join(output_directory,
-                                               self._inst_settings.dat_files_directory)
+            dat_files_directory = os.path.join(output_directory, self._inst_settings.dat_files_directory)
 
-        file_type = "" if run_details.file_extension is None else run_details.file_extension.lstrip(
-            ".")
+        file_type = "" if run_details.file_extension is None else run_details.file_extension.lstrip(".")
         out_file_names = {"output_folder": output_directory}
         format_options = {
             "inst": self._inst_prefix,
@@ -319,12 +305,10 @@ class AbstractInst(object):
             "dspacing_xye_filename": dat_files_directory
         }
         for key, output_dir in output_formats.items():
-            filepath = os.path.join(output_dir,
-                                    getattr(self._inst_settings, key).format(**format_options))
+            filepath = os.path.join(output_dir, getattr(self._inst_settings, key).format(**format_options))
             out_file_names[key] = filepath
 
-        out_file_names['output_name'] = os.path.splitext(
-            os.path.basename(out_file_names['nxs_filename']))[0]
+        out_file_names['output_name'] = os.path.splitext(os.path.basename(out_file_names['nxs_filename']))[0]
         return out_file_names
 
     def _generate_inst_filename(self, run_number, file_ext):

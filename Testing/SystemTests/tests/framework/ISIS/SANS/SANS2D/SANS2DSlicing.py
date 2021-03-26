@@ -24,7 +24,7 @@ class SANS2DMinimalBatchReductionSliced(systemtesting.MantidSystemTest):
         i.MaskFile('MaskSANS2DReductionGUI.txt')
         i.SetEventSlices("0.0-451, 5-10")
         batch_file = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
-        batch.BatchReduce(batch_file, '.nxs',saveAlgs={}, combineDet='rear')
+        batch.BatchReduce(batch_file, '.nxs', saveAlgs={}, combineDet='rear')
 
     def validate(self):
         self.tolerance = 0.02
@@ -39,7 +39,7 @@ class SANS2DMinimalSingleReductionSliced(SANS2DMinimalBatchReductionSliced):
         i.MaskFile('MaskSANS2DReductionGUI.txt')
         i.AssignSample('22048')
         i.AssignCan('22023')
-        i.TransmissionSample('22041','22024')
+        i.TransmissionSample('22041', '22024')
         i.TransmissionCan('22024', '22024')
         i.SetEventSlices("0.0-450, 5-10")
         reduced = i.WavRangeReduction()

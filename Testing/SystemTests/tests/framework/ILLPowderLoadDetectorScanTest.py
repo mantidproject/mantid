@@ -13,7 +13,6 @@ from mantid import config
 # TODO: Once the nexus saver for a scanned workspace is implemented,
 # replace the assertions with compare workspaces with the reference
 class ILLPowderLoadDetectorScanTest(systemtesting.MantidSystemTest):
-
     def __init__(self):
         super(ILLPowderLoadDetectorScanTest, self).__init__()
         self.setUp()

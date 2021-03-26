@@ -28,7 +28,9 @@ class FitScriptGeneratorStartupTest(systemtesting.MantidSystemTest, QtWidgetFind
 
         self.ws_name = "WorkspaceName"
         test_workspace = CreateWorkspace(DataX=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
-                                         DataY=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], NSpec=4, UnitX="Wavelength")
+                                         DataY=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                                         NSpec=4,
+                                         UnitX="Wavelength")
         AnalysisDataService.addOrReplace(self.ws_name, test_workspace)
 
         self.fsg_model = FitScriptGeneratorModel()

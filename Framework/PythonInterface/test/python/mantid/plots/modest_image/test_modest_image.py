@@ -9,6 +9,7 @@ import itertools
 import unittest
 
 import matplotlib
+
 matplotlib.use("agg")
 
 from matplotlib import pyplot as plt
@@ -67,7 +68,7 @@ def check(label, modest, axes, thresh=2.e-5):
         return
 
     # convert to array
-    shp = modest.figure.canvas.get_width_height()[::-1] + (3,)
+    shp = modest.figure.canvas.get_width_height()[::-1] + (3, )
     data1 = np.fromstring(str1, dtype=np.uint8, sep='')
     data2 = np.fromstring(str2, dtype=np.uint8, sep='')
     data1.shape = shp
@@ -102,7 +103,6 @@ class ModestImageTest(unittest.TestCase):
         axim = init(mi.AxesImage, data)
         check('default', modest.axes, axim.axes)
 
-
     def test_move(self):
         """ move at default zoom """
         data = default_data()
@@ -115,20 +115,18 @@ class ModestImageTest(unittest.TestCase):
         axim.axes.set_xlim(xlim[0] + delta, xlim[1] + delta)
         check('move', modest.axes, axim.axes)
 
-
     def test_zoom(self):
-       """ zoom in """
-       data = default_data()
-       modest = init(ModestImage, data)
-       axim = init(mi.AxesImage, data)
-       lohi = 200, 250
-       modest.axes.set_xlim(lohi)
-       axim.axes.set_xlim(lohi)
-       modest.axes.set_ylim(lohi)
-       axim.axes.set_ylim(lohi)
+        """ zoom in """
+        data = default_data()
+        modest = init(ModestImage, data)
+        axim = init(mi.AxesImage, data)
+        lohi = 200, 250
+        modest.axes.set_xlim(lohi)
+        axim.axes.set_xlim(lohi)
+        modest.axes.set_ylim(lohi)
+        axim.axes.set_ylim(lohi)
 
-       check('zoom', modest.axes, axim.axes)
-
+        check('zoom', modest.axes, axim.axes)
 
     def test_zoom_out(self):
         """ zoom out
@@ -145,15 +143,10 @@ class ModestImageTest(unittest.TestCase):
 
         check('zoom_out', modest.axes, axim.axes, thresh=0.4)
 
-
     def test_interpolate(self):
 
-        INTRP_METHODS = ('nearest', 'bilinear', 'bicubic',
-                        'spline16', 'spline36', 'hanning',
-                        'hamming', 'hermite', 'kaiser',
-                        'quadric', 'catrom', 'gaussian',
-                        'bessel', 'mitchell', 'sinc', 'lanczos',
-                        'none')
+        INTRP_METHODS = ('nearest', 'bilinear', 'bicubic', 'spline16', 'spline36', 'hanning', 'hamming', 'hermite',
+                         'kaiser', 'quadric', 'catrom', 'gaussian', 'bessel', 'mitchell', 'sinc', 'lanczos', 'none')
 
         for method in INTRP_METHODS:
             """ change interpolation """
@@ -170,7 +163,6 @@ class ModestImageTest(unittest.TestCase):
             axim.set_interpolation(method)
             check('interp_%s' % method, modest.axes, axim.axes)
 
-
     def test_scale(self):
         """change color scale"""
 
@@ -184,7 +176,6 @@ class ModestImageTest(unittest.TestCase):
 
         check("cmap", modest.axes, axim.axes)
 
-
     def test_unequal_limits(self):
         """Test different x/y scalings"""
         data = default_data()
@@ -197,7 +188,6 @@ class ModestImageTest(unittest.TestCase):
             im.axes.set_ylim(10, 80)
 
         check('unequal_limits', modest.axes, axim.axes)
-
 
     def test_alpha(self):
         """alpha changes """
@@ -236,16 +226,11 @@ class ModestImageTest(unittest.TestCase):
         ax.axes.set_ylim(20, 25)
         ax.axes.figure.canvas.draw()
         modest.axes.figure.canvas.draw()
-        np.testing.assert_array_equal(modest.get_array(),
-                                      ax.get_array())
-
-
+        np.testing.assert_array_equal(modest.get_array(), ax.get_array())
 
     def test_extent(self):
 
-        EXTENT_OPTIONS = itertools.product(['upper', 'lower'],
-                                   [None, [1., 7., -1., 5.]],
-                                   ['', 'x', 'y', 'xy'])
+        EXTENT_OPTIONS = itertools.product(['upper', 'lower'], [None, [1., 7., -1., 5.]], ['', 'x', 'y', 'xy'])
 
         for origin, extent, flip in EXTENT_OPTIONS:
             data = default_data()
@@ -262,8 +247,7 @@ class ModestImageTest(unittest.TestCase):
                 axim.axes.invert_yaxis()
                 modest.axes.invert_yaxis()
 
-            check('extent1_{0}_{1}_{2}'.format(origin, extent is not None, flip),
-                  modest.axes, axim.axes, thresh=0.0)
+            check('extent1_{0}_{1}_{2}'.format(origin, extent is not None, flip), modest.axes, axim.axes, thresh=0.0)
 
             # Try using set_extent
 
@@ -284,8 +268,8 @@ class ModestImageTest(unittest.TestCase):
                 modest.set_extent(extent)
                 axim.set_extent(extent)
 
-            check('extent2_{0}_{1}_{2}'.format(origin, extent is not None, flip),
-                  modest.axes, axim.axes, thresh=0.0)
+            check('extent2_{0}_{1}_{2}'.format(origin, extent is not None, flip), modest.axes, axim.axes, thresh=0.0)
+
 
 if __name__ == '__main__':
     unittest.main()

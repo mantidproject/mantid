@@ -23,7 +23,6 @@ from abins.instruments import get_instrument
 
 class AbinsAlgorithm:
     """Class providing shared utility for multiple inheritence by 1D, 2D implementations"""
-
     def get_common_properties(self) -> None:
         """From user input, set properties common to Abins 1D and 2D versions"""
         self._ab_initio_program = self.getProperty("AbInitioProgram").value
@@ -47,14 +46,14 @@ class AbinsAlgorithm:
         instrument_name = self.getProperty("Instrument").value
         if instrument_name in ALL_INSTRUMENTS:
             self._instrument_name = instrument_name
-            self._instrument = get_instrument(self._instrument_name,
-                                              **self._instrument_kwargs)
+            self._instrument = get_instrument(self._instrument_name, **self._instrument_kwargs)
         else:
             raise ValueError("Unknown instrument %s" % instrument_name)
 
     def declare_common_properties(self) -> None:
         """Declare properties common to Abins 1D and 2D versions"""
-        self.declareProperty(FileProperty("VibrationalOrPhononFile", "",
+        self.declareProperty(FileProperty("VibrationalOrPhononFile",
+                                          "",
                                           action=FileAction.Load,
                                           direction=Direction.Input,
                                           extensions=AB_INITIO_FILE_EXTENSIONS),
@@ -84,33 +83,37 @@ class AbinsAlgorithm:
 
         self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
                              doc="List of atoms to use to calculate partial S."
-                                 "If left blank, workspaces with S for all types of atoms will be calculated. "
-                                 "Element symbols will be interpreted as a sum of all atoms of that element in the "
-                                 "cell. 'atomN' or 'atom_N' (where N is a positive integer) will be interpreted as "
-                                 "individual atoms, indexing from 1 following the order of the input data.")
+                             "If left blank, workspaces with S for all types of atoms will be calculated. "
+                             "Element symbols will be interpreted as a sum of all atoms of that element in the "
+                             "cell. 'atomN' or 'atom_N' (where N is a positive integer) will be interpreted as "
+                             "individual atoms, indexing from 1 following the order of the input data.")
 
-        self.declareProperty(name="SumContributions", defaultValue=False,
+        self.declareProperty(name="SumContributions",
+                             defaultValue=False,
                              doc="Sum the partial dynamical structure factors into a single workspace.")
 
-        self.declareProperty(name="SaveAscii", defaultValue=False,
+        self.declareProperty(name="SaveAscii",
+                             defaultValue=False,
                              doc="Write workspaces to .ascii files after computing them.")
 
-        self.declareProperty(name="ScaleByCrossSection", defaultValue='Incoherent',
+        self.declareProperty(name="ScaleByCrossSection",
+                             defaultValue='Incoherent',
                              validator=StringListValidator(['Total', 'Incoherent', 'Coherent']),
                              doc="Scale the partial dynamical structure factors by the scattering cross section.")
 
         # Abins is supposed to support excitations up to fourth-order. Order 3 and 4 are currently disabled while the
         # weighting is being investigated; these intensities were unreasonably large in hydrogenous test cases
-        self.declareProperty(name="QuantumOrderEventsNumber", defaultValue='1',
+        self.declareProperty(name="QuantumOrderEventsNumber",
+                             defaultValue='1',
                              validator=StringListValidator(['1', '2']),
                              doc="Number of quantum order effects included in the calculation "
-                                 "(1 -> FUNDAMENTALS, 2-> first overtone + FUNDAMENTALS + 2nd order combinations")
+                             "(1 -> FUNDAMENTALS, 2-> first overtone + FUNDAMENTALS + 2nd order combinations")
 
-    def declare_instrument_properties(
-            self, default: str = "TOSCA",
-            choices: Iterable = ALL_INSTRUMENTS,
-            multiple_choice_settings: List[Tuple[str, str, str]] = [],
-            freeform_settings: List[Tuple[str, str, str]] = []):
+    def declare_instrument_properties(self,
+                                      default: str = "TOSCA",
+                                      choices: Iterable = ALL_INSTRUMENTS,
+                                      multiple_choice_settings: List[Tuple[str, str, str]] = [],
+                                      freeform_settings: List[Tuple[str, str, str]] = []):
         """Declare properties related to instrument
 
         Args:
@@ -140,8 +143,7 @@ class AbinsAlgorithm:
             # Populate list of possible instrument settings
             valid_choices = ['']
             for instrument in choices:
-                if (
-                        (instrument in abins.parameters.instruments)
+                if ((instrument in abins.parameters.instruments)
                         and (parameter_name in abins.parameters.instruments[instrument])):
                     valid_choices += sorted(list(abins.parameters.instruments[instrument][parameter_name]))
 
@@ -152,10 +154,7 @@ class AbinsAlgorithm:
                                  doc=doc)
 
         for property_name, default, doc in freeform_settings:
-            self.declareProperty(name=property_name,
-                                 direction=Direction.Input,
-                                 defaultValue=default,
-                                 doc=doc)
+            self.declareProperty(name=property_name, direction=Direction.Input, defaultValue=default, doc=doc)
 
     def validate_common_inputs(self, issues: dict = None) -> Dict[str, str]:
         """Validate inputs common to Abins 1D and 2D versions
@@ -170,11 +169,13 @@ class AbinsAlgorithm:
         if issues is None:
             issues = {}
 
-        input_file_validators = {"CASTEP": self._validate_castep_input_file,
-                                 "CRYSTAL": self._validate_crystal_input_file,
-                                 "DMOL3": self._validate_dmol3_input_file,
-                                 "GAUSSIAN": self._validate_gaussian_input_file,
-                                 "VASP": self._validate_vasp_input_file}
+        input_file_validators = {
+            "CASTEP": self._validate_castep_input_file,
+            "CRYSTAL": self._validate_crystal_input_file,
+            "DMOL3": self._validate_dmol3_input_file,
+            "GAUSSIAN": self._validate_gaussian_input_file,
+            "VASP": self._validate_vasp_input_file
+        }
         ab_initio_program = self.getProperty("AbInitioProgram").value
         vibrational_or_phonon_data_filename = self.getProperty("VibrationalOrPhononFile").value
 
@@ -184,7 +185,9 @@ class AbinsAlgorithm:
 
         workspace_name = self.getPropertyValue("OutputWorkspace")
         # list of special keywords which cannot be used in the name of workspace
-        forbidden_keywords = {"total",}
+        forbidden_keywords = {
+            "total",
+        }
         if workspace_name in mtd:
             issues["OutputWorkspace"] = "Workspace with name " + workspace_name + " already in use; please give " \
                                                                                   "a different name for workspace."
@@ -221,19 +224,20 @@ class AbinsAlgorithm:
             if parameter + '_default' in parameters:
                 return {}
             else:
-                return {"Setting":
-                        f'Instrument "{instrument_name}" does not have a default '
-                        + 'setting, and no setting was specified. Accepted settings: '
-                        + ', '.join(parameters[parameter].keys())}
+                return {
+                    "Setting": f'Instrument "{instrument_name}" does not have a default ' +
+                    'setting, and no setting was specified. Accepted settings: ' +
+                    ', '.join(parameters[parameter].keys())
+                }
 
         downcased_settings = {s.lower(): s for s in parameters[parameter]}
         if setting.lower() in downcased_settings:
             return {}
 
-        return {name:
-                f'{name}: "{setting}" is unknown for instrument '
-                + f'{instrument_name}. Supported values: '
-                + ', '.join(sorted(parameters[parameter].keys()))}
+        return {
+            name: f'{name}: "{setting}" is unknown for instrument ' + f'{instrument_name}. Supported values: ' +
+            ', '.join(sorted(parameters[parameter].keys()))
+        }
 
     @staticmethod
     def get_atom_selection(*, atoms_data: abins.AtomsData, selection: list) -> Tuple[list, list]:
@@ -242,8 +246,7 @@ class AbinsAlgorithm:
         (These atom indices match the user-facing convention and begin at 1.)"""
 
         num_atoms = len(atoms_data)
-        all_atms_smbls = list(set([atoms_data[atom_index]["symbol"]
-                                   for atom_index in range(num_atoms)]))
+        all_atms_smbls = list(set([atoms_data[atom_index]["symbol"] for atom_index in range(num_atoms)]))
         all_atms_smbls.sort()
 
         if len(selection) == 0:  # case: all atoms
@@ -262,8 +265,9 @@ class AbinsAlgorithm:
             atom_numbers = [int(match[0]) for match in atom_numbers if match]  # Remove empty matches, cast rest to int
 
             if len(atom_numbers) != len(set(atom_numbers)):
-                raise ValueError("User atom selection (by number) contains repeated atom. This is not permitted as Abins"
-                                 " cannot create multiple workspaces with the same name.")
+                raise ValueError(
+                    "User atom selection (by number) contains repeated atom. This is not permitted as Abins"
+                    " cannot create multiple workspaces with the same name.")
 
             for atom_symbol in atom_symbols:
                 if atom_symbol not in all_atms_smbls:
@@ -279,8 +283,8 @@ class AbinsAlgorithm:
             if len(atom_symbols) + len(atom_numbers) < len(selection):
                 elements_report = " Symbols: " + ", ".join(atom_symbols) if len(atom_symbols) else ""
                 numbers_report = " Numbers: " + ", ".join(atom_numbers) if len(atom_numbers) else ""
-                raise ValueError("Not all user atom selections ('atoms' option) were understood."
-                                 + elements_report + numbers_report)
+                raise ValueError("Not all user atom selections ('atoms' option) were understood." + elements_report +
+                                 numbers_report)
 
         return atom_numbers, atom_symbols
 
@@ -348,16 +352,29 @@ class AbinsAlgorithm:
                 sub = (len(masses[symbol]) > ONLY_ONE_MASS
                        or abs(Atom(symbol=symbol).mass - masses[symbol][0]) > MASS_EPS)
                 for m in masses[symbol]:
-                    result.extend(self._atom_type_s(num_atoms=num_atoms, mass=m, s_data=s_data, atoms_data=atoms_data,
-                                                    element_symbol=symbol, temp_s_atom_data=temp_s_atom_data,
-                                                    s_atom_data=s_atom_data, substitution=sub))
+                    result.extend(
+                        self._atom_type_s(num_atoms=num_atoms,
+                                          mass=m,
+                                          s_data=s_data,
+                                          atoms_data=atoms_data,
+                                          element_symbol=symbol,
+                                          temp_s_atom_data=temp_s_atom_data,
+                                          s_atom_data=s_atom_data,
+                                          substitution=sub))
         if atom_numbers is not None:
             for atom_number in atom_numbers:
-                result.extend(self._atom_number_s(atom_number=atom_number, s_data=s_data,
-                                                  s_atom_data=s_atom_data, atoms_data=atoms_data))
+                result.extend(
+                    self._atom_number_s(atom_number=atom_number,
+                                        s_data=s_data,
+                                        s_atom_data=s_atom_data,
+                                        atoms_data=atoms_data))
         return result
 
-    def _create_workspace(self, atom_name=None, s_points=None, optional_name="", protons_number=None,
+    def _create_workspace(self,
+                          atom_name=None,
+                          s_points=None,
+                          optional_name="",
+                          protons_number=None,
                           nucleons_number=None):
         """
         Creates workspace for the given frequencies and s_points with S data. After workspace is created it is rebined,
@@ -373,7 +390,9 @@ class AbinsAlgorithm:
         """
 
         ws_name = self._out_ws_name + "_" + atom_name + optional_name
-        self._fill_s_workspace(s_points=s_points, workspace=ws_name, protons_number=protons_number,
+        self._fill_s_workspace(s_points=s_points,
+                               workspace=ws_name,
+                               protons_number=protons_number,
                                nucleons_number=nucleons_number)
         return ws_name
 
@@ -411,16 +430,24 @@ class AbinsAlgorithm:
         total_s_atom_data = np.sum(s_atom_data, axis=0)
 
         atom_workspaces = []
-        atom_workspaces.append(self._create_workspace(atom_name=output_atom_label,
-                                                      s_points=np.copy(total_s_atom_data),
-                                                      optional_name="_total", protons_number=z_number))
-        atom_workspaces.append(self._create_workspace(atom_name=output_atom_label,
-                                                      s_points=np.copy(s_atom_data),
-                                                      protons_number=z_number))
+        atom_workspaces.append(
+            self._create_workspace(atom_name=output_atom_label,
+                                   s_points=np.copy(total_s_atom_data),
+                                   optional_name="_total",
+                                   protons_number=z_number))
+        atom_workspaces.append(
+            self._create_workspace(atom_name=output_atom_label, s_points=np.copy(s_atom_data), protons_number=z_number))
         return atom_workspaces
 
-    def _atom_type_s(self, num_atoms=None, mass=None, s_data=None, atoms_data=None,
-                     element_symbol=None, temp_s_atom_data=None, s_atom_data=None, substitution=None):
+    def _atom_type_s(self,
+                     num_atoms=None,
+                     mass=None,
+                     s_data=None,
+                     atoms_data=None,
+                     element_symbol=None,
+                     temp_s_atom_data=None,
+                     s_atom_data=None,
+                     substitution=None):
         """
         Helper function for calculating S for the given type of atom
 
@@ -462,21 +489,27 @@ class AbinsAlgorithm:
 
         if substitution:
 
-            atom_workspaces.append(self._create_workspace(atom_name=str(nucleons_number) + element_symbol,
-                                                          s_points=np.copy(total_s_atom_data),
-                                                          optional_name="_total", protons_number=element.z_number,
-                                                          nucleons_number=nucleons_number))
-            atom_workspaces.append(self._create_workspace(atom_name=str(nucleons_number) + element_symbol,
-                                                          s_points=np.copy(s_atom_data),
-                                                          protons_number=element.z_number,
-                                                          nucleons_number=nucleons_number))
+            atom_workspaces.append(
+                self._create_workspace(atom_name=str(nucleons_number) + element_symbol,
+                                       s_points=np.copy(total_s_atom_data),
+                                       optional_name="_total",
+                                       protons_number=element.z_number,
+                                       nucleons_number=nucleons_number))
+            atom_workspaces.append(
+                self._create_workspace(atom_name=str(nucleons_number) + element_symbol,
+                                       s_points=np.copy(s_atom_data),
+                                       protons_number=element.z_number,
+                                       nucleons_number=nucleons_number))
         else:
-            atom_workspaces.append(self._create_workspace(atom_name=element_symbol,
-                                                          s_points=np.copy(total_s_atom_data),
-                                                          optional_name="_total", protons_number=element.z_number))
-            atom_workspaces.append(self._create_workspace(atom_name=element_symbol,
-                                                          s_points=np.copy(s_atom_data),
-                                                          protons_number=element.z_number))
+            atom_workspaces.append(
+                self._create_workspace(atom_name=element_symbol,
+                                       s_points=np.copy(total_s_atom_data),
+                                       optional_name="_total",
+                                       protons_number=element.z_number))
+            atom_workspaces.append(
+                self._create_workspace(atom_name=element_symbol,
+                                       s_points=np.copy(s_atom_data),
+                                       protons_number=element.z_number))
 
         return atom_workspaces
 
@@ -546,7 +579,9 @@ class AbinsAlgorithm:
         for wrk_num in range(num_workspaces):
             wrk = mtd[ws_name].getItem(wrk_num)
             SaveAscii(InputWorkspace=Scale(wrk, scale, "Multiply"),
-                      Filename=wrk.name() + ".dat", Separator="Space", WriteSpectrumID=False)
+                      Filename=wrk.name() + ".dat",
+                      Separator="Space",
+                      WriteSpectrumID=False)
 
     @staticmethod
     def get_cross_section(scattering: str = 'Total',
@@ -571,9 +606,7 @@ class AbinsAlgorithm:
         else:
             atom = Atom(z_number=protons_number)
 
-        scattering_keys = {'Incoherent': 'inc_scatt_xs',
-                           'Coherent': 'coh_scatt_xs',
-                           'Total': 'tot_scatt_xs'}
+        scattering_keys = {'Incoherent': 'inc_scatt_xs', 'Coherent': 'coh_scatt_xs', 'Total': 'tot_scatt_xs'}
         return atom.neutron()[scattering_keys[scattering]]
 
     @staticmethod
@@ -596,8 +629,7 @@ class AbinsAlgorithm:
         :type str:
         """
 
-        energy_units_map = {'cm-1': 'DeltaE_inWavenumber',
-                            'mev': 'DeltaE'}
+        energy_units_map = {'cm-1': 'DeltaE_inWavenumber', 'mev': 'DeltaE'}
         energy_units_str = energy_units_map.get(energy_units.lower(), '')
 
         if not energy_units_str:
@@ -616,9 +648,7 @@ class AbinsAlgorithm:
             raise ValueError('Unknown data/units layout "{}"'.format(layout))
 
     @staticmethod
-    def _validate_ab_initio_file_extension(*,
-                                           ab_initio_program: str,
-                                           filename_full_path: str,
+    def _validate_ab_initio_file_extension(*, ab_initio_program: str, filename_full_path: str,
                                            expected_file_extension: str) -> dict:
         """
         Checks consistency between name of ab initio program and extension.
@@ -663,8 +693,7 @@ class AbinsAlgorithm:
                                                       expected_file_extension=".log")
 
     @classmethod
-    def _validate_crystal_input_file(cls,
-                                     filename_full_path: str) -> dict:
+    def _validate_crystal_input_file(cls, filename_full_path: str) -> dict:
         """
         Method to validate input file for CRYSTAL ab initio program.
         :param filename_full_path: full path of a file to check.
@@ -710,11 +739,11 @@ class AbinsAlgorithm:
 
                 line = cls._get_one_line(castep_file)
                 if not cls._compare_one_line(one_line=line, pattern="numberofwavevectors"):
-                    return dict(Invalid=True, Comment=msg_err + "The fourth line should include 'Number of wavevectors'.")
+                    return dict(Invalid=True,
+                                Comment=msg_err + "The fourth line should include 'Number of wavevectors'.")
 
                 line = cls._get_one_line(castep_file)
-                if not cls._compare_one_line(one_line=line,
-                                             pattern="frequenciesin"):
+                if not cls._compare_one_line(one_line=line, pattern="frequenciesin"):
                     return dict(Invalid=True, Comment=msg_err + "The fifth line should be 'Frequencies in'.")
 
                 return dict(Invalid=False, Comment="")
@@ -731,8 +760,8 @@ class AbinsAlgorithm:
                                                             expected_file_extension=".xml")
             if output["Invalid"]:
                 output["Comment"] = ("Invalid filename {}. Expected OUTCAR, *.OUTCAR or"
-                                     " *.xml for VASP calculation output. Please rename your file and try again. "
-                                     .format(filename_full_path))
+                                     " *.xml for VASP calculation output. Please rename your file and try again. ".
+                                     format(filename_full_path))
         return output
 
     @staticmethod

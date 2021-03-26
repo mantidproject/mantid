@@ -12,7 +12,6 @@ import ReflectometryILL_common as common
 
 
 class ReflectometryILL_commonTest(unittest.TestCase):
-
     def tearDown(self):
         mtd.clear()
 

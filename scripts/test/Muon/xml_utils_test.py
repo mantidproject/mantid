@@ -34,10 +34,15 @@ class FittingTabPresenterTest(unittest.TestCase):
 
     @mock.patch('Muon.GUI.Common.utilities.xml_utils.ET.parse')
     def test_that_save_and_load_grouping_xml_correctly_stores_and_reads_period_data(self, mock_file_parse):
-        groups = [MuonGroup('fwd', [1,2,3], [1,3]), MuonGroup('bwd', [4,5,6], [2,4])]
+        groups = [MuonGroup('fwd', [1, 2, 3], [1, 3]), MuonGroup('bwd', [4, 5, 6], [2, 4])]
         pairs = [MuonPair('long', 'fwd', 'bwd')]
         diffs = []
-        xml_tree = save_grouping_to_XML(groups, pairs, diffs, 'filename.xml', save=False, description='Bespoke grouping')
+        xml_tree = save_grouping_to_XML(groups,
+                                        pairs,
+                                        diffs,
+                                        'filename.xml',
+                                        save=False,
+                                        description='Bespoke grouping')
         mock_file_parse.return_value = xml_tree
 
         loaded_groups, loaded_pairs, diffs, loaded_description, loaded_default = load_grouping_from_XML('filename.xml')

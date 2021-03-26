@@ -17,7 +17,6 @@ from mantid.api import *
 
 
 class ExampleSaveAscii(PythonAlgorithm):
-
     def category(self):
         # defines the category the algorithm will be put in the algorithm browser
         return 'Examples'
@@ -27,15 +26,14 @@ class ExampleSaveAscii(PythonAlgorithm):
         # Declare properties
 
         # Declare a property for the output filename with a default of default_output.txt
-        self.declareProperty(FileProperty(name='OutputFilename',
-                                          defaultValue='default_output.txt',
-                                          action=FileAction.Save,
-                                          extensions=['txt']))
+        self.declareProperty(
+            FileProperty(name='OutputFilename',
+                         defaultValue='default_output.txt',
+                         action=FileAction.Save,
+                         extensions=['txt']))
 
         # Declare a property for the input workspace which will be written to file
-        self.declareProperty(WorkspaceProperty(name='InputWorkspace',
-                                               defaultValue='',
-                                               direction=Direction.Input),
+        self.declareProperty(WorkspaceProperty(name='InputWorkspace', defaultValue='', direction=Direction.Input),
                              doc='Documentation for this property')
 
     def PyExec(self):
@@ -65,19 +63,17 @@ class ExampleSaveAscii(PythonAlgorithm):
                 edata = input_workspace.readE(histogram_n)
 
                 # Write the spectrum histogram index to file
-                file_handle.write(str(histogram_n+1) + '\n')  # +1 to convert to 1 indexed
+                file_handle.write(str(histogram_n + 1) + '\n')  # +1 to convert to 1 indexed
 
                 # Loop through each bin
                 for bin_n in range(input_workspace.blocksize()):
 
                     # Calculate bin center from bin boundaries
-                    bin_center = xdata[bin_n]+(xdata[bin_n+1]-xdata[bin_n])/2.
+                    bin_center = xdata[bin_n] + (xdata[bin_n + 1] - xdata[bin_n]) / 2.
 
                     # Write the data for the nth bin to file
                     # with a precision of 4 decimal places
-                    file_handle.write('{0:.4f},{1:.4f},{2:.4f}\n'.format(bin_center,
-                                                                         ydata[bin_n],
-                                                                         edata[bin_n]))
+                    file_handle.write('{0:.4f},{1:.4f},{2:.4f}\n'.format(bin_center, ydata[bin_n], edata[bin_n]))
 
 
 # Register algorithm with Mantid

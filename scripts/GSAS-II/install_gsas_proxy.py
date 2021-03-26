@@ -82,32 +82,36 @@ def install_gsasii(install_directory, revision_number, force_overwrite):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script to install GSAS-II")
 
-    parser.add_argument("-d", "--install-dir",
+    parser.add_argument("-d",
+                        "--install-dir",
                         default=os.path.abspath(os.sep),
                         type=str,
                         dest="install_dir",
                         help="Directory to install GSAS-II in "
-                             "(leave blank to use current drive (Windows) or / (Linux)")
+                        "(leave blank to use current drive (Windows) or / (Linux)")
 
-    parser.add_argument("-v", "--version",
+    parser.add_argument("-v",
+                        "--version",
                         default=0,
                         type=int,
                         dest="version",
                         help="SVN revision number to install (leave blank to use the latest revision")
 
-    parser.add_argument("-b", "--build-server",
+    parser.add_argument("-b",
+                        "--build-server",
                         action="store_true",
                         default=False,
                         dest="build_server_mode",
                         help="Build server mode. Install GSAS-II in Python user site package directory "
-                             "and don't wait for prompt before exiting")
+                        "and don't wait for prompt before exiting")
 
-    parser.add_argument("-f", "--force-overwrite",
+    parser.add_argument("-f",
+                        "--force-overwrite",
                         action="store_true",
                         default=False,
                         dest="force_overwrite",
                         help="Force overwrite mode. If a GSAS-II installation is found at the requested "
-                             "directory, remove it and perform a fresh install")
+                        "directory, remove it and perform a fresh install")
 
     args = parser.parse_args()
 

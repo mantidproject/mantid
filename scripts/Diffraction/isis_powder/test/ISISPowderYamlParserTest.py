@@ -12,7 +12,6 @@ from isis_powder.routines import yaml_parser
 
 
 class ISISPowderYamlParserTest(unittest.TestCase):
-
     def setUp(self):
         self.temp_file_paths = []
 

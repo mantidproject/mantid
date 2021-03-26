@@ -12,14 +12,12 @@ import os
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.kernel import config
 from sans.command_interface.ISISCommandInterface import (SANS2D, Set1D, Detector, MaskFile, Gravity, AssignSample,
-                                                         WavRangeReduction, DefaultTrans, UseCompatibilityMode,
-                                                         AddRuns)
+                                                         WavRangeReduction, DefaultTrans, UseCompatibilityMode, AddRuns)
 from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DMultiPeriodAddFiles_V2(systemtesting.MantidSystemTest):
-
     def requiredMemoryMB(self):
         """Requires 2.5Gb"""
         return 2500
@@ -37,8 +35,10 @@ class SANS2DMultiPeriodAddFiles_V2(systemtesting.MantidSystemTest):
         AssignSample('5512-add.nxs', period=7)
 
         WavRangeReduction(2, 4, DefaultTrans)
-        paths = [os.path.join(config['defaultsave.directory'], 'SANS2D00005512-add.nxs'),
-                 os.path.join(config['defaultsave.directory'], 'SANS2D00005512.log')]
+        paths = [
+            os.path.join(config['defaultsave.directory'], 'SANS2D00005512-add.nxs'),
+            os.path.join(config['defaultsave.directory'], 'SANS2D00005512.log')
+        ]
         for path in paths:
             if os.path.exists(path):
                 os.remove(path)

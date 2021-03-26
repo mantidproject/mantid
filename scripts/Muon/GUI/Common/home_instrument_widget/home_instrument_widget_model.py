@@ -18,7 +18,6 @@ class InstrumentWidgetModel(object):
     so that when processing is done from elsewhere the parameters of the pre-processing are up-to-date with the
     GUI.
     """
-
     def __init__(self, context=None):
         self._data = context.data_context
         self._context = context
@@ -93,7 +92,8 @@ class InstrumentWidgetModel(object):
 
     def get_dead_time_table_from_data(self):
         dead_time_name = self._data.current_data["DataDeadTimeTable"]
-        return api.AnalysisDataService.retrieve(self._data.current_data["DataDeadTimeTable"]) if dead_time_name else None
+        return api.AnalysisDataService.retrieve(
+            self._data.current_data["DataDeadTimeTable"]) if dead_time_name else None
 
     def get_dead_time_table(self):
         return self._data.dead_time_table
@@ -171,7 +171,7 @@ class InstrumentWidgetModel(object):
             if variable_rebin_list[1] <= 0:
                 return (True, '')
 
-            if (variable_rebin_list[2] - variable_rebin_list[0])%variable_rebin_list[1] != 0:
+            if (variable_rebin_list[2] - variable_rebin_list[0]) % variable_rebin_list[1] != 0:
                 return (False, 'Step and bin boundaries must line up')
 
             variable_rebin_list = variable_rebin_list[2:]

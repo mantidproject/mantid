@@ -15,10 +15,10 @@ import os
 
 
 def do_cleanup():
-    Files = ["BioSANS_test_data_reduction.log",
-             "BioSANS_test_data_Iq.xml",
-             "BioSANS_test_data_Iq.txt",
-             "BioSANS_test_data_Iqxy.dat"]
+    Files = [
+        "BioSANS_test_data_reduction.log", "BioSANS_test_data_Iq.xml", "BioSANS_test_data_Iq.txt",
+        "BioSANS_test_data_Iqxy.dat"
+    ]
     for filename in Files:
         absfile = FileFinder.getFullPath(filename)
         if os.path.exists(absfile):
@@ -30,7 +30,6 @@ class HFIRReductionAPIv2(systemtesting.MantidSystemTest):
     """
         Simple reduction example
     """
-
     def cleanup(self):
         do_cleanup()
         return True
@@ -38,7 +37,7 @@ class HFIRReductionAPIv2(systemtesting.MantidSystemTest):
     def runTest(self):
 
         configI = ConfigService.Instance()
-        configI["facilityName"]='HFIR'
+        configI["facilityName"] = 'HFIR'
         GPSANS()
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
@@ -60,14 +59,13 @@ class HFIRAbsoluteScalingReference(systemtesting.MantidSystemTest):
     """
         Test absolute scaling using a reference data set
     """
-
     def cleanup(self):
         do_cleanup()
         return True
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='HFIR'
+        configI["facilityName"] = 'HFIR'
         GPSANS()
         SetSampleDetectorDistance(6000)
         SolidAngle(detector_tubes=True)
@@ -91,14 +89,13 @@ class HFIRAbsoluteScalingValue(systemtesting.MantidSystemTest):
     """
         Test absolute scaling using a reference data set
     """
-
     def cleanup(self):
         do_cleanup()
         return True
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='HFIR'
+        configI["facilityName"] = 'HFIR'
         GPSANS()
         SetSampleDetectorDistance(6000)
         SolidAngle(detector_tubes=True)

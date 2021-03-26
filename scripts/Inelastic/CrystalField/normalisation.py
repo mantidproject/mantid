@@ -13,14 +13,14 @@ def _get_normalisation(nre, bnames):
     """ Helper function to calculate the normalisation factor.
         Defined as: ||Blm|| = sum_{Jz,Jz'} |<Jz|Blm|Jz'>|^2 / (2J+1)
     """
-    Jvals = [0, 5./2, 4, 9./2, 4, 5./2, 0, 7./2, 6, 15./2, 8, 15./2, 6, 7./2]
+    Jvals = [0, 5. / 2, 4, 9. / 2, 4, 5. / 2, 0, 7. / 2, 6, 15. / 2, 8, 15. / 2, 6, 7. / 2]
     J = (-nre / 2.) if (nre < 0) else Jvals[nre]
     retval = {}
     for bname in bnames:
         bdict = {bname: 1}
         ee, vv, ham = CFEnergy(nre, **bdict)
         Omat = np.mat(ham)
-        norm = np.trace(np.real(Omat * np.conj(Omat))) / (2*J+1)
+        norm = np.trace(np.real(Omat * np.conj(Omat))) / (2 * J + 1)
         retval[bname] = np.sqrt(np.abs(norm)) * np.sign(norm)
     return retval
 
@@ -32,7 +32,7 @@ def _parse_args(**kwargs):
     Blms = ['B20', 'B21', 'B22', 'B40', 'B41', 'B42', 'B43', 'B44', 'B60', 'B61', 'B62', 'B63', 'B64', 'B65', 'B66']
     # Some Error checking
     if 'Ion' not in kwargs.keys() and 'IonNum' not in kwargs.keys():
-        raise NameError('You must specify the ion using either the ''Ion'', ''IonNum'' keywords')
+        raise NameError('You must specify the ion using either the ' 'Ion' ', ' 'IonNum' ' keywords')
     if 'Ion' in kwargs.keys():
         nre = ionname2Nre(kwargs['Ion'])
     else:
@@ -170,7 +170,7 @@ def split2range(*args, **kwargs):
     argin['Output'] = 'dictionary'
     argin['Parameters'] = []
     # Parses the non-keyword arguments
-    for ia in range(3 if len(args)>3 else len(args)):
+    for ia in range(3 if len(args) > 3 else len(args)):
         argin[argnames[ia]] = args[ia]
     # Further arguments beyond the first 3 are treated as crystal field parameter names
     for ia in range(3, len(args)):
@@ -187,7 +187,7 @@ def split2range(*args, **kwargs):
 
     # Error checking
     if 'Ion' not in argin.keys() and 'IonNum' not in argin.keys():
-        raise NameError('You must specify the ion using either the ''Ion'', ''IonNum'' keywords')
+        raise NameError('You must specify the ion using either the ' 'Ion' ', ' 'IonNum' ' keywords')
     if 'Ion' in argin.keys():
         nre = ionname2Nre(kwargs['Ion'])
     else:
@@ -203,7 +203,7 @@ def split2range(*args, **kwargs):
     Blm = norm2stev(IonNum=nre, **Nlm)
     ee, vv, ham = CFEnergy(nre, **Blm)
     # Factor of 2 is needed to get the Gaussian centred on the desired energy splitting.
-    splitting_factor = 2 * argin['EnergySplitting'] / (np.max(ee-np.min(ee)))
+    splitting_factor = 2 * argin['EnergySplitting'] / (np.max(ee - np.min(ee)))
     Nlm = {}
     for bname in Blm.keys():
         Nlm[bname] = splitting_factor

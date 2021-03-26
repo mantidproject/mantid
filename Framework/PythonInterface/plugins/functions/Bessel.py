@@ -12,7 +12,6 @@ from scipy import special as sp
 
 
 class Bessel(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 

@@ -9,7 +9,6 @@
     accessing certain objects easier.
 """
 
-
 from mantid.kernel import (ConfigServiceImpl, Logger, PropertyManagerDataServiceImpl, UnitFactoryImpl, UsageServiceImpl)
 
 
@@ -31,13 +30,11 @@ def lazy_instance_access(cls, key_as_str=False):
     for ``__contains__``
     :return: A new LazySingletonHolder wrapping cls
     """
-
     class LazySingletonHolder(object):
         """
         Delays construction of a singleton instance until the
         first attribute access.
         """
-
         def __getattribute__(self, item):
             # Called for each attribute access. cls.Instance() constructs
             # the singleton at first access

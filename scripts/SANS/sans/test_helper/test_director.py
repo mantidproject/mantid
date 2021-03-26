@@ -20,16 +20,14 @@ from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import get_wavele
 from sans.state.StateObjects.StateAdjustment import get_adjustment_builder
 from sans.state.StateObjects.StateConvertToQ import get_convert_to_q_builder
 
-from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality,
-                               FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape,
-                               SANSInstrument)
+from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality, FitModeForMerge, RebinType,
+                               RangeStepType, SaveType, FitType, SampleShape, SANSInstrument)
 from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 class TestDirector(object):
     """ The purpose of this builder is to create a valid state object for tests"""
-
     def __init__(self):
         super(TestDirector, self).__init__()
         self.data_state = None
@@ -44,8 +42,16 @@ class TestDirector(object):
         self.convert_to_q_state = None
         self.inst_info_state = None
 
-    def set_states(self, data_state=None, move_state=None, reduction_state=None, slice_state=None,
-                   mask_state=None, wavelength_state=None, save_state=None, scale_state=None, adjustment_state=None,
+    def set_states(self,
+                   data_state=None,
+                   move_state=None,
+                   reduction_state=None,
+                   slice_state=None,
+                   mask_state=None,
+                   wavelength_state=None,
+                   save_state=None,
+                   scale_state=None,
+                   adjustment_state=None,
                    convert_to_q_state=None):
         self.data_state = data_state
         self.data_state = data_state

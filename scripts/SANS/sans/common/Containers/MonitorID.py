@@ -7,7 +7,7 @@
 
 
 class MonitorID(object):
-    def __init__(self, monitor_spec_num, monitor_name = None):
+    def __init__(self, monitor_spec_num, monitor_name=None):
         self.monitor_name = monitor_name
         self.monitor_spec_num = monitor_spec_num
 

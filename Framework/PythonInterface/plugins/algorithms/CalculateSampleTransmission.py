@@ -25,32 +25,37 @@ class CalculateSampleTransmission(PythonAlgorithm):
         return 'Sample'
 
     def seeAlso(self):
-        return [ "SetSampleMaterial" ]
+        return ["SetSampleMaterial"]
 
     def summary(self):
-        return 'Calculates the scattering & transmission for a given sample material and size over a given wavelength range.'
+        return 'Calculates the scattering & transmission for a given sample material and size over a given wavelength' \
+               ' range.'
 
     def PyInit(self):
-        self.declareProperty(name='WavelengthRange', defaultValue='',
+        self.declareProperty(name='WavelengthRange',
+                             defaultValue='',
                              validator=StringMandatoryValidator(),
                              doc='Wavelength range to calculate transmission for.')
 
-        self.declareProperty(name='ChemicalFormula', defaultValue='',
+        self.declareProperty(name='ChemicalFormula',
+                             defaultValue='',
                              validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
 
-        self.declareProperty(name='DensityType', defaultValue = 'Mass Density',
+        self.declareProperty(name='DensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc = 'Use of Mass density or Number density')
+                             doc='Use of Mass density or Number density')
 
-        self.declareProperty(name='Density', defaultValue=0.1,
+        self.declareProperty(name='Density',
+                             defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3). Default=0.1')
 
-        self.declareProperty(name='Thickness', defaultValue=0.1,
-                             doc='Sample thickness (cm). Default=0.1')
+        self.declareProperty(name='Thickness', defaultValue=0.1, doc='Sample thickness (cm). Default=0.1')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
-                             doc='Outputs the sample transmission over the wavelength range as a function of wavelength.')
+        self.declareProperty(
+            MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
+            doc='Outputs the sample transmission over the wavelength range as a function of wavelength.')
 
     def validateInputs(self):
         issues = dict()
@@ -69,16 +74,21 @@ class CalculateSampleTransmission(PythonAlgorithm):
         self._setup()
 
         # Create the workspace and set the sample material
-        CreateWorkspace(OutputWorkspace=self._output_ws, NSpec=2, DataX=[0, 1], DataY=[0, 0],
-                        VerticalAxisUnit='Text', VerticalAxisValues='Transmission,Scattering')
-        Rebin(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws,
-              Params=self._bin_params)
+        CreateWorkspace(OutputWorkspace=self._output_ws,
+                        NSpec=2,
+                        DataX=[0, 1],
+                        DataY=[0, 0],
+                        VerticalAxisUnit='Text',
+                        VerticalAxisValues='Transmission,Scattering')
+        Rebin(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws, Params=self._bin_params)
 
         if self._density_type == 'Mass Density':
             builder = MaterialBuilder()
             mat = builder.setFormula(self._chemical_formula).setMassDensity(self._density).build()
             self._density = mat.numberDensity
-        SetSampleMaterial(InputWorkspace=self._output_ws, ChemicalFormula=self._chemical_formula, SampleNumberDensity=self._density)
+        SetSampleMaterial(InputWorkspace=self._output_ws,
+                          ChemicalFormula=self._chemical_formula,
+                          SampleNumberDensity=self._density)
         ConvertToPointData(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws)
 
         ws = mtd[self._output_ws]

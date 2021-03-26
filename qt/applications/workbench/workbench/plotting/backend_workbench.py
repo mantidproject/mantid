@@ -14,10 +14,9 @@ It uses qtagg for rendering but the ensures that any rendering calls
 are done on the main thread of the application as the default
 """
 
-from workbench.plotting.figuremanager import (
-    MantidFigureCanvas, QAppThreadCall, draw_if_interactive_impl, show_impl, new_figure_manager as
-    new_figure_manager_impl, new_figure_manager_given_figure as
-    new_figure_manager_given_figure_impl)
+from workbench.plotting.figuremanager import (MantidFigureCanvas, QAppThreadCall, draw_if_interactive_impl, show_impl,
+                                              new_figure_manager as new_figure_manager_impl,
+                                              new_figure_manager_given_figure as new_figure_manager_given_figure_impl)
 
 # -----------------------------------------------------------------------------
 # Backend implementation

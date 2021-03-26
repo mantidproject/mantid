@@ -15,7 +15,6 @@ from mantid.kernel import Direction, IntBoundedValidator
 from mantid.simpleapi import ConvertToHistogram, ConvertToPointData, DeleteWorkspace, LoadAscii, WorkspaceFactory, \
     CropWorkspaceRagged
 
-
 TYPE_KEYS = {"10": "Prompt", "20": "Delayed", "99": "Total"}
 SPECTRUM_INDEX = {"Delayed": 1, "Prompt": 2, "Total": 3}
 NUM_FILES_PER_DETECTOR = 3
@@ -30,14 +29,17 @@ class LoadElementalAnalysisData(PythonAlgorithm):
         return "DataHandling"
 
     def PyInit(self):
-        self.declareProperty(name='Run', defaultValue=0, validator=IntBoundedValidator(lower=0),
+        self.declareProperty(name='Run',
+                             defaultValue=0,
+                             validator=IntBoundedValidator(lower=0),
                              doc='Run number to load')
 
-        self.declareProperty(WorkspaceGroupProperty(name='GroupWorkspace', defaultValue='',
-                                                    direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty(name='GroupWorkspace', defaultValue='', direction=Direction.Output),
                              doc='Output group workspace for run')
 
-        self.declareProperty(name="Directory", defaultValue="", direction=Direction.Output,
+        self.declareProperty(name="Directory",
+                             defaultValue="",
+                             direction=Direction.Output,
                              doc="provides the directory where the run files were acquired")
 
     def validateInputs(self):
@@ -130,7 +132,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
                         maxX.append(xdata[-1])
                     else:
                         maxX.append(xdata[-1] - 1)
-                CropWorkspaceRagged(InputWorkspace=detector, OutputWorkspace=detector, xmin = minX, xmax = maxX)
+                CropWorkspaceRagged(InputWorkspace=detector, OutputWorkspace=detector, xmin=minX, xmax=maxX)
                 overall_ws.addWorkspace(AnalysisDataService.retrieve(detector))
         self.setProperty("GroupWorkspace", overall_ws)
 
@@ -146,7 +148,8 @@ class LoadElementalAnalysisData(PythonAlgorithm):
             # create single ws for the merged data, use original ws as a template
             template_ws = next(ws for ws in workspace_list if ws is not None)
             merged_ws = WorkspaceFactory.create(AnalysisDataService.retrieve(template_ws),
-                                                NVectors=NUM_FILES_PER_DETECTOR, XLength=max_num_bins,
+                                                NVectors=NUM_FILES_PER_DETECTOR,
+                                                XLength=max_num_bins,
                                                 YLength=max_num_bins)
 
             # create a merged workspace based on every entry from workspace list

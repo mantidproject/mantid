@@ -91,13 +91,11 @@ class FocusPresenter(object):
             create_error_message(self.view, "Check run numbers/path is valid.")
             return False
         if not check_workspaces_exist() or not self.current_calibration.is_valid():
-            create_error_message(
-                self.view, "Create or Load a calibration via the Calibration tab before focusing.")
+            create_error_message(self.view, "Create or Load a calibration via the Calibration tab before focusing.")
             return False
         if self.current_calibration.get_instrument() != self.instrument:
             create_error_message(
-                self.view,
-                "Please make sure the selected instrument matches instrument for the current calibration.\n"
+                self.view, "Please make sure the selected instrument matches instrument for the current calibration.\n"
                 "The instrument for the current calibration is: " + self.current_calibration.get_instrument())
             return False
         if self.view.get_crop_checked() and not self.cropping_widget.is_valid():
@@ -109,8 +107,8 @@ class FocusPresenter(object):
         if len(paths) > 10:  # Just a guess on the warning for now. May change in future.
             response = QMessageBox.warning(
                 self.view, 'Engineering Diffraction - Warning',
-                'You are attempting to focus {} workspaces. This may take some time.\n\n Would you like to continue?'
-                .format(len(paths)), QMessageBox.Ok | QMessageBox.Cancel)
+                'You are attempting to focus {} workspaces. This may take some time.\n\n Would you like to continue?'.
+                format(len(paths)), QMessageBox.Ok | QMessageBox.Cancel)
             return response == QMessageBox.Ok
         else:
             return True

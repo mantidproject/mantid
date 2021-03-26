@@ -35,7 +35,7 @@ class Predicate(MantidQt.MantidWidgets.Batch.RowPredicate):
         return bool(self.meetsCriteria(location))
 
 
-def make_regex_filter(table, text, col = 0):
+def make_regex_filter(table, text, col=0):
     try:
         regex = re.compile(text)
         return Predicate(lambda location: regex.match(table.cellAt(location, col).contentText()))
@@ -80,7 +80,7 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
         self.clipboard = self.table.selectedSubtrees()
         self.table.clearSelection()
         if self.clipboard is None:
-            print ("Bad selection for copy.")
+            print("Bad selection for copy.")
 
     def on_paste_rows_request(self):
         replacement_roots = self.table.selectedSubtreeRoots()
@@ -96,23 +96,15 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
         self.filterBox.setText('')
 
     def options_hint_strategy(self):
-        return MantidQt.MantidWidgets.AlgorithmHintStrategy("ReflectometryReductionOneAuto",
-                                                            ["ThetaIn", "ThetaOut", "InputWorkspace",
-                                                             "OutputWorkspace", "OutputWorkspaceBinned",
-                                                             "OutputWorkspaceWavelength", "FirstTransmissionRun",
-                                                             "SecondTransmissionRun", "MomentumTransferMin",
-                                                             "MomentumTransferMax", "MomentumTransferStep",
-                                                             "ScaleFactor"])
+        return MantidQt.MantidWidgets.AlgorithmHintStrategy("ReflectometryReductionOneAuto", [
+            "ThetaIn", "ThetaOut", "InputWorkspace", "OutputWorkspace", "OutputWorkspaceBinned",
+            "OutputWorkspaceWavelength", "FirstTransmissionRun", "SecondTransmissionRun", "MomentumTransferMin",
+            "MomentumTransferMax", "MomentumTransferStep", "ScaleFactor"
+        ])
 
     def setup_layout(self):
-        self.table = MantidQt.MantidWidgets.Batch.JobTreeView(["Run(s)",
-                                                               "Angle",
-                                                               "Transmission Run(s)",
-                                                               "Q min",
-                                                               "Q max",
-                                                               "dQ/Q",
-                                                               "Scale",
-                                                               "Options"], cell(""), self)
+        self.table = MantidQt.MantidWidgets.Batch.JobTreeView(
+            ["Run(s)", "Angle", "Transmission Run(s)", "Q min", "Q max", "dQ/Q", "Scale", "Options"], cell(""), self)
         self.table.setHintsForColumn(7, self.options_hint_strategy())
 
         self.table_signals = MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.table)
@@ -126,14 +118,7 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
 
         self.table.appendChildRowOf(row([]), [cell("A")])
         self.table.appendChildRowOf(row([]), [cell("B")])
-        self.table.appendChildRowOf(row([0]), row_from_text("C",
-                                                            "C",
-                                                            "C",
-                                                            "C",
-                                                            "C",
-                                                            "C",
-                                                            "C",
-                                                            "C"))
+        self.table.appendChildRowOf(row([0]), row_from_text("C", "C", "C", "C", "C", "C", "C", "C"))
 
         self.filterBox = QtGui.QLineEdit(self)
         self.filterBox.textEdited.connect(lambda value: self.table.filterRowsBy(make_regex_filter(self.table, value)))

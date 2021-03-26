@@ -9,7 +9,6 @@ from mantid.kernel import *
 from mantid.simpleapi import *
 from mantid.api import *
 
-
 import os.path
 
 
@@ -30,8 +29,7 @@ class IndirectCalibration(DataProcessorAlgorithm):
         return 'Creates a calibration workspace from a White-Beam Vanadium run.'
 
     def PyInit(self):
-        self.declareProperty(StringArrayProperty(name='InputFiles'),
-                             doc='Comma separated list of input files')
+        self.declareProperty(StringArrayProperty(name='InputFiles'), doc='Comma separated list of input files')
 
         self.declareProperty(IntArrayProperty(name='DetectorRange',
                                               values=[0, 1],
@@ -48,14 +46,11 @@ class IndirectCalibration(DataProcessorAlgorithm):
                                                 validator=FloatArrayMandatoryValidator()),
                              doc='Time of flight range over the background.')
 
-        self.declareProperty(name='ScaleFactor', defaultValue=1.0,
-                             doc='Factor by which to scale the result.')
+        self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='Factor by which to scale the result.')
 
-        self.declareProperty(name='LoadLogFiles', defaultValue=False,
-                             doc = 'Option to load log files.' )
+        self.declareProperty(name='LoadLogFiles', defaultValue=False, doc='Option to load log files.')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                                               direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace for calibration data.')
 
     def validateInputs(self):
@@ -107,7 +102,7 @@ class IndirectCalibration(DataProcessorAlgorithm):
 
                 runs.append(root)
                 self._run_numbers.append(get_run_number(root))
-            except (RuntimeError,ValueError) as exc:
+            except (RuntimeError, ValueError) as exc:
                 logger.error('Could not load raw file "%s": %s' % (in_file, str(exc)))
             load_prog.report('Loading file: ' + str(i))
             i += 1
@@ -115,13 +110,10 @@ class IndirectCalibration(DataProcessorAlgorithm):
         calib_ws_name = 'calibration'
         merge_prog = Progress(self, start=0.30, end=0.40, nreports=2)
         if len(runs) > 1:
-            MergeRuns(InputWorkspaces=",".join(runs),
-                      OutputWorkspace=calib_ws_name)
+            MergeRuns(InputWorkspaces=",".join(runs), OutputWorkspace=calib_ws_name)
             merge_prog.report('Workspaces merged')
             factor = 1.0 / len(runs)
-            Scale(InputWorkspace=calib_ws_name,
-                  OutputWorkspace=calib_ws_name,
-                  Factor=factor)
+            Scale(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name, Factor=factor)
             merge_prog.report('Scaling complete')
         else:
             calib_ws_name = runs[0]
@@ -148,8 +140,7 @@ class IndirectCalibration(DataProcessorAlgorithm):
                     RangeUpper=self._peak_range[1])
 
         workflow_prog.report('Summing Spectra')
-        temp_sum = SumSpectra(InputWorkspace=calib_ws_name,
-                              OutputWorkspace='__temp_sum')
+        temp_sum = SumSpectra(InputWorkspace=calib_ws_name, OutputWorkspace='__temp_sum')
         total = temp_sum.readY(0)[0]
         DeleteWorkspace(temp_sum)
 
@@ -193,17 +184,17 @@ class IndirectCalibration(DataProcessorAlgorithm):
         """
 
         # Add sample logs to output workspace
-        sample_logs = [('calib_peak_min', self._peak_range[0]),
-                       ('calib_peak_max', self._peak_range[1]),
-                       ('calib_back_min', self._back_range[0]),
-                       ('calib_back_max', self._back_range[1]),
+        sample_logs = [('calib_peak_min', self._peak_range[0]), ('calib_peak_max', self._peak_range[1]),
+                       ('calib_back_min', self._back_range[0]), ('calib_back_max', self._back_range[1]),
                        ('calib_run_numbers', ','.join(self._run_numbers))]
 
         if self._intensity_scale is not None:
             sample_logs.append(('calib_scale_factor', self._intensity_scale))
 
-        log_alg = self.createChildAlgorithm(name='AddSampleLogMultiple', startProgress=0.9,
-                                            endProgress=1.0, enableLogging=True)
+        log_alg = self.createChildAlgorithm(name='AddSampleLogMultiple',
+                                            startProgress=0.9,
+                                            endProgress=1.0,
+                                            enableLogging=True)
         log_alg.setProperty('Workspace', self._out_ws)
         log_alg.setProperty('LogNames', [log[0] for log in sample_logs])
         log_alg.setProperty('LogValues', [log[1] for log in sample_logs])

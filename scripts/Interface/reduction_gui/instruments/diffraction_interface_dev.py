@@ -30,12 +30,12 @@ class DiffractionInterface(InstrumentInterface):
         self.scripter = DiffractionReductionScripter(name=name, facility=settings.facility_name)
 
         # Tab 1: Run number setup (Will be the first one)
-        self.attach(RunSetupWidget(settings = self._settings, data_type = self.data_type))
+        self.attach(RunSetupWidget(settings=self._settings, data_type=self.data_type))
 
         # Tab 2: Advanced and Vanadium number setup
-        self.attach(AdvancedSetupWidget(settings = self._settings, data_type = self.data_type))
+        self.attach(AdvancedSetupWidget(settings=self._settings, data_type=self.data_type))
 
         # Tab 3: Event filters setup
-        self.attach(FilterSetupWidget(settings = self._settings, data_type = self.data_type))
+        self.attach(FilterSetupWidget(settings=self._settings, data_type=self.data_type))
 
         return

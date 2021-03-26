@@ -25,7 +25,6 @@ class GroupingTabModel(object):
 
     pairs and groups should be of type MuonGroup and MuonPair respectively.
     """
-
     def __init__(self, context=None):
         self._context = context
         self._data = context.data_context
@@ -81,7 +80,8 @@ class GroupingTabModel(object):
 
     @property
     def group_and_pair_names(self):
-        return self._groups_and_pairs.group_names + self._groups_and_pairs.pair_names + self._groups_and_pairs.diff_names
+        return self._groups_and_pairs.group_names + self._groups_and_pairs.pair_names + \
+               self._groups_and_pairs.diff_names
 
     @property
     def selected_groups(self):
@@ -228,7 +228,8 @@ class GroupingTabModel(object):
         maximum_number_of_periods = max([self._context.num_periods(run) for run in self._context.current_runs])
 
         self._groups_and_pairs.reset_group_and_pairs_to_default(self._data.current_workspace, self._data.instrument,
-                                                                self._data.main_field_direction, maximum_number_of_periods)
+                                                                self._data.main_field_direction,
+                                                                maximum_number_of_periods)
         return "success"
 
     def reset_selected_groups_and_pairs(self):
@@ -254,9 +255,10 @@ class GroupingTabModel(object):
 
     def get_last_data_from_file(self):
         if self._data.current_runs:
-            return round(max(
-                self._data.get_loaded_data_for_run(self._data.current_runs[-1])['OutputWorkspace'][0].workspace.dataX(
-                    0)), 3)
+            return round(
+                max(
+                    self._data.get_loaded_data_for_run(
+                        self._data.current_runs[-1])['OutputWorkspace'][0].workspace.dataX(0)), 3)
         else:
             return 1.0
 

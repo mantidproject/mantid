@@ -35,8 +35,8 @@ class KpointsData(collections.abc.Sequence):
                   unit_cell.shape == (3, 3)
 
     """
-    def __init__(self, *, frequencies: np.ndarray, atomic_displacements: np.ndarray,
-                 weights: np.ndarray, k_vectors: np.ndarray, unit_cell: np.ndarray) -> None:
+    def __init__(self, *, frequencies: np.ndarray, atomic_displacements: np.ndarray, weights: np.ndarray,
+                 k_vectors: np.ndarray, unit_cell: np.ndarray) -> None:
         super().__init__()
 
         self._data = {}
@@ -47,28 +47,24 @@ class KpointsData(collections.abc.Sequence):
                 raise TypeError("All arguments to KpointsData should be numpy arrays")
 
         # unit_cell
-        if not (unit_cell.shape == (dim, dim)
-                and unit_cell.dtype.num == FLOAT_ID):
+        if not (unit_cell.shape == (dim, dim) and unit_cell.dtype.num == FLOAT_ID):
             raise ValueError("Invalid values of unit cell vectors.")
         self.unit_cell = unit_cell
 
         # weights
         num_k = weights.size
-        if not (weights.dtype.num == FLOAT_ID
-                and np.allclose(weights, weights[weights >= 0])):
+        if not (weights.dtype.num == FLOAT_ID and np.allclose(weights, weights[weights >= 0])):
             raise ValueError("Invalid value of weights.")
         self._weights = weights
 
         # k_vectors
-        if not (k_vectors.shape == (num_k, dim)
-                and k_vectors.dtype.num == FLOAT_ID):
+        if not (k_vectors.shape == (num_k, dim) and k_vectors.dtype.num == FLOAT_ID):
             raise ValueError("Invalid value of k_vectors.")
         self._k_vectors = k_vectors
 
         # frequencies
         num_freq = frequencies.shape[1]
-        if not (frequencies.shape == (num_k, num_freq)
-                and frequencies.dtype.num == FLOAT_ID):
+        if not (frequencies.shape == (num_k, num_freq) and frequencies.dtype.num == FLOAT_ID):
             raise ValueError("Invalid value of frequencies.")
         self._frequencies = frequencies
 
@@ -105,20 +101,32 @@ class KpointsData(collections.abc.Sequence):
         else:
             raise ValueError("Gamma point not found.")
 
-        k_points = {"weights": {GAMMA_POINT: self._data["weights"][gamma_pkt_index]},
-                    "k_vectors": {GAMMA_POINT: self._data["k_vectors"][gamma_pkt_index]},
-                    "frequencies": {GAMMA_POINT: self._data["frequencies"][gamma_pkt_index]},
-                    "atomic_displacements": {GAMMA_POINT: self._data["atomic_displacements"][gamma_pkt_index]},
-                    "unit_cell": self.unit_cell}
+        k_points = {
+            "weights": {
+                GAMMA_POINT: self._data["weights"][gamma_pkt_index]
+            },
+            "k_vectors": {
+                GAMMA_POINT: self._data["k_vectors"][gamma_pkt_index]
+            },
+            "frequencies": {
+                GAMMA_POINT: self._data["frequencies"][gamma_pkt_index]
+            },
+            "atomic_displacements": {
+                GAMMA_POINT: self._data["atomic_displacements"][gamma_pkt_index]
+            },
+            "unit_cell": self.unit_cell
+        }
 
         return k_points
 
     def extract(self):
-        extracted = {"unit_cell": self.unit_cell,
-                     "weights": self._array_to_dict(self._weights, string_key=True),
-                     "k_vectors": self._array_to_dict(self._k_vectors, string_key=True),
-                     "frequencies": self._array_to_dict(self._frequencies, string_key=True),
-                     "atomic_displacements": self._array_to_dict(self._atomic_displacements, string_key=True)}
+        extracted = {
+            "unit_cell": self.unit_cell,
+            "weights": self._array_to_dict(self._weights, string_key=True),
+            "k_vectors": self._array_to_dict(self._k_vectors, string_key=True),
+            "frequencies": self._array_to_dict(self._frequencies, string_key=True),
+            "atomic_displacements": self._array_to_dict(self._atomic_displacements, string_key=True)
+        }
         return extracted
 
     def __str__(self):
@@ -132,14 +140,12 @@ class KpointsData(collections.abc.Sequence):
         ...
 
     @overload  # noqa F811
-    def __getitem__(self, item: slice) -> List[KpointData]: # noqa F811
+    def __getitem__(self, item: slice) -> List[KpointData]:  # noqa F811
         ...
 
     def __getitem__(self, item):  # noqa F811
         if isinstance(item, int):
-            return KpointData(self._k_vectors[item],
-                              self._weights[item],
-                              self._frequencies[item],
+            return KpointData(self._k_vectors[item], self._weights[item], self._frequencies[item],
                               self._atomic_displacements[item])
         elif isinstance(item, slice):
             return [self[i] for i in range(len(self))[item]]

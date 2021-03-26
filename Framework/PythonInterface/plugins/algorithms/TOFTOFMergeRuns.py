@@ -16,7 +16,9 @@ class TOFTOFMergeRuns(PythonAlgorithm):
     """ Clean the Sample Logs of workspace after merging for TOFTOF instrument
     """
 
-    mandatory_properties = ['chopper_speed', 'channel_width', 'chopper_ratio',  'Ei', 'wavelength', 'full_channels', 'EPP']
+    mandatory_properties = [
+        'chopper_speed', 'channel_width', 'chopper_ratio', 'Ei', 'wavelength', 'full_channels', 'EPP'
+    ]
     optional_properties = ['temperature', 'run_title']
     properties_to_merge = ['temperature', 'monitor_counts', 'duration', 'run_number', 'run_start', 'run_end']
     must_have_properties = ['monitor_counts', 'duration', 'run_number', 'run_start', 'run_end']
@@ -33,7 +35,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         return "Workflow\\MLZ\\TOFTOF;Transforms\\Splitting"
 
     def seeAlso(self):
-        return [ "TOFTOFCropWorkspace","CorrectTOF" ]
+        return ["TOFTOFCropWorkspace", "CorrectTOF"]
 
     def name(self):
         """ Return summary
@@ -48,7 +50,8 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         """
         validator = StringArrayLengthValidator()
         validator.setLengthMin(1)
-        self.declareProperty(StringArrayProperty(name="InputWorkspaces", direction=Direction.Input, validator=validator),
+        self.declareProperty(StringArrayProperty(name="InputWorkspaces", direction=Direction.Input,
+                                                 validator=validator),
                              doc="Comma separated list of workspaces or groups of workspaces.")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              doc="Name of the workspace that will contain the merged workspaces.")
@@ -92,8 +95,9 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         # chopper_speed can vary about 10 and for some reason it is string (will be corrected in the future)
         cstable = api.CreateLogPropertyTable(wsnames, 'chopper_speed')
         chopper_speeds = [int(val) for val in cstable.column(0)]
-        if max(chopper_speeds) - min(chopper_speeds) > 10: # not within tolerance of 10 rpm
-            self.log().warning("Chopper speeds do not match! Chopper speeds are: " + " ,".join([str(val) for val in chopper_speeds]))
+        if max(chopper_speeds) - min(chopper_speeds) > 10:  # not within tolerance of 10 rpm
+            self.log().warning("Chopper speeds do not match! Chopper speeds are: " +
+                               " ,".join([str(val) for val in chopper_speeds]))
         api.DeleteWorkspace(cstable)
 
         # timing (x-axis binning) must match
@@ -163,9 +167,12 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         nentries = len(pdict['temperature'])
         if nentries > 0:
             temps = [float(temp) for temp in pdict['temperature']]
-            tmean = sum(temps)/nentries
-            api.AddSampleLog(Workspace=wsOutput, LogName='temperature', LogText=str(tmean),
-                             LogType='Number', LogUnit='K')
+            tmean = sum(temps) / nentries
+            api.AddSampleLog(Workspace=wsOutput,
+                             LogName='temperature',
+                             LogText=str(tmean),
+                             LogType='Number',
+                             LogUnit='K')
         # sum monitor counts
         mcounts = [int(mco) for mco in pdict['monitor_counts']]
         # check for zero monitor counts
@@ -174,24 +181,26 @@ class TOFTOFMergeRuns(PythonAlgorithm):
             for index in zeros:
                 self.log().warning("Workspace " + input_workspace_list[index] + " has zero monitor counts.")
         # create sample log
-        api.AddSampleLog(Workspace=wsOutput, LogName='monitor_counts', LogText=str(sum(mcounts)),
-                         LogType='Number')
+        api.AddSampleLog(Workspace=wsOutput, LogName='monitor_counts', LogText=str(sum(mcounts)), LogType='Number')
         # sum durations
         durations = [int(dur) for dur in pdict['duration']]
-        api.AddSampleLog(Workspace=wsOutput, LogName='duration', LogText=str(sum(durations)),
-                         LogType='Number', LogUnit='s')
+        api.AddSampleLog(Workspace=wsOutput,
+                         LogName='duration',
+                         LogText=str(sum(durations)),
+                         LogType='Number',
+                         LogUnit='s')
         # get minimal run_start
         fmt = "%Y-%m-%dT%H:%M:%S%z"
         run_start = [parse(entry) for entry in pdict['run_start']]
-        api.AddSampleLog(Workspace=wsOutput, LogName='run_start',
-                         LogText=min(run_start).strftime(fmt), LogType='String')
+        api.AddSampleLog(Workspace=wsOutput,
+                         LogName='run_start',
+                         LogText=min(run_start).strftime(fmt),
+                         LogType='String')
         # get maximal run_end
         run_end = [parse(entry) for entry in pdict['run_end']]
-        api.AddSampleLog(Workspace=wsOutput, LogName='run_end',
-                         LogText=max(run_end).strftime(fmt), LogType='String')
+        api.AddSampleLog(Workspace=wsOutput, LogName='run_end', LogText=max(run_end).strftime(fmt), LogType='String')
         # list of run_numbers
-        api.AddSampleLog(Workspace=wsOutput, LogName='run_number',
-                         LogText=str(pdict['run_number']), LogType='String')
+        api.AddSampleLog(Workspace=wsOutput, LogName='run_number', LogText=str(pdict['run_number']), LogType='String')
 
         self.setProperty("OutputWorkspace", wsOutput)
 
@@ -202,7 +211,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         """
         for i in range(len(wsNames)):
             leftWorkspace = wsNames[i]
-            rightWorkspace = wsNames[i+1]
+            rightWorkspace = wsNames[i + 1]
             leftXData = api.mtd[leftWorkspace].dataX(0)
             rightXData = api.mtd[rightWorkspace].dataX(0)
             leftDeltaX = leftXData[0] - leftXData[1]

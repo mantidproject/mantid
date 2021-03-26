@@ -14,14 +14,12 @@ from mantid.simpleapi import *
 
 
 class DOSPhononTest(systemtesting.MantidSystemTest):
-
     def runTest(self):
         file_name = 'squaricn.phonon'
         self.ouput_ws_name = 'squaricn'
         self.ref_result = 'II.DOSTest.nxs'
 
-        SimulatedDensityOfStates(PHONONFile=file_name,
-                                 OutputWorkspace=self.ouput_ws_name)
+        SimulatedDensityOfStates(PHONONFile=file_name, OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
         self.disableChecking.append('SpectraMap')
@@ -29,11 +27,11 @@ class DOSPhononTest(systemtesting.MantidSystemTest):
 
         return self.ouput_ws_name, self.ref_result
 
+
 #------------------------------------------------------------------------------------
 
 
 class DOSPhononCrossSectionScaleTest(systemtesting.MantidSystemTest):
-
     def runTest(self):
         file_name = 'squaricn.phonon'
         self.ouput_ws_name = 'squaricn'
@@ -49,18 +47,17 @@ class DOSPhononCrossSectionScaleTest(systemtesting.MantidSystemTest):
 
         return self.ouput_ws_name, self.ref_result
 
+
 #------------------------------------------------------------------------------------
 
 
 class DOSCastepTest(systemtesting.MantidSystemTest):
-
     def runTest(self):
         file_name = 'squaricn.castep'
         self.ouput_ws_name = 'squaricn'
         self.ref_result = 'II.DOSTest.nxs'
 
-        SimulatedDensityOfStates(CASTEPFile=file_name,
-                                 OutputWorkspace=self.ouput_ws_name)
+        SimulatedDensityOfStates(CASTEPFile=file_name, OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
         self.disableChecking.append('SpectraMap')
@@ -68,20 +65,18 @@ class DOSCastepTest(systemtesting.MantidSystemTest):
 
         return self.ouput_ws_name, self.ref_result
 
+
 #------------------------------------------------------------------------------------
 
 
 class DOSRamanActiveTest(systemtesting.MantidSystemTest):
-
     def runTest(self):
         file_name = 'squaricn.phonon'
         spec_type = 'Raman_Active'
         self.ouput_ws_name = 'squaricn'
         self.ref_result = 'II.DOSRamanTest.nxs'
 
-        SimulatedDensityOfStates(PHONONFile=file_name,
-                                 SpectrumType=spec_type,
-                                 OutputWorkspace=self.ouput_ws_name)
+        SimulatedDensityOfStates(PHONONFile=file_name, SpectrumType=spec_type, OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
         self.tolerance = 1e-3
@@ -90,20 +85,18 @@ class DOSRamanActiveTest(systemtesting.MantidSystemTest):
 
         return self.ouput_ws_name, self.ref_result
 
+
 #------------------------------------------------------------------------------------
 
 
 class DOSIRActiveTest(systemtesting.MantidSystemTest):
-
     def runTest(self):
         file_name = 'squaricn.phonon'
         spec_type = 'IR_Active'
         self.ouput_ws_name = 'squaricn'
         self.ref_result = 'II.DOSIRTest.nxs'
 
-        SimulatedDensityOfStates(PHONONFile=file_name,
-                                 SpectrumType=spec_type,
-                                 OutputWorkspace=self.ouput_ws_name)
+        SimulatedDensityOfStates(PHONONFile=file_name, SpectrumType=spec_type, OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
         self.disableChecking.append('SpectraMap')
@@ -111,11 +104,11 @@ class DOSIRActiveTest(systemtesting.MantidSystemTest):
 
         return self.ouput_ws_name, self.ref_result
 
+
 #------------------------------------------------------------------------------------
 
 
 class DOSPartialTest(systemtesting.MantidSystemTest):
-
     def runTest(self):
         file_name = 'squaricn.phonon'
         spec_type = 'DOS'
@@ -133,6 +126,7 @@ class DOSPartialTest(systemtesting.MantidSystemTest):
 
         return self.ouput_ws_name, self.ref_result
 
+
 #------------------------------------------------------------------------------------
 
 
@@ -142,7 +136,6 @@ class DOSPartialSummedContributionsTest(systemtesting.MantidSystemTest):
       the summed partial contributions of all elements. The two should be roughly
       equal to within a small degree of error.
     """
-
     def runTest(self):
 
         file_name = 'squaricn.phonon'
@@ -163,11 +156,11 @@ class DOSPartialSummedContributionsTest(systemtesting.MantidSystemTest):
 
         return self.ouput_ws_name, self.ref_result
 
+
 #------------------------------------------------------------------------------------
 
 
 class DOSPartialCrossSectionScaleTest(systemtesting.MantidSystemTest):
-
     def runTest(self):
         file_name = 'squaricn.phonon'
         spec_type = 'DOS'
@@ -186,6 +179,7 @@ class DOSPartialCrossSectionScaleTest(systemtesting.MantidSystemTest):
 
         return self.ouput_ws_name, self.ref_result
 
+
 #------------------------------------------------------------------------------------
 
 
@@ -195,7 +189,6 @@ class DOSPartialSummedContributionsCrossSectionScaleTest(systemtesting.MantidSys
       the summed partial contributions of all elements. The two should be roughly
       equal to within a small degree of error.
     """
-
     def runTest(self):
 
         file_name = 'squaricn.phonon'

@@ -107,15 +107,12 @@ class DirectILLIntegrateVanadiumTest(unittest.TestCase):
             wsName = self._TEST_WS_NAME
         tempName = 'temp_testWS_'
         mtd.addOrReplace(tempName, self._testIN5WS)
-        ws = CloneWorkspace(InputWorkspace=tempName,
-                            OutputWorkspace=wsName)
+        ws = CloneWorkspace(InputWorkspace=tempName, OutputWorkspace=wsName)
         mtd.remove(tempName)
         return ws
 
     def _EPPTable(self, ws, eppWSName):
-        eppWS = FindEPP(InputWorkspace=ws,
-                        OutputWorkspace=eppWSName,
-                        EnableLogging=False)
+        eppWS = FindEPP(InputWorkspace=ws, OutputWorkspace=eppWSName, EnableLogging=False)
         return eppWS
 
 

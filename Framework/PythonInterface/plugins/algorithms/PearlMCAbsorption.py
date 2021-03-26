@@ -12,7 +12,6 @@ import math
 
 
 class PearlMCAbsorption(PythonAlgorithm):
-
     def category(self):
         return "CorrectionFunctions\\AbsorptionCorrections"
 
@@ -20,14 +19,15 @@ class PearlMCAbsorption(PythonAlgorithm):
         return "Loads pre-calculated or measured absorption correction files for Pearl."
 
     def seeAlso(self):
-        return [ "MonteCarloAbsorption", "MayersSampleCorrection",
-                 "CarpenterSampleCorrection", "VesuvioCalculateMS" ]
+        return ["MonteCarloAbsorption", "MayersSampleCorrection", "CarpenterSampleCorrection", "VesuvioCalculateMS"]
 
     def PyInit(self):
         # Input file
-        self.declareProperty(FileProperty("Filename","", FileAction.Load, ['.out','.dat']), doc="The name of the input file.")
+        self.declareProperty(FileProperty("Filename", "", FileAction.Load, ['.out', '.dat']),
+                             doc="The name of the input file.")
         # Output workspace
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace","", direction=Direction.Output), doc="The name of the input file.")
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
+                             doc="The name of the input file.")
 
     def PyExec(self):
         filename = self.getProperty("Filename").value
@@ -41,7 +41,10 @@ class PearlMCAbsorption(PythonAlgorithm):
 
         wkspace_name = self.getPropertyValue("OutputWorkspace")
         # Load the file
-        ascii_wkspace = mantid.simpleapi.LoadAscii(Filename=filename, OutputWorkspace=wkspace_name, Separator="Space", Unit=x_unit)
+        ascii_wkspace = mantid.simpleapi.LoadAscii(Filename=filename,
+                                                   OutputWorkspace=wkspace_name,
+                                                   Separator="Space",
+                                                   Unit=x_unit)
         if thickness is None:
             coeffs = ascii_wkspace
         else:
@@ -83,7 +86,7 @@ class PearlMCAbsorption(PythonAlgorithm):
         for i in range(num_hist):
             mu_values = input_ws.readY(i)
             for j in range(num_vals):
-                input_ws.dataY(i)[j] = math.exp(-1.0*mu_values[j]*thickness)
+                input_ws.dataY(i)[j] = math.exp(-1.0 * mu_values[j] * thickness)
 
         return input_ws
 

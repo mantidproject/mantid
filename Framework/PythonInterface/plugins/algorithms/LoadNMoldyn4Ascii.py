@@ -35,7 +35,7 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
     _axis_cache = None
     _data_directory = None
 
-#------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------
 
     def category(self):
         return 'Inelastic\\DataHandling;Simulation'
@@ -46,15 +46,12 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
 #------------------------------------------------------------------------------
 
     def PyInit(self):
-        self.declareProperty(FileProperty('Directory', '',
-                                          action=FileAction.Directory),
+        self.declareProperty(FileProperty('Directory', '', action=FileAction.Directory),
                              doc='Path to directory containg .dat files')
 
-        self.declareProperty(StringArrayProperty('Functions'),
-                             doc='Names of functions to attempt to load from file')
+        self.declareProperty(StringArrayProperty('Functions'), doc='Names of functions to attempt to load from file')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                                               direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace name')
 
 #------------------------------------------------------------------------------
@@ -74,7 +71,9 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
         self._data_directory = self.getPropertyValue('Directory')
 
         # Convert the simplified function names to the actual file names
-        data_directory_files = [os.path.splitext(f)[0] for f in fnmatch.filter(os.listdir(self._data_directory), '*.dat')]
+        data_directory_files = [
+            os.path.splitext(f)[0] for f in fnmatch.filter(os.listdir(self._data_directory), '*.dat')
+        ]
         logger.debug('All data files: {0}'.format(data_directory_files))
         functions_input = [x.strip().replace(',', '') for x in self.getProperty('Functions').value]
         functions = [f for f in data_directory_files if f.replace(',', '') in functions_input]
@@ -117,8 +116,7 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
         out_ws_name = self.getPropertyValue('OutputWorkspace')
         if len(loaded_function_workspaces) == 0:
             raise RuntimeError('Failed to load any functions for data')
-        GroupWorkspaces(InputWorkspaces=loaded_function_workspaces,
-                        OutputWorkspace=out_ws_name)
+        GroupWorkspaces(InputWorkspaces=loaded_function_workspaces, OutputWorkspace=out_ws_name)
 
         # Set the output workspace
         self.setProperty('OutputWorkspace', out_ws_name)
@@ -286,22 +284,22 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
         if name.lower() == 'q' and unit.lower() == 'inv_nm':
             logger.information('Axis {0} will be converted to Q in Angstrom**-1'.format(name))
             unit = 'MomentumTransfer'
-            data /= sc.nano # nm to m
-            data *= sc.angstrom # m to Angstrom
+            data /= sc.nano  # nm to m
+            data *= sc.angstrom  # m to Angstrom
 
         # Frequency (THz) to Energy (meV)
         elif name.lower() == 'frequency' and unit.lower() == 'thz':
             logger.information('Axis {0} will be converted to energy in meV'.format(name))
             unit = 'Energy'
-            data *= sc.tera # THz to Hz
-            data *= sc.value('Planck constant in eV s') # Hz to eV
-            data /= sc.milli # eV to meV
+            data *= sc.tera  # THz to Hz
+            data *= sc.value('Planck constant in eV s')  # Hz to eV
+            data /= sc.milli  # eV to meV
 
         # Time (ps) to TOF (s)
         elif name.lower() == 'time' and unit.lower() == 'ps':
             logger.information('Axis {0} will be converted to time in microsecond'.format(name))
             unit = 'TOF'
-            data *= sc.micro # ps to us
+            data *= sc.micro  # ps to us
 
         # No conversion
         else:
@@ -309,7 +307,7 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
 
         return (data, unit, name)
 
-#------------------------------------------------------------------------------
 
+#------------------------------------------------------------------------------
 
 AlgorithmFactory.subscribe(LoadNMoldyn4Ascii)

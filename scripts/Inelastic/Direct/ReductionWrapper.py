@@ -25,7 +25,6 @@ except ImportError:
 
 from abc import abstractmethod
 
-
 # R0921 abstract class not referenced -- wrong, client references it.
 # pylint: disable=too-many-instance-attributes, R0921
 
@@ -40,7 +39,6 @@ class ReductionWrapper(object):
     # pylint: disable=too-few-public-methods
     class var_holder(object):
         """ A simple wrapper class to keep web variables"""
-
         def __init__(self, Web_vars=None):
             if Web_vars:
                 self.standard_vars = Web_vars.standard_vars
@@ -137,7 +135,7 @@ class ReductionWrapper(object):
         str_wrapper = '         '
         for key, val in self._wvs.standard_vars.items():
             if isinstance(val, str):
-                row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
+                row = "{0}\'{1}\':\'{2}\'".format(str_wrapper, key, val)
             else:
                 row = "{0}\'{1}\':{2}".format(str_wrapper, key, val)
             f.write(row)
@@ -147,7 +145,7 @@ class ReductionWrapper(object):
         str_wrapper = '         '
         for key, val in self._wvs.advanced_vars.items():
             if isinstance(val, str):
-                row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
+                row = "{0}\'{1}\':\'{2}\'".format(str_wrapper, key, val)
             else:
                 row = "{0}\'{1}\':{2}".format(str_wrapper, key, val)
             f.write(row)
@@ -293,8 +291,8 @@ class ReductionWrapper(object):
             "**************************************************************************************************",
             'notice')
         prop_man.log(
-            "*** Estimated time to run absorption corrections on the final workspace is: {0:.1f}sec".
-            format(estimated_time), 'notice')
+            "*** Estimated time to run absorption corrections on the final workspace is: {0:.1f}sec".format(
+                estimated_time), 'notice')
         prop_man.log(
             "**************************************************************************************************",
             'notice')
@@ -392,9 +390,12 @@ class ReductionWrapper(object):
                 TOLL = self._tolerr
             else:
                 TOLL = Error
-            result = CompareWorkspaces(Workspace1=reference_ws, Workspace2=reduced,
-                                       Tolerance=TOLL, CheckSample=False,
-                                       CheckInstrument=False, ToleranceRelErr=ToleranceRelErr)
+            result = CompareWorkspaces(Workspace1=reference_ws,
+                                       Workspace2=reduced,
+                                       Tolerance=TOLL,
+                                       CheckSample=False,
+                                       CheckInstrument=False,
+                                       ToleranceRelErr=ToleranceRelErr)
 
         self.wait_for_file = current_wait_state
         self._run_from_web = current_web_state
@@ -404,8 +405,9 @@ class ReductionWrapper(object):
         else:
             fname, _ = os.path.splitext(fileName)
             filename = fname + '-mismatch.nxs'
-            self.reducer.prop_man.log("***WARNING: can not get results matching the reference file.\n"
-                                      "   Saving new results to file {0}".format(filename), 'warning')
+            self.reducer.prop_man.log(
+                "***WARNING: can not get results matching the reference file.\n"
+                "   Saving new results to file {0}".format(filename), 'warning')
             SaveNexus(reduced, Filename=filename)
             return False, result
 
@@ -422,7 +424,8 @@ class ReductionWrapper(object):
 
     @abstractmethod
     def def_advanced_properties(self):
-        """ Define properties which considered to be advanced but still changeable by instrument scientist or advanced user
+        """ Define properties which considered to be advanced but still changeable by instrument scientist or advanced
+            user
 
             Should be overwritten by special reduction and decorated with  @AdvancedProperties decorator.
 
@@ -447,7 +450,7 @@ class ReductionWrapper(object):
             Pause(timeToWait)
 
     #
-    def _check_progress_log_run_completed(self,run_number_requested):
+    def _check_progress_log_run_completed(self, run_number_requested):
         """ Method to verify experiment progress log file and check if the file to reduce
             has been written.
             Input:
@@ -463,13 +466,13 @@ class ReductionWrapper(object):
             so further checks are necessary to verify if actual file is indeed available
         """
         propman = self.reducer.prop_man
-        if len(propman.archive_upload_log_file)==0 :
-            return (True,0,'log test disabled as no log file available')
+        if len(propman.archive_upload_log_file) == 0:
+            return (True, 0, 'log test disabled as no log file available')
 
         mod_time = os.path.getmtime(propman.archive_upload_log_file)
-        if self._last_commit_log_modification_time == mod_time: # Still old data in archive
+        if self._last_commit_log_modification_time == mod_time:  # Still old data in archive
             run_num = self._last_runnum_added_to_archive
-            return (run_num >= run_number_requested,run_num,'no new data have been added to archive')
+            return (run_num >= run_number_requested, run_num, 'no new data have been added to archive')
         self._last_commit_log_modification_time = mod_time
         # Here the file may be modified during the access. Let's try to catch
         # any errors, which may occur due to this modification
@@ -477,19 +480,19 @@ class ReductionWrapper(object):
             with open(propman.archive_upload_log_file) as fh:
                 contents = fh.read()
         except:
-            return(False,self._last_runnum_added_to_archive,
-                   'Error accessing log file {0}'.format(propman.archive_upload_log_file))
+            return (False, self._last_runnum_added_to_archive,
+                    'Error accessing log file {0}'.format(propman.archive_upload_log_file))
         # If the file is modified during the read operation, the read can return anything
         # Let's be on a safe side and guard the contents parsing too.
         try:
             contents = contents.split()
             run_written = int(contents[1])
         except:
-            return(False,self._last_runnum_added_to_archive,
-                   'Error processing the contents of the log file {0}'.format(propman.archive_upload_log_file))
+            return (False, self._last_runnum_added_to_archive,
+                    'Error processing the contents of the log file {0}'.format(propman.archive_upload_log_file))
 
         self._last_runnum_added_to_archive = run_written
-        return(run_written >= run_number_requested,run_written,'')
+        return (run_written >= run_number_requested, run_written, '')
 
     #
     def _check_access_granted(self, input_file):
@@ -507,7 +510,8 @@ class ReductionWrapper(object):
             # all our working systems. Inform user about the problem
             self.reducer.prop_man.log \
                 (
-                    '*** Can not verify if file is accessible. Install h5py to be able to check file access in waiting mode',
+                    '*** Can not verify if file is accessible. Install h5py to be able to check file access in waiting '
+                    'mode',
                     'notice')
             return
         ic = 0
@@ -551,27 +555,29 @@ class ReductionWrapper(object):
         if timeToWait > 0:
             _, fext_requested = PropertyManager.sample_run.file_hint()
             run_number_requsted = PropertyManager.sample_run.run_number()
-            available,_,info = self._check_progress_log_run_completed(run_number_requsted)
-            if len(info) > 0: # report if archive upload log is not available
-                self.reducer.prop_man.log("*** "+info, 'warning')
+            available, _, info = self._check_progress_log_run_completed(run_number_requsted)
+            if len(info) > 0:  # report if archive upload log is not available
+                self.reducer.prop_man.log("*** " + info, 'warning')
 
             if available:
-                Found, input_file = PropertyManager.sample_run.find_file(
-                                    self.reducer.prop_man,be_quet=True,
-                                    force_extension=fext_requested)
+                Found, input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,
+                                                                         be_quet=True,
+                                                                         force_extension=fext_requested)
             else:
                 Found = False
             while not Found:
                 file_hint, fext = PropertyManager.sample_run.file_hint()
-                self.reducer.prop_man.log("*** Waiting {0} sec for file {1} to appear on the data search path"
-                                          .format(timeToWait, file_hint), 'notice')
+                self.reducer.prop_man.log(
+                    "*** Waiting {0} sec for file {1} to appear on the data search path".format(timeToWait, file_hint),
+                    'notice')
 
                 self._run_pause(timeToWait)
-                available,_,_ = self._check_progress_log_run_completed(run_number_requsted)
+                available, _, _ = self._check_progress_log_run_completed(run_number_requsted)
                 if available:
-                    Found, input_file = PropertyManager.sample_run.find_file(
-                                        self.reducer.prop_man, file_hint=file_hint,
-                                        be_quet=True,force_extension=fext_requested)
+                    Found, input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,
+                                                                             file_hint=file_hint,
+                                                                             be_quet=True,
+                                                                             force_extension=fext_requested)
                 else:
                     Found = False
             # endWhile
@@ -623,8 +629,9 @@ class ReductionWrapper(object):
                     if ok:  # no need to cache sum any more.  All necessary files found
                         self.reducer.prop_man.cashe_sum_ws = False
 
-                self.reducer.prop_man.log("*** Waiting {0} sec for runs {1} to appear on the data search path"
-                                          .format(timeToWait, str(missing)), 'notice')
+                self.reducer.prop_man.log(
+                    "*** Waiting {0} sec for runs {1} to appear on the data search path".format(
+                        timeToWait, str(missing)), 'notice')
                 self._run_pause(timeToWait)
                 ok, missing, found = self.reducer.prop_man.find_files_to_sum()
                 n_found = len(found)
@@ -637,7 +644,7 @@ class ReductionWrapper(object):
                     prop_man = self.reducer.prop_man
                     instr_name = prop_man.short_instr_name
                     run_number_requsted = PropertyManager.sample_run.run_number()
-                    available,_,_ = self._check_progress_log_run_completed(run_number_requsted)
+                    available, _, _ = self._check_progress_log_run_completed(run_number_requsted)
                     if available:
                         is_found, fname = PropertyManager.sample_run.find_file(prop_man, instr_name, run)
                     else:
@@ -738,7 +745,6 @@ class ReductionWrapper(object):
 def MainProperties(main_prop_definition):
     """ Decorator stores properties dedicated as main and sets these properties
         as input to reduction parameters."""
-
     def main_prop_wrapper(*args):
         # execute decorated function
         prop_dict = main_prop_definition(*args)
@@ -761,7 +767,6 @@ def AdvancedProperties(adv_prop_definition):
     """ Decorator stores properties decided to be advanced and sets these properties
         as input for reduction parameters
     """
-
     def advanced_prop_wrapper(*args):
         prop_dict = adv_prop_definition(*args)
         # print "in decorator: ",properties
@@ -784,7 +789,6 @@ def iliad(reduce):
         web variables to properties or vice versa depending on web variables
         presence
     """
-
     def iliad_wrapper(*args):
         # seq = inspect.stack()
         # output workspace name.

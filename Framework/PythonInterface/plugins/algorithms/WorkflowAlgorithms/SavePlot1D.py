@@ -20,7 +20,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         return "DataHandling\\Plots"
 
     def seeAlso(self):
-        return [ "SavePlot1DAsJson","StringToPng" ]
+        return ["SavePlot1DAsJson", "StringToPng"]
 
     def name(self):
         """ Algorithm name
@@ -34,10 +34,10 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         return False
 
     def PyInit(self):
-        self.declareProperty(mantid.api.WorkspaceProperty('InputWorkspace', '',
-                                                          mantid.kernel.Direction.Input),
+        self.declareProperty(mantid.api.WorkspaceProperty('InputWorkspace', '', mantid.kernel.Direction.Input),
                              'Workspace to plot')
-        self.declareProperty(mantid.api.FileProperty('OutputFilename', '',
+        self.declareProperty(mantid.api.FileProperty('OutputFilename',
+                                                     '',
                                                      action=mantid.api.FileAction.OptionalSave,
                                                      extensions=['.png']),
                              doc='Name of the image file to savefile.')
@@ -46,15 +46,10 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
             outputTypes = ['image', 'plotly', 'plotly-full']
         else:
             outputTypes = ['image']
-        self.declareProperty('OutputType', 'image',
-                             StringListValidator(outputTypes),
-                             'Method for rendering plot')
-        self.declareProperty('XLabel', '',
-                             'Label on the X axis. If empty, it will be taken from workspace')
-        self.declareProperty('YLabel', '',
-                             'Label on the Y axis. If empty, it will be taken from workspace')
-        self.declareProperty(IntArrayProperty('SpectraList', [], direction=Direction.Input),
-                             'Which spectra to plot')
+        self.declareProperty('OutputType', 'image', StringListValidator(outputTypes), 'Method for rendering plot')
+        self.declareProperty('XLabel', '', 'Label on the X axis. If empty, it will be taken from workspace')
+        self.declareProperty('YLabel', '', 'Label on the Y axis. If empty, it will be taken from workspace')
+        self.declareProperty(IntArrayProperty('SpectraList', [], direction=Direction.Input), 'Which spectra to plot')
         self.declareProperty(StringArrayProperty('SpectraNames', [], direction=Direction.Input),
                              'Override with custom names for spectra')
         self.declareProperty('Result', '', Direction.Output)
@@ -88,8 +83,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
     def getData(self, ws, wkspIndex, label=''):
         x = ws.readX(wkspIndex)
         y = ws.readY(wkspIndex)
-        if x.size == y.size+1:
-            x = (x[:-1]+x[1:])*0.5
+        if x.size == y.size + 1:
+            x = (x[:-1] + x[1:]) * 0.5
 
         # use suggested label
         if len(label.strip()) > 0:
@@ -124,7 +119,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                 unitLabel = xaxis.getUnit().symbol().utf8()
             else:  # latex markup
                 unitLabel = '$' + xaxis.getUnit().symbol().latex() + '$'
-            xlabel = xaxis.getUnit().caption()+' ('+unitLabel+')'
+            xlabel = xaxis.getUnit().caption() + ' (' + unitLabel + ')'
 
         ylabel = self.getProperty('YLabel').value
         if ylabel == '':
@@ -147,26 +142,39 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                 wksp = self._wksp.getItem(i)
                 (traces, xlabel, ylabel) = self.toScatterAndLabels(wksp, spectraNames)
                 for spectrum in traces:
-                    fig.append_trace(spectrum, i+1, 1)
-                fig['layout']['xaxis%d' % (i+1)].update(title={'text':xlabel})
-                fig['layout']['yaxis%d' % (i+1)].update(title={'text':ylabel})
+                    fig.append_trace(spectrum, i + 1, 1)
+                fig['layout']['xaxis%d' % (i + 1)].update(title={'text': xlabel})
+                fig['layout']['yaxis%d' % (i + 1)].update(title={'text': ylabel})
                 if len(spectraNames) > 0:  # remove the used spectra names
                     spectraNames = spectraNames[len(traces):]
-            fig['layout'].update(margin={'r':0,'t':0})
+            fig['layout'].update(margin={'r': 0, 't': 0})
         else:
-            (traces, xlabel, ylabel) = self.toScatterAndLabels(self._wksp,
-                                                               spectraNames)
+            (traces, xlabel, ylabel) = self.toScatterAndLabels(self._wksp, spectraNames)
 
             # plotly seems to change the way to set the axes labels
             # randomly and within a version. Just give up and try both.
             try:
                 layout = go.Layout(yaxis={'title': ylabel},
                                    xaxis={'title': xlabel},
-                                   margin={'l': 40, 'r': 0, 't': 0, 'b': 40})
+                                   margin={
+                                       'l': 40,
+                                       'r': 0,
+                                       't': 0,
+                                       'b': 40
+                                   })
             except:  # try different call when any exception happens
-                layout = go.Layout(yaxis={'title': {'text': ylabel}},
-                                   xaxis={'title': {'text': xlabel}},
-                                   margin={'l': 40, 'r': 0, 't': 0, 'b': 40})
+                layout = go.Layout(yaxis={'title': {
+                    'text': ylabel
+                }},
+                                   xaxis={'title': {
+                                       'text': xlabel
+                                   }},
+                                   margin={
+                                       'l': 40,
+                                       'r': 0,
+                                       't': 0,
+                                       'b': 40
+                                   })
 
             fig = go.Figure(data=traces, layout=layout)
 
@@ -175,8 +183,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
             filename = self.getProperty("OutputFilename").value
             plotly_args = {'filename': filename}
         else:  # just the div
-            plotly_args = {'output_type': 'div',
-                           'include_plotlyjs': False}
+            plotly_args = {'output_type': 'div', 'include_plotlyjs': False}
 
         # render the plot
         div = plot(fig, show_link=False, **plotly_args)
@@ -247,8 +254,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         number_of_lines = spectra if len(self.visibleSpectra) <= 0 else len(self.visibleSpectra)
         if number_of_lines > 10:
             mantid.kernel.logger.warning("more than 10 spectra to plot")
-        prog_reporter = mantid.api.Progress(self, start=0.0, end=1.0,
-                                            nreports=spectra)
+        prog_reporter = mantid.api.Progress(self, start=0.0, end=1.0, nreports=spectra)
 
         for j in range(spectra):
             if not self.showSpectrum(ws, j):

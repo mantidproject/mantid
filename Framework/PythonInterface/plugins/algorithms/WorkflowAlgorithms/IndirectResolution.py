@@ -32,16 +32,18 @@ class IndirectResolution(DataProcessorAlgorithm):
         return 'Creates a resolution workspace for an indirect inelastic instrument.'
 
     def PyInit(self):
-        self.declareProperty(StringArrayProperty(name='InputFiles'),
-                             doc='Comma seperated list if input files')
+        self.declareProperty(StringArrayProperty(name='InputFiles'), doc='Comma seperated list if input files')
 
-        self.declareProperty(name='Instrument', defaultValue='',
+        self.declareProperty(name='Instrument',
+                             defaultValue='',
                              validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA']),
                              doc='Instrument used during run.')
-        self.declareProperty(name='Analyser', defaultValue='',
+        self.declareProperty(name='Analyser',
+                             defaultValue='',
                              validator=StringListValidator(['graphite', 'mica', 'fmica']),
                              doc='Analyser used during run.')
-        self.declareProperty(name='Reflection', defaultValue='',
+        self.declareProperty(name='Reflection',
+                             defaultValue='',
                              validator=StringListValidator(['002', '004', '006']),
                              doc='Reflection used during run.')
 
@@ -50,23 +52,21 @@ class IndirectResolution(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 0.0]),
                              doc='Energy range to use as background.')
 
-        self.declareProperty(name='RebinParam', defaultValue='',
-                             doc='Rebinning parameters (min,width,max)')
-        self.declareProperty(name='ScaleFactor', defaultValue=1.0,
-                             doc='Factor to scale resolution curve by')
+        self.declareProperty(name='RebinParam', defaultValue='', doc='Rebinning parameters (min,width,max)')
+        self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='Factor to scale resolution curve by')
 
-        self.declareProperty(name = "LoadLogFiles", defaultValue=True,
-                             doc='Option to load log files')
+        self.declareProperty(name="LoadLogFiles", defaultValue=True, doc='Option to load log files')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                                               direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output resolution workspace.')
 
     def PyExec(self):
         self._setup()
 
-        iet_alg = self.createChildAlgorithm(name='ISISIndirectEnergyTransferWrapper', startProgress=0.0,
-                                            endProgress=0.7, enableLogging=True)
+        iet_alg = self.createChildAlgorithm(name='ISISIndirectEnergyTransferWrapper',
+                                            startProgress=0.0,
+                                            endProgress=0.7,
+                                            enableLogging=True)
         iet_alg.setProperty('Instrument', self._instrument)
         iet_alg.setProperty('Analyser', self._analyser)
         iet_alg.setProperty('Reflection', self._reflection)
@@ -84,9 +84,7 @@ class IndirectResolution(DataProcessorAlgorithm):
 
         if self._scale_factor != 1.0:
             workflow_prog.report('Scaling Workspace')
-            Scale(InputWorkspace=icon_ws,
-                  OutputWorkspace=icon_ws,
-                  Factor=self._scale_factor)
+            Scale(InputWorkspace=icon_ws, OutputWorkspace=icon_ws, Factor=self._scale_factor)
 
         workflow_prog.report('Calculating flat background')
         CalculateFlatBackground(InputWorkspace=icon_ws,
@@ -97,9 +95,7 @@ class IndirectResolution(DataProcessorAlgorithm):
                                 OutputMode='Subtract Background')
 
         workflow_prog.report('Rebinning Workspace')
-        Rebin(InputWorkspace=self._out_ws,
-              OutputWorkspace=self._out_ws,
-              Params=self._rebin_string)
+        Rebin(InputWorkspace=self._out_ws, OutputWorkspace=self._out_ws, Params=self._rebin_string)
 
         workflow_prog.report('Completing Post Processing')
         self._post_process()
@@ -128,8 +124,7 @@ class IndirectResolution(DataProcessorAlgorithm):
         Handles adding logs, saving and plotting.
         """
 
-        sample_logs = [('res_back_start', self._background[0]),
-                       ('res_back_end', self._background[1])]
+        sample_logs = [('res_back_start', self._background[0]), ('res_back_end', self._background[1])]
 
         if self._scale_factor != 1.0:
             sample_logs.append(('res_scale_factor', self._scale_factor))
@@ -140,11 +135,13 @@ class IndirectResolution(DataProcessorAlgorithm):
             sample_logs.append(('rebin_width', rebin_params[1]))
             sample_logs.append(('rebin_high', rebin_params[2]))
 
-        log_alg = self.createChildAlgorithm(name='AddSampleLogMultiple', startProgress=0.9,
-                                            endProgress=1.0, enableLogging=True)
+        log_alg = self.createChildAlgorithm(name='AddSampleLogMultiple',
+                                            startProgress=0.9,
+                                            endProgress=1.0,
+                                            enableLogging=True)
         log_alg.setProperty('Workspace', self._out_ws)
         log_alg.setProperty('LogNames', [log[0] for log in sample_logs])
-        log_alg.setProperty('LogValues',[log[1] for log in sample_logs])
+        log_alg.setProperty('LogValues', [log[1] for log in sample_logs])
         self.setProperty('OutputWorkspace', self._out_ws)
         log_alg.execute()
 

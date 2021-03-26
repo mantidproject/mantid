@@ -33,8 +33,8 @@ class RelatedalgorithmsDirective(AlgorithmBaseDirective):
                     env = self.state.document.settings.env
                     try:
                         env.app.warn(
-                            'relatedalgorithms - Could not find algorithm "{0}" listed in the seeAlso for {1}.v{2}'
-                            .format(seeAlsoEntry, self.algorithm_name(), self.algorithm_version()))
+                            'relatedalgorithms - Could not find algorithm "{0}" listed in the seeAlso for {1}.v{2}'.
+                            format(seeAlsoEntry, self.algorithm_name(), self.algorithm_version()))
                     except AttributeError:
                         pass
 

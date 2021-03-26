@@ -15,8 +15,7 @@ import os
 
 
 def do_cleanup():
-    Files = ["EQSANS_4061_event_reduction.log",
-             "EQSANS_1466_event_reduction.log"]
+    Files = ["EQSANS_4061_event_reduction.log", "EQSANS_1466_event_reduction.log"]
     for filename in Files:
         absfile = FileFinder.getFullPath(filename)
         if os.path.exists(absfile):
@@ -25,14 +24,13 @@ def do_cleanup():
 
 
 class EQSANSTransmission(systemtesting.MantidSystemTest):
-
     def cleanup(self):
         do_cleanup()
         return True
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='SNS'
+        configI["facilityName"] = 'SNS'
         EQSANS(False)
         AppendDataFile("EQSANS_1466_event.nxs")
         SolidAngle()
@@ -46,8 +44,10 @@ class EQSANSTransmission(systemtesting.MantidSystemTest):
         ThetaDependentTransmission(True)
         Reduce1D()
         # Scale up to match correct scaling.
-        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81,
-              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")
+        Scale(InputWorkspace="EQSANS_1466_event_Iq",
+              Factor=2777.81,
+              Operation='Multiply',
+              OutputWorkspace="EQSANS_1466_event_Iq")
 
     def validate(self):
         # Be more tolerant with the output, mainly because of the errors.
@@ -61,14 +61,13 @@ class EQSANSTransmission(systemtesting.MantidSystemTest):
 
 
 class EQSANSTransmissionEvent(EQSANSTransmission):
-
     def cleanup(self):
         do_cleanup()
         return True
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='SNS'
+        configI["facilityName"] = 'SNS'
         EQSANS(True)
         AppendDataFile("EQSANS_1466_event.nxs")
         SolidAngle()
@@ -81,8 +80,10 @@ class EQSANSTransmissionEvent(EQSANSTransmission):
         ThetaDependentTransmission(True)
         Reduce1D()
         # Scale up to match correct scaling.
-        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81,
-              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")
+        Scale(InputWorkspace="EQSANS_1466_event_Iq",
+              Factor=2777.81,
+              Operation='Multiply',
+              OutputWorkspace="EQSANS_1466_event_Iq")
 
     def validate(self):
         # Be more tolerant with the output, mainly because of the errors.
@@ -96,7 +97,6 @@ class EQSANSTransmissionEvent(EQSANSTransmission):
 
 
 class EQSANSTransmissionDC(systemtesting.MantidSystemTest):
-
     def cleanup(self):
         do_cleanup()
         return True
@@ -106,7 +106,7 @@ class EQSANSTransmissionDC(systemtesting.MantidSystemTest):
             Check that EQSANSTofStructure returns the correct workspace
         """
         configI = ConfigService.Instance()
-        configI["facilityName"]='SNS'
+        configI["facilityName"] = 'SNS'
         EQSANS(False)
         AppendDataFile("EQSANS_1466_event.nxs")
         SolidAngle()
@@ -120,8 +120,10 @@ class EQSANSTransmissionDC(systemtesting.MantidSystemTest):
         ThetaDependentTransmission(True)
         Reduce1D()
         # Scale up to match correct scaling.
-        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81,
-              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")
+        Scale(InputWorkspace="EQSANS_1466_event_Iq",
+              Factor=2777.81,
+              Operation='Multiply',
+              OutputWorkspace="EQSANS_1466_event_Iq")
 
     def validate(self):
         # Be more tolerant with the output, mainly because of the errors.
@@ -140,14 +142,13 @@ class EQSANSTransmissionCompatibility(EQSANSTransmission):
         Check that the transmission correction can be applied if the
         sample run and transmission runs don't have the same binning
     """
-
     def cleanup(self):
         do_cleanup()
         return True
 
     def runTest(self):
         configI = ConfigService.Instance()
-        configI["facilityName"]='SNS'
+        configI["facilityName"] = 'SNS'
         EQSANS(True)
         AppendDataFile("EQSANS_1466_event.nxs")
         SolidAngle()
@@ -160,8 +161,10 @@ class EQSANSTransmissionCompatibility(EQSANSTransmission):
         ThetaDependentTransmission(True)
         Reduce1D()
         # Scale up to match correct scaling.
-        Scale(InputWorkspace="EQSANS_1466_event_Iq", Factor=2777.81,
-              Operation='Multiply', OutputWorkspace="EQSANS_1466_event_Iq")
+        Scale(InputWorkspace="EQSANS_1466_event_Iq",
+              Factor=2777.81,
+              Operation='Multiply',
+              OutputWorkspace="EQSANS_1466_event_Iq")
 
     def validate(self):
         # Be more tolerant with the output, mainly because of the errors.
@@ -175,7 +178,6 @@ class EQSANSTransmissionCompatibility(EQSANSTransmission):
 
 
 class EQSANSTransmissionFS(systemtesting.MantidSystemTest):
-
     def cleanup(self):
         do_cleanup()
         return True
@@ -185,7 +187,7 @@ class EQSANSTransmissionFS(systemtesting.MantidSystemTest):
             Check that EQSANSTofStructure returns the correct workspace
         """
         configI = ConfigService.Instance()
-        configI["facilityName"]='SNS'
+        configI["facilityName"] = 'SNS'
         EQSANS(False)
         SetBeamCenter(96.29, 126.15)
         AppendDataFile("EQSANS_4061_event.nxs")
@@ -208,7 +210,6 @@ class EQSANSTransmissionFS(systemtesting.MantidSystemTest):
 
 
 class EQSANSDirectTransFS(systemtesting.MantidSystemTest):
-
     def cleanup(self):
         do_cleanup()
         return True
@@ -218,7 +219,7 @@ class EQSANSDirectTransFS(systemtesting.MantidSystemTest):
             Check that EQSANSTofStructure returns the correct workspace
         """
         configI = ConfigService.Instance()
-        configI["facilityName"]='SNS'
+        configI["facilityName"] = 'SNS'
         EQSANS(False)
         SetBeamCenter(96.29, 126.15)
         AppendDataFile("EQSANS_4061_event.nxs")
@@ -230,8 +231,10 @@ class EQSANSDirectTransFS(systemtesting.MantidSystemTest):
         ThetaDependentTransmission(False)
         NoIQxQy()
         Reduce1D()
-        Scale(InputWorkspace="EQSANS_4061_event_frame1_Iq", Factor=2.0,
-              Operation='Multiply', OutputWorkspace="EQSANS_4061_event_frame1_Iq")
+        Scale(InputWorkspace="EQSANS_4061_event_frame1_Iq",
+              Factor=2.0,
+              Operation='Multiply',
+              OutputWorkspace="EQSANS_4061_event_frame1_Iq")
 
     def validate(self):
         # Relax the tolerance since the reference data is not for that exact

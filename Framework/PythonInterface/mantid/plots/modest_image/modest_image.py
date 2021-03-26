@@ -10,6 +10,7 @@ Modification of Chris Beaumont's mpl-modest-image package to allow the use of
 set_extent.
 """
 import matplotlib
+
 rcParams = matplotlib.rcParams
 import matplotlib.image as mi
 import matplotlib.colors as mcolors
@@ -24,7 +25,6 @@ IDENTITY_TRANSFORM = IdentityTransform()
 
 
 class ModestImage(MantidImage):
-
     """
     Computationally modest image class.
 
@@ -41,7 +41,6 @@ class ModestImage(MantidImage):
     may also be weird coordinate warping operations for images that
     I'm not aware of. Don't expect those to work either.
     """
-
     def __init__(self, *args, **kwargs):
         self._full_res = None
         self.transpose = kwargs.pop('transpose', False)
@@ -58,13 +57,11 @@ class ModestImage(MantidImage):
         self._full_res = A
         self._A = cbook.safe_masked_invalid(A)
 
-        if self._A.dtype != np.uint8 and not np.can_cast(self._A.dtype,
-                                                         np.float):
+        if self._A.dtype != np.uint8 and not np.can_cast(self._A.dtype, np.float):
             raise TypeError("Image data can not convert to float")
 
-        if (self._A.ndim not in (2, 3) or
-                (self._A.ndim == 3 and self._A.shape[-1] not in (3, 4))):
-                raise TypeError("Invalid dimensions for image data")
+        if (self._A.ndim not in (2, 3) or (self._A.ndim == 3 and self._A.shape[-1] not in (3, 4))):
+            raise TypeError("Invalid dimensions for image data")
 
         self.invalidate_cache()
 
@@ -134,10 +131,8 @@ class ModestImage(MantidImage):
 
         # Check whether we've already calculated what we need, and if so just
         # return without doing anything further.
-        if (self._bounds is not None and
-                sx >= self._sx and sy >= self._sy and
-                x0 >= self._bounds[0] and x1 <= self._bounds[1] and
-                y0 >= self._bounds[2] and y1 <= self._bounds[3]):
+        if (self._bounds is not None and sx >= self._sx and sy >= self._sy and x0 >= self._bounds[0]
+                and x1 <= self._bounds[1] and y0 >= self._bounds[2] and y1 <= self._bounds[3]):
             return
 
         # Slice the array using the slices determined previously to optimally
@@ -199,28 +194,50 @@ def main():
     plt.gcf().canvas.draw()
     t1 = time()
 
-    print("Draw time for %s: %0.1f ms" % (artist.__class__.__name__,
-                                          (t1 - t0) * 1000))
+    print("Draw time for %s: %0.1f ms" % (artist.__class__.__name__, (t1 - t0) * 1000))
 
     plt.show()
 
 
-def imshow(axes, X, cmap=None, norm=None, aspect=None,
-           interpolation=None, alpha=None, vmin=None, vmax=None,
-           origin=None, extent=None, shape=None, filternorm=1,
-           filterrad=4.0, imlim=None, resample=None, url=None, transpose=None, **kwargs):
+def imshow(axes,
+           X,
+           cmap=None,
+           norm=None,
+           aspect=None,
+           interpolation=None,
+           alpha=None,
+           vmin=None,
+           vmax=None,
+           origin=None,
+           extent=None,
+           shape=None,
+           filternorm=1,
+           filterrad=4.0,
+           imlim=None,
+           resample=None,
+           url=None,
+           transpose=None,
+           **kwargs):
     """Similar to matplotlib's imshow command, but produces a ModestImage
 
     Unlike matplotlib version, must explicitly specify axes
     """
     if norm is not None:
-        assert(isinstance(norm, mcolors.Normalize))
+        assert (isinstance(norm, mcolors.Normalize))
     if aspect is None:
         aspect = rcParams['image.aspect']
     axes.set_aspect(aspect)
-    im = ModestImage(axes, cmap=cmap, norm=norm, interpolation=interpolation,
-                     origin=origin, extent=extent, filternorm=filternorm,
-                     filterrad=filterrad, resample=resample, transpose=transpose, **kwargs)
+    im = ModestImage(axes,
+                     cmap=cmap,
+                     norm=norm,
+                     interpolation=interpolation,
+                     origin=origin,
+                     extent=extent,
+                     filternorm=filternorm,
+                     filterrad=filterrad,
+                     resample=resample,
+                     transpose=transpose,
+                     **kwargs)
 
     im.set_data(X)
     im.set_alpha(alpha)
@@ -254,8 +271,7 @@ def imshow(axes, X, cmap=None, norm=None, aspect=None,
     return im
 
 
-def extract_matched_slices(axes=None, shape=None, extent=None,
-                           transform=IDENTITY_TRANSFORM):
+def extract_matched_slices(axes=None, shape=None, extent=None, transform=IDENTITY_TRANSFORM):
     """Determine the slice parameters to use, matched to the screen.
 
     :param ax: Axes object to query. It's extent and pixel size

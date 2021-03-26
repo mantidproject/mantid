@@ -171,7 +171,6 @@ MIX_FAIL_RE = re.compile(r'^\s+(\d+)\s+of\s+(\d+)\s+in\s+(\w+)$')
 
 # -------------------------------------------------------------------------------
 class TestSuiteReport(object):
-
     def __init__(self, name, cases, package=None):
         if len(cases) == 0:
             raise ValueError("No test cases provided")
@@ -198,7 +197,6 @@ class TestSuiteReport(object):
 
 # -------------------------------------------------------------------------------
 class TestCaseReport(object):
-
     def __init__(self, classname, name, failure_descr):
         self.classname = classname
         self.name = name
@@ -231,7 +229,6 @@ class DocTestOutputParser(object):
     Process a doctest output file and convert it
     to a different format
     """
-
     def __init__(self, doctest_output, isfile=True):
         """
         Parses the given doctest output
@@ -307,8 +304,7 @@ class DocTestOutputParser(object):
             if in_doc and line != "":
                 document_txt.append(line)
         # endfor
-        return TestSuiteReport(name="doctests", cases=cases,
-                               package=PACKAGE_NAME)
+        return TestSuiteReport(name="doctests", cases=cases, package=PACKAGE_NAME)
 
     def __parse_document(self, results):
         """
@@ -344,8 +340,7 @@ class DocTestOutputParser(object):
           line (str): Line to test for title
         """
         if not line.startswith(DOCTEST_DOCUMENT_BEGIN):
-            raise ValueError("First line of output text should be a line "
-                             "beginning '%s'" % DOCTEST_DOCUMENT_BEGIN)
+            raise ValueError("First line of output text should be a line " "beginning '%s'" % DOCTEST_DOCUMENT_BEGIN)
         return line.replace(DOCTEST_DOCUMENT_BEGIN, "").strip()
 
     def __split_on_cleanup(self, results):
@@ -388,16 +383,14 @@ class DocTestOutputParser(object):
         """
         match = NUMBER_PASSED_RE.match(results[0])
         if not match:
-            raise ValueError("All passed line incorrect: '%s'"
-                             % results[0])
+            raise ValueError("All passed line incorrect: '%s'" % results[0])
         classname = self.__create_classname(fullname)
         nitems = int(match.group(1))
         cases = []
         for line in results[1:1 + nitems]:
             match = ALLPASS_TEST_NAMES_RE.match(line)
             if not match:
-                raise ValueError("Unexpected information line in "
-                                 "all pass case: %s" % line)
+                raise ValueError("Unexpected information line in " "all pass case: %s" % line)
             ntests, name = int(match.group(1)), match.group(2)
             for idx in range(ntests):
                 cases.append(TestCaseReport(classname, name, failure_descr=None))
@@ -438,8 +431,7 @@ class DocTestOutputParser(object):
         failcases = []
         for i in range(0, nmarkers - 1):
             start, end = fail_markers[i] + 1, fail_markers[i + 1]
-            failcases.append(self.__create_failure_report(classname,
-                                                          results[start:end]))
+            failcases.append(self.__create_failure_report(classname, results[start:end]))
 
         if len(success_markers) == 0:
             return failcases
@@ -461,8 +453,7 @@ class DocTestOutputParser(object):
             npasses = ntotal - nfails
             name = match.group(3)
             for i in range(npasses):
-                passcases.append(TestCaseReport(classname, name,
-                                                failure_descr=None))
+                passcases.append(TestCaseReport(classname, name, failure_descr=None))
 
         return self.__merge_passfail(passcases, failcases)
 
@@ -524,6 +515,7 @@ class DocTestOutputParser(object):
 
 # -------------------------------------------------------------------------------
 
+
 def doctest_to_xunit(app, exception):
     """
     If the runner was 'doctest'then parse the "output.txt"
@@ -556,6 +548,7 @@ def doctest_to_xunit(app, exception):
 
 
 # -------------------------------------------------------------------------------
+
 
 def setup(app):
     """

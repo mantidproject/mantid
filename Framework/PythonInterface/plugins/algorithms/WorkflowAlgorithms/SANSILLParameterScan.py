@@ -76,27 +76,25 @@ class SANSILLParameterScan(PythonAlgorithm):
 
     def PyInit(self):
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output,
+        self.declareProperty(WorkspaceProperty('OutputWorkspace',
+                                               '',
+                                               direction=Direction.Output,
                                                optional=PropertyMode.Optional),
                              doc="The output workspace containing the 2D reduced data.")
 
-        self.declareProperty(WorkspaceProperty('OutputJoinedWorkspace', '', direction=Direction.Output,
+        self.declareProperty(WorkspaceProperty('OutputJoinedWorkspace',
+                                               '',
+                                               direction=Direction.Output,
                                                optional=PropertyMode.Optional),
                              doc="The output workspace containing all the reduced data, before grouping.")
 
-        self.declareProperty(MultipleFileProperty('SampleRuns',
-                                                  action=FileAction.Load,
-                                                  extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('SampleRuns', action=FileAction.Load, extensions=['nxs']),
                              doc='Sample run(s).')
 
-        self.declareProperty(MultipleFileProperty('AbsorberRuns',
-                                                  action=FileAction.OptionalLoad,
-                                                  extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('AbsorberRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='Absorber (Cd/B4C) run(s).')
 
-        self.declareProperty(MultipleFileProperty('ContainerRuns',
-                                                  action=FileAction.OptionalLoad,
-                                                  extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('ContainerRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='Empty container run(s).')
 
         self.setPropertyGroup('SampleRuns', 'Numors')
@@ -114,15 +112,22 @@ class SANSILLParameterScan(PythonAlgorithm):
                              validator=StringListValidator(['None', 'Timer', 'Monitor']),
                              doc='Choose the normalisation type.')
 
-        self.declareProperty('Observable', 'Omega.value',
+        self.declareProperty('Observable',
+                             'Omega.value',
                              doc='Parameter from the sample logs along which the scan is made')
 
-        self.declareProperty('PixelYMin', 140, validator=IntBoundedValidator(lower=0),
+        self.declareProperty('PixelYMin',
+                             140,
+                             validator=IntBoundedValidator(lower=0),
                              doc='Minimal y-index taken in the integration')
-        self.declareProperty('PixelYMax', 180, validator=IntBoundedValidator(lower=0),
+        self.declareProperty('PixelYMax',
+                             180,
+                             validator=IntBoundedValidator(lower=0),
                              doc='Maximal y-index taken in the integration')
 
-        self.declareProperty('Wavelength', 0., validator=FloatBoundedValidator(lower=0.),
+        self.declareProperty('Wavelength',
+                             0.,
+                             validator=FloatBoundedValidator(lower=0.),
                              doc='Wavelength of the experiment. Will try to read Nexus files if not provided.')
 
         self.setPropertyGroup('SensitivityMap', 'Options')
@@ -137,16 +142,23 @@ class SANSILLParameterScan(PythonAlgorithm):
         self.setUp()
 
         _, load_ws_name = needs_loading(self.sample, "Load")
-        LoadAndMerge(Filename=self.sample, OutputWorkspace=load_ws_name + "_grouped",
-                     LoaderOptions={"Wavelength": self.wavelength}, startProgress=0, endProgress=0.7)
+        LoadAndMerge(Filename=self.sample,
+                     OutputWorkspace=load_ws_name + "_grouped",
+                     LoaderOptions={"Wavelength": self.wavelength},
+                     startProgress=0,
+                     endProgress=0.7)
         ConjoinXRuns(InputWorkspaces=load_ws_name + "_grouped",
                      OutputWorkspace=load_ws_name + "_joined",
-                     SampleLogAsXAxis=self.observable, startProgress=0.7, endProgress=0.75)
+                     SampleLogAsXAxis=self.observable,
+                     startProgress=0.7,
+                     endProgress=0.75)
         mtd[load_ws_name + '_grouped'].delete()
 
         sort_x_axis_output = load_ws_name + '_sorted' if not self.output_joined else self.output_joined
-        SortXAxis(InputWorkspace=load_ws_name + "_joined", OutputWorkspace=sort_x_axis_output,
-                  startProgress=0.75, endProgress=0.8)
+        SortXAxis(InputWorkspace=load_ws_name + "_joined",
+                  OutputWorkspace=sort_x_axis_output,
+                  startProgress=0.75,
+                  endProgress=0.8)
 
         if self.observable == "Omega.value":
             mtd[sort_x_axis_output].getAxis(0).setUnit("label").setLabel(self.observable, 'degrees')

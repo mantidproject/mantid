@@ -7,12 +7,10 @@
 
 
 class DrillExportPresenter:
-
     """
     Export view.
     """
     _view = None
-
     """
     Export model.
     """
@@ -44,7 +42,7 @@ class DrillExportPresenter:
         activation state of each algorithm in the model.
         """
         states = self._view.getAlgorithmCheckStates()
-        for a,s in states.items():
+        for a, s in states.items():
             if s:
                 self._model.activateAlgorithm(a)
             else:

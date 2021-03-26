@@ -28,9 +28,7 @@ if 'muon_analysis' in globals():
     except RuntimeError:
         is_hidden = True
     if not is_hidden:
-        muon_analysis.setWindowState(
-            muon_analysis.windowState(
-            ) & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+        muon_analysis.setWindowState(muon_analysis.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
         muon_analysis.activateWindow()
     else:
         muon_analysis = MuonAnalysisGui(parent, flags)

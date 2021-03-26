@@ -14,13 +14,16 @@ def attenuate_workspace(attenuation_file_path, ws_to_correct):
     original_units = ws_to_correct.getAxis(0).getUnit().unitID()
     wc_attenuated = mantid.PearlMCAbsorption(attenuation_file_path)
     wc_attenuated = mantid.ConvertToHistogram(InputWorkspace=wc_attenuated, OutputWorkspace=wc_attenuated)
-    ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
+    ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct,
+                                        OutputWorkspace=ws_to_correct,
                                         Target=wc_attenuated.getAxis(0).getUnit().unitID())
-    wc_attenuated = mantid.RebinToWorkspace(WorkspaceToRebin=wc_attenuated, WorkspaceToMatch=ws_to_correct,
+    wc_attenuated = mantid.RebinToWorkspace(WorkspaceToRebin=wc_attenuated,
+                                            WorkspaceToMatch=ws_to_correct,
                                             OutputWorkspace=wc_attenuated)
     pearl_attenuated_ws = mantid.Divide(LHSWorkspace=ws_to_correct, RHSWorkspace=wc_attenuated)
     common.remove_intermediate_workspace(workspaces=wc_attenuated)
-    pearl_attenuated_ws = mantid.ConvertUnits(InputWorkspace=pearl_attenuated_ws, OutputWorkspace=pearl_attenuated_ws,
+    pearl_attenuated_ws = mantid.ConvertUnits(InputWorkspace=pearl_attenuated_ws,
+                                              OutputWorkspace=pearl_attenuated_ws,
                                               Target=original_units)
     return pearl_attenuated_ws
 
@@ -35,7 +38,10 @@ def apply_vanadium_absorb_corrections(van_ws, run_details, absorb_ws=None):
         van_ws = mantid.ConvertUnits(InputWorkspace=van_ws, Target=absorb_units, OutputWorkspace=van_ws)
 
     absorb_ws = mantid.RebinToWorkspace(WorkspaceToRebin=absorb_ws, WorkspaceToMatch=van_ws, OutputWorkspace=absorb_ws)
-    van_ws = mantid.Divide(LHSWorkspace=van_ws, RHSWorkspace=absorb_ws, OutputWorkspace=van_ws, AllowDifferentNumberSpectra=True)
+    van_ws = mantid.Divide(LHSWorkspace=van_ws,
+                           RHSWorkspace=absorb_ws,
+                           OutputWorkspace=van_ws,
+                           AllowDifferentNumberSpectra=True)
 
     if van_original_units != absorb_units:
         van_ws = mantid.ConvertUnits(InputWorkspace=van_ws, Target=van_original_units, OutputWorkspace=van_ws)
@@ -47,15 +53,15 @@ def apply_vanadium_absorb_corrections(van_ws, run_details, absorb_ws=None):
 def generate_vanadium_absorb_corrections(van_ws, output_filename):
     shape_ws = mantid.CloneWorkspace(InputWorkspace=van_ws)
     shape_ws = mantid.ConvertUnits(InputWorkspace=shape_ws, OutputWorkspace=shape_ws, Target="Wavelength")
-    mantid.CreateSampleShape(InputWorkspace=shape_ws, ShapeXML='<sphere id="sphere_1"> <centre x="0" y="0" z= "0" />\
+    mantid.CreateSampleShape(InputWorkspace=shape_ws,
+                             ShapeXML='<sphere id="sphere_1"> <centre x="0" y="0" z= "0" />\
                                                       <radius val="0.005" /> </sphere>')
 
     absorb_ws = \
         mantid.AbsorptionCorrection(InputWorkspace=shape_ws, AttenuationXSection="5.08",
                                     ScatteringXSection="5.1", SampleNumberDensity="0.072",
                                     NumberOfWavelengthPoints="25", ElementSize="0.05")
-    mantid.SaveNexus(Filename=output_filename,
-                     InputWorkspace=absorb_ws, Append=False)
+    mantid.SaveNexus(Filename=output_filename, InputWorkspace=absorb_ws, Append=False)
     common.remove_intermediate_workspace(shape_ws)
     return absorb_ws
 
@@ -71,8 +77,7 @@ def _pearl_get_tt_grouping_file_name(inst_settings):
 
 def _get_run_numbers_for_key(current_mode_run_numbers, key):
     err_message = "this must be under the relevant Rietveld or PDF mode."
-    return common.cal_map_dictionary_key_helper(current_mode_run_numbers, key=key,
-                                                append_to_error_message=err_message)
+    return common.cal_map_dictionary_key_helper(current_mode_run_numbers, key=key, append_to_error_message=err_message)
 
 
 def get_run_details(run_number_string, inst_settings, is_vanadium_run):
@@ -86,27 +91,36 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
     if inst_settings.long_mode:
         spline_identifier.append("long")
 
-    return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
-                                     is_vanadium_run=is_vanadium_run, splined_name_list=spline_identifier,
-                                     grouping_file_name=grouping_file_name, empty_run_number=empty_runs,
-                                     vanadium_string=vanadium_runs, van_abs_file_name=inst_settings.van_absorb_file)
+    return create_run_details_object(run_number_string=run_number_string,
+                                     inst_settings=inst_settings,
+                                     is_vanadium_run=is_vanadium_run,
+                                     splined_name_list=spline_identifier,
+                                     grouping_file_name=grouping_file_name,
+                                     empty_run_number=empty_runs,
+                                     vanadium_string=vanadium_runs,
+                                     van_abs_file_name=inst_settings.van_absorb_file)
 
 
 def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values, integration_range, ex_regions):
     processed_monitor_ws = mantid.ConvertUnits(InputWorkspace=monitor_ws, Target="Wavelength")
     processed_monitor_ws = mantid.CropWorkspace(InputWorkspace=processed_monitor_ws,
-                                                XMin=lambda_values[0], XMax=lambda_values[-1])
+                                                XMin=lambda_values[0],
+                                                XMax=lambda_values[-1])
 
     for reg in range(0, 4):
-        processed_monitor_ws = mantid.MaskBins(InputWorkspace=processed_monitor_ws, XMin=ex_regions[0, reg],
+        processed_monitor_ws = mantid.MaskBins(InputWorkspace=processed_monitor_ws,
+                                               XMin=ex_regions[0, reg],
                                                XMax=ex_regions[1, reg])
 
     splined_monitor_ws = mantid.SplineBackground(InputWorkspace=processed_monitor_ws,
-                                                 WorkspaceIndex=0, NCoeff=spline_coeff)
+                                                 WorkspaceIndex=0,
+                                                 NCoeff=spline_coeff)
 
-    normalised_ws = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target="Wavelength",
+    normalised_ws = mantid.ConvertUnits(InputWorkspace=ws_to_correct,
+                                        Target="Wavelength",
                                         OutputWorkspace=ws_to_correct)
-    normalised_ws = mantid.NormaliseToMonitor(InputWorkspace=normalised_ws, MonitorWorkspace=splined_monitor_ws,
+    normalised_ws = mantid.NormaliseToMonitor(InputWorkspace=normalised_ws,
+                                              MonitorWorkspace=splined_monitor_ws,
                                               IntegrationRangeMin=integration_range[0],
                                               IntegrationRangeMax=integration_range[-1],
                                               OutputWorkspace=normalised_ws)
@@ -129,9 +143,13 @@ def strip_bragg_peaks(ws_list_to_correct):
     # Banks 13 / 14 have broad peaks which are missed so compensate for that and run twice as peaks are very broad
     for _ in range(2):
         ws_list_to_correct[12] = mantid.StripPeaks(InputWorkspace=ws_list_to_correct[12],
-                                                   OutputWorkspace=ws_list_to_correct[12], FWHM=100, Tolerance=10)
+                                                   OutputWorkspace=ws_list_to_correct[12],
+                                                   FWHM=100,
+                                                   Tolerance=10)
 
         ws_list_to_correct[13] = mantid.StripPeaks(InputWorkspace=ws_list_to_correct[13],
-                                                   OutputWorkspace=ws_list_to_correct[13], FWHM=60, Tolerance=10)
+                                                   OutputWorkspace=ws_list_to_correct[13],
+                                                   FWHM=60,
+                                                   Tolerance=10)
 
     return ws_list_to_correct

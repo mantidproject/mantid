@@ -125,7 +125,8 @@ class ProjectRecoverySaverTest(unittest.TestCase):
 
         self.pr_saver._save_project(self.working_directory)
 
-        project_file = os.path.join(self.working_directory, (os.path.basename(self.working_directory) + self.pr.recovery_file_ext))
+        project_file = os.path.join(self.working_directory,
+                                    (os.path.basename(self.working_directory) + self.pr.recovery_file_ext))
         self.assertTrue(os.path.exists(project_file))
         with open(project_file) as f:
             dictionary = json.load(f)

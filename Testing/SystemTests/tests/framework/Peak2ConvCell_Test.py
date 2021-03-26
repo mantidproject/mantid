@@ -13,7 +13,6 @@
 # NOTE; THIS TEST TAKES AN EXTREMELY LONG TIME. DELETE "XXX" IN requiredFiles method to get it to run.
 # !!!!!!!!!  REPLACE THE "XXX" OR else !!!!!!!!!!
 
-
 # import systemtesting
 import numpy
 from numpy import matrix
@@ -171,7 +170,7 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
 
                 if cc == 0:
                     if r > 0:
-                        s1 = (-1) ** r
+                        s1 = (-1)**r
                         s2 = -s1
 
                 res[r, cc] = res_p[0, cc] / 2 + s1 * res_p[1, cc] / 2 + s2 * res_p[2, cc] / 2
@@ -204,7 +203,7 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
                 k += 1
             for cc in range(3):
                 R = (r + 1) % 3
-                s = (-1) ** i
+                s = (-1)**i
 
                 res[k, cc] = res_p[(R) % 3, cc] / 2 + s * res_p[(R + 1) % 3, cc] / 2
 
@@ -414,8 +413,8 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
             #X.I
 
             print("B1", X)
-            if X[0, 0] > X[1, 1] or (math.fabs(X[0, 0] - X[1, 1]) < tolerance / 10 and math.fabs(X[1, 2]) > math.fabs(
-                    X[0, 2]) + tolerance / 10):
+            if X[0, 0] > X[1, 1] or (math.fabs(X[0, 0] - X[1, 1]) < tolerance / 10
+                                     and math.fabs(X[1, 2]) > math.fabs(X[0, 2]) + tolerance / 10):
                 done = 1
                 for i in range(0, 3):
                     sav = UB[i, 0]
@@ -425,8 +424,8 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
                 continue
 
             print("B2")
-            if X[1, 1] > X[2, 2] or (math.fabs(X[1, 1] - X[2, 2]) < tolerance and math.fabs(X[1, 0]) < math.fabs(
-                    X[2, 0]) - tolerance / 10):
+            if X[1, 1] > X[2, 2] or (math.fabs(X[1, 1] - X[2, 2]) < tolerance
+                                     and math.fabs(X[1, 0]) < math.fabs(X[2, 0]) - tolerance / 10):
                 done = 1
                 for i in range(0, 3):
                     sav = UB[i, 1]
@@ -593,10 +592,14 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
     def getLat(self, UB):
         G = UB.T * UB
         G1 = G.I
-        Res = [math.sqrt(G1[0, 0]), math.sqrt(G1[1, 1]), math.sqrt(G1[2, 2]),
-               math.acos(G1[1, 2] / Res[1] / Res[2]) * 180.0 / math.pi,
-               math.acos(G1[0, 2] / Res[0] / Res[2]) * 180.0 / math.pi,
-               math.acos(G1[0, 1] / Res[0] / Res[1]) * 180.0 / math.pi]
+        Res = [
+            math.sqrt(G1[0, 0]),
+            math.sqrt(G1[1, 1]),
+            math.sqrt(G1[2, 2]),
+            math.acos(G1[1, 2] / Res[1] / Res[2]) * 180.0 / math.pi,
+            math.acos(G1[0, 2] / Res[0] / Res[2]) * 180.0 / math.pi,
+            math.acos(G1[0, 1] / Res[0] / Res[1]) * 180.0 / math.pi
+        ]
         return Res
 
     def AppendForms(self, condition, Center, CenterTarg, FormNums, List2Append):
@@ -645,9 +648,11 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
             X = "Monoclinic"
             Z1 = list(self.Mon)
             C = Center
-            LL = [math.cos(LatNiggle[5] / 180 * math.pi) * LatNiggle[0] * LatNiggle[1],
-                  math.cos(LatNiggle[4] / 180 * math.pi) * LatNiggle[0] * LatNiggle[2],
-                  math.cos(LatNiggle[3] / 180 * math.pi) * LatNiggle[2] * LatNiggle[1]]
+            LL = [
+                math.cos(LatNiggle[5] / 180 * math.pi) * LatNiggle[0] * LatNiggle[1],
+                math.cos(LatNiggle[4] / 180 * math.pi) * LatNiggle[0] * LatNiggle[2],
+                math.cos(LatNiggle[3] / 180 * math.pi) * LatNiggle[2] * LatNiggle[1]
+            ]
 
             if C == 'A' or C == 'B':
                 C = 'C'
@@ -776,7 +781,12 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
                 Res = SelectCellWithForm(Peaks, FormXtal[i1], True)
 
                 if Res[0] > .85 * nOrigIndexed:
-                    CopySample(Peaks, "Temp", CopyMaterial="0", CopyEnvironment="0", CopyName="0", CopyShape="0",
+                    CopySample(Peaks,
+                               "Temp",
+                               CopyMaterial="0",
+                               CopyEnvironment="0",
+                               CopyName="0",
+                               CopyShape="0",
                                CopyLattice="1")
                     OrLat = mtd["Temp"].sample().getOrientedLattice()
                     Lat1 = [OrLat.a(), OrLat.b(), OrLat.c(), OrLat.alpha(), OrLat.beta(), OrLat.gamma()]
@@ -811,7 +821,12 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
                             return Lat1
                     i1 = i1 + 1
                     i2 = i2 + 1
-                    CopySample(wsName, Peaks, CopyMaterial="0", CopyEnvironment="0", CopyName="0", CopyShape="0",
+                    CopySample(wsName,
+                               Peaks,
+                               CopyMaterial="0",
+                               CopyEnvironment="0",
+                               CopyName="0",
+                               CopyShape="0",
                                CopyLattice="1")
         return []
 
@@ -893,13 +908,23 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
                                             FindUBUsingFFT(Peaks, Lat0[0] * .5, Lat0[2] * 2.0, .15)
                                             InPks = IndexPeaks(Peaks, .10)
 
-                                            CopySample(Peaks, "Sws", CopyMaterial="0",
-                                                       CopyEnvironment="0", CopyName="0", CopyShape="0",
+                                            CopySample(Peaks,
+                                                       "Sws",
+                                                       CopyMaterial="0",
+                                                       CopyEnvironment="0",
+                                                       CopyName="0",
+                                                       CopyShape="0",
                                                        CopyLattice="1")
                                             OrLat = mtd["Sws"].sample().getOrientedLattice()
 
-                                            Lat1 = [OrLat.a(), OrLat.b(), OrLat.c(), OrLat.alpha(), OrLat.beta(),
-                                                    OrLat.gamma()]
+                                            Lat1 = [
+                                                OrLat.a(),
+                                                OrLat.b(),
+                                                OrLat.c(),
+                                                OrLat.alpha(),
+                                                OrLat.beta(),
+                                                OrLat.gamma()
+                                            ]
 
                                             Lat1 = self.FixLatParams(Lat1)
 

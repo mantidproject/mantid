@@ -16,7 +16,6 @@ class ReflectometryQuickPointDetector(systemtesting.MantidSystemTest):
     ISIS reflectometry reduction scripts. Uses the point detector functionality with real transmission corrections.
 
     """
-
     def runTest(self):
         defaultInstKey = 'default.instrument'
         defaultInstrument = config[defaultInstKey]
@@ -35,4 +34,4 @@ class ReflectometryQuickPointDetector(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return '13460_IvsQ','QuickReferenceResult.nxs'
+        return '13460_IvsQ', 'QuickReferenceResult.nxs'

@@ -10,7 +10,6 @@ from mantid.simpleapi import (ElasticWindowMultiple, GroupWorkspaces, Load)
 
 
 class ElasticWindowMultipleOSIRISTest(systemtesting.MantidSystemTest):
-
     def runTest(self):
         Load(Filename='osi92762_graphite002_red.nxs,osi92763_graphite002_red.nxs',
              OutputWorkspace='__ElWinMulti_InputWS')
@@ -25,8 +24,7 @@ class ElasticWindowMultipleOSIRISTest(systemtesting.MantidSystemTest):
                               OutputELF='elf',
                               OutputELT='elt')
 
-        GroupWorkspaces(InputWorkspaces=['elf', 'elt'],
-                        OutputWorkspace='__ElWinMulti_OutputWS')
+        GroupWorkspaces(InputWorkspaces=['elf', 'elt'], OutputWorkspace='__ElWinMulti_OutputWS')
 
     def validate(self):
         self.tolerance = 1e-10
@@ -34,7 +32,6 @@ class ElasticWindowMultipleOSIRISTest(systemtesting.MantidSystemTest):
 
 
 class ElasticWindowMultipleIRISTest(systemtesting.MantidSystemTest):
-
     def runTest(self):
         input_files = Load(Filename='irs26173_graphite002_red.nxs,irs26176_graphite002_red.nxs')
 
@@ -47,8 +44,7 @@ class ElasticWindowMultipleIRISTest(systemtesting.MantidSystemTest):
                               OutputInQSquared='eq2',
                               OutputELF='elf')
 
-        GroupWorkspaces(InputWorkspaces=['eq', 'eq2', 'elf'],
-                        OutputWorkspace='__ElwinResultsGroup')
+        GroupWorkspaces(InputWorkspaces=['eq', 'eq2', 'elf'], OutputWorkspace='__ElwinResultsGroup')
 
     def validate(self):
         self.tolerance = 1e-10

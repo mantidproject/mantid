@@ -9,7 +9,6 @@ from mantid.simpleapi import SANSMask, SetInstrumentParameter, MaskDetectors, Cr
 
 
 class SANSMaskTest(unittest.TestCase):
-
     def setUp(self):
         # create sample workspace
         ws1 = CreateSampleWorkspace()
@@ -30,6 +29,7 @@ class SANSMaskTest(unittest.TestCase):
         MaskDetectors(Workspace='ws1', WorkspaceIndexList='7')
         SANSMask(Workspace='ws2', MaskedWorkspace='ws1')
         self.assertTrue(mtd['ws2'].spectrumInfo().isMasked(7))
+
 
 if __name__ == "__main__":
     unittest.main()

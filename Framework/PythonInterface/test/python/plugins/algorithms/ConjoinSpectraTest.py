@@ -13,19 +13,26 @@ from testhelpers import run_algorithm
 
 class ConjoinSpectraTest(unittest.TestCase):
 
-    _aWS= None
+    _aWS = None
 
     def setUp(self):
-            dataX = range(0,6)
-            dataY = range(0,5)
-            dataE = [1] * 5
+        dataX = range(0, 6)
+        dataY = range(0, 5)
+        dataE = [1] * 5
 
-            createWSAlg = run_algorithm( "CreateWorkspace", DataX=dataX, DataY=dataY, DataE=dataE, NSpec=1,UnitX="Wavelength", OutputWorkspace="single_spectra_ws")
-            self._aWS = createWSAlg.getPropertyValue("OutputWorkspace")
-
+        createWSAlg = run_algorithm("CreateWorkspace",
+                                    DataX=dataX,
+                                    DataY=dataY,
+                                    DataE=dataE,
+                                    NSpec=1,
+                                    UnitX="Wavelength",
+                                    OutputWorkspace="single_spectra_ws")
+        self._aWS = createWSAlg.getPropertyValue("OutputWorkspace")
 
     def test_basicRun(self):
-        conjoinAlg = run_algorithm( "ConjoinSpectra", InputWorkspaces="%s,%s" % (self._aWS, self._aWS), OutputWorkspace="conjoined" )
+        conjoinAlg = run_algorithm("ConjoinSpectra",
+                                   InputWorkspaces="%s,%s" % (self._aWS, self._aWS),
+                                   OutputWorkspace="conjoined")
         conjoinedWS = mtd.retrieve('conjoined')
 
         wsIndex = 0
@@ -41,7 +48,7 @@ class ConjoinSpectraTest(unittest.TestCase):
         self.assertEqual(len(inDataY), len(outDataY2))
         self.assertEqual(len(inDataE), len(outDataE1))
         self.assertEqual(len(inDataE), len(outDataE2))
-        self.assertEqual(2, conjoinedWS.getNumberHistograms()) # Should always have 2 histograms
+        self.assertEqual(2, conjoinedWS.getNumberHistograms())  # Should always have 2 histograms
 
         self.assertEqual(set(inDataY), set(outDataY1))
         self.assertEqual(set(inDataY), set(outDataY2))

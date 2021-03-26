@@ -17,19 +17,20 @@ class ExtractMonitors(DataProcessorAlgorithm):
         return 'Separates the monitors and/or detectors into separate workspaces.'
 
     def seeAlso(self):
-        return [ "ExtractMonitorWorkspace" ]
+        return ["ExtractMonitorWorkspace"]
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
-                                                     direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                              doc='A workspace with detectors and monitors')
 
-        self.declareProperty(MatrixWorkspaceProperty('DetectorWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('DetectorWorkspace',
+                                                     '',
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
                              doc='The output workspace with detectors only')
 
-        self.declareProperty(MatrixWorkspaceProperty('MonitorWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('MonitorWorkspace',
+                                                     '',
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
                              doc='The output workspace with monitors only')
@@ -73,7 +74,9 @@ class ExtractMonitors(DataProcessorAlgorithm):
 
         if detector_ws_name:
             if detectors:
-                detector_ws = ExtractSpectra(InputWorkspace=in_ws, WorkspaceIndexList=detectors, StoreInADS=False,
+                detector_ws = ExtractSpectra(InputWorkspace=in_ws,
+                                             WorkspaceIndexList=detectors,
+                                             StoreInADS=False,
                                              OutputWorkspace=self.getPropertyValue("DetectorWorkspace"))
                 self.setProperty("DetectorWorkspace", detector_ws)
             else:
@@ -81,7 +84,9 @@ class ExtractMonitors(DataProcessorAlgorithm):
 
         if monitor_ws_name:
             if monitors:
-                monitor_ws = ExtractSpectra(InputWorkspace=in_ws, WorkspaceIndexList=monitors, StoreInADS=False,
+                monitor_ws = ExtractSpectra(InputWorkspace=in_ws,
+                                            WorkspaceIndexList=monitors,
+                                            StoreInADS=False,
                                             OutputWorkspace=self.getPropertyValue("MonitorWorkspace"))
                 self.setProperty("MonitorWorkspace", monitor_ws)
             else:

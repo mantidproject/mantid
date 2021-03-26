@@ -9,7 +9,6 @@ from mantid.simpleapi import *
 
 
 class EQSANSQ2DTest(unittest.TestCase):
-
     def setUp(self):
 
         self.test_ws_name = "EQSANS_test_ws"
@@ -35,8 +34,10 @@ class EQSANSQ2DTest(unittest.TestCase):
 
     def test_q2d(self):
         EQSANSQ2D(InputWorkspace=self.test_ws_name)
-        ReplaceSpecialValues(InputWorkspace=self.test_ws_name + "_Iqxy", OutputWorkspace=self.test_ws_name + "_Iqxy",
-                             NaNValue=0, NaNError=0)
+        ReplaceSpecialValues(InputWorkspace=self.test_ws_name + "_Iqxy",
+                             OutputWorkspace=self.test_ws_name + "_Iqxy",
+                             NaNValue=0,
+                             NaNError=0)
         Integration(InputWorkspace=self.test_ws_name + "_Iqxy", OutputWorkspace="__tmp")
         SumSpectra(InputWorkspace="__tmp", OutputWorkspace="summed")
         self.assertAlmostEquals(mtd["summed"].readY(0)[0], 7.24077, 6)

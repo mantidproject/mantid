@@ -12,60 +12,57 @@ from qtpy.QtWidgets import QWidget
 from mantidqt.widgets.plotconfigdialog.colorselector import ColorSelector
 from mantidqt.utils.qt import load_ui
 
-MARKER_STYLES = {'None': [],
-                 'point': ['face', 'edge'],
-                 'pixel': ['face'],
-                 "circle": ['face', 'edge'],
-                 "triangle_down": ['face', 'edge'],
-                 "triangle_up": ['face', 'edge'],
-                 "triangle_left": ['face', 'edge'],
-                 "triangle_right": ['face', 'edge'],
-                 "tri_down": ['edge'],
-                 "tri_up": ['edge'],
-                 "tri_left": ['edge'],
-                 "tri_right": ['edge'],
-                 "octagon": ['face', 'edge'],
-                 "square": ['face', 'edge'],
-                 "pentagon": ['face', 'edge'],
-                 "plus (filled)": ['face', 'edge'],
-                 "star": ['face', 'edge'],
-                 "hexagon1": ['face', 'edge'],
-                 "hexagon2": ['face', 'edge'],
-                 "plus": ['edge'],
-                 "x": ['edge'],
-                 "x (filled)": ['face', 'edge'],
-                 "diamond": ['face', 'edge'],
-                 "thin_diamond": ['face', 'edge'],
-                 "vline": ['edge'],
-                 "hline": ['edge'],
-                 "tickleft": ['edge'],
-                 "tickright": ['edge'],
-                 "tickup": ['edge'],
-                 "tickdown": ['edge'],
-                 "caretleft": ['face', 'edge'],
-                 "caretright": ['face', 'edge'],
-                 "caretup": ['face', 'edge'],
-                 "caretdown": ['face', 'edge'],
-                 "caretleft (centered at base)": ['face', 'edge'],
-                 "caretright (centered at base)": ['face', 'edge'],
-                 "caretup (centered at base)": ['face', 'edge'],
-                 "caretdown (centered at base)": ['face', 'edge']}
+MARKER_STYLES = {
+    'None': [],
+    'point': ['face', 'edge'],
+    'pixel': ['face'],
+    "circle": ['face', 'edge'],
+    "triangle_down": ['face', 'edge'],
+    "triangle_up": ['face', 'edge'],
+    "triangle_left": ['face', 'edge'],
+    "triangle_right": ['face', 'edge'],
+    "tri_down": ['edge'],
+    "tri_up": ['edge'],
+    "tri_left": ['edge'],
+    "tri_right": ['edge'],
+    "octagon": ['face', 'edge'],
+    "square": ['face', 'edge'],
+    "pentagon": ['face', 'edge'],
+    "plus (filled)": ['face', 'edge'],
+    "star": ['face', 'edge'],
+    "hexagon1": ['face', 'edge'],
+    "hexagon2": ['face', 'edge'],
+    "plus": ['edge'],
+    "x": ['edge'],
+    "x (filled)": ['face', 'edge'],
+    "diamond": ['face', 'edge'],
+    "thin_diamond": ['face', 'edge'],
+    "vline": ['edge'],
+    "hline": ['edge'],
+    "tickleft": ['edge'],
+    "tickright": ['edge'],
+    "tickup": ['edge'],
+    "tickdown": ['edge'],
+    "caretleft": ['face', 'edge'],
+    "caretright": ['face', 'edge'],
+    "caretup": ['face', 'edge'],
+    "caretdown": ['face', 'edge'],
+    "caretleft (centered at base)": ['face', 'edge'],
+    "caretright (centered at base)": ['face', 'edge'],
+    "caretup (centered at base)": ['face', 'edge'],
+    "caretdown (centered at base)": ['face', 'edge']
+}
 
 
 class MarkerTabWidgetView(QWidget):
-
     def __init__(self, parent=None):
         super(MarkerTabWidgetView, self).__init__(parent=parent)
 
-        self.ui = load_ui(__file__,
-                          'curves_tab_marker_tab.ui',
-                          baseinstance=self)
+        self.ui = load_ui(__file__, 'curves_tab_marker_tab.ui', baseinstance=self)
         self.face_color_selector_widget = ColorSelector(parent=self)
-        self.grid_layout.replaceWidget(self.face_color_dummy_widget,
-                                       self.face_color_selector_widget)
+        self.grid_layout.replaceWidget(self.face_color_dummy_widget, self.face_color_selector_widget)
         self.edge_color_selector_widget = ColorSelector(parent=self)
-        self.grid_layout.replaceWidget(self.edge_color_dummy_widget,
-                                       self.edge_color_selector_widget)
+        self.grid_layout.replaceWidget(self.edge_color_dummy_widget, self.edge_color_selector_widget)
         self.ui.marker_style_combo_box.addItems(MARKER_STYLES.keys())
         self.set_colour_fields_enabled(self.get_style())
         self.setAttribute(Qt.WA_DeleteOnClose, True)

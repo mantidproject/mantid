@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-
 from mantid.api import FileFinder, AnalysisDataService
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
@@ -135,14 +134,16 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.view.rebin_steps_edit.editingFinished.emit()
 
         self.assertEqual(self.model._context.gui_context['RebinFixed'], '50')
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'RebinFixed': '50'})
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier,
+                                                                  {'RebinFixed': '50'})
 
     def test_that_changing_variable_rebin_updates_variable_binning_in_model(self):
         self.view.rebin_variable_edit.setText('1,5,21')
         self.view.rebin_variable_edit.editingFinished.emit()
 
         self.assertEqual(self.model._context.gui_context['RebinVariable'], '1,5,21')
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'RebinVariable': '1,5,21'})
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier,
+                                                                  {'RebinVariable': '1,5,21'})
 
     def test_that_steps_only_accepts_a_single_integer(self):
         self.view.rebin_steps_edit.insert('1,0.1,70')
@@ -150,7 +151,8 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.rebin_steps_edit.text(), '')
         self.assertEqual(self.model._context.gui_context['RebinFixed'], '')
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'RebinFixed': ''})
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier,
+                                                                  {'RebinFixed': ''})
 
     def test_that_variable_rebin_only_accepts_a_valid_rebin_string(self):
         self.view.rebin_variable_edit.insert('1-0.1-80')
@@ -184,7 +186,8 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.dead_time_label_3.text(), self.presenter.dead_time_from_data_text([0.0]))
         self.assertEqual(self.model._data.current_data["DeadTimeTable"], None)
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'DeadTimeSource': 'None'})
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier,
+                                                                  {'DeadTimeSource': 'None'})
 
     def test_that_on_deadtime_data_selected_updates_with_no_loaded_data(self):
         self.view.dead_time_selector.setCurrentIndex(DEADTIME_DATA_FILE)
@@ -200,12 +203,14 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.presenter.handle_user_selects_dead_time_from_data()
 
         self.assertEqual(self.view.dead_time_label_3.text(), 'From 0.001 to 0.003 (ave. 0.002)')
-        self.gui_variable_observer.update.assert_called_with(self.gui_context.gui_variables_notifier, {'DeadTimeSource': 'FromFile'})
+        self.gui_variable_observer.update.assert_called_with(self.gui_context.gui_variables_notifier,
+                                                             {'DeadTimeSource': 'FromFile'})
 
     @mock.patch(
-        'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.get_table_workspace_names_from_ADS')
-    def test_that_selecting_from_table_workspace_deadtime_option_enables_table_workspace_combo_box(self,
-                                                                                                   get_table_names_mock):
+        'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.get_table_workspace_names_from_ADS'
+    )
+    def test_that_selecting_from_table_workspace_deadtime_option_enables_table_workspace_combo_box(
+            self, get_table_names_mock):
         get_table_names_mock.return_value = ['table_1', 'table_2', 'table_3']
         self.assertTrue(self.view.dead_time_file_selector.isHidden())
 
@@ -237,7 +242,8 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.dead_time_label_3.text(), "From 0.000 to 0.000 (ave. 0.000)")
         self.assertTrue(self.view.dead_time_file_selector.isHidden())
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'DeadTimeSource': 'None'})
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier,
+                                                                  {'DeadTimeSource': 'None'})
 
     def test_browse_button_displayed_when_from_other_file_selected(self):
         self.assertTrue(self.view.dead_time_browse_button.isHidden())
@@ -248,7 +254,8 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.assertEqual(self.gui_variable_observer.update.call_count, 0)
 
     @mock.patch(
-        'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.load_dead_time_from_filename')
+        'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.load_dead_time_from_filename'
+    )
     def test_browse_clicked_displays_warning_popup_if_file_does_not_contain_table(self, load_deadtime_mock):
         self.view.show_file_browser_and_return_selection = mock.MagicMock()
         load_deadtime_mock.return_value = ''
@@ -262,7 +269,8 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.assertEqual(self.gui_variable_observer.update.call_count, 0)
 
     @mock.patch(
-        'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.load_dead_time_from_filename')
+        'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.load_dead_time_from_filename'
+    )
     def test_browse_clicked_does_nothing_if_no_file_selected(self, load_deadtime_mock):
         self.view.show_file_browser_and_return_selection = mock.MagicMock(return_value=[''])
         self.view.dead_time_selector.setCurrentIndex(DEADTIME_OTHER_FILE)
@@ -274,7 +282,8 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.gui_variable_observer.update.assert_not_called()
 
     @mock.patch(
-        'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.load_dead_time_from_filename')
+        'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.load_dead_time_from_filename'
+    )
     def test_browse_clicked_fails_if_table_not_loaded_into_ADS(self, load_deadtime_mock):
         self.view.show_file_browser_and_return_selection = mock.MagicMock(return_value=['filename'])
         load_deadtime_mock.return_value = 'dead_time_table_name'
@@ -296,7 +305,8 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.dead_time_selector.currentIndex(), DEADTIME_WORKSPACE)
         self.view.warning_popup.assert_not_called()
         self.assertEqual(self.view.dead_time_file_selector.currentText(), 'MUSR00015196.nxs_deadtime_table_1')
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'DeadTimeTable': mock.ANY})
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier,
+                                                                  {'DeadTimeTable': mock.ANY})
 
     def test_validate_variable_rebin_string_allows_single_number(self):
         result, message = self.model.validate_variable_rebin_string('0.034')
@@ -346,8 +356,9 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.view.dead_time_selector.setCurrentIndex(1)
         self.view.dead_time_file_selector.setCurrentIndex(1)
 
-        self.assertTrue(CompareWorkspaces(self.model._context.dead_time_table(62260),
-                                          AnalysisDataService.retrieve('dead_time_table')))
+        self.assertTrue(
+            CompareWorkspaces(self.model._context.dead_time_table(62260),
+                              AnalysisDataService.retrieve('dead_time_table')))
 
     def test_last_good_data_from_file(self):
         self.view.last_good_data_state = mock.Mock(return_value=True)

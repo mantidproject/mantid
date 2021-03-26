@@ -11,7 +11,6 @@ from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 
 
 class StripEndNansTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
@@ -32,12 +31,12 @@ class StripEndNansTest(unittest.TestCase):
         cropped_workspace = strip_end_nans(workspace)
         # Assert
         data_y = cropped_workspace.dataY(0)
-        self.assertEqual(len(data_y),  5)
-        self.assertEqual(data_y[0],  36.)
-        self.assertEqual(data_y[1],  44.)
-        self.assertEqual(data_y[2],  52.)
-        self.assertEqual(data_y[3],  63.)
-        self.assertEqual(data_y[4],  75.)
+        self.assertEqual(len(data_y), 5)
+        self.assertEqual(data_y[0], 36.)
+        self.assertEqual(data_y[1], 44.)
+        self.assertEqual(data_y[2], 52.)
+        self.assertEqual(data_y[3], 63.)
+        self.assertEqual(data_y[4], 75.)
 
     def test_that_can_strip_end_nans_and_infs_for_point_workspace(self):
         data_x = [1., 2., 3., 4., 5., 6., 7., 8., 9., 10.]

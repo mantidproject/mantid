@@ -25,7 +25,7 @@ class LoadRunTest(unittest.TestCase):
         config['default.instrument'] = 'SANS2D'
         ici.SANS2D()
 
-    def loadAndAssign(self, run_spec,options=dict()):
+    def loadAndAssign(self, run_spec, options=dict()):
         loadRun = steps.LoadRun(str(run_spec), **options)
         loadRun._assignHelper(ici.ReductionSingleton())
         return loadRun
@@ -59,7 +59,7 @@ class LoadRunTest(unittest.TestCase):
     def test_single_period_raw_file(self):
         runnum = 5547
         loadRun = self.loadAndAssign(runnum)
-        self.basicChecks(loadRun, 'SANS2D0000%d.raw'%(runnum), runnum, 1, '5547_sans_raw')
+        self.basicChecks(loadRun, 'SANS2D0000%d.raw' % (runnum), runnum, 1, '5547_sans_raw')
         self.assertEqual(loadRun._period, -1)
         self.assertEqual(loadRun.ext, 'raw')
 
@@ -75,7 +75,7 @@ class LoadRunTest(unittest.TestCase):
     def test_single_period_from_workspace_reload_false(self):
         runnum = 22048
         ws22048 = Load(str(runnum))
-        loadRun = self.passWsAndAssign(ws22048, {'reload':False})
+        loadRun = self.passWsAndAssign(ws22048, {'reload': False})
         self.basicChecks(loadRun, 'SANS2D00022048.nxs', runnum, 1, ws22048.name())
 
         self.assertEqual(loadRun._period, -1)
@@ -83,7 +83,7 @@ class LoadRunTest(unittest.TestCase):
 
     def test_single_period_trans_raw(self):
         runnum = 988
-        loadRun = self.loadAndAssign(runnum, {'trans':True})
+        loadRun = self.loadAndAssign(runnum, {'trans': True})
         self.basicChecks(loadRun, 'SANS2D00000988.raw', runnum, 1, '988_trans_raw')
         self.assertEqual(loadRun._period, -1)
         self.assertEqual(loadRun.ext, 'raw')
@@ -99,7 +99,7 @@ class LoadRunTest(unittest.TestCase):
     def test_multiperiod_from_workspace_reload_false(self):
         runnum = 5512
         ws5512 = Load(str(runnum))
-        loadRun = self.passWsAndAssign(ws5512, {'reload':False})
+        loadRun = self.passWsAndAssign(ws5512, {'reload': False})
         self.basicChecks(loadRun, 'SANS2D00005512.nxs', runnum, 13, ws5512[0].name())
         self.assertEqual(loadRun._period, -1)
         self.assertTrue(loadRun.move2ws(12))
@@ -107,7 +107,7 @@ class LoadRunTest(unittest.TestCase):
 
     def test_loading_single_period_in_multiperiod(self):
         runnum = 5512
-        loadRun = self.loadAndAssign(runnum, {'entry':5})
+        loadRun = self.loadAndAssign(runnum, {'entry': 5})
         name = '5512p5_sans_nxs'
         self.basicChecks(loadRun, 'SANS2D00005512.nxs', runnum, 1, name)
         self.assertEqual(loadRun._period, 5)
@@ -117,30 +117,29 @@ class LoadRunTest(unittest.TestCase):
 
 class LoadSampleTest(unittest.TestCase):
     """LoadSample extends LoadRun in order to move the workspaces to the defined centre"""
-
     def setUp(self):
         config['default.instrument'] = 'SANS2D'
         ici.SANS2D()
 
     def test_single_period_nxs_file(self):
-        ici.SetCentre(1,-2)
+        ici.SetCentre(1, -2)
         loadSample = steps.LoadSample('22048')
         loadSample.execute(ici.ReductionSingleton(), True)
         self.assertEqual(loadSample.wksp_name, '22048_sans_nxs')
         self.assertTrue(not loadSample.entries)
         cur_pos = ici.ReductionSingleton().instrument.cur_detector_position(loadSample.wksp_name)
-        self.assertAlmostEqual(cur_pos[0],1/1000.0)
-        self.assertAlmostEqual(cur_pos[1], -2/1000.0)
+        self.assertAlmostEqual(cur_pos[0], 1 / 1000.0)
+        self.assertAlmostEqual(cur_pos[1], -2 / 1000.0)
 
     def test_multiperiod_nxs_file(self):
         ici.SetCentre(1, -2)
         loadSample = steps.LoadSample('5512')
         loadSample.execute(ici.ReductionSingleton(), True)
         self.assertEqual(loadSample.wksp_name, '5512_sans_nxs_1')
-        self.assertEqual(loadSample.entries, list(range(0,13)))
-        for index in [0,5,12]:
+        self.assertEqual(loadSample.entries, list(range(0, 13)))
+        for index in [0, 5, 12]:
             loadSample.move2ws(index)
-            self.assertEqual(loadSample.wksp_name, '5512_sans_nxs_'+str(index+1))
+            self.assertEqual(loadSample.wksp_name, '5512_sans_nxs_' + str(index + 1))
             cur_pos = ici.ReductionSingleton().instrument.cur_detector_position(loadSample.wksp_name)
             self.assertAlmostEqual(cur_pos[0], 0.001)
             self.assertAlmostEqual(cur_pos[1], -0.002)
@@ -181,7 +180,7 @@ class LoadAddedEventDataSampleTestSystemTest(systemtesting.MantidSystemTest):
         ici.Gravity(False)
         ici.Set1D()
 
-        ici.add_runs(('22048', '22023') ,'SANS2D', 'nxs', saveAsEvent=True)
+        ici.add_runs(('22048', '22023'), 'SANS2D', 'nxs', saveAsEvent=True)
 
         ici.AssignSample('22023-add.nxs')
 
@@ -201,32 +200,32 @@ class LoadAddedEventDataSampleTestSystemTest(systemtesting.MantidSystemTest):
         value_pairs = list(self._validateCustom())
 
         # Make sure we have pairs of two
-        if len(value_pairs )%2 != 0:
+        if len(value_pairs) % 2 != 0:
             return False
 
         # For all pairs create a list and run the normal comparison
         validationResult = []
 
         for index in range(0, len(value_pairs), 2):
-            valNames = value_pairs[index : index + 2]
+            valNames = value_pairs[index:index + 2]
 
-            numRezToCheck=len(valNames)
-            mismatchName=None
+            numRezToCheck = len(valNames)
+            mismatchName = None
 
             validationResult.extend([True])
-            for ik in range(0,numRezToCheck,2): # check All results
-                workspace2 = valNames[ik+1]
+            for ik in range(0, numRezToCheck, 2):  # check All results
+                workspace2 = valNames[ik + 1]
                 if workspace2.endswith('.nxs'):
-                    Load(Filename=workspace2,OutputWorkspace="RefFile")
+                    Load(Filename=workspace2, OutputWorkspace="RefFile")
                     workspace2 = "RefFile"
                 else:
                     raise RuntimeError("Should supply a NeXus file: %s" % workspace2)
-                valPair=(valNames[ik],"RefFile")
-                if numRezToCheck>2:
+                valPair = (valNames[ik], "RefFile")
+                if numRezToCheck > 2:
                     mismatchName = valNames[ik]
 
-                if not self.validateWorkspaces(valPair,mismatchName):
-                    validationResult[index/2] = False
+                if not self.validateWorkspaces(valPair, mismatchName):
+                    validationResult[index / 2] = False
                     print('Workspace {0} not equal to its reference file'.format(valNames[ik]))
             #end check All results
 
@@ -234,8 +233,8 @@ class LoadAddedEventDataSampleTestSystemTest(systemtesting.MantidSystemTest):
         return all(item is True for item in validationResult)
 
     def _validateCustom(self):
-        return ('22023rear_1D_4.6_12.85', 'SANS2DLoadingAddedEventData.nxs',
-                '22023rear_1D_4.6_12.85_incident_monitor', 'SANS2DLoadingAddedEventDataMonitor.nxs')
+        return ('22023rear_1D_4.6_12.85', 'SANS2DLoadingAddedEventData.nxs', '22023rear_1D_4.6_12.85_incident_monitor',
+                'SANS2DLoadingAddedEventDataMonitor.nxs')
 
     def requiredMemoryMB(self):
         return 2000
@@ -244,7 +243,7 @@ class LoadAddedEventDataSampleTestSystemTest(systemtesting.MantidSystemTest):
         return "WorkspaceToNexus"
 
     def cleanup(self):
-        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00022023-add.nxs'))
+        os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00022023-add.nxs'))
 
     def validate(self):
         self.disableChecking.append('Instrument')

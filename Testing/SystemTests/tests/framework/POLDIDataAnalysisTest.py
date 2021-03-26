@@ -14,7 +14,6 @@ import numpy as np
 class POLDIDataAnalysisTestSi(systemtesting.MantidSystemTest):
     """Base class that loads/generates data for the tests, which is identical.
     """
-
     def runTest(self):
         pass
 
@@ -29,14 +28,14 @@ class POLDIDataAnalysisTestSi(systemtesting.MantidSystemTest):
 
     def _createSi(self):
         PoldiCreatePeaksFromCell(SpaceGroup='F d -3 m',
-                                 a=5.431, LatticeSpacingMin=0.7,
+                                 a=5.431,
+                                 LatticeSpacingMin=0.7,
                                  Atoms='Si 0 0 0 1.0 0.01',
                                  OutputWorkspace='Si')
 
 
 class POLDIDataAnalysisTestSiIndividual(POLDIDataAnalysisTestSi):
     """This test runs PoldiDataAnalysis with Si data, using individual peaks."""
-
     def runTest(self):
         data, expectedPeaks = self.prepareTest()
 
@@ -105,7 +104,6 @@ class POLDIDataAnalysisTestSiIndividualDiscardUnindexed(POLDIDataAnalysisTestSi)
 
 class POLDIDataAnalysisTestSiIndividualPseudoVoigtTied(POLDIDataAnalysisTestSi):
     """This test runs PoldiDataAnalysis with Si data, using PseudoVoigt with tied mixing parameter."""
-
     def runTest(self):
         data, expectedPeaks = self.prepareTest()
 
@@ -142,7 +140,6 @@ class POLDIDataAnalysisTestSiIndividualPseudoVoigtTied(POLDIDataAnalysisTestSi):
 
 class POLDIDataAnalysisTestSiPawley(POLDIDataAnalysisTestSi):
     """This test runs PoldiDataAnalysis with Si data, using the PawleyFit-option."""
-
     def runTest(self):
         data, expectedPeaks = self.prepareTest()
 
@@ -150,7 +147,8 @@ class POLDIDataAnalysisTestSiPawley(POLDIDataAnalysisTestSi):
                           MaximumPeakNumber=11,
                           ExpectedPeaks=expectedPeaks,
                           PawleyFit=True,
-                          PlotResult=False, OutputWorkspace='output')
+                          PlotResult=False,
+                          OutputWorkspace='output')
 
         # inspect the cell
         cell = AnalysisDataService.retrieve('poldi_data_6904_cell_refined')
@@ -167,19 +165,20 @@ class POLDIDataAnalysisTestSiPawley(POLDIDataAnalysisTestSi):
 
 class POLDIDataAnalysisEmptyFile(systemtesting.MantidSystemTest):
     """This test runs PoldiDataAnalysis with Si data, using an empty workspace."""
-
     def runTest(self):
         empty = PoldiLoadRuns(2015, 977)
 
         peaks = PoldiCreatePeaksFromCell(SpaceGroup='F d -3 m',
-                                         a=5.431, LatticeSpacingMin=0.7,
+                                         a=5.431,
+                                         LatticeSpacingMin=0.7,
                                          Atoms='Si 0 0 0 1.0 0.01',
                                          OutputWorkspace='Si')
         try:
             PoldiDataAnalysis(InputWorkspace=empty.getItem(0),
                               MaximumPeakNumber=11,
                               ExpectedPeaks=peaks,
-                              PlotResult=False, OutputWorkspace='output')
+                              PlotResult=False,
+                              OutputWorkspace='output')
         except RuntimeError as error:
-            self.assertTrue("Aborting analysis since workspace empty_data_977 does not contain any counts." in str(
-                error))
+            self.assertTrue(
+                "Aborting analysis since workspace empty_data_977 does not contain any counts." in str(error))

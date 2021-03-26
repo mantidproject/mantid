@@ -116,14 +116,14 @@ class CoLoadModel(unittest.TestCase):
         workspace1 = ["2695; detector 1", "2695; detector 2"]
         workspace2 = ["2696; detector 1", "2696; detector 2"]
         for ws in workspace1:
-            mantid.CreateSampleWorkspace(OutputWorkspace = ws)
+            mantid.CreateSampleWorkspace(OutputWorkspace=ws)
         for ws in workspace2:
-            mantid.CreateSampleWorkspace(OutputWorkspace = ws)
-        mock_lutils.flatten_run_data = mock.Mock(return_value=[workspace1,workspace2])
+            mantid.CreateSampleWorkspace(OutputWorkspace=ws)
+        mock_lutils.flatten_run_data = mock.Mock(return_value=[workspace1, workspace2])
         self.model.add_co_load_to_group = mock.Mock()
 
         self.model.co_load_run(mock_ws)
-        self.assertEquals(self.model.add_co_load_to_group.call_count,1)
+        self.assertEquals(self.model.add_co_load_to_group.call_count, 1)
         self.assertEqual(mock_lutils.hyphenise.call_count, 1)
         self.assertTrue("2695-2696" in self.model.loaded_runs.keys())
 

@@ -54,7 +54,7 @@ def animate_slice(sliceviewer, name, start, end, filename, num_frames=10, font_s
         #Write the caption into the whitespace
         draw = Drawing()
         draw.font_size = font_size
-        draw.text(5, font_size,"%s = %g" % (name,slice_point))
+        draw.text(5, font_size, "%s = %g" % (name, slice_point))
         draw(image)
         images.append(image)
     #Create a new image with the right dimensions

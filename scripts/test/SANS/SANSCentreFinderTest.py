@@ -76,7 +76,6 @@ class TestPositionProvider(unittest.TestCase):
         '''
         Mocking out the sample
         '''
-
         def __init__(self, ws_name):
             super(TestPositionProvider.MockSample, self).__init__()
             self.wksp_name = ws_name

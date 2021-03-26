@@ -14,7 +14,6 @@ from numpy.testing import assert_array_equal
 
 
 class FrequencyPowderGeneratorTest(unittest.TestCase):
-
     def setUp(self):
         self.simple_freq_generator = abins.FrequencyPowderGenerator()
         self.min_wavenumber = abins.parameters.sampling['min_wavenumber']
@@ -153,27 +152,23 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
 
         # At order one this should just be a pass-through
         # (it also reindexes the coefficients but we might not keep that)
-        fundamentals, fund_coeffs = (
-            abins.FrequencyPowderGenerator.construct_freq_combinations(
-                previous_array=None, previous_coefficients=None,
-                fundamentals_array=rand_fundamentals,
-                fundamentals_coefficients=np.arange(len(rand_fundamentals),
-                                                    dtype=INT_TYPE),
-                quantum_order=1))
+        fundamentals, fund_coeffs = (abins.FrequencyPowderGenerator.construct_freq_combinations(
+            previous_array=None,
+            previous_coefficients=None,
+            fundamentals_array=rand_fundamentals,
+            fundamentals_coefficients=np.arange(len(rand_fundamentals), dtype=INT_TYPE),
+            quantum_order=1))
 
         assert_array_equal(rand_fundamentals, fundamentals)
-        assert_array_equal(fund_coeffs, np.arange(len(rand_fundamentals),
-                                                  dtype=INT_TYPE))
+        assert_array_equal(fund_coeffs, np.arange(len(rand_fundamentals), dtype=INT_TYPE))
 
         # Calcualate some doubles
-        doubles, double_coeffs = (
-            abins.FrequencyPowderGenerator.construct_freq_combinations(
-                previous_array=fundamentals,
-                previous_coefficients=fund_coeffs,
-                fundamentals_array=rand_fundamentals,
-                fundamentals_coefficients=np.arange(len(rand_fundamentals),
-                                                    dtype=INT_TYPE),
-                quantum_order=2))
+        doubles, double_coeffs = (abins.FrequencyPowderGenerator.construct_freq_combinations(
+            previous_array=fundamentals,
+            previous_coefficients=fund_coeffs,
+            fundamentals_array=rand_fundamentals,
+            fundamentals_coefficients=np.arange(len(rand_fundamentals), dtype=INT_TYPE),
+            quantum_order=2))
 
         # Check the doubles have been screened for max frequency
         self.assertEqual(len(doubles), 2104)
@@ -182,9 +177,7 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
         # Check doubles are in the right places and the maths is just a sum
         self.assertTrue(np.any(fundamentals[0] * 2 == doubles))
         self.assertTrue(np.any(fundamentals[2] + fundamentals[3] == doubles))
-        self.assertEqual((fundamentals[double_coeffs[20, 0]]
-                          + fundamentals[double_coeffs[20, 1]]),
-                         doubles[20])
+        self.assertEqual((fundamentals[double_coeffs[20, 0]] + fundamentals[double_coeffs[20, 1]]), doubles[20])
 
 
 if __name__ == '__main__':

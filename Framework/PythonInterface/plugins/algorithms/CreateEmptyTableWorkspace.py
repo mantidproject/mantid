@@ -12,7 +12,6 @@ from mantid.kernel import Direction
 
 
 class CreateEmptyTableWorkspace(PythonAlgorithm):
-
     def summary(self):
         return "Creates an empty TableWorkspace which can be populated with various "\
                "types of information."
@@ -21,7 +20,7 @@ class CreateEmptyTableWorkspace(PythonAlgorithm):
         return 'Utility\\Workspaces'
 
     def seeAlso(self):
-        return [ "DeleteTableRows","SortTableWorkspace" ]
+        return ["DeleteTableRows", "SortTableWorkspace"]
 
     def PyInit(self):
         # Declare properties

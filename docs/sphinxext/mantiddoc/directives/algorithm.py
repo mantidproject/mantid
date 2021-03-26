@@ -7,6 +7,7 @@
 from mantiddoc.directives.base import AlgorithmBaseDirective  #pylint: disable=unused-import
 import os
 import re
+
 REDIRECT_TEMPLATE = "redirect.html"
 
 DEPRECATE_USE_ALG_RE = re.compile(r"Use\s(([A-Z][a-zA-Z0-9]+)\s(version ([0-9])+)?)\s*instead.")
@@ -103,14 +104,10 @@ class AlgorithmDirective(AlgorithmBaseDirective):
         # Generate image
         from mantiddoc.tools.screenshot import algorithm_screenshot
         try:
-            picture = algorithm_screenshot(self.algorithm_name(),
-                                           screenshots_dir,
-                                           version=self.algorithm_version())
+            picture = algorithm_screenshot(self.algorithm_name(), screenshots_dir, version=self.algorithm_version())
         except RuntimeError as exc:
             env = self.state.document.settings.env
-            env.warn(
-                env.docname,
-                "Unable to generate screenshot for '%s' - %s" % (self.algorithm_name(), str(exc)))
+            env.warn(env.docname, "Unable to generate screenshot for '%s' - %s" % (self.algorithm_name(), str(exc)))
             picture = None
 
         return picture

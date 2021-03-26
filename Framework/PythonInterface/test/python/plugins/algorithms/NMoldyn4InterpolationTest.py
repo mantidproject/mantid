@@ -30,7 +30,9 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
         y_data = np.asarray([val * (np.cos(5 * x_data) + 1) for val in q_data])
         y_data = y_data.flatten()
         x_data = np.tile(x_data, len(q_data))
-        sim = CreateWorkspace(DataX=x_data, DataY=y_data, NSpec=len(q_data),
+        sim = CreateWorkspace(DataX=x_data,
+                              DataY=y_data,
+                              NSpec=len(q_data),
                               VerticalAxisUnit='MomentumTransfer',
                               VerticalAxisValues=q_data)
 
@@ -54,7 +56,9 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
         y_data = np.asarray([val * (np.cos(5 * x_data) + 1) for val in q_data])
         y_data = y_data.flatten()
         x_data = np.tile(x_data, len(q_data))
-        sim = CreateWorkspace(DataX=x_data, DataY=y_data, NSpec=len(q_data),
+        sim = CreateWorkspace(DataX=x_data,
+                              DataY=y_data,
+                              NSpec=len(q_data),
                               VerticalAxisUnit='MomentumTransfer',
                               VerticalAxisValues=q_data)
         self.assertRaises(RuntimeError,
@@ -69,7 +73,9 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
         y_data = np.asarray([val * (np.cos(5 * x_data) + 1) for val in q_data])
         y_data = y_data.flatten()
         x_data = np.tile(x_data, len(q_data))
-        sim = CreateWorkspace(DataX=x_data, DataY=y_data, NSpec=len(q_data),
+        sim = CreateWorkspace(DataX=x_data,
+                              DataY=y_data,
+                              NSpec=len(q_data),
                               VerticalAxisUnit='MomentumTransfer',
                               VerticalAxisValues=q_data)
         self.assertRaises(RuntimeError,
@@ -84,7 +90,9 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
         y_data = np.asarray([val * (np.cos(5 * x_data) + 1) for val in q_data])
         y_data = y_data.flatten()
         x_data = np.tile(x_data, len(q_data))
-        sim = CreateWorkspace(DataX=x_data, DataY=y_data, NSpec=len(q_data),
+        sim = CreateWorkspace(DataX=x_data,
+                              DataY=y_data,
+                              NSpec=len(q_data),
                               VerticalAxisUnit='MomentumTransfer',
                               VerticalAxisValues=q_data)
         self.assertRaises(RuntimeError,
@@ -99,7 +107,9 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
         y_data = np.asarray([val * (np.cos(5 * x_data) + 1) for val in q_data])
         y_data = y_data.flatten()
         x_data = np.tile(x_data, len(q_data))
-        sim = CreateWorkspace(DataX=x_data, DataY=y_data, NSpec=len(q_data),
+        sim = CreateWorkspace(DataX=x_data,
+                              DataY=y_data,
+                              NSpec=len(q_data),
                               VerticalAxisUnit='MomentumTransfer',
                               VerticalAxisValues=q_data)
         self.assertRaises(RuntimeError,

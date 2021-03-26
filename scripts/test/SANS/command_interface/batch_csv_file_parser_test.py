@@ -113,7 +113,7 @@ class BatchCsvParserTest(unittest.TestCase):
         output = parser.parse_batch_file(batch_file_path)
 
         # Assert
-        self.assertEqual(len(output),  2)
+        self.assertEqual(len(output), 2)
 
         first_line = output[0]
         self.assertEqual(first_line.sample_scatter, "1")
@@ -144,7 +144,7 @@ class BatchCsvParserTest(unittest.TestCase):
         output = parser.parse_batch_file(batch_file_path)
 
         # Assert
-        self.assertEqual(len(output),  1)
+        self.assertEqual(len(output), 1)
 
         first_line = output[0]
         self.assertEqual(first_line.sample_scatter, "1")
@@ -166,7 +166,7 @@ class BatchCsvParserTest(unittest.TestCase):
         output = parser.parse_batch_file(batch_file_path)
 
         # Assert
-        self.assertEqual(len(output),  2)
+        self.assertEqual(len(output), 2)
 
         first_line = output[0]
         self.assertEqual(first_line.sample_scatter, "1")
@@ -194,8 +194,10 @@ class BatchCsvParserTest(unittest.TestCase):
         rows.
         We now add an empty final row in the parser if there are 15 rows and the last row provided is
         a batch file key"""
-        batch_file_row = ["sample_sans", "1", "sample_trans", "", "sample_direct_beam", "",
-                          "can_sans", "", "can_trans", "", "can_direct_beam", "", "output_as", "", "user_file"]
+        batch_file_row = [
+            "sample_sans", "1", "sample_trans", "", "sample_direct_beam", "", "can_sans", "", "can_trans", "",
+            "can_direct_beam", "", "output_as", "", "user_file"
+        ]
         parser = BatchCsvParser()
         parser._parse_csv_row(batch_file_row, 0)
 
@@ -208,9 +210,11 @@ class BatchCsvParserTest(unittest.TestCase):
         self.assertEqual(0, len(output))
 
     def test_can_parse_sample_geometries(self):
-        batch_file_row = ["sample_sans", "1", "sample_trans", "", "sample_direct_beam", "",
-                          "can_sans", "", "can_trans", "", "can_direct_beam", "", "output_as", "", "user_file", "",
-                          "sample_thickness", "5", "sample_height", "5", "sample_width", "5"]
+        batch_file_row = [
+            "sample_sans", "1", "sample_trans", "", "sample_direct_beam", "", "can_sans", "", "can_trans", "",
+            "can_direct_beam", "", "output_as", "", "user_file", "", "sample_thickness", "5", "sample_height", "5",
+            "sample_width", "5"
+        ]
         parser = BatchCsvParser()
         parser._parse_csv_row(batch_file_row, 0)
 

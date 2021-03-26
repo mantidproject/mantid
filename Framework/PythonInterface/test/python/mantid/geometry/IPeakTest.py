@@ -12,7 +12,6 @@ import numpy.testing as npt
 
 
 class IPeakTest(unittest.TestCase):
-
     def setUp(self):
         # IPeak cannot currently be instatiated so this is a quick way
         # getting a handle to a peak object
@@ -67,12 +66,8 @@ class IPeakTest(unittest.TestCase):
         npt.assert_allclose(self._peak.getQLabFrame(), q_sample, atol=self._tolerance)
 
     def test_set_goniometer_matrix_with_valid_matrix(self):
-        angle = np.pi/4
-        rotation = np.array([
-            [np.cos(angle), -np.sin(angle), 0],
-            [np.sin(angle), np.cos(angle), 0],
-            [0, 0, 1]
-        ])
+        angle = np.pi / 4
+        rotation = np.array([[np.cos(angle), -np.sin(angle), 0], [np.sin(angle), np.cos(angle), 0], [0, 0, 1]])
         q_sample = V3D(1, 1, 1)
 
         self._peak.setGoniometerMatrix(rotation)
@@ -94,7 +89,7 @@ class IPeakTest(unittest.TestCase):
 
     def test_get_scattering(self):
         expected_scattering_angle = 2.7024  # angle subtended by detector with ID=1
-        self.assertAlmostEqual(self._peak.getScattering(), expected_scattering_angle,  places=4)
+        self.assertAlmostEqual(self._peak.getScattering(), expected_scattering_angle, places=4)
 
     def test_get_tof(self):
         wavelength = 1.9

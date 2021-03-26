@@ -10,7 +10,6 @@ from mantid.kernel import PropertyHistory
 
 
 class PropertyHistoryTest(unittest.TestCase):
-
     def test_history_construction(self):
         prop_name = 'TestName'
         prop_value = 'TestValue'

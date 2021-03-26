@@ -68,14 +68,12 @@ class TomlV1ParserTest(unittest.TestCase):
             self.assertEqual(expected, val, "Failed to get key {0}".format(k))
 
     def test_instrument_configuration_parsed(self):
-        supported_keys = [
-            ("collimation_length", lambda x: x.get_state_convert_to_q().q_resolution_collimation_length),
-            ("gravity_extra_length", lambda x: x.get_state_convert_to_q().gravity_extra_length),
-            ("norm_monitor", lambda x: x.get_state_calculate_transmission().incident_monitor),
-            ("trans_monitor", lambda x: x.get_state_calculate_transmission().transmission_monitor),
-            ("sample_aperture_diameter", lambda x: x.get_state_convert_to_q().q_resolution_a2),
-            ("sample_offset", lambda x: x.get_state_move(None).sample_offset)
-        ]
+        supported_keys = [("collimation_length", lambda x: x.get_state_convert_to_q().q_resolution_collimation_length),
+                          ("gravity_extra_length", lambda x: x.get_state_convert_to_q().gravity_extra_length),
+                          ("norm_monitor", lambda x: x.get_state_calculate_transmission().incident_monitor),
+                          ("trans_monitor", lambda x: x.get_state_calculate_transmission().transmission_monitor),
+                          ("sample_aperture_diameter", lambda x: x.get_state_convert_to_q().q_resolution_a2),
+                          ("sample_offset", lambda x: x.get_state_move(None).sample_offset)]
 
         self._loop_over_supported_keys(supported_keys=supported_keys, top_level_keys=["instrument", "configuration"])
 
@@ -116,9 +114,15 @@ class TomlV1ParserTest(unittest.TestCase):
             self.assertEqual(0.1, wavelength.wavelength_step)
             self.assertEqual(RangeStepType(bin_type), wavelength.wavelength_step_type)
 
-        one_d_reduction_q_dict = {"binning": {"1d_reduction": {"binning": "1.0, 0.1, 2.0, -0.2, 3.0",
-                                                               "radius_cut": 12.3,
-                                                               "wavelength_cut": 23.4}}}
+        one_d_reduction_q_dict = {
+            "binning": {
+                "1d_reduction": {
+                    "binning": "1.0, 0.1, 2.0, -0.2, 3.0",
+                    "radius_cut": 12.3,
+                    "wavelength_cut": 23.4
+                }
+            }
+        }
         one_d_convert_to_q = self._setup_parser(one_d_reduction_q_dict).get_state_convert_to_q()
         self.assertEqual(1.0, one_d_convert_to_q.q_min)
         self.assertEqual(3.0, one_d_convert_to_q.q_max)
@@ -126,8 +130,16 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(12.3, one_d_convert_to_q.radius_cutoff)
         self.assertEqual(23.4, one_d_convert_to_q.wavelength_cutoff)
 
-        two_d_reduction_q_dict = {"binning": {"2d_reduction": {"step": 1.0, "stop": 5.0,
-                                                               "type": "Lin", "interpolate": True}}}
+        two_d_reduction_q_dict = {
+            "binning": {
+                "2d_reduction": {
+                    "step": 1.0,
+                    "stop": 5.0,
+                    "type": "Lin",
+                    "interpolate": True
+                }
+            }
+        }
         results = self._setup_parser(two_d_reduction_q_dict)
         two_d_convert_to_q = results.get_state_convert_to_q()
         self.assertEqual(5.0, two_d_convert_to_q.q_xy_max)
@@ -136,8 +148,7 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertTrue(results.get_state_calculate_transmission().rebin_type is RebinType.INTERPOLATING_REBIN)
 
     def test_reduction_commands_parsed(self):
-        top_level_dict = {"reduction": {"merged": {},
-                                        "events": {}}}
+        top_level_dict = {"reduction": {"merged": {}, "events": {}}}
 
         merged_dict = top_level_dict["reduction"]["merged"]
         merged_dict["merge_range"] = {"min": 1, "max": 2, "use_fit": False}
@@ -164,12 +175,20 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(state_reduction.merge_fit_mode, FitModeForMerge.BOTH)
 
     def test_detector_parsed(self):
-        top_level_dict = {"detector": {"calibration": {"direct": {},
-                                                       "flat": {},
-                                                       "tube": {},
-                                                       "position": {}},
-                                       "radius_limit": {"min": None,
-                                                        "max": None}}}
+        top_level_dict = {
+            "detector": {
+                "calibration": {
+                    "direct": {},
+                    "flat": {},
+                    "tube": {},
+                    "position": {}
+                },
+                "radius_limit": {
+                    "min": None,
+                    "max": None
+                }
+            }
+        }
 
         calibration_dict = top_level_dict["detector"]["calibration"]
 
@@ -199,10 +218,8 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(wavelength_state.adjustment_files[DetectorType.HAB.value].wavelength_adjustment_file,
                          direct_front)
 
-        self.assertEqual(wavelength_state.adjustment_files[DetectorType.LAB.value].pixel_adjustment_file,
-                         flat_rear)
-        self.assertEqual(wavelength_state.adjustment_files[DetectorType.HAB.value].pixel_adjustment_file,
-                         flat_front)
+        self.assertEqual(wavelength_state.adjustment_files[DetectorType.LAB.value].pixel_adjustment_file, flat_rear)
+        self.assertEqual(wavelength_state.adjustment_files[DetectorType.HAB.value].pixel_adjustment_file, flat_front)
 
         self.assertEqual(parser.get_state_adjustment(None).calibration, tube_file)
 
@@ -328,8 +345,7 @@ class TomlV1ParserTest(unittest.TestCase):
 
     def test_parse_normalisation(self):
         # A2 is intentional to check were not hardcoded to Mx
-        top_level_dict = {"normalisation": {"monitor": {"M1": {}, "A2": {}},
-                                            "selected_monitor": ""}}
+        top_level_dict = {"normalisation": {"monitor": {"M1": {}, "A2": {}}, "selected_monitor": ""}}
         monitor_dict = top_level_dict["normalisation"]["monitor"]
 
         m1_dict = monitor_dict["M1"]
@@ -362,8 +378,7 @@ class TomlV1ParserTest(unittest.TestCase):
             self._setup_parser(top_level_dict)
 
     def test_parse_mask_spatial(self):
-        top_level_dict = {"mask": {"spatial": {"rear": {},
-                                               "front": {}}}}
+        top_level_dict = {"mask": {"spatial": {"rear": {}, "front": {}}}}
 
         rear_spatial_dict = top_level_dict["mask"]["spatial"]["rear"]
         rear_spatial_dict["detector_columns"] = [101, 102]
@@ -398,12 +413,18 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual([400], front_result.range_horizontal_strip_stop)
 
     def test_parse_mask(self):
-        top_level_dict = {"mask": {"beamstop_shadow": {},
-                                   "prompt_peak": {},
-                                   "mask_pixels": [],
-                                   "mask_files": [],
-                                   "time": {"tof": []}},
-                          "phi": {}}
+        top_level_dict = {
+            "mask": {
+                "beamstop_shadow": {},
+                "prompt_peak": {},
+                "mask_pixels": [],
+                "mask_files": [],
+                "time": {
+                    "tof": []
+                }
+            },
+            "phi": {}
+        }
 
         top_level_dict["mask"]["beamstop_shadow"] = {"width": 10, "angle": 180}
         top_level_dict["mask"]["prompt_peak"] = {"start": 101, "stop": 102}
@@ -415,11 +436,9 @@ class TomlV1ParserTest(unittest.TestCase):
 
         time_dict = top_level_dict["mask"]["time"]
 
-        time_dict["tof"].extend([{"start": 100, "stop": 200},
-                                 {"start": 300, "stop": 400}])
+        time_dict["tof"].extend([{"start": 100, "stop": 200}, {"start": 300, "stop": 400}])
 
-        top_level_dict["mask"]["phi"] = {"mirror": False,
-                                         "start": -50, "stop": 50}
+        top_level_dict["mask"]["phi"] = {"mirror": False, "start": -50, "stop": 50}
 
         parser_result = self._setup_parser(top_level_dict)
         masks = parser_result.get_state_mask(None)

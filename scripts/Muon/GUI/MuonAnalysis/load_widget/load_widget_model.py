@@ -12,7 +12,6 @@ class LoadWidgetModel(object):
     The model is responsible for storing the currently loaded run or runs
     (both the nun numbers, filenames and workspaces) as well as loading new runs using a separate loading thread.
     """
-
     def __init__(self, loaded_data_store=MuonLoadData(), context=None):
         self._loaded_data_store = loaded_data_store
         self._data_context = context.data_context

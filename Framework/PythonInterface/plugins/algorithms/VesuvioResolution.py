@@ -22,16 +22,12 @@ class VesuvioResolution(VesuvioBase):
         return 'Calculates the resolution function for VESUVIO'
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty(name='Workspace',
-                                               defaultValue='',
-                                               direction=Direction.Input),
+        self.declareProperty(WorkspaceProperty(name='Workspace', defaultValue='', direction=Direction.Input),
                              doc='Sample workspace')
 
-        self.declareProperty(name='WorkspaceIndex', defaultValue=0,
-                             doc='Workspace index to use for resolution')
+        self.declareProperty(name='WorkspaceIndex', defaultValue=0, doc='Workspace index to use for resolution')
 
-        self.declareProperty(name='Mass', defaultValue=100.0,
-                             doc='The mass defining the recoil peak in AMU')
+        self.declareProperty(name='Mass', defaultValue=100.0, doc='The mass defining the recoil peak in AMU')
 
         self.declareProperty(WorkspaceProperty(name='OutputWorkspaceTOF',
                                                defaultValue='',
@@ -106,17 +102,18 @@ class VesuvioResolution(VesuvioBase):
         # Execute the resolution function using fit.
         # Functions can't currently be executed as stand alone objects,
         # so for now we will run fit with zero iterations to achieve the same result.
-        fit_ws = self._execute_child_alg('Fit', return_values='OutputWorkspace',
-                                         Function=function, InputWorkspace=workspace,
+        fit_ws = self._execute_child_alg('Fit',
+                                         return_values='OutputWorkspace',
+                                         Function=function,
+                                         InputWorkspace=workspace,
                                          MaxIterations=0,
-                                         CreateOutput=True, Output=fit_naming_stem,
+                                         CreateOutput=True,
+                                         Output=fit_naming_stem,
                                          WorkspaceIndex=self._workspace_index,
                                          OutputCompositeMembers=False)
 
         # Extract just the function values from the fit spectrum
-        res_ws = self._execute_child_alg('ExtractSingleSpectrum',
-                                         InputWorkspace=fit_ws,
-                                         WorkspaceIndex=1)
+        res_ws = self._execute_child_alg('ExtractSingleSpectrum', InputWorkspace=fit_ws, WorkspaceIndex=1)
         return res_ws
 
 

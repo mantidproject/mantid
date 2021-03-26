@@ -33,8 +33,10 @@ class RowEntriesTest(unittest.TestCase):
             self.assertEqual(RowState.ERROR, obj.state)  # This will likely stack-overflow instead of failing
 
     def test_is_multi_period(self):
-        multi_period_keys = ["can_direct_period", "can_scatter_period", "can_transmission_period",
-                             "sample_direct_period", "sample_scatter_period", "sample_transmission_period"]
+        multi_period_keys = [
+            "can_direct_period", "can_scatter_period", "can_transmission_period", "sample_direct_period",
+            "sample_scatter_period", "sample_transmission_period"
+        ]
 
         for key in multi_period_keys:
             obj = RowEntries()

@@ -12,7 +12,6 @@ from mantid.simpleapi import LoadRaw, MoveInstrumentComponent
 import unittest
 
 from sans.common.enums import SANSInstrument
-
 """
 Allowing the reduction to use already loaded workspace will make it easier to
 deal with event mode and producing new workspaces for the reduction of data.
@@ -45,7 +44,6 @@ class SANSLOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
      * If reload is False, it will be used, if it pass the following tests:
        * The instrument components have not been moved
     """
-
     def setUp(self):
         self.load_run = '54431.raw'
         config["default.instrument"] = "LOQ"
@@ -61,16 +59,16 @@ class SANSLOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
         my_workspace = Load(self.load_run)
         #set the value for my_workspace to ensure it is the one used
         aux = my_workspace.dataY(0)
-        aux[10]=5
-        my_workspace.setY(0,aux)
+        aux[10] = 5
+        my_workspace.setY(0, aux)
         # ask to use the loaded workspace
-        AssignSample(my_workspace,reload=False)
+        AssignSample(my_workspace, reload=False)
 
         ws_name = ReductionSingleton().get_sample().get_wksp_name()
 
         self.assertTrue(ws_name, my_workspace.name())
 
-        self.assertTrue(my_workspace.dataY(0)[10],5)
+        self.assertTrue(my_workspace.dataY(0)[10], 5)
         # ensure that it is able to execute the reduction
         Reduce()
         self.assertTrue(self.control_name in mtd)
@@ -79,10 +77,10 @@ class SANSLOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
         my_workspace = Load(self.load_run)
         #set the value for my_workspace to ensure it is the one used
         aux = my_workspace.dataY(0)
-        aux[10]=5
-        my_workspace.setY(0,aux)
+        aux[10] = 5
+        my_workspace.setY(0, aux)
         # ask to use the loaded workspace
-        AssignSample(my_workspace,reload=True)
+        AssignSample(my_workspace, reload=True)
 
         ws_name = ReductionSingleton().get_sample().get_wksp_name()
         # it is different, because, it will compose the name using its rule,
@@ -93,7 +91,7 @@ class SANSLOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
 
     def test_should_not_accept_loaded_workspace_if_moved(self):
         my_workspace = Load(self.load_run)
-        MoveInstrumentComponent(my_workspace,self.inst_comp,X=2,Y=1,Z=0)
+        MoveInstrumentComponent(my_workspace, self.inst_comp, X=2, Y=1, Z=0)
         ## attempt to use a workspace that has been moved
         self.assertRaises(RuntimeError, AssignSample, my_workspace, False)
 
@@ -116,7 +114,7 @@ class SANSLOQReductionShouldAcceptLoadedWorkspaceSystemTest(systemtesting.Mantid
         self._success = False
         # Custom code to create and run this single test suite
         suite = unittest.TestSuite()
-        suite.addTest( unittest.makeSuite(self.cl, "test"))
+        suite.addTest(unittest.makeSuite(self.cl, "test"))
         runner = unittest.TextTestRunner()
         # Run using either runner
         res = runner.run(suite)
@@ -137,11 +135,11 @@ class SANSLOQTransFitWorkspace2DWithLoadedWorkspace(systemtesting.MantidSystemTe
         Set2D()
         Detector("main-detector-bank")
         Sample = LoadRaw('54431.raw')
-        AssignSample(Sample,False)
+        AssignSample(Sample, False)
         Can = LoadRaw('54432.raw')
-        AssignCan(Can,False)
-        LimitsWav(3,4, 0.2, 'LIN')
-        TransFit('LOG',3.0,8.0)
+        AssignCan(Can, False)
+        LimitsWav(3, 4, 0.2, 'LIN')
+        TransFit('LOG', 3.0, 8.0)
         Sample_Trans = LoadRaw('54435.raw')
         Sample_Direct = LoadRaw('54433.raw')
         TransmissionSample(Sample_Trans, Sample_Direct, False)
@@ -157,7 +155,7 @@ class SANSLOQTransFitWorkspace2DWithLoadedWorkspace(systemtesting.MantidSystemTe
         #when comparing LOQ files you seem to need the following
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-        return '54431main_2D_3.0_4.0_suff','LOQTransFitWorkspace2D.nxs'
+        return '54431main_2D_3.0_4.0_suff', 'LOQTransFitWorkspace2D.nxs'
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)
@@ -165,7 +163,6 @@ class SANSLOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(systemtesting.
     """ It will repeat the test done at SANSLOQCentreNoGrav but using
     loaded workspaces
     """
-
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)
         self.tolerance = 1e-6
@@ -190,13 +187,13 @@ class SANSLOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(systemtesting.
         AssignCan(Can, False)
         TransmissionCan(CanTrans_Sample, CanTrans_Direct, False)
 
-        FindBeamCentre(60,200, 9)
+        FindBeamCentre(60, 200, 9)
 
         WavRangeReduction(3, 9, DefaultTrans)
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
+        return '54431main_1D_3.0_9.0', 'LOQCentreNoGravSearchCentreFixed.nxs'
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)
@@ -205,7 +202,6 @@ class SANSLOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(systemtesting.
     to produce a workspace that matches SANSLOQCentreNoGrav.nxs. This test is created to ensure
     that if we put the same centre that was produced before, we finish in the same result
     for the reduction"""
-
     def runTest(self):
         config["default.instrument"] = "LOQ"
         LOQ()
@@ -238,12 +234,11 @@ class SANSLOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(systemtesting.
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
 
-        return '54431main_1D_3.0_9.0','LOQCentreNoGrav_V2.nxs'
+        return '54431main_1D_3.0_9.0', 'LOQCentreNoGrav_V2.nxs'
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQCan2DReloadWorkspace(systemtesting.MantidSystemTest):
-
     def runTest(self):
         config["default.instrument"] = "LOQ"
         LOQ()
@@ -269,7 +264,7 @@ class SANSLOQCan2DReloadWorkspace(systemtesting.MantidSystemTest):
         #when comparing LOQ files you seem to need the following
         self.disableChecking.append('Axes')
         # the change in number is because the run number reported from 99630 is 53615
-        return '53615main_2D_2.2_10.0','SANSLOQCan2D.nxs'
+        return '53615main_2D_2.2_10.0', 'SANSLOQCan2D.nxs'
 
 
 if __name__ == "__main__":

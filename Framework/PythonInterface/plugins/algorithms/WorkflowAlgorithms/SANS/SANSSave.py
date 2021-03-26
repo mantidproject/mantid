@@ -5,11 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-
 """ SANSSave algorithm performs saving of SANS reduction data."""
 
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
-                        FileProperty, FileAction, Progress)
+from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, FileProperty,
+                        FileAction, Progress)
 from mantid.kernel import (Direction, logger)
 from sans.algorithm_detail.save_workspace import (save_to_file, get_zero_error_free_workspace, file_format_with_append)
 from sans.common.enums import (SaveType)
@@ -23,48 +22,65 @@ class SANSSave(DataProcessorAlgorithm):
         return 'Performs saving of reduced SANS data.'
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace",
+                                                     '',
+                                                     optional=PropertyMode.Mandatory,
+                                                     direction=Direction.Input),
                              doc='The workspace which is to be saved.'
-                                 ' This workspace needs to be the result of a SANS reduction,'
-                                 ' i.e. it can only be 1D or 2D if the second axis is numeric.')
+                             ' This workspace needs to be the result of a SANS reduction,'
+                             ' i.e. it can only be 1D or 2D if the second axis is numeric.')
 
-        self.declareProperty(FileProperty("Filename", '', action=FileAction.Save,
-                                          extensions=[]),
+        self.declareProperty(FileProperty("Filename", '', action=FileAction.Save, extensions=[]),
                              doc="The name of the file which needs to be stored. Note that "
-                                 "the actual file type is selected below.")
+                             "the actual file type is selected below.")
 
-        self.declareProperty(MatrixWorkspaceProperty("Transmission", defaultValue='',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("Transmission",
+                                                     defaultValue='',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
                              doc='The sample transmission workspace. Optional.')
-        self.declareProperty(MatrixWorkspaceProperty("TransmissionCan", defaultValue='',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("TransmissionCan",
+                                                     defaultValue='',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
                              doc='The can transmission workspace. Optional.')
 
-        self.declareProperty("Nexus", False, direction=Direction.Input,
+        self.declareProperty("Nexus",
+                             False,
+                             direction=Direction.Input,
                              doc="Save as nexus format. "
-                                 "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-                                 "file format is appended to the file name.")
-        self.declareProperty("CanSAS", False, direction=Direction.Input,
+                             "Note that if file formats of the same type, e.g. .xml are chosen, then the "
+                             "file format is appended to the file name.")
+        self.declareProperty("CanSAS",
+                             False,
+                             direction=Direction.Input,
                              doc="Save as CanSAS xml format."
-                                 "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-                                 "file format is appended to the file name.")
-        self.declareProperty("NXcanSAS", False, direction=Direction.Input,
+                             "Note that if file formats of the same type, e.g. .xml are chosen, then the "
+                             "file format is appended to the file name.")
+        self.declareProperty("NXcanSAS",
+                             False,
+                             direction=Direction.Input,
                              doc="Save as NXcanSAS format."
-                                 "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-                                 "file format is appended to the file name.")
-        self.declareProperty("NistQxy", False, direction=Direction.Input,
+                             "Note that if file formats of the same type, e.g. .xml are chosen, then the "
+                             "file format is appended to the file name.")
+        self.declareProperty("NistQxy",
+                             False,
+                             direction=Direction.Input,
                              doc="Save as Nist Qxy format."
-                                 "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-                                 "file format is appended to the file name.")
-        self.declareProperty("RKH", False, direction=Direction.Input,
+                             "Note that if file formats of the same type, e.g. .xml are chosen, then the "
+                             "file format is appended to the file name.")
+        self.declareProperty("RKH",
+                             False,
+                             direction=Direction.Input,
                              doc="Save as RKH format."
-                                 "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-                                 "file format is appended to the file name.")
-        self.declareProperty("CSV", False, direction=Direction.Input,
+                             "Note that if file formats of the same type, e.g. .xml are chosen, then the "
+                             "file format is appended to the file name.")
+        self.declareProperty("CSV",
+                             False,
+                             direction=Direction.Input,
                              doc="Save as CSV format."
-                                 "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-                                 "file format is appended to the file name.")
+                             "Note that if file formats of the same type, e.g. .xml are chosen, then the "
+                             "file format is appended to the file name.")
 
         self.setPropertyGroup("Nexus", 'FileFormats')
         self.setPropertyGroup("CanSAS", 'FileFormats')
@@ -73,18 +89,28 @@ class SANSSave(DataProcessorAlgorithm):
         self.setPropertyGroup("RKH", 'FileFormats')
         self.setPropertyGroup("CSV", 'FileFormats')
 
-        self.declareProperty("UseZeroErrorFree", True, direction=Direction.Input,
+        self.declareProperty("UseZeroErrorFree",
+                             True,
+                             direction=Direction.Input,
                              doc="This allows the user to artificially inflate zero error values.")
 
-        self.declareProperty("SampleTransmissionRunNumber", "", direction=Direction.Input,
+        self.declareProperty("SampleTransmissionRunNumber",
+                             "",
+                             direction=Direction.Input,
                              doc="The run number for the Sample Transmission workspace used in "
-                                 "the reduction. Can be blank.")
-        self.declareProperty("SampleDirectRunNumber", "", direction=Direction.Input,
+                             "the reduction. Can be blank.")
+        self.declareProperty("SampleDirectRunNumber",
+                             "",
+                             direction=Direction.Input,
                              doc="The run number for the Sample Direct workspace used in "
-                                 "the reduction. Can be blank.")
-        self.declareProperty("CanScatterRunNumber", "", direction=Direction.Input,
+                             "the reduction. Can be blank.")
+        self.declareProperty("CanScatterRunNumber",
+                             "",
+                             direction=Direction.Input,
                              doc="The run number for the Can Scatter workspace used in the reduction. Can be blank.")
-        self.declareProperty("CanDirectRunNumber", "", direction=Direction.Input,
+        self.declareProperty("CanDirectRunNumber",
+                             "",
+                             direction=Direction.Input,
                              doc="The run number for the Can Direct workspace used in the reduction. Can be blank.")
 
     def PyExec(self):
@@ -102,13 +128,14 @@ class SANSSave(DataProcessorAlgorithm):
                 transmission = get_zero_error_free_workspace(transmission)
             if transmission_can:
                 transmission_can = get_zero_error_free_workspace(transmission_can)
-        transmission_workspaces = {"Transmission": transmission,
-                                   "TransmissionCan": transmission_can}
+        transmission_workspaces = {"Transmission": transmission, "TransmissionCan": transmission_can}
 
-        additional_run_numbers = {"SampleTransmissionRunNumber": self.getProperty("SampleTransmissionRunNumber").value,
-                                  "SampleDirectRunNumber": self.getProperty("SampleDirectRunNumber").value,
-                                  "CanScatterRunNumber": self.getProperty("CanScatterRunNumber").value,
-                                  "CanDirectRunNumber": self.getProperty("CanDirectRunNumber").value}
+        additional_run_numbers = {
+            "SampleTransmissionRunNumber": self.getProperty("SampleTransmissionRunNumber").value,
+            "SampleDirectRunNumber": self.getProperty("SampleDirectRunNumber").value,
+            "CanScatterRunNumber": self.getProperty("CanScatterRunNumber").value,
+            "CanDirectRunNumber": self.getProperty("CanDirectRunNumber").value
+        }
 
         progress = Progress(self, start=0.0, end=1.0, nreports=len(file_formats) + 1)
         for file_format in file_formats:
@@ -132,8 +159,9 @@ class SANSSave(DataProcessorAlgorithm):
         axis1 = workspace.getAxis(1)
         is_first_axis_numeric = axis1.isNumeric()
         if not is_first_axis_numeric and number_of_histograms > 1:
-            errors.update({"InputWorkspace": "The input data seems to be 2D. In this case all "
-                                             "axes need to be numeric."})
+            errors.update(
+                {"InputWorkspace": "The input data seems to be 2D. In this case all "
+                 "axes need to be numeric."})
 
         # Make sure that at least one file format is selected
         file_formats = self._get_file_formats()
@@ -148,8 +176,10 @@ class SANSSave(DataProcessorAlgorithm):
         # NistQxy cannot be used with 1D data
         is_nistqxy_selected = self.getProperty("NistQxy").value
         if is_nistqxy_selected and number_of_histograms == 1 and not is_first_axis_numeric:
-            errors.update({"NistQxy": "Attempting to save a 1D workspace with NistQxy. NistQxy can store 2D data"
-                                      " only. This requires all axes to be numeric."})
+            errors.update({
+                "NistQxy": "Attempting to save a 1D workspace with NistQxy. NistQxy can store 2D data"
+                " only. This requires all axes to be numeric."
+            })
         return errors
 
     def _get_file_formats(self):
@@ -169,8 +199,7 @@ class SANSSave(DataProcessorAlgorithm):
         self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NEXUS, file_types, [])
 
         # SaveNXcanSAS clashes with SaveNexusProcessed
-        self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NX_CAN_SAS, file_types,
-                                                            [])
+        self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NX_CAN_SAS, file_types, [])
 
         # SaveNISTDAT clashes with SaveRKH, both can save to .dat
         self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NIST_QXY, file_types, [SaveType.RKH])
@@ -202,8 +231,7 @@ class SANSSave(DataProcessorAlgorithm):
             for clashing_file_format in clashing_file_formats:
                 if clashing_file_format in file_types:
                     append_name = True
-            file_formats.append(file_format_with_append(file_format=file_format,
-                                                        append_file_format_name=append_name))
+            file_formats.append(file_format_with_append(file_format=file_format, append_file_format_name=append_name))
 
     def _check_file_types(self, file_formats, key, to_add):
         if self.getProperty(key).value:

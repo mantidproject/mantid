@@ -9,7 +9,6 @@ from mantid.api import PreviewManager
 
 
 class PreviewManagerTest(unittest.TestCase):
-
     def test_instance(self):
         instance = PreviewManager.Instance()
         self.assertTrue(isinstance(instance, PreviewManager))
@@ -17,6 +16,7 @@ class PreviewManagerTest(unittest.TestCase):
         self.assertTrue(callable(getattr(instance, 'getPreview')))
         self.assertTrue(hasattr(instance, 'getPreviews'))
         self.assertTrue(callable(getattr(instance, 'getPreviews')))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -84,7 +84,7 @@ class SaveOtherPresenter(object):
         simple_list = self._view.get_selected_workspaces()
         for workspace_name in simple_list:
             workspace = AnalysisDataService.retrieve(workspace_name)
-            if issubclass(type(workspace),WorkspaceGroup):
+            if issubclass(type(workspace), WorkspaceGroup):
                 simple_list.remove(workspace_name)
                 simple_list += list(workspace.getNames())
         return list(set(simple_list))

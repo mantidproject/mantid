@@ -25,18 +25,17 @@ class TestAbinsData(unittest.TestCase):
 
     def test_init_noloader(self):
         with self.assertRaises(ValueError):
-            AbinsData.from_calculation_data(
-                abins.test_helpers.find_file("squaricn_sum_LoadCASTEP.phonon"),
-                ab_initio_program='fake_program')
+            AbinsData.from_calculation_data(abins.test_helpers.find_file("squaricn_sum_LoadCASTEP.phonon"),
+                                            ab_initio_program='fake_program')
 
     def test_data_content(self):
-        abins_data = AbinsData(k_points_data=self.mock_kpd,
-                               atoms_data=self.mock_ad)
+        abins_data = AbinsData(k_points_data=self.mock_kpd, atoms_data=self.mock_ad)
         self.assertEqual(abins_data.get_kpoints_data(), self.mock_kpd)
         self.assertEqual(abins_data.get_atoms_data(), self.mock_ad)
-        self.assertEqual(abins_data.extract(),
-                         {'k_points_data': self.mock_kpd.extract(),
-                          'atoms_data': self.mock_ad.extract()})
+        self.assertEqual(abins_data.extract(), {
+            'k_points_data': self.mock_kpd.extract(),
+            'atoms_data': self.mock_ad.extract()
+        })
 
 
 class DummyLoader:

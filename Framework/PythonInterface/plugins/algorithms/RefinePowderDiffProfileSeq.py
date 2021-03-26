@@ -9,7 +9,6 @@ from mantid.api import *
 import mantid.simpleapi as api
 from mantid.kernel import *
 
-
 #from Calibration_ImportInformation import *
 
 
@@ -43,7 +42,7 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
         return "Diffraction\\Fitting"
 
     def seeAlso(self):
-        return [ "RefinePowderInstrumentParameters" ]
+        return ["RefinePowderInstrumentParameters"]
 
     def name(self):
         """ Algorithm name
@@ -59,23 +58,28 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input, PropertyMode.Optional),
                              "Name of data workspace containing the diffraction pattern in .prf file. ")
 
-        self.declareProperty("WorkspaceIndex", 0,
-                             "Spectrum (workspace index starting from 0) of the data to refine against in input workspace.")
+        self.declareProperty(
+            "WorkspaceIndex", 0,
+            "Spectrum (workspace index starting from 0) of the data to refine against in input workspace.")
 
-        self.declareProperty(ITableWorkspaceProperty("SeqControlInfoWorkspace", "", Direction.InOut, PropertyMode.Optional),
-                             "Name of table workspace containing sequential refinement information.")
+        self.declareProperty(
+            ITableWorkspaceProperty("SeqControlInfoWorkspace", "", Direction.InOut, PropertyMode.Optional),
+            "Name of table workspace containing sequential refinement information.")
 
-        self.declareProperty(ITableWorkspaceProperty("InputProfileWorkspace", "", Direction.Input, PropertyMode.Optional),
-                             "Name of table workspace containing starting profile parameters.")
+        self.declareProperty(
+            ITableWorkspaceProperty("InputProfileWorkspace", "", Direction.Input, PropertyMode.Optional),
+            "Name of table workspace containing starting profile parameters.")
 
-        self.declareProperty(ITableWorkspaceProperty("InputBraggPeaksWorkspace", "", Direction.Input, PropertyMode.Optional),
-                             "Name of table workspace containing a list of reflections. ")
+        self.declareProperty(
+            ITableWorkspaceProperty("InputBraggPeaksWorkspace", "", Direction.Input, PropertyMode.Optional),
+            "Name of table workspace containing a list of reflections. ")
 
-        self.declareProperty(ITableWorkspaceProperty("InputBackgroundParameterWorkspace", "", Direction.Input,
-                                                     PropertyMode.Optional), "Name of table workspace containing a list of reflections. ")
+        self.declareProperty(
+            ITableWorkspaceProperty("InputBackgroundParameterWorkspace", "", Direction.Input, PropertyMode.Optional),
+            "Name of table workspace containing a list of reflections. ")
 
         self.declareProperty("StartX", -0., "Start X (TOF) to refine diffraction pattern.")
-        self.declareProperty("EndX",   -0., "End X (TOF) to refine diffraction pattern.")
+        self.declareProperty("EndX", -0., "End X (TOF) to refine diffraction pattern.")
 
         funcoptions = ["Setup", "Refine", "Save", "Load"]
         self.declareProperty("FunctionOption", "Refine", StringListValidator(funcoptions), "Options of functionality")
@@ -90,21 +94,24 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 
         self.declareProperty("NumRefineCycles", 1, "Number of refinement cycles.")
 
-        peaktypes = ["", "Neutron Back-to-back exponential convoluted with pseudo-voigt",
-                     "Thermal neutron Back-to-back exponential convoluted with pseudo-voigt"]
+        peaktypes = [
+            "", "Neutron Back-to-back exponential convoluted with pseudo-voigt",
+            "Thermal neutron Back-to-back exponential convoluted with pseudo-voigt"
+        ]
         self.declareProperty("ProfileType", "", StringListValidator(peaktypes), "Type of peak profile function.")
 
         bkgdtypes = ["", "Polynomial", "Chebyshev", "FullprofPolynomial"]
         self.declareProperty("BackgroundType", "", StringListValidator(bkgdtypes), "Type of background function.")
 
-        self.declareProperty("FromStep", -1, "If non-negative, the previous code is not set from last step, but the step specified.")
+        self.declareProperty("FromStep", -1,
+                             "If non-negative, the previous code is not set from last step, but the step specified.")
 
         # Property for save project
-        self.declareProperty(FileProperty("OutputProjectFilename","", FileAction.OptionalSave, ['.nxs']),
+        self.declareProperty(FileProperty("OutputProjectFilename", "", FileAction.OptionalSave, ['.nxs']),
                              "Name of sequential project file.")
 
         # Property for save project
-        self.declareProperty(FileProperty("InputProjectFilename","", FileAction.OptionalLoad, ['.nxs']),
+        self.declareProperty(FileProperty("InputProjectFilename", "", FileAction.OptionalLoad, ['.nxs']),
                              "Name of sequential project file.")
 
         # Project ID
@@ -127,14 +134,15 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
             if seqrefine.isSetup() is True:
                 raise NotImplementedError("Impossible to have it set up already.")
 
-            seqrefine.initSetup(self.dataws, self.wsindex, self.peaktype, self.profilews, self.braggpeakws, self.bkgdtype,
-                                self.bkgdparws, self.startx, self.endx)
+            seqrefine.initSetup(self.dataws, self.wsindex, self.peaktype, self.profilews, self.braggpeakws,
+                                self.bkgdtype, self.bkgdparws, self.startx, self.endx)
 
         elif self.functionoption == "Refine":
             # Refine
             if seqrefine.isSetup() is False:
                 raise NotImplementedError("Exception because sequential refinement is not set up.")
-            seqrefine.refine(self.dataws, self.wsindex, self.paramstofit,  self.numcycles, self.startx, self.endx, self._lastStep)
+            seqrefine.refine(self.dataws, self.wsindex, self.paramstofit, self.numcycles, self.startx, self.endx,
+                             self._lastStep)
 
         elif self.functionoption == "Save":
             # Save the current state to a project file
@@ -249,7 +257,7 @@ class SeqRefineProfile(object):
         self.glog.information("SeqRefineProfile is initialized with ID = %s" % (str(ID)))
 
         # Standard record table and check its existence
-    # FIXME - This workspace's name should be passed from Algorithm's property!
+        # FIXME - This workspace's name should be passed from Algorithm's property!
         self._recordwsname = "Record%sTable" % (str(ID))
         self.glog.notice("Using record table %s" % (self._recordwsname))
 
@@ -297,9 +305,10 @@ class SeqRefineProfile(object):
         # Check input parameters, i.e., verification/examine input parameters
         runner = RefineProfileParameters(self.glog)
 
-        outwsname = self._datawsname+"_Init"
+        outwsname = self._datawsname + "_Init"
 
-        runner.setInputs(self._datawsname, self._peakType, self._profileWS, self._braggpeakws, self._bkgdtype,  self._bkgdparws)
+        runner.setInputs(self._datawsname, self._peakType, self._profileWS, self._braggpeakws, self._bkgdtype,
+                         self._bkgdparws)
         # FIXME - Need to verify whether input and output background parameter ws name can be same
         runner.setOutputs(outwsname, self._profileWS, self._braggpeakws, self._bkgdparws)
 
@@ -308,7 +317,8 @@ class SeqRefineProfile(object):
         self._recordPostRefineInfo(runner)
 
         # Group the newly generated workspace and do some record
-        api.GroupWorkspaces(InputWorkspaces="%s, %s, %s, %s" % (outwsname, self._profileWS, self._braggpeakws, self._bkgdparws),
+        api.GroupWorkspaces(InputWorkspaces="%s, %s, %s, %s" %
+                            (outwsname, self._profileWS, self._braggpeakws, self._bkgdparws),
                             OutputWorkspace=self._wsgroupName)
         self._wsgroupCreated = True
 
@@ -385,10 +395,11 @@ class SeqRefineProfile(object):
         # Set up runner and refine
         runner.setupMonteCarloRefine(numcycles, parametersToFit)
 
-        outwsname, outprofilewsname, outbraggpeakwsname = self._genOutputWorkspace(str(dataws), profilewsname, braggpeakwsname)
+        outwsname, outprofilewsname, outbraggpeakwsname = self._genOutputWorkspace(str(dataws), profilewsname,
+                                                                                   braggpeakwsname)
 
         # Set up input and output
-        runner.setInputs(str(dataws), self._peakType, profilewsname, braggpeakwsname, bkgdtype,  bkgdparamwsname)
+        runner.setInputs(str(dataws), self._peakType, profilewsname, braggpeakwsname, bkgdtype, bkgdparamwsname)
         # FIXME - Need to verify whether input and output background parameter ws name can be same
         runner.setOutputs(outwsname, outprofilewsname, outbraggpeakwsname, bkgdparamwsname)
 
@@ -408,7 +419,8 @@ class SeqRefineProfile(object):
                 api.GroupWorkspaces(InputWorkspaces="%s, %s, %s" % (outwsname, outprofilewsname, outbraggpeakwsname),
                                     OutputWorkspace=self._wsgroupName)
             elif hasbkgd == 0:
-                api.GroupWorkspaces(InputWorkspaces="%s, %s, %s, %s" % (outwsname, outprofilewsname, outbraggpeakwsname, bkgdparamwsname),
+                api.GroupWorkspaces(InputWorkspaces="%s, %s, %s, %s" %
+                                    (outwsname, outprofilewsname, outbraggpeakwsname, bkgdparamwsname),
                                     OutputWorkspace=self._wsgroupName)
             else:
                 raise NotImplementedError("Impossible to have 1 workspace appeared twice in a workspace group.")
@@ -503,7 +515,7 @@ class SeqRefineProfile(object):
 
         # Find last valid row
         lastvalidrow = -1
-        lastrow = numrows-1
+        lastrow = numrows - 1
         self._recordwsLastRowValid = False
         while self._recordwsLastRowValid is False and lastrow >= 0:
             profilewsname = self._recordws.cell(lastrow, 1)
@@ -525,8 +537,7 @@ class SeqRefineProfile(object):
         self._lastValidRowIndex = lastvalidrow
 
         if laststep > lastrecordedstep:
-            self.glog.warning("Last step %d is not recorded.  Using step %d instead. " %
-                              (laststep, lastrecordedstep))
+            self.glog.warning("Last step %d is not recorded.  Using step %d instead. " % (laststep, lastrecordedstep))
             laststep = lastrecordedstep
         elif laststep < 0:
             self.glog.notice("Using default last valid step %d. " % (self._lastValidStep))
@@ -543,13 +554,12 @@ class SeqRefineProfile(object):
                 bkgdtype = self._recordws.cell(lastrow, 3).strip()
                 bkgdparamwsname = self._recordws.cell(lastrow, 4).strip()
                 if profilewsname == "":
-                    raise NotImplementedError("Profile workspace name is emtpy in row %d.  It is not supposed to happen." %
-                                              (lastvalidrow))
+                    raise NotImplementedError(
+                        "Profile workspace name is emtpy in row %d.  It is not supposed to happen." % (lastvalidrow))
                 break
         # ENDWHILE
         if profilewsname == "":
-            raise NotImplementedError("Step %d is not found in record table.  It is impossible. " %
-                                      (laststep))
+            raise NotImplementedError("Step %d is not found in record table.  It is impossible. " % (laststep))
 
         # Current step
         self._currstep = self._lastValidStep + 1
@@ -571,17 +581,19 @@ class SeqRefineProfile(object):
 
         if self._recordWSLastRowInvalid is False:
             self._currstep = numrows
-            rectablews.addRow([self._currstep, "", "", "", "", "", -1.0, laststep, -1.0, "profilews",
-                               "reflectionws", "Polynomial", "BkgdParm"])
+            rectablews.addRow([
+                self._currstep, "", "", "", "", "", -1.0, laststep, -1.0, "profilews", "reflectionws", "Polynomial",
+                "BkgdParm"
+            ])
         else:
-            self._currstep = numrows-1
+            self._currstep = numrows - 1
             laststep = self._lastValidStep
 
         # print "*** Record workspace has %d rows. current step = %d. " % (rectablews.rowCount(), self._currstep)
 
         if len(refiner.paramToFit) > 0:
-            rectablews.setCell(self._currstep,  5, str(refiner.paramToFit))
-        rectablews.setCell(self._currstep,  9, str(refiner.inprofilewsname))
+            rectablews.setCell(self._currstep, 5, str(refiner.paramToFit))
+        rectablews.setCell(self._currstep, 9, str(refiner.inprofilewsname))
         rectablews.setCell(self._currstep, 10, str(refiner.inreflectionwsname))
         rectablews.setCell(self._currstep, 11, str(refiner.bkgdtype))
         rectablews.setCell(self._currstep, 12, str(refiner.bkgdtablewsname))
@@ -633,9 +645,10 @@ class SeqRefineProfile(object):
             outbpwsname = braggpeakwsname.split(self._ID)[0]
         else:
             outbpwsname = braggpeakwsname
-        outbpwsname = "%s%s_Step%d"%(outbpwsname, self._ID, self._currstep)
+        outbpwsname = "%s%s_Step%d" % (outbpwsname, self._ID, self._currstep)
 
         return (outwsname, outprofilewsname, outbpwsname)
+
 
 #--------------------------------------------------------------------
 
@@ -652,17 +665,17 @@ def generateMCSetupTableProf9(wsname):
     tablews.addColumn("int", "Group")
 
     group = 0
-    tablews.addRow(["Dtt1"  , 5.0, 0.0, 0, group])
-    tablews.addRow(["Dtt2" , 1.0, 0.0, 0, group])
-    tablews.addRow(["Zero"  , 5.0, 0.0, 0, group])
+    tablews.addRow(["Dtt1", 5.0, 0.0, 0, group])
+    tablews.addRow(["Dtt2", 1.0, 0.0, 0, group])
+    tablews.addRow(["Zero", 5.0, 0.0, 0, group])
 
     group = 1
-    tablews.addRow(["Beta0" , 0.50, 1.0, 0, group])
-    tablews.addRow(["Beta1" , 0.05, 1.0, 0, group])
+    tablews.addRow(["Beta0", 0.50, 1.0, 0, group])
+    tablews.addRow(["Beta1", 0.05, 1.0, 0, group])
 
     group = 2
-    tablews.addRow(["Alph0" , 0.05, 1.0, 0, group])
-    tablews.addRow(["Alph1" , 0.02, 1.0, 0, group])
+    tablews.addRow(["Alph0", 0.05, 1.0, 0, group])
+    tablews.addRow(["Alph1", 0.02, 1.0, 0, group])
 
     group = 3
     tablews.addRow(["Sig0", 2.0, 1.0, 1, group])
@@ -690,23 +703,23 @@ def generateMCSetupTableProf10(wsname):
     tablews.addColumn("int", "Group")
 
     group = 0
-    tablews.addRow(["Dtt1"  , 5.0, 0.0, 0, group])
-    tablews.addRow(["Dtt1t" , 5.0, 0.0, 0, group])
-    tablews.addRow(["Dtt2t" , 1.0, 0.0, 0, group])
-    tablews.addRow(["Zero"  , 5.0, 0.0, 0, group])
-    tablews.addRow(["Zerot" , 5.0, 0.0, 0, group])
-    tablews.addRow(["Width" , 0.0, 0.1, 1, group])
+    tablews.addRow(["Dtt1", 5.0, 0.0, 0, group])
+    tablews.addRow(["Dtt1t", 5.0, 0.0, 0, group])
+    tablews.addRow(["Dtt2t", 1.0, 0.0, 0, group])
+    tablews.addRow(["Zero", 5.0, 0.0, 0, group])
+    tablews.addRow(["Zerot", 5.0, 0.0, 0, group])
+    tablews.addRow(["Width", 0.0, 0.1, 1, group])
     tablews.addRow(["Tcross", 0.0, 1.0, 1, group])
 
     group = 1
-    tablews.addRow(["Beta0" , 0.50, 1.0, 0, group])
-    tablews.addRow(["Beta1" , 0.05, 1.0, 0, group])
+    tablews.addRow(["Beta0", 0.50, 1.0, 0, group])
+    tablews.addRow(["Beta1", 0.05, 1.0, 0, group])
     tablews.addRow(["Beta0t", 0.50, 1.0, 0, group])
     tablews.addRow(["Beta1t", 0.05, 1.0, 0, group])
 
     group = 2
-    tablews.addRow(["Alph0" , 0.05, 1.0, 0, group])
-    tablews.addRow(["Alph1" , 0.02, 1.0, 0, group])
+    tablews.addRow(["Alph0", 0.05, 1.0, 0, group])
+    tablews.addRow(["Alph1", 0.02, 1.0, 0, group])
     tablews.addRow(["Alph0t", 0.10, 1.0, 0, group])
     tablews.addRow(["Alph1t", 0.05, 1.0, 0, group])
 
@@ -751,6 +764,7 @@ def resetParametersGroups(tablews):
             group = 4
         tablews.setCell(ir, 4, group)
         return
+
 
 #pylint: disable=too-many-instance-attributes
 
@@ -837,24 +851,22 @@ class RefineProfileParameters(object):
 
         self.glog.information("**** Calculate: DataWorksapce = %s" % (str(self.datawsname)))
         self.glog.information("**** Fit range: %f, %f" % (startx, endx))
-        self.glog.information("**** Profile workspace = %s, Reflection workspace = %s" % (
-            self.inprofilewsname, self.inreflectionwsname))
+        self.glog.information("**** Profile workspace = %s, Reflection workspace = %s" %
+                              (self.inprofilewsname, self.inreflectionwsname))
 
-        api.LeBailFit(
-            Function                =   'Calculation',
-            InputWorkspace          =   self.datawsname,
-            OutputWorkspace         =   self.outwsname,
-            InputParameterWorkspace =   self.inprofilewsname,
-            OutputParameterWorkspace=   self.outprofilewsname,
-            InputHKLWorkspace       =   self.inreflectionwsname,
-            OutputPeaksWorkspace    =   self.outreflectionwsname,
-            FitRegion               =   '%f, %f' % (startx, endx),
-            PeakType                =   self.peaktype,
-            BackgroundType          =   self.bkgdtype,
-            UseInputPeakHeights     =   False,
-            PeakRadius              =   '8',
-            BackgroundParametersWorkspace   =   self.bkgdtablewsname
-        )
+        api.LeBailFit(Function='Calculation',
+                      InputWorkspace=self.datawsname,
+                      OutputWorkspace=self.outwsname,
+                      InputParameterWorkspace=self.inprofilewsname,
+                      OutputParameterWorkspace=self.outprofilewsname,
+                      InputHKLWorkspace=self.inreflectionwsname,
+                      OutputPeaksWorkspace=self.outreflectionwsname,
+                      FitRegion='%f, %f' % (startx, endx),
+                      PeakType=self.peaktype,
+                      BackgroundType=self.bkgdtype,
+                      UseInputPeakHeights=False,
+                      PeakRadius='8',
+                      BackgroundParametersWorkspace=self.bkgdtablewsname)
 
         return
 
@@ -876,30 +888,26 @@ class RefineProfileParameters(object):
             #         UpdatePeakParameterTableValue().  It is not a real new table workspace, but a link
             #         to the 'inprofilewsname'
             #         There must be something wrong in AnalysisDataService.
-            api.UpdatePeakParameterTableValue(
-                InputWorkspace  =   self.inprofilewsname,
-                Column          =   "FitOrTie",
-                NewStringValue  =   "tie")
-            api.UpdatePeakParameterTableValue(
-                InputWorkspace  =   self.inprofilewsname,
-                Column          =   "FitOrTie",
-                ParameterNames  =   parameternames,
-                NewStringValue  =   "fit")
+            api.UpdatePeakParameterTableValue(InputWorkspace=self.inprofilewsname,
+                                              Column="FitOrTie",
+                                              NewStringValue="tie")
+            api.UpdatePeakParameterTableValue(InputWorkspace=self.inprofilewsname,
+                                              Column="FitOrTie",
+                                              ParameterNames=parameternames,
+                                              NewStringValue="fit")
 
             # Limit the range of MC
             if parameternames.count("Width") > 0:
                 #self.cwl = 1.33
-                UpdatePeakParameterTableValue(
-                    InputWorkspace  =   self.inprofilewsname,
-                    Column          =   "Min",
-                    ParameterNames  =   ["Width"],
-                    NewFloatValue   =   0.50) #cwl*0.25)
+                UpdatePeakParameterTableValue(InputWorkspace=self.inprofilewsname,
+                                              Column="Min",
+                                              ParameterNames=["Width"],
+                                              NewFloatValue=0.50)  #cwl*0.25)
 
-                UpdatePeakParameterTableValue(
-                    InputWorkspace  =   self.inprofilewsname,
-                    Column          =   "Max",
-                    ParameterNames  =   ["Width"],
-                    NewFloatValue   =   1.25) #cwl*4.0)
+                UpdatePeakParameterTableValue(InputWorkspace=self.inprofilewsname,
+                                              Column="Max",
+                                              ParameterNames=["Width"],
+                                              NewFloatValue=1.25)  #cwl*4.0)
 
             # Generate Monte carlo table
             wsname = "MCSetupParameterTable"
@@ -910,27 +918,26 @@ class RefineProfileParameters(object):
             else:
                 raise NotImplementedError("Peak type %s is not supported to set up MC table." % (self.peaktype))
 
-            api.LeBailFit(
-                InputWorkspace                  = self.datawsname,
-                OutputWorkspace                 = self.outwsname,
-                InputParameterWorkspace         = self.inprofilewsname,
-                OutputParameterWorkspace        = self.outprofilewsname,
-                InputHKLWorkspace               = self.inreflectionwsname,
-                OutputPeaksWorkspace            = self.outreflectionwsname,
-                FitRegion                       = '%f, %f' % (startx, endx),
-                Function                        = 'MonteCarlo',
-                NumberMinimizeSteps             = numsteps,
-                PeakType                        = self.peaktype,
-                BackgroundType                  = self.bkgdtype,
-                BackgroundParametersWorkspace   = self.bkgdtablewsname,
-                UseInputPeakHeights             = False,
-                PeakRadius                      ='8',
-                Minimizer                       = 'Levenberg-Marquardt',
-                MCSetupWorkspace                = tablews,
-                Damping                         = '5.0',
-                RandomSeed                      = 0,
-                AnnealingTemperature            = 100.0,
-                DrunkenWalk                     = True)
+            api.LeBailFit(InputWorkspace=self.datawsname,
+                          OutputWorkspace=self.outwsname,
+                          InputParameterWorkspace=self.inprofilewsname,
+                          OutputParameterWorkspace=self.outprofilewsname,
+                          InputHKLWorkspace=self.inreflectionwsname,
+                          OutputPeaksWorkspace=self.outreflectionwsname,
+                          FitRegion='%f, %f' % (startx, endx),
+                          Function='MonteCarlo',
+                          NumberMinimizeSteps=numsteps,
+                          PeakType=self.peaktype,
+                          BackgroundType=self.bkgdtype,
+                          BackgroundParametersWorkspace=self.bkgdtablewsname,
+                          UseInputPeakHeights=False,
+                          PeakRadius='8',
+                          Minimizer='Levenberg-Marquardt',
+                          MCSetupWorkspace=tablews,
+                          Damping='5.0',
+                          RandomSeed=0,
+                          AnnealingTemperature=100.0,
+                          DrunkenWalk=True)
         # ENDIF (step)
 
         return

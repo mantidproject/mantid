@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtCore, QtGui, PYQT4
 from qtpy.QtCore import Slot
-
 """
 Original code by user Blackwood, Jan 2018.
 https://stackoverflow.com/questions/47267195/in-pyqt4-is-it-possible-to-detach-tabs-from-a-qtabwidget
@@ -17,7 +16,6 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
     """
     The detached tabs are QMainWindow type
     """
-
     def __init__(self, parent=None):
         QtWidgets.QTabWidget.__init__(self, parent)
 
@@ -375,8 +373,9 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
             """
 
             # Determine if the current movement is detected as a drag
-            if not self.drag_start_pos.isNull() and (
-                    (event.pos() - self.drag_start_pos).manhattanLength() < QtWidgets.QApplication.startDragDistance()):
+            if not self.drag_start_pos.isNull() \
+                    and ((event.pos() - self.drag_start_pos).manhattanLength() <
+                         QtWidgets.QApplication.startDragDistance()):
                 self.drag_initiated = True
 
             # If the current movement is a drag initiated by the left button

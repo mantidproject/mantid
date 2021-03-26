@@ -134,5 +134,4 @@ class FigureWindow(QMainWindow, ObservingView):
         elif fig_type == FigureType.Contour:
             plot_contour(names, fig=fig)
         else:
-            plot_from_names(names, errors=(fig_type == FigureType.Errorbar),
-                            overplot=ax, fig=fig)
+            plot_from_names(names, errors=(fig_type == FigureType.Errorbar), overplot=ax, fig=fig)

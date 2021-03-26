@@ -27,7 +27,6 @@ rebin_string_values = namedtuple('rebin_string_values', 'value')
 event_binning_string_values = namedtuple('event_binning_string_values', 'value')
 q_rebin_values = namedtuple('q_rebin_values', 'min, max, rebin_string')
 
-
 # Mask
 mask_line = namedtuple('mask_line', 'width, angle, x, y')
 mask_block = namedtuple('mask_block', 'horizontal1, horizontal2, vertical1, vertical2, detector_type')

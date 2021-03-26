@@ -8,7 +8,6 @@
 #pylint: disable=too-many-instance-attributes,non-parent-init-called,abstract-method,too-few-public-methods
 # non-parent-init-called is disabled to remove false positives from a bug in pyLint < 1.4
 # abstract-method checking seems to ignore the fact some classes are declared abstract using abc
-
 '''
 - TOSCA only supported by "Reduction" (the Energy Transfer tab of C2E).
 - OSIRIS/IRIS supported by all tabs / interfaces.
@@ -86,7 +85,6 @@ class ISISIndirectInelasticBase(MantidSystemTest, metaclass=ABCMeta):
     '''
     A common base class for the ISISIndirectInelastic* base classes.
     '''
-
     @abstractmethod
     def get_reference_files(self):
         '''Returns the name of the reference files to compare against.'''
@@ -109,8 +107,7 @@ class ISISIndirectInelasticBase(MantidSystemTest, metaclass=ABCMeta):
             raise RuntimeError("The number of result workspaces (%d) does not match"
                                " the number of reference files (%d)." % (num_ref_files, num_results))
         if num_ref_files < 1 or num_results < 1:
-            raise RuntimeError("There needs to be a least one result and "
-                               "reference.")
+            raise RuntimeError("There needs to be a least one result and " "reference.")
 
     @abstractmethod
     def _validate_properties(self):
@@ -131,14 +128,12 @@ class ISISIndirectInelasticBase(MantidSystemTest, metaclass=ABCMeta):
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Axes')
 
-        for reference_file, result in zip(self.get_reference_files(),
-                                          self.result_names):
+        for reference_file, result in zip(self.get_reference_files(), self.result_names):
             wsName = "RefFile"
             if reference_file.endswith('.nxs'):
                 LoadNexus(Filename=reference_file, OutputWorkspace=wsName)
             else:
-                raise RuntimeError("Should supply a NeXus file: %s" %
-                                   reference_file)
+                raise RuntimeError("Should supply a NeXus file: %s" % reference_file)
 
             if not self.validateWorkspaces([result, wsName]):
                 print(str([reference_file, result]) + " do not match.")
@@ -150,6 +145,7 @@ class ISISIndirectInelasticBase(MantidSystemTest, metaclass=ABCMeta):
         '''Given a filename, prepends the system test temporary directory
         and returns the full path.'''
         return os.path.join(config['defaultsave.directory'], filename)
+
 
 #==============================================================================
 
@@ -194,8 +190,7 @@ class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
         if not isinstance(self.instr_name, str):
             raise RuntimeError("instr_name property should be a string")
         if not isinstance(self.detector_range, list) and len(self.detector_range) != 2:
-            raise RuntimeError("detector_range should be a list of exactly 2 "
-                               "values")
+            raise RuntimeError("detector_range should be a list of exactly 2 " "values")
         if not isinstance(self.data_files, list):
             raise RuntimeError("data_file property should be a string")
         if self.rebin_string is not None and not isinstance(self.rebin_string, str):
@@ -203,11 +198,11 @@ class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
         if self.sum_files is not None and not isinstance(self.sum_files, bool):
             raise RuntimeError("sum_files property should be a bool")
 
+
 #------------------------- TOSCA tests ----------------------------------------
 
 
 class TOSCAReduction(ISISIndirectInelasticReduction):
-
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'TOSCA'
@@ -220,7 +215,6 @@ class TOSCAReduction(ISISIndirectInelasticReduction):
 
 
 class TOSCASimpleReductionUsingOldRunNumber(ISISIndirectInelasticReduction):
-
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'TOSCA'
@@ -233,7 +227,6 @@ class TOSCASimpleReductionUsingOldRunNumber(ISISIndirectInelasticReduction):
 
 
 class TOSCAMultiFileReduction(ISISIndirectInelasticReduction):
-
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'TOSCA'
@@ -248,7 +241,6 @@ class TOSCAMultiFileReduction(ISISIndirectInelasticReduction):
 
 
 class TOSCAMultiFileSummedReduction(ISISIndirectInelasticReduction):
-
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'TOSCA'
@@ -290,13 +282,16 @@ class TOSCAMultiFileReductionWithDifferentMaskedDetectors(ISISIndirectInelasticR
         self.sum_files = False
 
     def get_reference_files(self):
-        return ['II.TOSCAMultiFileReduction22797.nxs', 'II.TOSCAMultiFileReduction22798.nxs', 'II.TOSCAMultiFileReduction22799.nxs']
+        return [
+            'II.TOSCAMultiFileReduction22797.nxs', 'II.TOSCAMultiFileReduction22798.nxs',
+            'II.TOSCAMultiFileReduction22799.nxs'
+        ]
+
 
 #------------------------- OSIRIS tests ---------------------------------------
 
 
 class OSIRISReduction(ISISIndirectInelasticReduction):
-
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'OSIRIS'
@@ -309,22 +304,20 @@ class OSIRISReduction(ISISIndirectInelasticReduction):
 
 
 class OSIRISMultiFileReduction(ISISIndirectInelasticReduction):
-
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'OSIRIS'
         self.detector_range = [963, 1004]
-        self.data_files = ['OSIRIS00106550.raw','OSIRIS00106551.raw']
+        self.data_files = ['OSIRIS00106550.raw', 'OSIRIS00106551.raw']
         self.rebin_string = None
 
     def get_reference_files(self):
         #note that the same run for single reduction is used.
         #as they should be the same
-        return ['II.OSIRISReductionFromFile.nxs','II.OSIRISMultiFileReduction1.nxs']
+        return ['II.OSIRISReductionFromFile.nxs', 'II.OSIRISMultiFileReduction1.nxs']
 
 
 class OSIRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
-
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'OSIRIS'
@@ -336,11 +329,11 @@ class OSIRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
     def get_reference_files(self):
         return ['II.OSIRISMultiFileSummedReduction.nxs']
 
+
 #------------------------- IRIS tests -----------------------------------------
 
 
 class IRISReduction(ISISIndirectInelasticReduction):
-
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'IRIS'
@@ -353,7 +346,6 @@ class IRISReduction(ISISIndirectInelasticReduction):
 
 
 class IRISMultiFileReduction(ISISIndirectInelasticReduction):
-
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'IRIS'
@@ -366,7 +358,6 @@ class IRISMultiFileReduction(ISISIndirectInelasticReduction):
 
 
 class IRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
-
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'IRIS'
@@ -379,6 +370,7 @@ class IRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
         #note that the same run for single reduction is used.
         #as they should be the same
         return ['II.IRISMultiFileSummedReduction.nxs']
+
 
 #==============================================================================
 
@@ -396,7 +388,6 @@ class ISISIndirectInelasticCalibration(ISISIndirectInelasticBase):
         - self.analyser: a string giving the name of the analyser to use
         - self.reflection: a string giving the reflection to use
     '''
-
     def _run(self):
         '''Defines the workflow for the test'''
         self.tolerance = 1e-7
@@ -421,11 +412,11 @@ class ISISIndirectInelasticCalibration(ISISIndirectInelasticBase):
         if not isinstance(self.back, list) and len(self.back) != 2:
             raise RuntimeError("back should be a list of exactly 2 values")
 
+
 #------------------------- OSIRIS tests ---------------------------------------
 
 
 class OSIRISCalibration(ISISIndirectInelasticCalibration):
-
     def __init__(self):
         ISISIndirectInelasticCalibration.__init__(self)
         self.data_file = 'OSI97935.raw'
@@ -436,11 +427,11 @@ class OSIRISCalibration(ISISIndirectInelasticCalibration):
     def get_reference_files(self):
         return ["II.OSIRISCalibration.nxs"]
 
+
 #------------------------- IRIS tests ---------------------------------------
 
 
 class IRISCalibration(ISISIndirectInelasticCalibration):
-
     def __init__(self):
         ISISIndirectInelasticCalibration.__init__(self)
         self.data_file = 'IRS53664.raw'
@@ -450,6 +441,7 @@ class IRISCalibration(ISISIndirectInelasticCalibration):
 
     def get_reference_files(self):
         return ["II.IRISCalibration.nxs"]
+
 
 #==============================================================================
 
@@ -468,7 +460,6 @@ class ISISIndirectInelasticResolution(ISISIndirectInelasticBase):
         - self.rebin_params: a comma separated string containing the rebin params
         - self.files: a list of strings containing filenames
     '''
-
     def _run(self):
         '''Defines the workflow for the test'''
         self.tolerance = 1e-7
@@ -503,11 +494,11 @@ class ISISIndirectInelasticResolution(ISISIndirectInelasticBase):
         if not isinstance(self.files, list) and len(self.files) != 1:
             raise RuntimeError("files should be a list of exactly 1 value")
 
+
 #------------------------- OSIRIS tests ---------------------------------------
 
 
 class OSIRISResolution(ISISIndirectInelasticResolution):
-
     def __init__(self):
         ISISIndirectInelasticResolution.__init__(self)
         self.instrument = 'OSIRIS'
@@ -521,11 +512,11 @@ class OSIRISResolution(ISISIndirectInelasticResolution):
     def get_reference_files(self):
         return ["II.OSIRISResolution.nxs"]
 
+
 #------------------------- IRIS tests -----------------------------------------
 
 
 class IRISResolution(ISISIndirectInelasticResolution):
-
     def __init__(self):
         ISISIndirectInelasticResolution.__init__(self)
         self.instrument = 'IRIS'
@@ -539,6 +530,7 @@ class IRISResolution(ISISIndirectInelasticResolution):
     def get_reference_files(self):
         return ["II.IRISResolution.nxs"]
 
+
 #==============================================================================
 
 
@@ -549,7 +541,6 @@ class ISISIndirectInelasticDiagnostics(ISISIndirectInelasticBase):
     define an __init__ method and set the following properties
     on the object
     '''
-
     def _run(self):
         '''Defines the workflow for the test'''
 
@@ -562,8 +553,7 @@ class ISISIndirectInelasticDiagnostics(ISISIndirectInelasticBase):
                   SpectraRange=self.spectra)
 
         # Construct the result ws name.
-        Load(Filename=self.rawfiles[0],
-             OutputWorkspace='__temp')
+        Load(Filename=self.rawfiles[0], OutputWorkspace='__temp')
         resultWs = mtd['__temp']
         inst_name = resultWs.getInstrument().getFullName().lower()
         run_number = resultWs.run().getProperty('run_number').value
@@ -581,11 +571,11 @@ class ISISIndirectInelasticDiagnostics(ISISIndirectInelasticBase):
         if not isinstance(self.suffix, str):
             raise RuntimeError("suffix property should be a string")
 
+
 #------------------------- IRIS tests -----------------------------------------
 
 
 class IRISDiagnostics(ISISIndirectInelasticDiagnostics):
-
     def __init__(self):
         ISISIndirectInelasticDiagnostics.__init__(self)
 
@@ -597,11 +587,11 @@ class IRISDiagnostics(ISISIndirectInelasticDiagnostics):
     def get_reference_files(self):
         return ["II.IRISDiagnostics.nxs"]
 
+
 #------------------------- OSIRIS tests ---------------------------------------
 
 
 class OSIRISDiagnostics(ISISIndirectInelasticDiagnostics):
-
     def __init__(self):
         ISISIndirectInelasticDiagnostics.__init__(self)
 
@@ -613,6 +603,7 @@ class OSIRISDiagnostics(ISISIndirectInelasticDiagnostics):
     def get_reference_files(self):
         return ["II.OSIRISDiagnostics.nxs"]
 
+
 #==============================================================================
 
 
@@ -622,15 +613,15 @@ class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
     The output of Elwin is usually used with MSDFit and so we plug one into
     the other in this test.
     '''
-
     def _run(self):
         '''Defines the workflow for the test'''
 
-        LoadNexus(self.input_workspace,
-                  OutputWorkspace=self.input_workspace)
+        LoadNexus(self.input_workspace, OutputWorkspace=self.input_workspace)
 
-        SofQWMoments(InputWorkspace=self.input_workspace, EnergyMin=self.e_min,
-                     EnergyMax=self.e_max, Scale=self.scale,
+        SofQWMoments(InputWorkspace=self.input_workspace,
+                     EnergyMin=self.e_min,
+                     EnergyMax=self.e_max,
+                     Scale=self.scale,
                      OutputWorkspace=self.input_workspace + '_Moments')
 
         self.result_names = [self.input_workspace + '_Moments']
@@ -647,11 +638,11 @@ class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
         if not isinstance(self.scale, float):
             raise RuntimeError("Scale should be a float")
 
+
 #------------------------- OSIRIS tests ---------------------------------------
 
 
 class OSIRISMoments(ISISIndirectInelasticMoments):
-
     def __init__(self):
         ISISIndirectInelasticMoments.__init__(self)
         self.input_workspace = 'osi97935_graphite002_sqw.nxs'
@@ -662,11 +653,11 @@ class OSIRISMoments(ISISIndirectInelasticMoments):
     def get_reference_files(self):
         return ['II.OSIRISMoments.nxs']
 
+
 #------------------------- IRIS tests -----------------------------------------
 
 
 class IRISMoments(ISISIndirectInelasticMoments):
-
     def __init__(self):
         ISISIndirectInelasticMoments.__init__(self)
         self.input_workspace = 'irs53664_graphite002_sqw.nxs'
@@ -677,6 +668,7 @@ class IRISMoments(ISISIndirectInelasticMoments):
     def get_reference_files(self):
         return ['II.IRISMoments.nxs']
 
+
 #==============================================================================
 
 
@@ -686,7 +678,6 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
     The output of Elwin is usually used with MSDFit and so we plug one into
     the other in this test.
     '''
-
     def __init__(self):
         super(ISISIndirectInelasticElwinAndMSDFit, self).__init__()
         self.tolerance = 1e-7
@@ -702,23 +693,20 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
         GroupWorkspaces(InputWorkspaces=self.files, OutputWorkspace=elwin_input)
 
         ElasticWindowMultiple(InputWorkspaces=elwin_input,
-                              IntegrationRangeStart=self.eRange[0], IntegrationRangeEnd=self.eRange[1],
-                              OutputInQ=elwin_results[0], OutputInQSquared=elwin_results[1],
+                              IntegrationRangeStart=self.eRange[0],
+                              IntegrationRangeEnd=self.eRange[1],
+                              OutputInQ=elwin_results[0],
+                              OutputInQSquared=elwin_results[1],
                               OutputELF=elwin_results[2])
 
-        int_files = [self.get_temp_dir_path(filename) + ".nxs"
-                     for filename in elwin_results]
+        int_files = [self.get_temp_dir_path(filename) + ".nxs" for filename in elwin_results]
 
         # Save the EQ1 & EQ2 results from Elwin to put into MSDFit.
         for ws, filename in zip(elwin_results, int_files):
-            SaveNexusProcessed(Filename=filename,
-                               InputWorkspace=ws)
+            SaveNexusProcessed(Filename=filename, InputWorkspace=ws)
 
         eq_file = elwin_results[0]
-        msdfit_result = MSDFit(InputWorkspace=eq_file,
-                               XStart=self.startX,
-                               XEnd=self.endX,
-                               SpecMax=1)
+        msdfit_result = MSDFit(InputWorkspace=eq_file, XStart=self.startX, XEnd=self.endX, SpecMax=1)
 
         # Clean up the intermediate files.
         for filename in int_files:
@@ -726,9 +714,11 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
 
         # We're interested in the intermediate Elwin results as well as the
         # final MSDFit result.
-        self.result_names = [elwin_results[0],  # EQ1
-                             elwin_results[1],  # EQ2
-                             msdfit_result[2].name()]  # Fit workspace
+        self.result_names = [
+            elwin_results[0],  # EQ1
+            elwin_results[1],  # EQ2
+            msdfit_result[2].name()
+        ]  # Fit workspace
 
     def _validate_properties(self):
         """Check the object properties are in an expected state to continue"""
@@ -742,42 +732,37 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
         if not isinstance(self.endX, float):
             raise RuntimeError("endX should be a float")
 
+
 #------------------------- OSIRIS tests ---------------------------------------
 
 
 class OSIRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
-
     def __init__(self):
         ISISIndirectInelasticElwinAndMSDFit.__init__(self)
         self.tolerance = 5e-6
-        self.files = ['osi97935_graphite002_red.nxs',
-                      'osi97936_graphite002_red.nxs']
+        self.files = ['osi97935_graphite002_red.nxs', 'osi97936_graphite002_red.nxs']
         self.eRange = [-0.02, 0.02]
         self.startX = 0.189077
         self.endX = 1.8141
 
     def get_reference_files(self):
-        return ['II.OSIRISElwinEQ1.nxs',
-                'II.OSIRISElwinEQ2.nxs',
-                'II.OSIRISMSDFit.nxs']
+        return ['II.OSIRISElwinEQ1.nxs', 'II.OSIRISElwinEQ2.nxs', 'II.OSIRISMSDFit.nxs']
+
 
 #------------------------- IRIS tests -----------------------------------------
 
 
 class IRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
-
     def __init__(self):
         ISISIndirectInelasticElwinAndMSDFit.__init__(self)
-        self.files = ['irs53664_graphite002_red.nxs',
-                      'irs53665_graphite002_red.nxs']
+        self.files = ['irs53664_graphite002_red.nxs', 'irs53665_graphite002_red.nxs']
         self.eRange = [-0.02, 0.02]
         self.startX = 0.441682
         self.endX = 1.85378
 
     def get_reference_files(self):
-        return ['II.IRISElwinEQ1.nxs',
-                'II.IRISElwinEQ2.nxs',
-                'II.IRISMSDFit.nxs']
+        return ['II.IRISElwinEQ1.nxs', 'II.IRISElwinEQ2.nxs', 'II.IRISMSDFit.nxs']
+
 
 #==============================================================================
 
@@ -789,7 +774,6 @@ class ISISIndirectInelasticIqtAndIqtFit(ISISIndirectInelasticBase):
     The output of TransformToIqt is usually used with IqtFit and so we plug one into
     the other in this test.
     '''
-
     def _run(self):
         '''Defines the workflow for the test'''
         self.tolerance = 1e-3
@@ -809,12 +793,14 @@ class ISISIndirectInelasticIqtAndIqtFit(ISISIndirectInelasticBase):
                                    NumberOfIterations=200)
 
         # Test IqtFit Sequential
-        iqtfitSeq_ws, params, fit_group = IqtFitSequential(InputWorkspace=iqt_ws, Function=self.func,
-                                                           StartX=self.startx, EndX=self.endx,
-                                                           SpecMin=0, SpecMax=self.spec_max)
+        iqtfitSeq_ws, params, fit_group = IqtFitSequential(InputWorkspace=iqt_ws,
+                                                           Function=self.func,
+                                                           StartX=self.startx,
+                                                           EndX=self.endx,
+                                                           SpecMin=0,
+                                                           SpecMax=self.spec_max)
 
-        self.result_names = [iqt_ws.name(),
-                             iqtfitSeq_ws[0].name()]
+        self.result_names = [iqt_ws.name(), iqtfitSeq_ws[0].name()]
 
         # Remove workspaces from Mantid
         for sample in self.samples:
@@ -843,11 +829,11 @@ class ISISIndirectInelasticIqtAndIqtFit(ISISIndirectInelasticBase):
         if not isinstance(self.endx, float):
             raise RuntimeError("endx should be a float")
 
+
 #------------------------- OSIRIS tests ---------------------------------------
 
 
 class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
-
     def __init__(self):
         ISISIndirectInelasticIqtAndIqtFit.__init__(self)
 
@@ -873,11 +859,11 @@ class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.tolerance_is_rel_err = True
         return ['II.OSIRISFury.nxs', 'II.OSIRISFuryFitSeq.nxs']
 
+
 #------------------------- IRIS tests -----------------------------------------
 
 
 class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
-
     def __init__(self):
         ISISIndirectInelasticIqtAndIqtFit.__init__(self)
 
@@ -903,6 +889,7 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.tolerance_is_rel_err = True
         return ['II.IRISFury.nxs', 'II.IRISFuryFitSeq.nxs']
 
+
 #==============================================================================
 
 
@@ -912,7 +899,6 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
     The output of Elwin is usually used with MSDFit and so we plug one into
     the other in this test.
     '''
-
     def _run(self):
         '''Defines the workflow for the test'''
         self.tolerance = 1e-2
@@ -932,16 +918,10 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
                                    NumberOfIterations=200)
 
         # Test IqtFitMultiple
-        iqtfitSeq_ws, params, fit_group = IqtFitMultiple(iqt_ws.name(),
-                                                         self.func,
-                                                         self.ftype,
-                                                         self.startx,
-                                                         self.endx,
-                                                         self.spec_min,
-                                                         self.spec_max)
+        iqtfitSeq_ws, params, fit_group = IqtFitMultiple(iqt_ws.name(), self.func, self.ftype, self.startx, self.endx,
+                                                         self.spec_min, self.spec_max)
 
-        self.result_names = [iqt_ws.name(),
-                             iqtfitSeq_ws.name()]
+        self.result_names = [iqt_ws.name(), iqtfitSeq_ws.name()]
 
         #remove workspaces from mantid
         for sample in self.samples:
@@ -972,11 +952,11 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
         if not isinstance(self.endx, float):
             raise RuntimeError("endx should be a float")
 
+
 #------------------------- OSIRIS tests ---------------------------------------
 
 
 class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
-
     def __init__(self):
         ISISIndirectInelasticIqtAndIqtFitMulti.__init__(self)
 
@@ -1002,14 +982,13 @@ class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         # within a set amount
         self.tolerance = 5.0
         self.tolerance_is_rel_err = True
-        return ['II.OSIRISIqt.nxs',
-                'II.OSIRISIqtFitMulti.nxs']
+        return ['II.OSIRISIqt.nxs', 'II.OSIRISIqtFitMulti.nxs']
+
 
 #------------------------- IRIS tests -----------------------------------------
 
 
 class IRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
-
     def __init__(self):
         ISISIndirectInelasticIqtAndIqtFitMulti.__init__(self)
 
@@ -1034,8 +1013,8 @@ class IRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         # within a set amount
         self.tolerance = 5.0
         self.tolerance_is_rel_err = True
-        return ['II.IRISFury.nxs',
-                'II.IRISFuryFitMulti.nxs']
+        return ['II.IRISFury.nxs', 'II.IRISFuryFitMulti.nxs']
+
 
 #==============================================================================
 
@@ -1047,7 +1026,6 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
     define an __init__ method and set the following properties
     on the object
     '''
-
     def _run(self):
         '''Defines the workflow for the test'''
         self.tolerance = 1e-4
@@ -1085,11 +1063,11 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
         if not isinstance(self.ties, bool):
             raise RuntimeError("ties should be a boolean.")
 
+
 #------------------------- OSIRIS tests ---------------------------------------
 
 
 class OSIRISConvFit(ISISIndirectInelasticConvFit):
-
     def __init__(self):
         ISISIndirectInelasticConvFit.__init__(self)
         self.sample = 'osi97935_graphite002_red.nxs'
@@ -1113,11 +1091,11 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         return ['II.OSIRISConvFitSeq.nxs'] if using_gsl_v1() \
             else ['II.OSIRISConvFitSeq_gslv2.nxs']
 
+
 #------------------------- IRIS tests -----------------------------------------
 
 
 class IRISConvFit(ISISIndirectInelasticConvFit):
-
     def __init__(self):
         ISISIndirectInelasticConvFit.__init__(self)
         self.sample = 'irs53664_graphite002_red.nxs'
@@ -1141,6 +1119,7 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         # gsl v2 gives a slightly different result than v1
         return ['II.IRISConvFitSeq.nxs'] if using_gsl_v1() else ['II.IRISConvFitSeq_gslv2.nxs']
 
+
 #==============================================================================
 # Transmission Monitor Test
 
@@ -1154,7 +1133,8 @@ class ISISIndirectInelasticTransmissionMonitor(ISISIndirectInelasticBase):
         Load(self.sample, OutputWorkspace=self.sample)
         Load(self.can, OutputWorkspace=self.can)
 
-        IndirectTransmissionMonitor(SampleWorkspace=self.sample, CanWorkspace=self.can,
+        IndirectTransmissionMonitor(SampleWorkspace=self.sample,
+                                    CanWorkspace=self.can,
                                     OutputWorkspace='IRISTransmissionMonitorTest')
 
     def _validate_properties(self):
@@ -1165,11 +1145,11 @@ class ISISIndirectInelasticTransmissionMonitor(ISISIndirectInelasticBase):
         if not isinstance(self.can, str):
             raise RuntimeError("Can should be a string.")
 
+
 #------------------------- IRIS tests -----------------------------------------
 
 
 class IRISTransmissionMonitor(ISISIndirectInelasticTransmissionMonitor):
-
     def __init__(self):
         ISISIndirectInelasticTransmissionMonitor.__init__(self)
         self.sample = 'IRS26176.RAW'

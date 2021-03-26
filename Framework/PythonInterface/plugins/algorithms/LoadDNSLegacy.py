@@ -21,7 +21,6 @@ class LoadDNSLegacy(PythonAlgorithm):
     Load the DNS Legacy data file to the matrix workspace
     Monitor/duration data are loaded to the separate workspace
     """
-
     def __init__(self):
         """
         Init
@@ -46,25 +45,28 @@ class LoadDNSLegacy(PythonAlgorithm):
         return "Load the DNS Legacy data file to the mantid workspace."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "",
-                                          FileAction.Load, ['.d_dat']),
+        self.declareProperty(FileProperty("Filename", "", FileAction.Load, ['.d_dat']),
                              "Name of DNS experimental data file.")
 
-        self.declareProperty(FileProperty("CoilCurrentsTable", "",
-                                          FileAction.OptionalLoad, ['.txt']),
+        self.declareProperty(FileProperty("CoilCurrentsTable", "", FileAction.OptionalLoad, ['.txt']),
                              "Name of file containing table of coil currents and polarisations.")
 
-        self.declareProperty(WorkspaceProperty("OutputWorkspace",
-                                               "", direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              doc="Name of the workspace to store the experimental data.")
         normalizations = ['duration', 'monitor', 'no']
-        self.declareProperty("Normalization", "duration", StringListValidator(normalizations),
+        self.declareProperty("Normalization",
+                             "duration",
+                             StringListValidator(normalizations),
                              doc="Kind of data normalization.")
 
-        self.declareProperty(name="ElasticChannel",defaultValue=0,validator=IntBoundedValidator(lower=0),
+        self.declareProperty(name="ElasticChannel",
+                             defaultValue=0,
+                             validator=IntBoundedValidator(lower=0),
                              doc="Time channel number where elastic peak is observed. Only for TOF data.")
 
-        self.declareProperty(name="Wavelength",defaultValue=0.0,validator=FloatBoundedValidator(lower=0.0),
+        self.declareProperty(name="Wavelength",
+                             defaultValue=0.0,
+                             validator=FloatBoundedValidator(lower=0.0),
                              doc="Wavelength in nm. If 0 will be read from data file.")
         return
 
@@ -101,8 +103,12 @@ class LoadDNSLegacy(PythonAlgorithm):
 
     def get_polarisation(self, metadata, poltable):
         pol = []
-        coilcurrents = {'C_a': metadata.a_coil_current, 'C_b': metadata.b_coil_current,
-                        'C_c': metadata.c_coil_current, 'C_z': metadata.z_coil_current}
+        coilcurrents = {
+            'C_a': metadata.a_coil_current,
+            'C_b': metadata.b_coil_current,
+            'C_c': metadata.c_coil_current,
+            'C_z': metadata.z_coil_current
+        }
         self.log().debug("Coil currents are " + str(coilcurrents))
         for row in poltable:
             if self.currents_match(row, coilcurrents):
@@ -139,8 +145,8 @@ class LoadDNSLegacy(PythonAlgorithm):
             wavelength = metadata.wavelength
 
         # calculate incident energy, since given in the data file is wrong
-        velocity = h/(m_n*wavelength*1e-10)   # m/s
-        incident_energy = 0.5e+03*m_n*velocity*velocity/physical_constants['electron volt'][0]  # meV
+        velocity = h / (m_n * wavelength * 1e-10)  # m/s
+        incident_energy = 0.5e+03 * m_n * velocity * velocity / physical_constants['electron volt'][0]  # meV
 
         tmp = api.LoadEmptyInstrument(InstrumentName='DNS')
         self.instrument = tmp.getInstrument()
@@ -151,17 +157,17 @@ class LoadDNSLegacy(PythonAlgorithm):
         pol = self.get_polarisation(metadata, poltable)
         if not pol:
             pol = ['0', 'undefined']
-            self.log().warning("Failed to determine polarisation for "
-                               + filename + ". Values have been set to undefined.")
+            self.log().warning("Failed to determine polarisation for " + filename +
+                               ". Values have been set to undefined.")
         ndet = 24
-        unitX="Wavelength"
+        unitX = "Wavelength"
         arr = data_array[0:ndet, 1:]
         if metadata.tof_channel_number < 2:
-            dataX = np.zeros(2*ndet)
+            dataX = np.zeros(2 * ndet)
             dataX.fill(wavelength + 0.00001)
             dataX[::2] -= 0.000002
         else:
-            unitX="TOF"
+            unitX = "TOF"
 
             # get instrument parameters
             l1 = np.linalg.norm(self.instrument.getSample().getPos() - self.instrument.getSource().getPos())
@@ -171,20 +177,20 @@ class LoadDNSLegacy(PythonAlgorithm):
             dt_factor = float(self.instrument.getStringParameter("channel_width_factor")[0])
 
             # channel width
-            dt = metadata.tof_channel_width*dt_factor
+            dt = metadata.tof_channel_width * dt_factor
             # calculate tof1
-            tof1 = 1e+06*l1/velocity        # microseconds
+            tof1 = 1e+06 * l1 / velocity  # microseconds
             self.log().debug("TOF1 = {} microseconds".format(tof1))
             self.log().debug("Delay time = {} microsecond".format(metadata.tof_delay_time))
-            tof2_elastic = 1e+06*l2/velocity
+            tof2_elastic = 1e+06 * l2 / velocity
             self.log().debug("TOF2 Elastic = {} microseconds".format(tof2_elastic))
-            epp_geom = int(tof2_elastic/dt)
+            epp_geom = int(tof2_elastic / dt)
 
             epp_user = self.getProperty("ElasticChannel").value
 
             # for comissioning period EPP in the data file is not relevant
             in_comissioning = self.instrument.getStringParameter("tof_comissioning")[0]
-            if (epp_user < 1) and (in_comissioning == 'no') and  metadata.tof_elastic_channel:
+            if (epp_user < 1) and (in_comissioning == 'no') and metadata.tof_elastic_channel:
                 epp_user = metadata.tof_elastic_channel
 
             # shift channels to keep elastic in the right position
@@ -194,7 +200,7 @@ class LoadDNSLegacy(PythonAlgorithm):
 
             # create dataX array
             x0 = tof1 + metadata.tof_delay_time
-            dataX = np.linspace(x0, x0+metadata.tof_channel_number*dt, metadata.tof_channel_number+1)
+            dataX = np.linspace(x0, x0 + metadata.tof_channel_number * dt, metadata.tof_channel_number + 1)
 
             # sample logs
             logs["names"].extend(["channel_width", "TOF1", "delay_time", "tof_channels"])
@@ -230,19 +236,17 @@ class LoadDNSLegacy(PythonAlgorithm):
             if factor <= 0:
                 raise RuntimeError("Monitor counts are invalid for file " + filename + ". Cannot normalize.")
         # set values for dataY and dataE
-        dataY = arr/factor
-        dataE = np.sqrt(arr)/factor
+        dataY = arr / factor
+        dataE = np.sqrt(arr) / factor
 
         # create workspace
-        api.CreateWorkspace(OutputWorkspace=outws_name, DataX=dataX, DataY=dataY,
-                            DataE=dataE, NSpec=ndet, UnitX=unitX)
+        api.CreateWorkspace(OutputWorkspace=outws_name, DataX=dataX, DataY=dataY, DataE=dataE, NSpec=ndet, UnitX=unitX)
         outws = api.AnalysisDataService.retrieve(outws_name)
         api.LoadInstrument(outws, InstrumentName='DNS', RewriteSpectraMap=True)
 
         run = outws.mutableRun()
         if metadata.start_time and metadata.end_time:
-            run.setStartAndEndTime(DateAndTime(metadata.start_time),
-                                   DateAndTime(metadata.end_time))
+            run.setStartAndEndTime(DateAndTime(metadata.start_time), DateAndTime(metadata.end_time))
         # add name of file as a run title
         fname = os.path.splitext(os.path.split(filename)[1])[0]
         run.addProperty('run_title', fname, True)
@@ -256,29 +260,38 @@ class LoadDNSLegacy(PythonAlgorithm):
 
         # add other sample logs
         logs["names"].extend(["deterota", "mon_sum", "duration", "huber", "omega", "T1", "T2", "Tsp"])
-        logs["values"].extend([metadata.deterota, float(metadata.monitor_counts), metadata.duration,
-                               metadata.huber, metadata.huber - metadata.deterota,
-                               metadata.temp1, metadata.temp2, metadata.tsp])
+        logs["values"].extend([
+            metadata.deterota,
+            float(metadata.monitor_counts), metadata.duration, metadata.huber, metadata.huber - metadata.deterota,
+            metadata.temp1, metadata.temp2, metadata.tsp
+        ])
         logs["units"].extend(["Degrees", "Counts", "Seconds", "Degrees", "Degrees", "K", "K", "K"])
 
         # flipper, coil currents and polarisation
-        flipper_status = 'OFF'    # flipper OFF
+        flipper_status = 'OFF'  # flipper OFF
         if abs(metadata.flipper_precession_current) > sys.float_info.epsilon:
-            flipper_status = 'ON'    # flipper ON
-        logs["names"].extend(["flipper_precession", "flipper_z_compensation", "flipper",
-                              "C_a", "C_b", "C_c", "C_z", "polarisation", "polarisation_comment"])
-        logs["values"].extend([metadata.flipper_precession_current,
-                               metadata.flipper_z_compensation_current, flipper_status,
-                               metadata.a_coil_current, metadata.b_coil_current,
-                               metadata.c_coil_current, metadata.z_coil_current,
-                               str(pol[0]), str(pol[1])])
+            flipper_status = 'ON'  # flipper ON
+        logs["names"].extend([
+            "flipper_precession", "flipper_z_compensation", "flipper", "C_a", "C_b", "C_c", "C_z", "polarisation",
+            "polarisation_comment"
+        ])
+        logs["values"].extend([
+            metadata.flipper_precession_current, metadata.flipper_z_compensation_current, flipper_status,
+            metadata.a_coil_current, metadata.b_coil_current, metadata.c_coil_current, metadata.z_coil_current,
+            str(pol[0]),
+            str(pol[1])
+        ])
         logs["units"].extend(["A", "A", "", "A", "A", "A", "A", "", ""])
 
         # slits
-        logs["names"].extend(["slit_i_upper_blade_position", "slit_i_lower_blade_position",
-                              "slit_i_left_blade_position", "slit_i_right_blade_position"])
-        logs["values"].extend([metadata.slit_i_upper_blade_position, metadata.slit_i_lower_blade_position,
-                               metadata.slit_i_left_blade_position, metadata.slit_i_right_blade_position])
+        logs["names"].extend([
+            "slit_i_upper_blade_position", "slit_i_lower_blade_position", "slit_i_left_blade_position",
+            "slit_i_right_blade_position"
+        ])
+        logs["values"].extend([
+            metadata.slit_i_upper_blade_position, metadata.slit_i_lower_blade_position,
+            metadata.slit_i_left_blade_position, metadata.slit_i_right_blade_position
+        ])
         logs["units"].extend(["mm", "mm", "mm", "mm"])
 
         # add information whether the data are normalized (duration/monitor/no):

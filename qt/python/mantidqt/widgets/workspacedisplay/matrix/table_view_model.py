@@ -105,8 +105,7 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             axis = self.ws.getAxis(axis_index)
             if role == Qt.DisplayRole:
                 if not axis.isNumeric():
-                    return self.VERTICAL_HEADER_DISPLAY_STRING.format(
-                        section, axis.label(section))
+                    return self.VERTICAL_HEADER_DISPLAY_STRING.format(section, axis.label(section))
                 else:
                     display_value, unit = _numeric_axis_value_unit(axis)
                     return self.VERTICAL_HEADER_DISPLAY_STRING_FOR_NUMERIC_AXIS.format(section, display_value, unit)

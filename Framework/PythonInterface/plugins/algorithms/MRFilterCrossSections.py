@@ -20,7 +20,6 @@ def extract_times(times, is_start, is_sf1=False, is_sf2=False, is_veto1=False, i
 
 
 class MRFilterCrossSections(PythonAlgorithm):
-
     def category(self):
         return "Reflectometry\\SNS"
 
@@ -31,21 +30,19 @@ class MRFilterCrossSections(PythonAlgorithm):
         return "This algorithm loads a Magnetism Reflectometer file and returns workspaces for each cross-section."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "", action=FileAction.OptionalLoad, extensions=[".nxs", ".nxs.h5"]))
-        self.declareProperty(WorkspaceProperty("InputWorkspace", "",
-                                               Direction.Input, PropertyMode.Optional),
+        self.declareProperty(
+            FileProperty("Filename", "", action=FileAction.OptionalLoad, extensions=[".nxs", ".nxs.h5"]))
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "", Direction.Input, PropertyMode.Optional),
                              "Optionally, we can provide a scattering workspace directly")
-        self.declareProperty("PolState", "SF1",
-                             doc="Name of the log entry determining the polarizer state")
-        self.declareProperty("AnaState", "SF2",
-                             doc="Name of the log entry determining the analyzer state")
-        self.declareProperty("PolVeto", "",
-                             doc="Name of the log entry determining the polarizer veto [optional]")
-        self.declareProperty("AnaVeto", "",
-                             doc="Name of the log entry determining the analyzer veto [optional]")
-        self.declareProperty("CheckDevices", True,
+        self.declareProperty("PolState", "SF1", doc="Name of the log entry determining the polarizer state")
+        self.declareProperty("AnaState", "SF2", doc="Name of the log entry determining the analyzer state")
+        self.declareProperty("PolVeto", "", doc="Name of the log entry determining the polarizer veto [optional]")
+        self.declareProperty("AnaVeto", "", doc="Name of the log entry determining the analyzer veto [optional]")
+        self.declareProperty("CheckDevices",
+                             True,
                              doc="If true, the analyzer/polarizer devices will be checked before filtering")
-        self.declareProperty(WorkspaceGroupProperty("CrossSectionWorkspaces", "",
+        self.declareProperty(WorkspaceGroupProperty("CrossSectionWorkspaces",
+                                                    "",
                                                     direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
                              doc="Workspace group containing cross-sections")
@@ -76,7 +73,7 @@ class MRFilterCrossSections(PythonAlgorithm):
             # We have a change of state, add an entry for the state that just ended
             if specified[0] and specified[1] and not current_state[2] and not current_state[3]:
                 xs = "%s_%s" % ('On' if current_state[0] else 'Off', 'On' if current_state[1] else 'Off')
-                split_table_ws.addRow([int(current_state_t0-start_time)*1e-9, (item[0]-start_time)*1e-9, xs])
+                split_table_ws.addRow([int(current_state_t0 - start_time) * 1e-9, (item[0] - start_time) * 1e-9, xs])
 
             # Now update the current state
             for i in range(len(current_state)):
@@ -118,58 +115,88 @@ class MRFilterCrossSections(PythonAlgorithm):
         change_list = []
         if polarizer > 0:
             # SF1 ON
-            splitws, _ = api.GenerateEventsFilter(InputWorkspace=ws_raw_name, LogName=pol_state,
-                                                  MinimumLogValue=0.99, MaximumLogValue=1.01, TimeTolerance=0,
-                                                  OutputWorkspace='filter', InformationWorkspace='filter_info',
-                                                  LogBoundary='Left', UnitOfTime='Seconds')
+            splitws, _ = api.GenerateEventsFilter(InputWorkspace=ws_raw_name,
+                                                  LogName=pol_state,
+                                                  MinimumLogValue=0.99,
+                                                  MaximumLogValue=1.01,
+                                                  TimeTolerance=0,
+                                                  OutputWorkspace='filter',
+                                                  InformationWorkspace='filter_info',
+                                                  LogBoundary='Left',
+                                                  UnitOfTime='Seconds')
             time_dict = splitws.toDict()
             change_list.extend(extract_times(time_dict['start'], True, is_sf1=True))
             change_list.extend(extract_times(time_dict['stop'], False, is_sf1=True))
 
             # SF1 OFF
-            splitws, _ = api.GenerateEventsFilter(InputWorkspace=ws_raw_name, LogName=pol_state,
-                                                  MinimumLogValue=-0.01, MaximumLogValue=0.01, TimeTolerance=0,
-                                                  OutputWorkspace='filter', InformationWorkspace='filter_info',
-                                                  LogBoundary='Left', UnitOfTime='Seconds')
+            splitws, _ = api.GenerateEventsFilter(InputWorkspace=ws_raw_name,
+                                                  LogName=pol_state,
+                                                  MinimumLogValue=-0.01,
+                                                  MaximumLogValue=0.01,
+                                                  TimeTolerance=0,
+                                                  OutputWorkspace='filter',
+                                                  InformationWorkspace='filter_info',
+                                                  LogBoundary='Left',
+                                                  UnitOfTime='Seconds')
             time_dict = splitws.toDict()
             change_list.extend(extract_times(time_dict['start'], False, is_sf1=True))
             change_list.extend(extract_times(time_dict['stop'], True, is_sf1=True))
 
             # SF1 VETO
             if not pol_veto == '':
-                splitws, _ = api.GenerateEventsFilter(InputWorkspace=ws_raw_name, LogName=pol_veto,
-                                                      MinimumLogValue=0.99, MaximumLogValue=1.01, TimeTolerance=0,
-                                                      OutputWorkspace='filter', InformationWorkspace='filter_info',
-                                                      LogBoundary='Left', UnitOfTime='Seconds')
+                splitws, _ = api.GenerateEventsFilter(InputWorkspace=ws_raw_name,
+                                                      LogName=pol_veto,
+                                                      MinimumLogValue=0.99,
+                                                      MaximumLogValue=1.01,
+                                                      TimeTolerance=0,
+                                                      OutputWorkspace='filter',
+                                                      InformationWorkspace='filter_info',
+                                                      LogBoundary='Left',
+                                                      UnitOfTime='Seconds')
                 time_dict = splitws.toDict()
                 change_list.extend(extract_times(time_dict['start'], True, is_veto1=True))
                 change_list.extend(extract_times(time_dict['stop'], False, is_veto1=True))
 
         if analyzer > 0:
             # SF2 ON
-            splitws, _ = api.GenerateEventsFilter(InputWorkspace=ws_raw_name, LogName=ana_state,
-                                                  MinimumLogValue=0.99, MaximumLogValue=1.01, TimeTolerance=0,
-                                                  OutputWorkspace='filter', InformationWorkspace='filter_info',
-                                                  LogBoundary='Left', UnitOfTime='Seconds')
+            splitws, _ = api.GenerateEventsFilter(InputWorkspace=ws_raw_name,
+                                                  LogName=ana_state,
+                                                  MinimumLogValue=0.99,
+                                                  MaximumLogValue=1.01,
+                                                  TimeTolerance=0,
+                                                  OutputWorkspace='filter',
+                                                  InformationWorkspace='filter_info',
+                                                  LogBoundary='Left',
+                                                  UnitOfTime='Seconds')
             time_dict = splitws.toDict()
             change_list.extend(extract_times(time_dict['start'], True, is_sf2=True))
             change_list.extend(extract_times(time_dict['stop'], False, is_sf2=True))
 
             # SF2 OFF
-            splitws, _ = api.GenerateEventsFilter(InputWorkspace=ws_raw_name, LogName=ana_state,
-                                                  MinimumLogValue=-0.01, MaximumLogValue=0.01, TimeTolerance=0,
-                                                  OutputWorkspace='filter', InformationWorkspace='filter_info',
-                                                  LogBoundary='Left', UnitOfTime='Seconds')
+            splitws, _ = api.GenerateEventsFilter(InputWorkspace=ws_raw_name,
+                                                  LogName=ana_state,
+                                                  MinimumLogValue=-0.01,
+                                                  MaximumLogValue=0.01,
+                                                  TimeTolerance=0,
+                                                  OutputWorkspace='filter',
+                                                  InformationWorkspace='filter_info',
+                                                  LogBoundary='Left',
+                                                  UnitOfTime='Seconds')
             time_dict = splitws.toDict()
             change_list.extend(extract_times(time_dict['start'], False, is_sf2=True))
             change_list.extend(extract_times(time_dict['stop'], True, is_sf2=True))
 
             # SF2 VETO
             if not ana_veto == '':
-                splitws, _ = api.GenerateEventsFilter(InputWorkspace=ws_raw_name, LogName=ana_veto,
-                                                      MinimumLogValue=0.99, MaximumLogValue=1.01, TimeTolerance=0,
-                                                      OutputWorkspace='filter', InformationWorkspace='filter_info',
-                                                      LogBoundary='Left', UnitOfTime='Seconds')
+                splitws, _ = api.GenerateEventsFilter(InputWorkspace=ws_raw_name,
+                                                      LogName=ana_veto,
+                                                      MinimumLogValue=0.99,
+                                                      MaximumLogValue=1.01,
+                                                      TimeTolerance=0,
+                                                      OutputWorkspace='filter',
+                                                      InformationWorkspace='filter_info',
+                                                      LogBoundary='Left',
+                                                      UnitOfTime='Seconds')
                 time_dict = splitws.toDict()
                 change_list.extend(extract_times(time_dict['start'], True, is_veto2=True))
                 change_list.extend(extract_times(time_dict['stop'], False, is_veto2=True))
@@ -177,11 +204,13 @@ class MRFilterCrossSections(PythonAlgorithm):
         start_time = ws_raw.run().startTime().totalNanoseconds()
 
         change_list = sorted(change_list, key=itemgetter(0))
-        split_table_ws = self.create_table(change_list, start_time,
-                                           has_polarizer=polarizer>0, has_analyzer=analyzer>0)
+        split_table_ws = self.create_table(change_list,
+                                           start_time,
+                                           has_polarizer=polarizer > 0,
+                                           has_analyzer=analyzer > 0)
 
         # Filter events if we found enough information to do so
-        if split_table_ws.rowCount()>0:
+        if split_table_ws.rowCount() > 0:
             outputs = api.FilterEvents(InputWorkspace=ws_raw,
                                        SplitterWorkspace=split_table_ws,
                                        OutputWorkspaceBaseName=output_wsg,
@@ -196,9 +225,8 @@ class MRFilterCrossSections(PythonAlgorithm):
                                        OutputTOFCorrectionWorkspace='_tmp')
             AnalysisDataService.remove('_tmp')
             for ws in outputs[-1]:
-                pol_state = str(ws).replace(output_wsg+'_', '')
-                api.AddSampleLog(Workspace=ws, LogName='cross_section_id',
-                                 LogText=pol_state)
+                pol_state = str(ws).replace(output_wsg + '_', '')
+                api.AddSampleLog(Workspace=ws, LogName='cross_section_id', LogText=pol_state)
 
             if ws_event_data is None:
                 AnalysisDataService.remove(ws_raw_name)
@@ -206,7 +234,7 @@ class MRFilterCrossSections(PythonAlgorithm):
 
         # If we don't have a splitter table, it might be because we don't have analyzer/polarizer
         # information. In this case don't filter and return the raw workspace.
-        elif polarizer <= 0 and analyzer <=0:
+        elif polarizer <= 0 and analyzer <= 0:
             api.logger.warning("No polarizer/analyzer information available")
             self.setProperty("CrossSectionWorkspaces", api.GroupWorkspaces([ws_raw]))
         else:
@@ -225,11 +253,8 @@ class MRFilterCrossSections(PythonAlgorithm):
         for entry in ['Off_Off', 'On_Off', 'Off_On', 'On_On']:
             try:
                 ws_name = "%s_%s" % (ws_base_name, entry)
-                ws = api.LoadEventNexus(Filename=file_path,
-                                        NXentryName='entry-%s' % entry,
-                                        OutputWorkspace=ws_name)
-                api.AddSampleLog(Workspace=ws, LogName='cross_section_id',
-                                 LogText=entry)
+                ws = api.LoadEventNexus(Filename=file_path, NXentryName='entry-%s' % entry, OutputWorkspace=ws_name)
+                api.AddSampleLog(Workspace=ws, LogName='cross_section_id', LogText=entry)
                 cross_sections.append(ws_name)
             except:
                 api.logger.information("Could not load %s from legacy data file" % entry)
@@ -237,8 +262,7 @@ class MRFilterCrossSections(PythonAlgorithm):
         # Prepare output workspace group
         output_wsg = self.getPropertyValue("CrossSectionWorkspaces")
 
-        api.GroupWorkspaces(InputWorkspaces=cross_sections,
-                            OutputWorkspace=output_wsg)
+        api.GroupWorkspaces(InputWorkspaces=cross_sections, OutputWorkspace=output_wsg)
         self.setProperty("CrossSectionWorkspaces", output_wsg)
 
 

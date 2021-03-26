@@ -58,8 +58,7 @@ class ProjectRecoveryWidgetViewTest(unittest.TestCase):
     def test_progress_bar_connection_is_attempted(self):
         self.prw.connect_progress_bar()
 
-        self.assertEqual(1,
-                         self.prw.presenter.project_recovery.loader.multi_file_interpreter.current_editor.call_count)
+        self.assertEqual(1, self.prw.presenter.project_recovery.loader.multi_file_interpreter.current_editor.call_count)
         self.prw.editor.connect_to_progress_reports.assert_called_once_with(self.prw.update_progress_bar)
 
     def test_progress_bar_disconnect_is_attempted_on_exit_if_editor_present(self):

@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
-
 """
          ngroups, npts are array sizes
          hists(ngroups): integer flag to say if used or not? R
@@ -21,17 +20,16 @@ def BACK(hists, datum, sigma, DETECT_e, filePHASE, mylog):
     (npts, ngroups) = datum.shape
     DETECT_d = np.zeros([ngroups])
     for j in range(ngroups):
-        if(hists[j] > 0):
+        if (hists[j] > 0):
             Ax = np.sum(DETECT_e * datum[:, j] / sigma[:, j]**2)
             Bx = np.sum(DETECT_e**2 / sigma[:, j]**2)
             scale = Ax / Bx
         DETECT_d[j] = scale
-        datum[:, j] = np.where(
-            sigma[:, j] > 1.e6, datum[:, j], datum[:, j] - scale * DETECT_e)
+        datum[:, j] = np.where(sigma[:, j] > 1.e6, datum[:, j], datum[:, j] - scale * DETECT_e)
     ggro = 0.0
     sum = 0.0
     for j in range(ngroups):
-        if(hists[j] > 0):
+        if (hists[j] > 0):
             ggro = ggro + 1.0
             sum = sum + DETECT_d[j]
     sum = sum / ggro

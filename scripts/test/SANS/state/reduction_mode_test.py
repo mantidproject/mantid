@@ -34,7 +34,7 @@ class StateReductionModeTest(unittest.TestCase):
         self.assertEqual(merge_strategy[1], ReductionMode.HAB)
 
         all_reductions = state.get_all_reduction_modes()
-        self.assertEqual(len(all_reductions),  2)
+        self.assertEqual(len(all_reductions), 2)
         self.assertEqual(all_reductions[0], ReductionMode.LAB)
         self.assertEqual(all_reductions[1], ReductionMode.HAB)
 

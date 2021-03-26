@@ -10,7 +10,7 @@ GROUP_STR = "; Group; "
 DIFF_STR = "; Diff; "
 PAIR_STR = "; Pair Asym; "
 PHASEQUAD_STR = '; PhaseQuad; '
-PHASEQUAD_RE = '_Re_' # use _ on both sides to prevent accidental ID (e.g. Red)
+PHASEQUAD_RE = '_Re_'  # use _ on both sides to prevent accidental ID (e.g. Red)
 PHASEQUAD_IM = "_Im_"
 TF_ASYMMETRY_PREFIX = "TFAsymmetry"
 REBIN_STR = 'Rebin'
@@ -54,7 +54,7 @@ def get_group_asymmetry_name(context, group_name, run, period_string, rebin):
     return name
 
 
-def get_diff_asymmetry_name(context, diff_name, run,  rebin):
+def get_diff_asymmetry_name(context, diff_name, run, rebin):
     name = context.data_context._base_run_name(run) + DIFF_STR + diff_name + "; Asymmetry;"
 
     if rebin:
@@ -81,12 +81,12 @@ def check_phasequad_name(group_or_pair):
 
 
 def add_phasequad_extensions(pair_name):
-    return pair_name+PHASEQUAD_RE+PHASEQUAD_IM
+    return pair_name + PHASEQUAD_RE + PHASEQUAD_IM
 
 
 def get_pair_phasequad_name(context, pair_name, run, rebin):
 
-    name = context.data_context._base_run_name(run) + PHASEQUAD_STR + pair_name +";"
+    name = context.data_context._base_run_name(run) + PHASEQUAD_STR + pair_name + ";"
 
     if rebin:
         name += "".join([' ', REBIN_STR, ';'])
@@ -99,22 +99,22 @@ def get_group_or_pair_from_name(name):
     if GROUP_STR in name:
         index = name.find(GROUP_STR) + len(GROUP_STR)
         end = name.find(";", index)
-        group_found = name[index: end]
+        group_found = name[index:end]
         return group_found.replace(" ", "")
     elif DIFF_STR in name:
         index = name.find(DIFF_STR) + len(DIFF_STR)
         end = name.find(";", index)
-        diff_found = name[index: end]
+        diff_found = name[index:end]
         return diff_found.replace(" ", "")
     elif PAIR_STR in name:
         index = name.find(PAIR_STR) + len(PAIR_STR)
         end = name.find(";", index)
-        pair_found = name[index: end]
+        pair_found = name[index:end]
         return pair_found.replace(" ", "")
     elif PHASEQUAD_STR in name:
         index = name.find(PHASEQUAD_STR) + len(PHASEQUAD_STR)
         end = name.find(";", index)
-        pair_found = name[index: end]
+        pair_found = name[index:end]
         return pair_found.replace(" ", "")
     return ""
 
@@ -273,12 +273,12 @@ def create_parameter_table_name(input_workspace_name, function_name):
 def remove_rebin_from_name(name):
     if REBIN_STR not in name:
         return name
-    index = [ch.start() for ch in re.finditer(r";",name)]
-    return name[:index[-2]]+name[index[-1]:]
+    index = [ch.start() for ch in re.finditer(r";", name)]
+    return name[:index[-2]] + name[index[-1]:]
 
 
 def add_rebin_to_name(name):
     if REBIN_STR in name:
         return name
-    index =  [ch.start() for ch in re.finditer(r";",name)]
-    return name[:index[-1]]+"; "+REBIN_STR+name[index[-1]:]
+    index = [ch.start() for ch in re.finditer(r";", name)]
+    return name[:index[-1]] + "; " + REBIN_STR + name[index[-1]:]

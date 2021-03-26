@@ -61,8 +61,8 @@ class SANSMoveFactoryTest(unittest.TestCase):
 # Component movement tests
 
 
-def compare_expected_position(instance, expected_position, expected_rotation, component,
-                              inst_info: StateInstrumentInfo, workspace):
+def compare_expected_position(instance, expected_position, expected_rotation, component, inst_info: StateInstrumentInfo,
+                              workspace):
     position, rotation = _get_position_and_rotation(workspace, inst_info, component)
     for index in range(0, 3):
         instance.assertAlmostEqual(position[index], expected_position[index], delta=1e-4)
@@ -70,21 +70,23 @@ def compare_expected_position(instance, expected_position, expected_rotation, co
         instance.assertAlmostEqual(rotation[index], expected_rotation[index], delta=1e-4)
 
 
-def check_elementry_displacement_with_translation(instance, workspace, state: AllStates,
-                                                  coordinates, component, component_key):
+def check_elementry_displacement_with_translation(instance, workspace, state: AllStates, coordinates, component,
+                                                  component_key):
     # Get position and rotation before the move
     position_before_move, rotation_before_move = _get_position_and_rotation(workspace, state.instrument_info,
                                                                             component_key)
     expected_position_elementary_move = V3D(position_before_move[0] - coordinates[0],
-                                            position_before_move[1] - coordinates[1],
-                                            position_before_move[2])
+                                            position_before_move[1] - coordinates[1], position_before_move[2])
     expected_rotation = rotation_before_move
 
-    move_component(component_name=component, state=state, workspace=workspace,
-                   beam_coordinates=coordinates, move_type=MoveTypes.ELEMENTARY_DISPLACEMENT)
+    move_component(component_name=component,
+                   state=state,
+                   workspace=workspace,
+                   beam_coordinates=coordinates,
+                   move_type=MoveTypes.ELEMENTARY_DISPLACEMENT)
 
-    compare_expected_position(instance, expected_position_elementary_move, expected_rotation,
-                              component_key, state.instrument_info, workspace)
+    compare_expected_position(instance, expected_position_elementary_move, expected_rotation, component_key,
+                              state.instrument_info, workspace)
 
 
 def check_that_sets_to_zero(instance, workspace, state: AllStates, comp_name=None):
@@ -95,8 +97,7 @@ def check_that_sets_to_zero(instance, workspace, state: AllStates, comp_name=Non
                 _component_names.append(_name)
 
     # Reset the position to zero
-    move_component(component_name=comp_name, state=state, workspace=workspace,
-                   move_type=MoveTypes.RESET_POSITION)
+    move_component(component_name=comp_name, state=state, workspace=workspace, move_type=MoveTypes.RESET_POSITION)
 
     # Get the components to compare
     inst_info = state.instrument_info
@@ -173,14 +174,16 @@ class LOQMoveTest(unittest.TestCase):
         state = _get_state_obj(SANSInstrument.LOQ, lab_x_translation_correction)
 
         # Initial move
-        move_component(component_name=component, workspace=workspace, state=state,
-                       move_type=MoveTypes.INITIAL_MOVE, beam_coordinates=beam_coordinates)
+        move_component(component_name=component,
+                       workspace=workspace,
+                       state=state,
+                       move_type=MoveTypes.INITIAL_MOVE,
+                       beam_coordinates=beam_coordinates)
 
         center_position = state.move.center_position
         initial_z_position = 15.15
         expected_position = V3D(center_position - beam_coordinates[0] + lab_x_translation_correction,
-                                center_position - beam_coordinates[1],
-                                initial_z_position)
+                                center_position - beam_coordinates[1], initial_z_position)
         expected_rotation = Quat(1., 0., 0., 0.)
         compare_expected_position(self, expected_position, expected_rotation, component_key, state.instrument_info,
                                   workspace)
@@ -190,10 +193,8 @@ class LOQMoveTest(unittest.TestCase):
         component_elementary_move_key = DetectorType.HAB.value
 
         beam_coordinates_elementary_move = [120, 135]
-        check_elementry_displacement_with_translation(self, workspace, state,
-                                                      beam_coordinates_elementary_move,
-                                                      component_elementary_move,
-                                                      component_elementary_move_key)
+        check_elementry_displacement_with_translation(self, workspace, state, beam_coordinates_elementary_move,
+                                                      component_elementary_move, component_elementary_move_key)
 
         # Reset to zero
         check_that_sets_to_zero(self, workspace, state=state)
@@ -223,8 +224,11 @@ class SANS2DMoveTest(unittest.TestCase):
 
         state = _get_state_obj(SANSInstrument.SANS2D, z_translation=lab_z_translation_correction)
 
-        move_component(component_name=component, workspace=workspace, state=state,
-                       move_type=MoveTypes.INITIAL_MOVE, beam_coordinates=beam_coordinates)
+        move_component(component_name=component,
+                       workspace=workspace,
+                       state=state,
+                       move_type=MoveTypes.INITIAL_MOVE,
+                       beam_coordinates=beam_coordinates)
 
         # Assert for initial move for low angle bank
         # These values are on the workspace and in the sample logs,
@@ -237,8 +241,8 @@ class SANS2DMoveTest(unittest.TestCase):
         total_z = initial_z_position + rear_det_z - offset + lab_z_translation_correction
         expected_position = V3D(total_x - beam_coordinates[0], total_y - beam_coordinates[1], total_z)
         expected_rotation = Quat(1., 0., 0., 0.)
-        compare_expected_position(self, expected_position, expected_rotation,
-                                  component_to_investigate, state.instrument_info, workspace)
+        compare_expected_position(self, expected_position, expected_rotation, component_to_investigate,
+                                  state.instrument_info, workspace)
 
         # Assert for initial move for high angle bank
         # These values are on the workspace and in the sample logs
@@ -252,17 +256,15 @@ class SANS2DMoveTest(unittest.TestCase):
         total_z = initial_z_position + z_correction
         expected_position = V3D(total_x - beam_coordinates[0], total_y - beam_coordinates[1], total_z)
         expected_rotation = Quat(0.9968998362876025, 0., 0.07868110579898738, 0.)
-        compare_expected_position(self, expected_position, expected_rotation,
-                                  component_to_investigate, state.instrument_info, workspace)
+        compare_expected_position(self, expected_position, expected_rotation, component_to_investigate,
+                                  state.instrument_info, workspace)
 
         # Act + Assert for elementary move
         component_elementary_move = "rear-detector"
         component_elementary_move_key = DetectorType.LAB.value
         beam_coordinates_elementary_move = [120, 135]
-        check_elementry_displacement_with_translation(self, workspace, state,
-                                                      beam_coordinates_elementary_move,
-                                                      component_elementary_move,
-                                                      component_elementary_move_key)
+        check_elementry_displacement_with_translation(self, workspace, state, beam_coordinates_elementary_move,
+                                                      component_elementary_move, component_elementary_move_key)
 
         # # Act + Assert for setting to zero position for all
         check_that_sets_to_zero(self, workspace, state, comp_name=None)
@@ -271,8 +273,7 @@ class SANS2DMoveTest(unittest.TestCase):
         lab_z_translation_correction = 123.
 
         workspace = self._prepare_sans2d_empty_ws()
-        state = _get_state_obj(instrument=SANSInstrument.SANS2D,
-                               z_translation=lab_z_translation_correction)
+        state = _get_state_obj(instrument=SANSInstrument.SANS2D, z_translation=lab_z_translation_correction)
 
         # These values should be used instead of an explicitly specified beam centre
         state.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = 26.
@@ -280,8 +281,7 @@ class SANS2DMoveTest(unittest.TestCase):
 
         # The component input is not relevant for SANS2D's initial move. All detectors are moved
         component = "front-detector"
-        move_component(component_name=component, state=state, workspace=workspace,
-                       move_type=MoveTypes.INITIAL_MOVE)
+        move_component(component_name=component, state=state, workspace=workspace, move_type=MoveTypes.INITIAL_MOVE)
 
         # These values are on the workspace and in the sample logs
         component_to_investigate = DetectorType.HAB.value
@@ -294,15 +294,14 @@ class SANS2DMoveTest(unittest.TestCase):
         total_z = initial_z_position + z_correction
         expected_position = V3D(total_x - 26., total_y - 98., total_z)
         expected_rotation = Quat(0.9968998362876025, 0., 0.07868110579898738, 0.)
-        compare_expected_position(self, expected_position, expected_rotation,
-                                  component_to_investigate, state.instrument_info, workspace)
+        compare_expected_position(self, expected_position, expected_rotation, component_to_investigate,
+                                  state.instrument_info, workspace)
 
     def test_that_missing_beam_centre_is_taken_from_lab_move_state_when_no_component_is_specified(self):
         lab_z_translation_correction = 123.
 
         workspace = self._prepare_sans2d_empty_ws()
-        state = _get_state_obj(instrument=SANSInstrument.SANS2D,
-                               z_translation=lab_z_translation_correction)
+        state = _get_state_obj(instrument=SANSInstrument.SANS2D, z_translation=lab_z_translation_correction)
 
         # These values should be used instead of an explicitly specified beam centre
         x_offset = 26.
@@ -312,8 +311,7 @@ class SANS2DMoveTest(unittest.TestCase):
 
         # The component input is not relevant for SANS2D's initial move. All detectors are moved
         component = None
-        move_component(component_name=component, state=state, workspace=workspace,
-                       move_type=MoveTypes.INITIAL_MOVE)
+        move_component(component_name=component, state=state, workspace=workspace, move_type=MoveTypes.INITIAL_MOVE)
 
         # Assert for initial move for low angle bank
         # These values are on the workspace and in the sample logs,
@@ -326,8 +324,8 @@ class SANS2DMoveTest(unittest.TestCase):
         total_z = initial_z_position + rear_det_z - offset + lab_z_translation_correction
         expected_position = V3D(total_x - x_offset, total_y - y_offset, total_z)
         expected_rotation = Quat(1., 0., 0., 0.)
-        compare_expected_position(self, expected_position, expected_rotation,
-                                  component_to_investigate, state.instrument_info, workspace)
+        compare_expected_position(self, expected_position, expected_rotation, component_to_investigate,
+                                  state.instrument_info, workspace)
 
 
 class LARMORMoveTest(unittest.TestCase):
@@ -344,11 +342,13 @@ class LARMORMoveTest(unittest.TestCase):
 
         # Act for initial move
         component = None
-        state = _get_state_obj(instrument=SANSInstrument.LARMOR,
-                               x_translation=lab_x_translation_correction)
+        state = _get_state_obj(instrument=SANSInstrument.LARMOR, x_translation=lab_x_translation_correction)
 
-        move_component(component_name=component, workspace=workspace, state=state,
-                       move_type=MoveTypes.INITIAL_MOVE, beam_coordinates=beam_coordinates)
+        move_component(component_name=component,
+                       workspace=workspace,
+                       state=state,
+                       move_type=MoveTypes.INITIAL_MOVE,
+                       beam_coordinates=beam_coordinates)
 
         # Assert low angle bank for initial move
         # These values are on the workspace and in the sample logs
@@ -357,8 +357,8 @@ class LARMORMoveTest(unittest.TestCase):
         # The rotation couples the movements, hence we just insert absolute value, to have a type of regression test.
         expected_position = V3D(0, -38, 25.3)
         expected_rotation = Quat(0.978146, 0, -0.20792, 0)
-        compare_expected_position(self, expected_position, expected_rotation,
-                                  component_to_investigate, state.instrument_info, workspace)
+        compare_expected_position(self, expected_position, expected_rotation, component_to_investigate,
+                                  state.instrument_info, workspace)
 
         check_that_sets_to_zero(self, workspace, state, comp_name=None)
 
@@ -373,26 +373,25 @@ class ZOOMMoveTest(unittest.TestCase):
         state = _get_state_obj(SANSInstrument.ZOOM)
 
         # Initial move
-        move_component(component_name=component, workspace=workspace, state=state,
-                       move_type=MoveTypes.INITIAL_MOVE, beam_coordinates=beam_coordinates)
+        move_component(component_name=component,
+                       workspace=workspace,
+                       state=state,
+                       move_type=MoveTypes.INITIAL_MOVE,
+                       beam_coordinates=beam_coordinates)
 
         initial_z_position = 20.77408
-        expected_position = V3D(-beam_coordinates[0],
-                                -beam_coordinates[1],
-                                initial_z_position)
+        expected_position = V3D(-beam_coordinates[0], -beam_coordinates[1], initial_z_position)
         expected_rotation = Quat(1., 0., 0., 0.)
-        compare_expected_position(self, expected_position, expected_rotation, component_key,
-                                  state.instrument_info, workspace)
+        compare_expected_position(self, expected_position, expected_rotation, component_key, state.instrument_info,
+                                  workspace)
 
         # Elementary Move
         component_elementary_move = "LAB"
         component_elementary_move_key = DetectorType.LAB.value
 
         beam_coordinates_elementary_move = [120, 135]
-        check_elementry_displacement_with_translation(self, workspace, state,
-                                                      beam_coordinates_elementary_move,
-                                                      component_elementary_move,
-                                                      component_elementary_move_key)
+        check_elementry_displacement_with_translation(self, workspace, state, beam_coordinates_elementary_move,
+                                                      component_elementary_move, component_elementary_move_key)
 
         # Reset to zero
         check_that_sets_to_zero(self, workspace, state)

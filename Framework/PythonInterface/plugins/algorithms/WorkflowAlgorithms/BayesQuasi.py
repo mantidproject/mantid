@@ -53,7 +53,8 @@ class BayesQuasi(PythonAlgorithm):
         return 1
 
     def PyInit(self):
-        self.declareProperty(name='Program', defaultValue='QL',
+        self.declareProperty(name='Program',
+                             defaultValue='QL',
                              validator=StringListValidator(['QL', 'QSe']),
                              doc='The type of program to run (either QL or QSe)')
 
@@ -63,35 +64,30 @@ class BayesQuasi(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('ResolutionWorkspace', '', direction=Direction.Input),
                              doc='Name of the resolution input Workspace')
 
-        self.declareProperty(WorkspaceGroupProperty('ResNormWorkspace', '',
+        self.declareProperty(WorkspaceGroupProperty('ResNormWorkspace',
+                                                    '',
                                                     optional=PropertyMode.Optional,
                                                     direction=Direction.Input),
                              doc='Name of the ResNorm input Workspace')
 
-        self.declareProperty(name='MinRange', defaultValue=-0.2,
-                             doc='The start of the fit range. Default=-0.2')
+        self.declareProperty(name='MinRange', defaultValue=-0.2, doc='The start of the fit range. Default=-0.2')
 
-        self.declareProperty(name='MaxRange', defaultValue=0.2,
-                             doc='The end of the fit range. Default=0.2')
+        self.declareProperty(name='MaxRange', defaultValue=0.2, doc='The end of the fit range. Default=0.2')
 
-        self.declareProperty(name='SampleBins', defaultValue=1,
-                             doc='The number of sample bins')
+        self.declareProperty(name='SampleBins', defaultValue=1, doc='The number of sample bins')
 
-        self.declareProperty(name='ResolutionBins', defaultValue=1,
-                             doc='The number of resolution bins')
+        self.declareProperty(name='ResolutionBins', defaultValue=1, doc='The number of resolution bins')
 
-        self.declareProperty(name='Elastic', defaultValue=True,
-                             doc='Fit option for using the elastic peak')
+        self.declareProperty(name='Elastic', defaultValue=True, doc='Fit option for using the elastic peak')
 
-        self.declareProperty(name='Background', defaultValue='Flat',
+        self.declareProperty(name='Background',
+                             defaultValue='Flat',
                              validator=StringListValidator(['Sloping', 'Flat', 'Zero']),
                              doc='Fit option for the type of background')
 
-        self.declareProperty(name='FixedWidth', defaultValue=True,
-                             doc='Fit option for using FixedWidth')
+        self.declareProperty(name='FixedWidth', defaultValue=True, doc='Fit option for using FixedWidth')
 
-        self.declareProperty(name='UseResNorm', defaultValue=False,
-                             doc='fit option for using ResNorm')
+        self.declareProperty(name='UseResNorm', defaultValue=False, doc='fit option for using ResNorm')
 
         self.declareProperty(name='WidthFile', defaultValue='', doc='The name of the fixedWidth file')
 
@@ -103,7 +99,8 @@ class BayesQuasi(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceResult', '', direction=Direction.Output),
                              doc='The name of the result output workspaces')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceProb', '',
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceProb',
+                                                     '',
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Output),
                              doc='The name of the probability output workspaces')
@@ -261,21 +258,18 @@ class BayesQuasi(PythonAlgorithm):
 
             if prog == 'QLr':
                 workflow_prog.report('Processing Sample number {0} as Lorentzian'.format(spectrum))
-                nd, xout, yout, eout, yfit, yprob = QLr.qlres(numb, Xv, Yv, Ev, reals, fitOp,
-                                                              Xdat, Xb, Yb, Wy, We, dtn, xsc,
-                                                              wrks, wrkr, lwrk)
+                nd, xout, yout, eout, yfit, yprob = QLr.qlres(numb, Xv, Yv, Ev, reals, fitOp, Xdat, Xb, Yb, Wy, We, dtn,
+                                                              xsc, wrks, wrkr, lwrk)
                 logger.information(' Log(prob) : {0} {1} {2} {3}'.format(yprob[0], yprob[1], yprob[2], yprob[3]))
             elif prog == 'QLd':
                 workflow_prog.report('Processing Sample number {0}'.format(spectrum))
-                nd, xout, yout, eout, yfit, yprob = QLd.qldata(numb, Xv, Yv, Ev, reals, fitOp,
-                                                               Xdat, Xb, Yb, Eb, Wy, We,
+                nd, xout, yout, eout, yfit, yprob = QLd.qldata(numb, Xv, Yv, Ev, reals, fitOp, Xdat, Xb, Yb, Eb, Wy, We,
                                                                wrks, wrkr, lwrk)
                 logger.information(' Log(prob) : {0} {1} {2} {3}'.format(yprob[0], yprob[1], yprob[2], yprob[3]))
             elif prog == 'QSe':
                 workflow_prog.report('Processing Sample number {0} as Stretched Exp'.format(spectrum))
-                nd, xout, yout, eout, yfit, yprob = Qse.qlstexp(numb, Xv, Yv, Ev, reals, fitOp,
-                                                                Xdat, Xb, Yb, Wy, We, dtn, xsc,
-                                                                wrks, wrkr, lwrk)
+                nd, xout, yout, eout, yfit, yprob = Qse.qlstexp(numb, Xv, Yv, Ev, reals, fitOp, Xdat, Xb, Yb, Wy, We,
+                                                                dtn, xsc, wrks, wrkr, lwrk)
 
             dataX = xout[:nd]
             dataX = np.append(dataX, 2 * xout[nd - 1] - xout[nd - 2])
@@ -331,8 +325,14 @@ class BayesQuasi(PythonAlgorithm):
             fout = fname + '_Workspace_' + str(spectrum)
 
             workflow_prog.report('Creating OutputWorkspace')
-            s_api.CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,
-                                  Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names,
+            s_api.CreateWorkspace(OutputWorkspace=fout,
+                                  DataX=datX,
+                                  DataY=datY,
+                                  DataE=datE,
+                                  Nspec=nsp,
+                                  UnitX='DeltaE',
+                                  VerticalAxisUnit='Text',
+                                  VerticalAxisValues=names,
                                   EnableLogging=False)
 
             # append workspace to list of results
@@ -359,9 +359,15 @@ class BayesQuasi(PythonAlgorithm):
             yProb = np.append(yProb, yPr3)
 
             prob_axis_names = '0 Peak, 1 Peak, 2 Peak, 3 Peak'
-            s_api.CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,
-                                  Nspec=4, UnitX='MomentumTransfer', VerticalAxisUnit='Text',
-                                  VerticalAxisValues=prob_axis_names, EnableLogging=False)
+            s_api.CreateWorkspace(OutputWorkspace=probWS,
+                                  DataX=xProb,
+                                  DataY=yProb,
+                                  DataE=eProb,
+                                  Nspec=4,
+                                  UnitX='MomentumTransfer',
+                                  VerticalAxisUnit='Text',
+                                  VerticalAxisValues=prob_axis_names,
+                                  EnableLogging=False)
             outWS = self.C2Fw(fname)
         elif self._program == 'QSe':
             comp_prog.report('Running C2Se')
@@ -412,14 +418,9 @@ class BayesQuasi(PythonAlgorithm):
         sample_binning, res_binning = binning
         energy_min, energy_max = e_range
 
-        sample_logs = [('res_workspace', self._resWS),
-                       ('fit_program', fit_program),
-                       ('background', self._background),
-                       ('elastic_peak', self._elastic),
-                       ('energy_min', energy_min),
-                       ('energy_max', energy_max),
-                       ('sample_binning', sample_binning),
-                       ('resolution_binning', res_binning)]
+        sample_logs = [('res_workspace', self._resWS), ('fit_program', fit_program), ('background', self._background),
+                       ('elastic_peak', self._elastic), ('energy_min', energy_min), ('energy_max', energy_max),
+                       ('sample_binning', sample_binning), ('resolution_binning', res_binning)]
 
         resnorm_used = (self._resnormWS != '')
         sample_logs.append(('resnorm', str(resnorm_used)))
@@ -478,9 +479,16 @@ class BayesQuasi(PythonAlgorithm):
         Vaxis.append('f1.Beta')
 
         logger.information('Vaxis=' + str(Vaxis))
-        s_api.CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
-                              UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis,
-                              YUnitLabel='', EnableLogging=False)
+        s_api.CreateWorkspace(OutputWorkspace=outWS,
+                              DataX=dataX,
+                              DataY=dataY,
+                              DataE=dataE,
+                              Nspec=nhist,
+                              UnitX='MomentumTransfer',
+                              VerticalAxisUnit='Text',
+                              VerticalAxisValues=Vaxis,
+                              YUnitLabel='',
+                              EnableLogging=False)
 
         return outWS
 
@@ -632,8 +640,8 @@ class BayesQuasi(PythonAlgorithm):
             # calculate EISF and EISF error
             total = height_data + amplitude_data
             EISF_data = height_data / total
-            total_error = height_error ** 2 + amplitude_error ** 2
-            EISF_error = EISF_data * np.sqrt((height_error ** 2 / height_data ** 2) + (total_error / total ** 2))
+            total_error = height_error**2 + amplitude_error**2
+            EISF_error = EISF_data * np.sqrt((height_error**2 / height_data**2) + (total_error / total**2))
 
             # interlace amplitudes and widths of the peaks
             y.append(np.asarray(height_data))
@@ -664,9 +672,16 @@ class BayesQuasi(PythonAlgorithm):
         y = np.asarray(y).flatten()
         e = np.asarray(e).flatten()
 
-        s_api.CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,
-                              UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text',
-                              VerticalAxisValues=axis_names, EnableLogging=False)
+        s_api.CreateWorkspace(OutputWorkspace=output_workspace,
+                              DataX=x,
+                              DataY=y,
+                              DataE=e,
+                              Nspec=num_spectra,
+                              UnitX='MomentumTransfer',
+                              YUnitLabel='',
+                              VerticalAxisUnit='Text',
+                              VerticalAxisValues=axis_names,
+                              EnableLogging=False)
 
         return output_workspace
 

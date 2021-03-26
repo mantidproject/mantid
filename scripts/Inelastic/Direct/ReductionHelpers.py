@@ -15,17 +15,16 @@ Set of functions to assist with processing instrument parameters relevant to red
 
 class ComplexProperty(object):
     """ Class describes property which depends on other properties and stores/receives values in other properties """
-
-    def __init__(self,other_prop_list):
+    def __init__(self, other_prop_list):
         self._other_prop = other_prop_list
 
-    def __get__(self,spec_dict,owner=None):
+    def __get__(self, spec_dict, owner=None):
         """ return complex properties list """
         if spec_dict is None:
             # access to property methods
             return self
 
-        if not isinstance(spec_dict,dict):
+        if not isinstance(spec_dict, dict):
             spec_dict = spec_dict.__dict__
         rez = list()
         for key in self._other_prop:
@@ -33,12 +32,13 @@ class ComplexProperty(object):
         # process very important case of property dependent on two other
         # properties.  Make it tuple
         if len(rez) == 2:
-            return (rez[0],rez[1])
+            return (rez[0], rez[1])
         else:
             return rez
+
     #
 
-    def __set__(self,instance,value):
+    def __set__(self, instance, value):
         try:
             lv = len(value)
         except:
@@ -46,15 +46,15 @@ class ComplexProperty(object):
         if lv != len(self._other_prop):
             raise KeyError("Complex property values can be set equal to the same length values list")
 
-        if isinstance(instance,dict):
+        if isinstance(instance, dict):
             spec_dict = instance
         else:
             spec_dict = instance.__dict__
 
         #changed_prop=[];
-        for key,val in zip(self._other_prop,value):
+        for key, val in zip(self._other_prop, value):
             spec_dict[key] = val
-                #changed_prop.append(key);
+            #changed_prop.append(key);
         #return changed_prop;
 
     def dependencies(self):
@@ -65,6 +65,8 @@ class ComplexProperty(object):
         """ returns the number of properties, this property depends on"""
 
         return len(self._other_prop)
+
+
 #end ComplexProperty
 
 
@@ -78,7 +80,7 @@ def findFile(fileName):
     fbase = os.path.basename(fileName)
     search_path = config.getDataSearchDirs()
     for path in search_path:
-        fname = os.path.join(path,fbase)
+        fname = os.path.join(path, fbase)
         if os.path.exists(fname):
             return fname
     return ''
@@ -100,17 +102,17 @@ def get_default_parameter(instrument, name):
         val = instrument.getBoolParameter(name)
     elif type_name == "string":
         val = instrument.getStringParameter(name)
-        if val[0] == "None" :
+        if val[0] == "None":
             return None
-    elif type_name == "int" :
+    elif type_name == "int":
         val = instrument.getIntParameter(name)
-    else :
-        raise KeyError(" Instrument: {0} does not have parameter with name: {1}".format(instrument.getName(),name))
+    else:
+        raise KeyError(" Instrument: {0} does not have parameter with name: {1}".format(instrument.getName(), name))
 
     return val[0]
 
 
-def get_default_idf_param_list(pInstrument,synonims_list=None):
+def get_default_idf_param_list(pInstrument, synonims_list=None):
     """ Obtain default reduction parameters list from the instrument """
 
     params = pInstrument.getParameterNames()
@@ -123,12 +125,12 @@ def get_default_idf_param_list(pInstrument,synonims_list=None):
                 key_name = name
         else:
             key_name = name
-        par_list[key_name] = get_default_parameter(pInstrument,name)
+        par_list[key_name] = get_default_parameter(pInstrument, name)
 
     return par_list
 
 
-def build_properties_dict(param_map,synonims,descr_list=[]) :
+def build_properties_dict(param_map, synonims, descr_list=[]):
     """ function builds the properties list from the properties strings obtained from Insturment_Parameters.xml file
 
        The properties, which have simple values are added to dictionary in the form:
@@ -154,7 +156,7 @@ def build_properties_dict(param_map,synonims,descr_list=[]) :
     properties_dict = dict()
     descr_dict = dict()
 
-    for name,val in param_map.items() :
+    for name, val in param_map.items():
         if name in synonims:
             final_name = str(synonims[name])
         else:
@@ -167,10 +169,10 @@ def build_properties_dict(param_map,synonims,descr_list=[]) :
             val = val.strip()
             keys_candidates = val.split(":")
             n_keys = len(keys_candidates)
-               #
-            if n_keys > 1 : # this is the property we want to modify
+            #
+            if n_keys > 1:  # this is the property we want to modify
                 result = list()
-                for key in keys_candidates :
+                for key in keys_candidates:
                     if key in synonims:
                         rkey = str(synonims[key])
                     else:
@@ -194,24 +196,25 @@ def build_properties_dict(param_map,synonims,descr_list=[]) :
             else:
                 properties_dict[final_name] = val
 
-    return (properties_dict,descr_dict)
+    return (properties_dict, descr_dict)
 
 
-def extract_non_system_names(names_list,prefix='_'):
+def extract_non_system_names(names_list, prefix='_'):
     """ The function processes the input list and returns
         the list with names which do not have the system framing (leading __)
     """
     result = list()
     ns = len(prefix)
     for name in names_list:
-        pend = min(ns,len(name))
+        pend = min(ns, len(name))
         if name[:pend] != prefix:
             result.append(name)
     return result
 
 
-def build_subst_dictionary(synonims_list=None) :
-    """Function to process "synonims_list" in the instrument parameters string, used to support synonyms in the reduction script
+def build_subst_dictionary(synonims_list=None):
+    """Function to process "synonims_list" in the instrument parameters string, used to support synonyms in the
+       reduction script
 
        it takes string of synonyms in the form key1=subs1=subst2=subts3;key2=subst4 and returns the dictionary
        in the form dict[subs1]=key1 ; dict[subst2] = key1 ... dict[subst4]=key2
@@ -219,9 +222,9 @@ def build_subst_dictionary(synonims_list=None) :
        e.g. if one wants to use the IDF key word my_detector instead of e.g. norm-mon1-spec, he has to type
        norm-mon1-spec=my_detector in the synonyms field of the IDF parameters file.
     """
-    if not synonims_list :  # nothing to do
+    if not synonims_list:  # nothing to do
         return dict()
-    if isinstance(synonims_list, dict) : # all done
+    if isinstance(synonims_list, dict):  # all done
         return synonims_list
     if not isinstance(synonims_list, str):
         raise AttributeError("The synonyms field of Reducer object has to be special format string or the dictionary")
@@ -230,25 +233,28 @@ def build_subst_dictionary(synonims_list=None) :
 
     subst_lines = synonims_list.split(";")
     rez = dict()
-    for lin in subst_lines :
+    for lin in subst_lines:
         lin = lin.strip()
         keys = lin.split("=")
-        if len(keys) < 2 :
-            raise AttributeError("The pairs in the synonyms fields have to have form key1=key2=key3 with at least two values present")
+        if len(keys) < 2:
+            raise AttributeError(
+                "The pairs in the synonyms fields have to have form key1=key2=key3 with at least two values present")
         if len(keys[0]) == 0:
-            raise AttributeError("The pairs in the synonyms fields have to have form key1=key2=key3 with at least two values present, "
-                                 "but the first key is empty")
-        for i in range(1,len(keys)) :
-            if len(keys[i]) == 0 :
-                raise AttributeError("The pairs in the synonyms fields have to have form key1=key2=key3 with at least two values present, "
-                                     "but the key" + str(i) + " is empty")
+            raise AttributeError(
+                "The pairs in the synonyms fields have to have form key1=key2=key3 with at least two values present, "
+                "but the first key is empty")
+        for i in range(1, len(keys)):
+            if len(keys[i]) == 0:
+                raise AttributeError(
+                    "The pairs in the synonyms fields have to have form key1=key2=key3 with at least two values "
+                    "present, but the key" + str(i) + " is empty")
             kkk = keys[i].strip()
             rez[kkk] = keys[0].strip()
 
     return rez
 
 
-def gen_getter(keyval_dict,key):
+def gen_getter(keyval_dict, key):
     """ function returns value from dictionary with substitution
 
         e.g. if keyval_dict[A] = 10, keyval_dict[B] = 20 and key_val[C] = [A,B]
@@ -263,15 +269,17 @@ def gen_getter(keyval_dict,key):
         name = key
 
     a_val = keyval_dict[name]
-    if isinstance(a_val,ComplexProperty):
+    if isinstance(a_val, ComplexProperty):
         return a_val.__get__(keyval_dict)
     else:
         return a_val
     #end
+
+
 #end
 
 
-def gen_setter(keyval_dict,key,val):
+def gen_setter(keyval_dict, key, val):
     """ function sets value to dictionary with substitution
 
         e.g. if keyval_dict[A] = 10, keyval_dict[B] = 20 and key_val[C] = [A,B]
@@ -289,31 +297,31 @@ def gen_setter(keyval_dict,key,val):
         name = key
 
     test_val = keyval_dict[name]
-    if isinstance(test_val,ComplexProperty):
+    if isinstance(test_val, ComplexProperty):
         # Assigning values for composite function to the function components
-        test_val.__set__(keyval_dict,val)
+        test_val.__set__(keyval_dict, val)
         return None
     else:
         keyval_dict[key] = val
     return None
 
 
-def check_instrument_name(old_name,new_name):
+def check_instrument_name(old_name, new_name):
     """ function checks if new instrument name is acceptable instrument name"""
 
     if new_name is None:
         if old_name is not None:
-            return (None,None,config.getFacility())
+            return (None, None, config.getFacility())
         else:
             raise KeyError("No instrument name is defined")
 
     if old_name == new_name:
-        return (None,None,None)
+        return (None, None, None)
 
     # Instrument name might be a prefix, query Mantid for the full name
     short_name = ''
     full_name = ''
-    try :
+    try:
         instrument = config.getFacility().instrument(new_name)
         short_name = instrument.shortName()
         full_name = instrument.name()
@@ -323,35 +331,35 @@ def check_instrument_name(old_name,new_name):
         facilities = config.getFacilities()
         for facility in facilities:
             #config.setString('default.facility',facility.name())
-            try :
+            try:
                 instrument = facility.instrument(new_name)
                 short_name = instrument.shortName()
                 full_name = instrument.name()
-                if len(short_name) > 0 :
+                if len(short_name) > 0:
                     break
             except:
                 pass
         #config.setString('default.facility',old_facility)
-        if len(short_name) == 0 :
+        if len(short_name) == 0:
             raise KeyError(" Can not find/set-up the instrument: " + new_name + ' in any supported facility')
 
     new_name = short_name
 
     #config['default.instrument'] = full_name
-    return (new_name,full_name,facility)
+    return (new_name, full_name, facility)
 
 
 def parse_single_name(filename):
     """ Process single run name into """
-    filepath,fname = os.path.split(filename)
+    filepath, fname = os.path.split(filename)
     if ':' in fname:
-        fl,fr = fname.split(':')
-        path1,ind1,ext1 = parse_single_name(fl)
-        path2,ind2,ext2 = parse_single_name(fr)
+        fl, fr = fname.split(':')
+        path1, ind1, ext1 = parse_single_name(fl)
+        path2, ind2, ext2 = parse_single_name(fr)
         if ind1 > ind2:
             raise ValueError('Invalid file number defined using colon : left run number '
-                             '{0} has to be large then right {1}'.format(ind1,ind2))
-        number = list(range(ind1[0],ind2[0] + 1))
+                             '{0} has to be large then right {1}'.format(ind1, ind2))
+        number = list(range(ind1[0], ind2[0] + 1))
         if len(filepath) > 0:
             filepath = [filepath] * len(number)
         else:
@@ -361,15 +369,15 @@ def parse_single_name(filename):
         else:
             fext = ext1 * len(number)
 
-        return (filepath,number,fext)
+        return (filepath, number, fext)
 
-    fname,fext = os.path.splitext(fname)
+    fname, fext = os.path.splitext(fname)
     fnumber = re.findall(r'\d+', fname)
     if len(fnumber) == 0:
         number = 0
     else:
         number = int(fnumber[0])
-    return ([filepath],[number],[fext])
+    return ([filepath], [number], [fext])
 
 
 def parse_run_file_name(run_string):
@@ -383,15 +391,15 @@ def parse_run_file_name(run_string):
     fext = []
     anExt = ''
     for run in runs:
-        path,ind,ext1 = parse_single_name(run)
-        filepath+=path
-        filenum+=ind
-        fext+=ext1
+        path, ind, ext1 = parse_single_name(run)
+        filepath += path
+        filenum += ind
+        fext += ext1
 
     non_empty = [x for x in fext if len(x) > 0]
     if len(non_empty) > 0:
         anExt = non_empty[-1]
-        for i,val in enumerate(fext):
+        for i, val in enumerate(fext):
             if len(val) == 0:
                 fext[i] = anExt
 
@@ -400,17 +408,19 @@ def parse_run_file_name(run_string):
         filenum = filenum[0]
         fext = fext[0]
     # extensions should be either all the same or all defined
-    return (filepath,filenum,fext)
+    return (filepath, filenum, fext)
+
+
 #
 
 
-def process_prop_list(workspace,logName="CombinedSpectraIDList"):
+def process_prop_list(workspace, logName="CombinedSpectraIDList"):
     """Method process log, which describes list of spectra, attached to
        the workspace
     """
     if workspace.run().hasProperty(logName):
         spec_id_str = workspace.run().getProperty(logName).value
-        spec_id_str = spec_id_str.replace('[','').replace(']','').strip()
+        spec_id_str = spec_id_str.replace('[', '').replace(']', '').strip()
         spec_id_listS = spec_id_str.split(',')
         spec_list = []
         for val in spec_id_listS:

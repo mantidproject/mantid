@@ -5,34 +5,34 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import SetBeam, SetSample, MonteCarloAbsorption, GroupWorkspaces
-from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
-                        WorkspaceGroupProperty, PropertyMode, Progress, mtd)
-from mantid.kernel import (StringMandatoryValidator, Direction, logger, FloatBoundedValidator,
-                           IntBoundedValidator, StringListValidator)
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty,
+                        PropertyMode, Progress, mtd)
+from mantid.kernel import (StringMandatoryValidator, Direction, logger, FloatBoundedValidator, IntBoundedValidator,
+                           StringListValidator)
 
 
 class IndirectCylinderAbsorption(DataProcessorAlgorithm):
     # Sample variables
-    _sample_ws_name=None
-    _sample_chemical_formula=None
-    _sample_density_type=None
-    _sample_density=None
-    _sample_radius=None
+    _sample_ws_name = None
+    _sample_chemical_formula = None
+    _sample_density_type = None
+    _sample_density = None
+    _sample_radius = None
 
     # Container variables
-    _can_ws_name=None
-    _use_can_corrections=None
-    _can_chemical_formula=None
-    _can_density_type=None
-    _can_density=None
-    _can_radius=None
-    _can_scale=None
+    _can_ws_name = None
+    _use_can_corrections = None
+    _can_chemical_formula = None
+    _can_density_type = None
+    _can_density = None
+    _can_radius = None
+    _can_scale = None
 
-    _events=None
-    _output_ws=None
-    _abs_ws=None
-    _ass_ws=None
-    _acc_ws=None
+    _events = None
+    _output_ws = None
+    _abs_ws = None
+    _ass_ws = None
+    _acc_ws = None
 
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
@@ -47,54 +47,65 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
         # Sample options
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
                              doc='Sample workspace.')
-        self.declareProperty(name='SampleChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
+        self.declareProperty(name='SampleChemicalFormula',
+                             defaultValue='',
+                             validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
-        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
+        self.declareProperty(name='SampleDensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass Density or Number density')
-        self.declareProperty(name='SampleDensity', defaultValue=0.1,
+        self.declareProperty(name='SampleDensity',
+                             defaultValue=0.1,
                              doc='Mass Density (g/cm^3) or Number density (atoms/Angstrom^3)')
-        self.declareProperty(name='SampleRadius', defaultValue=0.1,
+        self.declareProperty(name='SampleRadius',
+                             defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample radius')
-        self.declareProperty(name='SampleHeight', defaultValue=1.0,
+        self.declareProperty(name='SampleHeight',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample height')
 
         # Container options
-        self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '', optional=PropertyMode.Optional,
+        self.declareProperty(MatrixWorkspaceProperty('CanWorkspace',
+                                                     '',
+                                                     optional=PropertyMode.Optional,
                                                      direction=Direction.Input),
                              doc='Container workspace.')
-        self.declareProperty(name='UseCanCorrections', defaultValue=False,
-                             doc='Use can corrections in subtraction')
-        self.declareProperty(name='CanChemicalFormula', defaultValue='',
-                             doc='Can chemical formula')
-        self.declareProperty(name='CanDensityType', defaultValue='Mass Density',
+        self.declareProperty(name='UseCanCorrections', defaultValue=False, doc='Use can corrections in subtraction')
+        self.declareProperty(name='CanChemicalFormula', defaultValue='', doc='Can chemical formula')
+        self.declareProperty(name='CanDensityType',
+                             defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass Density or Number density')
-        self.declareProperty(name='CanDensity', defaultValue=0.1,
+        self.declareProperty(name='CanDensity',
+                             defaultValue=0.1,
                              doc='Mass Density (g/cm^3) or Number density (atoms/Angstrom^3)')
-        self.declareProperty(name='CanRadius', defaultValue=0.2,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Can radius')
-        self.declareProperty(name='CanScaleFactor', defaultValue=1.0,
+        self.declareProperty(name='CanRadius', defaultValue=0.2, validator=FloatBoundedValidator(0.0), doc='Can radius')
+        self.declareProperty(name='CanScaleFactor',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Scale factor to multiply can data')
 
         # Beam size
-        self.declareProperty(name='BeamHeight', defaultValue=1.0,
+        self.declareProperty(name='BeamHeight',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Height of the beam (cm)')
-        self.declareProperty(name='BeamWidth', defaultValue=1.0,
+        self.declareProperty(name='BeamWidth',
+                             defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Width of the beam (cm)')
 
         # General options
-        self.declareProperty(name='NumberWavelengths', defaultValue=10,
+        self.declareProperty(name='NumberWavelengths',
+                             defaultValue=10,
                              validator=IntBoundedValidator(1),
                              doc='Number of wavelengths for calculation')
 
-        self.declareProperty(name='Events', defaultValue=5000,
+        self.declareProperty(name='Events',
+                             defaultValue=5000,
                              validator=IntBoundedValidator(0),
                              doc='Number of neutron events')
 
@@ -102,7 +113,9 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output corrected workspace.')
 
-        self.declareProperty(WorkspaceGroupProperty('CorrectionsWorkspace', '', direction=Direction.Output,
+        self.declareProperty(WorkspaceGroupProperty('CorrectionsWorkspace',
+                                                    '',
+                                                    direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
                              doc='The corrections workspace for scattering and absorptions in sample.')
 
@@ -125,23 +138,26 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
         mtd.addOrReplace(sample_wave_ws, convert_unit_alg.getProperty("OutputWorkspace").value)
 
         prog.report('Calculating sample corrections')
-        SetBeam(sample_wave_ws,
-                Geometry={'Shape': 'Slit',
-                          'Width': self._beam_width,
-                          'Height': self._beam_height})
+        SetBeam(sample_wave_ws, Geometry={'Shape': 'Slit', 'Width': self._beam_width, 'Height': self._beam_height})
 
         if self._sample_density_type == 'Mass Density':
-            sample_mat_list = {'ChemicalFormula': self._sample_chemical_formula,
-                               'SampleMassDensity': self._sample_density}
+            sample_mat_list = {
+                'ChemicalFormula': self._sample_chemical_formula,
+                'SampleMassDensity': self._sample_density
+            }
         if self._sample_density_type == 'Number Density':
-            sample_mat_list = {'ChemicalFormula': self._sample_chemical_formula,
-                               'SampleNumberDensity': self._sample_density}
+            sample_mat_list = {
+                'ChemicalFormula': self._sample_chemical_formula,
+                'SampleNumberDensity': self._sample_density
+            }
 
         SetSample(sample_wave_ws,
-                  Geometry={'Shape': 'Cylinder',
-                            'Height': self._sample_height,
-                            'Radius': self._sample_radius,
-                            'Center': [0., 0., 0.]},
+                  Geometry={
+                      'Shape': 'Cylinder',
+                      'Height': self._sample_height,
+                      'Radius': self._sample_radius,
+                      'Center': [0., 0., 0.]
+                  },
                   Material=sample_mat_list)
 
         prog.report('Calculating sample corrections')
@@ -188,18 +204,24 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                 divide_alg.execute()
 
                 if self._sample_density_type == 'Mass Density':
-                    container_mat_list = {'ChemicalFormula': self._can_chemical_formula,
-                                          'SampleMassDensity': self._can_density}
+                    container_mat_list = {
+                        'ChemicalFormula': self._can_chemical_formula,
+                        'SampleMassDensity': self._can_density
+                    }
                 if self._sample_density_type == 'Number Density':
-                    container_mat_list = {'ChemicalFormula': self._can_chemical_formula,
-                                          'SampleNumberDensity': self._can_density}
+                    container_mat_list = {
+                        'ChemicalFormula': self._can_chemical_formula,
+                        'SampleNumberDensity': self._can_density
+                    }
 
                 SetSample(can_wave_ws,
-                          Geometry={'Shape': 'HollowCylinder',
-                                    'Height': self._sample_height,
-                                    'InnerRadius': self._sample_radius,
-                                    'OuterRadius': self._can_radius,
-                                    'Center': [0., 0., 0.]},
+                          Geometry={
+                              'Shape': 'HollowCylinder',
+                              'Height': self._sample_height,
+                              'InnerRadius': self._sample_radius,
+                              'OuterRadius': self._can_radius,
+                              'Center': [0., 0., 0.]
+                          },
                           Material=container_mat_list)
 
                 MonteCarloAbsorption(InputWorkspace=can_wave_ws,
@@ -252,8 +274,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
         # Record sample logs
         prog.report('Recording sample logs')
         sample_log_workspaces = [self._output_ws, self._ass_ws]
-        sample_logs = [('sample_shape', 'cylinder'),
-                       ('sample_filename', self._sample_ws_name),
+        sample_logs = [('sample_shape', 'cylinder'), ('sample_filename', self._sample_ws_name),
                        ('sample_radius', self._sample_radius)]
 
         if self._can_ws_name is not None:
@@ -284,9 +305,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                 delete_alg.execute()
 
         else:
-            GroupWorkspaces(InputWorkspaces=group,
-                            OutputWorkspace=self._abs_ws,
-                            EnableLogging=False)
+            GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=self._abs_ws, EnableLogging=False)
             self.setProperty('CorrectionsWorkspace', self._abs_ws)
 
     def _setup(self):

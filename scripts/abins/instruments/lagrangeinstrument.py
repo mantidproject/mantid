@@ -32,20 +32,18 @@ class LagrangeInstrument(IndirectInstrument):
 
         width = frequencies * ei_resolution + abs_resolution_cm
 
-        low_energy_indices = frequencies < (self.parameters['settings'][setting]
-                                            .get('low_energy_cutoff_meV', float('-Inf')))
-        width[low_energy_indices] = (self.parameters['settings'][setting]
-                                     .get('low_energy_resolution_meV', 0)
-                                     * MILLI_EV_TO_WAVENUMBER)
+        low_energy_indices = frequencies < (self.parameters['settings'][setting].get(
+            'low_energy_cutoff_meV', float('-Inf')))
+        width[low_energy_indices] = (self.parameters['settings'][setting].get('low_energy_resolution_meV', 0) *
+                                     MILLI_EV_TO_WAVENUMBER)
         return width / 2  # Lagrange reported resolution seems to equal 2*sigma
 
     def get_angles(self):
         start, end = self.parameters['scattering_angle_range']
         n_samples = self.parameters['angles_per_detector']
-        angles, step = np.linspace(start, end, n_samples,
-                                   endpoint=False, retstep=True)
+        angles, step = np.linspace(start, end, n_samples, endpoint=False, retstep=True)
 
         if n_samples == 1:
             step = end - start
 
-        return (angles + step/2).tolist()
+        return (angles + step / 2).tolist()

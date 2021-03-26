@@ -9,7 +9,4 @@
 #
 from mantidqt.utils.qt import import_qt
 
-
-AlgorithmHistoryWindow = import_qt('..._common',
-                                   'mantidqt.widgets.workspacewidget',
-                                   'AlgorithmHistoryWindow')
+AlgorithmHistoryWindow = import_qt('..._common', 'mantidqt.widgets.workspacewidget', 'AlgorithmHistoryWindow')

@@ -7,7 +7,6 @@
 #  This file is part of the mantid workbench.
 #
 
-
 # system imports
 import unittest
 

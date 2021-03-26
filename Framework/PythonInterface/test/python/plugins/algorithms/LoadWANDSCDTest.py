@@ -9,12 +9,11 @@ import unittest
 
 
 class LoadWANDTest(unittest.TestCase):
-
     def test(self):
         LoadWANDTest_ws = LoadWANDSCD('HB2C_7000.nxs.h5,HB2C_7001.nxs.h5')
         self.assertTrue(LoadWANDTest_ws)
         self.assertEqual(LoadWANDTest_ws.getNumDims(), 3)
-        self.assertEqual(LoadWANDTest_ws.getNPoints(), 1966080*2)
+        self.assertEqual(LoadWANDTest_ws.getNPoints(), 1966080 * 2)
         self.assertEqual(LoadWANDTest_ws.getSignalArray().max(), 7)
 
         d0 = LoadWANDTest_ws.getDimension(0)
@@ -47,7 +46,7 @@ class LoadWANDTest(unittest.TestCase):
         self.assertEqual(len(run_number), 2)
         self.assertEqual(run_number[0], 7000)
         self.assertEqual(run_number[1], 7001)
-        monitor_count=run.getProperty('monitor_count').value
+        monitor_count = run.getProperty('monitor_count').value
         self.assertEqual(len(monitor_count), 2)
         self.assertEqual(monitor_count[0], 907880)
         self.assertEqual(monitor_count[1], 908651)
@@ -58,8 +57,8 @@ class LoadWANDTest(unittest.TestCase):
 
         # test that the goniometer has been set correctly
         self.assertEqual(run.getNumGoniometers(), 2)
-        self.assertAlmostEqual(run.getGoniometer(0).getEulerAngles('YZY')[0], -142.6) # s1 from HB2C_7000
-        self.assertAlmostEqual(run.getGoniometer(1).getEulerAngles('YZY')[0], -142.5) # s1 from HB2C_7001
+        self.assertAlmostEqual(run.getGoniometer(0).getEulerAngles('YZY')[0], -142.6)  # s1 from HB2C_7000
+        self.assertAlmostEqual(run.getGoniometer(1).getEulerAngles('YZY')[0], -142.5)  # s1 from HB2C_7001
 
         LoadWANDTest_ws.delete()
 

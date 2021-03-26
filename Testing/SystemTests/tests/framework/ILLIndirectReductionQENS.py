@@ -34,9 +34,7 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
 
     def test_unmirror_0_1_2_3(self):
 
-        args = {'Run' : '136553.nxs',
-                'UnmirrorOption' : 0,
-                'OutputWorkspace' : 'zero'}
+        args = {'Run': '136553.nxs', 'UnmirrorOption': 0, 'OutputWorkspace': 'zero'}
 
         IndirectILLReductionQENS(**args)
 
@@ -58,25 +56,23 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
 
         IndirectILLReductionQENS(**args)
 
-        summed = Plus(mtd['left_red'].getItem(0),mtd['right_red'].getItem(0))
+        summed = Plus(mtd['left_red'].getItem(0), mtd['right_red'].getItem(0))
 
-        Scale(InputWorkspace=summed,Factor=0.5,OutputWorkspace=summed)
+        Scale(InputWorkspace=summed, Factor=0.5, OutputWorkspace=summed)
 
-        result = CompareWorkspaces(summed,mtd['both_red'].getItem(0))
+        result = CompareWorkspaces(summed, mtd['both_red'].getItem(0))
 
-        self.assertTrue(result[0],"Unmirror 1 should be the sum of 2 and 3")
+        self.assertTrue(result[0], "Unmirror 1 should be the sum of 2 and 3")
 
         left_right = GroupWorkspaces([mtd['left_red'].getItem(0).name(), mtd['right_red'].getItem(0).name()])
 
-        result = CompareWorkspaces(left_right,'zero_red')
+        result = CompareWorkspaces(left_right, 'zero_red')
 
-        self.assertTrue(result[0],"Unmirror 0 should be the group of 2 and 3")
+        self.assertTrue(result[0], "Unmirror 0 should be the group of 2 and 3")
 
     def test_unmirror_4_5(self):
 
-        args = {'Run': '136553.nxs',
-                'UnmirrorOption': 4,
-                'OutputWorkspace': 'vana4'}
+        args = {'Run': '136553.nxs', 'UnmirrorOption': 4, 'OutputWorkspace': 'vana4'}
 
         IndirectILLReductionQENS(**args)
 
@@ -91,13 +87,11 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
         result = CompareWorkspaces('vana4_red', 'vana5_red')
 
         self.assertTrue(result[0], "Unmirror 4 should be the same as 5 if "
-                                   "the same run is also defined as alignment run")
+                        "the same run is also defined as alignment run")
 
     def test_unmirror_6_7(self):
 
-        args = {'Run': '136553.nxs',
-                'UnmirrorOption': 6,
-                'OutputWorkspace': 'vana6'}
+        args = {'Run': '136553.nxs', 'UnmirrorOption': 6, 'OutputWorkspace': 'vana6'}
 
         IndirectILLReductionQENS(**args)
 
@@ -109,19 +103,17 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
 
         IndirectILLReductionQENS(**args)
 
-        result = CompareWorkspaces('vana6_red','vana7_red')
+        result = CompareWorkspaces('vana6_red', 'vana7_red')
 
         self.assertTrue(result[0], "Unmirror 6 should be the same as 7 if "
-                                   "the same run is also defined as alignment run")
+                        "the same run is also defined as alignment run")
 
     def test_unmirror_7_same_reference(self):
 
         # there was a bug in MatchPeaks with InputWorkspace2 and center peaks ON
         # in the case where the fitting was failing because of a too narrow peak
         # this tests the fix with the data where there are too narrow peaks to fit
-        args = {'AlignmentRun': '251554',
-                'UnmirrorOption': 7,
-                'ManualPSDIntegrationRange': '44,90'}
+        args = {'AlignmentRun': '251554', 'UnmirrorOption': 7, 'ManualPSDIntegrationRange': '44,90'}
 
         args['Run'] = '251530'
         args['OutputWorkspace'] = '50K'
@@ -185,4 +177,4 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
         self.assertEqual(out_croped_mon.getItem(0).blocksize(), 1018)
 
     def validate(self):
-        return ['136558_multiple_out_red','ILLIN16B_QENS.nxs']
+        return ['136558_multiple_out_red', 'ILLIN16B_QENS.nxs']

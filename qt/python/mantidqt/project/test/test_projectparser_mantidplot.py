@@ -13,7 +13,6 @@ from mantidqt.project.projectparser_mantidplot import MantidPlotProjectParser
 
 
 class ProjectParserMantidPlotTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         for directory in config.getDataSearchDirs():
@@ -48,8 +47,16 @@ class ProjectParserMantidPlotTest(unittest.TestCase):
 
     def test_parsing_simple_1d_plot(self):
         parser = MantidPlotProjectParser(self.project_with_simple_1d_plot)
-        expected_creation_args = {'linestyle': 'solid', 'linewidth': 1.5, 'drawstyle': 'default', 'marker': None,
-                                  'markersize': 6, 'function': 'plot', 'wkspIndex': 1, 'workspaces': 'MUSR00062261'}
+        expected_creation_args = {
+            'linestyle': 'solid',
+            'linewidth': 1.5,
+            'drawstyle': 'default',
+            'marker': None,
+            'markersize': 6,
+            'function': 'plot',
+            'wkspIndex': 1,
+            'workspaces': 'MUSR00062261'
+        }
 
         plot_list = parser.get_plots()
         plot_dict = plot_list[0]
@@ -70,8 +77,16 @@ class ProjectParserMantidPlotTest(unittest.TestCase):
 
     def test_parsing_multiple_1d_plots(self):
         parser = MantidPlotProjectParser(self.project_with_multiple_1d_plots)
-        expected_creation_args = {'linestyle': 'solid', 'linewidth': 1.5, 'drawstyle': 'default', 'marker': None,
-                                  'markersize': 6, 'function': 'plot', 'wkspIndex': 1, 'workspaces': 'MUSR00062261'}
+        expected_creation_args = {
+            'linestyle': 'solid',
+            'linewidth': 1.5,
+            'drawstyle': 'default',
+            'marker': None,
+            'markersize': 6,
+            'function': 'plot',
+            'wkspIndex': 1,
+            'workspaces': 'MUSR00062261'
+        }
 
         plot_list = parser.get_plots()
         creation_args_1 = plot_list[0]["creationArguments"][0][0]

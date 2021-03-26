@@ -50,7 +50,7 @@ class SANSBeamCentreFinderTest(unittest.TestCase):
         q1_data = self.gen_mock_data([1.0, 2.0], y_data_1)
         q2_data = self.gen_mock_data([1.0, 2.0], y_data_2)
 
-        expected_matched = (y_data_1[0] - y_data_2[0]) ** 2
+        expected_matched = (y_data_1[0] - y_data_2[0])**2
 
         obj = SANSBeamCentreFinder()
         result = obj._calculate_residuals(q1_data, q2_data)
@@ -67,8 +67,8 @@ class SANSBeamCentreFinderTest(unittest.TestCase):
         result = obj._calculate_residuals(q1_data, q2_data)
 
         # Matched bins contribute the diff ([0]) whilst mismatched ([1]) contribute all
-        expected_matched = (y_data_1[0] - y_data_2[0]) ** 2
-        expected_mismatched = (y_data_1[1] ** 2) + (y_data_2[1] ** 2)
+        expected_matched = (y_data_1[0] - y_data_2[0])**2
+        expected_mismatched = (y_data_1[1]**2) + (y_data_2[1]**2)
         squared_expected = expected_matched + expected_mismatched
         self.assertEqual(squared_expected, result.total_residual)
 

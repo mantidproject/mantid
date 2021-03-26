@@ -5,14 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm,
-                        WorkspaceGroup)
+from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, WorkspaceGroup)
 
 from mantid.simpleapi import (LoadEventNexus, LoadNexus, MergeRuns, RenameWorkspace)
 
-from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty,
-                           IntBoundedValidator, Property, PropertyCriterion,
-                           StringArrayLengthValidator, StringArrayMandatoryValidator,
+from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty, IntBoundedValidator, Property,
+                           PropertyCriterion, StringArrayLengthValidator, StringArrayMandatoryValidator,
                            StringArrayProperty)
 
 
@@ -37,7 +35,6 @@ class Prop:
 
 
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
-
     def __init__(self):
         """Initialize an instance of the algorithm."""
         DataProcessorAlgorithm.__init__(self)
@@ -66,7 +63,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def PyInit(self):
         """Initialize the input and output properties of the algorithm."""
-        self._reduction_properties = [] # cached list of properties copied from child alg
+        self._reduction_properties = []  # cached list of properties copied from child alg
         self._declareRunProperties()
         self._declareSlicingProperties()
         self._declareReductionProperties()
@@ -122,19 +119,19 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         lenValidator.setLengthMin(1)
         mandatoryInputRuns.add(lenValidator)
         # Add property for the input runs
-        self.declareProperty(StringArrayProperty(Prop.RUNS,
-                                                 values=[],
-                                                 validator=mandatoryInputRuns),
+        self.declareProperty(StringArrayProperty(Prop.RUNS, values=[], validator=mandatoryInputRuns),
                              doc='A list of run numbers or workspace names for the input runs. '
-                                 'Multiple runs will be summed before reduction.')
+                             'Multiple runs will be summed before reduction.')
         # Add properties from child algorithm
         properties = [
-            'ThetaIn', 'ThetaLogName',
+            'ThetaIn',
+            'ThetaLogName',
         ]
         self.copyProperties('ReflectometryReductionOneAuto', properties)
         self._reduction_properties += properties
         # Add properties for settings to apply to input runs
-        self.declareProperty(Prop.RELOAD, True,
+        self.declareProperty(Prop.RELOAD,
+                             True,
                              doc='If true, reload input workspaces if they are of the incorrect type')
         self.declareProperty(Prop.GROUP_TOF, True, doc='If true, group the TOF workspaces')
 
@@ -161,46 +158,37 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _declareReductionProperties(self):
         properties = [
-            'SummationType', 'ReductionType', 'IncludePartialBins',
-            'AnalysisMode', 'ProcessingInstructions', 'CorrectDetectors',
-            'DetectorCorrectionType', 'WavelengthMin', 'WavelengthMax', 'I0MonitorIndex',
-            'MonitorBackgroundWavelengthMin', 'MonitorBackgroundWavelengthMax',
-            'MonitorIntegrationWavelengthMin', 'MonitorIntegrationWavelengthMax',
-            'SubtractBackground', 'BackgroundProcessingInstructions', 'BackgroundCalculationMethod',
-            'DegreeOfPolynomial', 'CostFunction',
-            'NormalizeByIntegratedMonitors', 'PolarizationAnalysis',
-            'FloodCorrection', 'FloodWorkspace',
-            'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1'
+            'SummationType', 'ReductionType', 'IncludePartialBins', 'AnalysisMode', 'ProcessingInstructions',
+            'CorrectDetectors', 'DetectorCorrectionType', 'WavelengthMin', 'WavelengthMax', 'I0MonitorIndex',
+            'MonitorBackgroundWavelengthMin', 'MonitorBackgroundWavelengthMax', 'MonitorIntegrationWavelengthMin',
+            'MonitorIntegrationWavelengthMax', 'SubtractBackground', 'BackgroundProcessingInstructions',
+            'BackgroundCalculationMethod', 'DegreeOfPolynomial', 'CostFunction', 'NormalizeByIntegratedMonitors',
+            'PolarizationAnalysis', 'FloodCorrection', 'FloodWorkspace', 'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1'
         ]
         self.copyProperties('ReflectometryReductionOneAuto', properties)
         self._reduction_properties += properties
 
     def _declareTransmissionProperties(self):
         # Add input transmission run properties
-        self.declareProperty(StringArrayProperty(Prop.FIRST_TRANS_RUNS,
-                                                 values=[]),
+        self.declareProperty(StringArrayProperty(Prop.FIRST_TRANS_RUNS, values=[]),
                              doc='A list of run numbers or workspace names for the first transmission run. '
-                                 'Multiple runs will be summed before reduction.')
+                             'Multiple runs will be summed before reduction.')
         self.setPropertyGroup(Prop.FIRST_TRANS_RUNS, 'Transmission')
-        self.declareProperty(StringArrayProperty(Prop.SECOND_TRANS_RUNS,
-                                                 values=[]),
+        self.declareProperty(StringArrayProperty(Prop.SECOND_TRANS_RUNS, values=[]),
                              doc='A list of run numbers or workspace names for the second transmission run. '
-                                 'Multiple runs will be summed before reduction.')
+                             'Multiple runs will be summed before reduction.')
         self.setPropertyGroup(Prop.SECOND_TRANS_RUNS, 'Transmission')
         # Add properties copied from child algorithm
-        properties = [
-            'Params', 'StartOverlap', 'EndOverlap',
-            'ScaleRHSWorkspace', 'TransmissionProcessingInstructions'
-        ]
+        properties = ['Params', 'StartOverlap', 'EndOverlap', 'ScaleRHSWorkspace', 'TransmissionProcessingInstructions']
         self.copyProperties('ReflectometryReductionOneAuto', properties)
         self._reduction_properties += properties
 
     def _declareOutputProperties(self):
-        properties = [Prop.DEBUG,
-                      'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax',
-                      'ScaleFactor',
-                      Prop.OUTPUT_WS_BINNED, Prop.OUTPUT_WS, Prop.OUTPUT_WS_LAM,
-                      Prop.OUTPUT_WS_TRANS, Prop.OUTPUT_WS_FIRST_TRANS, Prop.OUTPUT_WS_SECOND_TRANS]
+        properties = [
+            Prop.DEBUG, 'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax', 'ScaleFactor',
+            Prop.OUTPUT_WS_BINNED, Prop.OUTPUT_WS, Prop.OUTPUT_WS_LAM, Prop.OUTPUT_WS_TRANS, Prop.OUTPUT_WS_FIRST_TRANS,
+            Prop.OUTPUT_WS_SECOND_TRANS
+        ]
         self.copyProperties('ReflectometryReductionOneAuto', properties)
         self._reduction_properties += properties
 
@@ -285,8 +273,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         for ws_name in workspaces:
             ws = AnalysisDataService.retrieve(ws_name)
             if isinstance(ws, WorkspaceGroup):
-                ungrouped_workspaces = ungrouped_workspaces.union(
-                    self._collapse_workspace_groups(ws.getNames()))
+                ungrouped_workspaces = ungrouped_workspaces.union(self._collapse_workspace_groups(ws.getNames()))
                 if delete_ws_group_flag is True:
                     AnalysisDataService.remove(ws_name)
             else:
@@ -391,8 +378,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         total_duration = (run.endTime() - run.startTime()).total_seconds()
         slice_duration = total_duration / number_of_slices
         alg.setProperty("TimeInterval", slice_duration)
-        self.log().information('Slicing ' + workspace_name + ' into ' + str(number_of_slices)
-                               + ' even slices of duration ' + str(slice_duration))
+        self.log().information('Slicing ' + workspace_name + ' into ' + str(number_of_slices) +
+                               ' even slices of duration ' + str(slice_duration))
 
     def _setSliceStartStopTimes(self, alg, workspace_name):
         """Set the start/stop time for the slicing algorithm based on the

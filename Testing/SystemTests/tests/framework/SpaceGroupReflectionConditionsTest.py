@@ -20,7 +20,6 @@ class SpaceGroupReflectionConditionsTest(systemtesting.MantidSystemTest):
     Since this is not the case in the examples, space group symmetry must account for all observed reflections, so they
     must be allowed.
     '''
-
     def runTest(self):
         sgTestDict = self.generateReflectionLists()
 
@@ -37,8 +36,12 @@ class SpaceGroupReflectionConditionsTest(systemtesting.MantidSystemTest):
         # so they can be supplied anyway for simplicity.
         parameters = {
             'Atoms': 'Fe 0.3421 0.5312 0.7222',
-            'a': 5.632, 'b': 6.121, 'c': 7.832,
-            'Alpha': 101.5, 'Beta': 102.3, 'Gamma': 100.75,
+            'a': 5.632,
+            'b': 6.121,
+            'c': 7.832,
+            'Alpha': 101.5,
+            'Beta': 102.3,
+            'Gamma': 100.75,
             'LatticeSpacingMin': 0.75
         }
 

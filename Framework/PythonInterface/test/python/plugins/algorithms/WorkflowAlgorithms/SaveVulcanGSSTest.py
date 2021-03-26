@@ -17,7 +17,6 @@ import os
 
 
 class SaveVulcanGSSTest(unittest.TestCase):
-
     def test_save_gss_simple(self):
         """ Test to Save a single spectrum GSAS file to a basic binning parameters
         """
@@ -33,7 +32,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         # Execute
         import tempfile
         tempDir = tempfile.gettempdir()
-        filename=os.path.join(tempDir, "tempout.gda")
+        filename = os.path.join(tempDir, "tempout.gda")
         alg_test = run_algorithm("SaveVulcanGSS",
                                  InputWorkspace=data_ws_name,
                                  BinningTable=bin_ws_name,
@@ -46,7 +45,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
 
         # check outputs
-        output_workspace = AnalysisDataService.retrieve(data_ws_name+"_rebinned")
+        output_workspace = AnalysisDataService.retrieve(data_ws_name + "_rebinned")
 
         self.assertEqual(output_workspace.getNumberHistograms(), 1)
         self.assertEqual(len(output_workspace.readX(0)), 132)
@@ -54,7 +53,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         # Delete the TESTING file
         AnalysisDataService.remove("InputWorkspace")
         AnalysisDataService.remove(bin_ws_name)
-        AnalysisDataService.remove(data_ws_name+"_rebinned")
+        AnalysisDataService.remove(data_ws_name + "_rebinned")
 
         os.remove(filename)
 
@@ -93,7 +92,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
 
         # check outputs
-        output_workspace = AnalysisDataService.retrieve(data_ws_name+"_rebinned")
+        output_workspace = AnalysisDataService.retrieve(data_ws_name + "_rebinned")
 
         self.assertEqual(output_workspace.getNumberHistograms(), 3)
         self.assertEqual(len(output_workspace.readX(0)), 99)
@@ -101,8 +100,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         # Delete the TESTING file
         AnalysisDataService.remove("InputWorkspace")
         AnalysisDataService.remove('vulcan_sim_table')
-        AnalysisDataService.remove(data_ws_name+"_rebinned")
-
+        AnalysisDataService.remove(data_ws_name + "_rebinned")
 
     # def test_saveGSS_no_binning(self):
     #     """ Test to Save a GSAS file without rebin to Vdrive's standard binning
@@ -148,7 +146,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         tof = tof0
         delta = abs(delta)
         for n in range(num_pts):
-            x_n = math.log(tof)/math.log(10.)
+            x_n = math.log(tof) / math.log(10.)
             tof *= (1 + delta)
             list_x.append(x_n)
         # END-FOR
@@ -157,8 +155,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         vec_y = numpy.array(list_x)
 
         # create workspace
-        api.CreateWorkspace(DataX=vec_tof, DataY=vec_y, DataE=vec_y, NSpec=1, UnitX='TOF',
-                            OutputWorkspace=bin_ws_name)
+        api.CreateWorkspace(DataX=vec_tof, DataY=vec_y, DataE=vec_y, NSpec=1, UnitX='TOF', OutputWorkspace=bin_ws_name)
 
         return
 
@@ -230,7 +227,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
             list_y.append(math.sin(tof0))
             list_e.append(1.)
 
-            tof *= 1+delta
+            tof *= 1 + delta
         # END-FOR
         list_x.append(tof)
 

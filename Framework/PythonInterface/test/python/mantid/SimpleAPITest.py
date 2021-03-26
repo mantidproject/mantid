@@ -7,14 +7,13 @@
 import inspect
 import unittest
 
-from mantid.api import (AlgorithmFactory, IAlgorithm, IEventWorkspace, ITableWorkspace,
-                        PythonAlgorithm, MatrixWorkspace, mtd)
+from mantid.api import (AlgorithmFactory, IAlgorithm, IEventWorkspace, ITableWorkspace, PythonAlgorithm,
+                        MatrixWorkspace, mtd)
 import mantid.simpleapi as simpleapi
 import numpy
 
 
 class SimpleAPITest(unittest.TestCase):
-
     def tearDown(self):
         mtd.clear()
 
@@ -45,25 +44,25 @@ class SimpleAPITest(unittest.TestCase):
 
     def test_function_call_executes_correct_algorithm_when_passed_correct_args(self):
         wsname = 'test_function_call_executes_correct_algorithm_when_passed_correct_args'
-        data = [1.0,2.0,3.0,4.0,5.0]
-        simpleapi.CreateWorkspace(data,data,OutputWorkspace=wsname,NSpec=1,UnitX='Wavelength')
-        self.assertTrue( wsname in mtd )
+        data = [1.0, 2.0, 3.0, 4.0, 5.0]
+        simpleapi.CreateWorkspace(data, data, OutputWorkspace=wsname, NSpec=1, UnitX='Wavelength')
+        self.assertTrue(wsname in mtd)
 
     def test_function_call_executes_with_output_workspace_on_lhs(self):
-        data = [1.0,2.0,3.0,4.0,5.0]
-        wavelength = simpleapi.CreateWorkspace(data,data,NSpec=1,UnitX='Wavelength') # noqa F841
+        data = [1.0, 2.0, 3.0, 4.0, 5.0]
+        wavelength = simpleapi.CreateWorkspace(data, data, NSpec=1, UnitX='Wavelength')  # noqa F841
         self.assertTrue('wavelength' in mtd)
 
     def test_function_call_executes_when_algorithm_has_only_inout_workspace_props(self):
-        data = [1.0,2.0,3.0,4.0,5.0, 6.0]
-        wavelength = simpleapi.CreateWorkspace(data,data,NSpec=3,UnitX='Wavelength')
-        simpleapi.MaskDetectors(wavelength,WorkspaceIndexList=[1,2])
+        data = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+        wavelength = simpleapi.CreateWorkspace(data, data, NSpec=3, UnitX='Wavelength')
+        simpleapi.MaskDetectors(wavelength, WorkspaceIndexList=[1, 2])
 
     def test_function_accepts_EnableLogging_keyword(self):
         # The test here is that the algorithm runs without falling over about the EnableLogging keyword being a property
         wsname = 'test_function_call_executes_correct_algorithm_when_passed_correct_args'
-        data = [1.0,2.0,3.0,4.0,5.0]
-        simpleapi.CreateWorkspace(data,data,OutputWorkspace=wsname,NSpec=1,UnitX='Wavelength',EnableLogging=False)
+        data = [1.0, 2.0, 3.0, 4.0, 5.0]
+        simpleapi.CreateWorkspace(data, data, OutputWorkspace=wsname, NSpec=1, UnitX='Wavelength', EnableLogging=False)
         self.assertTrue(wsname in mtd)
 
     def test_function_call_raises_ValueError_when_passed_args_with_invalid_values(self):
@@ -82,8 +81,8 @@ class SimpleAPITest(unittest.TestCase):
             pass
 
     def test_function_call_returns_tuple_when_a_single_argument_is_provided(self):
-        dataX=numpy.linspace(start=1,stop=3,num=11)
-        dataY=numpy.linspace(start=1,stop=3,num=10)
+        dataX = numpy.linspace(start=1, stop=3, num=11)
+        dataY = numpy.linspace(start=1, stop=3, num=10)
         workspace1_test = simpleapi.CreateWorkspace(DataX=dataX, dataY=dataY, NSpec=1)
         workspace2_test = simpleapi.CloneWorkspace(workspace1_test)
 
@@ -106,8 +105,8 @@ class SimpleAPITest(unittest.TestCase):
         simpleapi.DeleteWorkspace(ws2_name)
 
     def test_function_call_raises_ValueError_when_not_enough_arguments_in_return_tuple(self):
-        dataX=numpy.linspace(start=1,stop=3,num=11)
-        dataY=numpy.linspace(start=1,stop=3,num=10)
+        dataX = numpy.linspace(start=1, stop=3, num=11)
+        dataY = numpy.linspace(start=1, stop=3, num=10)
         workspace1_test = simpleapi.CreateWorkspace(DataX=dataX, dataY=dataY, NSpec=1)
         workspace2_test = simpleapi.CloneWorkspace(workspace1_test)
 
@@ -120,7 +119,7 @@ class SimpleAPITest(unittest.TestCase):
         try:
             (result, ) = simpleapi.CompareWorkspaces(workspace1_test, workspace2_test)
             self.fail("Should not have made it to this point.")
-        except(ValueError):
+        except (ValueError):
             pass
 
         simpleapi.DeleteWorkspace(ws1_name)
@@ -128,51 +127,66 @@ class SimpleAPITest(unittest.TestCase):
 
     def test_function_call_raises_ValueError_if_num_of_ret_vals_doesnt_match_num_assigned_vars(self):
         try:
-            ws, ws2 = simpleapi.CreateWorkspace([1.5],[1.5],NSpec=1,UnitX='Wavelength')
+            ws, ws2 = simpleapi.CreateWorkspace([1.5], [1.5], NSpec=1, UnitX='Wavelength')
             self.fail("Should not have made it to this point.")
         except RuntimeError:
             pass
 
     def test_function_returns_correct_args_when_extra_output_props_are_added_at_execute_time(self):
-        ws1 = simpleapi.CreateWorkspace([1.5],[1.5],NSpec=1,UnitX='Wavelength') # noqa F841
-        ws2 = simpleapi.CreateWorkspace([1.5],[1.5],NSpec=1,UnitX='Wavelength') # noqa F841
+        ws1 = simpleapi.CreateWorkspace([1.5], [1.5], NSpec=1, UnitX='Wavelength')  # noqa F841
+        ws2 = simpleapi.CreateWorkspace([1.5], [1.5], NSpec=1, UnitX='Wavelength')  # noqa F841
         # RenameWorkspaces defines extra properties for each workspace renamed at runtime
-        ws1a,ws2a = simpleapi.RenameWorkspaces(InputWorkspaces="ws1,ws2",WorkspaceNames="ws1a,ws2a")
+        ws1a, ws2a = simpleapi.RenameWorkspaces(InputWorkspaces="ws1,ws2", WorkspaceNames="ws1a,ws2a")
         self.assertTrue(isinstance(ws1a, MatrixWorkspace))
         self.assertTrue(isinstance(ws2a, MatrixWorkspace))
 
     def test_function_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided(self):
         wsname = 'test_function_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided'
-        data = [1.0,2.0,3.0,4.0,5.0]
-        wkspace = simpleapi.CreateWorkspace(data,data,OutputWorkspace=wsname,NSpec=1,UnitX='Wavelength') # noqa F841
-        self.assertTrue( wsname in mtd )
+        data = [1.0, 2.0, 3.0, 4.0, 5.0]
+        wkspace = simpleapi.CreateWorkspace(data, data, OutputWorkspace=wsname, NSpec=1,
+                                            UnitX='Wavelength')  # noqa F841
+        self.assertTrue(wsname in mtd)
 
     def test_function_returns_only_mandatory_workspace_when_optional_output_is_not_given(self):
-        _demo = simpleapi.CreateMDHistoWorkspace(SignalInput='1,2,3,4,5',ErrorInput='1,1,1,1,1',
-                                                 Dimensionality='1',Extents='-1,1',NumberOfBins='5',Names='A',Units='U')
+        _demo = simpleapi.CreateMDHistoWorkspace(SignalInput='1,2,3,4,5',
+                                                 ErrorInput='1,1,1,1,1',
+                                                 Dimensionality='1',
+                                                 Extents='-1,1',
+                                                 NumberOfBins='5',
+                                                 Names='A',
+                                                 Units='U')
         wsname = 'test_function_returns_only_mandatory_workspace_when_optional_output_is_not_given'
-        query = simpleapi.QueryMDWorkspace(InputWorkspace=_demo,OutputWorkspace=wsname,MaximumRows='500',
+        query = simpleapi.QueryMDWorkspace(InputWorkspace=_demo,
+                                           OutputWorkspace=wsname,
+                                           MaximumRows='500',
                                            Normalisation='volume')
 
-        self.assertTrue( isinstance(query, ITableWorkspace) )
-        self.assertTrue( wsname in mtd )
+        self.assertTrue(isinstance(query, ITableWorkspace))
+        self.assertTrue(wsname in mtd)
 
     def test_function_returns_both_mandatory_and_optional_workspaces_when_optional_output_is_given(self):
-        _demo = simpleapi.CreateMDWorkspace(Dimensions='2',EventType='MDEvent',Extents='1,10,1,10',Names='a,b',
-                                            Units='MomentumTransfer,MomentumTransfer',SplitInto='4')
+        _demo = simpleapi.CreateMDWorkspace(Dimensions='2',
+                                            EventType='MDEvent',
+                                            Extents='1,10,1,10',
+                                            Names='a,b',
+                                            Units='MomentumTransfer,MomentumTransfer',
+                                            SplitInto='4')
         wsname = 'test_function_returns_only_mandatory_workspace_when_optional_output_is_not_given'
         wsname_box = wsname + '_box'
-        query = simpleapi.QueryMDWorkspace(InputWorkspace=_demo,OutputWorkspace=wsname,MaximumRows='500',
-                                           Normalisation='volume',BoxDataTable=wsname_box)
+        query = simpleapi.QueryMDWorkspace(InputWorkspace=_demo,
+                                           OutputWorkspace=wsname,
+                                           MaximumRows='500',
+                                           Normalisation='volume',
+                                           BoxDataTable=wsname_box)
 
-        self.assertTrue( wsname in mtd )
-        self.assertTrue( wsname_box in mtd )
+        self.assertTrue(wsname in mtd)
+        self.assertTrue(wsname_box in mtd)
 
-        self.assertTrue( isinstance(query, tuple) )
-        self.assertEqual( 2, len(query) )
+        self.assertTrue(isinstance(query, tuple))
+        self.assertEqual(2, len(query))
 
-        self.assertTrue( isinstance(query[0], ITableWorkspace) )
-        self.assertTrue( isinstance(query[1], ITableWorkspace) )
+        self.assertTrue(isinstance(query[0], ITableWorkspace))
+        self.assertTrue(isinstance(query[1], ITableWorkspace))
 
     def test_function_attached_as_workpace_method_is_attached_to_correct_types(self):
         self.assertTrue(hasattr(IEventWorkspace, "rebin"))
@@ -187,8 +201,7 @@ class SimpleAPITest(unittest.TestCase):
         if hasattr(inspect, 'signature'):
             method_parameters = list(MatrixWorkspace.rebin.__signature__.parameters)
             self.assertEqual("self", method_parameters[0])
-            self.assertEqual(method_parameters,
-                             list(simpleapi.rebin.__call__.__signature__.parameters))
+            self.assertEqual(method_parameters, list(simpleapi.rebin.__call__.__signature__.parameters))
         else:
             freefunction_sig = inspect.getsource(simpleapi.rebin).co_varnames
             expected_method_sig = ['self']
@@ -197,15 +210,15 @@ class SimpleAPITest(unittest.TestCase):
 
     def test_function_attached_as_workpace_method_does_the_same_as_the_free_function(self):
         # Use Rebin as a test
-        ws1 = simpleapi.CreateWorkspace(DataX=[1.5,2.0,2.5,3.0],DataY=[1,2,3],NSpec=1,UnitX='Wavelength')
+        ws1 = simpleapi.CreateWorkspace(DataX=[1.5, 2.0, 2.5, 3.0], DataY=[1, 2, 3], NSpec=1, UnitX='Wavelength')
         self.assertTrue(hasattr(ws1, "rebin"))
 
-        ws2 = simpleapi.Rebin(ws1,Params=[1.5,1.5,3])
-        ws3 = ws1.rebin(Params=[1.5,1.5,3])
-        ws4 = ws1.rebin([1.5,1.5,3])
-        result = simpleapi.CompareWorkspaces(ws2,ws3)
+        ws2 = simpleapi.Rebin(ws1, Params=[1.5, 1.5, 3])
+        ws3 = ws1.rebin(Params=[1.5, 1.5, 3])
+        ws4 = ws1.rebin([1.5, 1.5, 3])
+        result = simpleapi.CompareWorkspaces(ws2, ws3)
         self.assertTrue(result[0])
-        result = simpleapi.CompareWorkspaces(ws2,ws4)
+        result = simpleapi.CompareWorkspaces(ws2, ws4)
         self.assertTrue(result[0])
 
         simpleapi.DeleteWorkspace(ws1)
@@ -215,12 +228,12 @@ class SimpleAPITest(unittest.TestCase):
     def test_call_inside_function_uses_new_variable_name(self):
         def rebin(workspace):
             # Should replace the input workspace
-            workspace = simpleapi.Rebin(workspace, Params=[1,0.1,10])
+            workspace = simpleapi.Rebin(workspace, Params=[1, 0.1, 10])
             return workspace
 
-        dataX=numpy.linspace(start=1,stop=3,num=11)
-        dataY=numpy.linspace(start=1,stop=3,num=10)
-        raw = simpleapi.CreateWorkspace(DataX=dataX,DataY=dataY,NSpec=1)
+        dataX = numpy.linspace(start=1, stop=3, num=11)
+        dataY = numpy.linspace(start=1, stop=3, num=10)
+        raw = simpleapi.CreateWorkspace(DataX=dataX, DataY=dataY, NSpec=1)
         raw = rebin(raw)
         # If this fails then the function above chose the name of the variable
         # over the actual object name
@@ -228,8 +241,8 @@ class SimpleAPITest(unittest.TestCase):
         self.assertTrue('raw' in mtd)
 
     def test_alg_produces_correct_workspace_in_APS_from_python(self):
-        dataX=numpy.linspace(start=1,stop=3,num=11)
-        dataY=numpy.linspace(start=1,stop=3,num=10)
+        dataX = numpy.linspace(start=1, stop=3, num=11)
+        dataY = numpy.linspace(start=1, stop=3, num=10)
         workspace1_test = simpleapi.CreateWorkspace(DataX=dataX, dataY=dataY, NSpec=1)
         workspace2_test = simpleapi.CloneWorkspace(workspace1_test)
 
@@ -286,26 +299,28 @@ class SimpleAPITest(unittest.TestCase):
 
     def test_optional_workspaces_are_ignored_if_not_present_in_output_even_if_given_as_input(self):
         # Test algorithm
-        from mantid.api import AlgorithmManager,PropertyMode,PythonAlgorithm,MatrixWorkspaceProperty,WorkspaceFactory
+        from mantid.api import AlgorithmManager, PropertyMode, PythonAlgorithm, MatrixWorkspaceProperty, WorkspaceFactory
         from mantid.kernel import Direction
 
         class OptionalWorkspace(PythonAlgorithm):
             def PyInit(self):
                 self.declareProperty(MatrixWorkspaceProperty("RequiredWorkspace", "", Direction.Output))
-                self.declareProperty(MatrixWorkspaceProperty("OptionalWorkspace", "", Direction.Output, PropertyMode.Optional))
+                self.declareProperty(
+                    MatrixWorkspaceProperty("OptionalWorkspace", "", Direction.Output, PropertyMode.Optional))
 
             def PyExec(self):
-                ws = WorkspaceFactory.create("Workspace2D", NVectors=1, YLength=1,XLength=1)
+                ws = WorkspaceFactory.create("Workspace2D", NVectors=1, YLength=1, XLength=1)
                 ws.dataY(0)[0] = 5
                 self.setProperty("RequiredWorkspace", ws)
                 self.getLogger().notice("done!")
+
         AlgorithmFactory.subscribe(OptionalWorkspace)
 
         # temporarily attach it to simpleapi module
-        name="OptionalWorkspace"
+        name = "OptionalWorkspace"
         algm_object = AlgorithmManager.createUnmanaged(name, 1)
         algm_object.initialize()
-        simpleapi._create_algorithm_function(name, 1, algm_object) # Create the wrapper
+        simpleapi._create_algorithm_function(name, 1, algm_object)  # Create the wrapper
 
         # Call with no optional output specified
         result = simpleapi.OptionalWorkspace(RequiredWorkspace="required")
@@ -314,7 +329,7 @@ class SimpleAPITest(unittest.TestCase):
         mtd.remove("required")
 
         # Call with both outputs specified
-        result = simpleapi.OptionalWorkspace(RequiredWorkspace="required",OptionalWorkspace="optional")
+        result = simpleapi.OptionalWorkspace(RequiredWorkspace="required", OptionalWorkspace="optional")
         self.assertTrue(isinstance(result, MatrixWorkspace))
         self.assertAlmostEqual(5, result.readY(0)[0], places=12)
         mtd.remove("required")
@@ -324,13 +339,11 @@ class SimpleAPITest(unittest.TestCase):
 
     def test_create_algorithm_object_produces_initialized_non_child_alorithm_outside_PyExec(self):
         alg = simpleapi._create_algorithm_object("Rebin")
-        self._is_initialized_test(alg, 1, expected_class=IAlgorithm,
-                                  expected_child=False)
+        self._is_initialized_test(alg, 1, expected_class=IAlgorithm, expected_child=False)
 
     def test_create_algorithm_with_version_produces_initialized_alorithm(self):
         alg = simpleapi._create_algorithm_object("LoadRaw", 3)
-        self._is_initialized_test(alg, 3, expected_class=IAlgorithm,
-                                  expected_child=False)
+        self._is_initialized_test(alg, 3, expected_class=IAlgorithm, expected_child=False)
 
     def test_create_algorithm_produces_child_inside_PyExec(self):
         # A small test class to have a PyExec method call the
@@ -341,15 +354,15 @@ class SimpleAPITest(unittest.TestCase):
 
             def PyExec(self):
                 self.alg = simpleapi._create_algorithm_object("Rebin")
+
         # end
         top_level = TestAlg()
         top_level.PyExec()
-        self._is_initialized_test(top_level.alg, 1, expected_class=IAlgorithm,
-                                  expected_child=True)
+        self._is_initialized_test(top_level.alg, 1, expected_class=IAlgorithm, expected_child=True)
 
     def _is_initialized_test(self, alg, version, expected_class, expected_child):
         self.assertTrue(alg.isInitialized())
-        self.assertEqual(expected_child,alg.isChild())
+        self.assertEqual(expected_child, alg.isChild())
         self.assertEqual(alg.version(), version)
         self.assertTrue(isinstance(alg, expected_class))
 
@@ -360,10 +373,11 @@ class SimpleAPITest(unittest.TestCase):
                 self.declareProperty("Prop2", 2.0)
 
             def validateInputs(self):
-                return {"Prop1":"Value is less than Prop2"}
+                return {"Prop1": "Value is less than Prop2"}
 
             def PyExec(self):
                 pass
+
         AlgorithmFactory.subscribe(ValidateInputsTest)
         # ---------------------------------------------------------
         alg_obj = ValidateInputsTest()
@@ -381,7 +395,8 @@ class SimpleAPITest(unittest.TestCase):
             def PyExec(self):
                 from mantid.simpleapi import CreateSampleWorkspace
                 workspaceNotInADS = CreateSampleWorkspace(StoreInADS=False)
-                assert(workspaceNotInADS)
+                assert (workspaceNotInADS)
+
         AlgorithmFactory.subscribe(SimpleAPIPythonAlgorithm3)
 
         alg = SimpleAPIPythonAlgorithm3()
@@ -397,7 +412,8 @@ class SimpleAPITest(unittest.TestCase):
             def PyExec(self):
                 from mantid.simpleapi import CreateSampleWorkspace
                 workspaceInADS = CreateSampleWorkspace()
-                assert(workspaceInADS)
+                assert (workspaceInADS)
+
         AlgorithmFactory.subscribe(SimpleAPIPythonAlgorithm4)
 
         alg = SimpleAPIPythonAlgorithm4()
@@ -413,7 +429,8 @@ class SimpleAPITest(unittest.TestCase):
             def PyExec(self):
                 from mantid.simpleapi import CreateSampleWorkspace
                 workspaceInADS = CreateSampleWorkspace(StoreInADS=True)
-                assert(workspaceInADS)
+                assert (workspaceInADS)
+
         AlgorithmFactory.subscribe(SimpleAPIPythonAlgorithm5)
 
         alg = SimpleAPIPythonAlgorithm5()
@@ -432,8 +449,9 @@ class SimpleAPITest(unittest.TestCase):
             def PyExec(self):
                 from mantid.simpleapi import CreateSampleWorkspace
                 workspaceNotInADS = CreateSampleWorkspace(StoreInADS=False)
-                assert(workspaceNotInADS)
+                assert (workspaceNotInADS)
                 self.setProperty("OutputWorkspace", workspaceNotInADS)
+
         AlgorithmFactory.subscribe(SimpleAPIPythonAlgorithm6)
 
         alg = SimpleAPIPythonAlgorithm6()
@@ -465,10 +483,11 @@ class SimpleAPITest(unittest.TestCase):
 
     def test_same_var_name_with_and_without_ADS(self):
         from mantid.simpleapi import CreateSampleWorkspace
-        ws = CreateSampleWorkspace() # in ADS
-        ws = CreateSampleWorkspace(StoreInADS=False) # not in ADS
+        ws = CreateSampleWorkspace()  # in ADS
+        ws = CreateSampleWorkspace(StoreInADS=False)  # not in ADS
         mtd.remove('ws')
         self.assertTrue(ws)
+
 
 if __name__ == '__main__':
     unittest.main()

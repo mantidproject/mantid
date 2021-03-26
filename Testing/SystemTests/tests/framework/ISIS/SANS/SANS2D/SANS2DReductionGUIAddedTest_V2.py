@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
-
 """
 One test has been removed from the port since it uses the ReductionSingleton.
 """
@@ -37,10 +36,20 @@ class SANS2DAddedEventFilesWithOverlayTest_V2(systemtesting.MantidSystemTest):
         Set1D()
 
         # add files (SAMPLE and CAN)
-        AddRuns(runs=('28827', '28797'), instrument='SANS2DTUBES', defType='.nxs', rawTypes=('.add', '.raw', '.s*'),
-                lowMem=False, saveAsEvent=True, isOverlay=True)
-        AddRuns(('28823', '28793'), 'SANS2DTUBES', defType='.nxs', rawTypes=('.add', '.raw', '.s*'),
-                lowMem=False, saveAsEvent=True, isOverlay=True)
+        AddRuns(runs=('28827', '28797'),
+                instrument='SANS2DTUBES',
+                defType='.nxs',
+                rawTypes=('.add', '.raw', '.s*'),
+                lowMem=False,
+                saveAsEvent=True,
+                isOverlay=True)
+        AddRuns(('28823', '28793'),
+                'SANS2DTUBES',
+                defType='.nxs',
+                rawTypes=('.add', '.raw', '.s*'),
+                lowMem=False,
+                saveAsEvent=True,
+                isOverlay=True)
 
         AssignSample(r'SANS2D00028797-add.nxs', reload=True)
         AssignCan(r'SANS2D00028793-add.nxs', reload=True)
@@ -78,12 +87,22 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest_V2(systemtesting.MantidSy
 
         # add files (SAMPLE and CAN)
         time_shifts = [1]
-        SANSadd2.add_runs(('28827', '28797'), 'SANS2DTUBES', '.nxs',
-                          rawTypes=('.add', '.raw', '.s*'), lowMem=False,
-                          saveAsEvent=True, isOverlay=True, time_shifts=time_shifts)
-        SANSadd2.add_runs(('28823', '28793'), 'SANS2DTUBES', '.nxs',
-                          rawTypes=('.add', '.raw', '.s*'), lowMem=False,
-                          saveAsEvent=True, isOverlay=True, time_shifts=time_shifts)
+        SANSadd2.add_runs(('28827', '28797'),
+                          'SANS2DTUBES',
+                          '.nxs',
+                          rawTypes=('.add', '.raw', '.s*'),
+                          lowMem=False,
+                          saveAsEvent=True,
+                          isOverlay=True,
+                          time_shifts=time_shifts)
+        SANSadd2.add_runs(('28823', '28793'),
+                          'SANS2DTUBES',
+                          '.nxs',
+                          rawTypes=('.add', '.raw', '.s*'),
+                          lowMem=False,
+                          saveAsEvent=True,
+                          isOverlay=True,
+                          time_shifts=time_shifts)
 
         AssignSample(r'SANS2D00028797-add.nxs', reload=True)
         AssignCan(r'SANS2D00028793-add.nxs', reload=True)
@@ -122,12 +141,20 @@ class SANS2DAddedEventFilesWithoutOverlayTest_V2(systemtesting.MantidSystemTest)
         Set1D()
 
         # add files (SAMPLE and CAN)
-        SANSadd2.add_runs(('28827', '28797'), 'SANS2DTUBES', '.nxs',
-                          rawTypes=('.add', '.raw', '.s*'), lowMem=False,
-                          saveAsEvent=True, isOverlay=False)
-        SANSadd2.add_runs(('28823', '28793'), 'SANS2DTUBES', '.nxs',
-                          rawTypes=('.add', '.raw', '.s*'), lowMem=False,
-                          saveAsEvent=True, isOverlay=False)
+        SANSadd2.add_runs(('28827', '28797'),
+                          'SANS2DTUBES',
+                          '.nxs',
+                          rawTypes=('.add', '.raw', '.s*'),
+                          lowMem=False,
+                          saveAsEvent=True,
+                          isOverlay=False)
+        SANSadd2.add_runs(('28823', '28793'),
+                          'SANS2DTUBES',
+                          '.nxs',
+                          rawTypes=('.add', '.raw', '.s*'),
+                          lowMem=False,
+                          saveAsEvent=True,
+                          isOverlay=False)
 
         AssignSample(r'SANS2D00028797-add.nxs', reload=True)
         AssignCan(r'SANS2D00028793-add.nxs', reload=True)

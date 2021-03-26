@@ -30,22 +30,28 @@ class TestCalculateMuonGroupPair(unittest.TestCase):
 
         params = _get_MuonGroupingAsymmetry_parameters(context, group, run, periods)
 
-        self.assertEquals(params, {'AsymmetryTimeMax': 15.0,
-                                   'AsymmetryTimeMin': 0.0,
-                                   'GroupName': 'fwd',
-                                   'Grouping': '1,2,3,4,5',
-                                   'SummedPeriods': [1]})
+        self.assertEquals(
+            params, {
+                'AsymmetryTimeMax': 15.0,
+                'AsymmetryTimeMin': 0.0,
+                'GroupName': 'fwd',
+                'Grouping': '1,2,3,4,5',
+                'SummedPeriods': [1]
+            })
 
     def test_parameters_correct_for_pairing_asymmetry(self):
         pair = MuonPair('long1', 'group_1', 'group2', 1.0)
 
         params = _get_MuonPairingAsymmetry_parameters(pair, 'group_1_counts', 'group_2_counts')
 
-        self.assertEqual(params, {'Alpha': '1.0',
-                                  'InputWorkspace1': 'group_1_counts',
-                                  'InputWorkspace2': 'group_2_counts',
-                                  'PairName': 'long1',
-                                  'SpecifyGroupsManually': False})
+        self.assertEqual(
+            params, {
+                'Alpha': '1.0',
+                'InputWorkspace1': 'group_1_counts',
+                'InputWorkspace2': 'group_2_counts',
+                'PairName': 'long1',
+                'SpecifyGroupsManually': False
+            })
 
 
 if __name__ == '__main__':

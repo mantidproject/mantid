@@ -12,13 +12,12 @@ from numpy import *
 
 
 class CorrectLogTimesTest(unittest.TestCase):
-
     def testCLTWrongLog(self):
-        w=CreateSingleValuedWorkspace(DataValue='1',ErrorValue='1')
-        LoadNexusLogs(Workspace=w,Filename='CNCS_7860_event.nxs')
+        w = CreateSingleValuedWorkspace(DataValue='1', ErrorValue='1')
+        LoadNexusLogs(Workspace=w, Filename='CNCS_7860_event.nxs')
 
         try:
-            CorrectLogTimes(Workspace=w,LogNames="s1")
+            CorrectLogTimes(Workspace=w, LogNames="s1")
             self.fail("Should not have got here. Should throw because wrong instrument.")
         except RuntimeError:
             pass
@@ -26,21 +25,23 @@ class CorrectLogTimesTest(unittest.TestCase):
             DeleteWorkspace(w)
 
     def testCLTsingle(self):
-        w=CreateSingleValuedWorkspace(DataValue='1',ErrorValue='1')
-        LoadNexusLogs(Workspace=w,Filename='CNCS_7860_event.nxs')
+        w = CreateSingleValuedWorkspace(DataValue='1', ErrorValue='1')
+        LoadNexusLogs(Workspace=w, Filename='CNCS_7860_event.nxs')
         self.assertNotEqual(w.getRun()['proton_charge'].firstTime(), w.getRun()['Speed4'].firstTime())
-        CorrectLogTimes(Workspace=w,LogNames="Speed4")
+        CorrectLogTimes(Workspace=w, LogNames="Speed4")
         self.assertEqual(w.getRun()['proton_charge'].firstTime(), w.getRun()['Speed4'].firstTime())
         self.assertNotEqual(w.getRun()['proton_charge'].firstTime(), w.getRun()['Speed5'].firstTime())
         DeleteWorkspace(w)
 
     def testCLTall(self):
-        w=CreateSingleValuedWorkspace(DataValue='1',ErrorValue='1')
-        LoadNexusLogs(Workspace=w,Filename='CNCS_7860_event.nxs')
+        w = CreateSingleValuedWorkspace(DataValue='1', ErrorValue='1')
+        LoadNexusLogs(Workspace=w, Filename='CNCS_7860_event.nxs')
         self.assertNotEqual(w.getRun()['proton_charge'].firstTime(), w.getRun()['Speed4'].firstTime())
-        CorrectLogTimes(Workspace=w,LogNames="")
+        CorrectLogTimes(Workspace=w, LogNames="")
         self.assertEqual(w.getRun()['proton_charge'].firstTime(), w.getRun()['Speed4'].firstTime())
         self.assertEqual(w.getRun()['proton_charge'].firstTime(), w.getRun()['Speed5'].firstTime())
         DeleteWorkspace(w)
+
+
 if __name__ == '__main__':
     unittest.main()

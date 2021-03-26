@@ -16,7 +16,6 @@ class ReflectometryQuickPointDetectorMakeTransmission(systemtesting.MantidSystem
     ISIS reflectometry reduction scripts. Uses the point detector functionality with real transmission corrections.
 
     """
-
     def runTest(self):
         defaultInstKey = 'default.instrument'
         defaultInstrument = config[defaultInstKey]
@@ -29,12 +28,14 @@ class ReflectometryQuickPointDetectorMakeTransmission(systemtesting.MantidSystem
             transmissionRuns = '13463,13464'
             runNo = '13460'
             incidentAngle = 0.7
-            transmissionWs=quick.make_trans_corr(transmissionRuns, stitch_start_overlap=10,
-                                                 stitch_end_overlap=12, stitch_params=[1.5,0.02,17])
+            transmissionWs = quick.make_trans_corr(transmissionRuns,
+                                                   stitch_start_overlap=10,
+                                                   stitch_end_overlap=12,
+                                                   stitch_params=[1.5, 0.02, 17])
             quick.quick(runNo, trans=transmissionWs, theta=incidentAngle)
         finally:
             config[defaultInstKey] = defaultInstrument
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return '13460_IvsQ','QuickReferenceResult.nxs'
+        return '13460_IvsQ', 'QuickReferenceResult.nxs'

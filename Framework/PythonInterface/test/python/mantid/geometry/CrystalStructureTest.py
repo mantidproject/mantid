@@ -13,23 +13,22 @@ class CrystalStructureTest(unittest.TestCase):
     def test_creation(self):
         # Some valid constructions
         self.assertTrue(self.createCrystalStructureOrRaise("5.43 5.43 5.43", "F d -3 m", "Al 1/3 0.454 1/12 1.0 0.01"))
-        self.assertTrue(self.createCrystalStructureOrRaise("5.43 5.43 5.43", "C m m m", "Al 1/3 0.454 1/12 1.0 0.01;\n"
-                                                                                        "Si 2/3 0.121 1/8"))
+        self.assertTrue(
+            self.createCrystalStructureOrRaise("5.43 5.43 5.43", "C m m m", "Al 1/3 0.454 1/12 1.0 0.01;\n"
+                                               "Si 2/3 0.121 1/8"))
         self.assertTrue(
             self.createCrystalStructureOrRaise("5.43 5.43 5.43 90 90 120", "R -3 c", "Al 1/3 0.454 1/12 1.0 0.01;\n"
-                                                                                     "Si 2/3 0.121 1/8"))
+                                               "Si 2/3 0.121 1/8"))
 
         # Invalid unit cell specification
         self.assertFalse(
             self.createCrystalStructureOrRaise("5.43 5.43 5.43 90.0", "C m m m", "Al 1/3 0.454 1/12 1.0 0.01"))
 
         # Invalid space group
-        self.assertFalse(
-            self.createCrystalStructureOrRaise("5.43 5.43 5.43", "INVALID", "Al 1/3 0.454 1/12 1.0 0.01"))
+        self.assertFalse(self.createCrystalStructureOrRaise("5.43 5.43 5.43", "INVALID", "Al 1/3 0.454 1/12 1.0 0.01"))
 
         # Invalid atom specification
-        self.assertFalse(
-            self.createCrystalStructureOrRaise("5.43 5.43 5.43", "C m c e", "Al 1/3 0"))
+        self.assertFalse(self.createCrystalStructureOrRaise("5.43 5.43 5.43", "C m c e", "Al 1/3 0"))
 
     def createCrystalStructureOrRaise(self, unitCell, spaceGroup, atomStrings):
         try:

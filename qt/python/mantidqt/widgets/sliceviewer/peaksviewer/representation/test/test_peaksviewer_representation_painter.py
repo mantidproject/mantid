@@ -109,8 +109,7 @@ class MplPainterTest(unittest.TestCase):
         # 1:1 transformation for simplicity
         inv_trans.transform.side_effect = lambda x: x
         axes.transData.inverted.return_value = inv_trans
-        artists = create_mock_artist(((1., 1.5), (3., 3.5))), create_mock_artist(
-            ((1.1, 1.3), (2.9, 3.6)))
+        artists = create_mock_artist(((1., 1.5), (3., 3.5))), create_mock_artist(((1.1, 1.3), (2.9, 3.6)))
         view.ax = axes
         painter = MplPainter(view)
         painted = Painted(painter, artists)

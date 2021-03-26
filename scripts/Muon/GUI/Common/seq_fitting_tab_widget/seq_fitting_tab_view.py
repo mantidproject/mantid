@@ -16,7 +16,6 @@ default_fit_status = "No fit"
 
 
 class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
-
     def __init__(self, parent=None):
         super(SeqFittingTabView, self).__init__(parent)
         self.setupUi(self)

@@ -29,37 +29,44 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
                'or calculated from peaks found from the input.'
 
     def PyInit(self):
-        self.declareProperty(IMDEventWorkspaceProperty("InputWorkspace", defaultValue="",
+        self.declareProperty(IMDEventWorkspaceProperty("InputWorkspace",
+                                                       defaultValue="",
                                                        optional=PropertyMode.Mandatory,
                                                        direction=Direction.Input),
                              doc="Input MDEvent workspace to convert to a MDHisto in HKL")
 
-        self.declareProperty(IPeaksWorkspaceProperty("PeaksWorkspace", defaultValue="", optional=PropertyMode.Optional,
+        self.declareProperty(IPeaksWorkspaceProperty("PeaksWorkspace",
+                                                     defaultValue="",
+                                                     optional=PropertyMode.Optional,
                                                      direction=Direction.Input),
                              doc="Optional peaks workspace to retrieve the UB matrix from, instead of InputWorkspace.")
 
-        self.declareProperty(FloatArrayProperty("Uproj", [1, 0, 0], validator=FloatArrayLengthValidator(3),
+        self.declareProperty(FloatArrayProperty("Uproj", [1, 0, 0],
+                                                validator=FloatArrayLengthValidator(3),
                                                 direction=Direction.Input),
                              doc="Defines the first projection vector of the target Q coordinate system in HKL mode")
-        self.declareProperty(FloatArrayProperty("Vproj", [0, 1, 0], validator=FloatArrayLengthValidator(3),
+        self.declareProperty(FloatArrayProperty("Vproj", [0, 1, 0],
+                                                validator=FloatArrayLengthValidator(3),
                                                 direction=Direction.Input),
                              doc="Defines the second projection vector of the target Q coordinate system in HKL mode")
-        self.declareProperty(FloatArrayProperty("Wproj", [0, 0, 1], validator=FloatArrayLengthValidator(3),
+        self.declareProperty(FloatArrayProperty("Wproj", [0, 0, 1],
+                                                validator=FloatArrayLengthValidator(3),
                                                 direction=Direction.Input),
                              doc="Defines the third projection vector of the target Q coordinate system in HKL mode")
 
-        self.declareProperty(FloatArrayProperty("Extents", [-6.02, 6.02, -6.02, 6.02, -6.02, 6.02],
-                                                direction=Direction.Input),
-                             "Binning parameters for each dimension. Enter it as a"
-                             "comma-separated list of values with the"
-                             "format: 'minimum,maximum,'.")
+        self.declareProperty(
+            FloatArrayProperty("Extents", [-6.02, 6.02, -6.02, 6.02, -6.02, 6.02], direction=Direction.Input),
+            "Binning parameters for each dimension. Enter it as a"
+            "comma-separated list of values with the"
+            "format: 'minimum,maximum,'.")
 
-        self.declareProperty(IntArrayProperty("Bins", [301, 301, 301],
-                                              direction=Direction.Input),
-                             "Number of bins to use for each dimension, Enter it as a"
-                             "comma-separated list of integers.")
+        self.declareProperty(
+            IntArrayProperty("Bins", [301, 301, 301], direction=Direction.Input),
+            "Number of bins to use for each dimension, Enter it as a"
+            "comma-separated list of integers.")
 
-        self.declareProperty(IMDHistoWorkspaceProperty("OutputWorkspace", "",
+        self.declareProperty(IMDHistoWorkspaceProperty("OutputWorkspace",
+                                                       "",
                                                        optional=PropertyMode.Mandatory,
                                                        direction=Direction.Output),
                              doc="Output MDWorkspace in Q-space, name is prefix if multiple input files were provided.")
@@ -95,7 +102,8 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
                 issues["PeaksWorkspace"] = "Provided peaks workspace does not exist in the ADS."
         else:
             # Check that the workspace has a UB matrix
-            if not (input_ws.getNumExperimentInfo() > 0 and input_ws.getExperimentInfo(0).sample().hasOrientedLattice()):
+            if not (input_ws.getNumExperimentInfo() > 0
+                    and input_ws.getExperimentInfo(0).sample().hasOrientedLattice()):
                 issues["InputWorkspace"] = "Could not find a UB matrix in this workspace."
 
         return issues
@@ -120,14 +128,18 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
         w[:, 2] = self.getProperty("Wproj").value
         char_dict = {0: '0', 1: '{1}', -1: '-{1}'}
         chars = ['H', 'K', 'L']
-        names = ['[' + ','.join(char_dict.get(j, '{0}{1}')
-                                .format(j, chars[np.argmax(np.abs(w[:, i]))]) for j in w[:, i]) + ']' for i in range(3)]
+        names = [
+            '[' + ','.join(char_dict.get(j, '{0}{1}').format(j, chars[np.argmax(np.abs(w[:, i]))])
+                           for j in w[:, i]) + ']' for i in range(3)
+        ]
 
         q = [self._lattice.qFromHKL(w[i]) for i in range(3)]
 
         units = ['in {:.3f} A^-1'.format(q[i].norm()) for i in range(3)]
 
-        mdhist = BinMD(InputWorkspace=input_ws, AxisAligned=False, NormalizeBasisVectors=False,
+        mdhist = BinMD(InputWorkspace=input_ws,
+                       AxisAligned=False,
+                       NormalizeBasisVectors=False,
                        BasisVector0='{},{},{},{},{}'.format(names[0], units[0], q[0].X(), q[0].Y(), q[0].Z()),
                        BasisVector1='{},{},{},{},{}'.format(names[1], units[1], q[1].X(), q[1].Y(), q[1].Z()),
                        BasisVector2='{},{},{},{},{}'.format(names[2], units[2], q[2].X(), q[2].Y(), q[2].Z()),

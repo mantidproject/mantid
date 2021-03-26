@@ -33,5 +33,6 @@ class CSGObjectTest(unittest.TestCase):
         box = shape.getBoundingBox()
         self.assertTrue(isinstance(box, BoundingBox))
 
+
 if __name__ == '__main__':
     unittest.main()

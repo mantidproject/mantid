@@ -12,8 +12,11 @@ from sans.common.enums import (ReductionDimensionality, RangeStepType)
 from sans.common.general_functions import (create_unmanaged_algorithm, append_to_sans_file_tag)
 
 
-def convert_workspace(workspace, state_convert_to_q, output_summed_parts=False,
-                      wavelength_adj_workspace=None, pixel_adj_workspace=None,
+def convert_workspace(workspace,
+                      state_convert_to_q,
+                      output_summed_parts=False,
+                      wavelength_adj_workspace=None,
+                      pixel_adj_workspace=None,
                       wavelength_and_pixel_adj_workspace=None):
     """
     Converts workspace from wavelengths to momentum Transfer
@@ -42,9 +45,11 @@ def convert_workspace(workspace, state_convert_to_q, output_summed_parts=False,
     # Set the output
     append_to_sans_file_tag(output_workspace, "_convertq")
     if output_summed_parts:
-        to_return = {'output': output_workspace,
-                     'counts_summed': sum_of_counts_workspace,
-                     'norm_summed': sum_of_norms_workspace}
+        to_return = {
+            'output': output_workspace,
+            'counts_summed': sum_of_counts_workspace,
+            'norm_summed': sum_of_norms_workspace
+        }
         return to_return
     else:
         return output_workspace
@@ -65,14 +70,16 @@ def _run_q_1d(workspace, output_summed_parts, conv_to_q_state, wavelength_adj_ws
     wavelength_cutoff = conv_to_q_state.wavelength_cutoff
 
     q1d_name = "Q1D"
-    q1d_options = {"DetBankWorkspace": workspace,
-                   "OutputWorkspace": EMPTY_NAME,
-                   "OutputBinning": q_binning,
-                   "AccountForGravity": use_gravity,
-                   "RadiusCut": radius_cutoff,
-                   "WaveCut": wavelength_cutoff,
-                   "OutputParts": output_summed_parts,
-                   "ExtraLength": gravity_extra_length}
+    q1d_options = {
+        "DetBankWorkspace": workspace,
+        "OutputWorkspace": EMPTY_NAME,
+        "OutputBinning": q_binning,
+        "AccountForGravity": use_gravity,
+        "RadiusCut": radius_cutoff,
+        "WaveCut": wavelength_cutoff,
+        "OutputParts": output_summed_parts,
+        "ExtraLength": gravity_extra_length
+    }
     if wavelength_adj_ws:
         q1d_options.update({"WavelengthAdj": wavelength_adj_ws})
 
@@ -98,8 +105,7 @@ def _run_q_1d(workspace, output_summed_parts, conv_to_q_state, wavelength_adj_ws
         return reduced_workspace, None, None
 
 
-def _run_q_2d(workspace, output_summed_parts, state_convert_to_q,
-              wavelength_adj_ws, pixel_adj_ws):
+def _run_q_2d(workspace, output_summed_parts, state_convert_to_q, wavelength_adj_ws, pixel_adj_ws):
     """
     This method performs a 2D data reduction on our workspace.
 
@@ -117,16 +123,18 @@ def _run_q_2d(workspace, output_summed_parts, state_convert_to_q,
     gravity_extra_length = state_convert_to_q.gravity_extra_length
 
     qxy_name = "Qxy"
-    qxy_options = {"InputWorkspace": workspace,
-                   "OutputWorkspace": EMPTY_NAME,
-                   "MaxQxy": max_q_xy,
-                   "DeltaQ": delta_q,
-                   "IQxQyLogBinning": log_binning,
-                   "AccountForGravity": use_gravity,
-                   "RadiusCut": radius_cutoff,
-                   "WaveCut": wavelength_cutoff,
-                   "OutputParts": output_summed_parts,
-                   "ExtraLength": gravity_extra_length}
+    qxy_options = {
+        "InputWorkspace": workspace,
+        "OutputWorkspace": EMPTY_NAME,
+        "MaxQxy": max_q_xy,
+        "DeltaQ": delta_q,
+        "IQxQyLogBinning": log_binning,
+        "AccountForGravity": use_gravity,
+        "RadiusCut": radius_cutoff,
+        "WaveCut": wavelength_cutoff,
+        "OutputParts": output_summed_parts,
+        "ExtraLength": gravity_extra_length
+    }
     if wavelength_adj_ws:
         qxy_options.update({"WavelengthAdj": wavelength_adj_ws})
 
@@ -160,10 +168,7 @@ def _get_partial_output(alg, do_clean=False):
 
 def _replace_special_values(workspace):
     replace_name = "ReplaceSpecialValues"
-    replace_options = {"InputWorkspace": workspace,
-                       "OutputWorkspace": EMPTY_NAME,
-                       "NaNValue": 0.,
-                       "InfinityValue": 0.}
+    replace_options = {"InputWorkspace": workspace, "OutputWorkspace": EMPTY_NAME, "NaNValue": 0., "InfinityValue": 0.}
     replace_alg = create_unmanaged_algorithm(replace_name, **replace_options)
     replace_alg.execute()
     return replace_alg.getProperty("OutputWorkspace").value
@@ -198,15 +203,17 @@ def _create_q_resolution_workspace(convert_to_q, workspace):
     gravity_extra_length = convert_to_q.gravity_extra_length
 
     resolution_name = "TOFSANSResolutionByPixel"
-    resolution_options = {"InputWorkspace": workspace,
-                          "OutputWorkspace": EMPTY_NAME,
-                          "DeltaR": delta_r,
-                          "SampleApertureRadius": sample_radius,
-                          "SourceApertureRadius": source_radius,
-                          "SigmaModerator": sigma_moderator,
-                          "CollimationLength": collimation_length,
-                          "AccountForGravity": use_gravity,
-                          "ExtraLength": gravity_extra_length}
+    resolution_options = {
+        "InputWorkspace": workspace,
+        "OutputWorkspace": EMPTY_NAME,
+        "DeltaR": delta_r,
+        "SampleApertureRadius": sample_radius,
+        "SourceApertureRadius": source_radius,
+        "SigmaModerator": sigma_moderator,
+        "CollimationLength": collimation_length,
+        "AccountForGravity": use_gravity,
+        "ExtraLength": gravity_extra_length
+    }
     resolution_alg = create_unmanaged_algorithm(resolution_name, **resolution_options)
     resolution_alg.execute()
     return resolution_alg.getProperty("OutputWorkspace").value
@@ -219,16 +226,13 @@ def _load_sigma_moderator_workspace(file_name):
     :returns the sigma moderator workspace
     """
     load_name = "LoadRKH"
-    load_option = {"Filename": file_name,
-                   "OutputWorkspace": EMPTY_NAME,
-                   "FirstColumnValue": "Wavelength"}
+    load_option = {"Filename": file_name, "OutputWorkspace": EMPTY_NAME, "FirstColumnValue": "Wavelength"}
     load_alg = create_unmanaged_algorithm(load_name, **load_option)
     load_alg.execute()
     moderator_workspace = load_alg.getProperty("OutputWorkspace").value
 
     convert_name = "ConvertToHistogram"
-    convert_options = {"InputWorkspace": moderator_workspace,
-                       "OutputWorkspace": EMPTY_NAME}
+    convert_options = {"InputWorkspace": moderator_workspace, "OutputWorkspace": EMPTY_NAME}
     convert_alg = create_unmanaged_algorithm(convert_name, **convert_options)
     convert_alg.execute()
     return convert_alg.getProperty("OutputWorkspace").value
@@ -242,7 +246,6 @@ def _get_aperture_diameters(convert_to_q):
     :param convert_to_q: a SANSStateConvertToQ object.
     :return: aperture diameter for the source, aperture diameter for the sample
     """
-
     def set_up_diameter(height, width):
         """
         Prepare the diameter parameter. If there are corresponding H and W values, then

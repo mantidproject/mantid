@@ -13,10 +13,7 @@ def main():
     # setup command line arguments
     parser = argparse.ArgumentParser(description='Mantid Workbench')
     parser.add_argument('script', nargs='?')
-    parser.add_argument('-x',
-                        '--execute',
-                        action='store_true',
-                        help='execute the script file given as argument')
+    parser.add_argument('-x', '--execute', action='store_true', help='execute the script file given as argument')
     parser.add_argument('-q',
                         '--quit',
                         action='store_true',

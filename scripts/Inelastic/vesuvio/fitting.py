@@ -14,10 +14,10 @@ import ast
 import vesuvio.backgrounds as backgrounds
 import vesuvio.profiles as profiles
 
-
 # --------------------------------------------------------------------------------
 # Functions
 # --------------------------------------------------------------------------------
+
 
 def parse_fit_options(mass_values, profile_strs, background_str="", constraints_str=""):
     """Parse the function string into a more usable format"""
@@ -54,7 +54,6 @@ def parse_fit_options(mass_values, profile_strs, background_str="", constraints_
 
 class FittingOptions(object):
     """Holds all of the parameters for the fitting that are not related to the domain"""
-
     def __init__(self, mass_profile, background=None, intensity_constraints=None):
         self.smooth_points = None
         self.bad_data_error = None
@@ -66,7 +65,9 @@ class FittingOptions(object):
                 self.intensity_constraints = intensity_constraints
             else:
                 # trailing comma is important or the list gets undone
-                self.intensity_constraints = [intensity_constraints, ]
+                self.intensity_constraints = [
+                    intensity_constraints,
+                ]
         else:
             self.intensity_constraints = None
         self.background = background

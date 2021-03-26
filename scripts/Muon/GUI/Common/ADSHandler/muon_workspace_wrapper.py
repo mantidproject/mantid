@@ -36,7 +36,6 @@ class MuonWorkspaceWrapper(object):
 
     A basic muon workspace which is either the workspace or the name of the workspace in the ADS
     """
-
     def __init__(self, workspace):
         self._is_in_ads = False
         self._workspace = None
@@ -112,8 +111,7 @@ class MuonWorkspaceWrapper(object):
         name = dirs/../dirs/workspace_name
         """
         if not name and not self.name:
-            raise ValueError("Cannot store workspace in ADS with name : ",
-                             str(name))
+            raise ValueError("Cannot store workspace in ADS with name : ", str(name))
 
         self.name = str(name)
 
@@ -127,8 +125,7 @@ class MuonWorkspaceWrapper(object):
             self._workspace = None
             self._is_in_ads = True
         else:
-            raise ValueError("Cannot store workspace in ADS with name : ",
-                             str(name))
+            raise ValueError("Cannot store workspace in ADS with name : ", str(name))
 
     def _add_to_appropriate_groups(self):
         if not self._directory_structure:

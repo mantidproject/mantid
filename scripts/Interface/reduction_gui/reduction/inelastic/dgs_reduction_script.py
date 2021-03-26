@@ -156,7 +156,8 @@ class DgsReductionScripter(BaseReductionScripter):
             for item in self._observers:
                 if item.state() is not None:
                     for subitem in str(item.state()).split('\n'):
-                        if len(subitem) and subitem.find("SampleInputFile") == -1 and subitem.find("OutputDirectory") == -1:
+                        if len(subitem) and subitem.find("SampleInputFile") == -1 and subitem.find(
+                                "OutputDirectory") == -1:
                             script += DgsReductionScripter.WIDTH + subitem + "\n"
                         elif len(subitem) and subitem.find("OutputDirectory") != -1:
                             out_dir_line = subitem.strip(',') + "\n"
