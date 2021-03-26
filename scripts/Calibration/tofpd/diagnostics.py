@@ -125,6 +125,27 @@ def __get_bad_counts(y, mean=None, band=0.01):
     return len(y[(y > top) | (y < bot)])
 
 
+def get_peakwindows(peakpositions: np.ndarray):
+    """
+    Calculates the peak windows for the given peak positions used for FitPeaks
+    :param peakpositions: List of peak positions in d-space
+    :return: List of peak windows (left and right) for each peak position
+    """
+    peakwindows = []
+    deltas = 0.5 * (peakpositions[1:] - peakpositions[:-1])
+    # first left and right
+    peakwindows.append(peakpositions[0] - deltas[0])
+    peakwindows.append(peakpositions[0] + deltas[0])
+    # ones in the middle
+    for i in range(1, len(peakpositions) - 1):
+        peakwindows.append(peakpositions[i] - deltas[i - 1])
+        peakwindows.append(peakpositions[i] + deltas[i])
+    # last one
+    peakwindows.append(peakpositions[-1] - deltas[-1])
+    peakwindows.append(peakpositions[-1] + deltas[-1])
+    return peakwindows
+
+
 def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
            xmin: float=np.nan, xmax: float=np.nan, horiz_markers=[]):
     TOLERANCE_COLOR = 'w'  # color to mark the area within tolerance

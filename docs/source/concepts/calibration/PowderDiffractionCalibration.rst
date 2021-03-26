@@ -385,18 +385,7 @@ The above figure can be generated using the following script:
     peakpositions = peakpositions[peakpositions > 0.4]
     peakpositions = peakpositions[peakpositions < 1.5]
     peakpositions.sort()
-    peakwindows = []
-    deltas = 0.5 * (peakpositions[1:] - peakpositions[:-1])
-    # first left and right
-    peakwindows.append(peakpositions[0] - deltas[0])
-    peakwindows.append(peakpositions[0] + deltas[0])
-    # ones in the middle
-    for i in range(1, len(peakpositions) - 1):
-        peakwindows.append(peakpositions[i] - deltas[i - 1])
-        peakwindows.append(peakpositions[i] + deltas[i])
-    # last one
-    peakwindows.append(peakpositions[-1] - deltas[-1])
-    peakwindows.append(peakpositions[-1] + deltas[-1])
+    peakwindows = diagnostics.get_peakwindows(peakpositions)
 
     LoadEventAndCompress(Filename=FILENAME, OutputWorkspace='ws', FilterBadPulses=0)
     LoadInstrument(Workspace='ws', InstrumentName="VULCAN", RewriteSpectraMap='True')
