@@ -33,6 +33,7 @@ Bugfixes
 - Fixed a bug which occurred when switching to a log scale in sliceviewer with negative data.
 - Fixed a bug that use wrong help links in certain interfaces
 - Fixed a bug that would not let the user input the bounding box of a shape in the instrument viewer.
+- The label of 1D curves in the legend of the plots is corrected to match the vertical axis bin center, if it is a BinEdgeAxis
 - If the facility in Mantid.user.properties is empty, it is consistently reflected as empty in the GUI
 - First time dialog box will not appear recurrently, if user selected their choice of facility
   and instrument at least once and checked "Do not show again until next version".

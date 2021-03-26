@@ -412,7 +412,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         # single spectrum with length 2 axis
         ws.getNumberHistograms.return_value = 1
         mock_axis.length.return_value = 2
-        mock_axis.label = MagicMock(side_effect=["0", "1"])
+        mock_axis.label = MagicMock(side_effect=["0.5"])
         mock_axis.getUnit().symbol().utf8.return_value = dummy_unit
         ws.getAxis.return_value = mock_axis
 

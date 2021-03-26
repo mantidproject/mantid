@@ -29,6 +29,7 @@ Data Objects
 ------------
 
 - exposed ``geographicalAngles`` method on :py:obj:`mantid.api.SpectrumInfo`
+- :ref:`BinEdgeAxis <mantid.api.BinEdgeAxis>` now overrides the label in order to return the bin center and not the edge
 - :ref:`Run <mantid.api.Run>` has been modified to allow multiple goniometers to be stored.
 - :ref:`FileFinder <mantid.api.FileFinderImpl>` has been modified to improve search times when loading multiple runs on the same instrument.
 
