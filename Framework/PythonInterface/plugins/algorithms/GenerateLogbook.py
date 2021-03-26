@@ -8,7 +8,7 @@
 from mantid import config
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, \
     ITableWorkspaceProperty, Progress, PythonAlgorithm
-from mantid.kernel import Direction, IntArrayOrderedPairsValidator, \
+from mantid.kernel import Direction, IntArrayBoundedValidator, \
     StringListValidator, StringMandatoryValidator
 from mantid.simpleapi import *
 
@@ -49,6 +49,13 @@ class GenerateLogbook(PythonAlgorithm):
             issues['Instrument'] = 'There is no parameter file for {} instrument.'.format(instrument)
         DeleteWorkspace(Workspace=ws_tmp)
 
+        if not self.getProperty('NumorRange').isDefault:
+            numor_range = self.getProperty('NumorRange').value
+            if len(numor_range) < 2:
+                issues['NumorRange'] = 'Please provide both bottom and upper numor limits.'
+            if numor_range[0] > numor_range[-1]:
+                issues['NumorRange'] = 'The upper limit must be larger than the bottom one.'
+
         if not self.getProperty('CustomEntries').isDefault:
             custom_entries = self.getPropertyValue('CustomEntries')
             custom_entries = custom_entries.split(',')
@@ -72,7 +79,7 @@ class GenerateLogbook(PythonAlgorithm):
 
         self.declareProperty("NumorRange", [0, 0],
                              direction=Direction.Input,
-                             validator=IntArrayOrderedPairsValidator(),
+                             validator=IntArrayBoundedValidator(lower=0),
                              doc='Numor range to be analysed in the directory.')
 
         facilities = StringListValidator(list(config.getFacilityNames()))
@@ -352,7 +359,8 @@ class GenerateLogbook(PythonAlgorithm):
         if self.getProperty('NumorRange').isDefault:
             self._numor_range = [0, float('inf')]
         else:
-            self._numor_range = self.getProperty('NumorRange').value
+            numor_range = self.getProperty('NumorRange').value
+            self._numor_range = [numor_range[0], numor_range[-1]]
         progress = Progress(self, start=0.0, end=1.0, nreports=15)
         progress.report("Preparing file list")
         data_array = self._prepare_file_array()
