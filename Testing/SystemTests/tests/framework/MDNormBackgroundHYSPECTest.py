@@ -234,9 +234,9 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
                Dimension3Name='QDimension0',
                Dimension3Binning='-0.5,0.5',
                SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
-               TemporaryDataWorkspace='backgroundMDH',
+               TemporaryDataWorkspace=background_temp_ws_names[0],
                TemporaryNormalizationWorkspace=background_temp_ws_names[0],  # 'background_dataMD',
-               OutputWorkspace=background_temp_ws_names[1],
+               OutputWorkspace='backgroundMDH',
                OutputDataWorkspace='background_dataMD',
                OutputNormalizationWorkspace='background_normMD')
 
