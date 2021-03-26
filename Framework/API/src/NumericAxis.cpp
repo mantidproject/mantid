@@ -137,7 +137,16 @@ bool NumericAxis::equalWithinTolerance(const Axis &axis2, const double tolerance
  *  @return the label of the requested axis
  */
 std::string NumericAxis::label(const std::size_t &index) const {
-  std::string numberLabel = boost::str(boost::format("%.13f") % (*this)(index));
+  return formatLabel((*this)(index));
+}
+
+/**
+ * @brief Formats the label to a string
+ * @param value: the value of the axis at an index
+ * @return formatted value as string
+ */
+std::string NumericAxis::formatLabel(const double value) const {
+  std::string numberLabel = boost::str(boost::format("%.13f") % value);
 
   // Remove all zeros up to the decimal place or a non zero value
   auto it = numberLabel.end() - 1;
