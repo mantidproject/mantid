@@ -177,7 +177,7 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-8
-        return 'result', 'MDNormBackgroundHYSPEC.nxs'
+        return 'result', 'MDNormBackgroundHYSPEC.nxs', 'clean2', 'MDNormBackgroundHYSPEC_10_15.nxs'
 
     from typing import Tuple
 
