@@ -537,6 +537,8 @@ class DrillPresenter:
 
     def _syncViewTable(self):
         columns, tooltips = self.model.getColumnHeaderData()
+        if tooltips and tooltips[-1] == "CustomOptions":
+            tooltips[-1] = "Provide semicolon (;) separated key=value pairs"
         samples = self.model.getSamples()
         groups = self.model.getSamplesGroups()
         masters = self.model.getMasterSamples()
