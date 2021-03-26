@@ -214,7 +214,7 @@ class MDNormHYSPECBackgroundTest:  # FIXME systemtesting.MantidSystemTest):
                    OutputWorkspace='clean_data',
                    OutputDataWorkspace='dataMD',
                    OutputNormalizationWorkspace='normMD',
-                   OutputBackgroundNormalizationWorkspace='normBkgdMD')
+                   OutputBackgroundNormalizationWorkspace='background_normMD')
         assert hasattr(r, 'OutputBackgroundNormalizationWorkspace')
         clean_data = r.OutputWorkspace
 
@@ -222,7 +222,7 @@ class MDNormHYSPECBackgroundTest:  # FIXME systemtesting.MantidSystemTest):
         SaveMD(InputWorkspace='normMD', Filename='/tmp/sample_norm_round1.nxs')
         SaveMD(InputWorkspace='dataMD', Filename='/tmp/sample_data_round1.nxs')
         SaveMD(InputWorkspace='background_normMD', Filename='/tmp/normed_background_round1.nxs')
-        SaveMD(InputWorkspace='background_dataMD', Filename='/tmp/background_data_round1.nxs')
+        # SaveMD(InputWorkspace='background_dataMD', Filename='/tmp/background_data_round1.nxs')
 
         # 2nd round
         clean_data = self.normalize_with_background('sum', 'clean2', (12., 15.),
@@ -265,7 +265,6 @@ class MDNormHYSPECBackgroundTest:  # FIXME systemtesting.MantidSystemTest):
                     MinValues='-11,-11,-11,-25',
                     MaxValues='11,11,11,49')
 
-
     def normalize_with_background(self, event_ws_name, output_ws_name, log_value_range: Tuple[float, float],
                                   sample_temp_ws_names: Tuple[str, str],
                                   background_temp_ws_names: Tuple[str, str]):
@@ -289,12 +288,16 @@ class MDNormHYSPECBackgroundTest:  # FIXME systemtesting.MantidSystemTest):
         self.prepare_md(input_ws_name=event_ws_name, merged_md_name='merged',
                         min_log_value=log_value_range[0], max_log_value=log_value_range[1])
         # Prepare background workspace
-        # old way - use reduced_1 as the background
-        self.prepare_background(input_md='reduced_1', reference_sample_mde='merged',
-                                background_md='background_MDE')
+        # # old way - use reduced_1 as the background
+        # self.prepare_background(input_md='reduced_1', reference_sample_mde='merged',
+        #                         background_md='background_MDE')
+        self.prepare_single_exp_info_background(input_md_name='reduced_1',
+                                                output_md_name='background_MDE',
+                                                target_qframe='Q_lab')
 
         # do MDNorm to sample data
         MDNorm(InputWorkspace='merged',
+               BackgroundWorkspace='background_MDE',
                Dimension0Name='QDimension1',
                Dimension0Binning='-5,0.05,5',
                Dimension1Name='QDimension2',
@@ -306,31 +309,14 @@ class MDNormHYSPECBackgroundTest:  # FIXME systemtesting.MantidSystemTest):
                SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
                TemporaryDataWorkspace=sample_temp_ws_names[0],  # 'dataMD',
                TemporaryNormalizationWorkspace=sample_temp_ws_names[1],  # 'normMD',
+               TemporaryBackgroundDataWorkspace=sample_temp_ws_names[0],  # FIXME this is temp solution use S for B
+               TemporaryBackgroundNormalizationWorkspace=background_temp_ws_names[1],  # 'normMD',
                OutputWorkspace='result',
-               OutputDataWorkspace='dataMD',
-               OutputNormalizationWorkspace='normMD')
+               OutputDataWorkspace=sample_temp_ws_names[0],
+               OutputNormalizationWorkspace=sample_temp_ws_names[1],
+               OutputBackgroundNormalizationWorkspace=background_temp_ws_names[1])
 
-        # do MDNorm to background
-        MDNorm(InputWorkspace='background_MDE',
-               Dimension0Name='QDimension1',
-               Dimension0Binning='-5,0.05,5',
-               Dimension1Name='QDimension2',
-               Dimension1Binning='-5,0.05,5',
-               Dimension2Name='DeltaE',
-               Dimension2Binning='-2,2',
-               Dimension3Name='QDimension0',
-               Dimension3Binning='-0.5,0.5',
-               SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
-               TemporaryDataWorkspace='backgroundMDH',
-               TemporaryNormalizationWorkspace=background_temp_ws_names[0],  # 'background_dataMD',
-               OutputWorkspace=background_temp_ws_names[1],
-               OutputDataWorkspace='background_dataMD',
-               OutputNormalizationWorkspace='background_normMD')
-
-        # clean
-        clean_md = MinusMD(LHSWorkspace='result',
-                           RHSWorkspace='backgroundMDH',
-                           OutputWorkspace=output_ws_name)
+        clean_md = mtd['result']
 
         return clean_md
 
