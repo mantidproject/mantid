@@ -15,7 +15,7 @@ create_vanadium
 
 .. diagram:: ISISPowderCreateVanadium_wkflw.dot
 
-focus 
+focus
 ^^^^^^
 
 .. diagram:: ISISPowderFocus_wkflw.dot
@@ -44,7 +44,7 @@ Save Focused Banks
 
 .. diagram:: ISISPowderSaveFocusedBanks_wkflw.dot
 
-Instrument Specific 
+Instrument Specific
 -------------------
 
 PEARL

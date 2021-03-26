@@ -41,10 +41,10 @@ case "$1" in
 	    fi
 	fi
 	;;
-    
+
     failed-upgrade)
 	;;
-    
+
     *)
 	echo "prerm called with unknown argument \`$1'" >&2
 	exit 1

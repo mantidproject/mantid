@@ -9,7 +9,7 @@
 .. warning::
 
    This algorithm is deprecated (June-2018). Please, use :ref:`MergeRuns <algm-MergeRuns>` instead.
-   
+
 Description
 -----------
 
@@ -46,7 +46,7 @@ If these conditions are not fulfilled, algorithm terminates with an error messag
 
 Sample log *temperature* is optional. If it is present in some of input workspaces, mean value will be calculated. Otherwise, no *temperature* sample log will be created in the output workspace.
 
-Algorithm will produce warning if 
+Algorithm will produce warning if
 - *temperature* and *run_title* sample logs are not present or different,
 - some of input workspaces have zero monitor counts.
 
@@ -69,7 +69,7 @@ Usage
     # Input = list of workspaces
     ws3 = TOFTOFMergeRuns('ws1,ws2')
 
-    # Temperature 
+    # Temperature
     print("Temperature of experiment for 1st workspace (in K): {}".format(ws1.getRun().getLogData('temperature').value))
     print("Temperature of experiment for 2nd workspace (in K): {}".format(ws2.getRun().getLogData('temperature').value))
     print("Temperature of experiment for merged workspaces = average over workspaces (in K): {}".format( ws3.getRun().getLogData('temperature').value))
@@ -79,26 +79,26 @@ Usage
     print("Duration of experiment for 2nd workspace (in s): {}".format(ws2.getRun().getLogData('duration').value))
     print("Duration of experiment for merged workspaces = sum of all durations (in s): {}".format(ws3.getRun().getLogData('duration').value))
 
-    # Run start 
+    # Run start
     print("Start of experiment for 1st workspace: {}".format(ws1.getRun().getLogData('run_start').value))
     print("Start of experiment for 2nd workspace: {}".format(ws2.getRun().getLogData('run_start').value))
     print("Start of experiment for merged workspaces = miminum of all workspaces: {}".format(ws3.getRun().getLogData('run_start').value))
 
-    # Run end 
+    # Run end
     print("End of experiment for 1st workspace: {}".format(ws1.getRun().getLogData('run_end').value))
     print("End of experiment for 2nd workspace: {}".format(ws2.getRun().getLogData('run_end').value))
     print("End of experiment for merged workspaces = maximum of all workspaces: {}".format(ws3.getRun().getLogData('run_end').value))
-    
-    # Run number 
+
+    # Run number
     print("Run number for 1st workspace: {}".format(ws1.getRun().getLogData('run_number').value))
     print("Run number for 2nd workspace: {}".format(ws2.getRun().getLogData('run_number').value))
     print("Run number for merged workspaces = list of all workspaces: {}".format(ws3.getRun().getLogData('run_number').value))
- 
+
     # Monitor counts
     print("Monitor counts for 1st workspace: {:.0f}".format(ws1.getRun().getLogData('monitor_counts').value))
     print("Monitor counts for 2nd workspace: {:.0f}".format(ws2.getRun().getLogData('monitor_counts').value))
     print("Monitor counts for merged workspaces = sum over all workspaces: {:.0f}".format(ws3.getRun().getLogData('monitor_counts').value))
-   
+
 
 Output:
 
@@ -121,7 +121,7 @@ Output:
     Run number for merged workspaces = list of all workspaces: ['TOFTOFTestdata', 'TOFTOFTestdata2']
     Monitor counts for 1st workspace: 136935
     Monitor counts for 2nd workspace: 145145
-    Monitor counts for merged workspaces = sum over all workspaces: 282080    
+    Monitor counts for merged workspaces = sum over all workspaces: 282080
 
 **Example - Merge group of workspaces**
 
@@ -155,5 +155,5 @@ Output:
 
 .. sourcelink::
 
-  
+
 

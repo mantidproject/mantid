@@ -48,7 +48,7 @@ Usage
 			    YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
 			    MinimalDistanceBetweenPeaks=1.5, BankOffsets=[3, 3, 1], ClearCache=True,
 			    FittingMethod='Individual', FitOutputWorkspace='shortWavelength')
-		       
+
    print('The calibrated wavelength is: {0:.2f}'.format(float(approximate_wavelength)*mtd['shortWavelength'].column(1)[1]))
    print('The bank2 gradient is: {0:.3f}'.format(1.0 / mtd['shortWavelength'].column(1)[0]))
    print('The bank3 gradient is: {0:.3f}'.format(1.0 / mtd['shortWavelength'].column(1)[176]))

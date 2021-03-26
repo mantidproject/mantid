@@ -1,0 +1,18 @@
+default_language_version:
+  python: python3
+
+exclude: ^$|instrument
+
+repos:
+
+  # Run fast code improvement/checks before running PR specific helpers.
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 2618198e9658cccb4a53f04af0f7d642109f3b54
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: check-added-large-files
+        args: ['--maxkb=4096']
+      - id: check-xml
+      - id: check-yaml
+

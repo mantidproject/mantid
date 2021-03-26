@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::API::IPeakFunction.
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.IPeakFunction 
+.. autoclass:: mantid.api.IPeakFunction
     :members:
     :undoc-members:
     :inherited-members:

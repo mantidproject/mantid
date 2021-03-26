@@ -10,7 +10,7 @@ Description
 -----------
 
 The algorithm performs a smoothing of the input data using a cubic
-spline. The algorithm takes a 2D workspace and generates a spline 
+spline. The algorithm takes a 2D workspace and generates a spline
 for each of the spectra to approximate a fit of the data.
 
 Optionally, this algorithm can also calculate the first and second
@@ -36,7 +36,7 @@ be able to successfully and efficiently apply the algorithm to a workspace
 with multiple spectrums, which would generate an output of workspace
 with multiple spectrums of :ref:`SplineSmoothing <algm-SplineSmoothing-v1>`
 algorithm applied to it. `BSpline <http://www.mantidproject.org/BSpline>`_
-can be used to help you understand break-points in further detail. 
+can be used to help you understand break-points in further detail.
 
 
 For Histogram Workspaces
@@ -53,7 +53,7 @@ Usage
 
 .. testcode:: SmoothNoisy
 
-    ws = CreateSampleWorkspace("Histogram","Multiple Peaks", 
+    ws = CreateSampleWorkspace("Histogram","Multiple Peaks",
         BankPixelWidth=1, NumBanks=10, Random=True,
         XMax=30, BinWidth=0.3)
     wsOut = SplineSmoothing(ws,Error=1)

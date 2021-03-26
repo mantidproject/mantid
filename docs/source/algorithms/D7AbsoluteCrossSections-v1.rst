@@ -14,7 +14,7 @@ Description
 This is the algorithm that performs cross-section separation and allows for sample data normalisation to absolute scale.
 The cross-section separation provides information about magnetic, nuclear coherent, and spin-incoherent contributions to the measured cross-section.
 The absolute scale normalisation uses either the output from cross-section separation or a vanadium reference sample for polarised diffraction and spectroscopy data measured
-by D7 instrument at the ILL. 
+by D7 instrument at the ILL.
 
 Three types of cross-section separation are supported: `Uniaxial`, `XYZ`, and `10p`, for which 2, 6, and 10 distributions with spin-flip and non-spin-flip cross-sections
 are required. The expected input is a workspace group containing spin-flip and non-spin-flip cross-sections, with the following order of axis directions:
@@ -211,7 +211,7 @@ Output:
                            CrossSectionSeparationMethod='XYZ', NormalisationMethod='Paramagnetic',
                            SampleAndEnvironmentProperties=sampleProperties, AbsoluteUnitsNormalisation=False)
    print("The number of entries in the normalised data is: {}".format(mtd['normalised_sample_magnetic'].getNumberOfEntries()))
-		
+
 Output:
 
 .. testoutput:: ExD7AbsoluteCrossSections_paramagnetic_normalisation

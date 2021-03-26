@@ -11,7 +11,7 @@ Description
 
 This algorithm removes the exponential time decay from the specified muon
 spectra, leaving the rest unchanged. By default, all the spectra
-in a workspace will be corrected. If the detector records a total of 
+in a workspace will be corrected. If the detector records a total of
 zero counts (i.e. the detector is dead) then the output will be all zeros for that detector.
 
 The formula for removing the exponential decay is given by:
@@ -57,7 +57,7 @@ Output:
   #make y data
   def genYData(x,phi):
     return np.sin(5.0*x+phi)+np.exp(-x/2.2)
-    
+
   yData = np.append(genYData(x, 0.0), genYData(x, 1.2))
   yData = np.append(yData, np.zeros(len(x))) # dead detector
   yData = np.append(yData, genYData(x, 3.4))

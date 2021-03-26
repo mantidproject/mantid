@@ -2,7 +2,7 @@
 # Use this module by invoking find_package with the form:
 #  find_package(JsonCPP [required] [quiet] )
 #
-# The module sets the following variables 
+# The module sets the following variables
 #  JSONCPP_FOUND          - True if headers and libraries were found
 #  JSONCPP_INCLUDE_DIR    - jsoncpp include directories
 #  JSONCPP_LIBRARY        - library files for linking (optimised version)
@@ -35,7 +35,7 @@ if (EXISTS "${JSONCPP_INCLUDE_DIR}/json/version.h")
   set(_JSONCPP_VERSION_ARGS VERSION_VAR JSONCPP_VERSION_STRING)
 endif ()
 
-# Handle the QUIETLY and REQUIRED arguments and set JSONCPP_FOUND to TRUE if 
+# Handle the QUIETLY and REQUIRED arguments and set JSONCPP_FOUND to TRUE if
 # all listed variables are TRUE
 include ( FindPackageHandleStandardArgs )
 find_package_handle_standard_args( JsonCPP REQUIRED_VARS JSONCPP_INCLUDE_DIR JSONCPP_LIBRARIES ${_JSONCPP_VERSION_ARGS} )

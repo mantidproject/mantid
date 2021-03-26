@@ -1037,8 +1037,8 @@ manual selection takes precedence.
 *Normalize To SANS Monitor*
 ---------------------------
 
-This step provides a monitor normalization workspace for subsequent 
-wavelength correction in :ref:`algm-Q1D` or :ref:`algm-Qxy`. 
+This step provides a monitor normalization workspace for subsequent
+wavelength correction in :ref:`algm-Q1D` or :ref:`algm-Qxy`.
 The user can provide a *ScaleFactor* which is
 normally obtained during event slicing.
 

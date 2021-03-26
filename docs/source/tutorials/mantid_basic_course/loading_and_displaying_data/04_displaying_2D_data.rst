@@ -1,7 +1,7 @@
 .. _04_displaying_2D_data:
 
 ==================
-Displaying 2D Data 
+Displaying 2D Data
 ==================
 
 Plotting All Spectra
@@ -11,7 +11,7 @@ We have previously seen how to plot one or more rows from a dataset.
 Here we will show how to visually inspect entire datasets.
 
 #. Reload the MAR11060 dataset, but this time with no SpectraMin/Max limits.
-#. Right click the workspace in the workspace list and select "Plot > 
+#. Right click the workspace in the workspace list and select "Plot >
    Colorfill". This will create a fairly boring purple display of the
    data, because one spectrum contains much higher counts than any of
    the other spectra, and the color scale has adjusted accordingly.

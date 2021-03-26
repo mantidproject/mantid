@@ -1,11 +1,11 @@
 .. _Muon_Analysis_DevelopersGuide-ref:
 
-Muon Analysis: a guide for Mantid developers 
+Muon Analysis: a guide for Mantid developers
 ============================================
 
 .. contents:: Table of Contents
     :local:
-    
+
 Introduction
 ^^^^^^^^^^^^
 This document is intended for Mantid developers as a guide to the architecture of the Muon Analysis custom interface.
@@ -27,7 +27,7 @@ In a typical muon spin resonance experiment, the muon spins precess in a magneti
 
 Data is loaded into the interface, corrected for dead time, and the detectors grouped into groups.
 For example, MuSR (64 detectors) uses two groups, *fwd* (forward, detectors 33-64) and *bwd* (backward, detectors 1-32) in its longitudinal field configuration, corresponding to the two detector rings.
-(MuSR is special in that the main field direction can be rotated either longitudinal or transverse). 
+(MuSR is special in that the main field direction can be rotated either longitudinal or transverse).
 In this case scientists will usually look at a "group pair" called *long*, defined as *fwd - bwd*.
 
 The grouping used is taken from the IDF by default, or from the data file if not present.
@@ -48,7 +48,7 @@ Groups and Periods
 Groups are explained above, as sets of detectors corresponding to physical arrangements.
 For example, the MuSR instrument has two rings of detectors, leading to two detector groups in the longitudinal field arrangement.
 
-*Periods* refers to collecting data in several periods of time - for example you might have two periods "RF on" and "RF off" or "laser on" and "laser off". 
+*Periods* refers to collecting data in several periods of time - for example you might have two periods "RF on" and "RF off" or "laser on" and "laser off".
 The interface allows users to analyse one period at a time, or a sum/difference (such as "1+2", "1-2" or even "1+2-3+4").
 
 .. warning:: Note that for summed periods (1+2), you sum the periods 1 and 2 first, then calculate the asymmetry of the sum. For subtracted periods (1-2), you calculate the asymmetry of each period separately, then subtract the asymmetry of period 2 from that of period 1. So for 1+2-3+4, you sum 1+2 and 3+4, calculate asymmetry of each sum, then subtract the asymmetry of (3+4) from that of (1+2).
@@ -98,7 +98,7 @@ It is fully tested, in addition to the tests that the algorithms themselves have
 
 The grouping is stored in a ``Mantid::API::Grouping`` struct. The user can specify their own grouping on the "Grouping Options" tab, and a ``MuonGroupingHelper`` object is used to deal with this. (This is not tested as it is too coupled to the GUI - needs refactoring).
 
-Load current run 
+Load current run
 ################
 
 **ISIS only**
@@ -106,7 +106,7 @@ Load current run
 Scientists at ISIS often use the "load current run" feature - a button on the front tab that will load the most recent data file from the selected instrument. The button is not enabled at other facilities, where this feature is not available.
 
 The location of the current run is kept in ``\\<instrument>\data\autosave.run``, a file that points to another file in the same directory where the data is.
-For example, ``\\MUSR\data\autosave.run`` might contain the file name ``auto_B.tmp``, meaning that the current data is in ``\\MUSR\data\auto_B.tmp``. 
+For example, ``\\MUSR\data\autosave.run`` might contain the file name ``auto_B.tmp``, meaning that the current data is in ``\\MUSR\data\auto_B.tmp``.
 
 After loading the current run, the left/right buttons are used to cycle through recent datasets.
 
@@ -125,7 +125,7 @@ As noted above, data loading/processing is handled with ``MuonAnalysisDataLoader
 
     ``MuonAnalysisHelper`` is also where the generation and parsing of workspace names is done.
     In the Muon Analysis interface, these follow a strict format delimited by semicolons:
-    
+
     ``INST00012345; Pair; long; Asym;[ 1;] #1``
 
     1. Run label, made up of instrument and run number.
@@ -193,7 +193,7 @@ Of course, it's not *properly* MVP, as that would have required a rewrite - the 
 
     It inherits from two new abstract base classes (i.e. implements two interfaces), so that it can be mocked when testing the two presenters.
 
-    **Views:** 
+    **Views:**
 
     - Fit function: ``FunctionBrowser`` - the same one used in the general multi-fitting interface. It is reused here, with the only change being to restrict the range of functions shown to only those that are of interest to muon scientists.
 
@@ -217,7 +217,7 @@ Fit function
 
 The actual function that is going to be fitted to the data is stored in the ``MuonFitPropertyBrowser`` (model) and, after the fit, this function will have the correct parameter values.
 
-It is therefore the job of the presenter to 
+It is therefore the job of the presenter to
 
 - Update the model's function when the user changes the function in the view
 - Update the view's displayed function parameters when the fit has finished.
@@ -251,7 +251,7 @@ Sequence of events when "Fit" clicked
 
 The "Fit" button is part of the *MuonFitPropertyBrowser*, i.e. the model. This doesn't fit with the MVP pattern but is this way for historical reasons, as the button was always part of this widget.
 
-When the user clicks "Fit", the model emits a signal ``preFitChecksRequested``. This is caught by the data presenter, which performs some checks that the data is valid before the fit starts. Extra checks could be easily added at this point. 
+When the user clicks "Fit", the model emits a signal ``preFitChecksRequested``. This is caught by the data presenter, which performs some checks that the data is valid before the fit starts. Extra checks could be easily added at this point.
 
 If everything is OK, the data presenter tells the model to continue, and the model emits ``functionUpdateAndFitRequested``.
 This signal is caught by the function presenter, which updates the fit function in the model from that in the view, to ensure they are in sync before the fit. It then tells the model to start the fit.
@@ -283,7 +283,7 @@ This is done by the ``PeakPickerTool`` from MantidPlot, not by anything within M
 
 (The ``PeakPickerTool`` is set to the plot when the Data Analysis tab is selected - see box below.)
 
-The ``PeakPickerTool`` can recognise muon data by noticing that the fit property browser is a ``MuonFitPropertyBrowser``. 
+The ``PeakPickerTool`` can recognise muon data by noticing that the fit property browser is a ``MuonFitPropertyBrowser``.
 In this case it doesn't remove previous fit curves like it would for other graphs, because this is handled by Muon Analysis instead - we have the option there to keep *n* previous fits as selected by the user...
 
 If it notes that the fit was a *simultaneous* fit of muon data, then **nothing is plotted**.
@@ -295,7 +295,7 @@ What users can currently do to plot the results of a simultaneous or sequential 
 Probably it would be best to make this automatic when a multiple fit ends, or provide a "Plot" button in Muon Analysis - this would most likely require exposing the relevant tiled plot functionality to Python first.
 
 .. topic:: Changing tabs in Muon Analysis
-    
+
     Changing tabs is handled by the ``changeTab`` method in ``MuonAnalysis.cpp``.
     When entering the *Data Analysis* tab:
 

@@ -20,7 +20,7 @@ Usage
 
 
 .. testcode:: RecordPythonScript
-    
+
     from threading import Thread
     import os, time
 
@@ -47,7 +47,7 @@ Usage
     wsOut=RebinToWorkspace(wsOut,ws,PreserveEvents=True)
 
     # This will cancel the rocording algorithm
-    # you can do the same in the GUI 
+    # you can do the same in the GUI
     # by clicking on the details button on the bottom right
     AlgorithmManager.cancelAll()
     thread.join()

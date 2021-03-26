@@ -29,7 +29,7 @@ Mocking Exercise Solution
             self.view.setTableRow = mock.Mock()
             self.view.addWidgetToTable = mock.Mock()
             self.view.addITemToTable = mock.Mock()
-        
+
             self.presenter = presenter.Presenter(self.view)
 
         def test_updatePlot(self):

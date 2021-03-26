@@ -81,7 +81,7 @@ using :ref:`CreateMDWorkspace <algm-CreateMDWorkspace>`.
 
 .. testcode:: SaveZODSEx
 
-    ws = CreateMDHistoWorkspace(SignalInput='1,2,3,4,5,6,7,8', ErrorInput='1,1,1,1,1,1,1,1', 
+    ws = CreateMDHistoWorkspace(SignalInput='1,2,3,4,5,6,7,8', ErrorInput='1,1,1,1,1,1,1,1',
         Dimensionality='3', Extents='-2, 2, -2, 2, -2, 2', Names=['[H,0,0]','[0,K,0]','[0,0,L]'],
         NumberOfBins='2,2,2', Units='lattice,lattice,lattice')
     import os
@@ -93,7 +93,7 @@ Output:
 
 .. testoutput:: SaveZODSEx
 
-   File created: True 
+   File created: True
 
 .. testcleanup:: SaveZODSEx
 

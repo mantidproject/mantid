@@ -63,7 +63,7 @@ Usage
     center = 0.0
     sigma = 200.0
     startX = -900.0
-    endX = 900.0 
+    endX = 900.0
     myFunc = 'name=Gaussian,Height={0},PeakCentre={1},Sigma={2}'.format(intensity,center,sigma)
 
     # Call the Fit algorithm and perform the fit

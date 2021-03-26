@@ -66,7 +66,7 @@ must be chosen by the user at the time the environment is attached to a
 workspace with the ``Environment`` option on the
 :ref:`SetSample <algm-SetSample>` algorithm.
 
-The container and sample geometry can alternatively be defined using a mesh description by 
+The container and sample geometry can alternatively be defined using a mesh description by
 specifying an .stl file as follows.
 
 .. code-block:: xml
@@ -86,7 +86,7 @@ specifying an .stl file as follows.
         </containers>
       </components>
     </environmentspec>
-	
+
 Mantid will try the following approaches to find the path to the stl file (in order):
 
 - If a full path is supplied in the filename attribute then it will be used
@@ -198,7 +198,7 @@ The non-container components can also be defined using mesh geometry by specifyi
         </component>
       </components>
     </environmentspec>
-	
+
 The shape defined in the stl file can be transformed and\or rotated in order to assemble it correctly with
 the other environment components. This is achieved by specifying a translation or rotation tag in the xml.
 The translation tag has an attribute vector which is a comma separated list of x, y, z coordinates.

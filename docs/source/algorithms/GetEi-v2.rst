@@ -59,7 +59,7 @@ Usage
 **Example: Fixing the Ei**
 
 .. testcode:: fixEi
-    
+
     ws = CreateSampleWorkspace(bankPixelWidth=1,binWidth=10)
 
     (ei, firstMonitorPeak, FirstMonitorIndex, tzero) = GetEi(ws,Monitor1Spec=1,Monitor2Spec=2,EnergyEstimate=15.0,FixEi=True)

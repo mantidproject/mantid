@@ -80,7 +80,7 @@ struct MSG
 {
 };
 
-typedef struct 
+typedef struct
 {
     LPVOID lpCreateParams;
 } CREATESTRUCT, *LPCREATESTRUCT;

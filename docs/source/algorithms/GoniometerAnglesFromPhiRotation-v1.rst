@@ -22,9 +22,9 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-.. testcode:: exGoniometerAnglesFromPhiRotation 
+.. testcode:: exGoniometerAnglesFromPhiRotation
 
-   # Load Peaks found in SXD23767.raw 
+   # Load Peaks found in SXD23767.raw
    ws1 =Load(Filename='SXD23767.peaks')
    ws2 = ws1.clone()
 
@@ -32,7 +32,7 @@ Usage
    ublist = [-0.06452276,  0.2478114,  -0.23742194, 0.29161678, -0.00914316, -0.12523779, 0.06958942, -0.1802702,  -0.14649001]
    SetUB(Workspace=ws1,UB=ublist)
 
-   # Run Algorithm 
+   # Run Algorithm
    result = GoniometerAnglesFromPhiRotation(ws1,ws2,Tolerance=0.5,MIND=0,MAXD=2)
    print("Chi: {:.1f}, Omega: {:.1f}, Indexed: {}, AvErrIndex: {:.2f} AvErrAll: {:.2f}".format(*result))
 

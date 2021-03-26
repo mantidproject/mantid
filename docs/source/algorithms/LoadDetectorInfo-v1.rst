@@ -22,18 +22,18 @@
 Description
 ------------
 
-The algorithm loads specific detector properties and, if *RelocateDets* property is true, the detector positions into the instrument, 
+The algorithm loads specific detector properties and, if *RelocateDets* property is true, the detector positions into the instrument,
 attached to the target workspace and modifies these properties as described below.
 
 The detection time delay for each detector is subtracted from the time of flight bin boundaries in the spectrum associated with that detector.
-It is required that all the monitors have the same time delay and if this is non-zero the delay time is added to all TOF values. 
-It is important that the units of the input workspace are TOF in microseconds, that :ref:`algm-GroupDetectors` 
+It is required that all the monitors have the same time delay and if this is non-zero the delay time is added to all TOF values.
+It is important that the units of the input workspace are TOF in microseconds, that :ref:`algm-GroupDetectors`
 has not been run and this algorithm is only applied once to a workspace.
 
-Values for the partial pressure of **3He** and **wall thickness** are added into the parameter map for each detector 
+Values for the partial pressure of **3He** and **wall thickness** are added into the parameter map for each detector
 in a form that can be read by :ref:`algm-DetectorEfficiencyCor`. That is, the values are assumed to be in atmospheres
 and meters, respectively, and the properties are stored internally in the workspace parameter map as **3He(atm)** and **wallT(m)**.
-The values are likely to be read from the same **RAW** file that the workspace was loaded from or a 
+The values are likely to be read from the same **RAW** file that the workspace was loaded from or a
 **DAT** file that corresponds to the same run or series of experimental runs.
 
 Spectra whose associated detector data are not found in the input **DAT** or **RAW** file will not have their
@@ -42,12 +42,12 @@ the algorithm will continue to process data as normal but a warning will be writ
 Detectors that are listed in the input file but do not exist in the instrument definition file will be ignored and details will be written to the log.
 
 If all the time offsets are the same and the file **appears** to contain enough data for all detectors
-all detector spectra will use same bin boundaries, where possible. 
+all detector spectra will use same bin boundaries, where possible.
 This will make the algorithm run much more quickly and use less memory.
 
-When using a **RAW** file the time offset for each detector is read from the "hold off" table in the file's 
-header while pressure and wall thickness data must be present in the user table array. 
-The format for **.DAT** files is specified in the document **DETECTOR.DAT format** written by Prof G Toby Perring and briefly described below. 
+When using a **RAW** file the time offset for each detector is read from the "hold off" table in the file's
+header while pressure and wall thickness data must be present in the user table array.
+The format for **.DAT** files is specified in the document **DETECTOR.DAT format** written by Prof G Toby Perring and briefly described below.
 
 If the RelocateDets option is set to true, (it is false by default)
 then the detectors are moved to the corresponding positions specified in the data file provided.
@@ -61,17 +61,17 @@ See :ref:`algm-UpdateInstrumentFromFile` which can do similar job in modifying t
 #############################
 
 The the detector data can be stored as ASCII or `NeXus <http://download.nexusformat.org/>`_ data file. It contains roughly corresponds
-to the detector.dat file, present on the instrument and written to the run files. The contents of these data can be overwritten by the file, 
+to the detector.dat file, present on the instrument and written to the run files. The contents of these data can be overwritten by the file,
 provided as input for this algorithm
 
-The description of the ASCII DETECTOR.dat file is provided in the table below. Nexus file format can come in two flavors. 
+The description of the ASCII DETECTOR.dat file is provided in the table below. Nexus file format can come in two flavors.
 The first one is completely equivalent to the ASCII 19 column data format and introduced to increase the speed of accessing these data in binary format,
-where the second one left for the compatibility with Libisis. 
-It has meaningful data corresponding to the columns 1-6, 17&18 below, but does not support multiple tube pressures and wall thickness. 
+where the second one left for the compatibility with Libisis.
+It has meaningful data corresponding to the columns 1-6, 17&18 below, but does not support multiple tube pressures and wall thickness.
 
-The :ref:`algm-LoadDetectorInfo` algorithm currently reads and interprets rows 1-6,17&18 of the table, 
-provided below (or columns of det.dat file) or correspondent data blocks from the NeXus file. 
-It also does not understand the short (15 columns) MARI detector.dat ASCII file format (see **ISIS detector.dat files** below). 
+The :ref:`algm-LoadDetectorInfo` algorithm currently reads and interprets rows 1-6,17&18 of the table,
+provided below (or columns of det.dat file) or correspondent data blocks from the NeXus file.
+It also does not understand the short (15 columns) MARI detector.dat ASCII file format (see **ISIS detector.dat files** below).
 
 Co-ordinate frames
 ##################
@@ -85,7 +85,7 @@ For the purposes of the detector table we choose a right handed set of axes fixe
 Centers of each detector element are defined in spherical polar co-ordinates as seen from the sample position:
 
 - **THETA** --  Polar angle measured from the z-axis (what we would normally call the scattering angle PHI). Note that  0< **THETA** <180
-- **PHI**   --  Azimuthal angle measured from the x-axis in a right handed sense (what TGP, CDF	and RD01 call -BETA). 
+- **PHI**   --  Azimuthal angle measured from the x-axis in a right handed sense (what TGP, CDF	and RD01 call -BETA).
                   For example, the West Bank of HET has PHI=0, the North Bank has PHI=90, the South Bank has PHI=270.
 
 To specify the orientation of a detector, define axes x', y', z' as follows:
@@ -94,14 +94,14 @@ To specify the orientation of a detector, define axes x', y', z' as follows:
 -  y'-axis -- increasing PHI
 -  z'-axis -- parallel to the line joining sample and detector
 
-The natural coordinate frame for the detector, xd, yd, zd, may not coincide with x', y', z'. 
+The natural coordinate frame for the detector, xd, yd, zd, may not coincide with x', y', z'.
 For example, the natural frame for a gas tube is with zd along the axis of the tube, and the direction of xd chosen to be perpendicular to the line joining the detector with the sample.
 The characteristic dimensions of the detector, W_x, W_y, W_z, are given in the frame xd, yd, zd.
 The detector coordinate axes xd, yd, zd are related to x', y', z' by a rotation.
 The transformation is be expressed by a three-component vector  :math:`\alpha_{x},\alpha_{y},\alpha_{z}`,
-where the magnitude of  the vector gives the angle of rotation in a right-hand sense, 
-and the normalized elements give the components along x', y', z' of the unit vector about which the rotation takes place. 
-The magnitude of the vector is in degrees. 
+where the magnitude of  the vector gives the angle of rotation in a right-hand sense,
+and the normalized elements give the components along x', y', z' of the unit vector about which the rotation takes place.
+The magnitude of the vector is in degrees.
 
 - e.g. non-PSD gas tube on the Debye-Scherrer cone:
        :math:`\alpha_{x} = -90^{o};\alpha_{y} = \alpha_{z} = 0^{o}; W_{x}=W_{y}= 0.0254, W_{z}=0.300`
@@ -216,12 +216,12 @@ ISIS DETECTOR.DAT raw files
 
 
 The ISIS raw files seem to have two possible entries - MARI is non-standard for some reason. The table below describes correspondence between the fields
-in ASCII file above and the data containing in DETECTOR.DAT file present on data acquisition machine  and the data written to the RAW file on different ISIS instruments. 
+in ASCII file above and the data containing in DETECTOR.DAT file present on data acquisition machine  and the data written to the RAW file on different ISIS instruments.
 
 +----+--------------+------------------+---------------+
 |    | Field        |  Field name in RAW file          |
-+----+--------------+------------------+---------------+ 
-|    | Name in      | All instruments: | MARI fields:  | 
++----+--------------+------------------+---------------+
+|    | Name in      | All instruments: | MARI fields:  |
 | N  | ASCII file,  | Fields in use:14 | In use:10.    |
 |    | table above  | ASCII ncol:19    | ASCII ncol:15 |
 +====+==============+==================+===============+
@@ -263,30 +263,30 @@ in ASCII file above and the data containing in DETECTOR.DAT file present on data
 +----+--------------+------------------+---------------+
 | 19 |  det_4       |      ut14        |    ut10       |
 +----+--------------+------------------+---------------+
- 
- 
+
+
 Usage
 ------------
 
 **Example - LoadDetectorInfo:**
 
 Calibrate **MARI** using full format detector calibration file.
-Note, that :ref:`algm-LoadDetectorInfo` algorithm does not modify the monitors. Test test below provides calibration file for six detectors and test output shows, 
-that the first three detectors (monitors) were not touched and the next three were completely modified. 
+Note, that :ref:`algm-LoadDetectorInfo` algorithm does not modify the monitors. Test test below provides calibration file for six detectors and test output shows,
+that the first three detectors (monitors) were not touched and the next three were completely modified.
 
 .. testcode:: exLoadDetectorInfo
-  
+
    import math
    import os
-      
+
    # printing procedure
    def write_detectors(instr_type,instr,ndet):
        ''' print first ndet detectors from given instrument '''
 
        print("{0} {1} instrument".format(instr_type, instr.getName()))
        print('det ID | monitor? | polar angle| position X | position Y | position Z |  Pressure  | Wall thick |')
-       
-       # get first nder detectors using detector ID    
+
+       # get first nder detectors using detector ID
        for i in range(0,ndet):
          if i<3:
              detBase = 1
@@ -300,12 +300,12 @@ that the first three detectors (monitors) were not touched and the next three we
          print(' {0:5} | {1:8} | {2:10.3f} | {3:>10.3f} | {4:>10.3f} | {5:>10.3f} | {6:10} | {7:10} |'.format(\
                 detID,det1.isMonitor(),(det1.getPhi()*(180/math.pi)),pos.X(),pos.Y(),pos.Z(),pressure[0],thickness[0]))
        print('*********************************************************************************')
-   # 
+   #
    def prepare_test_detector(ind):
         """  prepare modified detector with random test values  """
         if ind<3:
             detBase = 1
-            offset=0; 
+            offset=0;
             l2 = -10  # incorrect  L2 for testing changes
             code=1
             theta = 180 # incorrect theta for testing changes
@@ -331,9 +331,9 @@ that the first three detectors (monitors) were not touched and the next three we
             det2  = 15   # incorrect tube pressure for testing changes
             det3  = 0.9  # incorrect wall thickness for testing changes
             det4  = 666  # incorrect for testing changes
-         
+
         return (detBase,offset,l2,code,theta,phi,w_xyz,f_xyz,a_xyz,det1,det2,det2,det4)
-    
+
 
    def write_test_cal_file(filename,instrument,ndet):
       """ writes partial detector.dat file  modified for testing purposes
@@ -346,7 +346,7 @@ that the first three detectors (monitors) were not touched and the next three we
       f.write("Full format DETECTOR.DAT generated by CREATE_DETECTOR_FILE (part of it written for testing purposes)");
       f.write("{0}    14\n".format(ndet))
       f.write("det no.  offset    l2     code     theta        phi         w_x         w_y         w_z         f_x         f_y         f_z         a_x         a_y         a_z        det_1       det_2       det_3       det4\n");
-   
+
       for i in range(0,ndet):
          detBase,offset,l2,code,theta,phi,w_xyz,f_xyz,a_xyz,det1,det2,det3,det4=prepare_test_detector(i);
          detID = detBase+i
@@ -354,34 +354,34 @@ that the first three detectors (monitors) were not touched and the next three we
              detID,offset,l2,code,theta,phi,w_xyz,w_xyz,w_xyz,f_xyz,f_xyz,f_xyz,a_xyz,a_xyz,a_xyz,a_xyz,det1,det2,det3,det4))
       #  end write loop
       f.close()
-    
-   #-------------------- ------------------------------------------------------------------      
+
+   #-------------------- ------------------------------------------------------------------
    #  TEST  THE ALGORITHM
-   #--------------------------------------------------------------------------------------      
+   #--------------------------------------------------------------------------------------
    # create sample workspace
-   ws=CreateSampleWorkspace();  
-   #--------------------------------------------------------------------------------------      
+   ws=CreateSampleWorkspace();
+   #--------------------------------------------------------------------------------------
    # load MARI
-   det=LoadInstrument(ws,InstrumentName='MARI', RewriteSpectraMap=True)   
-   inst1=ws.getInstrument();   
-   #   
+   det=LoadInstrument(ws,InstrumentName='MARI', RewriteSpectraMap=True)
+   inst1=ws.getInstrument();
+   #
    write_detectors('unCalibrated',inst1,10);
-   #--------------------------------------------------------------------------------------   
+   #--------------------------------------------------------------------------------------
    # Prepare calibration file changing first 6 detectors & monitors
    file_name = 'mari_det.dat'
    write_test_cal_file(file_name ,inst1,6);
-   #--------------------------------------------------------------------------------------      
+   #--------------------------------------------------------------------------------------
    # CALIBRATE mari using full det.dat calibration file
    LoadDetectorInfo(ws,DataFilename=file_name,RelocateDets=True);
    inst1=ws.getInstrument();
-   #--------------------------------------------------------------------------------------      
+   #--------------------------------------------------------------------------------------
    # look at the result:
    write_detectors('Calibrated',inst1,10);
 
-   
+
 .. testcleanup:: exLoadDetectorInfo
 
-   os.remove(file_name)       
+   os.remove(file_name)
 
 **Output:**
 

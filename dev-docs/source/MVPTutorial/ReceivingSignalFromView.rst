@@ -37,14 +37,14 @@ pressed. First we will start with the view:
 
             # add widgets to layout
             self.sub_layout = QtWidgets.QHBoxLayout()
-            self.sub_layout.addWidget(self.label)            
+            self.sub_layout.addWidget(self.label)
             self.sub_layout.addWidget(self.button)
- 
+
             grid = QtWidgets.QVBoxLayout(self)
             grid.addLayout(self.sub_layout)
             # set the layout for the view widget
             self.setLayout(grid)
- 
+
         #send signals
         def btn_click(self):
             print ("hellow from view")
@@ -71,9 +71,9 @@ custom signal from the view to its own function (``handleButton``).
         def __init__(self, view):
             self.view = view
 
-            self.view.doSomethingSignal.connect(self.handleButton)             
-       
-        # handle signals 
+            self.view.doSomethingSignal.connect(self.handleButton)
+
+        # handle signals
         def handleButton(self):
             print("hello world, from the presenter")
 

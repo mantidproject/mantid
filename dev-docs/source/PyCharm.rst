@@ -244,4 +244,4 @@ Note: Requires PyCharm Professional.
 
 PyCharm supports deployment and syncronisation of written code to a remote server via SSH.
 
-Open a local copy of the project and then follow the the guides here for `configuring the remote interpreter <https://www.jetbrains.com/help/pycharm/configuring-remote-interpreters-via-ssh.html>`_ and `creating a deployment configuration <https://www.jetbrains.com/help/pycharm/creating-a-remote-server-configuration.html>`_. 
+Open a local copy of the project and then follow the the guides here for `configuring the remote interpreter <https://www.jetbrains.com/help/pycharm/configuring-remote-interpreters-via-ssh.html>`_ and `creating a deployment configuration <https://www.jetbrains.com/help/pycharm/creating-a-remote-server-configuration.html>`_.

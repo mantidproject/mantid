@@ -35,9 +35,9 @@ frequency sample logs, which can be even faster than chopper frequencies.
 Input Workspace
 ###############
 
-This algorithm mainly uses the information retrieved from sample logs to create 
+This algorithm mainly uses the information retrieved from sample logs to create
 event splitters.
-Therefore, EventWorkspace is only required if the run end time cannot be determined by sample logs. 
+Therefore, EventWorkspace is only required if the run end time cannot be determined by sample logs.
 For example, proton charge log cannot be found.
 
 
@@ -82,10 +82,10 @@ this algorithm:
    by 1 from 0 along with their orders in time.
 
 -  A series of filters for multiple continuous time intervals, which
-   have various lengths of period.  
-   Each of them has an individual workspace index associated. 
+   have various lengths of period.
+   Each of them has an individual workspace index associated.
    These workspace indices are incremented by 1 from 0 along with their
-   order in time. 
+   order in time.
 
 -  A filter containing one or multiple time intervals according to a
    specified log value. Any log value of the time that falls into the
@@ -103,37 +103,37 @@ this algorithm:
 Generate event filters by time
 ##############################
 
-Event filters can be created by defining start time, stop time and time intervals. 
-The three input properties for them are ``StartTime``, ``StopTime`` and ``TimeInterval``, 
-respectively. 
+Event filters can be created by defining start time, stop time and time intervals.
+The three input properties for them are ``StartTime``, ``StopTime`` and ``TimeInterval``,
+respectively.
 
-``TimeInterval`` accepts an array of doubles.  
-If the array size is zero, then there will be one and only splitter will be 
-created from ``StartTime`` and ``StopTime``.  
+``TimeInterval`` accepts an array of doubles.
+If the array size is zero, then there will be one and only splitter will be
+created from ``StartTime`` and ``StopTime``.
 If the size of the array is one, then all event splitters will have the same duration
-of time. 
-In general if the array is composed as :math:`t_1, t_2, \cdots, t_n`, 
-and :math:`T_0` is the run start time, 
-then the event splitters will have the time boundaries as 
+of time.
+In general if the array is composed as :math:`t_1, t_2, \cdots, t_n`,
+and :math:`T_0` is the run start time,
+then the event splitters will have the time boundaries as
 
 .. math:: (T_0, T_0+t_1), (T_0+t_1, T_0+t_1+t_2), \cdots, (T_0+\sum_{i=1}^{n-1}t_i, T_0+\sum_{i=1}^nt_i), (T_0+\sum_{i=1}^nt_i, T_0+\sum_{i=1}^nt_i+t_1), \cdots
 
-until the stop time is reached. 
+until the stop time is reached.
 
 Unit of time
 ============
 
-There are three types of units that are supported for time. 
-They are second, nanosecond and percentage of duration from ``StartTime`` to ``StopTime``. 
+There are three types of units that are supported for time.
+They are second, nanosecond and percentage of duration from ``StartTime`` to ``StopTime``.
 
 .. _filterbylogv-GenerateEventFilter-ref:
 
 Generate event filters by sample log value
 ##########################################
 
-The sample log will be divided to intervals as :math:`v_0, v_1, \cdots, v_{i-1}, v_i, v_{i+1}, \cdots`. 
+The sample log will be divided to intervals as :math:`v_0, v_1, \cdots, v_{i-1}, v_i, v_{i+1}, \cdots`.
 All log entries, whose values falls into range :math:`[v_j, v_{j+1})`, will be assigned to
-a same workspace group. 
+a same workspace group.
 
 
 About how log value is recorded
@@ -164,7 +164,7 @@ resolution to 1 microsecond.
 Algorithm Parameters and Examples
 ---------------------------------
 
-Here are the introductions to some important parameters (i.e., algorithm's properties). 
+Here are the introductions to some important parameters (i.e., algorithm's properties).
 
 
 Parameter: ``Centre``
@@ -193,9 +193,9 @@ filtering events.
 Double value log
 ================
 
-Let user-specified minimum log value to be :math:`L_{min}`, 
-LogValueTolerance to be :math:`t`, and LogValueInterval to be :math:`\delta`, 
-then the log value intervals are 
+Let user-specified minimum log value to be :math:`L_{min}`,
+LogValueTolerance to be :math:`t`, and LogValueInterval to be :math:`\delta`,
+then the log value intervals are
 
 .. math:: [L_{min}-t, L_{min}-tol+\delta), [L_{min}-tol+\delta, L_{min}-tol+2\cdot\delta), \cdots
 
@@ -204,35 +204,35 @@ The default value of LogValueTolerance is LogValueInterval divided by 2.
 Integer value log
 =================
 
-It is a little bit different for sample log recorded with integer. 
+It is a little bit different for sample log recorded with integer.
 
-- ``MinimumLogValue`` and ``MaximumLogValue`` can be same such that only entries with exactly the same log value 
+- ``MinimumLogValue`` and ``MaximumLogValue`` can be same such that only entries with exactly the same log value
   will be considered;
 - If ``LogValueInterval`` is not give (i.e., default value is used), then any log enetry with log value
-  larger and equal to ``MinimumLogValue`` and smaller and equal to ``MaximumLogValue`` will be considered. 
+  larger and equal to ``MinimumLogValue`` and smaller and equal to ``MaximumLogValue`` will be considered.
   Be noticed that in the same case for double value log, log entry with value equal to ``MaximumLogValue``
-  will be excluded. 
+  will be excluded.
 
 
 
 Example: Filter by double log value from :math:`s_0` to :math:`s_f`
 ###################################################################
 
-There are two setup to acquire the same result: 
+There are two setup to acquire the same result:
 
 - Use single-log-value mode:
 
   - MinimumLogValue = :math:`s_0`
   - MaximumLogValue = :math:`s_f`
   - LogValueInterval is left to default
-  
+
 - Use multiple-log-value mode:
 
   - MinimumLogValue = :math:`s_0`
   - MaximumLogValue = :math:`s_f`
   - LogValueInterval = :math:`s_f - s_0`
   - LogValueTolerance = 0
-  
+
 
 
 
@@ -280,9 +280,9 @@ Output:
 
 **Example - Generate event filter by temperature value with an empty workspace**
 
-The following is a contrived example to show how one would use the algorithm to 
+The following is a contrived example to show how one would use the algorithm to
 generate event splitters from an empty workspace, which has sample logs in run object,
-by a temperature log. 
+by a temperature log.
 The resulting workspaces would then be fed to
 :ref:`FilterEvents <algm-FilterEvents>`
 for further processing.
