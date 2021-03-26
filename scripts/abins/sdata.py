@@ -194,7 +194,7 @@ class SData(collections.abc.Sequence):
         ...
 
     @overload  # noqa F811
-    def __getitem__(self, item: slice) -> List[OneAtomSData]:
+    def __getitem__(self, item: slice) -> List[OneAtomSData]: # noqa F811
         ...
 
     def __getitem__(self, item):  # noqa F811
@@ -277,7 +277,7 @@ class SDataByAngle(collections.abc.Sequence):
         ...
 
     @overload  # noqa F811
-    def __getitem__(self: SDBA, item: slice) -> SDBA:
+    def __getitem__(self: SDBA, item: slice) -> SDBA: # noqa F811
         ...
 
     def __getitem__(self, item):  # noqa F811
