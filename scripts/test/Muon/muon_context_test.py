@@ -379,16 +379,19 @@ class MuonContextTest(unittest.TestCase):
         self.assertEqual(self.context._calculate_diffs.call_count, 2)
 
     def test_update_phasequads(self):
-        phasequad = MuonPhasequad("test", "table")
+        phasequad = MuonPhasequad("test", "test_table")
         self.context.group_pair_context.add_phasequad(phasequad)
-        self.assertEqual(["long", "test_Re_", "test_Im_"],self.context.group_pair_context.pair_names)
-        self.assertEqual("test",self.context.group_pair_context._phasequad[0].name)
-        self.assertEqual(1,len(self.context.group_pair_context._phasequad))
+        self.context._calculate_phasequads = mock.Mock()
+        self.assertEqual(["long", "test_Re_", "test_Im_"], self.context.group_pair_context.pair_names)
+        self.assertEqual("test", self.context.group_pair_context._phasequad[0].name)
+        self.assertEqual(1, len(self.context.group_pair_context._phasequad))
 
         self.context._update_phasequads(False)
 
-        self.assertEqual(["long"],self.context.group_pair_context.pair_names)
-        self.assertEqual(0,len(self.context.group_pair_context._phasequad))
+        self.assertEqual(["long", "test_Re_", "test_Im_"], self.context.group_pair_context.pair_names)
+        self.assertEqual("test", self.context.group_pair_context._phasequad[0].name)
+        self.assertEqual(1, len(self.context.group_pair_context._phasequad))
+        self.assertEqual(1, self.context._calculate_phasequads.call_count)
 
     def test_calculate_phasequads(self):
         self.context._calculate_phasequads = mock.Mock()

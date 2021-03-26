@@ -215,7 +215,7 @@ class PhaseTablePresenter(object):
         parameters['BackwardSpectra'] = self.context.group_pair_context[backward_group].detectors
 
         parameters['DetectorTable'] = get_phase_table_workspace_name(parameters['InputWorkspace'], forward_group,
-                                                                 backward_group, new_name=self._new_table_name)
+                                                                     backward_group, new_name=self._new_table_name)
         self._new_table_name = ""
 
         return parameters
@@ -297,6 +297,7 @@ class PhaseTablePresenter(object):
         self.context.phase_context.options_dict['phase_table_for_phase_quad'] = new_table
         # clear what is there currently and recalculate with new table
         if self.context.group_pair_context.phasequads:
+            self.disable_editing_notifier.notify_subscribers()
             for i, phasequad in enumerate(self.context.group_pair_context.phasequads):
                 self.add_phase_quad_to_analysis(False, phasequad)
                 self.context.group_pair_context.phasequads[i].phase_table = new_table
@@ -304,6 +305,7 @@ class PhaseTablePresenter(object):
                 self.context.calculate_phasequads(phasequad.name, phasequad)
                 self.add_phase_quad_to_analysis(True, phasequad)
             self.view.set_phase_table(new_table)
+            self.enable_editing_notifier.notify_subscribers()
 
     def clear_phase_quads(self):
         # Remove from view

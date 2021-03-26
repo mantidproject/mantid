@@ -18,6 +18,10 @@ from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
+def phase_table_name_side_effect():
+    return ""
+
+
 @start_qapplication
 class PhaseTablePresenterTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
@@ -40,6 +44,8 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.update_current_groups_list()
 
         self.view.warning_popup = mock.MagicMock()
+        self.view.enter_phase_table_name = mock.Mock()
+        self.view.enter_phase_table_name.side_effect = phase_table_name_side_effect
 
     def test_update_view_from_model_updates_view_to_have_correct_values(self):
         self.presenter.update_view_from_model()
@@ -103,7 +109,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.add_phase_table_to_ADS = mock.MagicMock()
 
         self.presenter.update_current_run_list()
-        self.presenter.handle_calulate_phase_table_clicked()
+        self.presenter.handle_calculate_phase_table_clicked()
         self.wait_for_thread(self.presenter.calculation_thread)
 
         self.presenter.add_phase_table_to_ADS.assert_called_once_with(detector_table_mock)
@@ -120,7 +126,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
             return_value=('MUSR22222_raw_data_period_1', 'MUSR22222 PhaseTable'))
 
         self.presenter.update_current_run_list()
-        self.presenter.handle_calulate_phase_table_clicked()
+        self.presenter.handle_calculate_phase_table_clicked()
         self.wait_for_thread(self.presenter.calculation_thread)
 
         self.assertTrue(self.view.isEnabled())
@@ -142,7 +148,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.handle_calculation_error = mock.MagicMock()
         self.presenter.calculate_phase_table = mock.MagicMock()
 
-        self.presenter.handle_calulate_phase_table_clicked()
+        self.presenter.handle_calculate_phase_table_clicked()
         self.wait_for_thread(self.presenter.calculation_thread)
 
         self.presenter.handle_phase_table_calculation_started.assert_called_once_with()
@@ -171,7 +177,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.view.enable_widget()
 
         for widget in self.view.children():
-            if str(widget.objectName()) in ['cancel_button', 'phasequad_cancel_button']:
+            if str(widget.objectName()) in ['cancel_calculate_phase_table_button']:
                 continue
             self.assertTrue(widget.isEnabled())
 
@@ -180,7 +186,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         disable_notifier.notify_subscribers()
         for widget in self.view.children():
-            if str(widget.objectName()) in ['cancel_button', 'phasequad_cancel_button']:
+            if str(widget.objectName()) in ['cancel_calculate_phase_table_button']:
                 continue
             self.assertFalse(widget.isEnabled())
 
@@ -189,7 +195,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.view.disable_widget()
 
         for widget in self.view.children():
-            if str(widget.objectName()) in ['cancel_button', 'phasequad_cancel_button']:
+            if str(widget.objectName()) in ['cancel_calculate_phase_table_button']:
                 continue
             self.assertFalse(widget.isEnabled())
 
@@ -198,7 +204,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         enable_notifier.notify_subscribers()
         for widget in self.view.children():
-            if str(widget.objectName()) in ['cancel_button', 'phasequad_cancel_button']:
+            if str(widget.objectName()) in ['cancel_calculate_phase_table_button']:
                 continue
             self.assertTrue(widget.isEnabled())
 
@@ -301,6 +307,15 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.handle_last_good_data_changed()
 
         self.view.warning_popup.assert_not_called()
+
+    def test_remove_phase_quad_button(self):
+        phasequad = MuonPhasequad("test", "table")
+        self.view.num_rows = mock.Mock(return_value=1)
+        self.view.get_table_item_text = mock.Mock(return_value="test")
+        self.presenter.context.group_pair_context._phasequad = [phasequad]
+        self.presenter.handle_remove_phasequad_button_clicked()
+
+        self.assertEqual(0, len(self.presenter.context.group_pair_context.phasequads))
 
 
 if __name__ == '__main__':
