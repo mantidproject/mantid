@@ -49,7 +49,7 @@ private:
   binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
   /// build symmetry matrix
   Mantid::Kernel::DblMatrix buildSymmetryMatrix(const Geometry::SymmetryOperation &so);
-
+  void determineBasisVector(const size_t &qindex, const std::string &value, const Kernel::DblMatrix &Qtransform, std::vector<double> &projection, std::stringstream &basisVector, std::vector<size_t> &qDimensionIndices);
 
   std::vector<coord_t>
   getValuesFromOtherDimensions(bool &skipNormalization,

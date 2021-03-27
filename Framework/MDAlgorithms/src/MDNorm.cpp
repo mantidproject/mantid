@@ -1090,6 +1090,52 @@ inline DblMatrix MDNorm::buildSymmetryMatrix(const Geometry::SymmetryOperation &
     return soMatrix;
 }
 
+// projection: input/output
+// requiring: m_hIdx, m_kIndex, m_lIdx, meidx, m_dEintegrated, m_Q0Basis, mQ1Basis,
+inline void MDNorm::determineBasisVector(const size_t &qindex, const std::string &value, const Mantid::Kernel::DblMatrix &Qtransform, std::vector<double> &projection, std::stringstream &basisVector,
+                                         std::vector<size_t> &qDimensionIndices) {
+    if (value.find("QDimension0") != std::string::npos) {
+      m_hIdx = qindex;
+      if (!m_isRLU) {
+        projection[0] = 1.;
+        basisVector << QDimensionNameQSample(0) << ",A^{-1}";
+      } else {
+        qDimensionIndices.emplace_back(qindex);
+        projection[0] = Qtransform[0][0];
+        projection[1] = Qtransform[1][0];
+        projection[2] = Qtransform[2][0];
+        basisVector << QDimensionName(m_Q0Basis) << ", r.l.u.";
+      }
+    } else if (value.find("QDimension1") != std::string::npos) {
+      m_kIdx = qindex;
+      if (!m_isRLU) {
+        projection[1] = 1.;
+        basisVector << QDimensionNameQSample(1) << ",A^{-1}";
+      } else {
+        qDimensionIndices.emplace_back(qindex);
+        projection[0] = Qtransform[0][1];
+        projection[1] = Qtransform[1][1];
+        projection[2] = Qtransform[2][1];
+        basisVector << QDimensionName(m_Q1Basis) << ", r.l.u.";
+      }
+    } else if (value.find("QDimension2") != std::string::npos) {
+      m_lIdx = qindex;
+      if (!m_isRLU) {
+        projection[2] = 1.;
+        basisVector << QDimensionNameQSample(2) << ",A^{-1}";
+      } else {
+        qDimensionIndices.emplace_back(qindex);
+        projection[0] = Qtransform[0][2];
+        projection[1] = Qtransform[1][2];
+        projection[2] = Qtransform[2][2];
+        basisVector << QDimensionName(m_Q2Basis) << ", r.l.u.";
+      }
+    } else if (value.find("DeltaE") != std::string::npos) {
+      m_eIdx = qindex;
+      m_dEIntegrated = false;
+    }
+}
+
 /**
  * Runs the BinMD algorithm on the input to provide the output workspace
  * All slicing algorithm properties are passed along
@@ -1110,13 +1156,15 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
   std::vector<size_t> qDimensionIndices;
   for (auto so : symmetryOps) {
     // calculate dimensions for binning
-    DblMatrix soMatrix(3, 3);
-    auto v = so.transformHKL(V3D(1, 0, 0));
-    soMatrix.setColumn(0, v);
-    v = so.transformHKL(V3D(0, 1, 0));
-    soMatrix.setColumn(1, v);
-    v = so.transformHKL(V3D(0, 0, 1));
-    soMatrix.setColumn(2, v);
+    // Replaced...
+//    DblMatrix soMatrix(3, 3);
+//    auto v = so.transformHKL(V3D(1, 0, 0));
+//    soMatrix.setColumn(0, v);
+//    v = so.transformHKL(V3D(0, 1, 0));
+//    soMatrix.setColumn(1, v);
+//    v = so.transformHKL(V3D(0, 0, 1));
+//    soMatrix.setColumn(2, v);
+    DblMatrix soMatrix = buildSymmetryMatrix(so);
     // ... ...
 
     DblMatrix Qtransform;
@@ -1145,46 +1193,49 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
       std::vector<double> projection(m_inputWS->getNumDims(), 0.);
       // value is a string that can start with QDimension0, etc, but contain
       // other stuff. Do not use ==
-      if (value.find("QDimension0") != std::string::npos) {
-        m_hIdx = qindex;
-        if (!m_isRLU) {
-          projection[0] = 1.;
-          basisVector << QDimensionNameQSample(0) << ",A^{-1}";
-        } else {
-          qDimensionIndices.emplace_back(qindex);
-          projection[0] = Qtransform[0][0];
-          projection[1] = Qtransform[1][0];
-          projection[2] = Qtransform[2][0];
-          basisVector << QDimensionName(m_Q0Basis) << ", r.l.u.";
-        }
-      } else if (value.find("QDimension1") != std::string::npos) {
-        m_kIdx = qindex;
-        if (!m_isRLU) {
-          projection[1] = 1.;
-          basisVector << QDimensionNameQSample(1) << ",A^{-1}";
-        } else {
-          qDimensionIndices.emplace_back(qindex);
-          projection[0] = Qtransform[0][1];
-          projection[1] = Qtransform[1][1];
-          projection[2] = Qtransform[2][1];
-          basisVector << QDimensionName(m_Q1Basis) << ", r.l.u.";
-        }
-      } else if (value.find("QDimension2") != std::string::npos) {
-        m_lIdx = qindex;
-        if (!m_isRLU) {
-          projection[2] = 1.;
-          basisVector << QDimensionNameQSample(2) << ",A^{-1}";
-        } else {
-          qDimensionIndices.emplace_back(qindex);
-          projection[0] = Qtransform[0][2];
-          projection[1] = Qtransform[1][2];
-          projection[2] = Qtransform[2][2];
-          basisVector << QDimensionName(m_Q2Basis) << ", r.l.u.";
-        }
-      } else if (value.find("DeltaE") != std::string::npos) {
-        m_eIdx = qindex;
-        m_dEIntegrated = false;
-      }
+//      if (value.find("QDimension0") != std::string::npos) {
+//        m_hIdx = qindex;
+//        if (!m_isRLU) {
+//          projection[0] = 1.;
+//          basisVector << QDimensionNameQSample(0) << ",A^{-1}";
+//        } else {
+//          qDimensionIndices.emplace_back(qindex);
+//          projection[0] = Qtransform[0][0];
+//          projection[1] = Qtransform[1][0];
+//          projection[2] = Qtransform[2][0];
+//          basisVector << QDimensionName(m_Q0Basis) << ", r.l.u.";
+//        }
+//      } else if (value.find("QDimension1") != std::string::npos) {
+//        m_kIdx = qindex;
+//        if (!m_isRLU) {
+//          projection[1] = 1.;
+//          basisVector << QDimensionNameQSample(1) << ",A^{-1}";
+//        } else {
+//          qDimensionIndices.emplace_back(qindex);
+//          projection[0] = Qtransform[0][1];
+//          projection[1] = Qtransform[1][1];
+//          projection[2] = Qtransform[2][1];
+//          basisVector << QDimensionName(m_Q1Basis) << ", r.l.u.";
+//        }
+//      } else if (value.find("QDimension2") != std::string::npos) {
+//        m_lIdx = qindex;
+//        if (!m_isRLU) {
+//          projection[2] = 1.;
+//          basisVector << QDimensionNameQSample(2) << ",A^{-1}";
+//        } else {
+//          qDimensionIndices.emplace_back(qindex);
+//          projection[0] = Qtransform[0][2];
+//          projection[1] = Qtransform[1][2];
+//          projection[2] = Qtransform[2][2];
+//          basisVector << QDimensionName(m_Q2Basis) << ", r.l.u.";
+//        }
+//      } else if (value.find("DeltaE") != std::string::npos) {
+//        m_eIdx = qindex;
+//        m_dEIntegrated = false;
+//      }
+      determineBasisVector(qindex, value, Qtransform, projection, basisVector, qDimensionIndices);
+      // .........................
+
       if (!basisVector.str().empty()) {
         for (auto proji : projection) {
           proji = std::abs(proji) > 1e-10 ? proji : 0.0;
@@ -1195,6 +1246,7 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
 
       g_log.debug() << "Binning parameter " << key << " value: " << value
                     << "\n";
+      std::cout << "BinMD parameter to set: " << key << " = " << value << "\n";
       binMD->setPropertyValue(key, value);
       qindex++;
     }
