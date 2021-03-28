@@ -13,6 +13,7 @@ from mantid.api import (
     AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, WorkspaceProperty, mtd, Progress, TextAxis,
     Workspace, WorkspaceGroup, WorkspaceUnitValidator)
 from mantid.dataobjects import TableWorkspace, Workspace2D
+from mantid.kernel import StringListValidator
 from mantid.simpleapi import (
     CalculateDIFC, CloneWorkspace, CopyInstrumentParameters, ConvertUnits, CreateEmptyTableWorkspace,
     CreateGroupingWorkspace, CreateWorkspace, DeleteWorkspace, GroupDetectors, GroupWorkspaces, Multiply,
@@ -149,6 +150,17 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         property_names = ['ComponentList', 'ComponentMaxTranslation', 'ComponentMaxRotation']
         [self.setPropertyGroup(name, 'Banks Calibration') for name in property_names]
 
+        #
+        # Minimization Properties
+        self.declareProperty(name='Minimizer', defaultValue='L-BFGS-B', direction=Direction.Input,
+                             validator=StringListValidator(['L-BFGS-B', 'differential_evolution']),
+                             doc='Minimizer to use, differential_evolution is more accurate and slower.')
+        self.declareProperty(name='MaxIterations', defaultValue=20, direction=Direction.Input,
+                             doc='Maximum number of iterations for minimizer differential_evolution')
+
+        properties = ['Minimizer', 'MaxIterations']
+        [self.setPropertyGroup(name, "Minimization") for name in properties]
+
     def PyExec(self):
         temporary_workspaces = []
         self.temp_ws = temp_workspace_generator(temporary_workspaces)  # name generator for temporary workpaces
@@ -230,7 +242,8 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
                           AdjustmentsTable=adjustments_table_name,
                           FitSourcePosition=True,
                           FitSamplePosition=False,
-                          Zposition=True, MinZPosition=-dz, MaxZPosition=dz)
+                          Zposition=True, MinZPosition=-dz, MaxZPosition=dz,
+                          Minimizer='L-BFGS-B')
             self.run_algorithm('AlignComponents', 0.1, 0.2, **kwargs)
         else:
             # Impose the fixed position of the source and save into the adjustments table
@@ -255,7 +268,9 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
                       AlphaRotation=True, MinAlphaRotation=-dr, MaxAlphaRotation=dr,
                       BetaRotation=True, MinBetaRotation=-dr, MaxBetaRotation=dr,
                       GammaRotation=True, MinGammaRotation=-dr, MaxGammaRotation=dr,
-                      EulerConvention='YXZ')
+                      EulerConvention='YXZ',
+                      Minimizer=self.getProperty('Minimizer').value,
+                      MaxIterations=self.getProperty('MaxIterations').value)
         self.run_algorithm('AlignComponents', 0.2, 0.97, **kwargs)
         progress.report('AlignComponents has been applied')
 
