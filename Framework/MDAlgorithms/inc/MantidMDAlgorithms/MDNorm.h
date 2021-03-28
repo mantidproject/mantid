@@ -48,8 +48,15 @@ private:
   DataObjects::MDHistoWorkspace_sptr
   binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
   /// build symmetry matrix
-  Mantid::Kernel::DblMatrix buildSymmetryMatrix(const Geometry::SymmetryOperation &so);
-  void determineBasisVector(const size_t &qindex, const std::string &value, const Kernel::DblMatrix &Qtransform, std::vector<double> &projection, std::stringstream &basisVector, std::vector<size_t> &qDimensionIndices);
+  Mantid::Kernel::DblMatrix
+  buildSymmetryMatrix(const Geometry::SymmetryOperation &so);
+  void determineBasisVector(const size_t &qindex, const std::string &value,
+                            const Kernel::DblMatrix &Qtransform,
+                            std::vector<double> &projection,
+                            std::stringstream &basisVector,
+                            std::vector<size_t> &qDimensionIndices);
+  inline void setQUnit(const std::vector<size_t> &qDimensionIndices,
+                       Mantid::DataObjects::MDHistoWorkspace_sptr outputMDHWS);
 
   std::vector<coord_t>
   getValuesFromOtherDimensions(bool &skipNormalization,
