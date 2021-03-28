@@ -1142,22 +1142,23 @@ MDNorm::determineBasisVector(const size_t &qindex, const std::string &value,
   }
 }
 
-inline void MDNorm::setQUnit(const std::vector<size_t> &qDimensionIndices,
-                             Mantid::DataObjects::MDHistoWorkspace_sptr outputMDHWS){
-    Mantid::Geometry::MDFrameArgument argument(
-        Mantid::Geometry::HKL::HKLName, Mantid::Kernel::Units::Symbol::RLU);
-    auto mdFrameFactory = Mantid::Geometry::makeMDFrameFactoryChain();
-    Mantid::Geometry::MDFrame_uptr hklFrame = mdFrameFactory->create(argument);
-    for (size_t i : qDimensionIndices) {
-      auto mdHistoDimension = std::const_pointer_cast<
-          Mantid::Geometry::MDHistoDimension>(
-          std::dynamic_pointer_cast<const Mantid::Geometry::MDHistoDimension>(
-              outputMDHWS->getDimension(i)));
-      mdHistoDimension->setMDFrame(*hklFrame);
-    }
-    // add W_matrix
-    auto ei = outputMDHWS->getExperimentInfo(0);
-    ei->mutableRun().addProperty("W_MATRIX", m_W.getVector(), true);
+inline void
+MDNorm::setQUnit(const std::vector<size_t> &qDimensionIndices,
+                 Mantid::DataObjects::MDHistoWorkspace_sptr outputMDHWS) {
+  Mantid::Geometry::MDFrameArgument argument(
+      Mantid::Geometry::HKL::HKLName, Mantid::Kernel::Units::Symbol::RLU);
+  auto mdFrameFactory = Mantid::Geometry::makeMDFrameFactoryChain();
+  Mantid::Geometry::MDFrame_uptr hklFrame = mdFrameFactory->create(argument);
+  for (size_t i : qDimensionIndices) {
+    auto mdHistoDimension =
+        std::const_pointer_cast<Mantid::Geometry::MDHistoDimension>(
+            std::dynamic_pointer_cast<const Mantid::Geometry::MDHistoDimension>(
+                outputMDHWS->getDimension(i)));
+    mdHistoDimension->setMDFrame(*hklFrame);
+  }
+  // add W_matrix
+  auto ei = outputMDHWS->getExperimentInfo(0);
+  ei->mutableRun().addProperty("W_MATRIX", m_W.getVector(), true);
 }
 
 /**
@@ -1241,20 +1242,6 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
   auto outputMDHWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
   // set MDUnits for Q dimensions
   if (m_isRLU) {
-//    Mantid::Geometry::MDFrameArgument argument(
-//        Mantid::Geometry::HKL::HKLName, Mantid::Kernel::Units::Symbol::RLU);
-//    auto mdFrameFactory = Mantid::Geometry::makeMDFrameFactoryChain();
-//    Mantid::Geometry::MDFrame_uptr hklFrame = mdFrameFactory->create(argument);
-//    for (size_t i : qDimensionIndices) {
-//      auto mdHistoDimension = std::const_pointer_cast<
-//          Mantid::Geometry::MDHistoDimension>(
-//          std::dynamic_pointer_cast<const Mantid::Geometry::MDHistoDimension>(
-//              outputMDHWS->getDimension(i)));
-//      mdHistoDimension->setMDFrame(*hklFrame);
-//    }
-//    // add W_matrix
-//    auto ei = outputMDHWS->getExperimentInfo(0);
-//    ei->mutableRun().addProperty("W_MATRIX", m_W.getVector(), true);
     setQUnit(qDimensionIndices, outputMDHWS);
   }
 
