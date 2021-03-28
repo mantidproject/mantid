@@ -252,7 +252,7 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-8
-        return 'result', 'MDNormBackgroundHYSPEC.nxs'
+        return 'result', 'MDNormBackgroundHYSPEC.nxs', 'clean2', 'MDNormBackgroundHYSPEC_10_15.nxs'
 
     @staticmethod
     def prepare_single_exp_info_background(input_md_name, output_md_name, target_qframe='Q_lab'):
