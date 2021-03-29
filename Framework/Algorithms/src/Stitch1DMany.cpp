@@ -93,7 +93,7 @@ void Stitch1DMany::init() {
   setPropertySettings("ScaleFactorFromPeriod",
                       std::move(scaleFactorFromPeriodVisible));
 
-  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(0);
   declareProperty(
       std::make_unique<PropertyWithValue<size_t>>(
