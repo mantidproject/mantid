@@ -107,7 +107,7 @@ class TOPAZPeakFinding(systemtesting.MantidSystemTest):
 
         # repeat but use LeanElasticPeaks
         FindPeaksMD(InputWorkspace='topaz_3132_QSample',PeakDistanceThreshold='0.12',MaxPeaks='200',OutputWorkspace='peaks_QSample',
-                    OutputPeakType='LeanElasticPeak')
+                    OutputType='LeanElasticPeak')
         self.assertTrue(isinstance(mtd['peaks_QSample'], LeanElasticPeaksWorkspace))
         FindUBUsingFFT(PeaksWorkspace='peaks_QSample',MinD='2',MaxD='16')
         CopySample(InputWorkspace='peaks_QSample',OutputWorkspace='topaz_3132',CopyName='0',CopyMaterial='0',

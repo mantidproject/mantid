@@ -299,7 +299,7 @@ public:
 
     if (expInfo)
       TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("OutputPeakType", "LeanElasticPeak"));
+          alg.setPropertyValue("OutputType", "LeanElasticPeak"));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());

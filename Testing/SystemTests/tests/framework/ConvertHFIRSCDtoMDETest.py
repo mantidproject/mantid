@@ -47,7 +47,7 @@ class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
 
         # now try using LeanElasticPeak
         ConvertHFIRSCDtoMDETest_peaks3 = FindPeaksMD(InputWorkspace=ConvertHFIRSCDtoMDETest_Q, PeakDistanceThreshold=2.2,
-                                                     OutputPeakType='LeanElasticPeak')
+                                                     OutputType='LeanElasticPeak')
 
         self.assertEqual(ConvertHFIRSCDtoMDETest_peaks3.getNumberPeaks(), 14)
 

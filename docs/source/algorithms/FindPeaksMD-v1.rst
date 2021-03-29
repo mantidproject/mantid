@@ -35,7 +35,7 @@ The algorithm proceeds in this way:
 
 Each peak created is placed in the output :ref:`PeaksWorkspace
 <PeaksWorkspace>` or :ref:`LeanElasticPeaksWorkspace
-<LeanElasticPeaksWorkspace>` (depending on the `OutputPeakType`
+<LeanElasticPeaksWorkspace>` (depending on the `OutputType`
 option), which can be a new workspace or replace the old one.
 
 This algorithm works on a :ref:`MDHistoWorkspace <MDHistoWorkspace>`

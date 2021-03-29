@@ -227,7 +227,7 @@ void FindPeaksMD::init() {
                           "CalculateGoniometerForCW",
                           Mantid::Kernel::ePropertyCriterion::IS_NOT_DEFAULT));
   std::vector<std::string> peakTypes = {"Automatic", "Peak", "LeanElasticPeak"};
-  declareProperty("OutputPeakType", "Automatic",
+  declareProperty("OutputType", "Automatic",
                   std::make_shared<StringListValidator>(peakTypes),
                   "Type of Peak in OutputWorkspace");
   declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
@@ -281,8 +281,8 @@ void FindPeaksMD::checkWorkspaceDims(const IMDWorkspace_sptr &ws) {
         "Unexpected dimensions: need either Q_lab_x or Q_sample_x.");
 }
 
-void FindPeaksMD::determineOutputPeakType(const std::string peakType,
-                                          const uint16_t nexp) {
+void FindPeaksMD::determineOutputType(const std::string peakType,
+                                      const uint16_t nexp) {
   // This method will be expanded later to check a property on the
   // input workspace which can specify a default peak type for that
   // instrument.
@@ -860,9 +860,9 @@ void FindPeaksMD::exec() {
   else if (inMDEW)
     nexp = inMDEW->getNumExperimentInfo();
 
-  std::string peakType = getProperty("OutputPeakType");
+  std::string peakType = getProperty("OutputType");
 
-  determineOutputPeakType(peakType, nexp);
+  determineOutputType(peakType, nexp);
 
   // Output peaks workspace, create if needed
   peakWS = getProperty("OutputWorkspace");
@@ -942,12 +942,12 @@ std::map<std::string, std::string> FindPeaksMD::validateInputs() {
   else if (inMDEW)
     nexp = inMDEW->getNumExperimentInfo();
 
-  std::string peakType = getProperty("OutputPeakType");
+  std::string peakType = getProperty("OutputType");
 
   if (peakType == "Peak" && nexp == 0)
-    result["OutputPeakType"] =
+    result["OutputType"] =
         "The InputWorkspace doesn't contain any experiment information so the "
-        "OutputPeakType cannot be Peak.";
+        "OutputType cannot be Peak.";
 
   return result;
 }
