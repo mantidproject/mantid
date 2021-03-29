@@ -142,14 +142,14 @@ void PredictPeaks::init() {
   setPropertySettings("ReflectionCondition", makeSet());
 
   std::vector<std::string> peakTypes = {"Peak", "LeanElasticPeak"};
-  declareProperty("OutputPeakType", "Peak", std::make_shared<StringListValidator>(peakTypes),
+  declareProperty("OutputType", "Peak", std::make_shared<StringListValidator>(peakTypes),
                   "Type of Peak in OutputWorkspace");
   declareProperty("CalculateWavelength", true,
-                  "When OutputPeakType is LeanElasticPeak you can choose to calculate the "
+                  "When OutputType is LeanElasticPeak you can choose to calculate the "
                   "wavelength of the peak using the instrument and check it is in the "
                   "valid range or alternatively just accept every peak and set the "
                   "goniometer.");
-  setPropertySettings("CalculateWavelength", std::make_unique<EnabledWhenProperty>("OutputPeakType", IS_NOT_DEFAULT));
+  setPropertySettings("CalculateWavelength", std::make_unique<EnabledWhenProperty>("OutputType", IS_NOT_DEFAULT));
 
   declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace.");
@@ -170,7 +170,7 @@ void PredictPeaks::exec() {
   // Get the input properties
   Workspace_sptr rawInputWorkspace = getProperty("InputWorkspace");
   m_edge = this->getProperty("EdgePixels");
-  m_leanElasticPeak = (getPropertyValue("OutputPeakType") == "LeanElasticPeak");
+  m_leanElasticPeak = (getPropertyValue("OutputType") == "LeanElasticPeak");
   bool leanElasticPeak_calculate_wl = getProperty("CalculateWavelength");
 
   ExperimentInfo_sptr inputExperimentInfo = std::dynamic_pointer_cast<ExperimentInfo>(rawInputWorkspace);

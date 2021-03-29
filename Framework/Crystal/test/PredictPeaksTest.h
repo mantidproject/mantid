@@ -283,10 +283,8 @@ public:
     std::string outWSName("PredictPeaksTest_OutputWS");
 
     // Make the fake input workspace
-    MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::create2DWorkspace(10000, 1);
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
+    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::create2DWorkspace(10000, 1);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
     inWS->setInstrument(inst);
 
     // Set ub and Goniometer rotation
@@ -296,24 +294,19 @@ public:
     PredictPeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalculateGoniometerForCW", true));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Wavelength", "1.5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MinAngle", "0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaxAngle", "5.0"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputPeakType", "LeanElasticPeak"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputType", "LeanElasticPeak"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     LeanElasticPeaksWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance()
-                 .retrieveWS<LeanElasticPeaksWorkspace>(outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<LeanElasticPeaksWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -330,27 +323,21 @@ public:
 
   void test_exec_LeanElasticPeak_no_instrument() {
     auto inWS = WorkspaceFactory::Instance().createPeaks();
-    inWS->mutableSample().setOrientedLattice(
-        std::make_unique<OrientedLattice>(2., 2., 2., 90., 90., 90.));
+    inWS->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(2., 2., 2., 90., 90., 90.));
     PredictPeaks alg;
     std::string outWSName("PredictPeaksTest_OutputWS");
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputPeakType", "LeanElasticPeak"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputType", "LeanElasticPeak"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalculateWavelength", false));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     LeanElasticPeaksWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance()
-                 .retrieveWS<LeanElasticPeaksWorkspace>(outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<LeanElasticPeaksWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;

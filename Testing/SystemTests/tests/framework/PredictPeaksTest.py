@@ -80,7 +80,7 @@ class PredictPeaksTestTOPAZ(systemtesting.MantidSystemTest):
         leanelasticpeaks = PredictPeaks(simulationWorkspace,
                                         WavelengthMin=0.5, WavelengthMax=6,
                                         MinDSpacing=0.5, MaxDSpacing=10,
-                                        OutputPeakType='LeanElasticPeak')
+                                        OutputType='LeanElasticPeak')
         self.assertEqual(peaks.getNumberPeaks(), leanelasticpeaks.getNumberPeaks())
         # sorting is different, just compare peak [1, 0, 2]
         peak102 = peaks.getPeak(117)
@@ -155,7 +155,7 @@ class PredictPeaksTestDEMAND(systemtesting.MantidSystemTest):
         # test predicting with LeanElasticPeak, filter any peak with 0 intensity
         PredictPeaks("data",
                      ReflectionCondition='B-face centred',
-                     OutputPeakType='LeanElasticPeak',
+                     OutputType='LeanElasticPeak',
                      CalculateWavelength=False,
                      OutputWorkspace="leanelasticpeaks")
 
