@@ -67,7 +67,7 @@ Usage
 
     for row in rows:
         table.addRow(row)
-    
+
     PeakMatching(table)
 
     primary_matches = mtd['primary_matches']
@@ -122,7 +122,7 @@ Output:
 
     for row in rows:
         table.addRow(row)
-    
+
     PeakMatching(table,PrimaryPeaks="primary",SecondaryPeaks="secondary",AllPeaks="all",SortedByEnergy="sort",ElementLikelihood="count")
 
     primary_matches = mtd['primary']
@@ -178,7 +178,7 @@ Output:
 
     for row in rows:
         table.addRow(row)
-    
+
     PeakMatching(table, PeakCentreColumn = "center",SigmaColumn = "standard deviation")
 
     primary_matches = mtd['primary_matches']
