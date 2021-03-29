@@ -45,7 +45,7 @@ Usage
 
    GenerateLogbook(Directory=data_directory,
                    OutputWorkspace='d7_logbook', Facility='ILL', Instrument='D7',
-                   NumorRange=[396990,396993], OptionalHeaders='TOF',
+                   NumorRange=[396990,396991,396993], OptionalHeaders='TOF',
                    CustomEntries='entry0/acquisition_mode')
    print("Number of numors in the logbook: {}".format(len(mtd['d7_logbook'].column(0))))
    print("Number of headers in the logbook: {}".format(len(mtd['d7_logbook'].row(0))))
@@ -71,7 +71,7 @@ Output:
 
    GenerateLogbook(Directory=data_directory,
                    OutputWorkspace='d7_logbook', Facility='ILL', Instrument='D7',
-                   NumorRange=[396990,396993], CustomHeaders='polarisation',
+                   NumorRange="396990:396993", CustomHeaders='polarisation',
                    CustomEntries='/entry0/D7/POL/actual_state+/entry0/D7/POL/actual_stateB1B2')
    print("Number of numors in the logbook: {}".format(len(mtd['d7_logbook'].column(0))))
    print("Number of headers in the logbook: {}".format(len(mtd['d7_logbook'].row(0))))
