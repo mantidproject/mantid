@@ -49,7 +49,7 @@ class CalibrationModel(object):
         :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         """
         van_integration, van_curves = vanadium_corrections.fetch_correction_workspaces(
-            vanadium_path, instrument, rb_num=rb_num)
+            vanadium_path, instrument, rb_num=rb_num)  # van_curves = None at this point
         sample_workspace = path_handling.load_workspace(sample_path)
         full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")

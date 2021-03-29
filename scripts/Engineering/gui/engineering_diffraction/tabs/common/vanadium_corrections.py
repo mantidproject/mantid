@@ -32,7 +32,8 @@ def fetch_correction_workspaces(vanadium_path, instrument, rb_num=""):
     :return: The resultant integration and curves workspaces.
     """
     vanadium_number = path_handling.get_run_number_from_path(vanadium_path, instrument)
-    integ_path, curves_path = _generate_saved_workspace_file_paths(vanadium_number)
+    integ_path = generate_van_ws_file_path(vanadium_number, SAVED_FILE_INTEG_SUFFIX, rb_num)
+    curves_path = generate_van_ws_file_path(vanadium_number, SAVED_FILE_CURVE_SUFFIX, rb_num)
     force_recalc = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
                                path_handling.ENGINEERING_PREFIX, "recalc_vanadium", return_type=bool)
     if path.exists(curves_path) and path.exists(integ_path) and not force_recalc:  # Check if the cached files exist.
@@ -40,23 +41,22 @@ def fetch_correction_workspaces(vanadium_path, instrument, rb_num=""):
             integ_workspace = Load(Filename=integ_path, OutputWorkspace=INTEGRATED_WORKSPACE_NAME)
             curves_workspace = Load(Filename=curves_path, OutputWorkspace=CURVES_WORKSPACE_NAME)
             if rb_num:
-                user_integ, user_curves = _generate_saved_workspace_file_paths(vanadium_number,
-                                                                               rb_num=rb_num)
+                user_integ = generate_van_ws_file_path(vanadium_number, SAVED_FILE_INTEG_SUFFIX, rb_num=rb_num)
+                user_curves = generate_van_ws_file_path(vanadium_number, SAVED_FILE_CURVE_SUFFIX, rb_num=rb_num)
                 if not path.exists(user_integ) and not path.exists(user_curves):
-                    _save_correction_files(integ_workspace, user_integ, curves_workspace,
-                                           user_curves)
+                    save_van_workspace(integ_workspace, user_integ)
+                    save_van_workspace(curves_workspace, user_curves)
             return integ_workspace, curves_workspace
         except RuntimeError as e:
             logger.error(
                 "Problem loading existing vanadium calculations. Creating new files. Description: "
                 + str(e))
-    integ_workspace, curves_workspace = _calculate_vanadium_correction(vanadium_path)
-    _save_correction_files(integ_workspace, integ_path, curves_workspace, curves_path)
+    integ_workspace = _calculate_vanadium_correction(vanadium_path)
+    save_van_workspace(integ_workspace, integ_path)
     if rb_num:
-        user_integ, user_curves = _generate_saved_workspace_file_paths(vanadium_number,
-                                                                       rb_num=rb_num)
-        _save_correction_files(integ_workspace, user_integ, curves_workspace, user_curves)
-    return integ_workspace, curves_workspace
+        user_integ = generate_van_ws_file_path(vanadium_number, SAVED_FILE_INTEG_SUFFIX, rb_num=rb_num)
+        save_van_workspace(integ_workspace, user_integ)
+    return integ_workspace, None  # curves workspace, if not retrieved from fs, will be created and saved separately
 
 
 def check_workspaces_exist():
@@ -83,35 +83,29 @@ def _calculate_vanadium_correction(vanadium_path):
     ws_van_int = Integration(InputWorkspace=van_ws)
     ws_van_int /= nbins
     Ads.remove(VANADIUM_INPUT_WORKSPACE_NAME)
-    return ws_van_int, None  # TODO curves
+    return ws_van_int
 
 
-def _save_correction_files(integration_workspace, integration_path, curves_workspace, curves_path):
+def save_van_workspace(workspace, output_path):
     """
     Attempt to save the created workspaces to the filesystem.
-    :param integration_workspace: The workspace for the vanadium integration.
-    :param integration_path: The path to save the integration workspace to.
-    :param curves_workspace: The workspace for the vanadium curves.
-    :param curves_path: The path to save the curves workspace to.
+    :param workspace: The vanadium workspace
+    :param output_path: The path to save the workspace to.
     """
     try:
-        SaveNexus(InputWorkspace=integration_workspace, Filename=integration_path)
-        SaveNexus(InputWorkspace=curves_workspace, Filename=curves_path)
+        SaveNexus(InputWorkspace=workspace, Filename=output_path)
     except RuntimeError as e:  # If the files cannot be saved, continue with the execution of the algorithm anyway.
         logger.error(
-            "Vanadium Correction files could not be saved to the filesystem. Description: " + str(e))
+            "Vanadium Integration file could not be saved to the filesystem. Description: " + str(e))
         return
 
 
-def _generate_saved_workspace_file_paths(vanadium_number, rb_num=""):
+def _generate_vanadium_saves_file_path(rb_num=""):
     """
     Generate file paths based on a vanadium run number.
-    :param vanadium_number: The number of the vanadium run.
     :param rb_num: User identifier, usually an experiment number.
     :return: The full path to the file.
     """
-    integrated_filename = vanadium_number + SAVED_FILE_INTEG_SUFFIX
-    curves_filename = vanadium_number + SAVED_FILE_CURVE_SUFFIX
     if rb_num:
         vanadium_dir = path.join(path_handling.get_output_path(), "User", rb_num,
                                  VANADIUM_DIRECTORY_NAME)
@@ -119,4 +113,17 @@ def _generate_saved_workspace_file_paths(vanadium_number, rb_num=""):
         vanadium_dir = path.join(path_handling.get_output_path(), VANADIUM_DIRECTORY_NAME)
     if not path.exists(vanadium_dir):
         makedirs(vanadium_dir)
-    return path.join(vanadium_dir, integrated_filename), path.join(vanadium_dir, curves_filename)
+    return vanadium_dir
+
+
+def generate_van_ws_file_path(vanadium_number, suffix, rb_num=""):
+    """
+    Generate file path based on a vanadium run number for the vanadium integration workspace.
+    :param vanadium_number: The number of the vanadium run.
+    :param suffix: The suffix the filename to be saved
+    :param rb_num: User identifier, usually an experiment number.
+    :return: The full path to the file.
+    """
+    integrated_filename = vanadium_number + suffix
+    vanadium_dir = _generate_vanadium_saves_file_path(rb_num)
+    return path.join(vanadium_dir, integrated_filename)
