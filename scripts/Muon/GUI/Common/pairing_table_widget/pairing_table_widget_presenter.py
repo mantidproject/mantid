@@ -99,10 +99,12 @@ class PairingTablePresenter(object):
             table = self._view.get_table_contents()
         self._model.clear_pairs()
         for entry in table:
+            periods = self._model.get_periods(str(entry[2]))+self._model.get_periods(str(entry[3]))
             pair = MuonPair(pair_name=str(entry[0]),
                             backward_group_name=str(entry[3]),
                             forward_group_name=str(entry[2]),
-                            alpha=float(entry[4]))
+                            alpha=float(entry[4]),
+                            periods = periods)
             self._model.add_pair(pair)
 
     def update_view_from_model(self):
@@ -129,7 +131,7 @@ class PairingTablePresenter(object):
         self._view.enable_updates()
 
     def update_group_selections(self):
-        groups = self._model.group_names
+        groups = self._model.group_names + [diff.name for diff in self._model.get_diffs("group")]
         self._view.update_group_selections(groups)
 
     def to_analyse_data_checkbox_changed(self, state, row, pair_name):
@@ -190,28 +192,46 @@ class PairingTablePresenter(object):
             elif self.validate_pair_name(new_pair_name):
                 group1 = self._model.group_names[0] if not group_1 else group_1
                 group2 = self._model.group_names[1] if not group_2 else group_2
+                periods = self._model.get_periods(group1)+self._model.get_periods(group2)
                 pair = MuonPair(pair_name=str(new_pair_name),
-                                forward_group_name=group1, backward_group_name=group2, alpha=1.0)
+                                forward_group_name=group1, backward_group_name=group2, alpha=1.0, periods=periods)
                 self.add_pair(pair)
                 self.notify_data_changed()
 
     def handle_remove_pair_button_clicked(self):
-        pair_names = self._view.get_selected_pair_names()
+        pair_names = self._view.get_selected_pair_names_and_indexes()
         if not pair_names:
             self.remove_last_row_in_view_and_model()
         else:
-            self._view.remove_selected_pairs()
-            for pair_name in pair_names:
-                self._model.remove_pair_from_analysis(pair_name)
-            self._model.remove_pairs_by_name(pair_names)
+            self.remove_selected_rows_in_view_and_model(pair_names)
         self.notify_data_changed()
+
+    def remove_selected_rows_in_view_and_model(self, pair_names):
+        safe_to_rm = []
+        warnings = ""
+        for name, index in pair_names:
+            used_by = self._model.check_if_used_by_diff(name)
+            if used_by:
+                warnings+=used_by+"\n"
+            else:
+                safe_to_rm.append([index, name])
+        for index, name in reversed(safe_to_rm):
+            self._model.remove_pair_from_analysis(name)
+            self._view.remove_pair_by_index(index)
+        self._model.remove_pairs_by_name([name for index, name in safe_to_rm])
+        if warnings:
+            self._view.warning_popup(warnings)
 
     def remove_last_row_in_view_and_model(self):
         if self._view.num_rows() > 0:
             name = self._view.get_table_contents()[-1][0]
-            self._view.remove_last_row()
-            self._model.remove_pair_from_analysis(name)
-            self._model.remove_pairs_by_name([name])
+            warning = self._model.check_if_used_by_diff(name)
+            if warning:
+                self._view.warning_popup(warning)
+            else:
+                self._view.remove_last_row()
+                self._model.remove_pair_from_analysis(name)
+                self._model.remove_pairs_by_name([name])
 
     # ------------------------------------------------------------------------------------------------------------------
     # Table entry validation

@@ -130,7 +130,7 @@ void ImportMDEventWorkspace::addEventsData(
       centers[j] = convert<Mantid::coord_t>(*(++mdEventEntriesIterator));
     }
     // Actually add the mdevent.
-    inserter.insertMDEvent(signal, error * error, run_no, detector_no,
+    inserter.insertMDEvent(signal, error * error, run_no, 0, detector_no,
                            centers.data());
   }
 }

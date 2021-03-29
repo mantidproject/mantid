@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.gui_helper import show_interface_help
 import numpy as np
-import os
 import mantid
 from qtpy import QtWidgets
 from mantidqt.MPLwidgets import *
@@ -52,8 +51,10 @@ class QECoverageGUI(QtWidgets.QWidget):
     # Initial Mantid Algorithm by Helen Walker (2015)
     # Rewritten as a Mantid interface by Duc Le (2016)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, window_flags=None):
         QtWidgets.QWidget.__init__(self, parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         self.setWindowTitle("QECoverage")
         self.grid = QtWidgets.QVBoxLayout()
         self.setLayout(self.grid)
@@ -206,19 +207,11 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.assistant_process = QtCore.QProcess(self)
         # pylint: disable=protected-access
         self.mantidplot_name='QE Coverage'
-        self.collection_file = os.path.join(mantid._bindir, '../docs/qthelp/MantidProject.qhc')
-        version = ".".join(mantid.__version__.split(".")[:2])
-        self.qt_url = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/QE Coverage.html'
-        self.external_url = 'http://docs.mantidproject.org/nightly/interfaces/QE Coverage.html'
         #register startup
         mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface,"QECoverage",False)
 
     def onHelp(self):
-        show_interface_help(self.mantidplot_name,
-                            self.assistant_process,
-                            self.collection_file,
-                            self.qt_url,
-                            self.external_url)
+        show_interface_help(self.mantidplot_name, self.assistant_process, area='utility')
 
     def closeEvent(self, event):
         self.assistant_process.close()

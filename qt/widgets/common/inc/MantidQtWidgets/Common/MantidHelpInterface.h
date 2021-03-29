@@ -16,11 +16,8 @@ class QUrl;
 namespace MantidQt {
 namespace API {
 
-/**
- *
-  This class is an interface for the central widget for handling VATES
- visualization
-  operations. Its main use is for the plugin mode operation of the viewer.
+/*
+ * An interface for handling offline help
  */
 class EXPORT_OPT_MANTIDQT_COMMON MantidHelpInterface : public QWidget {
   Q_OBJECT
@@ -43,8 +40,10 @@ public:
   virtual void showFitFunction(const std::string &name = std::string());
   virtual void showFitFunction(const QString &name);
   virtual void showCustomInterface(const std::string &name,
+                                   const std::string &area = std::string(),
                                    const std::string &section = std::string());
   virtual void showCustomInterface(const QString &name,
+                                   const QString &area = QString(),
                                    const QString &section = QString());
 
 public slots:

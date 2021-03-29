@@ -84,7 +84,8 @@ const std::string typeFromName(const std::string &name) {
  * @param peaks :: vector of peaks
  * @param name :: name for the column
  */
-PeakColumn::PeakColumn(std::vector<Peak> &peaks, const std::string &name)
+template <class T>
+PeakColumn<T>::PeakColumn(std::vector<T> &peaks, const std::string &name)
     : m_peaks(peaks), m_oldRows() {
   this->m_name = name;
   this->m_type = typeFromName(name); // Throws if the name is unknown
@@ -100,7 +101,7 @@ PeakColumn::PeakColumn(std::vector<Peak> &peaks, const std::string &name)
 }
 
 /// Returns typeid for the data in the column
-const std::type_info &PeakColumn::get_type_info() const {
+template <class T> const std::type_info &PeakColumn<T>::get_type_info() const {
   // This is horrible copy-and-paste with the method below. The whole thing
   // around columns could be much better implemented using templates & traits to
   // avoid this
@@ -121,7 +122,8 @@ const std::type_info &PeakColumn::get_type_info() const {
 }
 
 /// Returns typeid for the pointer type to the data element in the column
-const std::type_info &PeakColumn::get_pointer_type_info() const {
+template <class T>
+const std::type_info &PeakColumn<T>::get_pointer_type_info() const {
   if (type() == "double") {
     return typeid(double *);
   } else if (type() == "int") {
@@ -142,15 +144,18 @@ const std::type_info &PeakColumn::get_pointer_type_info() const {
  * @param s :: stream to output
  * @param index :: row index
  */
-void PeakColumn::print(size_t index, std::ostream &s) const {
-  Peak &peak = m_peaks[index];
+template <class T>
+void PeakColumn<T>::print(size_t index, std::ostream &s) const {
+  T &peak = m_peaks[index];
   s.imbue(std::locale("C"));
   std::ios::fmtflags fflags(s.flags());
   if (m_name == "RunNumber")
     s << peak.getRunNumber();
-  else if (m_name == "DetID")
-    s << peak.getDetectorID();
-  else if (m_name == "BankName")
+  else if (m_name == "DetID") {
+    auto fullPeak = dynamic_cast<Peak *>(&peak);
+    if (fullPeak)
+      s << fullPeak->getDetectorID();
+  } else if (m_name == "BankName")
     s << peak.getBankName();
   else if (m_name == "QLab")
     s << peak.getQLabFrame();
@@ -175,7 +180,8 @@ void PeakColumn::print(size_t index, std::ostream &s) const {
  * @param text :: string to read
  * @param index :: index of the peak to modify
  */
-void PeakColumn::read(size_t index, const std::string &text) {
+template <class T>
+void PeakColumn<T>::read(size_t index, const std::string &text) {
   // Don't modify read-only ones
   if (this->getReadOnly() || index >= m_peaks.size())
     return;
@@ -196,7 +202,8 @@ void PeakColumn::read(size_t index, const std::string &text) {
  * @param index :: index of the peak to modify
  * @param in :: input stream
  */
-void PeakColumn::read(const size_t index, std::istringstream &in) {
+template <class T>
+void PeakColumn<T>::read(const size_t index, std::istringstream &in) {
   if (this->getReadOnly() || index >= m_peaks.size())
     return;
 
@@ -214,19 +221,19 @@ void PeakColumn::read(const size_t index, std::istringstream &in) {
 
 //-------------------------------------------------------------------------------------
 /** @return true if the column is read-only */
-bool PeakColumn::getReadOnly() const {
+template <class T> bool PeakColumn<T>::getReadOnly() const {
   return !((m_name == "h") || (m_name == "k") || (m_name == "l") ||
            (m_name == "RunNumber"));
 }
 
 //-------------------------------------------------------------------------------------
 /// Specialized type check
-bool PeakColumn::isBool() const { return false; }
+template <class T> bool PeakColumn<T>::isBool() const { return false; }
 
-bool PeakColumn::isNumber() const { return false; }
+template <class T> bool PeakColumn<T>::isNumber() const { return false; }
 
 /// @returns overall memory size taken by the column.
-long int PeakColumn::sizeOfData() const {
+template <class T> long int PeakColumn<T>::sizeOfData() const {
   return sizeof(double) * static_cast<long int>(m_peaks.size());
 }
 
@@ -236,7 +243,7 @@ long int PeakColumn::sizeOfData() const {
  * @param count :: Count of new column size (unused)
  * @throw Exception::NotImplementedError
  */
-void PeakColumn::resize(size_t count) {
+template <class T> void PeakColumn<T>::resize(size_t count) {
   UNUSED_ARG(count);
   throw Exception::NotImplementedError("PeakColumn::resize - Peaks must be "
                                        "added through the PeaksWorkspace "
@@ -249,7 +256,7 @@ void PeakColumn::resize(size_t count) {
  * @param index :: The new index position (unused)
  * @throw Exception::NotImplementedError
  */
-void PeakColumn::insert(size_t index) {
+template <class T> void PeakColumn<T>::insert(size_t index) {
   UNUSED_ARG(index);
   throw Exception::NotImplementedError("PeakColumn::insert - Peaks must be "
                                        "inserted through the PeaksWorkspace "
@@ -262,7 +269,7 @@ void PeakColumn::insert(size_t index) {
  * @param index :: The index position removed(unused)
  * @throw Exception::NotImplementedError
  */
-void PeakColumn::remove(size_t index) {
+template <class T> void PeakColumn<T>::remove(size_t index) {
   UNUSED_ARG(index);
   throw Exception::NotImplementedError("PeakColumn::remove - Peaks must be "
                                        "remove through the PeaksWorkspace "
@@ -274,7 +281,7 @@ void PeakColumn::remove(size_t index) {
  * @param index :: A row index pointing to the PeaksWorkspace
  * @returns A pointer to the data element at that index from this column
  */
-void *PeakColumn::void_pointer(size_t index) {
+template <class T> void *PeakColumn<T>::void_pointer(size_t index) {
   const auto *constThis = const_cast<const PeakColumn *>(this);
   return const_cast<void *>(constThis->void_pointer(index));
 }
@@ -284,8 +291,8 @@ void *PeakColumn::void_pointer(size_t index) {
  * @param index :: A row index pointing to the PeaksWorkspace
  * @returns A pointer to the data element at that index from this column
  */
-const void *PeakColumn::void_pointer(size_t index) const {
-  const Peak &peak = m_peaks[index];
+template <class T> const void *PeakColumn<T>::void_pointer(size_t index) const {
+  const T &peak = m_peaks[index];
 
   // The cell() api requires that the value exist somewhere in memory, however,
   // some of the values from a Peak are calculated on the fly so a reference
@@ -309,7 +316,8 @@ const void *PeakColumn::void_pointer(size_t index) const {
     value = peak.getPeakNumber();
     return boost::get<int>(&value);
   } else if (m_name == "DetID") {
-    value = peak.getDetectorID();
+    auto fatPeak = dynamic_cast<const DataObjects::Peak &>(peak);
+    value = fatPeak.getDetectorID();
     return boost::get<int>(&value);
   } else if (m_name == "BankName") {
     value = peak.getBankName();
@@ -326,23 +334,26 @@ const void *PeakColumn::void_pointer(size_t index) const {
   }
 }
 
-PeakColumn *PeakColumn::clone() const {
-  auto temp = new PeakColumn(this->m_peaks, this->m_name);
+template <class T> PeakColumn<T> *PeakColumn<T>::clone() const {
+  auto temp = new PeakColumn<T>(this->m_peaks, this->m_name);
   return temp;
 }
 
-double PeakColumn::toDouble(size_t /*index*/) const {
+template <class T> double PeakColumn<T>::toDouble(size_t /*index*/) const {
   throw std::runtime_error("PeakColumn::toDouble() not implemented, PeakColumn "
                            "is has no general write access");
 }
 
-void PeakColumn::fromDouble(size_t /*index*/, double /*value*/) {
+template <class T>
+void PeakColumn<T>::fromDouble(size_t /*index*/, double /*value*/) {
   throw std::runtime_error("fromDouble() not implemented, PeakColumn is has no "
                            "general write access");
 }
 
-void PeakColumn::setPeakHKLOrRunNumber(const size_t index, const double val) {
-  Peak &peak = m_peaks[index];
+template <class T>
+void PeakColumn<T>::setPeakHKLOrRunNumber(const size_t index,
+                                          const double val) {
+  T &peak = m_peaks[index];
   if (m_name == "h")
     peak.setH(val);
   else if (m_name == "k")
@@ -354,6 +365,9 @@ void PeakColumn::setPeakHKLOrRunNumber(const size_t index, const double val) {
   else
     throw std::runtime_error("Unexpected column " + m_name + " being set.");
 }
+
+template class PeakColumn<Peak>;
+template class PeakColumn<LeanElasticPeak>;
 
 } // namespace DataObjects
 } // namespace Mantid

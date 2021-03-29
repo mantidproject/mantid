@@ -31,7 +31,7 @@ Usage
 
    print("Name of the instrument:  {}".format(ws.getInstrument().getName()))
    print("Number of spectra:  {}".format(ws.getNumberHistograms()))
-   
+
 
 Output:
 

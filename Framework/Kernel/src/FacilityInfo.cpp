@@ -42,10 +42,6 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element *elem)
       m_zeroPadding(0), m_delimiter(), m_extensions(), m_archiveSearch(),
       m_instruments(), m_noFilePrefix(), m_multiFileLimit(100),
       m_computeResources() {
-  if (m_name.empty()) {
-    g_log.error("Facility name is not defined");
-    throw std::runtime_error("Facility name is not defined");
-  }
 
   // Fill the various fields from the XML
   fillZeroPadding(elem);

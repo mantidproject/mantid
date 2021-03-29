@@ -18,6 +18,7 @@
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -1197,6 +1198,70 @@ public:
     check_log(reloadedWorkspace, "periods", 37, 1, 1);
     check_log(reloadedWorkspace, "period 1", 36, 505, true);
     check_log(reloadedWorkspace, "running", 72, 501, true);
+
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+  }
+
+  void test_load_leanElasticPeakWorkspace() {
+    // generate a lean elastic peak workspace with two peaks
+    auto lpws = std::make_shared<LeanElasticPeaksWorkspace>();
+    // add peaks
+    LeanElasticPeak pk1(V3D(0.0, 0.0, 6.28319), 2.0);     // (100)
+    LeanElasticPeak pk2(V3D(6.28319, 0.0, 6.28319), 1.0); // (110)
+    lpws->addPeak(pk1);
+    lpws->addPeak(pk2);
+
+    // save the lean elastic peak workspace to temp
+    std::string filename = "testLoadLeanElasticPeaksWorkspace.nxs";
+    SaveNexusProcessed save;
+    save.initialize();
+    save.setProperty("InputWorkspace", lpws);
+    save.setPropertyValue("Filename", filename);
+    save.execute();
+
+    // load it back with the loader
+    LoadNexusProcessed load;
+    load.initialize();
+    load.setProperty("Filename", filename);
+    load.setProperty("OutputWorkspace", "outws");
+    load.execute();
+
+    auto lpws_loaded =
+        AnalysisDataService::Instance().retrieveWS<LeanElasticPeaksWorkspace>(
+            "outws");
+
+    // confirm that the peaks are the same in original
+    // and the loaded lean elastic peak workspace
+    TS_ASSERT_EQUALS(lpws->getNumberPeaks(), lpws_loaded->getNumberPeaks());
+    // --pk1
+    TS_ASSERT_DELTA(lpws->getPeak(0).getWavelength(), pk1.getWavelength(),
+                    1e-5);
+    TS_ASSERT_DELTA(lpws->getPeak(0).getFinalEnergy(), pk1.getFinalEnergy(),
+                    1e-5);
+    TS_ASSERT_DELTA(lpws->getPeak(0).getH(), pk1.getH(), 1e-5);
+    TS_ASSERT_DELTA(lpws->getPeak(0).getK(), pk1.getK(), 1e-5);
+    TS_ASSERT_DELTA(lpws->getPeak(0).getL(), pk1.getL(), 1e-5);
+    TS_ASSERT_DELTA(lpws->getPeak(0).getQLabFrame().X(), pk1.getQLabFrame().X(),
+                    1e-5);
+    TS_ASSERT_DELTA(lpws->getPeak(0).getQLabFrame().Y(), pk1.getQLabFrame().Y(),
+                    1e-5);
+    TS_ASSERT_DELTA(lpws->getPeak(0).getQLabFrame().Z(), pk1.getQLabFrame().Z(),
+                    1e-5);
+    // --pk2
+    TS_ASSERT_DELTA(lpws->getPeak(1).getWavelength(), pk2.getWavelength(),
+                    1e-5);
+    TS_ASSERT_DELTA(lpws->getPeak(1).getFinalEnergy(), pk2.getFinalEnergy(),
+                    1e-5);
+    TS_ASSERT_DELTA(lpws->getPeak(1).getH(), pk2.getH(), 1e-5);
+    TS_ASSERT_DELTA(lpws->getPeak(1).getK(), pk2.getK(), 1e-5);
+    TS_ASSERT_DELTA(lpws->getPeak(1).getL(), pk2.getL(), 1e-5);
+    TS_ASSERT_DELTA(lpws->getPeak(1).getQLabFrame().X(), pk2.getQLabFrame().X(),
+                    1e-5);
+    TS_ASSERT_DELTA(lpws->getPeak(1).getQLabFrame().Y(), pk2.getQLabFrame().Y(),
+                    1e-5);
+    TS_ASSERT_DELTA(lpws->getPeak(1).getQLabFrame().Z(), pk2.getQLabFrame().Z(),
+                    1e-5);
 
     if (Poco::File(filename).exists())
       Poco::File(filename).remove();

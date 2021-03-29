@@ -14,11 +14,11 @@ defines new boundaries in intervals :math:`x_i-x_{i+1}\,`. Positive
 :math:`\Delta x_i\,` make constant width bins, whilst negative ones
 create logarithmic binning using the formula
 :math:`x(j+1)=x(j)(1+|\Delta x_i|)\,`
- 
+
 This algorithms is useful both in data reduction, but also in remapping
 :ref:`ragged workspace <Ragged_Workspace>` to a regular set of bin
 boundaries.
- 
+
 Unless the FullBinsOnly option is enabled, the bin immediately before
 the specified boundaries :math:`x_2`, :math:`x_3`, ... :math:`x_i` is
 likely to have a different width from its neighbours because there can
@@ -26,8 +26,8 @@ be no gaps between bins. Rebin ensures that any of these space filling
 bins cannot be less than 25% or more than 125% of the width that was
 specified.
 
-In both cases, where a new bin only partially overlaps one or more input 
-bins, the new counts are calculated as the sum of the old bins weighted 
+In both cases, where a new bin only partially overlaps one or more input
+bins, the new counts are calculated as the sum of the old bins weighted
 by the fractional overlapping widths of the new bin over the old bin:
 
 .. math:: Y^{\mathrm{new}} = \sum_i Y^{\mathrm{old}}_i F_i
@@ -136,7 +136,7 @@ Output:
    The 2nd and 3rd rebinned X values are: [ 1.5   2.25]
 
 **Example - custom two regions rebinning:**
- 
+
 .. testcode:: ExHistCustom
 
    # create histogram workspace
@@ -200,7 +200,7 @@ Output:
    What type is the workspace after 1st rebin: EventWorkspace
    What type is the workspace after 2nd rebin: Workspace2D
 
-  
+
 .. categories::
 
 .. sourcelink::

@@ -58,8 +58,10 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
     def warning_popup(message):
         message_box.warning(str(message))
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, window_flags=None):
         super(MuonAnalysisGui, self).__init__(parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setObjectName("MuonAnalysis2")
@@ -268,6 +270,12 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
+
+        # differences
+        self.grouping_tab_widget.diff_table.add_subscribers(
+            [self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer,
+             self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer,
+             self.plot_widget.presenter.added_group_or_pair_observer])
 
         # phase table set up
         self.phase_tab.phase_table_presenter.selected_phasequad_changed_notifier.add_subscriber(

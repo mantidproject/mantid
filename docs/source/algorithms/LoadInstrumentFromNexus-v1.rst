@@ -9,12 +9,12 @@
 Description
 -----------
 
-Attempts to load information about the instrument from a ISIS NeXus file. 
-In particular, it attempts to read the reference frame axis. 
+Attempts to load information about the instrument from a ISIS NeXus file.
+In particular, it attempts to read the reference frame axis.
 Also adds dummy source and samplepos components to instrument.
 
 LoadInstrumentFromNexus is intended to be used as a child algorithm of
-other Load algorithms, rather than being used directly. 
+other Load algorithms, rather than being used directly.
 
 Usage
 -----

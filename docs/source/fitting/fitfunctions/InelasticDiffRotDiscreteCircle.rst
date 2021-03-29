@@ -23,11 +23,11 @@ type of discrete rotational diffusion in a circle.
 
 .. math::
 
-   A_l(Q,r) = \frac{1}{N} \sum_{k=1}^{N} j_0( 2 Q r sin(\frac{\pi k}{N}) ) cos(\frac{2\pi lk}{N})
+   A_l(Q,r) = \frac{1}{N} \sum_{k=1}^{N} j_0( 2 Q r \sin(\frac{\pi k}{N}) ) \cos(\frac{2\pi lk}{N})
 
 .. math::
 
-   \tau_l^{-1} = 4 \tau^{-1} sin^2(\frac{\pi l}{N})
+   \tau_l^{-1} = 4 \tau^{-1} \sin^2(\frac{\pi l}{N})
 
 with h = 4.135665616 meV ps.
 

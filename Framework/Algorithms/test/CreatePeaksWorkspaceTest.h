@@ -8,6 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/CreatePeaksWorkspace.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Timer.h"
@@ -50,6 +51,38 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(
             outWSName));
+    // Check that this is a PeaksWorkspace
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    // Check the results
+    TS_ASSERT_EQUALS(ws->getNumberPeaks(), 13);
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+  void test_exec_leanElasticPeakWorkspace() {
+    // Name of the output workspace.
+    std::string outWSName("CreatePeaksWorkspaceTest_OutputWS2");
+
+    CreatePeaksWorkspace alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfPeaks", 13));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "LeanElasticPeak"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute();)
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    LeanElasticPeaksWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = AnalysisDataService::Instance()
+                 .retrieveWS<LeanElasticPeaksWorkspace>(outWSName));
+    // Check that this is a LeanElasticPeaksWorkspace
     TS_ASSERT(ws);
     if (!ws)
       return;

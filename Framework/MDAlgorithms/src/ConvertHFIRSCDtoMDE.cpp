@@ -77,6 +77,10 @@ std::map<std::string, std::string> ConvertHFIRSCDtoMDE::validateInputs() {
              inputWS->getExperimentInfo(0)->getInstrument()->getName() !=
                  "WAND") {
     inputWSmsg << "This only works for DEMAND (HB3A) or WAND (HB2C)";
+  } else if (inputWS->getDimension(2)->getNBins() !=
+             inputWS->getExperimentInfo(0)->run().getNumGoniometers()) {
+    inputWSmsg << "goniometers not set correctly, did you run SetGoniometer "
+                  "with Average=False";
   } else {
     std::string instrument =
         inputWS->getExperimentInfo(0)->getInstrument()->getName();
@@ -84,9 +88,9 @@ std::map<std::string, std::string> ConvertHFIRSCDtoMDE::validateInputs() {
     size_t number_of_runs = inputWS->getDimension(2)->getNBins();
     std::vector<std::string> logs;
     if (instrument == "HB3A")
-      logs = {"omega", "chi", "phi", "monitor", "time"};
+      logs = {"monitor", "time"};
     else
-      logs = {"duration", "monitor_count", "s1"};
+      logs = {"duration", "monitor_count"};
     for (auto log : logs) {
       if (run.hasProperty(log)) {
         if (static_cast<size_t>(run.getLogData(log)->size()) != number_of_runs)
@@ -175,17 +179,7 @@ void ConvertHFIRSCDtoMDE::exec() {
   std::string instrument = expInfo.getInstrument()->getName();
 
   std::vector<double> twotheta, azimuthal;
-  std::vector<double> s1, omega, chi, phi;
   if (instrument == "HB3A") {
-    auto omegaLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-        expInfo.run().getLogData("omega"));
-    omega = omegaLog->valuesAsVector();
-    auto chiLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-        expInfo.run().getLogData("chi"));
-    chi = chiLog->valuesAsVector();
-    auto phiLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-        expInfo.run().getLogData("phi"));
-    phi = phiLog->valuesAsVector();
     const auto &di = expInfo.detectorInfo();
     for (size_t x = 0; x < 512; x++) {
       for (size_t y = 0; y < 512 * 3; y++) {
@@ -197,9 +191,6 @@ void ConvertHFIRSCDtoMDE::exec() {
       }
     }
   } else { // HB2C
-    auto s1Log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-        expInfo.run().getLogData("s1"));
-    s1 = s1Log->valuesAsVector();
     azimuthal =
         (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
             expInfo.getLog("azimuthal"))))();
@@ -245,39 +236,22 @@ void ConvertHFIRSCDtoMDE::exec() {
                          -sin(twotheta_f) * sin(azimuthal_f) * k,
                          (1.f - cos(twotheta_f)) * k});
   }
-
+  const auto run = inputWS->getExperimentInfo(0)->run();
   for (size_t n = 0; n < inputWS->getDimension(2)->getNBins(); n++) {
+    auto gon = run.getGoniometerMatrix(n);
     Eigen::Matrix3f goniometer;
-    if (instrument == "HB3A") {
-      float omega_radian =
-          static_cast<float>(omega[n]) * boost::math::float_constants::degree;
-      float chi_radian =
-          static_cast<float>(chi[n]) * boost::math::float_constants::degree;
-      float phi_radian =
-          static_cast<float>(phi[n]) * boost::math::float_constants::degree;
-      Eigen::Matrix3f r1;
-      r1 << cos(omega_radian), 0, -sin(omega_radian), 0, 1, 0,
-          sin(omega_radian), 0, cos(omega_radian); // omega 0,1,0,-1
-      Eigen::Matrix3f r2;
-      r2 << cos(chi_radian), sin(chi_radian), 0, -sin(chi_radian),
-          cos(chi_radian), 0, 0, 0, 1; // chi 0,0,1,-1
-      Eigen::Matrix3f r3;
-      r3 << cos(phi_radian), 0, -sin(phi_radian), 0, 1, 0, sin(phi_radian), 0,
-          cos(phi_radian); // phi 0,1,0,-1
-      goniometer = r1 * r2 * r3;
-    } else { // HB2C
-      float s1_radian =
-          static_cast<float>(s1[n]) * boost::math::float_constants::degree;
-      goniometer << cos(s1_radian), 0, sin(s1_radian), 0, 1, 0, -sin(s1_radian),
-          0, cos(s1_radian); // s1 0,1,0,1
-    }
+    for (int i = 0; i < 3; i++)
+      for (int j = 0; j < 3; j++)
+        goniometer(i, j) = static_cast<float>(gon[i][j]);
     goniometer = goniometer.inverse().eval();
+    auto goniometerIndex = static_cast<uint16_t>(n);
     for (size_t m = 0; m < azimuthal.size(); m++) {
       size_t idx = n * azimuthal.size() + m;
       coord_t signal = static_cast<coord_t>(inputWS->getSignalAt(idx));
-      if (signal > 0.f) {
+      if (signal > 0.f && std::isfinite(signal)) {
         Eigen::Vector3f q_sample = goniometer * q_lab_pre[m];
-        inserter.insertMDEvent(signal, signal, 0, 0, q_sample.data());
+        inserter.insertMDEvent(signal, signal, 0, goniometerIndex, 0,
+                               q_sample.data());
       }
     }
   }

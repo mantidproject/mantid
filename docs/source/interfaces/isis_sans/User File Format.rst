@@ -80,8 +80,8 @@ Syntax
     DET/MAIN
     DET/HAB
 
-    DET/RESCALE rescale 
-    DET/SHIFT shift  
+    DET/RESCALE rescale
+    DET/SHIFT shift
     DET/RESCALE/FIT [Q1 Q2]
     DET/SHIFT/FIT [Q1 Q2]
 
@@ -196,9 +196,9 @@ Optional Qualifiers
 ^^^^^^^^^^^^^^^^^^^
 
 **/TRANS/SAMPLE/...**
-    Configure the settings for FIT just for the sample workspace. Ex: FIT/TRANS/SAMPLE/POLYNOMIAL3 - applies a third order polynomial to fit sample workspace for transmission. 
+    Configure the settings for FIT just for the sample workspace. Ex: FIT/TRANS/SAMPLE/POLYNOMIAL3 - applies a third order polynomial to fit sample workspace for transmission.
 **/TRANS/CAN/...**
-    Configure the settings for FIT just for the can workspace. Ex: FIT/TRANS/SAMPLE/LIN - fit the transmission of the can using a linear function. 
+    Configure the settings for FIT just for the can workspace. Ex: FIT/TRANS/SAMPLE/LIN - fit the transmission of the can using a linear function.
 
 If SAMPLE or CAN is not provided, it is assumed that the FIT/TRANS option applies to both.
 
@@ -391,7 +391,7 @@ Qualifiers
 **/LINE**
     Masking arm only has effect for SANS2D
 **/REAR**
-    Specifies that the mask applies to the Rear detector (if SANS2D) and the Main detector (if LOQ). This is default if not specified 
+    Specifies that the mask applies to the Rear detector (if SANS2D) and the Main detector (if LOQ). This is default if not specified
 **/FRONT**
     Specifies that the mask applies to the Front detector (if SANS2D) and the High-Angle Bank (if LOQ)
 **/HAB**
@@ -557,7 +557,7 @@ Command Verbs
 ^^^^^^^^^^^^^
 
 **CENTRE**
-    Defines the coordinates of the centre of the pattern on the detector and the detector pixel sizes 
+    Defines the coordinates of the centre of the pattern on the detector and the detector pixel sizes
 **SCALES**
     Defines the absolute intensity scaling factors to be applied to the reduced data
 
@@ -670,7 +670,7 @@ Syntax
 
 .. code-block:: none
 
-    QRESOL/ON 
+    QRESOL/ON
     QRESOL/OFF
     QRESOL/DELTAR=dr
     QRESOL/LCOLLIM="lcollim"
@@ -690,7 +690,7 @@ Qualifiers
 **/OFF**
     Turns the QResolution calcuation explicitly off for the reduction.
 **/DELTAR**
-    Specifies the virtual ring width on the detector 
+    Specifies the virtual ring width on the detector
 **/LCOLLIM**
     Specifies the collimation length
 **/MODERATOR**

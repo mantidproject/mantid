@@ -4,6 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDGridBox.h"
@@ -1138,13 +1139,11 @@ TMDE(void MDGridBox)::integrateSphere(
   // to see which boxes are partially contained/fully contained.
 
   // One entry with the # of vertices in this box contained; start at 0.
-  auto verticesContained = new size_t[numBoxes];
-  memset(verticesContained, 0, numBoxes * sizeof(size_t));
+  std::vector<size_t> verticesContained(numBoxes, 0);
 
   // Set to true if there is a possibility of the box at least partly touching
   // the integration volume.
-  auto boxMightTouch = new bool[numBoxes];
-  memset(boxMightTouch, 0, numBoxes * sizeof(bool));
+  std::vector<bool> boxMightTouch(numBoxes, 0);
 
   // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd
   // bits
@@ -1226,72 +1225,98 @@ TMDE(void MDGridBox)::integrateSphere(
         Kernel::Utils::NestedForLoop::Increment(nd, vertexIndex, vertices_max);
   }
 
-  // OK, we've done all the vertices. Now we go through and check each box.
-  size_t numFullyContained = 0;
-  size_t numPartiallyContained = 0;
+  // NOTE:
+  //    The following section is just trying to uncover the peak center so that
+  //    we can compute the distance bewteen peak center and box center correctly
+  //    without worrying about the skew coming from coordTransformDistnace.
+  auto tmpRadiusTransform =
+      dynamic_cast<CoordTransformDistance *>(&radiusTransform);
+  if (tmpRadiusTransform == nullptr) {
+    throw std::runtime_error(
+        "radiusTransform has to be CoordTransformDistance");
+  }
+  auto peakCenter = tmpRadiusTransform->getCenter();
+  double peakRadius = std::sqrt(radiusSquared);
+  double peakInnerRadius = std::sqrt(innerRadiusSquared);
 
+  // OK, we've done counting all the vertices.
+  // Now let's go through and check each box.
   for (size_t i = 0; i < numBoxes; ++i) {
     API::IMDNode *box = m_Children[i];
-    // Box partially contained?
-    bool partialBox = false;
 
-    // Is this box fully contained?
+    // First, check if we have reached the base case where the box is completely
+    // enveloped by the peak
     if (verticesContained[i] >= maxVertices) {
       // Use the integrated sum of signal in the box
       signal += box->getSignal();
       errorSquared += box->getErrorSquared();
-
-      //        std::cout << "box at " << i << " (" << box->getExtentsStr() <<
-      //        ") is fully contained. Vertices = " << verticesContained[i] <<
-      //        "\n";
-
-      numFullyContained++;
-      // Go on to the next box
-      continue;
+      continue; // move on to next
     }
 
-    if (verticesContained[i] == 0) {
-      // There is a chance that this part of the box is within integration
-      // volume,
-      // even if no vertex of it is.
-      coord_t boxCenter[nd];
-      box->getCenter(boxCenter);
-
-      // Distance from center to the peak integration center
-      coord_t out[nd];
-      radiusTransform.apply(boxCenter, out);
-
-      if (out[0] < diagonalSquared * 0.72 + radiusSquared ||
-          out[0] < diagonalSquared * 0.72 + innerRadiusSquared) {
-        // If the center is closer than the size of the box, then it MIGHT be
-        // touching.
-        // (We multiply by 0.72 (about sqrt(2)) to look for half the diagonal).
-        // NOTE! Watch out for non-spherical transforms!
-        //          std::cout << "box at " << i << " is maybe touching\n";
-        partialBox = true;
-      }
-    } else {
-      partialBox = true;
-      //        std::cout << "box at " << i << " has a vertex touching\n";
-    }
-
-    // We couldn't rule out that the box might be partially contained.
-    if (partialBox) {
-      // Use the detailed integration method.
+    // Second, check if there is at least one vertex in the integration volume,
+    // and kick off recursive search until we reach the base case
+    if (verticesContained[i] > 0) {
       box->integrateSphere(radiusTransform, radiusSquared, signal, errorSquared,
                            innerRadiusSquared,
                            useOnePercentBackgroundCorrection);
-      //        std::cout << ".signal=" << signal << "\n";
-      numPartiallyContained++;
+      continue;
     }
+
+    // Last, no vertices in the integration volume
+    //  -- there are only two cases (see below) where we can
+    //     skip the box and its children, and it requires
+    //     the knowledge of how box and peak are spatially
+    //     positioned in Euclidian space.
+    // NOTE:
+    //  For ellipsoid, we are using the long semi-axis, which
+    //  means we will inevitablly search some empty boxes, but
+    //  this is by design as we do not want to miss any box
+    //  that might contain events we need to collect.
+    coord_t boxCenter[nd];
+    box->getCenter(boxCenter);
+    double distPeakCenterToBoxCenter = 0.0;
+    for (size_t i = 0; i < nd; ++i) {
+      distPeakCenterToBoxCenter +=
+          (boxCenter[i] - peakCenter[i]) * (boxCenter[i] - peakCenter[i]);
+    }
+    distPeakCenterToBoxCenter = std::sqrt(distPeakCenterToBoxCenter);
+    double boxRadius = std::sqrt(diagonalSquared);
+
+    //  - Box is completely isolated from peak
+    //        distPeakCenterToBoxCenter - peakRadius > boxRadius
+    //    -> stop search and move on
+    if (distPeakCenterToBoxCenter - peakRadius > boxRadius) {
+      // Debug output
+      // std::ostringstream debugmsg;
+      // debugmsg << "R_peak = " << peakRadius << "\n"
+      //          << "R_box = " << boxRadius << "\n"
+      //          << "Peak Center: ";
+      // for (size_t i = 0; i < nd; ++i) {
+      //   debugmsg << peakCenter[i] << ",";
+      // }
+      // debugmsg << "\n"
+      //          << "Box center: ";
+      // for (size_t i = 0; i < nd; ++i) {
+      //   debugmsg << boxCenter[i] << ",";
+      // }
+      // debugmsg << "\n"
+      //          << "distPeakCenterToBoxCenter = " << distPeakCenterToBoxCenter
+      //          << "\n";
+      // std::cout << debugmsg.str();
+      continue;
+    }
+    //  - Tiny box falls into the donut hole
+    //        distPeakCenterToBoxCenter + boxRadius < peakInnerRadius
+    //    -> stop search and move on
+    if (peakInnerRadius > 0 &&
+        distPeakCenterToBoxCenter + boxRadius < peakInnerRadius) {
+      continue;
+    }
+    //  - All other cases, we need to refine the box, i.e. recursively
+    //    search the child box
+    box->integrateSphere(radiusTransform, radiusSquared, signal, errorSquared,
+                         innerRadiusSquared, useOnePercentBackgroundCorrection);
   } // (for each box)
-
-  //    std::cout << "Depth " << this->getDepth() << " with " <<
-  //    numFullyContained << " fully contained; " << numPartiallyContained << "
-  //    partial. Signal = " << signal <<"\n";
-
-  delete[] verticesContained;
-  delete[] boxMightTouch;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -1583,10 +1608,12 @@ public:
   static inline void
   EXEC(MDGridBox<MDE, nd> *pBox, const std::vector<signal_t> &sigErrSq,
        const std::vector<coord_t> &Coord, const std::vector<uint16_t> &runIndex,
+       const std::vector<uint16_t> &goniometerIndex,
        const std::vector<uint32_t> &detectorId, size_t nEvents) {
     for (size_t i = 0; i < nEvents; i++)
       pBox->addEvent(MDEvent<nd>(sigErrSq[2 * i], sigErrSq[2 * i + 1],
-                                 runIndex[i], detectorId[i], &Coord[i * nd]));
+                                 runIndex[i], goniometerIndex[i], detectorId[i],
+                                 &Coord[i * nd]));
   }
 };
 /* Specialize for the case of LeanEvent */
@@ -1597,6 +1624,7 @@ public:
                           const std::vector<signal_t> &sigErrSq,
                           const std::vector<coord_t> &Coord,
                           const std::vector<uint16_t> & /*runIndex*/,
+                          const std::vector<uint16_t> & /*goniometerIndex*/,
                           const std::vector<uint32_t> & /*detectorId*/,
                           size_t nEvents) {
     for (size_t i = 0; i < nEvents; i++)
@@ -1620,10 +1648,12 @@ public:
 TMDE(size_t MDGridBox)::buildAndAddEvents(
     const std::vector<signal_t> &sigErrSq, const std::vector<coord_t> &Coord,
     const std::vector<uint16_t> &runIndex,
+    const std::vector<uint16_t> &goniometerIndex,
     const std::vector<uint32_t> &detectorId) {
 
   size_t nEvents = sigErrSq.size() / 2;
-  IF_EVENT<MDE, nd>::EXEC(this, sigErrSq, Coord, runIndex, detectorId, nEvents);
+  IF_EVENT<MDE, nd>::EXEC(this, sigErrSq, Coord, runIndex, goniometerIndex,
+                          detectorId, nEvents);
 
   return 0;
 }
@@ -1638,9 +1668,11 @@ TMDE(size_t MDGridBox)::buildAndAddEvents(
 TMDE(void MDGridBox)::buildAndAddEvent(const signal_t Signal,
                                        const signal_t errorSq,
                                        const std::vector<coord_t> &point,
-                                       uint16_t runIndex, uint32_t detectorId) {
+                                       uint16_t runIndex,
+                                       uint16_t goniometerIndex,
+                                       uint32_t detectorId) {
   this->addEvent(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex,
-                                          detectorId));
+                                          goniometerIndex, detectorId));
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -1660,9 +1692,10 @@ TMDE(void MDGridBox)::buildAndAddEventUnsafe(const signal_t Signal,
                                              const signal_t errorSq,
                                              const std::vector<coord_t> &point,
                                              uint16_t runIndex,
+                                             uint16_t goniometerIndex,
                                              uint32_t detectorId) {
-  this->addEventUnsafe(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0],
-                                                runIndex, detectorId));
+  this->addEventUnsafe(IF<MDE, nd>::BUILD_EVENT(
+      Signal, errorSq, &point[0], runIndex, goniometerIndex, detectorId));
 }
 
 //-----------------------------------------------------------------------------------------------

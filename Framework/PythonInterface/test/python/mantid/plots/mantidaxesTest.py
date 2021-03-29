@@ -10,7 +10,6 @@ from matplotlib.backend_bases import MouseEvent
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
-from matplotlib.collections import PolyCollection
 from matplotlib.container import ErrorbarContainer
 import numpy as np
 import unittest
@@ -30,6 +29,7 @@ class MantidAxesTest(unittest.TestCase):
     '''
     Just test if mantid projection works
     '''
+
     @classmethod
     def setUpClass(cls):
         cls.ws2d_histo = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
@@ -60,7 +60,7 @@ class MantidAxesTest(unittest.TestCase):
 
     def test_errorbar_plots(self):
         self.ax.errorbar(self.ws2d_histo, specNum=2, linewidth=6)
-        self.ax.errorbar(np.arange(10), np.arange(10), 0.1 * np.ones((10, )), fmt='bo-')
+        self.ax.errorbar(np.arange(10), np.arange(10), 0.1 * np.ones((10,)), fmt='bo-')
 
     def test_imshow(self):
         self.ax.imshow(self.ws2d_histo)
@@ -761,6 +761,37 @@ class MantidAxesTest(unittest.TestCase):
 
         self.assertEqual(image.get_extent(), (10.0, 30.0, 3.0, 9.0))
         self.assertEqual(image.get_cursor_data(bottom_left_corner), 2.0)
+
+    def test_rename_workspace_relabels_curve_if_default_label(self):
+        ws = CreateSampleWorkspace()
+        self.ax.plot(ws, specNum=2)
+        expected_name = "ws: spec 2"
+        expected_new_name = "new_name: spec 2"
+        ws_artist = self.ax.tracked_workspaces["ws"][0]
+        artist = ws_artist._artists[0]
+        self.assertEqual(artist.get_label(), expected_name)
+        self.ax.rename_workspace_artists(new_name="new_name", old_name="ws")
+        self.assertEqual(artist.get_label(), expected_new_name)
+
+    def test_rename_workspace_relabels_curve_if_default_label_for_numeric_axis(self):
+        self.ax.plot(self.ws2d_histo, specNum=2)
+        expected_name = "ws2d_histo: 6"
+        expected_new_name = "new_name: 6"
+        ws_artist = self.ax.tracked_workspaces["ws2d_histo"][0]
+        artist = ws_artist._artists[0]
+        self.assertEqual(artist.get_label(), expected_name)
+        self.ax.rename_workspace_artists(new_name="new_name", old_name="ws2d_histo")
+        self.assertEqual(artist.get_label(), expected_new_name)
+
+    def test_rename_workspace_does_not_relabel_curve_if_name_not_default(self):
+        ws = CreateSampleWorkspace()
+        self.ax.plot(ws, specNum=2)
+        new_label = "Curve 1"
+        ws_artist = self.ax.tracked_workspaces["ws"][0]
+        artist = ws_artist._artists[0]
+        artist.set_label(new_label)
+        self.ax.rename_workspace_artists(new_name="new_name", old_name="ws")
+        self.assertEqual(artist.get_label(), new_label)
 
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {

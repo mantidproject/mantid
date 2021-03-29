@@ -48,8 +48,8 @@ Usage
 
 Output:
 
-.. testoutput:: ConvertToMatrixWorkspaceComplexExample    
-  
+.. testoutput:: ConvertToMatrixWorkspaceComplexExample
+
    51200 17
    51200 17
 

@@ -9,16 +9,16 @@
 Description
 -----------
 
-Algorithm written using the paper referenced below which has a very good 
-description. 
+Algorithm written using the paper referenced below which has a very good
+description.
 
-This algorithm estimates the background level and separates the background 
-from signal data in a Poisson-distributed data set by statistical analysis. 
-For each iteration, the bins/points with the highest intensity value are 
-eliminated from the data set and the sample mean and the unbiased variance 
-estimator are calculated. Convergence is reached when the absolute 
-difference between the sample mean and the sample variance of the data set 
-is within k standard deviations of the variance, the default value of k 
+This algorithm estimates the background level and separates the background
+from signal data in a Poisson-distributed data set by statistical analysis.
+For each iteration, the bins/points with the highest intensity value are
+eliminated from the data set and the sample mean and the unbiased variance
+estimator are calculated. Convergence is reached when the absolute
+difference between the sample mean and the sample variance of the data set
+is within k standard deviations of the variance, the default value of k
 being 1. The k value is called ``SigmaConstant`` in the algorithm input.
 
 References

@@ -5,7 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/FindUBUsingLatticeParameters.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -24,7 +26,7 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingLatticeParameters::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -74,18 +76,17 @@ void FindUBUsingLatticeParameters::exec() {
   int base_index = -1; // these "could" be properties if need be
   double degrees_per_step = 1.5;
 
-  PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
+  IPeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
   if (!ws)
     throw std::runtime_error("Could not read the peaks workspace");
 
-  const std::vector<Peak> &peaks = ws->getPeaks();
   const int n_peaks = ws->getNumberPeaks();
 
   std::vector<V3D> q_vectors;
   q_vectors.reserve(n_peaks);
 
   for (int i = 0; i < n_peaks; i++)
-    q_vectors.emplace_back(peaks[i].getQSampleFrame());
+    q_vectors.emplace_back(ws->getPeak(i).getQSampleFrame());
 
   Matrix<double> UB(3, 3, false);
   OrientedLattice lattice(a, b, c, alpha, beta, gamma);

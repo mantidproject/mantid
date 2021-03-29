@@ -53,8 +53,8 @@ void Q1DWeighted::init() {
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
           "OutputBinning", std::make_shared<RebinParamsValidator>()),
-      "The new bin boundaries in the form: <math>x_1,\\Delta x_1,x_2,\\Delta "
-      "x_2,\\dots,x_n</math>");
+      "The new bin boundaries in the form: :math:`x_1,\\Delta x_1,x_2,\\Delta "
+      "x_2,\\dots,x_n`");
 
   auto positiveInt = std::make_shared<BoundedValidator<int>>();
   positiveInt->setLower(0);

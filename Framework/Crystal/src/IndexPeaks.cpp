@@ -5,8 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/IndexPeaks.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/PeakAlgorithmHelpers.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -23,10 +25,10 @@ namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IndexPeaks)
 
-using DataObjects::Peak;
-using DataObjects::PeaksWorkspace;
-using DataObjects::PeaksWorkspace_sptr;
+using API::IPeaksWorkspace;
+using API::IPeaksWorkspace_sptr;
 using Geometry::IndexingUtils;
+using Geometry::IPeak;
 using Geometry::OrientedLattice;
 using Kernel::DblMatrix;
 using Kernel::Logger;
@@ -57,35 +59,52 @@ struct SatelliteIndexingArgs {
 };
 
 struct IndexPeaksArgs {
+  /**
+   * @brief parse input arguments about mod vector and max order
+   * @param alg: reference to algorithm instance
+   * @return: SatelliteIndexingArgs
+   */
   static IndexPeaksArgs parse(const API::Algorithm &alg) {
-    const PeaksWorkspace_sptr peaksWS = alg.getProperty(PEAKSWORKSPACE);
+    const IPeaksWorkspace_sptr peaksWS = alg.getProperty(PEAKSWORKSPACE);
     const int maxOrderFromAlg = alg.getProperty(ModulationProperties::MaxOrder);
 
+    // Init variables
     int maxOrderToUse{0};
     std::vector<V3D> modVectorsToUse;
     modVectorsToUse.reserve(3);
     bool crossTermToUse{false};
 
-    // default behavior: map everything automatically
-    maxOrderToUse = maxOrderFromAlg;
-    crossTermToUse = alg.getProperty(ModulationProperties::CrossTerms);
+    // Parse mod vectors
     modVectorsToUse =
         addModulationVectors(alg.getProperty(ModulationProperties::ModVector1),
                              alg.getProperty(ModulationProperties::ModVector2),
                              alg.getProperty(ModulationProperties::ModVector3));
+    // check the 3 mod vectors added from properties
+    modVectorsToUse = validModulationVectors(
+        modVectorsToUse[0], modVectorsToUse[1], modVectorsToUse[2]);
 
-    // deal with special cases
-    if (maxOrderFromAlg <= 0) {
+    // deal with case: max order > 0 and no mod vector is specified
+    if (maxOrderFromAlg > 0 && modVectorsToUse.size() == 0) {
+      // Max Order is larger than zero but no modulated vector specified
+      // Assume that the caller method will handle this
+      maxOrderToUse = maxOrderFromAlg;
+    } else if (maxOrderFromAlg == 0 && modVectorsToUse.size() == 0) {
       // Use lattice definitions if they exist
       const auto &lattice = peaksWS->sample().getOrientedLattice();
       crossTermToUse = lattice.getCrossTerm();
       maxOrderToUse = lattice.getMaxOrder(); // the lattice can return a 0 here
+
       // if lattice has maxOrder, we will use the modVec from it, otherwise
       // stick to the input got from previous assignment
       if (maxOrderToUse > 0) {
         modVectorsToUse = validModulationVectors(
             lattice.getModVec(0), lattice.getModVec(1), lattice.getModVec(2));
       }
+    } else {
+      // Use user specified
+      // default behavior: map everything automatically
+      maxOrderToUse = maxOrderFromAlg;
+      crossTermToUse = alg.getProperty(ModulationProperties::CrossTerms);
     }
 
     return {peaksWS,
@@ -98,7 +117,7 @@ struct IndexPeaksArgs {
                                   crossTermToUse}};
   }
 
-  PeaksWorkspace_sptr workspace;
+  IPeaksWorkspace_sptr workspace;
   const double mainTolerance;
   const bool roundHKLs;
   const bool commonUB;
@@ -251,7 +270,7 @@ indexSatellite(const V3D &mainHKL, const int maxOrder,
 
 /**
  * Index the main reflections on the workspace using the given UB matrix
- * @param peaksWS Workspace containing peaks
+ * @param peaks Vector of pointer to peaks
  * @param ub A UB matrix to define the the transform from Q_sample to hkl
  * @param tolerance If an index is within this tolerance of an integer then
  * accept it
@@ -261,7 +280,7 @@ indexSatellite(const V3D &mainHKL, const int maxOrder,
  * @return A CombinedIndexingStats detailing the output found
  */
 CombinedIndexingStats
-indexPeaks(const std::vector<Peak *> &peaks, DblMatrix ub,
+indexPeaks(const std::vector<IPeak *> &peaks, DblMatrix ub,
            const double mainTolerance, const bool roundHKLs,
            const bool optimizeUB,
            const Prop::SatelliteIndexingArgs &satelliteArgs) {
@@ -270,7 +289,6 @@ indexPeaks(const std::vector<Peak *> &peaks, DblMatrix ub,
   std::generate(
       std::begin(qSample), std::end(qSample),
       [&peaks, i = 0u]() mutable { return peaks[i++]->getQSampleFrame(); });
-
   if (optimizeUB) {
     ub = optimizeUBMatrix(ub, qSample, mainTolerance);
   }
@@ -302,6 +320,12 @@ indexPeaks(const std::vector<Peak *> &peaks, DblMatrix ub,
         peak->setIntMNP(std::get<1>(satelliteInfo));
         stats.satellites.numIndexed++;
         stats.satellites.error += std::get<2>(satelliteInfo) / 3.;
+      } else {
+        // clear these to make sure leftover values from previous index peaks
+        // run are not used
+        peak->setHKL(V3D(0, 0, 0));
+        peak->setIntHKL(V3D(0, 0, 0));
+        peak->setIntMNP(V3D(0, 0, 0));
       }
     } else {
       peak->setHKL(V3D(0, 0, 0));
@@ -363,7 +387,7 @@ void IndexPeaks::init() {
 
   // -- inputs --
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace_sptr::element_type>>(
+      std::make_unique<WorkspaceProperty<IPeaksWorkspace_sptr::element_type>>(
           Prop::PEAKSWORKSPACE, "", Direction::InOut),
       "Input Peaks Workspace");
 
@@ -413,7 +437,7 @@ void IndexPeaks::init() {
 std::map<std::string, std::string> IndexPeaks::validateInputs() {
   std::map<std::string, std::string> helpMsgs;
 
-  PeaksWorkspace_sptr ws = this->getProperty(Prop::PEAKSWORKSPACE);
+  IPeaksWorkspace_sptr ws = this->getProperty(Prop::PEAKSWORKSPACE);
   try {
     ws->sample().getOrientedLattice();
   } catch (std::runtime_error &) {
@@ -424,13 +448,9 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
   // get all runs which have peaks in the table
   const bool commonUB = this->getProperty(Prop::COMMONUB);
   if (commonUB) {
-    const auto &allPeaks = ws->getPeaks();
     std::unordered_map<int, int> peaksPerRun;
-    auto it = allPeaks.cbegin();
-    while (peaksPerRun.size() < 2 && it != allPeaks.cend()) {
-      peaksPerRun[it->getRunNumber()] = 1;
-      ++it;
-    };
+    for (int i = 0; i < ws->getNumberPeaks(); i++)
+      peaksPerRun[ws->getPeak(i).getRunNumber()] = 1;
     if (peaksPerRun.size() < 2) {
       helpMsgs[Prop::COMMONUB] =
           "CommonUBForAll can only be True if there are peaks from more "
@@ -442,9 +462,14 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
   const bool isSave = this->getProperty(Prop::SAVEMODINFO);
   const bool isMOZero = (args.satellites.maxOrder == 0);
   bool isAllVecZero = true;
+  // parse() validates all the mod vectors. There should not be any modulated
+  // vector in modVectors is equal to (0, 0, 0)
   for (size_t vecNo = 0; vecNo < args.satellites.modVectors.size(); vecNo++) {
     if (args.satellites.modVectors[vecNo] != V3D(0.0, 0.0, 0.0)) {
       isAllVecZero = false;
+    } else {
+      g_log.warning() << "Mod vector " << vecNo << " is invalid (0, 0, 0)"
+                      << "\n";
     }
   }
   if (isMOZero && !isAllVecZero) {
@@ -488,18 +513,21 @@ void IndexPeaks::exec() {
       lattice.setModVec1(args.satellites.modVectors[0]);
     } else {
       g_log.warning("empty modVector 1, skipping saving");
+      lattice.setModVec1(V3D(0.0, 0.0, 0.0));
     }
 
     if (args.satellites.modVectors.size() >= 2) {
       lattice.setModVec2(args.satellites.modVectors[1]);
     } else {
       g_log.warning("empty modVector 2, skipping saving");
+      lattice.setModVec2(V3D(0.0, 0.0, 0.0));
     }
 
     if (args.satellites.modVectors.size() >= 3) {
       lattice.setModVec3(args.satellites.modVectors[2]);
     } else {
       g_log.warning("empty modVector 3, skipping saving");
+      lattice.setModVec3(V3D(0.0, 0.0, 0.0));
     }
   }
 
@@ -508,21 +536,20 @@ void IndexPeaks::exec() {
   const auto &sampleUB = lattice.getUB();
   if (args.commonUB) {
     // Use sample UB an all peaks regardless of run
-    std::vector<Peak *> allPeaksRef(args.workspace->getNumberPeaks());
-    std::transform(std::begin(args.workspace->getPeaks()),
-                   std::end(args.workspace->getPeaks()),
-                   std::begin(allPeaksRef), [](Peak &peak) { return &peak; });
+    std::vector<IPeak *> allPeaksRef;
+    allPeaksRef.reserve(args.workspace->getNumberPeaks());
+    for (int i = 0; i < args.workspace->getNumberPeaks(); i++) {
+      allPeaksRef.emplace_back(args.workspace->getPeakPtr(i));
+    }
     const bool optimizeUB{false};
     indexingInfo = indexPeaks(allPeaksRef, sampleUB, args.mainTolerance,
                               args.roundHKLs, optimizeUB, args.satellites);
   } else {
     // Use a UB optimized for each run
-    auto &allPeaks = args.workspace->getPeaks();
-    std::unordered_map<int, std::vector<Peak *>> peaksPerRun;
-    std::for_each(std::begin(allPeaks), std::end(allPeaks),
-                  [&peaksPerRun](Peak &peak) {
-                    peaksPerRun[peak.getRunNumber()].emplace_back(&peak);
-                  });
+    std::unordered_map<int, std::vector<IPeak *>> peaksPerRun;
+    for (int i = 0; i < args.workspace->getNumberPeaks(); i++)
+      peaksPerRun[args.workspace->getPeak(i).getRunNumber()].emplace_back(
+          args.workspace->getPeakPtr(i));
     const bool optimizeUB{true};
     for (const auto &runPeaks : peaksPerRun) {
       const auto &peaks = runPeaks.second;

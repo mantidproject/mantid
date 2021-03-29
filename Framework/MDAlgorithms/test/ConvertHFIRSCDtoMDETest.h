@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -47,6 +48,15 @@ public:
     auto inputWS = Mantid::API::AnalysisDataService::Instance()
                        .retrieveWS<Mantid::API::IMDHistoWorkspace>(
                            "ConvertHFIRSCDtoMDETest_data");
+
+    auto setGoniometer = AlgorithmManager::Instance().create("SetGoniometer");
+    setGoniometer->initialize();
+    setGoniometer->setProperty("Workspace", inputWS);
+    setGoniometer->setPropertyValue("Axis0", "omega,0,1,0,-1");
+    setGoniometer->setPropertyValue("Axis1", "chi,0,0,1,-1");
+    setGoniometer->setPropertyValue("Axis2", "phi,0,1,0,-1");
+    setGoniometer->setProperty("Average", false);
+    setGoniometer->execute();
 
     ConvertHFIRSCDtoMDE alg;
     // Don't put output in ADS by default

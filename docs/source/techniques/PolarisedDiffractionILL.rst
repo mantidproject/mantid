@@ -10,7 +10,7 @@ Data reduction for D7 instrument at the ILL
 There are three workflow algorithms supporting data reduction at ILL's D7 polarised diffraction and spectroscopy instrument. These algorithms are:
 
 :ref:`algm-D7YIGPOsitionCalibration`
-    Performs wavelength and position calibraiton for D7 instrument banks and individual detectors in banks. 
+    Performs wavelength and position calibraiton for D7 instrument banks and individual detectors in banks.
 
 :ref:`algm-PolDiffILLReduction`
     Performs data reduction and produces the unnormalised sample cross-sections in one of the available units.
@@ -51,7 +51,7 @@ A very basic reduction would include a vanadium reference and a sample, without 
 
     # Define vanadium properties:
     vanadiumProperties = {'FormulaUnits': 1, 'SampleMass': 8.54, 'FormulaUnitMass': 50.94}
-    
+
     # Vanadium reduction
     PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputTreatment='Sum',
 	                OutputWorkspace='reduced_vanadium',
@@ -78,20 +78,20 @@ Output:
 
     dS/dOmega (TwoTheta) detector position range: 13.14...144.06 (degrees)
 
-   
+
 
 Wavelength and position calibration
 ===================================
 
-The first step of working with D7 data is to ensure that there exist a proper calibration of the wavelength, bank positions, and detector positions relative to their bank. This calibration can be either taken from a previous experiment performed in comparable conditions or obtained from the :math:`\text{Y}_{3}\text{Fe}_{5}\text{O}_{12}` (YIG) scan data using a dedicated algorithm :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>`. The method follows the description presented in Ref. [1].
+The first step of working with D7 data is to ensure that there exist a proper calibration of the wavelength, bank positions, and detector positions relative to their bank. This calibration can be either taken from a previous experiment performed in comparable conditions or obtained from the :math:`\text{Y}_{3}\text{Fe}_{5}\text{O}_{12}` (YIG) scan data using a dedicated algorithm :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>`. The method follows the description presented in Ref. [#Fennell]_.
 
 This algorithm performs wavelength and position calibration for both individual detectors and detector banks using measurement of a sample of powdered YIG. This data is fitted with Gaussian distributions at the expected peak positions. The output is an :ref:`Instrument Parameter File <InstrumentParameterFile>` readable by the :ref:`LoadILLPolarizedDiffraction <algm-LoadILLPolarizedDiffraction>` algorithm that will place the detector banks and detectors using the output of this algorithm.
 
-The provided YIG d-spacing values are loaded from an XML list. The default d-spacing distribution for YIG is coming from Ref. [2]. The peak positions are converted into :math:`2\theta` positions using the initial assumption of the neutron wavelength. YIG peaks in the detector's scan are fitted separately using a Gaussian distribution.
+The provided YIG d-spacing values are loaded from an XML list. The default d-spacing distribution for YIG is coming from Ref. [#Nakatsuka]_. The peak positions are converted into :math:`2\theta` positions using the initial assumption of the neutron wavelength. YIG peaks in the detector's scan are fitted separately using a Gaussian distribution.
 
 The workspace containing the peak fitting results is then fitted using a `Multidomain` function of the form:
 
-.. math:: 2\theta_{fit} = m \cdot (2.0 \cdot \text{asin} ( \lambda / 2d ) + offset_{\text{pixel}} + offset_{\text{bank}}),
+.. math:: 2\theta_{\text{fit}} = m \cdot (2.0 \cdot \text{asin} ( \lambda / 2d ) + offset_{\text{pixel}} + offset_{\text{bank}}),
 
 where `m` is the bank slope, :math:`offset_{\text{pixel}}` is the relative offset to the initial assumption of the position inside the detector bank, and :math:`offset_{\text{bank}}` is the offset of the entire bank. This function allows to extract the information about the wavelength, detector bank slopes and offsets, and the distribution of detector offsets.
 
@@ -126,7 +126,7 @@ It is strongly advised to first run the :ref:`D7YIGPositionCalibration <algm-D7Y
    print('The bank4 gradient is: {0:.3f}'.format(1.0 / mtd['shortWavelength'].column(1)[352]))
 
 
-	     
+
 Transmission calculation
 ========================
 
@@ -223,7 +223,7 @@ is not a problem, as the correction is given by a ratio and there is no spin-fli
 are calculated from ratios of non-spin-flip to spin-flip scattering, hence absolute numbers are not necessary.
 
 First, the data is normalised to monitor 1 (M1). Then, if the necessary inputs of container and absorber (please note this is a different measurement
-than mentioned in the `Transmission` section) measurements are provided, the background can be subtracted from the data: 
+than mentioned in the `Transmission` section) measurements are provided, the background can be subtracted from the data:
 
 .. math:: \dot{I_{B}} = \dot{I} - T\dot{E} - (1-T) \dot{C},
 
@@ -589,7 +589,7 @@ normalisation. It is possible to use only one of the possibilities, for example,
 data without the normalisation subroutines to be invoked. This is especially useful for diagnostic purposes.
 
 
-The cross-section separation is done according to formulae presented in Ref. [3-5]. More details on the exact calculations is given in
+The cross-section separation is done according to formulae presented in Ref. [#Sharpf]_ [#Steward]_ [#Ehlers]_. More details on the exact calculations is given in
 documentation of the :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` algorithm. It is possible to perform uniaxial,
 6-point (or XYZ), and 10-point measurement separation of magnetic, nuclear coherent, and nuclear-spin-incoherent components of the total
 measured scattering cross-section. The specifics of the 10-point measurement as a set of two separate 6-point measurements are taken into account.
@@ -797,27 +797,27 @@ Output:
 References
 ----------
 
-#. T. Fennell, L. Mangin-Thro, H.Mutka, G.J. Nilsen, A.R. Wildes.
+.. [#Fennell] T. Fennell, L. Mangin-Thro, H.Mutka, G.J. Nilsen, A.R. Wildes.
    *Wavevector and energy resolution of the polarized diffuse scattering spectrometer D7*,
    Nuclear Instruments and Methods in Physics Research A **857** (2017) 24–30
    `doi: 10.1016/j.nima.2017.03.024 <https://doi.org/10.1016/j.nima.2017.03.024>`_
 
-#. A. Nakatsuka, A. Yoshiasa, and S. Takeno.
+.. [#Nakatsuka] A. Nakatsuka, A. Yoshiasa, and S. Takeno.
    *Site preference of cations and structural variation in Y3Fe5O12 solid solutions with garnet structure*,
    Acta Crystallographica Section B **51** (1995) 737–745
    `doi: 10.1107/S0108768194014813 <https://doi.org/10.1107/S0108768194014813>`_
 
-#. Scharpf, O. and Capellmann, H.
+.. [#Sharpf] Scharpf, O. and Capellmann, H.
    *The XYZ‐Difference Method with Polarized Neutrons and the Separation of Coherent, Spin Incoherent, and Magnetic Scattering Cross Sections in a Multidetector*
    Physica Status Solidi (A) **135** (1993) 359-379
    `doi: 10.1002/pssa.2211350204 <https://doi.org/10.1002/pssa.2211350204>`_
 
-#. Stewart, J. R. and Deen, P. P. and Andersen, K. H. and Schober, H. and Barthelemy, J.-F. and Hillier, J. M. and Murani, A. P. and Hayes, T. and Lindenau, B.
+.. [#Steward] Stewart, J. R. and Deen, P. P. and Andersen, K. H. and Schober, H. and Barthelemy, J.-F. and Hillier, J. M. and Murani, A. P. and Hayes, T. and Lindenau, B.
    *Disordered materials studied using neutron polarization analysis on the multi-detector spectrometer, D7*
    Journal of Applied Crystallography **42** (2009) 69-84
    `doi: 10.1107/S0021889808039162 <https://doi.org/10.1107/S0021889808039162>`_
 
-#. G. Ehlers, J. R. Stewart, A. R. Wildes, P. P. Deen, and K. H. Andersen
+.. [#Ehlers] G. Ehlers, J. R. Stewart, A. R. Wildes, P. P. Deen, and K. H. Andersen
    *Generalization of the classical xyz-polarization analysis technique to out-of-plane and inelastic scattering*
    Review of Scientific Instruments **84** (2013), 093901
    `doi: 10.1063/1.4819739 <https://doi.org/10.1063/1.4819739>`_

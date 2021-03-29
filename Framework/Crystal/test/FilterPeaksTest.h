@@ -10,6 +10,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidCrystal/FilterPeaks.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -33,13 +34,15 @@ private:
     ws->getPeak(0).setHKL(h, k, l); // First peak is already indexed now.
     ws->getPeak(0).setIntensity(intensity);
     ws->getPeak(0).setSigmaIntensity(sigIntensity);
+    ws->getPeak(0).setBankName("bank1");
     return ws;
   }
 
   /*
    * Helper method to run the algorithm and return the output workspace.
+   * -- filter value
    */
-  IPeaksWorkspace_sptr runAlgorithm(const PeaksWorkspace_sptr &inWS,
+  IPeaksWorkspace_sptr runAlgorithm(const IPeaksWorkspace_sptr &inWS,
                                     const std::string &filterVariable,
                                     const double filterValue,
                                     const std::string &filterOperator) {
@@ -53,6 +56,31 @@ private:
     alg.setProperty("FilterVariable", filterVariable);
     alg.setProperty("FilterValue", filterValue);
     alg.setProperty("Operator", filterOperator);
+    alg.execute();
+
+    IPeaksWorkspace_sptr outWS =
+        AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(
+            outputWorkspace);
+
+    return outWS;
+  }
+
+  /*
+   * Helper method to run the algorithm and return the output workspace.
+   * -- bank selection
+   */
+  IPeaksWorkspace_sptr runAlgorithm(const PeaksWorkspace_sptr &inWS,
+                                    const std::string &bankname,
+                                    const std::string &criterion) {
+    const std::string outputWorkspace = "FilteredPeaks";
+
+    FilterPeaks alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setPropertyValue("OutputWorkspace", outputWorkspace);
+    alg.setProperty("BankName", bankname);
+    alg.setProperty("Criterion", criterion);
     alg.execute();
 
     IPeaksWorkspace_sptr outWS =
@@ -314,6 +342,66 @@ public:
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
     outWS = runAlgorithm(inWS, "Signal/Noise", ratio, "<=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    AnalysisDataService::Instance().remove(outWS->getName());
+    AnalysisDataService::Instance().remove(inWS->getName());
+  }
+
+  void test_filter_by_bank() {
+    const double h = 1;
+    const double k = 1;
+    const double l = 1;
+    const double intensity = 1;
+    const double sigIntensity = 0.5;
+    const std::string bankname = "bank1";
+
+    auto inWS = createInputWorkspace(h, k, l, intensity, sigIntensity);
+    auto outWS = runAlgorithm(inWS, "bank1", "=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "bank1", "!=");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+  }
+
+  void test_filter_LeanElasticPeaksWorkspace() {
+    auto inWS = std::make_shared<LeanElasticPeaksWorkspace>();
+
+    LeanElasticPeak peak(Mantid::Kernel::V3D(1, 1, 0), 1.0);
+    peak.setIntensity(100.0);
+    peak.setHKL(1, 1, 0);
+    TS_ASSERT_DELTA(peak.getDSpacing(), M_PI * M_SQRT2, 1e-9)
+    inWS->addPeak(peak);
+
+    LeanElasticPeak peak2(Mantid::Kernel::V3D(1, 0, 0), 2.0);
+    peak2.setIntensity(10.0);
+    peak2.setHKL(1, 0, 0);
+    TS_ASSERT_DELTA(peak2.getDSpacing(), 2 * M_PI, 1e-9)
+    inWS->addPeak(peak2);
+
+    auto outWS = runAlgorithm(inWS, "Wavelength", 1.0, "<");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+    outWS = runAlgorithm(inWS, "Wavelength", 1.0, ">");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "DSpacing", 5, "<");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+    outWS = runAlgorithm(inWS, "DSpacing", 0, ">");
+    TS_ASSERT_EQUALS(2, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "h+k+l", 2, "=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+    outWS = runAlgorithm(inWS, "h+k+l", 3, "<");
+    TS_ASSERT_EQUALS(2, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "h^2+k^2+l^2", 2, "=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+    outWS = runAlgorithm(inWS, "h^2+k^2+l^2", 2, ">");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "Intensity", 1000, "<");
+    TS_ASSERT_EQUALS(2, outWS->getNumberPeaks());
+    outWS = runAlgorithm(inWS, "Intensity", 20, ">");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
     AnalysisDataService::Instance().remove(outWS->getName());

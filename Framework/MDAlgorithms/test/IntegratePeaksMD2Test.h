@@ -10,6 +10,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -52,13 +53,13 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Run the IntegratePeaksMD2 with the given peak radius integration param */
-  static void doRun(std::vector<double> PeakRadius,
-                    std::vector<double> BackgroundRadius,
-                    std::string OutputWorkspace = "IntegratePeaksMD2Test_peaks",
-                    std::vector<double> BackgroundStartRadius = {},
-                    bool edge = true, bool cyl = false,
-                    std::string fnct = "NoFit", double adaptive = 0.0,
-                    bool ellip = false, bool fixQAxis = false) {
+  static void
+  doRun(std::vector<double> PeakRadius, std::vector<double> BackgroundRadius,
+        std::string OutputWorkspace = "IntegratePeaksMD2Test_peaks",
+        std::vector<double> BackgroundStartRadius = {}, bool edge = true,
+        bool cyl = false, std::string fnct = "NoFit", double adaptive = 0.0,
+        bool ellip = false, bool fixQAxis = false, bool useCentroid = false,
+        bool fixMajorAxisLength = true, int maxIterations = 1) {
     IntegratePeaksMD2 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -81,6 +82,10 @@ public:
         alg.setPropertyValue("OutputWorkspace", OutputWorkspace));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Ellipsoid", ellip));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FixQAxis", fixQAxis));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseCentroid", useCentroid));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("FixMajorAxisLength", fixMajorAxisLength));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxIterations", maxIterations));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Cylinder", cyl));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("CylinderLength", 4.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PercentBackground", 20.0));
@@ -557,6 +562,58 @@ public:
                     ceil(0.002 * static_cast<double>(sphereInten)));
   }
 
+  void test_exec_EllipsoidRadii_NoBackground_SingleCount_Vol_LongEllipse() {
+
+    CreateMDWorkspace algC;
+    TS_ASSERT_THROWS_NOTHING(algC.initialize())
+    TS_ASSERT(algC.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Dimensions", "3"));
+    TS_ASSERT_THROWS_NOTHING(
+        algC.setProperty("Extents", "-0.5,0.5,-0.5,0.5,-0.5,0.5"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Names", "h,k,l"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", "U,U,U"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Frames", "HKL,HKL,HKL"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("SplitInto", "2"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("MaxRecursionDepth", "5"));
+    TS_ASSERT_THROWS_NOTHING(algC.setPropertyValue(
+        "OutputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algC.execute());
+    TS_ASSERT(algC.isExecuted());
+
+    // Test an ellipsoid against theoretical vol
+    size_t numEvents = 200000;
+    V3D pos(0.0, 0.0, 0.0); // peak position
+
+    // Major axis along x
+    double fail_val = 0.013;
+    std::vector<double> radii = {0.05, fail_val, fail_val};
+
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5),
+                           std::make_pair(-0.5, 0.5)});
+    peakWS->addPeak(Peak(inst, 1, 1.0, pos));
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks",
+                                                 peakWS);
+
+    double ellipVol = (4.0 / 3.0) * M_PI * static_cast<double>(numEvents) *
+                      std::accumulate(radii.begin(), radii.end(), 1.0,
+                                      std::multiplies<double>());
+
+    doRun(radii, {0.0}, "IntegratePeaksMD2Test_peaks_out", {0.0}, false, false,
+          "NoFit", 0.0, true, false);
+
+    PeaksWorkspace_sptr peakResult = std::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "IntegratePeaksMD2Test_peaks_out"));
+    TS_ASSERT(peakResult);
+
+    double ellipInten = peakResult->getPeak(0).getIntensity();
+    TS_ASSERT_DELTA(ellipInten, ellipVol,
+                    ceil(0.05 * static_cast<double>(ellipVol)));
+  }
+
   void test_exec_EllipsoidRadii_NoBackground_SingleCount_Vol() {
     // Test an ellipsoid against theoretical vol
     size_t numEvents = 2000000;
@@ -617,6 +674,250 @@ public:
     ellipInten = peakResult->getPeak(0).getIntensity();
     TS_ASSERT_DELTA(ellipInten, ellipVol,
                     ceil(0.05 * static_cast<double>(ellipVol)));
+  }
+
+  void test_exec_EllipsoidRadii_WithBackground() {
+    // Test an ellipsoid against theoretical vol
+    size_t numEvents = 1000000;
+    V3D pos(0.0, 0.0, 0.0); // peak position
+
+    createMDEW();
+
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5),
+                           std::make_pair(-0.5, 0.5)});
+    std::vector<std::vector<double>> eigenvects;
+    eigenvects.push_back(std::vector<double>{1.0, 0.0, 0.0});
+    eigenvects.push_back(std::vector<double>{0.0, 1.0, 0.0});
+    eigenvects.push_back(std::vector<double>{0.0, 0.0, 1.0});
+    std::vector<double> radii = {0.4, 0.3, 0.2};
+    // addEllipsoid(numEvents, pos[0], pos[1], pos[2], eigenvects, radii, 0.0);
+    peakWS->addPeak(Peak(inst, 1, 1.0, pos));
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks",
+                                                 peakWS);
+
+    std::vector<double> background = {0.4, 0.45, 0.5};
+    doRun(radii, background, "IntegratePeaksMD2Test_peaks_out", {0.0}, true,
+          false, "NoFit", 0.0, true, false);
+
+    PeaksWorkspace_sptr peakResult = std::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "IntegratePeaksMD2Test_peaks_out"));
+    TS_ASSERT(peakResult);
+
+    // the integrated intensity should end up around 0 as this is just
+    // approximately uniform data
+    double ellipInten = peakResult->getPeak(0).getIntensity();
+    TS_ASSERT_DELTA(ellipInten, 0, 200);
+
+    // Get the peak's shape
+    const PeakShape &shape = peakResult->getPeak(0).getPeakShape();
+    PeakShapeEllipsoid const *const ellipsoidShape =
+        dynamic_cast<PeakShapeEllipsoid *>(const_cast<PeakShape *>(&shape));
+
+    // Check the shape is what we expect
+    TSM_ASSERT("Wrong sort of peak", ellipsoidShape);
+
+    TS_ASSERT_DELTA(ellipsoidShape->abcRadii(), radii, 1e-9);
+    TS_ASSERT_DELTA(ellipsoidShape->abcRadiiBackgroundInner(), radii, 1e-9);
+    TS_ASSERT_DELTA(ellipsoidShape->abcRadiiBackgroundOuter(), background,
+                    1e-9);
+    TS_ASSERT_EQUALS(ellipsoidShape->directions()[0], V3D(1, 0, 0));
+    TS_ASSERT_EQUALS(ellipsoidShape->directions()[1], V3D(0, 1, 0));
+    TS_ASSERT_EQUALS(ellipsoidShape->directions()[2], V3D(0, 0, 1));
+  }
+
+  void test_exec_ellipsoid_integrate_on_centroid() {
+    createMDEW();
+
+    // peak Q
+    V3D Q(1.0, 0.0, 0.0);
+    // set eigenvectors and eigenvalues
+    std::vector<double> eigenvals = {0.05, 0.03, 0.02};
+    std::vector<std::vector<double>> eigenvects;
+    eigenvects.push_back(std::vector<double>{Q[0], Q[1], Q[2]}); // para Q
+    eigenvects.push_back(std::vector<double>{0.0, 1.0, 0.0});
+    eigenvects.push_back(std::vector<double>{0.0, 0.0, 1.0});
+
+    size_t numEvents = 20000;
+    V3D offset(0.05, 0.0, 0.0); // generate peak away from nominal position
+    addEllipsoid(numEvents, Q[0] + offset[0], Q[1] + offset[1],
+                 Q[2] + offset[2], eigenvects, eigenvals, true);
+
+    // radius for integration (4 stdevs of principal axis)
+    std::vector<double> peakRadius{4 * sqrt(eigenvals[0])};
+    std::vector<double> innerBgRadius{0.0};
+    std::vector<double> outerBgRadius{0.0}; // set to less than peak
+    // Make a fake instrument - doesn't matter, we won't use it really
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    // --- Make a fake PeaksWorkspace ---
+    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    peakWS->addPeak(Peak(inst, 1, 1.0, Q));
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks",
+                                                 peakWS);
+
+    doRun(peakRadius, outerBgRadius, "IntegratePeaksMD2Test_peaks_out",
+          innerBgRadius, false, /* edge correction */
+          false,                /* cylinder*/
+          "NoFit", 0.0,         /* adaptive*/
+          true,                 /* ellipsoid integration*/
+          false,                /* fix Q axis of ellipsoid*/
+          true);                /* integrate around centroid*/
+
+    PeaksWorkspace_sptr newPW = std::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "IntegratePeaksMD2Test_peaks_out"));
+    TS_ASSERT(newPW);
+
+    // retrieve the peak
+    IPeak &iPeak = newPW->getPeak(0);
+    Peak *const peak = dynamic_cast<Peak *>(&iPeak);
+    TS_ASSERT(peak);
+
+    // Get the peak's shape
+    const PeakShape &shape = peak->getPeakShape();
+    PeakShapeEllipsoid const *const ellipsoidShape =
+        dynamic_cast<PeakShapeEllipsoid *>(const_cast<PeakShape *>(&shape));
+
+    // Check the shape is what we expect
+    TSM_ASSERT("Wrong sort of peak", ellipsoidShape);
+
+    // check translation is same as offset
+    auto translation = ellipsoidShape->translation();
+    for (size_t idim = 0; idim < eigenvals.size(); idim++) {
+      TS_ASSERT_DELTA(translation[idim], offset[idim], 0.005);
+    }
+  }
+
+  void test_exec_ellipsoid_integrate_use_estimated_stdevs_nobg() {
+    createMDEW();
+
+    // peak Q
+    V3D Q(1.0, 0.0, 0.0);
+    // set eigenvectors and eigenvalues
+    std::vector<double> eigenvals = {0.05, 0.03, 0.02};
+    std::vector<std::vector<double>> eigenvects;
+    eigenvects.push_back(std::vector<double>{Q[0], Q[1], Q[2]}); // para Q
+    eigenvects.push_back(std::vector<double>{0.0, 1.0, 0.0});
+    eigenvects.push_back(std::vector<double>{0.0, 0.0, 1.0});
+
+    size_t numEvents = 20000;
+    addEllipsoid(numEvents, Q[0], Q[1], Q[2], eigenvects, eigenvals, true);
+
+    // radius for integration (4 stdevs of principal axis)
+    std::vector<double> peakRadius{4 * sqrt(eigenvals[0])};
+    std::vector<double> innerBgRadius{0.0};
+    std::vector<double> outerBgRadius{0.0}; // set to less than peak
+    // Make a fake instrument - doesn't matter, we won't use it really
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    // --- Make a fake PeaksWorkspace ---
+    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    peakWS->addPeak(Peak(inst, 1, 1.0, Q));
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks",
+                                                 peakWS);
+
+    doRun(peakRadius, outerBgRadius, "IntegratePeaksMD2Test_peaks_out",
+          innerBgRadius, false, /* edge correction */
+          false,                /* cylinder*/
+          "NoFit", 0.0,         /* adaptive*/
+          true,                 /* ellipsoid integration*/
+          false,                /* fix Q axis of ellipsoid*/
+          false,                /* integrate around centroid*/
+          false);               /* fix major axis length*/
+
+    PeaksWorkspace_sptr newPW = std::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "IntegratePeaksMD2Test_peaks_out"));
+    TS_ASSERT(newPW);
+
+    // retrieve the peak
+    IPeak &iPeak = newPW->getPeak(0);
+    Peak *const peak = dynamic_cast<Peak *>(&iPeak);
+    TS_ASSERT(peak);
+
+    // Get the peak's shape
+    const PeakShape &shape = peak->getPeakShape();
+    PeakShapeEllipsoid const *const ellipsoidShape =
+        dynamic_cast<PeakShapeEllipsoid *>(const_cast<PeakShape *>(&shape));
+
+    // Check the shape is what we expect
+    TSM_ASSERT("Wrong sort of peak", ellipsoidShape);
+
+    // check translation is zero (not integrating round centroid)
+    auto translation = ellipsoidShape->translation();
+    for (size_t idim = 0; idim < eigenvals.size(); idim++) {
+      TS_ASSERT_DELTA(translation[idim], 0.0, 0.005);
+    }
+
+    // check axes corrsepond to 3 stdevs
+    auto radii = ellipsoidShape->abcRadii();
+    for (size_t idim = 0; idim < eigenvals.size(); idim++) {
+      TS_ASSERT_DELTA(radii[idim] * radii[idim], 9 * eigenvals[idim], 0.05);
+    }
+  }
+
+  void test_exec_ellipsoid_integrate_multi_iterations() {
+    createMDEW();
+
+    // peak Q
+    V3D Q(1.0, 0.0, 0.0);
+    // set eigenvectors and eigenvalues
+    std::vector<double> eigenvals = {0.05, 0.03, 0.02};
+    std::vector<std::vector<double>> eigenvects;
+    eigenvects.push_back(std::vector<double>{Q[0], Q[1], Q[2]}); // para Q
+    eigenvects.push_back(std::vector<double>{0.0, 1.0, 0.0});
+    eigenvects.push_back(std::vector<double>{0.0, 0.0, 1.0});
+
+    size_t numEvents = 2000;
+    addEllipsoid(numEvents, Q[0], Q[1], Q[2], eigenvects, eigenvals, true);
+    // add uniform bg
+    std::vector<std::pair<double, double>> range(eigenvals.size(),
+                                                 std::make_pair(0, 2));
+    addUniform(static_cast<size_t>(numEvents), range);
+
+    // radius for integration (4 stdevs of principal axis)
+    std::vector<double> peakRadius{4 * sqrt(eigenvals[0])};
+    std::vector<double> innerBgRadius{0.0};
+    std::vector<double> outerBgRadius{0.0}; // set to less than peak
+    // Make a fake instrument - doesn't matter, we won't use it really
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    // --- Make a fake PeaksWorkspace ---
+    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    peakWS->addPeak(Peak(inst, 1, 1.0, Q));
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks",
+                                                 peakWS);
+
+    std::vector<double> prev_radii(eigenvals.size(), DBL_MAX);
+    for (int niter = 1; niter < 3; niter++) {
+      doRun(peakRadius, outerBgRadius, "IntegratePeaksMD2Test_peaks_out",
+            innerBgRadius, false, /* edge correction */
+            false,                /* cylinder*/
+            "NoFit", 0.0,         /* adaptive*/
+            true,                 /* ellipsoid integration*/
+            true,                 /* fix Q axis of ellipsoid*/
+            false,                /* integrate around centroid*/
+            false,                /* fix major axis length*/
+            niter);               /* maxIterations */
+      PeaksWorkspace_sptr newPW = std::dynamic_pointer_cast<PeaksWorkspace>(
+          AnalysisDataService::Instance().retrieve(
+              "IntegratePeaksMD2Test_peaks_out"));
+      IPeak &iPeak = newPW->getPeak(0);
+      Peak *const peak = dynamic_cast<Peak *>(&iPeak);
+      const PeakShape &shape = peak->getPeakShape();
+      PeakShapeEllipsoid const *const ellipsoidShape =
+          dynamic_cast<PeakShapeEllipsoid *>(const_cast<PeakShape *>(&shape));
+      auto radii = ellipsoidShape->abcRadii();
+      // test radii are smaller than previous iteration
+      for (size_t idim = 0; idim < eigenvals.size(); idim++) {
+        TS_ASSERT_LESS_THAN(radii[idim], prev_radii[idim]);
+        prev_radii[idim] = radii[idim];
+      }
+    }
   }
 
   void EllipsoidTestHelper(
@@ -866,6 +1167,50 @@ public:
                      sphericalShape->backgroundOuterRadius().get());
     TS_ASSERT_EQUALS(backgroundInnerRadius,
                      sphericalShape->backgroundInnerRadius().get());
+  }
+
+  void test_exec_EllipsoidRadii_with_LeanElasticPeaks() {
+    // Test an ellipsoid against theoretical vol
+    const std::vector<double> radii = {0.4, 0.3, 0.2};
+    const V3D pos(0.0, 0.0, 0.0); // peak position
+    const int numEvents = 1000000;
+
+    createMDEW();
+    addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5),
+                           std::make_pair(-0.5, 0.5)});
+
+    auto peakWS = std::make_shared<LeanElasticPeaksWorkspace>();
+    peakWS->addPeak(LeanElasticPeak(pos));
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks",
+                                                 peakWS);
+
+    doRun(radii, {0.0}, "IntegratePeaksMD2Test_Leanpeaks_out", {0.0}, true,
+          false, "NoFit", 0.0, true, false);
+
+    LeanElasticPeaksWorkspace_sptr peakResult =
+        std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(
+            AnalysisDataService::Instance().retrieve(
+                "IntegratePeaksMD2Test_Leanpeaks_out"));
+    TS_ASSERT(peakResult);
+
+    // the integrated intensity should end up around
+    // 4/3*PI*0.4*0.3*0.2*numEvents
+    double ellipInten = peakResult->getPeak(0).getIntensity();
+    TS_ASSERT_DELTA(ellipInten, 4. / 3. * M_PI * 0.4 * 0.3 * 0.2 * numEvents,
+                    25);
+
+    // Get the peak's shape
+    const PeakShape &shape = peakResult->getPeak(0).getPeakShape();
+    PeakShapeEllipsoid const *const ellipsoidShape =
+        dynamic_cast<PeakShapeEllipsoid *>(const_cast<PeakShape *>(&shape));
+
+    // Check the shape is what we expect
+    TSM_ASSERT("Wrong sort of peak", ellipsoidShape);
+
+    TS_ASSERT_DELTA(ellipsoidShape->abcRadii(), radii, 1e-9);
+    TS_ASSERT_EQUALS(ellipsoidShape->directions()[0], V3D(1, 0, 0));
+    TS_ASSERT_EQUALS(ellipsoidShape->directions()[1], V3D(0, 1, 0));
+    TS_ASSERT_EQUALS(ellipsoidShape->directions()[2], V3D(0, 0, 1));
   }
 };
 

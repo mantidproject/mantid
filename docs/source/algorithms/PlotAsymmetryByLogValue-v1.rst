@@ -65,7 +65,7 @@ Output:
 
    Y values (asymmetry): [ 0.14500665  0.136374    0.11987909]
    X values (sample magn. field): [ 1350.  1360.  1370.]
-   
+
 **Example - Calculating asymmetry for a series of MUSR runs using a range:**
 
 .. testcode:: ExSimpleRange
@@ -81,12 +81,12 @@ Output:
        ws.readY(0)[0],ws.readY(0)[1],ws.readY(0)[2]))
    print("X values (sample magn. field): [ {:.1f}  {:.1f}  {:.1f} ]".format(
        ws.readX(0)[0],ws.readX(0)[1],ws.readX(0)[2]))
-	
+
 Output:
 
 .. testoutput:: ExSimpleRange
   :options: +NORMALIZE_WHITESPACE
-  
+
    Y values (asymmetry): [ 0.1450066  0.0929052  0.0652143 ]
    X values (sample magn. field): [ 1350.0  1380.0  1410.0 ]
 
@@ -124,7 +124,7 @@ Output:
 
    # Skip spectra 35
    fwd_spectra = [x for x in range(33, 65) if x != 35]
-   
+
    # Skip spectra 1 and 2
    bwd_spectra = range(3, 33)
 

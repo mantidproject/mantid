@@ -208,7 +208,7 @@ class ComponentInfoTest(unittest.TestCase):
         index = info.indexOfAny(info.name(info.root()))
         # Root index and the discovered index should be the same
         self.assertEqual(index, info.root())
-    
+
     def test_indexOfAny_throws(self):
         info = self._ws.componentInfo()
         with self.assertRaises(ValueError):
@@ -503,13 +503,13 @@ class ComponentInfoTest(unittest.TestCase):
 
     def test_basic_iterator(self):
         info = self._ws.componentInfo()
-        expected_iterations = len(info) 
+        expected_iterations = len(info)
         actual_iterations = len(list(iter(info)))
         self.assertEqual(expected_iterations, actual_iterations)
         it = iter(info)
         self.assertEqual(next(it).index, 0)
         self.assertEqual(next(it).index, 1)
-        
+
     def test_isDetector_via_iterator(self):
         comp_info = self._ws.componentInfo()
         n_detectors = len(self._ws.detectorInfo())
@@ -525,11 +525,11 @@ class ComponentInfoTest(unittest.TestCase):
         it = iter(comp_info)
         # basic check on first detector position
         self.assertGreater(next(it).position.distance(source_pos), 0)
-        
+
     def test_children_via_iterator(self):
         info = self._ws.componentInfo()
         it = iter(info)
-        first_det = next(it) 
+        first_det = next(it)
         self.assertEqual(type(first_det.children), np.ndarray)
         self.assertEqual(len(first_det.children), 0)
         root = next(it)
@@ -541,7 +541,7 @@ class ComponentInfoTest(unittest.TestCase):
     def test_detectorsInSubtree_via_iterator(self):
         info = self._ws.componentInfo()
         it = iter(info)
-        first_det = next(it) 
+        first_det = next(it)
         self.assertEqual(type(first_det.detectorsInSubtree), np.ndarray)
         # For detectors, only contain own index
         self.assertTrue(np.array_equal(first_det.detectorsInSubtree,np.array([0], dtype='uint64')))
@@ -553,7 +553,7 @@ class ComponentInfoTest(unittest.TestCase):
     def test_componentsInSubtree_via_iterator(self):
         info = self._ws.componentInfo()
         it = iter(info)
-        first_det = next(it) 
+        first_det = next(it)
         self.assertEqual(type(first_det.detectorsInSubtree), np.ndarray)
         # For detectors, only contain own index
         self.assertTrue(np.array_equal(first_det.componentsInSubtree,np.array([0], dtype='uint64')))

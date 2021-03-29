@@ -285,7 +285,7 @@ private:
                                const Mantid::HistogramData::HistogramX &X,
                                const int specNum, int &Centerchan);
 
-  double CalculatePositionSpan(Geometry::IPeak const &peak, const double dQ);
+  double CalculatePositionSpan(DataObjects::Peak const &peak, const double dQ);
 
   void InitializeColumnNamesInTableWorkspace(
       DataObjects::TableWorkspace_sptr &TabWS);
@@ -348,7 +348,7 @@ private:
   void FindPlane(Kernel::V3D &center, Kernel::V3D &xvec, Kernel::V3D &yvec,
                  double &ROW, double &COL, int &NROWS, int &NCOLS,
                  double &pixWidthx, double &pixHeighty,
-                 Geometry::IPeak const &peak) const;
+                 DataObjects::Peak const &peak) const;
 
   int findTimeChannel(const Mantid::HistogramData::HistogramX &X,
                       const double time);

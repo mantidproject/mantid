@@ -734,13 +734,6 @@ public:
     runTestThatPolarizationCorrectionsAreEnabledForInstrument("CRISP");
   }
 
-  void testRefreshFloodWorkspaceListWhenAllWorkspacesDeleted() {
-    auto presenter = makePresenter();
-    EXPECT_CALL(m_view, refreshFloodWorkspaceList());
-    presenter.notifyAllWorkspacesDeleted();
-    verifyAndClear();
-  }
-
 private:
   NiceMock<MockExperimentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;

@@ -69,6 +69,8 @@ std::string FeatureUsage::featureTypeToString() const {
     return "Feature";
   case FeatureType::Interface:
     return "Interface";
+  case FeatureType::Function:
+    return "Function";
   }
   return "Unknown";
 }
@@ -273,7 +275,7 @@ std::string UsageServiceImpl::generateStartupMessage() {
   message["osVersion"] = ConfigService::Instance().getOSVersion();
   message["osReadable"] = ConfigService::Instance().getOSVersionReadable();
 
-  // legacy interface requires paraview version
+  // legacy interface requires paraview version DON'T REMOVE
   message["ParaView"] = 0;
 
   // mantid version and sha1

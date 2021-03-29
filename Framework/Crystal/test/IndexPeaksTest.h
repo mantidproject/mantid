@@ -6,8 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/IndexPeaks.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -16,6 +18,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+using Mantid::API::IPeaksWorkspace_sptr;
 using Mantid::API::Workspace_sptr;
 using Mantid::Crystal::IndexPeaks;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
@@ -112,7 +115,7 @@ PeaksWorkspace_sptr createTestPeaksWorkspaceWithSatellites(
 }
 
 std::unique_ptr<IndexPeaks>
-indexPeaks(const PeaksWorkspace_sptr &peaksWS,
+indexPeaks(const IPeaksWorkspace_sptr &peaksWS,
            const std::unordered_map<std::string, std::string> &arguments) {
   auto alg = std::make_unique<IndexPeaks>();
   alg->setChild(true);
@@ -485,6 +488,82 @@ public:
     TS_ASSERT_EQUALS(true, lattice.getCrossTerm())
   }
 
+  void test_exec_mod_vectors_save_cleared_across_runs() {
+    const auto peakWS = createTestPeaksWorkspaceWithSatellites();
+
+    const auto alg_three_mod =
+        indexPeaks(peakWS, {{"RoundHKLs", "0"},
+                            {"MaxOrder", "1"},
+                            {"ModVector1", "0.333, 0.667, -0.333"},
+                            {"ModVector2", "-0.333, 0.667, 0.333"},
+                            {"ModVector3", "0.333, -0.667, 0.333"},
+                            {"SaveModulationInfo", "1"}});
+
+    // Repeat indexPeaks with 1 mod vector, verify lattice only has one set
+    const auto alg_one_mod =
+        indexPeaks(peakWS, {{"RoundHKLs", "0"},
+                            {"MaxOrder", "1"},
+                            {"ModVector1", "0.333, 0.667, -0.333"},
+                            {"SaveModulationInfo", "1"}});
+
+    const auto &lattice = peakWS->sample().getOrientedLattice();
+    TS_ASSERT_EQUALS(1, lattice.getMaxOrder())
+    TS_ASSERT_DELTA(V3D(0.333, 0.667, -0.333).norm(),
+                    lattice.getModVec(0).norm(), 1e-8)
+    TS_ASSERT_DELTA(V3D(0.0, 0.0, 0.0).norm(), lattice.getModVec(1).norm(),
+                    1e-8)
+    TS_ASSERT_DELTA(V3D(0.0, 0.0, 0.0).norm(), lattice.getModVec(2).norm(),
+                    1e-8)
+  }
+
+  void test_exec_compare_after_modvec_changes() {
+    const std::vector<double> ub = {0.0971,  0.1179, 0.0433, 0.1056, -0.0305,
+                                    -0.0190, 0.0311, 0.0820, -0.0698};
+
+    constexpr int npeaks{5};
+    constexpr int run{39056};
+    // peak numbers 7, 25, 66, 72, and 76 from TOPAZ_39056
+    constexpr std::array<MinimalPeak, npeaks> testPeaksInfo = {
+        MinimalPeak{run, V3D(-1.44683, 1.07978, 2.06781)},
+        MinimalPeak{run, V3D(-1.70476, 1.12522, 2.46955)},
+        MinimalPeak{run, V3D(1.22626, 1.20112, 4.88867)},
+        MinimalPeak{run, V3D(0.934964, 1.19063, 4.15398)},
+        MinimalPeak{run, V3D(1.19216, 1.75244, 4.69207)}};
+
+    const auto peakWS_onemod = createPeaksWorkspace<npeaks>(testPeaksInfo, ub);
+    const auto peakWS = createPeaksWorkspace<npeaks>(testPeaksInfo, ub);
+
+    // Index with one modulation vector on the first peaks workspace
+    const auto alg_one_mod =
+        indexPeaks(peakWS_onemod, {{"RoundHKLs", "0"},
+                                   {"MaxOrder", "1"},
+                                   {"ModVector1", "0.5, 0.5, 0"},
+                                   {"SaveModulationInfo", "1"}});
+
+    // Re-index using two modulation vectors
+    const auto alg_two_mod = indexPeaks(peakWS, {{"RoundHKLs", "0"},
+                                                 {"MaxOrder", "1"},
+                                                 {"ModVector1", "0.5, 0, 0"},
+                                                 {"ModVector2", "0, 0.5, 0"},
+                                                 {"SaveModulationInfo", "1"}});
+
+    // Re-index with one modulation vector, and compare to before
+    const auto alg = indexPeaks(peakWS, {{"RoundHKLs", "0"},
+                                         {"MaxOrder", "1"},
+                                         {"ModVector1", "0.5, 0.5, 0"},
+                                         {"SaveModulationInfo", "1"}});
+
+    for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
+      const auto &peak_onemod = peakWS_onemod->getPeak(i);
+      const auto &peak = peakWS->getPeak(i);
+      // Verify the HKL and MNP of each peak since these would change if the
+      // last indexPeaks call was using a second modulation vector
+      TS_ASSERT(peak_onemod.getHKL() == peak.getHKL());
+      TS_ASSERT(peak_onemod.getIntHKL() == peak.getIntHKL());
+      TS_ASSERT(peak_onemod.getIntMNP() == peak.getIntMNP());
+    }
+  }
+
   // --------------------------- Failure tests -----------------------------
 
   std::shared_ptr<IndexPeaks> setup_validate_inputs_test_alg() {
@@ -576,6 +655,30 @@ public:
       TS_ASSERT_THROWS(alg.setProperty(propName, "0,0,0,0"),
                        std::invalid_argument &)
     }
+  }
+
+  void test_LeanElasticPeak() {
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
+    auto ws =
+        std::make_shared<Mantid::DataObjects::LeanElasticPeaksWorkspace>();
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
+    ws->addPeak(Mantid::DataObjects::LeanElasticPeak(
+        Mantid::Kernel::V3D(2 * M_PI, 0, 0), 1.));
+    ws->addPeak(Mantid::DataObjects::LeanElasticPeak(
+        Mantid::Kernel::V3D(0, 4 * M_PI, 0), 1.));
+
+    auto alg = indexPeaks(ws, {});
+    TS_ASSERT(alg->isExecuted())
+    int numberIndexed = alg->getProperty("NumIndexed");
+    TS_ASSERT_EQUALS(numberIndexed, 2)
+
+    TS_ASSERT_DELTA(ws->getPeak(0).getH(), 1, 1e-9)
+    TS_ASSERT_DELTA(ws->getPeak(0).getK(), 0, 1e-9)
+    TS_ASSERT_DELTA(ws->getPeak(0).getL(), 0, 1e-9)
+
+    TS_ASSERT_DELTA(ws->getPeak(1).getH(), 0, 1e-9)
+    TS_ASSERT_DELTA(ws->getPeak(1).getK(), 2, 1e-9)
+    TS_ASSERT_DELTA(ws->getPeak(1).getL(), 0, 1e-9)
   }
 
 private:

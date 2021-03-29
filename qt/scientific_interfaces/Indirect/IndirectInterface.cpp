@@ -25,7 +25,8 @@ IndirectInterface::IndirectInterface(QWidget *parent)
 
 void IndirectInterface::help() {
   HelpWindow::showCustomInterface(nullptr,
-                                  QString::fromStdString(documentationPage()));
+                                  QString::fromStdString(documentationPage()),
+                                  QString("indirect"));
 }
 
 void IndirectInterface::settings() {

@@ -206,7 +206,7 @@ set<detid_t>
 SpecialWorkspace2D::getDetectorIDs(const std::size_t workspaceIndex) const {
   if (size_t(workspaceIndex) > this->getNumberHistograms())
     throw std::invalid_argument(
-        "SpecialWorkspace2D::getDetectorID(): Invalid workspaceIndex given.");
+        "SpecialWorkspace2D::getDetectorIDs(): Invalid workspaceIndex given.");
   return this->getSpectrum(workspaceIndex).getDetectorIDs();
 }
 

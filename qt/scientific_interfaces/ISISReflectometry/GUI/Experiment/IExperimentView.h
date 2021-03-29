@@ -113,7 +113,6 @@ public:
   virtual void setFloodCorrectionType(std::string const &correction) = 0;
   virtual std::string getFloodWorkspace() const = 0;
   virtual void setFloodWorkspace(std::string const &workspace) = 0;
-  virtual void refreshFloodWorkspaceList() = 0;
 
   virtual std::string getStitchOptions() const = 0;
   virtual void setStitchOptions(std::string const &stitchOptions) = 0;

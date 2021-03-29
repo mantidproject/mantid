@@ -120,6 +120,7 @@ void Fit::readProperties() {
   if (!contstraints.empty()) {
     m_function->addConstraints(contstraints);
   }
+  m_function->registerFunctionUsage(isChild());
 
   // Try to retrieve optional properties
   int intMaxIterations = getProperty("MaxIterations");

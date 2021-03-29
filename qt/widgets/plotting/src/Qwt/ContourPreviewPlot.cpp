@@ -51,9 +51,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 ContourPreviewPlot::ContourPreviewPlot(QWidget *parent)
-    : QWidget(parent), WorkspaceObserver(),
-      m_mdSettings(std::make_shared<MdSettings>()), m_workspace(),
-      m_dimensions() {
+    : QWidget(parent), WorkspaceObserver(), m_workspace(), m_dimensions() {
   this->observePreDelete(true);
   m_spectrogram = std::make_unique<QwtPlotSpectrogram>();
   m_data = std::make_unique<QwtRasterDataMD>();

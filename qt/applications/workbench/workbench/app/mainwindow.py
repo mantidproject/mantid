@@ -43,6 +43,7 @@ from workbench.projectrecovery.projectrecovery import ProjectRecovery  # noqa
 from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu # noqa
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback  # noqa
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall  # noqa
+from workbench.config import get_window_config
 
 # -----------------------------------------------------------------------------
 # Splash screen
@@ -56,8 +57,8 @@ def _get_splash_image():
 
     # the proportion of the whole window size for the splash screen
     splash_screen_scaling = 0.25
-    return QPixmap(':/images/MantidSplashScreen_4k.jpg').scaled(width * splash_screen_scaling,
-                                                                height * splash_screen_scaling,
+    return QPixmap(':/images/MantidSplashScreen_4k.jpg').scaled(int(width * splash_screen_scaling),
+                                                                int(height * splash_screen_scaling),
                                                                 Qt.KeepAspectRatio,
                                                                 Qt.SmoothTransformation)
 
@@ -76,6 +77,8 @@ QApplication.processEvents(QEventLoop.AllEvents)
 
 class MainWindow(QMainWindow):
     DOCKOPTIONS = QMainWindow.AllowTabbedDocks | QMainWindow.AllowNestedDocks
+    # list of custom interfaces that are not qt4/qt5 compatible
+    PYTHON_GUI_BLACKLIST = ['Frequency_Domain_Analysis_Old.py']
 
     def __init__(self):
         QMainWindow.__init__(self)
@@ -322,7 +325,6 @@ class MainWindow(QMainWindow):
         add_actions(self.file_menu, self.file_menu_actions)
         add_actions(self.view_menu, self.view_menu_actions)
         add_actions(self.help_menu, self.help_menu_actions)
-        self.populate_interfaces_menu()
 
     def launch_custom_python_gui(self, filename):
         self.interface_executor.execute(open(filename).read(), filename)
@@ -336,9 +338,12 @@ class MainWindow(QMainWindow):
             interface = self.interface_manager.createSubWindow(interface_name)
             interface.setObjectName(object_name)
             interface.setAttribute(Qt.WA_DeleteOnClose, True)
-            # make indirect interfaces children of workbench
+            parent, flags = get_window_config()
             if submenu == "Indirect":
+                # always make indirect interfaces children of workbench
                 interface.setParent(self, interface.windowFlags())
+            else:
+                interface.setParent(parent, flags)
             interface.show()
         else:
             if window.windowState() == Qt.WindowMinimized:
@@ -350,9 +355,8 @@ class MainWindow(QMainWindow):
         """Populate then Interfaces menu with all Python and C++ interfaces"""
         self.interfaces_menu.clear()
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
-        self.interface_list = self._discover_python_interfaces(interface_dir)
+        self.interface_list, registers_to_run = self._discover_python_interfaces(interface_dir)
         self._discover_cpp_interfaces(self.interface_list)
-
         hidden_interfaces = ConfigService['interfaces.categories.hidden'].split(';')
 
         keys = list(self.interface_list.keys())
@@ -372,6 +376,13 @@ class MainWindow(QMainWindow):
                         action = submenu.addAction(name)
                         action.triggered.connect(lambda checked_cpp, name=name, key=key: self.
                                                  launch_custom_cpp_gui(name, key))
+        # these register scripts contain code to register encoders and decoders to work with project save before the
+        # corresponding interface has been initialised. This is a temporary measure pending harmonisation of cpp/python
+        # interfaces
+        for reg_list in registers_to_run.values():
+            for register in reg_list:
+                file_path = os.path.join(interface_dir, register)
+                self.interface_executor.execute(open(file_path).read(), file_path)
 
     def redirect_python_warnings(self):
         """By default the warnings module writes warnings to sys.stderr. stderr is assumed to be
@@ -388,23 +399,27 @@ class MainWindow(QMainWindow):
     def _discover_python_interfaces(self, interface_dir):
         """Return a dictionary mapping a category to a set of named Python interfaces"""
         items = ConfigService['mantidqt.python_interfaces'].split()
-        # list of custom interfaces that are not qt4/qt5 compatible
-        GUI_BLACKLIST = ['Frequency_Domain_Analysis_Old.py']
-
+        try:
+            register_items = ConfigService['mantidqt.python_interfaces_io_registry'].split()
+        except KeyError:
+            register_items = []
         # detect the python interfaces
         interfaces = {}
+        registers_to_run = {}
         for item in items:
             key, scriptname = item.split('/')
+            reg_name = scriptname[:-3] + '_register.py'
+            if reg_name in register_items and os.path.exists(os.path.join(interface_dir, reg_name)):
+                registers_to_run.setdefault(key, []).append(reg_name)
             if not os.path.exists(os.path.join(interface_dir, scriptname)):
-                logger.warning('Failed to find script "{}" in "{}"'.format(
-                    scriptname, interface_dir))
+                logger.warning('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir))
                 continue
-            if scriptname in GUI_BLACKLIST:
+            if scriptname in self.PYTHON_GUI_BLACKLIST:
                 logger.information('Not adding gui "{}"'.format(scriptname))
                 continue
             interfaces.setdefault(key, []).append(scriptname)
 
-        return interfaces
+        return interfaces, registers_to_run
 
     def _discover_cpp_interfaces(self, interfaces):
         """Return a dictionary mapping a category to a set of named C++ interfaces"""

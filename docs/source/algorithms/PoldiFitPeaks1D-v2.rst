@@ -26,26 +26,26 @@ The following usage example loads an example correlation spectrum that was calcu
 
     # Load correlation spectrum
     Load(Filename='poldi_2_phases_theoretical_reference.nxs', OutputWorkspace='correlation_spectrum')
-    
+
     # Perform peak search
     PoldiPeakSearch(InputWorkspace='correlation_spectrum', MinimumPeakSeparation=8, MaximumPeakNumber=12, MinimumPeakHeight=180, OutputWorkspace='peaks')
-    
+
     # Fit peaks with proper overlap handling
     PoldiFitPeaks1D(InputWorkspace='correlation_spectrum', FwhmMultiples=2, AllowedOverlap=0.1, PoldiPeakTable='peaks')
-    
+
 Variation of the `AllowedOverlap`-parameter influences the quality of the fit at some point if it's too close to 1. Setting it to 1 makes the algorithm's behavior similar to that of version 1.
 
 .. testcode:: ExSiliconPeakFit2
 
     # Load correlation spectrum
     Load(Filename='poldi_2_phases_theoretical_reference.nxs', OutputWorkspace='correlation_spectrum')
-    
+
     # Perform peak search
     PoldiPeakSearch(InputWorkspace='correlation_spectrum', MinimumPeakSeparation=8, MaximumPeakNumber=9, MinimumPeakHeight=180, OutputWorkspace='peaks')
-    
+
     # Too large allowed overlap, fits will have bad quality.
     PoldiFitPeaks1D(InputWorkspace='correlation_spectrum', FwhmMultiples=2, AllowedOverlap=0.9, PoldiPeakTable='peaks')
-    
+
 .. categories::
 
 .. sourcelink::

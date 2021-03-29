@@ -8,8 +8,10 @@
 
 #include "DllOption.h"
 
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IFunction_fwd.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidQtWidgets/Common/FittingGlobals.h"
 #include "MantidQtWidgets/Common/IFunctionView.h"
 
 #include <QMap>
@@ -29,6 +31,7 @@ class QtEnumPropertyManager;
 class QtProperty;
 class QtBrowserItem;
 class ParameterPropertyManager;
+class DoubleDialogEditorFactory;
 
 class QPushButton;
 class QLabel;
@@ -42,7 +45,6 @@ class QTreeWidgetItem;
 
 namespace Mantid {
 namespace API {
-class CompositeFunction;
 class Workspace;
 class ParameterTie;
 } // namespace API
@@ -53,6 +55,7 @@ namespace MantidWidgets {
 
 class CreateAttributePropertyForFunctionTreeView;
 class SelectFunctionDialog;
+struct GlobalTie;
 
 /**
  * Class FitPropertyBrowser implements QtPropertyBrowser to display
@@ -132,6 +135,12 @@ public:
   // Show global boxes
   void showGlobals();
 
+  // Sets the function prefix of a domain to be displayed within a
+  // MultiDomainFunction
+  void setMultiDomainFunctionPrefix(const QString &functionPrefix);
+  // Sets the global ties to be displayed within a MultiDomainFunction
+  void setGlobalTies(std::vector<GlobalTie> const &globalTies);
+
 protected:
   /// Create the Qt property browser
   void createBrowser();
@@ -154,9 +163,30 @@ protected:
   AProperty addAttributeProperty(QtProperty *parent, const QString &attName,
                                  const Mantid::API::IFunction::Attribute &att);
   /// Add attribute and parameter properties to a function property
+  void addAttributeAndParameterProperties(
+      QtProperty *prop, const Mantid::API::IFunction_sptr &fun,
+      const Mantid::API::CompositeFunction_sptr &parentComposite = nullptr,
+      const std::size_t &parentIndex = 0);
+  /// Add tie to a parameter property. This will also work for ties across
+  /// functions in a composite function.
+  void addParameterTie(
+      QtProperty *property, const Mantid::API::IFunction_sptr &function,
+      const std::string &parameterName, const std::size_t &parameterIndex,
+      const Mantid::API::CompositeFunction_sptr &parentComposite = nullptr,
+      const std::size_t &parentIndex = 0);
+  /// Add tie to a parameter property stored within a composite function.
+  bool addParameterTieInComposite(
+      QtProperty *property, const std::string &parameterName,
+      const Mantid::API::CompositeFunction_sptr &composite,
+      const std::size_t &index);
+  /// Adds a global tie for a parameter if one exists
   void
-  addAttributeAndParameterProperties(QtProperty *prop,
-                                     const Mantid::API::IFunction_sptr &fun);
+  addGlobalParameterTie(QtProperty *property, const std::string &parameterName,
+                        const CompositeFunction_sptr &parentComposite = nullptr,
+                        const std::size_t &parentIndex = 0);
+  /// Adds an index property representing the function index of a specific
+  /// domain within a MultiDomainFunction.
+  void addMultiDomainIndexProperty(QtProperty *prop);
   /// Add property showing function's index in the composite function
   AProperty addIndexProperty(QtProperty *prop);
   /// Update function index properties
@@ -204,7 +234,8 @@ protected:
   QtProperty *getTieProperty(QtProperty *prop) const;
 
   /// Add a tie property
-  void addTieProperty(QtProperty *prop, const QString &tie);
+  void addTieProperty(QtProperty *prop, const QString &tie,
+                      bool globalTie = false);
   /// Check if a parameter property has a tie
   bool hasTie(QtProperty *prop) const;
   /// Check if a property is a tie
@@ -283,6 +314,9 @@ protected slots:
 
 protected:
   void removeConstraintsQuiet(QtProperty *paramProp);
+
+  /// Editor used for editing doubles.
+  DoubleDialogEditorFactory *m_doubleEditorFactory;
   /// Manager for function group properties
   QtGroupPropertyManager *m_functionManager;
   /// Manager for function parameter properties
@@ -357,6 +391,11 @@ protected:
   /// Set true if the constructed function is intended to be used in a
   /// multi-dataset fit
   bool m_multiDataset;
+  /// The function prefix of the domain with a MultiDomainFunction currently
+  /// being displayed.
+  QString m_multiDomainFunctionPrefix;
+  // A vector of global ties. E.g. f0.f0.A0=f1.f0.A0
+  std::vector<GlobalTie> m_globalTies;
   std::vector<std::string> m_allowedCategories;
   SelectFunctionDialog *m_selectFunctionDialog;
   QtProperty *m_selectedFunctionProperty;
@@ -375,6 +414,12 @@ private:
   void setVectorAttribute(const QString &attrName,
                           std::vector<double> &val) override;
 
+  /// Gets the full tie when using the m_multiDomainFunctionPrefix
+  QString getFullTie(const QString &tie) const;
+  /// Gets the full parameter name when using the m_multiDomainFunctionPrefix
+  std::string getFullParameterName(const std::string &parameter,
+                                   int compositeIndex = -1) const;
+
   // Intended for testing only
   QTreeWidgetItem *getPropertyWidgetItem(QtProperty *prop) const;
   QRect visualItemRect(QtProperty *prop) const;
@@ -387,6 +432,8 @@ public:
   QRect getVisualRectFunctionProperty(const QString &index) const;
   QRect getVisualRectParameterProperty(const QString &paramName) const;
   QTreeWidget *treeWidget() const;
+  QtTreePropertyBrowser *treeBrowser();
+  DoubleDialogEditorFactory *doubleEditorFactory();
   QWidget *getParamWidget(const QString &paramName) const;
 };
 

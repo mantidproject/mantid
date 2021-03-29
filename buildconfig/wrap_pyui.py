@@ -17,17 +17,17 @@ def lines_to_pre_append():
 def main(argv):
     """
         Main entry point
-        
+
         Args:
         argv (list): List of strings giving command line arguments The full absolulte path to the file to wrap is mandatory.
-        
+
     """
-  
+
     argv.reverse()
     to_wrap = argv[0]
     if not os.path.exists(to_wrap):
         raise ValueError("%s : Does not exist." % to_wrap)
-    
+
     with open(to_wrap, "r+", encoding="UTF-8") as f:
         existing = f.read();
         f.seek(0);
@@ -35,7 +35,7 @@ def main(argv):
         for line in lines_to_pre_append():
             f.write(line)
         f.write(existing)
-    
+
     return 0
 
 if __name__ == '__main__':

@@ -18,7 +18,7 @@ From a user's point of view, the main purposes of usage examples are:
 * Understanding the algorithm
 * Showing hints/comments etc. that help understand Mantid Python scripting in general
 
-The usage examples are written in `reStructuredText <http://docutils.sourceforge.net/rst.html>`__, which can be converted to HTML and the code in the usage examples can be tested. 
+The usage examples are written in `reStructuredText <http://docutils.sourceforge.net/rst.html>`__, which can be converted to HTML and the code in the usage examples can be tested.
 
 Guide
 =====
@@ -30,26 +30,26 @@ The example below show the proposed way to format an usage example in reStructur
    Usage
    -----
 
-   **Example - simple rebin of a histogram workspace:**  
+   **Example - simple rebin of a histogram workspace:**
 
    .. testcode:: ExHistSimple
 
       # create histogram workspace
-      dataX = [0,1,2,3,4,5,6,7,8,9] # or use dataX=range(0,10) 
-      dataY = [1,1,1,1,1,1,1,1,1] # or use dataY=[1]*9 
+      dataX = [0,1,2,3,4,5,6,7,8,9] # or use dataX=range(0,10)
+      dataY = [1,1,1,1,1,1,1,1,1] # or use dataY=[1]*9
       ws = CreateWorkspace(dataX, dataY)
-      
+
       # rebin from min to max with size bin = 2
-      ws = Rebin(ws, 2)   
-      
-      print "The rebinned X values are: " + str(ws.readX(0))  
-      print "The rebinned Y values are: " + str(ws.readY(0)) 
+      ws = Rebin(ws, 2)
+
+      print "The rebinned X values are: " + str(ws.readX(0))
+      print "The rebinned Y values are: " + str(ws.readY(0))
 
 
    Output:
 
    .. testoutput:: ExHistSimple
-      
+
       The rebinned X values are: [ 0.  2.  4.  6.  8.  9.]
       The rebinned Y values are: [ 2.  2.  2.  2.  1.]
 
@@ -103,9 +103,9 @@ There are many ways to create sample workspaces. For example :ref:`CreateMDHisto
 
       # Setup the data to fit:
       workspaceIndex = 0  # the spectrum with which WorkspaceIndex to fit
-      startX = 1      # specify fitting region 
+      startX = 1      # specify fitting region
       endX = 9      #
-      
+
       # Setup the model, here a Gaussian, to fit to data
       tryCentre = '4'   # A start guess on peak centre
       sigma = '1'          # A start guess on peak width
@@ -116,17 +116,17 @@ There are many ways to create sample workspaces. For example :ref:`CreateMDHisto
       #myFunc = 'name=LinearBackground, A0=0.3;name=Gaussian, Height='+height+', PeakCentre='+tryCentre+', Sigma='+sigma
 
       # Do the fitting
-      fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace = Fit(InputWorkspace='ws', \ 
+      fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace = Fit(InputWorkspace='ws', \
          WorkspaceIndex=0, StartX = startX, EndX=endX, Output='fit', Function=myFunc)
 
-      print "The fit was: " + fitStatus  
+      print "The fit was: " + fitStatus
       print("chi-squared of fit is: %.2f" % chiSq)
       print("Fitted Height value is: %.2f" % paramTable.column(1)[0])
-      print("Fitted centre value is: %.2f" % paramTable.column(1)[1]) 
+      print("Fitted centre value is: %.2f" % paramTable.column(1)[1])
       print("Fitted sigma value is: %.2f" % paramTable.column(1)[2])
-      # fitWorkspace contains the data, the calculated and the difference patterns 
+      # fitWorkspace contains the data, the calculated and the difference patterns
       print "Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms())
-      print("The 20th y-value of the calculated pattern: %.4f" % fitWorkspace.readY(1)[19])    
+      print("The 20th y-value of the calculated pattern: %.4f" % fitWorkspace.readY(1)[19])
 
    .. testcleanup:: ExFitPeak
 
@@ -158,13 +158,13 @@ For a more simple use of CreateSampleWorkspace see example below (note if no arg
       # create some event workspace
       ws = CreateSampleWorkspace(WorkspaceType="Event")
 
-      print "What type is the workspace before 1st rebin: " + str(type(ws)) 
+      print "What type is the workspace before 1st rebin: " + str(type(ws))
       # rebin from min to max with size bin = 2 preserving event workspace (default behaviour)
-      ws = Rebin(ws, 2)   
-      print "What type is the workspace after 1st rebin: " + str(type(ws)) 
-      ws = Rebin(ws, 2, PreserveEvents=False)   
-      print "What type is the workspace after 2nd rebin: " + str(type(ws)) 
-      # note you can also check the type of a workspace using: print isinstance(ws, IEventWorkspace)   
+      ws = Rebin(ws, 2)
+      print "What type is the workspace after 1st rebin: " + str(type(ws))
+      ws = Rebin(ws, 2, PreserveEvents=False)
+      print "What type is the workspace after 2nd rebin: " + str(type(ws))
+      # note you can also check the type of a workspace using: print isinstance(ws, IEventWorkspace)
 
    .. testcleanup:: ExEventRebin
 
@@ -199,23 +199,23 @@ as shown in the example below. This will generate a note to the user explaining 
    .. include:: ../usagedata-note.txt
 
    **Example - Load ISIS histogram Nexus file:**
-   (see :ref:`LoadISISNexus <algm-LoadISISNexus>` for more options)   
+   (see :ref:`LoadISISNexus <algm-LoadISISNexus>` for more options)
 
    .. testcode:: ExLoadISISnexusHist
 
       # Load ISIS LOQ histogram dataset
-      ws = Load('LOQ49886.nxs') 
-      
-      print "The 1st x-value of the first spectrum is: " + str(ws.readX(0)[0])      
+      ws = Load('LOQ49886.nxs')
+
+      print "The 1st x-value of the first spectrum is: " + str(ws.readX(0)[0])
 
    .. testcleanup:: ExLoadISISnexusHist
 
       DeleteWorkspace(ws)
-      
+
    Output:
 
    .. testoutput:: ExLoadISISnexusHist
-      
+
       The 1st x-value of the first spectrum is: 5.0
 
 Running the Tests

@@ -44,8 +44,10 @@ class PyChopGui(QMainWindow):
     minE = {}
     maxE = {}
 
-    def __init__(self):
-        super(PyChopGui, self).__init__()
+    def __init__(self, parent=None, window_flags=None):
+        super(PyChopGui, self).__init__(parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         self.folder = os.path.dirname(sys.modules[self.__module__].__file__)
         for fname in os.listdir(self.folder):
             if fname.endswith('.yaml'):
@@ -680,8 +682,8 @@ class PyChopGui(QMainWindow):
         Shows the help page
         """
         try:
-            from pymantidplot.proxies import showCustomInterfaceHelp
-            showCustomInterfaceHelp("PyChop")
+            import mantidqt
+            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp("PyChop", 'direct')
         except ImportError:
             helpTxt = "PyChop is a tool to allow direct inelastic neutron\nscattering users to estimate the inelastic resolution\n"
             helpTxt += "and incident flux for a given spectrometer setting.\n\nFirst select the instrument, chopper settings and\n"
