@@ -79,7 +79,7 @@ void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
   // which is a child of this class so the lifetime of this pointer is handled
   // by Qt
   m_fitOptionsBrowser =
-      new FitOptionsBrowser(nullptr, FittingMode::SIMULTANEOUS_SEQUENTIAL);
+      new FitOptionsBrowser(nullptr, FittingMode::SEQUENTIAL_AND_SIMULTANEOUS);
   m_fitOptionsBrowser->setObjectName("fitOptionsBrowser");
   m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SEQUENTIAL);
 }
@@ -312,13 +312,10 @@ void IndirectFitPropertyBrowser::updateFitStatus(const FitDomainIndex index) {
 }
 
 /**
- * @return  The selected fit type in the fit type combo box.
+ * @return  The currently active fitting mode (Sequential or Simultaneous).
  */
-QString IndirectFitPropertyBrowser::selectedFitType() const {
-  return m_fitOptionsBrowser->getCurrentFittingType() ==
-                 FittingMode::SIMULTANEOUS
-             ? "Simultaneous"
-             : "Sequential";
+FittingMode IndirectFitPropertyBrowser::getFittingMode() const {
+  return m_fitOptionsBrowser->getCurrentFittingType();
 }
 
 /**

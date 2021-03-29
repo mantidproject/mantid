@@ -155,6 +155,8 @@ public:
 
   void testMakeFileNameForISIS() {
     // Set the facility
+    ConfigService::Instance().setString("default.facility", "ISIS");
+
     const FacilityInfo &facility =
         ConfigService::Instance().getFacility("ISIS");
     const InstrumentInfo &instrument = facility.instrument("HRPD");
@@ -184,10 +186,14 @@ public:
 
     TS_ASSERT_EQUALS("EFG2H00000123", FileFinder::Instance().makeFileName(
                                           "EFG2H123", instrument));
+
+    ConfigService::Instance().setString("default.facility", " ");
   }
 
   void testMakeFileNameForSNS() {
     // Set the facility
+    ConfigService::Instance().setString("default.facility", "SNS");
+
     const FacilityInfo &facility = ConfigService::Instance().getFacility("SNS");
     const InstrumentInfo &instrument = facility.instrument("CNCS");
 
@@ -212,6 +218,8 @@ public:
     // Test for REF_L (to check that the extra _ doesn't upset anything)
     TS_ASSERT_EQUALS("REF_L_666", FileFinder::Instance().makeFileName(
                                       "REF_L666", instrument));
+
+    ConfigService::Instance().setString("default.facility", " ");
   }
 
   void testGetInstrument() {

@@ -83,7 +83,7 @@ Bug fixes
 - Fixed a bug in simultaneous TF asymmetry mode fitting, which would cause a crash when the run
   was incremented. Note that currently the single fitting tab will not update with the new normalization
   constants after a new run is loaded.
-- Fixed a bug were fitting in TF asymmetry mode for group data, then switching instrument and 
+- Fixed a bug were fitting in TF asymmetry mode for group data, then switching instrument and
   loading pair data would cause mantid to crash.
 
 ALC
@@ -99,13 +99,13 @@ Improvements
 ############
 - The ALC interface in workbench will now show errors by default. The error bars can also be
   turned on/off using the right-click plot menu.
-  
+
 Bug fixes
 ##########
 - Fixed an issue in the ALC interface baseline fit where corrected data from all fits were plotted at
   the same time in the corrected data tab. Now only corrected data from the most recent fit is plotted.
 
-Elemental Analysis 
+Elemental Analysis
 ------------------
 
 New Features

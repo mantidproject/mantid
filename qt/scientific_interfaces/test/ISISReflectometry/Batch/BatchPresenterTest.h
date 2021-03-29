@@ -518,13 +518,6 @@ public:
     verifyAndClear();
   }
 
-  void testExperimentNotifiedOnClearADS() {
-    auto presenter = makePresenter();
-    EXPECT_CALL(*m_experimentPresenter, notifyAllWorkspacesDeleted());
-    presenter->clearADSHandle();
-    verifyAndClear();
-  }
-
 private:
   NiceMock<MockBatchView> m_view;
   NiceMock<MockBatchJobRunner> *m_jobRunner;

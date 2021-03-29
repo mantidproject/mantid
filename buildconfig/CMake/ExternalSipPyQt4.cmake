@@ -77,6 +77,6 @@ import sys; new = sys.path[sys.__plen:]; del sys.path[sys.__plen:]; p = getattr(
 
 # Package PyQt. We assume this is for Python 3
 install(DIRECTORY ${PRIVATE_PYQT_SITE_PACKAGES}/PyQt4
-        DESTINATION ${LIB_DIR} 
+        DESTINATION ${LIB_DIR}
         PATTERN "__pycache__" EXCLUDE
         PATTERN "port_v2" EXCLUDE)

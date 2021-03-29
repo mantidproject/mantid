@@ -115,10 +115,10 @@ void FitOptionsBrowser::createBrowser() {
 void FitOptionsBrowser::initFittingTypeProp() {
   m_fittingTypeProp = m_enumManager->addProperty("Fitting");
   QStringList types;
-  types << "Simultaneous"
-        << "Sequential";
+  types << "Sequential"
+        << "Simultaneous";
   m_enumManager->setEnumNames(m_fittingTypeProp, types);
-  if (m_fittingType == FittingMode::SIMULTANEOUS_SEQUENTIAL) {
+  if (m_fittingType == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS) {
     m_browser->addProperty(m_fittingTypeProp);
   } else if (m_fittingType == FittingMode::SIMULTANEOUS ||
              m_fittingType == FittingMode::SEQUENTIAL) {
@@ -133,13 +133,14 @@ void FitOptionsBrowser::createProperties() {
   initFittingTypeProp();
   createCommonProperties();
   if (m_fittingType == FittingMode::SIMULTANEOUS ||
-      m_fittingType == FittingMode::SIMULTANEOUS_SEQUENTIAL) {
+      m_fittingType == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS) {
     createSimultaneousFitProperties();
   }
   if (m_fittingType == FittingMode::SEQUENTIAL ||
-      m_fittingType == FittingMode::SIMULTANEOUS_SEQUENTIAL) {
+      m_fittingType == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS) {
     createSequentialFitProperties();
   }
+  switchFitType();
 }
 
 void FitOptionsBrowser::createCommonProperties() {
@@ -407,8 +408,8 @@ void FitOptionsBrowser::updateMinimizer() {
  * Switch the current fit type according to the value in the FitType property.
  */
 void FitOptionsBrowser::switchFitType() {
-  auto fitType = m_enumManager->value(m_fittingTypeProp);
-  if (fitType == 0) {
+  const auto fittingMode = getCurrentFittingType();
+  if (fittingMode == FittingMode::SIMULTANEOUS) {
     displayNormalFitProperties();
   } else {
     displaySequentialFitProperties();
@@ -726,7 +727,11 @@ FittingMode FitOptionsBrowser::getCurrentFittingType() const {
  *    Simultaneous for Fit and Sequential for PlotPeakByLogValue.
  */
 void FitOptionsBrowser::setCurrentFittingType(FittingMode fitType) {
-  m_enumManager->setValue(m_fittingTypeProp, fitType);
+  if (fitType == FittingMode::SIMULTANEOUS) {
+    m_enumManager->setValue(m_fittingTypeProp, 1);
+  } else {
+    m_enumManager->setValue(m_fittingTypeProp, 0);
+  }
 }
 
 /**
@@ -735,7 +740,7 @@ void FitOptionsBrowser::setCurrentFittingType(FittingMode fitType) {
  * @param fitType :: Fitting type to lock the browser in.
  */
 void FitOptionsBrowser::lockCurrentFittingType(FittingMode fitType) {
-  m_enumManager->setValue(m_fittingTypeProp, fitType);
+  setCurrentFittingType(fitType);
   m_fittingTypeProp->setEnabled(false);
 }
 

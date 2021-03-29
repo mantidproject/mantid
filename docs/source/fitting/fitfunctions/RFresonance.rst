@@ -28,7 +28,7 @@ with
 and :math:`\Delta` (MHz) is the decay rate.
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

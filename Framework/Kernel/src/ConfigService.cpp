@@ -1830,7 +1830,7 @@ const std::vector<std::string> ConfigServiceImpl::getFacilityNames() const {
 const FacilityInfo &ConfigServiceImpl::getFacility() const {
   std::string defFacility = getString("default.facility");
   if (defFacility.empty()) {
-    defFacility = "ISIS";
+    defFacility = " ";
   }
   return this->getFacility(defFacility);
 }

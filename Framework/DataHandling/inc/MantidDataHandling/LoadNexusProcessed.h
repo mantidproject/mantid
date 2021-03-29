@@ -133,6 +133,8 @@ private:
 
   API::Workspace_sptr loadPeaksEntry(Mantid::NeXus::NXEntry &entry);
 
+  API::Workspace_sptr loadLeanElasticPeaksEntry(Mantid::NeXus::NXEntry &entry);
+
   API::MatrixWorkspace_sptr loadEventEntry(Mantid::NeXus::NXData &wksp_cls,
                                            Mantid::NeXus::NXDouble &xbins,
                                            const double &progressStart,

@@ -9,13 +9,18 @@ SANS Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
-Algorithms and instruments
---------------------------
+
+Bugs fixes
+----------
+
+- Fix a bug that made it impossible to process flux in SANSILLAutoprocess.
 
 Improvements
-############
+------------
 
+- With SANSILLAutoProcess, the detector distance, the collimation position and the wavelength are appended to the names of the output workspaces (values are taken from the sample logs).
 - :ref:`SANSILLReduction <algm-SANSILLReduction>` adds sample log information to reduced data about facility,
   sample transmission numor, and all SampleRuns numors, with relevant algebra.
+
 
 :ref:`Release 6.1.0 <v6.1.0>`

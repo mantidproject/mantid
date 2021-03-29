@@ -244,12 +244,14 @@ void ConvertHFIRSCDtoMDE::exec() {
       for (int j = 0; j < 3; j++)
         goniometer(i, j) = static_cast<float>(gon[i][j]);
     goniometer = goniometer.inverse().eval();
+    auto goniometerIndex = static_cast<uint16_t>(n);
     for (size_t m = 0; m < azimuthal.size(); m++) {
       size_t idx = n * azimuthal.size() + m;
       coord_t signal = static_cast<coord_t>(inputWS->getSignalAt(idx));
       if (signal > 0.f && std::isfinite(signal)) {
         Eigen::Vector3f q_sample = goniometer * q_lab_pre[m];
-        inserter.insertMDEvent(signal, signal, 0, 0, q_sample.data());
+        inserter.insertMDEvent(signal, signal, 0, goniometerIndex, 0,
+                               q_sample.data());
       }
     }
   }

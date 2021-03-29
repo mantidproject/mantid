@@ -368,6 +368,11 @@ double FitScriptGeneratorModel::getParameterValue(
 }
 
 bool FitScriptGeneratorModel::validParameter(
+    std::string const &fullParameter) const {
+  return validParameter(getDomainIndexOf(fullParameter), fullParameter);
+}
+
+bool FitScriptGeneratorModel::validParameter(
     FitDomainIndex domainIndex, std::string const &fullParameter) const {
   if (domainIndex.value < numberOfDomains()) {
     auto const parameter = getAdjustedFunctionIndex(fullParameter);
@@ -395,8 +400,7 @@ bool FitScriptGeneratorModel::validTie(std::string const &tie) const {
 
 bool FitScriptGeneratorModel::validGlobalTie(std::string const &fullParameter,
                                              std::string const &fullTie) const {
-  if (!fullTie.empty() && !isNumber(fullTie) &&
-      validParameter(getDomainIndexOf(fullTie), fullTie)) {
+  if (!fullTie.empty() && !isNumber(fullTie) && validParameter(fullTie)) {
     auto const domainIndex = getDomainIndexOf(fullParameter);
     auto const tieDomainIndex = getDomainIndexOf(fullTie);
     return isParameterValueWithinConstraints(
@@ -425,18 +429,50 @@ void FitScriptGeneratorModel::clearGlobalTie(std::string const &fullParameter) {
 }
 
 void FitScriptGeneratorModel::checkGlobalTies() {
-  auto const isTieInvalid = [&](GlobalTie const &globalTie) {
-    return !validParameter(getDomainIndexOf(globalTie.m_parameter),
-                           globalTie.m_parameter) ||
+  auto const isTieInvalid = [&](GlobalTie &globalTie) {
+    tryToAdjustParameterInGlobalTieIfInvalidated(globalTie);
+    tryToAdjustTieInGlobalTieIfInvalidated(globalTie);
+
+    return !validParameter(globalTie.m_parameter) ||
            !validGlobalTie(globalTie.m_parameter, globalTie.m_tie);
   };
 
   auto const iter =
       std::remove_if(m_globalTies.begin(), m_globalTies.end(), isTieInvalid);
 
-  if (iter != m_globalTies.cend()) {
+  if (iter != m_globalTies.cend())
     m_globalTies.erase(iter, m_globalTies.cend());
-    m_presenter->setGlobalTies(m_globalTies);
+
+  m_presenter->setGlobalTies(m_globalTies);
+}
+
+void FitScriptGeneratorModel::tryToAdjustParameterInGlobalTieIfInvalidated(
+    GlobalTie &globalTie) {
+  if (!validParameter(globalTie.m_parameter)) {
+    auto const promotedParam =
+        globalTie.toCompositeParameter(globalTie.m_parameter);
+    auto const demotedParam =
+        globalTie.toNonCompositeParameter(globalTie.m_parameter);
+
+    if (validParameter(promotedParam)) {
+      globalTie.m_parameter = promotedParam;
+    } else if (validParameter(demotedParam)) {
+      globalTie.m_parameter = demotedParam;
+    }
+  }
+}
+
+void FitScriptGeneratorModel::tryToAdjustTieInGlobalTieIfInvalidated(
+    GlobalTie &globalTie) {
+  if (!validGlobalTie(globalTie.m_parameter, globalTie.m_tie)) {
+    auto const promotedTie = globalTie.toCompositeParameter(globalTie.m_tie);
+    auto const demotedTie = globalTie.toNonCompositeParameter(globalTie.m_tie);
+
+    if (validGlobalTie(globalTie.m_parameter, promotedTie)) {
+      globalTie.m_tie = promotedTie;
+    } else if (validGlobalTie(globalTie.m_parameter, demotedTie)) {
+      globalTie.m_tie = demotedTie;
+    }
   }
 }
 
@@ -466,7 +502,7 @@ void FitScriptGeneratorModel::setGlobalParameters(
 }
 
 void FitScriptGeneratorModel::setFittingMode(FittingMode fittingMode) {
-  if (fittingMode == FittingMode::SIMULTANEOUS_SEQUENTIAL)
+  if (fittingMode == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS)
     throw std::invalid_argument(
         "Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
 
@@ -475,6 +511,10 @@ void FitScriptGeneratorModel::setFittingMode(FittingMode fittingMode) {
   m_presenter->setGlobalTies(m_globalTies);
   m_globalParameters.clear();
   m_presenter->setGlobalParameters(m_globalParameters);
+}
+
+bool FitScriptGeneratorModel::isSimultaneousMode() const {
+  return m_fittingMode == FittingMode::SIMULTANEOUS;
 }
 
 void FitScriptGeneratorModel::checkParameterIsInAllDomains(

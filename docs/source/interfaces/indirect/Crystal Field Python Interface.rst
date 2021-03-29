@@ -26,23 +26,23 @@ Possible values for the `Ion` argument are::
  Ce, Pr, Nd, Pm, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb
 
 These are the trivalent rare-earth ions. For other rare earth ions, use the equivalent trivalent ion based on
-the number of *f*-electrons in the outer shell (e.g. for Pr\ :sup:`4+` (4\ *f*\ :sup:`1`) use `Ce`). 
+the number of *f*-electrons in the outer shell (e.g. for Pr\ :sup:`4+` (4\ *f*\ :sup:`1`) use `Ce`).
 The rare earth ions sets the correct value of the Lande g-factor. In addition, a pure spin ion with arbitrary
 (but half-integral) *S* (or *J*) values are also supported using the syntax: `Ion=S<n>` where `<n>` is an integer
 or half-integer value, e.g. `Ion=S2` or `Ion=S1.5`. In these cases, the g-factor is set to *g*\ :sub:`J` = 2.
 The prefix letter can also be `J` instead of `S`, and lower case letters are also supported. (e.g. `Ion=j1`,
 `Ion=s2.5` and `Ion=J0.5` are all valid).
- 
+
 Allowed values for `Symmetry` are::
 
   C1, Ci, C2, Cs, C2h, C2v, D2, D2h, C4, S4, C4h, D4, C4v, D2d, D4h, C3,
   S6, D3, C3v, D3d, C6, C3h, C6h, D6, C6v, D3h, D6h, T, Td, Th, O, Oh
-  
+
 The minimum code to create a crystal field object is::
 
   from CrystalField import CrystalField
   cf = CrystalField('Ce', 'C2v')
-  
+
 Names of the crystal field parameters have the form `Bnn` and `IBnn` where `nn` are two digits between 0 and 6.
 `Bnn` is the real and `IBnn` is the imaginary part of a complex parameter. If a parameter isn't set explicitly
 its default value is 0. To set a parameter pass it to the `CrystalField` constructor as a keyword argument, e.g.::
@@ -52,7 +52,7 @@ its default value is 0. To set a parameter pass it to the `CrystalField` constru
 An alternative way to set a parameter is to use the square brackets with a `CrystalField` object::
 
   cf['B40'] = -0.031
-  
+
 Which can also be used to query the value of a parameter::
 
   b = cf['B40']
@@ -65,10 +65,10 @@ The `CrystalField` class has methods to calculate the Hamiltonian and its eigens
 
   # Calculate and return the Hamiltonian matrix as a 2D numpy array.
   h = cf.getHamiltonian()
-  
+
   # Calculate and return the eigenvalues of the Hamiltonian as a 1D numpy array.
   e = cf.getEigenvalues()
-  
+
   # Calculate and return the eigenvectors of the Hamiltonian as a 2D numpy array.
   w = cf.getEigenvectors()
 
@@ -86,14 +86,14 @@ The temperature can be set either via a keyword argument `Temperature` of the co
 
   # Using the keyword argument
   cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, Temperature=44)
-  
+
   # Using the property
   cf.Temperature = 44
 
 Knowing the temperature allows us to calculate a peak list: a list of transition energies and intensities.::
 
   print cf.getPeakList()
-  
+
 Which produces the output::
 
  [[  0.00000000e+00   2.44006198e+01   4.24977124e+01   1.80970926e+01 -2.44006198e+01]
@@ -109,35 +109,35 @@ If we set `ToleranceIntensity` of the above crystal field object to 1 mb/sr we'l
 
   cf.ToleranceIntensity = 1
   print cf.getPeakList()
-  
+
 The new output::
 
  [[   0.           24.40061976   42.49771237]
   [ 216.71156467   88.30985303    5.04430056]]
-  
+
 To calculate a spectrum we need to define the shape of each peak (peak profile function) and its default width (`FWHM`).
 The width can be set either via a keyword argument or a property with name `FWHM`. If the peak shape isn't set the default
 of `Lorentzian` is assumed. To set a different shape use the `PeakShape` property::
 
   cf.PeakShape = 'Gaussian'
   cf.FWHM = 0.9
-  
+
 The values of `PeakShape` are expected to be names of Mantid peak fit functions. At the moment only `Lorentzian` and
 `Gaussian` can be used.
 
 After the peak shape is defined a spectrum can be calculated::
 
   sp = cf.getSpectrum()
-  
+
 The output is a tuple of two 1d numpy arrays (x, y) that can be used with `matplotlib` to plot::
 
   import matplotlib.pyplot as plt
   plt.plot(*sp)
   plt.show()
-  
+
 .. image:: /images/CrystalFieldSpectrum1.png
    :height: 300
-   
+
 It is possible to change parameters of individual peaks separately. Note though that only the shape parameters can be changed,
 the peak centre and the integrated intensity are defined by the crystal field parameters. To change the width of a peak
 use the following syntax::
@@ -149,7 +149,7 @@ use the following syntax::
   # If the peak shape is Lorentzian
   cf.peaks.param[1]['FWHM'] = 2.0
   cf.peaks.param[2]['FWHM'] = 0.01
-  
+
 The three peaks now have all different widths. The first peak (index 0) keeps the default value.
 
 .. image:: /images/CrystalFieldSpectrum2.png
@@ -162,13 +162,13 @@ Alternatively, the x-values can be taken from a workspace::
   # Use a list for x-values
   x = [0, 1, 2, 3, ...]
   sp = cf.getSpectrum(x)
-  
+
   # Use the first spectrum of a workspace
   sp = cf.getSpectrum(ws)
-  
+
   # Use the i-th spectrum of a workspace
   sp = cf.getSpectrum(ws, i)
-   
+
 
 Plotting in MantidPlot
 ----------------------
@@ -178,8 +178,8 @@ and opens a window with a plot, e.g.::
 
   cf.plot()
 
-In addition to plotting, the `plot` method creates a workspace named `CrystalField_<Ion>` with the plot data. Subsequent calls to `plot` 
-for the same `CrystalField` object will use the same plot window as created by the first call unless this window has been closed in the 
+In addition to plotting, the `plot` method creates a workspace named `CrystalField_<Ion>` with the plot data. Subsequent calls to `plot`
+for the same `CrystalField` object will use the same plot window as created by the first call unless this window has been closed in the
 mean time.
 
 
@@ -193,13 +193,13 @@ A background has two components: a peak and a general background function. Set a
                       Temperature=44.0, FWHM=1.1)
     cf.background = Background(peak=Function('Gaussian', Height=10, Sigma=1),
                                background=Function('LinearBackground', A0=1.0, A1=0.01))
-    
+
 Here is an example of how to access the parameters of the background::
-    
+
     h = cf.background.peak.param['Height']
     a1 = cf.background.background.param['A1']
-    
-    
+
+
 Setting Ties and Constraints
 ----------------------------
 
@@ -207,29 +207,29 @@ Setting ties and constraints are done by calling the `ties` and `constraints` me
 The `Bnn` parameters are tied by the `CrystalField` class directly specifying the tied parameter as a keyword argument::
 
   cf.ties(B20=1.0, B40='B20/2')
-  
+
 The constraints are passed as strings containing expressions::
 
   cf.constraints('1 < B22 <= 2', 'B22 < 4')
-  
+
 For the parameters of the background the syntax is the same but the methods are called on the `background` property::
 
     cf.background.peak.ties(Height=10.1)
     cf.background.peak.constraints('Sigma > 0')
     cf.background.background.ties(A0=0.1)
     cf.background.background.constraints('A1 > 0')
-    
+
 The names of the peak parameters both in ties and constraints must include the index of the peak to which they belong. Here we follow
 the naming convention of the :ref:`func-CompositeFunction`: f<n>.<name>, where <n> stands for an integer index staring at 0 and <name>
 is the name of the parameter. For example, `f1.Sigma`, `f3.FWHM`. Because names now contain the period symbol '.' keyword arguments
 cannot be used. Instead we must pass a dictionary containing ties. The keys are parameter names and the values are the ties::
 
     cf.peaks.ties({'f2.FWHM': '2*f1.FWHM', 'f3.FWHM': '2*f2.FWHM'})
-    
+
 Constraints are a list of strings::
 
     cf.peaks.constraints('f0.FWHM < 2.2', 'f1.FWHM >= 0.1')
-    
+
 If a parameter of all peaks needs to be tied/constrained with the same expression then the following shortcut methods can be used::
 
     cf.peaks.tieAll('Sigma=0.1', 3)
@@ -255,7 +255,7 @@ Field python interface defines the helper class `ResolutionModel` to help define
 To construct an instance of `ResolutionModel` one needs to provide up to four input parameters. The first parameter, `model`, is
 mandatory and can be either of:
 
-1. A tuple containing two arrays (lists) of real numbers which will be interpreted as tabulated values of the model function. 
+1. A tuple containing two arrays (lists) of real numbers which will be interpreted as tabulated values of the model function.
    The first element of the tuple is a list of increasing values for peak centres, and the second element is a list of corresponding
    widths. Values between the tabulated peak positions will be linearly interpolated.
 
@@ -291,12 +291,12 @@ Finally, the :ref:`PyChop` interface may be used to generate the resolution func
     cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm)
 
 When a resolution model is set, the peak width will be constrained to have a value close to the model. The degree of deviation is controlled by the
-`FWHMVariation` parameter. It has the default of 0.1 and is the maximum difference from the value given by the resolution model a width can have. 
+`FWHMVariation` parameter. It has the default of 0.1 and is the maximum difference from the value given by the resolution model a width can have.
 If set to 0 the widths will be fixed to their calculated values (depending on the instant values of their peak centres). For example::
 
     cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm, FWHMVariation=0.1)
 
-will allow the peak widths to vary between :math:`\Delta(E)-0.1` and :math:`\Delta(E)+0.1` where :math:`\Delta(E)` is the value of the 
+will allow the peak widths to vary between :math:`\Delta(E)-0.1` and :math:`\Delta(E)+0.1` where :math:`\Delta(E)` is the value of the
 resolution model at the peak position :math:`E`.
 
 
@@ -350,10 +350,10 @@ To calculate a spectrum call the same method `getSpectrum` but pass the spectrum
     # Calculate third spectrum, use a list for x-values
     x = [0, 1, 2, 3, ...]
     sp = cf.getSpectrum(2, x)
-    
+
     # Calculate second spectrum, use the first spectrum of a workspace
     sp = cf.getSpectrum(1, ws)
-    
+
     # Calculate first spectrum, use the i-th spectrum of a workspace
     sp = cf.getSpectrum(0, ws, i)
 
@@ -426,7 +426,7 @@ Parameters can be set when creating the object by passing in a dictionary using 
                                  parameters={'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion1.B40':-0.031787,
                                              'ion1.B42':-0.11611, 'ion1.B44':-0.12544})
 
-A background can also be set this way, or using `cfms.background.` It can be passed as a string, a Function object(s), or a 
+A background can also be set this way, or using `cfms.background.` It can be passed as a string, a Function object(s), or a
 CompositeFunction object::
 
     cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2v', Temperatures=[20], FWHMs=[1.0],
@@ -526,33 +526,33 @@ Here is an example of a fit with initial estimation::
 Using the point charge model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Alternatively, the *Point Charge Model* may be used to calculate the crystal field parameters. In this case, the 
+Alternatively, the *Point Charge Model* may be used to calculate the crystal field parameters. In this case, the
 crystal field interaction is assumed to be purely electrostatic. At an infinite distance away from an ion, or
-analogously, at a nonzero distance from an ion of infinitesimal extend (a *point charge*), the charge in free space 
-is zero, so Gauss's law becomes :math:`\nabla^2 V = 0` which is Laplace's equation. The solution of this is a 
-*multipole expansion*, a sum of spherical harmonic functions: 
-:math:`V(r,\theta\phi) = \sum_{l=0}^{\infty} \sum_{m=-l}^l R_l(r) Y_l^m(\theta,\phi)`. In the limit of infinite 
-:math:`r`, :math:`R_l(r) = B / r^{l+1}`. The radial term is the crystal field parameters, and the angular term 
-(spherical harmonics in this case) are the crystal field operators. 
+analogously, at a nonzero distance from an ion of infinitesimal extend (a *point charge*), the charge in free space
+is zero, so Gauss's law becomes :math:`\nabla^2 V = 0` which is Laplace's equation. The solution of this is a
+*multipole expansion*, a sum of spherical harmonic functions:
+:math:`V(r,\theta\phi) = \sum_{l=0}^{\infty} \sum_{m=-l}^l R_l(r) Y_l^m(\theta,\phi)`. In the limit of infinite
+:math:`r`, :math:`R_l(r) = B / r^{l+1}`. The radial term is the crystal field parameters, and the angular term
+(spherical harmonics in this case) are the crystal field operators.
 
 One should now note that the quantities noted above are generally complex. In order to have real valued parameters,
-Stevens chose to use the *tesseral harmonics* :math:`Z_l^m(\theta,\phi)` instead of the spherical harmonics for the 
+Stevens chose to use the *tesseral harmonics* :math:`Z_l^m(\theta,\phi)` instead of the spherical harmonics for the
 angular part. These functions are simply the hermitian combinations of spherical harmonics of the same rank :math:`l`
 and opposite signed order :math:`m`. (An alternative formulation by Wybourne uses the original spherical harmonics)
 
 In Mantid we use the Stevens convention, as common in the neutron scattering literature. The user should note that
-the convention amongst optical spectroscopists is that of Wybourne. 
+the convention amongst optical spectroscopists is that of Wybourne.
 
-A derivation of the point charge energy can be found in many text books (e.g. 
+A derivation of the point charge energy can be found in many text books (e.g.
 `Morrison <http://dx.doi.org/10.1007/978-3-642-93376-9_12>`_), but will not be detailed here, where only the final
 result is given:
 
 .. math::
-   B_l^m = \frac{4\pi}{2l+1} \frac{| e|^2}{4\pi\epsilon_0} 
+   B_l^m = \frac{4\pi}{2l+1} \frac{| e|^2}{4\pi\epsilon_0}
            \sum_i \frac{q_i}{r_i^{l+1}} a_0^l \langle r^l \rangle Z_l^m(\theta_i,\phi_i)
 
 where :math:`q_i`, :math:`r_i`, :math:`\theta_i` and :math:`\phi_i` are the charge (in units of the elemental
-charge :math:`|e|`) and relative polar coordinates of the :math:`i^{\mathrm{th}}` point charge from the magnetic ion; 
+charge :math:`|e|`) and relative polar coordinates of the :math:`i^{\mathrm{th}}` point charge from the magnetic ion;
 :math:`a_0` is the Bohr radius, :math:`\langle r^l \rangle` is the :math:`l^{\mathrm{th}}` order expectation value
 of the radial wavefunction of the magnetic ion and :math:`\epsilon_0` is the permitivity of free space (note this
 equation is in SI units; many older texts use cgs units, but this does not matter because the value is eventually
@@ -566,7 +566,7 @@ ion has to be given. This may be done either directly, as a list of 4-element li
     axial_blm = axial_pc_model.calculate()
     print(axial_blm)
 
-which represents a simple axial crystal field with charges at :math:`\pm 4\mathrm{\AA}` away from a Nd ion in the 
+which represents a simple axial crystal field with charges at :math:`\pm 4\mathrm{\AA}` away from a Nd ion in the
 *z*-direction.
 
 Alternatively, the set of ligands may be calculated from a crystal structure and a maximum distance. For example,
@@ -596,7 +596,7 @@ so you should use the ``getIons()`` method to get the actual atom labels which `
 
     cif_pc_model = PointCharge('AMS_DATA.cif')
     print(cif_pc_model.getIons())
-    
+
 gives::
 
     {'O1': [0.125, 0.125, 0.375],
@@ -637,20 +637,20 @@ to calculate a spectrum or as the starting parameters in a fit::
     fit.fit()
 
 Finally, note that the calculated crystal field parameters are defined with the quantisation axis along the *z* direction
-in the Busing-Levy convention (that is, it is perpendicular to the *a*-*b* plane). This means that if the particular 
-magnetic ion lies on a higher symmetry site but the highest symmetry rotation axis is not along *z* (for example, the A 
-or B site in the Pyrochlore lattice, which has a 3-fold axis along [111], whilst *z* is parallel to *c*), then the 
-parameters may appear to have a low symmetry (e.g. more *m* terms are nonzero). You then need to rotate the parameters 
-if you want it quantised along the high symmetry direction. 
+in the Busing-Levy convention (that is, it is perpendicular to the *a*-*b* plane). This means that if the particular
+magnetic ion lies on a higher symmetry site but the highest symmetry rotation axis is not along *z* (for example, the A
+or B site in the Pyrochlore lattice, which has a 3-fold axis along [111], whilst *z* is parallel to *c*), then the
+parameters may appear to have a low symmetry (e.g. more *m* terms are nonzero). You then need to rotate the parameters
+if you want it quantised along the high symmetry direction.
 
 
 Calculating Physical Properties
 -------------------------------
 
 In addition to the inelastic neutron spectrum, various physical properties arising from the crystal field interaction
-can be calculated. These include the crystal field contribution to the magnetic heat capacity, the magnetic 
-susceptibility, and magnetisation. The calculated values can be invoked using the `getHeatCapacity()`, 
-`getSusceptibility()` and `getMagneticMoment()` methods. 
+can be calculated. These include the crystal field contribution to the magnetic heat capacity, the magnetic
+susceptibility, and magnetisation. The calculated values can be invoked using the `getHeatCapacity()`,
+`getSusceptibility()` and `getMagneticMoment()` methods.
 
 To calculate the heat capacity use::
 
@@ -674,11 +674,11 @@ To calculate the heat capacity use::
     Cv = cf.getHeatCapacity(ws, 1)  # Uses the second spectrum's x-values for T (e.g. 450<T<900)
     plot(*Cv)
 
-All the physical properties methods returns a tuple of `(x, y)` values. The heat capacity is calculated in 
+All the physical properties methods returns a tuple of `(x, y)` values. The heat capacity is calculated in
 Jmol\ :sup:`-1`\ K\ :sup:`-1`\ .
 The theory is described in :ref:`CrystalFieldHeatCapacity <func-CrystalFieldHeatCapacity>`.
 
-The molar susceptibility is calculated using Van Vleck's formula, and requires in addition knowledge of the applied 
+The molar susceptibility is calculated using Van Vleck's formula, and requires in addition knowledge of the applied
 field direction (default is `[0, 0, 1]` where the field is along the crystal field quantisation direction)::
 
     chi_v = cf.getSusceptibility(T, Hdir=[1, 1, 1])
@@ -704,7 +704,7 @@ In addition, "atomic" units (:math:`\mu_B/\mathrm{T}/\mathrm{ion}`) can also be 
 
 The theory is described in the :ref:`CrystalFieldSusceptibility <func-CrystalFieldSusceptibility>` function page.
 
-The magnetic moment is calculated by adding a Zeeman interaction to the crystal field Hamiltonian and diagonalising 
+The magnetic moment is calculated by adding a Zeeman interaction to the crystal field Hamiltonian and diagonalising
 the combined matrix, from which the expectation of the magnetic moment operator is calculated. The moment can
 be calculated as a function of temperature or applied field magnitude::
 
@@ -712,7 +712,7 @@ be calculated as a function of temperature or applied field magnitude::
     H = np.linspace(0, 30, 121)
     moment_h = cf.getMagneticMoment(Hmag=H, Hdir='powder', Temperature=10)   # Calcs M(H) at 10K for powder sample
 
-By default, the magnetisation is calculated in atomic units of bohr magnetons per magnetic ion. Alternatively, the 
+By default, the magnetisation is calculated in atomic units of bohr magnetons per magnetic ion. Alternatively, the
 SI or cgs molar magnetic moments can be calculated::
 
     moment_SI = cf.getMagneticMoment(H, [1, 1, 1], Unit='SI')         # M(H) in Am^2/mol at 1K for H||[111]
@@ -720,12 +720,12 @@ SI or cgs molar magnetic moments can be calculated::
 
 Please note that if cgs units are used, then the magnetic field must be specified in *Gauss* rather than *Tesla*
 (1T == 10000G). Note also that the cgs unit "emu/mol" in this case is "erg/Gauss/mol" quantifying a molar magnetic
-moment. 
+moment.
 
 Finally, please note that the calculation result is the molar magnetic moment. Thus to get the magnetisation, you
-should divide this by the molar volume of the material. 
-By default, the calculation temperature is 1K, and the applied magnetic field is 1T along [001]. For further details 
-and a description of the theory, see the :ref:`CrystalFieldMagnetisation <func-CrystalFieldMagnetisation>` and 
+should divide this by the molar volume of the material.
+By default, the calculation temperature is 1K, and the applied magnetic field is 1T along [001]. For further details
+and a description of the theory, see the :ref:`CrystalFieldMagnetisation <func-CrystalFieldMagnetisation>` and
 :ref:`CrystalFieldMoment <func-CrystalFieldMoment>` pages.
 
 Fitting Physical Properties
@@ -772,9 +772,9 @@ or separately after construction::
 
 Unfortunately only 1D datasets can be fitted (e.g. M(H, T) cannot be fitted as a simultaneous function of field and
 temperature). Also, note that setting the `PhysicalProperty` attribute after constructing the `CrystalField` object
-(e.g. running `cf.PhysicalProperty = PhysicalProperties('Cv')`) causes the number of datasets to change and will 
-clear all `Ties` and `Constraints` previously set, and also reset all `FWHM` and `peaks` to the default values (zero 
-for `FWHM` and `Lorentzian` for `peaks`). 
+(e.g. running `cf.PhysicalProperty = PhysicalProperties('Cv')`) causes the number of datasets to change and will
+clear all `Ties` and `Constraints` previously set, and also reset all `FWHM` and `peaks` to the default values (zero
+for `FWHM` and `Lorentzian` for `peaks`).
 
 
 Simultaneous Fitting of Physical Properties and Inelastic Neutron Spectra
@@ -815,9 +815,9 @@ are in the following order::
     PhysicalProperties('M(T)', hmag, hdir, inverse, unit)
     PhysicalProperties('M(T)', unit)
 
-Or these parameters may be specified using keyword arguments, with the keywords: `'Hdir'`, `'Hmag'`, `'Inverse'`, 
-`'Unit'`, and `'Temperature'` (note these are case sensitive, and not all parameters apply to all types of 
-physical properties). The default values (`Hdir=[0,0,1]`, `Hmag=1`, `Inverse=False`, `Unit='cgs'` and 
+Or these parameters may be specified using keyword arguments, with the keywords: `'Hdir'`, `'Hmag'`, `'Inverse'`,
+`'Unit'`, and `'Temperature'` (note these are case sensitive, and not all parameters apply to all types of
+physical properties). The default values (`Hdir=[0,0,1]`, `Hmag=1`, `Inverse=False`, `Unit='cgs'` and
 `Temperature=1` are used if nothing is specified for a particular attribute.
 
 .. categories:: Interfaces Indirect

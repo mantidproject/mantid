@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidCrystal/DllConfig.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -44,7 +44,7 @@ public:
 
   static Kernel::Matrix<double>
   DetermineErrors(std::vector<double> &sigabc, const Kernel::Matrix<double> &UB,
-                  const DataObjects::PeaksWorkspace_sptr &ws, double tolerance);
+                  const API::IPeaksWorkspace_sptr &ws, double tolerance);
 
 private:
   /// Initialise the properties

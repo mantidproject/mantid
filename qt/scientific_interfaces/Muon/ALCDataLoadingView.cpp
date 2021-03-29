@@ -27,7 +27,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
-    : m_widget(widget), m_selectedLog(DEFAULT_LOG) {}
+    : m_widget(widget), m_selectedLog(DEFAULT_LOG), m_numPeriods(0) {}
 
 ALCDataLoadingView::~ALCDataLoadingView() {}
 
@@ -262,10 +262,23 @@ void ALCDataLoadingView::setAvailablePeriods(
   setAvailableItems(m_ui.redPeriod, periods);
   setAvailableItems(m_ui.greenPeriod, periods);
 
+  // Reset subtraction if single period as not possible
+  if (periods.size() < 2)
+    m_ui.subtractCheckbox->setChecked(false);
+
   // If single period, disable "Subtract" checkbox and green period box
   const bool multiPeriod = periods.size() > 1;
   m_ui.subtractCheckbox->setEnabled(multiPeriod);
   m_ui.greenPeriod->setEnabled(multiPeriod);
+
+  // If two or more periods and number of periods has changed, default to 1
+  // minus 2
+  if (periods.size() >= 2 && m_numPeriods != periods.size()) {
+    m_ui.subtractCheckbox->setChecked(true);
+    m_ui.redPeriod->setCurrentText("1");
+    m_ui.greenPeriod->setCurrentText("2");
+  }
+  m_numPeriods = periods.size();
 }
 
 /**
@@ -316,7 +329,8 @@ void ALCDataLoadingView::setTimeRange(double tMin, double tMax) {
 }
 
 void ALCDataLoadingView::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"),
+                                                 QString("muon"));
 }
 
 void ALCDataLoadingView::disableAll() {

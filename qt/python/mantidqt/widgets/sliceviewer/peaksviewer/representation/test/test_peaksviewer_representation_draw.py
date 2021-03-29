@@ -23,7 +23,7 @@ def draw_shape(shape_name, shape_info=None):
     :param shape_name: The str name of the shape
     :param shape_info: The properties of the shape as an optional JSON-encoded str
     """
-    peak_origin, fg_color, bg_color = (1, 3, 5), "r", "g"
+    peak_origin, fg_color, bg_color = [1, 3, 5], "r", "g"
     peak_shape, slice_info, painter = (MagicMock(), ) * 3
     painter.axes = MagicMock()
     painter.axes.get_xlim.return_value = (-1, 1)

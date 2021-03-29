@@ -45,11 +45,11 @@ is not accessible. It may give better results on
 :ref:`MDWorkspaces <MDWorkspace>`.
 
 
-For data which has originally been based on histogram-type data and that has been converted to 
+For data which has originally been based on histogram-type data and that has been converted to
 event-based data it might be beneficial to select the NumberOfEventNormalization for the `PeakFindingStrategy` property instead of the VolumeNormalization which is the default. This
 will disable the `DensityThresholdFactor` property and enable the `SignalThresholdFactor` property.
 The algorithmic steps remain the same as above but instead of using the signal density as the sorting
-quantity the signal count (total weighted event sum divided by the number of events) is used. If 
+quantity the signal count (total weighted event sum divided by the number of events) is used. If
 the events are weighted this will result in boxes with signal counts larger than one for peaks and for the majority of background counts the signal count will be 1. Hence it is possible to discriminate between peaks and background. Note that the NumberOfEventNormalization selection of the `PeakFindingStrategy` property  does not make sense for all scenarios and infact might not produce useful results for your particular case.
 
 
@@ -162,7 +162,7 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
               name= name[:8]
            row += "| {:8} ".format(name)
        print(row + "|")
- 
+
        for i in range(nRows):
            row = ""
            for name in tab_names:
@@ -173,10 +173,10 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
                  else:
                      row += "| {:8} ".format(str(data2pr))
            print(row + "|")
-    
+
    # load test workspace
    Load(Filename=r'TOPAZ_3132_event.nxs',OutputWorkspace='TOPAZ_3132_event',LoadMonitors='1')
-   
+
    # build peak workspace necessary for IntegrateEllipsoids algorithm to work
    ConvertToMD(InputWorkspace='TOPAZ_3132_event',QDimensions='Q3D',dEAnalysisMode='Elastic',Q3DFrames='Q_sample',LorentzCorrection='1',OutputWorkspace='TOPAZ_3132_md',\
    MinValues='-25,-25,-25',MaxValues='25,25,25',SplitInto='2',SplitThreshold='50',MaxRecursionDepth='13',MinRecursionDepth='7')

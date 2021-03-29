@@ -16,7 +16,7 @@ First and second derivatives from the spline can be calculated by using
 the derivative1D function.
 
 A CubicSpline is a polynomial function :math:`f(x)` of order 3, defined between an interval :math:`a \leqslant x \leqslant b`.
-When using CubicSplines for interpolation or for fitting, we essentially chain :ref:`BSplines <func-BSpline>` 
+When using CubicSplines for interpolation or for fitting, we essentially chain :ref:`BSplines <func-BSpline>`
 of order 3 together so that each spline passes through the breakpoints in that interval.
 
 A Cubic Spline is a specific case of :ref:`BSpline <func-BSpline>`
@@ -30,13 +30,13 @@ Example
 
 To demonstrate these conditions we can set up a basic CubicSpline with 3 breakpoints:
 
-Our CubicSpline will be defined as the following: 
+Our CubicSpline will be defined as the following:
 
 Breakpoints : :math:`x_0, x_1, x_2`
 
 .. math::
 
-   C(x) = 
+   C(x) =
                                \begin{cases}
                                  f_1(x)& x_0 \leq x \leq x_1 \\
                                  f_2(x)& x_1 \leq x \leq x_2 \\
@@ -47,7 +47,7 @@ Our piecewise functions can be written as :math:`f_1(x) = c_0x^3 + c_1x^2 + c_2x
 To make our CubicSpline piecewise-smooth we must ensure that these conditions are satisfied:
 
 .. math::
-    
+
     f_1(x_0) = y_0\\
     f_2(x_2) = y_2\\
     \frac{df_1}{dx}(x_1) = \frac{df_2}{dx}(x_1)\\
@@ -64,7 +64,7 @@ This point of smoothness is represented by the red circle in the graph below of 
 CubicSplines and Fitting
 ------------------------
 
-Fitting using a CubicSpline fit function is different to interpolating with a CubicSpline as it requires the number of breakpoints 
+Fitting using a CubicSpline fit function is different to interpolating with a CubicSpline as it requires the number of breakpoints
 to be less than the number of data points. This allows the CubicSpline to fit as close as possible to the dataset using a least-squares fit
 instead of passing through all data points as with interpolation. The fitted curve will pass through the breakpoints however it may not pass through
 all of the data points in the set.
@@ -77,7 +77,7 @@ The original data plot is in black and our fitted CubicSpline with four breakpoi
     :align: center
     :height: 600px
     :alt: fitting example using BSplines
-    
+
 
 .. attributes::
 
@@ -85,7 +85,7 @@ The original data plot is in black and our fitted CubicSpline with four breakpoi
    x0;Double;\-;Position of first exterior breakpoint
    x1;Double;\-;Position of the interior breakpoint
    x2;Double;\-;Position of the last exterior breakpoint
-   
+
 .. properties::
 
 Even though the number of fitting parameters is set to 3 by default, this number is based off :math:`N + K - 2`.

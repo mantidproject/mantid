@@ -19,6 +19,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/cow_ptr.h"
 
+#include <utility>
+
 namespace Mantid {
 namespace HistogramData {
 class HistogramX;
@@ -144,14 +146,15 @@ private:
                        const API::IPeakFunction_sptr &peak_function,
                        const API::IBackgroundFunction_sptr &bkgd_function,
                        const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
-                       double xmin, double xmax,
+                       const std::pair<double, double> &peak_range,
                        const double &expected_peak_center,
                        bool estimate_peak_width, bool estimate_background);
 
   double fitFunctionMD(API::IFunction_sptr fit_function,
-                       const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
-                       std::vector<double> &vec_xmin,
-                       std::vector<double> &vec_xmax);
+                       const API::MatrixWorkspace_sptr &dataws,
+                       const size_t wsindex,
+                       const std::pair<double, double> &vec_xmin,
+                       const std::pair<double, double> &vec_xmax);
 
   /// fit a single peak with high background
   double fitFunctionHighBackground(
@@ -180,19 +183,9 @@ private:
                         const std::vector<double> &vec_y,
                         const std::vector<double> &vec_e);
 
-  /// Esitmate background by 'observation'
-  void estimateBackground(const HistogramData::Histogram &histogram,
-                          const std::pair<double, double> &peak_window,
-                          const API::IBackgroundFunction_sptr &bkgd_function);
-  /// estimate linear background
-  void estimateLinearBackground(const HistogramData::Histogram &histogram,
-                                double left_window_boundary,
-                                double right_window_boundary, double &bkgd_a0,
-                                double &bkgd_a1);
-
   /// Estimate peak parameters by 'observation'
   int estimatePeakParameters(const HistogramData::Histogram &histogram,
-                             const std::pair<double, double> &peak_window,
+                             const std::pair<size_t, size_t> &peak_window,
                              const API::IPeakFunction_sptr &peakfunction,
                              const API::IBackgroundFunction_sptr &bkgdfunction,
                              bool observe_peak_width);

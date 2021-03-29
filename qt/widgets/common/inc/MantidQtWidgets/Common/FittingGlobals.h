@@ -38,6 +38,9 @@ struct EXPORT_OPT_MANTIDQT_COMMON GlobalTie {
 
   GlobalTie(std::string const &parameter, std::string const &tie);
 
+  std::string toCompositeParameter(std ::string const &fullParameter) const;
+  std::string toNonCompositeParameter(std ::string const &fullParameter) const;
+
   std::string m_parameter;
   std::string m_tie;
 };

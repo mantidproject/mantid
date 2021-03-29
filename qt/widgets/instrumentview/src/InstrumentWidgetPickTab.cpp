@@ -23,6 +23,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -973,7 +974,26 @@ QString ComponentInfoController::displayDetectorInfo(size_t index) {
     const QString counts = integrated == InstrumentActor::INVALID_VALUE
                                ? "N/A"
                                : QString::number(integrated);
-    text += "Counts: " + counts + '\n';
+    text += "Pixel counts: " + counts + '\n';
+
+    // Display tube counts if the tube selection tool is active.
+    if (m_tab->getSelectionType() == InstrumentWidgetPickTab::Tube) {
+      int64_t tubeCounts = 0;
+
+      auto tube = componentInfo.parent(index);
+      auto tubeDetectors = componentInfo.detectorsInSubtree(tube);
+
+      for (auto detector : tubeDetectors) {
+        if (componentInfo.isDetector(detector)) {
+          const double pixelCounts = actor.getIntegratedCounts(detector);
+          if (pixelCounts != InstrumentActor::INVALID_VALUE) {
+            tubeCounts += static_cast<int64_t>(pixelCounts);
+          }
+        }
+      }
+      text += "Tube counts: " + QString::number(tubeCounts) + '\n';
+    }
+
     // display info about peak overlays
     text += actor.getParameterInfo(index);
   }
@@ -1004,8 +1024,9 @@ QString ComponentInfoController::displayNonDetectorInfo(
 }
 
 QString
-ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *peak) {
+ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *ipeak) {
   std::stringstream text;
+  auto peak = dynamic_cast<Mantid::DataObjects::Peak *>(ipeak);
   auto instrument = peak->getInstrument();
   auto sample = instrument->getSample()->getPos();
   auto source = instrument->getSource()->getPos();
@@ -1067,7 +1088,7 @@ void ComponentInfoController::displayComparePeaksInfo(
 
 void ComponentInfoController::displayAlignPeaksInfo(
     const std::vector<Mantid::Kernel::V3D> &planePeaks,
-    const Mantid::Geometry::IPeak *peak) {
+    const Mantid::Geometry::IPeak *ipeak) {
 
   using Mantid::Kernel::V3D;
 
@@ -1079,6 +1100,7 @@ void ComponentInfoController::displayAlignPeaksInfo(
 
   // find projection of beam direction onto plane
   // this is so we always orientate to a common reference direction
+  auto peak = dynamic_cast<const Mantid::DataObjects::Peak *>(ipeak);
   const auto instrument = peak->getInstrument();
   const auto samplePos = instrument->getSample()->getPos();
   const auto sourcePos = instrument->getSource()->getPos();

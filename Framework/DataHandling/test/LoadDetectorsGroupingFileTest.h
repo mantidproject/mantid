@@ -128,7 +128,8 @@ public:
     std::ostringstream os;
 
     os << "<?xml version=\"1.0\"?>\n";
-    os << "<detector-grouping instrument=\"VULCAN\">\n";
+    os << "<detector-grouping instrument=\"VULCAN\" idf-date=\"2018-01-01 "
+          "00:00:00\">\n";
     os << "  <group>\n";
     os << "    <detids>26250-27481,27500-28731,28750-29981</detids>\n";
     os << "  </group>\n";

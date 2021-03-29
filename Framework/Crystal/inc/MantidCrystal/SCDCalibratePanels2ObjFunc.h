@@ -10,6 +10,7 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidCrystal/DllConfig.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -33,23 +34,29 @@ public:
   void function1D(double *out, const double *xValues,
                   const size_t order) const override;
 
+  void setPeakWorkspace(Mantid::API::IPeaksWorkspace_sptr &pws,
+                        const std::string componentName);
+
 private:
   /// temp workspace holder
-  mutable std::shared_ptr<API::Workspace> m_ws;
   mutable std::string m_cmpt;
+  mutable Mantid::API::IPeaksWorkspace_sptr m_pws;
+  mutable int n_iter;
 
   const bool LOGCHILDALG{false};
   const Mantid::Kernel::V3D UNSET_HKL{0, 0, 0};
   const double PI{3.1415926535897932384626433832795028841971693993751058209};
 
   /// helper functions
-  void moveInstruentComponentBy(double deltaX, double deltaY, double deltaZ,
-                                std::string componentName,
-                                const API::Workspace_sptr &ws) const;
+  Mantid::API::IPeaksWorkspace_sptr
+  moveInstruentComponentBy(double deltaX, double deltaY, double deltaZ,
+                           std::string componentName,
+                           Mantid::API::IPeaksWorkspace_sptr &pws) const;
 
-  void rotateInstrumentComponentBy(double rotVx, double rotVy, double rotVz,
-                                   double rotAng, std::string componentName,
-                                   const API::Workspace_sptr &ws) const;
+  Mantid::API::IPeaksWorkspace_sptr
+  rotateInstrumentComponentBy(double rotVx, double rotVy, double rotVz,
+                              double rotAng, std::string componentName,
+                              Mantid::API::IPeaksWorkspace_sptr &pws) const;
 };
 
 } // namespace Crystal

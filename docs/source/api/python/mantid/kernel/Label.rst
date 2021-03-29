@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Kernel::Label.
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.Label 
+.. autoclass:: mantid.kernel.Label
     :members:
     :undoc-members:
     :inherited-members:
