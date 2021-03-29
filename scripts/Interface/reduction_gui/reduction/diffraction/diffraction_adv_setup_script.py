@@ -83,7 +83,7 @@ class AdvancedSetupScript(BaseScriptElement):
     def cache_dir(self):
         """Passing all three candidates back as one list"""
         # A comma ',' is used here since it is the default delimiter in mantid
-        return self.cache_dir_scan_save + "," + self.cache_dir_scan_1 + "," + self.cache_dir_scan_2
+        return ",".join((self.cache_dir_scan_save, self.cache_dir_scan_1, self.cache_dir_scan_2))
 
     def __init__(self, inst_name):
         """ Initialization
@@ -195,7 +195,7 @@ class AdvancedSetupScript(BaseScriptElement):
                 # special map for bool type
                 value = '1' if value else '0'
             else:
-                value = str(value)
+                value = self.cache_dir.replace(",", ";") if keyname == "CacheDir" else str(value)
 
             xml += f"<{keyname.lower()}>{value}</{keyname.lower()}>\n"
         xml += "</AdvancedSetup>\n"
@@ -290,7 +290,7 @@ class AdvancedSetupScript(BaseScriptElement):
             # NOTE: there should only be three entries, if not, let it fail early
             try:
                 self.cache_dir_scan_save, self.cache_dir_scan_1, self.cache_dir_scan_2 = BaseScriptElement.getStringElement(
-                    instrument_dom, 'cachedir', default=",,").split(",")
+                    instrument_dom, 'cachedir', default=";;").split(";")
             except ValueError:
                 self.cache_dir_scan_save = ''
                 self.cache_dir_scan_1 = ''
