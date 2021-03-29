@@ -364,7 +364,7 @@ in calibration. In theory, the relationship between (TOF, d-spacing) will always
 that is not always the case. This diagnostic plot primarily serves as a tool to ensure that the calibration makes sense,
 i.e., that a single DIFC parameter is enough to do the transformation. In the ideal case, all Pearson correlation
 coefficients will be close to 1. For more on Pearson correlation coefficients please see
-`this wikipedia article <https://en.wikipedia.org/wiki/Pearson_correlation_coefficient>`_. Below is an example plot for the Pearson correlation 
+`this wikipedia article <https://en.wikipedia.org/wiki/Pearson_correlation_coefficient>`_. Below is an example plot for the Pearson correlation
 coefficient of (TOF, d-spacing).
 
 .. figure:: /images/VULCAN_pearsoncorr.png
@@ -377,16 +377,16 @@ The following script can be used to generate the above plot.
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
     import numpy as npfrom Calibration.tofpd import diagnosticsFILENAME = 'VULCAN_192226.nxs.h5'  # 88 sec
-    
+
     FILENAME = 'VULCAN_192227.nxs.h5'  # 2.8 hour
     CALFILE = 'VULCAN_Calibration_CC_4runs_hybrid.h5'peakpositions = np.asarray(
       (0.3117, 0.3257, 0.3499, 0.3916, 0.4205, 0.4645, 0.4768, 0.4996, 0.515, 0.5441, 0.5642, 0.6307, 0.6867,
        0.7283, 0.8186, 0.892, 1.0758, 1.2615, 2.06))
-    
+
     peakpositions = peakpositions[peakpositions > 0.4]
     peakpositions = peakpositions[peakpositions < 1.5]
     peakpositions.sort()LoadEventAndCompress(Filename=FILENAME, OutputWorkspace='ws', FilterBadPulses=0)
-    
+
     LoadInstrument(Workspace='ws', Filename="mantid/instrument/VULCAN_Definition.xml", RewriteSpectraMap='True')
     Rebin(InputWorkspace='ws', OutputWorkspace='ws', Params=(5000, -.002, 70000))
     PDCalibration(InputWorkspace='ws', TofBinning=(5000,-.002,70000),
