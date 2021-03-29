@@ -97,21 +97,18 @@ void LoadMuonNexus::init() {
       "Table or a group of tables containing detector dead times. Version 1 "
       "only.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>("DetectorGroupingTable",
-                                                     "", Direction::Output,
-                                                     PropertyMode::Optional),
-      "Table or a group of tables with information about the "
-      "detector grouping stored in the file (if any). Version 1 only.");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("DetectorGroupingTable", "", Direction::Output,
+                                                                 PropertyMode::Optional),
+                  "Table or a group of tables with information about the "
+                  "detector grouping stored in the file (if any). Version 1 only.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>("PeriodsInformation"),
-      "An array of strings which hold period information. This array is in the "
-      "format ['NumberOfSequences', 'Labels', 'Type', 'Frames', "
-      "'TotalFrames', 'Counts', 'Tag,]. Empty "
-      "strings "
-      "show no value "
-      "could be read from file.");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("PeriodsInformation"),
+                  "An array of strings which hold period information. This array is in the "
+                  "format ['NumberOfSequences', 'Labels', 'Type', 'Frames', "
+                  "'TotalFrames', 'Counts', 'Tag,]. Empty "
+                  "strings "
+                  "show no value "
+                  "could be read from file.");
 }
 
 /// Validates the optional 'spectra to read' properties, if they have been set

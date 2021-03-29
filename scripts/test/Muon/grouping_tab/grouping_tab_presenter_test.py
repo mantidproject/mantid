@@ -22,7 +22,7 @@ from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import 
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 from Muon.GUI.Common.difference_table_widget.difference_widget_presenter import DifferencePresenter
-from Muon.GUI.Common.muon_period_info import PERIOD_INFO_NOT_FOUND
+from Muon.GUI.Common.muon_period_info_widget import PERIOD_INFO_NOT_FOUND
 
 
 def pair_name():

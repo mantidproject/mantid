@@ -31,13 +31,12 @@ class DLLExport MuonNexusReader {
   @date 14/08/2008
   */
 private:
-  std::string nexus_instrument_name; ///< name read from nexus file
-  std::string nexus_samplename;      ///< sample name read from Nexus
-  int nexusLogCount;                 ///< number of NXlog sections read from file
-  std::vector<bool> logType;         ///< true if i'th log is numeric
-  std::vector<std::string> logNames; ///< stores name read from file
-  std::vector<std::string>
-      m_periodInformation; /// stores the information of the periods
+  std::string nexus_instrument_name;            ///< name read from nexus file
+  std::string nexus_samplename;                 ///< sample name read from Nexus
+  int nexusLogCount;                            ///< number of NXlog sections read from file
+  std::vector<bool> logType;                    ///< true if i'th log is numeric
+  std::vector<std::string> logNames;            ///< stores name read from file
+  std::vector<std::string> m_periodInformation; /// stores the information of the periods
   void openFirstNXentry(NeXus::File &handle);
   bool readMuonLogData(NeXus::File &handle);             ///< method to read the fields of open NXlog section
   std::vector<std::vector<float>> logValues,             ///< array of values for i'th NXlog section
@@ -87,10 +86,10 @@ public:
   int t_ntc1; ///< number of time channels in time regime 1
   int t_nper; ///< number of periods in file (=1 at present)
   // for nexus histogram data
-  float *corrected_times;                ///< temp store for corrected times
-  int *counts;                           ///< temp store of histogram data
-  int *detectorGroupings;                ///< detector grouping info
-  int numDetectors;                      ///< detector count
-  std::string getInstrumentName() const; ///< return instrument name
+  float *corrected_times;                         ///< temp store for corrected times
+  int *counts;                                    ///< temp store of histogram data
+  int *detectorGroupings;                         ///< detector grouping info
+  int numDetectors;                               ///< detector count
+  std::string getInstrumentName() const;          ///< return instrument name
   std::vector<std::string> getPeriodInfo() const; /// Return period information
 };

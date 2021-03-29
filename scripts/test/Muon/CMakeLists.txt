@@ -73,6 +73,7 @@ set ( TEST_PY_FILES
    muon_data_context_test.py
    muon_group_pair_context_test.py
    muon_gui_context_test.py
+   muon_period_info_widget_test.py
    phase_table_widget/phase_table_context_test.py
    phase_table_widget/phase_table_presenter_test.py
    plot_widget/plot_widget_model_test.py

@@ -7,7 +7,7 @@
 import unittest
 
 from mantidqt.utils.qt.testing import start_qapplication
-from Muon.GUI.Common.muon_period_info import MuonPeriodInfoWidget, CYCLES_NOT_FOUND, DAQ, DWELL, NOT_DAQ_STRING
+from Muon.GUI.Common.muon_period_info_widget import MuonPeriodInfoWidget, CYCLES_NOT_FOUND, DAQ, DWELL, NOT_DAQ_STRING
 
 
 @start_qapplication
