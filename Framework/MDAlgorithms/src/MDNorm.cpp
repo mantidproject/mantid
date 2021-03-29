@@ -1352,18 +1352,19 @@ MDNorm::calQTransform(const ExperimentInfo &currentExpInfo,
   DblMatrix Qtransform = R * m_UB * soMatrix * m_W;
   Qtransform.Invert();
 
-//  // ...................................................................................
-//  std::cout << "[UNDERSTAND 1B] m_W = "
-//            << "\n";
-//  m_W.print();
-//  std::cout << "[......... ..] R =   "
-//            << "\n";
-//  R.print();
-//  std::cout << "[........  ..] Qtransform = "
-//            << "\n";
-//  Qtransform.print();
-//  std::cout << "[UNDERSTAND 1B] m_W = "
-//            << "\n";
+  //  //
+  //  ...................................................................................
+  //  std::cout << "[UNDERSTAND 1B] m_W = "
+  //            << "\n";
+  //  m_W.print();
+  //  std::cout << "[......... ..] R =   "
+  //            << "\n";
+  //  R.print();
+  //  std::cout << "[........  ..] Qtransform = "
+  //            << "\n";
+  //  Qtransform.print();
+  //  std::cout << "[UNDERSTAND 1B] m_W = "
+  //            << "\n";
 
   return Qtransform;
 }
@@ -1537,7 +1538,8 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
   std::vector<double> xValues, yValues;
   std::vector<coord_t> pos, posNew;
 
-//  std::cout << "[INFO] Normalization: signal array size = " << signalArray.size() << "\n";
+  //  std::cout << "[INFO] Normalization: signal array size = " <<
+  //  signalArray.size() << "\n";
 
   // Progress report
   double progStep = 0.7 / static_cast<double>(m_numExptInfos * m_numSymmOps);
