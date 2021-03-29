@@ -140,7 +140,7 @@ class SuperplotPresenter:
         currently selected workspace and spectrum index. It keeps a memory of
         the last plot and removes it if is not part of the memorised data.
         """
-        currentWsName = self._view.getSelectedWorkspaceFromList()
+        selection = self._view.getSelection()
         currentSpectrumIndex = self._view.getSpectrumSliderPosition()
         plottedData = self._model.getPlottedData()
         mode = self._view.getMode()
@@ -154,12 +154,17 @@ class SuperplotPresenter:
                 axes.plot(mtd[wsName], wkspIndex=sp)
             else:
                 axes.plot(mtd[wsName], wkspIndex=sp, axis=MantidAxType.BIN)
-        if currentWsName is not None and (currentWsName, currentSpectrumIndex) not in plottedData:
-            if mode == self.SPECTRUM_MODE_TEXT:
-                axes.plot(mtd[currentWsName], wkspIndex=currentSpectrumIndex)
-            else:
-                axes.plot(mtd[currentWsName], wkspIndex=currentSpectrumIndex,
-                          axis=MantidAxType.BIN)
+
+        for wsName, spectra in selection.items():
+            if not spectra:
+                spectra.append(currentSpectrumIndex)
+            for spectrum in spectra:
+                if (wsName, spectrum) not in plottedData:
+                    if mode == self.SPECTRUM_MODE_TEXT:
+                        axes.plot(mtd[wsName], wkspIndex=spectrum)
+                    else:
+                        axes.plot(mtd[wsName], wkspIndex=spectrum,
+                                  axis=MantidAxType.BIN)
 
         figure.tight_layout()
         axes.relim()

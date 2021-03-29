@@ -49,6 +49,9 @@
     </item>
     <item row="1" column="0" colspan="3">
      <widget class="QTreeWidget" name="workspacesList">
+      <property name="selectionMode">
+       <enum>QAbstractItemView::ExtendedSelection</enum>
+      </property>
       <attribute name="headerVisible">
        <bool>false</bool>
       </attribute>

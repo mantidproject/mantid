@@ -109,6 +109,29 @@ class SuperplotView(QWidget):
         else:
             return None
 
+    def getSelection(self):
+        """
+        Get the current selection.
+
+        Returns:
+            dict(str: list(int)): workspace names and list of spectrum numbers
+        """
+        selection = dict()
+        items = self._sideView.workspacesList.selectedItems()
+        for item in items:
+            if item.parent() is None:
+                wsName = item.text(0)
+                if wsName not in selection:
+                    selection[wsName] = list()
+            else:
+                spectrum = int(item.text(0))
+                wsName = item.parent().text(0)
+                if wsName in selection:
+                    selection[wsName].append(spectrum)
+                else:
+                    selection[wsName] = [spectrum]
+        return selection
+
     def setWorkspacesList(self, names):
         """
         Set the list of selected workspaces and update the workspace slider
