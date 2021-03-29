@@ -11,9 +11,12 @@ from mantid.kernel import (Direction, IntArrayProperty, FloatTimeSeriesProperty,
                            PropertyCriterion, Property)
 from mantid.simpleapi import (SaveGSSCW, SaveFocusedXYE)
 from mantid import logger
+import dateutil.parser as dparser
 import numpy as np
 import datetime
 import os
+import os.path
+import time
 import re
 import warnings
 
@@ -323,6 +326,7 @@ class HB2AReduce(PythonAlgorithm):
         This function returns either (vanadium_count, vanadium_monitor, None) or
         (None, None, vcorr) depending what type of file is provided by getProperty("Vanadium")
         """
+
         if not self.getProperty("Normalise").value:
             return None, None, np.ones(44)[detector_mask]
 
@@ -341,17 +345,40 @@ class HB2AReduce(PythonAlgorithm):
             # m1 = 0 -> Ge 115, 1.54A
             # m1 = 9.45 -> Ge 113, 2.41A
             # colltrans is the collimator position, whether in or out of the beam
-            # colltrans = 0 -> OUT
-            # colltrans = +/-80 -> IN
-            vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
-                exp, 115 if np.isclose(m1, 0, atol=0.1) else 113,
-                "OUT" if np.isclose(colltrans, 0, atol=0.1) else "IN")
+            if self.check_date():
+                # colltrans = 0 -> OUT
+                # colltrans = +/-80 -> IN
+                vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
+                    exp, 115 if np.isclose(m1, 0, atol=0.1) else 113,
+                    "OUT" if np.isclose(colltrans, 0, atol=0.1) else "IN")
+            else:
+                # colltrans = +/-80 -> OUT
+                # colltrans = 0 -> IN
+                vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
+                    exp, 115 if np.isclose(m1, 0, atol=0.1) else 113,
+                    "IN" if np.isclose(colltrans, 0, atol=0.1) else "OUT")
+
         vcorr_filename = os.path.join(indir, vcorr_filename)
         logger.notice("Using vcorr file: {}".format(vcorr_filename))
         if not os.path.isfile(vcorr_filename):
             raise RuntimeError("Vanadium file {} does not exist".format(vcorr_filename))
 
         return None, None, np.genfromtxt(vcorr_filename)[detector_mask]
+
+    def check_date(self):
+        filename = self.getPropertyValue("Filename")
+        filelist = filename.split(",")
+        filename = filelist[0]
+        date_created = time.ctime(os.path.getctime(filename))
+        date_created = dparser.parse(date_created, fuzzy=True)
+        year_created = int(date_created.strftime("%Y"))
+        month_created = int(date_created.strftime("%m"))
+        day_created = int(date_created.strftime("%d"))
+
+        if year_created >= 2022 or (year_created == 2021 and month_created >= 2 and day_created >= 23):
+            return True
+        else:
+            return False
 
     def process(self,
                 counts,
