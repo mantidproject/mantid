@@ -12,7 +12,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
-#include "MantidQtWidgets/Common/FitOptionsBrowser.h"
+#include "MantidQtWidgets/Common/BasicFitOptionsBrowser.h"
 #include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/FunctionTreeView.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
@@ -56,6 +56,9 @@ public:
 
   [[nodiscard]] std::vector<FitDomainIndex> allRows() const override;
   [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const override;
+  [[nodiscard]] FitDomainIndex currentRow() const override;
+
+  [[nodiscard]] bool hasLoadedData() const override;
 
   [[nodiscard]] double
   parameterValue(std::string const &parameter) const override;
@@ -76,7 +79,7 @@ public:
 
   void resetSelection() override;
 
-  bool isAddRemoveFunctionForAllChecked() const override;
+  bool applyFunctionChangesToAll() const override;
 
   void clearFunction() override;
   void setFunction(Mantid::API::IFunction_sptr const &function) const override;
@@ -119,8 +122,7 @@ private slots:
   void onGlobalParametersChanged(QStringList const &globalParameters);
   void onCopyFunctionToClipboard();
   void onFunctionHelpRequested();
-  void onChangeToSequentialFitting();
-  void onChangeToSimultaneousFitting();
+  void onFittingModeChanged(FittingMode fittingMode);
 
 private:
   void connectUiSignals();
@@ -132,7 +134,7 @@ private:
   std::unique_ptr<AddWorkspaceDialog> m_dialog;
   std::unique_ptr<FitScriptGeneratorDataTable> m_dataTable;
   std::unique_ptr<FunctionTreeView> m_functionTreeView;
-  std::unique_ptr<FitOptionsBrowser> m_fitOptionsBrowser;
+  std::unique_ptr<BasicFitOptionsBrowser> m_fitOptionsBrowser;
   Ui::FitScriptGenerator m_ui;
 };
 

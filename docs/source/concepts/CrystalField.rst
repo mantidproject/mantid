@@ -10,7 +10,7 @@ Crystal Field Theory
 Introduction
 ------------
 
-This page contains the theory and background to the crystal field calculations. 
+This page contains the theory and background to the crystal field calculations.
 If you want to know how to make these calculations please see the :ref:`Python interface page <Crystal Field Python Interface>`
 or the :ref:`examples page <Crystal_Field_Examples>`.
 
@@ -20,7 +20,7 @@ The Crystal Field Potential
 
 The crystal field (or in older terminology, *crystalline electric field*)
 is the potential acting on a particular magnetic ion :math:`i` at position :math:`\mathbf{r}_i` in a solid or molecule.
-When first proposed by Van Vleck, it was thought to be an electrostatic effect due to the charges 
+When first proposed by Van Vleck, it was thought to be an electrostatic effect due to the charges
 :math:`q_j` of neighbouring ions, located at :math:`\mathbf{r}_j`, of the magnetic ion (hence the original name).
 This leads to an approximation in which the surrounding ions are treated as point charges,
 so that the electric potential acting on the magnetic ion is
@@ -39,7 +39,7 @@ and so can be expanded in terms of spherical harmonic functions
 where the radial part is
 
 .. math::
-    A_l^m = \frac{1}{4\pi\epsilon_0} \left\{ (-1)^m \frac{4\pi}{2l+1} \sum_j \frac{q_j}{r_j^{l+1}} Y_{l,-m}(\mathbf{r}_j) \right\}. 
+    A_l^m = \frac{1}{4\pi\epsilon_0} \left\{ (-1)^m \frac{4\pi}{2l+1} \sum_j \frac{q_j}{r_j^{l+1}} Y_{l,-m}(\mathbf{r}_j) \right\}.
   :label: alm
 
 The above equations define the *point charge model* `[Hutchings64]`_.
@@ -61,7 +61,7 @@ Crystal Field Energy Levels
 ---------------------------
 
 The above potential, being an electric interaction, acts only on the orbital part of the electronic wavefunctions.
-Its effect is to lift the degeneracy of the orbital states 
+Its effect is to lift the degeneracy of the orbital states
 (labelled by the secondary orbital angular momentum quantum number :math:`L_z`)
 of the magnetic ion :math:`i` giving rise to a set of energy levels.
 
@@ -99,14 +99,14 @@ The Hamiltonian is constructed just like the potential in equation :eq:`cfexp`,
 but rather than being a sum of the spherical harmonic functions acting on the position coordinate,
 it must be a sum over tensor operators which act on the :math:`J_z` basis states.
 
-These operators could be *spherical tensor operators* :math:`T_q^{(k)}` 
+These operators could be *spherical tensor operators* :math:`T_q^{(k)}`
 which transform in the same way under rotations as the spherical harmonic functions,
 or they could be hermitian combinations of these operators
 which transform in the same way as the *tesseral harmonic functions* (also called real spherical harmonic functions)
 :math:`Z_{lm}`:
 
 .. math::
-    Z_{lm} = \left\{ \begin{array}{ll} 
+    Z_{lm} = \left\{ \begin{array}{ll}
             \frac{i}{\sqrt{2}} \left[ Y_{lm} - (-1)^m Y_{l,-m} \right] & m<0 \\
                                       Y_{lm} & m=0 \\
             \frac{1}{\sqrt{2}} \left[ Y_{l,-m} + (-1)^m Y_{lm} \right] & m>0 \\
@@ -120,7 +120,7 @@ The first attempt to construct such a crystal field Hamiltonian was by Stevens `
 for the tesseral harmonic functions  in `Cartesian coordinates <http://www.mcphase.de/manual/node123.html>`_,
 removed the constant prefactors and replaced the :math:`x`, :math:`y` and :math:`z` coordinates
 with the angular momentum operators :math:`\hat{J}_x`, :math:`\hat{J}_y`, :math:`\hat{J}_z` respectively,
-taking care to obey the commutation relations of the angular momentum operators. 
+taking care to obey the commutation relations of the angular momentum operators.
 These `Stevens operators <http://www.mcphase.de/manual/node124.html>`_ are used in Mantid and are calculated
 from the :math:`\hat{J}_x`, :math:`\hat{J}_y`, :math:`\hat{J}_z` operators expressed as a matrix
 using the :math:`J_z` basis states.
@@ -169,10 +169,10 @@ Symmetry considerations
 -----------------------
 
 The crystal field potential must be invariant under the operations of the point group of the atomic site at which the magnetic ion is positioned.
-The point groups are defined by reflections, rotations, roto-inversions, and inversion. 
+The point groups are defined by reflections, rotations, roto-inversions, and inversion.
 The multipolar expansion, equation :eq:`cfexp`, means that we just need to determine
 which spherical harmonics terms :math:`Y_{lm}` are invariant under each of these operations.
-:math:`Y_{lm}` terms which are not invariant under the operations of the point group of the magnetic ion must thus be zero. 
+:math:`Y_{lm}` terms which are not invariant under the operations of the point group of the magnetic ion must thus be zero.
 
 To determine the non-zero :math:`Y_{lm}` terms we need only consider the highest symmetry operation, since this is the most restrictive.
 Taking the principle axis as :math:`z`, the :math:`n`-fold rotations :math:`C_n` will change :math:`\phi` by :math:`2\pi/n`.
@@ -189,7 +189,7 @@ This mirroring is actually equivalent to an inversion about the origin,
 mapping :math:`x` to :math:`-x`, :math:`y` to :math:`-y` and :math:`z` to :math:`-z`.
 In spherical coordinates this means :math:`\cos\theta\rightarrow-\cos\theta=` and :math:`\sin\theta\rightarrow-\sin\theta`.
 Thus the presence of a centre of inversion implies that only terms with even powers of :math:`\cos\theta` and :math:`\sin\theta`
-(e.g. terms with even :math:`l`) are allowed. 
+(e.g. terms with even :math:`l`) are allowed.
 
 In fact, though, odd :math:`l` terms are always forbidden because the Stevens factor, :math:`\theta_l`, is zero for odd :math:`l` [#]_.
 This implies that, as far as the crystal field is concerned, all magnetic ions lie on centres of inversion.
@@ -222,14 +222,14 @@ where the second equality applies in the case of the rare-earths, where :math:`L
 where the :math:`x`, :math:`y`, and :math:`z` directions refer to the crystal field coordinates (usually with :math:`z` taken to be
 along the axis of highest symmetry), rather than necessarily relating to any crystallographic axes. Thus it may be
 necessary to rotate the coordinate systems (or equivalently, the crystal field parameters) for actual calculations for
-magnetic fields applied parallel to particular crystallographic directions. 
-The `FOCUS manual <https://epubs.stfc.ac.uk/manifestation/5723/RAL-TR-95-023.pdf>`_ [#]_ 
+magnetic fields applied parallel to particular crystallographic directions.
+The `FOCUS manual <https://epubs.stfc.ac.uk/manifestation/5723/RAL-TR-95-023.pdf>`_ [#]_
 has some details of how these calculations may be accomplished, and further details may be found in reference `[Buckmaster72]`_.
 
 The :math:`\hat{J}_x`, :math:`\hat{J}_y`, :math:`\hat{J}_z` operators may be identified with the :math:`\hat{C}_q^{(k)}` operators for :math:`k=1`
 with :math:`x`, :math:`y` and :math:`z` corresponding to :math:`q=1,-1` and 0 respectively [#]_.
 
-The magnetisation may then be calculated from the expectation value of the magnetic moment operator 
+The magnetisation may then be calculated from the expectation value of the magnetic moment operator
 :math:`\hat{\mathbf{J}} = \hat{\mathbf{L}} + 2\hat{\mathbf{S}} = (\hat{J}_x, \hat{J}_y, \hat{J}_z)`
 
 .. math::
@@ -259,8 +259,8 @@ Finally, the single-ion neutron scattering transition may also be calculated usi
 operators as:
 
 .. math::
-    I_{n\rightarrow m} = \left(\frac{g_{\mathrm{n}} r_e}{2}\right)^2 
-            \frac{\exp\left(\frac{-E_n}{k_B T}\right)}{Z} \frac{2}{3} 
+    I_{n\rightarrow m} = \left(\frac{g_{\mathrm{n}} r_e}{2}\right)^2
+            \frac{\exp\left(\frac{-E_n}{k_B T}\right)}{Z} \frac{2}{3}
                \sum_{\alpha} \left| \langle \psi_n |  \hat{J}_{\alpha} | \psi_m \rangle \right|^2,
   :label: neutcf
 
@@ -332,7 +332,7 @@ Now, it turns out the matrix elements of the tensor operators can expressed, via
 product of an angular momentum coupling (Clebsch-Gordan) coefficient, and a *reduced matrix element*,
 
 .. math::
-    \langle L,L_z | T_q^{(k)}| L,L'_z \rangle = (-1)^{L-L_z} 
+    \langle L,L_z | T_q^{(k)}| L,L'_z \rangle = (-1)^{L-L_z}
         \left( \begin{array}{ccc} L & k & L \\ -L_z & q & L'_z \end{array} \right)
     \langle L ||t^{(k)}|| L \rangle,
   :label: tkq
@@ -358,7 +358,7 @@ Note that the :math:`D_q^k` parameters are complex numbers.
 We can also construct the Hermitian operators :math:`\hat{C}_q^{(k)}` analogous to the tesseral harmonic functions:
 
 .. math::
-    \hat{C}_q^{(k)} = \left\{ \begin{array}{ll} 
+    \hat{C}_q^{(k)} = \left\{ \begin{array}{ll}
             \frac{i}{\sqrt{2}} \left[ T_q^{(k)} - (-1)^q T_{-q}^{(k)} \right] & q<0 \\
                                       T_q^{(k)} & q=0 \\
             \frac{1}{\sqrt{2}} \left[ T_{-q}^{(k)} + (-1)^q T_q^{(k)} \right] & q>0 \\
@@ -374,7 +374,7 @@ And so construct a "real-valued" Wybourne normalised crystal field Hamiltonian a
 where the :math:`L_q^k` parameters are real and related to the :math:`D_q^k` parameters by:
 
 .. math::
-    D_q^k = \left\{ \begin{array}{ll} 
+    D_q^k = \left\{ \begin{array}{ll}
                        (L_{|q|}^k + i L_{-|q|}^k)   &  q < 0  \\
                         L_0^k                       &  q = 0  \\
             (-1)^{|q|} (L_{|q|}^k - i L_{-|q|}^k)   &  q > 0
@@ -453,9 +453,9 @@ Appendix B: Tables
 | :math:`\mathrm{Yb}^{3+}` | 3 | |half|  | |7half|  | :math:`\frac{8}{7}`  |  3.175  | -17.32 | 148.0   |
 +--------------------------+---+---------+----------+----------------------+---------+--------+---------+
 
-Table 1: *Total angular momentum quantum numbers* :math:`L`, :math:`S` and :math:`J`, *Landé* :math:`g_J` *factors, 
+Table 1: *Total angular momentum quantum numbers* :math:`L`, :math:`S` and :math:`J`, *Landé* :math:`g_J` *factors,
 and Stevens factors* :math:`\theta_k` *for the ground states of the trivalent rare-earth ions*.
-After `[JensenMackintosh91]`_. 
+After `[JensenMackintosh91]`_.
 The ground state of :math:`\mathrm{Gd}^{3+}` is a pure spin state, on which the crystal field does not operate.
 Eu compound often do not adopt the trivalent state, and Pm is radioactive so not much studied.
 
@@ -529,14 +529,14 @@ Eu compound often do not adopt the trivalent state, and Pm is radioactive so not
 | cubic      | |TdOOh|     |       |       |       | |p|   |       |       |       | |p|   | |p|   |       |       |       | |p|   |       |       |
 +------------+-------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
 
-Table 2: *Possible local symmetries and corresponding nonzero CEF parameters.* 
-':math:`+`' indicates only :math:`|m|` terms are nonzero. 
+Table 2: *Possible local symmetries and corresponding nonzero CEF parameters.*
+':math:`+`' indicates only :math:`|m|` terms are nonzero.
 ':math:`\pm`' indicates that :math:`-|m|` terms are also non-zero.
 In the case when :math:`m>0` and both parameters :math:`B_l^m` and :math:`B_l^{-m}` are nonzero,
 one of these :math:`B_l^m` with :math:`m>0` can by made zero by a rotation of the coordinate system.
 However, the appropriate orientation of the coordinate system in these cases is not known *a priori*.
 It requires the knowledge of the CEF parameters.
-Note, that for cubic symmetry additionally :math:`\mathrm{B}_4^4=5 \mathrm{B}_4^0,` and :math:`\mathrm{B}_6^4 = -21 \mathrm{B}_6^0`. 
+Note, that for cubic symmetry additionally :math:`\mathrm{B}_4^4=5 \mathrm{B}_4^0,` and :math:`\mathrm{B}_6^4 = -21 \mathrm{B}_6^0`.
 
 .. _Table 3:
 
@@ -555,7 +555,7 @@ Note, that for cubic symmetry additionally :math:`\mathrm{B}_4^4=5 \mathrm{B}_4^
 Table 3: *Ratios* :math:`\lambda_{lm}` *of the Stevens to the real valued Wybourne normalised parameters.*
 After `[NewmanNg00]`_.
 
-            
+
 References
 ----------
 

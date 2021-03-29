@@ -28,24 +28,24 @@ the middle of two adjacent peaks. Algorithm will fit these few points
 (*BackgroundPoints*) to a background function of specified type.
 
 The purpose of this option is to select as many background data points as possible
-for future background function fitting. 
+for future background function fitting.
 
-Prior information can be given by two modes.  Property 'SelectionMode' determines which modes to use.  
-One (1)is from a list of X-values specified by users via property "BackgroundPoints". 
-The other (2) is through a (background) function, whose type is specified by property "BackgroundType" and 
-values are given via input table workspace "BackgroundTableWorkspace". 
+Prior information can be given by two modes.  Property 'SelectionMode' determines which modes to use.
+One (1)is from a list of X-values specified by users via property "BackgroundPoints".
+The other (2) is through a (background) function, whose type is specified by property "BackgroundType" and
+values are given via input table workspace "BackgroundTableWorkspace".
 
 
 Select background points from given X-values
 ============================================
 
-Here is how it works.  Assume that the :math:`X^{(u)}` is the list of x values specified by users. 
+Here is how it works.  Assume that the :math:`X^{(u)}` is the list of x values specified by users.
 
 * Create a data set (X, Y, E) from input workspace, where :math:`X_i` is the nearest value
   to :math:`X^{(u)}_i`;
 * Fit the background function against the data set (X, Y, E);
 * Select the data points, which are within a certain range above and below the fitted background function;
-* The last step is to fit background function against the selected background points 
+* The last step is to fit background function against the selected background points
 
 Select background points from given function
 ============================================
@@ -53,22 +53,22 @@ Select background points from given function
 
 In this approach, the difference from the other apporach is to use the user given background function
 to select data points within a range other than fitting the background function from given data points in the
-other approach. 
-Thus, it is just the last step of previous approach. 
+other approach.
+Thus, it is just the last step of previous approach.
 
 Output workspaces
 =================
 
-- OutputWorkspace: It contains 3 spectra.  
+- OutputWorkspace: It contains 3 spectra.
 
   - spectrum 0: the selected background data points;
   - spectrum 1: the fitted background function against the selected data points;
   - spectrum 2: the difference of sepctrum 0 and 1
 
-- OutputBackgroundParameterWorkspace: A table workspace containing the fitted parameter values including :math:`\chi^2`. 
+- OutputBackgroundParameterWorkspace: A table workspace containing the fitted parameter values including :math:`\chi^2`.
 
-- UserBackgroundWorkspace: a MatrixWorkspace to visualize by user. 
-  
+- UserBackgroundWorkspace: a MatrixWorkspace to visualize by user.
+
   - spectrum 0: background function (either given by user or fit from given data points) that is used to select background points;
   - spectrum 1: diffraction data with background (spectrum 0) removed;
   - spectrum 2: upper boundary on data points to be selected for spectrum 1;
@@ -78,7 +78,7 @@ Output workspaces
 Algorithm properties
 ====================
 
-Besides the common algorithm properties, below is the list of properties specific to this function option. 
+Besides the common algorithm properties, below is the list of properties specific to this function option.
 
 - Inputs:
 
@@ -93,11 +93,11 @@ Besides the common algorithm properties, below is the list of properties specifi
   - OutputBackgroundOrder
 
 - Outputs:
-  
+
   - OutputBackgroundParameterWorkspace
   - UserBackgroundWorkspace
 
-A suggested workflow 
+A suggested workflow
 ####################
 
 Here is a good example to select background points from a powder
@@ -123,18 +123,18 @@ Simple Remove Peaks
 ###################
 
 This algorithm is to remove peaks and output the backgrounds,
-which can be used to fit an artibrary background function after calling this algorithm. 
+which can be used to fit an artibrary background function after calling this algorithm.
 
-It is assumed that the all peaks have been fitted reasonably well. 
+It is assumed that the all peaks have been fitted reasonably well.
 Then by removing the peaks within range :math:`X_i^{(0)} \pm FWHM`,
-and save the rest data points, which are very likely backgrounds, to an output workspace.  
+and save the rest data points, which are very likely backgrounds, to an output workspace.
 
 Required and optional algorithm properties
 ==========================================
 
-Besides the common algorithm properties, below is the list of properties specific to this function option. 
+Besides the common algorithm properties, below is the list of properties specific to this function option.
 
-- Inputs: 
+- Inputs:
 
   - BraggPeakTableWorkspace
   - NumberOfFWHM
@@ -148,7 +148,7 @@ Add Region
 ##########
 
 Replace a region, which is defined by 'LowerBoundary' and 'UpperBoundary', in a workspace
-from another reference workspace. 
+from another reference workspace.
 
 
 Required and optional algorithm properties
@@ -164,7 +164,7 @@ Required and optional algorithm properties
 Delete Region
 #############
 
-Removed a specified region, which is defined by 'LowerBoundary' and 'UpperBoundary', from the input workspace. 
+Removed a specified region, which is defined by 'LowerBoundary' and 'UpperBoundary', from the input workspace.
 
 Required and optional algorithm properties
 ==========================================

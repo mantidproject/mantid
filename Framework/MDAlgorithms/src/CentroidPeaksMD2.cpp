@@ -6,14 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/CentroidPeaksMD2.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
-
-using Mantid::DataObjects::PeaksWorkspace;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -41,13 +41,13 @@ void CentroidPeaksMD2::init() {
       "Fixed radius around each peak position in which to calculate the "
       "centroid.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to centroid.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                          Direction::Output),
+      std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' positions modified by the new found centroids.");
 }
@@ -64,12 +64,10 @@ void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                                 "to have 3 dimensions only.");
 
   /// Peak workspace to centroid
-  Mantid::DataObjects::PeaksWorkspace_sptr inPeakWS =
-      getProperty("PeaksWorkspace");
+  IPeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
 
   /// Output peaks workspace, create if needed
-  Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
-      getProperty("OutputWorkspace");
+  IPeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
 
   if (peakWS != inPeakWS)
     peakWS = inPeakWS->clone();
@@ -83,8 +81,11 @@ void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     PRAGMA_OMP(parallel for schedule(dynamic, 10) )
     for (int i = 0; i < int(peakWS->getNumberPeaks()); ++i) {
       // Get a direct ref to that peak.
-      Peak &p = peakWS->getPeak(i);
-      double detectorDistance = p.getL2();
+      IPeak &p = peakWS->getPeak(i);
+      Peak *peak = dynamic_cast<Peak *>(&p);
+      double detectorDistance = 0.;
+      if (peak)
+        detectorDistance = p.getL2();
 
       // Get the peak center as a position in the dimensions of the workspace
       V3D pos;
@@ -128,11 +129,13 @@ void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           if (CoordinatesToUse == 1) //"Q (lab frame)"
           {
             p.setQLabFrame(vecCentroid, detectorDistance);
-            p.findDetector();
+            if (peak)
+              peak->findDetector();
           } else if (CoordinatesToUse == 2) //"Q (sample frame)"
           {
             p.setQSampleFrame(vecCentroid, detectorDistance);
-            p.findDetector();
+            if (peak)
+              peak->findDetector();
           } else if (CoordinatesToUse == 3) //"HKL"
           {
             p.setHKL(vecCentroid);

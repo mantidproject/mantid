@@ -1,7 +1,7 @@
 .. _02_the_matrix_workspace:
 
 ============
-Viewing Data 
+Viewing Data
 ============
 
 
@@ -48,12 +48,12 @@ flipping between the tabs you can see the X, Y and E values.
 
 The Index number refers to the bin it relates to. On the "Y values" and "E values" tabs there is another number (above displayed with the unit 'μs').
 
-The first number at the left of each row we call the "Workspace Index" and 
+The first number at the left of each row we call the "Workspace Index" and
 is simply the row number as data is read into the
 workspace; in the same way as a spreadsheet program like Excel uses row
-numbers. This always starts from zero, but the corresponding Spectrum 
-Number is displayed as 'sp 1'. 
-Often it is the case that the Spectrum Number is one greater than the 
+numbers. This always starts from zero, but the corresponding Spectrum
+Number is displayed as 'sp 1'.
+Often it is the case that the Spectrum Number is one greater than the
 Workspace Index, but this is not always the case. If you only load part
 of a file, for example spectra 100 - 200, then the Workspace Indices
 will still be 0-100, but Mantid will remember the original Spectra

@@ -69,7 +69,7 @@ Output:
     In order print: Ascending
     [ 1.  2.  3.]
     [ 1.  2.  3.]
-    [ 1.  2.  3.]  
+    [ 1.  2.  3.]
 
 .. categories::
 

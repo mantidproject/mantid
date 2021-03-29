@@ -8,7 +8,7 @@
 
 #include <cxxtest/LinkedList.h>
 
-namespace CxxTest 
+namespace CxxTest
 {
     class GlobalFixture : public Link
     {
@@ -17,10 +17,10 @@ namespace CxxTest
         virtual bool tearDownWorld();
         virtual bool setUp();
         virtual bool tearDown();
-        
+
         GlobalFixture();
         ~GlobalFixture();
-        
+
         static GlobalFixture *firstGlobalFixture();
         static GlobalFixture *lastGlobalFixture();
         GlobalFixture *nextGlobalFixture();

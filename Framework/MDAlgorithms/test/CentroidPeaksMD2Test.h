@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
@@ -226,6 +227,52 @@ public:
     doRun(V3D(0., 0., 0.), 1.0, 1000., V3D(0., 0., 0.),
           "Start at the center, get the center",
           "CentroidPeaksMD2Test_MDEWS_outputCopy");
+  }
+
+  void test_LeanElasticPeak() {
+    createMDEW("Q (sample frame)");
+    addPeak(1000, 1.1, 0.9, 1.05, 0.5);
+    MDEventWorkspace3Lean::sptr mdews =
+        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
+            "CentroidPeaksMD2Test_MDEWS");
+    mdews->setCoordinateSystem(Mantid::Kernel::QSample);
+
+    auto peakWS = std::make_shared<LeanElasticPeaksWorkspace>();
+
+    peakWS->addPeak(LeanElasticPeak(V3D(1, 1, 1), 1.0));
+
+    TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
+    AnalysisDataService::Instance().addOrReplace("CentroidPeaksMD2Test_Peaks",
+                                                 peakWS);
+
+    CentroidPeaksMD2 alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "CentroidPeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PeaksWorkspace", "CentroidPeaksMD2Test_Peaks"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "CentroidPeaksMD2Test_Peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    peakWS = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve("CentroidPeaksMD2Test_Peaks"));
+    TS_ASSERT(peakWS);
+    if (!peakWS)
+      return;
+
+    IPeak &p = peakWS->getPeak(0);
+    TS_ASSERT_DELTA(p.getBinCount(), 1000, 0.05);
+
+    V3D result = p.getQSampleFrame();
+    V3D expectedResult(1.1, 0.9, 1.05);
+
+    for (size_t i = 0; i < 3; i++)
+      TS_ASSERT_DELTA(result[i], expectedResult[i], 0.05);
+
+    AnalysisDataService::Instance().remove("CentroidPeaksMD2Test_Peaks");
   }
 
 private:

@@ -18,6 +18,7 @@ New features
 - :ref:`PDCalibration <algm-PDCalibration>` now supports workspaces with grouped detectors (i.e. more than one detector per spectrum).
 - New diagnostic plotting tool `Calibration.tofpd..diagnostics.plot2d` which adds markers for expected peak positions
 - New diagnostic plotting tool `Calibration.tofpd.diagnostics.difc_plot2d` which plots the change in DIFC between two instrument calibrations.
+- New diagnostic plotting tool `Calibration.tofpd.diagnostics.plot_peakd` which plots the d-spacing relative strain of peak positions.
 
 Improvements
 ############
@@ -28,6 +29,7 @@ Improvements
 Bugfixes
 ########
 
+- Fix the format inconsistency (with data saved from autoreduction workflow) issue for saving GSAS data using :ref:`HB2AReduce <algm-HB2AReduce>` - both are now using :ref:`SaveGSSCW <algm-SaveGSSCW>` for saving GSAS data.
 - Fix out-of-range bug in :ref:`FitPeaks <algm-FitPeaks>` for histogram data.
 - Fix bug in :ref:`FitPeaks <algm-FitPeaks>` not correctly checking right window for an individual peak
 - Fix bug to actually implement intended sequential fit of DIFC, DIFA, TZERO in :ref:`PDCalibration <algm-PDCalibration>`.
@@ -79,7 +81,6 @@ Instrument Updates
 
 Known Defects
 #############
-- When using new ellipsoidal peak integration capability in :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`, some peak intensities are returned as zero. When using the default spherical integration, the same behavior is not observed.
 
 Bugfixes
 ########
@@ -95,5 +96,22 @@ made to facilitate this.
 
 - New LeanElasticPeak and LeanElasticPeakWorkspace has been created :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`
 - :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` has been modified to optionally create a  :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
+- These following other algorithms have either been made to work or confirmed to already work with the LeanElasticPeak:
+
+   - :ref:`algm-AddPeakHKL`
+   - :ref:`algm-CalculatePeaksHKL`
+   - :ref:`algm-CentroidPeaksMD`
+   - :ref:`algm-CombinePeaksWorkspaces`
+   - :ref:`algm-FilterPeaks`
+   - :ref:`algm-FindUBUsingFFT`
+   - :ref:`algm-FindUBUsingIndexedPeaks`
+   - :ref:`algm-FindUBUsingLatticeParameters`
+   - :ref:`algm-FindUBUsingMinMaxD`
+   - :ref:`algm-IndexPeaks`
+   - :ref:`algm-IntegratePeaksMD`
+   - :ref:`algm-SelectCellOfType`
+   - :ref:`algm-SelectCellWithForm`
+   - :ref:`algm-ShowPossibleCells`
+   - :ref:`algm-TransformHKL`
 
 :ref:`Release 6.1.0 <v6.1.0>`

@@ -11,12 +11,18 @@
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+
+namespace {
+/// static logger object
+Mantid::Kernel::Logger g_log("LeanElasticPeaksWorkspaceTest");
+} // namespace
 
 class LeanElasticPeaksWorkspaceTest : public CxxTest::TestSuite {
 private:
@@ -225,5 +231,37 @@ public:
     TS_ASSERT_DELTA(pw->getPeak(3).getDSpacing(), 2 * M_PI, 1e-5);
     TS_ASSERT_DELTA(pw->getPeak(4).getWavelength(), 5.0, 1e-5);
     TS_ASSERT_DELTA(pw->getPeak(4).getDSpacing(), 2 * M_PI, 1e-5);
+  }
+
+  void test_saveToNexus() {
+    // build peaksworkspace (note number of peaks = 1)
+    auto lpws = std::make_shared<LeanElasticPeaksWorkspace>();
+    // add peaks
+    LeanElasticPeak p(V3D(1, 0, 0), 3.0);
+    LeanElasticPeak p2(V3D(0, 1, 0), 4.0);
+    LeanElasticPeak p3(V3D(0, 0, 1), 5.0);
+    lpws->addPeak(p);
+    lpws->addPeak(p2);
+    lpws->addPeak(p3);
+
+    // save to nexus
+    NexusTestHelper nexusHelper(true);
+    nexusHelper.createFile("testSaveLeanElasticPeaksWorkspace.nxs");
+    lpws->saveNexus(nexusHelper.file.get());
+    nexusHelper.reopenFile();
+
+    // Verify that this test_entry has a peaks_workspace entry
+    TS_ASSERT_THROWS_NOTHING(
+        nexusHelper.file->openGroup("peaks_workspace", "NXentry"));
+
+    // Check wavelengths
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openData("column_7"));
+    std::vector<double> waveLengths;
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->getData(waveLengths));
+    nexusHelper.file->closeData();
+    TS_ASSERT_EQUALS(waveLengths.size(), 3);
+    TS_ASSERT_DELTA(waveLengths[0], 3.0, 1e-5);
+    TS_ASSERT_DELTA(waveLengths[1], 4.0, 1e-5);
+    TS_ASSERT_DELTA(waveLengths[2], 5.0, 1e-5);
   }
 };

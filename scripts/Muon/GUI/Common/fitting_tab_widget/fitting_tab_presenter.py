@@ -106,7 +106,7 @@ class FittingTabPresenter(object):
 
     def handle_fit_generator_clicked(self):
         fitting_mode = FittingMode.SIMULTANEOUS if self.view.is_simul_fit else FittingMode.SEQUENTIAL
-        fit_options = {"Minimizer": self.view.minimizer, "EvaluationType": self.view.evaluation_type}
+        fit_options = {"Minimizer": self.view.minimizer, "Evaluation Type": self.view.evaluation_type}
 
         self.fsg_model = FitScriptGeneratorModel()
         self.fsg_view = FitScriptGeneratorView(None, fitting_mode, fit_options)

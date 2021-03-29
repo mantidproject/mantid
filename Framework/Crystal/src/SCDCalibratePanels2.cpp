@@ -581,7 +581,7 @@ IPeaksWorkspace_sptr SCDCalibratePanels2::removeUnindexedPeaks(
   fltpk_alg->setProperty("OutputWorkspace", "pws_filtered");
   fltpk_alg->executeAsChildAlg();
 
-  PeaksWorkspace_sptr outWS = fltpk_alg->getProperty("OutputWorkspace");
+  IPeaksWorkspace_sptr outWS = fltpk_alg->getProperty("OutputWorkspace");
   IPeaksWorkspace_sptr ows = std::dynamic_pointer_cast<IPeaksWorkspace>(outWS);
   return outWS;
 }
@@ -620,7 +620,7 @@ SCDCalibratePanels2::selectPeaksByBankName(IPeaksWorkspace_sptr pws,
   fltpk_alg->setProperty("OutputWorkspace", outputwsn);
   fltpk_alg->executeAsChildAlg();
 
-  PeaksWorkspace_sptr outWS = fltpk_alg->getProperty("OutputWorkspace");
+  IPeaksWorkspace_sptr outWS = fltpk_alg->getProperty("OutputWorkspace");
   IPeaksWorkspace_sptr ows = std::dynamic_pointer_cast<IPeaksWorkspace>(outWS);
   return outWS;
 }

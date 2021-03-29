@@ -258,7 +258,7 @@ class GroupingTabModel(object):
                 self._data.get_loaded_data_for_run(self._data.current_runs[-1])['OutputWorkspace'][0].workspace.dataX(
                     0)), 3)
         else:
-            return 0.0
+            return 1.0
 
     def get_first_good_data_from_file(self):
         if self._data.current_runs:

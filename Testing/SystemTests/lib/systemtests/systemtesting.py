@@ -680,7 +680,7 @@ class TestScript(object):
 import sys
 for p in ('{TESTING_FRAMEWORK_DIR}', '{FRAMEWORK_PYTHONINTERFACE_TEST_DIR}', '{self._test_dir}'):
     sys.path.append(p)
-                
+
 # Ensure sys path matches current to avoid weird import errors
 sys.path.extend({sys.path})
 from {self._modname} import {self._test_cls_name}

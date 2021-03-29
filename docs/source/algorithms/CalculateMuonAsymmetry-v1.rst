@@ -28,7 +28,7 @@ and the fitting function is given by
 
 and the renormalized data is transformed via the equation:
 
-.. math:: \textrm{NewData} = (\textrm{NormalisedCounts}/(N_0) - 1.0. 
+.. math:: \textrm{NewData} = (\textrm{NormalisedCounts}/(N_0) - 1.0.
 
 Usage
 -----
@@ -56,11 +56,11 @@ This example is for calculating the Asymmetry for a single data set.
 
    tab.addRow([11.,"a","Estimate"])
    tab.addRow([22.,"b","Estimate"])
-   
+
    ws= makeData("a",2.30)
    ws2= makeData("b",1.10)
-   
-   myFunc='name=GausOsc,$domains=i,Frequency=5.;'  
+
+   myFunc='name=GausOsc,$domains=i,Frequency=5.;'
 
    TFFunc = ConvertFitFunctionForMuonTFAsymmetry(InputFunction=myFunc,NormalizationTable=tab,WorkspaceList=["a"],Mode="Construct")
    CalculateMuonAsymmetry(NormalizationTable=tab, unNormalizedWorkspaceList=["a"],

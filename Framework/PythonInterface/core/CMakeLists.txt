@@ -82,12 +82,12 @@ set_target_properties(
 
 set(PUBLIC_TARGETS Python::NumPy ${BoostPython_LIBRARIES})
 if(USE_PYTHON_DYNAMIC_LIB)
-	list(APPEND PUBLIC_TARGETS Python::Python) 
+	list(APPEND PUBLIC_TARGETS Python::Python)
 endif()
 # Dependencies
 target_link_libraries(
   ${_target_name}
-  PUBLIC ${PUBLIC_TARGETS} 
+  PUBLIC ${PUBLIC_TARGETS}
   PRIVATE Types Kernel ${Boost_LIBRARIES}  ${POCO_LIBRARIES}
 )
 

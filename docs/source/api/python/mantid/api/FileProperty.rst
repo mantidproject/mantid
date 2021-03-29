@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::API::FileProperty.
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.FileProperty 
+.. autoclass:: mantid.api.FileProperty
     :members:
     :undoc-members:
     :inherited-members:

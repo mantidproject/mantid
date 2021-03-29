@@ -235,8 +235,8 @@ void SaveNexusProcessed::doExec(
       std::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
   ITableWorkspace_const_sptr tableWorkspace =
       std::dynamic_pointer_cast<const ITableWorkspace>(inputWorkspace);
-  PeaksWorkspace_const_sptr peaksWorkspace =
-      std::dynamic_pointer_cast<const PeaksWorkspace>(inputWorkspace);
+  IPeaksWorkspace_const_sptr peaksWorkspace =
+      std::dynamic_pointer_cast<const IPeaksWorkspace>(inputWorkspace);
   OffsetsWorkspace_const_sptr offsetsWorkspace =
       std::dynamic_pointer_cast<const OffsetsWorkspace>(inputWorkspace);
   MaskWorkspace_const_sptr maskWorkspace =
@@ -588,7 +588,7 @@ bool SaveNexusProcessed::processGroups() {
     for (size_t entry = 0; entry < workspaces.size(); entry++) {
       const Workspace_sptr ws = workspaces[entry];
       if (ws->isGroup()) {
-        throw std::runtime_error("SaveNexusProcessed: NeXus files do not "
+        throw std::runtime_error("NeXus files do not "
                                  "support nested groups of groups");
       }
       this->doExec(ws, nexusFile, entry > 0 /*keepFile*/, entry);

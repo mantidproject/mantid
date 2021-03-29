@@ -5,8 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SelectCellOfType.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/SelectCellWithForm.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -27,7 +29,7 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void SelectCellOfType::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -77,7 +79,7 @@ void SelectCellOfType::init() {
 /** Execute the algorithm.
  */
 void SelectCellOfType::exec() {
-  PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
+  IPeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
   if (!ws) {
     throw std::runtime_error("Could not read the peaks workspace");
   }
@@ -123,8 +125,7 @@ void SelectCellOfType::exec() {
     o_lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
                         sigabc[5]);
 
-    std::vector<Peak> &peaks = ws->getPeaks();
-    size_t n_peaks = ws->getNumberPeaks();
+    int n_peaks = ws->getNumberPeaks();
 
     int num_indexed = 0;
     double average_error = 0.0;
@@ -132,22 +133,24 @@ void SelectCellOfType::exec() {
     if (o_lattice->getMaxOrder() == 0) {
       std::vector<V3D> miller_indices;
       std::vector<V3D> q_vectors;
-      for (size_t i = 0; i < n_peaks; i++) {
-        q_vectors.emplace_back(peaks[i].getQSampleFrame());
+      for (int i = 0; i < n_peaks; i++) {
+        q_vectors.emplace_back(ws->getPeak(i).getQSampleFrame());
       }
       num_indexed = IndexingUtils::CalculateMillerIndices(
           newUB, q_vectors, tolerance, miller_indices, average_error);
 
-      for (size_t i = 0; i < n_peaks; i++) {
-        peaks[i].setIntHKL(miller_indices[i]);
-        peaks[i].setHKL(miller_indices[i]);
+      for (int i = 0; i < n_peaks; i++) {
+        IPeak &peak = ws->getPeak(i);
+        peak.setIntHKL(miller_indices[i]);
+        peak.setHKL(miller_indices[i]);
       }
     } else {
       num_indexed = static_cast<int>(num_indexed);
-      for (size_t i = 0; i < n_peaks; i++) {
-        average_error += (peaks[i].getHKL()).hklError();
-        peaks[i].setIntHKL(T * peaks[i].getIntHKL());
-        peaks[i].setHKL(T * peaks[i].getHKL());
+      for (int i = 0; i < n_peaks; i++) {
+        IPeak &peak = ws->getPeak(i);
+        average_error += (peak.getHKL()).hklError();
+        peak.setIntHKL(T * peak.getIntHKL());
+        peak.setHKL(T * peak.getHKL());
       }
     }
     ws->mutableSample().setOrientedLattice(std::move(o_lattice));

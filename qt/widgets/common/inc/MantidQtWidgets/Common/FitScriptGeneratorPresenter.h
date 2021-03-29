@@ -7,12 +7,14 @@
 #pragma once
 
 #include "DllOption.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include <QStringList>
@@ -50,9 +52,9 @@ public:
 private:
   void handleRemoveClicked();
   void handleAddWorkspaceClicked();
+  void handleSelectionChanged();
   void handleStartXChanged();
   void handleEndXChanged();
-  void handleSelectionChanged();
   void handleFunctionRemoved(std::string const &function);
   void handleFunctionAdded(std::string const &function);
   void handleFunctionReplaced(std::string const &function);
@@ -86,19 +88,56 @@ private:
   void updateEndX(std::string const &workspaceName,
                   WorkspaceIndex workspaceIndex, double endX);
 
-  void
-  removeFunctionForDomains(std::string const &function,
-                           std::vector<FitDomainIndex> const &domainIndices);
-  void addFunctionForDomains(std::string const &function,
-                             std::vector<FitDomainIndex> const &domainIndices);
-  void setFunctionForDomains(std::string const &function,
-                             std::vector<FitDomainIndex> const &domainIndices);
+  void updateParameterValue(std::string const &workspaceName,
+                            WorkspaceIndex workspaceIndex,
+                            std::string const &parameter, double newValue);
+  void updateAttributeValue(std::string const &workspaceName,
+                            WorkspaceIndex workspaceIndex,
+                            std::string const &fullAttribute,
+                            Mantid::API::IFunction::Attribute const &newValue);
 
   void updateParameterTie(std::string const &workspaceName,
                           WorkspaceIndex workspaceIndex,
                           std::string const &parameter, std::string const &tie);
 
+  void removeParameterConstraint(std::string const &workspaceName,
+                                 WorkspaceIndex workspaceIndex,
+                                 std::string const &parameter);
+  void updateParameterConstraint(std::string const &workspaceName,
+                                 WorkspaceIndex workspaceIndex,
+                                 std::string const &functionIndex,
+                                 std::string const &constraint);
+
+  void removeFunction(std::string const &workspaceName,
+                      WorkspaceIndex workspaceIndex,
+                      std::string const &function);
+  void addFunction(std::string const &workspaceName,
+                   WorkspaceIndex workspaceIndex, std::string const &function);
+  void setFunction(std::string const &workspaceName,
+                   WorkspaceIndex workspaceIndex, std::string const &function);
+
+  void updateFunctionInViewFromModel(FitDomainIndex domainIndex);
+
+  template <typename GetX, typename UpdateX>
+  void updateXLimitForDomain(GetX &&getX, UpdateX &&updateX);
+
+  template <typename UpdateFunction>
+  void updateFunctionStructure(UpdateFunction &&updateFunction,
+                               std::string const &function);
+
+  template <typename UpdateFunction, typename... Args>
+  void updateFunctionsInModel(UpdateFunction &&updateFunction,
+                              Args... arguments);
+
+  template <typename Function, typename... Args>
+  void invokeFunctionForDomain(FitDomainIndex domainIndex, Function &&func,
+                               Args... arguments);
+
   [[nodiscard]] std::vector<FitDomainIndex> getRowIndices() const;
+
+  std::tuple<std::string, std::string> convertFunctionIndexOfParameterTie(
+      std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+      std::string const &parameter, std::string const &tie) const;
 
   void checkForWarningMessages();
 
