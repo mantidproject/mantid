@@ -80,7 +80,7 @@ class GenerateLogbook(PythonAlgorithm):
         self.declareProperty("NumorRange", [0, 0],
                              direction=Direction.Input,
                              validator=IntArrayBoundedValidator(lower=0),
-                             doc='Numor range to be analysed in the directory.')
+                             doc='Numor range or a list of numors to be analysed in the directory.')
 
         facilities = StringListValidator(list(config.getFacilityNames()))
         self.declareProperty(name='Facility', defaultValue='ILL',
@@ -118,13 +118,13 @@ class GenerateLogbook(PythonAlgorithm):
         for file in sorted(fnmatch.filter(os.listdir(self._data_directory), '*.nxs')):
             try:
                 numor = int(os.path.splitext(file[instrument_name_len:])[0])
-            except ValueError:
+                if self._numor_range is None or numor in self._numor_range:
+                    file_list.append(os.path.splitext(file)[0])
+            except (ValueError, OverflowError):
                 self.log().debug("File {} cannot be cast into an integer numor".format(file))
                 continue
-            if self._numor_range[0] <= numor <= self._numor_range[1]:
-                file_list.append(os.path.splitext(file)[0])
         if file_list == list():
-            raise RuntimeError("There are no files in {} in the specified numor range.".format(self._data_directory))
+            raise RuntimeError("There are no files in {} with specified numors.".format(self._data_directory))
         return file_list
 
     def _get_default_entries(self):
@@ -356,11 +356,8 @@ class GenerateLogbook(PythonAlgorithm):
         self._data_directory = self.getPropertyValue('Directory')
         self._facility = self.getPropertyValue('Facility')
         self._instrument = self.getPropertyValue('Instrument')
-        if self.getProperty('NumorRange').isDefault:
-            self._numor_range = [0, float('inf')]
-        else:
-            numor_range = self.getProperty('NumorRange').value
-            self._numor_range = [numor_range[0], numor_range[-1]]
+        if not self.getProperty('NumorRange').isDefault:
+            self._numor_range = self.getProperty('NumorRange').value
         progress = Progress(self, start=0.0, end=1.0, nreports=15)
         progress.report("Preparing file list")
         data_array = self._prepare_file_array()
