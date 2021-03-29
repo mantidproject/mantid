@@ -1422,7 +1422,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "0.1, 0.1, 2.6"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartOverlaps", "0.8, 1.6"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndOverlaps", "1.1, 1.9"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IndexOfReference", 1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IndexOfReference", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outws"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());

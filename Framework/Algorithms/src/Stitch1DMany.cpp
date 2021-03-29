@@ -93,9 +93,11 @@ void Stitch1DMany::init() {
   setPropertySettings("ScaleFactorFromPeriod",
                       std::move(scaleFactorFromPeriodVisible));
 
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
+  mustBePositive->setLower(0);
   declareProperty(
-      std::make_unique<PropertyWithValue<int>>("IndexOfReference", 0,
-                                               Direction::Input),
+      std::make_unique<PropertyWithValue<size_t>>(
+          "IndexOfReference", 0, mustBePositive, Direction::Input),
       "Index of the workspace to be used as reference for scaling.");
 }
 
@@ -139,8 +141,8 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
       }
       if (!isDefault("IndexOfReference")) {
         m_indexOfReference = this->getProperty("IndexOfReference");
-        if (m_indexOfReference >= static_cast<int>(column.size()) &&
-            m_indexOfReference >= static_cast<int>(m_inputWSMatrix.size())) {
+        if (m_indexOfReference >= column.size() &&
+            m_indexOfReference >= m_inputWSMatrix.size()) {
           issues["IndexOfReference"] =
               "The index of reference workspace is larger than the number of "
               "provided workspaces.";
@@ -334,9 +336,8 @@ void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
   for (size_t i = 1; i < toStitch.size(); i++) {
     auto rhsWS = toStitch[i];
     outName += "_" + rhsWS->getName();
-
-    if (static_cast<const int>(i) >= m_indexOfReference) {
-      if (static_cast<const int>(i) == m_indexOfReference) {
+    if (i >= m_indexOfReference) {
+      if (i == m_indexOfReference) {
         // don't scale the RHS unless the desired index is the first ws
         scaleRHSWorkspace = false;
       } else { // after scaling to the desired ws, keep the scaling
@@ -388,7 +389,7 @@ void Stitch1DMany::doStitch1DMany(const size_t period,
                                   const bool useManualScaleFactors,
                                   std::string &outName,
                                   std::vector<double> &outScaleFactors,
-                                  const int indexOfReference,
+                                  const size_t indexOfReference,
                                   const bool storeInADS) {
 
   // List of workspaces to stitch

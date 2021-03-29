@@ -43,7 +43,8 @@ public:
   void doStitch1DMany(const size_t period, const bool useManualScaleFactors,
                       std::string &outName,
                       std::vector<double> &outScaleFactors,
-                      const int indexOfReference, const bool storeInADS = true);
+                      const size_t indexOfReference,
+                      const bool storeInADS = true);
 
 private:
   /// Overwrites Algorithm method.
@@ -66,7 +67,7 @@ private:
   bool m_scaleRHSWorkspace = true;
   bool m_useManualScaleFactors = false;
   size_t m_scaleFactorFromPeriod = 1;
-  int m_indexOfReference = 0;
+  size_t m_indexOfReference = 0;
 };
 
 } // namespace Algorithms
