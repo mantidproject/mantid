@@ -477,8 +477,7 @@ public:
 
   void test_get_path_from_files_multiple_directories() {
     std::vector<std::string> files = {"path1/file.nxs", "path2/file.nxs"};
-    ON_CALL(*m_view, getFiles())
-        .WillByDefault(Return(files));
+    ON_CALL(*m_view, getFiles()).WillByDefault(Return(files));
     EXPECT_CALL(*m_view, setPath(std::string{"Multiple Directories"})).Times(1);
     m_view->foundRuns();
   }

@@ -347,7 +347,7 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   m_numDetectors = ws->getInstrument()->getNumberDetectors();
 }
 
-std::string ALCDataLoadingPresenter::getPathFromFiles() { 
+std::string ALCDataLoadingPresenter::getPathFromFiles() {
   std::string returnPath;
   auto files = m_view->getFiles();
   for (auto path : files) {
