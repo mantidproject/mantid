@@ -16,6 +16,7 @@ from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
 from Muon.GUI.ElementalAnalysis2.load_widget.load_widget import LoadWidget
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_widget import EAGroupingTabWidget
+from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_widget import  EAAutoTabWidget
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 
 
@@ -76,6 +77,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.home_tab = QtWidgets.QLineEdit("home")
         self.grouping_tab_widget = EAGroupingTabWidget(self.context)
         self.fitting_tab = QtWidgets.QLineEdit("fitting")
+        self.auto_tab = EAAutoTabWidget(self.context)
 
     def setup_tabs(self):
         """
@@ -86,6 +88,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.home_tab, 'Home')
         self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view,
                                   'Grouping')
+        self.tabs.addTabWithOrder(self.auto_tab.auto_tab_view,
+                                  'Automatic')
         self.tabs.addTabWithOrder(self.fitting_tab, 'Fitting')
 
     def closeEvent(self, event):
@@ -100,6 +104,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         self.disable_notifier.add_subscriber(self.grouping_tab_widget.grouping_table_view.disable_table_observer)
 
+        self.disable_notifier.add_subscriber(self.auto_tab.auto_tab_presenter.disable_tab_observer)
+
     def setup_enable_notifier(self):
 
         self.enable_notifier.add_subscriber(self.load_widget.load_widget.enable_observer)
@@ -108,9 +114,13 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         self.enable_notifier.add_subscriber(self.grouping_tab_widget.grouping_table_view.enable_table_observer)
 
+        self.enable_notifier.add_subscriber(self.auto_tab.auto_tab_presenter.enable_tab_observer)
+
     def setup_load_observers(self):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.loadObserver)
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.auto_tab.auto_tab_presenter.update_view_observer )
 
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
