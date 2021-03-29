@@ -55,18 +55,19 @@ class CalibrationModel(object):
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")
         if full_calib_path is not None and path.exists(full_calib_path):
             full_calib = LoadAscii(full_calib_path, OutputWorkspace="det_pos", Separator="Tab")
-            output, sample_raw = self.run_calibration(sample_workspace,
-                                                      vanadium_path,
-                                                      van_integration,
-                                                      bank,
-                                                      spectrum_numbers,
-                                                      full_calib_ws=full_calib)
+            output, van_curves, sample_raw = self.run_calibration(sample_workspace,
+                                                                  vanadium_path,
+                                                                  van_integration,
+                                                                  bank,
+                                                                  spectrum_numbers,
+                                                                  full_calib_ws=full_calib)
         else:
-            output, sample_raw = self.run_calibration(sample_workspace,
-                                                      vanadium_path,
-                                                      van_integration,
-                                                      bank,
-                                                      spectrum_numbers)
+            output, van_curves, sample_raw = self.run_calibration(sample_workspace,
+                                                                  vanadium_path,
+                                                                  van_integration,
+                                                                  bank,
+                                                                  spectrum_numbers)
+        vanadium_corrections.handle_van_curves(van_curves, vanadium_path, instrument, rb_num)
         if plot_output:
             for i in range(len(output)):
                 if spectrum_numbers:
@@ -105,6 +106,7 @@ class CalibrationModel(object):
                                        "Calibration", "")
             self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, sample_path, vanadium_path,
                                      instrument, bank, spectrum_numbers)
+
 
     def extract_b2b_params(self, workspace):
 
@@ -290,10 +292,11 @@ class CalibrationModel(object):
             "CalibrationParameters": 'DIFC+TZERO+DIFA',
         }
         cal_output = list()
+        curves_output = list()
 
         if spectrum_numbers is None:
             if bank == 1 or bank is None:
-                focused_North = focus_and_normalise(ws_d, ws_van_d, NORTH_BANK_CAL)
+                focused_North, curves_North = focus_and_normalise(ws_d, ws_van_d, NORTH_BANK_CAL)
                 # final calibration of focused data
                 kwargs["InputWorkspace"] = focused_North
                 kwargs["OutputCalibrationTable"] = 'engggui_calibration_bank_1'
@@ -301,9 +304,10 @@ class CalibrationModel(object):
 
                 cal_north = run_pd_calibration(kwargs)[0]
                 cal_output.append(cal_north)
+                curves_output.append(curves_North)
 
             if bank == 2 or bank is None:
-                focused_South = focus_and_normalise(ws_d, ws_van_d, SOUTH_BANK_CAL)
+                focused_South, curves_South = focus_and_normalise(ws_d, ws_van_d, SOUTH_BANK_CAL)
                 # final calibration of focused data
                 kwargs["InputWorkspace"] = focused_South
                 kwargs["OutputCalibrationTable"] = 'engggui_calibration_bank_2'
@@ -311,6 +315,7 @@ class CalibrationModel(object):
 
                 cal_north = run_pd_calibration(kwargs)[0]
                 cal_output.append(cal_north)
+                curves_output.append(curves_South)
         else:
             pass
             # grouping ws from spectra numbers
@@ -319,12 +324,12 @@ class CalibrationModel(object):
             #
             # TODO
 
-        output = list()
+        cal = list()
         for bank_cal in cal_output:
             row = bank_cal.row(0)
             current_fit_params = {'difc': row['difc'], 'difa': row['difa'], 'tzero': row['tzero']}
-            output.append(current_fit_params)
-        return output, sample_raw
+            cal.append(current_fit_params)
+        return cal, curves_output, sample_raw
 
     def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, sample_path, vanadium_path,
                             instrument, bank, spectrum_numbers):

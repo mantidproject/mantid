@@ -7,7 +7,7 @@
 from os import path
 from os import makedirs
 
-from mantid.simpleapi import logger, Load, SaveNexus, NormaliseByCurrent, Integration
+from mantid.simpleapi import logger, Load, SaveNexus, NormaliseByCurrent, Integration, AppendSpectra
 from mantid.simpleapi import AnalysisDataService as Ads
 
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
@@ -127,3 +127,14 @@ def generate_van_ws_file_path(vanadium_number, suffix, rb_num=""):
     integrated_filename = vanadium_number + suffix
     vanadium_dir = _generate_vanadium_saves_file_path(rb_num)
     return path.join(vanadium_dir, integrated_filename)
+
+
+def handle_van_curves(van_curves, van_path, instrument, rb_num):
+    # this method is provided to be used by the calibration model, as this is where the vanadium curves are generated
+    van_number = path_handling.get_run_number_from_path(van_path, instrument)
+    curves_path = generate_van_ws_file_path(van_number, SAVED_FILE_CURVE_SUFFIX, rb_num)
+    if len(van_curves) == 2:
+        curves_ws = AppendSpectra(InputWorkspace1=van_curves[0], InputWorkspace2=van_curves[1])
+    else:
+        curves_ws = van_curves[0]
+    save_van_workspace(curves_ws, curves_path)
