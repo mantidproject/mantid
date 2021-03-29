@@ -12,7 +12,7 @@
 
 int Component::counter = 0;
 
-Component::Component(const std::string& name, const std::string& type) : 
+Component::Component(const std::string& name, const std::string& type) :
   m_name(name), m_type(type), m_parent(NULL), m_r(0), m_theta(0), m_phi(0)
 {
   // Open the .dat file for this type and check whether it's a composite type

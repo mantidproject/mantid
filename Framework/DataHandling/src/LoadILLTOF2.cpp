@@ -19,8 +19,8 @@
 
 namespace {
 /// An array containing the supported instrument names
-const std::array<std::string, 4> SUPPORTED_INSTRUMENTS = {
-    {"IN4", "IN5", "IN6", "PANTHER"}};
+const std::array<std::string, 5> SUPPORTED_INSTRUMENTS = {
+    {"IN4", "IN5", "IN6", "PANTHER", "SHARP"}};
 } // namespace
 
 namespace Mantid {

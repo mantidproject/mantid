@@ -119,7 +119,7 @@ public:
     algo.setProperty("OutputWorkspace", "outputWS");
     algo.setProperty("DetectorDistance", 10.0);
     algo.setProperty("DetectorAngle", 45.0);
-    TS_ASSERT_THROWS(algo.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(algo.execute(), std::runtime_error &);
   }
 
 private:

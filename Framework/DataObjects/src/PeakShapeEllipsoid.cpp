@@ -19,11 +19,12 @@ PeakShapeEllipsoid::PeakShapeEllipsoid(
     const std::vector<double> &abcRadiiBackgroundInner,
     const std::vector<double> &abcRadiiBackgroundOuter,
     Kernel::SpecialCoordinateSystem frame, std::string algorithmName,
-    int algorithmVersion)
+    int algorithmVersion, const Kernel::V3D &translation)
     : PeakShapeBase(frame, std::move(algorithmName), algorithmVersion),
       m_directions(directions), m_abc_radii(abcRadii),
       m_abc_radiiBackgroundInner(abcRadiiBackgroundInner),
-      m_abc_radiiBackgroundOuter(abcRadiiBackgroundOuter) {
+      m_abc_radiiBackgroundOuter(abcRadiiBackgroundOuter),
+      m_translation(translation) {
 
   if (directions.size() != 3) {
     throw std::invalid_argument("directions must be of size 3");
@@ -44,7 +45,8 @@ bool PeakShapeEllipsoid::operator==(const PeakShapeEllipsoid &other) const {
          other.directions() == this->directions() &&
          other.abcRadii() == this->abcRadii() &&
          other.abcRadiiBackgroundInner() == this->abcRadiiBackgroundInner() &&
-         other.abcRadiiBackgroundOuter() == this->abcRadiiBackgroundOuter();
+         other.abcRadiiBackgroundOuter() == this->abcRadiiBackgroundOuter() &&
+         other.translation() == this->translation();
 }
 
 const std::vector<double> &PeakShapeEllipsoid::abcRadii() const {
@@ -61,6 +63,10 @@ const std::vector<double> &PeakShapeEllipsoid::abcRadiiBackgroundOuter() const {
 
 const std::vector<Kernel::V3D> &PeakShapeEllipsoid::directions() const {
   return m_directions;
+}
+
+const Kernel::V3D &PeakShapeEllipsoid::translation() const {
+  return m_translation;
 }
 
 std::vector<Kernel::V3D> PeakShapeEllipsoid::getDirectionInSpecificFrame(
@@ -100,6 +106,10 @@ std::string PeakShapeEllipsoid::toJSON() const {
   root["direction0"] = m_directions[0].toString();
   root["direction1"] = m_directions[1].toString();
   root["direction2"] = m_directions[2].toString();
+
+  root["translation0"] = Json::Value(m_translation[0]);
+  root["translation1"] = Json::Value(m_translation[1]);
+  root["translation2"] = Json::Value(m_translation[2]);
 
   Json::StyledWriter writer;
   return writer.write(root);

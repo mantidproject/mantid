@@ -385,7 +385,7 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
   double ChiSqTot = 0.0;
   for (size_t i = 0; i < nData; i += 3) {
     int peakNum = boost::math::iround(xValues[i]);
-    IPeak &peak_old = Peaks->getPeak(peakNum);
+    Peak &peak_old = Peaks->getPeak(peakNum);
 
     int runNum = peak_old.getRunNumber();
     std::string runNumStr = std::to_string(runNum);
@@ -484,7 +484,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
 
   for (size_t i = 0; i < nData; i += 3) {
     int peakNum = boost::math::iround(xValues[i]);
-    IPeak &peak_old = Peaks->getPeak(peakNum);
+    Peak &peak_old = Peaks->getPeak(peakNum);
     Peak peak = createNewPeak(peak_old, instNew, 0, peak_old.getL1());
 
     int runNum = peak_old.getRunNumber();
@@ -642,7 +642,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   }
 }
 
-Peak PeakHKLErrors::createNewPeak(const Geometry::IPeak &peak_old,
+Peak PeakHKLErrors::createNewPeak(const DataObjects::Peak &peak_old,
                                   const Geometry::Instrument_sptr &instrNew,
                                   double T0, double L0) {
   Geometry::Instrument_const_sptr inst = peak_old.getInstrument();

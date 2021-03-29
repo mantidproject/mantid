@@ -10,14 +10,14 @@
 Description
 -----------
 
-The algorithm calculates a normalization MD workspace for single crystal direct geometry inelastic experiments. 
+The algorithm calculates a normalization MD workspace for single crystal direct geometry inelastic experiments.
 Trajectories of each detector in reciprocal space are calculated, and the flux is integrated between intersections with each
 MDBox. A brief introduction to the multi-dimensional data normalization can be found :ref:`here <MDNorm>`.
 
 .. Note::
 
     If the MDEvent input workspace is generated from an event workspace, the algorithm gives the correct normalization
-    only if the event workspace is cropped and binned to the same energy transfer range. If the workspace is not cropped, 
+    only if the event workspace is cropped and binned to the same energy transfer range. If the workspace is not cropped,
     one might have events in places where the normalization is calculated to be 0.
 
 .. Note::
@@ -38,7 +38,7 @@ Usage
     from mantid.simpleapi import *
     config['default.facility']="SNS"
     from numpy import *
-    
+
     DGS_input_data=Load("CNCS_7860")
     # Keep events (SofPhiEIsDistribution=False)
     # Do not normalize by proton charge in DgsReduction
@@ -65,16 +65,16 @@ Usage
     histoShape=histoNorm.getSignalArray().shape
     print "The normalization workspace shape is (%d, %d)" % histoShape
     print "Out of those elements, "+str(nonzero(histoNorm.getSignalArray())[0].size)+" are nonzero"
-   
-.. code-block:: python 
+
+.. code-block:: python
 
     The normalization workspace shape is (100, 100)
-    Out of those elements, 6712 are nonzero    
+    Out of those elements, 6712 are nonzero
 
 The output would look like:
 
 .. figure:: /images/MDNormDirectSC.png
-   :alt: MDNormDirectSC.png     
+   :alt: MDNormDirectSC.png
 
 .. categories::
 

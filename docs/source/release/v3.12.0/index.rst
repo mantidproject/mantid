@@ -15,9 +15,9 @@ Mantid 3.12.0 Release Notes
 
 We are proud to announce version 3.12.0 of Mantid.
 
-We have included the Mantid Mslice interface with this release for the first time, this alternative to the Dave or matlab variants has been developed separately  for some time, but has now been included with Mantid to make installation easier. 
+We have included the Mantid Mslice interface with this release for the first time, this alternative to the Dave or matlab variants has been developed separately  for some time, but has now been included with Mantid to make installation easier.
 
-This version of Mantid will also go live across 6 instruments at the ILL with the startup in March.  
+This version of Mantid will also go live across 6 instruments at the ILL with the startup in March.
 
 We have also listened to your concerns about stability issues with previous releases during long experiments and have implemented error reporting into Mantidplot to capture information about crashes allowing us to quantify the problems and help track them down and resolve them.
 

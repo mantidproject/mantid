@@ -25,7 +25,17 @@ public:
   static LoadILLTest *createSuite() { return new LoadILLTest(); }
   static void destroySuite(LoadILLTest *suite) { delete suite; }
 
-  void tearDown() override { AnalysisDataService::Instance().clear(); }
+  void setUp() override {
+
+    ConfigService::Instance().setString("default.facility", "ILL");
+  }
+
+  void tearDown() override {
+
+    ConfigService::Instance().setString("default.facility", " ");
+
+    AnalysisDataService::Instance().clear();
+  }
 
   void checkLoader(const std::string &filename, std::string resultLoader) {
     Load alg;
@@ -103,6 +113,11 @@ public:
   void test_loadTOF_PANTHER() {
     checkLoader("ILL/PANTHER/001036", "LoadILLTOF"); // monochromatic PANTHER
     checkLoader("ILL/PANTHER/001723", "LoadILLTOF");
+  }
+
+  void test_loadTOF_SHARP() {
+    checkLoader("ILL/SHARP/000102", "LoadILLTOF"); // single-channel
+    checkLoader("ILL/SHARP/000103", "LoadILLTOF");
   }
 
   void test_loadReflectometry_D17() {

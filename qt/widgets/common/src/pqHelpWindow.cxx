@@ -375,7 +375,7 @@ void pqHelpWindow::showPage(const QString &url,
 //-----------------------------------------------------------------------------
 void pqHelpWindow::showPage(const QUrl &url, bool linkClicked /* = false */) {
   if (url.scheme() == QTHELP_SCHEME) {
-    if (this->m_helpEngine->findFile(url).isValid()) {
+    if (this->isExistingPage(url)) {
       if (!linkClicked)
         this->m_browser->setUrl(url);
     } else {
@@ -450,5 +450,6 @@ void pqHelpWindow::showHomePage(const QString &namespace_name) {
 
 //-----------------------------------------------------------------------------
 bool pqHelpWindow::isExistingPage(const QUrl &url) {
-  return this->m_helpEngine->findFile(url).isValid();
+  return (this->m_helpEngine->findFile(url).isValid() &&
+          (this->m_helpEngine->fileData(url).size() > 0));
 }

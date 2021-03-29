@@ -22,7 +22,7 @@ ALFCustomInstrumentView::ALFCustomInstrumentView(const std::string &instrument,
       m_extractSingleTubeObservable(nullptr), m_averageTubeObservable(nullptr),
       m_extractAction(nullptr), m_averageAction(nullptr),
       m_analysisPane(nullptr) {
-  m_helpPage = "ALF View";
+  m_helpPage = "direct/ALF View";
 }
 
 void ALFCustomInstrumentView::setUpInstrument(

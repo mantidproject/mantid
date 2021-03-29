@@ -102,7 +102,7 @@ MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis &uiForm)
  */
 void MuonAnalysisResultTableTab::helpResultsClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Muon Analysis"), QString("results-table"));
+      nullptr, QString("Muon Analysis"), QString(""), QString("results-table"));
 }
 
 /**

@@ -154,11 +154,15 @@ private:
   // return a MatrixWorkspace with detectors allowing computations of Q values
   Mantid::API::MatrixWorkspace_sptr withDetectors() {
     Mantid::DataHandling::LoadNexus loader;
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility",
+                                                        "ISIS");
     loader.initialize();
     loader.setPropertyValue("Filename", "irs26173_graphite002_red");
     loader.setPropertyValue("OutputWorkspace", "irs26173");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT(loader.isExecuted());
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility",
+                                                        " ");
     return Mantid::API::AnalysisDataService::Instance()
         .retrieveWS<Mantid::API::MatrixWorkspace>("irs26173");
   }

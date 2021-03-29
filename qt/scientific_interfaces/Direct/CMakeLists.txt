@@ -3,12 +3,12 @@ set(SRC_FILES
     ALFCustomInstrumentView.cpp
     ALFCustomInstrumentPresenter.cpp
     ALFCustomInstrumentModel.cpp)
-    
+
 set(MOC_FILES
     ALFView.h
     ALFCustomInstrumentView.h
     ALFCustomInstrumentPresenter.h)
-    
+
 set(INC_FILES
     DllConfig.h
     ALFCustomInstrumentModel.h
@@ -28,6 +28,7 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesDirect
                    SYSTEM_INCLUDE_DIRS
                      ${Boost_INCLUDE_DIRS}
                    LINK_LIBS
+                     DataObjects
                      ${CORE_MANTIDLIBS}
                      ${POCO_LIBRARIES}
                      ${Boost_LIBRARIES}
@@ -60,6 +61,7 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesDirect
                    DEFS
                      IN_MANTIDQT_DIRECT
                    LINK_LIBS
+                     DataObjects
                      ${CORE_MANTIDLIBS}
                      PythonInterfaceCore
                      ${POCO_LIBRARIES}
@@ -80,6 +82,6 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesDirect
                      @loader_path/../../Contents/MacOS
                      @loader_path/../../plugins/qt5
                    LINUX_INSTALL_RPATH
-                     "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/") 
+                     "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/")
 # Testing target
 add_subdirectory(test)

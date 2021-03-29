@@ -1,7 +1,7 @@
 .. _basic_python_exercises_1-2:
 
 =======================
-Basic Python Exercises  
+Basic Python Exercises
 =======================
 
 -  Here we will try some exercises to get to grips with the basics of

@@ -235,18 +235,18 @@ _cell_volume                           415.09775
 _symmetry_cell_setting                 hexagonal
 _symmetry_space_group_name_H-M         "P 63 / m m c"
 loop_ _symmetry_equiv_pos_site_id _symmetry_equiv_pos_as_xyz
-       1 +x,+y,+z 
-       2 x-y,+x,+z+1/2 
-       3 -y,x-y,+z 
-       4 -x,-y,+z+1/2 
-       5 y-x,-x,+z 
-       6 +y,y-x,+z+1/2 
-       7 +y,+x,+z 
-       8 y-x,+y,+z+1/2 
-       9 -x,y-x,+z 
-      10 -y,-x,+z+1/2 
-      11 x-y,-y,+z 
-      12 +x,x-y,+z+1/2 
+       1 +x,+y,+z
+       2 x-y,+x,+z+1/2
+       3 -y,x-y,+z
+       4 -x,-y,+z+1/2
+       5 y-x,-x,+z
+       6 +y,y-x,+z+1/2
+       7 +y,+x,+z
+       8 y-x,+y,+z+1/2
+       9 -x,y-x,+z
+      10 -y,-x,+z+1/2
+      11 x-y,-y,+z
+      12 +x,x-y,+z+1/2
 
 # ATOMIC COORDINATES AND DISPLACEMENT PARAMETERS
 
@@ -261,13 +261,13 @@ loop_
       _atom_site_thermal_displace_type
       _atom_site_U_iso_or_equiv
       _atom_site_symmetry_multiplicity
-W 
+W
 W1      0.33333      0.66667      0.25         1.0        Uiso   0.025         4
 
 loop_ _atom_type_symbol
       _atom_type_number_in_cell
-                   W   4.0        
- 
+                   W   4.0
+
 # If you change Z, be sure to change all 3 of the following
 _chemical_formula_sum                  W
 _chemical_formula_weight               183.85

@@ -319,22 +319,24 @@ public:
   };
 
   //---------------------------------------------------------//
-
   /// Constructor
-  IFunction() : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0) {}
+  IFunction();
   /// Virtual destructor
   virtual ~IFunction();
   /// No copying
   IFunction(const IFunction &) = delete;
   /// No copying
   IFunction &operator=(const IFunction &) = delete;
-
   /// Returns the function's name
   virtual std::string name() const = 0;
   /// Writes itself into a string
   std::string asString() const;
   /// Virtual copy constructor
   virtual std::shared_ptr<IFunction> clone() const;
+
+  /** Registers the usage of the algorithm with the UsageService
+   */
+  virtual void registerFunctionUsage(bool internal);
   /// Set the workspace.
   /// @param ws :: Shared pointer to a workspace
   virtual void setWorkspace(std::shared_ptr<const Workspace> ws) {
@@ -660,6 +662,8 @@ private:
   std::vector<std::unique_ptr<IConstraint>> m_constraints;
   /// Ties ordered in order of correct application
   std::vector<ParameterTie *> m_orderedTies;
+  /// whether the function usage has been registered
+  bool m_isRegistered{false};
 };
 
 /// shared pointer to the function base class

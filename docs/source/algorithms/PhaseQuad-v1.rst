@@ -25,7 +25,7 @@ Description
 
 Assuming that the *InputWorkspace* contains measured counts as a function of time,
 and *PhaseTable* contains the detector phases and asymmetries, the algorithm returns a workspace
-containing two spectra (squashograms) as a function of the same time binning. If there are zero 
+containing two spectra (squashograms) as a function of the same time binning. If there are zero
 measured counts for a detector it is ignored in the calculation.
 *PhaseTable* is expected to have three columns, corresponding to the detector id, its asymmetry
 and its phase.

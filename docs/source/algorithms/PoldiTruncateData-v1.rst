@@ -28,16 +28,16 @@ Usage
 In the first example, POLDI data is cropped to the correct workspace size:
 
 .. testcode:: PoldiTruncateDataCrop
-     
+
     # Load data and instrument - this is important, as the chopper configuration must be known.
     raw_6903 = LoadSINQFile(Filename = "poldi2013n006903.hdf", Instrument = "POLDI")
     LoadInstrument(raw_6903, InstrumentName = "POLDI", RewriteSpectraMap=True)
 
     print("The raw data workspace contains {} time bins.".format(len(raw_6903.readX(0))))
-    
+
     # Truncate the data
     truncated_6903 = PoldiTruncateData(raw_6903)
-    
+
     print("The truncated data workspace contains {} time bins.".format(len(truncated_6903.readX(0))))
 
 Output:
@@ -46,7 +46,7 @@ Output:
 
     The raw data workspace contains 510 time bins.
     The truncated data workspace contains 500 time bins.
-    
+
 The second example also examines the extra time bins:
 
 .. testcode:: PoldiTruncateDataExtra
@@ -54,24 +54,24 @@ The second example also examines the extra time bins:
     # Load data and instrument again.
     raw_6903 = LoadSINQFile(Filename = "poldi2013n006903.hdf", Instrument = "POLDI")
     LoadInstrument(raw_6903, InstrumentName = "POLDI", RewriteSpectraMap=True)
-    
+
     # Truncate and store the extra bins in a workspace called "extra_6903"
     truncated_6903 = PoldiTruncateData(raw_6903, ExtraCountsWorkspaceName = "extra_6903")
-    
+
     # Get the workspace from central workspace manager
     extra_6903 = mtd['extra_6903']
-    
+
     # Examine the workspace a bit
     print("The extra data workspace contains {} spectrum.".format(extra_6903.getNumberHistograms()))
     print("The bins contain the following data: {}".format([int(x) for x in extra_6903.readY(0)]))
-    
+
 Output:
 
 .. testoutput:: PoldiTruncateDataExtra
 
     The extra data workspace contains 1 spectrum.
     The bins contain the following data: [13, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    
+
 .. categories::
 
 .. sourcelink::

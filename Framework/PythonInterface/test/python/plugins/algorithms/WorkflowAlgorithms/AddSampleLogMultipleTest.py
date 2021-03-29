@@ -69,7 +69,7 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                              LogValues=values)
 
         self._validate_sample_logs(names, values, types)
-        
+
 
     def test_strings_with_types(self):
         """
@@ -149,7 +149,7 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                           Workspace=self._workspace,
                           LogNames=names,
                           LogValues=values,
-                          LogUnits=units)        
+                          LogUnits=units)
 
     def test_validation_no_names(self):
         """

@@ -310,7 +310,7 @@ int PeakIntegration::fitneighbours(int ipeak, const std::string &det_name,
   UNUSED_ARG(det_name);
   UNUSED_ARG(x0);
   UNUSED_ARG(y0);
-  Geometry::IPeak &peak = Peaks->getPeak(ipeak);
+  Peak &peak = Peaks->getPeak(ipeak);
   // Number of slices
   int TOFmax = 0;
 

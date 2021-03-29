@@ -40,9 +40,9 @@ FitType defines the way of setting initial values. If it is set to
 previous fit. If set to "Individual" each fit starts with the same
 initial values defined in the Function property.
 
-The Function property can be a single domain function in which case this 
+The Function property can be a single domain function in which case this
 function is used to fit each of the inputs, or it can be a multi-domain function.
-In the latter case the number of domains must equal the number of inputs and 
+In the latter case the number of domains must equal the number of inputs and
 each input is fitted to the equivalent function from the multi-domain function.
 
 LogValue property specifies a log value to be included into the output.
@@ -66,8 +66,9 @@ The output workspace is a table in which rows correspond to the spectra
 in the order they (spectra) appear in the Input property. The first
 column of the table has the log values. It is followed by pairs of
 columns with parameter values and fitting errors. If a parameter was
-fixed or tied the error will be zero. Here is an example of the output
-workspace:
+fixed or tied the error will be zero. If the function being fitted is
+a Peak function, a column for its integrated intensity is added after its
+parameter columns. Here is an example of the output workspace:
 
 Minimizer setup
 ###############

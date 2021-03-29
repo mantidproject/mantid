@@ -5,7 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/CalculatePeaksHKL.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -37,7 +39,7 @@ const std::string CalculatePeaksHKL::category() const {
 /** Initialize the algorithm's properties.
  */
 void CalculatePeaksHKL::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -53,7 +55,7 @@ void CalculatePeaksHKL::init() {
 /** Execute the algorithm.
  */
 void CalculatePeaksHKL::exec() {
-  Mantid::DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
+  API::IPeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
   const bool overwrite = getProperty("OverWrite");
   const int n_peaks = ws->getNumberPeaks();
 
@@ -70,11 +72,12 @@ void CalculatePeaksHKL::exec() {
 
   int peaksIndexed = 0;
   for (int i = 0; i < n_peaks; i++) {
-    Peak &peak = ws->getPeak(i);
+    IPeak &peak = ws->getPeak(i);
     if (overwrite || (peak.getHKL().nullVector())) {
       V3D qlab = peak.getQSampleFrame();
       V3D hkl = UB_inverse * qlab / (2.0 * M_PI);
       peak.setHKL(hkl);
+      peak.setIntHKL(hkl);
       ++peaksIndexed;
     }
   }

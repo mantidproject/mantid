@@ -57,6 +57,9 @@ public:
 
   [[nodiscard]] std::vector<FitDomainIndex> allRows() const;
   [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const;
+  [[nodiscard]] FitDomainIndex currentRow() const;
+
+  [[nodiscard]] bool hasLoadedData() const;
 
   [[nodiscard]] QString selectedDomainFunctionPrefix() const;
 

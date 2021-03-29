@@ -71,8 +71,8 @@ FitScriptGeneratorView::FitScriptGeneratorView(
   m_ui.setupUi(this);
 
   m_ui.fDataTable->layout()->addWidget(m_dataTable.get());
-  m_ui.splitter->addWidget(m_functionTreeView.get());
-  m_ui.splitter->addWidget(m_fitOptionsBrowser.get());
+  m_ui.splitterVertical->addWidget(m_functionTreeView.get());
+  m_ui.splitterVertical->addWidget(m_fitOptionsBrowser.get());
 
   setFittingMode(fittingMode);
   setFitBrowserOptions(fitOptions);
@@ -278,6 +278,14 @@ std::vector<FitDomainIndex> FitScriptGeneratorView::selectedRows() const {
   return m_dataTable->selectedRows();
 }
 
+FitDomainIndex FitScriptGeneratorView::currentRow() const {
+  return m_dataTable->currentRow();
+}
+
+bool FitScriptGeneratorView::hasLoadedData() const {
+  return m_dataTable->hasLoadedData();
+}
+
 double
 FitScriptGeneratorView::parameterValue(std::string const &parameter) const {
   return m_functionTreeView->getParameter(QString::fromStdString(parameter));
@@ -321,8 +329,8 @@ FitScriptGeneratorView::getDialogWorkspaceIndices() const {
 
 void FitScriptGeneratorView::resetSelection() { m_dataTable->resetSelection(); }
 
-bool FitScriptGeneratorView::isAddRemoveFunctionForAllChecked() const {
-  return m_ui.ckAddRemoveFunctionForAllDatasets->isChecked();
+bool FitScriptGeneratorView::applyFunctionChangesToAll() const {
+  return m_ui.cbApplyFunctionChangesTo->currentText() == "All Domains";
 }
 
 void FitScriptGeneratorView::clearFunction() { m_functionTreeView->clear(); }

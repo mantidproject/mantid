@@ -11,7 +11,7 @@ Description
 
 .. warning::
 
-   This algorithm is being developed for a specific instrument. It might get changed or even 
+   This algorithm is being developed for a specific instrument. It might get changed or even
    removed without a notification, should instrument scientists decide to do so.
 
 This algorithm loads a DNS legacy data file into a :ref:`Workspace2D <Workspace2D>`. The loader rotates the detector bank
@@ -54,13 +54,13 @@ Alternatively, the text file with the coil currents table may be provided (optio
 +--------------+----------+-------+-------+-------+-------+
 | polarisation | comment  |  C_a  |  C_b  |  C_c  |  C_z  |
 +==============+==========+=======+=======+=======+=======+
-|      x       |    7     |   0   |  -2   | -0.77 |  2.21 |          
+|      x       |    7     |   0   |  -2   | -0.77 |  2.21 |
 +--------------+----------+-------+-------+-------+-------+
-|      y       |    7     |   0   |  1.6  | -2.77 |  2.21 |          
+|      y       |    7     |   0   |  1.6  | -2.77 |  2.21 |
 +--------------+----------+-------+-------+-------+-------+
-|      z       |    7     |   0   | 0.11  | -0.50 |   0   |          
+|      z       |    7     |   0   | 0.11  | -0.50 |   0   |
 +--------------+----------+-------+-------+-------+-------+
-|      x       |    7     |   0   | -2.1  | -0.97 |  2.21 |          
+|      x       |    7     |   0   | -2.1  | -0.97 |  2.21 |
 +--------------+----------+-------+-------+-------+-------+
 
 First row must contain the listed column headers, other rows contain coil currents for each polarisation. Rows with different currents for one polarisation are allowed. Columns are separated by tab symbols.

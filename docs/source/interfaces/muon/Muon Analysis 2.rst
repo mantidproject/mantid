@@ -25,7 +25,7 @@ The loading section is used to load data as well as to specify what the current 
 **Load Current Run** This will load the latest run for the selected instrument. You must be connected to the
  data archive. It also currently only works on windows.
 
-**Run selection box** This takes a comma seperated list of run numbers for the GUI to load. A range 
+**Run selection box** This takes a comma seperated list of run numbers for the GUI to load. A range
 be specified with a dash. For example ``62260, 62270-3`` will load ``62260, 62270, 62271, 62273``. This specifies
 the runs that are used in the rest of the GUI.
 
@@ -33,7 +33,7 @@ the runs that are used in the rest of the GUI.
 
 **Clear All** This clears all the data from the current GUI.
 
-**Co-Add** If selected the runs are added together for improved statistics. 
+**Co-Add** If selected the runs are added together for improved statistics.
 
 Tabs
 ----

@@ -26,7 +26,9 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using DataObjects::Peak_uptr;
 using namespace Mantid::Geometry;
+using Geometry::IPeak_uptr;
 using namespace Mantid::Kernel;
 using Mantid::Types::Event::TofEvent;
 
@@ -162,7 +164,8 @@ void WorkspaceBuilder::createPeak(const HKLPeakDescriptor &descriptor) {
   const auto sigmas = std::get<2>(descriptor);
 
   // Create the peak and add it to the peaks ws
-  const auto peak = m_peaksWorkspace->createPeakHKL(hkl);
+  auto ipeak = m_peaksWorkspace->createPeakHKL(hkl);
+  Peak_uptr peak(dynamic_cast<Peak *>(ipeak.release()));
   m_peaksWorkspace->addPeak(*peak);
 
   // Get detector ID and TOF position of peak

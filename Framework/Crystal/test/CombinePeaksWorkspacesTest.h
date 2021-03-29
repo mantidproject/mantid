@@ -11,6 +11,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/CombinePeaksWorkspaces.h"
 #include "MantidCrystal/PredictFractionalPeaks.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -347,5 +348,90 @@ public:
     TS_ASSERT_EQUALS(outWs->sample().getOrientedLattice().getModVec(2)[0], 0);
     TS_ASSERT_EQUALS(outWs->sample().getOrientedLattice().getModVec(2)[1], 0);
     TS_ASSERT_EQUALS(outWs->sample().getOrientedLattice().getModVec(2)[2], 0);
+  }
+
+  void test_LeanElasticPeak() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+
+    PeaksWorkspace_sptr ws1 = WorkspaceCreationHelper::createPeaksWorkspace(3);
+
+    auto ws2 = std::make_shared<LeanElasticPeaksWorkspace>();
+    ws2->addPeak(LeanElasticPeak(Mantid::Kernel::V3D(1, 0, 0), 1.));
+    ws2->addPeak(LeanElasticPeak(Mantid::Kernel::V3D(0, 4, 0), 1.));
+
+    auto ws3 = std::make_shared<LeanElasticPeaksWorkspace>();
+    ws3->addPeak(LeanElasticPeak(Mantid::Kernel::V3D(2, 0, 0), 1.));
+    ws3->addPeak(LeanElasticPeak(Mantid::Kernel::V3D(0, 4, 0), 1.));
+
+    // Name of the output workspace.
+    std::string outWSName("CombinePeaksWorkspacesTest_OutputWS");
+
+    // LeanElasticPeak + LeanElasticPeak - no combine
+    CombinePeaksWorkspaces alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LHSWorkspace", ws2))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RHSWorkspace", ws3))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName))
+    TS_ASSERT(alg.execute())
+
+    // Retrieve the workspace from data service.
+    LeanElasticPeaksWorkspace_const_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = AnalysisDataService::Instance()
+                 .retrieveWS<LeanElasticPeaksWorkspace>(outWSName));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    TS_ASSERT_EQUALS(ws->getNumberPeaks(), 4)
+    TS_ASSERT_EQUALS(ws->getPeak(1).getQSampleFrame(),
+                     ws->getPeak(3).getQSampleFrame())
+
+    // LeanElasticPeak + LeanElasticPeak - combine
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LHSWorkspace", ws2))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RHSWorkspace", ws3))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CombineMatchingPeaks", true))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Tolerance", 0.00001))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName))
+    TS_ASSERT(alg.execute())
+
+    // Retrieve the workspace from data service.
+    TS_ASSERT_THROWS_NOTHING(
+        ws = AnalysisDataService::Instance()
+                 .retrieveWS<LeanElasticPeaksWorkspace>(outWSName));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    TS_ASSERT_EQUALS(ws->getNumberPeaks(), 3)
+
+    // LeanElasticPeak + Peak
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LHSWorkspace", ws2))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RHSWorkspace", ws1))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName))
+    TS_ASSERT(alg.execute())
+
+    // Retrieve the workspace from data service.
+    TS_ASSERT_THROWS_NOTHING(
+        ws = AnalysisDataService::Instance()
+                 .retrieveWS<LeanElasticPeaksWorkspace>(outWSName));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    TS_ASSERT_EQUALS(ws->getNumberPeaks(), 5)
+
+    // Peak + LeanElasticPeak - SHOULD FAIL TO EXECUTE
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LHSWorkspace", ws1))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RHSWorkspace", ws2))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName))
+    TS_ASSERT(!alg.execute())
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
   }
 };
