@@ -13,8 +13,8 @@ Output unit
 ###########
 
 The unit of the output workspace is 1/cm. Assuming this algorithm is called with
-the appropriate input correction workspaces, include accounting for absolute 
-scaling, the output is meant to represent a macroscopic cross section, hence the 
+the appropriate input correction workspaces, include accounting for absolute
+scaling, the output is meant to represent a macroscopic cross section, hence the
 reason the output unit is 1/cm.
 
 Q Unit Conversion
@@ -105,7 +105,7 @@ takes any :ref:`bin masking <algm-MaskBins>` into account.
 
 Some corrections will be both pixel and wavelength dependent, for example an
 angle transmission correction. Such corrections can be taken into account by
-specifying WavePixelAdj. 
+specifying WavePixelAdj.
 
 Resolution and Cutoffs
 ######################
@@ -151,7 +151,7 @@ by altering :math:`Q{min}` and the binning scheme.
 
 Examples
 ######################
-For an example of how Q1D is used see 
+For an example of how Q1D is used see
 `ISIS SANS data reduction <http://www.mantidproject.org/SANS_ISIS_Data_Reduction>`_.
 
 **References**

@@ -29,11 +29,11 @@ The specified first good data is used for all calculations.
 
 **Double Pulse** This controls whether todo a double pulse fit and if so what time offset to use. If checked then :ref:`DoublePulseFit <algm-DoublePulseFit>` is run instead of :ref:`Fit <algm-Fit>`, when pressing the `fit` button. The `PulseOffset` parameter is the value entered here. The pulse weightings are set as
 
-.. math:: 
+.. math::
   N_1 = \frac{x}{1+x} \quad and \quad N_2 = \frac{1}{1+x},
 
 where :math:`x = \exp(\frac{-t_s}{\tau})`, :math:`t_s` is the time offset, :math:`\tau` is the posotive muon half life, :math:`N_1` is the first pulse weighting and :math:`N_2` is the second pulse weighting.
-  
+
 
 Rebin
 ^^^^^

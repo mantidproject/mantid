@@ -34,7 +34,7 @@ Workspace groups can be created in a more flexible way in the Python script wind
     # Create a group workpace
     wsList = [ws1,ws2,ws3]
     wsGroup = GroupWorkspaces(wsList)
-    # or 
+    # or
     wsGroup = GroupWorkspaces("ws1,ws2,ws3")
 
     print(wsGroup.getNames())
@@ -227,7 +227,7 @@ otherwise indexing will be confused by each deletion.
     ws1 = CreateSampleWorkspace()
     ws2 = CreateSampleWorkspace()
     wsGroup = GroupWorkspaces("ws1,ws2")
-    
+
     DeleteWorkspace(wsGroup)
 
 .. include:: WorkspaceNavigation.txt

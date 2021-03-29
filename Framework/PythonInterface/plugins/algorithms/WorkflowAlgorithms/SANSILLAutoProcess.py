@@ -392,14 +392,14 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             else:
                 self.log().information('Skipping empty token run.')
 
+        # rename to a user friendly naming scheme
         for i in range(len(outputSamples)):
-            ConvertToPointData(InputWorkspace=outputSamples[i],
-                               OutputWorkspace=outputSamples[i])
             suffix = self.createCustomSuffix(outputSamples[i])
             RenameWorkspace(InputWorkspace=outputSamples[i],
                             OutputWorkspace=outputSamples[i] + suffix)
             outputSamples[i] += suffix
 
+        # try to stitch automatically
         if (len(outputSamples) > 1
            and self.getPropertyValue('OutputType') == 'I(Q)'):
             try:
@@ -413,7 +413,18 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         GroupWorkspaces(InputWorkspaces=outputSamples,
                         OutputWorkspace=self.output)
+        self.setProperty('OutputWorkspace', mtd[self.output])
 
+        if outputWedges:
+            self.outputWedges(outputWedges)
+
+        if self.output_sens:
+            self.outputSensitivity(sensitivity_outputs)
+
+        if panel_output_groups:
+            self.outputPanels(panel_output_groups)
+
+    def outputWedges(self, outputWedges):
         # convert to point data and remove nan and 0 from wedges
         for i in range(self.dimensionality):
             for j in range(len(outputWedges[i])):
@@ -443,34 +454,32 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 inWs.append(stitched)
             except RuntimeError as re:
                 self.log().warning("Unable to stitch automatically, consider "
-                                   "stitching manually: "+ str(re))
-            GroupWorkspaces(InputWorkspaces=inWs, OutputWorkspace=self.output
-                            + "_wedge_" + str(i + 1))
+                                   "stitching manually: " + str(re))
+            GroupWorkspaces(InputWorkspaces=inWs,
+                            OutputWorkspace=self.output + "_wedge_" + str(i + 1))
 
-        self.setProperty('OutputWorkspace', mtd[self.output])
-        if self.output_sens:
-            if len(sensitivity_outputs) > 1:
-                GroupWorkspaces(InputWorkspaces=sensitivity_outputs, OutputWorkspace=self.output_sens)
-            if self.getProperty('SensitivityWithOffsets').value:
-                tmp_group_name = self.output_sens + '_group'
-                RenameWorkspace(InputWorkspace=self.output_sens, OutputWorkspace=tmp_group_name)
-                CalculateEfficiency(InputWorkspace=tmp_group_name, MergeGroup=True, OutputWorkspace=self.output_sens)
-                DeleteWorkspace(Workspace=tmp_group_name)
-            self.setProperty('SensitivityOutputWorkspace', mtd[self.output_sens])
+    def outputSensitivity(self, sensitivity_outputs):
+        if len(sensitivity_outputs) > 1:
+            GroupWorkspaces(InputWorkspaces=sensitivity_outputs, OutputWorkspace=self.output_sens)
+        if self.getProperty('SensitivityWithOffsets').value:
+            tmp_group_name = self.output_sens + '_group'
+            RenameWorkspace(InputWorkspace=self.output_sens, OutputWorkspace=tmp_group_name)
+            CalculateEfficiency(InputWorkspace=tmp_group_name, MergeGroup=True, OutputWorkspace=self.output_sens)
+            DeleteWorkspace(Workspace=tmp_group_name)
+        self.setProperty('SensitivityOutputWorkspace', mtd[self.output_sens])
 
-        # group panels
-        if panel_output_groups:
-            panelWs = []
-            for groupName in panel_output_groups:
-                wsNames = mtd[groupName].getNames()
-                UnGroupWorkspace(InputWorkspace=groupName)
-                for ws in wsNames:
-                    suffix = self.createCustomSuffix(ws)
-                    RenameWorkspace(InputWorkspace=ws,
-                                    OutputWorkspace=ws + suffix)
-                    panelWs.append(ws + suffix)
-            GroupWorkspaces(InputWorkspaces=panelWs,
-                            OutputWorkspace=self.output_panels)
+    def outputPanels(self, panel_output_groups):
+        panelWs = []
+        for groupName in panel_output_groups:
+            wsNames = mtd[groupName].getNames()
+            UnGroupWorkspace(InputWorkspace=groupName)
+            for ws in wsNames:
+                suffix = self.createCustomSuffix(ws)
+                RenameWorkspace(InputWorkspace=ws,
+                                OutputWorkspace=ws + suffix)
+                panelWs.append(ws + suffix)
+        GroupWorkspaces(InputWorkspaces=panelWs,
+                        OutputWorkspace=self.output_panels)
 
     def processTransmissions(self):
         absorber_transmission_names = []
@@ -820,6 +829,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 IQxQyLogBinning=self.getProperty('IQxQyLogBinning').value,
                 WavelengthRange=self.getProperty('WavelengthRange').value
                 )
+
+        ConvertToPointData(InputWorkspace=output_sample, OutputWorkspace=output_sample)
 
         # wedges ungrouping and renaming
         if output_wedges:

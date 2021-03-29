@@ -33,7 +33,7 @@ digraph SNSPowderReduction {
     isVanRunDefined [label="Is Vanadium run specified?"]
     mustDataPositive [label="Does data have to be positive?"]
   }
-  
+
 
   subgraph values {
     $value_style

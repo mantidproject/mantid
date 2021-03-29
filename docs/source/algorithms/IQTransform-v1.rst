@@ -114,7 +114,7 @@ Output:
 
    print('Output Y: {}'.format(output.readY(0)))
    print('Output X: {}'.format(output.readX(0)))
-   
+
 Output:
 
 .. testoutput:: ExGeneral

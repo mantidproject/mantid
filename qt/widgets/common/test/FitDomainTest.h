@@ -189,10 +189,13 @@ public:
   }
 
   void
-  test_that_addFunction_will_throw_if_attempting_to_create_a_nested_composite_function() {
+  test_that_addFunction_will_not_add_a_function_if_attempting_to_create_a_nested_composite_function() {
     m_fitDomain->addFunction(m_flatBackground);
-    TS_ASSERT_THROWS(m_fitDomain->addFunction(m_composite),
-                     std::invalid_argument const &);
+
+    m_fitDomain->addFunction(m_composite);
+
+    TS_ASSERT_EQUALS(m_fitDomain->getFunctionCopy()->asString(),
+                     m_flatBackground->asString());
   }
 
   void test_that_getParameterValue_will_get_the_parameter_value_if_it_exists() {

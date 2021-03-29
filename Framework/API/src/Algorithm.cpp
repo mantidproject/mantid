@@ -69,7 +69,6 @@ private:
 };
 
 template <typename T> struct RunOnFinish {
-
   RunOnFinish(T &&task) : m_onfinsh(std::move(task)) {}
   ~RunOnFinish() { m_onfinsh(); }
 

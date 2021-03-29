@@ -11,13 +11,13 @@ Description
 
 .. warning::
 
-   This algorithm is being developed for a specific instrument. It might get changed or even 
+   This algorithm is being developed for a specific instrument. It might get changed or even
    removed without a notification, should instrument scientists decide to do so.
 
-This algorithm applies flipping ratio correction to a given data workspaces. As a result, following workspaces will be created: 
+This algorithm applies flipping ratio correction to a given data workspaces. As a result, following workspaces will be created:
 
--  output workspace with corrected spin-flip data. Sample logs will be copied from the data spin-flip workspace. 
--  output workspace with corrected non-spin-flip data. Sample logs will be copied from the data non-spin-flip workspace. 
+-  output workspace with corrected spin-flip data. Sample logs will be copied from the data spin-flip workspace.
+-  output workspace with corrected non-spin-flip data. Sample logs will be copied from the data non-spin-flip workspace.
 
 Flipping ratio correction is performed using the measurements of :math:`Ni_{0.89}\,Cr_{0.11}` standard sample (hereafter NiCr). Background for NiCr must be also measured and provided to the algorithm as an input. Both, spin-flip anf non-spin-flip measurements are required. This algorithm performs the flipping ratio correction according to J. Appl. Cryst. 42, 69-84, 2009. Calculations are made in a following steps:
 
@@ -36,7 +36,7 @@ Flipping ratio correction is performed using the measurements of :math:`Ni_{0.89
 3. Apply correction to the data:
 
    :math:`(I^{NSF}_i)_{corr} = I^{NSF}_i + \frac{1}{k_i}\cdot\left(I^{NSF}_i - I^{SF}_i\right)`
-   
+
    :math:`(I^{SF}_i)_{corr} = I^{SF}_i - \frac{1}{k_i}\cdot\left(I^{NSF}_i - I^{SF}_i\right)`
 
    where :math:`I^{SF,\,NSF}_i` are the neutron counts in the **SFDataWorkspace** and **NSFDataWorkspace**, respectively.

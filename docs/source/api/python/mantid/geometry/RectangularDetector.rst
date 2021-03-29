@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Geometry::RectangularDetector.
 
 .. module:`mantid.geometry`
 
-.. autoclass:: mantid.geometry.RectangularDetector 
+.. autoclass:: mantid.geometry.RectangularDetector
     :members:
     :undoc-members:
     :inherited-members:

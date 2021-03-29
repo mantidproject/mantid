@@ -1,4 +1,4 @@
-spectrum,theta 
+spectrum,theta
 1   13.1636095801
 2   19.8228943569
 3   26.482164442

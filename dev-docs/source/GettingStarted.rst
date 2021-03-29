@@ -72,6 +72,9 @@ Red Hat/Cent OS/Fedora
   # Install dependencies
   yum install mantid-developer
 
+  # Install pre-commit
+  pip install pre-commit
+
 Ubuntu 18.04
 ~~~~~~~~~~~~
 - Setup the Kitware APT repository to get a recent version of CMake by
@@ -88,6 +91,10 @@ Ubuntu 18.04
    gdebi ~/Downloads/mantid-developer.X.Y.Z.deb
 
 where ``X.Y.Z`` should be replaced with the version that was downloaded.
+
+Install pre-commit for use in our current developer workflow
+.. code-block:: sh
+  snap install pre-commit --classic
 
 if you wish to setup eclipse for use developing mantid, then instructions can be found :ref:`here <Eclipse>`.
 
@@ -155,9 +162,17 @@ Ubuntu 20.04
 
 and passing the `-DENABLE_MANTIDPLOT=OFF` option to the cmake command line or selecting this in the cmake GUI.
 
+Install pre-commit for use in our current developer workflow
+.. code-block:: sh
+  snap install pre-commit --classic
+
 OSX
 ---
 The build environment on OS X is described here :ref:`BuildingOnOSX`.
+
+Install pre-commit for use in our current developer workflow
+.. code-block:: sh
+  brew install pre-commit
 
 Docker
 ------

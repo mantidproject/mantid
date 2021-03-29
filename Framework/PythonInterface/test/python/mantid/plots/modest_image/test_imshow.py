@@ -51,7 +51,7 @@ class ImshowTest(unittest.TestCase):
                  'interpolation', 'rasterized',
                  'resample', 'snap', 'url', 'visible', 'zorder']
         self.check_props(art1, art2, props)
-    
+
     def test_imshow_creates_modest_image(self):
         """returns a modestImage"""
         data = default_data()

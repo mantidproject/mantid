@@ -33,7 +33,7 @@ Improvements
 - :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometryReductionOneAuto` now take a parameter to pass processing instructions to the transmission workspace algorithms and no longer accept strict spectrum checking.
 - Common naming of slit component name and size properties across algorithms.
 - :ref:`algm-SpecularReflectionPositionCorrect` is now compatible with the reflectometers at ILL.
-- :ref:`algm-CreateTransmissionWorkspace` and :ref:`algm-CreateTransmissionWorkspaceAuto` now use NormalizeByIntegratedMontitors instead of using MonitorIntegrationWavelengthMin and MonitorIntegrationWavelengthMax being defined, to determine how to normalize. 
+- :ref:`algm-CreateTransmissionWorkspace` and :ref:`algm-CreateTransmissionWorkspaceAuto` now use NormalizeByIntegratedMontitors instead of using MonitorIntegrationWavelengthMin and MonitorIntegrationWavelengthMax being defined, to determine how to normalize.
 - ILL reflectometry algorithms name changes: *LinePosition* replaces *BeamCentre*, *DirectLineWorkspace* replaces *DirectBeamWorkspace*, and *TwoTheta* is the preferred input property which replaces *BraggAngle*.
 - :ref:`algm-ReflectometryILLPreprocess` does not accept and will not output an `OutputBeamPositionWorkspace`. The peak position and two theta scattering anlge are now present in the SampleLog information as documented.
 - ILL's D17 and Figaro instrument definition files are modified to let the detector ID's begin with index 0 instead of 1.

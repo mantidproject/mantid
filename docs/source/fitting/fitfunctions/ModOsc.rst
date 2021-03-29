@@ -15,7 +15,7 @@ Traverse Field sinususodally modulated oscillation. Sinusoidal distribution of p
 
 where,
 
-:math:`A_0` is the amplitude, 
+:math:`A_0` is the amplitude,
 
 :math:`\omega` is the oscillation frequency,
 
@@ -24,7 +24,7 @@ where,
 and :math:`\omega_\text{mod}` (G) is the modulation frequency.
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

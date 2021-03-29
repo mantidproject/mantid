@@ -1,4 +1,4 @@
-# Write out a files containing 
+# Write out a files containing
 # - the data search directories
 # - the default save directory
 # These will be read by the MantidConfig class to configure the properties file
@@ -19,7 +19,7 @@ list(APPEND DATA_DIRS ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest)
 # Doc tests
 list(APPEND DATA_DIRS ${ExternalData_BINARY_ROOT}/Testing/Data/DocTest)
 
-# Output to file 
+# Output to file
 # If this is changed, make sure to update the .gitignore in this directory
 set(DATA_DIRS_FILE ${CMAKE_CURRENT_LIST_DIR}/datasearch-directories.txt)
 # The quotes are important as CMake translates the list to a semicolon-separated
