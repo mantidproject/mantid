@@ -137,7 +137,7 @@ void CompareWorkspaces::init() {
                   "The name of the second input workspace.");
 
   declareProperty(
-      "Tolerance", 1e-10,
+      "Tolerance", 0.0,
       "The maximum amount by which values may differ between the workspaces.");
 
   declareProperty("CheckType", true,
