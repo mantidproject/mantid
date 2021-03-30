@@ -207,8 +207,8 @@ InstrumentWidgetEncoder::encodePickTab(const InstrumentWidgetPickTab *tab) {
   map.insert(QString("freeDraw"), QVariant(tab->m_free_draw->isChecked()));
   map.insert(QString("one"), QVariant(tab->m_one->isChecked()));
   map.insert(QString("tube"), QVariant(tab->m_tube->isChecked()));
-  map.insert(QString("peak"), QVariant(tab->m_peak->isChecked()));
-  map.insert(QString("peakSelect"), QVariant(tab->m_peakSelect->isChecked()));
+  map.insert(QString("peakAdd"), QVariant(tab->m_peakAdd->isChecked()));
+  map.insert(QString("peakErase"), QVariant(tab->m_peakErase->isChecked()));
 
   return map;
 }
