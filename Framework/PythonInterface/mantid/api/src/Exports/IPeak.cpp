@@ -209,8 +209,6 @@ void export_IPeak() {
            "For :class:`~mantid.geometry.RectangularDetector` s only, returns "
            "the column (x) of the pixel of the "
            ":class:`~mantid.geometry.Detector`.")
-      .def("getDetPos", &IPeak::getDetPos, arg("self"),
-           "Return the :class:`~mantid.geometry.Detector` position vector")
       .def("getL1", &IPeak::getL1, arg("self"),
            "Return the L1 flight path length (source to "
            ":class:`~mantid.api.Sample`), in meters. ")

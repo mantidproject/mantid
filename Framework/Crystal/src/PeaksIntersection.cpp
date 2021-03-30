@@ -16,6 +16,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::DataObjects::Peak;
 using Mantid::DataObjects::PeaksWorkspace;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
 
@@ -78,14 +79,14 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
 
   m_peakRadius = this->getProperty("PeakRadius");
 
-  // Find the coordinate frame to use an set up boost function for this.
-  boost::function<V3D(IPeak *)> coordFrameFunc = &IPeak::getHKL;
+  boost::function<V3D(Peak *)> coordFrameFunc;
+  coordFrameFunc = &Peak::getHKL;
   if (coordinateFrame == detectorSpaceFrame()) {
-    coordFrameFunc = &IPeak::getDetectorPosition;
+    coordFrameFunc = &Peak::getDetectorPosition;
   } else if (coordinateFrame == qLabFrame()) {
-    coordFrameFunc = &IPeak::getQLabFrame;
+    coordFrameFunc = &Peak::getQLabFrame;
   } else if (coordinateFrame == qSampleFrame()) {
-    coordFrameFunc = &IPeak::getQSampleFrame;
+    coordFrameFunc = &Peak::getQSampleFrame;
   }
 
   // Create the faces.
@@ -131,7 +132,7 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *outputWorkspace))
   for (int i = 0; i < nPeaks; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    IPeak *peak = ws->getPeakPtr(i);
+    Peak *peak = dynamic_cast<Peak *>(ws->getPeakPtr(i));
     V3D peakCenter = coordFrameFunc(peak);
 
     if (i % frequency == 0)
