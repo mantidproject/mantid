@@ -19,18 +19,15 @@ namespace {
 Mantid::Kernel::Logger g_log("ResNorm");
 
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      workspaceName);
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
 }
 
 WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-      workspaceName);
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName);
 }
 
 ITableWorkspace_sptr getADSTableWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-      workspaceName);
+  return AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(workspaceName);
 }
 
 } // namespace
@@ -42,10 +39,8 @@ ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
 
   // Create range selector
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("ResNormERange");
-  connect(eRangeSelector, SIGNAL(minValueChanged(double)), this,
-          SLOT(minValueChanged(double)));
-  connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this,
-          SLOT(maxValueChanged(double)));
+  connect(eRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
+  connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
 
   // Add the properties browser to the ui form
   m_uiForm.treeSpace->addWidget(m_propTree);
@@ -68,18 +63,15 @@ ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
           SLOT(handleResolutionInputReady(const QString &)));
 
   // Connect the preview spectrum selector
-  connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(previewSpecChanged(int)));
+  connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this, SLOT(previewSpecChanged(int)));
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(handleAlgorithmComplete(bool)));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(handleAlgorithmComplete(bool)));
 
   // Post Plot and Save
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
-  connect(m_uiForm.pbPlotCurrent, SIGNAL(clicked()), this,
-          SLOT(plotCurrentPreview()));
+  connect(m_uiForm.pbPlotCurrent, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsVanadium->isOptional(true);
@@ -89,14 +81,10 @@ ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
 void ResNorm::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("ResNorm");
-  m_uiForm.dsVanadium->setFBSuffixes(filter ? getVanadiumFBSuffixes(tabName)
-                                            : getExtensions(tabName));
-  m_uiForm.dsVanadium->setWSSuffixes(filter ? getVanadiumWSSuffixes(tabName)
-                                            : noSuffixes);
-  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName)
-                                              : getExtensions(tabName));
-  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName)
-                                              : noSuffixes);
+  m_uiForm.dsVanadium->setFBSuffixes(filter ? getVanadiumFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsVanadium->setWSSuffixes(filter ? getVanadiumWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
 void ResNorm::setup() {}
@@ -110,10 +98,8 @@ bool ResNorm::validate() {
   UserInputValidator uiv;
   QString errors("");
 
-  bool const vanValid =
-      uiv.checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
-  bool const resValid =
-      uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
+  bool const vanValid = uiv.checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
+  bool const resValid = uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
   if (vanValid) {
     // Check vanadium input is _red or _sqw workspace
@@ -126,8 +112,7 @@ bool ResNorm::validate() {
     // Check Res and Vanadium are the same Run
     if (resValid) {
       // Check that Res file is still in ADS if not, load it
-      auto const resolutionWs = getADSMatrixWorkspace(
-          m_uiForm.dsResolution->getCurrentDataName().toStdString());
+      auto const resolutionWs = getADSMatrixWorkspace(m_uiForm.dsResolution->getCurrentDataName().toStdString());
       auto const vanadiumWs = getADSMatrixWorkspace(vanName.toStdString());
 
       int const resRun = resolutionWs->getRunNumber();
@@ -177,8 +162,7 @@ void ResNorm::run() {
   resNorm->setProperty("EnergyMax", eMax);
   resNorm->setProperty("CreateOutput", true);
   resNorm->setProperty("OutputWorkspace", outputWsName.toStdString());
-  resNorm->setProperty("OutputWorkspaceTable",
-                       (outputWsName + "_Fit").toStdString());
+  resNorm->setProperty("OutputWorkspaceTable", (outputWsName + "_Fit").toStdString());
   m_batchAlgoRunner->addAlgorithm(resNorm);
   m_pythonExportWsName = outputWsName.toStdString();
   m_batchAlgoRunner->executeBatchAsync();
@@ -207,8 +191,7 @@ void ResNorm::handleAlgorithmComplete(bool error) {
 void ResNorm::processLogs() {
   auto const resWsName(m_uiForm.dsResolution->getCurrentDataName());
   auto const outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
-  auto const resolutionWorkspace =
-      getADSMatrixWorkspace(resWsName.toStdString());
+  auto const resolutionWorkspace = getADSMatrixWorkspace(resWsName.toStdString());
   auto const resultWorkspace = getADSGroupWorkspace(outputWsName.toStdString());
 
   copyLogs(resolutionWorkspace, resultWorkspace);
@@ -243,10 +226,8 @@ void ResNorm::addAdditionalLogs(const Workspace_sptr &resultWorkspace) const {
 
 std::map<std::string, std::string> ResNorm::getAdditionalLogStrings() const {
   auto logs = std::map<std::string, std::string>();
-  logs["sample_filename"] =
-      m_uiForm.dsVanadium->getCurrentDataName().toStdString();
-  logs["resolution_filename"] =
-      m_uiForm.dsResolution->getCurrentDataName().toStdString();
+  logs["sample_filename"] = m_uiForm.dsVanadium->getCurrentDataName().toStdString();
+  logs["resolution_filename"] = m_uiForm.dsResolution->getCurrentDataName().toStdString();
   logs["fit_program"] = "ResNorm";
   logs["create_output"] = "true";
   return logs;
@@ -254,10 +235,8 @@ std::map<std::string, std::string> ResNorm::getAdditionalLogStrings() const {
 
 std::map<std::string, std::string> ResNorm::getAdditionalLogNumbers() const {
   auto logs = std::map<std::string, std::string>();
-  logs["e_min"] =
-      boost::lexical_cast<std::string>(getDoubleManagerProperty("EMin"));
-  logs["e_max"] =
-      boost::lexical_cast<std::string>(getDoubleManagerProperty("EMax"));
+  logs["e_min"] = boost::lexical_cast<std::string>(getDoubleManagerProperty("EMin"));
+  logs["e_max"] = boost::lexical_cast<std::string>(getDoubleManagerProperty("EMax"));
   return logs;
 }
 
@@ -265,14 +244,12 @@ double ResNorm::getDoubleManagerProperty(QString const &propName) const {
   return m_dblManager->value(m_properties[propName]);
 }
 
-void ResNorm::copyLogs(const MatrixWorkspace_sptr &resultWorkspace,
-                       const WorkspaceGroup_sptr &resultGroup) const {
+void ResNorm::copyLogs(const MatrixWorkspace_sptr &resultWorkspace, const WorkspaceGroup_sptr &resultGroup) const {
   for (auto const &workspace : *resultGroup)
     copyLogs(resultWorkspace, workspace);
 }
 
-void ResNorm::copyLogs(const MatrixWorkspace_sptr &resultWorkspace,
-                       const Workspace_sptr &workspace) const {
+void ResNorm::copyLogs(const MatrixWorkspace_sptr &resultWorkspace, const Workspace_sptr &workspace) const {
   auto logCopier = AlgorithmManager::Instance().create("CopyLogs");
   logCopier->setProperty("InputWorkspace", resultWorkspace->getName());
   logCopier->setProperty("OutputWorkspace", workspace->getName());
@@ -313,8 +290,7 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
 
   auto const vanWs = getADSMatrixWorkspace(filename.toStdString());
   if (vanWs)
-    m_uiForm.spPreviewSpectrum->setMaximum(
-        static_cast<int>(vanWs->getNumberHistograms()) - 1);
+    m_uiForm.spPreviewSpectrum->setMaximum(static_cast<int>(vanWs->getNumberHistograms()) - 1);
 
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("ResNormERange");
 
@@ -325,15 +301,12 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
     res.first = res.first * 10;
     res.second = res.second * 10;
 
-    setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
-                     res);
+    setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"], res);
   } else {
-    setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
-                     range);
+    setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
   }
 
-  setPlotPropertyRange(eRangeSelector, m_properties["EMin"],
-                       m_properties["EMax"], range);
+  setPlotPropertyRange(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
 
   // Set the current values of the range bars
   eRangeSelector->setMinimum(range.first);
@@ -365,8 +338,7 @@ void ResNorm::minValueChanged(double min) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMin"], min);
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -378,8 +350,7 @@ void ResNorm::maxValueChanged(double max) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMax"], max);
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -395,15 +366,12 @@ void ResNorm::updateProperties(QtProperty *prop, double val) {
              SLOT(updateProperties(QtProperty *, double)));
 
   if (prop == m_properties["EMin"]) {
-    setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"],
-                        eRangeSelector, val);
+    setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
   } else if (prop == m_properties["EMax"]) {
-    setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"],
-                        eRangeSelector, val);
+    setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
   }
 
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -419,11 +387,8 @@ void ResNorm::previewSpecChanged(int value) {
   // Update vanadium plot
   if (m_uiForm.dsVanadium->isValid())
     try {
-      m_uiForm.ppPlot->addSpectrum(
-          "Vanadium", m_uiForm.dsVanadium->getCurrentDataName(), m_previewSpec);
-      m_uiForm.ppPlot->addSpectrum("Resolution",
-                                   m_uiForm.dsResolution->getCurrentDataName(),
-                                   0, Qt::blue);
+      m_uiForm.ppPlot->addSpectrum("Vanadium", m_uiForm.dsVanadium->getCurrentDataName(), m_previewSpec);
+      m_uiForm.ppPlot->addSpectrum("Resolution", m_uiForm.dsResolution->getCurrentDataName(), 0, Qt::blue);
     } catch (std::exception const &ex) {
       g_log.warning(ex.what());
     }
@@ -452,8 +417,7 @@ void ResNorm::previewSpecChanged(int value) {
         g_log.warning(ex.what());
       }
 
-      AnalysisDataService::Instance().addOrReplace(
-          "__" + fitWsGroupName + "_scaled", fit);
+      AnalysisDataService::Instance().addOrReplace("__" + fitWsGroupName + "_scaled", fit);
     }
   }
 }
@@ -468,13 +432,11 @@ void ResNorm::plotCurrentPreview() {
   std::vector<int> plotIndices;
 
   if (m_uiForm.ppPlot->hasCurve("Vanadium")) {
-    plotWorkspaces.emplace_back(
-        m_uiForm.dsVanadium->getCurrentDataName().toStdString());
+    plotWorkspaces.emplace_back(m_uiForm.dsVanadium->getCurrentDataName().toStdString());
     plotIndices.emplace_back(m_previewSpec);
   }
   if (m_uiForm.ppPlot->hasCurve("Resolution")) {
-    plotWorkspaces.emplace_back(
-        m_uiForm.dsResolution->getCurrentDataName().toStdString());
+    plotWorkspaces.emplace_back(m_uiForm.dsResolution->getCurrentDataName().toStdString());
     plotIndices.emplace_back(0);
   }
   if (m_uiForm.ppPlot->hasCurve("Fit")) {
@@ -524,18 +486,14 @@ void ResNorm::plotClicked() {
   setPlotResultIsPlotting(false);
 }
 
-void ResNorm::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-}
+void ResNorm::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
 void ResNorm::setPlotResultEnabled(bool enabled) {
   m_uiForm.pbPlot->setEnabled(enabled);
   m_uiForm.cbPlot->setEnabled(enabled);
 }
 
-void ResNorm::setSaveResultEnabled(bool enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
-}
+void ResNorm::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 void ResNorm::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
