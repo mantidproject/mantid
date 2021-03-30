@@ -90,12 +90,11 @@ class SuperplotPresenter:
         Triggered when the del button is pressed. This function removes the
         selected workspace from the selection list.
         """
-        selectedWorkspace = self._view.getSelectedWorkspaceFromList()
-        if selectedWorkspace is None:
-            return
-        self._model.delWorkspace(selectedWorkspace)
+        selectedWorkspaces = self._view.getSelectedWorkspacesFromList()
+        for selectedWorkspace in selectedWorkspaces:
+            self._model.delWorkspace(selectedWorkspace)
+            self._view.removeWorkspace(selectedWorkspace)
         names = self._model.getWorkspaces()
-        self._view.removeWorkspace(selectedWorkspace)
         self._view.setSelectedWorkspacesInList([names[-1]])
         self._updatePlot()
 
