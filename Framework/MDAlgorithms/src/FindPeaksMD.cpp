@@ -282,18 +282,18 @@ void FindPeaksMD::checkWorkspaceDims(const IMDWorkspace_sptr &ws) {
 }
 
 void FindPeaksMD::determineOutputType(const std::string peakType,
-                                      const uint16_t nexp) {
+                                      const uint16_t numExperimentInfo) {
   // This method will be expanded later to check a property on the
   // input workspace which can specify a default peak type for that
   // instrument.
   m_leanElasticPeak = false;
   if (peakType == "Automatic") {
-    if (nexp == 0)
+    if (numExperimentInfo == 0)
       m_leanElasticPeak = true;
   } else if (peakType == "LeanElasticPeak") {
     m_leanElasticPeak = true;
   } else { // Peak
-    if (nexp == 0)
+    if (numExperimentInfo == 0)
       throw std::runtime_error("Cannot create Peak output with 0 expInfo");
   }
 }
@@ -556,9 +556,9 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   prog->resetNumSteps(numBoxesFound, 0.95, 1.0);
 
-  uint16_t nexp = ws->getNumExperimentInfo();
+  uint16_t numExperimentInfo = ws->getNumExperimentInfo();
 
-  if (nexp == 0) {
+  if (numExperimentInfo == 0) {
     // --- Convert the "boxes" to peaks ----
     for (auto box : peakBoxes) {
       // The center of the box = Q in the lab frame
@@ -596,13 +596,13 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       // --- Convert the "boxes" to peaks ----
       for (auto box : peakBoxes) {
         //  If no events from this experimental contribute to the box then skip
-        if (nexp > 1) {
+        if (numExperimentInfo > 1) {
           auto *mdbox = dynamic_cast<MDBox<MDE, nd> *>(box);
           const std::vector<MDE> &events = mdbox->getEvents();
           if (std::none_of(events.cbegin(), events.cend(),
-                           [&iexp, &nexp](MDE event) {
+                           [&iexp, &numExperimentInfo](MDE event) {
                              return event.getRunIndex() == iexp ||
-                                    event.getRunIndex() >= nexp;
+                                    event.getRunIndex() >= numExperimentInfo;
                            }))
             continue;
         }
@@ -854,15 +854,15 @@ void FindPeaksMD::exec() {
 
   bool AppendPeaks = getProperty("AppendPeaks");
 
-  uint16_t nexp = 0;
+  uint16_t numExperimentInfo = 0;
   if (inMDHW)
-    nexp = inMDHW->getNumExperimentInfo();
+    numExperimentInfo = inMDHW->getNumExperimentInfo();
   else if (inMDEW)
-    nexp = inMDEW->getNumExperimentInfo();
+    numExperimentInfo = inMDEW->getNumExperimentInfo();
 
   std::string peakType = getProperty("OutputType");
 
-  determineOutputType(peakType, nexp);
+  determineOutputType(peakType, numExperimentInfo);
 
   // Output peaks workspace, create if needed
   peakWS = getProperty("OutputWorkspace");
@@ -936,15 +936,15 @@ std::map<std::string, std::string> FindPeaksMD::validateInputs() {
                                     "as the input.";
   }
 
-  uint16_t nexp = 0;
+  uint16_t numExperimentInfo = 0;
   if (inMDHW)
-    nexp = inMDHW->getNumExperimentInfo();
+    numExperimentInfo = inMDHW->getNumExperimentInfo();
   else if (inMDEW)
-    nexp = inMDEW->getNumExperimentInfo();
+    numExperimentInfo = inMDEW->getNumExperimentInfo();
 
   std::string peakType = getProperty("OutputType");
 
-  if (peakType == "Peak" && nexp == 0)
+  if (peakType == "Peak" && numExperimentInfo == 0)
     result["OutputType"] =
         "The InputWorkspace doesn't contain any experiment information so the "
         "OutputType cannot be Peak.";

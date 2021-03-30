@@ -30,7 +30,7 @@ static void createMDEW() {
       "CreateMDWorkspace", 18, "Dimensions", "3", "EventType", "MDEvent",
       "Extents", "-10,10,-10,10,-10,10", "Names", "Q_lab_x,Q_lab_y,Q_lab_z",
       "Units", "-,-,-", "SplitInto", "5", "SplitThreshold", "20",
-      "MaxRecursionDepth", "15", "OutputWorkspace", "MDEWS");
+      "MaxRecursionDepth", "15", "OutputWorkspace", "MDWS");
 
   // Give it an instrument
   Instrument_sptr inst =
@@ -38,7 +38,7 @@ static void createMDEW() {
   IMDEventWorkspace_sptr ws;
   TS_ASSERT_THROWS_NOTHING(
       ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-          "MDEWS"));
+          "MDWS"));
   ExperimentInfo_sptr ei(new ExperimentInfo());
   ei->setInstrument(inst);
   // Give it a run number
@@ -53,14 +53,14 @@ static void addPeak(size_t num, double x, double y, double z, double radius) {
   std::ostringstream mess;
   mess << num / 2 << ", " << x << ", " << y << ", " << z << ", " << radius;
   FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace",
-                                    "MDEWS", "PeakParams", mess.str().c_str());
+                                    "MDWS", "PeakParams", mess.str().c_str());
 
   // Add a center with more events (half radius, half the total), to create a
   // "peak"
   std::ostringstream mess2;
   mess2 << num / 2 << ", " << x << ", " << y << ", " << z << ", " << radius / 2;
   FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace",
-                                    "MDEWS", "PeakParams", mess2.str().c_str());
+                                    "MDWS", "PeakParams", mess2.str().c_str());
 }
 
 //=====================================================================================
@@ -92,14 +92,14 @@ public:
       FrameworkManager::Instance().exec(
           "BinMD", 14, "AxisAligned", "1", "AlignedDim0", "Q_lab_x,-10,10,100",
           "AlignedDim1", "Q_lab_y,-10,10,100", "AlignedDim2",
-          "Q_lab_z,-10,10,100", "IterateEvents", "1", "InputWorkspace", "MDEWS",
-          "OutputWorkspace", "MDEWS");
+          "Q_lab_z,-10,10,100", "IterateEvents", "1", "InputWorkspace", "MDWS",
+          "OutputWorkspace", "MDWS");
     }
 
     FindPeaksMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "MDWS"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(
@@ -161,7 +161,7 @@ public:
       // Remove workspace from the data service.
       AnalysisDataService::Instance().remove(outWSName);
     }
-    AnalysisDataService::Instance().remove("MDEWS");
+    AnalysisDataService::Instance().remove("MDWS");
   }
 
   /** Running the algo twice with same output workspace = replace the output,
@@ -226,14 +226,14 @@ public:
     FrameworkManager::Instance().exec(
         "BinMD", 14, "AxisAligned", "1", "AlignedDim0", "Q_lab_x,-10,10,100",
         "AlignedDim1", "Q_lab_y,-10,10,100", "AlignedDim2",
-        "Q_lab_z,-10,10,100", "IterateEvents", "1", "InputWorkspace", "MDEWS",
-        "OutputWorkspace", "MDEWS");
+        "Q_lab_z,-10,10,100", "IterateEvents", "1", "InputWorkspace", "MDWS",
+        "OutputWorkspace", "MDWS");
 
     FindPeaksMD alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "MDWS"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "place_holder"));
     TS_ASSERT_THROWS_NOTHING(
@@ -246,7 +246,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SignalThresholdFactor", 1.3));
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
 
-    AnalysisDataService::Instance().remove("MDEWS");
+    AnalysisDataService::Instance().remove("MDWS");
   }
 
   void do_test_LeanElastic(bool expInfo, bool histo) {
@@ -255,7 +255,7 @@ public:
         "Extents", "-10,10,-10,10,-10,10", "Names",
         "Q_sample_x,Q_sample_y,Q_sample_z", "Units", "-,-,-", "SplitInto", "5",
         "SplitThreshold", "20", "MaxRecursionDepth", "15", "OutputWorkspace",
-        "MDEWS");
+        "MDWS");
 
     if (expInfo) {
       Instrument_sptr inst =
@@ -264,7 +264,7 @@ public:
       IMDEventWorkspace_sptr ws;
       TS_ASSERT_THROWS_NOTHING(
           ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-              "MDEWS"));
+              "MDWS"));
       ExperimentInfo_sptr ei(new ExperimentInfo());
       ei->setInstrument(inst);
       // Give it a run number
@@ -282,14 +282,14 @@ public:
           "BinMD", 14, "AxisAligned", "1", "AlignedDim0",
           "Q_sample_x,-10,10,100", "AlignedDim1", "Q_sample_y,-10,10,100",
           "AlignedDim2", "Q_sample_z,-10,10,100", "IterateEvents", "1",
-          "InputWorkspace", "MDEWS", "OutputWorkspace", "MDEWS");
+          "InputWorkspace", "MDWS", "OutputWorkspace", "MDWS");
     }
 
     std::string outWSName("peaksFound");
     FindPeaksMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "MDWS"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(
@@ -340,7 +340,7 @@ public:
     TS_ASSERT_DELTA(ws->getPeak(2).getQSampleFrame()[1], 2.0, 0.11);
     TS_ASSERT_DELTA(ws->getPeak(2).getQSampleFrame()[2], 3.0, 0.11);
 
-    AnalysisDataService::Instance().remove("MDEWS");
+    AnalysisDataService::Instance().remove("MDWS");
   }
 
   void test_exec_LeanElastic() { do_test_LeanElastic(false, false); }
@@ -393,7 +393,7 @@ public:
     FindPeaksMD alg;
     alg.initialize();
 
-    alg.setPropertyValue("InputWorkspace", "MDEWS");
+    alg.setPropertyValue("InputWorkspace", "MDWS");
     alg.setPropertyValue("OutputWorkspace", outWSName);
     alg.setPropertyValue("DensityThresholdFactor", "2.0");
     alg.setPropertyValue("PeakDistanceThreshold", "0.7");
