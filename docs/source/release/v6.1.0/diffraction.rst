@@ -25,6 +25,9 @@ Improvements
 
 - :ref:`PDCalibration <algm-PDCalibration>` now intitialises A,B and S of BackToBackExponential if correpsonding coeficients are in the instrument parameter.xml file.
 - Support fitting diffractometer constants with chi-squared cost function in <algm-PDCalibration>.
+- Differential evolution minimizer added to :ref:`AlignComponents <algm-AlignComponents>`.
+- Differential evolution minimizer added to :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>`.
+- Added option to fix banks' vertical coordinate :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>`.
 
 Bugfixes
 ########
