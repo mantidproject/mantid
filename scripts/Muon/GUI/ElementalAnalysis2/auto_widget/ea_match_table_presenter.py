@@ -9,12 +9,20 @@ from Muon.GUI.ElementalAnalysis2.auto_widget.ea_match_table_view import EAMatchT
 
 class EAMatchTablePresenter(object):
 
-    def __init__(self , view : EAMatchTableView):
+    def __init__(self, view: EAMatchTableView):
         self.view = view
+        self.table_entries = []
 
-    def update_table(self,table_entries):
-        for entry in table_entries:
-            self.view.add_entry_to_table(entry)
+    def update_table(self, entry):
+        self.table_entries += entry
+        self.view.add_entry_to_table(entry)
+
+    def remove_element(self, row):
+        pass
+
+    def check_if_entry_is_present(self, entry):
+        pass
 
     def clear_table(self):
+        self.table_entries = []
         self.view.table.clearContents()

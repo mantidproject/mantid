@@ -4,39 +4,37 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets, QtGui, QtCore
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
-from Muon.GUI.Common.message_box import warning
+from qtpy import QtWidgets
 
-group_table_columns = {0: 'Element', 1: 'Likelihood', 2: 'Count' }
-inverse_group_table_columns = {'Element': 0, 'Likelihood': 1, 'Count': 2}
-group_table_column_tooltip = {0: "Element symbol" ,
-                              1: "A weigthed count of element occurences with those with less error"
-                                 " having a larger weight ",
-                              2: "Number of Occurences of element"}
+GROUP_TABLE_COLUMNS = {0: 'Run', 1: 'Detector', 2: 'Probable elements'}
+INVERSE_GROUP_TABLE_COLUMNS = {'Run': 0, 'Detector': 1, 'Probable elements': 2}
+GROUP_TABLE_COLUMN_TOOLTIP = {0: "Run number",
+                              1: "Detector number",
+                              2: "3 most probable elements"}
+
 
 class EAMatchTableView(QtWidgets.QWidget):
 
-    def __init__(self,parent = None):
+    def __init__(self, parent=None):
         super(EAMatchTableView, self).__init__(parent)
         self.table = QtWidgets.QTableWidget(self)
         self.setup_table()
         self.setup_interface_layout()
-        self.add_entry_to_table(["Ag","14" ,"6"])
+        self.add_entry_to_table(["Ag", "14", "6"])
         self.add_entry_to_table(["Au", "12", "5"])
         self.add_entry_to_table(["Fe", "10", "4"])
         self.add_entry_to_table(["Li", "8", "3"])
 
     def setup_table(self):
         self.table.setColumnCount(3)
-        self.table.setHorizontalHeaderLabels(list(inverse_group_table_columns))
+        self.table.setHorizontalHeaderLabels(list(INVERSE_GROUP_TABLE_COLUMNS))
 
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
 
-        for column_index,tooltip in group_table_column_tooltip.items():
+        for column_index, tooltip in GROUP_TABLE_COLUMN_TOOLTIP.items():
             self.table.horizontalHeaderItem(column_index).setToolTip(tooltip)
 
     def setup_interface_layout(self):

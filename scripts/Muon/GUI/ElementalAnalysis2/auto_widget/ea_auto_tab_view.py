@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets
 from mantidqt.utils.observer_pattern import GenericObservable
-from Muon.GUI.Common.message_box import warning
-from Muon.GUI.Common.utilities.muon_file_utils import show_file_browser_and_return_selection
+from Muon.GUI.Common import message_box
+
 
 class EAAutoTabView(QtWidgets.QWidget):
 
-    def __init__(self, match_table, parent = None):
+    def __init__(self, match_table, parent=None):
         super(EAAutoTabView, self).__init__(parent)
 
         self.match_table = match_table
@@ -24,15 +24,12 @@ class EAAutoTabView(QtWidgets.QWidget):
         self.setup_buttons()
         self.setup_intial_parameters()
 
-        option = ["Workspace1" , "Workspace2" , "Workspace3"]
-        self.add_options_to_find_peak_combobox(option)
-        self.add_options_to_show_matches_combobox(option)
-        self.add_options_to_show_peak_combobox(option)
-
-
     def setup_interface_layout(self):
         self.setObjectName("GroupingTabView")
         self.resize(1000, 1000)
+
+        self.peak_info_label = QtWidgets.QLabel(self)
+        self.peak_info_label.setVisible(False)
 
         self.select_workspace_hlayout = QtWidgets.QHBoxLayout()
         self.select_workspace_hlayout.setObjectName("horizontalLayout1")
@@ -51,31 +48,31 @@ class EAAutoTabView(QtWidgets.QWidget):
 
         self.vertical_layout.addItem(self.select_workspace_hlayout)
         self.vertical_layout.addItem(self.find_peaks_parameter_hlayout)
+        self.vertical_layout.addWidget(self.peak_info_label)
         self.vertical_layout.addItem(self.show_peaks_hlayout)
         self.vertical_layout.addWidget(self.match_table)
         self.vertical_layout.addItem(self.show_matches_hlayout)
 
-
         self.setLayout(self.vertical_layout)
 
     def setup_horizontal_layouts(self):
-        self.find_peaks_button = QtWidgets.QPushButton("Find Peaks" , self)
+        self.find_peaks_button = QtWidgets.QPushButton("Find Peaks", self)
         self.find_peaks_combobox = QtWidgets.QComboBox(self)
 
         self.select_workspace_hlayout.addWidget(self.find_peaks_button)
         self.select_workspace_hlayout.addWidget(self.find_peaks_combobox)
 
-        self.min_energy_label = QtWidgets.QLabel("Min Energy (KeV) " , self)
-        self.min_energy_line_edit = QtWidgets.QLineEdit( self)
+        self.min_energy_label = QtWidgets.QLabel("Min Energy (KeV) ", self)
+        self.min_energy_line_edit = QtWidgets.QLineEdit(self)
 
         self.max_energy_label = QtWidgets.QLabel(" Max Energy (KeV) ", self)
         self.max_energy_line_edit = QtWidgets.QLineEdit(self)
 
-        self.plot_peaks_label = QtWidgets.QLabel(" Plot Peaks ",self)
-        self.plot_peaks_checkbox = QtWidgets.QCheckBox("" , self)
+        self.plot_peaks_label = QtWidgets.QLabel(" Plot Peaks ", self)
+        self.plot_peaks_checkbox = QtWidgets.QCheckBox("", self)
 
         self.threshold_label = QtWidgets.QLabel(" Acceptance Threshold ", self)
-        self.threshold_line_edit = QtWidgets.QLineEdit( self)
+        self.threshold_line_edit = QtWidgets.QLineEdit(self)
 
         self.find_peaks_parameter_hlayout.addWidget(self.min_energy_label)
         self.find_peaks_parameter_hlayout.addWidget(self.min_energy_line_edit)
@@ -87,7 +84,7 @@ class EAAutoTabView(QtWidgets.QWidget):
         self.find_peaks_parameter_hlayout.addWidget(self.threshold_line_edit)
 
         self.show_peaks_table_combobox = QtWidgets.QComboBox(self)
-        self.show_peaks_table_button = QtWidgets.QPushButton(" Show peaks " , self)
+        self.show_peaks_table_button = QtWidgets.QPushButton(" Show peaks ", self)
 
         self.show_peaks_hlayout.addWidget(self.show_peaks_table_combobox)
         self.show_peaks_hlayout.addWidget(self.show_peaks_table_button)
@@ -111,7 +108,7 @@ class EAAutoTabView(QtWidgets.QWidget):
             parameters["threshold"] = float(self.threshold_line_edit.text())
 
         except ValueError:
-            warning("Invalid arguments for peak finding")
+            message_box.warning("Invalid arguments for peak finding")
             return None
 
         parameters["workspace"] = self.find_peaks_combobox.currentText()
@@ -119,25 +116,33 @@ class EAAutoTabView(QtWidgets.QWidget):
 
         return parameters
 
-    def add_options_to_find_peak_combobox(self , options):
+    def add_options_to_find_peak_combobox(self, options):
         self.find_peaks_combobox.clear()
         self.find_peaks_combobox.addItems(options)
 
-    def add_options_to_show_peak_combobox(self , options):
+    def add_options_to_show_peak_combobox(self, options):
         self.show_peaks_table_combobox.clear()
         self.show_peaks_table_combobox.addItems(options)
 
-    def add_options_to_show_matches_combobox(self , options):
+    def add_options_to_show_matches_combobox(self, options):
         self.show_match_table_combobox.clear()
         self.show_match_table_combobox.addItems(options)
 
     def setup_intial_parameters(self):
         self.min_energy_line_edit.setText("50")
         self.max_energy_line_edit.setText("1000")
-        self.threshold_line_edit.setText("20")
+        self.threshold_line_edit.setText("0.01")
 
     def enable(self):
         self.setEnabled(True)
 
     def disable(self):
         self.setEnabled(False)
+
+    def set_peak_info(self, workspace, number_of_peaks):
+        if number_of_peaks == 1:
+            label_text = f"{number_of_peaks} peak found in {workspace}"
+        else:
+            label_text = f"{number_of_peaks} peaks found in {workspace}"
+        self.peak_info_label.setText(label_text)
+        self.peak_info_label.setVisible(True)
