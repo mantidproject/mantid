@@ -8,14 +8,14 @@
 
 Description
 -----------
-This algorithm takes a table of peak centres and standard deviations, then finds overlap with a database of known values```
+This algorithm takes a table of peak centres and standard deviations, then finds overlap with a database of known values
 to find probable energy transitions for peaks.
 
 
 Input Table and datafile requirement
 ####################################
 
-- input table must have atleast 2 column in which one column is the peak centre and the other is the standard deviation,the names of the columns must be given if they differ from the default values: centre and sigma respectively.
+- input table must have at least 2 column in which one column is the peak centre and the other is the standard deviation, the names of the columns must be given if they differ from the default values: centre and sigma respectively.
 - json file can be loaded to override the default but must follow structure below:
 
 .. code-block:: json
@@ -100,7 +100,7 @@ Output:
     --------------------------------------------------
     {'Peak centre': '3.00', 'Database Energy': '3.40', 'Element': 'Li', 'Transition': 'L(3d->2p)', 'Error': '0.80', 'Difference': '0.40'}
     --------------------------------------------------
-    {'Element': 'Ag', 'Likelihood(arbitrary units)': 14}
+    {'Element': 'Ag', 'Likelihood(arbitrary units)': 10}
 
 *Example: Renaming tables**
 
@@ -155,7 +155,7 @@ Output:
     --------------------------------------------------
     {'Peak centre': '306.00', 'Database Energy': '304.10', 'Element': 'W', 'Transition': 'O(7i->5g)', 'Error': '2.40', 'Difference': '1.90'}
     --------------------------------------------------
-    {'Element': 'Tm', 'Likelihood(arbitrary units)': 9}
+    {'Element': 'Tm', 'Likelihood(arbitrary units)': 6}
 
 
 *Example: Using non default column names**
@@ -211,7 +211,7 @@ Output:
     --------------------------------------------------
     {'Peak centre': '306.00', 'Database Energy': '304.50', 'Element': 'Tm', 'Transition': 'N(5g->4f)', 'Error': '1.60', 'Difference': '1.50'}
     --------------------------------------------------
-    {'Element': 'In', 'Likelihood(arbitrary units)': 8}
+    {'Element': 'In', 'Likelihood(arbitrary units)': 4}
 
 
 .. categories::
