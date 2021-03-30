@@ -51,6 +51,23 @@ else
   echo "${SCRIPT_OUTPUT}"
 fi
 
+git add -A
+if git diff --cached --quiet
+then
+    echo "code is formatted correctly"
+else
+    echo "code is not formatted correctly!"
+    echo ".cpp/.h files are required to be formatted with ${CLANG_FORMAT_EXE}"
+    echo ".py files are required to be formatted with yapf"
+    git commit --no-verify --quiet -m "formatting PR${PR} ${sha}"
+    git format-patch --quiet HEAD~
+    echo
+    echo "To fix download ${BUILD_URL}artifact/0001-formatting-PR${PR}-${sha}.patch"
+    echo "then run the following in your mantid directory:"
+    echo "'git apply /path/to/0001-formatting-PR${PR}-${sha}.patch'"
+    echo "and commit the changes."
+fi
+
 # Perform cleanup of unused commit repos.
 pre-commit gc
 
