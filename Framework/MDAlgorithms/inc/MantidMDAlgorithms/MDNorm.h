@@ -88,11 +88,10 @@ private:
   calQTransform(const Mantid::API::ExperimentInfo &currentExpInfo,
                 const Geometry::SymmetryOperation &so);
 
-  void calcSingleDetectorNorm(
-      const std::vector<std::array<double, 4>> &intersections,
+  void calcSingleDetectorNorm(const std::vector<std::array<double, 4>> &intersections,
       const double &solid, std::vector<double> &yValues, const size_t &vmdDims,
       std::vector<coord_t> &pos, std::vector<coord_t> &posNew,
-      std::vector<std::atomic<signal_t>> &signalArray);
+      std::vector<std::atomic<signal_t>> &signalArray, const double &solidBkgd, std::vector<std::atomic<signal_t> > &bkgdSignalArray);
 
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;

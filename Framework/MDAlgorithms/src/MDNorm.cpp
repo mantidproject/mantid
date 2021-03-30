@@ -670,6 +670,16 @@ void MDNorm::exec() {
             << "Number of ExpInfo = " << outputDataWS->getNumExperimentInfo()
             << "  Number of Dimension = " << outputDataWS->getNumDims()
             <<"\n";
+  std::cout << "Normalization Workspace " << m_normWS->getName() << ": "
+            << "Number of ExpInfo = " << m_normWS->getNumExperimentInfo()
+            << "  Number of Dimension = " << m_normWS->getNumDims()
+            <<"\n";
+  if (m_backgroundWS) {
+      std::cout << "Background normalization Workspace " << m_bkgdNormWS->getName() << ": "
+                << "Number of ExpInfo = " << m_bkgdNormWS->getNumExperimentInfo()
+                << "  Number of Dimension = " << m_bkgdNormWS->getNumDims()
+                <<"\n";
+  }
 
 }
 
@@ -1217,6 +1227,11 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binBackgroundWS(
     // FIXME - FOUND OUT how to accumulate binned MD to a same MDHistoWorkspace
     double soIndex = 0;
     std::vector<size_t> qDimensionIndices;
+    for (uint16_t i = 0; i < static_cast<uint16_t>(m_inputWS->getNumExperimentInfo()); ++i) {
+
+        // @ANDREI
+        auto rotMatrix = m_inputWS->getExperimentInfo(i)->run().getGoniometerMatrix();
+
     for (auto so : symmetryOps) {
       // Building symmetric operation matrix
       DblMatrix soMatrix = buildSymmetryMatrix(so);
@@ -1224,11 +1239,11 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binBackgroundWS(
       // FIXME - need to add Q_Lab to Q_sample matrix in addition!!!
       DblMatrix Qtransform;
       if (m_isRLU) {
-        Qtransform = m_UB * soMatrix * m_W;
+        Qtransform = rotMatrix * m_UB * soMatrix * m_W;
         // TODO  Qtransform = R * m_UB * soMatrix * m_W;
 
       } else {
-        Qtransform = soMatrix * m_W;
+        Qtransform = rotMatrix * soMatrix * m_W;
         // TODO  Qtransform = R * soMatrix * m_W;
 
       }
@@ -1285,6 +1300,8 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binBackgroundWS(
       soIndex += 1;
     }
 
+
+    }
     auto outputMDHWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
     // set MDUnits for Q dimensions
     if (m_isRLU) {
@@ -1554,7 +1571,9 @@ inline void MDNorm::calcSingleDetectorNorm(
     const std::vector<std::array<double, 4>> &intersections,
     const double &solid, std::vector<double> &yValues, const size_t &vmdDims,
     std::vector<coord_t> &pos, std::vector<coord_t> &posNew,
-    std::vector<std::atomic<signal_t>> &signalArray) {
+    std::vector<std::atomic<signal_t>> &signalArray,
+    const double &solidBkgd,
+    std::vector<std::atomic<signal_t>> &bkgdSignalArray) {
 
   auto intersectionsBegin = intersections.begin();
   for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
@@ -1587,14 +1606,15 @@ inline void MDNorm::calcSingleDetectorNorm(
                      return static_cast<coord_t>(0.5 * (rhs + lhs));
                    });
     signal_t signal;
-    // [Task 89 signal_t bkgdSignal;
+    signal_t bkgdSignal;
     if (m_diffraction) {
       // Diffraction
       // index of the current intersection
       auto k = static_cast<size_t>(std::distance(intersectionsBegin, it));
       // signal = integral between two consecutive intersections
       signal = (yValues[k] - yValues[k - 1]) * solid;
-      // [Task 89] signalBkgd = (bkgdValues[k] - bkgdValues[k - 1]) * solidBkgd;
+      if (m_backgroundWS)
+        bkgdSignal = (yValues[k] - yValues[k - 1]) * solidBkgd;
 
     } else {
       // Inelastic
@@ -1603,7 +1623,8 @@ inline void MDNorm::calcSingleDetectorNorm(
       // signal = energy distance between two consecutive intersections *solid
       // angle *PC
       signal = solid * delta;
-      // [Task 89] bkgdSignal = bkgdSolid * delta
+      if (m_backgroundWS)
+        bkgdSignal = solidBkgd * delta;
     }
 
     // Find the coordiate of the new position after transformation
@@ -1613,12 +1634,14 @@ inline void MDNorm::calcSingleDetectorNorm(
     if (linIndex == size_t(-1))
       continue; // not found
 
+    // Set to output
     // set the calculated signal to
     Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
                              std::plus<signal_t>());
     // [Task 89]
-    // Mantid::Kernel::AtomicOp(bkgdSignalArray[linIndex], bkgdSignal,
-    //                          std::plus<signal_t>());
+    if (m_backgroundWS)
+        Mantid::Kernel::AtomicOp(bkgdSignalArray[linIndex], bkgdSignal,
+                              std::plus<signal_t>());
   }
   return;
 }
@@ -1650,8 +1673,8 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
   // get proton charges
   const double protonCharge = currentExptInfo.run().getProtonCharge();
   // [Task 89]
-  // const double protonChargeBkgd = (m_background != nullptr)?
-  // m_background.getExpInfo(0).run().getProtonCharge() : 0;
+   const double protonChargeBkgd = (m_backgroundWS != nullptr)?
+   m_backgroundWS->getExperimentInfo(0)->run().getProtonCharge() : 0;
 
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
 
@@ -1674,6 +1697,13 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
   // Define dimension, signal array
   const size_t vmdDims = (m_diffraction) ? 3 : 4;
   std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
+
+  size_t numNPoints = (m_backgroundWS) ? m_bkgdNormWS->getNPoints() : 0;
+  if (m_backgroundWS && numNPoints != m_normWS->getNPoints()) {
+      throw std::runtime_error("N points are different");
+  }
+  std::vector<std::atomic<signal_t>> bkgdSignalArray(numNPoints);
+
   std::vector<std::array<double, 4>> intersections;
   std::vector<double> xValues, yValues;
   std::vector<coord_t> pos, posNew;
@@ -1733,13 +1763,15 @@ for (int64_t i = 0; i < ndets; i++) {
 
   // Get solid angle for this contribution
   double solid = protonCharge;
-  // [Task 89] double bkgdSolid = protonChargeBkgd;
+  // [Task 89]
+  double bkgdSolid = protonChargeBkgd;
   if (haveSA) {
     double solid_angle_factor =
         solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0];
     //  solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0]
     solid = solid_angle_factor * protonCharge;
-    // [Task 89] bkgdSolid = solid_angle_factor * protonChargeBkgd;
+    // [Task 89]
+    bkgdSolid = solid_angle_factor * protonChargeBkgd;
   }
 
   if (m_diffraction) {
@@ -1761,7 +1793,8 @@ for (int64_t i = 0; i < ndets; i++) {
 
   calcSingleDetectorNorm(
       intersections, solid, yValues, vmdDims, pos, posNew,
-      signalArray); // [Task 89] ADD solidBkgd, bkgdYValues, bkgdSignalArray
+      signalArray,
+      bkgdSolid, bkgdSignalArray); // [Task 89] ADD solidBkgd, bkgdYValues, bkgdSignalArray
 
   prog->report();
 
@@ -1774,11 +1807,12 @@ if (m_accumulate) {
       m_normWS->mutableSignalArray(),
       [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
   // [Task 89] Process background
-  //  std::transform(
-  //      bkgdSignalArray.cbegin(), bkgdSignalArray.cend(),
-  //      m_bkgdNormWS->getSignalArray(), m_bkgdNormWS->mutableSignalArray(),
-  //      [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b;
-  //      });
+  if (m_backgroundWS)
+    std::transform(
+        bkgdSignalArray.cbegin(), bkgdSignalArray.cend(),
+        m_bkgdNormWS->getSignalArray(), m_bkgdNormWS->mutableSignalArray(),
+        [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b;
+        });
 
 } else {
   // First time, init

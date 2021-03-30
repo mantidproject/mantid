@@ -192,6 +192,8 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
 
         # prepare sample MD
         self.prepare_md(input_ws_name='sum', merged_md_name='merged', min_log_value=10, max_log_value=12)
+        mde = mtd['merged']
+        print(f'[VZ DEBUG] s1 = 10 .. 12: Number of Experiment Info = {mde.getNumExperimentInfo()}')
 
         # Test
         self.test_property_setup()
@@ -216,9 +218,11 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
                    OutputWorkspace='clean_data',
                    OutputDataWorkspace='dataMD',
                    OutputNormalizationWorkspace='normMD',
+                   OutputBackgroundDataWorkspace='background_dataMD',
                    OutputBackgroundNormalizationWorkspace='background_normMD')
         assert hasattr(r, 'OutputBackgroundNormalizationWorkspace')
         clean_data = r.OutputWorkspace
+        print(f'[VZ DEBUG] clean data: s1 = 10 .. 12: Number of Experiment Info = {clean_data.getNumExperimentInfo()}')
 
         SaveMD(InputWorkspace=clean_data, Filename='/tmp/clean.nxs')
 
@@ -252,7 +256,7 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-8
-        return 'result', 'MDNormBackgroundHYSPEC.nxs', 'clean2', 'MDNormBackgroundHYSPEC_10_15.nxs'
+        return 'result', 'MDNormBackgroundHYSPEC.nxs'   # FIXME , 'clean2', 'MDNormBackgroundHYSPEC_10_15.nxs'
 
     @staticmethod
     def prepare_single_exp_info_background(input_md_name, output_md_name, target_qframe='Q_lab'):
@@ -294,6 +298,8 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
         # prepare sample MD
         self.prepare_md(input_ws_name=event_ws_name, merged_md_name='merged',
                         min_log_value=log_value_range[0], max_log_value=log_value_range[1])
+        mde = mtd['merged']
+        print(f'[VZ DEBUG] s1 = 12 .. 15: Number of Experiment Info = {mde.getNumExperimentInfo()}')
         # Prepare background workspace
         # # old way - use reduced_1 as the background
         # self.prepare_background(input_md='reduced_1', reference_sample_mde='merged',
@@ -316,14 +322,16 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
                SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
                TemporaryDataWorkspace=sample_temp_ws_names[0],  # 'dataMD',
                TemporaryNormalizationWorkspace=sample_temp_ws_names[1],  # 'normMD',
-               TemporaryBackgroundDataWorkspace=sample_temp_ws_names[0],  # FIXME this is temp solution use S for B
+               TemporaryBackgroundDataWorkspace=background_temp_ws_names[0],  # FIXME this is temp solution use S for B
                TemporaryBackgroundNormalizationWorkspace=background_temp_ws_names[1],  # 'normMD',
                OutputWorkspace='result',
                OutputDataWorkspace=sample_temp_ws_names[0],
                OutputNormalizationWorkspace=sample_temp_ws_names[1],
+               OutputBackgroundDataWorkspace=background_temp_ws_names[0],
                OutputBackgroundNormalizationWorkspace=background_temp_ws_names[1])
 
         clean_md = mtd['result']
+        print(f'[VZ DEBUG] clean_data s1 = 12 .. 15: Number of Experiment Info = {clean_md.getNumExperimentInfo()}')
         #        OutputWorkspace='reducedMD',
         #        OutputDataWorkspace='dataMD',
         #        OutputNormalizationWorkspace='normMD')
