@@ -109,6 +109,22 @@ class SuperplotView(QWidget):
         else:
             return None
 
+    def getSelectedWorkspacesFromList(self):
+        """
+        Get the selected workspaces from the selection tree.
+
+        Returns:
+            list(str): list of selected workspace names
+        """
+        items = self._sideView.workspacesList.selectedItems()
+        selection = list()
+        for item in items:
+            if item.parent() is not None:
+                item = item.parent()
+            if item.text(0) not in selection:
+                selection.append(item.text(0))
+        return selection
+
     def getSelection(self):
         """
         Get the current selection.
