@@ -45,6 +45,9 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
     def runTest(self):
         start_time = time.time()
 
+        # raise tolerance to 1e-6
+        self.tolerance = 1e-6
+
         instrument_name             = "TOPAZ"
         calibration_file_1          = "TOPAZ_2011_02_16.DetCal"
         calibration_file_2          = None
@@ -81,25 +84,25 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
         rebin_params = min_tof+ ","+ rebin_step +"," +max_tof
         run                            = "3132"
         self.saved=False
-#
-# Get the fully qualified input run file name, either from a specified data
-# directory or from findnexus
-#
+        #
+        # Get the fully qualified input run file name, either from a specified data
+        # directory or from findnexus
+        #
 
         full_name = instrument_name + "_" + (run) + "_event.nxs"
 
         print("\nProcessing File: " + full_name + " ......\n")
 
-#
-# Name the files to write for this run
-#
-#        run_niggli_matrix_file = self.output_directory + "/" + run + "_Niggli.mat"
-#        run_niggli_integrate_file = self.output_directory + "/" + run + "_Niggli.integrate"
+        #
+        # Name the files to write for this run
+        #
+        #        run_niggli_matrix_file = self.output_directory + "/" + run + "_Niggli.mat"
+        #        run_niggli_integrate_file = self.output_directory + "/" + run + "_Niggli.integrate"
 
 
-#
-# Load the run data and find the total monitor counts
-#
+        #
+        # Load the run data and find the total monitor counts
+        #
         event_ws = LoadEventNexus(Filename=full_name,
                                   FilterByTofMin=min_tof, FilterByTofMax=max_tof )
 
@@ -115,43 +118,43 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
         monitor_count = integrated_monitor_ws.dataY(0)[0]
         print("\n", run, " has calculated monitor count", monitor_count, "\n")
 
-#
-# Make MD workspace using Lorentz correction, to find peaks
-#
+        #
+        # Make MD workspace using Lorentz correction, to find peaks
+        #
         MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
                             dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
                             LorentzCorrection='1', MinValues="-50,-50,-50", MaxValues="50,50,50",
                             SplitInto='2', SplitThreshold='50',MaxRecursionDepth='11' )
-#
-# Find the requested number of peaks.  Once the peaks are found, we no longer
-# need the weighted MD event workspace, so delete it.
-#
+        #
+        # Find the requested number of peaks.  Once the peaks are found, we no longer
+        # need the weighted MD event workspace, so delete it.
+        #
         distance_threshold = 0.9 * 6.28 / float(max_d)
         peaks_ws = FindPeaksMD( MDEW, MaxPeaks=num_peaks_to_find,
                                 PeakDistanceThreshold=distance_threshold )
 
         AnalysisDataService.remove( MDEW.name() )
-#      SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,
-#               Filename='A'+run_niggli_integrate_file )
-#
-# Find a Niggli UB matrix that indexes the peaks in this run
-#
+        #      SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,
+        #               Filename='A'+run_niggli_integrate_file )
+        #
+        # Find a Niggli UB matrix that indexes the peaks in this run
+        #
         FindUBUsingFFT( PeaksWorkspace=peaks_ws, MinD=min_d, MaxD=max_d, Tolerance=tolerance )
         IndexPeaks( PeaksWorkspace=peaks_ws, Tolerance=tolerance )
 
-#
-# Save UB and peaks file, so if something goes wrong latter, we can at least
-# see these partial results
-#
-#      SaveIsawUB( InputWorkspace=peaks_ws,Filename=run_niggli_matrix_file )
-#      SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,
-#               Filename=run_niggli_integrate_file )
+        #
+        # Save UB and peaks file, so if something goes wrong latter, we can at least
+        # see these partial results
+        #
+        #      SaveIsawUB( InputWorkspace=peaks_ws,Filename=run_niggli_matrix_file )
+        #      SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,
+        #               Filename=run_niggli_integrate_file )
 
-#
-# Get complete list of peaks to be integrated and load the UB matrix into
-# the predicted peaks workspace, so that information can be used by the
-# PeakIntegration algorithm.
-#
+        #
+        # Get complete list of peaks to be integrated and load the UB matrix into
+        # the predicted peaks workspace, so that information can be used by the
+        # PeakIntegration algorithm.
+        #
         if integrate_predicted_peaks:
             print("PREDICTING peaks to integrate....")
             peaks_ws = PredictPeaks(InputWorkspace=peaks_ws,
@@ -169,12 +172,12 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
             peak.setMonitorCount( monitor_count )
 
         if use_sphere_integration:
-#
-# Integrate found or predicted peaks in Q space using spheres, and save
-# integrated intensities, with Niggli indexing.  First get an un-weighted
-# workspace to do raw integration (we don't need high resolution or
-# LorentzCorrection to do the raw sphere integration )
-#
+            #
+            # Integrate found or predicted peaks in Q space using spheres, and save
+            # integrated intensities, with Niggli indexing.  First get an un-weighted
+            # workspace to do raw integration (we don't need high resolution or
+            # LorentzCorrection to do the raw sphere integration )
+            #
             MDEW = ConvertToDiffractionMDWorkspace( InputWorkspace=event_ws,
                                                     LorentzCorrection='0', OutputDimensions='Q (lab frame)',
                                                     SplitInto='2', SplitThreshold='500', MaxRecursionDepth='5' )
@@ -207,13 +210,13 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
         if (cell_type is not None) and (centering is not None) :
             self.run_conventional_matrix_file = self.output_directory + "/" + run + "_" +    \
                                  cell_type + "_" + centering + ".mat"
-        #    run_conventional_integrate_file = self.output_directory + "/" + run + "_" + \
-        #                            cell_type + "_" + centering + ".integrate"
+            #    run_conventional_integrate_file = self.output_directory + "/" + run + "_" + \
+            #                            cell_type + "_" + centering + ".integrate"
             SelectCellOfType( PeaksWorkspace=peaks_ws,
                               CellType=cell_type, Centering=centering,
                               Apply=True, Tolerance=tolerance )
-         # UNCOMMENT the line below to get new output values if an algorithm changes
-         #SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=run_conventional_integrate_file )
+            # UNCOMMENT the line below to get new output values if an algorithm changes
+            #SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=run_conventional_integrate_file )
             SaveIsawUB( InputWorkspace=peaks_ws, Filename=self.run_conventional_matrix_file )
             self.saved = True
 
