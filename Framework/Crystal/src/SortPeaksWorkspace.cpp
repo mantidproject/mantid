@@ -37,10 +37,10 @@ const std::string SortPeaksWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void SortPeaksWorkspace::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
@@ -58,8 +58,8 @@ void SortPeaksWorkspace::init() {
 void SortPeaksWorkspace::exec() {
   const std::string columnToSortBy = getProperty("ColumnNameToSortBy");
   const bool sortAscending = getProperty("SortAscending");
-  PeaksWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  PeaksWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  IPeaksWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  IPeaksWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   // Try to get the column. This will throw if the column does not exist.
   inputWS->getColumn(columnToSortBy);
@@ -68,7 +68,6 @@ void SortPeaksWorkspace::exec() {
     outputWS = inputWS->clone();
   }
 
-  // Perform the sorting.
   std::vector<PeaksWorkspace::ColumnAndDirection> sortCriteria;
   sortCriteria.emplace_back(columnToSortBy, sortAscending);
   outputWS->sort(sortCriteria);
