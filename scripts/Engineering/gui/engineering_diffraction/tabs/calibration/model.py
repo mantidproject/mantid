@@ -107,7 +107,6 @@ class CalibrationModel(object):
             self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, sample_path, vanadium_path,
                                      instrument, bank, spectrum_numbers)
 
-
     def extract_b2b_params(self, workspace):
 
         ws_inst = workspace.getInstrument()
@@ -258,7 +257,7 @@ class CalibrationModel(object):
 
         kwargs = {
             "InputWorkspace": sample_ws,
-            "PeakPositions": default_ceria_expected_peaks(),
+            "PeakPositions": default_ceria_expected_peaks(final=False),
             "TofBinning": [10000, -0.0005, 46000],
             "PeakWindow": 0.03,
             "MinimumPeakHeight": 0.5,
@@ -284,7 +283,7 @@ class CalibrationModel(object):
         ws_d /= van_integration
 
         kwargs = {
-            "PeakPositions": default_ceria_expected_peaks(True),
+            "PeakPositions": default_ceria_expected_peaks(final=True),
             "TofBinning": [15500, -0.0003, 52000],  # using a finer binning now have better stats
             "PeakWindow": 0.04,
             "MinimumPeakHeight": 0.5,
