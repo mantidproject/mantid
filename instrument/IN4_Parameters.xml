@@ -66,6 +66,47 @@
 		<parameter name="temperature_sample_log" type="string">
 			<value val="sample.temperature" />
 		</parameter>
+
+		<!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
+		<parameter name="logbook_default_parameters" type="string">
+		  <value val="acq_mode:/entry0/mode,
+			      start_time:/entry0/start_time,
+			      end_time:/entry0/end_time,
+			      BC2:/entry0/instrument/BC2/rotation_speed,
+			      Ph2:/entry0/instrument/BC2/phase,
+			      FC:/entry0/instrument/FC/rotation_speed,
+			      PhF:/entry0/instrument/FC/setpoint_phase,
+			      Monrate:/entry0/monitor/monsum/,
+			      cps:/entry0/instrument/Detector/detrate,
+			      Treg:/entry0/sample/regulation_temperature,
+			      Tsamp:/entry0/sample/temperature,
+			      subtitle:/entry0/experiment_identifier" />
+		</parameter>
+		<parameter name="logbook_optional_parameters" type="string">
+		  <value val="lambda:/entry0/wavelength,
+			      NCH:/entry0/monitor/time_of_flight/1,
+			      CHW:/entry0/monitor/time_of_flight/0,
+			      delay:/entry0/monitor/time_of_flight/2,
+			      duration:/entry0/duration,
+			      BC1:/entry0/instrument/BC1/rotation_speed,
+			      Tset:/entry0/sample/setpoint_temperature,
+			      Monsum:/entry0/monitor/monsum,
+			      Detrate:/entry0/instrument/Detector/detrate,
+			      BCTR:/entry0/instrument/bctr/value,
+			      HD:/entry0/instrument/hd/value,
+			      FCP:/entry0/instrument/fcp/value,
+			      MBA:/entry0/instrument/mba/value,
+			      MCR:/entry0/instrument/mcr/value,
+			      MFC:/entry0/instrument/mfc/value,
+			      MHCU111:/entry0/instrument/mhcu111/value,
+			      MHCU220:/entry0/instrument/mhcu220/value,
+			      MHGR:/entry0/instrument/mhgr/value,
+			      MHSPARE:/entry0/instrument/mhspare/value,
+			      MNA:/entry0/instrument/mna/value,
+			      MTR:/entry0/instrument/mtr/value,
+			      MVC:/entry0/instrument/mvc/value" />
+		</parameter>
+
 	</component-link>
 
 	<component-link name="wide_angle">
