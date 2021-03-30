@@ -82,7 +82,6 @@ class SuperplotPresenter:
         name = self._view.getSelectedWorkspace()
         self._model.addWorkspace(name)
         names = self._model.getWorkspaces()
-        selectedWs = self._view.getSelectedWorkspace()
         self._view.setWorkspacesList(names)
         self._view.setSelectedWorkspace(name)
         self._updatePlot()
