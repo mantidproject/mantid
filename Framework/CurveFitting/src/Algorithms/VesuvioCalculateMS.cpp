@@ -53,13 +53,12 @@ DECLARE_ALGORITHM(VesuvioCalculateMS)
 
 /// Constructor
 VesuvioCalculateMS::VesuvioCalculateMS()
-    : Algorithm(), m_acrossIdx(0), m_upIdx(1), m_beamIdx(3),
-      m_beamDir(), m_srcR2(0.0), m_halfSampleHeight(0.0),
-      m_halfSampleWidth(0.0), m_halfSampleThick(0.0), m_sampleShape(nullptr),
-      m_sampleProps(nullptr), m_detHeight(-1.0), m_detWidth(-1.0),
-      m_detThick(-1.0), m_tmin(-1.0), m_tmax(-1.0), m_delt(-1.0),
-      m_foilRes(-1.0), m_nscatters(0), m_nruns(0), m_nevents(0),
-      m_progress(nullptr), m_inputWS() {}
+    : Algorithm(), m_acrossIdx(0), m_upIdx(1), m_beamIdx(3), m_beamDir(),
+      m_srcR2(0.0), m_halfSampleHeight(0.0), m_halfSampleWidth(0.0),
+      m_halfSampleThick(0.0), m_sampleShape(nullptr), m_sampleProps(nullptr),
+      m_detHeight(-1.0), m_detWidth(-1.0), m_detThick(-1.0), m_tmin(-1.0),
+      m_tmax(-1.0), m_delt(-1.0), m_foilRes(-1.0), m_nscatters(0), m_nruns(0),
+      m_nevents(0), m_progress(nullptr), m_inputWS() {}
 
 /**
  * Initialize the algorithm's properties.
@@ -312,9 +311,8 @@ void VesuvioCalculateMS::cacheInputs() {
  */
 void VesuvioCalculateMS::calculateMS(
     CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
-    const size_t wsIndex,
-                                     API::ISpectrum &totalsc,
-                                     API::ISpectrum &multsc) const {
+    const size_t wsIndex, API::ISpectrum &totalsc,
+    API::ISpectrum &multsc) const {
   // Detector information
   DetectorParams detpar =
       ConvertToYSpace::getDetectorParameters(m_inputWS, wsIndex);
@@ -353,7 +351,7 @@ void VesuvioCalculateMS::calculateMS(
  * counts
  */
 void VesuvioCalculateMS::simulate(
-    CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng, 
+    CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
     const DetectorParams &detpar, const ResolutionParams &respar,
     CurveFitting::MSVesuvioHelper::Simulation &simulCounts) const {
   for (size_t i = 0; i < m_nevents; ++i) {
@@ -404,7 +402,7 @@ void VesuvioCalculateMS::assignToOutput(
  * @return The sum of the weights for all scatters
  */
 double VesuvioCalculateMS::calculateCounts(
-    CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng, 
+    CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
     const DetectorParams &detpar, const ResolutionParams &respar,
     CurveFitting::MSVesuvioHelper::Simulation &simulation) const {
   double weightSum(0.0);
@@ -473,8 +471,7 @@ double VesuvioCalculateMS::calculateCounts(
 
     const double scang = newDir.angle(oldDir);
     auto e1range = calculateE1Range(scang, en1[i - 1]);
-    en1[i] =
-        e1range.first + rng.flat() * (e1range.second - e1range.first);
+    en1[i] = e1range.first + rng.flat() * (e1range.second - e1range.first);
     const double d2sig = partialDiffXSec(en1[i - 1], en1[i], scang);
     double weight = d2sig * 4.0 * M_PI * (e1range.second - e1range.first) /
                     m_sampleProps->totalxsec;
@@ -553,8 +550,7 @@ V3D VesuvioCalculateMS::generateSrcPos(
  */
 double VesuvioCalculateMS::generateE0(
     CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng, const double l1,
-    const double t2,
-                                      double &weight) const {
+    const double t2, double &weight) const {
   const double tof = m_tmin + (m_tmax - m_tmin) * rng.flat();
   const double t1 = (tof - t2);
   const double vel0 = l1 / t1;
@@ -577,8 +573,7 @@ double VesuvioCalculateMS::generateE0(
  */
 double VesuvioCalculateMS::generateTOF(
     CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
-    const double en0, const double dtof,
-                                       const double dl1) const {
+    const double en0, const double dtof, const double dl1) const {
   const double vel1 = sqrt(en0 / MASS_TO_MEV);
   const double dt1 = (dl1 / vel1) * 1e6;
   const double xmin(0.0), xmax(15.0 * dt1);
@@ -618,9 +613,8 @@ double VesuvioCalculateMS::generateTOF(
  */
 bool VesuvioCalculateMS::generateScatter(
     CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
-    const Kernel::V3D &startPos,
-                                         const Kernel::V3D &direc,
-                                         double &weight, V3D &scatterPt) const {
+    const Kernel::V3D &startPos, const Kernel::V3D &direc, double &weight,
+    V3D &scatterPt) const {
   Track scatterTrack(startPos, direc);
   if (m_sampleShape->interceptSurface(scatterTrack) != 1) {
     return false;
@@ -631,8 +625,7 @@ bool VesuvioCalculateMS::generateScatter(
   const double scatterProb = 1.0 - exp(-m_sampleProps->mu * totalObjectDist);
   // Select a random point on the track that is the actual scatter point
   // from the scattering probability distribution
-  const double dist =
-      -log(1.0 - rng.flat() * scatterProb) / m_sampleProps->mu;
+  const double dist = -log(1.0 - rng.flat() * scatterProb) / m_sampleProps->mu;
   const double fraction = dist / totalObjectDist;
   // Scatter point is then entry point + fraction of width in each direction
   scatterPt = link->entryPoint;
@@ -735,7 +728,7 @@ double VesuvioCalculateMS::partialDiffXSec(const double en0, const double en1,
  * @return A new position in the detector
  */
 V3D VesuvioCalculateMS::generateDetectorPos(
-    CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng, 
+    CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
     const V3D &nominalPos, const double energy, const V3D &scatterPt,
     const V3D &direcBeforeSc, double &scang, double &distToExit) const {
   // Inverse attenuation length (m-1) for vesuvio det.
@@ -755,8 +748,7 @@ V3D VesuvioCalculateMS::generateDetectorPos(
     // perturb away from nominal position
     detPos[m_acrossIdx] =
         nominalPos[m_acrossIdx] + (rng.flat() - 0.5) * m_detWidth;
-    detPos[m_upIdx] =
-        nominalPos[m_upIdx] + (rng.flat() - 0.5) * m_detHeight;
+    detPos[m_upIdx] = nominalPos[m_upIdx] + (rng.flat() - 0.5) * m_detHeight;
 
     // Distance to exit the sample for this order
     const V3D scToDet = normalize(detPos - scatterPt);
@@ -789,8 +781,7 @@ V3D VesuvioCalculateMS::generateDetectorPos(
  */
 double VesuvioCalculateMS::generateE1(
     CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
-    const double angle, const double e1nom,
-                                      const double e1res) const {
+    const double angle, const double e1nom, const double e1res) const {
   if (e1res == 0.0)
     return e1nom;
 
