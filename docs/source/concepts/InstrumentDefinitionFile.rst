@@ -397,14 +397,14 @@ There is a shortcut way to create 3D arrays of detector pixels. These pixels rep
       <location x="0" y="0" z="0.2" name="bank2">
       </location>
     </component>
-      
-    <type name="block" is="GridDetector" type="voxel" 
+
+    <type name="block" is="GridDetector" type="voxel"
         xpixels="4" xstart="-0.04" xstep="+0.02"
-        ypixels="48" ystart="-0.48" ystep="+0.02" 
+        ypixels="48" ystart="-0.48" ystep="+0.02"
         zpixels="16" zstart="-0.08" zstep="+0.01">
       <properties/>
-    </type>  
-     
+    </type>
+
     <!-- Pixel for Detectors-->
     <type name="voxel" is="detector">
      	<cuboid id="shape">
@@ -416,7 +416,7 @@ There is a shortcut way to create 3D arrays of detector pixels. These pixels rep
     <algebra val="shape" />
     </type>
 
-- The “block” type defined above has the special “is” tag of “GridDetector”. The same type definition 
+- The “block” type defined above has the special “is” tag of “GridDetector”. The same type definition
   then needs these attributes specified:
 
   - type: point to another type defining your pixel shape and size.
@@ -429,22 +429,22 @@ There is a shortcut way to create 3D arrays of detector pixels. These pixels rep
   - zpixels: number of pixels in Z
   - zstart: z-position of the 0-th pixel (in length units, normally meters)
   - zstep: step size between pixels in the z (usually beam) direction (in length units, normally meters)
-- Detectors of the type specified (“pixel” in the example) will be replicated at the X Y and Z coordinates 
+- Detectors of the type specified (“pixel” in the example) will be replicated at the X Y and Z coordinates
   given. The usual rotation and translation of the panel will rotate the pixels as needed.
-- Each instance of a “block” needs to set these attributes, at the <component> tag, in order to specify the 
+- Each instance of a “block” needs to set these attributes, at the <component> tag, in order to specify the
   Pixel IDs of the 2D array.
-  
+
   - idstart: detector ID of the first pixel
-  - idfillorder: a string which determines the ordering of the axes. For example "zxy": (0,0,0)=1; 
-    (0,0,1)=1, (0, 0, 2)=2 and so on. Default is idfillorder=”xyz”. Other characters are not allowed and 
+  - idfillorder: a string which determines the ordering of the axes. For example "zxy": (0,0,0)=1;
+    (0,0,1)=1, (0, 0, 2)=2 and so on. Default is idfillorder=”xyz”. Other characters are not allowed and
     the string must contain all three axes.
-  - idstepbyrow: amount to increase the ID number on each row (2nd order). e.g, if idfillorder="zyx",and set 
-    idstepbyrow="100", and have 10 Z pixels, you would get: (0,0,0)=0; (0,0,1)=1; ... (0,0,9)=9; 
+  - idstepbyrow: amount to increase the ID number on each row (2nd order). e.g, if idfillorder="zyx",and set
+    idstepbyrow="100", and have 10 Z pixels, you would get: (0,0,0)=0; (0,0,1)=1; ... (0,0,9)=9;
     (0,1,0)=100;(0,1,1)=101; etc. The last order is always calculated automatically.
   - idstep. Default to 1. Set the ID increment within a row (1st order).
 - DO NOT also specify an “idlist” attribute for rectangular detectors, as it will not be used.
 - Advantages of using a GridDetector tag:
-  
+
   - Convenient way of defining voxel-based instruments.
   - Special handling/rendering of each voxel layer (z plane) as textures in the instrument view.
   - Smaller IDF and faster instrument loading times.
@@ -546,7 +546,7 @@ an example of how to do it:
 Creating Structured (Irregular Geometry) Detectors
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In the previous example, we saw that Rectangular Detectors provide a simple way 
+In the previous example, we saw that Rectangular Detectors provide a simple way
 of producing detectors with regular topology and geometry. The StructuredDetector
 provides a way of producing detectors with regular topology and irregular geometry. It
 can be thought of as a warped RectangularDetector:
@@ -601,13 +601,13 @@ can be thought of as a warped RectangularDetector:
    -  xpixels: number of pixels in X.
    -  ypixels: number of pixels in Y.
 
--  The StrucuredDetector type contains special <vertex> tags enclosed by this type. 
+-  The StrucuredDetector type contains special <vertex> tags enclosed by this type.
    There are some useful points to note about this type of definition:
 
    -  All vertices for a single detector panel must be defined.
    -  Detector panels can be duplicated and repositioned using <component> and <location> tags.
    -  Vertices appear in a particular winding order increasing in x then y then z e.g
-      (1, 0, 0) (2, 0, 0) / (1, 1, 0) (2, 1, 0)/ (1, 2, 0) (2, 2, 0) etc. Z 
+      (1, 0, 0) (2, 0, 0) / (1, 1, 0) (2, 1, 0)/ (1, 2, 0) (2, 2, 0) etc. Z
       is assumed to be fixed.
    -  The total number of vertices are strictly (xpixels + 1) * (ypixels + 1)
 
@@ -960,7 +960,7 @@ The above one line of XML is shorthand notation for
 If name is specified, e.g. as name="det" in the first example, then as seen the
 <location> elements are given the 'name' plus a counter, where by default this counter starts from zero. This counter can optionally be changed by using
 attribute name-count-start, e.g. setting name-count-start="1" in the above
-example would have named the 10 <location> elements det1, det2, ..., det10. Additionally, using the name-count-increment attribute, e.g setting 
+example would have named the 10 <location> elements det1, det2, ..., det10. Additionally, using the name-count-increment attribute, e.g setting
 name-count-increment="2" would have named the 10 <location> elements dat1, det3, ..., det21. By default, this increment is one.
 
 When one <locations> tag was used in ISIS LET_Definition.xml the number of

@@ -99,8 +99,7 @@ void CentroidPeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // cppcheck-suppress syntaxError
     PRAGMA_OMP(parallel for schedule(dynamic, 10) )
     for (int i = 0; i < int(peakWS->getNumberPeaks()); ++i) {
-      // Get a direct ref to that peak.
-      IPeak &p = peakWS->getPeak(i);
+      Peak &p = peakWS->getPeak(i);
       double detectorDistance = p.getL2();
 
       // Get the peak center as a position in the dimensions of the workspace

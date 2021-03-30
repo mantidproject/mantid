@@ -22,7 +22,7 @@ Usage
 **Example - a basic example using ResNorm.**
 
 .. code-block:: python
-   
+
    def createSampleWorkspace(name, random=False):
    """ Creates a sample workspace with a single lorentzian that looks like IRIS data"""
    import os

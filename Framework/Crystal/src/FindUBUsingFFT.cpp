@@ -5,7 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/FindUBUsingFFT.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -18,7 +20,6 @@ DECLARE_ALGORITHM(FindUBUsingFFT)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 const std::string FindUBUsingFFT::name() const { return "FindUBUsingFFT"; }
@@ -32,7 +33,7 @@ const std::string FindUBUsingFFT::category() const {
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingFFT::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -63,14 +64,13 @@ void FindUBUsingFFT::exec() {
 
   double degrees_per_step = this->getProperty("DegreesPerStep");
 
-  PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
+  IPeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
 
-  const std::vector<Peak> &peaks = ws->getPeaks();
-  size_t n_peaks = ws->getNumberPeaks();
+  int n_peaks = ws->getNumberPeaks();
 
   std::vector<V3D> q_vectors;
-  for (size_t i = 0; i < n_peaks; i++) {
-    q_vectors.emplace_back(peaks[i].getQSampleFrame());
+  for (int i = 0; i < n_peaks; i++) {
+    q_vectors.emplace_back(ws->getPeak(i).getQSampleFrame());
   }
 
   Matrix<double> UB(3, 3, false);

@@ -85,7 +85,7 @@ Usage
 
    # # To generate the pre-calculated features (integration and curves), for a new
    # Vanadium run, and apply the corrections on a workspace:
-   #             
+   #
    # sample_ws = Load('ENGINX00213855.nxs')
    # van_ws = Load('ENGINX00236516.nxs')
    # EnggVanadiumCorrections(Workspace = sample_ws, VanadiumWorkspace = van_ws
@@ -98,7 +98,7 @@ Usage
    # SaveNexus(InputWorkspace='curves_ws',
    #           Filename='ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
    #
-   # # (not done here because the Vanadium run file has a large number of events)              
+   # # (not done here because the Vanadium run file has a large number of events)
    #
    # # Below we use the pre-calculated features that can be obtained with
    # # the commands listed above.
@@ -136,7 +136,7 @@ Output:
    For workspace index 400 the spectrum integration is 23.998
    For workspace index 401 the spectrum integration is 23.799
    For workspace index 402 the spectrum integration is 22.872
-   
+
 .. categories::
 
 .. sourcelink::

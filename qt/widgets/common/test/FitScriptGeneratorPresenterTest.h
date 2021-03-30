@@ -97,21 +97,22 @@ public:
     auto const selectedRows = std::vector<FitDomainIndex>{selectedRow};
     auto const globals = std::vector<GlobalParameter>{};
 
+    ON_CALL(*m_view, hasLoadedData()).WillByDefault(Return(true));
     ON_CALL(*m_view, selectedRows()).WillByDefault(Return(selectedRows));
+    ON_CALL(*m_view, currentRow()).WillByDefault(Return(selectedRow));
     ON_CALL(*m_view, workspaceName(selectedRow))
         .WillByDefault(Return(m_wsName));
     ON_CALL(*m_view, workspaceIndex(selectedRow))
         .WillByDefault(Return(m_wsIndex));
 
-    ON_CALL(*m_model, getFittingMode())
-        .WillByDefault(Return(FittingMode::SEQUENTIAL));
+    ON_CALL(*m_model, isSimultaneousMode()).WillByDefault(Return(false));
     ON_CALL(*m_model, getFunction(m_wsName, m_wsIndex))
         .WillByDefault(Return(m_function));
 
     ON_CALL(*m_model, getGlobalParameters()).WillByDefault(Return(globals));
 
     EXPECT_CALL(*m_view, selectedRows())
-        .Times(2)
+        .Times(1)
         .WillRepeatedly(Return(selectedRows));
     EXPECT_CALL(*m_view, workspaceName(selectedRow))
         .Times(2)
@@ -123,8 +124,11 @@ public:
     EXPECT_CALL(*m_view, removeWorkspaceDomain(m_wsName, m_wsIndex)).Times(1);
     EXPECT_CALL(*m_model, removeWorkspaceDomain(m_wsName, m_wsIndex)).Times(1);
 
-    EXPECT_CALL(*m_model, getFittingMode()).Times(1);
+    EXPECT_CALL(*m_model, isSimultaneousMode()).Times(1);
     EXPECT_CALL(*m_view, setSimultaneousMode(false)).Times(1);
+
+    EXPECT_CALL(*m_view, hasLoadedData()).Times(1);
+    EXPECT_CALL(*m_view, currentRow()).Times(1);
 
     EXPECT_CALL(*m_model, getFunction(m_wsName, m_wsIndex)).Times(1);
     EXPECT_CALL(*m_view, setFunction(m_function)).Times(1);
@@ -170,9 +174,9 @@ public:
   void
   test_that_changing_a_start_x_will_update_its_value_in_the_model_when_the_x_value_is_valid() {
     auto const selectedRow = FitDomainIndex(0);
-    auto const selectedRows = std::vector<FitDomainIndex>{selectedRow};
 
-    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(selectedRows));
+    ON_CALL(*m_view, hasLoadedData()).WillByDefault(Return(true));
+    ON_CALL(*m_view, currentRow()).WillByDefault(Return(selectedRow));
     ON_CALL(*m_view, workspaceName(selectedRow))
         .WillByDefault(Return(m_wsName));
     ON_CALL(*m_view, workspaceIndex(selectedRow))
@@ -181,9 +185,8 @@ public:
     ON_CALL(*m_model, updateStartX(m_wsName, m_wsIndex, m_startX))
         .WillByDefault(Return(true));
 
-    EXPECT_CALL(*m_view, selectedRows())
-        .Times(1)
-        .WillOnce(Return(selectedRows));
+    EXPECT_CALL(*m_view, hasLoadedData()).Times(1);
+    EXPECT_CALL(*m_view, currentRow()).Times(1).WillOnce(Return(selectedRow));
     EXPECT_CALL(*m_view, workspaceName(selectedRow))
         .Times(1)
         .WillOnce(Return(m_wsName));
@@ -203,9 +206,9 @@ public:
   void
   test_that_changing_a_start_x_will_reset_the_view_if_its_new_value_is_invalid() {
     auto const selectedRow = FitDomainIndex(0);
-    auto const selectedRows = std::vector<FitDomainIndex>{selectedRow};
 
-    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(selectedRows));
+    ON_CALL(*m_view, hasLoadedData()).WillByDefault(Return(true));
+    ON_CALL(*m_view, currentRow()).WillByDefault(Return(selectedRow));
     ON_CALL(*m_view, workspaceName(selectedRow))
         .WillByDefault(Return(m_wsName));
     ON_CALL(*m_view, workspaceIndex(selectedRow))
@@ -214,9 +217,8 @@ public:
     ON_CALL(*m_model, updateStartX(m_wsName, m_wsIndex, m_startX))
         .WillByDefault(Return(false));
 
-    EXPECT_CALL(*m_view, selectedRows())
-        .Times(1)
-        .WillOnce(Return(selectedRows));
+    EXPECT_CALL(*m_view, hasLoadedData()).Times(1);
+    EXPECT_CALL(*m_view, currentRow()).Times(1).WillOnce(Return(selectedRow));
     EXPECT_CALL(*m_view, workspaceName(selectedRow))
         .Times(1)
         .WillOnce(Return(m_wsName));
@@ -242,9 +244,9 @@ public:
   void
   test_that_changing_a_end_x_will_update_its_value_in_the_model_when_the_x_value_is_valid() {
     auto const selectedRow = FitDomainIndex(0);
-    auto const selectedRows = std::vector<FitDomainIndex>{selectedRow};
 
-    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(selectedRows));
+    ON_CALL(*m_view, hasLoadedData()).WillByDefault(Return(true));
+    ON_CALL(*m_view, currentRow()).WillByDefault(Return(selectedRow));
     ON_CALL(*m_view, workspaceName(selectedRow))
         .WillByDefault(Return(m_wsName));
     ON_CALL(*m_view, workspaceIndex(selectedRow))
@@ -253,9 +255,8 @@ public:
     ON_CALL(*m_model, updateEndX(m_wsName, m_wsIndex, m_endX))
         .WillByDefault(Return(true));
 
-    EXPECT_CALL(*m_view, selectedRows())
-        .Times(1)
-        .WillOnce(Return(selectedRows));
+    EXPECT_CALL(*m_view, hasLoadedData()).Times(1);
+    EXPECT_CALL(*m_view, currentRow()).Times(1).WillOnce(Return(selectedRow));
     EXPECT_CALL(*m_view, workspaceName(selectedRow))
         .Times(1)
         .WillOnce(Return(m_wsName));
@@ -273,9 +274,9 @@ public:
   void
   test_that_changing_a_end_x_will_reset_the_view_if_its_new_value_is_invalid() {
     auto const selectedRow = FitDomainIndex(0);
-    auto const selectedRows = std::vector<FitDomainIndex>{selectedRow};
 
-    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(selectedRows));
+    ON_CALL(*m_view, hasLoadedData()).WillByDefault(Return(true));
+    ON_CALL(*m_view, currentRow()).WillByDefault(Return(selectedRow));
     ON_CALL(*m_view, workspaceName(selectedRow))
         .WillByDefault(Return(m_wsName));
     ON_CALL(*m_view, workspaceIndex(selectedRow))
@@ -284,9 +285,8 @@ public:
     ON_CALL(*m_model, updateEndX(m_wsName, m_wsIndex, m_endX))
         .WillByDefault(Return(false));
 
-    EXPECT_CALL(*m_view, selectedRows())
-        .Times(1)
-        .WillOnce(Return(selectedRows));
+    EXPECT_CALL(*m_view, hasLoadedData()).Times(1);
+    EXPECT_CALL(*m_view, currentRow()).Times(1).WillOnce(Return(selectedRow));
     EXPECT_CALL(*m_view, workspaceName(selectedRow))
         .Times(1)
         .WillOnce(Return(m_wsName));
@@ -319,34 +319,29 @@ public:
 
   void
   test_that_FunctionRemoved_will_remove_the_function_from_the_relevant_domains() {
-    auto const selectedRow = FitDomainIndex(0);
-    auto const selectedRows = std::vector<FitDomainIndex>{selectedRow};
+    auto const row = FitDomainIndex(0);
+    auto const allRows = std::vector<FitDomainIndex>{row};
 
-    ON_CALL(*m_view, isAddRemoveFunctionForAllChecked())
-        .WillByDefault(Return(false));
-    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(selectedRows));
-    ON_CALL(*m_view, workspaceName(selectedRow))
-        .WillByDefault(Return(m_wsName));
-    ON_CALL(*m_view, workspaceIndex(selectedRow))
-        .WillByDefault(Return(m_wsIndex));
+    ON_CALL(*m_view, hasLoadedData()).WillByDefault(Return(true));
+    ON_CALL(*m_view, applyFunctionChangesToAll()).WillByDefault(Return(true));
+    ON_CALL(*m_view, allRows()).WillByDefault(Return(allRows));
+    ON_CALL(*m_view, workspaceName(row)).WillByDefault(Return(m_wsName));
+    ON_CALL(*m_view, workspaceIndex(row)).WillByDefault(Return(m_wsIndex));
 
-    EXPECT_CALL(*m_view, isAddRemoveFunctionForAllChecked)
+    EXPECT_CALL(*m_view, hasLoadedData()).Times(1);
+    EXPECT_CALL(*m_view, applyFunctionChangesToAll)
         .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_view, selectedRows())
-        .Times(2)
-        .WillRepeatedly(Return(selectedRows));
-    EXPECT_CALL(*m_view, workspaceName(selectedRow))
-        .Times(2)
-        .WillRepeatedly(Return(m_wsName));
-    EXPECT_CALL(*m_view, workspaceIndex(selectedRow))
-        .Times(2)
-        .WillRepeatedly(Return(m_wsIndex));
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_view, allRows()).Times(1).WillOnce(Return(allRows));
+    EXPECT_CALL(*m_view, workspaceName(row))
+        .Times(1)
+        .WillOnce(Return(m_wsName));
+    EXPECT_CALL(*m_view, workspaceIndex(row))
+        .Times(1)
+        .WillOnce(Return(m_wsIndex));
     EXPECT_CALL(*m_model,
                 removeFunction(m_wsName, m_wsIndex, m_function->asString()))
         .Times(1);
-
-    set_selection_changed_expectations(selectedRow, false, true);
 
     m_presenter->notifyPresenter(ViewEvent::FunctionRemoved,
                                  m_function->asString());
@@ -356,19 +351,11 @@ public:
   test_that_FunctionAdded_will_clear_the_function_in_the_view_if_no_data_exists() {
     auto const selectedRows = std::vector<FitDomainIndex>{};
 
-    ON_CALL(*m_view, isAddRemoveFunctionForAllChecked())
-        .WillByDefault(Return(false));
-    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(selectedRows));
+    ON_CALL(*m_view, hasLoadedData()).WillByDefault(Return(false));
 
-    EXPECT_CALL(*m_view, isAddRemoveFunctionForAllChecked)
-        .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_view, selectedRows())
-        .Times(1)
-        .WillOnce(Return(selectedRows));
-    EXPECT_CALL(
-        *m_view,
-        displayWarning("Data needs to be loaded before adding a function."))
+    EXPECT_CALL(*m_view, hasLoadedData()).Times(1);
+    EXPECT_CALL(*m_view,
+                displayWarning("Data needs to be loaded using Add Workspace."))
         .Times(1);
     EXPECT_CALL(*m_view, clearFunction()).Times(1);
 
@@ -378,23 +365,22 @@ public:
 
   void
   test_that_FunctionAdded_will_add_the_function_in_the_relevant_domains_when_data_exists() {
-    auto const selectedRow = FitDomainIndex(0);
-    auto const selectedRows = std::vector<FitDomainIndex>{selectedRow};
+    auto const row = FitDomainIndex(0);
+    auto const allRows = std::vector<FitDomainIndex>{row};
 
-    ON_CALL(*m_view, isAddRemoveFunctionForAllChecked())
-        .WillByDefault(Return(false));
-    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(selectedRows));
+    ON_CALL(*m_view, hasLoadedData()).WillByDefault(Return(true));
+    ON_CALL(*m_view, applyFunctionChangesToAll()).WillByDefault(Return(true));
+    ON_CALL(*m_view, allRows()).WillByDefault(Return(allRows));
 
-    EXPECT_CALL(*m_view, isAddRemoveFunctionForAllChecked)
+    EXPECT_CALL(*m_view, hasLoadedData()).Times(1);
+    EXPECT_CALL(*m_view, applyFunctionChangesToAll)
         .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_view, selectedRows())
-        .Times(1)
-        .WillOnce(Return(selectedRows));
-    EXPECT_CALL(*m_view, workspaceName(selectedRow))
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_view, allRows()).Times(1).WillOnce(Return(allRows));
+    EXPECT_CALL(*m_view, workspaceName(row))
         .Times(1)
         .WillOnce(Return(m_wsName));
-    EXPECT_CALL(*m_view, workspaceIndex(selectedRow))
+    EXPECT_CALL(*m_view, workspaceIndex(row))
         .Times(1)
         .WillOnce(Return(m_wsIndex));
     EXPECT_CALL(*m_model,
@@ -407,21 +393,11 @@ public:
 
   void
   test_that_FunctionReplaced_will_clear_the_function_in_the_view_if_no_data_exists() {
-    auto const selectedRows = std::vector<FitDomainIndex>{};
+    ON_CALL(*m_view, hasLoadedData()).WillByDefault(Return(false));
 
-    ON_CALL(*m_view, isAddRemoveFunctionForAllChecked())
-        .WillByDefault(Return(false));
-    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(selectedRows));
-
-    EXPECT_CALL(*m_view, isAddRemoveFunctionForAllChecked)
-        .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_view, selectedRows())
-        .Times(1)
-        .WillOnce(Return(selectedRows));
-    EXPECT_CALL(
-        *m_view,
-        displayWarning("Data needs to be loaded before adding a function."))
+    EXPECT_CALL(*m_view, hasLoadedData()).Times(1);
+    EXPECT_CALL(*m_view,
+                displayWarning("Data needs to be loaded using Add Workspace."))
         .Times(1);
     EXPECT_CALL(*m_view, clearFunction()).Times(1);
 
@@ -431,27 +407,24 @@ public:
 
   void
   test_that_FunctionReplaced_will_set_the_function_in_the_relevant_domains_when_data_exists() {
-    auto const selectedRow = FitDomainIndex(0);
-    auto const selectedRows = std::vector<FitDomainIndex>{selectedRow};
+    auto const row = FitDomainIndex(0);
+    auto const allRows = std::vector<FitDomainIndex>{row};
 
-    ON_CALL(*m_view, isAddRemoveFunctionForAllChecked())
-        .WillByDefault(Return(false));
-    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(selectedRows));
-    ON_CALL(*m_view, workspaceName(selectedRow))
-        .WillByDefault(Return(m_wsName));
-    ON_CALL(*m_view, workspaceIndex(selectedRow))
-        .WillByDefault(Return(m_wsIndex));
+    ON_CALL(*m_view, hasLoadedData()).WillByDefault(Return(true));
+    ON_CALL(*m_view, applyFunctionChangesToAll()).WillByDefault(Return(true));
+    ON_CALL(*m_view, allRows()).WillByDefault(Return(allRows));
+    ON_CALL(*m_view, workspaceName(row)).WillByDefault(Return(m_wsName));
+    ON_CALL(*m_view, workspaceIndex(row)).WillByDefault(Return(m_wsIndex));
 
-    EXPECT_CALL(*m_view, isAddRemoveFunctionForAllChecked)
+    EXPECT_CALL(*m_view, hasLoadedData()).Times(1);
+    EXPECT_CALL(*m_view, applyFunctionChangesToAll)
         .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_view, selectedRows())
-        .Times(1)
-        .WillOnce(Return(selectedRows));
-    EXPECT_CALL(*m_view, workspaceName(selectedRow))
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_view, allRows()).Times(1).WillOnce(Return(allRows));
+    EXPECT_CALL(*m_view, workspaceName(row))
         .Times(1)
         .WillOnce(Return(m_wsName));
-    EXPECT_CALL(*m_view, workspaceIndex(selectedRow))
+    EXPECT_CALL(*m_view, workspaceIndex(row))
         .Times(1)
         .WillOnce(Return(m_wsIndex));
     EXPECT_CALL(*m_model,
@@ -470,7 +443,7 @@ public:
 
     ON_CALL(*m_view, parameterValue(parameter))
         .WillByDefault(Return(parameterValue));
-    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(allRows));
+    ON_CALL(*m_view, applyFunctionChangesToAll()).WillByDefault(Return(true));
     ON_CALL(*m_view, allRows()).WillByDefault(Return(allRows));
     ON_CALL(*m_view, workspaceName(row)).WillByDefault(Return(m_wsName));
     ON_CALL(*m_view, workspaceIndex(row)).WillByDefault(Return(m_wsIndex));
@@ -479,6 +452,7 @@ public:
         .WillByDefault(Return(parameter));
 
     EXPECT_CALL(*m_view, parameterValue(parameter)).Times(1);
+    EXPECT_CALL(*m_view, applyFunctionChangesToAll()).Times(1);
     EXPECT_CALL(*m_view, allRows()).Times(1);
     EXPECT_CALL(*m_view, workspaceName(row))
         .Times(2)
@@ -492,7 +466,6 @@ public:
     EXPECT_CALL(*m_model, updateParameterValue(m_wsName, m_wsIndex, parameter,
                                                parameterValue))
         .Times(1);
-    EXPECT_CALL(*m_view, selectedRows()).Times(1);
 
     set_selection_changed_expectations(row, false, true);
 
@@ -507,11 +480,13 @@ public:
 
     ON_CALL(*m_view, attributeValue(attribute))
         .WillByDefault(Return(attributeValue));
+    ON_CALL(*m_view, applyFunctionChangesToAll()).WillByDefault(Return(true));
     ON_CALL(*m_view, allRows()).WillByDefault(Return(allRows));
     ON_CALL(*m_view, workspaceName(row)).WillByDefault(Return(m_wsName));
     ON_CALL(*m_view, workspaceIndex(row)).WillByDefault(Return(m_wsIndex));
 
     EXPECT_CALL(*m_view, attributeValue(attribute)).Times(1);
+    EXPECT_CALL(*m_view, applyFunctionChangesToAll()).Times(1);
     EXPECT_CALL(*m_view, allRows()).Times(1);
     EXPECT_CALL(*m_view, workspaceName(row))
         .Times(1)
@@ -535,8 +510,8 @@ public:
     auto const allRows = std::vector<FitDomainIndex>{row};
     auto const globalTies = std::vector<GlobalTie>{};
 
+    ON_CALL(*m_view, applyFunctionChangesToAll()).WillByDefault(Return(true));
     ON_CALL(*m_view, allRows()).WillByDefault(Return(allRows));
-    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(allRows));
     ON_CALL(*m_model,
             getEquivalentFunctionIndexForDomain(m_wsName, m_wsIndex, parameter))
         .WillByDefault(Return(parameter));
@@ -545,6 +520,7 @@ public:
         .WillByDefault(Return(tie));
     ON_CALL(*m_model, getGlobalTies()).WillByDefault(Return(globalTies));
 
+    EXPECT_CALL(*m_view, applyFunctionChangesToAll()).Times(1);
     EXPECT_CALL(*m_view, allRows()).Times(1);
     EXPECT_CALL(*m_view, workspaceName(row))
         .Times(2)
@@ -565,8 +541,6 @@ public:
     EXPECT_CALL(*m_model, getGlobalTies()).Times(1);
     EXPECT_CALL(*m_view, setGlobalTies(VectorSize(0u))).Times(1);
 
-    EXPECT_CALL(*m_view, selectedRows()).Times(1);
-
     set_selection_changed_expectations(row, false, true);
 
     m_presenter->notifyPresenter(ViewEvent::ParameterTieChanged, parameter,
@@ -579,9 +553,10 @@ public:
     auto const row = FitDomainIndex(0);
     auto const allRows = std::vector<FitDomainIndex>{row};
 
+    ON_CALL(*m_view, applyFunctionChangesToAll()).WillByDefault(Return(true));
     ON_CALL(*m_view, allRows()).WillByDefault(Return(allRows));
-    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(allRows));
 
+    EXPECT_CALL(*m_view, applyFunctionChangesToAll()).Times(1);
     EXPECT_CALL(*m_view, allRows()).Times(1);
     EXPECT_CALL(*m_view, workspaceName(row))
         .Times(2)
@@ -592,7 +567,6 @@ public:
     EXPECT_CALL(*m_model,
                 removeParameterConstraint(m_wsName, m_wsIndex, parameter))
         .Times(1);
-    EXPECT_CALL(*m_view, selectedRows()).Times(1);
 
     set_selection_changed_expectations(row, false, true);
 
@@ -607,12 +581,13 @@ public:
     auto const row = FitDomainIndex(0);
     auto const allRows = std::vector<FitDomainIndex>{row};
 
+    ON_CALL(*m_view, applyFunctionChangesToAll()).WillByDefault(Return(true));
     ON_CALL(*m_view, allRows()).WillByDefault(Return(allRows));
-    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(allRows));
     ON_CALL(*m_model, getEquivalentFunctionIndexForDomain(m_wsName, m_wsIndex,
                                                           functionIndex))
         .WillByDefault(Return(functionIndex));
 
+    EXPECT_CALL(*m_view, applyFunctionChangesToAll()).Times(1);
     EXPECT_CALL(*m_view, allRows()).Times(1);
     EXPECT_CALL(*m_view, workspaceName(row))
         .Times(2)
@@ -626,8 +601,6 @@ public:
     EXPECT_CALL(*m_model, updateParameterConstraint(m_wsName, m_wsIndex,
                                                     functionIndex, constraint))
         .Times(1);
-
-    EXPECT_CALL(*m_view, selectedRows()).Times(1);
 
     set_selection_changed_expectations(row, false, true);
 
@@ -689,17 +662,19 @@ private:
       bool ignoreNameIndexRetrieval = false,
       std::vector<GlobalParameter> const &globals =
           std::vector<GlobalParameter>()) {
-    auto selectedRows = std::vector<FitDomainIndex>{selectedRow};
+    ON_CALL(*m_model, isSimultaneousMode()).WillByDefault(Return(false));
+    ON_CALL(*m_view, hasLoadedData()).WillByDefault(Return(!noSelection));
 
-    if (noSelection)
-      selectedRows = std::vector<FitDomainIndex>{};
+    EXPECT_CALL(*m_model, isSimultaneousMode()).Times(1);
+    EXPECT_CALL(*m_view, setSimultaneousMode(false)).Times(1);
 
-    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(selectedRows));
+    EXPECT_CALL(*m_view, hasLoadedData())
+        .Times(1)
+        .WillOnce(Return(!noSelection));
 
-    ON_CALL(*m_model, getFittingMode())
-        .WillByDefault(Return(FittingMode::SEQUENTIAL));
+    if (!noSelection) {
+      ON_CALL(*m_view, currentRow()).WillByDefault(Return(selectedRow));
 
-    if (!selectedRows.empty()) {
       ON_CALL(*m_view, workspaceName(selectedRow))
           .WillByDefault(Return(m_wsName));
       ON_CALL(*m_view, workspaceIndex(selectedRow))
@@ -710,10 +685,9 @@ private:
 
       ON_CALL(*m_model, getGlobalParameters()).WillByDefault(Return(globals));
 
+      EXPECT_CALL(*m_view, currentRow()).Times(1).WillOnce(Return(selectedRow));
+
       if (!ignoreNameIndexRetrieval) {
-        EXPECT_CALL(*m_view, selectedRows())
-            .Times(1)
-            .WillOnce(Return(selectedRows));
         EXPECT_CALL(*m_view, workspaceName(selectedRow))
             .Times(1)
             .WillOnce(Return(m_wsName));
@@ -722,9 +696,6 @@ private:
             .WillOnce(Return(m_wsIndex));
       }
 
-      EXPECT_CALL(*m_model, getFittingMode()).Times(1);
-      EXPECT_CALL(*m_view, setSimultaneousMode(false)).Times(1);
-
       EXPECT_CALL(*m_model, getFunction(m_wsName, m_wsIndex)).Times(1);
       EXPECT_CALL(*m_view, setFunction(m_function)).Times(1);
 
@@ -732,13 +703,6 @@ private:
       EXPECT_CALL(*m_view, setGlobalParameters(VectorSize(globals.size())))
           .Times(1);
     } else {
-      EXPECT_CALL(*m_view, selectedRows())
-          .Times(1)
-          .WillOnce(Return(selectedRows));
-
-      EXPECT_CALL(*m_model, getFittingMode()).Times(1);
-      EXPECT_CALL(*m_view, setSimultaneousMode(false)).Times(1);
-
       EXPECT_CALL(*m_view, clearFunction()).Times(1);
     }
   }

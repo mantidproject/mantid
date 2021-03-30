@@ -11,7 +11,7 @@ Description
 
 **Note**: this algorithm is deprecated, use :ref:`EvaluateFunction <algm-EvaluateFunction>` instead.
 
-The algorithm will use the axes of the input workspace to evaluate a functions on them 
+The algorithm will use the axes of the input workspace to evaluate a functions on them
 and store the result in the output workspace.
 
 This is a plot of the evaluated function from the usage example below.
@@ -41,8 +41,8 @@ Usage
     print(out.getXDimension().name)
     print(out.getYDimension().name)
     print(out.getZDimension().name)
-    
-    
+
+
 Output
 ######
 

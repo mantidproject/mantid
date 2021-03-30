@@ -14,7 +14,7 @@ from the Input Workspace log data, which is stored in the workspace's
 :py:obj:`run object <mantid.api.Run>`. Every data point
 (and its error) is divided by that number.
 The good proton charge value is added to the normalized workspace
-as the value of *NormalizationFactor* log. 
+as the value of *NormalizationFactor* log.
 
 
 ISIS Calculation Details
@@ -47,7 +47,7 @@ Usage
    # Create two workspaces
    ws = CreateWorkspace(DataX=range(0,3), DataY=(17,12))
 
-   # Add Good Proton Charge Log 
+   # Add Good Proton Charge Log
    AddSampleLog(Workspace=ws, LogName='gd_prtn_chrg', LogText='10.0', LogType='Number')
 
    # Fetch the generated logs
@@ -74,7 +74,7 @@ Output:
    Good Proton Charge = 10.0
    Before normalisation [ 17.  12.]
    After normalisation  [ 1.7  1.2]
-   Normalisation factor 10.0   
+   Normalisation factor 10.0
 
 .. categories::
 

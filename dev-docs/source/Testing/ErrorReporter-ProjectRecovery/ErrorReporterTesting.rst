@@ -15,8 +15,8 @@ Error Reporter test
 - Below you will be asked to produce a hard crash (by running the `Segfault`
   Algorithm) or a soft crash (bring up an error report pop-up without also
   closing Mantid, by Loading ``Training_Exercise3a_SNS.nxs`` available from
-  the `Training Course Data <https://sourceforge.net/projects/mantid/files/Sample%20Data/TrainingCourseData.zip/download>`__ 
-  and running the `NormaliseToMonitor` Algorithm. If one or both of these 
+  the `Training Course Data <https://sourceforge.net/projects/mantid/files/Sample%20Data/TrainingCourseData.zip/download>`__
+  and running the `NormaliseToMonitor` Algorithm. If one or both of these
   methods to crash Mantid no longer works, then ask other developers for a
   suitable method and update these instructions.
 - Make sure the location of this file is included in your search directories. Full instructions :ref:`are available online <mantid:getting started>`.

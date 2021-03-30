@@ -16,7 +16,7 @@ returns zero for points outside the tabulated values.
 The files can be either ascii text files or nexus files. The ascii files must contain two column
 of real numbers separated by spaces. The first column are the x-values and the second one is for y.
 
-If a nexus file is used its first spectrum provides the data for the function. The same is true for 
+If a nexus file is used its first spectrum provides the data for the function. The same is true for
 a workspace which must be a MatrixWorkspace.
 
 .. attributes::
@@ -34,12 +34,12 @@ Usage
 
     from __future__ import print_function
     ws1=LoadNexus('tabulatedFunctionExample.nxs')
-    
-    # Clone the workspace by rescaling and shift 
+
+    # Clone the workspace by rescaling and shift
     ws2=CloneWorkspace(ws1)
     ws2=Scale(ws2, Factor=1.34, Operation='Multiply')
     ws2=ScaleX(ws2, Factor=0.002, Operation='Add')
-    
+
     # Call the Fit algorithm and perform the fit
     myFunc='name=TabulatedFunction,Workspace=ws1,WorkspaceIndex=0,Scaling=1.0,Shift=0.0'
     fit_output = Fit(Function=myFunc, InputWorkspace=ws2, Output='fit')

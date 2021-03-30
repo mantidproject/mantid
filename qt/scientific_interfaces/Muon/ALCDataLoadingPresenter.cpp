@@ -23,6 +23,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <algorithm>
 #include <sstream>
 
 namespace {
@@ -67,10 +68,6 @@ void ALCDataLoadingPresenter::handleRunsEditing() {
 void ALCDataLoadingPresenter::handleRunsEditingFinished() {
   // Make sure everything is reset
   m_view->enableRunsAutoAdd(false);
-
-  if (m_previousFirstRun !=
-      m_view->getInstrument() + m_view->getRunsFirstRunText())
-    m_view->setAvailableInfoToEmpty();
 
   m_view->setLoadStatus(
       "Finding " + m_view->getInstrument() + m_view->getRunsText(), "orange");
@@ -325,8 +322,19 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   }
 
   // sort alphabetically
-  std::sort(logs.begin(), logs.end(), [](std::string &logA, std::string &logB) {
-    return std::tolower(logA[0]) < std::tolower(logB[0]);
+  // cannot use standard sort alone as some logs are capitalised and some are
+  // not
+  std::sort(logs.begin(), logs.end(), [](const auto &log1, const auto &log2) {
+    // compare logs char by char and return pair of non-equal elements
+    const auto result =
+        std::mismatch(log1.cbegin(), log1.cend(), log2.cbegin(), log2.cend(),
+                      [](const auto &lhs, const auto &rhs) {
+                        return std::tolower(lhs) == std::tolower(rhs);
+                      });
+    // compare the two elements to decide which log should go first
+    return result.second != log2.cend() &&
+           (result.first == log1.cend() ||
+            std::tolower(*result.first) < std::tolower(*result.second));
   });
 
   m_view->setAvailableLogs(logs);

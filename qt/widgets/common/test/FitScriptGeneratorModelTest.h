@@ -212,21 +212,34 @@ public:
                      m_flatBackground->asString());
   }
 
-  void test_that_addFunction_will_clear_the_global_ties_that_have_expired() {
+  void
+  test_that_addFunction_will_dynamically_adjust_the_global_ties_that_have_changed_function_index() {
     setup_simultaneous_fit_with_global_tie();
 
-    TS_ASSERT_EQUALS(m_model->getGlobalTies().size(), 1);
+    auto const globalTiesBefore = m_model->getGlobalTies();
+    TS_ASSERT_EQUALS(globalTiesBefore.size(), 1);
+    TS_ASSERT_EQUALS(globalTiesBefore[0].m_parameter, "f0.A0");
+    TS_ASSERT_EQUALS(globalTiesBefore[0].m_tie, "f1.A0");
+
+    // Add a function (thereby creating a composite)
     m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
-    TS_ASSERT_EQUALS(m_model->getGlobalTies().size(), 0);
+    m_model->addFunction("Name2", m_wsIndex, m_expDecay->asString());
+
+    // The global tie has shifted up one index because it is now a composite.
+    auto const globalTiesAfter = m_model->getGlobalTies();
+    TS_ASSERT_EQUALS(globalTiesAfter.size(), 1);
+    TS_ASSERT_EQUALS(globalTiesAfter[0].m_parameter, "f0.f0.A0");
+    TS_ASSERT_EQUALS(globalTiesAfter[0].m_tie, "f1.f0.A0");
   }
 
   void test_that_addFunction_will_throw_if_provided_a_composite_function() {
     m_model->addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX);
     m_model->addFunction(m_wsName, m_wsIndex, m_flatBackground->asString());
 
-    TS_ASSERT_THROWS(
-        m_model->addFunction(m_wsName, m_wsIndex, m_composite->asString()),
-        std::invalid_argument const &);
+    m_model->addFunction(m_wsName, m_wsIndex, m_composite->asString());
+
+    TS_ASSERT_EQUALS(m_model->getFunction(m_wsName, m_wsIndex)->asString(),
+                     m_flatBackground->asString());
   }
 
   void
@@ -280,7 +293,34 @@ public:
 
     TS_ASSERT_EQUALS(m_model->getGlobalTies().size(), 1);
     m_model->removeFunction(m_wsName, m_wsIndex, m_flatBackground->asString());
+    m_model->removeFunction("Name2", m_wsIndex, m_flatBackground->asString());
     TS_ASSERT_EQUALS(m_model->getGlobalTies().size(), 0);
+  }
+
+  void
+  test_that_removeFunction_will_dynamically_adjust_the_global_ties_that_have_changed_function_index() {
+    setup_simultaneous_fit_with_no_ties();
+
+    // Add a function to create a composite
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+    m_model->addFunction("Name2", m_wsIndex, m_expDecay->asString());
+    m_model->updateParameterTie("Name2", m_wsIndex, "f1.f1.Height",
+                                "f0.f1.Height");
+
+    auto const globalTiesBefore = m_model->getGlobalTies();
+    TS_ASSERT_EQUALS(globalTiesBefore.size(), 1);
+    TS_ASSERT_EQUALS(globalTiesBefore[0].m_parameter, "f1.f1.Height");
+    TS_ASSERT_EQUALS(globalTiesBefore[0].m_tie, "f0.f1.Height");
+
+    // Remove the flat background (thereby elimating the need for a composite)
+    m_model->removeFunction(m_wsName, m_wsIndex, m_flatBackground->asString());
+    m_model->removeFunction("Name2", m_wsIndex, m_flatBackground->asString());
+
+    // The global tie has shifted down one index because the composite is gone.
+    auto const globalTiesAfter = m_model->getGlobalTies();
+    TS_ASSERT_EQUALS(globalTiesAfter.size(), 1);
+    TS_ASSERT_EQUALS(globalTiesAfter[0].m_parameter, "f1.Height");
+    TS_ASSERT_EQUALS(globalTiesAfter[0].m_tie, "f0.Height");
   }
 
   void

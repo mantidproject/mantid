@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/FilterPeaks.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -55,9 +56,9 @@ DECLARE_ALGORITHM(FilterPeaks)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::PeaksWorkspace;
-using DataObjects::PeaksWorkspace_const_sptr;
-using DataObjects::PeaksWorkspace_sptr;
+using API::IPeaksWorkspace;
+using API::IPeaksWorkspace_const_sptr;
+using API::IPeaksWorkspace_sptr;
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string FilterPeaks::name() const { return "FilterPeaks"; }
@@ -69,10 +70,10 @@ const std::string FilterPeaks::category() const { return "Crystal\\Peaks"; }
 /** Initialize the algorithm's properties.
  */
 void FilterPeaks::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The filtered workspace");
 
@@ -109,9 +110,9 @@ void FilterPeaks::init() {
 /** Execute the algorithm.
  */
 void FilterPeaks::exec() {
-  PeaksWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  PeaksWorkspace_sptr filteredWS = std::dynamic_pointer_cast<PeaksWorkspace>(
-      WorkspaceFactory::Instance().createPeaks());
+  IPeaksWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  IPeaksWorkspace_sptr filteredWS = std::dynamic_pointer_cast<IPeaksWorkspace>(
+      WorkspaceFactory::Instance().createPeaks(inputWS->id()));
 
   // Copy over ExperimentInfo from input workspace
   filteredWS->copyExperimentInfoFrom(inputWS.get());
@@ -125,7 +126,7 @@ void FilterPeaks::exec() {
 
   if (!bankname.empty()) {
     FilterFunctionStr filterFunction = &BANKNAME;
-    PeaksWorkspace_sptr selectedWS = filteredWS->clone();
+    IPeaksWorkspace_sptr selectedWS = filteredWS->clone();
 
     if (criterion == "=")
       filterPeaksStr<std::equal_to<std::string>>(*inputWS, *selectedWS,

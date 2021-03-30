@@ -1,5 +1,5 @@
 
-# NOTE: the data in the 8 lines below are TEST data - 
+# NOTE: the data in the 8 lines below are TEST data -
 # it is not representative of any actual cycles/data values used
 
 # Used in ISIS Powder tutorial
@@ -133,7 +133,7 @@
 69963-73060:
 # Note: run 73060 (last run in Journal Folder 14_1 is
 #       VANADIUM ROD run from start of Cycle 2014/2
-    offset_file_name : "Cycle_14_1_silicon_all_spectra.cal"    
+    offset_file_name : "Cycle_14_1_silicon_all_spectra.cal"
     label : "14_1"
     Rietveld:
         vanadium_run_numbers : "69963"
@@ -143,7 +143,7 @@
 #        empty_run_numbers : ""
 
 63761-64299:
-    offset_file_name : "Cycle_12_2_group_masked_collimator.cal"    
+    offset_file_name : "Cycle_12_2_group_masked_collimator.cal"
     label : "13_2"
     Rietveld:
         vanadium_run_numbers : "63763"
@@ -151,7 +151,6 @@
 #    PDF:
 #        vanadium_run_numbers : ""
 #        empty_run_numbers : ""
-        
-        
-        
-        
+
+
+

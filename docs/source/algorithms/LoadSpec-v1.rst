@@ -10,7 +10,7 @@ Description
 -----------
 
 The LoadSpec algorithm reads in spectra data from a text file and stores
-it in a :ref:`Workspace2D <Workspace2D>` as data points. 
+it in a :ref:`Workspace2D <Workspace2D>` as data points.
 The data in the file must be organized by set of 3 columns (separated by any number of spaces). The
 first column has to be the X values, the second column the Y values and
 the third column the error values.

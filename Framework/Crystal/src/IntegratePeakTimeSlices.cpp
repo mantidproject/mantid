@@ -224,7 +224,7 @@ void IntegratePeakTimeSlices::exec() {
 
   int indx = getProperty("PeakIndex");
 
-  IPeak &peak = peaksW->getPeak(indx);
+  Peak &peak = peaksW->getPeak(indx);
 
   //------------------------------- Get Panel
   //--------------------------------------
@@ -766,9 +766,8 @@ bool IntegratePeakTimeSlices::updateNeighbors(
  * NOTE: differentials of Q =mv*sin(scatAng/2)/2 were used to calculate this
  *  Also s=r*theta was used to transfer d ScatAng to distance on a bank.
  */
-double
-IntegratePeakTimeSlices::CalculatePositionSpan(Geometry::IPeak const &peak,
-                                               const double dQ) {
+double IntegratePeakTimeSlices::CalculatePositionSpan(Peak const &peak,
+                                                      const double dQ) {
 
   try {
     double Q = 0, ScatAngle = 0, dScatAngle = 0, DetSpan = 0;
@@ -853,7 +852,7 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec,
                                         double &ROW, double &COL, int &NROWS,
                                         int &NCOLS, double &pixWidthx,
                                         double &pixHeighty,
-                                        Geometry::IPeak const &peak) const {
+                                        DataObjects::Peak const &peak) const {
 
   NROWS = NCOLS = -1;
   IDetector_const_sptr det = peak.getDetector();

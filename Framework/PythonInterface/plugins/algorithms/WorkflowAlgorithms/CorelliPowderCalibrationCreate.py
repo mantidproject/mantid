@@ -116,10 +116,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         )
         self.declareProperty(name='OutputWorkspacesPrefix', defaultValue='pdcal_', direction=Direction.Input,
                              doc="Prefix to be added to output workspaces")
-        # Tube Calibration properties
-        self.declareProperty(name='TubeDatabaseDir',
-                             defaultValue='/SNS/CORELLI/shared/calibration/tube', direction=Direction.Input,
-                             doc='path to database containing detector heights')
+
         # PDCalibration properties exposed, grouped
         property_names = ['TofBinning', 'PeakFunction', 'PeakPositions']
         self.copyProperties('PDCalibration', property_names)

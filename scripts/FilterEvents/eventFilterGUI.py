@@ -40,11 +40,14 @@ class MainWindow(QMainWindow):
 
     _errMsgWindow = None
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, window_flags=None):
         """ Initialization and set up
         """
         # Base class
         QMainWindow.__init__(self, parent)
+
+        if window_flags:
+            self.setWindowFlags(window_flags)
 
         # Mantid configuration
         config = ConfigService.Instance()
@@ -1070,7 +1073,7 @@ class MainWindow(QMainWindow):
     def helpClicked(self):
         try:
             import mantidqt
-            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp("Filter Events")
+            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp("Filter Events","utility")
         except ImportError:
             url = ("http://docs.mantidproject.org/nightly/interfaces/{}.html"
                    "".format("Filter Events"))
