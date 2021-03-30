@@ -95,6 +95,13 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
             raise RuntimeError("Unable to find incident energy for Doppler mode")
 
         Integration(InputWorkspace=ws, OutputWorkspace=self.output)
+        
+        ConvertToPointData(InputWorkspace=self.output, OutputWorkspace=self.output)
+        ConjoinXRuns(InputWorkspaces=self.output,
+                     SampleLogAsXAxis=self.scan_parameter,
+                     FailBehaviour="Skip File",
+                     OutputWorkspace=self.output)
+
         self._normalize_by_monitor()
         self._mask_tube_ends()
 
@@ -105,13 +112,6 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
                             Target='ElasticQ',
                             EMode="Direct",
                             EFixed=energy)
-
-        ConvertToPointData(InputWorkspace=self.output, OutputWorkspace=self.output)
-
-        ConjoinXRuns(InputWorkspaces=self.output,
-                     SampleLogAsXAxis=self.scan_parameter,
-                     FailBehaviour="Skip File",
-                     OutputWorkspace=self.output)
 
         if self.transpose:
             Transpose(InputWorkspace=self.output, OutputWorkspace=self.output)
