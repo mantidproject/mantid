@@ -162,6 +162,7 @@ class PeakMatching(PythonAlgorithm):
         for entry in data:
             if not(entry['element'] in counts):
                 counts[entry['element']] = entry['Rating']
+                continue
             counts[entry['element']] += entry['Rating']
 
         #will be sorted by second element in row
