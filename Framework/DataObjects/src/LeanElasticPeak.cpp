@@ -99,13 +99,6 @@ void LeanElasticPeak::setWavelength(double wavelength) {
   m_wavelength = wavelength;
 }
 
-//----------------------------------------------------------------------------------------------
-/** Return a shared ptr to the detector at center of peak. */
-Geometry::IDetector_const_sptr LeanElasticPeak::getDetector() const {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak::getDetector(): Has no detector ID");
-}
-
 /** Return a shared ptr to the reference frame for this peak. */
 std::shared_ptr<const Geometry::ReferenceFrame>
 LeanElasticPeak::getReferenceFrame() const {
@@ -241,18 +234,6 @@ double LeanElasticPeak::getInitialEnergy() const { return getFinalEnergy(); }
  * elastic so always 0 */
 double LeanElasticPeak::getEnergyTransfer() const { return 0.; }
 
-/** Set sample position */
-void LeanElasticPeak::setSamplePos(double, double, double) {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak has no sample information");
-}
-
-/** Set sample position  */
-void LeanElasticPeak::setSamplePos(const Mantid::Kernel::V3D &) {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak has no sample information");
-}
-
 /** Set the final energy */
 void LeanElasticPeak::setFinalEnergy(double) {
   throw Exception::NotImplementedError("Use LeanElasticPeak::setWavelength");
@@ -261,20 +242,6 @@ void LeanElasticPeak::setFinalEnergy(double) {
 /** Set the initial energy */
 void LeanElasticPeak::setInitialEnergy(double) {
   throw Exception::NotImplementedError("Use LeanElasticPeak::setWavelength");
-}
-
-// -------------------------------------------------------------------------------------
-/** Return the detector position vector */
-Mantid::Kernel::V3D LeanElasticPeak::getDetPos() const {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak has no detector information");
-}
-
-// -------------------------------------------------------------------------------------
-/** Return the sample position vector */
-Mantid::Kernel::V3D LeanElasticPeak::getSamplePos() const {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak has no sample information");
 }
 
 // -------------------------------------------------------------------------------------
@@ -303,23 +270,6 @@ LeanElasticPeak &LeanElasticPeak::operator=(const LeanElasticPeak &other) {
     m_wavelength = other.m_wavelength;
   }
   return *this;
-}
-
-/**
- Forwarding function. Exposes the detector position directly.
- */
-Mantid::Kernel::V3D LeanElasticPeak::getDetectorPositionNoCheck() const {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak has no detector information");
-}
-
-/**
- Forwarding function. Exposes the detector position directly, but checks that
- the detector is not null before accessing its position. Throws if null.
- */
-Mantid::Kernel::V3D LeanElasticPeak::getDetectorPosition() const {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak has no detector information");
 }
 
 Mantid::Kernel::Logger LeanElasticPeak::g_log("PeakLogger");
