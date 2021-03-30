@@ -81,15 +81,7 @@ class SuperplotPresenter:
         """
         addedWorkspace = self._view.getSelectedWorkspace()
         self._model.addWorkspace(addedWorkspace)
-        names = self._model.getWorkspaces()
-        plottedData = self._model.getPlottedData()
-        self._view.setWorkspacesList(names)
-        for name in names:
-            spectra = list()
-            for data in plottedData:
-                if data[0] == name:
-                    spectra.append(data[1])
-            self._view.setSpectraList(name, spectra)
+        self._view.appendWorkspace(addedWorkspace)
         self._view.setSelectedWorkspacesInList([addedWorkspace])
         self._updatePlot()
 
@@ -103,14 +95,7 @@ class SuperplotPresenter:
             return
         self._model.delWorkspace(selectedWorkspace)
         names = self._model.getWorkspaces()
-        plottedData = self._model.getPlottedData()
-        self._view.setWorkspacesList(names)
-        for name in names:
-            spectra = list()
-            for data in plottedData:
-                if data[0] == name:
-                    spectra.append(data[1])
-            self._view.setSpectraList(name, spectra)
+        self._view.removeWorkspace(selectedWorkspace)
         self._view.setSelectedWorkspacesInList([names[-1]])
         self._updatePlot()
 

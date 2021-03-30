@@ -151,6 +151,29 @@ class SuperplotView(QWidget):
                     selection[wsName] = [spectrum]
         return selection
 
+    def appendWorkspace(self, name):
+        """
+        Add a workspace at the end of the list.
+
+        Args:
+            name (str): name of the workspace
+        """
+        item = QTreeWidgetItem(self._sideView.workspacesList)
+        item.setText(0, name)
+
+    def removeWorkspace(self, name):
+        """
+        Remove a workspace from the list.
+
+        Args:
+            name (str): name of the workspace
+        """
+        wsItem = self._sideView.workspacesList.findItems(name,
+                                                         Qt.MatchExactly, 0)
+        for item in wsItem:
+            index = self._sideView.workspacesList.indexOfTopLevelItem(item)
+            self._sideView.workspacesList.takeTopLevelItem(index)
+
     def setWorkspacesList(self, names):
         """
         Set the list of selected workspaces and update the workspace slider
