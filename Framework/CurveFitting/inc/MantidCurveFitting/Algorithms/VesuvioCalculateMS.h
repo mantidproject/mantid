@@ -82,40 +82,51 @@ private:
   void exec() override;
 
   void cacheInputs();
-  void calculateMS(const size_t wsIndex, API::ISpectrum &totalsc,
+  void calculateMS(
+      CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng, const size_t wsIndex,
+      API::ISpectrum &totalsc,
                    API::ISpectrum &multsc) const;
-  void simulate(const DetectorParams &detpar,
+  void simulate(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
+                const DetectorParams &detpar,
                 const Functions::ResolutionParams &respar,
                 MSVesuvioHelper::Simulation &simulCounts) const;
   void assignToOutput(const MSVesuvioHelper::SimulationWithErrors &avgCounts,
                       API::ISpectrum &totalsc, API::ISpectrum &multsc) const;
-  double calculateCounts(const DetectorParams &detpar,
+  double
+  calculateCounts(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
+                  const DetectorParams &detpar,
                          const Functions::ResolutionParams &respar,
                          MSVesuvioHelper::Simulation &simulation) const;
 
   // single-event helpers
-  Kernel::V3D generateSrcPos(const double l1) const;
-  double generateE0(const double l1, const double t2, double &weight) const;
-  double generateTOF(const double en0, const double dtof,
+  Kernel::V3D
+  generateSrcPos(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
+                 const double l1) const;
+  double generateE0(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
+                    const double l1, const double t2, double &weight) const;
+  double generateTOF(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
+                     const double en0, const double dtof,
                      const double dl1) const;
-  bool generateScatter(const Kernel::V3D &startPos, const Kernel::V3D &direc,
+  bool
+  generateScatter(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
+                  const Kernel::V3D &startPos, const Kernel::V3D &direc,
                        double &weight, Kernel::V3D &scatterPt) const;
   std::pair<double, double> calculateE1Range(const double theta,
                                              const double en0) const;
   double partialDiffXSec(const double en0, const double en1,
                          const double theta) const;
-  Kernel::V3D generateDetectorPos(const Kernel::V3D &nominalPos,
+  Kernel::V3D generateDetectorPos(
+      CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
+      const Kernel::V3D &nominalPos,
                                   const double energy,
                                   const Kernel::V3D &scatterPt,
                                   const Kernel::V3D &direcBeforeSc,
                                   double &scang, double &distToExit) const;
-  double generateE1(const double angle, const double e1nom,
+  double generateE1(CurveFitting::MSVesuvioHelper::RandomVariateGenerator &rng,
+                    const double angle, const double e1nom,
                     const double e1res) const;
 
   // Member Variables
-  std::unique_ptr<CurveFitting::MSVesuvioHelper::RandomVariateGenerator>
-      m_randgen; // random number generator
-
   size_t m_acrossIdx, m_upIdx, m_beamIdx; // indices of each direction
   Kernel::V3D m_beamDir;                  // Directional vector for beam
   double m_srcR2;                         // beam penumbra radius (m)
@@ -133,6 +144,8 @@ private:
 
   std::unique_ptr<API::Progress> m_progress;
   API::MatrixWorkspace_sptr m_inputWS;
+
+  
 };
 
 } // namespace Algorithms
