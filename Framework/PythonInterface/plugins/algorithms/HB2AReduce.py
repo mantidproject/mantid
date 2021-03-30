@@ -11,12 +11,10 @@ from mantid.kernel import (Direction, IntArrayProperty, FloatTimeSeriesProperty,
                            PropertyCriterion, Property)
 from mantid.simpleapi import (SaveGSSCW, SaveFocusedXYE)
 from mantid import logger
-import dateutil.parser as dparser
 import numpy as np
 import datetime
 import os
 import os.path
-import time
 import re
 import warnings
 
@@ -326,8 +324,6 @@ class HB2AReduce(PythonAlgorithm):
         This function returns either (vanadium_count, vanadium_monitor, None) or
         (None, None, vcorr) depending what type of file is provided by getProperty("Vanadium")
         """
-        filename = self.getPropertyValue("Filename")
-
         if not self.getProperty("Normalise").value:
             return None, None, np.ones(44)[detector_mask]
 
