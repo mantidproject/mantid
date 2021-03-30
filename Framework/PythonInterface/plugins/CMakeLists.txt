@@ -81,6 +81,7 @@ set(PYTHON_PLUGINS
     algorithms/HB3AFindPeaks.py
     algorithms/HB3AIntegratePeaks.py
     algorithms/HB3APredictPeaks.py
+    algorithms/HFIRCalculateGoniometer.py
     algorithms/HFIRSANS2Wavelength.py
     algorithms/IndexSatellitePeaks.py
     algorithms/IndirectTransmission.py

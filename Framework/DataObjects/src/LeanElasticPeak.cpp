@@ -170,7 +170,8 @@ void LeanElasticPeak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
     double wl = calculateWavelengthFromQLab(qLab);
     setWavelength(wl);
   } catch (std::exception &e) {
-    g_log.warning() << "Unable to determine wavelength from q-lab\n" << e.what() << '\n';
+    g_log.information() << "Unable to automatically determine wavelength from q-lab\n"
+                        << e.what() << ", goniometer is likely not correct\n";
   }
 }
 

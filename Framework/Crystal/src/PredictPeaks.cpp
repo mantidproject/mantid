@@ -291,11 +291,8 @@ void PredictPeaks::exec() {
     m_detectorCacheSearch = std::make_unique<DetectorSearcher>(m_inst, m_pw->detectorInfo());
 
   if (m_leanElasticPeak && !leanElasticPeak_calculate_wl) {
-    Kernel::Matrix<double> identityGoniometer(3, 3, true);
-    // identityGoniometer.identityMatrix();
-    // Geometry::Goniometer identityGoniometer();
     for (auto &possibleHKL : possibleHKLs) {
-      calculateQAndAddToOutputLeanElastic(possibleHKL, ub, identityGoniometer);
+      calculateQAndAddToOutputLeanElastic(possibleHKL, ub, gonioVec.front());
     }
   } else if (getProperty("CalculateGoniometerForCW")) {
     size_t allowedPeakCount = 0;

@@ -7,7 +7,7 @@
 # pylint: disable=no-init,too-few-public-methods
 import systemtesting
 from mantid.simpleapi import *
-from mantid.geometry import CrystalStructure
+from mantid.geometry import CrystalStructure, Goniometer
 
 
 # The reference data for these tests were created with PredictPeaks in the state at Release 3.5,
@@ -172,3 +172,22 @@ class PredictPeaksTestDEMAND(systemtesting.MantidSystemTest):
         self.assertDelta(q_sample[0], 4.45541, 1e-5)
         self.assertDelta(q_sample[1], -0.420383, 1e-5)
         self.assertDelta(q_sample[2], 0.0913072, 1e-5)
+
+        g = Goniometer()
+        g.setR(peak0.getGoniometerMatrix())
+        YZY = g.getEulerAngles('YZY')
+        self.assertDelta(YZY[0], -20.4997, 1e-7)
+        self.assertDelta(YZY[1], 0.0003, 1e-7)
+        self.assertDelta(YZY[2], 90, 1e-7)
+        self.assertDelta(peak0.getWavelength(), 0, 1e-9)
+
+        HFIRCalculateGoniometer(filtered_peaks)
+
+        peak0 = filtered_peaks.getPeak(0)
+        g = Goniometer()
+        g.setR(peak0.getGoniometerMatrix())
+        YZY = g.getEulerAngles('YZY')
+        self.assertDelta(YZY[0], -20.4997, 1e-7)
+        self.assertDelta(YZY[1], 0.0003, 1e-7)
+        self.assertDelta(YZY[2], 0.5340761720854811, 1e-7)
+        self.assertDelta(peak0.getWavelength(), 1.008, 1e-9)
