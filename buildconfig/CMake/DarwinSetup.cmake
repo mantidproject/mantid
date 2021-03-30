@@ -136,6 +136,8 @@ if(ENABLE_WORKBENCH)
   string(REPLACE " " "" CPACK_SYSTEM_NAME ${MACOS_CODENAME})
 
   set(WORKBENCH_BUNDLE MantidWorkbench.app/Contents/)
+  set(WORKBENCH_APP MantidWorkbench${CPACK_PACKAGE_SUFFIX_CAMELCASE}.app)
+  set(WORKBENCH_BUNDLE ${WORKBENCH_APP}/Contents/)
   set(WORKBENCH_BIN_DIR ${WORKBENCH_BUNDLE}MacOS)
   set(WORKBENCH_LIB_DIR ${WORKBENCH_BUNDLE}MacOS)
   set(WORKBENCH_SITE_PACKAGES ${WORKBENCH_BUNDLE}MacOS)
@@ -143,15 +145,13 @@ if(ENABLE_WORKBENCH)
 
   install(
     PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
-    DESTINATION MantidWorkbench.app/Contents/MacOS/
+    DESTINATION ${WORKBENCH_BUNDLE}/MacOS/
     RENAME mantidpython
   )
   install(
-    FILES ${CMAKE_SOURCE_DIR}/images/MantidWorkbench.icns
-    DESTINATION MantidWorkbench.app/Contents/Resources/
-    RENAME MantidWorkbench.icns
+    FILES ${CMAKE_SOURCE_DIR}/images/mantid_workbench${CPACK_PACKAGE_SUFFIX}.icns
+    DESTINATION ${WORKBENCH_BUNDLE}Resources/
   )
-
   set(BUNDLES ${INBUNDLE} ${WORKBENCH_BUNDLE})
 
   # Produce script to move icons in finder window to the correct locations

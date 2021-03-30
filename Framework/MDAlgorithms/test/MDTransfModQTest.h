@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
@@ -179,8 +180,14 @@ public:
         ModQTransf.initialize(WSDescr), const std::runtime_error &);
 
     // let's preprocess detectors positions to go any further
-    WSDescr.m_PreprDetTable =
-        WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(ws2Dbig);
+    auto ppDets_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+        "PreprocessDetectorsToMD");
+    ppDets_alg->initialize();
+    ppDets_alg->setChild(true);
+    ppDets_alg->setProperty("InputWorkspace", ws2Dbig);
+    ppDets_alg->setProperty("OutputWorkspace", "UnitsConversionHelperTableWs");
+    ppDets_alg->execute();
+    WSDescr.m_PreprDetTable = ppDets_alg->getProperty("OutputWorkspace");
     TSM_ASSERT_THROWS_NOTHING("should initialize properly: ",
                               ModQTransf.initialize(WSDescr));
     std::vector<coord_t> coord(4);

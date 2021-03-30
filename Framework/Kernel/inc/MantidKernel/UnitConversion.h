@@ -8,6 +8,7 @@
 
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/Unit.h"
 #include <string>
 
 namespace Mantid {
@@ -27,10 +28,14 @@ public:
                     const double srcValue, const double l1, const double l2,
                     const double theta, const DeltaEMode::Type emode,
                     const double efixed);
+  static double run(const std::string &src, const std::string &dest,
+                    const double srcValue, const double l1,
+                    const DeltaEMode::Type emode,
+                    const UnitParametersMap &params = {});
   /// Convert a single value between the given units
   static double run(Unit &srcUnit, Unit &destUnit, const double srcValue,
-                    const double l1, const double l2, const double theta,
-                    const DeltaEMode::Type emode, const double efixed);
+                    const double l1, const DeltaEMode::Type emode,
+                    const UnitParametersMap &params = {});
 
   /// Convert to ElasticQ from Energy
   static double convertToElasticQ(const double theta, const double efixed);
@@ -42,9 +47,8 @@ private:
   /// Convert through TOF
   static double convertViaTOF(Unit &srcUnit, Unit &destUnit,
                               const double srcValue, const double l1,
-                              const double l2, const double theta,
                               const DeltaEMode::Type emode,
-                              const double efixed);
+                              const UnitParametersMap &params);
 };
 
 } // namespace Kernel

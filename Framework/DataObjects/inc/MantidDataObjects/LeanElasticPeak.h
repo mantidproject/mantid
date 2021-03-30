@@ -60,9 +60,6 @@ public:
   std::shared_ptr<const Geometry::ReferenceFrame>
   getReferenceFrame() const override;
 
-  void setSamplePos(double, double, double) override;
-  void setSamplePos(const Mantid::Kernel::V3D &) override;
-
   Mantid::Kernel::V3D getQLabFrame() const override;
   Mantid::Kernel::V3D getQSampleFrame() const override;
 
@@ -86,7 +83,6 @@ public:
   void setInitialEnergy(double m_initialEnergy) override;
   void setFinalEnergy(double m_finalEnergy) override;
 
-  virtual Mantid::Kernel::V3D getSamplePos() const override;
   double getL1() const override;
   double getL2() const override;
 

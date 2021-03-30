@@ -10,6 +10,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
 
+using Mantid::Kernel::UnitParams;
+
 namespace Mantid {
 namespace MDAlgorithms {
 
@@ -265,6 +267,10 @@ void UnitsConversionHelper::initialize(
   if (m_Emode == static_cast<int>(Kernel::DeltaEMode::Indirect))
     m_pEfixedArray = DetWS->getColDataArray<float>("eFixed");
 
+  m_pDIFAs = &(DetWS->getColVector<double>("DIFA"));
+  m_pDIFCs = &(DetWS->getColVector<double>("DIFC"));
+  m_pTZEROs = &(DetWS->getColVector<double>("TZERO"));
+
   // set up conversion to working state -- in some tests it can be used straight
   // from the beginning.
   m_TwoTheta = (*m_pTwoThetas)[0];
@@ -272,14 +278,29 @@ void UnitsConversionHelper::initialize(
   double Efix = m_Efix;
   if (m_pEfixedArray)
     Efix = static_cast<double>(*(m_pEfixedArray + 0));
+  m_DIFA = (*m_pDIFAs)[0];
+  m_DIFC = (*m_pDIFCs)[0];
+  m_TZERO = (*m_pTZEROs)[0];
 
-  m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode, Efix, 0.);
+  m_TargetUnit->initialize(m_L1, m_Emode,
+                           {{UnitParams::l2, m_L2},
+                            {UnitParams::twoTheta, m_TwoTheta},
+                            {UnitParams::efixed, Efix},
+                            {UnitParams::difa, m_DIFA},
+                            {UnitParams::difc, m_DIFC},
+                            {UnitParams::tzero, m_TZERO}});
   if (m_SourceWSUnit) {
-    m_SourceWSUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode, Efix, 0.);
+    m_SourceWSUnit->initialize(m_L1, m_Emode,
+                               {{UnitParams::l2, m_L2},
+                                {UnitParams::twoTheta, m_TwoTheta},
+                                {UnitParams::efixed, Efix},
+                                {UnitParams::difa, m_DIFA},
+                                {UnitParams::difc, m_DIFC},
+                                {UnitParams::tzero, m_TZERO}});
   }
 }
-/** Method updates unit conversion given the index of detector parameters in the
- * array of detectors */
+/** Method updates unit conversion given the index of detector parameters in
+ * the array of detectors */
 void UnitsConversionHelper::updateConversion(size_t i) {
   switch (m_UnitCnvrsn) {
   case (CnvrtToMD::ConvertNo):
@@ -287,33 +308,47 @@ void UnitsConversionHelper::updateConversion(size_t i) {
   case (CnvrtToMD::ConvertFast):
     return;
   case (CnvrtToMD::ConvertFromTOF): {
-    double delta(std::numeric_limits<double>::quiet_NaN());
     m_TwoTheta = (*m_pTwoThetas)[i];
     m_L2 = (*m_pL2s)[i];
     double Efix = m_Efix;
     if (m_pEfixedArray)
       Efix = static_cast<double>(*(m_pEfixedArray + i));
+    m_DIFA = (*m_pDIFAs)[i];
+    m_DIFC = (*m_pDIFCs)[i];
+    m_TZERO = (*m_pTZEROs)[i];
 
-    m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode, Efix, delta);
+    m_TargetUnit->initialize(m_L1, m_Emode,
+                             {{UnitParams::l2, m_L2},
+                              {UnitParams::twoTheta, m_TwoTheta},
+                              {UnitParams::efixed, Efix},
+                              {UnitParams::difa, m_DIFA},
+                              {UnitParams::difc, m_DIFC},
+                              {UnitParams::tzero, m_TZERO}});
     return;
   }
   case (CnvrtToMD::ConvertByTOF): {
-    double delta(std::numeric_limits<double>::quiet_NaN());
     m_TwoTheta = (*m_pTwoThetas)[i];
     m_L2 = (*m_pL2s)[i];
     double Efix = m_Efix;
     if (m_pEfixedArray)
       Efix = static_cast<double>(*(m_pEfixedArray + i));
+    m_DIFA = (*m_pDIFAs)[i];
+    m_DIFC = (*m_pDIFCs)[i];
+    m_TZERO = (*m_pTZEROs)[i];
 
-    m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode, Efix, delta);
-    m_SourceWSUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode, Efix, delta);
+    Kernel::UnitParametersMap pmap = {
+        {UnitParams::l2, m_L2},     {UnitParams::twoTheta, m_TwoTheta},
+        {UnitParams::efixed, Efix}, {UnitParams::difa, m_DIFA},
+        {UnitParams::difc, m_DIFC}, {UnitParams::tzero, m_TZERO}};
+    m_TargetUnit->initialize(m_L1, m_Emode, pmap);
+    m_SourceWSUnit->initialize(m_L1, m_Emode, pmap);
     return;
   }
   default:
     throw std::runtime_error(
         "updateConversion: unknown type of conversion requested");
   }
-}
+} // namespace MDAlgorithms
 /** do actual unit conversion from  input to oputput data
 @param   val  -- the input value which has to be converted
 @return          the input value converted into the units requested.
@@ -350,9 +385,15 @@ UnitsConversionHelper::UnitsConversionHelper(
   m_Efix = another.m_Efix;
   m_TwoTheta = another.m_TwoTheta;
   m_L2 = another.m_L2;
+  m_DIFA = another.m_DIFA;
+  m_DIFC = another.m_DIFC;
+  m_TZERO = another.m_TZERO;
   m_pTwoThetas = another.m_pTwoThetas;
   m_pL2s = another.m_pL2s;
   m_pEfixedArray = another.m_pEfixedArray;
+  m_pDIFAs = another.m_pDIFAs;
+  m_pDIFCs = another.m_pDIFCs;
+  m_pTZEROs = another.m_pTZEROs;
 
   if (another.m_SourceWSUnit)
     m_SourceWSUnit = Kernel::Unit_sptr(another.m_SourceWSUnit->clone());
@@ -363,8 +404,10 @@ UnitsConversionHelper::UnitsConversionHelper(
 UnitsConversionHelper::UnitsConversionHelper()
     : m_UnitCnvrsn(CnvrtToMD::ConvertNo), m_Factor(1), m_Power(1),
       m_Emode(-1), // undefined
-      m_L1(1), m_Efix(1), m_TwoTheta(0), m_L2(1), m_pTwoThetas(nullptr),
-      m_pL2s(nullptr), m_pEfixedArray(nullptr) {}
+      m_L1(1), m_Efix(1), m_TwoTheta(0), m_L2(1), m_DIFA(0.), m_DIFC(0.),
+      m_TZERO(0.), m_pTwoThetas(nullptr), m_pL2s(nullptr),
+      m_pEfixedArray(nullptr), m_pDIFAs(nullptr), m_pDIFCs(nullptr),
+      m_pTZEROs(nullptr) {}
 
 } // namespace MDAlgorithms
 } // namespace Mantid

@@ -12,6 +12,7 @@
 #include "MantidKernel/UnitLabel.h"
 #include <utility>
 
+#include <unordered_map>
 #include <vector>
 #ifndef Q_MOC_RUN
 #include <memory>
@@ -21,6 +22,12 @@
 
 namespace Mantid {
 namespace Kernel {
+
+enum class UnitParams { l2, twoTheta, efixed, delta, difa, difc, tzero };
+
+// list of parameter names and values - some code may relay on map behaviour
+// where [] creates element with value 0 if param name not present
+using UnitParametersMap = std::unordered_map<UnitParams, double>;
 
 /** The base units (abstract) class. All concrete units should inherit from
     this class and provide implementations of the caption(), label(),
@@ -75,87 +82,90 @@ public:
    *  @param ydata ::    Not currently used (ConvertUnits passes an empty
    * vector)
    *  @param _l1 ::       The source-sample distance (in metres)
-   *  @param _l2 ::       The sample-detector distance (in metres)
-   *  @param _twoTheta :: The scattering angle (in radians)
    *  @param _emode ::    The energy mode (0=elastic, 1=direct geometry,
    * 2=indirect geometry)
-   *  @param _efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2)
-   * (in
-   * meV)
-   *  @param _delta ::    Not currently used
+   *  @param params ::  Map containing optional parameters eg
+   *                    The sample-detector distance (in metres)
+   *                    The scattering angle (in radians)
+   *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
+   *                    Delta (not currently used)
    */
   void toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-             const double &_l1, const double &_l2, const double &_twoTheta,
-             const int &_emode, const double &_efixed, const double &_delta);
+             const double &_l1, const int &_emode,
+             std::initializer_list<std::pair<const UnitParams, double>> params);
+  void toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
+             const double &_l1, const int &_emode,
+             const UnitParametersMap &params);
 
   /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
    *  @param xvalue ::   A single X-value to convert
    *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
    *  @param emode ::    The energy mode (0=elastic, 1=direct geometry,
    * 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
-   * meV)
-   *  @param delta ::    Not currently used
+   *  @param params ::  Map containing optional parameters eg
+   *                    The sample-detector distance (in metres)
+   *                    The scattering angle (in radians)
+   *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
+   *                    Delta (not currently used)
    *  @return the value in TOF units.
    */
   double convertSingleToTOF(const double xvalue, const double &l1,
-                            const double &l2, const double &twoTheta,
-                            const int &emode, const double &efixed,
-                            const double &delta);
+                            const int &emode, const UnitParametersMap &params);
 
   /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
    *  @param xdata ::    The array of X data to be converted
    *  @param ydata ::    Not currently used (ConvertUnits passes an empty
    * vector)
    *  @param _l1 ::       The source-sample distance (in metres)
-   *  @param _l2 ::       The sample-detector distance (in metres)
-   *  @param _twoTheta :: The scattering angle (in radians)
    *  @param _emode ::    The energy mode (0=elastic, 1=direct geometry,
    * 2=indirect geometry)
-   *  @param _efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2)
-   * (in
-   * meV)
-   *  @param _delta ::    Not currently used
+   *  @param params ::  Map containing optional parameters eg
+   *                    The sample-detector distance (in metres)
+   *                    The scattering angle (in radians)
+   *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
+   *                    Delta (not currently used)
    */
+  void
+  fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
+          const double &_l1, const int &_emode,
+          std::initializer_list<std::pair<const UnitParams, double>> params);
+
   void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-               const double &_l1, const double &_l2, const double &_twoTheta,
-               const int &_emode, const double &_efixed, const double &_delta);
+               const double &_l1, const int &_emode,
+               const UnitParametersMap &params);
 
   /** Convert from the time-of-flight to the concrete unit. TOF is in
    * microseconds.
    *  @param xvalue ::   A single X-value to convert
    *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
    *  @param emode ::    The energy mode (0=elastic, 1=direct geometry,
    * 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
-   * meV)
-   *  @param delta ::    Not currently used
+   *  @param params ::  Map containing optional parameters eg
+   *                    The sample-detector distance (in metres)
+   *                    The scattering angle (in radians)
+   *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
+   *                    Delta (not currently used)
    *  @return the value in these units.
    */
   double convertSingleFromTOF(const double xvalue, const double &l1,
-                              const double &l2, const double &twoTheta,
-                              const int &emode, const double &efixed,
-                              const double &delta);
+                              const int &emode,
+                              const UnitParametersMap &params);
 
   /** Initialize the unit to perform conversion using singleToTof() and
    *singleFromTof()
    *
    *  @param _l1 ::       The source-sample distance (in metres)
-   *  @param _l2 ::       The sample-detector distance (in metres)
-   *  @param _twoTheta :: The scattering angle (in radians)
    *  @param _emode ::    The energy mode (0=elastic, 1=direct geometry,
    *2=indirect geometry)
-   *  @param _efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2)
-   *(in meV)
-   *  @param _delta ::    Not currently used
+   *  @param params ::    map containing other optional parameters:
+   *                      The sample-detector distance (in metres)
+   *                      The scattering angle (in radians)
+   *                      Fixed energy: EI (emode=1) or EF (emode=2) (in meV)
+   *                      Diffractometer constants (DIFA, DIFC, TZERO)
+   *                      Delta: unused
    */
-  void initialize(const double &_l1, const double &_l2, const double &_twoTheta,
-                  const int &_emode, const double &_efixed,
-                  const double &_delta);
+  void initialize(const double &_l1, const int &_emode,
+                  const UnitParametersMap &params);
 
   /** Finalize the initialization. This will be overridden by subclasses as
    * needed. */
@@ -194,21 +204,25 @@ protected:
   void addConversion(std::string to, const double &factor,
                      const double &power = 1.0) const;
 
+  // validate the contents of the unit parameters map. Throw
+  // std::invalid_argument if it's a global error or std::runtime_error if it's
+  // a detector specific error
+  virtual void validateUnitParams(const int emode,
+                                  const UnitParametersMap &params);
+
   /// The unit values have been initialized
   bool initialized;
   /// l1 ::       The source-sample distance (in metres)
   double l1;
-  /// l2 ::       The sample-detector distance (in metres)
-  double l2;
-  /// twoTheta :: The scattering angle (in radians)
-  double twoTheta;
   /// emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect
   /// geometry)
   int emode;
+  /// additional parameters
+  /// l2 :: distance from sample to detector (in metres)
+  /// twoTheta :: scattering angle in radians
   /// efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-  double efixed;
-  /// delta ::    Not currently used
-  double delta;
+  /// difc :: diffractometer constant DIFC
+  const UnitParametersMap *m_params;
 
 private:
   /// A 'quick conversion' requires the constant by which to multiply the input
@@ -318,6 +332,9 @@ public:
   Wavelength();
 
 protected:
+  void validateUnitParams(const int emode,
+                          const UnitParametersMap &params) override;
+  double efixed;
   double sfpTo;      ///< Extra correction factor in to conversion
   double factorTo;   ///< Constant factor for to conversion
   double sfpFrom;    ///< Extra correction factor in from conversion
@@ -368,9 +385,15 @@ public:
   Energy_inWavenumber();
 
 protected:
+  void validateUnitParams(const int emode,
+                          const UnitParametersMap &params) override;
   double factorTo;   ///< Constant factor for to conversion
   double factorFrom; ///< Constant factor for from conversion
 };
+
+MANTID_KERNEL_DLL double tofToDSpacingFactor(const double l1, const double l2,
+                                             const double twoTheta,
+                                             const double offset);
 
 //=================================================================================================
 /// d-Spacing in Angstrom
@@ -379,20 +402,27 @@ public:
   const std::string unitID() const override; ///< "dSpacing"
   const std::string caption() const override { return "d-Spacing"; }
   const UnitLabel label() const override;
-
   double singleToTOF(const double x) const override;
   double singleFromTOF(const double tof) const override;
   void init() override;
   Unit *clone() const override;
   double conversionTOFMin() const override;
   double conversionTOFMax() const override;
+  double calcTofMin(const double difc, const double difa, const double tzero,
+                    const double tofmin = 0.);
+  double calcTofMax(const double difc, const double difa, const double tzero,
+                    const double tofmax = 0.);
 
   /// Constructor
   dSpacing();
 
 protected:
-  double factorTo;   ///< Constant factor for to conversion
-  double factorFrom; ///< Constant factor for from conversion
+  void validateUnitParams(const int emode,
+                          const UnitParametersMap &params) override;
+  std::string toDSpacingError;
+  double difa;
+  double difc;
+  double tzero;
 };
 
 //=================================================================================================
@@ -416,6 +446,9 @@ public:
   dSpacingPerpendicular();
 
 protected:
+  void validateUnitParams(const int emode,
+                          const UnitParametersMap &params) override;
+  double twoTheta;
   double factorTo;   ///< Constant factor for to conversion
   double sfpTo;      ///< Extra correction factor in to conversion
   double factorFrom; ///< Constant factor for from conversion
@@ -440,13 +473,14 @@ public:
   MomentumTransfer();
 
 protected:
-  double factorTo;   ///< Constant factor for to conversion
-  double factorFrom; ///< Constant factor for from conversion
+  void validateUnitParams(const int emode,
+                          const UnitParametersMap &params) override;
+  double difc;
 };
 
 //=================================================================================================
 /// Momentum transfer squared in Angstrom^-2
-class MANTID_KERNEL_DLL QSquared : public Unit {
+class MANTID_KERNEL_DLL QSquared : public MomentumTransfer {
 public:
   const std::string unitID() const override; ///< "QSquared"
   const std::string caption() const override { return "Q2"; }
@@ -454,17 +488,12 @@ public:
 
   double singleToTOF(const double x) const override;
   double singleFromTOF(const double tof) const override;
-  void init() override;
   Unit *clone() const override;
   double conversionTOFMin() const override;
   double conversionTOFMax() const override;
 
   /// Constructor
   QSquared();
-
-protected:
-  double factorTo;   ///< Constant factor for to conversion
-  double factorFrom; ///< Constant factor for from conversion
 };
 
 //=================================================================================================
@@ -487,6 +516,9 @@ public:
   DeltaE();
 
 protected:
+  void validateUnitParams(const int emode,
+                          const UnitParametersMap &params) override;
+  double efixed;
   double factorTo;    ///< Constant factor for to conversion
   double factorFrom;  ///< Constant factor for from conversion
   double t_other;     ///< Energy mode dependent factor in to conversion
@@ -545,6 +577,9 @@ public:
   Momentum();
 
 protected:
+  void validateUnitParams(const int emode,
+                          const UnitParametersMap &params) override;
+  double efixed;
   double sfpTo;      ///< Extra correction factor in to conversion
   double factorTo;   ///< Constant factor for to conversion
   double sfpFrom;    ///< Extra correction factor in from conversion
@@ -569,6 +604,9 @@ public:
 
   /// Constructor
   SpinEchoLength();
+
+private:
+  double efixed;
 };
 
 //=================================================================================================
@@ -588,6 +626,9 @@ public:
 
   /// Constructor
   SpinEchoTime();
+
+private:
+  double efixed;
 };
 
 //=================================================================================================

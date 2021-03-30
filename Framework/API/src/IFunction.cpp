@@ -30,6 +30,7 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/UsageService.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -61,13 +62,34 @@ struct TieNode {
            other.right.end();
   }
 };
+const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
 } // namespace
+/**
+ * Constructor
+ */
+IFunction ::IFunction()
+    : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0) {}
 
 /**
  * Destructor
  */
 IFunction::~IFunction() { m_attrs.clear(); }
 
+/**
+Registers the usage of the function with the UsageService
+ */
+void IFunction::registerFunctionUsage(bool internal) {
+  if (!Kernel::UsageService::Instance().isEnabled()) {
+    return;
+  }
+  if (std::find(EXCLUDEUSAGE.cbegin(), EXCLUDEUSAGE.cend(), name()) ==
+          EXCLUDEUSAGE.cend() &&
+      !m_isRegistered) {
+    m_isRegistered = true;
+    Kernel::UsageService::Instance().registerFeatureUsage(
+        Kernel::FeatureType::Function, name(), internal);
+  }
+}
 /**
  * Virtual copy constructor
  */
@@ -1121,12 +1143,12 @@ void IFunction::setMatrixWorkspace(
               if (centreUnit) {
                 g_log.debug()
                     << "For FitParameter " << parameterName(i)
-                    << " centre of peak before any unit convertion is "
+                    << " centre of peak before any unit conversion is "
                     << centreValue << '\n';
                 centreValue =
                     convertValue(centreValue, centreUnit, workspace, wi);
                 g_log.debug() << "For FitParameter " << parameterName(i)
-                              << " centre of peak after any unit convertion is "
+                              << " centre of peak after any unit conversion is "
                               << centreValue << '\n';
               }
 
@@ -1143,11 +1165,11 @@ void IFunction::setMatrixWorkspace(
                     fitParam.getLookUpTable().getYUnit(); // from table
                 g_log.debug()
                     << "The FitParameter " << parameterName(i) << " = "
-                    << paramValue << " before y-unit convertion\n";
+                    << paramValue << " before y-unit conversion\n";
                 paramValue /= convertValue(1.0, resultUnit, workspace, wi);
                 g_log.debug()
                     << "The FitParameter " << parameterName(i) << " = "
-                    << paramValue << " after y-unit convertion\n";
+                    << paramValue << " after y-unit conversion\n";
               } else {
                 // so from formula
 
@@ -1173,12 +1195,12 @@ void IFunction::setMatrixWorkspace(
                     p.SetExpr(resultUnitStr);
                     g_log.debug() << "The FitParameter " << parameterName(i)
                                   << " = " << paramValue
-                                  << " before result-unit convertion (using "
+                                  << " before result-unit conversion (using "
                                   << resultUnitStr << ")\n";
                     paramValue *= p.Eval();
                     g_log.debug()
                         << "The FitParameter " << parameterName(i) << " = "
-                        << paramValue << " after result-unit convertion\n";
+                        << paramValue << " after result-unit conversion\n";
                   } catch (mu::Parser::exception_type &e) {
                     g_log.error()
                         << "Cannot convert formula unit to workspace unit"
@@ -1286,31 +1308,25 @@ void IFunction::convertValue(std::vector<double> &values,
     if (sample == nullptr) {
       g_log.error()
           << "No sample defined instrument. Cannot convert units for function\n"
-          << "Ignore convertion.";
+          << "Ignore conversion.";
       return;
     }
     const auto &spectrumInfo = ws->spectrumInfo();
     double l1 = spectrumInfo.l1();
     // If this is a monitor then l1+l2 = source-detector distance and twoTheta=0
-    double l2 = spectrumInfo.l2(wsIndex);
-    double twoTheta(0.0);
-    if (!spectrumInfo.isMonitor(wsIndex))
-      twoTheta = spectrumInfo.twoTheta(wsIndex);
-    auto emode = static_cast<int>(ws->getEMode());
-    double efixed(0.0);
-    try {
-      std::shared_ptr<const Geometry::IDetector> det(
-          &spectrumInfo.detector(wsIndex), NoDeleting());
-      efixed = ws->getEFixed(det);
-    } catch (std::exception &) {
-      // assume elastic
-      efixed = 0.0;
-      emode = 0;
-    }
+    auto emode = ws->getEMode();
 
+    Kernel::UnitParametersMap pmap{};
+    spectrumInfo.getDetectorValues(*wsUnit, *outUnit, emode, false, wsIndex,
+                                   pmap);
     std::vector<double> emptyVec;
-    wsUnit->toTOF(values, emptyVec, l1, l2, twoTheta, emode, efixed, 0.0);
-    outUnit->fromTOF(values, emptyVec, l1, l2, twoTheta, emode, efixed, 0.0);
+    try {
+      wsUnit->toTOF(values, emptyVec, l1, emode, pmap);
+      outUnit->fromTOF(values, emptyVec, l1, emode, pmap);
+    } catch (std::exception &) {
+      throw std::runtime_error("Unable to perform unit conversion to " +
+                               outUnit->unitID());
+    }
   }
 }
 

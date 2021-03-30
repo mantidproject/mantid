@@ -198,6 +198,8 @@ public:
   virtual void removeProperty(const std::string &name,
                               const bool delproperty = true) = 0;
 
+  virtual void resetProperties() = 0;
+
   /** Sets all the declared properties from a string.
     @param propertiesString :: A list of name = value pairs separated by a
      semicolon

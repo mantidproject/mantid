@@ -76,6 +76,11 @@ public:
   double signedTwoTheta(const std::pair<size_t, size_t> &index) const;
   double azimuthal(const size_t index) const;
   double azimuthal(const std::pair<size_t, size_t> &index) const;
+  std::tuple<double, double, double>
+  diffractometerConstants(const size_t index,
+                          std::vector<detid_t> &calibratedDets,
+                          std::vector<detid_t> &uncalibratedDets) const;
+  double difcUncalibrated(const size_t index) const;
   std::pair<double, double> geographicalAngles(const size_t index) const;
   std::pair<double, double>
   geographicalAngles(const std::pair<size_t, size_t> &index) const;
@@ -125,6 +130,7 @@ private:
   const Geometry::IDetector &getDetector(const size_t index) const;
   std::shared_ptr<const Geometry::IDetector>
   getDetectorPtr(const size_t index) const;
+  void clearPositionDependentParameters(const size_t index);
 
   /// Pointer to the actual DetectorInfo object (non-wrapping part).
   std::unique_ptr<Beamline::DetectorInfo> m_detectorInfo;

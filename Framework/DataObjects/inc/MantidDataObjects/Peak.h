@@ -93,9 +93,6 @@ public:
   bool findDetector();
   bool findDetector(const Geometry::InstrumentRayTracer &tracer);
 
-  void setSamplePos(double samX, double samY, double samZ) override;
-  void setSamplePos(const Mantid::Kernel::V3D &XYZ) override;
-
   Mantid::Kernel::V3D getQLabFrame() const override;
   Mantid::Kernel::V3D getQSampleFrame() const override;
   Mantid::Kernel::V3D getDetectorPosition() const;
@@ -122,7 +119,6 @@ public:
   void setFinalEnergy(double m_finalEnergy) override;
 
   virtual Mantid::Kernel::V3D getDetPos() const;
-  virtual Mantid::Kernel::V3D getSamplePos() const override;
   double getL1() const override;
   double getL2() const override;
 
@@ -155,8 +151,7 @@ private:
 
   /// Cached source position
   Mantid::Kernel::V3D sourcePos;
-  /// Cached sample position
-  Mantid::Kernel::V3D samplePos;
+
   /// Cached detector position
   Mantid::Kernel::V3D detPos;
 

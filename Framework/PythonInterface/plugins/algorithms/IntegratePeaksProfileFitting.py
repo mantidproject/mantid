@@ -9,9 +9,6 @@
 This is a Python algorithm, with profile
 fitting for integrating peaks.
 """
-
-# This __future__ import is for Python 2/3 compatibility
-import sys
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -80,10 +77,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
 
         # Either load the provided strong peaks file or set the flag to generate it as we go
         if strongPeaksParamsFile != "":
-            if sys.version_info[0] == 3:
-                strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'),encoding='latin1')
-            else:
-                strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'))
+            strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'),encoding='latin1')
             generateStrongPeakParams = False
             # A strong peaks file was provided - we don't need to generate it on the fly so we can fit in order
             runNumbers = np.array(peaks_ws.column('RunNumber'))
@@ -260,7 +254,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                     strongPeakParamsToSend = strongPeakParams
 
                 # Will allow forced weak and edge peaks to be fit using a neighboring peak profile
-                Y3D, goodIDX, pp_lambda, params = BVGFT.get3DPeak(peak, peaks_ws, box, padeCoefficients,qMask,
+                Y3D, goodIDX, pp_lambda, params = BVGFT.get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask,
                                                                   nTheta=nTheta, nPhi=nPhi, plotResults=False,
                                                                   zBG=zBG,fracBoxToHistogram=1.0,bgPolyOrder=1,
                                                                   strongPeakParams=strongPeakParamsToSend,

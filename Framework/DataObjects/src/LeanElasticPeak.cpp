@@ -234,18 +234,6 @@ double LeanElasticPeak::getInitialEnergy() const { return getFinalEnergy(); }
  * elastic so always 0 */
 double LeanElasticPeak::getEnergyTransfer() const { return 0.; }
 
-/** Set sample position */
-void LeanElasticPeak::setSamplePos(double, double, double) {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak has no sample information");
-}
-
-/** Set sample position  */
-void LeanElasticPeak::setSamplePos(const Mantid::Kernel::V3D &) {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak has no sample information");
-}
-
 /** Set the final energy */
 void LeanElasticPeak::setFinalEnergy(double) {
   throw Exception::NotImplementedError("Use LeanElasticPeak::setWavelength");
@@ -254,13 +242,6 @@ void LeanElasticPeak::setFinalEnergy(double) {
 /** Set the initial energy */
 void LeanElasticPeak::setInitialEnergy(double) {
   throw Exception::NotImplementedError("Use LeanElasticPeak::setWavelength");
-}
-
-// -------------------------------------------------------------------------------------
-/** Return the sample position vector */
-Mantid::Kernel::V3D LeanElasticPeak::getSamplePos() const {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak has no sample information");
 }
 
 // -------------------------------------------------------------------------------------

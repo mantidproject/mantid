@@ -68,9 +68,10 @@ void populateTable(Mantid::API::ITableWorkspace_sptr &t,
                    const Mantid::Geometry::PointingAlong &beamAxisIndex,
                    const double sampleDist, const bool isScanning,
                    const bool include_data, const bool calcQ,
-                   Kernel::Logger &logger);
+                   const bool includeDiffConstants, Kernel::Logger &logger);
 std::vector<std::pair<std::string, std::string>>
-createColumns(const bool isScanning, const bool includeData, const bool calcQ);
+createColumns(const bool isScanning, const bool includeData, const bool calcQ,
+              const bool hasDiffConstants);
 
 } // namespace Algorithms
 } // namespace Mantid

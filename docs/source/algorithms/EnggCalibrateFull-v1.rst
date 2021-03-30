@@ -50,7 +50,7 @@ In the output table the calibrated positions for every detector are
 found by calculating the *L2* values from the *DIFC* values as
 follows:
 
-.. math:: L2 = \left(\frac{DIFC} { 252.816 * 2 * sin \left(\frac{2\theta} {2.0}\right)}\right) - 50
+.. math:: L2 = \left(\frac{DIFC} { 252.816 * 2 * \sin \left(\frac{2\theta} {2.0}\right)}\right) - 50
 
 where the *DIFC* values are obtained from the fitting of expected
 peaks. See the algorithm :ref:`algm-EnggFitPeaks` for details on how

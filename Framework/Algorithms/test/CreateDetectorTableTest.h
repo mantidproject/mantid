@@ -82,7 +82,7 @@ public:
     }
 
     // Check the results
-    TS_ASSERT_EQUALS(ws->columnCount(), 7);
+    TS_ASSERT_EQUALS(ws->columnCount(), 11);
     TS_ASSERT_EQUALS(ws->rowCount(), 2);
 
     // Remove workspace from the data service.
@@ -117,7 +117,7 @@ public:
     }
 
     // Check the results
-    TS_ASSERT_EQUALS(ws->columnCount(), 9);
+    TS_ASSERT_EQUALS(ws->columnCount(), 13);
     TS_ASSERT_EQUALS(ws->rowCount(), 1);
 
     // Remove workspace from the data service.

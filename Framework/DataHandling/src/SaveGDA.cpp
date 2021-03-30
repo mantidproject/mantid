@@ -89,8 +89,8 @@ getParamLinesFromGSASFile(const std::string &paramsFilename) {
 
 DECLARE_ALGORITHM(SaveGDA)
 
-SaveGDA::CalibrationParams::CalibrationParams(const double _difa,
-                                              const double _difc,
+SaveGDA::CalibrationParams::CalibrationParams(const double _difc,
+                                              const double _difa,
                                               const double _tzero)
     : difa(_difa), difc(_difc), tzero(_tzero) {}
 
@@ -162,7 +162,7 @@ void SaveGDA::exec() {
     const auto ws = inputWS->getItem(i);
     const auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
 
-    const auto &d = matrixWS->x(0);
+    auto x = matrixWS->dataX(0);
     const size_t bankIndex(groupingScheme[i] - 1);
     if (bankIndex >= calibParams.size()) {
       throw Kernel::Exception::IndexError(bankIndex, calibParams.size(),
@@ -173,14 +173,15 @@ void SaveGDA::exec() {
     // For historic reasons, TOF is scaled by 32 in MAUD
     const static double tofScale = 32;
     std::vector<double> tofScaled;
-    tofScaled.reserve(d.size());
-    std::transform(d.begin(), d.end(), std::back_inserter(tofScaled),
-                   [&bankCalibParams](const double dVal) {
-                     return (dVal * bankCalibParams.difa +
-                             dVal * dVal * bankCalibParams.difc +
-                             bankCalibParams.tzero) *
-                            tofScale;
-                   });
+    tofScaled.reserve(x.size());
+    Kernel::Units::dSpacing dSpacingUnit;
+    std::vector<double> yunused;
+    dSpacingUnit.toTOF(x, yunused, 0., Kernel::DeltaEMode::Elastic,
+                       {{Kernel::UnitParams::difa, bankCalibParams.difa},
+                        {Kernel::UnitParams::difc, bankCalibParams.difc},
+                        {Kernel::UnitParams::tzero, bankCalibParams.tzero}});
+    std::transform(x.begin(), x.end(), std::back_inserter(tofScaled),
+                   [](const double tofVal) { return tofVal * tofScale; });
     const auto averageDeltaTByT = computeAverageDeltaTByT(tofScaled);
 
     const auto &intensity = matrixWS->y(0);

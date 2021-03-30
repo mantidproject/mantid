@@ -68,7 +68,8 @@ private:
                                 const double &primaryflightpath,
                                 const std::vector<int> &detectorids,
                                 const std::vector<double> &totalflightpaths,
-                                const std::vector<double> &twothetas);
+                                const std::vector<double> &twothetas,
+                                const std::vector<double> &difcs);
 };
 } // namespace DataHandling
 } // namespace Mantid

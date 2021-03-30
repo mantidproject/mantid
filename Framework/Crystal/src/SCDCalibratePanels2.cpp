@@ -685,8 +685,10 @@ void SCDCalibratePanels2::adjustT0(double dT0, IPeaksWorkspace_sptr &pws) {
   for (int i = 0; i < pws->getNumberPeaks(); ++i) {
     IPeak &pk = pws->getPeak(i);
     Units::Wavelength wl;
-    wl.initialize(pk.getL1(), pk.getL2(), pk.getScattering(), 0,
-                  pk.getInitialEnergy(), 0.0);
+    wl.initialize(pk.getL1(), 0,
+                  {{UnitParams::l2, pk.getL2()},
+                   {UnitParams::twoTheta, pk.getScattering()},
+                   {UnitParams::efixed, pk.getInitialEnergy()}});
     pk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
   }
 }

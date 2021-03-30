@@ -5,6 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+import re
+
 from qtpy.QtWidgets import QFileDialog, QMessageBox
 
 from ..view.DrillSettingsDialog import DrillSettingsDialog
@@ -27,6 +29,11 @@ class DrillPresenter:
     """
     _processError = set()
 
+    """
+    Set of custom options. Used to keep an history of the previous values.
+    """
+    _customOptions = set()
+
     def __init__(self, view):
         """
         Initialize the presenter by giving a view and a model. This method
@@ -40,6 +47,7 @@ class DrillPresenter:
         self.view = view
         self._invalidCells = set()
         self._processError = set()
+        self._customOptions = set()
 
         # view signals connection
         self.view.instrumentChanged.connect(self.instrumentChanged)
@@ -62,6 +70,7 @@ class DrillPresenter:
         self.view.saveRundex.connect(self.onSave)
         self.view.saveRundexAs.connect(self.onSaveAs)
         self.view.showSettings.connect(self.settingsWindow)
+        self.view.automaticFilling.connect(self.onAutomaticFilling)
 
         # model signals connection
         self.model.processStarted.connect(self.onProcessBegin)
@@ -95,6 +104,9 @@ class DrillPresenter:
             params = {}
             if not contents:
                 self.onParamOk(row, column)
+                for name in self._customOptions:
+                    self.model.changeParameter(row, name, "")
+                self._customOptions = set()
                 return
             for option in contents.split(';'):
                 if option and '=' not in option:
@@ -118,10 +130,92 @@ class DrillPresenter:
                 if value in ['false', 'False', 'FALSE']:
                     value = False
                 params[name] = value
+                currentOptions = set()
             for name,value in params.items():
+                currentOptions.add(name)
                 self.model.changeParameter(row, name, value)
+            for name in self._customOptions.difference(currentOptions):
+                self.model.changeParameter(row, name, "")
+            self._customOptions = currentOptions
         else:
             self.model.changeParameter(row, column, contents)
+
+    def onAutomaticFilling(self):
+        """
+        Copy (and increment) the contents of the first selected cell in the
+        other ones. The incremente value is found in the ui spinbox associated
+        with this action. If a single row is selected, the increment will be
+        propagated along that row. Otherwise, the increment is propagated along
+        columns.
+        """
+        def inc(value, i):
+            """
+            Increment the value depending on its content. This function can
+            increment numbers, numors (sum, range), names that end with a number
+            and comma seprarated list of all these types.
+            Some examples:
+            ("1000", 1)               -> "1001"
+            ("10,100,1000", 1)        -> "11,101,1001"
+            ("10+20,100", 2)          -> "12+22,102"
+            ("Sample_1,Sample10", 2)  -> "Sample_3,Sample12"
+            ("Sample,sample10", 1)    -> "Sample,sample11"
+
+            Args:
+                value (str): a string to increment
+                i (int): value of the increment
+
+            Returns:
+                str: A string that represents the incremented input value
+            """
+            if i == 0:
+                return value
+            if ',' in value:
+                return ','.join([inc(e, i) for e in value.split(',')])
+            if '+' in value:
+                return '+'.join([inc(e, i) for e in value.split('+')])
+            if ':' in value:
+                l = value.split(':')
+                try:
+                    l = [int(e) for e in l]
+                except:
+                    return value
+                if len(l) == 2:
+                    if i > 0:
+                        return str(l[1] + i) + ':' + str(l[1] + (l[1] - l[0]) + i)
+                    else:
+                        return str(l[0] - (l[1] - l[0]) + i) + ':' + str(l[0] + i)
+                if len(l) == 3:
+                    return inc(str(l[0]) + ':' + str(l[1]), i) + ':' + str(l[2])
+                else:
+                    return value
+
+            if re.match("^-{,1}\d+$", value):
+                return str(int(value) + i)
+            suffix = re.search("\d+$", value)
+            if suffix:
+                n = suffix.group(0)
+                ni = int(n) + i
+                if ni < 0:
+                    ni = 0
+                return value[0:-len(n)] + str(ni)
+
+            return value
+
+        increment = self.view.increment.value()
+        cells = self.view.table.getSelectedCells()
+        # check if increment should append along columns
+        columnIncrement = (len(self.view.table.getRowsFromSelectedCells()) > 1)
+        if not cells:
+            return
+        # increment or copy the content of the previous cell
+        for i in range(1, len(cells)):
+            # if we increment along columns and this is a new column
+            if columnIncrement and cells[i][1] != cells[i-1][1]:
+                continue
+            contents = self.view.table.getCellContents(cells[i-1][0],
+                                                       cells[i-1][1])
+            self.view.table.setCellContents(cells[i][0], cells[i][1],
+                                            inc(contents, increment))
 
     def onGroupSelectedRows(self):
         """
@@ -323,7 +417,7 @@ class DrillPresenter:
         QDialog to get the file path from the user.
         """
         filename = QFileDialog.getOpenFileName(self.view, 'Load rundex', '.',
-                                               "Rundex (*.mrd);;All (*.*)")
+                                               "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
         self.model.setIOFile(filename[0])
@@ -351,7 +445,7 @@ class DrillPresenter:
         """
         filename = QFileDialog.getSaveFileName(self.view, 'Save rundex',
                                                './*.mrd',
-                                               "Rundex (*.mrd);;All (*.*)")
+                                               "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
         self.model.setIOFile(filename[0])
@@ -446,11 +540,11 @@ class DrillPresenter:
         self.view.blockSignals(True)
         self.view.set_table(columns, tooltips)
         if not samples:
-            self.view.add_row_after()
+            self.view.add_row_after(1)
             self.model.addSample(-1, DrillSample())
         else:
             for i in range(len(samples)):
-                self.view.add_row_after()
+                self.view.add_row_after(1)
                 params = samples[i].getParameters()
                 for k,v in params.items():
                     if k not in self.view.columns:
