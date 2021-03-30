@@ -241,8 +241,8 @@ void MDNorm::init() {
                       "OutputNormalizationWorkspace", "", Direction::Output),
                   "A name for the output normalization MDHistoWorkspace.");
   declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
-                      "OutputBackgroundDataWorkspace", "", Kernel::Direction::Output,
-                      PropertyMode::Optional),
+                      "OutputBackgroundDataWorkspace", "",
+                      Kernel::Direction::Output, PropertyMode::Optional),
                   "A name for the output data MDHistoWorkspace.");
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>(
@@ -604,7 +604,8 @@ void MDNorm::exec() {
     }
   }
 
-  // Calculate (BinMD) input sample MDE to MDH and create noramlization MDH from it
+  // Calculate (BinMD) input sample MDE to MDH and create noramlization MDH from
+  // it
   auto outputDataWS = binInputWS(symmetryOps);
   createNormalizationWS(*outputDataWS);
   this->setProperty("OutputNormalizationWorkspace", m_normWS);
@@ -668,19 +669,17 @@ void MDNorm::exec() {
   // 4. ...
   std::cout << "Data Workspace " << outputDataWS->getName() << ": "
             << "Number of ExpInfo = " << outputDataWS->getNumExperimentInfo()
-            << "  Number of Dimension = " << outputDataWS->getNumDims()
-            <<"\n";
+            << "  Number of Dimension = " << outputDataWS->getNumDims() << "\n";
   std::cout << "Normalization Workspace " << m_normWS->getName() << ": "
             << "Number of ExpInfo = " << m_normWS->getNumExperimentInfo()
-            << "  Number of Dimension = " << m_normWS->getNumDims()
-            <<"\n";
+            << "  Number of Dimension = " << m_normWS->getNumDims() << "\n";
   if (m_backgroundWS) {
-      std::cout << "Background normalization Workspace " << m_bkgdNormWS->getName() << ": "
-                << "Number of ExpInfo = " << m_bkgdNormWS->getNumExperimentInfo()
-                << "  Number of Dimension = " << m_bkgdNormWS->getNumDims()
-                <<"\n";
+    std::cout << "Background normalization Workspace "
+              << m_bkgdNormWS->getName() << ": "
+              << "Number of ExpInfo = " << m_bkgdNormWS->getNumExperimentInfo()
+              << "  Number of Dimension = " << m_bkgdNormWS->getNumDims()
+              << "\n";
   }
-
 }
 
 /**
@@ -1207,30 +1206,34 @@ MDNorm::setQUnit(const std::vector<size_t> &qDimensionIndices,
 }
 
 DataObjects::MDHistoWorkspace_sptr MDNorm::binBackgroundWS(
-        const std::vector<Geometry::SymmetryOperation> &symmetryOps){
-    // Create output background data histogram MD workspace
-    // Either from TemporaryBackgroundDataWorkspace
-    // Or from scratch
-    Mantid::API::IMDHistoWorkspace_sptr tempBkgdDataWS = this->getProperty("TemporaryBackgroundDataWorkspace");
-    Mantid::API::Workspace_sptr outputWS;
+    const std::vector<Geometry::SymmetryOperation> &symmetryOps) {
+  // Create output background data histogram MD workspace
+  // Either from TemporaryBackgroundDataWorkspace
+  // Or from scratch
+  Mantid::API::IMDHistoWorkspace_sptr tempBkgdDataWS =
+      this->getProperty("TemporaryBackgroundDataWorkspace");
+  Mantid::API::Workspace_sptr outputWS;
 
-    // check that our input matches the temporary workspaces
-    std::map<std::string, std::string> parameters = getBinParameters();
-    if (tempBkgdDataWS) {
-        validateBinningForTemporaryDataWorkspace(parameters, tempBkgdDataWS);
-    }
+  // check that our input matches the temporary workspaces
+  std::map<std::string, std::string> parameters = getBinParameters();
+  if (tempBkgdDataWS) {
+    validateBinningForTemporaryDataWorkspace(parameters, tempBkgdDataWS);
+  }
 
-    std::cout << "[DEBUG VZ] Number of symmetry operaton = " << symmetryOps.size() << "\n";
+  std::cout << "[DEBUG VZ] Number of symmetry operaton = " << symmetryOps.size()
+            << "\n";
 
-    // For each symmetry operation, do binning MD once
-    // FIXME - The matrix is not correct!  The number of ExpInfo is not correct!
-    // FIXME - FOUND OUT how to accumulate binned MD to a same MDHistoWorkspace
-    double soIndex = 0;
-    std::vector<size_t> qDimensionIndices;
-    for (uint16_t i = 0; i < static_cast<uint16_t>(m_inputWS->getNumExperimentInfo()); ++i) {
+  // For each symmetry operation, do binning MD once
+  // FIXME - The matrix is not correct!  The number of ExpInfo is not correct!
+  // FIXME - FOUND OUT how to accumulate binned MD to a same MDHistoWorkspace
+  double soIndex = 0;
+  std::vector<size_t> qDimensionIndices;
+  for (uint16_t i = 0;
+       i < static_cast<uint16_t>(m_inputWS->getNumExperimentInfo()); ++i) {
 
-        // @ANDREI
-        auto rotMatrix = m_inputWS->getExperimentInfo(i)->run().getGoniometerMatrix();
+    // @ANDREI
+    auto rotMatrix =
+        m_inputWS->getExperimentInfo(i)->run().getGoniometerMatrix();
 
     for (auto so : symmetryOps) {
       // Building symmetric operation matrix
@@ -1245,21 +1248,22 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binBackgroundWS(
       } else {
         Qtransform = rotMatrix * soMatrix * m_W;
         // TODO  Qtransform = R * soMatrix * m_W;
-
       }
 
       // Set up BinMD for this symmetry opeation
       double progress_fraction = 1. / static_cast<double>(symmetryOps.size());
-      IAlgorithm_sptr binMD = createChildAlgorithm(
-          "BinMD", soIndex * 0.3 * progress_fraction, (soIndex + 1) * 0.3 * progress_fraction);
+      IAlgorithm_sptr binMD =
+          createChildAlgorithm("BinMD", soIndex * 0.3 * progress_fraction,
+                               (soIndex + 1) * 0.3 * progress_fraction);
 
       binMD->setPropertyValue("AxisAligned", "0");
       binMD->setProperty("InputWorkspace", m_backgroundWS);
       binMD->setProperty("TemporaryDataWorkspace", tempBkgdDataWS);
       binMD->setPropertyValue("NormalizeBasisVectors", "0");
-      // Set the output Workspace directly to Algorithm's OutputBackgroundDataWorkspace
-      binMD->setPropertyValue("OutputWorkspace",
-                              getPropertyValue("OutputBackgroundDataWorkspace"));
+      // Set the output Workspace directly to Algorithm's
+      // OutputBackgroundDataWorkspace
+      binMD->setPropertyValue(
+          "OutputWorkspace", getPropertyValue("OutputBackgroundDataWorkspace"));
       // set binning properties
       size_t qindex = 0;
       for (auto const &p : parameters) {
@@ -1281,9 +1285,11 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binBackgroundWS(
           value = basisVector.str();
         }
 
-        g_log.debug() << qindex << "-th Binning parameter " << key << " value: " << value
-                      << "\n";
-        std::cout << "[DEBUG VZ] " << qindex << "-th BinMD parameter to set: " << key << " = " << value << "\n";
+        g_log.debug() << qindex << "-th Binning parameter " << key
+                      << " value: " << value << "\n";
+        std::cout << "[DEBUG VZ] " << qindex
+                  << "-th BinMD parameter to set: " << key << " = " << value
+                  << "\n";
         binMD->setPropertyValue(key, value);
         qindex++;
       }
@@ -1299,17 +1305,15 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binBackgroundWS(
       tempBkgdDataWS->clearTransforms();
       soIndex += 1;
     }
+  }
+  auto outputMDHWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+  // set MDUnits for Q dimensions
+  if (m_isRLU) {
+    setQUnit(qDimensionIndices, outputMDHWS);
+  }
 
-
-    }
-    auto outputMDHWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
-    // set MDUnits for Q dimensions
-    if (m_isRLU) {
-      setQUnit(qDimensionIndices, outputMDHWS);
-    }
-
-    outputMDHWS->setDisplayNormalization(Mantid::API::NoNormalization);
-    return outputMDHWS;
+  outputMDHWS->setDisplayNormalization(Mantid::API::NoNormalization);
+  return outputMDHWS;
 }
 
 /**
@@ -1335,13 +1339,16 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
     DblMatrix soMatrix = buildSymmetryMatrix(so);
 
     DblMatrix Qtransform;
-    std::cout << "[DEBUG VZ] SO index = " << soIndex << ", isRLU = " << m_isRLU << "\n";
-    std::cout << "m_W: " << "\n";
+    std::cout << "[DEBUG VZ] SO index = " << soIndex << ", isRLU = " << m_isRLU
+              << "\n";
+    std::cout << "m_W: "
+              << "\n";
     m_W.print();
 
     if (m_isRLU) {
       Qtransform = m_UB * soMatrix * m_W;
-      std::cout << "UB: " << "\n";
+      std::cout << "UB: "
+                << "\n";
       m_UB.print();
     } else {
       Qtransform = soMatrix * m_W;
@@ -1571,8 +1578,7 @@ inline void MDNorm::calcSingleDetectorNorm(
     const std::vector<std::array<double, 4>> &intersections,
     const double &solid, std::vector<double> &yValues, const size_t &vmdDims,
     std::vector<coord_t> &pos, std::vector<coord_t> &posNew,
-    std::vector<std::atomic<signal_t>> &signalArray,
-    const double &solidBkgd,
+    std::vector<std::atomic<signal_t>> &signalArray, const double &solidBkgd,
     std::vector<std::atomic<signal_t>> &bkgdSignalArray) {
 
   auto intersectionsBegin = intersections.begin();
@@ -1640,8 +1646,8 @@ inline void MDNorm::calcSingleDetectorNorm(
                              std::plus<signal_t>());
     // [Task 89]
     if (m_backgroundWS)
-        Mantid::Kernel::AtomicOp(bkgdSignalArray[linIndex], bkgdSignal,
-                              std::plus<signal_t>());
+      Mantid::Kernel::AtomicOp(bkgdSignalArray[linIndex], bkgdSignal,
+                               std::plus<signal_t>());
   }
   return;
 }
@@ -1673,8 +1679,10 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
   // get proton charges
   const double protonCharge = currentExptInfo.run().getProtonCharge();
   // [Task 89]
-   const double protonChargeBkgd = (m_backgroundWS != nullptr)?
-   m_backgroundWS->getExperimentInfo(0)->run().getProtonCharge() : 0;
+  const double protonChargeBkgd =
+      (m_backgroundWS != nullptr)
+          ? m_backgroundWS->getExperimentInfo(0)->run().getProtonCharge()
+          : 0;
 
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
 
@@ -1700,7 +1708,7 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
 
   size_t numNPoints = (m_backgroundWS) ? m_bkgdNormWS->getNPoints() : 0;
   if (m_backgroundWS && numNPoints != m_normWS->getNPoints()) {
-      throw std::runtime_error("N points are different");
+    throw std::runtime_error("N points are different");
   }
   std::vector<std::atomic<signal_t>> bkgdSignalArray(numNPoints);
 
@@ -1792,9 +1800,9 @@ for (int64_t i = 0; i < ndets; i++) {
   //            << " Number of intersecton = " << intersections.size() << "\n";
 
   calcSingleDetectorNorm(
-      intersections, solid, yValues, vmdDims, pos, posNew,
-      signalArray,
-      bkgdSolid, bkgdSignalArray); // [Task 89] ADD solidBkgd, bkgdYValues, bkgdSignalArray
+      intersections, solid, yValues, vmdDims, pos, posNew, signalArray,
+      bkgdSolid,
+      bkgdSignalArray); // [Task 89] ADD solidBkgd, bkgdYValues, bkgdSignalArray
 
   prog->report();
 
@@ -1808,11 +1816,12 @@ if (m_accumulate) {
       [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
   // [Task 89] Process background
   if (m_backgroundWS)
-    std::transform(
-        bkgdSignalArray.cbegin(), bkgdSignalArray.cend(),
-        m_bkgdNormWS->getSignalArray(), m_bkgdNormWS->mutableSignalArray(),
-        [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b;
-        });
+    std::transform(bkgdSignalArray.cbegin(), bkgdSignalArray.cend(),
+                   m_bkgdNormWS->getSignalArray(),
+                   m_bkgdNormWS->mutableSignalArray(),
+                   [](const std::atomic<signal_t> &a, const signal_t &b) {
+                     return a + b;
+                   });
 
 } else {
   // First time, init
