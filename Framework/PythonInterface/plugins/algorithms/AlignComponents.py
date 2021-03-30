@@ -398,7 +398,7 @@ class AlignComponents(PythonAlgorithm):
                     instrument = api.mtd[wks_name].getInstrument()
                     name_finder = {'Source': instrument.getSource().getName(),
                                    'Sample': instrument.getSample().getName()}
-                    component_adjustments = [name_finder[component]] + xmap[:3] + [0.0] * 4 # no rotations
+                    component_adjustments = [name_finder[component]] + xmap[:3] + [0.0] * 4  # no rotations
                     adjustments_table.addRow(component_adjustments)
 
                 # Need to grab the component again, as things have changed
@@ -491,7 +491,7 @@ class AlignComponents(PythonAlgorithm):
             prog.report()
         api.DeleteWorkspace(wks_name)
         self.setProperty("OutputWorkspace", output_workspace)
-        logger.notice("Results applied to workspace "+wks_name)
+        logger.notice("Results applied to workspace " + wks_name)
 
     def _initialize_adjustments_table(self, table_name):
         r"""Create a table with appropriate column names for saving the adjustments to each component"""
