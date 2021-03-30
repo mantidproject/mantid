@@ -232,7 +232,7 @@ class HB2AReduce(PythonAlgorithm):
         # Get either vcorr file or vanadium data
         vanadium_count, vanadium_monitor, vcorr = self.get_vanadium(detector_mask, data['m1'][0],
                                                                     data['colltrans'][0], exp,
-                                                                    indir)
+                                                                    indir, metadata)
 
         def_x = self.getProperty("DefX").value
         if not def_x:
@@ -321,11 +321,12 @@ class HB2AReduce(PythonAlgorithm):
         detector_mask[exclude_detectors - 1] = False
         return detector_mask
 
-    def get_vanadium(self, detector_mask, m1, colltrans, exp, indir):
+    def get_vanadium(self, detector_mask, m1, colltrans, exp, indir, metadata):
         """
         This function returns either (vanadium_count, vanadium_monitor, None) or
         (None, None, vcorr) depending what type of file is provided by getProperty("Vanadium")
         """
+        filename = self.getPropertyValue("Filename")
 
         if not self.getProperty("Normalise").value:
             return None, None, np.ones(44)[detector_mask]
@@ -345,13 +346,15 @@ class HB2AReduce(PythonAlgorithm):
             # m1 = 0 -> Ge 115, 1.54A
             # m1 = 9.45 -> Ge 113, 2.41A
             # colltrans is the collimator position, whether in or out of the beam
-            if self.check_date():
+            new_convention = np.datetime64(datetime.datetime(2021, 2, 23))
+            date_created = self.get_date(metadata)
+            if date_created >= new_convention:
                 # colltrans = 0 -> OUT
                 # colltrans = +/-80 -> IN
                 vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
                     exp, 115 if np.isclose(m1, 0, atol=0.1) else 113,
                     "OUT" if np.isclose(colltrans, 0, atol=0.1) else "IN")
-            else:
+            elif date_created < new_convention:
                 # colltrans = +/-80 -> OUT
                 # colltrans = 0 -> IN
                 vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
@@ -365,20 +368,12 @@ class HB2AReduce(PythonAlgorithm):
 
         return None, None, np.genfromtxt(vcorr_filename)[detector_mask]
 
-    def check_date(self):
-        filename = self.getPropertyValue("Filename")
-        filelist = filename.split(",")
-        filename = filelist[0]
-        date_created = time.ctime(os.path.getctime(filename))
-        date_created = dparser.parse(date_created, fuzzy=True)
-        year_created = int(date_created.strftime("%Y"))
-        month_created = int(date_created.strftime("%m"))
-        day_created = int(date_created.strftime("%d"))
-
-        if year_created >= 2022 or (year_created == 2021 and month_created >= 2 and day_created >= 23):
-            return True
-        else:
-            return False
+    def get_date(self, metadata):
+        # Get correct start time
+        date_created = np.datetime64(
+            datetime.datetime.strptime(metadata['time'] + ' ' + metadata['date'],
+                                       '%I:%M:%S %p %m/%d/%Y'))
+        return date_created
 
     def process(self,
                 counts,
