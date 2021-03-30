@@ -50,7 +50,7 @@ class SuperplotPresenter:
             self._view.setMode(self.SPECTRUM_MODE_TEXT)
         else:
             self._view.setMode(self.BIN_MODE_TEXT)
-        self._changeCurrentWorkspace(ws.name())
+        self._updateSpectrumSlider([ws.name()], 0)
 
     def getSideView(self):
         return self._view.getSideWidget()
@@ -114,24 +114,29 @@ class SuperplotPresenter:
         self._view.setSelectedWorkspace(names[-1])
         self._updatePlot()
 
-    def _changeCurrentWorkspace(self, name):
+    def _updateSpectrumSlider(self, wsNames, position):
         """
-        Change the current workspace.
+        Update the spectrum slider and spinbox to match the selected workspaces.
 
         Args:
-            name (str): name of the workspace
+            wsNames (list(str)): list of workspace names
+            position (int): position that the slider should take
         """
-        currentWs = mtd[name]
-        currentSpectrumIndex = self._model.getSpectrum(name)
-        mode = self._view.getMode()
-        if mode == self.SPECTRUM_MODE_TEXT:
-            maximum = currentWs.getNumberHistograms()
-        else:
-            maximum = currentWs.blocksize()
-        self._view.setSpectrumSliderMax(maximum - 1)
-        self._view.setSpectrumSliderPosition(currentSpectrumIndex)
+        if not wsNames:
+            return
+        maximum = None
+        for wsName in wsNames:
+            ws = mtd[wsName]
+            nbHist = ws.getNumberHistograms()
+            if maximum is None:
+                maximum = nbHist
+            elif nbHist < maximum:
+                maximum = nbHist
+        self._view.setSpectrumDisabled(False)
+        self._view.setSpectrumSliderPosition(position)
+        self._view.setSpectrumSliderMax(nbHist  - 1)
+        self._view.setSpectrumSpinBoxValue(position)
         self._view.setSpectrumSpinBoxMax(maximum - 1)
-        self._view.setSpectrumSpinBoxValue(currentSpectrumIndex)
 
     def _updateHoldButton(self, wsName, spIndex):
         """
@@ -186,16 +191,21 @@ class SuperplotPresenter:
 
     def onWorkspaceSelectionChanged(self):
         """
-        Triggered when the selected workspace (in the workspace list) changed.
-
-        Args:
-            index (int): index of the selected workspace
+        Triggered when the selected workspace (in the workspace tree) changed.
         """
-        name = self._view.getSelectedWorkspaceFromList()
-        if name:
-            self._changeCurrentWorkspace(name)
-            self._updateHoldButton(name, self._view.getSpectrumSliderPosition())
-            self._updatePlot()
+        selection = self._view.getSelection()
+        for ws in selection:
+            if selection[ws]:
+                self._view.setSpectrumSliderPosition(0)
+                self._view.setSpectrumSpinBoxValue(0)
+                self._view.setSpectrumDisabled(True)
+                self._view.checkHoldButton(True)
+                self._updatePlot()
+                return
+
+        self._updateSpectrumSlider(selection.keys(), 0)
+        self._view.checkHoldButton(False)
+        self._updatePlot()
 
     def onSpectrumSliderMoved(self, position):
         """
@@ -225,17 +235,17 @@ class SuperplotPresenter:
 
     def onHoldButtonToggled(self, state):
         """
-        Add or delete the currently selected workspace, spectrum pair from the
+        Add or delete the currently selected workspace, spectrum pairs from the
         plotted data.
 
         Args:
-            state (bool): status of the two state button (not used)
+            state (bool): status of the two state button
         """
-        wsNames = self._view.getSelectedWorkspacesFromList()
+        selection = self._view.getSelection()
         spectrumIndex = self._view.getSpectrumSliderPosition()
         mode = self._view.getMode()
         if state:
-            for wsName in wsNames:
+            for wsName in selection:
                 spectraList = self._view.getSpectraList(wsName)
                 spectraList.append(spectrumIndex)
                 self._view.setSpectraList(wsName, spectraList)
@@ -247,12 +257,12 @@ class SuperplotPresenter:
                 self._model.setBinMode()
                 self._view.setAvailableModes([self.BIN_MODE_TEXT])
         else:
-            for wsName in wsNames:
+            for wsName in selection:
                 spectraList = self._view.getSpectraList(wsName)
-                if spectrumIndex in spectraList:
-                    spectraList.remove(spectrumIndex)
-                    self._view.setSpectraList(wsName, spectraList)
-                self._model.removeData(wsName, spectrumIndex)
+                for spectrum in selection[wsName]:
+                    spectraList.remove(spectrum)
+                    self._model.removeData(wsName, spectrum)
+                self._view.setSpectraList(wsName, spectraList)
             if not self._model.isBinMode() and not self._model.isSpectrumMode():
                 self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
                                               self.BIN_MODE_TEXT])

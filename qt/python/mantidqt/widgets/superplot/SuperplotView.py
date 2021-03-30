@@ -211,6 +211,16 @@ class SuperplotView(QWidget):
         self._bottomView.holdButton.setChecked(state)
         self._bottomView.holdButton.blockSignals(False)
 
+    def setSpectrumDisabled(self, state):
+        """
+        Disable/enable the spectrum selection widgets (slider and spinbox).
+
+        Args:
+            state (bool): if True, disable the widgets
+        """
+        self._bottomView.spectrumSlider.setDisabled(state)
+        self._bottomView.spectrumSpinBox.setDisabled(state)
+
     def setSpectrumSliderMax(self, length):
         """
         Set the max value of the spectrum slider.
