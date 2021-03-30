@@ -70,21 +70,6 @@ class SuperplotView(QWidget):
         self._sideView.close()
         self._bottomView.close()
 
-    def setSelectedWorkspace(self, name):
-        """
-        Select a specific workspace in the workspace list. This function does
-        not raise any QList signals.
-
-        Args:
-            index (int): new selection index
-        """
-        self._sideView.workspacesList.blockSignals(True)
-
-        item = self._sideView.workspacesList.findItems(name, Qt.MatchExactly, 0)[0]
-        if item:
-            self._sideView.workspacesList.setCurrentItem(item)
-        self._sideView.workspacesList.blockSignals(False)
-
     def getSelectedWorkspace(self):
         """
         Get the workspace selected in the workspace selector.
@@ -108,6 +93,24 @@ class SuperplotView(QWidget):
             return item.text(0)
         else:
             return None
+
+    def setSelectedWorkspacesInList(self, names):
+        """
+        Select the corresponding worspaces from the list. This function does not
+        raise any QTreeWidget signals.
+
+        Args:
+            names (list(str)): list of workspace names
+        """
+        self._sideView.workspacesList.blockSignals(True)
+        self._sideView.workspacesList.clearSelection()
+        for name in names:
+            item = self._sideView.workspacesList.findItems(name,
+                                                           Qt.MatchExactly, 0)
+            if item:
+                self._sideView.workspacesList.setCurrentItem(
+                        item[0], 0, QItemSelectionModel.Select)
+        self._sideView.workspacesList.blockSignals(False)
 
     def getSelectedWorkspacesFromList(self):
         """

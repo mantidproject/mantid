@@ -42,7 +42,7 @@ class SuperplotPresenter:
         self._model.setSpectrum(ws.name(), specIndex)
         names = self._model.getWorkspaces()
         self._view.setWorkspacesList(names)
-        self._view.setSelectedWorkspace(names[-1])
+        self._view.setSelectedWorkspacesInList([names[-1]])
         self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
                                       self.BIN_MODE_TEXT])
 
@@ -90,7 +90,7 @@ class SuperplotPresenter:
                 if data[0] == name:
                     spectra.append(data[1])
             self._view.setSpectraList(name, spectra)
-        self._view.setSelectedWorkspace(addedWorkspace)
+        self._view.setSelectedWorkspacesInList([addedWorkspace])
         self._updatePlot()
 
     def onDelButtonClicked(self):
@@ -111,7 +111,7 @@ class SuperplotPresenter:
                 if data[0] == name:
                     spectra.append(data[1])
             self._view.setSpectraList(name, spectra)
-        self._view.setSelectedWorkspace(names[-1])
+        self._view.setSelectedWorkspacesInList([names[-1]])
         self._updatePlot()
 
     def _updateSpectrumSlider(self, wsNames, position):
