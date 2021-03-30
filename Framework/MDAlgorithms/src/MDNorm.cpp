@@ -1,4 +1,4 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
+﻿// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -240,6 +240,10 @@ void MDNorm::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputNormalizationWorkspace", "", Direction::Output),
                   "A name for the output normalization MDHistoWorkspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
+                      "OutputBackgroundDataWorkspace", "", Kernel::Direction::Output,
+                      PropertyMode::Optional),
+                  "A name for the output data MDHistoWorkspace.");
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>(
           "OutputBackgroundNormalizationWorkspace", "", Direction::Output,
@@ -599,24 +603,25 @@ void MDNorm::exec() {
       throw std::invalid_argument("Could not find Ei value in the workspace.");
     }
   }
+
+  // Calculate (BinMD) input sample MDE to MDH and create noramlization MDH from it
   auto outputDataWS = binInputWS(symmetryOps);
-
-  // Background
-  m_backgroundWS = this->getProperty("BackgroundWorkspace");
-
   createNormalizationWS(*outputDataWS);
   this->setProperty("OutputNormalizationWorkspace", m_normWS);
   this->setProperty("OutputDataWorkspace", outputDataWS);
 
+  // Background
+  m_backgroundWS = this->getProperty("BackgroundWorkspace");
   // Outputs for background related
   if (m_backgroundWS) {
     // auto outputBkgdWS = binBackgroundWS(symmetryOps);
     // TODO/FIXME - Implement binBackgroundWS and replace outputDataWS with
     // outputBkgdDataWS! [Task 88]
-    createBackgroundNormalizationWS(*outputDataWS);
+    auto outputBackgroundDataWS = binBackgroundWS(symmetryOps);
+    createBackgroundNormalizationWS(*outputBackgroundDataWS);
     this->setProperty("OutputBackgroundNormalizationWorkspace", m_bkgdNormWS);
     // TODO/FIXME [Task 88] Enable this
-    // this->setProperty("OutputDataWorkspace", outputBkgdWS);
+    this->setProperty("OutputBackgroundDataWorkspace", outputBackgroundDataWS);
   }
 
   m_numExptInfos = outputDataWS->getNumExperimentInfo();
@@ -655,6 +660,17 @@ void MDNorm::exec() {
   divideMD->executeAsChildAlg();
   API::IMDWorkspace_sptr out = divideMD->getProperty("OutputWorkspace");
   this->setProperty("OutputWorkspace", out);
+
+  // [DEBUG VZ] Now it is a good place to output some helpful information
+  // 1. type of output
+  // 2. number of ExpInfo
+  // 3. dimension
+  // 4. ...
+  std::cout << "Data Workspace " << outputDataWS->getName() << ": "
+            << "Number of ExpInfo = " << outputDataWS->getNumExperimentInfo()
+            << "  Number of Dimension = " << outputDataWS->getNumDims()
+            <<"\n";
+
 }
 
 /**
@@ -1077,6 +1093,11 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
   }
 }
 
+/**
+ * Calculate symmetry operation matrix from Symmetry operation
+ * @param so :: symmetry operation
+ * @return :: matrix
+ */
 inline DblMatrix
 MDNorm::buildSymmetryMatrix(const Geometry::SymmetryOperation &so) {
   // calculate dimensions for binning
@@ -1094,6 +1115,15 @@ MDNorm::buildSymmetryMatrix(const Geometry::SymmetryOperation &so) {
 // projection: input/output
 // requiring: m_hIdx, m_kIndex, m_lIdx, meidx, m_dEintegrated, m_Q0Basis,
 // mQ1Basis,
+/**
+ * @brief MDNorm::determineBasisVector
+ * @param qindex
+ * @param value
+ * @param Qtransform
+ * @param projection
+ * @param basisVector
+ * @param qDimensionIndices :: output, Q dimension index mapped to input qindex
+ */
 inline void
 MDNorm::determineBasisVector(const size_t &qindex, const std::string &value,
                              const Mantid::Kernel::DblMatrix &Qtransform,
@@ -1142,6 +1172,11 @@ MDNorm::determineBasisVector(const size_t &qindex, const std::string &value,
   }
 }
 
+/**
+ * Set the output Frame to HKL
+ * @param qDimensionIndices
+ * @param outputMDHWS :: MDHistoWorkspace to set unit to
+ */
 inline void
 MDNorm::setQUnit(const std::vector<size_t> &qDimensionIndices,
                  Mantid::DataObjects::MDHistoWorkspace_sptr outputMDHWS) {
@@ -1159,6 +1194,105 @@ MDNorm::setQUnit(const std::vector<size_t> &qDimensionIndices,
   // add W_matrix
   auto ei = outputMDHWS->getExperimentInfo(0);
   ei->mutableRun().addProperty("W_MATRIX", m_W.getVector(), true);
+}
+
+DataObjects::MDHistoWorkspace_sptr MDNorm::binBackgroundWS(
+        const std::vector<Geometry::SymmetryOperation> &symmetryOps){
+    // Create output background data histogram MD workspace
+    // Either from TemporaryBackgroundDataWorkspace
+    // Or from scratch
+    Mantid::API::IMDHistoWorkspace_sptr tempBkgdDataWS = this->getProperty("TemporaryBackgroundDataWorkspace");
+    Mantid::API::Workspace_sptr outputWS;
+
+    // check that our input matches the temporary workspaces
+    std::map<std::string, std::string> parameters = getBinParameters();
+    if (tempBkgdDataWS) {
+        validateBinningForTemporaryDataWorkspace(parameters, tempBkgdDataWS);
+    }
+
+    std::cout << "[DEBUG VZ] Number of symmetry operaton = " << symmetryOps.size() << "\n";
+
+    // For each symmetry operation, do binning MD once
+    // FIXME - The matrix is not correct!  The number of ExpInfo is not correct!
+    // FIXME - FOUND OUT how to accumulate binned MD to a same MDHistoWorkspace
+    double soIndex = 0;
+    std::vector<size_t> qDimensionIndices;
+    for (auto so : symmetryOps) {
+      // Building symmetric operation matrix
+      DblMatrix soMatrix = buildSymmetryMatrix(so);
+      // Calculate Q transform matrix
+      // FIXME - need to add Q_Lab to Q_sample matrix in addition!!!
+      DblMatrix Qtransform;
+      if (m_isRLU) {
+        Qtransform = m_UB * soMatrix * m_W;
+        // TODO  Qtransform = R * m_UB * soMatrix * m_W;
+
+      } else {
+        Qtransform = soMatrix * m_W;
+        // TODO  Qtransform = R * soMatrix * m_W;
+
+      }
+
+      // Set up BinMD for this symmetry opeation
+      double progress_fraction = 1. / static_cast<double>(symmetryOps.size());
+      IAlgorithm_sptr binMD = createChildAlgorithm(
+          "BinMD", soIndex * 0.3 * progress_fraction, (soIndex + 1) * 0.3 * progress_fraction);
+
+      binMD->setPropertyValue("AxisAligned", "0");
+      binMD->setProperty("InputWorkspace", m_backgroundWS);
+      binMD->setProperty("TemporaryDataWorkspace", tempBkgdDataWS);
+      binMD->setPropertyValue("NormalizeBasisVectors", "0");
+      // Set the output Workspace directly to Algorithm's OutputBackgroundDataWorkspace
+      binMD->setPropertyValue("OutputWorkspace",
+                              getPropertyValue("OutputBackgroundDataWorkspace"));
+      // set binning properties
+      size_t qindex = 0;
+      for (auto const &p : parameters) {
+        auto key = p.first;
+        auto value = p.second;
+        std::stringstream basisVector;
+        std::vector<double> projection(m_inputWS->getNumDims(), 0.);
+        // value is a string that can start with QDimension0, etc, but contain
+        // other stuff. Do not use ==
+        determineBasisVector(qindex, value, Qtransform, projection, basisVector,
+                             qDimensionIndices);
+
+        if (!basisVector.str().empty()) {
+          // reconstruct from calculated basis vector
+          for (auto proji : projection) {
+            proji = std::abs(proji) > 1e-10 ? proji : 0.0;
+            basisVector << "," << proji;
+          }
+          value = basisVector.str();
+        }
+
+        g_log.debug() << qindex << "-th Binning parameter " << key << " value: " << value
+                      << "\n";
+        std::cout << "[DEBUG VZ] " << qindex << "-th BinMD parameter to set: " << key << " = " << value << "\n";
+        binMD->setPropertyValue(key, value);
+        qindex++;
+      }
+      // execute algorithm
+      binMD->executeAsChildAlg();
+
+      // set the temporary workspace to be the output workspace, so it keeps
+      // adding different symmetries AND
+      // FIXME in future another ExpInfo
+      outputWS = binMD->getProperty("OutputWorkspace");
+      tempBkgdDataWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+      tempBkgdDataWS->clearOriginalWorkspaces();
+      tempBkgdDataWS->clearTransforms();
+      soIndex += 1;
+    }
+
+    auto outputMDHWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+    // set MDUnits for Q dimensions
+    if (m_isRLU) {
+      setQUnit(qDimensionIndices, outputMDHWS);
+    }
+
+    outputMDHWS->setDisplayNormalization(Mantid::API::NoNormalization);
+    return outputMDHWS;
 }
 
 /**
@@ -1184,8 +1318,14 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
     DblMatrix soMatrix = buildSymmetryMatrix(so);
 
     DblMatrix Qtransform;
+    std::cout << "[DEBUG VZ] SO index = " << soIndex << ", isRLU = " << m_isRLU << "\n";
+    std::cout << "m_W: " << "\n";
+    m_W.print();
+
     if (m_isRLU) {
       Qtransform = m_UB * soMatrix * m_W;
+      std::cout << "UB: " << "\n";
+      m_UB.print();
     } else {
       Qtransform = soMatrix * m_W;
     }

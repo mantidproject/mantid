@@ -47,6 +47,11 @@ private:
   /// Bin(MD) input MDE workspace
   DataObjects::MDHistoWorkspace_sptr
   binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
+
+  /// Bin(MD) input Background workspace
+  DataObjects::MDHistoWorkspace_sptr binBackgroundWS(
+          const std::vector<Geometry::SymmetryOperation> &symmetryOps);
+
   /// build symmetry matrix
   Mantid::Kernel::DblMatrix
   buildSymmetryMatrix(const Geometry::SymmetryOperation &so);
