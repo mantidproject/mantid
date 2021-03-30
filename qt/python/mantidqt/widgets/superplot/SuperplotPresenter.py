@@ -178,17 +178,21 @@ class SuperplotPresenter:
         Triggered when the selected workspace (in the workspace tree) changed.
         """
         selection = self._view.getSelection()
+        spectrumIndex = None
         for ws in selection:
-            if selection[ws]:
-                self._view.setSpectrumSliderPosition(0)
-                self._view.setSpectrumSpinBoxValue(0)
-                self._view.setSpectrumDisabled(True)
-                self._view.checkHoldButton(True)
-                self._updatePlot()
-                return
+            for sp in selection[ws]:
+                if spectrumIndex is None:
+                    spectrumIndex = sp
+                if sp != spectrumIndex:
+                    spectrumIndex = 0
 
-        self._updateSpectrumSlider(selection.keys(), 0)
-        self._view.checkHoldButton(False)
+        if spectrumIndex is None:
+            self._view.checkHoldButton(False)
+            spectrumIndex = 0
+        else:
+            self._view.checkHoldButton(True)
+        self._view.setSpectrumSliderPosition(spectrumIndex)
+        self._view.setSpectrumSpinBoxValue(spectrumIndex)
         self._updatePlot()
 
     def onSpectrumSliderMoved(self, position):
