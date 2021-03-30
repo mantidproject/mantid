@@ -458,7 +458,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
   // build instrument geometry
   createInstrumentGeometry(outputWorkspace, instrumentname, primaryflightpath,
-                           detectorIDs, totalflightpaths, twothetas);
+                           detectorIDs, totalflightpaths, twothetas, difcs);
 
   return outputWorkspace;
 }
@@ -491,7 +491,7 @@ void LoadGSS::createInstrumentGeometry(
     const MatrixWorkspace_sptr &workspace, const std::string &instrumentname,
     const double &primaryflightpath, const std::vector<int> &detectorids,
     const std::vector<double> &totalflightpaths,
-    const std::vector<double> &twothetas) {
+    const std::vector<double> &twothetas, const std::vector<double> &difcs) {
   // Check Input
   if (detectorids.size() != totalflightpaths.size() ||
       totalflightpaths.size() != twothetas.size()) {
@@ -560,7 +560,13 @@ void LoadGSS::createInstrumentGeometry(
 
   } // ENDFOR (i: spectrum)
   workspace->setInstrument(instrument);
-}
 
+  auto &paramMap = workspace->instrumentParameters();
+  for (size_t i = 0; i < workspace->getNumberHistograms(); i++) {
+    auto detector = workspace->getDetector(i);
+    paramMap.addDouble(detector->getComponentID(), "DIFC", difcs[i]);
+  }
+}
 } // namespace DataHandling
+
 } // namespace Mantid

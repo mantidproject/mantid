@@ -137,8 +137,10 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
     pk.setDetectorID(pk.getDetectorID());
     // calculate&set wavelength based on new instrument
     Units::Wavelength wl;
-    wl.initialize(pk.getL1(), pk.getL2(), pk.getScattering(), 0,
-                  pk.getInitialEnergy(), 0.0);
+    wl.initialize(pk.getL1(), 0,
+                  {{UnitParams::l2, pk.getL2()},
+                   {UnitParams::twoTheta, pk.getScattering()},
+                   {UnitParams::efixed, pk.getInitialEnergy()}});
     pk.setWavelength(wl.singleFromTOF(tof));
 
     V3D qv = pk.getQSampleFrame();

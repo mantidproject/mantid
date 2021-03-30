@@ -11,6 +11,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/RemoveSpectra.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -89,6 +90,7 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
     TS_ASSERT_EQUALS(inputWS->x(94).front(), 19900.0);
     TS_ASSERT_EQUALS(inputWS->x(144).front(), 19900.0);
+    TS_ASSERT(!inputWS->spectrumInfo().hasDetectors(144));
 
     RemoveSpectra alg;
     alg.initialize();
@@ -102,13 +104,13 @@ public:
     MatrixWorkspace_sptr outputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             ouputWsName);
-    // Removed specs are workspace indices 140 and 144/specNum 141 and 145
+    // Removed specs are workspace indices 94 and 144/specNum 95 and 145
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 147);
     TS_ASSERT_DELTA(outputWS->x(93).front(), 0.41157, 0.0001);  // was 93
     TS_ASSERT_DELTA(outputWS->x(94).front(), 0.05484, 0.0001);  // was 95
     TS_ASSERT_DELTA(outputWS->x(95).front(), -0.15111, 0.0001); // was 96
-    TS_ASSERT_DIFFERS(outputWS->x(143).front(),
-                      19900.0); // Would be 144 if 94 wasn't also removed
+    TS_ASSERT(outputWS->spectrumInfo().hasDetectors(
+        143)); // Would be 144 if 144 wasn't also removed
   }
 
 private:

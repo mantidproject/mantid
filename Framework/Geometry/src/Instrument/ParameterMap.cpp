@@ -138,36 +138,7 @@ bool ParameterMap::operator!=(const ParameterMap &rhs) const {
  * @return true if the objects are considered equal, false otherwise
  */
 bool ParameterMap::operator==(const ParameterMap &rhs) const {
-  if (this == &rhs)
-    return true; // True for the same object
-
-  // Quick size check
-  if (this->size() != rhs.size())
-    return false;
-
-  // The map is unordered and the key is only valid at runtime. The
-  // asString method turns the ComponentIDs to full-qualified name identifiers
-  // so we will use the same approach to compare them
-
-  auto thisEnd = this->m_map.cend();
-  auto rhsEnd = rhs.m_map.cend();
-  for (auto thisIt = this->m_map.begin(); thisIt != thisEnd; ++thisIt) {
-    const IComponent *comp = static_cast<IComponent *>(thisIt->first);
-    const std::string fullName = comp->getFullName();
-    const auto &param = thisIt->second;
-    bool match(false);
-    for (auto rhsIt = rhs.m_map.cbegin(); rhsIt != rhsEnd; ++rhsIt) {
-      const IComponent *rhsComp = static_cast<IComponent *>(rhsIt->first);
-      const std::string rhsFullName = rhsComp->getFullName();
-      if (fullName == rhsFullName && (*param) == (*rhsIt->second)) {
-        match = true;
-        break;
-      }
-    }
-    if (!match)
-      return false;
-  }
-  return true;
+  return diff(rhs, true, false, 0.).empty();
 }
 
 /** Get the component description by name
@@ -217,6 +188,31 @@ ParameterMap::getShortDescription(const std::string &compName,
   }
   return result;
 }
+
+//------------------------------------------------------------------------------------------------
+/** Function which calculates relative error between two values and analyses if
+this error is within the limits
+* requested. When the absolute value of the difference is smaller then the value
+of the error requested,
+* absolute error is used instead of relative error.
+
+@param x1       -- first value to check difference
+@param x2       -- second value to check difference
+@param errorVal -- the value of the error, to check against. Should  be large
+then 0
+
+@returns true if error or false if the value is within the limits requested
+*/
+bool ParameterMap::relErr(double x1, double x2, double errorVal) const {
+  double num = std::fabs(x1 - x2);
+  // how to treat x1<0 and x2 > 0 ?  probably this way
+  double den = 0.5 * (std::fabs(x1) + std::fabs(x2));
+  if (den < errorVal)
+    return (num > errorVal);
+
+  return (num / den > errorVal);
+}
+
 /**
  * Output information that helps understanding the mismatch between two
  * parameter maps.
@@ -226,10 +222,15 @@ ParameterMap::getShortDescription(const std::string &compName,
  * true
  * @param rhs A reference to a ParameterMap object to compare it to
  * @param firstDiffOnly If true return only first difference found
+ * @param relative Indicates whether to treat the error as relative or absolute
+ * @param doubleTolerance The tolerance to use when comparing parameter values
+ * of type double
  * @return diff as a string
  */
 const std::string ParameterMap::diff(const ParameterMap &rhs,
-                                     const bool &firstDiffOnly) const {
+                                     const bool &firstDiffOnly,
+                                     const bool relative,
+                                     const double doubleTolerance) const {
   if (this == &rhs)
     return std::string(""); // True for the same object
 
@@ -240,25 +241,41 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
            std::to_string(rhs.size());
   }
 
-  // Run this same loops as in operator==
   // The map is unordered and the key is only valid at runtime. The
   // asString method turns the ComponentIDs to full-qualified name identifiers
   // so we will use the same approach to compare them
 
+  std::unordered_multimap<std::string, Parameter_sptr> thisMap, rhsMap;
+  for (auto &mappair : this->m_map) {
+    thisMap.emplace(mappair.first->getFullName(), mappair.second);
+  }
+  for (auto &mappair : rhs.m_map) {
+    rhsMap.emplace(mappair.first->getFullName(), mappair.second);
+  }
+
   std::stringstream strOutput;
-  auto thisEnd = this->m_map.cend();
-  auto rhsEnd = rhs.m_map.cend();
-  for (auto thisIt = this->m_map.cbegin(); thisIt != thisEnd; ++thisIt) {
-    const IComponent *comp = static_cast<IComponent *>(thisIt->first);
-    const std::string fullName = comp->getFullName();
+  for (auto thisIt = thisMap.cbegin(); thisIt != thisMap.cend(); ++thisIt) {
+    const std::string fullName = thisIt->first;
     const auto &param = thisIt->second;
     bool match(false);
-    for (auto rhsIt = rhs.m_map.cbegin(); rhsIt != rhsEnd; ++rhsIt) {
-      const IComponent *rhsComp = static_cast<IComponent *>(rhsIt->first);
-      const std::string rhsFullName = rhsComp->getFullName();
-      if (fullName == rhsFullName && (*param) == (*rhsIt->second)) {
-        match = true;
-        break;
+    for (auto rhsIt = rhsMap.cbegin(); rhsIt != rhsMap.cend(); ++rhsIt) {
+      const std::string rhsFullName = rhsIt->first;
+      const auto &rhsParam = rhsIt->second;
+      if ((fullName == rhsFullName) && (param->name() == (rhsParam->name()))) {
+        if ((param->type() == rhsParam->type()) &&
+            (rhsParam->type() == "double")) {
+          if (relative) {
+            if (!relErr(param->value<double>(), rhsParam->value<double>(),
+                        doubleTolerance))
+              match = true;
+          } else if (std::abs(param->value<double>() -
+                              rhsParam->value<double>()) <= doubleTolerance)
+            match = true;
+        } else if (param->asString() == rhsParam->asString()) {
+          match = true;
+        }
+        if (match)
+          break;
       }
     }
 
@@ -270,9 +287,8 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
                 << " and value: " << (*param).asString() << '\n';
       bool componentWithSameNameRHS = false;
       bool parameterWithSameNameRHS = false;
-      for (auto rhsIt = rhs.m_map.cbegin(); rhsIt != rhsEnd; ++rhsIt) {
-        const IComponent *rhsComp = static_cast<IComponent *>(rhsIt->first);
-        const std::string rhsFullName = rhsComp->getFullName();
+      for (auto rhsIt = rhsMap.cbegin(); rhsIt != rhsMap.cend(); ++rhsIt) {
+        const std::string rhsFullName = rhsIt->first;
         if (fullName == rhsFullName) {
           componentWithSameNameRHS = true;
           if ((*param).name() == (*rhsIt->second).name()) {

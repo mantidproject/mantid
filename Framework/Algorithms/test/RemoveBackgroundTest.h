@@ -95,13 +95,14 @@ public:
         std::vector<double>(1, 10.));
     TSM_ASSERT_THROWS(
         "Should throw if background workspace is not in TOF units",
-        bgRemoval.initialize(bkgWS, SourceWS, 0),
+        bgRemoval.initialize(bkgWS, SourceWS, Kernel::DeltaEMode::Elastic),
         const std::invalid_argument &);
 
     bkgWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 15);
-    TSM_ASSERT_THROWS("Should throw if background is not 1 or equal to source",
-                      bgRemoval.initialize(bkgWS, SourceWS, 0),
-                      const std::invalid_argument &);
+    TSM_ASSERT_THROWS(
+        "Should throw if background is not 1 or equal to source",
+        bgRemoval.initialize(bkgWS, SourceWS, Kernel::DeltaEMode::Elastic),
+        const std::invalid_argument &);
   }
 
   void testBackgroundHelper() {
@@ -110,7 +111,7 @@ public:
 
     API::AnalysisDataService::Instance().addOrReplace("TestWS", clone);
 
-    int emode = static_cast<int>(Kernel::DeltaEMode().fromString("Direct"));
+    auto emode = Kernel::DeltaEMode().fromString("Direct");
     bgRemoval.initialize(BgWS, SourceWS, emode);
 
     auto &dataX = clone->mutableX(0);
