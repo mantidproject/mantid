@@ -31,8 +31,8 @@ namespace DataObjects {
 //----------------------------------------------------------------------------------------------
 /** Default constructor */
 BasePeak::BasePeak()
-    : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
-      m_binCount(0), m_absorptionWeightedPathLength(0),
+    : m_samplePos(V3D(0, 0, 0)), m_H(0), m_K(0), m_L(0), m_intensity(0),
+      m_sigmaIntensity(0), m_binCount(0), m_absorptionWeightedPathLength(0),
       m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
       m_runNumber(0), m_monitorCount(0), m_row(-1), m_col(-1), m_peakNumber(0),
       m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
@@ -60,10 +60,10 @@ BasePeak::BasePeak(const Mantid::Kernel::Matrix<double> &goniometer)
 }
 
 BasePeak::BasePeak(const BasePeak &other)
-    : convention(other.convention), m_bankName(other.m_bankName),
-      m_H(other.m_H), m_K(other.m_K), m_L(other.m_L),
-      m_intensity(other.m_intensity), m_sigmaIntensity(other.m_sigmaIntensity),
-      m_binCount(other.m_binCount),
+    : convention(other.convention), m_samplePos(other.m_samplePos),
+      m_bankName(other.m_bankName), m_H(other.m_H), m_K(other.m_K),
+      m_L(other.m_L), m_intensity(other.m_intensity),
+      m_sigmaIntensity(other.m_sigmaIntensity), m_binCount(other.m_binCount),
       m_absorptionWeightedPathLength(other.m_absorptionWeightedPathLength),
       m_GoniometerMatrix(other.m_GoniometerMatrix),
       m_InverseGoniometerMatrix(other.m_InverseGoniometerMatrix),
@@ -190,6 +190,31 @@ void BasePeak::setIntHKL(const V3D &HKL) {
  */
 void BasePeak::setIntMNP(const V3D &MNP) {
   m_intMNP = V3D(std::round(MNP[0]), std::round(MNP[1]), std::round(MNP[2]));
+}
+
+/** Return the sample position vector */
+Mantid::Kernel::V3D BasePeak::getSamplePos() const { return m_samplePos; }
+
+/** Set sample position
+ *
+ * @ doubles x,y,z-> m_samplePos(x), m_samplePos(y), m_samplePos(z)
+ */
+void BasePeak::setSamplePos(double samX, double samY, double samZ) {
+
+  this->m_samplePos[0] = samX;
+  this->m_samplePos[1] = samY;
+  this->m_samplePos[2] = samZ;
+}
+
+/** Set sample position
+ *
+ * @param XYZ :: vector x,y,z-> m_samplePos(x), m_samplePos(y), m_samplePos(z)
+ */
+void BasePeak::setSamplePos(const Mantid::Kernel::V3D &XYZ) {
+
+  this->m_samplePos[0] = XYZ[0];
+  this->m_samplePos[1] = XYZ[1];
+  this->m_samplePos[2] = XYZ[2];
 }
 
 //----------------------------------------------------------------------------------------------
