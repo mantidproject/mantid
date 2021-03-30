@@ -19,13 +19,13 @@ Sequential fitting options
 
 **Plot fit results** Determines whether the results of the fit will be added to the plot window.
 
-**Parameters for previous fit** Uses the parameters from the previous fit calculation as initial values for the next fit. 
+**Parameters for previous fit** Uses the parameters from the previous fit calculation as initial values for the next fit.
 
 **Initial parameters for each fit** Uses the initial values (as specified in the Fit Table) in each fit calculation.
 
 Fit Table
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Each entry of the Fit Table corresponds to a fit object, which comprises a list of input workspaces and a fit function. 
+Each entry of the Fit Table corresponds to a fit object, which comprises a list of input workspaces and a fit function.
 
 **Run** The runs present in the fit object.
 
@@ -34,7 +34,7 @@ Each entry of the Fit Table corresponds to a fit object, which comprises a list 
 **Fit quality** The quality of the fit returned from the fitting algorithm.
 
 **List of fit parameters** The columns that proceed this correspond to the values of the fit parameters. The value of these
-parameters can be edited. 
+parameters can be edited.
 
 
 Used By

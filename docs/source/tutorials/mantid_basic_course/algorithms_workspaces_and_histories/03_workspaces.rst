@@ -1,17 +1,17 @@
 .. _03_workspaces:
 
 ===========================================================
-What is a Bin?, What is a Workspace? and the Power of Rebin 
+What is a Bin?, What is a Workspace? and the Power of Rebin
 ===========================================================
 
-Most data within Mantid are Histogram-like, so imagine a plot: There is an X-axis with a measured/calculated 
-unit, such as Time-of-Flight (TOF) in μs. The Y-axis is the Counts (How many neutrons / positrons were detected 
+Most data within Mantid are Histogram-like, so imagine a plot: There is an X-axis with a measured/calculated
+unit, such as Time-of-Flight (TOF) in μs. The Y-axis is the Counts (How many neutrons / positrons were detected
 at each TOF value?) and will have the inverse unit of the X-axis, such as (μs):sup:`-1`.
 
-But in a Histogram we cut the X-axis into set range blocks, and plot the Total Count (Y) within each block (range in X). Each set range or block is referred to as a "Bin". The Bins may be of equal length or varying length (see right). 
+But in a Histogram we cut the X-axis into set range blocks, and plot the Total Count (Y) within each block (range in X). Each set range or block is referred to as a "Bin". The Bins may be of equal length or varying length (see right).
 
-If Algorithms are the verbs of Mantid, then Workspaces are the nouns. 
-Workspaces are used to store data within Mantid, and when you manipulate data, 
+If Algorithms are the verbs of Mantid, then Workspaces are the nouns.
+Workspaces are used to store data within Mantid, and when you manipulate data,
 you output to a new Workspace.
 
 Workspaces come in several forms, but the most common two are the :ref:`Workspace2D` and the :ref:`EventWorkspace`. Their data are in an XYE format (the general Mantid term is :ref:`MatrixWorkspace`)
@@ -22,7 +22,7 @@ Workspace2D
 ===========
 
 A :ref:`Workspace2D` is histogrammed data, with one or more spectra. For each spectrum X, Y (counts) and E
-(error) data is stored. 
+(error) data is stored.
 
 .. figure:: /images/MBC_Workspace2D.png
    :width: 600px
@@ -30,7 +30,7 @@ A :ref:`Workspace2D` is histogrammed data, with one or more spectra. For each sp
    :align: center
 
 When the Matrix table of a Workspace is displayed (via right-click > "Show Data"):
-- Each row is a different Spectra. 
+- Each row is a different Spectra.
 - Each vertical column in X-data is (usually) the edges of each Bin
 - Each vertical column in Y-data is the number of Counts in that Bin
 - Each vertical column in E-data is the Error of the Y-data for that Bin
@@ -42,15 +42,15 @@ Note as the X-data refers to the Bin boundaries, there is one more column in the
 Correct Binning
 ---------------
 
-Where bin boundaries are set along the X-axis determines, how long or short bins are. The overall arrangement 
-of bins for a spectrum is called its **binning**. Converting units can lead to a *ragged workspace*, with inconsistent binning 
-between different spectra! A Colorfill plot of ragged data looks poor and often algorithms will not accept a ragged input. 
+Where bin boundaries are set along the X-axis determines, how long or short bins are. The overall arrangement
+of bins for a spectrum is called its **binning**. Converting units can lead to a *ragged workspace*, with inconsistent binning
+between different spectra! A Colorfill plot of ragged data looks poor and often algorithms will not accept a ragged input.
 
 To fix this **Rebin** the ragged workspace with regular binning:
 
 1. **Load** the *GEM38370_Focussed.nxs* file, naming the **OutputWorkspace** to be *ws*
 2. Execute the Algorithm **ConvertUnits** with *ws* as the InputWorkspace, *ws_lambda* as the **OutputWorkspace**,
-   **Target**\ =\ *Wavelength*, **EMode**\ =\ *Elastic*. 
+   **Target**\ =\ *Wavelength*, **EMode**\ =\ *Elastic*.
 3. Plotting the *ws_lambda* Workspace as a Colorfill demonstrates the ragged X-bins :-( .
 
 ( You may need to alter the max value of the colorbar to around 300 by double-click on the right of the colorbar)
@@ -103,7 +103,7 @@ Binning of Event Workspaces
    :align: center
 
 This extra information that Event Data has over Workspace2D (histogram) data
-means that rebinning is simply moving the Bin edges and summing the number of Counts 
+means that rebinning is simply moving the Bin edges and summing the number of Counts
 within the new Bin. While this can be done for Workspace2D (histogram) data, any split bins are averaged.
 
 On the other hand, EventWorkspaces know (to a certain precision) exactly the Time of Arrival value for each particle
@@ -127,8 +127,8 @@ Example of Workspace usage
 ==========================
 
 #. Load the event data HYS_11388_event.nxs
-#. Execute the **SumSpectra** algorithm and output to a sensible workspace name such as "HYS_sum" 
-#. Rebin this summed Workspace with Params=10 (the width of each bin) with the box ticked to Preserve Events. 
+#. Execute the **SumSpectra** algorithm and output to a sensible workspace name such as "HYS_sum"
+#. Rebin this summed Workspace with Params=10 (the width of each bin) with the box ticked to Preserve Events.
 #. Rebin again to binwidths of 100, 300 and 1000.
 #. Observe, on the plots below, that as the bins get larger, finer detail is "lost". It's nice to see rebinning graphically.
 

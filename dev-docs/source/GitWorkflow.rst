@@ -37,8 +37,11 @@ The steps for a new piece of work can be summarised as follows:
    issue `here <https://github.com/mantidproject/mantid/issues>`__
 2. Create a branch from master, using the naming convention described
    at :ref:`GitWorkflowPublicPrivateBranches`
-3. Do the work and commit changes to the branch. Push the branch
-   regularly to GitHub to make sure no work is accidentally lost
+3. Do the work and commit changes to the branch. On commit, the
+   `pre-commit <https://pre-commit.com/>`_ framework will run, it will
+   check all your changes for formatting, linting, and perform static
+   analysis. Push the branch regularly to GitHub to make sure no work
+   is accidentally lost.
 4. When you are finished with the work, ensure that all of the unit
    tests, documentation tests and system tests if necessary pass on
    your own machine

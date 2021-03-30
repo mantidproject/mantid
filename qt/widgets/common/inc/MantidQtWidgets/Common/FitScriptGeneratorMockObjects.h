@@ -78,6 +78,9 @@ public:
 
   MOCK_CONST_METHOD0(allRows, std::vector<FitDomainIndex>());
   MOCK_CONST_METHOD0(selectedRows, std::vector<FitDomainIndex>());
+  MOCK_CONST_METHOD0(currentRow, FitDomainIndex());
+
+  MOCK_CONST_METHOD0(hasLoadedData, bool());
 
   MOCK_CONST_METHOD1(parameterValue, double(std::string const &parameter));
   MOCK_CONST_METHOD1(attributeValue, Mantid::API::IFunction::Attribute(
@@ -99,7 +102,7 @@ public:
 
   MOCK_METHOD0(resetSelection, void());
 
-  MOCK_CONST_METHOD0(isAddRemoveFunctionForAllChecked, bool());
+  MOCK_CONST_METHOD0(applyFunctionChangesToAll, bool());
 
   MOCK_METHOD0(clearFunction, void());
   MOCK_CONST_METHOD1(setFunction,
@@ -205,6 +208,7 @@ public:
 
   MOCK_METHOD1(setFittingMode, void(FittingMode fittingMode));
   MOCK_CONST_METHOD0(getFittingMode, FittingMode());
+  MOCK_CONST_METHOD0(isSimultaneousMode, bool());
 
   MOCK_CONST_METHOD0(getGlobalTies, std::vector<GlobalTie>());
   MOCK_CONST_METHOD0(getGlobalParameters, std::vector<GlobalParameter>());

@@ -25,7 +25,7 @@ Access a workspace,loaded in the Workspace Toolbox, inside a script:
 .. code-block:: python
 
     ws = mtd['ws']
-    
+
     #or you could use:
     from mantid.api import AnalysisDataService as ADS
     ws = ADS.retrieve('ws')
@@ -191,7 +191,7 @@ Example Script
                                       UserDefinedFunction='\
                                       name=ExpDecay,Lifetime = 20,Height = 200;name=Gaussian,\
                                       PeakCentre=50, Height=10, Sigma=3',
-                                      XMax=100, BinWidth=2)       
+                                      XMax=100, BinWidth=2)
 
     #Create figure and axes
     fig, axes = plt.subplots(ncols=2,nrows=1,subplot_kw={'projection': 'mantid'})
@@ -229,5 +229,5 @@ Example Script
 * :ref:`06_formatting_plots`
 * `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
 
-.. |GenerateAScript.png| image:: /images/GenerateAScript.png  
+.. |GenerateAScript.png| image:: /images/GenerateAScript.png
    :width: 30px

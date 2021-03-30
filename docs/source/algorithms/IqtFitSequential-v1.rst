@@ -24,7 +24,7 @@ Usage
 **Example - Running IqtFitSequential on an reduced workspace.**
 
 .. code-block:: python
-    
+
     #Load in iqt data
     input_ws = Load(Filename='iris26176_graphite002_iqt.nxs')
     function = r'name=LinearBackground,A0=0.027668,A1=0,ties=(A1=0);

@@ -22,7 +22,7 @@ To obtain the flat background, :math:`B`, the second-half of the good raw-data i
 
 .. math:: f(t) = \mbox{A}e^{-\lambda t} + B
 
-where the first term represents a ExpDecay function, see :ref:`func-ExpDecayMuon`. 
+where the first term represents a ExpDecay function, see :ref:`func-ExpDecayMuon`.
 The good raw-data is defined as being from the bin containing the `first good data` to the bin containing the `last good data`.
 
 The algorithm takes in an input workspace and performs the correction inplace on the workspace. The number of iterations

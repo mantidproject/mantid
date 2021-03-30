@@ -66,13 +66,13 @@ FitScriptGeneratorView::FitScriptGeneratorView(
       m_dialog(std::make_unique<AddWorkspaceDialog>(this)),
       m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
       m_functionTreeView(std::make_unique<FunctionTreeView>(nullptr, true)),
-      m_fitOptionsBrowser(std::make_unique<FitOptionsBrowser>(
-          nullptr, FittingMode::SEQUENTIAL_AND_SIMULTANEOUS)) {
+      m_fitOptionsBrowser(std::make_unique<BasicFitOptionsBrowser>(nullptr)) {
   m_ui.setupUi(this);
 
   m_ui.fDataTable->layout()->addWidget(m_dataTable.get());
-  m_ui.splitter->addWidget(m_functionTreeView.get());
-  m_ui.splitter->addWidget(m_fitOptionsBrowser.get());
+  m_ui.splitterVertical->addWidget(m_functionTreeView.get());
+  m_ui.splitterVertical->addWidget(m_fitOptionsBrowser.get());
+  m_ui.splitterVertical->setSizes({360, 120});
 
   setFittingMode(fittingMode);
   setFitBrowserOptions(fitOptions);
@@ -124,10 +124,8 @@ void FitScriptGeneratorView::connectUiSignals() {
   connect(m_functionTreeView.get(), SIGNAL(functionHelpRequest()), this,
           SLOT(onFunctionHelpRequested()));
 
-  connect(m_fitOptionsBrowser.get(), SIGNAL(changedToSequentialFitting()), this,
-          SLOT(onChangeToSequentialFitting()));
-  connect(m_fitOptionsBrowser.get(), SIGNAL(changedToSimultaneousFitting()),
-          this, SLOT(onChangeToSimultaneousFitting()));
+  connect(m_fitOptionsBrowser.get(), SIGNAL(fittingModeChanged(FittingMode)),
+          this, SLOT(onFittingModeChanged(FittingMode)));
 
   /// Disconnected because it causes a crash when selecting a table row while
   /// editing a parameters value. This is because selecting a different row will
@@ -141,22 +139,19 @@ void FitScriptGeneratorView::connectUiSignals() {
 void FitScriptGeneratorView::setFitBrowserOptions(
     QMap<QString, QString> const &fitOptions) {
   for (auto it = fitOptions.constBegin(); it != fitOptions.constEnd(); ++it)
-    m_fitOptionsBrowser->setProperty(it.key(), it.value());
+    m_fitOptionsBrowser->setProperty(it.key().toStdString(),
+                                     it.value().toStdString());
 }
 
 void FitScriptGeneratorView::setFittingMode(FittingMode fittingMode) {
-  if (fittingMode == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS)
-    throw std::invalid_argument(
-        "Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
-
-  m_fitOptionsBrowser->setCurrentFittingType(fittingMode);
+  m_fitOptionsBrowser->setFittingMode(fittingMode);
 }
 
 void FitScriptGeneratorView::subscribePresenter(
     IFitScriptGeneratorPresenter *presenter) {
   m_presenter = presenter;
   m_presenter->notifyPresenter(ViewEvent::FittingModeChanged,
-                               m_fitOptionsBrowser->getCurrentFittingType());
+                               m_fitOptionsBrowser->getFittingMode());
 }
 
 void FitScriptGeneratorView::onRemoveClicked() {
@@ -243,14 +238,8 @@ void FitScriptGeneratorView::onFunctionHelpRequested() {
         QString::fromStdString(function->name()));
 }
 
-void FitScriptGeneratorView::onChangeToSequentialFitting() {
-  m_presenter->notifyPresenter(ViewEvent::FittingModeChanged,
-                               FittingMode::SEQUENTIAL);
-}
-
-void FitScriptGeneratorView::onChangeToSimultaneousFitting() {
-  m_presenter->notifyPresenter(ViewEvent::FittingModeChanged,
-                               FittingMode::SIMULTANEOUS);
+void FitScriptGeneratorView::onFittingModeChanged(FittingMode fittingMode) {
+  m_presenter->notifyPresenter(ViewEvent::FittingModeChanged, fittingMode);
 }
 
 std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {
@@ -276,6 +265,14 @@ std::vector<FitDomainIndex> FitScriptGeneratorView::allRows() const {
 
 std::vector<FitDomainIndex> FitScriptGeneratorView::selectedRows() const {
   return m_dataTable->selectedRows();
+}
+
+FitDomainIndex FitScriptGeneratorView::currentRow() const {
+  return m_dataTable->currentRow();
+}
+
+bool FitScriptGeneratorView::hasLoadedData() const {
+  return m_dataTable->hasLoadedData();
 }
 
 double
@@ -321,8 +318,8 @@ FitScriptGeneratorView::getDialogWorkspaceIndices() const {
 
 void FitScriptGeneratorView::resetSelection() { m_dataTable->resetSelection(); }
 
-bool FitScriptGeneratorView::isAddRemoveFunctionForAllChecked() const {
-  return m_ui.ckAddRemoveFunctionForAllDatasets->isChecked();
+bool FitScriptGeneratorView::applyFunctionChangesToAll() const {
+  return m_ui.cbApplyFunctionChangesTo->currentText() == "All Domains";
 }
 
 void FitScriptGeneratorView::clearFunction() { m_functionTreeView->clear(); }

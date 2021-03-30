@@ -5,12 +5,12 @@ Muon Unscripted Testing: Group 4 (Frequency Domain Analysis)
 
 .. contents:: Table of Contents
     :local:
-    
+
 Introduction
 ^^^^^^^^^^^^
 
 These are unscripted tests for the :program:`Frequency Domain Analysis` interface.
-Load "MUSR00062260" into Muon analysis and plot each of the available groups **before** opening Frequency Domain Analysis. 
+Load "MUSR00062260" into Muon analysis and plot each of the available groups **before** opening Frequency Domain Analysis.
 
 The master testing guide is located at :ref:`Muon_Analysis_TestGuide-ref`.
 
@@ -21,7 +21,7 @@ Ensure that you have first run all the tests in group 2, then open the Frequency
 
 Test 1: Basic FFT
 -----------------
-- Set the workspace to "MUSR00062260;Group;bkwd;Asym;#1" 
+- Set the workspace to "MUSR00062260;Group;bkwd;Asym;#1"
 - Click the calculate FFT button and a 3 workspaces should appear in the "MUSR00062260 FFT FD" group
 - The group will contain 3 workspace ending in `Re` (real), `Im` (imaginary) and `mod` (modulus)
 - The plot window will show a broad peak
@@ -54,7 +54,7 @@ Test 3: PhaseQuad
 - You will be able to select the real and imaginary parts of 'pq'
 - Select the real part
 - Click calculate
-- Tick the `Imaginary Data` 
+- Tick the `Imaginary Data`
 - Select the imaginary part of the phasequad
 - Click calculate
 - In both cases the plot should be a nice peak
@@ -64,7 +64,7 @@ Test 4: MaxEnt
 --------------
 - Change the drop-down menu at the top of the interface to "MaxEnt"
 - The interface should look different
-- Click the Calculate MaxEnt button 
+- Click the Calculate MaxEnt button
 - The calculate button will be disabled and cancel enabled
 - Click the cancel button
 - Click Calculate MaxEnt

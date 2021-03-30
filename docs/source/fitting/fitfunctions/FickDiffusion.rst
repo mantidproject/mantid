@@ -9,7 +9,7 @@ Fick Diffusion
 Description
 -----------
 
-Models the Q dependence of the QENS line width (Gamma (hwhm)), diffusion coefficients (D), 
+Models the Q dependence of the QENS line width (Gamma (hwhm)), diffusion coefficients (D),
 residence times (tau) and jump lengths (l) to extract the associated long range diffusive
 motions of molecules. Fick's law for diffusion has the form:
 

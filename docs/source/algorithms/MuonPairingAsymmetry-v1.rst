@@ -11,7 +11,7 @@ Description
 
 When interacting with the :ref:`Muon_Analysis-ref` interface, operations such as detector grouping, group and pair asymmetry are performed on data. This algorithm performs a "pair asymmetry" operation, in other words it takes two groups (from :ref:`algm-MuonGroupingCounts` for example) and calculates the asymmetry between them using the common formula from :ref:`algm-AsymmetryCalc`.
 
-This algorithm is part of a set of four; with :ref:`algm-MuonPreProcess` being run first; and the output being fed into this one. Alternatively, the groups may be calculated by using :ref:`algm-MuonPreProcess` followed by :ref:`algm-MuonGroupingCounts` and fed into this algorithm by switching off **SpecifyGroupsManually**. This allows the replication of the workflow used by the muon analysis interface to produce group data. 
+This algorithm is part of a set of four; with :ref:`algm-MuonPreProcess` being run first; and the output being fed into this one. Alternatively, the groups may be calculated by using :ref:`algm-MuonPreProcess` followed by :ref:`algm-MuonGroupingCounts` and fed into this algorithm by switching off **SpecifyGroupsManually**. This allows the replication of the workflow used by the muon analysis interface to produce group data.
 
 Analysis
 ########
@@ -24,7 +24,7 @@ With a pair, one may define an asymmetry operation as in :ref:`algm-AsymmetryCal
 
 where :math:`F` and :math:`B` are the forward and backwards groups and alpha is the balance parameter.
 
-The pair must be given a name via **PairName** which can consist of letters, numbers and underscores. 
+The pair must be given a name via **PairName** which can consist of letters, numbers and underscores.
 
 #. Valid names : "pair", "pair2", "pair_2", "1234"
 #. Invalid names : "", "pair!", "pair "
@@ -40,7 +40,7 @@ There are two options for supplying the group data :
 #. If **SpecifyGroupsManually** is not checked, then two workspaces must be supplied which represent the two groups via **InputWorkspace1** and **InputWorkspace2**. These may be *MatrixWorkspace*s (in the case of single period data); or *WorkspaceGroup*s (in the case of multi period data, the two groups must contain the same number of workspaces). Any *MatrixWorkspace* must only contain one spectra (the group counts).
 
 
-Multi period data 
+Multi period data
 #################
 
 Both single and multi period data are supported by the algorithm.
@@ -48,7 +48,7 @@ Both single and multi period data are supported by the algorithm.
 The **SummedPeriods** and **SubtractedPeriods** inputs are used to control the way that periods are combined. so for example;
 
 #. SummedPeriods = 1,2
-#. SubtractedPeriods = 3,4 
+#. SubtractedPeriods = 3,4
 
 would combine periods in the combination :math:`(1+2)-(3+4)`.
 

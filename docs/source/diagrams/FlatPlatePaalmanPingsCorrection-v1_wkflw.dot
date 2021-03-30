@@ -37,7 +37,7 @@ digraph FlatPlatePaalmanPingsCorrection {
     GroupWorkspaces
     SplineInterpolation
   }
-  
+
   subgraph decisions  {
     $decision_style
     useCan              [label="Using can"]
@@ -46,7 +46,7 @@ digraph FlatPlatePaalmanPingsCorrection {
     interpolate         [label="Interpolate"]
     processedAngles     [label="Processed all angles"]
   }
-  
+
   subgraph process  {
     $process_style
     detAngles     [label="get_angles: Determine detector angles based on sample workspace"]
@@ -103,5 +103,5 @@ digraph FlatPlatePaalmanPingsCorrection {
   interpolate               -> SplineInterpolation      [label="Yes"]
   SplineInterpolation       -> GroupWorkspaces
   interpolate               -> GroupWorkspaces          [label="No"]
-  GroupWorkspaces           -> OutputWorkspace  
+  GroupWorkspaces           -> OutputWorkspace
 }

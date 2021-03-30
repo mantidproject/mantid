@@ -61,10 +61,10 @@ An important aspect of examining the :math:`S(Q,E)` workspace is to plot cuts at
    import directtools as dt
    from mantid.simpleapi import *
    import warnings
-   
+
    DirectILLCollectData(Run='ILL/IN4/084447.nxs', OutputWorkspace='data')
    DirectILLReduction(InputWorkspace='data', OutputWorkspace='SofQW')
-   
+
    Q = 2.
    dQ = 0.2
    # plotconstQ produces a warning on some versions of numpy.
@@ -82,10 +82,10 @@ Any of the workspace, cut centre or cut width arguments can be a :class:`list` i
 
    import directtools as dt
    from mantid.simpleapi import *
-   
+
    DirectILLCollectData(Run='ILL/IN4/084447.nxs', OutputWorkspace='data')
    DirectILLReduction(InputWorkspace='data', OutputWorkspace='SofQW')
-   
+
    Q1 = 2.
    Q2 = 3.
    dQ = 0.2
@@ -101,10 +101,10 @@ If a line profile already exists, it can be plotted using :func:`directtools.plo
 
    import directtools as dt
    from mantid.simpleapi import *
-   
+
    DirectILLCollectData(Run='ILL/IN4/084447.nxs', OutputWorkspace='data')
    DirectILLReduction(InputWorkspace='data', OutputWorkspace='SofQW')
-   
+
    E1 = 8.
    dE = 2.
    cut1 = LineProfile('SofQW', E1, dE, 'Horizontal')
@@ -143,10 +143,10 @@ Convenience tools
 
    import directtools as dt
    from mantid.simpleapi import *
-   
+
    DirectILLCollectData(Run='ILL/IN4/084447.nxs', OutputWorkspace='data')
    DirectILLReduction(InputWorkspace='data', OutputWorkspace='SofQW')
-   
+
    # Works on any workspace, not just S(Q,E).
    logs = dt.SampleLogs('SofQW')
    print(logs.instrument.name)

@@ -26,6 +26,8 @@ except ImportError:
 # local imports
 from inspect import getfullargspec
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
+from workbench.utils.io import input_qinputdialog
 
 
 class InProcessJupyterConsole(RichJupyterWidget):
@@ -61,6 +63,9 @@ class InProcessJupyterConsole(RichJupyterWidget):
 
         self.kernel_manager = kernel_manager
         self.kernel_client = kernel_client
+
+        # Override python input to raise a QInputDialog.
+        kernel.raw_input = QAppThreadCall(input_qinputdialog)
 
     def keyPressEvent(self, event):
         if QApplication.keyboardModifiers() & Qt.ControlModifier and (event.key() == Qt.Key_Equal):

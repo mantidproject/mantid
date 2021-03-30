@@ -59,7 +59,7 @@ digraph ReflectometryReductionOne {
   medianDetTest      -> checkSample
   sampleWorkspace    -> checkSample
   checkSample        -> createPSDBMask  [label="Yes"]
-  checkSample        -> extractMask     [label="No"]   
+  checkSample        -> extractMask     [label="No"]
   createPSDBMask     -> extractMask
   extractMask        -> outputWorkspace
 }

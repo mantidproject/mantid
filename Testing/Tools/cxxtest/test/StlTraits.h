@@ -12,7 +12,7 @@ public:
     typedef CXXTEST_STD(string) String;
     typedef CXXTEST_STD(pair)<int, String> IntString;
     typedef CXXTEST_STD(pair)<String, double> StringDouble;
-    
+
     void test_Pair()
     {
         IntString three( 3, "Three" );
@@ -97,7 +97,7 @@ public:
     {
         CXXTEST_STD(map)<String, String> m;
         TS_TRACE( m );
-        
+
         m["Jack"] = "Jill";
         m["Humpty"] = "Dumpty";
         m["Ren"] = "Stimpy";
@@ -132,7 +132,7 @@ public:
     {
         CXXTEST_STD(multimap)<String, double> mm;
         TS_TRACE( mm );
-        
+
         mm.insert( StringDouble( "One", 1.0 ) );
         mm.insert( StringDouble( "Two", 2.0 ) );
         TS_FAIL( mm );
@@ -142,7 +142,7 @@ public:
     {
         CXXTEST_STD(multiset)<int> ms;
         TS_TRACE( ms );
-        
+
         ms.insert( 123 );
         ms.insert( 456 );
         TS_FAIL( ms );

@@ -43,7 +43,7 @@ as a colour map.
    :alt: RebinByPulseTime.png
 
    Instrument view of WISH with data projected after rebinning by pulse times
-  
+
 Usage
 -----
 
@@ -57,10 +57,10 @@ Input workspace has raw events
    event_ws = Load('CNCS_7860_event.nxs')
    # Start time
    start_time_in_seconds = 0
-   # End time 
+   # End time
    end_time_in_seconds = 1e2
    # Step size
-   time_step_in_seconds = 1 
+   time_step_in_seconds = 1
    # Perform the rebin
    pulse_t_ws = RebinByPulseTimes(InputWorkspace=event_ws, Params=[start_time_in_seconds, time_step_in_seconds, end_time_in_seconds])
 
@@ -69,7 +69,7 @@ Input workspace has raw events
    print("X-axis relative end time in seconds:  {}".format(pulse_t_ws.readX(0)[-1] ))
 
 Output:
-   
+
 .. testoutput:: RebinByPulseTimesExample
 
    Events are rebinned into:  100 bins per histogram

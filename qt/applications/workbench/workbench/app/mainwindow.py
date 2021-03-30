@@ -10,6 +10,7 @@
 """
 Defines the QMainWindow of the application and the main() entry point.
 """
+import builtins
 import os
 
 from mantid.api import FrameworkManager
@@ -39,6 +40,7 @@ from workbench.config import CONF  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 from workbench.utils.windowfinder import find_all_windows_that_are_savable  # noqa
 from workbench.utils.workspacehistorygeneration import get_all_workspace_history_from_ads  # noqa
+from workbench.utils.io import input_qinputdialog
 from workbench.projectrecovery.projectrecovery import ProjectRecovery  # noqa
 from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu # noqa
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback  # noqa
@@ -196,6 +198,8 @@ class MainWindow(QMainWindow):
         self.create_actions()
         self.readSettings(CONF)
         self.config_updated()
+
+        self.override_python_input()
 
     def post_mantid_init(self):
         """Run any setup that requires mantid
@@ -752,3 +756,7 @@ class MainWindow(QMainWindow):
         for widget in self.widgets:
             if hasattr(widget, 'writeSettings'):
                 widget.writeSettings(settings)
+
+    def override_python_input(self):
+        """Replace python input with a call to a qinputdialog"""
+        builtins.input = QAppThreadCall(input_qinputdialog)

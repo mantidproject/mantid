@@ -95,11 +95,11 @@ Here is a typical use case to calculate UB matrix after initial setup.
 1.  User specifies *Experiment* and pushes button *Set*
 2.  Users may do a new survey or load a survey result file in tab *Survey*;
 3.  User enters tab *View Raw Data* and inputs scan number and list all the measuring points (Pt.)
-4.  User views all the measurements  
+4.  User views all the measurements
 
     *  User finds out the measurement with the strongest reflection and push button use
     *  Alternatively, user can use the survey result to find out the Pt. with the maximum counts of the scan
- 
+
 5.  GUI shifts to tab *Calculate UB* automatically
 6.  User pushes button *Find Peak* with checking *Load HKL from file*
 7.  GUI finds the peak center and load HKL
@@ -109,11 +109,11 @@ Here is a typical use case to calculate UB matrix after initial setup.
 11.  GUI calculates UB matrix and show the result
 12.  User may push *Index peak* to use the calculated UB matrix to index peaks in the table to check UB matrix;
 13.  User may refine the UB matrix and thus lattice parameters
- 
+
      a. user adds more peaks to the UB peak table;
      b. user selects at least 3 non-degenerate peaks;
      c. user clicks button *Refine*;
-     d. application refines UB matrix and outputs the refined UB matrix, refined lattice parameters and their error. 
+     d. application refines UB matrix and outputs the refined UB matrix, refined lattice parameters and their error.
 
 
 Workflow to merge measurements in scan
@@ -293,16 +293,16 @@ fitted with a Gaussian plus flat background.
 
 .. math:: C = A\times e^{-(x - x_0)^2/(2s^2)} - B
 
-where 
+where
   * *x* is the (moving) motor position
   * *C* is the normalized counts in ROI when the moving motor is at *x*
 
 The integrated peak intensity and its error will be calculated as
 
-.. math:: I = \sum_i^{<pt>} (C_i - B) \times \Delta X 
+.. math:: I = \sum_i^{<pt>} (C_i - B) \times \Delta X
 
 where
-  *  :math:`C_i` is the normalized detector counts in ROI of measurement *i* 
+  *  :math:`C_i` is the normalized detector counts in ROI of measurement *i*
   *  :math:`\Delta X` is the motor step
   *  :math:`B_i` is the estimated background
   *  the set of measurements *<pt>* is defined by the motor positions in the range of :math:`x_0 \pm \frac{N}{2}FWHM`.
@@ -318,15 +318,15 @@ The error can be calculated as
 Integration algorithm 3: calculate intensity from fitted model
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-It is assumed that for a well measured diffraction peak, in 3D, 
-the counts in ROI of each measurement from the edge of the peak to the other edge of peak 
-against the moving motor's positions should be represented by a Gaussian function with 
+It is assumed that for a well measured diffraction peak, in 3D,
+the counts in ROI of each measurement from the edge of the peak to the other edge of peak
+against the moving motor's positions should be represented by a Gaussian function with
 flat background
 
 .. math:: C = A\times e^{-(x - x_0)^2/(2s^2)} - B
 
 Then the peak intensity should be the integral of the Gaussian from :math:`-\inf` to :math:`+\inf`,
-i.e., 
+i.e.,
 
 .. math:: I = A\times s\times\sqrt{2\pi}
 
