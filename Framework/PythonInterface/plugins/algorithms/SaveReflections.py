@@ -124,7 +124,7 @@ class FullprofFormat(object):
     """Writes a PeaksWorkspace to an ASCII file in the format required
     by the Fullprof crystallographic refinement program.
 
-    This is a 7 columns file format consisting of H, K, L, instensity,
+    This is a 7 columns file format consisting of H, K, L, intensity,
     sigma, crystal domain, and wavelength.
     """
 
@@ -133,7 +133,7 @@ class FullprofFormat(object):
 
         :param file_name: the file name to output data to.
         :param workspace: the PeaksWorkspace to write to file.
-        :param _: Ignored parameter for compatability with other savers
+        :param _: Ignored parameter for compatibility with other savers
         """
         with open(file_name, 'w') as f_handle:
             self.write_header(f_handle, workspace)
@@ -146,7 +146,8 @@ class FullprofFormat(object):
         :param workspace: the PeaksWorkspace to save to file.
         """
         num_hkl = 3 + num_modulation_vectors(workspace)
-        f_handle.write(workspace.getTitle())
+        title = workspace.getTitle() if workspace.getTitle() else workspace.name()
+        f_handle.write(title + '\n')
         f_handle.write("({}i4,2f12.2,i5,4f10.4)\n".format(num_hkl))
         f_handle.write("  0 0 0\n")
         names = "".join(["  {}".format(name) for name in get_additional_index_names(workspace)])
@@ -164,7 +165,7 @@ class FullprofFormat(object):
             data.extend(modulation_indices(peak, num_mod_vec))
             hkls = "".join(["{:>4.0f}".format(item) for item in data])
 
-            data = (peak.getIntensity(), peak.getSigmaIntensity(), i + 1, peak.getWavelength())
+            data = (peak.getIntensity(), peak.getSigmaIntensity(), 1, peak.getWavelength())
             line = "{:>12.2f}{:>12.2f}{:>5.0f}{:>10.4f}\n".format(*data)
             line = "".join([hkls, line])
 
