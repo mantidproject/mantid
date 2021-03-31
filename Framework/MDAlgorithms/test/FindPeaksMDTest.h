@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidMDAlgorithms/FindPeaksMD.h"
@@ -29,7 +30,7 @@ static void createMDEW() {
       "CreateMDWorkspace", 18, "Dimensions", "3", "EventType", "MDEvent",
       "Extents", "-10,10,-10,10,-10,10", "Names", "Q_lab_x,Q_lab_y,Q_lab_z",
       "Units", "-,-,-", "SplitInto", "5", "SplitThreshold", "20",
-      "MaxRecursionDepth", "15", "OutputWorkspace", "MDEWS");
+      "MaxRecursionDepth", "15", "OutputWorkspace", "MDWS");
 
   // Give it an instrument
   Instrument_sptr inst =
@@ -37,7 +38,7 @@ static void createMDEW() {
   IMDEventWorkspace_sptr ws;
   TS_ASSERT_THROWS_NOTHING(
       ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-          "MDEWS"));
+          "MDWS"));
   ExperimentInfo_sptr ei(new ExperimentInfo());
   ei->setInstrument(inst);
   // Give it a run number
@@ -52,14 +53,14 @@ static void addPeak(size_t num, double x, double y, double z, double radius) {
   std::ostringstream mess;
   mess << num / 2 << ", " << x << ", " << y << ", " << z << ", " << radius;
   FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace",
-                                    "MDEWS", "PeakParams", mess.str().c_str());
+                                    "MDWS", "PeakParams", mess.str().c_str());
 
   // Add a center with more events (half radius, half the total), to create a
   // "peak"
   std::ostringstream mess2;
   mess2 << num / 2 << ", " << x << ", " << y << ", " << z << ", " << radius / 2;
   FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace",
-                                    "MDEWS", "PeakParams", mess2.str().c_str());
+                                    "MDWS", "PeakParams", mess2.str().c_str());
 }
 
 //=====================================================================================
@@ -91,14 +92,14 @@ public:
       FrameworkManager::Instance().exec(
           "BinMD", 14, "AxisAligned", "1", "AlignedDim0", "Q_lab_x,-10,10,100",
           "AlignedDim1", "Q_lab_y,-10,10,100", "AlignedDim2",
-          "Q_lab_z,-10,10,100", "IterateEvents", "1", "InputWorkspace", "MDEWS",
-          "OutputWorkspace", "MDEWS");
+          "Q_lab_z,-10,10,100", "IterateEvents", "1", "InputWorkspace", "MDWS",
+          "OutputWorkspace", "MDWS");
     }
 
     FindPeaksMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "MDWS"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(
@@ -160,7 +161,7 @@ public:
       // Remove workspace from the data service.
       AnalysisDataService::Instance().remove(outWSName);
     }
-    AnalysisDataService::Instance().remove("MDEWS");
+    AnalysisDataService::Instance().remove("MDWS");
   }
 
   /** Running the algo twice with same output workspace = replace the output,
@@ -225,14 +226,14 @@ public:
     FrameworkManager::Instance().exec(
         "BinMD", 14, "AxisAligned", "1", "AlignedDim0", "Q_lab_x,-10,10,100",
         "AlignedDim1", "Q_lab_y,-10,10,100", "AlignedDim2",
-        "Q_lab_z,-10,10,100", "IterateEvents", "1", "InputWorkspace", "MDEWS",
-        "OutputWorkspace", "MDEWS");
+        "Q_lab_z,-10,10,100", "IterateEvents", "1", "InputWorkspace", "MDWS",
+        "OutputWorkspace", "MDWS");
 
     FindPeaksMD alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "MDWS"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "place_holder"));
     TS_ASSERT_THROWS_NOTHING(
@@ -245,7 +246,113 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SignalThresholdFactor", 1.3));
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
 
-    AnalysisDataService::Instance().remove("MDEWS");
+    AnalysisDataService::Instance().remove("MDWS");
+  }
+
+  void do_test_LeanElastic(bool expInfo, bool histo) {
+    FrameworkManager::Instance().exec(
+        "CreateMDWorkspace", 18, "Dimensions", "3", "EventType", "MDEvent",
+        "Extents", "-10,10,-10,10,-10,10", "Names",
+        "Q_sample_x,Q_sample_y,Q_sample_z", "Units", "-,-,-", "SplitInto", "5",
+        "SplitThreshold", "20", "MaxRecursionDepth", "15", "OutputWorkspace",
+        "MDWS");
+
+    if (expInfo) {
+      Instrument_sptr inst =
+          ComponentCreationHelper::createTestInstrumentRectangular2(1, 100,
+                                                                    0.05);
+      IMDEventWorkspace_sptr ws;
+      TS_ASSERT_THROWS_NOTHING(
+          ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
+              "MDWS"));
+      ExperimentInfo_sptr ei(new ExperimentInfo());
+      ei->setInstrument(inst);
+      // Give it a run number
+      ei->mutableRun().addProperty(
+          new PropertyWithValue<std::string>("run_number", "12345"), true);
+      ws->addExperimentInfo(ei);
+    }
+
+    addPeak(1000, 1, 2, 3, 0.1);
+    addPeak(3000, 4, 5, 6, 0.2);
+    addPeak(5000, -5, -5, 5, 0.2);
+
+    if (histo) {
+      FrameworkManager::Instance().exec(
+          "BinMD", 14, "AxisAligned", "1", "AlignedDim0",
+          "Q_sample_x,-10,10,100", "AlignedDim1", "Q_sample_y,-10,10,100",
+          "AlignedDim2", "Q_sample_z,-10,10,100", "IterateEvents", "1",
+          "InputWorkspace", "MDWS", "OutputWorkspace", "MDWS");
+    }
+
+    std::string outWSName("peaksFound");
+    FindPeaksMD alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "MDWS"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("DensityThresholdFactor", "2.0"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PeakDistanceThreshold", "0.7"));
+
+    if (expInfo)
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setPropertyValue("OutputType", "LeanElasticPeak"));
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    LeanElasticPeaksWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = AnalysisDataService::Instance()
+                 .retrieveWS<LeanElasticPeaksWorkspace>(outWSName));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    // Should find all 3 peaks.
+    TS_ASSERT_EQUALS(ws->getNumberPeaks(), 3);
+
+    TS_ASSERT_DELTA(ws->getPeak(0).getQSampleFrame()[0], -5.0, 0.11);
+    TS_ASSERT_DELTA(ws->getPeak(0).getQSampleFrame()[1], -5.0, 0.11);
+    TS_ASSERT_DELTA(ws->getPeak(0).getQSampleFrame()[2], 5.0, 0.11);
+    if (expInfo) {
+      TS_ASSERT_EQUALS(ws->getPeak(0).getRunNumber(), 12345);
+    } else {
+      TS_ASSERT_EQUALS(ws->getPeak(0).getRunNumber(), -1);
+    }
+    // Bin count = density of the box / 1e6
+    double BinCount = ws->getPeak(0).getBinCount();
+    if (histo) {
+      TS_ASSERT_DELTA(BinCount, 0.08375, 0.001);
+    } else {
+      TS_ASSERT_DELTA(BinCount, 7., 001000.);
+    }
+
+    TS_ASSERT_DELTA(ws->getPeak(1).getQSampleFrame()[0], 4.0, 0.11);
+    TS_ASSERT_DELTA(ws->getPeak(1).getQSampleFrame()[1], 5.0, 0.11);
+    TS_ASSERT_DELTA(ws->getPeak(1).getQSampleFrame()[2], 6.0, 0.11);
+
+    TS_ASSERT_DELTA(ws->getPeak(2).getQSampleFrame()[0], 1.0, 0.11);
+    TS_ASSERT_DELTA(ws->getPeak(2).getQSampleFrame()[1], 2.0, 0.11);
+    TS_ASSERT_DELTA(ws->getPeak(2).getQSampleFrame()[2], 3.0, 0.11);
+
+    AnalysisDataService::Instance().remove("MDWS");
+  }
+
+  void test_exec_LeanElastic() { do_test_LeanElastic(false, false); }
+
+  void test_exec_LeanElastic_histo() { do_test_LeanElastic(false, true); }
+
+  void test_exec_LeanElastic_with_expInfo() {
+    do_test_LeanElastic(true, false);
+  }
+
+  void test_exec_LeanElastic_histo_with_expInfo() {
+    do_test_LeanElastic(true, true);
   }
 };
 
@@ -286,7 +393,7 @@ public:
     FindPeaksMD alg;
     alg.initialize();
 
-    alg.setPropertyValue("InputWorkspace", "MDEWS");
+    alg.setPropertyValue("InputWorkspace", "MDWS");
     alg.setPropertyValue("OutputWorkspace", outWSName);
     alg.setPropertyValue("DensityThresholdFactor", "2.0");
     alg.setPropertyValue("PeakDistanceThreshold", "0.7");
