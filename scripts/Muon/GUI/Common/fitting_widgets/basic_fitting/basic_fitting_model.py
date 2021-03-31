@@ -452,7 +452,7 @@ class BasicFittingModel:
 
     def get_fit_function_parameters(self) -> list:
         """Returns the names of the fit parameters in the fit functions."""
-        if len(self.single_fit_functions) > 0:
+        if self.single_fit_functions:
             fit_function = self.single_fit_functions[0]
             if fit_function is not None:
                 return [fit_function.parameterName(i) for i in range(fit_function.nParams())]
