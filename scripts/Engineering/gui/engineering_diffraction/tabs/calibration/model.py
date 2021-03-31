@@ -9,10 +9,11 @@ from matplotlib import gridspec
 import matplotlib.pyplot as plt
 
 from mantid.api import AnalysisDataService as Ads
-from mantid.kernel import logger
+from mantid.kernel import logger, IntArrayProperty
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, Integration, DiffractionFocussing, \
     CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, LoadAscii, NormaliseByCurrent, AlignDetectors, \
-    EditInstrumentGeometry, ConvertUnits, Load, GroupDetectors, EnggEstimateFocussedBackground, RebinToWorkspace, Divide
+    CreateGroupingWorkspace, EditInstrumentGeometry, ConvertUnits, Load, GroupDetectors, RebinToWorkspace,\
+    Divide, EnggEstimateFocussedBackground
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
@@ -86,7 +87,7 @@ class CalibrationModel(object):
                 self._plot_tof_fit_single_bank_or_custom(bank)
             else:
                 self._plot_tof_fit_single_bank_or_custom("cropped")
-        difa = [row['difa'] for row in output] # TODO these aren't right
+        difa = [row['difa'] for row in output]
         difc = [row['difc'] for row in output]
         tzero = [row['tzero'] for row in output]
 
@@ -234,12 +235,12 @@ class CalibrationModel(object):
         def run_pd_calibration(kwargs_to_pass):
             return PDCalibration(**kwargs_to_pass)
 
-        def focus_and_normalise(ws_d, ws_van_d, cal_file):
+        def focus_and_normalise(ws_d, ws_van_d, grouping_kwarg):
             # focus sample
-            focused_sample = DiffractionFocussing(InputWorkspace=ws_d, GroupingFileName=cal_file)
+            focused_sample = DiffractionFocussing(InputWorkspace=ws_d, *grouping_kwarg)
 
             # focus van data
-            focused_van = DiffractionFocussing(InputWorkspace=ws_van_d, GroupingFileName=cal_file)
+            focused_van = DiffractionFocussing(InputWorkspace=ws_van_d, *grouping_kwarg)
             background_van = EnggEstimateFocussedBackground(InputWorkspace=focused_van, NIterations='15', XWindow=0.03)
 
             # normalise by focused vanadium
@@ -295,7 +296,8 @@ class CalibrationModel(object):
 
         if spectrum_numbers is None:
             if bank == 1 or bank is None:
-                focused_North, curves_North = focus_and_normalise(ws_d, ws_van_d, NORTH_BANK_CAL)
+                pdc_kwarg = {"GroupingFileName": NORTH_BANK_CAL}
+                focused_North, curves_North = focus_and_normalise(ws_d, ws_van_d, pdc_kwarg)
                 # final calibration of focused data
                 kwargs["InputWorkspace"] = focused_North
                 kwargs["OutputCalibrationTable"] = 'engggui_calibration_bank_1'
@@ -306,7 +308,8 @@ class CalibrationModel(object):
                 curves_output.append(curves_North)
 
             if bank == 2 or bank is None:
-                focused_South, curves_South = focus_and_normalise(ws_d, ws_van_d, SOUTH_BANK_CAL)
+                pdc_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
+                focused_South, curves_South = focus_and_normalise(ws_d, ws_van_d, pdc_kwarg)
                 # final calibration of focused data
                 kwargs["InputWorkspace"] = focused_South
                 kwargs["OutputCalibrationTable"] = 'engggui_calibration_bank_2'
@@ -316,12 +319,21 @@ class CalibrationModel(object):
                 cal_output.append(cal_north)
                 curves_output.append(curves_South)
         else:
-            pass
-            # grouping ws from spectra numbers
-            # CreateMaskWorkspace?
-            # MaskSpectra/MaskDetectors investigate
-            #
-            # TODO
+            grp_ws, _, _ = CreateGroupingWorkspace(InputWorkspace=sample_raw)  # blank grouping workspace based on inst
+            int_spectrum_numbers = self._create_spectrum_list_from_string(spectrum_numbers)
+            for spec in int_spectrum_numbers:
+                det_id = grp_ws.getSpectrum(spec).getDetectorIDs()
+                grp_ws.setValue(det_id, 1)
+            df_kwarg = {"GroupingWorkspace": grp_ws}
+            focused_Cropped, curves_Cropped = focus_and_normalise(ws_d, ws_van_d, df_kwarg)
+            # final calibration of focused data
+            kwargs["InputWorkspace"] = focused_Cropped
+            kwargs["OutputCalibrationTable"] = 'engggui_calibration_cropped'
+            kwargs["DiagnosticWorkspaces"] = 'diag_Cropped'
+
+            cal_north = run_pd_calibration(kwargs)[0]
+            cal_output.append(cal_north)
+            curves_output.append(curves_Cropped)
 
         cal = list()
         for bank_cal in cal_output:
@@ -329,6 +341,11 @@ class CalibrationModel(object):
             current_fit_params = {'difc': row['difc'], 'difa': row['difa'], 'tzero': row['tzero']}
             cal.append(current_fit_params)
         return cal, curves_output, sample_raw
+
+    def _create_spectrum_list_from_string(self, str_list):
+        array = IntArrayProperty('var', str_list).value
+        int_list = list(array)
+        return int_list
 
     def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, sample_path, vanadium_path,
                             instrument, bank, spectrum_numbers):

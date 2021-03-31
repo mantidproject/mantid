@@ -33,4 +33,5 @@ void export_ISpectrum() {
            "Set the spectrum number for this spectrum")
       .def("hasDx", &ISpectrum::hasDx, arg("self"),
            "Returns True if the spectrum uses the "
-           "DX (X Error) array, else False.")
+           "DX (X Error) array, else False.");
+}

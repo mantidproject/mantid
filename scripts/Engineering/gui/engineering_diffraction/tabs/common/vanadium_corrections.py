@@ -82,7 +82,7 @@ def _calculate_vanadium_correction(vanadium_path):
     nbins = van_ws.blocksize()
     ws_van_int = Integration(InputWorkspace=van_ws)
     ws_van_int /= nbins
-    Ads.remove(VANADIUM_INPUT_WORKSPACE_NAME)
+    Ads.remove(VANADIUM_INPUT_WORKSPACE_NAME) #TODO
     return ws_van_int
 
 
