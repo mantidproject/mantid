@@ -22,33 +22,23 @@ if [[ $JOB_TYPE == "pull-request" ]]; then
   # If using the snap version (No longer updated but it doesn't use pip on ubuntu, so it's better to be outdated here) run
   # Using the older source
   if [[ ${PRE_COMMIT_VERSION} < "pre-commit 1.22.0" ]]; then
-    SCRIPT_OUTPUT=$(pre-commit run --origin "${BASE_SHA}" --source "${GIT_SHA}" --show-diff-on-failure --verbose)
+    $(pre-commit run --origin "${BASE_SHA}" --source "${GIT_SHA}" --show-diff-on-failure --verbose)
   else
-    SCRIPT_OUTPUT=$(pre-commit run --from-ref "${BASE_SHA}" --to-ref "${GIT_SHA}" --show-diff-on-failure --verbose)
+    $(pre-commit run --from-ref "${BASE_SHA}" --to-ref "${GIT_SHA}" --show-diff-on-failure --verbose)
   fi
 elif [[ $JOB_TYPE == "master" ]]; then
-  SCRIPT_OUTPUT=$(pre-commit run --all-files)
+  $(pre-commit run --all-files)
 else
   echo "JOB_TYPE not set, add a 3rd argument (e.g. master or pull-request)"
   exit 1
 fi
 
-EXIT_CODE=$?
-# If last job was a failure echo out how to fix it locally
-if [ $EXIT_CODE -ne 0 ]; then
-  echo "
-Pre-commit checks have failed, if you have the pre-commit framework installed locally you can fix this using the following command, otherwise check this file for the pre-commit output to fix manually.
-Run this command in the repository locally to fix:
-  pre-commit run --from-ref ${BASE_SHA} --to-ref ${GIT_SHA}
-If this does not work you may have an older version of pre-commit, try:
-  pre-commit run --origin ${BASE_SHA} --source ${GIT_SHA}
-Or if this was run on all files:
-  pre-commit run --all-files
-Pre-commit output:
-${SCRIPT_OUTPUT}
-"
-else
-  echo "${SCRIPT_OUTPUT}"
+# git needs to have a minimal configuration for git commit to work
+if [ "$(git config user.name)" == "" ]; then
+  git config user.name mantid-builder
+fi
+if [ "$(git config user.email)" == "" ]; then
+  git config user.email "mantid-buildserver@mantidproject.org"
 fi
 
 git add -A
@@ -57,7 +47,7 @@ then
     echo "code is formatted correctly"
 else
     echo "code is not formatted correctly!"
-    echo ".cpp/.h files are required to be formatted with ${CLANG_FORMAT_EXE}"
+    echo ".cpp/.h files are required to be formatted with clang-format"
     echo ".py files are required to be formatted with yapf"
     git commit --no-verify --quiet -m "formatting PR${PR} ${sha}"
     git format-patch --quiet HEAD~
@@ -70,5 +60,3 @@ fi
 
 # Perform cleanup of unused commit repos.
 pre-commit gc
-
-exit $EXIT_CODE
