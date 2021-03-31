@@ -23,7 +23,6 @@ def get_default_grouping(loadedData):
     for run_item in run_list:
         for workspace in loadedData.get_data(run=run_item)["workspace"]:
             group_name = str(workspace)
-            print(group_name)
             detector_name = (group_name.split(';', 1)[-1].lstrip()).split('_', 1)[0]
             run_number = str(run_item).replace('[', '').replace(']', '')
             groups += [EAGroup(group_name=group_name, detector=detector_name, run_number=run_number)]
