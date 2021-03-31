@@ -10,6 +10,7 @@ from .WorkspaceItem import WorkspaceItem
 from .SpectrumItem import SpectrumItem
 
 from qtpy.QtWidgets import QDockWidget, QWidget
+from qtpy.QtGui import QColor
 from qtpy.QtCore import *
 from qtpy import uic
 
@@ -177,6 +178,30 @@ class SuperplotView(QWidget):
         for item in wsItem:
             index = self._sideView.workspacesList.indexOfTopLevelItem(item)
             self._sideView.workspacesList.takeTopLevelItem(index)
+
+    def modifySpectrumLabel(self, wsName, spectrumIndex, label, color):
+        """
+        Modify spectrum label text and color.
+
+        Args:
+            wsName (str): name of the concerned workspace
+            spectrumIndex (int): index of the spectrum
+            label (str): new label
+            color (str): new color (#RRGGBB)
+        """
+        wsItem = self._sideView.workspacesList.findItems(wsName,
+                                                         Qt.MatchExactly, 0)
+        if not wsItem:
+            return
+        wsItem = wsItem[0]
+
+        for i in range(wsItem.childCount()):
+            spItem = wsItem.child(i)
+            if spItem.getSpectrumIndex() == spectrumIndex:
+                brush = spItem.foreground(0)
+                brush.setColor(QColor(color))
+                spItem.setForeground(0, brush)
+                spItem.setText(0, label)
 
     def setWorkspacesList(self, names):
         """
