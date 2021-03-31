@@ -93,7 +93,9 @@ LeanElasticPeak::LeanElasticPeak(const Geometry::IPeak &ipeak)
 void LeanElasticPeak::setWavelength(double wavelength) { m_wavelength = wavelength; }
 
 /** Return a shared ptr to the reference frame for this peak. */
-std::shared_ptr<const Geometry::ReferenceFrame> LeanElasticPeak::getReferenceFrame() const { return m_refFrame; }
+std::shared_ptr<const Geometry::ReferenceFrame> LeanElasticPeak::getReferenceFrame() const {
+  return (m_refFrame) ? m_refFrame : std::make_shared<const ReferenceFrame>();
+}
 
 /**
 Setter for the reference frame.

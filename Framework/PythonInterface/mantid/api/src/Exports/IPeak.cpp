@@ -5,17 +5,21 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
 #include "MantidPythonInterface/core/Converters/PyObjectToMatrix.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/Policies/MatrixToNumpy.h"
+#include "MantidPythonInterface/core/Policies/RemoveConst.h"
 #include <boost/optional.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Geometry::IPeak;
+using Mantid::Geometry::ReferenceFrame;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
+using Mantid::PythonInterface::Policies::RemoveConstSharedPtr;
 
 GET_POINTER_SPECIALIZATION(IPeak)
 
@@ -178,5 +182,9 @@ void export_IPeak() {
            ":class:`~mantid.geometry.Detector`), in meters.")
       .def("getPeakShape", getPeakShape, arg("self"), "Get the peak shape")
       .def("getAbsorptionWeightedPathLength", &IPeak::getAbsorptionWeightedPathLength, arg("self"),
-           "Get the absorption weighted path length");
+           "Get the absorption weighted path length")
+      .def("getReferenceFrame", (std::shared_ptr<const ReferenceFrame>(IPeak::*)()) & IPeak::getReferenceFrame,
+           arg("self"), return_value_policy<RemoveConstSharedPtr>(),
+           "Returns the :class:`~mantid.geometry.ReferenceFrame` attached that "
+           "defines the instrument axes");
 }
