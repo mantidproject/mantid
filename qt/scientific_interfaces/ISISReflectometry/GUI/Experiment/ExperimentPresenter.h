@@ -26,31 +26,25 @@ public:
       PerThetaDefaultsTableValidationError perThetaDefaultsErrors)
       : m_perThetaDefaultsErrors(std::move(perThetaDefaultsErrors)) {}
 
-  PerThetaDefaultsTableValidationError const &perThetaValidationErrors() const {
-    return m_perThetaDefaultsErrors;
-  }
+  PerThetaDefaultsTableValidationError const &perThetaValidationErrors() const { return m_perThetaDefaultsErrors; }
 
 private:
   PerThetaDefaultsTableValidationError m_perThetaDefaultsErrors;
 };
 
-using ExperimentValidationResult =
-    ValidationResult<Experiment, ExperimentValidationErrors>;
+using ExperimentValidationResult = ValidationResult<Experiment, ExperimentValidationErrors>;
 
 /** @class ExperimentPresenter
 
 ExperimentPresenter is a presenter class for the widget 'Experiment' in the
 ISIS Reflectometry Interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentPresenter
-    : public ExperimentViewSubscriber,
-      public IExperimentPresenter {
+class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentPresenter : public ExperimentViewSubscriber,
+                                                           public IExperimentPresenter {
 public:
   ExperimentPresenter(
-      IExperimentView *view, Experiment experiment,
-      double defaultsThetaTolerance,
-      std::unique_ptr<IExperimentOptionDefaults> experimentDefaults =
-          std::make_unique<ExperimentOptionDefaults>());
+      IExperimentView *view, Experiment experiment, double defaultsThetaTolerance,
+      std::unique_ptr<IExperimentOptionDefaults> experimentDefaults = std::make_unique<ExperimentOptionDefaults>());
 
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   Experiment const &experiment() const override;
@@ -89,8 +83,7 @@ private:
   void updateViewFromModel();
 
   void showValidationResult(ExperimentValidationResult const &result);
-  void
-  showPerThetaTableErrors(PerThetaDefaultsTableValidationError const &errors);
+  void showPerThetaTableErrors(PerThetaDefaultsTableValidationError const &errors);
 
   void updateWidgetEnabledState();
   void updateSummationTypeEnabledState();

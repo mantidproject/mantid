@@ -13,8 +13,7 @@ namespace Kernel {
 /**
  * Begins listening to notifications from the global ConfigService.
  */
-ConfigObserver::ConfigObserver()
-    : m_valueChangeListener(*this, &ConfigObserver::notifyValueChanged) {
+ConfigObserver::ConfigObserver() : m_valueChangeListener(*this, &ConfigObserver::notifyValueChanged) {
   ConfigService::Instance().addObserver(m_valueChangeListener);
 }
 
@@ -47,9 +46,7 @@ ConfigObserver &ConfigObserver::operator=(const ConfigObserver &other) {
   return *this;
 }
 
-ConfigObserver::~ConfigObserver() noexcept {
-  ConfigService::Instance().removeObserver(m_valueChangeListener);
-}
+ConfigObserver::~ConfigObserver() noexcept { ConfigService::Instance().removeObserver(m_valueChangeListener); }
 
 /**
  * Called when a config property's value is changed.
@@ -58,8 +55,7 @@ ConfigObserver::~ConfigObserver() noexcept {
  * @param newValue The new value of the property.
  * @param oldValue The old value of the property.
  */
-void ConfigObserver::notifyValueChanged(const std::string &name,
-                                        const std::string &newValue,
+void ConfigObserver::notifyValueChanged(const std::string &name, const std::string &newValue,
                                         const std::string &oldValue) {
   onValueChanged(name, newValue, oldValue);
 }
@@ -69,10 +65,8 @@ void ConfigObserver::notifyValueChanged(const std::string &name,
  *
  * @param notification The Poco notification object.
  */
-void ConfigObserver::notifyValueChanged(
-    ConfigValChangeNotification_ptr notification) {
-  notifyValueChanged(notification->key(), notification->curValue(),
-                     notification->preValue());
+void ConfigObserver::notifyValueChanged(ConfigValChangeNotification_ptr notification) {
+  notifyValueChanged(notification->key(), notification->curValue(), notification->preValue());
 }
 } // namespace Kernel
 } // namespace Mantid

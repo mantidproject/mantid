@@ -26,9 +26,7 @@ using namespace Mantid::DataObjects;
 namespace {
 
 // Set algorithm properties
-Mantid::API::IAlgorithm_sptr
-algorithmWithPropertiesSet(const std::string &inputWSName,
-                           const std::string &filename) {
+Mantid::API::IAlgorithm_sptr algorithmWithPropertiesSet(const std::string &inputWSName, const std::string &filename) {
   auto alg = std::make_shared<Muon::LoadAndApplyMuonDetectorGrouping>();
   alg->initialize();
   alg->setProperty("InputWorkspace", inputWSName);
@@ -61,17 +59,11 @@ public:
 class LoadAndApplyMuonDetectorGroupingTest : public CxxTest::TestSuite {
 public:
   // WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  LoadAndApplyMuonDetectorGroupingTest() {
-    Mantid::API::FrameworkManager::Instance();
-  }
+  LoadAndApplyMuonDetectorGroupingTest() { Mantid::API::FrameworkManager::Instance(); }
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadAndApplyMuonDetectorGroupingTest *createSuite() {
-    return new LoadAndApplyMuonDetectorGroupingTest();
-  };
-  static void destroySuite(LoadAndApplyMuonDetectorGroupingTest *suite) {
-    delete suite;
-  };
+  static LoadAndApplyMuonDetectorGroupingTest *createSuite() { return new LoadAndApplyMuonDetectorGroupingTest(); };
+  static void destroySuite(LoadAndApplyMuonDetectorGroupingTest *suite) { delete suite; };
 
   void test_init() {
     Muon::LoadAndApplyMuonDetectorGrouping alg;
@@ -87,8 +79,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("inputData", ws);
     AnalysisDataService::Instance().addOrReplace("inputGroup", wsGroup);
 
-    auto file =
-        MuonGroupingXMLHelper::createGroupingXMLSingleGroup("test", "1,2,3");
+    auto file = MuonGroupingXMLHelper::createGroupingXMLSingleGroup("test", "1,2,3");
     std::string filename = file.getFileName();
 
     Muon::LoadAndApplyMuonDetectorGrouping alg;
@@ -96,8 +87,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("WorkspaceGroup", wsGroup->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WorkspaceGroup", wsGroup->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyAsymmetryToGroups", false));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -107,8 +97,7 @@ public:
   }
 
   void test_workspaces_named_and_grouped_correctly() {
-    size_t workspacesBeforeExec =
-        AnalysisDataService::Instance().getObjectNames().size();
+    size_t workspacesBeforeExec = AnalysisDataService::Instance().getObjectNames().size();
 
     auto ws = MuonWorkspaceCreationHelper::createCountsWorkspace(10, 10, 0.0);
     setUpADSWithWorkspace setup(ws);
@@ -118,8 +107,8 @@ public:
     alg->execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("EMU00012345"));
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("EMU00012345"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("EMU00012345"));
     TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 14);
     // Group Counts
     TS_ASSERT(wsGroup->contains("EMU00012345; Group; group1; Counts; #1"));
@@ -133,11 +122,9 @@ public:
     TS_ASSERT(wsGroup->contains("EMU00012345; Group; group2; Asym; #1_Raw"));
     // Group Asymmetry, unNormalized
     TS_ASSERT(wsGroup->contains("EMU00012345; Group; group1; Asym; #1_unNorm"));
-    TS_ASSERT(
-        wsGroup->contains("EMU00012345; Group; group1; Asym; #1_unNorm_Raw"));
+    TS_ASSERT(wsGroup->contains("EMU00012345; Group; group1; Asym; #1_unNorm_Raw"));
     TS_ASSERT(wsGroup->contains("EMU00012345; Group; group2; Asym; #1_unNorm"));
-    TS_ASSERT(
-        wsGroup->contains("EMU00012345; Group; group2; Asym; #1_unNorm_Raw"));
+    TS_ASSERT(wsGroup->contains("EMU00012345; Group; group2; Asym; #1_unNorm_Raw"));
     // Pair Asymmetry
     TS_ASSERT(wsGroup->contains("EMU00012345; Pair; pair1; Asym; #1"));
     TS_ASSERT(wsGroup->contains("EMU00012345; Pair; pair1; Asym; #1_Raw"));
@@ -151,8 +138,7 @@ public:
     // "MuonAnalysisTFNormalizations" (1)
     // "tmp_unNorm" (1)
     auto names = AnalysisDataService::Instance().getObjectNames();
-    TS_ASSERT_EQUALS(AnalysisDataService::Instance().getObjectNames().size(),
-                     workspacesBeforeExec + 19);
+    TS_ASSERT_EQUALS(AnalysisDataService::Instance().getObjectNames().size(), workspacesBeforeExec + 19);
   }
 
   void test_produces_workspaces_with_correct_entries() {
@@ -165,11 +151,11 @@ public:
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("EMU00012345"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("EMU00012345"));
 
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
 
     // Check values against calculation by hand.
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
@@ -184,15 +170,13 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.007071, 0.00001);
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.007071, 0.00001);
 
-    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], 37.2468, 0.0001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], 2.2974, 0.0001);
     TS_ASSERT_DELTA(wsOut->readY(0)[9], 8.9759, 0.0001);
 
-    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
 
     // Asymmetry converts bin width to point data
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
@@ -210,8 +194,8 @@ public:
 
   void test_workspace_overwritten_if_name_is_duplicated() {
 
-    auto ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
-        1, 10, MuonWorkspaceCreationHelper::yDataAsymmetry());
+    auto ws =
+        MuonWorkspaceCreationHelper::createAsymmetryWorkspace(1, 10, MuonWorkspaceCreationHelper::yDataAsymmetry());
     setUpADSWithWorkspace setup(ws);
     auto file = MuonGroupingXMLHelper::createXMLwithPairsAndGroups(1, 1);
 
@@ -231,8 +215,7 @@ public:
 
     TS_ASSERT_EQUALS(setup.wsGroup->getNumberOfEntries(), numEntriesBefore);
     TS_ASSERT(setup.wsGroup->getItem("EMU00012345; Group; group1; Counts; #1"));
-    TS_ASSERT(
-        setup.wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+    TS_ASSERT(setup.wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
     auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
@@ -245,8 +228,7 @@ public:
   void test_default_workspace_name_correct_for_unrecongnized_instrument() {
 
     auto ws = MuonWorkspaceCreationHelper::createCountsWorkspace(4, 2, 0.0);
-    std::shared_ptr<Geometry::Instrument> inst1 =
-        std::make_shared<Geometry::Instrument>();
+    std::shared_ptr<Geometry::Instrument> inst1 = std::make_shared<Geometry::Instrument>();
     inst1->setName("LHC");
     ws->setInstrument(inst1);
 
@@ -273,8 +255,7 @@ public:
     alg->execute();
 
     ITableWorkspace_sptr wsGroupings =
-        std::dynamic_pointer_cast<ITableWorkspace>(
-            AnalysisDataService::Instance().retrieve("MuonGroupings"));
+        std::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("MuonGroupings"));
 
     // Col1 : Names, Col2 : Detector IDs
     std::string name1 = wsGroupings->String(0, 0);
@@ -284,14 +265,12 @@ public:
 
     std::vector<int> group1 = wsGroupings->cell<std::vector<int>>(0, 1);
     std::stringstream group1String;
-    std::copy(group1.begin(), group1.end(),
-              std::ostream_iterator<int>(group1String, ","));
+    std::copy(group1.begin(), group1.end(), std::ostream_iterator<int>(group1String, ","));
     TS_ASSERT_EQUALS(group1String.str(), "1,2,");
 
     std::vector<int> group2 = wsGroupings->cell<std::vector<int>>(1, 1);
     std::stringstream group2String;
-    std::copy(group2.begin(), group2.end(),
-              std::ostream_iterator<int>(group2String, ","));
+    std::copy(group2.begin(), group2.end(), std::ostream_iterator<int>(group2String, ","));
     TS_ASSERT_EQUALS(group2String.str(), "3,4,");
   }
 
@@ -300,8 +279,7 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
         4, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.5, 0.1));
     setUpADSWithWorkspace setup(ws);
-    auto file =
-        MuonGroupingXMLHelper::createGroupingXMLSingleGroup("group_", "1-2");
+    auto file = MuonGroupingXMLHelper::createGroupingXMLSingleGroup("group_", "1-2");
 
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
@@ -312,12 +290,10 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
         2, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.5, 0.1));
     setUpADSWithWorkspace setup(ws);
-    auto file = MuonGroupingXMLHelper::createGroupingXMLSinglePair(
-        "pair1", "nonExistantGroup");
+    auto file = MuonGroupingXMLHelper::createGroupingXMLSinglePair("pair1", "nonExistantGroup");
 
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
-    TS_ASSERT_THROWS(alg->execute(),
-                     const Mantid::Kernel::Exception::FileError &);
+    TS_ASSERT_THROWS(alg->execute(), const Mantid::Kernel::Exception::FileError &);
   }
 
   void test_throws_when_file_has_detectors_which_are_not_in_workspace() {
@@ -325,8 +301,7 @@ public:
     auto ws = MuonWorkspaceCreationHelper::createCountsWorkspace(5, 3, 0.0);
     setUpADSWithWorkspace setup(ws);
     std::string group = "1-10";
-    auto file =
-        MuonGroupingXMLHelper::createGroupingXMLSingleGroup("test", group);
+    auto file = MuonGroupingXMLHelper::createGroupingXMLSingleGroup("test", group);
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
 
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
@@ -343,32 +318,29 @@ public:
     alg->setProperty("RebinArgs", "0.2");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("EMU00012345"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("EMU00012345"));
 
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.100, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
 
-    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1"));
+    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1"));
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.200, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.800, 0.001);
 
-    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
     // Asymmetry converted to point data
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.0001);
     TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.150, 0.0001);
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.0001);
 
-    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1"));
+    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1"));
     // Rebinning happens before conversion to point data
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.100, 0.0001);
     TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.300, 0.0001);
@@ -386,32 +358,29 @@ public:
     alg->setProperty("TimeOffset", "0.5");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("EMU00012345"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("EMU00012345"));
 
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
-
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.600, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.900, 0.001);
-
-    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.500, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.600, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.900, 0.001);
 
-    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1"));
+
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.500, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.600, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.900, 0.001);
+
+    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.550, 0.0001);
     TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.650, 0.0001);
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.950, 0.0001);
 
-    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1"));
+    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1"));
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.550, 0.0001);
     TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.650, 0.0001);
@@ -420,8 +389,7 @@ public:
 
   void test_multiple_period_data_summing_periods_gives_correct_result() {
 
-    auto ws = MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(
-        2, 4, 10, "MuonAnalysis");
+    auto ws = MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(2, 4, 10, "MuonAnalysis");
     setUpADSWithWorkspace setup(ws);
     auto file = MuonGroupingXMLHelper::createXMLwithPairsAndGroups(2, 2);
 
@@ -429,25 +397,23 @@ public:
     alg->setProperty("SummedPeriods", "1,2");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("EMU00012345"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("EMU00012345"));
 
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], 26, 0.1);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], 30, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], 42, 0.001);
 
-    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
+    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], 106, 0.1);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], 110, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], 122, 0.001);
 
-    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
     // Asymmetry on group 1 and 2
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.6061, 0.1);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.5714, 0.001);
@@ -456,8 +422,7 @@ public:
 
   void test_multiple_period_data_subtracting_periods_gives_correct_result() {
 
-    auto ws = MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(
-        2, 4, 10, "MuonAnalysis");
+    auto ws = MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(2, 4, 10, "MuonAnalysis");
     setUpADSWithWorkspace setup(ws);
     auto file = MuonGroupingXMLHelper::createXMLwithPairsAndGroups(2, 2);
 
@@ -466,25 +431,23 @@ public:
     alg->setProperty("SubtractedPeriods", "2");
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("EMU00012345"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("EMU00012345"));
 
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
-
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -2, 0.1);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], -2, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -2, 0.001);
-
-    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -2, 0.1);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], -2, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], -2, 0.001);
 
-    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
+
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -2, 0.1);
+    TS_ASSERT_DELTA(wsOut->readY(0)[1], -2, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -2, 0.001);
+
+    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.03676, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.03268, 0.001);
@@ -500,32 +463,29 @@ public:
 
     // Apply same dead time to every spectra
     std::vector<double> deadTimes(4, 0.0025);
-    ITableWorkspace_sptr deadTimeTable =
-        MuonWorkspaceCreationHelper::createDeadTimeTable(4, deadTimes);
+    ITableWorkspace_sptr deadTimeTable = MuonWorkspaceCreationHelper::createDeadTimeTable(4, deadTimes);
 
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
     alg->setProperty("DeadTimeTable", deadTimeTable);
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("EMU00012345"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("EMU00012345"));
 
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], 39.2846, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], 32.9165, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], 2.30412, 0.001);
 
-    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
+    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], 95.8873, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], 75.7566, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.87585, 0.001);
 
-    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.41874, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.39421, 0.001);
@@ -545,19 +505,18 @@ public:
     alg->setProperty("TimeMax", 0.8);
     alg->execute();
 
-    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("EMU00012345"));
+    WorkspaceGroup_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("EMU00012345"));
 
     auto delta = 0.001;
-    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+    auto wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.2, delta);
     TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.3, delta);
     TS_ASSERT_DELTA(wsOut->readX(0)[8], 1.0, delta);
 
-    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+    wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.25, delta);
     TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.35, delta);

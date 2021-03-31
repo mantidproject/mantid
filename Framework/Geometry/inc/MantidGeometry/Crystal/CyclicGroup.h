@@ -70,8 +70,7 @@ public:
   CyclicGroup(const SymmetryOperation &symmetryOperation);
 
 protected:
-  std::vector<SymmetryOperation>
-  generateAllOperations(const SymmetryOperation &operation) const;
+  std::vector<SymmetryOperation> generateAllOperations(const SymmetryOperation &operation) const;
 };
 
 using CyclicGroup_sptr = std::shared_ptr<CyclicGroup>;

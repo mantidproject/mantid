@@ -18,27 +18,21 @@ namespace API {
 //---------------------------------------------------------------------------
 // Observer callback
 //---------------------------------------------------------------------------
-void ObserverCallback::handlePreDelete(const std::string &name,
-                                       Mantid::API::Workspace_sptr workspace) {
+void ObserverCallback::handlePreDelete(const std::string &name, Mantid::API::Workspace_sptr workspace) {
   m_observer->preDeleteHandle(name, std::move(workspace));
 }
 
-void ObserverCallback::handlePostDelete(const std::string &name) {
-  m_observer->postDeleteHandle(name);
-}
+void ObserverCallback::handlePostDelete(const std::string &name) { m_observer->postDeleteHandle(name); }
 
-void ObserverCallback::handleAdd(const std::string &name,
-                                 Mantid::API::Workspace_sptr workspace) {
+void ObserverCallback::handleAdd(const std::string &name, Mantid::API::Workspace_sptr workspace) {
   m_observer->addHandle(name, std::move(workspace));
 }
 
-void ObserverCallback::handleAfterReplace(
-    const std::string &name, Mantid::API::Workspace_sptr workspace) {
+void ObserverCallback::handleAfterReplace(const std::string &name, Mantid::API::Workspace_sptr workspace) {
   m_observer->afterReplaceHandle(name, std::move(workspace));
 }
 
-void ObserverCallback::handleRename(const std::string &oldName,
-                                    const std::string &newName) {
+void ObserverCallback::handleRename(const std::string &oldName, const std::string &newName) {
   m_observer->renameHandle(oldName, newName);
 }
 
@@ -55,9 +49,8 @@ WorkspaceObserver::WorkspaceObserver()
       m_addObserver(*this, &WorkspaceObserver::_addHandle),
       m_afterReplaceObserver(*this, &WorkspaceObserver::_afterReplaceHandle),
       m_renameObserver(*this, &WorkspaceObserver::_renameHandle),
-      m_clearADSObserver(*this, &WorkspaceObserver::_clearADSHandle),
-      m_predel_observed(false), m_postdel_observed(false),
-      m_add_observed(false), m_repl_observed(false), m_rename_observed(false),
+      m_clearADSObserver(*this, &WorkspaceObserver::_clearADSHandle), m_predel_observed(false),
+      m_postdel_observed(false), m_add_observed(false), m_repl_observed(false), m_rename_observed(false),
       m_clr_observed(false) {
   m_proxy = new ObserverCallback(this);
 }
@@ -83,24 +76,14 @@ WorkspaceObserver::~WorkspaceObserver() {
 void WorkspaceObserver::observePreDelete(bool turnOn) {
   if (turnOn && !m_predel_observed) // Turning it on
   {
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_preDeleteObserver);
-    m_proxy->connect(
-        m_proxy,
-        SIGNAL(preDeleteRequested(const std::string &,
-                                  Mantid::API::Workspace_sptr)),
-        SLOT(handlePreDelete(const std::string &, Mantid::API::Workspace_sptr)),
-        Qt::QueuedConnection);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_preDeleteObserver);
+    m_proxy->connect(m_proxy, SIGNAL(preDeleteRequested(const std::string &, Mantid::API::Workspace_sptr)),
+                     SLOT(handlePreDelete(const std::string &, Mantid::API::Workspace_sptr)), Qt::QueuedConnection);
   } else if (!turnOn && m_predel_observed) // Turning it off
   {
-    Mantid::API::AnalysisDataService::Instance()
-        .notificationCenter.removeObserver(m_preDeleteObserver);
-    m_proxy->disconnect(m_proxy,
-                        SIGNAL(preDeleteRequested(const std::string &,
-                                                  Mantid::API::Workspace_sptr)),
-                        m_proxy,
-                        SLOT(handlePreDelete(const std::string &,
-                                             Mantid::API::Workspace_sptr)));
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_preDeleteObserver);
+    m_proxy->disconnect(m_proxy, SIGNAL(preDeleteRequested(const std::string &, Mantid::API::Workspace_sptr)), m_proxy,
+                        SLOT(handlePreDelete(const std::string &, Mantid::API::Workspace_sptr)));
   } else {
   }
   m_predel_observed = turnOn;
@@ -114,18 +97,14 @@ void WorkspaceObserver::observePreDelete(bool turnOn) {
 void WorkspaceObserver::observePostDelete(bool turnOn) {
   if (turnOn && !m_postdel_observed) // Turning it on
   {
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_postDeleteObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_postDeleteObserver);
     m_proxy->connect(m_proxy, SIGNAL(postDeleteRequested(const std::string &)),
-                     SLOT(handlePostDelete(const std::string &)),
-                     Qt::QueuedConnection);
+                     SLOT(handlePostDelete(const std::string &)), Qt::QueuedConnection);
   } else if (!turnOn && m_postdel_observed) // Turning it off
   {
-    Mantid::API::AnalysisDataService::Instance()
-        .notificationCenter.removeObserver(m_postDeleteObserver);
-    m_proxy->disconnect(m_proxy,
-                        SIGNAL(postDeleteRequested(const std::string &)),
-                        m_proxy, SLOT(handlePostDelete(const std::string &)));
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_postDeleteObserver);
+    m_proxy->disconnect(m_proxy, SIGNAL(postDeleteRequested(const std::string &)), m_proxy,
+                        SLOT(handlePostDelete(const std::string &)));
   } else {
   }
   m_postdel_observed = turnOn;
@@ -138,23 +117,13 @@ void WorkspaceObserver::observePostDelete(bool turnOn) {
  */
 void WorkspaceObserver::observeAfterReplace(bool turnOn) {
   if (turnOn && !m_repl_observed) {
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_afterReplaceObserver);
-    m_proxy->connect(
-        m_proxy,
-        SIGNAL(afterReplaced(const std::string &, Mantid::API::Workspace_sptr)),
-        SLOT(handleAfterReplace(const std::string &,
-                                Mantid::API::Workspace_sptr)),
-        Qt::QueuedConnection);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_afterReplaceObserver);
+    m_proxy->connect(m_proxy, SIGNAL(afterReplaced(const std::string &, Mantid::API::Workspace_sptr)),
+                     SLOT(handleAfterReplace(const std::string &, Mantid::API::Workspace_sptr)), Qt::QueuedConnection);
   } else if (!turnOn && m_repl_observed) {
-    Mantid::API::AnalysisDataService::Instance()
-        .notificationCenter.removeObserver(m_afterReplaceObserver);
-    m_proxy->disconnect(
-        m_proxy,
-        SIGNAL(afterReplaced(const std::string &, Mantid::API::Workspace_sptr)),
-        m_proxy,
-        SLOT(handleAfterReplace(const std::string &,
-                                Mantid::API::Workspace_sptr)));
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_afterReplaceObserver);
+    m_proxy->disconnect(m_proxy, SIGNAL(afterReplaced(const std::string &, Mantid::API::Workspace_sptr)), m_proxy,
+                        SLOT(handleAfterReplace(const std::string &, Mantid::API::Workspace_sptr)));
   }
   m_repl_observed = turnOn;
 }
@@ -166,18 +135,13 @@ void WorkspaceObserver::observeAfterReplace(bool turnOn) {
  */
 void WorkspaceObserver::observeRename(bool turnOn) {
   if (turnOn && !m_rename_observed) {
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_renameObserver);
-    m_proxy->connect(
-        m_proxy, SIGNAL(renamed(const std::string &, const std::string &)),
-        SLOT(handleRename(const std::string &, const std::string &)),
-        Qt::QueuedConnection);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
+    m_proxy->connect(m_proxy, SIGNAL(renamed(const std::string &, const std::string &)),
+                     SLOT(handleRename(const std::string &, const std::string &)), Qt::QueuedConnection);
   } else if (!turnOn && m_rename_observed) {
-    Mantid::API::AnalysisDataService::Instance()
-        .notificationCenter.removeObserver(m_renameObserver);
-    m_proxy->disconnect(
-        m_proxy, SIGNAL(renamed(const std::string &, const std::string &)),
-        m_proxy, SLOT(handleRename(const std::string &, const std::string &)));
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
+    m_proxy->disconnect(m_proxy, SIGNAL(renamed(const std::string &, const std::string &)), m_proxy,
+                        SLOT(handleRename(const std::string &, const std::string &)));
   }
   m_rename_observed = turnOn;
 }
@@ -189,21 +153,13 @@ void WorkspaceObserver::observeRename(bool turnOn) {
  */
 void WorkspaceObserver::observeAdd(bool turnOn) {
   if (turnOn && !m_add_observed) {
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_addObserver);
-    m_proxy->connect(
-        m_proxy,
-        SIGNAL(addRequested(const std::string &, Mantid::API::Workspace_sptr)),
-        SLOT(handleAdd(const std::string &, Mantid::API::Workspace_sptr)),
-        Qt::QueuedConnection);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
+    m_proxy->connect(m_proxy, SIGNAL(addRequested(const std::string &, Mantid::API::Workspace_sptr)),
+                     SLOT(handleAdd(const std::string &, Mantid::API::Workspace_sptr)), Qt::QueuedConnection);
   } else if (!turnOn && m_add_observed) {
-    Mantid::API::AnalysisDataService::Instance()
-        .notificationCenter.removeObserver(m_addObserver);
-    m_proxy->disconnect(
-        m_proxy,
-        SIGNAL(addRequested(const std::string &, Mantid::API::Workspace_sptr)),
-        m_proxy,
-        SLOT(handleAdd(const std::string &, Mantid::API::Workspace_sptr)));
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
+    m_proxy->disconnect(m_proxy, SIGNAL(addRequested(const std::string &, Mantid::API::Workspace_sptr)), m_proxy,
+                        SLOT(handleAdd(const std::string &, Mantid::API::Workspace_sptr)));
   }
   m_add_observed = turnOn;
 }
@@ -215,15 +171,11 @@ void WorkspaceObserver::observeAdd(bool turnOn) {
  */
 void WorkspaceObserver::observeADSClear(bool turnOn) {
   if (turnOn && !m_clr_observed) {
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_clearADSObserver);
-    m_proxy->connect(m_proxy, SIGNAL(adsCleared()), SLOT(handleClearADS()),
-                     Qt::QueuedConnection);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_clearADSObserver);
+    m_proxy->connect(m_proxy, SIGNAL(adsCleared()), SLOT(handleClearADS()), Qt::QueuedConnection);
   } else if (!turnOn && m_clr_observed) {
-    Mantid::API::AnalysisDataService::Instance()
-        .notificationCenter.removeObserver(m_clearADSObserver);
-    m_proxy->disconnect(m_proxy, SIGNAL(adsCleared()), m_proxy,
-                        SLOT(handleClearADS()));
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearADSObserver);
+    m_proxy->disconnect(m_proxy, SIGNAL(adsCleared()), m_proxy, SLOT(handleClearADS()));
   }
   m_clr_observed = turnOn;
 }

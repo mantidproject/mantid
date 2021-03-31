@@ -50,28 +50,20 @@ namespace LiveData {
  * @param sampleEnvTopic The name of the topic stream sample environment
  * information. run mapping
  */
-IKafkaStreamDecoder::IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
-                                         const std::string &streamTopic,
-                                         const std::string &runInfoTopic,
-                                         const std::string &sampleEnvTopic,
-                                         const std::string &chopperTopic,
-                                         const std::string &monitorTopic)
-    : m_broker(std::move(broker)), m_streamTopic(streamTopic),
-      m_runInfoTopic(runInfoTopic), m_sampleEnvTopic(sampleEnvTopic),
-      m_chopperTopic(chopperTopic), m_monitorTopic(monitorTopic),
-      m_interrupt(false), m_specToIdx(), m_runStart(), m_runId(""), m_thread(),
-      m_capturing(false), m_exception(), m_extractWaiting(false),
+IKafkaStreamDecoder::IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker, const std::string &streamTopic,
+                                         const std::string &runInfoTopic, const std::string &sampleEnvTopic,
+                                         const std::string &chopperTopic, const std::string &monitorTopic)
+    : m_broker(std::move(broker)), m_streamTopic(streamTopic), m_runInfoTopic(runInfoTopic),
+      m_sampleEnvTopic(sampleEnvTopic), m_chopperTopic(chopperTopic), m_monitorTopic(monitorTopic), m_interrupt(false),
+      m_specToIdx(), m_runStart(), m_runId(""), m_thread(), m_capturing(false), m_exception(), m_extractWaiting(false),
       m_cbIterationEnd([] {}), m_cbError([] {}) {}
 
 IKafkaStreamDecoder::IKafkaStreamDecoder(IKafkaStreamDecoder &&o) noexcept
-    : m_broker(std::move(o.m_broker)), m_streamTopic(o.m_streamTopic),
-      m_runInfoTopic(o.m_runInfoTopic), m_sampleEnvTopic(o.m_sampleEnvTopic),
-      m_chopperTopic(o.m_chopperTopic), m_monitorTopic(o.m_monitorTopic),
-      m_interrupt(o.m_interrupt.load()), m_specToIdx(std::move(o.m_specToIdx)),
-      m_runStart(o.m_runStart), m_runId(std::move(o.m_runId)),
-      m_thread(std::move(o.m_thread)), m_capturing(o.m_capturing.load()),
-      m_exception(std::move(o.m_exception)),
-      m_cbIterationEnd(std::move(o.m_cbIterationEnd)),
+    : m_broker(std::move(o.m_broker)), m_streamTopic(o.m_streamTopic), m_runInfoTopic(o.m_runInfoTopic),
+      m_sampleEnvTopic(o.m_sampleEnvTopic), m_chopperTopic(o.m_chopperTopic), m_monitorTopic(o.m_monitorTopic),
+      m_interrupt(o.m_interrupt.load()), m_specToIdx(std::move(o.m_specToIdx)), m_runStart(o.m_runStart),
+      m_runId(std::move(o.m_runId)), m_thread(std::move(o.m_thread)), m_capturing(o.m_capturing.load()),
+      m_exception(std::move(o.m_exception)), m_cbIterationEnd(std::move(o.m_cbIterationEnd)),
       m_cbError(std::move(o.m_cbError)) {
   std::scoped_lock lck(m_runStatusMutex, m_waitMutex, m_mutex);
   m_runStatusSeen = o.m_runStatusSeen;
@@ -92,21 +84,18 @@ void IKafkaStreamDecoder::startCapture(bool startNow) {
   // If we are not starting now, then we want to start at the start of the run
   if (!startNow) {
     // Get last two messages in run topic to ensure we get a runStart message
-    m_runStream =
-        m_broker->subscribe({m_runInfoTopic}, SubscribeAtOption::LASTTWO);
+    m_runStream = m_broker->subscribe({m_runInfoTopic}, SubscribeAtOption::LASTTWO);
     std::string rawMsgBuffer;
     auto runStartData = getRunStartMessage(rawMsgBuffer);
     joinStreamAtTime(runStartData);
   } else {
-    m_dataStream = m_broker->subscribe(
-        {m_streamTopic, m_monitorTopic, m_runInfoTopic, m_sampleEnvTopic},
-        SubscribeAtOption::LATEST);
+    m_dataStream = m_broker->subscribe({m_streamTopic, m_monitorTopic, m_runInfoTopic, m_sampleEnvTopic},
+                                       SubscribeAtOption::LATEST);
   }
 
   try {
     if (!m_chopperTopic.empty())
-      m_chopperStream =
-          m_broker->subscribe({m_chopperTopic}, SubscribeAtOption::LATEST);
+      m_chopperStream = m_broker->subscribe({m_chopperTopic}, SubscribeAtOption::LATEST);
   } catch (std::exception &) {
     g_log.notice() << "Could not subscribe to topic " + m_chopperTopic +
                           ". This topic does not exist. No chopper information "
@@ -115,8 +104,7 @@ void IKafkaStreamDecoder::startCapture(bool startNow) {
   }
 
   // Get last two messages in run topic to ensure we get a runStart message
-  m_runStream =
-      m_broker->subscribe({m_runInfoTopic}, SubscribeAtOption::LASTTWO);
+  m_runStream = m_broker->subscribe({m_runInfoTopic}, SubscribeAtOption::LASTTWO);
 
   m_thread = std::thread([this]() { this->captureImpl(); });
   m_thread.detach();
@@ -132,20 +120,17 @@ bool IKafkaStreamDecoder::dataReset() {
   return result;
 }
 
-void IKafkaStreamDecoder::joinStreamAtTime(
-    const IKafkaStreamDecoder::RunStartStruct &runStartData) {
+void IKafkaStreamDecoder::joinStreamAtTime(const IKafkaStreamDecoder::RunStartStruct &runStartData) {
   auto runStartTime = runStartData.startTime;
   int64_t startTimeMilliseconds = nanosecondsToMilliseconds(runStartTime);
-  m_dataStream =
-      m_broker->subscribe({m_streamTopic, m_runInfoTopic, m_sampleEnvTopic},
-                          startTimeMilliseconds, SubscribeAtOption::TIME);
+  m_dataStream = m_broker->subscribe({m_streamTopic, m_runInfoTopic, m_sampleEnvTopic}, startTimeMilliseconds,
+                                     SubscribeAtOption::TIME);
   // make sure we listen to the run start topic starting from the run start
   // message we already got the start time from
   m_dataStream->seek(m_runInfoTopic, 0, runStartData.runStartMsgOffset);
 }
 
-int64_t
-IKafkaStreamDecoder::nanosecondsToMilliseconds(uint64_t timeNanoseconds) {
+int64_t IKafkaStreamDecoder::nanosecondsToMilliseconds(uint64_t timeNanoseconds) {
   return static_cast<int64_t>(timeNanoseconds / 1000000);
 }
 
@@ -225,8 +210,7 @@ void IKafkaStreamDecoder::captureImpl() noexcept {
     m_exception = std::make_shared<std::runtime_error>(exc.what());
   } catch (...) {
     m_cbError();
-    m_exception = std::make_shared<std::runtime_error>(
-        "IKafkaStreamDecoder: Unknown exception type caught.");
+    m_exception = std::make_shared<std::runtime_error>("IKafkaStreamDecoder: Unknown exception type caught.");
   }
   m_capturing = false;
 }
@@ -238,13 +222,11 @@ void IKafkaStreamDecoder::captureImpl() noexcept {
  * offset reached
  */
 void IKafkaStreamDecoder::checkIfAllStopOffsetsReached(
-    const std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
-    bool &checkOffsets) {
+    const std::unordered_map<std::string, std::vector<bool>> &reachedEnd, bool &checkOffsets) {
   if (std::all_of(reachedEnd.cbegin(), reachedEnd.cend(),
                   [](const std::pair<std::string, std::vector<bool>> &kv) {
-                    return std::all_of(
-                        kv.second.cbegin(), kv.second.cend(),
-                        [](bool partitionEnd) { return partitionEnd; });
+                    return std::all_of(kv.second.cbegin(), kv.second.cend(),
+                                       [](bool partitionEnd) { return partitionEnd; });
                   }) ||
       reachedEnd.empty()) {
     m_endRun = true;
@@ -263,16 +245,14 @@ void IKafkaStreamDecoder::checkIfAllStopOffsetsReached(
 }
 
 std::unordered_map<std::string, std::vector<int64_t>>
-IKafkaStreamDecoder::getStopOffsets(
-    std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
-    std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
-    uint64_t stopTime) const {
+IKafkaStreamDecoder::getStopOffsets(std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
+                                    std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
+                                    uint64_t stopTime) const {
   reachedEnd.clear();
   stopOffsets.clear();
   // Wait for max latency so that we don't miss any late messages
   std::this_thread::sleep_for(MAX_LATENCY);
-  stopOffsets = m_dataStream->getOffsetsForTimestamp(
-      static_cast<int64_t>(stopTime / 1000000));
+  stopOffsets = m_dataStream->getOffsetsForTimestamp(static_cast<int64_t>(stopTime / 1000000));
   // /1000000 to convert nanosecond precision from message to millisecond
   // precision which Kafka offset query supports
 
@@ -282,18 +262,13 @@ IKafkaStreamDecoder::getStopOffsets(
   for (auto &topicOffsets : stopOffsets) {
     auto topicName = topicOffsets.first;
     // Ignore the runInfo topic
-    if (topicName.substr(topicName.length() -
-                         KafkaTopicSubscriber::RUN_TOPIC_SUFFIX.length()) !=
+    if (topicName.substr(topicName.length() - KafkaTopicSubscriber::RUN_TOPIC_SUFFIX.length()) !=
         KafkaTopicSubscriber::RUN_TOPIC_SUFFIX) {
-      g_log.debug() << "TOPIC: " << topicName
-                    << " PARTITIONS: " << topicOffsets.second.size()
-                    << std::endl;
-      reachedEnd.insert(
-          {topicName, std::vector<bool>(topicOffsets.second.size(), false)});
+      g_log.debug() << "TOPIC: " << topicName << " PARTITIONS: " << topicOffsets.second.size() << std::endl;
+      reachedEnd.insert({topicName, std::vector<bool>(topicOffsets.second.size(), false)});
 
       auto &partitionOffsets = topicOffsets.second;
-      for (uint32_t partitionNumber = 0;
-           partitionNumber < partitionOffsets.size(); partitionNumber++) {
+      for (uint32_t partitionNumber = 0; partitionNumber < partitionOffsets.size(); partitionNumber++) {
         auto offset = partitionOffsets[partitionNumber];
         // If the stop offset is negative then there are no messages for us
         // to collect on this topic, so mark reachedEnd as true already
@@ -369,8 +344,7 @@ void IKafkaStreamDecoder::waitForRunEndObservation() {
  * @param runStartStructOutput details of the new run
  * @return true if interrupted, false if got a new run start message
  */
-bool IKafkaStreamDecoder::waitForNewRunStartMessage(
-    RunStartStruct &runStartStructOutput) {
+bool IKafkaStreamDecoder::waitForNewRunStartMessage(RunStartStruct &runStartStructOutput) {
   while (!m_interrupt) {
     std::string runMsgBuffer;
     int64_t offset;
@@ -378,13 +352,11 @@ bool IKafkaStreamDecoder::waitForNewRunStartMessage(
     std::string topicName;
     m_runStream->consumeMessage(&runMsgBuffer, offset, partition, topicName);
     if (runMsgBuffer.empty() ||
-        !flatbuffers::BufferHasIdentifier(
-            reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()),
-            RUN_START_MESSAGE_ID.c_str())) {
+        !flatbuffers::BufferHasIdentifier(reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()),
+                                          RUN_START_MESSAGE_ID.c_str())) {
       continue; // no start message available, try again
     } else {
-      auto runStartStruct =
-          extractRunStartDataFromMessage(runMsgBuffer, offset);
+      auto runStartStruct = extractRunStartDataFromMessage(runMsgBuffer, offset);
       if (runStartStruct.runId != m_runId) {
         runStartStructOutput = runStartStruct;
         m_runId = runStartStruct.runId;
@@ -396,16 +368,13 @@ bool IKafkaStreamDecoder::waitForNewRunStartMessage(
 }
 
 IKafkaStreamDecoder::RunStartStruct
-IKafkaStreamDecoder::extractRunStartDataFromMessage(
-    const std::string &messageBuffer, const int64_t offset) {
-  auto runStartData =
-      GetRunStart(reinterpret_cast<const uint8_t *>(messageBuffer.c_str()));
+IKafkaStreamDecoder::extractRunStartDataFromMessage(const std::string &messageBuffer, const int64_t offset) {
+  auto runStartData = GetRunStart(reinterpret_cast<const uint8_t *>(messageBuffer.c_str()));
   bool detSpecMapSpecified = false;
   size_t numberOfSpectra = 0;
   std::vector<int32_t> spectrumNumbers;
   std::vector<int32_t> detectorIDs;
-  if (runStartData->detector_spectrum_map() != nullptr &&
-      runStartData->detector_spectrum_map()->n_spectra() != 0) {
+  if (runStartData->detector_spectrum_map() != nullptr && runStartData->detector_spectrum_map()->n_spectra() != 0) {
     detSpecMapSpecified = true;
     auto spDetMsg = runStartData->detector_spectrum_map();
     numberOfSpectra = static_cast<size_t>(spDetMsg->n_spectra());
@@ -418,12 +387,9 @@ IKafkaStreamDecoder::extractRunStartDataFromMessage(
          << numberOfSpectra << ", numberOfDetectors=" << numberOfDetectors;
       throw std::runtime_error(os.str());
     }
-    spectrumNumbers.assign(spDetMsg->spectrum()->data(),
-                           spDetMsg->spectrum()->data() +
-                               spDetMsg->spectrum()->size());
+    spectrumNumbers.assign(spDetMsg->spectrum()->data(), spDetMsg->spectrum()->data() + spDetMsg->spectrum()->size());
     detectorIDs.assign(spDetMsg->detector_id()->data(),
-                       spDetMsg->detector_id()->data() +
-                           spDetMsg->detector_id()->size());
+                       spDetMsg->detector_id()->data() + spDetMsg->detector_id()->size());
   }
   return {runStartData->instrument_name()->str(),
           runStartData->run_name()->str(),
@@ -437,23 +403,19 @@ IKafkaStreamDecoder::extractRunStartDataFromMessage(
           detectorIDs};
 }
 
-IKafkaStreamDecoder::RunStartStruct
-IKafkaStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
+IKafkaStreamDecoder::RunStartStruct IKafkaStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
   auto offset = getRunInfoMessage(rawMsgBuffer);
   // If the first message is not a run start message then get another message
-  if (!flatbuffers::BufferHasIdentifier(
-          reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
-          RUN_START_MESSAGE_ID.c_str())) {
+  if (!flatbuffers::BufferHasIdentifier(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
+                                        RUN_START_MESSAGE_ID.c_str())) {
     offset = getRunInfoMessage(rawMsgBuffer);
 
     // If the second message is not a run start then give up
-    if (!flatbuffers::BufferHasIdentifier(
-            reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
-            RUN_START_MESSAGE_ID.c_str())) {
-      throw std::runtime_error(
-          "IKafkaStreamDecoder::getRunStartMessage() - "
-          "Didn't find a run start message in the run info "
-          "topic. Unable to continue");
+    if (!flatbuffers::BufferHasIdentifier(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
+                                          RUN_START_MESSAGE_ID.c_str())) {
+      throw std::runtime_error("IKafkaStreamDecoder::getRunStartMessage() - "
+                               "Didn't find a run start message in the run info "
+                               "topic. Unable to continue");
     }
   }
   return extractRunStartDataFromMessage(rawMsgBuffer, offset);
@@ -473,14 +435,11 @@ int64_t IKafkaStreamDecoder::getRunInfoMessage(std::string &rawMsgBuffer) {
                              "Empty message received from run info "
                              "topic. Unable to continue");
   }
-  if (!flatbuffers::BufferHasIdentifier(
-          reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
-          RUN_START_MESSAGE_ID.c_str()) &&
-      !flatbuffers::BufferHasIdentifier(
-          reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
-          RUN_STOP_MESSAGE_ID.c_str())) {
-    g_log.error() << "Message with flatbuffer ID of "
-                  << rawMsgBuffer.substr(4, 8) << " in run info topic.\n";
+  if (!flatbuffers::BufferHasIdentifier(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
+                                        RUN_START_MESSAGE_ID.c_str()) &&
+      !flatbuffers::BufferHasIdentifier(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()),
+                                        RUN_STOP_MESSAGE_ID.c_str())) {
+    g_log.error() << "Message with flatbuffer ID of " << rawMsgBuffer.substr(4, 8) << " in run info topic.\n";
     throw std::runtime_error("IKafkaStreamDecoder::getRunInfoMessage() - "
                              "Received unexpected message type from run info "
                              "topic. Unable to continue");
@@ -489,9 +448,7 @@ int64_t IKafkaStreamDecoder::getRunInfoMessage(std::string &rawMsgBuffer) {
 }
 
 std::map<int32_t, std::set<int32_t>>
-IKafkaStreamDecoder::buildSpectrumToDetectorMap(const int32_t *spec,
-                                                const int32_t *udet,
-                                                uint32_t length) {
+IKafkaStreamDecoder::buildSpectrumToDetectorMap(const int32_t *spec, const int32_t *udet, uint32_t length) {
   // Order is important here
   std::map<int32_t, std::set<int32_t>> spdetMap;
   for (uint32_t i = 0; i < length; ++i) {
@@ -508,19 +465,15 @@ IKafkaStreamDecoder::buildSpectrumToDetectorMap(const int32_t *spec,
   return spdetMap;
 }
 
-void IKafkaStreamDecoder::checkRunMessage(
-    const std::string &buffer, bool &checkOffsets,
-    std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
-    std::unordered_map<std::string, std::vector<bool>> &reachedEnd) {
-  if (flatbuffers::BufferHasIdentifier(
-          reinterpret_cast<const uint8_t *>(buffer.c_str()),
-          RUN_STOP_MESSAGE_ID.c_str())) {
-    auto runStopMsg =
-        GetRunStop(reinterpret_cast<const uint8_t *>(buffer.c_str()));
+void IKafkaStreamDecoder::checkRunMessage(const std::string &buffer, bool &checkOffsets,
+                                          std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
+                                          std::unordered_map<std::string, std::vector<bool>> &reachedEnd) {
+  if (flatbuffers::BufferHasIdentifier(reinterpret_cast<const uint8_t *>(buffer.c_str()),
+                                       RUN_STOP_MESSAGE_ID.c_str())) {
+    auto runStopMsg = GetRunStop(reinterpret_cast<const uint8_t *>(buffer.c_str()));
     if (!checkOffsets) {
       auto stopTime = runStopMsg->stop_time();
-      g_log.debug() << "Received an end-of-run message with stop time = "
-                    << stopTime << std::endl;
+      g_log.debug() << "Received an end-of-run message with stop time = " << stopTime << std::endl;
       stopOffsets = getStopOffsets(stopOffsets, reachedEnd, stopTime);
       checkOffsets = true;
       checkIfAllStopOffsetsReached(reachedEnd, checkOffsets);
@@ -528,23 +481,18 @@ void IKafkaStreamDecoder::checkRunMessage(
   }
 }
 
-void IKafkaStreamDecoder::checkRunEnd(
-    const std::string &topicName, bool &checkOffsets, const int64_t offset,
-    const int32_t partition,
-    std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
-    std::unordered_map<std::string, std::vector<bool>> &reachedEnd) {
-  if (reachedEnd.count(topicName) &&
-      offset >= stopOffsets[topicName][static_cast<size_t>(partition)]) {
+void IKafkaStreamDecoder::checkRunEnd(const std::string &topicName, bool &checkOffsets, const int64_t offset,
+                                      const int32_t partition,
+                                      std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
+                                      std::unordered_map<std::string, std::vector<bool>> &reachedEnd) {
+  if (reachedEnd.count(topicName) && offset >= stopOffsets[topicName][static_cast<size_t>(partition)]) {
 
     reachedEnd[topicName][static_cast<size_t>(partition)] = true;
 
     if (offset == stopOffsets[topicName][static_cast<size_t>(partition)]) {
-      g_log.debug() << "Reached end-of-run in " << topicName << " topic."
-                    << std::endl;
+      g_log.debug() << "Reached end-of-run in " << topicName << " topic." << std::endl;
       g_log.debug() << "topic: " << topicName << " offset: " << offset
-                    << " stopOffset: "
-                    << stopOffsets[topicName][static_cast<size_t>(partition)]
-                    << std::endl;
+                    << " stopOffset: " << stopOffsets[topicName][static_cast<size_t>(partition)] << std::endl;
     }
     checkIfAllStopOffsetsReached(reachedEnd, checkOffsets);
   }
@@ -552,10 +500,8 @@ void IKafkaStreamDecoder::checkRunEnd(
 
 int IKafkaStreamDecoder::runNumber() const noexcept {
   // If the run ID is empty or if any non-digit char was found in the string
-  if (m_runId.empty() ||
-      (std::find_if_not(m_runId.cbegin(), m_runId.cend(), [](const char c) {
-         return std::isdigit(c);
-       }) != m_runId.end()))
+  if (m_runId.empty() || (std::find_if_not(m_runId.cbegin(), m_runId.cend(),
+                                           [](const char c) { return std::isdigit(c); }) != m_runId.end()))
     return -1;
 
   return std::atoi(m_runId.c_str());

@@ -21,17 +21,12 @@ to work y must increase with distance from the earth
 */
 class GravitySANSHelper {
 public:
-  GravitySANSHelper()
-      : m_beamLineNorm(-1), m_dropPerAngstrom2(-1), m_cachedDrop(-1) {}
-  GravitySANSHelper(const API::SpectrumInfo &spectrumInfo, const size_t index,
-                    const double extraLength = 0.0);
+  GravitySANSHelper() : m_beamLineNorm(-1), m_dropPerAngstrom2(-1), m_cachedDrop(-1) {}
+  GravitySANSHelper(const API::SpectrumInfo &spectrumInfo, const size_t index, const double extraLength = 0.0);
   double calcSinTheta(const double wavAngstroms) const;
-  double calcComponents(const double wavAngstroms, double &xFrac,
-                        double &yFrac) const;
+  double calcComponents(const double wavAngstroms, double &xFrac, double &yFrac) const;
 
-  double gravitationalDrop(const double wav) const {
-    return m_dropPerAngstrom2 * wav * wav;
-  }
+  double gravitationalDrop(const double wav) const { return m_dropPerAngstrom2 * wav * wav; }
 
 private:
   /// coordinates of the sample
@@ -52,8 +47,7 @@ private:
   mutable double m_cachedDrop;
 
   const Kernel::V3D &getDetLoc(const double wav) const;
-  double gravitationalDrop(const double L2, const double waveLength,
-                           const double extraLength) const;
+  double gravitationalDrop(const double L2, const double waveLength, const double extraLength) const;
   double calcSinTheta() const;
 };
 } // namespace Algorithms

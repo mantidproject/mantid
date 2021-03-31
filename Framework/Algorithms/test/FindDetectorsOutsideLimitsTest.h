@@ -75,8 +75,7 @@ public:
       }
       work_in->getSpectrum(i).setSpectrumNo(i);
 
-      Mantid::Geometry::Detector *det =
-          new Mantid::Geometry::Detector("", i, nullptr);
+      Mantid::Geometry::Detector *det = new Mantid::Geometry::Detector("", i, nullptr);
       instr->add(det);
       instr->markAsDetector(det);
       work_in->getSpectrum(i).setDetectorID(i);
@@ -99,9 +98,7 @@ public:
 
     // Get back the output workspace
     MatrixWorkspace_sptr work_out;
-    TS_ASSERT_THROWS_NOTHING(
-        work_out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "testdead_out"));
+    TS_ASSERT_THROWS_NOTHING(work_out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testdead_out"));
 
     const int numFailed = alg.getProperty("NumberOfFailures");
     TS_ASSERT_EQUALS(numFailed, 11);
@@ -131,9 +128,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     // retrieve the output workspace
-    TS_ASSERT_THROWS_NOTHING(
-        work_out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "testdead_out"));
+    TS_ASSERT_THROWS_NOTHING(work_out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testdead_out"));
 
     const int numFailed2 = alg.getProperty("NumberOfFailures");
     TS_ASSERT_EQUALS(numFailed2, 10);
@@ -161,16 +156,13 @@ public:
 
   void testExec_Event() {
     // Make a workspace with 50 pixels, 200 events per pixel.
-    EventWorkspace_sptr work_in = WorkspaceCreationHelper::createEventWorkspace(
-        50, 100, 100, 0.0, 1.0, 2, 1);
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(10);
+    EventWorkspace_sptr work_in = WorkspaceCreationHelper::createEventWorkspace(50, 100, 100, 0.0, 1.0, 2, 1);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(10);
     work_in->setInstrument(inst);
     DateAndTime run_start("2010-01-01T00:00:00");
     // Add ten more at #10 so that it fails
     for (int i = 0; i < 10; i++)
-      work_in->getSpectrum(10).addEventQuickly(
-          TofEvent((i + 0.5), run_start + double(i)));
+      work_in->getSpectrum(10).addEventQuickly(TofEvent((i + 0.5), run_start + double(i)));
 
     AnalysisDataService::Instance().add("testdead_in", work_in);
 
@@ -186,9 +178,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     MatrixWorkspace_sptr work_out;
-    TS_ASSERT_THROWS_NOTHING(
-        work_out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "testdead_out"));
+    TS_ASSERT_THROWS_NOTHING(work_out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testdead_out"));
 
     TS_ASSERT_EQUALS(work_out->y(0)[0], 0.0);
     TS_ASSERT_EQUALS(work_out->y(9)[0], 0.0);

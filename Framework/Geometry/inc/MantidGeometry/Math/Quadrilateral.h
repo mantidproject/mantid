@@ -24,20 +24,17 @@ namespace Geometry {
 class DLLExport Quadrilateral final : public ConvexPolygon {
 public:
   /// Constructor with the four vertices
-  Quadrilateral(const Kernel::V2D &lowerLeft, const Kernel::V2D &lowerRight,
-                const Kernel::V2D &upperRight, const Kernel::V2D &upperLeft);
+  Quadrilateral(const Kernel::V2D &lowerLeft, const Kernel::V2D &lowerRight, const Kernel::V2D &upperRight,
+                const Kernel::V2D &upperLeft);
   /// Special constructor for a rectangle
-  Quadrilateral(const double lowerX, const double upperX, const double lowerY,
-                const double upperY);
+  Quadrilateral(const double lowerX, const double upperX, const double lowerY, const double upperY);
   Quadrilateral(Quadrilateral &&) = default;
   Quadrilateral &operator=(Quadrilateral &&) = default;
   Quadrilateral(const Quadrilateral &) = default;
   Quadrilateral &operator=(const Quadrilateral &) = default;
 
   /// Index access.
-  inline const Kernel::V2D &operator[](const size_t index) const override {
-    return m_vertices[index];
-  };
+  inline const Kernel::V2D &operator[](const size_t index) const override { return m_vertices[index]; };
   /// Bounds-checked index access
   const Kernel::V2D &at(const size_t index) const override;
   /// Return the number of vertices
@@ -54,14 +51,10 @@ public:
    * @returns The area of the polygon
    */
   inline double area() const override {
-    const double lhs = lowerLeft().Y() * upperLeft().X() +
-                       upperLeft().Y() * upperRight().X() +
-                       upperRight().Y() * lowerRight().X() +
-                       lowerRight().Y() * lowerLeft().X();
-    const double rhs = lowerLeft().X() * upperLeft().Y() +
-                       upperLeft().X() * upperRight().Y() +
-                       upperRight().X() * lowerRight().Y() +
-                       lowerRight().X() * lowerLeft().Y();
+    const double lhs = lowerLeft().Y() * upperLeft().X() + upperLeft().Y() * upperRight().X() +
+                       upperRight().Y() * lowerRight().X() + lowerRight().Y() * lowerLeft().X();
+    const double rhs = lowerLeft().X() * upperLeft().Y() + upperLeft().X() * upperRight().Y() +
+                       upperRight().X() * lowerRight().Y() + lowerRight().X() * lowerLeft().Y();
     return 0.5 * (lhs - rhs);
   }
 
@@ -73,21 +66,13 @@ public:
    */
   inline double determinant() const override { return 2.0 * area(); }
   /// Return the lowest X value in the polygon
-  inline double minX() const override {
-    return std::min(lowerLeft().X(), upperLeft().X());
-  }
+  inline double minX() const override { return std::min(lowerLeft().X(), upperLeft().X()); }
   /// Return the max X value in the polygon
-  inline double maxX() const override {
-    return std::max(lowerRight().X(), upperRight().X());
-  }
+  inline double maxX() const override { return std::max(lowerRight().X(), upperRight().X()); }
   /// Return the lowest Y value in the polygon
-  inline double minY() const override {
-    return std::min(lowerLeft().Y(), lowerRight().Y());
-  }
+  inline double minY() const override { return std::min(lowerLeft().Y(), lowerRight().Y()); }
   /// Return the max Y value in the polygon
-  inline double maxY() const override {
-    return std::max(upperLeft().Y(), upperRight().Y());
-  }
+  inline double maxY() const override { return std::max(upperLeft().Y(), upperRight().Y()); }
   /// Return a new Polygon based on the current Quadrilateral
   ConvexPolygon toPoly() const override;
   /// Shifts the vertexes in a clockwise manner

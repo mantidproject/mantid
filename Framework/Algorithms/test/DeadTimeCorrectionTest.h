@@ -18,9 +18,7 @@ using Mantid::API::FrameworkManager;
 using Mantid::API::MatrixWorkspace_sptr;
 
 namespace {
-MatrixWorkspace_sptr createWorkspace(const int nPixelsPerBank = 3,
-                                     const int nBins = 2,
-                                     const int numBanks = 2) {
+MatrixWorkspace_sptr createWorkspace(const int nPixelsPerBank = 3, const int nBins = 2, const int numBanks = 2) {
   CreateSampleWorkspace creator;
   creator.initialize();
   creator.setChild(true);
@@ -41,9 +39,7 @@ class DeadTimeCorrectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DeadTimeCorrectionTest *createSuite() {
-    return new DeadTimeCorrectionTest();
-  }
+  static DeadTimeCorrectionTest *createSuite() { return new DeadTimeCorrectionTest(); }
   static void destroySuite(DeadTimeCorrectionTest *suite) { delete suite; }
 
   DeadTimeCorrectionTest() { FrameworkManager::Instance(); }
@@ -68,8 +64,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", in))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Tau", tau))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingPattern", "0-8,9-17"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
@@ -94,12 +89,8 @@ public:
 
 class DeadTimeCorrectionTestPerformance : public CxxTest::TestSuite {
 public:
-  static DeadTimeCorrectionTestPerformance *createSuite() {
-    return new DeadTimeCorrectionTestPerformance();
-  }
-  static void destroySuite(DeadTimeCorrectionTestPerformance *suite) {
-    delete suite;
-  }
+  static DeadTimeCorrectionTestPerformance *createSuite() { return new DeadTimeCorrectionTestPerformance(); }
+  static void destroySuite(DeadTimeCorrectionTestPerformance *suite) { delete suite; }
 
   DeadTimeCorrectionTestPerformance() { FrameworkManager::Instance(); }
 
@@ -111,10 +102,9 @@ public:
     m_alg.setProperty("InputWorkspace", in);
     m_alg.setPropertyValue("OutputWorkspace", "__unused");
     m_alg.setProperty("Tau", 0.0000001);
-    m_alg.setPropertyValue("GroupingPattern",
-                           "0-9999,10000-19999,20000-29999,30000-39999,40000-"
-                           "49999,50000-59999,60000-"
-                           "69999,70000-79999,80000-89999,90000-99999");
+    m_alg.setPropertyValue("GroupingPattern", "0-9999,10000-19999,20000-29999,30000-39999,40000-"
+                                              "49999,50000-59999,60000-"
+                                              "69999,70000-79999,80000-89999,90000-99999");
   }
 
   void test_performance() {

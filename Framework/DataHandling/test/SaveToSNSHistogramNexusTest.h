@@ -22,11 +22,9 @@ public:
     TS_ASSERT(algToBeTested.isInitialized());
   }
 
-  void
-  xtestExec() ///< Test is disabled because it is slow and requires large files
+  void xtestExec() ///< Test is disabled because it is slow and requires large files
   {
-    IAlgorithm_sptr alg(
-        AlgorithmFactory::Instance().create("LoadEventNexus", 1));
+    IAlgorithm_sptr alg(AlgorithmFactory::Instance().create("LoadEventNexus", 1));
     alg->initialize();
     alg->setProperty("Filename", "/home/8oz/data/TOPAZ_1786_event.nxs");
     alg->setProperty("OutputWorkspace", "savesnsnexus_workspace");
@@ -42,8 +40,7 @@ public:
     rebin->execute();
     TS_ASSERT(rebin->isExecuted());
 
-    IAlgorithm_sptr save(
-        AlgorithmFactory::Instance().create("SaveToSNSHistogramNexus", 1));
+    IAlgorithm_sptr save(AlgorithmFactory::Instance().create("SaveToSNSHistogramNexus", 1));
     save->initialize();
     save->setProperty("InputFilename", "/home/8oz/data/TOPAZ_1786.nxs");
     save->setProperty("InputWorkspace", "savesnsnexus_workspace");

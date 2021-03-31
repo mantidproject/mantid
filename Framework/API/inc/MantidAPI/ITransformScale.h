@@ -43,10 +43,8 @@ using ITransformScale_sptr = std::shared_ptr<ITransformScale>;
 } // namespace API
 } // namespace Mantid
 
-#define DECLARE_TRANSFORMSCALE(classname)                                      \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_trs_##classname(                 \
-      ((Mantid::API::TransformScaleFactory::Instance().subscribe<classname>(   \
-           #classname)),                                                       \
-       0));                                                                    \
+#define DECLARE_TRANSFORMSCALE(classname)                                                                              \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper register_trs_##classname(                                                         \
+      ((Mantid::API::TransformScaleFactory::Instance().subscribe<classname>(#classname)), 0));                         \
   }

@@ -27,8 +27,7 @@ public:
   // Converts a given vector to a complex vector
   virtual std::vector<double> toComplex(const std::vector<double> &values) = 0;
   // Converts to a complex vector
-  virtual std::vector<double>
-  fromComplex(const std::vector<double> &values) = 0;
+  virtual std::vector<double> fromComplex(const std::vector<double> &values) = 0;
 };
 
 using MaxentSpace_sptr = std::shared_ptr<MaxentSpace>;

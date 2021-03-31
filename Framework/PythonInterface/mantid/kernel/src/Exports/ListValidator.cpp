@@ -27,21 +27,14 @@ namespace {
  * @param allowedValues :: The list of allowed values
  * @return A new ListValidator instance
  */
-template <typename T>
-ListValidator<T> *
-createListValidator(const boost::python::list &allowedValues) {
-  return new ListValidator<T>(
-      Converters::PySequenceToVector<T>(allowedValues)());
+template <typename T> ListValidator<T> *createListValidator(const boost::python::list &allowedValues) {
+  return new ListValidator<T>(Converters::PySequenceToVector<T>(allowedValues)());
 }
 
-#define EXPORT_LISTVALIDATOR(type, prefix)                                     \
-  class_<ListValidator<type>, bases<IValidator>, boost::noncopyable>(          \
-      #prefix "ListValidator")                                                 \
-      .def("__init__",                                                         \
-           make_constructor(&createListValidator<type>,                        \
-                            default_call_policies(), arg("allowedValues")))    \
-      .def("addAllowedValue", &ListValidator<type>::addAllowedValue,           \
-           (arg("self"), arg("value")),                                        \
+#define EXPORT_LISTVALIDATOR(type, prefix)                                                                             \
+  class_<ListValidator<type>, bases<IValidator>, boost::noncopyable>(#prefix "ListValidator")                          \
+      .def("__init__", make_constructor(&createListValidator<type>, default_call_policies(), arg("allowedValues")))    \
+      .def("addAllowedValue", &ListValidator<type>::addAllowedValue, (arg("self"), arg("value")),                      \
            "Adds a value to the list of accepted values");
 } // namespace
 

@@ -26,16 +26,15 @@ GET_POINTER_SPECIALIZATION(FilteredTimeSeriesProperty<double>)
 
 namespace {
 /// Macro to reduce copy-and-paste
-#define EXPORT_FILTEREDTIMESERIES_PROP(TYPE, Prefix)                           \
-  register_ptr_to_python<FilteredTimeSeriesProperty<TYPE> *>();                \
-                                                                               \
-  class_<FilteredTimeSeriesProperty<TYPE>, bases<TimeSeriesProperty<TYPE>>,    \
-         boost::noncopyable>(#Prefix "FilteredTimeSeriesProperty", no_init)    \
-      .def(init<TimeSeriesProperty<TYPE> *, const TimeSeriesProperty<bool> &>( \
-          "Constructor", (arg("self"), arg("source"), arg("filter"))))         \
-      .def("unfiltered", &FilteredTimeSeriesProperty<TYPE>::unfiltered,        \
-           (arg("self")), return_value_policy<RemoveConst>(),                  \
-           "Returns a time series containing the unfiltered data");
+#define EXPORT_FILTEREDTIMESERIES_PROP(TYPE, Prefix)                                                                   \
+  register_ptr_to_python<FilteredTimeSeriesProperty<TYPE> *>();                                                        \
+                                                                                                                       \
+  class_<FilteredTimeSeriesProperty<TYPE>, bases<TimeSeriesProperty<TYPE>>, boost::noncopyable>(                       \
+      #Prefix "FilteredTimeSeriesProperty", no_init)                                                                   \
+      .def(init<TimeSeriesProperty<TYPE> *, const TimeSeriesProperty<bool> &>(                                         \
+          "Constructor", (arg("self"), arg("source"), arg("filter"))))                                                 \
+      .def("unfiltered", &FilteredTimeSeriesProperty<TYPE>::unfiltered, (arg("self")),                                 \
+           return_value_policy<RemoveConst>(), "Returns a time series containing the unfiltered data");
 } // namespace
 
 void export_FilteredTimeSeriesProperty() {

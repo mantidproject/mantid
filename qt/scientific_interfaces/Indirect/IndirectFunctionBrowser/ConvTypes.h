@@ -45,10 +45,8 @@ extern std::map<FitType, bool> FitTypeQDepends;
 extern std::unordered_map<FitType, std::string> FitTypeEnumToString;
 extern std::unordered_map<std::string, FitType> FitTypeStringToEnum;
 
-extern std::unordered_map<LorentzianType, std::string>
-    LorentzianTypeEnumToString;
-extern std::unordered_map<std::string, LorentzianType>
-    LorentzianTypeStringToEnum;
+extern std::unordered_map<LorentzianType, std::string> LorentzianTypeEnumToString;
+extern std::unordered_map<std::string, LorentzianType> LorentzianTypeStringToEnum;
 
 enum class BackgroundType { None, Flat, Linear };
 
@@ -110,8 +108,7 @@ inline ParamID &operator++(ParamID &id) {
   return id;
 }
 
-inline void applyToParamIDRange(ParamID from, ParamID to,
-                                const std::function<void(ParamID)> &fun) {
+inline void applyToParamIDRange(ParamID from, ParamID to, const std::function<void(ParamID)> &fun) {
   if (from == ParamID::NONE || to == ParamID::NONE)
     return;
   for (auto i = from; i <= to; ++i)
@@ -182,22 +179,17 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
     if (!function.empty()) {
       IFunction_sptr fun = FunctionFactory::Instance().createFunction(function);
       auto fillDescriptions = [&descriptions, &fun](ParamID id) {
-        descriptions << fun->parameterDescription(
-            fun->parameterIndex(paramName(id).toStdString()));
+        descriptions << fun->parameterDescription(fun->parameterIndex(paramName(id).toStdString()));
       };
-      applyToParamIDRange(g_typeMap[type].blocks.front(),
-                          g_typeMap[type].blocks.back(), fillDescriptions);
+      applyToParamIDRange(g_typeMap[type].blocks.front(), g_typeMap[type].blocks.back(), fillDescriptions);
     }
     return descriptions;
   }
 
-  std::string getFunctionName(Type type) const {
-    return g_typeMap[type].function;
-  }
+  std::string getFunctionName(Type type) const { return g_typeMap[type].function; }
 
   void applyToType(Type type, std::function<void(ParamID)> paramFun) const {
-    applyToParamIDRange(g_typeMap[type].blocks.front(),
-                        g_typeMap[type].blocks.back(), paramFun);
+    applyToParamIDRange(g_typeMap[type].blocks.front(), g_typeMap[type].blocks.back(), paramFun);
   }
 
   static std::map<Type, TemplateSubTypeDescriptor> g_typeMap;
@@ -224,18 +216,14 @@ struct TempSubType : public TemplateSubTypeImpl<TempCorrectionType> {
   QString name() const override { return "ConvTempCorrection"; }
 };
 
-void applyToFitType(FitType fitType,
-                    const std::function<void(ParamID)> &paramFun);
+void applyToFitType(FitType fitType, const std::function<void(ParamID)> &paramFun);
 
-void applyToLorentzianType(LorentzianType lorenzianType,
-                           const std::function<void(ParamID)> &paramFun);
+void applyToLorentzianType(LorentzianType lorenzianType, const std::function<void(ParamID)> &paramFun);
 
-void applyToBackground(BackgroundType bgType,
-                       const std::function<void(ParamID)> &paramFun);
+void applyToBackground(BackgroundType bgType, const std::function<void(ParamID)> &paramFun);
 void applyToDelta(bool deltaType, const std::function<void(ParamID)> &paramFun);
 
-void applyToTemp(TempCorrectionType tempCorrectionType,
-                 const std::function<void(ParamID)> &paramFun);
+void applyToTemp(TempCorrectionType tempCorrectionType, const std::function<void(ParamID)> &paramFun);
 
 } // namespace ConvTypes
 } // namespace IDA

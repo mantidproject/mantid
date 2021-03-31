@@ -27,17 +27,12 @@ namespace DataHandling {
 */
 class MANTID_DATAHANDLING_DLL ParallelEventLoader {
 public:
-  static void loadMPI(DataObjects::EventWorkspace &ws,
-                      const std::string &filename, const std::string &groupName,
-                      const std::vector<std::string> &bankNames,
-                      const bool eventIDIsSpectrumNumber);
+  static void loadMPI(DataObjects::EventWorkspace &ws, const std::string &filename, const std::string &groupName,
+                      const std::vector<std::string> &bankNames, const bool eventIDIsSpectrumNumber);
 
-  static void loadMultiProcess(DataObjects::EventWorkspace &ws,
-                               const std::string &filename,
-                               const std::string &groupName,
-                               const std::vector<std::string> &bankNames,
-                               const bool eventIDIsSpectrumNumber,
-                               const bool precalcEvents);
+  static void loadMultiProcess(DataObjects::EventWorkspace &ws, const std::string &filename,
+                               const std::string &groupName, const std::vector<std::string> &bankNames,
+                               const bool eventIDIsSpectrumNumber, const bool precalcEvents);
 };
 
 } // namespace DataHandling

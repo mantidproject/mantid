@@ -32,13 +32,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadIsawDetCal"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadIsawDetCal"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Diffraction\\DataHandling;DataHandling\\Isaw";
-  }
+  const std::string category() const override { return "Diffraction\\DataHandling;DataHandling\\Isaw"; }
 
 private:
   /// Initialise the properties
@@ -47,8 +43,7 @@ private:
   void exec() override;
   /// find position for rectangular and non-rectangular
   Kernel::V3D findPixelPos(const std::string &bankName, int col, int row);
-  void sizeBanks(const std::string &bankName, int &NCOLS, int &NROWS,
-                 double &xsize, double &ysize);
+  void sizeBanks(const std::string &bankName, int &NCOLS, int &NROWS, double &xsize, double &ysize);
   Geometry::Instrument_const_sptr inst;
 };
 

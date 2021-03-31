@@ -37,62 +37,44 @@ public:
   UserInputValidator();
 
   /// Check that the given QLineEdit field is not empty.
-  bool checkFieldIsNotEmpty(const QString &name, QLineEdit *field,
-                            QLabel *errorLabel = nullptr);
+  bool checkFieldIsNotEmpty(const QString &name, QLineEdit *field, QLabel *errorLabel = nullptr);
   /// Check that the given QLineEdit field is valid as per any validators it
   /// might have.
-  bool checkFieldIsValid(const QString &errorMessage, QLineEdit *field,
-                         QLabel *errorLabel = nullptr);
+  bool checkFieldIsValid(const QString &errorMessage, QLineEdit *field, QLabel *errorLabel = nullptr);
   /// Check that the given WorkspaceSelector is not empty.
-  bool checkWorkspaceSelectorIsNotEmpty(const QString &name,
-                                        WorkspaceSelector *workspaceSelector);
+  bool checkWorkspaceSelectorIsNotEmpty(const QString &name, WorkspaceSelector *workspaceSelector);
   /// Check that the given FileFinderWidget widget has valid files.
-  bool checkFileFinderWidgetIsValid(const QString &name,
-                                    FileFinderWidget *widget);
+  bool checkFileFinderWidgetIsValid(const QString &name, FileFinderWidget *widget);
   /// Check that the given DataSelector widget has valid input.
-  bool checkDataSelectorIsValid(const QString &name, DataSelector *widget,
-                                bool silent = false);
+  bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent = false);
   /// Check that the given start and end range is valid.
   bool checkValidRange(const QString &name, std::pair<double, double> range);
   /// Check that the given ranges dont overlap.
-  bool checkRangesDontOverlap(std::pair<double, double> rangeA,
-                              std::pair<double, double> rangeB);
+  bool checkRangesDontOverlap(std::pair<double, double> rangeA, std::pair<double, double> rangeB);
   /// Check that the given "outer" range completely encloses the given "inner"
   /// range.
-  bool checkRangeIsEnclosed(const QString &outerName,
-                            std::pair<double, double> outer,
-                            const QString &innerName,
+  bool checkRangeIsEnclosed(const QString &outerName, std::pair<double, double> outer, const QString &innerName,
                             std::pair<double, double> inner);
   /// Check that the given range can be split evenly into bins of the given
   /// width.
-  bool checkBins(double lower, double binWidth, double upper,
-                 double tolerance = 0.00000001);
+  bool checkBins(double lower, double binWidth, double upper, double tolerance = 0.00000001);
   /// Checks two values are not equal
-  bool checkNotEqual(const QString &name, double x, double y = 0.0,
-                     double tolerance = 0.00000001);
+  bool checkNotEqual(const QString &name, double x, double y = 0.0, double tolerance = 0.00000001);
 
   /// Checks that a workspace has the correct workspace type
   template <typename T = Mantid::API::MatrixWorkspace>
-  bool checkWorkspaceType(QString const &workspaceName,
-                          QString const &inputType, QString const &validType,
+  bool checkWorkspaceType(QString const &workspaceName, QString const &inputType, QString const &validType,
                           bool silent = false);
   /// Checks that a workspace exists in the ADS
   bool checkWorkspaceExists(QString const &workspaceName, bool silent = false);
   /// Checks the number of histograms in a workspace
-  bool checkWorkspaceNumberOfHistograms(QString const &workspaceName,
-                                        std::size_t const &validSize);
-  bool
-  checkWorkspaceNumberOfHistograms(const Mantid::API::MatrixWorkspace_sptr &,
-                                   std::size_t const &validSize);
+  bool checkWorkspaceNumberOfHistograms(QString const &workspaceName, std::size_t const &validSize);
+  bool checkWorkspaceNumberOfHistograms(const Mantid::API::MatrixWorkspace_sptr &, std::size_t const &validSize);
   /// Checks the number of bins in a workspace
-  bool checkWorkspaceNumberOfBins(QString const &workspaceName,
-                                  std::size_t const &validSize);
-  bool checkWorkspaceNumberOfBins(const Mantid::API::MatrixWorkspace_sptr &,
-                                  std::size_t const &validSize);
+  bool checkWorkspaceNumberOfBins(QString const &workspaceName, std::size_t const &validSize);
+  bool checkWorkspaceNumberOfBins(const Mantid::API::MatrixWorkspace_sptr &, std::size_t const &validSize);
   /// Checks that a workspace group contains valid matrix workspace's
-  bool checkWorkspaceGroupIsValid(QString const &groupName,
-                                  QString const &inputType,
-                                  bool silent = false);
+  bool checkWorkspaceGroupIsValid(QString const &groupName, QString const &inputType, bool silent = false);
 
   /// Add a custom error message to the list.
   void addErrorMessage(const QString &message, bool silent = false);
@@ -127,15 +109,11 @@ private:
  * @return True if the workspace has the correct type
  */
 template <typename T>
-bool UserInputValidator::checkWorkspaceType(QString const &workspaceName,
-                                            QString const &inputType,
-                                            QString const &validType,
-                                            bool silent) {
+bool UserInputValidator::checkWorkspaceType(QString const &workspaceName, QString const &inputType,
+                                            QString const &validType, bool silent) {
   if (checkWorkspaceExists(workspaceName, silent)) {
     if (!getADSWorkspace<T>(workspaceName.toStdString())) {
-      addErrorMessage("The " + inputType + " workspace is not a " + validType +
-                          ".",
-                      silent);
+      addErrorMessage("The " + inputType + " workspace is not a " + validType + ".", silent);
       return false;
     } else
       return true;
@@ -149,11 +127,8 @@ bool UserInputValidator::checkWorkspaceType(QString const &workspaceName,
  * @param workspaceName The name of the workspace
  * @return The workspace
  */
-template <typename T>
-std::shared_ptr<T>
-UserInputValidator::getADSWorkspace(std::string const &workspaceName) {
-  return Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(
-      workspaceName);
+template <typename T> std::shared_ptr<T> UserInputValidator::getADSWorkspace(std::string const &workspaceName) {
+  return Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
 }
 
 } // namespace CustomInterfaces

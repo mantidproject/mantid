@@ -32,8 +32,7 @@ using Mantid::Types::Core::DateAndTime;
 namespace {
 class LiveDataAlgInputHistoryImpl : public AbstractAlgorithmInputHistory {
 private:
-  LiveDataAlgInputHistoryImpl()
-      : AbstractAlgorithmInputHistory("LiveDataAlgorithms") {}
+  LiveDataAlgInputHistoryImpl() : AbstractAlgorithmInputHistory("LiveDataAlgorithms") {}
   ~LiveDataAlgInputHistoryImpl() override {}
 
 private:
@@ -45,25 +44,20 @@ private:
 template class Mantid::Kernel::SingletonHolder<LiveDataAlgInputHistoryImpl>;
 #endif /* _WIN32 */
 /// The specific instantiation of the templated type
-using LiveDataAlgInputHistory =
-    Mantid::Kernel::SingletonHolder<LiveDataAlgInputHistoryImpl>;
+using LiveDataAlgInputHistory = Mantid::Kernel::SingletonHolder<LiveDataAlgInputHistoryImpl>;
 
-class LiveDataPostProcessingAlgInputHistoryImpl
-    : public AbstractAlgorithmInputHistory {
+class LiveDataPostProcessingAlgInputHistoryImpl : public AbstractAlgorithmInputHistory {
 private:
-  LiveDataPostProcessingAlgInputHistoryImpl()
-      : AbstractAlgorithmInputHistory("LiveDataPostProcessingAlgorithms") {}
+  LiveDataPostProcessingAlgInputHistoryImpl() : AbstractAlgorithmInputHistory("LiveDataPostProcessingAlgorithms") {}
   ~LiveDataPostProcessingAlgInputHistoryImpl() override {}
 
 private:
-  friend struct Mantid::Kernel::CreateUsingNew<
-      LiveDataPostProcessingAlgInputHistoryImpl>;
+  friend struct Mantid::Kernel::CreateUsingNew<LiveDataPostProcessingAlgInputHistoryImpl>;
 };
 
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-template class Mantid::Kernel::SingletonHolder<
-    LiveDataPostProcessingAlgInputHistoryImpl>;
+template class Mantid::Kernel::SingletonHolder<LiveDataPostProcessingAlgInputHistoryImpl>;
 #endif /* _WIN32 */
 /// The specific instantiation of the templated type
 using LiveDataPostProcessingAlgInputHistory =
@@ -83,9 +77,8 @@ const QString StartLiveDataDialog::CUSTOM_CONNECTION = "[Custom]";
 //----------------------
 /// Constructor
 StartLiveDataDialog::StartLiveDataDialog(QWidget *parent)
-    : AlgorithmDialog(parent), m_scrollbars(this), m_useProcessAlgo(false),
-      m_useProcessScript(false), m_usePostProcessAlgo(false),
-      m_usePostProcessScript(false) {
+    : AlgorithmDialog(parent), m_scrollbars(this), m_useProcessAlgo(false), m_useProcessScript(false),
+      m_usePostProcessAlgo(false), m_usePostProcessScript(false) {
   // Create the input history. This loads it too.
   LiveDataAlgInputHistory::Instance();
 }
@@ -107,11 +100,9 @@ void StartLiveDataDialog::initLayout() {
   // To save the history of inputs
   // RJT: I don't much like this, but at least it's safe from a lifetime point
   // of view.
-  AbstractAlgorithmInputHistory *history1 =
-      &LiveDataAlgInputHistory::Instance();
+  AbstractAlgorithmInputHistory *history1 = &LiveDataAlgInputHistory::Instance();
   ui.processingAlgo->setInputHistory(history1);
-  AbstractAlgorithmInputHistory *history2 =
-      &LiveDataPostProcessingAlgInputHistory::Instance();
+  AbstractAlgorithmInputHistory *history2 = &LiveDataPostProcessingAlgInputHistory::Instance();
   ui.postAlgo->setInputHistory(history2);
 
   // ========== Set previous values from history =============
@@ -149,12 +140,9 @@ void StartLiveDataDialog::initLayout() {
 
     if (post)
       prefix = "PostProcessing";
-    QString algo = AlgorithmInputHistory::Instance().previousInput(
-        "StartLiveData", prefix + "Algorithm");
-    QString algoProps = AlgorithmInputHistory::Instance().previousInput(
-        "StartLiveData", prefix + "Properties");
-    QString script = AlgorithmInputHistory::Instance().previousInput(
-        "StartLiveData", prefix + "Script");
+    QString algo = AlgorithmInputHistory::Instance().previousInput("StartLiveData", prefix + "Algorithm");
+    QString algoProps = AlgorithmInputHistory::Instance().previousInput("StartLiveData", prefix + "Properties");
+    QString script = AlgorithmInputHistory::Instance().previousInput("StartLiveData", prefix + "Script");
 
     if (!post) {
       if (!algo.isEmpty())
@@ -186,8 +174,7 @@ void StartLiveDataDialog::initLayout() {
   //=========== Load Listener Class Names =============
   // Add available listeners to combo box
   ui.cmbConnListener->clear();
-  std::vector<std::string> listeners =
-      Mantid::API::LiveListenerFactory::Instance().getKeys();
+  std::vector<std::string> listeners = Mantid::API::LiveListenerFactory::Instance().getKeys();
   for (const auto &listener : listeners) {
     ui.cmbConnListener->addItem(QString::fromStdString(listener));
   }
@@ -201,38 +188,27 @@ void StartLiveDataDialog::initLayout() {
   initListenerPropLayout(ui.cmbConnListener->currentText());
 
   //=========== SLOTS =============
-  connect(ui.processingAlgo, SIGNAL(changedAlgorithm()), this,
-          SLOT(changeProcessingAlgorithm()));
-  connect(ui.postAlgo, SIGNAL(changedAlgorithm()), this,
-          SLOT(changePostProcessingAlgorithm()));
+  connect(ui.processingAlgo, SIGNAL(changedAlgorithm()), this, SLOT(changeProcessingAlgorithm()));
+  connect(ui.postAlgo, SIGNAL(changedAlgorithm()), this, SLOT(changePostProcessingAlgorithm()));
 
-  connect(ui.radProcessNone, SIGNAL(toggled(bool)), this,
-          SLOT(radioProcessClicked()));
-  connect(ui.radProcessAlgorithm, SIGNAL(toggled(bool)), this,
-          SLOT(radioProcessClicked()));
-  connect(ui.radProcessScript, SIGNAL(toggled(bool)), this,
-          SLOT(radioProcessClicked()));
+  connect(ui.radProcessNone, SIGNAL(toggled(bool)), this, SLOT(radioProcessClicked()));
+  connect(ui.radProcessAlgorithm, SIGNAL(toggled(bool)), this, SLOT(radioProcessClicked()));
+  connect(ui.radProcessScript, SIGNAL(toggled(bool)), this, SLOT(radioProcessClicked()));
 
-  connect(ui.radPostProcessNone, SIGNAL(toggled(bool)), this,
-          SLOT(radioPostProcessClicked()));
-  connect(ui.radPostProcessAlgorithm, SIGNAL(toggled(bool)), this,
-          SLOT(radioPostProcessClicked()));
-  connect(ui.radPostProcessScript, SIGNAL(toggled(bool)), this,
-          SLOT(radioPostProcessClicked()));
+  connect(ui.radPostProcessNone, SIGNAL(toggled(bool)), this, SLOT(radioPostProcessClicked()));
+  connect(ui.radPostProcessAlgorithm, SIGNAL(toggled(bool)), this, SLOT(radioPostProcessClicked()));
+  connect(ui.radPostProcessScript, SIGNAL(toggled(bool)), this, SLOT(radioPostProcessClicked()));
 
   connect(ui.radNow, SIGNAL(toggled(bool)), this, SLOT(radioTimeClicked()));
-  connect(ui.radStartOfRun, SIGNAL(toggled(bool)), this,
-          SLOT(radioTimeClicked()));
-  connect(ui.radAbsoluteTime, SIGNAL(toggled(bool)), this,
-          SLOT(radioTimeClicked()));
+  connect(ui.radStartOfRun, SIGNAL(toggled(bool)), this, SLOT(radioTimeClicked()));
+  connect(ui.radAbsoluteTime, SIGNAL(toggled(bool)), this, SLOT(radioTimeClicked()));
 
-  connect(ui.chkPreserveEvents, SIGNAL(toggled(bool)), this,
-          SLOT(chkPreserveEventsToggled()));
+  connect(ui.chkPreserveEvents, SIGNAL(toggled(bool)), this, SLOT(chkPreserveEventsToggled()));
 
-  connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)),
-          this, SLOT(setDefaultAccumulationMethod(const QString &)));
-  connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)),
-          this, SLOT(initListenerPropLayout(const QString &)));
+  connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)), this,
+          SLOT(setDefaultAccumulationMethod(const QString &)));
+  connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)), this,
+          SLOT(initListenerPropLayout(const QString &)));
   connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(updateUiElements(const QString &)));
   connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
@@ -254,11 +230,9 @@ void StartLiveDataDialog::parseInput() {
   storePropertyValue("Listener", ui.cmbConnListener->currentText());
   storePropertyValue("Address", ui.edtConnAddress->text());
 
-  storePropertyValue("AccumulationMethod",
-                     ui.cmbAccumulationMethod->currentText());
+  storePropertyValue("AccumulationMethod", ui.cmbAccumulationMethod->currentText());
 
-  storePropertyValue("AccumulationWorkspace",
-                     ui.editAccumulationWorkspace->text());
+  storePropertyValue("AccumulationWorkspace", ui.editAccumulationWorkspace->text());
   if (!m_usePostProcessAlgo && !m_usePostProcessScript)
     storePropertyValue("AccumulationWorkspace", "");
 
@@ -268,8 +242,7 @@ void StartLiveDataDialog::parseInput() {
   storePropertyValue("ProcessingProperties", "");
   storePropertyValue("ProcessingScript", "");
   if (m_useProcessAlgo && m_processingAlg) {
-    storePropertyValue("ProcessingAlgorithm",
-                       ui.processingAlgo->getSelectedAlgorithm());
+    storePropertyValue("ProcessingAlgorithm", ui.processingAlgo->getSelectedAlgorithm());
     std::string props;
     props = m_processingAlg->asString(false);
     storePropertyValue("ProcessingProperties", QString::fromStdString(props));
@@ -280,12 +253,10 @@ void StartLiveDataDialog::parseInput() {
   storePropertyValue("PostProcessingProperties", "");
   storePropertyValue("PostProcessingScript", "");
   if (m_usePostProcessAlgo && m_postProcessingAlg) {
-    storePropertyValue("PostProcessingAlgorithm",
-                       ui.postAlgo->getSelectedAlgorithm());
+    storePropertyValue("PostProcessingAlgorithm", ui.postAlgo->getSelectedAlgorithm());
     std::string props;
     props = m_postProcessingAlg->asString(false);
-    storePropertyValue("PostProcessingProperties",
-                       QString::fromStdString(props));
+    storePropertyValue("PostProcessingProperties", QString::fromStdString(props));
   } else if (m_usePostProcessScript)
     storePropertyValue("PostProcessingScript", ui.postAlgo->getScriptText());
 
@@ -311,17 +282,13 @@ void StartLiveDataDialog::radioPostProcessClicked() {
   m_usePostProcessScript = ui.radPostProcessScript->isChecked();
   ui.postAlgo->editorVisible(m_usePostProcessScript);
   // Disable the AccumulationWorkspace widget unless it is needed
-  ui.editAccumulationWorkspace->setEnabled(m_usePostProcessAlgo ||
-                                           m_usePostProcessScript);
-  ui.lblAccumulationWorkspace->setEnabled(m_usePostProcessAlgo ||
-                                          m_usePostProcessScript);
+  ui.editAccumulationWorkspace->setEnabled(m_usePostProcessAlgo || m_usePostProcessScript);
+  ui.lblAccumulationWorkspace->setEnabled(m_usePostProcessAlgo || m_usePostProcessScript);
 }
 
 //------------------------------------------------------------------------------
 /** Slot called when one of the radio buttons in "starting time" are picked */
-void StartLiveDataDialog::radioTimeClicked() {
-  ui.dateTimeEdit->setEnabled(ui.radAbsoluteTime->isChecked());
-}
+void StartLiveDataDialog::radioTimeClicked() { ui.dateTimeEdit->setEnabled(ui.radAbsoluteTime->isChecked()); }
 
 /** Slot called when the preserve events checkbox changes */
 void StartLiveDataDialog::chkPreserveEventsToggled() {
@@ -353,24 +320,20 @@ void StartLiveDataDialog::changePostProcessingAlgorithm() {
  *  Disables the 'Add' option if the listener is going to pass back histograms.
  *  @param listener :: The listener class name.
  */
-void StartLiveDataDialog::setDefaultAccumulationMethod(
-    const QString &listener) {
+void StartLiveDataDialog::setDefaultAccumulationMethod(const QString &listener) {
   if (listener.isEmpty())
     return;
   try {
     // Make sure 'Add' is enabled ahead of the check (the check may throw)
     int addIndex = ui.cmbAccumulationMethod->findText("Add");
-    ui.cmbAccumulationMethod->setItemData(
-        addIndex, QVariant(Qt::ItemIsSelectable | Qt::ItemIsEnabled),
-        Qt::UserRole - 1);
+    ui.cmbAccumulationMethod->setItemData(addIndex, QVariant(Qt::ItemIsSelectable | Qt::ItemIsEnabled),
+                                          Qt::UserRole - 1);
 
     // Check whether this listener will give back events. If not, disable 'Add'
     // as an option
     // The 'false' 2nd argument means don't connect the created listener
     Mantid::Kernel::LiveListenerInfo info(listener.toStdString());
-    if (!Mantid::API::LiveListenerFactory::Instance()
-             .create(info, false)
-             ->buffersEvents()) {
+    if (!Mantid::API::LiveListenerFactory::Instance().create(info, false)->buffersEvents()) {
       // If 'Add' is currently selected, select 'Replace' instead
       if (ui.cmbAccumulationMethod->currentIndex() == addIndex) {
         int replaceIndex = ui.cmbAccumulationMethod->findText("Replace");
@@ -414,8 +377,7 @@ void StartLiveDataDialog::updateUiElements(const QString &inst) {
 
 void StartLiveDataDialog::accept() {
   // Now manually set the StartTime property as there's a computation needed
-  DateAndTime startTime =
-      DateAndTime::getCurrentTime() - ui.dateTimeEdit->value() * 60.0;
+  DateAndTime startTime = DateAndTime::getCurrentTime() - ui.dateTimeEdit->value() * 60.0;
   m_algorithm->setPropertyValue("StartTime", startTime.toISO8601String());
 
   AlgorithmDialog::accept(); // accept executes the algorithm
@@ -438,8 +400,7 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
 
   // update algorithm's properties
   if (ui.cmbInstrument->currentText().toStdString() != "") {
-    m_algorithm->setPropertyValue(
-        "Instrument", ui.cmbInstrument->currentText().toStdString());
+    m_algorithm->setPropertyValue("Instrument", ui.cmbInstrument->currentText().toStdString());
     m_algorithm->setPropertyValue("Listener", listener.toStdString());
     // create or clear the layout
     QLayout *layout = ui.listenerProps->layout();
@@ -491,8 +452,7 @@ void StartLiveDataDialog::updateConnectionChoices(const QString &inst_name) {
   ui.cmbConnection->addItem(CUSTOM_CONNECTION);
 
   // Add available LiveListenerInfo names based on selected instrument
-  const auto &inst =
-      ConfigService::Instance().getInstrument(inst_name.toStdString());
+  const auto &inst = ConfigService::Instance().getInstrument(inst_name.toStdString());
   for (const auto &listener : inst.liveListenerInfoList()) {
     ui.cmbConnection->addItem(QString::fromStdString(listener.name()));
   }
@@ -525,8 +485,7 @@ void StartLiveDataDialog::updateConnectionDetails(const QString &connection) {
   ui.edtConnAddress->setEnabled(false);
 
   // Get live listener for select instrument and connection
-  const auto &inst = ConfigService::Instance().getInstrument(
-      ui.cmbInstrument->currentText().toStdString());
+  const auto &inst = ConfigService::Instance().getInstrument(ui.cmbInstrument->currentText().toStdString());
   const auto &info = inst.liveListenerInfo(connection.toStdString());
 
   // Select correct listener

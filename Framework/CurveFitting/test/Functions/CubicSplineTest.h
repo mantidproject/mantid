@@ -60,15 +60,13 @@ public:
     CubicSpline cspline;
 
     // cubic splines must have at least 3 points
-    TS_ASSERT_THROWS(cspline.setAttributeValue("n", 2),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(cspline.setAttributeValue("n", 2), const std::invalid_argument &);
 
     // set the number of points to something sensible
     cspline.setAttributeValue("n", 5);
 
     // attempt to make it smaller than it already is
-    TS_ASSERT_THROWS(cspline.setAttributeValue("n", 4),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(cspline.setAttributeValue("n", 4), const std::invalid_argument &);
 
     size_t oldAttrN = cspline.nAttributes();
 
@@ -209,22 +207,19 @@ public:
 
 private:
   // generate a set of uniform points to test the spline
-  void generateTestData(int numTests, boost::scoped_array<double> &refSet,
-                        boost::scoped_array<double> &xValues, double xModify) {
+  void generateTestData(int numTests, boost::scoped_array<double> &refSet, boost::scoped_array<double> &xValues,
+                        double xModify) {
     for (int i = 0; i < numTests; ++i) {
       xValues[i] = (i * xModify);
       refSet[i] = splineYFunction(xValues[i]);
     }
   }
 
-  void generateDerviTestData(int numTests, boost::scoped_array<double> &refSet,
-                             boost::scoped_array<double> &xValues,
+  void generateDerviTestData(int numTests, boost::scoped_array<double> &refSet, boost::scoped_array<double> &xValues,
                              double xModify, double h) {
     for (int i = 0; i < numTests; ++i) {
       xValues[i] = (i * xModify);
-      refSet[i] =
-          (splineYFunction(xValues[i] + h) - splineYFunction(xValues[i] - h)) /
-          2 * h;
+      refSet[i] = (splineYFunction(xValues[i] + h) - splineYFunction(xValues[i] - h)) / 2 * h;
     }
   }
 
@@ -238,8 +233,7 @@ private:
     // calculate a reference set to check against
     for (int i = 0; i < nData; ++i) {
       cspline.setXAttribute(i, i * xModify);
-      cspline.setParameter(static_cast<size_t>(i),
-                           splineYFunction(i * xModify));
+      cspline.setParameter(static_cast<size_t>(i), splineYFunction(i * xModify));
     }
   }
 };

@@ -50,8 +50,7 @@ using Kernel::V3D;
  * @param base: the base (un-parametrized) RectangularDetector
  * @param map: pointer to the ParameterMap
  * */
-RectangularDetector::RectangularDetector(const RectangularDetector *base,
-                                         const ParameterMap *map)
+RectangularDetector::RectangularDetector(const RectangularDetector *base, const ParameterMap *map)
     : GridDetector(base, map) {
   init();
 }
@@ -65,9 +64,7 @@ RectangularDetector::RectangularDetector(const RectangularDetector *base,
  *  an assembly itself, then in addition to parenting
  *  this is registered as a children of reference.
  */
-RectangularDetector::RectangularDetector(const std::string &n,
-                                         IComponent *reference)
-    : GridDetector(n, reference) {
+RectangularDetector::RectangularDetector(const std::string &n, IComponent *reference) : GridDetector(n, reference) {
   init();
   m_textureID = 0;
   this->setName(n);
@@ -85,9 +82,7 @@ bool RectangularDetector::compareName(const std::string &proposedMatch) {
  *  Make a copy of the component assembly
  *  @return new(*this)
  */
-RectangularDetector *RectangularDetector::clone() const {
-  return new RectangularDetector(*this);
-}
+RectangularDetector *RectangularDetector::clone() const { return new RectangularDetector(*this); }
 
 //-------------------------------------------------------------------------------------------------
 /** Return a pointer to the component in the assembly at the
@@ -100,8 +95,7 @@ RectangularDetector *RectangularDetector::clone() const {
  * @throw runtime_error if the x/y pixel width is not set, or X/Y are out of
  *range
  */
-std::shared_ptr<Detector> RectangularDetector::getAtXY(const int X,
-                                                       const int Y) const {
+std::shared_ptr<Detector> RectangularDetector::getAtXY(const int X, const int Y) const {
   return GridDetector::getAtXYZ(X, Y, 0);
 }
 
@@ -125,8 +119,7 @@ detid_t RectangularDetector::getDetectorIDAtXY(const int X, const int Y) const {
  * @param detectorID :: detectorID
  * @return pair of (x,y)
  */
-std::pair<int, int>
-RectangularDetector::getXYForDetectorID(const int detectorID) const {
+std::pair<int, int> RectangularDetector::getXYForDetectorID(const int detectorID) const {
   auto xyz = GridDetector::getXYZForDetectorID(detectorID);
   return std::pair<int, int>(std::get<0>(xyz), std::get<1>(xyz));
 }
@@ -140,9 +133,7 @@ RectangularDetector::getXYForDetectorID(const int detectorID) const {
  * @param y :: y pixel integer
  * @return a V3D vector of the relative position
  */
-V3D RectangularDetector::getRelativePosAtXY(int x, int y) const {
-  return GridDetector::getRelativePosAtXYZ(x, y, 0);
-}
+V3D RectangularDetector::getRelativePosAtXY(int x, int y) const { return GridDetector::getRelativePosAtXYZ(x, y, 0); }
 
 //-------------------------------------------------------------------------------------------------
 /** Initialize a RectangularDetector by creating all of the pixels
@@ -174,15 +165,12 @@ V3D RectangularDetector::getRelativePosAtXY(int x, int y) const {
  *            and idstep=100 and idstart=1 then (0,0)=1; (0,1)=101; and so on
  *
  */
-void RectangularDetector::initialize(std::shared_ptr<IObject> shape,
-                                     int xpixels, double xstart, double xstep,
-                                     int ypixels, double ystart, double ystep,
-                                     int idstart, bool idfillbyfirst_y,
+void RectangularDetector::initialize(std::shared_ptr<IObject> shape, int xpixels, double xstart, double xstep,
+                                     int ypixels, double ystart, double ystep, int idstart, bool idfillbyfirst_y,
                                      int idstepbyrow, int idstep) {
 
-  GridDetector::initialize(
-      std::move(shape), xpixels, xstart, xstep, ypixels, ystart, ystep, 0, 0, 0,
-      idstart, idfillbyfirst_y ? "yxz" : "xyz", idstepbyrow, idstep);
+  GridDetector::initialize(std::move(shape), xpixels, xstart, xstep, ypixels, ystart, ystep, 0, 0, 0, idstart,
+                           idfillbyfirst_y ? "yxz" : "xyz", idstepbyrow, idstep);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -195,8 +183,8 @@ void RectangularDetector::initialize(std::shared_ptr<IObject> shape,
  * @param searchQueue :: If a child is a sub-assembly then it is appended for
  *later searching. Unused.
  */
-void RectangularDetector::testIntersectionWithChildren(
-    Track &testRay, std::deque<IComponent_const_sptr> & /*searchQueue*/) const {
+void RectangularDetector::testIntersectionWithChildren(Track &testRay,
+                                                       std::deque<IComponent_const_sptr> & /*searchQueue*/) const {
   /// Base point (x,y,z) = position of pixel 0,0
   V3D basePoint;
 
@@ -255,8 +243,7 @@ void RectangularDetector::testIntersectionWithChildren(
 
   // TODO: Do I need to put something smart here for the first 3 parameters?
   auto comp = getAtXY(xIndex, yIndex);
-  testRay.addLink(intersec, intersec, 0.0, *(comp->shape()),
-                  comp->getComponentID());
+  testRay.addLink(intersec, intersec, 0.0, *(comp->shape()), comp->getComponentID());
 }
 
 /**
@@ -272,19 +259,14 @@ void RectangularDetector::getTextureSize(int &xsize, int &ysize) const {
 
 /** Set the texture ID to use when rendering the RectangularDetector
  */
-void RectangularDetector::setTextureID(unsigned int textureID) {
-  m_textureID = textureID;
-}
+void RectangularDetector::setTextureID(unsigned int textureID) { m_textureID = textureID; }
 
 /** Return the texture ID to be used in plotting . */
 unsigned int RectangularDetector::getTextureID() const { return m_textureID; }
 
-const Kernel::Material RectangularDetector::material() const {
-  return Kernel::Material();
-}
+const Kernel::Material RectangularDetector::material() const { return Kernel::Material(); }
 
-size_t RectangularDetector::registerContents(
-    ComponentVisitor &componentVisitor) const {
+size_t RectangularDetector::registerContents(ComponentVisitor &componentVisitor) const {
   return componentVisitor.registerRectangularBank(*this);
 }
 

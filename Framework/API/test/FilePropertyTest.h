@@ -23,23 +23,22 @@ class FilePropertyTest : public CxxTest::TestSuite {
 public:
   void setUp() override {
     // Ensure we have the correct facility set up
-    const std::string xmlStr =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<facilities>"
-        "  <facility name=\"ISIS\" zeropadding=\"5\" "
-        "FileExtensions=\".nxs,.raw,.sav,.n*,.s*\">"
-        "    <archive>"
-        "      <archiveSearch plugin=\"ISISDataSearch\" />"
-        "    </archive>"
-        "    <instrument name=\"LOQ\" shortname=\"LOQ\">"
-        "      <technique>technique</technique>"
-        "    </instrument>"
-        "    <instrument name=\"ALF\" shortname=\"ALF\">"
-        "      <technique>technique</technique>"
-        "    </instrument>"
+    const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                               "<facilities>"
+                               "  <facility name=\"ISIS\" zeropadding=\"5\" "
+                               "FileExtensions=\".nxs,.raw,.sav,.n*,.s*\">"
+                               "    <archive>"
+                               "      <archiveSearch plugin=\"ISISDataSearch\" />"
+                               "    </archive>"
+                               "    <instrument name=\"LOQ\" shortname=\"LOQ\">"
+                               "      <technique>technique</technique>"
+                               "    </instrument>"
+                               "    <instrument name=\"ALF\" shortname=\"ALF\">"
+                               "      <technique>technique</technique>"
+                               "    </instrument>"
 
-        "  </facility>"
-        "</facilities>";
+                               "  </facility>"
+                               "</facilities>";
 
     const std::string facilityFilePath("FilePropertyTest_Facilities.xml");
     std::ofstream facilityFile(facilityFilePath.c_str());
@@ -58,9 +57,7 @@ public:
     Poco::File(facilityFilePath).remove();
   }
 
-  void testSearchDirs() {
-    TS_ASSERT_DIFFERS(ConfigService::Instance().getDataSearchDirs().size(), 0);
-  }
+  void testSearchDirs() { TS_ASSERT_DIFFERS(ConfigService::Instance().getDataSearchDirs().size(), 0); }
 
   void testLoadPropertyWithEmptyValueIsInvalid() {
     FileProperty fp("Filename", "", FileProperty::Load);
@@ -135,8 +132,7 @@ public:
   }
 
   void testThatRunNumberReturnsFileWithCorrectPrefix() {
-    FileProperty fp("Filename", "", FileProperty::Load,
-                    std::vector<std::string>(1, ".raw"));
+    FileProperty fp("Filename", "", FileProperty::Load, std::vector<std::string>(1, ".raw"));
     std::string error = fp.setValue("48127");
     TS_ASSERT_EQUALS(error, "");
     TS_ASSERT_DIFFERS(fp.value().find("LOQ48127"), std::string::npos);
@@ -174,13 +170,11 @@ public:
     auto pos = msg.find("Directory");
     TS_ASSERT(pos != std::string::npos);
     // "not found" comes after "Directory"
-    TS_ASSERT(msg.find("not found", pos) !=
-              std::string::npos); //.substr(0, 3), "Dir");
+    TS_ASSERT(msg.find("not found", pos) != std::string::npos); //.substr(0, 3), "Dir");
   }
 
   void testDirectoryPasses() {
-    std::string TestDir(ConfigService::Instance().getDirectoryOfExecutable() +
-                        "MyTestFolder");
+    std::string TestDir(ConfigService::Instance().getDirectoryOfExecutable() + "MyTestFolder");
     Poco::File dir(TestDir);
     dir.createDirectory();
 
@@ -214,8 +208,8 @@ public:
   }
 
 private:
-  void doPropertyTraitTests(const FileProperty &fileProp, const bool loadProp,
-                            const bool saveProp, const bool validByDefault) {
+  void doPropertyTraitTests(const FileProperty &fileProp, const bool loadProp, const bool saveProp,
+                            const bool validByDefault) {
     // Check type
     TS_ASSERT_EQUALS(fileProp.isLoadProperty(), loadProp);
     TS_ASSERT_EQUALS(fileProp.isSaveProperty(), saveProp);
@@ -226,8 +220,8 @@ private:
     }
   }
 
-  void doExtensionCheck(FileProperty &fileProp, const std::string &defaultExt,
-                        const std::string &match, const std::string &nomatch) {
+  void doExtensionCheck(FileProperty &fileProp, const std::string &defaultExt, const std::string &match,
+                        const std::string &nomatch) {
     TS_ASSERT_EQUALS(fileProp.getDefaultExt(), defaultExt);
     // Filename as given
     std::string msg = fileProp.setValue(match);

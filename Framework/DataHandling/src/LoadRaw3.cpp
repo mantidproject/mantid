@@ -33,31 +33,26 @@ using namespace API;
 
 /// Constructor
 LoadRaw3::LoadRaw3()
-    : m_filename(), m_numberOfSpectra(), m_cache_options(), m_specTimeRegimes(),
-      m_noTimeRegimes(0), m_prog(0.0), m_prog_start(0.0), m_prog_end(1.0),
-      m_lengthIn(0), m_timeChannelsVec(), m_total_specs(0), m_periodList() {}
+    : m_filename(), m_numberOfSpectra(), m_cache_options(), m_specTimeRegimes(), m_noTimeRegimes(0), m_prog(0.0),
+      m_prog_start(0.0), m_prog_end(1.0), m_lengthIn(0), m_timeChannelsVec(), m_total_specs(0), m_periodList() {}
 
 /// Initialization method.
 void LoadRaw3::init() {
   LoadRawHelper::init();
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
-  declareProperty(
-      "SpectrumMin", 1, mustBePositive,
-      "The index number of the first spectrum to read.  Only used if\n"
-      "SpectrumMax is set.");
-  declareProperty(
-      "SpectrumMax", EMPTY_INT(), mustBePositive,
-      "The number of the last spectrum to read. Only used if explicitly\n"
-      "set.");
-  declareProperty(
-      std::make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
-      "A comma-separated list of individual spectra to read.  Only used if\n"
-      "explicitly set.");
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("PeriodList"),
-      "A comma-separated list of individual periods to read.  Only used if\n"
-      "explicitly set.");
+  declareProperty("SpectrumMin", 1, mustBePositive,
+                  "The index number of the first spectrum to read.  Only used if\n"
+                  "SpectrumMax is set.");
+  declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive,
+                  "The number of the last spectrum to read. Only used if explicitly\n"
+                  "set.");
+  declareProperty(std::make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
+                  "A comma-separated list of individual spectra to read.  Only used if\n"
+                  "explicitly set.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("PeriodList"),
+                  "A comma-separated list of individual periods to read.  Only used if\n"
+                  "explicitly set.");
 
   std::vector<std::string> monitorOptions;
   monitorOptions.emplace_back("Include");
@@ -67,8 +62,7 @@ void LoadRaw3::init() {
   monitorOptionsAliases["1"] = "Separate";
   monitorOptionsAliases["0"] = "Exclude";
   declareProperty("LoadMonitors", "Include",
-                  std::make_shared<StringListValidator>(monitorOptions,
-                                                        monitorOptionsAliases),
+                  std::make_shared<StringListValidator>(monitorOptions, monitorOptionsAliases),
                   "Option to control the loading of monitors.\n"
                   "Allowed options are Include,Exclude, Separate.\n"
                   "Include:The default is Include option which loads the "
@@ -97,16 +91,14 @@ void LoadRaw3::exec() {
   bool bLoadlogFiles = getProperty("LoadLogFiles");
 
   bool bincludeMonitors, bseparateMonitors, bexcludeMonitors;
-  LoadRawHelper::ProcessLoadMonitorOptions(bincludeMonitors, bseparateMonitors,
-                                           bexcludeMonitors, this);
+  LoadRawHelper::ProcessLoadMonitorOptions(bincludeMonitors, bseparateMonitors, bexcludeMonitors, this);
 
   std::string title;
   // read workspace title from raw file
   readTitle(file, title);
 
   // read workspace dimensions,number of periods etc from the raw file.
-  readworkspaceParameters(m_numberOfSpectra, m_numberOfPeriods, m_lengthIn,
-                          m_noTimeRegimes);
+  readworkspaceParameters(m_numberOfSpectra, m_numberOfPeriods, m_lengthIn, m_noTimeRegimes);
 
   setOptionalProperties();
   // to validate the optional parameters, if set
@@ -123,13 +115,11 @@ void LoadRaw3::exec() {
   int firstPeriod = isSelectedPeriods() ? m_periodList.front() - 1 : 0;
 
   // Create the 2D workspace for the output
-  DataObjects::Workspace2D_sptr localWorkspace =
-      createWorkspace(m_total_specs, m_lengthIn, m_lengthIn - 1, title);
+  DataObjects::Workspace2D_sptr localWorkspace = createWorkspace(m_total_specs, m_lengthIn, m_lengthIn - 1, title);
 
   // Only run the Child Algorithms once
   loadRunParameters(localWorkspace);
-  const SpectrumDetectorMapping detectorMapping(isisRaw().spec, isisRaw().udet,
-                                                isisRaw().i_det);
+  const SpectrumDetectorMapping detectorMapping(isisRaw().spec, isisRaw().udet, isisRaw().i_det);
   localWorkspace->updateSpectraUsing(detectorMapping);
 
   runLoadInstrument(m_filename, localWorkspace, 0.0, 0.4);
@@ -162,16 +152,14 @@ void LoadRaw3::exec() {
   std::vector<specnum_t> monitorSpecList;
 
   if (bincludeMonitors) {
-    setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace,
-                         m_numberOfPeriods, false, this);
+    setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace, m_numberOfPeriods, false, this);
   } else {
     // gets the monitor spectra list from workspace
     monitorSpecList = getmonitorSpectrumList(detectorMapping);
     // calculate the workspace size for normal workspace and monitor workspace
     calculateWorkspacesizes(monitorSpecList, normalwsSpecs, monitorwsSpecs);
     try {
-      validateWorkspaceSizes(bexcludeMonitors, bseparateMonitors, normalwsSpecs,
-                             monitorwsSpecs);
+      validateWorkspaceSizes(bexcludeMonitors, bseparateMonitors, normalwsSpecs, monitorwsSpecs);
     } catch (std::out_of_range &) {
       fclose(file);
       throw;
@@ -180,16 +168,13 @@ void LoadRaw3::exec() {
     // now create a workspace of size normalwsSpecs and set it as output
     // workspace
     if (normalwsSpecs > 0) {
-      localWorkspace = createWorkspace(localWorkspace, normalwsSpecs,
-                                       m_lengthIn, m_lengthIn - 1);
-      setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace,
-                           m_numberOfPeriods, false, this);
+      localWorkspace = createWorkspace(localWorkspace, normalwsSpecs, m_lengthIn, m_lengthIn - 1);
+      setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace, m_numberOfPeriods, false, this);
     }
     // now create monitor workspace if separateMonitors selected
     if (bseparateMonitors) {
-      createMonitorWorkspace(monitorWorkspace, localWorkspace, monitorws_grp,
-                             monitorwsSpecs, normalwsSpecs, m_numberOfPeriods,
-                             m_lengthIn, title, this);
+      createMonitorWorkspace(monitorWorkspace, localWorkspace, monitorws_grp, monitorwsSpecs, normalwsSpecs,
+                             m_numberOfPeriods, m_lengthIn, title, this);
     }
   }
 
@@ -224,13 +209,11 @@ void LoadRaw3::exec() {
       }
       if (bseparateMonitors) {
         try {
-          monitorWorkspace = createWorkspace(monitorWorkspace, monitorwsSpecs,
-                                             m_lengthIn, m_lengthIn - 1);
+          monitorWorkspace = createWorkspace(monitorWorkspace, monitorwsSpecs, m_lengthIn, m_lengthIn - 1);
         } catch (std::out_of_range &) {
           g_log.information() << "Separate Monitors option is selected and no "
                                  "monitors in the selected specra range.\n";
-          g_log.information()
-              << "Error in creating one of the output workspaces\n";
+          g_log.information() << "Error in creating one of the output workspaces\n";
         } catch (std::runtime_error &) {
           g_log.information() << "Separate Monitors option is selected,Error "
                                  "in creating one of the output workspaces\n";
@@ -266,8 +249,7 @@ void LoadRaw3::exec() {
       includeMonitors(file, period, localWorkspace);
     }
     if (bseparateMonitors) {
-      separateMonitors(file, period, monitorSpecList, localWorkspace,
-                       monitorWorkspace);
+      separateMonitors(file, period, monitorSpecList, localWorkspace, monitorWorkspace);
     }
 
     // Re-update spectra etc.
@@ -282,8 +264,7 @@ void LoadRaw3::exec() {
       if (bseparateMonitors) {
         if (normalwsSpecs > 0) {
           // declare and set monitor workspace for each period
-          setWorkspaceProperty(monitorWorkspace, monitorws_grp, period, true,
-                               this);
+          setWorkspaceProperty(monitorWorkspace, monitorws_grp, period, true, this);
         } else {
           localWorkspace = monitorWorkspace;
         }
@@ -293,8 +274,7 @@ void LoadRaw3::exec() {
         setWorkspaceProperty(localWorkspace, ws_grp, period, false, this);
       }
       // progress for workspace groups
-      setProg(static_cast<double>(period) /
-              static_cast<double>(m_numberOfPeriods - 1));
+      setProg(static_cast<double>(period) / static_cast<double>(m_numberOfPeriods - 1));
     }
 
   } // loop over periods
@@ -309,8 +289,7 @@ void LoadRaw3::exec() {
  *@param monitorList :: a list containing the spectrum numbers for monitors
  *@param ws_sptr :: shared pointer to workspace
  */
-void LoadRaw3::excludeMonitors(FILE *file, const int &period,
-                               const std::vector<specnum_t> &monitorList,
+void LoadRaw3::excludeMonitors(FILE *file, const int &period, const std::vector<specnum_t> &monitorList,
                                const DataObjects::Workspace2D_sptr &ws_sptr) {
   int64_t histCurrent = -1;
   int64_t wsIndex = 0;
@@ -319,8 +298,7 @@ void LoadRaw3::excludeMonitors(FILE *file, const int &period,
   for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     specnum_t histToRead = i + period * (m_numberOfSpectra + 1);
     if ((i >= m_spec_min && i < m_spec_max) ||
-        (m_list && find(m_spec_list.begin(), m_spec_list.end(), i) !=
-                       m_spec_list.end())) {
+        (m_list && find(m_spec_list.begin(), m_spec_list.end(), i) != m_spec_list.end())) {
       progress(m_prog, "Reading raw file data...");
       // skip monitor spectrum
       if (isMonitor(monitorList, i)) {
@@ -333,8 +311,7 @@ void LoadRaw3::excludeMonitors(FILE *file, const int &period,
         throw std::runtime_error("Error reading raw file");
       }
       // set the workspace data
-      setWorkspaceData(ws_sptr, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes,
-                       m_lengthIn, 1);
+      setWorkspaceData(ws_sptr, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes, m_lengthIn, 1);
       // increment workspace index
       ++wsIndex;
 
@@ -357,8 +334,7 @@ void LoadRaw3::excludeMonitors(FILE *file, const int &period,
  *@param period :: period number
  *@param ws_sptr :: shared pointer to workspace
  */
-void LoadRaw3::includeMonitors(FILE *file, const int64_t &period,
-                               const DataObjects::Workspace2D_sptr &ws_sptr) {
+void LoadRaw3::includeMonitors(FILE *file, const int64_t &period, const DataObjects::Workspace2D_sptr &ws_sptr) {
 
   int64_t histCurrent = -1;
   int64_t wsIndex = 0;
@@ -367,8 +343,7 @@ void LoadRaw3::includeMonitors(FILE *file, const int64_t &period,
   for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     int64_t histToRead = i + period * (m_numberOfSpectra + 1);
     if ((i >= m_spec_min && i < m_spec_max) ||
-        (m_list && find(m_spec_list.begin(), m_spec_list.end(), i) !=
-                       m_spec_list.end())) {
+        (m_list && find(m_spec_list.begin(), m_spec_list.end(), i) != m_spec_list.end())) {
       progress(m_prog, "Reading raw file data...");
 
       // read spectrum from raw file
@@ -376,8 +351,7 @@ void LoadRaw3::includeMonitors(FILE *file, const int64_t &period,
         throw std::runtime_error("Error reading raw file");
       }
       // set workspace data
-      setWorkspaceData(ws_sptr, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes,
-                       m_lengthIn, 1);
+      setWorkspaceData(ws_sptr, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes, m_lengthIn, 1);
       ++wsIndex;
 
       if (m_numberOfPeriods == 1) {
@@ -402,8 +376,7 @@ void LoadRaw3::includeMonitors(FILE *file, const int64_t &period,
  *@param mws_sptr :: -shared pointer to monitor workspace
  */
 
-void LoadRaw3::separateMonitors(FILE *file, const int64_t &period,
-                                const std::vector<specnum_t> &monitorList,
+void LoadRaw3::separateMonitors(FILE *file, const int64_t &period, const std::vector<specnum_t> &monitorList,
                                 const DataObjects::Workspace2D_sptr &ws_sptr,
                                 const DataObjects::Workspace2D_sptr &mws_sptr) {
   int64_t histCurrent = -1;
@@ -414,8 +387,7 @@ void LoadRaw3::separateMonitors(FILE *file, const int64_t &period,
   for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     int64_t histToRead = i + period * (m_numberOfSpectra + 1);
     if ((i >= m_spec_min && i < m_spec_max) ||
-        (m_list && find(m_spec_list.begin(), m_spec_list.end(), i) !=
-                       m_spec_list.end())) {
+        (m_list && find(m_spec_list.begin(), m_spec_list.end(), i) != m_spec_list.end())) {
       progress(m_prog, "Reading raw file data...");
 
       // read spectrum from raw file
@@ -424,13 +396,11 @@ void LoadRaw3::separateMonitors(FILE *file, const int64_t &period,
       }
       // if this a monitor  store that spectrum to monitor workspace
       if (isMonitor(monitorList, i)) {
-        setWorkspaceData(mws_sptr, m_timeChannelsVec, mwsIndex, i,
-                         m_noTimeRegimes, m_lengthIn, 1);
+        setWorkspaceData(mws_sptr, m_timeChannelsVec, mwsIndex, i, m_noTimeRegimes, m_lengthIn, 1);
         ++mwsIndex;
       } else {
         // not a monitor,store the spectrum to normal output workspace
-        setWorkspaceData(ws_sptr, m_timeChannelsVec, wsIndex, i,
-                         m_noTimeRegimes, m_lengthIn, 1);
+        setWorkspaceData(ws_sptr, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes, m_lengthIn, 1);
         ++wsIndex;
       }
 
@@ -463,9 +433,7 @@ void LoadRaw3::skipPeriod(FILE *file, const int64_t &period) {
  * @param period :: A period to check (0-based).
  */
 bool LoadRaw3::isPeriodIncluded(int period) const {
-  return !isSelectedPeriods() ||
-         std::find(m_periodList.begin(), m_periodList.end(), period + 1) !=
-             m_periodList.end();
+  return !isSelectedPeriods() || std::find(m_periodList.begin(), m_periodList.end(), period + 1) != m_periodList.end();
 }
 
 /**
@@ -496,10 +464,8 @@ void LoadRaw3::setOptionalProperties() {
     std::sort(m_periodList.begin(), m_periodList.end());
     // check that the periods are within their range: 1 <= p <=
     // m_numberOfPeriods
-    auto minElement =
-        std::min_element(m_periodList.begin(), m_periodList.end());
-    auto maxElement =
-        std::max_element(m_periodList.begin(), m_periodList.end());
+    auto minElement = std::min_element(m_periodList.begin(), m_periodList.end());
+    auto maxElement = std::max_element(m_periodList.begin(), m_periodList.end());
     if (*minElement < 1 || *maxElement > m_numberOfPeriods) {
       throw std::runtime_error("Values in PeriodList must be between 1 and "
                                "total number of periods.");
@@ -509,9 +475,7 @@ void LoadRaw3::setOptionalProperties() {
 
 /// This sets the progress taking account of progress time taken up by
 /// ChildAlgorithms
-void LoadRaw3::setProg(double prog) {
-  m_prog = m_prog_start + (m_prog_end - m_prog_start) * prog;
-}
+void LoadRaw3::setProg(double prog) { m_prog = m_prog_start + (m_prog_end - m_prog_start) * prog; }
 
 /**This method validates workspace sizes if exclude monitors or separate
  *monitors options is selected
@@ -521,9 +485,7 @@ void LoadRaw3::setProg(double prog) {
  *monitors
  *@param monitorwsSpecs :: number of monitor spectra
  */
-void LoadRaw3::validateWorkspaceSizes(bool bexcludeMonitors,
-                                      bool bseparateMonitors,
-                                      const int64_t normalwsSpecs,
+void LoadRaw3::validateWorkspaceSizes(bool bexcludeMonitors, bool bseparateMonitors, const int64_t normalwsSpecs,
                                       const int64_t monitorwsSpecs) {
   if (normalwsSpecs <= 0 && bexcludeMonitors) {
     throw std::out_of_range("All the spectra in the selected range for this "
@@ -532,8 +494,7 @@ void LoadRaw3::validateWorkspaceSizes(bool bexcludeMonitors,
   }
   if (bseparateMonitors) {
     if (normalwsSpecs <= 0 && monitorwsSpecs <= 0) {
-      throw std::out_of_range(
-          "Workspace size is zero,Error in creating output workspace.");
+      throw std::out_of_range("Workspace size is zero,Error in creating output workspace.");
     }
   }
 }
@@ -543,10 +504,8 @@ void LoadRaw3::validateWorkspaceSizes(bool bexcludeMonitors,
  *  @param spectrumNum ::  the requested spectrum number
  *  @return true if it's a monitor
  */
-bool LoadRaw3::isMonitor(const std::vector<specnum_t> &monitorIndexes,
-                         specnum_t spectrumNum) {
-  return (find(monitorIndexes.begin(), monitorIndexes.end(), spectrumNum) !=
-          monitorIndexes.end());
+bool LoadRaw3::isMonitor(const std::vector<specnum_t> &monitorIndexes, specnum_t spectrumNum) {
+  return (find(monitorIndexes.begin(), monitorIndexes.end(), spectrumNum) != monitorIndexes.end());
 }
 
 } // namespace DataHandling

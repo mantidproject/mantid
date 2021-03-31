@@ -23,12 +23,8 @@ class MantidWebServiceAPIHelperTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MantidWebServiceAPIHelperTest *createSuite() {
-    return new MantidWebServiceAPIHelperTest();
-  }
-  static void destroySuite(MantidWebServiceAPIHelperTest *suite) {
-    delete suite;
-  }
+  static MantidWebServiceAPIHelperTest *createSuite() { return new MantidWebServiceAPIHelperTest(); }
+  static void destroySuite(MantidWebServiceAPIHelperTest *suite) { delete suite; }
 
   void test_construct() {
     // can create

@@ -34,36 +34,31 @@ namespace DataObjects {
 namespace FractionalRebinning {
 
 /// Find the intersect region on the output grid
-MANTID_DATAOBJECTS_DLL bool
-getIntersectionRegion(const std::vector<double> &xAxis,
-                      const std::vector<double> &verticalAxis,
-                      const Geometry::Quadrilateral &inputQ, size_t &qstart,
-                      size_t &qend, size_t &x_start, size_t &x_end);
+MANTID_DATAOBJECTS_DLL bool getIntersectionRegion(const std::vector<double> &xAxis,
+                                                  const std::vector<double> &verticalAxis,
+                                                  const Geometry::Quadrilateral &inputQ, size_t &qstart, size_t &qend,
+                                                  size_t &x_start, size_t &x_end);
 
 /// Compute sqrt of errors and put back in bin width division if necessary
-MANTID_DATAOBJECTS_DLL void
-normaliseOutput(const API::MatrixWorkspace_sptr &outputWS,
-                const API::MatrixWorkspace_const_sptr &inputWS,
-                API::Progress *progress = nullptr);
+MANTID_DATAOBJECTS_DLL void normaliseOutput(const API::MatrixWorkspace_sptr &outputWS,
+                                            const API::MatrixWorkspace_const_sptr &inputWS,
+                                            API::Progress *progress = nullptr);
 
 /// Rebin the input quadrilateral to to output grid
-MANTID_DATAOBJECTS_DLL void
-rebinToOutput(const Geometry::Quadrilateral &inputQ,
-              const API::MatrixWorkspace_const_sptr &inputWS, const size_t i,
-              const size_t j, API::MatrixWorkspace &outputWS,
-              const std::vector<double> &verticalAxis);
+MANTID_DATAOBJECTS_DLL void rebinToOutput(const Geometry::Quadrilateral &inputQ,
+                                          const API::MatrixWorkspace_const_sptr &inputWS, const size_t i,
+                                          const size_t j, API::MatrixWorkspace &outputWS,
+                                          const std::vector<double> &verticalAxis);
 
 /// Rebin the input quadrilateral to to output grid
-MANTID_DATAOBJECTS_DLL void rebinToFractionalOutput(
-    const Geometry::Quadrilateral &inputQ,
-    const API::MatrixWorkspace_const_sptr &inputWS, const size_t i,
-    const size_t j, DataObjects::RebinnedOutput &outputWS,
-    const std::vector<double> &verticalAxis,
-    const DataObjects::RebinnedOutput_const_sptr &inputRB = nullptr);
+MANTID_DATAOBJECTS_DLL void rebinToFractionalOutput(const Geometry::Quadrilateral &inputQ,
+                                                    const API::MatrixWorkspace_const_sptr &inputWS, const size_t i,
+                                                    const size_t j, DataObjects::RebinnedOutput &outputWS,
+                                                    const std::vector<double> &verticalAxis,
+                                                    const DataObjects::RebinnedOutput_const_sptr &inputRB = nullptr);
 
 /// Set finalize flag after fractional rebinning loop
-MANTID_DATAOBJECTS_DLL void
-finalizeFractionalRebin(DataObjects::RebinnedOutput &outputWS);
+MANTID_DATAOBJECTS_DLL void finalizeFractionalRebin(DataObjects::RebinnedOutput &outputWS);
 
 } // namespace FractionalRebinning
 

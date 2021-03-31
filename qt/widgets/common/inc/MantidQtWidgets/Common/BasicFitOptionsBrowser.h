@@ -31,10 +31,8 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_COMMON BasicFitOptionsBrowser : public QWidget {
   Q_OBJECT
 
-  using PropertySetter = void (BasicFitOptionsBrowser::*)(QtProperty *,
-                                                          std::string const &);
-  using PropertyGetter =
-      std::string (BasicFitOptionsBrowser::*)(QtProperty *) const;
+  using PropertySetter = void (BasicFitOptionsBrowser::*)(QtProperty *, std::string const &);
+  using PropertyGetter = std::string (BasicFitOptionsBrowser::*)(QtProperty *) const;
 
 public:
   BasicFitOptionsBrowser(QWidget *parent = nullptr);
@@ -61,8 +59,7 @@ private:
   void createCostFunctionProperty();
   void createEvaluationTypeProperty();
 
-  void addProperty(std::string const &name, QtProperty *prop,
-                   PropertyGetter getter, PropertySetter setter);
+  void addProperty(std::string const &name, QtProperty *prop, PropertyGetter getter, PropertySetter setter);
 
   void setIntProperty(QtProperty *prop, std::string const &value);
   std::string getIntProperty(QtProperty *prop) const;

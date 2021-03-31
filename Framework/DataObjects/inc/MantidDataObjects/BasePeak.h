@@ -75,6 +75,10 @@ public:
   void setIntHKL(const Kernel::V3D &HKL) override;
   void setIntMNP(const Mantid::Kernel::V3D &MNP) override;
 
+  Mantid::Kernel::V3D getSamplePos() const override;
+  void setSamplePos(double samX, double samY, double samZ) override;
+  void setSamplePos(const Mantid::Kernel::V3D &XYZ) override;
+
   double getIntensity() const override;
   double getSigmaIntensity() const override;
   double getIntensityOverSigma() const override;
@@ -87,8 +91,7 @@ public:
 
   Mantid::Kernel::Matrix<double> getGoniometerMatrix() const override;
   Mantid::Kernel::Matrix<double> getInverseGoniometerMatrix() const;
-  void setGoniometerMatrix(
-      const Mantid::Kernel::Matrix<double> &goniometerMatrix) override;
+  void setGoniometerMatrix(const Mantid::Kernel::Matrix<double> &goniometerMatrix) override;
 
   std::string getBankName() const override;
   int getRow() const override;
@@ -120,6 +123,9 @@ protected:
 
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
   std::string convention;
+
+  /// Cached sample position
+  Mantid::Kernel::V3D m_samplePos;
 
 private:
   /// Name of the parent bank

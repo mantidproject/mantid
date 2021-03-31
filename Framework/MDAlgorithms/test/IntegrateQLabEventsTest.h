@@ -41,47 +41,33 @@ public:
     V3D peak_2(0, 5, 0);
     V3D peak_3(0, 0, 4);
     std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{
-        {std::make_pair(1., 1.), peak_1},
-        {std::make_pair(1., 1.), peak_2},
-        {std::make_pair(1., 1.), peak_3}};
+        {std::make_pair(1., 1.), peak_1}, {std::make_pair(1., 1.), peak_2}, {std::make_pair(1., 1.), peak_3}};
 
     /* synthesize events around the peaks. All events with in one unit of the
      * peak. 755 events around peak 1, 704 events around peak 2, and
      * 603 events around peak 3.*/
     std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs;
     for (int i = -100; i <= 100; i++) {
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_1 + V3D((double)i / 100.0, 0, 0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_2 + V3D((double)i / 100.0, 0, 0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_3 + V3D((double)i / 100.0, 0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_1 + V3D((double)i / 100.0, 0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_2 + V3D((double)i / 100.0, 0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_3 + V3D((double)i / 100.0, 0, 0))));
 
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_1 + V3D(0, (double)i / 200.0, 0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_2 + V3D(0, (double)i / 200.0, 0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_3 + V3D(0, (double)i / 200.0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_1 + V3D(0, (double)i / 200.0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_2 + V3D(0, (double)i / 200.0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_3 + V3D(0, (double)i / 200.0, 0))));
 
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_1 + V3D(0, 0, (double)i / 300.0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_2 + V3D(0, 0, (double)i / 300.0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_3 + V3D(0, 0, (double)i / 300.0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_1 + V3D(0, 0, (double)i / 300.0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_2 + V3D(0, 0, (double)i / 300.0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_3 + V3D(0, 0, (double)i / 300.0))));
     }
 
     for (int i = -50; i <= 50; i++) {
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_1 + V3D(0, (double)i / 147.0, 0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_2 + V3D(0, (double)i / 147.0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_1 + V3D(0, (double)i / 147.0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_2 + V3D(0, (double)i / 147.0, 0))));
     }
 
     for (int i = -25; i <= 25; i++) {
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_1 + V3D(0, 0, (double)i / 61.0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_1 + V3D(0, 0, (double)i / 61.0))));
     }
 
     double radius = 1.3;
@@ -100,14 +86,12 @@ public:
     double inti;
     double sigi;
     for (size_t i = 0; i < peak_q_list.size(); i++) {
-      auto shape = integrator.ellipseIntegrateEvents(
-          E1Vec, peak_q_list[i].second, specify_size, peak_radius,
-          back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
+      auto shape = integrator.ellipseIntegrateEvents(E1Vec, peak_q_list[i].second, specify_size, peak_radius,
+                                                     back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
       TS_ASSERT_DELTA(inti, 2 * inti_all[i], 0.1);
       TS_ASSERT_DELTA(sigi, sigi_all[i], 0.01);
 
-      auto ellipsoid_shape = std::dynamic_pointer_cast<
-          const Mantid::DataObjects::PeakShapeEllipsoid>(shape);
+      auto ellipsoid_shape = std::dynamic_pointer_cast<const Mantid::DataObjects::PeakShapeEllipsoid>(shape);
       TSM_ASSERT("Expect to get back an ellipsoid shape", ellipsoid_shape);
     }
 
@@ -115,9 +99,8 @@ public:
     // sizes, we miss some counts
     specify_size = false;
     for (size_t i = 0; i < peak_q_list.size(); i++) {
-      integrator.ellipseIntegrateEvents(
-          E1Vec, peak_q_list[i].second, specify_size, peak_radius,
-          back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
+      integrator.ellipseIntegrateEvents(E1Vec, peak_q_list[i].second, specify_size, peak_radius, back_inner_radius,
+                                        back_outer_radius, new_sigma, inti, sigi);
       TS_ASSERT_DELTA(inti, 2 * inti_some[i], 0.1);
       TS_ASSERT_DELTA(sigi, sigi_some[i], 0.01);
     }

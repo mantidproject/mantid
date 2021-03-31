@@ -24,9 +24,7 @@ class ConvertHFIRSCDtoMDETest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertHFIRSCDtoMDETest *createSuite() {
-    return new ConvertHFIRSCDtoMDETest();
-  }
+  static ConvertHFIRSCDtoMDETest *createSuite() { return new ConvertHFIRSCDtoMDETest(); }
   static void destroySuite(ConvertHFIRSCDtoMDETest *suite) { delete suite; }
 
   void test_Init() {
@@ -39,15 +37,12 @@ public:
     // Create test input if necessary
     LoadMD loader;
     loader.initialize();
-    loader.setPropertyValue(
-        "Filename",
-        Mantid::API::FileFinder::Instance().getFullPath("HB3A_data.nxs"));
+    loader.setPropertyValue("Filename", Mantid::API::FileFinder::Instance().getFullPath("HB3A_data.nxs"));
     loader.setPropertyValue("OutputWorkspace", "ConvertHFIRSCDtoMDETest_data");
     loader.setProperty("FileBackEnd", false);
     loader.execute();
-    auto inputWS = Mantid::API::AnalysisDataService::Instance()
-                       .retrieveWS<Mantid::API::IMDHistoWorkspace>(
-                           "ConvertHFIRSCDtoMDETest_data");
+    auto inputWS = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::IMDHistoWorkspace>(
+        "ConvertHFIRSCDtoMDETest_data");
 
     auto setGoniometer = AlgorithmManager::Instance().create("SetGoniometer");
     setGoniometer->initialize();
@@ -63,11 +58,9 @@ public:
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", "ConvertHFIRSCDtoMDETest_data"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ConvertHFIRSCDtoMDETest_data"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Wavelength", "1.008"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -79,8 +72,7 @@ public:
 
     // check dimensions
     TS_ASSERT_EQUALS(3, outWS->getNumDims());
-    TS_ASSERT_EQUALS(Mantid::Kernel::QSample,
-                     outWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(Mantid::Kernel::QSample, outWS->getSpecialCoordinateSystem());
     TS_ASSERT_EQUALS("QSample", outWS->getDimension(0)->getMDFrame().name());
     TS_ASSERT_EQUALS(true, outWS->getDimension(0)->getMDUnits().isQUnit());
     TS_ASSERT_EQUALS(-10, outWS->getDimension(0)->getMinimum());
@@ -97,10 +89,7 @@ public:
     // check other things
     TS_ASSERT_EQUALS(1, outWS->getNumExperimentInfo());
     TS_ASSERT_EQUALS(9038, outWS->getNEvents());
-    const Mantid::coord_t coords[3] = {
-        -0.42f, 1.71f, 2.3f}; // roughly the location of maximum instenity
-    TS_ASSERT_DELTA(
-        outWS->getSignalAtCoord(coords, Mantid::API::NoNormalization), 568,
-        1e-5);
+    const Mantid::coord_t coords[3] = {-0.42f, 1.71f, 2.3f}; // roughly the location of maximum instenity
+    TS_ASSERT_DELTA(outWS->getSignalAtCoord(coords, Mantid::API::NoNormalization), 568, 1e-5);
   }
 };

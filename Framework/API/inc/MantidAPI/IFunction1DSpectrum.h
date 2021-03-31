@@ -25,19 +25,16 @@ namespace API {
   */
 class MANTID_API_DLL IFunction1DSpectrum : public virtual IFunction {
 public:
-  void function(const FunctionDomain &domain,
-                FunctionValues &values) const override;
+  void function(const FunctionDomain &domain, FunctionValues &values) const override;
   void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override;
 
   /// Provide a concrete function in an implementation that operates on a
   /// FunctionDomain1DSpectrum.
-  virtual void function1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                                  FunctionValues &values) const = 0;
+  virtual void function1DSpectrum(const FunctionDomain1DSpectrum &domain, FunctionValues &values) const = 0;
 
   /// Derivatives of the function. The base implementation calculates numerical
   /// derivatives.
-  virtual void functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                                       Jacobian &jacobian);
+  virtual void functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain, Jacobian &jacobian);
 
 protected:
   static Kernel::Logger g_log;

@@ -28,59 +28,45 @@ void QueryAllRemoteJobs2::init() {
   auto nullValidator = std::make_shared<NullValidator>();
 
   // Compute Resources
-  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
-                                          .getFacility()
-                                          .computeResources();
-  declareProperty("ComputeResource", "",
-                  std::make_shared<StringListValidator>(computes),
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty("ComputeResource", "", std::make_shared<StringListValidator>(computes),
                   "The name of the remote computer to query", Direction::Input);
 
   // Mantid can't store arbitrary structs in its properties, so we're going to
   // declare several array properties for different pieces of data.  Values from
   // the same array index are for the same job.
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "JobID", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("JobID", nullValidator, Direction::Output),
                   "ID string for the job(s)");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "JobStatusString", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("JobStatusString", nullValidator, Direction::Output),
                   "Description of the job's current status (Queued, Running, "
                   "Complete, etc..)");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "JobName", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("JobName", nullValidator, Direction::Output),
                   "Name of the job (specified when the job was submitted)");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "ScriptName", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("ScriptName", nullValidator, Direction::Output),
                   "The name of the script (python, etc.) or other type of "
                   "executable that the job runs");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "TransID", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("TransID", nullValidator, Direction::Output),
                   "The ID of the transaction that owns the job");
 
   // Times for job submit, job start and job complete (may be empty depending
   // on the server-side implementation)
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "SubmitDate", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("SubmitDate", nullValidator, Direction::Output),
                   "The date & time the job was submitted");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "StartDate", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("StartDate", nullValidator, Direction::Output),
                   "The date & time the job actually started executing");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "CompletionDate", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("CompletionDate", nullValidator, Direction::Output),
                   "The date & time the job finished");
 
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "CommandLine", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("CommandLine", nullValidator, Direction::Output),
                   "The command line run by this job on the remote compute "
                   "resource machine(s)");
 }
 
 void QueryAllRemoteJobs2::exec() {
   Mantid::API::IRemoteJobManager_sptr jm =
-      Mantid::API::RemoteJobManagerFactory::Instance().create(
-          getPropertyValue("ComputeResource"));
+      Mantid::API::RemoteJobManagerFactory::Instance().create(getPropertyValue("ComputeResource"));
 
-  std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> infos =
-      jm->queryAllRemoteJobs();
+  std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> infos = jm->queryAllRemoteJobs();
 
   std::vector<std::string> jobIds;
   std::vector<std::string> jobStatusStrs;

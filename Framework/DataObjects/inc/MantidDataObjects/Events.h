@@ -56,10 +56,8 @@ public:
   WeightedEvent(double time_of_flight);
 
   /// Constructor, full
-  WeightedEvent(double tof, const Mantid::Types::Core::DateAndTime pulsetime,
-                double weight, double errorSquared);
-  WeightedEvent(double tof, const Mantid::Types::Core::DateAndTime pulsetime,
-                float weight, float errorSquared);
+  WeightedEvent(double tof, const Mantid::Types::Core::DateAndTime pulsetime, double weight, double errorSquared);
+  WeightedEvent(double tof, const Mantid::Types::Core::DateAndTime pulsetime, float weight, float errorSquared);
 
   WeightedEvent(const TofEvent &, double weight, double errorSquared);
   WeightedEvent(const TofEvent &, float weight, float errorSquared);
@@ -69,8 +67,7 @@ public:
   WeightedEvent();
 
   bool operator==(const WeightedEvent &rhs) const;
-  bool equals(const WeightedEvent &rhs, const double tolTof,
-              const double tolWeight, const int64_t tolPulse) const;
+  bool equals(const WeightedEvent &rhs, const double tolTof, const double tolWeight, const int64_t tolPulse) const;
 
   double weight() const;
   double error() const;
@@ -117,17 +114,11 @@ public:
   WeightedEventNoTime(double tof, double weight, double errorSquared);
   WeightedEventNoTime(double tof, float weight, float errorSquared);
 
-  WeightedEventNoTime(double tof,
-                      const Mantid::Types::Core::DateAndTime pulsetime,
-                      double weight, double errorSquared);
-  WeightedEventNoTime(double tof,
-                      const Mantid::Types::Core::DateAndTime pulsetime,
-                      float weight, float errorSquared);
+  WeightedEventNoTime(double tof, const Mantid::Types::Core::DateAndTime pulsetime, double weight, double errorSquared);
+  WeightedEventNoTime(double tof, const Mantid::Types::Core::DateAndTime pulsetime, float weight, float errorSquared);
 
-  WeightedEventNoTime(const Types::Event::TofEvent &, double weight,
-                      double errorSquared);
-  WeightedEventNoTime(const Types::Event::TofEvent &, float weight,
-                      float errorSquared);
+  WeightedEventNoTime(const Types::Event::TofEvent &, double weight, double errorSquared);
+  WeightedEventNoTime(const Types::Event::TofEvent &, float weight, float errorSquared);
 
   WeightedEventNoTime(const WeightedEvent &);
 
@@ -141,9 +132,7 @@ public:
    * @param rhs: the other WeightedEventNoTime to compare.
    * @return true if this->m_tof < rhs.m_tof
    */
-  bool operator<(const WeightedEventNoTime &rhs) const {
-    return (this->m_tof < rhs.m_tof);
-  }
+  bool operator<(const WeightedEventNoTime &rhs) const { return (this->m_tof < rhs.m_tof); }
 
   /** < comparison operator, using the TOF to do the comparison.
    * @param rhs_tof: the other time of flight to compare.
@@ -151,8 +140,7 @@ public:
    */
   bool operator<(const double rhs_tof) const { return (this->m_tof < rhs_tof); }
 
-  bool equals(const WeightedEventNoTime &rhs, const double tolTof,
-              const double tolWeight) const;
+  bool equals(const WeightedEventNoTime &rhs, const double tolTof, const double tolWeight) const;
 
   double operator()() const;
   double tof() const;
@@ -178,9 +166,7 @@ inline double WeightedEvent::weight() const { return m_weight; }
  *  internally as the SQUARED error, so this function calculates sqrt().
  *  For more speed, use errorSquared().
  */
-inline double WeightedEvent::error() const {
-  return std::sqrt(double(m_errorSquared));
-}
+inline double WeightedEvent::error() const { return std::sqrt(double(m_errorSquared)); }
 
 /** @return the square of the error for this event.
  *  This is how the error is saved internally, so this is faster than error()
@@ -199,22 +185,16 @@ inline double WeightedEventNoTime::tof() const { return m_tof; }
 /** Return the pulse time; this returns 0 since this
  *  type of Event has no time associated.
  */
-inline Types::Core::DateAndTime WeightedEventNoTime::pulseTime() const {
-  return 0;
-}
+inline Types::Core::DateAndTime WeightedEventNoTime::pulseTime() const { return 0; }
 
 /// Return the weight of the neutron, as a double (it is saved as a float).
 inline double WeightedEventNoTime::weight() const { return m_weight; }
 
 /// Return the error of the neutron, as a double (it is saved as a float).
-inline double WeightedEventNoTime::error() const {
-  return std::sqrt(double(m_errorSquared));
-}
+inline double WeightedEventNoTime::error() const { return std::sqrt(double(m_errorSquared)); }
 
 /// Return the squared error of the neutron, as a double
-inline double WeightedEventNoTime::errorSquared() const {
-  return m_errorSquared;
-}
+inline double WeightedEventNoTime::errorSquared() const { return m_errorSquared; }
 
 } // namespace DataObjects
 } // namespace Mantid

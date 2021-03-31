@@ -54,25 +54,19 @@ void SaveNXTomo::init() {
   // wsValidator->add<API::CommonBinsValidator>();
   wsValidator->add<API::HistogramValidator>();
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspaces", "",
-                                            Direction::Input, wsValidator),
-      "The name of the workspace(s) to save - this can be the name of a single "
-      "Workspace2D or the name of a WorkspaceGroup in which case all the "
-      "Workspace2Ds included in the group will be saved.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspaces", "", Direction::Input, wsValidator),
+                  "The name of the workspace(s) to save - this can be the name of a single "
+                  "Workspace2D or the name of a WorkspaceGroup in which case all the "
+                  "Workspace2Ds included in the group will be saved.");
 
   declareProperty(
-      std::make_unique<API::FileProperty>("Filename", "", FileProperty::Save,
-                                          std::vector<std::string>(1, ".nxs")),
+      std::make_unique<API::FileProperty>("Filename", "", FileProperty::Save, std::vector<std::string>(1, ".nxs")),
       "The name of the NXTomo file to write, as a full or relative path");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("OverwriteFile", false,
-                                                Kernel::Direction::Input),
-      "Replace any existing file of the same name instead of appending data?");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("OverwriteFile", false, Kernel::Direction::Input),
+                  "Replace any existing file of the same name instead of appending data?");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "IncludeError", false, Kernel::Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("IncludeError", false, Kernel::Direction::Input),
                   "Write the error values to NXTomo file?");
 }
 
@@ -97,12 +91,10 @@ void SaveNXTomo::exec() {
 bool SaveNXTomo::processGroups() {
   try {
     std::string name = getPropertyValue("InputWorkspaces");
-    WorkspaceGroup_sptr groupWS =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
+    WorkspaceGroup_sptr groupWS = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
 
     for (int i = 0; i < groupWS->getNumberOfEntries(); ++i) {
-      m_workspaces.emplace_back(
-          std::dynamic_pointer_cast<Workspace2D>(groupWS->getItem(i)));
+      m_workspaces.emplace_back(std::dynamic_pointer_cast<Workspace2D>(groupWS->getItem(i)));
     }
   } catch (...) {
   }
@@ -128,8 +120,7 @@ void SaveNXTomo::processAll() {
 
     if ((workspaceID.find("Workspace2D") == std::string::npos) &&
         (workspaceID.find("RebinnedOutput") == std::string::npos))
-      throw Exception::NotImplementedError(
-          "SaveNXTomo passed invalid workspaces. Must be Workspace2D");
+      throw Exception::NotImplementedError("SaveNXTomo passed invalid workspaces. Must be Workspace2D");
   }
 
   // Retrieve the filename from the properties
@@ -137,10 +128,8 @@ void SaveNXTomo::processAll() {
 
   // Populate the dimension array - assume all are the same
   m_dimensions.emplace_back(m_workspaces.size());
-  m_dimensions.emplace_back(boost::lexical_cast<int64_t>(
-      m_workspaces[0]->mutableRun().getLogData("Axis1")->value()));
-  m_dimensions.emplace_back(boost::lexical_cast<int64_t>(
-      m_workspaces[0]->mutableRun().getLogData("Axis2")->value()));
+  m_dimensions.emplace_back(boost::lexical_cast<int64_t>(m_workspaces[0]->mutableRun().getLogData("Axis1")->value()));
+  m_dimensions.emplace_back(boost::lexical_cast<int64_t>(m_workspaces[0]->mutableRun().getLogData("Axis2")->value()));
 
   m_spectraCount = m_dimensions[1] * m_dimensions[2];
 
@@ -195,8 +184,7 @@ void SaveNXTomo::processAll() {
   }
 
   // If not overwriting, ensure it has a .nxs extension
-  if ((!m_overwriteFile || status == NX_ERROR) &&
-      !boost::ends_with(this->m_filename, ".nxs"))
+  if ((!m_overwriteFile || status == NX_ERROR) && !boost::ends_with(this->m_filename, ".nxs"))
     m_filename = m_filename + ".nxs";
 
   status = NXopen(this->m_filename.c_str(), NXACC_CREATE5, &fileHandle);
@@ -304,8 +292,7 @@ void SaveNXTomo::processAll() {
  * @param workspace the workspace to get data from
  * @param nxFile the nexus file to save data into
  */
-void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace,
-                                      ::NeXus::File &nxFile) {
+void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace, ::NeXus::File &nxFile) {
   try {
     nxFile.openPath("/entry1/tomo_entry/data");
   } catch (...) {
@@ -348,8 +335,7 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace,
     const auto &Y = workspace->y(i);
     for (int64_t j = 0; j < m_dimensions[2]; ++j) {
       if (spectrumPerPixel) {
-        dataArr[i * m_dimensions[1] + j] =
-            workspace->y(i * m_dimensions[1] + j)[0];
+        dataArr[i * m_dimensions[1] + j] = workspace->y(i * m_dimensions[1] + j)[0];
       } else {
         dataArr[i * m_dimensions[1] + j] = Y[j];
       }
@@ -371,9 +357,8 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace,
   delete[] dataArr;
 }
 
-void SaveNXTomo::writeImageKeyValue(
-    const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile,
-    int thisFileInd) {
+void SaveNXTomo::writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile,
+                                    int thisFileInd) {
   // Add ImageKey to instrument/image_key if present, use 0 if not
   try {
     nxFile.openPath("/entry1/tomo_entry/instrument/detector");
@@ -401,8 +386,8 @@ void SaveNXTomo::writeImageKeyValue(
   nxFile.closeGroup();
 }
 
-void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace,
-                                ::NeXus::File &nxFile, int thisFileInd) {
+void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile,
+                                int thisFileInd) {
   // Add Log information (minus special values - Rotation, ImageKey, Intensity)
   // Unable to add multidimensional string data, storing strings as
   // multidimensional data set of uint8 values
@@ -417,9 +402,8 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace,
   const auto &logVals = workspace->run().getLogData();
 
   for (const auto &prop : logVals) {
-    if (prop->name() != "ImageKey" && prop->name() != "Rotation" &&
-        prop->name() != "Intensity" && prop->name() != "Axis1" &&
-        prop->name() != "Axis2") {
+    if (prop->name() != "ImageKey" && prop->name() != "Rotation" && prop->name() != "Intensity" &&
+        prop->name() != "Axis1" && prop->name() != "Axis2") {
       try {
         nxFile.openData(prop->name());
       } catch (::NeXus::Exception &) {
@@ -445,9 +429,8 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace,
   }
 }
 
-void SaveNXTomo::writeIntensityValue(
-    const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile,
-    int thisFileInd) {
+void SaveNXTomo::writeIntensityValue(const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile,
+                                     int thisFileInd) {
   // Add Intensity to control if present, use 1 if not
   try {
     nxFile.openPath("/entry1/tomo_entry/control");

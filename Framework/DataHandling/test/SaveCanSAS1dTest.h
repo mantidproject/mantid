@@ -40,8 +40,7 @@ public:
 
   // set up the workspace that will be loaded
   SaveCanSAS1dTest()
-      : m_workspace1("SaveCanSAS1DTest_in1"),
-        m_workspace2("SaveCanSAS1DTest_in2"), m_filename("./savecansas1d.xml")
+      : m_workspace1("SaveCanSAS1DTest_in1"), m_workspace2("SaveCanSAS1DTest_in2"), m_filename("./savecansas1d.xml")
 
   {
     LoadRaw3 loader;
@@ -61,14 +60,11 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Change the unit to Q
-    ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(m_workspace1));
-    ws->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(m_workspace1));
+    ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
 
     WorkspaceGroup_sptr group(new WorkspaceGroup);
-    AnalysisDataService::Instance().addOrReplace("SaveCanSAS1DTest_group",
-                                                 group);
+    AnalysisDataService::Instance().addOrReplace("SaveCanSAS1DTest_group", group);
     // group->add("SaveCanSAS1DTest_group");
     group->add(m_workspace1);
 
@@ -81,10 +77,8 @@ public:
     TS_ASSERT(load.isExecuted());
 
     // Change the unit to Q
-    ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(m_workspace2));
-    ws->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(m_workspace2));
+    ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
 
     group->add(m_workspace2);
   }
@@ -214,16 +208,14 @@ public:
       return; // To avoid breaking the rest of the test runner.
     std::vector<std::string> wNames = group->getNames();
 
-    TS_ASSERT_EQUALS(
-        wNames.size(),
-        2); // change this and the lines below when group workspace names change
+    TS_ASSERT_EQUALS(wNames.size(),
+                     2); // change this and the lines below when group workspace names change
     TS_ASSERT_EQUALS(wNames[0], m_workspace1);
     TS_ASSERT_EQUALS(wNames[1], m_workspace2);
 
     // check the second workspace in more detail
     ws = Mantid::API::AnalysisDataService::Instance().retrieve(wNames[1]);
-    Mantid::DataObjects::Workspace2D_sptr ws2d =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+    Mantid::DataObjects::Workspace2D_sptr ws2d = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
     TS_ASSERT(ws2d);
 
     Run run = ws2d->run();

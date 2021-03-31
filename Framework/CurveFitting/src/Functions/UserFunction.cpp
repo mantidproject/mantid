@@ -27,10 +27,7 @@ using namespace Kernel;
 using namespace API;
 
 /// Constructor
-UserFunction::UserFunction()
-    : m_parser(new mu::Parser()), m_x(0.), m_x_set(false) {
-  extraOneVarFunctions(*m_parser);
-}
+UserFunction::UserFunction() : m_parser(new mu::Parser()), m_x(0.), m_x_set(false) { extraOneVarFunctions(*m_parser); }
 
 /// Destructor
 UserFunction::~UserFunction() { delete m_parser; }
@@ -60,8 +57,7 @@ double *UserFunction::AddVariable(const char *varName, void *pufun) {
  * @param value :: The attribute value. For "Formula" it must be a mu::Parser
  * expression string
  */
-void UserFunction::setAttribute(const std::string &attName,
-                                const Attribute &value) {
+void UserFunction::setAttribute(const std::string &attName, const Attribute &value) {
   IFunction::setAttribute(attName, value);
 
   if (attName != "Formula") {
@@ -108,8 +104,7 @@ void UserFunction::setAttribute(const std::string &attName,
  *  @param xValues :: The array of nData x-values.
  *  @param nData :: The size of the fitted data.
  */
-void UserFunction::function1D(double *out, const double *xValues,
-                              const size_t nData) const {
+void UserFunction::function1D(double *out, const double *xValues, const size_t nData) const {
   for (size_t i = 0; i < nData; i++) {
     m_x = xValues[i];
     try {
@@ -125,8 +120,7 @@ void UserFunction::function1D(double *out, const double *xValues,
  * @param jacobian :: the set of partial derivatives of the function with
  * respect to the fitting parameters
  */
-void UserFunction::functionDeriv(const API::FunctionDomain &domain,
-                                 API::Jacobian &jacobian) {
+void UserFunction::functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
 }
 

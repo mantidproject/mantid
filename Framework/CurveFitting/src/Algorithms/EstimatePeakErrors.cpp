@@ -38,15 +38,11 @@ const std::string EstimatePeakErrors::summary() const {
          "centre, height, FWHM and intensity.";
 }
 
-const std::string EstimatePeakErrors::name() const {
-  return "EstimatePeakErrors";
-}
+const std::string EstimatePeakErrors::name() const { return "EstimatePeakErrors"; }
 
 int EstimatePeakErrors::version() const { return 1; }
 
-const std::string EstimatePeakErrors::category() const {
-  return "Optimization";
-}
+const std::string EstimatePeakErrors::category() const { return "Optimization"; }
 
 //--------------------------------------------------------------------------------------------------------
 // Private members
@@ -62,8 +58,7 @@ namespace {
 /// @param height :: Output receiving value of peak height.
 /// @param fwhm :: Output receiving value of peak FWHM.
 /// @param intensity :: Output receiving value of peak intensity.
-GSLMatrix makeJacobian(IPeakFunction &peak, double &centre, double &height,
-                       double &fwhm, double &intensity) {
+GSLMatrix makeJacobian(IPeakFunction &peak, double &centre, double &height, double &fwhm, double &intensity) {
   GSLMatrix jacobian(4, peak.nParams());
   centre = peak.centre();
   height = peak.height();
@@ -90,8 +85,7 @@ GSLMatrix makeJacobian(IPeakFunction &peak, double &centre, double &height,
 /// @param results :: The table with results
 /// @param covariance :: The covariance matrix for the parameters of the peak.
 /// @param prefix :: A prefix for the parameter names.
-void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results,
-                         const GSLMatrix &covariance,
+void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results, const GSLMatrix &covariance,
                          const std::string &prefix) {
   double centre, height, fwhm, intensity;
   GSLMatrix J = makeJacobian(peak, centre, height, fwhm, intensity);
@@ -114,14 +108,12 @@ void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results,
 /// Initialize
 void EstimatePeakErrors::init() {
 
-  declareProperty(
-      std::make_unique<FunctionProperty>("Function", Direction::InOut),
-      "Fitting function containing peaks. Must have a covariance "
-      "matrix attached.");
+  declareProperty(std::make_unique<FunctionProperty>("Function", Direction::InOut),
+                  "Fitting function containing peaks. Must have a covariance "
+                  "matrix attached.");
 
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "OutputWorkspace", "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the TableWorkspace with the output values and errors.");
 }
 
@@ -130,8 +122,7 @@ void EstimatePeakErrors::exec() {
 
   IFunction_sptr function = getProperty("Function");
 
-  ITableWorkspace_sptr results =
-      WorkspaceFactory::Instance().createTable("TableWorkspace");
+  ITableWorkspace_sptr results = WorkspaceFactory::Instance().createTable("TableWorkspace");
   results->addColumn("str", "Parameter");
   results->addColumn("double", "Value");
   results->addColumn("double", "Error");

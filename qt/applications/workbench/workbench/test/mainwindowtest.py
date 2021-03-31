@@ -337,6 +337,14 @@ class MainWindowTest(unittest.TestCase):
         }
         self.assertDictEqual(expected_interfaces, all_interfaces)
 
+    @patch('workbench.app.mainwindow.input_qinputdialog')
+    def test_override_python_input_replaces_input_with_qinputdialog(self, mock_input):
+        self.main_window.override_python_input()
+
+        input("prompt")
+
+        mock_input.assert_called_with("prompt")
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -72,22 +72,17 @@ public:
    * union fields)
    */
   struct AccessFor {
-    static std::enable_if_t<
-        std::is_same<EventAccessor, typename Accessor::EventAccessType>::value>
-    convertToCoordinates(MDLeanEvent<nd> &event,
-                         const morton_index::MDSpaceBounds<nd> &space) {
+    static std::enable_if_t<std::is_same<EventAccessor, typename Accessor::EventAccessType>::value>
+    convertToCoordinates(MDLeanEvent<nd> &event, const morton_index::MDSpaceBounds<nd> &space) {
       event.convertToCoordinates(space);
     }
-    static std::enable_if_t<
-        std::is_same<EventAccessor, typename Accessor::EventAccessType>::value>
-    convertToIndex(MDLeanEvent<nd> &event,
-                   const morton_index::MDSpaceBounds<nd> &space) {
+    static std::enable_if_t<std::is_same<EventAccessor, typename Accessor::EventAccessType>::value>
+    convertToIndex(MDLeanEvent<nd> &event, const morton_index::MDSpaceBounds<nd> &space) {
       event.convertToIndex(space);
     }
-    static typename std::enable_if<
-        std::is_same<EventAccessor, typename Accessor::EventAccessType>::value,
-        MortonT>::type
-    getIndex(const MDLeanEvent<nd> &event) {
+    static
+        typename std::enable_if<std::is_same<EventAccessor, typename Accessor::EventAccessType>::value, MortonT>::type
+        getIndex(const MDLeanEvent<nd> &event) {
       return event.getIndex();
     }
   };
@@ -135,8 +130,7 @@ private:
    * @param space :: known space
    */
   void convertToCoordinates(const morton_index::MDSpaceBounds<nd> &space) {
-    auto coords =
-        morton_index::indexToCoordinates<nd, IntT, MortonT>(index, space);
+    auto coords = morton_index::indexToCoordinates<nd, IntT, MortonT>(index, space);
     for (unsigned i = 0; i < nd; ++i)
       center[i] = coords[i];
   }
@@ -169,8 +163,7 @@ public:
    * @param signal :: signal (aka weight)
    * @param errorSquared :: square of the error on the weight
    * */
-  MDLeanEvent(const float signal, const float errorSquared)
-      : signal(signal), errorSquared(errorSquared) {}
+  MDLeanEvent(const float signal, const float errorSquared) : signal(signal), errorSquared(errorSquared) {}
 
   //---------------------------------------------------------------------------------------------
   /** Constructor with signal and error and an array of centers
@@ -180,8 +173,7 @@ public:
    * @param centers :: pointer to a nd-sized array of values to set for all
    *coordinates.
    * */
-  MDLeanEvent(const float signal, const float errorSquared,
-              const coord_t *centers)
+  MDLeanEvent(const float signal, const float errorSquared, const coord_t *centers)
       : signal(signal), errorSquared(errorSquared) {
     for (size_t i = 0; i < nd; i++)
       center[i] = centers[i];
@@ -194,8 +186,7 @@ public:
    * @param centers :: pointer to a nd-sized array of values to set for all
    *coordinates.
    * */
-  MDLeanEvent(const double signal, const double errorSquared,
-              const coord_t *centers)
+  MDLeanEvent(const double signal, const double errorSquared, const coord_t *centers)
       : signal(float(signal)), errorSquared(float(errorSquared)) {
     for (size_t i = 0; i < nd; i++)
       center[i] = centers[i];
@@ -210,8 +201,7 @@ public:
    * @param centers :: pointer to a nd-sized array of values to set for all
    *coordinates.
    * */
-  MDLeanEvent(const float signal, const float errorSquared,
-              const double *centers)
+  MDLeanEvent(const float signal, const float errorSquared, const double *centers)
       : signal(signal), errorSquared(errorSquared) {
     for (size_t i = 0; i < nd; i++)
       center[i] = static_cast<coord_t>(centers[i]);
@@ -221,8 +211,7 @@ public:
   /** Copy constructor
    * @param rhs :: mdevent to copy
    * */
-  MDLeanEvent(const MDLeanEvent &rhs)
-      : signal(rhs.signal), errorSquared(rhs.errorSquared) {
+  MDLeanEvent(const MDLeanEvent &rhs) : signal(rhs.signal), errorSquared(rhs.errorSquared) {
     for (size_t i = 0; i < nd; i++)
       center[i] = rhs.center[i];
   }
@@ -266,9 +255,7 @@ public:
    * @param n :: index (0-based) of the dimension you want to set
    * @param value :: value to set.
    * */
-  void setCenter(const size_t n, const double value) {
-    center[n] = static_cast<coord_t>(value);
-  }
+  void setCenter(const size_t n, const double value) { center[n] = static_cast<coord_t>(value); }
 #endif
 
   //---------------------------------------------------------------------------------------------
@@ -313,9 +300,7 @@ public:
   //---------------------------------------------------------------------------------------------
   /** Set the squared error  of the event
    * @param newerrorSquared :: the error squared value  */
-  void setErrorSquared(const float newerrorSquared) {
-    errorSquared = newerrorSquared;
-  }
+  void setErrorSquared(const float newerrorSquared) { errorSquared = newerrorSquared; }
 
   //---------------------------------------------------------------------------------------------
   /** @returns a string identifying the type of event this is. */
@@ -347,8 +332,7 @@ public:
    @return totalSignal -- total signal in the vector of events
    @return totalErr   -- total error corresponting to the vector of events
   */
-  static inline void eventsToData(const std::vector<MDLeanEvent<nd>> &events,
-                                  std::vector<coord_t> &data, size_t &ncols,
+  static inline void eventsToData(const std::vector<MDLeanEvent<nd>> &events, std::vector<coord_t> &data, size_t &ncols,
                                   double &totalSignal, double &totalErrSq) {
     ncols = nd + 2;
     size_t nEvents = events.size();
@@ -378,8 +362,7 @@ public:
    @param reserveMemory -- reserve memory for events copying. Set to false if
    one wants to add new events to the existing one.
   */
-  static inline void dataToEvents(const std::vector<coord_t> &coord,
-                                  std::vector<MDLeanEvent<nd>> &events,
+  static inline void dataToEvents(const std::vector<coord_t> &coord, std::vector<MDLeanEvent<nd>> &events,
                                   bool reserveMemory = true) {
     // Number of columns = number of dimensions + 2 (signal/error)
     size_t numColumns = (nd + 2);
@@ -403,14 +386,12 @@ public:
       const coord_t *centers = &(coord[ii + 2]);
 
       // Create the event with signal, error squared, and the centers
-      events.emplace_back(static_cast<signal_t>(coord[ii]),
-                          static_cast<signal_t>(coord[ii + 1]), centers);
+      events.emplace_back(static_cast<signal_t>(coord[ii]), static_cast<signal_t>(coord[ii + 1]), centers);
     }
   }
 };
 
-template <size_t ND>
-void swap(MDLeanEvent<ND> &first, MDLeanEvent<ND> &second) {
+template <size_t ND> void swap(MDLeanEvent<ND> &first, MDLeanEvent<ND> &second) {
   std::swap(first.signal, second.signal);
   std::swap(first.errorSquared, second.errorSquared);
   // Index always of the same size as center

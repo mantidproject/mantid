@@ -22,12 +22,10 @@
 
 namespace {
 using MantidQt::MantidWidgets::WorkspaceIndex;
-std::vector<WorkspaceIndex>
-convertToWorkspaceIndex(std::vector<int> const &indices) {
+std::vector<WorkspaceIndex> convertToWorkspaceIndex(std::vector<int> const &indices) {
   std::vector<WorkspaceIndex> workspaceIndices;
   workspaceIndices.reserve(indices.size());
-  std::transform(indices.cbegin(), indices.cend(),
-                 std::back_inserter(workspaceIndices),
+  std::transform(indices.cbegin(), indices.cend(), std::back_inserter(workspaceIndices),
                  [](int index) { return WorkspaceIndex(index); });
   return workspaceIndices;
 }
@@ -40,8 +38,7 @@ std::vector<std::string> convertToStdVector(QStringList const &qList) {
   return vec;
 }
 
-QStringList convertToQStringList(
-    std::vector<MantidQt::MantidWidgets::GlobalParameter> const &vec) {
+QStringList convertToQStringList(std::vector<MantidQt::MantidWidgets::GlobalParameter> const &vec) {
   QStringList qList;
   qList.reserve(static_cast<int>(vec.size()));
   std::transform(vec.cbegin(), vec.cend(), std::back_inserter(qList),
@@ -59,11 +56,9 @@ namespace MantidWidgets {
 using ColumnIndex = FitScriptGeneratorDataTable::ColumnIndex;
 using ViewEvent = IFitScriptGeneratorView::Event;
 
-FitScriptGeneratorView::FitScriptGeneratorView(
-    QWidget *parent, FittingMode fittingMode,
-    QMap<QString, QString> const &fitOptions)
-    : IFitScriptGeneratorView(parent), m_presenter(),
-      m_dialog(std::make_unique<AddWorkspaceDialog>(this)),
+FitScriptGeneratorView::FitScriptGeneratorView(QWidget *parent, FittingMode fittingMode,
+                                               QMap<QString, QString> const &fitOptions)
+    : IFitScriptGeneratorView(parent), m_presenter(), m_dialog(std::make_unique<AddWorkspaceDialog>(this)),
       m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
       m_functionTreeView(std::make_unique<FunctionTreeView>(nullptr, true)),
       m_fitOptionsBrowser(std::make_unique<BasicFitOptionsBrowser>(nullptr)) {
@@ -88,79 +83,60 @@ FitScriptGeneratorView::~FitScriptGeneratorView() {
 
 void FitScriptGeneratorView::connectUiSignals() {
   connect(m_ui.pbRemove, SIGNAL(clicked()), this, SLOT(onRemoveClicked()));
-  connect(m_ui.pbAddWorkspace, SIGNAL(clicked()), this,
-          SLOT(onAddWorkspaceClicked()));
-  connect(m_dataTable.get(), SIGNAL(cellChanged(int, int)), this,
-          SLOT(onCellChanged(int, int)));
-  connect(m_dataTable.get(), SIGNAL(itemSelectionChanged()), this,
-          SLOT(onItemSelected()));
+  connect(m_ui.pbAddWorkspace, SIGNAL(clicked()), this, SLOT(onAddWorkspaceClicked()));
+  connect(m_dataTable.get(), SIGNAL(cellChanged(int, int)), this, SLOT(onCellChanged(int, int)));
+  connect(m_dataTable.get(), SIGNAL(itemSelectionChanged()), this, SLOT(onItemSelected()));
 
-  connect(m_functionTreeView.get(),
-          SIGNAL(functionRemovedString(QString const &)), this,
+  connect(m_functionTreeView.get(), SIGNAL(functionRemovedString(QString const &)), this,
           SLOT(onFunctionRemoved(QString const &)));
-  connect(m_functionTreeView.get(), SIGNAL(functionAdded(QString const &)),
-          this, SLOT(onFunctionAdded(const QString &)));
-  connect(m_functionTreeView.get(), SIGNAL(functionReplaced(QString const &)),
-          this, SLOT(onFunctionReplaced(QString const &)));
-  connect(m_functionTreeView.get(), SIGNAL(parameterChanged(QString const &)),
-          this, SLOT(onParameterChanged(QString const &)));
-  connect(m_functionTreeView.get(),
-          SIGNAL(attributePropertyChanged(QString const &)), this,
+  connect(m_functionTreeView.get(), SIGNAL(functionAdded(QString const &)), this,
+          SLOT(onFunctionAdded(const QString &)));
+  connect(m_functionTreeView.get(), SIGNAL(functionReplaced(QString const &)), this,
+          SLOT(onFunctionReplaced(QString const &)));
+  connect(m_functionTreeView.get(), SIGNAL(parameterChanged(QString const &)), this,
+          SLOT(onParameterChanged(QString const &)));
+  connect(m_functionTreeView.get(), SIGNAL(attributePropertyChanged(QString const &)), this,
           SLOT(onAttributeChanged(QString const &)));
-  connect(m_functionTreeView.get(),
-          SIGNAL(parameterTieChanged(QString const &, QString const &)), this,
+  connect(m_functionTreeView.get(), SIGNAL(parameterTieChanged(QString const &, QString const &)), this,
           SLOT(onParameterTieChanged(QString const &, QString const &)));
-  connect(m_functionTreeView.get(),
-          SIGNAL(parameterConstraintRemoved(QString const &)), this,
+  connect(m_functionTreeView.get(), SIGNAL(parameterConstraintRemoved(QString const &)), this,
           SLOT(onParameterConstraintRemoved(QString const &)));
-  connect(m_functionTreeView.get(),
-          SIGNAL(parameterConstraintAdded(QString const &, QString const &)),
-          this,
+  connect(m_functionTreeView.get(), SIGNAL(parameterConstraintAdded(QString const &, QString const &)), this,
           SLOT(onParameterConstraintChanged(QString const &, QString const &)));
-  connect(m_functionTreeView.get(), SIGNAL(globalsChanged(QStringList const &)),
-          this, SLOT(onGlobalParametersChanged(QStringList const &)));
-  connect(m_functionTreeView.get(), SIGNAL(copyToClipboardRequest()), this,
-          SLOT(onCopyFunctionToClipboard()));
-  connect(m_functionTreeView.get(), SIGNAL(functionHelpRequest()), this,
-          SLOT(onFunctionHelpRequested()));
+  connect(m_functionTreeView.get(), SIGNAL(globalsChanged(QStringList const &)), this,
+          SLOT(onGlobalParametersChanged(QStringList const &)));
+  connect(m_functionTreeView.get(), SIGNAL(copyToClipboardRequest()), this, SLOT(onCopyFunctionToClipboard()));
+  connect(m_functionTreeView.get(), SIGNAL(functionHelpRequest()), this, SLOT(onFunctionHelpRequested()));
 
-  connect(m_fitOptionsBrowser.get(), SIGNAL(fittingModeChanged(FittingMode)),
-          this, SLOT(onFittingModeChanged(FittingMode)));
+  connect(m_fitOptionsBrowser.get(), SIGNAL(fittingModeChanged(FittingMode)), this,
+          SLOT(onFittingModeChanged(FittingMode)));
 
   /// Disconnected because it causes a crash when selecting a table row while
   /// editing a parameters value. This is because selecting a different row will
   /// change the current function in the FunctionTreeView. The closeEditor slot
   /// is then called after this, but the memory location of the old function is
   /// now a nullptr so there is a read access violation.
-  disconnect(m_functionTreeView->doubleEditorFactory(), SIGNAL(closeEditor()),
-             m_functionTreeView->treeBrowser(), SLOT(closeEditor()));
+  disconnect(m_functionTreeView->doubleEditorFactory(), SIGNAL(closeEditor()), m_functionTreeView->treeBrowser(),
+             SLOT(closeEditor()));
 }
 
-void FitScriptGeneratorView::setFitBrowserOptions(
-    QMap<QString, QString> const &fitOptions) {
+void FitScriptGeneratorView::setFitBrowserOptions(QMap<QString, QString> const &fitOptions) {
   for (auto it = fitOptions.constBegin(); it != fitOptions.constEnd(); ++it)
-    m_fitOptionsBrowser->setProperty(it.key().toStdString(),
-                                     it.value().toStdString());
+    m_fitOptionsBrowser->setProperty(it.key().toStdString(), it.value().toStdString());
 }
 
 void FitScriptGeneratorView::setFittingMode(FittingMode fittingMode) {
   m_fitOptionsBrowser->setFittingMode(fittingMode);
 }
 
-void FitScriptGeneratorView::subscribePresenter(
-    IFitScriptGeneratorPresenter *presenter) {
+void FitScriptGeneratorView::subscribePresenter(IFitScriptGeneratorPresenter *presenter) {
   m_presenter = presenter;
-  m_presenter->notifyPresenter(ViewEvent::FittingModeChanged,
-                               m_fitOptionsBrowser->getFittingMode());
+  m_presenter->notifyPresenter(ViewEvent::FittingModeChanged, m_fitOptionsBrowser->getFittingMode());
 }
 
-void FitScriptGeneratorView::onRemoveClicked() {
-  m_presenter->notifyPresenter(ViewEvent::RemoveClicked);
-}
+void FitScriptGeneratorView::onRemoveClicked() { m_presenter->notifyPresenter(ViewEvent::RemoveClicked); }
 
-void FitScriptGeneratorView::onAddWorkspaceClicked() {
-  m_presenter->notifyPresenter(ViewEvent::AddClicked);
-}
+void FitScriptGeneratorView::onAddWorkspaceClicked() { m_presenter->notifyPresenter(ViewEvent::AddClicked); }
 
 void FitScriptGeneratorView::onCellChanged(int row, int column) {
   UNUSED_ARG(row);
@@ -172,70 +148,53 @@ void FitScriptGeneratorView::onCellChanged(int row, int column) {
     m_presenter->notifyPresenter(ViewEvent::EndXChanged);
 }
 
-void FitScriptGeneratorView::onItemSelected() {
-  m_presenter->notifyPresenter(ViewEvent::SelectionChanged);
-}
+void FitScriptGeneratorView::onItemSelected() { m_presenter->notifyPresenter(ViewEvent::SelectionChanged); }
 
 void FitScriptGeneratorView::onFunctionRemoved(QString const &function) {
-  m_presenter->notifyPresenter(ViewEvent::FunctionRemoved,
-                               function.toStdString());
+  m_presenter->notifyPresenter(ViewEvent::FunctionRemoved, function.toStdString());
 }
 
 void FitScriptGeneratorView::onFunctionAdded(QString const &function) {
-  m_presenter->notifyPresenter(ViewEvent::FunctionAdded,
-                               function.toStdString());
+  m_presenter->notifyPresenter(ViewEvent::FunctionAdded, function.toStdString());
 }
 
 void FitScriptGeneratorView::onFunctionReplaced(QString const &function) {
-  m_presenter->notifyPresenter(ViewEvent::FunctionReplaced,
-                               function.toStdString());
+  m_presenter->notifyPresenter(ViewEvent::FunctionReplaced, function.toStdString());
 }
 
 void FitScriptGeneratorView::onParameterChanged(QString const &parameter) {
-  m_presenter->notifyPresenter(ViewEvent::ParameterChanged,
-                               parameter.toStdString());
+  m_presenter->notifyPresenter(ViewEvent::ParameterChanged, parameter.toStdString());
 }
 
 void FitScriptGeneratorView::onAttributeChanged(QString const &attribute) {
-  m_presenter->notifyPresenter(ViewEvent::AttributeChanged,
-                               attribute.toStdString());
+  m_presenter->notifyPresenter(ViewEvent::AttributeChanged, attribute.toStdString());
 }
 
-void FitScriptGeneratorView::onParameterTieChanged(QString const &parameter,
-                                                   QString const &tie) {
-  m_presenter->notifyPresenter(ViewEvent::ParameterTieChanged,
-                               parameter.toStdString(), tie.toStdString());
+void FitScriptGeneratorView::onParameterTieChanged(QString const &parameter, QString const &tie) {
+  m_presenter->notifyPresenter(ViewEvent::ParameterTieChanged, parameter.toStdString(), tie.toStdString());
 }
 
-void FitScriptGeneratorView::onParameterConstraintRemoved(
-    QString const &parameter) {
-  m_presenter->notifyPresenter(ViewEvent::ParameterConstraintRemoved,
-                               parameter.toStdString());
+void FitScriptGeneratorView::onParameterConstraintRemoved(QString const &parameter) {
+  m_presenter->notifyPresenter(ViewEvent::ParameterConstraintRemoved, parameter.toStdString());
 }
 
-void FitScriptGeneratorView::onParameterConstraintChanged(
-    QString const &functionIndex, QString const &constraint) {
-  m_presenter->notifyPresenter(ViewEvent::ParameterConstraintChanged,
-                               functionIndex.toStdString(),
+void FitScriptGeneratorView::onParameterConstraintChanged(QString const &functionIndex, QString const &constraint) {
+  m_presenter->notifyPresenter(ViewEvent::ParameterConstraintChanged, functionIndex.toStdString(),
                                constraint.toStdString());
 }
 
-void FitScriptGeneratorView::onGlobalParametersChanged(
-    QStringList const &globalParameters) {
-  m_presenter->notifyPresenter(ViewEvent::GlobalParametersChanged,
-                               convertToStdVector(globalParameters));
+void FitScriptGeneratorView::onGlobalParametersChanged(QStringList const &globalParameters) {
+  m_presenter->notifyPresenter(ViewEvent::GlobalParametersChanged, convertToStdVector(globalParameters));
 }
 
 void FitScriptGeneratorView::onCopyFunctionToClipboard() {
   if (auto const function = m_functionTreeView->getSelectedFunction())
-    QApplication::clipboard()->setText(
-        QString::fromStdString(function->asString()));
+    QApplication::clipboard()->setText(QString::fromStdString(function->asString()));
 }
 
 void FitScriptGeneratorView::onFunctionHelpRequested() {
   if (auto const function = m_functionTreeView->getSelectedFunction())
-    m_functionTreeView->showFunctionHelp(
-        QString::fromStdString(function->name()));
+    m_functionTreeView->showFunctionHelp(QString::fromStdString(function->name()));
 }
 
 void FitScriptGeneratorView::onFittingModeChanged(FittingMode fittingMode) {
@@ -246,73 +205,49 @@ std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {
   return m_dataTable->workspaceName(index);
 }
 
-WorkspaceIndex
-FitScriptGeneratorView::workspaceIndex(FitDomainIndex index) const {
+WorkspaceIndex FitScriptGeneratorView::workspaceIndex(FitDomainIndex index) const {
   return m_dataTable->workspaceIndex(index);
 }
 
-double FitScriptGeneratorView::startX(FitDomainIndex index) const {
-  return m_dataTable->startX(index);
-}
+double FitScriptGeneratorView::startX(FitDomainIndex index) const { return m_dataTable->startX(index); }
 
-double FitScriptGeneratorView::endX(FitDomainIndex index) const {
-  return m_dataTable->endX(index);
-}
+double FitScriptGeneratorView::endX(FitDomainIndex index) const { return m_dataTable->endX(index); }
 
-std::vector<FitDomainIndex> FitScriptGeneratorView::allRows() const {
-  return m_dataTable->allRows();
-}
+std::vector<FitDomainIndex> FitScriptGeneratorView::allRows() const { return m_dataTable->allRows(); }
 
-std::vector<FitDomainIndex> FitScriptGeneratorView::selectedRows() const {
-  return m_dataTable->selectedRows();
-}
+std::vector<FitDomainIndex> FitScriptGeneratorView::selectedRows() const { return m_dataTable->selectedRows(); }
 
-FitDomainIndex FitScriptGeneratorView::currentRow() const {
-  return m_dataTable->currentRow();
-}
+FitDomainIndex FitScriptGeneratorView::currentRow() const { return m_dataTable->currentRow(); }
 
-bool FitScriptGeneratorView::hasLoadedData() const {
-  return m_dataTable->hasLoadedData();
-}
+bool FitScriptGeneratorView::hasLoadedData() const { return m_dataTable->hasLoadedData(); }
 
-double
-FitScriptGeneratorView::parameterValue(std::string const &parameter) const {
+double FitScriptGeneratorView::parameterValue(std::string const &parameter) const {
   return m_functionTreeView->getParameter(QString::fromStdString(parameter));
 }
 
-IFunction::Attribute
-FitScriptGeneratorView::attributeValue(std::string const &attribute) const {
+IFunction::Attribute FitScriptGeneratorView::attributeValue(std::string const &attribute) const {
   return m_functionTreeView->getAttribute(QString::fromStdString(attribute));
 }
 
-void FitScriptGeneratorView::removeWorkspaceDomain(
-    std::string const &workspaceName, WorkspaceIndex workspaceIndex) {
+void FitScriptGeneratorView::removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) {
   m_dataTable->removeDomain(workspaceName, workspaceIndex);
 }
 
-void FitScriptGeneratorView::addWorkspaceDomain(
-    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
-    double startX, double endX) {
-  m_dataTable->addDomain(QString::fromStdString(workspaceName), workspaceIndex,
-                         startX, endX);
+void FitScriptGeneratorView::addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+                                                double startX, double endX) {
+  m_dataTable->addDomain(QString::fromStdString(workspaceName), workspaceIndex, startX, endX);
 }
 
-bool FitScriptGeneratorView::openAddWorkspaceDialog() {
-  return m_dialog->exec() == QDialog::Accepted;
-}
+bool FitScriptGeneratorView::openAddWorkspaceDialog() { return m_dialog->exec() == QDialog::Accepted; }
 
-std::vector<MatrixWorkspace_const_sptr>
-FitScriptGeneratorView::getDialogWorkspaces() {
+std::vector<MatrixWorkspace_const_sptr> FitScriptGeneratorView::getDialogWorkspaces() {
   auto const workspaces = m_dialog->getWorkspaces();
   if (workspaces.empty())
-    displayWarning("Failed to add workspace: '" +
-                   m_dialog->workspaceName().toStdString() +
-                   "' doesn't exist.");
+    displayWarning("Failed to add workspace: '" + m_dialog->workspaceName().toStdString() + "' doesn't exist.");
   return workspaces;
 }
 
-std::vector<WorkspaceIndex>
-FitScriptGeneratorView::getDialogWorkspaceIndices() const {
+std::vector<WorkspaceIndex> FitScriptGeneratorView::getDialogWorkspaceIndices() const {
   return convertToWorkspaceIndex(m_dialog->workspaceIndices());
 }
 
@@ -326,8 +261,7 @@ void FitScriptGeneratorView::clearFunction() { m_functionTreeView->clear(); }
 
 void FitScriptGeneratorView::setSimultaneousMode(bool simultaneousMode) {
   m_dataTable->setFunctionPrefixVisible(simultaneousMode);
-  m_functionTreeView->setMultiDomainFunctionPrefix(
-      simultaneousMode ? m_dataTable->selectedDomainFunctionPrefix() : "");
+  m_functionTreeView->setMultiDomainFunctionPrefix(simultaneousMode ? m_dataTable->selectedDomainFunctionPrefix() : "");
 
   if (simultaneousMode)
     m_functionTreeView->showGlobals();
@@ -342,15 +276,12 @@ void FitScriptGeneratorView::setFunction(IFunction_sptr const &function) const {
     m_functionTreeView->clear();
 }
 
-void FitScriptGeneratorView::setGlobalTies(
-    std::vector<GlobalTie> const &globalTies) {
+void FitScriptGeneratorView::setGlobalTies(std::vector<GlobalTie> const &globalTies) {
   m_functionTreeView->setGlobalTies(globalTies);
 }
 
-void FitScriptGeneratorView::setGlobalParameters(
-    std::vector<GlobalParameter> const &globalParameters) {
-  m_functionTreeView->setGlobalParameters(
-      convertToQStringList(globalParameters));
+void FitScriptGeneratorView::setGlobalParameters(std::vector<GlobalParameter> const &globalParameters) {
+  m_functionTreeView->setGlobalParameters(convertToQStringList(globalParameters));
 }
 
 void FitScriptGeneratorView::displayWarning(std::string const &message) {

@@ -23,12 +23,9 @@ DECLARE_ALGORITHM(DefineGaugeVolume)
  * Initialize the algorithm
  */
 void DefineGaugeVolume::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("Workspace", "",
-                                            Kernel::Direction::InOut),
-      "The workspace with which to associate the defined gauge volume");
-  declareProperty("ShapeXML", "",
-                  std::make_shared<Kernel::MandatoryValidator<std::string>>(),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "", Kernel::Direction::InOut),
+                  "The workspace with which to associate the defined gauge volume");
+  declareProperty("ShapeXML", "", std::make_shared<Kernel::MandatoryValidator<std::string>>(),
                   "The XML that describes the shape of the gauge volume");
 }
 

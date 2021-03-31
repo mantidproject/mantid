@@ -39,47 +39,33 @@ public:
   static SpectrumInfoTest *createSuite() { return new SpectrumInfoTest(); }
   static void destroySuite(SpectrumInfoTest *suite) { delete suite; }
 
-  SpectrumInfoTest()
-      : m_workspace(makeDefaultWorkspace()), m_grouped(makeDefaultWorkspace()) {
+  SpectrumInfoTest() : m_workspace(makeDefaultWorkspace()), m_grouped(makeDefaultWorkspace()) {
     size_t numberOfHistograms = 5;
     size_t numberOfBins = 1;
-    m_workspaceNoInstrument.initialize(numberOfHistograms, numberOfBins + 1,
-                                       numberOfBins);
+    m_workspaceNoInstrument.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
 
     // Workspace has 5 detectors, 1 and 4 are masked, 4 and 5 are monitors.
-    m_grouped.getSpectrum(GroupOfDets2And3).setDetectorIDs({2, 3}); // no mask
-    m_grouped.getSpectrum(GroupOfDets1And2)
-        .setDetectorIDs({1, 2}); // partial mask
-    m_grouped.getSpectrum(GroupOfDets1And4)
-        .setDetectorIDs({1, 4}); // masked, partial monitor
-    m_grouped.getSpectrum(GroupOfDets4And5)
-        .setDetectorIDs({4, 5}); // full monitor
-    m_grouped.getSpectrum(GroupOfAllDets)
-        .setDetectorIDs({1, 2, 3, 4, 5}); // everything
+    m_grouped.getSpectrum(GroupOfDets2And3).setDetectorIDs({2, 3});        // no mask
+    m_grouped.getSpectrum(GroupOfDets1And2).setDetectorIDs({1, 2});        // partial mask
+    m_grouped.getSpectrum(GroupOfDets1And4).setDetectorIDs({1, 4});        // masked, partial monitor
+    m_grouped.getSpectrum(GroupOfDets4And5).setDetectorIDs({4, 5});        // full monitor
+    m_grouped.getSpectrum(GroupOfAllDets).setDetectorIDs({1, 2, 3, 4, 5}); // everything
   }
 
   void test_constructor() {
     Beamline::SpectrumInfo specInfo(3);
     auto ws = makeWorkspace(3);
-    TS_ASSERT_THROWS_NOTHING(
-        SpectrumInfo(specInfo, *ws, ws->mutableDetectorInfo()));
+    TS_ASSERT_THROWS_NOTHING(SpectrumInfo(specInfo, *ws, ws->mutableDetectorInfo()));
   }
 
-  void test_sourcePosition() {
-    TS_ASSERT_EQUALS(m_workspace.spectrumInfo().sourcePosition(),
-                     V3D(0.0, 0.0, -20.0));
-  }
+  void test_sourcePosition() { TS_ASSERT_EQUALS(m_workspace.spectrumInfo().sourcePosition(), V3D(0.0, 0.0, -20.0)); }
 
-  void test_samplePosition() {
-    TS_ASSERT_EQUALS(m_workspace.spectrumInfo().samplePosition(),
-                     V3D(0.0, 0.0, 0.0));
-  }
+  void test_samplePosition() { TS_ASSERT_EQUALS(m_workspace.spectrumInfo().samplePosition(), V3D(0.0, 0.0, 0.0)); }
 
   void test_l1() { TS_ASSERT_EQUALS(m_workspace.spectrumInfo().l1(), 20.0); }
 
   void test_l1_no_instrument() {
-    TS_ASSERT_THROWS(m_workspaceNoInstrument.spectrumInfo().l1(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(m_workspaceNoInstrument.spectrumInfo().l1(), const std::runtime_error &);
   }
 
   void test_isMonitor() {
@@ -155,10 +141,8 @@ public:
     const auto &spectrumInfo = m_grouped.spectrumInfo();
     double x2 = 5.0 * 5.0;
     double y2 = 2.0 * 2.0 * 0.05 * 0.05;
-    TS_ASSERT_EQUALS(spectrumInfo.l2(GroupOfDets2And3),
-                     (sqrt(x2 + 0 * 0 * y2) + sqrt(x2 + 1 * 1 * y2)) / 2.0);
-    TS_ASSERT_EQUALS(spectrumInfo.l2(GroupOfDets1And2),
-                     (sqrt(x2 + 0 * 0 * y2) + sqrt(x2 + 1 * 1 * y2)) / 2.0);
+    TS_ASSERT_EQUALS(spectrumInfo.l2(GroupOfDets2And3), (sqrt(x2 + 0 * 0 * y2) + sqrt(x2 + 1 * 1 * y2)) / 2.0);
+    TS_ASSERT_EQUALS(spectrumInfo.l2(GroupOfDets1And2), (sqrt(x2 + 0 * 0 * y2) + sqrt(x2 + 1 * 1 * y2)) / 2.0);
     // Other lengths are not sensible since the detectors include monitors
   }
 
@@ -188,10 +172,8 @@ public:
 
   void test_grouped_twoTheta() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    TS_ASSERT_DELTA(spectrumInfo.twoTheta(GroupOfDets2And3), 0.0199973 / 2.0,
-                    1e-6);
-    TS_ASSERT_DELTA(spectrumInfo.twoTheta(GroupOfDets1And2), 0.0199973 / 2.0,
-                    1e-6);
+    TS_ASSERT_DELTA(spectrumInfo.twoTheta(GroupOfDets2And3), 0.0199973 / 2.0, 1e-6);
+    TS_ASSERT_DELTA(spectrumInfo.twoTheta(GroupOfDets1And2), 0.0199973 / 2.0, 1e-6);
     // Other theta values are not sensible since the detectors include monitors
   }
 
@@ -200,8 +182,7 @@ public:
   void test_twoThetaLegacy() {
     const auto &spectrumInfo = m_workspace.spectrumInfo();
     auto det = m_workspace.getDetector(2);
-    TS_ASSERT_EQUALS(spectrumInfo.twoTheta(2),
-                     m_workspace.detectorTwoTheta(*det));
+    TS_ASSERT_EQUALS(spectrumInfo.twoTheta(2), m_workspace.detectorTwoTheta(*det));
   }
 
   // Legacy test via the workspace method detectorTwoTheta(), which might be
@@ -209,8 +190,7 @@ public:
   void test_grouped_twoThetaLegacy() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
     auto det = m_grouped.getDetector(GroupOfDets1And2);
-    TS_ASSERT_EQUALS(spectrumInfo.twoTheta(GroupOfDets1And2),
-                     m_grouped.detectorTwoTheta(*det));
+    TS_ASSERT_EQUALS(spectrumInfo.twoTheta(GroupOfDets1And2), m_grouped.detectorTwoTheta(*det));
   }
 
   void test_signedTwoTheta() {
@@ -225,10 +205,8 @@ public:
 
   void test_grouped_signedTwoTheta() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(GroupOfDets2And3),
-                    0.0199973 / 2.0, 1e-6);
-    TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(GroupOfDets1And2),
-                    -0.0199973 / 2.0, 1e-6);
+    TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(GroupOfDets2And3), 0.0199973 / 2.0, 1e-6);
+    TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(GroupOfDets1And2), -0.0199973 / 2.0, 1e-6);
     // Other theta values are not sensible since the detectors include monitors
   }
 
@@ -237,8 +215,7 @@ public:
   void test_signedTwoThetaLegacy() {
     const auto &spectrumInfo = m_workspace.spectrumInfo();
     auto det = m_workspace.getDetector(2);
-    TS_ASSERT_EQUALS(spectrumInfo.signedTwoTheta(2),
-                     m_workspace.detectorSignedTwoTheta(*det));
+    TS_ASSERT_EQUALS(spectrumInfo.signedTwoTheta(2), m_workspace.detectorSignedTwoTheta(*det));
   }
 
   // Legacy test via the workspace method detectorSignedTwoTheta(), which might
@@ -246,8 +223,7 @@ public:
   void test_grouped_signedTwoThetaLegacy() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
     auto det = m_grouped.getDetector(GroupOfDets1And2);
-    TS_ASSERT_EQUALS(spectrumInfo.signedTwoTheta(GroupOfDets1And2),
-                     m_grouped.detectorSignedTwoTheta(*det));
+    TS_ASSERT_EQUALS(spectrumInfo.signedTwoTheta(GroupOfDets1And2), m_grouped.detectorSignedTwoTheta(*det));
   }
 
   void test_azimuthal() {
@@ -271,10 +247,8 @@ public:
 
   void test_grouped_position() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    TS_ASSERT_EQUALS(spectrumInfo.position(GroupOfDets2And3),
-                     V3D(0.0, 0.1 / 2.0, 5.0));
-    TS_ASSERT_EQUALS(spectrumInfo.position(GroupOfDets1And2),
-                     V3D(0.0, -0.1 / 2.0, 5.0));
+    TS_ASSERT_EQUALS(spectrumInfo.position(GroupOfDets2And3), V3D(0.0, 0.1 / 2.0, 5.0));
+    TS_ASSERT_EQUALS(spectrumInfo.position(GroupOfDets1And2), V3D(0.0, -0.1 / 2.0, 5.0));
     // Other positions are not sensible since the detectors include monitors
   }
 
@@ -284,8 +258,7 @@ public:
     const auto oldPos = detectorInfo.position(1);
     // Change Y pos from 0.0 to -0.1
     detectorInfo.setPosition(1, V3D(0.0, -0.1, 5.0));
-    TS_ASSERT_EQUALS(spectrumInfo.position(GroupOfDets2And3),
-                     V3D(0.0, 0.0, 5.0));
+    TS_ASSERT_EQUALS(spectrumInfo.position(GroupOfDets2And3), V3D(0.0, 0.0, 5.0));
     TS_ASSERT_DELTA(spectrumInfo.twoTheta(0), 0.0199973, 1e-6);
     // Restore old position
     detectorInfo.setPosition(1, oldPos);
@@ -435,17 +408,14 @@ public:
 
   void test_no_detector() {
     const auto &spectrumInfo = m_workspaceNoInstrument.spectrumInfo();
-    TS_ASSERT_THROWS(spectrumInfo.detector(0),
-                     const Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(spectrumInfo.detector(0), const Kernel::Exception::NotFoundError &);
   }
 
   void test_no_detector_twice() {
     // Regression test: Make sure that *repeated* access also fails.
     const auto &spectrumInfo = m_workspaceNoInstrument.spectrumInfo();
-    TS_ASSERT_THROWS(spectrumInfo.detector(0),
-                     const Kernel::Exception::NotFoundError &);
-    TS_ASSERT_THROWS(spectrumInfo.detector(0),
-                     const Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(spectrumInfo.detector(0), const Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(spectrumInfo.detector(0), const Kernel::Exception::NotFoundError &);
   }
 
   void test_ExperimentInfo_basics() {
@@ -608,8 +578,7 @@ private:
     bool includeMonitors = true;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");
-    InstrumentCreationHelper::addFullInstrumentToWorkspace(
-        ws, includeMonitors, startYNegative, instrumentName);
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(ws, includeMonitors, startYNegative, instrumentName);
 
     std::set<int64_t> toMask{0, 3};
     auto &detectorInfo = ws.mutableDetectorInfo();
@@ -621,9 +590,7 @@ private:
 
 class SpectrumInfoTestPerformance : public CxxTest::TestSuite {
 public:
-  static SpectrumInfoTestPerformance *createSuite() {
-    return new SpectrumInfoTestPerformance();
-  }
+  static SpectrumInfoTestPerformance *createSuite() { return new SpectrumInfoTestPerformance(); }
   static void destroySuite(SpectrumInfoTestPerformance *suite) { delete suite; }
 
   SpectrumInfoTestPerformance() : m_workspace() {
@@ -633,8 +600,8 @@ public:
     bool includeMonitors = false;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");
-    InstrumentCreationHelper::addFullInstrumentToWorkspace(
-        m_workspace, includeMonitors, startYNegative, instrumentName);
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(m_workspace, includeMonitors, startYNegative,
+                                                           instrumentName);
   }
 
   void test_typical() {

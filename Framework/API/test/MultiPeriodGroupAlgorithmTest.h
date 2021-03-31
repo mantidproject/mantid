@@ -27,28 +27,20 @@ public:
   int version() const override { return 1; }
   const std::string summary() const override { return "Test summary"; }
   void init() override {
-    declareProperty(
-        std::make_unique<ArrayProperty<std::string>>("MyInputWorkspaces"));
-    declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                          Direction::Output),
-                    "");
-    declareProperty(
-        "PropertyA", 1,
-        std::make_shared<Kernel::MandatoryValidator<int>>()); // I'm only
-                                                              // adding this
-                                                              // property to
-                                                              // cause errors
-                                                              // if it's not
-                                                              // passed to
-                                                              // spawned
-                                                              // algorithms.
+    declareProperty(std::make_unique<ArrayProperty<std::string>>("MyInputWorkspaces"));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output), "");
+    declareProperty("PropertyA", 1,
+                    std::make_shared<Kernel::MandatoryValidator<int>>()); // I'm only
+                                                                          // adding this
+                                                                          // property to
+                                                                          // cause errors
+                                                                          // if it's not
+                                                                          // passed to
+                                                                          // spawned
+                                                                          // algorithms.
   }
-  void exec() override {
-    setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester));
-  }
-  std::string fetchInputPropertyName() const override {
-    return "MyInputWorkspaces";
-  }
+  void exec() override { setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester)); }
+  std::string fetchInputPropertyName() const override { return "MyInputWorkspaces"; }
   bool useCustomInputPropertyName() const override { return true; }
   ~TestAlgorithmA() override {}
 };
@@ -66,25 +58,19 @@ public:
   int version() const override { return 1; }
   const std::string summary() const override { return "Test summary"; }
   void init() override {
-    declareProperty(std::make_unique<WorkspaceProperty<>>("PropertyA", "ws1",
-                                                          Direction::Input));
-    declareProperty(std::make_unique<WorkspaceProperty<>>("PropertyB", "ws2",
-                                                          Direction::Input));
-    declareProperty(std::make_unique<WorkspaceProperty<>>("PropertyC", "ws3",
-                                                          Direction::Input));
-    declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                          Direction::Output),
-                    "");
-    declareProperty(
-        "PropertyX", 1,
-        std::make_shared<Kernel::MandatoryValidator<int>>()); // I'm only
-                                                              // adding this
-                                                              // property to
-                                                              // cause errors
-                                                              // if it's not
-                                                              // passed to
-                                                              // spawned
-                                                              // algorithms.
+    declareProperty(std::make_unique<WorkspaceProperty<>>("PropertyA", "ws1", Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("PropertyB", "ws2", Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("PropertyC", "ws3", Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output), "");
+    declareProperty("PropertyX", 1,
+                    std::make_shared<Kernel::MandatoryValidator<int>>()); // I'm only
+                                                                          // adding this
+                                                                          // property to
+                                                                          // cause errors
+                                                                          // if it's not
+                                                                          // passed to
+                                                                          // spawned
+                                                                          // algorithms.
   }
   void exec() override {
     MatrixWorkspace_sptr a = getProperty("PropertyA");
@@ -106,18 +92,13 @@ DECLARE_ALGORITHM(TestAlgorithmB)
 // ------------------------------------------------------------------
 // End class dec
 
-class MultiPeriodGroupAlgorithmTest : public CxxTest::TestSuite,
-                                      public MultiPeriodGroupTestBase {
+class MultiPeriodGroupAlgorithmTest : public CxxTest::TestSuite, public MultiPeriodGroupTestBase {
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MultiPeriodGroupAlgorithmTest *createSuite() {
-    return new MultiPeriodGroupAlgorithmTest();
-  }
-  static void destroySuite(MultiPeriodGroupAlgorithmTest *suite) {
-    delete suite;
-  }
+  static MultiPeriodGroupAlgorithmTest *createSuite() { return new MultiPeriodGroupAlgorithmTest(); }
+  static void destroySuite(MultiPeriodGroupAlgorithmTest *suite) { delete suite; }
 
   // Note that we may wish to retire this test if we support other input
   // property types in the future.
@@ -130,27 +111,19 @@ public:
       int version() const override { return 1; }
       const std::string summary() const override { return "Test summary"; }
       void init() override {
-        declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                            "InputWorkspaces", "", Direction::Input),
+        declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("InputWorkspaces", "", Direction::Input),
                         "");
-        declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "OutputWorkspace", "", Direction::Output),
-                        "");
+        declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output), "");
       }
-      void exec() override {
-        setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester));
-      }
-      std::string fetchInputPropertyName() const override {
-        return "InputWorkspaces";
-      }
+      void exec() override { setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester)); }
+      std::string fetchInputPropertyName() const override { return "InputWorkspaces"; }
       bool useCustomInputPropertyName() const override { return true; }
       ~BrokenAlgorithm() override {}
     };
     // ------------------------------------------------------------------
     // End class dec
 
-    WorkspaceGroup_sptr testInput =
-        create_good_multiperiod_workspace_group("test");
+    WorkspaceGroup_sptr testInput = create_good_multiperiod_workspace_group("test");
 
     BrokenAlgorithm alg;
     alg.setRethrows(true);
@@ -171,18 +144,12 @@ public:
       int version() const override { return 1; }
       const std::string summary() const override { return "Test summary"; }
       void init() override {
-        declareProperty(
-            std::make_unique<ArrayProperty<std::string>>("InputWorkspaces"));
-        declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "OutputWorkspace", "", Direction::Output),
+        declareProperty(std::make_unique<ArrayProperty<std::string>>("InputWorkspaces"));
+        declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                         "Name of the output workspace");
       }
-      void exec() override {
-        setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester));
-      }
-      std::string fetchInputPropertyName() const override {
-        return "made_up_property_name";
-      }
+      void exec() override { setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester)); }
+      std::string fetchInputPropertyName() const override { return "made_up_property_name"; }
       bool useCustomInputPropertyName() const override { return true; }
       ~BrokenAlgorithm() override {}
     };
@@ -216,9 +183,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    WorkspaceGroup_sptr wsgroup =
-        Mantid::API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            "outWS");
+    WorkspaceGroup_sptr wsgroup = Mantid::API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outWS");
     TS_ASSERT(wsgroup != nullptr);
     TS_ASSERT_EQUALS(a->size(), wsgroup->size());
   }
@@ -243,9 +208,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    WorkspaceGroup_sptr wsgroup =
-        Mantid::API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            "outWS");
+    WorkspaceGroup_sptr wsgroup = Mantid::API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outWS");
     TS_ASSERT(wsgroup != nullptr);
     TS_ASSERT_EQUALS(a->size(), wsgroup->size());
   }

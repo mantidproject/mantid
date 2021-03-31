@@ -59,8 +59,7 @@ public:
     std::string header1, header2, header3, separator, comment;
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
-        specID;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID;
     TS_ASSERT_EQUALS(specID, 1);
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
@@ -99,9 +98,8 @@ public:
   }
 
   void testExec_DXNoData() {
-    Mantid::DataObjects::Workspace2D_sptr wsToSave =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-            WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
+    Mantid::DataObjects::Workspace2D_sptr wsToSave = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
       std::vector<double> &X = wsToSave->dataX(i);
       std::vector<double> &Y = wsToSave->dataY(i);
@@ -121,9 +119,8 @@ public:
   }
 
   void testExec_DX() {
-    Mantid::DataObjects::Workspace2D_sptr wsToSave =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-            WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
+    Mantid::DataObjects::Workspace2D_sptr wsToSave = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
       auto &X = wsToSave->mutableX(i);
       auto &Y = wsToSave->mutableY(i);
@@ -155,8 +152,7 @@ public:
 
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
-        separator >> header4 >> specID;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> separator >> header4 >> specID;
     TS_ASSERT_EQUALS(specID, 1);
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
@@ -202,8 +198,7 @@ public:
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
 
-    TS_ASSERT_THROWS_NOTHING(
-        save.setProperty("SpectrumMetaData", "SpectrumNumber,Q,Angle"));
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("SpectrumMetaData", "SpectrumNumber,Q,Angle"));
     TS_ASSERT_THROWS_NOTHING(save.setProperty("WriteSpectrumID", false));
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
@@ -218,8 +213,8 @@ public:
 
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
-        specID >> separator >> qVal >> separator >> angle;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID >> separator >> qVal >>
+        separator >> angle;
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
     TS_ASSERT_EQUALS(header1, "X");
@@ -255,8 +250,7 @@ public:
 
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
-        axisVal;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> axisVal;
 
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
@@ -277,8 +271,7 @@ public:
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
 
-    TS_ASSERT_THROWS_NOTHING(
-        save.setProperty("SpectrumMetaData", "SpectrumNumber"));
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("SpectrumMetaData", "SpectrumNumber"));
     TS_ASSERT_THROWS_NOTHING(save.setProperty("WriteSpectrumID", true));
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
@@ -293,8 +286,7 @@ public:
 
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
-        specID >> firstData;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID >> firstData;
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
     TS_ASSERT_EQUALS(header1, "X");
@@ -316,8 +308,7 @@ public:
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
 
-    TS_ASSERT_THROWS_NOTHING(
-        save.setPropertyValue("SpectrumMetaData", "SpectrumNumber,Q,Angle"));
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("SpectrumMetaData", "SpectrumNumber,Q,Angle"));
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // the algorithm will have used a defualt and written a file to disk
@@ -347,8 +338,7 @@ public:
 
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
-        specID;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID;
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
     TS_ASSERT_EQUALS(header1, "X");
@@ -377,8 +367,7 @@ public:
     save.setPropertyValue("Filename", m_filename_nohead);
     save.setPropertyValue("InputWorkspace", m_name);
     TS_ASSERT_THROWS_NOTHING(save.setProperty("ColumnHeader", false));
-    std::string filename_nohead =
-        save.getPropertyValue("Filename"); // Get absolute path
+    std::string filename_nohead = save.getPropertyValue("Filename"); // Get absolute path
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
@@ -427,8 +416,7 @@ public:
 
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
-        specID;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID;
     TS_ASSERT_EQUALS(specID, 1);
     TS_ASSERT_EQUALS(comment, "#");
     // the algorithm will use a custom one if supplied even if the type selected
@@ -467,10 +455,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.initialize());
     TS_ASSERT(save.isInitialized());
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Filename", m_filename));
-    std::string filename =
-        save.getPropertyValue("Filename"); // Get absolute path
-    TS_ASSERT_THROWS_ANYTHING(
-        save.setPropertyValue("InputWorkspace", "NotARealWS"));
+    std::string filename = save.getPropertyValue("Filename"); // Get absolute path
+    TS_ASSERT_THROWS_ANYTHING(save.setPropertyValue("InputWorkspace", "NotARealWS"));
     TS_ASSERT_THROWS_ANYTHING(save.execute());
 
     // the algorithm shouldn't have written a file to disk
@@ -532,8 +518,7 @@ public:
     SaveAscii2 save;
     initSaveAscii2(save);
 
-    TS_ASSERT_THROWS_NOTHING(
-        save.setProperty("SpectrumMetaData", "SpectrumNumber"));
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("SpectrumMetaData", "SpectrumNumber"));
     TS_ASSERT_THROWS_ANYTHING(save.execute());
 
     AnalysisDataService::Instance().remove(m_name);
@@ -615,8 +600,7 @@ public:
     std::string header1, header2, header3, separator, comment;
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
-        specID;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID;
     TS_ASSERT_EQUALS(specID, 2);
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
@@ -819,8 +803,7 @@ public:
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
 
-    TS_ASSERT_THROWS_ANYTHING(
-        save.setPropertyValue("Separator", "NotAValidChoice"));
+    TS_ASSERT_THROWS_ANYTHING(save.setPropertyValue("Separator", "NotAValidChoice"));
 
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
@@ -838,8 +821,7 @@ public:
     SaveAscii2 save;
     initSaveAscii2(save);
 
-    TS_ASSERT_THROWS_NOTHING(
-        save.setPropertyValue("SpectrumMetaData", "NotAValidChoice"));
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("SpectrumMetaData", "NotAValidChoice"));
     TS_ASSERT_THROWS_ANYTHING(save.execute());
 
     AnalysisDataService::Instance().remove(m_name);
@@ -877,14 +859,13 @@ public:
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
-    std::string header1, header2, header3, header4, header5, header6, header7,
-        header8, header9, separator, comment, type1, type2;
+    std::string header1, header2, header3, header4, header5, header6, header7, header8, header9, separator, comment,
+        type1, type2;
 
     // Test that the first few column headers, separator and first two types are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
-        separator >> header4 >> separator >> header5 >> separator >> header6 >>
-        separator >> header7 >> separator >> header8 >> separator >> header9 >>
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> separator >> header4 >> separator >>
+        header5 >> separator >> header6 >> separator >> header7 >> separator >> header8 >> separator >> header9 >>
         separator >> type1 >> separator >> type2;
 
     TS_ASSERT_EQUALS(comment, "#");
@@ -923,25 +904,21 @@ public:
 
     // A few rows
     TableRow row1 = table->appendRow();
-    row1 << -1 << static_cast<uint32_t>(0) << static_cast<int64_t>(1)
-         << static_cast<size_t>(10) << 5.5f << -9.9 << true << "Hello"
-         << Mantid::Kernel::V3D();
+    row1 << -1 << static_cast<uint32_t>(0) << static_cast<int64_t>(1) << static_cast<size_t>(10) << 5.5f << -9.9 << true
+         << "Hello" << Mantid::Kernel::V3D();
     TableRow row2 = table->appendRow();
-    row2 << 1 << static_cast<uint32_t>(2) << static_cast<int64_t>(-2)
-         << static_cast<size_t>(100) << 0.0f << 101.0 << false << "World"
-         << Mantid::Kernel::V3D(-1, 3, 4);
+    row2 << 1 << static_cast<uint32_t>(2) << static_cast<int64_t>(-2) << static_cast<size_t>(100) << 0.0f << 101.0
+         << false << "World" << Mantid::Kernel::V3D(-1, 3, 4);
     TableRow row3 = table->appendRow();
-    row3 << 6 << static_cast<uint32_t>(3) << static_cast<int64_t>(0)
-         << static_cast<size_t>(0) << -99.0f << 0.0 << false << "!"
-         << Mantid::Kernel::V3D(1, 6, 10);
+    row3 << 6 << static_cast<uint32_t>(3) << static_cast<int64_t>(0) << static_cast<size_t>(0) << -99.0f << 0.0 << false
+         << "!" << Mantid::Kernel::V3D(1, 6, 10);
 
     AnalysisDataService::Instance().add(name, table);
     return table;
   }
 
 private:
-  void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave,
-                     const bool &isSpectra = true) {
+  void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave, const bool &isSpectra = true) {
     wsToSave = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
         WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
@@ -971,8 +948,7 @@ private:
     const std::vector<double> azimutal{1, 2, 3, 4, 5};
     const int nBins = 3;
 
-    wsToSave = WorkspaceCreationHelper::createProcessedInelasticWS(
-        l2, polar, azimutal, nBins);
+    wsToSave = WorkspaceCreationHelper::createProcessedInelasticWS(l2, polar, azimutal, nBins);
     AnalysisDataService::Instance().add(m_name, wsToSave);
   }
 
@@ -1042,8 +1018,7 @@ private:
     const std::vector<double> azimutal{1, 2, 3, 4, 5};
     const int nBins = 3;
 
-    auto wsToSave = WorkspaceCreationHelper::createProcessedInelasticWS(
-        l2, polar, azimutal, nBins);
+    auto wsToSave = WorkspaceCreationHelper::createProcessedInelasticWS(l2, polar, azimutal, nBins);
     AnalysisDataService::Instance().add(m_name, wsToSave);
   }
 };

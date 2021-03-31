@@ -15,14 +15,11 @@
 namespace Mantid {
 namespace API {
 
-void writeJsonFile(const std::string &filename, const Json::Value &json,
-                   const std::string &error);
+void writeJsonFile(const std::string &filename, const Json::Value &json, const std::string &error);
 
 Json::Value readJsonFile(const std::string &filename, const std::string &error);
 
-void writeStringFile(const std::string &filename,
-                     const std::string &stringToWrite,
-                     const std::string &error);
+void writeStringFile(const std::string &filename, const std::string &stringToWrite, const std::string &error);
 
 bool fileExists(const std::string &filename);
 
@@ -68,12 +65,10 @@ class SCRIPT_DLL_EXPORT ScriptRepositoryImpl : public ScriptRepository {
     SCRIPTSTATUS status;
     /// provide a constructor, to set the default values.
     RepositoryEntry()
-        : remote(false), local(false), directory(false),
-          current_date(Types::Core::DateAndTime::defaultTime()),
-          downloaded_date(Types::Core::DateAndTime::defaultTime()),
-          pub_date(Types::Core::DateAndTime::defaultTime()), description(""),
-          downloaded_pubdate(Types::Core::DateAndTime::defaultTime()),
-          auto_update(false), author(""), status(BOTH_UNCHANGED){};
+        : remote(false), local(false), directory(false), current_date(Types::Core::DateAndTime::defaultTime()),
+          downloaded_date(Types::Core::DateAndTime::defaultTime()), pub_date(Types::Core::DateAndTime::defaultTime()),
+          description(""), downloaded_pubdate(Types::Core::DateAndTime::defaultTime()), auto_update(false), author(""),
+          status(BOTH_UNCHANGED){};
   };
 
   using Repository = std::map<std::string, RepositoryEntry>;
@@ -81,8 +76,7 @@ class SCRIPT_DLL_EXPORT ScriptRepositoryImpl : public ScriptRepository {
   Repository repo;
 
 public:
-  ScriptRepositoryImpl(const std::string &local_rep = std::string(),
-                       const std::string &remote = std::string());
+  ScriptRepositoryImpl(const std::string &local_rep = std::string(), const std::string &remote = std::string());
 
   void connect(const std::string &server) override;
 
@@ -97,11 +91,11 @@ public:
 
   SCRIPTSTATUS fileStatus(const std::string &input_path) override;
 
-  void upload(const std::string &file_path, const std::string &comment,
-              const std::string &author, const std::string &email) override;
+  void upload(const std::string &file_path, const std::string &comment, const std::string &author,
+              const std::string &email) override;
   // remove file from the central repository and from local folder
-  void remove(const std::string &file_path, const std::string &comment,
-              const std::string &author, const std::string &email) override;
+  void remove(const std::string &file_path, const std::string &comment, const std::string &author,
+              const std::string &email) override;
 
   /* Return true if there is a local repository installed*/
   bool isValid() override;
@@ -117,13 +111,10 @@ public:
   /// @deprecated Should avoid this, it is not in the design file.
   std::string localRepository() const { return local_repository; }
 
-  virtual void doDownloadFile(const std::string &url_file,
-                              const std::string &local_file_path = "");
+  virtual void doDownloadFile(const std::string &url_file, const std::string &local_file_path = "");
   // convenient method to allow to perform the unit tests on remove files.
-  virtual std::string doDeleteRemoteFile(const std::string &url,
-                                         const std::string &file_path,
-                                         const std::string &author,
-                                         const std::string &email,
+  virtual std::string doDeleteRemoteFile(const std::string &url, const std::string &file_path,
+                                         const std::string &author, const std::string &email,
                                          const std::string &comment);
 
 protected:

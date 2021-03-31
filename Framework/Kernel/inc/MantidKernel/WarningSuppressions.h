@@ -20,8 +20,7 @@
 #endif
 
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !defined(__clang__)
-#define GCC_VERSION                                                            \
-  (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 #endif
 
 #if defined(GCC_VERSION) || defined(CLANG_VERSION)

@@ -21,13 +21,10 @@ StartsWithValidator::StartsWithValidator(const std::vector<std::string> &values)
  * Constructor.
  * @param values :: A set with the allowed values.
  */
-StartsWithValidator::StartsWithValidator(const std::set<std::string> &values)
-    : Kernel::StringListValidator(values) {}
+StartsWithValidator::StartsWithValidator(const std::set<std::string> &values) : Kernel::StringListValidator(values) {}
 
 /// Clone the validator
-IValidator_sptr StartsWithValidator::clone() const {
-  return std::make_shared<StartsWithValidator>(*this);
-}
+IValidator_sptr StartsWithValidator::clone() const { return std::make_shared<StartsWithValidator>(*this); }
 
 /** Checks if the string passed starts with one from the list
  *  @param value :: The value to test
@@ -36,16 +33,13 @@ IValidator_sptr StartsWithValidator::clone() const {
  */
 std::string StartsWithValidator::checkValidity(const std::string &value) const {
   if (std::any_of(m_allowedValues.cbegin(), m_allowedValues.cend(),
-                  [&value](const auto &val) {
-                    return value.substr(0, val.size()) == val;
-                  })) {
+                  [&value](const auto &val) { return value.substr(0, val.size()) == val; })) {
     return "";
   }
   if (isEmpty(value))
     return "Select a value";
   std::ostringstream os;
-  os << "The value \"" << value
-     << "\" does not start with any of the allowed values";
+  os << "The value \"" << value << "\" does not start with any of the allowed values";
   return os.str();
 }
 

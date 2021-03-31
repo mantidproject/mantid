@@ -52,9 +52,9 @@ boost::python::list valueAsPyObject(MultipleFileProperty &self) {
   return fileList;
 }
 
-MultipleFileProperty *createMultipleFilePropertyWithAction(
-    const std::string &name, unsigned int action,
-    const object &extensions = object(), const bool allowEmptyTokens = false) {
+MultipleFileProperty *createMultipleFilePropertyWithAction(const std::string &name, unsigned int action,
+                                                           const object &extensions = object(),
+                                                           const bool allowEmptyTokens = false) {
   std::vector<std::string> extsAsVector;
   if (!Mantid::PythonInterface::isNone(extensions)) {
     extract<std::string> extractor(extensions);
@@ -67,29 +67,21 @@ MultipleFileProperty *createMultipleFilePropertyWithAction(
   return new MultipleFileProperty(name, action, extsAsVector, allowEmptyTokens);
 }
 
-MultipleFileProperty *
-createMultipleFileProperty(const std::string &name,
-                           const object &extensions = object()) {
-  return createMultipleFilePropertyWithAction(
-      name, FileProperty::FileAction::Load, extensions);
+MultipleFileProperty *createMultipleFileProperty(const std::string &name, const object &extensions = object()) {
+  return createMultipleFilePropertyWithAction(name, FileProperty::FileAction::Load, extensions);
 }
 } // namespace
 
 void export_MultipleFileProperty() {
   using BaseClass = PropertyWithValue<HeldType>;
-  PropertyWithValueExporter<HeldType>::define(
-      "VectorVectorStringPropertyWithValue");
+  PropertyWithValueExporter<HeldType>::define("VectorVectorStringPropertyWithValue");
 
-  class_<MultipleFileProperty, bases<BaseClass>, boost::noncopyable>(
-      "MultipleFileProperty", no_init)
-      .def("__init__", make_constructor(
-                           &createMultipleFileProperty, default_call_policies(),
-                           (arg("name"), arg("extensions") = object())))
-      .def("__init__", make_constructor(&createMultipleFilePropertyWithAction,
-                                        default_call_policies(),
-                                        (arg("name"), arg("action"),
-                                         arg("extensions") = object(),
-                                         arg("allow_empty") = false)))
+  class_<MultipleFileProperty, bases<BaseClass>, boost::noncopyable>("MultipleFileProperty", no_init)
+      .def("__init__", make_constructor(&createMultipleFileProperty, default_call_policies(),
+                                        (arg("name"), arg("extensions") = object())))
+      .def("__init__",
+           make_constructor(&createMultipleFilePropertyWithAction, default_call_policies(),
+                            (arg("name"), arg("action"), arg("extensions") = object(), arg("allow_empty") = false)))
       // Override the base class one to do something more appropriate
       .add_property("value", &valueAsPyObject);
 }

@@ -12,17 +12,14 @@
 namespace Mantid {
 namespace Poldi {
 
-PoldiResidualCorrelationCore::PoldiResidualCorrelationCore(
-    Kernel::Logger &g_log, double weight)
+PoldiResidualCorrelationCore::PoldiResidualCorrelationCore(Kernel::Logger &g_log, double weight)
     : PoldiAutoCorrelationCore(g_log), m_weight(weight) {}
 
 /// Returns the weight that is added to normalization counts
 double PoldiResidualCorrelationCore::getWeight() const { return m_weight; }
 
 /// Sets the weight that is added to normalization counts.
-void PoldiResidualCorrelationCore::setWeight(double newWeight) {
-  m_weight = newWeight;
-}
+void PoldiResidualCorrelationCore::setWeight(double newWeight) { m_weight = newWeight; }
 
 /// Returns norm counts (with an added weight).
 double PoldiResidualCorrelationCore::getNormCounts(int x, int y) const {
@@ -31,36 +28,33 @@ double PoldiResidualCorrelationCore::getNormCounts(int x, int y) const {
 
 /// Calculates a scaled and weighted average signal/noise value from the
 /// supplied list.
-double PoldiResidualCorrelationCore::reduceChopperSlitList(
-    const std::vector<Mantid::Poldi::UncertainValue> &valuesWithSigma,
-    double weight) const {
+double
+PoldiResidualCorrelationCore::reduceChopperSlitList(const std::vector<Mantid::Poldi::UncertainValue> &valuesWithSigma,
+                                                    double weight) const {
   std::vector<double> signalToNoise(valuesWithSigma.size());
-  std::transform(valuesWithSigma.begin(), valuesWithSigma.end(),
-                 signalToNoise.begin(), &UncertainValue::valueToErrorRatio);
+  std::transform(valuesWithSigma.begin(), valuesWithSigma.end(), signalToNoise.begin(),
+                 &UncertainValue::valueToErrorRatio);
 
   double average = calculateAverage(signalToNoise);
   double absoluteAverage = fabs(average);
-  double averageDeviation =
-      calculateAverageDeviationFromValue(signalToNoise, average);
+  double averageDeviation = calculateAverageDeviationFromValue(signalToNoise, average);
 
-  return average * absoluteAverage / (averageDeviation + absoluteAverage) *
-         static_cast<double>(signalToNoise.size()) * weight;
+  return average * absoluteAverage / (averageDeviation + absoluteAverage) * static_cast<double>(signalToNoise.size()) *
+         weight;
 }
 
 /// Calculates the average of the values in a vector.
-double PoldiResidualCorrelationCore::calculateAverage(
-    const std::vector<double> &values) const {
+double PoldiResidualCorrelationCore::calculateAverage(const std::vector<double> &values) const {
   if (values.empty()) {
     throw std::runtime_error("Cannot calculate average of 0 values.");
   }
 
-  return std::accumulate(values.begin(), values.end(), 0.0) /
-         static_cast<double>(values.size());
+  return std::accumulate(values.begin(), values.end(), 0.0) / static_cast<double>(values.size());
 }
 
 /// Calculates the average absolute deviation from the supplied value
-double PoldiResidualCorrelationCore::calculateAverageDeviationFromValue(
-    const std::vector<double> &values, double value) const {
+double PoldiResidualCorrelationCore::calculateAverageDeviationFromValue(const std::vector<double> &values,
+                                                                        double value) const {
   std::vector<double> deviationFromValue(values.size());
   for (size_t i = 0; i < values.size(); ++i) {
     deviationFromValue[i] = fabs(values[i] - value);
@@ -70,8 +64,8 @@ double PoldiResidualCorrelationCore::calculateAverageDeviationFromValue(
 }
 
 /// Background is the sum of correlation counts, sum of counts is discarded.
-double PoldiResidualCorrelationCore::calculateCorrelationBackground(
-    double sumOfCorrelationCounts, double sumOfCounts) const {
+double PoldiResidualCorrelationCore::calculateCorrelationBackground(double sumOfCorrelationCounts,
+                                                                    double sumOfCounts) const {
   UNUSED_ARG(sumOfCounts);
 
   return sumOfCorrelationCounts;
@@ -80,8 +74,7 @@ double PoldiResidualCorrelationCore::calculateCorrelationBackground(
 /// Distributes correlation counts over all points that are possible for a given
 /// d-value.
 void PoldiResidualCorrelationCore::distributeCorrelationCounts(
-    const std::vector<double> &correctedCorrelatedIntensities,
-    const std::vector<double> &dValues) const {
+    const std::vector<double> &correctedCorrelatedIntensities, const std::vector<double> &dValues) const {
   const std::vector<double> chopperSlits(m_chopper->slitTimes());
 
   PARALLEL_FOR_NO_WSP_CHECK()
@@ -89,8 +82,7 @@ void PoldiResidualCorrelationCore::distributeCorrelationCounts(
     for (size_t i = 0; i < dValues.size(); ++i) {
       double d = dValues[dValues.size() - i - 1];
       double dInt = correctedCorrelatedIntensities[i];
-      double deltaForD =
-          -dInt / m_weightsForD[i] / static_cast<double>(chopperSlits.size());
+      double deltaForD = -dInt / m_weightsForD[i] / static_cast<double>(chopperSlits.size());
 
       for (double chopperSlit : chopperSlits) {
         CountLocator locator = getCountLocator(d, chopperSlit, m_indices[k]);
@@ -99,30 +91,25 @@ void PoldiResidualCorrelationCore::distributeCorrelationCounts(
 
         switch (indexDifference) {
         case 0:
-          addToCountData(locator.detectorElement, locator.iicmin,
-                         deltaForD * locator.arrivalWindowWidth);
+          addToCountData(locator.detectorElement, locator.iicmin, deltaForD * locator.arrivalWindowWidth);
           break;
         case 2: {
           int middleIndex = cleanIndex((locator.icmin + 1), m_timeBinCount);
 
           if (middleIndex < 0) {
-            m_logger.warning()
-                << "Inconsistency foun while calculating distribute "
-                   "correlation counts for d-value with index "
-                << std::to_string(k)
-                << ", got middle index: " << std::to_string(middleIndex)
-                << ", ignoring it.\n";
+            m_logger.warning() << "Inconsistency foun while calculating distribute "
+                                  "correlation counts for d-value with index "
+                               << std::to_string(k) << ", got middle index: " << std::to_string(middleIndex)
+                               << ", ignoring it.\n";
             break;
           }
           addToCountData(locator.detectorElement, middleIndex, deltaForD);
         }
         case 1: {
           addToCountData(locator.detectorElement, locator.iicmin,
-                         deltaForD * (static_cast<double>(locator.icmin) -
-                                      locator.cmin + 1.0));
-          addToCountData(
-              locator.detectorElement, locator.iicmax,
-              deltaForD * (locator.cmax - static_cast<double>(locator.icmax)));
+                         deltaForD * (static_cast<double>(locator.icmin) - locator.cmin + 1.0));
+          addToCountData(locator.detectorElement, locator.iicmax,
+                         deltaForD * (locator.cmax - static_cast<double>(locator.icmax)));
           break;
         }
         default:
@@ -136,8 +123,7 @@ void PoldiResidualCorrelationCore::distributeCorrelationCounts(
 /// Modifies count data so that the sum is zero.
 void PoldiResidualCorrelationCore::correctCountData() const {
   double sumOfResiduals = getSumOfCounts(m_timeBinCount, m_detectorElements);
-  auto numberOfCells =
-      static_cast<double>(m_timeBinCount * m_detectorElements.size());
+  auto numberOfCells = static_cast<double>(m_timeBinCount * m_detectorElements.size());
   double ratio = sumOfResiduals / numberOfCells;
 
   PARALLEL_FOR_NO_WSP_CHECK()
@@ -172,9 +158,9 @@ void PoldiResidualCorrelationCore::correctCountData() const {
  * @param dValues :: d-values in reverse order.
  * @return Final corrected correlation spectrum of residuals.
  */
-DataObjects::Workspace2D_sptr PoldiResidualCorrelationCore::finalizeCalculation(
-    const std::vector<double> &correctedCorrelatedIntensities,
-    const std::vector<double> &dValues) const {
+DataObjects::Workspace2D_sptr
+PoldiResidualCorrelationCore::finalizeCalculation(const std::vector<double> &correctedCorrelatedIntensities,
+                                                  const std::vector<double> &dValues) const {
   distributeCorrelationCounts(correctedCorrelatedIntensities, dValues);
   correctCountData();
 
@@ -182,16 +168,14 @@ DataObjects::Workspace2D_sptr PoldiResidualCorrelationCore::finalizeCalculation(
 
   std::vector<double> newCorrected(correctedCorrelatedIntensities.size());
   for (size_t i = 0; i < correctedCorrelatedIntensities.size(); ++i) {
-    newCorrected[i] = correctedCorrelatedIntensities[i] -
-                      (sumOfResiduals * m_weightsForD[i] / m_sumOfWeights);
+    newCorrected[i] = correctedCorrelatedIntensities[i] - (sumOfResiduals * m_weightsForD[i] / m_sumOfWeights);
   }
 
   return PoldiAutoCorrelationCore::finalizeCalculation(newCorrected, dValues);
 }
 
 /// Adds the supplied value to each data point.
-void PoldiResidualCorrelationCore::addToCountData(int x, int y,
-                                                  double newCounts) const {
+void PoldiResidualCorrelationCore::addToCountData(int x, int y, double newCounts) const {
   m_countData->mutableY(x)[y] += newCounts;
 }
 

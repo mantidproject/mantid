@@ -47,8 +47,7 @@ public:
   void test_algorithm() {
     std::string name = "LoadFITS";
     int version = 1;
-    testAlg =
-        Mantid::API::AlgorithmManager::Instance().create(name /*, version*/);
+    testAlg = Mantid::API::AlgorithmManager::Instance().create(name /*, version*/);
     TS_ASSERT(testAlg);
     TS_ASSERT_EQUALS(testAlg->name(), name);
     TS_ASSERT_EQUALS(testAlg->version(), version);
@@ -81,8 +80,7 @@ public:
 
     LoadFITS lf2;
     TS_ASSERT_THROWS_NOTHING(lf2.initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        lf2.setPropertyValue("OutputWorkspace", "out_ws_name"));
+    TS_ASSERT_THROWS_NOTHING(lf2.setPropertyValue("OutputWorkspace", "out_ws_name"));
     TS_ASSERT_THROWS(lf2.execute(), const std::runtime_error &);
     TS_ASSERT(!lf2.isExecuted());
   }
@@ -90,29 +88,19 @@ public:
   void test_wrongProp() {
     LoadFITS lf;
     TS_ASSERT_THROWS_NOTHING(lf.initialize());
-    TS_ASSERT_THROWS(lf.setPropertyValue("file", "anything"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(lf.setPropertyValue("output", "anything"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(lf.setPropertyValue("FITS", "anything"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(lf.setPropertyValue("file", "anything"), const std::runtime_error &);
+    TS_ASSERT_THROWS(lf.setPropertyValue("output", "anything"), const std::runtime_error &);
+    TS_ASSERT_THROWS(lf.setPropertyValue("FITS", "anything"), const std::runtime_error &);
 
-    TS_ASSERT_THROWS(lf.setPropertyValue("BinSize", "-1"),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(lf.setPropertyValue("BinSize", "0"),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(lf.setPropertyValue("FilterNoiseLevel", "-10"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(lf.setPropertyValue("BinSize", "-1"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(lf.setPropertyValue("BinSize", "0"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(lf.setPropertyValue("FilterNoiseLevel", "-10"), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(lf.setPropertyValue("FilterNoiseLevel", "0"));
 
-    TS_ASSERT_THROWS(lf.setPropertyValue("ImageKey", "anything"),
-                     const Mantid::Kernel::Exception::NotFoundError &);
-    TS_ASSERT_THROWS(lf.setPropertyValue("BITPIX", "anything"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(lf.setPropertyValue("NAXIS", "anything"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(lf.setPropertyValue("NAXIS1", "anything"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(lf.setPropertyValue("ImageKey", "anything"), const Mantid::Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(lf.setPropertyValue("BITPIX", "anything"), const std::runtime_error &);
+    TS_ASSERT_THROWS(lf.setPropertyValue("NAXIS", "anything"), const std::runtime_error &);
+    TS_ASSERT_THROWS(lf.setPropertyValue("NAXIS1", "anything"), const std::runtime_error &);
   }
 
   void test_initGood() {
@@ -133,8 +121,7 @@ public:
 
     // Set the ImageKey to be 0 (this used to be required, but the key
     // should not be there any longer);
-    TS_ASSERT_THROWS(algToBeTested.setProperty<int>("ImageKey", 0),
-                     const Mantid::Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(algToBeTested.setProperty<int>("ImageKey", 0), const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void test_performAssertions() {
@@ -143,17 +130,13 @@ public:
     //  get workspace generated
     WorkspaceGroup_sptr out;
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputSpace));
-    TS_ASSERT_THROWS_NOTHING(
-        out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            outputSpace));
+    TS_ASSERT_THROWS_NOTHING(out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace));
     TS_ASSERT_EQUALS(out->getNumberOfEntries(),
                      2); // Number of time bins should equal number of files
     MatrixWorkspace_sptr ws1;
-    TS_ASSERT_THROWS_NOTHING(
-        ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0)));
+    TS_ASSERT_THROWS_NOTHING(ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0)));
     MatrixWorkspace_sptr ws2;
-    TS_ASSERT_THROWS_NOTHING(
-        ws2 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1)));
+    TS_ASSERT_THROWS_NOTHING(ws2 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1)));
 
     // basic FITS headers
     const auto run = ws1->run();
@@ -168,13 +151,11 @@ public:
     TS_ASSERT_EQUALS(ws2->getNumberHistograms(), g_SPECTRA_COUNT);
 
     // Sum the two bins from the last spectra - should be 70400
-    double sumY =
-        ws1->y(g_SPECTRA_COUNT - 1)[0] + ws2->y(g_SPECTRA_COUNT - 1)[0];
+    double sumY = ws1->y(g_SPECTRA_COUNT - 1)[0] + ws2->y(g_SPECTRA_COUNT - 1)[0];
     TS_ASSERT_EQUALS(sumY, 275);
     // Check the sum of the error values for the last spectra in each file -
     // should be 375.183
-    double sumE =
-        ws1->e(g_SPECTRA_COUNT - 1)[0] + ws2->e(g_SPECTRA_COUNT - 1)[0];
+    double sumE = ws1->e(g_SPECTRA_COUNT - 1)[0] + ws2->e(g_SPECTRA_COUNT - 1)[0];
     TS_ASSERT_LESS_THAN(std::abs(sumE - 23.4489), 0.0001); // Include a small
     // tolerance check with
     // the assert - not
@@ -182,8 +163,7 @@ public:
   }
 
   void test_noiseFilter() {
-    testAlg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
+    testAlg = Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
 
     TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
     TS_ASSERT(testAlg->isInitialized());
@@ -199,9 +179,7 @@ public:
 
     WorkspaceGroup_sptr out;
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputSpace));
-    TS_ASSERT_THROWS_NOTHING(
-        out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            outputSpace));
+    TS_ASSERT_THROWS_NOTHING(out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace));
     const int nws = 2;
     TS_ASSERT_EQUALS(out->getNumberOfEntries(), nws);
 
@@ -209,21 +187,18 @@ public:
     double expectedE[nws] = {12, 12.2066};
     for (int i = 0; i < out->getNumberOfEntries(); ++i) {
       MatrixWorkspace_sptr ws;
-      TS_ASSERT_THROWS_NOTHING(
-          ws = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
+      TS_ASSERT_THROWS_NOTHING(ws = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
 
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), g_SPECTRA_COUNT);
 
       // check Y and Error
       TS_ASSERT_EQUALS(ws->y(g_SPECTRA_COUNT - 100)[0], expectedY[i]);
-      TS_ASSERT_LESS_THAN(
-          std::abs(ws->e(g_SPECTRA_COUNT - 100)[0] - expectedE[i]), 0.0001);
+      TS_ASSERT_LESS_THAN(std::abs(ws->e(g_SPECTRA_COUNT - 100)[0] - expectedE[i]), 0.0001);
     }
   }
 
   void test_rebinWrong() {
-    testAlg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
+    testAlg = Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
 
     TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
     TS_ASSERT(testAlg->isInitialized());
@@ -240,8 +215,7 @@ public:
   }
 
   void test_rebinOK() {
-    testAlg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
+    testAlg = Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
 
     TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
     TS_ASSERT(testAlg->isInitialized());
@@ -258,24 +232,19 @@ public:
 
     WorkspaceGroup_sptr out;
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputSpace));
-    TS_ASSERT_THROWS_NOTHING(
-        out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            outputSpace));
+    TS_ASSERT_THROWS_NOTHING(out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace));
     TS_ASSERT_EQUALS(out->getNumberOfEntries(), 2);
 
     for (int i = 0; i < out->getNumberOfEntries(); ++i) {
       MatrixWorkspace_sptr ws;
-      TS_ASSERT_THROWS_NOTHING(
-          ws = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
+      TS_ASSERT_THROWS_NOTHING(ws = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
 
-      TS_ASSERT_EQUALS(ws->getNumberHistograms(),
-                       g_SPECTRA_COUNT_ASRECT / binSize);
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), g_SPECTRA_COUNT_ASRECT / binSize);
     }
 
     // try 8, 512x512 => 64x64 image
     binSize = 8;
-    testAlg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
+    testAlg = Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
 
     TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
     TS_ASSERT(testAlg->isInitialized());
@@ -290,24 +259,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(testAlg->execute());
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputSpace));
-    TS_ASSERT_THROWS_NOTHING(
-        out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            outputSpace));
+    TS_ASSERT_THROWS_NOTHING(out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace));
     TS_ASSERT_EQUALS(out->getNumberOfEntries(), 2);
 
     for (int i = 0; i < out->getNumberOfEntries(); ++i) {
       MatrixWorkspace_sptr ws;
-      TS_ASSERT_THROWS_NOTHING(
-          ws = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
+      TS_ASSERT_THROWS_NOTHING(ws = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
 
-      TS_ASSERT_EQUALS(ws->getNumberHistograms(),
-                       g_SPECTRA_COUNT_ASRECT / binSize);
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), g_SPECTRA_COUNT_ASRECT / binSize);
     }
   }
 
   void test_loadAsRect() {
-    testAlg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
+    testAlg = Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
 
     TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
     TS_ASSERT(testAlg->isInitialized());
@@ -323,69 +287,52 @@ public:
 
     WorkspaceGroup_sptr out;
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputSpace));
-    TS_ASSERT_THROWS_NOTHING(
-        out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            outputSpace));
+    TS_ASSERT_THROWS_NOTHING(out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace));
     TS_ASSERT_EQUALS(out->getNumberOfEntries(), 2);
 
     for (int i = 0; i < out->getNumberOfEntries(); ++i) {
       MatrixWorkspace_sptr ws;
-      TS_ASSERT_THROWS_NOTHING(
-          ws = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
+      TS_ASSERT_THROWS_NOTHING(ws = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
 
       TSM_ASSERT_EQUALS("The number of histograms should be the expected, "
                         "dimension of the image",
                         ws->getNumberHistograms(), g_SPECTRA_COUNT_ASRECT);
     }
 
-    TSM_ASSERT_EQUALS("The output workspace group should have two workspaces",
-                      out->size(), 2);
+    TSM_ASSERT_EQUALS("The output workspace group should have two workspaces", out->size(), 2);
 
     // and finally a basic check of values in the image, to be safe
     MatrixWorkspace_sptr ws0;
-    TS_ASSERT_THROWS_NOTHING(
-        ws0 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0)));
+    TS_ASSERT_THROWS_NOTHING(ws0 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0)));
 
     TSM_ASSERT_EQUALS("The title of the first output workspace is not the name "
                       "of the first file",
                       ws0->getTitle(), g_smallFname1);
 
     size_t n = ws0->getNumberHistograms();
-    TSM_ASSERT_EQUALS(
-        "The value at a given spectrum and bin (first one) is not as expected",
-        ws0->y(n - 1)[0], 137);
+    TSM_ASSERT_EQUALS("The value at a given spectrum and bin (first one) is not as expected", ws0->y(n - 1)[0], 137);
 
-    TSM_ASSERT_EQUALS(
-        "The value at a given spectrum and bin (middle one) is not as expected",
-        ws0->y(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 159);
+    TSM_ASSERT_EQUALS("The value at a given spectrum and bin (middle one) is not as expected",
+                      ws0->y(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 159);
 
-    TSM_ASSERT_EQUALS(
-        "The value at a given spectrum and bin (last one) is not as expected",
-        ws0->y(n - 1).back(), 142);
+    TSM_ASSERT_EQUALS("The value at a given spectrum and bin (last one) is not as expected", ws0->y(n - 1).back(), 142);
 
     MatrixWorkspace_sptr ws1;
-    TS_ASSERT_THROWS_NOTHING(
-        ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1)));
+    TS_ASSERT_THROWS_NOTHING(ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1)));
 
     TSM_ASSERT_EQUALS("The title of the second output workspace is not the "
                       "name of the second file",
                       ws1->getTitle(), g_smallFname2);
-    TSM_ASSERT_EQUALS(
-        "The value at a given spectrum and bin (first one) is not as expected",
-        ws1->y(n - 1)[0], 155);
+    TSM_ASSERT_EQUALS("The value at a given spectrum and bin (first one) is not as expected", ws1->y(n - 1)[0], 155);
 
-    TSM_ASSERT_EQUALS(
-        "The value at a given spectrum and bin (middle one) is not as expected",
-        ws1->y(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 199);
+    TSM_ASSERT_EQUALS("The value at a given spectrum and bin (middle one) is not as expected",
+                      ws1->y(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 199);
 
-    TSM_ASSERT_EQUALS(
-        "The value at a given spectrum and bin (last one) is not as expected",
-        ws1->y(n - 1).back(), 133);
+    TSM_ASSERT_EQUALS("The value at a given spectrum and bin (last one) is not as expected", ws1->y(n - 1).back(), 133);
   }
 
   void test_loadEmpty() {
-    testAlg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
+    testAlg = Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
 
     TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
     TS_ASSERT(testAlg->isInitialized());
@@ -412,16 +359,12 @@ class LoadFITSTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadFITSTestPerformance *createSuite() {
-    return new LoadFITSTestPerformance();
-  }
+  static LoadFITSTestPerformance *createSuite() { return new LoadFITSTestPerformance(); }
   static void destroySuite(LoadFITSTestPerformance *suite) { delete suite; }
 
   void setUp() override { FrameworkManager::Instance(); }
 
-  void tearDown() override {
-    Mantid::API::AnalysisDataService::Instance().remove("FitsOutput");
-  }
+  void tearDown() override { Mantid::API::AnalysisDataService::Instance().remove("FitsOutput"); }
 
   void test_Load_Small_01() {
     LoadFITS lf;

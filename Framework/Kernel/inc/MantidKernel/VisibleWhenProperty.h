@@ -21,22 +21,19 @@ class DLLExport VisibleWhenProperty : public EnabledWhenProperty {
 public:
   /// Constructs a VisibleWhenProperty object which checks the property
   /// with name given and if it matches the criteria makes it visible
-  VisibleWhenProperty(const std::string &otherPropName, ePropertyCriterion when,
-                      const std::string &value = "");
+  VisibleWhenProperty(const std::string &otherPropName, ePropertyCriterion when, const std::string &value = "");
 
   /// Constructs a VisibleWhenProperty object which copies two
   /// already constructed VisibleWhenProperty objects and returns the result
   /// of both of them with the specified logic operator
-  VisibleWhenProperty(const VisibleWhenProperty &conditionOne,
-                      const VisibleWhenProperty &conditionTwo,
+  VisibleWhenProperty(const VisibleWhenProperty &conditionOne, const VisibleWhenProperty &conditionTwo,
                       eLogicOperator logicOperator);
 
   /// Constructs a VisibleWhenProperty object which takes ownership of two
   /// already constructed VisibleWhenProperty objects and returns the result
   /// of both of them with the specified logic operator
   VisibleWhenProperty(std::shared_ptr<VisibleWhenProperty> &&conditionOne,
-                      std::shared_ptr<VisibleWhenProperty> &&conditionTwo,
-                      eLogicOperator logicOperator);
+                      std::shared_ptr<VisibleWhenProperty> &&conditionTwo, eLogicOperator logicOperator);
 
   /// Checks two VisisbleWhenProperty objects to determine the
   /// result of both of them
@@ -54,8 +51,7 @@ public:
 
 private:
   /// Hold a copy of any existing VisibleWhenPropertyObjects
-  std::shared_ptr<ComparisonDetails<VisibleWhenProperty>> m_comparisonDetails =
-      nullptr;
+  std::shared_ptr<ComparisonDetails<VisibleWhenProperty>> m_comparisonDetails = nullptr;
 };
 
 } // namespace Kernel

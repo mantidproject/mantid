@@ -37,8 +37,8 @@ std::string getFunctionString(std::string const &workspaceName) {
 }
 
 MultiDomainFunction_sptr getFunction(std::string const &functionString) {
-  auto fun = FunctionFactory::Instance().createInitialized(
-      "composite=MultiDomainFunction;" + functionString + ";" + functionString);
+  auto fun = FunctionFactory::Instance().createInitialized("composite=MultiDomainFunction;" + functionString + ";" +
+                                                           functionString);
   return std::dynamic_pointer_cast<MultiDomainFunction>(fun);
 }
 
@@ -74,14 +74,12 @@ public:
     auto const workspace4 = createWorkspace(3, 6);
     auto const workspace5 = createWorkspace(3, 7);
 
-    addWorkspacesToModel(spectra, m_workspace, workspace2, workspace3,
-                         workspace4, workspace5);
+    addWorkspacesToModel(spectra, m_workspace, workspace2, workspace3, workspace4, workspace5);
 
     TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{5});
   }
 
-  void
-  test_that_getFittingFunction_will_return_the_fitting_function_which_has_been_set() {
+  void test_that_getFittingFunction_will_return_the_fitting_function_which_has_been_set() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
@@ -103,8 +101,7 @@ public:
     TS_ASSERT(!m_model->getInstrumentResolution(TableDatasetIndex{3}));
   }
 
-  void
-  test_that_getInstrumentResolution_will_return_the_none_if_the_workspace_has_no_analyser() {
+  void test_that_getInstrumentResolution_will_return_the_none_if_the_workspace_has_no_analyser() {
     /// A unit test for a positive response from getInstrumentResolution needs
     /// to be added. The workspace used in the test will need to have an
     /// analyser attached to its instrument
@@ -117,8 +114,7 @@ public:
     TS_ASSERT(!m_model->getInstrumentResolution(TableDatasetIndex{0}));
   }
 
-  void
-  test_that_getNumberHistograms_will_get_the_number_of_spectra_for_the_workspace_specified() {
+  void test_that_getNumberHistograms_will_get_the_number_of_spectra_for_the_workspace_specified() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
     auto const workspace2 = createWorkspace(5, 3);
     m_ads->addOrReplace("Name2", workspace2);
@@ -128,8 +124,7 @@ public:
     TS_ASSERT_EQUALS(m_model->getNumberHistograms(TableDatasetIndex{1}), 5);
   }
 
-  void
-  test_that_removeWorkspace_will_remove_the_workspace_specified_from_the_model() {
+  void test_that_removeWorkspace_will_remove_the_workspace_specified_from_the_model() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
@@ -138,22 +133,15 @@ public:
     TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{0});
   }
 
-  void
-  test_that_setResolution_will_throw_when_provided_the_name_of_a_workspace_which_does_not_exist() {
-    TS_ASSERT_THROWS(
-        m_model->setResolution("InvalidName", TableDatasetIndex{0}),
-        const std::runtime_error &);
+  void test_that_setResolution_will_throw_when_provided_the_name_of_a_workspace_which_does_not_exist() {
+    TS_ASSERT_THROWS(m_model->setResolution("InvalidName", TableDatasetIndex{0}), const std::runtime_error &);
   }
 
-  void
-  test_that_setResolution_will_throw_when_provided_an_index_that_is_out_of_range() {
-    TS_ASSERT_THROWS(
-        m_model->setResolution(m_workspace->getName(), TableDatasetIndex{5}),
-        const std::out_of_range &);
+  void test_that_setResolution_will_throw_when_provided_an_index_that_is_out_of_range() {
+    TS_ASSERT_THROWS(m_model->setResolution(m_workspace->getName(), TableDatasetIndex{5}), const std::out_of_range &);
   }
 
-  void
-  test_that_get_resolution_for_fit_returns_correctly_for_multiple_workspaces() {
+  void test_that_get_resolution_for_fit_returns_correctly_for_multiple_workspaces() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0,5");
     addWorkspacesToModel(spectra, m_workspace);
     auto const workspace2 = createWorkspace(3, 3);
@@ -178,15 +166,13 @@ public:
 
 private:
   template <typename Workspace, typename... Workspaces>
-  void addWorkspacesToModel(FunctionModelSpectra const &spectra,
-                            Workspace const &workspace,
-                            Workspaces const &... workspaces) {
+  void addWorkspacesToModel(FunctionModelSpectra const &spectra, Workspace const &workspace,
+                            Workspaces const &...workspaces) {
     m_model->addWorkspace(workspace, spectra);
     addWorkspacesToModel(spectra, workspaces...);
   }
 
-  void addWorkspacesToModel(FunctionModelSpectra const &spectra,
-                            MatrixWorkspace_sptr const &workspace) {
+  void addWorkspacesToModel(FunctionModelSpectra const &spectra, MatrixWorkspace_sptr const &workspace) {
     m_model->addWorkspace(workspace, spectra);
   }
 

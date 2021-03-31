@@ -30,15 +30,12 @@ class SCDCalibratePanelsTest : public CxxTest::TestSuite {
 public:
   void test_TOPAZ_5637() {
     // load a peaks file
-    std::shared_ptr<Algorithm> alg =
-        AlgorithmFactory::Instance().create("LoadIsawPeaks", 1);
+    std::shared_ptr<Algorithm> alg = AlgorithmFactory::Instance().create("LoadIsawPeaks", 1);
     alg->initialize();
     alg->setPropertyValue("Filename", "Peaks5637.integrate");
     alg->setPropertyValue("OutputWorkspace", "TOPAZ_5637");
     TS_ASSERT(alg->execute());
-    PeaksWorkspace_sptr pws =
-        AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(
-            "TOPAZ_5637");
+    PeaksWorkspace_sptr pws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("TOPAZ_5637");
     size_t numberPeaks = pws->getNumberPeaks();
     std::vector<int> notBank47;
     for (int i = 0; i < int(numberPeaks); i++)
@@ -63,26 +60,20 @@ public:
     TS_ASSERT(alg->execute());
 
     // verify the results
-    ITableWorkspace_sptr results =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            "params_bank47");
+    ITableWorkspace_sptr results = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("params_bank47");
     // TODO: Some of the fit parameters that are below are extermly sensitive to
     // rounding errors in the algorithm LoadIsawPeaks and floating point math in
     // the instrument code. Ideally the assertions should be on something else.
     TS_ASSERT_DELTA(-0.0031, results->cell<double>(0, 1), 1e-3);
     TS_ASSERT_DELTA(0.0008, results->cell<double>(1, 1), 4e-4);
     TS_ASSERT_DELTA(-0.00009, results->cell<double>(2, 1), 3e-4);
-    TS_ASSERT_DELTA(0.750445,
-                    results->cell<double>(3, 1) + results->cell<double>(5, 1),
-                    0.05);
+    TS_ASSERT_DELTA(0.750445, results->cell<double>(3, 1) + results->cell<double>(5, 1), 0.05);
     TS_ASSERT_DELTA(-1.39339, results->cell<double>(4, 1), 1.1);
     TS_ASSERT_DELTA(0.210786, results->cell<double>(5, 1), 1.e-2);
     TS_ASSERT_DELTA(1.0024, results->cell<double>(6, 1), 5e-3);
     TS_ASSERT_DELTA(0.9986, results->cell<double>(7, 1), 1e-2);
     TS_ASSERT_DELTA(0.2710, results->cell<double>(9, 1), 0.2);
-    ITableWorkspace_sptr resultsL1 =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            "params_L1");
+    ITableWorkspace_sptr resultsL1 = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("params_L1");
     TS_ASSERT_DELTA(0.00529, resultsL1->cell<double>(2, 1), .01);
 
     remove(detCalTempPath.string().c_str());

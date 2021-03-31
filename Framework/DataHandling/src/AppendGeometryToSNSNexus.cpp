@@ -36,8 +36,7 @@ DECLARE_ALGORITHM(AppendGeometryToSNSNexus)
 /** Constructor
  */
 AppendGeometryToSNSNexus::AppendGeometryToSNSNexus()
-    : m_makeNexusCopy(false), m_instrumentLoadedCorrectly(false),
-      m_logsLoadedCorrectly(false) {}
+    : m_makeNexusCopy(false), m_instrumentLoadedCorrectly(false), m_logsLoadedCorrectly(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -48,17 +47,13 @@ AppendGeometryToSNSNexus::~AppendGeometryToSNSNexus() {
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string AppendGeometryToSNSNexus::name() const {
-  return "AppendGeometryToSNSNexus";
-}
+const std::string AppendGeometryToSNSNexus::name() const { return "AppendGeometryToSNSNexus"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int AppendGeometryToSNSNexus::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string AppendGeometryToSNSNexus::category() const {
-  return "DataHandling\\DataAcquisition";
-}
+const std::string AppendGeometryToSNSNexus::category() const { return "DataHandling\\DataAcquisition"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -69,16 +64,13 @@ void AppendGeometryToSNSNexus::init() {
   // Declare potential extensions for input NeXus file
   std::vector<std::string> extensions{".nxs", ".h5"};
 
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Load, extensions),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, extensions),
                   "The name of the NeXus file to append geometry to.");
 
   // TODO: change MakeCopy default to False when comfortable. Otherwise need to
   // remove the extra copy once in production.
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("MakeCopy", true,
-                                                Direction::Input),
-      "Copy the NeXus file first before appending (optional, default True).");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("MakeCopy", true, Direction::Input),
+                  "Copy the NeXus file first before appending (optional, default True).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -88,8 +80,7 @@ void AppendGeometryToSNSNexus::exec() {
   // TODO: rename the created arrays before moving to production
   g_log.warning() << "This is intended as a proof of principle and not a long "
                      "term implementation.\n";
-  g_log.warning()
-      << "(the created arrays in the NeXus file will have the '_new' suffix)\n";
+  g_log.warning() << "(the created arrays in the NeXus file will have the '_new' suffix)\n";
 
   // Retrieve filename from the properties
   m_filename = getPropertyValue("Filename");
@@ -102,31 +93,26 @@ void AppendGeometryToSNSNexus::exec() {
     Poco::Path originalPath(m_filename);
 
     if (originalFile.exists()) {
-      Poco::File destinationFile(
-          Poco::Path(Poco::Path::temp(), originalPath.getFileName()));
+      Poco::File destinationFile(Poco::Path(Poco::Path::temp(), originalPath.getFileName()));
 
       try {
         originalFile.copyTo(destinationFile.path());
-        g_log.notice() << "Copied " << m_filename << " to "
-                       << destinationFile.path() << ".\n";
+        g_log.notice() << "Copied " << m_filename << " to " << destinationFile.path() << ".\n";
         m_filename = destinationFile.path();
       } catch (Poco::FileAccessDeniedException &) {
         throw std::runtime_error("A Problem occurred in making a copy of the "
                                  "NeXus file. Failed to copy " +
-                                 originalFile.path() + " to " +
-                                 destinationFile.path() +
+                                 originalFile.path() + " to " + destinationFile.path() +
                                  ". Please check file permissions.");
       }
     } else {
-      g_log.error() << "Cannot copy a file that doesn't exist! ("
-                    << originalFile.path() << ").\n";
+      g_log.error() << "Cannot copy a file that doesn't exist! (" << originalFile.path() << ").\n";
     }
   }
 
   // Let's check to see if we can write to the NeXus file.
   if (!(Poco::File(m_filename).canWrite())) {
-    throw std::runtime_error("The specified NeXus file (" + m_filename +
-                             ") is not writable.");
+    throw std::runtime_error("The specified NeXus file (" + m_filename + ") is not writable.");
   }
 
   // Let's look for the instrument name
@@ -134,8 +120,7 @@ void AppendGeometryToSNSNexus::exec() {
 
   if (m_instrument.length() == 0) {
 
-    throw std::runtime_error("Failed to get instrument name from " +
-                             m_filename +
+    throw std::runtime_error("Failed to get instrument name from " + m_filename +
                              ". Can't identify instrument definition file.");
   }
 
@@ -146,15 +131,13 @@ void AppendGeometryToSNSNexus::exec() {
   // TODO: Modify to use /entry/instrument/instrument_xml/data after
   // establishing a way to maintain ADARA Geometry Packet
   m_idf_filename = InstrumentFileFinder::getInstrumentFilename(m_instrument);
-  g_log.debug() << "Loading instrument definition from " << m_idf_filename
-                << ".\n";
+  g_log.debug() << "Loading instrument definition from " << m_idf_filename << ".\n";
 
   // Modified to call LoadInstrument directly as a Child Algorithm
   ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
 
   // Load NeXus logs for HYSPEC, HYSPECA(testing), and SNAP
-  if (m_instrument == "HYSPEC" || m_instrument == "HYSPECA" ||
-      m_instrument == "SNAP") {
+  if (m_instrument == "HYSPEC" || m_instrument == "HYSPECA" || m_instrument == "SNAP") {
     g_log.debug() << "Run LoadNexusLogs Child Algorithm.\n";
     m_logsLoadedCorrectly = runLoadNexusLogs(m_filename, ws, this);
 
@@ -199,20 +182,17 @@ void AppendGeometryToSNSNexus::exec() {
       // Create an iterator for this
       std::map<std::string, std::string>::const_iterator entry_iter;
 
-      for (entry_iter = entry_items.begin(); entry_iter != entry_items.end();
-           ++entry_iter) {
+      for (entry_iter = entry_items.begin(); entry_iter != entry_items.end(); ++entry_iter) {
         // Look for an instrument
         if (entry_iter->second == "NXinstrument") {
           // Open the instrument
           nxfile.openGroup(entry_iter->first, "NXinstrument");
           std::map<std::string, std::string> instr_items = nxfile.getEntries();
           std::map<std::string, std::string>::const_iterator instr_iter;
-          for (instr_iter = instr_items.begin();
-               instr_iter != instr_items.end(); ++instr_iter) {
+          for (instr_iter = instr_items.begin(); instr_iter != instr_items.end(); ++instr_iter) {
             // Look for NXdetectors
             if (instr_iter->second == "NXdetector") {
-              g_log.debug()
-                  << "Detector called '" << instr_iter->first << "' found.\n";
+              g_log.debug() << "Detector called '" << instr_iter->first << "' found.\n";
               std::string bankName = instr_iter->first;
               std::vector<Geometry::IDetector_const_sptr> dets;
               ws->getInstrument()->getDetectorsInBank(dets, bankName);
@@ -264,11 +244,9 @@ void AppendGeometryToSNSNexus::exec() {
 
                 progress.report(dets.size());
               } else {
-                throw std::runtime_error(
-                    "Could not find any detectors for the bank named " +
-                    bankName +
-                    " that is listed in the NeXus file."
-                    "Check that it exists in the Instrument Definition File.");
+                throw std::runtime_error("Could not find any detectors for the bank named " + bankName +
+                                         " that is listed in the NeXus file."
+                                         "Check that it exists in the Instrument Definition File.");
               }
             }
           }
@@ -278,12 +256,10 @@ void AppendGeometryToSNSNexus::exec() {
         }
         // Look for monitors
         else if (entry_iter->second == "NXmonitor") {
-          g_log.debug() << "Monitor called '" << entry_iter->first
-                        << "' found.\n";
+          g_log.debug() << "Monitor called '" << entry_iter->first << "' found.\n";
           nxfile.openGroup(entry_iter->first, "NXmonitor");
 
-          Geometry::IComponent_const_sptr monitor =
-              instrument->getComponentByName(entry_iter->first);
+          Geometry::IComponent_const_sptr monitor = instrument->getComponentByName(entry_iter->first);
 
           // Write Pixel ID to file
           // nxfile.writeData("pixel_id_new", monitor->get);
@@ -293,8 +269,7 @@ void AppendGeometryToSNSNexus::exec() {
 
           g_log.debug() << "source->monitor=" << source_monitor << '\n';
           g_log.debug() << "source->sample=" << source_sample << '\n';
-          g_log.debug() << "sample->monitor="
-                        << (source_monitor - source_sample) << '\n';
+          g_log.debug() << "sample->monitor=" << (source_monitor - source_sample) << '\n';
 
           // Distance
           nxfile.writeData("distance_new", (source_monitor - source_sample));
@@ -307,8 +282,7 @@ void AppendGeometryToSNSNexus::exec() {
       }
 
     } else {
-      g_log.error()
-          << "There are no NXentry nodes in the specified NeXus file.\n";
+      g_log.error() << "There are no NXentry nodes in the specified NeXus file.\n";
     }
   }
 }
@@ -319,8 +293,7 @@ void AppendGeometryToSNSNexus::exec() {
  * @param nxfilename :: Input NeXus file.
  * @return the instrument name, empty string if failed.
  */
-std::string
-AppendGeometryToSNSNexus::getInstrumentName(const std::string &nxfilename) {
+std::string AppendGeometryToSNSNexus::getInstrumentName(const std::string &nxfilename) {
   std::string instrument;
 
   // Open the NeXus file
@@ -330,8 +303,7 @@ AppendGeometryToSNSNexus::getInstrumentName(const std::string &nxfilename) {
 
   // For now, let's just open the first entry
   nxfile.openGroup(entries.begin()->first, "NXentry");
-  g_log.debug() << "Using entry '" << entries.begin()->first
-                << "' to determine instrument name.\n";
+  g_log.debug() << "Using entry '" << entries.begin()->first << "' to determine instrument name.\n";
 
   nxfile.openGroup("instrument", "NXinstrument");
   try {
@@ -344,8 +316,7 @@ AppendGeometryToSNSNexus::getInstrumentName(const std::string &nxfilename) {
     instrument = "";
   }
 
-  g_log.debug() << " Instrument name read from NeXus file is " << instrument
-                << '\n';
+  g_log.debug() << " Instrument name read from NeXus file is " << instrument << '\n';
 
   return instrument;
 }
@@ -360,9 +331,8 @@ AppendGeometryToSNSNexus::getInstrumentName(const std::string &nxfilename) {
  * @return true if successful
  */
 
-bool AppendGeometryToSNSNexus::runLoadInstrument(
-    const std::string &idf_filename,
-    const API::MatrixWorkspace_sptr &localWorkspace, Algorithm *alg) {
+bool AppendGeometryToSNSNexus::runLoadInstrument(const std::string &idf_filename,
+                                                 const API::MatrixWorkspace_sptr &localWorkspace, Algorithm *alg) {
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument", 0, 1, true);
 
   // Execute the Child Algorithm.
@@ -373,13 +343,11 @@ bool AppendGeometryToSNSNexus::runLoadInstrument(
     loadInst->setProperty("RewriteSpectraMap", OptionalBool(false));
     loadInst->execute();
   } catch (std::invalid_argument &e) {
-    alg->getLogger().information(
-        "Invalid argument to LoadInstrument Child Algorithm");
+    alg->getLogger().information("Invalid argument to LoadInstrument Child Algorithm");
     alg->getLogger().information(e.what());
     executionSuccessful = false;
   } catch (std::runtime_error &e) {
-    alg->getLogger().information(
-        "Failed to run LoadInstrument Child Algorithm");
+    alg->getLogger().information("Failed to run LoadInstrument Child Algorithm");
     alg->getLogger().information(e.what());
     executionSuccessful = false;
   }
@@ -399,11 +367,9 @@ bool AppendGeometryToSNSNexus::runLoadInstrument(
  * @param alg :: Handle of an algorithm for logging access.
  * @return true if successful.
  */
-bool AppendGeometryToSNSNexus::runLoadNexusLogs(
-    const std::string &nexusFileName,
-    const API::MatrixWorkspace_sptr &localWorkspace, Algorithm *alg) {
-  IAlgorithm_sptr loadLogs =
-      alg->createChildAlgorithm("LoadNexusLogs", 0, 1, true);
+bool AppendGeometryToSNSNexus::runLoadNexusLogs(const std::string &nexusFileName,
+                                                const API::MatrixWorkspace_sptr &localWorkspace, Algorithm *alg) {
+  IAlgorithm_sptr loadLogs = alg->createChildAlgorithm("LoadNexusLogs", 0, 1, true);
 
   // Execute the Child Algorithm, catching errors without stopping.
   bool executionSuccessful(true);
@@ -413,13 +379,11 @@ bool AppendGeometryToSNSNexus::runLoadNexusLogs(
     loadLogs->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
     loadLogs->executeAsChildAlg();
   } catch (std::invalid_argument &e) {
-    alg->getLogger().information(
-        "Invalid argument to LoadNexusLogs Child Algorithm");
+    alg->getLogger().information("Invalid argument to LoadNexusLogs Child Algorithm");
     alg->getLogger().information(e.what());
     executionSuccessful = false;
   } catch (std::runtime_error &) {
-    alg->getLogger().information(
-        "Unable to successfully run runLoadNexusLogs Child Algorithm./n");
+    alg->getLogger().information("Unable to successfully run runLoadNexusLogs Child Algorithm./n");
     executionSuccessful = false;
   }
 

@@ -27,6 +27,9 @@ Improvements
 
 - :ref:`PDCalibration <algm-PDCalibration>` now intitialises A,B and S of BackToBackExponential if correpsonding coeficients are in the instrument parameter.xml file.
 - Support fitting diffractometer constants with chi-squared cost function in <algm-PDCalibration>.
+- Differential evolution minimizer added to :ref:`AlignComponents <algm-AlignComponents>`.
+- Differential evolution minimizer added to :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>`.
+- Added option to fix banks' vertical coordinate :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>`.
 
 Bugfixes
 ########
@@ -48,6 +51,8 @@ Bugfixes
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has additional property, ``DeltaRagged``, which allows using :ref:`RebinRagged <algm-RebinRagged>` to bin each spectrum differently.
 - Allow a different number of spectra for absorption correction division of PEARL data. This allows ``create_vanadium`` to work for a non-standard dataset.
 - Saved filenames for summed empty workspaces now include spline properties to avoid long_mode confusion when focussing.
+
+- The :ref:`ConvertUnits <algm-ConvertUnits>` algorithm has been extended to use a quadratic relationship between d spacing and TOF when doing conversions between these units. The diffractometer constants DIFA, DIFC and TZERO that determine the form of the quadratic can be loaded into a workspace using a new :ref:`ApplyDiffCal <algm-ApplyDiffCal>` algorithm. This functionality was previously only available in :ref:`AlignDetectors <algm-AlignDetectors>` which only performed the conversion in the direction TOF to d spacing. This change will ensure that the conversion of focussed datasets from d spacing back to TOF at the end of the ISIS powder diffraction data reduction is performed correctly.
 
 Engineering Diffraction
 -----------------------
@@ -97,7 +102,8 @@ this peak is a Q-sample vector. There are a number of modifications
 made to facilitate this.
 
 - New LeanElasticPeak and LeanElasticPeakWorkspace has been created :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`
-- :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` has been modified to optionally create a  :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
+- :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` has been modified to optionally create a :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
+- :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to optionally create a :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
 - These following other algorithms have either been made to work or confirmed to already work with the LeanElasticPeak:
 
    - :ref:`algm-AddPeakHKL`
@@ -111,6 +117,8 @@ made to facilitate this.
    - :ref:`algm-FindUBUsingMinMaxD`
    - :ref:`algm-IndexPeaks`
    - :ref:`algm-IntegratePeaksMD`
+   - :ref:`algm-LoadNexusProcessed`
+   - :ref:`algm-SaveNexusProcessed`
    - :ref:`algm-SelectCellOfType`
    - :ref:`algm-SelectCellWithForm`
    - :ref:`algm-ShowPossibleCells`

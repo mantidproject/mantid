@@ -31,8 +31,7 @@ private:
   Mantid::API::IMDIterator *m_iterator;
 
 public:
-  SkipMaskedBins(Mantid::API::IMDIterator *const iterator)
-      : m_iterator(iterator) {}
+  SkipMaskedBins(Mantid::API::IMDIterator *const iterator) : m_iterator(iterator) {}
   /**
   Keep going as long as the current iterator bin is masked.
   @return True to keep going.

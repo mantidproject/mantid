@@ -90,15 +90,12 @@ public:
 
 protected:
   /// Run the load algorithms
-  bool loadFile(const QString &filename, const QString &outputName,
-                const int specMin = -1, const int specMax = -1,
+  bool loadFile(const QString &filename, const QString &outputName, const int specMin = -1, const int specMax = -1,
                 bool loadHistory = true);
 
   /// Add a SaveNexusProcessed step to the batch queue
-  void addSaveWorkspaceToQueue(const std::string &wsName,
-                               const std::string &filename = "");
-  void addSaveWorkspaceToQueue(const QString &wsName,
-                               const QString &filename = "");
+  void addSaveWorkspaceToQueue(const std::string &wsName, const std::string &filename = "");
+  void addSaveWorkspaceToQueue(const QString &wsName, const QString &filename = "");
 
   /// Gets the workspace suffix of a workspace name
   QString getWorkspaceSuffix(const QString &wsName);
@@ -107,27 +104,22 @@ protected:
 
   /// Extracts the labels from the axis at the specified index in the
   /// specified workspace.
-  std::unordered_map<std::string, size_t>
-  extractAxisLabels(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
-                    const size_t &axisIndex) const;
+  std::unordered_map<std::string, size_t> extractAxisLabels(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
+                                                            const size_t &axisIndex) const;
 
   /// Function to set the range limits of the plot
-  void setPlotPropertyRange(MantidWidgets::RangeSelector *rs, QtProperty *min,
-                            QtProperty *max,
+  void setPlotPropertyRange(MantidWidgets::RangeSelector *rs, QtProperty *min, QtProperty *max,
                             const QPair<double, double> &bounds);
   /// Function to set the range selector on the mini plot
-  void setRangeSelector(
-      MantidWidgets::RangeSelector *rs, QtProperty *lower, QtProperty *upper,
-      const QPair<double, double> &bounds,
-      const boost::optional<QPair<double, double>> &range = boost::none);
+  void setRangeSelector(MantidWidgets::RangeSelector *rs, QtProperty *lower, QtProperty *upper,
+                        const QPair<double, double> &bounds,
+                        const boost::optional<QPair<double, double>> &range = boost::none);
   /// Sets the min of the range selector if it is less than the max
   void setRangeSelectorMin(QtProperty *minProperty, QtProperty *maxProperty,
-                           MantidWidgets::RangeSelector *rangeSelector,
-                           double newValue);
+                           MantidWidgets::RangeSelector *rangeSelector, double newValue);
   /// Sets the max of the range selector if it is more than the min
   void setRangeSelectorMax(QtProperty *minProperty, QtProperty *maxProperty,
-                           MantidWidgets::RangeSelector *rangeSelector,
-                           double newValue);
+                           MantidWidgets::RangeSelector *rangeSelector, double newValue);
 
   /// Function to get energy mode from a workspace
   std::string getEMode(const Mantid::API::MatrixWorkspace_sptr &ws);
@@ -136,26 +128,19 @@ protected:
   double getEFixed(const Mantid::API::MatrixWorkspace_sptr &ws);
 
   /// Function to read an instrument's resolution from the IPF using a string
-  bool getResolutionRangeFromWs(const QString &filename,
-                                QPair<double, double> &res);
+  bool getResolutionRangeFromWs(const QString &filename, QPair<double, double> &res);
 
   /// Function to read an instrument's resolution from the IPF using a workspace
   /// pointer
-  bool
-  getResolutionRangeFromWs(const Mantid::API::MatrixWorkspace_const_sptr &ws,
-                           QPair<double, double> &res);
+  bool getResolutionRangeFromWs(const Mantid::API::MatrixWorkspace_const_sptr &ws, QPair<double, double> &res);
 
   /// Gets the x range from a workspace
-  QPair<double, double>
-  getXRangeFromWorkspace(std::string const &workspaceName,
-                         double precision = 0.000001) const;
-  QPair<double, double> getXRangeFromWorkspace(
-      const Mantid::API::MatrixWorkspace_const_sptr &workspace,
-      double precision = 0.000001) const;
+  QPair<double, double> getXRangeFromWorkspace(std::string const &workspaceName, double precision = 0.000001) const;
+  QPair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
+                                               double precision = 0.000001) const;
 
   /// Converts a standard vector of standard strings to a QVector of QStrings.
-  QVector<QString>
-  convertStdStringVector(const std::vector<std::string> &stringVec) const;
+  QVector<QString> convertStdStringVector(const std::vector<std::string> &stringVec) const;
 
   /// Function to run an algorithm on a seperate thread
   void runAlgorithm(const Mantid::API::IAlgorithm_sptr &algorithm);
@@ -164,9 +149,7 @@ protected:
 
   /// Checks the ADS for a workspace named `workspaceName`,
   /// opens a warning box for plotting/saving if none found
-  bool checkADSForPlotSaveWorkspace(const std::string &workspaceName,
-                                    const bool plotting,
-                                    const bool warn = true);
+  bool checkADSForPlotSaveWorkspace(const std::string &workspaceName, const bool plotting, const bool warn = true);
 
   /// Overidden by child class.
   virtual void setup() = 0;
@@ -215,8 +198,7 @@ protected:
   std::unique_ptr<IndirectPlotter> m_plotter;
 
 private:
-  std::string getInterfaceProperty(std::string const &interfaceName,
-                                   std::string const &propertyName,
+  std::string getInterfaceProperty(std::string const &interfaceName, std::string const &propertyName,
                                    std::string const &attribute) const;
 
 public slots:
@@ -230,9 +212,7 @@ protected slots:
   virtual void algorithmFinished(bool error);
 
 private slots:
-  virtual void handleDataReady(QString const &dataName) {
-    UNUSED_ARG(dataName);
-  };
+  virtual void handleDataReady(QString const &dataName) { UNUSED_ARG(dataName); };
 
 signals:
   /// Send signal to parent window to show a message box to user

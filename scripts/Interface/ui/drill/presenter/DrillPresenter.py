@@ -114,8 +114,8 @@ class DrillPresenter:
                                       "separated key=value pairs.")
                     return
                 try:
-                    name = option.split("=")[0]
-                    value = option.split("=")[1]
+                    name = option.split("=")[0].strip()
+                    value = option.split("=")[1].strip()
                 except:
                     self.onParamError(row, column, "Please provide semicolon "
                                       "separated key=value pairs.")
@@ -190,6 +190,10 @@ class DrillPresenter:
                     return value
 
             if re.match("^-{,1}\d+$", value):
+                if int(value) == 0:
+                    return value
+                if int(value) + i == 0:
+                    return value
                 return str(int(value) + i)
             suffix = re.search("\d+$", value)
             if suffix:
@@ -533,6 +537,8 @@ class DrillPresenter:
 
     def _syncViewTable(self):
         columns, tooltips = self.model.getColumnHeaderData()
+        if tooltips and tooltips[-1] == "CustomOptions":
+            tooltips[-1] = "Provide semicolon (;) separated key=value pairs"
         samples = self.model.getSamples()
         groups = self.model.getSamplesGroups()
         masters = self.model.getMasterSamples()

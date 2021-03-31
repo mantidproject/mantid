@@ -15,39 +15,32 @@ namespace Mantid {
 namespace Geometry {
 
 /// Creates a PointGroup object from its Hermann-Mauguin symbol.
-PointGroup_sptr
-PointGroupFactoryImpl::createPointGroup(const std::string &hmSymbol) {
+PointGroup_sptr PointGroupFactoryImpl::createPointGroup(const std::string &hmSymbol) {
   if (!isSubscribed(hmSymbol)) {
-    throw std::invalid_argument("Point group with symbol '" + hmSymbol +
-                                "' is not registered.");
+    throw std::invalid_argument("Point group with symbol '" + hmSymbol + "' is not registered.");
   }
 
   return constructFromPrototype(getPrototype(hmSymbol));
 }
 
-PointGroup_sptr PointGroupFactoryImpl::createPointGroupFromSpaceGroup(
-    const SpaceGroup_const_sptr &spaceGroup) {
+PointGroup_sptr PointGroupFactoryImpl::createPointGroupFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup) {
   return createPointGroupFromSpaceGroup(*spaceGroup);
 }
 
-PointGroup_sptr PointGroupFactoryImpl::createPointGroupFromSpaceGroup(
-    const SpaceGroup &spaceGroup) {
-  std::string pointGroupSymbol =
-      pointGroupSymbolFromSpaceGroupSymbol(spaceGroup.hmSymbol());
+PointGroup_sptr PointGroupFactoryImpl::createPointGroupFromSpaceGroup(const SpaceGroup &spaceGroup) {
+  std::string pointGroupSymbol = pointGroupSymbolFromSpaceGroupSymbol(spaceGroup.hmSymbol());
 
   try {
     PointGroup_sptr pointGroup = createPointGroup(pointGroupSymbol);
 
     // If the crystal system is trigonal, we need to do more.
     if (pointGroup->crystalSystem() == PointGroup::CrystalSystem::Trigonal) {
-      throw std::invalid_argument(
-          "Trigonal space groups need to be processed differently.");
+      throw std::invalid_argument("Trigonal space groups need to be processed differently.");
     }
 
     return pointGroup;
   } catch (const std::invalid_argument &) {
-    if (spaceGroup.getCoordinateSystem() !=
-        Group::CoordinateSystem::Hexagonal) {
+    if (spaceGroup.getCoordinateSystem() != Group::CoordinateSystem::Hexagonal) {
       pointGroupSymbol.append(" r");
     }
 
@@ -60,8 +53,7 @@ bool PointGroupFactoryImpl::isSubscribed(const std::string &hmSymbol) const {
 }
 
 /// Returns the Hermann-Mauguin symbols of all registered point groups.
-std::vector<std::string>
-PointGroupFactoryImpl::getAllPointGroupSymbols() const {
+std::vector<std::string> PointGroupFactoryImpl::getAllPointGroupSymbols() const {
   std::vector<std::string> pointGroups;
   pointGroups.reserve(m_generatorMap.size());
   for (const auto &generator : m_generatorMap) {
@@ -72,8 +64,7 @@ PointGroupFactoryImpl::getAllPointGroupSymbols() const {
 
 /// Returns the Hermann-Mauguin symbols of all point groups that belong to a
 /// certain crystal system.
-std::vector<std::string> PointGroupFactoryImpl::getPointGroupSymbols(
-    const PointGroup::CrystalSystem &crystalSystem) {
+std::vector<std::string> PointGroupFactoryImpl::getPointGroupSymbols(const PointGroup::CrystalSystem &crystalSystem) {
   std::vector<std::string> pointGroups;
 
   for (auto &generator : m_generatorMap) {
@@ -87,16 +78,13 @@ std::vector<std::string> PointGroupFactoryImpl::getPointGroupSymbols(
   return pointGroups;
 }
 
-void PointGroupFactoryImpl::subscribePointGroup(
-    const std::string &hmSymbol, const std::string &generatorString,
-    const std::string &description) {
+void PointGroupFactoryImpl::subscribePointGroup(const std::string &hmSymbol, const std::string &generatorString,
+                                                const std::string &description) {
   if (isSubscribed(hmSymbol)) {
-    throw std::invalid_argument(
-        "Point group with this symbol is already registered.");
+    throw std::invalid_argument("Point group with this symbol is already registered.");
   }
 
-  PointGroupGenerator_sptr generator = std::make_shared<PointGroupGenerator>(
-      hmSymbol, generatorString, description);
+  PointGroupGenerator_sptr generator = std::make_shared<PointGroupGenerator>(hmSymbol, generatorString, description);
 
   subscribe(generator);
 }
@@ -118,28 +106,22 @@ void PointGroupFactoryImpl::subscribePointGroup(
  * @param spaceGroupSymbol :: Space group symbol
  * @return
  */
-std::string PointGroupFactoryImpl::pointGroupSymbolFromSpaceGroupSymbol(
-    const std::string &spaceGroupSymbol) const {
-  std::string noOriginChoice =
-      boost::regex_replace(spaceGroupSymbol, m_originChoiceRegex, "");
-  std::string noScrews =
-      boost::regex_replace(noOriginChoice, m_screwAxisRegex, "\\1");
+std::string PointGroupFactoryImpl::pointGroupSymbolFromSpaceGroupSymbol(const std::string &spaceGroupSymbol) const {
+  std::string noOriginChoice = boost::regex_replace(spaceGroupSymbol, m_originChoiceRegex, "");
+  std::string noScrews = boost::regex_replace(noOriginChoice, m_screwAxisRegex, "\\1");
   std::string noGlides = boost::regex_replace(noScrews, m_glidePlaneRegex, "m");
-  std::string noCentering =
-      boost::regex_replace(noGlides, m_centeringRegex, "");
+  std::string noCentering = boost::regex_replace(noGlides, m_centeringRegex, "");
 
   std::string noSpaces = boost::algorithm::erase_all_copy(noCentering, " ");
 
-  if (noSpaces.substr(0, 1) == "1" && noSpaces.size() > 2 &&
-      noSpaces.substr(noSpaces.size() - 1, 1) == "1") {
+  if (noSpaces.substr(0, 1) == "1" && noSpaces.size() > 2 && noSpaces.substr(noSpaces.size() - 1, 1) == "1") {
     noSpaces = noSpaces.substr(1, noSpaces.size() - 2);
   }
 
   return noSpaces;
 }
 
-PointGroup_sptr
-PointGroupFactoryImpl::getPrototype(const std::string &hmSymbol) {
+PointGroup_sptr PointGroupFactoryImpl::getPrototype(const std::string &hmSymbol) {
   PointGroupGenerator_sptr generator = m_generatorMap.find(hmSymbol)->second;
 
   if (!generator) {
@@ -149,8 +131,7 @@ PointGroupFactoryImpl::getPrototype(const std::string &hmSymbol) {
   return generator->getPrototype();
 }
 
-void PointGroupFactoryImpl::subscribe(
-    const PointGroupGenerator_sptr &generator) {
+void PointGroupFactoryImpl::subscribe(const PointGroupGenerator_sptr &generator) {
   if (!generator) {
     throw std::runtime_error("Cannot register null-generator.");
   }
@@ -158,25 +139,20 @@ void PointGroupFactoryImpl::subscribe(
   m_generatorMap.emplace(generator->getHMSymbol(), generator);
 }
 
-PointGroup_sptr PointGroupFactoryImpl::constructFromPrototype(
-    const PointGroup_sptr &prototype) const {
+PointGroup_sptr PointGroupFactoryImpl::constructFromPrototype(const PointGroup_sptr &prototype) const {
   return std::make_shared<PointGroup>(*prototype);
 }
 
 /// Private default constructor.
 PointGroupFactoryImpl::PointGroupFactoryImpl()
-    : m_generatorMap(), m_crystalSystemMap(),
-      m_screwAxisRegex("(2|3|4|6)[1|2|3|4|5]"),
-      m_glidePlaneRegex("a|b|c|d|e|g|n"), m_centeringRegex("[A-Z]"),
-      m_originChoiceRegex(":(1|2|r)") {
+    : m_generatorMap(), m_crystalSystemMap(), m_screwAxisRegex("(2|3|4|6)[1|2|3|4|5]"),
+      m_glidePlaneRegex("a|b|c|d|e|g|n"), m_centeringRegex("[A-Z]"), m_originChoiceRegex(":(1|2|r)") {
   Kernel::LibraryManager::Instance();
 }
 
-PointGroupGenerator::PointGroupGenerator(
-    const std::string &hmSymbol, const std::string &generatorInformation,
-    const std::string &description)
-    : m_hmSymbol(hmSymbol), m_generatorString(generatorInformation),
-      m_description(description) {}
+PointGroupGenerator::PointGroupGenerator(const std::string &hmSymbol, const std::string &generatorInformation,
+                                         const std::string &description)
+    : m_hmSymbol(hmSymbol), m_generatorString(generatorInformation), m_description(description) {}
 
 PointGroup_sptr PointGroupGenerator::getPrototype() {
   if (!hasValidPrototype()) {
@@ -187,16 +163,13 @@ PointGroup_sptr PointGroupGenerator::getPrototype() {
 }
 
 PointGroup_sptr PointGroupGenerator::generatePrototype() {
-  Group_const_sptr generatingGroup =
-      GroupFactory::create<ProductOfCyclicGroups>(m_generatorString);
+  Group_const_sptr generatingGroup = GroupFactory::create<ProductOfCyclicGroups>(m_generatorString);
 
   if (!generatingGroup) {
-    throw std::runtime_error(
-        "Could not create group from supplied symmetry operations.");
+    throw std::runtime_error("Could not create group from supplied symmetry operations.");
   }
 
-  return std::make_shared<PointGroup>(m_hmSymbol, *generatingGroup,
-                                      m_description);
+  return std::make_shared<PointGroup>(m_hmSymbol, *generatingGroup, m_description);
 }
 
 DECLARE_POINTGROUP("1", "x,y,z", "Triclinic")

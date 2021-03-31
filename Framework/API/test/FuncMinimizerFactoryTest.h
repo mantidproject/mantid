@@ -40,16 +40,13 @@ class FuncMinimizerFactoryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FuncMinimizerFactoryTest *createSuite() {
-    return new FuncMinimizerFactoryTest();
-  }
+  static FuncMinimizerFactoryTest *createSuite() { return new FuncMinimizerFactoryTest(); }
   static void destroySuite(FuncMinimizerFactoryTest *suite) { delete suite; }
 
   FuncMinimizerFactoryTest() { Mantid::API::FrameworkManager::Instance(); }
 
   void testCreateFunction() {
-    IFuncMinimizer *minimizerA =
-        FuncMinimizerFactory::Instance().createUnwrapped("nedtur");
+    IFuncMinimizer *minimizerA = FuncMinimizerFactory::Instance().createUnwrapped("nedtur");
     TS_ASSERT(minimizerA);
     TS_ASSERT(minimizerA->name().compare("Boevs") == 0);
 
@@ -57,8 +54,7 @@ public:
   }
 
   void test_createMinimizer_setAllProperties() {
-    auto minimizer = FuncMinimizerFactory::Instance().createMinimizer(
-        "nedtur, paramA= 3.14, paramB = 2.73");
+    auto minimizer = FuncMinimizerFactory::Instance().createMinimizer("nedtur, paramA= 3.14, paramB = 2.73");
     TS_ASSERT(minimizer);
     TS_ASSERT(minimizer->existsProperty("paramA"));
     TS_ASSERT(minimizer->existsProperty("paramB"));
@@ -80,8 +76,7 @@ public:
   }
 
   void test_createMinimizer_setOneProperty() {
-    auto minimizer = FuncMinimizerFactory::Instance().createMinimizer(
-        "nedtur, paramB = 2.73");
+    auto minimizer = FuncMinimizerFactory::Instance().createMinimizer("nedtur, paramB = 2.73");
     TS_ASSERT(minimizer);
     TS_ASSERT(minimizer->existsProperty("paramA"));
     TS_ASSERT(minimizer->existsProperty("paramB"));

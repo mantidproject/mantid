@@ -18,14 +18,10 @@ class MANTID_ALGORITHMS_DLL ClearMaskFlag : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"MaskDetectors"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"MaskDetectors"}; }
   const std::string category() const override;
   /// Algorithm's summary
-  const std::string summary() const override {
-    return "Delete the mask flag/bit on all spectra in a workspace.";
-  }
+  const std::string summary() const override { return "Delete the mask flag/bit on all spectra in a workspace."; }
 
 private:
   void init() override;

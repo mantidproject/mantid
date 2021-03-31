@@ -23,8 +23,7 @@ namespace Algorithms {
  *@param hostAlgorithm :: the pointer to SofQ algorithm hosting the base class.
  *This algorithm expects to have EMode and EFixed properties attached to it.
  */
-void SofQCommon::initCachedValues(const API::MatrixWorkspace &workspace,
-                                  API::Algorithm *const hostAlgorithm) {
+void SofQCommon::initCachedValues(const API::MatrixWorkspace &workspace, API::Algorithm *const hostAlgorithm) {
   // Retrieve the emode & efixed properties
   const std::string emode = hostAlgorithm->getProperty("EMode");
   // Convert back to an integer representation
@@ -83,10 +82,9 @@ double SofQCommon::getEFixed(const Geometry::IDetector &det) const {
     else {
       const std::vector<double> param = det.getNumberParameter("EFixed");
       if (param.empty())
-        throw std::runtime_error(
-            "Cannot find EFixed parameter for component \"" + det.getName() +
-            "\". This is required in indirect mode. Please check the IDF "
-            "contains these values.");
+        throw std::runtime_error("Cannot find EFixed parameter for component \"" + det.getName() +
+                                 "\". This is required in indirect mode. Please check the IDF "
+                                 "contains these values.");
       efixed = param[0];
     }
   }
@@ -101,8 +99,7 @@ double SofQCommon::getEFixed(const Geometry::IDetector &det) const {
  *        for direct emode.
  * @return The momentum transfer in A-1
  */
-double SofQCommon::q(const double deltaE, const double twoTheta,
-                     const Geometry::IDetector *det) const {
+double SofQCommon::q(const double deltaE, const double twoTheta, const Geometry::IDetector *det) const {
   if (m_emode == 1) {
     return directQ(deltaE, twoTheta);
   }
@@ -116,8 +113,7 @@ double SofQCommon::q(const double deltaE, const double twoTheta,
  * @param maxE maximum energy transfer in ws
  * @return a pair containing global minimun and maximum Q
  */
-std::pair<double, double> SofQCommon::qBinHints(const API::MatrixWorkspace &ws,
-                                                const double minE,
+std::pair<double, double> SofQCommon::qBinHints(const API::MatrixWorkspace &ws, const double minE,
                                                 const double maxE) const {
   if (m_emode == 1) {
     return qBinHintsDirect(ws, minE, maxE);
@@ -134,8 +130,7 @@ std::pair<double, double> SofQCommon::qBinHints(const API::MatrixWorkspace &ws,
 double SofQCommon::directQ(const double deltaE, const double twoTheta) const {
   using Mantid::PhysicalConstants::E_mev_toNeutronWavenumberSq;
   const double ki = std::sqrt(m_efixed / E_mev_toNeutronWavenumberSq);
-  const double kf =
-      std::sqrt((m_efixed - deltaE) / E_mev_toNeutronWavenumberSq);
+  const double kf = std::sqrt((m_efixed - deltaE) / E_mev_toNeutronWavenumberSq);
   return std::sqrt(ki * ki + kf * kf - 2. * ki * kf * std::cos(twoTheta));
 }
 
@@ -146,8 +141,7 @@ double SofQCommon::directQ(const double deltaE, const double twoTheta) const {
  * @param det A pointer to the corresponding Detector
  * @return The value of Q
  */
-double SofQCommon::indirectQ(const double deltaE, const double twoTheta,
-                             const Geometry::IDetector *det) const {
+double SofQCommon::indirectQ(const double deltaE, const double twoTheta, const Geometry::IDetector *det) const {
   using Mantid::PhysicalConstants::E_mev_toNeutronWavenumberSq;
   if (!det) {
     throw std::runtime_error("indirectQ: det is nullptr.");
@@ -166,9 +160,8 @@ double SofQCommon::indirectQ(const double deltaE, const double twoTheta,
  * @param maxE maximum energy transfer in ws
  * @return a pair containing global minimun and maximum Q
  */
-std::pair<double, double>
-SofQCommon::qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE,
-                            const double maxE) const {
+std::pair<double, double> SofQCommon::qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE,
+                                                      const double maxE) const {
   using namespace Mantid::PhysicalConstants;
   if (maxE > m_efixed) {
     throw std::invalid_argument("Cannot compute Q binning range: maximum "
@@ -209,9 +202,8 @@ SofQCommon::qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE,
  * @param maxE maximum energy transfer in ws
  * @return a pair containing global minimun and maximum Q
  */
-std::pair<double, double>
-SofQCommon::qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE,
-                              const double maxE) const {
+std::pair<double, double> SofQCommon::qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE,
+                                                        const double maxE) const {
   using namespace Mantid::PhysicalConstants;
   auto minQ = std::numeric_limits<double>::max();
   auto maxQ = std::numeric_limits<double>::lowest();
@@ -225,10 +217,9 @@ SofQCommon::qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE,
     const auto Q1 = indirectQ(minE, twoTheta, &det);
     const auto Q2 = indirectQ(maxE, twoTheta, &det);
     if (!std::isfinite(Q1) || !std::isfinite(Q2)) {
-      throw std::invalid_argument(
-          "Cannot compute Q binning range: non-finite "
-          "Q found for detector ID " +
-          std::to_string(detectorInfo.detectorIDs()[i]));
+      throw std::invalid_argument("Cannot compute Q binning range: non-finite "
+                                  "Q found for detector ID " +
+                                  std::to_string(detectorInfo.detectorIDs()[i]));
     }
     const auto minmaxQ = std::minmax(Q1, Q2);
     minQ = std::min(minQ, minmaxQ.first);

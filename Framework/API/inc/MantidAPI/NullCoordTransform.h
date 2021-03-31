@@ -22,8 +22,7 @@ public:
   NullCoordTransform(size_t ndims = 3);
   std::string toXMLString() const override;
   std::string id() const override;
-  void apply(const Mantid::coord_t *inputVector,
-             Mantid::coord_t *outVector) const override;
+  void apply(const Mantid::coord_t *inputVector, Mantid::coord_t *outVector) const override;
   CoordTransform *clone() const override;
 
 private:

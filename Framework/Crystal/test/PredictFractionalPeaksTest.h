@@ -58,9 +58,8 @@ PeaksWorkspace_sptr createIndexedPeaksWorkspace() {
   return std::dynamic_pointer_cast<PeaksWorkspace_sptr::element_type>(loadedWS);
 }
 
-PeaksWorkspace_sptr runPredictFractionalPeaks(
-    const PeaksWorkspace_sptr &inputPeaks,
-    const std::unordered_map<const char *, const char *> &args) {
+PeaksWorkspace_sptr runPredictFractionalPeaks(const PeaksWorkspace_sptr &inputPeaks,
+                                              const std::unordered_map<const char *, const char *> &args) {
   PredictFractionalPeaks alg;
   alg.setChild(true);
   alg.initialize();
@@ -93,9 +92,8 @@ public:
   }
 
   void test_exec_without_hkl_range_uses_input_peaks() {
-    const auto fracPeaks = runPredictFractionalPeaks(
-        m_indexedPeaks,
-        {{"HOffset", "-0.5,0,0.5"}, {"KOffset", "0.0"}, {"LOffset", "0.2"}});
+    const auto fracPeaks =
+        runPredictFractionalPeaks(m_indexedPeaks, {{"HOffset", "-0.5,0,0.5"}, {"KOffset", "0.0"}, {"LOffset", "0.2"}});
 
     auto nPeaks = fracPeaks->getNumberPeaks();
     TS_ASSERT_EQUALS(117, nPeaks)
@@ -125,19 +123,18 @@ public:
   }
 
   void test_exec_with_include_in_range_and_hit_detector() {
-    const auto fracPeaks = runPredictFractionalPeaks(
-        m_indexedPeaks, {{"HOffset", "-0.5,0,0.5"},
-                         {"KOffset", "0.0"},
-                         {"LOffset", "0.2"},
-                         {"IncludeAllPeaksInRange", "1"},
-                         {"Hmin", "-1"},
-                         {"Hmax", "1"},
-                         {"Kmin", "-2"},
-                         {"Kmax", "2"},
-                         {"Lmin", "-3"},
-                         {"Lmax", "3"}
+    const auto fracPeaks = runPredictFractionalPeaks(m_indexedPeaks, {{"HOffset", "-0.5,0,0.5"},
+                                                                      {"KOffset", "0.0"},
+                                                                      {"LOffset", "0.2"},
+                                                                      {"IncludeAllPeaksInRange", "1"},
+                                                                      {"Hmin", "-1"},
+                                                                      {"Hmax", "1"},
+                                                                      {"Kmin", "-2"},
+                                                                      {"Kmax", "2"},
+                                                                      {"Lmin", "-3"},
+                                                                      {"Lmax", "3"}
 
-                        });
+                                                                     });
     TS_ASSERT_EQUALS(9, fracPeaks->getNumberPeaks())
     const auto &peak0 = fracPeaks->getPeak(0);
     TS_ASSERT_DELTA(peak0.getH(), -0.5, .0001)
@@ -165,17 +162,16 @@ public:
   }
 
   void test_exec_with_reflection_condition_and_hit_detector() {
-    const auto fracPeaks = runPredictFractionalPeaks(
-        m_indexedPeaks, {{"HOffset", "-0.5,0,0.5"},
-                         {"KOffset", "0.0"},
-                         {"LOffset", "0.2"},
-                         {"ReflectionCondition", "C-face centred"},
-                         {"Hmin", "-1"},
-                         {"Hmax", "1"},
-                         {"Kmin", "-2"},
-                         {"Kmax", "2"},
-                         {"Lmin", "-3"},
-                         {"Lmax", "3"}});
+    const auto fracPeaks = runPredictFractionalPeaks(m_indexedPeaks, {{"HOffset", "-0.5,0,0.5"},
+                                                                      {"KOffset", "0.0"},
+                                                                      {"LOffset", "0.2"},
+                                                                      {"ReflectionCondition", "C-face centred"},
+                                                                      {"Hmin", "-1"},
+                                                                      {"Hmax", "1"},
+                                                                      {"Kmin", "-2"},
+                                                                      {"Kmax", "2"},
+                                                                      {"Lmin", "-3"},
+                                                                      {"Lmax", "3"}});
     TS_ASSERT_EQUALS(5, fracPeaks->getNumberPeaks())
     const auto &peak0 = fracPeaks->getPeak(0);
     TS_ASSERT_DELTA(peak0.getH(), -1.5, .0001)
@@ -197,18 +193,17 @@ public:
   }
 
   void test_exec_with_reflection_condition_and_not_required_on_detector() {
-    const auto fracPeaks = runPredictFractionalPeaks(
-        m_indexedPeaks, {{"HOffset", "-0.5,0,0.5"},
-                         {"KOffset", "0.0"},
-                         {"LOffset", "0.2"},
-                         {"ReflectionCondition", "C-face centred"},
-                         {"RequirePeaksOnDetector", "0"},
-                         {"Hmin", "-1"},
-                         {"Hmax", "1"},
-                         {"Kmin", "-2"},
-                         {"Kmax", "2"},
-                         {"Lmin", "-3"},
-                         {"Lmax", "3"}});
+    const auto fracPeaks = runPredictFractionalPeaks(m_indexedPeaks, {{"HOffset", "-0.5,0,0.5"},
+                                                                      {"KOffset", "0.0"},
+                                                                      {"LOffset", "0.2"},
+                                                                      {"ReflectionCondition", "C-face centred"},
+                                                                      {"RequirePeaksOnDetector", "0"},
+                                                                      {"Hmin", "-1"},
+                                                                      {"Hmax", "1"},
+                                                                      {"Kmin", "-2"},
+                                                                      {"Kmax", "2"},
+                                                                      {"Lmin", "-3"},
+                                                                      {"Lmax", "3"}});
     TS_ASSERT_EQUALS(72, fracPeaks->getNumberPeaks())
 
     const auto &peak0 = fracPeaks->getPeak(0);
@@ -236,10 +231,8 @@ public:
 
   void test_providing_modulation_vector_saves_properties_to_lattice() {
     const auto fracPeaks = runPredictFractionalPeaks(
-        m_indexedPeaks, {{"ModVector1", "-0.5,0,0.5"},
-                         {"ModVector2", "0.0,0.5,0.5"},
-                         {"MaxOrder", "1"},
-                         {"CrossTerms", "0"}});
+        m_indexedPeaks,
+        {{"ModVector1", "-0.5,0,0.5"}, {"ModVector2", "0.0,0.5,0.5"}, {"MaxOrder", "1"}, {"CrossTerms", "0"}});
 
     TS_ASSERT_EQUALS(124, fracPeaks->getNumberPeaks())
 
@@ -298,17 +291,11 @@ public:
     TS_ASSERT(valueIter != helpMsgs.cend())
   }
 
-  void test_inconsistent_H_range_gives_validation_error() {
-    doInvalidRangeTest("H");
-  }
+  void test_inconsistent_H_range_gives_validation_error() { doInvalidRangeTest("H"); }
 
-  void test_inconsistent_K_range_gives_validation_error() {
-    doInvalidRangeTest("K");
-  }
+  void test_inconsistent_K_range_gives_validation_error() { doInvalidRangeTest("K"); }
 
-  void test_inconsistent_L_range_gives_validation_error() {
-    doInvalidRangeTest("L");
-  }
+  void test_inconsistent_L_range_gives_validation_error() { doInvalidRangeTest("L"); }
 
   void test_modulation_vector_requires_maxOrder_gt_0() {
     PredictFractionalPeaks alg;

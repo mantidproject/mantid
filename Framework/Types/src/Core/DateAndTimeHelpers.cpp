@@ -37,8 +37,7 @@ bool stringIsISO8601(const std::string &date) {
  */
 bool stringIsPosix(const std::string &date) {
   // Formatting taken from boost::to_simple_string.
-  static const boost::regex format(
-      R"(^\d{4}-[A-Z][a-z]{2}-[0-3]\d\s[0-2]\d:[0-5]\d:\d{2}(.\d+)?$)");
+  static const boost::regex format(R"(^\d{4}-[A-Z][a-z]{2}-[0-3]\d\s[0-2]\d:[0-5]\d:\d{2}(.\d+)?$)");
   return boost::regex_match(date, format);
 }
 } // namespace DateAndTimeHelpers

@@ -44,8 +44,7 @@ public:
   void testExec() {
     Mantid::DataHandling::LoadNexus loader;
     loader.initialize();
-    loader.setPropertyValue(
-        "Filename", "HRP38692a.nxs"); // HRP38692.raw spectrum range 320 to 330
+    loader.setPropertyValue("Filename", "HRP38692a.nxs"); // HRP38692.raw spectrum range 320 to 330
 
     std::string outputSpace = "tofocus";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
@@ -69,9 +68,7 @@ public:
     TS_ASSERT(focus.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "focusedWS"));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("focusedWS"));
 
     // only 1 group for this limited range of spectra
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
@@ -82,34 +79,20 @@ public:
 
   void test_EventWorkspace_SameOutputWS() { dotestEventWorkspace(true, 2); }
 
-  void test_EventWorkspace_DifferentOutputWS() {
-    dotestEventWorkspace(false, 2);
-  }
-  void test_EventWorkspace_SameOutputWS_oneGroup() {
-    dotestEventWorkspace(true, 1);
-  }
+  void test_EventWorkspace_DifferentOutputWS() { dotestEventWorkspace(false, 2); }
+  void test_EventWorkspace_SameOutputWS_oneGroup() { dotestEventWorkspace(true, 1); }
 
-  void test_EventWorkspace_DifferentOutputWS_oneGroup() {
-    dotestEventWorkspace(false, 1);
-  }
+  void test_EventWorkspace_DifferentOutputWS_oneGroup() { dotestEventWorkspace(false, 1); }
 
-  void test_EventWorkspace_TwoGroups_dontPreserveEvents() {
-    dotestEventWorkspace(false, 2, false);
-  }
+  void test_EventWorkspace_TwoGroups_dontPreserveEvents() { dotestEventWorkspace(false, 2, false); }
 
-  void test_EventWorkspace_OneGroup_dontPreserveEvents() {
-    dotestEventWorkspace(false, 1, false);
-  }
+  void test_EventWorkspace_OneGroup_dontPreserveEvents() { dotestEventWorkspace(false, 1, false); }
 
-  void dotestEventWorkspace(bool inplace, size_t numgroups,
-                            bool preserveEvents = true,
-                            int bankWidthInPixels = 16) {
+  void dotestEventWorkspace(bool inplace, size_t numgroups, bool preserveEvents = true, int bankWidthInPixels = 16) {
     std::string nxsWSname("DiffractionFocussing2Test_ws");
 
     // Create the fake event workspace
-    EventWorkspace_sptr inputW =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
-            3, bankWidthInPixels);
+    EventWorkspace_sptr inputW = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(3, bankWidthInPixels);
     AnalysisDataService::Instance().addOrReplace(nxsWSname, inputW);
 
     //    //----- Load some event data --------
@@ -139,44 +122,34 @@ public:
     if (numgroups == 1)
       GroupNames = "bank3";
     std::string groupWSName("DiffractionFocussing2Test_group");
-    FrameworkManager::Instance().exec("CreateGroupingWorkspace", 6,
-                                      "InputWorkspace", nxsWSname.c_str(),
-                                      "GroupNames", GroupNames.c_str(),
-                                      "OutputWorkspace", groupWSName.c_str());
+    FrameworkManager::Instance().exec("CreateGroupingWorkspace", 6, "InputWorkspace", nxsWSname.c_str(), "GroupNames",
+                                      GroupNames.c_str(), "OutputWorkspace", groupWSName.c_str());
 
     // ------------ Create a grouping workspace by name -------------
     DiffractionFocussing2 focus;
     focus.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        focus.setPropertyValue("InputWorkspace", nxsWSname));
+    TS_ASSERT_THROWS_NOTHING(focus.setPropertyValue("InputWorkspace", nxsWSname));
     std::string outputws = nxsWSname + "_focussed";
     if (inplace)
       outputws = nxsWSname;
-    TS_ASSERT_THROWS_NOTHING(
-        focus.setPropertyValue("OutputWorkspace", outputws));
+    TS_ASSERT_THROWS_NOTHING(focus.setPropertyValue("OutputWorkspace", outputws));
 
     // This fake calibration file was generated using
     // DiffractionFocussing2Test_helper.py
-    TS_ASSERT_THROWS_NOTHING(
-        focus.setPropertyValue("GroupingWorkspace", groupWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        focus.setProperty("PreserveEvents", preserveEvents));
+    TS_ASSERT_THROWS_NOTHING(focus.setPropertyValue("GroupingWorkspace", groupWSName));
+    TS_ASSERT_THROWS_NOTHING(focus.setProperty("PreserveEvents", preserveEvents));
     // OK, run the algorithm
     TS_ASSERT_THROWS_NOTHING(focus.execute(););
     TS_ASSERT(focus.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output =
-            AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(
-                outputws));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(outputws));
     if (!output)
       return;
 
     // ---- Did we keep the event workspace ----
     EventWorkspace_const_sptr outputEvent;
-    TS_ASSERT_THROWS_NOTHING(
-        outputEvent = std::dynamic_pointer_cast<const EventWorkspace>(output));
+    TS_ASSERT_THROWS_NOTHING(outputEvent = std::dynamic_pointer_cast<const EventWorkspace>(output));
     if (preserveEvents) {
       TS_ASSERT(outputEvent);
       if (!outputEvent)
@@ -196,10 +169,8 @@ public:
 
     // Events in these two banks alone
     if (preserveEvents)
-      TS_ASSERT_EQUALS(outputEvent->getNumberEvents(),
-                       (numgroups == 2)
-                           ? (bankWidthInPixels * bankWidthInPixels * 2)
-                           : bankWidthInPixels * bankWidthInPixels);
+      TS_ASSERT_EQUALS(outputEvent->getNumberEvents(), (numgroups == 2) ? (bankWidthInPixels * bankWidthInPixels * 2)
+                                                                        : bankWidthInPixels * bankWidthInPixels);
 
     // Now let's test the grouping of detector UDETS to groups
     for (size_t wi = 0; wi < output->getNumberHistograms(); wi++) {
@@ -221,12 +192,9 @@ public:
       TS_ASSERT(rebin.isExecuted());
 
       /* Get the output ws again */
-      outputEvent =
-          AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputws);
+      outputEvent = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputws);
       double events_after_binning = 0;
-      for (size_t workspace_index = 0;
-           workspace_index < outputEvent->getNumberHistograms();
-           workspace_index++) {
+      for (size_t workspace_index = 0; workspace_index < outputEvent->getNumberHistograms(); workspace_index++) {
         // should be 16 bins
         TS_ASSERT_EQUALS(outputEvent->refX(workspace_index)->size(), 16);
         // There should be some data in the bins
@@ -235,9 +203,8 @@ public:
       }
       // The count sums up to the same as the number of events
       TS_ASSERT_DELTA(events_after_binning,
-                      (numgroups == 2)
-                          ? double(bankWidthInPixels * bankWidthInPixels) * 2.0
-                          : double(bankWidthInPixels * bankWidthInPixels),
+                      (numgroups == 2) ? double(bankWidthInPixels * bankWidthInPixels) * 2.0
+                                       : double(bankWidthInPixels * bankWidthInPixels),
                       1e-4);
     }
   }
@@ -254,26 +221,20 @@ class DiffractionFocussing2TestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DiffractionFocussing2TestPerformance *createSuite() {
-    return new DiffractionFocussing2TestPerformance();
-  }
-  static void destroySuite(DiffractionFocussing2TestPerformance *suite) {
-    delete suite;
-  }
+  static DiffractionFocussing2TestPerformance *createSuite() { return new DiffractionFocussing2TestPerformance(); }
+  static void destroySuite(DiffractionFocussing2TestPerformance *suite) { delete suite; }
 
   EventWorkspace_sptr ws;
 
   DiffractionFocussing2TestPerformance() {
-    IAlgorithm_sptr alg =
-        AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
+    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
     alg->initialize();
     alg->setRethrows(true);
     alg->setPropertyValue("Filename", "SNAP_Definition_2011-09-07.xml");
     alg->setPropertyValue("OutputWorkspace", "SNAP_empty");
     alg->setPropertyValue("MakeEventWorkspace", "1");
     alg->execute();
-    ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-        "SNAP_empty");
+    ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("SNAP_empty");
     ws->sortAll(TOF_SORT, nullptr);
 
     // Fill a whole bunch of events
@@ -310,17 +271,14 @@ public:
   }
 
   void test_SNAP_event_one_group() {
-    IAlgorithm_sptr alg =
-        AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
+    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", "SNAP_empty");
     alg->setPropertyValue("GroupingWorkspace", "SNAP_group_bank1");
     alg->setPropertyValue("OutputWorkspace", "SNAP_focus");
     alg->setPropertyValue("PreserveEvents", "1");
     alg->execute();
-    EventWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            "SNAP_focus");
+    EventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("SNAP_focus");
 
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(outWS->getNumberEvents(), 20 * 65536);
@@ -328,17 +286,14 @@ public:
   }
 
   void test_SNAP_event_six_groups() {
-    IAlgorithm_sptr alg =
-        AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
+    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", "SNAP_empty");
     alg->setPropertyValue("GroupingWorkspace", "SNAP_group_several");
     alg->setPropertyValue("OutputWorkspace", "SNAP_focus");
     alg->setPropertyValue("PreserveEvents", "1");
     alg->execute();
-    EventWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            "SNAP_focus");
+    EventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("SNAP_focus");
 
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 6);
     TS_ASSERT_EQUALS(outWS->getNumberEvents(), 6 * 20 * 65536);
@@ -346,34 +301,28 @@ public:
   }
 
   void test_SNAP_event_one_group_dontPreserveEvents() {
-    IAlgorithm_sptr alg =
-        AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
+    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", "SNAP_empty");
     alg->setPropertyValue("GroupingWorkspace", "SNAP_group_bank1");
     alg->setPropertyValue("OutputWorkspace", "SNAP_focus");
     alg->setPropertyValue("PreserveEvents", "0");
     alg->execute();
-    MatrixWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "SNAP_focus");
+    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("SNAP_focus");
 
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1);
     AnalysisDataService::Instance().remove("SNAP_focus");
   }
 
   void test_SNAP_event_six_groups_dontPreserveEvents() {
-    IAlgorithm_sptr alg =
-        AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
+    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", "SNAP_empty");
     alg->setPropertyValue("GroupingWorkspace", "SNAP_group_several");
     alg->setPropertyValue("OutputWorkspace", "SNAP_focus");
     alg->setPropertyValue("PreserveEvents", "0");
     alg->execute();
-    MatrixWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "SNAP_focus");
+    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("SNAP_focus");
 
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 6);
     AnalysisDataService::Instance().remove("SNAP_focus");
