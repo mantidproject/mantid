@@ -62,8 +62,9 @@ MCInteractionVolume::MCInteractionVolume(
 }
 
 /**
- * Returns the axis-aligned bounding box for the volume including env
- * @return A reference to the bounding box
+ * Returns the axis-aligned bounding box for the volume including env if
+ * m_pointsIn != SampleOnly
+ * @return The bounding box
  */
 const Geometry::BoundingBox MCInteractionVolume::getFullBoundingBox() const {
   auto sampleBox = m_sample->getBoundingBox();
@@ -90,7 +91,10 @@ int MCInteractionVolume::getComponentIndex(
   int componentIndex = -1;
   if (m_pointsIn != ScatteringPointVicinity::SAMPLEONLY && m_env) {
     const int randomStart =
-        (m_pointsIn == ScatteringPointVicinity::ENVIRONMENTONLY) ? 1 : 0;
+        ((m_pointsIn == ScatteringPointVicinity::ENVIRONMENTONLY) ||
+         !m_sample->hasValidShape())
+            ? 1
+            : 0;
     componentIndex =
         rng.nextInt(randomStart, static_cast<int>(m_env->nelements())) - 1;
   }
