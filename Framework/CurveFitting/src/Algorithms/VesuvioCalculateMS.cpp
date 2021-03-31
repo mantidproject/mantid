@@ -139,7 +139,7 @@ void VesuvioCalculateMS::exec() {
   const size_t nhist = m_inputWS->getNumberHistograms();
   m_progress = std::make_unique<Progress>(this, 0.0, 1.0, nhist * m_nruns * 2);
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
-  std::cout << "before parallel section" << std::endl;
+
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -168,7 +168,7 @@ void VesuvioCalculateMS::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  std::cout << "after parallel section" << std::endl;
+
   setProperty("TotalScatteringWS", totalsc);
   setProperty("MultipleScatteringWS", multsc);
 }
@@ -303,6 +303,7 @@ void VesuvioCalculateMS::cacheInputs() {
 /**
  * Calculate the total scattering and contributions from higher-order scattering
  * for given spectrum
+ * @param rng A reference to a PseudoRandomNumberGenerator
  * @param wsIndex The index on the input workspace for the chosen spectrum
  * @param totalsc A non-const reference to the spectrum that will contain the
  * total scattering calculation
@@ -345,6 +346,7 @@ void VesuvioCalculateMS::calculateMS(
  * Perform a single simulation of a given number of events for up to a maximum
  * number of
  * scatterings on a chosen detector
+ * @param rng A reference to a PseudoRandomNumberGenerator
  * @param detpar Detector information describing the final detector position
  * @param respar Resolution information on the intrument as a whole
  * @param simulCounts Simulation object used to storing the calculated number of
@@ -396,6 +398,7 @@ void VesuvioCalculateMS::assignToOutput(
 }
 
 /**
+ * @param rng A reference to a PseudoRandomNumberGenerator
  * @param detpar Detector information describing the final detector position
  * @param respar Resolution information on the intrument as a whole
  * @param simulation [Output] Store the calculated counts here
@@ -519,6 +522,7 @@ double VesuvioCalculateMS::calculateCounts(
 /**
  * Sample from the moderator assuming it can be seen
  * as a cylindrical ring with inner and outer radius
+ * @param rng A reference to a PseudoRandomNumberGenerator
  * @param l1 Src-sample distance (m)
  * @returns Position on the moderator of the generated point
  */
@@ -543,6 +547,7 @@ V3D VesuvioCalculateMS::generateSrcPos(
 /**
  * Generate an incident energy based on a randomly-selected TOF value
  * It is assigned a weight = (2.0*E0/(T-t2))/E0^0.9.
+ * @param rng A reference to a PseudoRandomNumberGenerator
  * @param l1 Distance from src to sample (metres)
  * @param t2 Nominal time from sample to detector (seconds)
  * @param weight [Out] Weight factor to modify for the generated energy value
@@ -566,6 +571,7 @@ double VesuvioCalculateMS::generateE0(
  * Generate an initial tof from this distribution:
  * 1-(0.5*X**2/T0**2+X/T0+1)*EXP(-X/T0), where x is the time and t0
  * is the src-sample time.
+ * @param rng A reference to a PseudoRandomNumberGenerator
  * @param dtof Error in time resolution (us)
  * @param en0 Value of the incident energy
  * @param dl1 S.d of moderator to sample distance
@@ -604,6 +610,7 @@ double VesuvioCalculateMS::generateTOF(
 /**
  * Generate a scatter event and update the weight according to the
  * amount the beam would be attenuted by the sample
+ * @param rng A reference to a PseudoRandomNumberGenerator
  * @param startPos Starting position
  * @param direc Direction of travel for the neutron
  * @param weight [InOut] Multiply the incoming weight by the attenuation
@@ -715,6 +722,7 @@ double VesuvioCalculateMS::partialDiffXSec(const double en0, const double en1,
 
 /**
  * Generate a random position within the final detector in the lab frame
+ * @param rng A reference to a PseudoRandomNumberGenerator
  * @param nominalPos The poisiton of the centre point of the detector
  * @param energy The final energy of the neutron
  * @param scatterPt The position of the scatter event that lead to this
@@ -774,6 +782,7 @@ V3D VesuvioCalculateMS::generateDetectorPos(
 
 /**
  * Generate the final energy of the analyser
+ * @param rng A reference to a PseudoRandomNumberGenerator
  * @param angle Detector angle from sample
  * @param e1nom The nominal final energy of the analyzer
  * @param e1res The resoltion in energy of the analyser
