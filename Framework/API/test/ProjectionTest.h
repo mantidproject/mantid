@@ -21,8 +21,7 @@ namespace {
 // Provides a table that claims to have the given number of rows and columns.
 class DimensionedTable : public TableWorkspaceTester {
 public:
-  DimensionedTable(size_t cols, size_t rows)
-      : m_numColumns(cols), m_numRows(rows) {}
+  DimensionedTable(size_t cols, size_t rows) : m_numColumns(cols), m_numRows(rows) {}
   size_t columnCount() const override { return m_numColumns; }
   size_t rowCount() const override { return m_numRows; }
 
@@ -43,9 +42,7 @@ public:
   size_t size() const override { return 3; }
 
   using ColumnTester::void_pointer;
-  const void *void_pointer(size_t index) const override {
-    return &m_names[index];
-  }
+  const void *void_pointer(size_t index) const override { return &m_names[index]; }
 
 private:
   std::string m_names[3];
@@ -61,9 +58,7 @@ public:
   size_t size() const override { return 3; }
 
   using ColumnTester::void_pointer;
-  const void *void_pointer(size_t index) const override {
-    return &m_values[index];
-  }
+  const void *void_pointer(size_t index) const override { return &m_values[index]; }
 
 private:
   V3D m_values[3];
@@ -79,9 +74,7 @@ public:
   size_t size() const override { return 3; }
 
   using ColumnTester::void_pointer;
-  const void *void_pointer(size_t index) const override {
-    return &m_offsets[index];
-  }
+  const void *void_pointer(size_t index) const override { return &m_offsets[index]; }
 
 private:
   double m_offsets[3];
@@ -97,9 +90,7 @@ public:
   size_t size() const override { return 3; }
 
   using ColumnTester::void_pointer;
-  const void *void_pointer(size_t index) const override {
-    return &m_units[index];
-  }
+  const void *void_pointer(size_t index) const override { return &m_units[index]; }
 
 private:
   std::string m_units[3];
@@ -159,9 +150,7 @@ public:
       auto p = std::make_shared<Projection>(table);
       TS_FAIL("Projection constructor should have thrown exception");
     } catch (std::runtime_error &e) {
-      TS_ASSERT_EQUALS(
-          e.what(),
-          std::string("4 columns must be provided to create a projection"))
+      TS_ASSERT_EQUALS(e.what(), std::string("4 columns must be provided to create a projection"))
     } catch (...) {
       TS_FAIL("Projection constructor threw unexpected exception");
     }
@@ -173,9 +162,7 @@ public:
       auto p = std::make_shared<Projection>(table);
       TS_FAIL("Projection constructor should have thrown exception");
     } catch (std::runtime_error &e) {
-      TS_ASSERT_EQUALS(
-          e.what(),
-          std::string("3 rows must be provided to create a projection"))
+      TS_ASSERT_EQUALS(e.what(), std::string("3 rows must be provided to create a projection"))
     } catch (...) {
       TS_FAIL("Projection constructor threw unexpected exception");
     }
@@ -187,9 +174,7 @@ public:
       auto p = std::make_shared<Projection>(table);
       TS_FAIL("Projection constructor should have thrown exception");
     } catch (std::runtime_error &e) {
-      TS_ASSERT_EQUALS(
-          e.what(),
-          std::string("3 rows must be provided to create a projection"))
+      TS_ASSERT_EQUALS(e.what(), std::string("3 rows must be provided to create a projection"))
     } catch (...) {
       TS_FAIL("Projection constructor threw unexpected exception");
     }

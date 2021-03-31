@@ -13,28 +13,20 @@ namespace Poldi {
 
 using namespace Geometry;
 
-PoldiDetectorDecorator::PoldiDetectorDecorator(
-    std::shared_ptr<PoldiAbstractDetector> decoratedDetector)
+PoldiDetectorDecorator::PoldiDetectorDecorator(std::shared_ptr<PoldiAbstractDetector> decoratedDetector)
     : PoldiAbstractDetector(), m_decoratedDetector() {
   setDecoratedDetector(std::move(decoratedDetector));
 }
 
-void PoldiDetectorDecorator::setDecoratedDetector(
-    std::shared_ptr<PoldiAbstractDetector> detector) {
+void PoldiDetectorDecorator::setDecoratedDetector(std::shared_ptr<PoldiAbstractDetector> detector) {
   m_decoratedDetector = std::move(detector);
 
   detectorSetHook();
 }
 
-std::shared_ptr<PoldiAbstractDetector>
-PoldiDetectorDecorator::decoratedDetector() {
-  return m_decoratedDetector;
-}
+std::shared_ptr<PoldiAbstractDetector> PoldiDetectorDecorator::decoratedDetector() { return m_decoratedDetector; }
 
-void PoldiDetectorDecorator::loadConfiguration(
-    Instrument_const_sptr poldiInstrument) {
-  UNUSED_ARG(poldiInstrument)
-}
+void PoldiDetectorDecorator::loadConfiguration(Instrument_const_sptr poldiInstrument) { UNUSED_ARG(poldiInstrument) }
 
 double PoldiDetectorDecorator::efficiency() {
   if (m_decoratedDetector) {
@@ -84,8 +76,7 @@ const std::vector<int> &PoldiDetectorDecorator::availableElements() {
   }
 }
 
-std::pair<double, double> PoldiDetectorDecorator::qLimits(double lambdaMin,
-                                                          double lambdaMax) {
+std::pair<double, double> PoldiDetectorDecorator::qLimits(double lambdaMin, double lambdaMax) {
   if (m_decoratedDetector) {
     return m_decoratedDetector->qLimits(lambdaMin, lambdaMax);
   } else {

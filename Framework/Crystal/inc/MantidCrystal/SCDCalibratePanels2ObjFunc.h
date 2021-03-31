@@ -18,8 +18,7 @@ namespace Crystal {
 
 /** SCDCalibratePanels2ObjFunc : TODO: DESCRIPTION
  */
-class MANTID_CRYSTAL_DLL SCDCalibratePanels2ObjFunc : public API::ParamFunction,
-                                                      public API::IFunction1D {
+class MANTID_CRYSTAL_DLL SCDCalibratePanels2ObjFunc : public API::ParamFunction, public API::IFunction1D {
 public:
   /// Constructor for init input vector
   SCDCalibratePanels2ObjFunc();
@@ -31,11 +30,9 @@ public:
   const std::string category() const override { return "General"; }
 
   /// base objective function
-  void function1D(double *out, const double *xValues,
-                  const size_t order) const override;
+  void function1D(double *out, const double *xValues, const size_t order) const override;
 
-  void setPeakWorkspace(Mantid::API::IPeaksWorkspace_sptr &pws,
-                        const std::string componentName);
+  void setPeakWorkspace(Mantid::API::IPeaksWorkspace_sptr &pws, const std::string componentName);
 
 private:
   /// temp workspace holder
@@ -48,15 +45,13 @@ private:
   const double PI{3.1415926535897932384626433832795028841971693993751058209};
 
   /// helper functions
-  Mantid::API::IPeaksWorkspace_sptr
-  moveInstruentComponentBy(double deltaX, double deltaY, double deltaZ,
-                           std::string componentName,
-                           Mantid::API::IPeaksWorkspace_sptr &pws) const;
+  Mantid::API::IPeaksWorkspace_sptr moveInstruentComponentBy(double deltaX, double deltaY, double deltaZ,
+                                                             std::string componentName,
+                                                             Mantid::API::IPeaksWorkspace_sptr &pws) const;
 
-  Mantid::API::IPeaksWorkspace_sptr
-  rotateInstrumentComponentBy(double rotVx, double rotVy, double rotVz,
-                              double rotAng, std::string componentName,
-                              Mantid::API::IPeaksWorkspace_sptr &pws) const;
+  Mantid::API::IPeaksWorkspace_sptr rotateInstrumentComponentBy(double rotVx, double rotVy, double rotVz, double rotAng,
+                                                                std::string componentName,
+                                                                Mantid::API::IPeaksWorkspace_sptr &pws) const;
 };
 
 } // namespace Crystal

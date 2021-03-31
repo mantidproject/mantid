@@ -72,8 +72,7 @@ public:
   void setBaseEqn() override;
   /// Writes the sphere equatation in MCNP format
   void write(std::ostream &) const override;
-  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin) override;
+  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) override;
 
   /// The number of slices to approximate a sphere
   constexpr static int g_NSLICES = 5;

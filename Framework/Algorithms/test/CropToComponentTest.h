@@ -22,9 +22,7 @@ class CropToComponentTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CropToComponentTest *createSuite() {
-    return new CropToComponentTest();
-  }
+  static CropToComponentTest *createSuite() { return new CropToComponentTest(); }
   static void destroySuite(CropToComponentTest *suite) { delete suite; }
 
   void test_Init() {
@@ -38,8 +36,7 @@ public:
     int numberOfBanks = 4;
     int numberOfPixelsPerBank = 3;
 
-    auto inputWorkspace =
-        getSampleWorkspace(numberOfBanks, numberOfPixelsPerBank);
+    auto inputWorkspace = getSampleWorkspace(numberOfBanks, numberOfPixelsPerBank);
     std::vector<std::string> componentNames = {"bank2", "bank3"};
 
     // Act
@@ -51,8 +48,7 @@ public:
     crop.setProperty("ComponentNames", componentNames);
     crop.execute();
     TS_ASSERT(crop.isExecuted())
-    Mantid::API::MatrixWorkspace_sptr outputWorkspace =
-        crop.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr outputWorkspace = crop.getProperty("OutputWorkspace");
 
     // Assert
     size_t expectedNumberOfHistograms = 18;
@@ -66,8 +62,7 @@ public:
     int numberOfBanks = 4;
     int numberOfPixelsPerBank = 3;
 
-    auto inputWorkspace =
-        getSampleWorkspace(numberOfBanks, numberOfPixelsPerBank);
+    auto inputWorkspace = getSampleWorkspace(numberOfBanks, numberOfPixelsPerBank);
     std::vector<std::string> componentNames = {};
 
     // Act
@@ -79,8 +74,7 @@ public:
     crop.setProperty("ComponentNames", componentNames);
     crop.execute();
     TS_ASSERT(crop.isExecuted())
-    Mantid::API::MatrixWorkspace_sptr outputWorkspace =
-        crop.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr outputWorkspace = crop.getProperty("OutputWorkspace");
 
     // Assert
     size_t expectedNumberOfHistograms = 36;
@@ -94,8 +88,7 @@ public:
     int numberOfBanks = 4;
     int numberOfPixelsPerBank = 3;
 
-    auto inputWorkspace =
-        getSampleWorkspace(numberOfBanks, numberOfPixelsPerBank);
+    auto inputWorkspace = getSampleWorkspace(numberOfBanks, numberOfPixelsPerBank);
     std::vector<std::string> componentNames = {"bank3"};
     // Clearing some IDs in bank2 should not cause issues, compare
     // test_throws_if_no_spectrum_for_detector.
@@ -110,8 +103,7 @@ public:
     crop.setProperty("ComponentNames", componentNames);
     crop.execute();
     TS_ASSERT(crop.isExecuted())
-    Mantid::API::MatrixWorkspace_sptr outputWorkspace =
-        crop.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr outputWorkspace = crop.getProperty("OutputWorkspace");
 
     // Assert
     size_t expectedNumberOfHistograms = 9;
@@ -124,8 +116,7 @@ public:
     int numberOfBanks = 4;
     int numberOfPixelsPerBank = 3;
 
-    auto inputWorkspace =
-        getSampleWorkspace(numberOfBanks, numberOfPixelsPerBank);
+    auto inputWorkspace = getSampleWorkspace(numberOfBanks, numberOfPixelsPerBank);
     std::vector<std::string> componentNames = {"bank3"};
     // Clear some IDs in bank3.
     inputWorkspace->getSpectrum(18).clearDetectorIDs();
@@ -137,9 +128,8 @@ public:
     crop.setProperty("InputWorkspace", inputWorkspace);
     crop.setProperty("OutputWorkspace", "dummy");
     crop.setProperty("ComponentNames", componentNames);
-    TS_ASSERT_THROWS_EQUALS(
-        crop.execute(), const std::runtime_error &e, std::string(e.what()),
-        "Some of the requested detectors do not have a corresponding spectrum");
+    TS_ASSERT_THROWS_EQUALS(crop.execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some of the requested detectors do not have a corresponding spectrum");
   }
 
   void test_that_incorrect_component_name_is_not_accepeted() {
@@ -147,8 +137,7 @@ public:
     int numberOfBanks = 4;
     int numberOfPixelsPerBank = 3;
 
-    auto inputWorkspace =
-        getSampleWorkspace(numberOfBanks, numberOfPixelsPerBank);
+    auto inputWorkspace = getSampleWorkspace(numberOfBanks, numberOfPixelsPerBank);
     std::vector<std::string> componentNames = {"wrong_detector_name"};
 
     // Act
@@ -159,8 +148,7 @@ public:
     crop.setProperty("InputWorkspace", inputWorkspace);
     crop.setProperty("OutputWorkspace", "dummy");
     crop.setProperty("ComponentNames", componentNames);
-    TSM_ASSERT_THROWS("Invalid detector names will throw.", crop.execute(),
-                      const std::runtime_error &)
+    TSM_ASSERT_THROWS("Invalid detector names will throw.", crop.execute(), const std::runtime_error &)
   }
 
   void test_that_det_ids_are_ordered() {
@@ -171,8 +159,7 @@ public:
     loader.setPropertyValue("OutputWorkspace", "in");
     loader.execute();
     Mantid::API::MatrixWorkspace_sptr workspace =
-        Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::MatrixWorkspace>("in");
+        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("in");
 
     std::vector<std::string> componentNames = {"main-detector-bank"};
 
@@ -186,8 +173,7 @@ public:
     crop.setProperty("ComponentNames", componentNames);
     crop.execute();
     TS_ASSERT(crop.isExecuted())
-    Mantid::API::MatrixWorkspace_sptr orderedWorkspace =
-        crop.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr orderedWorkspace = crop.getProperty("OutputWorkspace");
 
     // Assert
     // Test the first three spectrum numbers.
@@ -217,8 +203,7 @@ public:
     creator.setProperty("NumScanPoints", 5);
     creator.setProperty("OutputWorkspace", "__unused_for_child");
     creator.execute();
-    Mantid::API::MatrixWorkspace_sptr workspace =
-        creator.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr workspace = creator.getProperty("OutputWorkspace");
 
     // Act
     Mantid::Algorithms::CropToComponent crop;
@@ -230,20 +215,16 @@ public:
     crop.setProperty("ComponentNames", "bank1");
     TS_ASSERT_THROWS_NOTHING(crop.execute())
     TS_ASSERT(crop.isExecuted())
-    Mantid::API::MatrixWorkspace_sptr cropped =
-        crop.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr cropped = crop.getProperty("OutputWorkspace");
     TS_ASSERT(cropped)
   }
 
 private:
-  Mantid::API::MatrixWorkspace_sptr
-  getSampleWorkspace(int numberOfBanks, int numbersOfPixelPerBank) {
-    return WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-        numberOfBanks, numbersOfPixelPerBank, 2);
+  Mantid::API::MatrixWorkspace_sptr getSampleWorkspace(int numberOfBanks, int numbersOfPixelPerBank) {
+    return WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(numberOfBanks, numbersOfPixelPerBank, 2);
   }
 
-  void doAsssert(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                 std::vector<Mantid::detid_t> &expectedIDs,
+  void doAsssert(const Mantid::API::MatrixWorkspace_sptr &workspace, std::vector<Mantid::detid_t> &expectedIDs,
                  size_t expectedNumberOfHistograms) {
     // Assert
     const auto numberOfHistograms = workspace->getNumberHistograms();
@@ -255,8 +236,7 @@ private:
     const auto &spectrumInfo = workspace->spectrumInfo();
     for (const auto index : indices) {
       Mantid::detid_t detectorID = spectrumInfo.detector(index).getID();
-      TSM_ASSERT_EQUALS("The detector IDs should match.", expectedIDs[index],
-                        detectorID);
+      TSM_ASSERT_EQUALS("The detector IDs should match.", expectedIDs[index], detectorID);
     }
   }
 };

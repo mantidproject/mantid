@@ -36,11 +36,9 @@ using namespace std;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
 
-IntegrateQLabEvents::IntegrateQLabEvents(
-    const SlimEvents &peak_q_list, double radius,
-    const bool useOnePercentBackgroundCorrection)
-    : m_radius(radius),
-      m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
+IntegrateQLabEvents::IntegrateQLabEvents(const SlimEvents &peak_q_list, double radius,
+                                         const bool useOnePercentBackgroundCorrection)
+    : m_radius(radius), m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
   m_cellSize = m_radius;
   for (size_t peakIndex = 0; peakIndex != peak_q_list.size(); ++peakIndex) {
     const V3D q = peak_q_list[peakIndex].second;
@@ -68,10 +66,9 @@ void IntegrateQLabEvents::addEvents(SlimEvents const &event_qs) {
 }
 
 Mantid::Geometry::PeakShape_const_sptr
-IntegrateQLabEvents::ellipseIntegrateEvents(
-    const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size,
-    double peak_radius, double back_inner_radius, double back_outer_radius,
-    std::vector<double> &axes_radii, double &inti, double &sigi) {
+IntegrateQLabEvents::ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size,
+                                            double peak_radius, double back_inner_radius, double back_outer_radius,
+                                            std::vector<double> &axes_radii, double &inti, double &sigi) {
   inti = 0.0; // default values, in case something
   sigi = 0.0; // is wrong with the peak.
 
@@ -96,23 +93,18 @@ IntegrateQLabEvents::ellipseIntegrateEvents(
     sigmas[i] = sqrt(eigen_values[i]);
 
   bool invalid_peak =
-      std::any_of(sigmas.cbegin(), sigmas.cend(), [](const double sigma) {
-        return std::isnan(sigma) || sigma <= 0;
-      });
+      std::any_of(sigmas.cbegin(), sigmas.cend(), [](const double sigma) { return std::isnan(sigma) || sigma <= 0; });
 
   // if data collapses to a line or plane, the ellipsoid volume is zero
   if (invalid_peak)
     return std::make_shared<NoShape>();
 
-  return ellipseIntegrateEvents(std::move(E1Vec), peak_q, some_events,
-                                eigen_vectors, sigmas, specify_size,
-                                peak_radius, back_inner_radius,
-                                back_outer_radius, axes_radii, inti, sigi);
+  return ellipseIntegrateEvents(std::move(E1Vec), peak_q, some_events, eigen_vectors, sigmas, specify_size, peak_radius,
+                                back_inner_radius, back_outer_radius, axes_radii, inti, sigi);
 }
-std::pair<double, double>
-IntegrateQLabEvents::numInEllipsoid(SlimEvents const &events,
-                                    std::vector<V3D> const &directions,
-                                    std::vector<double> const &sizes) {
+std::pair<double, double> IntegrateQLabEvents::numInEllipsoid(SlimEvents const &events,
+                                                              std::vector<V3D> const &directions,
+                                                              std::vector<double> const &sizes) {
   std::pair<double, double> count(0, 0);
   for (const auto &event : events) {
     double sum = 0;
@@ -128,10 +120,11 @@ IntegrateQLabEvents::numInEllipsoid(SlimEvents const &events,
   return count;
 }
 
-std::pair<double, double> IntegrateQLabEvents::numInEllipsoidBkg(
-    SlimEvents const &events, std::vector<V3D> const &directions,
-    std::vector<double> const &sizes, std::vector<double> const &sizesIn,
-    const bool useOnePercentBackgroundCorrection) {
+std::pair<double, double> IntegrateQLabEvents::numInEllipsoidBkg(SlimEvents const &events,
+                                                                 std::vector<V3D> const &directions,
+                                                                 std::vector<double> const &sizes,
+                                                                 std::vector<double> const &sizesIn,
+                                                                 const bool useOnePercentBackgroundCorrection) {
   std::pair<double, double> count(0, 0);
   std::vector<std::pair<double, double>> eventVec;
   for (const auto &event : events) {
@@ -150,10 +143,8 @@ std::pair<double, double> IntegrateQLabEvents::numInEllipsoidBkg(
   auto endIndex = eventVec.size();
   if (useOnePercentBackgroundCorrection) {
     // Remove top 1% of background
-    std::sort(
-        eventVec.begin(), eventVec.end(),
-        [](const std::pair<double, double> &a,
-           const std::pair<double, double> &b) { return a.first < b.first; });
+    std::sort(eventVec.begin(), eventVec.end(),
+              [](const std::pair<double, double> &a, const std::pair<double, double> &b) { return a.first < b.first; });
     endIndex = static_cast<size_t>(0.99 * static_cast<double>(endIndex));
   }
 
@@ -165,9 +156,7 @@ std::pair<double, double> IntegrateQLabEvents::numInEllipsoidBkg(
   return count;
 }
 
-void IntegrateQLabEvents::makeCovarianceMatrix(SlimEvents const &events,
-                                               DblMatrix &matrix,
-                                               double radius) {
+void IntegrateQLabEvents::makeCovarianceMatrix(SlimEvents const &events, DblMatrix &matrix, double radius) {
   double totalCounts;
   for (int row = 0; row < 3; row++) {
     for (int col = 0; col < 3; col++) {
@@ -187,8 +176,7 @@ void IntegrateQLabEvents::makeCovarianceMatrix(SlimEvents const &events,
   }
 }
 
-void IntegrateQLabEvents::getEigenVectors(DblMatrix const &cov_matrix,
-                                          std::vector<V3D> &eigen_vectors,
+void IntegrateQLabEvents::getEigenVectors(DblMatrix const &cov_matrix, std::vector<V3D> &eigen_vectors,
                                           std::vector<double> &eigen_values) {
   unsigned int size = 3;
 
@@ -207,8 +195,7 @@ void IntegrateQLabEvents::getEigenVectors(DblMatrix const &cov_matrix,
 
   // copy the resulting eigen vectors to output vector
   for (size_t col = 0; col < size; col++) {
-    eigen_vectors.emplace_back(gsl_matrix_get(eigen_vec, 0, col),
-                               gsl_matrix_get(eigen_vec, 1, col),
+    eigen_vectors.emplace_back(gsl_matrix_get(eigen_vec, 0, col), gsl_matrix_get(eigen_vec, 1, col),
                                gsl_matrix_get(eigen_vec, 2, col));
     eigen_values.emplace_back(gsl_vector_get(eigen_val, col));
   }
@@ -235,11 +222,9 @@ void IntegrateQLabEvents::addEvent(const SlimEvent event) {
 }
 
 PeakShapeEllipsoid_const_sptr IntegrateQLabEvents::ellipseIntegrateEvents(
-    const std::vector<V3D> &E1Vec, V3D const &peak_q, SlimEvents const &ev_list,
-    std::vector<V3D> const &directions, std::vector<double> const &sigmas,
-    bool specify_size, double peak_radius, double back_inner_radius,
-    double back_outer_radius, std::vector<double> &axes_radii, double &inti,
-    double &sigi) {
+    const std::vector<V3D> &E1Vec, V3D const &peak_q, SlimEvents const &ev_list, std::vector<V3D> const &directions,
+    std::vector<double> const &sigmas, bool specify_size, double peak_radius, double back_inner_radius,
+    double back_outer_radius, std::vector<double> &axes_radii, double &inti, double &sigi) {
   /* r1, r2 and r3 will give the sizes of the major axis of the peak
    * ellipsoid, and of the inner and outer surface of the background
    * ellipsoidal shell, respectively.
@@ -290,32 +275,26 @@ PeakShapeEllipsoid_const_sptr IntegrateQLabEvents::ellipseIntegrateEvents(
   if (!E1Vec.empty()) {
     double h3 = 1.0 - detectorQ(E1Vec, peak_q, abcBackgroundOuterRadii);
     // scaled from area of circle minus segment when r normalized to 1
-    double m3 = std::sqrt(1.0 - (std::acos(1.0 - h3) -
-                                 (1.0 - h3) * std::sqrt(2.0 * h3 - h3 * h3)) /
-                                    M_PI);
+    double m3 = std::sqrt(1.0 - (std::acos(1.0 - h3) - (1.0 - h3) * std::sqrt(2.0 * h3 - h3 * h3)) / M_PI);
     double h1 = 1.0 - detectorQ(E1Vec, peak_q, axes_radii);
     // Do not use peak if edge of detector is inside integration radius
     if (h1 > 0.0)
-      return std::make_shared<const PeakShapeEllipsoid>(
-          directions, abcRadii, abcBackgroundInnerRadii,
-          abcBackgroundOuterRadii, Mantid::Kernel::QLab, "IntegrateEllipsoids");
+      return std::make_shared<const PeakShapeEllipsoid>(directions, abcRadii, abcBackgroundInnerRadii,
+                                                        abcBackgroundOuterRadii, Mantid::Kernel::QLab,
+                                                        "IntegrateEllipsoids");
     r3 *= m3;
     if (r2 != r1) {
       double h2 = 1.0 - detectorQ(E1Vec, peak_q, abcBackgroundInnerRadii);
       // scaled from area of circle minus segment when r normalized to 1
-      double m2 = std::sqrt(1.0 - (std::acos(1.0 - h2) -
-                                   (1.0 - h2) * std::sqrt(2.0 * h2 - h2 * h2)) /
-                                      M_PI);
+      double m2 = std::sqrt(1.0 - (std::acos(1.0 - h2) - (1.0 - h2) * std::sqrt(2.0 * h2 - h2 * h2)) / M_PI);
       r2 *= m2;
     }
   }
 
-  std::pair<double, double> backgrd = numInEllipsoidBkg(
-      ev_list, directions, abcBackgroundOuterRadii, abcBackgroundInnerRadii,
-      m_useOnePercentBackgroundCorrection);
+  std::pair<double, double> backgrd = numInEllipsoidBkg(ev_list, directions, abcBackgroundOuterRadii,
+                                                        abcBackgroundInnerRadii, m_useOnePercentBackgroundCorrection);
 
-  std::pair<double, double> peak_w_back =
-      numInEllipsoid(ev_list, directions, axes_radii);
+  std::pair<double, double> peak_w_back = numInEllipsoid(ev_list, directions, axes_radii);
 
   double ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
 
@@ -323,18 +302,15 @@ PeakShapeEllipsoid_const_sptr IntegrateQLabEvents::ellipseIntegrateEvents(
   sigi = sqrt(peak_w_back.second + ratio * ratio * backgrd.second);
 
   // Make the shape and return it.
-  return std::make_shared<const PeakShapeEllipsoid>(
-      directions, abcRadii, abcBackgroundInnerRadii, abcBackgroundOuterRadii,
-      Mantid::Kernel::QLab, "IntegrateEllipsoids");
+  return std::make_shared<const PeakShapeEllipsoid>(directions, abcRadii, abcBackgroundInnerRadii,
+                                                    abcBackgroundOuterRadii, Mantid::Kernel::QLab,
+                                                    "IntegrateEllipsoids");
 }
-double IntegrateQLabEvents::detectorQ(const std::vector<V3D> &E1Vec,
-                                      const V3D QLabFrame,
+double IntegrateQLabEvents::detectorQ(const std::vector<V3D> &E1Vec, const V3D QLabFrame,
                                       const std::vector<double> &r) {
   double quot = 1.0;
   for (auto &E1 : E1Vec) {
-    V3D distv =
-        QLabFrame - E1 * (QLabFrame.scalar_prod(
-                             E1)); // distance to the trajectory as a vector
+    V3D distv = QLabFrame - E1 * (QLabFrame.scalar_prod(E1)); // distance to the trajectory as a vector
     double quot0 = distv.norm() / *(std::min_element(r.begin(), r.end()));
     if (quot0 < quot) {
       quot = quot0;

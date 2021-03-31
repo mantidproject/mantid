@@ -37,13 +37,10 @@ public:
     const std::string workspaceName("forMasking");
     const std::string resultWorkspaceName("masked");
     AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-    ads.add(workspaceName,
-            WorkspaceCreationHelper::create2DWorkspaceBinned(5, 25, 0.0));
+    ads.add(workspaceName, WorkspaceCreationHelper::create2DWorkspaceBinned(5, 25, 0.0));
 
-    TS_ASSERT_THROWS_NOTHING(
-        masker.setPropertyValue("InputWorkspace", workspaceName));
-    TS_ASSERT_THROWS_NOTHING(
-        masker.setPropertyValue("OutputWorkspace", resultWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(masker.setPropertyValue("InputWorkspace", workspaceName));
+    TS_ASSERT_THROWS_NOTHING(masker.setPropertyValue("OutputWorkspace", resultWorkspaceName));
 
     // Check that execution fails if XMin & XMax not set
     TS_ASSERT_THROWS(masker.execute(), const std::runtime_error &);
@@ -55,9 +52,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(masker.execute());
     TS_ASSERT(masker.isExecuted());
 
-    MatrixWorkspace_const_sptr outputWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(
-            ads.retrieve(resultWorkspaceName));
+    MatrixWorkspace_const_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(ads.retrieve(resultWorkspaceName));
 
     for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
       TS_ASSERT(outputWS->hasMaskedBins(i));
@@ -94,16 +89,13 @@ public:
 
     // Create a dummy workspace
     const std::string workspaceName("raggedMask");
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 0.0);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 0.0);
     // Now change one set of bin boundaries so that the don't match the others
     WS->mutableX(1) += -10;
     AnalysisDataService::Instance().add(workspaceName, WS);
 
-    TS_ASSERT_THROWS_NOTHING(
-        masker2.setPropertyValue("InputWorkspace", workspaceName));
-    TS_ASSERT_THROWS_NOTHING(
-        masker2.setPropertyValue("OutputWorkspace", workspaceName));
+    TS_ASSERT_THROWS_NOTHING(masker2.setPropertyValue("InputWorkspace", workspaceName));
+    TS_ASSERT_THROWS_NOTHING(masker2.setPropertyValue("OutputWorkspace", workspaceName));
     TS_ASSERT_THROWS_NOTHING(masker2.setPropertyValue("XMin", "-11.0"));
     TS_ASSERT_THROWS_NOTHING(masker2.setPropertyValue("XMax", "-8.5"));
 
@@ -133,8 +125,7 @@ public:
   void testSpectraList_out_of_range() {
     // Create a dummy workspace
     const std::string workspaceName("raggedMask");
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10, 0.0);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     Mantid::Algorithms::MaskBins masker2;
@@ -154,8 +145,7 @@ public:
     // Create a dummy workspace
     const std::string workspaceName("raggedMask");
     int nBins = 10;
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     Mantid::Algorithms::MaskBins masker2;
@@ -186,8 +176,7 @@ public:
     const std::string opWSName("maskedWS");
 
     int nBins = 10;
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     Mantid::Algorithms::MaskBins masker2;
@@ -202,8 +191,8 @@ public:
     TS_ASSERT(masker2.isExecuted());
 
     // Get output workspace and compare
-    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(opWSName));
+    MatrixWorkspace_sptr outWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(opWSName));
     TS_ASSERT(outWS);
     if (!outWS)
       return;
@@ -228,8 +217,7 @@ public:
     const std::string workspaceName("raggedMask");
     int nBins = 10;
     int numHist = 5;
-    EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::createEventWorkspace(numHist, nBins);
+    EventWorkspace_sptr WS = WorkspaceCreationHelper::createEventWorkspace(numHist, nBins);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     Mantid::Algorithms::MaskBins masker2;
@@ -243,8 +231,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(masker2.execute());
     TS_ASSERT(masker2.isExecuted());
 
-    EventWorkspace_const_sptr constWS =
-        std::dynamic_pointer_cast<const EventWorkspace>(WS);
+    EventWorkspace_const_sptr constWS = std::dynamic_pointer_cast<const EventWorkspace>(WS);
     for (int wi = 1; wi <= 3; wi++)
       for (int bin = 3; bin < 6; bin++) {
         TS_ASSERT_EQUALS(constWS->y(wi)[bin], 0.0);
@@ -263,8 +250,7 @@ public:
 
     int nBins = 10;
     int numHist = 5;
-    EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::createEventWorkspace(numHist, nBins);
+    EventWorkspace_sptr WS = WorkspaceCreationHelper::createEventWorkspace(numHist, nBins);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     Mantid::Algorithms::MaskBins masker2;
@@ -279,8 +265,7 @@ public:
     TS_ASSERT(masker2.isExecuted());
 
     EventWorkspace_const_sptr constWS =
-        std::dynamic_pointer_cast<const EventWorkspace>(
-            AnalysisDataService::Instance().retrieve(opWSName));
+        std::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve(opWSName));
 
     for (size_t wi = 0; wi < 5; ++wi) {
       for (size_t bin = 0; bin < size_t(nBins); ++bin) {
@@ -303,8 +288,7 @@ public:
     const std::string workspaceName("raggedMask");
     int nBins = 10;
     int numHist = 5;
-    EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::createEventWorkspace(numHist, nBins);
+    EventWorkspace_sptr WS = WorkspaceCreationHelper::createEventWorkspace(numHist, nBins);
     AnalysisDataService::Instance().add(workspaceName, WS);
     std::size_t events_before = WS->getNumberEvents();
 
@@ -319,8 +303,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(masker2.execute());
     TS_ASSERT(masker2.isExecuted());
 
-    EventWorkspace_const_sptr constWS =
-        std::dynamic_pointer_cast<const EventWorkspace>(WS);
+    EventWorkspace_const_sptr constWS = std::dynamic_pointer_cast<const EventWorkspace>(WS);
     std::size_t events_after = constWS->getNumberEvents();
 
     for (int wi = 0; wi < numHist; wi++)
@@ -338,8 +321,7 @@ public:
     const std::string workspaceName("raggedMask");
     int nBins = 10;
     int numHist = 5;
-    EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::createEventWorkspace(numHist, nBins);
+    EventWorkspace_sptr WS = WorkspaceCreationHelper::createEventWorkspace(numHist, nBins);
     AnalysisDataService::Instance().add(workspaceName, WS);
     std::size_t events_before = WS->getNumberEvents();
 
@@ -355,8 +337,7 @@ public:
     TS_ASSERT(masker2.isExecuted());
 
     EventWorkspace_const_sptr constWS =
-        AnalysisDataService::Instance().retrieveWS<const EventWorkspace>(
-            workspaceName + "2");
+        AnalysisDataService::Instance().retrieveWS<const EventWorkspace>(workspaceName + "2");
     std::size_t events_after = constWS->getNumberEvents();
 
     for (int wi = 0; wi < numHist; wi++)

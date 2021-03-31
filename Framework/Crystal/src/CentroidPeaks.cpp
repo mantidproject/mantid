@@ -32,30 +32,23 @@ using namespace Mantid::Crystal;
 /** Initialize the algorithm's properties.
  */
 void CentroidPeaks::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "InPeaksWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("InPeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to centroid.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "An input 2D Workspace.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<int>>("PeakRadius", 10,
-                                               Direction::Input),
-      "Fixed radius around each peak position in which to calculate the "
-      "centroid.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("PeakRadius", 10, Direction::Input),
+                  "Fixed radius around each peak position in which to calculate the "
+                  "centroid.");
 
-  declareProperty(std::make_unique<PropertyWithValue<int>>("EdgePixels", 0,
-                                                           Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("EdgePixels", 0, Direction::Input),
                   "The number of pixels where peaks are removed at edges. Only "
                   "for instruments with RectangularDetectors. ");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-          "OutPeaksWorkspace", "", Direction::Output),
-      "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
-      "with the peaks' positions modified by the new found centroids.");
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutPeaksWorkspace", "", Direction::Output),
+                  "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
+                  "with the peaks' positions modified by the new found centroids.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -65,12 +58,10 @@ void CentroidPeaks::init() {
 void CentroidPeaks::integrate() {
 
   /// Peak workspace to centroid
-  Mantid::DataObjects::PeaksWorkspace_sptr inPeakWS =
-      getProperty("InPeaksWorkspace");
+  Mantid::DataObjects::PeaksWorkspace_sptr inPeakWS = getProperty("InPeaksWorkspace");
 
   /// Output peaks workspace, create if needed
-  Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
-      getProperty("OutPeaksWorkspace");
+  Mantid::DataObjects::PeaksWorkspace_sptr peakWS = getProperty("OutPeaksWorkspace");
   if (peakWS != inPeakWS)
     peakWS = inPeakWS->clone();
 
@@ -88,8 +79,7 @@ void CentroidPeaks::integrate() {
     // Find the workspace index for this detector ID
     if (wi_to_detid_map.find(pixelID) != wi_to_detid_map.end()) {
       size_t wi = wi_to_detid_map[pixelID];
-      if (MinPeaks == -1 && peak.getRunNumber() == inWS->getRunNumber() &&
-          wi < Numberwi)
+      if (MinPeaks == -1 && peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi)
         MinPeaks = i;
       if (peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi)
         MaxPeaks = i;
@@ -135,8 +125,7 @@ void CentroidPeaks::integrate() {
         for (int icol = colstart; icol <= colend; ++icol) {
           if (edgePixel(inst, bankName, icol, irow, Edge))
             continue;
-          const auto it =
-              wi_to_detid_map.find(findPixelID(bankName, icol, irow));
+          const auto it = wi_to_detid_map.find(findPixelID(bankName, icol, irow));
           if (it == wi_to_detid_map.end())
             continue;
 
@@ -191,12 +180,10 @@ void CentroidPeaks::integrate() {
 void CentroidPeaks::integrateEvent() {
 
   /// Peak workspace to centroid
-  Mantid::DataObjects::PeaksWorkspace_sptr inPeakWS =
-      getProperty("InPeaksWorkspace");
+  Mantid::DataObjects::PeaksWorkspace_sptr inPeakWS = getProperty("InPeaksWorkspace");
 
   /// Output peaks workspace, create if needed
-  Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
-      getProperty("OutPeaksWorkspace");
+  Mantid::DataObjects::PeaksWorkspace_sptr peakWS = getProperty("OutPeaksWorkspace");
   if (peakWS != inPeakWS)
     peakWS = inPeakWS->clone();
 
@@ -215,8 +202,7 @@ void CentroidPeaks::integrateEvent() {
     // Find the workspace index for this detector ID
     if (wi_to_detid_map.find(pixelID) != wi_to_detid_map.end()) {
       size_t wi = wi_to_detid_map[pixelID];
-      if (MinPeaks == -1 && peak.getRunNumber() == inWS->getRunNumber() &&
-          wi < Numberwi)
+      if (MinPeaks == -1 && peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi)
         MinPeaks = i;
       if (peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi)
         MaxPeaks = i;
@@ -326,8 +312,7 @@ void CentroidPeaks::exec() {
 int CentroidPeaks::findPixelID(const std::string &bankName, int col, int row) {
   std::shared_ptr<const IComponent> parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
-    std::shared_ptr<const RectangularDetector> RDet =
-        std::dynamic_pointer_cast<const RectangularDetector>(parent);
+    std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     std::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
     return pixel->getID();
@@ -336,19 +321,15 @@ int CentroidPeaks::findPixelID(const std::string &bankName, int col, int row) {
     // Only works for WISH
     bankName0.erase(0, 4);
     std::ostringstream pixelString;
-    pixelString << inst->getName() << "/" << bankName0 << "/" << bankName
-                << "/tube" << std::setw(3) << std::setfill('0') << col
-                << "/pixel" << std::setw(4) << std::setfill('0') << row;
-    std::shared_ptr<const Geometry::IComponent> component =
-        inst->getComponentByName(pixelString.str());
-    std::shared_ptr<const Detector> pixel =
-        std::dynamic_pointer_cast<const Detector>(component);
+    pixelString << inst->getName() << "/" << bankName0 << "/" << bankName << "/tube" << std::setw(3)
+                << std::setfill('0') << col << "/pixel" << std::setw(4) << std::setfill('0') << row;
+    std::shared_ptr<const Geometry::IComponent> component = inst->getComponentByName(pixelString.str());
+    std::shared_ptr<const Detector> pixel = std::dynamic_pointer_cast<const Detector>(component);
     return pixel->getID();
   }
 }
 
-void CentroidPeaks::removeEdgePeaks(
-    Mantid::DataObjects::PeaksWorkspace &peakWS) {
+void CentroidPeaks::removeEdgePeaks(Mantid::DataObjects::PeaksWorkspace &peakWS) {
   int Edge = getProperty("EdgePixels");
   std::vector<int> badPeaks;
   size_t numPeaks = peakWS.getNumberPeaks();
@@ -366,8 +347,7 @@ void CentroidPeaks::removeEdgePeaks(
   peakWS.removePeaks(std::move(badPeaks));
 }
 
-void CentroidPeaks::sizeBanks(const std::string &bankName, int &nCols,
-                              int &nRows) {
+void CentroidPeaks::sizeBanks(const std::string &bankName, int &nCols, int &nRows) {
   if (bankName == "None")
     return;
   ExperimentInfo expInfo;
@@ -377,19 +357,16 @@ void CentroidPeaks::sizeBanks(const std::string &bankName, int &nCols,
   // Get a single bank
   auto bank = inst->getComponentByName(bankName);
   auto bankID = bank->getComponentID();
-  auto allBankDetectorIndexes =
-      compInfo.detectorsInSubtree(compInfo.indexOf(bankID));
+  auto allBankDetectorIndexes = compInfo.detectorsInSubtree(compInfo.indexOf(bankID));
 
-  nRows = static_cast<int>(
-      compInfo.componentsInSubtree(compInfo.indexOf(bankID)).size() -
-      allBankDetectorIndexes.size() - 1);
+  nRows = static_cast<int>(compInfo.componentsInSubtree(compInfo.indexOf(bankID)).size() -
+                           allBankDetectorIndexes.size() - 1);
   nCols = static_cast<int>(allBankDetectorIndexes.size()) / nRows;
 
   if (nCols * nRows != static_cast<int>(allBankDetectorIndexes.size())) {
     // Need grandchild instead of child
-    nRows = static_cast<int>(
-        compInfo.componentsInSubtree(compInfo.indexOf(bankID)).size() -
-        allBankDetectorIndexes.size() - 2);
+    nRows = static_cast<int>(compInfo.componentsInSubtree(compInfo.indexOf(bankID)).size() -
+                             allBankDetectorIndexes.size() - 2);
     nCols = static_cast<int>(allBankDetectorIndexes.size()) / nRows;
   }
 }

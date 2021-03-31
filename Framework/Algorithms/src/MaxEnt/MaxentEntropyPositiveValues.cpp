@@ -16,9 +16,7 @@ namespace Algorithms {
  * @param background : [input] The background
  * @return : The first derivative as a vector
  */
-std::vector<double>
-MaxentEntropyPositiveValues::derivative(const std::vector<double> &values,
-                                        double background) {
+std::vector<double> MaxentEntropyPositiveValues::derivative(const std::vector<double> &values, double background) {
 
   std::vector<double> result(values.size());
 
@@ -35,9 +33,8 @@ MaxentEntropyPositiveValues::derivative(const std::vector<double> &values,
  * @param background : [input] The background (unused)
  * @return : The second derivative as a vector
  */
-std::vector<double>
-MaxentEntropyPositiveValues::secondDerivative(const std::vector<double> &values,
-                                              double background) {
+std::vector<double> MaxentEntropyPositiveValues::secondDerivative(const std::vector<double> &values,
+                                                                  double background) {
 
   UNUSED_ARG(background);
   // This is referred to as 'second derivative' in the paper, but in the codes
@@ -51,9 +48,7 @@ MaxentEntropyPositiveValues::secondDerivative(const std::vector<double> &values,
  * @param newValue : [input] The new value to use
  * @return : The corrected values
  */
-std::vector<double>
-MaxentEntropyPositiveValues::correctValues(const std::vector<double> &values,
-                                           double newValue) {
+std::vector<double> MaxentEntropyPositiveValues::correctValues(const std::vector<double> &values, double newValue) {
 
   std::vector<double> result(values.size());
 

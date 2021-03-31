@@ -26,8 +26,7 @@ void Keren::init() {
   declareParameter("A", 1.0, "Polarization at time zero");
   declareParameter("Delta", 0.2, "Distribution width of local fields (MHz)");
   declareParameter("Field", 50.0, "Longitudinal field (Gauss)");
-  declareParameter("Fluct", 0.2,
-                   "Hopping rate (inverse correlation time, MHz)");
+  declareParameter("Fluct", 0.2, "Hopping rate (inverse correlation time, MHz)");
 }
 
 /**
@@ -44,8 +43,7 @@ void Keren::setActiveParameter(size_t i, double value) {
   }
   if (parameterName(i) == "Field") {
     // Value passed in is omega_L, return B
-    setParameter(i, value / (PhysicalConstants::MuonGyromagneticRatio * TWOPI),
-                 false);
+    setParameter(i, value / (PhysicalConstants::MuonGyromagneticRatio * TWOPI), false);
   } else
     setParameter(i, value, false);
 }
@@ -75,14 +73,12 @@ double Keren::activeParameter(size_t i) const {
  * @param xValues :: [input] Array of X values to calculate function at
  * @param nData :: [input] Number of X values
  */
-void Keren::function1D(double *out, const double *xValues,
-                       const size_t nData) const {
+void Keren::function1D(double *out, const double *xValues, const size_t nData) const {
   // Get parameters
   const double initial = getParameter("A");
   const double delta = getParameter("Delta");
   const double fluct = getParameter("Fluct");
-  const double larmor =
-      getParameter("Field") * PhysicalConstants::MuonGyromagneticRatio * TWOPI;
+  const double larmor = getParameter("Field") * PhysicalConstants::MuonGyromagneticRatio * TWOPI;
 
   for (size_t i = 0; i < nData; i++) {
     out[i] = initial * polarization(delta, larmor, fluct, xValues[i]);
@@ -99,8 +95,7 @@ void Keren::function1D(double *out, const double *xValues,
  * @param time :: [input] t, time in microseconds
  * @returns :: Polarization P_z(t) (dimensionless)
  */
-double Keren::polarization(const double delta, const double larmor,
-                           const double fluct, const double time) const {
+double Keren::polarization(const double delta, const double larmor, const double fluct, const double time) const {
   return exp(-1.0 * relaxation(delta, larmor, fluct, time));
 }
 
@@ -113,8 +108,7 @@ double Keren::polarization(const double delta, const double larmor,
  * @param time :: [input] t, time in microseconds
  * @returns :: Relaxation Gamma(t)*t (dimensionless)
  */
-double Keren::relaxation(const double delta, const double larmor,
-                         const double fluct, const double time) const {
+double Keren::relaxation(const double delta, const double larmor, const double fluct, const double time) const {
   // Useful shortcuts
   const double deltaSq = delta * delta;
   const double omegaSq = larmor * larmor;
@@ -124,8 +118,7 @@ double Keren::relaxation(const double delta, const double larmor,
   const double expon = exp(-1.0 * nuT);
 
   // 2*Delta^2 / (omega_L^2 + nu^2)^2
-  const double prefactor =
-      (2.0 * deltaSq) / ((omegaSq + nuSq) * (omegaSq + nuSq));
+  const double prefactor = (2.0 * deltaSq) / ((omegaSq + nuSq) * (omegaSq + nuSq));
 
   const double term1 = (omegaSq + nuSq) * nuT;
   const double term2 = omegaSq - nuSq;

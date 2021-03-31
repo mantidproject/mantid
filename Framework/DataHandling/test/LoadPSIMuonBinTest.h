@@ -37,8 +37,7 @@ public:
     TS_ASSERT(alg.isInitialized())
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SearchForTempFile", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
   }
 
@@ -48,8 +47,7 @@ public:
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SearchForTempFile", false));
 
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -62,25 +60,19 @@ public:
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SearchForTempFile", false));
 
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws"));
     TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->getTitle(), "BNFSO      - Run:1529");
     TS_ASSERT_EQUALS(ws->getLog("sample_magn_field")->value(), "0");
-    TS_ASSERT_EQUALS(
-        ws->getComment(),
-        "Ba3NbFe3Si2O14, crystal                                       ");
-    TS_ASSERT_DELTA(std::stod(ws->getLog("Spectra 1 Temperature")->value()),
-                    4.99961, 0.00001)
-    TS_ASSERT_DELTA(std::stod(ws->getLog("Spectra 2 Temperature")->value()),
-                    5.19769, 0.00001)
+    TS_ASSERT_EQUALS(ws->getComment(), "Ba3NbFe3Si2O14, crystal                                       ");
+    TS_ASSERT_DELTA(std::stod(ws->getLog("Spectra 1 Temperature")->value()), 4.99961, 0.00001)
+    TS_ASSERT_DELTA(std::stod(ws->getLog("Spectra 2 Temperature")->value()), 5.19769, 0.00001)
     TS_ASSERT_EQUALS(ws->getLog("end_time")->value(), "2011-07-04T11:56:24");
     TS_ASSERT_EQUALS(ws->getLog("start_time")->value(), "2011-07-04T10:40:23");
     TS_ASSERT_EQUALS(ws->getLog("Label Spectra 0")->value(), "Forw");
@@ -114,16 +106,14 @@ public:
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SearchForTempFile", false));
 
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Filename", getTestFilePath("pid_offset_vulcan_new.dat.bin")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("pid_offset_vulcan_new.dat.bin")));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     // If algorithm was successful there will be one, we are assuming it won't
     // have been
-    TS_ASSERT_THROWS_ANYTHING(
-        MatrixWorkspace_sptr ws =
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws"));
+    TS_ASSERT_THROWS_ANYTHING(MatrixWorkspace_sptr ws =
+                                  AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws"));
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove("ws"));
   }
@@ -136,8 +126,7 @@ public:
     FileDescriptor descriptor(getTestFilePath("deltat_tdc_dolly_1529.bin"));
     TS_ASSERT_EQUALS(alg.confidence(descriptor), 90);
 
-    FileDescriptor descriptor1(
-        getTestFilePath("pid_offset_vulcan_new.dat.bin"));
+    FileDescriptor descriptor1(getTestFilePath("pid_offset_vulcan_new.dat.bin"));
     TS_ASSERT_EQUALS(alg.confidence(descriptor1), 0);
   }
 
@@ -146,8 +135,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -165,30 +153,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws"));
     TS_ASSERT(ws);
 
     // These values rely on run_1529_templs0.mon being found and loaded by
     // LoadPSIMuonBin
-    TS_ASSERT_EQUALS(ws->getLog("Temp_Heater")->value().substr(0, 28),
-                     "2011-Jul-04 10:40:23  4.9906")
-    TS_ASSERT_EQUALS(ws->getLog("Temp_Analog")->value().substr(0, 28),
-                     "2011-Jul-04 10:40:23  5.1805")
-    TS_ASSERT_EQUALS(ws->getLog("Temp_ChannelA")->value().substr(0, 28),
-                     "2011-Jul-04 10:40:23  4.9921")
-    TS_ASSERT_EQUALS(ws->getLog("Temp_ChannelB")->value().substr(0, 28),
-                     "2011-Jul-04 10:40:23  5.1804")
-    TS_ASSERT_EQUALS(ws->getLog("Temp_ChannelC")->value().substr(0, 28),
-                     "2011-Jul-04 10:40:23  314.36")
-    TS_ASSERT_EQUALS(ws->getLog("Temp_ChannelD")->value().substr(0, 28),
-                     "2011-Jul-04 10:40:23  314.46")
+    TS_ASSERT_EQUALS(ws->getLog("Temp_Heater")->value().substr(0, 28), "2011-Jul-04 10:40:23  4.9906")
+    TS_ASSERT_EQUALS(ws->getLog("Temp_Analog")->value().substr(0, 28), "2011-Jul-04 10:40:23  5.1805")
+    TS_ASSERT_EQUALS(ws->getLog("Temp_ChannelA")->value().substr(0, 28), "2011-Jul-04 10:40:23  4.9921")
+    TS_ASSERT_EQUALS(ws->getLog("Temp_ChannelB")->value().substr(0, 28), "2011-Jul-04 10:40:23  5.1804")
+    TS_ASSERT_EQUALS(ws->getLog("Temp_ChannelC")->value().substr(0, 28), "2011-Jul-04 10:40:23  314.36")
+    TS_ASSERT_EQUALS(ws->getLog("Temp_ChannelD")->value().substr(0, 28), "2011-Jul-04 10:40:23  314.46")
   }
 
   void test_time_zero_list_loaded_correctly() {
@@ -223,8 +203,7 @@ public:
     ITableWorkspace_sptr tbl = ads.retrieveWS<TableWorkspace>("tzt");
 
     TS_ASSERT_EQUALS(tbl->columnCount(), 1);
-    TS_ASSERT_EQUALS(tbl->getColumnNames(),
-                     std::vector<std::string>{"time zero"});
+    TS_ASSERT_EQUALS(tbl->getColumnNames(), std::vector<std::string>{"time zero"});
     TS_ASSERT_EQUALS(tbl->rowCount(), 4);
     TS_ASSERT_DELTA(tbl->getColumn(0)->toDouble(0), 0.1582, 0.0001);
     TS_ASSERT_DELTA(tbl->getColumn(0)->toDouble(1), 0.1553, 0.0001);
@@ -270,8 +249,7 @@ public:
     alg.execute();
 
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws"));
 
     TS_ASSERT_DELTA(ws->x(0)[0], 0.0, 0.001);
     TS_ASSERT_DELTA(ws->x(0)[10240], 10.0, 0.001);
@@ -279,8 +257,7 @@ public:
 
 private:
   std::string getTestFilePath(const std::string &filename) {
-    const std::string filepath =
-        Mantid::API::FileFinder::Instance().getFullPath(filename);
+    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename);
     TS_ASSERT_DIFFERS(filepath, "");
     return filepath;
   }

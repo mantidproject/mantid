@@ -24,17 +24,13 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ApplyCalibration"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Update detector positions from input table workspace.";
-  }
+  const std::string summary() const override { return "Update detector positions from input table workspace."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
 
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Instrument";
-  } // Needs to change
+  const std::string category() const override { return "DataHandling\\Instrument"; } // Needs to change
 
 private:
   /// Overwrites Algorithm method. Does nothing at present

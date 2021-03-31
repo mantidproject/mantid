@@ -71,16 +71,16 @@ struct RPB_STRUCT {
   float r_tot_prtn_chrg; ///< total proton charge (uA.hour)
   int r_goodfrm;         ///< good frames
   int r_rawfrm;          ///< raw frames
-  int r_dur_wanted; ///< requested run duration (units as for "duration" above)
-  int r_dur_secs;   ///< actual run duration in seconds
-  int r_mon_sum1;   ///< monitor sum 1
-  int r_mon_sum2;   ///< monitor sum 2
-  int r_mon_sum3;   ///< monitor sum 3
-  char r_enddate[12]; ///< format DD-MMM-YYYY
-  char r_endtime[8];  ///< format HH-MM-SS
-  int r_prop;         ///< RB (proposal) number
-  int spare[10];      ///< to pad out to 32*4 bytes
-                      /// constructor
+  int r_dur_wanted;      ///< requested run duration (units as for "duration" above)
+  int r_dur_secs;        ///< actual run duration in seconds
+  int r_mon_sum1;        ///< monitor sum 1
+  int r_mon_sum2;        ///< monitor sum 2
+  int r_mon_sum3;        ///< monitor sum 3
+  char r_enddate[12];    ///< format DD-MMM-YYYY
+  char r_endtime[8];     ///< format HH-MM-SS
+  int r_prop;            ///< RB (proposal) number
+  int spare[10];         ///< to pad out to 32*4 bytes
+                         /// constructor
 
   // cppcheck-suppress memsetClassFloat
   RPB_STRUCT() { memset(this, 0, sizeof(RPB_STRUCT)); }
@@ -342,8 +342,8 @@ public:
   DHDR_STRUCT dhdr; ///< size 32*4 bytes
   // D_DATA points at ddes
   DDES_STRUCT
-  *ddes;          ///< (NSP1+1)*NPER items, totoal size (NSP1+1)*NPER*2*4 bytes
-  uint32_t *dat1; ///< compressed data for (NTC1+1)*(NSP1+1)*NPER values
+  *ddes;              ///< (NSP1+1)*NPER items, totoal size (NSP1+1)*NPER*2*4 bytes
+  uint32_t *dat1;     ///< compressed data for (NTC1+1)*(NSP1+1)*NPER values
   LOG_STRUCT logsect; ///< log section
 
 public:

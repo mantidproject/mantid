@@ -39,14 +39,11 @@ void removeFromIterable(BeginIter const &beginIter, Iterable &iterable) {
   iterable.erase(beginIter, iterable.end());
 }
 
-std::vector<std::string> splitStringBy(std::string const &str,
-                                       std::string const &delimiter) {
+std::vector<std::string> splitStringBy(std::string const &str, std::string const &delimiter) {
   std::vector<std::string> subStrings;
   boost::split(subStrings, str, boost::is_any_of(delimiter));
   removeFromIterable(std::remove_if(subStrings.begin(), subStrings.end(),
-                                    [](std::string const &subString) {
-                                      return subString.empty();
-                                    }),
+                                    [](std::string const &subString) { return subString.empty(); }),
                      subStrings);
   return subStrings;
 }
@@ -56,30 +53,23 @@ template <typename T> T convertToT(std::string const &num) {
     return static_cast<std::size_t>(std::stoi(num));
   else if (std::is_same<T, int>::value)
     return std::stoi(num);
-  std::runtime_error(
-      "Could not convert std::string to std::size_t or int type.");
+  std::runtime_error("Could not convert std::string to std::size_t or int type.");
 }
 
-template <typename T>
-void addToIndicesVector(std::vector<T> &indicesVec, T const &startIndex,
-                        T const &endIndex) {
+template <typename T> void addToIndicesVector(std::vector<T> &indicesVec, T const &startIndex, T const &endIndex) {
   for (auto index = startIndex; index <= endIndex; ++index)
     indicesVec.emplace_back(index);
 }
 
-template <typename T>
-void addToIndicesVector(std::vector<T> &indicesVec,
-                        std::string const &indicesString) {
+template <typename T> void addToIndicesVector(std::vector<T> &indicesVec, std::string const &indicesString) {
   auto const range = splitStringBy(indicesString, "-");
   if (range.size() > 1)
-    addToIndicesVector<T>(indicesVec, convertToT<T>(range[0]),
-                          convertToT<T>(range[1]));
+    addToIndicesVector<T>(indicesVec, convertToT<T>(range[0]), convertToT<T>(range[1]));
   else
     indicesVec.emplace_back(convertToT<T>(range[0]));
 }
 
-template <typename T>
-std::vector<T> createIndicesVector(std::string const &indices) {
+template <typename T> std::vector<T> createIndicesVector(std::string const &indices) {
   std::vector<T> indicesVec;
   for (auto subString : splitStringBy(indices, ","))
     addToIndicesVector<T>(indicesVec, subString);
@@ -87,8 +77,7 @@ std::vector<T> createIndicesVector(std::string const &indices) {
 }
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-std::string expandIndicesRange(std::size_t const &startIndex,
-                               std::size_t const &endIndex,
+std::string expandIndicesRange(std::size_t const &startIndex, std::size_t const &endIndex,
                                std::string const &separator) {
   std::string expandedRange;
   for (auto index = startIndex; index <= endIndex; ++index) {
@@ -98,18 +87,14 @@ std::string expandIndicesRange(std::size_t const &startIndex,
   return expandedRange;
 }
 
-std::string expandIndicesRange(std::string const &startIndex,
-                               std::string const &endIndex,
+std::string expandIndicesRange(std::string const &startIndex, std::string const &endIndex,
                                std::string const &separator) {
-  return expandIndicesRange(std::stoul(startIndex), std::stoul(endIndex),
-                            separator);
+  return expandIndicesRange(std::stoul(startIndex), std::stoul(endIndex), separator);
 }
 
-void addToIndicesList(std::string &indicesList,
-                      std::string const &indicesString) {
+void addToIndicesList(std::string &indicesList, std::string const &indicesString) {
   auto const range = splitStringBy(indicesString, "-");
-  auto const expandedIndices =
-      range.size() > 1 ? expandIndicesRange(range[0], range[1], ",") : range[0];
+  auto const expandedIndices = range.size() > 1 ? expandIndicesRange(range[0], range[1], ",") : range[0];
   indicesList += expandedIndices;
 }
 
@@ -123,21 +108,16 @@ std::string createIndicesList(std::string const &indices) {
   return "[" + indicesList + "]";
 }
 
-std::string createPlotSpectraString(std::string const &workspaceName,
-                                    std::string const &spectra,
-                                    bool errorbars) {
+std::string createPlotSpectraString(std::string const &workspaceName, std::string const &spectra, bool errorbars) {
   auto const errors = errorbars ? "True" : "False";
   std::string plotString = "from mantidplot import plotSpectrum\n";
-  return plotString + "plotSpectrum(['" + workspaceName + "'], " + spectra +
-         ", error_bars=" + errors + ")\n";
+  return plotString + "plotSpectrum(['" + workspaceName + "'], " + spectra + ", error_bars=" + errors + ")\n";
 }
 
-std::string createPlotBinsString(std::string const &workspaceName,
-                                 std::string const &bins, bool errorbars) {
+std::string createPlotBinsString(std::string const &workspaceName, std::string const &bins, bool errorbars) {
   auto const errors = errorbars ? "True" : "False";
   std::string plotString = "from mantidplot import plotTimeBin\n";
-  return plotString + "plotTimeBin(['" + workspaceName + "'], " + bins +
-         ", error_bars=" + errors + ")\n";
+  return plotString + "plotTimeBin(['" + workspaceName + "'], " + bins + ", error_bars=" + errors + ")\n";
 }
 
 std::string createPlotContourString(std::string const &workspaceName) {
@@ -145,13 +125,11 @@ std::string createPlotContourString(std::string const &workspaceName) {
   return plotString + "plot2D('" + workspaceName + "')\n";
 }
 
-std::string createPlotTiledString(std::string const &workspaceName,
-                                  std::vector<std::size_t> const &spectra) {
+std::string createPlotTiledString(std::string const &workspaceName, std::vector<std::size_t> const &spectra) {
   std::string plotString = "from mantidplot import newTiledWindow\n";
   plotString += "newTiledWindow(sources=[";
   for (auto spectrum : spectra) {
-    plotString +=
-        "(['" + workspaceName + "'], " + std::to_string(spectrum) + ")";
+    plotString += "(['" + workspaceName + "'], " + std::to_string(spectrum) + ")";
     plotString += spectrum < spectra.back() ? "," : "";
   }
   plotString += "])\n";
@@ -171,11 +149,10 @@ std::string createPlotTiledString(std::string const &workspaceName,
 using namespace Mantid::PythonInterface;
 using namespace MantidQt::Widgets::Common;
 
-boost::optional<Python::Object>
-workbenchPlot(QStringList const &workspaceNames,
-              std::vector<int> const &indices, bool errorBars,
-              boost::optional<QHash<QString, QVariant>> kwargs = boost::none,
-              boost::optional<Python::Object> figure = boost::none) {
+boost::optional<Python::Object> workbenchPlot(QStringList const &workspaceNames, std::vector<int> const &indices,
+                                              bool errorBars,
+                                              boost::optional<QHash<QString, QVariant>> kwargs = boost::none,
+                                              boost::optional<Python::Object> figure = boost::none) {
   QHash<QString, QVariant> plotKwargs;
   if (kwargs)
     plotKwargs = kwargs.get();
@@ -184,8 +161,8 @@ workbenchPlot(QStringList const &workspaceNames,
 
   using MantidQt::Widgets::MplCpp::plot;
   try {
-    return plot(workspaceNames, boost::none, indices, std::move(figure),
-                plotKwargs, boost::none, boost::none, errorBars);
+    return plot(workspaceNames, boost::none, indices, std::move(figure), plotKwargs, boost::none, boost::none,
+                errorBars);
   } catch (PythonException const &ex) {
     g_log.error() << ex.what();
     return boost::none;
@@ -199,13 +176,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-IndirectPlotter::IndirectPlotter(IPyRunner *pythonRunner)
-    : QObject(nullptr), m_pyRunner(pythonRunner) {}
+IndirectPlotter::IndirectPlotter(IPyRunner *pythonRunner) : QObject(nullptr), m_pyRunner(pythonRunner) {}
 
 #else
-IndirectPlotter::IndirectPlotter(IPyRunner *pythonRunner) : QObject(nullptr) {
-  UNUSED_ARG(pythonRunner);
-}
+IndirectPlotter::IndirectPlotter(IPyRunner *pythonRunner) : QObject(nullptr) { UNUSED_ARG(pythonRunner); }
 #endif
 
 IndirectPlotter::~IndirectPlotter() {}
@@ -217,17 +191,14 @@ IndirectPlotter::~IndirectPlotter() {}
  * @param workspaceIndices The indices within the workspace to plot (e.g.
  * '0-2,5,7-10')
  */
-void IndirectPlotter::plotSpectra(std::string const &workspaceName,
-                                  std::string const &workspaceIndices) {
+void IndirectPlotter::plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices) {
   if (validate(workspaceName, workspaceIndices, MantidAxis::Spectrum)) {
     auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    runPythonCode(createPlotSpectraString(
-        workspaceName, createIndicesList(workspaceIndices), errorBars));
+    runPythonCode(createPlotSpectraString(workspaceName, createIndicesList(workspaceIndices), errorBars));
 #else
-    workbenchPlot(QStringList(QString::fromStdString(workspaceName)),
-                  createIndicesVector<int>(workspaceIndices), errorBars,
-                  boost::none);
+    workbenchPlot(QStringList(QString::fromStdString(workspaceName)), createIndicesVector<int>(workspaceIndices),
+                  errorBars, boost::none);
 #endif
   }
 }
@@ -239,13 +210,11 @@ void IndirectPlotter::plotSpectra(std::string const &workspaceName,
  * @param workspaceNames List of names of workspaces to plot
  * @param workspaceIndices List of indices to plot
  */
-void IndirectPlotter::plotCorrespondingSpectra(
-    std::vector<std::string> const &workspaceNames,
-    std::vector<int> const &workspaceIndices) {
+void IndirectPlotter::plotCorrespondingSpectra(std::vector<std::string> const &workspaceNames,
+                                               std::vector<int> const &workspaceIndices) {
   if (workspaceNames.empty() || workspaceIndices.empty())
     return;
-  if (workspaceNames.size() > 1 &&
-      workspaceNames.size() != workspaceIndices.size())
+  if (workspaceNames.size() > 1 && workspaceNames.size() != workspaceIndices.size())
     return;
   auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -266,14 +235,11 @@ void IndirectPlotter::plotCorrespondingSpectra(
   }
   runPythonCode(pyInput);
 #else
-  auto figure =
-      workbenchPlot(QStringList(QString::fromStdString(workspaceNames[0])),
-                    {workspaceIndices[0]}, errorBars);
+  auto figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[0])), {workspaceIndices[0]}, errorBars);
   for (auto i = 1u; i < workspaceNames.size(); ++i) {
     if (figure)
-      figure = workbenchPlot(
-          QStringList(QString::fromStdString(workspaceNames[i])),
-          {workspaceIndices[i]}, errorBars, boost::none, figure.get());
+      figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[i])), {workspaceIndices[i]}, errorBars,
+                             boost::none, figure.get());
   }
 #endif
 }
@@ -285,18 +251,16 @@ void IndirectPlotter::plotCorrespondingSpectra(
  * @param binIndices The indices within the workspace to plot (e.g.
  * '0-2,5,7-10')
  */
-void IndirectPlotter::plotBins(std::string const &workspaceName,
-                               std::string const &binIndices) {
+void IndirectPlotter::plotBins(std::string const &workspaceName, std::string const &binIndices) {
   if (validate(workspaceName, binIndices, MantidAxis::Bin)) {
     auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    runPythonCode(createPlotBinsString(
-        workspaceName, createIndicesList(binIndices), errorBars));
+    runPythonCode(createPlotBinsString(workspaceName, createIndicesList(binIndices), errorBars));
 #else
     QHash<QString, QVariant> plotKwargs;
     plotKwargs["axis"] = static_cast<int>(MantidAxType::Bin);
-    workbenchPlot(QStringList(QString::fromStdString(workspaceName)),
-                  createIndicesVector<int>(binIndices), errorBars, plotKwargs);
+    workbenchPlot(QStringList(QString::fromStdString(workspaceName)), createIndicesVector<int>(binIndices), errorBars,
+                  plotKwargs);
 #endif
   }
 }
@@ -323,21 +287,18 @@ void IndirectPlotter::plotContour(std::string const &workspaceName) {
  * @param workspaceIndices The indices within the workspace to tile plot (e.g.
  * '0-2,5,7-10')
  */
-void IndirectPlotter::plotTiled(std::string const &workspaceName,
-                                std::string const &workspaceIndices) {
+void IndirectPlotter::plotTiled(std::string const &workspaceName, std::string const &workspaceIndices) {
   if (validate(workspaceName, workspaceIndices, MantidAxis::Spectrum)) {
     auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     UNUSED_ARG(errorBars);
-    runPythonCode(createPlotTiledString(
-        workspaceName, createIndicesVector<std::size_t>(workspaceIndices)));
+    runPythonCode(createPlotTiledString(workspaceName, createIndicesVector<std::size_t>(workspaceIndices)));
 #else
     QHash<QString, QVariant> plotKwargs;
     if (errorBars)
       plotKwargs["capsize"] = ERROR_CAPSIZE;
-    plot(QStringList(QString::fromStdString(workspaceName)), boost::none,
-         createIndicesVector<int>(workspaceIndices), boost::none, plotKwargs,
-         boost::none, "Tiled Plot: " + workspaceName, errorBars, false, true);
+    plot(QStringList(QString::fromStdString(workspaceName)), boost::none, createIndicesVector<int>(workspaceIndices),
+         boost::none, plotKwargs, boost::none, "Tiled Plot: " + workspaceName, errorBars, false, true);
 #endif
   }
 }
@@ -352,10 +313,8 @@ void IndirectPlotter::plotTiled(std::string const &workspaceName,
  * @param axisType The axis to validate (i.e. Spectrum or Bin)
  * @return True if the data is valid
  */
-bool IndirectPlotter::validate(
-    std::string const &workspaceName,
-    boost::optional<std::string> const &workspaceIndices,
-    boost::optional<MantidAxis> const &axisType) const {
+bool IndirectPlotter::validate(std::string const &workspaceName, boost::optional<std::string> const &workspaceIndices,
+                               boost::optional<MantidAxis> const &axisType) const {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName))
     if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName))
@@ -372,10 +331,9 @@ bool IndirectPlotter::validate(
  * @param axisType The axis to validate (i.e. Spectrum or Bin)
  * @return True if the data is valid
  */
-bool IndirectPlotter::validate(
-    const MatrixWorkspace_const_sptr &workspace,
-    boost::optional<std::string> const &workspaceIndices,
-    boost::optional<MantidAxis> const &axisType) const {
+bool IndirectPlotter::validate(const MatrixWorkspace_const_sptr &workspace,
+                               boost::optional<std::string> const &workspaceIndices,
+                               boost::optional<MantidAxis> const &axisType) const {
   if (workspaceIndices && axisType && axisType.get() == MantidAxis::Spectrum)
     return validateSpectra(workspace, workspaceIndices.get());
   else if (workspaceIndices && axisType && axisType.get() == MantidAxis::Bin)
@@ -391,12 +349,10 @@ bool IndirectPlotter::validate(
  * '0-2,5,7-10')
  * @return True if the indices exist
  */
-bool IndirectPlotter::validateSpectra(
-    const MatrixWorkspace_const_sptr &workspace,
-    std::string const &workspaceIndices) const {
+bool IndirectPlotter::validateSpectra(const MatrixWorkspace_const_sptr &workspace,
+                                      std::string const &workspaceIndices) const {
   auto const numberOfHistograms = workspace->getNumberHistograms();
-  auto const lastIndex =
-      std::stoul(splitStringBy(workspaceIndices, ",-").back());
+  auto const lastIndex = std::stoul(splitStringBy(workspaceIndices, ",-").back());
   return lastIndex < numberOfHistograms;
 }
 
@@ -408,8 +364,7 @@ bool IndirectPlotter::validateSpectra(
  * '0-2,5,7-10')
  * @return True if the bin indices exist
  */
-bool IndirectPlotter::validateBins(const MatrixWorkspace_const_sptr &workspace,
-                                   std::string const &binIndices) const {
+bool IndirectPlotter::validateBins(const MatrixWorkspace_const_sptr &workspace, std::string const &binIndices) const {
   auto const numberOfBins = workspace->y(0).size();
   auto const lastIndex = std::stoul(splitStringBy(binIndices, ",-").back());
   return lastIndex < numberOfBins;
@@ -421,9 +376,7 @@ bool IndirectPlotter::validateBins(const MatrixWorkspace_const_sptr &workspace,
  * @param pythonCode The python code to run
  */
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-void IndirectPlotter::runPythonCode(std::string const &pythonCode) {
-  m_pyRunner->runPythonCode(pythonCode);
-}
+void IndirectPlotter::runPythonCode(std::string const &pythonCode) { m_pyRunner->runPythonCode(pythonCode); }
 #endif
 
 } // namespace CustomInterfaces

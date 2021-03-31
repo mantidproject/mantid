@@ -46,19 +46,14 @@ public:
   void test_errors_options() {
     auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveFITS");
 
-    TS_ASSERT_THROWS(
-        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"),
-        const Mantid::Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"),
+                     const Mantid::Kernel::Exception::NotFoundError &);
 
-    TS_ASSERT_THROWS(
-        alg->setPropertyValue("BitDepth", "this_is_wrong_you_must_fail"),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setPropertyValue("BitDepth", "this_is_wrong_you_must_fail"), const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg->setProperty("BitDepth", 10),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setProperty("BitDepth", 10), const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg->setProperty("BitDepth", 64),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setProperty("BitDepth", 64), const std::invalid_argument &);
   }
 
   void test_exec_fail() {
@@ -66,9 +61,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "foo.fits"));
-    TS_ASSERT_THROWS(
-        alg.setPropertyValue("InputWorkspace", "inexistent_workspace_fails"),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("InputWorkspace", "inexistent_workspace_fails"),
+                     const std::invalid_argument &);
 
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
@@ -84,9 +78,8 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
 
-    TSM_ASSERT_THROWS(
-        "The algorithm should not accept workspaces if the units are wrong",
-        alg.setProperty("InputWorkspace", ws), const std::invalid_argument &);
+    TSM_ASSERT_THROWS("The algorithm should not accept workspaces if the units are wrong",
+                      alg.setProperty("InputWorkspace", ws), const std::invalid_argument &);
   }
 
   void test_exec_fails_empty() {
@@ -100,9 +93,8 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
 
-    TSM_ASSERT_THROWS(
-        "The algorithm should not accept empty / uninitialized workspaces",
-        alg.setProperty("InputWorkspace", ws), const std::invalid_argument &);
+    TSM_ASSERT_THROWS("The algorithm should not accept empty / uninitialized workspaces",
+                      alg.setProperty("InputWorkspace", ws), const std::invalid_argument &);
   }
 
   void test_exec_runs_ok() {
@@ -135,10 +127,7 @@ public:
     TSM_ASSERT("The saved file should be found on disk", saved.exists());
     TSM_ASSERT("The saved file should be a regular file", saved.isFile());
     TSM_ASSERT("The saved file should be readable", saved.canRead());
-    TSM_ASSERT_EQUALS("The size of the file should be as expected",
-                      saved.getSize(), 2888);
-    TSM_ASSERT_THROWS_NOTHING(
-        "It should be possible to remove the file saved by the algorithm",
-        saved.remove());
+    TSM_ASSERT_EQUALS("The size of the file should be as expected", saved.getSize(), 2888);
+    TSM_ASSERT_THROWS_NOTHING("It should be possible to remove the file saved by the algorithm", saved.remove());
   }
 };

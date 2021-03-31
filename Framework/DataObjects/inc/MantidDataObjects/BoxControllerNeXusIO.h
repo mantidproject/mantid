@@ -36,15 +36,11 @@ public:
 
   bool openFile(const std::string &fileName, const std::string &mode) override;
 
-  void saveBlock(const std::vector<float> & /* DataBlock */,
-                 const uint64_t /*blockPosition*/) const override;
-  void loadBlock(std::vector<float> & /* Block */,
-                 const uint64_t /*blockPosition*/,
+  void saveBlock(const std::vector<float> & /* DataBlock */, const uint64_t /*blockPosition*/) const override;
+  void loadBlock(std::vector<float> & /* Block */, const uint64_t /*blockPosition*/,
                  const size_t /*BlockSize*/) const override;
-  void saveBlock(const std::vector<double> & /* DataBlock */,
-                 const uint64_t /*blockPosition*/) const override;
-  void loadBlock(std::vector<double> & /* Block */,
-                 const uint64_t /*blockPosition*/,
+  void saveBlock(const std::vector<double> & /* DataBlock */, const uint64_t /*blockPosition*/) const override;
+  void loadBlock(std::vector<double> & /* Block */, const uint64_t /*blockPosition*/,
                  const size_t /*BlockSize*/) const override;
 
   void flushData() const override;
@@ -53,8 +49,7 @@ public:
   ~BoxControllerNeXusIO() override;
   // Auxiliary functions. Used to change default state of this object which is
   // not fully supported. Should be replaced by some IBoxControllerIO factory
-  void setDataType(const size_t blockSize,
-                   const std::string &typeName) override;
+  void setDataType(const size_t blockSize, const std::string &typeName) override;
   void getDataType(size_t &CoordSize, std::string &typeName) const override;
   //------------------------------------------------------------------------------------------------------------------------
   // Auxiliary functions (non-virtual, used for testing)
@@ -75,11 +70,7 @@ public:
    *
    * The number of attributes stored (neglecting coordinates) define the version
    */
-  enum class EventDataVersion : size_t {
-    EDVLean = 2,
-    EDVOriginal = 4,
-    EDVGoniometer = 5
-  };
+  enum class EventDataVersion : size_t { EDVLean = 2, EDVOriginal = 4, EDVGoniometer = 5 };
 
   EventDataVersion getEventDataVersion() const { return m_EventDataVersion; }
 
@@ -110,8 +101,7 @@ public:
    * file. Valid values are "READ" and "WRITE"
    */
   template <typename FloatOrDouble>
-  void adjustEventDataBlock(std::vector<FloatOrDouble> &Block,
-                            std::string accessMode) const;
+  void adjustEventDataBlock(std::vector<FloatOrDouble> &Block, std::string accessMode) const;
 
 private:
   /// Default size of the events block which can be written in the NeXus array
@@ -151,8 +141,7 @@ private:
   /// defined in EVENT_TYPES_SUPPORTED vector
   enum EventType {
     LeanEvent = 0, //< the event consisting of signal error and event coordinate
-    FatEvent =
-        1 //< the event having the same as lean event plus RunID and detID
+    FatEvent = 1   //< the event having the same as lean event plus RunID and detID
     /// the type of event (currently MD event or MDLean event this class deals
     /// with. )
   } m_EventType;
@@ -182,9 +171,7 @@ private:
   void prepareNxSToWrite_CurVersion();
   void prepareNxSdata_CurVersion();
   // get the event type from event name
-  static EventType
-  TypeFromString(const std::vector<std::string> &typesSupported,
-                 const std::string &typeName);
+  static EventType TypeFromString(const std::vector<std::string> &typesSupported, const std::string &typeName);
   /// the enum, which suggests the way (currently)two possible data types are
   /// converted to each other
   enum CoordConversion {
@@ -195,8 +182,7 @@ private:
   } m_ReadConversion;
 
   template <typename Type>
-  void saveGenericBlock(const std::vector<Type> &DataBlock,
-                        const uint64_t blockPosition) const;
+  void saveGenericBlock(const std::vector<Type> &DataBlock, const uint64_t blockPosition) const;
 
   /** Load generic data block from the opened NeXus file.
     *@param Block         -- the storage vector to place data into
@@ -207,8 +193,7 @@ private:
     representation.
   */
   template <typename Type>
-  void loadGenericBlock(std::vector<Type> &Block, const uint64_t blockPosition,
-                        const size_t nPoints) const;
+  void loadGenericBlock(std::vector<Type> &Block, const uint64_t blockPosition, const size_t nPoints) const;
 };
 } // namespace DataObjects
 } // namespace Mantid

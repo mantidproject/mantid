@@ -33,10 +33,8 @@ namespace {
 /// @param values :: Functin's values.
 /// @param chi0 :: Chi squared at the minimum.
 /// @param sigma2 :: Estimated variance of the fitted data.
-void calcChiSquared(const API::IFunction &fun, size_t nParams,
-                    const API::FunctionDomain &domain,
-                    API::FunctionValues &values, double &chiSquared,
-                    double &chiSquaredWeighted, double &dof) {
+void calcChiSquared(const API::IFunction &fun, size_t nParams, const API::FunctionDomain &domain,
+                    API::FunctionValues &values, double &chiSquared, double &chiSquaredWeighted, double &dof) {
 
   // Calculate function values.
   fun.function(domain, values);
@@ -64,9 +62,7 @@ void calcChiSquared(const API::IFunction &fun, size_t nParams,
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CalculateChiSquared::name() const {
-  return "CalculateChiSquared";
-}
+const std::string CalculateChiSquared::name() const { return "CalculateChiSquared"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CalculateChiSquared::version() const { return 1; }
@@ -79,8 +75,7 @@ const std::string CalculateChiSquared::summary() const {
 //----------------------------------------------------------------------------------------------
 /// Initialize the algorithm's properties.
 void CalculateChiSquared::initConcrete() {
-  declareProperty("ChiSquared", 0.0, "Output value of chi squared.",
-                  Direction::Output);
+  declareProperty("ChiSquared", 0.0, "Output value of chi squared.", Direction::Output);
   declareProperty("ChiSquaredDividedByDOF", 0.0,
                   "Output value of chi squared divided by the "
                   "number of degrees of freedom (NofData "
@@ -90,8 +85,7 @@ void CalculateChiSquared::initConcrete() {
                   "Output value of chi squared divided by the "
                   "number of data points).",
                   Direction::Output);
-  declareProperty("ChiSquaredWeighted", 0.0,
-                  "Output value of weighted chi squared.", Direction::Output);
+  declareProperty("ChiSquaredWeighted", 0.0, "Output value of weighted chi squared.", Direction::Output);
   declareProperty("ChiSquaredWeightedDividedByDOF", 0.0,
                   "Output value of weighted chi squared divided by the "
                   "number of degrees of freedom (NofData "
@@ -135,8 +129,7 @@ void CalculateChiSquared::execConcrete() {
   double chiSquared = 0.0;
   double chiSquaredWeighted = 0.0;
   double dof = 0.0;
-  calcChiSquared(*m_function, nParams, *domain, *values, chiSquared,
-                 chiSquaredWeighted, dof);
+  calcChiSquared(*m_function, nParams, *domain, *values, chiSquared, chiSquaredWeighted, dof);
   g_log.notice() << "Chi squared " << chiSquared << "\n"
                  << "Chi squared weighted " << chiSquaredWeighted << "\n";
 
@@ -149,8 +142,7 @@ void CalculateChiSquared::execConcrete() {
   const double chiSquaredNData = chiSquared / nData;
   const double chiSquaredWeightedNData = chiSquaredWeighted / nData;
   g_log.notice() << "Chi squared / NData " << chiSquaredNData << "\n"
-                 << "Chi squared weighed / NData " << chiSquaredWeightedNData
-                 << "\n"
+                 << "Chi squared weighed / NData " << chiSquaredWeightedNData << "\n"
                  << "NParams " << nParams << "\n";
 
   // Store the result.
@@ -165,8 +157,7 @@ void CalculateChiSquared::execConcrete() {
   const double chiSquaredDOF = chiSquared / dof;
   const double chiSquaredWeightedDOF = chiSquaredWeighted / dof;
   g_log.notice() << "Chi squared / DOF " << chiSquaredDOF << "\n"
-                 << "Chi squared weighed / DOF " << chiSquaredWeightedDOF
-                 << "\n"
+                 << "Chi squared weighed / DOF " << chiSquaredWeightedDOF << "\n"
                  << "DOF " << dof << "\n";
 
   // Store the result.
@@ -189,14 +180,12 @@ namespace {
 /// @param values :: Functin's values.
 /// @param chi0 :: Chi squared at the minimum.
 /// @param sigma2 :: Estimated variance of the fitted data.
-double getDiff(const API::IFunction &fun, size_t nParams,
-               const API::FunctionDomain &domain, API::FunctionValues &values,
-               double chi0, double sigma2) {
+double getDiff(const API::IFunction &fun, size_t nParams, const API::FunctionDomain &domain,
+               API::FunctionValues &values, double chi0, double sigma2) {
   double chiSquared = 0.0;
   double chiSquaredWeighted = 0.0;
   double dof = 0;
-  calcChiSquared(fun, nParams, domain, values, chiSquared, chiSquaredWeighted,
-                 dof);
+  calcChiSquared(fun, nParams, domain, values, chiSquared, chiSquaredWeighted, dof);
   double res = 0.0;
   if (sigma2 > 0) {
     res = (chiSquared - chi0) / 2 / sigma2;
@@ -217,11 +206,9 @@ public:
   /// @param values :: Functin's values.
   /// @param chi0 :: Chi squared at the minimum.
   /// @param sigma2 :: Estimated variance of the fitted data.
-  ChiSlice(IFunction &f, const GSLVector &dir,
-           const API::FunctionDomain &domain, API::FunctionValues &values,
+  ChiSlice(IFunction &f, const GSLVector &dir, const API::FunctionDomain &domain, API::FunctionValues &values,
            double chi0, double sigma2)
-      : m_function(f), m_direction(dir), m_domain(domain), m_values(values),
-        m_chi0(chi0), m_sigma2(sigma2) {}
+      : m_function(f), m_direction(dir), m_domain(domain), m_values(values), m_chi0(chi0), m_sigma2(sigma2) {}
   /// Calculate the value of chi squared along the chosen direction at a
   /// distance from
   /// the minimum point.
@@ -232,8 +219,7 @@ public:
       par0[ip] = m_function.getParameter(ip);
       m_function.setParameter(ip, par0[ip] + p * m_direction[ip]);
     }
-    double res = getDiff(m_function, m_function.nParams(), m_domain, m_values,
-                         m_chi0, m_sigma2);
+    double res = getDiff(m_function, m_function.nParams(), m_domain, m_values, m_chi0, m_sigma2);
     for (size_t ip = 0; ip < m_function.nParams(); ++ip) {
       m_function.setParameter(ip, par0[ip]);
     }
@@ -245,12 +231,9 @@ public:
   /// @param rBound :: The right bound of the approximation interval.
   /// @param P :: Output vector with approximation parameters.
   /// @param A :: Output vector with approximation parameters.
-  ChebfunBase_sptr makeApprox(double lBound, double rBound,
-                              std::vector<double> &P, std::vector<double> &A,
-                              bool &ok) {
+  ChebfunBase_sptr makeApprox(double lBound, double rBound, std::vector<double> &P, std::vector<double> &A, bool &ok) {
 
-    auto base = ChebfunBase::bestFitAnyTolerance(lBound, rBound, *this, P, A,
-                                                 1.0, 1e-4, 129);
+    auto base = ChebfunBase::bestFitAnyTolerance(lBound, rBound, *this, P, A, 1.0, 1e-4, 129);
     ok = bool(base);
     if (!base) {
       base = std::make_shared<ChebfunBase>(10, lBound, rBound, 1e-4);
@@ -329,11 +312,9 @@ void CalculateChiSquared::estimateErrors() {
   if (baseName.empty()) {
     baseName = "CalculateChiSquared";
   }
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "PDFs", "", Kernel::Direction::Output),
-      "The name of the TableWorkspace in which to store the "
-      "pdfs of fit parameters");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("PDFs", "", Kernel::Direction::Output),
+                  "The name of the TableWorkspace in which to store the "
+                  "pdfs of fit parameters");
   setPropertyValue("PDFs", baseName + "_pdf");
   setProperty("PDFs", pdfTable);
 
@@ -348,8 +329,7 @@ void CalculateChiSquared::estimateErrors() {
   auto chiMinColumn = errorsTable->addColumn("double", "Chi2 Min");
   errorsTable->setRowCount(nParams);
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "Errors", "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("Errors", "", Kernel::Direction::Output),
       "The name of the TableWorkspace in which to store the "
       "values and errors of fit parameters");
   setPropertyValue("Errors", baseName + "_errors");
@@ -362,8 +342,7 @@ void CalculateChiSquared::estimateErrors() {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
   m_domainCreator->createDomain(domain, values);
-  calcChiSquared(*m_function, nParams, *domain, *values, chiSquared,
-                 chiSquaredWeighted, dof);
+  calcChiSquared(*m_function, nParams, *domain, *values, chiSquared, chiSquaredWeighted, dof);
   // Value of chi squared for current parameters in m_function
   double chi0 = chiSquared;
   // Fit data variance
@@ -441,8 +420,7 @@ void CalculateChiSquared::estimateErrors() {
     }
     if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
       g_log.debug() << "Parameter " << ip << '\n';
-      g_log.debug() << "Slice approximated by polynomial of order "
-                    << base->size() - 1;
+      g_log.debug() << "Slice approximated by polynomial of order " << base->size() - 1;
       g_log.debug() << " between " << lBound << " and " << rBound << '\n';
     }
 
@@ -487,8 +465,7 @@ void CalculateChiSquared::estimateErrors() {
     }
     if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
       g_log.debug() << '\n';
-      g_log.debug() << "Smallest minimum at " << parMin << " is " << chiMin
-                    << '\n';
+      g_log.debug() << "Smallest minimum at " << parMin << " is " << chiMin << '\n';
     }
 
     // Points of intersections with line chi^2 = 1/2 give an estimate of
@@ -633,8 +610,8 @@ void CalculateChiSquared::estimateErrors() {
       roots.resize(2);
     }
     if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-      g_log.debug() << "Roots " << roots[0] << " (" << slice(roots[0]) << ") "
-                    << roots[1] << " (" << slice(roots[1]) << ") \n";
+      g_log.debug() << "Roots " << roots[0] << " (" << slice(roots[0]) << ") " << roots[1] << " (" << slice(roots[1])
+                    << ") \n";
     }
     // Loop over the parameters and see if there deviations along
     // this direction is greater than any previous value.
@@ -646,15 +623,13 @@ void CalculateChiSquared::estimateErrors() {
       }
       if (lError < leftErrColumn->toDouble(ip)) {
         if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-          g_log.debug() << "  left for  " << ip << ' ' << lError << ' '
-                        << leftErrColumn->toDouble(ip) << '\n';
+          g_log.debug() << "  left for  " << ip << ' ' << lError << ' ' << leftErrColumn->toDouble(ip) << '\n';
         }
         leftErrColumn->fromDouble(ip, lError);
       }
       if (rError > rightErrColumn->toDouble(ip)) {
         if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-          g_log.debug() << "  right for " << ip << ' ' << rError << ' '
-                        << rightErrColumn->toDouble(ip) << '\n';
+          g_log.debug() << "  right for " << ip << ' ' << rError << ' ' << rightErrColumn->toDouble(ip) << '\n';
         }
         rightErrColumn->fromDouble(ip, rError);
       }

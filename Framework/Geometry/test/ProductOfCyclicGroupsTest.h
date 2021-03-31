@@ -18,16 +18,13 @@ class ProductOfCyclicGroupsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProductOfCyclicGroupsTest *createSuite() {
-    return new ProductOfCyclicGroupsTest();
-  }
+  static ProductOfCyclicGroupsTest *createSuite() { return new ProductOfCyclicGroupsTest(); }
   static void destroySuite(ProductOfCyclicGroupsTest *suite) { delete suite; }
 
   void testStringConstructor() {
     TS_ASSERT_THROWS_NOTHING(ProductOfCyclicGroups group("x,y,z"));
 
-    TS_ASSERT_THROWS_ANYTHING(
-        ProductOfCyclicGroups group("x,y,z; doesnt work"));
+    TS_ASSERT_THROWS_ANYTHING(ProductOfCyclicGroups group("x,y,z; doesnt work"));
     TS_ASSERT_THROWS_ANYTHING(ProductOfCyclicGroups group("x,y,z| z,x,y"));
   }
 
@@ -47,8 +44,7 @@ public:
   void testGetGeneratedGroup() {
     TestableProductOfCyclicGroups group;
 
-    Group_const_sptr generatedGroup =
-        group.getGeneratedGroup("-x,-y,-z; x,-y,z");
+    Group_const_sptr generatedGroup = group.getGeneratedGroup("-x,-y,-z; x,-y,z");
 
     // Inversion generates 1, -1; Mirror 1, m [010] -> results in 1, -1, m
     // [010], 2 [010]
@@ -60,8 +56,7 @@ public:
 
     std::vector<SymmetryOperation> symmetryOperations =
         SymmetryOperationFactory::Instance().createSymOps("-x,-y,-z; x,-y,z");
-    std::vector<Group_const_sptr> generatedGroup =
-        group.getFactorGroups(symmetryOperations);
+    std::vector<Group_const_sptr> generatedGroup = group.getFactorGroups(symmetryOperations);
     // one group for each symmetry operation
     TS_ASSERT_EQUALS(generatedGroup.size(), 2);
   }

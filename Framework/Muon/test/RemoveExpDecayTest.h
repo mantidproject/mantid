@@ -21,14 +21,12 @@ using Mantid::Algorithms::MuonRemoveExpDecay;
 const std::string outputName = "MuonRemoveExpDecay_Output";
 
 namespace {
-MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt,
-                                     bool useBinEdges = false) {
+MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt, bool useBinEdges = false) {
 
   // Create a fake muon dataset
-  double a = 0.1; // Amplitude of the oscillations
-  double w = 25.; // Frequency of the oscillations
-  double tau = Mantid::PhysicalConstants::MuonLifetime *
-               1e6; // Muon life time in microseconds
+  double a = 0.1;                                             // Amplitude of the oscillations
+  double w = 25.;                                             // Frequency of the oscillations
+  double tau = Mantid::PhysicalConstants::MuonLifetime * 1e6; // Muon life time in microseconds
 
   MantidVec X;
   MantidVec Y;
@@ -41,11 +39,7 @@ MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt,
       double x = static_cast<double>(t) / static_cast<double>(maxt);
       double e = exp(-x / tau);
       X.emplace_back(x);
-      Y.emplace_back(a *
-                         sin(w * x + static_cast<double>(s) * M_PI /
-                                         static_cast<double>(nspec)) *
-                         e +
-                     e);
+      Y.emplace_back(a * sin(w * x + static_cast<double>(s) * M_PI / static_cast<double>(nspec)) * e + e);
       E.emplace_back(0.005);
     }
   }
@@ -186,8 +180,7 @@ public:
     auto ws = createWorkspace(2, 50);
 
     // First, run the algorithm without specifying any spectrum
-    IAlgorithm_sptr alg1 =
-        AlgorithmManager::Instance().create("RemoveExpDecay");
+    IAlgorithm_sptr alg1 = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg1->initialize();
     alg1->setChild(true);
     alg1->setProperty("InputWorkspace", ws);
@@ -197,8 +190,7 @@ public:
     MatrixWorkspace_sptr out1 = alg1->getProperty("OutputWorkspace");
 
     // Then run the algorithm on the second spectrum only
-    IAlgorithm_sptr alg2 =
-        AlgorithmManager::Instance().create("RemoveExpDecay");
+    IAlgorithm_sptr alg2 = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg2->initialize();
     alg2->setChild(true);
     alg2->setProperty("InputWorkspace", ws);
@@ -245,9 +237,7 @@ class RemoveExpDecayTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RemoveExpDecayTestPerformance *createSuite() {
-    return new RemoveExpDecayTestPerformance();
-  }
+  static RemoveExpDecayTestPerformance *createSuite() { return new RemoveExpDecayTestPerformance(); }
   static void destroySuite(RemoveExpDecayTestPerformance *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;

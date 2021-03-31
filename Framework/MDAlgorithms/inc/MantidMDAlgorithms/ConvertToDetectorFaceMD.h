@@ -21,8 +21,7 @@ namespace MDAlgorithms {
 
   @date 2012-03-08
 */
-class DLLExport ConvertToDetectorFaceMD
-    : public API::BoxControllerSettingsAlgorithm {
+class DLLExport ConvertToDetectorFaceMD : public API::BoxControllerSettingsAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -32,9 +31,7 @@ public:
   }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"ConvertToMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ConvertToMD"}; }
   const std::string category() const override;
 
 private:
@@ -44,10 +41,9 @@ private:
   std::map<int, Geometry::RectangularDetector_const_sptr> getBanks();
 
   template <class T, class MDE, size_t nd>
-  void convertEventList(
-      std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS,
-      size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum,
-      uint16_t runIndex, uint16_t goniometerIndex, int32_t detectorID);
+  void convertEventList(std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS, size_t workspaceIndex,
+                        coord_t x, coord_t y, coord_t bankNum, uint16_t runIndex, uint16_t goniometerIndex,
+                        int32_t detectorID);
 
   /// The input event workspace
   Mantid::DataObjects::EventWorkspace_sptr in_ws;

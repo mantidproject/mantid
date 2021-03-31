@@ -50,38 +50,28 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
 
     auto classType =
         PythonType(pythonClassName, no_init)
-            .def("add", &DataServiceExporter::addItem,
-                 (arg("self"), arg("name"), arg("item")),
+            .def("add", &DataServiceExporter::addItem, (arg("self"), arg("name"), arg("item")),
                  "Adds the given object to the service with the given name. If "
                  "the name/object exists it will raise an error.")
-            .def("addOrReplace", &DataServiceExporter::addOrReplaceItem,
-                 (arg("self"), arg("name"), arg("item")),
+            .def("addOrReplace", &DataServiceExporter::addOrReplaceItem, (arg("self"), arg("name"), arg("item")),
                  "Adds the given object to the service with the given name. "
                  "The the name exists the object is replaced.")
             .def("doesExist", &SvcType::doesExist, (arg("self"), arg("name")),
                  "Returns True if the object is found in the service.")
-            .def("retrieve", &DataServiceExporter::retrieveOrKeyError,
-                 (arg("self"), arg("name")),
+            .def("retrieve", &DataServiceExporter::retrieveOrKeyError, (arg("self"), arg("name")),
                  "Retrieve the named object. Raises an exception if the name "
                  "does not exist")
-            .def("remove", &SvcType::remove, (arg("self"), arg("name")),
-                 "Remove a named object")
-            .def("clear", &SvcType::clear, arg("self"),
-                 "Removes all objects managed by the service.")
-            .def("size", &SvcType::size, arg("self"),
-                 "Returns the number of objects within the service")
-            .def("getObjectNames", &DataServiceExporter::getObjectNamesAsList,
-                 arg("self"),
+            .def("remove", &SvcType::remove, (arg("self"), arg("name")), "Remove a named object")
+            .def("clear", &SvcType::clear, arg("self"), "Removes all objects managed by the service.")
+            .def("size", &SvcType::size, arg("self"), "Returns the number of objects within the service")
+            .def("getObjectNames", &DataServiceExporter::getObjectNamesAsList, arg("self"),
                  "Return the list of names currently known to the ADS")
 
             // Make it act like a dictionary
             .def("__len__", &SvcType::size, arg("self"))
-            .def("__getitem__", &DataServiceExporter::retrieveOrKeyError,
-                 (arg("self"), arg("name")))
-            .def("__setitem__", &DataServiceExporter::addOrReplaceItem,
-                 (arg("self"), arg("name"), arg("item")))
-            .def("__contains__", &SvcType::doesExist,
-                 (arg("self"), arg("name")))
+            .def("__getitem__", &DataServiceExporter::retrieveOrKeyError, (arg("self"), arg("name")))
+            .def("__setitem__", &DataServiceExporter::addOrReplaceItem, (arg("self"), arg("name"), arg("item")))
+            .def("__contains__", &SvcType::doesExist, (arg("self"), arg("name")))
             .def("__delitem__", &SvcType::remove, (arg("self"), arg("name")));
 
     return classType;
@@ -93,8 +83,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param name The name to assign to this in the service
    * @param item A boost.python wrapped SvcHeldType object
    */
-  static void addItem(SvcType &self, const std::string &name,
-                      const boost::python::object &item) {
+  static void addItem(SvcType &self, const std::string &name, const boost::python::object &item) {
     self.add(name, extractCppValue(item));
   }
 
@@ -105,8 +94,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param name The name to assign to this in the service
    * @param item A boost.python wrapped SvcHeldType object
    */
-  static void addOrReplaceItem(SvcType &self, const std::string &name,
-                               const boost::python::object &item) {
+  static void addOrReplaceItem(SvcType &self, const std::string &name, const boost::python::object &item) {
     self.addOrReplace(name, extractCppValue(item));
   }
 
@@ -125,8 +113,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
     if (extractRefShared.check()) {
       return extractRefShared();
     } else {
-      throw std::invalid_argument(
-          "Cannot extract pointer from Python object argument. Incorrect type");
+      throw std::invalid_argument("Cannot extract pointer from Python object argument. Incorrect type");
     }
   }
 

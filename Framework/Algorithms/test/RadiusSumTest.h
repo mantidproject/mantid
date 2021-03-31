@@ -37,16 +37,14 @@ public:
     { // check numbins, min and max radius
       auto alg = algInstance();
       // check numbins is only integer > 1
-      TS_ASSERT_THROWS(alg->setProperty("NumBins", -3),
-                       const std::invalid_argument &);
+      TS_ASSERT_THROWS(alg->setProperty("NumBins", -3), const std::invalid_argument &);
       TS_ASSERT_THROWS_NOTHING(alg->setProperty("MinRadius", 1.0));
       TS_ASSERT_THROWS_NOTHING(alg->setProperty("MaxRadius", 0.1));
       MatrixWorkspace_sptr goodWS = RingProfileTest::create_2d_workspace();
       TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", goodWS));
       std::vector<double> twoInputs(2, 0);
       TS_ASSERT_THROWS_NOTHING(alg->setProperty("Centre", twoInputs));
-      TS_ASSERT_THROWS_NOTHING(
-          alg->setPropertyValue("OutputWorkspace", outWSName));
+      TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", outWSName));
 
       TS_ASSERT_EQUALS(alg->execute(), false);
     }
@@ -57,15 +55,12 @@ public:
       // centre must be 2 or 3 values (x,y) or (x,y,z)
       std::vector<double> justOne(1);
       justOne[0] = -0.35;
-      TS_ASSERT_THROWS(alg->setProperty("Centre", justOne),
-                       const std::invalid_argument &);
+      TS_ASSERT_THROWS(alg->setProperty("Centre", justOne), const std::invalid_argument &);
 
       std::vector<double> fourInputs(4, -0.45);
-      TS_ASSERT_THROWS(alg->setProperty("Centre", fourInputs),
-                       const std::invalid_argument &);
+      TS_ASSERT_THROWS(alg->setProperty("Centre", fourInputs), const std::invalid_argument &);
 
-      TS_ASSERT_THROWS_NOTHING(
-          alg->setPropertyValue("OutputWorkspace", outWSName));
+      TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", outWSName));
 
       // change to a 2d workspace
       MatrixWorkspace_sptr goodWS = RingProfileTest::create_2d_workspace();
@@ -96,8 +91,7 @@ public:
 
     TS_ASSERT_EQUALS(alg->execute(), true);
 
-    MatrixWorkspace_sptr outws =
-        RingProfileTest::basic_checkup_on_output_workspace((*alg), numbins);
+    MatrixWorkspace_sptr outws = RingProfileTest::basic_checkup_on_output_workspace((*alg), numbins);
     TS_ASSERT_DELTA(outws->y(0)[0], 0, 0.1);
     TS_ASSERT_DELTA(outws->y(0)[1], 1 + 2 + 3 + 4, 0.1);
     TS_ASSERT_DELTA(outws->y(0)[2], 4 + 1 + 1 + 2 + 2 + 3 + 3 + 4, 0.1);
@@ -117,12 +111,10 @@ public:
 
     TS_ASSERT_EQUALS(alg->execute(), true);
 
-    MatrixWorkspace_sptr outws =
-        RingProfileTest::basic_checkup_on_output_workspace((*alg), numbins);
+    MatrixWorkspace_sptr outws = RingProfileTest::basic_checkup_on_output_workspace((*alg), numbins);
     TS_ASSERT_DELTA(outws->y(0)[0], 0, 0.1);
     TS_ASSERT_DELTA(outws->y(0)[1], (1 + 2 + 3 + 4) / 0.15, 0.1);
-    TS_ASSERT_DELTA(outws->y(0)[2], (4 + 1 + 1 + 2 + 2 + 3 + 3 + 4) / 0.25,
-                    0.1);
+    TS_ASSERT_DELTA(outws->y(0)[2], (4 + 1 + 1 + 2 + 2 + 3 + 3 + 4) / 0.25, 0.1);
   }
 
   void test_radiussum_horizontal_left_vertical_center_image() {
@@ -141,8 +133,7 @@ public:
 
     TS_ASSERT_EQUALS(alg->execute(), true);
 
-    MatrixWorkspace_sptr outws =
-        RingProfileTest::basic_checkup_on_output_workspace((*alg), numbins);
+    MatrixWorkspace_sptr outws = RingProfileTest::basic_checkup_on_output_workspace((*alg), numbins);
 
     double output[] = {0, 8, 11, 6, 5};
 
@@ -164,14 +155,11 @@ public:
 
     std::string outWSName("RadiusSumTest_OutputWS");
     alg->setPropertyValue("OutputWorkspace", outWSName);
-    alg->setProperty(
-        "InputWorkspace",
-        RingProfileTest::create_rectangular_instrument_workspace());
+    alg->setProperty("InputWorkspace", RingProfileTest::create_rectangular_instrument_workspace());
 
     TS_ASSERT_EQUALS(alg->execute(), true);
 
-    MatrixWorkspace_sptr outws =
-        RingProfileTest::basic_checkup_on_output_workspace((*alg), numbins);
+    MatrixWorkspace_sptr outws = RingProfileTest::basic_checkup_on_output_workspace((*alg), numbins);
 
     TS_ASSERT_DELTA(outws->y(0)[0], 0, 0.1);
     TS_ASSERT_DELTA(outws->y(0)[1], 1 + 2 + 3 + 4, 0.1);
@@ -192,14 +180,11 @@ public:
 
     std::string outWSName("RadiusSumTest_OutputWS");
     alg->setPropertyValue("OutputWorkspace", outWSName);
-    alg->setProperty(
-        "InputWorkspace",
-        RingProfileTest::create_rectangular_instrument_workspace());
+    alg->setProperty("InputWorkspace", RingProfileTest::create_rectangular_instrument_workspace());
 
     TS_ASSERT_EQUALS(alg->execute(), true);
 
-    MatrixWorkspace_sptr outws =
-        RingProfileTest::basic_checkup_on_output_workspace((*alg), numbins);
+    MatrixWorkspace_sptr outws = RingProfileTest::basic_checkup_on_output_workspace((*alg), numbins);
 
     double output[] = {1 + 2 + 2, 0, 11, 7, 7};
 

@@ -25,33 +25,25 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 
 /// data for the pixel (flood file) correction
-static double flat_cell061Ys[] = {
-    1.002863E+00, 1.032594E+00, 1.017332E+00, 1.062325E+00, 1.004316E+00,
-    1.041249E+00, 1.023080E+00, 1.011716E+00, 1.012046E+00, 1.066157E+00,
-    9.934810E-01, 1.087497E+00, 9.593894E-01, 1.060872E+00, 1.022618E+00,
-    1.054595E+00, 1.042901E+00, 1.064241E+00, 1.035699E+00, 1.048186E+00,
-    1.020834E+00, 1.063712E+00, 1.034774E+00, 1.025458E+00, 9.860153E-01,
-    1.044222E+00, 9.872045E-01, 1.046006E+00, 9.772280E-01, 1.011782E+00};
-static double flat_cell061Es[] = {
-    8.140295E-03, 8.260089E-03, 8.198814E-03, 8.378171E-03, 8.146192E-03,
-    8.294637E-03, 8.221945E-03, 8.176151E-03, 8.177485E-03, 8.393270E-03,
-    8.102125E-03, 8.476863E-03, 7.961886E-03, 8.372437E-03, 8.220086E-03,
-    8.347631E-03, 8.301214E-03, 8.385724E-03, 8.272501E-03, 8.322226E-03,
-    8.212913E-03, 8.383642E-03, 8.268805E-03, 8.231497E-03, 8.071622E-03,
-    8.306473E-03, 8.076489E-03, 8.313566E-03, 8.035571E-03, 8.176417E-03};
+static double flat_cell061Ys[] = {1.002863E+00, 1.032594E+00, 1.017332E+00, 1.062325E+00, 1.004316E+00, 1.041249E+00,
+                                  1.023080E+00, 1.011716E+00, 1.012046E+00, 1.066157E+00, 9.934810E-01, 1.087497E+00,
+                                  9.593894E-01, 1.060872E+00, 1.022618E+00, 1.054595E+00, 1.042901E+00, 1.064241E+00,
+                                  1.035699E+00, 1.048186E+00, 1.020834E+00, 1.063712E+00, 1.034774E+00, 1.025458E+00,
+                                  9.860153E-01, 1.044222E+00, 9.872045E-01, 1.046006E+00, 9.772280E-01, 1.011782E+00};
+static double flat_cell061Es[] = {8.140295E-03, 8.260089E-03, 8.198814E-03, 8.378171E-03, 8.146192E-03, 8.294637E-03,
+                                  8.221945E-03, 8.176151E-03, 8.177485E-03, 8.393270E-03, 8.102125E-03, 8.476863E-03,
+                                  7.961886E-03, 8.372437E-03, 8.220086E-03, 8.347631E-03, 8.301214E-03, 8.385724E-03,
+                                  8.272501E-03, 8.322226E-03, 8.212913E-03, 8.383642E-03, 8.268805E-03, 8.231497E-03,
+                                  8.071622E-03, 8.306473E-03, 8.076489E-03, 8.313566E-03, 8.035571E-03, 8.176417E-03};
 
 /// defined below this creates some input data
-void createInputWorkspaces(int start, int end,
-                           Mantid::API::MatrixWorkspace_sptr &input,
-                           Mantid::API::MatrixWorkspace_sptr &wave,
-                           Mantid::API::MatrixWorkspace_sptr &pixels);
-void createInputWorkSpacesForMasking(Mantid::API::MatrixWorkspace_sptr &input,
-                                     Mantid::API::MatrixWorkspace_sptr &wave,
+void createInputWorkspaces(int start, int end, Mantid::API::MatrixWorkspace_sptr &input,
+                           Mantid::API::MatrixWorkspace_sptr &wave, Mantid::API::MatrixWorkspace_sptr &pixels);
+void createInputWorkSpacesForMasking(Mantid::API::MatrixWorkspace_sptr &input, Mantid::API::MatrixWorkspace_sptr &wave,
                                      Mantid::API::MatrixWorkspace_sptr &pixels);
 void createQResolutionWorkspace(Mantid::API::MatrixWorkspace_sptr &qResolution,
                                 Mantid::API::MatrixWorkspace_sptr &alteredInput,
-                                Mantid::API::MatrixWorkspace_sptr &input,
-                                double value1, double value2);
+                                Mantid::API::MatrixWorkspace_sptr &input, double value1, double value2);
 
 class Q1D2Test : public CxxTest::TestSuite {
 public:
@@ -69,10 +61,8 @@ public:
 
     const std::string outputWS("Q1D2Test_result");
     TS_ASSERT_THROWS_NOTHING(
-        Q1D2.setProperty("DetBankWorkspace", m_inputWS);
-        Q1D2.setProperty("WavelengthAdj", m_wavNorm);
-        Q1D2.setPropertyValue("OutputWorkspace", outputWS);
-        Q1D2.setPropertyValue("OutputBinning", "0,0.02,0.5");
+        Q1D2.setProperty("DetBankWorkspace", m_inputWS); Q1D2.setProperty("WavelengthAdj", m_wavNorm);
+        Q1D2.setPropertyValue("OutputWorkspace", outputWS); Q1D2.setPropertyValue("OutputBinning", "0,0.02,0.5");
         // The property PixelAdj is undefined but that shouldn't cause this to
         // throw
         Q1D2.execute())
@@ -80,9 +70,8 @@ public:
     TS_ASSERT(Q1D2.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
     TS_ASSERT_EQUALS(result->isDistribution(), true)
     TS_ASSERT_EQUALS(result->getAxis(0)->unit()->unitID(), "MomentumTransfer")
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
@@ -113,10 +102,8 @@ public:
 
     const std::string outputWS("Q1D2Test_OutputParts");
     TS_ASSERT_THROWS_NOTHING(
-        Q1D2.setProperty("DetBankWorkspace", m_inputWS);
-        Q1D2.setProperty("WavelengthAdj", m_wavNorm);
-        Q1D2.setPropertyValue("OutputWorkspace", outputWS);
-        Q1D2.setPropertyValue("OutputBinning", "0,0.02,0.5");
+        Q1D2.setProperty("DetBankWorkspace", m_inputWS); Q1D2.setProperty("WavelengthAdj", m_wavNorm);
+        Q1D2.setPropertyValue("OutputWorkspace", outputWS); Q1D2.setPropertyValue("OutputBinning", "0,0.02,0.5");
         Q1D2.setProperty("OutputParts", true);
 
         // The property PixelAdj is undefined but that shouldn't cause this to
@@ -126,22 +113,16 @@ public:
     TS_ASSERT(Q1D2.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     Mantid::API::MatrixWorkspace_sptr sumOfCounts;
-    TS_ASSERT_THROWS_NOTHING(
-        sumOfCounts = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                outputWS + "_sumOfCounts")))
+    TS_ASSERT_THROWS_NOTHING(sumOfCounts = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS + "_sumOfCounts")))
 
     Mantid::API::MatrixWorkspace_sptr sumOfNormFactors;
-    TS_ASSERT_THROWS_NOTHING(
-        sumOfNormFactors =
-            std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-                Mantid::API::AnalysisDataService::Instance().retrieve(
-                    outputWS + "_sumOfNormFactors")))
+    TS_ASSERT_THROWS_NOTHING(sumOfNormFactors = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS + "_sumOfNormFactors")))
 
     TS_ASSERT_DELTA(result->x(0)[10], 0.1999, 0.0001)
     TS_ASSERT_DELTA(sumOfCounts->x(0)[10], 0.1999, 0.0001)
@@ -163,30 +144,25 @@ public:
     TS_ASSERT_EQUALS(sumOfCounts->y(0).size(), 25)
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
-    Mantid::API::AnalysisDataService::Instance().remove(outputWS +
-                                                        "_sumOfCounts");
-    Mantid::API::AnalysisDataService::Instance().remove(outputWS +
-                                                        "_sumOfNormFactors");
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS + "_sumOfCounts");
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS + "_sumOfNormFactors");
   }
 
   void testPixelAdj() {
     Mantid::Algorithms::Q1D2 Q1D;
     Q1D.initialize();
 
-    TS_ASSERT_THROWS_NOTHING(
-        Q1D.setProperty("DetBankWorkspace", m_inputWS);
-        Q1D.setProperty("WavelengthAdj", m_wavNorm);
-        Q1D.setProperty("PixelAdj", m_pixel);
-        Q1D.setPropertyValue("OutputWorkspace", m_noGrav);
-        Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");)
+    TS_ASSERT_THROWS_NOTHING(Q1D.setProperty("DetBankWorkspace", m_inputWS);
+                             Q1D.setProperty("WavelengthAdj", m_wavNorm); Q1D.setProperty("PixelAdj", m_pixel);
+                             Q1D.setPropertyValue("OutputWorkspace", m_noGrav);
+                             Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");)
     //#default is don't correct for gravity
     TS_ASSERT_THROWS_NOTHING(Q1D.execute())
     TS_ASSERT(Q1D.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(m_noGrav)))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(m_noGrav)))
     TS_ASSERT(result)
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
 
@@ -220,20 +196,17 @@ public:
     // First run algorithm on workspaces for masking without masking any pixels.
     // It should fail because two pixels have non-positive PixelAdj values
     const std::string outputWS("Q1D2Test_invalid_Pixel_Adj");
-    TS_ASSERT_THROWS_NOTHING(
-        Q1D.setProperty("DetBankWorkspace", mask_input);
-        Q1D.setProperty("WavelengthAdj", mask_wave);
-        Q1D.setProperty("PixelAdj", mask_pixels);
-        Q1D.setPropertyValue("OutputWorkspace", outputWS);
-        Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");)
+    TS_ASSERT_THROWS_NOTHING(Q1D.setProperty("DetBankWorkspace", mask_input);
+                             Q1D.setProperty("WavelengthAdj", mask_wave); Q1D.setProperty("PixelAdj", mask_pixels);
+                             Q1D.setPropertyValue("OutputWorkspace", outputWS);
+                             Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");)
     Q1D.execute();
 
     TS_ASSERT(!Q1D.isExecuted())
 
     // Secondly we mask the detectors for these two pixels
     maskDetectors.initialize();
-    maskDetectors.setPropertyValue("Workspace",
-                                   "Q1D2Test_inputworkspace_for_masking");
+    maskDetectors.setPropertyValue("Workspace", "Q1D2Test_inputworkspace_for_masking");
     ;
     maskDetectors.setPropertyValue("WorkspaceIndexList", "5,6");
     maskDetectors.execute();
@@ -250,22 +223,17 @@ public:
 
     const std::string outputWS("Q1D2Test_result");
     TS_ASSERT_THROWS_NOTHING(
-        Q1D.setProperty("DetBankWorkspace", m_inputWS);
-        Q1D.setProperty("WavelengthAdj", m_wavNorm);
-        Q1D.setProperty("PixelAdj", m_pixel);
-        Q1D.setPropertyValue("OutputWorkspace", outputWS);
-        Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
-        Q1D.setPropertyValue("AccountForGravity", "1");
+        Q1D.setProperty("DetBankWorkspace", m_inputWS); Q1D.setProperty("WavelengthAdj", m_wavNorm);
+        Q1D.setProperty("PixelAdj", m_pixel); Q1D.setPropertyValue("OutputWorkspace", outputWS);
+        Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5"); Q1D.setPropertyValue("AccountForGravity", "1");
 
         Q1D.execute())
     TS_ASSERT(Q1D.isExecuted())
 
-    Mantid::API::MatrixWorkspace_sptr gravity,
-        refNoGrav = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(m_noGrav));
-    TS_ASSERT_THROWS_NOTHING(
-        gravity = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    Mantid::API::MatrixWorkspace_sptr gravity, refNoGrav = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                                   Mantid::API::AnalysisDataService::Instance().retrieve(m_noGrav));
+    TS_ASSERT_THROWS_NOTHING(gravity = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     TS_ASSERT(refNoGrav)
 
@@ -293,21 +261,18 @@ public:
     Q1D.initialize();
 
     const std::string outputWS("Q1D2Test_result");
-    TS_ASSERT_THROWS_NOTHING(
-        Q1D.setProperty("DetBankWorkspace", m_inputWS);
-        Q1D.setProperty("WavelengthAdj", m_wavNorm);
-        Q1D.setProperty("PixelAdj", m_pixel);
-        Q1D.setPropertyValue("OutputWorkspace", outputWS);
-        Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
-        Q1D.setProperty("RadiusCut", 220.0); Q1D.setProperty("WaveCut", 8.0);)
+    TS_ASSERT_THROWS_NOTHING(Q1D.setProperty("DetBankWorkspace", m_inputWS);
+                             Q1D.setProperty("WavelengthAdj", m_wavNorm); Q1D.setProperty("PixelAdj", m_pixel);
+                             Q1D.setPropertyValue("OutputWorkspace", outputWS);
+                             Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
+                             Q1D.setProperty("RadiusCut", 220.0); Q1D.setProperty("WaveCut", 8.0);)
     //#default is don't correct for gravity
     TS_ASSERT_THROWS_NOTHING(Q1D.execute())
     TS_ASSERT(Q1D.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
     TS_ASSERT(result)
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
 
@@ -334,25 +299,21 @@ public:
     Q1D.initialize();
 
     const std::string outputWS("Q1D2Test_result");
-    TS_ASSERT_THROWS_NOTHING(
-        Q1D.setProperty("DetBankWorkspace", m_inputWS);
-        Q1D.setProperty("WavelengthAdj", m_wavNorm);
-        Q1D.setProperty("PixelAdj", m_pixel);
-        Q1D.setPropertyValue("OutputWorkspace", outputWS);
-        Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
-        // this raduis is too small to exclude anything
-        Q1D.setProperty("RadiusCut", 50.0);
-        // this is the entire wavelength range
-        Q1D.setProperty("WaveCut", 30.0);)
+    TS_ASSERT_THROWS_NOTHING(Q1D.setProperty("DetBankWorkspace", m_inputWS);
+                             Q1D.setProperty("WavelengthAdj", m_wavNorm); Q1D.setProperty("PixelAdj", m_pixel);
+                             Q1D.setPropertyValue("OutputWorkspace", outputWS);
+                             Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
+                             // this raduis is too small to exclude anything
+                             Q1D.setProperty("RadiusCut", 50.0);
+                             // this is the entire wavelength range
+                             Q1D.setProperty("WaveCut", 30.0);)
     TS_ASSERT_THROWS_NOTHING(Q1D.execute())
     TS_ASSERT(Q1D.isExecuted())
 
-    Mantid::API::MatrixWorkspace_sptr nocuts,
-        noGrav = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(m_noGrav));
-    TS_ASSERT_THROWS_NOTHING(
-        nocuts = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    Mantid::API::MatrixWorkspace_sptr nocuts, noGrav = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                                  Mantid::API::AnalysisDataService::Instance().retrieve(m_noGrav));
+    TS_ASSERT_THROWS_NOTHING(nocuts = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     TS_ASSERT(nocuts)
     TS_ASSERT_EQUALS(nocuts->getNumberHistograms(), 1)
@@ -380,10 +341,8 @@ public:
 
     const std::string outputWS("Q1D2Test_invalid_result");
     TS_ASSERT_THROWS_NOTHING(
-        Q1D.setProperty("DetBankWorkspace", m_inputWS);
-        Q1D.setProperty("WavelengthAdj", m_wavNorm);
-        Q1D.setPropertyValue("OutputWorkspace", outputWS);
-        Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
+        Q1D.setProperty("DetBankWorkspace", m_inputWS); Q1D.setProperty("WavelengthAdj", m_wavNorm);
+        Q1D.setPropertyValue("OutputWorkspace", outputWS); Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
         Q1D.setPropertyValue("AccountForGravity", "1");)
     Q1D.execute();
 
@@ -398,8 +357,7 @@ public:
     Mantid::API::MatrixWorkspace_sptr qResolution, alteredInput;
     const double value1 = 1;
     const double value2 = 1;
-    createQResolutionWorkspace(qResolution, alteredInput, m_inputWS, value1,
-                               value2);
+    createQResolutionWorkspace(qResolution, alteredInput, m_inputWS, value1, value2);
 
     // Act
     TSM_ASSERT("Resolution workspace should not be NULL", qResolution)
@@ -422,15 +380,12 @@ public:
     TS_ASSERT(Q1D.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     Mantid::API::MatrixWorkspace_sptr sumOfCounts;
-    TS_ASSERT_THROWS_NOTHING(
-        sumOfCounts = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                outputWS + "_sumOfCounts")))
+    TS_ASSERT_THROWS_NOTHING(sumOfCounts = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS + "_sumOfCounts")))
 
     TSM_ASSERT("Should have the x error flag set", result->hasDx(0));
     // That output will be
@@ -449,8 +404,7 @@ public:
       // our value with sqrt(1 + 0.5^2/12). Hence it is enough for us to confirm
       // that the values lie in an interval around this value
       auto isZeroValue = dx == 0.0;
-      auto isCloseToZeroPoint1DividedByRootTwelve =
-          (dx > 1.01035) && (dx < 1.01037);
+      auto isCloseToZeroPoint1DividedByRootTwelve = (dx > 1.01035) && (dx < 1.01037);
       if (isCloseToZeroPoint1DividedByRootTwelve) {
         counter++;
       }
@@ -463,10 +417,8 @@ public:
 
     // Clean Up
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
-    Mantid::API::AnalysisDataService::Instance().remove(outputWS +
-                                                        "_sumOfCounts");
-    Mantid::API::AnalysisDataService::Instance().remove(outputWS +
-                                                        "_sumOfNormFactors");
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS + "_sumOfCounts");
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS + "_sumOfNormFactors");
   }
 
   void testThatDxIsNotPopulatedWhenQResolutionIsNotChoosen() {
@@ -486,9 +438,8 @@ public:
     TS_ASSERT(Q1D.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     // Make sure that the Q resolution is not calculated
     TS_ASSERT(!result->sharedDx(0));
@@ -520,9 +471,7 @@ public:
     m_outputWS = "Q1D2Test_result";
   }
 
-  void tearDown() override {
-    Mantid::API::AnalysisDataService::Instance().remove(m_outputWS);
-  }
+  void tearDown() override { Mantid::API::AnalysisDataService::Instance().remove(m_outputWS); }
 
   void test_slow_performance() {
     Mantid::Algorithms::Q1D2 Q1D;
@@ -538,20 +487,17 @@ public:
   }
 };
 
-void createInputWorkspaces(int start, int end,
-                           Mantid::API::MatrixWorkspace_sptr &input,
-                           Mantid::API::MatrixWorkspace_sptr &wave,
-                           Mantid::API::MatrixWorkspace_sptr &pixels) {
+void createInputWorkspaces(int start, int end, Mantid::API::MatrixWorkspace_sptr &input,
+                           Mantid::API::MatrixWorkspace_sptr &wave, Mantid::API::MatrixWorkspace_sptr &pixels) {
 
   std::string wsName("Q1D2Test_inputworkspace"), wavNorm("Q1D2Test_wave");
 
   bool forMasking = (start > 9000); // If start is late we assume we a creating
                                     // a 2nd set of workspaces for masking
-  if (forMasking) // avoid workspace name clash if creating workspaces for
-                  // masking
+  if (forMasking)                   // avoid workspace name clash if creating workspaces for
+                                    // masking
   {
-    wsName = "Q1D2Test_inputworkspace_for_masking",
-    wavNorm = "Q1D2Test_wave_for_masking";
+    wsName = "Q1D2Test_inputworkspace_for_masking", wavNorm = "Q1D2Test_wave_for_masking";
   }
 
   LoadRaw3 loader;
@@ -605,20 +551,16 @@ void createInputWorkspaces(int start, int end,
     pixels->mutableY(6)[0] = -1.0; // This pixel should be masked
     AnalysisDataService::Instance().add("Q1DTest_flat_file", pixels);
   } else
-    AnalysisDataService::Instance().add("Q1DTest_flat_file_for_masking",
-                                        pixels);
+    AnalysisDataService::Instance().add("Q1DTest_flat_file_for_masking", pixels);
 }
-void createInputWorkSpacesForMasking(
-    Mantid::API::MatrixWorkspace_sptr &input,
-    Mantid::API::MatrixWorkspace_sptr &wave,
-    Mantid::API::MatrixWorkspace_sptr &pixels) {
+void createInputWorkSpacesForMasking(Mantid::API::MatrixWorkspace_sptr &input, Mantid::API::MatrixWorkspace_sptr &wave,
+                                     Mantid::API::MatrixWorkspace_sptr &pixels) {
   createInputWorkspaces(9001, 9030, input, wave, pixels);
 }
 
 void createQResolutionWorkspace(Mantid::API::MatrixWorkspace_sptr &qResolution,
                                 Mantid::API::MatrixWorkspace_sptr &alteredInput,
-                                Mantid::API::MatrixWorkspace_sptr &input,
-                                double value1, double value2) {
+                                Mantid::API::MatrixWorkspace_sptr &input, double value1, double value2) {
   // The q resolution workspace is almost the same to the input workspace,
   // except for the y value, we set all Y values to 1
   qResolution = input->clone();

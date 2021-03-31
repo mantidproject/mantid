@@ -21,9 +21,7 @@ class DLLExport NexusTester : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Algorithm for testing and debugging purposes only!";
-  }
+  const std::string summary() const override { return "Algorithm for testing and debugging purposes only!"; }
 
   int version() const override;
   const std::string category() const override;

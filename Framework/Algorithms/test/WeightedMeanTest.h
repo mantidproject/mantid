@@ -56,11 +56,9 @@ public:
 
     MatrixWorkspace_const_sptr in2, result;
     TS_ASSERT_THROWS_NOTHING(
-        in2 = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("second")))
+        in2 = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("second")))
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("result")))
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("result")))
     // Check bin boundaries are the same
     TS_ASSERT_EQUALS(in2->x(0), result->x(0))
     // Pick a bin where both entries are non-zero

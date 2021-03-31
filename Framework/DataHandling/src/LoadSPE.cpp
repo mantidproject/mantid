@@ -56,8 +56,7 @@ int LoadSPE::confidence(Kernel::FileDescriptor &descriptor) const {
 
   // Next line should be comment line: "### Phi Grid" or "### Q Grid"
   std::getline(file, fileline);
-  if (fileline.find("Phi Grid") != std::string::npos ||
-      fileline.find("Q Grid") != std::string::npos) {
+  if (fileline.find("Phi Grid") != std::string::npos || fileline.find("Q Grid") != std::string::npos) {
     return 80;
   } else
     return 0;
@@ -71,11 +70,9 @@ int LoadSPE::confidence(Kernel::FileDescriptor &descriptor) const {
  * Initialise the algorithm
  */
 void LoadSPE::init() {
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Load, ".spe"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".spe"),
                   "The name of the SPE file to load.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 }
 
@@ -154,8 +151,7 @@ void LoadSPE::exec() {
   fgets(comment, 100, speFile);
 
   // Now create the output workspace
-  MatrixWorkspace_sptr workspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", nhist, nbins + 1, nbins);
+  MatrixWorkspace_sptr workspace = WorkspaceFactory::Instance().create("Workspace2D", nhist, nbins + 1, nbins);
   workspace->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
   workspace->setDistribution(true); // It should be a distribution
   workspace->setYUnitLabel("S(Phi,Energy)");
@@ -185,9 +181,7 @@ void LoadSPE::exec() {
  *  @param workspace :: The output workspace
  *  @param index ::     The index of the current spectrum
  */
-void LoadSPE::readHistogram(FILE *speFile,
-                            const API::MatrixWorkspace_sptr &workspace,
-                            size_t index) {
+void LoadSPE::readHistogram(FILE *speFile, const API::MatrixWorkspace_sptr &workspace, size_t index) {
   // First, there should be a comment line
   char comment[100];
   fgets(comment, 100, speFile);

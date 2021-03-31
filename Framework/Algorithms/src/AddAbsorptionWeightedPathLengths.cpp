@@ -48,19 +48,15 @@ constexpr int NLAMBDA = 1;
  */
 void AddAbsorptionWeightedPathLengths::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace_sptr::element_type>>(
-          "InputWorkspace", "", Direction::InOut),
+      std::make_unique<WorkspaceProperty<PeaksWorkspace_sptr::element_type>>("InputWorkspace", "", Direction::InOut),
       "An input/output peaks workspace that the path distances will be added "
       "to.");
-  declareProperty(
-      "UseSinglePath", false,
-      "Use a single path with a scatter point at the sample position");
+  declareProperty("UseSinglePath", false, "Use a single path with a scatter point at the sample position");
   auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
   declareProperty("EventsPerPoint", DEFAULT_NEVENTS, positiveInt,
                   "The number of \"neutron\" events to generate per peak");
-  declareProperty("SeedValue", DEFAULT_SEED, positiveInt,
-                  "Seed the random number generator with this value");
+  declareProperty("SeedValue", DEFAULT_SEED, positiveInt, "Seed the random number generator with this value");
   declareProperty("MaxScatterPtAttempts", 5000, positiveInt,
                   "Maximum number of tries made to generate a scattering point "
                   "within the sample. Objects with "
@@ -70,22 +66,17 @@ void AddAbsorptionWeightedPathLengths::init() {
                   "this value then there is most likely a problem with "
                   "the sample geometry.");
   setPropertySettings("SeedValue",
-                      std::make_unique<EnabledWhenProperty>(
-                          "UseSinglePath", ePropertyCriterion::IS_DEFAULT));
+                      std::make_unique<EnabledWhenProperty>("UseSinglePath", ePropertyCriterion::IS_DEFAULT));
   setPropertySettings("EventsPerPoint",
-                      std::make_unique<EnabledWhenProperty>(
-                          "UseSinglePath", ePropertyCriterion::IS_DEFAULT));
+                      std::make_unique<EnabledWhenProperty>("UseSinglePath", ePropertyCriterion::IS_DEFAULT));
   setPropertySettings("MaxScatterPtAttempts",
-                      std::make_unique<EnabledWhenProperty>(
-                          "UseSinglePath", ePropertyCriterion::IS_DEFAULT));
+                      std::make_unique<EnabledWhenProperty>("UseSinglePath", ePropertyCriterion::IS_DEFAULT));
 }
 
-std::map<std::string, std::string>
-AddAbsorptionWeightedPathLengths::validateInputs() {
+std::map<std::string, std::string> AddAbsorptionWeightedPathLengths::validateInputs() {
   PeaksWorkspace_sptr inputWS = getProperty("InputWorkspace");
   std::map<std::string, std::string> issues;
-  Geometry::IComponent_const_sptr sample =
-      inputWS->getInstrument()->getSample();
+  Geometry::IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
   if (!sample) {
     issues["InputWorkspace"] = "Input workspace does not have a Sample";
   } else {
@@ -94,8 +85,7 @@ AddAbsorptionWeightedPathLengths::validateInputs() {
     }
 
     if (inputWS->sample().getMaterial().numberDensity() == 0) {
-      issues["InputWorkspace"] =
-          "Sample must have a material set up with a non-zero number density";
+      issues["InputWorkspace"] = "Sample must have a material set up with a non-zero number density";
     }
   }
   return issues;
@@ -122,9 +112,7 @@ void AddAbsorptionWeightedPathLengths::exec() {
 
   // Configure strategy
   MCInteractionVolume interactionVol(inputWS->sample(), maxScatterPtAttempts);
-  MCAbsorptionStrategy strategy(interactionVol, *beamProfile,
-                                DeltaEMode::Elastic, nevents,
-                                maxScatterPtAttempts, true);
+  MCAbsorptionStrategy strategy(interactionVol, *beamProfile, DeltaEMode::Elastic, nevents, maxScatterPtAttempts, true);
 
   const int seed = getProperty("SeedValue");
 
@@ -134,8 +122,7 @@ void AddAbsorptionWeightedPathLengths::exec() {
     Peak &peak = inputWS->getPeak(i);
     auto peakWavelength = peak.getWavelength();
 
-    std::vector<double> lambdas{peakWavelength}, absFactors(NLAMBDA),
-        absFactorErrors(NLAMBDA);
+    std::vector<double> lambdas{peakWavelength}, absFactors(NLAMBDA), absFactorErrors(NLAMBDA);
 
     bool useSinglePath = getProperty("UseSinglePath");
     if (useSinglePath) {
@@ -152,16 +139,13 @@ void AddAbsorptionWeightedPathLengths::exec() {
       Track afterScatter(samplePos, detDir);
       sampleShape->interceptSurface(afterScatter);
 
-      absFactors[0] = beforeScatter.calculateAttenuation(lambdas[0]) *
-                      afterScatter.calculateAttenuation(lambdas[0]);
+      absFactors[0] = beforeScatter.calculateAttenuation(lambdas[0]) * afterScatter.calculateAttenuation(lambdas[0]);
 
     } else {
       MersenneTwister rng(seed + int(i));
-      MCInteractionStatistics detStatistics(peak.getDetectorID(),
-                                            inputWS->sample());
+      MCInteractionStatistics detStatistics(peak.getDetectorID(), inputWS->sample());
 
-      strategy.calculate(rng, peak.getDetectorPosition(), lambdas,
-                         peakWavelength, absFactors, absFactorErrors,
+      strategy.calculate(rng, peak.getDetectorPosition(), lambdas, peakWavelength, absFactors, absFactorErrors,
                          detStatistics);
 
       if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
@@ -169,10 +153,9 @@ void AddAbsorptionWeightedPathLengths::exec() {
       }
     }
 
-    double mu = inputWS->sample().getMaterial().attenuationCoefficient(
-        peakWavelength);                                               // m-1
-    double absWeightedPathLength = -log(absFactors[0]) / mu;           // metres
-    peak.setAbsorptionWeightedPathLength(absWeightedPathLength * 100); // cm
+    double mu = inputWS->sample().getMaterial().attenuationCoefficient(peakWavelength); // m-1
+    double absWeightedPathLength = -log(absFactors[0]) / mu;                            // metres
+    peak.setAbsorptionWeightedPathLength(absWeightedPathLength * 100);                  // cm
 
     prog.report(reportMsg);
     PARALLEL_END_INTERUPT_REGION
@@ -188,9 +171,8 @@ void AddAbsorptionWeightedPathLengths::exec() {
  * @param sample A reference to the sample object
  * @return A new IBeamProfile object
  */
-std::unique_ptr<IBeamProfile>
-AddAbsorptionWeightedPathLengths::createBeamProfile(
-    const Instrument &instrument, const Sample &sample) const {
+std::unique_ptr<IBeamProfile> AddAbsorptionWeightedPathLengths::createBeamProfile(const Instrument &instrument,
+                                                                                  const Sample &sample) const {
   const auto frame = instrument.getReferenceFrame();
   const auto source = instrument.getSource();
   double beamWidth(-1.0), beamHeight(-1.0), beamRadius(-1.0);
@@ -202,22 +184,19 @@ AddAbsorptionWeightedPathLengths::createBeamProfile(
     if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
       beamWidth = beamWidthParam[0];
       beamHeight = beamHeightParam[0];
-      return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(),
-                                                      beamWidth, beamHeight);
+      return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(), beamWidth, beamHeight);
     }
   } else if (beamShapeParam.compare("Circle") == 0) {
     auto beamRadiusParam = source->getNumberParameter("beam-radius");
     if (beamRadiusParam.size() == 1) {
       beamRadius = beamRadiusParam[0];
-      return std::make_unique<CircularBeamProfile>(*frame, source->getPos(),
-                                                   beamRadius);
+      return std::make_unique<CircularBeamProfile>(*frame, source->getPos(), beamRadius);
     }
   } // revert to sample dimensions if no return by this point
   const auto bbox = sample.getShape().getBoundingBox().width();
   beamWidth = bbox[frame->pointingHorizontal()];
   beamHeight = bbox[frame->pointingUp()];
-  return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(),
-                                                  beamWidth, beamHeight);
+  return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(), beamWidth, beamHeight);
 }
 
 } // namespace Algorithms

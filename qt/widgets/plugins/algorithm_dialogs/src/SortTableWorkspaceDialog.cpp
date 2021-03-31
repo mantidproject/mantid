@@ -22,8 +22,7 @@ namespace CustomDialogs {
 DECLARE_DIALOG(SortTableWorkspaceDialog)
 
 /// Default constructor
-SortTableWorkspaceDialog::SortTableWorkspaceDialog(QWidget *parent)
-    : API::AlgorithmDialog(parent), m_form() {}
+SortTableWorkspaceDialog::SortTableWorkspaceDialog(QWidget *parent) : API::AlgorithmDialog(parent), m_form() {}
 
 /// Initialize the layout
 void SortTableWorkspaceDialog::initLayout() {
@@ -45,11 +44,9 @@ void SortTableWorkspaceDialog::initLayout() {
   connect(m_form.workspace, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(workspaceChanged(const QString &)));
   connect(m_form.workspace, SIGNAL(emptied()), this, SLOT(clearGUI()));
-  connect(m_form.cbColumnName, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(changedColumnName(int)));
+  connect(m_form.cbColumnName, SIGNAL(currentIndexChanged(int)), this, SLOT(changedColumnName(int)));
   connect(m_form.btnAddColumn, SIGNAL(clicked()), this, SLOT(addColumn()));
-  connect(m_form.btnRemoveColumn, SIGNAL(clicked()), this,
-          SLOT(removeColumn()));
+  connect(m_form.btnRemoveColumn, SIGNAL(clicked()), this, SLOT(removeColumn()));
 
   tieStaticWidgets(true);
 }
@@ -66,15 +63,12 @@ void SortTableWorkspaceDialog::parseInput() {
   for (int i = 0; i < n; ++i) {
     auto itemColumn = m_form.columnsLayout->itemAtPosition(i, 1);
     auto itemAscending = m_form.columnsLayout->itemAtPosition(i, 2);
-    if (!itemColumn || !itemColumn->widget() || !itemAscending ||
-        !itemAscending->widget()) {
-      throw std::logic_error(
-          "Logic error in SortTableWorkspaceDialog: internal inconsistency.");
+    if (!itemColumn || !itemColumn->widget() || !itemAscending || !itemAscending->widget()) {
+      throw std::logic_error("Logic error in SortTableWorkspaceDialog: internal inconsistency.");
     }
 
     auto name = dynamic_cast<QComboBox *>(itemColumn->widget())->currentText();
-    auto ia =
-        dynamic_cast<QComboBox *>(itemAscending->widget())->currentIndex();
+    auto ia = dynamic_cast<QComboBox *>(itemAscending->widget())->currentIndex();
     columns << name;
     ascending << QString::number(ia == 0 ? 1 : 0);
   }
@@ -113,8 +107,7 @@ void SortTableWorkspaceDialog::workspaceChanged(const QString &wsName) {
     return;
   try {
     auto ws =
-        Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::ITableWorkspace>(wsName.toStdString());
+        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::ITableWorkspace>(wsName.toStdString());
     if (!ws)
       return;
     m_columnNames.clear();
@@ -178,8 +171,7 @@ void SortTableWorkspaceDialog::addColumn() {
   auto *columnName = new QComboBox();
   columnName->addItems(m_columnNames);
   columnName->setToolTip(m_form.cbColumnName->toolTip());
-  connect(columnName, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(changedColumnName(int)));
+  connect(columnName, SIGNAL(currentIndexChanged(int)), this, SLOT(changedColumnName(int)));
   auto *ascending = new QComboBox();
   ascending->addItem("Ascending");
   ascending->addItem("Descending");
@@ -189,9 +181,7 @@ void SortTableWorkspaceDialog::addColumn() {
   m_form.columnsLayout->addWidget(columnName, newRow, 1);
   m_form.columnsLayout->addWidget(ascending, newRow, 2);
   // correct the tab order
-  QWidget::setTabOrder(
-      m_form.columnsLayout->itemAtPosition(newRow - 1, 2)->widget(),
-      columnName);
+  QWidget::setTabOrder(m_form.columnsLayout->itemAtPosition(newRow - 1, 2)->widget(), columnName);
   QWidget::setTabOrder(columnName, ascending);
 
   // suggest a name for the new column: one that hasn't been used in
@@ -220,10 +210,8 @@ void SortTableWorkspaceDialog::changedColumnName(int /*unused*/) {
   auto n = m_sortColumns.size();
   for (int i = 0; i < n; ++i) {
     auto item = m_form.columnsLayout->itemAtPosition(i, 1);
-    if (!item || !item->widget() ||
-        !dynamic_cast<QComboBox *>(item->widget())) {
-      throw std::logic_error(
-          "Logic error in SortTableWorkspaceDialog: internal inconsistency.");
+    if (!item || !item->widget() || !dynamic_cast<QComboBox *>(item->widget())) {
+      throw std::logic_error("Logic error in SortTableWorkspaceDialog: internal inconsistency.");
     }
 
     auto name = dynamic_cast<QComboBox *>(item->widget())->currentText();

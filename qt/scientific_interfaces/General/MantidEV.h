@@ -38,13 +38,11 @@ namespace CustomInterfaces {
 class RunLoadAndConvertToMD : public QRunnable {
 public:
   /// Constructor just saves the info needed by the run() method
-  explicit RunLoadAndConvertToMD(
-      MantidEVWorker *worker, const std::string &file_name,
-      const std::string &ev_ws_name, const std::string &md_ws_name,
-      const double modQ, const double minQ, const double maxQ,
-      const bool do_lorentz_corr, const bool load_data, const bool load_det_cal,
-      const std::string &det_cal_file, const std::string &det_cal_file2,
-      const std::string &axisCORELLI);
+  explicit RunLoadAndConvertToMD(MantidEVWorker *worker, const std::string &file_name, const std::string &ev_ws_name,
+                                 const std::string &md_ws_name, const double modQ, const double minQ, const double maxQ,
+                                 const bool do_lorentz_corr, const bool load_data, const bool load_det_cal,
+                                 const std::string &det_cal_file, const std::string &det_cal_file2,
+                                 const std::string &axisCORELLI);
 
   /// Calls worker->loadAndConvertToMD from a separate thread
   void run() override;
@@ -69,11 +67,9 @@ private:
 class RunFindPeaks : public QRunnable {
 public:
   /// Constructor just saves the info needed by the run() method
-  RunFindPeaks(MantidEVWorker *worker, const std::string &ev_ws_name,
-               const std::string &md_ws_name, const std::string &peaks_ws_name,
-               double max_abc, size_t num_to_find, double min_intensity,
-               double minQPeaks, double maxQPeaks,
-               const std::string &file_name);
+  RunFindPeaks(MantidEVWorker *worker, const std::string &ev_ws_name, const std::string &md_ws_name,
+               const std::string &peaks_ws_name, double max_abc, size_t num_to_find, double min_intensity,
+               double minQPeaks, double maxQPeaks, const std::string &file_name);
 
   /// Calls worker->findPeaks from a separate thread
   void run() override;
@@ -95,8 +91,7 @@ private:
 class RunPredictPeaks : public QRunnable {
 public:
   /// Constructor just saves the info needed by the run() method
-  RunPredictPeaks(MantidEVWorker *worker, const std::string &peaks_ws_name,
-                  double min_pred_wl, double max_pred_wl,
+  RunPredictPeaks(MantidEVWorker *worker, const std::string &peaks_ws_name, double min_pred_wl, double max_pred_wl,
                   double min_pred_dspacing, double max_pred_dspacing);
 
   /// Calls worker->predictPeaks from a separate thread
@@ -115,13 +110,10 @@ private:
 class RunSphereIntegrate : public QRunnable {
 public:
   /// Constructor just saves the info needed by the run() method
-  RunSphereIntegrate(MantidEVWorker *worker, const std::string &peaks_ws_name,
-                     const std::string &event_ws_name, double peak_radius,
-                     double inner_radius, double outer_radius,
-                     bool integrate_edge, bool use_cylinder_integration,
-                     double cylinder_length, double cylinder_percent_bkg,
-                     const std::string &cylinder_profile_fit, bool adaptiveQBkg,
-                     double adaptiveQMult);
+  RunSphereIntegrate(MantidEVWorker *worker, const std::string &peaks_ws_name, const std::string &event_ws_name,
+                     double peak_radius, double inner_radius, double outer_radius, bool integrate_edge,
+                     bool use_cylinder_integration, double cylinder_length, double cylinder_percent_bkg,
+                     const std::string &cylinder_profile_fit, bool adaptiveQBkg, double adaptiveQMult);
 
   /// Calls worker->sphereIntegrate from a separate thread
   void run() override;
@@ -146,10 +138,8 @@ private:
 class RunFitIntegrate : public QRunnable {
 public:
   /// Constructor just saves the info needed by the run() method
-  RunFitIntegrate(MantidEVWorker *worker, const std::string &peaks_ws_name,
-                  const std::string &event_ws_name,
-                  const std::string &rebin_params, size_t n_bad_edge_pix,
-                  bool use_ikeda_carpenter);
+  RunFitIntegrate(MantidEVWorker *worker, const std::string &peaks_ws_name, const std::string &event_ws_name,
+                  const std::string &rebin_params, size_t n_bad_edge_pix, bool use_ikeda_carpenter);
 
   /// Calls worker->fitIntegrate from a separate thread
   void run() override;
@@ -167,10 +157,8 @@ private:
 class RunEllipsoidIntegrate : public QRunnable {
 public:
   /// Constructor just saves the info needed by the run() method
-  RunEllipsoidIntegrate(MantidEVWorker *worker,
-                        const std::string &peaks_ws_name,
-                        const std::string &event_ws_name, double region_radius,
-                        bool specify_size, double peak_size, double inner_size,
+  RunEllipsoidIntegrate(MantidEVWorker *worker, const std::string &peaks_ws_name, const std::string &event_ws_name,
+                        double region_radius, bool specify_size, double peak_size, double inner_size,
                         double outer_size);
 
   /// Calls worker->ellipsoidIntegrate from a separate thread
@@ -215,8 +203,7 @@ public:
 
 public slots:
   /// Slot for Q-Point selection notification
-  void QPointSelection_slot(bool /*lab_coords*/, double /*qx*/, double /*qy*/,
-                            double /*qz*/);
+  void QPointSelection_slot(bool /*lab_coords*/, double /*qx*/, double /*qy*/, double /*qz*/);
 
 private slots:
 

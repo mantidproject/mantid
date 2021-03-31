@@ -41,8 +41,7 @@ std::vector<V3D> PointGroup::getEquivalents(const V3D &hkl) const {
 
   std::sort(equivalents.begin(), equivalents.end(), std::greater<V3D>());
 
-  equivalents.erase(std::unique(equivalents.begin(), equivalents.end()),
-                    equivalents.end());
+  equivalents.erase(std::unique(equivalents.begin(), equivalents.end()), equivalents.end());
 
   return equivalents;
 }
@@ -67,10 +66,8 @@ V3D PointGroup::getReflectionFamily(const Kernel::V3D &hkl) const {
 }
 
 /// Protected constructor - can not be used directly.
-PointGroup::PointGroup(const std::string &symbolHM, const Group &group,
-                       const std::string &description)
-    : Group(group), m_symbolHM(symbolHM),
-      m_name(symbolHM + " (" + description + ")") {
+PointGroup::PointGroup(const std::string &symbolHM, const Group &group, const std::string &description)
+    : Group(group), m_symbolHM(symbolHM), m_name(symbolHM + " (" + description + ")") {
   m_crystalSystem = getCrystalSystemFromGroup();
   m_latticeSystem = getLatticeSystemFromCrystalSystemAndGroup(m_crystalSystem);
 }
@@ -78,12 +75,10 @@ PointGroup::PointGroup(const std::string &symbolHM, const Group &group,
 /// Hermann-Mauguin symbol
 std::string PointGroup::getSymbol() const { return m_symbolHM; }
 
-bool PointGroup::isEquivalent(const Kernel::V3D &hkl,
-                              const Kernel::V3D &hkl2) const {
+bool PointGroup::isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const {
   auto hklEquivalents = getAllEquivalents(hkl);
 
-  return (std::find(hklEquivalents.cbegin(), hklEquivalents.cend(), hkl2) !=
-          hklEquivalents.end());
+  return (std::find(hklEquivalents.cbegin(), hklEquivalents.cend(), hkl2) != hklEquivalents.end());
 }
 
 /**
@@ -124,9 +119,8 @@ PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
   std::map<std::string, std::set<V3D>> symbolMap;
 
   for (const auto &operation : m_allOperations) {
-    SymmetryElementWithAxis_sptr element =
-        std::dynamic_pointer_cast<SymmetryElementWithAxis>(
-            SymmetryElementFactory::Instance().createSymElement(operation));
+    SymmetryElementWithAxis_sptr element = std::dynamic_pointer_cast<SymmetryElementWithAxis>(
+        SymmetryElementFactory::Instance().createSymElement(operation));
 
     if (element) {
       std::string symbol = element->hmSymbol();
@@ -152,8 +146,7 @@ PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
     return CrystalSystem::Tetragonal;
   }
 
-  if (symbolMap["2"].size() == 3 ||
-      (symbolMap["2"].size() == 1 && symbolMap["m"].size() == 2)) {
+  if (symbolMap["2"].size() == 3 || (symbolMap["2"].size() == 1 && symbolMap["m"].size() == 2)) {
     return CrystalSystem::Orthorhombic;
   }
 
@@ -175,8 +168,8 @@ PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
  * @param crystalSystem :: CrystalSystem of the point group.
  * @return LatticeSystem the point group belongs to.
  */
-PointGroup::LatticeSystem PointGroup::getLatticeSystemFromCrystalSystemAndGroup(
-    const CrystalSystem &crystalSystem) const {
+PointGroup::LatticeSystem
+PointGroup::getLatticeSystemFromCrystalSystemAndGroup(const CrystalSystem &crystalSystem) const {
   switch (crystalSystem) {
   case CrystalSystem::Cubic:
     return LatticeSystem::Cubic;
@@ -203,8 +196,7 @@ PointGroup::LatticeSystem PointGroup::getLatticeSystemFromCrystalSystemAndGroup(
 /** @return a vector with all possible PointGroup objects */
 std::vector<PointGroup_sptr> getAllPointGroups() {
   auto &pointGroupFactory = PointGroupFactory::Instance();
-  std::vector<std::string> allSymbols =
-      pointGroupFactory.getAllPointGroupSymbols();
+  std::vector<std::string> allSymbols = pointGroupFactory.getAllPointGroupSymbols();
   std::vector<PointGroup_sptr> out;
   out.reserve(allSymbols.size());
   for (const auto &symbol : allSymbols) {
@@ -227,8 +219,7 @@ PointGroupCrystalSystemMap getPointGroupsByCrystalSystem() {
 }
 
 /// Return a human-readable string for the given crystal system
-std::string
-getCrystalSystemAsString(const PointGroup::CrystalSystem &crystalSystem) {
+std::string getCrystalSystemAsString(const PointGroup::CrystalSystem &crystalSystem) {
   switch (crystalSystem) {
   case PointGroup::CrystalSystem::Cubic:
     return "Cubic";
@@ -249,8 +240,7 @@ getCrystalSystemAsString(const PointGroup::CrystalSystem &crystalSystem) {
 
 /// Returns the crystal system enum that corresponds to the supplied string or
 /// throws an invalid_argument exception.
-PointGroup::CrystalSystem
-getCrystalSystemFromString(const std::string &crystalSystem) {
+PointGroup::CrystalSystem getCrystalSystemFromString(const std::string &crystalSystem) {
   std::string crystalSystemLC = boost::algorithm::to_lower_copy(crystalSystem);
 
   if (crystalSystemLC == "cubic") {
@@ -268,14 +258,12 @@ getCrystalSystemFromString(const std::string &crystalSystem) {
   } else if (crystalSystemLC == "triclinic") {
     return PointGroup::CrystalSystem::Triclinic;
   } else {
-    throw std::invalid_argument("Not a valid crystal system: '" +
-                                crystalSystem + "'.");
+    throw std::invalid_argument("Not a valid crystal system: '" + crystalSystem + "'.");
   }
 }
 
 /// Returns the supplied LatticeSystem as a string.
-std::string
-getLatticeSystemAsString(const PointGroup::LatticeSystem &latticeSystem) {
+std::string getLatticeSystemAsString(const PointGroup::LatticeSystem &latticeSystem) {
   switch (latticeSystem) {
   case PointGroup::LatticeSystem::Cubic:
     return "Cubic";
@@ -296,8 +284,7 @@ getLatticeSystemAsString(const PointGroup::LatticeSystem &latticeSystem) {
 
 /// Returns the lattice system enum that corresponds to the supplied string or
 /// throws an invalid_argument exception.PointGroup::LatticeSystem
-PointGroup::LatticeSystem
-getLatticeSystemFromString(const std::string &latticeSystem) {
+PointGroup::LatticeSystem getLatticeSystemFromString(const std::string &latticeSystem) {
   std::string latticeSystemLC = boost::algorithm::to_lower_copy(latticeSystem);
 
   if (latticeSystemLC == "cubic") {
@@ -315,24 +302,20 @@ getLatticeSystemFromString(const std::string &latticeSystem) {
   } else if (latticeSystemLC == "triclinic") {
     return PointGroup::LatticeSystem::Triclinic;
   } else {
-    throw std::invalid_argument("Not a valid lattice system: '" +
-                                latticeSystem + "'.");
+    throw std::invalid_argument("Not a valid lattice system: '" + latticeSystem + "'.");
   }
 }
 
-bool CrystalSystemComparator::
-operator()(const PointGroup::CrystalSystem &lhs,
-           const PointGroup::CrystalSystem &rhs) const {
+bool CrystalSystemComparator::operator()(const PointGroup::CrystalSystem &lhs,
+                                         const PointGroup::CrystalSystem &rhs) const {
   return static_cast<int>(lhs) < static_cast<int>(rhs);
 }
 
 /// Returns a streamed representation of the PointGroup object
 std::ostream &operator<<(std::ostream &stream, const PointGroup &self) {
   stream << "Point group with:\n"
-         << "Lattice system: " << getLatticeSystemAsString(self.latticeSystem())
-         << "\n"
-         << "Crystal system: " << getCrystalSystemAsString(self.crystalSystem())
-         << "\n"
+         << "Lattice system: " << getLatticeSystemAsString(self.latticeSystem()) << "\n"
+         << "Crystal system: " << getCrystalSystemAsString(self.crystalSystem()) << "\n"
          << "Symbol: " << self.getSymbol();
   return stream;
 }

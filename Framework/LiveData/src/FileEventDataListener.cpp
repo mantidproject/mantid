@@ -26,12 +26,9 @@ Kernel::Logger g_log("FileEventDataListener");
 
 /// Constructor
 FileEventDataListener::FileEventDataListener()
-    : LiveListener(), m_filename(), m_runNumber(-1),
-      m_tempWSname("__filelistenerchunk"), m_nextChunk(1),
-      m_filePropName("Filename"), m_loaderName(""), m_canLoadMonitors(true),
-      m_chunkload(nullptr) {
-  std::string tfilename =
-      ConfigService::Instance().getString("fileeventdatalistener.filename");
+    : LiveListener(), m_filename(), m_runNumber(-1), m_tempWSname("__filelistenerchunk"), m_nextChunk(1),
+      m_filePropName("Filename"), m_loaderName(""), m_canLoadMonitors(true), m_chunkload(nullptr) {
+  std::string tfilename = ConfigService::Instance().getString("fileeventdatalistener.filename");
   if (tfilename.empty()) {
     g_log.error("Configuration property fileeventdatalistener.filename not "
                 "found. The algorithm will fail!");
@@ -45,22 +42,18 @@ FileEventDataListener::FileEventDataListener()
       auto loader = FileLoaderRegistry::Instance().chooseLoader(m_filename);
       m_loaderName = loader->name();
       if (m_loaderName.find("Nexus") != std::string::npos &&
-          (m_loaderName.find("Pre") != std::string::npos ||
-           m_loaderName.find("Event") != std::string::npos)) {
-        if (m_loaderName.find("Pre") != std::string::npos &&
-            m_loaderName.find("Event") != std::string::npos) {
+          (m_loaderName.find("Pre") != std::string::npos || m_loaderName.find("Event") != std::string::npos)) {
+        if (m_loaderName.find("Pre") != std::string::npos && m_loaderName.find("Event") != std::string::npos) {
           m_filePropName = "EventFilename";
           m_canLoadMonitors = false;
         }
       } else {
-        g_log.error("No loader for " + m_filename +
-                    " that supports chunking. The algorithm will fail.");
+        g_log.error("No loader for " + m_filename + " that supports chunking. The algorithm will fail.");
       }
     }
   }
 
-  auto numChunks =
-      ConfigService::Instance().getValue<int>("fileeventdatalistener.chunks");
+  auto numChunks = ConfigService::Instance().getValue<int>("fileeventdatalistener.chunks");
   m_numChunks = numChunks.get_value_or(0);
   if (!numChunks.is_initialized()) {
     g_log.error("Configuration property fileeventdatalistener.chunks not "
@@ -88,8 +81,7 @@ FileEventDataListener::~FileEventDataListener() {
   }
 }
 
-bool FileEventDataListener::connect(
-    const Poco::Net::SocketAddress & /*address*/) {
+bool FileEventDataListener::connect(const Poco::Net::SocketAddress & /*address*/) {
   // Do nothing for now. Later, put in stuff to help test failure modes.
   return true;
 }
@@ -118,8 +110,7 @@ ILiveListener::RunStatus FileEventDataListener::runStatus() {
 
 int FileEventDataListener::runNumber() const { return m_runNumber; }
 
-void FileEventDataListener::start(
-    Types::Core::DateAndTime /*startTime*/) // Ignore the start time
+void FileEventDataListener::start(Types::Core::DateAndTime /*startTime*/) // Ignore the start time
 {
   // Kick off loading the first chunk (which will include loading the instrument
   // etc.)
@@ -141,8 +132,7 @@ std::shared_ptr<Workspace> FileEventDataListener::extractData() {
     throw std::runtime_error("LoadEventPreNexus failed for some reason.");
   }
   // The loading succeeded: get the workspace from the ADS.
-  MatrixWorkspace_sptr chunk =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_tempWSname);
+  MatrixWorkspace_sptr chunk = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_tempWSname);
   // Remove the workspace from the ADS now we've extracted it
   AnalysisDataService::Instance().remove(m_tempWSname);
   // Delete the ActiveResult to signify that we're done with it.
@@ -177,8 +167,7 @@ void FileEventDataListener::loadChunk() {
   }
   m_loader->setPropertyValue("OutputWorkspace",
                              m_tempWSname); // Goes into 'hidden' workspace
-  m_chunkload =
-      std::make_unique<Poco::ActiveResult<bool>>(m_loader->executeAsync());
+  m_chunkload = std::make_unique<Poco::ActiveResult<bool>>(m_loader->executeAsync());
 }
 
 } // namespace LiveData

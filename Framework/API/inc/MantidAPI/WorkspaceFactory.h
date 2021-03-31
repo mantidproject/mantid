@@ -11,12 +11,10 @@
  * is used in the call to its constructor to effect a call to the factory's
  * subscribe method.
  */
-#define DECLARE_WORKSPACE(classname)                                           \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper                                           \
-      register_ws_##classname(((Mantid::API::WorkspaceFactory::Instance()      \
-                                    .subscribe<classname>(#classname)),        \
-                               0));                                            \
+#define DECLARE_WORKSPACE(classname)                                                                                   \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper                                                                                   \
+      register_ws_##classname(((Mantid::API::WorkspaceFactory::Instance().subscribe<classname>(#classname)), 0));      \
   }
 
 #include "MantidAPI/DllConfig.h"
@@ -43,30 +41,22 @@ class Workspace;
     @date 26/09/2007
 */
 
-class MANTID_API_DLL WorkspaceFactoryImpl
-    : public Kernel::DynamicFactory<Workspace> {
+class MANTID_API_DLL WorkspaceFactoryImpl : public Kernel::DynamicFactory<Workspace> {
 public:
   WorkspaceFactoryImpl(const WorkspaceFactoryImpl &) = delete;
   WorkspaceFactoryImpl &operator=(const WorkspaceFactoryImpl &) = delete;
-  MatrixWorkspace_sptr create(const MatrixWorkspace_const_sptr &parent,
-                              size_t NVectors = size_t(-1),
-                              size_t XLength = size_t(-1),
-                              size_t YLength = size_t(-1)) const;
-  MatrixWorkspace_sptr create(const std::string &className,
-                              const size_t &NVectors, const size_t &XLength,
+  MatrixWorkspace_sptr create(const MatrixWorkspace_const_sptr &parent, size_t NVectors = size_t(-1),
+                              size_t XLength = size_t(-1), size_t YLength = size_t(-1)) const;
+  MatrixWorkspace_sptr create(const std::string &className, const size_t &NVectors, const size_t &XLength,
                               const size_t &YLength) const;
 
-  void initializeFromParent(const MatrixWorkspace &parent,
-                            MatrixWorkspace &child,
-                            const bool differentSize) const;
+  void initializeFromParent(const MatrixWorkspace &parent, MatrixWorkspace &child, const bool differentSize) const;
 
   /// Create a ITableWorkspace
-  std::shared_ptr<ITableWorkspace>
-  createTable(const std::string &className = "TableWorkspace") const;
+  std::shared_ptr<ITableWorkspace> createTable(const std::string &className = "TableWorkspace") const;
 
   /// Create a IPeaksWorkspace
-  std::shared_ptr<IPeaksWorkspace>
-  createPeaks(const std::string &className = "PeaksWorkspace") const;
+  std::shared_ptr<IPeaksWorkspace> createPeaks(const std::string &className = "PeaksWorkspace") const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<WorkspaceFactoryImpl>;
@@ -81,8 +71,7 @@ private:
 
 using WorkspaceFactory = Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>;
 
-template <class T, class... InitArgs>
-std::shared_ptr<T> createWorkspace(InitArgs... args) {
+template <class T, class... InitArgs> std::shared_ptr<T> createWorkspace(InitArgs... args) {
   auto ws = std::make_shared<T>();
   ws->initialize(args...);
   return ws;
@@ -93,7 +82,6 @@ std::shared_ptr<T> createWorkspace(InitArgs... args) {
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<Mantid::API::WorkspaceFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::WorkspaceFactoryImpl>;
 }
 } // namespace Mantid

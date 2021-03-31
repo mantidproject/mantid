@@ -62,14 +62,10 @@ const std::string LoadDiffCal::name() const { return "LoadDiffCal"; }
 int LoadDiffCal::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadDiffCal::category() const {
-  return "DataHandling\\Instrument;Diffraction\\DataHandling";
-}
+const std::string LoadDiffCal::category() const { return "DataHandling\\Instrument;Diffraction\\DataHandling"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string LoadDiffCal::summary() const {
-  return "Loads a calibration file for powder diffraction";
-}
+const std::string LoadDiffCal::summary() const { return "Loads a calibration file for powder diffraction"; }
 
 /** Initialize the algorithm's properties.
  */
@@ -78,41 +74,31 @@ void LoadDiffCal::init() {
   LoadCalFile::getInstrument3WaysInit(this);
 
   const std::vector<std::string> exts{".h5", ".hd5", ".hdf", ".cal"};
-  declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "",
-                                                 FileProperty::Load, exts),
+  declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::Load, exts),
                   "Path to the .h5 file.");
-  declareProperty(std::make_unique<FileProperty>(
-                      PropertyNames::GROUP_FILE, "", FileProperty::OptionalLoad,
-                      std::vector<std::string>{".xml", ".cal"}),
+  declareProperty(std::make_unique<FileProperty>(PropertyNames::GROUP_FILE, "", FileProperty::OptionalLoad,
+                                                 std::vector<std::string>{".xml", ".cal"}),
                   "Overrides grouping from CalFileName");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      PropertyNames::MAKE_GRP, true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(PropertyNames::MAKE_GRP, true, Direction::Input),
                   "Set to true to create a GroupingWorkspace with called "
                   "WorkspaceName_group.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      PropertyNames::MAKE_CAL, true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(PropertyNames::MAKE_CAL, true, Direction::Input),
                   "Set to true to create a CalibrationWorkspace with called "
                   "WorkspaceName_cal.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>(PropertyNames::MAKE_MSK, true,
-                                                Direction::Input),
-      "Set to true to create a MaskWorkspace with called WorkspaceName_mask.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(PropertyNames::MAKE_MSK, true, Direction::Input),
+                  "Set to true to create a MaskWorkspace with called WorkspaceName_mask.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("WorkspaceName", "",
-                                                       Direction::Input),
-      "The base of the output workspace names. Names will have '_group', "
-      "'_cal', '_mask' appended to them.");
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("WorkspaceName", "", Direction::Input),
+                  "The base of the output workspace names. Names will have '_group', "
+                  "'_cal', '_mask' appended to them.");
 
   std::string grpName("Calibration Validation");
   declareProperty("TofMin", 0., "Minimum for TOF axis. Defaults to 0.");
-  declareProperty("TofMax", EMPTY_DBL(),
-                  "Maximum for TOF axis. Defaults to Unused.");
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "FixConversionIssues", true, Direction::Input),
+  declareProperty("TofMax", EMPTY_DBL(), "Maximum for TOF axis. Defaults to Unused.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("FixConversionIssues", true, Direction::Input),
                   "Set DIFA and TZERO to zero if there is an error and the "
                   "pixel is masked");
   setPropertyGroup("TofMin", grpName);
@@ -127,33 +113,26 @@ bool endswith(const std::string &str, const std::string &ending) {
     return false;
   }
 
-  return std::equal(str.begin() + str.size() - ending.size(), str.end(),
-                    ending.begin());
+  return std::equal(str.begin() + str.size() - ending.size(), str.end(), ending.begin());
 }
 
-void setGroupWSProperty(API::Algorithm *alg, const std::string &prefix,
-                        const GroupingWorkspace_sptr &wksp) {
-  alg->declareProperty(
-      std::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
-          "OutputGroupingWorkspace", prefix + "_group", Direction::Output),
-      "Set the the output GroupingWorkspace, if any.");
+void setGroupWSProperty(API::Algorithm *alg, const std::string &prefix, const GroupingWorkspace_sptr &wksp) {
+  alg->declareProperty(std::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
+                           "OutputGroupingWorkspace", prefix + "_group", Direction::Output),
+                       "Set the the output GroupingWorkspace, if any.");
   alg->setProperty("OutputGroupingWorkspace", wksp);
 }
 
-void setMaskWSProperty(API::Algorithm *alg, const std::string &prefix,
-                       const MaskWorkspace_sptr &wksp) {
-  alg->declareProperty(
-      std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
-          "OutputMaskWorkspace", prefix + "_mask", Direction::Output),
-      "Set the the output MaskWorkspace, if any.");
+void setMaskWSProperty(API::Algorithm *alg, const std::string &prefix, const MaskWorkspace_sptr &wksp) {
+  alg->declareProperty(std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
+                           "OutputMaskWorkspace", prefix + "_mask", Direction::Output),
+                       "Set the the output MaskWorkspace, if any.");
   alg->setProperty("OutputMaskWorkspace", wksp);
 }
 
-void setCalWSProperty(API::Algorithm *alg, const std::string &prefix,
-                      const ITableWorkspace_sptr &wksp) {
+void setCalWSProperty(API::Algorithm *alg, const std::string &prefix, const ITableWorkspace_sptr &wksp) {
   alg->declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "OutputCalWorkspace", prefix + "_cal", Direction::Output),
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputCalWorkspace", prefix + "_cal", Direction::Output),
       "Set the output Diffraction Calibration workspace, if any.");
   alg->setProperty("OutputCalWorkspace", wksp);
 }
@@ -173,16 +152,13 @@ void LoadDiffCal::getInstrument(H5File &file) {
     return;
   }
 
-  std::string idf =
-      H5Util::readString(file, "/calibration/instrument/instrument_source");
-  std::string instrumentName =
-      H5Util::readString(file, "/calibration/instrument/name");
+  std::string idf = H5Util::readString(file, "/calibration/instrument/instrument_source");
+  std::string instrumentName = H5Util::readString(file, "/calibration/instrument/name");
 
   g_log.debug() << "IDF : " << idf << "\n"
                 << "NAME: " << instrumentName << "\n";
 
-  API::Algorithm_sptr childAlg =
-      this->createChildAlgorithm("LoadInstrument", 0.0, 0.1);
+  API::Algorithm_sptr childAlg = this->createChildAlgorithm("LoadInstrument", 0.0, 0.1);
   MatrixWorkspace_sptr tempWS(new Workspace2D());
   childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
   if (idf.empty()) {
@@ -190,22 +166,19 @@ void LoadDiffCal::getInstrument(H5File &file) {
   } else {
     childAlg->setPropertyValue("Filename", idf);
   }
-  childAlg->setProperty("RewriteSpectraMap",
-                        Mantid::Kernel::OptionalBool(false));
+  childAlg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
   childAlg->executeAsChildAlg();
 
   m_instrument = tempWS->getInstrument();
 
-  g_log.information() << "Loaded instrument \"" << m_instrument->getName()
-                      << "\" from \"" << m_instrument->getFilename() << "\"\n";
+  g_log.information() << "Loaded instrument \"" << m_instrument->getName() << "\" from \""
+                      << m_instrument->getFilename() << "\"\n";
 }
 
-void LoadDiffCal::makeGroupingWorkspace(const std::vector<int32_t> &detids,
-                                        const std::vector<int32_t> &groups) {
+void LoadDiffCal::makeGroupingWorkspace(const std::vector<int32_t> &detids, const std::vector<int32_t> &groups) {
   bool makeWS = getProperty(PropertyNames::MAKE_GRP);
   if (!makeWS) {
-    g_log.information(
-        "Not loading GroupingWorkspace from the calibration file");
+    g_log.information("Not loading GroupingWorkspace from the calibration file");
     return;
   }
 
@@ -218,8 +191,7 @@ void LoadDiffCal::makeGroupingWorkspace(const std::vector<int32_t> &detids,
   size_t numDet = detids.size();
   Progress progress(this, .4, .6, numDet);
 
-  GroupingWorkspace_sptr wksp =
-      std::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
+  GroupingWorkspace_sptr wksp = std::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
   wksp->setTitle(m_filename);
   wksp->mutableRun().addProperty("Filename", m_filename);
 
@@ -232,8 +204,7 @@ void LoadDiffCal::makeGroupingWorkspace(const std::vector<int32_t> &detids,
   setGroupWSProperty(this, m_workspaceName, wksp);
 }
 
-void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids,
-                                    const std::vector<int32_t> &use) {
+void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids, const std::vector<int32_t> &use) {
   bool makeWS = getProperty(PropertyNames::MAKE_MSK);
   if (!makeWS) {
     g_log.information("Not making a MaskWorkspace");
@@ -243,8 +214,7 @@ void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids,
   size_t numDet = detids.size();
   Progress progress(this, .6, .8, numDet);
 
-  MaskWorkspace_sptr wksp =
-      std::make_shared<DataObjects::MaskWorkspace>(m_instrument);
+  MaskWorkspace_sptr wksp = std::make_shared<DataObjects::MaskWorkspace>(m_instrument);
   wksp->setTitle(m_filename);
   wksp->mutableRun().addProperty("Filename", m_filename);
 
@@ -261,12 +231,9 @@ void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids,
   setMaskWSProperty(this, m_workspaceName, wksp);
 }
 
-void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
-                                   const std::vector<double> &difc,
-                                   const std::vector<double> &difa,
-                                   const std::vector<double> &tzero,
-                                   const std::vector<int32_t> &dasids,
-                                   const std::vector<double> &offsets,
+void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids, const std::vector<double> &difc,
+                                   const std::vector<double> &difa, const std::vector<double> &tzero,
+                                   const std::vector<int32_t> &dasids, const std::vector<double> &offsets,
                                    const std::vector<int32_t> &use) {
   bool makeWS = getProperty(PropertyNames::MAKE_CAL);
   if (!makeWS) {
@@ -315,16 +282,14 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
       newrow << offsets[i];
 
     // calculate tof range for information
-    const double tofMinRow =
-        Kernel::Diffraction::calcTofMin(difc[i], difa[i], tzero[i], tofMin);
+    const double tofMinRow = Kernel::Diffraction::calcTofMin(difc[i], difa[i], tzero[i], tofMin);
     std::stringstream msg;
     if (tofMinRow != tofMin) {
       msg << "TofMin shifted from " << tofMin << " to " << tofMinRow << " ";
     }
     newrow << tofMinRow;
     if (useTofMax) {
-      const double tofMaxRow =
-          Kernel::Diffraction::calcTofMax(difc[i], difa[i], tzero[i], tofMax);
+      const double tofMaxRow = Kernel::Diffraction::calcTofMax(difc[i], difa[i], tzero[i], tofMax);
       newrow << tofMaxRow;
 
       if (tofMaxRow != tofMax) {
@@ -365,8 +330,7 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
     progress.report();
   }
   if (badCount > 0) {
-    this->g_log.warning() << badCount
-                          << " rows have reduced time-of-flight range\n";
+    this->g_log.warning() << badCount << " rows have reduced time-of-flight range\n";
   }
 
   setCalWSProperty(this, m_workspaceName, wksp);
@@ -383,14 +347,11 @@ void LoadDiffCal::loadGroupingFromAlternateFile() {
     return; // a separate grouping file was not specified
 
   std::string filename = getPropertyValue(PropertyNames::GROUP_FILE);
-  g_log.information() << "Override grouping with information from \""
-                      << filename << "\"\n";
+  g_log.information() << "Override grouping with information from \"" << filename << "\"\n";
   if (!m_instrument) {
-    throw std::runtime_error(
-        "Do not have an instrument defined before loading separate grouping");
+    throw std::runtime_error("Do not have an instrument defined before loading separate grouping");
   }
-  GroupingWorkspace_sptr wksp =
-      std::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
+  GroupingWorkspace_sptr wksp = std::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
 
   if (filename.find(".cal") != std::string::npos) {
     auto alg = createChildAlgorithm("LoadDiffCal");
@@ -428,8 +389,7 @@ void LoadDiffCal::runLoadCalFile() {
   alg->setPropertyValue("CalFilename", m_filename);
   alg->setProperty("InputWorkspace", inputWs);
   alg->setPropertyValue("InstrumentName", getPropertyValue("InstrumentName"));
-  alg->setPropertyValue("InstrumentFilename",
-                        getPropertyValue("InstrumentFilename"));
+  alg->setPropertyValue("InstrumentFilename", getPropertyValue("InstrumentFilename"));
   alg->setProperty<bool>("MakeOffsetsWorkspace", makeCalWS);
   alg->setProperty<bool>("MakeGroupingWorkspace", makeGroupWS);
   alg->setProperty<bool>("MakeMaskWorkspace", makeMaskWS);
@@ -443,9 +403,7 @@ void LoadDiffCal::runLoadCalFile() {
 
   if (makeMaskWS) {
     MatrixWorkspace_sptr wksp = alg->getProperty("OutputMaskWorkspace");
-    setMaskWSProperty(
-        this, m_workspaceName,
-        std::dynamic_pointer_cast<DataObjects::MaskWorkspace>(wksp));
+    setMaskWSProperty(this, m_workspaceName, std::dynamic_pointer_cast<DataObjects::MaskWorkspace>(wksp));
   }
 
   if (makeGroupWS) {
@@ -499,41 +457,31 @@ void LoadDiffCal::exec() {
   }
 
   progress.report("Reading detid");
-  std::vector<int32_t> detids =
-      H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "detid");
+  std::vector<int32_t> detids = H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "detid");
   progress.report("Reading dasid");
-  std::vector<int32_t> dasids =
-      H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "dasid");
+  std::vector<int32_t> dasids = H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "dasid");
   progress.report("Reading group");
-  std::vector<int32_t> groups =
-      H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "group");
+  std::vector<int32_t> groups = H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "group");
   progress.report("Reading use");
-  std::vector<int32_t> use =
-      H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "use");
+  std::vector<int32_t> use = H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "use");
 
   progress.report("Reading difc");
-  std::vector<double> difc =
-      H5Util::readArray1DCoerce<double>(calibrationGroup, "difc");
+  std::vector<double> difc = H5Util::readArray1DCoerce<double>(calibrationGroup, "difc");
   progress.report("Reading difa");
-  std::vector<double> difa =
-      H5Util::readArray1DCoerce<double>(calibrationGroup, "difa");
+  std::vector<double> difa = H5Util::readArray1DCoerce<double>(calibrationGroup, "difa");
   progress.report("Reading tzero");
-  std::vector<double> tzero =
-      H5Util::readArray1DCoerce<double>(calibrationGroup, "tzero");
+  std::vector<double> tzero = H5Util::readArray1DCoerce<double>(calibrationGroup, "tzero");
   progress.report("Reading offset");
-  std::vector<double> offset =
-      H5Util::readArray1DCoerce<double>(calibrationGroup, "offset");
+  std::vector<double> offset = H5Util::readArray1DCoerce<double>(calibrationGroup, "offset");
 
   file.close();
 
   // verify the minimum is present
   if (detids.empty()) {
-    throw std::runtime_error(
-        "File was missing required field \"/calibraion/detid\"");
+    throw std::runtime_error("File was missing required field \"/calibraion/detid\"");
   }
   if (difc.empty()) {
-    throw std::runtime_error(
-        "File was missing required field \"/calibraion/difc\"");
+    throw std::runtime_error("File was missing required field \"/calibraion/difc\"");
   }
 
   // fix up empty arrays
@@ -552,8 +500,8 @@ void LoadDiffCal::exec() {
   makeCalWorkspace(detids, difc, difa, tzero, dasids, offset, use);
 }
 
-Parallel::ExecutionMode LoadDiffCal::getParallelExecutionMode(
-    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+Parallel::ExecutionMode
+LoadDiffCal::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   // There is an optional input workspace which may have
   // StorageMode::Distributed but it is merely used for passing an instrument.
   // Output should always have StorageMode::Cloned, so we run with

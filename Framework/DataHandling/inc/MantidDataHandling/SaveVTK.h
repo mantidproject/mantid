@@ -69,8 +69,7 @@ private:
   void checkOptionalProperties();
 
   /// Write a histogram to the file
-  void writeVTKPiece(std::ostream &outVTP, const std::vector<double> &xValue,
-                     const std::vector<double> &yValue,
+  void writeVTKPiece(std::ostream &outVTP, const std::vector<double> &xValue, const std::vector<double> &yValue,
                      const std::vector<double> &errors, int index) const;
 
   /// The x-axis minimum

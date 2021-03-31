@@ -50,9 +50,7 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Transforms\\Units;Transforms\\Axes";
-  }
+  const std::string category() const override { return "Transforms\\Units;Transforms\\Axes"; }
 
 private:
   /// Initialisation code
@@ -60,8 +58,7 @@ private:
   /// Execution code
   void exec() override;
   /// Getting Efixed
-  double getEfixed(const Mantid::Geometry::IDetector &detector,
-                   const API::MatrixWorkspace_const_sptr &inputWS,
+  double getEfixed(const Mantid::Geometry::IDetector &detector, const API::MatrixWorkspace_const_sptr &inputWS,
                    int emode) const;
 };
 

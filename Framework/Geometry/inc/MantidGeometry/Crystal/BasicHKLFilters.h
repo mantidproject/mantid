@@ -63,12 +63,8 @@ namespace Geometry {
  */
 class MANTID_GEOMETRY_DLL HKLFilterNone final : public HKLFilter {
 public:
-  inline std::string getDescription() const noexcept override {
-    return "Accepts all HKL values.";
-  }
-  inline bool isAllowed(const Kernel::V3D & /*hkl*/) const noexcept override {
-    return true;
-  }
+  inline std::string getDescription() const noexcept override { return "Accepts all HKL values."; }
+  inline bool isAllowed(const Kernel::V3D & /*hkl*/) const noexcept override { return true; }
 };
 
 /**
@@ -125,8 +121,7 @@ protected:
  */
 class MANTID_GEOMETRY_DLL HKLFilterStructureFactor final : public HKLFilter {
 public:
-  HKLFilterStructureFactor(const StructureFactorCalculator_sptr &calculator,
-                           double fSquaredMin = 1.0e-6);
+  HKLFilterStructureFactor(const StructureFactorCalculator_sptr &calculator, double fSquaredMin = 1.0e-6);
 
   std::string getDescription() const noexcept override;
   bool isAllowed(const Kernel::V3D &hkl) const noexcept override;

@@ -13,23 +13,16 @@
 
 namespace WorkflowAlgorithmHelpers {
 /// Function to get double property or instrument parameter value
-double getDblPropOrParam(const std::string &pmProp,
-                         Mantid::Kernel::PropertyManager_sptr &pm,
-                         const std::string &instParam,
-                         Mantid::API::MatrixWorkspace_sptr &ws,
+double getDblPropOrParam(const std::string &pmProp, Mantid::Kernel::PropertyManager_sptr &pm,
+                         const std::string &instParam, Mantid::API::MatrixWorkspace_sptr &ws,
                          const double overrideValue = Mantid::EMPTY_DBL());
 
 /// Function to get int property or instrument parameter value
-int getIntPropOrParam(const std::string &pmProp,
-                      Mantid::Kernel::PropertyManager_sptr &pm,
-                      const std::string &instParam,
-                      Mantid::API::MatrixWorkspace_sptr &ws,
-                      const int overrideValue = Mantid::EMPTY_INT());
+int getIntPropOrParam(const std::string &pmProp, Mantid::Kernel::PropertyManager_sptr &pm, const std::string &instParam,
+                      Mantid::API::MatrixWorkspace_sptr &ws, const int overrideValue = Mantid::EMPTY_INT());
 
 /// Function to get boolean property or instrument parameter value
-bool getBoolPropOrParam(const std::string &pmProp,
-                        Mantid::Kernel::PropertyManager_sptr &pm,
-                        const std::string &instParam,
-                        Mantid::API::MatrixWorkspace_sptr &ws,
+bool getBoolPropOrParam(const std::string &pmProp, Mantid::Kernel::PropertyManager_sptr &pm,
+                        const std::string &instParam, Mantid::API::MatrixWorkspace_sptr &ws,
                         const bool overrideValue = false);
 } // namespace WorkflowAlgorithmHelpers

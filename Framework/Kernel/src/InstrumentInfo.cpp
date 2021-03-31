@@ -34,9 +34,7 @@ Logger g_log("InstrumentInfo");
  * @param elem :: The Poco::XML::Element to read the data from
  * @throw std::runtime_error if name or at least one technique are not defined
  */
-InstrumentInfo::InstrumentInfo(const FacilityInfo *f,
-                               const Poco::XML::Element *elem)
-    : m_facility(f) {
+InstrumentInfo::InstrumentInfo(const FacilityInfo *f, const Poco::XML::Element *elem) : m_facility(f) {
 
   m_name = elem->getAttribute("name");
 
@@ -150,8 +148,7 @@ std::string InstrumentInfo::liveDataAddress(const std::string &name) const {
  * @return Reference to LiveListenerInfo for specified connection
  * @throw std::runtime_error When no listeners, or name not found
  */
-const LiveListenerInfo &
-InstrumentInfo::liveListenerInfo(std::string name) const {
+const LiveListenerInfo &InstrumentInfo::liveListenerInfo(std::string name) const {
   if (!hasLiveListenerInfo())
     throw std::runtime_error("Attempted to access live listener for " + m_name +
                              " instrument, which has no listeners.");
@@ -172,31 +169,22 @@ InstrumentInfo::liveListenerInfo(std::string name) const {
   }
 
   // The provided name was not valid / did not match any listeners
-  throw std::runtime_error("Could not find connection " + name +
-                           " for instrument " + m_name);
+  throw std::runtime_error("Could not find connection " + name + " for instrument " + m_name);
 }
 
-bool InstrumentInfo::hasLiveListenerInfo() const {
-  return !m_listeners.empty();
-}
+bool InstrumentInfo::hasLiveListenerInfo() const { return !m_listeners.empty(); }
 
-const std::vector<LiveListenerInfo> &
-InstrumentInfo::liveListenerInfoList() const {
-  return m_listeners;
-}
+const std::vector<LiveListenerInfo> &InstrumentInfo::liveListenerInfoList() const { return m_listeners; }
 
 /// Return list of techniques
-const std::set<std::string> &InstrumentInfo::techniques() const {
-  return m_technique;
-}
+const std::set<std::string> &InstrumentInfo::techniques() const { return m_technique; }
 
 /// Return the facility
 const FacilityInfo &InstrumentInfo::facility() const { return *m_facility; }
 
 /// Called from constructor to fill zero padding
 void InstrumentInfo::fillZeroPadding(const Poco::XML::Element *elem) {
-  Poco::AutoPtr<Poco::XML::NodeList> pNL_zeropadding =
-      elem->getElementsByTagName("zeropadding");
+  Poco::AutoPtr<Poco::XML::NodeList> pNL_zeropadding = elem->getElementsByTagName("zeropadding");
   unsigned long n = pNL_zeropadding->length();
 
   for (unsigned long i = 0; i < n; ++i) {
@@ -205,22 +193,18 @@ void InstrumentInfo::fillZeroPadding(const Poco::XML::Element *elem) {
       continue;
     // read the zero padding size
     if (!elem->hasAttribute("size")) {
-      throw std::runtime_error("Zeropadding size is missing for instrument " +
-                               m_name);
+      throw std::runtime_error("Zeropadding size is missing for instrument " + m_name);
     }
     auto &sizeStr = elem->getAttribute("size");
     int size = 0;
     if (!Mantid::Kernel::Strings::convert(sizeStr, size)) {
-      throw std::runtime_error(
-          "Zeropadding size must be an integer value (instrument " + m_name +
-          ")");
+      throw std::runtime_error("Zeropadding size must be an integer value (instrument " + m_name + ")");
     }
     // read the start run number
     unsigned int startRunNumber = 0;
     if (!elem->hasAttribute("startRunNumber")) {
       if (!m_zeroPadding.empty()) {
-        throw std::runtime_error("Zeropadding size is missing for instrument " +
-                                 m_name);
+        throw std::runtime_error("Zeropadding size is missing for instrument " + m_name);
       }
     } else {
       auto &startRunNumberStr = elem->getAttribute("startRunNumber");
@@ -247,13 +231,11 @@ void InstrumentInfo::fillZeroPadding(const Poco::XML::Element *elem) {
 
 /// Called from constructor to fill live listener name
 void InstrumentInfo::fillTechniques(const Poco::XML::Element *elem) {
-  Poco::AutoPtr<Poco::XML::NodeList> pNL_technique =
-      elem->getElementsByTagName("technique");
+  Poco::AutoPtr<Poco::XML::NodeList> pNL_technique = elem->getElementsByTagName("technique");
   unsigned long n = pNL_technique->length();
 
   for (unsigned long i = 0; i < n; ++i) {
-    Poco::AutoPtr<Poco::XML::NodeList> pNL =
-        pNL_technique->item(i)->childNodes();
+    Poco::AutoPtr<Poco::XML::NodeList> pNL = pNL_technique->item(i)->childNodes();
     if (pNL->length() > 0) {
       auto *txt = dynamic_cast<Poco::XML::Text *>(pNL->item(0));
       if (txt) {
@@ -266,8 +248,7 @@ void InstrumentInfo::fillTechniques(const Poco::XML::Element *elem) {
   }
 
   if (m_technique.empty()) {
-    throw std::runtime_error("No technique is defined for instrument " +
-                             m_name);
+    throw std::runtime_error("No technique is defined for instrument " + m_name);
   }
 }
 
@@ -282,8 +263,7 @@ void InstrumentInfo::fillLiveData(const Poco::XML::Element *elem) {
   m_defaultListener = live->getAttribute("default");
 
   // Get connections under <livedata>
-  Poco::AutoPtr<Poco::XML::NodeList> connections =
-      elem->getElementsByTagName("connection");
+  Poco::AutoPtr<Poco::XML::NodeList> connections = elem->getElementsByTagName("connection");
 
   // Load connection info for each child element
   for (unsigned long i = 0; i < connections->length(); ++i) {
@@ -291,14 +271,13 @@ void InstrumentInfo::fillLiveData(const Poco::XML::Element *elem) {
     try {
       m_listeners.emplace_back(this, conn);
     } catch (...) {
-      g_log.error() << "Exception occurred while loading livedata for "
-                    << m_name << " instrument. Skipping faulty connection.\n";
+      g_log.error() << "Exception occurred while loading livedata for " << m_name
+                    << " instrument. Skipping faulty connection.\n";
     }
   }
 
   // Get kafka topics under <livedata>
-  Poco::AutoPtr<Poco::XML::NodeList> topics =
-      elem->getElementsByTagName("topic");
+  Poco::AutoPtr<Poco::XML::NodeList> topics = elem->getElementsByTagName("topic");
   for (unsigned long i = 0; i < topics->length(); ++i) {
     auto *topic = dynamic_cast<Poco::XML::Element *>(topics->item(i));
     try {
@@ -319,8 +298,7 @@ void InstrumentInfo::fillLiveData(const Poco::XML::Element *elem) {
  * @param instrumentDescriptor :: A reference to an InstrumentInfo object
  * @return A reference to the stream written to
  */
-std::ostream &operator<<(std::ostream &buffer,
-                         const InstrumentInfo &instrumentDescriptor) {
+std::ostream &operator<<(std::ostream &buffer, const InstrumentInfo &instrumentDescriptor) {
   buffer << instrumentDescriptor.name();
   return buffer;
 }

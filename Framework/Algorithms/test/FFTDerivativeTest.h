@@ -25,15 +25,14 @@ public:
 
     createWS(N, 0, "exp");
 
-    auto fft =
-        Mantid::API::AlgorithmManager::Instance().create("FFTDerivative");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFTDerivative");
     fft->initialize();
     fft->setPropertyValue("InputWorkspace", "FFTDerivative_WS_exp");
     fft->setPropertyValue("OutputWorkspace", "FFTDerivative_out");
     fft->execute();
 
-    MatrixWorkspace_sptr fWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("FFTDerivative_out"));
+    MatrixWorkspace_sptr fWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("FFTDerivative_out"));
 
     auto &X = fWS->x(0);
     auto &Y = fWS->y(0);
@@ -54,16 +53,15 @@ public:
 
     createWS(N, 0, "exp");
 
-    auto fft =
-        Mantid::API::AlgorithmManager::Instance().create("FFTDerivative");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFTDerivative");
     fft->initialize();
     fft->setPropertyValue("InputWorkspace", "FFTDerivative_WS_exp");
     fft->setPropertyValue("OutputWorkspace", "FFTDerivative_out");
     fft->setPropertyValue("Order", "2");
     fft->execute();
 
-    MatrixWorkspace_sptr fWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("FFTDerivative_out"));
+    MatrixWorkspace_sptr fWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("FFTDerivative_out"));
 
     auto &X = fWS->x(0);
     auto &Y = fWS->y(0);
@@ -82,9 +80,8 @@ public:
 
 private:
   MatrixWorkspace_sptr createWS(int n, int dn, const std::string &name) {
-    Mantid::DataObjects::Workspace2D_sptr ws =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-            WorkspaceFactory::Instance().create("Workspace2D", 1, n + dn, n));
+    Mantid::DataObjects::Workspace2D_sptr ws = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 1, n + dn, n));
 
     const double dX = 10.0 / (n - 1);
     const double x0 = 0.;

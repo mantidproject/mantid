@@ -47,8 +47,7 @@ public:
   void testPlottingThrowsWithSpecNumAndWorkspaceIndex() {
     const std::vector<std::string> workspaces = {m_testws_name};
     const std::vector<int> index = {1};
-    TS_ASSERT_THROWS(plot(workspaces, index, index),
-                     const std::invalid_argument &)
+    TS_ASSERT_THROWS(plot(workspaces, index, index), const std::invalid_argument &)
   }
 
   void testPlottingWithPlotKwargs() {
@@ -56,8 +55,7 @@ public:
     const std::vector<int> index = {1};
     QHash<QString, QVariant> hash;
     hash.insert(QString("linewidth"), QVariant(10));
-    TS_ASSERT_THROWS_NOTHING(
-        plot(workspaces, index, boost::none, boost::none, hash))
+    TS_ASSERT_THROWS_NOTHING(plot(workspaces, index, boost::none, boost::none, hash))
   }
 
   void testPlottingWorksWhenPlottingABin() {
@@ -66,8 +64,7 @@ public:
     QHash<QString, QVariant> hash;
     hash["axis"] = static_cast<int>(MantidAxType::Bin);
 
-    TS_ASSERT_THROWS_NOTHING(
-        plot(workspaces, index, boost::none, boost::none, hash))
+    TS_ASSERT_THROWS_NOTHING(plot(workspaces, index, boost::none, boost::none, hash))
   }
 
   void testPlottingWithIncorrectPlotKwargsThrows() {
@@ -75,8 +72,7 @@ public:
     const std::vector<int> index = {1};
     QHash<QString, QVariant> hash;
     hash.insert(QString("asdasdasdasdasd"), QVariant(1));
-    TS_ASSERT_THROWS(plot(workspaces, index, boost::none, boost::none, hash),
-                     const PythonException &)
+    TS_ASSERT_THROWS(plot(workspaces, index, boost::none, boost::none, hash), const PythonException &)
   }
 
   void testPlottingWithAxProperties() {
@@ -84,8 +80,7 @@ public:
     const std::vector<int> index = {1};
     QHash<QString, QVariant> hash;
     hash.insert(QString("xscale"), QVariant("log"));
-    TS_ASSERT_THROWS_NOTHING(
-        plot(workspaces, index, boost::none, boost::none, boost::none, hash))
+    TS_ASSERT_THROWS_NOTHING(plot(workspaces, index, boost::none, boost::none, boost::none, hash))
   }
 
   void testPlottingWithIncorrectAxPropertiesThrows() {
@@ -93,24 +88,21 @@ public:
     const std::vector<int> index = {1};
     QHash<QString, QVariant> hash;
     hash.insert(QString("asdasdasdasdasd"), QVariant(QString(1)));
-    TS_ASSERT_THROWS(
-        plot(workspaces, index, boost::none, boost::none, boost::none, hash),
-        const PythonException &)
+    TS_ASSERT_THROWS(plot(workspaces, index, boost::none, boost::none, boost::none, hash), const PythonException &)
   }
 
   void testPlottingWithWindowTitle() {
     const std::vector<std::string> workspaces = {m_testws_name};
     const std::vector<int> index = {1};
     const std::string window_title = "window_title";
-    TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index, boost::none,
-                                  boost::none, boost::none, window_title))
+    TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index, boost::none, boost::none, boost::none, window_title))
   }
 
   void testPlottingWithErrors() {
     const std::vector<std::string> workspaces = {m_testws_name};
     const std::vector<int> index = {1};
-    TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index, boost::none,
-                                  boost::none, boost::none, boost::none, true))
+    TS_ASSERT_THROWS_NOTHING(
+        plot(workspaces, boost::none, index, boost::none, boost::none, boost::none, boost::none, true))
   }
 
   void testPlottingWithOverplotAndMultipleWorkspaces() {
@@ -118,9 +110,8 @@ public:
     createTestWorkspaceInADS("ws2");
     const std::vector<std::string> workspaces = {m_testws_name, "ws1", "ws2"};
     const std::vector<int> index = {1, 1, 1};
-    TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index, boost::none,
-                                  boost::none, boost::none, boost::none, false,
-                                  true))
+    TS_ASSERT_THROWS_NOTHING(
+        plot(workspaces, boost::none, index, boost::none, boost::none, boost::none, boost::none, false, true))
   }
 
   void testPlottingWithoutOverplotButWithMultipleWorkspace() {
@@ -128,9 +119,8 @@ public:
     createTestWorkspaceInADS("ws2");
     const std::vector<std::string> workspaces = {"ws", "ws1", "ws2"};
     const std::vector<int> index = {1, 1, 1};
-    TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index, boost::none,
-                                  boost::none, boost::none, boost::none, false,
-                                  false))
+    TS_ASSERT_THROWS_NOTHING(
+        plot(workspaces, boost::none, index, boost::none, boost::none, boost::none, boost::none, false, false))
   }
 
   void testPcolormesh() {
@@ -143,24 +133,22 @@ public:
     const std::vector<int> index = {1};
     const std::string window_title = "window_title";
 
-    TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index, boost::none,
-                                  boost::none, boost::none, window_title))
+    TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index, boost::none, boost::none, boost::none, window_title))
   }
 
   void testPlottingSubplotsWithErrorsWillNotThrow() {
     const QStringList workspaces = {m_testws_name};
     const std::vector<int> index = {1};
 
-    TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index, boost::none,
-                                  boost::none, boost::none, boost::none, true))
+    TS_ASSERT_THROWS_NOTHING(
+        plot(workspaces, boost::none, index, boost::none, boost::none, boost::none, boost::none, true))
   }
 
 private:
   void createTestWorkspaceInADS(const std::string &name) {
     constexpr int nhist{2};
     constexpr int ny{2};
-    auto testWS =
-        WorkspaceFactory::Instance().create("Workspace2D", nhist, ny, ny);
+    auto testWS = WorkspaceFactory::Instance().create("Workspace2D", nhist, ny, ny);
     AnalysisDataService::Instance().addOrReplace(name, testWS);
   }
 

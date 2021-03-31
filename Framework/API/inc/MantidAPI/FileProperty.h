@@ -39,39 +39,32 @@ namespace API {
      FileAction type parameter in the constructor.
 
  */
-class MANTID_API_DLL FileProperty
-    : public Kernel::PropertyWithValue<std::string> {
+class MANTID_API_DLL FileProperty : public Kernel::PropertyWithValue<std::string> {
 public:
   /// An enumeration for load/save types. This is passed on to the FileValidator
   /// as a constructor parameter.
   enum FileAction {
     // Note that the order here ensures that the correct boolean gets passed to
     // the FileValidator.
-    Save = 0, ///< to specify a file to write to, the file may or may not exist
+    Save = 0,         ///< to specify a file to write to, the file may or may not exist
     OptionalSave = 1, ///< to specify a file to write to but an empty string is
     /// allowed here which will be passed to the algorithm
-    Load = 2, ///< to specify a file to open for reading, the file must exist
-    OptionalLoad =
-        3, ///< to specify a file to read but the file doesn't have to exist
-    Directory = 4, ///< to specify a directory that must exist
-    OptionalDirectory =
-        5 ///< to specify a directory that does not have to exist
+    Load = 2,             ///< to specify a file to open for reading, the file must exist
+    OptionalLoad = 3,     ///< to specify a file to read but the file doesn't have to exist
+    Directory = 4,        ///< to specify a directory that must exist
+    OptionalDirectory = 5 ///< to specify a directory that does not have to exist
   };
 
   /// Constructor taking a list of extensions as a vector
-  FileProperty(
-      const std::string &name, const std::string &defaultValue,
-      unsigned int action,
-      const std::vector<std::string> &exts = std::vector<std::string>(),
-      unsigned int direction = Kernel::Direction::Input);
+  FileProperty(const std::string &name, const std::string &defaultValue, unsigned int action,
+               const std::vector<std::string> &exts = std::vector<std::string>(),
+               unsigned int direction = Kernel::Direction::Input);
   /// Constructor taking a single extension as a string
-  FileProperty(const std::string &name, const std::string &default_value,
-               unsigned int action, const std::string &ext,
+  FileProperty(const std::string &name, const std::string &default_value, unsigned int action, const std::string &ext,
                unsigned int direction = Kernel::Direction::Input);
   /// Constructor taking a list of extensions as an initializer_list
-  FileProperty(const std::string &name, const std::string &default_value,
-               unsigned int action, std::initializer_list<std::string> exts,
-               unsigned int direction = Kernel::Direction::Input);
+  FileProperty(const std::string &name, const std::string &default_value, unsigned int action,
+               std::initializer_list<std::string> exts, unsigned int direction = Kernel::Direction::Input);
 
   FileProperty(const FileProperty &) = default;
   FileProperty &operator=(const FileProperty &) = default;
@@ -123,8 +116,7 @@ private:
 };
 
 #ifdef _WIN32
-#pragma warning(                                                               \
-    pop) // Re-enable the warning about multiple assignment operators
+#pragma warning(pop) // Re-enable the warning about multiple assignment operators
 #endif
 } // namespace API
 } // namespace Mantid

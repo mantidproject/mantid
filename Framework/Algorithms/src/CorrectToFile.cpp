@@ -25,27 +25,21 @@ DECLARE_ALGORITHM(CorrectToFile)
 const double CorrectToFile::LOAD_TIME = 0.5;
 
 void CorrectToFile::init() {
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "WorkspaceToCorrect", "", Kernel::Direction::Input),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("WorkspaceToCorrect", "", Kernel::Direction::Input),
                   "Name of the input workspace");
-  declareProperty(std::make_unique<API::FileProperty>("Filename", "",
-                                                      API::FileProperty::Load),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load),
                   "The file containing the correction factors");
 
-  std::vector<std::string> propOptions =
-      Kernel::UnitFactory::Instance().getKeys();
+  std::vector<std::string> propOptions = Kernel::UnitFactory::Instance().getKeys();
   propOptions.emplace_back("SpectrumNumber");
-  declareProperty("FirstColumnValue", "Wavelength",
-                  std::make_shared<Kernel::StringListValidator>(propOptions),
+  declareProperty("FirstColumnValue", "Wavelength", std::make_shared<Kernel::StringListValidator>(propOptions),
                   "The units of the first column of the correction file "
                   "(default wavelength)");
 
   std::vector<std::string> operations{"Divide", "Multiply"};
-  declareProperty("WorkspaceOperation", "Divide",
-                  std::make_shared<Kernel::StringListValidator>(operations),
+  declareProperty("WorkspaceOperation", "Divide", std::make_shared<Kernel::StringListValidator>(operations),
                   "Allowed values: Divide, Multiply (default is divide)");
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Kernel::Direction::Output),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "", Kernel::Direction::Output),
                   "Name of the output workspace to store the results in");
 }
 
@@ -68,8 +62,7 @@ void CorrectToFile::exec() {
     // are matching to
     // However, just print a warning if it isn't, don't abort (since user
     // provides the file's unit)
-    if (toCorrect->getAxis(0)->unit()->unitID() !=
-        rkhInput->getAxis(0)->unit()->unitID()) {
+    if (toCorrect->getAxis(0)->unit()->unitID() != rkhInput->getAxis(0)->unit()->unitID()) {
       g_log.warning("Unit on input workspace is different to that specified in "
                     "'FirstColumnValue' property");
     }
@@ -110,13 +103,10 @@ void CorrectToFile::exec() {
         } else if (index) {
           // Calculate where between the two closest points our current X value
           // is
-          const double fraction =
-              (currentX - Xcor[index - 1]) / (Xcor[index] - Xcor[index - 1]);
+          const double fraction = (currentX - Xcor[index - 1]) / (Xcor[index] - Xcor[index - 1]);
           // Now linearly interpolate to find the correction factors to use
-          Yfactor =
-              Ycor[index - 1] + fraction * (Ycor[index] - Ycor[index - 1]);
-          correctError =
-              Ecor[index - 1] + fraction * (Ecor[index] - Ecor[index - 1]);
+          Yfactor = Ycor[index - 1] + fraction * (Ycor[index] - Ycor[index - 1]);
+          correctError = Ecor[index - 1] + fraction * (Ecor[index] - Ecor[index - 1]);
         } else {
           // If we're before the start of the correction factors vector, use the
           // first point
@@ -136,9 +126,7 @@ void CorrectToFile::exec() {
           // (Sa c/a)2 + (Sb c/b)2 = (Sc)2
           // = (Sa 1/b)2 + (Sb (a/b2))2
           // (Sc)2 = (1/b)2( (Sa)2 + (Sb a/b)2 )
-          eOut[j] =
-              sqrt(pow(eIn[j], 2) + pow(yIn[j] * correctError / Yfactor, 2)) /
-              Yfactor;
+          eOut[j] = sqrt(pow(eIn[j], 2) + pow(yIn[j] * correctError / Yfactor, 2)) / Yfactor;
         } else {
           yOut[j] = yIn[j] * Yfactor;
           // error multiplying two uncorrelated numbers, re-arrange so that you
@@ -147,8 +135,7 @@ void CorrectToFile::exec() {
           // c = a*b
           // (Sa/a)2 + (Sb/b)2 = (Sc/c)2
           // (Sc)2 = (Sa c/a)2 + (Sb c/b)2 = (Sa b)2 + (Sb a)2
-          eOut[j] =
-              sqrt(pow(eIn[j] * Yfactor, 2) + pow(correctError * yIn[j], 2));
+          eOut[j] = sqrt(pow(eIn[j] * Yfactor, 2) + pow(correctError * yIn[j], 2));
         }
       }
       prg.report("CorrectToFile: applying " + operation);
@@ -166,8 +153,7 @@ void CorrectToFile::exec() {
 MatrixWorkspace_sptr CorrectToFile::loadInFile(const std::string &corrFile) {
   g_log.information() << "Loading file " << corrFile << '\n';
   progress(0, "Loading file");
-  IAlgorithm_sptr loadRKH =
-      createChildAlgorithm("LoadRKH", 0, 1.0 /*LOAD_TIME*/);
+  IAlgorithm_sptr loadRKH = createChildAlgorithm("LoadRKH", 0, 1.0 /*LOAD_TIME*/);
   std::string rkhfile = getProperty("Filename");
   loadRKH->setPropertyValue("Filename", rkhfile);
   loadRKH->setPropertyValue("OutputWorkspace", "rkhout");
@@ -186,10 +172,8 @@ MatrixWorkspace_sptr CorrectToFile::loadInFile(const std::string &corrFile) {
  *  @throw NotFoundError if requested algorithm requested doesn't exist
  *  @throw runtime_error if algorithm encounters an error
  */
-void CorrectToFile::doWkspAlgebra(const API::MatrixWorkspace_sptr &lhs,
-                                  const API::MatrixWorkspace_sptr &rhs,
-                                  const std::string &algName,
-                                  API::MatrixWorkspace_sptr &result) {
+void CorrectToFile::doWkspAlgebra(const API::MatrixWorkspace_sptr &lhs, const API::MatrixWorkspace_sptr &rhs,
+                                  const std::string &algName, API::MatrixWorkspace_sptr &result) {
   g_log.information() << "Initalising the algorithm " << algName << '\n';
   progress(LOAD_TIME, "Applying correction");
   IAlgorithm_sptr algebra = createChildAlgorithm(algName, LOAD_TIME, 1.0);
@@ -200,11 +184,8 @@ void CorrectToFile::doWkspAlgebra(const API::MatrixWorkspace_sptr &lhs,
   try {
     algebra->execute();
   } catch (std::runtime_error &) {
-    g_log.warning() << "Error encountered while running algorithm " << algName
-                    << '\n';
-    g_log.error() << "Correction file "
-                  << getPropertyValue("Filename") +
-                         " can't be used to correct workspace "
+    g_log.warning() << "Error encountered while running algorithm " << algName << '\n';
+    g_log.error() << "Correction file " << getPropertyValue("Filename") + " can't be used to correct workspace "
                   << getPropertyValue("WorkspaceToCorrect") << '\n';
     g_log.error() << "Mismatched number of spectra?\n";
     throw std::runtime_error("Correct to file failed, see log for details");

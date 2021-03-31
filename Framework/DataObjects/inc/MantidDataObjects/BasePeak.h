@@ -91,8 +91,7 @@ public:
 
   Mantid::Kernel::Matrix<double> getGoniometerMatrix() const override;
   Mantid::Kernel::Matrix<double> getInverseGoniometerMatrix() const;
-  void setGoniometerMatrix(
-      const Mantid::Kernel::Matrix<double> &goniometerMatrix) override;
+  void setGoniometerMatrix(const Mantid::Kernel::Matrix<double> &goniometerMatrix) override;
 
   std::string getBankName() const override;
   int getRow() const override;

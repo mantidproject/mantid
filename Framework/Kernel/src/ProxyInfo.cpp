@@ -13,8 +13,7 @@ namespace Kernel {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ProxyInfo::ProxyInfo()
-    : m_host(""), m_port(0), m_isHttpProxy(false), m_isEmptyProxy(true) {}
+ProxyInfo::ProxyInfo() : m_host(""), m_port(0), m_isHttpProxy(false), m_isEmptyProxy(true) {}
 
 /**
  * Proxy information constructor
@@ -22,10 +21,8 @@ ProxyInfo::ProxyInfo()
  * @param port : port number
  * @param isHttpProxy : is this a http proxy
  */
-ProxyInfo::ProxyInfo(const std::string &host, const int port,
-                     const bool isHttpProxy)
-    : m_host(host), m_port(port), m_isHttpProxy(isHttpProxy),
-      m_isEmptyProxy(false) {
+ProxyInfo::ProxyInfo(const std::string &host, const int port, const bool isHttpProxy)
+    : m_host(host), m_port(port), m_isHttpProxy(isHttpProxy), m_isEmptyProxy(false) {
   if (host.empty() || port == 0) {
     m_isEmptyProxy = true;
   }

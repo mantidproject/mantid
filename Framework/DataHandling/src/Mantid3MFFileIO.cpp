@@ -59,13 +59,11 @@ void Mantid3MFFileIO::LoadFile(std::string filename) {
     };
     setScaleType(scale);
 
-    for (Lib3MF_uint32 iWarning = 0; iWarning < reader->GetWarningCount();
-         iWarning++) {
+    for (Lib3MF_uint32 iWarning = 0; iWarning < reader->GetWarningCount(); iWarning++) {
       Lib3MF_uint32 nErrorCode;
       std::string sWarningMessage = reader->GetWarning(iWarning, nErrorCode);
       std::stringstream ss;
-      ss << "Encountered warning #" << nErrorCode << " : " << sWarningMessage
-         << std::endl;
+      ss << "Encountered warning #" << nErrorCode << " : " << sWarningMessage << std::endl;
       g_log.warning(ss.str());
     }
   }
@@ -77,9 +75,7 @@ void Mantid3MFFileIO::LoadFile(std::string filename) {
  * @param buildTransform The rotation/translation to be applied to the object
  * @return A pointer to the Geometry::MeshObject
  */
-MeshObject_sptr
-Mantid3MFFileIO::loadMeshObject(Lib3MF::PMeshObject meshObject,
-                                sLib3MFTransform buildTransform) {
+MeshObject_sptr Mantid3MFFileIO::loadMeshObject(Lib3MF::PMeshObject meshObject, sLib3MFTransform buildTransform) {
 
   Lib3MF_uint64 nVertexCount = meshObject->GetVertexCount();
   Lib3MF_uint64 nTriangleCount = meshObject->GetTriangleCount();
@@ -106,8 +102,7 @@ Mantid3MFFileIO::loadMeshObject(Lib3MF::PMeshObject meshObject,
   std::vector<Lib3MF::sPosition> vertices;
   meshObject->GetVertices(vertices);
   for (auto i : vertices) {
-    Mantid::Kernel::V3D vertex = createScaledV3D(
-        i.m_Coordinates[0], i.m_Coordinates[1], i.m_Coordinates[2]);
+    Mantid::Kernel::V3D vertex = createScaledV3D(i.m_Coordinates[0], i.m_Coordinates[1], i.m_Coordinates[2]);
     m_vertices.push_back(vertex);
   }
 
@@ -123,46 +118,35 @@ Mantid3MFFileIO::loadMeshObject(Lib3MF::PMeshObject meshObject,
 
     if (propType == Lib3MF::ePropertyType::BaseMaterial) {
 
-      Lib3MF::PBaseMaterialGroup baseMaterialGroup =
-          model->GetBaseMaterialGroupByID(nResourceID);
+      Lib3MF::PBaseMaterialGroup baseMaterialGroup = model->GetBaseMaterialGroupByID(nResourceID);
       ReadMaterial::MaterialParameters params;
       std::string fullMaterialName = baseMaterialGroup->GetName(nPropertyID);
       std::string materialName;
       size_t openBracket = fullMaterialName.find("(");
       size_t closeBracket = fullMaterialName.find(")");
-      if ((openBracket != std::string::npos) &&
-          (closeBracket != std::string::npos)) {
+      if ((openBracket != std::string::npos) && (closeBracket != std::string::npos)) {
         materialName = fullMaterialName.substr(0, openBracket);
-        materialName.erase(
-            std::remove_if(materialName.begin(), materialName.end(), ::isspace),
-            materialName.end());
-        std::string materialSpec = fullMaterialName.substr(
-            openBracket + 1, closeBracket - openBracket - 1);
+        materialName.erase(std::remove_if(materialName.begin(), materialName.end(), ::isspace), materialName.end());
+        std::string materialSpec = fullMaterialName.substr(openBracket + 1, closeBracket - openBracket - 1);
         Poco::XML::DOMParser parser;
         Poco::XML::AutoPtr<Poco::XML::Document> doc;
         try {
-          doc = parser.parseString("<material id=\"" + materialName +
-                                   "\" formula=\"" + materialName + "\" " +
+          doc = parser.parseString("<material id=\"" + materialName + "\" formula=\"" + materialName + "\" " +
                                    materialSpec + "></material>");
-          Poco::XML::AutoPtr<Poco::XML::NodeList> materialElements =
-              doc->getElementsByTagName("material");
+          Poco::XML::AutoPtr<Poco::XML::NodeList> materialElements = doc->getElementsByTagName("material");
           Kernel::MaterialXMLParser materialParser;
-          material = materialParser.parse(
-              static_cast<Poco::XML::Element *>(materialElements->item(0)));
+          material = materialParser.parse(static_cast<Poco::XML::Element *>(materialElements->item(0)));
         } catch (std::exception) {
-          g_log.warning("Unable to parse material properties for " +
-                        fullMaterialName + " so material will be ignored");
+          g_log.warning("Unable to parse material properties for " + fullMaterialName + " so material will be ignored");
         }
       } else {
-        g_log.warning(
-            "Material name " + fullMaterialName +
-            " found without any properties so material will be ignored");
+        g_log.warning("Material name " + fullMaterialName +
+                      " found without any properties so material will be ignored");
       }
     }
   };
 
-  auto mesh = std::make_shared<Geometry::MeshObject>(
-      std::move(m_triangle), std::move(m_vertices), material);
+  auto mesh = std::make_shared<Geometry::MeshObject>(std::move(m_triangle), std::move(m_vertices), material);
   mesh->setID(meshObject->GetName());
 
   // 3MF stores transformation as a 4 x 3 matrix using row major convention
@@ -192,8 +176,7 @@ Mantid3MFFileIO::loadMeshObject(Lib3MF::PMeshObject meshObject,
  * @param meshObjects A vector to store the meshes for env components
  * @param sample A parameter to store a mesh for the sample
  */
-void Mantid3MFFileIO::readMeshObjects(std::vector<MeshObject_sptr> &meshObjects,
-                                      MeshObject_sptr &sample) {
+void Mantid3MFFileIO::readMeshObjects(std::vector<MeshObject_sptr> &meshObjects, MeshObject_sptr &sample) {
   Lib3MF::PBuildItemIterator buildItemIterator = model->GetBuildItems();
   while (buildItemIterator->MoveNext()) {
     Lib3MF::PBuildItem buildItem = buildItemIterator->GetCurrent();
@@ -211,16 +194,13 @@ void Mantid3MFFileIO::readMeshObjects(std::vector<MeshObject_sptr> &meshObjects,
  * @param objectResourceID Integer identifier of the object to read in
  * @param transform Rotation/translation matrix for the object
  */
-void Mantid3MFFileIO::readMeshObject(std::vector<MeshObject_sptr> &meshObjects,
-                                     MeshObject_sptr &sample,
-                                     uint32_t objectResourceID,
-                                     sLib3MFTransform transform) {
+void Mantid3MFFileIO::readMeshObject(std::vector<MeshObject_sptr> &meshObjects, MeshObject_sptr &sample,
+                                     uint32_t objectResourceID, sLib3MFTransform transform) {
   // no general GetObjectByID in the lib3MF library??
   try {
     Lib3MF::PMeshObject meshObject = model->GetMeshObjectByID(objectResourceID);
     std::string objectName = meshObject->GetName();
-    std::transform(objectName.begin(), objectName.end(), objectName.begin(),
-                   toupper);
+    std::transform(objectName.begin(), objectName.end(), objectName.begin(), toupper);
     if (objectName == SAMPLE_OBJECT_NAME) {
       sample = loadMeshObject(meshObject, transform);
     } else {
@@ -237,17 +217,12 @@ void Mantid3MFFileIO::readMeshObject(std::vector<MeshObject_sptr> &meshObjects,
  * @param objectResourceID Integer identifier of the object to read in
  * @param transform Rotation/translation matrix for the object
  */
-void Mantid3MFFileIO::readComponents(std::vector<MeshObject_sptr> &meshObjects,
-                                     MeshObject_sptr &sample,
-                                     uint32_t objectResourceID,
-                                     sLib3MFTransform transform) {
-  Lib3MF::PComponentsObject componentsObject =
-      model->GetComponentsObjectByID(objectResourceID);
-  for (Lib3MF_uint32 nIndex = 0; nIndex < componentsObject->GetComponentCount();
-       nIndex++) {
+void Mantid3MFFileIO::readComponents(std::vector<MeshObject_sptr> &meshObjects, MeshObject_sptr &sample,
+                                     uint32_t objectResourceID, sLib3MFTransform transform) {
+  Lib3MF::PComponentsObject componentsObject = model->GetComponentsObjectByID(objectResourceID);
+  for (Lib3MF_uint32 nIndex = 0; nIndex < componentsObject->GetComponentCount(); nIndex++) {
     Lib3MF::PComponent component = componentsObject->GetComponent(nIndex);
-    readMeshObject(meshObjects, sample, component->GetObjectResourceID(),
-                   transform);
+    readMeshObject(meshObjects, sample, component->GetObjectResourceID(), transform);
   }
 }
 
@@ -257,8 +232,7 @@ void Mantid3MFFileIO::readComponents(std::vector<MeshObject_sptr> &meshObjects,
  * @param mantidMeshObject MeshObject to write out
  * @param name Name of the mesh object
  */
-void Mantid3MFFileIO::writeMeshObject(
-    const Geometry::MeshObject &mantidMeshObject, std::string name) {
+void Mantid3MFFileIO::writeMeshObject(const Geometry::MeshObject &mantidMeshObject, std::string name) {
   Lib3MF::PMeshObject meshObject = model->AddMeshObject();
   meshObject->SetName(name);
   std::vector<uint32_t> mantidTriangles = mantidMeshObject.getTriangles();
@@ -268,9 +242,8 @@ void Mantid3MFFileIO::writeMeshObject(
 
   // convert vertices from V3D to the Lib3MF struct
   for (auto i : mantidVertices) {
-    sLib3MFPosition vertex = {{static_cast<Lib3MF_single>(i.X()),
-                               static_cast<Lib3MF_single>(i.Y()),
-                               static_cast<Lib3MF_single>(i.Z())}};
+    sLib3MFPosition vertex = {
+        {static_cast<Lib3MF_single>(i.X()), static_cast<Lib3MF_single>(i.Y()), static_cast<Lib3MF_single>(i.Z())}};
     vertices.push_back(vertex);
   }
 
@@ -292,8 +265,8 @@ void Mantid3MFFileIO::writeMeshObject(
     auto firstLink = faceNormalTrack.front();
 
     if (firstLink.distInsideObject > M_TOLERANCE) {
-      g_log.debug("Face normal pointing to interior of object on object " +
-                  mantidMeshObject.id() + ". Vertices swapped");
+      g_log.debug("Face normal pointing to interior of object on object " + mantidMeshObject.id() +
+                  ". Vertices swapped");
       // swap order of b and c
       mantidVertices[3 * i + 1] = c;
       mantidVertices[3 * i + 2] = b;
@@ -311,16 +284,14 @@ void Mantid3MFFileIO::writeMeshObject(
     Lib3MF_uint32 materialPropertyID;
     int baseMaterialsResourceID;
 
-    AddBaseMaterial(mantidMeshObject.material().name(), generateRandomColor(),
-                    baseMaterialsResourceID, materialPropertyID);
-    meshObject->SetObjectLevelProperty(baseMaterialsResourceID,
-                                       materialPropertyID);
+    AddBaseMaterial(mantidMeshObject.material().name(), generateRandomColor(), baseMaterialsResourceID,
+                    materialPropertyID);
+    meshObject->SetObjectLevelProperty(baseMaterialsResourceID, materialPropertyID);
   }
 
   // Set up one to one mapping between build items and mesh objects
   // Don't bother setting up any components
-  sLib3MFTransform mMatrix = {
-      {{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 0.0}}};
+  sLib3MFTransform mMatrix = {{{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 0.0}}};
   model->AddBuildItem(meshObject.get(), mMatrix);
 }
 
@@ -346,9 +317,8 @@ int Mantid3MFFileIO ::generateRandomColor() {
  * @param sample Mesh Object representing sample
  * @param scaleType Units to write out coordinates in eg mm
  */
-void Mantid3MFFileIO::writeMeshObjects(
-    std::vector<const Geometry::MeshObject *> meshObjects,
-    MeshObject_const_sptr &sample, DataHandling::ScaleUnits scaleType) {
+void Mantid3MFFileIO::writeMeshObjects(std::vector<const Geometry::MeshObject *> meshObjects,
+                                       MeshObject_const_sptr &sample, DataHandling::ScaleUnits scaleType) {
 
   Lib3MF::eModelUnit scale;
   switch (scaleType) {
@@ -382,22 +352,19 @@ void Mantid3MFFileIO::writeMeshObjects(
  * @param resourceID Out parameter representing object id of material created
  * @param materialPropertyID Out parameter representing id of material created
  */
-void Mantid3MFFileIO::AddBaseMaterial(std::string materialName,
-                                      int materialColor, int &resourceID,
+void Mantid3MFFileIO::AddBaseMaterial(std::string materialName, int materialColor, int &resourceID,
                                       Lib3MF_uint32 &materialPropertyID) {
   // check if master material definition exists
   bool materialNameExists = false;
 
-  Lib3MF::PBaseMaterialGroupIterator materialIterator =
-      model->GetBaseMaterialGroups();
+  Lib3MF::PBaseMaterialGroupIterator materialIterator = model->GetBaseMaterialGroups();
   Lib3MF::PBaseMaterialGroup groupToAddTo;
 
   if (materialIterator->Count() == 0) {
     groupToAddTo = model->AddBaseMaterialGroup();
   } else {
     while (materialIterator->MoveNext() && !materialNameExists) {
-      Lib3MF::PBaseMaterialGroup materialGroup =
-          materialIterator->GetCurrentBaseMaterialGroup();
+      Lib3MF::PBaseMaterialGroup materialGroup = materialIterator->GetCurrentBaseMaterialGroup();
       // by default add the new material to the 1st material group unless
       // another group is found with the supplied materialName
       if (!groupToAddTo) {
@@ -420,8 +387,7 @@ void Mantid3MFFileIO::AddBaseMaterial(std::string materialName,
   Lib3MF_uint8 gColor = (materialColor & 0x00FF00) >> 8;
   Lib3MF_uint8 bColor = (materialColor & 0x0000FF) >> 0;
   if (!materialNameExists) {
-    materialPropertyID = groupToAddTo->AddMaterial(
-        materialName, Lib3MF::sColor{rColor, gColor, bColor, 255});
+    materialPropertyID = groupToAddTo->AddMaterial(materialName, Lib3MF::sColor{rColor, gColor, bColor, 255});
   }
   resourceID = groupToAddTo->GetResourceID();
 }
@@ -434,14 +400,11 @@ void Mantid3MFFileIO::AddBaseMaterial(std::string materialName,
  * @param materialName Name of material to be assigned to the object
  * @param materialColor Colour of the material to be written into 3mf file
  */
-void Mantid3MFFileIO::setMaterialOnObject(std::string objectName,
-                                          std::string materialName,
-                                          int materialColor) {
+void Mantid3MFFileIO::setMaterialOnObject(std::string objectName, std::string materialName, int materialColor) {
 
   Lib3MF_uint32 materialPropertyID;
   int baseMaterialsResourceID;
-  AddBaseMaterial(materialName, materialColor, baseMaterialsResourceID,
-                  materialPropertyID);
+  AddBaseMaterial(materialName, materialColor, baseMaterialsResourceID, materialPropertyID);
 
   Lib3MF::PMeshObjectIterator meshObjectIterator = model->GetMeshObjects();
   bool meshObjectFound = false;
@@ -451,37 +414,30 @@ void Mantid3MFFileIO::setMaterialOnObject(std::string objectName,
     if (meshObject->GetName() == objectName) {
       meshObjectFound = true;
       Lib3MF_uint32 resourceID, propertyID;
-      bool propExists =
-          meshObject->GetObjectLevelProperty(resourceID, propertyID);
+      bool propExists = meshObject->GetObjectLevelProperty(resourceID, propertyID);
       // currently just setObjectLevelProperty in all 3 branches of the
       // following so it's a bit verbose but different debug messages
       if (propExists) {
         Lib3MF::ePropertyType propType = model->GetPropertyTypeByID(resourceID);
         if (baseMaterialsResourceID == resourceID) {
           // update the material with the one in the input csv file
-          g_log.debug("Existing material found for object " + objectName +
-                      ". Overwriting with material " + materialName +
-                      "supplied in csv file");
-          meshObject->SetObjectLevelProperty(baseMaterialsResourceID,
-                                             materialPropertyID);
+          g_log.debug("Existing material found for object " + objectName + ". Overwriting with material " +
+                      materialName + "supplied in csv file");
+          meshObject->SetObjectLevelProperty(baseMaterialsResourceID, materialPropertyID);
         } else {
           // if there's already a different property there (eg color) then
           // overwrite it
-          g_log.debug("Existing non-material property found for object " +
-                      objectName +
-                      ". Overwriting with material property with value " +
-                      materialName + " supplied in csv file");
+          g_log.debug("Existing non-material property found for object " + objectName +
+                      ". Overwriting with material property with value " + materialName + " supplied in csv file");
           // clear properties first because lib3mf seems to write existing
           // color property down onto the individual triangles when you
           // overwrite the object level property. Don't want this
           meshObject->ClearAllProperties();
-          meshObject->SetObjectLevelProperty(baseMaterialsResourceID,
-                                             materialPropertyID);
+          meshObject->SetObjectLevelProperty(baseMaterialsResourceID, materialPropertyID);
         }
       } else {
         // add the material
-        meshObject->SetObjectLevelProperty(baseMaterialsResourceID,
-                                           materialPropertyID);
+        meshObject->SetObjectLevelProperty(baseMaterialsResourceID, materialPropertyID);
       }
     }
   }

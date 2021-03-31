@@ -30,36 +30,27 @@ void NormaliseToUnity::init() {
   wsValidator->add<HistogramValidator>();
   wsValidator->add<CommonBinsValidator>();
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "The name with which to store the output workspace in the [[Analysis "
-      "Data Service]]");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "The name with which to store the output workspace in the [[Analysis "
+                  "Data Service]]");
 
-  declareProperty("RangeLower", EMPTY_DBL(),
-                  "The X (frame) value to integrate from");
-  declareProperty("RangeUpper", EMPTY_DBL(),
-                  "The X (frame) value to integrate to");
+  declareProperty("RangeLower", EMPTY_DBL(), "The X (frame) value to integrate from");
+  declareProperty("RangeUpper", EMPTY_DBL(), "The X (frame) value to integrate to");
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty(
-      "StartWorkspaceIndex", 0, mustBePositive,
-      "The lowest workspace index of the specta that will be integrated");
+  declareProperty("StartWorkspaceIndex", 0, mustBePositive,
+                  "The lowest workspace index of the specta that will be integrated");
   // As the property takes ownership of the validator pointer, have to take care
   // to pass in a unique
   // pointer to each property.
-  declareProperty(
-      "EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
-      "The highest workspace index of the spectra that will be integrated");
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
+                  "The highest workspace index of the spectra that will be integrated");
   declareProperty("IncludePartialBins", false,
                   "If true then partial bins from the beginning and end of the "
                   "input range are also included in the integration.");
-  declareProperty(
-      "IncludeMonitors", true,
-      "Whether to include monitor spectra in the sum (default: yes)");
+  declareProperty("IncludeMonitors", true, "Whether to include monitor spectra in the sum (default: yes)");
 }
 
 /** Executes the algorithm
@@ -82,8 +73,7 @@ void NormaliseToUnity::exec() {
 
   // Sum up all the wavelength bins
   IAlgorithm_sptr integrateAlg = createChildAlgorithm("Integration");
-  integrateAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
-                                                  localworkspace);
+  integrateAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", localworkspace);
   integrateAlg->setProperty<double>("RangeLower", m_MinRange);
   integrateAlg->setProperty<double>("RangeUpper", m_MaxRange);
   integrateAlg->setProperty<int>("StartWorkspaceIndex", m_MinSpec);
@@ -92,8 +82,7 @@ void NormaliseToUnity::exec() {
   integrateAlg->executeAsChildAlg();
   progress.report("Normalising to unity");
 
-  MatrixWorkspace_sptr integrated =
-      integrateAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr integrated = integrateAlg->getProperty("OutputWorkspace");
 
   // Sum all the spectra of the integrated workspace
   IAlgorithm_sptr sumAlg = createChildAlgorithm("SumSpectra");

@@ -46,8 +46,8 @@ int LoadPDFgetNFile::confidence(Kernel::FileDescriptor &descriptor) const {
   // check the file extension
   const std::string &extn = descriptor.extension();
   // Only allow known file extensions
-  if (extn != "sq" && extn != "sqa" && extn != "sqb" && extn != "gr" &&
-      extn != "ain" && extn != "braw" && extn != "bsmo") {
+  if (extn != "sq" && extn != "sqa" && extn != "sqb" && extn != "gr" && extn != "ain" && extn != "braw" &&
+      extn != "bsmo") {
     return 0;
   }
 
@@ -71,18 +71,15 @@ int LoadPDFgetNFile::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Define input
  */
 void LoadPDFgetNFile::init() {
-  const std::vector<std::string> exts{".sq",  ".sqa",  ".sqb", ".gr",
-                                      ".ain", ".braw", ".bsmo"};
-  auto fileproperty = std::make_unique<FileProperty>(
-      "Filename", "", FileProperty::Load, exts, Kernel::Direction::Input);
-  this->declareProperty(std::move(fileproperty),
-                        "The input filename of the stored data");
+  const std::vector<std::string> exts{".sq", ".sqa", ".sqb", ".gr", ".ain", ".braw", ".bsmo"};
+  auto fileproperty =
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts, Kernel::Direction::Input);
+  this->declareProperty(std::move(fileproperty), "The input filename of the stored data");
 
   // auto wsproperty = new WorkspaceProperty<Workspace2D>("OutputWorkspace",
   // "Anonymous", Kernel::Direction::Output);
   // this->declareProperty(wsproperty, "Name of output workspace. ");
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Kernel::Direction::Output),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "", Kernel::Direction::Output),
                   "Workspace name to load into.");
 }
 
@@ -160,8 +157,7 @@ void LoadPDFgetNFile::parseDataFile(const std::string &filename) {
 //----------------------------------------------------------------------------------------------
 /** Check whether the line starts with some specific character
  */
-bool LoadPDFgetNFile::startsWith(const std::string &s,
-                                 const std::string &header) const {
+bool LoadPDFgetNFile::startsWith(const std::string &s, const std::string &header) const {
   bool answer = true;
 
   if (s.size() < header.size()) {
@@ -196,8 +192,7 @@ void LoadPDFgetNFile::parseColumnNameLine(std::string line) {
   string header = terms[0];
   if (header != "#L") {
     stringstream errmsg;
-    errmsg << "Expecting header as #L.  Input line has header as " << header
-           << ". Unable to proceed. ";
+    errmsg << "Expecting header as #L.  Input line has header as " << header << ". Unable to proceed. ";
     g_log.error() << errmsg.str() << '\n';
     throw std::runtime_error(errmsg.str());
   }
@@ -229,9 +224,7 @@ void LoadPDFgetNFile::parseDataLine(string line) {
   } else if (terms.size() != numcols) {
     // Data line with incorrect number of columns
     stringstream warnss;
-    warnss << "Line (" << line
-           << ") has incorrect number of columns other than " << numcols
-           << " as expected. ";
+    warnss << "Line (" << line << ") has incorrect number of columns other than " << numcols << " as expected. ";
     g_log.warning(warnss.str());
     return;
   }
@@ -267,8 +260,7 @@ void LoadPDFgetNFile::setUnit(const Workspace2D_sptr &ws) {
   } else if (xcolname == "r") {
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
     Unit_sptr unit = ws->getAxis(0)->unit();
-    std::shared_ptr<Units::Label> label =
-        std::dynamic_pointer_cast<Units::Label>(unit);
+    std::shared_ptr<Units::Label> label = std::dynamic_pointer_cast<Units::Label>(unit);
     label->setLabel("AtomicDistance", "Angstrom");
   } else {
     stringstream errss;
@@ -289,9 +281,7 @@ void LoadPDFgetNFile::setUnit(const Workspace2D_sptr &ws) {
   ws->setYUnitLabel(ylabel);
 }
 
-size_t calcVecSize(const std::vector<double> &data0,
-                   std::vector<size_t> &numptsvec, size_t &numsets,
-                   bool xascend) {
+size_t calcVecSize(const std::vector<double> &data0, std::vector<size_t> &numptsvec, size_t &numsets, bool xascend) {
   size_t vecsize = 1;
   auto prex = data0[0];
   for (size_t i = 1; i < data0.size(); ++i) {
@@ -314,8 +304,7 @@ size_t calcVecSize(const std::vector<double> &data0,
   return vecsize;
 }
 
-void LoadPDFgetNFile::checkSameSize(const std::vector<size_t> &numptsvec,
-                                    size_t numsets) {
+void LoadPDFgetNFile::checkSameSize(const std::vector<size_t> &numptsvec, size_t numsets) {
   bool samesize = true;
   for (size_t i = 0; i < numsets; ++i) {
     if (i > 0) {
@@ -323,8 +312,7 @@ void LoadPDFgetNFile::checkSameSize(const std::vector<size_t> &numptsvec,
         samesize = false;
       }
     }
-    g_log.information() << "Set " << i
-                        << ":  Number of Points = " << numptsvec[i] << '\n';
+    g_log.information() << "Set " << i << ":  Number of Points = " << numptsvec[i] << '\n';
   }
   if (!samesize) {
     stringstream errmsg;
@@ -369,8 +357,7 @@ void LoadPDFgetNFile::generateDataWorkspace() {
 
   // 2. Generate workspace2D object and set the unit
   outWS = std::dynamic_pointer_cast<Workspace2D>(
-      API::WorkspaceFactory::Instance().create("Workspace2D", numsets, size,
-                                               size));
+      API::WorkspaceFactory::Instance().create("Workspace2D", numsets, size, size));
 
   setUnit(outWS);
 

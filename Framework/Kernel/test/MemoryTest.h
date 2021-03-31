@@ -35,8 +35,7 @@ public:
     TS_ASSERT_DIFFERS(mem.totalMemStr(), "");
 
     // Current process stats
-    TS_ASSERT_LESS_THAN(
-        0, mem.residentMem()); // Current process must use something
+    TS_ASSERT_LESS_THAN(0, mem.residentMem()); // Current process must use something
     TS_ASSERT_DIFFERS(mem.resUsageStr(), "");
     TS_ASSERT_LESS_THAN_EQUALS(0, mem.virtualMem());
     TS_ASSERT_DIFFERS(mem.vmUsageStr(), "");
@@ -55,8 +54,7 @@ public:
   void test_parallel_threadpool() {
     ThreadPool pool;
     for (int i = 0; i < 500; i++) {
-      pool.schedule(
-          std::make_shared<FunctionTask>(&MemoryTest_myTaskFunction, 1.0));
+      pool.schedule(std::make_shared<FunctionTask>(&MemoryTest_myTaskFunction, 1.0));
     }
     pool.joinAll();
   }

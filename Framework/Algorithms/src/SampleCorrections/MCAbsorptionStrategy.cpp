@@ -29,14 +29,11 @@ namespace Algorithms {
  * @param regenerateTracksForEachLambda Whether to resimulate tracks for each
  * wavelength point or not
  */
-MCAbsorptionStrategy::MCAbsorptionStrategy(
-    IMCInteractionVolume &interactionVolume, const IBeamProfile &beamProfile,
-    DeltaEMode::Type EMode, const size_t nevents,
-    const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda)
-    : m_beamProfile(beamProfile),
-      m_scatterVol(setActiveRegion(interactionVolume, beamProfile)),
-      m_nevents(nevents), m_maxScatterAttempts(maxScatterPtAttempts),
-      m_EMode(EMode),
+MCAbsorptionStrategy::MCAbsorptionStrategy(IMCInteractionVolume &interactionVolume, const IBeamProfile &beamProfile,
+                                           DeltaEMode::Type EMode, const size_t nevents,
+                                           const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda)
+    : m_beamProfile(beamProfile), m_scatterVol(setActiveRegion(interactionVolume, beamProfile)), m_nevents(nevents),
+      m_maxScatterAttempts(maxScatterPtAttempts), m_EMode(EMode),
       m_regenerateTracksForEachLambda(regenerateTracksForEachLambda) {}
 
 /**
@@ -47,11 +44,9 @@ MCAbsorptionStrategy::MCAbsorptionStrategy(
  * @param beamProfile The beam profile
  * @return The interaction volume object with active region set
  */
-IMCInteractionVolume &
-MCAbsorptionStrategy::setActiveRegion(IMCInteractionVolume &interactionVolume,
-                                      const IBeamProfile &beamProfile) {
-  interactionVolume.setActiveRegion(
-      beamProfile.defineActiveRegion(interactionVolume.getFullBoundingBox()));
+IMCInteractionVolume &MCAbsorptionStrategy::setActiveRegion(IMCInteractionVolume &interactionVolume,
+                                                            const IBeamProfile &beamProfile) {
+  interactionVolume.setActiveRegion(beamProfile.defineActiveRegion(interactionVolume.getFullBoundingBox()));
   return interactionVolume;
 }
 
@@ -72,18 +67,14 @@ MCAbsorptionStrategy::setActiveRegion(IMCInteractionVolume &interactionVolume,
  * tracks such as the scattering angle and count of scatter points generated in
  * each sample or environment part
  */
-void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
-                                     const Kernel::V3D &finalPos,
-                                     const std::vector<double> &lambdas,
-                                     const double lambdaFixed,
-                                     std::vector<double> &attenuationFactors,
-                                     std::vector<double> &attFactorErrors,
+void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &finalPos,
+                                     const std::vector<double> &lambdas, const double lambdaFixed,
+                                     std::vector<double> &attenuationFactors, std::vector<double> &attFactorErrors,
                                      MCInteractionStatistics &stats) {
   const auto scatterBounds = m_scatterVol.getBoundingBox();
   const auto nbins = static_cast<int>(lambdas.size());
 
-  std::vector<double> wgtMean(attenuationFactors.size()),
-      wgtM2(attenuationFactors.size());
+  std::vector<double> wgtMean(attenuationFactors.size()), wgtM2(attenuationFactors.size());
 
   for (size_t i = 0; i < m_nevents; ++i) {
     std::shared_ptr<Geometry::Track> beforeScatter;
@@ -95,8 +86,7 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
         if (m_regenerateTracksForEachLambda || j == 0) {
           const auto neutron = m_beamProfile.generatePoint(rng, scatterBounds);
           std::tie(success, beforeScatter, afterScatter) =
-              m_scatterVol.calculateBeforeAfterTrack(rng, neutron.startPos,
-                                                     finalPos, stats);
+              m_scatterVol.calculateBeforeAfterTrack(rng, neutron.startPos, finalPos, stats);
         } else {
           success = true;
         }
@@ -112,8 +102,8 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
           } else {
             // elastic case already initialized
           }
-          const double wgt = beforeScatter->calculateAttenuation(lambdaIn) *
-                             afterScatter->calculateAttenuation(lambdaOut);
+          const double wgt =
+              beforeScatter->calculateAttenuation(lambdaIn) * afterScatter->calculateAttenuation(lambdaOut);
           attenuationFactors[j] += wgt;
           // increment standard deviation using Welford algorithm
           double delta = wgt - wgtMean[j];
@@ -137,16 +127,12 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
     }
   }
 
-  std::transform(attenuationFactors.begin(), attenuationFactors.end(),
-                 attenuationFactors.begin(),
-                 std::bind(std::divides<double>(), std::placeholders::_1,
-                           static_cast<double>(m_nevents)));
+  std::transform(attenuationFactors.begin(), attenuationFactors.end(), attenuationFactors.begin(),
+                 std::bind(std::divides<double>(), std::placeholders::_1, static_cast<double>(m_nevents)));
 
   // calculate standard deviation of mean from sample mean
-  std::transform(attFactorErrors.begin(), attFactorErrors.end(),
-                 attFactorErrors.begin(), [this](double v) -> double {
-                   return v / sqrt(static_cast<double>(m_nevents));
-                 });
+  std::transform(attFactorErrors.begin(), attFactorErrors.end(), attFactorErrors.begin(),
+                 [this](double v) -> double { return v / sqrt(static_cast<double>(m_nevents)); });
 }
 
 } // namespace Algorithms

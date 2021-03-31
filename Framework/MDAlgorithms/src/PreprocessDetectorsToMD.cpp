@@ -24,8 +24,7 @@ namespace MDAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PreprocessDetectorsToMD)
 
-PreprocessDetectorsToMD::PreprocessDetectorsToMD()
-    : m_getEFixed(false), m_getIsMasked(false) {}
+PreprocessDetectorsToMD::PreprocessDetectorsToMD() : m_getEFixed(false), m_getIsMasked(false) {}
 
 /** Initialize the algorithm's properties. */
 void PreprocessDetectorsToMD::init() {
@@ -35,18 +34,16 @@ void PreprocessDetectorsToMD::init() {
   // the validator which checks if the workspace has axis and any units
   // ws_valid->add<API::WorkspaceUnitValidator>("");
 
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Kernel::Direction::Input, ws_valid),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "",
+                                                                            Kernel::Direction::Input, ws_valid),
                   "Name of an input Matrix Workspace with instrument.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
-                      "OutputWorkspace", "", Kernel::Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
                   "Name of the output Table workspace with pre-processed "
                   "detectors data. If the workspace exists, it will be "
                   "replaced.");
 
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
-                      "GetMaskState", true, Kernel::Direction::Input),
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("GetMaskState", true, Kernel::Direction::Input),
                   "Returns masked state of the detectors. If this option is "
                   "false, the masked detectors are just dropped from the "
                   "resulting workspace and spectra-to detectors map has to be "
@@ -54,8 +51,7 @@ void PreprocessDetectorsToMD::init() {
                   "and logic necessary until Mantid masks signal by 0 rather "
                   "then NaN.");
 
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
-                      "UpdateMasksInfo", false, Kernel::Direction::Input),
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("UpdateMasksInfo", false, Kernel::Direction::Input),
                   "If target workspace already exists as the result of "
                   "previous deployment of this algorithm, the algorithm just "
                   "updated masks states column instead of calculating the "
@@ -64,8 +60,7 @@ void PreprocessDetectorsToMD::init() {
                   "parameter and logic necessary until Mantid masks signal by "
                   "0 rather then NaN.");
 
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
-                      "GetEFixed", false, Kernel::Direction::Input),
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("GetEFixed", false, Kernel::Direction::Input),
                   "This option makes sense for Indirect instrument, where each "
                   "detector can have its own energy, defined by correspondent "
                   "crystal-analyzer position.\n"
@@ -98,19 +93,17 @@ void PreprocessDetectorsToMD::exec() {
   // workspace masks
   DataObjects::TableWorkspace_sptr targWS;
   bool updateMasks(false);
-  if (this->getProperty("GetMaskState") &&
-      this->getProperty("UpdateMasksInfo")) {
+  if (this->getProperty("GetMaskState") && this->getProperty("UpdateMasksInfo")) {
     std::string wsName = this->getPointerToProperty("OutputWorkspace")->value();
     if (API::AnalysisDataService::Instance().doesExist(wsName)) {
-      targWS = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
-          API::AnalysisDataService::Instance().retrieve(wsName));
+      targWS =
+          std::dynamic_pointer_cast<DataObjects::TableWorkspace>(API::AnalysisDataService::Instance().retrieve(wsName));
       if (targWS) {
         auto *pMasksArray = targWS->getColDataArray<int>("detMask");
         if (pMasksArray)
           updateMasks = true;
         // was this workspace calculated without eFixed and now we need one?
-        if (this->getProperty("GetEFixed") &&
-            !targWS->getColDataArray<float>("eFixed"))
+        if (this->getProperty("GetEFixed") && !targWS->getColDataArray<float>("eFixed"))
           updateMasks = false;
       }
     }
@@ -132,8 +125,7 @@ void PreprocessDetectorsToMD::exec() {
 
 /** helper method to create resulting table workspace */
 std::shared_ptr<DataObjects::TableWorkspace>
-PreprocessDetectorsToMD::createTableWorkspace(
-    const API::MatrixWorkspace_const_sptr &inputWS) {
+PreprocessDetectorsToMD::createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS) {
   const size_t nHist = inputWS->getNumberHistograms();
 
   // set the target workspace
@@ -176,11 +168,9 @@ PreprocessDetectorsToMD::createTableWorkspace(
 results into k-dE space ;
 and places the results into static cash to be used in subsequent calls to this
 algorithm */
-void PreprocessDetectorsToMD::processDetectorsPositions(
-    const API::MatrixWorkspace_const_sptr &inputWS,
-    DataObjects::TableWorkspace_sptr &targWS) {
-  g_log.information()
-      << "Preprocessing detector locations in a target reciprocal space\n";
+void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
+                                                        DataObjects::TableWorkspace_sptr &targWS) {
+  g_log.information() << "Preprocessing detector locations in a target reciprocal space\n";
   //
   Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
   // this->pBaseInstr                = instrument->baseInstrument();
@@ -201,15 +191,13 @@ void PreprocessDetectorsToMD::processDetectorsPositions(
     targWS->logs()->addProperty<double>("L1", L1, true);
     g_log.debug() << "Source-sample distance: " << L1 << '\n';
   } catch (Kernel::Exception::NotFoundError &) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Unable to calculate source-sample distance for workspace",
-        inputWS->getTitle());
+    throw Kernel::Exception::InstrumentDefinitionError("Unable to calculate source-sample distance for workspace",
+                                                       inputWS->getTitle());
   }
   // Instrument name
   std::string InstrName = instrument->getName();
-  targWS->logs()->addProperty<std::string>(
-      "InstrumentName", InstrName,
-      true); // "The name which should unique identify current instrument");
+  targWS->logs()->addProperty<std::string>("InstrumentName", InstrName,
+                                           true); // "The name which should unique identify current instrument");
   targWS->logs()->addProperty<bool>("FakeDetectors", false, true);
 
   // get access to the workspace memory
@@ -302,34 +290,28 @@ void PreprocessDetectorsToMD::processDetectorsPositions(
     if (i % div == 0)
       theProgress.report(i, "Preprocessing detectors");
   }
-  targWS->logs()->addProperty<uint32_t>("ActualDetectorsNum",
-                                        liveDetectorsCount, true);
+  targWS->logs()->addProperty<uint32_t>("ActualDetectorsNum", liveDetectorsCount, true);
 
   theProgress.report();
-  g_log.information() << "Finished preprocessing detector locations. Found: "
-                      << liveDetectorsCount << " detectors out of: " << nHist
-                      << " histograms\n";
+  g_log.information() << "Finished preprocessing detector locations. Found: " << liveDetectorsCount
+                      << " detectors out of: " << nHist << " histograms\n";
 }
 /** Method updates the column, which describes if current detector/spectra is
    masked
     It is used if one tries to process multiple workspaces obtained from a
    series of experiments  where the masked detectors can change */
-void PreprocessDetectorsToMD::updateMasksState(
-    const API::MatrixWorkspace_const_sptr &inputWS,
-    DataObjects::TableWorkspace_sptr &targWS) {
+void PreprocessDetectorsToMD::updateMasksState(const API::MatrixWorkspace_const_sptr &inputWS,
+                                               DataObjects::TableWorkspace_sptr &targWS) {
   auto *pMasksArray = targWS->getColDataArray<int>("detMask");
   if (!pMasksArray)
-    throw std::invalid_argument(
-        "target workspace " + targWS->getName() +
-        " does not have defined masks column to update");
+    throw std::invalid_argument("target workspace " + targWS->getName() +
+                                " does not have defined masks column to update");
 
   size_t nHist = targWS->rowCount();
   const size_t nRows = inputWS->getNumberHistograms();
   if (nHist != nRows)
-    throw std::invalid_argument(
-        " source workspace " + inputWS->getName() + " and target workspace " +
-        targWS->getName() +
-        " are inconsistent as have different numner of detectors");
+    throw std::invalid_argument(" source workspace " + inputWS->getName() + " and target workspace " +
+                                targWS->getName() + " are inconsistent as have different numner of detectors");
 
   uint32_t liveDetectorsCount(0);
   const auto &spectrumInfo = inputWS->spectrumInfo();
@@ -347,15 +329,13 @@ void PreprocessDetectorsToMD::updateMasksState(
 
 /** method calculates fake detectors positions in the situation when real
  * detector information has been lost  */
-void PreprocessDetectorsToMD::buildFakeDetectorsPositions(
-    const API::MatrixWorkspace_const_sptr &inputWS,
-    DataObjects::TableWorkspace_sptr &targWS) {
+void PreprocessDetectorsToMD::buildFakeDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
+                                                          DataObjects::TableWorkspace_sptr &targWS) {
   UNUSED_ARG(inputWS);
   // set sample-detector position equal to 1;
   targWS->logs()->addProperty<double>("L1", 1., true);
   //
-  targWS->logs()->addProperty<std::string>("InstrumentName", "FakeInstrument",
-                                           true);
+  targWS->logs()->addProperty<std::string>("InstrumentName", "FakeInstrument", true);
   targWS->logs()->addProperty<bool>("FakeDetectors", true, true);
 
   // get access to the workspace memory
@@ -370,8 +350,7 @@ void PreprocessDetectorsToMD::buildFakeDetectorsPositions(
 
   //// progress message appearance
   size_t nHist = targWS->rowCount();
-  targWS->logs()->addProperty<uint32_t>("ActualDetectorsNum", uint32_t(nHist),
-                                        true);
+  targWS->logs()->addProperty<uint32_t>("ActualDetectorsNum", uint32_t(nHist), true);
 
   double polar(0);
   // Loop over the spectra
@@ -398,8 +377,7 @@ void PreprocessDetectorsToMD::buildFakeDetectorsPositions(
 
 /// function checks if source workspace still has information about detectors.
 /// Some ws (like rebinned one) do not have this information any more.
-bool PreprocessDetectorsToMD::isDetInfoLost(
-    const Mantid::API::MatrixWorkspace_const_sptr &inWS2D) const {
+bool PreprocessDetectorsToMD::isDetInfoLost(const Mantid::API::MatrixWorkspace_const_sptr &inWS2D) const {
   auto pYAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(1));
   // if this is numeric axis, then the detector's information has been lost:
   return pYAxis != nullptr;
@@ -417,8 +395,7 @@ bool PreprocessDetectorsToMD::isDetInfoLost(
  *  or undefined if "Ei" property is not found.
  *
  */
-double PreprocessDetectorsToMD::getEi(
-    const API::MatrixWorkspace_const_sptr &inputWS) const {
+double PreprocessDetectorsToMD::getEi(const API::MatrixWorkspace_const_sptr &inputWS) const {
   double Efi = std::numeric_limits<double>::quiet_NaN();
 
   // is Ei on workspace properties? (it can be defined for some reason if

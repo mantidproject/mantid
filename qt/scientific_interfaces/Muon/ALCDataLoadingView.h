@@ -26,8 +26,7 @@ namespace CustomInterfaces {
   widgets
 */
 
-class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingView
-    : public IALCDataLoadingView {
+class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingView : public IALCDataLoadingView {
 public:
   ALCDataLoadingView(QWidget *widget);
   ~ALCDataLoadingView();
@@ -55,8 +54,7 @@ public:
   std::string getRunsText() const override;
   std::string getRunsFirstRunText() const override;
 
-  void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
-                    std::size_t const &workspaceIndex = 0) override;
+  void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) override;
   void displayError(const std::string &error) override;
   bool displayWarning(const std::string &warning) override;
   void setAvailableLogs(const std::vector<std::string> &logs) override;
@@ -75,8 +73,7 @@ public:
   std::string getRunsError() override;
   std::vector<std::string> getFiles() override;
   std::string getFirstFile() override;
-  void setLoadStatus(const std::string &status,
-                     const std::string &colour) override;
+  void setLoadStatus(const std::string &status, const std::string &colour) override;
   void runsAutoAddToggled(bool on) override;
   void setRunsTextWithoutSearch(const std::string &text) override;
   void toggleRunsAutoAdd(const bool autoAdd) override;
@@ -91,8 +88,7 @@ public:
 
 private:
   /// Common function to set available items in a combo box
-  void setAvailableItems(QComboBox *comboBox,
-                         const std::vector<std::string> &items);
+  void setAvailableItems(QComboBox *comboBox, const std::vector<std::string> &items);
 
   bool setCurrentLog(const QString &log);
 

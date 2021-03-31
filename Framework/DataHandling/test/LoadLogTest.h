@@ -48,19 +48,15 @@ public:
   void testThreeColumnLogFile() {
     if (!loader.isInitialized())
       loader.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", "NIMROD00001097.log"))
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "NIMROD00001097.log"))
     inputFile = loader.getPropertyValue("Filename");
 
     outputSpace = "LoadLogTest-threeColumnFile";
-    TS_ASSERT_THROWS(loader.setPropertyValue("Workspace", outputSpace),
-                     const std::invalid_argument &)
+    TS_ASSERT_THROWS(loader.setPropertyValue("Workspace", outputSpace), const std::invalid_argument &)
 
-    Workspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().add(outputSpace, ws));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));
 
     std::string result;
     TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("Filename"))
@@ -75,14 +71,11 @@ public:
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
 
     // This value is at the start of the log file.
     Property *l_property = output->run().getLogData(std::string("BeamCurrent"));
-    TimeSeriesProperty<double> *l_timeSeriesDouble =
-        dynamic_cast<TimeSeriesProperty<double> *>(l_property);
+    TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double> *>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS(timeSeriesString.substr(0, 20), "2009-Nov-10 10:14:03");
     // While this value is at the end.
@@ -99,19 +92,15 @@ public:
       loader.initialize();
 
     // Path to test input file assumes Test directory checked out from SVN
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", "HRP37129_ICPevent.txt"))
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "HRP37129_ICPevent.txt"))
     inputFile = loader.getPropertyValue("Filename");
 
     outputSpace = "LoadLogTest-singleLogFile";
-    TS_ASSERT_THROWS(loader.setPropertyValue("Workspace", outputSpace),
-                     const std::invalid_argument &)
+    TS_ASSERT_THROWS(loader.setPropertyValue("Workspace", outputSpace), const std::invalid_argument &)
     // Create an empty workspace and put it in the AnalysisDataService
-    Workspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().add(outputSpace, ws));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));
 
     std::string result;
     TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("Filename"))
@@ -126,18 +115,14 @@ public:
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
 
     // std::shared_ptr<Sample> sample = output->getSample();
 
     Property *l_property = output->run().getLogData("HRP37129_ICPevent");
-    TimeSeriesProperty<std::string> *l_timeSeries =
-        dynamic_cast<TimeSeriesProperty<std::string> *>(l_property);
+    TimeSeriesProperty<std::string> *l_timeSeries = dynamic_cast<TimeSeriesProperty<std::string> *>(l_property);
     std::string timeSeriesString = l_timeSeries->value();
-    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 26),
-                     "2007-Nov-16 13:25:48   END");
+    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 26), "2007-Nov-16 13:25:48   END");
 
     AnalysisDataService::Instance().remove(outputSpace);
   }
@@ -152,8 +137,7 @@ public:
                             "2007-11-16T13:44:33 num2 4\n"
                             "2007-11-16T14:00:21 str3 c\n");
     ScopedFile file(logFileText, "test_log_file.log");
-    MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     ws->mutableRun().addProperty("nspectra", 1);
     // "nspectra" is already in the logs when LoadLog runs
     LoadLog alg;
@@ -173,25 +157,21 @@ public:
     TS_ASSERT(ws->run().hasProperty("str3"));
   }
 
-  void do_test_SNSTextFile(const std::string &names, const std::string &units,
-                           bool willFail, bool createWorkspace = true,
-                           std::string expectedLastUnit = "Furlongs") {
+  void do_test_SNSTextFile(const std::string &names, const std::string &units, bool willFail,
+                           bool createWorkspace = true, std::string expectedLastUnit = "Furlongs") {
     // Create an empty workspace and put it in the AnalysisDataService
 
     outputSpace = "test_SNSTextFile";
     if (createWorkspace) {
-      Workspace_sptr ws =
-          WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-      TS_ASSERT_THROWS_NOTHING(
-          AnalysisDataService::Instance().addOrReplace(outputSpace, ws));
+      Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+      TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(outputSpace, ws));
     }
 
     // Set up the algo
     LoadLog alg;
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "VULCAN_furnace4208.txt"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "VULCAN_furnace4208.txt"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace", outputSpace));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Names", names));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Units", units));
@@ -205,9 +185,7 @@ public:
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
 
     Property *prop = nullptr;
     TimeSeriesProperty<double> *tsp;
@@ -278,33 +256,23 @@ public:
 
   void test_SNSTextFile_noNames_fails() { do_test_SNSTextFile("", "", true); }
 
-  void test_SNSTextFile_tooFewNames_fails() {
-    do_test_SNSTextFile("Yadda,Yadda", "", true);
-  }
+  void test_SNSTextFile_tooFewNames_fails() { do_test_SNSTextFile("Yadda,Yadda", "", true); }
 
-  void test_SNSTextFile_tooManyNames_fails() {
-    do_test_SNSTextFile("Yadda,Yadda,Yadda,Yadda,Yadda,Yadda", "", true);
-  }
+  void test_SNSTextFile_tooManyNames_fails() { do_test_SNSTextFile("Yadda,Yadda,Yadda,Yadda,Yadda,Yadda", "", true); }
 
-  void test_SNSTextFile() {
-    do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "C,K,F,Furlongs", false);
-  }
+  void test_SNSTextFile() { do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "C,K,F,Furlongs", false); }
 
-  void test_SNSTextFile_noUnits() {
-    do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "", false);
-  }
+  void test_SNSTextFile_noUnits() { do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "", false); }
 
   void test_SNSTextFile_wrongNumberOfUnits_fails() {
     do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "Dynes,Ergs", true);
   }
 
   void test_SNSTextFile_twice_overwrites_logs() {
-    do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "C,K,F,Furlongs", false,
-                        true, "Furlongs");
+    do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "C,K,F,Furlongs", false, true, "Furlongs");
     // Dont re-create the workspace the 2nd time around.
     // Switch a unit around to make sure the new one got overwritten
-    do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "C,K,F,Fortnights", false,
-                        false, "Fortnights");
+    do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "C,K,F,Fortnights", false, false, "Fortnights");
   }
 
 private:

@@ -44,8 +44,7 @@ public:
   size_t getNumberPeaks() const;
   double getParameterValue(size_t ipeak, size_t iparam) const;
   double getParameterError(size_t ipeak, size_t iparam) const;
-  void setRecord(size_t ipeak, const double cost, const double peak_position,
-                 const FitFunction &fit_functions);
+  void setRecord(size_t ipeak, const double cost, const double peak_position, const FitFunction &fit_functions);
   void setBadRecord(size_t ipeak, const double peak_position);
   void setFunctionParameters(size_t ipeak, std::vector<double> &param_values);
 
@@ -71,9 +70,7 @@ public:
   const std::string name() const override { return "FitPeaks"; }
 
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Fit one or multiple peaks in all spectra of a given workspace";
-  }
+  const std::string summary() const override { return "Fit one or multiple peaks in all spectra of a given workspace"; }
 
   /// Algorithm's version
   int version() const override { return (1); }
@@ -122,113 +119,81 @@ private:
   std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fitPeaks();
 
   /// fit peaks in a same spectrum
-  void fitSpectrumPeaks(
-      size_t wi, const std::vector<double> &expected_peak_centers,
-      const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
-      std::vector<std::vector<double>> &lastGoodPeakParameters);
+  void fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_peak_centers,
+                        const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
+                        std::vector<std::vector<double>> &lastGoodPeakParameters);
 
   /// fit background
-  bool fitBackground(const size_t &ws_index,
-                     const std::pair<double, double> &fit_window,
-                     const double &expected_peak_pos,
-                     const API::IBackgroundFunction_sptr &bkgd_func);
+  bool fitBackground(const size_t &ws_index, const std::pair<double, double> &fit_window,
+                     const double &expected_peak_pos, const API::IBackgroundFunction_sptr &bkgd_func);
 
   // Peak fitting suite
-  double fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter,
-                           const double expected_peak_center,
-                           const std::pair<double, double> &fitwindow,
-                           const bool estimate_peak_width,
-                           const API::IPeakFunction_sptr &peakfunction,
-                           const API::IBackgroundFunction_sptr &bkgdfunc);
+  double fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter, const double expected_peak_center,
+                           const std::pair<double, double> &fitwindow, const bool estimate_peak_width,
+                           const API::IPeakFunction_sptr &peakfunction, const API::IBackgroundFunction_sptr &bkgdfunc);
 
   /// Methods to fit functions (general)
-  double fitFunctionSD(const API::IAlgorithm_sptr &fit,
-                       const API::IPeakFunction_sptr &peak_function,
-                       const API::IBackgroundFunction_sptr &bkgd_function,
-                       const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
-                       const std::pair<double, double> &peak_range,
-                       const double &expected_peak_center,
+  double fitFunctionSD(const API::IAlgorithm_sptr &fit, const API::IPeakFunction_sptr &peak_function,
+                       const API::IBackgroundFunction_sptr &bkgd_function, const API::MatrixWorkspace_sptr &dataws,
+                       size_t wsindex, const std::pair<double, double> &peak_range, const double &expected_peak_center,
                        bool estimate_peak_width, bool estimate_background);
 
-  double fitFunctionMD(API::IFunction_sptr fit_function,
-                       const API::MatrixWorkspace_sptr &dataws,
-                       const size_t wsindex,
-                       const std::pair<double, double> &vec_xmin,
-                       const std::pair<double, double> &vec_xmax);
+  double fitFunctionMD(API::IFunction_sptr fit_function, const API::MatrixWorkspace_sptr &dataws, const size_t wsindex,
+                       const std::pair<double, double> &vec_xmin, const std::pair<double, double> &vec_xmax);
 
   /// fit a single peak with high background
-  double fitFunctionHighBackground(
-      const API::IAlgorithm_sptr &fit,
-      const std::pair<double, double> &fit_window, const size_t &ws_index,
-      const double &expected_peak_center, bool observe_peak_shape,
-      const API::IPeakFunction_sptr &peakfunction,
-      const API::IBackgroundFunction_sptr &bkgdfunc);
+  double fitFunctionHighBackground(const API::IAlgorithm_sptr &fit, const std::pair<double, double> &fit_window,
+                                   const size_t &ws_index, const double &expected_peak_center, bool observe_peak_shape,
+                                   const API::IPeakFunction_sptr &peakfunction,
+                                   const API::IBackgroundFunction_sptr &bkgdfunc);
 
   void setupParameterTableWorkspace(const API::ITableWorkspace_sptr &table_ws,
-                                    const std::vector<std::string> &param_names,
-                                    bool with_chi2);
+                                    const std::vector<std::string> &param_names, bool with_chi2);
 
   /// get vector X, Y and E in a given range
-  void getRangeData(size_t iws, const std::pair<double, double> &fit_window,
-                    std::vector<double> &vec_x, std::vector<double> &vec_y,
-                    std::vector<double> &vec_e);
+  void getRangeData(size_t iws, const std::pair<double, double> &fit_window, std::vector<double> &vec_x,
+                    std::vector<double> &vec_y, std::vector<double> &vec_e);
 
   /// Reduce background
-  void reduceByBackground(const API::IBackgroundFunction_sptr &bkgd_func,
-                          const std::vector<double> &vec_x,
+  void reduceByBackground(const API::IBackgroundFunction_sptr &bkgd_func, const std::vector<double> &vec_x,
                           std::vector<double> &vec_y);
 
-  API::MatrixWorkspace_sptr
-  createMatrixWorkspace(const std::vector<double> &vec_x,
-                        const std::vector<double> &vec_y,
-                        const std::vector<double> &vec_e);
+  API::MatrixWorkspace_sptr createMatrixWorkspace(const std::vector<double> &vec_x, const std::vector<double> &vec_y,
+                                                  const std::vector<double> &vec_e);
 
   /// Estimate peak parameters by 'observation'
-  int estimatePeakParameters(const HistogramData::Histogram &histogram,
-                             const std::pair<size_t, size_t> &peak_window,
+  int estimatePeakParameters(const HistogramData::Histogram &histogram, const std::pair<size_t, size_t> &peak_window,
                              const API::IPeakFunction_sptr &peakfunction,
-                             const API::IBackgroundFunction_sptr &bkgdfunction,
-                             bool observe_peak_width);
+                             const API::IBackgroundFunction_sptr &bkgdfunction, bool observe_peak_width);
 
-  bool decideToEstimatePeakParams(const bool firstPeakInSpectrum,
-                                  const API::IPeakFunction_sptr &peak_function);
+  bool decideToEstimatePeakParams(const bool firstPeakInSpectrum, const API::IPeakFunction_sptr &peak_function);
 
   /// observe peak center
-  int observePeakCenter(const HistogramData::Histogram &histogram,
-                        API::FunctionValues &bkgd_values, size_t start_index,
-                        size_t stop_index, double &peak_center,
-                        size_t &peak_center_index, double &peak_height);
+  int observePeakCenter(const HistogramData::Histogram &histogram, API::FunctionValues &bkgd_values, size_t start_index,
+                        size_t stop_index, double &peak_center, size_t &peak_center_index, double &peak_height);
 
   /// Observe peak width
-  double observePeakFwhm(const HistogramData::Histogram &histogram,
-                         API::FunctionValues &bkgd_values, size_t ipeak,
+  double observePeakFwhm(const HistogramData::Histogram &histogram, API::FunctionValues &bkgd_values, size_t ipeak,
                          size_t istart, size_t istop);
 
   /// Process the result from fitting a single peak
-  bool processSinglePeakFitResult(
-      size_t wsindex, size_t peakindex, const double cost,
-      const std::vector<double> &expected_peak_positions,
-      const FitPeaksAlgorithm::FitFunction &fitfunction,
-      const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
+  bool processSinglePeakFitResult(size_t wsindex, size_t peakindex, const double cost,
+                                  const std::vector<double> &expected_peak_positions,
+                                  const FitPeaksAlgorithm::FitFunction &fitfunction,
+                                  const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
 
   /// calculate peak+background for fitted
-  void calculateFittedPeaks(
-      std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
-          fit_results);
+  void calculateFittedPeaks(std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_results);
 
   /// Get the parameter name for peak height (I or height or etc)
-  std::string getPeakHeightParameterName(
-      const API::IPeakFunction_const_sptr &peak_function);
+  std::string getPeakHeightParameterName(const API::IPeakFunction_const_sptr &peak_function);
 
   /// Set the workspaces and etc to output properties
-  void
-  processOutputs(std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
-                     fit_result_vec);
+  void processOutputs(std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_result_vec);
 
   /// Write result of peak fit per spectrum to output analysis workspaces
-  void writeFitResult(
-      size_t wi, const std::vector<double> &expected_positions,
-      const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
+  void writeFitResult(size_t wi, const std::vector<double> &expected_positions,
+                      const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
 
   /// check whether FitPeaks supports observation on a certain peak profile's
   /// parameters (width!)
@@ -241,8 +206,7 @@ private:
   /// event workspace for input
   DataObjects::EventWorkspace_const_sptr m_inputEventWS; // cast from m_inputWS
   /// output workspace for peak positions
-  API::MatrixWorkspace_sptr
-      m_outputPeakPositionWorkspace; // output workspace for peak positions
+  API::MatrixWorkspace_sptr m_outputPeakPositionWorkspace; // output workspace for peak positions
   /// output analysis workspaces
   /// table workspace for fitted parameters
   API::ITableWorkspace_sptr m_fittedParamTable;

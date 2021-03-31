@@ -70,8 +70,7 @@ public:
     // Test workspace data (copied from LoadRawTest.h)
     //
     MatrixWorkspace_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outputSpace);
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 32 for file inputFile =
     // "../../../../Test/Nexus/emu00006473.nxs";
@@ -95,13 +94,10 @@ public:
     // Test code copied from LoadLogTest to check Child Algorithm is running
     // properly
     //----------------------------------------------------------------------
-    Property *l_property =
-        output->run().getLogData(std::string("beamlog_current"));
-    TimeSeriesProperty<double> *l_timeSeriesDouble =
-        dynamic_cast<TimeSeriesProperty<double> *>(l_property);
+    Property *l_property = output->run().getLogData(std::string("beamlog_current"));
+    TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double> *>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
-    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 27),
-                     "2006-Nov-21 07:03:08  182.8");
+    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 27), "2006-Nov-21 07:03:08  182.8");
     // check that sample name has been set correctly
     TS_ASSERT_EQUALS(output->sample().getName(), "Cr2.7Co0.3Si");
 
@@ -136,8 +132,7 @@ public:
 
     // Test that the output workspace knows the field direction
     MatrixWorkspace_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outputSpace);
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
     Property *fieldDirection = output->run().getLogData("main_field_direction");
     TS_ASSERT(fieldDirection);
     TS_ASSERT_EQUALS(fieldDirection->value(), "Transverse");
@@ -165,18 +160,14 @@ public:
     //
     if (entryNumber == 0) {
       WorkspaceGroup_sptr outGrp;
-      TS_ASSERT_THROWS_NOTHING(
-          outGrp = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-              outputSpace));
+      TS_ASSERT_THROWS_NOTHING(outGrp = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace));
     }
     // if entry number is given
     if (entryNumber == 1) {
       MatrixWorkspace_sptr output;
-      output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          outputSpace);
+      output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
 
-      Workspace2D_sptr output2D =
-          std::dynamic_pointer_cast<Workspace2D>(output);
+      Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
       // Workspace2D_sptr output2D2 =
       // std::dynamic_pointer_cast<Workspace2D>(output2);
       // Should be 32 for file inputFile =
@@ -200,23 +191,15 @@ public:
     WorkspaceGroup_sptr outGrp;
     // if no entry number load the group workspace
     if (entryNumber == 0) {
-      TS_ASSERT_THROWS_NOTHING(
-          outGrp = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-              outputSpace));
+      TS_ASSERT_THROWS_NOTHING(outGrp = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace));
 
-      (output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-           outputSpace + "_1"));
-      (output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-           outputSpace + "_2"));
-      (output3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-           outputSpace + "_3"));
-      (output4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-           outputSpace + "_4"));
+      (output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_1"));
+      (output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_2"));
+      (output3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_3"));
+      (output4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_4"));
 
-      Workspace2D_sptr output2D =
-          std::dynamic_pointer_cast<Workspace2D>(output);
-      Workspace2D_sptr output2D2 =
-          std::dynamic_pointer_cast<Workspace2D>(output2);
+      Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
+      Workspace2D_sptr output2D2 = std::dynamic_pointer_cast<Workspace2D>(output2);
       // Should be 32 for file inputFile =
       // "../../../../Test/Nexus/emu00006475.nxs";
       TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 32);
@@ -261,27 +244,19 @@ public:
     // file
     //
     WorkspaceGroup_sptr outGrp;
-    TS_ASSERT_THROWS_NOTHING(
-        outGrp = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            outputSpace));
+    TS_ASSERT_THROWS_NOTHING(outGrp = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace));
 
     MatrixWorkspace_sptr output, output2, output3, output4;
     // WorkspaceGroup_sptr outGrp;
     // if no entry number load the group workspace
     if (entryNumber == 0) {
-      (output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-           outputSpace + "_1"));
-      (output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-           outputSpace + "_2"));
-      (output3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-           outputSpace + "_3"));
-      (output4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-           outputSpace + "_4"));
+      (output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_1"));
+      (output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_2"));
+      (output3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_3"));
+      (output4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_4"));
 
-      Workspace2D_sptr output2D =
-          std::dynamic_pointer_cast<Workspace2D>(output);
-      Workspace2D_sptr output2D2 =
-          std::dynamic_pointer_cast<Workspace2D>(output2);
+      Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
+      Workspace2D_sptr output2D2 = std::dynamic_pointer_cast<Workspace2D>(output2);
       // Should be 32 for file inputFile =
       // "../../../../Test/Nexus/emu00006475.nxs";
       TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 32);
@@ -321,8 +296,7 @@ public:
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    (output =
-         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"));
+    (output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"));
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     // Should be 6 for selected input
@@ -364,8 +338,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg1.execute());
     TS_ASSERT(alg1.isExecuted());
     // Get back the saved workspace
-    MatrixWorkspace_sptr output1 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS1");
+    MatrixWorkspace_sptr output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS1");
     Workspace2D_sptr out1 = std::dynamic_pointer_cast<Workspace2D>(output1);
 
     // Execute alg2
@@ -377,8 +350,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg2.execute());
     TS_ASSERT(alg2.isExecuted());
     // Get back the saved workspace
-    MatrixWorkspace_sptr output2 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS2");
+    MatrixWorkspace_sptr output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS2");
     Workspace2D_sptr out2 = std::dynamic_pointer_cast<Workspace2D>(output2);
 
     // Check common spectra
@@ -403,10 +375,8 @@ public:
 
     // Check dead time table
     TableWorkspace_sptr deadTimeTable;
-    TS_ASSERT_THROWS_NOTHING(
-        deadTimeTable =
-            AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-                deadTimeWSName));
+    TS_ASSERT_THROWS_NOTHING(deadTimeTable =
+                                 AnalysisDataService::Instance().retrieveWS<TableWorkspace>(deadTimeWSName));
     TS_ASSERT(deadTimeTable);
     // Check number of rows and columns
     TS_ASSERT_EQUALS(deadTimeTable->columnCount(), 2);
@@ -423,10 +393,8 @@ public:
 
     // Check detector grouping table
     TableWorkspace_sptr groupingTable;
-    TS_ASSERT_THROWS_NOTHING(
-        groupingTable =
-            AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-                groupingWSName));
+    TS_ASSERT_THROWS_NOTHING(groupingTable =
+                                 AnalysisDataService::Instance().retrieveWS<TableWorkspace>(groupingWSName));
     TS_ASSERT(groupingTable);
     // Check number of rows and columns
     TS_ASSERT_EQUALS(groupingTable->columnCount(), 1);
@@ -465,8 +433,7 @@ public:
     TS_ASSERT(loadedWS);
 
     // Check the right spectra have been loaded
-    const std::vector<Mantid::specnum_t> expectedSpectra{5, 6,  7,  8,
-                                                         9, 10, 29, 31};
+    const std::vector<Mantid::specnum_t> expectedSpectra{5, 6, 7, 8, 9, 10, 29, 31};
     TS_ASSERT_EQUALS(loadedWS->getNumberHistograms(), expectedSpectra.size());
     for (size_t i = 0; i < loadedWS->getNumberHistograms(); ++i) {
       const auto spec = loadedWS->getSpectrum(i);
@@ -487,22 +454,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "emu00006473.nxs"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("DeadTimeTable", deadTimesWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "emu00006473.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DeadTimeTable", deadTimesWSName));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     TableWorkspace_sptr deadTimesTable;
 
-    TS_ASSERT_THROWS_NOTHING(
-        deadTimesTable =
-            AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-                deadTimesWSName));
+    TS_ASSERT_THROWS_NOTHING(deadTimesTable =
+                                 AnalysisDataService::Instance().retrieveWS<TableWorkspace>(deadTimesWSName));
 
     TS_ASSERT(deadTimesTable);
 
@@ -533,30 +495,24 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "MUSR00015189.nxs"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("DeadTimeTable", deadTimesWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "MUSR00015189.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DeadTimeTable", deadTimesWSName));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     WorkspaceGroup_sptr deadTimesGroup;
 
-    TS_ASSERT_THROWS_NOTHING(
-        deadTimesGroup =
-            AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-                deadTimesWSName));
+    TS_ASSERT_THROWS_NOTHING(deadTimesGroup =
+                                 AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(deadTimesWSName));
 
     TS_ASSERT(deadTimesGroup);
 
     if (deadTimesGroup) {
       TS_ASSERT_EQUALS(deadTimesGroup->size(), 2);
 
-      TableWorkspace_sptr table1 =
-          std::dynamic_pointer_cast<TableWorkspace>(deadTimesGroup->getItem(0));
+      TableWorkspace_sptr table1 = std::dynamic_pointer_cast<TableWorkspace>(deadTimesGroup->getItem(0));
       TS_ASSERT(table1);
 
       if (table1) {
@@ -572,8 +528,7 @@ public:
         TS_ASSERT_DELTA(table1->Double(63, 1), 0.01245339, 0.00000001);
       }
 
-      TableWorkspace_sptr table2 =
-          std::dynamic_pointer_cast<TableWorkspace>(deadTimesGroup->getItem(1));
+      TableWorkspace_sptr table2 = std::dynamic_pointer_cast<TableWorkspace>(deadTimesGroup->getItem(1));
       TS_ASSERT(table2);
 
       if (table2) {
@@ -596,30 +551,24 @@ public:
 
   void test_loadingDetectorGrouping_singlePeriod() {
     const std::string outWSName = "LoadMuonNexus1Test_OutputWS";
-    const std::string detectorGroupingWSName =
-        "LoadMuonNexus1Test_DetectorGrouping";
+    const std::string detectorGroupingWSName = "LoadMuonNexus1Test_DetectorGrouping";
 
     LoadMuonNexus1 alg;
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "emu00006473.nxs"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("DetectorGroupingTable", detectorGroupingWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "emu00006473.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DetectorGroupingTable", detectorGroupingWSName));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     TableWorkspace_sptr detectorGrouping;
 
-    TS_ASSERT_THROWS_NOTHING(
-        detectorGrouping =
-            AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-                detectorGroupingWSName));
+    TS_ASSERT_THROWS_NOTHING(detectorGrouping =
+                                 AnalysisDataService::Instance().retrieveWS<TableWorkspace>(detectorGroupingWSName));
 
     TS_ASSERT(detectorGrouping);
 
@@ -631,10 +580,8 @@ public:
       TS_ASSERT_EQUALS(detectorGrouping->getColumn(0)->name(), "Detectors");
 
       std::vector<int> e1, e2;
-      TS_ASSERT_THROWS_NOTHING(
-          e1 = detectorGrouping->cell<std::vector<int>>(0, 0));
-      TS_ASSERT_THROWS_NOTHING(
-          e2 = detectorGrouping->cell<std::vector<int>>(1, 0));
+      TS_ASSERT_THROWS_NOTHING(e1 = detectorGrouping->cell<std::vector<int>>(0, 0));
+      TS_ASSERT_THROWS_NOTHING(e2 = detectorGrouping->cell<std::vector<int>>(1, 0));
 
       TS_ASSERT_EQUALS(e1.size(), 16);
       TS_ASSERT_EQUALS(e2.size(), 16);
@@ -652,38 +599,31 @@ public:
 
   void test_loadingDetectorGrouping_multiPeriod() {
     const std::string outWSName = "LoadMuonNexus1Test_OutputWS";
-    const std::string detectorGroupingWSName =
-        "LoadMuonNexus1Test_DetectorGrouping";
+    const std::string detectorGroupingWSName = "LoadMuonNexus1Test_DetectorGrouping";
 
     LoadMuonNexus1 alg;
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "MUSR00015189.nxs"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("DetectorGroupingTable", detectorGroupingWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "MUSR00015189.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DetectorGroupingTable", detectorGroupingWSName));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     WorkspaceGroup_sptr detectorGrouping;
 
-    TS_ASSERT_THROWS_NOTHING(
-        detectorGrouping =
-            AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-                detectorGroupingWSName));
+    TS_ASSERT_THROWS_NOTHING(detectorGrouping =
+                                 AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(detectorGroupingWSName));
 
     TS_ASSERT(detectorGrouping);
 
     if (detectorGrouping) {
       TS_ASSERT_EQUALS(detectorGrouping->size(), 2);
 
-      TableWorkspace_sptr table1 = std::dynamic_pointer_cast<TableWorkspace>(
-          detectorGrouping->getItem(0));
+      TableWorkspace_sptr table1 = std::dynamic_pointer_cast<TableWorkspace>(detectorGrouping->getItem(0));
       TS_ASSERT(table1);
 
       if (table1) {
@@ -704,8 +644,7 @@ public:
         TS_ASSERT_EQUALS(e2[31], 32);
       }
 
-      TableWorkspace_sptr table2 = std::dynamic_pointer_cast<TableWorkspace>(
-          detectorGrouping->getItem(1));
+      TableWorkspace_sptr table2 = std::dynamic_pointer_cast<TableWorkspace>(detectorGrouping->getItem(1));
       TS_ASSERT(table2);
 
       if (table2) {
@@ -747,8 +686,7 @@ public:
       return;
     }
 
-    auto outWs =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outWsEntry.retrieve());
+    auto outWs = std::dynamic_pointer_cast<MatrixWorkspace>(outWsEntry.retrieve());
     TS_ASSERT(outWs);
 
     if (!outWs)
@@ -782,8 +720,7 @@ public:
       return;
     }
 
-    auto outWs =
-        std::dynamic_pointer_cast<WorkspaceGroup>(outWsEntry.retrieve());
+    auto outWs = std::dynamic_pointer_cast<WorkspaceGroup>(outWsEntry.retrieve());
     TS_ASSERT(outWs);
 
     if (!outWs)
@@ -832,10 +769,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "emu00006475.nxs"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWsEntry.name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "emu00006475.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWsEntry.name()));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -887,10 +822,8 @@ public:
     }
 
     Workspace_sptr grouping;
-    TS_ASSERT_THROWS_NOTHING(grouping =
-                                 alg.getProperty("DetectorGroupingTable"));
-    const auto detectorGrouping =
-        std::dynamic_pointer_cast<TableWorkspace>(grouping);
+    TS_ASSERT_THROWS_NOTHING(grouping = alg.getProperty("DetectorGroupingTable"));
+    const auto detectorGrouping = std::dynamic_pointer_cast<TableWorkspace>(grouping);
 
     if (detectorGrouping) {
       TS_ASSERT_EQUALS(detectorGrouping->columnCount(), 1);
@@ -900,15 +833,11 @@ public:
       TS_ASSERT_EQUALS(detectorGrouping->getColumn(0)->name(), "Detectors");
 
       std::vector<int> left, right, up, down;
-      TS_ASSERT_THROWS_NOTHING(
-          left = detectorGrouping->cell<std::vector<int>>(0, 0));
-      TS_ASSERT_THROWS_NOTHING(
-          right = detectorGrouping->cell<std::vector<int>>(1, 0));
+      TS_ASSERT_THROWS_NOTHING(left = detectorGrouping->cell<std::vector<int>>(0, 0));
+      TS_ASSERT_THROWS_NOTHING(right = detectorGrouping->cell<std::vector<int>>(1, 0));
 
-      TS_ASSERT_THROWS_NOTHING(
-          up = detectorGrouping->cell<std::vector<int>>(2, 0));
-      TS_ASSERT_THROWS_NOTHING(
-          down = detectorGrouping->cell<std::vector<int>>(3, 0));
+      TS_ASSERT_THROWS_NOTHING(up = detectorGrouping->cell<std::vector<int>>(2, 0));
+      TS_ASSERT_THROWS_NOTHING(down = detectorGrouping->cell<std::vector<int>>(3, 0));
 
       TS_ASSERT_EQUALS(left.size(), 76);
       TS_ASSERT_EQUALS(right.size(), 78);
@@ -939,10 +868,8 @@ public:
     }
 
     Workspace_sptr grouping;
-    TS_ASSERT_THROWS_NOTHING(grouping =
-                                 alg.getProperty("DetectorGroupingTable"));
-    const auto detectorGrouping =
-        std::dynamic_pointer_cast<TableWorkspace>(grouping);
+    TS_ASSERT_THROWS_NOTHING(grouping = alg.getProperty("DetectorGroupingTable"));
+    const auto detectorGrouping = std::dynamic_pointer_cast<TableWorkspace>(grouping);
 
     if (detectorGrouping) {
       TS_ASSERT_EQUALS(detectorGrouping->columnCount(), 1);
@@ -952,10 +879,8 @@ public:
       TS_ASSERT_EQUALS(detectorGrouping->getColumn(0)->name(), "Detectors");
 
       std::vector<int> fwd, bwd;
-      TS_ASSERT_THROWS_NOTHING(
-          fwd = detectorGrouping->cell<std::vector<int>>(0, 0));
-      TS_ASSERT_THROWS_NOTHING(
-          bwd = detectorGrouping->cell<std::vector<int>>(1, 0));
+      TS_ASSERT_THROWS_NOTHING(fwd = detectorGrouping->cell<std::vector<int>>(0, 0));
+      TS_ASSERT_THROWS_NOTHING(bwd = detectorGrouping->cell<std::vector<int>>(1, 0));
 
       TS_ASSERT_EQUALS(fwd.size(), 48);
       TS_ASSERT_EQUALS(bwd.size(), 48);
@@ -1002,9 +927,7 @@ private:
   std::string inputFile;
   std::string inputFile2;
 
-  template <typename T>
-  void checkProperty(const Run &run, const std::string &property,
-                     const T &expectedValue) {
+  template <typename T> void checkProperty(const Run &run, const std::string &property, const T &expectedValue) {
     if (run.hasProperty(property)) {
       T propertyValue;
 
@@ -1015,8 +938,7 @@ private:
         return;
       }
 
-      TSM_ASSERT_EQUALS("Property value mismatch: " + property, propertyValue,
-                        expectedValue);
+      TSM_ASSERT_EQUALS("Property value mismatch: " + property, propertyValue, expectedValue);
     } else {
       TS_FAIL("No property: " + property);
     }

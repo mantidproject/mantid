@@ -47,8 +47,7 @@ public:
     TS_ASSERT(alg2D.isExecuted());
 
     MatrixWorkspace_sptr output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            alg2D.getProperty("OutputWorkspace"));
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(alg2D.getProperty("OutputWorkspace"));
 
     Mantid::MantidVec &Xold = input->dataX(0);
     Mantid::MantidVec &Xnew = output->dataX(0);
@@ -69,8 +68,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg2D.execute());
     TS_ASSERT(alg2D.isExecuted());
 
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "output2D_lims");
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output2D_lims");
 
     // check hist 0 is unchanged
     Mantid::MantidVec &Xold0 = input->dataX(0);
@@ -132,38 +130,30 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    EventWorkspace_sptr WSI =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            this->inputSpace);
+    EventWorkspace_sptr WSI = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(this->inputSpace);
     TS_ASSERT(WSI);
-    EventWorkspace_sptr WSO =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
+    EventWorkspace_sptr WSO = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
     TS_ASSERT(WSO);
 
     std::size_t wkspIndex = 4348; // a good workspace index (with events)
     TS_ASSERT_DELTA(WSI->getSpectrum(wkspIndex).getEvents()[0].tof() + 100,
                     WSO->getSpectrum(wkspIndex).getEvents()[0].tof(), 0.001);
-    TS_ASSERT_DELTA(WSI->getSpectrum(wkspIndex).dataX()[1] + 100.,
-                    WSO->getSpectrum(wkspIndex).dataX()[1], 0.001);
+    TS_ASSERT_DELTA(WSI->getSpectrum(wkspIndex).dataX()[1] + 100., WSO->getSpectrum(wkspIndex).dataX()[1], 0.001);
 
     alg.setPropertyValue("IndexMin", "4349");
     alg.setPropertyValue("IndexMax", "4350");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
-    WSO =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
+    WSO = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
     TS_ASSERT(WSO);
-    TS_ASSERT_DELTA(WSI->getSpectrum(wkspIndex).getEvents()[0].tof(),
-                    WSO->getSpectrum(wkspIndex).getEvents()[0].tof(),
+    TS_ASSERT_DELTA(WSI->getSpectrum(wkspIndex).getEvents()[0].tof(), WSO->getSpectrum(wkspIndex).getEvents()[0].tof(),
                     0.001); // should be unchanged
-    TS_ASSERT_DELTA(WSI->getSpectrum(wkspIndex).dataX()[1],
-                    WSO->getSpectrum(wkspIndex).dataX()[1],
+    TS_ASSERT_DELTA(WSI->getSpectrum(wkspIndex).dataX()[1], WSO->getSpectrum(wkspIndex).dataX()[1],
                     0.001); // should be unchanged
     TS_ASSERT_DELTA(WSI->getSpectrum(wkspIndex + 1).getEvents()[0].tof() + 100,
                     WSO->getSpectrum(wkspIndex + 1).getEvents()[0].tof(),
                     0.001); // should change
-    TS_ASSERT_DELTA(WSI->getSpectrum(wkspIndex + 1).dataX()[1] + 100.,
-                    WSO->getSpectrum(wkspIndex + 1).dataX()[1],
+    TS_ASSERT_DELTA(WSI->getSpectrum(wkspIndex + 1).dataX()[1] + 100., WSO->getSpectrum(wkspIndex + 1).dataX()[1],
                     0.001); // should change
   }
 
@@ -175,9 +165,7 @@ class ChangeBinOffsetTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ChangeBinOffsetTestPerformance *createSuite() {
-    return new ChangeBinOffsetTestPerformance();
-  }
+  static ChangeBinOffsetTestPerformance *createSuite() { return new ChangeBinOffsetTestPerformance(); }
   static void destroySuite(ChangeBinOffsetTestPerformance *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;
@@ -185,8 +173,7 @@ public:
 
   ChangeBinOffsetTestPerformance() {
     input = WorkspaceCreationHelper::create2DWorkspaceBinned(10000, 1000);
-    inputEvent =
-        WorkspaceCreationHelper::createEventWorkspace(10000, 1000, 5000);
+    inputEvent = WorkspaceCreationHelper::createEventWorkspace(10000, 1000, 5000);
   }
 
   void testExec2D() {

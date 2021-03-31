@@ -50,19 +50,13 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RemoveBins"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Used to remove data from a range of bins in a workspace.";
-  }
+  const std::string summary() const override { return "Used to remove data from a range of bins in a workspace."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"CropWorkspace"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CropWorkspace"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Transforms\\Splitting";
-  }
+  const std::string category() const override { return "Transforms\\Splitting"; }
 
 private:
   // Overridden Algorithm methods
@@ -72,22 +66,18 @@ private:
 
   void crop(const double &start, const double &end);
   void transformRangeUnit(const int index, double &startX, double &endX);
-  void calculateDetectorPosition(const int index, double &l1, double &l2,
-                                 double &twoTheta);
+  void calculateDetectorPosition(const int index, double &l1, double &l2, double &twoTheta);
   int findIndex(const double &value, const HistogramData::HistogramX &vec);
-  void RemoveFromEnds(int start, int end, HistogramData::HistogramY &Y,
-                      HistogramData::HistogramE &E);
-  void RemoveFromMiddle(const int &start, const int &end,
-                        const double &startFrac, const double &endFrac,
-                        HistogramData::HistogramY &Y,
-                        HistogramData::HistogramE &E);
+  void RemoveFromEnds(int start, int end, HistogramData::HistogramY &Y, HistogramData::HistogramE &E);
+  void RemoveFromMiddle(const int &start, const int &end, const double &startFrac, const double &endFrac,
+                        HistogramData::HistogramY &Y, HistogramData::HistogramE &E);
 
   API::MatrixWorkspace_const_sptr m_inputWorkspace; ///< The input workspace
   const API::SpectrumInfo *m_spectrumInfo;
   double m_startX;               ///< The range start point
   double m_endX;                 ///< The range end point
   Kernel::Unit_sptr m_rangeUnit; ///< The unit in which the above range is given
-  bool m_interpolate; ///< Whether removed bins should be interpolated
+  bool m_interpolate;            ///< Whether removed bins should be interpolated
 };
 
 } // namespace Algorithms

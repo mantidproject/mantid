@@ -16,40 +16,32 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALFCustomInstrumentView::ALFCustomInstrumentView(const std::string &instrument,
-                                                 QWidget *parent)
-    : MantidWidgets::BaseCustomInstrumentView(instrument, parent),
-      m_extractSingleTubeObservable(nullptr), m_averageTubeObservable(nullptr),
-      m_extractAction(nullptr), m_averageAction(nullptr),
-      m_analysisPane(nullptr) {
+ALFCustomInstrumentView::ALFCustomInstrumentView(const std::string &instrument, QWidget *parent)
+    : MantidWidgets::BaseCustomInstrumentView(instrument, parent), m_extractSingleTubeObservable(nullptr),
+      m_averageTubeObservable(nullptr), m_extractAction(nullptr), m_averageAction(nullptr), m_analysisPane(nullptr) {
   m_helpPage = "direct/ALF View";
 }
 
-void ALFCustomInstrumentView::setUpInstrument(
-    const std::string &fileName,
-    std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) {
+void ALFCustomInstrumentView::setUpInstrument(const std::string &fileName,
+                                              std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) {
 
   m_extractSingleTubeObservable = new Observable();
   m_averageTubeObservable = new Observable();
 
-  auto instrumentWidget =
-      new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName));
+  auto instrumentWidget = new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName));
   instrumentWidget->removeTab("Instrument");
   instrumentWidget->removeTab("Draw");
   instrumentWidget->hideHelp();
 
   // set up extract single tube
   m_extractAction = new QAction("Extract Single Tube", this);
-  connect(m_extractAction, SIGNAL(triggered()), this,
-          SLOT(extractSingleTube())),
-      instrumentWidget->getPickTab()->addToContextMenu(m_extractAction,
-                                                       binders[0]);
+  connect(m_extractAction, SIGNAL(triggered()), this, SLOT(extractSingleTube())),
+      instrumentWidget->getPickTab()->addToContextMenu(m_extractAction, binders[0]);
 
   // set up add to average
   m_averageAction = new QAction("Add Tube To Average", this);
   connect(m_averageAction, SIGNAL(triggered()), this, SLOT(averageTube())),
-      instrumentWidget->getPickTab()->addToContextMenu(m_averageAction,
-                                                       binders[1]);
+      instrumentWidget->getPickTab()->addToContextMenu(m_averageAction, binders[1]);
 
   setInstrumentWidget(instrumentWidget);
 }
@@ -70,12 +62,9 @@ void ALFCustomInstrumentView::averageTube() {
 void ALFCustomInstrumentView::observeExtractSingleTube(Observer *listner) {
   m_extractSingleTubeObservable->attach(listner);
 }
-void ALFCustomInstrumentView::observeAverageTube(Observer *listner) {
-  m_averageTubeObservable->attach(listner);
-}
+void ALFCustomInstrumentView::observeAverageTube(Observer *listner) { m_averageTubeObservable->attach(listner); }
 
-void ALFCustomInstrumentView::addObserver(
-    std::tuple<std::string, Observer *> &listener) {
+void ALFCustomInstrumentView::addObserver(std::tuple<std::string, Observer *> &listener) {
   if (std::get<0>(listener) == "singleTube") {
     observeExtractSingleTube(std::get<1>(listener));
   } else if (std::get<0>(listener) == "averageTube") {
@@ -83,18 +72,14 @@ void ALFCustomInstrumentView::addObserver(
   }
 }
 
-void ALFCustomInstrumentView::setupAnalysisPane(
-    MantidWidgets::IPlotFitAnalysisPaneView *analysis) {
+void ALFCustomInstrumentView::setupAnalysisPane(MantidWidgets::IPlotFitAnalysisPaneView *analysis) {
   // keep a copy here so we can use a custom class
   m_analysisPane = analysis;
   // just adds it to the view
-  BaseCustomInstrumentView::setupInstrumentAnalysisSplitters(
-      analysis->getQWidget());
+  BaseCustomInstrumentView::setupInstrumentAnalysisSplitters(analysis->getQWidget());
 }
 
-void ALFCustomInstrumentView::addSpectrum(const std::string &wsName) {
-  m_analysisPane->addSpectrum(std::move(wsName));
-}
+void ALFCustomInstrumentView::addSpectrum(const std::string &wsName) { m_analysisPane->addSpectrum(std::move(wsName)); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -23,12 +23,8 @@ class BraggScattererInCrystalStructureTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BraggScattererInCrystalStructureTest *createSuite() {
-    return new BraggScattererInCrystalStructureTest();
-  }
-  static void destroySuite(BraggScattererInCrystalStructureTest *suite) {
-    delete suite;
-  }
+  static BraggScattererInCrystalStructureTest *createSuite() { return new BraggScattererInCrystalStructureTest(); }
+  static void destroySuite(BraggScattererInCrystalStructureTest *suite) { delete suite; }
 
   void testInitialization() {
     BraggScattererInCrystalStructure_sptr scatterer = getDefaultScatterer();
@@ -60,8 +56,7 @@ public:
     TS_ASSERT_EQUALS(testPos, goodPosition);
 
     V3D badPosition(1.2, 4.3, -6.2);
-    TS_ASSERT_THROWS_NOTHING(
-        scatterer->setProperty("Position", "[1.2, 4.3, -6.2]"));
+    TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("Position", "[1.2, 4.3, -6.2]"));
     TS_ASSERT_THROWS_NOTHING(testPos = scatterer->getPosition());
     TS_ASSERT_DIFFERS(testPos, badPosition);
     TS_ASSERT_EQUALS(testPos, V3D(0.2, 0.3, 0.8));
@@ -72,8 +67,7 @@ public:
 
     UnitCell cell(5.43, 5.43, 5.43);
 
-    TS_ASSERT_THROWS_NOTHING(
-        scatterer->setProperty("UnitCell", unitCellToStr(cell)));
+    TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("UnitCell", unitCellToStr(cell)));
     TS_ASSERT_EQUALS(scatterer->getCell().getG(), cell.getG());
   }
 
@@ -97,11 +91,8 @@ public:
 
 private:
   BraggScattererInCrystalStructure_sptr getDefaultScatterer() {
-    std::shared_ptr<MockBraggScatterer> mockScatterer =
-        std::make_shared<MockBraggScatterer>();
-    EXPECT_CALL(*mockScatterer,
-                afterScattererPropertySet(A<const std::string &>()))
-        .WillRepeatedly(Return());
+    std::shared_ptr<MockBraggScatterer> mockScatterer = std::make_shared<MockBraggScatterer>();
+    EXPECT_CALL(*mockScatterer, afterScattererPropertySet(A<const std::string &>())).WillRepeatedly(Return());
 
     return mockScatterer;
   }

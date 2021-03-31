@@ -36,12 +36,12 @@ ComplexType v31{31, 0.31};
 ComplexType v32{32, 0.32};
 ComplexType v33{33, 0.33};
 
-#define TS_ASSERT_COMPLEX_DELTA(v1, r2, i2, d)                                 \
-  TS_ASSERT_DELTA(ComplexType(v1).real(), r2, d);                              \
+#define TS_ASSERT_COMPLEX_DELTA(v1, r2, i2, d)                                                                         \
+  TS_ASSERT_DELTA(ComplexType(v1).real(), r2, d);                                                                      \
   TS_ASSERT_DELTA(ComplexType(v1).imag(), i2, d);
 
-#define TS_ASSERT_COMPLEX_DELTA_2(v1, v2, d)                                   \
-  TS_ASSERT_DELTA(ComplexType(v1).real(), ComplexType(v2).real(), d);          \
+#define TS_ASSERT_COMPLEX_DELTA_2(v1, v2, d)                                                                           \
+  TS_ASSERT_DELTA(ComplexType(v1).real(), ComplexType(v2).real(), d);                                                  \
   TS_ASSERT_DELTA(ComplexType(v1).imag(), ComplexType(v2).imag(), d);
 } // namespace
 
@@ -314,8 +314,7 @@ public:
     m.set(3, 2, 32);
     m.set(3, 3, 33);
 
-    TS_ASSERT_THROWS(ComplexMatrix subm(m, 2, 2, 3, 3),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ComplexMatrix subm(m, 2, 2, 3, 3), const std::runtime_error &);
   }
 
   void test_eigenSystem_rectangular_throw() {

@@ -30,27 +30,22 @@ using namespace API;
 DECLARE_ALGORITHM(RemoveBins)
 
 RemoveBins::RemoveBins()
-    : API::Algorithm(), m_inputWorkspace(), m_spectrumInfo(nullptr),
-      m_startX(DBL_MAX), m_endX(-DBL_MAX), m_rangeUnit(), m_interpolate(false) {
-}
+    : API::Algorithm(), m_inputWorkspace(), m_spectrumInfo(nullptr), m_startX(DBL_MAX), m_endX(-DBL_MAX), m_rangeUnit(),
+      m_interpolate(false) {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */
 void RemoveBins::init() {
   auto wsValidator = std::make_shared<HistogramValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 
   auto mustHaveValue = std::make_shared<MandatoryValidator<double>>();
-  declareProperty("XMin", Mantid::EMPTY_DBL(), mustHaveValue,
-                  "The lower bound of the region to be removed.");
-  declareProperty("XMax", Mantid::EMPTY_DBL(), mustHaveValue,
-                  "The upper bound of the region to be removed.");
+  declareProperty("XMin", Mantid::EMPTY_DBL(), mustHaveValue, "The lower bound of the region to be removed.");
+  declareProperty("XMax", Mantid::EMPTY_DBL(), mustHaveValue, "The upper bound of the region to be removed.");
 
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
 
@@ -62,14 +57,12 @@ void RemoveBins::init() {
 
   // add a default do nothing value
   units.insert(units.begin(), "AsInput");
-  declareProperty("RangeUnit", "AsInput",
-                  std::make_shared<StringListValidator>(units),
+  declareProperty("RangeUnit", "AsInput", std::make_shared<StringListValidator>(units),
                   "The unit in which XMin/XMax are being given. If not given, "
                   "it will peak the unit from the Input workspace X unit.");
 
   std::vector<std::string> propOptions{"None", "Linear"};
-  declareProperty("Interpolation", "None",
-                  std::make_shared<StringListValidator>(propOptions),
+  declareProperty("Interpolation", "None", std::make_shared<StringListValidator>(propOptions),
                   "Whether mid-axis bins should be interpolated linearly "
                   "(\"Linear\") or set to zero (\"None\"). Note: Used when the "
                   "region to be removed is within a bin. Linear scales the "
@@ -105,11 +98,9 @@ std::map<std::string, std::string> RemoveBins::validateInputs() {
 
   // If WorkspaceIndex has been set it must be valid
   const int index = getProperty("WorkspaceIndex");
-  if (!isEmpty(index) &&
-      index >= static_cast<int>(m_inputWorkspace->getNumberHistograms())) {
+  if (!isEmpty(index) && index >= static_cast<int>(m_inputWorkspace->getNumberHistograms())) {
     std::stringstream failureMsg;
-    failureMsg << "The value of WorkspaceIndex provided (" << index
-               << ") is larger than the size of this workspace ("
+    failureMsg << "The value of WorkspaceIndex provided (" << index << ") is larger than the size of this workspace ("
                << m_inputWorkspace->getNumberHistograms() << ")";
     g_log.error(failureMsg.str());
     result["WorkspaceIndex"] = failureMsg.str();
@@ -122,16 +113,14 @@ std::map<std::string, std::string> RemoveBins::validateInputs() {
   if (unitChange) {
     std::string errorString = "";
     if (m_inputWorkspace->axes() == 0)
-      errorString =
-          "A single valued workspace has no unit, which is required for "
-          "this algorithm";
+      errorString = "A single valued workspace has no unit, which is required for "
+                    "this algorithm";
 
     Kernel::Unit_const_sptr unit = m_inputWorkspace->getAxis(0)->unit();
     // If m_unitID is empty it means that the workspace must have units, which
     // can be anything
     if (unit && (!std::dynamic_pointer_cast<const Kernel::Unit>(unit))) {
-      errorString =
-          "The workspace must have units if the RangeUnit is not \"AsInput\"";
+      errorString = "The workspace must have units if the RangeUnit is not \"AsInput\"";
     }
     if (!errorString.empty()) {
       g_log.error() << "InputWorkspace: " << errorString << "\n";
@@ -149,9 +138,7 @@ void RemoveBins::exec() {
   // isn't square, then we will need
   // to calculate the bin indices to cut out each time.
   const std::string rangeUnit = getProperty("RangeUnit");
-  const bool unitChange =
-      (rangeUnit != "AsInput" &&
-       rangeUnit != m_inputWorkspace->getAxis(0)->unit()->unitID());
+  const bool unitChange = (rangeUnit != "AsInput" && rangeUnit != m_inputWorkspace->getAxis(0)->unit()->unitID());
   if (unitChange)
     m_rangeUnit = UnitFactory::Instance().create(rangeUnit);
   const bool commonBins = m_inputWorkspace->isCommonBins();
@@ -163,8 +150,7 @@ void RemoveBins::exec() {
   // workspace, then we can just call
   // CropWorkspace as a ChildAlgorithm and we're done.
   auto &X0 = m_inputWorkspace->x(0);
-  if (!singleSpectrum && !recalcRange &&
-      (m_startX <= X0.front() || m_endX >= X0.back())) {
+  if (!singleSpectrum && !recalcRange && (m_startX <= X0.front() || m_endX >= X0.back())) {
     double start, end;
     if (m_startX <= X0.front()) {
       start = m_endX;
@@ -185,8 +171,7 @@ void RemoveBins::exec() {
 
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
-  if (m_inputWorkspace !=
-      outputWS) // Create the output workspace only if not the same as input
+  if (m_inputWorkspace != outputWS) // Create the output workspace only if not the same as input
   {
     outputWS = WorkspaceFactory::Instance().create(m_inputWorkspace);
   }
@@ -194,8 +179,7 @@ void RemoveBins::exec() {
   // Loop over the spectra
   int start = 0, end = 0;
   const auto blockSize = static_cast<int>(m_inputWorkspace->x(0).size());
-  const auto numHists =
-      static_cast<int>(m_inputWorkspace->getNumberHistograms());
+  const auto numHists = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numHists);
   for (int i = 0; i < numHists; ++i) {
     outputWS->setHistogram(i, m_inputWorkspace->histogram(i));
@@ -241,9 +225,8 @@ void RemoveBins::exec() {
 /// end of a square workspace
 void RemoveBins::crop(const double &start, const double &end) {
   IAlgorithm_sptr childAlg = createChildAlgorithm("CropWorkspace");
-  childAlg->setProperty<MatrixWorkspace_sptr>(
-      "InputWorkspace",
-      std::const_pointer_cast<MatrixWorkspace>(m_inputWorkspace));
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
+                                              std::const_pointer_cast<MatrixWorkspace>(m_inputWorkspace));
   childAlg->setProperty<double>("XMin", start);
   childAlg->setProperty<double>("XMax", end);
   childAlg->executeAsChildAlg();
@@ -259,8 +242,7 @@ void RemoveBins::crop(const double &start, const double &end) {
  *  @param startX :: Returns the start of the range in the workspace's unit
  *  @param endX ::   Returns the end of the range in the workspace's unit
  */
-void RemoveBins::transformRangeUnit(const int index, double &startX,
-                                    double &endX) {
+void RemoveBins::transformRangeUnit(const int index, double &startX, double &endX) {
   const Kernel::Unit_sptr inputUnit = m_inputWorkspace->getAxis(0)->unit();
   // First check for a 'quick' conversion
   double factor, power;
@@ -286,8 +268,8 @@ void RemoveBins::transformRangeUnit(const int index, double &startX,
     endX = temp;
   }
 
-  g_log.debug() << "For index " << index << ", X range given corresponds to "
-                << startX << "-" << endX << " in workspace's unit\n";
+  g_log.debug() << "For index " << index << ", X range given corresponds to " << startX << "-" << endX
+                << " in workspace's unit\n";
 }
 
 /** Retrieves the detector postion for a given spectrum
@@ -296,8 +278,7 @@ void RemoveBins::transformRangeUnit(const int index, double &startX,
  *  @param l2 ::       Returns the sample-detector distance
  *  @param twoTheta :: Returns the detector's scattering angle
  */
-void RemoveBins::calculateDetectorPosition(const int index, double &l1,
-                                           double &l2, double &twoTheta) {
+void RemoveBins::calculateDetectorPosition(const int index, double &l1, double &l2, double &twoTheta) {
   l1 = m_spectrumInfo->l1();
   l2 = m_spectrumInfo->l2(index);
   if (m_spectrumInfo->isMonitor(index))
@@ -305,8 +286,7 @@ void RemoveBins::calculateDetectorPosition(const int index, double &l1,
   else
     twoTheta = m_spectrumInfo->twoTheta(index);
 
-  g_log.debug() << "Detector for index " << index << " has L1+L2=" << l1 + l2
-                << " & 2theta= " << twoTheta << '\n';
+  g_log.debug() << "Detector for index " << index << " has L1+L2=" << l1 + l2 << " & 2theta= " << twoTheta << '\n';
 }
 
 /** Finds the index in an ordered vector which follows the given value
@@ -326,8 +306,7 @@ int RemoveBins::findIndex(const double &value, const HistogramX &vec) {
  *  @param Y ::     The data vector
  *  @param E ::     The error vector
  */
-void RemoveBins::RemoveFromEnds(int start, int end, HistogramY &Y,
-                                HistogramE &E) {
+void RemoveBins::RemoveFromEnds(int start, int end, HistogramY &Y, HistogramE &E) {
   if (start)
     --start;
   auto size = static_cast<int>(Y.size());
@@ -353,10 +332,8 @@ void RemoveBins::RemoveFromEnds(int start, int end, HistogramY &Y,
  *  @param Y ::         The data vector
  *  @param E ::         The error vector
  */
-void RemoveBins::RemoveFromMiddle(const int &start, const int &end,
-                                  const double &startFrac,
-                                  const double &endFrac, HistogramY &Y,
-                                  HistogramE &E) {
+void RemoveBins::RemoveFromMiddle(const int &start, const int &end, const double &startFrac, const double &endFrac,
+                                  HistogramY &Y, HistogramE &E) {
   // Remove bins from middle
   double valPrev = 0;
   double valNext = 0;
@@ -371,9 +348,8 @@ void RemoveBins::RemoveFromMiddle(const int &start, const int &end,
     errNext = E[end];
   }
 
-  const double m =
-      (valNext - valPrev) / (1.0 * (end - start) + 2.0); // Gradient
-  const double c = valPrev;                              // Intercept
+  const double m = (valNext - valPrev) / (1.0 * (end - start) + 2.0); // Gradient
+  const double c = valPrev;                                           // Intercept
 
   double aveE = (errPrev + errNext) / 2; // Cheat: will do properly later
 

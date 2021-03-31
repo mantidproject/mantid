@@ -55,17 +55,13 @@ DownloadInstrument::DownloadInstrument() : m_proxyInfo() {}
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string DownloadInstrument::name() const {
-  return "DownloadInstrument";
-}
+const std::string DownloadInstrument::name() const { return "DownloadInstrument"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int DownloadInstrument::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string DownloadInstrument::category() const {
-  return "DataHandling\\Instrument";
-}
+const std::string DownloadInstrument::category() const { return "DataHandling\\Instrument"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string DownloadInstrument::summary() const {
@@ -80,9 +76,7 @@ void DownloadInstrument::init() {
   using Kernel::Direction;
 
   declareProperty("ForceUpdate", false, "Ignore cache information");
-  declareProperty("FileDownloadCount", 0,
-                  "The number of files downloaded by this algorithm",
-                  Direction::Output);
+  declareProperty("FileDownloadCount", 0, "The number of files downloaded by this algorithm", Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -98,8 +92,7 @@ void DownloadInstrument::exec() {
     GitHubApiHelper inetHelper;
     g_log.debug(inetHelper.getRateLimitDescription());
   } catch (Mantid::Kernel::Exception::InternetError &ex) {
-    g_log.debug() << "Unable to get the rate limit from GitHub: " << ex.what()
-                  << '\n';
+    g_log.debug() << "Unable to get the rate limit from GitHub: " << ex.what() << '\n';
   }
 
   try {
@@ -107,15 +100,13 @@ void DownloadInstrument::exec() {
   } catch (Mantid::Kernel::Exception::InternetError &ex) {
     std::string errorText(ex.what());
     if (errorText.find("rate limit") != std::string::npos) {
-      g_log.information() << "Instrument Definition Update: " << errorText
-                          << '\n';
+      g_log.information() << "Instrument Definition Update: " << errorText << '\n';
     } else {
       // log the failure at Notice Level
-      g_log.notice(
-          "Internet Connection Failed - cannot update instrument "
-          "definitions. Please check your connection. If you are behind a "
-          "proxy server, consider setting proxy.host and proxy.port in "
-          "the Mantid properties file or using the config object.");
+      g_log.notice("Internet Connection Failed - cannot update instrument "
+                   "definitions. Please check your connection. If you are behind a "
+                   "proxy server, consider setting proxy.host and proxy.port in "
+                   "the Mantid properties file or using the config object.");
       // log this error at information level
       g_log.information() << errorText << '\n';
     }
@@ -126,8 +117,7 @@ void DownloadInstrument::exec() {
     g_log.notice("All instrument definitions up to date");
   } else {
     std::string s = (fileMap.size() > 1) ? "s" : "";
-    g_log.notice() << "Downloading " << fileMap.size() << " file" << s
-                   << " from the instrument repository\n";
+    g_log.notice() << "Downloading " << fileMap.size() << " file" << s << " from the instrument repository\n";
   }
 
   for (auto &itMap : fileMap) {
@@ -136,8 +126,7 @@ void DownloadInstrument::exec() {
       g_log.notice("A new Facilities.xml file has been downloaded, this will "
                    "take effect next time Mantid is started.");
     } else {
-      g_log.information() << "Downloading \"" << itMap.second << "\" from \""
-                          << itMap.first << "\"\n";
+      g_log.information() << "Downloading \"" << itMap.second << "\" from \"" << itMap.first << "\"\n";
     }
     doDownloadFile(itMap.first, itMap.second);
   }
@@ -162,8 +151,7 @@ std::string getDownloadUrl(Json::Value &contents) {
 
 DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   // get the instrument directories
-  auto instrumentDirs =
-      Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
+  auto instrumentDirs = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
   Poco::Path installPath(instrumentDirs.back());
   installPath.makeDirectory();
   Poco::Path localPath(instrumentDirs[0]);
@@ -181,18 +169,15 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   // get the file list from github
   StringToStringMap headers;
   headers.emplace("if-modified-since",
-                  Poco::DateTimeFormatter::format(
-                      gitHubJsonDate, Poco::DateTimeFormat::HTTP_FORMAT));
-  std::string gitHubInstrumentRepoUrl =
-      ConfigService::Instance().getString("UpdateInstrumentDefinitions.URL");
+                  Poco::DateTimeFormatter::format(gitHubJsonDate, Poco::DateTimeFormat::HTTP_FORMAT));
+  std::string gitHubInstrumentRepoUrl = ConfigService::Instance().getString("UpdateInstrumentDefinitions.URL");
   if (gitHubInstrumentRepoUrl.empty()) {
-    throw std::runtime_error(
-        "Property UpdateInstrumentDefinitions.URL is not defined, "
-        "this should point to the location of the instrument "
-        "directory in the github API "
-        "e.g. "
-        "https://api.github.com/repos/mantidproject/mantid/contents/"
-        "instrument.");
+    throw std::runtime_error("Property UpdateInstrumentDefinitions.URL is not defined, "
+                             "this should point to the location of the instrument "
+                             "directory in the github API "
+                             "e.g. "
+                             "https://api.github.com/repos/mantidproject/mantid/contents/"
+                             "instrument.");
   }
   StringToStringMap fileMap;
   try {
@@ -215,8 +200,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   // verify repo info was downloaded correctly
   if (gitHubJsonFile.getSize() == 0) {
     std::stringstream msg;
-    msg << "Encountered empty file \"" << gitHubJson.toString()
-        << "\" while determining what to download";
+    msg << "Encountered empty file \"" << gitHubJson.toString() << "\" while determining what to download";
     throw std::runtime_error(msg.str());
   }
 
@@ -225,8 +209,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   Json::Value serverContents;
   Poco::FileStream fileStream(gitHubJson.toString(), std::ios::in);
   if (!reader.parse(fileStream, serverContents)) {
-    throw std::runtime_error("Unable to parse server JSON file \"" +
-                             gitHubJson.toString() + "\"");
+    throw std::runtime_error("Unable to parse server JSON file \"" + gitHubJson.toString() + "\"");
   }
   fileStream.close();
 
@@ -249,9 +232,8 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
     // will be "")
     if ((sha != installSha) && (sha != localSha)) {
       fileMap.emplace(downloadUrl,
-                      filePath.toString()); // ACTION - DOWNLOAD to localPath
-    } else if ((!localSha.empty()) && (sha == installSha) &&
-               (sha != localSha)) // matches install, but different local
+                      filePath.toString());                                     // ACTION - DOWNLOAD to localPath
+    } else if ((!localSha.empty()) && (sha == installSha) && (sha != localSha)) // matches install, but different local
     {
       fileMap.emplace(downloadUrl, filePath.toString()); // ACTION - DOWNLOAD to
                                                          // localPath and
@@ -273,9 +255,8 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
  * @param defaultValue A default to return if the key is not present
  * @return The value of the key or the default if the key does not exist
  */
-std::string DownloadInstrument::getValueOrDefault(
-    const DownloadInstrument::StringToStringMap &mapping,
-    const std::string &key, const std::string &defaultValue) const {
+std::string DownloadInstrument::getValueOrDefault(const DownloadInstrument::StringToStringMap &mapping,
+                                                  const std::string &key, const std::string &defaultValue) const {
   auto element = mapping.find(key);
   return (element != mapping.end()) ? element->second : defaultValue;
 }
@@ -284,8 +265,7 @@ std::string DownloadInstrument::getValueOrDefault(
  * @param directoryPath The path to the directory to catalog
  * @return A map of file names to sha1 values
  **/
-DownloadInstrument::StringToStringMap
-DownloadInstrument::getFileShas(const std::string &directoryPath) {
+DownloadInstrument::StringToStringMap DownloadInstrument::getFileShas(const std::string &directoryPath) {
   StringToStringMap filesToSha;
   try {
     using Poco::DirectoryIterator;
@@ -299,14 +279,12 @@ DownloadInstrument::getFileShas(const std::string &directoryPath) {
       filesToSha.emplace(entryPath.getFileName(), sha1);
     }
   } catch (Poco::Exception &ex) {
-    g_log.error() << "DownloadInstrument: failed to parse the directory: "
-                  << directoryPath << " : " << ex.className() << " : "
-                  << ex.displayText() << '\n';
+    g_log.error() << "DownloadInstrument: failed to parse the directory: " << directoryPath << " : " << ex.className()
+                  << " : " << ex.displayText() << '\n';
     // silently ignore this exception.
   } catch (std::exception &ex) {
     std::stringstream ss;
-    ss << "unknown exception while checking local file system. " << ex.what()
-       << ". Input = " << directoryPath;
+    ss << "unknown exception while checking local file system. " << ex.what() << ". Input = " << directoryPath;
     throw std::runtime_error(ss.str());
   }
 
@@ -318,9 +296,8 @@ DownloadInstrument::getFileShas(const std::string &directoryPath) {
  * @param filenamesToKeep a set of filenames to keep
  * @returns the number of files removed
  **/
-size_t DownloadInstrument::removeOrphanedFiles(
-    const std::string &directoryPath,
-    const std::unordered_set<std::string> &filenamesToKeep) const {
+size_t DownloadInstrument::removeOrphanedFiles(const std::string &directoryPath,
+                                               const std::unordered_set<std::string> &filenamesToKeep) const {
   // hold files to delete in a set so we don't remove files while iterating over
   // the directory.
   std::vector<std::string> filesToDelete;
@@ -332,8 +309,7 @@ size_t DownloadInstrument::removeOrphanedFiles(
       const auto &entryPath = Poco::Path(it->path());
       if (entryPath.getExtension() != "xml")
         continue;
-      if (filenamesToKeep.find(entryPath.getFileName()) ==
-          filenamesToKeep.end()) {
+      if (filenamesToKeep.find(entryPath.getFileName()) == filenamesToKeep.end()) {
         g_log.debug() << "File not found in remote instrument repository, will "
                          "be deleted: "
                       << entryPath.getFileName() << '\n';
@@ -341,14 +317,12 @@ size_t DownloadInstrument::removeOrphanedFiles(
       }
     }
   } catch (Poco::Exception &ex) {
-    g_log.error() << "DownloadInstrument: failed to list the directory: "
-                  << directoryPath << " : " << ex.className() << " : "
-                  << ex.displayText() << '\n';
+    g_log.error() << "DownloadInstrument: failed to list the directory: " << directoryPath << " : " << ex.className()
+                  << " : " << ex.displayText() << '\n';
     // silently ignore this exception.
   } catch (std::exception &ex) {
     std::stringstream ss;
-    ss << "unknown exception while checking local file system. " << ex.what()
-       << ". Input = " << directoryPath;
+    ss << "unknown exception while checking local file system. " << ex.what() << ". Input = " << directoryPath;
     throw std::runtime_error(ss.str());
   }
 
@@ -359,8 +333,8 @@ size_t DownloadInstrument::removeOrphanedFiles(
       file.remove();
     }
   } catch (Poco::Exception &ex) {
-    g_log.error() << "DownloadInstrument: failed to delete file: "
-                  << ex.className() << " : " << ex.displayText() << '\n';
+    g_log.error() << "DownloadInstrument: failed to delete file: " << ex.className() << " : " << ex.displayText()
+                  << '\n';
     // silently ignore this exception.
   } catch (std::exception &ex) {
     std::stringstream ss;
@@ -386,8 +360,7 @@ include in the request.
 @exception Mantid::Kernel::Exception::InternetError : For any unexpected
 behaviour.
 */
-int DownloadInstrument::doDownloadFile(const std::string &urlFile,
-                                       const std::string &localFilePath,
+int DownloadInstrument::doDownloadFile(const std::string &urlFile, const std::string &localFilePath,
                                        const StringToStringMap &headers) {
   Poco::File localFile(localFilePath);
   if (localFile.exists()) {

@@ -49,9 +49,7 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PlotPeakByLogValue"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Fits a number of spectra with the same function.";
-  }
+  const std::string summary() const override { return "Fits a number of spectra with the same function."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
@@ -66,42 +64,31 @@ private:
   void exec() override;
 
   /// Set any WorkspaceIndex attributes in the fitting function
-  void setWorkspaceIndexAttribute(const API::IFunction_sptr &fun,
-                                  int wsIndex) const;
+  void setWorkspaceIndexAttribute(const API::IFunction_sptr &fun, int wsIndex) const;
 
-  std::shared_ptr<Algorithm>
-  runSingleFit(bool createFitOutput, bool outputCompositeMembers,
-               bool outputConvolvedMembers, const API::IFunction_sptr &ifun,
-               const InputSpectraToFit &data, double startX, double endX,
-               const std::string &exclude);
+  std::shared_ptr<Algorithm> runSingleFit(bool createFitOutput, bool outputCompositeMembers,
+                                          bool outputConvolvedMembers, const API::IFunction_sptr &ifun,
+                                          const InputSpectraToFit &data, double startX, double endX,
+                                          const std::string &exclude);
 
-  double calculateLogValue(const std::string &logName,
-                           const InputSpectraToFit &data);
+  double calculateLogValue(const std::string &logName, const InputSpectraToFit &data);
 
-  API::ITableWorkspace_sptr
-  createResultsTable(const std::string &logName,
-                     const API::IFunction_sptr ifunSingle, bool &isDataName);
+  API::ITableWorkspace_sptr createResultsTable(const std::string &logName, const API::IFunction_sptr ifunSingle,
+                                               bool &isDataName);
 
-  void appendTableRow(bool isDataName, API::ITableWorkspace_sptr &result,
-                      const API::IFunction_sptr ifun,
-                      const InputSpectraToFit &data, double logValue,
-                      double chi2) const;
+  void appendTableRow(bool isDataName, API::ITableWorkspace_sptr &result, const API::IFunction_sptr ifun,
+                      const InputSpectraToFit &data, double logValue, double chi2) const;
 
-  void finaliseOutputWorkspaces(
-      bool createFitOutput,
-      const std::vector<API::MatrixWorkspace_sptr> &fitWorkspaces,
-      const std::vector<API::ITableWorkspace_sptr> &parameterWorkspaces,
-      const std::vector<API::ITableWorkspace_sptr> &covarianceWorkspaces);
+  void finaliseOutputWorkspaces(bool createFitOutput, const std::vector<API::MatrixWorkspace_sptr> &fitWorkspaces,
+                                const std::vector<API::ITableWorkspace_sptr> &parameterWorkspaces,
+                                const std::vector<API::ITableWorkspace_sptr> &covarianceWorkspaces);
 
   API::IFunction_sptr setupFunction(bool individual, bool passWSIndexToFunction,
-                                    const API::IFunction_sptr &inputFunction,
-                                    const std::vector<double> &initialParams,
-                                    bool isMultiDomainFunction, int i,
-                                    const InputSpectraToFit &data) const;
+                                    const API::IFunction_sptr &inputFunction, const std::vector<double> &initialParams,
+                                    bool isMultiDomainFunction, int i, const InputSpectraToFit &data) const;
 
   /// Create a minimizer string based on template string provided
-  std::string getMinimizerString(const std::string &wsName,
-                                 const std::string &wsIndex);
+  std::string getMinimizerString(const std::string &wsName, const std::string &wsIndex);
 
   /// Create a vector of linked exclude starts and ends
   std::vector<std::string> getExclude(const size_t numSpectra);

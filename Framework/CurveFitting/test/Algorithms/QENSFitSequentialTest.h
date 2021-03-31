@@ -32,9 +32,7 @@ class QENSFitSequentialTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static QENSFitSequentialTest *createSuite() {
-    return new QENSFitSequentialTest();
-  }
+  static QENSFitSequentialTest *createSuite() { return new QENSFitSequentialTest(); }
   static void destroySuite(QENSFitSequentialTest *suite) { delete suite; }
 
   QENSFitSequentialTest() { FrameworkManager::Instance(); }
@@ -42,25 +40,22 @@ public:
   void test_set_valid_fit_function() {
     QENSFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Function", "name=DeltaFunction,Height=1,Centre=0;name="
-                    "Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0;"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Function", "name=DeltaFunction,Height=1,Centre=0;name="
+                                                         "Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0;"));
   }
 
   void test_empty_function_is_not_allowed() {
     QENSFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Function", ""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("Function", ""), const std::invalid_argument &);
   }
 
   void test_convolution_fit() {
     const int totalBins = 6;
     const int totalHist = 5;
     auto inputWorkspace = createReducedWorkspace(totalBins, totalHist);
-    auto resolution =
-        createResolutionWorkspace(totalBins, totalHist, "__QENS_Resolution");
+    auto resolution = createResolutionWorkspace(totalBins, totalHist, "__QENS_Resolution");
 
     std::vector<double> startX;
     std::vector<double> endX;
@@ -69,8 +64,7 @@ public:
       startX.push_back(0.0);
       endX.push_back(3.0);
     }
-    auto outputBaseName =
-        runConvolutionFit(inputWorkspace, resolution, startX, endX);
+    auto outputBaseName = runConvolutionFit(inputWorkspace, resolution, startX, endX);
     testFitOutput(outputBaseName, inputWorkspace->getNumberHistograms());
     AnalysisDataService::Instance().clear();
   }
@@ -79,14 +73,12 @@ public:
     const int totalBins = 6;
     const int totalHist = 5;
     auto inputWorkspace = createReducedWorkspace(totalBins, totalHist);
-    auto resolution =
-        createResolutionWorkspace(totalBins, totalHist, "__QENS_Resolution");
+    auto resolution = createResolutionWorkspace(totalBins, totalHist, "__QENS_Resolution");
     std::vector<double> startX;
     startX.push_back(0.0);
     std::vector<double> endX;
     endX.push_back(3.0);
-    auto outputBaseName =
-        runConvolutionFit(inputWorkspace, resolution, startX, endX);
+    auto outputBaseName = runConvolutionFit(inputWorkspace, resolution, startX, endX);
     testFitOutput(outputBaseName, inputWorkspace->getNumberHistograms());
     AnalysisDataService::Instance().clear();
   }
@@ -104,8 +96,7 @@ public:
       endX.push_back(10.0);
     }
     auto outputBaseName =
-        runMultipleFit(createReducedWorkspaces(names, totalBins, totalHist),
-                       peakFunction(), startX, endX);
+        runMultipleFit(createReducedWorkspaces(names, totalBins, totalHist), peakFunction(), startX, endX);
     testFitOutput(outputBaseName, names.size() * 3);
     AnalysisDataService::Instance().clear();
   }
@@ -120,17 +111,14 @@ public:
     std::vector<double> endX;
     endX.push_back(10.0);
     auto outputBaseName =
-        runMultipleFit(createReducedWorkspaces(names, totalBins, totalHist),
-                       peakFunction(), startX, endX);
+        runMultipleFit(createReducedWorkspaces(names, totalBins, totalHist), peakFunction(), startX, endX);
     testFitOutput(outputBaseName, names.size() * 3);
     AnalysisDataService::Instance().clear();
   }
 
 private:
-  std::string runConvolutionFit(const MatrixWorkspace_sptr &inputWorkspace,
-                                const MatrixWorkspace_sptr &resolution,
-                                const std::vector<double> &startX,
-                                const std::vector<double> &endX) {
+  std::string runConvolutionFit(const MatrixWorkspace_sptr &inputWorkspace, const MatrixWorkspace_sptr &resolution,
+                                const std::vector<double> &startX, const std::vector<double> &endX) {
     QENSFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
@@ -139,23 +127,20 @@ private:
     alg.setProperty("StartX", startX);
     alg.setProperty("EndX", endX);
     alg.setProperty("SpecMin", 0);
-    alg.setProperty(
-        "SpecMax", static_cast<int>(inputWorkspace->getNumberHistograms() - 1));
+    alg.setProperty("SpecMax", static_cast<int>(inputWorkspace->getNumberHistograms() - 1));
     alg.setProperty("ConvolveMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
-    alg.setProperty("OutputWorkspace",
-                    "ReductionWs_conv_1LFixF_s0_to_5_Result");
+    alg.setProperty("OutputWorkspace", "ReductionWs_conv_1LFixF_s0_to_5_Result");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     return "ReductionWs_conv_1LFixF_s0_to_5";
   }
 
-  std::string runMultipleFit(
-      const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
-      const std::string &function, const std::vector<double> startX,
-      const std::vector<double> endX) {
+  std::string runMultipleFit(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
+                             const std::string &function, const std::vector<double> startX,
+                             const std::vector<double> endX) {
     QENSFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
@@ -173,26 +158,19 @@ private:
     return "MultiQENSFitSequential";
   }
 
-  void testFitOutput(const std::string &outputBaseName,
-                     std::size_t expectedGroupSize) {
+  void testFitOutput(const std::string &outputBaseName, std::size_t expectedGroupSize) {
     WorkspaceGroup_sptr groupWorkspace;
 
     TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            outputBaseName + "_Parameters"));
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outputBaseName + "_Parameters"));
     TS_ASSERT_THROWS_NOTHING(
-        groupWorkspace =
-            AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-                outputBaseName + "_Workspaces"));
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            outputBaseName + "_Result"));
+        groupWorkspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputBaseName + "_Workspaces"));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputBaseName + "_Result"));
     TS_ASSERT_EQUALS(groupWorkspace->size(), expectedGroupSize);
   }
 
-  std::vector<Mantid::API::MatrixWorkspace_sptr>
-  createReducedWorkspaces(const std::vector<std::string> &names, int totalBins,
-                          int totalHist) {
+  std::vector<Mantid::API::MatrixWorkspace_sptr> createReducedWorkspaces(const std::vector<std::string> &names,
+                                                                         int totalBins, int totalHist) {
     std::vector<Mantid::API::MatrixWorkspace_sptr> workspaces;
 
     for (const auto &name : names) {
@@ -202,14 +180,12 @@ private:
     return workspaces;
   }
 
-  std::string createMultipleFitInput(
-      const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces) const {
+  std::string createMultipleFitInput(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces) const {
     std::ostringstream input;
 
     for (const auto &workspace : workspaces)
       input << workspace->getName() << ",i0;" << workspace->getName() << ",i"
-            << std::to_string(workspace->getNumberHistograms() / 2) << ";"
-            << workspace->getName() << ",i"
+            << std::to_string(workspace->getNumberHistograms() / 2) << ";" << workspace->getName() << ",i"
             << std::to_string(workspace->getNumberHistograms() - 1) << ";";
     return input.str();
   }
@@ -229,8 +205,8 @@ private:
   }
 
   MatrixWorkspace_sptr createReducedWorkspace(int xlen, int ylen) const {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        xlen, xlen - 1, false, false, true, "testInst");
+    auto ws =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(xlen, xlen - 1, false, false, true, "testInst");
     ws->initialize(ylen, xlen, xlen - 1);
     addBinsAndCountsToWorkspace(ws, xlen, xlen - 1, 1.0, 3.0);
 
@@ -240,27 +216,22 @@ private:
       ws->setEFixed((i + 1), 0.50);
 
     auto &run = ws->mutableRun();
-    auto timeSeries =
-        new Mantid::Kernel::TimeSeriesProperty<std::string>("TestTimeSeries");
+    auto timeSeries = new Mantid::Kernel::TimeSeriesProperty<std::string>("TestTimeSeries");
     timeSeries->addValue("2010-09-14T04:20:12", "0.02");
     run.addProperty(timeSeries);
     return ws;
   }
 
-  MatrixWorkspace_sptr
-  createResolutionWorkspace(std::size_t totalBins, std::size_t totalHist,
-                            const std::string &name) const {
-    auto resolution =
-        createWorkspace<Workspace2D>(totalHist + 1, totalBins + 1, totalBins);
+  MatrixWorkspace_sptr createResolutionWorkspace(std::size_t totalBins, std::size_t totalHist,
+                                                 const std::string &name) const {
+    auto resolution = createWorkspace<Workspace2D>(totalHist + 1, totalBins + 1, totalBins);
     addBinsAndCountsToWorkspace(resolution, totalBins + 1, totalBins, 0.0, 3.0);
     AnalysisDataService::Instance().addOrReplace(name, resolution);
     return resolution;
   }
 
-  void addBinsAndCountsToWorkspace(const Workspace2D_sptr &workspace,
-                                   std::size_t totalBinEdges,
-                                   std::size_t totalCounts, double binValue,
-                                   double countValue) const {
+  void addBinsAndCountsToWorkspace(const Workspace2D_sptr &workspace, std::size_t totalBinEdges,
+                                   std::size_t totalCounts, double binValue, double countValue) const {
     BinEdges x1(totalBinEdges, binValue);
     Counts y1(totalCounts, countValue);
     CountStandardDeviations e1(totalCounts, sqrt(countValue));

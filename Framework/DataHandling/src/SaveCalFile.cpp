@@ -27,31 +27,26 @@ DECLARE_ALGORITHM(SaveCalFile)
 /** Initialize the algorithm's properties.
  */
 void SaveCalFile::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<GroupingWorkspace>>(
-          "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional: An GroupingWorkspace workspace giving the grouping info.");
+  declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>("GroupingWorkspace", "", Direction::Input,
+                                                                         PropertyMode::Optional),
+                  "Optional: An GroupingWorkspace workspace giving the grouping info.");
+
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>("OffsetsWorkspace", "", Direction::Input,
+                                                                        PropertyMode::Optional),
+                  "Optional: An OffsetsWorkspace workspace giving the detector calibration "
+                  "values.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
-          "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional: An OffsetsWorkspace workspace giving the detector calibration "
-      "values.");
-
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MaskWorkspace>>(
-          "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<MaskWorkspace>>("MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An Workspace workspace giving which detectors are masked.");
 
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Save, ".cal"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".cal"),
                   "Path to the .cal file that will be created.");
 
   auto offsetprecision = std::make_shared<BoundedValidator<int>>();
   offsetprecision->setLower(7);
   offsetprecision->setUpper(11);
-  declareProperty("OffsetPrecision", 7, offsetprecision,
-                  "Precision of offsets (between 7 and 11 decimal).");
+  declareProperty("OffsetPrecision", 7, offsetprecision, "Precision of offsets (between 7 and 11 decimal).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -79,10 +74,8 @@ void SaveCalFile::exec() {
  * @param maskWS :: optional, masking-type workspace to save. Will be 1
  *(selected) if not specified.
  */
-void SaveCalFile::saveCalFile(const std::string &calFileName,
-                              const GroupingWorkspace_sptr &groupWS,
-                              const OffsetsWorkspace_sptr &offsetsWS,
-                              const MaskWorkspace_sptr &maskWS) {
+void SaveCalFile::saveCalFile(const std::string &calFileName, const GroupingWorkspace_sptr &groupWS,
+                              const OffsetsWorkspace_sptr &offsetsWS, const MaskWorkspace_sptr &maskWS) {
   Instrument_const_sptr inst;
 
   bool doGroup = false;
@@ -102,13 +95,11 @@ void SaveCalFile::saveCalFile(const std::string &calFileName,
     doMask = true;
     inst = maskWS->getInstrument();
     if (!inst)
-      g_log.warning() << "Mask workspace " << maskWS->getName()
-                      << " has no instrument associated with."
+      g_log.warning() << "Mask workspace " << maskWS->getName() << " has no instrument associated with."
                       << "\n";
   }
 
-  g_log.information() << "Status: doGroup = " << doGroup
-                      << " doOffsets = " << doOffsets << " doMask = " << doMask
+  g_log.information() << "Status: doGroup = " << doGroup << " doOffsets = " << doOffsets << " doMask = " << doMask
                       << "\n";
 
   if (!inst)
@@ -117,9 +108,8 @@ void SaveCalFile::saveCalFile(const std::string &calFileName,
 
   // Header of the file
   std::ofstream fout(calFileName.c_str());
-  fout << "# Calibration file for instrument " << inst->getName()
-       << " written on " << DateAndTime::getCurrentTime().toISO8601String()
-       << ".\n";
+  fout << "# Calibration file for instrument " << inst->getName() << " written on "
+       << DateAndTime::getCurrentTime().toISO8601String() << ".\n";
   fout << "# Format: number    UDET         offset    select    group\n";
 
   // Get all the detectors
@@ -148,9 +138,8 @@ void SaveCalFile::saveCalFile(const std::string &calFileName,
       selected = 0;
 
     // if(group > 0)
-    fout << std::fixed << std::setw(9) << number << std::fixed << std::setw(15)
-         << detectorID << std::fixed << std::setprecision(m_precision)
-         << std::setw(15) << offset << std::fixed << std::setw(8) << selected
+    fout << std::fixed << std::setw(9) << number << std::fixed << std::setw(15) << detectorID << std::fixed
+         << std::setprecision(m_precision) << std::setw(15) << offset << std::fixed << std::setw(8) << selected
          << std::fixed << std::setw(8) << group << "\n";
 
     number++;

@@ -61,9 +61,7 @@ void setup_WS(std::string &inputSpace) {
   Mantid::DataHandling::LoadInstrument loader;
   loader.initialize();
   // Path to test input file assumes Test directory checked out from SVN
-  const std::string inputFile =
-      ConfigService::Instance().getInstrumentDirectory() +
-      "HET_Definition_old.xml";
+  const std::string inputFile = ConfigService::Instance().getInstrumentDirectory() + "HET_Definition_old.xml";
   loader.setPropertyValue("Filename", inputFile);
   loader.setPropertyValue("Workspace", inputSpace);
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
@@ -97,9 +95,7 @@ void setup_Points_WS(std::string &inputSpace) {
   Mantid::DataHandling::LoadInstrument loader;
   loader.initialize();
   // Path to test input file assumes Test directory checked out from SVN
-  const std::string inputFile =
-      ConfigService::Instance().getInstrumentDirectory() +
-      "HET_Definition_old.xml";
+  const std::string inputFile = ConfigService::Instance().getInstrumentDirectory() + "HET_Definition_old.xml";
   loader.setPropertyValue("Filename", inputFile);
   loader.setPropertyValue("Workspace", inputSpace);
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
@@ -127,27 +123,21 @@ public:
     ConvertUnits convertUnits;
     TS_ASSERT_THROWS_NOTHING(convertUnits.initialize());
     TS_ASSERT(convertUnits.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(
-        convertUnits.setPropertyValue("InputWorkspace", inputSpace));
-    TS_ASSERT_THROWS_NOTHING(
-        convertUnits.setPropertyValue("OutputWorkspace", "outWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        convertUnits.setPropertyValue("Target", "Wavelength"));
+    TS_ASSERT_THROWS_NOTHING(convertUnits.setPropertyValue("InputWorkspace", inputSpace));
+    TS_ASSERT_THROWS_NOTHING(convertUnits.setPropertyValue("OutputWorkspace", "outWS"));
+    TS_ASSERT_THROWS_NOTHING(convertUnits.setPropertyValue("Target", "Wavelength"));
     TS_ASSERT_THROWS_NOTHING(convertUnits.execute());
     TS_ASSERT(convertUnits.isExecuted());
 
     Workspace_sptr input;
-    TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieve(inputSpace));
+    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieve(inputSpace));
     Workspace2D_sptr input2D = std::dynamic_pointer_cast<Workspace2D>(input);
 
     // make sure input WS is not changed, i.e. still not Histogram
     TS_ASSERT(!input2D->isHistogramData());
 
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS"));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"));
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     // Test that X data is still Points (it was converted back)
@@ -205,17 +195,14 @@ public:
 
     alg.setRethrows(true);
     // Convert to Wavelength
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", inputSpace));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", temp_ws_name));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputSpace));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", temp_ws_name));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Target", "Wavelength"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     // Convert back to TOF
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", temp_ws_name));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", temp_ws_name));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outWS"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Target", "TOF"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -223,16 +210,12 @@ public:
 
     // get the input WS to compare values
     Workspace_sptr pointsWS;
-    TS_ASSERT_THROWS_NOTHING(
-        pointsWS = AnalysisDataService::Instance().retrieve(inputSpace));
-    Workspace2D_sptr pointsWS2D =
-        std::dynamic_pointer_cast<Workspace2D>(pointsWS);
+    TS_ASSERT_THROWS_NOTHING(pointsWS = AnalysisDataService::Instance().retrieve(inputSpace));
+    Workspace2D_sptr pointsWS2D = std::dynamic_pointer_cast<Workspace2D>(pointsWS);
 
     // This is the WS with units converted back to TOF
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS"));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"));
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     // Test that X data is still Points (it was converted back)
@@ -279,8 +262,7 @@ public:
     if (!alg.isInitialized())
       alg.initialize();
 
-    auto inWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputSpace);
+    auto inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputSpace);
     // Set the properties
     alg.setRethrows(true);
     alg.setPropertyValue("InputWorkspace", inputSpace);
@@ -289,11 +271,8 @@ public:
     alg.setPropertyValue("Target", "TOF"); // Same as the input workspace.
     alg.execute();
 
-    auto outWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputSpace);
-    TSM_ASSERT_EQUALS(
-        "Input and Output Workspaces should be pointer identical.", inWS.get(),
-        outWS.get());
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputSpace);
+    TSM_ASSERT_EQUALS("Input and Output Workspaces should be pointer identical.", inWS.get(), outWS.get());
     AnalysisDataService::Instance().remove(inputSpace);
   }
 
@@ -308,23 +287,18 @@ public:
     if (!alg.isInitialized())
       alg.initialize();
 
-    auto inWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputSpace);
+    auto inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputSpace);
     // Set the properties
     alg.setRethrows(true);
     alg.setPropertyValue("InputWorkspace", inputSpace);
     const std::string outputWorkspaceName = "OutWSName";
-    alg.setPropertyValue(
-        "OutputWorkspace",
-        outputWorkspaceName);              // OutputWorkspace == InputWorkspace
-    alg.setPropertyValue("Target", "TOF"); // Same as the input workspace.
+    alg.setPropertyValue("OutputWorkspace",
+                         outputWorkspaceName); // OutputWorkspace == InputWorkspace
+    alg.setPropertyValue("Target", "TOF");     // Same as the input workspace.
     alg.execute();
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outputWorkspaceName);
-    TSM_ASSERT_DIFFERS(
-        "Input and Output Workspaces be completely different objects.",
-        inWS.get(), outWS.get());
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWorkspaceName);
+    TSM_ASSERT_DIFFERS("Input and Output Workspaces be completely different objects.", inWS.get(), outWS.get());
     AnalysisDataService::Instance().remove(outputWorkspaceName);
     AnalysisDataService::Instance().remove(inputSpace);
   }
@@ -347,11 +321,9 @@ public:
 
     // Get back the saved workspace
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace_sptr input;
-    TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieve(inputSpace));
+    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieve(inputSpace));
 
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr input2D = std::dynamic_pointer_cast<Workspace2D>(input);
@@ -402,9 +374,7 @@ public:
     TS_ASSERT(quickly.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "quickOut2"));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("quickOut2"));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Energy");
     TS_ASSERT_DELTA(output->x(1)[1], 10.10, 0.01);
     // Check EMode has been set
@@ -414,10 +384,8 @@ public:
   }
 
   void testConvertQuicklyCommonBins() {
-    Workspace2D_sptr input =
-        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
-    input->getAxis(0)->unit() =
-        UnitFactory::Instance().create("MomentumTransfer");
+    Workspace2D_sptr input = WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
+    input->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
     AnalysisDataService::Instance().add("quickIn", input);
     ConvertUnits quickly;
     quickly.initialize();
@@ -429,9 +397,7 @@ public:
     TS_ASSERT(quickly.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "quickOut"));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("quickOut"));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "dSpacing");
     // What is this meant to be testing should this be input vs output?
     TS_ASSERT_EQUALS(&(output->x(0)[0]), &(output->x(0)[0]));
@@ -440,8 +406,7 @@ public:
       auto &outX = output->x(i);
       for (size_t j = 0; j <= xsize; ++j) {
         // Axis gets reversed by ConvertUnits to make it strictly increasing
-        TS_ASSERT_EQUALS(outX[j],
-                         2.0 * M_PI / (1.0 + static_cast<double>(xsize - j)));
+        TS_ASSERT_EQUALS(outX[j], 2.0 * M_PI / (1.0 + static_cast<double>(xsize - j)));
       }
     }
 
@@ -458,10 +423,8 @@ public:
     // We have to make sure that bin width is non-zero and not 1.0, otherwise
     // the scaling of Y and E for the distribution case is not testable.
     double deltax = 0.123;
-    Workspace2D_sptr input =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 10, x0, deltax);
-    input->getAxis(0)->unit() =
-        UnitFactory::Instance().create("MomentumTransfer");
+    Workspace2D_sptr input = WorkspaceCreationHelper::create2DWorkspaceBinned(2, 10, x0, deltax);
+    input->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
     // Y must have units, otherwise ConvertUnits does not treat data as
     // distribution.
     input->setYUnit("Counts");
@@ -494,9 +457,7 @@ public:
     TS_ASSERT(convert2.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "output"));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output"));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "MomentumTransfer");
     // What is this testing? Does it have to do with copy-on-write dataX?
     TS_ASSERT_EQUALS(&(output->x(0)[0]), &(output->x(0)[0]));
@@ -530,8 +491,7 @@ public:
   }
 
   void testDeltaE() {
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 2663, 5, 7.5);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 2663, 5, 7.5);
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     Instrument_sptr testInst(new Instrument);
@@ -539,8 +499,7 @@ public:
     // real MARI file used before)
     // Define a source and sample position
     // Define a source component
-    ObjComponent *source =
-        new ObjComponent("moderator", IObject_sptr(), testInst.get());
+    ObjComponent *source = new ObjComponent("moderator", IObject_sptr(), testInst.get());
     source->setPos(V3D(0, 0.0, -11.739));
     testInst->add(source);
     testInst->markAsSource(source);
@@ -567,9 +526,7 @@ public:
     conv.execute();
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "DeltaE");
     TS_ASSERT_EQUALS(output->blocksize(), 1669);
     // Check EMode has been set
@@ -584,11 +541,8 @@ public:
     conv2.setPropertyValue("Efixed", "10");
     conv2.execute();
 
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace));
-    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(),
-                     "DeltaE_inWavenumber");
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "DeltaE_inWavenumber");
     TS_ASSERT_EQUALS(output->blocksize(), 2275);
     // Check EMode has been set
     TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Indirect, output->getEMode());
@@ -602,11 +556,8 @@ public:
     conv3.setPropertyValue("Efixed", "12.95");
     conv3.execute();
 
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace));
-    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(),
-                     "DeltaE_inFrequency");
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "DeltaE_inFrequency");
     TS_ASSERT_EQUALS(output->blocksize(), 1669);
     // Check EMode has been set
     TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());
@@ -619,11 +570,8 @@ public:
     conv4.setPropertyValue("Emode", "Direct");
     conv4.execute();
 
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace));
-    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(),
-                     "dSpacingPerpendicular");
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "dSpacingPerpendicular");
     TS_ASSERT_EQUALS(output->blocksize(), 2663);
     // Check EMode has been set
     TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());
@@ -632,8 +580,7 @@ public:
   }
 
   void testZeroLengthVectorExecutesWithNaNOutput() {
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 2663, 5, 7.5);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 2663, 5, 7.5);
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     Instrument_sptr testInst(new Instrument);
@@ -641,8 +588,7 @@ public:
     // real MARI file used before)
     // Define a source and sample position
     // Define a source component
-    ObjComponent *source =
-        new ObjComponent("moderator", IObject_sptr(), testInst.get());
+    ObjComponent *source = new ObjComponent("moderator", IObject_sptr(), testInst.get());
     source->setPos(V3D(0, 0.0, -11.739));
     testInst->add(source);
     testInst->markAsSource(source);
@@ -669,9 +615,7 @@ public:
     conv.execute();
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "MomentumTransfer");
     TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());
     TS_ASSERT(std::isnan(output->x(0)[0]));
@@ -679,9 +623,7 @@ public:
 
   void setup_Event() {
     this->inputSpace = "eventWS";
-    EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10,
-                                                                        false);
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10, false);
     AnalysisDataService::Instance().addOrReplace(inputSpace, ws);
   }
 
@@ -690,8 +632,7 @@ public:
     this->setup_Event();
 
     // Retrieve Workspace
-    EventWorkspace_sptr WS =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputSpace);
+    EventWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputSpace);
     TS_ASSERT(WS); // workspace is loaded
     size_t start_blocksize = WS->blocksize();
     size_t num_events = WS->getNumberEvents();
@@ -754,11 +695,8 @@ public:
    * if
    * sorting flips the direction
    */
-  void do_testExecEvent_RemainsSorted(EventSortType sortType,
-                                      const std::string &targetUnit) {
-    EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10,
-                                                                        false);
+  void do_testExecEvent_RemainsSorted(EventSortType sortType, const std::string &targetUnit) {
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10, false);
     ws->getAxis(0)->setUnit("TOF");
     ws->sortAll(sortType, nullptr);
 
@@ -770,15 +708,13 @@ public:
 
     ConvertUnits conv;
     conv.initialize();
-    conv.setProperty("InputWorkspace",
-                     std::dynamic_pointer_cast<MatrixWorkspace>(ws));
+    conv.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(ws));
     conv.setPropertyValue("OutputWorkspace", "out");
     conv.setPropertyValue("Target", targetUnit);
     conv.execute();
     TS_ASSERT(conv.isExecuted());
 
-    EventWorkspace_sptr out =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>("out");
+    EventWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("out");
     TS_ASSERT(out);
     if (!out)
       return;
@@ -809,29 +745,18 @@ public:
     }
   }
 
-  void testExecEvent_RemainsSorted_TOF() {
-    do_testExecEvent_RemainsSorted(TOF_SORT, "dSpacing");
-  }
+  void testExecEvent_RemainsSorted_TOF() { do_testExecEvent_RemainsSorted(TOF_SORT, "dSpacing"); }
 
-  void testExecEvent_RemainsSorted_Pulsetime() {
-    do_testExecEvent_RemainsSorted(PULSETIME_SORT, "dSpacing");
-  }
+  void testExecEvent_RemainsSorted_Pulsetime() { do_testExecEvent_RemainsSorted(PULSETIME_SORT, "dSpacing"); }
 
-  void testExecEvent_RemainsSorted_TOF_to_Energy() {
-    do_testExecEvent_RemainsSorted(TOF_SORT, "Energy");
-  }
+  void testExecEvent_RemainsSorted_TOF_to_Energy() { do_testExecEvent_RemainsSorted(TOF_SORT, "Energy"); }
 
-  void testExecEvent_RemainsSorted_Pulsetime_to_Energy() {
-    do_testExecEvent_RemainsSorted(PULSETIME_SORT, "Energy");
-  }
+  void testExecEvent_RemainsSorted_Pulsetime_to_Energy() { do_testExecEvent_RemainsSorted(PULSETIME_SORT, "Energy"); }
 
   void testDeltaEFailDoesNotAlterInPlaceWorkspace() {
 
-    std::string wsName =
-        "ConvertUnits_testDeltaEFailDoesNotAlterInPlaceWorkspace";
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 200,
-                                                                     false);
+    std::string wsName = "ConvertUnits_testDeltaEFailDoesNotAlterInPlaceWorkspace";
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 200, false);
     // set to a distribution
     ws->setDistribution(true);
     AnalysisDataService::Instance().add(wsName, ws);
@@ -874,9 +799,7 @@ class ConvertUnitsTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertUnitsTestPerformance *createSuite() {
-    return new ConvertUnitsTestPerformance();
-  }
+  static ConvertUnitsTestPerformance *createSuite() { return new ConvertUnitsTestPerformance(); }
   static void destroySuite(ConvertUnitsTestPerformance *suite) { delete suite; }
 
   void setUp() override {

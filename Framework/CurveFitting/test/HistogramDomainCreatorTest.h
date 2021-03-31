@@ -37,9 +37,7 @@ class HistogramDomainCreatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static HistogramDomainCreatorTest *createSuite() {
-    return new HistogramDomainCreatorTest();
-  }
+  static HistogramDomainCreatorTest *createSuite() { return new HistogramDomainCreatorTest(); }
   static void destroySuite(HistogramDomainCreatorTest *suite) { delete suite; }
 
   void test_declared_properties() {
@@ -60,24 +58,21 @@ public:
     PropertyManager manager;
     HistogramDomainCreator creator(manager, "InputWorkspace");
     creator.declareDatasetProperties();
-    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                                "InputWorkspace", "", Direction::Input),
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
     // Data points workspace
     auto ws = createTestWorkspace(false);
     manager.setProperty("InputWorkspace", ws);
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
-    TS_ASSERT_THROWS(creator.createDomain(domain, values),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(creator.createDomain(domain, values), const std::runtime_error &);
   }
 
   void test_domain_values() {
     PropertyManager manager;
     HistogramDomainCreator creator(manager, "InputWorkspace");
     creator.declareDatasetProperties();
-    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                                "InputWorkspace", "", Direction::Input),
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
     // Histogram workspace
     auto ws = createTestWorkspace(true);
@@ -101,8 +96,7 @@ public:
     PropertyManager manager;
     HistogramDomainCreator creator(manager, "InputWorkspace");
     creator.declareDatasetProperties();
-    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                                "InputWorkspace", "", Direction::Input),
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
 
     auto ws = createLorentzWorkspace(10);
@@ -136,27 +130,21 @@ public:
     fun.setParameter("Amplitude", 2.1 + dp);
     fun.function(*domain, values1);
     for (size_t i = 0; i < values1.size(); ++i) {
-      TS_ASSERT_DELTA(
-          jacobian.get(i, 0),
-          (values1.getCalculated(i) - values->getCalculated(i)) / dp, 1e-5);
+      TS_ASSERT_DELTA(jacobian.get(i, 0), (values1.getCalculated(i) - values->getCalculated(i)) / dp, 1e-5);
     }
 
     fun.setParameter("Amplitude", 2.1);
     fun.setParameter("PeakCentre", dp);
     fun.function(*domain, values1);
     for (size_t i = 0; i < values1.size(); ++i) {
-      TS_ASSERT_DELTA(
-          jacobian.get(i, 1),
-          (values1.getCalculated(i) - values->getCalculated(i)) / dp, 1e-5);
+      TS_ASSERT_DELTA(jacobian.get(i, 1), (values1.getCalculated(i) - values->getCalculated(i)) / dp, 1e-5);
     }
 
     fun.setParameter("PeakCentre", 0.0);
     fun.setParameter("FWHM", 1.0 + dp);
     fun.function(*domain, values1);
     for (size_t i = 0; i < values1.size(); ++i) {
-      TS_ASSERT_DELTA(
-          jacobian.get(i, 2),
-          (values1.getCalculated(i) - values->getCalculated(i)) / dp, 1e-5);
+      TS_ASSERT_DELTA(jacobian.get(i, 2), (values1.getCalculated(i) - values->getCalculated(i)) / dp, 1e-5);
     }
   }
 
@@ -189,8 +177,7 @@ public:
     TS_ASSERT_DELTA(fun->getParameter("PeakCentre"), 0.0, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("FWHM"), 0.4, 1e-5);
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "fit_Workspace");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fit_Workspace");
     TS_ASSERT(outWS);
 
     auto &y = outWS->y(0);
@@ -206,8 +193,7 @@ public:
 
   void test_Gaussian() {
 
-    FunctionDomain1DHistogram domain(
-        {-1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0});
+    FunctionDomain1DHistogram domain({-1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0});
     FunctionValues values(domain);
 
     Gaussian fun;
@@ -235,18 +221,14 @@ public:
     fun.setParameter("Height", 2.1 + dp);
     fun.function(domain, values1);
     for (size_t i = 0; i < values1.size(); ++i) {
-      TS_ASSERT_DELTA(jacobian.get(i, 0),
-                      (values1.getCalculated(i) - values.getCalculated(i)) / dp,
-                      1e-5);
+      TS_ASSERT_DELTA(jacobian.get(i, 0), (values1.getCalculated(i) - values.getCalculated(i)) / dp, 1e-5);
     }
 
     fun.setParameter("Height", 2.1);
     fun.setParameter("PeakCentre", dp);
     fun.function(domain, values1);
     for (size_t i = 0; i < values1.size(); ++i) {
-      TS_ASSERT_DELTA(jacobian.get(i, 1),
-                      (values1.getCalculated(i) - values.getCalculated(i)) / dp,
-                      1e-5);
+      TS_ASSERT_DELTA(jacobian.get(i, 1), (values1.getCalculated(i) - values.getCalculated(i)) / dp, 1e-5);
     }
 
     fun.setParameter("PeakCentre", 0.0);
@@ -254,9 +236,7 @@ public:
     fun.setActiveParameter(2, oldPar + dp);
     fun.function(domain, values1);
     for (size_t i = 0; i < values1.size(); ++i) {
-      TS_ASSERT_DELTA(jacobian.get(i, 2),
-                      (values1.getCalculated(i) - values.getCalculated(i)) / dp,
-                      1e-5);
+      TS_ASSERT_DELTA(jacobian.get(i, 2), (values1.getCalculated(i) - values.getCalculated(i)) / dp, 1e-5);
     }
   }
 
@@ -306,13 +286,11 @@ public:
     fit.execute();
     IFunction_sptr fun = fit.getProperty("Function");
 
-    TS_ASSERT_DELTA(fun->getParameter("Height"), 1.0 / 0.2 / sqrt(2.0 * M_PI),
-                    1e-5);
+    TS_ASSERT_DELTA(fun->getParameter("Height"), 1.0 / 0.2 / sqrt(2.0 * M_PI), 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("PeakCentre"), 0.0, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("Sigma"), 0.2, 1e-5);
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "fit_Workspace");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fit_Workspace");
     TS_ASSERT(outWS);
 
     auto &y = outWS->y(0);
@@ -339,8 +317,7 @@ public:
 
     TS_ASSERT_DELTA(fun->getParameter("A0"), 3.1, 1e-5);
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "fit_Workspace");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fit_Workspace");
     TS_ASSERT(outWS);
 
     auto &y = outWS->y(0);
@@ -368,8 +345,7 @@ public:
     TS_ASSERT_DELTA(fun->getParameter("A0"), 3.1, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("A1"), 0.3, 1e-5);
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "fit_Workspace");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fit_Workspace");
     TS_ASSERT(outWS);
 
     auto &y = outWS->y(0);
@@ -387,8 +363,7 @@ public:
     auto ws = createGaussLinearWorkspace();
     Fit fit;
     fit.initialize();
-    fit.setProperty("Function",
-                    "name=LinearBackground;name=Gaussian,Height=1,Sigma=0.3");
+    fit.setProperty("Function", "name=LinearBackground;name=Gaussian,Height=1,Sigma=0.3");
     fit.setProperty("EvaluationType", "Histogram");
     fit.setProperty("InputWorkspace", ws);
     fit.setProperty("Output", "fit");
@@ -397,13 +372,11 @@ public:
 
     TS_ASSERT_DELTA(fun->getParameter("f0.A0"), 3.1, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("f0.A1"), 0.3, 1e-5);
-    TS_ASSERT_DELTA(fun->getParameter("f1.Height"),
-                    1.0 / 0.2 / sqrt(2.0 * M_PI), 1e-4);
+    TS_ASSERT_DELTA(fun->getParameter("f1.Height"), 1.0 / 0.2 / sqrt(2.0 * M_PI), 1e-4);
     TS_ASSERT_DELTA(fun->getParameter("f1.PeakCentre"), 0.0, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("f1.Sigma"), 0.2, 1e-5);
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "fit_Workspace");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fit_Workspace");
     TS_ASSERT(outWS);
 
     auto &y = outWS->y(0);
@@ -463,9 +436,7 @@ private:
     return ws2;
   }
 
-  MatrixWorkspace_sptr
-  createFitWorkspace(const size_t ny,
-                     const std::function<double(double)> &fun) {
+  MatrixWorkspace_sptr createFitWorkspace(const size_t ny, const std::function<double(double)> &fun) {
     MatrixWorkspace_sptr ws(new WorkspaceTester);
     size_t nx = ny + 1;
     double x0 = -1.0;
@@ -494,9 +465,7 @@ private:
 
   MatrixWorkspace_sptr createGaussWorkspace(const size_t ny = 10) {
     double sigma = 0.2;
-    auto cumulFun = [sigma](double x) {
-      return 0.5 * erf(x / sigma / sqrt(2.0));
-    };
+    auto cumulFun = [sigma](double x) { return 0.5 * erf(x / sigma / sqrt(2.0)); };
     return createFitWorkspace(ny, cumulFun);
   }
 
@@ -517,9 +486,7 @@ private:
     double a0 = 3.1;
     double a1 = 0.3;
     double sigma = 0.2;
-    auto cumulFun = [a0, a1, sigma](double x) {
-      return (a0 + 0.5 * a1 * x) * x + 0.5 * erf(x / sigma / sqrt(2.0));
-    };
+    auto cumulFun = [a0, a1, sigma](double x) { return (a0 + 0.5 * a1 * x) * x + 0.5 * erf(x / sigma / sqrt(2.0)); };
     return createFitWorkspace(ny, cumulFun);
   }
 };

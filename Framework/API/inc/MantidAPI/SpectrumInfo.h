@@ -50,8 +50,7 @@ class ExperimentInfo;
 */
 class MANTID_API_DLL SpectrumInfo {
 public:
-  SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
-               const ExperimentInfo &experimentInfo,
+  SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo, const ExperimentInfo &experimentInfo,
                Geometry::DetectorInfo &detectorInfo);
   ~SpectrumInfo();
 
@@ -59,8 +58,7 @@ public:
   size_t detectorCount() const;
 
   const SpectrumDefinition &spectrumDefinition(const size_t index) const;
-  const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
-  sharedSpectrumDefinitions() const;
+  const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &sharedSpectrumDefinitions() const;
 
   bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;
@@ -95,14 +93,12 @@ public:
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
-  const SpectrumDefinition &
-  checkAndGetSpectrumDefinition(const size_t index) const;
+  const SpectrumDefinition &checkAndGetSpectrumDefinition(const size_t index) const;
 
   const ExperimentInfo &m_experimentInfo;
   Geometry::DetectorInfo &m_detectorInfo;
   const Beamline::SpectrumInfo &m_spectrumInfo;
-  mutable std::vector<std::shared_ptr<const Geometry::IDetector>>
-      m_lastDetector;
+  mutable std::vector<std::shared_ptr<const Geometry::IDetector>> m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;
 };
 

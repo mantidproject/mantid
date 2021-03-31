@@ -31,8 +31,7 @@ public:
   // The boilerplate methods are not included because this base class does not
   // include any tests itself
 
-  void jobsViewIs(MantidQt::MantidWidgets::Batch::IJobTreeView &jobsView,
-                  MockRunsTableView &view) {
+  void jobsViewIs(MantidQt::MantidWidgets::Batch::IJobTreeView &jobsView, MockRunsTableView &view) {
     ON_CALL(view, jobs()).WillByDefault(::testing::ReturnRef(jobsView));
   }
 
@@ -48,16 +47,12 @@ public:
     return true;
   }
 
-  void selectedRowLocationsAre(
-      MantidQt::MantidWidgets::Batch::MockJobTreeView &mockJobs,
-      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
-          &locations) {
+  void selectedRowLocationsAre(MantidQt::MantidWidgets::Batch::MockJobTreeView &mockJobs,
+                               std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &locations) {
     ON_CALL(mockJobs, selectedRowLocations()).WillByDefault(Return(locations));
   }
 
-  void
-  selectedColumnIs(MantidQt::MantidWidgets::Batch::MockJobTreeView &mockJobs,
-                   int columnIndex) {
+  void selectedColumnIs(MantidQt::MantidWidgets::Batch::MockJobTreeView &mockJobs, int columnIndex) {
     ON_CALL(mockJobs, currentColumn()).WillByDefault(Return(columnIndex));
   }
 
@@ -65,19 +60,14 @@ public:
     return presenter.runsTable().reductionJobs();
   }
 
-  template <typename... Args>
-  MantidQt::MantidWidgets::Batch::RowLocation location(Args... args) {
-    return MantidQt::MantidWidgets::Batch::RowLocation(
-        MantidQt::MantidWidgets::Batch::RowPath({args...}));
+  template <typename... Args> MantidQt::MantidWidgets::Batch::RowLocation location(Args... args) {
+    return MantidQt::MantidWidgets::Batch::RowLocation(MantidQt::MantidWidgets::Batch::RowPath({args...}));
   }
 
-  RunsTablePresenter makePresenter(IRunsTableView &view) {
-    return makePresenter(view, ReductionJobs());
-  }
+  RunsTablePresenter makePresenter(IRunsTableView &view) { return makePresenter(view, ReductionJobs()); }
 
   RunsTablePresenter makePresenter(IRunsTableView &view, ReductionJobs jobs) {
-    auto presenter =
-        RunsTablePresenter(&view, {}, 0.01, std::move(jobs), m_plotter);
+    auto presenter = RunsTablePresenter(&view, {}, 0.01, std::move(jobs), m_plotter);
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }
@@ -90,41 +80,30 @@ public:
 
   Row *getRow(RunsTablePresenter &presenter, int groupIndex, int rowIndex) {
     auto &reductionJobs = presenter.mutableRunsTable().mutableReductionJobs();
-    auto *row = &reductionJobs.mutableGroups()[groupIndex]
-                     .mutableRows()[rowIndex]
-                     .get();
+    auto *row = &reductionJobs.mutableGroups()[groupIndex].mutableRows()[rowIndex].get();
     return row;
   }
 
-  Row *getRow(RunsTablePresenter &presenter,
-              MantidQt::MantidWidgets::Batch::RowLocation const &location) {
+  Row *getRow(RunsTablePresenter &presenter, MantidQt::MantidWidgets::Batch::RowLocation const &location) {
     return getRow(presenter, location.path()[0], location.path()[1]);
   }
 
   std::vector<Cell> emptyCellsArray() {
-    return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
-        9, MantidQt::MantidWidgets::Batch::Cell(""));
+    return std::vector<MantidQt::MantidWidgets::Batch::Cell>(9, MantidQt::MantidWidgets::Batch::Cell(""));
   }
 
-  std::vector<Cell> cellsArray(std::string const &run = "12345",
-                               std::string const &theta = "0.5",
-                               std::string const &trans1 = "",
-                               std::string const &trans2 = "") {
-    return std::vector<Cell>{Cell(run),    Cell(theta), Cell(trans1),
-                             Cell(trans2), Cell(""),    Cell(""),
-                             Cell(""),     Cell(""),    Cell("")};
+  std::vector<Cell> cellsArray(std::string const &run = "12345", std::string const &theta = "0.5",
+                               std::string const &trans1 = "", std::string const &trans2 = "") {
+    return std::vector<Cell>{Cell(run), Cell(theta), Cell(trans1), Cell(trans2), Cell(""),
+                             Cell(""),  Cell(""),    Cell(""),     Cell("")};
   }
 
   void expectIsProcessing() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_mainPresenter, isProcessing()).Times(AtLeast(1)).WillRepeatedly(Return(true));
   }
 
   void expectIsAutoreducing() {
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(true));
   }
 
 protected:

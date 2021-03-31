@@ -14,8 +14,7 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 enum class PolarizationCorrectionType { None, ParameterFile };
 
-inline PolarizationCorrectionType
-polarizationCorrectionTypeFromString(std::string const &correctionType) {
+inline PolarizationCorrectionType polarizationCorrectionTypeFromString(std::string const &correctionType) {
   if (correctionType == "None")
     return PolarizationCorrectionType::None;
   else if (correctionType == "ParameterFile")
@@ -24,8 +23,7 @@ polarizationCorrectionTypeFromString(std::string const &correctionType) {
     throw std::invalid_argument("Unexpected polarization correction type.");
 }
 
-inline std::string
-polarizationCorrectionTypeToString(PolarizationCorrectionType correctionType) {
+inline std::string polarizationCorrectionTypeToString(PolarizationCorrectionType correctionType) {
   switch (correctionType) {
   case PolarizationCorrectionType::None:
     return "None";
@@ -52,12 +50,8 @@ private:
   PolarizationCorrectionType m_correctionType;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool
-operator==(PolarizationCorrections const &lhs,
-           PolarizationCorrections const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool
-operator!=(PolarizationCorrections const &lhs,
-           PolarizationCorrections const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

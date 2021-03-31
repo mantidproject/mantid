@@ -61,9 +61,7 @@ const std::string LoadSQW2::name() const { return "LoadSQW"; }
 int LoadSQW2::version() const { return 2; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadSQW2::category() const {
-  return "DataHandling\\SQW;MDAlgorithms\\DataHandling";
-}
+const std::string LoadSQW2::category() const { return "DataHandling\\SQW;MDAlgorithms\\DataHandling"; }
 
 /// Algorithm's summary for use in the GUI and help. @see
 /// Algorithm::summary
@@ -100,27 +98,21 @@ void LoadSQW2::init() {
   using StringInitializerList = std::initializer_list<std::string>;
 
   // Inputs
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, StringInitializerList({".sqw"})),
+                  "File of type SQW format");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("MetadataOnly", false), "Load Metadata without events.");
   declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load,
-                                     StringInitializerList({".sqw"})),
-      "File of type SQW format");
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("MetadataOnly", false),
-      "Load Metadata without events.");
-  declareProperty(std::make_unique<FileProperty>(
-                      "OutputFilename", "", FileProperty::OptionalSave,
-                      StringInitializerList({".nxs"})),
-                  "If specified, the output workspace will be a file-backed "
-                  "MDEventWorkspace");
+      std::make_unique<FileProperty>("OutputFilename", "", FileProperty::OptionalSave, StringInitializerList({".nxs"})),
+      "If specified, the output workspace will be a file-backed "
+      "MDEventWorkspace");
   std::vector<std::string> allowed = {"Q_sample", "HKL"};
-  declareProperty("Q3DFrames", allowed[0],
-                  std::make_shared<StringListValidator>(allowed),
+  declareProperty("Q3DFrames", allowed[0], std::make_shared<StringListValidator>(allowed),
                   "The required frame for the output workspace");
 
   // Outputs
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "OutputWorkspace", "", Kernel::Direction::Output),
-                  "Output IMDEventWorkspace reflecting SQW data");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
+      "Output IMDEventWorkspace reflecting SQW data");
 }
 
 /// Execute the algorithm.
@@ -143,8 +135,7 @@ void LoadSQW2::cacheInputs() { m_outputFrame = getPropertyValue("Q3DFrames"); }
 void LoadSQW2::initFileReader() {
   using API::Progress;
 
-  m_file = std::make_unique<std::ifstream>(getPropertyValue("Filename"),
-                                           std::ios_base::binary);
+  m_file = std::make_unique<std::ifstream>(getPropertyValue("Filename"), std::ios_base::binary);
   m_reader = std::make_unique<BinaryStreamReader>(*m_file);
 }
 
@@ -158,8 +149,7 @@ int32_t LoadSQW2::readMainHeader() {
   std::string appName, filename, filepath, title;
   double appVersion(0.0);
   int32_t sqwType(-1), numDims(-1), nspe(-1);
-  *m_reader >> appName >> appVersion >> sqwType >> numDims >> filename >>
-      filepath >> title >> nspe;
+  *m_reader >> appName >> appVersion >> sqwType >> numDims >> filename >> filepath >> title >> nspe;
   m_nspe = static_cast<uint16_t>(nspe);
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     std::ostringstream os;
@@ -183,17 +173,14 @@ int32_t LoadSQW2::readMainHeader() {
  */
 void LoadSQW2::throwIfUnsupportedFileType(int32_t sqwType) {
   if (sqwType != 1) {
-    throw std::runtime_error(
-        "Unsupported SQW type: " + std::to_string(sqwType) +
-        "\nOnly files containing the full pixel "
-        "information are currently supported");
+    throw std::runtime_error("Unsupported SQW type: " + std::to_string(sqwType) +
+                             "\nOnly files containing the full pixel "
+                             "information are currently supported");
   }
 }
 
 /// Create the output workspace object
-void LoadSQW2::createOutputWorkspace() {
-  m_outputWS = std::make_shared<SQWWorkspace>();
-}
+void LoadSQW2::createOutputWorkspace() { m_outputWS = std::make_shared<SQWWorkspace>(); }
 
 /**
  * Read all of the SPE headers and fill in the experiment details on the
@@ -233,22 +220,16 @@ std::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
   // lattice - alatt, angdeg, cu, cv = 12 values
   std::vector<float> floats;
   m_reader->read(floats, 12);
-  auto lattice = std::make_unique<OrientedLattice>(
-      floats[0], floats[1], floats[2], floats[3], floats[4], floats[5]);
-  V3D uVec(floats[6], floats[7], floats[8]),
-      vVec(floats[9], floats[10], floats[11]);
+  auto lattice = std::make_unique<OrientedLattice>(floats[0], floats[1], floats[2], floats[3], floats[4], floats[5]);
+  V3D uVec(floats[6], floats[7], floats[8]), vVec(floats[9], floats[10], floats[11]);
   lattice->setUFromVectors(uVec, vVec);
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     std::stringstream os;
     os << "Lattice:"
-       << "    alatt: " << lattice->a1() << " " << lattice->a2() << " "
-       << lattice->a3() << "\n"
-       << "    angdeg: " << lattice->alpha() << " " << lattice->beta() << " "
-       << lattice->gamma() << "\n"
-       << "    cu: " << floats[6] << " " << floats[7] << " " << floats[8]
-       << "\n"
-       << "    cv: " << floats[9] << " " << floats[10] << " " << floats[11]
-       << "\n"
+       << "    alatt: " << lattice->a1() << " " << lattice->a2() << " " << lattice->a3() << "\n"
+       << "    angdeg: " << lattice->alpha() << " " << lattice->beta() << " " << lattice->gamma() << "\n"
+       << "    cu: " << floats[6] << " " << floats[7] << " " << floats[8] << "\n"
+       << "    cv: " << floats[9] << " " << floats[10] << " " << floats[11] << "\n"
        << "B matrix (calculated): " << lattice->getB() << "\n"
        << "Inverse B matrix (calculated): " << lattice->getBinv() << "\n";
     g_log.debug(os.str());
@@ -282,8 +263,7 @@ std::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
   *m_reader >> nbounds;
   std::vector<float> enBins(nbounds);
   m_reader->read(enBins, nbounds);
-  run.storeHistogramBinBoundaries(
-      std::vector<double>(enBins.begin(), enBins.end()));
+  run.storeHistogramBinBoundaries(std::vector<double>(enBins.begin(), enBins.end()));
 
   // Skip the per-spe file projection information. We only use the
   // information from the data section
@@ -315,8 +295,7 @@ void LoadSQW2::skipDetectorSection() {
   *m_reader >> ndet;
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     std::stringstream os;
-    os << "Skipping " << ndet << " detector parameters from '" << filename
-       << "'\n";
+    os << "Skipping " << ndet << " detector parameters from '" << filename << "'\n";
     g_log.debug(os.str());
   }
   // 6 float fields all ndet long - group, x2, phi, azim, width, height
@@ -379,18 +358,15 @@ void LoadSQW2::readSQWDimensions() {
   // The lattice is assumed to be the same in all contributing files so use
   // the first B matrix to create the axis information (only needed in HKL
   // frame)
-  const auto &bmat0 =
-      m_outputWS->getExperimentInfo(0)->sample().getOrientedLattice().getB();
+  const auto &bmat0 = m_outputWS->getExperimentInfo(0)->sample().getOrientedLattice().getB();
   for (size_t i = 0; i < 4; ++i) {
     // To ensure that we capture all of the data from the file we initially
     // set the dimension limits to arbitrarily large values and reset them later
     float umin(dimLimits[2 * i]), umax(dimLimits[2 * i + 1]);
     if (i < 3) {
-      m_outputWS->addDimension(createQDimension(
-          i, umin, umax, static_cast<size_t>(nbins[i]), bmat0));
+      m_outputWS->addDimension(createQDimension(i, umin, umax, static_cast<size_t>(nbins[i]), bmat0));
     } else {
-      m_outputWS->addDimension(
-          createEnDimension(umin, umax, static_cast<size_t>(nbins[i])));
+      m_outputWS->addDimension(createEnDimension(umin, umax, static_cast<size_t>(nbins[i])));
     }
   }
   setupBoxController();
@@ -408,8 +384,7 @@ std::vector<int32_t> LoadSQW2::readProjection() {
   int32_t nIntAxes(4 - nProjAxes);
   if (nIntAxes > 0) {
     // n indices + 2*n limits
-    m_file->seekg(nIntAxes * sizeof(int32_t) + 2 * nIntAxes * sizeof(float),
-                  std::ios_base::cur);
+    m_file->seekg(nIntAxes * sizeof(int32_t) + 2 * nIntAxes * sizeof(float), std::ios_base::cur);
   }
   std::vector<int32_t> nbins(4, 1);
   if (nProjAxes > 0) {
@@ -427,9 +402,7 @@ std::vector<int32_t> LoadSQW2::readProjection() {
     // skip display axes
     m_file->seekg(nProjAxes * sizeof(int32_t), std::ios_base::cur);
     // skip data+error+npix(binned)
-    m_file->seekg(2 * signalLength * sizeof(float) +
-                      signalLength * sizeof(int64_t),
-                  std::ios_base::cur);
+    m_file->seekg(2 * signalLength * sizeof(float) + signalLength * sizeof(int64_t), std::ios_base::cur);
   }
   return nbins;
 }
@@ -501,9 +474,8 @@ GNU_DIAG_OFF("missing-braces")
  * HKL frame
  * @return A new MDHistoDimension object
  */
-Geometry::IMDDimension_sptr
-LoadSQW2::createQDimension(size_t index, float dimMin, float dimMax,
-                           size_t nbins, const Kernel::DblMatrix &bmat) {
+Geometry::IMDDimension_sptr LoadSQW2::createQDimension(size_t index, float dimMin, float dimMax, size_t nbins,
+                                                       const Kernel::DblMatrix &bmat) {
   if (index > 2) {
     throw std::logic_error("LoadSQW2::createQDimension - Expected a dimension "
                            "index between 0 & 2. Found: " +
@@ -523,8 +495,7 @@ LoadSQW2::createQDimension(size_t index, float dimMin, float dimMax,
     unit = "A^-1";
     frameName = "QSample";
   } else if (m_outputFrame == "HKL") {
-    static std::array<const char *, 3> indexToHKL{"[H,0,0]", "[0,K,0]",
-                                                  "[0,0,L]"};
+    static std::array<const char *, 3> indexToHKL{"[H,0,0]", "[0,K,0]", "[0,0,L]"};
     name = indexToHKL[index];
     V3D dimDir;
     dimDir[index] = 1;
@@ -533,8 +504,7 @@ LoadSQW2::createQDimension(size_t index, float dimMin, float dimMax,
     unit = "in " + MDAlgorithms::sprintfd(length, 1.e-3) + " A^-1";
     frameName = "HKL";
   } else {
-    throw std::logic_error(
-        "LoadSQW2::createQDimension - Unknown output frame: " + m_outputFrame);
+    throw std::logic_error("LoadSQW2::createQDimension - Unknown output frame: " + m_outputFrame);
   }
   builder.setUnits(unit);
   builder.setName(name);
@@ -552,8 +522,7 @@ GNU_DIAG_ON("missing-braces")
  * @param nbins Number of bins for this dimension
  * @return A new MDHistoDimension object
  */
-Geometry::IMDDimension_sptr
-LoadSQW2::createEnDimension(float dimMin, float dimMax, size_t nbins) {
+Geometry::IMDDimension_sptr LoadSQW2::createEnDimension(float dimMin, float dimMax, size_t nbins) {
   MDHistoDimensionBuilder builder;
   builder.setId("en");
   builder.setUnits("meV");
@@ -606,8 +575,7 @@ void LoadSQW2::setupFileBackend(const std::string &filebackPath) {
 
   // create file-backed box controller
   auto boxControllerMem = m_outputWS->getBoxController();
-  auto boxControllerIO =
-      std::make_shared<BoxControllerNeXusIO>(boxControllerMem.get());
+  auto boxControllerIO = std::make_shared<BoxControllerNeXusIO>(boxControllerMem.get());
   boxControllerMem->setFileBacked(boxControllerIO, filebackPath);
   m_outputWS->getBox()->setFileBacked();
   boxControllerMem->getFileIO()->setWriteBufferSize(1000000);
@@ -655,9 +623,8 @@ void LoadSQW2::readPixelDataIntoWorkspace() {
   }
   assert(pixelsLeftToRead == 0);
   if (pixelsAdded == 0) {
-    throw std::runtime_error(
-        "No pixels could be added from the source file. "
-        "Please check the irun fields of all pixels are valid.");
+    throw std::runtime_error("No pixels could be added from the source file. "
+                             "Please check the irun fields of all pixels are valid.");
   } else if (pixelsAdded != static_cast<size_t>(npixtot)) {
     g_log.warning("Some pixels within the source file had an invalid irun "
                   "field. They have been ignored.");
@@ -691,14 +658,12 @@ void LoadSQW2::warnIfMemoryInsufficient(int64_t npixtot) {
   if (m_outputWS->isFileBacked())
     return;
   MemoryStats stat;
-  size_t reqdMemory =
-      (npixtot * sizeof(MDEvent<4>) + NPIX_CHUNK * FIELDS_PER_PIXEL) / 1024;
+  size_t reqdMemory = (npixtot * sizeof(MDEvent<4>) + NPIX_CHUNK * FIELDS_PER_PIXEL) / 1024;
   if (reqdMemory > stat.availMem()) {
-    g_log.warning()
-        << "It looks as if there is insufficient memory to load the "
-        << "entire file. It is recommended to cancel the algorithm and "
-           "specify "
-           "the OutputFilename option to create a file-backed workspace.\n";
+    g_log.warning() << "It looks as if there is insufficient memory to load the "
+                    << "entire file. It is recommended to cancel the algorithm and "
+                       "specify "
+                       "the OutputFilename option to create a file-backed workspace.\n";
   }
 }
 
@@ -723,9 +688,8 @@ size_t LoadSQW2::addEventFromBuffer(const float *pixel) {
   coord_t centers[4] = {pixel[0], pixel[1], pixel[2], pixel[3]};
   toOutputFrame(centers);
   auto error = pixel[8];
-  auto added = m_outputWS->addEvent(
-      MDEvent<4>(pixel[7], error * error, static_cast<uint16_t>(irun - 1),
-                 goniometerIndex, static_cast<detid_t>(pixel[5]), centers));
+  auto added = m_outputWS->addEvent(MDEvent<4>(pixel[7], error * error, static_cast<uint16_t>(irun - 1),
+                                               goniometerIndex, static_cast<detid_t>(pixel[5]), centers));
   // At this point the workspace should be setup so that we always add the
   // event so only do a runtime check in debug mode
   assert(added == 1);

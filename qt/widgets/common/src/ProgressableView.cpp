@@ -9,9 +9,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-bool ProgressableView::isPercentageIndicator() const {
-  return m_style == Style::PERCENTAGE;
-}
+bool ProgressableView::isPercentageIndicator() const { return m_style == Style::PERCENTAGE; }
 
 void ProgressableView::setProgressRange(int min, int max) {
   // Cache values for a percentage-style progress bar i.e. where both are not

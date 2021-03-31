@@ -9,8 +9,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-IndirectBayesTab::IndirectBayesTab(QWidget *parent)
-    : IndirectTab(parent), m_propTree(new QtTreePropertyBrowser()) {
+IndirectBayesTab::IndirectBayesTab(QWidget *parent) : IndirectTab(parent), m_propTree(new QtTreePropertyBrowser()) {
   m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
@@ -25,9 +24,7 @@ IndirectBayesTab::~IndirectBayesTab() {}
  *
  * @param filter :: true if you want to allow filtering
  */
-void IndirectBayesTab::filterInputData(bool filter) {
-  setFileExtensionsByName(filter);
-}
+void IndirectBayesTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
 /**
  * Emits a signal to run a python script using the method in the parent
@@ -35,9 +32,7 @@ void IndirectBayesTab::filterInputData(bool filter) {
  *
  * @param pyInput :: A string of python code to execute
  */
-void IndirectBayesTab::runPythonScript(const QString &pyInput) {
-  emit runAsPythonScript(pyInput, true);
-}
+void IndirectBayesTab::runPythonScript(const QString &pyInput) { emit runAsPythonScript(pyInput, true); }
 
 /**
  * Format the tree widget so its easier to read the contents. It changes the
@@ -46,13 +41,11 @@ void IndirectBayesTab::runPythonScript(const QString &pyInput) {
  * @param treeWidget :: The tree widget to format
  * @param properties :: The properties within the tree widget
  */
-void IndirectBayesTab::formatTreeWidget(
-    QtTreePropertyBrowser *treeWidget,
-    QMap<QString, QtProperty *> const &properties) const {
+void IndirectBayesTab::formatTreeWidget(QtTreePropertyBrowser *treeWidget,
+                                        QMap<QString, QtProperty *> const &properties) const {
   treeWidget->setIndentation(0);
   for (auto const &item : properties)
-    treeWidget->setBackgroundColor(treeWidget->topLevelItem(item),
-                                   QColor(246, 246, 246));
+    treeWidget->setBackgroundColor(treeWidget->topLevelItem(item), QColor(246, 246, 246));
 }
 
 } // namespace CustomInterfaces

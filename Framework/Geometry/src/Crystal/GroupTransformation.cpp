@@ -16,8 +16,7 @@ namespace Geometry {
 using namespace Kernel;
 
 /// Constructor using MatrixVectorPair.
-GroupTransformation::GroupTransformation(
-    const MatrixVectorPair<double, V3R> &operation)
+GroupTransformation::GroupTransformation(const MatrixVectorPair<double, V3R> &operation)
     : m_matrixVectorPair(operation) {
   setInverseFromPair();
 }
@@ -28,16 +27,14 @@ GroupTransformation::GroupTransformation(const std::string &operationString)
 
 /// Transforms the supplied group and returns the result.
 Group GroupTransformation::operator()(const Group &other) const {
-  std::vector<SymmetryOperation> groupOperations =
-      other.getSymmetryOperations();
+  std::vector<SymmetryOperation> groupOperations = other.getSymmetryOperations();
 
   std::vector<SymmetryOperation> transformedOperations;
   transformedOperations.reserve(groupOperations.size());
 
   using std::placeholders::_1;
 
-  std::transform(groupOperations.cbegin(), groupOperations.cend(),
-                 std::back_inserter(transformedOperations),
+  std::transform(groupOperations.cbegin(), groupOperations.cend(), std::back_inserter(transformedOperations),
                  std::bind(&GroupTransformation::transformOperation, this, _1));
 
   return Group(transformedOperations);
@@ -61,20 +58,15 @@ GroupTransformation GroupTransformation::getInverse() const {
  * @param operation :: SymmetryOperation to transform.
  * @return Transformed symmetry operation.
  */
-SymmetryOperation GroupTransformation::transformOperation(
-    const SymmetryOperation &operation) const {
+SymmetryOperation GroupTransformation::transformOperation(const SymmetryOperation &operation) const {
   MatrixVectorPair<double, V3R> op =
-      m_inversePair *
-      MatrixVectorPair<double, V3R>(convertMatrix<double>(operation.matrix()),
-                                    operation.vector()) *
+      m_inversePair * MatrixVectorPair<double, V3R>(convertMatrix<double>(operation.matrix()), operation.vector()) *
       m_matrixVectorPair;
 
   return SymmetryOperation(op.getMatrix(), getWrappedVector(op.getVector()));
 }
 
-void GroupTransformation::setInverseFromPair() {
-  m_inversePair = m_matrixVectorPair.getInverse();
-}
+void GroupTransformation::setInverseFromPair() { m_inversePair = m_matrixVectorPair.getInverse(); }
 
 } // namespace Geometry
 } // namespace Mantid

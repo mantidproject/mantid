@@ -38,11 +38,9 @@ DECLARE_VECTOR_PARAMETER(DimensionsUsedVectorParam, bool)
  */
 class DLLExport CoordTransformDistance : public Mantid::API::CoordTransform {
 public:
-  CoordTransformDistance(
-      const size_t inD, const coord_t *center, const bool *dimensionsUsed,
-      const size_t outD = 1,
-      const std::vector<Kernel::V3D> &eigenvects = std::vector<Kernel::V3D>(0),
-      const std::vector<double> &eigenvals = std::vector<double>(0, 0.0));
+  CoordTransformDistance(const size_t inD, const coord_t *center, const bool *dimensionsUsed, const size_t outD = 1,
+                         const std::vector<Kernel::V3D> &eigenvects = std::vector<Kernel::V3D>(0),
+                         const std::vector<double> &eigenvals = std::vector<double>(0, 0.0));
 
   CoordTransform *clone() const override;
   std::string toXMLString() const override;

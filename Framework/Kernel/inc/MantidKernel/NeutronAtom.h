@@ -24,17 +24,14 @@ struct MANTID_KERNEL_DLL NeutronAtom {
   /// The reference wavelength value for absorption cross sections
   static const double ReferenceLambda;
 
-  NeutronAtom(const uint16_t z, const double coh_b_real,
-              const double inc_b_real, const double coh_xs, const double inc_xs,
-              const double tot_xs, const double abs_xs);
+  NeutronAtom(const uint16_t z, const double coh_b_real, const double inc_b_real, const double coh_xs,
+              const double inc_xs, const double tot_xs, const double abs_xs);
 
-  NeutronAtom(const uint16_t z, const uint16_t a, const double coh_b_real,
-              const double inc_b_real, const double coh_xs, const double inc_xs,
-              const double tot_xs, const double abs_xs);
+  NeutronAtom(const uint16_t z, const uint16_t a, const double coh_b_real, const double inc_b_real, const double coh_xs,
+              const double inc_xs, const double tot_xs, const double abs_xs);
 
-  NeutronAtom(const uint16_t z, const uint16_t a, const double coh_b_real,
-              const double coh_b_img, const double inc_b_real,
-              const double inc_b_img, const double coh_xs, const double inc_xs,
+  NeutronAtom(const uint16_t z, const uint16_t a, const double coh_b_real, const double coh_b_img,
+              const double inc_b_real, const double inc_b_img, const double coh_xs, const double inc_xs,
               const double tot_xs, const double abs_xs);
 
   NeutronAtom(const NeutronAtom &other);
@@ -84,27 +81,19 @@ struct MANTID_KERNEL_DLL NeutronAtom {
   double inc_scatt_length;
 };
 
-MANTID_KERNEL_DLL bool operator==(const NeutronAtom &left,
-                                  const NeutronAtom &right);
-MANTID_KERNEL_DLL bool operator!=(const NeutronAtom &left,
-                                  const NeutronAtom &right);
+MANTID_KERNEL_DLL bool operator==(const NeutronAtom &left, const NeutronAtom &right);
+MANTID_KERNEL_DLL bool operator!=(const NeutronAtom &left, const NeutronAtom &right);
 
 // addition
-MANTID_KERNEL_DLL NeutronAtom operator+(const NeutronAtom &left,
-                                        const NeutronAtom &right);
+MANTID_KERNEL_DLL NeutronAtom operator+(const NeutronAtom &left, const NeutronAtom &right);
 
 // multiplication
-MANTID_KERNEL_DLL NeutronAtom operator*(const NeutronAtom &left,
-                                        const double right);
-MANTID_KERNEL_DLL NeutronAtom operator*(const double left,
-                                        const NeutronAtom &right);
+MANTID_KERNEL_DLL NeutronAtom operator*(const NeutronAtom &left, const double right);
+MANTID_KERNEL_DLL NeutronAtom operator*(const double left, const NeutronAtom &right);
 
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &out,
-                                           const NeutronAtom &atom);
-MANTID_KERNEL_DLL NeutronAtom getNeutronAtom(const uint16_t z_number,
-                                             const uint16_t a_number = 0);
-MANTID_KERNEL_DLL NeutronAtom getNeutronNoExceptions(const uint16_t z_number,
-                                                     const uint16_t a_number);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &out, const NeutronAtom &atom);
+MANTID_KERNEL_DLL NeutronAtom getNeutronAtom(const uint16_t z_number, const uint16_t a_number = 0);
+MANTID_KERNEL_DLL NeutronAtom getNeutronNoExceptions(const uint16_t z_number, const uint16_t a_number);
 MANTID_KERNEL_DLL NeutronAtom getNeutronNoExceptions(const NeutronAtom &other);
 
 /// Utility function to calculate scattering lengths from cross-sections.

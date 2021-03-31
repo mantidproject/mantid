@@ -20,13 +20,11 @@ namespace API {
  * @param domainType
  * @returns A pointer to the new object
  */
-IDomainCreator *DomainCreatorFactoryImpl::createDomainCreator(
-    const std::string &id, Kernel::IPropertyManager *pm,
-    const std::string &workspacePropertyName,
-    const unsigned int domainType) const {
+IDomainCreator *DomainCreatorFactoryImpl::createDomainCreator(const std::string &id, Kernel::IPropertyManager *pm,
+                                                              const std::string &workspacePropertyName,
+                                                              const unsigned int domainType) const {
   auto creator = this->createUnwrapped(id);
-  creator->initialize(pm, workspacePropertyName,
-                      static_cast<IDomainCreator::DomainType>(domainType));
+  creator->initialize(pm, workspacePropertyName, static_cast<IDomainCreator::DomainType>(domainType));
   return creator;
 }
 

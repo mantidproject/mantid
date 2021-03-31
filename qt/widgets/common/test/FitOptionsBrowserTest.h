@@ -37,17 +37,14 @@ using namespace MantidQt::MantidWidgets;
 class FitOptionsBrowserTest : public CxxTest::TestSuite {
 
 public:
-  static FitOptionsBrowserTest *createSuite() {
-    return new FitOptionsBrowserTest;
-  }
+  static FitOptionsBrowserTest *createSuite() { return new FitOptionsBrowserTest; }
   static void destroySuite(FitOptionsBrowserTest *suite) { delete suite; }
 
   void setUp() override { m_numberOfTries = 100u; }
 
   void tearDown() override { m_fitOptionsBrowser.reset(); }
 
-  void
-  test_that_the_FitOptionsBrowser_can_be_instantiated_many_times_without_instability() {
+  void test_that_the_FitOptionsBrowser_can_be_instantiated_many_times_without_instability() {
     for (auto i = 0u; i < m_numberOfTries; ++i)
       m_fitOptionsBrowser = std::make_unique<FitOptionsBrowser>(nullptr);
   }

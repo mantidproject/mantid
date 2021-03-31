@@ -40,10 +40,8 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", mdWsName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SolidAngleWorkspace", saWsName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "OutWSName"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputNormalizationWorkspace", "OutNormWSName"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "OutWSName"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputNormalizationWorkspace", "OutNormWSName"));
 
     AnalysisDataService::Instance().clear();
   }
@@ -71,8 +69,7 @@ private:
   }
 
   void createSolidAngleWorkspace(const std::string &wsName) {
-    auto sa =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    auto sa = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     AnalysisDataService::Instance().addOrReplace(wsName, sa);
   }
 };

@@ -29,8 +29,7 @@ public:
   /// compiler)
   virtual ~IProjectSerialisable() {}
 
-  static IProjectSerialisable *loadFromProject(const std::string &lines,
-                                               ApplicationWindow *app,
+  static IProjectSerialisable *loadFromProject(const std::string &lines, ApplicationWindow *app,
                                                const int fileVersion) {
     UNUSED_ARG(lines);
     UNUSED_ARG(app);

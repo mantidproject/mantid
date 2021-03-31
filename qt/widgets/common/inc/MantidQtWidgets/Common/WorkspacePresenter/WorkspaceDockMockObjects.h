@@ -30,10 +30,8 @@ public:
   }
   ~MockWorkspaceDockView() override {}
 
-  MOCK_CONST_METHOD2(askUserYesNo, bool(const std::string &caption,
-                                        const std::string &message));
-  MOCK_CONST_METHOD2(showCriticalUserMessage, void(const std::string &caption,
-                                                   const std::string &message));
+  MOCK_CONST_METHOD2(askUserYesNo, bool(const std::string &caption, const std::string &message));
+  MOCK_CONST_METHOD2(showCriticalUserMessage, void(const std::string &caption, const std::string &message));
 
   MOCK_METHOD0(showLoadDialog, void());
   MOCK_METHOD0(showLiveDataDialog, void());
@@ -43,21 +41,16 @@ public:
   MOCK_CONST_METHOD0(clearWorkspacesConfirmation, bool());
   MOCK_METHOD1(enableClearButton, void(bool enable));
   MOCK_METHOD0(clearView, void());
-  MOCK_METHOD2(recordWorkspaceRename,
-               void(const std::string &oldName, const std::string &newName));
+  MOCK_METHOD2(recordWorkspaceRename, void(const std::string &oldName, const std::string &newName));
   MOCK_METHOD1(showRenameDialog, void(const StringList &wsNames));
   MOCK_CONST_METHOD0(getSortDirection, SortDirection());
   MOCK_CONST_METHOD0(getSortCriteria, SortCriteria());
   MOCK_METHOD2(sortWorkspaces,
-               void(IWorkspaceDockView::SortCriteria criteria,
-                    IWorkspaceDockView::SortDirection direction));
+               void(IWorkspaceDockView::SortCriteria criteria, IWorkspaceDockView::SortDirection direction));
   MOCK_CONST_METHOD0(getSaveFileType, SaveFileType());
-  MOCK_METHOD2(saveWorkspace,
-               void(const std::string &wsName, SaveFileType type));
+  MOCK_METHOD2(saveWorkspace, void(const std::string &wsName, SaveFileType type));
   MOCK_METHOD1(saveWorkspaces, void(const StringList &wsNames));
-  MOCK_METHOD1(
-      updateTree,
-      void(const std::map<std::string, Mantid::API::Workspace_sptr> &items));
+  MOCK_METHOD1(updateTree, void(const std::map<std::string, Mantid::API::Workspace_sptr> &items));
 
   MOCK_CONST_METHOD0(getFilterText, std::string());
   MOCK_METHOD1(filterWorkspaces, void(const std::string &filterText));
@@ -87,8 +80,7 @@ public:
   MOCK_METHOD0(showSurfacePlot, void());
   MOCK_METHOD0(showContourPlot, void());
 
-  MOCK_METHOD2(executeAlgorithmAsync,
-               bool(Mantid::API::IAlgorithm_sptr alg, const bool wait));
+  MOCK_METHOD2(executeAlgorithmAsync, bool(Mantid::API::IAlgorithm_sptr alg, const bool wait));
 
   // Methods which are not to be mocked
   void enableDeletePrompt(bool) override {}
