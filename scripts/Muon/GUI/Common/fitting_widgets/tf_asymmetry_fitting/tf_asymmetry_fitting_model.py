@@ -804,7 +804,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     def _do_sequential_fit(self, row_index: int, workspace_name: str, parameter_values: list, functions: list,
                            use_initial_values: bool = False):
         """Performs a sequential fit of the single fit data."""
-        single_function = functions[row_index - 1] if not use_initial_values and row_index >= 1 else \
+        single_function = functions[row_index - 1].clone() if not use_initial_values and row_index >= 1 else \
             self._get_single_function_with_parameters(parameter_values)
 
         params = self._get_parameters_for_single_fit(workspace_name, single_function)
@@ -820,7 +820,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     def _do_sequential_simultaneous_fits(self, row_index: int, workspace_names: list, parameter_values: list,
                                          functions: list, use_initial_values: bool = False):
         """Performs a number of simultaneous fits, sequentially."""
-        simultaneous_function = functions[row_index - 1] if not use_initial_values and row_index >= 1 else \
+        simultaneous_function = functions[row_index - 1].clone() if not use_initial_values and row_index >= 1 else \
             self._get_simultaneous_function_with_parameters(parameter_values)
 
         params = self._get_parameters_for_simultaneous_fit(workspace_names, simultaneous_function)
@@ -836,7 +836,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     def _do_sequential_tf_asymmetry_fit(self, row_index: int, workspace_name: str, parameter_values: list,
                                         functions: list, use_initial_values: bool = False):
         """Performs a sequential fit of the TF Asymmetry single fit data."""
-        tf_single_function = functions[row_index - 1] if not use_initial_values and row_index >= 1 else \
+        tf_single_function = functions[row_index - 1].clone() if not use_initial_values and row_index >= 1 else \
             self._get_tf_asymmetry_single_function_with_parameters(parameter_values)
 
         params = self._get_parameters_for_tf_asymmetry_single_fit(workspace_name, tf_single_function)
@@ -858,7 +858,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
                                                       parameter_values: list, functions: list,
                                                       use_initial_values: bool = False):
         """Performs a number of TF Asymmetry simultaneous fits, sequentially."""
-        tf_simultaneous_function = functions[row_index - 1] if not use_initial_values and row_index >= 1 else \
+        tf_simultaneous_function = functions[row_index - 1].clone() if not use_initial_values and row_index >= 1 else \
             self._get_tf_asymmetry_simultaneous_function_with_parameters(parameter_values)
 
         params = self._get_parameters_for_tf_asymmetry_simultaneous_fit(workspace_names, tf_simultaneous_function)
