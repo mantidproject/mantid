@@ -22,9 +22,7 @@ class SortTableWorkspaceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SortTableWorkspaceTest *createSuite() {
-    return new SortTableWorkspaceTest();
-  }
+  static SortTableWorkspaceTest *createSuite() { return new SortTableWorkspaceTest(); }
   static void destroySuite(SortTableWorkspaceTest *suite) { delete suite; }
 
   void test_Init() {
@@ -77,30 +75,21 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Columns", columns));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Ascending", ascending));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     ITableWorkspace_sptr outws;
-    TS_ASSERT_THROWS_NOTHING(
-        outws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(outws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outWSName));
     TS_ASSERT(outws);
     if (!outws)
       return;
 
-    auto &data1 = static_cast<Mantid::DataObjects::TableColumn<int> &>(
-                      *outws->getColumn("x"))
-                      .data();
-    auto &data2 = static_cast<Mantid::DataObjects::TableColumn<std::string> &>(
-                      *outws->getColumn("y"))
-                      .data();
-    auto &data3 = static_cast<Mantid::DataObjects::TableColumn<double> &>(
-                      *outws->getColumn("z"))
-                      .data();
+    auto &data1 = static_cast<Mantid::DataObjects::TableColumn<int> &>(*outws->getColumn("x")).data();
+    auto &data2 = static_cast<Mantid::DataObjects::TableColumn<std::string> &>(*outws->getColumn("y")).data();
+    auto &data3 = static_cast<Mantid::DataObjects::TableColumn<double> &>(*outws->getColumn("z")).data();
 
     TS_ASSERT_EQUALS(data1[0], 1);
     TS_ASSERT_EQUALS(data1[1], 1);
@@ -181,30 +170,21 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Columns", columns));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Ascending", ascending));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     ITableWorkspace_sptr outws;
-    TS_ASSERT_THROWS_NOTHING(
-        outws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(outws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outWSName));
     TS_ASSERT(outws);
     if (!outws)
       return;
 
-    auto &data1 = static_cast<Mantid::DataObjects::TableColumn<int> &>(
-                      *outws->getColumn("x"))
-                      .data();
-    auto &data2 = static_cast<Mantid::DataObjects::TableColumn<std::string> &>(
-                      *outws->getColumn("y"))
-                      .data();
-    auto &data3 = static_cast<Mantid::DataObjects::TableColumn<double> &>(
-                      *outws->getColumn("z"))
-                      .data();
+    auto &data1 = static_cast<Mantid::DataObjects::TableColumn<int> &>(*outws->getColumn("x")).data();
+    auto &data2 = static_cast<Mantid::DataObjects::TableColumn<std::string> &>(*outws->getColumn("y")).data();
+    auto &data3 = static_cast<Mantid::DataObjects::TableColumn<double> &>(*outws->getColumn("z")).data();
 
     TS_ASSERT_EQUALS(data1[0], 1);
     TS_ASSERT_EQUALS(data1[1], 1);
@@ -283,29 +263,20 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Columns", columns));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     ITableWorkspace_sptr outws;
-    TS_ASSERT_THROWS_NOTHING(
-        outws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(outws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outWSName));
     TS_ASSERT(outws);
     if (!outws)
       return;
 
-    auto &data1 = static_cast<Mantid::DataObjects::TableColumn<int> &>(
-                      *outws->getColumn("x"))
-                      .data();
-    auto &data2 = static_cast<Mantid::DataObjects::TableColumn<std::string> &>(
-                      *outws->getColumn("y"))
-                      .data();
-    auto &data3 = static_cast<Mantid::DataObjects::TableColumn<double> &>(
-                      *outws->getColumn("z"))
-                      .data();
+    auto &data1 = static_cast<Mantid::DataObjects::TableColumn<int> &>(*outws->getColumn("x")).data();
+    auto &data2 = static_cast<Mantid::DataObjects::TableColumn<std::string> &>(*outws->getColumn("y")).data();
+    auto &data3 = static_cast<Mantid::DataObjects::TableColumn<double> &>(*outws->getColumn("z")).data();
 
     TS_ASSERT_EQUALS(data1[0], 1);
     TS_ASSERT_EQUALS(data1[1], 1);
@@ -386,30 +357,21 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Columns", columns));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Ascending", ascending));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     ITableWorkspace_sptr outws;
-    TS_ASSERT_THROWS_NOTHING(
-        outws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(outws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outWSName));
     TS_ASSERT(outws);
     if (!outws)
       return;
 
-    auto &data1 = static_cast<Mantid::DataObjects::TableColumn<int> &>(
-                      *outws->getColumn("x"))
-                      .data();
-    auto &data2 = static_cast<Mantid::DataObjects::TableColumn<std::string> &>(
-                      *outws->getColumn("y"))
-                      .data();
-    auto &data3 = static_cast<Mantid::DataObjects::TableColumn<double> &>(
-                      *outws->getColumn("z"))
-                      .data();
+    auto &data1 = static_cast<Mantid::DataObjects::TableColumn<int> &>(*outws->getColumn("x")).data();
+    auto &data2 = static_cast<Mantid::DataObjects::TableColumn<std::string> &>(*outws->getColumn("y")).data();
+    auto &data3 = static_cast<Mantid::DataObjects::TableColumn<double> &>(*outws->getColumn("z")).data();
 
     TS_ASSERT_EQUALS(data1[0], 3);
     TS_ASSERT_EQUALS(data1[1], 3);
@@ -470,8 +432,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
     TS_ASSERT(!alg.isExecuted());
   }
@@ -506,8 +467,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Columns", columns));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Ascending", ascending));
     TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
@@ -543,8 +503,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Columns", columns));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Ascending", ascending));
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
@@ -581,8 +540,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Columns", columns));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Ascending", ascending));
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);

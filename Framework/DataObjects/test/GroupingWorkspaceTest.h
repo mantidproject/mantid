@@ -23,10 +23,8 @@ class GroupingWorkspaceTest : public CxxTest::TestSuite {
 public:
   void test_default_constructor() {
     GroupingWorkspace_sptr ws(new GroupingWorkspace());
-    TSM_ASSERT_THROWS_ANYTHING("Can't init with > 1 X or Y entries.",
-                               ws->initialize(100, 2, 1));
-    TSM_ASSERT_THROWS_ANYTHING("Can't init with > 1 X or Y entries.",
-                               ws->initialize(100, 1, 2));
+    TSM_ASSERT_THROWS_ANYTHING("Can't init with > 1 X or Y entries.", ws->initialize(100, 2, 1));
+    TSM_ASSERT_THROWS_ANYTHING("Can't init with > 1 X or Y entries.", ws->initialize(100, 1, 2));
     TS_ASSERT_THROWS_NOTHING(ws->initialize(100, 1, 1));
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 100);
     TS_ASSERT_EQUALS(ws->blocksize(), 1);
@@ -34,8 +32,7 @@ public:
 
   void test_constructor_from_Instrument() {
     // Fake instrument with 5*9 pixels with ID starting at 1
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
     GroupingWorkspace_sptr ws(new GroupingWorkspace(inst));
 
@@ -67,8 +64,7 @@ public:
   void testClone() {
     // As test_constructor_from_Instrument(), set on ws, get on clone.
     // Fake instrument with 5*9 pixels with ID starting at 1
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
     GroupingWorkspace_sptr ws(new GroupingWorkspace(inst));
     auto cloned = ws->clone();
@@ -112,11 +108,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     GroupingWorkspace_const_sptr wsConst;
     GroupingWorkspace_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<GroupingWorkspace_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<GroupingWorkspace_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(
-        wsNonConst = manager.getValue<GroupingWorkspace_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<GroupingWorkspace_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 

@@ -26,8 +26,7 @@ public:
   static void destroySuite(CreateMDTest *suite) { delete suite; }
 
   void createTwoTestWorkspaces() {
-    auto sim_alg = Mantid::API::AlgorithmManager::Instance().create(
-        "CreateSimulationWorkspace");
+    auto sim_alg = Mantid::API::AlgorithmManager::Instance().create("CreateSimulationWorkspace");
     sim_alg->initialize();
     sim_alg->setPropertyValue("Instrument", "MAR");
     sim_alg->setPropertyValue("BinParams", "-3,1,3");
@@ -38,8 +37,7 @@ public:
     sim_alg->setPropertyValue("OutputWorkspace", "data_source_2");
     sim_alg->execute();
 
-    auto log_alg =
-        Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
+    auto log_alg = Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
     log_alg->initialize();
     log_alg->setProperty("Workspace", "data_source_1");
     log_alg->setPropertyValue("LogName", "Ei");
@@ -61,14 +59,12 @@ public:
     CreateMD alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS(alg.setPropertyValue("DataSources", ""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("DataSources", ""), const std::invalid_argument &);
   }
 
   void test_psi_right_size() {
     auto sample_ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    Mantid::API::AnalysisDataService::Instance().add("__CreateMDTest_sample",
-                                                     sample_ws);
+    Mantid::API::AnalysisDataService::Instance().add("__CreateMDTest_sample", sample_ws);
 
     CreateMD alg;
     alg.setRethrows(true);
@@ -87,14 +83,12 @@ public:
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
 
     // Clean up
-    Mantid::API::AnalysisDataService::Instance().remove(
-        "__CreateMDTest_sample");
+    Mantid::API::AnalysisDataService::Instance().remove("__CreateMDTest_sample");
   }
 
   void test_gl_right_size() {
     auto sample_ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    Mantid::API::AnalysisDataService::Instance().add("__CreateMDTest_sample",
-                                                     sample_ws);
+    Mantid::API::AnalysisDataService::Instance().add("__CreateMDTest_sample", sample_ws);
 
     CreateMD alg;
     alg.setRethrows(true);
@@ -113,14 +107,12 @@ public:
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
 
     // Clean up
-    Mantid::API::AnalysisDataService::Instance().remove(
-        "__CreateMDTest_sample");
+    Mantid::API::AnalysisDataService::Instance().remove("__CreateMDTest_sample");
   }
 
   void test_gs_right_size() {
     auto sample_ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    Mantid::API::AnalysisDataService::Instance().add("__CreateMDTest_sample",
-                                                     sample_ws);
+    Mantid::API::AnalysisDataService::Instance().add("__CreateMDTest_sample", sample_ws);
 
     CreateMD alg;
     alg.setRethrows(true);
@@ -139,13 +131,11 @@ public:
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
 
     // Clean up
-    Mantid::API::AnalysisDataService::Instance().remove(
-        "__CreateMDTest_sample");
+    Mantid::API::AnalysisDataService::Instance().remove("__CreateMDTest_sample");
   }
 
   void test_execute_single_workspace() {
-    auto sim_alg = Mantid::API::AlgorithmManager::Instance().create(
-        "CreateSimulationWorkspace");
+    auto sim_alg = Mantid::API::AlgorithmManager::Instance().create("CreateSimulationWorkspace");
     sim_alg->initialize();
     sim_alg->setPropertyValue("Instrument", "MAR");
     sim_alg->setPropertyValue("BinParams", "-3,1,3");
@@ -153,8 +143,7 @@ public:
     sim_alg->setPropertyValue("OutputWorkspace", "data_source_1");
     sim_alg->execute();
 
-    auto log_alg =
-        Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
+    auto log_alg = Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
     log_alg->initialize();
     log_alg->setProperty("Workspace", "data_source_1");
     log_alg->setPropertyValue("LogName", "Ei");
@@ -174,12 +163,10 @@ public:
     alg.setPropertyValue("v", "0,1,0");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(
-        "__CreateMDTest_mdworkspace"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__CreateMDTest_mdworkspace"));
 
     // Clean up
-    Mantid::API::AnalysisDataService::Instance().remove(
-        "__CreateMDTest_mdworkspace");
+    Mantid::API::AnalysisDataService::Instance().remove("__CreateMDTest_mdworkspace");
   }
 
   void test_execute_multi_file() {
@@ -197,12 +184,10 @@ public:
     alg.setPropertyValue("v", "0,1,0");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(
-        "__CreateMDTest_mdworkspace"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__CreateMDTest_mdworkspace"));
 
     // Clean up
-    Mantid::API::AnalysisDataService::Instance().remove(
-        "__CreateMDTest_mdworkspace");
+    Mantid::API::AnalysisDataService::Instance().remove("__CreateMDTest_mdworkspace");
   }
 
   void test_execute_filebackend() {
@@ -220,35 +205,28 @@ public:
     alg.setPropertyValue("v", "0,1,0");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(
-        "__CreateMDTest_mdworkspace"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__CreateMDTest_mdworkspace"));
 
     alg.setPropertyValue("OutputWorkspace", "__CreateMDTest_mdworkspace_fb");
     alg.setProperty("Filename", "CreateMDTest_filebackend.nxs");
     alg.setProperty("FileBackEnd", true);
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(
-        "__CreateMDTest_mdworkspace_fb"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__CreateMDTest_mdworkspace_fb"));
 
-    auto compare_alg =
-        Mantid::API::AlgorithmManager::Instance().create("CompareMDWorkspaces");
+    auto compare_alg = Mantid::API::AlgorithmManager::Instance().create("CompareMDWorkspaces");
     compare_alg->initialize();
     compare_alg->setProperty("Workspace1", "__CreateMDTest_mdworkspace_fb");
     compare_alg->setProperty("Workspace2", "__CreateMDTest_mdworkspace");
     compare_alg->setProperty("CheckEvents", false);
     compare_alg->setProperty("IgnoreBoxID", true);
-    TSM_ASSERT_THROWS_NOTHING(
-        "Workspaces with and without filebackend should be the same",
-        compare_alg->execute(););
+    TSM_ASSERT_THROWS_NOTHING("Workspaces with and without filebackend should be the same", compare_alg->execute(););
 
     std::string filename = alg.getPropertyValue("Filename");
     TSM_ASSERT("File was indeed created", Poco::File(filename).exists());
 
     // Clean up workspaces
-    Mantid::API::AnalysisDataService::Instance().remove(
-        "__CreateMDTest_mdworkspace");
-    Mantid::API::AnalysisDataService::Instance().remove(
-        "__CreateMDTest_mdworkspace_fb");
+    Mantid::API::AnalysisDataService::Instance().remove("__CreateMDTest_mdworkspace");
+    Mantid::API::AnalysisDataService::Instance().remove("__CreateMDTest_mdworkspace_fb");
   }
 };

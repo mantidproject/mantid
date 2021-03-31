@@ -38,11 +38,9 @@ public:
    * @param max :: maximum extent
    * @param numBins :: number of bins (evenly spaced)
    */
-  MDHistoDimension(std::string name, std::string ID, const MDFrame &frame,
-                   coord_t min, coord_t max, size_t numBins)
-      : m_name(std::move(name)), m_dimensionId(std::move(ID)),
-        m_frame(frame.clone()), m_min(min), m_max(max), m_numBins(numBins),
-        m_binWidth((max - min) / static_cast<coord_t>(numBins)) {
+  MDHistoDimension(std::string name, std::string ID, const MDFrame &frame, coord_t min, coord_t max, size_t numBins)
+      : m_name(std::move(name)), m_dimensionId(std::move(ID)), m_frame(frame.clone()), m_min(min), m_max(max),
+        m_numBins(numBins), m_binWidth((max - min) / static_cast<coord_t>(numBins)) {
     if (max < min) {
       throw std::invalid_argument("Error making MDHistoDimension. Cannot have "
                                   "dimension with min > max");
@@ -53,9 +51,8 @@ public:
    * @param other :: other IMDDimension
    */
   MDHistoDimension(const IMDDimension *other)
-      : m_name(other->getName()), m_dimensionId(other->getDimensionId()),
-        m_frame(other->getMDFrame().clone()), m_min(other->getMinimum()),
-        m_max(other->getMaximum()), m_numBins(other->getNBins()),
+      : m_name(other->getName()), m_dimensionId(other->getDimensionId()), m_frame(other->getMDFrame().clone()),
+        m_min(other->getMinimum()), m_max(other->getMaximum()), m_numBins(other->getNBins()),
         m_binWidth(other->getBinWidth()) {}
 
   /// Return the name of the dimension as can be displayed along the axis
@@ -65,14 +62,10 @@ public:
   const MDFrame &getMDFrame() const override { return *m_frame; }
 
   /// Return the units of the dimension as a string
-  const Kernel::UnitLabel getUnits() const override {
-    return m_frame->getUnitLabel();
-  }
+  const Kernel::UnitLabel getUnits() const override { return m_frame->getUnitLabel(); }
 
   /// Returns the unit
-  const Kernel::MDUnit &getMDUnits() const override {
-    return m_frame->getMDUnit();
-  }
+  const Kernel::MDUnit &getMDUnits() const override { return m_frame->getMDUnit(); }
 
   /** Short name which identify the dimension among other dimension.
    * A dimension can be usually found by its ID and various
@@ -97,9 +90,7 @@ public:
   std::string toXMLString() const override;
 
   ///  Get coordinate for index;
-  coord_t getX(size_t index) const override {
-    return static_cast<coord_t>(index) * m_binWidth + m_min;
-  }
+  coord_t getX(size_t index) const override { return static_cast<coord_t>(index) * m_binWidth + m_min; }
 
   /// Return the width of one bin.
   coord_t getBinWidth() const override { return m_binWidth; }

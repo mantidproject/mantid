@@ -58,15 +58,12 @@ public:
   int side(const Kernel::V3D &) const override;
   int onSurface(const Kernel::V3D &) const override;
   // stuff for finding intersections etc.
-  double dotProd(const Plane &) const;        ///< returns normal dot product
-  Kernel::V3D crossProd(const Plane &) const; ///< returns normal cross product
-  double
-  distance(const Kernel::V3D &) const override; ///< distance from a point
+  double dotProd(const Plane &) const;                 ///< returns normal dot product
+  Kernel::V3D crossProd(const Plane &) const;          ///< returns normal cross product
+  double distance(const Kernel::V3D &) const override; ///< distance from a point
 
-  double getDistance() const { return m_distance; } ///< Distance from origin
-  const Kernel::V3D &getNormal() const {
-    return m_normVec;
-  } ///< Normal to plane (+ve surface)
+  double getDistance() const { return m_distance; }          ///< Distance from origin
+  const Kernel::V3D &getNormal() const { return m_normVec; } ///< Normal to plane (+ve surface)
 
   void rotate(const Kernel::Matrix<double> &) override;
   void displace(const Kernel::V3D &) override;
@@ -77,10 +74,8 @@ public:
 
   void setBaseEqn() override; ///< set up to be eqn based
 
-  int LineIntersectionWithPlane(Kernel::V3D startpt, Kernel::V3D endpt,
-                                Kernel::V3D &output);
-  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin) override;
+  int LineIntersectionWithPlane(Kernel::V3D startpt, Kernel::V3D endpt, Kernel::V3D &output);
+  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) override;
 #ifdef ENABLE_OPENCASCADE
   TopoDS_Shape createShape() override;
 #endif

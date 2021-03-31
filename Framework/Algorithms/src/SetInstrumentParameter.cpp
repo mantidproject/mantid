@@ -28,17 +28,13 @@ using namespace API;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string SetInstrumentParameter::name() const {
-  return "SetInstrumentParameter";
-}
+const std::string SetInstrumentParameter::name() const { return "SetInstrumentParameter"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int SetInstrumentParameter::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SetInstrumentParameter::category() const {
-  return "DataHandling\\Instrument";
-}
+const std::string SetInstrumentParameter::category() const { return "DataHandling\\Instrument"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -46,9 +42,8 @@ const std::string SetInstrumentParameter::category() const {
 /** Initialize the algorithm's properties.
  */
 void SetInstrumentParameter::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "Workspace", "", Direction::InOut,
-                      std::make_shared<InstrumentValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace", "", Direction::InOut,
+                                                                 std::make_shared<InstrumentValidator>()),
                   "Workspace to add the log entry to");
   declareProperty("ComponentName", "",
                   "The name of the component to attach "
@@ -57,13 +52,11 @@ void SetInstrumentParameter::init() {
   declareProperty(std::make_unique<ArrayProperty<detid_t>>("DetectorList"),
                   "The detector ID list to attach the parameter to. If set "
                   "this will override any ComponentName");
-  declareProperty("ParameterName", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
+  declareProperty("ParameterName", "", std::make_shared<MandatoryValidator<std::string>>(),
                   "The name that will identify the parameter");
 
   std::vector<std::string> propOptions{"String", "Number", "Bool"};
-  declareProperty("ParameterType", "String",
-                  std::make_shared<StringListValidator>(propOptions),
+  declareProperty("ParameterType", "String", std::make_shared<StringListValidator>(propOptions),
                   "The type that the parameter value will be.");
 
   declareProperty("Value", "", "The content of the Parameter");
@@ -99,8 +92,7 @@ void SetInstrumentParameter::exec() {
   // A pointer to the workspace to add a log to
   Workspace_sptr ws = getProperty("Workspace");
   MatrixWorkspace_sptr inputW = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  DataObjects::PeaksWorkspace_sptr inputP =
-      std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+  DataObjects::PeaksWorkspace_sptr inputP = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
   // Get some stuff from the input workspace
   Instrument_sptr inst;
   if (inputW) {
@@ -184,10 +176,9 @@ void SetInstrumentParameter::exec() {
  *  @param paramType  The parameter type
  *  @param paramValue  The parameter value as a string
  */
-void SetInstrumentParameter::addParameter(
-    Mantid::Geometry::ParameterMap &pmap,
-    const Mantid::Geometry::IComponent *cmptId, const std::string &paramName,
-    const std::string &paramType, const std::string &paramValue) const {
+void SetInstrumentParameter::addParameter(Mantid::Geometry::ParameterMap &pmap,
+                                          const Mantid::Geometry::IComponent *cmptId, const std::string &paramName,
+                                          const std::string &paramType, const std::string &paramValue) const {
 
   // remove existing parameters first
   pmap.clearParametersByName(paramName, cmptId);

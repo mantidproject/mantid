@@ -39,11 +39,9 @@ public:
   UncertainValue operator+(double d);
   UncertainValue operator-(double d);
 
-  static const UncertainValue plainAddition(UncertainValue const &left,
-                                            UncertainValue const &right);
+  static const UncertainValue plainAddition(UncertainValue const &left, UncertainValue const &right);
 
-  static bool lessThanError(UncertainValue const &left,
-                            UncertainValue const &right);
+  static bool lessThanError(UncertainValue const &left, UncertainValue const &right);
   static double valueToErrorRatio(UncertainValue const &uncertainValue);
   static double errorToValueRatio(UncertainValue const &uncertainValue);
 

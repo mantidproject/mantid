@@ -21,11 +21,9 @@ namespace Geometry {
  *
  */
 
-MANTID_GEOMETRY_DLL IMDDimension_sptr
-createDimension(const std::string &dimensionXMLString);
-MANTID_GEOMETRY_DLL IMDDimension_sptr
-createDimension(const Poco::XML::Element &dimensionXML);
-MANTID_GEOMETRY_DLL IMDDimension_sptr createDimension(
-    const std::string &dimensionXMLString, int nBins, coord_t min, coord_t max);
+MANTID_GEOMETRY_DLL IMDDimension_sptr createDimension(const std::string &dimensionXMLString);
+MANTID_GEOMETRY_DLL IMDDimension_sptr createDimension(const Poco::XML::Element &dimensionXML);
+MANTID_GEOMETRY_DLL IMDDimension_sptr createDimension(const std::string &dimensionXMLString, int nBins, coord_t min,
+                                                      coord_t max);
 } // namespace Geometry
 } // namespace Mantid

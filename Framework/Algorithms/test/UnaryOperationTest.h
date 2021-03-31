@@ -27,29 +27,20 @@ public:
   const std::string summary() const override { return "Test summary"; }
 
   // Pass-throughs to UnaryOperation methods
-  const std::string inputPropName() const override {
-    return UnaryOperation::inputPropName();
-  }
-  const std::string outputPropName() const override {
-    return UnaryOperation::outputPropName();
-  }
+  const std::string inputPropName() const override { return UnaryOperation::inputPropName(); }
+  const std::string outputPropName() const override { return UnaryOperation::outputPropName(); }
 
 private:
-  void performUnaryOperation(const double, const double, const double, double &,
-                             double &) override {}
+  void performUnaryOperation(const double, const double, const double, double &, double &) override {}
 };
 
 class UnaryOperationTest : public CxxTest::TestSuite {
 public:
   void testCategory() { TS_ASSERT_EQUALS(helper.category(), "Arithmetic") }
 
-  void testInputPropName() {
-    TS_ASSERT_EQUALS(helper.inputPropName(), "InputWorkspace")
-  }
+  void testInputPropName() { TS_ASSERT_EQUALS(helper.inputPropName(), "InputWorkspace") }
 
-  void testOutputPropName() {
-    TS_ASSERT_EQUALS(helper.outputPropName(), "OutputWorkspace")
-  }
+  void testOutputPropName() { TS_ASSERT_EQUALS(helper.outputPropName(), "OutputWorkspace") }
 
   void testInit() {
     UnaryOpHelper helper2;
@@ -69,16 +60,13 @@ public:
   }
 
   void testExec() {
-    MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().add("InputWS", inputWS);
 
     UnaryOpHelper helper3;
     helper3.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        helper3.setPropertyValue("InputWorkspace", "InputWS"))
-    TS_ASSERT_THROWS_NOTHING(
-        helper3.setPropertyValue("OutputWorkspace", "InputWS"))
+    TS_ASSERT_THROWS_NOTHING(helper3.setPropertyValue("InputWorkspace", "InputWS"))
+    TS_ASSERT_THROWS_NOTHING(helper3.setPropertyValue("OutputWorkspace", "InputWS"))
 
     TS_ASSERT_THROWS_NOTHING(helper3.execute())
     TS_ASSERT(helper3.isExecuted())

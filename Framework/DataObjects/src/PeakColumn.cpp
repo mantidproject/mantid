@@ -71,10 +71,9 @@ const std::string typeFromName(const std::string &name) {
   if (iter != typeIndex.data().end()) {
     return iter->second;
   } else {
-    throw std::runtime_error(
-        "PeakColumn - Unknown column name: \"" + name +
-        "\""
-        "Peak column names/types must be explicitly marked in PeakColumn.cpp");
+    throw std::runtime_error("PeakColumn - Unknown column name: \"" + name +
+                             "\""
+                             "Peak column names/types must be explicitly marked in PeakColumn.cpp");
   }
 }
 } // namespace
@@ -85,18 +84,15 @@ const std::string typeFromName(const std::string &name) {
  * @param name :: name for the column
  */
 template <class T>
-PeakColumn<T>::PeakColumn(std::vector<T> &peaks, const std::string &name)
-    : m_peaks(peaks), m_oldRows() {
+PeakColumn<T>::PeakColumn(std::vector<T> &peaks, const std::string &name) : m_peaks(peaks), m_oldRows() {
   this->m_name = name;
   this->m_type = typeFromName(name); // Throws if the name is unknown
   const std::string key = "PeakColumn.hklPrec";
   auto hklPrec = ConfigService::Instance().getValue<int>(key);
   this->m_hklPrec = hklPrec.get_value_or(2);
   if (!hklPrec.is_initialized()) {
-    g_log.information()
-        << "In PeakColumn constructor, did not find any value for '" << key
-        << "' from the Config Service. Using default: " << this->m_hklPrec
-        << "\n";
+    g_log.information() << "In PeakColumn constructor, did not find any value for '" << key
+                        << "' from the Config Service. Using default: " << this->m_hklPrec << "\n";
   }
 }
 
@@ -116,14 +112,12 @@ template <class T> const std::type_info &PeakColumn<T>::get_type_info() const {
   } else if (type() == "V3D") {
     return typeid(V3D);
   } else {
-    throw std::runtime_error(
-        "PeakColumn::get_type_info() - Unknown column type: " + m_name);
+    throw std::runtime_error("PeakColumn::get_type_info() - Unknown column type: " + m_name);
   }
 }
 
 /// Returns typeid for the pointer type to the data element in the column
-template <class T>
-const std::type_info &PeakColumn<T>::get_pointer_type_info() const {
+template <class T> const std::type_info &PeakColumn<T>::get_pointer_type_info() const {
   if (type() == "double") {
     return typeid(double *);
   } else if (type() == "int") {
@@ -133,8 +127,7 @@ const std::type_info &PeakColumn<T>::get_pointer_type_info() const {
   } else if (type() == "V3D") {
     return typeid(V3D *);
   } else {
-    throw std::runtime_error("PeakColumn::get_pointer_type_info() -: " +
-                             m_name);
+    throw std::runtime_error("PeakColumn::get_pointer_type_info() -: " + m_name);
   }
 }
 
@@ -144,8 +137,7 @@ const std::type_info &PeakColumn<T>::get_pointer_type_info() const {
  * @param s :: stream to output
  * @param index :: row index
  */
-template <class T>
-void PeakColumn<T>::print(size_t index, std::ostream &s) const {
+template <class T> void PeakColumn<T>::print(size_t index, std::ostream &s) const {
   T &peak = m_peaks[index];
   s.imbue(std::locale("C"));
   std::ios::fmtflags fflags(s.flags());
@@ -180,8 +172,7 @@ void PeakColumn<T>::print(size_t index, std::ostream &s) const {
  * @param text :: string to read
  * @param index :: index of the peak to modify
  */
-template <class T>
-void PeakColumn<T>::read(size_t index, const std::string &text) {
+template <class T> void PeakColumn<T>::read(size_t index, const std::string &text) {
   // Don't modify read-only ones
   if (this->getReadOnly() || index >= m_peaks.size())
     return;
@@ -202,8 +193,7 @@ void PeakColumn<T>::read(size_t index, const std::string &text) {
  * @param index :: index of the peak to modify
  * @param in :: input stream
  */
-template <class T>
-void PeakColumn<T>::read(const size_t index, std::istringstream &in) {
+template <class T> void PeakColumn<T>::read(const size_t index, std::istringstream &in) {
   if (this->getReadOnly() || index >= m_peaks.size())
     return;
 
@@ -211,8 +201,7 @@ void PeakColumn<T>::read(const size_t index, std::istringstream &in) {
   try {
     in >> val;
   } catch (std::exception &e) {
-    g_log.error() << "Could not convert input to a number. " << e.what()
-                  << '\n';
+    g_log.error() << "Could not convert input to a number. " << e.what() << '\n';
     return;
   }
 
@@ -222,8 +211,7 @@ void PeakColumn<T>::read(const size_t index, std::istringstream &in) {
 //-------------------------------------------------------------------------------------
 /** @return true if the column is read-only */
 template <class T> bool PeakColumn<T>::getReadOnly() const {
-  return !((m_name == "h") || (m_name == "k") || (m_name == "l") ||
-           (m_name == "RunNumber"));
+  return !((m_name == "h") || (m_name == "k") || (m_name == "l") || (m_name == "RunNumber"));
 }
 
 //-------------------------------------------------------------------------------------
@@ -307,8 +295,7 @@ template <class T> const void *PeakColumn<T>::void_pointer(size_t index) const {
 
   if (type() == "double") {
     value = peak.getValueByColName(m_name); // Assign the value to the store
-    return boost::get<double>(
-        &value); // Given a pointer it will return a pointer
+    return boost::get<double>(&value);      // Given a pointer it will return a pointer
   } else if (m_name == "RunNumber") {
     value = peak.getRunNumber();
     return boost::get<int>(&value);
@@ -329,8 +316,7 @@ template <class T> const void *PeakColumn<T>::void_pointer(size_t index) const {
     value = peak.getQSampleFrame();
     return boost::get<Kernel::V3D>(&value);
   } else {
-    throw std::runtime_error(
-        "void_pointer() - Unknown peak column name or type: " + m_name);
+    throw std::runtime_error("void_pointer() - Unknown peak column name or type: " + m_name);
   }
 }
 
@@ -344,15 +330,12 @@ template <class T> double PeakColumn<T>::toDouble(size_t /*index*/) const {
                            "is has no general write access");
 }
 
-template <class T>
-void PeakColumn<T>::fromDouble(size_t /*index*/, double /*value*/) {
+template <class T> void PeakColumn<T>::fromDouble(size_t /*index*/, double /*value*/) {
   throw std::runtime_error("fromDouble() not implemented, PeakColumn is has no "
                            "general write access");
 }
 
-template <class T>
-void PeakColumn<T>::setPeakHKLOrRunNumber(const size_t index,
-                                          const double val) {
+template <class T> void PeakColumn<T>::setPeakHKLOrRunNumber(const size_t index, const double val) {
   T &peak = m_peaks[index];
   if (m_name == "h")
     peak.setH(val);

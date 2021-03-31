@@ -31,20 +31,16 @@ const std::string SaveZODS::name() const { return "SaveZODS"; }
 int SaveZODS::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SaveZODS::category() const {
-  return "MDAlgorithms\\DataHandling";
-}
+const std::string SaveZODS::category() const { return "MDAlgorithms\\DataHandling"; }
 
 /** Initialize the algorithm's properties.
  */
 void SaveZODS::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input MDHistoWorkspace in HKL space.");
 
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".h5"),
-      "The name of the HDF5 file to write, as a full or relative path.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".h5"),
+                  "The name of the HDF5 file to write, as a full or relative path.");
 }
 
 /** Execute the algorithm.

@@ -28,19 +28,14 @@ class LeanElasticPeaksWorkspaceTest : public CxxTest::TestSuite {
 private:
   class TestableLeanElasticPeaksWorkspace : public LeanElasticPeaksWorkspace {
   public:
-    TestableLeanElasticPeaksWorkspace(const LeanElasticPeaksWorkspace &other)
-        : LeanElasticPeaksWorkspace(other) {}
+    TestableLeanElasticPeaksWorkspace(const LeanElasticPeaksWorkspace &other) : LeanElasticPeaksWorkspace(other) {}
   };
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LeanElasticPeaksWorkspaceTest *createSuite() {
-    return new LeanElasticPeaksWorkspaceTest();
-  }
-  static void destroySuite(LeanElasticPeaksWorkspaceTest *suite) {
-    delete suite;
-  }
+  static LeanElasticPeaksWorkspaceTest *createSuite() { return new LeanElasticPeaksWorkspaceTest(); }
+  static void destroySuite(LeanElasticPeaksWorkspaceTest *suite) { delete suite; }
 
   void test_defaultConstructor() {
     auto pw = std::make_shared<LeanElasticPeaksWorkspace>();
@@ -84,8 +79,7 @@ public:
     pw->mutableRun().setGoniometer(goniometer, false);
 
     // cannot create peak using q-lab
-    TS_ASSERT_THROWS(pw->createPeak(V3D(1, 1, 0)),
-                     const Exception::NotImplementedError &)
+    TS_ASSERT_THROWS(pw->createPeak(V3D(1, 1, 0)), const Exception::NotImplementedError &)
 
     auto peak = pw->createPeakQSample(V3D(1, 1, 0));
 
@@ -105,8 +99,7 @@ public:
     goniometer.pushAxis("axis1", 0, 1, 0);
     goniometer.setRotationAngle(0, 90);
 
-    pw->mutableSample().setOrientedLattice(
-        std::make_unique<OrientedLattice>(5, 5, 5, 90, 90, 90));
+    pw->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(5, 5, 5, 90, 90, 90));
     pw->mutableRun().setGoniometer(goniometer, false);
     auto peak = pw->createPeakHKL(V3D(1, 0, 0));
 
@@ -129,12 +122,10 @@ public:
     goniometer.pushAxis("axis1", 0, 1, 0);
     goniometer.setRotationAngle(0, 90);
 
-    pw->mutableSample().setOrientedLattice(
-        std::make_unique<OrientedLattice>(5, 5, 5, 90, 90, 90));
+    pw->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(5, 5, 5, 90, 90, 90));
     pw->mutableRun().setGoniometer(goniometer, false);
 
-    TS_ASSERT_THROWS(pw->addPeak(V3D(1, 0, 0), Mantid::Kernel::QLab),
-                     const Exception::NotImplementedError &)
+    TS_ASSERT_THROWS(pw->addPeak(V3D(1, 0, 0), Mantid::Kernel::QLab), const Exception::NotImplementedError &)
 
     pw->addPeak(V3D(1, 1, 0), Mantid::Kernel::QSample);
     pw->addPeak(V3D(1, 0, 0), Mantid::Kernel::HKL);
@@ -251,8 +242,7 @@ public:
     nexusHelper.reopenFile();
 
     // Verify that this test_entry has a peaks_workspace entry
-    TS_ASSERT_THROWS_NOTHING(
-        nexusHelper.file->openGroup("peaks_workspace", "NXentry"));
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openGroup("peaks_workspace", "NXentry"));
 
     // Check wavelengths
     TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openData("column_7"));

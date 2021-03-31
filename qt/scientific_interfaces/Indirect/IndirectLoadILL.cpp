@@ -20,39 +20,32 @@ using namespace Mantid::Geometry;
 
 namespace {
 
-std::string getInstrumentParameter(Instrument_const_sptr &instrument,
-                                   std::string const &parameter,
+std::string getInstrumentParameter(Instrument_const_sptr &instrument, std::string const &parameter,
                                    std::string const &defaultValue) {
   if (instrument->hasParameter(parameter))
     return instrument->getStringParameter(parameter)[0];
   return defaultValue;
 }
 
-std::string constructRunName(bool isILL, std::string const &instrumentName,
-                             std::string const &runNumber) {
+std::string constructRunName(bool isILL, std::string const &instrumentName, std::string const &runNumber) {
   return isILL ? instrumentName + "_" + runNumber : instrumentName + runNumber;
 }
 
-std::string constructPrefix(std::string const &runName,
-                            std::string const &analyser,
-                            std::string const &reflection) {
+std::string constructPrefix(std::string const &runName, std::string const &analyser, std::string const &reflection) {
   auto const prefix = runName + '_' + analyser + reflection;
   return (!analyser.empty() && !reflection.empty()) ? prefix + "_" : prefix;
 }
 
-std::string constructPrefix(std::string const &runName,
-                            Instrument_const_sptr instrument) {
+std::string constructPrefix(std::string const &runName, Instrument_const_sptr instrument) {
   auto const analyser = getInstrumentParameter(instrument, "analyser", "");
   auto const reflection = getInstrumentParameter(instrument, "reflection", "");
   return constructPrefix(runName, analyser, reflection);
 }
 
-std::string getWorkspacePrefix(const MatrixWorkspace_const_sptr &workspace,
-                               std::string const &facility) {
+std::string getWorkspacePrefix(const MatrixWorkspace_const_sptr &workspace, std::string const &facility) {
   auto const instrument = workspace->getInstrument();
   auto const runName =
-      constructRunName(facility == "ILL", instrument->getName(),
-                       std::to_string(workspace->getRunNumber()));
+      constructRunName(facility == "ILL", instrument->getName(), std::to_string(workspace->getRunNumber()));
   return constructPrefix(runName, instrument);
 }
 
@@ -60,15 +53,13 @@ std::string getWorkspacePrefix(std::string const &workspaceName) {
   auto &ads = AnalysisDataService::Instance();
   if (!workspaceName.empty() && ads.doesExist(workspaceName)) {
     auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName);
-    auto const facility =
-        ConfigService::Instance().getString("default.facility");
+    auto const facility = ConfigService::Instance().getString("default.facility");
     return getWorkspacePrefix(workspace, facility);
   }
   return "";
 }
 
-void renameWorkspace(std::string const &inputName,
-                     std::string const &outputName) {
+void renameWorkspace(std::string const &inputName, std::string const &outputName) {
   auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
   renamer->initialize();
   renamer->setProperty("InputWorkspace", inputName);
@@ -94,8 +85,7 @@ IndirectLoadILL::IndirectLoadILL(QWidget *parent) : IndirectToolsTab(parent) {
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 
   connect(m_uiForm.mwRun, SIGNAL(filesFound()), this, SLOT(handleFilesFound()));
-  connect(m_uiForm.chkUseMap, SIGNAL(toggled(bool)), m_uiForm.mwMapFile,
-          SLOT(setEnabled(bool)));
+  connect(m_uiForm.chkUseMap, SIGNAL(toggled(bool)), m_uiForm.mwMapFile, SLOT(setEnabled(bool)));
 }
 
 /**
@@ -116,8 +106,7 @@ bool IndirectLoadILL::validate() {
   bool invalidExt = (ext != "asc" && ext != "inx" && ext != "nxs");
 
   if (invalidExt) {
-    emit showMessageBox(
-        "File is not of expected type:\n File type must be .asc, .inx or .nxs");
+    emit showMessageBox("File is not of expected type:\n File type must be .asc, .inx or .nxs");
   }
 
   return !invalidExt;
@@ -140,12 +129,9 @@ void IndirectLoadILL::run() {
   QFileInfo const finfo(filename);
   QString ext = finfo.suffix().toLower();
 
-  QString const instrument =
-      m_uiForm.iicInstrumentConfiguration->getInstrumentName();
-  QString const analyser =
-      m_uiForm.iicInstrumentConfiguration->getAnalyserName();
-  QString const reflection =
-      m_uiForm.iicInstrumentConfiguration->getReflectionName();
+  QString const instrument = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+  QString const analyser = m_uiForm.iicInstrumentConfiguration->getAnalyserName();
+  QString const reflection = m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
   if (m_uiForm.chkUseMap->isChecked()) {
     useMap = "True";
@@ -182,15 +168,13 @@ void IndirectLoadILL::run() {
       pyFunc += "InxStart";
     } else {
       setRunIsRunning(false);
-      emit showMessageBox("Could not find appropriate loading routine for " +
-                          filename);
+      emit showMessageBox("Could not find appropriate loading routine for " + filename);
       return;
     }
 
     pyInput += "from IndirectNeutron import " + pyFunc + "\n";
-    pyInput += pyFunc + "('" + instrument + "','" + filename + "','" +
-               analyser + "','" + reflection + "'," + rejectZero + "," +
-               useMap + ",'" + mapPath +
+    pyInput += pyFunc + "('" + instrument + "','" + filename + "','" + analyser + "','" + reflection + "'," +
+               rejectZero + "," + useMap + ",'" + mapPath +
                "'"
                ",'" +
                plot + "'," + save + ")";
@@ -210,9 +194,7 @@ void IndirectLoadILL::run() {
  *
  * @param settings :: The settings to loading into the interface
  */
-void IndirectLoadILL::loadSettings(const QSettings &settings) {
-  m_uiForm.mwRun->readSettings(settings.group());
-}
+void IndirectLoadILL::loadSettings(const QSettings &settings) { m_uiForm.mwRun->readSettings(settings.group()); }
 
 /**
  * Set the instrument selected in the combobox based on
@@ -240,13 +222,9 @@ void IndirectLoadILL::setRunIsRunning(bool running) {
   setPlotOptionsEnabled(!running);
 }
 
-void IndirectLoadILL::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-}
+void IndirectLoadILL::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void IndirectLoadILL::setPlotOptionsEnabled(bool enabled) {
-  m_uiForm.cbPlot->setEnabled(enabled);
-}
+void IndirectLoadILL::setPlotOptionsEnabled(bool enabled) { m_uiForm.cbPlot->setEnabled(enabled); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

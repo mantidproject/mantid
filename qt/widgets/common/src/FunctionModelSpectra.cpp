@@ -11,10 +11,8 @@
 
 namespace {
 
-std::vector<MantidQt::MantidWidgets::WorkspaceIndex>
-workspaceIndexVectorFromString(const std::string &listString) {
-  auto const intVec =
-      MantidQt::MantidWidgets::vectorFromString<std::size_t>(listString);
+std::vector<MantidQt::MantidWidgets::WorkspaceIndex> workspaceIndexVectorFromString(const std::string &listString) {
+  auto const intVec = MantidQt::MantidWidgets::vectorFromString<std::size_t>(listString);
   std::vector<MantidQt::MantidWidgets::WorkspaceIndex> output;
   for (auto const i : intVec) {
     output.emplace_back(MantidQt::MantidWidgets::WorkspaceIndex{i});
@@ -32,8 +30,7 @@ FunctionModelSpectra::FunctionModelSpectra(const std::string &str)
   checkContinuous();
 }
 
-FunctionModelSpectra::FunctionModelSpectra(WorkspaceIndex minimum,
-                                           WorkspaceIndex maximum) {
+FunctionModelSpectra::FunctionModelSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) {
   if (maximum < minimum) {
     std::swap(minimum, maximum);
   }
@@ -46,18 +43,15 @@ FunctionModelSpectra::FunctionModelSpectra(const FunctionModelSpectra &vec)
     : m_vec(vec.m_vec), m_isContinuous(vec.m_isContinuous) {}
 
 FunctionModelSpectra::FunctionModelSpectra(FunctionModelSpectra &&vec)
-    : m_vec(std::move(vec.m_vec)),
-      m_isContinuous(std::move(vec.m_isContinuous)) {}
+    : m_vec(std::move(vec.m_vec)), m_isContinuous(std::move(vec.m_isContinuous)) {}
 
-FunctionModelSpectra &FunctionModelSpectra::
-operator=(const FunctionModelSpectra &vec) {
+FunctionModelSpectra &FunctionModelSpectra::operator=(const FunctionModelSpectra &vec) {
   m_vec = vec.m_vec;
   m_isContinuous = vec.m_isContinuous;
   return *this;
 }
 
-FunctionModelSpectra &FunctionModelSpectra::
-operator=(FunctionModelSpectra &&vec) {
+FunctionModelSpectra &FunctionModelSpectra::operator=(FunctionModelSpectra &&vec) {
   m_vec = std::move(vec.m_vec);
   m_isContinuous = std::move(vec.m_isContinuous);
   return *this;
@@ -65,25 +59,20 @@ operator=(FunctionModelSpectra &&vec) {
 
 [[nodiscard]] bool FunctionModelSpectra::empty() const { return m_vec.empty(); }
 
-FitDomainIndex FunctionModelSpectra::size() const {
-  return FitDomainIndex{m_vec.size()};
-}
+FitDomainIndex FunctionModelSpectra::size() const { return FitDomainIndex{m_vec.size()}; }
 
 std::string FunctionModelSpectra::getString() const {
   if (empty())
     return "";
   if (m_isContinuous)
-    return m_vec.size() > 1 ? std::to_string(m_vec.front().value) + "-" +
-                                  std::to_string(m_vec.back().value)
+    return m_vec.size() > 1 ? std::to_string(m_vec.front().value) + "-" + std::to_string(m_vec.back().value)
                             : std::to_string(m_vec.front().value);
   std::vector<size_t> out(m_vec.size());
-  std::transform(m_vec.begin(), m_vec.end(), out.begin(),
-                 [](WorkspaceIndex i) { return i.value; });
+  std::transform(m_vec.begin(), m_vec.end(), out.begin(), [](WorkspaceIndex i) { return i.value; });
   return Mantid::Kernel::Strings::toString(out);
 }
 
-std::pair<WorkspaceIndex, WorkspaceIndex>
-FunctionModelSpectra::getMinMax() const {
+std::pair<WorkspaceIndex, WorkspaceIndex> FunctionModelSpectra::getMinMax() const {
   if (empty())
     return std::make_pair(WorkspaceIndex{0}, WorkspaceIndex{0});
   return std::make_pair(m_vec.front(), m_vec.back());
@@ -98,21 +87,18 @@ bool FunctionModelSpectra::isContinuous() const { return m_isContinuous; }
 FitDomainIndex FunctionModelSpectra::indexOf(WorkspaceIndex i) const {
   auto const it = std::find(begin(), end(), i);
   if (it == end()) {
-    throw std::runtime_error("Spectrum index " + std::to_string(i.value) +
-                             " not found.");
+    throw std::runtime_error("Spectrum index " + std::to_string(i.value) + " not found.");
   }
   return FitDomainIndex{static_cast<size_t>(std::distance(begin(), it))};
 }
 
-FunctionModelSpectra
-FunctionModelSpectra::combine(const FunctionModelSpectra &other) const {
+FunctionModelSpectra FunctionModelSpectra::combine(const FunctionModelSpectra &other) const {
   std::set<WorkspaceIndex> indices(begin(), end());
   indices.insert(other.begin(), other.end());
   return FunctionModelSpectra(indices);
 }
 
-FunctionModelSpectra::FunctionModelSpectra(
-    const std::set<WorkspaceIndex> &indices)
+FunctionModelSpectra::FunctionModelSpectra(const std::set<WorkspaceIndex> &indices)
     : m_vec(indices.begin(), indices.end()) {
   checkContinuous();
 }

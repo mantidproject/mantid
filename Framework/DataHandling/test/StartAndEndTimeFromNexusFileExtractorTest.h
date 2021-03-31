@@ -21,18 +21,15 @@ public:
   static StartAndEndTimeFromNexusFileExtractorTest *createSuite() {
     return new StartAndEndTimeFromNexusFileExtractorTest();
   }
-  static void destroySuite(StartAndEndTimeFromNexusFileExtractorTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(StartAndEndTimeFromNexusFileExtractorTest *suite) { delete suite; }
 
   void test_that_throws_for_non_sense_file() {
     // Arrrange
     std::string filename = "file_doesnt_exist.nxs";
 
     // Act + Assert
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Should throw something when opening file which does not exist",
-        extractEndTime(filename));
+    TSM_ASSERT_THROWS_ANYTHING("Should throw something when opening file which does not exist",
+                               extractEndTime(filename));
   }
 
   void test_that_times_can_be_extracted_from_muon_file() {
@@ -68,11 +65,9 @@ public:
   }
 
 private:
-  void do_test(const std::string &filename, const std::string &startTime,
-               const std::string &endTime) {
+  void do_test(const std::string &filename, const std::string &startTime, const std::string &endTime) {
     // Arrange
-    auto fullFilePath =
-        Mantid::API::FileFinder::Instance().getFullPath(filename);
+    auto fullFilePath = Mantid::API::FileFinder::Instance().getFullPath(filename);
 
     // Act
     auto startTimeExtracted = extractStartTime(fullFilePath);
@@ -82,9 +77,7 @@ private:
     Mantid::Types::Core::DateAndTime expectedStartTimeString(startTime.c_str());
     Mantid::Types::Core::DateAndTime expectedEndTimeString(endTime.c_str());
 
-    TSM_ASSERT("Should have the same start time",
-               startTimeExtracted == expectedStartTimeString);
-    TSM_ASSERT("Should have the same end time",
-               endTimeExtracted == expectedEndTimeString);
+    TSM_ASSERT("Should have the same start time", startTimeExtracted == expectedStartTimeString);
+    TSM_ASSERT("Should have the same end time", endTimeExtracted == expectedEndTimeString);
   }
 };

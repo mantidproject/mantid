@@ -17,20 +17,15 @@ class TrackedActionTest : public CxxTest::TestSuite {
   // inner class
   class TestableTrackedAction : public TrackedAction {
   public:
-    TestableTrackedAction(QObject *parent)
-        : TrackedAction(parent), m_lastName(){};
-    TestableTrackedAction(const QString &text, QObject *parent)
-        : TrackedAction(text, parent), m_lastName(){};
-    TestableTrackedAction(const QIcon &icon, const QString &text,
-                          QObject *parent)
+    TestableTrackedAction(QObject *parent) : TrackedAction(parent), m_lastName(){};
+    TestableTrackedAction(const QString &text, QObject *parent) : TrackedAction(text, parent), m_lastName(){};
+    TestableTrackedAction(const QIcon &icon, const QString &text, QObject *parent)
         : TrackedAction(icon, text, parent), m_lastName(){};
 
     std::vector<std::string> getLastUsedName() const { return m_lastName; };
 
   protected:
-    void registerUsage(const std::vector<std::string> &name) override {
-      m_lastName = name;
-    };
+    void registerUsage(const std::vector<std::string> &name) override { m_lastName = name; };
 
   private:
     std::vector<std::string> m_lastName;
@@ -55,8 +50,7 @@ public:
     QObject parent;
     TestableTrackedAction action(QString::fromStdString("TestName"), &parent);
 
-    std::string appNamePrefix =
-        QCoreApplication::applicationName().toStdString();
+    std::string appNamePrefix = QCoreApplication::applicationName().toStdString();
 
     TS_ASSERT_EQUALS(action.getTrackingName().size(), 2);
     TS_ASSERT_EQUALS(action.getTrackingName()[0],

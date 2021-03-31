@@ -16,12 +16,9 @@ namespace Poldi {
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-PoldiSourceSpectrum::PoldiSourceSpectrum(const Interpolation &spectrum)
-    : m_spectrum(spectrum) {}
+PoldiSourceSpectrum::PoldiSourceSpectrum(const Interpolation &spectrum) : m_spectrum(spectrum) {}
 
-PoldiSourceSpectrum::PoldiSourceSpectrum(
-    const Instrument_const_sptr &poldiInstrument)
-    : m_spectrum() {
+PoldiSourceSpectrum::PoldiSourceSpectrum(const Instrument_const_sptr &poldiInstrument) : m_spectrum() {
   setSpectrumFromInstrument(std::move(poldiInstrument));
 }
 
@@ -30,9 +27,7 @@ PoldiSourceSpectrum::PoldiSourceSpectrum(
  * @param wavelength :: Wavelength for which the intensity is required
  * @return Intensity at supplied wavelength.
  */
-double PoldiSourceSpectrum::intensity(double wavelength) const {
-  return std::max(0.0, m_spectrum.value(wavelength));
-}
+double PoldiSourceSpectrum::intensity(double wavelength) const { return std::max(0.0, m_spectrum.value(wavelength)); }
 
 /** Extracts the source spectrum from an Instrument
  *
@@ -45,12 +40,10 @@ double PoldiSourceSpectrum::intensity(double wavelength) const {
  * @param poldiInstrument :: Pointer to valid POLDI instrument with configured
  *spectrum.
  */
-void PoldiSourceSpectrum::setSpectrumFromInstrument(
-    const Instrument_const_sptr &poldiInstrument) {
+void PoldiSourceSpectrum::setSpectrumFromInstrument(const Instrument_const_sptr &poldiInstrument) {
   IComponent_const_sptr source = getSourceComponent(poldiInstrument);
 
-  Parameter_sptr spectrumParameter =
-      getSpectrumParameter(source, poldiInstrument->getParameterMap());
+  Parameter_sptr spectrumParameter = getSpectrumParameter(source, poldiInstrument->getParameterMap());
 
   setSpectrum(spectrumParameter);
 }
@@ -64,13 +57,11 @@ void PoldiSourceSpectrum::setSpectrumFromInstrument(
  * @param poldiInstrument :: Instrument with valid POLDI definition
  * @return Shared pointer to source component
  */
-IComponent_const_sptr PoldiSourceSpectrum::getSourceComponent(
-    const Instrument_const_sptr &poldiInstrument) {
+IComponent_const_sptr PoldiSourceSpectrum::getSourceComponent(const Instrument_const_sptr &poldiInstrument) {
   IComponent_const_sptr source = poldiInstrument->getComponentByName("source");
 
   if (!source) {
-    throw std::runtime_error(
-        "Instrument does not contain a neutron source definition.");
+    throw std::runtime_error("Instrument does not contain a neutron source definition.");
   }
 
   return source;
@@ -88,15 +79,13 @@ IComponent_const_sptr PoldiSourceSpectrum::getSourceComponent(
  *map
  * @return Shared pointer to Parameter that contains the spectrum.
  */
-Parameter_sptr PoldiSourceSpectrum::getSpectrumParameter(
-    const IComponent_const_sptr &source,
-    const ParameterMap_sptr &instrumentParameterMap) {
-  Parameter_sptr spectrumParameter = instrumentParameterMap->getRecursive(
-      &(*source), "WavelengthDistribution", "fitting");
+Parameter_sptr PoldiSourceSpectrum::getSpectrumParameter(const IComponent_const_sptr &source,
+                                                         const ParameterMap_sptr &instrumentParameterMap) {
+  Parameter_sptr spectrumParameter =
+      instrumentParameterMap->getRecursive(&(*source), "WavelengthDistribution", "fitting");
 
   if (!spectrumParameter) {
-    throw std::runtime_error(
-        "WavelengthDistribution could not be extracted from source component.");
+    throw std::runtime_error("WavelengthDistribution could not be extracted from source component.");
   }
 
   return spectrumParameter;
@@ -121,8 +110,7 @@ void PoldiSourceSpectrum::setSpectrum(const Parameter_sptr &spectrumParameter) {
 
     m_spectrum = spectrum.getLookUpTable();
   } catch (...) {
-    throw std::runtime_error(
-        "PoldiSourceSpectrum could not be initialized properly.");
+    throw std::runtime_error("PoldiSourceSpectrum could not be initialized properly.");
   }
 }
 } // namespace Poldi

@@ -78,26 +78,23 @@ private:
   void zoomIn(PanZoomTool *panZoomTool) {
     panZoomTool->pyobj().attr("press_zoom")(createDummyMplMouseEvent(100, 100));
     // events myst be >=5 pixels apart to count
-    panZoomTool->pyobj().attr("release_zoom")(
-        createDummyMplMouseEvent(110, 110));
+    panZoomTool->pyobj().attr("release_zoom")(createDummyMplMouseEvent(110, 110));
   }
 
   Python::Object createDummyMplMouseEvent(double xpos, double ypos) {
     try {
       auto mainModule = Python::NewRef(PyImport_ImportModule("__main__"));
-      auto builtinsDict =
-          Python::BorrowedRef(PyModule_GetDict(mainModule.ptr()));
-      auto createMouseEventFnSrc =
-          QString("def createDummyMouseEvent(xpos, ypos):\n"
-                  "  class MouseEvent(object):\n"
-                  "      x, y = xpos, ypos\n"
-                  "      button = 1\n"
-                  "      key = None\n"
-                  "  return MouseEvent()\n");
+      auto builtinsDict = Python::BorrowedRef(PyModule_GetDict(mainModule.ptr()));
+      auto createMouseEventFnSrc = QString("def createDummyMouseEvent(xpos, ypos):\n"
+                                           "  class MouseEvent(object):\n"
+                                           "      x, y = xpos, ypos\n"
+                                           "      button = 1\n"
+                                           "      key = None\n"
+                                           "  return MouseEvent()\n");
       Python::Dict context;
       context.update(builtinsDict);
-      Python::NewRef(PyRun_String(createMouseEventFnSrc.toLatin1().constData(),
-                                  Py_file_input, context.ptr(), context.ptr()));
+      Python::NewRef(
+          PyRun_String(createMouseEventFnSrc.toLatin1().constData(), Py_file_input, context.ptr(), context.ptr()));
       return context["createDummyMouseEvent"](xpos, ypos);
     } catch (Python::ErrorAlreadySet &) {
       throw Mantid::PythonInterface::PythonException();

@@ -246,8 +246,7 @@ int BnId::intValue() const
   return out;
 }
 
-void BnId::mapState(const std::vector<int> &Index,
-                    std::map<int, int> &Base) const
+void BnId::mapState(const std::vector<int> &Index, std::map<int, int> &Base) const
 /**
   Sets the components within base with true/false
   @param Index :: vector of Literal/Surface numbers
@@ -319,8 +318,7 @@ void BnId::reverse()
 */
 {
   using std::placeholders::_1;
-  transform(Tval.begin(), Tval.end(), Tval.begin(),
-            std::bind(std::multiplies<int>(), _1, -1));
+  transform(Tval.begin(), Tval.end(), Tval.begin(), std::bind(std::multiplies<int>(), _1, -1));
   setCounters();
 }
 

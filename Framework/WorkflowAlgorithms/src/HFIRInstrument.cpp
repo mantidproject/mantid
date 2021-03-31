@@ -32,21 +32,17 @@ namespace HFIRInstrument {
 /*
  * Read a parameter from the instrument description
  */
-double readInstrumentParameter(const std::string &parameter,
-                               const API::MatrixWorkspace_sptr &dataWS) {
-  std::vector<double> pars =
-      dataWS->getInstrument()->getNumberParameter(parameter);
+double readInstrumentParameter(const std::string &parameter, const API::MatrixWorkspace_sptr &dataWS) {
+  std::vector<double> pars = dataWS->getInstrument()->getNumberParameter(parameter);
   if (pars.empty())
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Unable to find [" + parameter + "] instrument parameter");
+    throw Kernel::Exception::InstrumentDefinitionError("Unable to find [" + parameter + "] instrument parameter");
   return pars[0];
 }
 
 /*
  * Return the detector ID corresponding to the [x,y] pixel coordinates.
  */
-int getDetectorFromPixel(const int &pixel_x, const int &pixel_y,
-                         const API::MatrixWorkspace_sptr &dataWS) {
+int getDetectorFromPixel(const int &pixel_x, const int &pixel_y, const API::MatrixWorkspace_sptr &dataWS) {
   UNUSED_ARG(dataWS);
   return 1000000 + 1000 * pixel_x + pixel_y;
 }
@@ -55,13 +51,10 @@ int getDetectorFromPixel(const int &pixel_x, const int &pixel_y,
  * Returns the real-space coordinates corresponding to the
  * given pixel coordinates [m].
  */
-void getCoordinateFromPixel(const double &pixel_x, const double &pixel_y,
-                            const API::MatrixWorkspace_sptr &dataWS, double &x,
-                            double &y) {
-  const int nx_pixels =
-      static_cast<int>(readInstrumentParameter("number-of-x-pixels", dataWS));
-  const int ny_pixels =
-      static_cast<int>(readInstrumentParameter("number-of-y-pixels", dataWS));
+void getCoordinateFromPixel(const double &pixel_x, const double &pixel_y, const API::MatrixWorkspace_sptr &dataWS,
+                            double &x, double &y) {
+  const int nx_pixels = static_cast<int>(readInstrumentParameter("number-of-x-pixels", dataWS));
+  const int ny_pixels = static_cast<int>(readInstrumentParameter("number-of-y-pixels", dataWS));
   const double pixel_size_x = readInstrumentParameter("x-pixel-size", dataWS);
   const double pixel_size_y = readInstrumentParameter("y-pixel-size", dataWS);
   x = (pixel_x - nx_pixels / 2.0 + 0.5) * pixel_size_x / 1000.0;
@@ -76,13 +69,10 @@ void getCoordinateFromPixel(const double &pixel_x, const double &pixel_y,
  * @param y: real-space y coordinate [m]
  *
  */
-void getPixelFromCoordinate(const double &x, const double &y,
-                            const API::MatrixWorkspace_sptr &dataWS,
-                            double &pixel_x, double &pixel_y) {
-  const int nx_pixels =
-      static_cast<int>(readInstrumentParameter("number-of-x-pixels", dataWS));
-  const int ny_pixels =
-      static_cast<int>(readInstrumentParameter("number-of-y-pixels", dataWS));
+void getPixelFromCoordinate(const double &x, const double &y, const API::MatrixWorkspace_sptr &dataWS, double &pixel_x,
+                            double &pixel_y) {
+  const int nx_pixels = static_cast<int>(readInstrumentParameter("number-of-x-pixels", dataWS));
+  const int ny_pixels = static_cast<int>(readInstrumentParameter("number-of-y-pixels", dataWS));
   const double pixel_size_x = readInstrumentParameter("x-pixel-size", dataWS);
   const double pixel_size_y = readInstrumentParameter("y-pixel-size", dataWS);
   pixel_x = x / pixel_size_x * 1000.0 + nx_pixels / 2.0 - 0.5;
@@ -93,8 +83,7 @@ void getPixelFromCoordinate(const double &x, const double &y,
  * Returns the default beam center position, or the pixel location
  * of real-space coordinates (0,0).
  */
-void getDefaultBeamCenter(const API::MatrixWorkspace_sptr &dataWS,
-                          double &pixel_x, double &pixel_y) {
+void getDefaultBeamCenter(const API::MatrixWorkspace_sptr &dataWS, double &pixel_x, double &pixel_y) {
   getPixelFromCoordinate(0.0, 0.0, std::move(dataWS), pixel_x, pixel_y);
 }
 
@@ -109,31 +98,24 @@ double getSourceToSampleDistance(const API::MatrixWorkspace_sptr &dataWS) {
 
   double sourceToSampleDistance;
 
-  std::vector<double> parsDouble =
-      dataWS->getInstrument()->getNumberParameter("Header_source_distance");
+  std::vector<double> parsDouble = dataWS->getInstrument()->getNumberParameter("Header_source_distance");
   if (!parsDouble.empty()) {
     // First let's try to get source_distance first:
     sourceToSampleDistance = parsDouble[0] *= 1000; // convert to mm
   } else {
-    const auto nGuides =
-        dataWS->run().getPropertyValueAsType<int>("Motor_Positions_nguides");
+    const auto nGuides = dataWS->run().getPropertyValueAsType<int>("Motor_Positions_nguides");
     // aperture-distances: array from the instrument parameters
-    std::vector<std::string> parsString =
-        dataWS->getInstrument()->getStringParameter("aperture-distances");
+    std::vector<std::string> parsString = dataWS->getInstrument()->getStringParameter("aperture-distances");
     if (parsString.empty())
-      throw Kernel::Exception::InstrumentDefinitionError(
-          "Unable to find [aperture-distances] instrument parameter");
+      throw Kernel::Exception::InstrumentDefinitionError("Unable to find [aperture-distances] instrument parameter");
     std::string guidesDistances = parsString[0];
 
     std::vector<std::string> guidesDistancesSplit;
-    boost::split(guidesDistancesSplit, guidesDistances,
-                 boost::is_any_of("\t ,"), boost::token_compress_on);
-    sourceToSampleDistance =
-        boost::lexical_cast<double>(guidesDistancesSplit[nGuides]);
+    boost::split(guidesDistancesSplit, guidesDistances, boost::is_any_of("\t ,"), boost::token_compress_on);
+    sourceToSampleDistance = boost::lexical_cast<double>(guidesDistancesSplit[nGuides]);
 
     auto sourceToSampleDistanceOffset =
-        dataWS->run().getPropertyValueAsType<double>(
-            "Header_sample_aperture_to_flange");
+        dataWS->run().getPropertyValueAsType<double>("Header_sample_aperture_to_flange");
 
     sourceToSampleDistance -= sourceToSampleDistanceOffset;
   }

@@ -43,30 +43,26 @@ void RemoveBackground::init() {
   auto sourceValidator = std::make_shared<CompositeValidator>();
   sourceValidator->add<InstrumentValidator>();
   sourceValidator->add<HistogramValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input, sourceValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, sourceValidator),
                   "Workspace containing the input data");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name to give the output workspace");
 
   auto vsValidator = std::make_shared<CompositeValidator>();
   vsValidator->add<WorkspaceUnitValidator>("TOF");
   vsValidator->add<HistogramValidator>();
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("BkgWorkspace", "",
-                                            Direction::Input, vsValidator),
-      "An optional histogram workspace in the units of TOF defining background "
-      "for removal during rebinning."
-      "The workspace has to have single value or contain the same number of "
-      "spectra as the \"InputWorkspace\" and single Y value per each spectra,"
-      "representing flat background in the background time region. "
-      "If such workspace is present, the value of the flat background provided "
-      "by this workspace is removed "
-      "from each spectra of the rebinned workspace. This works for histogram "
-      "and event workspace when events are not retained "
-      "but actually useful mainly for removing background while rebinning an "
-      "event workspace in the units different from TOF.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("BkgWorkspace", "", Direction::Input, vsValidator),
+                  "An optional histogram workspace in the units of TOF defining background "
+                  "for removal during rebinning."
+                  "The workspace has to have single value or contain the same number of "
+                  "spectra as the \"InputWorkspace\" and single Y value per each spectra,"
+                  "representing flat background in the background time region. "
+                  "If such workspace is present, the value of the flat background provided "
+                  "by this workspace is removed "
+                  "from each spectra of the rebinned workspace. This works for histogram "
+                  "and event workspace when events are not retained "
+                  "but actually useful mainly for removing background while rebinning an "
+                  "event workspace in the units different from TOF.");
 
   std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
   declareProperty("EMode", dE_modes[Kernel::DeltaEMode::Direct],
@@ -98,8 +94,7 @@ void RemoveBackground::exec() {
   API::MatrixWorkspace_const_sptr bkgWksp = getProperty("BkgWorkspace");
   bool nullifyNegative = getProperty("NullifyNegativeValues");
 
-  if (!(bkgWksp->getNumberHistograms() == 1 ||
-        inputWS->getNumberHistograms() == bkgWksp->getNumberHistograms())) {
+  if (!(bkgWksp->getNumberHistograms() == 1 || inputWS->getNumberHistograms() == bkgWksp->getNumberHistograms())) {
     throw std::invalid_argument(" Background Workspace: " + bkgWksp->getName() +
                                 " should have the same number of spectra as "
                                 "source workspace or be a single histogram "
@@ -122,8 +117,7 @@ void RemoveBackground::exec() {
   }
 
   int nThreads = PARALLEL_GET_MAX_THREADS;
-  m_BackgroundHelper.initialize(bkgWksp, inputWS, eMode, &g_log, nThreads,
-                                inPlace, nullifyNegative);
+  m_BackgroundHelper.initialize(bkgWksp, inputWS, eMode, &g_log, nThreads, inPlace, nullifyNegative);
 
   Progress prog(this, 0.0, 1.0, histnumber);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
@@ -153,9 +147,8 @@ void RemoveBackground::exec() {
 //-------------------------------------------------------------------------------------------------------------------------------
 /// Constructor
 BackgroundHelper::BackgroundHelper()
-    : m_WSUnit(), m_bgWs(), m_wkWS(), m_spectrumInfo(nullptr), m_pgLog(nullptr),
-      m_inPlace(true), m_singleValueBackground(false), m_NBg(0), m_dtBg(1),
-      m_ErrSq(0), m_Emode(0), m_Efix(0), m_nullifyNegative(false),
+    : m_WSUnit(), m_bgWs(), m_wkWS(), m_spectrumInfo(nullptr), m_pgLog(nullptr), m_inPlace(true),
+      m_singleValueBackground(false), m_NBg(0), m_dtBg(1), m_ErrSq(0), m_Emode(0), m_Efix(0), m_nullifyNegative(false),
       m_previouslyRemovedBkgMode(false) {}
 
 /** Initialization method:
@@ -171,9 +164,8 @@ BackgroundHelper::BackgroundHelper()
 or target workspace has to be cloned.
 */
 void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
-                                  const API::MatrixWorkspace_sptr &sourceWS,
-                                  int emode, Kernel::Logger *pLog, int nThreads,
-                                  bool inPlace, bool nullifyNegative) {
+                                  const API::MatrixWorkspace_sptr &sourceWS, int emode, Kernel::Logger *pLog,
+                                  int nThreads, bool inPlace, bool nullifyNegative) {
   m_bgWs = bkgWS;
   m_wkWS = sourceWS;
   m_Emode = emode;
@@ -183,11 +175,9 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
 
   std::string bgUnits = bkgWS->getAxis(0)->unit()->unitID();
   if (bgUnits != "TOF")
-    throw std::invalid_argument(" Background Workspace: " + bkgWS->getName() +
-                                " should be in the units of TOF");
+    throw std::invalid_argument(" Background Workspace: " + bkgWS->getName() + " should be in the units of TOF");
 
-  if (!(bkgWS->getNumberHistograms() == 1 ||
-        sourceWS->getNumberHistograms() == bkgWS->getNumberHistograms()))
+  if (!(bkgWS->getNumberHistograms() == 1 || sourceWS->getNumberHistograms() == bkgWS->getNumberHistograms()))
     throw std::invalid_argument(" Background Workspace: " + bkgWS->getName() +
                                 " should have the same number of spectra as "
                                 "source workspace or be a single histogram "
@@ -195,8 +185,7 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
 
   auto WSUnit = sourceWS->getAxis(0)->unit();
   if (!WSUnit)
-    throw std::invalid_argument(" Source Workspace: " + sourceWS->getName() +
-                                " should have units");
+    throw std::invalid_argument(" Source Workspace: " + sourceWS->getName() + " should have units");
 
   m_spectrumInfo = &sourceWS->spectrumInfo();
 
@@ -238,8 +227,7 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
  * single thread, in multithreading -- result of
  *                      omp_get_thread_num() )
  */
-void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data,
-                                        HistogramY &y_data, HistogramE &e_data,
+void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data, HistogramY &y_data, HistogramE &e_data,
                                         int threadNum) const {
 
   double dtBg, IBg, ErrBgSq;
@@ -310,9 +298,7 @@ void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data,
     // no background removal for this spectra as it does not have a detector or
     // other reason
     if (m_pgLog)
-      m_pgLog->debug()
-          << " Can not remove background for the spectra with number (id)"
-          << nHist;
+      m_pgLog->debug() << " Can not remove background for the spectra with number (id)" << nHist;
   }
 }
 /** Method returns the efixed or Ei value stored in properties of the input
@@ -327,8 +313,7 @@ void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data,
  *  or undefined if "Ei" property is not found.
  *
  */
-double
-BackgroundHelper::getEi(const API::MatrixWorkspace_const_sptr &inputWS) const {
+double BackgroundHelper::getEi(const API::MatrixWorkspace_const_sptr &inputWS) const {
   double Efi = std::numeric_limits<double>::quiet_NaN();
 
   // is Ei on workspace properties? (it can be defined for some reason if

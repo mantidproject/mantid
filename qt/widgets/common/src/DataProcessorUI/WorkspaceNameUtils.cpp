@@ -27,8 +27,8 @@ namespace { // unnamed namespace
              * @param allowInsertions : if true, allow new keys to be inserted;
              * otherwise, only allow updating of keys that already exist
              */
-void updateRowOptions(OptionsMap &options, const RowData_sptr &data,
-                      const WhiteList &whitelist, const bool allowInsertions) {
+void updateRowOptions(OptionsMap &options, const RowData_sptr &data, const WhiteList &whitelist,
+                      const bool allowInsertions) {
   // Loop through all columns (excluding the Options and Hidden options
   // columns)
   auto columnIt = whitelist.cbegin();
@@ -55,10 +55,9 @@ void updateRowOptions(OptionsMap &options, const RowData_sptr &data,
  * @param allowInsertions : if true, allow new keys to be inserted;
  * otherwise, only allow updating of keys that already exist
  */
-void updateUserOptions(OptionsMap &options, const RowData_sptr &data,
-                       const WhiteList &whitelist, const bool allowInsertions) {
-  auto userOptions =
-      parseKeyValueQString(data->value(static_cast<int>(whitelist.size()) - 2));
+void updateUserOptions(OptionsMap &options, const RowData_sptr &data, const WhiteList &whitelist,
+                       const bool allowInsertions) {
+  auto userOptions = parseKeyValueQString(data->value(static_cast<int>(whitelist.size()) - 2));
   for (auto &kvp : userOptions) {
     if (allowInsertions || options.find(kvp.first) != options.end())
       options[kvp.first] = kvp.second;
@@ -72,8 +71,7 @@ void updateUserOptions(OptionsMap &options, const RowData_sptr &data,
  * @param allowInsertions : if true, allow new keys to be inserted;
  * otherwise, only allow updating of keys that already exist
  */
-void updateHiddenOptions(OptionsMap &options, const RowData_sptr &data,
-                         const bool allowInsertions) {
+void updateHiddenOptions(OptionsMap &options, const RowData_sptr &data, const bool allowInsertions) {
   const auto hiddenOptions = parseKeyValueQString(data->back());
   for (auto &kvp : hiddenOptions) {
     if (allowInsertions || options.find(kvp.first) != options.end())
@@ -86,8 +84,7 @@ void updateHiddenOptions(OptionsMap &options, const RowData_sptr &data,
  * @param options : a map of property name to option value to update
  * @param data : the data for this row
  */
-void updateOutputOptions(OptionsMap &options, const RowData_sptr &data,
-                         const bool allowInsertions,
+void updateOutputOptions(OptionsMap &options, const RowData_sptr &data, const bool allowInsertions,
                          const std::vector<QString> &outputPropertyNames,
                          const std::vector<QString> &outputNamePrefixes) {
   // Set the properties for the output workspace names
@@ -111,8 +108,8 @@ QStringList preprocessingStringToList(const QString &inputStr) {
 
   // split on comma or plus symbol
   auto str = inputStr.toStdString();
-  boost::tokenizer<boost::escaped_list_separator<char>> tok(
-      str, boost::escaped_list_separator<char>("\\", ",+", "\"'"));
+  boost::tokenizer<boost::escaped_list_separator<char>> tok(str,
+                                                            boost::escaped_list_separator<char>("\\", ",+", "\"'"));
 
   for (const auto &it : tok) {
     if (!it.empty())
@@ -125,9 +122,7 @@ QStringList preprocessingStringToList(const QString &inputStr) {
 /** Join a list of preprocessing inputs into a single string
  * separated by '+' with an optional prefix
  */
-QString preprocessingListToString(const QStringList &values,
-                                  const QString &prefix,
-                                  const QString &separator) {
+QString preprocessingListToString(const QStringList &values, const QString &prefix, const QString &separator) {
   return prefix + values.join(separator);
 }
 
@@ -140,9 +135,8 @@ algorithm for that column
 @throws std::runtime_error if the workspace could not be prepared
 @returns : The name of the workspace
 */
-QString getReducedWorkspaceName(
-    const RowData_sptr &data, const WhiteList &whitelist,
-    const std::map<QString, PreprocessingAlgorithm> &preprocessMap) {
+QString getReducedWorkspaceName(const RowData_sptr &data, const WhiteList &whitelist,
+                                const std::map<QString, PreprocessingAlgorithm> &preprocessMap) {
   if (data->size() != static_cast<int>(whitelist.size()))
     throw std::invalid_argument("Can't find reduced workspace name");
 
@@ -206,11 +200,8 @@ QString getReducedWorkspaceName(
  * names
  * @return : a map of property names to value
  */
-OptionsMap getCanonicalOptions(const RowData_sptr &data,
-                               const OptionsMap &globalOptions,
-                               const WhiteList &whitelist,
-                               const bool allowInsertions,
-                               const std::vector<QString> &outputProperties,
+OptionsMap getCanonicalOptions(const RowData_sptr &data, const OptionsMap &globalOptions, const WhiteList &whitelist,
+                               const bool allowInsertions, const std::vector<QString> &outputProperties,
                                const std::vector<QString> &prefixes) {
   // Compile all of the options into a single map - add them in reverse
   // order of precedence. Latter items are overwritten, or added if they
@@ -219,8 +210,7 @@ OptionsMap getCanonicalOptions(const RowData_sptr &data,
   updateHiddenOptions(options, data, allowInsertions);
   updateUserOptions(options, data, whitelist, allowInsertions);
   updateRowOptions(options, data, whitelist, allowInsertions);
-  updateOutputOptions(options, data, allowInsertions, outputProperties,
-                      prefixes);
+  updateOutputOptions(options, data, allowInsertions, outputProperties, prefixes);
   return options;
 }
 } // namespace DataProcessor

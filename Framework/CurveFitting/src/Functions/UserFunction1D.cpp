@@ -48,9 +48,7 @@ double *UserFunction1D::AddVariable(const char *varName, void *palg) {
 /** Declare properties that are not fit parameters
  */
 void UserFunction1D::declareAdditionalProperties() {
-  declareProperty("Function", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
-                  "The fit function");
+  declareProperty("Function", "", std::make_shared<MandatoryValidator<std::string>>(), "The fit function");
   declareProperty("InitialParameters", "",
                   "The comma separated list of initial values of the fit "
                   "parameters in the form varName=value");
@@ -72,8 +70,7 @@ void UserFunction1D::prepare() {
   // Set the initial values to the fit parameters
   std::string initParams = getProperty("InitialParameters");
   if (!initParams.empty()) {
-    Mantid::Kernel::StringTokenizer values(
-        initParams, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer values(initParams, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
     for (const auto &it : values) {
       size_t ieq = it.find('=');
       if (ieq == std::string::npos)
@@ -89,8 +86,7 @@ void UserFunction1D::prepare() {
         throw std::invalid_argument("Property InitialParameters is malformed");
       double value = std::stod(varValue);
       if (!existsProperty(varName))
-        throw std::invalid_argument("Fit parameter " + varName +
-                                    " does not exist");
+        throw std::invalid_argument("Fit parameter " + varName + " does not exist");
       setProperty(varName, value);
     }
   }
@@ -113,8 +109,7 @@ void UserFunction1D::prepare() {
  *  @param xValues :: The array of nData x-values.
  *  @param nData :: The size of the fitted data.
  */
-void UserFunction1D::function(const double *in, double *out,
-                              const double *xValues, const size_t nData) {
+void UserFunction1D::function(const double *in, double *out, const double *xValues, const size_t nData) {
   for (size_t i = 0; i < static_cast<size_t>(m_nPars); i++)
     m_parameters[i] = in[i];
 
@@ -130,8 +125,7 @@ void UserFunction1D::function(const double *in, double *out,
  * @param xValues :: X values for data points
  * @param nData :: Number of data points
  */
-void UserFunction1D::functionDeriv(const double *in, Jacobian *out,
-                                   const double *xValues, const size_t nData) {
+void UserFunction1D::functionDeriv(const double *in, Jacobian *out, const double *xValues, const size_t nData) {
   // throw Exception::NotImplementedError("No derivative function provided");
   if (nData == 0)
     return;

@@ -52,15 +52,13 @@ public:
   // set a quaternion from a rotational matrix;
   Quat(const Matrix<double> &RotMat);
   void operator()(const Quat &);
-  void operator()(const double ww, const double aa, const double bb,
-                  const double cc);
+  void operator()(const double ww, const double aa, const double bb, const double cc);
   void operator()(const double angle, const V3D &);
   void operator()(const V3D &rX, const V3D &rY, const V3D &rZ);
 
   void set(const double ww, const double aa, const double bb, const double cc);
   void setAngleAxis(const double _deg, const V3D &_axis);
-  void getAngleAxis(double &_deg, double &_ax0, double &_ax1,
-                    double &ax2) const;
+  void getAngleAxis(double &_deg, double &_ax0, double &_ax1, double &ax2) const;
   std::vector<double> getEulerAngles(const std::string &convention) const;
   /// Set the rotation (both don't change rotation axis)
   void setRotation(const double deg);
@@ -86,8 +84,7 @@ public:
   // vector representing M33 matrix
   //! (m33 is not used at the moment), if check_normalisation selected, verify
   // if the mod(quat) is indeed == 1 and throws otherwise.
-  std::vector<double> getRotation(bool check_normalisation = false,
-                                  bool throw_on_errors = false) const;
+  std::vector<double> getRotation(bool check_normalisation = false, bool throw_on_errors = false) const;
   //! Convert GL Matrix into Quat
   void setQuat(double mat[16]);
   //! Convert usual 3D rotation matrix into quat; Will throw if matirix is not
@@ -101,14 +98,13 @@ public:
   // which means implicitly that the cube edges are parallel to the axes,
   // find the smallest bounding box with the edges also parallel to the axes
   // after rotation of the object.
-  void rotateBB(double &xmin, double &ymin, double &zmin, double &xmax,
-                double &ymax, double &zmax) const;
+  void rotateBB(double &xmin, double &ymin, double &zmin, double &xmax, double &ymax, double &zmax) const;
   //! Overload operators
   Quat operator+(const Quat &) const;
   Quat &operator+=(const Quat &);
   Quat operator-(const Quat &) const;
   Quat &operator-=(const Quat &);
-  Quat operator*(const Quat &)const;
+  Quat operator*(const Quat &) const;
   Quat &operator*=(const Quat &);
   bool operator==(const Quat &) const;
   bool operator!=(const Quat &) const;

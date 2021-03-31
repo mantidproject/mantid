@@ -23,15 +23,12 @@ namespace Functions {
     It will involve the calculation from peak's miller indices
 */
 
-class MANTID_CURVEFITTING_DLL ThermalNeutronBk2BkExpConvPVoigt
-    : public API::IPowderDiffPeakFunction {
+class MANTID_CURVEFITTING_DLL ThermalNeutronBk2BkExpConvPVoigt : public API::IPowderDiffPeakFunction {
 public:
   ThermalNeutronBk2BkExpConvPVoigt();
 
   /// Overwrite IFunction base class methods
-  std::string name() const override {
-    return "ThermalNeutronBk2BkExpConvPVoigt";
-  }
+  std::string name() const override { return "ThermalNeutronBk2BkExpConvPVoigt"; }
   const std::string category() const override { return "General"; }
 
   /// Overwrite IPeakFunction base class methods
@@ -70,12 +67,10 @@ public:
   */
 
   /// Override setting a new value to the i-th parameter
-  void setParameter(size_t i, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(size_t i, const double &value, bool explicitlySet = true) override;
 
   /// Override setting a new value to a parameter by name
-  void setParameter(const std::string &name, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(const std::string &name, const double &value, bool explicitlySet = true) override;
 
   /// Set peak's height
   // virtual void setHeight(const double h);
@@ -83,24 +78,19 @@ public:
   // virtual double height()const;
 
   using IFunction1D::function;
-  void function(std::vector<double> &out,
-                const std::vector<double> &xValues) const override;
+  void function(std::vector<double> &out, const std::vector<double> &xValues) const override;
 
   /// Function you want to fit to.
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 
 private:
   //----- Overwrite IFunction ------------------------------------------------
   /// Fuction local
-  void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const;
+  void functionLocal(double *out, const double *xValues, const size_t nData) const;
   /// Derivative
-  virtual void functionDerivLocal(API::Jacobian *out, const double *xValues,
-                                  const size_t nData);
+  virtual void functionDerivLocal(API::Jacobian *out, const double *xValues, const size_t nData);
   /// Derivative
-  void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian) override;
+  void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) override;
 
   /// Overwrite IFunction base class method, which declare function parameters
   void init() override;
@@ -115,9 +105,8 @@ private:
   double calPeakCenter() const;
 
   /// Calculate peak profile I(TOF) = Omega(TOF)
-  double calOmega(const double x, const double eta, const double N,
-                  const double alpha, const double beta, const double H,
-                  const double sigma2, const double invert_sqrt2sigma,
+  double calOmega(const double x, const double eta, const double N, const double alpha, const double beta,
+                  const double H, const double sigma2, const double invert_sqrt2sigma,
                   const bool explicitoutput = false) const;
 
   /// Set 2 functions to be hidden from client
@@ -164,8 +153,7 @@ private:
 };
 
 /// Shared pointer to ThermalNeutronBk2BkExpConvPVoigt peak/function
-using ThermalNeutronBk2BkExpConvPVoigt_sptr =
-    std::shared_ptr<ThermalNeutronBk2BkExpConvPVoigt>;
+using ThermalNeutronBk2BkExpConvPVoigt_sptr = std::shared_ptr<ThermalNeutronBk2BkExpConvPVoigt>;
 
 //--- Public inline function --------------------------------------------------
 /** Calculate d = a/sqrt(h**2+k**2+l**2)

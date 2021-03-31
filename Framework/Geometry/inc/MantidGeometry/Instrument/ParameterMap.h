@@ -38,24 +38,17 @@ class Instrument;
   @date 2/12/2008
 */
 /// Parameter map iterator typedef
-using component_map_it =
-    tbb::concurrent_unordered_multimap<ComponentID,
-                                       std::shared_ptr<Parameter>>::iterator;
-using component_map_cit = tbb::concurrent_unordered_multimap<
-    ComponentID, std::shared_ptr<Parameter>>::const_iterator;
+using component_map_it = tbb::concurrent_unordered_multimap<ComponentID, std::shared_ptr<Parameter>>::iterator;
+using component_map_cit = tbb::concurrent_unordered_multimap<ComponentID, std::shared_ptr<Parameter>>::const_iterator;
 
 class MANTID_GEOMETRY_DLL ParameterMap {
 public:
   /// Parameter map typedef
-  using pmap = tbb::concurrent_unordered_multimap<ComponentID,
-                                                  std::shared_ptr<Parameter>>;
+  using pmap = tbb::concurrent_unordered_multimap<ComponentID, std::shared_ptr<Parameter>>;
   /// Parameter map iterator typedef
-  using pmap_it =
-      tbb::concurrent_unordered_multimap<ComponentID,
-                                         std::shared_ptr<Parameter>>::iterator;
+  using pmap_it = tbb::concurrent_unordered_multimap<ComponentID, std::shared_ptr<Parameter>>::iterator;
   /// Parameter map iterator typedef
-  using pmap_cit = tbb::concurrent_unordered_multimap<
-      ComponentID, std::shared_ptr<Parameter>>::const_iterator;
+  using pmap_cit = tbb::concurrent_unordered_multimap<ComponentID, std::shared_ptr<Parameter>>::const_iterator;
   /// Default constructor
   ParameterMap();
   /// Const constructor
@@ -82,8 +75,7 @@ public:
   static const std::string &pQuat();
   static const std::string &scale();
 
-  const std::string diff(const ParameterMap &rhs,
-                         const bool &firstDiffOnly = false) const;
+  const std::string diff(const ParameterMap &rhs, const bool &firstDiffOnly = false) const;
 
   /// Inquality comparison operator
   bool operator!=(const ParameterMap &rhs) const;
@@ -108,8 +100,7 @@ public:
   void clearParametersByName(const std::string &name, const IComponent *comp);
 
   /// Method for adding a parameter providing its value as a string
-  void add(const std::string &type, const IComponent *comp,
-           const std::string &name, const std::string &value,
+  void add(const std::string &type, const IComponent *comp, const std::string &name, const std::string &value,
            const std::string *const pDescription = nullptr);
 
   /**
@@ -126,8 +117,7 @@ public:
    * string, containing parameter's description.
    */
   template <class T>
-  void add(const std::string &type, const IComponent *comp,
-           const std::string &name, const T &value,
+  void add(const std::string &type, const IComponent *comp, const std::string &name, const T &value,
            const std::string *const pDescription = nullptr) {
     auto param = create(type, name);
     auto typedParam = std::dynamic_pointer_cast<ParameterType<T>>(param);
@@ -143,86 +133,67 @@ public:
 
   /** @name Helper methods for adding and updating parameter types  */
   /// Create or adjust "pos" parameter for a component
-  void addPositionCoordinate(const IComponent *comp, const std::string &name,
-                             const double value,
+  void addPositionCoordinate(const IComponent *comp, const std::string &name, const double value,
                              const std::string *const pDescription = nullptr);
   /// Create or adjust "rot" parameter for a component
-  void addRotationParam(const IComponent *comp, const std::string &name,
-                        const double deg,
+  void addRotationParam(const IComponent *comp, const std::string &name, const double deg,
                         const std::string *const pDescription = nullptr);
   /// Adds a double value to the parameter map.
-  void addDouble(const IComponent *comp, const std::string &name,
-                 const std::string &value,
+  void addDouble(const IComponent *comp, const std::string &name, const std::string &value,
                  const std::string *const pDescription = nullptr);
   /// Adds a double value to the parameter map.
   void addDouble(const IComponent *comp, const std::string &name, double value,
                  const std::string *const pDescription = nullptr);
   /// Adds an int value to the parameter map.
-  void addInt(const IComponent *comp, const std::string &name,
-              const std::string &value,
+  void addInt(const IComponent *comp, const std::string &name, const std::string &value,
               const std::string *const pDescription = nullptr);
   /// Adds an int value to the parameter map.
   void addInt(const IComponent *comp, const std::string &name, int value,
               const std::string *const pDescription = nullptr);
   /// Adds a bool value to the parameter map.
-  void addBool(const IComponent *comp, const std::string &name,
-               const std::string &value,
+  void addBool(const IComponent *comp, const std::string &name, const std::string &value,
                const std::string *const pDescription = nullptr);
   /// Adds a bool value to the parameter map.
   void addBool(const IComponent *comp, const std::string &name, bool value,
                const std::string *const pDescription = nullptr);
   /// Adds a std::string value to the parameter map.
-  void addString(const IComponent *comp, const std::string &name,
-                 const std::string &value,
+  void addString(const IComponent *comp, const std::string &name, const std::string &value,
                  const std::string *const pDescription = nullptr);
   /// Adds a Kernel::V3D value to the parameter map.
-  void addV3D(const IComponent *comp, const std::string &name,
-              const std::string &value,
+  void addV3D(const IComponent *comp, const std::string &name, const std::string &value,
               const std::string *const pDescription = nullptr);
   /// @param value :: Parameter value as a Kernel::V3D
-  void addV3D(const IComponent *comp, const std::string &name,
-              const Kernel::V3D &value,
+  void addV3D(const IComponent *comp, const std::string &name, const Kernel::V3D &value,
               const std::string *const pDescription = nullptr);
   /// Adds a Kernel::Quat value to the parameter map.
-  void addQuat(const IComponent *comp, const std::string &name,
-               const Kernel::Quat &value,
+  void addQuat(const IComponent *comp, const std::string &name, const Kernel::Quat &value,
                const std::string *const pDescription = nullptr);
   void forceUnsafeSetMasked(const IComponent *comp, bool value);
   //@}
 
   /// Does the named parameter exist for the given component and type
   /// (std::string version)
-  bool contains(const IComponent *comp, const std::string &name,
-                const std::string &type = "") const;
+  bool contains(const IComponent *comp, const std::string &name, const std::string &type = "") const;
   /// Does the named parameter exist for the given component (c-string version)
-  bool contains(const IComponent *comp, const char *name,
-                const char *type = "") const;
+  bool contains(const IComponent *comp, const char *name, const char *type = "") const;
   /// Does the given parameter & component combination exist
   bool contains(const IComponent *comp, const Parameter &parameter) const;
   /// Get a parameter with a given name and type (std::string version)
-  std::shared_ptr<Parameter> get(const IComponent *comp,
-                                 const std::string &name,
-                                 const std::string &type = "") const;
+  std::shared_ptr<Parameter> get(const IComponent *comp, const std::string &name, const std::string &type = "") const;
   /// Get a parameter with a given name and type (c-string version)
-  std::shared_ptr<Parameter> get(const IComponent *comp, const char *name,
-                                 const char *type = "") const;
+  std::shared_ptr<Parameter> get(const IComponent *comp, const char *name, const char *type = "") const;
   /// Finds the parameter in the map via the parameter type.
-  std::shared_ptr<Parameter> getByType(const IComponent *comp,
-                                       const std::string &type) const;
+  std::shared_ptr<Parameter> getByType(const IComponent *comp, const std::string &type) const;
   /// Use get() recursively to see if can find param in all parents of comp and
   /// given type (std::string version)
-  std::shared_ptr<Parameter> getRecursive(const IComponent *comp,
-                                          const std::string &name,
+  std::shared_ptr<Parameter> getRecursive(const IComponent *comp, const std::string &name,
                                           const std::string &type = "") const;
   /// Use get() recursively to see if can find param in all parents of comp and
   /// given type (const char type)
-  std::shared_ptr<Parameter> getRecursive(const IComponent *comp,
-                                          const char *name,
-                                          const char *type = "") const;
+  std::shared_ptr<Parameter> getRecursive(const IComponent *comp, const char *name, const char *type = "") const;
   /// Looks recursively upwards in the component tree for the first instance of
   /// a parameter with a specified type.
-  std::shared_ptr<Parameter> getRecursiveByType(const IComponent *comp,
-                                                const std::string &type) const;
+  std::shared_ptr<Parameter> getRecursiveByType(const IComponent *comp, const std::string &type) const;
 
   /** Get the values of a given parameter of all the components that have the
    * name: compName
@@ -231,9 +202,7 @@ public:
    *  @param name :: The name of the parameter
    *  @return all component values from the given component name
    */
-  template <class T>
-  std::vector<T> getType(const std::string &compName,
-                         const std::string &name) const {
+  template <class T> std::vector<T> getType(const std::string &compName, const std::string &name) const {
     std::vector<T> retval;
 
     pmap_cit it;
@@ -247,19 +216,15 @@ public:
     return retval;
   }
   /** Get the component description by name */
-  const std::string getDescription(const std::string &compName,
-                                   const std::string &name) const;
+  const std::string getDescription(const std::string &compName, const std::string &name) const;
   /** Get the component tooltip by name */
-  const std::string getShortDescription(const std::string &compName,
-                                        const std::string &name) const;
+  const std::string getShortDescription(const std::string &compName, const std::string &name) const;
 
   /// Return the value of a parameter as a string
-  std::string getString(const IComponent *comp, const std::string &name,
-                        bool recursive = false) const;
+  std::string getString(const IComponent *comp, const std::string &name, bool recursive = false) const;
   /// Returns a string parameter as vector's first element if exists and an
   /// empty vector if it doesn't
-  std::vector<std::string> getString(const std::string &compName,
-                                     const std::string &name) const {
+  std::vector<std::string> getString(const std::string &compName, const std::string &name) const {
     return getType<std::string>(compName, name);
   }
   /**
@@ -269,8 +234,7 @@ public:
    * @param name :: Parameter name
    * @return a double parameter from component with the requested name
    */
-  std::vector<double> getDouble(const std::string &compName,
-                                const std::string &name) const {
+  std::vector<double> getDouble(const std::string &compName, const std::string &name) const {
     return getType<double>(compName, name);
   }
   /**
@@ -280,8 +244,7 @@ public:
    * @param name :: Parameter name
    * @return a Kernel::V3D parameter from component with the requested name
    */
-  std::vector<Kernel::V3D> getV3D(const std::string &compName,
-                                  const std::string &name) const {
+  std::vector<Kernel::V3D> getV3D(const std::string &compName, const std::string &name) const {
     return getType<Kernel::V3D>(compName, name);
   }
 
@@ -293,22 +256,18 @@ public:
   /// Clears the location, rotation & bounding box caches
   void clearPositionSensitiveCaches();
   /// Sets a cached location on the location cache
-  void setCachedLocation(const IComponent *comp,
-                         const Kernel::V3D &location) const;
+  void setCachedLocation(const IComponent *comp, const Kernel::V3D &location) const;
   /// Attempts to retrieve a location from the location cache
   bool getCachedLocation(const IComponent *comp, Kernel::V3D &location) const;
   /// Sets a cached rotation on the rotation cache
-  void setCachedRotation(const IComponent *comp,
-                         const Kernel::Quat &rotation) const;
+  void setCachedRotation(const IComponent *comp, const Kernel::Quat &rotation) const;
   /// Attempts to retrieve a rotation from the rotation cache
   bool getCachedRotation(const IComponent *comp, Kernel::Quat &rotation) const;
   /// Persist a representation of the Parameter map to the open Nexus file
   void saveNexus(::NeXus::File *file, const std::string &group) const;
   /// Copy pairs (oldComp->id,Parameter) to the m_map assigning the new
   /// newComp->id
-  void copyFromParameterMap(const IComponent *oldComp,
-                            const IComponent *newComp,
-                            const ParameterMap *oldPMap);
+  void copyFromParameterMap(const IComponent *oldComp, const IComponent *newComp, const ParameterMap *oldPMap);
 
   /// Returns a list of all the parameter files loaded
   const std::vector<std::string> &getParameterFilenames() const;
@@ -334,18 +293,15 @@ public:
   void setInstrument(const Instrument *instrument);
 
 private:
-  std::shared_ptr<Parameter> create(const std::string &className,
-                                    const std::string &name) const;
+  std::shared_ptr<Parameter> create(const std::string &className, const std::string &name) const;
 
   /// Assignment operator
   ParameterMap &operator=(ParameterMap *rhs);
   /// internal function to get position of the parameter in the parameter map
-  component_map_it positionOf(const IComponent *comp, const char *name,
-                              const char *type);
+  component_map_it positionOf(const IComponent *comp, const char *name, const char *type);
   /// const version of the internal function to get position of the parameter in
   /// the parameter map
-  component_map_cit positionOf(const IComponent *comp, const char *name,
-                               const char *type) const;
+  component_map_cit positionOf(const IComponent *comp, const char *name, const char *type) const;
 
   /// internal list of parameter files loaded
   std::vector<std::string> m_parameterFileNames;

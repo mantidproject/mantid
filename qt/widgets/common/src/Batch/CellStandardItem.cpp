@@ -40,9 +40,7 @@ void setBorderThickness(QStandardItem &item, int borderThickness) {
   item.setData(borderThickness, CellUserRoles::BorderThickness);
 }
 
-int getBorderThickness(QStandardItem const &item) {
-  return item.data(CellUserRoles::BorderThickness).toInt();
-}
+int getBorderThickness(QStandardItem const &item) { return item.data(CellUserRoles::BorderThickness).toInt(); }
 
 std::string getIconFilePath(QStandardItem const &item) {
   return item.data(CellUserRoles::IconFilePath).toString().toStdString();
@@ -61,44 +59,31 @@ void setIcon(QStandardItem &item, std::string const &iconFilePath) {
     item.setIcon(QIcon());
 }
 
-void setBorderColor(QStandardItem &item, std::string const &borderColor,
-                    int alpha) {
+void setBorderColor(QStandardItem &item, std::string const &borderColor, int alpha) {
   auto borderQColor = QColor(borderColor.c_str());
   borderQColor.setAlpha(alpha);
   item.setData(borderQColor, CellUserRoles::BorderColor);
 }
 
-void setBackgroundColor(QStandardItem &item,
-                        std::string const &backgroundColor) {
+void setBackgroundColor(QStandardItem &item, std::string const &backgroundColor) {
   auto borderColor = QColor(backgroundColor.c_str());
   item.setData(QBrush(borderColor), Qt::BackgroundRole);
 }
 
 std::string getBackgroundColor(QStandardItem const &item) {
-  return item.data(Qt::BackgroundRole)
-      .value<QBrush>()
-      .color()
-      .name()
-      .toStdString();
+  return item.data(Qt::BackgroundRole).value<QBrush>().color().name().toStdString();
 }
 
-void setForegroundColor(QStandardItem &item,
-                        std::string const &foregroundColor) {
+void setForegroundColor(QStandardItem &item, std::string const &foregroundColor) {
   auto borderColor = QColor(foregroundColor.c_str());
   item.setData(QBrush(borderColor), Qt::ForegroundRole);
 }
 
 std::string getForegroundColor(QStandardItem const &item) {
-  return item.data(Qt::ForegroundRole)
-      .value<QBrush>()
-      .color()
-      .name()
-      .toStdString();
+  return item.data(Qt::ForegroundRole).value<QBrush>().color().name().toStdString();
 }
 
-QColor getBorderColor(QStandardItem const &item) {
-  return item.data(CellUserRoles::BorderColor).value<QColor>();
-}
+QColor getBorderColor(QStandardItem const &item) { return item.data(CellUserRoles::BorderColor).value<QColor>(); }
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt

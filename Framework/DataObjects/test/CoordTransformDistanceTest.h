@@ -21,8 +21,7 @@ using Mantid::API::CoordTransform;
 class CoordTransformDistanceTest : public CxxTest::TestSuite {
 public:
   /** Helper to compare two "vectors" (bare float arrays) */
-  void compare(size_t numdims, coord_t *value,
-               const std::vector<coord_t> expected) {
+  void compare(size_t numdims, coord_t *value, const std::vector<coord_t> expected) {
     for (size_t i = 0; i < numdims; i++)
       TS_ASSERT_DELTA(value[i], expected[i], 1e-5);
   }
@@ -127,37 +126,32 @@ public:
     TS_ASSERT_THROWS_NOTHING(ct.apply(in4, &out));
     TS_ASSERT_DELTA(out, 4.0, 1e-5);
 
-    coord_t in5[3] = {1, static_cast<coord_t>(2 + M_SQRT1_2),
-                      static_cast<coord_t>(3 - M_SQRT1_2)};
+    coord_t in5[3] = {1, static_cast<coord_t>(2 + M_SQRT1_2), static_cast<coord_t>(3 - M_SQRT1_2)};
     TS_ASSERT_THROWS_NOTHING(ct.apply(in5, &out));
     TS_ASSERT_DELTA(out, 4.0, 1e-5);
 
-    coord_t in6[3] = {1, static_cast<coord_t>(2 + M_SQRT2),
-                      static_cast<coord_t>(3 - M_SQRT2)};
+    coord_t in6[3] = {1, static_cast<coord_t>(2 + M_SQRT2), static_cast<coord_t>(3 - M_SQRT2)};
     TS_ASSERT_THROWS_NOTHING(ct.apply(in6, &out));
     TS_ASSERT_DELTA(out, 16.0, 1e-5);
   }
 
   /** Test serialization */
   void test_to_xml_string() {
-    std::string expectedResult =
-        std::string("<CoordTransform>") +
-        "<Type>CoordTransformDistance</Type>" + "<ParameterList>" +
-        "<Parameter><Type>InDimParameter</Type><Value>4</Value></Parameter>" +
-        "<Parameter><Type>OutDimParameter</Type><Value>1</Value></Parameter>" +
-        "<Parameter><Type>CoordCenterVectorParam</"
-        "Type><Value>1.0000,2.0000,2.0000,1.0000</Value></Parameter>" +
-        "<Parameter><Type>DimensionsUsedVectorParam</Type><Value>1,0,0,1</"
-        "Value></Parameter>"
-        "</ParameterList>"
-        "</CoordTransform>";
+    std::string expectedResult = std::string("<CoordTransform>") + "<Type>CoordTransformDistance</Type>" +
+                                 "<ParameterList>" +
+                                 "<Parameter><Type>InDimParameter</Type><Value>4</Value></Parameter>" +
+                                 "<Parameter><Type>OutDimParameter</Type><Value>1</Value></Parameter>" +
+                                 "<Parameter><Type>CoordCenterVectorParam</"
+                                 "Type><Value>1.0000,2.0000,2.0000,1.0000</Value></Parameter>" +
+                                 "<Parameter><Type>DimensionsUsedVectorParam</Type><Value>1,0,0,1</"
+                                 "Value></Parameter>"
+                                 "</ParameterList>"
+                                 "</CoordTransform>";
 
     coord_t center[4] = {1, 2, 2, 1};
     bool used[4] = {true, false, false, true};
     CoordTransformDistance ct(4, center, used);
-    TSM_ASSERT_EQUALS(
-        "CoordTransformDistance has failed to serialize correctly.",
-        expectedResult, ct.toXMLString());
+    TSM_ASSERT_EQUALS("CoordTransformDistance has failed to serialize correctly.", expectedResult, ct.toXMLString());
   }
 };
 
@@ -191,8 +185,7 @@ public:
 
   void test_apply_10D_with_3D_used_performance() {
     coord_t center[10] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
-    bool used[10] = {true,  true,  true,  false, false,
-                     false, false, false, false, false};
+    bool used[10] = {true, true, true, false, false, false, false, false, false, false};
     CoordTransformDistance ct(10, center, used);
     coord_t in[10] = {1.5, 2.5, 3.5, 4.5, 16, 17, 18, 19, 20, 21};
     coord_t out;

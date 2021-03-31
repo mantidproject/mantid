@@ -36,17 +36,12 @@ Mantid::Kernel::Logger g_log("ScriptBuilder");
 
 const std::string COMMENT_ALG = "Comment";
 
-ScriptBuilder::ScriptBuilder(
-    const std::shared_ptr<HistoryView> &view, std::string versionSpecificity,
-    bool appendTimestamp, std::vector<std::string> ignoreTheseAlgs,
-    std::vector<std::vector<std::string>> ignoreTheseAlgProperties,
-    bool appendExecCount)
-    : m_historyItems(view->getAlgorithmsList()), m_output(),
-      m_versionSpecificity(std::move(versionSpecificity)),
-      m_timestampCommands(appendTimestamp),
-      m_algsToIgnore(std::move(ignoreTheseAlgs)),
-      m_propertiesToIgnore(std::move(ignoreTheseAlgProperties)),
-      m_execCount(appendExecCount) {}
+ScriptBuilder::ScriptBuilder(const std::shared_ptr<HistoryView> &view, std::string versionSpecificity,
+                             bool appendTimestamp, std::vector<std::string> ignoreTheseAlgs,
+                             std::vector<std::vector<std::string>> ignoreTheseAlgProperties, bool appendExecCount)
+    : m_historyItems(view->getAlgorithmsList()), m_output(), m_versionSpecificity(std::move(versionSpecificity)),
+      m_timestampCommands(appendTimestamp), m_algsToIgnore(std::move(ignoreTheseAlgs)),
+      m_propertiesToIgnore(std::move(ignoreTheseAlgProperties)), m_execCount(appendExecCount) {}
 
 /**
  * Build a python script for each algorithm included in the history view.
@@ -73,9 +68,8 @@ const std::string ScriptBuilder::build() {
  *items
  * @param depth :: count of how far we've recursed into the history
  */
-void ScriptBuilder::writeHistoryToStream(
-    std::ostringstream &os, std::vector<HistoryItem>::const_iterator &iter,
-    int depth) {
+void ScriptBuilder::writeHistoryToStream(std::ostringstream &os, std::vector<HistoryItem>::const_iterator &iter,
+                                         int depth) {
   auto algHistory = iter->getAlgorithmHistory();
   if (iter->isUnrolled()) {
     os << "\n";
@@ -88,8 +82,7 @@ void ScriptBuilder::writeHistoryToStream(
     os << std::string(depth, '#');
     os << " End of child algorithms of " << algHistory->name() << "\n";
 
-    if (boost::next(iter) == m_historyItems.end() ||
-        !boost::next(iter)->isUnrolled()) {
+    if (boost::next(iter) == m_historyItems.end() || !boost::next(iter)->isUnrolled()) {
 
       if (m_timestampCommands) {
         os << " # " << algHistory->executionDate().toISO8601String();
@@ -100,16 +93,14 @@ void ScriptBuilder::writeHistoryToStream(
   } else {
     // create the string for this algorithm if not found to be in the ignore
     // list
-    if (!(std::find(m_algsToIgnore.begin(), m_algsToIgnore.end(),
-                    algHistory->name()) != m_algsToIgnore.end())) {
+    if (!(std::find(m_algsToIgnore.begin(), m_algsToIgnore.end(), algHistory->name()) != m_algsToIgnore.end())) {
       createStringForAlg(os, algHistory);
     }
   }
 }
 
-void ScriptBuilder::createStringForAlg(
-    std::ostringstream &os,
-    std::shared_ptr<const Mantid::API::AlgorithmHistory> &algHistory) {
+void ScriptBuilder::createStringForAlg(std::ostringstream &os,
+                                       std::shared_ptr<const Mantid::API::AlgorithmHistory> &algHistory) {
   os << buildAlgorithmString(*algHistory);
   if (m_timestampCommands) {
     os << " # " << algHistory->executionDate().toISO8601String();
@@ -138,13 +129,10 @@ void ScriptBuilder::createStringForAlg(
  *items
  * @param depth :: count of how far we've recursed into the history
  */
-void ScriptBuilder::buildChildren(
-    std::ostringstream &os, std::vector<HistoryItem>::const_iterator &iter,
-    int depth) {
+void ScriptBuilder::buildChildren(std::ostringstream &os, std::vector<HistoryItem>::const_iterator &iter, int depth) {
   size_t numChildren = iter->numberOfChildren();
   ++iter; // move to first child
-  for (size_t i = 0; i < numChildren && iter != m_historyItems.end();
-       ++i, ++iter) {
+  for (size_t i = 0; i < numChildren && iter != m_historyItems.end(); ++i, ++iter) {
     writeHistoryToStream(os, iter, depth);
   }
   --iter;
@@ -156,8 +144,7 @@ void ScriptBuilder::buildChildren(
  * @param algHistory :: pointer to an algorithm history object
  * @returns std::string to run this algorithm
  */
-const std::string
-ScriptBuilder::buildCommentString(const AlgorithmHistory &algHistory) {
+const std::string ScriptBuilder::buildCommentString(const AlgorithmHistory &algHistory) {
   std::ostringstream comment;
   const std::string name = algHistory.name();
   if (name == COMMENT_ALG) {
@@ -177,8 +164,7 @@ ScriptBuilder::buildCommentString(const AlgorithmHistory &algHistory) {
  * @param algHistory :: pointer to an algorithm history object
  * @returns std::string to run this algorithm
  */
-const std::string
-ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
+const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
   std::ostringstream properties;
   const std::string name = algHistory.name();
   std::string prop;
@@ -190,8 +176,7 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
 
   try {
     // create a fresh version of the algorithm - unmanaged
-    auto algFresh = AlgorithmManager::Instance().createUnmanaged(
-        name, algHistory.version());
+    auto algFresh = AlgorithmManager::Instance().createUnmanaged(name, algHistory.version());
     algFresh->initialize();
 
     const auto &propsFresh = algFresh->getProperties();
@@ -213,8 +198,7 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
     }
 
   } catch (std::exception &) {
-    g_log.error() << "Could not create a fresh version of " << name
-                  << " version " << algHistory.version() << "\n";
+    g_log.error() << "Could not create a fresh version of " << name << " version " << algHistory.version() << "\n";
   }
 
   for (auto &propIter : props) {
@@ -252,8 +236,7 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
   }
 
   std::string historyEntry = name + "(" + propStr + ")";
-  historyEntry.erase(boost::remove_if(historyEntry, boost::is_any_of("\n\r")),
-                     historyEntry.end());
+  historyEntry.erase(boost::remove_if(historyEntry, boost::is_any_of("\n\r")), historyEntry.end());
   return historyEntry;
 }
 
@@ -264,17 +247,15 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
  * @param algName :: reference to the algorithm that the property is from's name
  * @returns std::string for this property
  */
-const std::string ScriptBuilder::buildPropertyString(
-    const Mantid::Kernel::PropertyHistory &propHistory,
-    const std::string &algName) {
+const std::string ScriptBuilder::buildPropertyString(const Mantid::Kernel::PropertyHistory &propHistory,
+                                                     const std::string &algName) {
   using Mantid::Kernel::Direction;
 
   // If the property is to be ignored then return with an empty string
-  if (std::find_if(
-          m_propertiesToIgnore.begin(), m_propertiesToIgnore.end(),
-          [&propHistory, algName](std::vector<std::string> &c) -> bool {
-            return algName == c[0] && propHistory.name() == c[1];
-          }) != m_propertiesToIgnore.end()) {
+  if (std::find_if(m_propertiesToIgnore.begin(), m_propertiesToIgnore.end(),
+                   [&propHistory, algName](std::vector<std::string> &c) -> bool {
+                     return algName == c[0] && propHistory.name() == c[1];
+                   }) != m_propertiesToIgnore.end()) {
     return "";
   }
 
@@ -285,13 +266,11 @@ const std::string ScriptBuilder::buildPropertyString(
   // No need to specify value for default properties
   if (!propHistory.isDefault()) {
     // Do not give values to output properties other than workspace properties
-    if (find(nonWorkspaceTypes.begin(), nonWorkspaceTypes.end(),
-             propHistory.type()) != nonWorkspaceTypes.end() &&
+    if (find(nonWorkspaceTypes.begin(), nonWorkspaceTypes.end(), propHistory.type()) != nonWorkspaceTypes.end() &&
         propHistory.direction() == Direction::Output) {
       // If algs are to be ignored (Common use case is project recovery) ignore
       if (m_algsToIgnore.size() == 0) {
-        g_log.debug() << "Ignoring property " << propHistory.name()
-                      << " of type " << propHistory.type() << '\n';
+        g_log.debug() << "Ignoring property " << propHistory.name() << " of type " << propHistory.type() << '\n';
       }
       // Handle numerical properties
     } else if (propHistory.type() == "number") {

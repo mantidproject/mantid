@@ -38,20 +38,14 @@ public:
 
 protected:
   void setPeakFunction(const std::string &peakFunction);
-  PoldiPeakCollection_sptr getInitializedPeakCollection(
-      const DataObjects::TableWorkspace_sptr &peakTable) const;
+  PoldiPeakCollection_sptr getInitializedPeakCollection(const DataObjects::TableWorkspace_sptr &peakTable) const;
 
   API::IFunction_sptr getPeakProfile(const PoldiPeak_sptr &poldiPeak) const;
-  void
-  setValuesFromProfileFunction(const PoldiPeak_sptr &poldiPeak,
-                               const API::IFunction_sptr &fittedFunction) const;
-  double
-  getFwhmWidthRelation(const API::IPeakFunction_sptr &peakFunction) const;
+  void setValuesFromProfileFunction(const PoldiPeak_sptr &poldiPeak, const API::IFunction_sptr &fittedFunction) const;
+  double getFwhmWidthRelation(const API::IPeakFunction_sptr &peakFunction) const;
 
-  API::IAlgorithm_sptr
-  getFitAlgorithm(const DataObjects::Workspace2D_sptr &dataWorkspace,
-                  const PoldiPeak_sptr &peak,
-                  const API::IFunction_sptr &profile);
+  API::IAlgorithm_sptr getFitAlgorithm(const DataObjects::Workspace2D_sptr &dataWorkspace, const PoldiPeak_sptr &peak,
+                                       const API::IFunction_sptr &profile);
 
   PoldiPeakCollection_sptr m_peaks;
   std::string m_profileTemplate;

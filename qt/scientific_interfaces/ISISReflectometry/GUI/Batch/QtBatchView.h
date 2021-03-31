@@ -23,8 +23,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtBatchView : public QWidget,
-                                                   public IBatchView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtBatchView : public QWidget, public IBatchView {
   Q_OBJECT
 public:
   explicit QtBatchView(QWidget *parent);
@@ -36,8 +35,7 @@ public:
   IExperimentView *experiment() const override;
   IInstrumentView *instrument() const override;
   void clearAlgorithmQueue() override;
-  void setAlgorithmQueue(
-      std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms) override;
+  void setAlgorithmQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms) override;
   void executeAlgorithmQueue() override;
   void cancelAlgorithmQueue() override;
 
@@ -46,8 +44,7 @@ private slots:
   void onBatchCancelled();
   void onAlgorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
   void onAlgorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
-  void onAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
-                        const std::string &errorMessage);
+  void onAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm, const std::string &errorMessage);
 
 private:
   void initLayout();

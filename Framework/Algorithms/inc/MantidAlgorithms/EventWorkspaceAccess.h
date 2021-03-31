@@ -11,10 +11,8 @@
 namespace Mantid {
 namespace Algorithms {
 struct EventWorkspaceAccess {
-  static decltype(
-      std::mem_fn((DataObjects::EventList &
-                   (DataObjects::EventWorkspace::*)(const std::size_t)) &
-                  DataObjects::EventWorkspace::getSpectrum)) eventList;
+  static decltype(std::mem_fn((DataObjects::EventList & (DataObjects::EventWorkspace::*)(const std::size_t)) &
+                              DataObjects::EventWorkspace::getSpectrum)) eventList;
 };
 } // namespace Algorithms
 } // namespace Mantid

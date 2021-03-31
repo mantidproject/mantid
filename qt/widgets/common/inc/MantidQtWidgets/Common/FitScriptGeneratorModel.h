@@ -28,11 +28,10 @@ namespace MantidWidgets {
  */
 struct FitDomain {
 
-  FitDomain(std::string const &prefix, std::string const &workspaceName,
-            WorkspaceIndex workspaceIndex, double startX, double endX);
+  FitDomain(std::string const &prefix, std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX,
+            double endX);
 
-  [[nodiscard]] bool isSameDomain(std::string const &workspaceName,
-                                  WorkspaceIndex workspaceIndex) const;
+  [[nodiscard]] bool isSameDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) const;
 
   std::string m_multiDomainFunctionPrefix;
   std::string m_workspaceName;
@@ -46,60 +45,42 @@ struct FitDomain {
  * function relating to this domain data. This data is used to generate a python
  * script for complex Mantid fitting.
  */
-class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorModel
-    : public IFitScriptGeneratorModel {
+class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorModel : public IFitScriptGeneratorModel {
 public:
   FitScriptGeneratorModel();
   ~FitScriptGeneratorModel();
 
-  void removeWorkspaceDomain(std::string const &workspaceName,
-                             WorkspaceIndex workspaceIndex) override;
-  void addWorkspaceDomain(std::string const &workspaceName,
-                          WorkspaceIndex workspaceIndex, double startX,
+  void removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) override;
+  void addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX,
                           double endX) override;
 
-  [[nodiscard]] bool isStartXValid(std::string const &workspaceName,
-                                   WorkspaceIndex workspaceIndex,
+  [[nodiscard]] bool isStartXValid(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                                    double startX) const override;
-  [[nodiscard]] bool isEndXValid(std::string const &workspaceName,
-                                 WorkspaceIndex workspaceIndex,
+  [[nodiscard]] bool isEndXValid(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                                  double endX) const override;
 
-  void updateStartX(std::string const &workspaceName,
-                    WorkspaceIndex workspaceIndex, double startX) override;
-  void updateEndX(std::string const &workspaceName,
-                  WorkspaceIndex workspaceIndex, double endX) override;
+  void updateStartX(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX) override;
+  void updateEndX(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double endX) override;
 
 private:
-  void removeWorkspaceDomain(
-      std::size_t const &removeIndex,
-      std::vector<FitDomain>::const_iterator const &removeIter);
-  void addWorkspaceDomain(std::string const &prefix,
-                          std::string const &workspaceName,
-                          WorkspaceIndex workspaceIndex, double startX,
-                          double endX);
+  void removeWorkspaceDomain(std::size_t const &removeIndex, std::vector<FitDomain>::const_iterator const &removeIter);
+  void addWorkspaceDomain(std::string const &prefix, std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+                          double startX, double endX);
 
-  [[nodiscard]] std::pair<double, double>
-  xLimits(std::string const &workspaceName,
-          WorkspaceIndex workspaceIndex) const;
-  [[nodiscard]] std::pair<double, double>
-  xLimits(Mantid::API::MatrixWorkspace_const_sptr const &workspace,
-          WorkspaceIndex workspaceIndex) const;
+  [[nodiscard]] std::pair<double, double> xLimits(std::string const &workspaceName,
+                                                  WorkspaceIndex workspaceIndex) const;
+  [[nodiscard]] std::pair<double, double> xLimits(Mantid::API::MatrixWorkspace_const_sptr const &workspace,
+                                                  WorkspaceIndex workspaceIndex) const;
 
-  [[nodiscard]] std::size_t
-  findDomainIndex(std::string const &workspaceName,
-                  WorkspaceIndex workspaceIndex) const;
-  [[nodiscard]] std::vector<FitDomain>::const_iterator
-  findWorkspaceDomain(std::string const &workspaceName,
-                      WorkspaceIndex workspaceIndex) const;
-  [[nodiscard]] bool hasWorkspaceDomain(std::string const &workspaceName,
-                                        WorkspaceIndex workspaceIndex) const;
+  [[nodiscard]] std::size_t findDomainIndex(std::string const &workspaceName, WorkspaceIndex workspaceIndex) const;
+  [[nodiscard]] std::vector<FitDomain>::const_iterator findWorkspaceDomain(std::string const &workspaceName,
+                                                                           WorkspaceIndex workspaceIndex) const;
+  [[nodiscard]] bool hasWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) const;
 
   void removeCompositeAtPrefix(std::string const &prefix);
 
   void addEmptyCompositeAtPrefix(std::string const &prefix);
-  void addEmptyCompositeAtPrefix(std::string const &compositePrefix,
-                                 std::size_t const &compositeIndex);
+  void addEmptyCompositeAtPrefix(std::string const &compositePrefix, std::size_t const &compositeIndex);
 
   void removeCompositeAtIndex(std::size_t const &compositeIndex);
 
@@ -107,9 +88,7 @@ private:
 
   [[nodiscard]] std::string nextAvailablePrefix() const;
 
-  [[nodiscard]] inline std::size_t numberOfDomains() const noexcept {
-    return m_fitDomains.size();
-  }
+  [[nodiscard]] inline std::size_t numberOfDomains() const noexcept { return m_fitDomains.size(); }
 
   std::vector<FitDomain> m_fitDomains;
   Mantid::API::MultiDomainFunction_sptr m_function;

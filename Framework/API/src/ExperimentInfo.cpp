@@ -67,8 +67,7 @@ Kernel::Logger g_log("ExperimentInfo");
 
 /** Constructor
  */
-ExperimentInfo::ExperimentInfo()
-    : m_parmap(new ParameterMap()), sptr_instrument(new Instrument()) {
+ExperimentInfo::ExperimentInfo() : m_parmap(new ParameterMap()), sptr_instrument(new Instrument()) {
   m_parmap->setInstrument(sptr_instrument.get());
 }
 
@@ -104,9 +103,7 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
 
 /** Clone this ExperimentInfo class into a new one
  */
-ExperimentInfo *ExperimentInfo::cloneExperimentInfo() const {
-  return new ExperimentInfo(*this);
-}
+ExperimentInfo *ExperimentInfo::cloneExperimentInfo() const { return new ExperimentInfo(*this); }
 
 /// @returns A human-readable description of the object
 const std::string ExperimentInfo::toString() const {
@@ -123,8 +120,7 @@ const std::string ExperimentInfo::toString() const {
   const auto instName = inst->getName();
   out << "Instrument: ";
   if (!instName.empty()) {
-    out << instName << " ("
-        << inst->getValidFromDate().toFormattedString("%Y-%b-%d") << " to "
+    out << instName << " (" << inst->getValidFromDate().toFormattedString("%Y-%b-%d") << " to "
         << inst->getValidToDate().toFormattedString("%Y-%b-%d") << ")";
     const auto instFilename = inst->getFilename();
     if (!instFilename.empty()) {
@@ -137,8 +133,7 @@ const std::string ExperimentInfo::toString() const {
   out << "\n";
 
   // parameter files loaded
-  auto paramFileVector =
-      this->constInstrumentParameters().getParameterFilenames();
+  auto paramFileVector = this->constInstrumentParameters().getParameterFilenames();
   for (auto &itFilename : paramFileVector) {
     out << "Parameters from: " << itFilename;
     out << "\n";
@@ -152,15 +147,13 @@ const std::string ExperimentInfo::toString() const {
   if (runEnd.empty())
     runEnd = msgNA;
   out << "Run start: " << runStart << "\n";
-  out << "Run end:  " << runEnd
-      << "\n"; // note extra space for pseudo/approx-alignment
+  out << "Run end:  " << runEnd << "\n"; // note extra space for pseudo/approx-alignment
 
   if (this->sample().hasOrientedLattice()) {
     const Geometry::OrientedLattice &latt = this->sample().getOrientedLattice();
-    out << "Sample: a " << std::fixed << std::setprecision(1) << latt.a()
-        << ", b " << latt.b() << ", c " << latt.c();
-    out << "; alpha " << std::fixed << std::setprecision(0) << latt.alpha()
-        << ", beta " << latt.beta() << ", gamma " << latt.gamma();
+    out << "Sample: a " << std::fixed << std::setprecision(1) << latt.a() << ", b " << latt.b() << ", c " << latt.c();
+    out << "; alpha " << std::fixed << std::setprecision(0) << latt.alpha() << ", beta " << latt.beta() << ", gamma "
+        << latt.gamma();
     out << "\n";
   }
   return out.str();
@@ -168,8 +161,7 @@ const std::string ExperimentInfo::toString() const {
 
 // Helpers for setInstrument and getInstrument
 namespace {
-void checkDetectorInfoSize(const Instrument &instr,
-                           const Geometry::DetectorInfo &detInfo) {
+void checkDetectorInfoSize(const Instrument &instr, const Geometry::DetectorInfo &detInfo) {
   const auto numDets = instr.getNumberDetectors();
   if (numDets != detInfo.size())
     throw std::runtime_error("ExperimentInfo: size mismatch between "
@@ -188,8 +180,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   // instrument may now suddenly be valid, so we have to reinitialize the
   // detector grouping. Also the index corresponding to specific IDs may have
   // changed.
-  if (sptr_instrument !=
-      (instr->isParametrized() ? instr->baseInstrument() : instr))
+  if (sptr_instrument != (instr->isParametrized() ? instr->baseInstrument() : instr))
     invalidateAllSpectrumDefinitions();
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
@@ -212,8 +203,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
   populateIfNotLoaded();
   checkDetectorInfoSize(*sptr_instrument, detectorInfo());
-  return Geometry::ParComponentFactory::createInstrument(sptr_instrument,
-                                                         m_parmap);
+  return Geometry::ParComponentFactory::createInstrument(sptr_instrument, m_parmap);
 }
 
 /**  Returns a new copy of the instrument parameters
@@ -235,8 +225,7 @@ const Geometry::ParameterMap &ExperimentInfo::instrumentParameters() const {
 /**  Returns a const reference to the instrument parameters.
  *    @return a const reference to the instrument ParameterMap.
  */
-const Geometry::ParameterMap &
-ExperimentInfo::constInstrumentParameters() const {
+const Geometry::ParameterMap &ExperimentInfo::constInstrumentParameters() const {
   populateIfNotLoaded();
   return *m_parmap;
 }
@@ -256,16 +245,14 @@ struct RTP {
 };
 
 struct ParameterValue {
-  ParameterValue(const Geometry::XMLInstrumentParameter &paramInfo,
-                 const API::Run &run)
+  ParameterValue(const Geometry::XMLInstrumentParameter &paramInfo, const API::Run &run)
       : info(paramInfo), runData(run) {}
 
   operator double() {
     if (info.m_logfileID.empty())
       return boost::lexical_cast<double>(info.m_value);
     else
-      return info.createParamValue(
-          runData.getTimeSeriesProperty<double>(info.m_logfileID));
+      return info.createParamValue(runData.getTimeSeriesProperty<double>(info.m_logfileID));
   }
   operator int() { return boost::lexical_cast<int>(info.m_value); }
   operator bool() {
@@ -283,35 +270,26 @@ struct ParameterValue {
 } // namespace
 
 namespace {
-bool isPositionParameter(const std::string &name) {
-  return ParameterMap::pos() == name;
-}
+bool isPositionParameter(const std::string &name) { return ParameterMap::pos() == name; }
 
-bool isRotationParameter(const std::string &name) {
-  return ParameterMap::rot() == name;
-}
+bool isRotationParameter(const std::string &name) { return ParameterMap::rot() == name; }
 
-bool isScaleParameter(const std::string &name) {
-  return (name == "scalex" || name == "scaley");
-}
+bool isScaleParameter(const std::string &name) { return (name == "scalex" || name == "scaley"); }
 
 bool isRedundantPosOrRot(const std::string &name) {
   // Check size first as a small optimization.
   return (name.size() == 4) &&
-         (name == "posx" || name == "posy" || name == "posz" ||
-          name == "rotx" || name == "roty" || name == "rotz");
+         (name == "posx" || name == "posy" || name == "posz" || name == "rotx" || name == "roty" || name == "rotz");
 }
 
-template <class T>
-T getParam(const std::string &paramType, const std::string &paramValue) {
+template <class T> T getParam(const std::string &paramType, const std::string &paramValue) {
   const std::string name = "dummy";
   auto param = ParameterFactory::create(paramType, name);
   param->fromString(paramValue);
   return param->value<T>();
 }
 
-void updatePosition(ComponentInfo &componentInfo, const IComponent *component,
-                    const V3D &newRelPos) {
+void updatePosition(ComponentInfo &componentInfo, const IComponent *component, const V3D &newRelPos) {
   const auto compIndex = componentInfo.indexOf(component->getComponentID());
   V3D position = newRelPos;
   if (componentInfo.hasParent(compIndex)) {
@@ -322,8 +300,7 @@ void updatePosition(ComponentInfo &componentInfo, const IComponent *component,
   componentInfo.setPosition(compIndex, position);
 }
 
-void updateRotation(ComponentInfo &componentInfo, const IComponent *component,
-                    const Quat &newRelRot) {
+void updateRotation(ComponentInfo &componentInfo, const IComponent *component, const Quat &newRelRot) {
   const auto compIndex = componentInfo.indexOf(component->getComponentID());
 
   auto rotation = newRelRot;
@@ -334,18 +311,15 @@ void updateRotation(ComponentInfo &componentInfo, const IComponent *component,
   componentInfo.setRotation(compIndex, rotation);
 }
 
-void adjustPositionsFromScaleFactor(ComponentInfo &componentInfo,
-                                    const IComponent *component,
-                                    const std::string &paramName,
-                                    double factor) {
+void adjustPositionsFromScaleFactor(ComponentInfo &componentInfo, const IComponent *component,
+                                    const std::string &paramName, double factor) {
   double ScaleX = 1.0;
   double ScaleY = 1.0;
   if (paramName == "scalex")
     ScaleX = factor;
   else
     ScaleY = factor;
-  applyRectangularDetectorScaleToComponentInfo(
-      componentInfo, component->getComponentID(), ScaleX, ScaleY);
+  applyRectangularDetectorScaleToComponentInfo(componentInfo, component->getComponentID(), ScaleX, ScaleY);
 }
 } // namespace
 
@@ -407,16 +381,13 @@ void ExperimentInfo::populateInstrumentParameters() {
         if (rtpValues.haveRadius) {
           V3D pos;
           pos.spherical(rtpValues.radius, rtpValues.theta, rtpValues.phi);
-          paramMapForPosAndRot.addV3D(paramInfo->m_component,
-                                      ParameterMap::pos(), pos);
+          paramMapForPosAndRot.addV3D(paramInfo->m_component, ParameterMap::pos(), pos);
         }
       } else {
-        populateWithParameter(paramMap, paramMapForPosAndRot, paramN,
-                              *paramInfo, runData);
+        populateWithParameter(paramMap, paramMapForPosAndRot, paramN, *paramInfo, runData);
       }
     } catch (std::exception &exc) {
-      g_log.information() << "Unable to add component parameter '"
-                          << nameComp.first << "'. Error: " << exc.what();
+      g_log.information() << "Unable to add component parameter '" << nameComp.first << "'. Error: " << exc.what();
       continue;
     }
   }
@@ -435,9 +406,7 @@ void ExperimentInfo::populateInstrumentParameters() {
   // positions.
   for (const auto &item : paramMap) {
     if (isScaleParameter(item.second->name()))
-      adjustPositionsFromScaleFactor(componentInfo, item.first,
-                                     item.second->name(),
-                                     item.second->value<double>());
+      adjustPositionsFromScaleFactor(componentInfo, item.first, item.second->name(), item.second->value<double>());
   }
   // paramMapForPosAndRot goes out of scope, dropping all position and rotation
   // parameters of detectors (parameters for non-detector components have been
@@ -462,16 +431,13 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
  *
  * For MatrixWorkspace this is equal to getNumberHistograms() (after
  *initialization). */
-size_t ExperimentInfo::numberOfDetectorGroups() const {
-  return m_spectrumDefinitionNeedsUpdate.size();
-}
+size_t ExperimentInfo::numberOfDetectorGroups() const { return m_spectrumDefinitionNeedsUpdate.size(); }
 
 /** Sets the detector grouping for the spectrum with the given `index`.
  *
  * This method should not need to be called explicitly. Groupings are updated
  * automatically when modifying detector IDs in a workspace (via ISpectrum). */
-void ExperimentInfo::setDetectorGrouping(
-    const size_t index, const std::set<detid_t> &detIDs) const {
+void ExperimentInfo::setDetectorGrouping(const size_t index, const std::set<detid_t> &detIDs) const {
   SpectrumDefinition specDef;
   for (const auto detID : detIDs) {
     try {
@@ -492,8 +458,7 @@ void ExperimentInfo::setDetectorGrouping(
  * implementation throws, since no grouping information for update is available
  * when grouping comes from a call to `cacheDetectorGroupings`. This method is
  * overridden in MatrixWorkspace. */
-void ExperimentInfo::updateCachedDetectorGrouping(
-    const size_t /*unused*/) const {
+void ExperimentInfo::updateCachedDetectorGrouping(const size_t /*unused*/) const {
   throw std::runtime_error("ExperimentInfo::updateCachedDetectorGrouping: "
                            "Cannot update -- grouping information not "
                            "available");
@@ -536,9 +501,7 @@ Run &ExperimentInfo::mutableRun() {
 }
 
 /// Set the run object. Use in particular to clear run without copying old run.
-void ExperimentInfo::setSharedRun(Kernel::cow_ptr<Run> run) {
-  m_run = std::move(run);
-}
+void ExperimentInfo::setSharedRun(Kernel::cow_ptr<Run> run) { m_run = std::move(run); }
 
 /// Return the cow ptr of the run
 Kernel::cow_ptr<Run> ExperimentInfo::sharedRun() { return m_run; }
@@ -564,12 +527,10 @@ Kernel::Property *ExperimentInfo::getLog(const std::string &log) const {
   }
   // If the instrument has a parameter with that name then take the value as a
   // log name
-  const std::string logName =
-      constInstrumentParameters().getString(sptr_instrument.get(), log);
+  const std::string logName = constInstrumentParameters().getString(sptr_instrument.get(), log);
   if (logName.empty()) {
-    throw std::invalid_argument(
-        "ExperimentInfo::getLog - No instrument parameter named \"" + log +
-        "\". Cannot access full log name");
+    throw std::invalid_argument("ExperimentInfo::getLog - No instrument parameter named \"" + log +
+                                "\". Cannot access full log name");
   }
   return run().getProperty(logName);
 }
@@ -591,12 +552,10 @@ double ExperimentInfo::getLogAsSingleValue(const std::string &log) const {
   }
   // If the instrument has a parameter with that name then take the value as a
   // log name
-  const std::string logName =
-      constInstrumentParameters().getString(sptr_instrument.get(), log);
+  const std::string logName = constInstrumentParameters().getString(sptr_instrument.get(), log);
   if (logName.empty()) {
-    throw std::invalid_argument(
-        "ExperimentInfo::getLog - No instrument parameter named \"" + log +
-        "\". Cannot access full log name");
+    throw std::invalid_argument("ExperimentInfo::getLog - No instrument parameter named \"" + log +
+                                "\". Cannot access full log name");
   }
   return run().getPropertyAsSingleValue(logName);
 }
@@ -640,10 +599,8 @@ Kernel::DeltaEMode::Type ExperimentInfo::getEMode() const {
   std::string emodeStr;
   if (run().hasProperty(emodeTag)) {
     emodeStr = run().getPropertyValueAsType<std::string>(emodeTag);
-  } else if (sptr_instrument && constInstrumentParameters().contains(
-                                    sptr_instrument.get(), emodeTag)) {
-    Geometry::Parameter_sptr param =
-        constInstrumentParameters().get(sptr_instrument.get(), emodeTag);
+  } else if (sptr_instrument && constInstrumentParameters().contains(sptr_instrument.get(), emodeTag)) {
+    Geometry::Parameter_sptr param = constInstrumentParameters().get(sptr_instrument.get(), emodeTag);
     emodeStr = param->asString();
   } else {
     return Kernel::DeltaEMode::Elastic;
@@ -672,31 +629,27 @@ double ExperimentInfo::getEFixed(const detid_t detID) const {
  * required for Indirect mode
  * @return The current efixed value
  */
-double ExperimentInfo::getEFixed(
-    const std::shared_ptr<const Geometry::IDetector> &detector) const {
+double ExperimentInfo::getEFixed(const std::shared_ptr<const Geometry::IDetector> &detector) const {
   populateIfNotLoaded();
   Kernel::DeltaEMode::Type emode = getEMode();
   if (emode == Kernel::DeltaEMode::Direct) {
     try {
       return this->run().getPropertyValueAsType<double>("Ei");
     } catch (Kernel::Exception::NotFoundError &) {
-      throw std::runtime_error(
-          "Experiment logs do not contain an Ei value. Have you run GetEi?");
+      throw std::runtime_error("Experiment logs do not contain an Ei value. Have you run GetEi?");
     }
   } else if (emode == Kernel::DeltaEMode::Indirect) {
     if (!detector)
       throw std::runtime_error("ExperimentInfo::getEFixed - Indirect mode "
                                "efixed requested without a valid detector.");
-    Parameter_sptr par =
-        constInstrumentParameters().getRecursive(detector.get(), "Efixed");
+    Parameter_sptr par = constInstrumentParameters().getRecursive(detector.get(), "Efixed");
     if (par) {
       return par->value<double>();
     } else {
       std::vector<double> efixedVec = detector->getNumberParameter("Efixed");
       if (efixedVec.empty()) {
         int detid = detector->getID();
-        IDetector_const_sptr detectorSingle =
-            getInstrument()->getDetector(detid);
+        IDetector_const_sptr detectorSingle = getInstrument()->getDetector(detid);
         efixedVec = detectorSingle->getNumberParameter("Efixed");
       }
       if (!efixedVec.empty()) {
@@ -808,8 +761,7 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
       cacheDefaultDetectorGrouping();
     if (!m_spectrumInfoWrapper) {
       static_cast<void>(detectorInfo());
-      m_spectrumInfoWrapper = std::make_unique<SpectrumInfo>(
-          *m_spectrumInfo, *this, m_parmap->mutableDetectorInfo());
+      m_spectrumInfoWrapper = std::make_unique<SpectrumInfo>(*m_spectrumInfo, *this, m_parmap->mutableDetectorInfo());
     }
   }
   // Rebuild any spectrum definitions that are out of date. Accessing
@@ -829,12 +781,10 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
   // is not possible for a read-only workspace. If the workspace is write-locked
   // detector IDs in ISpectrum may change, but the write-lock by `Algorithm`
   // guarantees that there is no concurrent reader and thus updating is safe.
-  if (std::any_of(m_spectrumDefinitionNeedsUpdate.cbegin(),
-                  m_spectrumDefinitionNeedsUpdate.cend(),
+  if (std::any_of(m_spectrumDefinitionNeedsUpdate.cbegin(), m_spectrumDefinitionNeedsUpdate.cend(),
                   [](char i) { return i == 1; })) {
     std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
-    if (std::any_of(m_spectrumDefinitionNeedsUpdate.cbegin(),
-                    m_spectrumDefinitionNeedsUpdate.cend(),
+    if (std::any_of(m_spectrumDefinitionNeedsUpdate.cbegin(), m_spectrumDefinitionNeedsUpdate.cend(),
                     [](char i) { return i == 1; })) {
       auto size = static_cast<int64_t>(m_spectrumInfoWrapper->size());
 #pragma omp parallel for
@@ -849,24 +799,17 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
 /** Return a non-const reference to the SpectrumInfo object. Not thread safe.
  */
 SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
-  return const_cast<SpectrumInfo &>(
-      static_cast<const ExperimentInfo &>(*this).spectrumInfo());
+  return const_cast<SpectrumInfo &>(static_cast<const ExperimentInfo &>(*this).spectrumInfo());
 }
 
-const Geometry::ComponentInfo &ExperimentInfo::componentInfo() const {
-  return m_parmap->componentInfo();
-}
+const Geometry::ComponentInfo &ExperimentInfo::componentInfo() const { return m_parmap->componentInfo(); }
 
-ComponentInfo &ExperimentInfo::mutableComponentInfo() {
-  return m_parmap->mutableComponentInfo();
-}
+ComponentInfo &ExperimentInfo::mutableComponentInfo() { return m_parmap->mutableComponentInfo(); }
 
 /// Sets the SpectrumDefinition for all spectra.
-void ExperimentInfo::setSpectrumDefinitions(
-    Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions) {
+void ExperimentInfo::setSpectrumDefinitions(Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions) {
   if (spectrumDefinitions) {
-    m_spectrumInfo = std::make_unique<Beamline::SpectrumInfo>(
-        std::move(spectrumDefinitions));
+    m_spectrumInfo = std::make_unique<Beamline::SpectrumInfo>(std::move(spectrumDefinitions));
     m_spectrumDefinitionNeedsUpdate.resize(0);
     m_spectrumDefinitionNeedsUpdate.resize(m_spectrumInfo->size(), 0);
   } else {
@@ -888,8 +831,7 @@ void ExperimentInfo::invalidateSpectrumDefinition(const size_t index) {
   m_spectrumDefinitionNeedsUpdate.at(index) = 1;
 }
 
-void ExperimentInfo::updateSpectrumDefinitionIfNecessary(
-    const size_t index) const {
+void ExperimentInfo::updateSpectrumDefinitionIfNecessary(const size_t index) const {
   if (m_spectrumDefinitionNeedsUpdate.at(index) != 0)
     updateCachedDetectorGrouping(index);
 }
@@ -919,16 +861,14 @@ void ExperimentInfo::cacheDefaultDetectorGrouping() const {
 /// Sets flags for all spectrum definitions indicating that they need to be
 /// updated.
 void ExperimentInfo::invalidateAllSpectrumDefinitions() {
-  std::fill(m_spectrumDefinitionNeedsUpdate.begin(),
-            m_spectrumDefinitionNeedsUpdate.end(), 1);
+  std::fill(m_spectrumDefinitionNeedsUpdate.begin(), m_spectrumDefinitionNeedsUpdate.end(), 1);
 }
 
 /** Save the object to an open NeXus file.
  * @param file :: open NeXus file
  * @param saveLegacyInstrument : defaults to true, otherwise not in file output
  */
-void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file,
-                                             bool saveLegacyInstrument) const {
+void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file, bool saveLegacyInstrument) const {
   Instrument_const_sptr instrument = getInstrument();
   if (saveLegacyInstrument) {
     instrument->saveNexus(file, "instrument");
@@ -943,9 +883,7 @@ void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file,
  * @param saveSample :: option to save Sample
  * @param saveLogs :: option to save Logs
  */
-void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file,
-                                             bool saveInstrument,
-                                             bool saveSample,
+void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file, bool saveInstrument, bool saveSample,
                                              bool saveLogs) const {
   Instrument_const_sptr instrument = getInstrument();
 
@@ -985,8 +923,7 @@ void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file) {
  * file and cannot
  *                                  be loaded from the IDF.
  */
-void ExperimentInfo::loadExperimentInfoNexus(const std::string &nxFilename,
-                                             ::NeXus::File *file,
+void ExperimentInfo::loadExperimentInfoNexus(const std::string &nxFilename, ::NeXus::File *file,
                                              std::string &parameterStr) {
   // load sample and log info
   loadSampleAndLogInfoNexus(file);
@@ -1004,8 +941,7 @@ void ExperimentInfo::loadExperimentInfoNexus(const std::string &nxFilename,
  * file and cannot
  *                                  be loaded from the IDF.
  */
-void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename,
-                                             ::NeXus::File *file,
+void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename, ::NeXus::File *file,
                                              std::string &parameterStr) {
 
   // Open instrument group
@@ -1035,8 +971,7 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename,
  * file and cannot
  *                                  be loaded from the IDF.
  */
-void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename,
-                                             ::NeXus::File *file) {
+void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename, ::NeXus::File *file) {
 
   // Open instrument group
   file->openGroup("instrument", "NXinstrument");
@@ -1059,9 +994,8 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename,
  * @param[out] instrumentXml  :: XML string of embedded instrument definition or
  * empty if not found
  */
-void ExperimentInfo::loadEmbeddedInstrumentInfoNexus(
-    ::NeXus::File *file, std::string &instrumentName,
-    std::string &instrumentXml) {
+void ExperimentInfo::loadEmbeddedInstrumentInfoNexus(::NeXus::File *file, std::string &instrumentName,
+                                                     std::string &instrumentXml) {
 
   file->readData("name", instrumentName);
 
@@ -1083,8 +1017,7 @@ void ExperimentInfo::loadEmbeddedInstrumentInfoNexus(
  * @param instrumentXml  :: XML string of instrument or empty to indicate load
  * of instrument definition file
  */
-void ExperimentInfo::setInstumentFromXML(const std::string &nxFilename,
-                                         std::string &instrumentName,
+void ExperimentInfo::setInstumentFromXML(const std::string &nxFilename, std::string &instrumentName,
                                          std::string &instrumentXml) {
 
   instrumentXml = Strings::strip(instrumentXml);
@@ -1099,16 +1032,14 @@ void ExperimentInfo::setInstumentFromXML(const std::string &nxFilename,
   } else {
     // XML was not included or was empty
     // Use the instrument name to find the file
-    instrumentFilename = InstrumentFileFinder::getInstrumentFilename(
-        instrumentName, getWorkspaceStartDate());
+    instrumentFilename = InstrumentFileFinder::getInstrumentFilename(instrumentName, getWorkspaceStartDate());
     // And now load the contents
     instrumentXml = loadInstrumentXML(instrumentFilename);
   }
 
   // ---------- Now parse that XML to make the instrument -------------------
   if (!instrumentXml.empty() && !instrumentName.empty()) {
-    InstrumentDefinitionParser parser(instrumentFilename, instrumentName,
-                                      instrumentXml);
+    InstrumentDefinitionParser parser(instrumentFilename, instrumentName, instrumentXml);
 
     std::string instrumentNameMangled = parser.getMangledName();
     Instrument_sptr instr;
@@ -1157,17 +1088,14 @@ std::string ExperimentInfo::loadInstrumentXML(const std::string &filename) {
  *             Feed that to ExperimentInfo::readParameterMap() after the
  * instrument is done.
  */
-void ExperimentInfo::loadInstrumentParametersNexus(::NeXus::File *file,
-                                                   std::string &parameterStr) {
+void ExperimentInfo::loadInstrumentParametersNexus(::NeXus::File *file, std::string &parameterStr) {
   try {
     file->openGroup("instrument_parameter_map", "NXnote");
     file->readData("data", parameterStr);
     file->closeGroup();
   } catch (NeXus::Exception &ex) {
-    g_log.debug(std::string("Unable to load instrument_parameter_map: ") +
-                ex.what());
-    g_log.information(
-        "Parameter map entry missing from NeXus file. Continuing without it.");
+    g_log.debug(std::string("Unable to load instrument_parameter_map: ") + ex.what());
+    g_log.information("Parameter map entry missing from NeXus file. Continuing without it.");
   }
 }
 
@@ -1227,8 +1155,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       auto value = getParam<bool>(paramType, paramValue);
       if (value) {
         // Do not add masking to ParameterMap, it is stored in DetectorInfo
-        const auto componentIndex =
-            componentInfo.indexOf(comp->getComponentID());
+        const auto componentIndex = componentInfo.indexOf(comp->getComponentID());
         if (!componentInfo.isDetector(componentIndex)) {
           throw std::runtime_error("Found masking for a non-detector "
                                    "component. This is not possible");
@@ -1255,8 +1182,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       // Special case RectangularDetector: Parameters scalex and scaley affect
       // pixel positions, but we must also add the parameter below.
       if (isScaleParameter(paramName))
-        adjustPositionsFromScaleFactor(componentInfo, comp, paramName,
-                                       getParam<double>(paramType, paramValue));
+        adjustPositionsFromScaleFactor(componentInfo, comp, paramName, getParam<double>(paramType, paramValue));
       pmap.add(paramType, comp, paramName, paramValue);
     }
   }
@@ -1272,10 +1198,9 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
  * @param paramInfo A reference to the object describing this parameter
  * @param runData A reference to the run object, which stores log value entries
  */
-void ExperimentInfo::populateWithParameter(
-    Geometry::ParameterMap &paramMap,
-    Geometry::ParameterMap &paramMapForPosAndRot, const std::string &name,
-    const Geometry::XMLInstrumentParameter &paramInfo, const Run &runData) {
+void ExperimentInfo::populateWithParameter(Geometry::ParameterMap &paramMap,
+                                           Geometry::ParameterMap &paramMapForPosAndRot, const std::string &name,
+                                           const Geometry::XMLInstrumentParameter &paramInfo, const Run &runData) {
   const std::string &category = paramInfo.m_type;
   ParameterValue paramValue(paramInfo,
                             runData); // Defines implicit conversion operator
@@ -1290,37 +1215,28 @@ void ExperimentInfo::populateWithParameter(
     if (value) {
       // Do not add masking to ParameterMap, it is stored in DetectorInfo
 
-      const auto componentIndex =
-          componentInfo().indexOf(paramInfo.m_component->getComponentID());
+      const auto componentIndex = componentInfo().indexOf(paramInfo.m_component->getComponentID());
       if (!componentInfo().isDetector(componentIndex))
-        throw std::runtime_error(
-            "Found masking for a non-detector component. This is not possible");
+        throw std::runtime_error("Found masking for a non-detector component. This is not possible");
       mutableDetectorInfo().setMasked(componentIndex,
                                       paramValue); // all detector indexes have
                                                    // same component index
                                                    // (guarantee)
     }
   } else if (name == "x" || name == "y" || name == "z") {
-    paramMapForPosAndRot.addPositionCoordinate(paramInfo.m_component, name,
-                                               paramValue);
-  } else if (name == "rot" || name == "rotx" || name == "roty" ||
-             name == "rotz") {
+    paramMapForPosAndRot.addPositionCoordinate(paramInfo.m_component, name, paramValue);
+  } else if (name == "rot" || name == "rotx" || name == "roty" || name == "rotz") {
     // Effectively this is dropping any parameters named 'rot'.
-    paramMapForPosAndRot.addRotationParam(paramInfo.m_component, name,
-                                          paramValue, pDescription);
+    paramMapForPosAndRot.addRotationParam(paramInfo.m_component, name, paramValue, pDescription);
   } else if (category == "fitting") {
     std::ostringstream str;
-    str << paramInfo.m_value << " , " << paramInfo.m_fittingFunction << " , "
-        << name << " , " << paramInfo.m_constraint[0] << " , "
-        << paramInfo.m_constraint[1] << " , " << paramInfo.m_penaltyFactor
-        << " , " << paramInfo.m_tie << " , " << paramInfo.m_formula << " , "
-        << paramInfo.m_formulaUnit << " , " << paramInfo.m_resultUnit << " , "
-        << (*(paramInfo.m_interpolation));
-    paramMap.add("fitting", paramInfo.m_component, name, str.str(),
-                 pDescription);
+    str << paramInfo.m_value << " , " << paramInfo.m_fittingFunction << " , " << name << " , "
+        << paramInfo.m_constraint[0] << " , " << paramInfo.m_constraint[1] << " , " << paramInfo.m_penaltyFactor
+        << " , " << paramInfo.m_tie << " , " << paramInfo.m_formula << " , " << paramInfo.m_formulaUnit << " , "
+        << paramInfo.m_resultUnit << " , " << (*(paramInfo.m_interpolation));
+    paramMap.add("fitting", paramInfo.m_component, name, str.str(), pDescription);
   } else if (category == "string") {
-    paramMap.addString(paramInfo.m_component, name, paramInfo.m_value,
-                       pDescription);
+    paramMap.addString(paramInfo.m_component, name, paramInfo.m_value, pDescription);
   } else if (category == "bool") {
     paramMap.addBool(paramInfo.m_component, name, paramValue, pDescription);
   } else if (category == "int") {
@@ -1343,34 +1259,26 @@ namespace Kernel {
 
 template <>
 MANTID_API_DLL Mantid::API::ExperimentInfo_sptr
-IPropertyManager::getValue<Mantid::API::ExperimentInfo_sptr>(
-    const std::string &name) const {
-  auto *prop =
-      dynamic_cast<PropertyWithValue<Mantid::API::ExperimentInfo_sptr> *>(
-          getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::API::ExperimentInfo_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::ExperimentInfo_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected shared_ptr<ExperimentInfo>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected shared_ptr<ExperimentInfo>.";
     throw std::runtime_error(message);
   }
 }
 
 template <>
 MANTID_API_DLL Mantid::API::ExperimentInfo_const_sptr
-IPropertyManager::getValue<Mantid::API::ExperimentInfo_const_sptr>(
-    const std::string &name) const {
-  auto *prop =
-      dynamic_cast<PropertyWithValue<Mantid::API::ExperimentInfo_sptr> *>(
-          getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::API::ExperimentInfo_const_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::ExperimentInfo_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const shared_ptr<ExperimentInfo>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<ExperimentInfo>.";
     throw std::runtime_error(message);
   }
 }

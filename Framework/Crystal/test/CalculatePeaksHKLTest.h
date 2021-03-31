@@ -21,9 +21,7 @@ class CalculatePeaksHKLTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalculatePeaksHKLTest *createSuite() {
-    return new CalculatePeaksHKLTest();
-  }
+  static CalculatePeaksHKLTest *createSuite() { return new CalculatePeaksHKLTest(); }
   static void destroySuite(CalculatePeaksHKLTest *suite) { delete suite; }
 
   void test_Constructor() { TS_ASSERT_THROWS_NOTHING(CalculatePeaksHKL alg); }
@@ -46,8 +44,7 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setPropertyValue("PeaksWorkspace", "ws");
-    TSM_ASSERT_THROWS("Should throw. No UB has been given.", alg.execute(),
-                      std::runtime_error &);
+    TSM_ASSERT_THROWS("Should throw. No UB has been given.", alg.execute(), std::runtime_error &);
   }
 
   void test_Execute() {
@@ -71,9 +68,7 @@ public:
 
     for (int i = 0; i < ws->getNumberPeaks(); i++) {
       Peak &peak = ws->getPeak(i);
-      Mantid::Kernel::V3D expectedHKL =
-          peak.getQSampleFrame() /
-          (2.0 * M_PI); // Simulate the transform. UB is unity.
+      Mantid::Kernel::V3D expectedHKL = peak.getQSampleFrame() / (2.0 * M_PI); // Simulate the transform. UB is unity.
 
       TS_ASSERT_EQUALS(expectedHKL, peak.getHKL());
     }

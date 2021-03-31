@@ -28,9 +28,7 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveAscii"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Saves a 2D workspace to a ascii file.";
-  }
+  const std::string summary() const override { return "Saves a 2D workspace to a ascii file."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }

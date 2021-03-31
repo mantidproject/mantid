@@ -36,14 +36,10 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadAscii", "SaveGSS", "LoadMultipleGSS"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadAscii", "SaveGSS", "LoadMultipleGSS"}; }
 
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Diffraction\\DataHandling;DataHandling\\Text";
-  }
+  const std::string category() const override { return "Diffraction\\DataHandling;DataHandling\\Text"; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
@@ -56,19 +52,15 @@ private:
   void exec() override;
 
   /// Main method to load GSAS
-  API::MatrixWorkspace_sptr loadGSASFile(const std::string &filename,
-                                         bool useBankAsSpectrum);
+  API::MatrixWorkspace_sptr loadGSASFile(const std::string &filename, bool useBankAsSpectrum);
 
   /// Convert a string (value+unit) to double (value)
   double convertToDouble(std::string inputstring);
 
   /// Create an instrument geometry.
-  void createInstrumentGeometry(const API::MatrixWorkspace_sptr &workspace,
-                                const std::string &instrumentname,
-                                const double &primaryflightpath,
-                                const std::vector<int> &detectorids,
-                                const std::vector<double> &totalflightpaths,
-                                const std::vector<double> &twothetas);
+  void createInstrumentGeometry(const API::MatrixWorkspace_sptr &workspace, const std::string &instrumentname,
+                                const double &primaryflightpath, const std::vector<int> &detectorids,
+                                const std::vector<double> &totalflightpaths, const std::vector<double> &twothetas);
 };
 } // namespace DataHandling
 } // namespace Mantid

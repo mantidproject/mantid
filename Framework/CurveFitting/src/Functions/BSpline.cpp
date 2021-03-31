@@ -32,9 +32,7 @@ struct ReleaseBSplineWorkspace {
 #if GSL_MAJOR_VERSION < 2
 // shared pointer deleter for bspline derivative workspace
 struct ReleaseBSplineDerivativeWorkspace {
-  void operator()(gsl_bspline_deriv_workspace *ws) {
-    gsl_bspline_deriv_free(ws);
-  }
+  void operator()(gsl_bspline_deriv_workspace *ws) { gsl_bspline_deriv_free(ws); }
 };
 #endif
 } // namespace
@@ -63,8 +61,7 @@ BSpline::BSpline() {
  * @param xValues :: The array of x values to interpolate
  * @param nData :: The size of the arrays
  */
-void BSpline::function1D(double *out, const double *xValues,
-                         const size_t nData) const {
+void BSpline::function1D(double *out, const double *xValues, const size_t nData) const {
   size_t np = nParams();
   GSLVector B(np);
   double startX = getAttribute("StartX").asDouble();
@@ -96,16 +93,14 @@ void BSpline::function1D(double *out, const double *xValues,
  * @param nData :: The size of the arrays
  * @param order :: The order of the derivatives o calculate
  */
-void BSpline::derivative1D(double *out, const double *xValues, size_t nData,
-                           const size_t order) const {
+void BSpline::derivative1D(double *out, const double *xValues, size_t nData, const size_t order) const {
 
   int splineOrder = getAttribute("Order").asInt();
   auto k = static_cast<size_t>(splineOrder);
 #if GSL_MAJOR_VERSION < 2
   if (!m_bsplineDerivWorkspace) {
     gsl_bspline_deriv_workspace *ws = gsl_bspline_deriv_alloc(k);
-    m_bsplineDerivWorkspace = std::shared_ptr<gsl_bspline_deriv_workspace>(
-        ws, ReleaseBSplineDerivativeWorkspace());
+    m_bsplineDerivWorkspace = std::shared_ptr<gsl_bspline_deriv_workspace>(ws, ReleaseBSplineDerivativeWorkspace());
   }
 #endif
 
@@ -125,12 +120,10 @@ void BSpline::derivative1D(double *out, const double *xValues, size_t nData,
       size_t jstart(0);
       size_t jend(0);
 #if GSL_MAJOR_VERSION < 2
-      gsl_bspline_deriv_eval_nonzero(x, order, B.gsl(), &jstart, &jend,
-                                     m_bsplineWorkspace.get(),
+      gsl_bspline_deriv_eval_nonzero(x, order, B.gsl(), &jstart, &jend, m_bsplineWorkspace.get(),
                                      m_bsplineDerivWorkspace.get());
 #else
-      gsl_bspline_deriv_eval_nonzero(x, order, B.gsl(), &jstart, &jend,
-                                     m_bsplineWorkspace.get());
+      gsl_bspline_deriv_eval_nonzero(x, order, B.gsl(), &jstart, &jend, m_bsplineWorkspace.get());
 #endif
       double val = 0.0;
       for (size_t j = jstart; j <= jend; ++j) {
@@ -146,14 +139,12 @@ void BSpline::derivative1D(double *out, const double *xValues, size_t nData,
  * @param attName :: The name of the attribute to set
  * @param att :: The attribute to set
  */
-void BSpline::setAttribute(const std::string &attName,
-                           const API::IFunction::Attribute &att) {
+void BSpline::setAttribute(const std::string &attName, const API::IFunction::Attribute &att) {
   bool isUniform = attName == "Uniform" && att.asBool();
 
   storeAttributeValue(attName, att);
 
-  if (attName == "BreakPoints" || isUniform || attName == "StartX" ||
-      attName == "EndX") {
+  if (attName == "BreakPoints" || isUniform || attName == "StartX" || attName == "EndX") {
     resetKnots();
   } else if (attName == "NBreak" || attName == "Order") {
     resetGSLObjects();
@@ -181,10 +172,8 @@ void BSpline::resetGSLObjects() {
   if (nbreak < 2) {
     throw std::invalid_argument("BSpline: NBreak must be at least 2.");
   }
-  gsl_bspline_workspace *ws = gsl_bspline_alloc(static_cast<size_t>(order),
-                                                static_cast<size_t>(nbreak));
-  m_bsplineWorkspace =
-      std::shared_ptr<gsl_bspline_workspace>(ws, ReleaseBSplineWorkspace());
+  gsl_bspline_workspace *ws = gsl_bspline_alloc(static_cast<size_t>(order), static_cast<size_t>(nbreak));
+  m_bsplineWorkspace = std::shared_ptr<gsl_bspline_workspace>(ws, ReleaseBSplineWorkspace());
 #if GSL_MAJOR_VERSION < 2
   m_bsplineDerivWorkspace.reset();
 #endif
@@ -234,8 +223,7 @@ void BSpline::resetKnots() {
     int nbreaks = getAttribute("NBreak").asInt();
     // if number of break points change do necessary updates
     if (static_cast<size_t>(nbreaks) != breakPoints.size()) {
-      storeAttributeValue("NBreak",
-                          Attribute(static_cast<int>(breakPoints.size())));
+      storeAttributeValue("NBreak", Attribute(static_cast<int>(breakPoints.size())));
       resetGSLObjects();
       resetParameters();
     }

@@ -35,18 +35,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
 
-    IMDEventWorkspace_sptr in_ws =
-        MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
-    AnalysisDataService::Instance().addOrReplace("FakeMDEventDataTest_ws",
-                                                 in_ws);
+    IMDEventWorkspace_sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    AnalysisDataService::Instance().addOrReplace("FakeMDEventDataTest_ws", in_ws);
 
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS(in_ws->getNPoints(), 1000);
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PeakParams", "1000, 5.0,5.0,5.0, 1.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakParams", "1000, 5.0,5.0,5.0, 1.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("UniformParams", "10000"));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
@@ -63,19 +59,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
 
-    MDEventWorkspace3Lean::sptr in_ws =
-        MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
-    AnalysisDataService::Instance().addOrReplace("FakeMDEventDataTest_ws",
-                                                 in_ws);
+    MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
+    AnalysisDataService::Instance().addOrReplace("FakeMDEventDataTest_ws", in_ws);
 
     // No events
     TS_ASSERT_EQUALS(in_ws->getNPoints(), 0);
     TS_ASSERT_DELTA(in_ws->getBox()->getSignal(), 0.0, 1e-5);
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PeakParams", "100, 5.0,5.0,5.0, 1.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakParams", "100, 5.0,5.0,5.0, 1.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("UniformParams", "100"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("RandomizeSignal", "1"));
 
@@ -91,8 +83,7 @@ public:
     TS_ASSERT_DIFFERS(in_ws->getBox()->getSignal(), 200.0);
     TS_ASSERT_DIFFERS(in_ws->getBox()->getErrorSquared(), 200.0);
 
-    TSM_ASSERT("If the workspace is file-backed, then it needs updating.",
-               in_ws->fileNeedsUpdating());
+    TSM_ASSERT("If the workspace is file-backed, then it needs updating.", in_ws->fileNeedsUpdating());
 
     AnalysisDataService::Instance().remove("FakeMDEventDataTest_ws");
   }
@@ -102,17 +93,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
 
-    MDEventWorkspace3Lean::sptr in_ws =
-        MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
-    AnalysisDataService::Instance().addOrReplace("FakeMDEventDataTest_ws",
-                                                 in_ws);
+    MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
+    AnalysisDataService::Instance().addOrReplace("FakeMDEventDataTest_ws", in_ws);
 
     // No events
     TS_ASSERT_EQUALS(in_ws->getNPoints(), 0);
     TS_ASSERT_DELTA(in_ws->getBox()->getSignal(), 0.0, 1e-5);
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakParams", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("UniformParams", "-1000"));
     //    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("RandomizeSignal", ""));
@@ -125,24 +113,18 @@ public:
     TS_ASSERT_DELTA(in_ws->getBox()->getSignal(), 1000.0, 1.e-6);
     TS_ASSERT_DELTA(in_ws->getBox()->getErrorSquared(), 1000.0, 1.e-6);
 
-    TSM_ASSERT("If the workspace is file-backed, then it needs updating.",
-               in_ws->fileNeedsUpdating());
+    TSM_ASSERT("If the workspace is file-backed, then it needs updating.", in_ws->fileNeedsUpdating());
 
     BinMD BinAlg;
     TS_ASSERT_THROWS_NOTHING(BinAlg.initialize())
     TS_ASSERT(BinAlg.isInitialized())
 
-    TS_ASSERT_THROWS_NOTHING(
-        BinAlg.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        BinAlg.setPropertyValue("AlignedDim0", "Axis0,0,10,10"));
-    TS_ASSERT_THROWS_NOTHING(
-        BinAlg.setPropertyValue("AlignedDim1", "Axis1,0,10,10"));
-    TS_ASSERT_THROWS_NOTHING(
-        BinAlg.setPropertyValue("AlignedDim2", "Axis2,0,10,10"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim0", "Axis0,0,10,10"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim1", "Axis1,0,10,10"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim2", "Axis2,0,10,10"));
 
-    TS_ASSERT_THROWS_NOTHING(
-        BinAlg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
 
     TS_ASSERT_THROWS_NOTHING(BinAlg.execute();)
 
@@ -150,10 +132,8 @@ public:
 
     MDHistoWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = std::dynamic_pointer_cast<MDHistoWorkspace>(
-            AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
-    TSM_ASSERT("can not retrieve binned workspace from analysis data service",
-               out);
+        out = std::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
+    TSM_ASSERT("can not retrieve binned workspace from analysis data service", out);
     if (!out)
       return;
 
@@ -175,21 +155,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
 
-    auto inWS =
-        MDEventsTestHelper::makeAnyMDEW<MDEvent<3>, 3>(10, 0.0, 10.0, 0);
+    auto inWS = MDEventsTestHelper::makeAnyMDEW<MDEvent<3>, 3>(10, 0.0, 10.0, 0);
     // Give it an instrument
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, 16);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 16);
     // ExperimentInfo_sptr ei(new ExperimentInfo());
     ExperimentInfo_sptr ei = inWS->getExperimentInfo(0);
     ei->setInstrument(inst);
     // Give it a run number
-    ei->mutableRun().addProperty(
-        new PropertyWithValue<std::string>("run_number", "12345"), true);
+    ei->mutableRun().addProperty(new PropertyWithValue<std::string>("run_number", "12345"), true);
     // inWS->addExperimentInfo(ei);
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty<IMDEventWorkspace_sptr>("InputWorkspace", inWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty<IMDEventWorkspace_sptr>("InputWorkspace", inWS));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakParams", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("UniformParams", "-1000"));
     alg.execute();
@@ -197,8 +173,7 @@ public:
 
     TS_ASSERT_EQUALS(1000, inWS->getNEvents());
 
-    Mantid::detid_t expectedIDs[10] = {37,  235, 140, 72, 255,
-                                       137, 203, 133, 79, 192};
+    Mantid::detid_t expectedIDs[10] = {37, 235, 140, 72, 255, 137, 203, 133, 79, 192};
     auto it = inWS->createIterator();
     size_t counter(0);
     while (counter < 10) {

@@ -73,8 +73,7 @@ public:
   bool equals(const Column &otherColumn, double tolerance) const override {
     (void)otherColumn;
     (void)tolerance;
-    throw std::runtime_error(
-        "equals not implemented, to compare use CompareWorkspace");
+    throw std::runtime_error("equals not implemented, to compare use CompareWorkspace");
   }
 
 protected:

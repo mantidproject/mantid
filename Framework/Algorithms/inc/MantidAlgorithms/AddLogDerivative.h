@@ -31,16 +31,13 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"AddSampleLog"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AddSampleLog"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Logs"; }
 
-  static Mantid::Kernel::TimeSeriesProperty<double> *
-  makeDerivative(API::Progress &progress,
-                 Mantid::Kernel::TimeSeriesProperty<double> *input,
-                 const std::string &name, int numDerivatives);
+  static Mantid::Kernel::TimeSeriesProperty<double> *makeDerivative(API::Progress &progress,
+                                                                    Mantid::Kernel::TimeSeriesProperty<double> *input,
+                                                                    const std::string &name, int numDerivatives);
 
 private:
   /// Initialise the properties

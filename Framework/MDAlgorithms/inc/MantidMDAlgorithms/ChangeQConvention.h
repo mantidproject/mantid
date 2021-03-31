@@ -21,16 +21,12 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "ChangeQConvention"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Change the convention of MD workspace.";
-  }
+  const std::string summary() const override { return "Change the convention of MD workspace."; }
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\DataHandling";
-  }
+  const std::string category() const override { return "MDAlgorithms\\DataHandling"; }
 
 private:
   /// Initialise the properties

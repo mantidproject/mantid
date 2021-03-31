@@ -30,9 +30,7 @@ public:
   virtual ~ISplittersWorkspace() = default;
 
   /// Returns a clone of the workspace
-  std::unique_ptr<ISplittersWorkspace> clone() const {
-    return std::unique_ptr<ISplittersWorkspace>(doClone());
-  }
+  std::unique_ptr<ISplittersWorkspace> clone() const { return std::unique_ptr<ISplittersWorkspace>(doClone()); }
 
   /*
    * Add a time splitter to table workspace
@@ -66,8 +64,7 @@ private:
 /// Typedef for a shared pointer to \c TableWorkspace
 using ISplittersWorkspace_sptr = std::shared_ptr<ISplittersWorkspace>;
 /// Typedef for a shared pointer to \c const \c TableWorkspace
-using ISplittersWorkspace_const_sptr =
-    std::shared_ptr<const ISplittersWorkspace>;
+using ISplittersWorkspace_const_sptr = std::shared_ptr<const ISplittersWorkspace>;
 
 } // namespace API
 } // namespace Mantid

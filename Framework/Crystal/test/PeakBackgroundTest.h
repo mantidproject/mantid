@@ -25,8 +25,7 @@ using namespace testing;
 namespace {
 // Make a peaks workspace with a single HKL peak.
 IPeaksWorkspace_sptr make_peaks_workspace(const V3D &hklPeak) {
-  Instrument_sptr inst =
-      ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
+  Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
 
   // --- Make a fake PeaksWorkspace ---
   IPeaksWorkspace_sptr peakWS(new PeaksWorkspace());
@@ -53,12 +52,9 @@ public:
   MOCK_CONST_METHOD0(getNormalizedSignalWithMask, signal_t());
   MOCK_CONST_METHOD0(getSignal, signal_t());
   MOCK_CONST_METHOD0(getError, signal_t());
-  MOCK_CONST_METHOD1(getVertexesArray,
-                     std::unique_ptr<coord_t[]>(size_t &numVertices));
+  MOCK_CONST_METHOD1(getVertexesArray, std::unique_ptr<coord_t[]>(size_t &numVertices));
   MOCK_CONST_METHOD3(getVertexesArray,
-                     std::unique_ptr<coord_t[]>(size_t &numVertices,
-                                                const size_t outDimensions,
-                                                const bool *maskDim));
+                     std::unique_ptr<coord_t[]>(size_t &numVertices, const size_t outDimensions, const bool *maskDim));
   MOCK_CONST_METHOD0(getCenter, Mantid::Kernel::VMD());
   MOCK_CONST_METHOD0(getNumEvents, size_t());
   MOCK_CONST_METHOD1(getInnerRunIndex, uint16_t(size_t index));
@@ -88,18 +84,14 @@ public:
     IPeaksWorkspace_const_sptr peaksWS = make_peaks_workspace(hklPeak);
     const double radius = 1;
     const double threshold = 100;
-    PeakBackground strategy(peaksWS, radius, threshold, NoNormalization,
-                            Mantid::Kernel::HKL);
+    PeakBackground strategy(peaksWS, radius, threshold, NoNormalization, Mantid::Kernel::HKL);
 
     MockIMDIterator mockIterator;
-    EXPECT_CALL(mockIterator, getNormalizedSignal())
-        .WillOnce(Return(threshold + 1)); // Returns above the threshold.
-    EXPECT_CALL(mockIterator, getCenter())
-        .WillOnce(Return(hklPeak)); // Returns center as being on the peak.
-                                    // Thefore within range.
+    EXPECT_CALL(mockIterator, getNormalizedSignal()).WillOnce(Return(threshold + 1)); // Returns above the threshold.
+    EXPECT_CALL(mockIterator, getCenter()).WillOnce(Return(hklPeak)); // Returns center as being on the peak.
+                                                                      // Thefore within range.
 
-    TSM_ASSERT("MD data in this peak region is not background",
-               !strategy.isBackground(&mockIterator));
+    TSM_ASSERT("MD data in this peak region is not background", !strategy.isBackground(&mockIterator));
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockIterator));
   }
@@ -109,19 +101,15 @@ public:
     IPeaksWorkspace_const_sptr peaksWS = make_peaks_workspace(hklPeak);
     const double radius = 1;
     const double threshold = 100;
-    PeakBackground strategy(peaksWS, radius, threshold, NoNormalization,
-                            Mantid::Kernel::HKL);
+    PeakBackground strategy(peaksWS, radius, threshold, NoNormalization, Mantid::Kernel::HKL);
 
     MockIMDIterator mockIterator;
     V3D iteratorCenter(hklPeak[0] + radius, hklPeak[1],
                        hklPeak[2]); // Offset so to be outside of peak radius.
-    EXPECT_CALL(mockIterator, getNormalizedSignal())
-        .WillOnce(Return(threshold + 1e-4)); // Returns above the threshold.
-    EXPECT_CALL(mockIterator, getCenter())
-        .WillOnce(Return(iteratorCenter)); // Return offset iterator center.
+    EXPECT_CALL(mockIterator, getNormalizedSignal()).WillOnce(Return(threshold + 1e-4)); // Returns above the threshold.
+    EXPECT_CALL(mockIterator, getCenter()).WillOnce(Return(iteratorCenter)); // Return offset iterator center.
 
-    TSM_ASSERT("Data too far from peak. Should be considered background.",
-               strategy.isBackground(&mockIterator));
+    TSM_ASSERT("Data too far from peak. Should be considered background.", strategy.isBackground(&mockIterator));
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockIterator));
   }
@@ -131,20 +119,16 @@ public:
     IPeaksWorkspace_const_sptr peaksWS = make_peaks_workspace(hklPeak);
     const double radius = 1;
     const double threshold = 100;
-    PeakBackground strategy(peaksWS, radius, threshold, NoNormalization,
-                            Mantid::Kernel::HKL);
+    PeakBackground strategy(peaksWS, radius, threshold, NoNormalization, Mantid::Kernel::HKL);
 
     MockIMDIterator mockIterator;
     V3D iteratorCenter(hklPeak[0] + radius - 1e-4, hklPeak[1],
                        hklPeak[2]); // Offset so to be outside of peak radius.
-    EXPECT_CALL(mockIterator, getNormalizedSignal())
-        .WillOnce(Return(threshold + 1e-4)); // Returns above the threshold.
-    EXPECT_CALL(mockIterator, getCenter())
-        .WillOnce(Return(iteratorCenter)); // Return offset iterator center.
+    EXPECT_CALL(mockIterator, getNormalizedSignal()).WillOnce(Return(threshold + 1e-4)); // Returns above the threshold.
+    EXPECT_CALL(mockIterator, getCenter()).WillOnce(Return(iteratorCenter)); // Return offset iterator center.
 
-    TSM_ASSERT(
-        "Data is within peak radius. Should NOT be considered background.",
-        !strategy.isBackground(&mockIterator));
+    TSM_ASSERT("Data is within peak radius. Should NOT be considered background.",
+               !strategy.isBackground(&mockIterator));
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockIterator));
   }
@@ -154,17 +138,14 @@ public:
     IPeaksWorkspace_const_sptr peaksWS = make_peaks_workspace(hklPeak);
     const double radius = 1;
     const double threshold = 100;
-    PeakBackground strategy(peaksWS, radius, threshold, NoNormalization,
-                            Mantid::Kernel::HKL);
+    PeakBackground strategy(peaksWS, radius, threshold, NoNormalization, Mantid::Kernel::HKL);
 
     MockIMDIterator mockIterator;
     EXPECT_CALL(mockIterator, getNormalizedSignal())
-        .WillOnce(Return(
-            threshold)); // Returns equal to the threshold. Exclusive checking.
+        .WillOnce(Return(threshold)); // Returns equal to the threshold. Exclusive checking.
 
-    TSM_ASSERT(
-        "MD data signal is below the allowed threshold. Should be background.",
-        strategy.isBackground(&mockIterator));
+    TSM_ASSERT("MD data signal is below the allowed threshold. Should be background.",
+               strategy.isBackground(&mockIterator));
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockIterator));
   }

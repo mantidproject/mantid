@@ -45,26 +45,24 @@ public:
   }
 
   void test_throws_if_no_instruments() {
-    const std::string xmlStr =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<facilities>"
-        "  <facility name=\"MyFacility\" FileExtensions=\".xyz\">"
-        "  </facility>"
-        "</facilities>";
+    const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                               "<facilities>"
+                               "  <facility name=\"MyFacility\" FileExtensions=\".xyz\">"
+                               "  </facility>"
+                               "</facilities>";
 
     TS_ASSERT_THROWS(getFacility(xmlStr), const std::runtime_error &);
   }
 
   void test_minimal() {
-    const std::string xmlStr =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<facilities>"
-        "  <facility name=\"MyFacility\" FileExtensions=\".xyz\">"
-        "    <instrument name=\"AnInst\">"
-        "      <technique>Measuring Stuff</technique>"
-        "    </instrument>"
-        "  </facility>"
-        "</facilities>";
+    const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                               "<facilities>"
+                               "  <facility name=\"MyFacility\" FileExtensions=\".xyz\">"
+                               "    <instrument name=\"AnInst\">"
+                               "      <technique>Measuring Stuff</technique>"
+                               "    </instrument>"
+                               "  </facility>"
+                               "</facilities>";
 
     FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = getFacility(xmlStr));
@@ -81,37 +79,34 @@ public:
     TS_ASSERT(fac->archiveSearch().empty());
     TS_ASSERT_EQUALS(fac->instruments().size(), 1);
     TS_ASSERT_EQUALS(fac->instruments().front().name(), "AnInst");
-    TS_ASSERT_EQUALS(fac->instruments("Measuring Stuff").front().name(),
-                     "AnInst");
+    TS_ASSERT_EQUALS(fac->instruments("Measuring Stuff").front().name(), "AnInst");
     TS_ASSERT(fac->instruments("Nonsense").empty());
     TS_ASSERT_EQUALS(fac->instrument("AnInst").name(), "AnInst");
-    TS_ASSERT_THROWS(fac->instrument("NoInst"),
-                     const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(fac->instrument("NoInst"), const Exception::NotFoundError &);
 
     delete fac;
   }
 
   void testFacilities() {
-    const std::string xmlStr =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<facilities>"
-        "  <facility name=\"ISIS\" zeropadding=\"5\" delimiter=\"%\" "
-        "FileExtensions=\".nxs,.raw,.sav,.n*,.s*\">"
-        "    <archive>"
-        "      <archiveSearch plugin=\"ADataSearch\" />"
-        "      <archiveSearch plugin=\"BDataSearch\" />"
-        "    </archive>"
-        "    <instrument name=\"HRPD\" shortname=\"HRP\">"
-        "      <technique>Powder Diffraction</technique>"
-        "    </instrument>"
-        "    <instrument name=\"WISH\" >"
-        "      <zeropadding size=\"8\"/>"
-        "      <zeropadding size=\"15\" startRunNumber=\"300\"/>"
-        "      <technique>Powder Diffraction</technique>"
-        "      <technique>Single Crystal Diffraction</technique>"
-        "    </instrument>"
-        "  </facility>"
-        "</facilities>";
+    const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                               "<facilities>"
+                               "  <facility name=\"ISIS\" zeropadding=\"5\" delimiter=\"%\" "
+                               "FileExtensions=\".nxs,.raw,.sav,.n*,.s*\">"
+                               "    <archive>"
+                               "      <archiveSearch plugin=\"ADataSearch\" />"
+                               "      <archiveSearch plugin=\"BDataSearch\" />"
+                               "    </archive>"
+                               "    <instrument name=\"HRPD\" shortname=\"HRP\">"
+                               "      <technique>Powder Diffraction</technique>"
+                               "    </instrument>"
+                               "    <instrument name=\"WISH\" >"
+                               "      <zeropadding size=\"8\"/>"
+                               "      <zeropadding size=\"15\" startRunNumber=\"300\"/>"
+                               "      <technique>Powder Diffraction</technique>"
+                               "      <technique>Single Crystal Diffraction</technique>"
+                               "    </instrument>"
+                               "  </facility>"
+                               "</facilities>";
 
     FacilityInfo *fac = getFacility(xmlStr);
 
@@ -138,8 +133,7 @@ public:
     TS_ASSERT_EQUALS(instrums.size(), 2);
 
     TS_ASSERT_THROWS_NOTHING(fac->instrument("HRPD"));
-    InstrumentInfo instr =
-        fac->instrument("HRP"); // Tests getting by short name
+    InstrumentInfo instr = fac->instrument("HRP"); // Tests getting by short name
     TS_ASSERT_EQUALS(instr.name(), "HRPD");
     TS_ASSERT_EQUALS(instr.shortName(), "HRP");
     TS_ASSERT_EQUALS(instr.zeroPadding(123), 5);
@@ -151,21 +145,17 @@ public:
     TS_ASSERT_EQUALS(instr.zeroPadding(123), 8);
     TS_ASSERT_EQUALS(instr.zeroPadding(301), 15);
 
-    const std::vector<InstrumentInfo> pwdInstr =
-        fac->instruments("Powder Diffraction");
+    const std::vector<InstrumentInfo> pwdInstr = fac->instruments("Powder Diffraction");
     TS_ASSERT_EQUALS(pwdInstr.size(), 2);
 
-    const std::vector<InstrumentInfo> crysInstr =
-        fac->instruments("Single Crystal Diffraction");
+    const std::vector<InstrumentInfo> crysInstr = fac->instruments("Single Crystal Diffraction");
     TS_ASSERT_EQUALS(crysInstr.size(), 1);
     TS_ASSERT_EQUALS(fac->instruments("rubbish category").size(), 0);
 
     delete fac;
   }
 
-  void testConfigService() {
-    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().getFacility("ISIS"));
-  }
+  void testConfigService() { TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().getFacility("ISIS")); }
 
   void testDefaultInstrument() {
     ConfigService::Instance().setString("default.instrument", "HRPD");
@@ -174,20 +164,19 @@ public:
   }
 
   void testFacilitiesArchiveMissing() {
-    const std::string xmlStr =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<facilities>"
-        "  <facility name=\"ISIS\" zeropadding=\"5\" "
-        "FileExtensions=\".nxs,.raw,.sav,.n*,.s*\">"
-        "    <instrument name=\"HRPD\" shortname=\"HRP\">"
-        "      <technique>Powder Diffraction</technique>"
-        "    </instrument>"
-        "    <instrument name=\"WISH\" zeropadding=\"8\">"
-        "      <technique>Powder Diffraction</technique>"
-        "      <technique>Single Crystal Diffraction</technique>"
-        "    </instrument>"
-        "  </facility>"
-        "</facilities>";
+    const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                               "<facilities>"
+                               "  <facility name=\"ISIS\" zeropadding=\"5\" "
+                               "FileExtensions=\".nxs,.raw,.sav,.n*,.s*\">"
+                               "    <instrument name=\"HRPD\" shortname=\"HRP\">"
+                               "      <technique>Powder Diffraction</technique>"
+                               "    </instrument>"
+                               "    <instrument name=\"WISH\" zeropadding=\"8\">"
+                               "      <technique>Powder Diffraction</technique>"
+                               "      <technique>Single Crystal Diffraction</technique>"
+                               "    </instrument>"
+                               "  </facility>"
+                               "</facilities>";
 
     FacilityInfo *fac = getFacility(xmlStr);
 
@@ -206,14 +195,12 @@ private:
     TS_ASSERT(pDoc);
 
     Poco::XML::Element *pRootElem = pDoc->documentElement();
-    Poco::AutoPtr<Poco::XML::NodeList> pNL_facility =
-        pRootElem->getElementsByTagName("facility");
+    Poco::AutoPtr<Poco::XML::NodeList> pNL_facility = pRootElem->getElementsByTagName("facility");
     size_t n = pNL_facility->length();
 
     TS_ASSERT(n > 0);
 
-    Poco::XML::Element *elem =
-        dynamic_cast<Poco::XML::Element *>(pNL_facility->item(0));
+    Poco::XML::Element *elem = dynamic_cast<Poco::XML::Element *>(pNL_facility->item(0));
     TS_ASSERT(elem);
 
     FacilityInfo *facility = new FacilityInfo(elem);

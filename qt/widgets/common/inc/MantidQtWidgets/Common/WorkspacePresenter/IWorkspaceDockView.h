@@ -35,15 +35,12 @@ public:
 
   virtual WorkspacePresenterWN_wptr getPresenterWeakPtr() = 0;
 
-  virtual bool askUserYesNo(const std::string &caption,
-                            const std::string &message) const = 0;
-  virtual void showCriticalUserMessage(const std::string &caption,
-                                       const std::string &message) const = 0;
+  virtual bool askUserYesNo(const std::string &caption, const std::string &message) const = 0;
+  virtual void showCriticalUserMessage(const std::string &caption, const std::string &message) const = 0;
   virtual void showLoadDialog() = 0;
   virtual void showLiveDataDialog() = 0;
   virtual void showRenameDialog(const StringList &wsNames) = 0;
-  virtual void recordWorkspaceRename(const std::string &oldName,
-                                     const std::string &newName) = 0;
+  virtual void recordWorkspaceRename(const std::string &oldName, const std::string &newName) = 0;
   virtual void enableDeletePrompt(bool enable) = 0;
   virtual bool isPromptDelete() const = 0;
   virtual bool deleteConfirmation() const = 0;
@@ -53,19 +50,16 @@ public:
   virtual void clearView() = 0;
   virtual SortDirection getSortDirection() const = 0;
   virtual SortCriteria getSortCriteria() const = 0;
-  virtual void sortWorkspaces(SortCriteria criteria,
-                              SortDirection direction) = 0;
+  virtual void sortWorkspaces(SortCriteria criteria, SortDirection direction) = 0;
   virtual SaveFileType getSaveFileType() const = 0;
-  virtual void saveWorkspace(const std::string &wsName,
-                             const SaveFileType type) = 0;
+  virtual void saveWorkspace(const std::string &wsName, const SaveFileType type) = 0;
   virtual void saveWorkspaces(const StringList &wsNames) = 0;
   virtual std::string getFilterText() const = 0;
   virtual void filterWorkspaces(const std::string &filterText) = 0;
   virtual StringList getSelectedWorkspaceNames() const = 0;
   virtual Mantid::API::Workspace_sptr getSelectedWorkspace() const = 0;
   virtual void refreshWorkspaces() = 0;
-  virtual void updateTree(
-      const std::map<std::string, Mantid::API::Workspace_sptr> &items) = 0;
+  virtual void updateTree(const std::map<std::string, Mantid::API::Workspace_sptr> &items) = 0;
 
   // Workspace Context Menu Handlers
   virtual void popupContextMenu() = 0;
@@ -87,8 +81,7 @@ public:
   virtual void convertToMatrixWorkspace() = 0;
   virtual void convertMDHistoToMatrixWorkspace() = 0;
 
-  virtual bool executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
-                                     const bool wait = true) = 0;
+  virtual bool executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const bool wait = true) = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

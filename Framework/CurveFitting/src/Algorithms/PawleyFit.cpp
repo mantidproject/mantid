@@ -46,13 +46,11 @@ const std::string PawleyFit::summary() const {
 
 /// Transforms the specified value from d-spacing to the supplied unit.
 double PawleyFit::getTransformedCenter(double d, const Unit_sptr &unit) const {
-  if (std::dynamic_pointer_cast<Units::Empty>(unit) ||
-      std::dynamic_pointer_cast<Units::dSpacing>(unit)) {
+  if (std::dynamic_pointer_cast<Units::Empty>(unit) || std::dynamic_pointer_cast<Units::dSpacing>(unit)) {
     return d;
   }
 
-  return UnitConversion::run(*m_dUnit, *unit, d, 0, 0, 0, DeltaEMode::Elastic,
-                             0);
+  return UnitConversion::run(*m_dUnit, *unit, d, 0, 0, 0, DeltaEMode::Elastic, 0);
 }
 
 /**
@@ -77,10 +75,8 @@ double PawleyFit::getTransformedCenter(double d, const Unit_sptr &unit) const {
  * @param startX :: Lowest allowed x-value for reflection position.
  * @param endX :: Highest allowed x-value for reflection position.
  */
-void PawleyFit::addHKLsToFunction(Functions::PawleyFunction_sptr &pawleyFn,
-                                  const ITableWorkspace_sptr &tableWs,
-                                  const Unit_sptr &unit, double startX,
-                                  double endX) const {
+void PawleyFit::addHKLsToFunction(Functions::PawleyFunction_sptr &pawleyFn, const ITableWorkspace_sptr &tableWs,
+                                  const Unit_sptr &unit, double startX, double endX) const {
   if (!tableWs || !pawleyFn) {
     throw std::invalid_argument("Can only process non-null function & table.");
   }
@@ -120,42 +116,34 @@ void PawleyFit::addHKLsToFunction(Functions::PawleyFunction_sptr &pawleyFn,
 
 /// Creates a table containing the cell parameters stored in the supplied
 /// function.
-ITableWorkspace_sptr PawleyFit::getLatticeFromFunction(
-    const Functions::PawleyFunction_sptr &pawleyFn) const {
+ITableWorkspace_sptr PawleyFit::getLatticeFromFunction(const Functions::PawleyFunction_sptr &pawleyFn) const {
   if (!pawleyFn) {
-    throw std::invalid_argument(
-        "Cannot extract lattice parameters from null function.");
+    throw std::invalid_argument("Cannot extract lattice parameters from null function.");
   }
 
-  ITableWorkspace_sptr latticeParameterTable =
-      WorkspaceFactory::Instance().createTable();
+  ITableWorkspace_sptr latticeParameterTable = WorkspaceFactory::Instance().createTable();
 
   latticeParameterTable->addColumn("str", "Parameter");
   latticeParameterTable->addColumn("double", "Value");
   latticeParameterTable->addColumn("double", "Error");
 
-  Functions::PawleyParameterFunction_sptr parameters =
-      pawleyFn->getPawleyParameterFunction();
+  Functions::PawleyParameterFunction_sptr parameters = pawleyFn->getPawleyParameterFunction();
 
   for (size_t i = 0; i < parameters->nParams(); ++i) {
     TableRow newRow = latticeParameterTable->appendRow();
-    newRow << parameters->parameterName(i) << parameters->getParameter(i)
-           << parameters->getError(i);
+    newRow << parameters->parameterName(i) << parameters->getParameter(i) << parameters->getError(i);
   }
 
   return latticeParameterTable;
 }
 
 /// Extracts all profile parameters from the supplied function.
-ITableWorkspace_sptr PawleyFit::getPeakParametersFromFunction(
-    const Functions::PawleyFunction_sptr &pawleyFn) const {
+ITableWorkspace_sptr PawleyFit::getPeakParametersFromFunction(const Functions::PawleyFunction_sptr &pawleyFn) const {
   if (!pawleyFn) {
-    throw std::invalid_argument(
-        "Cannot extract peak parameters from null function.");
+    throw std::invalid_argument("Cannot extract peak parameters from null function.");
   }
 
-  ITableWorkspace_sptr peakParameterTable =
-      WorkspaceFactory::Instance().createTable();
+  ITableWorkspace_sptr peakParameterTable = WorkspaceFactory::Instance().createTable();
 
   peakParameterTable->addColumn("int", "Peak");
   peakParameterTable->addColumn("V3D", "HKL");
@@ -172,8 +160,8 @@ ITableWorkspace_sptr PawleyFit::getPeakParametersFromFunction(
 
     for (size_t j = 0; j < currentPeak->nParams(); ++j) {
       TableRow newRow = peakParameterTable->appendRow();
-      newRow << peakNumber << peakHKL << currentPeak->parameterName(j)
-             << currentPeak->getParameter(j) << currentPeak->getError(j);
+      newRow << peakNumber << peakHKL << currentPeak->parameterName(j) << currentPeak->getParameter(j)
+             << currentPeak->getError(j);
     }
   }
 
@@ -182,16 +170,14 @@ ITableWorkspace_sptr PawleyFit::getPeakParametersFromFunction(
 
 /// Returns a composite function consisting of the Pawley function and Chebyshev
 /// background if enabled in the algorithm.
-IFunction_sptr PawleyFit::getCompositeFunction(
-    const Functions::PawleyFunction_sptr &pawleyFn) const {
+IFunction_sptr PawleyFit::getCompositeFunction(const Functions::PawleyFunction_sptr &pawleyFn) const {
   CompositeFunction_sptr composite = std::make_shared<CompositeFunction>();
   composite->addFunction(pawleyFn);
 
   bool enableChebyshev = getProperty("EnableChebyshevBackground");
   if (enableChebyshev) {
     int degree = getProperty("ChebyshevBackgroundDegree");
-    IFunction_sptr chebyshev =
-        FunctionFactory::Instance().createFunction("Chebyshev");
+    IFunction_sptr chebyshev = FunctionFactory::Instance().createFunction("Chebyshev");
     chebyshev->setAttributeValue("n", degree);
 
     composite->addFunction(chebyshev);
@@ -202,45 +188,38 @@ IFunction_sptr PawleyFit::getCompositeFunction(
 
 /// Initialization of properties.
 void PawleyFit::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Input workspace that contains the spectrum on which to "
                   "perform the Pawley fit.");
 
-  declareProperty("WorkspaceIndex", 0,
-                  "Spectrum on which the fit should be performed.");
+  declareProperty("WorkspaceIndex", 0, "Spectrum on which the fit should be performed.");
 
   declareProperty("StartX", 0.0, "Lower border of fitted data range.");
   declareProperty("EndX", 0.0, "Upper border of fitted data range.");
 
-  std::vector<std::string> latticeSystems{
-      "Cubic",        "Tetragonal", "Hexagonal", "Rhombohedral",
-      "Orthorhombic", "Monoclinic", "Triclinic"};
+  std::vector<std::string> latticeSystems{"Cubic",        "Tetragonal", "Hexagonal", "Rhombohedral",
+                                          "Orthorhombic", "Monoclinic", "Triclinic"};
 
-  auto latticeSystemValidator =
-      std::make_shared<StringListValidator>(latticeSystems);
+  auto latticeSystemValidator = std::make_shared<StringListValidator>(latticeSystems);
 
-  declareProperty("LatticeSystem", latticeSystems.back(),
-                  latticeSystemValidator,
+  declareProperty("LatticeSystem", latticeSystems.back(), latticeSystemValidator,
                   "Lattice system to use for refinement.");
 
   declareProperty("InitialCell", "1.0 1.0 1.0 90.0 90.0 90.0",
                   "Specification of initial unit cell, given as 'a, b, c, "
                   "alpha, beta, gamma'.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>("PeakTable", "",
-                                                           Direction::Input),
-      "Table with peak information. Can be used instead of "
-      "supplying a list of indices for better starting parameters.");
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("PeakTable", "", Direction::Input),
+                  "Table with peak information. Can be used instead of "
+                  "supplying a list of indices for better starting parameters.");
 
   declareProperty("RefineZeroShift", false,
                   "If checked, a zero-shift with the "
                   "same unit as the spectrum is "
                   "refined.");
 
-  auto peakFunctionValidator = std::make_shared<StringListValidator>(
-      FunctionFactory::Instance().getFunctionNames<IPeakFunction>());
+  auto peakFunctionValidator =
+      std::make_shared<StringListValidator>(FunctionFactory::Instance().getFunctionNames<IPeakFunction>());
 
   declareProperty("PeakProfileFunction", "Gaussian", peakFunctionValidator,
                   "Profile function that is used for each peak.");
@@ -250,27 +229,22 @@ void PawleyFit::init() {
                   "polynomial will be added "
                   "to model the background.");
 
-  declareProperty("ChebyshevBackgroundDegree", 0,
-                  "Degree of the Chebyshev polynomial, if used as background.");
+  declareProperty("ChebyshevBackgroundDegree", 0, "Degree of the Chebyshev polynomial, if used as background.");
 
   declareProperty("CalculationOnly", false,
                   "If enabled, no fit is performed, "
                   "the function is only evaluated "
                   "and output is generated.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Workspace that contains measured spectrum, calculated "
                   "spectrum and difference curve.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "RefinedCellTable", "", Direction::Output),
-      "TableWorkspace with refined lattice parameters, including errors.");
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("RefinedCellTable", "", Direction::Output),
+                  "TableWorkspace with refined lattice parameters, including errors.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "RefinedPeakParameterTable", "", Direction::Output),
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>("RefinedPeakParameterTable", "", Direction::Output),
       "TableWorkspace with refined peak parameters, including errors.");
 
   declareProperty("ReducedChiSquare", 0.0,
@@ -285,27 +259,22 @@ void PawleyFit::init() {
 /// Execution of algorithm.
 void PawleyFit::exec() {
   // Setup PawleyFunction with cell from input parameters
-  Functions::PawleyFunction_sptr pawleyFn =
-      std::dynamic_pointer_cast<Functions::PawleyFunction>(
-          FunctionFactory::Instance().createFunction("PawleyFunction"));
+  Functions::PawleyFunction_sptr pawleyFn = std::dynamic_pointer_cast<Functions::PawleyFunction>(
+      FunctionFactory::Instance().createFunction("PawleyFunction"));
   g_log.information() << "Setting up Pawley function...\n";
 
   std::string profileFunction = getProperty("PeakProfileFunction");
   pawleyFn->setProfileFunction(profileFunction);
-  g_log.information() << "  Selected profile function: " << profileFunction
-                      << '\n';
+  g_log.information() << "  Selected profile function: " << profileFunction << '\n';
 
   std::string latticeSystem = getProperty("LatticeSystem");
   pawleyFn->setLatticeSystem(latticeSystem);
   g_log.information() << "  Selected crystal system: " << latticeSystem << '\n';
 
   pawleyFn->setUnitCell(getProperty("InitialCell"));
-  Functions::PawleyParameterFunction_sptr pawleyParameterFunction =
-      pawleyFn->getPawleyParameterFunction();
-  g_log.information()
-      << "  Initial unit cell: "
-      << unitCellToStr(pawleyParameterFunction->getUnitCellFromParameters())
-      << '\n';
+  Functions::PawleyParameterFunction_sptr pawleyParameterFunction = pawleyFn->getPawleyParameterFunction();
+  g_log.information() << "  Initial unit cell: " << unitCellToStr(pawleyParameterFunction->getUnitCellFromParameters())
+                      << '\n';
 
   // Get the input workspace with the data
   MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
@@ -336,8 +305,7 @@ void PawleyFit::exec() {
   Unit_sptr xUnit = xAxis->unit();
   addHKLsToFunction(pawleyFn, peakTable, xUnit, startX, endX);
 
-  g_log.information() << "  Peaks in PawleyFunction: "
-                      << pawleyFn->getPeakCount() << '\n';
+  g_log.information() << "  Peaks in PawleyFunction: " << pawleyFn->getPeakCount() << '\n';
 
   // Determine if zero-shift should be refined
   bool refineZeroShift = getProperty("RefineZeroShift");
@@ -354,8 +322,7 @@ void PawleyFit::exec() {
   // Generate Fit-algorithm with required properties.
   Algorithm_sptr fit = createChildAlgorithm("Fit", -1, -1, true);
   fit->setProperty("Function", getCompositeFunction(pawleyFn));
-  fit->setProperty("InputWorkspace",
-                   std::const_pointer_cast<MatrixWorkspace>(ws));
+  fit->setProperty("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(ws));
   fit->setProperty("StartX", startX);
   fit->setProperty("EndX", endX);
   fit->setProperty("WorkspaceIndex", wsIndex);
@@ -370,8 +337,7 @@ void PawleyFit::exec() {
   fit->execute();
   double chiSquare = fit->getProperty("OutputChi2overDoF");
 
-  g_log.information() << "Fit finished, reduced ChiSquare = " << chiSquare
-                      << '\n';
+  g_log.information() << "Fit finished, reduced ChiSquare = " << chiSquare << '\n';
 
   g_log.information() << "Generating output...\n";
 
@@ -379,15 +345,13 @@ void PawleyFit::exec() {
   MatrixWorkspace_sptr output = fit->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", output);
   setProperty("RefinedCellTable", getLatticeFromFunction(pawleyFn));
-  setProperty("RefinedPeakParameterTable",
-              getPeakParametersFromFunction(pawleyFn));
+  setProperty("RefinedPeakParameterTable", getPeakParametersFromFunction(pawleyFn));
 
   setProperty("ReducedChiSquare", chiSquare);
 }
 
 /// Tries to extract Miller indices as V3D from column.
-V3D V3DFromHKLColumnExtractor::operator()(const Column_const_sptr &hklColumn,
-                                          size_t i) const {
+V3D V3DFromHKLColumnExtractor::operator()(const Column_const_sptr &hklColumn, size_t i) const {
   if (hklColumn->type() == "V3D") {
     return getHKLFromV3DColumn(hklColumn, i);
   }
@@ -396,21 +360,18 @@ V3D V3DFromHKLColumnExtractor::operator()(const Column_const_sptr &hklColumn,
 }
 
 /// Returns the i-th cell of a V3D column.
-V3D V3DFromHKLColumnExtractor::getHKLFromV3DColumn(
-    const Column_const_sptr &hklColumn, size_t i) const {
+V3D V3DFromHKLColumnExtractor::getHKLFromV3DColumn(const Column_const_sptr &hklColumn, size_t i) const {
   return hklColumn->cell<V3D>(i);
 }
 
 /// Pass the cell value as string to getHKLFromString.
-V3D V3DFromHKLColumnExtractor::getHKLFromStringColumn(
-    const Column_const_sptr &hklColumn, size_t i) const {
+V3D V3DFromHKLColumnExtractor::getHKLFromStringColumn(const Column_const_sptr &hklColumn, size_t i) const {
 
   return getHKLFromString(hklColumn->cell<std::string>(i));
 }
 
 /// Try to extract a V3D from the given string with different separators.
-V3D V3DFromHKLColumnExtractor::getHKLFromString(
-    const std::string &hklString) const {
+V3D V3DFromHKLColumnExtractor::getHKLFromString(const std::string &hklString) const {
   auto delimiters = boost::is_any_of(" ,[];");
 
   std::string workingCopy = boost::trim_copy_if(hklString, delimiters);

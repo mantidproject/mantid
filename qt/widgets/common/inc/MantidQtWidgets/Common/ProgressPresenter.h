@@ -14,18 +14,15 @@ private:
   MantidQt::MantidWidgets::ProgressableView *const m_progressableView;
 
 public:
-  ProgressPresenter(
-      double start, double end, int64_t nSteps,
-      MantidQt::MantidWidgets::ProgressableView *const progressableView)
-      : ProgressBase(static_cast<int>(start), static_cast<int>(end),
-                     static_cast<int>(nSteps)),
+  ProgressPresenter(double start, double end, int64_t nSteps,
+                    MantidQt::MantidWidgets::ProgressableView *const progressableView)
+      : ProgressBase(static_cast<int>(start), static_cast<int>(end), static_cast<int>(nSteps)),
         m_progressableView(progressableView) {
     if (!progressableView) {
       throw std::runtime_error("ProgressableView is null");
     }
     m_progressableView->clearProgress();
-    m_progressableView->setProgressRange(static_cast<int>(start),
-                                         static_cast<int>(end));
+    m_progressableView->setProgressRange(static_cast<int>(start), static_cast<int>(end));
   }
 
   void doReport(const std::string & /*msg*/) override {
@@ -33,9 +30,7 @@ public:
       m_progressableView->setProgress(static_cast<int>(m_i));
   }
   void clear() { m_progressableView->clearProgress(); }
-  void setAsPercentageIndicator() {
-    m_progressableView->setAsPercentageIndicator();
-  }
+  void setAsPercentageIndicator() { m_progressableView->setAsPercentageIndicator(); }
   void setAsEndlessIndicator() { m_progressableView->setAsEndlessIndicator(); }
   ~ProgressPresenter() {}
 };

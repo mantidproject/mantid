@@ -22,9 +22,7 @@ class PoldiSourceSpectrumTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiSourceSpectrumTest *createSuite() {
-    return new PoldiSourceSpectrumTest();
-  }
+  static PoldiSourceSpectrumTest *createSuite() { return new PoldiSourceSpectrumTest(); }
   static void destroySuite(PoldiSourceSpectrumTest *suite) { delete suite; }
 
   void testInterpolationConstructor() {
@@ -50,47 +48,36 @@ public:
   void testGetSourceComponent() {
     TestablePoldiSourceSpectrum spectrum;
 
-    std::shared_ptr<const PoldiAbstractFakeInstrument> goodInstrument(
-        new PoldiValidSourceFakeInstrument);
+    std::shared_ptr<const PoldiAbstractFakeInstrument> goodInstrument(new PoldiValidSourceFakeInstrument);
     TS_ASSERT_THROWS_NOTHING(spectrum.getSourceComponent(goodInstrument));
     IComponent_const_sptr source = spectrum.getSourceComponent(goodInstrument);
     TS_ASSERT_EQUALS(source->getFullName(), "FakePoldiSource");
 
-    std::shared_ptr<const PoldiAbstractFakeInstrument> badInstrument(
-        new PoldiInvalidSourceFakeInstrument);
-    TS_ASSERT_THROWS(spectrum.getSourceComponent(badInstrument),
-                     const std::runtime_error &);
+    std::shared_ptr<const PoldiAbstractFakeInstrument> badInstrument(new PoldiInvalidSourceFakeInstrument);
+    TS_ASSERT_THROWS(spectrum.getSourceComponent(badInstrument), const std::runtime_error &);
   }
 
   void testGetSpectrumParameter() {
     TestablePoldiSourceSpectrum spectrum;
 
-    std::shared_ptr<const IComponent> source =
-        std::make_shared<PoldiFakeSourceComponent>();
-    ParameterMap_sptr goodParameterMap(
-        new PoldiValidFakeParameterMap(source.get()));
+    std::shared_ptr<const IComponent> source = std::make_shared<PoldiFakeSourceComponent>();
+    ParameterMap_sptr goodParameterMap(new PoldiValidFakeParameterMap(source.get()));
 
-    TS_ASSERT_THROWS_NOTHING(
-        spectrum.getSpectrumParameter(source, goodParameterMap));
+    TS_ASSERT_THROWS_NOTHING(spectrum.getSpectrumParameter(source, goodParameterMap));
 
     ParameterMap_sptr badParameterMap(new PoldiInvalidFakeParameterMap);
-    TS_ASSERT_THROWS(spectrum.getSpectrumParameter(source, badParameterMap),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(spectrum.getSpectrumParameter(source, badParameterMap), const std::runtime_error &);
   }
 
   void testSetSpectrum() {
     TestablePoldiSourceSpectrum spectrum;
 
-    std::shared_ptr<const IComponent> source =
-        std::make_shared<PoldiFakeSourceComponent>();
-    ParameterMap_sptr goodParameterMap(
-        new PoldiValidFakeParameterMap(source.get()));
-    Parameter_sptr goodParameter =
-        spectrum.getSpectrumParameter(source, goodParameterMap);
+    std::shared_ptr<const IComponent> source = std::make_shared<PoldiFakeSourceComponent>();
+    ParameterMap_sptr goodParameterMap(new PoldiValidFakeParameterMap(source.get()));
+    Parameter_sptr goodParameter = spectrum.getSpectrumParameter(source, goodParameterMap);
     TS_ASSERT_THROWS_NOTHING(spectrum.setSpectrum(goodParameter));
 
-    TS_ASSERT_THROWS(spectrum.setSpectrum(Parameter_sptr()),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(spectrum.setSpectrum(Parameter_sptr()), const std::runtime_error &);
   }
 
 private:
@@ -98,8 +85,7 @@ private:
     friend class PoldiSourceSpectrumTest;
 
   public:
-    TestablePoldiSourceSpectrum(const Interpolation &spectrum = Interpolation())
-        : PoldiSourceSpectrum(spectrum) {}
+    TestablePoldiSourceSpectrum(const Interpolation &spectrum = Interpolation()) : PoldiSourceSpectrum(spectrum) {}
 
     TestablePoldiSourceSpectrum(Instrument_const_sptr poldiInstrument)
         : PoldiSourceSpectrum(std::move(poldiInstrument)) {}

@@ -21,8 +21,7 @@ using namespace Mantid::DataObjects;
 // Allow testing of protected methods
 class PeakColumnTestHelper : public PeakColumn<Peak> {
 public:
-  PeakColumnTestHelper(std::vector<Peak> &peaks, const std::string &name)
-      : PeakColumn<Peak>(peaks, name) {}
+  PeakColumnTestHelper(std::vector<Peak> &peaks, const std::string &name) : PeakColumn<Peak>(peaks, name) {}
 
   using PeakColumn::insert;
   using PeakColumn::remove;
@@ -49,8 +48,7 @@ public:
   }
 
   void test_constructor_throws_given_unknown_name() {
-    TS_ASSERT_THROWS(PeakColumn<Peak>(m_peaks, "NotPeakColumn"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(PeakColumn<Peak>(m_peaks, "NotPeakColumn"), const std::runtime_error &);
   }
 
   void test_clone() {
@@ -83,20 +81,17 @@ public:
 
   void test_PeakColumn_Cannot_Be_Resized() {
     PeakColumnTestHelper pc(m_peaks, "DetID");
-    TS_ASSERT_THROWS(pc.resize(10),
-                     const Mantid::Kernel::Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(pc.resize(10), const Mantid::Kernel::Exception::NotImplementedError &);
   }
 
   void test_Row_Cannot_Be_Inserted_Into_PeakColumn() {
     PeakColumnTestHelper pc(m_peaks, "DetID");
-    TS_ASSERT_THROWS(pc.insert(0),
-                     const Mantid::Kernel::Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(pc.insert(0), const Mantid::Kernel::Exception::NotImplementedError &);
   }
 
   void test_Row_Cannot_Be_Removed_From_PeakColumn() {
     PeakColumnTestHelper pc(m_peaks, "DetID");
-    TS_ASSERT_THROWS(pc.remove(0),
-                     const Mantid::Kernel::Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(pc.remove(0), const Mantid::Kernel::Exception::NotImplementedError &);
   }
 
   void test_cell_returns_correct_value_from_PeakColumn() {

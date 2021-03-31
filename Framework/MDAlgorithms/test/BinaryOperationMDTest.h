@@ -32,12 +32,9 @@ public:
   MOCK_METHOD0(checkInputs, void());
   MOCK_METHOD0(execEvent, void());
   MOCK_METHOD2(execHistoHisto,
-               void(Mantid::DataObjects::MDHistoWorkspace_sptr,
-                    Mantid::DataObjects::MDHistoWorkspace_const_sptr));
-  MOCK_METHOD2(
-      execHistoScalar,
-      void(Mantid::DataObjects::MDHistoWorkspace_sptr,
-           Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar));
+               void(Mantid::DataObjects::MDHistoWorkspace_sptr, Mantid::DataObjects::MDHistoWorkspace_const_sptr));
+  MOCK_METHOD2(execHistoScalar, void(Mantid::DataObjects::MDHistoWorkspace_sptr,
+                                     Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar));
   void exec() override { BinaryOperationMD::exec(); }
 };
 GNU_DIAG_ON_SUGGEST_OVERRIDE
@@ -45,9 +42,7 @@ class BinaryOperationMDTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BinaryOperationMDTest *createSuite() {
-    return new BinaryOperationMDTest();
-  }
+  static BinaryOperationMDTest *createSuite() { return new BinaryOperationMDTest(); }
   static void destroySuite(BinaryOperationMDTest *suite) { delete suite; }
 
   MDHistoWorkspace_sptr histo_A;
@@ -60,14 +55,10 @@ public:
   IMDWorkspace_sptr out;
 
   void setUp() override {
-    histo_A =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 5, 10.0, 1.0);
-    histo_B =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 5, 10.0, 1.0);
-    histo2d_100 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10, 10.0, 1.0);
-    histo3d =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 5, 10.0, 1.0);
+    histo_A = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 5, 10.0, 1.0);
+    histo_B = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 5, 10.0, 1.0);
+    histo2d_100 = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10, 10.0, 1.0);
+    histo3d = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 5, 10.0, 1.0);
     event_A = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
     event_B = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
     scalar = WorkspaceCreationHelper::createWorkspaceSingleValue(2.5);
@@ -89,14 +80,12 @@ public:
   /// Sub-class can abort
   void test_checkInputs() {
     MockBinaryOperationMD alg;
-    EXPECT_CALL(alg, checkInputs())
-        .WillOnce(Throw(std::runtime_error("Bad inputs!")));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(Throw(std::runtime_error("Bad inputs!")));
     doTest(alg, "histo_A", "histo_B", "some_output", false /*it fails*/);
   }
 
   /// Run the mock algorithm
-  void doTest(MockBinaryOperationMD &alg, const std::string &lhs,
-              const std::string &rhs, const std::string &outName,
+  void doTest(MockBinaryOperationMD &alg, const std::string &lhs, const std::string &rhs, const std::string &outName,
               bool succeeds = true) {
     out.reset();
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -107,20 +96,16 @@ public:
     alg.execute();
     if (succeeds) {
       TS_ASSERT(alg.isExecuted());
-      TSM_ASSERT("Algorithm methods were called as expected",
-                 testing::Mock::VerifyAndClearExpectations(&alg));
-      out = std::dynamic_pointer_cast<IMDWorkspace>(
-          AnalysisDataService::Instance().retrieve(outName));
+      TSM_ASSERT("Algorithm methods were called as expected", testing::Mock::VerifyAndClearExpectations(&alg));
+      out = std::dynamic_pointer_cast<IMDWorkspace>(AnalysisDataService::Instance().retrieve(outName));
       TS_ASSERT(out);
       auto outHisto = std::dynamic_pointer_cast<MDHistoWorkspace>(out);
       if (outHisto) {
-        TS_ASSERT(outHisto->getExperimentInfo(0)->run().hasProperty(
-            "mdhisto_was_modified"));
+        TS_ASSERT(outHisto->getExperimentInfo(0)->run().hasProperty("mdhisto_was_modified"));
       }
     } else {
       TS_ASSERT(!alg.isExecuted());
-      TSM_ASSERT("Algorithm methods were called as expected",
-                 testing::Mock::VerifyAndClearExpectations(&alg));
+      TSM_ASSERT("Algorithm methods were called as expected", testing::Mock::VerifyAndClearExpectations(&alg));
     }
   }
 

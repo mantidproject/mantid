@@ -16,24 +16,21 @@ public:
   void testIsValid() {
     using namespace Mantid::MDAlgorithms;
     InvalidParameter invalidParam;
-    TSM_ASSERT_EQUALS("The InvalidParameter should always be invalid", false,
-                      invalidParam.isValid());
+    TSM_ASSERT_EQUALS("The InvalidParameter should always be invalid", false, invalidParam.isValid());
   }
 
   void testClone() {
     using namespace Mantid::MDAlgorithms;
     InvalidParameter original("1");
     boost::scoped_ptr<InvalidParameter> cloned(original.clone());
-    TSM_ASSERT_EQUALS("The parameter value has not been cloned.", "1",
-                      cloned->getValue());
+    TSM_ASSERT_EQUALS("The parameter value has not been cloned.", "1", cloned->getValue());
   }
 
   void testCopy() {
     using namespace Mantid::MDAlgorithms;
     InvalidParameter original("1");
     InvalidParameter copy(original);
-    TSM_ASSERT_EQUALS("The parameter value has not been copied.", "1",
-                      copy.getValue());
+    TSM_ASSERT_EQUALS("The parameter value has not been copied.", "1", copy.getValue());
   }
 
   void testGetNameFunctionsEquivalent() {

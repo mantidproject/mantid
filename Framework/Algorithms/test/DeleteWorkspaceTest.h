@@ -22,11 +22,9 @@ public:
 
     // Need a test workspace registered within the ADS
     const int yLength1 = 10;
-    Workspace2D_sptr testWS1 =
-        WorkspaceCreationHelper::create2DWorkspace(yLength1, 10);
+    Workspace2D_sptr testWS1 = WorkspaceCreationHelper::create2DWorkspace(yLength1, 10);
     const int yLength2 = 20;
-    Workspace2D_sptr testWS2 =
-        WorkspaceCreationHelper::create2DWorkspace(yLength2, 10);
+    Workspace2D_sptr testWS2 = WorkspaceCreationHelper::create2DWorkspace(yLength2, 10);
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
     const size_t storeSizeAtStart(dataStore.size());
     const std::string testName1 = "DeleteWorkspace_testWS1";
@@ -44,8 +42,7 @@ public:
 
     TS_ASSERT_EQUALS(dataStore.size(), storeSizeAtStart + 1);
     // Check that what is left is correct
-    MatrixWorkspace_sptr wsTwo = std::dynamic_pointer_cast<MatrixWorkspace>(
-        dataStore.retrieve(testName2));
+    MatrixWorkspace_sptr wsTwo = std::dynamic_pointer_cast<MatrixWorkspace>(dataStore.retrieve(testName2));
     TS_ASSERT(wsTwo);
     if (!wsTwo)
       TS_FAIL("Unable to retrieve remaining workspace.");
@@ -61,11 +58,9 @@ public:
 
     // Need a test workspace registered within the ADS
     const int yLength1 = 10;
-    Workspace2D_sptr testWS1 =
-        WorkspaceCreationHelper::create2DWorkspace(yLength1, 10);
+    Workspace2D_sptr testWS1 = WorkspaceCreationHelper::create2DWorkspace(yLength1, 10);
     const int yLength2 = 20;
-    Workspace2D_sptr testWS2 =
-        WorkspaceCreationHelper::create2DWorkspace(yLength2, 10);
+    Workspace2D_sptr testWS2 = WorkspaceCreationHelper::create2DWorkspace(yLength2, 10);
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
     dataStore.clear();
 

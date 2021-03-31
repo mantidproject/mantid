@@ -17,9 +17,7 @@ class WorkspaceUnitValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static WorkspaceUnitValidatorTest *createSuite() {
-    return new WorkspaceUnitValidatorTest();
-  }
+  static WorkspaceUnitValidatorTest *createSuite() { return new WorkspaceUnitValidatorTest(); }
   static void destroySuite(WorkspaceUnitValidatorTest *suite) { delete suite; }
 
   void test_fail() {

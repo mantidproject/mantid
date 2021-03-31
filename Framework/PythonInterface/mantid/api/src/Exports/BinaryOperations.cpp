@@ -25,32 +25,24 @@ void export_BinaryOperations() {
   using namespace boost::python;
 
   // Typedefs the various function types
-  using binary_fn_md_md = IMDWorkspace_sptr (*)(
-      const IMDWorkspace_sptr, const IMDWorkspace_sptr, const std::string &,
-      const std::string &, bool, bool);
-  using binary_fn_md_gp = WorkspaceGroup_sptr (*)(
-      const IMDWorkspace_sptr, const WorkspaceGroup_sptr, const std::string &,
-      const std::string &, bool, bool);
-  using binary_fn_gp_md = WorkspaceGroup_sptr (*)(
-      const WorkspaceGroup_sptr, const IMDWorkspace_sptr, const std::string &,
-      const std::string &, bool, bool);
-  using binary_fn_gp_gp = WorkspaceGroup_sptr (*)(
-      const WorkspaceGroup_sptr, const WorkspaceGroup_sptr, const std::string &,
-      const std::string &, bool, bool);
+  using binary_fn_md_md = IMDWorkspace_sptr (*)(const IMDWorkspace_sptr, const IMDWorkspace_sptr, const std::string &,
+                                                const std::string &, bool, bool);
+  using binary_fn_md_gp = WorkspaceGroup_sptr (*)(const IMDWorkspace_sptr, const WorkspaceGroup_sptr,
+                                                  const std::string &, const std::string &, bool, bool);
+  using binary_fn_gp_md = WorkspaceGroup_sptr (*)(const WorkspaceGroup_sptr, const IMDWorkspace_sptr,
+                                                  const std::string &, const std::string &, bool, bool);
+  using binary_fn_gp_gp = WorkspaceGroup_sptr (*)(const WorkspaceGroup_sptr, const WorkspaceGroup_sptr,
+                                                  const std::string &, const std::string &, bool, bool);
 
-  using binary_fn_mh_mh = IMDHistoWorkspace_sptr (*)(
-      const IMDHistoWorkspace_sptr, const IMDHistoWorkspace_sptr,
-      const std::string &, const std::string &, bool, bool);
+  using binary_fn_mh_mh = IMDHistoWorkspace_sptr (*)(const IMDHistoWorkspace_sptr, const IMDHistoWorkspace_sptr,
+                                                     const std::string &, const std::string &, bool, bool);
 
-  using binary_fn_md_db = IMDWorkspace_sptr (*)(
-      const IMDWorkspace_sptr, double, const std::string &, const std::string &,
-      bool, bool);
-  using binary_fn_mh_db = IMDHistoWorkspace_sptr (*)(
-      const IMDHistoWorkspace_sptr, double, const std::string &,
-      const std::string &, bool, bool);
-  using binary_fn_gp_db = WorkspaceGroup_sptr (*)(
-      const WorkspaceGroup_sptr, double, const std::string &,
-      const std::string &, bool, bool);
+  using binary_fn_md_db =
+      IMDWorkspace_sptr (*)(const IMDWorkspace_sptr, double, const std::string &, const std::string &, bool, bool);
+  using binary_fn_mh_db = IMDHistoWorkspace_sptr (*)(const IMDHistoWorkspace_sptr, double, const std::string &,
+                                                     const std::string &, bool, bool);
+  using binary_fn_gp_db =
+      WorkspaceGroup_sptr (*)(const WorkspaceGroup_sptr, double, const std::string &, const std::string &, bool, bool);
 
   // Always a return a Workspace_sptr
   using ReturnWorkspaceSptr = return_value_policy<AsType<Workspace_sptr>>;
@@ -60,23 +52,15 @@ void export_BinaryOperations() {
   using Mantid::PythonInterface::performBinaryOp;
   using Mantid::PythonInterface::performBinaryOpWithDouble;
 
-  def("performBinaryOp", (binary_fn_md_md)&performBinaryOp,
-      ReturnWorkspaceSptr());
-  def("performBinaryOp", (binary_fn_md_gp)&performBinaryOp,
-      ReturnWorkspaceSptr());
-  def("performBinaryOp", (binary_fn_gp_md)&performBinaryOp,
-      ReturnWorkspaceSptr());
-  def("performBinaryOp", (binary_fn_gp_gp)&performBinaryOp,
-      ReturnWorkspaceSptr());
-  def("performBinaryOp", (binary_fn_mh_mh)&performBinaryOp,
-      ReturnWorkspaceSptr());
+  def("performBinaryOp", (binary_fn_md_md)&performBinaryOp, ReturnWorkspaceSptr());
+  def("performBinaryOp", (binary_fn_md_gp)&performBinaryOp, ReturnWorkspaceSptr());
+  def("performBinaryOp", (binary_fn_gp_md)&performBinaryOp, ReturnWorkspaceSptr());
+  def("performBinaryOp", (binary_fn_gp_gp)&performBinaryOp, ReturnWorkspaceSptr());
+  def("performBinaryOp", (binary_fn_mh_mh)&performBinaryOp, ReturnWorkspaceSptr());
 
-  def("performBinaryOp", (binary_fn_md_db)&performBinaryOpWithDouble,
-      ReturnWorkspaceSptr());
-  def("performBinaryOp", (binary_fn_mh_db)&performBinaryOpWithDouble,
-      ReturnWorkspaceSptr());
-  def("performBinaryOp", (binary_fn_gp_db)&performBinaryOpWithDouble,
-      ReturnWorkspaceSptr());
+  def("performBinaryOp", (binary_fn_md_db)&performBinaryOpWithDouble, ReturnWorkspaceSptr());
+  def("performBinaryOp", (binary_fn_mh_db)&performBinaryOpWithDouble, ReturnWorkspaceSptr());
+  def("performBinaryOp", (binary_fn_gp_db)&performBinaryOpWithDouble, ReturnWorkspaceSptr());
 }
 
 namespace Mantid {
@@ -97,20 +81,15 @@ using namespace Mantid::API;
  * @returns The resulting workspace
  */
 template <typename LHSType, typename RHSType, typename ResultType>
-ResultType performBinaryOp(const LHSType lhs, const RHSType rhs,
-                           const std::string &op, const std::string &name,
+ResultType performBinaryOp(const LHSType lhs, const RHSType rhs, const std::string &op, const std::string &name,
                            bool inplace, bool reverse) {
   std::string algoName = op;
 
   // ----- Determine which version of the algo should be called -----
-  MatrixWorkspace_const_sptr lhs_mat =
-      std::dynamic_pointer_cast<const MatrixWorkspace>(lhs);
-  MatrixWorkspace_const_sptr rhs_mat =
-      std::dynamic_pointer_cast<const MatrixWorkspace>(rhs);
-  WorkspaceGroup_const_sptr lhs_grp =
-      std::dynamic_pointer_cast<const WorkspaceGroup>(lhs);
-  WorkspaceGroup_const_sptr rhs_grp =
-      std::dynamic_pointer_cast<const WorkspaceGroup>(rhs);
+  MatrixWorkspace_const_sptr lhs_mat = std::dynamic_pointer_cast<const MatrixWorkspace>(lhs);
+  MatrixWorkspace_const_sptr rhs_mat = std::dynamic_pointer_cast<const MatrixWorkspace>(rhs);
+  WorkspaceGroup_const_sptr lhs_grp = std::dynamic_pointer_cast<const WorkspaceGroup>(lhs);
+  WorkspaceGroup_const_sptr rhs_grp = std::dynamic_pointer_cast<const WorkspaceGroup>(rhs);
 
   if ((lhs_mat || lhs_grp) && (rhs_mat || rhs_grp))
     // Both sides are matrixworkspace - use the original algos (e..g "Plus.")
@@ -124,13 +103,11 @@ ResultType performBinaryOp(const LHSType lhs, const RHSType rhs,
   std::string error;
   try {
     if (reverse) {
-      result = API::OperatorOverloads::executeBinaryOperation<RHSType, LHSType,
-                                                              ResultType>(
-          algoName, rhs, lhs, inplace, false, name, true);
+      result = API::OperatorOverloads::executeBinaryOperation<RHSType, LHSType, ResultType>(algoName, rhs, lhs, inplace,
+                                                                                            false, name, true);
     } else {
-      result = API::OperatorOverloads::executeBinaryOperation<LHSType, RHSType,
-                                                              ResultType>(
-          algoName, lhs, rhs, inplace, false, name, true);
+      result = API::OperatorOverloads::executeBinaryOperation<LHSType, RHSType, ResultType>(algoName, lhs, rhs, inplace,
+                                                                                            false, name, true);
     }
   } catch (std::runtime_error &exc) {
     error = exc.what();
@@ -159,15 +136,11 @@ ResultType performBinaryOp(const LHSType lhs, const RHSType rhs,
  * @return A shared pointer to the result workspace
  */
 template <typename LHSType, typename ResultType>
-ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
-                                     const std::string &op,
-                                     const std::string &name, bool inplace,
-                                     bool reverse) {
+ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value, const std::string &op,
+                                     const std::string &name, bool inplace, bool reverse) {
   // RAII struct to add/remove workspace from ADS
   struct ScopedADSEntry {
-    ScopedADSEntry(const std::string &entryName,
-                   const MatrixWorkspace_sptr &value)
-        : name(entryName) {
+    ScopedADSEntry(const std::string &entryName, const MatrixWorkspace_sptr &value) : name(entryName) {
       ads.addOrReplace(entryName, value);
     }
     ~ScopedADSEntry() { ads.remove(name); }
@@ -184,8 +157,7 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
   // return the same string. WorkspaceProperty<TYPE>::createHistory() then
   // records the correct workspace name for input into the final binary
   // operation rather than creating a temporary name.
-  auto alg = API::AlgorithmManager::Instance().createUnmanaged(
-      "CreateSingleValuedWorkspace");
+  auto alg = API::AlgorithmManager::Instance().createUnmanaged("CreateSingleValuedWorkspace");
   alg->setChild(false);
   // we manually store the workspace as it's easier to retrieve the correct
   // type from alg->getProperty rather than calling the ADS again and casting
@@ -205,46 +177,31 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
   }
   ScopedADSEntry removeOnExit(tmpName, singleValue);
   ResultType result =
-      performBinaryOp<LHSType, MatrixWorkspace_sptr, ResultType>(
-          inputWS, singleValue, op, name, inplace, reverse);
+      performBinaryOp<LHSType, MatrixWorkspace_sptr, ResultType>(inputWS, singleValue, op, name, inplace, reverse);
   return result;
 }
 
 // Concrete instantations
-template IMDWorkspace_sptr performBinaryOp(const IMDWorkspace_sptr,
-                                           const IMDWorkspace_sptr,
-                                           const std::string &,
+template IMDWorkspace_sptr performBinaryOp(const IMDWorkspace_sptr, const IMDWorkspace_sptr, const std::string &,
                                            const std::string &name, bool, bool);
-template WorkspaceGroup_sptr
-performBinaryOp(const IMDWorkspace_sptr, const WorkspaceGroup_sptr,
-                const std::string &, const std::string &name, bool, bool);
-template WorkspaceGroup_sptr
-performBinaryOp(const WorkspaceGroup_sptr, const IMDWorkspace_sptr,
-                const std::string &, const std::string &name, bool, bool);
-template WorkspaceGroup_sptr
-performBinaryOp(const WorkspaceGroup_sptr, const WorkspaceGroup_sptr,
-                const std::string &, const std::string &name, bool, bool);
+template WorkspaceGroup_sptr performBinaryOp(const IMDWorkspace_sptr, const WorkspaceGroup_sptr, const std::string &,
+                                             const std::string &name, bool, bool);
+template WorkspaceGroup_sptr performBinaryOp(const WorkspaceGroup_sptr, const IMDWorkspace_sptr, const std::string &,
+                                             const std::string &name, bool, bool);
+template WorkspaceGroup_sptr performBinaryOp(const WorkspaceGroup_sptr, const WorkspaceGroup_sptr, const std::string &,
+                                             const std::string &name, bool, bool);
 
-template IMDHistoWorkspace_sptr
-performBinaryOp(const IMDHistoWorkspace_sptr, const IMDHistoWorkspace_sptr,
-                const std::string &, const std::string &name, bool, bool);
-template IMDHistoWorkspace_sptr
-performBinaryOp(const IMDHistoWorkspace_sptr, const MatrixWorkspace_sptr,
-                const std::string &, const std::string &name, bool, bool);
+template IMDHistoWorkspace_sptr performBinaryOp(const IMDHistoWorkspace_sptr, const IMDHistoWorkspace_sptr,
+                                                const std::string &, const std::string &name, bool, bool);
+template IMDHistoWorkspace_sptr performBinaryOp(const IMDHistoWorkspace_sptr, const MatrixWorkspace_sptr,
+                                                const std::string &, const std::string &name, bool, bool);
 
 // Double variants
-template IMDWorkspace_sptr performBinaryOpWithDouble(const IMDWorkspace_sptr,
-                                                     const double,
-                                                     const std::string &op,
-                                                     const std::string &, bool,
-                                                     bool);
-template IMDHistoWorkspace_sptr
-performBinaryOpWithDouble(const IMDHistoWorkspace_sptr, const double,
-                          const std::string &op, const std::string &, bool,
-                          bool);
-template WorkspaceGroup_sptr
-performBinaryOpWithDouble(const WorkspaceGroup_sptr, const double,
-                          const std::string &op, const std::string &, bool,
-                          bool);
+template IMDWorkspace_sptr performBinaryOpWithDouble(const IMDWorkspace_sptr, const double, const std::string &op,
+                                                     const std::string &, bool, bool);
+template IMDHistoWorkspace_sptr performBinaryOpWithDouble(const IMDHistoWorkspace_sptr, const double,
+                                                          const std::string &op, const std::string &, bool, bool);
+template WorkspaceGroup_sptr performBinaryOpWithDouble(const WorkspaceGroup_sptr, const double, const std::string &op,
+                                                       const std::string &, bool, bool);
 } // namespace PythonInterface
 } // namespace Mantid

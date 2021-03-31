@@ -17,8 +17,7 @@ namespace PythonInterface {
 namespace Registry {
 
 /// Create a C++ PropertyMananager from a Python dictionary
-std::shared_ptr<Kernel::PropertyManager>
-createPropertyManager(const boost::python::dict &mapping);
+std::shared_ptr<Kernel::PropertyManager> createPropertyManager(const boost::python::dict &mapping);
 } // namespace Registry
 } // namespace PythonInterface
 } // namespace Mantid

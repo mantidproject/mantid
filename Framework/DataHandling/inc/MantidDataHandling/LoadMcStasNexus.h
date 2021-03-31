@@ -15,19 +15,14 @@ namespace DataHandling {
 
 /** LoadMcStasNexus : TODO: DESCRIPTION
  */
-class DLLExport LoadMcStasNexus
-    : public API::IFileLoader<Kernel::NexusDescriptor> {
+class DLLExport LoadMcStasNexus : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Loads an McStas NeXus file into a group workspace.";
-  }
+  const std::string summary() const override { return "Loads an McStas NeXus file into a group workspace."; }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadMcStas"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadMcStas"}; }
   const std::string category() const override;
 
   /// Returns a confidence value that this algorithm can load a file

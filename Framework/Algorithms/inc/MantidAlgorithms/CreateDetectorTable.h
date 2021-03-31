@@ -52,25 +52,20 @@ private:
 };
 
 /// Creates table workspace of detector information from a given workspace
-API::ITableWorkspace_sptr
-createDetectorTableWorkspace(const API::MatrixWorkspace_sptr &ws,
-                             const std::vector<int> &indices,
-                             const bool includeData, Kernel::Logger &logger);
+API::ITableWorkspace_sptr createDetectorTableWorkspace(const API::MatrixWorkspace_sptr &ws,
+                                                       const std::vector<int> &indices, const bool includeData,
+                                                       Kernel::Logger &logger);
 
 /// Converts a list to a string, shortened if necessary
 std::string createTruncatedList(const std::set<int> &elements);
 
-void populateTable(Mantid::API::ITableWorkspace_sptr &t,
-                   const Mantid::API::MatrixWorkspace_sptr &ws, const int nrows,
-                   const std::vector<int> &indices,
-                   const Mantid::API::SpectrumInfo &spectrumInfo,
+void populateTable(Mantid::API::ITableWorkspace_sptr &t, const Mantid::API::MatrixWorkspace_sptr &ws, const int nrows,
+                   const std::vector<int> &indices, const Mantid::API::SpectrumInfo &spectrumInfo,
                    bool signedThetaParamRetrieved, bool showSignedTwoTheta,
-                   const Mantid::Geometry::PointingAlong &beamAxisIndex,
-                   const double sampleDist, const bool isScanning,
-                   const bool include_data, const bool calcQ,
-                   Kernel::Logger &logger);
-std::vector<std::pair<std::string, std::string>>
-createColumns(const bool isScanning, const bool includeData, const bool calcQ);
+                   const Mantid::Geometry::PointingAlong &beamAxisIndex, const double sampleDist, const bool isScanning,
+                   const bool include_data, const bool calcQ, Kernel::Logger &logger);
+std::vector<std::pair<std::string, std::string>> createColumns(const bool isScanning, const bool includeData,
+                                                               const bool calcQ);
 
 } // namespace Algorithms
 } // namespace Mantid

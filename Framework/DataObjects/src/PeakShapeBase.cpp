@@ -13,10 +13,8 @@
 namespace Mantid {
 namespace DataObjects {
 
-PeakShapeBase::PeakShapeBase(Kernel::SpecialCoordinateSystem frame,
-                             std::string algorithmName, int algorithmVersion)
-    : m_frame(frame), m_algorithmName(std::move(algorithmName)),
-      m_algorithmVersion(algorithmVersion) {}
+PeakShapeBase::PeakShapeBase(Kernel::SpecialCoordinateSystem frame, std::string algorithmName, int algorithmVersion)
+    : m_frame(frame), m_algorithmName(std::move(algorithmName)), m_algorithmVersion(algorithmVersion) {}
 
 /**
  * @brief PeakShapeBase::frame
@@ -52,9 +50,7 @@ std::string PeakShapeBase::algorithmName() const { return m_algorithmName; }
  */
 int PeakShapeBase::algorithmVersion() const { return m_algorithmVersion; }
 
-bool PeakShapeBase::operator==(const PeakShapeBase &other) const {
-  return other.frame() == this->frame();
-}
+bool PeakShapeBase::operator==(const PeakShapeBase &other) const { return other.frame() == this->frame(); }
 
 } // namespace DataObjects
 } // namespace Mantid

@@ -16,35 +16,25 @@ namespace {
 // Filter functions
 double intensity(const Mantid::Geometry::IPeak &p) { return p.getIntensity(); }
 
-double wavelength(const Mantid::Geometry::IPeak &p) {
-  return p.getWavelength();
-}
+double wavelength(const Mantid::Geometry::IPeak &p) { return p.getWavelength(); }
 
 double dspacing(const Mantid::Geometry::IPeak &p) { return p.getDSpacing(); }
 
 double tof(const Mantid::Geometry::IPeak &p) { return p.getTOF(); }
 
-double HKLSum(const Mantid::Geometry::IPeak &p) {
-  return p.getH() + p.getK() + p.getL();
-}
+double HKLSum(const Mantid::Geometry::IPeak &p) { return p.getH() + p.getK() + p.getL(); }
 
 double HKL2(const Mantid::Geometry::IPeak &p) {
   return p.getH() * p.getH() + p.getK() * p.getK() + p.getL() * p.getL();
 }
 
-double QMOD(const Mantid::Geometry::IPeak &p) {
-  return p.getQSampleFrame().norm();
-}
+double QMOD(const Mantid::Geometry::IPeak &p) { return p.getQSampleFrame().norm(); }
 
-double SN(const Mantid::Geometry::IPeak &p) {
-  return p.getIntensity() / p.getSigmaIntensity();
-}
+double SN(const Mantid::Geometry::IPeak &p) { return p.getIntensity() / p.getSigmaIntensity(); }
 
 double RUN(const Mantid::Geometry::IPeak &p) { return p.getRunNumber(); }
 
-std::string BANKNAME(const Mantid::Geometry::IPeak &p) {
-  return p.getBankName();
-}
+std::string BANKNAME(const Mantid::Geometry::IPeak &p) { return p.getBankName(); }
 
 } // namespace
 
@@ -70,28 +60,22 @@ const std::string FilterPeaks::category() const { return "Crystal\\Peaks"; }
 /** Initialize the algorithm's properties.
  */
 void FilterPeaks::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The filtered workspace");
 
   // filter by property
   const std::string FILTER("Filter Options");
-  std::vector<std::string> filters{"h+k+l",        "h^2+k^2+l^2", "Intensity",
-                                   "Signal/Noise", "QMod",        "Wavelength",
-                                   "DSpacing",     "TOF",         "RunNumber"};
-  declareProperty("FilterVariable", "h+k+l",
-                  std::make_shared<StringListValidator>(filters),
+  std::vector<std::string> filters{"h+k+l",      "h^2+k^2+l^2", "Intensity", "Signal/Noise", "QMod",
+                                   "Wavelength", "DSpacing",    "TOF",       "RunNumber"};
+  declareProperty("FilterVariable", "h+k+l", std::make_shared<StringListValidator>(filters),
                   "The variable on which to filter the peaks");
 
-  declareProperty("FilterValue", EMPTY_DBL(),
-                  "The value of the FilterVariable to compare each peak to");
+  declareProperty("FilterValue", EMPTY_DBL(), "The value of the FilterVariable to compare each peak to");
 
   std::vector<std::string> operation{"<", ">", "=", "!=", "<=", ">="};
-  declareProperty("Operator", "<",
-                  std::make_shared<StringListValidator>(operation), "");
+  declareProperty("Operator", "<", std::make_shared<StringListValidator>(operation), "");
   setPropertyGroup("FilterVariable", FILTER);
   setPropertyGroup("FilterValue", FILTER);
   setPropertyGroup("Operator", FILTER);
@@ -99,10 +83,8 @@ void FilterPeaks::init() {
   // select by bankname
   const std::string SELECT("Select Bank by Name");
   std::vector<std::string> action{"=", "!="};
-  declareProperty("Criterion", "=",
-                  std::make_shared<StringListValidator>(action), "");
-  declareProperty("BankName", "",
-                  "Selected bank name, empty means skip selection");
+  declareProperty("Criterion", "=", std::make_shared<StringListValidator>(action), "");
+  declareProperty("BankName", "", "Selected bank name, empty means skip selection");
   setPropertyGroup("Criterion", SELECT);
   setPropertyGroup("BankName", SELECT);
 }
@@ -111,8 +93,8 @@ void FilterPeaks::init() {
  */
 void FilterPeaks::exec() {
   IPeaksWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  IPeaksWorkspace_sptr filteredWS = std::dynamic_pointer_cast<IPeaksWorkspace>(
-      WorkspaceFactory::Instance().createPeaks(inputWS->id()));
+  IPeaksWorkspace_sptr filteredWS =
+      std::dynamic_pointer_cast<IPeaksWorkspace>(WorkspaceFactory::Instance().createPeaks(inputWS->id()));
 
   // Copy over ExperimentInfo from input workspace
   filteredWS->copyExperimentInfoFrom(inputWS.get());
@@ -129,14 +111,11 @@ void FilterPeaks::exec() {
     IPeaksWorkspace_sptr selectedWS = filteredWS->clone();
 
     if (criterion == "=")
-      filterPeaksStr<std::equal_to<std::string>>(*inputWS, *selectedWS,
-                                                 filterFunction, bankname);
+      filterPeaksStr<std::equal_to<std::string>>(*inputWS, *selectedWS, filterFunction, bankname);
     else if (criterion == "!=")
-      filterPeaksStr<std::not_equal_to<std::string>>(*inputWS, *selectedWS,
-                                                     filterFunction, bankname);
+      filterPeaksStr<std::not_equal_to<std::string>>(*inputWS, *selectedWS, filterFunction, bankname);
     else
-      throw std::invalid_argument("Unsupported operator " + criterion +
-                                  " for BankName filter");
+      throw std::invalid_argument("Unsupported operator " + criterion + " for BankName filter");
 
     inputWS = selectedWS;
     setProperty("OutputWorkspace", selectedWS);
@@ -146,23 +125,17 @@ void FilterPeaks::exec() {
     const auto filterFunction = getFilterVariableFunction(filterVariable);
     // Choose which version of the function to use based on the operator
     if (Operator == "<")
-      filterPeaks<std::less<double>>(*inputWS, *filteredWS, filterFunction,
-                                     filterValue);
+      filterPeaks<std::less<double>>(*inputWS, *filteredWS, filterFunction, filterValue);
     else if (Operator == ">")
-      filterPeaks<std::greater<double>>(*inputWS, *filteredWS, filterFunction,
-                                        filterValue);
+      filterPeaks<std::greater<double>>(*inputWS, *filteredWS, filterFunction, filterValue);
     else if (Operator == "=")
-      filterPeaks<std::equal_to<double>>(*inputWS, *filteredWS, filterFunction,
-                                         filterValue);
+      filterPeaks<std::equal_to<double>>(*inputWS, *filteredWS, filterFunction, filterValue);
     else if (Operator == "!=")
-      filterPeaks<std::not_equal_to<double>>(*inputWS, *filteredWS,
-                                             filterFunction, filterValue);
+      filterPeaks<std::not_equal_to<double>>(*inputWS, *filteredWS, filterFunction, filterValue);
     else if (Operator == "<=")
-      filterPeaks<std::less_equal<double>>(*inputWS, *filteredWS,
-                                           filterFunction, filterValue);
+      filterPeaks<std::less_equal<double>>(*inputWS, *filteredWS, filterFunction, filterValue);
     else if (Operator == ">=")
-      filterPeaks<std::greater_equal<double>>(*inputWS, *filteredWS,
-                                              filterFunction, filterValue);
+      filterPeaks<std::greater_equal<double>>(*inputWS, *filteredWS, filterFunction, filterValue);
     else
       throw std::invalid_argument("Unknown Operator " + Operator);
 
@@ -180,8 +153,7 @@ void FilterPeaks::exec() {
  * e.g. "h+k+l" or "TOF".
  * @return a function object which will return the a value for a given peak
  */
-FilterPeaks::FilterFunction FilterPeaks::getFilterVariableFunction(
-    const std::string &filterVariable) const {
+FilterPeaks::FilterFunction FilterPeaks::getFilterVariableFunction(const std::string &filterVariable) const {
   FilterFunction filterFunction;
   if (filterVariable == "h+k+l")
     filterFunction = &HKLSum;

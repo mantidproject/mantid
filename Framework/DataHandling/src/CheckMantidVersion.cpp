@@ -29,17 +29,13 @@ using namespace Mantid::Kernel;
 DECLARE_ALGORITHM(CheckMantidVersion)
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CheckMantidVersion::name() const {
-  return "CheckMantidVersion";
-}
+const std::string CheckMantidVersion::name() const { return "CheckMantidVersion"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CheckMantidVersion::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CheckMantidVersion::category() const {
-  return "Utility\\Development";
-}
+const std::string CheckMantidVersion::category() const { return "Utility\\Development"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CheckMantidVersion::summary() const {
@@ -52,8 +48,7 @@ const std::string CheckMantidVersion::summary() const {
 void CheckMantidVersion::init() {
   declareProperty("CurrentVersion", "", Direction::Output);
   declareProperty("MostRecentVersion", "", Direction::Output);
-  declareProperty("IsNewVersionAvailable", false,
-                  "True if a newer version is available, otherwise false",
+  declareProperty("IsNewVersionAvailable", false, "True if a newer version is available, otherwise false",
                   Direction::Output);
 }
 
@@ -64,14 +59,11 @@ void CheckMantidVersion::exec() {
   setProperty("CurrentVersion", currentVersion);
   std::string mostRecentVersion;
 
-  std::string gitHubReleaseUrl = ConfigService::Instance().getString(
-      "CheckMantidVersion.GitHubReleaseURL");
+  std::string gitHubReleaseUrl = ConfigService::Instance().getString("CheckMantidVersion.GitHubReleaseURL");
   if (gitHubReleaseUrl.empty()) {
-    gitHubReleaseUrl =
-        "https://api.github.com/repos/mantidproject/mantid/releases/latest";
+    gitHubReleaseUrl = "https://api.github.com/repos/mantidproject/mantid/releases/latest";
   }
-  std::string downloadUrl =
-      ConfigService::Instance().getString("CheckMantidVersion.DownloadURL");
+  std::string downloadUrl = ConfigService::Instance().getString("CheckMantidVersion.DownloadURL");
   if (downloadUrl.empty()) {
     downloadUrl = "http://download.mantidproject.org";
   }
@@ -83,8 +75,7 @@ void CheckMantidVersion::exec() {
     if (ex.errorCode() == InternetHelper::HTTP_NOT_MODIFIED) {
       // No changes since last release
       // mostRecentVersion = getCurrentVersion();
-      mostRecentVersion =
-          "No new versions since " + std::string(MantidVersion::releaseDate());
+      mostRecentVersion = "No new versions since " + std::string(MantidVersion::releaseDate());
     } else {
       // any other exception just log quietly and return
       g_log.debug("Cannot get latest version details from " + gitHubReleaseUrl);
@@ -106,19 +97,17 @@ void CheckMantidVersion::exec() {
       g_log.warning() << "Error found when parsing version information "
                          "retrieved from GitHub as a JSON string. "
                          "Error trying to parse this JSON string: "
-                      << json << "\n. Parsing error details: "
-                      << r.getFormattedErrorMessages() << '\n';
+                      << json << "\n. Parsing error details: " << r.getFormattedErrorMessages() << '\n';
     }
 
     std::string gitHubVersionTag;
     try {
       gitHubVersionTag = root["tag_name"].asString();
     } catch (std::runtime_error &re) {
-      g_log.error()
-          << "Error while trying to get the field 'tag_name' from "
-             "the version information retrieved from GitHub. This "
-             "algorithm cannot continue and will stop now. Error details: "
-          << re.what() << '\n';
+      g_log.error() << "Error while trying to get the field 'tag_name' from "
+                       "the version information retrieved from GitHub. This "
+                       "algorithm cannot continue and will stop now. Error details: "
+                    << re.what() << '\n';
 
       mostRecentVersion = "Could not get information from GitHub";
       setProperty("MostRecentVersion", mostRecentVersion);
@@ -127,12 +116,10 @@ void CheckMantidVersion::exec() {
     }
 
     mostRecentVersion = cleanVersionTag(gitHubVersionTag);
-    isNewVersionAvailable =
-        isVersionMoreRecent(currentVersion, mostRecentVersion);
+    isNewVersionAvailable = isVersionMoreRecent(currentVersion, mostRecentVersion);
     if (isNewVersionAvailable) {
       // output a notice level log
-      g_log.notice("A new version of Mantid(" + mostRecentVersion +
-                   ") is available for download from " + downloadUrl);
+      g_log.notice("A new version of Mantid(" + mostRecentVersion + ") is available for download from " + downloadUrl);
     }
   }
 
@@ -148,8 +135,7 @@ void CheckMantidVersion::exec() {
  * @param versionTag the version tag that needs cleaning
  * @returns a clean string
  */
-std::string
-CheckMantidVersion::cleanVersionTag(const std::string &versionTag) const {
+std::string CheckMantidVersion::cleanVersionTag(const std::string &versionTag) const {
   std::string retVal = versionTag;
 
   retVal = Strings::replaceAll(retVal, "v", "");
@@ -163,13 +149,11 @@ CheckMantidVersion::cleanVersionTag(const std::string &versionTag) const {
  * @param versionString Something like "2.3.4"
  * @returns a vector of [2,3,4]
  */
-std::vector<int>
-CheckMantidVersion::splitVersionString(const std::string &versionString) const {
+std::vector<int> CheckMantidVersion::splitVersionString(const std::string &versionString) const {
   std::vector<int> retVal;
-  Mantid::Kernel::StringTokenizer tokenizer(
-      versionString, ".",
-      Mantid::Kernel::StringTokenizer::TOK_TRIM |
-          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  Mantid::Kernel::StringTokenizer tokenizer(versionString, ".",
+                                            Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                                                Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   auto h = tokenizer.begin();
 
   for (; h != tokenizer.end(); ++h) {
@@ -177,8 +161,8 @@ CheckMantidVersion::splitVersionString(const std::string &versionString) const {
       auto part = boost::lexical_cast<int>(*h);
       retVal.emplace_back(part);
     } catch (const boost::bad_lexical_cast &) {
-      g_log.error("Failed to convert the following string to an integer '" +
-                  *h + "' as part of CheckMantidVersion::splitVersionString");
+      g_log.error("Failed to convert the following string to an integer '" + *h +
+                  "' as part of CheckMantidVersion::splitVersionString");
       retVal.emplace_back(0);
     }
   }
@@ -190,8 +174,7 @@ CheckMantidVersion::splitVersionString(const std::string &versionString) const {
  * @param gitHubVersion Something like "2.3.4"
  * @returns True if gitHubVersion is more recent
  */
-bool CheckMantidVersion::isVersionMoreRecent(
-    const std::string &localVersion, const std::string &gitHubVersion) const {
+bool CheckMantidVersion::isVersionMoreRecent(const std::string &localVersion, const std::string &gitHubVersion) const {
   auto localVersionParts = splitVersionString(localVersion);
   auto gitHubVersionParts = splitVersionString(gitHubVersion);
 
@@ -232,11 +215,9 @@ std::string CheckMantidVersion::getVersionsFromGitHub(const std::string &url) {
   std::ostringstream os;
   int tzd = 0;
 
-  inetHelper.addHeader(
-      "if-modified-since",
-      Poco::DateTimeFormatter::format(
-          Poco::DateTimeParser::parse(MantidVersion::releaseDate(), tzd),
-          Poco::DateTimeFormat::HTTP_FORMAT));
+  inetHelper.addHeader("if-modified-since",
+                       Poco::DateTimeFormatter::format(Poco::DateTimeParser::parse(MantidVersion::releaseDate(), tzd),
+                                                       Poco::DateTimeFormat::HTTP_FORMAT));
   inetHelper.sendRequest(url, os);
   std::string retVal = os.str();
 
@@ -245,9 +226,7 @@ std::string CheckMantidVersion::getVersionsFromGitHub(const std::string &url) {
 /** Gets the version of this Mantid
 @returns a string of the form "1.2.3[.4]"
 */
-std::string CheckMantidVersion::getCurrentVersion() const {
-  return Mantid::Kernel::MantidVersion::version();
-}
+std::string CheckMantidVersion::getCurrentVersion() const { return Mantid::Kernel::MantidVersion::version(); }
 
 } // namespace DataHandling
 } // namespace Mantid

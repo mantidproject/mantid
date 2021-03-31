@@ -28,13 +28,10 @@ class FrequencyStandardDeviations;
   @date 2016
 */
 class MANTID_HISTOGRAMDATA_DLL CountStandardDeviations
-    : public detail::StandardDeviationVectorOf<CountStandardDeviations,
-                                               HistogramE, CountVariances> {
+    : public detail::StandardDeviationVectorOf<CountStandardDeviations, HistogramE, CountVariances> {
 public:
-  using StandardDeviationVectorOf<CountStandardDeviations, HistogramE,
-                                  CountVariances>::StandardDeviationVectorOf;
-  using StandardDeviationVectorOf<CountStandardDeviations, HistogramE,
-                                  CountVariances>::operator=;
+  using StandardDeviationVectorOf<CountStandardDeviations, HistogramE, CountVariances>::StandardDeviationVectorOf;
+  using StandardDeviationVectorOf<CountStandardDeviations, HistogramE, CountVariances>::operator=;
   /// Default constructor, creates a NULL object.
   CountStandardDeviations() = default;
   // The copy and move constructor and assignment are not captured properly by
@@ -44,15 +41,12 @@ public:
   /// Move constructor.
   CountStandardDeviations(CountStandardDeviations &&) = default;
   /// Copy assignment. Lightweight, internal data will be shared.
-  CountStandardDeviations &
-  operator=(const CountStandardDeviations &) & = default;
+  CountStandardDeviations &operator=(const CountStandardDeviations &) & = default;
   /// Move assignment.
   CountStandardDeviations &operator=(CountStandardDeviations &&) & = default;
 
-  CountStandardDeviations(const FrequencyStandardDeviations &frequencies,
-                          const BinEdges &edges);
-  CountStandardDeviations(FrequencyStandardDeviations &&frequencies,
-                          const BinEdges &edges);
+  CountStandardDeviations(const FrequencyStandardDeviations &frequencies, const BinEdges &edges);
+  CountStandardDeviations(FrequencyStandardDeviations &&frequencies, const BinEdges &edges);
 };
 
 } // namespace HistogramData

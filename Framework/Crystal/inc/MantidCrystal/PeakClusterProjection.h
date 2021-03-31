@@ -36,10 +36,8 @@ public:
   PeakClusterProjection(const PeakClusterProjection &) = delete;
   PeakClusterProjection &operator=(const PeakClusterProjection &) = delete;
   /// Get the signal value at the peak center
-  Mantid::signal_t
-  signalAtPeakCenter(const Mantid::Geometry::IPeak &peak,
-                     Mantid::API::MDNormalization normalization =
-                         Mantid::API::NoNormalization) const;
+  Mantid::signal_t signalAtPeakCenter(const Mantid::Geometry::IPeak &peak,
+                                      Mantid::API::MDNormalization normalization = Mantid::API::NoNormalization) const;
   /// Get the peak center
   Mantid::Kernel::V3D peakCenter(const Mantid::Geometry::IPeak &peak) const;
   /// Destructor

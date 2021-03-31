@@ -40,49 +40,36 @@ DECLARE_ALGORITHM(SaveLauenorm)
 /** Initialize the algorithm's properties.
  */
 void SaveLauenorm::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace.");
-  declareProperty(std::make_unique<API::FileProperty>("Filename", "",
-                                                      API::FileProperty::Save),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save),
                   "Select the directory and base name for the output files.");
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty("ScalePeaks", 1.0, mustBePositive,
-                  "Multiply FSQ and sig(FSQ) by scaleFactor");
+  declareProperty("ScalePeaks", 1.0, mustBePositive, "Multiply FSQ and sig(FSQ) by scaleFactor");
   declareProperty("MinDSpacing", 0.0, "Minimum d-spacing (Angstroms)");
   declareProperty("MinWavelength", 0.0, "Minimum wavelength (Angstroms)");
-  declareProperty("MaxWavelength", EMPTY_DBL(),
-                  "Maximum wavelength (Angstroms)");
-  std::vector<std::string> histoTypes{"Bank", "RunNumber",
-                                      "Both Bank and RunNumber"};
-  declareProperty("SortFilesBy", histoTypes[0],
-                  std::make_shared<StringListValidator>(histoTypes),
+  declareProperty("MaxWavelength", EMPTY_DBL(), "Maximum wavelength (Angstroms)");
+  std::vector<std::string> histoTypes{"Bank", "RunNumber", "Both Bank and RunNumber"};
+  declareProperty("SortFilesBy", histoTypes[0], std::make_shared<StringListValidator>(histoTypes),
                   "Sort into files by bank(default), run number or both.");
-  declareProperty("MinIsigI", EMPTY_DBL(), mustBePositive,
-                  "The minimum I/sig(I) ratio");
+  declareProperty("MinIsigI", EMPTY_DBL(), mustBePositive, "The minimum I/sig(I) ratio");
   declareProperty("WidthBorder", EMPTY_INT(), "Width of border of detectors");
-  declareProperty("MinIntensity", EMPTY_DBL(), mustBePositive,
-                  "The minimum Intensity");
+  declareProperty("MinIntensity", EMPTY_DBL(), mustBePositive, "The minimum Intensity");
   declareProperty("UseDetScale", false,
                   "Scale intensity and sigI by scale "
                   "factor of detector if set in "
                   "SetDetScale.\n"
                   "If false, no change (default).");
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>("EliminateBankNumbers",
-                                                   Direction::Input),
-      "Comma deliminated string of bank numbers to exclude for example 1,2,5");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("EliminateBankNumbers", Direction::Input),
+                  "Comma deliminated string of bank numbers to exclude for example 1,2,5");
   declareProperty("LaueScaleFormat", false, "New format for Lauescale");
 
-  declareProperty("CrystalSystem", m_typeList[0],
-                  std::make_shared<Kernel::StringListValidator>(m_typeList),
+  declareProperty("CrystalSystem", m_typeList[0], std::make_shared<Kernel::StringListValidator>(m_typeList),
                   "The conventional cell type to use");
 
-  declareProperty(
-      "Centering", m_centeringList[0],
-      std::make_shared<Kernel::StringListValidator>(m_centeringList),
-      "The centering for the conventional cell");
+  declareProperty("Centering", m_centeringList[0], std::make_shared<Kernel::StringListValidator>(m_centeringList),
+                  "The centering for the conventional cell");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -156,10 +143,8 @@ void SaveLauenorm::exec() {
       findUB->executeAsChildAlg();
 
       if (!ws->sample().hasOrientedLattice()) {
-        g_log.notice(std::string("Could not find UB for ") +
-                     std::string(ws->getName()));
-        throw std::invalid_argument(std::string("Could not find UB for ") +
-                                    std::string(ws->getName()));
+        g_log.notice(std::string("Could not find UB for ") + std::string(ws->getName()));
+        throw std::invalid_argument(std::string("Could not find UB for ") + std::string(ws->getName()));
       }
     }
     lattice = ws->sample().getOrientedLattice();
@@ -188,15 +173,11 @@ void SaveLauenorm::exec() {
     std::string bankName = p.getBankName();
     int nCols, nRows;
     sizeBanks(bankName, nCols, nRows);
-    if (widthBorder != EMPTY_INT() &&
-        (p.getCol() < widthBorder || p.getRow() < widthBorder ||
-         p.getCol() > (nCols - widthBorder) ||
-         p.getRow() > (nRows - widthBorder)))
+    if (widthBorder != EMPTY_INT() && (p.getCol() < widthBorder || p.getRow() < widthBorder ||
+                                       p.getCol() > (nCols - widthBorder) || p.getRow() > (nRows - widthBorder)))
       continue;
     // Take out the "bank" part of the bank name and convert to an int
-    bankName.erase(
-        remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)),
-        bankName.end());
+    bankName.erase(remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)), bankName.end());
     if (type.compare(0, 2, "Ba") == 0) {
       Strings::convert(bankName, sequence);
     }
@@ -206,8 +187,7 @@ void SaveLauenorm::exec() {
       continue;
     if (scaleDet) {
       if (inst->hasParameter("detScale" + bankName)) {
-        double correc = static_cast<double>(
-            inst->getNumberParameter("detScale" + bankName)[0]);
+        double correc = static_cast<double>(inst->getNumberParameter("detScale" + bankName)[0]);
         intensity *= correc;
         sigI *= correc;
       }
@@ -216,8 +196,7 @@ void SaveLauenorm::exec() {
       continue;
     double lambda = p.getWavelength();
     double dsp = p.getDSpacing();
-    if (dsp < dMin || lambda < wlMin ||
-        (wlMax != EMPTY_DBL() && lambda > wlMax))
+    if (dsp < dMin || lambda < wlMin || (wlMax != EMPTY_DBL() && lambda > wlMax))
       continue;
     if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0)
       continue;
@@ -264,15 +243,11 @@ void SaveLauenorm::exec() {
     std::string bankName = p.getBankName();
     int nCols, nRows;
     sizeBanks(bankName, nCols, nRows);
-    if (widthBorder != EMPTY_INT() &&
-        (p.getCol() < widthBorder || p.getRow() < widthBorder ||
-         p.getCol() > (nCols - widthBorder) ||
-         p.getRow() > (nRows - widthBorder)))
+    if (widthBorder != EMPTY_INT() && (p.getCol() < widthBorder || p.getRow() < widthBorder ||
+                                       p.getCol() > (nCols - widthBorder) || p.getRow() > (nRows - widthBorder)))
       continue;
     // Take out the "bank" part of the bank name and convert to an int
-    bankName.erase(
-        remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)),
-        bankName.end());
+    bankName.erase(remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)), bankName.end());
     if (type.compare(0, 2, "Ba") == 0) {
       Strings::convert(bankName, sequence);
     }
@@ -282,8 +257,7 @@ void SaveLauenorm::exec() {
       continue;
     if (scaleDet) {
       if (inst->hasParameter("detScale" + bankName)) {
-        double correc = static_cast<double>(
-            inst->getNumberParameter("detScale" + bankName)[0]);
+        double correc = static_cast<double>(inst->getNumberParameter("detScale" + bankName)[0]);
         intensity *= correc;
         sigI *= correc;
       }
@@ -295,8 +269,7 @@ void SaveLauenorm::exec() {
     double scattering = p.getScattering();
     double lambda = p.getWavelength();
     double dsp = p.getDSpacing();
-    if (dsp < dMin || lambda < wlMin ||
-        (wlMax != EMPTY_DBL() && lambda > wlMax))
+    if (dsp < dMin || lambda < wlMin || (wlMax != EMPTY_DBL() && lambda > wlMax))
       continue;
     // This can be bank number of run number depending on
     if (sequence != oldSequence) {
@@ -330,13 +303,10 @@ void SaveLauenorm::exec() {
                "1.00000     1.00000\n";
         out << "OMEG     1.00000     1.00000     1.00000     1.00000     "
                "1.00000     1.00000\n";
-        out << "CELL " << std::setw(11) << std::setprecision(4)
-            << 1.0 / lattice.a() << std::setw(12) << std::setprecision(4)
-            << 1.0 / lattice.b() << std::setw(12) << std::setprecision(4)
-            << 1.0 / lattice.c() << std::setw(9)
-            << boost::math::iround(lattice.alpha()) << std::setw(9)
-            << boost::math::iround(lattice.beta()) << std::setw(9)
-            << boost::math::iround(lattice.gamma()) << '\n';
+        out << "CELL " << std::setw(11) << std::setprecision(4) << 1.0 / lattice.a() << std::setw(12)
+            << std::setprecision(4) << 1.0 / lattice.b() << std::setw(12) << std::setprecision(4) << 1.0 / lattice.c()
+            << std::setw(9) << boost::math::iround(lattice.alpha()) << std::setw(9)
+            << boost::math::iround(lattice.beta()) << std::setw(9) << boost::math::iround(lattice.gamma()) << '\n';
 
         out << "SYST    " << cellNo << "   " << centerNo << "   1   3"
             << "\n";
@@ -351,18 +321,15 @@ void SaveLauenorm::exec() {
         double chi = angles[1];
         double omega = angles[0];
 
-        out << "PHIS " << std::setw(11) << std::setprecision(4) << phi
-            << std::setw(12) << std::setprecision(4) << chi << std::setw(12)
-            << std::setprecision(4) << omega << "\n";
+        out << "PHIS " << std::setw(11) << std::setprecision(4) << phi << std::setw(12) << std::setprecision(4) << chi
+            << std::setw(12) << std::setprecision(4) << omega << "\n";
         out << "LAMS      ";
 
-        out << std::setprecision(1) << std::fixed
-            << sumLamVec[sequenceNo] / numPeaks[sequenceNo] << " "
+        out << std::setprecision(1) << std::fixed << sumLamVec[sequenceNo] / numPeaks[sequenceNo] << " "
             << minLamVec[sequenceNo] << " " << maxLamVec[sequenceNo] << "\n";
 
         out << "DMIN      ";
-        out << std::setprecision(2) << std::fixed << minDVec[sequenceNo]
-            << "\n";
+        out << std::setprecision(2) << std::fixed << minDVec[sequenceNo] << "\n";
 
         // distance from sample to detector (use first pixel) in mm
         double L2 = 500.0;
@@ -409,11 +376,9 @@ void SaveLauenorm::exec() {
             << "\n";
         out << "PACK        0"
             << "\n";
-        out << "NSPT   " << numPeaks[sequenceNo]
-            << "      0      0      0      0"
+        out << "NSPT   " << numPeaks[sequenceNo] << "      0      0      0      0"
             << "\n";
-        out << "NODH " << numPeaks[sequenceNo]
-            << "    0      0      0      0      0      0      0      0      0\n"
+        out << "NODH " << numPeaks[sequenceNo] << "    0      0      0      0      0      0      0      0      0\n"
             << "      0      0\n";
         out << "INTF        0"
             << "\n";
@@ -427,35 +392,29 @@ void SaveLauenorm::exec() {
     // unless Crystallography convention
     if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0)
       continue;
-    out << std::setw(5) << Utils::round(qSign * p.getH()) << std::setw(5)
-        << Utils::round(qSign * p.getK()) << std::setw(5)
-        << Utils::round(qSign * p.getL());
+    out << std::setw(5) << Utils::round(qSign * p.getH()) << std::setw(5) << Utils::round(qSign * p.getK())
+        << std::setw(5) << Utils::round(qSign * p.getL());
     if (newFormat) {
       // Convert to mm from centre
-      out << std::setw(10) << std::fixed << std::setprecision(5)
-          << (p.getCol() - 127.5) * 150.0 / 256.0;
-      out << std::setw(10) << std::fixed << std::setprecision(5)
-          << (p.getRow() - 127.5) * 150.0 / 256.0 << "\n";
+      out << std::setw(10) << std::fixed << std::setprecision(5) << (p.getCol() - 127.5) * 150.0 / 256.0;
+      out << std::setw(10) << std::fixed << std::setprecision(5) << (p.getRow() - 127.5) * 150.0 / 256.0 << "\n";
     }
     out << std::setw(10) << std::fixed << std::setprecision(5) << lambda;
     if (newFormat) {
       // mult nodal ovlp close h2 k2 l2 nidx lambda2 ipoint
       out << " 1 0 0 0 0 0 0 0 0.0 0 ";
       // Dmin threshold squared for next harmonic
-      out << std::setw(10) << std::fixed << std::setprecision(5)
-          << dsp * dsp * 0.25 << "\n";
+      out << std::setw(10) << std::fixed << std::setprecision(5) << dsp * dsp * 0.25 << "\n";
     } else {
       // Assume that want theta not two-theta
-      out << std::setw(10) << std::fixed << std::setprecision(5)
-          << 0.5 * scattering;
+      out << std::setw(10) << std::fixed << std::setprecision(5) << 0.5 * scattering;
     }
 
     // SHELX can read data without the space between the l and intensity
     if (p.getDetectorID() != -1) {
       double ckIntensity = scaleFactor * intensity;
       if (ckIntensity > 999999999.985)
-        g_log.warning() << "Scaled intensity, " << ckIntensity
-                        << " is too large for format.  Decrease ScalePeaks.\n";
+        g_log.warning() << "Scaled intensity, " << ckIntensity << " is too large for format.  Decrease ScalePeaks.\n";
       out << std::setw(10) << Utils::round(ckIntensity);
       if (newFormat) {
         // mult nodal ovlp close h2 k2 l2 nidx lambda2 ipoint
@@ -499,17 +458,14 @@ void SaveLauenorm::exec() {
   out.flush();
   out.close();
 }
-void SaveLauenorm::sizeBanks(const std::string &bankName, int &nCols,
-                             int &nRows) {
+void SaveLauenorm::sizeBanks(const std::string &bankName, int &nCols, int &nRows) {
   if (bankName == "None")
     return;
-  std::shared_ptr<const IComponent> parent =
-      ws->getInstrument()->getComponentByName(bankName);
+  std::shared_ptr<const IComponent> parent = ws->getInstrument()->getComponentByName(bankName);
   if (!parent)
     return;
   if (parent->type() == "RectangularDetector") {
-    std::shared_ptr<const RectangularDetector> RDet =
-        std::dynamic_pointer_cast<const RectangularDetector>(parent);
+    std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     nCols = RDet->xpixels();
     nRows = RDet->ypixels();

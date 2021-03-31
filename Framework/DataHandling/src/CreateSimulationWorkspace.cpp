@@ -48,23 +48,19 @@ StartAndEndTime getStartAndEndTimesFromRawFile(const std::string &filename) {
   isisRaw.ioRAW(rawFile, fromFile, readData);
 
   StartAndEndTime startAndEndTime;
-  startAndEndTime.startTime =
-      Mantid::DataHandling::LoadRawHelper::extractStartTime(isisRaw);
-  startAndEndTime.endTime =
-      Mantid::DataHandling::LoadRawHelper::extractEndTime(isisRaw);
+  startAndEndTime.startTime = Mantid::DataHandling::LoadRawHelper::extractStartTime(isisRaw);
+  startAndEndTime.endTime = Mantid::DataHandling::LoadRawHelper::extractEndTime(isisRaw);
 
   fclose(rawFile);
   return startAndEndTime;
 }
 
-StartAndEndTime getStartAndEndTimesFromNexusFile(
-    const std::string &filename,
-    const Mantid::Types::Core::DateAndTime &startTimeDefault,
-    const Mantid::Types::Core::DateAndTime &endTimeDefault) {
+StartAndEndTime getStartAndEndTimesFromNexusFile(const std::string &filename,
+                                                 const Mantid::Types::Core::DateAndTime &startTimeDefault,
+                                                 const Mantid::Types::Core::DateAndTime &endTimeDefault) {
   StartAndEndTime startAndEndTime;
   try {
-    startAndEndTime.startTime =
-        Mantid::DataHandling::extractStartTime(filename);
+    startAndEndTime.startTime = Mantid::DataHandling::extractStartTime(filename);
     startAndEndTime.endTime = Mantid::DataHandling::extractEndTime(filename);
   } catch (...) {
     startAndEndTime.startTime = startTimeDefault;
@@ -86,17 +82,13 @@ using namespace HistogramData;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string CreateSimulationWorkspace::name() const {
-  return "CreateSimulationWorkspace";
-}
+const std::string CreateSimulationWorkspace::name() const { return "CreateSimulationWorkspace"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CreateSimulationWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CreateSimulationWorkspace::category() const {
-  return "Utility\\Workspaces";
-}
+const std::string CreateSimulationWorkspace::category() const { return "Utility\\Workspaces"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -106,32 +98,26 @@ const std::string CreateSimulationWorkspace::category() const {
 void CreateSimulationWorkspace::init() {
   using namespace Kernel;
 
-  declareProperty("Instrument", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
+  declareProperty("Instrument", "", std::make_shared<MandatoryValidator<std::string>>(),
                   "An instrument name or filename ( a full path or string "
                   "containing an xml extension).",
                   Direction::Input);
 
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "BinParams", std::make_shared<RebinParamsValidator>(),
-                      Direction::Input),
-                  "A comma separated list of first bin boundary, width, last "
-                  "bin boundary. See Rebin for more details");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("BinParams", std::make_shared<RebinParamsValidator>(), Direction::Input),
+      "A comma separated list of first bin boundary, width, last "
+      "bin boundary. See Rebin for more details");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
-                  "The new workspace");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output), "The new workspace");
 
   auto knownUnits = UnitFactory::Instance().getKeys();
-  declareProperty("UnitX", "DeltaE",
-                  std::make_shared<ListValidator<std::string>>(knownUnits),
+  declareProperty("UnitX", "DeltaE", std::make_shared<ListValidator<std::string>>(knownUnits),
                   "The unit to assign to the X axis", Direction::Input);
 
-  declareProperty(std::make_unique<FileProperty>("DetectorTableFilename", "",
-                                                 FileProperty::OptionalLoad, "",
-                                                 Direction::Input),
-                  "An optional filename (currently RAW or ISIS NeXus) that "
-                  "contains UDET & SPEC tables to access hardware grouping");
+  declareProperty(
+      std::make_unique<FileProperty>("DetectorTableFilename", "", FileProperty::OptionalLoad, "", Direction::Input),
+      "An optional filename (currently RAW or ISIS NeXus) that "
+      "contains UDET & SPEC tables to access hardware grouping");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -153,10 +139,8 @@ void CreateSimulationWorkspace::exec() {
  */
 void CreateSimulationWorkspace::createInstrument() {
   const bool enableLogging(false);
-  IAlgorithm_sptr loadInstrument =
-      createChildAlgorithm("LoadInstrument", 0.0, 0.5, enableLogging);
-  MatrixWorkspace_sptr tempWS =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+  IAlgorithm_sptr loadInstrument = createChildAlgorithm("LoadInstrument", 0.0, 0.5, enableLogging);
+  MatrixWorkspace_sptr tempWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
   // We need to set the correct start date for this workspace
   // else we might be pulling an inadequate IDF
@@ -185,8 +169,7 @@ void CreateSimulationWorkspace::createOutputWorkspace() {
   const size_t xlength = binBoundaries.size();
   const size_t ylength = xlength - 1;
 
-  m_outputWS = WorkspaceFactory::Instance().create("Workspace2D", nhistograms,
-                                                   xlength, ylength);
+  m_outputWS = WorkspaceFactory::Instance().create("Workspace2D", nhistograms, xlength, ylength);
   m_outputWS->setInstrument(m_instrument);
   m_outputWS->populateInstrumentParameters();
 
@@ -206,10 +189,8 @@ void CreateSimulationWorkspace::createOutputWorkspace() {
 
   // Update the instrument from the file if necessary
   const std::string detTableFile = getProperty("DetectorTableFilename");
-  if (boost::algorithm::ends_with(detTableFile, ".raw") ||
-      boost::algorithm::ends_with(detTableFile, ".RAW") ||
-      boost::algorithm::ends_with(detTableFile, ".nxs") ||
-      boost::algorithm::ends_with(detTableFile, ".NXS")) {
+  if (boost::algorithm::ends_with(detTableFile, ".raw") || boost::algorithm::ends_with(detTableFile, ".RAW") ||
+      boost::algorithm::ends_with(detTableFile, ".nxs") || boost::algorithm::ends_with(detTableFile, ".NXS")) {
     adjustInstrument(detTableFile);
   }
 }
@@ -248,13 +229,10 @@ void CreateSimulationWorkspace::createOneToOneMapping() {
  * Load the detector mapping from a file
  * @param filename :: The name of the file to pull the UDET/SPEC tables from
  */
-void CreateSimulationWorkspace::loadMappingFromFile(
-    const std::string &filename) {
-  if (boost::algorithm::ends_with(filename, ".raw") ||
-      boost::algorithm::ends_with(filename, ".RAW")) {
+void CreateSimulationWorkspace::loadMappingFromFile(const std::string &filename) {
+  if (boost::algorithm::ends_with(filename, ".raw") || boost::algorithm::ends_with(filename, ".RAW")) {
     loadMappingFromRAW(filename);
-  } else if (boost::algorithm::ends_with(filename, ".nxs") ||
-             boost::algorithm::ends_with(filename, ".NXS")) {
+  } else if (boost::algorithm::ends_with(filename, ".nxs") || boost::algorithm::ends_with(filename, ".NXS")) {
     loadMappingFromISISNXS(filename);
   }
 }
@@ -263,8 +241,7 @@ void CreateSimulationWorkspace::loadMappingFromFile(
  * Load the detector mapping from a RAW file
  * @param filename :: The name of the RAW file to pull the UDET/SPEC tables from
  */
-void CreateSimulationWorkspace::loadMappingFromRAW(
-    const std::string &filename) {
+void CreateSimulationWorkspace::loadMappingFromRAW(const std::string &filename) {
   FILE *rawFile = fopen(filename.c_str(), "rb");
   if (!rawFile)
     throw std::runtime_error("Cannot open RAW file for reading: " + filename);
@@ -287,14 +264,12 @@ void CreateSimulationWorkspace::loadMappingFromRAW(
  * @param filename :: The name of the ISIS raw NeXus file to pull the UDET/SPEC
  * tables from
  */
-void CreateSimulationWorkspace::loadMappingFromISISNXS(
-    const std::string &filename) {
+void CreateSimulationWorkspace::loadMappingFromISISNXS(const std::string &filename) {
   ::NeXus::File nxsFile(filename);
   try {
     nxsFile.openPath("/raw_data_1/isis_vms_compat");
   } catch (::NeXus::Exception &) {
-    throw std::runtime_error(
-        "Cannot find path to isis_vms_compat. Is the file an ISIS NeXus file?");
+    throw std::runtime_error("Cannot find path to isis_vms_compat. Is the file an ISIS NeXus file?");
   }
   using NXIntArray = std::unique_ptr<std::vector<int32_t>>;
 
@@ -319,9 +294,7 @@ void CreateSimulationWorkspace::loadMappingFromISISNXS(
  * @param udetTable :: An array of detector IDs
  * @param ndets :: The size of the two arrays
  */
-void CreateSimulationWorkspace::createGroupingsFromTables(int *specTable,
-                                                          int *udetTable,
-                                                          int ndets) {
+void CreateSimulationWorkspace::createGroupingsFromTables(int *specTable, int *udetTable, int ndets) {
   m_detGroups.clear();
   for (int i = 0; i < ndets; ++i) {
     int specNo = specTable[i];
@@ -346,13 +319,10 @@ void CreateSimulationWorkspace::createGroupingsFromTables(int *specTable,
 BinEdges CreateSimulationWorkspace::createBinBoundaries() const {
   const std::vector<double> rbparams = getProperty("BinParams");
   MantidVec newBins;
-  const int numBoundaries =
-      Mantid::Kernel::VectorHelper::createAxisFromRebinParams(rbparams,
-                                                              newBins);
+  const int numBoundaries = Mantid::Kernel::VectorHelper::createAxisFromRebinParams(rbparams, newBins);
   if (numBoundaries <= 2) {
-    throw std::invalid_argument(
-        "Error in BinParams - Gave invalid number of bin boundaries: " +
-        std::to_string(numBoundaries));
+    throw std::invalid_argument("Error in BinParams - Gave invalid number of bin boundaries: " +
+                                std::to_string(numBoundaries));
   }
   return BinEdges(std::move(newBins));
 }
@@ -364,8 +334,7 @@ void CreateSimulationWorkspace::applyDetectorMapping() {
   size_t wsIndex(0);
   for (auto &detGroup : m_detGroups) {
     auto &spectrum = m_outputWS->getSpectrum(wsIndex);
-    spectrum.setSpectrumNo(
-        static_cast<specnum_t>(wsIndex + 1)); // Ensure a contiguous mapping
+    spectrum.setSpectrumNo(static_cast<specnum_t>(wsIndex + 1)); // Ensure a contiguous mapping
     spectrum.clearDetectorIDs();
     spectrum.addDetectorIDs(detGroup.second);
     ++wsIndex;
@@ -380,15 +349,13 @@ void CreateSimulationWorkspace::adjustInstrument(const std::string &filename) {
   // If requested update the instrument to positions in the raw file
   const auto &pmap = m_outputWS->constInstrumentParameters();
   Geometry::Instrument_const_sptr instrument = m_outputWS->getInstrument();
-  std::shared_ptr<Geometry::Parameter> updateDets =
-      pmap.get(instrument->getComponentID(), "det-pos-source");
+  std::shared_ptr<Geometry::Parameter> updateDets = pmap.get(instrument->getComponentID(), "det-pos-source");
   if (!updateDets)
     return; // No tag, use IDF
 
   std::string value = updateDets->value<std::string>();
   if (value.substr(0, 8) == "datafile") {
-    IAlgorithm_sptr updateInst =
-        createChildAlgorithm("UpdateInstrumentFromFile", 0.75, 1.0);
+    IAlgorithm_sptr updateInst = createChildAlgorithm("UpdateInstrumentFromFile", 0.75, 1.0);
     updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_outputWS);
     updateInst->setPropertyValue("Filename", filename);
     if (value == "datafile-ignore-phi") {
@@ -396,8 +363,7 @@ void CreateSimulationWorkspace::adjustInstrument(const std::string &filename) {
       g_log.information("Detector positions in IDF updated with positions in "
                         "the data file except for the phi values");
     } else {
-      g_log.information(
-          "Detector positions in IDF updated with positions in the data file");
+      g_log.information("Detector positions in IDF updated with positions in the data file");
     }
     // We want this to throw if it fails to warn the user that the information
     // is not correct.
@@ -410,8 +376,7 @@ void CreateSimulationWorkspace::adjustInstrument(const std::string &filename) {
  * available we update the dummy workspace with the start date from this file.
  * @param workspace: dummy workspace
  */
-void CreateSimulationWorkspace::setStartDate(
-    const API::MatrixWorkspace_sptr &workspace) {
+void CreateSimulationWorkspace::setStartDate(const API::MatrixWorkspace_sptr &workspace) {
   const std::string detTableFile = getProperty("DetectorTableFilename");
   auto hasDetTableFile = !detTableFile.empty();
   auto &run = workspace->mutableRun();
@@ -428,15 +393,12 @@ void CreateSimulationWorkspace::setStartDate(
   }
 
   if (hasDetTableFile) {
-    if (boost::algorithm::ends_with(detTableFile, ".raw") ||
-        boost::algorithm::ends_with(detTableFile, ".RAW")) {
+    if (boost::algorithm::ends_with(detTableFile, ".raw") || boost::algorithm::ends_with(detTableFile, ".RAW")) {
       auto startAndEndTime = getStartAndEndTimesFromRawFile(detTableFile);
       startTime = startAndEndTime.startTime;
       endTime = startAndEndTime.endTime;
-    } else if (boost::algorithm::ends_with(detTableFile, ".nxs") ||
-               boost::algorithm::ends_with(detTableFile, ".NXS")) {
-      auto startAndEndTime =
-          getStartAndEndTimesFromNexusFile(detTableFile, startTime, endTime);
+    } else if (boost::algorithm::ends_with(detTableFile, ".nxs") || boost::algorithm::ends_with(detTableFile, ".NXS")) {
+      auto startAndEndTime = getStartAndEndTimesFromNexusFile(detTableFile, startTime, endTime);
       startTime = startAndEndTime.startTime;
       endTime = startAndEndTime.endTime;
     }

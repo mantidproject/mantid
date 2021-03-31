@@ -50,12 +50,9 @@ void PeakHKLErrors::init() {
   declareParameter("SampleXOffset", 0.0, "Sample x offset");
   declareParameter("SampleYOffset", 0.0, "Sample y offset");
   declareParameter("SampleZOffset", 0.0, "Sample z offset");
-  declareParameter("GonRotx", 0.0,
-                   "3rd Rotation of Goniometer about the x axis");
-  declareParameter("GonRoty", 0.0,
-                   "2nd Rotation of Goniometer about the y axis");
-  declareParameter("GonRotz", 0.0,
-                   "1st Rotation of Goniometer about the z axis");
+  declareParameter("GonRotx", 0.0, "3rd Rotation of Goniometer about the x axis");
+  declareParameter("GonRoty", 0.0, "2nd Rotation of Goniometer about the y axis");
+  declareParameter("GonRotz", 0.0, "1st Rotation of Goniometer about the z axis");
   initMode = 1;
   if (OptRuns.empty())
     return;
@@ -82,8 +79,7 @@ void PeakHKLErrors::setUpOptRuns() {
   for (auto &OptRunNum : OptRunNums) {
     declareParameter("phi" + OptRunNum, 0.0, "Phi sample orientation value");
     declareParameter("chi" + OptRunNum, 0.0, "Chi sample orientation value");
-    declareParameter("omega" + OptRunNum, 0.0,
-                     "Omega sample orientation value");
+    declareParameter("omega" + OptRunNum, 0.0, "Omega sample orientation value");
   }
 }
 
@@ -115,10 +111,9 @@ void PeakHKLErrors::setUpOptRuns() {
  *corresponding
  *                   to the given component or subchild are added to pmap
  */
-void PeakHKLErrors::cLone(
-    std::shared_ptr<Geometry::ParameterMap> &pmap,
-    const std::shared_ptr<const Geometry::IComponent> &component,
-    std::shared_ptr<const Geometry::ParameterMap> &pmapSv) {
+void PeakHKLErrors::cLone(std::shared_ptr<Geometry::ParameterMap> &pmap,
+                          const std::shared_ptr<const Geometry::IComponent> &component,
+                          std::shared_ptr<const Geometry::ParameterMap> &pmapSv) {
   if (!component)
     return;
   if (component->isParametrized()) {
@@ -127,8 +122,7 @@ void PeakHKLErrors::cLone(
     for (const auto &nm : nms) {
 
       if (pmapSv->contains(component.get(), nm, "double")) {
-        std::vector<double> dparams =
-            pmapSv->getDouble(component->getName(), nm);
+        std::vector<double> dparams = pmapSv->getDouble(component->getName(), nm);
         pmap->addDouble(component.get(), nm, dparams[0]);
         continue;
       }
@@ -140,36 +134,31 @@ void PeakHKLErrors::cLone(
       }
 
       if (pmapSv->contains(component.get(), nm, "int")) {
-        std::vector<int> iparams =
-            pmapSv->getType<int>(component->getName(), nm);
+        std::vector<int> iparams = pmapSv->getType<int>(component->getName(), nm);
         pmap->addInt(component.get(), nm, iparams[0]);
         continue;
       }
 
       if (pmapSv->contains(component.get(), nm, "string")) {
-        std::vector<std::string> sparams =
-            pmapSv->getString(component->getName(), nm);
+        std::vector<std::string> sparams = pmapSv->getString(component->getName(), nm);
         pmap->addString(component.get(), nm, sparams[0]);
         continue;
       }
 
       if (pmapSv->contains(component.get(), nm, "Quat")) {
-        std::vector<Kernel::Quat> sparams =
-            pmapSv->getType<Kernel::Quat>(component->getName(), nm);
+        std::vector<Kernel::Quat> sparams = pmapSv->getType<Kernel::Quat>(component->getName(), nm);
         pmap->addQuat(component.get(), nm, sparams[0]);
         continue;
       }
     }
 
-    std::shared_ptr<const CompAssembly> parent =
-        std::dynamic_pointer_cast<const CompAssembly>(component);
+    std::shared_ptr<const CompAssembly> parent = std::dynamic_pointer_cast<const CompAssembly>(component);
     if (parent && parent->nelements() < 180) //# need speed up. Assume pixel
       // elements of a Panel have no
       // attributes
       for (int child = 0; child < parent->nelements(); child++) {
         std::shared_ptr<const Geometry::IComponent> kid =
-            std::const_pointer_cast<const Geometry::IComponent>(
-                parent->getChild(child));
+            std::const_pointer_cast<const Geometry::IComponent>(parent->getChild(child));
         if (kid)
           cLone(pmap, kid, pmapSv);
       }
@@ -186,8 +175,7 @@ void PeakHKLErrors::cLone(
  *
  * NOTE: All the peaks in the PeaksWorkspace must use the same instrument.
  */
-std::shared_ptr<Geometry::Instrument>
-PeakHKLErrors::getNewInstrument(const PeaksWorkspace_sptr &Peaks) const {
+std::shared_ptr<Geometry::Instrument> PeakHKLErrors::getNewInstrument(const PeaksWorkspace_sptr &Peaks) const {
   Geometry::Instrument_const_sptr instSave = Peaks->getPeak(0).getInstrument();
   auto pmap = std::make_shared<Geometry::ParameterMap>();
 
@@ -209,8 +197,7 @@ PeakHKLErrors::getNewInstrument(const PeaksWorkspace_sptr &Peaks) const {
       sampPos = sample->getRelativePos();
     } else // catch(... )
     {
-      auto P1 = std::make_shared<Geometry::Instrument>(
-          instSave->baseInstrument(), instSave->makeLegacyParameterMap());
+      auto P1 = std::make_shared<Geometry::Instrument>(instSave->baseInstrument(), instSave->makeLegacyParameterMap());
       instChange = P1;
       IComponent_const_sptr sample = instChange->getSample();
       sampPos = sample->getRelativePos();
@@ -224,16 +211,12 @@ PeakHKLErrors::getNewInstrument(const PeaksWorkspace_sptr &Peaks) const {
   //------------------"clone" orig instruments pmap -------------------
 
   cLone(pmap, instSave, pmapSv);
-  V3D sampOffsets(getParameter("SampleXOffset"), getParameter("SampleYOffset"),
-                  getParameter("SampleZOffset"));
+  V3D sampOffsets(getParameter("SampleXOffset"), getParameter("SampleYOffset"), getParameter("SampleZOffset"));
 
   IComponent_const_sptr sample = instChange->getSample();
-  pmap->addPositionCoordinate(sample.get(), std::string("x"),
-                              sampPos.X() + sampOffsets.X());
-  pmap->addPositionCoordinate(sample.get(), std::string("y"),
-                              sampPos.Y() + sampOffsets.Y());
-  pmap->addPositionCoordinate(sample.get(), std::string("z"),
-                              sampPos.Z() + sampOffsets.Z());
+  pmap->addPositionCoordinate(sample.get(), std::string("x"), sampPos.X() + sampOffsets.X());
+  pmap->addPositionCoordinate(sample.get(), std::string("y"), sampPos.Y() + sampOffsets.Y());
+  pmap->addPositionCoordinate(sample.get(), std::string("z"), sampPos.Z() + sampOffsets.Z());
 
   return instChange;
 }
@@ -249,9 +232,8 @@ PeakHKLErrors::getNewInstrument(const PeaksWorkspace_sptr &Peaks) const {
  *
  * @param Res      The resultant map.
  */
-void PeakHKLErrors::getRun2MatMap(
-    PeaksWorkspace_sptr &Peaks, const std::string &OptRuns,
-    std::map<int, Mantid::Kernel::Matrix<double>> &Res) const {
+void PeakHKLErrors::getRun2MatMap(PeaksWorkspace_sptr &Peaks, const std::string &OptRuns,
+                                  std::map<int, Mantid::Kernel::Matrix<double>> &Res) const {
 
   for (int i = 0; i < Peaks->getNumberPeaks(); ++i) {
     Geometry::IPeak &peak_old = Peaks->getPeak(i);
@@ -260,12 +242,9 @@ void PeakHKLErrors::getRun2MatMap(
     std::string runNumStr = std::to_string(runNum);
     size_t N = OptRuns.find("/" + runNumStr + "/");
     if (N < OptRuns.size()) {
-      double chi =
-          getParameter("chi" + boost::lexical_cast<std::string>(runNumStr));
-      double phi =
-          getParameter("phi" + boost::lexical_cast<std::string>(runNumStr));
-      double omega =
-          getParameter("omega" + boost::lexical_cast<std::string>(runNumStr));
+      double chi = getParameter("chi" + boost::lexical_cast<std::string>(runNumStr));
+      double phi = getParameter("phi" + boost::lexical_cast<std::string>(runNumStr));
+      double omega = getParameter("omega" + boost::lexical_cast<std::string>(runNumStr));
       Mantid::Geometry::Goniometer uniGonio;
       uniGonio.makeUniversalGoniometer();
       uniGonio.setRotationAngle("phi", phi);
@@ -286,8 +265,7 @@ void PeakHKLErrors::getRun2MatMap(
  *
  *  Replace by Quats?
  */
-Matrix<double> PeakHKLErrors::RotationMatrixAboutRegAxis(double theta,
-                                                         char axis) {
+Matrix<double> PeakHKLErrors::RotationMatrixAboutRegAxis(double theta, char axis) {
   int cint = toupper(axis);
   auto c = static_cast<char>(cint);
   std::string S(std::string("") + c);
@@ -320,8 +298,7 @@ Matrix<double> PeakHKLErrors::RotationMatrixAboutRegAxis(double theta,
  *  @return The derivative of the matrix that corresponds to this action with
  *respect to degree rotation.
  */
-Matrix<double> PeakHKLErrors::DerivRotationMatrixAboutRegAxis(double theta,
-                                                              char axis) {
+Matrix<double> PeakHKLErrors::DerivRotationMatrixAboutRegAxis(double theta, char axis) {
   int cint = toupper(axis);
   auto c = static_cast<char>(cint);
   std::string S(std::string("") + c);
@@ -355,17 +332,13 @@ Matrix<double> PeakHKLErrors::DerivRotationMatrixAboutRegAxis(double theta,
  *              three consecutive entries all with the same index
  * @param nData The size of the xValues and out arrays
  */
-void PeakHKLErrors::function1D(double *out, const double *xValues,
-                               const size_t nData) const {
-  PeaksWorkspace_sptr Peaks =
-      AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(
-          PeakWorkspaceName);
+void PeakHKLErrors::function1D(double *out, const double *xValues, const size_t nData) const {
+  PeaksWorkspace_sptr Peaks = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(PeakWorkspaceName);
 
   std::shared_ptr<Geometry::Instrument> instNew = getNewInstrument(Peaks);
 
   if (!Peaks)
-    throw std::invalid_argument("Peaks not stored under the name " +
-                                PeakWorkspaceName);
+    throw std::invalid_argument("Peaks not stored under the name " + PeakWorkspaceName);
 
   std::map<int, Mantid::Kernel::Matrix<double>> RunNum2GonMatrixMap;
   getRun2MatMap(Peaks, OptRuns, RunNum2GonMatrixMap);
@@ -378,8 +351,7 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
   double GonRotx = getParameter("GonRotx");
   double GonRoty = getParameter("GonRoty");
   double GonRotz = getParameter("GonRotz");
-  Matrix<double> GonRot = RotationMatrixAboutRegAxis(GonRotx, 'x') *
-                          RotationMatrixAboutRegAxis(GonRoty, 'y') *
+  Matrix<double> GonRot = RotationMatrixAboutRegAxis(GonRotx, 'x') * RotationMatrixAboutRegAxis(GonRoty, 'y') *
                           RotationMatrixAboutRegAxis(GonRotz, 'z');
 
   double ChiSqTot = 0.0;
@@ -398,9 +370,7 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
     } else {
       peak.setGoniometerMatrix(GonRot * peak.getGoniometerMatrix());
     }
-    V3D sampOffsets(getParameter("SampleXOffset"),
-                    getParameter("SampleYOffset"),
-                    getParameter("SampleZOffset"));
+    V3D sampOffsets(getParameter("SampleXOffset"), getParameter("SampleYOffset"), getParameter("SampleZOffset"));
     peak.setSamplePos(peak.getSamplePos() + sampOffsets);
 
     V3D hkl = UBinv * peak.getQSampleFrame();
@@ -430,20 +400,15 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
     IConstraint *constr = getConstraint(p);
     if (constr)
       if ((constr->check() > 0))
-        g_log.debug() << "(" << parameterName(p) << "=" << constr->check()
-                      << ");";
+        g_log.debug() << "(" << parameterName(p) << "=" << constr->check() << ");";
   }
   g_log.debug() << '\n';
 
-  g_log.debug() << "    Chi**2 = " << ChiSqTot << "     nData = " << nData
-                << '\n';
+  g_log.debug() << "    Chi**2 = " << ChiSqTot << "     nData = " << nData << '\n';
 }
 
-void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
-                                    const size_t nData) {
-  PeaksWorkspace_sptr Peaks =
-      AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(
-          PeakWorkspaceName);
+void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
+  PeaksWorkspace_sptr Peaks = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(PeakWorkspaceName);
   std::shared_ptr<Geometry::Instrument> instNew = getNewInstrument(Peaks);
 
   const DblMatrix &UB = Peaks->sample().getOrientedLattice().getUB();
@@ -466,20 +431,17 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   std::map<int, Kernel::Matrix<double>> RunNums2GonMatrix;
   getRun2MatMap(Peaks, OptRuns, RunNums2GonMatrix);
 
-  g_log.debug()
-      << "----------------------------Derivative------------------------\n";
+  g_log.debug() << "----------------------------Derivative------------------------\n";
 
   V3D samplePosition = instNew->getSample()->getPos();
   IPeak &ppeak = Peaks->getPeak(0);
   double L0 = ppeak.getL1();
   double velocity = (L0 + ppeak.getL2()) / ppeak.getTOF();
 
-  double K =
-      2 * M_PI / ppeak.getWavelength() / velocity; // 2pi/lambda = K* velocity
+  double K = 2 * M_PI / ppeak.getWavelength() / velocity; // 2pi/lambda = K* velocity
   V3D beamDir = instNew->getBeamDirection();
 
-  size_t paramNums[] = {parameterIndex(std::string("SampleXOffset")),
-                        parameterIndex(std::string("SampleYOffset")),
+  size_t paramNums[] = {parameterIndex(std::string("SampleXOffset")), parameterIndex(std::string("SampleYOffset")),
                         parameterIndex(std::string("SampleZOffset"))};
 
   for (size_t i = 0; i < nData; i += 3) {
@@ -521,9 +483,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
       chiParamNum = phiParamNum = omegaParamNum = nParams() + 10;
       peak.setGoniometerMatrix(GonRot * peak.getGoniometerMatrix());
     }
-    V3D sampOffsets(getParameter("SampleXOffset"),
-                    getParameter("SampleYOffset"),
-                    getParameter("SampleZOffset"));
+    V3D sampOffsets(getParameter("SampleXOffset"), getParameter("SampleYOffset"), getParameter("SampleZOffset"));
     peak.setSamplePos(peak.getSamplePos() + sampOffsets);
     // NOTE:Use getQLabFrame except for below.
     // For parameters the getGoniometerMatrix should remove GonRot, for derivs
@@ -553,8 +513,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
 
       R = domegaMatrix * chiMatrix * phiMatrix;
       InvR = InvG * R * InvG * -1;
-      V3D Dhkl2 =
-          UBinv * InvR * peak.getQLabFrame(); // R.transpose should be R inverse
+      V3D Dhkl2 = UBinv * InvR * peak.getQLabFrame(); // R.transpose should be R inverse
 
       out->set(i, chiParamNum, Dhkl1[0]);
       out->set(i + 1, chiParamNum, Dhkl1[1]);
@@ -575,19 +534,16 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     Matrix<double> InvGon = InvGonRot * peak.getGoniometerMatrix();
     InvGon.Invert();
     V3D DGonx = (UBinv * InvGon * InvGonRotzMat * InvGonRotyMat *
-                 DerivRotationMatrixAboutRegAxis(
-                     -GonRotx, 'x') * // - gives inverse of GonRot
+                 DerivRotationMatrixAboutRegAxis(-GonRotx, 'x') * // - gives inverse of GonRot
                  peak.getQLabFrame()) *
                 -1;
 
-    V3D DGony = (UBinv * InvGon * InvGonRotzMat *
-                 DerivRotationMatrixAboutRegAxis(-GonRoty, 'y') *
-                 InvGonRotxMat * peak.getQLabFrame()) *
+    V3D DGony = (UBinv * InvGon * InvGonRotzMat * DerivRotationMatrixAboutRegAxis(-GonRoty, 'y') * InvGonRotxMat *
+                 peak.getQLabFrame()) *
                 -1;
-    V3D DGonz =
-        (UBinv * InvGon * DerivRotationMatrixAboutRegAxis(-GonRotz, 'z') *
-         InvGonRotyMat * InvGonRotxMat * peak.getQLabFrame()) *
-        -1;
+    V3D DGonz = (UBinv * InvGon * DerivRotationMatrixAboutRegAxis(-GonRotz, 'z') * InvGonRotyMat * InvGonRotxMat *
+                 peak.getQLabFrame()) *
+                -1;
 
     size_t paramnum = parameterIndex("GonRotx");
     out->set(i, paramnum, DGonx[0]);
@@ -642,8 +598,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   }
 }
 
-Peak PeakHKLErrors::createNewPeak(const DataObjects::Peak &peak_old,
-                                  const Geometry::Instrument_sptr &instrNew,
+Peak PeakHKLErrors::createNewPeak(const DataObjects::Peak &peak_old, const Geometry::Instrument_sptr &instrNew,
                                   double T0, double L0) {
   Geometry::Instrument_const_sptr inst = peak_old.getInstrument();
   if (inst->getComponentID() != instrNew->getComponentID()) {
@@ -657,13 +612,11 @@ Peak PeakHKLErrors::createNewPeak(const DataObjects::Peak &peak_old,
 
   Kernel::V3D hkl = peak_old.getHKL();
   // peak_old.setDetectorID(ID); //set det positions
-  Peak peak(instrNew, ID, peak_old.getWavelength(), hkl,
-            peak_old.getGoniometerMatrix());
+  Peak peak(instrNew, ID, peak_old.getWavelength(), hkl, peak_old.getGoniometerMatrix());
 
   Wavelength wl;
 
-  wl.initialize(L0, peak.getL2(), peak.getScattering(), 0,
-                peak_old.getInitialEnergy(), 0.0);
+  wl.initialize(L0, peak.getL2(), peak.getScattering(), 0, peak_old.getInitialEnergy(), 0.0);
 
   peak.setWavelength(wl.singleFromTOF(T));
   peak.setIntensity(peak_old.getIntensity());

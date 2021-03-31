@@ -19,9 +19,7 @@ using namespace Mantid::DataObjects;
 
 class CreateDetectorTableTest : public CxxTest::TestSuite {
 public:
-  static CreateDetectorTableTest *createSuite() {
-    return new CreateDetectorTableTest();
-  }
+  static CreateDetectorTableTest *createSuite() { return new CreateDetectorTableTest(); }
 
   static void destroySuite(CreateDetectorTableTest *suite) { delete suite; }
 
@@ -58,14 +56,12 @@ public:
   }
 
   void test_Exec_Matrix_Workspace() {
-    Workspace2D_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
 
     CreateDetectorTable alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted());
 
@@ -73,8 +69,7 @@ public:
     //[input workspace name] + "-Detectors"
     TableWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            inputWS->getName() + "-Detectors"));
+        ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(inputWS->getName() + "-Detectors"));
     TS_ASSERT(ws);
 
     if (!ws) {
@@ -90,26 +85,21 @@ public:
   }
 
   void test_Exec_Matrix_Workspace_With_Altered_Parameters() {
-    Workspace2D_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     std::string outWSName{"Detector Table Test"};
 
     CreateDetectorTable alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WorkspaceIndices", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IncludeData", true));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorTableWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTableWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted());
 
     TableWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(outWSName));
     TS_ASSERT(ws);
 
     if (!ws) {
@@ -125,8 +115,7 @@ public:
   }
 
   void test_Exec_Peaks_Workspace() {
-    PeaksWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::createPeaksWorkspace(5, false);
+    PeaksWorkspace_sptr inputWS = WorkspaceCreationHelper::createPeaksWorkspace(5, false);
 
     CreateDetectorTable alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -137,8 +126,7 @@ public:
 
     TableWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            inputWS->getName() + "-Detectors"));
+        ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(inputWS->getName() + "-Detectors"));
     TS_ASSERT(ws);
 
     if (!ws) {
@@ -170,14 +158,9 @@ public:
   MatrixWorkspace_sptr WS;
   CreateDetectorTable alg;
 
-  void setUp() override {
-    WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10000,
-                                                                      1000);
-  }
+  void setUp() override { WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10000, 1000); }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().remove(WS->getName() + "-Detectors");
-  }
+  void tearDown() override { AnalysisDataService::Instance().remove(WS->getName() + "-Detectors"); }
 
   void testExec() {
     alg.initialize();

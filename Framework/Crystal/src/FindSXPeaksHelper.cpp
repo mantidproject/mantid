@@ -23,8 +23,7 @@ namespace {
 
 const double TWO_PI = 2 * M_PI;
 
-bool isDifferenceLargerThanTolerance(const double angle1, const double angle2,
-                                     const double tolerance) {
+bool isDifferenceLargerThanTolerance(const double angle1, const double angle2, const double tolerance) {
   auto difference = std::abs(angle1 - angle2);
 
   // If we have more than 360 degree angle difference then we need to wrap it
@@ -65,11 +64,9 @@ Constructor
 @param wsIndex : ws index of the contributing spectrum
 @param spectrumInfo: spectrum info of the original ws.
 */
-SXPeak::SXPeak(double t, double phi, double intensity,
-               const std::vector<int> &spectral, const size_t wsIndex,
+SXPeak::SXPeak(double t, double phi, double intensity, const std::vector<int> &spectral, const size_t wsIndex,
                const API::SpectrumInfo &spectrumInfo)
-    : m_tof(t), m_phi(phi), m_intensity(intensity), m_spectra(spectral),
-      m_wsIndex(wsIndex) {
+    : m_tof(t), m_phi(phi), m_intensity(intensity), m_spectra(spectral), m_wsIndex(wsIndex) {
   // Sanity checks
   if (intensity < 0) {
     throw std::invalid_argument("SXPeak: Cannot have an intensity < 0");
@@ -78,9 +75,7 @@ SXPeak::SXPeak(double t, double phi, double intensity,
     throw std::invalid_argument("SXPeak: Cannot have zero sized spectral list");
   }
   if (!spectrumInfo.hasDetectors(m_wsIndex)) {
-    throw std::invalid_argument("SXPeak: Spectrum at ws index " +
-                                std::to_string(wsIndex) +
-                                " doesn't have detectors");
+    throw std::invalid_argument("SXPeak: Spectrum at ws index " + std::to_string(wsIndex) + " doesn't have detectors");
   }
 
   const auto l1 = spectrumInfo.l1();
@@ -115,20 +110,16 @@ Object comparision
 @param tolerance : tolerance
 */
 bool SXPeak::compare(const SXPeak &rhs, double tolerance) const {
-  if (std::abs(m_tof / m_nPixels - rhs.m_tof / rhs.m_nPixels) >
-      tolerance * m_tof / m_nPixels)
+  if (std::abs(m_tof / m_nPixels - rhs.m_tof / rhs.m_nPixels) > tolerance * m_tof / m_nPixels)
     return false;
-  if (std::abs(m_phi / m_nPixels - rhs.m_phi / rhs.m_nPixels) >
-      tolerance * m_phi / m_nPixels)
+  if (std::abs(m_phi / m_nPixels - rhs.m_phi / rhs.m_nPixels) > tolerance * m_phi / m_nPixels)
     return false;
-  if (std::abs(m_twoTheta / m_nPixels - rhs.m_twoTheta / rhs.m_nPixels) >
-      tolerance * m_twoTheta / m_nPixels)
+  if (std::abs(m_twoTheta / m_nPixels - rhs.m_twoTheta / rhs.m_nPixels) > tolerance * m_twoTheta / m_nPixels)
     return false;
   return true;
 }
 
-bool SXPeak::compare(const SXPeak &rhs, const double xTolerance,
-                     const double phiTolerance, const double thetaTolerance,
+bool SXPeak::compare(const SXPeak &rhs, const double xTolerance, const double phiTolerance, const double thetaTolerance,
                      const XAxisUnit units) const {
 
   const auto x_1 = (units == XAxisUnit::TOF) ? m_tof : m_dSpacing;
@@ -141,8 +132,7 @@ bool SXPeak::compare(const SXPeak &rhs, const double xTolerance,
   if (isDifferenceLargerThanTolerance(m_phi, rhs.m_phi, phiTolerance)) {
     return false;
   }
-  if (isDifferenceLargerThanTolerance(m_twoTheta, rhs.m_twoTheta,
-                                      thetaTolerance)) {
+  if (isDifferenceLargerThanTolerance(m_twoTheta, rhs.m_twoTheta, thetaTolerance)) {
     return false;
   }
   return true;
@@ -179,8 +169,7 @@ SXPeak &SXPeak::operator+=(const SXPeak &rhs) {
   m_intensity += rhs.m_intensity;
   m_LTotal += rhs.m_LTotal;
   m_nPixels += 1;
-  m_spectra.insert(m_spectra.end(), rhs.m_spectra.cbegin(),
-                   rhs.m_spectra.cend());
+  m_spectra.insert(m_spectra.end(), rhs.m_spectra.cbegin(), rhs.m_spectra.cend());
   return *this;
 }
 
@@ -246,20 +235,18 @@ yIt PeakContainer::getMaxIterator() const { return m_y.begin() + m_maxIndex; }
  * Background
  * ------------------------------------------------------------------------------------------
  */
-AbsoluteBackgroundStrategy::AbsoluteBackgroundStrategy(const double background)
-    : m_background(background) {}
+AbsoluteBackgroundStrategy::AbsoluteBackgroundStrategy(const double background) : m_background(background) {}
 
-bool AbsoluteBackgroundStrategy::isBelowBackground(
-    const double intensity, const HistogramData::HistogramY & /*y*/) const {
+bool AbsoluteBackgroundStrategy::isBelowBackground(const double intensity,
+                                                   const HistogramData::HistogramY & /*y*/) const {
   return intensity < m_background;
 }
 
-PerSpectrumBackgroundStrategy::PerSpectrumBackgroundStrategy(
-    const double backgroundMultiplier)
+PerSpectrumBackgroundStrategy::PerSpectrumBackgroundStrategy(const double backgroundMultiplier)
     : m_backgroundMultiplier(backgroundMultiplier) {}
 
-bool PerSpectrumBackgroundStrategy::isBelowBackground(
-    const double intensity, const HistogramData::HistogramY &y) const {
+bool PerSpectrumBackgroundStrategy::isBelowBackground(const double intensity,
+                                                      const HistogramData::HistogramY &y) const {
   auto background = 0.5 * (1.0 + y.front() + y.back());
   background *= m_backgroundMultiplier;
   return intensity < background;
@@ -270,15 +257,13 @@ bool PerSpectrumBackgroundStrategy::isBelowBackground(
  * ------------------------------------------------------------------------------------------
  */
 
-PeakFindingStrategy::PeakFindingStrategy(
-    const BackgroundStrategy *backgroundStrategy,
-    const API::SpectrumInfo &spectrumInfo, const double minValue,
-    const double maxValue, const XAxisUnit units)
-    : m_backgroundStrategy(backgroundStrategy), m_minValue(minValue),
-      m_maxValue(maxValue), m_spectrumInfo(spectrumInfo), m_units(units) {}
+PeakFindingStrategy::PeakFindingStrategy(const BackgroundStrategy *backgroundStrategy,
+                                         const API::SpectrumInfo &spectrumInfo, const double minValue,
+                                         const double maxValue, const XAxisUnit units)
+    : m_backgroundStrategy(backgroundStrategy), m_minValue(minValue), m_maxValue(maxValue),
+      m_spectrumInfo(spectrumInfo), m_units(units) {}
 
-PeakList PeakFindingStrategy::findSXPeaks(const HistogramData::HistogramX &x,
-                                          const HistogramData::HistogramY &y,
+PeakList PeakFindingStrategy::findSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
                                           const int workspaceIndex) const {
   // ---------------------------------------
   // Get the lower and upper bound iterators
@@ -301,18 +286,13 @@ PeakList PeakFindingStrategy::findSXPeaks(const HistogramData::HistogramX &x,
   return dofindSXPeaks(x, y, lowit, highit, workspaceIndex);
 }
 
-BoundsIterator
-PeakFindingStrategy::getBounds(const HistogramData::HistogramX &x) const {
+BoundsIterator PeakFindingStrategy::getBounds(const HistogramData::HistogramX &x) const {
   // Find the range [min,max]
-  auto lowit = (m_minValue == EMPTY_DBL())
-                   ? x.begin()
-                   : std::lower_bound(x.begin(), x.end(), m_minValue);
+  auto lowit = (m_minValue == EMPTY_DBL()) ? x.begin() : std::lower_bound(x.begin(), x.end(), m_minValue);
   using std::placeholders::_1;
-  auto highit =
-      (m_maxValue == EMPTY_DBL())
-          ? x.end()
-          : std::find_if(lowit, x.end(),
-                         std::bind(std::greater<double>(), _1, m_maxValue));
+  auto highit = (m_maxValue == EMPTY_DBL())
+                    ? x.end()
+                    : std::find_if(lowit, x.end(), std::bind(std::greater<double>(), _1, m_maxValue));
 
   return std::make_pair(lowit, highit);
 }
@@ -328,16 +308,14 @@ double PeakFindingStrategy::calculatePhi(size_t workspaceIndex) const {
   double phi;
 
   // Get the detectors for the workspace index
-  const auto &spectrumDefinition =
-      m_spectrumInfo.spectrumDefinition(workspaceIndex);
+  const auto &spectrumDefinition = m_spectrumInfo.spectrumDefinition(workspaceIndex);
   const auto numberOfDetectors = spectrumDefinition.size();
   const auto &det = m_spectrumInfo.detector(workspaceIndex);
   if (numberOfDetectors == 1) {
     phi = det.getPhi();
   } else {
     // Have to average the value for phi
-    auto detectorGroup =
-        dynamic_cast<const Mantid::Geometry::DetectorGroup *>(&det);
+    auto detectorGroup = dynamic_cast<const Mantid::Geometry::DetectorGroup *>(&det);
     if (!detectorGroup) {
       throw std::runtime_error("Could not cast to detector group");
     }
@@ -350,45 +328,38 @@ double PeakFindingStrategy::calculatePhi(size_t workspaceIndex) const {
   return phi;
 }
 
-double PeakFindingStrategy::getXValue(const HistogramData::HistogramX &x,
-                                      const size_t peakLocation) const {
+double PeakFindingStrategy::getXValue(const HistogramData::HistogramX &x, const size_t peakLocation) const {
   auto leftBinPosition = x.begin() + peakLocation;
   const double leftBinEdge = *leftBinPosition;
   const double rightBinEdge = *std::next(leftBinPosition);
   return 0.5 * (leftBinEdge + rightBinEdge);
 }
 
-double PeakFindingStrategy::convertToTOF(const double xValue,
-                                         const size_t workspaceIndex) const {
+double PeakFindingStrategy::convertToTOF(const double xValue, const size_t workspaceIndex) const {
   if (m_units == XAxisUnit::TOF) {
     // we're already using TOF units
     return xValue;
   } else {
     const auto unit = UnitFactory::Instance().create("dSpacing");
     // we're using d-spacing, convert the point to TOF
-    unit->initialize(m_spectrumInfo.l1(), m_spectrumInfo.l2(workspaceIndex),
-                     m_spectrumInfo.twoTheta(workspaceIndex), 0, 0, 0);
+    unit->initialize(m_spectrumInfo.l1(), m_spectrumInfo.l2(workspaceIndex), m_spectrumInfo.twoTheta(workspaceIndex), 0,
+                     0, 0);
     return unit->singleToTOF(xValue);
   }
 }
 
-StrongestPeaksStrategy::StrongestPeaksStrategy(
-    const BackgroundStrategy *backgroundStrategy,
-    const API::SpectrumInfo &spectrumInfo, const double minValue,
-    const double maxValue, const XAxisUnit units)
-    : PeakFindingStrategy(backgroundStrategy, spectrumInfo, minValue, maxValue,
-                          units) {}
+StrongestPeaksStrategy::StrongestPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
+                                               const API::SpectrumInfo &spectrumInfo, const double minValue,
+                                               const double maxValue, const XAxisUnit units)
+    : PeakFindingStrategy(backgroundStrategy, spectrumInfo, minValue, maxValue, units) {}
 
-PeakList StrongestPeaksStrategy::dofindSXPeaks(
-    const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
-    Bound low, Bound high, const int workspaceIndex) const {
+PeakList StrongestPeaksStrategy::dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
+                                               Bound low, Bound high, const int workspaceIndex) const {
   auto distmin = std::distance(x.begin(), low);
   auto distmax = std::distance(x.begin(), high);
 
   // Find the max element
-  auto maxY = (y.size() > 1)
-                  ? std::max_element(y.begin() + distmin, y.begin() + distmax)
-                  : y.begin();
+  auto maxY = (y.size() > 1) ? std::max_element(y.begin() + distmin, y.begin() + distmax) : y.begin();
 
   // Perform a check against the background
   double intensity = (*maxY);
@@ -408,12 +379,9 @@ PeakList StrongestPeaksStrategy::dofindSXPeaks(
   return peaks;
 }
 
-AllPeaksStrategy::AllPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
-                                   const API::SpectrumInfo &spectrumInfo,
-                                   const double minValue, const double maxValue,
-                                   const XAxisUnit units)
-    : PeakFindingStrategy(backgroundStrategy, spectrumInfo, minValue, maxValue,
-                          units) {
+AllPeaksStrategy::AllPeaksStrategy(const BackgroundStrategy *backgroundStrategy, const API::SpectrumInfo &spectrumInfo,
+                                   const double minValue, const double maxValue, const XAxisUnit units)
+    : PeakFindingStrategy(backgroundStrategy, spectrumInfo, minValue, maxValue, units) {
   // We only allow the AbsoluteBackgroundStrategy for now
   if (!dynamic_cast<const AbsoluteBackgroundStrategy *>(m_backgroundStrategy)) {
     throw std::invalid_argument("The AllPeaksStrategy has to be initialized "
@@ -421,10 +389,8 @@ AllPeaksStrategy::AllPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
   }
 }
 
-PeakList AllPeaksStrategy::dofindSXPeaks(const HistogramData::HistogramX &x,
-                                         const HistogramData::HistogramY &y,
-                                         Bound low, Bound high,
-                                         const int workspaceIndex) const {
+PeakList AllPeaksStrategy::dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
+                                         Bound low, Bound high, const int workspaceIndex) const {
   // Get all peaks from the container
   auto foundPeaks = getAllPeaks(x, y, low, high, m_backgroundStrategy);
 
@@ -434,11 +400,10 @@ PeakList AllPeaksStrategy::dofindSXPeaks(const HistogramData::HistogramX &x,
   return peaks;
 }
 
-std::vector<std::unique_ptr<PeakContainer>> AllPeaksStrategy::getAllPeaks(
-    const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
-    Bound low, Bound high,
-    const Mantid::Crystal::FindSXPeaksHelper::BackgroundStrategy
-        *backgroundStrategy) const {
+std::vector<std::unique_ptr<PeakContainer>>
+AllPeaksStrategy::getAllPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y, Bound low,
+                              Bound high,
+                              const Mantid::Crystal::FindSXPeaksHelper::BackgroundStrategy *backgroundStrategy) const {
   // We iterate over the data and only consider data which is above the
   // threshold.
   // Once data starts to be above the threshold we start to record it and add it
@@ -458,14 +423,11 @@ std::vector<std::unique_ptr<PeakContainer>> AllPeaksStrategy::getAllPeaks(
   auto distanceMax = std::distance(x.begin(), high);
 
   const auto lowY = y.begin() + distanceMin;
-  auto highY = distanceMax < static_cast<int>(y.size())
-                   ? y.begin() + distanceMax
-                   : y.end();
+  auto highY = distanceMax < static_cast<int>(y.size()) ? y.begin() + distanceMax : y.end();
 
   for (auto it = lowY; it != highY; ++it) {
     const auto signal = *it;
-    const auto isAboveThreshold =
-        !backgroundStrategy->isBelowBackground(signal, y);
+    const auto isAboveThreshold = !backgroundStrategy->isBelowBackground(signal, y);
 
     // There are four scenarios:
     // 1. Not recording + below threshold => continue
@@ -501,10 +463,9 @@ std::vector<std::unique_ptr<PeakContainer>> AllPeaksStrategy::getAllPeaks(
   return peaks;
 }
 
-PeakList AllPeaksStrategy::convertToSXPeaks(
-    const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
-    const std::vector<std::unique_ptr<PeakContainer>> &foundPeaks,
-    const int workspaceIndex) const {
+PeakList AllPeaksStrategy::convertToSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
+                                            const std::vector<std::unique_ptr<PeakContainer>> &foundPeaks,
+                                            const int workspaceIndex) const {
   PeakList peaks;
 
   if (foundPeaks.empty()) {
@@ -523,8 +484,7 @@ PeakList AllPeaksStrategy::convertToSXPeaks(
     const double phi = calculatePhi(workspaceIndex);
 
     std::vector<int> specs(1, workspaceIndex);
-    (*peaks).emplace_back(tof, phi, *maxY, specs, workspaceIndex,
-                          m_spectrumInfo);
+    (*peaks).emplace_back(tof, phi, *maxY, specs, workspaceIndex, m_spectrumInfo);
   }
 
   return peaks;
@@ -535,17 +495,14 @@ PeakList AllPeaksStrategy::convertToSXPeaks(
  * ------------------------------------------------------------------------------------------
  */
 
-ReducePeakListStrategy::ReducePeakListStrategy(
-    const CompareStrategy *compareStrategy)
+ReducePeakListStrategy::ReducePeakListStrategy(const CompareStrategy *compareStrategy)
     : m_compareStrategy(compareStrategy) {}
 
-SimpleReduceStrategy::SimpleReduceStrategy(
-    const CompareStrategy *compareStrategy)
+SimpleReduceStrategy::SimpleReduceStrategy(const CompareStrategy *compareStrategy)
     : ReducePeakListStrategy(compareStrategy) {}
 
-std::vector<SXPeak> SimpleReduceStrategy::reduce(
-    const std::vector<SXPeak> &peaks,
-    Mantid::Kernel::ProgressBase & /*progress*/) const {
+std::vector<SXPeak> SimpleReduceStrategy::reduce(const std::vector<SXPeak> &peaks,
+                                                 Mantid::Kernel::ProgressBase & /*progress*/) const {
   // If the peaks are empty then do nothing
   if (peaks.empty()) {
     return peaks;
@@ -553,16 +510,14 @@ std::vector<SXPeak> SimpleReduceStrategy::reduce(
 
   std::vector<SXPeak> finalPeaks;
   for (const auto &currentPeak : peaks) {
-    auto pos = std::find_if(finalPeaks.begin(), finalPeaks.end(),
-                            [&currentPeak, this](SXPeak &peak) {
-                              auto result = this->m_compareStrategy->compare(
-                                  currentPeak, peak);
-                              // bool result = currentPeak.compare(peak,
-                              // resolution);
-                              if (result)
-                                peak += currentPeak;
-                              return result;
-                            });
+    auto pos = std::find_if(finalPeaks.begin(), finalPeaks.end(), [&currentPeak, this](SXPeak &peak) {
+      auto result = this->m_compareStrategy->compare(currentPeak, peak);
+      // bool result = currentPeak.compare(peak,
+      // resolution);
+      if (result)
+        peak += currentPeak;
+      return result;
+    });
     if (pos == finalPeaks.end()) {
       finalPeaks.emplace_back(currentPeak);
     }
@@ -571,13 +526,11 @@ std::vector<SXPeak> SimpleReduceStrategy::reduce(
   return finalPeaks;
 }
 
-FindMaxReduceStrategy::FindMaxReduceStrategy(
-    const CompareStrategy *compareStrategy)
+FindMaxReduceStrategy::FindMaxReduceStrategy(const CompareStrategy *compareStrategy)
     : ReducePeakListStrategy(compareStrategy) {}
 
-std::vector<SXPeak>
-FindMaxReduceStrategy::reduce(const std::vector<SXPeak> &peaks,
-                              Mantid::Kernel::ProgressBase &progress) const {
+std::vector<SXPeak> FindMaxReduceStrategy::reduce(const std::vector<SXPeak> &peaks,
+                                                  Mantid::Kernel::ProgressBase &progress) const {
   // If the peaks are empty then do nothing
   if (peaks.empty()) {
     return peaks;
@@ -595,9 +548,8 @@ using PeakGraph = adjacency_list<vecS, vecS, undirectedS, SXPeak *>;
 using Vertex = boost::graph_traits<PeakGraph>::vertex_descriptor;
 using Edge = boost::graph_traits<PeakGraph>::edge_descriptor;
 
-std::vector<std::vector<SXPeak *>> FindMaxReduceStrategy::getPeakGroups(
-    const std::vector<SXPeak> &peakList,
-    Mantid::Kernel::ProgressBase &progress) const {
+std::vector<std::vector<SXPeak *>> FindMaxReduceStrategy::getPeakGroups(const std::vector<SXPeak> &peakList,
+                                                                        Mantid::Kernel::ProgressBase &progress) const {
 
   // Create a vector of addresses. Note that the peaks live on the stack. This
   // here only works, because the peaks are always in a stack frame below.
@@ -614,19 +566,16 @@ std::vector<std::vector<SXPeak *>> FindMaxReduceStrategy::getPeakGroups(
   // Provide a warning if there are more than 500 peaks found.
   const size_t numberOfPeaksFound = peaks.size();
   if (numberOfPeaksFound > 500) {
-    std::string warningMessage =
-        std::string("There are ") + std::to_string(numberOfPeaksFound) +
-        std::string(
-            " peaks being processed. This might take a long time. "
-            "Please check that the cutoff of the background that "
-            "you have selected is high enough, else the algorithm will"
-            " mistake background noise for peaks. The instrument view "
-            "allows you to easily inspect the typical background level.");
+    std::string warningMessage = std::string("There are ") + std::to_string(numberOfPeaksFound) +
+                                 std::string(" peaks being processed. This might take a long time. "
+                                             "Please check that the cutoff of the background that "
+                                             "you have selected is high enough, else the algorithm will"
+                                             " mistake background noise for peaks. The instrument view "
+                                             "allows you to easily inspect the typical background level.");
     g_log.warning(warningMessage);
   }
 
-  std::string message = std::string("There are ") +
-                        std::to_string(numberOfPeaksFound) +
+  std::string message = std::string("There are ") + std::to_string(numberOfPeaksFound) +
                         std::string(" peaks. Investigating peak number ");
   int peakCounter = 0;
 
@@ -680,8 +629,7 @@ std::vector<std::vector<SXPeak *>> FindMaxReduceStrategy::getPeakGroups(
   return peakGroups;
 }
 
-std::vector<SXPeak> FindMaxReduceStrategy::getFinalPeaks(
-    const std::vector<std::vector<SXPeak *>> &peakGroups) const {
+std::vector<SXPeak> FindMaxReduceStrategy::getFinalPeaks(const std::vector<std::vector<SXPeak *>> &peakGroups) const {
   std::vector<SXPeak> peaks;
   // For each peak groupf find one peak
   // Currently we select the peak with the largest signal (this strategy could
@@ -706,29 +654,24 @@ std::vector<SXPeak> FindMaxReduceStrategy::getFinalPeaks(
  * Comparison Strategy
  * ------------------------------------------------------------------------------------------
  */
-RelativeCompareStrategy::RelativeCompareStrategy(const double resolution)
-    : m_resolution(resolution) {}
+RelativeCompareStrategy::RelativeCompareStrategy(const double resolution) : m_resolution(resolution) {}
 
-bool RelativeCompareStrategy::compare(const SXPeak &lhs,
-                                      const SXPeak &rhs) const {
+bool RelativeCompareStrategy::compare(const SXPeak &lhs, const SXPeak &rhs) const {
   return lhs.compare(rhs, m_resolution);
 }
 
-AbsoluteCompareStrategy::AbsoluteCompareStrategy(
-    const double xUnitResolution, const double phiResolution,
-    const double twoThetaResolution, const XAxisUnit units)
-    : m_xUnitResolution(xUnitResolution), m_phiResolution(phiResolution),
-      m_twoThetaResolution(twoThetaResolution), m_units(units) {
+AbsoluteCompareStrategy::AbsoluteCompareStrategy(const double xUnitResolution, const double phiResolution,
+                                                 const double twoThetaResolution, const XAxisUnit units)
+    : m_xUnitResolution(xUnitResolution), m_phiResolution(phiResolution), m_twoThetaResolution(twoThetaResolution),
+      m_units(units) {
   // Convert the input from degree to radians
   constexpr double rad2deg = M_PI / 180.;
   m_phiResolution *= rad2deg;
   m_twoThetaResolution *= rad2deg;
 }
 
-bool AbsoluteCompareStrategy::compare(const SXPeak &lhs,
-                                      const SXPeak &rhs) const {
-  return lhs.compare(rhs, m_xUnitResolution, m_phiResolution,
-                     m_twoThetaResolution, m_units);
+bool AbsoluteCompareStrategy::compare(const SXPeak &lhs, const SXPeak &rhs) const {
+  return lhs.compare(rhs, m_xUnitResolution, m_phiResolution, m_twoThetaResolution, m_units);
 }
 
 } // namespace FindSXPeaksHelper

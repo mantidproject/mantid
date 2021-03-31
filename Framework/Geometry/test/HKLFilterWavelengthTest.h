@@ -18,30 +18,21 @@ class HKLFilterWavelengthTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static HKLFilterWavelengthTest *createSuite() {
-    return new HKLFilterWavelengthTest();
-  }
+  static HKLFilterWavelengthTest *createSuite() { return new HKLFilterWavelengthTest(); }
   static void destroySuite(HKLFilterWavelengthTest *suite) { delete suite; }
 
   void testConstructor() {
     OrientedLattice ol(5.5, 6.1, 8.2);
     DblMatrix ub = ol.getUB();
 
-    TS_ASSERT_THROWS_NOTHING(
-        HKLFilterWavelength wavelengthFilter(ub, 0.9, 6.0));
+    TS_ASSERT_THROWS_NOTHING(HKLFilterWavelength wavelengthFilter(ub, 0.9, 6.0));
 
-    TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, -0.9, 6.0),
-                     const std::range_error &);
-    TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, 0.9, -6.0),
-                     const std::range_error &);
-    TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, -0.9, -6.0),
-                     const std::range_error &);
-    TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, 0.0, 6.0),
-                     const std::range_error &);
-    TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, 0.9, 0.0),
-                     const std::range_error &);
-    TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, 0.0, 0.0),
-                     const std::range_error &);
+    TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, -0.9, 6.0), const std::range_error &);
+    TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, 0.9, -6.0), const std::range_error &);
+    TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, -0.9, -6.0), const std::range_error &);
+    TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, 0.0, 6.0), const std::range_error &);
+    TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, 0.9, 0.0), const std::range_error &);
+    TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, 0.0, 0.0), const std::range_error &);
   }
 
   void testDescription() {

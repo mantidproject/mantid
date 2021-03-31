@@ -31,24 +31,17 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PDDetermineCharacterizationsTest *createSuite() {
-    return new PDDetermineCharacterizationsTest();
-  }
-  static void destroySuite(PDDetermineCharacterizationsTest *suite) {
-    delete suite;
-  }
+  static PDDetermineCharacterizationsTest *createSuite() { return new PDDetermineCharacterizationsTest(); }
+  static void destroySuite(PDDetermineCharacterizationsTest *suite) { delete suite; }
 
-  void createLogWksp(const std::string &frequency,
-                     const std::string &wavelength,
+  void createLogWksp(const std::string &frequency, const std::string &wavelength,
                      const std::string &canName = std::string("")) {
     m_logWSName = "_det_char_log";
 
     {
       auto alg = AlgorithmManager::Instance().create("CreateWorkspace");
-      alg->setPropertyValue("DataX",
-                            "-1.0,-0.8,-0.6,-0.4,-0.2,0.0,0.2,0.4,0.6,0.8,1.0");
-      alg->setPropertyValue("DataY",
-                            "-1.0,-0.8,-0.6,-0.4,-0.2,0.0,0.2,0.4,0.6,0.8");
+      alg->setPropertyValue("DataX", "-1.0,-0.8,-0.6,-0.4,-0.2,0.0,0.2,0.4,0.6,0.8,1.0");
+      alg->setPropertyValue("DataY", "-1.0,-0.8,-0.6,-0.4,-0.2,0.0,0.2,0.4,0.6,0.8");
       alg->setPropertyValue("OutputWorkspace", m_logWSName);
       TS_ASSERT(alg->execute());
     }
@@ -81,13 +74,10 @@ public:
     }
   }
 
-  void addRow(const ITableWorkspace_sptr &wksp, const double freq,
-              const double wl, const int bank, const std::string &van,
-              const std::string &van_back, const std::string &can,
-              const std::string &empty_env, const std::string &empty_inst,
-              const std::string &dmin, const std::string &dmax,
-              const double tofmin, const double tofmax, const double wlmin,
-              const double wlmax,
+  void addRow(const ITableWorkspace_sptr &wksp, const double freq, const double wl, const int bank,
+              const std::string &van, const std::string &van_back, const std::string &can, const std::string &empty_env,
+              const std::string &empty_inst, const std::string &dmin, const std::string &dmax, const double tofmin,
+              const double tofmax, const double wlmin, const double wlmax,
               const std::string &canExtra = std::string("")) {
     Mantid::API::TableRow row = wksp->appendRow();
     row << freq;
@@ -108,8 +98,7 @@ public:
       row << canExtra;
   }
 
-  ITableWorkspace_sptr
-  createEmptyTableWksp(const std::string &canName = std::string("")) {
+  ITableWorkspace_sptr createEmptyTableWksp(const std::string &canName = std::string("")) {
     ITableWorkspace_sptr wksp = WorkspaceFactory::Instance().createTable();
     wksp->addColumn("double", "frequency");
     wksp->addColumn("double", "wavelength");
@@ -135,14 +124,13 @@ public:
   ITableWorkspace_sptr createTableWkspPG3() {
     ITableWorkspace_sptr wksp = createEmptyTableWksp("PAC08");
 
-    addRow(wksp, 60., 0.533, 1, "17702", "1234", "17711", "0", "0", "0.05",
-           "2.20", 0000.00, 16666.67, 0., 0., "12345");
-    addRow(wksp, 60., 1.333, 3, "17703", "1235", "17712", "0", "0", "0.43",
-           "5.40", 12500.00, 29166.67, 0., 0., "12346");
-    addRow(wksp, 60., 2.665, 4, "17704", "1236", "17713", "0", "0", "1.15",
-           "9.20", 33333.33, 50000.00, 0., 0., "12347");
-    addRow(wksp, 60., 4.797, 5, "17705", "1237", "17714", "0", "0", "2.00",
-           "15.35", 66666.67, 83333.67, 0., 0., "12348");
+    addRow(wksp, 60., 0.533, 1, "17702", "1234", "17711", "0", "0", "0.05", "2.20", 0000.00, 16666.67, 0., 0., "12345");
+    addRow(wksp, 60., 1.333, 3, "17703", "1235", "17712", "0", "0", "0.43", "5.40", 12500.00, 29166.67, 0., 0.,
+           "12346");
+    addRow(wksp, 60., 2.665, 4, "17704", "1236", "17713", "0", "0", "1.15", "9.20", 33333.33, 50000.00, 0., 0.,
+           "12347");
+    addRow(wksp, 60., 4.797, 5, "17705", "1237", "17714", "0", "0", "2.00", "15.35", 66666.67, 83333.67, 0., 0.,
+           "12348");
 
     return wksp;
   }
@@ -150,9 +138,8 @@ public:
   ITableWorkspace_sptr createTableWkspNOM() {
     ITableWorkspace_sptr wksp = createEmptyTableWksp();
 
-    addRow(wksp, 60., 1.4, 1, "0", "0", "0", "0", "0",
-           ".31,.25,.13,.13,.13,.42", "13.66,5.83,3.93,2.09,1.57,31.42", 300.00,
-           16666.67, 0., 0.);
+    addRow(wksp, 60., 1.4, 1, "0", "0", "0", "0", "0", ".31,.25,.13,.13,.13,.42", "13.66,5.83,3.93,2.09,1.57,31.42",
+           300.00, 16666.67, 0., 0.);
 
     return wksp;
   }
@@ -160,64 +147,44 @@ public:
   ITableWorkspace_sptr createTableWkspNOM_withwl() {
     ITableWorkspace_sptr wksp = createEmptyTableWksp();
 
-    addRow(wksp, 60., 1.4, 1, "0", "0", "0", "0", "0",
-           ".31,.25,.13,.13,.13,.42", "13.66,5.83,3.93,2.09,1.57,31.42", 300.00,
-           16666.67, .9, 2.1);
+    addRow(wksp, 60., 1.4, 1, "0", "0", "0", "0", "0", ".31,.25,.13,.13,.13,.42", "13.66,5.83,3.93,2.09,1.57,31.42",
+           300.00, 16666.67, .9, 2.1);
 
     return wksp;
   }
 
-  PropertyManager_sptr
-  createExpectedInfo(const double freq, const double wl, const int bank,
-                     const std::string &van, const std::string &vanback,
-                     const std::string &can, const std::string &empty,
-                     const std::string &dmin, const std::string &dmax,
-                     const double tofmin, const double tofmax,
-                     const double wlmin, const double wlmax) {
+  PropertyManager_sptr createExpectedInfo(const double freq, const double wl, const int bank, const std::string &van,
+                                          const std::string &vanback, const std::string &can, const std::string &empty,
+                                          const std::string &dmin, const std::string &dmax, const double tofmin,
+                                          const double tofmax, const double wlmin, const double wlmax) {
 
     PropertyManager_sptr expectedInfo = std::make_shared<PropertyManager>();
-    expectedInfo->declareProperty(
-        std::make_unique<PropertyWithValue<double>>("frequency", freq));
-    expectedInfo->declareProperty(
-        std::make_unique<PropertyWithValue<double>>("wavelength", wl));
-    expectedInfo->declareProperty(
-        std::make_unique<PropertyWithValue<int>>("bank", bank));
-    expectedInfo->declareProperty(
-        std::make_unique<ArrayProperty<int32_t>>("vanadium", van));
-    expectedInfo->declareProperty(std::make_unique<ArrayProperty<int32_t>>(
-        "vanadium_background", vanback));
-    expectedInfo->declareProperty(
-        std::make_unique<ArrayProperty<int32_t>>("container", can));
-    expectedInfo->declareProperty(
-        std::make_unique<ArrayProperty<int32_t>>("empty_environment", "0"));
-    expectedInfo->declareProperty(
-        std::make_unique<ArrayProperty<int32_t>>("empty_instrument", empty));
-    expectedInfo->declareProperty(
-        std::make_unique<ArrayProperty<double>>("d_min", dmin));
-    expectedInfo->declareProperty(
-        std::make_unique<ArrayProperty<double>>("d_max", dmax));
-    expectedInfo->declareProperty(
-        std::make_unique<PropertyWithValue<double>>("tof_min", tofmin));
-    expectedInfo->declareProperty(
-        std::make_unique<PropertyWithValue<double>>("tof_max", tofmax));
-    expectedInfo->declareProperty(
-        std::make_unique<PropertyWithValue<double>>("wavelength_min", wlmin));
-    expectedInfo->declareProperty(
-        std::make_unique<PropertyWithValue<double>>("wavelength_max", wlmax));
+    expectedInfo->declareProperty(std::make_unique<PropertyWithValue<double>>("frequency", freq));
+    expectedInfo->declareProperty(std::make_unique<PropertyWithValue<double>>("wavelength", wl));
+    expectedInfo->declareProperty(std::make_unique<PropertyWithValue<int>>("bank", bank));
+    expectedInfo->declareProperty(std::make_unique<ArrayProperty<int32_t>>("vanadium", van));
+    expectedInfo->declareProperty(std::make_unique<ArrayProperty<int32_t>>("vanadium_background", vanback));
+    expectedInfo->declareProperty(std::make_unique<ArrayProperty<int32_t>>("container", can));
+    expectedInfo->declareProperty(std::make_unique<ArrayProperty<int32_t>>("empty_environment", "0"));
+    expectedInfo->declareProperty(std::make_unique<ArrayProperty<int32_t>>("empty_instrument", empty));
+    expectedInfo->declareProperty(std::make_unique<ArrayProperty<double>>("d_min", dmin));
+    expectedInfo->declareProperty(std::make_unique<ArrayProperty<double>>("d_max", dmax));
+    expectedInfo->declareProperty(std::make_unique<PropertyWithValue<double>>("tof_min", tofmin));
+    expectedInfo->declareProperty(std::make_unique<PropertyWithValue<double>>("tof_max", tofmax));
+    expectedInfo->declareProperty(std::make_unique<PropertyWithValue<double>>("wavelength_min", wlmin));
+    expectedInfo->declareProperty(std::make_unique<PropertyWithValue<double>>("wavelength_max", wlmax));
 
     return expectedInfo;
   }
 
-  void compareResult(const PropertyManager_sptr &expected,
-                     const PropertyManager_sptr &observed) {
+  void compareResult(const PropertyManager_sptr &expected, const PropertyManager_sptr &observed) {
     TS_ASSERT_EQUALS(expected->propertyCount(), observed->propertyCount());
 
     const std::vector<Property *> &expectedProps = expected->getProperties();
 
     for (auto expectedProp : expectedProps) {
       const std::string name = expectedProp->name();
-      TS_ASSERT_EQUALS(expected->getPropertyValue(name),
-                       observed->getPropertyValue(name));
+      TS_ASSERT_EQUALS(expected->getPropertyValue(name), observed->getPropertyValue(name));
     }
   }
 
@@ -233,18 +200,14 @@ public:
 
     PDDetermineCharacterizations alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_logWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", m_logWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    auto expectedInfo = createExpectedInfo(0., 0., 1, "0", "0", "0", "0", "",
-                                           "", 0., 0., 0., 0.);
+    auto expectedInfo = createExpectedInfo(0., 0., 1, "0", "0", "0", "0", "", "", 0., 0., 0., 0.);
 
-    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
-                                    PROPERTY_MANAGER_NAME));
+    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(PROPERTY_MANAGER_NAME));
   }
 
   void testEmptyChar() {
@@ -253,19 +216,15 @@ public:
 
     PDDetermineCharacterizations alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_logWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", m_logWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Characterizations", tableWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    auto expectedInfo = createExpectedInfo(0., 0., 1, "0", "0", "0", "0", "",
-                                           "", 0., 0., 0., 0.);
+    auto expectedInfo = createExpectedInfo(0., 0., 1, "0", "0", "0", "0", "", "", 0., 0., 0., 0.);
 
-    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
-                                    PROPERTY_MANAGER_NAME));
+    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(PROPERTY_MANAGER_NAME));
   }
 
   void testFullChar() {
@@ -274,20 +233,16 @@ public:
 
     PDDetermineCharacterizations alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_logWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", m_logWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Characterizations", tableWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     auto expectedInfo =
-        createExpectedInfo(60., 0.533, 1, "17702", "1234", "17711", "0", "0.05",
-                           "2.20", 0000.00, 16666.67, 0., 0.);
+        createExpectedInfo(60., 0.533, 1, "17702", "1234", "17711", "0", "0.05", "2.20", 0000.00, 16666.67, 0., 0.);
 
-    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
-                                    PROPERTY_MANAGER_NAME));
+    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(PROPERTY_MANAGER_NAME));
   }
 
   void testFullCharDisableChar() {
@@ -296,23 +251,19 @@ public:
 
     PDDetermineCharacterizations alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_logWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", m_logWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Characterizations", tableWS));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BackRun", "-1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormRun", "-1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormBackRun", "-1"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     auto expectedInfo =
-        createExpectedInfo(60., 0.533, 1, "0", "0", "0", "0", "0.05", "2.20",
-                           0000.00, 16666.67, 0., 0.);
+        createExpectedInfo(60., 0.533, 1, "0", "0", "0", "0", "0.05", "2.20", 0000.00, 16666.67, 0., 0.);
 
-    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
-                                    PROPERTY_MANAGER_NAME));
+    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(PROPERTY_MANAGER_NAME));
   }
 
   void testFullCharWithCan() {
@@ -321,20 +272,16 @@ public:
 
     PDDetermineCharacterizations alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_logWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", m_logWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Characterizations", tableWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     auto expectedInfo =
-        createExpectedInfo(60., 0.533, 1, "17702", "1234", "12345", "0", "0.05",
-                           "2.20", 0000.00, 16666.67, 0., 0.);
+        createExpectedInfo(60., 0.533, 1, "17702", "1234", "12345", "0", "0.05", "2.20", 0000.00, 16666.67, 0., 0.);
 
-    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
-                                    PROPERTY_MANAGER_NAME));
+    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(PROPERTY_MANAGER_NAME));
   }
 
   void testFullCharNom() {
@@ -343,20 +290,16 @@ public:
 
     PDDetermineCharacterizations alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_logWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", m_logWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Characterizations", tableWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    auto expectedInfo = createExpectedInfo(
-        60., 1.4, 1, "0", "0", "0", "0", ".31,.25,.13,.13,.13,.42",
-        "13.66,5.83,3.93,2.09,1.57,31.42", 300.00, 16666.67, 0., 0.);
+    auto expectedInfo = createExpectedInfo(60., 1.4, 1, "0", "0", "0", "0", ".31,.25,.13,.13,.13,.42",
+                                           "13.66,5.83,3.93,2.09,1.57,31.42", 300.00, 16666.67, 0., 0.);
 
-    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
-                                    PROPERTY_MANAGER_NAME));
+    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(PROPERTY_MANAGER_NAME));
   }
 
   void testFullCharNomMultiChar() {
@@ -365,23 +308,19 @@ public:
 
     PDDetermineCharacterizations alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_logWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", m_logWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Characterizations", tableWS));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormRun", "1,  2"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BackRun", "3,4"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormBackRun", "5,6"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    auto expectedInfo = createExpectedInfo(
-        60., 1.4, 1, "1,2", "5,6", "3,4", "0", ".31,.25,.13,.13,.13,.42",
-        "13.66,5.83,3.93,2.09,1.57,31.42", 300.00, 16666.67, 0., 0.);
+    auto expectedInfo = createExpectedInfo(60., 1.4, 1, "1,2", "5,6", "3,4", "0", ".31,.25,.13,.13,.13,.42",
+                                           "13.66,5.83,3.93,2.09,1.57,31.42", 300.00, 16666.67, 0., 0.);
 
-    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
-                                    PROPERTY_MANAGER_NAME));
+    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(PROPERTY_MANAGER_NAME));
   }
 
   void testNomWithWL() {
@@ -390,19 +329,15 @@ public:
 
     PDDetermineCharacterizations alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_logWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", m_logWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Characterizations", tableWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    auto expectedInfo = createExpectedInfo(
-        60., 1.4, 1, "0", "0", "0", "0", ".31,.25,.13,.13,.13,.42",
-        "13.66,5.83,3.93,2.09,1.57,31.42", 300.00, 16666.67, .9, 2.1);
+    auto expectedInfo = createExpectedInfo(60., 1.4, 1, "0", "0", "0", "0", ".31,.25,.13,.13,.13,.42",
+                                           "13.66,5.83,3.93,2.09,1.57,31.42", 300.00, 16666.67, .9, 2.1);
 
-    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
-                                    PROPERTY_MANAGER_NAME));
+    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(PROPERTY_MANAGER_NAME));
   }
 };

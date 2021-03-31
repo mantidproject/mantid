@@ -17,31 +17,22 @@ namespace Algorithms {
 DECLARE_ALGORITHM(CreateDetectorTable)
 
 void CreateDetectorTable::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
                   "The name of the workspace to take as input.");
 
-  declareProperty(std::make_unique<ArrayProperty<int>>("WorkspaceIndices",
-                                                       Direction::Input),
+  declareProperty(std::make_unique<ArrayProperty<int>>("WorkspaceIndices", Direction::Input),
                   "If left empty then all workspace indices are used.");
-  setPropertySettings(
-      "WorkspaceIndices",
-      std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>(
-          "InputWorkspace", true));
+  setPropertySettings("WorkspaceIndices",
+                      std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>("InputWorkspace", true));
 
-  declareProperty("IncludeData", false,
-                  "Include the first value from each spectrum.");
-  setPropertySettings(
-      "IncludeData",
-      std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>(
-          "InputWorkspace", true));
+  declareProperty("IncludeData", false, "Include the first value from each spectrum.");
+  setPropertySettings("IncludeData",
+                      std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>("InputWorkspace", true));
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<TableWorkspace>>(
-          "DetectorTableWorkspace", "", Direction::Output,
-          PropertyMode::Optional),
-      "The name of the outputted detector table workspace, if left empty then "
-      "the input workspace name + \"-Detectors\" is used.");
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("DetectorTableWorkspace", "", Direction::Output,
+                                                                      PropertyMode::Optional),
+                  "The name of the outputted detector table workspace, if left empty then "
+                  "the input workspace name + \"-Detectors\" is used.");
 }
 
 void CreateDetectorTable::exec() {
@@ -53,8 +44,7 @@ void CreateDetectorTable::exec() {
   // Standard MatrixWorkspace
   auto matrix = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
   if (matrix) {
-    detectorTable =
-        createDetectorTableWorkspace(matrix, indices, includeData, g_log);
+    detectorTable = createDetectorTableWorkspace(matrix, indices, includeData, g_log);
 
     if (detectorTable == nullptr) {
       throw std::runtime_error("The instrument has no sample.");
@@ -67,13 +57,11 @@ void CreateDetectorTable::exec() {
   }
 
   if (detectorTable == nullptr) {
-    throw std::runtime_error(
-        "Detector table can only be created for matrix and peaks workspaces.");
+    throw std::runtime_error("Detector table can only be created for matrix and peaks workspaces.");
   }
 
   if (getPropertyValue("DetectorTableWorkspace") == "") {
-    setPropertyValue("DetectorTableWorkspace",
-                     inputWS->getName() + "-Detectors");
+    setPropertyValue("DetectorTableWorkspace", inputWS->getName() + "-Detectors");
   }
 
   setProperty("DetectorTableWorkspace", detectorTable);
@@ -96,11 +84,8 @@ std::map<std::string, std::string> CreateDetectorTable::validateInputs() {
     const std::vector<int> indices = getProperty("WorkspaceIndices");
 
     if (std::any_of(indices.cbegin(), indices.cend(),
-                    [numSpectra](const auto index) {
-                      return (index >= numSpectra) || (index < 0);
-                    })) {
-      validationOutput["WorkspaceIndices"] =
-          "One or more indices out of range of available spectra.";
+                    [numSpectra](const auto index) { return (index >= numSpectra) || (index < 0); })) {
+      validationOutput["WorkspaceIndices"] = "One or more indices out of range of available spectra.";
     }
   }
 
@@ -117,10 +102,8 @@ std::map<std::string, std::string> CreateDetectorTable::validateInputs() {
  *
  * @return A pointer to the table workspace of detector information
  */
-ITableWorkspace_sptr
-createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws,
-                             const std::vector<int> &indices,
-                             const bool includeData, Logger &logger) {
+ITableWorkspace_sptr createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws, const std::vector<int> &indices,
+                                                  const bool includeData, Logger &logger) {
 
   IComponent_const_sptr sample = ws->getInstrument()->getSample();
   if (!sample) {
@@ -136,8 +119,7 @@ createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws,
   const auto &spectrumInfo = ws->spectrumInfo();
   if (spectrumInfo.hasDetectors(0)) {
     try {
-      std::shared_ptr<const IDetector> detector(&spectrumInfo.detector(0),
-                                                Mantid::NoDeleting());
+      std::shared_ptr<const IDetector> detector(&spectrumInfo.detector(0), Mantid::NoDeleting());
       ws->getEFixed(detector);
     } catch (std::runtime_error &) {
       calcQ = false;
@@ -151,9 +133,7 @@ createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws,
   auto colNames = createColumns(isScanning, includeData, calcQ);
 
   const int ncols = static_cast<int>(colNames.size());
-  const int nrows = indices.empty()
-                        ? static_cast<int>(ws->getNumberHistograms())
-                        : static_cast<int>(indices.size());
+  const int nrows = indices.empty() ? static_cast<int>(ws->getNumberHistograms()) : static_cast<int>(indices.size());
 
   auto t = WorkspaceFactory::Instance().createTable("TableWorkspace");
 
@@ -166,22 +146,19 @@ createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws,
   t->setRowCount(nrows);
 
   // Cache some frequently used values
-  const auto beamAxisIndex =
-      ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
+  const auto beamAxisIndex = ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
   const auto sampleDist = sample->getPos()[beamAxisIndex];
-  bool signedThetaParamRetrieved{false},
-      showSignedTwoTheta{false}; // If true, signedVersion of the two theta
-                                 // value should be displayed
+  bool signedThetaParamRetrieved{false}, showSignedTwoTheta{false}; // If true, signedVersion of the two theta
+                                                                    // value should be displayed
 
-  populateTable(t, ws, nrows, indices, spectrumInfo, signedThetaParamRetrieved,
-                showSignedTwoTheta, beamAxisIndex, sampleDist, isScanning,
-                includeData, calcQ, logger);
+  populateTable(t, ws, nrows, indices, spectrumInfo, signedThetaParamRetrieved, showSignedTwoTheta, beamAxisIndex,
+                sampleDist, isScanning, includeData, calcQ, logger);
 
   return t;
 }
 
-std::vector<std::pair<std::string, std::string>>
-createColumns(const bool isScanning, const bool includeData, const bool calcQ) {
+std::vector<std::pair<std::string, std::string>> createColumns(const bool isScanning, const bool includeData,
+                                                               const bool calcQ) {
   std::vector<std::pair<std::string, std::string>> colNames;
   colNames.emplace_back("double", "Index");
   colNames.emplace_back("int", "Spectrum No");
@@ -203,13 +180,10 @@ createColumns(const bool isScanning, const bool includeData, const bool calcQ) {
   return colNames;
 }
 
-void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws,
-                   const int nrows, const std::vector<int> &indices,
-                   const SpectrumInfo &spectrumInfo,
-                   bool signedThetaParamRetrieved, bool showSignedTwoTheta,
-                   const PointingAlong &beamAxisIndex, const double sampleDist,
-                   const bool isScanning, const bool includeData,
-                   const bool calcQ, Logger &logger) {
+void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws, const int nrows,
+                   const std::vector<int> &indices, const SpectrumInfo &spectrumInfo, bool signedThetaParamRetrieved,
+                   bool showSignedTwoTheta, const PointingAlong &beamAxisIndex, const double sampleDist,
+                   const bool isScanning, const bool includeData, const bool calcQ, Logger &logger) {
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
   for (int row = 0; row < nrows; ++row) {
     TableRow colValues = t->getRow(row);
@@ -219,8 +193,7 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws,
     try {
       auto &spectrum = ws->getSpectrum(wsIndex);
       Mantid::specnum_t specNo = spectrum.getSpectrumNo();
-      const auto &ids =
-          dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
+      const auto &ids = dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
       std::string detIds = createTruncatedList(ids);
 
       // Geometry
@@ -228,11 +201,9 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws,
         throw std::runtime_error("No detectors found.");
       if (!signedThetaParamRetrieved) {
         const std::vector<std::string> &parameters =
-            spectrumInfo.detector(wsIndex).getStringParameter(
-                "show-signed-theta", true); // recursive
+            spectrumInfo.detector(wsIndex).getStringParameter("show-signed-theta", true); // recursive
         showSignedTwoTheta =
-            (!parameters.empty() && find(parameters.begin(), parameters.end(),
-                                         "Always") != parameters.end());
+            (!parameters.empty() && find(parameters.begin(), parameters.end(), "Always") != parameters.end());
         signedThetaParamRetrieved = true;
       }
 
@@ -250,8 +221,7 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws,
       const bool isMonitor = spectrumInfo.isMonitor(wsIndex);
       if (!isMonitor) {
         try {
-          theta = showSignedTwoTheta ? spectrumInfo.signedTwoTheta(wsIndex)
-                                     : spectrumInfo.twoTheta(wsIndex);
+          theta = showSignedTwoTheta ? spectrumInfo.signedTwoTheta(wsIndex) : spectrumInfo.twoTheta(wsIndex);
           theta *= 180.0 / M_PI; // To degrees
         } catch (const std::exception &ex) {
           // Log the error and leave theta as it is
@@ -291,8 +261,7 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws,
           try {
 
             // Get unsigned theta and efixed value
-            IDetector_const_sptr det{&spectrumInfo.detector(wsIndex),
-                                     Mantid::NoDeleting()};
+            IDetector_const_sptr det{&spectrumInfo.detector(wsIndex), Mantid::NoDeleting()};
             double efixed = ws->getEFixed(det);
             double usignTheta = spectrumInfo.twoTheta(wsIndex) * 0.5;
 
@@ -340,8 +309,7 @@ std::string createTruncatedList(const std::set<int> &elements) {
   auto itEnd = elements.end();
   if (ndets > 10) {
     const Mantid::detid_t first{*iter++}, second{*iter++};
-    truncated = std::to_string(first) + "," + std::to_string(second) + "...(" +
-                std::to_string(ndets - 4) + " more)...";
+    truncated = std::to_string(first) + "," + std::to_string(second) + "...(" + std::to_string(ndets - 4) + " more)...";
     auto revIter = elements.rbegin();
     const Mantid::detid_t last{*revIter++}, lastm1{*revIter++};
     truncated += std::to_string(lastm1) + "," + std::to_string(last);

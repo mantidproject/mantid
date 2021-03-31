@@ -21,9 +21,7 @@ class SplineInterpolationTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SplineInterpolationTest *createSuite() {
-    return new SplineInterpolationTest();
-  }
+  static SplineInterpolationTest *createSuite() { return new SplineInterpolationTest(); }
   static void destroySuite(SplineInterpolationTest *suite) { delete suite; }
 
   // Functor to generate spline values
@@ -41,12 +39,9 @@ public:
     int order(2), spectra(1);
 
     // create binned workspaces
-    MatrixWorkspace_sptr mws =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
-                                                               0, 20, 1, false);
+    MatrixWorkspace_sptr mws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1, 0, 20, 1, false);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-            SplineFunc(), spectra, 0, 20, 0.1, false);
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 20, 0.1, false);
 
     SplineInterpolation alg;
     runAlgorithm(alg, order, iws, mws);
@@ -57,12 +52,9 @@ public:
     int order(2), spectra(1);
 
     // create binned workspaces
-    MatrixWorkspace_sptr mws =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
-                                                               0, 20, 1, true);
+    MatrixWorkspace_sptr mws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1, 0, 20, 1, true);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-            SplineFunc(), spectra, 0, 20, 1, true);
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 20, 1, true);
 
     SplineInterpolation alg;
     runAlgorithm(alg, order, iws, mws);
@@ -72,12 +64,10 @@ public:
   void testLinear2Point() {
 
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-            SplineFunc(), 3, 2.1, 4.9, 1.4, true);
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 3, 2.1, 4.9, 1.4, true);
 
     MatrixWorkspace_sptr mws =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-            SplineFunc(), 2, 1.6, 5.6, 0.4, true);
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 2, 1.6, 5.6, 0.4, true);
 
     SplineInterpolation alg;
     runAlgorithm(alg, 1, iws, mws, true);
@@ -115,15 +105,12 @@ public:
     TS_ASSERT_EQUALS(y[8], 7.)
 
     for (size_t i = 0; i < ows->getNumberHistograms(); ++i) {
-      MatrixWorkspace_const_sptr derivsWs =
-          std::dynamic_pointer_cast<const MatrixWorkspace>(derivs->getItem(i));
+      MatrixWorkspace_const_sptr derivsWs = std::dynamic_pointer_cast<const MatrixWorkspace>(derivs->getItem(i));
 
-      NumericAxis *derivVAxis =
-          dynamic_cast<NumericAxis *>(derivsWs->getAxis(1));
+      NumericAxis *derivVAxis = dynamic_cast<NumericAxis *>(derivsWs->getAxis(1));
       TS_ASSERT(derivVAxis);
       TS_ASSERT_EQUALS((*derivVAxis)(0), 1);
-      NumericAxis *derivXAxis =
-          dynamic_cast<NumericAxis *>(derivsWs->getAxis(0));
+      NumericAxis *derivXAxis = dynamic_cast<NumericAxis *>(derivsWs->getAxis(0));
       TS_ASSERT(derivXAxis);
 
       const size_t numBins = ows->blocksize();
@@ -150,12 +137,9 @@ public:
     int order(2), spectra(3);
 
     // create binned workspaces
-    MatrixWorkspace_sptr mws =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
-                                                               0, 20, 1, true);
+    MatrixWorkspace_sptr mws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1, 0, 20, 1, true);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-            SplineFunc(), spectra, 0, 20, 1, true);
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 20, 1, true);
 
     SplineInterpolation alg;
     runAlgorithm(alg, order, iws, mws);
@@ -166,12 +150,9 @@ public:
     int order(2), spectra(3);
 
     // create binned workspaces
-    MatrixWorkspace_sptr mws =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
-                                                               0, 20, 1, true);
+    MatrixWorkspace_sptr mws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1, 0, 20, 1, true);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-            SplineFunc(), spectra, 0, 20, 1, true);
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 20, 1, true);
 
     // Add an axis
     auto vAxis = std::make_unique<TextAxis>(spectra);
@@ -200,11 +181,9 @@ public:
     WorkspaceGroup_const_sptr derivs = alg.getProperty("OutputWorkspaceDeriv");
 
     for (size_t i = 0; i < ows->getNumberHistograms(); ++i) {
-      MatrixWorkspace_const_sptr derivsWs =
-          std::dynamic_pointer_cast<const MatrixWorkspace>(derivs->getItem(i));
+      MatrixWorkspace_const_sptr derivsWs = std::dynamic_pointer_cast<const MatrixWorkspace>(derivs->getItem(i));
 
-      NumericAxis *derivVAxis =
-          dynamic_cast<NumericAxis *>(derivsWs->getAxis(1));
+      NumericAxis *derivVAxis = dynamic_cast<NumericAxis *>(derivsWs->getAxis(1));
       TS_ASSERT(derivVAxis);
       if (derivVAxis) {
         for (size_t i = 0; i < derivsWs->getNumberHistograms(); i++)
@@ -225,10 +204,8 @@ public:
     }
   }
 
-  void runAlgorithm(SplineInterpolation &alg, int order,
-                    const Mantid::API::MatrixWorkspace_sptr &iws,
-                    const Mantid::API::MatrixWorkspace_sptr &mws,
-                    const bool linear = false) const {
+  void runAlgorithm(SplineInterpolation &alg, int order, const Mantid::API::MatrixWorkspace_sptr &iws,
+                    const Mantid::API::MatrixWorkspace_sptr &mws, const bool linear = false) const {
     alg.initialize();
     alg.isInitialized();
     alg.setChild(true);
@@ -254,13 +231,11 @@ public:
     constexpr int xStartVal(0), xEndVal(100);
     constexpr int xStepVal(1);
 
-    MatrixWorkspace_sptr matWs =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-            SplineFunc(), spectra, xStartVal, xEndVal, xStepVal, false);
+    MatrixWorkspace_sptr matWs = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        SplineFunc(), spectra, xStartVal, xEndVal, xStepVal, false);
 
-    MatrixWorkspace_sptr inWs =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-            SplineFunc(), spectra, xStartVal, xEndVal, (xStepVal * 0.1), false);
+    MatrixWorkspace_sptr inWs = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        SplineFunc(), spectra, xStartVal, xEndVal, (xStepVal * 0.1), false);
 
     inputWs = inWs;
     matrixWs = matWs;
@@ -277,9 +252,7 @@ public:
     splineInterpAlg.setRethrows(true);
   }
 
-  void testSplineInterpolationPerformance() {
-    TS_ASSERT_THROWS_NOTHING(splineInterpAlg.execute());
-  }
+  void testSplineInterpolationPerformance() { TS_ASSERT_THROWS_NOTHING(splineInterpAlg.execute()); }
 
   void tearDown() override {
     AnalysisDataService::Instance().remove(outputWsName);

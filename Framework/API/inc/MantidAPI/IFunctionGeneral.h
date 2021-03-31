@@ -25,16 +25,14 @@ namespace API {
   */
 class MANTID_API_DLL IFunctionGeneral : public virtual IFunction {
 public:
-  void function(const FunctionDomain &domain,
-                FunctionValues &values) const override;
+  void function(const FunctionDomain &domain, FunctionValues &values) const override;
   void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override;
 
   size_t getValuesSize(const FunctionDomain &domain) const override;
 
   /// Provide a concrete function in an implementation that operates on a
   /// FunctionDomainGeneral.
-  virtual void functionGeneral(const FunctionDomainGeneral &domain,
-                               FunctionValues &values) const = 0;
+  virtual void functionGeneral(const FunctionDomainGeneral &domain, FunctionValues &values) const = 0;
 
   /// Get number of columns that the domain must have.
   /// If consider the collection of these columns as a table

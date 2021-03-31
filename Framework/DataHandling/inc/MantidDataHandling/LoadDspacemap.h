@@ -42,18 +42,14 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  void readVulcanAsciiFile(const std::string &fileName,
-                           std::map<detid_t, double> &vulcan);
-  void readVulcanBinaryFile(const std::string &fileName,
-                            std::map<detid_t, double> &vulcan);
+  void readVulcanAsciiFile(const std::string &fileName, std::map<detid_t, double> &vulcan);
+  void readVulcanBinaryFile(const std::string &fileName, std::map<detid_t, double> &vulcan);
 
-  void CalculateOffsetsFromDSpacemapFile(
-      const std::string &DFileName,
-      const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS);
+  void CalculateOffsetsFromDSpacemapFile(const std::string &DFileName,
+                                         const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS);
 
-  void CalculateOffsetsFromVulcanFactors(
-      std::map<detid_t, double> &vulcan,
-      const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS);
+  void CalculateOffsetsFromVulcanFactors(std::map<detid_t, double> &vulcan,
+                                         const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS);
 };
 
 } // namespace DataHandling
