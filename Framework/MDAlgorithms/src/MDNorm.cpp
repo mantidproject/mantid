@@ -1205,6 +1205,11 @@ MDNorm::setQUnit(const std::vector<size_t> &qDimensionIndices,
   ei->mutableRun().addProperty("W_MATRIX", m_W.getVector(), true);
 }
 
+/**
+ * Bin(MD) input background MDEventWorkspace
+ * @param symmetryOps
+ * @return
+ */
 DataObjects::MDHistoWorkspace_sptr MDNorm::binBackgroundWS(
     const std::vector<Geometry::SymmetryOperation> &symmetryOps) {
   // Create output background data histogram MD workspace
@@ -1226,35 +1231,43 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binBackgroundWS(
   // For each symmetry operation, do binning MD once
   // FIXME - The matrix is not correct!  The number of ExpInfo is not correct!
   // FIXME - FOUND OUT how to accumulate binned MD to a same MDHistoWorkspace
-  double soIndex = 0;
   std::vector<size_t> qDimensionIndices;
-  for (uint16_t i = 0;
-       i < static_cast<uint16_t>(m_inputWS->getNumExperimentInfo()); ++i) {
+  uint16_t numexpinfo = static_cast<uint16_t>(m_inputWS->getNumExperimentInfo());
+  if (m_numSymmOps != symmetryOps.size())
+      throw std::runtime_error("Symmetry operation number m_umSymops is wrong!");
 
-    // @ANDREI
+  uint16_t bincount = 1;
+
+  for (uint16_t i_expinfo = 0;
+       i_expinfo < numexpinfo; ++i_expinfo) {
+
     auto rotMatrix =
-        m_inputWS->getExperimentInfo(i)->run().getGoniometerMatrix();
+        m_inputWS->getExperimentInfo(i_expinfo)->run().getGoniometerMatrix();
+
+    // Reset symmetry operation index
+    double soIndex = 0;
 
     for (auto so : symmetryOps) {
+      // Q transformation matrix: From Q_lab to HKL or Q_sample
       // Building symmetric operation matrix
       DblMatrix soMatrix = buildSymmetryMatrix(so);
       // Calculate Q transform matrix
-      // FIXME - need to add Q_Lab to Q_sample matrix in addition!!!
       DblMatrix Qtransform;
       if (m_isRLU) {
         Qtransform = rotMatrix * m_UB * soMatrix * m_W;
-        // TODO  Qtransform = R * m_UB * soMatrix * m_W;
-
+        std::cout << "[DEBUG VZ Background] Index = " << bincount << " RLU Q Transform matrix" << "\n";
+        Qtransform.print();
       } else {
         Qtransform = rotMatrix * soMatrix * m_W;
-        // TODO  Qtransform = R * soMatrix * m_W;
       }
 
       // Set up BinMD for this symmetry opeation
-      double progress_fraction = 1. / static_cast<double>(symmetryOps.size());
+      double progress_fraction = 1. / static_cast<double>(symmetryOps.size() * numexpinfo);
       IAlgorithm_sptr binMD =
-          createChildAlgorithm("BinMD", soIndex * 0.3 * progress_fraction,
+          createChildAlgorithm("BinMD",
+                               soIndex * 0.3 * progress_fraction,
                                (soIndex + 1) * 0.3 * progress_fraction);
+      //        createChildAlgorithm("BinMD", static_cast<double>(soIndex) +  * 0.3 / static_cast<double>(numexpinfo) * progress_fraction,
 
       binMD->setPropertyValue("AxisAligned", "0");
       binMD->setProperty("InputWorkspace", m_backgroundWS);
@@ -1287,7 +1300,7 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binBackgroundWS(
 
         g_log.debug() << qindex << "-th Binning parameter " << key
                       << " value: " << value << "\n";
-        std::cout << "[DEBUG VZ] " << qindex
+        std::cout << "[DEBUG VZ Background] " << qindex
                   << "-th BinMD parameter to set: " << key << " = " << value
                   << "\n";
         binMD->setPropertyValue(key, value);
@@ -1303,12 +1316,17 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binBackgroundWS(
       tempBkgdDataWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
       tempBkgdDataWS->clearOriginalWorkspaces();
       tempBkgdDataWS->clearTransforms();
+
+      std::cout << "[DEBUG VZ Background] Output to " << getPropertyValue("OutputBackgroundDataWorkspace") << " Total binning count = " << bincount << " @ Exp info (index) " << i_expinfo << ", symmetry operation (index) " << soIndex << "\n";
+
       soIndex += 1;
+      bincount += 1;
     }
   }
   auto outputMDHWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
   // set MDUnits for Q dimensions
   if (m_isRLU) {
+    std::cout << "[DEBUG VZ] Background Q dimension indexes size = " << qDimensionIndices.size() << "\n";
     setQUnit(qDimensionIndices, outputMDHWS);
   }
 
@@ -1339,17 +1357,18 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
     DblMatrix soMatrix = buildSymmetryMatrix(so);
 
     DblMatrix Qtransform;
-    std::cout << "[DEBUG VZ] SO index = " << soIndex << ", isRLU = " << m_isRLU
+    std::cout << "[DEBUG VZ Sample] SO index = " << soIndex << ", isRLU = " << m_isRLU
+              << ", Output to " << getPropertyValue("OutputDataWorkspace")
               << "\n";
-    std::cout << "m_W: "
-              << "\n";
-    m_W.print();
+//    std::cout << "m_W: "
+//              << "\n";
+//    m_W.print();
 
     if (m_isRLU) {
       Qtransform = m_UB * soMatrix * m_W;
-      std::cout << "UB: "
+      std::cout << "[DEBUG VZ Sampe] RLU Q Transform: "
                 << "\n";
-      m_UB.print();
+      Qtransform.print();
     } else {
       Qtransform = soMatrix * m_W;
     }
@@ -1406,6 +1425,7 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
   auto outputMDHWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
   // set MDUnits for Q dimensions
   if (m_isRLU) {
+    std::cout << "[DEBUG VZ Sample] Q dimension size = " << qDimensionIndices.size() << "\n";
     setQUnit(qDimensionIndices, outputMDHWS);
   }
 
