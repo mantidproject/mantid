@@ -153,9 +153,13 @@ class SuperplotPresenter:
         axes.clear()
         for wsName, sp in plottedData:
             if self._model.isSpectrumMode():
-                axes.plot(mtd[wsName], wkspIndex=sp)
+                axisType = MantidAxType.SPECTRUM
             else:
-                axes.plot(mtd[wsName], wkspIndex=sp, axis=MantidAxType.BIN)
+                axisType = MantidAxType.BIN
+            lines = axes.plot(mtd[wsName], wkspIndex=sp)
+            line = lines[0]
+            self._view.modifySpectrumLabel(wsName, sp, line.get_label(),
+                                           line.get_color())
 
         for wsName, spectra in selection.items():
             if not spectra:
@@ -163,10 +167,15 @@ class SuperplotPresenter:
             for spectrum in spectra:
                 if (wsName, spectrum) not in plottedData:
                     if mode == self.SPECTRUM_MODE_TEXT:
-                        axes.plot(mtd[wsName], wkspIndex=spectrum)
+                        axisType = MantidAxType.SPECTRUM
                     else:
-                        axes.plot(mtd[wsName], wkspIndex=spectrum,
-                                  axis=MantidAxType.BIN)
+                        axisType = MantidAxType.BIN
+                    lines = axes.plot(mtd[wsName], wkspIndex=spectrum,
+                                      axis=axisType)
+                    line = lines[0]
+                    self._view.modifySpectrumLabel(wsName, spectrum,
+                                                   line.get_label(),
+                                                   line.get_color())
 
         figure.tight_layout()
         axes.relim()
