@@ -82,6 +82,8 @@ public:
   Geometry::Instrument_const_sptr getInstrument() const;
   std::shared_ptr<const Geometry::ReferenceFrame> getReferenceFrame() const override;
 
+  std::string getBankName() const;
+
   bool findDetector();
   bool findDetector(const Geometry::InstrumentRayTracer &tracer);
 
@@ -127,6 +129,9 @@ private:
 
   /// Detector pointed to
   Geometry::IDetector_const_sptr m_det;
+
+  /// Name of the parent bank
+  std::string m_bankName;
 
   /// ID of the detector
   int m_detectorID;

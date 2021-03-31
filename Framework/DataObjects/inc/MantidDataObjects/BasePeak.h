@@ -93,7 +93,6 @@ public:
   Mantid::Kernel::Matrix<double> getInverseGoniometerMatrix() const;
   void setGoniometerMatrix(const Mantid::Kernel::Matrix<double> &goniometerMatrix) override;
 
-  std::string getBankName() const override;
   int getRow() const override;
   int getCol() const override;
   void setRow(int m_row);
@@ -128,9 +127,6 @@ protected:
   Mantid::Kernel::V3D m_samplePos;
 
 private:
-  /// Name of the parent bank
-  std::string m_bankName;
-
   /// H of the peak
   double m_H;
 
