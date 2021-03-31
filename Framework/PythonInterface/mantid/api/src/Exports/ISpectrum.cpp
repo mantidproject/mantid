@@ -34,6 +34,3 @@ void export_ISpectrum() {
       .def("hasDx", &ISpectrum::hasDx, arg("self"),
            "Returns True if the spectrum uses the "
            "DX (X Error) array, else False.")
-      .def("mutableY", &ISpectrum:mutableY, arg(""),
-            "Gets a mutable reference to the Y data")
-}
