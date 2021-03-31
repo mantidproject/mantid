@@ -145,13 +145,28 @@ class FullprofFormat(object):
         :param f_handle: handle to the file to write to.
         :param workspace: the PeaksWorkspace to save to file.
         """
-        num_hkl = 3 + num_modulation_vectors(workspace)
+        num_hkl = 3 + has_modulated_indexing(workspace)  # add a column if mod vectors
         title = workspace.getTitle() if workspace.getTitle() else workspace.name()
         f_handle.write(title + '\n')
         f_handle.write("({}i4,2f12.2,i5,4f10.4)\n".format(num_hkl))
         f_handle.write("  0 0 0\n")
-        names = "".join(["  {}".format(name) for name in get_additional_index_names(workspace)])
-        f_handle.write("#  h   k   l{}      Fsqr       s(Fsqr)   Cod   Lambda\n".format(names))
+        mod_colname = ""
+        if has_modulated_indexing(workspace):
+            # num_rows = 2*num_vecs (separate rows for +/- q)
+            f_handle.write("   {:>4.0f}\n".format(2 * num_modulation_vectors(workspace)))
+            # now write out mode vectors
+            lattice = workspace.sample().getOrientedLattice()
+            row_num = 1
+            for ivec in range(num_modulation_vectors(workspace)):
+                vec = lattice.getModVec(ivec)
+                x, y, z = vec.X(), vec.Y(), vec.Z()
+                if abs(x) > 0 or abs(y) > 0 or abs(z) > 0:
+                    f_handle.write("   {}{: >13.6f}{: >13.6f}{: >13.6f}\n".format(row_num, x, y, z))
+                    f_handle.write("   {}{: >13.6f}{: >13.6f}{: >13.6f}\n".format(
+                        row_num + 1, -x, -y, -z))
+                    row_num += 2
+            mod_colname = "   m"
+        f_handle.write("#  h   k   l{}      Fsqr       s(Fsqr)   Cod   Lambda\n".format(mod_colname))
 
     def write_peaks(self, f_handle, workspace):
         """Write all the peaks in the workspace to file.
@@ -160,9 +175,13 @@ class FullprofFormat(object):
         :param workspace: the PeaksWorkspace to save to file.
         """
         num_mod_vec = num_modulation_vectors(workspace)
+        print('num_mod_vec = ', num_mod_vec)
         for i, peak in enumerate(workspace):
             data = [peak.getH(), peak.getK(), peak.getL()]
-            data.extend(modulation_indices(peak, num_mod_vec))
+            # find num of mod vector as written in header
+            iq = [2 * im + 1 + (m < 0) for im, m in enumerate(peak.getIntMNP()) if
+                  (abs(m) > 1e-10) and im < num_mod_vec]
+            data.extend(iq)
             hkls = "".join(["{:>4.0f}".format(item) for item in data])
 
             data = (peak.getIntensity(), peak.getSigmaIntensity(), 1, peak.getWavelength())
