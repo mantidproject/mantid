@@ -8,22 +8,39 @@
 from Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
 from mantidqt.utils.observer_pattern import GenericObservable
 
+INVALID_STRINGS_FOR_GROUP_NAMES = ["EA_Rebinned_Fixed", "EA_Rebinned_Variable"]
+
 
 def get_default_grouping(loadedData):
-    '''this creates the first set of groups listed in the grouping table of the Elemental Analysis GUI '''
+    """this creates the first set of groups listed in the grouping table of the Elemental Analysis GUI
+        For single workspace names the detector is found by taking everything after ; in the name
+        For example : 2695; Detector 1 --> Detector 1
+        For co-added workspaces the detector is found by taking everything before
+        For example : Detector 1_2695-2686 --> Detector 1
+    """
     groups = []
     run_list = loadedData.get_parameter("run")
     for run_item in run_list:
         for workspace in loadedData.get_data(run=run_item)["workspace"]:
             group_name = str(workspace)
-            '''For single workspace names the detector is found by taking everything after ; in the name
-            For example : 2695; Detector 1 --> Detector 1
-            For co-added workspaces the detector is found by taking everything before
-            For example : Detector 1_2695-2686 --> Detector 1 '''
+            print(group_name)
             detector_name = (group_name.split(';', 1)[-1].lstrip()).split('_', 1)[0]
             run_number = str(run_item).replace('[', '').replace(']', '')
             groups += [EAGroup(group_name=group_name, detector=detector_name, run_number=run_number)]
     return groups
+
+
+def check_if_group_is_valid(group_name):
+    """
+        format of group name is run; Detector x , where x is an integer between 1 and 4 inclusively, if workspace has
+        anything else at the end it may be invalid so function checks if trailing string makes name is invalid
+    """
+    split_group_name = (group_name.split(';', 1)[-1].lstrip()).split('_', 1)
+    if len(split_group_name) == 1:
+        return True
+    if "_".join(split_group_name[1:]) in INVALID_STRINGS_FOR_GROUP_NAMES:
+        return False
+    return True
 
 
 class EAGroupContext(object):
@@ -63,29 +80,30 @@ class EAGroupContext(object):
         return [group.name for group in self._groups]
 
     def add_new_group(self, group, loadedData):
-        '''this adds groups to the grouping tab that are not already loaded'''
+        """this adds groups to the grouping tab that are not already loaded"""
         run_list = loadedData.get_parameter("run")
         for run_item in run_list:
             for workspace in loadedData.get_data(run=run_item)["workspace"]:
                 if str(workspace) not in self.group_names:
                     group_name = str(workspace)
-                    '''For single workspace names the detector is found by taking everything after ; in the name
-                     For co-added workspaces the detector is found by taking everything before _'''
+                    # For single workspace names the detector is found by taking everything after ; in the name
+                    # For co-added workspaces the detector is found by taking everything before _
+                    if not check_if_group_is_valid(group_name):
+                        continue
                     detector_name = (group_name.split(';', 1)[-1].lstrip()).split('_', 1)[0]
                     run_number = str(run_item).replace('[', '').replace(']', '')
                     group += [EAGroup(group_name=group_name, detector=detector_name, run_number=run_number)]
         return group
 
     def add_group(self, group):
-        '''this adds groups to the grouping tab that are not already loaded'''
+        """this adds groups to the grouping tab that are not already loaded"""
         if group._group_name not in self.group_names:
             self._groups.append(group)
         return group
 
     def reset_group_to_default(self, loadedData):
         if loadedData:
-            default_groups = get_default_grouping(loadedData)
-            self._groups = default_groups
+            self._groups = get_default_grouping(loadedData)
 
     def add_group_to_selected_groups(self, group):
         if group in self.group_names and group not in self.selected_groups:

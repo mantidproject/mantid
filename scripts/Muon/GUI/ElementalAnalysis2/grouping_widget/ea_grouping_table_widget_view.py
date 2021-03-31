@@ -10,10 +10,10 @@ from qtpy.QtWidgets import QTableWidgetItem
 from Muon.GUI.Common import message_box
 from mantidqt.utils.observer_pattern import GenericObserver
 
-group_table_columns = {0: 'workspace_name', 1: 'run', 2: 'detector', 3: 'to_analyse', 4: 'rebin', 5: 'rebin_options'}
-inverse_group_table_columns = {'workspace_name': 0, 'run': 1, 'detector': 2, 'to_analyse': 3,  'rebin': 4,
+GROUP_TABLE_COLUMNS = {0: 'workspace_name', 1: 'run', 2: 'detector', 3: 'to_analyse', 4: 'rebin', 5: 'rebin_options'}
+INVERSE_GROUP_TABLE_COLUMNS = {'workspace_name': 0, 'run': 1, 'detector': 2, 'to_analyse': 3, 'rebin': 4,
                                'rebin_options': 5}
-table_column_flags = {'workspace_name': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+TABLE_COLUMN_FLAGS = {'workspace_name': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
                       'run': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
                       'detector': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
                       'to_analyse': QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled,
@@ -120,10 +120,8 @@ class EAGroupingTableView(QtWidgets.QWidget):
             self.dataChanged.emit()
 
     def get_index_of_text(self, selector, text):
-        for i in range(selector.count()):
-            if str(selector.itemText(i)) == text:
-                return i
-        return 0
+        index = selector.findText(text)
+        return index if index != -1 else 0
 
     # ------------------------------------------------------------------------------------------------------------------
     # Adding / removing table entries
@@ -132,25 +130,29 @@ class EAGroupingTableView(QtWidgets.QWidget):
         assert len(row_entries) == self.grouping_table.columnCount()
         row_position = self.grouping_table.rowCount()
         self.grouping_table.insertRow(row_position)
+        self.add_row_entries(row_entries, row_position)
+
+    def add_row_entries(self, row_entries, row_position):
         for i, entry in enumerate(row_entries):
             table_item = QtWidgets.QTableWidgetItem(entry)
-            table_item.setFlags(table_column_flags[group_table_columns[i]])
-
-            if group_table_columns[i] == 'to_analyse':
+            table_item.setFlags(TABLE_COLUMN_FLAGS[GROUP_TABLE_COLUMNS[i]])
+            if GROUP_TABLE_COLUMNS[i] == 'to_analyse':
                 if entry:
                     table_item.setCheckState(QtCore.Qt.Checked)
                 else:
                     table_item.setCheckState(QtCore.Qt.Unchecked)
-
-            if group_table_columns[i] == 'rebin':
-                rebin_selector_widget = self._rebin_selection_cell_widget()
-                rebin_selector_widget.currentIndexChanged.connect(
-                     lambda i, row_position=row_position: self.on_rebin_combo_changed(i, row_position))
-                index = int(table_item.text())
-                rebin_selector_widget.setCurrentIndex(index)
-                self.grouping_table.setCellWidget(row_position, i, rebin_selector_widget)
+            if GROUP_TABLE_COLUMNS[i] == 'rebin':
+                self.add_rebin_cell(row_position, i, table_item)
 
             self.grouping_table.setItem(row_position, i, table_item)
+
+    def add_rebin_cell(self, row_position, column, table_item):
+        rebin_selector_widget = self._rebin_selection_cell_widget()
+        rebin_selector_widget.currentIndexChanged.connect(
+            lambda i, row_position=row_position: self.on_rebin_combo_changed(i, row_position))
+        index = int(table_item.text())
+        rebin_selector_widget.setCurrentIndex(index)
+        self.grouping_table.setCellWidget(row_position, column, rebin_selector_widget)
 
     def _get_selected_row_indices(self):
         return list(set(index.row() for index in self.grouping_table.selectedIndexes()))
@@ -161,7 +163,7 @@ class EAGroupingTableView(QtWidgets.QWidget):
 
     def remove_selected_groups(self):
         indices = self._get_selected_row_indices()
-        for index in sorted(indices,reverse=True):
+        for index in sorted(indices, reverse=True):
             self.grouping_table.removeRow(index)
 
     def remove_last_row(self):
@@ -238,12 +240,12 @@ class EAGroupingTableView(QtWidgets.QWidget):
 
     def set_to_analyse_state(self, row, state):
         checked_state = QtCore.Qt.Checked if state is True else QtCore.Qt.Unchecked
-        item = self.get_table_item(row, inverse_group_table_columns['to_analyse'])
+        item = self.get_table_item(row, INVERSE_GROUP_TABLE_COLUMNS['to_analyse'])
         item.setCheckState(checked_state)
 
     def set_to_analyse_state_quietly(self, row, state):
         checked_state = QtCore.Qt.Checked if state is True else QtCore.Qt.Unchecked
-        item = self.get_table_item(row, inverse_group_table_columns['to_analyse'])
+        item = self.get_table_item(row, INVERSE_GROUP_TABLE_COLUMNS['to_analyse'])
         self.grouping_table.blockSignals(True)
         item.setCheckState(checked_state)
         self.grouping_table.blockSignals(False)
@@ -296,11 +298,9 @@ class EAGroupingTableView(QtWidgets.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def disable_updates(self):
-        """Usage : """
         self._updating = True
 
     def enable_updates(self):
-        """Usage : """
         self._updating = False
 
     def disable_editing(self):

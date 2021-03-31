@@ -8,7 +8,8 @@ import re
 from Muon.GUI.Common.utilities import run_string_utils as run_utils
 from Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
 from mantidqt.utils.observer_pattern import GenericObservable
-from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view import inverse_group_table_columns
+from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view import INVERSE_GROUP_TABLE_COLUMNS
+from Muon.GUI.Common import message_box
 
 
 MAXIMUM_NUMBER_OF_GROUPS = 20
@@ -39,9 +40,7 @@ class EAGroupingTablePresenter(object):
 
     def _is_edited_name_duplicated(self, new_name):
         is_name_column_being_edited = self._view.grouping_table.currentColumn() == 0
-        is_name_not_unique = False
-        if new_name in self._model.group_names:
-            is_name_not_unique = True
+        is_name_not_unique = new_name in self._model.group_names
         return is_name_column_being_edited and is_name_not_unique
 
     def validate_group_name(self, text):
@@ -91,25 +90,44 @@ class EAGroupingTablePresenter(object):
 
     def handle_data_change(self, row, col):
         changed_item = self._view.get_table_item(row, col)
-        workspace_name = self._view.get_table_item(row, inverse_group_table_columns['workspace_name']).text()
+        workspace_name = self._view.get_table_item(row, INVERSE_GROUP_TABLE_COLUMNS['workspace_name']).text()
+
+        update_model = self.handle_to_analyse_column_changed(col, changed_item, workspace_name)
+        self.handle_rebin_column_changed(col, row, changed_item)
+        self.handle_rebin_option_column_changed(col, changed_item, workspace_name)
+
+        self.handle_update(update_model)
+
+    def handle_to_analyse_column_changed(self, col, changed_item, workspace_name):
         update_model = True
-        if col == inverse_group_table_columns['to_analyse']:
+        if col == INVERSE_GROUP_TABLE_COLUMNS['to_analyse']:
             update_model = False
             self.to_analyse_data_checkbox_changed(changed_item.checkState(), workspace_name)
-        if col == inverse_group_table_columns['rebin']:
+        return update_model
+
+    def handle_rebin_column_changed(self, col, row, changed_item):
+        if col == INVERSE_GROUP_TABLE_COLUMNS['rebin']:
             if changed_item.text() == REBIN_FIXED_OPTION:
                 self._view.rebin_fixed_chosen(row)
             elif changed_item.text() == REBIN_VARIABLE_OPTION:
                 self._view.rebin_variable_chosen(row)
-        if col == inverse_group_table_columns['rebin_options']:
+
+    def handle_rebin_option_column_changed(self, col, changed_item, workspace_name):
+        if col == INVERSE_GROUP_TABLE_COLUMNS['rebin_options']:
             params = changed_item.text().split(":")
             if len(params) == 2:
                 if params[0] == "Steps":
                     if len(params[1]) >= 1:
-                        self._model.handle_rebin(name =workspace_name, rebinType="Fixed", rebinParam = float(params[1]) )
+                        try:
+                            self._model.handle_rebin(name=workspace_name, rebin_type="Fixed",
+                                                     rebin_param=float(params[1]))
+                        except ValueError:
+                            message_box.warning("Given rebin step is invalid", None)
                 if params[0] == "Bin Boundaries":
                     if len(params[1]) >= 1:
-                        self._model.handle_rebin(name =workspace_name,rebinType="Variable", rebinParam = params[1] )
+                        self._model.handle_rebin(name=workspace_name, rebin_type="Variable", rebin_param=params[1])
+
+    def handle_update(self, update_model):
         if not update_model:
             # Reset the view back to model values and exit early as the changes are invalid.
             self.update_view_from_model()
@@ -119,11 +137,6 @@ class EAGroupingTablePresenter(object):
             self.update_model_from_view()
         except ValueError as error:
             self._view.warning_popup(error)
-
-        # if the column containing the "to_analyse" flag is changed, then we don't need to update anything group related
-        if col != inverse_group_table_columns['to_analyse']:
-            self.update_view_from_model()
-            self.notify_data_changed()
 
     def update_model_from_view(self):
         table = self._view.get_table_contents()

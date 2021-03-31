@@ -10,11 +10,11 @@ from enum import Enum
 
 class RowValid(Enum):
     invalid_for_all_runs = 0
-    valid_for_all_runs = 2
     valid_for_some_runs = 1
+    valid_for_all_runs = 2
 
 
-class EAGroupingTabModel(object):
+class EAGroupingTabModel():
     """
     The model for the grouping tab should be shared between all widgets of the tab.
     It keeps a record of the groups defined for the current instance of the interface.

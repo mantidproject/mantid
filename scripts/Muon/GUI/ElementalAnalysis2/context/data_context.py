@@ -35,7 +35,7 @@ class DataContext(object):
             # default to 1
             n_det = 1
         if n_det == 0:
-            #Number of detectors is number of workspace in group
+            # Number of detectors is number of workspace in group
             return self.current_workspace.size()
         return n_det
 
@@ -43,10 +43,7 @@ class DataContext(object):
         return self._loaded_data.num_items() > 0
 
     def check_group_contains_valid_detectors(self, group):
-        if max(group.detectors) > self.num_detectors or min(group.detectors) < 1:
-            return False
-        else:
-            return True
+        return max(group.detectors) <= self.num_detectors and min(group.detectors) >= 1
 
     @property
     def _current_data(self):

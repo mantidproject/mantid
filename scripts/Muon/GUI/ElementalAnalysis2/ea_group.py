@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.muon_group import MuonRun
-from typing import List
 
 
 class EAGroup(object):
@@ -41,11 +40,11 @@ class EAGroup(object):
             raise AttributeError("Attempting to set workspace to type " + str(
                 type(new_workspace)) + " but should be MuonWorkspaceWrapper")
 
-    """
-    Returns the name of the counts workspace for a given run
-    if the workspace does not exist will raise a KeyError
-    """
     def get_counts_workspace_for_run(self, run, rebin):
+        """
+            Returns the name of the counts workspace for a given run
+            if the workspace does not exist will raise a KeyError
+        """
         if rebin:
             return self._counts_workspace_rebin[MuonRun(run)].workspace_name
         else:
@@ -80,10 +79,6 @@ class EAGroup(object):
                 raise AttributeError("MuonGroup : detectors must be a list of ints.")
         else:
             raise ValueError("detectors must be a list of ints.")
-
-    def show_raw(self, run: List[int], name: str):
-        run_object = MuonRun(run)
-        run_object not in self._counts_workspace or self._counts_workspace[run_object].show(name)
 
     def update_workspaces(self, run, counts_workspace, rebin):
         run_object = MuonRun(run)
