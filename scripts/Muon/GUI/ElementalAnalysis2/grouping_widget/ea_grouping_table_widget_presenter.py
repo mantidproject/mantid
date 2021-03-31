@@ -131,6 +131,7 @@ class EAGroupingTablePresenter(object):
         if not update_model:
             # Reset the view back to model values and exit early as the changes are invalid.
             self.update_view_from_model()
+            self.notify_data_changed()
             return
 
         try:
