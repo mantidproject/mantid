@@ -40,27 +40,21 @@ namespace DropEventHelper = MantidQt::MantidWidgets::DropEventHelper;
 ////////////////////////////////////////////////////////////////////
 
 FileFinderWidget::FileFinderWidget(QWidget *parent)
-    : MantidWidget(parent), m_findRunFiles(true), m_isForDirectory(false),
-      m_allowMultipleFiles(false), m_isOptional(false), m_multiEntry(false),
-      m_buttonOpt(Text), m_fileProblem(""), m_entryNumProblem(""),
-      m_algorithmProperty(""), m_fileExtensions(), m_extsAsSingleOption(true),
-      m_liveButtonState(Hide), m_showValidator(true), m_foundFiles(),
-      m_lastFoundFiles(), m_lastDir(), m_fileFilter(), m_pool() {
+    : MantidWidget(parent), m_findRunFiles(true), m_isForDirectory(false), m_allowMultipleFiles(false),
+      m_isOptional(false), m_multiEntry(false), m_buttonOpt(Text), m_fileProblem(""), m_entryNumProblem(""),
+      m_algorithmProperty(""), m_fileExtensions(), m_extsAsSingleOption(true), m_liveButtonState(Hide),
+      m_showValidator(true), m_foundFiles(), m_lastFoundFiles(), m_lastDir(), m_fileFilter(), m_pool() {
 
   m_uiForm.setupUi(this);
 
-  connect(m_uiForm.fileEditor, SIGNAL(textChanged(const QString &)), this,
-          SIGNAL(fileTextChanged(const QString &)));
-  connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this,
-          SIGNAL(fileEditingFinished()));
+  connect(m_uiForm.fileEditor, SIGNAL(textChanged(const QString &)), this, SIGNAL(fileTextChanged(const QString &)));
+  connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this, SIGNAL(fileEditingFinished()));
   connect(m_uiForm.browseBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
   connect(m_uiForm.browseIco, SIGNAL(clicked()), this, SLOT(browseClicked()));
 
   connect(this, SIGNAL(fileEditingFinished()), this, SLOT(findFiles()));
-  connect(m_uiForm.entryNum, SIGNAL(textChanged(const QString &)), this,
-          SLOT(checkEntry()));
-  connect(m_uiForm.entryNum, SIGNAL(editingFinished()), this,
-          SLOT(checkEntry()));
+  connect(m_uiForm.entryNum, SIGNAL(textChanged(const QString &)), this, SLOT(checkEntry()));
+  connect(m_uiForm.entryNum, SIGNAL(editingFinished()), this, SLOT(checkEntry()));
 
   m_uiForm.fileEditor->clear();
 
@@ -75,8 +69,7 @@ FileFinderWidget::FileFinderWidget(QWidget *parent)
   doButtonOpt(m_buttonOpt);
 
   liveButtonState(m_liveButtonState);
-  connect(m_uiForm.liveButton, SIGNAL(toggled(bool)), this,
-          SIGNAL(liveButtonPressed(bool)));
+  connect(m_uiForm.liveButton, SIGNAL(toggled(bool)), this, SIGNAL(liveButtonPressed(bool)));
 
   setFocusPolicy(Qt::StrongFocus);
   setFocusProxy(m_uiForm.fileEditor);
@@ -84,16 +77,12 @@ FileFinderWidget::FileFinderWidget(QWidget *parent)
   // When first used try to starting directory better than the directory
   // MantidPlot is installed in
   // First try default save directory
-  m_lastDir = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "defaultsave.directory"));
+  m_lastDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
   // If that fails pick the first data search directory
   if (m_lastDir.isEmpty()) {
     QStringList dataDirs =
-        QString::fromStdString(
-            Mantid::Kernel::ConfigService::Instance().getString(
-                "datasearch.directories"))
+        QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"))
             .split(";", QString::SkipEmptyParts);
 
     if (!dataDirs.isEmpty())
@@ -136,9 +125,7 @@ void FileFinderWidget::isForDirectory(const bool mode) {
  * Return the label text on the widget
  * @returns The current value of the text on the label
  */
-QString FileFinderWidget::getLabelText() const {
-  return m_uiForm.textLabel->text();
-}
+QString FileFinderWidget::getLabelText() const { return m_uiForm.textLabel->text(); }
 
 /**
  * Set the text on the label
@@ -152,18 +139,14 @@ void FileFinderWidget::setLabelText(const QString &text) {
 /** Set the minimum width on the label widget
  *  @param width The new minimum width of the widget
  */
-void FileFinderWidget::setLabelMinWidth(const int width) {
-  m_uiForm.textLabel->setMinimumWidth(width);
-}
+void FileFinderWidget::setLabelMinWidth(const int width) { m_uiForm.textLabel->setMinimumWidth(width); }
 
 /**
  * Return whether this widget allows multiple files to be specified within the
  * edit box
  * @returns True if multiple files can be specified, false otherwise
  */
-bool FileFinderWidget::allowMultipleFiles() const {
-  return m_allowMultipleFiles;
-}
+bool FileFinderWidget::allowMultipleFiles() const { return m_allowMultipleFiles; }
 
 /**
  * Set whether this widget allows multiple files to be specifed or not
@@ -193,17 +176,14 @@ void FileFinderWidget::isOptional(const bool optional) {
  * Returns the preference for how the dialog control should be
  * @return the setting
  */
-FileFinderWidget::ButtonOpts FileFinderWidget::doButtonOpt() const {
-  return m_buttonOpt;
-}
+FileFinderWidget::ButtonOpts FileFinderWidget::doButtonOpt() const { return m_buttonOpt; }
 
 /**
  * Set how the browse should appear
  * @param buttonOpt the preference for the control, if there will be one, to
  * activate the dialog box
  */
-void FileFinderWidget::doButtonOpt(
-    const FileFinderWidget::ButtonOpts buttonOpt) {
+void FileFinderWidget::doButtonOpt(const FileFinderWidget::ButtonOpts buttonOpt) {
   m_buttonOpt = buttonOpt;
   if (buttonOpt == None) {
     m_uiForm.browseBtn->hide();
@@ -244,25 +224,19 @@ void FileFinderWidget::doMultiEntry(const bool multiEntry) {
  * Returns the algorithm name
  * @returns The algorithm name
  */
-QString FileFinderWidget::getAlgorithmProperty() const {
-  return m_algorithmProperty;
-}
+QString FileFinderWidget::getAlgorithmProperty() const { return m_algorithmProperty; }
 
 /**
  * Sets an algorithm name that can be tied to this widget
  * @param text :: The name of the algorithm and property in the form
  * [AlgorithmName|PropertyName]
  */
-void FileFinderWidget::setAlgorithmProperty(const QString &text) {
-  m_algorithmProperty = text;
-}
+void FileFinderWidget::setAlgorithmProperty(const QString &text) { m_algorithmProperty = text; }
 /**
  * Returns the list of file extensions the widget will search for.
  * @return list of file extensions
  */
-QStringList FileFinderWidget::getFileExtensions() const {
-  return m_fileExtensions;
-}
+QStringList FileFinderWidget::getFileExtensions() const { return m_fileExtensions; }
 /**
  * Sets the list of file extensions the dialog will search for. Only taken
  * notice of if AlgorithmProperty not set.
@@ -278,9 +252,7 @@ void FileFinderWidget::setFileExtensions(const QStringList &extensions) {
  * as multiple items
  * @return boolean
  */
-bool FileFinderWidget::extsAsSingleOption() const {
-  return m_extsAsSingleOption;
-}
+bool FileFinderWidget::extsAsSingleOption() const { return m_extsAsSingleOption; }
 
 /**
  * Sets whether the file dialog should display the exts as a single list or as
@@ -288,14 +260,10 @@ bool FileFinderWidget::extsAsSingleOption() const {
  * @param value :: If true the file dialog wil contain a single entry will all
  * filters
  */
-void FileFinderWidget::extsAsSingleOption(const bool value) {
-  m_extsAsSingleOption = value;
-}
+void FileFinderWidget::extsAsSingleOption(const bool value) { m_extsAsSingleOption = value; }
 
 /// Returns whether the live button is being shown;
-FileFinderWidget::LiveButtonOpts FileFinderWidget::liveButtonState() const {
-  return m_liveButtonState;
-}
+FileFinderWidget::LiveButtonOpts FileFinderWidget::liveButtonState() const { return m_liveButtonState; }
 
 void FileFinderWidget::liveButtonState(const LiveButtonOpts option) {
   m_liveButtonState = option;
@@ -306,13 +274,9 @@ void FileFinderWidget::liveButtonState(const LiveButtonOpts option) {
   }
 }
 
-void FileFinderWidget::liveButtonSetChecked(const bool checked) {
-  m_uiForm.liveButton->setChecked(checked);
-}
+void FileFinderWidget::liveButtonSetChecked(const bool checked) { m_uiForm.liveButton->setChecked(checked); }
 
-bool FileFinderWidget::liveButtonIsChecked() const {
-  return m_uiForm.liveButton->isChecked();
-}
+bool FileFinderWidget::liveButtonIsChecked() const { return m_uiForm.liveButton->isChecked(); }
 
 /**
  * Is the input within the widget valid?
@@ -349,16 +313,12 @@ QString FileFinderWidget::getFirstFilename() const {
 /** Check if any text, valid or not, has been entered into the line edit
  *  @return true if no text has been entered
  */
-bool FileFinderWidget::isEmpty() const {
-  return m_uiForm.fileEditor->text().isEmpty();
-}
+bool FileFinderWidget::isEmpty() const { return m_uiForm.fileEditor->text().isEmpty(); }
 
 /** The verbatum, unexpanded text, that was entered into the box
  *  @return the contents shown in the Line Edit
  */
-QString FileFinderWidget::getText() const {
-  return m_uiForm.fileEditor->text();
-}
+QString FileFinderWidget::getText() const { return m_uiForm.fileEditor->text(); }
 
 /** The number the user entered into the entryNum lineEdit
  * or NO_ENTRY_NUM on error. Checking if isValid is true should
@@ -381,9 +341,7 @@ int FileFinderWidget::getEntryNum() const {
 /** Set the entry displayed in the box to this value
  * @param num the period number to use
  */
-void FileFinderWidget::setEntryNum(const int num) {
-  m_uiForm.entryNum->setText(QString::number(num));
-}
+void FileFinderWidget::setEntryNum(const int num) { m_uiForm.entryNum->setText(QString::number(num)); }
 
 /**
  * Retrieve user input from this widget. This expands the current
@@ -392,9 +350,7 @@ void FileFinderWidget::setEntryNum(const int num) {
  * NOTE: This knows nothing of periods yet
  * @returns A QVariant containing the text string for the algorithm property
  */
-QVariant FileFinderWidget::getUserInput() const {
-  return QVariant(m_valueForProperty);
-}
+QVariant FileFinderWidget::getUserInput() const { return QVariant(m_valueForProperty); }
 
 /**
  * "Silently" sets the value of the widget.  It does NOT emit a signal to say it
@@ -404,9 +360,7 @@ QVariant FileFinderWidget::getUserInput() const {
  * @param value A QString containing text to be entered into the widget
  */
 
-void FileFinderWidget::setText(const QString &value) {
-  m_uiForm.fileEditor->setText(value);
-}
+void FileFinderWidget::setText(const QString &value) { m_uiForm.fileEditor->setText(value); }
 
 /**
  * Sets a value on the widget through a common interface. The
@@ -472,10 +426,7 @@ void FileFinderWidget::setNumberOfEntries(const int number) {
  *  to an instance of MonitorLiveData.
  *  @param monitorLiveData The running algorithm
  */
-void FileFinderWidget::setLiveAlgorithm(
-    const IAlgorithm_sptr &monitorLiveData) {
-  m_monitorLiveData = monitorLiveData;
-}
+void FileFinderWidget::setLiveAlgorithm(const IAlgorithm_sptr &monitorLiveData) { m_monitorLiveData = monitorLiveData; }
 
 /**
  * Gets the instrument currently set by the override property.
@@ -486,9 +437,7 @@ void FileFinderWidget::setLiveAlgorithm(
  *
  * @return Name of instrument, empty if not set
  */
-QString FileFinderWidget::getInstrumentOverride() {
-  return m_defaultInstrumentName;
-}
+QString FileFinderWidget::getInstrumentOverride() { return m_defaultInstrumentName; }
 
 /**
  * Sets an instrument to fix the widget to.
@@ -539,9 +488,7 @@ void FileFinderWidget::clear() {
 /**
  * Finds the files if the user has changed the parameter text.
  */
-void FileFinderWidget::findFiles() {
-  findFiles(m_uiForm.fileEditor->isModified());
-}
+void FileFinderWidget::findFiles() { findFiles(m_uiForm.fileEditor->isModified()); }
 
 /**
  * Finds the files specified by the user in a background thread.
@@ -586,8 +533,7 @@ const QString FileFinderWidget::findFilesGetSearchText(QString &searchText) {
     const std::string runNumberString = "([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?";
     boost::regex runNumberExp(runNumberString, boost::regex::extended);
     // Regex to match a list of run numbers delimited by commas
-    const std::string runListString =
-        "(" + runNumberString + ")(, ?(" + runNumberString + "))*";
+    const std::string runListString = "(" + runNumberString + ")(, ?(" + runNumberString + "))*";
     boost::regex runNumberListExp(runListString, boost::regex::extended);
 
     // See if we can just prepend the instrument and be done
@@ -615,8 +561,7 @@ const QString FileFinderWidget::findFilesGetSearchText(QString &searchText) {
 void FileFinderWidget::runFindFiles(const QString &searchText) {
   emit findingFiles();
 
-  const auto parameters =
-      createFindFilesSearchParameters(searchText.toStdString());
+  const auto parameters = createFindFilesSearchParameters(searchText.toStdString());
   m_pool.createWorker(this, parameters);
 }
 
@@ -639,8 +584,7 @@ IAlgorithm_const_sptr FileFinderWidget::stopLiveAlgorithm() {
  * Called when the file finding thread finishes.  Inspects the result
  * of the thread, and emits fileFound() if it has been successful.
  */
-void FileFinderWidget::inspectThreadResult(
-    const FindFilesSearchResults &results) {
+void FileFinderWidget::inspectThreadResult(const FindFilesSearchResults &results) {
   // Update caches before we might exit early
   m_cachedResults = results;
   m_valueForProperty = QString::fromStdString(results.valueForProperty);
@@ -658,8 +602,7 @@ void FileFinderWidget::inspectThreadResult(
     m_foundFiles.append(QString::fromStdString(filename));
   }
   if (m_foundFiles.isEmpty() && !isOptional()) {
-    setFileProblem(
-        "No files found. Check search paths and instrument selection.");
+    setFileProblem("No files found. Check search paths and instrument selection.");
   } else if (m_foundFiles.count() > 1 && this->allowMultipleFiles() == false) {
     setFileProblem("Multiple files specified.");
   } else {
@@ -686,9 +629,7 @@ void FileFinderWidget::readSettings(const QString &group) {
 
   if (m_lastDir == "") {
     QStringList datadirs =
-        QString::fromStdString(
-            Mantid::Kernel::ConfigService::Instance().getString(
-                "datasearch.directories"))
+        QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"))
             .split(";", QString::SkipEmptyParts);
     if (!datadirs.isEmpty())
       m_lastDir = datadirs[0];
@@ -707,8 +648,7 @@ QString FileFinderWidget::createFileFilter() {
     if (!m_fileExtensions.isEmpty()) {
       fileExts = m_fileExtensions;
     } else if (isForRunFiles()) {
-      std::vector<std::string> exts =
-          ConfigService::Instance().getFacility().extensions();
+      std::vector<std::string> exts = ConfigService::Instance().getFacility().extensions();
       for (auto &ext : exts) {
         fileExts.append(QString::fromStdString(ext));
       }
@@ -785,12 +725,9 @@ QString FileFinderWidget::createFileFilter() {
  * @param propName :: The name of the property
  * @returns A list of file extensions
  */
-QStringList
-FileFinderWidget::getFileExtensionsFromAlgorithm(const QString &algName,
-                                                 const QString &propName) {
+QStringList FileFinderWidget::getFileExtensionsFromAlgorithm(const QString &algName, const QString &propName) {
   Mantid::API::IAlgorithm_sptr algorithm =
-      Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-          algName.toStdString());
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged(algName.toStdString());
   QStringList fileExts;
   if (!algorithm)
     return fileExts;
@@ -814,8 +751,7 @@ FileFinderWidget::getFileExtensionsFromAlgorithm(const QString &algName,
 
   std::vector<std::string>::const_iterator iend = allowed.end();
   int index(0);
-  for (std::vector<std::string>::const_iterator it = allowed.begin();
-       it != iend; ++it) {
+  for (std::vector<std::string>::const_iterator it = allowed.begin(); it != iend; ++it) {
     if (!it->empty()) {
       QString ext = QString::fromStdString(*it);
       fileExts.append(ext);
@@ -842,18 +778,15 @@ QString FileFinderWidget::openFileDialog() {
   }
 
   if (m_isForDirectory) {
-    QString file =
-        QFileDialog::getExistingDirectory(this, "Select directory", dir);
+    QString file = QFileDialog::getExistingDirectory(this, "Select directory", dir);
     if (!file.isEmpty())
       filenames.append(file);
   } else if (m_allowMultipleFiles) {
-    filenames = QFileDialog::getOpenFileNames(this, "Open file", dir,
-                                              m_fileFilter, nullptr,
-                                              QFileDialog::DontResolveSymlinks);
+    filenames =
+        QFileDialog::getOpenFileNames(this, "Open file", dir, m_fileFilter, nullptr, QFileDialog::DontResolveSymlinks);
   } else {
     QString file =
-        QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter,
-                                     nullptr, QFileDialog::DontResolveSymlinks);
+        QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter, nullptr, QFileDialog::DontResolveSymlinks);
     if (!file.isEmpty())
       filenames.append(file);
   }
@@ -989,12 +922,9 @@ void FileFinderWidget::setReadOnly(bool readOnly) {
  * result.
  * @param display :: [input] whether to show validator result or not
  */
-void FileFinderWidget::setValidatorDisplay(bool display) {
-  m_showValidator = display;
-}
+void FileFinderWidget::setValidatorDisplay(bool display) { m_showValidator = display; }
 
-FindFilesSearchParameters FileFinderWidget::createFindFilesSearchParameters(
-    const std::string &text) const {
+FindFilesSearchParameters FileFinderWidget::createFindFilesSearchParameters(const std::string &text) const {
   FindFilesSearchParameters parameters;
   parameters.searchText = text;
   parameters.isOptional = isOptional();
@@ -1010,6 +940,4 @@ FindFilesSearchParameters FileFinderWidget::createFindFilesSearchParameters(
   return parameters;
 }
 
-void FileFinderWidget::setTextValidator(const QValidator *validator) {
-  m_uiForm.fileEditor->setValidator(validator);
-}
+void FileFinderWidget::setTextValidator(const QValidator *validator) { m_uiForm.fileEditor->setValidator(validator); }

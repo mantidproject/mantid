@@ -39,29 +39,21 @@ public:
     model = wrapper->CreateModel();
   };
   void LoadFile(std::string filename);
-  void readMeshObjects(std::vector<MeshObject_sptr> &meshObjects,
-                       MeshObject_sptr &sample);
-  void writeMeshObjects(std::vector<const Geometry::MeshObject *> meshObjects,
-                        MeshObject_const_sptr &sample,
+  void readMeshObjects(std::vector<MeshObject_sptr> &meshObjects, MeshObject_sptr &sample);
+  void writeMeshObjects(std::vector<const Geometry::MeshObject *> meshObjects, MeshObject_const_sptr &sample,
                         DataHandling::ScaleUnits scale);
   void saveFile(std::string filename);
 
 private:
   Lib3MF::PModel model;
-  MeshObject_sptr loadMeshObject(Lib3MF::PMeshObject meshObject,
-                                 sLib3MFTransform buildTransform);
-  void readMeshObject(std::vector<MeshObject_sptr> &meshObjects,
-                      MeshObject_sptr &sample, uint32_t objectResourceID,
+  MeshObject_sptr loadMeshObject(Lib3MF::PMeshObject meshObject, sLib3MFTransform buildTransform);
+  void readMeshObject(std::vector<MeshObject_sptr> &meshObjects, MeshObject_sptr &sample, uint32_t objectResourceID,
                       sLib3MFTransform transform);
-  void readComponents(std::vector<MeshObject_sptr> &meshObjects,
-                      MeshObject_sptr &sample, uint32_t objectResourceID,
+  void readComponents(std::vector<MeshObject_sptr> &meshObjects, MeshObject_sptr &sample, uint32_t objectResourceID,
                       sLib3MFTransform transform);
-  void writeMeshObject(const Geometry::MeshObject &meshObject,
-                       std::string name);
-  void AddBaseMaterial(std::string materialName, int materialColor,
-                       int &resourceID, Lib3MF_uint32 &materialPropertyID);
-  void setMaterialOnObject(std::string objectName, std::string materialName,
-                           int materialColor);
+  void writeMeshObject(const Geometry::MeshObject &meshObject, std::string name);
+  void AddBaseMaterial(std::string materialName, int materialColor, int &resourceID, Lib3MF_uint32 &materialPropertyID);
+  void setMaterialOnObject(std::string objectName, std::string materialName, int materialColor);
   int generateRandomColor();
 };
 } // namespace DataHandling

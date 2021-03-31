@@ -53,9 +53,8 @@ void WorkspaceBuilder::setNumPixels(const int numPixels) {
  * @param numEvents :: the number of events to create for the peak
  * @param sigmas :: tuple controlling the distribution of events
  */
-void WorkspaceBuilder::addPeakByHKL(
-    const V3D &hkl, const int numEvents,
-    const std::tuple<double, double, double> &sigmas) {
+void WorkspaceBuilder::addPeakByHKL(const V3D &hkl, const int numEvents,
+                                    const std::tuple<double, double, double> &sigmas) {
   m_peakDescriptors.emplace_back(hkl, numEvents, sigmas);
 }
 
@@ -70,8 +69,7 @@ void WorkspaceBuilder::addPeakByHKL(
  *
  * @return a tuple containing a matrix workspace and a peaks workspace
  */
-std::tuple<MatrixWorkspace_sptr, PeaksWorkspace_sptr>
-WorkspaceBuilder::build() {
+std::tuple<MatrixWorkspace_sptr, PeaksWorkspace_sptr> WorkspaceBuilder::build() {
   createInstrument();
   createPeaksWorkspace();
   createEventWorkspace();
@@ -92,8 +90,7 @@ WorkspaceBuilder::build() {
  */
 void WorkspaceBuilder::createInstrument() {
   m_instrument = ComponentCreationHelper::createTestInstrumentRectangular(
-      1 /*num_banks*/, m_numPixels /*pixels in each direction yields n by n*/,
-      0.01, 1.0);
+      1 /*num_banks*/, m_numPixels /*pixels in each direction yields n by n*/, 0.01, 1.0);
 }
 
 /** Create an empty peaks workspace
@@ -121,8 +118,7 @@ void WorkspaceBuilder::createEventWorkspace() {
   // Make an event workspace and add fake peak data
   m_eventWorkspace = std::make_shared<EventWorkspace>();
   m_eventWorkspace->setInstrument(m_instrument);
-  m_eventWorkspace->initialize(m_totalNPixels /*n spectra*/, 3 /* x-size */,
-                               3 /* y-size */);
+  m_eventWorkspace->initialize(m_totalNPixels /*n spectra*/, 3 /* x-size */, 3 /* y-size */);
   m_eventWorkspace->getAxis(0)->setUnit("TOF");
   // Give the spectra-detector mapping for all event lists
   for (int i = 0; i < m_totalNPixels; ++i) {
@@ -190,8 +186,7 @@ void WorkspaceBuilder::createPeak(const HKLPeakDescriptor &descriptor) {
     const auto tof = tofDist(m_generator);
 
     const auto pos = V3D(detPos[0] + xOffset, detPos[1] + yOffset, detPos[2]);
-    const auto result = m_detectorSearcher->findNearest(
-        Eigen::Vector3d(pos[0], pos[1], pos[2]));
+    const auto result = m_detectorSearcher->findNearest(Eigen::Vector3d(pos[0], pos[1], pos[2]));
     const auto index = std::get<1>(result[0]);
     auto &el = m_eventWorkspace->getSpectrum(index);
     el.addEventQuickly(TofEvent(tof));
@@ -217,12 +212,9 @@ void WorkspaceBuilder::createBackground(const int index) {
   const auto backgroundDetSize = std::get<1>(m_backgroundParameters);
   const auto backgroundTOFSize = std::get<2>(m_backgroundParameters);
 
-  std::uniform_real_distribution<> backgroundXDist(-backgroundDetSize,
-                                                   backgroundDetSize);
-  std::uniform_real_distribution<> backgroundYDist(-backgroundDetSize,
-                                                   backgroundDetSize);
-  std::uniform_real_distribution<> backgroundTOFDist(
-      tofExact - backgroundTOFSize, tofExact + backgroundTOFSize);
+  std::uniform_real_distribution<> backgroundXDist(-backgroundDetSize, backgroundDetSize);
+  std::uniform_real_distribution<> backgroundYDist(-backgroundDetSize, backgroundDetSize);
+  std::uniform_real_distribution<> backgroundTOFDist(tofExact - backgroundTOFSize, tofExact + backgroundTOFSize);
 
   for (int i = 0; i < nBackgroundEvents; ++i) {
     const auto xOffset = backgroundXDist(m_generator);
@@ -230,8 +222,7 @@ void WorkspaceBuilder::createBackground(const int index) {
     const auto tof = backgroundTOFDist(m_generator);
 
     const auto pos = V3D(detPos[0] + xOffset, detPos[1] + yOffset, detPos[2]);
-    const auto result = m_detectorSearcher->findNearest(
-        Eigen::Vector3d(pos[0], pos[1], pos[2]));
+    const auto result = m_detectorSearcher->findNearest(Eigen::Vector3d(pos[0], pos[1], pos[2]));
     const auto index = std::get<1>(result[0]);
 
     auto &el = m_eventWorkspace->getSpectrum(index);

@@ -47,8 +47,7 @@ DECLARE_DIALOG(FitDialog)
  * with the followin rule InputWorkspace_[domainIndex]
  */
 InputWorkspaceWidget::InputWorkspaceWidget(FitDialog *parent, int domainIndex)
-    : QWidget(parent), m_fitDialog(parent), m_domainIndex(domainIndex),
-      m_dynamicProperties(nullptr) {
+    : QWidget(parent), m_fitDialog(parent), m_domainIndex(domainIndex), m_dynamicProperties(nullptr) {
   m_wsPropName = "InputWorkspace";
   if (domainIndex > 0) {
     m_wsPropName += "_" + QString::number(domainIndex);
@@ -60,8 +59,7 @@ InputWorkspaceWidget::InputWorkspaceWidget(FitDialog *parent, int domainIndex)
   QStringList allowedValues = getAllowedPropertyValues(m_wsPropName);
   m_workspaceName->clear();
   m_workspaceName->insertItems(0, allowedValues);
-  connect(m_workspaceName, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(setDynamicProperties()));
+  connect(m_workspaceName, SIGNAL(currentIndexChanged(int)), this, SLOT(setDynamicProperties()));
 
   setDynamicProperties();
 }
@@ -82,8 +80,7 @@ bool InputWorkspaceWidget::isMatrixWorkspace() const {
   if (wsName.isEmpty())
     return false;
   try {
-    auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(
-        wsName.toStdString());
+    auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString());
     return dynamic_cast<Mantid::API::MatrixWorkspace *>(ws.get()) != nullptr;
   } catch (...) {
     return false;
@@ -98,8 +95,7 @@ bool InputWorkspaceWidget::isMDWorkspace() const {
   if (wsName.isEmpty())
     return false;
   try {
-    auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(
-        wsName.toStdString());
+    auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString());
     return dynamic_cast<Mantid::API::IMDWorkspace *>(ws.get()) != nullptr;
   } catch (...) {
     return false;
@@ -109,9 +105,7 @@ bool InputWorkspaceWidget::isMDWorkspace() const {
 /**
  * Is current workspace supported by Fit?
  */
-bool InputWorkspaceWidget::isWorkspaceSupported() const {
-  return isMatrixWorkspace() || isMDWorkspace();
-}
+bool InputWorkspaceWidget::isWorkspaceSupported() const { return isMatrixWorkspace() || isMDWorkspace(); }
 
 /**
  * Set the dynamic properties
@@ -140,15 +134,12 @@ void InputWorkspaceWidget::setDynamicProperties() {
     m_dynamicProperties = new MWPropertiesWidget(this);
     m_layout->insertWidget(1, m_dynamicProperties);
   } else {
-    m_layout->insertWidget(
-        1, new QLabel("Workspace of this type is not supported"));
+    m_layout->insertWidget(1, new QLabel("Workspace of this type is not supported"));
   }
 }
 
 /// Get workspace name
-QString InputWorkspaceWidget::getWorkspaceName() const {
-  return m_workspaceName->currentText();
-}
+QString InputWorkspaceWidget::getWorkspaceName() const { return m_workspaceName->currentText(); }
 
 /// Set workspace name
 void InputWorkspaceWidget::setWorkspaceName(const QString &wsName) {
@@ -163,11 +154,9 @@ void InputWorkspaceWidget::setWorkspaceName(const QString &wsName) {
  * @param propName :: Property name
  * @param propValue :: Property value
  */
-void InputWorkspaceWidget::setPropertyValue(const QString &propName,
-                                            const QString &propValue) {
+void InputWorkspaceWidget::setPropertyValue(const QString &propName, const QString &propValue) {
   if (m_fitDialog->getAlgorithm()->existsProperty(propName.toStdString())) {
-    m_fitDialog->getAlgorithm()->setPropertyValue(propName.toStdString(),
-                                                  propValue.toStdString());
+    m_fitDialog->getAlgorithm()->setPropertyValue(propName.toStdString(), propValue.toStdString());
     m_fitDialog->storePropertyValue(propName, propValue);
   }
 }
@@ -187,8 +176,7 @@ void InputWorkspaceWidget::setProperties() {
 /**
  * Constructor.
  */
-MWPropertiesWidget::MWPropertiesWidget(InputWorkspaceWidget *parent)
-    : DynamicPropertiesWidget(parent) {
+MWPropertiesWidget::MWPropertiesWidget(InputWorkspaceWidget *parent) : DynamicPropertiesWidget(parent) {
   m_workspaceIndex = new QSpinBox(this);
   m_startX = new QLineEdit(this);
   m_endX = new QLineEdit(this);
@@ -216,12 +204,9 @@ MWPropertiesWidget::MWPropertiesWidget(InputWorkspaceWidget *parent)
     return;
   try {
     auto ws = dynamic_cast<Mantid::API::MatrixWorkspace *>(
-        Mantid::API::AnalysisDataService::Instance()
-            .retrieve(wsName.toStdString())
-            .get());
+        Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()).get());
     if (ws) {
-      m_workspaceIndex->setRange(0,
-                                 static_cast<int>(ws->getNumberHistograms()));
+      m_workspaceIndex->setRange(0, static_cast<int>(ws->getNumberHistograms()));
       const Mantid::MantidVec &x = ws->readX(0);
       if (!x.empty()) {
         m_startX->setText(QString::number(x.front()));
@@ -281,8 +266,7 @@ void MWPropertiesWidget::setProperties() {
  * Constructor.
  * @param parent :: Parent InputWorkspaceWidget tab.
  */
-MDPropertiesWidget::MDPropertiesWidget(InputWorkspaceWidget *parent)
-    : DynamicPropertiesWidget(parent) {
+MDPropertiesWidget::MDPropertiesWidget(InputWorkspaceWidget *parent) : DynamicPropertiesWidget(parent) {
   if (parent->getDomainType() > 0) {
     auto layout = new QGridLayout(this);
     m_maxSize = new QSpinBox(this);
@@ -318,8 +302,7 @@ void MDPropertiesWidget::setProperties() {
 //------------------------------------------------------
 
 /// Default constructor
-FitDialog::FitDialog(QWidget *parent)
-    : API::AlgorithmDialog(parent), m_form() {}
+FitDialog::FitDialog(QWidget *parent) : API::AlgorithmDialog(parent), m_form() {}
 
 /// Initialize the layout
 void FitDialog::initLayout() {
@@ -347,8 +330,7 @@ void FitDialog::saveInput() {
 void FitDialog::parseInput() {
   // int domainType = getDomainType();
   storePropertyValue("DomainType", getDomainTypeString());
-  getAlgorithm()->setPropertyValue("DomainType",
-                                   getDomainTypeString().toStdString());
+  getAlgorithm()->setPropertyValue("DomainType", getDomainTypeString().toStdString());
   QString funStr = m_form.function->getFunctionString();
   if (!funStr.isEmpty()) {
     storePropertyValue("Function", funStr);
@@ -377,8 +359,7 @@ void FitDialog::tieStaticWidgets(const bool readHistory) {
 
   tie(m_form.chbCreateOutput, "CreateOutput", m_form.staticLayout, readHistory);
   tie(m_form.leOutput, "Output", m_form.staticLayout, readHistory);
-  tie(m_form.leMaxIterations, "MaxIterations", m_form.staticLayout,
-      readHistory);
+  tie(m_form.leMaxIterations, "MaxIterations", m_form.staticLayout, readHistory);
 
   m_form.cbCostFunction->addItems(getAllowedPropertyValues("CostFunction"));
   tie(m_form.cbCostFunction, "CostFunction", m_form.staticLayout, readHistory);
@@ -390,8 +371,7 @@ void FitDialog::tieStaticWidgets(const bool readHistory) {
   allowedDomainTypes.removeAll("Parallel");
   m_form.cbDomainType->addItems(allowedDomainTypes);
   // tie(m_form.cbDomainType, "DomainType", m_form.staticLayout, readHistory);
-  connect(m_form.cbDomainType, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(domainTypeChanged()));
+  connect(m_form.cbDomainType, SIGNAL(currentIndexChanged(int)), this, SLOT(domainTypeChanged()));
   QString domainTypeValue = getPreviousValue("DomainType");
   if (!domainTypeValue.isEmpty()) {
     m_form.cbDomainType->setItemText(-1, domainTypeValue);
@@ -412,8 +392,7 @@ void FitDialog::tieStaticWidgets(const bool readHistory) {
  * Update user interface when domain type changes.
  */
 void FitDialog::domainTypeChanged() {
-  getAlgorithm()->setPropertyValue("DomainType",
-                                   getDomainTypeString().toStdString());
+  getAlgorithm()->setPropertyValue("DomainType", getDomainTypeString().toStdString());
   auto minimizerList = getAllowedPropertyValues("Minimizer");
   if (getDomainType() != 0) {
     minimizerList.removeAll("Levenberg-Marquardt");
@@ -454,8 +433,7 @@ void FitDialog::createInputWorkspaceWidgets() {
   auto fun = m_form.function->getFunction();
   if (!fun)
     return;
-  auto multid =
-      std::dynamic_pointer_cast<Mantid::API::MultiDomainFunction>(fun);
+  auto multid = std::dynamic_pointer_cast<Mantid::API::MultiDomainFunction>(fun);
   if (multid) {
     // number of domains that the function expects
     size_t nd = multid->getMaxIndex();
@@ -484,9 +462,7 @@ void FitDialog::setWorkspaceName(int i, const QString &wsName) {
     tab->setWorkspaceName(wsName);
 }
 
-void FitDialog::workspaceChanged(const QString & /*unused*/) {
-  this->setPropertyValues();
-}
+void FitDialog::workspaceChanged(const QString & /*unused*/) { this->setPropertyValues(); }
 
 void FitDialog::functionChanged() {
   // this->setPropertyValues();
@@ -500,10 +476,8 @@ void FitDialog::functionChanged() {
  */
 QStringList FitDialog::getAllowedPropertyValues(const QString &propName) const {
   QStringList out;
-  std::vector<std::string> workspaces =
-      getAlgorithmProperty(propName)->allowedValues();
-  for (std::vector<std::string>::const_iterator itr = workspaces.begin();
-       itr != workspaces.end(); ++itr) {
+  std::vector<std::string> workspaces = getAlgorithmProperty(propName)->allowedValues();
+  for (std::vector<std::string>::const_iterator itr = workspaces.begin(); itr != workspaces.end(); ++itr) {
     out << QString::fromStdString(*itr);
   }
   return out;
@@ -517,8 +491,7 @@ namespace {
 bool isFunctionMD(const Mantid::API::IFunction_sptr &fun) {
   auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
   if (!cf)
-    return static_cast<bool>(
-        std::dynamic_pointer_cast<Mantid::API::IFunctionMD>(fun));
+    return static_cast<bool>(std::dynamic_pointer_cast<Mantid::API::IFunctionMD>(fun));
   for (size_t i = 0; i < cf->nFunctions(); ++i) {
     bool yes = isFunctionMD(cf->getFunction(i));
     if (yes)
@@ -553,9 +526,7 @@ int FitDialog::getDomainType() const {
 }
 
 /// Get the domain type: Simple, Sequential, or Parallel
-QString FitDialog::getDomainTypeString() const {
-  return m_form.cbDomainType->currentText();
-}
+QString FitDialog::getDomainTypeString() const { return m_form.cbDomainType->currentText(); }
 
 } // namespace CustomDialogs
 } // namespace MantidQt

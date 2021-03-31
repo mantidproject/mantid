@@ -22,10 +22,9 @@ namespace MDAlgorithms {
  * @param isQ: if the transform is Q or not
  * @param mode: the energy transfer mode
  */
-void DisplayNormalizationSetter::
-operator()(const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
-           const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace,
-           bool isQ, const Mantid::Kernel::DeltaEMode::Type &mode) {
+void DisplayNormalizationSetter::operator()(const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
+                                            const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace, bool isQ,
+                                            const Mantid::Kernel::DeltaEMode::Type &mode) {
   if (std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(mdWorkspace)) {
     setNormalizationMDEvent(mdWorkspace, underlyingWorkspace, isQ, mode);
   } else {
@@ -42,27 +41,21 @@ operator()(const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
  * @param isQ: if the transform is Q or not
  * @param mode: the energy transfer mode
  */
-void DisplayNormalizationSetter::setNormalizationMDEvent(
-    const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
-    const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace, bool isQ,
-    const Mantid::Kernel::DeltaEMode::Type &mode) {
+void DisplayNormalizationSetter::setNormalizationMDEvent(const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
+                                                         const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace,
+                                                         bool isQ, const Mantid::Kernel::DeltaEMode::Type &mode) {
 
-  auto isEventWorkspace = static_cast<bool>(
-      std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
-          underlyingWorkspace));
-  Mantid::API::MDNormalization displayNormalization(
-      Mantid::API::MDNormalization::VolumeNormalization);
-  Mantid::API::MDNormalization displayNormalizationHisto(
-      Mantid::API::MDNormalization::VolumeNormalization);
+  auto isEventWorkspace =
+      static_cast<bool>(std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(underlyingWorkspace));
+  Mantid::API::MDNormalization displayNormalization(Mantid::API::MDNormalization::VolumeNormalization);
+  Mantid::API::MDNormalization displayNormalizationHisto(Mantid::API::MDNormalization::VolumeNormalization);
 
   // If is not Q
   if (!isQ) {
-    displayNormalizationHisto =
-        Mantid::API::MDNormalization::VolumeNormalization;
+    displayNormalizationHisto = Mantid::API::MDNormalization::VolumeNormalization;
     // 2. If Energy mode is elastic --> Volume Normalization
   } else if (mode == Mantid::Kernel::DeltaEMode::Elastic) {
-    displayNormalizationHisto =
-        Mantid::API::MDNormalization::VolumeNormalization;
+    displayNormalizationHisto = Mantid::API::MDNormalization::VolumeNormalization;
     // 3. If Energy is inelastic and underlying workspace is event workspace -->
     // use no normalization
   } else if (isEventWorkspace) {
@@ -70,12 +63,10 @@ void DisplayNormalizationSetter::setNormalizationMDEvent(
     // 4. If Eneregy is inelastic and underlying workspace is other workspace
     // --> use num event normalization
   } else {
-    displayNormalizationHisto =
-        Mantid::API::MDNormalization::NumEventsNormalization;
+    displayNormalizationHisto = Mantid::API::MDNormalization::NumEventsNormalization;
   }
 
-  applyNormalizationMDEvent(std::move(mdWorkspace), displayNormalization,
-                            displayNormalizationHisto);
+  applyNormalizationMDEvent(std::move(mdWorkspace), displayNormalization, displayNormalizationHisto);
 }
 
 /**
@@ -86,12 +77,10 @@ void DisplayNormalizationSetter::setNormalizationMDEvent(
  * @param displayNormalizationHisto: the display normalization for derived
  * MDHisto workspaces
  */
-void DisplayNormalizationSetter::applyNormalizationMDEvent(
-    const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
-    Mantid::API::MDNormalization displayNormalization,
-    Mantid::API::MDNormalization displayNormalizationHisto) {
-  auto ws =
-      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(mdWorkspace);
+void DisplayNormalizationSetter::applyNormalizationMDEvent(const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
+                                                           Mantid::API::MDNormalization displayNormalization,
+                                                           Mantid::API::MDNormalization displayNormalizationHisto) {
+  auto ws = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(mdWorkspace);
   ws->setDisplayNormalization(displayNormalization);
   ws->setDisplayNormalizationHisto(displayNormalizationHisto);
 }

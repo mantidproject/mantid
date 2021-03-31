@@ -21,11 +21,10 @@ Python
 */
 /// Checks whether the given object's type dictionary contains the named
 /// attribute.
-bool MANTID_PYTHONINTERFACE_CORE_DLL typeHasAttribute(PyObject *obj,
-                                                      const char *attr);
+bool MANTID_PYTHONINTERFACE_CORE_DLL typeHasAttribute(PyObject *obj, const char *attr);
 /// An overload for the above taking a wrapper reference
-bool MANTID_PYTHONINTERFACE_CORE_DLL typeHasAttribute(
-    const boost::python::detail::wrapper_base &wrapper, const char *attr);
+bool MANTID_PYTHONINTERFACE_CORE_DLL typeHasAttribute(const boost::python::detail::wrapper_base &wrapper,
+                                                      const char *attr);
 
 } // namespace PythonInterface
 } // namespace Mantid

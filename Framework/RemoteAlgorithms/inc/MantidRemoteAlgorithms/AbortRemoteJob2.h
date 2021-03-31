@@ -19,9 +19,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "AbortRemoteJob"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Abort a previously submitted job.";
-  }
+  const std::string summary() const override { return "Abort a previously submitted job."; }
 
   /// Algorithm's version
   int version() const override { return (2); }

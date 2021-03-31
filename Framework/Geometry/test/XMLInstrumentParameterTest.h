@@ -29,8 +29,7 @@ private:
   XMLInstrumentParameter_sptr make_logfile_object(const std::string &filterBy) {
     const std::string logfileID = "1";
     const std::string value;
-    const std::shared_ptr<Kernel::Interpolation> &interpolation =
-        std::make_shared<Interpolation>();
+    const std::shared_ptr<Kernel::Interpolation> &interpolation = std::make_shared<Interpolation>();
     const std::string formula;
     const std::string formulaUnit;
     const std::string resultUnit;
@@ -44,10 +43,9 @@ private:
     const Geometry::IComponent *comp = nullptr;
     double angleConvertConst = 0.0;
 
-    return std::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(
-        logfileID, value, interpolation, formula, formulaUnit, resultUnit,
-        paramName, type, tie, constraint, penaltyFactor, fitFunc, filterBy, eq,
-        comp, angleConvertConst, ""));
+    return std::shared_ptr<XMLInstrumentParameter>(
+        new XMLInstrumentParameter(logfileID, value, interpolation, formula, formulaUnit, resultUnit, paramName, type,
+                                   tie, constraint, penaltyFactor, fitFunc, filterBy, eq, comp, angleConvertConst, ""));
   }
 
 public:
@@ -55,12 +53,10 @@ public:
     TimeSeriesProperty<double> series("doubleProperty");
     series.addValue("2000-11-30T01:01:01", 1);
 
-    const std::string made_up_flag =
-        "mode"; // We do not support mode statistics filtering.
+    const std::string made_up_flag = "mode"; // We do not support mode statistics filtering.
     XMLInstrumentParameter_sptr logFile = make_logfile_object(made_up_flag);
 
-    TSM_ASSERT_THROWS("Unknown flag should cause failure",
-                      logFile->createParamValue(&series),
+    TSM_ASSERT_THROWS("Unknown flag should cause failure", logFile->createParamValue(&series),
                       const Kernel::Exception::InstrumentDefinitionError &)
   }
 
@@ -73,8 +69,8 @@ public:
 
     XMLInstrumentParameter_sptr logFile = make_logfile_object("first_value");
     const double actualFilteredValue = logFile->createParamValue(&series);
-    TSM_ASSERT_EQUALS("Filtering by First Value is not performed correctly",
-                      expectedFilteredValue, actualFilteredValue);
+    TSM_ASSERT_EQUALS("Filtering by First Value is not performed correctly", expectedFilteredValue,
+                      actualFilteredValue);
   }
 
   void test_filter_by_last_value() {
@@ -86,8 +82,7 @@ public:
 
     XMLInstrumentParameter_sptr logFile = make_logfile_object("last_value");
     const double actualFilteredValue = logFile->createParamValue(&series);
-    TSM_ASSERT_EQUALS("Filtering by Last Value is not performed correctly",
-                      expectedFilteredValue, actualFilteredValue);
+    TSM_ASSERT_EQUALS("Filtering by Last Value is not performed correctly", expectedFilteredValue, actualFilteredValue);
   }
 
   void test_filter_by_maximum_value() {
@@ -101,8 +96,7 @@ public:
 
     XMLInstrumentParameter_sptr logFile = make_logfile_object("maximum");
     const double actualFilteredValue = logFile->createParamValue(&series);
-    TSM_ASSERT_EQUALS("Filtering by Maximum is not performed correctly",
-                      expectedFilteredValue, actualFilteredValue);
+    TSM_ASSERT_EQUALS("Filtering by Maximum is not performed correctly", expectedFilteredValue, actualFilteredValue);
   }
 
   void test_filter_by_minimum_value() {
@@ -116,8 +110,7 @@ public:
 
     XMLInstrumentParameter_sptr logFile = make_logfile_object("minimum");
     const double actualFilteredValue = logFile->createParamValue(&series);
-    TSM_ASSERT_EQUALS("Filtering by Minimum is not performed correctly",
-                      expectedFilteredValue, actualFilteredValue);
+    TSM_ASSERT_EQUALS("Filtering by Minimum is not performed correctly", expectedFilteredValue, actualFilteredValue);
   }
 
   void test_filter_by_mean_value() {
@@ -132,8 +125,7 @@ public:
 
     XMLInstrumentParameter_sptr logFile = make_logfile_object("mean");
     const double actualFilteredValue = logFile->createParamValue(&series);
-    TSM_ASSERT_EQUALS("Filtering by Mean is not performed correctly",
-                      expectedFilteredValue, actualFilteredValue);
+    TSM_ASSERT_EQUALS("Filtering by Mean is not performed correctly", expectedFilteredValue, actualFilteredValue);
   }
 
   void test_filter_by_median_value() {
@@ -149,8 +141,7 @@ public:
 
     XMLInstrumentParameter_sptr logFile = make_logfile_object("median");
     const double actualFilteredValue = logFile->createParamValue(&series);
-    TSM_ASSERT_EQUALS("Filtering by Median is not performed correctly",
-                      expectedFilteredValue, actualFilteredValue);
+    TSM_ASSERT_EQUALS("Filtering by Median is not performed correctly", expectedFilteredValue, actualFilteredValue);
   }
 
   // This functionality will soon be legacy, since filtering by nth-position is
@@ -166,18 +157,16 @@ public:
 
     XMLInstrumentParameter_sptr logFile = make_logfile_object("position 2");
     const double actualFilteredValue = logFile->createParamValue(&series);
-    TSM_ASSERT_EQUALS("Filtering by Nth position is not performed correctly",
-                      expectedFilteredValue, actualFilteredValue);
+    TSM_ASSERT_EQUALS("Filtering by Nth position is not performed correctly", expectedFilteredValue,
+                      actualFilteredValue);
   }
 
   void test_help_string() {
     std::vector<std::string> constr;
     std::string penaltyFactor;
-    XMLInstrumentParameter testPar(
-        "logfileID", "value", std::make_shared<Interpolation>(), "formula",
-        "sourceFU", "resultFU", "testPar", "aType", "noTie", constr,
-        penaltyFactor, "aFitFunc", "FilterBy", "eqTo", nullptr, 0.0,
-        "test string.     Long test string.");
+    XMLInstrumentParameter testPar("logfileID", "value", std::make_shared<Interpolation>(), "formula", "sourceFU",
+                                   "resultFU", "testPar", "aType", "noTie", constr, penaltyFactor, "aFitFunc",
+                                   "FilterBy", "eqTo", nullptr, 0.0, "test string.     Long test string.");
 
     TS_ASSERT_EQUALS(testPar.m_description, "test string. Long test string.");
   }

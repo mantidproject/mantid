@@ -16,8 +16,7 @@ namespace ISISReflectometry {
 
 class MockInstrumentOptionDefaults : public IInstrumentOptionDefaults {
 public:
-  MOCK_METHOD1(get,
-               Instrument(Mantid::Geometry::Instrument_const_sptr instrument));
+  MOCK_METHOD1(get, Instrument(Mantid::Geometry::Instrument_const_sptr instrument));
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

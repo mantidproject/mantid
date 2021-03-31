@@ -60,9 +60,7 @@ public:
     TS_ASSERT(algToBeTested.isExecuted());
 
     // get workspace generated
-    MatrixWorkspace_sptr output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace);
+    MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
 
     // check number of histograms
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 6528);
@@ -75,25 +73,19 @@ public:
     auto run = output->run();
 
     // test start and end time
-    TS_ASSERT(
-        run.getProperty("start_time")->value().compare("2018-07-26T10:13:12") ==
-        0)
-    TS_ASSERT(
-        run.getProperty("end_time")->value().find("2018-07-26T10:17:12.6") == 0)
+    TS_ASSERT(run.getProperty("start_time")->value().compare("2018-07-26T10:13:12") == 0)
+    TS_ASSERT(run.getProperty("end_time")->value().find("2018-07-26T10:17:12.6") == 0)
 
     // test some data properties
     auto logpm = [&run](const std::string &tag) {
-      return dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(tag))
-          ->firstValue();
+      return dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(tag))->firstValue();
     };
     TS_ASSERT_DELTA(logpm("DopplerFrequency"), 9.974, 1.0e-3);
     TS_ASSERT_DELTA(logpm("DopplerAmplitude"), 0.075, 1.0e-4);
 
     // test some instrument parameters
     auto instr = output->getInstrument();
-    auto iparam = [&instr](const std::string &tag) {
-      return instr->getNumberParameter(tag)[0];
-    };
+    auto iparam = [&instr](const std::string &tag) { return instr->getNumberParameter(tag)[0]; };
     TS_ASSERT_DELTA(iparam("AnalysedV2"), 630.866, 1.0e-3);
     TS_ASSERT_DELTA(iparam("SampleAnalyser"), 1.8, 1.0e-3);
   }

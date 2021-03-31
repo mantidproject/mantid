@@ -16,10 +16,7 @@ using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
 void export_AlgorithmFactoryObserver() {
-  boost::python::class_<AlgorithmFactoryObserver, bases<>,
-                        AlgorithmFactoryObserverAdapter, boost::noncopyable>(
-      "AlgorithmFactoryObserver",
-      "Observes AlgorithmFactory notifications: all only")
-      .def("observeUpdate", &AlgorithmFactoryObserverAdapter::observeUpdate,
-           (arg("self"), arg("on")));
+  boost::python::class_<AlgorithmFactoryObserver, bases<>, AlgorithmFactoryObserverAdapter, boost::noncopyable>(
+      "AlgorithmFactoryObserver", "Observes AlgorithmFactory notifications: all only")
+      .def("observeUpdate", &AlgorithmFactoryObserverAdapter::observeUpdate, (arg("self"), arg("on")));
 }

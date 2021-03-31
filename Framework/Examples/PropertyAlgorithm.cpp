@@ -49,8 +49,7 @@ void PropertyAlgorithm::init() {
 void PropertyAlgorithm::exec() {
   // g_log is a reference to the logger. It is used to print out information,
   // warning, and error messages
-  g_log.information() << "Running algorithm " << name() << " version "
-                      << version() << std::endl;
+  g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl;
 
   // Retrieve properties values
 
@@ -64,26 +63,21 @@ void PropertyAlgorithm::exec() {
   std::string doubleValueString = getPropertyValue("DoubleValue");
 
   g_log.information() << "IntValue    = " << intValue << std::endl;
-  g_log.information() << "DoubleValue = " << doubleValue << ' '
-                      << doubleValueString << std::endl;
+  g_log.information() << "DoubleValue = " << doubleValue << ' ' << doubleValueString << std::endl;
   g_log.information() << "BoolValue   = " << boolValue << std::endl;
   g_log.information() << "StringValue = " << stringValue << std::endl;
 
   int positiveIntValue = getProperty("PositiveIntValue");
-  g_log.information() << "PositiveIntValue    = " << positiveIntValue
-                      << std::endl;
+  g_log.information() << "PositiveIntValue    = " << positiveIntValue << std::endl;
 
   std::vector<int> intArray = getProperty("IntArray");
-  g_log.information() << "Size of IntArray    = " << intArray.size()
-                      << std::endl;
+  g_log.information() << "Size of IntArray    = " << intArray.size() << std::endl;
 
   std::vector<double> doubleArray = getProperty("DoubleArray");
-  g_log.information() << "Size of DoubleArray = " << doubleArray.size()
-                      << std::endl;
+  g_log.information() << "Size of DoubleArray = " << doubleArray.size() << std::endl;
 
   std::vector<std::string> stringArray = getProperty("StringArray");
-  g_log.information() << "Size of StringArray = " << stringArray.size()
-                      << std::endl;
+  g_log.information() << "Size of StringArray = " << stringArray.size() << std::endl;
 }
 } // namespace Algorithms
 } // namespace Mantid

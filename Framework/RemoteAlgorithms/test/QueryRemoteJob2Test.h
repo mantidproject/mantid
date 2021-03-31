@@ -19,14 +19,11 @@ class QueryRemoteJob2Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static QueryRemoteJob2Test *createSuite() {
-    return new QueryRemoteJob2Test();
-  }
+  static QueryRemoteJob2Test *createSuite() { return new QueryRemoteJob2Test(); }
   static void destroySuite(QueryRemoteJob2Test *suite) { delete suite; }
 
   void test_algorithm() {
-    testAlg = Mantid::API::AlgorithmManager::Instance().create(
-        "QueryRemoteJob" /*, 2*/);
+    testAlg = Mantid::API::AlgorithmManager::Instance().create("QueryRemoteJob" /*, 2*/);
     TS_ASSERT(testAlg);
     TS_ASSERT_EQUALS(testAlg->name(), "QueryRemoteJob");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
@@ -38,8 +35,7 @@ public:
     TS_ASSERT(a = std::make_shared<QueryRemoteJob2>());
 
     // can cast to inherited interfaces and base classes
-    TS_ASSERT(
-        dynamic_cast<Mantid::RemoteAlgorithms::QueryRemoteJob2 *>(a.get()));
+    TS_ASSERT(dynamic_cast<Mantid::RemoteAlgorithms::QueryRemoteJob2 *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::API::Algorithm *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::Kernel::PropertyManagerOwner *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::API::IAlgorithm *>(a.get()));
@@ -63,8 +59,7 @@ public:
     QueryRemoteJob2 alg1;
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
     // id missing
-    TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"), const std::invalid_argument &);
 
     TS_ASSERT_THROWS(alg1.execute(), const std::runtime_error &);
     TS_ASSERT(!alg1.isExecuted());
@@ -81,19 +76,15 @@ public:
   void test_wrongProperty() {
     QueryRemoteJob2 qr;
     TS_ASSERT_THROWS_NOTHING(qr.initialize();)
-    TS_ASSERT_THROWS(qr.setPropertyValue("job", "whatever"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(qr.setPropertyValue("id", "whichever"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(qr.setPropertyValue("ComputeRes", "anything"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(qr.setPropertyValue("job", "whatever"), const std::runtime_error &);
+    TS_ASSERT_THROWS(qr.setPropertyValue("id", "whichever"), const std::runtime_error &);
+    TS_ASSERT_THROWS(qr.setPropertyValue("ComputeRes", "anything"), const std::runtime_error &);
   }
 
   void test_propertiesOK() {
     testFacilities.emplace_back("SNS", "Fermi");
 
-    const Mantid::Kernel::FacilityInfo &prevFac =
-        Mantid::Kernel::ConfigService::Instance().getFacility();
+    const Mantid::Kernel::FacilityInfo &prevFac = Mantid::Kernel::ConfigService::Instance().getFacility();
     for (auto &testFacility : testFacilities) {
       const std::string facName = testFacility.first;
       const std::string compName = testFacility.second;
@@ -101,8 +92,7 @@ public:
       Mantid::Kernel::ConfigService::Instance().setFacility(facName);
       QueryRemoteJob2 qr;
       TS_ASSERT_THROWS_NOTHING(qr.initialize());
-      TS_ASSERT_THROWS_NOTHING(
-          qr.setPropertyValue("ComputeResource", compName));
+      TS_ASSERT_THROWS_NOTHING(qr.setPropertyValue("ComputeResource", compName));
       TS_ASSERT_THROWS_NOTHING(qr.setPropertyValue("JobID", "000001"));
       // TODO: this would run the algorithm and do a remote
       // connection. uncomment only when/if we have a mock up for this

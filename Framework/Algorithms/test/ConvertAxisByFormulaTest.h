@@ -21,9 +21,7 @@ class ConvertAxisByFormulaTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertAxisByFormulaTest *createSuite() {
-    return new ConvertAxisByFormulaTest();
-  }
+  static ConvertAxisByFormulaTest *createSuite() { return new ConvertAxisByFormulaTest(); }
   static void destroySuite(ConvertAxisByFormulaTest *suite) { delete suite; }
 
   void testPlusRefAxis() {
@@ -36,8 +34,7 @@ public:
     std::string inputWs = alg.name() + "_testPlusRefAxis_Input";
     std::string resultWs = alg.name() + "_testPlusRefAxis_Result";
 
-    AnalysisDataService::Instance().add(
-        inputWs, WorkspaceCreationHelper::create2DWorkspace123(10, 10));
+    AnalysisDataService::Instance().add(inputWs, WorkspaceCreationHelper::create2DWorkspace123(10, 10));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWs));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", resultWs));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Formula", "x+3"));
@@ -55,11 +52,9 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(inputWs)));
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(resultWs)));
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(resultWs)));
 
     Axis *ax = result->getAxis(0);
     TS_ASSERT_EQUALS(ax->unit()->caption(), "My Title");
@@ -93,8 +88,7 @@ public:
     std::string inputWs = alg.name() + "_testSquareXNumeric_Input";
     std::string resultWs = alg.name() + "_testSquareXNumeric_Result";
 
-    AnalysisDataService::Instance().add(
-        inputWs, WorkspaceCreationHelper::create2DWorkspace123(10, 10));
+    AnalysisDataService::Instance().add(inputWs, WorkspaceCreationHelper::create2DWorkspace123(10, 10));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWs));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", resultWs));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Formula", "(X+2)*(x+2)"));
@@ -112,11 +106,9 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(inputWs)));
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(resultWs)));
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(resultWs)));
 
     Axis *ax = result->getAxis(0);
     TS_ASSERT_EQUALS(ax->unit()->caption(), "XTitle");
@@ -138,8 +130,7 @@ public:
     std::string inputWs = alg.name() + "_testSquareXNumeric_Input";
     std::string resultWs = alg.name() + "_testSquareXNumeric_Result";
 
-    AnalysisDataService::Instance().add(
-        inputWs, WorkspaceCreationHelper::create2DWorkspaceThetaVsTOF(10, 10));
+    AnalysisDataService::Instance().add(inputWs, WorkspaceCreationHelper::create2DWorkspaceThetaVsTOF(10, 10));
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWs));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", resultWs));
@@ -156,11 +147,9 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(inputWs)));
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(resultWs)));
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(resultWs)));
 
     Axis *ax = result->getAxis(1);
     TS_ASSERT_EQUALS(ax->unit()->caption(), in->getAxis(1)->unit()->caption());
@@ -179,13 +168,10 @@ public:
     Mantid::Algorithms::ConvertAxisByFormula alg;
     alg.initialize();
 
-    std::string inputWs =
-        alg.name() + "_testYNumericAxisDisalowsGeometricOperators_Input";
-    std::string resultWs =
-        alg.name() + "_testYNumericAxisDisalowsGeometricOperators_Result";
+    std::string inputWs = alg.name() + "_testYNumericAxisDisalowsGeometricOperators_Input";
+    std::string resultWs = alg.name() + "_testYNumericAxisDisalowsGeometricOperators_Result";
 
-    AnalysisDataService::Instance().add(
-        inputWs, WorkspaceCreationHelper::create2DWorkspaceThetaVsTOF(10, 10));
+    AnalysisDataService::Instance().add(inputWs, WorkspaceCreationHelper::create2DWorkspaceThetaVsTOF(10, 10));
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWs));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", resultWs));
@@ -197,17 +183,14 @@ public:
     cleanupWorkspaces(std::vector<std::string>{inputWs});
   }
 
-  bool runConvertAxisByFormula(const std::string &testName,
-                               const std::string &formula,
-                               const std::string &axis, std::string &inputWs,
-                               std::string &resultWs) {
+  bool runConvertAxisByFormula(const std::string &testName, const std::string &formula, const std::string &axis,
+                               std::string &inputWs, std::string &resultWs) {
     Mantid::Algorithms::ConvertAxisByFormula alg;
     alg.initialize();
     inputWs = alg.name() + "_" + testName + "_Input";
     resultWs = alg.name() + "_" + testName + "_Result";
     Mantid::API::AnalysisDataService::Instance().add(
-        inputWs,
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10));
+        inputWs, WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWs));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", resultWs));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Formula", formula));
@@ -238,16 +221,13 @@ public:
     std::string axis = "X";
     std::string inputWs;
     std::string resultWs;
-    TS_ASSERT(
-        runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
+    TS_ASSERT(runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(inputWs)));
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(resultWs)));
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(resultWs)));
 
     double l1 = in->spectrumInfo().l1();
     Axis *axIn = in->getAxis(0);
@@ -267,16 +247,13 @@ public:
     std::string axis = "X";
     std::string inputWs;
     std::string resultWs;
-    TS_ASSERT(
-        runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
+    TS_ASSERT(runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(inputWs)));
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(resultWs)));
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(resultWs)));
 
     const auto &spectrumInfo = in->spectrumInfo();
     const size_t xsize = result->blocksize();
@@ -308,16 +285,13 @@ public:
     std::string axis = "X";
     std::string inputWs;
     std::string resultWs;
-    TS_ASSERT(
-        runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
+    TS_ASSERT(runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(inputWs)));
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(resultWs)));
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(resultWs)));
 
     const auto &spectrumInfo = in->spectrumInfo();
     const size_t xsize = result->blocksize();
@@ -350,16 +324,13 @@ public:
     std::string axis = "X";
     std::string inputWs;
     std::string resultWs;
-    TS_ASSERT(
-        runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
+    TS_ASSERT(runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(inputWs)));
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(resultWs)));
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(resultWs)));
 
     const auto &spectrumInfo = in->spectrumInfo();
     const size_t xsize = result->blocksize();
@@ -391,16 +362,13 @@ public:
     std::string axis = "X";
     std::string inputWs;
     std::string resultWs;
-    TS_ASSERT(
-        runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
+    TS_ASSERT(runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(inputWs)));
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(resultWs)));
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(resultWs)));
 
     const size_t xsize = result->blocksize();
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
@@ -430,16 +398,13 @@ public:
     std::string axis = "X";
     std::string inputWs;
     std::string resultWs;
-    TS_ASSERT(
-        runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
+    TS_ASSERT(runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(inputWs)));
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(resultWs)));
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(resultWs)));
 
     const size_t xsize = result->blocksize();
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {

@@ -29,12 +29,11 @@ class Counts;
   @author Simon Heybrock
   @date 2016
 */
-class MANTID_HISTOGRAMDATA_DLL Frequencies
-    : public detail::VectorOf<Frequencies, HistogramY>,
-      public detail::Addable<Frequencies>,
-      public detail::Iterable<Frequencies>,
-      public detail::Offsetable<Frequencies>,
-      public detail::Scalable<Frequencies> {
+class MANTID_HISTOGRAMDATA_DLL Frequencies : public detail::VectorOf<Frequencies, HistogramY>,
+                                             public detail::Addable<Frequencies>,
+                                             public detail::Iterable<Frequencies>,
+                                             public detail::Offsetable<Frequencies>,
+                                             public detail::Scalable<Frequencies> {
 public:
   using VectorOf<Frequencies, HistogramY>::VectorOf;
   using VectorOf<Frequencies, HistogramY>::operator=;

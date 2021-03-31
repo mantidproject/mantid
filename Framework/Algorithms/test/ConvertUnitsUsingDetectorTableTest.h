@@ -29,12 +29,8 @@ class ConvertUnitsUsingDetectorTableTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertUnitsUsingDetectorTableTest *createSuite() {
-    return new ConvertUnitsUsingDetectorTableTest();
-  }
-  static void destroySuite(ConvertUnitsUsingDetectorTableTest *suite) {
-    delete suite;
-  }
+  static ConvertUnitsUsingDetectorTableTest *createSuite() { return new ConvertUnitsUsingDetectorTableTest(); }
+  static void destroySuite(ConvertUnitsUsingDetectorTableTest *suite) { delete suite; }
   void test_Init() {
     ConvertUnitsUsingDetectorTable alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -52,8 +48,7 @@ public:
     //     WorkspaceCreationHelper::Create2DWorkspaceBinned(2, nBins, 500.0,
     //     50.0);
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            2, nBins, false, false, true, "TESTY");
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, nBins, false, false, true, "TESTY");
 
     WS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
@@ -61,8 +56,7 @@ public:
 
     // Create TableWorkspace with values in it
 
-    ITableWorkspace_sptr pars =
-        WorkspaceFactory::Instance().createTable("TableWorkspace");
+    ITableWorkspace_sptr pars = WorkspaceFactory::Instance().createTable("TableWorkspace");
     pars->addColumn("int", "spectra");
     pars->addColumn("double", "l1");
     pars->addColumn("double", "l2");
@@ -84,8 +78,7 @@ public:
     myAlg.setProperty("DetectorParameters", pars);
     myAlg.execute();
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        workspaceName);
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
 
     TS_ASSERT_DELTA(outWS->x(0)[0], 0.0, 0.000001);
     TS_ASSERT_DELTA(outWS->x(0)[9], 0.000323676, 0.000001);
@@ -97,9 +90,7 @@ public:
 
     std::string wsName = "ConvertUnitsUsingDetectorTable_"
                          "testDeltaEFailDoesNotAlterInPlaceWorkspace";
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 200,
-                                                                     false);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 200, false);
     // set to a distribution
     ws->setDistribution(true);
     AnalysisDataService::Instance().add(wsName, ws);
@@ -111,8 +102,7 @@ public:
     auto originalYdata = ws->readY(0);
 
     // Create TableWorkspace with values in it
-    ITableWorkspace_sptr pars =
-        WorkspaceFactory::Instance().createTable("TableWorkspace");
+    ITableWorkspace_sptr pars = WorkspaceFactory::Instance().createTable("TableWorkspace");
     pars->addColumn("int", "spectra");
     pars->addColumn("double", "l1");
     pars->addColumn("double", "l2");

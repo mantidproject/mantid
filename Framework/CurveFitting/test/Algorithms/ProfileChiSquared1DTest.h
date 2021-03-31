@@ -19,16 +19,13 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 namespace {
-constexpr char *linearFunctionString =
-    "name = LinearBackground, A0=0.8753627851076761,  A1 = "
-    "2.026706319695708 ";
+constexpr char *linearFunctionString = "name = LinearBackground, A0=0.8753627851076761,  A1 = "
+                                       "2.026706319695708 ";
 }
 
 class ProfileChiSquared1DTest : public CxxTest::TestSuite {
 public:
-  static ProfileChiSquared1DTest *createSuite() {
-    return new ProfileChiSquared1DTest();
-  }
+  static ProfileChiSquared1DTest *createSuite() { return new ProfileChiSquared1DTest(); }
   static void destroySuite(ProfileChiSquared1DTest *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;
@@ -67,10 +64,8 @@ public:
 
     // if name is empty, workspaces will use default name of ProfileChiSquared1D
     executeAlgorithmOnLinearData("");
-    TS_ASSERT(AnalysisDataService::Instance().doesExist(
-        "ProfileChiSquared1D_errors"));
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("ProfileChiSquared1D_pdf"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("ProfileChiSquared1D_errors"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("ProfileChiSquared1D_pdf"));
 
     AnalysisDataService::Instance().clear();
   }
@@ -79,10 +74,8 @@ public:
   void test_errors_for_linear_function_are_correct() {
     executeAlgorithmOnLinearData("OutputName1");
     TableWorkspace_sptr errorsTable;
-    TS_ASSERT_THROWS_NOTHING(
-        errorsTable =
-            AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-                "OutputName1_errors"));
+    TS_ASSERT_THROWS_NOTHING(errorsTable =
+                                 AnalysisDataService::Instance().retrieveWS<TableWorkspace>("OutputName1_errors"));
 
     TS_ASSERT_EQUALS(errorsTable->String(0, 0), "A0");
     TS_ASSERT_EQUALS(errorsTable->String(1, 0), "A1");
@@ -112,9 +105,7 @@ public:
   void test_pdf_values_for_linear_function_are_correct() {
     executeAlgorithmOnLinearData("OutputName2");
     TableWorkspace_sptr pdfTable;
-    TS_ASSERT_THROWS_NOTHING(
-        pdfTable = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "OutputName2_pdf"));
+    TS_ASSERT_THROWS_NOTHING(pdfTable = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("OutputName2_pdf"));
     // check some values of pdf table
     TS_ASSERT_DELTA(pdfTable->Double(0, 0), 0.696088486717624, 1e-6);
     TS_ASSERT_DELTA(pdfTable->Double(0, 1), 27.03687327118116, 1e-2);
@@ -147,10 +138,8 @@ public:
   void test_errors_table_has_correct_shape() {
     executeAlgorithmOnLinearData("OutputName3");
     TableWorkspace_sptr errorsTable;
-    TS_ASSERT_THROWS_NOTHING(
-        errorsTable =
-            AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-                "OutputName3_errors"));
+    TS_ASSERT_THROWS_NOTHING(errorsTable =
+                                 AnalysisDataService::Instance().retrieveWS<TableWorkspace>("OutputName3_errors"));
     TS_ASSERT_EQUALS(errorsTable->columnCount(), 10);
     TS_ASSERT_EQUALS(errorsTable->rowCount(), 2);
     AnalysisDataService::Instance().clear();
@@ -159,9 +148,7 @@ public:
   void test_pdf_table_has_correct_shape() {
     executeAlgorithmOnLinearData("OutputName4");
     TableWorkspace_sptr pdfTable;
-    TS_ASSERT_THROWS_NOTHING(
-        pdfTable = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "OutputName4_pdf"));
+    TS_ASSERT_THROWS_NOTHING(pdfTable = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("OutputName4_pdf"));
     TS_ASSERT_EQUALS(pdfTable->columnCount(), 6);
     TS_ASSERT_EQUALS(pdfTable->rowCount(), 100);
     AnalysisDataService::Instance().clear();

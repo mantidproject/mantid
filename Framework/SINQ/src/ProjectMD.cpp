@@ -23,23 +23,19 @@ using namespace Mantid::DataObjects;
 // It is used to print out information, warning and error messages
 
 void ProjectMD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-      "InputWorkspace", "", Direction::Input));
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input));
   std::vector<std::string> projectOptions{"X", "Y", "Z", "K"};
-  this->declareProperty("ProjectDirection", "Z",
-                        std::make_shared<StringListValidator>(projectOptions),
+  this->declareProperty("ProjectDirection", "Z", std::make_shared<StringListValidator>(projectOptions),
                         "The project direction");
 
   declareProperty("StartIndex", 0, Direction::Input);
   declareProperty("EndIndex", -1, Direction::Input);
 
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-      "OutputWorkspace", "", Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output));
 }
 
 void ProjectMD::exec() {
-  IMDHistoWorkspace_sptr inWS =
-      IMDHistoWorkspace_sptr(getProperty("InputWorkspace"));
+  IMDHistoWorkspace_sptr inWS = IMDHistoWorkspace_sptr(getProperty("InputWorkspace"));
   unsigned int dimNo;
   int start, end, targetDim[MAXDIM], sourceDim[MAXDIM];
 
@@ -61,8 +57,7 @@ void ProjectMD::exec() {
   std::vector<IMDDimension_sptr> dimensions;
   for (size_t i = 0; i < inWS->getNumDims(); i++) {
     if (i != dimNo) {
-      dimensions.emplace_back(
-          std::const_pointer_cast<IMDDimension>(inWS->getDimension(i)));
+      dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(inWS->getDimension(i)));
     } else {
       std::shared_ptr<const IMDDimension> dimi = inWS->getDimension(i);
       if (start < 0) {
@@ -81,8 +76,7 @@ void ProjectMD::exec() {
 
   memset(targetDim, 0, MAXDIM * sizeof(int));
   memset(sourceDim, 0, MAXDIM * sizeof(int));
-  sumData(inWS, outWS, sourceDim, targetDim, 0, static_cast<int>(dimNo), start,
-          end, 0);
+  sumData(inWS, outWS, sourceDim, targetDim, 0, static_cast<int>(dimNo), start, end, 0);
 
   copyMetaData(inWS, outWS);
 
@@ -139,8 +133,7 @@ double ProjectMD::getValue(const IMDHistoWorkspace_sptr &ws, int dim[]) {
   // " << dim[1] << "," <<dim[2] <<'\n';
   return val;
 }
-void ProjectMD::putValue(const IMDHistoWorkspace_sptr &ws, int dim[],
-                         double value) {
+void ProjectMD::putValue(const IMDHistoWorkspace_sptr &ws, int dim[], double value) {
   unsigned int idx = calcIndex(ws, dim);
   // std::cout << "Result index " << idx << " value " << value << " dim= " <<
   // dim[0] << ", " << dim[1] <<", " << dim[2] <<'\n';
@@ -148,10 +141,8 @@ void ProjectMD::putValue(const IMDHistoWorkspace_sptr &ws, int dim[],
   ws->setErrorSquaredAt(idx, value);
 }
 
-void ProjectMD::sumData(const IMDHistoWorkspace_sptr &inWS,
-                        const IMDHistoWorkspace_sptr &outWS, int *sourceDim,
-                        int *targetDim, int targetDimCount, int dimNo,
-                        int start, int end, int currentDim) {
+void ProjectMD::sumData(const IMDHistoWorkspace_sptr &inWS, const IMDHistoWorkspace_sptr &outWS, int *sourceDim,
+                        int *targetDim, int targetDimCount, int dimNo, int start, int end, int currentDim) {
   std::shared_ptr<const IMDDimension> dimi;
 
   /*
@@ -173,8 +164,7 @@ void ProjectMD::sumData(const IMDHistoWorkspace_sptr &inWS,
        through the dimensions
      */
     if (currentDim == dimNo) {
-      sumData(inWS, outWS, sourceDim, targetDim, targetDimCount, dimNo, start,
-              end, currentDim + 1);
+      sumData(inWS, outWS, sourceDim, targetDim, targetDimCount, dimNo, start, end, currentDim + 1);
     } else {
       /*
          loop over all values of the non summed dimension
@@ -191,8 +181,7 @@ void ProjectMD::sumData(const IMDHistoWorkspace_sptr &inWS,
         targetDimCount++;
 
         sourceDim[currentDim] = i;
-        sumData(inWS, outWS, sourceDim, targetDim, targetDimCount, dimNo, start,
-                end, currentDim + 1);
+        sumData(inWS, outWS, sourceDim, targetDim, targetDimCount, dimNo, start, end, currentDim + 1);
         targetDimCount--;
       }
     }

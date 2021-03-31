@@ -45,8 +45,7 @@ int TestGroupDataListener::runNumber() const { return 0; }
 
 void TestGroupDataListener::setSpectra(const std::vector<specnum_t> &) {}
 
-void TestGroupDataListener::start(
-    Types::Core::DateAndTime /*startTime*/) // Ignore the start time
+void TestGroupDataListener::start(Types::Core::DateAndTime /*startTime*/) // Ignore the start time
 {}
 
 /** Create the default empty event workspace */

@@ -61,9 +61,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "CorrectionFunctions\\InstrumentCorrections";
-  }
+  const std::string category() const override { return "CorrectionFunctions\\InstrumentCorrections"; }
 
 private:
   /// Overwrites Algorithm method.
@@ -76,19 +74,14 @@ private:
   std::string m_filename;
   /// An integer option controlling the scaling method
   int m_scalingOption;
-  bool processScalingFile(const std::string &scalingFile,
-                          std::vector<Kernel::V3D> &truepos);
+  bool processScalingFile(const std::string &scalingFile, std::vector<Kernel::V3D> &truepos);
   API::MatrixWorkspace_sptr m_workspace; ///< Pointer to the workspace
   // void runMoveInstrumentComp(const int& detIndex, const Kernel::V3D& shift);
 
   /// apply the shifts in posMap to the detectors in WS
-  void movePos(API::MatrixWorkspace_sptr &WS,
-               std::map<int, Kernel::V3D> &posMap,
-               std::map<int, double> &scaleMap);
+  void movePos(API::MatrixWorkspace_sptr &WS, std::map<int, Kernel::V3D> &posMap, std::map<int, double> &scaleMap);
   /// read the positions of detectors defined in the raw file
-  void getDetPositionsFromRaw(const std::string &rawfile,
-                              std::vector<int> &detID,
-                              std::vector<Kernel::V3D> &pos);
+  void getDetPositionsFromRaw(const std::string &rawfile, std::vector<int> &detID, std::vector<Kernel::V3D> &pos);
 };
 
 } // namespace DataHandling

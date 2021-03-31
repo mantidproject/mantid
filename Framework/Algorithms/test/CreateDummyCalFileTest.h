@@ -40,10 +40,8 @@ public:
 
     loaderCAL.initialize();
     loaderCAL.isInitialized();
-    loaderCAL.setPropertyValue(
-        "Filename",
-        ConfigService::Instance().getString("instrumentDefinition.directory") +
-            "/INES_Definition.xml");
+    loaderCAL.setPropertyValue("Filename", ConfigService::Instance().getString("instrumentDefinition.directory") +
+                                               "/INES_Definition.xml");
     const std::string wsName = "LoadEmptyInstrumentTestCAL";
     loaderCAL.setPropertyValue("OutputWorkspace", wsName);
     loaderCAL.execute();

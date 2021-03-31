@@ -19,8 +19,7 @@ GET_POINTER_SPECIALIZATION(LeanElasticPeaksWorkspace)
 
 void export_LeanElasticPeaksWorkspace() {
 
-  class_<LeanElasticPeaksWorkspace, bases<IPeaksWorkspace>, boost::noncopyable>(
-      "LeanElasticPeaksWorkspace", no_init);
+  class_<LeanElasticPeaksWorkspace, bases<IPeaksWorkspace>, boost::noncopyable>("LeanElasticPeaksWorkspace", no_init);
 
   // register pointers
   RegisterWorkspacePtrToPython<LeanElasticPeaksWorkspace>();

@@ -24,31 +24,24 @@ namespace Algorithms {
  Fredrikze, H, et al. "Calibration of a polarized neutron reflectometer" Physica
  B 297 (2001)
  */
-class MANTID_ALGORITHMS_DLL PolarizationCorrectionFredrikze
-    : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PolarizationCorrectionFredrikze : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"PolarizationEfficiencyCor"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"PolarizationEfficiencyCor"}; }
   const std::string category() const override;
   const std::string summary() const override;
 
 private:
   void init() override;
   void exec() override;
-  std::shared_ptr<Mantid::API::MatrixWorkspace>
-  getEfficiencyWorkspace(const std::string &label);
-  std::shared_ptr<Mantid::API::WorkspaceGroup>
-  execPA(const std::shared_ptr<Mantid::API::WorkspaceGroup> &inWS);
-  std::shared_ptr<Mantid::API::WorkspaceGroup>
-  execPNR(const std::shared_ptr<Mantid::API::WorkspaceGroup> &inWS);
-  std::shared_ptr<Mantid::API::MatrixWorkspace>
-  add(std::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS, const double &rhs);
-  std::shared_ptr<Mantid::API::MatrixWorkspace>
-  multiply(std::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS,
-           const double &rhs);
+  std::shared_ptr<Mantid::API::MatrixWorkspace> getEfficiencyWorkspace(const std::string &label);
+  std::shared_ptr<Mantid::API::WorkspaceGroup> execPA(const std::shared_ptr<Mantid::API::WorkspaceGroup> &inWS);
+  std::shared_ptr<Mantid::API::WorkspaceGroup> execPNR(const std::shared_ptr<Mantid::API::WorkspaceGroup> &inWS);
+  std::shared_ptr<Mantid::API::MatrixWorkspace> add(std::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS,
+                                                    const double &rhs);
+  std::shared_ptr<Mantid::API::MatrixWorkspace> multiply(std::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS,
+                                                         const double &rhs);
 };
 
 } // namespace Algorithms

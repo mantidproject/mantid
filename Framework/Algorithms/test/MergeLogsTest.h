@@ -104,8 +104,7 @@ public:
     testLogValues(ws, "MergedLog", 10, 15, 2.2, 3.3);
   }
 
-  Property *createLog(const std::string &name, int64_t t_ns, int64_t dt_ns,
-                      size_t number, double value) {
+  Property *createLog(const std::string &name, int64_t t_ns, int64_t dt_ns, size_t number, double value) {
     TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>(name);
     for (size_t i = 0; i < number; ++i) {
       DateAndTime time(t_ns);
@@ -116,10 +115,8 @@ public:
     return log;
   }
 
-  void testLogValues(const MatrixWorkspace_sptr &ws, const std::string &name,
-                     const int msize, double value) {
-    TimeSeriesProperty<double> *log =
-        ws->run().getTimeSeriesProperty<double>(name);
+  void testLogValues(const MatrixWorkspace_sptr &ws, const std::string &name, const int msize, double value) {
+    TimeSeriesProperty<double> *log = ws->run().getTimeSeriesProperty<double>(name);
     TS_ASSERT_EQUALS(log->size(), msize);
     std::vector<DateAndTime> mergedtimes = log->timesAsVector();
     for (int i = 0; i < msize; ++i) {
@@ -131,15 +128,12 @@ public:
   }
 
   // msize1 < msize2!
-  void testLogValues(const MatrixWorkspace_sptr &ws, const std::string &name,
-                     const int msize1, const int msize2, const double v1,
-                     const double v2) {
-    TimeSeriesProperty<double> *log =
-        ws->run().getTimeSeriesProperty<double>(name);
+  void testLogValues(const MatrixWorkspace_sptr &ws, const std::string &name, const int msize1, const int msize2,
+                     const double v1, const double v2) {
+    TimeSeriesProperty<double> *log = ws->run().getTimeSeriesProperty<double>(name);
     TS_ASSERT_EQUALS(log->size(), msize1 + msize2);
     std::vector<DateAndTime> mergedtimes = log->timesAsVector();
-    const std::vector<double> v12 = {v1, v2, v1, v2, v1, v2, v1, v2, v1, v2,
-                                     v1, v2, v1, v2, v1, v2, v1, v2, v1, v2};
+    const std::vector<double> v12 = {v1, v2, v1, v2, v1, v2, v1, v2, v1, v2, v1, v2, v1, v2, v1, v2, v1, v2, v1, v2};
     for (int i = 0; i < msize1 * 2; ++i) {
       DateAndTime logtime = mergedtimes[i];
       const double logvalue = log->getSingleValue(logtime);

@@ -10,16 +10,13 @@
 
 namespace {
 
-MantidQt::CustomInterfaces::RunLabel
-parseListWidgetItem(const QString &listWidgetItem) {
+MantidQt::CustomInterfaces::RunLabel parseListWidgetItem(const QString &listWidgetItem) {
   const auto pieces = listWidgetItem.split("_");
   if (pieces.size() != 2) {
-    throw std::runtime_error(
-        "Unexpected run label: \"" + listWidgetItem.toStdString() +
-        "\". Please contact the development team with this message");
+    throw std::runtime_error("Unexpected run label: \"" + listWidgetItem.toStdString() +
+                             "\". Please contact the development team with this message");
   }
-  return MantidQt::CustomInterfaces::RunLabel(pieces[0].toStdString(),
-                                              pieces[1].toUInt());
+  return MantidQt::CustomInterfaces::RunLabel(pieces[0].toStdString(), pieces[1].toUInt());
 }
 
 } // anonymous namespace
@@ -32,17 +29,14 @@ EnggDiffMultiRunFittingQtWidget::EnggDiffMultiRunFittingQtWidget(
     : m_pythonRunner(std::move(pythonRunner)) {
   setupUI();
 
-  m_zoomTool = std::make_unique<QwtPlotZoomer>(
-      QwtPlot::xBottom, QwtPlot::yLeft,
-      QwtPicker::DragSelection | QwtPicker::CornerToCorner,
-      QwtPicker::AlwaysOff, m_ui.plotArea->canvas());
+  m_zoomTool = std::make_unique<QwtPlotZoomer>(QwtPlot::xBottom, QwtPlot::yLeft,
+                                               QwtPicker::DragSelection | QwtPicker::CornerToCorner,
+                                               QwtPicker::AlwaysOff, m_ui.plotArea->canvas());
   m_zoomTool->setRubberBandPen(QPen(Qt::black));
   m_zoomTool->setEnabled(false);
 }
 
-EnggDiffMultiRunFittingQtWidget::~EnggDiffMultiRunFittingQtWidget() {
-  cleanUpPlot();
-}
+EnggDiffMultiRunFittingQtWidget::~EnggDiffMultiRunFittingQtWidget() { cleanUpPlot(); }
 
 void EnggDiffMultiRunFittingQtWidget::cleanUpPlot() {
   for (auto &curve : m_focusedRunCurves) {
@@ -66,8 +60,7 @@ std::vector<RunLabel> EnggDiffMultiRunFittingQtWidget::getAllRunLabels() const {
   return runLabels;
 }
 
-boost::optional<RunLabel>
-EnggDiffMultiRunFittingQtWidget::getSelectedRunLabel() const {
+boost::optional<RunLabel> EnggDiffMultiRunFittingQtWidget::getSelectedRunLabel() const {
   if (hasSelectedRunLabel()) {
     const auto currentLabel = m_ui.listWidget_runLabels->currentItem()->text();
     return parseListWidgetItem(currentLabel);
@@ -77,26 +70,19 @@ EnggDiffMultiRunFittingQtWidget::getSelectedRunLabel() const {
 }
 
 void EnggDiffMultiRunFittingQtWidget::reportNoRunSelectedForPlot() {
-  userError("No run selected",
-            "Please select a run from the list before plotting");
+  userError("No run selected", "Please select a run from the list before plotting");
 }
 
-void EnggDiffMultiRunFittingQtWidget::reportPlotInvalidFittedPeaks(
-    const RunLabel &runLabel) {
-  userError("Invalid fitted peaks identifier",
-            "Tried to plot invalid fitted peaks, run number " +
-                runLabel.runNumber + " and bank ID " +
-                std::to_string(runLabel.bank) +
-                ". Please contact the development team with this message");
+void EnggDiffMultiRunFittingQtWidget::reportPlotInvalidFittedPeaks(const RunLabel &runLabel) {
+  userError("Invalid fitted peaks identifier", "Tried to plot invalid fitted peaks, run number " + runLabel.runNumber +
+                                                   " and bank ID " + std::to_string(runLabel.bank) +
+                                                   ". Please contact the development team with this message");
 }
 
-void EnggDiffMultiRunFittingQtWidget::reportPlotInvalidFocusedRun(
-    const RunLabel &runLabel) {
-  userError("Invalid focused run identifier",
-            "Tried to plot invalid focused run, run number " +
-                runLabel.runNumber + " and bank ID " +
-                std::to_string(runLabel.bank) +
-                ". Please contact the development team with this message");
+void EnggDiffMultiRunFittingQtWidget::reportPlotInvalidFocusedRun(const RunLabel &runLabel) {
+  userError("Invalid focused run identifier", "Tried to plot invalid focused run, run number " + runLabel.runNumber +
+                                                  " and bank ID " + std::to_string(runLabel.bank) +
+                                                  ". Please contact the development team with this message");
 }
 
 bool EnggDiffMultiRunFittingQtWidget::hasSelectedRunLabel() const {
@@ -104,12 +90,10 @@ bool EnggDiffMultiRunFittingQtWidget::hasSelectedRunLabel() const {
 }
 
 void EnggDiffMultiRunFittingQtWidget::plotFittedPeaksStateChanged() {
-  m_presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
-                          PlotPeaksStateChanged);
+  m_presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::PlotPeaksStateChanged);
 }
 
-void EnggDiffMultiRunFittingQtWidget::plotFittedPeaks(
-    const std::vector<std::shared_ptr<QwtData>> &curves) {
+void EnggDiffMultiRunFittingQtWidget::plotFittedPeaks(const std::vector<std::shared_ptr<QwtData>> &curves) {
   for (const auto &curve : curves) {
     auto plotCurve = std::make_unique<QwtPlotCurve>();
 
@@ -124,12 +108,10 @@ void EnggDiffMultiRunFittingQtWidget::plotFittedPeaks(
 }
 
 void EnggDiffMultiRunFittingQtWidget::processPlotToSeparateWindow() {
-  m_presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
-                          PlotToSeparateWindow);
+  m_presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::PlotToSeparateWindow);
 }
 
-void EnggDiffMultiRunFittingQtWidget::plotFocusedRun(
-    const std::vector<std::shared_ptr<QwtData>> &curves) {
+void EnggDiffMultiRunFittingQtWidget::plotFocusedRun(const std::vector<std::shared_ptr<QwtData>> &curves) {
   for (const auto &curve : curves) {
     auto plotCurve = std::make_unique<QwtPlotCurve>();
 
@@ -142,9 +124,8 @@ void EnggDiffMultiRunFittingQtWidget::plotFocusedRun(
   m_zoomTool->setEnabled(true);
 }
 
-void EnggDiffMultiRunFittingQtWidget::plotToSeparateWindow(
-    const std::string &focusedRunName,
-    const boost::optional<std::string> fittedPeaksName) {
+void EnggDiffMultiRunFittingQtWidget::plotToSeparateWindow(const std::string &focusedRunName,
+                                                           const boost::optional<std::string> fittedPeaksName) {
 
   std::string plotCode = "ws1 = \"" + focusedRunName + "\"\n";
 
@@ -160,33 +141,29 @@ void EnggDiffMultiRunFittingQtWidget::plotToSeparateWindow(
 
   if (fittedPeaksName) {
     plotCode += "ws2 = \"" + *fittedPeaksName + "\"\n";
-    plotCode +=
-        "ws2_spectrum = ExtractSingleSpectrum(InputWorkspace=ws2, "
-        "WorkspaceIndex=0, StoreInADS=False)\n"
+    plotCode += "ws2_spectrum = ExtractSingleSpectrum(InputWorkspace=ws2, "
+                "WorkspaceIndex=0, StoreInADS=False)\n"
 
-        "AppendSpectra(InputWorkspace1=workspaceToPlot, "
-        "InputWorkspace2=ws2_spectrum, OutputWorkspace=workspaceToPlot)\n"
+                "AppendSpectra(InputWorkspace1=workspaceToPlot, "
+                "InputWorkspace2=ws2_spectrum, OutputWorkspace=workspaceToPlot)\n"
 
-        "DeleteWorkspace(ws2_spectrum)\n"
-        "spectra_to_plot = [0, 1]\n";
+                "DeleteWorkspace(ws2_spectrum)\n"
+                "spectra_to_plot = [0, 1]\n";
   }
 
-  plotCode +=
-      "plot = plotSpectrum(workspaceToPlot, spectra_to_plot).activeLayer()\n"
-      "plot.setTitle(\"Engg GUI Fitting Workspaces\")\n";
+  plotCode += "plot = plotSpectrum(workspaceToPlot, spectra_to_plot).activeLayer()\n"
+              "plot.setTitle(\"Engg GUI Fitting Workspaces\")\n";
   m_pythonRunner->enggRunPythonCode(plotCode);
 }
 
 void EnggDiffMultiRunFittingQtWidget::processRemoveRun() {
   emit removeRunClicked();
-  m_presenter->notify(
-      IEnggDiffMultiRunFittingWidgetPresenter::Notification::RemoveRun);
+  m_presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::RemoveRun);
 }
 
 void EnggDiffMultiRunFittingQtWidget::processSelectRun() {
   emit runSelected();
-  m_presenter->notify(
-      IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
+  m_presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
 }
 
 void EnggDiffMultiRunFittingQtWidget::resetCanvas() {
@@ -209,45 +186,36 @@ void EnggDiffMultiRunFittingQtWidget::setEnabled(const bool enabled) {
   m_zoomTool->setEnabled(enabled);
 }
 
-void EnggDiffMultiRunFittingQtWidget::setMessageProvider(
-    std::shared_ptr<IEnggDiffractionUserMsg> messageProvider) {
+void EnggDiffMultiRunFittingQtWidget::setMessageProvider(std::shared_ptr<IEnggDiffractionUserMsg> messageProvider) {
   m_userMessageProvider = messageProvider;
 }
 
-void EnggDiffMultiRunFittingQtWidget::setPresenter(
-    std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter) {
+void EnggDiffMultiRunFittingQtWidget::setPresenter(std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter) {
   m_presenter = presenter;
 }
 
 void EnggDiffMultiRunFittingQtWidget::setupUI() {
   m_ui.setupUi(this);
 
-  connect(m_ui.listWidget_runLabels, SIGNAL(itemSelectionChanged()), this,
-          SLOT(processSelectRun()));
-  connect(m_ui.checkBox_plotFittedPeaks, SIGNAL(stateChanged(int)), this,
-          SLOT(plotFittedPeaksStateChanged()));
-  connect(m_ui.pushButton_removeRun, SIGNAL(clicked()), this,
-          SLOT(processRemoveRun()));
-  connect(m_ui.pushButton_plotToSeparateWindow, SIGNAL(clicked()), this,
-          SLOT(processPlotToSeparateWindow()));
+  connect(m_ui.listWidget_runLabels, SIGNAL(itemSelectionChanged()), this, SLOT(processSelectRun()));
+  connect(m_ui.checkBox_plotFittedPeaks, SIGNAL(stateChanged(int)), this, SLOT(plotFittedPeaksStateChanged()));
+  connect(m_ui.pushButton_removeRun, SIGNAL(clicked()), this, SLOT(processRemoveRun()));
+  connect(m_ui.pushButton_plotToSeparateWindow, SIGNAL(clicked()), this, SLOT(processPlotToSeparateWindow()));
 }
 
 bool EnggDiffMultiRunFittingQtWidget::showFitResultsSelected() const {
   return m_ui.checkBox_plotFittedPeaks->isChecked();
 }
 
-void EnggDiffMultiRunFittingQtWidget::updateRunList(
-    const std::vector<RunLabel> &runLabels) {
+void EnggDiffMultiRunFittingQtWidget::updateRunList(const std::vector<RunLabel> &runLabels) {
   m_ui.listWidget_runLabels->clear();
   for (const auto &runLabel : runLabels) {
-    const auto labelStr = QString(runLabel.runNumber.c_str()) + tr("_") +
-                          QString::number(runLabel.bank);
+    const auto labelStr = QString(runLabel.runNumber.c_str()) + tr("_") + QString::number(runLabel.bank);
     m_ui.listWidget_runLabels->addItem(labelStr);
   }
 }
 
-void EnggDiffMultiRunFittingQtWidget::userError(
-    const std::string &errorTitle, const std::string &errorDescription) {
+void EnggDiffMultiRunFittingQtWidget::userError(const std::string &errorTitle, const std::string &errorDescription) {
   m_userMessageProvider->userError(errorTitle, errorDescription);
 }
 

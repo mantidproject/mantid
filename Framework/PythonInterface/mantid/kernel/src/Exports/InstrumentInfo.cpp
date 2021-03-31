@@ -33,12 +33,10 @@ void export_InstrumentInfo() {
            "Returns the abbreviated name of the instrument as definined in the "
            "Facilites.xml file")
 
-      .def("zeroPadding", &InstrumentInfo::zeroPadding,
-           (arg("self"), arg("runNumber")),
+      .def("zeroPadding", &InstrumentInfo::zeroPadding, (arg("self"), arg("runNumber")),
            "Returns zero padding for this instrument")
 
-      .def("filePrefix", &InstrumentInfo::filePrefix,
-           (arg("self"), arg("runNumber")),
+      .def("filePrefix", &InstrumentInfo::filePrefix, (arg("self"), arg("runNumber")),
            "Returns file prefix for this instrument")
 
       .def("delimiter", &InstrumentInfo::delimiter, arg("self"),
@@ -46,16 +44,13 @@ void export_InstrumentInfo() {
            "between the instrument "
            "name and the run number.")
 
-      .def("techniques", &InstrumentInfo::techniques, arg("self"),
-           return_value_policy<copy_const_reference>(),
+      .def("techniques", &InstrumentInfo::techniques, arg("self"), return_value_policy<copy_const_reference>(),
            "Return list of techniques this instrument supports")
 
-      .def("facility", &InstrumentInfo::facility, arg("self"),
-           return_value_policy<copy_const_reference>(),
+      .def("facility", &InstrumentInfo::facility, arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the facility that contains this instrument.")
 
-      .def("liveListener", &InstrumentInfo::liveListener,
-           (arg("self"), arg("name") = ""),
+      .def("liveListener", &InstrumentInfo::liveListener, (arg("self"), arg("name") = ""),
            "Returns the name of the specific LiveListener class that is used "
            "by the given connection name. If no name is provided, the default "
            "connection is used.")
@@ -65,25 +60,21 @@ void export_InstrumentInfo() {
            "Returns the host name and the port of the machine hosting DAE and "
            "providing port to connect to for a live data stream")
 
-      .def("liveDataAddress", &InstrumentInfo::liveDataAddress,
-           (arg("self"), arg("name") = ""),
+      .def("liveDataAddress", &InstrumentInfo::liveDataAddress, (arg("self"), arg("name") = ""),
            "Returns the Address string of a live data connection on this "
            "instrument. If no connection name is provided, the default "
            "connection is used.")
 
-      .def("liveListenerInfo", &InstrumentInfo::liveListenerInfo,
-           (arg("self"), arg("name") = ""),
+      .def("liveListenerInfo", &InstrumentInfo::liveListenerInfo, (arg("self"), arg("name") = ""),
            return_value_policy<copy_const_reference>(),
            "Returns a LiveListenerInfo instance for this instrument. If "
            "no connection name is specified, the default is used.")
 
-      .def("hasLiveListenerInfo", &InstrumentInfo::hasLiveListenerInfo,
-           arg("self"),
+      .def("hasLiveListenerInfo", &InstrumentInfo::hasLiveListenerInfo, arg("self"),
            "Returns true if this instrument has at least one LiveListenerInfo")
 
-      .def("liveListenerInfoList", &InstrumentInfo::liveListenerInfoList,
-           arg("self"), return_value_policy<copy_const_reference>(),
-           "Returns all available LiveListenerInfo instances as a vector")
+      .def("liveListenerInfoList", &InstrumentInfo::liveListenerInfoList, arg("self"),
+           return_value_policy<copy_const_reference>(), "Returns all available LiveListenerInfo instances as a vector")
 
       ;
 }

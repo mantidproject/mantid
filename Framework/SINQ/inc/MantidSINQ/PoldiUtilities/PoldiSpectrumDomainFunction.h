@@ -44,13 +44,10 @@ namespace Poldi {
  */
 struct MANTID_SINQ_DLL Poldi2DHelper {
   /// Default constructor
-  Poldi2DHelper()
-      : dFractionalOffsets(), dOffsets(), domain(), values(), factors(),
-        deltaD(), minTOFN() {}
+  Poldi2DHelper() : dFractionalOffsets(), dOffsets(), domain(), values(), factors(), deltaD(), minTOFN() {}
 
   /// Transforms the chopper slit offsets for a given 2theta/distance pair.
-  void setChopperSlitOffsets(double distance, double sinTheta, double deltaD,
-                             const std::vector<double> &offsets) {
+  void setChopperSlitOffsets(double distance, double sinTheta, double deltaD, const std::vector<double> &offsets) {
     dFractionalOffsets.clear();
     dOffsets.clear();
 
@@ -79,14 +76,12 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
   }
 
   /// Calculates intensity factors for each point in the spectrum domain.
-  void setFactors(const PoldiTimeTransformer_sptr &timeTransformer,
-                  size_t index) {
+  void setFactors(const PoldiTimeTransformer_sptr &timeTransformer, size_t index) {
     factors.clear();
     if (domain && timeTransformer) {
       factors.reserve(domain->size());
       for (size_t i = 0; i < domain->size(); ++i) {
-        factors.emplace_back(
-            timeTransformer->detectorElementIntensity((*domain)[i], index));
+        factors.emplace_back(timeTransformer->detectorElementIntensity((*domain)[i], index));
       }
     }
   }
@@ -106,19 +101,16 @@ using Poldi2DHelper_sptr = std::shared_ptr<Poldi2DHelper>;
 
 class WrapAroundJacobian : public API::Jacobian {
 public:
-  WrapAroundJacobian(API::Jacobian &jacobian, size_t offset,
-                     const std::vector<double> &factors, size_t factorOffset,
+  WrapAroundJacobian(API::Jacobian &jacobian, size_t offset, const std::vector<double> &factors, size_t factorOffset,
                      size_t domainSize)
-      : m_jacobian(jacobian), m_offset(offset), m_factors(factors),
-        m_factorOffset(factorOffset), m_domainSize(domainSize) {}
+      : m_jacobian(jacobian), m_offset(offset), m_factors(factors), m_factorOffset(factorOffset),
+        m_domainSize(domainSize) {}
 
   double get(size_t iY, size_t iP) override { return m_jacobian.get(iY, iP); }
 
   void set(size_t iY, size_t iP, double value) override {
     size_t realY = (m_offset + iY) % m_domainSize;
-    m_jacobian.set(realY, iP,
-                   m_jacobian.get(realY, iP) +
-                       value * m_factors[m_factorOffset + iY]);
+    m_jacobian.set(realY, iP, m_jacobian.get(realY, iP) + value * m_factors[m_factorOffset + iY]);
   }
 
   void zero() override { m_jacobian.zero(); }
@@ -146,20 +138,15 @@ class LocalJacobian : public API::Jacobian {
 public:
   /// Constructor
   LocalJacobian(size_t nValues, size_t nParams)
-      : Jacobian(), m_nValues(nValues), m_nParams(nParams),
-        m_jacobian(nValues * nParams) {}
+      : Jacobian(), m_nValues(nValues), m_nParams(nParams), m_jacobian(nValues * nParams) {}
 
   /// Implementation of API::Jacobian::set. Throws std::out_of_range on invalid
   /// index.
-  void set(size_t iY, size_t iP, double value) override {
-    m_jacobian[safeIndex(iY, iP)] = value;
-  }
+  void set(size_t iY, size_t iP, double value) override { m_jacobian[safeIndex(iY, iP)] = value; }
 
   /// Implementation of API::Jacobian::get. Throws std::out_of_range on invalid
   /// index.
-  double get(size_t iY, size_t iP) override {
-    return m_jacobian[safeIndex(iY, iP)];
-  }
+  double get(size_t iY, size_t iP) override { return m_jacobian[safeIndex(iY, iP)]; }
 
   /// Implements API::Jacobian::zero
   void zero() override { m_jacobian.assign(m_jacobian.size(), 0.0); }
@@ -178,15 +165,11 @@ public:
   }
 
   /// Get-method without checks.
-  inline double getRaw(size_t iY, size_t iP) const {
-    return m_jacobian[index(iY, iP)];
-  }
+  inline double getRaw(size_t iY, size_t iP) const { return m_jacobian[index(iY, iP)]; }
 
 protected:
   /// Index-calculation for vector access.
-  inline size_t index(size_t iY, size_t iP) const {
-    return iY + iP * m_nValues;
-  }
+  inline size_t index(size_t iY, size_t iP) const { return iY + iP * m_nValues; }
 
   /// Get index and check for validity. Throws std::out_of_range on invalid
   /// index.
@@ -221,24 +204,20 @@ protected:
         @date 16/05/2014
   */
 
-class MANTID_SINQ_DLL PoldiSpectrumDomainFunction
-    : public API::FunctionParameterDecorator,
-      public API::IFunction1DSpectrum,
-      public IPoldiFunction1D {
+class MANTID_SINQ_DLL PoldiSpectrumDomainFunction : public API::FunctionParameterDecorator,
+                                                    public API::IFunction1DSpectrum,
+                                                    public IPoldiFunction1D {
 public:
   PoldiSpectrumDomainFunction();
 
   std::string name() const override { return "PoldiSpectrumDomainFunction"; }
 
   void setWorkspace(std::shared_ptr<const API::Workspace> ws) override;
-  void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
-                          API::FunctionValues &values) const override;
+  void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::FunctionValues &values) const override;
 
-  void functionDeriv1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
-                               API::Jacobian &jacobian) override;
+  void functionDeriv1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::Jacobian &jacobian) override;
 
-  void poldiFunction1D(const std::vector<int> &indices,
-                       const API::FunctionDomain1D &domain,
+  void poldiFunction1D(const std::vector<int> &indices, const API::FunctionDomain1D &domain,
                        API::FunctionValues &values) const override;
 
   API::IPeakFunction_sptr getProfileFunction() const;
@@ -246,15 +225,12 @@ public:
 protected:
   void init() override;
 
-  void initializeParametersFromWorkspace(
-      const DataObjects::Workspace2D_const_sptr &workspace2D);
-  void initializeInstrumentParameters(
-      const PoldiInstrumentAdapter_sptr &poldiInstrument);
+  void initializeParametersFromWorkspace(const DataObjects::Workspace2D_const_sptr &workspace2D);
+  void initializeInstrumentParameters(const PoldiInstrumentAdapter_sptr &poldiInstrument);
 
   void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn) override;
 
-  std::vector<double>
-  getChopperSlitOffsets(const PoldiAbstractChopper_sptr &chopper);
+  std::vector<double> getChopperSlitOffsets(const PoldiAbstractChopper_sptr &chopper);
 
   std::vector<double> m_chopperSlitOffsets;
   double m_deltaT;

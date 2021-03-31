@@ -19,17 +19,14 @@ RawCountValidator::RawCountValidator(const bool &mustNotBeDistribution)
     : m_mustNotBeDistribution(mustNotBeDistribution) {}
 
 /// Clone the current state
-Kernel::IValidator_sptr RawCountValidator::clone() const {
-  return std::make_shared<RawCountValidator>(*this);
-}
+Kernel::IValidator_sptr RawCountValidator::clone() const { return std::make_shared<RawCountValidator>(*this); }
 
 /** Checks if the workspace must be a distribution but isn't and vice-versa
  *  @param value :: The workspace to test
  *  @return A user level description of any problem that exists or "" no
  * problem
  */
-std::string
-RawCountValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
+std::string RawCountValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   if (m_mustNotBeDistribution) {
     if (!value->isDistribution())
       return "";

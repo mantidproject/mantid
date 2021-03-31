@@ -21,26 +21,19 @@ using namespace Mantid::API;
 
 class MaskDetectorsInShapeTest : public CxxTest::TestSuite {
 public:
-  static MaskDetectorsInShapeTest *createSuite() {
-    return new MaskDetectorsInShapeTest();
-  }
+  static MaskDetectorsInShapeTest *createSuite() { return new MaskDetectorsInShapeTest(); }
   static void destroySuite(MaskDetectorsInShapeTest *suite) { delete suite; }
 
   MaskDetectorsInShapeTest() { loadTestWS(); }
 
-  ~MaskDetectorsInShapeTest() override {
-    Mantid::API::AnalysisDataService::Instance().clear();
-  }
+  ~MaskDetectorsInShapeTest() override { Mantid::API::AnalysisDataService::Instance().clear(); }
 
   void testCuboidMiss() {
     std::string xmlShape = "<cuboid id=\"shape\"> ";
     xmlShape += R"(<left-front-bottom-point x="0.005" y="-0.1" z="0.0" /> )";
-    xmlShape +=
-        R"(<left-front-top-point x="0.005" y="-0.1" z="0.0001" />  )";
-    xmlShape +=
-        R"(<left-back-bottom-point x="-0.005" y="-0.1" z="0.0" />  )";
-    xmlShape +=
-        R"(<right-front-bottom-point x="0.005" y="0.1" z="0.0" />  )";
+    xmlShape += R"(<left-front-top-point x="0.005" y="-0.1" z="0.0001" />  )";
+    xmlShape += R"(<left-back-bottom-point x="-0.005" y="-0.1" z="0.0" />  )";
+    xmlShape += R"(<right-front-bottom-point x="0.005" y="0.1" z="0.0" />  )";
     xmlShape += "</cuboid> ";
     xmlShape += "<algebra val=\"shape\" /> ";
 
@@ -60,8 +53,7 @@ public:
     runTest(xmlShape, "320,340,360,380", false);
   }
 
-  void runTest(const std::string &xmlShape, std::string expectedHits,
-               bool includeMonitors = true) {
+  void runTest(const std::string &xmlShape, std::string expectedHits, bool includeMonitors = true) {
     using namespace Mantid::API;
 
     Mantid::DataHandling::MaskDetectorsInShape alg;
@@ -78,17 +70,14 @@ public:
 
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_const_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    MatrixWorkspace_const_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     checkDeadDetectors(outWS, std::move(expectedHits));
   }
 
-  void checkDeadDetectors(const Mantid::API::MatrixWorkspace_const_sptr &outWS,
-                          const std::string &expectedHits) {
+  void checkDeadDetectors(const Mantid::API::MatrixWorkspace_const_sptr &outWS, const std::string &expectedHits) {
     // check that the detectors have actually been marked dead
-    std::vector<int> expectedDetectorArray =
-        convertStringToVector(std::move(expectedHits));
+    std::vector<int> expectedDetectorArray = convertStringToVector(std::move(expectedHits));
     const auto &detectorInfo = outWS->detectorInfo();
     for (const auto detID : expectedDetectorArray) {
       TS_ASSERT(detectorInfo.isMasked(detectorInfo.indexOf(detID)));
@@ -131,12 +120,8 @@ private:
   const std::string workspace;
 
 public:
-  static MaskDetectorsInShapeTestPerformance *createSuite() {
-    return new MaskDetectorsInShapeTestPerformance();
-  }
-  static void destroySuite(MaskDetectorsInShapeTestPerformance *suite) {
-    delete suite;
-  }
+  static MaskDetectorsInShapeTestPerformance *createSuite() { return new MaskDetectorsInShapeTestPerformance(); }
+  static void destroySuite(MaskDetectorsInShapeTestPerformance *suite) { delete suite; }
 
   MaskDetectorsInShapeTestPerformance() : workspace("SANS2D") {
     // Load the instrument alone so as to isolate the raw file loading time from
@@ -150,11 +135,10 @@ public:
   void testMaskingLotsOfDetectors() {
     auto masker = AlgorithmManager::Instance().create("MaskDetectorsInShape");
     masker->setPropertyValue("Workspace", workspace);
-    masker->setPropertyValue(
-        "ShapeXML", "<infinite-cylinder id=\"beam_area\"><centre x=\"0\" "
-                    "y=\"0\" z=\"0.0\" /><axis x=\"0\" y=\"0\" z=\"1\" "
-                    "/><radius val=\"0.28\" /></infinite-cylinder><algebra "
-                    "val=\"#beam_area\"/>");
+    masker->setPropertyValue("ShapeXML", "<infinite-cylinder id=\"beam_area\"><centre x=\"0\" "
+                                         "y=\"0\" z=\"0.0\" /><axis x=\"0\" y=\"0\" z=\"1\" "
+                                         "/><radius val=\"0.28\" /></infinite-cylinder><algebra "
+                                         "val=\"#beam_area\"/>");
     masker->execute();
 
     AnalysisDataService::Instance().remove(workspace);

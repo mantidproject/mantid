@@ -26,21 +26,19 @@ namespace CustomInterfaces {
 IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
-  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
-      m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra, "0,2,4"));
+  setOutputPlotOptionsPresenter(
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra, "0,2,4"));
 
   const unsigned int NUM_DECIMALS = 6;
 
   m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
   m_uiForm.ppMomentsPreview->setCanvasColour(QColor(240, 240, 240));
 
-  MantidWidgets::RangeSelector *xRangeSelector =
-      m_uiForm.ppRawPlot->addRangeSelector("XRange");
+  MantidWidgets::RangeSelector *xRangeSelector = m_uiForm.ppRawPlot->addRangeSelector("XRange");
 
   // PROPERTY TREE
   m_propTrees["MomentsPropTree"] = new QtTreePropertyBrowser();
-  m_propTrees["MomentsPropTree"]->setFactoryForManager(m_dblManager,
-                                                       m_dblEdFac);
+  m_propTrees["MomentsPropTree"]->setFactoryForManager(m_dblManager, m_dblEdFac);
   m_uiForm.properties->addWidget(m_propTrees["MomentsPropTree"]);
   m_properties["EMin"] = m_dblManager->addProperty("EMin");
   m_properties["EMax"] = m_dblManager->addProperty("EMax");
@@ -51,28 +49,20 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
   m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
   m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
 
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this,
-          SLOT(handleDataReady(const QString &)));
+  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(const QString &)));
 
-  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
-          SLOT(rangeChanged(double, double)));
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateProperties(QtProperty *, double)));
+  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 
   // Update the preview plot when the algorithm completes
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(momentsAlgComplete(bool)));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(momentsAlgComplete(bool)));
 
   // Plot and save
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
-  connect(this,
-          SIGNAL(updateRunButton(bool, std::string const &, QString const &,
-                                 QString const &)),
-          this,
-          SLOT(updateRunButton(bool, std::string const &, QString const &,
-                               QString const &)));
+  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), this,
+          SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsInput->isOptional(true);
@@ -84,9 +74,7 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IndirectMoments::~IndirectMoments() {
-  m_propTrees["MomentsPropTree"]->unsetFactoryForManager(m_dblManager);
-}
+IndirectMoments::~IndirectMoments() { m_propTrees["MomentsPropTree"]->unsetFactoryForManager(m_dblManager); }
 
 void IndirectMoments::setup() {}
 
@@ -118,8 +106,7 @@ void IndirectMoments::run() {
 
   std::string const outputWorkspaceName = outputName.toStdString() + "_Moments";
 
-  IAlgorithm_sptr momentsAlg =
-      AlgorithmManager::Instance().create("SofQWMoments", -1);
+  IAlgorithm_sptr momentsAlg = AlgorithmManager::Instance().create("SofQWMoments", -1);
   momentsAlg->initialize();
   momentsAlg->setProperty("InputWorkspace", workspaceName.toStdString());
   momentsAlg->setProperty("EnergyMin", eMin);
@@ -153,14 +140,11 @@ void IndirectMoments::plotNewData(QString const &filename) {
   auto const range = getXRangeFromWorkspace(filename.toStdString());
 
   auto xRangeSelector = m_uiForm.ppRawPlot->getRangeSelector("XRange");
-  setPlotPropertyRange(xRangeSelector, m_properties["EMin"],
-                       m_properties["EMax"], range);
-  setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"],
-                   range);
+  setPlotPropertyRange(xRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
+  setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
   m_uiForm.ppRawPlot->replot();
 
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -174,8 +158,7 @@ void IndirectMoments::rangeChanged(double min, double max) {
              SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMin"], min);
   m_dblManager->setValue(m_properties["EMax"], max);
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -193,15 +176,12 @@ void IndirectMoments::updateProperties(QtProperty *prop, double val) {
              SLOT(updateProperties(QtProperty *, double)));
 
   if (prop == m_properties["EMin"]) {
-    setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"],
-                        eRangeSelector, val);
+    setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
   } else if (prop == m_properties["EMax"]) {
-    setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"],
-                        eRangeSelector, val);
+    setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
   }
 
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -214,8 +194,7 @@ void IndirectMoments::momentsAlgComplete(bool error) {
     return;
 
   MatrixWorkspace_sptr outputWorkspace =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_pythonExportWsName);
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_pythonExportWsName);
 
   if (outputWorkspace->getNumberHistograms() < 5)
     return;
@@ -224,12 +203,9 @@ void IndirectMoments::momentsAlgComplete(bool error) {
 
   // Plot each spectrum
   m_uiForm.ppMomentsPreview->clear();
-  m_uiForm.ppMomentsPreview->addSpectrum(
-      "M0", QString::fromStdString(m_pythonExportWsName), 0, Qt::green);
-  m_uiForm.ppMomentsPreview->addSpectrum(
-      "M1", QString::fromStdString(m_pythonExportWsName), 1, Qt::black);
-  m_uiForm.ppMomentsPreview->addSpectrum(
-      "M2", QString::fromStdString(m_pythonExportWsName), 2, Qt::red);
+  m_uiForm.ppMomentsPreview->addSpectrum("M0", QString::fromStdString(m_pythonExportWsName), 0, Qt::green);
+  m_uiForm.ppMomentsPreview->addSpectrum("M1", QString::fromStdString(m_pythonExportWsName), 1, Qt::black);
+  m_uiForm.ppMomentsPreview->addSpectrum("M2", QString::fromStdString(m_pythonExportWsName), 2, Qt::red);
   m_uiForm.ppMomentsPreview->resizeX();
 
   // Enable plot and save buttons
@@ -239,10 +215,8 @@ void IndirectMoments::momentsAlgComplete(bool error) {
 void IndirectMoments::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Moments");
-  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
-                                         : getExtensions(tabName));
-  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
-                                         : noSuffixes);
+  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
 /**
@@ -259,17 +233,11 @@ void IndirectMoments::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void IndirectMoments::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-}
+void IndirectMoments::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void IndirectMoments::setSaveEnabled(bool enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
-}
+void IndirectMoments::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
-void IndirectMoments::updateRunButton(bool enabled,
-                                      std::string const &enableOutputButtons,
-                                      QString const &message,
+void IndirectMoments::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
                                       QString const &tooltip) {
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);

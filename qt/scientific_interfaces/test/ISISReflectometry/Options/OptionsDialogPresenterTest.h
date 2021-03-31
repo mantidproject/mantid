@@ -25,9 +25,7 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 class OptionsDialogPresenterTest : public CxxTest::TestSuite {
 public:
-  static OptionsDialogPresenterTest *createSuite() {
-    return new OptionsDialogPresenterTest();
-  }
+  static OptionsDialogPresenterTest *createSuite() { return new OptionsDialogPresenterTest(); }
   static void destroySuite(OptionsDialogPresenterTest *suite) { delete suite; }
 
   OptionsDialogPresenterTest() : m_view(), m_model() {}
@@ -43,8 +41,7 @@ public:
   }
 
   void testInitOptionsClearsVariables() {
-    auto model =
-        std::make_unique<NiceMock<MockOptionsDialogModelUnsuccessfulLoad>>();
+    auto model = std::make_unique<NiceMock<MockOptionsDialogModelUnsuccessfulLoad>>();
     auto presenter = makePresenter(std::move(model));
     presenter.initOptions();
     TS_ASSERT_EQUALS(presenter.m_boolOptions.size(), 0);
@@ -55,26 +52,20 @@ public:
 
   void testInitOptionsAttemptsToLoadFromModel() {
     auto presenter = makePresenter();
-    auto mainWindowSubscriber =
-        std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
+    auto mainWindowSubscriber = std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
     presenter.subscribe(mainWindowSubscriber.get());
     presenter.notifySaveOptions();
-    EXPECT_CALL(*m_model, loadSettingsProxy(presenter.m_boolOptions,
-                                            presenter.m_intOptions))
-        .WillOnce(Return());
+    EXPECT_CALL(*m_model, loadSettingsProxy(presenter.m_boolOptions, presenter.m_intOptions)).WillOnce(Return());
     presenter.initOptions();
     assertLoadOptions(presenter);
     verifyAndClear();
   }
 
   void testInitOptionsAppliesDefaultOptionsIfLoadUnsuccessful() {
-    auto model = std::make_unique<
-        NiceMock<MockOptionsDialogModelUnsuccessfulDefaults>>();
+    auto model = std::make_unique<NiceMock<MockOptionsDialogModelUnsuccessfulDefaults>>();
     auto presenter = makePresenter(std::move(model));
-    EXPECT_CALL(*m_modelUnsuccessfulDefaults, loadSettings(_, _))
-        .WillOnce(Return());
-    EXPECT_CALL(*m_modelUnsuccessfulDefaults, applyDefaultOptionsProxy(_, _))
-        .WillOnce(Return());
+    EXPECT_CALL(*m_modelUnsuccessfulDefaults, loadSettings(_, _)).WillOnce(Return());
+    EXPECT_CALL(*m_modelUnsuccessfulDefaults, applyDefaultOptionsProxy(_, _)).WillOnce(Return());
     presenter.initOptions();
     assertDefaultOptions(presenter);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
@@ -83,15 +74,11 @@ public:
 
   void testLoadOptionsQueriesModel() {
     auto presenter = makePresenter();
-    auto mainWindowSubscriber =
-        std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
+    auto mainWindowSubscriber = std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
     presenter.subscribe(mainWindowSubscriber.get());
     presenter.notifySaveOptions();
-    EXPECT_CALL(*m_model, loadSettingsProxy(presenter.m_boolOptions,
-                                            presenter.m_intOptions))
-        .Times(AtLeast(1));
-    EXPECT_CALL(*mainWindowSubscriber.get(), notifyOptionsChanged())
-        .Times(AtLeast(1));
+    EXPECT_CALL(*m_model, loadSettingsProxy(presenter.m_boolOptions, presenter.m_intOptions)).Times(AtLeast(1));
+    EXPECT_CALL(*mainWindowSubscriber.get(), notifyOptionsChanged()).Times(AtLeast(1));
     presenter.notifyLoadOptions();
     verifyAndClear(std::move(mainWindowSubscriber));
     verifyAndClear(std::move(mainWindowSubscriber));
@@ -99,15 +86,11 @@ public:
 
   void testLoadOptionsUpdatesView() {
     auto presenter = makePresenter();
-    auto mainWindowSubscriber =
-        std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
+    auto mainWindowSubscriber = std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
     presenter.subscribe(mainWindowSubscriber.get());
     presenter.notifySaveOptions();
-    EXPECT_CALL(m_view,
-                setOptions(presenter.m_boolOptions, presenter.m_intOptions))
-        .Times(AtLeast(1));
-    EXPECT_CALL(*mainWindowSubscriber.get(), notifyOptionsChanged())
-        .Times(AtLeast(1));
+    EXPECT_CALL(m_view, setOptions(presenter.m_boolOptions, presenter.m_intOptions)).Times(AtLeast(1));
+    EXPECT_CALL(*mainWindowSubscriber.get(), notifyOptionsChanged()).Times(AtLeast(1));
     presenter.notifyLoadOptions();
     assertLoadOptions(presenter);
     verifyAndClear(std::move(mainWindowSubscriber));
@@ -115,10 +98,8 @@ public:
 
   void testLoadOptionsNotifiesMainWindow() {
     auto presenter = makePresenter();
-    auto mainWindowSubscriber =
-        std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
-    EXPECT_CALL(*mainWindowSubscriber.get(), notifyOptionsChanged())
-        .Times(AtLeast(1));
+    auto mainWindowSubscriber = std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
+    EXPECT_CALL(*mainWindowSubscriber.get(), notifyOptionsChanged()).Times(AtLeast(1));
     presenter.subscribe(mainWindowSubscriber.get());
     presenter.notifyLoadOptions();
     assertLoadOptions(presenter);
@@ -127,23 +108,18 @@ public:
 
   void testSaveOptionsUpdatesModel() {
     auto presenter = makePresenter();
-    auto mainWindowSubscriber =
-        std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
+    auto mainWindowSubscriber = std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
     presenter.subscribe(mainWindowSubscriber.get());
     presenter.notifyLoadOptions();
-    EXPECT_CALL(*m_model,
-                saveSettings(presenter.m_boolOptions, presenter.m_intOptions))
-        .Times(AtLeast(1));
+    EXPECT_CALL(*m_model, saveSettings(presenter.m_boolOptions, presenter.m_intOptions)).Times(AtLeast(1));
     presenter.notifySaveOptions();
     verifyAndClear();
   }
 
   void testSaveOptionsNotifiesMainWindow() {
     auto presenter = makePresenter();
-    auto mainWindowSubscriber =
-        std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
-    EXPECT_CALL(*mainWindowSubscriber.get(), notifyOptionsChanged())
-        .Times(AtLeast(1));
+    auto mainWindowSubscriber = std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
+    EXPECT_CALL(*mainWindowSubscriber.get(), notifyOptionsChanged()).Times(AtLeast(1));
     presenter.subscribe(mainWindowSubscriber.get());
     presenter.notifySaveOptions();
     verifyAndClear(std::move(mainWindowSubscriber));
@@ -151,14 +127,11 @@ public:
 
   void testSaveOptionsQueriesView() {
     auto presenter = makePresenter();
-    auto mainWindowSubscriber =
-        std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
+    auto mainWindowSubscriber = std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
 
     presenter.subscribe(mainWindowSubscriber.get());
     presenter.notifyLoadOptions();
-    EXPECT_CALL(m_view,
-                getOptions(presenter.m_boolOptions, presenter.m_intOptions))
-        .Times(AtLeast(1));
+    EXPECT_CALL(m_view, getOptions(presenter.m_boolOptions, presenter.m_intOptions)).Times(AtLeast(1));
     presenter.notifySaveOptions();
     verifyAndClear();
   }
@@ -169,16 +142,14 @@ private:
 
   public:
     OptionsDialogPresenterFriend() = default;
-    OptionsDialogPresenterFriend(IOptionsDialogView *view,
-                                 std::unique_ptr<IOptionsDialogModel> model)
+    OptionsDialogPresenterFriend(IOptionsDialogView *view, std::unique_ptr<IOptionsDialogModel> model)
         : OptionsDialogPresenter(view, std::move(model)) {}
   };
 
   NiceMock<MockOptionsDialogView> m_view;
   NiceMock<MockOptionsDialogModel> *m_model;
   NiceMock<MockOptionsDialogModelUnsuccessfulLoad> *m_modelUnsuccessfulLoad;
-  NiceMock<MockOptionsDialogModelUnsuccessfulDefaults>
-      *m_modelUnsuccessfulDefaults;
+  NiceMock<MockOptionsDialogModelUnsuccessfulDefaults> *m_modelUnsuccessfulDefaults;
 
   OptionsDialogPresenterFriend makePresenter() {
     auto model = std::make_unique<NiceMock<MockOptionsDialogModel>>();
@@ -187,16 +158,14 @@ private:
     return presenter;
   }
 
-  OptionsDialogPresenterFriend makePresenter(
-      std::unique_ptr<NiceMock<MockOptionsDialogModelUnsuccessfulLoad>> model) {
+  OptionsDialogPresenterFriend makePresenter(std::unique_ptr<NiceMock<MockOptionsDialogModelUnsuccessfulLoad>> model) {
     m_modelUnsuccessfulLoad = model.get();
     auto presenter = OptionsDialogPresenterFriend(&m_view, std::move(model));
     return presenter;
   }
 
-  OptionsDialogPresenterFriend makePresenter(
-      std::unique_ptr<NiceMock<MockOptionsDialogModelUnsuccessfulDefaults>>
-          model) {
+  OptionsDialogPresenterFriend
+  makePresenter(std::unique_ptr<NiceMock<MockOptionsDialogModelUnsuccessfulDefaults>> model) {
     m_modelUnsuccessfulDefaults = model.get();
     auto presenter = OptionsDialogPresenterFriend(&m_view, std::move(model));
     presenter.m_boolOptions["WarnDiscardChanges"] = true;
@@ -223,10 +192,8 @@ private:
     TS_ASSERT_EQUALS(presenter.m_intOptions["RoundPrecision"], 5);
   }
 
-  void
-  verifyAndClear(std::unique_ptr<NiceMock<MockOptionsDialogPresenterSubscriber>>
-                     mainWindowSubscriber = std::make_unique<
-                         NiceMock<MockOptionsDialogPresenterSubscriber>>()) {
+  void verifyAndClear(std::unique_ptr<NiceMock<MockOptionsDialogPresenterSubscriber>> mainWindowSubscriber =
+                          std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>()) {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mainWindowSubscriber));

@@ -30,9 +30,7 @@ class ALCPeakFittingModelTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ALCPeakFittingModelTest *createSuite() {
-    return new ALCPeakFittingModelTest();
-  }
+  static ALCPeakFittingModelTest *createSuite() { return new ALCPeakFittingModelTest(); }
   static void destroySuite(ALCPeakFittingModelTest *suite) { delete suite; }
 
   ALCPeakFittingModelTest() {
@@ -44,8 +42,7 @@ public:
   void tearDown() override { delete m_model; }
 
   void test_setData() {
-    MatrixWorkspace_sptr data =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
     QSignalSpy spy(m_model, SIGNAL(dataChanged()));
 
@@ -56,18 +53,14 @@ public:
   }
 
   void test_fit() {
-    MatrixWorkspace_sptr data =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 8, 8);
+    MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create("Workspace2D", 1, 8, 8);
 
-    data->setHistogram(0,
-                       Points{1.00, 2.00, 3.00, 4.00, 5.00, 6.00, 7.00, 8.00},
-                       Counts{0.00, 0.01, 0.02, 0.37, 1.00, 0.37, 0.01, 0.00},
-                       CountStandardDeviations(8, 0));
+    data->setHistogram(0, Points{1.00, 2.00, 3.00, 4.00, 5.00, 6.00, 7.00, 8.00},
+                       Counts{0.00, 0.01, 0.02, 0.37, 1.00, 0.37, 0.01, 0.00}, CountStandardDeviations(8, 0));
 
     m_model->setData(data);
 
-    IFunction_const_sptr func =
-        FunctionFactory::Instance().createInitialized("name=FlatBackground");
+    IFunction_const_sptr func = FunctionFactory::Instance().createInitialized("name=FlatBackground");
 
     TS_ASSERT_THROWS_NOTHING(m_model->fitPeaks(func));
 
@@ -97,7 +90,5 @@ public:
     }
   }
 
-  void test_exportWorkspace() {
-    TS_ASSERT_THROWS_NOTHING(m_model->exportWorkspace());
-  }
+  void test_exportWorkspace() { TS_ASSERT_THROWS_NOTHING(m_model->exportWorkspace()); }
 };

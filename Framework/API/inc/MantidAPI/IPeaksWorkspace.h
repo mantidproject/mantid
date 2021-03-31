@@ -30,8 +30,7 @@ namespace API {
     @author Ruth Mikkelson, SNS ORNL
     @date 3/10/2010
  */
-class MANTID_API_DLL IPeaksWorkspace : public ITableWorkspace,
-                                       public Mantid::API::ExperimentInfo {
+class MANTID_API_DLL IPeaksWorkspace : public ITableWorkspace, public Mantid::API::ExperimentInfo {
 public:
   /// Ctor
   IPeaksWorkspace() : ITableWorkspace(), ExperimentInfo() {
@@ -70,8 +69,7 @@ public:
    * @param position :: V3D positon of the peak.
    * @param frame :: Coordinate system frame of the peak position.
    */
-  virtual void addPeak(const Kernel::V3D &position,
-                       const Kernel::SpecialCoordinateSystem &frame) = 0;
+  virtual void addPeak(const Kernel::V3D &position, const Kernel::SpecialCoordinateSystem &frame) = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Return a reference to the Peak
@@ -92,9 +90,7 @@ public:
    * @param peakNum :: index of the peak to get.
    * @return a pointer to a Peak object.
    */
-  Mantid::Geometry::IPeak *getPeakPtr(const int peakNum) {
-    return &this->getPeak(peakNum);
-  }
+  Mantid::Geometry::IPeak *getPeakPtr(const int peakNum) { return &this->getPeak(peakNum); }
 
   //---------------------------------------------------------------------------------------------
   /** Create an instance of a Peak
@@ -104,9 +100,8 @@ public:
    * detector. Calculated if not provided.
    * @return a pointer to a new Peak object.
    */
-  virtual std::unique_ptr<Geometry::IPeak>
-  createPeak(const Mantid::Kernel::V3D &QLabFrame,
-             boost::optional<double> detectorDistance = boost::none) const = 0;
+  virtual std::unique_ptr<Geometry::IPeak> createPeak(const Mantid::Kernel::V3D &QLabFrame,
+                                                      boost::optional<double> detectorDistance = boost::none) const = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Create an instance of a Peak
@@ -115,24 +110,21 @@ public:
    * @return a pointer to a new Peak object.
    */
   virtual std::unique_ptr<Mantid::Geometry::IPeak>
-  createPeak(const Mantid::Kernel::V3D &position,
-             const Mantid::Kernel::SpecialCoordinateSystem &frame) const = 0;
+  createPeak(const Mantid::Kernel::V3D &position, const Mantid::Kernel::SpecialCoordinateSystem &frame) const = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Create an instance of a Peak
    * @param position :: enter of the peak in the sample frame
    * @return a pointer to a new Peak object.
    */
-  virtual std::unique_ptr<Mantid::Geometry::IPeak>
-  createPeakQSample(const Mantid::Kernel::V3D &position) const = 0;
+  virtual std::unique_ptr<Mantid::Geometry::IPeak> createPeakQSample(const Mantid::Kernel::V3D &position) const = 0;
 
   /**
    * Create an instance of a peak using a V3D
    * @param HKL V3D
    * @return a pointer to a new Peak object.
    */
-  virtual std::unique_ptr<Geometry::IPeak>
-  createPeakHKL(const Mantid::Kernel::V3D &HKL) const = 0;
+  virtual std::unique_ptr<Geometry::IPeak> createPeakHKL(const Mantid::Kernel::V3D &HKL) const = 0;
 
   /**
    * Create an instance of a peak using default constructor
@@ -161,21 +153,18 @@ public:
    * Set the special coordinate system.
    * @param coordinateSystem : Special Q3D coordinate system to use.
    */
-  virtual void setCoordinateSystem(
-      const Kernel::SpecialCoordinateSystem coordinateSystem) = 0;
+  virtual void setCoordinateSystem(const Kernel::SpecialCoordinateSystem coordinateSystem) = 0;
   //---------------------------------------------------------------------------------------------
   /**
    * Get the special coordinate system.
    * @returns special Q3D coordinate system to use being used by this
    * PeaksWorkspace object. Probably the one the workspace was generated with.
    */
-  virtual Kernel::SpecialCoordinateSystem
-  getSpecialCoordinateSystem() const = 0;
+  virtual Kernel::SpecialCoordinateSystem getSpecialCoordinateSystem() const = 0;
 
-  virtual std::vector<std::pair<std::string, std::string>>
-  peakInfo(const Kernel::V3D &QFrame, bool labCoords) const = 0;
-  virtual int peakInfoNumber(const Kernel::V3D &qLabFrame,
-                             bool labCoords) const = 0;
+  virtual std::vector<std::pair<std::string, std::string>> peakInfo(const Kernel::V3D &QFrame,
+                                                                    bool labCoords) const = 0;
+  virtual int peakInfoNumber(const Kernel::V3D &qLabFrame, bool labCoords) const = 0;
 
   //---------------------------------------------------------------------------------------------
   virtual void saveNexus(::NeXus::File *file) const = 0;

@@ -26,8 +26,7 @@ namespace API {
   @author Janik Zikovsky
   @date 2011-09-21
 */
-template <typename T>
-class DLLExport EnabledWhenWorkspaceIsType : public Kernel::IPropertySettings {
+template <typename T> class DLLExport EnabledWhenWorkspaceIsType : public Kernel::IPropertySettings {
 public:
   //--------------------------------------------------------------------------------------------
   /** Constructor
@@ -35,10 +34,8 @@ public:
    * @param enabledSetting :: Set Enabled on this property to this value when
    * the workspace is of type T. Default true.
    */
-  EnabledWhenWorkspaceIsType(std::string otherPropName,
-                             bool enabledSetting = true)
-      : IPropertySettings(), m_otherPropName(std::move(otherPropName)),
-        m_enabledSetting(enabledSetting) {}
+  EnabledWhenWorkspaceIsType(std::string otherPropName, bool enabledSetting = true)
+      : IPropertySettings(), m_otherPropName(std::move(otherPropName)), m_enabledSetting(enabledSetting) {}
 
   //--------------------------------------------------------------------------------------------
   /** Does the validator fulfill the criterion based on the
@@ -81,15 +78,11 @@ public:
   //--------------------------------------------------------------------------------------------
   /// Return true/false based on whether the other property satisfies the
   /// criterion
-  bool isEnabled(const Kernel::IPropertyManager *algo) const override {
-    return checkCriterion(algo);
-  }
+  bool isEnabled(const Kernel::IPropertyManager *algo) const override { return checkCriterion(algo); }
 
   //--------------------------------------------------------------------------------------------
   /// Return true always
-  bool isVisible(const Kernel::IPropertyManager *) const override {
-    return true;
-  }
+  bool isVisible(const Kernel::IPropertyManager *) const override { return true; }
 
   //--------------------------------------------------------------------------------------------
   /// Make a copy of the present type of validator

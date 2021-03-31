@@ -31,8 +31,7 @@ namespace DataObjects {
  * @throw std::runtime_error if outD > inD
  */
 CoordTransformAffine::CoordTransformAffine(const size_t inD, const size_t outD)
-    : CoordTransform(inD, outD), m_affineMatrix(outD + 1, inD + 1),
-      m_rawMatrix(nullptr), m_rawMemory(nullptr) {
+    : CoordTransform(inD, outD), m_affineMatrix(outD + 1, inD + 1), m_rawMatrix(nullptr), m_rawMemory(nullptr) {
   m_affineMatrix.identityMatrix();
 
   // Allocate the raw matrix
@@ -86,8 +85,7 @@ CoordTransform *CoordTransformAffine::clone() const {
  * @param newMatrix :: (outD+1 * inD+1) matrix to set.
  * @throw runtime_error if the matrix dimensions are incompatible.
  */
-void CoordTransformAffine::setMatrix(
-    const Mantid::Kernel::Matrix<coord_t> &newMatrix) {
+void CoordTransformAffine::setMatrix(const Mantid::Kernel::Matrix<coord_t> &newMatrix) {
   if (newMatrix.numRows() != outD + 1)
     throw std::runtime_error("setMatrix(): Number of rows must match!");
   if (newMatrix.numCols() != inD + 1)
@@ -100,14 +98,10 @@ void CoordTransformAffine::setMatrix(
 //----------------------------------------------------------------------------------------------
 /** Return the affine matrix in the transform.
  */
-const Mantid::Kernel::Matrix<coord_t> &CoordTransformAffine::getMatrix() const {
-  return m_affineMatrix;
-}
+const Mantid::Kernel::Matrix<coord_t> &CoordTransformAffine::getMatrix() const { return m_affineMatrix; }
 
 /** @return the affine matrix */
-Mantid::Kernel::Matrix<coord_t> CoordTransformAffine::makeAffineMatrix() const {
-  return m_affineMatrix;
-}
+Mantid::Kernel::Matrix<coord_t> CoordTransformAffine::makeAffineMatrix() const { return m_affineMatrix; }
 
 //----------------------------------------------------------------------------------------------
 /** Add a translation (in the output coordinates) to the transform.
@@ -161,10 +155,9 @@ void CoordTransformAffine::addTranslation(const coord_t *translationVector) {
  *        OUTPUT dimensions.
  * @throw if inconsistent vector sizes are received, or zero-length
  */
-void CoordTransformAffine::buildOrthogonal(
-    const Mantid::Kernel::VMD &origin,
-    const std::vector<Mantid::Kernel::VMD> &axes,
-    const Mantid::Kernel::VMD &scaling) {
+void CoordTransformAffine::buildOrthogonal(const Mantid::Kernel::VMD &origin,
+                                           const std::vector<Mantid::Kernel::VMD> &axes,
+                                           const Mantid::Kernel::VMD &scaling) {
   if (origin.size() != inD)
     throw std::runtime_error("CoordTransformAffine::buildOrthogonal(): the "
                              "origin must be in the dimensions of the input "
@@ -200,8 +193,7 @@ void CoordTransformAffine::buildOrthogonal(
     // Now account for the translation
     coord_t transl = 0;
     for (size_t j = 0; j < basis.size(); j++)
-      transl += static_cast<coord_t>(
-          origin[j] * basis[j]); // dot product of origin * basis aka ( X0 . U )
+      transl += static_cast<coord_t>(origin[j] * basis[j]); // dot product of origin * basis aka ( X0 . U )
     // The last column of the matrix = the translation movement
     m_affineMatrix[i][inD] = -transl * static_cast<coord_t>(scaling[i]);
   }
@@ -210,10 +202,9 @@ void CoordTransformAffine::buildOrthogonal(
   copyRawMatrix();
 }
 
-void CoordTransformAffine::buildNonOrthogonal(
-    const Mantid::Kernel::VMD &origin,
-    const std::vector<Mantid::Kernel::VMD> &axes,
-    const Mantid::Kernel::VMD &scaling) {
+void CoordTransformAffine::buildNonOrthogonal(const Mantid::Kernel::VMD &origin,
+                                              const std::vector<Mantid::Kernel::VMD> &axes,
+                                              const Mantid::Kernel::VMD &scaling) {
   if (origin.size() != inD)
     throw std::runtime_error("CoordTransformAffine::buildNonOrthogonal(): the "
                              "origin must be in the dimensions of the input "
@@ -264,8 +255,7 @@ void CoordTransformAffine::buildNonOrthogonal(
  * @param inputVector :: fixed-size array of input coordinates, of size inD
  * @param outVector :: fixed-size array of output coordinates, of size outD
  */
-void CoordTransformAffine::apply(const coord_t *inputVector,
-                                 coord_t *outVector) const {
+void CoordTransformAffine::apply(const coord_t *inputVector, coord_t *outVector) const {
   // For each output dimension
   for (size_t out = 0; out < outD; ++out) {
     // Cache the row pointer to make the matrix access a bit faster
@@ -292,13 +282,11 @@ std::string CoordTransformAffine::toXMLString() const {
   using namespace Poco::XML;
 
   AutoPtr<Document> pDoc = new Document;
-  AutoPtr<Element> coordTransformElement =
-      pDoc->createElement("CoordTransform");
+  AutoPtr<Element> coordTransformElement = pDoc->createElement("CoordTransform");
   pDoc->appendChild(coordTransformElement);
 
   AutoPtr<Element> coordTransformTypeElement = pDoc->createElement("Type");
-  coordTransformTypeElement->appendChild(
-      AutoPtr<Node>(pDoc->createTextNode("CoordTransformAffine")));
+  coordTransformTypeElement->appendChild(AutoPtr<Node>(pDoc->createTextNode("CoordTransformAffine")));
   coordTransformElement->appendChild(coordTransformTypeElement);
 
   AutoPtr<Element> paramListElement = pDoc->createElement("ParameterList");
@@ -319,10 +307,9 @@ std::string CoordTransformAffine::toXMLString() const {
   Mantid::API::InDimParameter inD_param(inD);
   Mantid::API::OutDimParameter outD_param(outD);
 
-  std::string formattedXMLString = boost::str(
-      boost::format(xmlstream.str().c_str()) % inD_param.toXMLString().c_str() %
-      outD_param.toXMLString().c_str() %
-      affineMatrixParameter.toXMLString().c_str());
+  std::string formattedXMLString =
+      boost::str(boost::format(xmlstream.str().c_str()) % inD_param.toXMLString().c_str() %
+                 outD_param.toXMLString().c_str() % affineMatrixParameter.toXMLString().c_str());
   return formattedXMLString;
 }
 
@@ -341,12 +328,9 @@ std::string CoordTransformAffine::id() const { return "CoordTransformAffine"; }
  * @throw std::runtime_error if one of the inputs is not CoordTransformAffine or
  *CoordTransformAligned
  */
-CoordTransformAffine *
-CoordTransformAffine::combineTransformations(CoordTransform *first,
-                                             CoordTransform *second) {
+CoordTransformAffine *CoordTransformAffine::combineTransformations(CoordTransform *first, CoordTransform *second) {
   if (!first || !second)
-    throw std::runtime_error(
-        "CoordTransformAffine::combineTransformations(): Null input provided.");
+    throw std::runtime_error("CoordTransformAffine::combineTransformations(): Null input provided.");
   if (second->getInD() != first->getOutD())
     throw std::runtime_error("CoordTransformAffine::combineTransformations(): "
                              "The # of output dimensions of first must be the "
@@ -357,9 +341,8 @@ CoordTransformAffine::combineTransformations(CoordTransform *first,
   if (!firstAff) {
     auto *firstAl = dynamic_cast<CoordTransformAligned *>(first);
     if (!firstAl)
-      throw std::runtime_error(
-          "CoordTransformAffine::combineTransformations(): first transform "
-          "must be either CoordTransformAffine or CoordTransformAligned.");
+      throw std::runtime_error("CoordTransformAffine::combineTransformations(): first transform "
+                               "must be either CoordTransformAffine or CoordTransformAligned.");
     firstAff = new CoordTransformAffine(firstAl->getInD(), firstAl->getOutD());
     firstAff->setMatrix(firstAl->makeAffineMatrix());
     ownFirstAff = true;
@@ -369,11 +352,9 @@ CoordTransformAffine::combineTransformations(CoordTransform *first,
   if (!secondAff) {
     auto *secondAl = dynamic_cast<CoordTransformAligned *>(second);
     if (!secondAl)
-      throw std::runtime_error(
-          "CoordTransformAffine::combineTransformations(): second transform "
-          "must be either CoordTransformAffine or CoordTransformAligned.");
-    secondAff =
-        new CoordTransformAffine(secondAl->getInD(), secondAl->getOutD());
+      throw std::runtime_error("CoordTransformAffine::combineTransformations(): second transform "
+                               "must be either CoordTransformAffine or CoordTransformAligned.");
+    secondAff = new CoordTransformAffine(secondAl->getInD(), secondAl->getOutD());
     secondAff->setMatrix(secondAl->makeAffineMatrix());
     ownSecondAff = true;
   }

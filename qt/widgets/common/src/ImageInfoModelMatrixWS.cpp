@@ -31,8 +31,7 @@ static const std::array<std::tuple<Unit_sptr, bool>, 6> &displayUnits() {
       std::make_tuple(UnitFactory::Instance().create("Wavelength"), false),
       std::make_tuple(UnitFactory::Instance().create("Energy"), false),
       std::make_tuple(UnitFactory::Instance().create("dSpacing"), false),
-      std::make_tuple(UnitFactory::Instance().create("MomentumTransfer"),
-                      false),
+      std::make_tuple(UnitFactory::Instance().create("MomentumTransfer"), false),
       std::make_tuple(UnitFactory::Instance().create("DeltaE"), true)};
   return units;
 }
@@ -47,16 +46,13 @@ namespace MantidWidgets {
  * Constructor
  * @param workspace A MatrixWorkspace to provide information for the model
  */
-ImageInfoModelMatrixWS::ImageInfoModelMatrixWS(
-    Mantid::API::MatrixWorkspace_sptr workspace)
+ImageInfoModelMatrixWS::ImageInfoModelMatrixWS(Mantid::API::MatrixWorkspace_sptr workspace)
     : m_workspace(std::move(workspace)), m_spectrumInfo(nullptr) {
   cacheWorkspaceInfo();
 }
 
 /// @copydoc MantidQt::MantidWidgets::ImageInfoModel::info
-ImageInfoModel::ImageInfo
-ImageInfoModelMatrixWS::info(const double x, const double y,
-                             const double signal) const {
+ImageInfoModel::ImageInfo ImageInfoModelMatrixWS::info(const double x, const double y, const double signal) const {
   ImageInfo info(m_names);
   if (x == UnsetValue || y == UnsetValue || signal == UnsetValue)
     return info;
@@ -80,14 +76,11 @@ ImageInfoModelMatrixWS::info(const double x, const double y,
     info.setValue(3, defaultFormat(*spectrum.getDetectorIDs().begin()));
     info.setValue(4, defaultFormat(m_spectrumInfo->l2(wsIndex)));
     try {
-      info.setValue(
-          5, defaultFormat(m_spectrumInfo->signedTwoTheta(wsIndex) * rad2deg));
-      info.setValue(
-          6, defaultFormat(m_spectrumInfo->azimuthal(wsIndex) * rad2deg));
+      info.setValue(5, defaultFormat(m_spectrumInfo->signedTwoTheta(wsIndex) * rad2deg));
+      info.setValue(6, defaultFormat(m_spectrumInfo->azimuthal(wsIndex) * rad2deg));
       setUnitsInfo(&info, 7, wsIndex, x);
     } catch (const std::exception &exc) {
-      g_log.debug() << "Unable to fill in instrument angle-related value: "
-                    << exc.what() << "\n";
+      g_log.debug() << "Unable to fill in instrument angle-related value: " << exc.what() << "\n";
     }
   }
 
@@ -101,14 +94,12 @@ ImageInfoModelMatrixWS::info(const double x, const double y,
  * @param wsIndex The wsIndex whose spectrum is under the cursor
  * @param x The value from the cursor on the X axis
  */
-void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
-                                          int infoIndex, const size_t wsIndex,
+void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info, int infoIndex, const size_t wsIndex,
                                           const double x) const {
   const auto l1 = m_spectrumInfo->l1();
   auto emode = m_workspace->getEMode();
   UnitParametersMap pmap{};
-  m_spectrumInfo->getDetectorValues(Units::Empty(), Units::Empty(), emode,
-                                    false, wsIndex, pmap);
+  m_spectrumInfo->getDetectorValues(Units::Empty(), Units::Empty(), emode, false, wsIndex, pmap);
   double efixed = 0.;
   if (pmap.find(UnitParams::efixed) != pmap.end()) {
     efixed = pmap[UnitParams::efixed];
@@ -128,8 +119,7 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
     } catch (std::exception &exc) {
       // without TOF we can't get to the other units
       if (g_log.is(Logger::Priority::PRIO_DEBUG))
-        g_log.debug() << "Error calculating TOF from " << m_xunit->unitID()
-                      << ": " << exc.what() << "\n";
+        g_log.debug() << "Error calculating TOF from " << m_xunit->unitID() << ": " << exc.what() << "\n";
       return;
     }
   }
@@ -143,8 +133,8 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
         info->setValue(infoIndex, defaultFormat(unitValue));
       } catch (std::exception &exc) {
         if (g_log.is(Logger::Priority::PRIO_DEBUG))
-          g_log.debug() << "Error calculating " << unit->unitID() << " from "
-                        << m_xunit->unitID() << ": " << exc.what() << "\n";
+          g_log.debug() << "Error calculating " << unit->unitID() << " from " << m_xunit->unitID() << ": " << exc.what()
+                        << "\n";
       }
       ++infoIndex;
     }

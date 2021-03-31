@@ -27,8 +27,7 @@ class OffsetableTester : public VectorOf<OffsetableTester, HistogramX>,
 };
 
 // Does Offsetable also work with FixedLengthVector instead of VectorOf?
-struct OffsetableTester2 : public FixedLengthVector<OffsetableTester2>,
-                           public Offsetable<OffsetableTester2> {
+struct OffsetableTester2 : public FixedLengthVector<OffsetableTester2>, public Offsetable<OffsetableTester2> {
   using FixedLengthVector<OffsetableTester2>::FixedLengthVector;
 };
 

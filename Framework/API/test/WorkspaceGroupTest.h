@@ -27,24 +27,18 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 class WorkspaceGroupTest_WorkspaceGroupObserver {
-  Poco::NObserver<WorkspaceGroupTest_WorkspaceGroupObserver,
-                  Mantid::API::GroupUpdatedNotification>
+  Poco::NObserver<WorkspaceGroupTest_WorkspaceGroupObserver, Mantid::API::GroupUpdatedNotification>
       m_workspaceGroupUpdateObserver;
 
 public:
   bool received;
   WorkspaceGroupTest_WorkspaceGroupObserver()
-      : m_workspaceGroupUpdateObserver(
-            *this, &WorkspaceGroupTest_WorkspaceGroupObserver::
-                       handleWorkspaceGroupUpdate),
+      : m_workspaceGroupUpdateObserver(*this, &WorkspaceGroupTest_WorkspaceGroupObserver::handleWorkspaceGroupUpdate),
         received(false) {
-    AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_workspaceGroupUpdateObserver);
+    AnalysisDataService::Instance().notificationCenter.addObserver(m_workspaceGroupUpdateObserver);
   }
   // handles notification send by a WorkspaceGroup instance
-  void handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_ptr) {
-    received = true;
-  }
+  void handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_ptr) { received = true; }
 };
 
 class WorkspaceGroupTest : public CxxTest::TestSuite {
@@ -52,11 +46,9 @@ private:
   /// Helper method to add an 'nperiods' log value to each workspace in a group.
   void add_periods_logs(const WorkspaceGroup_sptr &ws, int nperiods = -1) {
     for (size_t i = 0; i < ws->size(); ++i) {
-      MatrixWorkspace_sptr currentWS =
-          std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));
+      MatrixWorkspace_sptr currentWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));
 
-      PropertyWithValue<int> *nperiodsProp =
-          new PropertyWithValue<int>("nperiods", nperiods);
+      PropertyWithValue<int> *nperiodsProp = new PropertyWithValue<int>("nperiods", nperiods);
       currentWS->mutableRun().addLogData(nperiodsProp);
     }
   }
@@ -84,8 +76,7 @@ private:
     for (size_t i = 0; i < 3; i++) {
       std::shared_ptr<WorkspaceTester> ws = std::make_shared<WorkspaceTester>();
       ws->initialize(2, 4, 3);
-      AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i),
-                                                   ws);
+      AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i), ws);
     }
     WorkspaceGroup_sptr group(new WorkspaceGroup());
     AnalysisDataService::Instance().addOrReplace("group", group);
@@ -130,8 +121,7 @@ public:
     TS_ASSERT_EQUALS(group->size(), 3);
     TS_ASSERT(group->contains("ws0"));
     // cannot add a workspace which doesn't exist
-    TS_ASSERT_THROWS(group->add("noworkspace"),
-                     const Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(group->add("noworkspace"), const Kernel::Exception::NotFoundError &);
     AnalysisDataService::Instance().clear();
   }
 
@@ -213,8 +203,7 @@ public:
     WorkspaceGroup_sptr group = makeGroup();
     group->remove("ws0");
     TSM_ASSERT("remove() takes out from group", !group->contains("ws0"));
-    TSM_ASSERT("remove() does not take out of ADS ",
-               AnalysisDataService::Instance().doesExist("ws0"));
+    TSM_ASSERT("remove() does not take out of ADS ", AnalysisDataService::Instance().doesExist("ws0"));
     AnalysisDataService::Instance().clear();
   }
 
@@ -240,8 +229,7 @@ public:
     WorkspaceGroup_sptr group = makeGroup();
     group->removeAll();
     TS_ASSERT_EQUALS(group->size(), 0);
-    TSM_ASSERT("removeAll() does not take out of ADS ",
-               AnalysisDataService::Instance().doesExist("ws0"));
+    TSM_ASSERT("removeAll() does not take out of ADS ", AnalysisDataService::Instance().doesExist("ws0"));
     AnalysisDataService::Instance().clear();
   }
 
@@ -318,9 +306,7 @@ public:
     Workspace_sptr a = std::make_shared<MockWorkspace>();
     WorkspaceGroup group;
     group.addWorkspace(a);
-    TSM_ASSERT(
-        "Cannot be multiperiod unless MatrixWorkspaces are used as elements.",
-        !group.isMultiperiod());
+    TSM_ASSERT("Cannot be multiperiod unless MatrixWorkspaces are used as elements.", !group.isMultiperiod());
   }
 
   void test_not_multiperiod_if_missing_nperiods_log() {
@@ -329,8 +315,7 @@ public:
                                                             // entry.
     WorkspaceGroup group;
     group.addWorkspace(a);
-    TSM_ASSERT("Cannot be multiperiod without nperiods log.",
-               !group.isMultiperiod());
+    TSM_ASSERT("Cannot be multiperiod without nperiods log.", !group.isMultiperiod());
   }
 
   void test_not_multiperiod_if_nperiods_log_less_than_one() {
@@ -338,8 +323,7 @@ public:
     WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
     group->addWorkspace(a);
     add_periods_logs(group, 0); // nperiods set to 0.
-    TSM_ASSERT("Cannot be multiperiod without nperiods log.",
-               !group->isMultiperiod());
+    TSM_ASSERT("Cannot be multiperiod without nperiods log.", !group->isMultiperiod());
   }
 
   void test_positive_identification_of_multiperiod_data() {
@@ -387,11 +371,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     WorkspaceGroup_const_sptr wsConst;
     WorkspaceGroup_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<WorkspaceGroup_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<WorkspaceGroup_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(wsNonConst =
-                                 manager.getValue<WorkspaceGroup_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<WorkspaceGroup_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
@@ -419,11 +401,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     Workspace_const_sptr wsConst;
     Workspace_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<Workspace_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<Workspace_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(wsNonConst =
-                                 manager.getValue<Workspace_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<Workspace_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 

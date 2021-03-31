@@ -36,9 +36,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING((BoxTree.initFlatStructure(spEw3, "aFile")));
 
-    TSM_ASSERT_EQUALS(
-        "Workspace creatrion helper should generate ws split into 1001 boxes",
-        1001, BoxTree.getNBoxes());
+    TSM_ASSERT_EQUALS("Workspace creatrion helper should generate ws split into 1001 boxes", 1001, BoxTree.getNBoxes());
 
     TS_ASSERT_THROWS_NOTHING(BoxTree.saveBoxStructure("someFile.nxs"));
 
@@ -47,32 +45,26 @@ public:
 
     MDBoxFlatTree BoxStoredTree;
     int nDims = 3;
-    TSM_ASSERT_THROWS(
-        "Should throw as the box data were written for lean event and now we "
-        "try to retrieve full events",
-        BoxStoredTree.loadBoxStructure("someFile.nxs", nDims, "MDEvent"),
-        const std::runtime_error &);
+    TSM_ASSERT_THROWS("Should throw as the box data were written for lean event and now we "
+                      "try to retrieve full events",
+                      BoxStoredTree.loadBoxStructure("someFile.nxs", nDims, "MDEvent"), const std::runtime_error &);
 
     nDims = 0;
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should path now and return nDims",
-        BoxStoredTree.loadBoxStructure("someFile.nxs", nDims, "MDLeanEvent"));
+    TSM_ASSERT_THROWS_NOTHING("Should path now and return nDims",
+                              BoxStoredTree.loadBoxStructure("someFile.nxs", nDims, "MDLeanEvent"));
 
     TSM_ASSERT_EQUALS("Should be nDims = 3", 3, nDims);
-    TS_ASSERT_THROWS_NOTHING(
-        BoxStoredTree.loadBoxStructure("someFile.nxs", nDims, "MDLeanEvent"));
+    TS_ASSERT_THROWS_NOTHING(BoxStoredTree.loadBoxStructure("someFile.nxs", nDims, "MDLeanEvent"));
 
     size_t nDim = size_t(BoxStoredTree.getNDims());
     auto new_bc = std::make_shared<Mantid::API::BoxController>(nDim);
     new_bc->fromXMLString(BoxStoredTree.getBCXMLdescr());
 
-    TSM_ASSERT(
-        "Should restore the box controller equal to the one before saving ",
-        *(spEw3->getBoxController()) == *(new_bc));
+    TSM_ASSERT("Should restore the box controller equal to the one before saving ",
+               *(spEw3->getBoxController()) == *(new_bc));
 
     std::vector<Mantid::API::IMDNode *> Boxes;
-    TS_ASSERT_THROWS_NOTHING(
-        BoxStoredTree.restoreBoxTree(Boxes, new_bc, false, false));
+    TS_ASSERT_THROWS_NOTHING(BoxStoredTree.restoreBoxTree(Boxes, new_bc, false, false));
 
     std::vector<Mantid::API::IMDNode *> OldBoxes;
     TS_ASSERT_THROWS_NOTHING(spEw3->getBoxes(OldBoxes, 1000, false));
@@ -84,8 +76,7 @@ public:
       size_t numChildren = Boxes[i]->getNumChildren();
       TS_ASSERT(OldBoxes[i]->getNumChildren() == numChildren);
       if (numChildren > 0) {
-        TS_ASSERT(OldBoxes[i]->getChild(0)->getID() ==
-                  Boxes[i]->getChild(0)->getID());
+        TS_ASSERT(OldBoxes[i]->getChild(0)->getID() == Boxes[i]->getChild(0)->getID());
       }
     }
 

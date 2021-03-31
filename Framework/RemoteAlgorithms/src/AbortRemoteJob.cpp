@@ -34,35 +34,27 @@ void AbortRemoteJob::init() {
   auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
-  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
-                                          .getFacility()
-                                          .computeResources();
-  declareProperty(
-      "ComputeResource", "", std::make_shared<StringListValidator>(computes),
-      "The remote computer where the job is running", Direction::Input);
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty("ComputeResource", "", std::make_shared<StringListValidator>(computes),
+                  "The remote computer where the job is running", Direction::Input);
 
   // The ID of the job we want to Abort
-  declareProperty("JobID", "", requireValue, "The ID of the job to abort",
-                  Direction::Input);
+  declareProperty("JobID", "", requireValue, "The ID of the job to abort", Direction::Input);
 }
 
 void AbortRemoteJob::exec() {
   std::shared_ptr<RemoteJobManager> jobManager =
-      Mantid::Kernel::ConfigService::Instance()
-          .getFacility()
-          .getRemoteJobManager(getPropertyValue("ComputeResource"));
+      Mantid::Kernel::ConfigService::Instance().getFacility().getRemoteJobManager(getPropertyValue("ComputeResource"));
 
   // jobManager is a std::shared_ptr...
   if (!jobManager) {
     // Requested compute resource doesn't exist
     // TODO: should we create our own exception class for this??
     throw(std::runtime_error(
-        std::string("Unable to create a compute resource named " +
-                    getPropertyValue("ComputeResource"))));
+        std::string("Unable to create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
-  std::istream &respStream = jobManager->httpGet(
-      "/abort", std::string("JobID=") + getPropertyValue("JobID"));
+  std::istream &respStream = jobManager->httpGet("/abort", std::string("JobID=") + getPropertyValue("JobID"));
 
   if (jobManager->lastStatus() != Poco::Net::HTTPResponse::HTTP_OK) {
     JSONObject resp;

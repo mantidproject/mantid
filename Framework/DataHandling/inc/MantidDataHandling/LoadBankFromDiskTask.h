@@ -25,13 +25,9 @@ class DefaultEventLoader;
 class MANTID_DATAHANDLING_DLL LoadBankFromDiskTask : public Kernel::Task {
 
 public:
-  LoadBankFromDiskTask(DefaultEventLoader &loader,
-                       const std::string &entry_name,
-                       const std::string &entry_type,
-                       const std::size_t numEvents,
-                       const bool oldNeXusFileNames, API::Progress *prog,
-                       std::shared_ptr<std::mutex> ioMutex,
-                       Kernel::ThreadScheduler &scheduler,
+  LoadBankFromDiskTask(DefaultEventLoader &loader, const std::string &entry_name, const std::string &entry_type,
+                       const std::size_t numEvents, const bool oldNeXusFileNames, API::Progress *prog,
+                       std::shared_ptr<std::mutex> ioMutex, Kernel::ThreadScheduler &scheduler,
                        const std::vector<int> &framePeriodNumbers);
 
   void run() override;
@@ -39,8 +35,7 @@ public:
 private:
   void loadPulseTimes(::NeXus::File &file);
   std::vector<uint64_t> loadEventIndex(::NeXus::File &file);
-  void prepareEventId(::NeXus::File &file, int64_t &start_event,
-                      int64_t &stop_event,
+  void prepareEventId(::NeXus::File &file, int64_t &start_event, int64_t &stop_event,
                       const std::vector<uint64_t> &event_index);
   std::unique_ptr<std::vector<uint32_t>> loadEventId(::NeXus::File &file);
   std::unique_ptr<std::vector<float>> loadTof(::NeXus::File &file);

@@ -18,8 +18,7 @@ namespace DataHandling {
 
 /*! LoadILLReflectometry : Loads an ILL reflectometry Nexus data file.
  */
-class DLLExport LoadILLReflectometry
-    : public API::IFileLoader<Kernel::NexusDescriptor> {
+class DLLExport LoadILLReflectometry : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadILLReflectometry() = default;
   /// Returns a confidence value that this algorithm can load a file
@@ -28,14 +27,10 @@ public:
   const std::string name() const override { return "LoadILLReflectometry"; }
   /// Algorithm's version for identification. @see Algorithm::version
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadNexus"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
   std::map<std::string, std::string> validateInputs() override;
   /// Algorithm's category for search and find. @see Algorithm::category
-  const std::string category() const override {
-    return "DataHandling\\Nexus;ILL\\Reflectometry";
-  }
+  const std::string category() const override { return "DataHandling\\Nexus;ILL\\Reflectometry"; }
   /// Algorithm's summary. @see Algorithm::summary
   const std::string summary() const override {
     return "Loads an ILL reflectometry Nexus file (instrument D17 or "
@@ -60,12 +55,10 @@ private:
   std::vector<double> getXValues();
   void convertTofToWavelength();
   double reflectometryPeak();
-  void loadData(NeXus::NXEntry &entry,
-                const std::vector<std::vector<int>> &monitorsData,
+  void loadData(NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitorsData,
                 const std::vector<double> &xVals);
   void loadNexusEntriesIntoProperties();
-  std::vector<int> loadSingleMonitor(NeXus::NXEntry &entry,
-                                     const std::string &monitor_data);
+  std::vector<int> loadSingleMonitor(NeXus::NXEntry &entry, const std::string &monitor_data);
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void loadInstrument();
   double peakOffsetAngle();
@@ -76,12 +69,11 @@ private:
   void placeSource();
   double collimationAngle() const;
   double detectorAngle() const;
-  double offsetAngle(const double peakCentre, const double detectorCentre,
-                     const double detectorDistance) const;
+  double offsetAngle(const double peakCentre, const double detectorCentre, const double detectorDistance) const;
   API::MatrixWorkspace_sptr m_localWorkspace;
 
   Supported m_instrument{Supported::D17}; ///< Name of the instrument
-  size_t m_acqMode{1}; ///< Acquisition mode (1 TOF (default), 0 monochromatic)
+  size_t m_acqMode{1};                    ///< Acquisition mode (1 TOF (default), 0 monochromatic)
   size_t m_numberOfChannels{0};
   double m_tofDelay{0.0};
   size_t m_numberOfHistograms{0};

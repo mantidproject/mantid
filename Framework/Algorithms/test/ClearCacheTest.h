@@ -29,8 +29,7 @@ public:
 
   void setUp() override {
     const std::string TEST_SUFFIX = "TEMPORARY_ClearCacheUnitTest";
-    m_originalInstDir =
-        Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
+    m_originalInstDir = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
 
     // change the local download directory by adding a unittest subdirectory
     auto testDirectories = m_originalInstDir;
@@ -40,8 +39,7 @@ public:
     createDirectory(localDownloadPath);
     testDirectories[0] = m_localInstDir;
 
-    Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(
-        testDirectories);
+    Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(testDirectories);
 
     // create a geometryCache subdirectory
     Poco::Path GeomPath = localDownloadPath;
@@ -70,8 +68,7 @@ public:
   }
 
   void tearDown() override {
-    Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(
-        m_originalInstDir);
+    Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(m_originalInstDir);
     removeDirectories();
   }
 
@@ -116,14 +113,12 @@ public:
     Poco::Path localPath(instrumentDirs[0]);
     localPath.makeDirectory();
     // create a file in the directory
-    Poco::File testFile(
-        localPath.append("test_exec_DownloadInstrument_Cache.xml"));
+    Poco::File testFile(localPath.append("test_exec_DownloadInstrument_Cache.xml"));
     testFile.createFile();
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DownloadedInstrumentFileCache", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DownloadedInstrumentFileCache", true));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 

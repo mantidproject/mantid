@@ -66,8 +66,7 @@ private:
     double effective_number_density;
     double packing_fraction;
   };
-  density_packing
-  getOrCalculateRhoAndPacking(const Material::ChemicalFormula &formula) const;
+  density_packing getOrCalculateRhoAndPacking(const Material::ChemicalFormula &formula) const;
 
   std::string m_name;
   Material::ChemicalFormula m_formula;
@@ -76,8 +75,7 @@ private:
   boost::optional<double> m_numberDensity, m_packingFraction;
   boost::optional<double> m_numberDensityEff;
   boost::optional<double> m_zParam, m_cellVol, m_massDensity;
-  boost::optional<double> m_totalXSection, m_cohXSection, m_incXSection,
-      m_absSection;
+  boost::optional<double> m_totalXSection, m_cohXSection, m_incXSection, m_absSection;
   NumberDensityUnit m_numberDensityUnit;
   boost::optional<std::string> m_attenuationProfileFileName;
   boost::optional<std::string> m_xRayAttenuationProfileFileName;

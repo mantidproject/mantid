@@ -31,9 +31,8 @@ namespace {
  * @param right :: element to compare
  * @return true if left should come before right in the order
  */
-static bool
-compareIDPair(const std::pair<int64_t, Mantid::Kernel::V3D> &left,
-              const std::pair<int64_t, Mantid::Kernel::V3D> &right) {
+static bool compareIDPair(const std::pair<int64_t, Mantid::Kernel::V3D> &left,
+                          const std::pair<int64_t, Mantid::Kernel::V3D> &right) {
   return (left.second.norm() < right.second.norm());
 }
 } // namespace
@@ -47,12 +46,11 @@ DECLARE_ALGORITHM(SpatialGrouping)
  * init() method implemented from Algorithm base class
  */
 void SpatialGrouping::init() {
-  declareProperty(std::make_unique<Mantid::API::WorkspaceProperty<>>(
-                      "InputWorkspace", "", Mantid::Kernel::Direction::Input),
-                  "Name of the input workspace, which is used only as a means "
-                  "of retrieving the instrument geometry.");
-  declareProperty(std::make_unique<Mantid::API::FileProperty>(
-                      "Filename", "", Mantid::API::FileProperty::Save, ".xml"),
+  declareProperty(
+      std::make_unique<Mantid::API::WorkspaceProperty<>>("InputWorkspace", "", Mantid::Kernel::Direction::Input),
+      "Name of the input workspace, which is used only as a means "
+      "of retrieving the instrument geometry.");
+  declareProperty(std::make_unique<Mantid::API::FileProperty>("Filename", "", Mantid::API::FileProperty::Save, ".xml"),
                   "Name (and location) in which to save the file. Having a "
                   "suffix of ''.xml'' is recommended.");
   declareProperty("SearchDistance", 2.5,
@@ -69,8 +67,7 @@ void SpatialGrouping::init() {
  * exec() method implemented from Algorithm base class
  */
 void SpatialGrouping::exec() {
-  API::MatrixWorkspace_const_sptr inputWorkspace =
-      getProperty("InputWorkspace");
+  API::MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   double searchDist = getProperty("SearchDistance");
   int gridSize = getProperty("GridSize");
   size_t nNeighbours = (gridSize * gridSize) - 1;
@@ -88,8 +85,7 @@ void SpatialGrouping::exec() {
   Mantid::API::Progress prog(this, 0.0, 1.0, m_positions.size());
 
   bool ignoreMaskedDetectors = false;
-  m_neighbourInfo = std::make_unique<API::WorkspaceNearestNeighbourInfo>(
-      *inputWorkspace, ignoreMaskedDetectors);
+  m_neighbourInfo = std::make_unique<API::WorkspaceNearestNeighbourInfo>(*inputWorkspace, ignoreMaskedDetectors);
 
   for (size_t i = 0; i < inputWorkspace->getNumberHistograms(); ++i) {
     prog.report();
@@ -114,8 +110,7 @@ void SpatialGrouping::exec() {
     std::map<detid_t, Mantid::Kernel::V3D> nearest;
 
     const double empty = EMPTY_DBL();
-    Mantid::Geometry::BoundingBox bbox(empty, empty, empty, empty, empty,
-                                       empty);
+    Mantid::Geometry::BoundingBox bbox(empty, empty, empty, empty, empty, empty);
 
     createBox(spectrumInfo.detector(i), bbox, searchDist);
 
@@ -172,15 +167,12 @@ void SpatialGrouping::exec() {
 
   int grpID = 1;
   for (grpIt = m_groups.begin(); grpIt != m_groups.end(); ++grpIt) {
-    xml << "<group name=\"group" << grpID++ << "\"><detids val=\""
-        << (*grpIt)[0];
+    xml << "<group name=\"group" << grpID++ << "\"><detids val=\"" << (*grpIt)[0];
     for (size_t i = 1; i < (*grpIt).size(); i++) {
       // The following lines replace: std::vector<detid_t> detIds =
       // smap.getDetectors((*grpIt)[i]);
-      size_t workspaceIndex =
-          inputWorkspace->getIndexFromSpectrumNumber((*grpIt)[i]);
-      const auto &detIds =
-          inputWorkspace->getSpectrum(workspaceIndex).getDetectorIDs();
+      size_t workspaceIndex = inputWorkspace->getIndexFromSpectrumNumber((*grpIt)[i]);
+      const auto &detIds = inputWorkspace->getSpectrum(workspaceIndex).getDetectorIDs();
       for (auto detId : detIds) {
         xml << "," << detId;
       }
@@ -207,9 +199,8 @@ void SpatialGrouping::exec() {
  * @return true if neighbours were found matching the parameters, false
  * otherwise
  */
-bool SpatialGrouping::expandNet(
-    std::map<specnum_t, Mantid::Kernel::V3D> &nearest, specnum_t spec,
-    const size_t noNeighbours, const Mantid::Geometry::BoundingBox &bbox) {
+bool SpatialGrouping::expandNet(std::map<specnum_t, Mantid::Kernel::V3D> &nearest, specnum_t spec,
+                                const size_t noNeighbours, const Mantid::Geometry::BoundingBox &bbox) {
   const size_t incoming = nearest.size();
 
   std::map<specnum_t, Mantid::Kernel::V3D> potentials;
@@ -278,11 +269,8 @@ bool SpatialGrouping::expandNet(
  * the method
  * @param noNeighbours :: number of elements that should be kept
  */
-void SpatialGrouping::sortByDistance(
-    std::map<detid_t, Mantid::Kernel::V3D> &nearest,
-    const size_t noNeighbours) {
-  std::vector<std::pair<detid_t, Mantid::Kernel::V3D>> order(nearest.begin(),
-                                                             nearest.end());
+void SpatialGrouping::sortByDistance(std::map<detid_t, Mantid::Kernel::V3D> &nearest, const size_t noNeighbours) {
+  std::vector<std::pair<detid_t, Mantid::Kernel::V3D>> order(nearest.begin(), nearest.end());
 
   std::sort(order.begin(), order.end(), compareIDPair);
 
@@ -307,9 +295,7 @@ void SpatialGrouping::sortByDistance(
  * @param searchDist :: search distance in pixels, number of pixels to search
  * through for finding group
  */
-void SpatialGrouping::createBox(const Geometry::IDetector &det,
-                                Geometry::BoundingBox &bndbox,
-                                double searchDist) {
+void SpatialGrouping::createBox(const Geometry::IDetector &det, Geometry::BoundingBox &bndbox, double searchDist) {
 
   // We may have DetectorGroups here
   // Unfortunately, IDetector doesn't contain the

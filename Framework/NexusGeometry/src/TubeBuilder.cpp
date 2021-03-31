@@ -16,14 +16,12 @@ namespace NexusGeometry {
 
 namespace detail {
 
-TubeBuilder::TubeBuilder(const Mantid::Geometry::IObject &pixelShape,
-                         const Eigen::Vector3d &firstDetectorPosition,
+TubeBuilder::TubeBuilder(const Mantid::Geometry::IObject &pixelShape, const Eigen::Vector3d &firstDetectorPosition,
                          int firstDetectorId)
     : m_pixelHeight(pixelShape.getGeometryHandler()->shapeInfo().height()),
       m_pixelRadius(pixelShape.getGeometryHandler()->shapeInfo().radius()) {
   // Get axis along which cylinder lies
-  m_axis = Kernel::toVector3d(
-      pixelShape.getGeometryHandler()->shapeInfo().points()[1]);
+  m_axis = Kernel::toVector3d(pixelShape.getGeometryHandler()->shapeInfo().points()[1]);
   // Set position and id of first detector in tube
   m_positions.emplace_back(firstDetectorPosition);
   m_detIDs.emplace_back(firstDetectorId);
@@ -45,9 +43,7 @@ const Eigen::Vector3d &TubeBuilder::tubePosition() const { return m_baseVec; }
 
 size_t TubeBuilder::size() const { return m_positions.size(); }
 
-const std::vector<Eigen::Vector3d> &TubeBuilder::detPositions() const {
-  return m_positions;
-}
+const std::vector<Eigen::Vector3d> &TubeBuilder::detPositions() const { return m_positions; }
 
 const std::vector<int> &TubeBuilder::detIDs() const { return m_detIDs; }
 

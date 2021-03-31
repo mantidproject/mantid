@@ -25,8 +25,8 @@ using namespace Geometry;
 using namespace API;
 
 CylinderAbsorption::CylinderAbsorption()
-    : AbsorptionCorrection(), m_cylHeight(0.0), m_cylRadius(0.0),
-      m_numSlices(0), m_numAnnuli(0), m_useSampleShape(false) {}
+    : AbsorptionCorrection(), m_cylHeight(0.0), m_cylRadius(0.0), m_numSlices(0), m_numAnnuli(0),
+      m_useSampleShape(false) {}
 
 std::map<std::string, std::string> CylinderAbsorption::validateInputs() {
   std::map<std::string, std::string> issues;
@@ -44,32 +44,27 @@ void CylinderAbsorption::defineProperties() {
                   "The height of the cylindrical sample in centimetres");
   declareProperty("CylinderSampleRadius", EMPTY_DBL(), mustBePositive,
                   "The radius of the cylindrical sample in centimetres");
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("CylinderAxis", "0.0, 1.0, 0.0"),
-      "A 3D vector specifying the cylindrical sample's orientation");
+  declareProperty(std::make_unique<ArrayProperty<double>>("CylinderAxis", "0.0, 1.0, 0.0"),
+                  "A 3D vector specifying the cylindrical sample's orientation");
 
   auto positiveInt = std::make_shared<BoundedValidator<int>>();
   positiveInt->setLower(1);
-  declareProperty(
-      "NumberOfSlices", 1, positiveInt,
-      "The number of slices into which the cylinder is divided for the\n"
-      "calculation");
-  declareProperty(
-      "NumberOfAnnuli", 1, positiveInt,
-      "The number of annuli into which each slice is divided for the\n"
-      "calculation");
+  declareProperty("NumberOfSlices", 1, positiveInt,
+                  "The number of slices into which the cylinder is divided for the\n"
+                  "calculation");
+  declareProperty("NumberOfAnnuli", 1, positiveInt,
+                  "The number of annuli into which each slice is divided for the\n"
+                  "calculation");
 }
 
 // returns an empty string if anything is wrong
-void CylinderAbsorption::getShapeFromSample(
-    const Geometry::IObject &sampleShape, bool updateHeight,
-    bool updateRadius) {
+void CylinderAbsorption::getShapeFromSample(const Geometry::IObject &sampleShape, bool updateHeight,
+                                            bool updateRadius) {
   if (!(updateHeight || updateRadius))
     return; // nothing to update
   if (!sampleShape.hasValidShape())
     return; // no valid shape
-  if (sampleShape.shape() !=
-      Geometry::detail::ShapeInfo::GeometryShape::CYLINDER)
+  if (sampleShape.shape() != Geometry::detail::ShapeInfo::GeometryShape::CYLINDER)
     return; // not a cylinder
 
   // get to the underlying ShapeInfo object
@@ -111,8 +106,7 @@ void CylinderAbsorption::retrieveProperties() {
 
   // if the user supplied both, then just ignore the built-in shape
   if (userSuppliedHeight && userSuppliedRadius) {
-    g_log.information(
-        "Chosing user supplied sample geometry in CylinderAbsorption");
+    g_log.information("Chosing user supplied sample geometry in CylinderAbsorption");
     return;
   }
 
@@ -123,14 +117,12 @@ void CylinderAbsorption::retrieveProperties() {
   bool heightOk = m_cylRadius >= 0. && (!isEmpty(m_cylHeight));
   bool radiusOk = (m_cylRadius >= 0.) && (!isEmpty(m_cylRadius));
   if (heightOk && radiusOk) {
-    g_log.information() << "Creating cylinder with radius=" << m_cylRadius
-                        << "m, height=" << m_cylHeight << "m\n";
+    g_log.information() << "Creating cylinder with radius=" << m_cylRadius << "m, height=" << m_cylHeight << "m\n";
   } else if (!heightOk) {
     if (radiusOk) {
       throw std::invalid_argument("Failed to specify height of cylinder");
     } else { // radiusOk == false
-      throw std::invalid_argument(
-          "Failed to specify height and radius of cylinder");
+      throw std::invalid_argument("Failed to specify height and radius of cylinder");
     }
   } else { // radiusOk == false
     throw std::invalid_argument("Failed to specify radius of cylinder");
@@ -151,10 +143,10 @@ std::string CylinderAbsorption::sampleXML() {
   // else is desired, it will have to be done through SetSample.
   std::ostringstream xmlShapeStream;
   xmlShapeStream << "<cylinder id=\"detector-shape\"> "
-                 << "<centre-of-bottom-base x=\"" << cylBase.X() << "\" y=\""
-                 << cylBase.Y() << "\" z=\"" << cylBase.Z() << "\" /> "
-                 << "<axis x=\"" << m_cylAxis.X() << "\" y=\"" << m_cylAxis.Y()
-                 << "\" z=\"" << m_cylAxis.Z() << "\" /> "
+                 << "<centre-of-bottom-base x=\"" << cylBase.X() << "\" y=\"" << cylBase.Y() << "\" z=\"" << cylBase.Z()
+                 << "\" /> "
+                 << "<axis x=\"" << m_cylAxis.X() << "\" y=\"" << m_cylAxis.Y() << "\" z=\"" << m_cylAxis.Z()
+                 << "\" /> "
                  << "<radius val=\"" << m_cylRadius << "\" /> "
                  << "<height val=\"" << m_cylHeight << "\" /> "
                  << "</cylinder>";
@@ -168,15 +160,12 @@ void CylinderAbsorption::initialiseCachedDistances() {
   if (!m_sampleObject) // should never happen
     throw std::runtime_error("Do not have a sample object defined");
 
-  if (m_sampleObject->shape() !=
-      Geometry::detail::ShapeInfo::GeometryShape::CYLINDER)
+  if (m_sampleObject->shape() != Geometry::detail::ShapeInfo::GeometryShape::CYLINDER)
     throw std::runtime_error("Sample shape is not a cylinder");
   const auto *shape = dynamic_cast<const Geometry::CSGObject *>(m_sampleObject);
   if (!shape)
-    throw std::runtime_error(
-        "Failed to convert shape from IObject to CSGObject");
-  auto raster = Geometry::Rasterize::calculateCylinder(
-      m_beamDirection, *shape, m_numSlices, m_numAnnuli);
+    throw std::runtime_error("Failed to convert shape from IObject to CSGObject");
+  auto raster = Geometry::Rasterize::calculateCylinder(m_beamDirection, *shape, m_numSlices, m_numAnnuli);
   m_sampleVolume = raster.totalvolume;
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize shape");

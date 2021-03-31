@@ -45,8 +45,7 @@ const char *nofile_flag = "nofile";
 
 /// Executes the download from ScriptRepository. This function will be executed
 /// in a separate thread
-static QString download_thread(Mantid::API::ScriptRepository_sptr &pt,
-                               const std::string &path) {
+static QString download_thread(Mantid::API::ScriptRepository_sptr &pt, const std::string &path) {
   QString result;
   try {
     pt->download(path);
@@ -61,12 +60,10 @@ static QString download_thread(Mantid::API::ScriptRepository_sptr &pt,
 
 /// Execute the upload from ScriptRepository. This function will be executed in
 /// a separate thread
-static QString upload_thread(Mantid::API::ScriptRepository_sptr &pt,
-                             const std::string &path, const QString &email,
+static QString upload_thread(Mantid::API::ScriptRepository_sptr &pt, const std::string &path, const QString &email,
                              const QString &author, const QString &comment) {
   try {
-    pt->upload(path, comment.toStdString(), author.toStdString(),
-               email.toStdString());
+    pt->upload(path, comment.toStdString(), author.toStdString(), email.toStdString());
   } catch (Mantid::API::ScriptRepoException &ex) {
     QString info = QString::fromStdString(ex.what());
     info.replace("\n", "</p><p>");
@@ -76,12 +73,10 @@ static QString upload_thread(Mantid::API::ScriptRepository_sptr &pt,
 }
 /// Execute the remove from ScriptRepository. This function will be executed in
 /// a separate thread.
-static QString delete_thread(Mantid::API::ScriptRepository_sptr &pt,
-                             const std::string &path, const QString &email,
+static QString delete_thread(Mantid::API::ScriptRepository_sptr &pt, const std::string &path, const QString &email,
                              const QString &author, const QString &comment) {
   try {
-    pt->remove(path, comment.toStdString(), author.toStdString(),
-               email.toStdString());
+    pt->remove(path, comment.toStdString(), author.toStdString(), email.toStdString());
   } catch (Mantid::API::ScriptRepoException &ex) {
     QString info = QString::fromStdString(ex.what());
     info.replace("\n", "</p><p>");
@@ -101,17 +96,14 @@ static QString delete_thread(Mantid::API::ScriptRepository_sptr &pt,
   user nicer way.
 
 */
-RepoModel::RepoItem::RepoItem(const QString &label, const QString &path,
-                              RepoItem *parent)
+RepoModel::RepoItem::RepoItem(const QString &label, const QString &path, RepoItem *parent)
     : m_label(label), keypath(path), parentItem(parent) {}
 /// destruct all the childItems.
 RepoModel::RepoItem::~RepoItem() { qDeleteAll(childItems); }
 /** This method is the very responsible to allow the reconstruction of the
     hierarchical tree, keeping track of the children of one item.
  */
-void RepoModel::RepoItem::appendChild(RepoItem *child) {
-  childItems.append(child);
-}
+void RepoModel::RepoItem::appendChild(RepoItem *child) { childItems.append(child); }
 
 /** Gives access to the row_th children of RepoItem. Note that
     the row can not be greater than RepoModel::childCount().
@@ -124,9 +116,7 @@ void RepoModel::RepoItem::appendChild(RepoItem *child) {
     @return The pointer to the row_th children.
 
  */
-RepoModel::RepoItem *RepoModel::RepoItem::child(int row) const {
-  return childItems.value(row);
-}
+RepoModel::RepoItem *RepoModel::RepoItem::child(int row) const { return childItems.value(row); }
 
 /** Return the number of children that this entry may find.
     @return Number of children
@@ -168,8 +158,7 @@ RepoModel::RepoModel(QObject *parent) : QAbstractItemModel(parent) {
   using Mantid::API::ScriptRepository_sptr;
   using Mantid::API::ScriptRepositoryFactory;
   repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
-  connect(&download_watcher, SIGNAL(finished()), this,
-          SLOT(downloadFinished()));
+  connect(&download_watcher, SIGNAL(finished()), this, SLOT(downloadFinished()));
   connect(&upload_watcher, SIGNAL(finished()), this, SLOT(uploadFinished()));
   uploading_path = nofile_flag;
   downloading_path = nofile_flag;
@@ -269,8 +258,7 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
         if (inf.directory) {
           status = repo_ptr->fileStatus(path.toStdString());
           if (status == Mantid::API::REMOTE_ONLY)
-            return QIcon::fromTheme("folder-remote",
-                                    QIcon(QPixmap(":/win/folder-remote")));
+            return QIcon::fromTheme("folder-remote", QIcon(QPixmap(":/win/folder-remote")));
           else
             return QIcon::fromTheme("folder", QIcon(QPixmap(":/win/folder")));
         } else {
@@ -278,27 +266,19 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
           if (pos < 0)
             return QIcon::fromTheme("unknown", QIcon(QPixmap(":/win/unknown")));
           if (path.contains("readme", Qt::CaseInsensitive))
-            return QIcon::fromTheme("text-x-readme",
-                                    QIcon(QPixmap(":/win/txt_file.png")));
+            return QIcon::fromTheme("text-x-readme", QIcon(QPixmap(":/win/txt_file.png")));
 
           QString extension = QString(path).remove(0, pos);
-          if (extension == ".cpp" || extension == ".CPP" || extension == ".c" ||
-              extension == ".C")
-            return QIcon::fromTheme("text-x-c++",
-                                    QIcon(QPixmap(":/win/unknown")));
+          if (extension == ".cpp" || extension == ".CPP" || extension == ".c" || extension == ".C")
+            return QIcon::fromTheme("text-x-c++", QIcon(QPixmap(":/win/unknown")));
           else if (extension == ".py" || extension == ".PY")
-            return QIcon::fromTheme("text-x-python",
-                                    QIcon(QPixmap(":/win/text-x-python")));
+            return QIcon::fromTheme("text-x-python", QIcon(QPixmap(":/win/text-x-python")));
           else if (extension == ".ui")
-            return QIcon::fromTheme("document",
-                                    QIcon(QPixmap(":/win/document")));
-          else if (extension == ".docx" || extension == ".doc" ||
-                   extension == ".odf")
-            return QIcon::fromTheme("x-office-document",
-                                    QIcon(QPixmap(":/win/office-document")));
+            return QIcon::fromTheme("document", QIcon(QPixmap(":/win/document")));
+          else if (extension == ".docx" || extension == ".doc" || extension == ".odf")
+            return QIcon::fromTheme("x-office-document", QIcon(QPixmap(":/win/office-document")));
           else if (extension == ".pdf")
-            return QIcon::fromTheme("application-pdf",
-                                    QIcon(QPixmap(":/win/file_pdf")));
+            return QIcon::fromTheme("application-pdf", QIcon(QPixmap(":/win/file_pdf")));
           else
             return QIcon::fromTheme("unknown", QIcon(QPixmap(":/win/unknown")));
         }
@@ -320,10 +300,8 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
           if (extension == ".py" || extension == ".PY")
             return Icons::getIcon("mdi.language-python", "black", 1.2);
           else if (extension == ".ui")
-            return Icons::getIcon("mdi.file-document-box-outline", "black",
-                                  1.2);
-          else if (extension == ".docx" || extension == ".doc" ||
-                   extension == ".odf")
+            return Icons::getIcon("mdi.file-document-box-outline", "black", 1.2);
+          else if (extension == ".docx" || extension == ".doc" || extension == ".odf")
             return Icons::getIcon("mdi.file-outline", "black", 1.2);
           else if (extension == ".pdf")
             return Icons::getIcon("mdi.file-pdf-outline", "black", 1.2);
@@ -346,13 +324,11 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
         switch (status) {
 
         case REMOTE_ONLY:
-          return (inf.directory)
-                     ? "Click here to download this folder and all its files"
-                     : "Click here to download this file";
+          return (inf.directory) ? "Click here to download this folder and all its files"
+                                 : "Click here to download this file";
           break;
         case BOTH_UNCHANGED:
-          return (inf.directory) ? "This folder is up-to-date"
-                                 : "This file is up-to-date";
+          return (inf.directory) ? "This folder is up-to-date" : "This file is up-to-date";
           break;
         case LOCAL_CHANGED:
           return "Click here to publish your changes";
@@ -362,13 +338,12 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
                                  : "There is a new version of this file "
                                    "available. Click here to install it.";
         case BOTH_CHANGED:
-          return (inf.directory)
-                     ? "Files in this folder may have changed both locally and "
-                       "remotely.\nClick here to install the remote version, "
-                       "a backup of the local version will also be created."
-                     : "This file may have changed both locally and "
-                       "remotely.\nClick here to install the remote version, "
-                       "a backup of the local version will also be created.";
+          return (inf.directory) ? "Files in this folder may have changed both locally and "
+                                   "remotely.\nClick here to install the remote version, "
+                                   "a backup of the local version will also be created."
+                                 : "This file may have changed both locally and "
+                                   "remotely.\nClick here to install the remote version, "
+                                   "a backup of the local version will also be created.";
           break;
         case LOCAL_ONLY:
           return "Click here to share this file with the Mantid community!";
@@ -435,8 +410,7 @@ const QString &RepoModel::fromStatus(Mantid::API::SCRIPTSTATUS status) const {
  *
  *
  */
-bool RepoModel::setData(const QModelIndex &index, const QVariant &value,
-                        int role) {
+bool RepoModel::setData(const QModelIndex &index, const QVariant &value, int role) {
   if (!index.isValid())
     return false;
   if (role != Qt::EditRole)
@@ -507,18 +481,16 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value,
       form->lastSaveOption(lastChk);
       if (form->exec()) {
         settings.setValue("UploadEmail", form->saveInfo() ? form->email() : "");
-        settings.setValue("UploadAuthor",
-                          form->saveInfo() ? form->author() : "");
+        settings.setValue("UploadAuthor", form->saveInfo() ? form->author() : "");
         settings.setValue("UploadSaveInfo", form->saveInfo());
 
-        qDebug() << "Uploading... " << QString::fromStdString(path)
-                 << form->comment() << form->author() << form->email() << '\n';
+        qDebug() << "Uploading... " << QString::fromStdString(path) << form->comment() << form->author()
+                 << form->email() << '\n';
         uploading_path = QString::fromStdString(path);
         upload_index = index;
         emit executingThread(true);
         upload_threads =
-            QtConcurrent::run(upload_thread, repo_ptr, path, form->email(),
-                              form->author(), form->comment());
+            QtConcurrent::run(upload_thread, repo_ptr, path, form->email(), form->author(), form->comment());
         upload_watcher.setFuture(upload_threads);
         ret = true;
       } else {
@@ -583,9 +555,7 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value,
 
     // check if the reason was given and it is valid
     if (comment.isEmpty()) {
-      QMessageBox::information(
-          father, "Not Allowed",
-          "You are not allowed to delete one file without a reason");
+      QMessageBox::information(father, "Not Allowed", "You are not allowed to delete one file without a reason");
       return false;
     }
 
@@ -610,8 +580,7 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value,
     upload_index = index;
     uploading_path = QString::fromStdString(path);
     emit executingThread(true);
-    upload_threads = QtConcurrent::run(delete_thread, repo_ptr, path, email,
-                                       author, comment);
+    upload_threads = QtConcurrent::run(delete_thread, repo_ptr, path, email, author, comment);
     upload_watcher.setFuture(upload_threads);
     ret = true;
   } // end delete action
@@ -652,8 +621,7 @@ Qt::ItemFlags RepoModel::flags(const QModelIndex &index) const {
  *
  *  @return The title for the columns.
  */
-QVariant RepoModel::headerData(int section, Qt::Orientation orientation,
-                               int role) const {
+QVariant RepoModel::headerData(int section, Qt::Orientation orientation, int role) const {
   if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
     switch (section) {
     case 0:
@@ -685,8 +653,7 @@ QVariant RepoModel::headerData(int section, Qt::Orientation orientation,
  * @return The QModelIndex that allows to retrieve the information of the
  *desired child.
  */
-QModelIndex RepoModel::index(int row, int column,
-                             const QModelIndex &parent) const {
+QModelIndex RepoModel::index(int row, int column, const QModelIndex &parent) const {
   // check if the row and column are allowed,
   // for example, it will not accept column == 3, or row = 1
   // for parent that refers to file and not to folder.
@@ -762,8 +729,7 @@ QString RepoModel::fileDescription(const QModelIndex &index) {
     return "";
   QString desc;
   try {
-    desc = QString::fromStdString(
-        repo_ptr->description(item->path().toStdString()));
+    desc = QString::fromStdString(repo_ptr->description(item->path().toStdString()));
   } catch (...) {
     // just ignore
   }
@@ -776,8 +742,7 @@ QString RepoModel::author(const QModelIndex &index) {
   if (!item)
     return author;
   try {
-    author = QString::fromStdString(
-        repo_ptr->info(item->path().toStdString()).author);
+    author = QString::fromStdString(repo_ptr->info(item->path().toStdString()).author);
   } catch (...) {
     // just ignore
   }
@@ -791,8 +756,7 @@ QString RepoModel::author(const QModelIndex &index) {
 QString RepoModel::filePath(const QModelIndex &index) {
   auto *item = static_cast<RepoItem *>(index.internalPointer());
   //   qDebug() << "Get file path from : " <<  item->path()<< '\n';
-  Mantid::API::SCRIPTSTATUS state =
-      repo_ptr->fileStatus(item->path().toStdString());
+  Mantid::API::SCRIPTSTATUS state = repo_ptr->fileStatus(item->path().toStdString());
 
   if (state == Mantid::API::REMOTE_ONLY)
     return "";
@@ -822,8 +786,7 @@ related to a RepoItem
    @return Pointer to the RepoItem related to the given folder.
 
 **/
-RepoModel::RepoItem *RepoModel::getParent(const QString &folder,
-                                          QList<RepoItem *> &parents) {
+RepoModel::RepoItem *RepoModel::getParent(const QString &folder, QList<RepoItem *> &parents) {
   // in order to speed the algorithm, check if the
   // folder is the same of the last folder.
   if (parents.last()->path() == folder)
@@ -933,28 +896,24 @@ void RepoModel::setupModelData(RepoItem *root) {
     }
   }
 }
-void RepoModel::handleExceptions(const Mantid::API::ScriptRepoException &ex,
-                                 const QString &title, bool showWarning) const {
-  g_log.information() << "Download failed " << ex.what()
-                      << "\n Detail: " << ex.systemError() << '\n';
+void RepoModel::handleExceptions(const Mantid::API::ScriptRepoException &ex, const QString &title,
+                                 bool showWarning) const {
+  g_log.information() << "Download failed " << ex.what() << "\n Detail: " << ex.systemError() << '\n';
   if (showWarning) {
 
     QWidget *father = qobject_cast<QWidget *>(QObject::parent());
     QString info = QString::fromStdString(ex.what());
     // make the exception a nice html message
     info.replace("\n", "</p><p>");
-    QMessageBox::warning(
-        father, title,
-        QString("<html><body><p>%1</p></body></html>").arg(info));
+    QMessageBox::warning(father, title, QString("<html><body><p>%1</p></body></html>").arg(info));
   }
 }
 
 void RepoModel::downloadFinished(void) {
   QString info = download_threads.result();
   if (!info.isEmpty()) {
-    QMessageBox::warning(
-        qobject_cast<QWidget *>(QObject::parent()), "Download Failed",
-        QString("<html><body><p>%1</p></body></html>").arg(info));
+    QMessageBox::warning(qobject_cast<QWidget *>(QObject::parent()), "Download Failed",
+                         QString("<html><body><p>%1</p></body></html>").arg(info));
   }
   downloading_path = nofile_flag;
   auto *repo_item = static_cast<RepoItem *>(download_index.internalPointer());
@@ -980,9 +939,8 @@ void RepoModel::uploadFinished(void) {
   }
 
   if (!info.isEmpty()) {
-    QMessageBox::warning(
-        qobject_cast<QWidget *>(QObject::parent()), title,
-        QString("<html><body><p>%1</p></body></html>").arg(info));
+    QMessageBox::warning(qobject_cast<QWidget *>(QObject::parent()), title,
+                         QString("<html><body><p>%1</p></body></html>").arg(info));
   }
 
   uploading_path = nofile_flag;
@@ -1017,8 +975,7 @@ const QString &RepoModel::downloadSt() { return DOWNLOADST; }
 /// @return string to define the uploading state
 const QString &RepoModel::uploadSt() { return UPLOADST; }
 
-RepoModel::UploadForm::UploadForm(const QString &file2upload, QWidget *parent)
-    : QDialog(parent) {
+RepoModel::UploadForm::UploadForm(const QString &file2upload, QWidget *parent) : QDialog(parent) {
   author_le = new QLineEdit();
   email_le = new QLineEdit();
   save_ck = new QCheckBox("Save your personal information");
@@ -1039,8 +996,7 @@ RepoModel::UploadForm::UploadForm(const QString &file2upload, QWidget *parent)
 
   QLabel *cmLabel = new QLabel("Comment");
   auto *buttonBox = new QDialogButtonBox();
-  buttonBox->setStandardButtons(QDialogButtonBox::Cancel |
-                                QDialogButtonBox::Ok);
+  buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
 
   auto *layout = new QVBoxLayout();
   layout->addWidget(personalGroupBox);
@@ -1058,19 +1014,14 @@ QString RepoModel::UploadForm::email() { return email_le->text(); }
 QString RepoModel::UploadForm::author() { return author_le->text(); }
 QString RepoModel::UploadForm::comment() { return comment_te->toPlainText(); }
 bool RepoModel::UploadForm::saveInfo() { return save_ck->isChecked(); }
-void RepoModel::UploadForm::setEmail(const QString &email) {
-  email_le->setText(email);
-}
-void RepoModel::UploadForm::setAuthor(const QString &author) {
-  author_le->setText(author);
-}
+void RepoModel::UploadForm::setEmail(const QString &email) { email_le->setText(email); }
+void RepoModel::UploadForm::setAuthor(const QString &author) { author_le->setText(author); }
 void RepoModel::UploadForm::lastSaveOption(bool option) {
   save_ck->setCheckState(option ? Qt::Checked : Qt::Unchecked);
 }
 
 RepoModel::DeleteQueryBox::DeleteQueryBox(const QString &path, QWidget *parent)
-    : QMessageBox(QMessageBox::Question, "Delete file", "",
-                  QMessageBox::Yes | QMessageBox::No, parent) {
+    : QMessageBox(QMessageBox::Question, "Delete file", "", QMessageBox::Yes | QMessageBox::No, parent) {
   using namespace Mantid::API;
   QString info_str;
   QTextStream info(&info_str);

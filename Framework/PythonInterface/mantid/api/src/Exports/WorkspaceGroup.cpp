@@ -44,9 +44,7 @@ GET_POINTER_SPECIALIZATION(WorkspaceGroup)
  * @return A non-const iterator pointing at start of workspace group,
  *         for use in python.
  */
-std::vector<Workspace_sptr>::iterator group_begin(WorkspaceGroup &self) {
-  return self.begin();
-}
+std::vector<Workspace_sptr>::iterator group_begin(WorkspaceGroup &self) { return self.begin(); }
 
 /**
  * Returns an iterator pointing to the past-the-end element in the group.
@@ -55,9 +53,7 @@ std::vector<Workspace_sptr>::iterator group_begin(WorkspaceGroup &self) {
  * @return A non-const iterator pointing at end of workspace group,
  *         for use in python.
  */
-std::vector<Workspace_sptr>::iterator group_end(WorkspaceGroup &self) {
-  return self.end();
-}
+std::vector<Workspace_sptr>::iterator group_end(WorkspaceGroup &self) { return self.end(); }
 
 /** Constructor function for WorkspaceGroup */
 Workspace_sptr makeWorkspaceGroup() {
@@ -66,9 +62,7 @@ Workspace_sptr makeWorkspaceGroup() {
 }
 
 void addWorkspace(WorkspaceGroup &self, const boost::python::object &pyobj) {
-  self.addWorkspace(
-      DataServiceExporter<AnalysisDataServiceImpl,
-                          Workspace_sptr>::extractCppValue(pyobj));
+  self.addWorkspace(DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr>::extractCppValue(pyobj));
 }
 
 PyObject *getItem(WorkspaceGroup &self, const int &index) {
@@ -81,43 +75,28 @@ PyObject *getItem(WorkspaceGroup &self, const int &index) {
 }
 
 void export_WorkspaceGroup() {
-  class_<WorkspaceGroup, bases<Workspace>, boost::noncopyable>("WorkspaceGroup",
-                                                               no_init)
+  class_<WorkspaceGroup, bases<Workspace>, boost::noncopyable>("WorkspaceGroup", no_init)
       .def("__init__", make_constructor(&makeWorkspaceGroup))
-      .def("getNumberOfEntries", &WorkspaceGroup::getNumberOfEntries,
-           arg("self"), "Returns the number of entries in the group")
-      .def("getNames", &WorkspaceGroup::getNames, arg("self"),
-           "Returns the names of the entries in the group")
-      .def("contains",
-           (bool (WorkspaceGroup::*)(const std::string &wsName) const) &
-               WorkspaceGroup::contains,
-           (arg("self"), arg("workspace")),
-           "Returns true if the given name is in the group")
-      .def("sortByName", &WorkspaceGroup::sortByName, (arg("self")),
-           "Sort members by name")
-      .def("add", &WorkspaceGroup::add, (arg("self"), arg("workspace_name")),
-           "Add a name to the group")
-      .def("addWorkspace", addWorkspace, (arg("self"), arg("workspace")),
-           "Add a workspace to the group.")
-      .def("size", &WorkspaceGroup::size, arg("self"),
-           "Returns the number of workspaces contained in the group")
-      .def("remove", &WorkspaceGroup::remove,
-           (arg("self"), arg("workspace_name")), "Remove a name from the group")
-      .def("getItem", getItem, (arg("self"), arg("index")),
-           "Returns the item at the given index")
+      .def("getNumberOfEntries", &WorkspaceGroup::getNumberOfEntries, arg("self"),
+           "Returns the number of entries in the group")
+      .def("getNames", &WorkspaceGroup::getNames, arg("self"), "Returns the names of the entries in the group")
+      .def("contains", (bool (WorkspaceGroup::*)(const std::string &wsName) const) & WorkspaceGroup::contains,
+           (arg("self"), arg("workspace")), "Returns true if the given name is in the group")
+      .def("sortByName", &WorkspaceGroup::sortByName, (arg("self")), "Sort members by name")
+      .def("add", &WorkspaceGroup::add, (arg("self"), arg("workspace_name")), "Add a name to the group")
+      .def("addWorkspace", addWorkspace, (arg("self"), arg("workspace")), "Add a workspace to the group.")
+      .def("size", &WorkspaceGroup::size, arg("self"), "Returns the number of workspaces contained in the group")
+      .def("remove", &WorkspaceGroup::remove, (arg("self"), arg("workspace_name")), "Remove a name from the group")
+      .def("getItem", getItem, (arg("self"), arg("index")), "Returns the item at the given index")
       .def("isMultiPeriod", &WorkspaceGroup::isMultiperiod, arg("self"),
            "Returns true if the workspace group is multi-period")
       // ------------ Operators --------------------------------
       .def("__len__", &WorkspaceGroup::getNumberOfEntries, arg("self"),
            "Gets the number of entries in the workspace group")
-      .def("__contains__",
-           (bool (WorkspaceGroup::*)(const std::string &wsName) const) &
-               WorkspaceGroup::contains,
-           (arg("self"), arg("workspace name")),
-           "Does this group contain the named workspace?")
+      .def("__contains__", (bool (WorkspaceGroup::*)(const std::string &wsName) const) & WorkspaceGroup::contains,
+           (arg("self"), arg("workspace name")), "Does this group contain the named workspace?")
       .def("__getitem__", getItem, (arg("self"), arg("index")))
-      .def("__iter__", range<return_value_policy<copy_non_const_reference>>(
-                           &group_begin, &group_end));
+      .def("__iter__", range<return_value_policy<copy_non_const_reference>>(&group_begin, &group_end));
 
   Registry::RegisterWorkspacePtrToPython<WorkspaceGroup>();
 }

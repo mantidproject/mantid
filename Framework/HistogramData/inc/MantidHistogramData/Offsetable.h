@@ -26,8 +26,7 @@ public:
   /// Offsets each element in the container by offset.
   T &operator+=(const double offset) & {
     auto &derived = static_cast<T &>(*this);
-    std::for_each(derived.begin(), derived.end(),
-                  [=](double &value) { value += offset; });
+    std::for_each(derived.begin(), derived.end(), [=](double &value) { value += offset; });
     return derived;
   }
 

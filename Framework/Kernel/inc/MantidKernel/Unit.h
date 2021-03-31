@@ -72,10 +72,8 @@ public:
   bool operator!=(const Unit &u) const;
 
   // Check whether the unit can be converted to another via a simple factor
-  bool quickConversion(const Unit &destination, double &factor,
-                       double &power) const;
-  bool quickConversion(std::string destUnitName, double &factor,
-                       double &power) const;
+  bool quickConversion(const Unit &destination, double &factor, double &power) const;
+  bool quickConversion(std::string destUnitName, double &factor, double &power) const;
 
   /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
    *  @param xdata ::    The array of X data to be converted
@@ -90,11 +88,9 @@ public:
    *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
    *                    Delta (not currently used)
    */
-  void toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-             const double &_l1, const int &_emode,
+  void toTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const int &_emode,
              std::initializer_list<std::pair<const UnitParams, double>> params);
-  void toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-             const double &_l1, const int &_emode,
+  void toTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const int &_emode,
              const UnitParametersMap &params);
 
   /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
@@ -109,8 +105,7 @@ public:
    *                    Delta (not currently used)
    *  @return the value in TOF units.
    */
-  double convertSingleToTOF(const double xvalue, const double &l1,
-                            const int &emode, const UnitParametersMap &params);
+  double convertSingleToTOF(const double xvalue, const double &l1, const int &emode, const UnitParametersMap &params);
 
   /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
    *  @param xdata ::    The array of X data to be converted
@@ -125,13 +120,10 @@ public:
    *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
    *                    Delta (not currently used)
    */
-  void
-  fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-          const double &_l1, const int &_emode,
-          std::initializer_list<std::pair<const UnitParams, double>> params);
+  void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const int &_emode,
+               std::initializer_list<std::pair<const UnitParams, double>> params);
 
-  void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-               const double &_l1, const int &_emode,
+  void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const int &_emode,
                const UnitParametersMap &params);
 
   /** Convert from the time-of-flight to the concrete unit. TOF is in
@@ -147,9 +139,7 @@ public:
    *                    Delta (not currently used)
    *  @return the value in these units.
    */
-  double convertSingleFromTOF(const double xvalue, const double &l1,
-                              const int &emode,
-                              const UnitParametersMap &params);
+  double convertSingleFromTOF(const double xvalue, const double &l1, const int &emode, const UnitParametersMap &params);
 
   /** Initialize the unit to perform conversion using singleToTof() and
    *singleFromTof()
@@ -164,8 +154,7 @@ public:
    *                      Diffractometer constants (DIFA, DIFC, TZERO)
    *                      Delta: unused
    */
-  void initialize(const double &_l1, const int &_emode,
-                  const UnitParametersMap &params);
+  void initialize(const double &_l1, const int &_emode, const UnitParametersMap &params);
 
   /** Finalize the initialization. This will be overridden by subclasses as
    * needed. */
@@ -201,14 +190,12 @@ public:
 
 protected:
   // Add a 'quick conversion' for a unit pair
-  void addConversion(std::string to, const double &factor,
-                     const double &power = 1.0) const;
+  void addConversion(std::string to, const double &factor, const double &power = 1.0) const;
 
   // validate the contents of the unit parameters map. Throw
   // std::invalid_argument if it's a global error or std::runtime_error if it's
   // a detector specific error
-  virtual void validateUnitParams(const int emode,
-                                  const UnitParametersMap &params);
+  virtual void validateUnitParams(const int emode, const UnitParametersMap &params);
 
   /// The unit values have been initialized
   bool initialized;
@@ -230,12 +217,10 @@ private:
   using ConstantAndPower = std::pair<double, double>;
   /// Lists, for a given starting unit, the units to which a 'quick conversion'
   /// can be made
-  using UnitConversions =
-      tbb::concurrent_unordered_map<std::string, ConstantAndPower>;
+  using UnitConversions = tbb::concurrent_unordered_map<std::string, ConstantAndPower>;
   /// The possible 'quick conversions' are held in a map with the starting unit
   /// as the key
-  using ConversionsMap =
-      tbb::concurrent_unordered_map<std::string, UnitConversions>;
+  using ConversionsMap = tbb::concurrent_unordered_map<std::string, UnitConversions>;
   /// The table of possible 'quick conversions'
   static ConversionsMap s_conversionFactors;
 };
@@ -332,8 +317,7 @@ public:
   Wavelength();
 
 protected:
-  void validateUnitParams(const int emode,
-                          const UnitParametersMap &params) override;
+  void validateUnitParams(const int emode, const UnitParametersMap &params) override;
   double efixed;
   double sfpTo;      ///< Extra correction factor in to conversion
   double factorTo;   ///< Constant factor for to conversion
@@ -385,14 +369,12 @@ public:
   Energy_inWavenumber();
 
 protected:
-  void validateUnitParams(const int emode,
-                          const UnitParametersMap &params) override;
+  void validateUnitParams(const int emode, const UnitParametersMap &params) override;
   double factorTo;   ///< Constant factor for to conversion
   double factorFrom; ///< Constant factor for from conversion
 };
 
-MANTID_KERNEL_DLL double tofToDSpacingFactor(const double l1, const double l2,
-                                             const double twoTheta,
+MANTID_KERNEL_DLL double tofToDSpacingFactor(const double l1, const double l2, const double twoTheta,
                                              const double offset);
 
 //=================================================================================================
@@ -408,17 +390,14 @@ public:
   Unit *clone() const override;
   double conversionTOFMin() const override;
   double conversionTOFMax() const override;
-  double calcTofMin(const double difc, const double difa, const double tzero,
-                    const double tofmin = 0.);
-  double calcTofMax(const double difc, const double difa, const double tzero,
-                    const double tofmax = 0.);
+  double calcTofMin(const double difc, const double difa, const double tzero, const double tofmin = 0.);
+  double calcTofMax(const double difc, const double difa, const double tzero, const double tofmax = 0.);
 
   /// Constructor
   dSpacing();
 
 protected:
-  void validateUnitParams(const int emode,
-                          const UnitParametersMap &params) override;
+  void validateUnitParams(const int emode, const UnitParametersMap &params) override;
   std::string toDSpacingError;
   double difa;
   double difc;
@@ -430,9 +409,7 @@ protected:
 class MANTID_KERNEL_DLL dSpacingPerpendicular : public Unit {
 public:
   const std::string unitID() const override; ///< "dSpacingPerpendicular"
-  const std::string caption() const override {
-    return "d-SpacingPerpendicular";
-  }
+  const std::string caption() const override { return "d-SpacingPerpendicular"; }
   const UnitLabel label() const override;
 
   double singleToTOF(const double x) const override;
@@ -446,8 +423,7 @@ public:
   dSpacingPerpendicular();
 
 protected:
-  void validateUnitParams(const int emode,
-                          const UnitParametersMap &params) override;
+  void validateUnitParams(const int emode, const UnitParametersMap &params) override;
   double twoTheta;
   double factorTo;   ///< Constant factor for to conversion
   double sfpTo;      ///< Extra correction factor in to conversion
@@ -473,8 +449,7 @@ public:
   MomentumTransfer();
 
 protected:
-  void validateUnitParams(const int emode,
-                          const UnitParametersMap &params) override;
+  void validateUnitParams(const int emode, const UnitParametersMap &params) override;
   double difc;
 };
 
@@ -516,8 +491,7 @@ public:
   DeltaE();
 
 protected:
-  void validateUnitParams(const int emode,
-                          const UnitParametersMap &params) override;
+  void validateUnitParams(const int emode, const UnitParametersMap &params) override;
   double efixed;
   double factorTo;    ///< Constant factor for to conversion
   double factorFrom;  ///< Constant factor for from conversion
@@ -577,8 +551,7 @@ public:
   Momentum();
 
 protected:
-  void validateUnitParams(const int emode,
-                          const UnitParametersMap &params) override;
+  void validateUnitParams(const int emode, const UnitParametersMap &params) override;
   double efixed;
   double sfpTo;      ///< Extra correction factor in to conversion
   double factorTo;   ///< Constant factor for to conversion
@@ -728,17 +701,13 @@ private:
 
 //=================================================================================================
 
-MANTID_KERNEL_DLL double timeConversionValue(const std::string &input_unit,
-                                             const std::string &output_unit);
+MANTID_KERNEL_DLL double timeConversionValue(const std::string &input_unit, const std::string &output_unit);
 
 template <typename T>
-void timeConversionVector(std::vector<T> &vec, const std::string &input_unit,
-                          const std::string &output_unit) {
-  double factor =
-      timeConversionValue(std::move(input_unit), std::move(output_unit));
+void timeConversionVector(std::vector<T> &vec, const std::string &input_unit, const std::string &output_unit) {
+  double factor = timeConversionValue(std::move(input_unit), std::move(output_unit));
   if (factor != 1.0)
-    std::transform(vec.begin(), vec.end(), vec.begin(),
-                   [factor](T x) -> T { return x * static_cast<T>(factor); });
+    std::transform(vec.begin(), vec.end(), vec.begin(), [factor](T x) -> T { return x * static_cast<T>(factor); });
 }
 
 } // namespace Units

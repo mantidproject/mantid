@@ -16,11 +16,8 @@ namespace CurveFitting {
 
 /// Return the number of points in the domain
 size_t SeqDomain::size() const {
-  return std::accumulate(m_creators.cbegin(), m_creators.cend(),
-                         static_cast<size_t>(0),
-                         [](size_t sum, const auto &creator) {
-                           return sum + creator->getDomainSize();
-                         });
+  return std::accumulate(m_creators.cbegin(), m_creators.cend(), static_cast<size_t>(0),
+                         [](size_t sum, const auto &creator) { return sum + creator->getDomainSize(); });
 }
 
 /// Return the number of parts in the domain
@@ -32,8 +29,7 @@ size_t SeqDomain::getNDomains() const { return m_creators.size(); }
  * @param domain :: Output pointer to the returned domain.
  * @param values :: Output pointer to the returned values.
  */
-void SeqDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
-                                   API::FunctionValues_sptr &values) const {
+void SeqDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain, API::FunctionValues_sptr &values) const {
   if (i >= m_creators.size())
     throw std::range_error("Function domain index is out of range.");
   if (!m_domain[i] || i != m_currentIndex) {
@@ -75,8 +71,7 @@ SeqDomain *SeqDomain::create(API::IDomainCreator::DomainType type) {
  * Calculate the value of a least squares cost function
  * @param costFunction :: The cost func to calculate the value for
  */
-void SeqDomain::additiveCostFunctionVal(
-    const CostFunctions::CostFuncFitting &costFunction) {
+void SeqDomain::additiveCostFunctionVal(const CostFunctions::CostFuncFitting &costFunction) {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
   const size_t n = getNDomains();
@@ -116,9 +111,8 @@ void SeqDomain::rwpVal(const CostFunctions::CostFuncRwp &rwp) {
  * @param evalDeriv :: Flag to evaluate the first derivatives
  * @param evalHessian :: Flag to evaluate the Hessian (second derivatives)
  */
-void SeqDomain::additiveCostFunctionValDerivHessian(
-    const CostFunctions::CostFuncFitting &costFunction, bool evalDeriv,
-    bool evalHessian) {
+void SeqDomain::additiveCostFunctionValDerivHessian(const CostFunctions::CostFuncFitting &costFunction, bool evalDeriv,
+                                                    bool evalHessian) {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
   const size_t n = getNDomains();
@@ -128,8 +122,7 @@ void SeqDomain::additiveCostFunctionValDerivHessian(
     if (!values) {
       throw std::runtime_error("CostFunction: undefined FunctionValues.");
     }
-    costFunction.addValDerivHessian(costFunction.getFittingFunction(), domain,
-                                    values, evalDeriv, evalHessian);
+    costFunction.addValDerivHessian(costFunction.getFittingFunction(), domain, values, evalDeriv, evalHessian);
   }
 }
 
@@ -139,8 +132,7 @@ void SeqDomain::additiveCostFunctionValDerivHessian(
  * @param evalDeriv :: Flag to evaluate the first derivatives
  * @param evalHessian :: Flag to evaluate the Hessian (second derivatives)
  */
-void SeqDomain::rwpValDerivHessian(const CostFunctions::CostFuncRwp &rwp,
-                                   bool evalDeriv, bool evalHessian) {
+void SeqDomain::rwpValDerivHessian(const CostFunctions::CostFuncRwp &rwp, bool evalDeriv, bool evalHessian) {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
   const size_t n = getNDomains();
@@ -150,8 +142,7 @@ void SeqDomain::rwpValDerivHessian(const CostFunctions::CostFuncRwp &rwp,
     if (!values) {
       throw std::runtime_error("Rwp: undefined FunctionValues.");
     }
-    rwp.addValDerivHessian(rwp.getFittingFunction(), domain, values, evalDeriv,
-                           evalHessian);
+    rwp.addValDerivHessian(rwp.getFittingFunction(), domain, values, evalDeriv, evalHessian);
   }
 }
 
