@@ -330,7 +330,7 @@ class GeneralFittingModel(BasicFittingModel):
     def _copy_logs(self, input_workspaces, output_workspace: str) -> None:
         """Copy the logs from the input workspace(s) to the output workspaces."""
         if self.number_of_datasets == 1:
-            CopyLogs(InputWorkspace=input_workspaces, OutputWorkspace=output_workspace, StoreInADS=False)
+            CopyLogs(InputWorkspace=input_workspaces[0], OutputWorkspace=output_workspace, StoreInADS=False)
         else:
             self._copy_logs_for_all_datsets(input_workspaces, output_workspace)
 
