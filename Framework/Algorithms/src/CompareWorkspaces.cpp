@@ -1064,6 +1064,8 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
       } else if (name == "Col") {
         s1 = peak1.getCol();
         s2 = peak2.getCol();
+      } else {
+        g_log.information() << "Column " << name << " is not compared\n";
       }
       if (std::fabs(s1 - s2) > tolerance) {
         g_log.notice(name);
@@ -1158,9 +1160,17 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(LeanElasticPeaksWorkspace_s
           s1 += (q1[i] - q2[i]) * (q1[i] - q2[i]);
         }
         s1 = std::sqrt(s1);
+      } else {
+        g_log.information() << "Column " << name << " is not compared\n";
       }
       if (std::fabs(s1 - s2) > tolerance) {
-        g_log.debug() << "Data mismatch at cell (row#,col#): (" << i << "," << j << ")\n";
+        g_log.notice(name);
+        g_log.notice() << "s1 = " << s1 << "\n"
+                       << "s2 = " << s2 << "\n"
+                       << "std::fabs(s1 - s2) = " << std::fabs(s1 - s2) << "\n"
+                       << "tolerance = " << tolerance << "\n";
+        g_log.notice() << "Data mismatch at cell (row#,col#): (" << i << ","
+                       << j << ")\n";
         recordMismatch("Data mismatch");
         return;
       }
