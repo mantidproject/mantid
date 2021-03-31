@@ -28,7 +28,8 @@ is the creation string accepted by the FunctionFactory.
 class MANTID_API_DLL FunctionProperty : public Kernel::PropertyWithValue<std::shared_ptr<IFunction>> {
 public:
   /// Constructor.
-  FunctionProperty(const std::string &name, const unsigned int direction = Kernel::Direction::Input);
+  FunctionProperty(const std::string &name, const unsigned int direction = Kernel::Direction::Input,
+                   bool isOptional = false);
 
   /// Copy constructor
   FunctionProperty(const FunctionProperty &right);
@@ -74,6 +75,8 @@ public:
 private:
   /// The function definition string (as used by the FunctionFactory)
   std::string m_definition;
+  /// A boolean stating whether the property is optional or not.
+  bool m_isOptional;
 };
 
 } // namespace API

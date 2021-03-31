@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMuon/PSIBackgroundSubtraction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -28,7 +29,7 @@ constexpr double FIT_TOLERANCE = 10;
 const std::string FIRST_GOOD = "First good spectra ";
 const std::string LAST_GOOD = "Last good spectra ";
 
-std::pair<double, double> getRange(const MatrixWorkspace_sptr &inputWorkspace, const size_t &index) {
+std::pair<double, double> getRangeFromWorkspace(MatrixWorkspace_const_sptr inputWorkspace, const size_t &index) {
   auto firstGoodIndex = std::stoi(inputWorkspace->getLog(FIRST_GOOD + std::to_string(index))->value());
   auto lastGoodIndex = std::stoi(inputWorkspace->getLog(LAST_GOOD + std::to_string(index))->value());
 
@@ -53,6 +54,19 @@ void PSIBackgroundSubtraction::init() {
       "Input workspace containing the PSI bin data "
       "which the background correction will be applied to.");
 
+  declareProperty(std::make_unique<API::FunctionProperty>("AdditionalFunction", Direction::Input, true),
+                  "An additional fit function that will be added to the default fit "
+                  "function, before being used for the background substraction.");
+
+  declareProperty("StartX", EMPTY_DBL(),
+                  "An X value in the first bin to be included in the background "
+                  "subtraction. If this is not provided, it will use a start X found in "
+                  "the InputWorkspace.");
+  declareProperty("EndX", EMPTY_DBL(),
+                  "An X value in the last bin to be included in the background "
+                  "subtraction. If this is not provided, it will use an end X "
+                  "found in the InputWorkspace.");
+
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("MaxIterations", 500, mustBePositive,
@@ -61,6 +75,9 @@ void PSIBackgroundSubtraction::init() {
   auto mustBeGreater0 = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBeGreater0->setLower(1);
   declareProperty("Binning", 1, mustBeGreater0, "Constant sized rebinning of the data");
+
+  declareProperty(std::make_unique<API::FunctionProperty>("OutputFunction", Direction::Output),
+                  "The full function that was fitted during the background subtraction.");
 }
 
 std::map<std::string, std::string> PSIBackgroundSubtraction::validateInputs() {
@@ -99,6 +116,15 @@ std::map<std::string, std::string> PSIBackgroundSubtraction::validateInputs() {
       errors["InputWorkspace"] += "\n Input Workspace should have last good data < number of bins. ";
     }
   }
+
+  if (!isDefault("StartX") && !isDefault("EndX")) {
+    const double startX = getProperty("StartX");
+    const double endX = getProperty("EndX");
+    if (startX > endX) {
+      errors["StartX"] = "StartX must be less than EndX.";
+      errors["EndX"] = "EndX must be greater than StartX.";
+    }
+  }
   return errors;
 }
 
@@ -107,6 +133,7 @@ void PSIBackgroundSubtraction::exec() {
   // Caclulate and subtract background from inputWS
   calculateBackgroundUsingFit(inputWS);
 }
+
 /**
  * Calculate the background of a PSI workspace by performing a fit, comprising
  of a FlatBackground and ExpDecayMuon, on the second half of the PSI data.
@@ -151,13 +178,10 @@ void PSIBackgroundSubtraction::calculateBackgroundUsingFit(MatrixWorkspace_sptr 
  * @return Initalised fitting algorithm
  */
 IAlgorithm_sptr PSIBackgroundSubtraction::setupFitAlgorithm(const std::string &wsName) {
-  std::string functionstring = "name=FlatBackground,A0=0;name=ExpDecayMuon";
-  IFunction_sptr func = FunctionFactory::Instance().createInitialized(functionstring);
-
   IAlgorithm_sptr fit = createChildAlgorithm("Fit");
   int maxIterations = getProperty("MaxIterations");
   fit->initialize();
-  fit->setProperty("Function", func);
+  fit->setProperty("Function", getFunction());
   fit->setProperty("MaxIterations", maxIterations);
   fit->setPropertyValue("Minimizer", MINIMISER);
   fit->setProperty("CreateOutput", false);
@@ -180,9 +204,46 @@ std::tuple<double, double> PSIBackgroundSubtraction::calculateBackgroundFromFit(
   fit->setProperty("WorkspaceIndex", workspaceIndex);
   fit->execute();
   IFunction_sptr func = fit->getProperty("Function");
+  setProperty("OutputFunction", func);
+
   double flatbackground = func->getParameter("f0.A0");
   double chi2 = std::stod(fit->getPropertyValue("OutputChi2overDof"));
   return std::make_tuple(flatbackground, chi2);
 }
+
+/**
+ * Gets the Function to use for the background subtraction.
+ * @return An IFunction_sptr used in the Fit algorithm.
+ */
+IFunction_sptr PSIBackgroundSubtraction::getFunction() const {
+  std::string funcString = "name=FlatBackground,A0=0;name=ExpDecayMuon";
+  if (!getPointerToProperty("AdditionalFunction")->isDefault())
+    funcString += ";" + getPropertyValue("AdditionalFunction");
+
+  return FunctionFactory::Instance().createInitialized(funcString);
+}
+
+/**
+ * Gets the X range to use for fitting to the current index in the
+ * InputWorkspace. If a Start or End X is not provided, the start or end X from
+ * the InputWorkspace is used instead.
+ * @param inputWorkspace :: The workspace being fitted too.
+ * @param index :: The workspace index the fit will be performed on.
+ * @return An X range to use for the fitting.
+ */
+std::pair<double, double> PSIBackgroundSubtraction::getRange(MatrixWorkspace_const_sptr inputWorkspace,
+                                                             const std::size_t &index) const {
+  double startX = getProperty("StartX");
+  double endX = getProperty("EndX");
+  if (isEmpty(startX) || isEmpty(endX)) {
+    const auto range = getRangeFromWorkspace(inputWorkspace, index);
+    if (isEmpty(startX))
+      startX = range.first;
+    if (isEmpty(endX))
+      endX = range.second;
+  }
+  return std::make_pair(startX, endX);
+}
+
 } // namespace Muon
 } // namespace Mantid
