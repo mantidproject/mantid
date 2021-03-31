@@ -1317,7 +1317,8 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binBackgroundWS(
       tempBkgdDataWS->clearOriginalWorkspaces();
       tempBkgdDataWS->clearTransforms();
 
-      std::cout << "[DEBUG VZ Background] Output to " << getPropertyValue("OutputBackgroundDataWorkspace") << " Total binning count = " << bincount << " @ Exp info (index) " << i_expinfo << ", symmetry operation (index) " << soIndex << "\n";
+      std::cout << "[DEBUG VZ Background] Output to " << getPropertyValue("OutputBackgroundDataWorkspace")
+                << " Total binning count = " << bincount << " @ Exp info (index) " << i_expinfo << ", symmetry operation (index) " << soIndex << "\n";
 
       soIndex += 1;
       bincount += 1;
