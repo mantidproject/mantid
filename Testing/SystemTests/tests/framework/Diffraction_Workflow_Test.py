@@ -32,6 +32,9 @@ class Diffraction_Workflow_Test(systemtesting.MantidSystemTest):
         return 4000
 
     def runTest(self):
+        # raise tolerance to 1e-4
+        self.tolerance = 1e-4
+
         import platform
         if platform.system() == "Darwin":
             import resource
