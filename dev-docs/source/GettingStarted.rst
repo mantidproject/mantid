@@ -73,7 +73,7 @@ Red Hat/Cent OS/Fedora
   yum install mantid-developer
 
   # Install pre-commit
-  pip install pre-commit
+  pip install pre-commit --user
 
 Ubuntu 18.04
 ~~~~~~~~~~~~
@@ -94,7 +94,7 @@ where ``X.Y.Z`` should be replaced with the version that was downloaded.
 
 Install pre-commit for use in our current developer workflow
 .. code-block:: sh
-  snap install pre-commit --classic
+  pip install pre-commit --user
 
 if you wish to setup eclipse for use developing mantid, then instructions can be found :ref:`here <Eclipse>`.
 
@@ -164,7 +164,7 @@ and passing the `-DENABLE_MANTIDPLOT=OFF` option to the cmake command line or se
 
 Install pre-commit for use in our current developer workflow
 .. code-block:: sh
-  snap install pre-commit --classic
+  pip install pre-commit --user
 
 OSX
 ---
