@@ -6,7 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-from qtpy.QtWidgets import QDockWidget, QWidget, QTreeWidgetItem
+from .WorkspaceItem import WorkspaceItem
+from .SpectrumItem import SpectrumItem
+
+from qtpy.QtWidgets import QDockWidget, QWidget
 from qtpy.QtCore import *
 from qtpy import uic
 
@@ -90,7 +93,7 @@ class SuperplotView(QWidget):
         if item:
             if item.parent() is not None:
                 item = item.parent()
-            return item.text(0)
+            return item.getWorkspaceName()
         else:
             return None
 
@@ -124,8 +127,9 @@ class SuperplotView(QWidget):
         for item in items:
             if item.parent() is not None:
                 item = item.parent()
-            if item.text(0) not in selection:
-                selection.append(item.text(0))
+            wsName = item.getWorkspaceName()
+            if wsName not in selection:
+                selection.append(wsName)
         return selection
 
     def getSelection(self):
@@ -139,12 +143,12 @@ class SuperplotView(QWidget):
         items = self._sideView.workspacesList.selectedItems()
         for item in items:
             if item.parent() is None:
-                wsName = item.text(0)
+                wsName = item.getWorkspaceName()
                 if wsName not in selection:
                     selection[wsName] = list()
             else:
-                spectrum = int(item.text(0))
-                wsName = item.parent().text(0)
+                spectrum = item.getSpectrumIndex()
+                wsName = item.parent().getWorkspaceName()
                 if wsName in selection:
                     selection[wsName].append(spectrum)
                 else:
@@ -158,7 +162,7 @@ class SuperplotView(QWidget):
         Args:
             name (str): name of the workspace
         """
-        item = QTreeWidgetItem(self._sideView.workspacesList)
+        item = WorkspaceItem(self._sideView.workspacesList, name)
         item.setText(0, name)
 
     def removeWorkspace(self, name):
@@ -185,7 +189,7 @@ class SuperplotView(QWidget):
         self._sideView.workspacesList.blockSignals(True)
         self._sideView.workspacesList.clear()
         for name in names:
-            item = QTreeWidgetItem(self._sideView.workspacesList)
+            item = WorkspaceItem(self._sideView.workspacesList, name)
             item.setText(0, name)
         self._sideView.workspacesList.blockSignals(False)
 
@@ -201,7 +205,7 @@ class SuperplotView(QWidget):
                                                          Qt.MatchExactly, 0)[0]
         wsItem.takeChildren()
         for num in nums:
-            item = QTreeWidgetItem(wsItem)
+            item = SpectrumItem(wsItem, num)
             item.setText(0, str(num))
 
     def getSpectraList(self, name):
@@ -222,7 +226,7 @@ class SuperplotView(QWidget):
             return []
         nums = list()
         for i in range(wsItem.childCount()):
-            nums.append(int(wsItem.child(i).text(0)))
+            nums.append(wsItem.child(i).getSpectrumIndex())
         return nums
 
     def checkHoldButton(self, state):
