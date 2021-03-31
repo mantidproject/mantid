@@ -10,6 +10,7 @@ of single crystal LeanElasticPeak objects. It is the equivalent to the
 Creating a LeanElasticPeaksWorkspace
 ------------------------------------
 
+* :ref:`FindPeaksMD <algm-FindPeaksMD>` will find peaks in reciprocal space in a :ref:`MDWorkspace <MDWorkspace>`.
 * :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` will create an empty LeanElasticPeaksWorkspace that you can then edit.
 
 Viewing a LeanElasticPeaksWorkspace

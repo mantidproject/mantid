@@ -17,7 +17,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/Diffraction.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
@@ -49,8 +48,8 @@ public:
     this->generateDetidToRow(table);
   }
 
-  std::function<double(double)>
-  getConversionFunc(const std::set<detid_t> &detIds) const {
+  std::tuple<double, double, double>
+  getDiffConstants(const std::set<detid_t> &detIds) const {
     const std::set<size_t> rows = this->getRow(detIds);
     double difc = 0.;
     double difa = 0.;
@@ -67,7 +66,7 @@ public:
       tzero = norm * tzero;
     }
 
-    return Kernel::Diffraction::getTofToDConversionFunc(difc, difa, tzero);
+    return {difc, difa, tzero};
   }
 
 private:
@@ -86,6 +85,16 @@ private:
       if (rowIter != m_detidToRow.end()) { // skip if not found
         rows.insert(rowIter->second);
       }
+    }
+    if (rows.empty()) {
+      std::string detIdsStr = std::accumulate(
+          std::begin(detIds), std::end(detIds), std::string{},
+          [](const std::string &a, const detid_t &b) {
+            return a.empty() ? std::to_string(b) : a + ',' + std::to_string(b);
+          });
+      throw Exception::NotFoundError(
+          "None of the detectors were found in the calibration table",
+          detIdsStr);
     }
     return rows;
   }
@@ -110,8 +119,11 @@ const std::string AlignDetectors::summary() const {
          "values to account for small errors in the detector positions.";
 }
 
-/// (Empty) Constructor
-AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {}
+/// Constructor
+AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {
+  useAlgorithm("ConvertUnits");
+  deprecatedDate("2021-01-04");
+}
 
 void AlignDetectors::init() {
   auto wsValidator = std::make_shared<CompositeValidator>();
@@ -262,60 +274,58 @@ void AlignDetectors::exec() {
 
   Progress progress(this, 0.0, 1.0, m_numberOfSpectra);
 
-  auto eventW = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
-  if (eventW) {
-    align(converter, progress, *eventW);
-  } else {
-    align(converter, progress, *outputWS);
-  }
+  align(converter, progress, outputWS);
 }
 
 void AlignDetectors::align(const ConversionFactors &converter,
-                           Progress &progress, MatrixWorkspace &outputWS) {
-  PARALLEL_FOR_IF(Kernel::threadSafe(outputWS))
+                           Progress &progress, MatrixWorkspace_sptr &outputWS) {
+  auto eventW = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < m_numberOfSpectra; ++i) {
     PARALLEL_START_INTERUPT_REGION
     try {
       // Get the input spectrum number at this workspace index
-      auto &spec = outputWS.getSpectrum(size_t(i));
-      auto toDspacing = converter.getConversionFunc(spec.getDetectorIDs());
+      auto &spec = outputWS->getSpectrum(size_t(i));
+      auto [difc, difa, tzero] =
+          converter.getDiffConstants(spec.getDetectorIDs());
 
-      auto &x = outputWS.mutableX(i);
-      std::transform(x.begin(), x.end(), x.begin(), toDspacing);
-    } catch (const Exception::NotFoundError &) {
-      // Zero the data in this case
-      outputWS.setHistogram(i, BinEdges(outputWS.x(i).size()),
-                            Counts(outputWS.y(i).size()));
+      auto &x = outputWS->dataX(i);
+      Kernel::Units::dSpacing dSpacingUnit;
+      std::vector<double> yunused;
+      dSpacingUnit.fromTOF(
+          x, yunused, -1., 0,
+          UnitParametersMap{{Kernel::UnitParams::difa, difa},
+                            {Kernel::UnitParams::difc, difc},
+                            {Kernel::UnitParams::tzero, tzero}});
+
+      if (eventW) {
+        Kernel::Units::TOF tofUnit;
+        tofUnit.initialize(0, 0, {});
+        // EventWorkspace part, modifying the EventLists.
+        eventW->getSpectrum(i).convertUnitsViaTof(&tofUnit, &dSpacingUnit);
+      }
+    } catch (const std::runtime_error &) {
+      if (!eventW) {
+        // Zero the data in this case (detectors not found in cal table or
+        // conversion fails)
+        outputWS->setHistogram(i, BinEdges(outputWS->x(i).size()),
+                               Counts(outputWS->y(i).size()));
+      }
     }
     progress.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-}
-
-void AlignDetectors::align(const ConversionFactors &converter,
-                           Progress &progress, EventWorkspace &outputWS) {
-  PARALLEL_FOR_NO_WSP_CHECK()
-  for (int64_t i = 0; i < m_numberOfSpectra; ++i) {
-    PARALLEL_START_INTERUPT_REGION
-
-    auto toDspacing = converter.getConversionFunc(
-        outputWS.getSpectrum(size_t(i)).getDetectorIDs());
-    outputWS.getSpectrum(i).convertTof(toDspacing);
-
-    progress.report();
-    PARALLEL_END_INTERUPT_REGION
+  if (eventW) {
+    if (eventW->getTofMin() < 0.) {
+      std::stringstream msg;
+      msg << "Something wrong with the calibration. Negative minimum d-spacing "
+             "created. d_min = "
+          << eventW->getTofMin() << " d_max " << eventW->getTofMax();
+      g_log.warning(msg.str());
+    }
+    eventW->clearMRU();
   }
-  PARALLEL_CHECK_INTERUPT_REGION
-
-  if (outputWS.getTofMin() < 0.) {
-    std::stringstream msg;
-    msg << "Something wrong with the calibration. Negative minimum d-spacing "
-           "created. d_min = "
-        << outputWS.getTofMin() << " d_max " << outputWS.getTofMax();
-    g_log.warning(msg.str());
-  }
-  outputWS.clearMRU();
 }
 
 Parallel::ExecutionMode AlignDetectors::getParallelExecutionMode(

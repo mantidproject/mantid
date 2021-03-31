@@ -82,8 +82,10 @@ public:
   static const std::string &pQuat();
   static const std::string &scale();
 
-  const std::string diff(const ParameterMap &rhs,
-                         const bool &firstDiffOnly = false) const;
+  const std::string
+  diff(const ParameterMap &rhs, const bool &firstDiffOnly = false,
+       const bool relative = false,
+       const double doubleTolerance = Kernel::Tolerance) const;
 
   /// Inquality comparison operator
   bool operator!=(const ParameterMap &rhs) const;
@@ -346,6 +348,8 @@ private:
   /// the parameter map
   component_map_cit positionOf(const IComponent *comp, const char *name,
                                const char *type) const;
+  /// calculate relative error for use in diff
+  bool relErr(double x1, double x2, double errorVal) const;
 
   /// internal list of parameter files loaded
   std::vector<std::string> m_parameterFileNames;

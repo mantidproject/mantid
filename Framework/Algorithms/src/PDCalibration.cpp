@@ -29,10 +29,10 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/Diffraction.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/Unit.h"
 
 #include <algorithm>
 #include <cassert>
@@ -120,11 +120,13 @@ public:
    *
    * @param peaksInD :: peak centers, in d-spacing
    * @param peaksInDWindows :: left and right fit ranges for each peak
-   * @param toTof :: function converting from d-spacing to TOF
+   * @param difa :: difa diffractometer constant (quadratic term)
+   * @param difc :: difc diffractometer constant (linear term)
+   * @param tzero :: tzero diffractometer constant (constant term)
    */
   void setPositions(const std::vector<double> &peaksInD,
                     const std::vector<double> &peaksInDWindows,
-                    const std::function<double(double)> &toTof) {
+                    const double difa, const double difc, const double tzero) {
     // clear out old values
     inDPos.clear();
     inTofPos.clear();
@@ -136,9 +138,16 @@ public:
     inTofWindows.assign(peaksInDWindows.begin(), peaksInDWindows.end());
 
     // convert the bits that matter to TOF
-    std::transform(inTofPos.begin(), inTofPos.end(), inTofPos.begin(), toTof);
-    std::transform(inTofWindows.begin(), inTofWindows.end(),
-                   inTofWindows.begin(), toTof);
+    Kernel::Units::dSpacing dSpacingUnit;
+    std::vector<double> yunused;
+    dSpacingUnit.toTOF(inTofPos, yunused, -1, 0,
+                       {{Kernel::UnitParams::difa, difa},
+                        {Kernel::UnitParams::difc, difc},
+                        {Kernel::UnitParams::tzero, tzero}});
+    dSpacingUnit.toTOF(inTofWindows, yunused, -1, 0,
+                       {{Kernel::UnitParams::difa, difa},
+                        {Kernel::UnitParams::difc, difc},
+                        {Kernel::UnitParams::tzero, tzero}});
   }
 
   std::size_t wkspIndex;
@@ -581,8 +590,10 @@ void PDCalibration::exec() {
      // object to hold the information about the peak positions, detid, and wksp
      // index
      PDCalibration::FittedPeaks peaks(m_uncalibratedWS, wkspIndex);
-     auto toTof = getDSpacingToTof(peaks.detid);
-     peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, toTof);
+     auto [difc, difa, tzero] = getDSpacingToTof(
+         peaks.detid); // doesn't matter which one - all have same difc etc.
+     peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, difa, difc,
+                        tzero);
 
      // includes peaks that aren't used in the fit
      // The following data structures will hold information for the peaks
@@ -690,15 +701,18 @@ void PDCalibration::exec() {
          // and the peak positions using the GSAS formula with optimized difc,
          // difa, and tzero
          double chisq = 0.;
-         // `converter` if a function that returns a d-spacing for an input TOF
-         auto converter =
-             Kernel::Diffraction::getTofToDConversionFunc(difc, difa, t0);
+         Mantid::Kernel::Units::dSpacing dSpacingUnit;
+         dSpacingUnit.initialize(
+             -1., 0,
+             Kernel::UnitParametersMap{{Kernel::UnitParams::difa, difa},
+                                       {Kernel::UnitParams::difc, difc},
+                                       {Kernel::UnitParams::tzero, t0}});
          for (std::size_t i = 0; i < numPeaks; ++i) {
            if (std::isnan(tof_vec_full[i]))
              continue;
            // Find d-spacing using the GSAS formula with optimized difc, difa,
            // t0 for the TOF of the current peak's center.
-           const double dspacing = converter(tof_vec_full[i]);
+           const double dspacing = dSpacingUnit.singleFromTOF(tof_vec_full[i]);
            // `temp` is residual between the nominal position in d-spacing for
            // the current peak, and the fitted position in d-spacing
            const double temp = m_peaksInDspacing[i] - dspacing;
@@ -706,7 +720,7 @@ void PDCalibration::exec() {
            m_peakPositionTable->cell<double>(rowIndexOutputPeaks, i + 1) =
                dspacing;
            m_peakWidthTable->cell<double>(rowIndexOutputPeaks, i + 1) =
-               WIDTH_TO_FWHM * converter(width_vec_full[i]);
+               WIDTH_TO_FWHM * dSpacingUnit.singleFromTOF(width_vec_full[i]);
            m_peakHeightTable->cell<double>(rowIndexOutputPeaks, i + 1) =
                height_vec_full[i];
          }
@@ -804,13 +818,17 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
     if (numParams > 2)
       difa = gsl_vector_get(v, 2);
   }
-  auto converter =
-      Kernel::Diffraction::getDToTofConversionFunc(difc, difa, tzero);
+  Mantid::Kernel::Units::dSpacing dSpacingUnit;
+  dSpacingUnit.initialize(
+      -1., 0,
+      Kernel::UnitParametersMap{{Kernel::UnitParams::difa, difa},
+                                {Kernel::UnitParams::difc, difc},
+                                {Kernel::UnitParams::tzero, tzero}});
 
   // calculate the sum of the residuals from observed peaks
   double errsum = 0.0;
   for (size_t i = 0; i < numPeaks; ++i) {
-    const double tofCalib = converter(dspace[i]);
+    const double tofCalib = dSpacingUnit.singleToTOF(dspace[i]);
     const double errsum_i = std::fabs(tofObs[i] - tofCalib) * weights[i];
     errsum += errsum_i;
   }
@@ -1056,9 +1074,8 @@ PDCalibration::dSpacingWindows(const std::vector<double> &centres,
  *
  * @param detIds :: set of detector IDs
  */
-std::function<double(double)>
+std::tuple<double, double, double>
 PDCalibration::getDSpacingToTof(const std::set<detid_t> &detIds) {
-
   // to start this is the old calibration values
   double difc = 0.;
   double difa = 0.;
@@ -1076,7 +1093,7 @@ PDCalibration::getDSpacingToTof(const std::set<detid_t> &detIds) {
     tzero = norm * tzero;
   }
 
-  return Kernel::Diffraction::getDToTofConversionFunc(difc, difa, tzero);
+  return {difc, difa, tzero};
 }
 
 void PDCalibration::setCalibrationValues(const detid_t detid, const double difc,
@@ -1111,8 +1128,9 @@ vector<double> PDCalibration::getTOFminmax(const double difc, const double difa,
                                            const double tzero) {
   vector<double> tofminmax(2);
 
-  tofminmax[0] = Kernel::Diffraction::calcTofMin(difc, difa, tzero, m_tofMin);
-  tofminmax[1] = Kernel::Diffraction::calcTofMax(difc, difa, tzero, m_tofMax);
+  Kernel::Units::dSpacing dSpacingUnit;
+  tofminmax[0] = dSpacingUnit.calcTofMin(difc, difa, tzero, m_tofMin);
+  tofminmax[1] = dSpacingUnit.calcTofMax(difc, difa, tzero, m_tofMax);
 
   return tofminmax;
 }
@@ -1433,9 +1451,9 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
     PDCalibration::FittedPeaks peaks(dataws, static_cast<size_t>(iws));
     // toTof is a function that converts from d-spacing to TOF for a particular
     // pixel
-    auto toTof = getDSpacingToTof(peaks.detid);
+    auto [difc, difa, tzero] = getDSpacingToTof(peaks.detid);
     // setpositions initializes peaks.inTofPos and peaks.inTofWindows
-    peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, toTof);
+    peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, difa, difc, tzero);
     peak_pos_ws->setPoints(iws, peaks.inTofPos);
     peak_window_ws->setPoints(iws, peaks.inTofWindows);
     prog.report();

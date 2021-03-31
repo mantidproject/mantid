@@ -161,7 +161,7 @@ class RundexSettings(object):
             POWDER_DSCAN: {
                 "SaveNexusProcessed": False,
                 "SaveAscii": False,
-                "SaveFocussedXYE": True
+                "SaveFocusedXYE": True
                 },
             POWDER_PSCAN: {
                 "SaveNexusProcessed": False,

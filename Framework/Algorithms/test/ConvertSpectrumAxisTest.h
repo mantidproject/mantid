@@ -142,7 +142,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("Target", "DeltaE"));
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("EMode", "Indirect"));
     conv.setRethrows(true);
-    TS_ASSERT_THROWS(conv.execute(), const std::logic_error &);
+    TS_ASSERT_THROWS(conv.execute(), const std::runtime_error &);
 
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("Efixed", "1.845"));
     TS_ASSERT_THROWS_NOTHING(conv.execute());

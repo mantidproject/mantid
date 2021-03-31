@@ -32,8 +32,23 @@ double UnitConversion::run(const std::string &src, const std::string &dest,
                            const DeltaEMode::Type emode, const double efixed) {
   Unit_sptr srcUnit = UnitFactory::Instance().create(src);
   Unit_sptr destUnit = UnitFactory::Instance().create(dest);
-  return UnitConversion::run(*srcUnit, *destUnit, srcValue, l1, l2, theta,
-                             emode, efixed);
+  if ((srcUnit->unitID() == "dSpacing") || (destUnit->unitID() == "dSpacing")) {
+    throw std::runtime_error(
+        "This signature is deprecated for d Spacing unit conversions");
+  }
+  UnitParametersMap params{{UnitParams::l2, l2},
+                           {UnitParams::twoTheta, theta},
+                           {UnitParams::efixed, efixed}};
+  return UnitConversion::run(*srcUnit, *destUnit, srcValue, l1, emode, params);
+} // namespace Kernel
+
+double UnitConversion::run(const std::string &src, const std::string &dest,
+                           const double srcValue, const double l1,
+                           const DeltaEMode::Type emode,
+                           const UnitParametersMap &params) {
+  Unit_sptr srcUnit = UnitFactory::Instance().create(src);
+  Unit_sptr destUnit = UnitFactory::Instance().create(dest);
+  return UnitConversion::run(*srcUnit, *destUnit, srcValue, l1, emode, params);
 }
 
 /**
@@ -42,22 +57,22 @@ double UnitConversion::run(const std::string &src, const std::string &dest,
  * @param destUnit :: The destination unit
  * @param srcValue :: The value to convert
  * @param l1 ::       The source-sample distance (in metres)
- * @param l2 ::       The sample-detector distance (in metres)
- * @param theta :: The scattering angle (in radians)
  * @param emode ::    The energy mode enumeration
- * @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
- * meV)
+ * @param params ::  Map containing optional parameters eg
+ *                   The sample-detector distance (in metres)
+ *                   The scattering angle (in radians)
+ *                   Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
+ *                   Delta (not currently used)
  * @return The value converted to the destination unit
  */
 double UnitConversion::run(Unit &srcUnit, Unit &destUnit, const double srcValue,
-                           const double l1, const double l2, const double theta,
-                           const DeltaEMode::Type emode, const double efixed) {
+                           const double l1, const DeltaEMode::Type emode,
+                           const UnitParametersMap &params) {
   double factor(0.0), power(0.0);
   if (srcUnit.quickConversion(destUnit, factor, power)) {
     return convertQuickly(srcValue, factor, power);
   } else {
-    return convertViaTOF(srcUnit, destUnit, srcValue, l1, l2, theta, emode,
-                         efixed);
+    return convertViaTOF(srcUnit, destUnit, srcValue, l1, emode, params);
   }
 }
 
@@ -83,18 +98,18 @@ double UnitConversion::convertQuickly(const double srcValue,
  * @param destUnit :: The destination unit
  * @param srcValue :: The value to convert
  * @param l1 ::       The source-sample distance (in metres)
- * @param l2 ::       The sample-detector distance (in metres)
- * @param theta :: The scattering angle (in radians)
  * @param emode ::    The energy mode enumeration
- * @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
- * meV)
+ * @param params ::  Map containing optional parameters eg
+ *                   The sample-detector distance (in metres)
+ *                   The scattering angle (in radians)
+ *                   Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
+ *                   Delta (not currently used)
  * @return The value converted to the destination unit
  */
 double UnitConversion::convertViaTOF(Unit &srcUnit, Unit &destUnit,
                                      const double srcValue, const double l1,
-                                     const double l2, const double theta,
                                      const DeltaEMode::Type emode,
-                                     const double efixed) {
+                                     const UnitParametersMap &params) {
   // Translate the emode to the int formulation
   int emodeAsInt(0);
   switch (emode) {
@@ -113,11 +128,9 @@ double UnitConversion::convertViaTOF(Unit &srcUnit, Unit &destUnit,
         std::to_string(emode));
   };
 
-  const double unused(0.0);
-  const double tof = srcUnit.convertSingleToTOF(srcValue, l1, l2, theta,
-                                                emodeAsInt, efixed, unused);
-  return destUnit.convertSingleFromTOF(tof, l1, l2, theta, emodeAsInt, efixed,
-                                       unused);
+  const double tof =
+      srcUnit.convertSingleToTOF(srcValue, l1, emodeAsInt, params);
+  return destUnit.convertSingleFromTOF(tof, l1, emodeAsInt, params);
 }
 
 /**

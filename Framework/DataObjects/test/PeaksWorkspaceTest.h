@@ -422,8 +422,8 @@ public:
     const auto params = makePeakParameters();
     auto ws = makeWorkspace(params);
     // Create the peak
-    auto peak = ws->createPeakHKL(params.hkl);
-
+    IPeak_uptr ipeak = ws->createPeakHKL(params.hkl);
+    Peak_uptr peak(static_cast<Peak *>(ipeak.release()));
     /*
      Now we check we have made a self - consistent peak
      */

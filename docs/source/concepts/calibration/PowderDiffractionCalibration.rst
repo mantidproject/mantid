@@ -356,4 +356,103 @@ which accepts a tuple of the starting detector ID and ending detector ID to plot
 
 To adjust the horizontal bars above and below the mean, a percent can be passed to the ``threshold`` option.
 
+Pearson Correlation Coefficient
+###############################
+
+It can be useful to compare the linearity of the relationship between time of flight and d-spacing for each peak involved
+in calibration. In theory, the relationship between (TOF, d-spacing) will always be perfectly linear, but in practice,
+that is not always the case. This diagnostic plot primarily serves as a tool to ensure that the calibration makes sense,
+i.e., that a single DIFC parameter is enough to do the transformation. In the ideal case, all Pearson correlation
+coefficients will be close to 1. For more on Pearson correlation coefficients please see
+`this wikipedia article <https://en.wikipedia.org/wiki/Pearson_correlation_coefficient>`_. Below is an example plot for the Pearson correlation
+coefficient of (TOF, d-spacing).
+
+.. figure:: /images/VULCAN_pearsoncorr.png
+
+The following script can be used to generate the above plot.
+
+.. code::
+
+    # import mantid algorithms, numpy and matplotlib
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    import numpy as npfrom Calibration.tofpd import diagnosticsFILENAME = 'VULCAN_192226.nxs.h5'  # 88 sec
+
+    FILENAME = 'VULCAN_192227.nxs.h5'  # 2.8 hour
+    CALFILE = 'VULCAN_Calibration_CC_4runs_hybrid.h5'peakpositions = np.asarray(
+      (0.3117, 0.3257, 0.3499, 0.3916, 0.4205, 0.4645, 0.4768, 0.4996, 0.515, 0.5441, 0.5642, 0.6307, 0.6867,
+       0.7283, 0.8186, 0.892, 1.0758, 1.2615, 2.06))
+
+    peakpositions = peakpositions[peakpositions > 0.4]
+    peakpositions = peakpositions[peakpositions < 1.5]
+    peakpositions.sort()LoadEventAndCompress(Filename=FILENAME, OutputWorkspace='ws', FilterBadPulses=0)
+
+    LoadInstrument(Workspace='ws', Filename="mantid/instrument/VULCAN_Definition.xml", RewriteSpectraMap='True')
+    Rebin(InputWorkspace='ws', OutputWorkspace='ws', Params=(5000, -.002, 70000))
+    PDCalibration(InputWorkspace='ws', TofBinning=(5000,-.002,70000),
+               PeakPositions=peakpositions,
+               MinimumPeakHeight=5,
+               OutputCalibrationTable='calib',
+               DiagnosticWorkspaces='diag')
+    center_tof = diagnostics.collect_fit_result('diag_fitparam', 'center_tof', peakpositions, donor='ws', infotype='centre')
+    fig, ax = diagnostics.plot_corr('center_tof')
+
+Peak Information
+################
+
+Plotting the fitted peak parameters for different instrument banks can also provide useful information for
+calibration diagnostics. The fitted peak parameters from :ref:`FitPeaks <algm-FitPeaks>` (center, width,
+height, and intensity) are plotted for each bank at different peak positions. This can be used to help calibrate
+each group rather than individual detector pixels.
+
+.. figure:: /images/VULCAN_peakinfo_diagnostic.png
+  :width: 400px
+
+The above figure can be generated using the following script:
+
+.. code::
+
+    import numpy as np
+    from mantid.simpleapi import (AlignAndFocusPowder, ConvertUnits, FitPeaks, LoadEventAndCompress,
+                                  LoadDiffCal, LoadInstrument)
+    from Calibration.tofpd import diagnostics
+
+    FILENAME = 'VULCAN_192227.nxs.h5'  # 2.8 hour
+    CALFILE = 'VULCAN_Calibration_CC_4runs_hybrid.h5'
+
+    peakpositions = np.asarray(
+        (0.3117, 0.3257, 0.3499, 0.3916, 0.4205, 0.4645, 0.4768, 0.4996, 0.515, 0.5441, 0.5642, 0.6307, 0.6867,
+         0.7283, 0.8186, 0.892, 1.0758, 1.2615, 2.06))
+    peakpositions = peakpositions[peakpositions > 0.4]
+    peakpositions = peakpositions[peakpositions < 1.5]
+    peakpositions.sort()
+    peakwindows = diagnostics.get_peakwindows(peakpositions)
+
+    LoadEventAndCompress(Filename=FILENAME, OutputWorkspace='ws', FilterBadPulses=0)
+    LoadInstrument(Workspace='ws', InstrumentName="VULCAN", RewriteSpectraMap='True')
+
+    LoadDiffCal(Filename=CALFILE, InputWorkspace='ws', WorkspaceName='VULCAN')
+    AlignAndFocusPowder(InputWorkspace='ws',
+                        OutputWorkspace='focus',
+                        GroupingWorkspace="VULCAN_group",
+                        CalibrationWorkspace="VULCAN_cal",
+                        MaskWorkspace="VULCAN_mask",
+                        Dspacing=True,
+                        Params="0.3,3e-4,1.5")
+
+    ConvertUnits(InputWorkspace='focus', OutputWorkspace='focus', Target='dSpacing', EMode='Elastic')
+    FitPeaks(InputWorkspace='focus',
+            OutputWorkspace='output',
+            PeakFunction='Gaussian',
+            RawPeakParameters=False,
+            HighBackground=False,  # observe background
+            ConstrainPeakPositions=False,
+            MinimumPeakHeight=3,
+            PeakCenters=peakpositions,
+            FitWindowBoundaryList=peakwindows,
+            FittedPeaksWorkspace='fitted',
+            OutputPeakParametersWorkspace='parameters')
+
+    fig, ax = diagnostics.plot_peak_info('parameters', peakpositions)
+
 .. categories:: Calibration

@@ -676,39 +676,70 @@ double ExperimentInfo::getEFixed(
     const std::shared_ptr<const Geometry::IDetector> &detector) const {
   populateIfNotLoaded();
   Kernel::DeltaEMode::Type emode = getEMode();
-  if (emode == Kernel::DeltaEMode::Direct) {
-    try {
-      return this->run().getPropertyValueAsType<double>("Ei");
-    } catch (Kernel::Exception::NotFoundError &) {
-      throw std::runtime_error(
-          "Experiment logs do not contain an Ei value. Have you run GetEi?");
-    }
-  } else if (emode == Kernel::DeltaEMode::Indirect) {
-    if (!detector)
-      throw std::runtime_error("ExperimentInfo::getEFixed - Indirect mode "
-                               "efixed requested without a valid detector.");
+  return getEFixedGivenEMode(detector, emode);
+}
+
+double ExperimentInfo::getEFixedForIndirect(
+    const std::shared_ptr<const Geometry::IDetector> &detector,
+    const std::vector<std::string> &parameterNames) const {
+  double efixed = 0.;
+  for (auto &parameterName : parameterNames) {
     Parameter_sptr par =
-        constInstrumentParameters().getRecursive(detector.get(), "Efixed");
+        constInstrumentParameters().getRecursive(detector.get(), parameterName);
     if (par) {
-      return par->value<double>();
+      efixed = par->value<double>();
     } else {
-      std::vector<double> efixedVec = detector->getNumberParameter("Efixed");
+      std::vector<double> efixedVec =
+          detector->getNumberParameter(parameterName);
       if (efixedVec.empty()) {
         int detid = detector->getID();
         IDetector_const_sptr detectorSingle =
             getInstrument()->getDetector(detid);
-        efixedVec = detectorSingle->getNumberParameter("Efixed");
+        efixedVec = detectorSingle->getNumberParameter(parameterName);
       }
       if (!efixedVec.empty()) {
-        return efixedVec.at(0);
-      } else {
-        std::ostringstream os;
-        os << "ExperimentInfo::getEFixed - Indirect mode efixed requested but "
-              "detector has no Efixed parameter attached. ID="
-           << detector->getID();
-        throw std::runtime_error(os.str());
+        efixed = efixedVec.at(0);
       }
     }
+  }
+  if (efixed == 0.) {
+    std::ostringstream os;
+    os << "ExperimentInfo::getEFixed - Indirect mode efixed requested but "
+          "detector has no Efixed parameter attached. ID="
+       << detector->getID();
+    throw std::runtime_error(os.str());
+  }
+  return efixed;
+}
+
+/**
+ * Easy access to the efixed value for this run & detector
+ * @param detector :: The detector object to ask for the efixed mode. Only
+ * required for Indirect mode
+ * @param emode :: enum value indicating whether elastic, direct or indirect
+ * @return The current efixed value
+ */
+double ExperimentInfo::getEFixedGivenEMode(
+    const std::shared_ptr<const Geometry::IDetector> &detector,
+    const Kernel::DeltaEMode::Type emode) const {
+  if (emode == Kernel::DeltaEMode::Direct) {
+    double efixed = 0.;
+    for (auto &parameterName : {"Ei", "EnergyRequested", "EnergyEstimate"}) {
+      if (run().hasProperty(parameterName)) {
+        efixed = run().getPropertyValueAsType<double>(parameterName);
+        break;
+      }
+    }
+    if (efixed == 0.) {
+      throw std::runtime_error("Experiment logs do not contain an Ei "
+                               "value. Have you run GetEi?");
+    }
+    return efixed;
+  } else if (emode == Kernel::DeltaEMode::Indirect) {
+    if (!detector)
+      throw std::runtime_error("ExperimentInfo::getEFixed - Indirect mode "
+                               "efixed requested without a valid detector.");
+    return getEFixedForIndirect(detector, {"Efixed", "EFixed-val"});
   } else {
     throw std::runtime_error("ExperimentInfo::getEFixed - EFixed requested for "
                              "elastic mode, don't know what to do!");

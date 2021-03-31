@@ -62,20 +62,12 @@ MCInteractionVolume::MCInteractionVolume(
 }
 
 /**
- * Returns the axis-aligned bounding box for the volume
- * @return A reference to the bounding box
- */
-const Geometry::BoundingBox &MCInteractionVolume::getBoundingBox() const {
-  return m_sample->getBoundingBox();
-}
-
-/**
  * Returns the axis-aligned bounding box for the volume including env
  * @return A reference to the bounding box
  */
 const Geometry::BoundingBox MCInteractionVolume::getFullBoundingBox() const {
   auto sampleBox = m_sample->getBoundingBox();
-  if (m_env) {
+  if (m_pointsIn != ScatteringPointVicinity::SAMPLEONLY && m_env) {
     const auto &envBox = m_env->boundingBox();
     sampleBox.grow(envBox);
   }

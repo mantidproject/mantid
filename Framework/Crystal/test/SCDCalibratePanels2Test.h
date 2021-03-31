@@ -449,9 +449,10 @@ private:
     for (int i = 0; i < pws->getNumberPeaks(); ++i) {
       tof = pws->getPeak(i).getTOF();
       pws->getPeak(i).setInstrument(pws->getInstrument());
-      wl.initialize(pws->getPeak(i).getL1(), pws->getPeak(i).getL2(),
-                    pws->getPeak(i).getScattering(), 0,
-                    pws->getPeak(i).getInitialEnergy(), 0.0);
+      wl.initialize(pws->getPeak(i).getL1(), 0,
+                    {{UnitParams::l2, pws->getPeak(i).getL2()},
+                     {UnitParams::twoTheta, pws->getPeak(i).getScattering()},
+                     {UnitParams::efixed, pws->getPeak(i).getInitialEnergy()}});
       pws->getPeak(i).setDetectorID(pws->getPeak(i).getDetectorID());
       pws->getPeak(i).setWavelength(wl.singleFromTOF(tof));
     }

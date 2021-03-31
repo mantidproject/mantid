@@ -64,7 +64,6 @@ Mock IPeak
 ------------------------------------------------------------*/
 class MockIPeak : public Mantid::Geometry::IPeak {
 public:
-  MOCK_CONST_METHOD0(getDetector, Geometry::IDetector_const_sptr());
   MOCK_CONST_METHOD0(getReferenceFrame,
                      std::shared_ptr<const Geometry::ReferenceFrame>());
   MOCK_CONST_METHOD0(getRunNumber, int());
@@ -123,11 +122,8 @@ public:
   MOCK_CONST_METHOD0(getBankName, std::string());
   MOCK_CONST_METHOD0(getRow, int());
   MOCK_CONST_METHOD0(getCol, int());
-  MOCK_CONST_METHOD0(getDetPos, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getL1, double());
   MOCK_CONST_METHOD0(getL2, double());
-  MOCK_CONST_METHOD0(getDetectorPosition, Mantid::Kernel::V3D());
-  MOCK_CONST_METHOD0(getDetectorPositionNoCheck, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getPeakShape, const Mantid::Geometry::PeakShape &());
   MOCK_METHOD1(setPeakShape, void(Mantid::Geometry::PeakShape *shape));
   MOCK_METHOD1(setPeakShape,

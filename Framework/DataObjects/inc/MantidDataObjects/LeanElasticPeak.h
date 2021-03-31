@@ -57,17 +57,11 @@ public:
   // Construct a peak from a reference to the interface
   explicit LeanElasticPeak(const Geometry::IPeak &ipeak);
 
-  Geometry::IDetector_const_sptr getDetector() const override;
   std::shared_ptr<const Geometry::ReferenceFrame>
   getReferenceFrame() const override;
 
-  void setSamplePos(double, double, double) override;
-  void setSamplePos(const Mantid::Kernel::V3D &) override;
-
   Mantid::Kernel::V3D getQLabFrame() const override;
   Mantid::Kernel::V3D getQSampleFrame() const override;
-  Mantid::Kernel::V3D getDetectorPosition() const override;
-  Mantid::Kernel::V3D getDetectorPositionNoCheck() const override;
 
   void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
                        boost::optional<double> = boost::none) override;
@@ -89,8 +83,6 @@ public:
   void setInitialEnergy(double m_initialEnergy) override;
   void setFinalEnergy(double m_finalEnergy) override;
 
-  virtual Mantid::Kernel::V3D getDetPos() const override;
-  virtual Mantid::Kernel::V3D getSamplePos() const override;
   double getL1() const override;
   double getL2() const override;
 

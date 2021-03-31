@@ -43,7 +43,7 @@ public:
     MCInteractionVolume interactor(sample);
     interactor.setActiveRegion(sampleBox);
 
-    const auto interactionBox = interactor.getBoundingBox();
+    const auto interactionBox = interactor.getFullBoundingBox();
     TS_ASSERT_EQUALS(sampleBox.minPoint(), interactionBox.minPoint());
     TS_ASSERT_EQUALS(sampleBox.maxPoint(), interactionBox.maxPoint());
   }

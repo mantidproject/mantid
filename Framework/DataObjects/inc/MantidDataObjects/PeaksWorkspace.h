@@ -15,6 +15,7 @@
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
 
+using Mantid::Geometry::IPeak_uptr;
 // IsamplePosition should be IsampleOrientation
 namespace Mantid {
 //----------------------------------------------------------------------
@@ -87,24 +88,22 @@ public:
   Peak &getPeak(int peakNum) override;
   const Peak &getPeak(int peakNum) const override;
 
-  std::unique_ptr<Geometry::IPeak> createPeak(
+  IPeak_uptr createPeak(
       const Kernel::V3D &QLabFrame,
       boost::optional<double> detectorDistance = boost::none) const override;
 
-  std::unique_ptr<Geometry::IPeak>
+  IPeak_uptr
   createPeak(const Kernel::V3D &Position,
              const Kernel::SpecialCoordinateSystem &frame) const override;
 
-  std::unique_ptr<Geometry::IPeak>
-  createPeakQSample(const Kernel::V3D &position) const override;
+  IPeak_uptr createPeakQSample(const Kernel::V3D &position) const override;
 
   std::vector<std::pair<std::string, std::string>>
   peakInfo(const Kernel::V3D &qFrame, bool labCoords) const override;
 
-  std::unique_ptr<Geometry::IPeak>
-  createPeakHKL(const Kernel::V3D &HKL) const override;
+  IPeak_uptr createPeakHKL(const Kernel::V3D &HKL) const override;
 
-  std::unique_ptr<Geometry::IPeak> createPeak() const override;
+  IPeak_uptr createPeak() const override;
 
   int peakInfoNumber(const Kernel::V3D &qFrame, bool labCoords) const override;
 
