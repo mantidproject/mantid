@@ -80,6 +80,12 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, std::s
   case ViewEvent::ParameterConstraintChanged:
     handleParameterConstraintChanged(arg1, arg2);
     return;
+  case ViewEvent::EditLocalParameterClicked:
+    handleEditLocalParameterClicked(arg1);
+    return;
+  case ViewEvent::EditLocalParameterFinished:
+    handleEditLocalParameterFinished();
+    return;
   default:
     throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
   }
@@ -195,6 +201,27 @@ void FitScriptGeneratorPresenter::handleGlobalParametersChanged(std::vector<std:
   } catch (std::invalid_argument const &ex) {
     m_view->displayWarning(ex.what());
   }
+  handleSelectionChanged();
+}
+
+void FitScriptGeneratorPresenter::handleEditLocalParameterClicked(std::string const &parameter) {
+  std::vector<std::string> workspaceNames, domainNames, ties, constraints;
+  std::vector<double> values;
+  std::vector<bool> fixes;
+  insertLocalParameterData(parameter, workspaceNames, domainNames, values, fixes, ties, constraints);
+
+  m_view->openEditLocalParameterDialog(m_model->getAdjustedFunctionIndex(parameter), workspaceNames, domainNames,
+                                       values, fixes, ties, constraints);
+}
+
+void FitScriptGeneratorPresenter::handleEditLocalParameterFinished() {
+  auto const [parameter, values, fixes, ties, constraints] = m_view->getEditLocalParameterResults();
+
+  auto const domainIndices = getDomainsWithLocalParameter(parameter);
+  for (auto i = 0u; i < values.size(); ++i) {
+    setLocalParameterDataForDomain(domainIndices[i], parameter, values[i], fixes[i], ties[i], constraints[i]);
+  }
+
   handleSelectionChanged();
 }
 
@@ -372,6 +399,62 @@ void FitScriptGeneratorPresenter::invokeFunctionForDomain(FitDomainIndex domainI
 
 std::vector<FitDomainIndex> FitScriptGeneratorPresenter::getRowIndices() const {
   return m_view->applyFunctionChangesToAll() ? m_view->allRows() : m_view->selectedRows();
+}
+
+void FitScriptGeneratorPresenter::insertLocalParameterData(std::string const &parameter,
+                                                           std::vector<std::string> &workspaceNames,
+                                                           std::vector<std::string> &domainNames,
+                                                           std::vector<double> &values, std::vector<bool> &fixes,
+                                                           std::vector<std::string> &ties,
+                                                           std::vector<std::string> &constraints) const {
+  auto domainIndices = m_view->allRows();
+  std::reverse(domainIndices.begin(), domainIndices.end());
+  for (auto const domainIndex : domainIndices) {
+    insertLocalParameterDataForDomain(domainIndex, parameter, workspaceNames, domainNames, values, fixes, ties,
+                                      constraints);
+  }
+}
+
+void FitScriptGeneratorPresenter::insertLocalParameterDataForDomain(
+    FitDomainIndex domainIndex, std::string const &parameter, std::vector<std::string> &workspaceNames,
+    std::vector<std::string> &domainNames, std::vector<double> &values, std::vector<bool> &fixes,
+    std::vector<std::string> &ties, std::vector<std::string> &constraints) const {
+  if (m_model->hasParameter(domainIndex, parameter)) {
+    workspaceNames.emplace_back(m_view->workspaceName(domainIndex));
+    domainNames.emplace_back(m_model->getDomainName(domainIndex));
+    values.emplace_back(m_model->getParameterValue(domainIndex, parameter));
+    fixes.emplace_back(m_model->isParameterFixed(domainIndex, parameter));
+    ties.emplace_back(m_model->getParameterTie(domainIndex, parameter));
+    constraints.emplace_back(m_model->getParameterConstraint(domainIndex, parameter));
+  }
+}
+
+void FitScriptGeneratorPresenter::setLocalParameterDataForDomain(FitDomainIndex domainIndex,
+                                                                 std::string const &parameter, double value, bool fix,
+                                                                 std::string const &tie,
+                                                                 std::string const &constraint) {
+  auto const fullParameter = m_model->getFullParameter(domainIndex, parameter);
+
+  if (m_model->hasParameter(domainIndex, fullParameter)) {
+    m_model->setParameterValue(domainIndex, fullParameter, value);
+    m_model->setParameterTie(domainIndex, fullParameter, tie);
+    m_model->setParameterConstraint(domainIndex, fullParameter, constraint);
+
+    if (tie.empty())
+      m_model->setParameterFixed(domainIndex, fullParameter, fix);
+  }
+}
+
+std::vector<FitDomainIndex>
+FitScriptGeneratorPresenter::getDomainsWithLocalParameter(std::string const &parameter) const {
+  auto const doesNotHaveParameter = [&](FitDomainIndex domainIndex) {
+    return !m_model->hasParameter(domainIndex, m_model->getFullParameter(domainIndex, parameter));
+  };
+
+  auto domainIndices = m_view->allRows();
+  domainIndices.erase(std::remove_if(domainIndices.begin(), domainIndices.end(), doesNotHaveParameter),
+                      domainIndices.end());
+  return domainIndices;
 }
 
 std::tuple<std::string, std::string> FitScriptGeneratorPresenter::convertFunctionIndexOfParameterTie(
