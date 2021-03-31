@@ -45,8 +45,7 @@ public:
   void setPeakRange(const double &minimumTof, const double &maximumTof);
   void setBackgroundRange(const double &minimumTof, const double &maximumTof);
   void setPeakRangeLimits(const double &peakMin, const double &peakMax);
-  void setBackgroundRangeLimits(const double &backgroundMin,
-                                const double &backgroundMax);
+  void setBackgroundRangeLimits(const double &backgroundMin, const double &backgroundMax);
   void setResolutionSpectraRange(const double &minimum, const double &maximum);
 
 private slots:
@@ -56,13 +55,11 @@ private slots:
   void calMinChanged(double /*val*/);
   void calMaxChanged(double /*val*/);
   void calUpdateRS(QtProperty * /*prop*/, double /*val*/);
-  void
-  calSetDefaultResolution(const Mantid::API::MatrixWorkspace_const_sptr &ws);
+  void calSetDefaultResolution(const Mantid::API::MatrixWorkspace_const_sptr &ws);
   void resCheck(bool state); ///< handles checking/unchecking of "Create RES
   /// File" checkbox
   void setDefaultInstDetails();
-  void
-  pbRunEditing(); //< Called when a user starts to type / edit the runs to load.
+  void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
   void pbRunFinding();  //< Called when the FileFinder starts finding the files.
   void pbRunFinished(); //< Called when the FileFinder has finished finding the
   // files.
@@ -72,24 +69,18 @@ private slots:
 
   void setRunEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
-  void updateRunButton(bool enabled = true,
-                       std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run",
-                       QString const &tooltip = "");
+  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
+                       QString const &message = "Run", QString const &tooltip = "");
 
 private:
   void setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails);
   void createRESfile(const QString &file);
   void addRuntimeSmoothing(const QString &workspaceName);
-  void setRangeLimits(MantidWidgets::RangeSelector *rangeSelector,
-                      const double &minimum, const double &maximum,
-                      const QString &minPropertyName,
-                      const QString &maxPropertyName);
+  void setRangeLimits(MantidWidgets::RangeSelector *rangeSelector, const double &minimum, const double &maximum,
+                      const QString &minPropertyName, const QString &maxPropertyName);
   Mantid::API::IAlgorithm_sptr calibrationAlgorithm(const QString &inputFiles);
-  Mantid::API::IAlgorithm_sptr
-  resolutionAlgorithm(const QString &inputFiles) const;
-  Mantid::API::IAlgorithm_sptr
-  energyTransferReductionAlgorithm(const QString &inputFiles) const;
+  Mantid::API::IAlgorithm_sptr resolutionAlgorithm(const QString &inputFiles) const;
+  Mantid::API::IAlgorithm_sptr energyTransferReductionAlgorithm(const QString &inputFiles) const;
 
   Ui::ISISCalibration m_uiForm;
   QString m_lastCalPlotFilename;

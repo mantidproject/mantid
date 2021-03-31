@@ -46,13 +46,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"ChangeBinOffset", "Scale"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ChangeBinOffset", "Scale"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Arithmetic;CorrectionFunctions";
-  }
+  const std::string category() const override { return "Arithmetic;CorrectionFunctions"; }
 
 private:
   // Overridden Algorithm methods
@@ -62,11 +58,9 @@ private:
   void execEvent();
 
   /// Create output workspace
-  API::MatrixWorkspace_sptr
-  createOutputWS(const API::MatrixWorkspace_sptr &input);
+  API::MatrixWorkspace_sptr createOutputWS(const API::MatrixWorkspace_sptr &input);
   /// Get the scale factor for the given spectrum
-  double getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS,
-                        const size_t index);
+  double getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS, const size_t index);
 
   /// The progress reporting object
   std::unique_ptr<API::Progress> m_progress;

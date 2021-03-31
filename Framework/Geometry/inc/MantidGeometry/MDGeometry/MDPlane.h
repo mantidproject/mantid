@@ -41,12 +41,10 @@ namespace Geometry {
 class DLLExport MDPlane {
 public:
   MDPlane(const Mantid::Kernel::VMD &normal, const Mantid::Kernel::VMD &point);
-  MDPlane(const std::vector<coord_t> &normal,
-          const std::vector<coord_t> &point);
+  MDPlane(const std::vector<coord_t> &normal, const std::vector<coord_t> &point);
   MDPlane(const size_t nd, const float *normal, const float *point);
   MDPlane(const size_t nd, const double *normal, const double *point);
-  MDPlane(const std::vector<Mantid::Kernel::VMD> &vectors,
-          const Mantid::Kernel::VMD &origin,
+  MDPlane(const std::vector<Mantid::Kernel::VMD> &vectors, const Mantid::Kernel::VMD &origin,
           const Mantid::Kernel::VMD &insidePoint);
   MDPlane(const MDPlane &other);
   MDPlane &operator=(const MDPlane &other);
@@ -169,8 +167,7 @@ private:
    * @param normal :: vector giving the normal to the surface
    * @param point :: vector giving one point on the surface
    */
-  template <typename IterableType>
-  void construct(IterableType normal, IterableType point) {
+  template <typename IterableType> void construct(IterableType normal, IterableType point) {
     m_normal = new coord_t[m_nd];
     m_inequality = 0;
     for (size_t d = 0; d < m_nd; ++d) {

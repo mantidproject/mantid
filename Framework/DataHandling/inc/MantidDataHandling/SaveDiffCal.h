@@ -24,9 +24,7 @@ class DLLExport SaveDiffCal : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadDiffCal"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadDiffCal"}; }
   const std::string category() const override;
   const std::string summary() const override;
 
@@ -37,9 +35,8 @@ private:
 
   void writeDoubleFieldFromTable(H5::Group &group, const std::string &name);
   void writeIntFieldFromTable(H5::Group &group, const std::string &name);
-  void
-  writeIntFieldFromSVWS(H5::Group &group, const std::string &name,
-                        const DataObjects::SpecialWorkspace2D_const_sptr &ws);
+  void writeIntFieldFromSVWS(H5::Group &group, const std::string &name,
+                             const DataObjects::SpecialWorkspace2D_const_sptr &ws);
   void generateDetidToIndex();
   bool tableHasColumn(const std::string &ColumnName) const;
 

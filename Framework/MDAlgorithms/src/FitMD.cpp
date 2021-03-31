@@ -35,18 +35,15 @@ using namespace Kernel;
  * Default Constructor
  */
 FitMD::FitMD()
-    : API::IDomainCreator(nullptr, std::vector<std::string>(),
-                          IDomainCreator::Simple),
-      m_maxSize(0), m_startIndex(0), m_count(0) {}
+    : API::IDomainCreator(nullptr, std::vector<std::string>(), IDomainCreator::Simple), m_maxSize(0), m_startIndex(0),
+      m_count(0) {}
 
 /**
  * Constructor
  */
-FitMD::FitMD(IPropertyManager *fit, const std::string &workspacePropertyName,
-             IDomainCreator::DomainType domainType)
-    : API::IDomainCreator(
-          fit, std::vector<std::string>(1, workspacePropertyName), domainType),
-      m_maxSize(0), m_startIndex(0), m_count(0) {
+FitMD::FitMD(IPropertyManager *fit, const std::string &workspacePropertyName, IDomainCreator::DomainType domainType)
+    : API::IDomainCreator(fit, std::vector<std::string>(1, workspacePropertyName), domainType), m_maxSize(0),
+      m_startIndex(0), m_count(0) {
   if (domainType != IDomainCreator::Simple) {
     throw std::runtime_error("FitMD only supports simple domains");
   }
@@ -63,8 +60,7 @@ FitMD::FitMD(IPropertyManager *fit, const std::string &workspacePropertyName,
  * @param workspacePropertyName The name of the workspace property
  * @param domainType
  */
-void FitMD::initialize(Kernel::IPropertyManager *pm,
-                       const std::string &workspacePropertyName,
+void FitMD::initialize(Kernel::IPropertyManager *pm, const std::string &workspacePropertyName,
                        IDomainCreator::DomainType domainType) {
   m_manager = pm;
   m_workspacePropertyName = workspacePropertyName;
@@ -83,9 +79,8 @@ void FitMD::declareDatasetProperties(const std::string &suffix, bool addProp) {
     if (addProp && !m_manager->existsProperty(m_maxSizePropertyName)) {
       auto mustBePositive = std::make_shared<BoundedValidator<int>>();
       mustBePositive->setLower(1);
-      declareProperty(
-          new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),
-          "The maximum number of values per a simple domain.");
+      declareProperty(new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),
+                      "The maximum number of values per a simple domain.");
     }
   }
 }
@@ -96,8 +91,7 @@ void FitMD::declareDatasetProperties(const std::string &suffix, bool addProp) {
  * @param ivalues :: The calculated values
  * @param i0 :: Ignored currently
  */
-void FitMD::createDomain(std::shared_ptr<API::FunctionDomain> &domain,
-                         std::shared_ptr<API::FunctionValues> &ivalues,
+void FitMD::createDomain(std::shared_ptr<API::FunctionDomain> &domain, std::shared_ptr<API::FunctionValues> &ivalues,
                          size_t i0) {
   UNUSED_ARG(i0);
   setParameters();
@@ -108,8 +102,7 @@ void FitMD::createDomain(std::shared_ptr<API::FunctionDomain> &domain,
     m_count = n;
   }
 
-  API::FunctionDomainMD *dmd =
-      new API::FunctionDomainMD(m_IMDWorkspace, m_startIndex, m_count);
+  API::FunctionDomainMD *dmd = new API::FunctionDomainMD(m_IMDWorkspace, m_startIndex, m_count);
   domain.reset(dmd);
   auto values = new API::FunctionValues(*domain);
   ivalues.reset(values);
@@ -141,12 +134,10 @@ void FitMD::createDomain(std::shared_ptr<API::FunctionDomain> &domain,
  * @param values :: A pointer to the calculated values
  * @param outputWorkspacePropertyName :: The property name
  */
-std::shared_ptr<API::Workspace>
-FitMD::createOutputWorkspace(const std::string &baseName,
-                             API::IFunction_sptr function,
-                             std::shared_ptr<API::FunctionDomain> domain,
-                             std::shared_ptr<API::FunctionValues> values,
-                             const std::string &outputWorkspacePropertyName) {
+std::shared_ptr<API::Workspace> FitMD::createOutputWorkspace(const std::string &baseName, API::IFunction_sptr function,
+                                                             std::shared_ptr<API::FunctionDomain> domain,
+                                                             std::shared_ptr<API::FunctionValues> values,
+                                                             const std::string &outputWorkspacePropertyName) {
   if (!values) {
     return std::shared_ptr<API::Workspace>();
   }
@@ -156,18 +147,14 @@ FitMD::createOutputWorkspace(const std::string &baseName,
   }
   API::IMDWorkspace_const_sptr domainWS = functionMD->getWorkspace();
 
-  auto inputEventWS =
-      std::dynamic_pointer_cast<const API::IMDEventWorkspace>(domainWS);
+  auto inputEventWS = std::dynamic_pointer_cast<const API::IMDEventWorkspace>(domainWS);
   if (inputEventWS) {
-    return createEventOutputWorkspace(baseName, *inputEventWS, *values,
-                                      outputWorkspacePropertyName);
+    return createEventOutputWorkspace(baseName, *inputEventWS, *values, outputWorkspacePropertyName);
   }
 
-  auto inputHistoWS =
-      std::dynamic_pointer_cast<const API::IMDHistoWorkspace>(domainWS);
+  auto inputHistoWS = std::dynamic_pointer_cast<const API::IMDHistoWorkspace>(domainWS);
   if (inputHistoWS) {
-    return createHistoOutputWorkspace(baseName, function, inputHistoWS,
-                                      outputWorkspacePropertyName);
+    return createHistoOutputWorkspace(baseName, function, inputHistoWS, outputWorkspacePropertyName);
   }
 
   return std::shared_ptr<API::Workspace>();
@@ -181,24 +168,21 @@ FitMD::createOutputWorkspace(const std::string &baseName,
  * @param values :: The calculated values
  * @param outputWorkspacePropertyName :: The property name
  */
-std::shared_ptr<API::Workspace> FitMD::createEventOutputWorkspace(
-    const std::string &baseName, const API::IMDEventWorkspace &inputWorkspace,
-    const API::FunctionValues &values,
-    const std::string &outputWorkspacePropertyName) {
-  auto outputWS =
-      MDEventFactory::CreateMDWorkspace(inputWorkspace.getNumDims(), "MDEvent");
+std::shared_ptr<API::Workspace> FitMD::createEventOutputWorkspace(const std::string &baseName,
+                                                                  const API::IMDEventWorkspace &inputWorkspace,
+                                                                  const API::FunctionValues &values,
+                                                                  const std::string &outputWorkspacePropertyName) {
+  auto outputWS = MDEventFactory::CreateMDWorkspace(inputWorkspace.getNumDims(), "MDEvent");
   // Add events
   // TODO: Generalize to ND (the current framework is a bit limiting)
-  auto mdWS = std::dynamic_pointer_cast<
-      DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4>>(outputWS);
+  auto mdWS = std::dynamic_pointer_cast<DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4>>(outputWS);
   if (!mdWS) {
     return std::shared_ptr<API::Workspace>();
   }
 
   // Bins extents and meta data
   for (size_t i = 0; i < 4; ++i) {
-    std::shared_ptr<const Geometry::IMDDimension> inputDim =
-        inputWorkspace.getDimension(i);
+    std::shared_ptr<const Geometry::IMDDimension> inputDim = inputWorkspace.getDimension(i);
     Geometry::MDHistoDimensionBuilder builder;
     builder.setName(inputDim->getName());
     builder.setId(inputDim->getDimensionId());
@@ -227,14 +211,11 @@ std::shared_ptr<API::Workspace> FitMD::createEventOutputWorkspace(
   const float errorSq = 0.0;
   do {
     const size_t numEvents = inputIter->getNumEvents();
-    const auto signal =
-        static_cast<float>(values.getCalculated(resultValueIndex));
+    const auto signal = static_cast<float>(values.getCalculated(resultValueIndex));
     for (size_t i = 0; i < numEvents; ++i) {
-      coord_t centers[4] = {
-          inputIter->getInnerPosition(i, 0), inputIter->getInnerPosition(i, 1),
-          inputIter->getInnerPosition(i, 2), inputIter->getInnerPosition(i, 3)};
-      mdWS->addEvent(MDEvent<4>(signal, errorSq, inputIter->getInnerRunIndex(i),
-                                inputIter->getInnerGoniometerIndex(i),
+      coord_t centers[4] = {inputIter->getInnerPosition(i, 0), inputIter->getInnerPosition(i, 1),
+                            inputIter->getInnerPosition(i, 2), inputIter->getInnerPosition(i, 3)};
+      mdWS->addEvent(MDEvent<4>(signal, errorSq, inputIter->getInnerRunIndex(i), inputIter->getInnerGoniometerIndex(i),
                                 inputIter->getInnerDetectorID(i), centers));
     }
     ++resultValueIndex;
@@ -250,11 +231,9 @@ std::shared_ptr<API::Workspace> FitMD::createEventOutputWorkspace(
   // Store it
   if (!outputWorkspacePropertyName.empty()) {
     declareProperty(
-        new API::WorkspaceProperty<API::IMDEventWorkspace>(
-            outputWorkspacePropertyName, "", Direction::Output),
+        new API::WorkspaceProperty<API::IMDEventWorkspace>(outputWorkspacePropertyName, "", Direction::Output),
         "Name of the output Workspace holding resulting simulated spectrum");
-    m_manager->setPropertyValue(outputWorkspacePropertyName,
-                                baseName + "Workspace");
+    m_manager->setPropertyValue(outputWorkspacePropertyName, baseName + "Workspace");
     m_manager->setProperty(outputWorkspacePropertyName, outputWS);
   }
 
@@ -269,14 +248,13 @@ std::shared_ptr<API::Workspace> FitMD::createEventOutputWorkspace(
  * @param inputWorkspace :: The input workspace
  * @param outputWorkspacePropertyName :: The property name
  */
-std::shared_ptr<API::Workspace> FitMD::createHistoOutputWorkspace(
-    const std::string &baseName, const API::IFunction_sptr &function,
-    const API::IMDHistoWorkspace_const_sptr &inputWorkspace,
-    const std::string &outputWorkspacePropertyName) {
+std::shared_ptr<API::Workspace>
+FitMD::createHistoOutputWorkspace(const std::string &baseName, const API::IFunction_sptr &function,
+                                  const API::IMDHistoWorkspace_const_sptr &inputWorkspace,
+                                  const std::string &outputWorkspacePropertyName) {
   // have to cast const away to be able to pass the workspace to the algorithm
   API::IMDHistoWorkspace_sptr nonConstInputWS =
-      std::const_pointer_cast<API::IMDHistoWorkspace,
-                              const API::IMDHistoWorkspace>(inputWorkspace);
+      std::const_pointer_cast<API::IMDHistoWorkspace, const API::IMDHistoWorkspace>(inputWorkspace);
   // evaluate the function on the input workspace
   auto alg = API::AlgorithmFactory::Instance().create("EvaluateMDFunction", -1);
   alg->setChild(true);
@@ -284,21 +262,17 @@ std::shared_ptr<API::Workspace> FitMD::createHistoOutputWorkspace(
   alg->initialize();
   alg->setProperty("Function", function);
   alg->setProperty("InputWorkspace", nonConstInputWS);
-  alg->setProperty("OutputWorkspace",
-                   "__FitMD_createHistoOutputWorkspace_outputWorkspace");
+  alg->setProperty("OutputWorkspace", "__FitMD_createHistoOutputWorkspace_outputWorkspace");
   alg->execute();
 
   // get the result
-  API::IMDHistoWorkspace_sptr outputWorkspace =
-      alg->getProperty("OutputWorkspace");
+  API::IMDHistoWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
   // Store it
   if (!outputWorkspacePropertyName.empty()) {
     declareProperty(
-        new API::WorkspaceProperty<API::IMDHistoWorkspace>(
-            outputWorkspacePropertyName, "", Direction::Output),
+        new API::WorkspaceProperty<API::IMDHistoWorkspace>(outputWorkspacePropertyName, "", Direction::Output),
         "Name of the output Workspace holding resulting simulated spectrum");
-    m_manager->setPropertyValue(outputWorkspacePropertyName,
-                                baseName + "Workspace");
+    m_manager->setPropertyValue(outputWorkspacePropertyName, baseName + "Workspace");
     m_manager->setProperty(outputWorkspacePropertyName, outputWorkspace);
   }
 
@@ -312,8 +286,7 @@ void FitMD::setParameters() const {
   // if property manager is set overwrite any set parameters
   if (m_manager) {
     if (m_workspacePropertyNames.empty()) {
-      throw std::runtime_error(
-          "Cannot create FunctionDomainMD: no workspace given");
+      throw std::runtime_error("Cannot create FunctionDomainMD: no workspace given");
     }
     // get the workspace
     API::Workspace_sptr ws = m_manager->getProperty(m_workspacePropertyName);

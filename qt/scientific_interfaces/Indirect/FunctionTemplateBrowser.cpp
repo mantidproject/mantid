@@ -34,8 +34,7 @@ namespace IDA {
  * Constructor
  * @param parent :: The parent widget.
  */
-FunctionTemplateBrowser::FunctionTemplateBrowser(QWidget *parent)
-    : QWidget(parent), m_decimals(6) {}
+FunctionTemplateBrowser::FunctionTemplateBrowser(QWidget *parent) : QWidget(parent), m_decimals(6) {}
 
 FunctionTemplateBrowser::~FunctionTemplateBrowser() {
   m_browser->unsetFactoryForManager(m_stringManager);
@@ -74,26 +73,19 @@ void FunctionTemplateBrowser::createBrowser() {
   m_browser->setFactoryForManager(m_enumManager, comboBoxFactory);
   m_browser->setFactoryForManager(m_parameterManager, doubleDialogFactory);
 
-  connect(m_intManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(intChanged(QtProperty *)));
-  connect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(boolChanged(QtProperty *)));
-  connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(enumChanged(QtProperty *)));
-  connect(m_parameterManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(parameterChanged(QtProperty *)));
+  connect(m_intManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(intChanged(QtProperty *)));
+  connect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(boolChanged(QtProperty *)));
+  connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(enumChanged(QtProperty *)));
+  connect(m_parameterManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(parameterChanged(QtProperty *)));
 
-  connect(doubleDialogFactory, SIGNAL(buttonClicked(QtProperty *)), this,
-          SLOT(parameterButtonClicked(QtProperty *)));
-  connect(doubleDialogFactory, SIGNAL(closeEditor()), m_browser,
-          SLOT(closeEditor()));
+  connect(doubleDialogFactory, SIGNAL(buttonClicked(QtProperty *)), this, SLOT(parameterButtonClicked(QtProperty *)));
+  connect(doubleDialogFactory, SIGNAL(closeEditor()), m_browser, SLOT(closeEditor()));
 
   m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this,
-          SLOT(popupMenu(const QPoint &)));
+  connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
 
-  connect(m_browser, SIGNAL(optionChanged(QtProperty *, const QString &, bool)),
-          this, SLOT(globalChanged(QtProperty *, const QString &, bool)));
+  connect(m_browser, SIGNAL(optionChanged(QtProperty *, const QString &, bool)), this,
+          SLOT(globalChanged(QtProperty *, const QString &, bool)));
 }
 
 void FunctionTemplateBrowser::init() {

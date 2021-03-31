@@ -19,8 +19,7 @@ public:
   /** Class for debugging progress reporting */
   class MyTestProgress : public ProgressBase {
   public:
-    MyTestProgress(double start, double end, int64_t numSteps)
-        : ProgressBase(start, end, numSteps) {}
+    MyTestProgress(double start, double end, int64_t numSteps) : ProgressBase(start, end, numSteps) {}
 
     void doReport(const std::string &msg = "") override {
       last_report_message = msg;

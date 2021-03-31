@@ -23,14 +23,10 @@ public:
 
   void test_has_correct_mixins() {
     Points data;
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(
-        (dynamic_cast<detail::VectorOf<Points, HistogramX> &>(data))));
-    TS_ASSERT_THROWS_NOTHING(
-        UNUSED_ARG(dynamic_cast<detail::Iterable<Points> &>(data)));
-    TS_ASSERT_THROWS_NOTHING(
-        UNUSED_ARG(dynamic_cast<detail::Offsetable<Points> &>(data)));
-    TS_ASSERT_THROWS_NOTHING(
-        UNUSED_ARG(dynamic_cast<detail::Scalable<Points> &>(data)));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG((dynamic_cast<detail::VectorOf<Points, HistogramX> &>(data))));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Iterable<Points> &>(data)));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Offsetable<Points> &>(data)));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Scalable<Points> &>(data)));
   }
 
   void test_construct_default() {

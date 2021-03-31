@@ -41,14 +41,10 @@ public:
 
     // Get back the workspaces
     MatrixWorkspace_sptr output1;
-    TS_ASSERT_THROWS_NOTHING(
-        output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "CRISPdata_1"));
+    TS_ASSERT_THROWS_NOTHING(output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("CRISPdata_1"));
     TS_ASSERT_EQUALS(output1->getNumberHistograms(), 4)
     MatrixWorkspace_sptr output2;
-    TS_ASSERT_THROWS_NOTHING(
-        output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "CRISPdata_2"));
+    TS_ASSERT_THROWS_NOTHING(output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("CRISPdata_2"));
     TS_ASSERT_EQUALS(output2->getNumberHistograms(), 4)
 
     // get the parameter map for the period 1 CRISP data
@@ -67,11 +63,8 @@ public:
     // linear-detector is composite, i.e., not a detector and thus not stored in
     // DetectorInfo but in ComponentInfo
     const auto &componentInfo = output1->componentInfo();
-    const auto &linearDetector = output1->getInstrument()
-                                     ->getComponentByName("linear-detector")
-                                     ->getComponentID();
-    const auto pos2 =
-        componentInfo.position(componentInfo.indexOf(linearDetector));
+    const auto &linearDetector = output1->getInstrument()->getComponentByName("linear-detector")->getComponentID();
+    const auto pos2 = componentInfo.position(componentInfo.indexOf(linearDetector));
     std::vector<V3D> ret2 = paramMap.getV3D("linear-detector", "pos");
     TS_ASSERT_EQUALS(static_cast<int>(ret2.size()), 0);
     TS_ASSERT_DELTA(pos2.Y(), 0.0, 0.0001);
@@ -87,8 +80,7 @@ public:
   // checks that this is done ok
   void testParsing() {
     IComponent *comp(nullptr);
-    std::shared_ptr<Interpolation> interpolation =
-        std::make_shared<Interpolation>();
+    std::shared_ptr<Interpolation> interpolation = std::make_shared<Interpolation>();
     std::vector<std::string> constraint;
     std::string penaltyFactor;
     std::string fitFunc;
@@ -96,10 +88,9 @@ public:
     std::string eq;
     const double angleConvert(1.0);
 
-    XMLInstrumentParameter testParamEntry(
-        "", "1000.0", interpolation, "", "", "", "bob", "double", "",
-        constraint, penaltyFactor, fitFunc, extractSingleValueAs, eq, comp,
-        angleConvert, "bla bla bla");
+    XMLInstrumentParameter testParamEntry("", "1000.0", interpolation, "", "", "", "bob", "double", "", constraint,
+                                          penaltyFactor, fitFunc, extractSingleValueAs, eq, comp, angleConvert,
+                                          "bla bla bla");
 
     TimeSeriesProperty<double> *dummy = nullptr;
     TS_ASSERT_DELTA(testParamEntry.createParamValue(dummy), 1000.0, 0.0001);

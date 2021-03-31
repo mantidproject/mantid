@@ -34,8 +34,7 @@ using namespace Mantid::API;
 /// Constructor
 SampleTransmission::SampleTransmission(QWidget *parent)
     : UserSubWindow(parent), m_algRunner(new API::AlgorithmRunner(this)) {
-  connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
+  connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(algorithmComplete(bool)));
 }
 
 /**
@@ -54,8 +53,8 @@ void SampleTransmission::initLayout() {
  * Opens the Qt help page for the interface.
  */
 void SampleTransmission::showHelp() {
-  MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Sample Transmission Calculator"), QString("general"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Sample Transmission Calculator"),
+                                                 QString("general"));
 }
 
 /**
@@ -73,15 +72,12 @@ bool SampleTransmission::validate(bool silent) {
   switch (wavelengthBinning) {
   // Single
   case 0:
-    uiv.checkBins(m_uiForm.spSingleLow->value(),
-                  m_uiForm.spSingleWidth->value(),
-                  m_uiForm.spSingleHigh->value());
+    uiv.checkBins(m_uiForm.spSingleLow->value(), m_uiForm.spSingleWidth->value(), m_uiForm.spSingleHigh->value());
     break;
 
   // Multiple
   case 1:
-    uiv.checkFieldIsNotEmpty("Multiple binning", m_uiForm.leMultiple,
-                             m_uiForm.valMultiple);
+    uiv.checkFieldIsNotEmpty("Multiple binning", m_uiForm.leMultiple, m_uiForm.valMultiple);
 
     // Checks that the first number in the list is not negative.
     // Only the first number needs to be checked because if it isn't negative
@@ -96,17 +92,13 @@ bool SampleTransmission::validate(bool silent) {
   }
 
   // Validate chemical formula
-  uiv.checkFieldIsNotEmpty("Chemical Formula", m_uiForm.leChemicalFormula,
-                           m_uiForm.valChemicalFormula);
+  uiv.checkFieldIsNotEmpty("Chemical Formula", m_uiForm.leChemicalFormula, m_uiForm.valChemicalFormula);
 
   // Ensure number density is not zero
-  uiv.setErrorLabel(m_uiForm.valDensity,
-                    uiv.checkNotEqual("Density", m_uiForm.spDensity->value()));
+  uiv.setErrorLabel(m_uiForm.valDensity, uiv.checkNotEqual("Density", m_uiForm.spDensity->value()));
 
   // Ensure thickness is not zero
-  uiv.setErrorLabel(
-      m_uiForm.valThickness,
-      uiv.checkNotEqual("Thickness", m_uiForm.spThickness->value()));
+  uiv.setErrorLabel(m_uiForm.valThickness, uiv.checkNotEqual("Thickness", m_uiForm.spThickness->value()));
 
   // Give error message
   if (!silent && !uiv.isAllInputValid())
@@ -124,8 +116,7 @@ void SampleTransmission::calculate() {
     return;
 
   // Create the transmission calculation algorithm
-  IAlgorithm_sptr transCalcAlg =
-      AlgorithmManager::Instance().create("CalculateSampleTransmission");
+  IAlgorithm_sptr transCalcAlg = AlgorithmManager::Instance().create("CalculateSampleTransmission");
   transCalcAlg->initialize();
 
   // Set the wavelength binning based on type set in UI
@@ -136,8 +127,7 @@ void SampleTransmission::calculate() {
     // Convert values to binning params using the 'C' locale.
     std::ostringstream binning;
     binning.imbue(std::locale::classic());
-    binning << m_uiForm.spSingleLow->value() << ','
-            << m_uiForm.spSingleWidth->value() << ','
+    binning << m_uiForm.spSingleLow->value() << ',' << m_uiForm.spSingleWidth->value() << ','
             << m_uiForm.spSingleHigh->value();
     transCalcAlg->setProperty("WavelengthRange", binning.str());
     break;
@@ -145,17 +135,14 @@ void SampleTransmission::calculate() {
 
   // Multiple
   case 1:
-    transCalcAlg->setProperty("WavelengthRange",
-                              m_uiForm.leMultiple->text().toStdString());
+    transCalcAlg->setProperty("WavelengthRange", m_uiForm.leMultiple->text().toStdString());
     break;
   }
 
   // Set sample material properties
-  transCalcAlg->setProperty("ChemicalFormula",
-                            m_uiForm.leChemicalFormula->text().toStdString());
+  transCalcAlg->setProperty("ChemicalFormula", m_uiForm.leChemicalFormula->text().toStdString());
 
-  transCalcAlg->setProperty("DensityType",
-                            m_uiForm.cbDensity->currentText().toStdString());
+  transCalcAlg->setProperty("DensityType", m_uiForm.cbDensity->currentText().toStdString());
   transCalcAlg->setProperty("Density", m_uiForm.spDensity->value());
 
   transCalcAlg->setProperty("Thickness", m_uiForm.spThickness->value());
@@ -180,14 +167,11 @@ void SampleTransmission::algorithmComplete(bool error) {
 
   // Ignore errors
   if (error) {
-    showInformationBox(
-        "Transmission calculation failed.\nSee Results Log for details.");
+    showInformationBox("Transmission calculation failed.\nSee Results Log for details.");
     return;
   }
 
-  MatrixWorkspace_sptr ws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          "CalculatedSampleTransmission");
+  MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("CalculatedSampleTransmission");
 
   // Fill the output table
   double scattering = ws->y(1)[0];
@@ -210,8 +194,7 @@ void SampleTransmission::algorithmComplete(bool error) {
   transmissionStats["Median"] = stats.median;
   transmissionStats["Std. Dev."] = stats.standard_deviation;
 
-  for (auto it = transmissionStats.begin(); it != transmissionStats.end();
-       ++it) {
+  for (auto it = transmissionStats.begin(); it != transmissionStats.end(); ++it) {
     QTreeWidgetItem *item = new QTreeWidgetItem();
     item->setText(0, it.key());
     item->setText(1, QString::number(it.value()));
@@ -222,14 +205,11 @@ void SampleTransmission::algorithmComplete(bool error) {
 
   try {
     // Plot transmission curve on preview plot
-    m_uiForm.ppTransmission->addSpectrum("Transmission",
-                                         "CalculatedSampleTransmission", 0);
+    m_uiForm.ppTransmission->addSpectrum("Transmission", "CalculatedSampleTransmission", 0);
     m_uiForm.ppTransmission->resizeX();
   } catch (std::runtime_error &e) {
     // PreviewPlot may throw an exception if our workspace has less than two X
     // values
-    showInformationBox(
-        QString::fromStdString("Unable to plot CalculatedSampleTransmission: " +
-                               std::string(e.what())));
+    showInformationBox(QString::fromStdString("Unable to plot CalculatedSampleTransmission: " + std::string(e.what())));
   }
 }

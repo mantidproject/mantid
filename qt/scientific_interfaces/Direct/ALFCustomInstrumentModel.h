@@ -17,8 +17,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_DIRECT_DLL IALFCustomInstrumentModel
-    : public virtual MantidWidgets::IBaseCustomInstrumentModel {
+class MANTIDQT_DIRECT_DLL IALFCustomInstrumentModel : public virtual MantidWidgets::IBaseCustomInstrumentModel {
 
 public:
   IALFCustomInstrumentModel() {}
@@ -64,9 +63,7 @@ public:
   std::string dataFileName() override { return m_base->dataFileName(); };
   int currentRun() override { return m_base->currentRun(); };
   bool isErrorCode(const int run) override { return m_base->isErrorCode(run); };
-  const std::string getInstrument() override {
-    return m_base->getInstrument();
-  };
+  const std::string getInstrument() override { return m_base->getInstrument(); };
   const std::string getTmpName() override { return m_base->getTmpName(); };
   const std::string getWSName() override { return m_base->getWSName(); };
 

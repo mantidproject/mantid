@@ -57,8 +57,7 @@ int IDCsetreportfunc(idc_error_report_t report_func) {
 }
 
 /** returns 0 on success, -1 on failure */
-int IDCopen(const char *host, int mode, int options, idc_handle_t *pfh,
-            uint16_t port) {
+int IDCopen(const char *host, int mode, int options, idc_handle_t *pfh, uint16_t port) {
   (void)mode;    // Avoid compiler warning
   (void)options; // Avoid compiler warning
 
@@ -83,8 +82,7 @@ int IDCclose(idc_handle_t *pfh) {
 
 /** main worker routine for all data reading. Returns 0 on success, -1 on error
  */
-static int getdat(idc_handle_t fh, int ifsn, int nos, int **value,
-                  int dims_array[], int *ndims, int do_alloc) {
+static int getdat(idc_handle_t fh, int ifsn, int nos, int **value, int dims_array[], int *ndims, int do_alloc) {
   (void)isisds_type_size; // Avoid compiler warning
   (void)isisds_type_name; // Avoid compiler warning
 
@@ -93,22 +91,18 @@ static int getdat(idc_handle_t fh, int ifsn, int nos, int **value,
   int spec_nos[2] = {ifsn, nos};
   int spec_nos_dims[1] = {2};
   char *command = nullptr;
-  if (isisds_send_command(fh->s, "GETDAT", spec_nos, ISISDSInt32, spec_nos_dims,
-                          1) <= 0) {
+  if (isisds_send_command(fh->s, "GETDAT", spec_nos, ISISDSInt32, spec_nos_dims, 1) <= 0) {
     IDCreport(0, 0, "error sending command (getdat)");
     return -1;
   };
   ret_type = ISISDSInt32;
   if (do_alloc) {
-    stat = isisds_recv_command_alloc(fh->s, &command,
-                                     reinterpret_cast<void **>(value),
-                                     &ret_type, dims_array, ndims);
+    stat = isisds_recv_command_alloc(fh->s, &command, reinterpret_cast<void **>(value), &ret_type, dims_array, ndims);
     free(command);
   } else {
     char comm_buffer[256];
     comm_buff_size = sizeof(comm_buffer);
-    stat = isisds_recv_command(fh->s, comm_buffer, &comm_buff_size, *value,
-                               &ret_type, dims_array, ndims);
+    stat = isisds_recv_command(fh->s, comm_buffer, &comm_buff_size, *value, &ret_type, dims_array, ndims);
   }
   if (stat <= 0) {
     IDCreport(0, 0, "error reading command (getdat)");
@@ -122,19 +116,16 @@ static int getdat(idc_handle_t fh, int ifsn, int nos, int **value,
   return 0;
 }
 
-int IDCgetdat(idc_handle_t fh, int ifsn, int nos, int *value, int dims_array[],
-              int *ndims) {
+int IDCgetdat(idc_handle_t fh, int ifsn, int nos, int *value, int dims_array[], int *ndims) {
   return getdat(fh, ifsn, nos, &value, dims_array, ndims, 0);
 }
 
-int IDCAgetdat(idc_handle_t fh, int ifsn, int nos, int **value,
-               int dims_array[], int *ndims) {
+int IDCAgetdat(idc_handle_t fh, int ifsn, int nos, int **value, int dims_array[], int *ndims) {
   return getdat(fh, ifsn, nos, value, dims_array, ndims, 1);
 }
 
 /// Get a parameter
-static int IDCgetpar(idc_handle_t fh, const char *name, void **value,
-                     ISISDSDataType type, int dims_array[], int *ndims,
+static int IDCgetpar(idc_handle_t fh, const char *name, void **value, ISISDSDataType type, int dims_array[], int *ndims,
                      int do_alloc) {
   int n, stat, comm_buff_size;
   ISISDSDataType ret_type;
@@ -148,13 +139,11 @@ static int IDCgetpar(idc_handle_t fh, const char *name, void **value,
   };
   ret_type = type;
   if (do_alloc) {
-    stat = isisds_recv_command_alloc(fh->s, &command, value, &ret_type,
-                                     dims_array, ndims);
+    stat = isisds_recv_command_alloc(fh->s, &command, value, &ret_type, dims_array, ndims);
     free(command);
   } else {
     comm_buff_size = sizeof(comm_buffer);
-    stat = isisds_recv_command(fh->s, comm_buffer, &comm_buff_size, *value,
-                               &ret_type, dims_array, ndims);
+    stat = isisds_recv_command(fh->s, comm_buffer, &comm_buff_size, *value, &ret_type, dims_array, ndims);
   }
   if (stat <= 0) {
     IDCreport(0, 0, "error receiving command %s (getpar)", name);
@@ -168,91 +157,73 @@ static int IDCgetpar(idc_handle_t fh, const char *name, void **value,
 }
 
 /// Get a parameter
-int IDCAgetpari(idc_handle_t fh, const char *name, int **value,
-                int dims_array[], int *ndims) {
+int IDCAgetpari(idc_handle_t fh, const char *name, int **value, int dims_array[], int *ndims) {
   int stat;
   ISISDSDataType type = ISISDSInt32;
-  stat = IDCgetpar(fh, name, reinterpret_cast<void **>(value), type, dims_array,
-                   ndims, 1);
+  stat = IDCgetpar(fh, name, reinterpret_cast<void **>(value), type, dims_array, ndims, 1);
   return stat;
 }
 
 /// Get a parameter
-int IDCgetpari(idc_handle_t fh, const char *name, int *value, int dims_array[],
-               int *ndims) {
+int IDCgetpari(idc_handle_t fh, const char *name, int *value, int dims_array[], int *ndims) {
   int stat;
   ISISDSDataType type = ISISDSInt32;
-  stat = IDCgetpar(fh, name, reinterpret_cast<void **>(&value), type,
-                   dims_array, ndims, 0);
+  stat = IDCgetpar(fh, name, reinterpret_cast<void **>(&value), type, dims_array, ndims, 0);
   return stat;
 }
 
 /// Get a parameter
-int IDCgetparr(idc_handle_t fh, const char *name, float *value,
-               int dims_array[], int *ndims) {
+int IDCgetparr(idc_handle_t fh, const char *name, float *value, int dims_array[], int *ndims) {
   int stat;
   ISISDSDataType type = ISISDSReal32;
-  stat = IDCgetpar(fh, name, reinterpret_cast<void **>(&value), type,
-                   dims_array, ndims, 0);
+  stat = IDCgetpar(fh, name, reinterpret_cast<void **>(&value), type, dims_array, ndims, 0);
   return stat;
 }
 
 /// Get a parameter
-int IDCAgetparr(idc_handle_t fh, const char *name, float **value,
-                int dims_array[], int *ndims) {
+int IDCAgetparr(idc_handle_t fh, const char *name, float **value, int dims_array[], int *ndims) {
   int stat;
   ISISDSDataType type = ISISDSReal32;
-  stat = IDCgetpar(fh, name, reinterpret_cast<void **>(value), type, dims_array,
-                   ndims, 1);
+  stat = IDCgetpar(fh, name, reinterpret_cast<void **>(value), type, dims_array, ndims, 1);
   return stat;
 }
 
 /// Get a parameter
-int IDCgetpard(idc_handle_t fh, const char *name, double *value,
-               int dims_array[], int *ndims) {
+int IDCgetpard(idc_handle_t fh, const char *name, double *value, int dims_array[], int *ndims) {
   int stat;
   ISISDSDataType type = ISISDSReal64;
-  stat = IDCgetpar(fh, name, reinterpret_cast<void **>(&value), type,
-                   dims_array, ndims, 0);
+  stat = IDCgetpar(fh, name, reinterpret_cast<void **>(&value), type, dims_array, ndims, 0);
   return stat;
 }
 
 /// Get a parameter
-int IDCAgetpard(idc_handle_t fh, const char *name, double **value,
-                int dims_array[], int *ndims) {
+int IDCAgetpard(idc_handle_t fh, const char *name, double **value, int dims_array[], int *ndims) {
   int stat;
   ISISDSDataType type = ISISDSReal64;
-  stat = IDCgetpar(fh, name, reinterpret_cast<void **>(value), type, dims_array,
-                   ndims, 1);
+  stat = IDCgetpar(fh, name, reinterpret_cast<void **>(value), type, dims_array, ndims, 1);
   return stat;
 }
 
 /// Get a parameter
-int IDCgetparc(idc_handle_t fh, const char *name, char *value, int dims_array[],
-               int *ndims) {
+int IDCgetparc(idc_handle_t fh, const char *name, char *value, int dims_array[], int *ndims) {
   int stat;
   ISISDSDataType type = ISISDSChar;
-  stat = IDCgetpar(fh, name, reinterpret_cast<void **>(&value), type,
-                   dims_array, ndims, 0);
+  stat = IDCgetpar(fh, name, reinterpret_cast<void **>(&value), type, dims_array, ndims, 0);
   return stat;
 }
 
 /// Get a parameter
-int IDCAgetparc(idc_handle_t fh, const char *name, char **value,
-                int dims_array[], int *ndims) {
+int IDCAgetparc(idc_handle_t fh, const char *name, char **value, int dims_array[], int *ndims) {
   int stat;
   ISISDSDataType type = ISISDSChar;
-  stat = IDCgetpar(fh, name, reinterpret_cast<void **>(value), type, dims_array,
-                   ndims, 1);
+  stat = IDCgetpar(fh, name, reinterpret_cast<void **>(value), type, dims_array, ndims, 1);
   return stat;
 }
 
 #ifdef _WIN32
-void __stdcall IDCFOPEN(const char *host, unsigned len_host, int *mode,
-                        int *options, int fh[], int *errcode)
+void __stdcall IDCFOPEN(const char *host, unsigned len_host, int *mode, int *options, int fh[], int *errcode)
 #else
-void idcfopen_(const char *host, int *mode, int *options, int fh[],
-               int *errcode, unsigned len_host)
+void idcfopen_(const char *host, int *mode, int *options, int fh[], int *errcode, unsigned len_host)
 #endif
 {
   int stat;
@@ -280,12 +251,11 @@ void idcfclose_(int fh[], int *errcode)
 }
 
 #ifdef _WIN32
-void __stdcall IDCFGETPARI(int fh[], const char *name, unsigned len_name,
-                           int value[], int dims_array[], int *ndims,
+void __stdcall IDCFGETPARI(int fh[], const char *name, unsigned len_name, int value[], int dims_array[], int *ndims,
                            int *errcode)
 #else
-void idcfgetpari_(int fh[], const char *name, int value[], int dims_array[],
-                  int *ndims, int *errcode, unsigned len_name)
+void idcfgetpari_(int fh[], const char *name, int value[], int dims_array[], int *ndims, int *errcode,
+                  unsigned len_name)
 #endif
 {
   int stat;
@@ -300,12 +270,11 @@ void idcfgetpari_(int fh[], const char *name, int value[], int dims_array[],
 }
 
 #ifdef _WIN32
-void __stdcall IDCFGETPARR(int fh[], const char *name, unsigned len_name,
-                           float value[], int dims_array[], int *ndims,
+void __stdcall IDCFGETPARR(int fh[], const char *name, unsigned len_name, float value[], int dims_array[], int *ndims,
                            int *errcode)
 #else
-void idcfgetparr_(int fh[], const char *name, float value[], int dims_array[],
-                  int *ndims, int *errcode, unsigned len_name)
+void idcfgetparr_(int fh[], const char *name, float value[], int dims_array[], int *ndims, int *errcode,
+                  unsigned len_name)
 #endif
 {
   int stat;
@@ -320,12 +289,11 @@ void idcfgetparr_(int fh[], const char *name, float value[], int dims_array[],
 }
 
 #ifdef _WIN32
-void __stdcall IDCFGETPARD(int fh[], const char *name, unsigned len_name,
-                           double value[], int dims_array[], int *ndims,
+void __stdcall IDCFGETPARD(int fh[], const char *name, unsigned len_name, double value[], int dims_array[], int *ndims,
                            int *errcode)
 #else
-void idcfgetpard_(int fh[], const char *name, double value[], int dims_array[],
-                  int *ndims, int *errcode, unsigned len_name)
+void idcfgetpard_(int fh[], const char *name, double value[], int dims_array[], int *ndims, int *errcode,
+                  unsigned len_name)
 #endif
 {
   int stat;
@@ -340,13 +308,11 @@ void idcfgetpard_(int fh[], const char *name, double value[], int dims_array[],
 }
 
 #ifdef _WIN32
-void __stdcall IDCFGETPARC(int fh[], const char *name, unsigned len_name,
-                           char value[], unsigned len_value, int dims_array[],
-                           int *ndims, int *errcode)
+void __stdcall IDCFGETPARC(int fh[], const char *name, unsigned len_name, char value[], unsigned len_value,
+                           int dims_array[], int *ndims, int *errcode)
 #else
-void idcfgetparc_(int fh[], const char *name, char *value, int dims_array[],
-                  int *ndims, int *errcode, unsigned len_name,
-                  unsigned len_value)
+void idcfgetparc_(int fh[], const char *name, char *value, int dims_array[], int *ndims, int *errcode,
+                  unsigned len_name, unsigned len_value)
 #endif
 {
   (void)len_value; // Avoid compiler warning
@@ -366,11 +332,9 @@ void idcfgetparc_(int fh[], const char *name, char *value, int dims_array[],
 }
 
 #ifdef _WIN32
-void __stdcall IDCFGETDAT(int fh[], int *ifsn, int *nos, int value[],
-                          int dims_array[], int *ndims, int *errcode)
+void __stdcall IDCFGETDAT(int fh[], int *ifsn, int *nos, int value[], int dims_array[], int *ndims, int *errcode)
 #else
-void idcfgetdat_(int fh[], int *ifsn, int *nos, int value[], int dims_array[],
-                 int *ndims, int *errcode)
+void idcfgetdat_(int fh[], int *ifsn, int *nos, int value[], int dims_array[], int *ndims, int *errcode)
 #endif
 {
   int stat;

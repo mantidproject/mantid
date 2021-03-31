@@ -67,12 +67,9 @@ public:
       const auto &errorData = histo.countStandardDeviations().rawData();
       const auto &binEdges = histo.binEdges().rawData();
 
-      spectraList.append(object(
-          handle<>(VectorToNDArray<double, WrapReadOnly>()(spectraData))));
-      errorList.append(
-          object(handle<>(VectorToNDArray<double, WrapReadOnly>()(errorData))));
-      binEdgeList.append(
-          object(handle<>(VectorToNDArray<double, WrapReadOnly>()(binEdges))));
+      spectraList.append(object(handle<>(VectorToNDArray<double, WrapReadOnly>()(spectraData))));
+      errorList.append(object(handle<>(VectorToNDArray<double, WrapReadOnly>()(errorData))));
+      binEdgeList.append(object(handle<>(VectorToNDArray<double, WrapReadOnly>()(binEdges))));
 
       auto spectrumNumber = indexInfo.spectrumNumber(i);
       const auto &spectrumDefinition = (*spectrumDefinitions)[i];
@@ -83,8 +80,7 @@ public:
         detectorIndices.emplace_back(std::move(detectorIndex));
       }
 
-      detectorList.append(
-          object(handle<>(VectorToNDArray<size_t, Clone>()(detectorIndices))));
+      detectorList.append(object(handle<>(VectorToNDArray<size_t, Clone>()(detectorIndices))));
       specNumList.append(static_cast<int32_t>(spectrumNumber));
     }
 
@@ -123,16 +119,11 @@ public:
     ws.getAxis(1)->setUnit(unitY);
 
     for (size_t i = 0; i < static_cast<size_t>(len(spectraList)); ++i) {
-      std::vector<double> spectraData =
-          NDArrayToVector<double>(boost::python::object(spectraList[i]))();
-      std::vector<double> errorData =
-          NDArrayToVector<double>(boost::python::object(errorList[i]))();
-      std::vector<double> binEdgeData =
-          NDArrayToVector<double>(boost::python::object(binEdgeList[i]))();
-      std::vector<size_t> detectorIndices =
-          NDArrayToVector<size_t>(boost::python::object(detectorList[i]))();
-      SpectrumNumber specNum =
-          static_cast<SpectrumNumber>(extract<int32_t>(specNumList[i]));
+      std::vector<double> spectraData = NDArrayToVector<double>(boost::python::object(spectraList[i]))();
+      std::vector<double> errorData = NDArrayToVector<double>(boost::python::object(errorList[i]))();
+      std::vector<double> binEdgeData = NDArrayToVector<double>(boost::python::object(binEdgeList[i]))();
+      std::vector<size_t> detectorIndices = NDArrayToVector<size_t>(boost::python::object(detectorList[i]))();
+      SpectrumNumber specNum = static_cast<SpectrumNumber>(extract<int32_t>(specNumList[i]));
 
       ws.setCounts(i, std::move(spectraData));
       ws.setCountStandardDeviations(i, std::move(errorData));
@@ -150,17 +141,14 @@ public:
     std::string instrumentName = extract<std::string>(state["instrument_name"]);
     if (!instrumentName.empty() && !instrumentXML.empty()) {
       try {
-        auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-            "LoadInstrument");
+        auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
         // Do not put the workspace in the ADS
         alg->setChild(true);
         alg->initialize();
         alg->setPropertyValue("InstrumentName", instrumentName);
         alg->setPropertyValue("InstrumentXML", instrumentXML);
-        alg->setProperty("Workspace", std::shared_ptr<Workspace2D>(
-                                          &ws, [](Workspace2D *) {}));
-        alg->setProperty("RewriteSpectraMap",
-                         Mantid::Kernel::OptionalBool(false));
+        alg->setProperty("Workspace", std::shared_ptr<Workspace2D>(&ws, [](Workspace2D *) {}));
+        alg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
         alg->execute();
       } catch (std::exception &exc) {
         Mantid::Kernel::Logger("Workspace2DPickleSuite").warning()
@@ -174,9 +162,7 @@ public:
   }
 };
 
-std::shared_ptr<Mantid::API::Workspace> makeWorkspace2D() {
-  return std::make_shared<Workspace2D>();
-}
+std::shared_ptr<Mantid::API::Workspace> makeWorkspace2D() { return std::make_shared<Workspace2D>(); }
 
 void export_Workspace2D() {
   class_<Workspace2D, bases<MatrixWorkspace>, boost::noncopyable>("Workspace2D")

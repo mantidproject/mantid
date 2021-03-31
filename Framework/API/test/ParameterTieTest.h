@@ -24,8 +24,7 @@ public:
     declareParameter("sig", 1.);
   }
   std::string name() const override { return "ParameterTieTest_Gauss"; }
-  void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const override {
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override {
     double c = getParameter("cen");
     double h = getParameter("hi");
     double w = getParameter("sig");
@@ -34,8 +33,7 @@ public:
       out[i] = h * exp(-0.5 * x * x * w);
     }
   }
-  void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) override {
+  void functionDerivLocal(Jacobian *out, const double *xValues, const size_t nData) override {
     // throw Mantid::Kernel::Exception::NotImplementedError("");
     double c = getParameter("cen");
     double h = getParameter("hi");
@@ -68,16 +66,14 @@ public:
     declareParameter("b");
   }
   std::string name() const override { return "ParameterTieTest_Linear"; }
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override {
+  void function1D(double *out, const double *xValues, const size_t nData) const override {
     double a = getParameter("a");
     double b = getParameter("b");
     for (size_t i = 0; i < nData; i++) {
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) override {
+  void functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) override {
     // throw Mantid::Kernel::Exception::NotImplementedError("");
     for (size_t i = 0; i < nData; i++) {
       out->set(static_cast<int>(i), 0, 1.);
@@ -179,8 +175,7 @@ public:
     TS_ASSERT_EQUALS(tie.asString(&mfun), "f0.f0.b=f0.f1.a^2+f0.f1.b+1");
 
     ParameterTie tie1(&mfun, "f1.f0.sig", "sin(f1.f0.sig)+f1.f1.cen/2");
-    TS_ASSERT_EQUALS(tie1.asString(&mfun),
-                     "f1.f0.sig=sin(f1.f0.sig)+f1.f1.cen/2");
+    TS_ASSERT_EQUALS(tie1.asString(&mfun), "f1.f0.sig=sin(f1.f0.sig)+f1.f1.cen/2");
     TS_ASSERT_EQUALS(tie1.asString(mf2.get()), "f0.sig=sin(f0.sig)+f1.cen/2");
 
     ParameterTie tie2(&mfun, "f1.f0.sig", "123.4");
@@ -203,10 +198,8 @@ public:
 
     ParameterTie tie5(nth.get(), "a", "cos(B1e2Ta_)-sin(alpha12)");
     TS_ASSERT_THROWS(tie5.asString(mf1.get()), const std::logic_error &);
-    TS_ASSERT_EQUALS(tie5.asString(&mfun),
-                     "f1.f2.a=cos(f1.f2.B1e2Ta_)-sin(f1.f2.alpha12)");
-    TS_ASSERT_EQUALS(tie5.asString(mf2.get()),
-                     "f2.a=cos(f2.B1e2Ta_)-sin(f2.alpha12)");
+    TS_ASSERT_EQUALS(tie5.asString(&mfun), "f1.f2.a=cos(f1.f2.B1e2Ta_)-sin(f1.f2.alpha12)");
+    TS_ASSERT_EQUALS(tie5.asString(mf2.get()), "f2.a=cos(f2.B1e2Ta_)-sin(f2.alpha12)");
     TS_ASSERT_EQUALS(tie5.asString(nth.get()), "a=cos(B1e2Ta_)-sin(alpha12)");
   }
 
@@ -268,17 +261,15 @@ public:
     mf->tie("f2.sig", "f3.f1.hi");
     mf->tie("f3.f1.hi", "f0.b");
 
-    TS_ASSERT_THROWS_EQUALS(
-        mf->sortTies(), std::runtime_error & e, std::string(e.what()),
-        "Circular dependency in "
-        "ties:\nf3.f1.hi=f0.b\nf0.a=f3.f1.hi\nf0.b=f2.sig + f0.a");
+    TS_ASSERT_THROWS_EQUALS(mf->sortTies(), std::runtime_error & e, std::string(e.what()),
+                            "Circular dependency in "
+                            "ties:\nf3.f1.hi=f0.b\nf0.a=f3.f1.hi\nf0.b=f2.sig + f0.a");
   }
 
   void test_circular_dependency_a_a() {
     ParameterTieTest_Linear fun;
     fun.tie("a", "2*a");
-    TS_ASSERT_THROWS_EQUALS(fun.sortTies(), std::runtime_error & e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(fun.sortTies(), std::runtime_error & e, std::string(e.what()),
                             "Parameter is tied to itself: a=2*a");
   }
 
@@ -286,8 +277,7 @@ public:
     ParameterTieTest_Linear fun;
     fun.tie("a", "2*b");
     fun.tie("b", "a/2");
-    TS_ASSERT_THROWS_EQUALS(fun.sortTies(), std::runtime_error & e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(fun.sortTies(), std::runtime_error & e, std::string(e.what()),
                             "Circular dependency in ties:\nb=a/2\na=2*b");
   }
 
@@ -296,9 +286,8 @@ public:
     fun.tie("cen", "2*hi");
     fun.tie("hi", "sig/2");
     fun.tie("sig", "cen + 1");
-    TS_ASSERT_THROWS_EQUALS(
-        fun.sortTies(), std::runtime_error & e, std::string(e.what()),
-        "Circular dependency in ties:\nsig=cen + 1\nhi=sig/2\ncen=2*hi");
+    TS_ASSERT_THROWS_EQUALS(fun.sortTies(), std::runtime_error & e, std::string(e.what()),
+                            "Circular dependency in ties:\nsig=cen + 1\nhi=sig/2\ncen=2*hi");
   }
 
   void test_ties_order() {
@@ -311,40 +300,25 @@ public:
 
     mf->applyTies();
     // Unordered ties applied wrongly
-    TS_ASSERT(fabs(mf->getParameter("f0.a") - mf->getParameter("f3.f1.hi")) >
-              1);
-    TS_ASSERT(fabs(mf->getParameter("f0.b") - (mf->getParameter("f2.sig") +
-                                               mf->getParameter("f0.a"))) > 1);
-    TS_ASSERT(fabs(mf->getParameter("f1.hi") -
-                   mf->getParameter("f1.cen") * 2.0) < 1e-5);
-    TS_ASSERT(fabs(mf->getParameter("f2.sig") - mf->getParameter("f3.f1.hi")) >
-              1);
-    TS_ASSERT(fabs(mf->getParameter("f3.f1.hi") - mf->getParameter("f2.sig")) >
-              1);
+    TS_ASSERT(fabs(mf->getParameter("f0.a") - mf->getParameter("f3.f1.hi")) > 1);
+    TS_ASSERT(fabs(mf->getParameter("f0.b") - (mf->getParameter("f2.sig") + mf->getParameter("f0.a"))) > 1);
+    TS_ASSERT(fabs(mf->getParameter("f1.hi") - mf->getParameter("f1.cen") * 2.0) < 1e-5);
+    TS_ASSERT(fabs(mf->getParameter("f2.sig") - mf->getParameter("f3.f1.hi")) > 1);
+    TS_ASSERT(fabs(mf->getParameter("f3.f1.hi") - mf->getParameter("f2.sig")) > 1);
     TS_ASSERT_THROWS_NOTHING(mf->sortTies());
     mf->applyTies();
     // After ordering apply correctly
-    TS_ASSERT_DELTA(mf->getParameter("f0.a"), mf->getParameter("f3.f1.hi"),
-                    1e-5);
-    TS_ASSERT_DELTA(mf->getParameter("f0.b"),
-                    mf->getParameter("f2.sig") + mf->getParameter("f0.a"),
-                    1e-5);
-    TS_ASSERT_DELTA(mf->getParameter("f1.hi"), mf->getParameter("f1.cen") * 2.0,
-                    1e-5);
-    TS_ASSERT_DELTA(mf->getParameter("f2.sig"), mf->getParameter("f3.f1.hi"),
-                    1e-5);
-    TS_ASSERT_DELTA(mf->getParameter("f3.f1.hi"), mf->getParameter("f2.sig"),
-                    1e-5);
+    TS_ASSERT_DELTA(mf->getParameter("f0.a"), mf->getParameter("f3.f1.hi"), 1e-5);
+    TS_ASSERT_DELTA(mf->getParameter("f0.b"), mf->getParameter("f2.sig") + mf->getParameter("f0.a"), 1e-5);
+    TS_ASSERT_DELTA(mf->getParameter("f1.hi"), mf->getParameter("f1.cen") * 2.0, 1e-5);
+    TS_ASSERT_DELTA(mf->getParameter("f2.sig"), mf->getParameter("f3.f1.hi"), 1e-5);
+    TS_ASSERT_DELTA(mf->getParameter("f3.f1.hi"), mf->getParameter("f2.sig"), 1e-5);
   }
 
 private:
   void mustThrow1(CompositeFunction *fun) { ParameterTie tie(fun, "sig", "0"); }
-  void mustThrow2(CompositeFunction *fun) {
-    ParameterTie tie(fun, "g1.sig", "0");
-  }
-  void mustThrow3(CompositeFunction *fun) {
-    ParameterTie tie(fun, "f10.sig", "0");
-  }
+  void mustThrow2(CompositeFunction *fun) { ParameterTie tie(fun, "g1.sig", "0"); }
+  void mustThrow3(CompositeFunction *fun) { ParameterTie tie(fun, "f10.sig", "0"); }
   void mustThrow4(IFunction *fun) { ParameterTie tie(fun, "f1.a", "0"); }
   void mustThrow5(IFunction *fun) { ParameterTie tie(fun, "cen", "0"); }
 

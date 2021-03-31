@@ -19,9 +19,7 @@ using namespace Mantid::Kernel;
 
 class PropertyWithValueTest : public CxxTest::TestSuite {
 public:
-  static PropertyWithValueTest *createSuite() {
-    return new PropertyWithValueTest();
-  }
+  static PropertyWithValueTest *createSuite() { return new PropertyWithValueTest(); }
   static void destroySuite(PropertyWithValueTest *suite) { delete suite; }
 
   PropertyWithValueTest() {
@@ -100,8 +98,7 @@ public:
     v.emplace_back(1);
     v.emplace_back(2);
     v.emplace_back(3);
-    PropertyWithValue<std::vector<int>> *pv =
-        new PropertyWithValue<std::vector<int>>("some_array", v);
+    PropertyWithValue<std::vector<int>> *pv = new PropertyWithValue<std::vector<int>>("some_array", v);
     TS_ASSERT_EQUALS(int(v.size()), pv->size());
 
     delete pv;
@@ -119,11 +116,8 @@ public:
     v.emplace_back(VecInt(1, 0));
     v.emplace_back(VecInt(2, 0));
     v.emplace_back(VecInt(1, 0));
-    PropertyWithValue<VecVecInt> *pv =
-        new PropertyWithValue<VecVecInt>("some_vec_vec_int", v);
-    TSM_ASSERT_EQUALS(
-        "The size of the nested vectors should not be taken into account.",
-        int(v.size()), pv->size());
+    PropertyWithValue<VecVecInt> *pv = new PropertyWithValue<VecVecInt>("some_vec_vec_int", v);
+    TSM_ASSERT_EQUALS("The size of the nested vectors should not be taken into account.", int(v.size()), pv->size());
 
     delete pv;
   }
@@ -132,23 +126,15 @@ public:
     PropertyWithValue<int> i("test", 1);
     TS_ASSERT_EQUALS(i.setValue("10"), "");
     TS_ASSERT_EQUALS(i, 10);
-    TS_ASSERT_EQUALS(
-        i.setValue("9.99"),
-        "Could not set property test. Can not convert \"9.99\" to " + i.type());
-    TS_ASSERT_EQUALS(
-        i.setValue("garbage"),
-        "Could not set property test. Can not convert \"garbage\" to " +
-            i.type());
+    TS_ASSERT_EQUALS(i.setValue("9.99"), "Could not set property test. Can not convert \"9.99\" to " + i.type());
+    TS_ASSERT_EQUALS(i.setValue("garbage"), "Could not set property test. Can not convert \"garbage\" to " + i.type());
 
     PropertyWithValue<double> d("test", 5.55);
     TS_ASSERT_EQUALS(d.setValue("-9.99"), "");
     TS_ASSERT_EQUALS(d, -9.99);
     TS_ASSERT_EQUALS(d.setValue("0"), "");
     TS_ASSERT_EQUALS(d, 0);
-    TS_ASSERT_EQUALS(
-        d.setValue("garbage"),
-        "Could not set property test. Can not convert \"garbage\" to " +
-            d.type());
+    TS_ASSERT_EQUALS(d.setValue("garbage"), "Could not set property test. Can not convert \"garbage\" to " + d.type());
 
     PropertyWithValue<std::string> s("test", "test");
     TS_ASSERT_EQUALS(s.setValue("-9.99"), "");
@@ -163,13 +149,8 @@ public:
     TS_ASSERT_EQUALS(l, 10);
     TS_ASSERT_EQUALS(l.setValue("1234567890123456"), "");
     TS_ASSERT_EQUALS(l, 1234567890123456LL);
-    TS_ASSERT_EQUALS(
-        l.setValue("9.99"),
-        "Could not set property test. Can not convert \"9.99\" to " + l.type());
-    TS_ASSERT_EQUALS(
-        l.setValue("garbage"),
-        "Could not set property test. Can not convert \"garbage\" to " +
-            l.type());
+    TS_ASSERT_EQUALS(l.setValue("9.99"), "Could not set property test. Can not convert \"9.99\" to " + l.type());
+    TS_ASSERT_EQUALS(l.setValue("garbage"), "Could not set property test. Can not convert \"garbage\" to " + l.type());
   }
 
   void testSetValueFromJson() {
@@ -178,8 +159,7 @@ public:
     TS_ASSERT_EQUALS(10, intProp);
 
     const auto helpMsg = intProp.setValueFromJson(Json::Value("7.99"));
-    TSM_ASSERT("Expected error when setting string to int property",
-               !helpMsg.empty());
+    TSM_ASSERT("Expected error when setting string to int property", !helpMsg.empty());
     TS_ASSERT_EQUALS(10, intProp);
   }
 
@@ -215,20 +195,16 @@ public:
     TS_ASSERT_EQUALS(i.getDefault(), "3");
     TS_ASSERT_EQUALS(i.setValue("5"), "");
     TS_ASSERT_EQUALS(i.getDefault(), "3");
-    TS_ASSERT_EQUALS(
-        i.setValue("garbage"),
-        "Could not set property defau1. Can not convert \"garbage\" to " +
-            i.type());
+    TS_ASSERT_EQUALS(i.setValue("garbage"),
+                     "Could not set property defau1. Can not convert \"garbage\" to " + i.type());
     TS_ASSERT_EQUALS(i.getDefault(), "3");
 
     PropertyWithValue<int64_t> l("defau1", 987987987987LL);
     TS_ASSERT_EQUALS(l.getDefault(), "987987987987");
     TS_ASSERT_EQUALS(l.setValue("5"), "");
     TS_ASSERT_EQUALS(l.getDefault(), "987987987987");
-    TS_ASSERT_EQUALS(
-        l.setValue("garbage"),
-        "Could not set property defau1. Can not convert \"garbage\" to " +
-            l.type());
+    TS_ASSERT_EQUALS(l.setValue("garbage"),
+                     "Could not set property defau1. Can not convert \"garbage\" to " + l.type());
     TS_ASSERT_EQUALS(l.getDefault(), "987987987987");
 
     // Note that some versions of boost::lexical_cast > 1.34 give a string such
@@ -240,10 +216,8 @@ public:
     TS_ASSERT_EQUALS(d.getDefault().substr(0, 4), "3.33");
     TS_ASSERT_EQUALS(d.setValue("1.6"), "");
     TS_ASSERT_EQUALS(d.getDefault().substr(0, 4), "3.33");
-    TS_ASSERT_EQUALS(
-        d.setValue("garbage"),
-        "Could not set property defau3.33. Can not convert \"garbage\" to " +
-            d.type());
+    TS_ASSERT_EQUALS(d.setValue("garbage"),
+                     "Could not set property defau3.33. Can not convert \"garbage\" to " + d.type());
     TS_ASSERT_EQUALS(d.getDefault().substr(0, 4), "3.33");
   }
 
@@ -366,10 +340,8 @@ public:
     v.emplace_back(1);
     v.emplace_back(2);
     v.emplace_back(3);
-    PropertyWithValue<std::vector<int>> *pv =
-        new PropertyWithValue<std::vector<int>>("some_array", v);
-    PropertyWithValue<std::vector<int>> *pv2 =
-        new PropertyWithValue<std::vector<int>>("some_array", v);
+    PropertyWithValue<std::vector<int>> *pv = new PropertyWithValue<std::vector<int>>("some_array", v);
+    PropertyWithValue<std::vector<int>> *pv2 = new PropertyWithValue<std::vector<int>>("some_array", v);
     (*pv) += pv2;
     TS_ASSERT_EQUALS(pv->value(), "1,2,3,1,2,3");
     delete pv;
@@ -381,8 +353,7 @@ public:
     v.emplace_back(1);
     v.emplace_back(2);
     v.emplace_back(3);
-    PropertyWithValue<std::vector<int>> *pv =
-        new PropertyWithValue<std::vector<int>>("some_array", v);
+    PropertyWithValue<std::vector<int>> *pv = new PropertyWithValue<std::vector<int>>("some_array", v);
     (*pv) += pv;
     TS_ASSERT_EQUALS(pv->value(), "1,2,3,1,2,3");
     delete pv;
@@ -409,8 +380,7 @@ public:
   }
 
   void testCasting() {
-    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(iProp),
-                      static_cast<Property *>(nullptr));
+    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(iProp), static_cast<Property *>(nullptr));
     PropertyWithValue<int> i("Prop1", 5);
     Property *p = dynamic_cast<Property *>(&i);
     TS_ASSERT(!p->name().compare("Prop1"));
@@ -419,8 +389,7 @@ public:
     TS_ASSERT(!p->value().compare("10"));
     TS_ASSERT_EQUALS(i, 10);
 
-    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(dProp),
-                      static_cast<Property *>(nullptr));
+    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(dProp), static_cast<Property *>(nullptr));
     PropertyWithValue<double> d("Prop2", 5.5);
     Property *pp = dynamic_cast<Property *>(&d);
     TS_ASSERT(!pp->name().compare("Prop2"));
@@ -434,8 +403,7 @@ public:
     TS_ASSERT(!pp->value().substr(0, 5).compare("7.777"));
     TS_ASSERT_EQUALS(d, 7.777);
 
-    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(sProp),
-                      static_cast<Property *>(nullptr));
+    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(sProp), static_cast<Property *>(nullptr));
     PropertyWithValue<std::string> s("Prop3", "testing");
     Property *ppp = dynamic_cast<Property *>(&s);
     TS_ASSERT(!ppp->name().compare("Prop3"));
@@ -444,8 +412,7 @@ public:
     TS_ASSERT(!ppp->value().compare("newValue"));
     TS_ASSERT_EQUALS(s.operator()(), "newValue");
 
-    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(lProp),
-                      static_cast<Property *>(nullptr));
+    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(lProp), static_cast<Property *>(nullptr));
     PropertyWithValue<int64_t> l("Prop4", 789789789789LL);
     Property *pppp = dynamic_cast<Property *>(&l);
     TS_ASSERT(!pppp->name().compare("Prop4"));
@@ -456,118 +423,94 @@ public:
   }
 
   void testMandatoryValidator() {
-    PropertyWithValue<std::string> p(
-        "test", "", std::make_shared<MandatoryValidator<std::string>>());
+    PropertyWithValue<std::string> p("test", "", std::make_shared<MandatoryValidator<std::string>>());
     TS_ASSERT_EQUALS(p.isValid(), "A value must be entered for this parameter");
     TS_ASSERT_EQUALS(p.setValue("I'm here"), "");
     TS_ASSERT_EQUALS(p.isValid(), "");
-    TS_ASSERT(
-        p.setValue("").find("A value must be entered for this parameter") !=
-        std::string::npos);
+    TS_ASSERT(p.setValue("").find("A value must be entered for this parameter") != std::string::npos);
     TS_ASSERT_EQUALS(p.value(), "I'm here");
   }
 
   void testIntBoundedValidator() {
-    std::string start("Selected value "), end(")"),
-        greaterThan(" is > the upper bound ("),
+    std::string start("Selected value "), end(")"), greaterThan(" is > the upper bound ("),
         lessThan(" is < the lower bound (");
 
     // int tests
-    PropertyWithValue<int> pi("test", 11,
-                              std::make_shared<BoundedValidator<int>>(1, 10));
+    PropertyWithValue<int> pi("test", 11, std::make_shared<BoundedValidator<int>>(1, 10));
     TS_ASSERT_EQUALS(pi.isValid(), start + "11" + greaterThan + "10" + end);
-    TS_ASSERT(pi.setValue("0").find(start + "0" + lessThan + "1" + end) !=
-              std::string::npos);
+    TS_ASSERT(pi.setValue("0").find(start + "0" + lessThan + "1" + end) != std::string::npos);
     TS_ASSERT_EQUALS(pi.value(), "11");
     TS_ASSERT_EQUALS(pi.isValid(), start + "11" + greaterThan + "10" + end);
     TS_ASSERT_EQUALS(pi.setValue("1"), "");
     TS_ASSERT_EQUALS(pi.isValid(), "");
     TS_ASSERT_EQUALS(pi.setValue("10"), "");
     TS_ASSERT_EQUALS(pi.isValid(), "");
-    TS_ASSERT(pi.setValue("11").find(start + "11" + greaterThan + "10" + end) !=
-              std::string::npos);
+    TS_ASSERT(pi.setValue("11").find(start + "11" + greaterThan + "10" + end) != std::string::npos);
     TS_ASSERT_EQUALS(pi.value(), "10");
     TS_ASSERT_EQUALS(pi.isValid(), "");
     std::string errorMsg = pi.setValue("");
     // when the string can't be converted to the correct type we get a system
     // dependent meassage that in this case should look like the string below
-    TS_ASSERT_EQUALS(
-        errorMsg.find("Could not set property test. Can not convert \"\" to ",
-                      0),
-        0);
+    TS_ASSERT_EQUALS(errorMsg.find("Could not set property test. Can not convert \"\" to ", 0), 0);
 
     // double tests
-    PropertyWithValue<double> pd(
-        "test", 11.0, std::make_shared<BoundedValidator<double>>(1.0, 10.0));
+    PropertyWithValue<double> pd("test", 11.0, std::make_shared<BoundedValidator<double>>(1.0, 10.0));
     TS_ASSERT_EQUALS(pd.isValid(), start + "11" + greaterThan + "10" + end);
-    TS_ASSERT(pd.setValue("0.9").find(start + "0.9" + lessThan + "1" + end) !=
-              std::string::npos);
+    TS_ASSERT(pd.setValue("0.9").find(start + "0.9" + lessThan + "1" + end) != std::string::npos);
     TS_ASSERT_EQUALS(pd.value(), "11");
     TS_ASSERT_EQUALS(pd.isValid(), start + "11" + greaterThan + "10" + end);
     TS_ASSERT_EQUALS(pd.setValue("1"), "");
     TS_ASSERT_EQUALS(pd.isValid(), "");
     TS_ASSERT_EQUALS(pd.setValue("10"), "");
     TS_ASSERT_EQUALS(pd.isValid(), "");
-    TS_ASSERT(pd.setValue("10.1").find(start + "10.1" + greaterThan + "10" +
-                                       end) != std::string::npos);
+    TS_ASSERT(pd.setValue("10.1").find(start + "10.1" + greaterThan + "10" + end) != std::string::npos);
     TS_ASSERT_EQUALS(pd.value(), "10");
     TS_ASSERT_EQUALS(pd.isValid(), "");
 
     // string tests
-    PropertyWithValue<std::string> ps(
-        "test", "", std::make_shared<BoundedValidator<std::string>>("B", "T"));
+    PropertyWithValue<std::string> ps("test", "", std::make_shared<BoundedValidator<std::string>>("B", "T"));
     TS_ASSERT_EQUALS(ps.isValid(), start + "" + lessThan + "B" + end);
-    TS_ASSERT(ps.setValue("AZ").find(start + "AZ" + lessThan + "B" + end) !=
-              std::string::npos);
+    TS_ASSERT(ps.setValue("AZ").find(start + "AZ" + lessThan + "B" + end) != std::string::npos);
     TS_ASSERT_EQUALS(ps.value(), "");
     TS_ASSERT_EQUALS(ps.isValid(), start + "" + lessThan + "B" + end);
     TS_ASSERT_EQUALS(ps.setValue("B"), "");
     TS_ASSERT_EQUALS(ps.isValid(), "");
     TS_ASSERT_EQUALS(ps.setValue("T"), "");
     TS_ASSERT_EQUALS(ps.isValid(), "");
-    TS_ASSERT(ps.setValue("TA").find(start + "TA" + greaterThan + "T" + end) !=
-              std::string::npos);
+    TS_ASSERT(ps.setValue("TA").find(start + "TA" + greaterThan + "T" + end) != std::string::npos);
     TS_ASSERT_EQUALS(ps.value(), "T");
     TS_ASSERT_EQUALS(ps.isValid(), "");
 
     // int64 tests
-    PropertyWithValue<int64_t> pl(
-        "test", 987987987987LL,
-        std::make_shared<BoundedValidator<int64_t>>(0, 789789789789LL));
-    TS_ASSERT_EQUALS(pl.isValid(), start + "987987987987" + greaterThan +
-                                       "789789789789" + end);
-    TS_ASSERT(pl.setValue("-1").find(start + "-1" + lessThan + "0" + end) !=
-              std::string::npos);
+    PropertyWithValue<int64_t> pl("test", 987987987987LL,
+                                  std::make_shared<BoundedValidator<int64_t>>(0, 789789789789LL));
+    TS_ASSERT_EQUALS(pl.isValid(), start + "987987987987" + greaterThan + "789789789789" + end);
+    TS_ASSERT(pl.setValue("-1").find(start + "-1" + lessThan + "0" + end) != std::string::npos);
     TS_ASSERT_EQUALS(pl.value(), "987987987987");
     TS_ASSERT_EQUALS(pl.setValue("0"), "");
     TS_ASSERT_EQUALS(pl.isValid(), "");
     TS_ASSERT_EQUALS(pl.setValue("789789789789"), "");
     TS_ASSERT_EQUALS(pl.isValid(), "");
-    TS_ASSERT(pl.setValue("789789789790")
-                  .find(start + "789789789790" + greaterThan + "789789789789" +
-                        end) != std::string::npos);
+    TS_ASSERT(pl.setValue("789789789790").find(start + "789789789790" + greaterThan + "789789789789" + end) !=
+              std::string::npos);
     TS_ASSERT_EQUALS(pl.value(), "789789789789");
   }
 
   void testListValidator() {
-    std::string start("The value '"),
-        end("' is not in the list of allowed values");
+    std::string start("The value '"), end("' is not in the list of allowed values");
 
     std::vector<std::string> empt, vec;
-    PropertyWithValue<std::string> empty(
-        "test", "", std::make_shared<StringListValidator>(empt));
+    PropertyWithValue<std::string> empty("test", "", std::make_shared<StringListValidator>(empt));
     TS_ASSERT_EQUALS(empty.isValid(), "Select a value");
     vec.emplace_back("one");
     vec.emplace_back("two");
-    PropertyWithValue<std::string> p(
-        "test", "", std::make_shared<StringListValidator>(vec));
+    PropertyWithValue<std::string> p("test", "", std::make_shared<StringListValidator>(vec));
     TS_ASSERT_EQUALS(p.isValid(), "Select a value");
     TS_ASSERT_EQUALS(p.setValue("one"), "");
     TS_ASSERT_EQUALS(p.isValid(), "");
     TS_ASSERT_EQUALS(p.setValue("two"), "");
     TS_ASSERT_EQUALS(p.isValid(), "");
-    TS_ASSERT(p.setValue("three").find(
-                  "The value \"three\" is not in the list of allowed values") !=
+    TS_ASSERT(p.setValue("three").find("The value \"three\" is not in the list of allowed values") !=
               std::string::npos);
     TS_ASSERT_EQUALS(p.value(), "two");
     TS_ASSERT_EQUALS(p.isValid(), "");
@@ -638,8 +581,7 @@ public:
     p1 = new PropertyWithValue<double>("Prop1", 12.0);
     p2 = new PropertyWithValue<double>("Prop1", 23.0);
     (*p1) += p2;
-    PropertyWithValue<double> *pd =
-        dynamic_cast<PropertyWithValue<double> *>(p1);
+    PropertyWithValue<double> *pd = dynamic_cast<PropertyWithValue<double> *>(p1);
     d = *pd;
     TS_ASSERT_EQUALS(d, 35.0);
     delete p1;
@@ -659,8 +601,7 @@ public:
     p1 = new PropertyWithValue<std::vector<int>>("Prop1", v1);
     p2 = new PropertyWithValue<std::vector<int>>("Prop1", v2);
     (*p1) += p2;
-    PropertyWithValue<std::vector<int>> *pvi =
-        dynamic_cast<PropertyWithValue<std::vector<int>> *>(p1);
+    PropertyWithValue<std::vector<int>> *pvi = dynamic_cast<PropertyWithValue<std::vector<int>> *>(p1);
     std::vector<int> v3 = *pvi;
     TS_ASSERT_EQUALS(v3.size(), 6);
     delete p1;
@@ -671,8 +612,7 @@ public:
     // system("pause");
     std::array<std::string, 2> allowedValues = {{"Hello", "World"}};
     std::map<std::string, std::string> alias{{"1", "Hello"}, {"0", "World"}};
-    auto validator =
-        std::make_shared<ListValidator<std::string>>(allowedValues, alias);
+    auto validator = std::make_shared<ListValidator<std::string>>(allowedValues, alias);
     PropertyWithValue<std::string> prop("String", "", validator);
     TS_ASSERT_THROWS_NOTHING(prop = "Hello");
     std::string value = prop;
@@ -699,21 +639,18 @@ public:
   void test_optional_bool_to_setValue() {
 
     std::string input = OptionalBool::StrTrue;
-    PropertyWithValue<OptionalBool> property("myproperty", OptionalBool::Unset,
-                                             Direction::Input);
+    PropertyWithValue<OptionalBool> property("myproperty", OptionalBool::Unset, Direction::Input);
     property.setValue(input);
   }
 
   void test_optional_bool_allowed_values() {
-    PropertyWithValue<OptionalBool> property("myproperty", OptionalBool::Unset,
-                                             Direction::Input);
+    PropertyWithValue<OptionalBool> property("myproperty", OptionalBool::Unset, Direction::Input);
 
     auto values = property.allowedValues();
     auto possibilities = OptionalBool::strToEmumMap();
     TSM_ASSERT_EQUALS("3 states allowed", possibilities.size(), values.size());
     for (auto &value : values) {
-      TSM_ASSERT("value not a known state",
-                 possibilities.find(value) != possibilities.end());
+      TSM_ASSERT("value not a known state", possibilities.find(value) != possibilities.end());
     }
   }
 
@@ -721,16 +658,14 @@ public:
     std::string stringWithWhitespace = "  value with whitespace\t\t \r\n";
     std::string trimmedStringWithWhitespace = "value with whitespace";
     sProp->setValue(stringWithWhitespace);
-    TSM_ASSERT_EQUALS("Input value has not been trimmed", sProp->value(),
-                      trimmedStringWithWhitespace);
+    TSM_ASSERT_EQUALS("Input value has not been trimmed", sProp->value(), trimmedStringWithWhitespace);
 
     // turn trimming off
     sProp->setAutoTrim(false);
     TSM_ASSERT_EQUALS("Auto trim is not turned off", sProp->autoTrim(), false);
 
     sProp->setValue(stringWithWhitespace);
-    TSM_ASSERT_EQUALS("Input value has been trimmed when it should not",
-                      sProp->value(), stringWithWhitespace);
+    TSM_ASSERT_EQUALS("Input value has been trimmed when it should not", sProp->value(), stringWithWhitespace);
 
     // turn trimming on
     sProp->setAutoTrim(true);
@@ -738,29 +673,26 @@ public:
 
     // test assignment
     *sProp = stringWithWhitespace;
-    TSM_ASSERT_EQUALS("Assignment input value has not been trimmed",
-                      sProp->value(), trimmedStringWithWhitespace);
+    TSM_ASSERT_EQUALS("Assignment input value has not been trimmed", sProp->value(), trimmedStringWithWhitespace);
 
     // test assignment with string literal
     *sProp = "  value with whitespace\t\t \r\n";
-    TSM_ASSERT_EQUALS("Assignment string literal has not been trimmed",
-                      sProp->value(), trimmedStringWithWhitespace);
+    TSM_ASSERT_EQUALS("Assignment string literal has not been trimmed", sProp->value(), trimmedStringWithWhitespace);
   }
 
   void test_trimming_integer_property() {
     std::string stringWithWhitespace = "  1243\t\t \r\n";
     std::string trimmedStringWithWhitespace = "1243";
     iProp->setValue(stringWithWhitespace);
-    TSM_ASSERT_EQUALS("Input value has not been trimmed", iProp->value(),
-                      trimmedStringWithWhitespace);
+    TSM_ASSERT_EQUALS("Input value has not been trimmed", iProp->value(), trimmedStringWithWhitespace);
 
     // turn trimming off
     iProp->setAutoTrim(false);
     TSM_ASSERT_EQUALS("Auto trim is not turned off", iProp->autoTrim(), false);
 
     iProp->setValue(stringWithWhitespace);
-    TSM_ASSERT_EQUALS("Input value should still appear trimmed for an integer",
-                      iProp->value(), trimmedStringWithWhitespace);
+    TSM_ASSERT_EQUALS("Input value should still appear trimmed for an integer", iProp->value(),
+                      trimmedStringWithWhitespace);
 
     // turn trimming on
     iProp->setAutoTrim(true);

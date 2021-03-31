@@ -32,17 +32,11 @@ public:
   const std::string name() const override { return "SplineBackground"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"Fit", "SplineInterpolation", "SplineSmoothing"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"Fit", "SplineInterpolation", "SplineSmoothing"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Optimization;CorrectionFunctions\\BackgroundCorrections";
-  }
+  const std::string category() const override { return "Optimization;CorrectionFunctions\\BackgroundCorrections"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Fit spectra background using b-splines.";
-  }
+  const std::string summary() const override { return "Fit spectra background using b-splines."; }
 
 private:
   // Overridden Algorithm methods
@@ -50,8 +44,7 @@ private:
   void exec() override;
 
   /// Adds data from the workspace to the GSL vectors for later processing
-  void addWsDataToSpline(const API::MatrixWorkspace *ws, const size_t specNum,
-                         int expectedNumBins);
+  void addWsDataToSpline(const API::MatrixWorkspace *ws, const size_t specNum, int expectedNumBins);
 
   /// Allocates various pointers used within GSL
   void allocateBSplinePointers(int numBins, int ncoeffs);
@@ -67,8 +60,7 @@ private:
 
   /// Gets the values from the fitted GSL, and creates a clone of input
   /// workspace with new values
-  API::MatrixWorkspace_sptr
-  saveSplineOutput(const API::MatrixWorkspace_sptr &ws, const size_t spec);
+  API::MatrixWorkspace_sptr saveSplineOutput(const API::MatrixWorkspace_sptr &ws, const size_t spec);
 
   /// Sets up the splines for later fitting
   void setupSpline(double xMin, double xMax, int numBins, int ncoeff);

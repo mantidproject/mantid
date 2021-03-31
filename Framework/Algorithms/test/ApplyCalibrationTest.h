@@ -51,16 +51,13 @@ public:
   void testSimple() {
     int ndets = 3;
     // Create workspace with paremeterised instrument and put into data store
-    Workspace2D_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(ndets, 10,
-                                                                     true);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(ndets, 10, true);
     const std::string wsName("ApplyCabrationWs");
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
     dataStore.add(wsName, ws);
 
     // Create Calibration Table
-    ITableWorkspace_sptr calTableWs =
-        WorkspaceFactory::Instance().createTable();
+    ITableWorkspace_sptr calTableWs = WorkspaceFactory::Instance().createTable();
     calTableWs->addColumn("int", "Detector ID");
     calTableWs->addColumn("V3D", "Detector Position");
     calTableWs->addColumn("double", "Detector Y Coordinate");
@@ -75,8 +72,7 @@ public:
     ApplyCalibration appCalib;
     appCalib.initialize();
     TS_ASSERT_THROWS_NOTHING(appCalib.setPropertyValue("Workspace", wsName));
-    TS_ASSERT_THROWS_NOTHING(appCalib.setProperty<ITableWorkspace_sptr>(
-        "CalibrationTable", calTableWs));
+    TS_ASSERT_THROWS_NOTHING(appCalib.setProperty<ITableWorkspace_sptr>("CalibrationTable", calTableWs));
     TS_ASSERT_THROWS_NOTHING(appCalib.execute());
 
     TS_ASSERT(appCalib.isExecuted());
@@ -108,8 +104,7 @@ public:
    */
   void testCalibrateRawFile() {
     // Create a calibration table
-    ITableWorkspace_sptr calTableWs =
-        WorkspaceFactory::Instance().createTable();
+    ITableWorkspace_sptr calTableWs = WorkspaceFactory::Instance().createTable();
     calTableWs->addColumn("int", "Detector ID");
     calTableWs->addColumn("V3D", "Detector Position");
     calTableWs->addColumn("double", "Detector Y Coordinate");
@@ -124,19 +119,17 @@ public:
     loader.setPropertyValue("Filename", "HRP39180.RAW");
     loader.setPropertyValue("OutputWorkspace", wsName);
     loader.setPropertyValue("SpectrumMin",
-                            "1"); // Spectrum number, not workspace index
+                            "1");                // Spectrum number, not workspace index
     loader.setPropertyValue("SpectrumMax", "9"); // std::to_string(nSpectra));
     loader.execute();
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
-    MatrixWorkspace_sptr workspace =
-        dataStore.retrieveWS<MatrixWorkspace>(wsName);
+    MatrixWorkspace_sptr workspace = dataStore.retrieveWS<MatrixWorkspace>(wsName);
     const auto &detectorInfo = workspace->detectorInfo();
     const auto &componentInfo = workspace->componentInfo();
 
     // Populate the calibration table with some final detector positions,
     // widths, and heights
-    const std::vector<V3D> positions{V3D(0.20, 0.0, 0.42),
-                                     V3D(0.53, 0.0, 0.75)};
+    const std::vector<V3D> positions{V3D(0.20, 0.0, 0.42), V3D(0.53, 0.0, 0.75)};
     const std::vector<double> yCoords{0.31, 0.64};
     const std::vector<double> widths{0.008, 0.007};
     const std::vector<double> heights{0.041, 0.039};
@@ -146,19 +139,15 @@ public:
       TableRow row = calTableWs->appendRow();
       // insert data in the same order in which table columns were declared
       // detector-ID  position  Y-coordinate  Width Height
-      row << detectorID << positions[i] << yCoords[i] << widths[i]
-          << heights[i];
+      row << detectorID << positions[i] << yCoords[i] << widths[i] << heights[i];
     }
 
     // Apply the calibration to the workspace
     ApplyCalibration calibrationAlgorithm;
     calibrationAlgorithm.initialize();
     TS_ASSERT(calibrationAlgorithm.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        calibrationAlgorithm.setPropertyValue("Workspace", wsName));
-    TS_ASSERT_THROWS_NOTHING(
-        calibrationAlgorithm.setProperty<ITableWorkspace_sptr>(
-            "CalibrationTable", calTableWs));
+    TS_ASSERT_THROWS_NOTHING(calibrationAlgorithm.setPropertyValue("Workspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(calibrationAlgorithm.setProperty<ITableWorkspace_sptr>("CalibrationTable", calTableWs));
     TS_ASSERT_THROWS_NOTHING(calibrationAlgorithm.execute());
     TS_ASSERT(calibrationAlgorithm.isExecuted());
 
@@ -174,8 +163,7 @@ public:
       // assert detector width and height
       const auto detectorIndex = detectorInfo.indexOf(detectorID);
       const auto &scaleFactor = componentInfo.scaleFactor(detectorIndex);
-      const auto &box =
-          componentInfo.shape(detectorIndex).getBoundingBox().width();
+      const auto &box = componentInfo.shape(detectorIndex).getBoundingBox().width();
       TS_ASSERT_DELTA(scaleFactor.X() * box.X(), widths[i], 0.0001);
       TS_ASSERT_DELTA(scaleFactor.Y() * box.Y(), heights[i], 0.0001);
     }
@@ -197,8 +185,7 @@ public:
     const std::string wsName("ApplyCabrationWs");
     Mantid::DataHandling::LoadEmptyInstrument loader;
     loader.initialize();
-    loader.setPropertyValue("Filename",
-                            "unit_testing/MAPS_Definition_Reduced.xml");
+    loader.setPropertyValue("Filename", "unit_testing/MAPS_Definition_Reduced.xml");
     loader.setPropertyValue("OutputWorkspace", wsName);
     loader.execute();
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
@@ -206,8 +193,7 @@ public:
 
     // Create Calibration Table
     int firstDetectorID = 34208002;
-    ITableWorkspace_sptr calTableWs =
-        WorkspaceFactory::Instance().createTable();
+    ITableWorkspace_sptr calTableWs = WorkspaceFactory::Instance().createTable();
     calTableWs->addColumn("int", "Detector ID");
     calTableWs->addColumn("V3D", "Detector Position");
 
@@ -220,8 +206,7 @@ public:
     ApplyCalibration appCalib;
     appCalib.initialize();
     TS_ASSERT_THROWS_NOTHING(appCalib.setPropertyValue("Workspace", wsName));
-    TS_ASSERT_THROWS_NOTHING(appCalib.setProperty<ITableWorkspace_sptr>(
-        "CalibrationTable", calTableWs));
+    TS_ASSERT_THROWS_NOTHING(appCalib.setProperty<ITableWorkspace_sptr>("CalibrationTable", calTableWs));
     TS_ASSERT_THROWS_NOTHING(appCalib.execute());
 
     TS_ASSERT(appCalib.isExecuted());

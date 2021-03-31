@@ -25,16 +25,12 @@ class FunctionMultiDomainPresenter;
  * Parameters can be set individually or all to the same value.
  * They also can be fixed and unfixed.
  */
-class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog
-    : public MantidQt::API::MantidDialog {
+class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog : public MantidQt::API::MantidDialog {
   Q_OBJECT
 public:
-  EditLocalParameterDialog(QWidget *parent, const QString &parName,
-                           const QStringList &datasetNames,
-                           const QStringList &datasetDomainNames,
-                           const QList<double> &values,
-                           const QList<bool> &fixes, const QStringList &ties,
-                           const QStringList &constraints);
+  EditLocalParameterDialog(QWidget *parent, const QString &parName, const QStringList &datasetNames,
+                           const QStringList &datasetDomainNames, const QList<double> &values, const QList<bool> &fixes,
+                           const QStringList &ties, const QStringList &constraints);
 
   QString getParameterName() const { return m_parName; }
   QList<double> getValues() const;
@@ -68,8 +64,7 @@ private slots:
   void setAllValuesToLog();
 
 private:
-  void doSetup(const QString &parName, const QStringList &datasetDomains,
-               const QStringList &datasetDomainNames);
+  void doSetup(const QString &parName, const QStringList &datasetDomains, const QStringList &datasetDomainNames);
   bool eventFilter(QObject *obj, QEvent *ev) override;
   void showContextMenu();
   void redrawCells();

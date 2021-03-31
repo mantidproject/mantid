@@ -19,9 +19,7 @@ public:
   static void destroySuite(ProgressTest *suite) { delete suite; }
 
   void testBadParameters() {
-    TS_ASSERT_THROWS(Progress(nullptr, -1., 100., 42),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(Progress(nullptr, 1., .1, 42),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(Progress(nullptr, -1., 100., 42), const std::invalid_argument &);
+    TS_ASSERT_THROWS(Progress(nullptr, 1., .1, 42), const std::invalid_argument &);
   }
 };

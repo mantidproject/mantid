@@ -46,8 +46,7 @@ public:
      * @param data :: A pointer to the transformed complex data
      * @param n :: The size of untransformed real data
      */
-    HalfComplex(double *data, const size_t &n)
-        : m_size(n / 2 + 1), m_data(data), m_even(n / 2 * 2 == n) {}
+    HalfComplex(double *data, const size_t &n) : m_size(n / 2 + 1), m_data(data), m_even(n / 2 * 2 == n) {}
     /// Returns the size of the transform
     size_t size() const { return m_size; }
     /**
@@ -107,15 +106,11 @@ public:
   /// Function you want to fit to.
   /// @param domain :: The buffer for writing the calculated values. Must be big
   /// enough to accept dataSize() values
-  void function(const API::FunctionDomain &domain,
-                API::FunctionValues &values) const override;
-  void functionFFTMode(const API::FunctionDomain &domain,
-                       API::FunctionValues &values) const;
-  void functionDirectMode(const API::FunctionDomain &domain,
-                          API::FunctionValues &values) const;
+  void function(const API::FunctionDomain &domain, API::FunctionValues &values) const override;
+  void functionFFTMode(const API::FunctionDomain &domain, API::FunctionValues &values) const;
+  void functionDirectMode(const API::FunctionDomain &domain, API::FunctionValues &values) const;
   /// Derivatives of function with respect to active parameters
-  void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian) override;
+  void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) override;
 
   /// Set a value to attribute attName
   void setAttribute(const std::string &attName, const Attribute &) override;

@@ -36,23 +36,20 @@ public:
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     m_wkspProp = ws;
 
-    TS_ASSERT_THROWS_NOTHING(
-        IndexProperty("IndexSet", m_wkspProp, m_itypeProp));
+    TS_ASSERT_THROWS_NOTHING(IndexProperty("IndexSet", m_wkspProp, m_itypeProp));
   }
 
   void testInvalidWorkspaceType() {
-    WorkspaceProperty<Workspace> wkspProp("InputWorkspace", "",
-                                          Direction::Input);
+    WorkspaceProperty<Workspace> wkspProp("InputWorkspace", "", Direction::Input);
 
     auto ws = std::make_shared<TableWorkspaceTester>();
     wkspProp = ws;
 
     IndexProperty indexProp("IndexSet", wkspProp, m_itypeProp);
 
-    TS_ASSERT_EQUALS(indexProp.isValid(),
-                     "Invalid workspace type provided to "
-                     "IndexProperty. Must be convertible to "
-                     "MatrixWorkspace.")
+    TS_ASSERT_EQUALS(indexProp.isValid(), "Invalid workspace type provided to "
+                                          "IndexProperty. Must be convertible to "
+                                          "MatrixWorkspace.")
   }
 
   void testSetIndicesUsingString() {
@@ -130,9 +127,7 @@ public:
 
     auto error = indexProp.setValue("30:35");
 
-    TS_ASSERT(
-        error.find("Indices provided to IndexProperty are out of range") !=
-        std::string::npos);
+    TS_ASSERT(error.find("Indices provided to IndexProperty are out of range") != std::string::npos);
 
     TS_ASSERT(error.find("following value") != std::string::npos);
   }
@@ -154,8 +149,7 @@ public:
 
   void testGeneratePropertyName() {
     std::string propName = "InputWorkspace";
-    TS_ASSERT_EQUALS(propName + "IndexSet",
-                     IndexProperty::generatePropertyName(propName));
+    TS_ASSERT_EQUALS(propName + "IndexSet", IndexProperty::generatePropertyName(propName));
   }
 
   void testGetFilteredIndexInfo_WorkspaceIndex() {

@@ -27,8 +27,7 @@ using namespace Geometry;
   @param qResolution: the QResolution workspace
   @throw invalid_argument if the workspaces are not mututially compatible
 */
-void Qhelper::examineInput(const API::MatrixWorkspace_const_sptr &dataWS,
-                           const API::MatrixWorkspace_const_sptr &binAdj,
+void Qhelper::examineInput(const API::MatrixWorkspace_const_sptr &dataWS, const API::MatrixWorkspace_const_sptr &binAdj,
                            const API::MatrixWorkspace_const_sptr &detectAdj,
                            const API::MatrixWorkspace_const_sptr &qResolution) {
 
@@ -49,9 +48,8 @@ void Qhelper::examineInput(const API::MatrixWorkspace_const_sptr &dataWS,
     auto qResX = qResolution->x(0).cbegin();
     for (; reqX != dataWS->x(0).end(); ++reqX, ++qResX) {
       if (*reqX != *qResX) {
-        throw std::invalid_argument(
-            "The QResolution needs to have the same binning as"
-            "as the input workspace.");
+        throw std::invalid_argument("The QResolution needs to have the same binning as"
+                                    "as the input workspace.");
       }
     }
   }
@@ -66,19 +64,16 @@ void Qhelper::examineInput(const API::MatrixWorkspace_const_sptr &dataWS,
   one bin
   @throw invalid_argument if the workspaces are not mututially compatible
 */
-void Qhelper::examineInput(const API::MatrixWorkspace_const_sptr &dataWS,
-                           const API::MatrixWorkspace_const_sptr &binAdj,
+void Qhelper::examineInput(const API::MatrixWorkspace_const_sptr &dataWS, const API::MatrixWorkspace_const_sptr &binAdj,
                            const API::MatrixWorkspace_const_sptr &detectAdj) {
   if (dataWS->getNumberHistograms() < 1) {
-    throw std::invalid_argument(
-        "Empty data workspace passed, can not continue");
+    throw std::invalid_argument("Empty data workspace passed, can not continue");
   }
 
   // it is not an error for these workspaces not to exist
   if (binAdj) {
     if (binAdj->getNumberHistograms() != 1) {
-      throw std::invalid_argument(
-          "The WavelengthAdj workspace must have one spectrum");
+      throw std::invalid_argument("The WavelengthAdj workspace must have one spectrum");
     }
     if (binAdj->y(0).size() != dataWS->y(0).size()) {
       throw std::invalid_argument("The WavelengthAdj workspace's bins must "
@@ -135,8 +130,7 @@ void Qhelper::examineInput(const API::MatrixWorkspace_const_sptr &dataWS,
           det_is_masked = spectrumInfo.isMasked(i);
         }
         if (!det_is_masked) {
-          throw std::invalid_argument(
-              "Every detector with non-positive PixelAdj value must be masked");
+          throw std::invalid_argument("Every detector with non-positive PixelAdj value must be masked");
         }
       }
     }
@@ -154,10 +148,8 @@ void Qhelper::examineInput(const API::MatrixWorkspace_const_sptr &dataWS,
  *  @param wsInd spectrum that is being analysed
  *  @return index number of the first bin to include in the calculation
  */
-size_t Qhelper::waveLengthCutOff(const API::MatrixWorkspace_const_sptr &dataWS,
-                                 const SpectrumInfo &spectrumInfo,
-                                 const double RCut, const double WCut,
-                                 const size_t wsInd) const {
+size_t Qhelper::waveLengthCutOff(const API::MatrixWorkspace_const_sptr &dataWS, const SpectrumInfo &spectrumInfo,
+                                 const double RCut, const double WCut, const size_t wsInd) const {
   double l_WCutOver = 0.0;
   double l_RCut = 0.0; // locally we store RCut in units of meters
   if (RCut > 0 && WCut > 0) {
@@ -189,22 +181,19 @@ sumOfCounts/sumOfNormFactors equals the
 *  @param sumOfCounts sum of counts
 *  @param sumOfNormFactors sum of normalisation factors
 */
-void Qhelper::outputParts(API::Algorithm *alg,
-                          const API::MatrixWorkspace_sptr &sumOfCounts,
+void Qhelper::outputParts(API::Algorithm *alg, const API::MatrixWorkspace_sptr &sumOfCounts,
                           const API::MatrixWorkspace_sptr &sumOfNormFactors) {
   std::string baseName = alg->getPropertyValue("OutputWorkspace");
 
   alg->declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "SumOfCounts", "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("SumOfCounts", "", Kernel::Direction::Output),
       "The name of the MatrixWorkspace to store sum of counts");
   alg->setPropertyValue("SumOfCounts", baseName + "_sumOfCounts");
 
   alg->setProperty("SumOfCounts", sumOfCounts);
 
   alg->declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "sumOfNormFactors", "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("sumOfNormFactors", "", Kernel::Direction::Output),
       "The name of the MatrixWorkspace to store sum of normalising factors");
   alg->setPropertyValue("sumOfNormFactors", baseName + "_sumOfNormFactors");
 

@@ -20,18 +20,15 @@
 /**  This class implements QwtData with direct access to a spectrum in a
  * MatrixWorkspace.
  */
-class EXPORT_OPT_MANTIDQT_PLOTTING QwtWorkspaceSpectrumData
-    : public MantidQwtMatrixWorkspaceData {
+class EXPORT_OPT_MANTIDQT_PLOTTING QwtWorkspaceSpectrumData : public MantidQwtMatrixWorkspaceData {
 public:
-  QwtWorkspaceSpectrumData(const Mantid::API::MatrixWorkspace &workspace,
-                           int wsIndex, const bool logScale,
+  QwtWorkspaceSpectrumData(const Mantid::API::MatrixWorkspace &workspace, int wsIndex, const bool logScale,
                            const bool plotAsDistribution);
 
   //! @return Pointer to a copy (virtual copy constructor)
   QwtWorkspaceSpectrumData *copy() const override;
   /// Return a new data object of the same type but with a new workspace
-  QwtWorkspaceSpectrumData *copyWithNewSource(
-      const Mantid::API::MatrixWorkspace &workspace) const override;
+  QwtWorkspaceSpectrumData *copyWithNewSource(const Mantid::API::MatrixWorkspace &workspace) const override;
 
   //! @return Size of the data set
   size_t size() const override;

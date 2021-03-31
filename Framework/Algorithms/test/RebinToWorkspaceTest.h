@@ -33,8 +33,7 @@ public:
     // Creates a workspace with 10 points
     const int numYPoints(10);
     const int numSpectra(2);
-    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspace123(
-        numSpectra, numYPoints, false);
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspace123(numSpectra, numYPoints, false);
     // Reset the X data to something reasonable
     Points x(numYPoints);
     std::iota(begin(x), end(x), 0.0);
@@ -43,10 +42,8 @@ public:
     }
 
     TS_ASSERT_EQUALS(testWS->isHistogramData(), false);
-    TS_ASSERT_THROWS_ANYTHING(
-        alg.setProperty<MatrixWorkspace_sptr>("WorkspaceToMatch", testWS));
-    TS_ASSERT_THROWS_ANYTHING(
-        alg.setProperty<MatrixWorkspace_sptr>("WorkspaceToRebin", testWS));
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty<MatrixWorkspace_sptr>("WorkspaceToMatch", testWS));
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty<MatrixWorkspace_sptr>("WorkspaceToRebin", testWS));
   }
 
   void testExec() {
@@ -58,16 +55,12 @@ public:
 
     // Need to input workspaces to test this
     using namespace Mantid::DataObjects;
-    Workspace2D_sptr rebinThis =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 50, 5.0, 1.0);
-    Workspace2D_sptr matchToThis =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(15, 30, 3.0, 2.5);
+    Workspace2D_sptr rebinThis = WorkspaceCreationHelper::create2DWorkspaceBinned(10, 50, 5.0, 1.0);
+    Workspace2D_sptr matchToThis = WorkspaceCreationHelper::create2DWorkspaceBinned(15, 30, 3.0, 2.5);
     // Register them with the DataService
     using namespace Mantid::API;
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().add("rbThis", rebinThis));
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().add("matThis", matchToThis));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add("rbThis", rebinThis));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add("matThis", matchToThis));
 
     // Set the properties for the algorithm
     rebinToWS.setPropertyValue("WorkspaceToRebin", "rbThis");
@@ -77,16 +70,13 @@ public:
 
     // Test that the properties are set correctly
     std::string result;
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 rebinToWS.getPropertyValue("WorkspaceToRebin"))
+    TS_ASSERT_THROWS_NOTHING(result = rebinToWS.getPropertyValue("WorkspaceToRebin"))
     TS_ASSERT(result == "rbThis");
 
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 rebinToWS.getPropertyValue("WorkspaceToMatch"))
+    TS_ASSERT_THROWS_NOTHING(result = rebinToWS.getPropertyValue("WorkspaceToMatch"))
     TS_ASSERT(result == "matThis");
 
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 rebinToWS.getPropertyValue("OutputWorkspace"))
+    TS_ASSERT_THROWS_NOTHING(result = rebinToWS.getPropertyValue("OutputWorkspace"))
     TS_ASSERT(result == outputSpace);
 
     // Execute the algorithm, testing that it does not throw
@@ -95,10 +85,8 @@ public:
 
     // Retrieved rebinned workspace
     Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(
-        workspace = AnalysisDataService::Instance().retrieve(outputSpace));
-    Workspace2D_sptr output2D =
-        std::dynamic_pointer_cast<Workspace2D>(workspace);
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(outputSpace));
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(workspace);
 
     // Test x-vectors from this and "matchToThis" are the same
     TS_ASSERT_EQUALS(output2D->x(0).size(), matchToThis->x(0).size());

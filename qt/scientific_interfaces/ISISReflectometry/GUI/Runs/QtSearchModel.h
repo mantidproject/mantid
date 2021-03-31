@@ -22,8 +22,7 @@ namespace ISISReflectometry {
 
 Provides a QAbstractTableModel for the search results widget on the QtRunsView.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtSearchModel : public QAbstractTableModel,
-                                                     public ISearchModel {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtSearchModel : public QAbstractTableModel, public ISearchModel {
   Q_OBJECT
 public:
   QtSearchModel();
@@ -42,13 +41,10 @@ public:
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   // get/set data for a cell
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
-  bool setData(const QModelIndex &index, const QVariant &value,
-               int role = Qt::EditRole) override;
+  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+  bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
   // get header data for the table
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role) const override;
+  QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
   // get flags for a cell
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 

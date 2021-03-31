@@ -32,10 +32,8 @@ class MANTID_CURVEFITTING_DLL Quadratic : public BackgroundFunction {
 public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "Quadratic"; }
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters

@@ -35,11 +35,8 @@ namespace {
 using Mantid::PythonInterface::Policies::VectorToNumpy;
 
 template <typename TYPE>
-void addPyTimeValue(TimeSeriesProperty<TYPE> &self,
-                    const boost::python::api::object &datetime,
-                    const TYPE &value) {
-  const auto dateandtime =
-      Mantid::PythonInterface::Converters::to_dateandtime(datetime);
+void addPyTimeValue(TimeSeriesProperty<TYPE> &self, const boost::python::api::object &datetime, const TYPE &value) {
+  const auto dateandtime = Mantid::PythonInterface::Converters::to_dateandtime(datetime);
   self.addValue(*dateandtime, value);
 }
 
@@ -65,8 +62,7 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
   }
 
   // Find the maximum number of characters
-  size_t max =
-      *std::max_element(std::begin(stringSizes), std::end(stringSizes));
+  size_t max = *std::max_element(std::begin(stringSizes), std::end(stringSizes));
 
   // Create the string to return
   std::stringstream ss;
@@ -76,106 +72,66 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
 }
 
 // Macro to reduce copy-and-paste
-#define EXPORT_TIMESERIES_PROP(TYPE, Prefix)                                   \
-  register_ptr_to_python<TimeSeriesProperty<TYPE> *>();                        \
-                                                                               \
-  class_<TimeSeriesProperty<TYPE>, bases<Property>, boost::noncopyable>(       \
-      #Prefix "TimeSeriesProperty",                                            \
-      init<const std::string &>((arg("self"), arg("value"))))                  \
-      .add_property(                                                           \
-          "value",                                                             \
-          make_function(                                                       \
-              &Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector,       \
-              return_value_policy<VectorToNumpy>()))                           \
-      .add_property(                                                           \
-          "times",                                                             \
-          make_function(                                                       \
-              &Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector,        \
-              return_value_policy<VectorToNumpy>()))                           \
-      .add_property("filtered_value",                                          \
-                    make_function(&Mantid::Kernel::TimeSeriesProperty<         \
-                                      TYPE>::filteredValuesAsVector,           \
-                                  return_value_policy<VectorToNumpy>()))       \
-      .add_property("filtered_times",                                          \
-                    make_function(&Mantid::Kernel::TimeSeriesProperty<         \
-                                      TYPE>::filteredTimesAsVector,            \
-                                  return_value_policy<VectorToNumpy>()))       \
-      .def("addValue",                                                         \
-           (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &,            \
-                                               const TYPE)) &                  \
-               TimeSeriesProperty<TYPE>::addValue,                             \
-           (arg("self"), arg("time"), arg("value")))                           \
-      .def("addValue",                                                         \
-           (void (TimeSeriesProperty<TYPE>::*)(const std::string &,            \
-                                               const TYPE)) &                  \
-               TimeSeriesProperty<TYPE>::addValue,                             \
-           (arg("self"), arg("time"), arg("value")))                           \
-      .def("addValue", &addPyTimeValue<TYPE>,                                  \
-           (arg("self"), arg("time"), arg("value")))                           \
-      .def("clear", &TimeSeriesProperty<TYPE>::clear, arg("self"))             \
-      .def("valueAsString", &TimeSeriesProperty<TYPE>::value, arg("self"))     \
-      .def("size", &TimeSeriesProperty<TYPE>::size, arg("self"))               \
-      .def("filterByTime",                                                     \
-           (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &,            \
-                                               const DateAndTime &)) &         \
-               TimeSeriesProperty<TYPE>::filterByTime,                         \
-           (arg("self"), arg("start"), arg("stop")))                           \
-      .def("firstTime", &TimeSeriesProperty<TYPE>::firstTime, arg("self"),     \
-           "returns :class:`mantid.kernel.DateAndTime`")                       \
-      .def("firstValue", &TimeSeriesProperty<TYPE>::firstValue, arg("self"))   \
-      .def("lastTime", &TimeSeriesProperty<TYPE>::lastTime, arg("self"),       \
-           "returns :class:`mantid.kernel.DateAndTime`")                       \
-      .def("lastValue", &TimeSeriesProperty<TYPE>::lastValue, arg("self"))     \
-      .def("nthValue", &TimeSeriesProperty<TYPE>::nthValue,                    \
-           (arg("self"), arg("index")))                                        \
-      .def("nthTime", &TimeSeriesProperty<TYPE>::nthTime,                      \
-           (arg("self"), arg("index")),                                        \
-           "returns :class:`mantid.kernel.DateAndTime`")                       \
-      .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics,          \
-           arg("self"),                                                        \
-           "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")      \
-      .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue,    \
-           arg("self"))                                                        \
+#define EXPORT_TIMESERIES_PROP(TYPE, Prefix)                                                                           \
+  register_ptr_to_python<TimeSeriesProperty<TYPE> *>();                                                                \
+                                                                                                                       \
+  class_<TimeSeriesProperty<TYPE>, bases<Property>, boost::noncopyable>(                                               \
+      #Prefix "TimeSeriesProperty", init<const std::string &>((arg("self"), arg("value"))))                            \
+      .add_property("value", make_function(&Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector,                  \
+                                           return_value_policy<VectorToNumpy>()))                                      \
+      .add_property("times", make_function(&Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector,                   \
+                                           return_value_policy<VectorToNumpy>()))                                      \
+      .add_property("filtered_value", make_function(&Mantid::Kernel::TimeSeriesProperty<TYPE>::filteredValuesAsVector, \
+                                                    return_value_policy<VectorToNumpy>()))                             \
+      .add_property("filtered_times", make_function(&Mantid::Kernel::TimeSeriesProperty<TYPE>::filteredTimesAsVector,  \
+                                                    return_value_policy<VectorToNumpy>()))                             \
+      .def("addValue",                                                                                                 \
+           (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &, const TYPE)) & TimeSeriesProperty<TYPE>::addValue, \
+           (arg("self"), arg("time"), arg("value")))                                                                   \
+      .def("addValue",                                                                                                 \
+           (void (TimeSeriesProperty<TYPE>::*)(const std::string &, const TYPE)) & TimeSeriesProperty<TYPE>::addValue, \
+           (arg("self"), arg("time"), arg("value")))                                                                   \
+      .def("addValue", &addPyTimeValue<TYPE>, (arg("self"), arg("time"), arg("value")))                                \
+      .def("clear", &TimeSeriesProperty<TYPE>::clear, arg("self"))                                                     \
+      .def("valueAsString", &TimeSeriesProperty<TYPE>::value, arg("self"))                                             \
+      .def("size", &TimeSeriesProperty<TYPE>::size, arg("self"))                                                       \
+      .def("filterByTime",                                                                                             \
+           (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &, const DateAndTime &)) &                            \
+               TimeSeriesProperty<TYPE>::filterByTime,                                                                 \
+           (arg("self"), arg("start"), arg("stop")))                                                                   \
+      .def("firstTime", &TimeSeriesProperty<TYPE>::firstTime, arg("self"),                                             \
+           "returns :class:`mantid.kernel.DateAndTime`")                                                               \
+      .def("firstValue", &TimeSeriesProperty<TYPE>::firstValue, arg("self"))                                           \
+      .def("lastTime", &TimeSeriesProperty<TYPE>::lastTime, arg("self"), "returns :class:`mantid.kernel.DateAndTime`") \
+      .def("lastValue", &TimeSeriesProperty<TYPE>::lastValue, arg("self"))                                             \
+      .def("nthValue", &TimeSeriesProperty<TYPE>::nthValue, (arg("self"), arg("index")))                               \
+      .def("nthTime", &TimeSeriesProperty<TYPE>::nthTime, (arg("self"), arg("index")),                                 \
+           "returns :class:`mantid.kernel.DateAndTime`")                                                               \
+      .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics, arg("self"),                                     \
+           "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")                                              \
+      .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue, arg("self"))                               \
       .def("dtype", &dtype<TYPE>, arg("self"));
 
 } // namespace
 
-void export_TimeSeriesProperty_Double() {
-  EXPORT_TIMESERIES_PROP(double, Float);
-}
+void export_TimeSeriesProperty_Double() { EXPORT_TIMESERIES_PROP(double, Float); }
 
 void export_TimeSeriesProperty_Bool() { EXPORT_TIMESERIES_PROP(bool, Bool); }
 
-void export_TimeSeriesProperty_Int32() {
-  EXPORT_TIMESERIES_PROP(int32_t, Int32);
-}
+void export_TimeSeriesProperty_Int32() { EXPORT_TIMESERIES_PROP(int32_t, Int32); }
 
-void export_TimeSeriesProperty_Int64() {
-  EXPORT_TIMESERIES_PROP(int64_t, Int64);
-}
+void export_TimeSeriesProperty_Int64() { EXPORT_TIMESERIES_PROP(int64_t, Int64); }
 
-void export_TimeSeriesProperty_String() {
-  EXPORT_TIMESERIES_PROP(std::string, String);
-}
+void export_TimeSeriesProperty_String() { EXPORT_TIMESERIES_PROP(std::string, String); }
 
 void export_TimeSeriesPropertyStatistics() {
-  class_<Mantid::Kernel::TimeSeriesPropertyStatistics>(
-      "TimeSeriesPropertyStatistics", no_init)
-      .add_property("minimum",
-                    &Mantid::Kernel::TimeSeriesPropertyStatistics::minimum)
-      .add_property("maximum",
-                    &Mantid::Kernel::TimeSeriesPropertyStatistics::maximum)
+  class_<Mantid::Kernel::TimeSeriesPropertyStatistics>("TimeSeriesPropertyStatistics", no_init)
+      .add_property("minimum", &Mantid::Kernel::TimeSeriesPropertyStatistics::minimum)
+      .add_property("maximum", &Mantid::Kernel::TimeSeriesPropertyStatistics::maximum)
       .add_property("mean", &Mantid::Kernel::TimeSeriesPropertyStatistics::mean)
-      .add_property("median",
-                    &Mantid::Kernel::TimeSeriesPropertyStatistics::median)
-      .add_property(
-          "standard_deviation",
-          &Mantid::Kernel::TimeSeriesPropertyStatistics::standard_deviation)
-      .add_property("time_mean",
-                    &Mantid::Kernel::TimeSeriesPropertyStatistics::time_mean)
-      .add_property("time_standard_deviation",
-                    &Mantid::Kernel::TimeSeriesPropertyStatistics::
-                        time_standard_deviation)
-      .add_property("duration",
-                    &Mantid::Kernel::TimeSeriesPropertyStatistics::duration);
+      .add_property("median", &Mantid::Kernel::TimeSeriesPropertyStatistics::median)
+      .add_property("standard_deviation", &Mantid::Kernel::TimeSeriesPropertyStatistics::standard_deviation)
+      .add_property("time_mean", &Mantid::Kernel::TimeSeriesPropertyStatistics::time_mean)
+      .add_property("time_standard_deviation", &Mantid::Kernel::TimeSeriesPropertyStatistics::time_standard_deviation)
+      .add_property("duration", &Mantid::Kernel::TimeSeriesPropertyStatistics::duration);
 }

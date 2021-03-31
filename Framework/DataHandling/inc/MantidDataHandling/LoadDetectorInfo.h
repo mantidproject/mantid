@@ -28,9 +28,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadRaw", "LoadNexus"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadRaw", "LoadNexus"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Raw"; }
 
@@ -62,11 +60,9 @@ private:
   void readNXSDotDat(::NeXus::File &nxsFile, DetectorInfo &detInfo) const;
 
   /// Update the parameter map with the new values for the given detector
-  void updateParameterMap(Geometry::DetectorInfo &detectorInfo,
-                          const size_t detIndex, Geometry::ParameterMap &pmap,
-                          const double l2, const double theta, const double phi,
-                          const double delay, const double pressure,
-                          const double thickness) const;
+  void updateParameterMap(Geometry::DetectorInfo &detectorInfo, const size_t detIndex, Geometry::ParameterMap &pmap,
+                          const double l2, const double theta, const double phi, const double delay,
+                          const double pressure, const double thickness) const;
 
   /// Cached instrument for this workspace
   Geometry::Instrument_const_sptr m_baseInstrument;

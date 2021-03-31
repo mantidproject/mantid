@@ -36,8 +36,7 @@ OrientedLattice::OrientedLattice(const DblMatrix &Umatrix) : UnitCell() {
  90^\circ \f$
  @param Umatrix :: orientation matrix U
  */
-OrientedLattice::OrientedLattice(const double _a, const double _b,
-                                 const double _c, const DblMatrix &Umatrix)
+OrientedLattice::OrientedLattice(const double _a, const double _b, const double _c, const DblMatrix &Umatrix)
     : UnitCell(_a, _b, _c) {
   if (Umatrix.isRotation()) {
     U = Umatrix;
@@ -56,10 +55,8 @@ OrientedLattice::OrientedLattice(const double _a, const double _b,
  @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
  @param Umatrix :: orientation matrix U
  */
-OrientedLattice::OrientedLattice(const double _a, const double _b,
-                                 const double _c, const double _alpha,
-                                 const double _beta, const double _gamma,
-                                 const DblMatrix &Umatrix, const int angleunit)
+OrientedLattice::OrientedLattice(const double _a, const double _b, const double _c, const double _alpha,
+                                 const double _beta, const double _gamma, const DblMatrix &Umatrix, const int angleunit)
     : UnitCell(_a, _b, _c, _alpha, _beta, _gamma, angleunit) {
   if (Umatrix.isRotation()) {
     U = Umatrix;
@@ -72,8 +69,7 @@ OrientedLattice::OrientedLattice(const double _a, const double _b,
  @param uc :: UnitCell
  @param Umatrix :: orientation matrix U. By default this will be identity matrix
  */
-OrientedLattice::OrientedLattice(const UnitCell &uc, const DblMatrix &Umatrix)
-    : UnitCell(uc), U(Umatrix) {
+OrientedLattice::OrientedLattice(const UnitCell &uc, const DblMatrix &Umatrix) : UnitCell(uc), U(Umatrix) {
   if (Umatrix.isRotation()) {
     U = Umatrix;
     UB = U * getB();
@@ -154,9 +150,7 @@ V3D OrientedLattice::hklFromQ(const V3D &Q) const {
  * @param hkl a V3D with H,K,L
  * @return Q-vector in $AA^-1 in the sample frame
  */
-V3D OrientedLattice::qFromHKL(const V3D &hkl) const {
-  return UB * hkl * TWO_PI;
-}
+V3D OrientedLattice::qFromHKL(const V3D &hkl) const { return UB * hkl * TWO_PI; }
 
 /** gets a vector along beam direction when goniometers are at 0. Note, this
  vector is not unique, but
@@ -242,8 +236,7 @@ const DblMatrix &OrientedLattice::setUFromVectors(const V3D &u, const V3D &v) {
  * @param file :: open NeXus file
  * @param group :: name of the group to create
  */
-void OrientedLattice::saveNexus(::NeXus::File *file,
-                                const std::string &group) const {
+void OrientedLattice::saveNexus(::NeXus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXcrystal", true);
   file->writeData("unit_cell_a", this->a());
   file->writeData("unit_cell_b", this->b());
@@ -286,8 +279,7 @@ void OrientedLattice::loadNexus(::NeXus::File *file, const std::string &group) {
  @return true if UB was set to the new matrix and false if UB could not be
  set since the matrix with a,b,c as rows could not be inverted.
  */
-bool OrientedLattice::GetUB(DblMatrix &UB, const V3D &a_dir, const V3D &b_dir,
-                            const V3D &c_dir) {
+bool OrientedLattice::GetUB(DblMatrix &UB, const V3D &a_dir, const V3D &b_dir, const V3D &c_dir) {
   if (UB.numRows() != 3 || UB.numCols() != 3) {
     throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
@@ -320,8 +312,7 @@ bool OrientedLattice::GetUB(DblMatrix &UB, const V3D &a_dir, const V3D &b_dir,
  a_dir, b_dir and c_dir vectors have been set to the rows of
  UB inverse.
  */
-bool OrientedLattice::GetABC(const DblMatrix &UB, V3D &a_dir, V3D &b_dir,
-                             V3D &c_dir) {
+bool OrientedLattice::GetABC(const DblMatrix &UB, V3D &a_dir, V3D &b_dir, V3D &c_dir) {
   if (UB.numRows() != 3 || UB.numCols() != 3) {
     throw std::invalid_argument("GetABC(): UB matrix NULL or not 3X3");
   }
@@ -344,11 +335,7 @@ void OrientedLattice::recalculate() {
   UnitCell::recalculate();
   UB = U * getB();
 }
-bool OrientedLattice::operator==(const OrientedLattice &other) const {
-  return UB == other.UB;
-}
-bool OrientedLattice::operator!=(const OrientedLattice &other) const {
-  return UB != other.UB;
-}
+bool OrientedLattice::operator==(const OrientedLattice &other) const { return UB == other.UB; }
+bool OrientedLattice::operator!=(const OrientedLattice &other) const { return UB != other.UB; }
 } // Namespace Geometry
 } // Namespace Mantid

@@ -32,9 +32,7 @@ namespace Algorithms {
  * Set the interpolation option
  * @param kind Set the type of interpolation on the call to apply
  */
-void InterpolationOption::set(InterpolationOption::Value kind) {
-  m_value = kind;
-}
+void InterpolationOption::set(InterpolationOption::Value kind) { m_value = kind; }
 
 /**
  * Set the interpolation option
@@ -46,9 +44,7 @@ void InterpolationOption::set(const std::string &kind) {
   } else if (kind == CSPLINE_OPT) {
     m_value = Value::CSpline;
   } else {
-    throw std::invalid_argument(
-        "InterpolationOption::set() - Unknown interpolation method '" + kind +
-        "'");
+    throw std::invalid_argument("InterpolationOption::set() - Unknown interpolation method '" + kind + "'");
   }
 }
 
@@ -56,9 +52,7 @@ void InterpolationOption::set(const std::string &kind) {
  * Sets whether the errors in the spectra should be considered to be independent
  * or not when interpolating between them
  */
-void InterpolationOption::setIndependentErrors(const bool independent) {
-  m_independentErrors = independent;
-}
+void InterpolationOption::setIndependentErrors(const bool independent) { m_independentErrors = independent; }
 
 /**
  * Create a property suitable to attach to an algorithm to support interpolation
@@ -69,8 +63,7 @@ std::unique_ptr<Property> InterpolationOption::property() const {
   using Kernel::StringListValidator;
   using StringProperty = Kernel::PropertyWithValue<std::string>;
 
-  return std::make_unique<StringProperty>(
-      PROP_NAME, LINEAR_OPT, std::make_shared<StringListValidator>(OPTIONS));
+  return std::make_unique<StringProperty>(PROP_NAME, LINEAR_OPT, std::make_shared<StringListValidator>(OPTIONS));
 }
 
 /**
@@ -91,15 +84,13 @@ std::string InterpolationOption::validateInputSize(const size_t size) const {
   case Value::Linear:
     nMin = minSizeForLinearInterpolation();
     if (size < nMin) {
-      return "Linear interpolation requires at least " + std::to_string(nMin) +
-             " points.";
+      return "Linear interpolation requires at least " + std::to_string(nMin) + " points.";
     }
     break;
   case Value::CSpline:
     nMin = minSizeForCSplineInterpolation();
     if (size < nMin) {
-      return "CSpline interpolation requires at least " + std::to_string(nMin) +
-             " points.";
+      return "CSpline interpolation requires at least " + std::to_string(nMin) + " points.";
     }
     break;
   }
@@ -111,8 +102,7 @@ std::string InterpolationOption::validateInputSize(const size_t size) const {
  * @param inOut A reference to a histogram to interpolate
  * @param stepSize The step size of calculated points
  */
-void InterpolationOption::applyInplace(HistogramData::Histogram &inOut,
-                                       size_t stepSize) const {
+void InterpolationOption::applyInplace(HistogramData::Histogram &inOut, size_t stepSize) const {
   switch (m_value) {
   case Value::Linear:
     interpolateLinearInplace(inOut, stepSize, true, m_independentErrors);
@@ -132,8 +122,7 @@ void InterpolationOption::applyInplace(HistogramData::Histogram &inOut,
  * @param out A histogram where to store the interpolated values
  * @throw runtime_error Indicates unknown interpolatio method.
  */
-void InterpolationOption::applyInPlace(const HistogramData::Histogram &in,
-                                       HistogramData::Histogram &out) const {
+void InterpolationOption::applyInPlace(const HistogramData::Histogram &in, HistogramData::Histogram &out) const {
   switch (m_value) {
   case Value::Linear:
     interpolateLinearInplace(in, out, true, m_independentErrors);

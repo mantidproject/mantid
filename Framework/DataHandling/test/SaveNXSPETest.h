@@ -126,8 +126,7 @@ public:
 
     // throws file not exist from ChildAlgorithm
     saver.setRethrows(true);
-    TS_ASSERT_THROWS(saver.execute(),
-                     const Mantid::Kernel::Exception::FileError &);
+    TS_ASSERT_THROWS(saver.execute(), const Mantid::Kernel::Exception::FileError &);
     TS_ASSERT(Poco::File(outputFile).exists());
 
     if (Poco::File(outputFile).exists())
@@ -136,8 +135,7 @@ public:
 
 private:
   MatrixWorkspace_sptr makeWorkspace(int nhist = 3, int nx = 10) {
-    auto testWS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nx, 1.0);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nx, 1.0);
     // Fill workspace with increasing counter to properly check saving
     for (int i = 0; i < nhist; ++i) {
       auto &outY = testWS->mutableY(i);
@@ -151,16 +149,12 @@ private:
   }
 
   MatrixWorkspace_sptr setUpWorkspace(MatrixWorkspace_sptr inputWS) {
-    inputWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
+    inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
     // Create an instrument but we don't care where they are
     std::vector<double> dummy(inputWS->getNumberHistograms(), 0.0);
-    auto testInst =
-        ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(
-            dummy, dummy, dummy);
+    auto testInst = ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(dummy, dummy, dummy);
     inputWS->setInstrument(testInst);
-    inputWS->setIndexInfo(
-        Mantid::Indexing::IndexInfo(inputWS->getNumberHistograms()));
+    inputWS->setIndexInfo(Mantid::Indexing::IndexInfo(inputWS->getNumberHistograms()));
 
     // mask the detector
     inputWS->mutableDetectorInfo().setMasked(THEMASKED, true);
@@ -171,8 +165,7 @@ private:
     return inputWS;
   }
 
-  using DataHolder = boost::tuple<std::vector<hsize_t>, std::vector<double>,
-                                  std::vector<double>>;
+  using DataHolder = boost::tuple<std::vector<hsize_t>, std::vector<double>, std::vector<double>>;
 
   DataHolder saveAndReloadWorkspace(const MatrixWorkspace_sptr &inputWS) {
     SaveNXSPE saver;
@@ -191,8 +184,7 @@ private:
 
     TS_ASSERT(Poco::File(outputFile).exists());
     if (!Poco::File(outputFile).exists()) {
-      return boost::make_tuple(std::vector<hsize_t>(), std::vector<double>(),
-                               std::vector<double>());
+      return boost::make_tuple(std::vector<hsize_t>(), std::vector<double>(), std::vector<double>());
     }
 
     auto h5file = H5Fopen(outputFile.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
@@ -205,8 +197,7 @@ private:
     std::vector<hsize_t> dims(rank);
     H5T_class_t classId(H5T_NO_CLASS);
     size_t typeSize(0);
-    status =
-        H5LTget_dataset_info(h5file, dset, dims.data(), &classId, &typeSize);
+    status = H5LTget_dataset_info(h5file, dset, dims.data(), &classId, &typeSize);
     TS_ASSERT_EQUALS(0, status);
     TS_ASSERT_EQUALS(H5T_FLOAT, classId);
     TS_ASSERT_EQUALS(8, typeSize);

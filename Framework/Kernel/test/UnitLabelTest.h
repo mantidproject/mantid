@@ -42,8 +42,7 @@ public:
     TS_ASSERT_EQUALS("LabelText", label.latex());
   }
 
-  void
-  test_implicit_construction_from_std_string_sets_both_label_types_to_equal() {
+  void test_implicit_construction_from_std_string_sets_both_label_types_to_equal() {
     doImplicitConversionTest("LabelText", "LabelText");
   }
 

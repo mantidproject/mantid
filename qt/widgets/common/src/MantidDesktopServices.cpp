@@ -51,9 +51,7 @@ bool MantidDesktopServices::openUrl(const QUrl &url) {
 #endif
 }
 
-bool MantidDesktopServices::openUrl(const QString &url) {
-  return openUrl(QUrl(url));
-}
+bool MantidDesktopServices::openUrl(const QString &url) { return openUrl(QUrl(url)); }
 
 /**
  * Pass through method to MantidDesktopServices::setUrlHandler. See Qt
@@ -64,9 +62,7 @@ bool MantidDesktopServices::openUrl(const QString &url) {
  * @param receiver Handler object
  * @param method Method called on the receiver object
  */
-void MantidDesktopServices::setUrlHandler(const QString &scheme,
-                                          QObject *receiver,
-                                          const char *method) {
+void MantidDesktopServices::setUrlHandler(const QString &scheme, QObject *receiver, const char *method) {
   QDesktopServices::setUrlHandler(scheme, receiver, method);
 }
 
@@ -76,8 +72,6 @@ void MantidDesktopServices::setUrlHandler(const QString &scheme,
  * further details.
  * @param scheme Name of scheme to drop
  */
-void MantidDesktopServices::unsetUrlHandler(const QString &scheme) {
-  QDesktopServices::unsetUrlHandler(scheme);
-}
+void MantidDesktopServices::unsetUrlHandler(const QString &scheme) { QDesktopServices::unsetUrlHandler(scheme); }
 } // namespace API
 } // namespace MantidQt

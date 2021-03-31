@@ -35,9 +35,7 @@ Mantid::Kernel::Logger g_log("MultipleFileProperty");
  * Unary predicate for use with copy_if.  Checks for the existance of
  * a "*" wild card in the file extension string passed to it.
  */
-bool doesNotContainWildCard(const std::string &ext) {
-  return std::string::npos == ext.find('*');
-}
+bool doesNotContainWildCard(const std::string &ext) { return std::string::npos == ext.find('*'); }
 
 static const std::string SUCCESS("");
 
@@ -55,8 +53,7 @@ static const boost::regex REGEX_COMMA_OPERATORS(COMMA_OPERATORS);
 const std::string NUM_PLUS_ALPHA(R"((?<=\d)\s*\+\s*(?=\D))");
 const std::string ALPHA_PLUS_ALPHA(R"((?<=\D)\s*\+\s*(?=\D))");
 const std::string PLUS_OPERATORS = NUM_PLUS_ALPHA + "|" + ALPHA_PLUS_ALPHA;
-static const boost::regex REGEX_PLUS_OPERATORS(PLUS_OPERATORS,
-                                               boost::regex_constants::perl);
+static const boost::regex REGEX_PLUS_OPERATORS(PLUS_OPERATORS, boost::regex_constants::perl);
 
 } // anonymous namespace
 
@@ -70,27 +67,20 @@ namespace API {
  * @param exts   ::  The allowed/suggested extensions
  * @param allowEmptyTokens :: whether to allow empty tokens
  */
-MultipleFileProperty::MultipleFileProperty(const std::string &name,
-                                           unsigned int action,
-                                           const std::vector<std::string> &exts,
-                                           bool allowEmptyTokens)
+MultipleFileProperty::MultipleFileProperty(const std::string &name, unsigned int action,
+                                           const std::vector<std::string> &exts, bool allowEmptyTokens)
     : PropertyWithValue<std::vector<std::vector<std::string>>>(
           name, std::vector<std::vector<std::string>>(),
-          std::make_shared<MultiFileValidator>(exts,
-                                               (action == FileProperty::Load)),
-          Direction::Input),
+          std::make_shared<MultiFileValidator>(exts, (action == FileProperty::Load)), Direction::Input),
       m_allowEmptyTokens(allowEmptyTokens) {
   if (action != FileProperty::Load && action != FileProperty::OptionalLoad) {
     /// raise error for unsupported actions
-    throw std::runtime_error(
-        "Specified action is not supported for MultipleFileProperty");
+    throw std::runtime_error("Specified action is not supported for MultipleFileProperty");
   } else {
     m_action = action;
   }
 
-  m_multiFileLoadingEnabled = Kernel::ConfigService::Instance()
-                                  .getValue<bool>("loading.multifile")
-                                  .get_value_or(false);
+  m_multiFileLoadingEnabled = Kernel::ConfigService::Instance().getValue<bool>("loading.multifile").get_value_or(false);
 
   for (const auto &ext : exts)
     if (doesNotContainWildCard(ext))
@@ -103,17 +93,14 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
  * @param name :: The name of the property
  * @param exts ::  The allowed/suggested extensions
  */
-MultipleFileProperty::MultipleFileProperty(const std::string &name,
-                                           const std::vector<std::string> &exts)
+MultipleFileProperty::MultipleFileProperty(const std::string &name, const std::vector<std::string> &exts)
     : MultipleFileProperty(name, FileProperty::Load, exts) {}
 
 /**
  * Check if this property is optional
  * @returns True if the property is optinal, false otherwise
  */
-bool MultipleFileProperty::isOptional() const {
-  return (m_action == FileProperty::OptionalLoad);
-}
+bool MultipleFileProperty::isOptional() const { return (m_action == FileProperty::OptionalLoad); }
 
 /**
  * @returns Empty string if empty value is valid, error message otherwise
@@ -148,8 +135,7 @@ std::string MultipleFileProperty::setValue(const std::string &propValue) {
   // If multiple file loading is disabled, then set value assuming it is a
   // single file.
   if (!m_multiFileLoadingEnabled) {
-    g_log.debug(
-        "MultiFile loading is not enabled, acting as standard FileProperty.");
+    g_log.debug("MultiFile loading is not enabled, acting as standard FileProperty.");
     return setValueAsSingleFile(propValue);
   }
 
@@ -160,8 +146,7 @@ std::string MultipleFileProperty::setValue(const std::string &propValue) {
     // it was a valid multi file string but for too many files.
     return std::string(re.what());
   } catch (const std::runtime_error &re) {
-    g_log.debug(
-        "MultiFile loading has failed. Trying as standard FileProperty.");
+    g_log.debug("MultiFile loading has failed. Trying as standard FileProperty.");
 
     const std::string error = setValueAsSingleFile(propValue);
 
@@ -202,18 +187,15 @@ std::string MultipleFileProperty::getDefault() const {
  * @return A string indicating the outcome of the attempt to set the property.
  *An empty string indicates success.
  */
-std::string
-MultipleFileProperty::setValueAsSingleFile(const std::string &propValue) {
+std::string MultipleFileProperty::setValueAsSingleFile(const std::string &propValue) {
   // if value is unchanged use the cached version
   if ((propValue == m_oldPropValue) && (!m_oldFoundValue.empty())) {
-    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(
-        m_oldFoundValue);
+    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(m_oldFoundValue);
     return SUCCESS;
   }
 
   // Use a slave FileProperty to do the job for us.
-  FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts,
-                             Direction::Input);
+  FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts, Direction::Input);
 
   std::string error = slaveFileProp.setValue(propValue);
 
@@ -224,11 +206,9 @@ MultipleFileProperty::setValueAsSingleFile(const std::string &propValue) {
   std::vector<std::vector<std::string>> foundFiles;
   try {
     toValue(slaveFileProp(), foundFiles, "", "");
-    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(
-        foundFiles);
+    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(foundFiles);
   } catch (std::invalid_argument &except) {
-    g_log.debug() << "Could not set property " << name() << ": "
-                  << except.what();
+    g_log.debug() << "Could not set property " << name() << ": " << except.what();
     return except.what();
   }
 
@@ -251,36 +231,29 @@ MultipleFileProperty::setValueAsSingleFile(const std::string &propValue) {
  * @return A string indicating the outcome of the attempt to set the property.
  *An empty string indicates success.
  */
-std::string
-MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
+std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   // if value is unchanged use the cached version
   if ((propValue == m_oldPropValue) && (!m_oldFoundValue.empty())) {
-    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(
-        m_oldFoundValue);
+    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(m_oldFoundValue);
     return SUCCESS;
   }
 
   // Return error if there are any adjacent + or , operators.
   boost::smatch invalid_substring;
-  if (!m_allowEmptyTokens &&
-      boost::regex_search(propValue.begin(), propValue.end(), invalid_substring,
-                          REGEX_INVALID))
+  if (!m_allowEmptyTokens && boost::regex_search(propValue.begin(), propValue.end(), invalid_substring, REGEX_INVALID))
     return "Unable to parse filename due to an empty token.";
 
   std::vector<std::vector<std::string>> fileNames;
 
   // Tokenise on allowed comma operators, and iterate over each token.
   boost::sregex_token_iterator end;
-  boost::sregex_token_iterator commaToken(propValue.begin(), propValue.end(),
-                                          REGEX_COMMA_OPERATORS, -1);
+  boost::sregex_token_iterator commaToken(propValue.begin(), propValue.end(), REGEX_COMMA_OPERATORS, -1);
 
   for (; commaToken != end; ++commaToken) {
     const std::string commaTokenString = commaToken->str();
 
     // Tokenise on allowed plus operators.
-    boost::sregex_token_iterator plusToken(commaTokenString.begin(),
-                                           commaTokenString.end(),
-                                           REGEX_PLUS_OPERATORS, -1);
+    boost::sregex_token_iterator plusToken(commaTokenString.begin(), commaTokenString.end(), REGEX_PLUS_OPERATORS, -1);
 
     std::vector<std::vector<std::string>> temp;
 
@@ -331,8 +304,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       }
     }
 
-    fileNames.insert(fileNames.end(), std::make_move_iterator(temp.begin()),
-                     std::make_move_iterator(temp.end()));
+    fileNames.insert(fileNames.end(), std::make_move_iterator(temp.begin()), std::make_move_iterator(temp.end()));
   }
 
   std::vector<std::vector<std::string>> allUnresolvedFileNames = fileNames;
@@ -340,8 +312,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
 
   // First, find the default extension.  Flatten all the unresolved filenames
   // first, to make this easier.
-  std::vector<std::string> flattenedAllUnresolvedFileNames =
-      VectorHelper::flattenVector(allUnresolvedFileNames);
+  std::vector<std::string> flattenedAllUnresolvedFileNames = VectorHelper::flattenVector(allUnresolvedFileNames);
   std::string defaultExt;
   for (const auto &unresolvedFileName : flattenedAllUnresolvedFileNames) {
     try {
@@ -363,8 +334,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   for (const auto &unresolvedFileNames : allUnresolvedFileNames) {
     // Check for the existance of wild cards. (Instead of iterating over all the
     // filenames just join them together and search for "*" in the result.)
-    if (std::string::npos !=
-        boost::algorithm::join(unresolvedFileNames, "").find("*"))
+    if (std::string::npos != boost::algorithm::join(unresolvedFileNames, "").find("*"))
       return "Searching for files by wildcards is not currently supported.";
 
     std::vector<std::string> fullFileNames;
@@ -386,8 +356,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       std::string fullyResolvedFile;
 
       if (!useDefaultExt) {
-        FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts,
-                                   Direction::Input);
+        FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts, Direction::Input);
         std::string error = slaveFileProp.setValue(unresolvedFileName);
 
         // If an error was returned then pass it along.
@@ -399,11 +368,10 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       } else {
         // If a default ext has been specified/found, then use it.
         if (!defaultExt.empty()) {
-          fullyResolvedFile = FileFinder::Instance().findRun(
-              unresolvedFileName, std::vector<std::string>(1, defaultExt));
-        } else {
           fullyResolvedFile =
-              FileFinder::Instance().findRun(unresolvedFileName, m_exts);
+              FileFinder::Instance().findRun(unresolvedFileName, std::vector<std::string>(1, defaultExt));
+        } else {
+          fullyResolvedFile = FileFinder::Instance().findRun(unresolvedFileName, m_exts);
         }
         if (fullyResolvedFile.empty()) {
           bool doThrow = false;
@@ -420,10 +388,8 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
             doThrow = true;
           }
           if (doThrow) {
-            throw std::runtime_error(
-                "Unable to find file matching the string \"" +
-                unresolvedFileName +
-                "\", please check the data search directories.");
+            throw std::runtime_error("Unable to find file matching the string \"" + unresolvedFileName +
+                                     "\", please check the data search directories.");
           } else {
             // if the fullyResolvedFile is empty, it means it failed to find the
             // file so keep the unresolvedFileName as a hint to be displayed
@@ -440,8 +406,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   }
 
   // Now re-set the value using the full paths found.
-  PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(
-      allFullFileNames);
+  PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(allFullFileNames);
 
   // cache the new version of things
   m_oldPropValue = propValue;

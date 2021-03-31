@@ -72,9 +72,7 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"AbsorptionCorrection"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AbsorptionCorrection"}; }
 
 protected:
   void initialiseCachedDistances() override;

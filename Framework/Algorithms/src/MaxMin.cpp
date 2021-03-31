@@ -30,26 +30,19 @@ using namespace Mantid::HistogramData;
  *
  */
 void MaxMin::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<HistogramValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<HistogramValidator>()),
                   "The name of the Workspace2D to take as input");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name of the workspace in which to store the result");
 
-  declareProperty("ShowMin", false,
-                  "Flag to show minimum instead of maximum (default=false)");
-  declareProperty("RangeLower", EMPTY_DBL(),
-                  "The X value to search from (default min)");
-  declareProperty("RangeUpper", EMPTY_DBL(),
-                  "The X value to search to (default max)");
+  declareProperty("ShowMin", false, "Flag to show minimum instead of maximum (default=false)");
+  declareProperty("RangeLower", EMPTY_DBL(), "The X value to search from (default min)");
+  declareProperty("RangeUpper", EMPTY_DBL(), "The X value to search to (default max)");
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty("StartWorkspaceIndex", 0, mustBePositive,
-                  "Start spectrum number (default 0)");
-  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
-                  "End spectrum number  (default max)");
+  declareProperty("StartWorkspaceIndex", 0, mustBePositive, "Start spectrum number (default 0)");
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive, "End spectrum number  (default max)");
 }
 
 /** Executes the algorithm
@@ -73,8 +66,7 @@ void MaxMin::exec() {
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
-  const auto numberOfSpectra =
-      static_cast<int>(localworkspace->getNumberHistograms());
+  const auto numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
   if (MinSpec > numberOfSpectra) {
@@ -96,8 +88,7 @@ void MaxMin::exec() {
   // Create the 1D workspace for the output
   MatrixWorkspace_sptr outputWorkspace;
 
-  outputWorkspace = create<HistoWorkspace>(*localworkspace,
-                                           MaxSpec - MinSpec + 1, BinEdges(2));
+  outputWorkspace = create<HistoWorkspace>(*localworkspace, MaxSpec - MinSpec + 1, BinEdges(2));
 
   Progress progress(this, 0.0, 1.0, (MaxSpec - MinSpec + 1));
   PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace, *outputWorkspace))
@@ -106,8 +97,7 @@ void MaxMin::exec() {
     PARALLEL_START_INTERUPT_REGION
     int newindex = i - MinSpec;
     // Copy over spectrum and detector number info
-    outputWorkspace->getSpectrum(newindex).copyInfoFrom(
-        localworkspace->getSpectrum(i));
+    outputWorkspace->getSpectrum(newindex).copyInfoFrom(localworkspace->getSpectrum(i));
 
     // Retrieve the spectrum into a vector
     auto &X = localworkspace->x(i);
@@ -124,8 +114,7 @@ void MaxMin::exec() {
       highit = X.end();
     else {
       using std::placeholders::_1;
-      highit = std::find_if(lowit, X.end(),
-                            std::bind(std::greater<double>(), _1, MaxRange));
+      highit = std::find_if(lowit, X.end(), std::bind(std::greater<double>(), _1, MaxRange));
     }
 
     // If range specified doesn't overlap with this spectrum then bail out
@@ -148,8 +137,7 @@ void MaxMin::exec() {
     MantidVec::difference_type d = std::distance(Y.begin(), maxY);
     // X boundaries for the max/min element
     outputWorkspace->mutableX(newindex)[0] = *(X.begin() + d);
-    outputWorkspace->mutableX(newindex)[1] =
-        *(X.begin() + d + 1); // This is safe since X is of dimension Y+1
+    outputWorkspace->mutableX(newindex)[1] = *(X.begin() + d + 1); // This is safe since X is of dimension Y+1
     outputWorkspace->mutableY(newindex)[0] = *maxY;
     progress.report();
     PARALLEL_END_INTERUPT_REGION

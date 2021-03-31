@@ -72,8 +72,8 @@ public:
 
   void copyDataFrom(const ISpectrum &source) override;
 
-  void createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
-                           bool GenerateMultipleEvents, int MaxEventsPerBin);
+  void createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros, bool GenerateMultipleEvents,
+                           int MaxEventsPerBin);
 
   EventList &operator=(const EventList &);
 
@@ -93,8 +93,7 @@ public:
 
   bool operator==(const EventList &rhs) const;
   bool operator!=(const EventList &rhs) const;
-  bool equals(const EventList &rhs, const double tolTof, const double tolWeight,
-              const int64_t tolPulse) const;
+  bool equals(const EventList &rhs, const double tolTof, const double tolWeight, const int64_t tolPulse) const;
 
   // --------------------------------------------------------------------------
   /** Append an event to the histogram, without clearing the cache, to make it
@@ -160,8 +159,7 @@ public:
 
   void sortPulseTime() const;
   void sortPulseTimeTOF() const;
-  void sortTimeAtSample(const double &tofFactor, const double &tofShift,
-                        bool forceResort = false) const;
+  void sortTimeAtSample(const double &tofFactor, const double &tofShift, bool forceResort = false) const;
 
   bool isSortedByTof() const override;
 
@@ -180,16 +178,10 @@ public:
 
   /// Deprecated, use mutableY() instead. Disallowed data accessors - can't
   /// modify Y/E on a EventList
-  MantidVec &dataY() override {
-    throw std::runtime_error(
-        "EventList: non-const access to Y data is not possible.");
-  }
+  MantidVec &dataY() override { throw std::runtime_error("EventList: non-const access to Y data is not possible."); }
   /// Deprecated, use mutableE() instead. Disallowed data accessors - can't
   /// modify Y/E on a EventList
-  MantidVec &dataE() override {
-    throw std::runtime_error(
-        "EventList: non-const access to E data is not possible.");
-  }
+  MantidVec &dataE() override { throw std::runtime_error("EventList: non-const access to E data is not possible."); }
 
   // Allowed data accessors - read-only Y/E histogram VIEWS of an event list
   /// Deprecated, use y() instead. Return a read-only Y histogram view of an
@@ -210,29 +202,21 @@ public:
   virtual size_t histogram_size() const;
 
   void compressEvents(double tolerance, EventList *destination);
-  void compressFatEvents(const double tolerance,
-                         const Types::Core::DateAndTime &timeStart,
-                         const double seconds, EventList *destination);
+  void compressFatEvents(const double tolerance, const Types::Core::DateAndTime &timeStart, const double seconds,
+                         EventList *destination);
   // get EventType declaration
-  void generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E,
-                         bool skipError = false) const override;
-  void generateHistogramPulseTime(const MantidVec &X, MantidVec &Y,
-                                  MantidVec &E,
+  void generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E, bool skipError = false) const override;
+  void generateHistogramPulseTime(const MantidVec &X, MantidVec &Y, MantidVec &E,
                                   bool skipError = false) const override;
 
-  void generateHistogramTimeAtSample(const MantidVec &X, MantidVec &Y,
-                                     MantidVec &E, const double &tofFactor,
-                                     const double &tofOffset,
-                                     bool skipError = false) const override;
+  void generateHistogramTimeAtSample(const MantidVec &X, MantidVec &Y, MantidVec &E, const double &tofFactor,
+                                     const double &tofOffset, bool skipError = false) const override;
 
-  void integrate(const double minX, const double maxX, const bool entireRange,
-                 double &sum, double &error) const;
+  void integrate(const double minX, const double maxX, const bool entireRange, double &sum, double &error) const;
 
-  double integrate(const double minX, const double maxX,
-                   const bool entireRange) const override;
+  double integrate(const double minX, const double maxX, const bool entireRange) const override;
 
-  void convertTof(std::function<double(double)> func,
-                  const int sorting = 0) override;
+  void convertTof(std::function<double(double)> func, const int sorting = 0) override;
 
   void convertTof(const double factor, const double offset = 0.) override;
 
@@ -252,14 +236,9 @@ public:
   double getTofMax() const override;
   Mantid::Types::Core::DateAndTime getPulseTimeMax() const override;
   Mantid::Types::Core::DateAndTime getPulseTimeMin() const override;
-  void getPulseTimeMinMax(Mantid::Types::Core::DateAndTime &tMin,
-                          Mantid::Types::Core::DateAndTime &tM) const;
-  Mantid::Types::Core::DateAndTime
-  getTimeAtSampleMax(const double &tofFactor,
-                     const double &tofOffset) const override;
-  Mantid::Types::Core::DateAndTime
-  getTimeAtSampleMin(const double &tofFactor,
-                     const double &tofOffset) const override;
+  void getPulseTimeMinMax(Mantid::Types::Core::DateAndTime &tMin, Mantid::Types::Core::DateAndTime &tM) const;
+  Mantid::Types::Core::DateAndTime getTimeAtSampleMax(const double &tofFactor, const double &tofOffset) const override;
+  Mantid::Types::Core::DateAndTime getTimeAtSampleMin(const double &tofFactor, const double &tofOffset) const override;
 
   std::vector<double> getTofs() const override;
 
@@ -279,54 +258,42 @@ public:
 
   void reverse();
 
-  void filterByPulseTime(Types::Core::DateAndTime start,
-                         Types::Core::DateAndTime stop,
-                         EventList &output) const;
+  void filterByPulseTime(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, EventList &output) const;
 
-  void filterByTimeAtSample(Types::Core::DateAndTime start,
-                            Types::Core::DateAndTime stop, double tofFactor,
+  void filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, double tofFactor,
                             double tofOffset, EventList &output) const;
 
   void filterInPlace(Kernel::TimeSplitterType &splitter);
 
-  void splitByTime(Kernel::TimeSplitterType &splitter,
-                   std::vector<EventList *> outputs) const;
+  void splitByTime(Kernel::TimeSplitterType &splitter, std::vector<EventList *> outputs) const;
 
-  void splitByFullTime(Kernel::TimeSplitterType &splitter,
-                       std::map<int, EventList *> outputs, bool docorrection,
+  void splitByFullTime(Kernel::TimeSplitterType &splitter, std::map<int, EventList *> outputs, bool docorrection,
                        double toffactor, double tofshift) const;
 
   /// Split ...
-  std::string
-  splitByFullTimeMatrixSplitter(const std::vector<int64_t> &vec_splitters_time,
-                                const std::vector<int> &vecgroups,
-                                std::map<int, EventList *> vec_outputEventList,
-                                bool docorrection, double toffactor,
-                                double tofshift) const;
+  std::string splitByFullTimeMatrixSplitter(const std::vector<int64_t> &vec_splitters_time,
+                                            const std::vector<int> &vecgroups,
+                                            std::map<int, EventList *> vec_outputEventList, bool docorrection,
+                                            double toffactor, double tofshift) const;
 
   /// Split events by pulse time
-  void splitByPulseTime(Kernel::TimeSplitterType &splitter,
-                        std::map<int, EventList *> outputs) const;
+  void splitByPulseTime(Kernel::TimeSplitterType &splitter, std::map<int, EventList *> outputs) const;
 
   /// Split events by pulse time with Matrix splitters
-  void splitByPulseTimeWithMatrix(const std::vector<int64_t> &vec_times,
-                                  const std::vector<int> &vec_target,
+  void splitByPulseTimeWithMatrix(const std::vector<int64_t> &vec_times, const std::vector<int> &vec_target,
                                   std::map<int, EventList *> outputs) const;
 
   void multiply(const double value, const double error = 0.0) override;
   EventList &operator*=(const double value);
 
-  void multiply(const MantidVec &X, const MantidVec &Y,
-                const MantidVec &E) override;
+  void multiply(const MantidVec &X, const MantidVec &Y, const MantidVec &E) override;
 
   void divide(const double value, const double error = 0.0) override;
   EventList &operator/=(const double value);
 
-  void divide(const MantidVec &X, const MantidVec &Y,
-              const MantidVec &E) override;
+  void divide(const MantidVec &X, const MantidVec &Y, const MantidVec &E) override;
 
-  void convertUnitsViaTof(Mantid::Kernel::Unit *fromUnit,
-                          Mantid::Kernel::Unit *toUnit);
+  void convertUnitsViaTof(Mantid::Kernel::Unit *fromUnit, Mantid::Kernel::Unit *toUnit);
   void convertUnitsQuickly(const double &factor, const double &power);
 
   /// Returns the Histogram associated with this spectrum. Y and E data is
@@ -334,21 +301,18 @@ public:
   HistogramData::Histogram histogram() const override;
   HistogramData::Counts counts() const override;
   HistogramData::CountVariances countVariances() const override;
-  HistogramData::CountStandardDeviations
-  countStandardDeviations() const override;
+  HistogramData::CountStandardDeviations countStandardDeviations() const override;
   HistogramData::Frequencies frequencies() const override;
   HistogramData::FrequencyVariances frequencyVariances() const override;
-  HistogramData::FrequencyStandardDeviations
-  frequencyStandardDeviations() const override;
+  HistogramData::FrequencyStandardDeviations frequencyStandardDeviations() const override;
   const HistogramData::HistogramY &y() const override;
   const HistogramData::HistogramE &e() const override;
   Kernel::cow_ptr<HistogramData::HistogramY> sharedY() const override;
   Kernel::cow_ptr<HistogramData::HistogramE> sharedE() const override;
 
-  void generateCountsHistogramPulseTime(
-      const double &xMin, const double &xMax, MantidVec &Y,
-      const double TofMin = std::numeric_limits<double>::lowest(),
-      const double TofMax = std::numeric_limits<double>::max()) const;
+  void generateCountsHistogramPulseTime(const double &xMin, const double &xMax, MantidVec &Y,
+                                        const double TofMin = std::numeric_limits<double>::lowest(),
+                                        const double TofMax = std::numeric_limits<double>::max()) const;
 
 protected:
   void checkAndSanitizeHistogram(HistogramData::Histogram &histogram) override;
@@ -360,9 +324,7 @@ private:
   void copyDataInto(EventList &sink) const override;
   void copyDataInto(Histogram1D &sink) const override;
 
-  const HistogramData::Histogram &histogramRef() const override {
-    return m_histogram;
-  }
+  const HistogramData::Histogram &histogramRef() const override { return m_histogram; }
   HistogramData::Histogram &mutableHistogramRef() override;
 
   /// Histogram object holding the histogram data. Currently only X.
@@ -390,22 +352,19 @@ private:
   mutable std::mutex m_sortMutex;
 
   template <class T>
-  static typename std::vector<T>::const_iterator
-  findFirstPulseEvent(const std::vector<T> &events,
-                      const double seek_pulsetime);
+  static typename std::vector<T>::const_iterator findFirstPulseEvent(const std::vector<T> &events,
+                                                                     const double seek_pulsetime);
 
   template <class T>
-  typename std::vector<T>::const_iterator
-  findFirstTimeAtSampleEvent(const std::vector<T> &events,
-                             const double seek_time, const double &tofFactor,
-                             const double &tofOffset) const;
+  typename std::vector<T>::const_iterator findFirstTimeAtSampleEvent(const std::vector<T> &events,
+                                                                     const double seek_time, const double &tofFactor,
+                                                                     const double &tofOffset) const;
 
   void generateCountsHistogram(const MantidVec &X, MantidVec &Y) const;
 
   void generateCountsHistogramPulseTime(const MantidVec &X, MantidVec &Y) const;
 
-  void generateCountsHistogramTimeAtSample(const MantidVec &X, MantidVec &Y,
-                                           const double &tofFactor,
+  void generateCountsHistogramTimeAtSample(const MantidVec &X, MantidVec &Y, const double &tofFactor,
                                            const double &tofOffset) const;
 
   void generateErrorsHistogram(const MantidVec &Y, MantidVec &E) const;
@@ -413,155 +372,100 @@ private:
   void switchToWeightedEvents();
   void switchToWeightedEventsNoTime();
   // should not be called externally
-  void sortPulseTimeTOFDelta(const Types::Core::DateAndTime &start,
-                             const double seconds) const;
+  void sortPulseTimeTOFDelta(const Types::Core::DateAndTime &start, const double seconds) const;
 
   // helper functions are all internal to simplify the code
-  template <class T1, class T2>
-  static void minusHelper(std::vector<T1> &events,
-                          const std::vector<T2> &more_events);
+  template <class T1, class T2> static void minusHelper(std::vector<T1> &events, const std::vector<T2> &more_events);
   template <class T>
-  static void compressEventsHelper(const std::vector<T> &events,
-                                   std::vector<WeightedEventNoTime> &out,
+  static void compressEventsHelper(const std::vector<T> &events, std::vector<WeightedEventNoTime> &out,
                                    double tolerance);
   template <class T>
-  void compressEventsParallelHelper(const std::vector<T> &events,
-                                    std::vector<WeightedEventNoTime> &out,
+  void compressEventsParallelHelper(const std::vector<T> &events, std::vector<WeightedEventNoTime> &out,
                                     double tolerance);
   template <class T>
-  static void compressFatEventsHelper(
-      const std::vector<T> &events, std::vector<WeightedEvent> &out,
-      const double tolerance, const Mantid::Types::Core::DateAndTime &timeStart,
-      const double seconds);
+  static void compressFatEventsHelper(const std::vector<T> &events, std::vector<WeightedEvent> &out,
+                                      const double tolerance, const Mantid::Types::Core::DateAndTime &timeStart,
+                                      const double seconds);
 
   template <class T>
-  static void histogramForWeightsHelper(const std::vector<T> &events,
-                                        const MantidVec &X, MantidVec &Y,
-                                        MantidVec &E);
+  static void histogramForWeightsHelper(const std::vector<T> &events, const MantidVec &X, MantidVec &Y, MantidVec &E);
   template <class T>
-  static void integrateHelper(std::vector<T> &events, const double minX,
-                              const double maxX, const bool entireRange,
+  static void integrateHelper(std::vector<T> &events, const double minX, const double maxX, const bool entireRange,
                               double &sum, double &error);
   template <class T>
-  static double integrateHelper(std::vector<T> &events, const double minX,
-                                const double maxX, const bool entireRange);
-  template <class T>
-  void convertTofHelper(std::vector<T> &events,
-                        const std::function<double(double)> &func);
+  static double integrateHelper(std::vector<T> &events, const double minX, const double maxX, const bool entireRange);
+  template <class T> void convertTofHelper(std::vector<T> &events, const std::function<double(double)> &func);
 
-  template <class T>
-  void convertTofHelper(std::vector<T> &events, const double factor,
-                        const double offset);
-  template <class T>
-  void addPulsetimeHelper(std::vector<T> &events, const double seconds);
-  template <class T>
-  void addPulsetimesHelper(std::vector<T> &events,
-                           const std::vector<double> &seconds);
-  template <class T>
-  static std::size_t maskTofHelper(std::vector<T> &events, const double tofMin,
-                                   const double tofMax);
-  template <class T>
-  static std::size_t maskConditionHelper(std::vector<T> &events,
-                                         const std::vector<bool> &mask);
+  template <class T> void convertTofHelper(std::vector<T> &events, const double factor, const double offset);
+  template <class T> void addPulsetimeHelper(std::vector<T> &events, const double seconds);
+  template <class T> void addPulsetimesHelper(std::vector<T> &events, const std::vector<double> &seconds);
+  template <class T> static std::size_t maskTofHelper(std::vector<T> &events, const double tofMin, const double tofMax);
+  template <class T> static std::size_t maskConditionHelper(std::vector<T> &events, const std::vector<bool> &mask);
 
+  template <class T> static void getTofsHelper(const std::vector<T> &events, std::vector<double> &tofs);
+  template <class T> static void getWeightsHelper(const std::vector<T> &events, std::vector<double> &weights);
+  template <class T> static void getWeightErrorsHelper(const std::vector<T> &events, std::vector<double> &weightErrors);
   template <class T>
-  static void getTofsHelper(const std::vector<T> &events,
-                            std::vector<double> &tofs);
+  static void getPulseTimesHelper(const std::vector<T> &events, std::vector<Mantid::Types::Core::DateAndTime> &times);
+  template <class T> static void setTofsHelper(std::vector<T> &events, const std::vector<double> &tofs);
   template <class T>
-  static void getWeightsHelper(const std::vector<T> &events,
-                               std::vector<double> &weights);
+  static void filterByPulseTimeHelper(std::vector<T> &events, Types::Core::DateAndTime start,
+                                      Types::Core::DateAndTime stop, std::vector<T> &output);
   template <class T>
-  static void getWeightErrorsHelper(const std::vector<T> &events,
-                                    std::vector<double> &weightErrors);
-  template <class T>
-  static void
-  getPulseTimesHelper(const std::vector<T> &events,
-                      std::vector<Mantid::Types::Core::DateAndTime> &times);
-  template <class T>
-  static void setTofsHelper(std::vector<T> &events,
-                            const std::vector<double> &tofs);
-  template <class T>
-  static void filterByPulseTimeHelper(std::vector<T> &events,
-                                      Types::Core::DateAndTime start,
-                                      Types::Core::DateAndTime stop,
-                                      std::vector<T> &output);
-  template <class T>
-  static void filterByTimeAtSampleHelper(std::vector<T> &events,
-                                         Types::Core::DateAndTime start,
-                                         Types::Core::DateAndTime stop,
-                                         double tofFactor, double tofOffset,
+  static void filterByTimeAtSampleHelper(std::vector<T> &events, Types::Core::DateAndTime start,
+                                         Types::Core::DateAndTime stop, double tofFactor, double tofOffset,
                                          std::vector<T> &output);
+  template <class T> void filterInPlaceHelper(Kernel::TimeSplitterType &splitter, typename std::vector<T> &events);
   template <class T>
-  void filterInPlaceHelper(Kernel::TimeSplitterType &splitter,
-                           typename std::vector<T> &events);
-  template <class T>
-  void splitByTimeHelper(Kernel::TimeSplitterType &splitter,
-                         std::vector<EventList *> outputs,
+  void splitByTimeHelper(Kernel::TimeSplitterType &splitter, std::vector<EventList *> outputs,
                          typename std::vector<T> &events) const;
   template <class T>
-  void splitByFullTimeHelper(Kernel::TimeSplitterType &splitter,
-                             std::map<int, EventList *> outputs,
-                             typename std::vector<T> &events, bool docorrection,
-                             double toffactor, double tofshift) const;
+  void splitByFullTimeHelper(Kernel::TimeSplitterType &splitter, std::map<int, EventList *> outputs,
+                             typename std::vector<T> &events, bool docorrection, double toffactor,
+                             double tofshift) const;
   /// Split events by pulse time
   template <class T>
-  void splitByPulseTimeHelper(Kernel::TimeSplitterType &splitter,
-                              std::map<int, EventList *> outputs,
+  void splitByPulseTimeHelper(Kernel::TimeSplitterType &splitter, std::map<int, EventList *> outputs,
                               typename std::vector<T> &events) const;
 
   /// Split events (template) by pulse time with matrix splitters
   template <class T>
-  void
-  splitByPulseTimeWithMatrixHelper(const std::vector<int64_t> &vec_split_times,
-                                   const std::vector<int> &vec_split_target,
-                                   std::map<int, EventList *> outputs,
-                                   typename std::vector<T> &events) const;
+  void splitByPulseTimeWithMatrixHelper(const std::vector<int64_t> &vec_split_times,
+                                        const std::vector<int> &vec_split_target, std::map<int, EventList *> outputs,
+                                        typename std::vector<T> &events) const;
 
   template <class T>
-  std::string splitByFullTimeVectorSplitterHelper(
-      const std::vector<int64_t> &vectimes, const std::vector<int> &vecgroups,
-      std::map<int, EventList *> outputs, typename std::vector<T> &vecEvents,
-      bool docorrection, double toffactor, double tofshift) const;
+  std::string splitByFullTimeVectorSplitterHelper(const std::vector<int64_t> &vectimes,
+                                                  const std::vector<int> &vecgroups, std::map<int, EventList *> outputs,
+                                                  typename std::vector<T> &vecEvents, bool docorrection,
+                                                  double toffactor, double tofshift) const;
 
   template <class T>
-  std::string splitByFullTimeSparseVectorSplitterHelper(
-      const std::vector<int64_t> &vectimes, const std::vector<int> &vecgroups,
-      std::map<int, EventList *> outputs, typename std::vector<T> &vecEvents,
-      bool docorrection, double toffactor, double tofshift) const;
+  std::string
+  splitByFullTimeSparseVectorSplitterHelper(const std::vector<int64_t> &vectimes, const std::vector<int> &vecgroups,
+                                            std::map<int, EventList *> outputs, typename std::vector<T> &vecEvents,
+                                            bool docorrection, double toffactor, double tofshift) const;
 
+  template <class T> static void multiplyHelper(std::vector<T> &events, const double value, const double error = 0.0);
   template <class T>
-  static void multiplyHelper(std::vector<T> &events, const double value,
-                             const double error = 0.0);
-  template <class T>
-  static void multiplyHistogramHelper(std::vector<T> &events,
-                                      const MantidVec &X, const MantidVec &Y,
+  static void multiplyHistogramHelper(std::vector<T> &events, const MantidVec &X, const MantidVec &Y,
                                       const MantidVec &E);
   template <class T>
-  static void divideHistogramHelper(std::vector<T> &events, const MantidVec &X,
-                                    const MantidVec &Y, const MantidVec &E);
+  static void divideHistogramHelper(std::vector<T> &events, const MantidVec &X, const MantidVec &Y, const MantidVec &E);
   template <class T>
-  void convertUnitsViaTofHelper(typename std::vector<T> &events,
-                                Mantid::Kernel::Unit *fromUnit,
+  void convertUnitsViaTofHelper(typename std::vector<T> &events, Mantid::Kernel::Unit *fromUnit,
                                 Mantid::Kernel::Unit *toUnit);
   template <class T>
-  void convertUnitsQuicklyHelper(typename std::vector<T> &events,
-                                 const double &factor, const double &power);
+  void convertUnitsQuicklyHelper(typename std::vector<T> &events, const double &factor, const double &power);
 };
 
 // Methods overloaded to get event vectors.
-DLLExport void getEventsFrom(EventList &el,
-                             std::vector<Types::Event::TofEvent> *&events);
-DLLExport void
-getEventsFrom(const EventList &el,
-              std::vector<Types::Event::TofEvent> const *&events);
-DLLExport void getEventsFrom(EventList &el,
-                             std::vector<WeightedEvent> *&events);
-DLLExport void getEventsFrom(const EventList &el,
-                             std::vector<WeightedEvent> const *&events);
-DLLExport void getEventsFrom(EventList &el,
-                             std::vector<WeightedEventNoTime> *&events);
-DLLExport void getEventsFrom(const EventList &el,
-                             std::vector<WeightedEventNoTime> const *&events);
+DLLExport void getEventsFrom(EventList &el, std::vector<Types::Event::TofEvent> *&events);
+DLLExport void getEventsFrom(const EventList &el, std::vector<Types::Event::TofEvent> const *&events);
+DLLExport void getEventsFrom(EventList &el, std::vector<WeightedEvent> *&events);
+DLLExport void getEventsFrom(const EventList &el, std::vector<WeightedEvent> const *&events);
+DLLExport void getEventsFrom(EventList &el, std::vector<WeightedEventNoTime> *&events);
+DLLExport void getEventsFrom(const EventList &el, std::vector<WeightedEventNoTime> const *&events);
 
 } // namespace DataObjects
 } // namespace Mantid

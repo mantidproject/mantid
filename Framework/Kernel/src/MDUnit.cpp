@@ -30,8 +30,7 @@ bool QUnit::isQUnit() const { return true; }
 //----------------------------------------------------------------------------------------------
 ReciprocalLatticeUnit::ReciprocalLatticeUnit() : m_unitLabel(UnitLabel("")) {}
 
-ReciprocalLatticeUnit::ReciprocalLatticeUnit(const UnitLabel &unitLabel)
-    : m_unitLabel(unitLabel) {}
+ReciprocalLatticeUnit::ReciprocalLatticeUnit(const UnitLabel &unitLabel) : m_unitLabel(unitLabel) {}
 
 UnitLabel ReciprocalLatticeUnit::getUnitLabel() const {
   if (isSpecialRLUUnitLabel()) {
@@ -41,9 +40,7 @@ UnitLabel ReciprocalLatticeUnit::getUnitLabel() const {
   }
 }
 
-bool ReciprocalLatticeUnit::canConvertTo(const MDUnit &other) const {
-  return other.isQUnit();
-}
+bool ReciprocalLatticeUnit::canConvertTo(const MDUnit &other) const { return other.isQUnit(); }
 
 ReciprocalLatticeUnit *ReciprocalLatticeUnit::clone() const {
   if (isSpecialRLUUnitLabel()) {
@@ -66,17 +63,11 @@ bool ReciprocalLatticeUnit::isSpecialRLUUnitLabel() const {
 // Inverse Angstrom Unit
 //----------------------------------------------------------------------------------------------
 
-UnitLabel InverseAngstromsUnit::getUnitLabel() const {
-  return Units::Symbol::InverseAngstrom;
-}
+UnitLabel InverseAngstromsUnit::getUnitLabel() const { return Units::Symbol::InverseAngstrom; }
 
-bool InverseAngstromsUnit::canConvertTo(const MDUnit &other) const {
-  return other.isQUnit();
-}
+bool InverseAngstromsUnit::canConvertTo(const MDUnit &other) const { return other.isQUnit(); }
 
-InverseAngstromsUnit *InverseAngstromsUnit::clone() const {
-  return new InverseAngstromsUnit;
-}
+InverseAngstromsUnit *InverseAngstromsUnit::clone() const { return new InverseAngstromsUnit; }
 
 //----------------------------------------------------------------------------------------------
 // Inverse Angstrom Unit
@@ -90,9 +81,7 @@ LabelUnit::LabelUnit(const UnitLabel &unitLabel) : m_unitLabel(unitLabel) {}
 
 UnitLabel LabelUnit::getUnitLabel() const { return m_unitLabel; }
 
-bool LabelUnit::canConvertTo(const MDUnit &other) const {
-  return this->getUnitLabel() == other.getUnitLabel();
-}
+bool LabelUnit::canConvertTo(const MDUnit &other) const { return this->getUnitLabel() == other.getUnitLabel(); }
 
 bool LabelUnit::isQUnit() const {
   boost::regex pattern("(A\\^-1)");

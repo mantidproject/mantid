@@ -41,22 +41,17 @@ The input workspace is
 @author Vickie Lynch, SNS
 @date 07/16/2012
 */
-class DLLExport AlignAndFocusPowder
-    : public API::DistributedDataProcessorAlgorithm {
+class DLLExport AlignAndFocusPowder : public API::DistributedDataProcessorAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "AlignAndFocusPowder"; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"AlignAndFocusPowderFromFiles"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AlignAndFocusPowderFromFiles"}; }
 
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Workflow\\Diffraction";
-  }
+  const std::string category() const override { return "Workflow\\Diffraction"; }
 
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -71,31 +66,25 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  void loadCalFile(const std::string &calFilename,
-                   const std::string &groupFilename);
+  void loadCalFile(const std::string &calFilename, const std::string &groupFilename);
   API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr matrixws);
-  API::MatrixWorkspace_sptr rebinRagged(API::MatrixWorkspace_sptr matrixws,
-                                        const bool inDspace);
+  API::MatrixWorkspace_sptr rebinRagged(API::MatrixWorkspace_sptr matrixws, const bool inDspace);
 
-  API::MatrixWorkspace_sptr
-  conjoinWorkspaces(const API::MatrixWorkspace_sptr &ws1,
-                    const API::MatrixWorkspace_sptr &ws2, size_t offset);
+  API::MatrixWorkspace_sptr conjoinWorkspaces(const API::MatrixWorkspace_sptr &ws1,
+                                              const API::MatrixWorkspace_sptr &ws2, size_t offset);
 
   /// Call diffraction focus to a matrix workspace.
   API::MatrixWorkspace_sptr diffractionFocus(API::MatrixWorkspace_sptr ws);
 
   /// Convert units
-  API::MatrixWorkspace_sptr convertUnits(API::MatrixWorkspace_sptr matrixws,
-                                         const std::string &target);
+  API::MatrixWorkspace_sptr convertUnits(API::MatrixWorkspace_sptr matrixws, const std::string &target);
 
   /// Call edit instrument geometry
-  API::MatrixWorkspace_sptr editInstrument(
-      API::MatrixWorkspace_sptr ws, const std::vector<double> &polars,
-      const std::vector<specnum_t> &specids, const std::vector<double> &l2s,
-      const std::vector<double> &phis);
+  API::MatrixWorkspace_sptr editInstrument(API::MatrixWorkspace_sptr ws, const std::vector<double> &polars,
+                                           const std::vector<specnum_t> &specids, const std::vector<double> &l2s,
+                                           const std::vector<double> &phis);
   void convertOffsetsToCal(DataObjects::OffsetsWorkspace_sptr &offsetsWS);
-  double getVecPropertyFromPmOrSelf(const std::string &name,
-                                    std::vector<double> &avec);
+  double getVecPropertyFromPmOrSelf(const std::string &name, std::vector<double> &avec);
 
   API::MatrixWorkspace_sptr m_inputW;
   API::MatrixWorkspace_sptr m_outputW;

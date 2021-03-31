@@ -52,8 +52,7 @@ public:
 
     ITableWorkspace_sptr hkls = getHCPTable();
     MatrixWorkspace_sptr ws =
-        getWorkspace(getFunctionString(hkls, true), (2.0 * M_PI) / 2.1,
-                     (2.0 * M_PI) / 1.0, 1000, "MomentumTransfer");
+        getWorkspace(getFunctionString(hkls, true), (2.0 * M_PI) / 2.1, (2.0 * M_PI) / 1.0, 1000, "MomentumTransfer");
 
     IAlgorithm_sptr pFit = AlgorithmManager::Instance().create("PawleyFit");
     pFit->setProperty("InputWorkspace", ws);
@@ -68,8 +67,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(pFit->execute());
 
     // Examine table with cell parameters.
-    ITableWorkspace_sptr cellWs =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("HCP_cell");
+    ITableWorkspace_sptr cellWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("HCP_cell");
 
     // Three rows (a, c, ZeroShift)
     TS_ASSERT_EQUALS(cellWs->rowCount(), 3);
@@ -85,9 +83,7 @@ public:
     TS_ASSERT_DELTA(cellWs->cell<double>(1, 1), 3.93, 1e-6);
 
     // Check number of peak parameters.
-    ITableWorkspace_sptr peakWs =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            "HCP_peaks");
+    ITableWorkspace_sptr peakWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("HCP_peaks");
     TS_ASSERT_EQUALS(peakWs->rowCount(), 5 * 3); // 5 functions with 3 params.
 
     AnalysisDataService::Instance().remove("HCP_output");
@@ -101,8 +97,7 @@ public:
      */
 
     ITableWorkspace_sptr hkls = getOrthorhombicTable();
-    MatrixWorkspace_sptr ws = getWorkspace(getFunctionString(hkls, false), 1.5,
-                                           2.1, 1000, "dSpacing");
+    MatrixWorkspace_sptr ws = getWorkspace(getFunctionString(hkls, false), 1.5, 2.1, 1000, "dSpacing");
 
     IAlgorithm_sptr pFit = AlgorithmManager::Instance().create("PawleyFit");
     pFit->setProperty("InputWorkspace", ws);
@@ -119,8 +114,7 @@ public:
     pFit->execute();
 
     // Examine table with cell parameters.
-    ITableWorkspace_sptr cellWs =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("OP_cell");
+    ITableWorkspace_sptr cellWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("OP_cell");
 
     // Three rows (a, b, c, ZeroShift)
     TS_ASSERT_EQUALS(cellWs->rowCount(), 4);
@@ -141,8 +135,7 @@ public:
     TS_ASSERT_DELTA(cellWs->cell<double>(2, 1), 4.06, 3e-3);
 
     // Check number of peak parameters.
-    ITableWorkspace_sptr peakWs =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("OP_peaks");
+    ITableWorkspace_sptr peakWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("OP_peaks");
     TS_ASSERT_EQUALS(peakWs->rowCount(), 7 * 3); // 5 functions with 3 params.
 
     AnalysisDataService::Instance().remove("OP_output");
@@ -227,8 +220,7 @@ private:
       double d = row.Double(1);
       double center = useQ ? (2.0 * M_PI) / d : d;
       double fwhmAbs = row.Double(2) * center;
-      fn << "name=Gaussian,PeakCentre=" << center
-         << ",Sigma=" << fwhmAbs / (2.0 * sqrt(2.0 * M_LN2))
+      fn << "name=Gaussian,PeakCentre=" << center << ",Sigma=" << fwhmAbs / (2.0 * sqrt(2.0 * M_LN2))
          << ",Height=" << row.String(3);
 
       functionStrings.emplace_back(fn.str());
@@ -237,11 +229,9 @@ private:
     return boost::join(functionStrings, ";");
   }
 
-  MatrixWorkspace_sptr getWorkspace(const std::string &functionString,
-                                    double xMin, double xMax, size_t n,
+  MatrixWorkspace_sptr getWorkspace(const std::string &functionString, double xMin, double xMax, size_t n,
                                     const std::string &unit, double bg = 0.0) {
-    IFunction_sptr siFn =
-        FunctionFactory::Instance().createInitialized(functionString);
+    IFunction_sptr siFn = FunctionFactory::Instance().createInitialized(functionString);
 
     auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, n, n);
 

@@ -42,17 +42,12 @@ using Geometry::Instrument_sptr;
 void LoadParameterFile::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "Workspace", "Anonymous", Direction::InOut),
-      "The name of the workspace to load the instrument parameters into.");
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
-                                     ".xml"),
-      "The filename (including its full or relative path) of a parameter "
-      "definition file. The file extension must either be .xml or .XML.");
-  declareProperty("ParameterXML", "",
-                  "The parameter definition XML as a string.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous", Direction::InOut),
+                  "The name of the workspace to load the instrument parameters into.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad, ".xml"),
+                  "The filename (including its full or relative path) of a parameter "
+                  "definition file. The file extension must either be .xml or .XML.");
+  declareProperty("ParameterXML", "", "The parameter definition XML as a string.");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -67,8 +62,7 @@ void LoadParameterFile::exec() {
   std::string filename = getPropertyValue("Filename");
 
   // Retrieve the parameter XML string from the properties
-  const Property *const parameterXMLProperty =
-      getProperty("ParameterXML"); // to check whether it is default
+  const Property *const parameterXMLProperty = getProperty("ParameterXML"); // to check whether it is default
   const std::string parameterXML = getPropertyValue("ParameterXML");
 
   // Check the two properties (at least one must be set)
@@ -83,8 +77,7 @@ void LoadParameterFile::exec() {
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
   // TODO: Refactor to remove the need for the const cast (ticket #8521)
-  Instrument_sptr instrument = std::const_pointer_cast<Instrument>(
-      localWorkspace->getInstrument()->baseInstrument());
+  Instrument_sptr instrument = std::const_pointer_cast<Instrument>(localWorkspace->getInstrument()->baseInstrument());
 
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
@@ -100,12 +93,9 @@ void LoadParameterFile::exec() {
       g_log.information("Parsing from ParameterXML property.");
       pDoc = pParser.parseString(parameterXML);
     } catch (Poco::Exception &exc) {
-      throw Kernel::Exception::FileError(
-          exc.displayText() + ". Unable to parse parameter XML string",
-          "ParameterXML");
+      throw Kernel::Exception::FileError(exc.displayText() + ". Unable to parse parameter XML string", "ParameterXML");
     } catch (...) {
-      throw Kernel::Exception::FileError("Unable to parse parameter XML string",
-                                         "ParameterXML");
+      throw Kernel::Exception::FileError("Unable to parse parameter XML string", "ParameterXML");
     }
   } else {
     try {
@@ -113,18 +103,15 @@ void LoadParameterFile::exec() {
       Poco::File ipfFile(filename);
       if (!ipfFile.exists()) {
         Poco::Path filePath(filename);
-        filename =
-            Poco::Path(
-                Kernel::ConfigService::Instance().getInstrumentDirectory())
-                .makeDirectory()
-                .setFileName(filePath.getFileName())
-                .toString();
+        filename = Poco::Path(Kernel::ConfigService::Instance().getInstrumentDirectory())
+                       .makeDirectory()
+                       .setFileName(filePath.getFileName())
+                       .toString();
       }
       g_log.information() << "Parsing from XML file: " << filename << '\n';
       pDoc = pParser.parse(filename);
     } catch (Poco::Exception &exc) {
-      throw Kernel::Exception::FileError(
-          exc.displayText() + ". Unable to parse File:", filename);
+      throw Kernel::Exception::FileError(exc.displayText() + ". Unable to parse File:", filename);
     } catch (...) {
       throw Kernel::Exception::FileError("Unable to parse File:", filename);
     }
@@ -133,15 +120,13 @@ void LoadParameterFile::exec() {
   // Get pointer to root element
   Element *pRootElem = pDoc->documentElement();
   if (!pRootElem->hasChildNodes()) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "No root element in XML Parameter file", filename);
+    throw Kernel::Exception::InstrumentDefinitionError("No root element in XML Parameter file", filename);
   }
 
   // Set all parameters that specified in all component-link elements of
   // pRootElem
   InstrumentDefinitionParser loadInstr;
-  loadInstr.setComponentLinks(instrument, pRootElem, &prog,
-                              localWorkspace->getWorkspaceStartDate());
+  loadInstr.setComponentLinks(instrument, pRootElem, &prog, localWorkspace->getWorkspaceStartDate());
 
   // populate parameter map of workspace
   localWorkspace->populateInstrumentParameters();

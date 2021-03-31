@@ -53,9 +53,7 @@ public:
   std::map<std::string, std::string> validateInputs() override;
   /// Algorithm's version for identification
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"SofQW", "SofQWPolygon", "Rebin2D"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SofQW", "SofQWPolygon", "Rebin2D"}; }
   /// Algorithm's category for identification
   const std::string category() const override;
 
@@ -68,8 +66,7 @@ private:
   void initAngularCachesNonPSD(const API::MatrixWorkspace &workspace);
   /// Get angles and calculate angular widths.
   void initAngularCachesPSD(const API::MatrixWorkspace &workspace);
-  void initAngularCachesTable(const API::MatrixWorkspace &workspace,
-                              const DataObjects::TableWorkspace &widthTable);
+  void initAngularCachesTable(const API::MatrixWorkspace &workspace, const DataObjects::TableWorkspace &widthTable);
 
   SofQCommon m_EmodeProperties;
   /// Output Q axis

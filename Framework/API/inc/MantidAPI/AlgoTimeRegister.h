@@ -30,8 +30,7 @@ public:
     timespec m_begin;
     timespec m_end;
 
-    Info(const std::string &nm, const std::thread::id &id, const timespec &be,
-         const timespec &en)
+    Info(const std::string &nm, const std::thread::id &id, const timespec &be, const timespec &en)
         : m_name(nm), m_threadId(id), m_begin(be), m_end(en) {}
   };
 

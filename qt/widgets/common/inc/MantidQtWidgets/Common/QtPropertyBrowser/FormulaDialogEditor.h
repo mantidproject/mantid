@@ -17,8 +17,7 @@ namespace MantidWidgets {
 class FormulaDialogEditor : public StringDialogEditor {
   Q_OBJECT
 public:
-  FormulaDialogEditor(QtProperty *property, QWidget *parent)
-      : StringDialogEditor(property, parent) {}
+  FormulaDialogEditor(QtProperty *property, QWidget *parent) : StringDialogEditor(property, parent) {}
 protected slots:
   void runDialog() override;
 };
@@ -29,12 +28,10 @@ protected slots:
 class FormulaDialogEditorFactory : public StringDialogEditorFactory {
   Q_OBJECT
 public:
-  FormulaDialogEditorFactory(QObject *parent)
-      : StringDialogEditorFactory(parent) {}
+  FormulaDialogEditorFactory(QObject *parent) : StringDialogEditorFactory(parent) {}
 
 protected:
-  QWidget *createEditorForManager(QtStringPropertyManager * /*manager*/,
-                                  QtProperty *property,
+  QWidget *createEditorForManager(QtStringPropertyManager * /*manager*/, QtProperty *property,
                                   QWidget *parent) override {
     return new FormulaDialogEditor(property, parent);
   }

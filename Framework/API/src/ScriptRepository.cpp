@@ -11,8 +11,7 @@
 namespace Mantid {
 namespace API {
 
-ScriptRepoException::ScriptRepoException(int err_, const std::string &info,
-                                         const std::string &file, int line) {
+ScriptRepoException::ScriptRepoException(int err_, const std::string &info, const std::string &file, int line) {
   if (err_)
     _system_error = strerror(err_);
   else {
@@ -36,9 +35,8 @@ ScriptRepoException::ScriptRepoException(int err_, const std::string &info,
   }
 }
 
-ScriptRepoException::ScriptRepoException(const std::string &info,
-                                         const std::string &system,
-                                         const std::string &file, int line) {
+ScriptRepoException::ScriptRepoException(const std::string &info, const std::string &system, const std::string &file,
+                                         int line) {
   _system_error = system;
   _user_info = info;
 
@@ -54,9 +52,7 @@ ScriptRepoException::ScriptRepoException(const std::string &info,
   }
 }
 
-const char *ScriptRepoException::what() const noexcept {
-  return _user_info.c_str();
-}
+const char *ScriptRepoException::what() const noexcept { return _user_info.c_str(); }
 
 } // namespace API
 } // namespace Mantid

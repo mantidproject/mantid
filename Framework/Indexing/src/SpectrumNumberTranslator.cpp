@@ -12,48 +12,38 @@ namespace Indexing {
 namespace {
 // Helpers for accessing vectors of tuples used as a map. Lookup is by first
 // element in a tuple. Templated to support const and non-const.
-template <class T, class Key>
-auto lower_bound(T &map, const Key key) -> decltype(map.begin()) {
-  return std::lower_bound(map.begin(), map.end(),
-                          std::make_pair(key, size_t{0}),
-                          [](const typename T::value_type &a,
-                             const typename T::value_type &b) -> bool {
+template <class T, class Key> auto lower_bound(T &map, const Key key) -> decltype(map.begin()) {
+  return std::lower_bound(map.begin(), map.end(), std::make_pair(key, size_t{0}),
+                          [](const typename T::value_type &a, const typename T::value_type &b) -> bool {
                             return std::get<0>(a) < std::get<0>(b);
                           });
 }
 
-template <class T, class Key>
-auto upper_bound(T &map, const Key key) -> decltype(map.begin()) {
-  return std::upper_bound(map.begin(), map.end(),
-                          std::make_pair(key, size_t{0}),
-                          [](const typename T::value_type &a,
-                             const typename T::value_type &b) -> bool {
+template <class T, class Key> auto upper_bound(T &map, const Key key) -> decltype(map.begin()) {
+  return std::upper_bound(map.begin(), map.end(), std::make_pair(key, size_t{0}),
+                          [](const typename T::value_type &a, const typename T::value_type &b) -> bool {
                             return std::get<0>(a) < std::get<0>(b);
                           });
 }
 
-template <class T, class Key>
-auto find(T &map, const Key key) -> decltype(map.begin()) {
+template <class T, class Key> auto find(T &map, const Key key) -> decltype(map.begin()) {
   auto it = lower_bound(map, key);
   if ((it != map.end()) && (std::get<0>(*it) == key))
     return it;
   return map.end();
 }
 
-template <class MapT, class KeyT>
-void checkPartitionContainsValue(const MapT &map, const KeyT key) {
+template <class MapT, class KeyT> void checkPartitionContainsValue(const MapT &map, const KeyT key) {
   // These can be replaced with .contains(x) in C++-20
   auto it = map.find(key);
   if (it == map.end()) {
-    throw std::out_of_range("The following value is out of range: " +
-                            key.str());
+    throw std::out_of_range("The following value is out of range: " + key.str());
   }
 }
 } // namespace
 
-SpectrumNumberTranslator::SpectrumNumberTranslator(
-    const std::vector<SpectrumNumber> &spectrumNumbers,
-    const Partitioner &partitioner, const PartitionIndex &partition)
+SpectrumNumberTranslator::SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers,
+                                                   const Partitioner &partitioner, const PartitionIndex &partition)
     : m_partition(partition), m_globalSpectrumNumbers(spectrumNumbers) {
   partitioner.checkValid(m_partition);
 
@@ -83,9 +73,8 @@ SpectrumNumberTranslator::SpectrumNumberTranslator(
   // called.
 }
 
-SpectrumNumberTranslator::SpectrumNumberTranslator(
-    const std::vector<SpectrumNumber> &spectrumNumbers,
-    const SpectrumNumberTranslator &parent)
+SpectrumNumberTranslator::SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers,
+                                                   const SpectrumNumberTranslator &parent)
     : m_isPartitioned(parent.m_isPartitioned), m_partition(parent.m_partition),
       m_globalSpectrumNumbers(spectrumNumbers) {
   size_t currentIndex = 0;
@@ -103,26 +92,20 @@ SpectrumNumberTranslator::SpectrumNumberTranslator(
   }
 }
 
-const std::vector<SpectrumNumber> &
-SpectrumNumberTranslator::globalSpectrumNumbers() const {
+const std::vector<SpectrumNumber> &SpectrumNumberTranslator::globalSpectrumNumbers() const {
   return m_globalSpectrumNumbers;
 }
 
-SpectrumNumberTranslator::SpectrumNumberTranslator(
-    const std::vector<GlobalSpectrumIndex> &globalIndices,
-    const SpectrumNumberTranslator &parent)
+SpectrumNumberTranslator::SpectrumNumberTranslator(const std::vector<GlobalSpectrumIndex> &globalIndices,
+                                                   const SpectrumNumberTranslator &parent)
     : SpectrumNumberTranslator(parent.spectrumNumbers(globalIndices), parent) {}
 
-SpectrumIndexSet
-SpectrumNumberTranslator::makeIndexSet(SpectrumNumber min,
-                                       SpectrumNumber max) const {
+SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(SpectrumNumber min, SpectrumNumber max) const {
   checkUniqueSpectrumNumbers();
   checkPartitionContainsValue(m_spectrumNumberToPartition, min);
   checkPartitionContainsValue(m_spectrumNumberToPartition, max);
 
-  std::call_once(m_mapSetup,
-                 &SpectrumNumberTranslator::setupSpectrumNumberToIndexMap,
-                 this);
+  std::call_once(m_mapSetup, &SpectrumNumberTranslator::setupSpectrumNumberToIndexMap, this);
   std::vector<size_t> indices;
   const auto begin = lower_bound(m_spectrumNumberToIndex, min);
   const auto end = upper_bound(m_spectrumNumberToIndex, max);
@@ -131,49 +114,37 @@ SpectrumNumberTranslator::makeIndexSet(SpectrumNumber min,
   return SpectrumIndexSet(indices, m_spectrumNumberToIndex.size());
 }
 
-SpectrumIndexSet
-SpectrumNumberTranslator::makeIndexSet(GlobalSpectrumIndex min,
-                                       GlobalSpectrumIndex max) const {
+SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(GlobalSpectrumIndex min, GlobalSpectrumIndex max) const {
   if (min > max)
-    throw std::logic_error(
-        "SpectrumIndexTranslator: specified min is larger than max.");
+    throw std::logic_error("SpectrumIndexTranslator: specified min is larger than max.");
   if (max >= m_spectrumNumberToPartition.size())
-    throw std::out_of_range("The following value is out of range: " +
-                            max.str());
+    throw std::out_of_range("The following value is out of range: " + max.str());
 
   const auto begin = lower_bound(m_globalToLocal, min);
   const auto end = upper_bound(m_globalToLocal, max);
-  if (begin == m_globalToLocal.end() || end == m_globalToLocal.begin() ||
-      begin == end)
+  if (begin == m_globalToLocal.end() || end == m_globalToLocal.begin() || begin == end)
     return SpectrumIndexSet(0);
-  return SpectrumIndexSet(begin->second, std::prev(end)->second,
-                          m_globalToLocal.size());
+  return SpectrumIndexSet(begin->second, std::prev(end)->second, m_globalToLocal.size());
 }
 
-SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
-    const std::vector<SpectrumNumber> &spectrumNumbers) const {
+SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(const std::vector<SpectrumNumber> &spectrumNumbers) const {
   checkUniqueSpectrumNumbers();
-  std::call_once(m_mapSetup,
-                 &SpectrumNumberTranslator::setupSpectrumNumberToIndexMap,
-                 this);
+  std::call_once(m_mapSetup, &SpectrumNumberTranslator::setupSpectrumNumberToIndexMap, this);
   std::vector<size_t> indices;
   for (const auto &spectrumNumber : spectrumNumbers) {
     checkPartitionContainsValue(m_spectrumNumberToPartition, spectrumNumber);
 
     if (m_spectrumNumberToPartition.at(spectrumNumber) == m_partition)
-      indices.emplace_back(
-          find(m_spectrumNumberToIndex, spectrumNumber)->second);
+      indices.emplace_back(find(m_spectrumNumberToIndex, spectrumNumber)->second);
   }
   return SpectrumIndexSet(indices, m_spectrumNumberToIndex.size());
 }
 
-SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
-    const std::vector<GlobalSpectrumIndex> &globalIndices) const {
+SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const {
   std::vector<size_t> indices;
   for (const auto &globalIndex : globalIndices) {
     if (globalIndex >= m_spectrumNumberToPartition.size())
-      throw std::out_of_range("The following value is out of range: " +
-                              globalIndex.str());
+      throw std::out_of_range("The following value is out of range: " + globalIndex.str());
     const auto it = find(m_globalToLocal, globalIndex);
     if (it != m_globalToLocal.end())
       indices.emplace_back(it->second);
@@ -181,11 +152,9 @@ SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
   return SpectrumIndexSet(indices, m_globalToLocal.size());
 }
 
-PartitionIndex SpectrumNumberTranslator::partitionOf(
-    const GlobalSpectrumIndex globalIndex) const {
+PartitionIndex SpectrumNumberTranslator::partitionOf(const GlobalSpectrumIndex globalIndex) const {
   checkUniqueSpectrumNumbers();
-  const auto spectrumNumber =
-      m_globalSpectrumNumbers[static_cast<size_t>(globalIndex)];
+  const auto spectrumNumber = m_globalSpectrumNumbers[static_cast<size_t>(globalIndex)];
   return m_spectrumNumberToPartition.at(spectrumNumber);
 }
 
@@ -200,20 +169,17 @@ void SpectrumNumberTranslator::checkUniqueSpectrumNumbers() const {
 
 void SpectrumNumberTranslator::setupSpectrumNumberToIndexMap() const {
   std::sort(m_spectrumNumberToIndex.begin(), m_spectrumNumberToIndex.end(),
-            [](const std::pair<SpectrumNumber, size_t> &a,
-               const std::pair<SpectrumNumber, size_t> &b) -> bool {
+            [](const std::pair<SpectrumNumber, size_t> &a, const std::pair<SpectrumNumber, size_t> &b) -> bool {
               return std::get<0>(a) < std::get<0>(b);
             });
 }
 
-std::vector<SpectrumNumber> SpectrumNumberTranslator::spectrumNumbers(
-    const std::vector<GlobalSpectrumIndex> &globalIndices) const {
+std::vector<SpectrumNumber>
+SpectrumNumberTranslator::spectrumNumbers(const std::vector<GlobalSpectrumIndex> &globalIndices) const {
   std::vector<SpectrumNumber> spectrumNumbers;
   spectrumNumbers.reserve(globalIndices.size());
-  std::transform(globalIndices.cbegin(), globalIndices.cend(),
-                 std::back_inserter(spectrumNumbers), [this](const auto index) {
-                   return m_globalSpectrumNumbers[static_cast<size_t>(index)];
-                 });
+  std::transform(globalIndices.cbegin(), globalIndices.cend(), std::back_inserter(spectrumNumbers),
+                 [this](const auto index) { return m_globalSpectrumNumbers[static_cast<size_t>(index)]; });
   return spectrumNumbers;
 }
 

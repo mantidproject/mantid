@@ -21,16 +21,13 @@ namespace Crystal {
 */
 namespace CalibrationHelpers {
 
-MANTID_CRYSTAL_DLL void
-adjustUpSampleAndSourcePositions(double const L0, const Kernel::V3D &newSampPos,
-                                 Geometry::ComponentInfo &componentInfo);
+MANTID_CRYSTAL_DLL void adjustUpSampleAndSourcePositions(double const L0, const Kernel::V3D &newSampPos,
+                                                         Geometry::ComponentInfo &componentInfo);
 
-MANTID_CRYSTAL_DLL void
-adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
-                            const Geometry::Instrument &newInstrument,
-                            const Kernel::V3D &pos, const Kernel::Quat &rot,
-                            const double detWScale, const double detHtScale,
-                            Geometry::ComponentInfo &componentInfo);
+MANTID_CRYSTAL_DLL void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
+                                                    const Geometry::Instrument &newInstrument, const Kernel::V3D &pos,
+                                                    const Kernel::Quat &rot, const double detWScale,
+                                                    const double detHtScale, Geometry::ComponentInfo &componentInfo);
 
 } // namespace CalibrationHelpers
 } // namespace Crystal

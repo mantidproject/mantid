@@ -82,13 +82,11 @@ void process_mem_usage(size_t &vm_usage, size_t &resident_set) {
   unsigned long vsize; // according to man this is %lu
   long rss;            // according to man this is %ld
 
-  stat_stream >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr >>
-      tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt >> utime >>
-      stime >> cutime >> cstime >> priority >> nice >> O >> itrealvalue >>
-      starttime >> vsize >> rss; // don't care about the rest
+  stat_stream >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr >> tpgid >> flags >> minflt >> cminflt >>
+      majflt >> cmajflt >> utime >> stime >> cutime >> cstime >> priority >> nice >> O >> itrealvalue >> starttime >>
+      vsize >> rss; // don't care about the rest
 
-  long page_size_kb = sysconf(_SC_PAGE_SIZE) /
-                      1024; // in case x86-64 is configured to use 2MB pages
+  long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; // in case x86-64 is configured to use 2MB pages
   vm_usage = static_cast<size_t>(vsize / static_cast<long double>(1024.0));
   resident_set = static_cast<size_t>(rss * page_size_kb);
 #elif __APPLE__
@@ -98,9 +96,8 @@ void process_mem_usage(size_t &vm_usage, size_t &resident_set) {
   struct task_basic_info t_info;
   mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
 
-  if (KERN_SUCCESS != task_info(mach_task_self(), TASK_BASIC_INFO,
-                                reinterpret_cast<task_info_t>(&t_info),
-                                &t_info_count)) {
+  if (KERN_SUCCESS !=
+      task_info(mach_task_self(), TASK_BASIC_INFO, reinterpret_cast<task_info_t>(&t_info), &t_info_count)) {
     return;
   }
   // Need to find out the system page size for next part
@@ -113,8 +110,7 @@ void process_mem_usage(size_t &vm_usage, size_t &resident_set) {
   // Adapted from
   // http://msdn.microsoft.com/en-us/library/windows/desktop/ms682050%28v=vs.85%29.aspx
   DWORD pid = GetCurrentProcessId();
-  HANDLE hProcess =
-      OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+  HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
   if (NULL == hProcess)
     return;
   PROCESS_MEMORY_COUNTERS pmc;
@@ -251,16 +247,14 @@ void MemoryStats::process_mem_system(size_t &sys_avail, size_t &sys_total) {
   vm_statistics vmStats;
   mach_msg_type_number_t count;
   count = sizeof(vm_statistics) / sizeof(natural_t);
-  err = host_statistics(port, HOST_VM_INFO,
-                        reinterpret_cast<host_info_t>(&vmStats), &count);
+  err = host_statistics(port, HOST_VM_INFO, reinterpret_cast<host_info_t>(&vmStats), &count);
   if (err)
     g_log.warning("Unable to obtain memory statistics for this Mac.");
   sys_avail = pageSize * (vmStats.free_count + vmStats.inactive_count) / 1024;
 
   // Now add in reserved but unused memory as reported by malloc
   const size_t unusedReserved = mstats().bytes_free / 1024;
-  g_log.debug() << "Mac - Adding reserved but unused memory of "
-                << unusedReserved << " KB\n";
+  g_log.debug() << "Mac - Adding reserved but unused memory of " << unusedReserved << " KB\n";
   sys_avail += unusedReserved;
 #elif _WIN32
   GlobalMemoryStatusEx(&memStatus);
@@ -275,8 +269,7 @@ void MemoryStats::process_mem_system(size_t &sys_avail, size_t &sys_total) {
   }
 #endif
 
-  g_log.debug() << "Memory: " << sys_avail << " (free), " << sys_total
-                << " (total).\n";
+  g_log.debug() << "Memory: " << sys_avail << " (free), " << sys_total << " (total).\n";
 }
 
 /**
@@ -316,12 +309,10 @@ void MemoryOptions::initAllocatorOptions() {
   HANDLE hHeaps[1025];
   // Get the number of heaps
   const DWORD numHeap = GetProcessHeaps(1024, hHeaps);
-  memOptLogger.debug() << "Number of heaps: " << numHeap
-                       << "\n"; // GetProcessHeaps(0, NULL) << "\n";
-  ULONG ulEnableLFH = 2;        // 2 = Low Fragmentation Heap
+  memOptLogger.debug() << "Number of heaps: " << numHeap << "\n"; // GetProcessHeaps(0, NULL) << "\n";
+  ULONG ulEnableLFH = 2;                                          // 2 = Low Fragmentation Heap
   for (DWORD i = 0; i < numHeap; i++) {
-    if (!HeapSetInformation(hHeaps[i], HeapCompatibilityInformation,
-                            &ulEnableLFH, sizeof(ulEnableLFH))) {
+    if (!HeapSetInformation(hHeaps[i], HeapCompatibilityInformation, &ulEnableLFH, sizeof(ulEnableLFH))) {
       memOptLogger.debug() << "Failed to enable the LFH for heap " << i << "\n";
     }
   }
@@ -335,8 +326,7 @@ void MemoryOptions::initAllocatorOptions() {
  * Constructor
  * @param ignore :: Which memory stats should be ignored.
  */
-MemoryStats::MemoryStats(const MemoryStatsIgnore ignore)
-    : vm_usage(0), res_usage(0), total_memory(0), avail_memory(0) {
+MemoryStats::MemoryStats(const MemoryStatsIgnore ignore) : vm_usage(0), res_usage(0), total_memory(0), avail_memory(0) {
 
 #ifdef _WIN32
   memStatus.dwLength = sizeof(MEMORYSTATUSEX);
@@ -368,9 +358,7 @@ void MemoryStats::update() {
  * Set the fields to ignore
  * @param ignore :: An enumeration giving the fields to ignore
  */
-void MemoryStats::ignoreFields(const MemoryStatsIgnore ignore) {
-  this->ignore = ignore;
-}
+void MemoryStats::ignoreFields(const MemoryStatsIgnore ignore) { this->ignore = ignore; }
 
 /**
  * Returns the virtual memory usage as a string
@@ -388,17 +376,13 @@ string MemoryStats::resUsageStr() const { return memToString(this->res_usage); }
  * Returns the total memory of the system as a string
  * @returns A string containing the total amount of memory on the system
  */
-string MemoryStats::totalMemStr() const {
-  return memToString(this->total_memory);
-}
+string MemoryStats::totalMemStr() const { return memToString(this->total_memory); }
 
 /**
  * Returns the available memory of the system as a string
  * @returns A string containing the amount of available memory on the system
  */
-string MemoryStats::availMemStr() const {
-  return memToString(this->avail_memory);
-}
+string MemoryStats::availMemStr() const { return memToString(this->avail_memory); }
 
 /**
  * Returns the total memory of the system
@@ -446,8 +430,7 @@ size_t MemoryStats::reservedMem() const {
   size_t unusedReserved = 0; // total reserved space
   DWORDLONG size = 0;
   GlobalMemoryStatusEx(&memStatus);
-  DWORDLONG GB2 =
-      memStatus.ullTotalVirtual; // Maximum memory available to the process
+  DWORDLONG GB2 = memStatus.ullTotalVirtual; // Maximum memory available to the process
 
   // Loop over all virtual memory to find out the status of every block.
   do {
@@ -457,8 +440,7 @@ size_t MemoryStats::reservedMem() const {
     if (info.State == MEM_RESERVE)
       unusedReserved += info.RegionSize;
 
-    addr +=
-        info.RegionSize; // Move up to the starting address for the next call
+    addr += info.RegionSize; // Move up to the starting address for the next call
     size += info.RegionSize;
   } while (size < GB2);
 
@@ -476,8 +458,7 @@ size_t MemoryStats::reservedMem() const {
  * @returns A percentage
  */
 double MemoryStats::getFreeRatio() const {
-  return 100. * static_cast<double>(this->avail_memory) /
-         static_cast<double>(this->total_memory);
+  return 100. * static_cast<double>(this->avail_memory) / static_cast<double>(this->total_memory);
 }
 
 /// Convenience function for writting out to stream.
@@ -508,9 +489,8 @@ size_t MemoryStats::getPeakRSS() const {
   GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info));
   return (size_t)info.PeakWorkingSetSize;
 
-#elif (defined(_AIX) || defined(__TOS__AIX__)) ||                              \
-    (defined(__sun__) || defined(__sun) ||                                     \
-     defined(sun) && (defined(__SVR4) || defined(__svr4__)))
+#elif (defined(_AIX) || defined(__TOS__AIX__)) ||                                                                      \
+    (defined(__sun__) || defined(__sun) || defined(sun) && (defined(__SVR4) || defined(__svr4__)))
   /* AIX and Solaris ------------------------------------------ */
   struct psinfo psinfo;
   int fd = -1;
@@ -523,8 +503,7 @@ size_t MemoryStats::getPeakRSS() const {
   close(fd);
   return (size_t)(psinfo.pr_rssize * 1024L);
 
-#elif defined(__unix__) || defined(__unix) || defined(unix) ||                 \
-    (defined(__APPLE__) && defined(__MACH__))
+#elif defined(__unix__) || defined(__unix) || defined(unix) || (defined(__APPLE__) && defined(__MACH__))
   /* BSD, Linux, and OSX -------------------------------------- */
   struct rusage rusage;
   getrusage(RUSAGE_SELF, &rusage);
@@ -558,14 +537,12 @@ size_t MemoryStats::getCurrentRSS() const {
   /* OSX ------------------------------------------------------ */
   struct mach_task_basic_info info;
   mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
-  if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO,
-                reinterpret_cast<task_info_t>(&info),
-                &infoCount) != KERN_SUCCESS)
+  if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO, reinterpret_cast<task_info_t>(&info), &infoCount) !=
+      KERN_SUCCESS)
     return static_cast<size_t>(0L); /* Can't access? */
   return static_cast<size_t>(info.resident_size);
 
-#elif defined(__linux__) || defined(__linux) || defined(linux) ||              \
-    defined(__gnu_linux__)
+#elif defined(__linux__) || defined(__linux) || defined(linux) || defined(__gnu_linux__)
   /* Linux ---------------------------------------------------- */
   long rss = 0L;
   FILE *fp = nullptr;

@@ -73,11 +73,9 @@ public:
    * @param inputPeaks A peaks workspace used to pull the goniometer and run
    * number.
    */
-  PeaksInRangeStrategy(V3D hklMin, V3D hklMax, HKLFilter *filter,
-                       const PeaksWorkspace *const inputPeaks)
-      : m_hklGenerator(std::move(hklMin), std::move(hklMax)),
-        m_hklIterator(m_hklGenerator.begin()), m_hklFilter(filter),
-        m_inputPeaks(inputPeaks) {
+  PeaksInRangeStrategy(V3D hklMin, V3D hklMax, HKLFilter *filter, const PeaksWorkspace *const inputPeaks)
+      : m_hklGenerator(std::move(hklMin), std::move(hklMax)), m_hklIterator(m_hklGenerator.begin()),
+        m_hklFilter(filter), m_inputPeaks(inputPeaks) {
     assert(filter);
   }
 
@@ -85,8 +83,7 @@ public:
     return Progress(alg, 0.0, 1.0, m_hklGenerator.size());
   }
 
-  void initialHKL(V3D *hkl, DblMatrix *gonioMatrix, int *runNumber) const
-      noexcept {
+  void initialHKL(V3D *hkl, DblMatrix *gonioMatrix, int *runNumber) const noexcept {
     *hkl = *(m_hklGenerator.begin());
     *gonioMatrix = m_inputPeaks->run().getGoniometer().getR();
     *runNumber = m_inputPeaks->getPeak(0).getRunNumber();
@@ -127,8 +124,7 @@ public:
     return Progress(alg, 0.0, 1.0, m_inputPeaks->getNumberPeaks());
   }
 
-  void initialHKL(V3D *hkl, DblMatrix *gonioMatrix, int *runNumber) const
-      noexcept {
+  void initialHKL(V3D *hkl, DblMatrix *gonioMatrix, int *runNumber) const noexcept {
     const auto &initialPeak = m_inputPeaks->getPeak(m_currentPeak);
     *hkl = initialPeak.getHKL();
     *gonioMatrix = initialPeak.getGoniometerMatrix();
@@ -162,15 +158,13 @@ private:
  * @param modulationProps The set of modulation properties
  * @return A new PeaksWorkspace
  */
-std::shared_ptr<Mantid::API::IPeaksWorkspace> createOutputWorkspace(
-    const PeaksWorkspace &inputPeaks,
-    const Mantid::Crystal::ModulationProperties &modulationProps) {
+std::shared_ptr<Mantid::API::IPeaksWorkspace>
+createOutputWorkspace(const PeaksWorkspace &inputPeaks, const Mantid::Crystal::ModulationProperties &modulationProps) {
   using Mantid::API::WorkspaceFactory;
   auto outPeaks = WorkspaceFactory::Instance().createPeaks();
   outPeaks->setInstrument(inputPeaks.getInstrument());
   if (modulationProps.saveOnLattice) {
-    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>(
-        inputPeaks.sample().getOrientedLattice());
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>(inputPeaks.sample().getOrientedLattice());
     lattice->setMaxOrder(modulationProps.maxOrder);
     lattice->setCrossTerm(modulationProps.crossTerms);
     const auto &offsets = modulationProps.offsets;
@@ -178,8 +172,7 @@ std::shared_ptr<Mantid::API::IPeaksWorkspace> createOutputWorkspace(
     // order=(1,0,0),(0,1,0), (0,0,1) vectors
     for (const auto &offset : offsets) {
       const V3D &modVector{std::get<3>(offset)};
-      const double m{std::get<0>(offset)}, n{std::get<1>(offset)},
-          p{std::get<2>(offset)};
+      const double m{std::get<0>(offset)}, n{std::get<1>(offset)}, p{std::get<2>(offset)};
       int modNum(-1);
       if (m == 1 && n == 0 && p == 0)
         modNum = 1;
@@ -218,11 +211,9 @@ std::shared_ptr<Mantid::API::IPeaksWorkspace> createOutputWorkspace(
  * @return A new PeaksWorkspace containing the predicted fractional peaks
  */
 template <typename SearchStrategy>
-IPeaksWorkspace_sptr predictFractionalPeaks(
-    Algorithm *const alg, const bool requirePeaksOnDetector,
-    const PeaksWorkspace &inputPeaks,
-    const Mantid::Crystal::ModulationProperties &modulationProps,
-    SearchStrategy searchStrategy) {
+IPeaksWorkspace_sptr
+predictFractionalPeaks(Algorithm *const alg, const bool requirePeaksOnDetector, const PeaksWorkspace &inputPeaks,
+                       const Mantid::Crystal::ModulationProperties &modulationProps, SearchStrategy searchStrategy) {
   using Mantid::Geometry::InstrumentRayTracer;
 
   const InstrumentRayTracer tracer(inputPeaks.getInstrument());
@@ -240,12 +231,9 @@ IPeaksWorkspace_sptr predictFractionalPeaks(
   auto progressReporter = searchStrategy.createProgressReporter(alg);
   while (true) {
     for (const auto &mnpOffset : offsets) {
-      const V3D currentIntHKL{std::round(currentHKL[0]),
-                              std::round(currentHKL[1]),
-                              std::round(currentHKL[2])};
+      const V3D currentIntHKL{std::round(currentHKL[0]), std::round(currentHKL[1]), std::round(currentHKL[2])};
       const V3D candidateHKL{currentIntHKL + std::get<3>(mnpOffset)};
-      const V3D qLab =
-          (gonioMatrix * UB * candidateHKL) * 2 * M_PI * qConvention;
+      const V3D qLab = (gonioMatrix * UB * candidateHKL) * 2 * M_PI * qConvention;
       if (qLab[2] <= 0)
         continue;
 
@@ -262,13 +250,10 @@ IPeaksWorkspace_sptr predictFractionalPeaks(
       if (requirePeaksOnDetector && peak->getDetectorID() < 0)
         continue;
       GNU_DIAG_OFF("missing-braces")
-      PeakHash savedPeak{runNumber,
-                         boost::math::iround(1000.0 * candidateHKL[0]),
-                         boost::math::iround(1000.0 * candidateHKL[1]),
-                         boost::math::iround(1000.0 * candidateHKL[2])};
+      PeakHash savedPeak{runNumber, boost::math::iround(1000.0 * candidateHKL[0]),
+                         boost::math::iround(1000.0 * candidateHKL[1]), boost::math::iround(1000.0 * candidateHKL[2])};
       GNU_DIAG_ON("missing-braces")
-      auto it =
-          find(alreadyDonePeaks.begin(), alreadyDonePeaks.end(), savedPeak);
+      auto it = find(alreadyDonePeaks.begin(), alreadyDonePeaks.end(), savedPeak);
       if (it == alreadyDonePeaks.end())
         alreadyDonePeaks.emplace_back(std::move(savedPeak));
       else
@@ -276,8 +261,7 @@ IPeaksWorkspace_sptr predictFractionalPeaks(
 
       peak->setHKL(candidateHKL * qConvention);
       peak->setIntHKL(currentIntHKL * qConvention);
-      const double m{std::get<0>(mnpOffset)}, n{std::get<1>(mnpOffset)},
-          p{std::get<2>(mnpOffset)};
+      const double m{std::get<0>(mnpOffset)}, n{std::get<1>(mnpOffset)}, p{std::get<2>(mnpOffset)};
       if (fabs(m) > 0. || fabs(n) > 0. || fabs(p) > 0.)
         peak->setIntMNP(V3D(m, n, p));
       peak->setRunNumber(runNumber);
@@ -305,45 +289,32 @@ void PredictFractionalPeaks::init() {
   using Kernel::Direction;
   using Kernel::StringListValidator;
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace_sptr::element_type>>(
-          PropertyNames::PEAKS, "", Direction::Input),
-      "Workspace of Peaks with orientation matrix that indexed the peaks and "
-      "instrument loaded");
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace_sptr::element_type>>(PropertyNames::PEAKS, "",
+                                                                                         Direction::Input),
+                  "Workspace of Peaks with orientation matrix that indexed the peaks and "
+                  "instrument loaded");
 
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-                      PropertyNames::HOFFSET, "-0.5,0.0,0.5"),
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(PropertyNames::HOFFSET, "-0.5,0.0,0.5"),
                   "Offset in the h direction");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-                      PropertyNames::KOFFSET, "0"),
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(PropertyNames::KOFFSET, "0"),
                   "Offset in the k direction");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-                      PropertyNames::LOFFSET, "-0.5,0.5"),
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(PropertyNames::LOFFSET, "-0.5,0.5"),
                   "Offset in the h direction");
-  declareProperty(PropertyNames::INCLUDEPEAKSINRANGE, false,
-                  "If false only offsets from peaks from Peaks are used");
-  declareProperty(PropertyNames::HMIN, -8.0,
-                  "Minimum H value to use during search", Direction::Input);
-  declareProperty(PropertyNames::HMAX, 8.0,
-                  "Maximum H value to use during search", Direction::Input);
-  declareProperty(PropertyNames::KMIN, -8.0,
-                  "Minimum K value to use during search", Direction::Input);
-  declareProperty(PropertyNames::KMAX, 8.0,
-                  "Maximum K value to use during search", Direction::Input);
-  declareProperty(PropertyNames::LMIN, -8.0,
-                  "Minimum L value to use during search", Direction::Input);
-  declareProperty(PropertyNames::LMAX, 8.0,
-                  "Maximum L value to use during search", Direction::Input);
+  declareProperty(PropertyNames::INCLUDEPEAKSINRANGE, false, "If false only offsets from peaks from Peaks are used");
+  declareProperty(PropertyNames::HMIN, -8.0, "Minimum H value to use during search", Direction::Input);
+  declareProperty(PropertyNames::HMAX, 8.0, "Maximum H value to use during search", Direction::Input);
+  declareProperty(PropertyNames::KMIN, -8.0, "Minimum K value to use during search", Direction::Input);
+  declareProperty(PropertyNames::KMAX, 8.0, "Maximum K value to use during search", Direction::Input);
+  declareProperty(PropertyNames::LMIN, -8.0, "Minimum L value to use during search", Direction::Input);
+  declareProperty(PropertyNames::LMAX, 8.0, "Maximum L value to use during search", Direction::Input);
 
   const auto &reflectionConditions = getAllReflectionConditions();
   std::vector<std::string> propOptions;
   propOptions.reserve(reflectionConditions.size() + 1);
   propOptions.emplace_back("");
-  std::transform(reflectionConditions.cbegin(), reflectionConditions.cend(),
-                 std::back_inserter(propOptions),
+  std::transform(reflectionConditions.cbegin(), reflectionConditions.cend(), std::back_inserter(propOptions),
                  [](const auto &condition) { return condition->getName(); });
-  declareProperty(PropertyNames::REFLECTION_COND, "",
-                  std::make_shared<StringListValidator>(propOptions),
+  declareProperty(PropertyNames::REFLECTION_COND, "", std::make_shared<StringListValidator>(propOptions),
                   "If provided, generate a list of possible peaks from this "
                   "reflection condition and use them to predict the fractional "
                   "peaks. This option requires a range of HKL values and "
@@ -357,51 +328,37 @@ void PredictFractionalPeaks::init() {
 
   // enable range properties if required
   using Kernel::EnabledWhenProperty;
-  for (const auto &name :
-       {PropertyNames::HMIN, PropertyNames::HMAX, PropertyNames::KMIN,
-        PropertyNames::KMAX, PropertyNames::LMIN, PropertyNames::LMAX}) {
-    EnabledWhenProperty includeInRangeEqOne{PropertyNames::INCLUDEPEAKSINRANGE,
-                                            Kernel::IS_EQUAL_TO, "1"};
-    EnabledWhenProperty reflConditionNotEmpty{PropertyNames::REFLECTION_COND,
-                                              Kernel::IS_NOT_EQUAL_TO, ""};
-    setPropertySettings(name,
-                        std::make_unique<Kernel::EnabledWhenProperty>(
-                            std::move(includeInRangeEqOne),
-                            std::move(reflConditionNotEmpty), Kernel::OR));
+  for (const auto &name : {PropertyNames::HMIN, PropertyNames::HMAX, PropertyNames::KMIN, PropertyNames::KMAX,
+                           PropertyNames::LMIN, PropertyNames::LMAX}) {
+    EnabledWhenProperty includeInRangeEqOne{PropertyNames::INCLUDEPEAKSINRANGE, Kernel::IS_EQUAL_TO, "1"};
+    EnabledWhenProperty reflConditionNotEmpty{PropertyNames::REFLECTION_COND, Kernel::IS_NOT_EQUAL_TO, ""};
+    setPropertySettings(name, std::make_unique<Kernel::EnabledWhenProperty>(
+                                  std::move(includeInRangeEqOne), std::move(reflConditionNotEmpty), Kernel::OR));
   }
   // group offset/modulations options together
-  for (const auto &name : {PropertyNames::HOFFSET, PropertyNames::KOFFSET,
-                           PropertyNames::LOFFSET}) {
+  for (const auto &name : {PropertyNames::HOFFSET, PropertyNames::KOFFSET, PropertyNames::LOFFSET}) {
     setPropertyGroup(name, "Separate Offsets");
   }
   for (const auto &name :
-       {ModulationProperties::ModVector1, ModulationProperties::ModVector2,
-        ModulationProperties::ModVector3, ModulationProperties::MaxOrder,
-        ModulationProperties::CrossTerms}) {
+       {ModulationProperties::ModVector1, ModulationProperties::ModVector2, ModulationProperties::ModVector3,
+        ModulationProperties::MaxOrder, ModulationProperties::CrossTerms}) {
     setPropertyGroup(name, "Modulation Vectors");
   }
   // enable/disable offsets & modulation vectors appropriately
-  for (const auto &offsetName : {PropertyNames::HOFFSET, PropertyNames::KOFFSET,
-                                 PropertyNames::LOFFSET}) {
-    EnabledWhenProperty modVectorOneIsDefault{ModulationProperties::ModVector1,
-                                              Kernel::IS_DEFAULT};
-    EnabledWhenProperty modVectorTwoIsDefault{ModulationProperties::ModVector2,
-                                              Kernel::IS_DEFAULT};
-    EnabledWhenProperty modVectorThreeIsDefault{
-        ModulationProperties::ModVector3, Kernel::IS_DEFAULT};
-    EnabledWhenProperty modVectorOneAndTwoIsDefault{
-        std::move(modVectorOneIsDefault), std::move(modVectorTwoIsDefault),
-        Kernel::AND};
+  for (const auto &offsetName : {PropertyNames::HOFFSET, PropertyNames::KOFFSET, PropertyNames::LOFFSET}) {
+    EnabledWhenProperty modVectorOneIsDefault{ModulationProperties::ModVector1, Kernel::IS_DEFAULT};
+    EnabledWhenProperty modVectorTwoIsDefault{ModulationProperties::ModVector2, Kernel::IS_DEFAULT};
+    EnabledWhenProperty modVectorThreeIsDefault{ModulationProperties::ModVector3, Kernel::IS_DEFAULT};
+    EnabledWhenProperty modVectorOneAndTwoIsDefault{std::move(modVectorOneIsDefault), std::move(modVectorTwoIsDefault),
+                                                    Kernel::AND};
     setPropertySettings(offsetName,
-                        std::make_unique<Kernel::EnabledWhenProperty>(
-                            std::move(modVectorOneAndTwoIsDefault),
-                            std::move(modVectorThreeIsDefault), Kernel::AND));
+                        std::make_unique<Kernel::EnabledWhenProperty>(std::move(modVectorOneAndTwoIsDefault),
+                                                                      std::move(modVectorThreeIsDefault), Kernel::AND));
   }
   // Outputs
-  declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace_sptr::element_type>>(
-          PropertyNames::FRACPEAKS, "", Direction::Output),
-      "Workspace of Peaks with peaks with fractional h,k, and/or l values");
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace_sptr::element_type>>(PropertyNames::FRACPEAKS, "",
+                                                                                         Direction::Output),
+                  "Workspace of Peaks with peaks with fractional h,k, and/or l values");
 }
 
 /**
@@ -415,12 +372,10 @@ std::map<std::string, std::string> PredictFractionalPeaks::validateInputs() {
     helpMessages[PropertyNames::PEAKS] = "Input workspace has no peaks.";
   }
 
-  auto validateRange = [&helpMessages, this](const std::string &minName,
-                                             const std::string &maxName) {
+  auto validateRange = [&helpMessages, this](const std::string &minName, const std::string &maxName) {
     const double min{getProperty(minName)}, max{getProperty(maxName)};
     if (max < min) {
-      const std::string helpMsg = "Inconsistent " + minName + "/" + maxName +
-                                  ": " + maxName + " < " + minName;
+      const std::string helpMsg = "Inconsistent " + minName + "/" + maxName + ": " + maxName + " < " + minName;
       helpMessages[minName] = helpMsg;
       helpMessages[maxName] = helpMsg;
     }
@@ -430,14 +385,12 @@ std::map<std::string, std::string> PredictFractionalPeaks::validateInputs() {
   validateRange(PropertyNames::LMIN, PropertyNames::LMAX);
 
   // If a modulation vector is provided then maxOrder is needed
-  const auto modVectors =
-      validModulationVectors(getProperty(ModulationProperties::ModVector1),
-                             getProperty(ModulationProperties::ModVector2),
-                             getProperty(ModulationProperties::ModVector3));
+  const auto modVectors = validModulationVectors(getProperty(ModulationProperties::ModVector1),
+                                                 getProperty(ModulationProperties::ModVector2),
+                                                 getProperty(ModulationProperties::ModVector3));
   const int maxOrder = getProperty(ModulationProperties::MaxOrder);
   if (maxOrder == 0 && !modVectors.empty()) {
-    helpMessages[ModulationProperties::MaxOrder] =
-        "Maxorder required when specifying a modulation vector.";
+    helpMessages[ModulationProperties::MaxOrder] = "Maxorder required when specifying a modulation vector.";
   }
   return helpMessages;
 }
@@ -447,25 +400,20 @@ void PredictFractionalPeaks::exec() {
   PeaksWorkspace_sptr inputPeaks = getProperty(PropertyNames::PEAKS);
   auto modulationInfo = getModulationInfo();
   const bool includePeaksInRange = getProperty("IncludeAllPeaksInRange");
-  const V3D hklMin{getProperty(PropertyNames::HMIN),
-                   getProperty(PropertyNames::KMIN),
+  const V3D hklMin{getProperty(PropertyNames::HMIN), getProperty(PropertyNames::KMIN),
                    getProperty(PropertyNames::LMIN)};
-  const V3D hklMax{getProperty(PropertyNames::HMAX),
-                   getProperty(PropertyNames::KMAX),
+  const V3D hklMax{getProperty(PropertyNames::HMAX), getProperty(PropertyNames::KMAX),
                    getProperty(PropertyNames::LMAX)};
-  const std::string reflectionConditionName =
-      getProperty(PropertyNames::REFLECTION_COND);
+  const std::string reflectionConditionName = getProperty(PropertyNames::REFLECTION_COND);
   const bool requirePeakOnDetector = getProperty(PropertyNames::ON_DETECTOR);
 
   IPeaksWorkspace_sptr outPeaks;
   if (includePeaksInRange || !reflectionConditionName.empty()) {
     using Mantid::Geometry::getAllReflectionConditions;
     const auto &allConditions = getAllReflectionConditions();
-    const auto found =
-        std::find_if(std::cbegin(allConditions), std::cend(allConditions),
-                     [&reflectionConditionName](const auto &condition) {
-                       return condition->getName() == reflectionConditionName;
-                     });
+    const auto found = std::find_if(
+        std::cbegin(allConditions), std::cend(allConditions),
+        [&reflectionConditionName](const auto &condition) { return condition->getName() == reflectionConditionName; });
     using Geometry::HKLFilterCentering;
     HKLFilter_uptr filter;
     if (found != std::cend(allConditions)) {
@@ -474,13 +422,11 @@ void PredictFractionalPeaks::exec() {
       using Mantid::Geometry::HKLFilterNone;
       filter = std::make_unique<HKLFilterNone>();
     }
-    outPeaks = predictFractionalPeaks(
-        this, requirePeakOnDetector, *inputPeaks, std::move(modulationInfo),
-        PeaksInRangeStrategy(hklMin, hklMax, filter.get(), inputPeaks.get()));
+    outPeaks = predictFractionalPeaks(this, requirePeakOnDetector, *inputPeaks, std::move(modulationInfo),
+                                      PeaksInRangeStrategy(hklMin, hklMax, filter.get(), inputPeaks.get()));
   } else {
-    outPeaks = predictFractionalPeaks(
-        this, requirePeakOnDetector, *inputPeaks, std::move(modulationInfo),
-        PeaksFromIndexedStrategy(inputPeaks.get()));
+    outPeaks = predictFractionalPeaks(this, requirePeakOnDetector, *inputPeaks, std::move(modulationInfo),
+                                      PeaksFromIndexedStrategy(inputPeaks.get()));
   }
   setProperty(PropertyNames::FRACPEAKS, outPeaks);
 }
@@ -506,8 +452,7 @@ ModulationProperties PredictFractionalPeaks::getModulationInfo() {
     if (lOffsets.empty())
       lOffsets.emplace_back(0.0);
     const bool crossTerms{false}, saveOnLattice{false};
-    return {generateOffsetVectors(hOffsets, kOffsets, lOffsets), maxOrder,
-            crossTerms, saveOnLattice};
+    return {generateOffsetVectors(hOffsets, kOffsets, lOffsets), maxOrder, crossTerms, saveOnLattice};
   } else {
     return ModulationProperties::create(*this);
   }

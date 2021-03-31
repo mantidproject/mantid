@@ -25,8 +25,7 @@ namespace {
  * @return A peak transform matching the workspace configuration.
  */
 PeakTransform_sptr makePeakTransform(IMDWorkspace const *const mdWS) {
-  const SpecialCoordinateSystem mdCoordinates =
-      mdWS->getSpecialCoordinateSystem();
+  const SpecialCoordinateSystem mdCoordinates = mdWS->getSpecialCoordinateSystem();
   PeakTransformFactory_sptr peakTransformFactory;
   if (mdCoordinates == QLab) {
     peakTransformFactory = std::make_shared<PeakTransformQLabFactory>();
@@ -40,8 +39,7 @@ PeakTransform_sptr makePeakTransform(IMDWorkspace const *const mdWS) {
   }
   const std::string xDim = mdWS->getDimension(0)->getName();
   const std::string yDim = mdWS->getDimension(1)->getName();
-  PeakTransform_sptr peakTransform =
-      peakTransformFactory->createTransform(xDim, yDim);
+  PeakTransform_sptr peakTransform = peakTransformFactory->createTransform(xDim, yDim);
   return peakTransform;
 }
 
@@ -57,8 +55,7 @@ void validate(IMDWorkspace const *const mdWS) {
   }
 
   if (mdWS->getNumDims() < 3) {
-    throw std::invalid_argument(
-        "Need to have 3 or more dimension in the workspace.");
+    throw std::invalid_argument("Need to have 3 or more dimension in the workspace.");
   }
 }
 } // namespace
@@ -71,9 +68,7 @@ namespace Crystal {
  @param mdWS: Input image workspace to base the projection on and to take the
  coordinate system from.
  */
-PeakClusterProjection::PeakClusterProjection(
-    std::shared_ptr<Mantid::API::IMDWorkspace> &mdWS)
-    : m_mdWS(mdWS) {
+PeakClusterProjection::PeakClusterProjection(std::shared_ptr<Mantid::API::IMDWorkspace> &mdWS) : m_mdWS(mdWS) {
   validate(mdWS.get());
 
   // Make a peak transform so that we can understand a peak in the context of
@@ -86,8 +81,7 @@ PeakClusterProjection::PeakClusterProjection(
  @param mdWS: Input image workspace to base the projection on and to take the
  coordinate system from.
  */
-PeakClusterProjection::PeakClusterProjection(
-    std::shared_ptr<Mantid::API::IMDHistoWorkspace> &mdWS)
+PeakClusterProjection::PeakClusterProjection(std::shared_ptr<Mantid::API::IMDHistoWorkspace> &mdWS)
     : m_mdWS(std::static_pointer_cast<IMDWorkspace>(mdWS)) {
   validate(mdWS.get());
 
@@ -101,8 +95,7 @@ PeakClusterProjection::PeakClusterProjection(
  @param mdWS: Input mdevent workspace to base the projection on and to take the
  coordinate system from.
  */
-PeakClusterProjection::PeakClusterProjection(
-    std::shared_ptr<Mantid::API::IMDEventWorkspace> &mdWS)
+PeakClusterProjection::PeakClusterProjection(std::shared_ptr<Mantid::API::IMDEventWorkspace> &mdWS)
     : m_mdWS(std::static_pointer_cast<IMDWorkspace>(mdWS)) {
   validate(mdWS.get());
 
@@ -125,9 +118,7 @@ Mantid::Kernel::V3D PeakClusterProjection::peakCenter(const IPeak &peak) const {
  * @return signal value at peak center. NAN if the peak is not centered on the
  * image.
  */
-Mantid::signal_t
-PeakClusterProjection::signalAtPeakCenter(const IPeak &peak,
-                                          MDNormalization normalization) const {
+Mantid::signal_t PeakClusterProjection::signalAtPeakCenter(const IPeak &peak, MDNormalization normalization) const {
   const Mantid::Kernel::V3D &center = m_peakTransform->transformPeak(peak);
   return m_mdWS->getSignalAtVMD(center, normalization);
 }

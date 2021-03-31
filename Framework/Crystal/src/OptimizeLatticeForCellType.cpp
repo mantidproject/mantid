@@ -37,8 +37,7 @@ using namespace DataObjects;
  */
 void OptimizeLatticeForCellType::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "PeaksWorkspace", "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "", Direction::InOut),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> cellTypes;
   cellTypes.emplace_back(ReducedCell::CUBIC());
@@ -48,22 +47,16 @@ void OptimizeLatticeForCellType::init() {
   cellTypes.emplace_back(ReducedCell::RHOMBOHEDRAL());
   cellTypes.emplace_back(ReducedCell::MONOCLINIC());
   cellTypes.emplace_back(ReducedCell::TRICLINIC());
-  declareProperty("CellType", cellTypes[0],
-                  std::make_shared<StringListValidator>(cellTypes),
-                  "Select the cell type.");
+  declareProperty("CellType", cellTypes[0], std::make_shared<StringListValidator>(cellTypes), "Select the cell type.");
   declareProperty("Apply", false, "Re-index the peaks");
   declareProperty("PerRun", false, "Make per run orientation matrices");
   declareProperty("Tolerance", 0.12, "Indexing Tolerance");
-  declareProperty("EdgePixels", 0,
-                  "Remove peaks that are at pixels this close to edge. ");
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "OutputChi2", 0.0, Direction::Output),
+  declareProperty("EdgePixels", 0, "Remove peaks that are at pixels this close to edge. ");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("OutputChi2", 0.0, Direction::Output),
                   "Returns the goodness of the fit");
-  declareProperty(
-      std::make_unique<FileProperty>("OutputDirectory", ".",
-                                     FileProperty::Directory),
-      "The directory where the per run peaks files and orientation matrices "
-      "will be written.");
+  declareProperty(std::make_unique<FileProperty>("OutputDirectory", ".", FileProperty::Directory),
+                  "The directory where the per run peaks files and orientation matrices "
+                  "will be written.");
 
   // Disable default gsl error handler (which is to call abort!)
   gsl_set_error_handler_off();
@@ -88,8 +81,7 @@ void OptimizeLatticeForCellType::exec() {
   if (edge > 0) {
     for (int i = int(ws->getNumberPeaks()) - 1; i >= 0; --i) {
       const std::vector<Peak> &peaks = ws->getPeaks();
-      if (edgePixel(inst, peaks[i].getBankName(), peaks[i].getCol(),
-                    peaks[i].getRow(), edge)) {
+      if (edgePixel(inst, peaks[i].getBankName(), peaks[i].getCol(), peaks[i].getRow(), edge)) {
         badPeaks.emplace_back(i);
       }
     }
@@ -114,8 +106,7 @@ void OptimizeLatticeForCellType::exec() {
         runWS.emplace_back(cloneWS);
         runWS[count]->addPeak(peak);
         run = peak.getRunNumber();
-        AnalysisDataService::Instance().addOrReplace(
-            std::to_string(run) + ws->getName(), runWS[count]);
+        AnalysisDataService::Instance().addOrReplace(std::to_string(run) + ws->getName(), runWS[count]);
       } else {
         runWS[count]->addPeak(peak);
       }
@@ -129,13 +120,11 @@ void OptimizeLatticeForCellType::exec() {
     auto ol = peakWS->sample().getOrientedLattice();
     DblMatrix modUB = peakWS->mutableSample().getOrientedLattice().getModUB();
     int maxOrder = peakWS->mutableSample().getOrientedLattice().getMaxOrder();
-    bool crossTerms =
-        peakWS->mutableSample().getOrientedLattice().getCrossTerm();
+    bool crossTerms = peakWS->mutableSample().getOrientedLattice().getCrossTerm();
     std::vector<double> lat(6);
     IndexingUtils::GetLatticeParameters(UB, lat);
 
-    API::ILatticeFunction_sptr latticeFunction =
-        getLatticeFunction(cell_type, peakWS->sample().getOrientedLattice());
+    API::ILatticeFunction_sptr latticeFunction = getLatticeFunction(cell_type, peakWS->sample().getOrientedLattice());
 
     IAlgorithm_sptr fit_alg;
     try {
@@ -145,8 +134,7 @@ void OptimizeLatticeForCellType::exec() {
       throw;
     }
 
-    fit_alg->setProperty("Function",
-                         std::static_pointer_cast<IFunction>(latticeFunction));
+    fit_alg->setProperty("Function", std::static_pointer_cast<IFunction>(latticeFunction));
     fit_alg->setProperty("Ties", "ZeroShift=0.0");
     fit_alg->setProperty("InputWorkspace", peakWS);
     fit_alg->setProperty("CostFunction", "Unweighted least squares");
@@ -180,11 +168,9 @@ void OptimizeLatticeForCellType::exec() {
       o_lattice->setMaxOrder(maxOrder);
       o_lattice->setCrossTerm(crossTerms);
     }
-    o_lattice->set(refinedCell.a(), refinedCell.b(), refinedCell.c(),
-                   refinedCell.alpha(), refinedCell.beta(),
+    o_lattice->set(refinedCell.a(), refinedCell.b(), refinedCell.c(), refinedCell.alpha(), refinedCell.beta(),
                    refinedCell.gamma());
-    o_lattice->setError(refinedCell.errora(), refinedCell.errorb(),
-                        refinedCell.errorc(), refinedCell.erroralpha(),
+    o_lattice->setError(refinedCell.errora(), refinedCell.errorb(), refinedCell.errorc(), refinedCell.erroralpha(),
                         refinedCell.errorbeta(), refinedCell.errorgamma());
 
     // Show the modified lattice parameters
@@ -207,25 +193,19 @@ void OptimizeLatticeForCellType::exec() {
       if (outputdir.back() != '/')
         outputdir += "/";
       // Save Peaks
-      Mantid::API::IAlgorithm_sptr savePks_alg =
-          createChildAlgorithm("SaveIsawPeaks");
+      Mantid::API::IAlgorithm_sptr savePks_alg = createChildAlgorithm("SaveIsawPeaks");
       savePks_alg->setPropertyValue("InputWorkspace", i_run->getName());
-      savePks_alg->setProperty("Filename", outputdir + "ls" + i_run->getName() +
-                                               ".integrate");
+      savePks_alg->setProperty("Filename", outputdir + "ls" + i_run->getName() + ".integrate");
       savePks_alg->executeAsChildAlg();
-      g_log.notice() << "See output file: "
-                     << outputdir + "ls" + i_run->getName() + ".integrate"
+      g_log.notice() << "See output file: " << outputdir + "ls" + i_run->getName() + ".integrate"
                      << "\n";
       // Save UB
-      Mantid::API::IAlgorithm_sptr saveUB_alg =
-          createChildAlgorithm("SaveIsawUB");
+      Mantid::API::IAlgorithm_sptr saveUB_alg = createChildAlgorithm("SaveIsawUB");
       saveUB_alg->setPropertyValue("InputWorkspace", i_run->getName());
-      saveUB_alg->setProperty("Filename",
-                              outputdir + "ls" + i_run->getName() + ".mat");
+      saveUB_alg->setProperty("Filename", outputdir + "ls" + i_run->getName() + ".mat");
       saveUB_alg->executeAsChildAlg();
       // Show the names of files written
-      g_log.notice() << "See output file: "
-                     << outputdir + "ls" + i_run->getName() + ".mat"
+      g_log.notice() << "See output file: " << outputdir + "ls" + i_run->getName() + ".mat"
                      << "\n";
     }
   }
@@ -236,16 +216,13 @@ void OptimizeLatticeForCellType::exec() {
   @param  cell                          unit cell
   @return  latticeFunction        Function for fitting
 */
-API::ILatticeFunction_sptr
-OptimizeLatticeForCellType::getLatticeFunction(const std::string &cellType,
-                                               const UnitCell &cell) const {
+API::ILatticeFunction_sptr OptimizeLatticeForCellType::getLatticeFunction(const std::string &cellType,
+                                                                          const UnitCell &cell) const {
   std::ostringstream fun_str;
   fun_str << "name=LatticeFunction,LatticeSystem=" << cellType;
 
-  API::IFunction_sptr rawFunction =
-      API::FunctionFactory::Instance().createInitialized(fun_str.str());
-  API::ILatticeFunction_sptr latticeFunction =
-      std::dynamic_pointer_cast<API::ILatticeFunction>(rawFunction);
+  API::IFunction_sptr rawFunction = API::FunctionFactory::Instance().createInitialized(fun_str.str());
+  API::ILatticeFunction_sptr latticeFunction = std::dynamic_pointer_cast<API::ILatticeFunction>(rawFunction);
   if (latticeFunction) {
     latticeFunction->setUnitCell(cell);
   }

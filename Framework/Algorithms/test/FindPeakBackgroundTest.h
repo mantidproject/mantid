@@ -33,9 +33,7 @@ class FindPeakBackgroundTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FindPeakBackgroundTest *createSuite() {
-    return new FindPeakBackgroundTest();
-  }
+  static FindPeakBackgroundTest *createSuite() { return new FindPeakBackgroundTest(); }
   static void destroySuite(FindPeakBackgroundTest *suite) { delete suite; }
 
   void test_Calculation() {
@@ -55,9 +53,8 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    Mantid::API::ITableWorkspace_sptr peaklist =
-        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve("Signal"));
+    Mantid::API::ITableWorkspace_sptr peaklist = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("Signal"));
 
     TS_ASSERT(peaklist);
     TS_ASSERT_EQUALS(peaklist->rowCount(), 1);
@@ -79,15 +76,13 @@ public:
 
     const size_t size = 20;
 
-    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
+    MatrixWorkspace_sptr ws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
     MantidVec xdata(size);
     std::iota(xdata.begin(), xdata.end(), 0);
 
-    ws->setHistogram(0, Points(xdata),
-                     Counts{1,  2,  1,  1,  9,  11, 13, 20, 24, 32,
-                            28, 48, 42, 77, 67, 33, 27, 20, 9,  2});
+    ws->setHistogram(0, Points(xdata), Counts{1, 2, 1, 1, 9, 11, 13, 20, 24, 32, 28, 48, 42, 77, 67, 33, 27, 20, 9, 2});
     return ws;
   }
 
@@ -114,8 +109,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Check result
-    ITableWorkspace_sptr outws = std::dynamic_pointer_cast<ITableWorkspace>(
-        AnalysisDataService::Instance().retrieve("Signal3"));
+    ITableWorkspace_sptr outws =
+        std::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("Signal3"));
     TS_ASSERT(outws);
     if (!outws)
       return;
@@ -158,8 +153,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Check result
-    ITableWorkspace_sptr outws = std::dynamic_pointer_cast<ITableWorkspace>(
-        AnalysisDataService::Instance().retrieve("Signal2"));
+    ITableWorkspace_sptr outws =
+        std::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("Signal2"));
     TS_ASSERT(outws);
     if (!outws)
       return;
@@ -189,8 +184,8 @@ public:
 
     const size_t size = 20;
 
-    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", 2, size, size));
+    MatrixWorkspace_sptr ws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", 2, size, size));
 
     // Workspace index = 0
     MantidVec xdata(size);
@@ -199,9 +194,7 @@ public:
     ws->mutableE(0).assign(size, 1.0);
 
     // Workspace index = 1
-    ws->setHistogram(1, ws->points(0),
-                     Counts{1,  2,  1,  1,  9,  11, 13, 20, 24, 32,
-                            28, 48, 42, 77, 67, 33, 27, 20, 9,  2});
+    ws->setHistogram(1, ws->points(0), Counts{1, 2, 1, 1, 9, 11, 13, 20, 24, 32, 28, 48, 42, 77, 67, 33, 27, 20, 9, 2});
 
     return ws;
   }

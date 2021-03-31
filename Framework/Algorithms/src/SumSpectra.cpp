@@ -38,37 +38,30 @@ namespace {
  * @param maxIndex Mmaximum index of range to sum
  * @param indices A list of indices to sum
  */
-bool validateSingleMatrixWorkspace(
-    std::map<std::string, std::string> &validationOutput,
-    const MatrixWorkspace &ws, const int minIndex, const int maxIndex,
-    const std::vector<int> &indices) {
+bool validateSingleMatrixWorkspace(std::map<std::string, std::string> &validationOutput, const MatrixWorkspace &ws,
+                                   const int minIndex, const int maxIndex, const std::vector<int> &indices) {
   bool success(true);
   const auto numSpectra = static_cast<int>(ws.getNumberHistograms());
   // check StartWorkSpaceIndex,  >=0 done by validator
   if (minIndex >= numSpectra) {
-    validationOutput["StartWorkspaceIndex"] =
-        "Selected minimum workspace index is greater than available "
-        "spectra.";
+    validationOutput["StartWorkspaceIndex"] = "Selected minimum workspace index is greater than available "
+                                              "spectra.";
     success = false;
   }
   // check EndWorkspaceIndex in range
   if (maxIndex != EMPTY_INT()) {
     // check EndWorkspaceIndex in range
     if (maxIndex >= numSpectra) {
-      validationOutput["EndWorkspaceIndex"] =
-          "Selected maximum workspace index is greater than available "
-          "spectra.";
+      validationOutput["EndWorkspaceIndex"] = "Selected maximum workspace index is greater than available "
+                                              "spectra.";
       success = false;
       // check StartWorkspaceIndex < EndWorkspaceIndex
     }
   }
   // check ListOfWorkspaceIndices in range
   if (std::any_of(indices.cbegin(), indices.cend(),
-                  [numSpectra](const auto index) {
-                    return (index >= numSpectra) || (index < 0);
-                  })) {
-    validationOutput["ListOfWorkspaceIndices"] =
-        "One or more indices out of range of available spectra.";
+                  [numSpectra](const auto index) { return (index >= numSpectra) || (index < 0); })) {
+    validationOutput["ListOfWorkspaceIndices"] = "One or more indices out of range of available spectra.";
     success = false;
   }
   return success;
@@ -81,10 +74,8 @@ bool validateSingleMatrixWorkspace(
  * @param maxIndex Mmaximum index of range to sum
  * @param indices A list of indices to sum
  */
-void validateWorkspaceName(std::map<std::string, std::string> &validationOutput,
-                           const std::string &name, const int minIndex,
-                           const int maxIndex,
-                           const std::vector<int> &indices) {
+void validateWorkspaceName(std::map<std::string, std::string> &validationOutput, const std::string &name,
+                           const int minIndex, const int maxIndex, const std::vector<int> &indices) {
   const auto &ads = AnalysisDataService::Instance();
   if (!ads.doesExist(name))
     return;
@@ -95,13 +86,11 @@ void validateWorkspaceName(std::map<std::string, std::string> &validationOutput,
   for (const auto &item : *wsGroup) {
     auto matrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(item);
     if (!matrixWs) {
-      validationOutput["InputWorkspace"] =
-          "Input group contains an invalid workspace type at item " +
-          std::to_string(index) + ". All members must be a  MatrixWorkspace";
+      validationOutput["InputWorkspace"] = "Input group contains an invalid workspace type at item " +
+                                           std::to_string(index) + ". All members must be a  MatrixWorkspace";
       break;
     }
-    if (!validateSingleMatrixWorkspace(validationOutput, *matrixWs, minIndex,
-                                       maxIndex, indices)) {
+    if (!validateSingleMatrixWorkspace(validationOutput, *matrixWs, minIndex, maxIndex, indices)) {
       break;
     }
     ++index;
@@ -113,36 +102,30 @@ void validateWorkspaceName(std::map<std::string, std::string> &validationOutput,
  *
  */
 void SumSpectra::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<CommonBinsValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<CommonBinsValidator>()),
                   "The workspace containing the spectra to be summed.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "The name of the workspace to be created as the output of the algorithm. "
-      " A workspace of this name will be created and stored in the Analysis "
-      "Data Service.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the workspace to be created as the output of the algorithm. "
+                  " A workspace of this name will be created and stored in the Analysis "
+                  "Data Service.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty("StartWorkspaceIndex", 0, mustBePositive,
-                  "The first Workspace index to be included in the summing");
+  declareProperty("StartWorkspaceIndex", 0, mustBePositive, "The first Workspace index to be included in the summing");
   declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
                   "The last Workspace index to be included in the summing");
 
-  declareProperty(
-      std::make_unique<Kernel::ArrayProperty<int>>("ListOfWorkspaceIndices"),
-      "A list of workspace indices as a string with ranges, for "
-      "example: 5-10,15,20-23. \n"
-      "Optional: if not specified, then the "
-      "Start/EndWorkspaceIndex fields are used alone. "
-      "If specified, the range and the list are combined (without "
-      "duplicating indices). For example, a range of 10 to 20 and "
-      "a list '12,15,26,28' gives '10-20,26,28'.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("ListOfWorkspaceIndices"),
+                  "A list of workspace indices as a string with ranges, for "
+                  "example: 5-10,15,20-23. \n"
+                  "Optional: if not specified, then the "
+                  "Start/EndWorkspaceIndex fields are used alone. "
+                  "If specified, the range and the list are combined (without "
+                  "duplicating indices). For example, a range of 10 to 20 and "
+                  "a list '12,15,26,28' gives '10-20,26,28'.");
 
-  declareProperty("IncludeMonitors", true,
-                  "Whether to include monitor spectra in the summation.");
+  declareProperty("IncludeMonitors", true, "Whether to include monitor spectra in the summation.");
 
   declareProperty("WeightedSum", false,
                   "Instead of the usual spectra sum, calculate the weighted "
@@ -162,9 +145,7 @@ void SumSpectra::init() {
   declareProperty("MultiplyBySpectra", true,
                   "For unnormalized data one should multiply the weighted sum "
                   "by the number of spectra contributing to the bin.");
-  setPropertySettings(
-      "MultiplyBySpectra",
-      std::make_unique<EnabledWhenProperty>("WeightedSum", IS_EQUAL_TO, "1"));
+  setPropertySettings("MultiplyBySpectra", std::make_unique<EnabledWhenProperty>("WeightedSum", IS_EQUAL_TO, "1"));
 
   declareProperty("UseFractionalArea", true,
                   "Normalize the output workspace to the fractional area for "
@@ -193,12 +174,9 @@ std::map<std::string, std::string> SumSpectra::validateInputs() {
   } else {
     const std::vector<int> indices = getProperty("ListOfWorkspaceIndices");
     if (MatrixWorkspace_const_sptr singleWs = getProperty("InputWorkspace")) {
-      validateSingleMatrixWorkspace(validationOutput, *singleWs, minIndex,
-                                    maxIndex, indices);
+      validateSingleMatrixWorkspace(validationOutput, *singleWs, minIndex, maxIndex, indices);
     } else {
-      validateWorkspaceName(validationOutput,
-                            getPropertyValue("InputWorkspace"), minIndex,
-                            maxIndex, indices);
+      validateWorkspaceName(validationOutput, getPropertyValue("InputWorkspace"), minIndex, maxIndex, indices);
     }
   }
   return validationOutput;
@@ -220,9 +198,7 @@ void SumSpectra::exec() {
 
   // determine the output spectrum number
   m_outSpecNum = getOutputSpecNo(localworkspace);
-  g_log.information()
-      << "Spectra remapping gives single spectra with spectra number: "
-      << m_outSpecNum << "\n";
+  g_log.information() << "Spectra remapping gives single spectra with spectra number: " << m_outSpecNum << "\n";
 
   m_calculateWeightedSum = getProperty("WeightedSum");
   m_multiplyByNumSpec = getProperty("MultiplyBySpectra");
@@ -236,8 +212,7 @@ void SumSpectra::exec() {
   // Poissonian statistics is)
 
   Progress progress(this, 0.0, 1.0, m_indices.size());
-  EventWorkspace_const_sptr eventW =
-      std::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
+  EventWorkspace_const_sptr eventW = std::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
   if (eventW) {
     if (m_calculateWeightedSum) {
       g_log.warning("Ignoring request for WeightedSum");
@@ -251,8 +226,7 @@ void SumSpectra::exec() {
 
     // Create the 2D workspace for the output
     outputWorkspace = API::WorkspaceFactory::Instance().create(
-        localworkspace, 1, localworkspace->x(*(m_indices.begin())).size(),
-        m_yLength);
+        localworkspace, 1, localworkspace->x(*(m_indices.begin())).size(), m_yLength);
 
     // This is the (only) output spectrum
     auto &outSpec = outputWorkspace->getSpectrum(0);
@@ -267,8 +241,7 @@ void SumSpectra::exec() {
     if (localworkspace->id() == "RebinnedOutput") {
       // this version is for a special workspace that has fractional overlap
       // information
-      doFractionalSum(outputWorkspace, progress, numSpectra, numMasked,
-                      numZeros);
+      doFractionalSum(outputWorkspace, progress, numSpectra, numMasked, numZeros);
     } else {
       // for things where all the bins are lined up
       doSimpleSum(outputWorkspace, progress, numSpectra, numMasked, numZeros);
@@ -277,17 +250,13 @@ void SumSpectra::exec() {
     // take the square root of all the accumulated squared errors - Assumes
     // Gaussian errors
     auto &YError = outSpec.mutableE();
-    std::transform(YError.begin(), YError.end(), YError.begin(),
-                   (double (*)(double))std::sqrt);
+    std::transform(YError.begin(), YError.end(), YError.begin(), (double (*)(double))std::sqrt);
   }
 
   // set up the summing statistics
-  outputWorkspace->mutableRun().addProperty("NumAllSpectra", int(numSpectra),
-                                            "", true);
-  outputWorkspace->mutableRun().addProperty("NumMaskSpectra", int(numMasked),
-                                            "", true);
-  outputWorkspace->mutableRun().addProperty("NumZeroSpectra", int(numZeros), "",
-                                            true);
+  outputWorkspace->mutableRun().addProperty("NumAllSpectra", int(numSpectra), "", true);
+  outputWorkspace->mutableRun().addProperty("NumMaskSpectra", int(numMasked), "", true);
+  outputWorkspace->mutableRun().addProperty("NumZeroSpectra", int(numZeros), "", true);
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputWorkspace);
@@ -323,11 +292,9 @@ void SumSpectra::determineIndices(const size_t numberOfSpectra) {
  * @param localworkspace The workspace to use.
  * @return The minimum spectrum No for all the spectra being summed.
  */
-specnum_t
-SumSpectra::getOutputSpecNo(const MatrixWorkspace_const_sptr &localworkspace) {
+specnum_t SumSpectra::getOutputSpecNo(const MatrixWorkspace_const_sptr &localworkspace) {
   // initial value - any included spectrum will do
-  specnum_t specId =
-      localworkspace->getSpectrum(*(m_indices.begin())).getSpectrumNo();
+  specnum_t specId = localworkspace->getSpectrum(*(m_indices.begin())).getSpectrumNo();
 
   // the total number of spectra
   size_t totalSpec = localworkspace->getNumberHistograms();
@@ -373,14 +340,11 @@ API::MatrixWorkspace_sptr SumSpectra::replaceSpecialValues() {
 namespace { // anonymous namespace
 // small function that normalizes the accumulated weight in a consistent fashion
 // the weights are modified in the process
-size_t applyWeight(const size_t numSpectra, HistogramData::HistogramY &y,
-                   std::vector<double> &weights,
-                   const std::vector<size_t> &nZeros,
-                   const bool multiplyByNumSpec) {
+size_t applyWeight(const size_t numSpectra, HistogramData::HistogramY &y, std::vector<double> &weights,
+                   const std::vector<size_t> &nZeros, const bool multiplyByNumSpec) {
   // convert weight into proper normalization factor
   if (multiplyByNumSpec) {
-    std::transform(weights.begin(), weights.end(), nZeros.begin(),
-                   weights.begin(),
+    std::transform(weights.begin(), weights.end(), nZeros.begin(), weights.begin(),
                    [numSpectra](const double weight, const size_t nzero) {
                      if (numSpectra > nzero) {
                        return static_cast<double>(numSpectra - nzero) / weight;
@@ -389,8 +353,7 @@ size_t applyWeight(const size_t numSpectra, HistogramData::HistogramY &y,
                      }
                    });
   } else {
-    std::transform(weights.begin(), weights.end(), nZeros.begin(),
-                   weights.begin(),
+    std::transform(weights.begin(), weights.end(), nZeros.begin(), weights.begin(),
                    [numSpectra](const double weight, const size_t nzero) {
                      if (numSpectra > nzero) {
                        return 1. / weight;
@@ -409,8 +372,7 @@ size_t applyWeight(const size_t numSpectra, HistogramData::HistogramY &y,
 
 // various checks on the workspace index to see if it should be included in the
 // sum if it is masked, the value of numMasked is incremented
-bool useSpectrum(const SpectrumInfo &spectrumInfo, const size_t wsIndex,
-                 const bool keepMonitors, size_t &numMasked) {
+bool useSpectrum(const SpectrumInfo &spectrumInfo, const size_t wsIndex, const bool keepMonitors, size_t &numMasked) {
   if (spectrumInfo.hasDetectors(wsIndex)) {
     // Skip monitors, if the property is set to do so
     if (!keepMonitors && spectrumInfo.isMonitor(wsIndex))
@@ -435,8 +397,7 @@ bool useSpectrum(const SpectrumInfo &spectrumInfo, const size_t wsIndex,
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
  */
-void SumSpectra::doSimpleSum(const MatrixWorkspace_sptr &outputWorkspace,
-                             Progress &progress, size_t &numSpectra,
+void SumSpectra::doSimpleSum(const MatrixWorkspace_sptr &outputWorkspace, Progress &progress, size_t &numSpectra,
                              size_t &numMasked, size_t &numZeros) {
   // Clean workspace of any NANs or Inf values
   auto localworkspace = replaceSpecialValues();
@@ -478,23 +439,18 @@ void SumSpectra::doSimpleSum(const MatrixWorkspace_sptr &outputWorkspace,
       }
     } else {
       YSum += YValues;
-      std::transform(YErrorSum.begin(), YErrorSum.end(), YErrors.begin(),
-                     YErrorSum.begin(),
-                     [](const double accum, const double yerrorSpec) {
-                       return accum + yerrorSpec * yerrorSpec;
-                     });
+      std::transform(YErrorSum.begin(), YErrorSum.end(), YErrors.begin(), YErrorSum.begin(),
+                     [](const double accum, const double yerrorSpec) { return accum + yerrorSpec * yerrorSpec; });
     }
 
     // Map all the detectors onto the spectrum of the output
-    outSpec.addDetectorIDs(
-        localworkspace->getSpectrum(wsIndex).getDetectorIDs());
+    outSpec.addDetectorIDs(localworkspace->getSpectrum(wsIndex).getDetectorIDs());
 
     progress.report();
   }
 
   if (m_calculateWeightedSum) {
-    numZeros =
-        applyWeight(numSpectra, YSum, Weight, nZeros, m_multiplyByNumSpec);
+    numZeros = applyWeight(numSpectra, YSum, Weight, nZeros, m_multiplyByNumSpec);
   } else {
     numZeros = 0;
   }
@@ -510,8 +466,7 @@ void SumSpectra::doSimpleSum(const MatrixWorkspace_sptr &outputWorkspace,
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
  */
-void SumSpectra::doFractionalSum(const MatrixWorkspace_sptr &outputWorkspace,
-                                 Progress &progress, size_t &numSpectra,
+void SumSpectra::doFractionalSum(const MatrixWorkspace_sptr &outputWorkspace, Progress &progress, size_t &numSpectra,
                                  size_t &numMasked, size_t &numZeros) {
   // First, we need to clean the input workspace for nan's and inf's in order
   // to treat the data correctly later. This will create a new private
@@ -519,10 +474,8 @@ void SumSpectra::doFractionalSum(const MatrixWorkspace_sptr &outputWorkspace,
   auto localworkspace = replaceSpecialValues();
 
   // Transform to real workspace types
-  RebinnedOutput_sptr inWS =
-      std::dynamic_pointer_cast<RebinnedOutput>(localworkspace);
-  RebinnedOutput_sptr outWS =
-      std::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
+  RebinnedOutput_sptr inWS = std::dynamic_pointer_cast<RebinnedOutput>(localworkspace);
+  RebinnedOutput_sptr outWS = std::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
 
   // Check finalize state prior to the sum process, at the completion
   // the output is unfinalized
@@ -570,24 +523,20 @@ void SumSpectra::doFractionalSum(const MatrixWorkspace_sptr &outputWorkspace,
       for (size_t yIndex = 0; yIndex < m_yLength; ++yIndex) {
         const double fracVal = (isFinalized ? FracArea[yIndex] : 1.0);
         YSum[yIndex] += YValues[yIndex] * fracVal;
-        YErrorSum[yIndex] +=
-            YErrors[yIndex] * YErrors[yIndex] * fracVal * fracVal;
+        YErrorSum[yIndex] += YErrors[yIndex] * YErrors[yIndex] * fracVal * fracVal;
       }
     }
     // accumulation of fractional weight is the same
-    std::transform(FracSum.begin(), FracSum.end(), FracArea.begin(),
-                   FracSum.begin(), std::plus<double>());
+    std::transform(FracSum.begin(), FracSum.end(), FracArea.begin(), FracSum.begin(), std::plus<double>());
 
     // Map all the detectors onto the spectrum of the output
-    outSpec.addDetectorIDs(
-        localworkspace->getSpectrum(wsIndex).getDetectorIDs());
+    outSpec.addDetectorIDs(localworkspace->getSpectrum(wsIndex).getDetectorIDs());
 
     progress.report();
   }
 
   if (m_calculateWeightedSum) {
-    numZeros =
-        applyWeight(numSpectra, YSum, Weight, nZeros, m_multiplyByNumSpec);
+    numZeros = applyWeight(numSpectra, YSum, Weight, nZeros, m_multiplyByNumSpec);
   } else {
     numZeros = 0;
   }
@@ -608,16 +557,13 @@ void SumSpectra::doFractionalSum(const MatrixWorkspace_sptr &outputWorkspace,
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
  */
-void SumSpectra::execEvent(const MatrixWorkspace_sptr &outputWorkspace,
-                           Progress &progress, size_t &numSpectra,
+void SumSpectra::execEvent(const MatrixWorkspace_sptr &outputWorkspace, Progress &progress, size_t &numSpectra,
                            size_t &numMasked, size_t &numZeros) {
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
-  EventWorkspace_const_sptr inputWorkspace =
-      std::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
+  EventWorkspace_const_sptr inputWorkspace = std::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
 
   // Get the pointer to the output event list
-  EventWorkspace_sptr outputEventWorkspace =
-      std::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
+  EventWorkspace_sptr outputEventWorkspace = std::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
   EventList &outputEL = outputEventWorkspace->getSpectrum(0);
   outputEL.setSpectrumNo(m_outSpecNum);
   outputEL.clearDetectorIDs();

@@ -38,13 +38,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadRaw"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadRaw"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\Raw;Sample";
-  }
+  const std::string category() const override { return "DataHandling\\Raw;Sample"; }
 
 private:
   /// Initialisation code

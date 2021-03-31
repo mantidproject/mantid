@@ -20,19 +20,16 @@ namespace Geometry {
 GeometryHandler::GeometryHandler(IObjComponent *comp) : m_objComp(comp) {}
 
 GeometryHandler::GeometryHandler(const std::shared_ptr<CSGObject> &obj)
-    : m_triangulator(new detail::GeometryTriangulator(obj.get())),
-      m_csgObj(obj.get()) {}
+    : m_triangulator(new detail::GeometryTriangulator(obj.get())), m_csgObj(obj.get()) {}
 
 GeometryHandler::GeometryHandler(CSGObject *obj)
     : m_triangulator(new detail::GeometryTriangulator(obj)), m_csgObj(obj) {}
 
 GeometryHandler::GeometryHandler(const MeshObject &obj)
-    : m_triangulator(
-          new detail::GeometryTriangulator(detail::makeRenderingMesh(obj))) {}
+    : m_triangulator(new detail::GeometryTriangulator(detail::makeRenderingMesh(obj))) {}
 
 GeometryHandler::GeometryHandler(const MeshObject2D &obj)
-    : m_triangulator(
-          new detail::GeometryTriangulator(detail::makeRenderingMesh(obj))) {}
+    : m_triangulator(new detail::GeometryTriangulator(detail::makeRenderingMesh(obj))) {}
 
 GeometryHandler::GeometryHandler(const GeometryHandler &handler) {
   if (handler.m_csgObj) {
@@ -49,9 +46,7 @@ GeometryHandler::GeometryHandler(const GeometryHandler &handler) {
 /// Destructor
 GeometryHandler::~GeometryHandler() {}
 
-std::shared_ptr<GeometryHandler> GeometryHandler::clone() const {
-  return std::make_shared<GeometryHandler>(*this);
-}
+std::shared_ptr<GeometryHandler> GeometryHandler::clone() const { return std::make_shared<GeometryHandler>(*this); }
 
 void GeometryHandler::render() const {
   if (m_shapeInfo)
@@ -94,19 +89,15 @@ const std::vector<uint32_t> &GeometryHandler::getTriangleFaces() const {
   return empty;
 }
 
-void GeometryHandler::setGeometryCache(size_t nPts, size_t nFaces,
-                                       std::vector<double> &&pts,
+void GeometryHandler::setGeometryCache(size_t nPts, size_t nFaces, std::vector<double> &&pts,
                                        std::vector<uint32_t> &&faces) {
   if (canTriangulate()) {
-    m_triangulator->setGeometryCache(nPts, nFaces, std::move(pts),
-                                     std::move(faces));
+    m_triangulator->setGeometryCache(nPts, nFaces, std::move(pts), std::move(faces));
   }
 }
 
-void GeometryHandler::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
-                                    std::vector<Kernel::V3D> &vectors,
-                                    double &innerRadius, double &radius,
-                                    double &height) const {
+void GeometryHandler::GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vector<Kernel::V3D> &vectors,
+                                    double &innerRadius, double &radius, double &height) const {
   type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (m_shapeInfo)
     m_shapeInfo->getObjectGeometry(type, vectors, innerRadius, radius, height);

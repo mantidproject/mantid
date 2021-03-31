@@ -64,8 +64,7 @@ public:
   void updateParameters(const IFunction &fun);
   void updateMultiDatasetParameters(const IFunction &fun);
   void updateMultiDatasetParameters(const ITableWorkspace &params);
-  void updateFitStatusData(const std::vector<std::string> &status,
-                           const std::vector<double> &chiSquared);
+  void updateFitStatusData(const std::vector<std::string> &status, const std::vector<double> &chiSquared);
   void updateFitStatus(const FitDomainIndex index);
   FittingMode getFittingMode() const;
   void setConvolveMembers(bool convolveEnabled);
@@ -73,14 +72,12 @@ public:
   void setFitEnabled(bool enable);
   void setCurrentDataset(FitDomainIndex i);
   FitDomainIndex currentDataset() const;
-  void updateFunctionBrowserData(
-      int nData, const QList<MantidWidgets::FunctionModelDataset> &datasets,
-      const std::vector<double> &qValues,
-      const std::vector<std::pair<std::string, size_t>> &fitResolutions);
+  void updateFunctionBrowserData(int nData, const QList<MantidWidgets::FunctionModelDataset> &datasets,
+                                 const std::vector<double> &qValues,
+                                 const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void updatePlotGuess(const MatrixWorkspace_const_sptr &sampleWorkspace);
   void setErrorsEnabled(bool enabled);
-  void
-  updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void estimateFunctionParameters();
   void setBackgroundA0(double value);
   void setHiddenProperties(std::vector<std::string>);
@@ -88,10 +85,8 @@ public:
 public slots:
   void fit();
   void sequentialFit();
-  void setModelResolution(std::string const &name,
-                          TableDatasetIndex const &index);
-  void setModelResolution(
-      const std::vector<std::pair<std::string, size_t>> &fitResolutions);
+  void setModelResolution(std::string const &name, TableDatasetIndex const &index);
+  void setModelResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions);
 
 protected slots:
   void clear();

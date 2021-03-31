@@ -25,8 +25,7 @@ using namespace WorkspaceCreationHelper;
 class ApplyFloodWorkspaceTest : public CxxTest::TestSuite {
 public:
   void test_flood_same_x_units() {
-    auto inputWS =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    auto inputWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
     auto flood = createFloodWorkspace(inputWS->getInstrument());
 
     ApplyFloodWorkspace alg;
@@ -45,8 +44,7 @@ public:
   }
 
   void test_flood_different_x_units() {
-    auto inputWS =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    auto inputWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
     auto flood = createFloodWorkspace(inputWS->getInstrument(), "Wavelength");
 
     ApplyFloodWorkspace alg;
@@ -65,9 +63,8 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr createFloodWorkspace(
-      const Mantid::Geometry::Instrument_const_sptr &instrument,
-      std::string const &xUnit = "TOF") {
+  MatrixWorkspace_sptr createFloodWorkspace(const Mantid::Geometry::Instrument_const_sptr &instrument,
+                                            std::string const &xUnit = "TOF") {
     MatrixWorkspace_sptr flood = create2DWorkspace(4, 1);
     flood->mutableY(0)[0] = 0.7;
     flood->mutableY(1)[0] = 1.0;

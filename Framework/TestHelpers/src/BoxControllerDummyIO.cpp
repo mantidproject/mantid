@@ -26,8 +26,7 @@ namespace MantidTestHelpers {
  operations
 */
 BoxControllerDummyIO::BoxControllerDummyIO(const Mantid::API::BoxController *bc)
-    : m_bc(bc), m_CoordSize(4), m_TypeName("MDEvent"), m_ReadOnly(true),
-      m_isOpened(false) {
+    : m_bc(bc), m_CoordSize(4), m_TypeName("MDEvent"), m_ReadOnly(true), m_isOpened(false) {
   m_EventSize = static_cast<unsigned int>(bc->getNDims() + 4);
 }
 
@@ -45,8 +44,7 @@ save/load operations. 4 and 8 are supported only
 itself defines the size and the format of the event
                     The events described in the class header are supported only
 */
-void BoxControllerDummyIO::setDataType(const size_t blockSize,
-                                       const std::string &typeName) {
+void BoxControllerDummyIO::setDataType(const size_t blockSize, const std::string &typeName) {
   if (blockSize == 4 || blockSize == 8) {
     m_CoordSize = static_cast<unsigned int>(blockSize);
   } else
@@ -73,8 +71,7 @@ void BoxControllerDummyIO::setDataType(const size_t blockSize,
  *itself defines the size and the format of the event
  */
 
-void BoxControllerDummyIO::getDataType(size_t &CoordSize,
-                                       std::string &typeName) const {
+void BoxControllerDummyIO::getDataType(size_t &CoordSize, std::string &typeName) const {
   CoordSize = m_CoordSize;
   typeName = m_TypeName;
 }
@@ -87,8 +84,7 @@ void BoxControllerDummyIO::getDataType(size_t &CoordSize,
  *                 othewise if assumed to be new and size 0
  *@param mode  opening mode (read ("r" ) or read/write "w")
  */
-bool BoxControllerDummyIO::openFile(const std::string &fileName,
-                                    const std::string &mode) {
+bool BoxControllerDummyIO::openFile(const std::string &fileName, const std::string &mode) {
   m_fileName = fileName;
   // file already opened
   if (m_isOpened)
@@ -96,8 +92,7 @@ bool BoxControllerDummyIO::openFile(const std::string &fileName,
 
   m_ReadOnly = true;
   ;
-  if (mode.find('w') != std::string::npos ||
-      mode.find('W') != std::string::npos) {
+  if (mode.find('w') != std::string::npos || mode.find('W') != std::string::npos) {
     m_ReadOnly = false;
   }
 
@@ -127,8 +122,7 @@ bool BoxControllerDummyIO::openFile(const std::string &fileName,
  @param blockPosition -- the position of the data block within the data file
  itself
 */
-void BoxControllerDummyIO::saveBlock(const std::vector<float> &DataBlock,
-                                     const uint64_t blockPosition) const {
+void BoxControllerDummyIO::saveBlock(const std::vector<float> &DataBlock, const uint64_t blockPosition) const {
   size_t nEvents = DataBlock.size() / m_EventSize;
   uint64_t position = blockPosition;
   // uint64_t fileLength = this->getFileLength();
@@ -154,13 +148,11 @@ void BoxControllerDummyIO::saveBlock(const std::vector<float> &DataBlock,
 
  *Throws if attempted to read data outside of the file.
 */
-void BoxControllerDummyIO::loadBlock(std::vector<float> &Block,
-                                     const uint64_t blockPosition,
+void BoxControllerDummyIO::loadBlock(std::vector<float> &Block, const uint64_t blockPosition,
                                      const size_t nPoints) const {
   std::lock_guard<std::mutex> _lock(m_fileMutex);
   if (blockPosition + nPoints > this->getFileLength())
-    throw Mantid::Kernel::Exception::FileError(
-        "Attemtp to read behind the file end", m_fileName);
+    throw Mantid::Kernel::Exception::FileError("Attemtp to read behind the file end", m_fileName);
 
   Block.resize(nPoints * m_EventSize);
   for (size_t i = 0; i < nPoints * m_EventSize; i++) {

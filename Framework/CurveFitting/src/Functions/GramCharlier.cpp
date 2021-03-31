@@ -43,8 +43,7 @@ void GramCharlier::init() {
  * @param x An array of size nData defining the input domain
  * @param n The number of values in in & out
  */
-void GramCharlier::function1D(double *out, const double *x,
-                              const size_t n) const {
+void GramCharlier::function1D(double *out, const double *x, const size_t n) const {
   using boost::math::hermite;
   using std::exp;
   using std::pow;
@@ -58,10 +57,9 @@ void GramCharlier::function1D(double *out, const double *x,
   // where z=((x-X0)/Sigma/sqrt(2))
 
   // retrieve parameter values and scale coefficients once
-  const double amp(getParameter(0)), x0(getParameter(1)),
-      sigma(getParameter(2)), c4(getParameter(3) / 32.0),
-      c6(getParameter(4) / 384.0), c8(getParameter(5) / 6144.0),
-      c10(getParameter(6) / 122880.0), ampFSE(getParameter(7));
+  const double amp(getParameter(0)), x0(getParameter(1)), sigma(getParameter(2)), c4(getParameter(3) / 32.0),
+      c6(getParameter(4) / 384.0), c8(getParameter(5) / 6144.0), c10(getParameter(6) / 122880.0),
+      ampFSE(getParameter(7));
   const double root2Sigma = sqrt(2) * sigma;
   const double norm = 1 / (root2Sigma * sqrt(M_PI));
   const double prefactorFSE = root2Sigma / 12.0;
@@ -69,8 +67,7 @@ void GramCharlier::function1D(double *out, const double *x,
   for (size_t i = 0; i < n; ++i) {
     const double z = (x[i] - x0) / root2Sigma;
     out[i] = amp * norm * exp(-z * z) *
-                 (1 + c4 * hermite(4, z) + c6 * hermite(6, z) +
-                  c8 * hermite(8, z) + c10 * hermite(10, z)) +
+                 (1 + c4 * hermite(4, z) + c6 * hermite(6, z) + c8 * hermite(8, z) + c10 * hermite(10, z)) +
              ampFSE * norm * prefactorFSE * exp(-z * z) * hermite(3, z);
   }
 }

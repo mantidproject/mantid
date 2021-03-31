@@ -12,8 +12,7 @@
 
 using namespace MantidQt;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
-using namespace MantidQt::CustomInterfaces::ISISReflectometry::
-    ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using MantidQt::MantidWidgets::Batch::Cell;
 
 class ClipboardTest : public CxxTest::TestSuite {
@@ -45,20 +44,17 @@ public:
 
   void testSettingGroupNameThrowsForEmptyClipboard() {
     auto clipboard = Clipboard();
-    TS_ASSERT_THROWS(clipboard.setGroupName(0, "test group"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(clipboard.setGroupName(0, "test group"), const std::runtime_error &);
   }
 
   void testCreateGroupForRootThrowsForEmptyClipboard() {
     auto clipboard = Clipboard();
-    TS_ASSERT_THROWS(clipboard.createGroupForRoot(0),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(clipboard.createGroupForRoot(0), const std::runtime_error &);
   }
 
   void testCreateRowsForAllRootsThrowsForEmptyClipboard() {
     auto clipboard = Clipboard();
-    TS_ASSERT_THROWS(clipboard.createRowsForAllRoots(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(clipboard.createRowsForAllRoots(), const std::runtime_error &);
   }
 
   void testContainsGroupsThrowsForEmptyClipboard() {
@@ -83,14 +79,12 @@ public:
 
   void testSettingGroupNameThrowsForRow() {
     auto clipboard = clipboardWithARow();
-    TS_ASSERT_THROWS(clipboard.setGroupName(0, "test group"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(clipboard.setGroupName(0, "test group"), const std::runtime_error &);
   }
 
   void testCreateGroupForRootThrowsForRow() {
     auto clipboard = clipboardWithARow();
-    TS_ASSERT_THROWS(clipboard.createGroupForRoot(0),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(clipboard.createGroupForRoot(0), const std::runtime_error &);
   }
 
   void testCreateRowsForAllRootsSucceeds() {
@@ -135,8 +129,7 @@ public:
 
   void testCreateRowsForAllRootsThrowsForGroup() {
     auto clipboard = clipboardWithAGroup();
-    TS_ASSERT_THROWS(clipboard.createRowsForAllRoots(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(clipboard.createRowsForAllRoots(), const std::runtime_error &);
   }
 
   void testContainsGroupsReturnsTrueIfGroupsExist() {
@@ -176,8 +169,7 @@ public:
 
   void testCreateRowsForAllRootsThrowsForMultiGroupClipboard() {
     auto clipboard = clipboardWithTwoMultiRowGroups();
-    TS_ASSERT_THROWS(clipboard.createRowsForAllRoots(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(clipboard.createRowsForAllRoots(), const std::runtime_error &);
   }
 
   void testContainsGroupsReturnsTrueIfMultipleGroupsExist() {
@@ -186,23 +178,16 @@ public:
   }
 
 private:
-  Cell makeCell(std::string const &text = std::string("")) {
-    return Cell(text);
+  Cell makeCell(std::string const &text = std::string("")) { return Cell(text); }
+
+  std::vector<Cell> makeRowCells(std::string const &run = std::string("12345"), std::string const &theta = "0.5") {
+    return std::vector<Cell>{makeCell(run), makeCell(theta), makeCell("Trans A"), makeCell("Trans B"), makeCell(),
+                             makeCell(),    makeCell(),      makeCell(),          makeCell()};
   }
 
-  std::vector<Cell> makeRowCells(std::string const &run = std::string("12345"),
-                                 std::string const &theta = "0.5") {
-    return std::vector<Cell>{
-        makeCell(run),       makeCell(theta), makeCell("Trans A"),
-        makeCell("Trans B"), makeCell(),      makeCell(),
-        makeCell(),          makeCell(),      makeCell()};
-  }
-
-  std::vector<Cell>
-  makeGroupCells(std::string const &groupName = std::string("test group")) {
-    return std::vector<Cell>{makeCell(groupName), makeCell(), makeCell(),
-                             makeCell(),          makeCell(), makeCell(),
-                             makeCell(),          makeCell(), makeCell()};
+  std::vector<Cell> makeGroupCells(std::string const &groupName = std::string("test group")) {
+    return std::vector<Cell>{makeCell(groupName), makeCell(), makeCell(), makeCell(), makeCell(),
+                             makeCell(),          makeCell(), makeCell(), makeCell()};
   }
 
   MantidWidgets::Batch::RowLocation makeLocation() {
@@ -228,16 +213,12 @@ private:
     return subtree;
   }
 
-  MantidWidgets::Batch::Subtree
-  makeSubtreeWithAMultiRowGroup(std::string const &groupName) {
+  MantidWidgets::Batch::Subtree makeSubtreeWithAMultiRowGroup(std::string const &groupName) {
     // The group path is relative to the root (and it is the root) so does not
     // need an index. The rows just need a row index.
-    auto group =
-        MantidWidgets::Batch::Row(makeLocation(), makeGroupCells(groupName));
-    auto row1 = MantidWidgets::Batch::Row(makeLocation(0),
-                                          makeRowCells("12345", "0.5"));
-    auto row2 = MantidWidgets::Batch::Row(makeLocation(1),
-                                          makeRowCells("22345", "2.5"));
+    auto group = MantidWidgets::Batch::Row(makeLocation(), makeGroupCells(groupName));
+    auto row1 = MantidWidgets::Batch::Row(makeLocation(0), makeRowCells("12345", "0.5"));
+    auto row2 = MantidWidgets::Batch::Row(makeLocation(1), makeRowCells("22345", "2.5"));
     auto subtree = MantidWidgets::Batch::Subtree{group, row1, row2};
     return subtree;
   }
@@ -245,40 +226,33 @@ private:
   MantidWidgets::Batch::Subtree makeSubtreeWithARow(int rowIndex) {
     // The row path in the subtree is relative to the root (group) i.e. excludes
     // the group index
-    auto row =
-        MantidWidgets::Batch::Row(makeLocation(rowIndex), {makeRowCells()});
+    auto row = MantidWidgets::Batch::Row(makeLocation(rowIndex), {makeRowCells()});
     auto subtree = MantidWidgets::Batch::Subtree{row};
     return subtree;
   }
 
   Clipboard clipboardWithAGroup() {
     auto const groupIndex = 0;
-    auto subtrees = std::vector<MantidWidgets::Batch::Subtree>{
-        makeSubtreeWithAnEmptyGroup()};
+    auto subtrees = std::vector<MantidWidgets::Batch::Subtree>{makeSubtreeWithAnEmptyGroup()};
     // Subtree roots include the full path, i.e. with the group index
-    auto subtreeRoots = std::vector<MantidWidgets::Batch::RowLocation>{
-        makeLocation(groupIndex)};
+    auto subtreeRoots = std::vector<MantidWidgets::Batch::RowLocation>{makeLocation(groupIndex)};
     return Clipboard(subtrees, subtreeRoots);
   }
 
   Clipboard clipboardWithARow() {
     auto const groupIndex = 0;
     auto const rowIndex = 0;
-    auto subtrees = std::vector<MantidWidgets::Batch::Subtree>{
-        makeSubtreeWithARow(rowIndex)};
+    auto subtrees = std::vector<MantidWidgets::Batch::Subtree>{makeSubtreeWithARow(rowIndex)};
     // Subtree roots include the full path i.e. with group and row index
-    auto subtreeRoots = std::vector<MantidWidgets::Batch::RowLocation>{
-        makeLocation(groupIndex, rowIndex)};
+    auto subtreeRoots = std::vector<MantidWidgets::Batch::RowLocation>{makeLocation(groupIndex, rowIndex)};
     return Clipboard(subtrees, subtreeRoots);
   }
 
   Clipboard clipboardWithTwoMultiRowGroups() {
-    auto subtrees = std::vector<MantidWidgets::Batch::Subtree>{
-        makeSubtreeWithAMultiRowGroup("groupA"),
-        makeSubtreeWithAMultiRowGroup("groupB")};
+    auto subtrees = std::vector<MantidWidgets::Batch::Subtree>{makeSubtreeWithAMultiRowGroup("groupA"),
+                                                               makeSubtreeWithAMultiRowGroup("groupB")};
     // Subtree roots include the full path, i.e. with the group index
-    auto subtreeRoots = std::vector<MantidWidgets::Batch::RowLocation>{
-        makeLocation(0), makeLocation(1)};
+    auto subtreeRoots = std::vector<MantidWidgets::Batch::RowLocation>{makeLocation(0), makeLocation(1)};
     return Clipboard(subtrees, subtreeRoots);
   }
 };

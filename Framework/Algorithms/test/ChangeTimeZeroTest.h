@@ -38,9 +38,8 @@ DateAndTime stringPropertyTime("2010-01-01T00:10:00");
 enum LogType { STANDARD, NOPROTONCHARGE };
 
 template <typename T>
-void addTimeSeriesLogToWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws,
-                                 const std::string &id, DateAndTime startTime,
-                                 T defaultValue, int length) {
+void addTimeSeriesLogToWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws, const std::string &id,
+                                 DateAndTime startTime, T defaultValue, int length) {
   auto timeSeries = new TimeSeriesProperty<T>(id);
   timeSeries->setUnits("mm");
   for (int i = 0; i < length; i++) {
@@ -50,56 +49,41 @@ void addTimeSeriesLogToWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws,
 }
 
 template <typename T>
-void addProperyWithValueToWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws,
-                                    const std::string &id, T value) {
+void addProperyWithValueToWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws, const std::string &id, T value) {
   auto propWithVal = new PropertyWithValue<T>(id, value);
   propWithVal->setUnits("mm");
   ws->mutableRun().addProperty(propWithVal, true);
 }
 
 // Provide the logs for matrix workspaces
-void provideLogs(LogType logType, const Mantid::API::MatrixWorkspace_sptr &ws,
-                 DateAndTime startTime, int length) {
+void provideLogs(LogType logType, const Mantid::API::MatrixWorkspace_sptr &ws, DateAndTime startTime, int length) {
   switch (logType) {
   case (STANDARD):
     // Use one of each
-    addTimeSeriesLogToWorkspace<double>(ws, doubleSeriesID, startTime, 1.0,
-                                        length);
-    addTimeSeriesLogToWorkspace<bool>(ws, boolSeriesID, startTime, true,
-                                      length);
+    addTimeSeriesLogToWorkspace<double>(ws, doubleSeriesID, startTime, 1.0, length);
+    addTimeSeriesLogToWorkspace<bool>(ws, boolSeriesID, startTime, true, length);
     addTimeSeriesLogToWorkspace<double>(ws, intSeriesID, startTime, 1, length);
-    addTimeSeriesLogToWorkspace<std::string>(ws, stringSeriesID, startTime,
-                                             "default", length);
-    addProperyWithValueToWorkspace<std::string>(
-        ws, stringID, stringPropertyTime.toISO8601String());
+    addTimeSeriesLogToWorkspace<std::string>(ws, stringSeriesID, startTime, "default", length);
+    addProperyWithValueToWorkspace<std::string>(ws, stringID, stringPropertyTime.toISO8601String());
     break;
   case (NOPROTONCHARGE):
-    addTimeSeriesLogToWorkspace<bool>(ws, boolSeriesID, startTime, true,
-                                      length);
+    addTimeSeriesLogToWorkspace<bool>(ws, boolSeriesID, startTime, true, length);
     addTimeSeriesLogToWorkspace<double>(ws, intSeriesID, startTime, 1, length);
-    addTimeSeriesLogToWorkspace<std::string>(ws, stringSeriesID, startTime,
-                                             "default", length);
-    addProperyWithValueToWorkspace<std::string>(
-        ws, stringID, stringPropertyTime.toISO8601String());
+    addTimeSeriesLogToWorkspace<std::string>(ws, stringSeriesID, startTime, "default", length);
+    addProperyWithValueToWorkspace<std::string>(ws, stringID, stringPropertyTime.toISO8601String());
     break;
   default:
-    addTimeSeriesLogToWorkspace<double>(ws, doubleSeriesID, startTime, 1.0,
-                                        length);
-    addTimeSeriesLogToWorkspace<bool>(ws, boolSeriesID, startTime, true,
-                                      length);
+    addTimeSeriesLogToWorkspace<double>(ws, doubleSeriesID, startTime, 1.0, length);
+    addTimeSeriesLogToWorkspace<bool>(ws, boolSeriesID, startTime, true, length);
     addTimeSeriesLogToWorkspace<double>(ws, intSeriesID, startTime, 1, length);
-    addTimeSeriesLogToWorkspace<std::string>(ws, stringSeriesID, startTime,
-                                             "default", length);
-    addProperyWithValueToWorkspace<std::string>(
-        ws, stringID, stringPropertyTime.toISO8601String());
+    addTimeSeriesLogToWorkspace<std::string>(ws, stringSeriesID, startTime, "default", length);
+    addProperyWithValueToWorkspace<std::string>(ws, stringID, stringPropertyTime.toISO8601String());
     break;
   }
 }
 
 // Provides a 2D workspace with a log
-Mantid::API::MatrixWorkspace_sptr provideWorkspace2D(LogType logType,
-                                                     const std::string &wsName,
-                                                     DateAndTime startTime,
+Mantid::API::MatrixWorkspace_sptr provideWorkspace2D(LogType logType, const std::string &wsName, DateAndTime startTime,
                                                      int length) {
   Workspace2D_sptr ws(new Workspace2D);
   ws->setTitle(wsName);
@@ -116,9 +100,7 @@ Mantid::API::MatrixWorkspace_sptr provideWorkspace2D(LogType logType,
 }
 
 // Provides a WorkspaceSingleValue with a log
-Mantid::API::MatrixWorkspace_sptr
-provideWorkspaceSingleValue(LogType logType, DateAndTime startTime,
-                            int length) {
+Mantid::API::MatrixWorkspace_sptr provideWorkspaceSingleValue(LogType logType, DateAndTime startTime, int length) {
   auto ws = WorkspaceCreationHelper::createWorkspaceSingleValue(10);
   // Add the logs
   provideLogs(logType, ws, startTime, length);
@@ -126,24 +108,20 @@ provideWorkspaceSingleValue(LogType logType, DateAndTime startTime,
 }
 
 // Provides an EventWorkspace with a log
-Mantid::API::MatrixWorkspace_sptr
-provideEventWorkspaceCustom(LogType logType, DateAndTime startTime, int length,
-                            int pixels, int bins, int events) {
-  auto ws = WorkspaceCreationHelper::createEventWorkspaceWithStartTime(
-      pixels, bins, events, 0.0, 1.0, 2, 0, startTime);
+Mantid::API::MatrixWorkspace_sptr provideEventWorkspaceCustom(LogType logType, DateAndTime startTime, int length,
+                                                              int pixels, int bins, int events) {
+  auto ws = WorkspaceCreationHelper::createEventWorkspaceWithStartTime(pixels, bins, events, 0.0, 1.0, 2, 0, startTime);
   // Add the logs
   provideLogs(logType, ws, startTime, length);
   return ws;
 }
 
 // Provides an EventWorkspace with a log
-Mantid::API::MatrixWorkspace_sptr
-provideEventWorkspace(LogType logType, DateAndTime startTime, int length) {
+Mantid::API::MatrixWorkspace_sptr provideEventWorkspace(LogType logType, DateAndTime startTime, int length) {
   return provideEventWorkspaceCustom(logType, startTime, length, 100, 100, 100);
 }
 
-MatrixWorkspace_sptr execute_change_time(const MatrixWorkspace_sptr &in_ws,
-                                         double relativeTimeOffset,
+MatrixWorkspace_sptr execute_change_time(const MatrixWorkspace_sptr &in_ws, double relativeTimeOffset,
                                          const std::string &absolutTimeOffset) {
   // Create and run the algorithm
   ChangeTimeZero alg;
@@ -169,10 +147,8 @@ public:
   static void destroySuite(ChangeTimeZeroTest *suite) { delete suite; }
 
   ChangeTimeZeroTest()
-      : m_startTime("2010-01-01T00:00:00"),
-        m_stringPropertyTime(stringPropertyTime),
-        m_dateTimeValidator(std::make_shared<DateTimeValidator>()),
-        m_length(10) {}
+      : m_startTime("2010-01-01T00:00:00"), m_stringPropertyTime(stringPropertyTime),
+        m_dateTimeValidator(std::make_shared<DateTimeValidator>()), m_length(10) {}
 
   void test_Init() {
     ChangeTimeZero alg;
@@ -181,63 +157,51 @@ public:
   }
 
   // Workspace2D tests
-  void
-  test_changed_time_for_standard_setting_and_relative_time_and_differnt_inOutWS_and_Workspace2D() {
+  void test_changed_time_for_standard_setting_and_relative_time_and_differnt_inOutWS_and_Workspace2D() {
     // Arrange
     bool inputEqualsOutputWorkspace = false;
     const std::string absoluteTimeShift = "";
     const double relativeTimeShift = 1000;
-    Mantid::API::MatrixWorkspace_sptr ws =
-        provideWorkspace2D(LogType::STANDARD, "in_ws", m_startTime, m_length);
+    Mantid::API::MatrixWorkspace_sptr ws = provideWorkspace2D(LogType::STANDARD, "in_ws", m_startTime, m_length);
 
     // Act and assert
-    act_and_assert(relativeTimeShift, absoluteTimeShift, ws,
-                   inputEqualsOutputWorkspace);
+    act_and_assert(relativeTimeShift, absoluteTimeShift, ws, inputEqualsOutputWorkspace);
   }
 
-  void
-  test_changed_time_for_standard_setting_and_absolute_time_and_differnt_inOutWS_and_Workspace2D() {
+  void test_changed_time_for_standard_setting_and_absolute_time_and_differnt_inOutWS_and_Workspace2D() {
     // Arrange
     bool inputEqualsOutputWorkspace = false;
     DateAndTime absoluteTimeShift(m_startTime);
     absoluteTimeShift += 1000.0;
     const double relativeTimeShift = 0.0;
 
-    Mantid::API::MatrixWorkspace_sptr ws =
-        provideWorkspace2D(LogType::STANDARD, "in_ws", m_startTime, m_length);
+    Mantid::API::MatrixWorkspace_sptr ws = provideWorkspace2D(LogType::STANDARD, "in_ws", m_startTime, m_length);
 
     // Act and assert
-    act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(), ws,
-                   inputEqualsOutputWorkspace);
+    act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(), ws, inputEqualsOutputWorkspace);
   }
 
-  void
-  test_changed_time_for_standard_setting_and_relative_time_and_same_inOutWS_and_Workspace2D() {
+  void test_changed_time_for_standard_setting_and_relative_time_and_same_inOutWS_and_Workspace2D() {
     // Arrange
     bool inputEqualsOutputWorkspace = true;
     const std::string absoluteTimeShift = "";
     const double relativeTimeShift = 1000;
-    Mantid::API::MatrixWorkspace_sptr ws =
-        provideWorkspace2D(LogType::STANDARD, "in_ws", m_startTime, m_length);
+    Mantid::API::MatrixWorkspace_sptr ws = provideWorkspace2D(LogType::STANDARD, "in_ws", m_startTime, m_length);
 
     // Act and assert
-    act_and_assert(relativeTimeShift, absoluteTimeShift, ws,
-                   inputEqualsOutputWorkspace);
+    act_and_assert(relativeTimeShift, absoluteTimeShift, ws, inputEqualsOutputWorkspace);
   }
 
-  void
-  test_changed_time_for_standard_setting_and_absolute_time_and_same_inOutWS_and_Workspace2D() {
+  void test_changed_time_for_standard_setting_and_absolute_time_and_same_inOutWS_and_Workspace2D() {
     // Arrange
     bool inputEqualsOutputWorkspace = true;
     DateAndTime absoluteTimeShift(m_startTime);
     absoluteTimeShift += 1000.0;
     const double relativeTimeShift = 0.0;
-    auto ws =
-        provideWorkspace2D(LogType::STANDARD, "in_ws", m_startTime, m_length);
+    auto ws = provideWorkspace2D(LogType::STANDARD, "in_ws", m_startTime, m_length);
 
     // Act and assert
-    act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(), ws,
-                   inputEqualsOutputWorkspace);
+    act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(), ws, inputEqualsOutputWorkspace);
   }
 
   // Absolute times and no proton charges
@@ -245,8 +209,7 @@ public:
     // Arrange
     const double timeShiftDouble = 1000;
     DateAndTime absoluteTimeShift = m_startTime + timeShiftDouble;
-    auto ws = provideWorkspace2D(LogType::NOPROTONCHARGE, "in_ws", m_startTime,
-                                 m_length);
+    auto ws = provideWorkspace2D(LogType::NOPROTONCHARGE, "in_ws", m_startTime, m_length);
 
     // Act
     ChangeTimeZero alg;
@@ -257,20 +220,17 @@ public:
     alg.setProperty("InputWorkspace", ws);
     ScopedWorkspace scopedWorkspace(ws);
     alg.setPropertyValue("OutputWorkspace", scopedWorkspace.name());
-    alg.setPropertyValue("AbsoluteTimeOffset",
-                         absoluteTimeShift.toISO8601String());
+    alg.setPropertyValue("AbsoluteTimeOffset", absoluteTimeShift.toISO8601String());
 
     // We expect to see an exception because we are using absolute times and
     // there is no proton charge log
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
-  void
-  test_no_exception_is_thrown_for_missing_proton_charge_and_relative_time() {
+  void test_no_exception_is_thrown_for_missing_proton_charge_and_relative_time() {
     // Arrange
     double timeShift = 1000;
-    auto ws = provideWorkspace2D(LogType::NOPROTONCHARGE, "in_ws", m_startTime,
-                                 m_length);
+    auto ws = provideWorkspace2D(LogType::NOPROTONCHARGE, "in_ws", m_startTime, m_length);
 
     // Act
     ChangeTimeZero alg;
@@ -288,121 +248,97 @@ public:
   }
 
   // EventWorkspaces tests
-  void
-  test_changed_time_for_standard_setting_and_relative_time_and_differnt_inOutWS_and_EventWorkspace() {
+  void test_changed_time_for_standard_setting_and_relative_time_and_differnt_inOutWS_and_EventWorkspace() {
     // Arrange
     bool inputEqualsOutputWorkspace = false;
     const std::string absoluteTimeShift = "";
     const double relativeTimeShift = 1000;
-    Mantid::API::MatrixWorkspace_sptr ws =
-        provideEventWorkspace(LogType::STANDARD, m_startTime, m_length);
+    Mantid::API::MatrixWorkspace_sptr ws = provideEventWorkspace(LogType::STANDARD, m_startTime, m_length);
 
     // Act and assert
-    act_and_assert(relativeTimeShift, absoluteTimeShift, ws,
-                   inputEqualsOutputWorkspace);
+    act_and_assert(relativeTimeShift, absoluteTimeShift, ws, inputEqualsOutputWorkspace);
   }
 
-  void
-  test_changed_time_for_standard_setting_and_absolute_time_and_differnt_inOutWS_and_EventWorkspace() {
+  void test_changed_time_for_standard_setting_and_absolute_time_and_differnt_inOutWS_and_EventWorkspace() {
     // Arrange
     bool inputEqualsOutputWorkspace = false;
     DateAndTime absoluteTimeShift(m_startTime);
     absoluteTimeShift += 1000.0;
     const double relativeTimeShift = 0.0;
-    Mantid::API::MatrixWorkspace_sptr ws =
-        provideEventWorkspace(LogType::STANDARD, m_startTime, m_length);
+    Mantid::API::MatrixWorkspace_sptr ws = provideEventWorkspace(LogType::STANDARD, m_startTime, m_length);
 
     // Act and assert
-    act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(), ws,
-                   inputEqualsOutputWorkspace);
+    act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(), ws, inputEqualsOutputWorkspace);
   }
 
-  void
-  test_changed_time_for_standard_setting_and_relative_time_and_same_inOutWS_and_EventWorkspace() {
+  void test_changed_time_for_standard_setting_and_relative_time_and_same_inOutWS_and_EventWorkspace() {
     // Arrange
     bool inputEqualsOutputWorkspace = true;
     const std::string absoluteTimeShift = "";
     const double relativeTimeShift = 1000;
-    Mantid::API::MatrixWorkspace_sptr ws =
-        provideEventWorkspace(LogType::STANDARD, m_startTime, m_length);
+    Mantid::API::MatrixWorkspace_sptr ws = provideEventWorkspace(LogType::STANDARD, m_startTime, m_length);
 
     // Act and assert
-    act_and_assert(relativeTimeShift, absoluteTimeShift, ws,
-                   inputEqualsOutputWorkspace);
+    act_and_assert(relativeTimeShift, absoluteTimeShift, ws, inputEqualsOutputWorkspace);
   }
 
-  void
-  test_changed_time_for_standard_setting_and_absolute_time_and_same_inOutWS_and_EventWorkspace() {
+  void test_changed_time_for_standard_setting_and_absolute_time_and_same_inOutWS_and_EventWorkspace() {
     // Arrange
     bool inputEqualsOutputWorkspace = true;
     DateAndTime absoluteTimeShift(m_startTime);
     absoluteTimeShift += 1000.0;
     const double relativeTimeShift = 0.0;
-    Mantid::API::MatrixWorkspace_sptr ws =
-        provideEventWorkspace(LogType::STANDARD, m_startTime, m_length);
+    Mantid::API::MatrixWorkspace_sptr ws = provideEventWorkspace(LogType::STANDARD, m_startTime, m_length);
 
     // Act and assert
-    act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(), ws,
-                   inputEqualsOutputWorkspace);
+    act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(), ws, inputEqualsOutputWorkspace);
   }
 
   // Negative and fractional relative times
-  void
-  test_changed_time_for_standard_setting_and_relative_negative_time_and_same_inOutWS() {
+  void test_changed_time_for_standard_setting_and_relative_negative_time_and_same_inOutWS() {
     // Arrange
     bool inputEqualsOutputWorkspace = true;
     const std::string absoluteTimeShift = "";
     const double relativeTimeShift = -1000;
-    Mantid::API::MatrixWorkspace_sptr ws =
-        provideEventWorkspace(LogType::STANDARD, m_startTime, m_length);
+    Mantid::API::MatrixWorkspace_sptr ws = provideEventWorkspace(LogType::STANDARD, m_startTime, m_length);
 
     // Act and assert
-    act_and_assert(relativeTimeShift, absoluteTimeShift, ws,
-                   inputEqualsOutputWorkspace);
+    act_and_assert(relativeTimeShift, absoluteTimeShift, ws, inputEqualsOutputWorkspace);
   }
 
-  void
-  test_changed_time_for_standard_setting_and_relative_fractional_time_and_same_inOutWS() {
+  void test_changed_time_for_standard_setting_and_relative_fractional_time_and_same_inOutWS() {
     // Arrange
     bool inputEqualsOutputWorkspace = true;
     const std::string absoluteTimeShift = "";
     const double relativeTimeShift = 1020.5;
-    Mantid::API::MatrixWorkspace_sptr ws =
-        provideEventWorkspace(LogType::STANDARD, m_startTime, m_length);
+    Mantid::API::MatrixWorkspace_sptr ws = provideEventWorkspace(LogType::STANDARD, m_startTime, m_length);
 
     // Act and assert
-    act_and_assert(relativeTimeShift, absoluteTimeShift, ws,
-                   inputEqualsOutputWorkspace);
+    act_and_assert(relativeTimeShift, absoluteTimeShift, ws, inputEqualsOutputWorkspace);
   }
 
   // WorkspaceSingleValue tests
-  void
-  test_changed_time_for_standard_setting_and_relative_time_and_differnt_inOutWS_and_WorkspaceSingleValue() {
+  void test_changed_time_for_standard_setting_and_relative_time_and_differnt_inOutWS_and_WorkspaceSingleValue() {
     // Arrange
     bool inputEqualsOutputWorkspace = false;
     const std::string absoluteTimeShift = "";
     const double relativeTimeShift = 1000;
-    Mantid::API::MatrixWorkspace_sptr ws =
-        provideWorkspaceSingleValue(LogType::STANDARD, m_startTime, m_length);
+    Mantid::API::MatrixWorkspace_sptr ws = provideWorkspaceSingleValue(LogType::STANDARD, m_startTime, m_length);
 
     // Act and assert
-    act_and_assert(relativeTimeShift, absoluteTimeShift, ws,
-                   inputEqualsOutputWorkspace);
+    act_and_assert(relativeTimeShift, absoluteTimeShift, ws, inputEqualsOutputWorkspace);
   }
 
-  void
-  test_changed_time_for_standard_setting_and_absolute_time_and_differnt_inOutWS_and_WorkspaceSingleValue() {
+  void test_changed_time_for_standard_setting_and_absolute_time_and_differnt_inOutWS_and_WorkspaceSingleValue() {
     // Arrange
     bool inputEqualsOutputWorkspace = false;
     DateAndTime absoluteTimeShift(m_startTime);
     absoluteTimeShift += 1000.0;
     const double relativeTimeShift = 0.0;
-    Mantid::API::MatrixWorkspace_sptr ws =
-        provideWorkspaceSingleValue(LogType::STANDARD, m_startTime, m_length);
+    Mantid::API::MatrixWorkspace_sptr ws = provideWorkspaceSingleValue(LogType::STANDARD, m_startTime, m_length);
 
     // Act and assert
-    act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(), ws,
-                   inputEqualsOutputWorkspace);
+    act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(), ws, inputEqualsOutputWorkspace);
   }
 
   /**
@@ -415,10 +351,8 @@ public:
   void testValidateInputsWithWSGroup() {
     const double timeShiftDouble = 1000;
     DateAndTime absoluteTimeShift = m_startTime + timeShiftDouble;
-    auto ws1 = provideWorkspace2D(LogType::NOPROTONCHARGE, "in_ws", m_startTime,
-                                  m_length);
-    auto ws2 = provideWorkspace2D(LogType::NOPROTONCHARGE, "in_ws", m_startTime,
-                                  m_length);
+    auto ws1 = provideWorkspace2D(LogType::NOPROTONCHARGE, "in_ws", m_startTime, m_length);
+    auto ws2 = provideWorkspace2D(LogType::NOPROTONCHARGE, "in_ws", m_startTime, m_length);
     AnalysisDataService::Instance().add("workspace1", ws1);
     AnalysisDataService::Instance().add("workspace2", ws2);
     auto group = std::make_shared<WorkspaceGroup>();
@@ -430,8 +364,7 @@ public:
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "group"));
     alg.setPropertyValue("OutputWorkspace", "__NoName");
-    alg.setPropertyValue("AbsoluteTimeOffset",
-                         absoluteTimeShift.toISO8601String());
+    alg.setPropertyValue("AbsoluteTimeOffset", absoluteTimeShift.toISO8601String());
     TS_ASSERT_THROWS_NOTHING(alg.validateInputs());
     AnalysisDataService::Instance().clear();
   }
@@ -443,9 +376,7 @@ private:
   int m_length;
 
   // act and assert
-  void act_and_assert(double relativeTimeShift,
-                      const std::string &absoluteTimeShift,
-                      const MatrixWorkspace_sptr &in_ws,
+  void act_and_assert(double relativeTimeShift, const std::string &absoluteTimeShift, const MatrixWorkspace_sptr &in_ws,
                       bool inputEqualsOutputWorkspace) {
     // Create a duplicate workspace
     EventWorkspace_sptr duplicate_ws;
@@ -478,8 +409,7 @@ private:
 
     double timeShift = relativeTimeShift;
     if (relativeTimeShift == 0.0) {
-      timeShift = DateAndTime::secondsFromDuration(
-          DateAndTime(absoluteTimeShift) - m_startTime);
+      timeShift = DateAndTime::secondsFromDuration(DateAndTime(absoluteTimeShift) - m_startTime);
     }
 
     MatrixWorkspace_sptr out_ws = alg.getProperty("OutputWorkspace");
@@ -509,8 +439,7 @@ private:
   }
 
   // Check contents of time series.
-  void do_check_time_series(Mantid::Kernel::Property *prop,
-                            const double timeShift) const {
+  void do_check_time_series(Mantid::Kernel::Property *prop, const double timeShift) const {
     auto timeSeriesProperty = dynamic_cast<ITimeSeriesProperty *>(prop);
     auto times = timeSeriesProperty->timesAsVector();
     // Iterator over all entries of the time series and check if they are
@@ -518,23 +447,18 @@ private:
     double secondCounter = timeShift;
     for (auto &time : times) {
       double secs = DateAndTime::secondsFromDuration(time - m_startTime);
-      TSM_ASSERT_DELTA("Time series logs should have shifted times.", secs,
-                       secondCounter, 1e-5);
+      TSM_ASSERT_DELTA("Time series logs should have shifted times.", secs, secondCounter, 1e-5);
       ++secondCounter;
     }
   }
   // Check contents of a string value property.
-  void do_check_property_with_string_value(Property *prop,
-                                           const double timeShift) const {
-    auto propertyWithValue =
-        dynamic_cast<PropertyWithValue<std::string> *>(prop);
+  void do_check_property_with_string_value(Property *prop, const double timeShift) const {
+    auto propertyWithValue = dynamic_cast<PropertyWithValue<std::string> *>(prop);
     auto value = propertyWithValue->value();
     if (checkDateTime(value)) {
       DateAndTime newTime(value);
-      double secs =
-          DateAndTime::secondsFromDuration(newTime - m_stringPropertyTime);
-      TSM_ASSERT_DELTA("String property should have shifted time", secs,
-                       timeShift, 1e-5);
+      double secs = DateAndTime::secondsFromDuration(newTime - m_stringPropertyTime);
+      TSM_ASSERT_DELTA("String property should have shifted time", secs, timeShift, 1e-5);
     }
   }
   // Check contents of an event workspace. We compare the time stamps to the
@@ -545,8 +469,7 @@ private:
     auto duplicateWs = std::dynamic_pointer_cast<EventWorkspace>(duplicate);
 
     // For each workspace index
-    for (size_t workspaceIndex = 0; workspaceIndex < ws->getNumberHistograms();
-         ++workspaceIndex) {
+    for (size_t workspaceIndex = 0; workspaceIndex < ws->getNumberHistograms(); ++workspaceIndex) {
 
       auto &eventList = ws->getSpectrum(workspaceIndex);
       auto &eventListDuplicate = duplicateWs->getSpectrum(workspaceIndex);
@@ -555,8 +478,7 @@ private:
       auto &eventsDuplicate = eventListDuplicate.getEvents();
 
       for (unsigned int i = 0; i < events.size(); ++i) {
-        double secs = DateAndTime::secondsFromDuration(
-            events[i].pulseTime() - eventsDuplicate[i].pulseTime());
+        double secs = DateAndTime::secondsFromDuration(events[i].pulseTime() - eventsDuplicate[i].pulseTime());
         // Don't print a message here, as we iterate over all events
         TS_ASSERT_DELTA(secs, timeShift, 1e-5);
       }
@@ -564,14 +486,12 @@ private:
   }
 
   // Create comparison workspace
-  EventWorkspace_sptr
-  createComparisonWorkspace(const EventWorkspace_sptr &inputWorkspace) {
+  EventWorkspace_sptr createComparisonWorkspace(const EventWorkspace_sptr &inputWorkspace) {
     CloneWorkspace alg;
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    alg.setProperty<Workspace_sptr>(
-        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inputWorkspace));
+    alg.setProperty<Workspace_sptr>("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inputWorkspace));
     alg.setProperty("OutputWorkspace", "outWs");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -611,23 +531,17 @@ public:
     // Set up the Workspace 2D
     const int length2D = 3000;
     const std::string ws2DName = "WS2D_REUSE";
-    m_workspace2D =
-        provideWorkspace2D(LogType::STANDARD, ws2DName, date, length2D);
+    m_workspace2D = provideWorkspace2D(LogType::STANDARD, ws2DName, date, length2D);
 
     // Set up the Event Workspace
     const int lengthEvent = 1000;
     const int pixels = 3000;
     const int bins = 3000;
     const int events = 1000;
-    m_workspaceEvent = provideEventWorkspaceCustom(
-        LogType::STANDARD, date, lengthEvent, pixels, bins, events);
+    m_workspaceEvent = provideEventWorkspaceCustom(LogType::STANDARD, date, lengthEvent, pixels, bins, events);
   }
 
-  void test_change_zero_time_for_Workspace2D() {
-    execute_change_time(m_workspace2D, 1000, "");
-  }
+  void test_change_zero_time_for_Workspace2D() { execute_change_time(m_workspace2D, 1000, ""); }
 
-  void test_change_zero_time_for_EventWorkspace() {
-    execute_change_time(m_workspaceEvent, 1000, "");
-  }
+  void test_change_zero_time_for_EventWorkspace() { execute_change_time(m_workspaceEvent, 1000, ""); }
 };

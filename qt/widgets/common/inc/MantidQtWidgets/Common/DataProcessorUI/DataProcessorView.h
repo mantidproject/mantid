@@ -43,8 +43,7 @@ public:
   // Dialog/Prompt methods
   virtual QString requestNotebookPath() = 0;
   /// Dialog/Prompt methods
-  virtual QString askUserString(const QString &prompt, const QString &title,
-                                const QString &defaultValue) = 0;
+  virtual QString askUserString(const QString &prompt, const QString &title, const QString &defaultValue) = 0;
   virtual bool askUserYesNo(QString prompt, QString title) = 0;
   virtual void giveUserWarning(QString prompt, QString title) = 0;
   virtual void giveUserCritical(QString prompt, QString title) = 0;
@@ -73,12 +72,9 @@ public:
   virtual void setOutputNotebookEnabled(const bool enabled) = 0;
 
   // Setter methods
-  virtual void setInstrumentList(const QString &instruments,
-                                 const QString &defaultInstrument) = 0;
+  virtual void setInstrumentList(const QString &instruments, const QString &defaultInstrument) = 0;
   virtual void setSelection(const std::set<int> &groups) = 0;
-  virtual void
-  setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
-                         int column) = 0;
+  virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy, int column) = 0;
   virtual void setClipboard(const QString &text) = 0;
   virtual void setItemDelegate() = 0;
   virtual void setModel(QString const &name) = 0;

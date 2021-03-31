@@ -35,27 +35,23 @@ int convertStringNumToInt(const std::string &string) {
   } catch (std::invalid_argument &) {
     throw std::runtime_error("Invalid argument for processing instructions");
   } catch (std::out_of_range &) {
-    throw std::runtime_error(
-        "Out of range value given for processing instructions");
+    throw std::runtime_error("Out of range value given for processing instructions");
   }
 }
 
-std::string convertToWorkspaceIndex(const std::string &spectrumNumber,
-                                    const MatrixWorkspace_const_sptr &ws) {
+std::string convertToWorkspaceIndex(const std::string &spectrumNumber, const MatrixWorkspace_const_sptr &ws) {
   auto specNum = convertStringNumToInt(spectrumNumber);
-  std::string wsIdx = std::to_string(
-      ws->getIndexFromSpectrumNumber(static_cast<Mantid::specnum_t>(specNum)));
+  std::string wsIdx = std::to_string(ws->getIndexFromSpectrumNumber(static_cast<Mantid::specnum_t>(specNum)));
   return wsIdx;
 }
 
-std::string convertProcessingInstructionsToWorkspaceIndices(
-    const std::string &instructions, const MatrixWorkspace_const_sptr &ws) {
+std::string convertProcessingInstructionsToWorkspaceIndices(const std::string &instructions,
+                                                            const MatrixWorkspace_const_sptr &ws) {
   std::string converted = "";
   std::string currentNumber = "";
   std::string ignoreThese = "-,:+";
   for (const char instruction : instructions) {
-    if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) !=
-        ignoreThese.end()) {
+    if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) != ignoreThese.end()) {
       // Found a spacer so add currentNumber to converted followed by separator
       converted.append(convertToWorkspaceIndex(currentNumber, ws));
       converted.push_back(instruction);
@@ -77,19 +73,14 @@ std::string convertProcessingInstructionsToWorkspaceIndices(
  * @returns : a vector of indices of the requested spectra in the given
  * workspace
  */
-std::vector<size_t>
-getProcessingInstructionsAsIndices(std::string const &instructions,
-                                   const MatrixWorkspace_sptr &workspace) {
-  auto instructionsInWSIndex =
-      convertProcessingInstructionsToWorkspaceIndices(instructions, workspace);
-  auto groups =
-      Mantid::Kernel::Strings::parseGroups<size_t>(instructionsInWSIndex);
+std::vector<size_t> getProcessingInstructionsAsIndices(std::string const &instructions,
+                                                       const MatrixWorkspace_sptr &workspace) {
+  auto instructionsInWSIndex = convertProcessingInstructionsToWorkspaceIndices(instructions, workspace);
+  auto groups = Mantid::Kernel::Strings::parseGroups<size_t>(instructionsInWSIndex);
   auto indices = std::vector<size_t>();
-  std::for_each(groups.cbegin(), groups.cend(),
-                [&indices](std::vector<size_t> const &groupIndices) -> void {
-                  indices.insert(indices.begin(), groupIndices.cbegin(),
-                                 groupIndices.cend());
-                });
+  std::for_each(groups.cbegin(), groups.cend(), [&indices](std::vector<size_t> const &groupIndices) -> void {
+    indices.insert(indices.begin(), groupIndices.cbegin(), groupIndices.cend());
+  });
   return indices;
 }
 } // namespace
@@ -102,30 +93,23 @@ namespace Reflectometry {
 void ReflectometryWorkflowBase2::initReductionProperties() {
   // Summation type
   std::vector<std::string> summationTypes = {"SumInLambda", "SumInQ"};
-  declareProperty("SummationType", "SumInLambda",
-                  std::make_shared<StringListValidator>(summationTypes),
+  declareProperty("SummationType", "SumInLambda", std::make_shared<StringListValidator>(summationTypes),
                   "The type of summation to perform.", Direction::Input);
 
   // Reduction type
-  std::vector<std::string> reductionTypes = {"Normal", "DivergentBeam",
-                                             "NonFlatSample"};
-  declareProperty("ReductionType", "Normal",
-                  std::make_shared<StringListValidator>(reductionTypes),
-                  "The type of reduction to perform when summing in Q.",
-                  Direction::Input);
+  std::vector<std::string> reductionTypes = {"Normal", "DivergentBeam", "NonFlatSample"};
+  declareProperty("ReductionType", "Normal", std::make_shared<StringListValidator>(reductionTypes),
+                  "The type of reduction to perform when summing in Q.", Direction::Input);
   setPropertySettings("ReductionType",
-                      std::make_unique<Kernel::EnabledWhenProperty>(
-                          "SummationType", IS_EQUAL_TO, "SumInQ"));
+                      std::make_unique<Kernel::EnabledWhenProperty>("SummationType", IS_EQUAL_TO, "SumInQ"));
 
   // Whether to crop out partial bins when projecting to virtual lambda for Q
   // summation
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "IncludePartialBins", false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("IncludePartialBins", false, Direction::Input),
                   "If true then partial bins at the beginning and end of the "
                   "output range are included");
   setPropertySettings("IncludePartialBins",
-                      std::make_unique<Kernel::EnabledWhenProperty>(
-                          "SummationType", IS_EQUAL_TO, "SumInQ"));
+                      std::make_unique<Kernel::EnabledWhenProperty>("SummationType", IS_EQUAL_TO, "SumInQ"));
 }
 
 /** Initialize properties related to direct beam normalization
@@ -143,64 +127,51 @@ void ReflectometryWorkflowBase2::initDirectBeamProperties() {
 void ReflectometryWorkflowBase2::initMonitorProperties() {
 
   // Monitor workspace index
-  declareProperty(std::make_unique<PropertyWithValue<int>>(
-                      "I0MonitorIndex", Mantid::EMPTY_INT(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("I0MonitorIndex", Mantid::EMPTY_INT(), Direction::Input),
                   "I0 monitor workspace index");
 
   // Minimum wavelength for background subtraction
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
-          Direction::Input),
-      "Wavelength minimum for monitor background subtraction in angstroms.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
+                                                              Direction::Input),
+                  "Wavelength minimum for monitor background subtraction in angstroms.");
   // Maximum wavelength for background subtraction
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
-          Direction::Input),
-      "Wavelength maximum for monitor background subtraction in angstroms.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
+                                                              Direction::Input),
+                  "Wavelength maximum for monitor background subtraction in angstroms.");
 
   // Minimum wavelength for monitor integration
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
-                      Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
+                                                              Direction::Input),
                   "Wavelength minimum for integration in angstroms.");
   // Maximum wavelength for monitor integration
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
-                      Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
+                                                              Direction::Input),
                   "Wavelength maximum for integration in angstroms.");
   // Normalization by integrated monitors
-  declareProperty("NormalizeByIntegratedMonitors", true,
-                  "Normalize by dividing by the integrated monitors.");
+  declareProperty("NormalizeByIntegratedMonitors", true, "Normalize by dividing by the integrated monitors.");
 }
 
 /** Initialize properties related to transmission normalization
  */
 void ReflectometryWorkflowBase2::initBackgroundProperties() {
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "SubtractBackground", false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("SubtractBackground", false, Direction::Input),
                   "If true then perform background subtraction");
   declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>(
-          "BackgroundProcessingInstructions", "", Direction::Input),
+      std::make_unique<PropertyWithValue<std::string>>("BackgroundProcessingInstructions", "", Direction::Input),
       "These processing instructions will be passed to the background "
       "subtraction algorithm");
 
-  auto algBkg = AlgorithmManager::Instance().createUnmanaged(
-      "ReflectometryBackgroundSubtraction");
+  auto algBkg = AlgorithmManager::Instance().createUnmanaged("ReflectometryBackgroundSubtraction");
   algBkg->initialize();
   copyProperty(algBkg, "BackgroundCalculationMethod");
   copyProperty(algBkg, "DegreeOfPolynomial");
   copyProperty(algBkg, "CostFunction");
 
   setPropertySettings("BackgroundProcessingInstructions",
-                      std::make_unique<Kernel::EnabledWhenProperty>(
-                          "SubtractBackground", IS_EQUAL_TO, "1"));
+                      std::make_unique<Kernel::EnabledWhenProperty>("SubtractBackground", IS_EQUAL_TO, "1"));
   setPropertySettings("BackgroundCalculationMethod",
-                      std::make_unique<Kernel::EnabledWhenProperty>(
-                          "SubtractBackground", IS_EQUAL_TO, "1"));
+                      std::make_unique<Kernel::EnabledWhenProperty>("SubtractBackground", IS_EQUAL_TO, "1"));
 
   setPropertyGroup("SubtractBackground", "Background");
   setPropertyGroup("BackgroundProcessingInstructions", "Background");
@@ -213,16 +184,14 @@ void ReflectometryWorkflowBase2::initBackgroundProperties() {
  */
 void ReflectometryWorkflowBase2::initTransmissionProperties() {
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "FirstTransmissionRun", "", Direction::Input, PropertyMode::Optional),
-      "First transmission run, or the low wavelength transmission run if "
-      "SecondTransmissionRun is also provided.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("FirstTransmissionRun", "", Direction::Input,
+                                                                       PropertyMode::Optional),
+                  "First transmission run, or the low wavelength transmission run if "
+                  "SecondTransmissionRun is also provided.");
 
   auto inputValidator = std::make_shared<WorkspaceUnitValidator>("TOF");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "SecondTransmissionRun", "", Direction::Input,
-                      PropertyMode::Optional, inputValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("SecondTransmissionRun", "", Direction::Input,
+                                                                       PropertyMode::Optional, inputValidator),
                   "Second, high wavelength transmission run. Optional. Causes "
                   "the FirstTransmissionRun to be treated as the low "
                   "wavelength transmission run.");
@@ -230,8 +199,7 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
   initStitchProperties();
 
   declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>(
-          "TransmissionProcessingInstructions", "", Direction::Input),
+      std::make_unique<PropertyWithValue<std::string>>("TransmissionProcessingInstructions", "", Direction::Input),
       "These processing instructions will be passed to the transmission "
       "workspace algorithm");
 
@@ -248,52 +216,42 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
  */
 void ReflectometryWorkflowBase2::initTransmissionOutputProperties() {
   // Add additional output workspace properties
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspaceTransmission", "", Direction::Output,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspaceTransmission", "",
+                                                                       Direction::Output, PropertyMode::Optional),
                   "Output transmissison workspace in wavelength");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspaceFirstTransmission", "", Direction::Output,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspaceFirstTransmission", "",
+                                                                       Direction::Output, PropertyMode::Optional),
                   "First transmissison workspace in wavelength");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspaceSecondTransmission", "",
-                      Direction::Output, PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspaceSecondTransmission", "",
+                                                                       Direction::Output, PropertyMode::Optional),
                   "Second transmissison workspace in wavelength");
 
   // Specify conditional output properties for when debug is on
-  setPropertySettings(
-      "OutputWorkspaceFirstTransmission",
-      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
-  setPropertySettings(
-      "OutputWorkspaceSecondTransmission",
-      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
+  setPropertySettings("OutputWorkspaceFirstTransmission",
+                      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
+  setPropertySettings("OutputWorkspaceSecondTransmission",
+                      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
 }
 
 /** Initialize properties used for stitching transmission runs
  */
 void ReflectometryWorkflowBase2::initStitchProperties() {
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "Params", std::make_shared<RebinParamsValidator>(true)),
-      "A comma separated list of first bin boundary, width, last bin boundary. "
-      "These parameters are used for stitching together transmission runs. "
-      "Values are in wavelength (angstroms). This input is only needed if a "
-      "SecondTransmission run is provided.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Params", std::make_shared<RebinParamsValidator>(true)),
+                  "A comma separated list of first bin boundary, width, last bin boundary. "
+                  "These parameters are used for stitching together transmission runs. "
+                  "Values are in wavelength (angstroms). This input is only needed if a "
+                  "SecondTransmission run is provided.");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
                   "Start wavelength for stitching transmission runs together. "
                   "Only used if a second transmission run is provided.");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
                   "End wavelength (angstroms) for stitching transmission runs "
                   "together. Only used if a second transmission run is "
                   "provided.");
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "ScaleRHSWorkspace", true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace", true, Direction::Input),
                   "Scale the right-hand-side or left-hand-side workspace. "
                   "Only used if a second transmission run is provided.");
 }
@@ -304,8 +262,7 @@ void ReflectometryWorkflowBase2::initStitchProperties() {
  */
 void ReflectometryWorkflowBase2::initAlgorithmicProperties(bool autoDetect) {
 
-  std::vector<std::string> correctionAlgorithms = {
-      "None", "PolynomialCorrection", "ExponentialCorrection"};
+  std::vector<std::string> correctionAlgorithms = {"None", "PolynomialCorrection", "ExponentialCorrection"};
   std::string defaultCorrection = "None";
 
   if (autoDetect) {
@@ -313,21 +270,18 @@ void ReflectometryWorkflowBase2::initAlgorithmicProperties(bool autoDetect) {
     defaultCorrection = "AutoDetect";
   }
 
-  declareProperty("CorrectionAlgorithm", defaultCorrection,
-                  std::make_shared<StringListValidator>(correctionAlgorithms),
+  declareProperty("CorrectionAlgorithm", defaultCorrection, std::make_shared<StringListValidator>(correctionAlgorithms),
                   "The type of correction to perform.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("Polynomial"),
                   "Coefficients to be passed to the PolynomialCorrection"
                   " algorithm.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("C0", 0.0, Direction::Input),
-      "C0 value to be passed to the ExponentialCorrection algorithm.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("C0", 0.0, Direction::Input),
+                  "C0 value to be passed to the ExponentialCorrection algorithm.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("C1", 0.0, Direction::Input),
-      "C1 value to be passed to the ExponentialCorrection algorithm.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("C1", 0.0, Direction::Input),
+                  "C1 value to be passed to the ExponentialCorrection algorithm.");
 
   setPropertyGroup("CorrectionAlgorithm", "Polynomial Corrections");
   setPropertyGroup("Polynomial", "Polynomial Corrections");
@@ -355,15 +309,13 @@ void ReflectometryWorkflowBase2::initMomentumTransferProperties() {
                   "Workspace. Used for Rebinning "
                   "the IvsQ Workspace",
                   Direction::Input);
-  declareProperty("ScaleFactor", Mantid::EMPTY_DBL(),
-                  "Factor you wish to scale Q workspace by.", Direction::Input);
+  declareProperty("ScaleFactor", Mantid::EMPTY_DBL(), "Factor you wish to scale Q workspace by.", Direction::Input);
 }
 
 /** Initialize properties for diagnostics
  */
 void ReflectometryWorkflowBase2::initDebugProperties() {
-  declareProperty("Debug", false,
-                  "Whether to enable the output of extra workspaces.");
+  declareProperty("Debug", false, "Whether to enable the output of extra workspaces.");
   declareProperty("Diagnostics", false,
                   "Whether to enable the output of "
                   "interim workspaces for debugging "
@@ -374,8 +326,7 @@ void ReflectometryWorkflowBase2::initDebugProperties() {
  *
  * @return :: A map with results of validation
  */
-std::map<std::string, std::string>
-ReflectometryWorkflowBase2::validateBackgroundProperties() const {
+std::map<std::string, std::string> ReflectometryWorkflowBase2::validateBackgroundProperties() const {
 
   std::map<std::string, std::string> results;
   return results;
@@ -385,8 +336,7 @@ ReflectometryWorkflowBase2::validateBackgroundProperties() const {
  *
  * @return :: A map with results of validation
  */
-std::map<std::string, std::string>
-ReflectometryWorkflowBase2::validateReductionProperties() const {
+std::map<std::string, std::string> ReflectometryWorkflowBase2::validateReductionProperties() const {
 
   std::map<std::string, std::string> results;
 
@@ -395,13 +345,11 @@ ReflectometryWorkflowBase2::validateReductionProperties() const {
   const std::string reductionType = getProperty("ReductionType");
   if (summationType == "SumInQ") {
     if (reductionType == "Normal") {
-      results["ReductionType"] =
-          "ReductionType must be set if SummationType is SumInQ";
+      results["ReductionType"] = "ReductionType must be set if SummationType is SumInQ";
     }
   } else {
     if (reductionType != "Normal") {
-      results["ReductionType"] =
-          "ReductionType should not be set unless SummationType is SumInQ";
+      results["ReductionType"] = "ReductionType should not be set unless SummationType is SumInQ";
     }
   }
 
@@ -412,8 +360,7 @@ ReflectometryWorkflowBase2::validateReductionProperties() const {
  *
  * @return :: A map with results of validation
  */
-std::map<std::string, std::string>
-ReflectometryWorkflowBase2::validateDirectBeamProperties() const {
+std::map<std::string, std::string> ReflectometryWorkflowBase2::validateDirectBeamProperties() const {
 
   std::map<std::string, std::string> results;
 
@@ -423,12 +370,10 @@ ReflectometryWorkflowBase2::validateDirectBeamProperties() const {
 
     const std::vector<int> directBeamRegion = getProperty("RegionOfDirectBeam");
     if (directBeamRegion.size() != 2) {
-      results["RegionOfDirectBeam"] =
-          "RegionOfDirect beam requires a lower and upper boundary";
+      results["RegionOfDirectBeam"] = "RegionOfDirect beam requires a lower and upper boundary";
     }
     if (directBeamRegion[0] > directBeamRegion[1]) {
-      results["RegionOfDirectBeam"] =
-          "First index must be less or equal than max index";
+      results["RegionOfDirectBeam"] = "First index must be less or equal than max index";
     }
   }
 
@@ -439,27 +384,21 @@ ReflectometryWorkflowBase2::validateDirectBeamProperties() const {
  *
  * @return :: A map with results of validation
  */
-std::map<std::string, std::string>
-ReflectometryWorkflowBase2::validateTransmissionProperties() const {
+std::map<std::string, std::string> ReflectometryWorkflowBase2::validateTransmissionProperties() const {
 
   std::map<std::string, std::string> results;
 
-  MatrixWorkspace_sptr firstTransmissionRun =
-      getProperty("FirstTransmissionRun");
+  MatrixWorkspace_sptr firstTransmissionRun = getProperty("FirstTransmissionRun");
   if (firstTransmissionRun) {
     const auto xUnitFirst = firstTransmissionRun->getAxis(0)->unit()->unitID();
     if (xUnitFirst != "TOF" && xUnitFirst != "Wavelength") {
-      results["FirstTransmissionRun"] =
-          "First transmission run must be in TOF or wavelength";
+      results["FirstTransmissionRun"] = "First transmission run must be in TOF or wavelength";
     }
-    MatrixWorkspace_sptr secondTransmissionRun =
-        getProperty("SecondTransmissionRun");
+    MatrixWorkspace_sptr secondTransmissionRun = getProperty("SecondTransmissionRun");
     if (secondTransmissionRun) {
-      const auto xUnitSecond =
-          secondTransmissionRun->getAxis(0)->unit()->unitID();
+      const auto xUnitSecond = secondTransmissionRun->getAxis(0)->unit()->unitID();
       if (xUnitSecond != "TOF")
-        results["SecondTransmissionRun"] =
-            "Second transmission run must be in TOF";
+        results["SecondTransmissionRun"] = "Second transmission run must be in TOF";
       if (xUnitFirst != "TOF")
         results["FirstTransmissionRun"] = "When a second transmission run is "
                                           "given, first transmission run must "
@@ -474,8 +413,7 @@ ReflectometryWorkflowBase2::validateTransmissionProperties() const {
  *
  * @return :: A map with results of validation
  */
-std::map<std::string, std::string>
-ReflectometryWorkflowBase2::validateWavelengthRanges() const {
+std::map<std::string, std::string> ReflectometryWorkflowBase2::validateWavelengthRanges() const {
 
   std::map<std::string, std::string> results;
 
@@ -483,24 +421,21 @@ ReflectometryWorkflowBase2::validateWavelengthRanges() const {
   double wavMin = getProperty("WavelengthMin");
   double wavMax = getProperty("WavelengthMax");
   if (wavMin > wavMax)
-    results["WavelengthMin"] =
-        "WavelengthMax must be greater than WavelengthMin";
+    results["WavelengthMin"] = "WavelengthMax must be greater than WavelengthMin";
 
   // Validate monitor background range
   double monMin = getProperty("MonitorBackgroundWavelengthMin");
   double monMax = getProperty("MonitorBackgroundWavelengthMax");
   if (monMin > monMax)
-    results["MonitorBackgroundWavelengthMin"] =
-        "MonitorBackgroundWavelengthMax must be greater than "
-        "MonitorBackgroundWavelengthMin";
+    results["MonitorBackgroundWavelengthMin"] = "MonitorBackgroundWavelengthMax must be greater than "
+                                                "MonitorBackgroundWavelengthMin";
 
   // Validate monitor integration range
   double monIntMin = getProperty("MonitorIntegrationWavelengthMin");
   double monIntMax = getProperty("MonitorIntegrationWavelengthMax");
   if (monIntMin > monIntMax)
-    results["MonitorIntegrationWavelengthMax"] =
-        "MonitorIntegrationWavelengthMax must be greater than "
-        "MonitorIntegrationWavelengthMin";
+    results["MonitorIntegrationWavelengthMax"] = "MonitorIntegrationWavelengthMax must be greater than "
+                                                 "MonitorIntegrationWavelengthMin";
 
   return results;
 }
@@ -509,8 +444,7 @@ ReflectometryWorkflowBase2::validateWavelengthRanges() const {
  * @param inputWS :: the workspace to convert
  * @return :: the workspace in wavelength
  */
-MatrixWorkspace_sptr ReflectometryWorkflowBase2::convertToWavelength(
-    const MatrixWorkspace_sptr &inputWS) {
+MatrixWorkspace_sptr ReflectometryWorkflowBase2::convertToWavelength(const MatrixWorkspace_sptr &inputWS) {
 
   auto convertUnitsAlg = createChildAlgorithm("ConvertUnits");
   convertUnitsAlg->initialize();
@@ -518,8 +452,7 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::convertToWavelength(
   convertUnitsAlg->setProperty("Target", "Wavelength");
   convertUnitsAlg->setProperty("AlignBins", true);
   convertUnitsAlg->execute();
-  MatrixWorkspace_sptr outputWS =
-      convertUnitsAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWS = convertUnitsAlg->getProperty("OutputWorkspace");
 
   return outputWS;
 }
@@ -532,9 +465,8 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::convertToWavelength(
  * @param argMax :: the maximum wavelength to crop to if useArgs is true
  * @return :: the cropped workspace
  */
-MatrixWorkspace_sptr ReflectometryWorkflowBase2::cropWavelength(
-    const MatrixWorkspace_sptr &inputWS, const bool useArgs,
-    const double argMin, const double argMax) {
+MatrixWorkspace_sptr ReflectometryWorkflowBase2::cropWavelength(const MatrixWorkspace_sptr &inputWS, const bool useArgs,
+                                                                const double argMin, const double argMax) {
 
   double wavelengthMin = 0.0;
   double wavelengthMax = 0.0;
@@ -555,8 +487,7 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::cropWavelength(
     cropWorkspaceAlg->setProperty("XMin", wavelengthMin);
     cropWorkspaceAlg->setProperty("XMax", wavelengthMax);
     cropWorkspaceAlg->execute();
-    MatrixWorkspace_sptr outputWS =
-        cropWorkspaceAlg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outputWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
 
     return outputWS;
   } catch (std::out_of_range &e) {
@@ -573,17 +504,15 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::cropWavelength(
  * @param sum :: whether the detectors should be summed into a single spectrum
  * @return :: the detector workspace in wavelength
  */
-MatrixWorkspace_sptr
-ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
-                                           const bool convert, const bool sum) {
+MatrixWorkspace_sptr ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS, const bool convert,
+                                                                const bool sum) {
   auto detectorWS = std::move(inputWS);
 
   if (sum) {
     // Use GroupDetectors to extract and sum the detectors of interest
     auto groupAlg = createChildAlgorithm("GroupDetectors");
     groupAlg->initialize();
-    groupAlg->setProperty("GroupingPattern",
-                          m_processingInstructionsWorkspaceIndex);
+    groupAlg->setProperty("GroupingPattern", m_processingInstructionsWorkspaceIndex);
     groupAlg->setProperty("InputWorkspace", detectorWS);
     groupAlg->execute();
     detectorWS = groupAlg->getProperty("OutputWorkspace");
@@ -591,10 +520,9 @@ ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
     // Extract the detectors for the ROI and background. Note that if background
     // instructions are not set then we require the whole workspace so there is
     // nothing to do.
-    auto indices = getProcessingInstructionsAsIndices(m_processingInstructions,
-                                                      detectorWS);
-    auto bkgIndices = getProcessingInstructionsAsIndices(
-        getPropertyValue("BackgroundProcessingInstructions"), detectorWS);
+    auto indices = getProcessingInstructionsAsIndices(m_processingInstructions, detectorWS);
+    auto bkgIndices =
+        getProcessingInstructionsAsIndices(getPropertyValue("BackgroundProcessingInstructions"), detectorWS);
     indices.insert(indices.end(), bkgIndices.cbegin(), bkgIndices.cend());
     std::sort(indices.begin(), indices.end());
     indices.erase(std::unique(indices.begin(), indices.end()), indices.end());
@@ -606,8 +534,7 @@ ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
     detectorWS = extractAlg->getProperty("OutputWorkspace");
     // Update the workspace indicies to match the new workspace
     m_processingInstructionsWorkspaceIndex =
-        convertProcessingInstructionsToWorkspaceIndices(
-            m_processingInstructions, detectorWS);
+        convertProcessingInstructionsToWorkspaceIndices(m_processingInstructions, detectorWS);
   }
 
   if (convert) {
@@ -626,9 +553,8 @@ ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
  * integrated
  * @return :: the monitor workspace in wavelength
  */
-MatrixWorkspace_sptr
-ReflectometryWorkflowBase2::makeMonitorWS(const MatrixWorkspace_sptr &inputWS,
-                                          const bool integratedMonitors) {
+MatrixWorkspace_sptr ReflectometryWorkflowBase2::makeMonitorWS(const MatrixWorkspace_sptr &inputWS,
+                                                               const bool integratedMonitors) {
 
   // Extract the monitor workspace
   const int monitorIndex = getProperty("I0MonitorIndex");
@@ -638,8 +564,7 @@ ReflectometryWorkflowBase2::makeMonitorWS(const MatrixWorkspace_sptr &inputWS,
   cropWorkspaceAlg->setProperty("StartWorkspaceIndex", monitorIndex);
   cropWorkspaceAlg->setProperty("EndWorkspaceIndex", monitorIndex);
   cropWorkspaceAlg->execute();
-  MatrixWorkspace_sptr monitorWS =
-      cropWorkspaceAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr monitorWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
 
   monitorWS = convertToWavelength(monitorWS);
 
@@ -664,20 +589,17 @@ ReflectometryWorkflowBase2::makeMonitorWS(const MatrixWorkspace_sptr &inputWS,
   integrationAlg->initialize();
   integrationAlg->setProperty("InputWorkspace", monitorWS);
 
-  Property *integrationMinProperty =
-      getProperty("MonitorIntegrationWavelengthMin");
+  Property *integrationMinProperty = getProperty("MonitorIntegrationWavelengthMin");
   if (!integrationMinProperty->isDefault()) {
     integrationAlg->setProperty("RangeLower", integrationMinProperty->value());
   }
 
-  Property *integrationMaxProperty =
-      getProperty("MonitorIntegrationWavelengthMax");
+  Property *integrationMaxProperty = getProperty("MonitorIntegrationWavelengthMax");
   if (!integrationMaxProperty->isDefault()) {
     integrationAlg->setProperty("RangeUpper", integrationMaxProperty->value());
   }
   integrationAlg->execute();
-  MatrixWorkspace_sptr integratedMonitor =
-      integrationAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr integratedMonitor = integrationAlg->getProperty("OutputWorkspace");
 
   return integratedMonitor;
 }
@@ -688,9 +610,8 @@ ReflectometryWorkflowBase2::makeMonitorWS(const MatrixWorkspace_sptr &inputWS,
  * @param monitorWS :: the monitor workspace in wavelength
  * @return :: the rebinned detector workspace
  */
-MatrixWorkspace_sptr ReflectometryWorkflowBase2::rebinDetectorsToMonitors(
-    const MatrixWorkspace_sptr &detectorWS,
-    const MatrixWorkspace_sptr &monitorWS) {
+MatrixWorkspace_sptr ReflectometryWorkflowBase2::rebinDetectorsToMonitors(const MatrixWorkspace_sptr &detectorWS,
+                                                                          const MatrixWorkspace_sptr &monitorWS) {
 
   auto rebin = createChildAlgorithm("RebinToWorkspace");
   rebin->initialize();
@@ -707,51 +628,46 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::rebinDetectorsToMonitors(
  * @param alg :: ReflectometryReductionOne algorithm
  * @param instrument :: the instrument attached to the workspace
  */
-void ReflectometryWorkflowBase2::populateMonitorProperties(
-    const IAlgorithm_sptr &alg, const Instrument_const_sptr &instrument) {
+void ReflectometryWorkflowBase2::populateMonitorProperties(const IAlgorithm_sptr &alg,
+                                                           const Instrument_const_sptr &instrument) {
 
-  const auto startOverlap = checkForOptionalInstrumentDefault<double>(
-      this, "StartOverlap", instrument, "TransRunStartOverlap");
+  const auto startOverlap =
+      checkForOptionalInstrumentDefault<double>(this, "StartOverlap", instrument, "TransRunStartOverlap");
   if (startOverlap.is_initialized())
     alg->setProperty("StartOverlap", startOverlap.get());
 
-  const auto endOverlap = checkForOptionalInstrumentDefault<double>(
-      this, "EndOverlap", instrument, "TransRunEndOverlap");
+  const auto endOverlap =
+      checkForOptionalInstrumentDefault<double>(this, "EndOverlap", instrument, "TransRunEndOverlap");
   if (endOverlap.is_initialized())
     alg->setProperty("EndOverlap", endOverlap.get());
 
-  const auto monitorIndex = checkForOptionalInstrumentDefault<int>(
-      this, "I0MonitorIndex", instrument, "I0MonitorIndex");
+  const auto monitorIndex =
+      checkForOptionalInstrumentDefault<int>(this, "I0MonitorIndex", instrument, "I0MonitorIndex");
   if (monitorIndex.is_initialized())
     alg->setProperty("I0MonitorIndex", monitorIndex.get());
 
-  const auto backgroundMin = checkForOptionalInstrumentDefault<double>(
-      this, "MonitorBackgroundWavelengthMin", instrument,
-      "MonitorBackgroundMin");
+  const auto backgroundMin = checkForOptionalInstrumentDefault<double>(this, "MonitorBackgroundWavelengthMin",
+                                                                       instrument, "MonitorBackgroundMin");
   if (backgroundMin.is_initialized())
     alg->setProperty("MonitorBackgroundWavelengthMin", backgroundMin.get());
 
-  const auto backgroundMax = checkForOptionalInstrumentDefault<double>(
-      this, "MonitorBackgroundWavelengthMax", instrument,
-      "MonitorBackgroundMax");
+  const auto backgroundMax = checkForOptionalInstrumentDefault<double>(this, "MonitorBackgroundWavelengthMax",
+                                                                       instrument, "MonitorBackgroundMax");
   if (backgroundMax.is_initialized())
     alg->setProperty("MonitorBackgroundWavelengthMax", backgroundMax.get());
 
-  const auto integrationMin = checkForOptionalInstrumentDefault<double>(
-      this, "MonitorIntegrationWavelengthMin", instrument,
-      "MonitorIntegralMin");
+  const auto integrationMin = checkForOptionalInstrumentDefault<double>(this, "MonitorIntegrationWavelengthMin",
+                                                                        instrument, "MonitorIntegralMin");
   if (integrationMin.is_initialized())
     alg->setProperty("MonitorIntegrationWavelengthMin", integrationMin.get());
 
-  const auto integrationMax = checkForOptionalInstrumentDefault<double>(
-      this, "MonitorIntegrationWavelengthMax", instrument,
-      "MonitorIntegralMax");
+  const auto integrationMax = checkForOptionalInstrumentDefault<double>(this, "MonitorIntegrationWavelengthMax",
+                                                                        instrument, "MonitorIntegralMax");
   if (integrationMax.is_initialized())
     alg->setProperty("MonitorIntegrationWavelengthMax", integrationMax.get());
 
-  const auto integrationBool = checkForOptionalInstrumentDefault<bool>(
-      this, "NormalizeByIntegratedMonitors", instrument,
-      "NormalizeByIntegratedMonitors");
+  const auto integrationBool = checkForOptionalInstrumentDefault<bool>(this, "NormalizeByIntegratedMonitors",
+                                                                       instrument, "NormalizeByIntegratedMonitors");
   if (integrationBool.is_initialized())
     alg->setProperty("NormalizeByIntegratedMonitors", integrationBool.get());
 }
@@ -761,17 +677,14 @@ void ReflectometryWorkflowBase2::populateMonitorProperties(
  * @param inputWS :: the input workspace
  * @return :: processing instructions as a string
  */
-std::string ReflectometryWorkflowBase2::findProcessingInstructions(
-    const Instrument_const_sptr &instrument,
-    const MatrixWorkspace_sptr &inputWS) const {
+std::string ReflectometryWorkflowBase2::findProcessingInstructions(const Instrument_const_sptr &instrument,
+                                                                   const MatrixWorkspace_sptr &inputWS) const {
 
   const std::string analysisMode = getProperty("AnalysisMode");
 
   if (analysisMode == "PointDetectorAnalysis") {
-    const std::vector<double> pointStart =
-        instrument->getNumberParameter("PointDetectorStart");
-    const std::vector<double> pointStop =
-        instrument->getNumberParameter("PointDetectorStop");
+    const std::vector<double> pointStart = instrument->getNumberParameter("PointDetectorStart");
+    const std::vector<double> pointStop = instrument->getNumberParameter("PointDetectorStop");
 
     if (pointStart.empty() || pointStop.empty())
       throw std::runtime_error("Could not find 'PointDetectorStart' and/or "
@@ -789,16 +702,15 @@ std::string ReflectometryWorkflowBase2::findProcessingInstructions(
   }
 
   else {
-    const std::vector<double> multiStart =
-        instrument->getNumberParameter("MultiDetectorStart");
+    const std::vector<double> multiStart = instrument->getNumberParameter("MultiDetectorStart");
     if (multiStart.empty())
       throw std::runtime_error("Could not find 'MultiDetectorStart in "
                                "parameter file. Please provide processing "
                                "instructions manually or set analysis mode to "
                                "'PointDetectorAnalysis'.");
 
-    auto instructions = std::to_string(static_cast<int>(multiStart[0])) + ":" +
-                        std::to_string(inputWS->getNumberHistograms() - 1);
+    auto instructions =
+        std::to_string(static_cast<int>(multiStart[0])) + ":" + std::to_string(inputWS->getNumberHistograms() - 1);
     return instructions;
   }
 }
@@ -808,8 +720,7 @@ std::string ReflectometryWorkflowBase2::findProcessingInstructions(
  * @param alg :: The algorithm to populate parameters for
  * @return Boolean, whether or not any transmission runs were found
  */
-bool ReflectometryWorkflowBase2::populateTransmissionProperties(
-    const IAlgorithm_sptr &alg) const {
+bool ReflectometryWorkflowBase2::populateTransmissionProperties(const IAlgorithm_sptr &alg) const {
 
   bool transRunsExist = false;
 
@@ -823,8 +734,7 @@ bool ReflectometryWorkflowBase2::populateTransmissionProperties(
       alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
       alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
       alg->setPropertyValue("Params", getPropertyValue("Params"));
-      alg->setProperty("ScaleRHSWorkspace",
-                       getPropertyValue("ScaleRHSWorkspace"));
+      alg->setProperty("ScaleRHSWorkspace", getPropertyValue("ScaleRHSWorkspace"));
     }
   }
 
@@ -839,8 +749,7 @@ bool ReflectometryWorkflowBase2::populateTransmissionProperties(
  * @return :: the value of theta found from the logs
  * @throw :: NotFoundError if the log value was not found
  */
-double ReflectometryWorkflowBase2::getThetaFromLogs(
-    const MatrixWorkspace_sptr &inputWs, const std::string &logName) {
+double ReflectometryWorkflowBase2::getThetaFromLogs(const MatrixWorkspace_sptr &inputWs, const std::string &logName) {
   double theta = -1.;
   const Mantid::API::Run &run = inputWs->run();
   Property *logData = run.getLogData(logName);
@@ -865,8 +774,7 @@ double ReflectometryWorkflowBase2::getThetaFromLogs(
  *"_".
  *   if the workspace doesn't have the run number an empty string is returned.
  */
-std::string
-ReflectometryWorkflowBase2::getRunNumber(MatrixWorkspace const &ws) const {
+std::string ReflectometryWorkflowBase2::getRunNumber(MatrixWorkspace const &ws) const {
   auto const &run = ws.run();
   if (run.hasProperty("run_number")) {
     return "_" + run.getPropertyValueAsType<std::string>("run_number");
@@ -874,16 +782,13 @@ ReflectometryWorkflowBase2::getRunNumber(MatrixWorkspace const &ws) const {
   return "";
 }
 
-std::string
-ReflectometryWorkflowBase2::convertProcessingInstructionsToSpectrumNumbers(
-    const std::string &instructions,
-    const Mantid::API::MatrixWorkspace_const_sptr &ws) const {
+std::string ReflectometryWorkflowBase2::convertProcessingInstructionsToSpectrumNumbers(
+    const std::string &instructions, const Mantid::API::MatrixWorkspace_const_sptr &ws) const {
   std::string converted = "";
   std::string currentNumber = "";
   std::string ignoreThese = "-,:+";
   for (const char instruction : instructions) {
-    if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) !=
-        ignoreThese.end()) {
+    if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) != ignoreThese.end()) {
       // Found a spacer so add currentNumber to converted after seperator
       converted.append(convertToSpectrumNumber(currentNumber, ws));
       converted.push_back(instruction);
@@ -896,43 +801,37 @@ ReflectometryWorkflowBase2::convertProcessingInstructionsToSpectrumNumbers(
   converted.append(convertToSpectrumNumber(currentNumber, ws));
   return converted;
 }
-std::string ReflectometryWorkflowBase2::convertToSpectrumNumber(
-    const std::string &workspaceIndex,
-    const Mantid::API::MatrixWorkspace_const_sptr &ws) const {
+std::string
+ReflectometryWorkflowBase2::convertToSpectrumNumber(const std::string &workspaceIndex,
+                                                    const Mantid::API::MatrixWorkspace_const_sptr &ws) const {
   auto wsIndx = convertStringNumToInt(workspaceIndex);
-  std::string specId = std::to_string(
-      static_cast<int32_t>(ws->indexInfo().spectrumNumber(wsIndx)));
+  std::string specId = std::to_string(static_cast<int32_t>(ws->indexInfo().spectrumNumber(wsIndx)));
   return specId;
 }
 
-void ReflectometryWorkflowBase2::convertProcessingInstructions(
-    const Instrument_const_sptr &instrument,
-    const MatrixWorkspace_sptr &inputWS) {
+void ReflectometryWorkflowBase2::convertProcessingInstructions(const Instrument_const_sptr &instrument,
+                                                               const MatrixWorkspace_sptr &inputWS) {
   m_processingInstructions = getPropertyValue("ProcessingInstructions");
   if (!getPointerToProperty("ProcessingInstructions")->isDefault()) {
     m_processingInstructionsWorkspaceIndex =
-        convertProcessingInstructionsToWorkspaceIndices(
-            m_processingInstructions, inputWS);
+        convertProcessingInstructionsToWorkspaceIndices(m_processingInstructions, inputWS);
   } else {
-    m_processingInstructionsWorkspaceIndex =
-        findProcessingInstructions(std::move(instrument), inputWS);
-    m_processingInstructions = convertProcessingInstructionsToSpectrumNumbers(
-        m_processingInstructionsWorkspaceIndex, inputWS);
+    m_processingInstructionsWorkspaceIndex = findProcessingInstructions(std::move(instrument), inputWS);
+    m_processingInstructions =
+        convertProcessingInstructionsToSpectrumNumbers(m_processingInstructionsWorkspaceIndex, inputWS);
   }
 }
 
-void ReflectometryWorkflowBase2::convertProcessingInstructions(
-    const MatrixWorkspace_sptr &inputWS) {
+void ReflectometryWorkflowBase2::convertProcessingInstructions(const MatrixWorkspace_sptr &inputWS) {
   m_processingInstructions = getPropertyValue("ProcessingInstructions");
   m_processingInstructionsWorkspaceIndex =
-      convertProcessingInstructionsToWorkspaceIndices(m_processingInstructions,
-                                                      inputWS);
+      convertProcessingInstructionsToWorkspaceIndices(m_processingInstructions, inputWS);
 }
 
 // Create an on-the-fly property to set an output workspace from a child
 // algorithm, if the child has that output value set
-void ReflectometryWorkflowBase2::setWorkspacePropertyFromChild(
-    const Algorithm_sptr &alg, std::string const &propertyName) {
+void ReflectometryWorkflowBase2::setWorkspacePropertyFromChild(const Algorithm_sptr &alg,
+                                                               std::string const &propertyName) {
   if (alg->isDefault(propertyName))
     return;
 

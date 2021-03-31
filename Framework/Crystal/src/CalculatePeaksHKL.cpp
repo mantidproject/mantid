@@ -24,31 +24,23 @@ namespace Crystal {
 DECLARE_ALGORITHM(CalculatePeaksHKL)
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string CalculatePeaksHKL::name() const {
-  return "CalculatePeaksHKL";
-}
+const std::string CalculatePeaksHKL::name() const { return "CalculatePeaksHKL"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CalculatePeaksHKL::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CalculatePeaksHKL::category() const {
-  return "Crystal\\Peaks";
-}
+const std::string CalculatePeaksHKL::category() const { return "Crystal\\Peaks"; }
 
 /** Initialize the algorithm's properties.
  */
 void CalculatePeaksHKL::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
-                            "PeaksWorkspace", "", Direction::InOut),
+  this->declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  this->declareProperty(
-      "OverWrite", false,
-      "Overwrite existing miller indices as well as empty ones.");
+  this->declareProperty("OverWrite", false, "Overwrite existing miller indices as well as empty ones.");
 
-  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
-                            "NumIndexed", 0, Direction::Output),
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
                         "Gets set with the number of indexed peaks.");
 }
 

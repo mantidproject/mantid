@@ -77,10 +77,8 @@ public:
     std::vector<int> peak_index_vec;
     peak_index_vec.emplace_back(0);
     const std::string ws_name("peakcenter1");
-    const std::string peak_center_ws_name =
-        genPeakCenterWorkspace(peak_index_vec, ws_name);
-    const std::string fit_window_ws_name =
-        genFitWindowWorkspace(peak_index_vec, "peakwindow1");
+    const std::string peak_center_ws_name = genPeakCenterWorkspace(peak_index_vec, ws_name);
+    const std::string fit_window_ws_name = genFitWindowWorkspace(peak_index_vec, "peakwindow1");
 
     // Initialize FitPeak
     FitPeaks fitpeaks;
@@ -88,15 +86,12 @@ public:
     fitpeaks.initialize();
     TS_ASSERT(fitpeaks.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("InputWorkspace", data_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 1));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakFunction", "Gaussian"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakCentersWorkspace", peak_center_ws_name));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitPeakWindowWorkspace", fit_window_ws_name))
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCentersWorkspace", peak_center_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitPeakWindowWorkspace", fit_window_ws_name))
 
     fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3");
     fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3");
@@ -107,17 +102,13 @@ public:
     TS_ASSERT(fitpeaks.isExecuted());
     if (fitpeaks.isExecuted()) {
       // check output workspaces
-      TS_ASSERT(
-          API::AnalysisDataService::Instance().doesExist("PeakPositionsWS3"));
-      TS_ASSERT(
-          API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
-      TS_ASSERT(
-          API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakPositionsWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
 
       // about the parameters
       API::MatrixWorkspace_sptr peak_params_ws =
-          std::dynamic_pointer_cast<API::MatrixWorkspace>(
-              AnalysisDataService::Instance().retrieve("PeakPositionsWS3"));
+          std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PeakPositionsWS3"));
       TS_ASSERT(peak_params_ws);
       // 2 spectra
       TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 2);
@@ -159,18 +150,14 @@ public:
     fitpeaks.initialize();
     TS_ASSERT(fitpeaks.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 2));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.0, 10.0"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakParameterNames", peakparnames));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterNames", peakparnames));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterValues", peakparvalues));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
 
     fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS");
@@ -187,20 +174,17 @@ public:
 
     // get fitted peak data
     API::MatrixWorkspace_sptr main_out_ws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("PeakPositionsWS"));
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PeakPositionsWS"));
     TS_ASSERT(main_out_ws);
     TS_ASSERT_EQUALS(main_out_ws->getNumberHistograms(), 3);
 
     API::MatrixWorkspace_sptr plot_ws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("FittedPeaksWS"));
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("FittedPeaksWS"));
     TS_ASSERT(plot_ws);
     TS_ASSERT_EQUALS(plot_ws->getNumberHistograms(), 3);
 
     API::ITableWorkspace_sptr param_ws =
-        std::dynamic_pointer_cast<API::ITableWorkspace>(
-            AnalysisDataService::Instance().retrieve("PeakParametersWS"));
+        std::dynamic_pointer_cast<API::ITableWorkspace>(AnalysisDataService::Instance().retrieve("PeakParametersWS"));
     TS_ASSERT(param_ws);
     TS_ASSERT_EQUALS(param_ws->rowCount(), 6);
 
@@ -228,16 +212,11 @@ public:
     TS_ASSERT_DELTA(ws1peak1_width, 0.12, 1E-6);
 
     // check the fitted peak workspace
-    API::MatrixWorkspace_sptr data_ws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            API::AnalysisDataService::Instance().retrieve(
-                m_inputWorkspaceName));
-    TS_ASSERT_EQUALS(plot_ws->histogram(0).x().size(),
-                     data_ws->histogram(0).x().size());
-    TS_ASSERT_DELTA(plot_ws->histogram(0).x().front(),
-                    data_ws->histogram(0).x().front(), 1E-10);
-    TS_ASSERT_DELTA(plot_ws->histogram(0).x().back(),
-                    data_ws->histogram(0).x().back(), 1E-10);
+    API::MatrixWorkspace_sptr data_ws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
+        API::AnalysisDataService::Instance().retrieve(m_inputWorkspaceName));
+    TS_ASSERT_EQUALS(plot_ws->histogram(0).x().size(), data_ws->histogram(0).x().size());
+    TS_ASSERT_DELTA(plot_ws->histogram(0).x().front(), data_ws->histogram(0).x().front(), 1E-10);
+    TS_ASSERT_DELTA(plot_ws->histogram(0).x().back(), data_ws->histogram(0).x().back(), 1E-10);
 
     // clean up
     AnalysisDataService::Instance().remove(m_inputWorkspaceName);
@@ -270,18 +249,14 @@ public:
     fitpeaks.initialize();
     TS_ASSERT(fitpeaks.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 2));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.0, 10.0"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakParameterNames", peakparnames));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterNames", peakparnames));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterValues", peakparvalues));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("RawPeakParameters", false));
 
@@ -299,20 +274,17 @@ public:
 
     // get fitted peak data
     API::MatrixWorkspace_sptr main_out_ws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("PeakPositionsWS"));
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PeakPositionsWS"));
     TS_ASSERT(main_out_ws);
     TS_ASSERT_EQUALS(main_out_ws->getNumberHistograms(), 3);
 
     API::MatrixWorkspace_sptr plot_ws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("FittedPeaksWS"));
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("FittedPeaksWS"));
     TS_ASSERT(plot_ws);
     TS_ASSERT_EQUALS(plot_ws->getNumberHistograms(), 3);
 
     API::ITableWorkspace_sptr param_ws =
-        std::dynamic_pointer_cast<API::ITableWorkspace>(
-            AnalysisDataService::Instance().retrieve("PeakParametersWS"));
+        std::dynamic_pointer_cast<API::ITableWorkspace>(AnalysisDataService::Instance().retrieve("PeakParametersWS"));
     TS_ASSERT(param_ws);
     TS_ASSERT_EQUALS(param_ws->rowCount(), 6);
 
@@ -341,16 +313,11 @@ public:
     TS_ASSERT_DELTA(ws1peak1_width, 0.12 * 2.3548, 1E-4);
 
     // check the fitted peak workspace
-    API::MatrixWorkspace_sptr data_ws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            API::AnalysisDataService::Instance().retrieve(
-                m_inputWorkspaceName));
-    TS_ASSERT_EQUALS(plot_ws->histogram(0).x().size(),
-                     data_ws->histogram(0).x().size());
-    TS_ASSERT_DELTA(plot_ws->histogram(0).x().front(),
-                    data_ws->histogram(0).x().front(), 1E-10);
-    TS_ASSERT_DELTA(plot_ws->histogram(0).x().back(),
-                    data_ws->histogram(0).x().back(), 1E-10);
+    API::MatrixWorkspace_sptr data_ws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
+        API::AnalysisDataService::Instance().retrieve(m_inputWorkspaceName));
+    TS_ASSERT_EQUALS(plot_ws->histogram(0).x().size(), data_ws->histogram(0).x().size());
+    TS_ASSERT_DELTA(plot_ws->histogram(0).x().front(), data_ws->histogram(0).x().front(), 1E-10);
+    TS_ASSERT_DELTA(plot_ws->histogram(0).x().back(), data_ws->histogram(0).x().back(), 1E-10);
 
     // clean up
     AnalysisDataService::Instance().remove(m_inputWorkspaceName);
@@ -385,27 +352,22 @@ public:
     fit_peaks_alg.initialize();
     TS_ASSERT(fit_peaks_alg.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        fit_peaks_alg.setProperty("InputWorkspace", input_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("InputWorkspace", input_ws_name));
 
-    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
-        "PeakCenters", "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0."
-                       "6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,"
-                       "1.5133,2.1401"));
-    TS_ASSERT_THROWS_NOTHING(
-        fit_peaks_alg.setProperty("StartWorkspaceIndex", 3));
-    TS_ASSERT_THROWS_NOTHING(
-        fit_peaks_alg.setProperty("StopWorkspaceIndex", 3));
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("PeakCenters",
+                                                       "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0."
+                                                       "6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,"
+                                                       "1.5133,2.1401"));
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("StartWorkspaceIndex", 3));
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("StopWorkspaceIndex", 3));
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("FitFromRight", false));
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("HighBackground", true));
-    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
-        "PeakWidthPercent", 0.016)); // typical powgen's
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("PeakWidthPercent", 0.016)); // typical powgen's
 
     std::string peak_pos_ws_name("PG3_733_peak_positions");
     std::string peak_param_ws_name("PG3_733_peak_params");
     fit_peaks_alg.setProperty("OutputWorkspace", peak_pos_ws_name);
-    fit_peaks_alg.setProperty("OutputPeakParametersWorkspace",
-                              peak_param_ws_name);
+    fit_peaks_alg.setProperty("OutputPeakParametersWorkspace", peak_param_ws_name);
 
     fit_peaks_alg.execute();
     TS_ASSERT(fit_peaks_alg.isExecuted());
@@ -414,10 +376,8 @@ public:
 
     // get result
     bool peak_pos_ws_exist, peak_param_ws_exist;
-    API::MatrixWorkspace_sptr peak_pos_ws =
-        CheckAndRetrieveMatrixWorkspace(peak_pos_ws_name, &peak_pos_ws_exist);
-    API::ITableWorkspace_sptr peak_param_ws = CheckAndRetrieveTableWorkspace(
-        peak_param_ws_name, &peak_param_ws_exist);
+    API::MatrixWorkspace_sptr peak_pos_ws = CheckAndRetrieveMatrixWorkspace(peak_pos_ws_name, &peak_pos_ws_exist);
+    API::ITableWorkspace_sptr peak_param_ws = CheckAndRetrieveTableWorkspace(peak_param_ws_name, &peak_param_ws_exist);
 
     // fitted peak position workspace.  should contain 1 spectrum for workspace
     // index 3
@@ -467,27 +427,23 @@ public:
     fit_peaks_alg.initialize();
     TS_ASSERT(fit_peaks_alg.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        fit_peaks_alg.setProperty("InputWorkspace", input_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("InputWorkspace", input_ws_name));
 
-    TS_ASSERT_THROWS_NOTHING(
-        fit_peaks_alg.setProperty("BackgroundType", "Quadratic"));
-    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
-        "PeakCenters", "0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1."
-                       "2356, 1.5133, 2.1401"));
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("BackgroundType", "Quadratic"));
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("PeakCenters",
+                                                       "0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1."
+                                                       "2356, 1.5133, 2.1401"));
     fit_peaks_alg.setProperty("StartWorkspaceIndex", 0);
     fit_peaks_alg.setProperty("StopWorkspaceIndex", 3);
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("FitFromRight", true));
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("HighBackground", true));
-    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
-        "PeakWidthPercent", 0.016)); // typical powgen's
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("PeakWidthPercent", 0.016)); // typical powgen's
 
     std::string output_ws_name("PG3_733_stripped");
     std::string peak_pos_ws_name("PG3_733_peak_positions");
     std::string peak_param_ws_name("PG3_733_peak_params");
     fit_peaks_alg.setProperty("OutputWorkspace", peak_pos_ws_name);
-    fit_peaks_alg.setProperty("OutputPeakParametersWorkspace",
-                              peak_param_ws_name);
+    fit_peaks_alg.setProperty("OutputPeakParametersWorkspace", peak_param_ws_name);
     fit_peaks_alg.setProperty("FittedPeaksWorkspace", output_ws_name);
 
     fit_peaks_alg.execute();
@@ -497,12 +453,9 @@ public:
 
     // Check result
     bool peak_pos_ws_exist, peak_param_ws_exist, fitted_peak_ws_exist;
-    API::MatrixWorkspace_sptr peak_pos_ws =
-        CheckAndRetrieveMatrixWorkspace(peak_pos_ws_name, &peak_pos_ws_exist);
-    API::MatrixWorkspace_sptr fitted_peak_ws =
-        CheckAndRetrieveMatrixWorkspace(output_ws_name, &fitted_peak_ws_exist);
-    API::ITableWorkspace_sptr peak_param_ws = CheckAndRetrieveTableWorkspace(
-        peak_param_ws_name, &peak_param_ws_exist);
+    API::MatrixWorkspace_sptr peak_pos_ws = CheckAndRetrieveMatrixWorkspace(peak_pos_ws_name, &peak_pos_ws_exist);
+    API::MatrixWorkspace_sptr fitted_peak_ws = CheckAndRetrieveMatrixWorkspace(output_ws_name, &fitted_peak_ws_exist);
+    API::ITableWorkspace_sptr peak_param_ws = CheckAndRetrieveTableWorkspace(peak_param_ws_name, &peak_param_ws_exist);
 
     // check peak positions
     if (peak_pos_ws_exist) {
@@ -556,8 +509,8 @@ public:
     createBackToBackExponentialParameters(peakparnames, peakparvalues, false);
 
     // Input data workspace contains 16 spectra
-    auto inputWS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(input_ws_name));
+    auto inputWS =
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve(input_ws_name));
     TS_ASSERT(inputWS);
     TS_ASSERT_EQUALS(inputWS->getNumberHistograms(), 16);
 
@@ -570,22 +523,15 @@ public:
     fitpeaks.initialize();
     TS_ASSERT(fitpeaks.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("InputWorkspace", input_ws_name));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
-        "StartWorkspaceIndex", static_cast<int>(start_ws_index)));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
-        "StopWorkspaceIndex", static_cast<int>(stop_ws_index)));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakFunction", "BackToBackExponential"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", input_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", static_cast<int>(start_ws_index)));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", static_cast<int>(stop_ws_index)));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakFunction", "BackToBackExponential"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("BackgroundType", "Linear"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "1.0758"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowBoundaryList", "1.05, 1.11"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakParameterNames", peakparnames));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "1.05, 1.11"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterNames", peakparnames));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterValues", peakparvalues));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
 
@@ -603,8 +549,7 @@ public:
 
     // About the parameters
     API::MatrixWorkspace_sptr peak_pos_ws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(peak_pos_ws_name));
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve(peak_pos_ws_name));
     // Check peak values
     // Only the number of selected spectra will be recorded
     size_t expectedNumSpectra = stop_ws_index - start_ws_index + 1;
@@ -618,8 +563,8 @@ public:
     }
 
     // Get the table workspace
-    auto param_table = std::dynamic_pointer_cast<API::ITableWorkspace>(
-        AnalysisDataService::Instance().retrieve(param_ws_name));
+    auto param_table =
+        std::dynamic_pointer_cast<API::ITableWorkspace>(AnalysisDataService::Instance().retrieve(param_ws_name));
     TS_ASSERT(param_table);
 
     // Columns: 0. wsindex, 1. peakindex, 2. I, 3. A, 4. B, 5. X0, 6. S, 7.
@@ -629,15 +574,12 @@ public:
 
     // Verify intensity: between 90 and 150
     for (size_t i = 0; i < expectedNumSpectra; ++i) {
-      TS_ASSERT(param_table->cell<double>(i, 2) > 90. &&
-                param_table->cell<double>(i, 2) < 150);
+      TS_ASSERT(param_table->cell<double>(i, 2) > 90. && param_table->cell<double>(i, 2) < 150);
     }
     // workspace index 10, 11 and 12 are smallest with output index at 4, 5 and
     // 6
-    TS_ASSERT(param_table->cell<double>(0, 2) >
-              param_table->cell<double>(4, 2));
-    TS_ASSERT(param_table->cell<double>(8, 2) >
-              param_table->cell<double>(5, 2));
+    TS_ASSERT(param_table->cell<double>(0, 2) > param_table->cell<double>(4, 2));
+    TS_ASSERT(param_table->cell<double>(8, 2) > param_table->cell<double>(5, 2));
 
     // Clean up
     AnalysisDataService::Instance().remove(input_ws_name);
@@ -656,8 +598,7 @@ public:
     // Generate input workspace
     std::string input_ws_name = generateTestDataBackToBackExponential();
     API::MatrixWorkspace_sptr input_ws =
-        std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(input_ws_name));
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(input_ws_name));
 
     // Specify output workspaces names
     std::string peak_pos_ws_name("PeakPositionsB2BmPmS");
@@ -678,24 +619,16 @@ public:
     fitpeaks.initialize();
     TS_ASSERT(fitpeaks.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("InputWorkspace", input_ws_name));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
-        "StartWorkspaceIndex", static_cast<int>(min_ws_index)));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
-        "StopWorkspaceIndex", static_cast<int>(max_ws_index)));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakFunction", "BackToBackExponential"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", input_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", static_cast<int>(min_ws_index)));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", static_cast<int>(max_ws_index)));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakFunction", "BackToBackExponential"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("BackgroundType", "Linear"));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
-        "PeakCenters", "0.728299, 0.817, 0.89198, 1.0758"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "0.728299, 0.817, 0.89198, 1.0758"));
     TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowBoundaryList",
-                             "0.71, 0.76, 0.80, 0.84, 0.87, 0.91, 1.05, 1.11"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakParameterNames", peakparnames));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+        fitpeaks.setProperty("FitWindowBoundaryList", "0.71, 0.76, 0.80, 0.84, 0.87, 0.91, 1.05, 1.11"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterNames", peakparnames));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterValues", peakparvalues));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
 
@@ -708,12 +641,9 @@ public:
 
     // Verify the existence of output workspaces
     bool peak_pos_ws_exist, peak_param_ws_exist, fitted_ws_exist;
-    API::MatrixWorkspace_sptr peak_pos_ws =
-        CheckAndRetrieveMatrixWorkspace(peak_pos_ws_name, &peak_pos_ws_exist);
-    API::MatrixWorkspace_sptr model_ws =
-        CheckAndRetrieveMatrixWorkspace(model_ws_name, &fitted_ws_exist);
-    API::ITableWorkspace_sptr peak_param_ws =
-        CheckAndRetrieveTableWorkspace(param_ws_name, &peak_param_ws_exist);
+    API::MatrixWorkspace_sptr peak_pos_ws = CheckAndRetrieveMatrixWorkspace(peak_pos_ws_name, &peak_pos_ws_exist);
+    API::MatrixWorkspace_sptr model_ws = CheckAndRetrieveMatrixWorkspace(model_ws_name, &fitted_ws_exist);
+    API::ITableWorkspace_sptr peak_param_ws = CheckAndRetrieveTableWorkspace(param_ws_name, &peak_param_ws_exist);
 
     size_t num_histograms = max_ws_index - min_ws_index + 1;
 
@@ -758,8 +688,7 @@ public:
     // Verify calcualated model
     if (fitted_ws_exist) {
       // workspace for calculated peaks from fitted data
-      TS_ASSERT_EQUALS(model_ws->getNumberHistograms(),
-                       input_ws->getNumberHistograms());
+      TS_ASSERT_EQUALS(model_ws->getNumberHistograms(), input_ws->getNumberHistograms());
     }
 
     if (peak_param_ws_exist) {
@@ -805,8 +734,7 @@ public:
     pLoaderPF->execute();
 
     API::MatrixWorkspace_sptr input_ws =
-        std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(input_ws_name));
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(input_ws_name));
 
     // Specify output workspaces names
     std::string peak_pos_ws_name("PeakPositionsB2BmPmS");
@@ -822,20 +750,14 @@ public:
     fitpeaks.initialize();
     TS_ASSERT(fitpeaks.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("InputWorkspace", input_ws_name));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
-        "StartWorkspaceIndex", static_cast<int>(min_ws_index)));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
-        "StopWorkspaceIndex", static_cast<int>(max_ws_index)));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakFunction", "BackToBackExponential"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", input_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", static_cast<int>(min_ws_index)));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", static_cast<int>(max_ws_index)));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakFunction", "BackToBackExponential"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("BackgroundType", "Linear"));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
-        "PeakCenters", "0.728299, 0.817, 0.89198, 1.0758"));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
-        "FitWindowBoundaryList",
-        "0.71, 0.76, 0.80, 0.84, 0.885, 0.91, 1.05, 1.11"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "0.728299, 0.817, 0.89198, 1.0758"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowBoundaryList", "0.71, 0.76, 0.80, 0.84, 0.885, 0.91, 1.05, 1.11"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
 
@@ -848,12 +770,9 @@ public:
 
     // Verify the existence of output workspaces
     bool peak_pos_ws_exist, peak_param_ws_exist, fitted_ws_exist;
-    API::MatrixWorkspace_sptr peak_pos_ws =
-        CheckAndRetrieveMatrixWorkspace(peak_pos_ws_name, &peak_pos_ws_exist);
-    API::MatrixWorkspace_sptr model_ws =
-        CheckAndRetrieveMatrixWorkspace(model_ws_name, &fitted_ws_exist);
-    API::ITableWorkspace_sptr peak_param_ws =
-        CheckAndRetrieveTableWorkspace(param_ws_name, &peak_param_ws_exist);
+    API::MatrixWorkspace_sptr peak_pos_ws = CheckAndRetrieveMatrixWorkspace(peak_pos_ws_name, &peak_pos_ws_exist);
+    API::MatrixWorkspace_sptr model_ws = CheckAndRetrieveMatrixWorkspace(model_ws_name, &fitted_ws_exist);
+    API::ITableWorkspace_sptr peak_param_ws = CheckAndRetrieveTableWorkspace(param_ws_name, &peak_param_ws_exist);
 
     size_t num_histograms = max_ws_index - min_ws_index + 1;
 
@@ -865,8 +784,7 @@ public:
       // workspace for peak positions from fitted value: must be a 16 x 4
       // workspace2D
       TS_ASSERT_EQUALS(peak_pos_ws->getNumberHistograms(), num_histograms);
-      TS_ASSERT_EQUALS(peak_pos_ws->histogram(0).y().size(),
-                       exp_positions.size());
+      TS_ASSERT_EQUALS(peak_pos_ws->histogram(0).y().size(), exp_positions.size());
 
       for (size_t ih = 0; ih < num_histograms; ++ih) {
         // Get histogram
@@ -890,14 +808,12 @@ public:
     // Verify calcualated model
     if (fitted_ws_exist) {
       // workspace for calculated peaks from fitted data
-      TS_ASSERT_EQUALS(model_ws->getNumberHistograms(),
-                       input_ws->getNumberHistograms());
+      TS_ASSERT_EQUALS(model_ws->getNumberHistograms(), input_ws->getNumberHistograms());
     }
 
     if (peak_param_ws_exist) {
       // workspace for calcualted peak parameters
-      TS_ASSERT_EQUALS(peak_param_ws->rowCount(),
-                       (exp_positions.size() * num_histograms));
+      TS_ASSERT_EQUALS(peak_param_ws->rowCount(), (exp_positions.size() * num_histograms));
     }
 
     // clean
@@ -931,29 +847,23 @@ public:
     fitpeaks.initialize();
     TS_ASSERT(fitpeaks.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 2));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.0, 10.0"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakParameterNames", peakparnames));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterNames", peakparnames));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterValues", peakparvalues));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("ConstrainPeakPositions", true));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("ConstrainPeakPositions", true));
 
     fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS");
     fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS");
 
     fitpeaks.setProperty("RawPeakParameters", true);
     fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS");
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setPropertyValue(
-        "OutputParameterFitErrorsWorkspace", "FitErrorsWS"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setPropertyValue("OutputParameterFitErrorsWorkspace", "FitErrorsWS"));
 
     fitpeaks.execute();
 
@@ -964,25 +874,21 @@ public:
 
     // get fitted peak data
     API::MatrixWorkspace_sptr main_out_ws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("PeakPositionsWS"));
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PeakPositionsWS"));
     TS_ASSERT(main_out_ws);
     TS_ASSERT_EQUALS(main_out_ws->getNumberHistograms(), 3);
 
     API::MatrixWorkspace_sptr plot_ws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("FittedPeaksWS"));
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("FittedPeaksWS"));
     TS_ASSERT(plot_ws);
     TS_ASSERT_EQUALS(plot_ws->getNumberHistograms(), 3);
 
     API::ITableWorkspace_sptr param_ws =
-        std::dynamic_pointer_cast<API::ITableWorkspace>(
-            AnalysisDataService::Instance().retrieve("PeakParametersWS"));
+        std::dynamic_pointer_cast<API::ITableWorkspace>(AnalysisDataService::Instance().retrieve("PeakParametersWS"));
     TS_ASSERT(param_ws);
     TS_ASSERT_EQUALS(param_ws->rowCount(), 6);
     API::ITableWorkspace_sptr error_table =
-        std::dynamic_pointer_cast<API::ITableWorkspace>(
-            AnalysisDataService::Instance().retrieve("FitErrorsWS"));
+        std::dynamic_pointer_cast<API::ITableWorkspace>(AnalysisDataService::Instance().retrieve("FitErrorsWS"));
     TS_ASSERT(error_table);
     // shall be same number of rows to OutputPeakParametersWorkspace
     // (PeakParametersWS)
@@ -1012,8 +918,7 @@ public:
    * @param workspace_name
    * @return
    */
-  std::string genPeakCenterWorkspace(const std::vector<int> &peak_index_vec,
-                                     const std::string &workspace_name) {
+  std::string genPeakCenterWorkspace(const std::vector<int> &peak_index_vec, const std::string &workspace_name) {
     // create the empty workspace containing N X values for N peaks (N <=2)
     size_t num_peaks = peak_index_vec.size();
     int64_t nbins = num_peaks;
@@ -1023,8 +928,8 @@ public:
     bool ishist = false;
     double xval(0), yval(0), eval(0), dxval(1);
     std::set<int64_t> maskedws;
-    MatrixWorkspace_sptr center_ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(
+    MatrixWorkspace_sptr center_ws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(
             nhist, nbins, ishist, xval, yval, eval, dxval, maskedws));
 
     for (size_t i = 0; i < center_ws->getNumberHistograms(); ++i) {
@@ -1048,13 +953,11 @@ public:
    * @param peak_index_vec :: vector for peak indexes
    * @param workspace_name :: name of the output workspace registered to ADS
    */
-  std::string genFitWindowWorkspace(std::vector<int> &peak_index_vec,
-                                    const std::string &workspace_name) {
+  std::string genFitWindowWorkspace(std::vector<int> &peak_index_vec, const std::string &workspace_name) {
     // create the empty workspace containing 3 spectrum
     const size_t num_peaks = peak_index_vec.size();
     MatrixWorkspace_sptr center_ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::create2DWorkspace(
-            3, static_cast<int>(num_peaks) * 2));
+        WorkspaceCreationHelper::create2DWorkspace(3, static_cast<int>(num_peaks) * 2));
     for (size_t i = 0; i < center_ws->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < peak_index_vec.size(); ++j) {
         const int peak_index = peak_index_vec[j];
@@ -1084,10 +987,8 @@ public:
     size_t num_spec = 3;
 
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            static_cast<int>(num_spec), 300);
-    WS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(static_cast<int>(num_spec), 300);
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     // change the resolution of the binning
     for (size_t i = 0; i < num_spec; ++i)
@@ -1095,22 +996,17 @@ public:
 
     // spectrum 1 (ws=0)
     const auto &xvals = WS->points(0);
-    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
-                   [](const double x) {
-                     return exp(-0.5 * pow((x - 10) / 0.1, 2)) +
-                            2.0 * exp(-0.5 * pow((x - 5) / 0.15, 2)) + 1;
-                   });
+    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(), [](const double x) {
+      return exp(-0.5 * pow((x - 10) / 0.1, 2)) + 2.0 * exp(-0.5 * pow((x - 5) / 0.15, 2)) + 1;
+    });
     const auto &yvals = WS->histogram(0).y();
-    std::transform(yvals.cbegin(), yvals.cend(), WS->mutableE(0).begin(),
-                   [](const double y) { return 0.2 * sqrt(y); });
+    std::transform(yvals.cbegin(), yvals.cend(), WS->mutableE(0).begin(), [](const double y) { return 0.2 * sqrt(y); });
 
     if (num_spec > 1) {
       const auto &xvals1 = WS->points(1);
-      std::transform(xvals1.cbegin(), xvals1.cend(), WS->mutableY(1).begin(),
-                     [](const double x) {
-                       return 2. * exp(-0.5 * pow((x - 9.98) / 0.12, 2)) +
-                              4.0 * exp(-0.5 * pow((x - 5.01) / 0.17, 2)) + 1;
-                     });
+      std::transform(xvals1.cbegin(), xvals1.cend(), WS->mutableY(1).begin(), [](const double x) {
+        return 2. * exp(-0.5 * pow((x - 9.98) / 0.12, 2)) + 4.0 * exp(-0.5 * pow((x - 5.01) / 0.17, 2)) + 1;
+      });
       const auto &yvals1 = WS->histogram(1).y();
       std::transform(yvals1.cbegin(), yvals1.cend(), WS->mutableE(1).begin(),
                      [](const double y) { return 0.2 * sqrt(y); });
@@ -1118,11 +1014,9 @@ public:
 
     if (num_spec > 2) {
       const auto &xvals2 = WS->points(2);
-      std::transform(xvals2.cbegin(), xvals2.cend(), WS->mutableY(2).begin(),
-                     [](const double x) {
-                       return 10 * exp(-0.5 * pow((x - 10.02) / 0.14, 2)) +
-                              3.0 * exp(-0.5 * pow((x - 5.03) / 0.19, 2)) + 1;
-                     });
+      std::transform(xvals2.cbegin(), xvals2.cend(), WS->mutableY(2).begin(), [](const double x) {
+        return 10 * exp(-0.5 * pow((x - 10.02) / 0.14, 2)) + 3.0 * exp(-0.5 * pow((x - 5.03) / 0.19, 2)) + 1;
+      });
       const auto &yvals2 = WS->histogram(2).y();
       std::transform(yvals2.cbegin(), yvals2.cend(), WS->mutableE(2).begin(),
                      [](const double y) { return 0.2 * sqrt(y); });
@@ -1132,8 +1026,7 @@ public:
     return;
   }
 
-  void createGuassParameters(vector<string> &parnames,
-                             vector<double> &parvalues) {
+  void createGuassParameters(vector<string> &parnames, vector<double> &parvalues) {
     parnames.clear();
     parvalues.clear();
 
@@ -1166,8 +1059,7 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("diamond_3peaks"));
 
     API::MatrixWorkspace_sptr ws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("diamond_3peaks"));
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("diamond_3peaks"));
     TS_ASSERT(ws);
 
     return "diamond_3peaks";
@@ -1187,10 +1079,8 @@ public:
    * MinGuessedPeakWidth=10, MaxGuessedPeakWidth=20, GuessedPeakWidthStep=1,
    * PeakPositionTolerance=0.02)
    */
-  void
-  createBackToBackExponentialParameters(vector<string> &parnames,
-                                        vector<double> &parvalues,
-                                        bool include_pos_intensity = true) {
+  void createBackToBackExponentialParameters(vector<string> &parnames, vector<double> &parvalues,
+                                             bool include_pos_intensity = true) {
     parnames.clear();
     parvalues.clear();
 
@@ -1223,8 +1113,7 @@ public:
    * @param correct
    * @return
    */
-  API::MatrixWorkspace_sptr
-  CheckAndRetrieveMatrixWorkspace(const std::string &ws_name, bool *correct) {
+  API::MatrixWorkspace_sptr CheckAndRetrieveMatrixWorkspace(const std::string &ws_name, bool *correct) {
     // retrieve workspace
     API::MatrixWorkspace_sptr workspace;
     bool exist = AnalysisDataService::Instance().doesExist(ws_name);
@@ -1237,8 +1126,7 @@ public:
     }
 
     // check workspace type
-    workspace = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(ws_name));
+    workspace = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(ws_name));
     TS_ASSERT(workspace);
     if (!workspace) {
       std::cout << "Workspace " << ws_name << " is not a MatrixWorkspace."
@@ -1258,8 +1146,7 @@ public:
    * @param correct
    * @return
    */
-  API::ITableWorkspace_sptr
-  CheckAndRetrieveTableWorkspace(const std::string &ws_name, bool *correct) {
+  API::ITableWorkspace_sptr CheckAndRetrieveTableWorkspace(const std::string &ws_name, bool *correct) {
     // retrieve workspace
     API::ITableWorkspace_sptr workspace;
     bool exist = AnalysisDataService::Instance().doesExist(ws_name);
@@ -1272,8 +1159,7 @@ public:
     }
 
     // check workspace type
-    workspace = std::dynamic_pointer_cast<ITableWorkspace>(
-        AnalysisDataService::Instance().retrieve(ws_name));
+    workspace = std::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve(ws_name));
     TS_ASSERT(workspace);
     if (!workspace) {
       std::cout << "Workspace " << ws_name << " is not a TableWorkspace."

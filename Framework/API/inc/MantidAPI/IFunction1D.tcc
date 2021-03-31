@@ -13,9 +13,7 @@ namespace Mantid {
 namespace API {
 
 template <typename EvaluationMethod>
-void IFunction1D::calcNumericalDerivative1D(Jacobian *jacobian,
-                                            EvaluationMethod eval1D,
-                                            const double *xValues,
+void IFunction1D::calcNumericalDerivative1D(Jacobian *jacobian, EvaluationMethod eval1D, const double *xValues,
                                             const size_t nData) {
   /*
    * Uses the knowledge that this is a simple 1D domain to calculate the
@@ -30,8 +28,7 @@ void IFunction1D::calcNumericalDerivative1D(Jacobian *jacobian,
   using std::fabs;
   constexpr double epsilon(std::numeric_limits<double>::epsilon() * 100);
   constexpr double stepPercentage(0.001);
-  constexpr double cutoff =
-      100.0 * std::numeric_limits<double>::min() / stepPercentage;
+  constexpr double cutoff = 100.0 * std::numeric_limits<double>::min() / stepPercentage;
 
   applyTies(); // just in case
   std::vector<double> minusStep(nData), plusStep(nData);

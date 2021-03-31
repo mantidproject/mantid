@@ -17,11 +17,10 @@ namespace Kernel {
 namespace // unnamed
 {
 struct ModeIndex {
-  std::map<DeltaEMode::Type, std::string> index{
-      {DeltaEMode::Elastic, "Elastic"},
-      {DeltaEMode::Direct, "Direct"},
-      {DeltaEMode::Indirect, "Indirect"},
-      {DeltaEMode::Undefined, "Undefined"}};
+  std::map<DeltaEMode::Type, std::string> index{{DeltaEMode::Elastic, "Elastic"},
+                                                {DeltaEMode::Direct, "Direct"},
+                                                {DeltaEMode::Indirect, "Indirect"},
+                                                {DeltaEMode::Undefined, "Undefined"}};
 };
 /// Returns the map storing the mode->string lookup
 ModeIndex &typeStringLookup() {
@@ -71,17 +70,15 @@ std::string DeltaEMode::asString(const Type mode) {
 DeltaEMode::Type DeltaEMode::fromString(const std::string &modeStr) {
   const ModeIndex &lookup = typeStringLookup();
 
-  auto emode = std::find_if(
-      lookup.index.cbegin(), lookup.index.cend(),
-      [&modeStr](auto it) { return boost::iequals(it.second, modeStr); });
+  auto emode = std::find_if(lookup.index.cbegin(), lookup.index.cend(),
+                            [&modeStr](auto it) { return boost::iequals(it.second, modeStr); });
 
   if (emode != lookup.index.cend()) {
     return emode->first;
   }
 
   // Unknown mode
-  throw std::invalid_argument(
-      "DeltaEMode::fromString - Unknown energy transfer mode: " + modeStr);
+  throw std::invalid_argument("DeltaEMode::fromString - Unknown energy transfer mode: " + modeStr);
 }
 } // namespace Kernel
 } // namespace Mantid

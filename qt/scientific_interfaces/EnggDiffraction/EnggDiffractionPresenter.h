@@ -36,11 +36,10 @@ setup, signals from the model should always be handled through this
 presenter and never go directly to the view, and viceversa.
 */
 // needs to be dll-exported for the tests
-class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffractionPresenter
-    : public QObject,
-      public IEnggDiffractionPresenter,
-      public IEnggDiffractionCalibration,
-      public IEnggDiffractionParam {
+class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffractionPresenter : public QObject,
+                                                              public IEnggDiffractionPresenter,
+                                                              public IEnggDiffractionCalibration,
+                                                              public IEnggDiffractionParam {
   // Q_OBJECT for 'connect' with thread/worker
   Q_OBJECT
 
@@ -51,29 +50,25 @@ public:
   void notify(IEnggDiffractionPresenter::Notification notif) override;
 
   /// the calibration hard work that a worker / thread will run
-  void doNewCalibration(const std::string &outFilename,
-                        const std::string &vanNo, const std::string &ceriaNo,
+  void doNewCalibration(const std::string &outFilename, const std::string &vanNo, const std::string &ceriaNo,
                         const std::string &specNos);
 
   /// the focusing hard work that a worker / thread will run
-  void doFocusRun(const std::string &runNo, const std::vector<bool> &banks,
-                  const std::string &specNos, const std::string &dgFile);
+  void doFocusRun(const std::string &runNo, const std::vector<bool> &banks, const std::string &specNos,
+                  const std::string &dgFile);
 
   /// checks if its a valid run number returns string
   std::string isValidRunNumber(const std::vector<std::string> &dir);
 
   /// checks if its a valid run number inside vector and returns a vector;
   /// used for mutli-run focusing, and other multi-run file selections
-  std::vector<std::string>
-  isValidMultiRunNumber(const std::vector<std::string> &dir);
+  std::vector<std::string> isValidMultiRunNumber(const std::vector<std::string> &dir);
 
   /// pre-processing re-binning with Rebin, for a worker/thread
-  void doRebinningTime(const std::string &runNo, double bin,
-                       const std::string &outWSName);
+  void doRebinningTime(const std::string &runNo, double bin, const std::string &outWSName);
 
   /// pre-processing re-binning with RebinByPulseTimes, for a worker/thread
-  void doRebinningPulses(const std::string &runNo, size_t nperiods, double bin,
-                         const std::string &outWSName);
+  void doRebinningPulses(const std::string &runNo, size_t nperiods, double bin, const std::string &outWSName);
 
 protected:
   void initialize();
@@ -97,8 +92,7 @@ protected:
   void processShutDown();
   void processStopFocus();
 
-  std::vector<std::string> outputFocusFilenames(const std::string &runNo,
-                                                const std::vector<bool> &banks);
+  std::vector<std::string> outputFocusFilenames(const std::string &runNo, const std::vector<bool> &banks);
 
   std::string outputFocusCroppedFilename(const std::string &runNo);
 
@@ -112,44 +106,33 @@ private:
 
   /// @name Calibration related private methods
   //@{
-  void inputChecksBeforeCalibrate(const std::string &newVanNo,
-                                  const std::string &newCeriaNo);
+  void inputChecksBeforeCalibrate(const std::string &newVanNo, const std::string &newCeriaNo);
 
-  std::string outputCalibFilename(const std::string &vanNo,
-                                  const std::string &ceriaNo,
+  std::string outputCalibFilename(const std::string &vanNo, const std::string &ceriaNo,
                                   const std::string &bankName = "");
 
   void updateNewCalib(const std::string &fname);
 
-  void parseCalibrateFilename(const std::string &path, std::string &instName,
-                              std::string &vanNo, std::string &ceriaNo);
+  void parseCalibrateFilename(const std::string &path, std::string &instName, std::string &vanNo, std::string &ceriaNo);
 
-  void grabCalibParms(const std::string &fname, std::string &vanNo,
-                      std::string &ceriaNo);
+  void grabCalibParms(const std::string &fname, std::string &vanNo, std::string &ceriaNo);
 
   void updateCalibParmsTable();
 
   // this may need to be mocked up in tests
-  virtual void startAsyncCalibWorker(const std::string &outFilename,
-                                     const std::string &vanNo,
-                                     const std::string &ceriaNo,
-                                     const std::string &specNos);
+  virtual void startAsyncCalibWorker(const std::string &outFilename, const std::string &vanNo,
+                                     const std::string &ceriaNo, const std::string &specNos);
 
-  void doCalib(const EnggDiffCalibSettings &cs, const std::string &vanNo,
-               const std::string &ceriaNo, const std::string &outFilename,
-               const std::string &specNos);
+  void doCalib(const EnggDiffCalibSettings &cs, const std::string &vanNo, const std::string &ceriaNo,
+               const std::string &outFilename, const std::string &specNos);
 
-  void appendCalibInstPrefix(const std::string &vanNo,
-                             std::string &outVanName) const;
+  void appendCalibInstPrefix(const std::string &vanNo, std::string &outVanName) const;
 
-  void appendCalibInstPrefix(const std::string &vanNo, const std::string &cerNo,
-                             std::string &outVanName,
+  void appendCalibInstPrefix(const std::string &vanNo, const std::string &cerNo, std::string &outVanName,
                              std::string &outCerName) const;
 
-  std::string
-  buildCalibrateSuggestedFilename(const std::string &vanNo,
-                                  const std::string &ceriaNo,
-                                  const std::string &bankName = "") const;
+  std::string buildCalibrateSuggestedFilename(const std::string &vanNo, const std::string &ceriaNo,
+                                              const std::string &bankName = "") const;
 
   std::vector<GSASCalibrationParms> currentCalibration() const override;
   //@}
@@ -157,41 +140,28 @@ private:
   /// @name Focusing related private methods
   //@{
   /// this may also need to be mocked up in tests
-  void startFocusing(const std::vector<std::string> &multi_runNo,
-                     const std::vector<bool> &banks,
-                     const std::string &specNos = "",
-                     const std::string &dgFile = "");
+  void startFocusing(const std::vector<std::string> &multi_runNo, const std::vector<bool> &banks,
+                     const std::string &specNos = "", const std::string &dgFile = "");
 
-  virtual void
-  startAsyncFocusWorker(const std::vector<std::string> &multi_RunNo,
-                        const std::vector<bool> &banks,
-                        const std::string &specNos, const std::string &dgFile);
+  virtual void startAsyncFocusWorker(const std::vector<std::string> &multi_RunNo, const std::vector<bool> &banks,
+                                     const std::string &specNos, const std::string &dgFile);
 
-  void inputChecksBeforeFocusBasic(const std::vector<std::string> &multi_RunNo,
-                                   const std::vector<bool> &banks);
-  void
-  inputChecksBeforeFocusCropped(const std::vector<std::string> &multi_RunNo,
-                                const std::vector<bool> &banks,
-                                const std::string &specNos);
-  void
-  inputChecksBeforeFocusTexture(const std::vector<std::string> &multi_RunNo,
-                                const std::string &dgfile);
+  void inputChecksBeforeFocusBasic(const std::vector<std::string> &multi_RunNo, const std::vector<bool> &banks);
+  void inputChecksBeforeFocusCropped(const std::vector<std::string> &multi_RunNo, const std::vector<bool> &banks,
+                                     const std::string &specNos);
+  void inputChecksBeforeFocusTexture(const std::vector<std::string> &multi_RunNo, const std::string &dgfile);
   void inputChecksBeforeFocus();
   void inputChecksBanks(const std::vector<bool> &banks);
 
   std::vector<std::string> sumOfFilesLoadVec();
 
-  std::vector<std::string>
-  outputFocusTextureFilenames(const std::string &runNo,
-                              const std::vector<size_t> &bankIDs);
+  std::vector<std::string> outputFocusTextureFilenames(const std::string &runNo, const std::vector<size_t> &bankIDs);
 
-  void loadDetectorGroupingCSV(const std::string &dgFile,
-                               std::vector<size_t> &bankIDs,
+  void loadDetectorGroupingCSV(const std::string &dgFile, std::vector<size_t> &bankIDs,
                                std::vector<std::string> &specs);
 
-  void doFocusing(const EnggDiffCalibSettings &cs, const std::string &runLabel,
-                  const size_t bank, const std::string &specNos,
-                  const std::string &dgFile);
+  void doFocusing(const EnggDiffCalibSettings &cs, const std::string &runLabel, const size_t bank,
+                  const std::string &specNos, const std::string &dgFile);
 
   /// @name Methods related to pre-processing / re-binning
   //@{
@@ -199,54 +169,42 @@ private:
 
   void inputChecksBeforeRebinTime(const std::string &runNo, double bin);
 
-  void inputChecksBeforeRebinPulses(const std::string &runNo, size_t nperiods,
-                                    double timeStep);
+  void inputChecksBeforeRebinPulses(const std::string &runNo, size_t nperiods, double timeStep);
 
   Mantid::API::Workspace_sptr loadToPreproc(const std::string &runNo);
 
-  virtual void startAsyncRebinningTimeWorker(const std::string &runNo,
-                                             double bin,
-                                             const std::string &outWSName);
+  virtual void startAsyncRebinningTimeWorker(const std::string &runNo, double bin, const std::string &outWSName);
 
-  virtual void startAsyncRebinningPulsesWorker(const std::string &runNo,
-                                               size_t nperiods, double timeStep,
+  virtual void startAsyncRebinningPulsesWorker(const std::string &runNo, size_t nperiods, double timeStep,
                                                const std::string &outWSName);
   //@}
 
   // plots workspace according to the user selection
   void plotFocusedWorkspace(const std::string &outWSName);
 
-  void plotCalibWorkspace(const std::vector<double> &difa,
-                          const std::vector<double> &difc,
-                          const std::vector<double> &tzero,
-                          const std::string &specNos);
+  void plotCalibWorkspace(const std::vector<double> &difa, const std::vector<double> &difc,
+                          const std::vector<double> &tzero, const std::string &specNos);
 
   // algorithms to save the generated workspace
   void saveGSS(const RunLabel &runLabel, const std::string &inputWorkspace);
-  void saveFocusedXYE(const RunLabel &runLabel,
-                      const std::string &inputWorkspace);
+  void saveFocusedXYE(const RunLabel &runLabel, const std::string &inputWorkspace);
   void saveNexus(const RunLabel &runLabel, const std::string &inputWorkspace);
-  void saveOpenGenie(const RunLabel &runLabel,
-                     const std::string &inputWorkspace);
-  void exportSampleLogsToHDF5(const std::string &inputWorkspace,
-                              const std::string &filename) const;
+  void saveOpenGenie(const RunLabel &runLabel, const std::string &inputWorkspace);
+  void exportSampleLogsToHDF5(const std::string &inputWorkspace, const std::string &filename) const;
 
   // generates the required file name of the output files
-  std::string outFileNameFactory(const std::string &inputWorkspace,
-                                 const RunLabel &runLabel,
+  std::string outFileNameFactory(const std::string &inputWorkspace, const RunLabel &runLabel,
                                  const std::string &format);
 
   // returns a directory as a path, creating it if not found, and checking
   // errors
   Poco::Path outFilesUserDir(const std::string &addToDir) const override;
   std::string userHDFRunFilename(const std::string &runNumber) const override;
-  std::string userHDFMultiRunFilename(
-      const std::vector<RunLabel> &runLabels) const override;
+  std::string userHDFMultiRunFilename(const std::vector<RunLabel> &runLabels) const override;
   Poco::Path outFilesGeneralDir(const std::string &addComponent);
   Poco::Path outFilesRootDir() const;
 
-  std::string appendToPath(const std::string &path,
-                           const std::string &toAppend) const;
+  std::string appendToPath(const std::string &path, const std::string &toAppend) const;
 
   /// convenience methods to copy files to different destinations
   void copyToGeneral(const Poco::Path &source, const std::string &pathComp);
@@ -254,26 +212,21 @@ private:
   void copyFocusedToUserAndAll(const std::string &fullFilename);
 
   // generates appropriate names for table workspaces
-  std::string outFitParamsTblNameGenerator(const std::string &specNos,
-                                           size_t bank_i) const;
+  std::string outFitParamsTblNameGenerator(const std::string &specNos, size_t bank_i) const;
 
   // generates the pycode string which can be passed to view
   std::string vanadiumCurvesPlotFactory();
 
-  std::string TOFFitWorkspaceFactory(
-      const std::vector<double> &difa, const std::vector<double> &difc,
-      const std::vector<double> &tzero, const std::string &specNo,
-      const std::string &customisedBankName) const;
+  std::string TOFFitWorkspaceFactory(const std::vector<double> &difa, const std::vector<double> &difc,
+                                     const std::vector<double> &tzero, const std::string &specNo,
+                                     const std::string &customisedBankName) const;
 
   std::string plotTOFWorkspace(const std::string &customisedBankName) const;
 
-  void writeOutCalibFile(const std::string &outFilename,
-                         const std::vector<double> &difa,
-                         const std::vector<double> &difc,
-                         const std::vector<double> &tzero,
-                         const std::vector<std::string> &bankNames,
-                         const std::string &ceriaNo, const std::string &vanNo,
-                         const std::string &templateFile = "");
+  void writeOutCalibFile(const std::string &outFilename, const std::vector<double> &difa,
+                         const std::vector<double> &difc, const std::vector<double> &tzero,
+                         const std::vector<std::string> &bankNames, const std::string &ceriaNo,
+                         const std::string &vanNo, const std::string &templateFile = "");
 
   /// keep track of the paths the user "browses to", to add them in
   /// the file search path

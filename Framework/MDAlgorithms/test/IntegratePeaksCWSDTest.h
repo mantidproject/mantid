@@ -33,11 +33,9 @@ namespace {
 /** Add a list of MDEvents around Q = (1, 2, 3)
  * @brief createMDWorkspace
  */
-IMDEventWorkspace_sptr
-createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
-                  const std::vector<double> &vec_event_signal,
-                  const std::vector<int> &vec_event_det,
-                  const std::vector<int> &vec_event_run) {
+IMDEventWorkspace_sptr createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
+                                         const std::vector<double> &vec_event_signal,
+                                         const std::vector<int> &vec_event_det, const std::vector<int> &vec_event_run) {
   // Check the inputs
   TS_ASSERT_EQUALS(vec_event_qsample.size(), vec_event_signal.size());
   TS_ASSERT_EQUALS(vec_event_qsample.size(), vec_event_det.size());
@@ -46,8 +44,7 @@ createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
   // Create MDEVENTWorkspace
   // Create workspace in Q_sample with dimenion as 3
   size_t nDimension = 3;
-  IMDEventWorkspace_sptr mdws =
-      MDEventFactory::CreateMDWorkspace(nDimension, "MDEvent");
+  IMDEventWorkspace_sptr mdws = MDEventFactory::CreateMDWorkspace(nDimension, "MDEvent");
 
   // Extract Dimensions and add to the output workspace.
   std::vector<std::string> vec_ID(3);
@@ -59,8 +56,7 @@ createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
   dimensionNames[1] = "Q_sample_y";
   dimensionNames[2] = "Q_sample_z";
 
-  Mantid::Kernel::SpecialCoordinateSystem coordinateSystem =
-      Mantid::Kernel::QSample;
+  Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::QSample;
 
   // Add dimensions
   std::vector<double> m_extentMins(3);
@@ -78,17 +74,15 @@ createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
     std::string id = vec_ID[i];
     std::string name = dimensionNames[i];
     mdws->addDimension(Mantid::Geometry::MDHistoDimension_sptr(
-        new Mantid::Geometry::MDHistoDimension(
-            id, name, frame, static_cast<Mantid::coord_t>(m_extentMins[i]),
-            static_cast<Mantid::coord_t>(m_extentMaxs[i]), m_numBins[i])));
+        new Mantid::Geometry::MDHistoDimension(id, name, frame, static_cast<Mantid::coord_t>(m_extentMins[i]),
+                                               static_cast<Mantid::coord_t>(m_extentMaxs[i]), m_numBins[i])));
   }
 
   // Set coordinate system
   mdws->setCoordinateSystem(coordinateSystem);
 
   // Creates a new instance of the MDEventInserter to output workspace
-  MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 =
-      std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(mdws);
+  MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 = std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(mdws);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   // Go though each spectrum to conver to MDEvent
@@ -105,9 +99,8 @@ createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
     Mantid::detid_t detid = vec_event_det[iq];
 
     // Insert
-    inserter.insertMDEvent(
-        static_cast<float>(signal), static_cast<float>(error * error),
-        static_cast<uint16_t>(runnumber), 0, detid, millerindex.data());
+    inserter.insertMDEvent(static_cast<float>(signal), static_cast<float>(error * error),
+                           static_cast<uint16_t>(runnumber), 0, detid, millerindex.data());
   }
 
   // Set up run information
@@ -116,8 +109,7 @@ createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
   exp_info->mutableRun().addProperty("monitor", 3021);
 
   // add instrument
-  Instrument_sptr inst1 =
-      ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+  Instrument_sptr inst1 = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
   inst1->setName("SillyInstrument1");
   exp_info->setInstrument(inst1);
   mdws->addExperimentInfo(exp_info);
@@ -126,8 +118,7 @@ createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
   exp_info2->mutableRun().addProperty("run_number", 144);
   exp_info2->mutableRun().addProperty("monitor", 1022);
   // add instrument
-  Instrument_sptr inst2 =
-      ComponentCreationHelper::createTestInstrumentRectangular2(1, 11);
+  Instrument_sptr inst2 = ComponentCreationHelper::createTestInstrumentRectangular2(1, 11);
   inst1->setName("SillyInstrument2");
   exp_info2->setInstrument(inst2);
 
@@ -140,12 +131,9 @@ createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
  * @brief buildPW
  * @return
  */
-PeaksWorkspace_sptr
-buildPeakWorkspace(std::vector<int> vec_run_number,
-                   std::vector<Mantid::Kernel::V3D> vec_q_sample) {
+PeaksWorkspace_sptr buildPeakWorkspace(std::vector<int> vec_run_number, std::vector<Mantid::Kernel::V3D> vec_q_sample) {
   // create instrument
-  Instrument_sptr inst =
-      ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+  Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
   inst->setName("SillyInstrument");
 
   // create PeaksWorkspace with property
@@ -177,10 +165,8 @@ buildPeakWorkspace(std::vector<int> vec_run_number,
  * @param vec_detid
  * @param vec_runnumber
  */
-void createMDEvents1Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
-                        std::vector<double> &vec_signal,
-                        std::vector<Mantid::detid_t> &vec_detid,
-                        std::vector<int> &vec_runnumber) {
+void createMDEvents1Run(std::vector<Mantid::Kernel::V3D> &vec_qsample, std::vector<double> &vec_signal,
+                        std::vector<Mantid::detid_t> &vec_detid, std::vector<int> &vec_runnumber) {
 
   double q_x0 = 1.0;
   double q_y0 = 2.0;
@@ -218,10 +204,8 @@ void createMDEvents1Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
  * @param vec_detid
  * @param vec_runnumber
  */
-void createMDEvents2Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
-                        std::vector<double> &vec_signal,
-                        std::vector<Mantid::detid_t> &vec_detid,
-                        std::vector<int> &vec_runnumber) {
+void createMDEvents2Run(std::vector<Mantid::Kernel::V3D> &vec_qsample, std::vector<double> &vec_signal,
+                        std::vector<Mantid::detid_t> &vec_detid, std::vector<int> &vec_runnumber) {
 
   double q_x0 = -0.4;
   double q_y0 = -0.4;
@@ -281,9 +265,7 @@ void createMDEvents2Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
 
 class IntegratePeaksCWSDTest : public CxxTest::TestSuite {
 public:
-  static IntegratePeaksCWSDTest *createSuite() {
-    return new IntegratePeaksCWSDTest();
-  }
+  static IntegratePeaksCWSDTest *createSuite() { return new IntegratePeaksCWSDTest(); }
 
   static void destroySuite(IntegratePeaksCWSDTest *suite) { delete suite; }
 
@@ -312,8 +294,7 @@ public:
     std::vector<int> vec_runnumbers;
     createMDEvents1Run(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
 
-    IMDEventWorkspace_sptr inputws =
-        createMDWorkspace(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
+    IMDEventWorkspace_sptr inputws = createMDWorkspace(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
     AnalysisDataService::Instance().addOrReplace("TestMDWS", inputws);
 
     std::vector<int> runnumberlist;
@@ -321,8 +302,7 @@ public:
     Mantid::Kernel::V3D peakcenter(1.4, 2.4, 3.4);
     std::vector<Mantid::Kernel::V3D> peakcenterlist;
     peakcenterlist.emplace_back(peakcenter);
-    PeaksWorkspace_sptr peakws =
-        buildPeakWorkspace(runnumberlist, peakcenterlist);
+    PeaksWorkspace_sptr peakws = buildPeakWorkspace(runnumberlist, peakcenterlist);
     AnalysisDataService::Instance().addOrReplace("TestPeaksWS", peakws);
 
     alg.setProperty("InputWorkspace", inputws);
@@ -336,8 +316,8 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted())
     // check result
-    PeaksWorkspace_sptr outws = std::dynamic_pointer_cast<PeaksWorkspace>(
-        AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
+    PeaksWorkspace_sptr outws =
+        std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
     TS_ASSERT(outws)
     TS_ASSERT_EQUALS(outws->getNumberPeaks(), 1)
 
@@ -362,8 +342,7 @@ public:
     std::vector<int> vec_runnumbers;
     createMDEvents2Run(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
 
-    IMDEventWorkspace_sptr inputws =
-        createMDWorkspace(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
+    IMDEventWorkspace_sptr inputws = createMDWorkspace(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
     AnalysisDataService::Instance().addOrReplace("TestMDWS2", inputws);
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TestMDWS2"));
 
@@ -374,8 +353,7 @@ public:
     std::vector<Mantid::Kernel::V3D> peakcenterlist;
     peakcenterlist.emplace_back(peakcenter);
     peakcenterlist.emplace_back(peakcenter);
-    PeaksWorkspace_sptr peakws =
-        buildPeakWorkspace(runnumberlist, peakcenterlist);
+    PeaksWorkspace_sptr peakws = buildPeakWorkspace(runnumberlist, peakcenterlist);
     AnalysisDataService::Instance().addOrReplace("TestPeaksWS", peakws);
 
     // Initialize algorithm and set up
@@ -395,8 +373,8 @@ public:
     TS_ASSERT(alg.isExecuted())
 
     // check
-    PeaksWorkspace_sptr outws = std::dynamic_pointer_cast<PeaksWorkspace>(
-        AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
+    PeaksWorkspace_sptr outws =
+        std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
     TS_ASSERT(outws)
     TS_ASSERT_EQUALS(outws->getNumberPeaks(), 2)
 
@@ -418,8 +396,7 @@ public:
     std::vector<int> vec_runnumbers;
     createMDEvents2Run(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
 
-    IMDEventWorkspace_sptr inputws =
-        createMDWorkspace(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
+    IMDEventWorkspace_sptr inputws = createMDWorkspace(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
     AnalysisDataService::Instance().addOrReplace("TestMDWS2", inputws);
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TestMDWS2"));
 
@@ -441,11 +418,10 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // check result
-    bool doesexit =
-        AnalysisDataService::Instance().doesExist("IntegratedPeakWS");
+    bool doesexit = AnalysisDataService::Instance().doesExist("IntegratedPeakWS");
     TS_ASSERT(doesexit);
-    PeaksWorkspace_sptr outws = std::dynamic_pointer_cast<PeaksWorkspace>(
-        AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
+    PeaksWorkspace_sptr outws =
+        std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->getNumberPeaks(), 2)
@@ -458,18 +434,13 @@ public:
 
 class IntegratePeaksCWSDTestPerformance : public CxxTest::TestSuite {
 public:
-  static IntegratePeaksCWSDTestPerformance *createSuite() {
-    return new IntegratePeaksCWSDTestPerformance();
-  }
-  static void destroySuite(IntegratePeaksCWSDTestPerformance *suite) {
-    delete suite;
-  }
+  static IntegratePeaksCWSDTestPerformance *createSuite() { return new IntegratePeaksCWSDTestPerformance(); }
+  static void destroySuite(IntegratePeaksCWSDTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     createMDEvents2Run(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
 
-    inputws =
-        createMDWorkspace(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
+    inputws = createMDWorkspace(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
     AnalysisDataService::Instance().addOrReplace("TestMDWS2", inputws);
 
     runnumberlist.emplace_back(vec_runnumbers.front());
@@ -503,9 +474,7 @@ public:
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
-  void testIntegratePeaksCWSDPerformance() {
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-  }
+  void testIntegratePeaksCWSDPerformance() { TS_ASSERT_THROWS_NOTHING(alg.execute()); }
 
 private:
   IntegratePeaksCWSD alg;

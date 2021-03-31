@@ -31,8 +31,7 @@ namespace Crystal {
   @author Ruth Mikkelson, SNS,ORNL
   @date 01/26/2013
  */
-class MANTID_CRYSTAL_DLL PeakHKLErrors : public API::ParamFunction,
-                                         public API::IFunction1D {
+class MANTID_CRYSTAL_DLL PeakHKLErrors : public API::ParamFunction, public API::IFunction1D {
 public:
   PeakHKLErrors();
 
@@ -42,11 +41,9 @@ public:
 
   const std::string category() const override { return "Calibration"; };
 
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 
-  void functionDeriv1D(Mantid::API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void functionDeriv1D(Mantid::API::Jacobian *out, const double *xValues, const size_t nData) override;
 
   void init() override;
 
@@ -67,33 +64,24 @@ public:
    * @return The new peak with the new instrument( adjusted with the
    *parameters) and time adjusted.
    */
-  static DataObjects::Peak
-  createNewPeak(const DataObjects::Peak &peak_old,
-                const Geometry::Instrument_sptr &instrNew, double T0,
-                double L0);
+  static DataObjects::Peak createNewPeak(const DataObjects::Peak &peak_old, const Geometry::Instrument_sptr &instrNew,
+                                         double T0, double L0);
 
-  static void
-  cLone(std::shared_ptr<Geometry::ParameterMap> &pmap,
-        const std::shared_ptr<const Geometry::IComponent> &component,
-        std::shared_ptr<const Geometry::ParameterMap> &pmapSv);
+  static void cLone(std::shared_ptr<Geometry::ParameterMap> &pmap,
+                    const std::shared_ptr<const Geometry::IComponent> &component,
+                    std::shared_ptr<const Geometry::ParameterMap> &pmapSv);
 
-  void getRun2MatMap(DataObjects::PeaksWorkspace_sptr &Peaks,
-                     const std::string &OptRuns,
+  void getRun2MatMap(DataObjects::PeaksWorkspace_sptr &Peaks, const std::string &OptRuns,
                      std::map<int, Mantid::Kernel::Matrix<double>> &Res) const;
   size_t nAttributes() const override { return (size_t)2; }
 
-  static Kernel::Matrix<double> DerivRotationMatrixAboutRegAxis(double theta,
-                                                                char axis);
+  static Kernel::Matrix<double> DerivRotationMatrixAboutRegAxis(double theta, char axis);
 
-  static Kernel::Matrix<double> RotationMatrixAboutRegAxis(double theta,
-                                                           char axis);
+  static Kernel::Matrix<double> RotationMatrixAboutRegAxis(double theta, char axis);
 
-  std::shared_ptr<Geometry::Instrument>
-  getNewInstrument(const DataObjects::PeaksWorkspace_sptr &Peaks) const;
+  std::shared_ptr<Geometry::Instrument> getNewInstrument(const DataObjects::PeaksWorkspace_sptr &Peaks) const;
 
-  std::vector<std::string> getAttributeNames() const override {
-    return {"OptRuns", "PeakWorkspaceName"};
-  }
+  std::vector<std::string> getAttributeNames() const override { return {"OptRuns", "PeakWorkspaceName"}; }
 
   IFunction::Attribute getAttribute(const std::string &attName) const override {
     if (attName == "OptRuns")
@@ -105,8 +93,7 @@ public:
     throw std::invalid_argument("Not a valid attribute name");
   }
 
-  void setAttribute(const std::string &attName,
-                    const IFunction::Attribute &value) override {
+  void setAttribute(const std::string &attName, const IFunction::Attribute &value) override {
     if (attName == "OptRuns") {
       OptRuns = value.asString();
 

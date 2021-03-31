@@ -18,12 +18,8 @@ class CreateFlatEventWorkspaceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CreateFlatEventWorkspaceTest *createSuite() {
-    return new CreateFlatEventWorkspaceTest();
-  }
-  static void destroySuite(CreateFlatEventWorkspaceTest *suite) {
-    delete suite;
-  }
+  static CreateFlatEventWorkspaceTest *createSuite() { return new CreateFlatEventWorkspaceTest(); }
+  static void destroySuite(CreateFlatEventWorkspaceTest *suite) { delete suite; }
 
   void test_pass() { TS_ASSERT(true); }
 
@@ -40,10 +36,8 @@ public:
     CreateFlatEventWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -51,8 +45,7 @@ public:
     Mantid::API::MatrixWorkspace_sptr ws;
 
     TS_ASSERT_THROWS_NOTHING(
-        ws = Mantid::API::AnalysisDataService::Instance()
-                 .retrieveWS<Mantid::API::MatrixWorkspace>(outWSName));
+        ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;

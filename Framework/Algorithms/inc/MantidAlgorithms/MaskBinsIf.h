@@ -20,12 +20,8 @@ public:
   int version() const override { return 1; }
   const std::string category() const override { return "Transforms\\Masking"; }
   std::map<std::string, std::string> validateInputs() override;
-  const std::string summary() const override {
-    return "Masks bins based on muparser expression";
-  }
-  const std::vector<std::string> seeAlso() const override {
-    return {"MaskBins"};
-  }
+  const std::string summary() const override { return "Masks bins based on muparser expression"; }
+  const std::vector<std::string> seeAlso() const override { return {"MaskBins"}; }
 
 private:
   void init() override;

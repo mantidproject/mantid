@@ -17,23 +17,16 @@ DECLARE_ALGORITHM(Minus)
 
 const std::string Minus::alias() const { return "Subtract"; }
 
-void Minus::performBinaryOperation(const HistogramData::Histogram &lhs,
-                                   const HistogramData::Histogram &rhs,
-                                   HistogramData::HistogramY &YOut,
-                                   HistogramData::HistogramE &EOut) {
-  std::transform(lhs.y().begin(), lhs.y().end(), rhs.y().begin(), YOut.begin(),
-                 std::minus<>());
-  std::transform(lhs.e().begin(), lhs.e().end(), rhs.e().begin(), EOut.begin(),
-                 VectorHelper::SumGaussError<double>());
+void Minus::performBinaryOperation(const HistogramData::Histogram &lhs, const HistogramData::Histogram &rhs,
+                                   HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) {
+  std::transform(lhs.y().begin(), lhs.y().end(), rhs.y().begin(), YOut.begin(), std::minus<>());
+  std::transform(lhs.e().begin(), lhs.e().end(), rhs.e().begin(), EOut.begin(), VectorHelper::SumGaussError<double>());
 }
 
-void Minus::performBinaryOperation(const HistogramData::Histogram &lhs,
-                                   const double rhsY, const double rhsE,
-                                   HistogramData::HistogramY &YOut,
-                                   HistogramData::HistogramE &EOut) {
+void Minus::performBinaryOperation(const HistogramData::Histogram &lhs, const double rhsY, const double rhsE,
+                                   HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) {
   using std::placeholders::_1;
-  std::transform(lhs.y().begin(), lhs.y().end(), YOut.begin(),
-                 [rhsY](double l) { return l - rhsY; });
+  std::transform(lhs.y().begin(), lhs.y().end(), YOut.begin(), [rhsY](double l) { return l - rhsY; });
   // Only do E if non-zero, otherwise just copy
   if (rhsE != 0) {
     double rhsE2 = rhsE * rhsE;
@@ -52,8 +45,7 @@ void Minus::performBinaryOperation(const HistogramData::Histogram &lhs,
  *  @param lhs :: Reference to the EventList that will be modified in place.
  *  @param rhs :: Const reference to the EventList on the right hand side.
  */
-void Minus::performEventBinaryOperation(DataObjects::EventList &lhs,
-                                        const DataObjects::EventList &rhs) {
+void Minus::performEventBinaryOperation(DataObjects::EventList &lhs, const DataObjects::EventList &rhs) {
   // Easy, no? :) - This appends the event lists, with the rhs being negatively
   // weighted.
   lhs -= rhs;
@@ -67,18 +59,15 @@ void Minus::performEventBinaryOperation(DataObjects::EventList &lhs,
  *  @param rhsY :: The vector of rhs data values
  *  @param rhsE :: The vector of rhs error values
  */
-void Minus::performEventBinaryOperation(DataObjects::EventList &lhs,
-                                        const MantidVec &rhsX,
-                                        const MantidVec &rhsY,
+void Minus::performEventBinaryOperation(DataObjects::EventList &lhs, const MantidVec &rhsX, const MantidVec &rhsY,
                                         const MantidVec &rhsE) {
   (void)lhs; // Avoid compiler warnings
   (void)rhsX;
   (void)rhsY;
   (void)rhsE;
-  throw Exception::NotImplementedError(
-      "Plus::performEventBinaryOperation() cannot subtract a histogram from an "
-      "event list in an EventWorkspace. Try switching to a Workspace2D before "
-      "using Minus.");
+  throw Exception::NotImplementedError("Plus::performEventBinaryOperation() cannot subtract a histogram from an "
+                                       "event list in an EventWorkspace. Try switching to a Workspace2D before "
+                                       "using Minus.");
 }
 
 /** Carries out the binary operation IN-PLACE on a single EventList,
@@ -89,16 +78,13 @@ void Minus::performEventBinaryOperation(DataObjects::EventList &lhs,
  *  @param rhsY :: The rhs data value
  *  @param rhsE :: The rhs error value
  */
-void Minus::performEventBinaryOperation(DataObjects::EventList &lhs,
-                                        const double &rhsY,
-                                        const double &rhsE) {
+void Minus::performEventBinaryOperation(DataObjects::EventList &lhs, const double &rhsY, const double &rhsE) {
   (void)lhs; // Avoid compiler warnings
   (void)rhsY;
   (void)rhsE;
-  throw Exception::NotImplementedError(
-      "Plus::performEventBinaryOperation() cannot subtract a number from an "
-      "event list in an EventWorkspace. Try switching to a Workspace2D before "
-      "using Minus.");
+  throw Exception::NotImplementedError("Plus::performEventBinaryOperation() cannot subtract a number from an "
+                                       "event list in an EventWorkspace. Try switching to a Workspace2D before "
+                                       "using Minus.");
 }
 
 //---------------------------------------------------------------------------------------------
@@ -136,9 +122,8 @@ void Minus::checkRequirements() {
  *  @param rhs :: second workspace to check for compatibility
  *  @return workspace unit compatibility flag
  */
-bool Minus::checkUnitCompatibility(
-    const API::MatrixWorkspace_const_sptr &lhs,
-    const API::MatrixWorkspace_const_sptr &rhs) const {
+bool Minus::checkUnitCompatibility(const API::MatrixWorkspace_const_sptr &lhs,
+                                   const API::MatrixWorkspace_const_sptr &rhs) const {
   if (lhs->size() > 1 && rhs->size() > 1) {
     if (lhs->YUnit() != rhs->YUnit()) {
       g_log.error("The two workspaces are not compatible because they have "
@@ -162,9 +147,8 @@ bool Minus::checkUnitCompatibility(
  *  @param rhs :: second workspace to check for compatibility
  *  @return workspace compatibility flag
  */
-bool Minus::checkCompatibility(
-    const API::MatrixWorkspace_const_sptr lhs,
-    const API::MatrixWorkspace_const_sptr rhs) const {
+bool Minus::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                               const API::MatrixWorkspace_const_sptr rhs) const {
   // Are we allowing the subtraction of different # of spectra, using detector
   // IDs to match up?
   if (m_AllowDifferentNumberSpectra) {
@@ -189,9 +173,8 @@ bool Minus::checkCompatibility(
  *  @retval "<reason why not compatible>" The two workspaces are NOT size
  * compatible
  */
-std::string
-Minus::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                              const API::MatrixWorkspace_const_sptr rhs) const {
+std::string Minus::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                          const API::MatrixWorkspace_const_sptr rhs) const {
   if (m_erhs && m_elhs) {
 
     if (lhs->getNumberHistograms() == rhs->getNumberHistograms()) {

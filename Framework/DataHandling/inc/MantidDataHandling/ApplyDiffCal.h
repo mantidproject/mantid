@@ -33,8 +33,7 @@ private:
   void init() override;
   void exec() override;
 
-  void loadCalFile(const Mantid::API::Workspace_sptr &inputWS,
-                   const std::string &filename);
+  void loadCalFile(const Mantid::API::Workspace_sptr &inputWS, const std::string &filename);
   void getCalibrationWS(const Mantid::API::Workspace_sptr &inputWS);
 
   Mantid::API::ITableWorkspace_sptr m_calibrationWS;

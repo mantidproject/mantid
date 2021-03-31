@@ -48,16 +48,13 @@ namespace PythonInterface {
 /// that an instance will be created by the FunctionFactory
 /// and it needs to be a subclass of IFunction and not a
 /// FunctionWrapper.
-template <>
-std::shared_ptr<IFunction>
-PythonObjectInstantiator<IFunction>::createInstance() const {
+template <> std::shared_ptr<IFunction> PythonObjectInstantiator<IFunction>::createInstance() const {
   using namespace boost::python;
   GlobalInterpreterLock gil;
 
   // The class may instantiate different objects depending on whether
   // it is being created by the function factory or not
-  bool const isClassFactoryAware =
-      PyObject_HasAttrString(m_classObject.ptr(), "_factory_use");
+  bool const isClassFactoryAware = PyObject_HasAttrString(m_classObject.ptr(), "_factory_use");
 
   if (isClassFactoryAware) {
     m_classObject.attr("_factory_use")();
@@ -67,8 +64,7 @@ PythonObjectInstantiator<IFunction>::createInstance() const {
     m_classObject.attr("_factory_free")();
   }
   auto instancePtr = extract<std::shared_ptr<IFunction>>(instance)();
-  auto *deleter =
-      std::get_deleter<converter::shared_ptr_deleter, IFunction>(instancePtr);
+  auto *deleter = std::get_deleter<converter::shared_ptr_deleter, IFunction>(instancePtr);
   instancePtr.reset(instancePtr.get(), GILSharedPtrDeleter(*deleter));
   return instancePtr;
 }
@@ -86,8 +82,7 @@ namespace {
  * FunctionFactory class
  */
 PyObject *getFunctionNames(FunctionFactoryImpl &self) {
-  const std::vector<std::string> &names =
-      self.getFunctionNames<Mantid::API::IFunction>();
+  const std::vector<std::string> &names = self.getFunctionNames<Mantid::API::IFunction>();
 
   PyObject *registered = PyList_New(0);
   for (const auto &name : names) {
@@ -106,8 +101,7 @@ PyObject *getFunctionNames(FunctionFactoryImpl &self) {
  * FunctionFactory class
  */
 PyObject *getBackgroundFunctionNames(FunctionFactoryImpl &self) {
-  const std::vector<std::string> &names =
-      self.getFunctionNames<Mantid::API::IFunction>();
+  const std::vector<std::string> &names = self.getFunctionNames<Mantid::API::IFunction>();
 
   PyObject *registered = PyList_New(0);
   for (const auto &name : names) {
@@ -129,8 +123,7 @@ PyObject *getBackgroundFunctionNames(FunctionFactoryImpl &self) {
  * FunctionFactory class
  */
 PyObject *getPeakFunctionNames(FunctionFactoryImpl &self) {
-  const std::vector<std::string> &names =
-      self.getFunctionNames<Mantid::API::IFunction>();
+  const std::vector<std::string> &names = self.getFunctionNames<Mantid::API::IFunction>();
 
   PyObject *registered = PyList_New(0);
   for (const auto &name : names) {
@@ -152,8 +145,7 @@ PyObject *getPeakFunctionNames(FunctionFactoryImpl &self) {
  * FunctionFactory class
  * @param name :: Peak function name
  */
-Mantid::API::IPeakFunction_sptr createPeakFunction(FunctionFactoryImpl &self,
-                                                   const std::string &name) {
+Mantid::API::IPeakFunction_sptr createPeakFunction(FunctionFactoryImpl &self, const std::string &name) {
 
   auto fun = self.createFunction(name);
   auto peakFun = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(fun);
@@ -173,11 +165,9 @@ Mantid::API::IPeakFunction_sptr createPeakFunction(FunctionFactoryImpl &self,
  * @param name :: Name of the superclass of composite function,
  * e.g. "ProductFunction".
  */
-Mantid::API::CompositeFunction_sptr
-createCompositeFunction(FunctionFactoryImpl &self, const std::string &name) {
+Mantid::API::CompositeFunction_sptr createCompositeFunction(FunctionFactoryImpl &self, const std::string &name) {
   auto fun = self.createFunction(name);
-  auto composite =
-      std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
+  auto composite = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
   if (composite) {
     return composite;
   }
@@ -197,15 +187,13 @@ std::recursive_mutex FUNCTION_REGISTER_MUTEX;
 void subscribe(FunctionFactoryImpl &self, PyObject *classObject) {
   UninstallTrace uninstallTrace;
   std::lock_guard<std::recursive_mutex> lock(FUNCTION_REGISTER_MUTEX);
-  static auto *baseClass = const_cast<PyTypeObject *>(
-      converter::registered<IFunction>::converters.to_python_target_type());
+  static auto *baseClass =
+      const_cast<PyTypeObject *>(converter::registered<IFunction>::converters.to_python_target_type());
 
   // obj should be a class deriving from IFunction
   // PyObject_IsSubclass can set the error handler if classObject
   // is not a class so this needs to be checked in two stages
-  const bool isSubClass =
-      (PyObject_IsSubclass(classObject,
-                           reinterpret_cast<PyObject *>(baseClass)) == 1);
+  const bool isSubClass = (PyObject_IsSubclass(classObject, reinterpret_cast<PyObject *>(baseClass)) == 1);
   if (PyErr_Occurred() || !isSubClass) {
     throw std::invalid_argument(std::string("subscribe(): Unexpected type. "
                                             "Expected a class derived from "
@@ -215,8 +203,7 @@ void subscribe(FunctionFactoryImpl &self, PyObject *classObject) {
   }
   // Instantiator will store a reference to the class object, so increase
   // reference count with borrowed template
-  auto creator = std::make_unique<PythonObjectInstantiator<IFunction>>(
-      object(handle<>(borrowed(classObject))));
+  auto creator = std::make_unique<PythonObjectInstantiator<IFunction>>(object(handle<>(borrowed(classObject))));
 
   // Can the function be created and initialized? It really shouldn't go in
   // to the factory if not
@@ -224,44 +211,33 @@ void subscribe(FunctionFactoryImpl &self, PyObject *classObject) {
   func->initialize();
 
   // Takes ownership of instantiator
-  self.subscribe(func->name(), std::move(creator),
-                 FunctionFactoryImpl::OverwriteCurrent);
+  self.subscribe(func->name(), std::move(creator), FunctionFactoryImpl::OverwriteCurrent);
 }
 ///@endcond
 } // namespace
 
 void export_FunctionFactory() {
 
-  class_<FunctionFactoryImpl, boost::noncopyable>("FunctionFactoryImpl",
-                                                  no_init)
-      .def("getFunctionNames", &getFunctionNames, arg("self"),
-           "Returns a list of the currently available functions")
-      .def("createCompositeFunction", &createCompositeFunction,
-           (arg("self"), arg("name")),
+  class_<FunctionFactoryImpl, boost::noncopyable>("FunctionFactoryImpl", no_init)
+      .def("getFunctionNames", &getFunctionNames, arg("self"), "Returns a list of the currently available functions")
+      .def("createCompositeFunction", &createCompositeFunction, (arg("self"), arg("name")),
            "Return a pointer to the requested function")
-      .def("createFunction", &FunctionFactoryImpl::createFunction,
-           (arg("self"), arg("type")),
+      .def("createFunction", &FunctionFactoryImpl::createFunction, (arg("self"), arg("type")),
            "Return a pointer to the requested function")
-      .def("createInitialized", &FunctionFactoryImpl::createInitialized,
-           (arg("self"), arg("init_expr")),
+      .def("createInitialized", &FunctionFactoryImpl::createInitialized, (arg("self"), arg("init_expr")),
            "Return a pointer to the requested function")
-      .def("createInitializedMultiDomainFunction",
-           &FunctionFactoryImpl::createInitializedMultiDomainFunction,
-           (arg("self"), arg("init_expr"), arg("domain_number")),
-           "Return a pointer to the requested function")
+      .def("createInitializedMultiDomainFunction", &FunctionFactoryImpl::createInitializedMultiDomainFunction,
+           (arg("self"), arg("init_expr"), arg("domain_number")), "Return a pointer to the requested function")
       .def("subscribe", &subscribe, (arg("self"), arg("object")),
            "Register a Python class derived from IFunction into the factory")
-      .def("unsubscribe", &FunctionFactoryImpl::unsubscribe,
-           (arg("self"), arg("class_name")), "Remove a type from the factory")
-      .def("Instance", &FunctionFactory::Instance,
-           return_value_policy<reference_existing_object>(),
+      .def("unsubscribe", &FunctionFactoryImpl::unsubscribe, (arg("self"), arg("class_name")),
+           "Remove a type from the factory")
+      .def("Instance", &FunctionFactory::Instance, return_value_policy<reference_existing_object>(),
            "Returns a reference to the FunctionFactory singleton")
-      .def("getBackgroundFunctionNames", &getBackgroundFunctionNames,
-           arg("self"),
+      .def("getBackgroundFunctionNames", &getBackgroundFunctionNames, arg("self"),
            "Returns a list of the currently available background functions")
       .def("getPeakFunctionNames", &getPeakFunctionNames, arg("self"),
            "Returns a list of the currently available peak functions")
-      .def("createPeakFunction", &createPeakFunction,
-           (arg("self"), arg("name")), "Return pointer to peak function.")
+      .def("createPeakFunction", &createPeakFunction, (arg("self"), arg("name")), "Return pointer to peak function.")
       .staticmethod("Instance");
 }

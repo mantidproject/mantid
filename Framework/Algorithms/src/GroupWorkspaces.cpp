@@ -25,24 +25,19 @@ using namespace Kernel;
 void GroupWorkspaces::init() {
 
   declareProperty(
-      std::make_unique<ArrayProperty<std::string>>(
-          "InputWorkspaces", std::make_shared<ADSValidator>(true, true)),
+      std::make_unique<ArrayProperty<std::string>>("InputWorkspaces", std::make_shared<ADSValidator>(true, true)),
       "Names of the Input Workspaces to Group");
-  declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("GlobExpression", ""),
-      "Add all Workspaces that match Glob expression to Group");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "",
-                                                          Direction::Output),
-      "Name of the workspace to be created as the output of grouping ");
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("GlobExpression", ""),
+                  "Add all Workspaces that match Glob expression to Group");
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "", Direction::Output),
+                  "Name of the workspace to be created as the output of grouping ");
 }
 
 /** Executes the algorithm
  *  @throw std::runtime_error If the selected workspaces are not of same types
  */
 void GroupWorkspaces::exec() {
-  const std::vector<std::string> inputWorkspaces =
-      getProperty("InputWorkspaces");
+  const std::vector<std::string> inputWorkspaces = getProperty("InputWorkspaces");
 
   const std::string globExpression = getProperty("GlobExpression");
 
@@ -54,9 +49,7 @@ void GroupWorkspaces::exec() {
   if (!globExpression.empty())
     addToGroup(globExpression);
   if ((m_group == nullptr) || m_group->isEmpty())
-    throw std::invalid_argument(
-        "Glob pattern " + globExpression +
-        " does not match any workspace names in the ADS.");
+    throw std::invalid_argument("Glob pattern " + globExpression + " does not match any workspace names in the ADS.");
   setProperty("OutputWorkspace", m_group);
   auto &notifier = API::AnalysisDataService::Instance().notificationCenter;
   notifier.postNotification(new WorkspacesGroupedNotification(inputWorkspaces));
@@ -64,8 +57,7 @@ void GroupWorkspaces::exec() {
 
 std::map<std::string, std::string> GroupWorkspaces::validateInputs() {
   std::map<std::string, std::string> results;
-  const std::vector<std::string> inputWorkspaces =
-      getProperty("InputWorkspaces");
+  const std::vector<std::string> inputWorkspaces = getProperty("InputWorkspaces");
   std::string globExpression = getProperty("GlobExpression");
   std::string outputWorkspace = getProperty("OutputWorkspace");
 
@@ -74,9 +66,8 @@ std::map<std::string, std::string> GroupWorkspaces::validateInputs() {
   for (const auto &ws : inputWorkspaces) {
     if (ws == outputWorkspace) {
       if (!AnalysisDataService::Instance().retrieve(ws)->isGroup())
-        results["OutputWorkspace"] =
-            "The output workspace has the same name as "
-            "one of the input workspaces";
+        results["OutputWorkspace"] = "The output workspace has the same name as "
+                                     "one of the input workspaces";
     }
   }
 
@@ -87,9 +78,8 @@ std::map<std::string, std::string> GroupWorkspaces::validateInputs() {
   }
 
   if (inputWorkspaces.empty() && globExpression.empty()) {
-    results["InputWorkspaces"] =
-        "No InputWorkspace names specified. Rerun with a list of workspaces "
-        "names or a glob expression";
+    results["InputWorkspaces"] = "No InputWorkspace names specified. Rerun with a list of workspaces "
+                                 "names or a glob expression";
     return results;
   }
 
@@ -155,17 +145,15 @@ void GroupWorkspaces::addToGroup(const API::Workspace_sptr &workspace) {
   } else {
     if (!m_group)
       m_group = std::make_shared<WorkspaceGroup>(workspace->storageMode());
-    else if (communicator().size() != 1 &&
-             m_group->storageMode() != workspace->storageMode()) {
-      throw std::runtime_error(
-          "WorkspaceGroup with mixed Parallel::Storage mode is not supported.");
+    else if (communicator().size() != 1 && m_group->storageMode() != workspace->storageMode()) {
+      throw std::runtime_error("WorkspaceGroup with mixed Parallel::Storage mode is not supported.");
     }
     m_group->addWorkspace(workspace);
   }
 }
 
-Parallel::ExecutionMode GroupWorkspaces::getParallelExecutionMode(
-    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+Parallel::ExecutionMode
+GroupWorkspaces::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   static_cast<void>(storageModes);
   const std::vector<std::string> names = getProperty("InputWorkspaces");
   const auto ws = AnalysisDataService::Instance().retrieve(names.front());
