@@ -443,7 +443,29 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.model.perform_fit()
 
-        self.model._do_single_fit.assert_called_once_with(self.model._get_parameters_for_single_fit())
+        self.model._do_single_fit.assert_called_once_with(self.model._get_parameters_for_single_fit(
+            self.model.current_dataset_name, self.model.current_single_fit_function))
+
+    def test_that_get_fit_function_parameters_will_return_a_list_of_parameter_names_for_the_current_single_functions(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+
+        self.assertEqual(self.model.get_fit_function_parameters(), ["A0"])
+
+        self.fit_function = FunctionFactory.createFunction("ExpDecay")
+        self.model.single_fit_functions = [self.fit_function.clone(), self.fit_function.clone()]
+
+        self.assertEqual(self.model.get_fit_function_parameters(), ["Height", "Lifetime"])
+
+    def test_that_get_fit_function_parameters_returns_an_empty_list_if_the_single_fit_functions_are_empty(self):
+        self.model.dataset_names = self.dataset_names
+        self.assertEqual(self.model.get_fit_function_parameters(), [])
+
+    def test_that_get_all_fit_functions_returns_the_single_fit_functions(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+
+        self.assertEqual(self.model.get_all_fit_functions(), self.model.single_fit_functions)
 
 
 if __name__ == '__main__':

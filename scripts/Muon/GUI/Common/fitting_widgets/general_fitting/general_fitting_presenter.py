@@ -25,10 +25,11 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self._update_plot = True
 
         self.fitting_mode_changed_notifier = GenericObservable()
+        self.simultaneous_fit_by_specifier_changed = GenericObservable()
 
         self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
-
         self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
+        self.fit_parameter_updated_observer = GenericObserver(self.update_fit_function_in_view_from_model)
 
         self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_pulse_type_changed)
         self.model.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
@@ -81,17 +82,19 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         """Handle when the fitting mode is changed to or from simultaneous fitting."""
         self.model.simultaneous_fitting_mode = self.view.simultaneous_fitting_mode
         self.switch_fitting_mode_in_view()
-        self.automatically_update_function_name()
 
         self.update_fit_functions_in_model_from_view()
 
         # Triggers handle_dataset_name_changed
         self.update_dataset_names_in_view_and_model()
 
+        self.automatically_update_function_name()
+
         self.reset_fit_status_and_chi_squared_information()
         self.clear_cached_fit_functions()
 
         self.fitting_mode_changed_notifier.notify_subscribers()
+        self.fit_function_changed_notifier.notify_subscribers()
 
     def handle_simultaneous_fit_by_changed(self) -> None:
         """Handle when the simultaneous fit by combo box is changed."""
@@ -110,6 +113,8 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.reset_start_xs_and_end_xs()
         self.reset_fit_status_and_chi_squared_information()
         self.clear_cached_fit_functions()
+
+        self.simultaneous_fit_by_specifier_changed.notify_subscribers()
 
     def handle_dataset_name_changed(self) -> None:
         """Handle when the display workspace combo box is changed."""
@@ -178,8 +183,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         else:
             self.model.clear_simultaneous_fit_function()
             self.update_single_fit_functions_in_model()
-
-        self.fit_function_changed_notifier.notify_subscribers()
 
     def update_simultaneous_fit_function_in_model(self) -> None:
         """Updates the simultaneous fit function in the model using the view."""

@@ -252,22 +252,32 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.view.set_normalisation.assert_called_with(self.normalisation, self.normalisation_error)
 
     def test_that_update_fit_function_in_model_will_update_the_simultaneous_fit_functions_when_in_simultaneous_mode(self):
-        self.model.update_simultaneous_fit_functions = mock.Mock()
+        self.model.update_tf_asymmetry_simultaneous_fit_function = mock.Mock()
         self.mock_model_simultaneous_fitting_mode = mock.PropertyMock(return_value=True)
         type(self.model).simultaneous_fitting_mode = self.mock_model_simultaneous_fitting_mode
 
         self.presenter.update_fit_function_in_model(self.fit_function)
 
-        self.model.update_simultaneous_fit_functions.assert_called_once_with(self.fit_function)
+        self.model.update_tf_asymmetry_simultaneous_fit_function.assert_called_once_with(self.fit_function)
 
     def test_that_update_fit_function_in_model_will_update_the_current_fit_function_when_in_single_mode(self):
-        self.model.update_current_single_fit_functions = mock.Mock()
+        self.model.update_tf_asymmetry_single_fit_function = mock.Mock()
         self.mock_model_simultaneous_fitting_mode = mock.PropertyMock(return_value=False)
         type(self.model).simultaneous_fitting_mode = self.mock_model_simultaneous_fitting_mode
 
         self.presenter.update_fit_function_in_model(self.fit_function)
 
-        self.model.update_current_single_fit_functions.assert_called_once_with(self.fit_function)
+        self.model.update_tf_asymmetry_single_fit_function.assert_called_once_with(self.model.current_dataset_index,
+                                                                                   self.fit_function)
+
+    def test_that_handle_sequential_fit_finished_will_update_the_fit_functions_and_statuses_in_the_view_and_model(self):
+        self.presenter.update_fit_function_in_view_from_model = mock.Mock()
+        self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model = mock.Mock()
+
+        self.presenter.handle_sequential_fit_finished()
+
+        self.presenter.update_fit_function_in_view_from_model.assert_called_once_with()
+        self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model.assert_called_once_with()
 
     def _setup_mock_view(self):
         self.view = mock.Mock(spec=TFAsymmetryFittingView)

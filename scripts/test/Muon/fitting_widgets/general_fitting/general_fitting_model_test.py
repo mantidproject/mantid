@@ -402,7 +402,8 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.model.perform_fit()
 
-        self.model._do_single_fit.assert_called_once_with(self.model._get_parameters_for_single_fit())
+        self.model._do_single_fit.assert_called_once_with(self.model._get_parameters_for_single_fit(
+            self.model.current_dataset_name, self.model.current_single_fit_function))
 
     def test_perform_fit_will_call_the_correct_function_for_a_simultaneous_fit(self):
         self.model.dataset_names = self.dataset_names
@@ -416,8 +417,39 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.model.perform_fit()
 
-        self.model._do_simultaneous_fit.assert_called_once_with(self.model._get_parameters_for_simultaneous_fit(),
-                                                                global_parameters)
+        self.model._do_simultaneous_fit.assert_called_once_with(self.model._get_parameters_for_simultaneous_fit(
+            self.model.dataset_names, self.model.simultaneous_fit_function), global_parameters)
+
+    def test_that_get_fit_function_parameters_will_return_a_list_of_parameter_names_when_in_single_fit_mode(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+
+        self.assertEqual(self.model.get_fit_function_parameters(), ["A0"])
+
+        self.fit_function = FunctionFactory.createFunction("ExpDecay")
+        self.model.single_fit_functions = [self.fit_function.clone(), self.fit_function.clone()]
+
+        self.assertEqual(self.model.get_fit_function_parameters(), ["Height", "Lifetime"])
+
+    def test_that_get_fit_function_parameters_will_return_a_list_of_parameter_names_when_in_simultaneous_fit_mode(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fit_function = self.simultaneous_fit_function
+        self.model.simultaneous_fitting_mode = True
+
+        self.assertEqual(self.model.get_fit_function_parameters(), ["f0.A0", "f1.A0"])
+
+    def test_that_get_fit_function_parameters_returns_an_empty_list_if_the_simultaneous_function_is_none_in_simultaneous_fit_mode(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fitting_mode = True
+
+        self.assertEqual(self.model.get_fit_function_parameters(), [])
+
+    def test_that_get_all_fit_functions_returns_the_simultaneous_fitting_function_in_a_list_when_in_simultaneous_mode(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fit_function = self.simultaneous_fit_function
+        self.model.simultaneous_fitting_mode = True
+
+        self.assertEqual(self.model.get_all_fit_functions(), [self.model.simultaneous_fit_function])
 
 
 if __name__ == '__main__':

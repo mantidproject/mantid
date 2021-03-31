@@ -184,6 +184,23 @@ class GeneralFittingModel(BasicFittingModel):
 
         return self._sort_workspace_names(display_workspaces)
 
+    def get_fit_function_parameters(self) -> list:
+        """Returns the names of the fit parameters in the fit functions."""
+        if self.simultaneous_fitting_mode:
+            if self.simultaneous_fit_function is not None:
+                return [self.simultaneous_fit_function.parameterName(i)
+                        for i in range(self.simultaneous_fit_function.nParams())]
+            return []
+        else:
+            return super().get_fit_function_parameters()
+
+    def get_all_fit_functions(self) -> list:
+        """Returns all the fit functions for the current fitting mode."""
+        if self.simultaneous_fitting_mode:
+            return [self.simultaneous_fit_function]
+        else:
+            return super().get_all_fit_functions()
+
     def get_active_fit_function(self) -> IFunction:
         """Returns the fit function that is active and will be used for a fit."""
         if self.simultaneous_fitting_mode:
@@ -287,7 +304,8 @@ class GeneralFittingModel(BasicFittingModel):
     def perform_fit(self) -> tuple:
         """Performs a single or simultaneous fit and returns the resulting function, status and chi squared."""
         if self.simultaneous_fitting_mode:
-            return self._do_simultaneous_fit(self._get_parameters_for_simultaneous_fit(), self.global_parameters)
+            return self._do_simultaneous_fit(self._get_parameters_for_simultaneous_fit(
+                self.dataset_names, self.simultaneous_fit_function), self.global_parameters)
         else:
             return super().perform_fit()
 
@@ -296,8 +314,8 @@ class GeneralFittingModel(BasicFittingModel):
         output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = \
             self._do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(parameters)
 
-        self._add_simultaneous_fit_results_to_ADS_and_context(parameter_table, output_workspace, covariance_matrix,
-                                                              global_parameters)
+        self._add_simultaneous_fit_results_to_ADS_and_context(parameters["InputWorkspace"], parameter_table,
+                                                              output_workspace, covariance_matrix, global_parameters)
         return function, fit_status, chi_squared
 
     def _do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(self, parameters: dict) -> tuple:
@@ -306,51 +324,54 @@ class GeneralFittingModel(BasicFittingModel):
         output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = run_simultaneous_Fit(
             parameters, alg)
 
-        self._copy_logs(output_workspace)
+        self._copy_logs(parameters["InputWorkspace"], output_workspace)
         return output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix
 
-    def _copy_logs(self, output_workspace: str) -> None:
+    def _copy_logs(self, input_workspaces, output_workspace: str) -> None:
         """Copy the logs from the input workspace(s) to the output workspaces."""
         if self.number_of_datasets == 1:
-            CopyLogs(InputWorkspace=self.current_dataset_name, OutputWorkspace=output_workspace, StoreInADS=False)
+            CopyLogs(InputWorkspace=input_workspaces, OutputWorkspace=output_workspace, StoreInADS=False)
         else:
-            self._copy_logs_for_all_datsets(output_workspace)
+            self._copy_logs_for_all_datsets(input_workspaces, output_workspace)
 
-    def _copy_logs_for_all_datsets(self, output_group: str) -> None:
+    def _copy_logs_for_all_datsets(self, input_workspaces: list, output_group: str) -> None:
         """Copy the logs from the input workspaces to the output workspaces."""
-        for input_workspace, output in zip(self.dataset_names, self._get_names_in_group_workspace(output_group)):
+        for input_workspace, output in zip(input_workspaces, self._get_names_in_group_workspace(output_group)):
             CopyLogs(InputWorkspace=input_workspace, OutputWorkspace=output, StoreInADS=False)
 
-    def _get_parameters_for_simultaneous_fit(self) -> dict:
+    def _get_parameters_for_simultaneous_fit(self, dataset_names: list, simultaneous_function: IFunction) -> dict:
         """Gets the parameters to use for a simultaneous fit."""
         params = self._get_common_parameters()
-        params["InputWorkspace"] = self.dataset_names
+        params["Function"] = simultaneous_function
+        params["InputWorkspace"] = dataset_names
         params["StartX"] = self.start_xs
         params["EndX"] = self.end_xs
         return params
 
-    def _add_simultaneous_fit_results_to_ADS_and_context(self, parameter_table, output_workspace, covariance_matrix,
+    def _add_simultaneous_fit_results_to_ADS_and_context(self, input_workspace_names: list, parameter_table,
+                                                         output_workspace, covariance_matrix,
                                                          global_parameters: list) -> None:
         """Adds the results of a simultaneous fit to the ADS and fitting context."""
         if self.number_of_datasets > 1:
-            workspace_names, table_name, table_directory = self._add_multiple_fit_workspaces_to_ADS(output_workspace,
-                                                                                                    covariance_matrix)
+            workspace_names, table_name, table_directory = self._add_multiple_fit_workspaces_to_ADS(
+                input_workspace_names, output_workspace, covariance_matrix)
         else:
             workspace_name, table_name, table_directory = self._add_single_fit_workspaces_to_ADS(
-                self.current_dataset_name, output_workspace, covariance_matrix)
+                input_workspace_names[0], output_workspace, covariance_matrix)
             workspace_names = [workspace_name]
 
         self._add_fit_to_context(self._add_workspace_to_ADS(parameter_table, table_name, table_directory),
-                                 self.dataset_names, workspace_names, global_parameters)
+                                 input_workspace_names, workspace_names, global_parameters)
 
-    def _add_multiple_fit_workspaces_to_ADS(self, output_workspace, covariance_matrix) -> tuple:
+    def _add_multiple_fit_workspaces_to_ADS(self, input_workspace_names: list, output_workspace, covariance_matrix):
         """Adds the results of a simultaneous fit to the ADS and fitting context if multiple workspaces were fitted."""
         suffix = self.function_name
-        workspace_names, workspace_directory = create_multi_domain_fitted_workspace_name(self.dataset_names[0], suffix)
-        table_name, table_directory = create_parameter_table_name(self.dataset_names[0] + "+ ...", suffix)
+        workspace_names, workspace_directory = create_multi_domain_fitted_workspace_name(input_workspace_names[0],
+                                                                                         suffix)
+        table_name, table_directory = create_parameter_table_name(input_workspace_names[0] + "+ ...", suffix)
 
         self._add_workspace_to_ADS(output_workspace, workspace_names, "")
-        workspace_names = self._rename_members_of_fitted_workspace_group(workspace_names)
+        workspace_names = self._rename_members_of_fitted_workspace_group(input_workspace_names, workspace_names)
         self._add_workspace_to_ADS(covariance_matrix, workspace_names[0] + "_CovarianceMatrix", table_directory)
 
         return workspace_names, table_name, table_directory
@@ -362,11 +383,11 @@ class GeneralFittingModel(BasicFittingModel):
         else:
             return []
 
-    def _rename_members_of_fitted_workspace_group(self, group_workspace: str) -> list:
+    def _rename_members_of_fitted_workspace_group(self, input_workspace_names: list, group_workspace: str) -> list:
         """Renames the fit result workspaces within a group workspace."""
         self.context.ads_observer.observeRename(False)
         output_names = [self._rename_workspace(input_name, workspace_name) for input_name, workspace_name in
-                        zip(self.dataset_names, self._get_names_in_group_workspace(group_workspace))]
+                        zip(input_workspace_names, self._get_names_in_group_workspace(group_workspace))]
         self.context.ads_observer.observeRename(True)
 
         return output_names

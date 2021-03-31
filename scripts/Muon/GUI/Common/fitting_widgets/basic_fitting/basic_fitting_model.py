@@ -450,6 +450,18 @@ class BasicFittingModel:
         except AttributeError:
             return DEFAULT_START_X
 
+    def get_fit_function_parameters(self) -> list:
+        """Returns the names of the fit parameters in the fit functions."""
+        if self.single_fit_functions:
+            fit_function = self.single_fit_functions[0]
+            if fit_function is not None:
+                return [fit_function.parameterName(i) for i in range(fit_function.nParams())]
+        return []
+
+    def get_all_fit_functions(self) -> list:
+        """Returns all the fit functions for the current fitting mode."""
+        return self.single_fit_functions
+
     def get_active_fit_function(self) -> IFunction:
         """Returns the fit function that is active and will be used for a fit."""
         return self.current_single_fit_function
@@ -471,15 +483,15 @@ class BasicFittingModel:
 
     def perform_fit(self) -> tuple:
         """Performs a single fit and returns the resulting function, status and chi squared."""
-        function, fit_status, chi_squared = self._do_single_fit(self._get_parameters_for_single_fit())
-        return function, fit_status, chi_squared
+        params = self._get_parameters_for_single_fit(self.current_dataset_name, self.current_single_fit_function)
+        return self._do_single_fit(params)
 
     def _do_single_fit(self, parameters: dict) -> tuple:
         """Does a single fit and returns the fit function, status and chi squared. Adds the results to the ADS."""
         output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = \
             self._do_single_fit_and_return_workspace_parameters_and_fit_function(parameters)
 
-        self._add_single_fit_results_to_ADS_and_context(self.current_dataset_name, parameter_table, output_workspace,
+        self._add_single_fit_results_to_ADS_and_context(parameters["InputWorkspace"], parameter_table, output_workspace,
                                                         covariance_matrix)
         return function, fit_status, chi_squared
 
@@ -491,18 +503,18 @@ class BasicFittingModel:
         CopyLogs(InputWorkspace=self.current_dataset_name, OutputWorkspace=output_workspace, StoreInADS=False)
         return output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix
 
-    def _get_parameters_for_single_fit(self) -> dict:
+    def _get_parameters_for_single_fit(self, dataset_name: str, single_fit_function: IFunction) -> dict:
         """Returns the parameters used for a single fit."""
         params = self._get_common_parameters()
-        params["InputWorkspace"] = self.current_dataset_name
+        params["Function"] = single_fit_function
+        params["InputWorkspace"] = dataset_name
         params["StartX"] = self.current_start_x
         params["EndX"] = self.current_end_x
         return params
 
     def _get_common_parameters(self) -> dict:
         """Returns the parameters which are common across different fitting modes."""
-        return {"Function": self.get_active_fit_function(),
-                "Minimizer": self.minimizer,
+        return {"Minimizer": self.minimizer,
                 "EvaluationType": self.evaluation_type}
 
     def _create_fit_algorithm(self) -> IAlgorithm:

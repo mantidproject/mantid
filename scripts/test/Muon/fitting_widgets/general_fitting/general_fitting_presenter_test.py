@@ -139,6 +139,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.presenter.reset_fit_status_and_chi_squared_information.assert_called_once_with()
         self.presenter.clear_cached_fit_functions.assert_called_once_with()
         self.presenter.fitting_mode_changed_notifier.notify_subscribers.assert_called_once_with()
+        self.presenter.fit_function_changed_notifier.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_simultaneous_fit_by_changed_will_update_the_model(self):
         self.presenter.update_simultaneous_fit_by_specifiers_in_view = mock.Mock()
@@ -164,6 +165,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.presenter.reset_start_xs_and_end_xs.assert_called_once_with()
         self.presenter.reset_fit_status_and_chi_squared_information.assert_called_once_with()
         self.presenter.clear_cached_fit_functions.assert_called_once_with()
+        self.presenter.simultaneous_fit_by_specifier_changed.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_dataset_name_changed_will_update_the_model_and_view(self):
         self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model = mock.Mock()
@@ -314,8 +316,6 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.model.clear_single_fit_functions.assert_called_once_with()
         self.presenter.update_simultaneous_fit_function_in_model.assert_called_once_with()
 
-        self.presenter.fit_function_changed_notifier.notify_subscribers.assert_called_once_with()
-
     def test_that_update_fit_functions_in_model_from_view_will_update_the_single_function_if_in_single_mode(self):
         self.mock_model_simultaneous_fitting_mode = mock.PropertyMock(return_value=False)
         type(self.model).simultaneous_fitting_mode = self.mock_model_simultaneous_fitting_mode
@@ -326,8 +326,6 @@ class GeneralFittingPresenterTest(unittest.TestCase):
 
         self.model.clear_simultaneous_fit_function.assert_called_once_with()
         self.presenter.update_single_fit_functions_in_model.assert_called_once_with()
-
-        self.presenter.fit_function_changed_notifier.notify_subscribers.assert_called_once_with()
 
     def test_that_update_simultaneous_fit_function_in_model_will_set_the_simultaneous_function_in_the_model(self):
         self.presenter.update_simultaneous_fit_function_in_model()
@@ -448,6 +446,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.presenter.fit_function_changed_notifier.notify_subscribers = mock.Mock()
         self.presenter.fit_parameter_changed_notifier.notify_subscribers = mock.Mock()
         self.presenter.fitting_mode_changed_notifier.notify_subscribers = mock.Mock()
+        self.presenter.simultaneous_fit_by_specifier_changed.notify_subscribers = mock.Mock()
 
 
 if __name__ == '__main__':
