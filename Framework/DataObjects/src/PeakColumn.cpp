@@ -139,14 +139,14 @@ template <class T> const std::type_info &PeakColumn<T>::get_pointer_type_info() 
  */
 template <class T> void PeakColumn<T>::print(size_t index, std::ostream &s) const {
   T &peak = m_peaks[index];
-  auto fullPeak = dynamic_cast<Peak *>(&peak);  // additional printout for class Peak
+  auto fullPeak = dynamic_cast<Peak *>(&peak); // additional printout for class Peak
 
   s.imbue(std::locale("C"));
   std::ios::fmtflags fflags(s.flags());
   if (m_name == "RunNumber")
     s << peak.getRunNumber();
   else if (m_name == "DetID" && fullPeak) {
-      s << fullPeak->getDetectorID();
+    s << fullPeak->getDetectorID();
   } else if (m_name == "BankName" && fullPeak)
     s << fullPeak->getBankName();
   else if (m_name == "QLab")

@@ -37,7 +37,7 @@ double SN(const Mantid::Geometry::IPeak &p) { return p.getIntensity() / p.getSig
 double RUN(const Mantid::Geometry::IPeak &p) { return p.getRunNumber(); }
 
 std::string BANKNAME(const Mantid::Geometry::IPeak &p) {
-  const Peak& fullPeak = dynamic_cast<const Peak&>(p);
+  const Peak &fullPeak = dynamic_cast<const Peak &>(p);
   return fullPeak.getBankName();
 }
 

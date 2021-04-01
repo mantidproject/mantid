@@ -143,11 +143,9 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering, dou
  * @return
  */
 Peak::Peak(const Peak &other)
-    : BasePeak(other), m_inst(other.m_inst), m_det(other.m_det),
-      m_bankName(other.m_bankName),
-      m_detectorID(other.m_detectorID), m_initialEnergy(other.m_initialEnergy),
-      m_finalEnergy(other.m_finalEnergy), sourcePos(other.sourcePos),
-      detPos(other.detPos), m_detIDs(other.m_detIDs) {}
+    : BasePeak(other), m_inst(other.m_inst), m_det(other.m_det), m_bankName(other.m_bankName),
+      m_detectorID(other.m_detectorID), m_initialEnergy(other.m_initialEnergy), m_finalEnergy(other.m_finalEnergy),
+      sourcePos(other.sourcePos), detPos(other.detPos), m_detIDs(other.m_detIDs) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a Peak from IPeak interface
@@ -319,7 +317,7 @@ Geometry::Instrument_const_sptr Peak::getInstrument() const { return m_inst; }
 /** Return a shared ptr to the reference frame from the instrument for this peak. */
 std::shared_ptr<const Geometry::ReferenceFrame> Peak::getReferenceFrame() const { return m_inst->getReferenceFrame(); }
 
-  // -------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 /** Find the name of the bank that is the parent of the detector. This works
  * best for RectangularDetector instruments (goes up two levels)
  * @return name of the bank.
@@ -329,7 +327,7 @@ std::string Peak::getBankName() const { return m_bankName; }
 /** Set the BankName of this peak
  * @param m_bankName :: index to set
  */
-void Peak::setBankName(std::string bankName) {this->m_bankName = std::move(bankName);}
+void Peak::setBankName(std::string bankName) { this->m_bankName = std::move(bankName); }
 
 // -------------------------------------------------------------------------------------
 /** Calculate the neutron wavelength (in angstroms) at the peak
