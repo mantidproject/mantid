@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMuon/PSIBackgroundSubtraction.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -54,10 +53,6 @@ void PSIBackgroundSubtraction::init() {
       "Input workspace containing the PSI bin data "
       "which the background correction will be applied to.");
 
-  declareProperty(std::make_unique<API::FunctionProperty>("AdditionalFunction", Direction::Input, true),
-                  "An additional fit function that will be added to the default fit "
-                  "function, before being used for the background substraction.");
-
   declareProperty("StartX", EMPTY_DBL(),
                   "An X value in the first bin to be included in the background "
                   "subtraction. If this is not provided, it will use a start X found in "
@@ -75,9 +70,6 @@ void PSIBackgroundSubtraction::init() {
   auto mustBeGreater0 = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBeGreater0->setLower(1);
   declareProperty("Binning", 1, mustBeGreater0, "Constant sized rebinning of the data");
-
-  declareProperty(std::make_unique<API::FunctionProperty>("OutputFunction", Direction::Output),
-                  "The full function that was fitted during the background subtraction.");
 }
 
 std::map<std::string, std::string> PSIBackgroundSubtraction::validateInputs() {
@@ -178,10 +170,13 @@ void PSIBackgroundSubtraction::calculateBackgroundUsingFit(MatrixWorkspace_sptr 
  * @return Initalised fitting algorithm
  */
 IAlgorithm_sptr PSIBackgroundSubtraction::setupFitAlgorithm(const std::string &wsName) {
+  std::string functionstring = "name=FlatBackground,A0=0;name=ExpDecayMuon";
+  IFunction_sptr func = FunctionFactory::Instance().createInitialized(functionstring);
+
   IAlgorithm_sptr fit = createChildAlgorithm("Fit");
   int maxIterations = getProperty("MaxIterations");
   fit->initialize();
-  fit->setProperty("Function", getFunction());
+  fit->setProperty("Function", func);
   fit->setProperty("MaxIterations", maxIterations);
   fit->setPropertyValue("Minimizer", MINIMISER);
   fit->setProperty("CreateOutput", false);
@@ -204,23 +199,9 @@ std::tuple<double, double> PSIBackgroundSubtraction::calculateBackgroundFromFit(
   fit->setProperty("WorkspaceIndex", workspaceIndex);
   fit->execute();
   IFunction_sptr func = fit->getProperty("Function");
-  setProperty("OutputFunction", func);
-
   double flatbackground = func->getParameter("f0.A0");
   double chi2 = std::stod(fit->getPropertyValue("OutputChi2overDof"));
   return std::make_tuple(flatbackground, chi2);
-}
-
-/**
- * Gets the Function to use for the background subtraction.
- * @return An IFunction_sptr used in the Fit algorithm.
- */
-IFunction_sptr PSIBackgroundSubtraction::getFunction() const {
-  std::string funcString = "name=FlatBackground,A0=0;name=ExpDecayMuon";
-  if (!getPointerToProperty("AdditionalFunction")->isDefault())
-    funcString += ";" + getPropertyValue("AdditionalFunction");
-
-  return FunctionFactory::Instance().createInitialized(funcString);
 }
 
 /**
