@@ -119,11 +119,6 @@ void PredictSatellitePeaks::exec() {
   // boolean for only including order zero once
   bool notOrderZero = false;
 
-  if (Peaks->getNumberPeaks() <= 0) {
-    g_log.error() << "There are No peaks in the input PeaksWorkspace\n";
-    return;
-  }
-
   API::Sample sample = Peaks->mutableSample();
   auto lattice = std::make_unique<OrientedLattice>(sample.getOrientedLattice());
 
@@ -154,7 +149,6 @@ void PredictSatellitePeaks::exec() {
 
   const double lambdaMin = getProperty("WavelengthMin");
   const double lambdaMax = getProperty("WavelengthMax");
-  IPeak &peak0 = Peaks->getPeak(0);
 
   std::vector<V3D> possibleHKLs;
   const double dMin = getProperty("MinDSpacing");
@@ -176,7 +170,8 @@ void PredictSatellitePeaks::exec() {
   size_t N = possibleHKLs.size();
   N = max<size_t>(100, N);
   const auto &UB = outPeaks->sample().getOrientedLattice().getUB();
-  goniometer = peak0.getGoniometerMatrix();
+  goniometer = Peaks->run().getGoniometerMatrix();
+  int run_number = Peaks->getRunNumber();
   Progress prog(this, 0.0, 1.0, N);
   vector<vector<int>> AlreadyDonePeaks;
   auto orientedUB = goniometer * UB;
@@ -187,12 +182,15 @@ void PredictSatellitePeaks::exec() {
   for (auto it = possibleHKLs.begin(); it != possibleHKLs.end(); ++it) {
     V3D hkl = *it;
     if (crossTerms) {
-      predictOffsetsWithCrossTerms(offsets1, offsets2, offsets3, maxOrder, hkl, lambdaFilter, includePeaksInRange,
-                                   includeOrderZero, AlreadyDonePeaks);
+      predictOffsetsWithCrossTerms(offsets1, offsets2, offsets3, maxOrder, run_number, goniometer, hkl, lambdaFilter,
+                                   includePeaksInRange, includeOrderZero, AlreadyDonePeaks);
     } else {
-      predictOffsets(0, offsets1, maxOrder, hkl, lambdaFilter, includePeaksInRange, includeOrderZero, AlreadyDonePeaks);
-      predictOffsets(1, offsets2, maxOrder, hkl, lambdaFilter, includePeaksInRange, notOrderZero, AlreadyDonePeaks);
-      predictOffsets(2, offsets3, maxOrder, hkl, lambdaFilter, includePeaksInRange, notOrderZero, AlreadyDonePeaks);
+      predictOffsets(0, offsets1, maxOrder, run_number, goniometer, hkl, lambdaFilter, includePeaksInRange,
+                     includeOrderZero, AlreadyDonePeaks);
+      predictOffsets(1, offsets2, maxOrder, run_number, goniometer, hkl, lambdaFilter, includePeaksInRange,
+                     notOrderZero, AlreadyDonePeaks);
+      predictOffsets(2, offsets3, maxOrder, run_number, goniometer, hkl, lambdaFilter, includePeaksInRange,
+                     notOrderZero, AlreadyDonePeaks);
     }
   }
   // Sort peaks by run number so that peaks with equal goniometer matrices are
@@ -263,14 +261,21 @@ void PredictSatellitePeaks::exec_peaks() {
   std::vector<Peak> peaks = Peaks->getPeaks();
   for (auto it = peaks.begin(); it != peaks.end(); ++it) {
     auto peak = *it;
+    Kernel::Matrix<double> const peak_goniometer_matrix = peak.getGoniometerMatrix();
+    int run_number = peak.getRunNumber();
     V3D hkl = peak.getHKL();
     if (crossTerms) {
-      predictOffsetsWithCrossTerms(offsets1, offsets2, offsets3, maxOrder, hkl, lambdaFilter, includePeaksInRange,
-                                   includeOrderZero, AlreadyDonePeaks);
+      predictOffsetsWithCrossTerms(offsets1, offsets2, offsets3, maxOrder, run_number, peak_goniometer_matrix, hkl,
+                                   lambdaFilter, includePeaksInRange, includeOrderZero, AlreadyDonePeaks);
     } else {
-      predictOffsets(0, offsets1, maxOrder, hkl, lambdaFilter, includePeaksInRange, includeOrderZero, AlreadyDonePeaks);
-      predictOffsets(1, offsets2, maxOrder, hkl, lambdaFilter, includePeaksInRange, notOrderZero, AlreadyDonePeaks);
-      predictOffsets(2, offsets3, maxOrder, hkl, lambdaFilter, includePeaksInRange, notOrderZero, AlreadyDonePeaks);
+      predictOffsets(0, offsets1, maxOrder, run_number, peak_goniometer_matrix, hkl, lambdaFilter, includePeaksInRange,
+                     includeOrderZero, AlreadyDonePeaks);
+
+      predictOffsets(1, offsets2, maxOrder, run_number, peak_goniometer_matrix, hkl, lambdaFilter, includePeaksInRange,
+                     notOrderZero, AlreadyDonePeaks);
+
+      predictOffsets(2, offsets3, maxOrder, run_number, peak_goniometer_matrix, hkl, lambdaFilter, includePeaksInRange,
+                     notOrderZero, AlreadyDonePeaks);
     }
   }
   // Sort peaks by run number so that peaks with equal goniometer matrices are
@@ -290,15 +295,13 @@ void PredictSatellitePeaks::exec_peaks() {
   setProperty("SatellitePeaks", outPeaks);
 }
 
-void PredictSatellitePeaks::predictOffsets(int indexModulatedVector, V3D offsets, int &maxOrder, V3D &hkl,
+void PredictSatellitePeaks::predictOffsets(int indexModulatedVector, V3D offsets, int &maxOrder, int RunNumber,
+                                           Kernel::Matrix<double> const &goniometer, V3D &hkl,
                                            HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange,
                                            bool &includeOrderZero, vector<vector<int>> &AlreadyDonePeaks) {
   if (offsets == V3D(0, 0, 0) && !includeOrderZero)
     return;
   const Kernel::DblMatrix &UB = Peaks->sample().getOrientedLattice().getUB();
-  IPeak &peak1 = Peaks->getPeak(0);
-  Kernel::Matrix<double> goniometer = peak1.getGoniometerMatrix();
-  auto RunNumber = peak1.getRunNumber();
   Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
   for (int order = -maxOrder; order <= maxOrder; order++) {
     if (order == 0 && !includeOrderZero)
@@ -344,15 +347,14 @@ void PredictSatellitePeaks::predictOffsets(int indexModulatedVector, V3D offsets
 }
 
 void PredictSatellitePeaks::predictOffsetsWithCrossTerms(V3D offsets1, V3D offsets2, V3D offsets3, int &maxOrder,
-                                                         V3D &hkl, HKLFilterWavelength &lambdaFilter,
-                                                         bool &includePeaksInRange, bool &includeOrderZero,
+                                                         int RunNumber,
+                                                         Kernel::Matrix<double> const &peak_goniometer_matrix, V3D &hkl,
+                                                         HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange,
+                                                         bool &includeOrderZero,
                                                          vector<vector<int>> &AlreadyDonePeaks) {
   if (offsets1 == V3D(0, 0, 0) && offsets2 == V3D(0, 0, 0) && offsets3 == V3D(0, 0, 0) && !includeOrderZero)
     return;
   const Kernel::DblMatrix &UB = Peaks->sample().getOrientedLattice().getUB();
-  IPeak &peak1 = Peaks->getPeak(0);
-  Kernel::Matrix<double> goniometer = peak1.getGoniometerMatrix();
-  auto RunNumber = peak1.getRunNumber();
   Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
   DblMatrix offsetsMat(3, 3);
   offsetsMat.setColumn(0, offsets1);
@@ -378,7 +380,7 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(V3D offsets1, V3D offse
         if (!lambdaFilter.isAllowed(satelliteHKL) && includePeaksInRange)
           continue;
 
-        Kernel::V3D Qs = goniometer * UB * satelliteHKL * 2.0 * M_PI * m_qConventionFactor;
+        Kernel::V3D Qs = peak_goniometer_matrix * UB * satelliteHKL * 2.0 * M_PI * m_qConventionFactor;
 
         // Check if Q is non-physical
         if (Qs.Z() * m_qConventionFactor <= 0)
@@ -387,7 +389,7 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(V3D offsets1, V3D offse
         IPeak_uptr iPeak(Peaks->createPeak(Qs, 1));
         Peak_uptr peak(static_cast<DataObjects::Peak *>(iPeak.release()));
 
-        peak->setGoniometerMatrix(goniometer);
+        peak->setGoniometerMatrix(peak_goniometer_matrix);
 
         if (!peak->findDetector(tracer))
           continue;
