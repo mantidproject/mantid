@@ -623,7 +623,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         """
         Set the label of the x-axis using ascii only with a non-ascii character and make sure it's handled properly.
         """
-        ws = CreateWorkspace(DataX=[0,1,2],DataY=[3,7,5],DataE=[0.2,0.3,0.1],NSpec=1)
+        ws = CreateWorkspace(DataX=[0, 1, 2], DataY=[3, 7, 5], DataE=[0.2, 0.3, 0.1], NSpec=1)
         label_unit = ws.getAxis(0).setUnit("Label")
         microseconds = "\u00B5s"
         # Second argument will implicitly call the ascii only constructor of UnitLabel.
