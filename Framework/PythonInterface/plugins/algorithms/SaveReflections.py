@@ -53,7 +53,7 @@ def has_modulated_indexing(workspace):
 
 
 def get_intHKLM(peak, workspace):
-    """Get the HKL to write to file. If t
+    """Get the HKL to write to file (of parent peak if a satellite) and mnp (empty if no modulation)
 
     :params: peak :: peak object from workspace
     :params: workspace :: the peak workspace
