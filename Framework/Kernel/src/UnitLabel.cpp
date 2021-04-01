@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/UnitLabel.h"
 #include <codecvt>
+#include <cstring>
 #include <locale>
 
 namespace Mantid {
