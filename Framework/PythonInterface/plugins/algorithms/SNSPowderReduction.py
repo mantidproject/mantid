@@ -13,7 +13,8 @@ from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DistributedDa
     ITableWorkspace, MatrixWorkspace
 from mantid.kernel import (
     ConfigService, Direction, EnabledWhenProperty, FloatArrayProperty, FloatBoundedValidator, IntArrayBoundedValidator,
-    IntArrayProperty, Property, PropertyCriterion, PropertyManagerDataService, StringListValidator, StringTimeSeriesProperty)
+    IntArrayProperty, MaterialBuilder, Property, PropertyCriterion, PropertyManagerDataService, StringListValidator,
+    StringTimeSeriesProperty)
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
 from mantid.utils import absorptioncorrutils
 if AlgorithmFactory.exists('GatherWorkspaces'):
@@ -271,8 +272,12 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         # If doing absorption correction, make sure the sample formula is correct
         if self.getProperty("TypeOfCorrection").value != "None":
-            if self.getProperty("SampleFormula").value == '':
-                issues['SampleFormula'] = "A sample formula must be provided."
+            if self.getProperty("SampleFormula").value != '':
+                try:
+                    material = MaterialBuilder()
+                    material.setFormula(self.getProperty("SampleFormula").value)
+                except ValueError as ex:
+                    issues['SampleFormula'] = "Invalid SampleFormula: '{}'".format(str(ex))
 
         # The provided cache directory does not exist
         cache_dir_string = self.getProperty('CacheDir').value  # comma-delimited string representation of list
