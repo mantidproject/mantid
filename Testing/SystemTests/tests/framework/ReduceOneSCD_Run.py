@@ -45,8 +45,8 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
     def runTest(self):
         start_time = time.time()
 
-        # raise tolerance to 1e-6
-        self.tolerance = 1e-6
+        # raise tolerance to 1e-3
+        self.tolerance = 1e-3
 
         instrument_name = "TOPAZ"
         calibration_file_1 = "TOPAZ_2011_02_16.DetCal"
@@ -238,7 +238,7 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
         LoadIsawUB(InputWorkspace="XX1", Filename=self.run_conventional_matrix_file)
         s1 = mtd["XX1"].sample()
 
-        LoadIsawPeaks(OutputWorkspace="PeaksP", Filename="3132_Orthorhombic_P.integrate")
+        LoadNexus(OutputWorkspace="PeaksP", Filename="3132_Orthorhombic_P.integrate.nxs")
         LoadIsawUB(InputWorkspace=peaks_ws, Filename="3132_Orthorhombic_P.mat")
         IndexPeaks(PeaksWorkspace=peaks_ws, Tolerance=tolerance)
         CreateSingleValuedWorkspace(OutputWorkspace="XX2", DataValue="3")
