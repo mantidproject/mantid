@@ -2,26 +2,29 @@
 
 set ( TEST_PY_FILES
    ADSHandler/workspace_naming_test.py
-   elemental_analysis/detectors_presenter_test.py
-   elemental_analysis/element_button_test.py
    elemental_analysis/elemental_analysis_test.py
-   elemental_analysis/lmodel_test.py
-   elemental_analysis/load_model_test.py
    elemental_analysis/name_generator_test.py
+   elemental_analysis/detectors_presenter_test.py
+   elemental_analysis/periodic_table_test.py
    elemental_analysis/peak_selector_view_test.py
+   elemental_analysis/element_button_test.py
    elemental_analysis/periodic_combo_test.py
    elemental_analysis/periodic_list_test.py
    elemental_analysis/periodic_table_item_test.py
-   elemental_analysis/periodic_table_test.py
+   elemental_analysis/lmodel_test.py
+   elemental_analysis/load_model_test.py
    elemental_analysis_2/elemental_analysis_context_test.py
-   elemental_analysis_2/elemental_analysis_load_model_test.py
-   elemental_analysis_2/elemental_analysis_load_widget_presenter_test.py
-   elemental_analysis_2/elemental_analysis_loadfile_model_test.py
-   elemental_analysis_2/elemental_analysis_loadrun_model_test.py
-   elemental_analysis_2/elemental_analysis_loadrun_presenter_increment_decrement_test.py
-   elemental_analysis_2/elemental_analysis_loadrun_presenter_single_run_test.py
-   elemental_analysis_2/elemental_analysis_loadutils_test.py
    elemental_analysis_2/elemental_analysis_main_GUI_test.py
+   elemental_analysis_2/EA_loading_tab/elemental_analysis_loadutils_test.py
+   elemental_analysis_2/EA_loading_tab/elemental_analysis_load_model_test.py
+   elemental_analysis_2/EA_loading_tab/elemental_analysis_load_widget_presenter_test.py
+   elemental_analysis_2/EA_loading_tab/elemental_analysis_loadfile_model_test.py
+   elemental_analysis_2/EA_loading_tab/elemental_analysis_loadrun_model_test.py
+   elemental_analysis_2/EA_loading_tab/elemental_analysis_loadrun_presenter_single_run_test.py
+   elemental_analysis_2/EA_loading_tab/elemental_analysis_loadrun_presenter_increment_decrement_test.py
+   elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_tab_model_test.py
+   elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_tab_presenter_test.py
+   elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_table_presenter_test.py
    external_plotting_model_test.py
    fft_presenter_context_interaction_test.py
    FFTModel_test.py
