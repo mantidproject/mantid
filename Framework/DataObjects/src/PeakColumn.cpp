@@ -139,16 +139,16 @@ template <class T> const std::type_info &PeakColumn<T>::get_pointer_type_info() 
  */
 template <class T> void PeakColumn<T>::print(size_t index, std::ostream &s) const {
   T &peak = m_peaks[index];
+  auto fullPeak = dynamic_cast<Peak *>(&peak);  // additional printout for class Peak
+
   s.imbue(std::locale("C"));
   std::ios::fmtflags fflags(s.flags());
   if (m_name == "RunNumber")
     s << peak.getRunNumber();
-  else if (m_name == "DetID") {
-    auto fullPeak = dynamic_cast<Peak *>(&peak);
-    if (fullPeak)
+  else if (m_name == "DetID" && fullPeak) {
       s << fullPeak->getDetectorID();
-  } else if (m_name == "BankName")
-    s << peak.getBankName();
+  } else if (m_name == "BankName" && fullPeak)
+    s << fullPeak->getBankName();
   else if (m_name == "QLab")
     s << peak.getQLabFrame();
   else if (m_name == "QSample")
@@ -281,6 +281,7 @@ template <class T> void *PeakColumn<T>::void_pointer(size_t index) {
  */
 template <class T> const void *PeakColumn<T>::void_pointer(size_t index) const {
   const T &peak = m_peaks[index];
+  auto fatPeak = dynamic_cast<const DataObjects::Peak &>(peak); // additional methods available in class Peak
 
   // The cell() api requires that the value exist somewhere in memory, however,
   // some of the values from a Peak are calculated on the fly so a reference
@@ -303,11 +304,10 @@ template <class T> const void *PeakColumn<T>::void_pointer(size_t index) const {
     value = peak.getPeakNumber();
     return boost::get<int>(&value);
   } else if (m_name == "DetID") {
-    auto fatPeak = dynamic_cast<const DataObjects::Peak &>(peak);
     value = fatPeak.getDetectorID();
     return boost::get<int>(&value);
   } else if (m_name == "BankName") {
-    value = peak.getBankName();
+    value = fatPeak.getBankName();
     return boost::get<std::string>(&value);
   } else if (m_name == "QLab") {
     value = peak.getQLabFrame();

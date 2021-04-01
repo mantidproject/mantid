@@ -109,7 +109,6 @@ public:
   MOCK_METHOD1(setBinCount, void(double m_BinCount));
   MOCK_CONST_METHOD0(getGoniometerMatrix, Mantid::Kernel::Matrix<double>());
   MOCK_METHOD1(setGoniometerMatrix, void(const Mantid::Kernel::Matrix<double> &m_GoniometerMatrix));
-  MOCK_CONST_METHOD0(getBankName, std::string());
   MOCK_CONST_METHOD0(getRow, int());
   MOCK_CONST_METHOD0(getCol, int());
   MOCK_CONST_METHOD0(getL1, double());

@@ -83,6 +83,7 @@ public:
   std::shared_ptr<const Geometry::ReferenceFrame> getReferenceFrame() const override;
 
   std::string getBankName() const;
+  void setBankName(std::string bankName);
 
   bool findDetector();
   bool findDetector(const Geometry::InstrumentRayTracer &tracer);

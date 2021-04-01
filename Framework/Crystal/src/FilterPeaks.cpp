@@ -11,6 +11,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
+using Mantid::DataObjects::Peak;
+
 namespace {
 
 // Filter functions
@@ -34,7 +36,10 @@ double SN(const Mantid::Geometry::IPeak &p) { return p.getIntensity() / p.getSig
 
 double RUN(const Mantid::Geometry::IPeak &p) { return p.getRunNumber(); }
 
-std::string BANKNAME(const Mantid::Geometry::IPeak &p) { return p.getBankName(); }
+std::string BANKNAME(const Mantid::Geometry::IPeak &p) {
+  const Peak& fullPeak = dynamic_cast<const Peak&>(p);
+  return fullPeak.getBankName();
+}
 
 } // namespace
 

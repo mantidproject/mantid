@@ -326,6 +326,11 @@ std::shared_ptr<const Geometry::ReferenceFrame> Peak::getReferenceFrame() const 
  */
 std::string Peak::getBankName() const { return m_bankName; }
 
+/** Set the BankName of this peak
+ * @param m_bankName :: index to set
+ */
+void Peak::setBankName(std::string bankName) {this->m_bankName = std::move(bankName);}
+
 // -------------------------------------------------------------------------------------
 /** Calculate the neutron wavelength (in angstroms) at the peak
  * (Note for inelastic scattering - it is the wavelength corresponding to the

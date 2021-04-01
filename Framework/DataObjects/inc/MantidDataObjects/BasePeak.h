@@ -69,7 +69,6 @@ public:
   void setH(double m_H) override;
   void setK(double m_K) override;
   void setL(double m_L) override;
-  void setBankName(std::string m_bankName);
   void setHKL(double H, double K, double L) override;
   void setHKL(const Mantid::Kernel::V3D &HKL) override;
   void setIntHKL(const Kernel::V3D &HKL) override;

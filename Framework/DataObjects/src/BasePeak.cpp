@@ -141,10 +141,6 @@ void BasePeak::setK(double m_K) { this->m_K = m_K; }
  * @param m_L :: index to set   */
 void BasePeak::setL(double m_L) { this->m_L = m_L; }
 
-/** Set the BankName of this peak
- * @param m_bankName :: index to set   */
-void BasePeak::setBankName(std::string m_bankName) { this->m_bankName = std::move(m_bankName); }
-
 /** Set all three H,K,L indices of the peak */
 void BasePeak::setHKL(double H, double K, double L) {
   m_H = H;
