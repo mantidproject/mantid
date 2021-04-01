@@ -54,13 +54,11 @@ void PSIBackgroundSubtraction::init() {
       "which the background correction will be applied to.");
 
   declareProperty("StartX", EMPTY_DBL(),
-                  "An X value in the first bin to be included in the background "
-                  "subtraction. If this is not provided, it will use a start X found in "
-                  "the InputWorkspace.");
+                  "An X value in the first bin to be included in the calculation of the background. If this is not "
+                  "provided, it will use the first X found in the InputWorkspace.");
   declareProperty("EndX", EMPTY_DBL(),
-                  "An X value in the last bin to be included in the background "
-                  "subtraction. If this is not provided, it will use an end X "
-                  "found in the InputWorkspace.");
+                  "An X value in the last bin to be included in the calculation of the background. If this is not "
+                  "provided, it will use the last X found in the InputWorkspace.");
 
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
@@ -91,12 +89,12 @@ std::map<std::string, std::string> PSIBackgroundSubtraction::validateInputs() {
     try {
       firstGood = std::stoi(run.getProperty(FIRST_GOOD + std::to_string(index))->value());
     } catch (Kernel::Exception::NotFoundError) {
-      errors["InputWorkspace"] = "Input Workspace should should contain first food data. ";
+      errors["InputWorkspace"] = "Input Workspace should should contain first good data. ";
     }
     try {
       lastGood = std::stoi(run.getProperty(LAST_GOOD + std::to_string(index))->value());
     } catch (Kernel::Exception::NotFoundError) {
-      errors["InputWorkspace"] += "\n Input Workspace should should contain last food data. ";
+      errors["InputWorkspace"] += "\n Input Workspace should should contain last good data. ";
     }
     if (lastGood <= firstGood) {
       errors["InputWorkspace"] += "\n Input Workspace should have last good data > first good data. ";
