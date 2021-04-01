@@ -15,8 +15,7 @@ namespace MDAlgorithms {
 
   @date 2012-06-21
 */
-class DLLExport CreateMDHistoWorkspace
-    : public MDAlgorithms::ImportMDHistoWorkspaceBase {
+class DLLExport CreateMDHistoWorkspace : public MDAlgorithms::ImportMDHistoWorkspaceBase {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -26,9 +25,7 @@ public:
   }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"ConvertToMD", "CreateMDWorkspace"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ConvertToMD", "CreateMDWorkspace"}; }
   const std::string category() const override;
 
 private:

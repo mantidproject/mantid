@@ -45,8 +45,7 @@ public:
     auto inst = saveDiffCal.createInstrument();
     auto groupWSIn = saveDiffCal.createGrouping(inst);
     auto maskWSIn = saveDiffCal.createMasking(inst);
-    auto calWSIn =
-        saveDiffCal.createCalibration(5 * 9); // nine components per bank
+    auto calWSIn = saveDiffCal.createCalibration(5 * 9); // nine components per bank
     SaveDiffCal saveAlg;
     saveAlg.initialize();
     saveAlg.setProperty("GroupingWorkspace", groupWSIn);
@@ -61,18 +60,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(loadAlg.initialize());
     TS_ASSERT(loadAlg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(loadAlg.setPropertyValue("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(
-        loadAlg.setPropertyValue("WorkspaceName", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        loadAlg.setProperty("MakeGroupingWorkspace", false));
+    TS_ASSERT_THROWS_NOTHING(loadAlg.setPropertyValue("WorkspaceName", outWSName));
+    TS_ASSERT_THROWS_NOTHING(loadAlg.setProperty("MakeGroupingWorkspace", false));
     TS_ASSERT_THROWS_NOTHING(loadAlg.setProperty("MakeMaskWorkspace", false));
     TS_ASSERT_THROWS_NOTHING(loadAlg.execute(););
     TS_ASSERT(loadAlg.isExecuted());
 
     ITableWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            outWSName + "_cal"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outWSName + "_cal"));
     TS_ASSERT(ws);
 
     if (ws) {
@@ -101,8 +96,7 @@ public:
     auto inst = saveDiffCal.createInstrument();
     auto groupWSIn = saveDiffCal.createGrouping(inst, false);
     auto maskWSIn = saveDiffCal.createMasking(inst);
-    auto calWSIn =
-        saveDiffCal.createCalibration(5 * 9); // nine components per bank
+    auto calWSIn = saveDiffCal.createCalibration(5 * 9); // nine components per bank
     SaveDiffCal saveAlg;
     saveAlg.initialize();
     saveAlg.setProperty("GroupingWorkspace", groupWSIn);
@@ -127,20 +121,15 @@ public:
     TS_ASSERT(loadAlg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(loadAlg.setProperty("InputWorkspace", groupWSIn));
     TS_ASSERT_THROWS_NOTHING(loadAlg.setPropertyValue("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(
-        loadAlg.setPropertyValue("GroupFilename", groupingfile));
-    TS_ASSERT_THROWS_NOTHING(
-        loadAlg.setPropertyValue("WorkspaceName", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        loadAlg.setProperty("MakeGroupingWorkspace", true));
+    TS_ASSERT_THROWS_NOTHING(loadAlg.setPropertyValue("GroupFilename", groupingfile));
+    TS_ASSERT_THROWS_NOTHING(loadAlg.setPropertyValue("WorkspaceName", outWSName));
+    TS_ASSERT_THROWS_NOTHING(loadAlg.setProperty("MakeGroupingWorkspace", true));
     TS_ASSERT_THROWS_NOTHING(loadAlg.setProperty("MakeMaskWorkspace", false));
     TS_ASSERT_THROWS_NOTHING(loadAlg.execute(););
     TS_ASSERT(loadAlg.isExecuted());
 
     ITableWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            outWSName + "_cal"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outWSName + "_cal"));
     TS_ASSERT(ws);
 
     if (ws) {

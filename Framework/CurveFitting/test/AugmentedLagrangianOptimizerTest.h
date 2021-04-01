@@ -17,25 +17,14 @@ class AugmentedLagrangianOptimizerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AugmentedLagrangianOptimizerTest *createSuite() {
-    return new AugmentedLagrangianOptimizerTest();
-  }
-  static void destroySuite(AugmentedLagrangianOptimizerTest *suite) {
-    delete suite;
-  }
+  static AugmentedLagrangianOptimizerTest *createSuite() { return new AugmentedLagrangianOptimizerTest(); }
+  static void destroySuite(AugmentedLagrangianOptimizerTest *suite) { delete suite; }
 
-  enum CONSTRAINT_TYPE {
-    NOCONSTRAINTS,
-    EMPTYCONSTRAINTS,
-    EQUALITYCONSTRAINT,
-    INEQUALITYCONSTRAINT,
-    BOTHCONSTRAINTS
-  };
+  enum CONSTRAINT_TYPE { NOCONSTRAINTS, EMPTYCONSTRAINTS, EQUALITYCONSTRAINT, INEQUALITYCONSTRAINT, BOTHCONSTRAINTS };
 
   AugmentedLagrangianOptimizerTest() : CxxTest::TestSuite(), m_nparams(2) {}
 
-  void
-  test_constuctor_with_equality_matrix_whose_num_columns_dont_match_nparams_throws() {
+  void test_constuctor_with_equality_matrix_whose_num_columns_dont_match_nparams_throws() {
     using Mantid::CurveFitting::AugmentedLagrangianOptimizer;
     using Mantid::Kernel::DblMatrix;
 
@@ -44,18 +33,15 @@ public:
     DblMatrix inequality;               // Empty indicates no constraint
 
     AugmentedLagrangianOptimizer::ObjFunction userFunc;
-    TS_ASSERT_THROWS(
-        AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality),
+                     const std::invalid_argument &);
 
     equality = DblMatrix(1, nparams - 1); // cols < number parameters
-    TS_ASSERT_THROWS(
-        AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality),
+                     const std::invalid_argument &);
   }
 
-  void
-  test_constuctor_with_inequality_matrix_whose_num_columns_dont_match_nparams_throws() {
+  void test_constuctor_with_inequality_matrix_whose_num_columns_dont_match_nparams_throws() {
     using Mantid::CurveFitting::AugmentedLagrangianOptimizer;
     using Mantid::Kernel::DblMatrix;
 
@@ -64,14 +50,12 @@ public:
     DblMatrix inequality(1, nparams + 1);
 
     AugmentedLagrangianOptimizer::ObjFunction userFunc;
-    TS_ASSERT_THROWS(
-        AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality),
+                     const std::invalid_argument &);
 
     inequality = DblMatrix(1, nparams - 1); // cols < number parameters
-    TS_ASSERT_THROWS(
-        AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality),
+                     const std::invalid_argument &);
   }
 
   void test_minimizer_calls_user_function() {
@@ -80,8 +64,7 @@ public:
 
     bool userFuncCalled = false;
     TestUserFuncCall testFunc(userFuncCalled);
-    AugmentedLagrangianOptimizer::ObjFunction userFunc =
-        std::bind(&TestUserFuncCall::eval, testFunc, _1, _2);
+    AugmentedLagrangianOptimizer::ObjFunction userFunc = std::bind(&TestUserFuncCall::eval, testFunc, _1, _2);
     AugmentedLagrangianOptimizer lsqmin(2, userFunc);
 
     std::vector<double> xv(2, 1);
@@ -166,24 +149,19 @@ private:
     std::shared_ptr<AugmentedLagrangianOptimizer> lsqmin;
     switch (type) {
     case NOCONSTRAINTS:
-      lsqmin =
-          std::make_shared<AugmentedLagrangianOptimizer>(nparams, userFunc);
+      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(nparams, userFunc);
       break;
     case EMPTYCONSTRAINTS:
-      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(
-          nparams, userFunc, DblMatrix(), DblMatrix());
+      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(nparams, userFunc, DblMatrix(), DblMatrix());
       break;
     case EQUALITYCONSTRAINT:
-      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(
-          nparams, userFunc, equality, DblMatrix());
+      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(nparams, userFunc, equality, DblMatrix());
       break;
     case INEQUALITYCONSTRAINT:
-      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(
-          nparams, userFunc, DblMatrix(), inequality);
+      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(nparams, userFunc, DblMatrix(), inequality);
       break;
     case BOTHCONSTRAINTS:
-      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(
-          nparams, userFunc, equality, inequality);
+      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(nparams, userFunc, equality, inequality);
       break;
     };
 

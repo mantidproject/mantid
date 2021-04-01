@@ -14,10 +14,8 @@ namespace HistogramData {
 class Counts;
 class Frequencies;
 
-template <class T, typename std::enable_if<
-                       std::is_same<HistogramY, T>::value ||
-                       std::is_same<Counts, T>::value ||
-                       std::is_same<Frequencies, T>::value>::type * = nullptr>
+template <class T, typename std::enable_if<std::is_same<HistogramY, T>::value || std::is_same<Counts, T>::value ||
+                                           std::is_same<Frequencies, T>::value>::type * = nullptr>
 bool isValid(const T &eData) {
   return detail::Validator<HistogramY>::isValid(eData);
 }

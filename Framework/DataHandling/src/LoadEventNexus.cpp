@@ -68,8 +68,7 @@ bool exists(::NeXus::File &file, const std::string &name) {
   return exists(entries, name);
 }
 
-bool exists(const std::map<std::string, std::string> &entries,
-            const std::string &name) {
+bool exists(const std::map<std::string, std::string> &entries, const std::string &name) {
   return entries.find(name) != entries.end();
 }
 
@@ -77,10 +76,9 @@ bool exists(const std::map<std::string, std::string> &entries,
 /** Empty default constructor
  */
 LoadEventNexus::LoadEventNexus()
-    : filter_tof_min(0), filter_tof_max(0), m_specMin(0), m_specMax(0),
-      longest_tof(0), shortest_tof(0), bad_tofs(0), discarded_events(0),
-      compressTolerance(0), m_instrument_loaded_correctly(false),
-      loadlogs(false), event_id_is_spec(false) {}
+    : filter_tof_min(0), filter_tof_max(0), m_specMin(0), m_specMax(0), longest_tof(0), shortest_tof(0), bad_tofs(0),
+      discarded_events(0), compressTolerance(0), m_instrument_loaded_correctly(false), loadlogs(false),
+      event_id_is_spec(false) {}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -92,11 +90,9 @@ LoadEventNexus::LoadEventNexus()
 int LoadEventNexus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
 
   int confidence = 0;
-  const std::map<std::string, std::set<std::string>> &allEntries =
-      descriptor.getAllEntries();
+  const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
   if (allEntries.count("NXevent_data") == 1) {
-    if (descriptor.isEntry("/entry", "NXentry") ||
-        descriptor.isEntry("/raw_data_1", "NXentry")) {
+    if (descriptor.isEntry("/entry", "NXentry") || descriptor.isEntry("/raw_data_1", "NXentry")) {
       confidence = 80;
     }
   }
@@ -109,45 +105,36 @@ int LoadEventNexus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
  */
 void LoadEventNexus::init() {
   const std::vector<std::string> exts{".nxs.h5", ".nxs", "_event.nxs"};
-  this->declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The name of the Event NeXus file to read, including its full or "
-      "relative path. "
-      "The file name is typically of the form INST_####_event.nxs (N.B. case "
-      "sensitive if running on Linux).");
+  this->declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                        "The name of the Event NeXus file to read, including its full or "
+                        "relative path. "
+                        "The file name is typically of the form INST_####_event.nxs (N.B. case "
+                        "sensitive if running on Linux).");
 
-  this->declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
-      "The name of the output EventWorkspace or WorkspaceGroup in which to "
-      "load the EventNexus file.");
+  this->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
+                        "The name of the output EventWorkspace or WorkspaceGroup in which to "
+                        "load the EventNexus file.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<string>>("NXentryName", "",
-                                                  Direction::Input),
-      "Optional: Name of the NXentry to load if it's not the default.");
+  declareProperty(std::make_unique<PropertyWithValue<string>>("NXentryName", "", Direction::Input),
+                  "Optional: Name of the NXentry to load if it's not the default.");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "FilterByTofMin", EMPTY_DBL(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("FilterByTofMin", EMPTY_DBL(), Direction::Input),
                   "Optional: To exclude events that do not fall within a range "
                   "of times-of-flight. "
                   "This is the minimum accepted value in microseconds. Keep "
                   "blank to load all events.");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "FilterByTofMax", EMPTY_DBL(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("FilterByTofMax", EMPTY_DBL(), Direction::Input),
                   "Optional: To exclude events that do not fall within a range "
                   "of times-of-flight. "
                   "This is the maximum accepted value in microseconds. Keep "
                   "blank to load all events.");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "FilterByTimeStart", EMPTY_DBL(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("FilterByTimeStart", EMPTY_DBL(), Direction::Input),
                   "Optional: To only include events after the provided start "
                   "time, in seconds (relative to the start of the run).");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "FilterByTimeStop", EMPTY_DBL(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("FilterByTimeStop", EMPTY_DBL(), Direction::Input),
                   "Optional: To only include events before the provided stop "
                   "time, in seconds (relative to the start of the run).");
 
@@ -157,36 +144,29 @@ void LoadEventNexus::init() {
   setPropertyGroup("FilterByTimeStart", grp1);
   setPropertyGroup("FilterByTimeStop", grp1);
 
-  declareProperty(
-      std::make_unique<ArrayProperty<string>>("BankName", Direction::Input),
-      "Optional: To only include events from one bank. Any bank "
-      "whose name does not match the given string will have no "
-      "events.");
+  declareProperty(std::make_unique<ArrayProperty<string>>("BankName", Direction::Input),
+                  "Optional: To only include events from one bank. Any bank "
+                  "whose name does not match the given string will have no "
+                  "events.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "SingleBankPixelsOnly", true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("SingleBankPixelsOnly", true, Direction::Input),
                   "Optional: Only applies if you specified a single bank to "
                   "load with BankName. "
                   "Only pixels in the specified bank will be created if true; "
                   "all of the instrument's pixels will be created otherwise.");
-  setPropertySettings(
-      "SingleBankPixelsOnly",
-      std::make_unique<VisibleWhenProperty>("BankName", IS_NOT_DEFAULT));
+  setPropertySettings("SingleBankPixelsOnly", std::make_unique<VisibleWhenProperty>("BankName", IS_NOT_DEFAULT));
 
   std::string grp2 = "Loading a Single Bank";
   setPropertyGroup("BankName", grp2);
   setPropertyGroup("SingleBankPixelsOnly", grp2);
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("Precount", true,
-                                                Direction::Input),
-      "Pre-count the number of events in each pixel before allocating memory "
-      "(optional, default True). "
-      "This can significantly reduce memory use and memory fragmentation; it "
-      "may also speed up loading.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("Precount", true, Direction::Input),
+                  "Pre-count the number of events in each pixel before allocating memory "
+                  "(optional, default True). "
+                  "This can significantly reduce memory use and memory fragmentation; it "
+                  "may also speed up loading.");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "CompressTolerance", -1.0, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("CompressTolerance", -1.0, Direction::Input),
                   "Run CompressEvents while loading (optional, leave blank or "
                   "negative to not do). "
                   "This specified the tolerance to use (in microseconds) when "
@@ -203,8 +183,7 @@ void LoadEventNexus::init() {
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at
   // validation
-  setPropertySettings("TotalChunks", std::make_unique<VisibleWhenProperty>(
-                                         "ChunkNumber", IS_NOT_DEFAULT));
+  setPropertySettings("TotalChunks", std::make_unique<VisibleWhenProperty>("ChunkNumber", IS_NOT_DEFAULT));
 
   std::string grp3 = "Reduce Memory Use";
   setPropertyGroup("Precount", grp3);
@@ -212,46 +191,37 @@ void LoadEventNexus::init() {
   setPropertyGroup("ChunkNumber", grp3);
   setPropertyGroup("TotalChunks", grp3);
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "LoadMonitors", false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadMonitors", false, Direction::Input),
                   "Load the monitors from the file (optional, default False).");
 
   std::vector<std::string> options{"", "Events", "Histogram"};
-  declareProperty("MonitorsLoadOnly", "",
-                  std::make_shared<Kernel::StringListValidator>(options),
+  declareProperty("MonitorsLoadOnly", "", std::make_shared<Kernel::StringListValidator>(options),
                   "If multiple repesentations exist, which one to load. "
                   "Default is to load the one that is present.");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "FilterMonByTofMin", EMPTY_DBL(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("FilterMonByTofMin", EMPTY_DBL(), Direction::Input),
                   "Optional: To exclude events from monitors that do not fall "
                   "within a range of times-of-flight. "
                   "This is the minimum accepted value in microseconds.");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "FilterMonByTofMax", EMPTY_DBL(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("FilterMonByTofMax", EMPTY_DBL(), Direction::Input),
                   "Optional: To exclude events from monitors that do not fall "
                   "within a range of times-of-flight. "
                   "This is the maximum accepted value in microseconds.");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "FilterMonByTimeStart", EMPTY_DBL(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("FilterMonByTimeStart", EMPTY_DBL(), Direction::Input),
                   "Optional: To only include events from monitors after the "
                   "provided start time, in seconds (relative to the start of "
                   "the run).");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "FilterMonByTimeStop", EMPTY_DBL(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("FilterMonByTimeStop", EMPTY_DBL(), Direction::Input),
                   "Optional: To only include events from monitors before the "
                   "provided stop time, in seconds (relative to the start of "
                   "the run).");
 
-  setPropertySettings(
-      "MonitorsLoadOnly",
-      std::make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
+  setPropertySettings("MonitorsLoadOnly", std::make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
   auto asEventsIsOn = [] {
-    std::unique_ptr<IPropertySettings> prop =
-        std::make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1");
+    std::unique_ptr<IPropertySettings> prop = std::make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1");
     return prop;
   };
   setPropertySettings("FilterMonByTofMin", asEventsIsOn());
@@ -267,20 +237,15 @@ void LoadEventNexus::init() {
   setPropertyGroup("FilterMonByTimeStart", grp4);
   setPropertyGroup("FilterMonByTimeStop", grp4);
 
-  declareProperty("SpectrumMin", EMPTY_INT(), mustBePositive,
-                  "The number of the first spectrum to read.");
-  declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive,
-                  "The number of the last spectrum to read.");
+  declareProperty("SpectrumMin", EMPTY_INT(), mustBePositive, "The number of the first spectrum to read.");
+  declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive, "The number of the last spectrum to read.");
   declareProperty(std::make_unique<ArrayProperty<int32_t>>("SpectrumList"),
                   "A comma-separated list of individual spectra to read.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("MetaDataOnly", false,
-                                                Direction::Input),
-      "If true, only the meta data and sample logs will be loaded.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("MetaDataOnly", false, Direction::Input),
+                  "If true, only the meta data and sample logs will be loaded.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadLogs", true,
-                                                            Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadLogs", true, Direction::Input),
                   "Load the Sample/DAS logs from the file (default True).");
   std::vector<std::string> loadType{"Default"};
 
@@ -298,8 +263,7 @@ void LoadEventNexus::init() {
                   "'Multiprocess' should work faster for big files and it is "
                   "experimental, available only in Linux");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "LoadNexusInstrumentXML", true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadNexusInstrumentXML", true, Direction::Input),
                   "Reads the embedded Instrument XML from the NeXus file "
                   "(optional, default True). ");
 
@@ -309,16 +273,14 @@ void LoadEventNexus::init() {
                   "select meta data only you will only get 1 bin.");
 
   // Flexible log loading
-  declareProperty(
-      std::make_unique<PropertyWithValue<std::vector<std::string>>>(
-          "AllowList", std::vector<std::string>(), Direction::Input),
-      "If specified, only these logs will be loaded from the file (each "
-      "separated by a space).");
-  declareProperty(
-      std::make_unique<PropertyWithValue<std::vector<std::string>>>(
-          "BlockList", std::vector<std::string>(), Direction::Input),
-      "If specified, these logs will NOT be loaded from the file (each "
-      "separated by a space).");
+  declareProperty(std::make_unique<PropertyWithValue<std::vector<std::string>>>("AllowList", std::vector<std::string>(),
+                                                                                Direction::Input),
+                  "If specified, only these logs will be loaded from the file (each "
+                  "separated by a space).");
+  declareProperty(std::make_unique<PropertyWithValue<std::vector<std::string>>>("BlockList", std::vector<std::string>(),
+                                                                                Direction::Input),
+                  "If specified, these logs will NOT be loaded from the file (each "
+                  "separated by a space).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -340,9 +302,8 @@ void LoadEventNexus::setTopEntryName() {
           break;
         }
       } else if (entry.first == NULL_STR && entry.second == NULL_STR) {
-        g_log.error()
-            << "Unable to determine name of top level NXentry - assuming "
-               "\"entry\".\n";
+        g_log.error() << "Unable to determine name of top level NXentry - assuming "
+                         "\"entry\".\n";
         m_top_entry_name = "entry";
         break;
       }
@@ -356,8 +317,7 @@ void LoadEventNexus::setTopEntryName() {
 
 template <typename T> void LoadEventNexus::filterDuringPause(T workspace) {
   try {
-    if ((!ConfigService::Instance().hasProperty(
-            "loadeventnexus.keeppausedevents")) &&
+    if ((!ConfigService::Instance().hasProperty("loadeventnexus.keeppausedevents")) &&
         (m_ws->run().getLogData("pause")->size() > 1)) {
       g_log.notice("Filtering out events when the run was marked as paused. "
                    "Set the loadeventnexus.keeppausedevents configuration "
@@ -379,12 +339,10 @@ template <typename T> void LoadEventNexus::filterDuringPause(T workspace) {
 }
 
 template <>
-void LoadEventNexus::filterDuringPause<EventWorkspaceCollection_sptr>(
-    EventWorkspaceCollection_sptr workspace) {
+void LoadEventNexus::filterDuringPause<EventWorkspaceCollection_sptr>(EventWorkspaceCollection_sptr workspace) {
   // We provide a function pointer to the filter method of the object
   using std::placeholders::_1;
-  auto func = std::bind(
-      &LoadEventNexus::filterDuringPause<MatrixWorkspace_sptr>, this, _1);
+  auto func = std::bind(&LoadEventNexus::filterDuringPause<MatrixWorkspace_sptr>, this, _1);
   workspace->applyFilter(func);
 }
 
@@ -448,8 +406,7 @@ void LoadEventNexus::execLoader() {
   }
 }
 
-std::pair<DateAndTime, DateAndTime>
-firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
+std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   file.openData("event_time_zero");
   std::string isooffset; // ISO8601 offset
   DateAndTime offset;
@@ -468,15 +425,13 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   if (file.hasAttr("units"))
     file.getAttr("units", units);
   // Read in the pulse times
-  auto pulse_times =
-      NeXus::NeXusIOHelper::readNexusVector<double>(file, "event_time_zero");
+  auto pulse_times = NeXus::NeXusIOHelper::readNexusVector<double>(file, "event_time_zero");
   // Remember to close the entry
   file.closeData();
   // Convert to seconds
   auto conv = Kernel::Units::timeConversionValue(units, "s");
-  return std::make_pair(
-      DateAndTime(pulse_times.front() * conv, 0.0) + offset.totalNanoseconds(),
-      DateAndTime(pulse_times.back() * conv, 0.0) + offset.totalNanoseconds());
+  return std::make_pair(DateAndTime(pulse_times.front() * conv, 0.0) + offset.totalNanoseconds(),
+                        DateAndTime(pulse_times.back() * conv, 0.0) + offset.totalNanoseconds());
 } // namespace DataHandling
 
 /**
@@ -491,8 +446,7 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
  * @param descriptor input containing metadata information
  * @return The number of events.
  */
-std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
-                      bool &oldNeXusFileNames, const std::string &prefix,
+std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts, bool &oldNeXusFileNames, const std::string &prefix,
                       const NexusHDF5Descriptor &descriptor) {
   // try getting the value of total_counts
   if (hasTotalCounts) {
@@ -549,10 +503,10 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
  * @return Pulse times given in the DAS logs
  */
 template <typename T>
-std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
-    const std::string &nexusfilename, T localWorkspace, API::Algorithm &alg,
-    bool returnpulsetimes, int &nPeriods,
-    std::unique_ptr<const TimeSeriesProperty<int>> &periodLog) {
+std::shared_ptr<BankPulseTimes>
+LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, T localWorkspace, API::Algorithm &alg,
+                                 bool returnpulsetimes, int &nPeriods,
+                                 std::unique_ptr<const TimeSeriesProperty<int>> &periodLog) {
   // --------------------- Load DAS Logs -----------------
   // The pulse times will be empty if not specified in the DAS logs.
   // BankPulseTimes * out = NULL;
@@ -564,11 +518,9 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     alg.getLogger().information() << "Loading logs from NeXus file..."
                                   << "\n";
     loadLogs->setPropertyValue("Filename", nexusfilename);
-    loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace",
-                                                     localWorkspace);
+    loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace", localWorkspace);
     try {
-      loadLogs->setPropertyValue("NXentryName",
-                                 alg.getPropertyValue("NXentryName"));
+      loadLogs->setPropertyValue("NXentryName", alg.getPropertyValue("NXentryName"));
     } catch (...) {
     }
 
@@ -583,17 +535,15 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     if (run.hasProperty("period_log")) {
       auto *temp = run.getProperty("period_log");
       // Check for corrupted period logs
-      std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog(
-          dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
-      checkForCorruptedPeriods(std::move(tempPeriodLog), periodLog, nPeriods,
-                               nexusfilename);
+      std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog(dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
+      checkForCorruptedPeriods(std::move(tempPeriodLog), periodLog, nPeriods, nexusfilename);
     }
 
     // If successful, we can try to load the pulse times
     std::vector<Types::Core::DateAndTime> temp;
     if (localWorkspace->run().hasProperty("proton_charge")) {
-      auto *log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-          localWorkspace->mutableRun().getProperty("proton_charge"));
+      auto *log =
+          dynamic_cast<Kernel::TimeSeriesProperty<double> *>(localWorkspace->mutableRun().getProperty("proton_charge"));
       if (log)
         temp = log->timesAsVector();
     }
@@ -611,8 +561,7 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
       // first non-zero time.
       // (this is used in LoadInstrument to find the right instrument file to
       // use).
-      localWorkspace->mutableRun().addProperty(
-          "run_start", run_start.toISO8601String(), true);
+      localWorkspace->mutableRun().addProperty("run_start", run_start.toISO8601String(), true);
     } else {
       alg.getLogger().warning() << "Empty proton_charge sample log. You will "
                                    "not be able to filter by time.\n";
@@ -654,10 +603,8 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
  */
 template <typename T>
 std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
-    const std::string &nexusfilename, T localWorkspace, API::Algorithm &alg,
-    bool returnpulsetimes, int &nPeriods,
-    std::unique_ptr<const TimeSeriesProperty<int>> &periodLog,
-    const std::vector<std::string> &allow_list,
+    const std::string &nexusfilename, T localWorkspace, API::Algorithm &alg, bool returnpulsetimes, int &nPeriods,
+    std::unique_ptr<const TimeSeriesProperty<int>> &periodLog, const std::vector<std::string> &allow_list,
     const std::vector<std::string> &block_list) {
   // --------------------- Load DAS Logs -----------------
   // The pulse times will be empty if not specified in the DAS logs.
@@ -670,14 +617,12 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     alg.getLogger().information() << "Loading logs from NeXus file..."
                                   << "\n";
     loadLogs->setPropertyValue("Filename", nexusfilename);
-    loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace",
-                                                     localWorkspace);
+    loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace", localWorkspace);
     loadLogs->setProperty<std::vector<std::string>>("AllowList", allow_list);
     loadLogs->setProperty<std::vector<std::string>>("BlockList", block_list);
 
     try {
-      loadLogs->setPropertyValue("NXentryName",
-                                 alg.getPropertyValue("NXentryName"));
+      loadLogs->setPropertyValue("NXentryName", alg.getPropertyValue("NXentryName"));
     } catch (...) {
     }
 
@@ -692,17 +637,15 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     if (run.hasProperty("period_log")) {
       auto *temp = run.getProperty("period_log");
       // Check for corrupted period logs
-      std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog(
-          dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
-      checkForCorruptedPeriods(std::move(tempPeriodLog), periodLog, nPeriods,
-                               nexusfilename);
+      std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog(dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
+      checkForCorruptedPeriods(std::move(tempPeriodLog), periodLog, nPeriods, nexusfilename);
     }
 
     // If successful, we can try to load the pulse times
     std::vector<Types::Core::DateAndTime> temp;
     if (localWorkspace->run().hasProperty("proton_charge")) {
-      auto *log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-          localWorkspace->mutableRun().getProperty("proton_charge"));
+      auto *log =
+          dynamic_cast<Kernel::TimeSeriesProperty<double> *>(localWorkspace->mutableRun().getProperty("proton_charge"));
       if (log)
         temp = log->timesAsVector();
     }
@@ -720,8 +663,7 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
       // first non-zero time.
       // (this is used in LoadInstrument to find the right instrument file to
       // use).
-      localWorkspace->mutableRun().addProperty(
-          "run_start", run_start.toISO8601String(), true);
+      localWorkspace->mutableRun().addProperty("run_start", run_start.toISO8601String(), true);
     } else {
       alg.getLogger().warning() << "Empty proton_charge sample log. You will "
                                    "not be able to filter by time.\n";
@@ -758,13 +700,11 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
  * expected periods
  * @param nexusfilename :: the filename of the run to load
  */
-void LoadEventNexus::checkForCorruptedPeriods(
-    std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog,
-    std::unique_ptr<const TimeSeriesProperty<int>> &periodLog,
-    const int &nPeriods, const std::string &nexusfilename) {
+void LoadEventNexus::checkForCorruptedPeriods(std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog,
+                                              std::unique_ptr<const TimeSeriesProperty<int>> &periodLog,
+                                              const int &nPeriods, const std::string &nexusfilename) {
   const auto valuesAsVector = tempPeriodLog->valuesAsVector();
-  const auto nPeriodsInLog =
-      *std::max_element(valuesAsVector.begin(), valuesAsVector.end());
+  const auto nPeriodsInLog = *std::max_element(valuesAsVector.begin(), valuesAsVector.end());
 
   // Check for historic files
   if (nPeriodsInLog == 0 && nPeriods == 1) {
@@ -772,8 +712,7 @@ void LoadEventNexus::checkForCorruptedPeriods(
     // a vector of 1s
     const std::vector<int> newValues(tempPeriodLog->realSize(), 1);
     const auto times = tempPeriodLog->timesAsVector();
-    periodLog.reset(
-        new const TimeSeriesProperty<int>("period_log", times, newValues));
+    periodLog.reset(new const TimeSeriesProperty<int>("period_log", times, newValues));
   } else if (nPeriodsInLog != nPeriods) {
     // Sanity check here that period_log only contains period numbers up to
     // nperiods. These values can be different due to instrument noise, and
@@ -783,10 +722,8 @@ void LoadEventNexus::checkForCorruptedPeriods(
     const auto msg = "File " + nexusfilename +
                      " has been corrupted. The log framelog/period_log/value "
                      "contains " +
-                     std::to_string(nPeriodsInLog) +
-                     " periods, but periods/number contains " +
-                     std::to_string(nPeriods) +
-                     ". This file should be manually inspected and corrected.";
+                     std::to_string(nPeriodsInLog) + " periods, but periods/number contains " +
+                     std::to_string(nPeriods) + ". This file should be manually inspected and corrected.";
     throw InvalidLogPeriods(msg);
   } else {
     // periodLog should point to a copy of the period logs
@@ -810,15 +747,11 @@ void LoadEventNexus::checkForCorruptedPeriods(
  * @return Pulse times given in the DAS logs
  */
 template <>
-std::shared_ptr<BankPulseTimes>
-LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(
-    const std::string &nexusfilename,
-    EventWorkspaceCollection_sptr localWorkspace, API::Algorithm &alg,
-    bool returnpulsetimes, int &nPeriods,
-    std::unique_ptr<const TimeSeriesProperty<int>> &periodLog) {
+std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(
+    const std::string &nexusfilename, EventWorkspaceCollection_sptr localWorkspace, API::Algorithm &alg,
+    bool returnpulsetimes, int &nPeriods, std::unique_ptr<const TimeSeriesProperty<int>> &periodLog) {
   auto ws = localWorkspace->getSingleHeldWorkspace();
-  auto ret = runLoadNexusLogs<MatrixWorkspace_sptr>(
-      nexusfilename, ws, alg, returnpulsetimes, nPeriods, periodLog);
+  auto ret = runLoadNexusLogs<MatrixWorkspace_sptr>(nexusfilename, ws, alg, returnpulsetimes, nPeriods, periodLog);
   return ret;
 }
 
@@ -839,18 +772,13 @@ LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(
  * @return Pulse times given in the DAS logs
  */
 template <>
-std::shared_ptr<BankPulseTimes>
-LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(
-    const std::string &nexusfilename,
-    EventWorkspaceCollection_sptr localWorkspace, API::Algorithm &alg,
-    bool returnpulsetimes, int &nPeriods,
-    std::unique_ptr<const TimeSeriesProperty<int>> &periodLog,
-    const std::vector<std::string> &allow_list,
-    const std::vector<std::string> &block_list) {
+std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(
+    const std::string &nexusfilename, EventWorkspaceCollection_sptr localWorkspace, API::Algorithm &alg,
+    bool returnpulsetimes, int &nPeriods, std::unique_ptr<const TimeSeriesProperty<int>> &periodLog,
+    const std::vector<std::string> &allow_list, const std::vector<std::string> &block_list) {
   auto ws = localWorkspace->getSingleHeldWorkspace();
-  auto ret = runLoadNexusLogs<MatrixWorkspace_sptr>(
-      nexusfilename, ws, alg, returnpulsetimes, nPeriods, periodLog, allow_list,
-      block_list);
+  auto ret = runLoadNexusLogs<MatrixWorkspace_sptr>(nexusfilename, ws, alg, returnpulsetimes, nPeriods, periodLog,
+                                                    allow_list, block_list);
   return ret;
 }
 
@@ -867,8 +795,7 @@ enum class LoadEventNexus::LoaderType { MPI, MULTIPROCESS, DEFAULT };
  *workspace
  * being used as input (m_ws data member). Same applies to the logs.
  */
-void LoadEventNexus::loadEvents(API::Progress *const prog,
-                                const bool monitors) {
+void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) {
   bool metaDataOnly = getProperty("MetaDataOnly");
 
   // Get the time filters
@@ -884,18 +811,16 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Initialize the counter of bad TOFs
   bad_tofs = 0;
   int nPeriods = 1;
-  auto periodLog =
-      std::make_unique<const TimeSeriesProperty<int>>("period_log");
+  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
   if (loadlogs) {
     prog->doReport("Loading DAS logs");
 
     if (allow_list.empty() && block_list.empty()) {
-      m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(
-          m_filename, m_ws, *this, true, nPeriods, periodLog);
+      m_allBanksPulseTimes =
+          runLoadNexusLogs<EventWorkspaceCollection_sptr>(m_filename, m_ws, *this, true, nPeriods, periodLog);
     } else {
-      m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(
-          m_filename, m_ws, *this, true, nPeriods, periodLog, allow_list,
-          block_list);
+      m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(m_filename, m_ws, *this, true, nPeriods,
+                                                                             periodLog, allow_list, block_list);
     }
 
     try {
@@ -911,8 +836,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
   } else {
     g_log.information() << "Skipping the loading of sample logs!\n"
-                        << "Reading the start time directly from /"
-                        << m_top_entry_name << "/start_time\n";
+                        << "Reading the start time directly from /" << m_top_entry_name << "/start_time\n";
     // start_time is read and set
     m_file->openPath("/");
     m_file->openGroup(m_top_entry_name, "NXentry");
@@ -920,8 +844,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_file->readData("start_time", tmp);
     m_file->closeGroup();
     run_start = createFromSanitizedISO8601(tmp);
-    m_ws->mutableRun().addProperty("run_start", run_start.toISO8601String(),
-                                   true);
+    m_ws->mutableRun().addProperty("run_start", run_start.toISO8601String(), true);
   }
   // set more properties on the workspace
   const std::shared_ptr<NexusHDF5Descriptor> descriptor = getFileInfo();
@@ -930,16 +853,14 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     // this is a static method that is why it is passing the
     // file object and the file path
 
-    loadEntryMetadata<EventWorkspaceCollection_sptr>(
-        m_filename, m_ws, m_top_entry_name, *descriptor);
+    loadEntryMetadata<EventWorkspaceCollection_sptr>(m_filename, m_ws, m_top_entry_name, *descriptor);
   } catch (std::runtime_error &e) {
     // Missing metadata is not a fatal error. Log and go on with your life
     g_log.error() << "Error loading metadata: " << e.what() << '\n';
   }
 
-  m_ws->setNPeriods(
-      static_cast<size_t>(nPeriods),
-      periodLog); // This is how many workspaces we are going to make.
+  m_ws->setNPeriods(static_cast<size_t>(nPeriods),
+                    periodLog); // This is how many workspaces we are going to make.
 
   // Make sure you have a non-NULL m_allBanksPulseTimes
   if (m_allBanksPulseTimes == nullptr) {
@@ -955,8 +876,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     // This may not be needed in the future if both LoadEventNexus and
     // LoadInstrument are made to use the same Nexus/HDF5 library
     m_file->close();
-    m_instrument_loaded_correctly = loadInstrument(
-        m_filename, m_ws, m_top_entry_name, this, descriptor.get());
+    m_instrument_loaded_correctly = loadInstrument(m_filename, m_ws, m_top_entry_name, this, descriptor.get());
 
     if (!m_instrument_loaded_correctly)
       throw std::runtime_error("Instrument was not initialized correctly! "
@@ -979,8 +899,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   bool haveWeights = false;
   auto firstPulseT = DateAndTime::maximum();
 
-  const std::map<std::string, std::set<std::string>> &allEntries =
-      descriptor->getAllEntries();
+  const std::map<std::string, std::set<std::string>> &allEntries = descriptor->getAllEntries();
 
   auto itClassEntries = allEntries.find(classType);
 
@@ -1007,8 +926,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
         // get the number of events
         const std::string prefix = "/" + m_top_entry_name + "/" + entry_name;
         bool hasTotalCounts = true;
-        std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames,
-                                    prefix, *descriptor);
+        std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames, prefix, *descriptor);
         bankNames.emplace_back(entry_name);
         bankNumEvents.emplace_back(num);
 
@@ -1074,8 +992,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   if (metaDataOnly) {
     // Now, create a default X-vector for histogramming, with just 2 bins.
-    auto axis = HistogramData::BinEdges{
-        1, static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1 - 1};
+    auto axis = HistogramData::BinEdges{1, static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1 - 1};
     // Set the binning axis using this.
     m_ws->setAllX(axis);
 
@@ -1094,16 +1011,12 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
     // check that all of the requested banks are in the file
     const auto invalidBank =
-        std::find_if(eventedBanks.cbegin(), eventedBanks.cend(),
-                     [&bankNames](const auto &someBank) {
-                       return std::none_of(bankNames.cbegin(), bankNames.cend(),
-                                           [&someBank](const auto &name) {
-                                             return name == someBank;
-                                           });
-                     });
+        std::find_if(eventedBanks.cbegin(), eventedBanks.cend(), [&bankNames](const auto &someBank) {
+          return std::none_of(bankNames.cbegin(), bankNames.cend(),
+                              [&someBank](const auto &name) { return name == someBank; });
+        });
     if (invalidBank != eventedBanks.cend()) {
-      throw std::invalid_argument("No entry named '" + *invalidBank +
-                                  "' was found in the .NXS file.");
+      throw std::invalid_argument("No entry named '" + *invalidBank + "' was found in the .NXS file.");
     }
 
     // change the number of banks to load
@@ -1120,8 +1033,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   // Remove unused banks if parameter is set
   if (m_ws->getInstrument()->hasParameter("remove-unused-banks")) {
-    std::vector<double> instrumentUnused =
-        m_ws->getInstrument()->getNumberParameter("remove-unused-banks", true);
+    std::vector<double> instrumentUnused = m_ws->getInstrument()->getNumberParameter("remove-unused-banks", true);
     if (!instrumentUnused.empty()) {
       const auto unused = static_cast<int>(instrumentUnused.front());
       if (unused == 1)
@@ -1137,8 +1049,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_ws->getSpectrum(i).setSortOrder(DataObjects::PULSETIME_SORT);
 
   // Count the limits to time of flight
-  shortest_tof =
-      static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
+  shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   longest_tof = 0.;
 
   bool loaded{false};
@@ -1148,23 +1059,19 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_file->close();
     if (loaderType == LoaderType::MPI) {
       try {
-        ParallelEventLoader::loadMPI(*ws, m_filename, m_top_entry_name,
-                                     bankNames, event_id_is_spec);
+        ParallelEventLoader::loadMPI(*ws, m_filename, m_top_entry_name, bankNames, event_id_is_spec);
         g_log.information() << "Used MPI ParallelEventLoader.\n";
         loaded = true;
         shortest_tof = 0.0;
         longest_tof = 1e10;
       } catch (const std::runtime_error &) {
-        g_log.warning()
-            << "MPI event loader failed, falling back to default loader.\n";
+        g_log.warning() << "MPI event loader failed, falling back to default loader.\n";
       }
     } else {
 
       struct ExceptionOutput {
-        static void out(decltype(g_log) &log, const std::exception &e,
-                        int level = 0) {
-          log.warning() << std::string(level, ' ') << "exception: " << e.what()
-                        << '\n';
+        static void out(decltype(g_log) &log, const std::exception &e, int level = 0) {
+          log.warning() << std::string(level, ' ') << "exception: " << e.what() << '\n';
           try {
             std::rethrow_if_nested(e);
           } catch (const std::exception &e) {
@@ -1175,8 +1082,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       };
 
       try {
-        ParallelEventLoader::loadMultiProcess(*ws, m_filename, m_top_entry_name,
-                                              bankNames, event_id_is_spec,
+        ParallelEventLoader::loadMultiProcess(*ws, m_filename, m_top_entry_name, bankNames, event_id_is_spec,
                                               getProperty("Precount"));
         g_log.information() << "Used Multiprocess ParallelEventLoader.\n";
         loaded = true;
@@ -1195,17 +1101,14 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     bool precount = getProperty("Precount");
     int chunk = getProperty("ChunkNumber");
     int totalChunks = getProperty("TotalChunks");
-    DefaultEventLoader::load(this, *m_ws, haveWeights, event_id_is_spec,
-                             bankNames, periodLog->valuesAsVector(), classType,
-                             bankNumEvents, oldNeXusFileNames, precount, chunk,
-                             totalChunks);
+    DefaultEventLoader::load(this, *m_ws, haveWeights, event_id_is_spec, bankNames, periodLog->valuesAsVector(),
+                             classType, bankNumEvents, oldNeXusFileNames, precount, chunk, totalChunks);
   }
 
   // Info reporting
   const std::size_t eventsLoaded = m_ws->getNumberEvents();
   g_log.information() << "Read " << eventsLoaded << " events"
-                      << ". Shortest TOF: " << shortest_tof
-                      << " microsec; longest TOF: " << longest_tof
+                      << ". Shortest TOF: " << shortest_tof << " microsec; longest TOF: " << longest_tof
                       << " microsec.\n";
 
   if (shortest_tof < 0)
@@ -1219,8 +1122,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   // Use T0 offset from TOPAZ Parameter file if it exists
   if (m_ws->getInstrument()->hasParameter("T0")) {
-    std::vector<double> instrumentT0 =
-        m_ws->getInstrument()->getNumberParameter("T0", true);
+    std::vector<double> instrumentT0 = m_ws->getInstrument()->getNumberParameter("T0", true);
     if (!instrumentT0.empty()) {
       const double mT0 = instrumentT0.front();
       if (mT0 != 0.0) {
@@ -1254,8 +1156,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_ws->setAllX(HistogramData::BinEdges{0.0, 1.0});
 
   // if there is time_of_flight load it
-  adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType,
-                               descriptor.get());
+  adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType, descriptor.get());
 }
 
 //-----------------------------------------------------------------------------
@@ -1270,13 +1171,12 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
  *  @return true if successful
  */
 template <>
-bool LoadEventNexus::runLoadIDFFromNexus<EventWorkspaceCollection_sptr>(
-    const std::string &nexusfilename,
-    EventWorkspaceCollection_sptr localWorkspace,
-    const std::string &top_entry_name, Algorithm *alg) {
+bool LoadEventNexus::runLoadIDFFromNexus<EventWorkspaceCollection_sptr>(const std::string &nexusfilename,
+                                                                        EventWorkspaceCollection_sptr localWorkspace,
+                                                                        const std::string &top_entry_name,
+                                                                        Algorithm *alg) {
   auto ws = localWorkspace->getSingleHeldWorkspace();
-  auto hasLoaded = runLoadIDFFromNexus<MatrixWorkspace_sptr>(
-      nexusfilename, ws, top_entry_name, alg);
+  auto hasLoaded = runLoadIDFFromNexus<MatrixWorkspace_sptr>(nexusfilename, ws, top_entry_name, alg);
   localWorkspace->setInstrument(ws->getInstrument());
   return hasLoaded;
 }
@@ -1285,8 +1185,7 @@ bool LoadEventNexus::runLoadIDFFromNexus<EventWorkspaceCollection_sptr>(
  * not written properly within the instrument
  * @param hFile :: A reference to the NeXus file opened at the root entry
  */
-std::string
-LoadEventNexus::readInstrumentFromISIS_VMSCompat(::NeXus::File &hFile) {
+std::string LoadEventNexus::readInstrumentFromISIS_VMSCompat(::NeXus::File &hFile) {
   std::string instrumentName;
   try {
     hFile.openGroup("isis_vms_compat", "IXvms");
@@ -1321,14 +1220,12 @@ LoadEventNexus::readInstrumentFromISIS_VMSCompat(::NeXus::File &hFile) {
  *  @return true if successful
  */
 template <>
-bool LoadEventNexus::runLoadInstrument<EventWorkspaceCollection_sptr>(
-    const std::string &nexusfilename,
-    EventWorkspaceCollection_sptr localWorkspace,
-    const std::string &top_entry_name, Algorithm *alg,
-    const Kernel::NexusHDF5Descriptor *descriptor) {
+bool LoadEventNexus::runLoadInstrument<EventWorkspaceCollection_sptr>(const std::string &nexusfilename,
+                                                                      EventWorkspaceCollection_sptr localWorkspace,
+                                                                      const std::string &top_entry_name, Algorithm *alg,
+                                                                      const Kernel::NexusHDF5Descriptor *descriptor) {
   auto ws = localWorkspace->getSingleHeldWorkspace();
-  auto hasLoaded = runLoadInstrument<MatrixWorkspace_sptr>(
-      nexusfilename, ws, top_entry_name, alg, descriptor);
+  auto hasLoaded = runLoadInstrument<MatrixWorkspace_sptr>(nexusfilename, ws, top_entry_name, alg, descriptor);
   localWorkspace->setInstrument(ws->getInstrument());
   return hasLoaded;
 }
@@ -1341,8 +1238,7 @@ bool LoadEventNexus::runLoadInstrument<EventWorkspaceCollection_sptr>(
  */
 void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
                                  const std::vector<std::string> &bankNames) {
-  Instrument_sptr inst = std::const_pointer_cast<Instrument>(
-      workspace->getInstrument()->baseInstrument());
+  Instrument_sptr inst = std::const_pointer_cast<Instrument>(workspace->getInstrument()->baseInstrument());
   // Build a list of Rectangular Detectors
   std::vector<std::shared_ptr<RectangularDetector>> detList;
   for (int i = 0; i < inst->nelements(); i++) {
@@ -1371,8 +1267,7 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
             assem2 = std::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
             if (assem2) {
               for (int k = 0; k < assem2->nelements(); k++) {
-                det = std::dynamic_pointer_cast<RectangularDetector>(
-                    (*assem2)[k]);
+                det = std::dynamic_pointer_cast<RectangularDetector>((*assem2)[k]);
                 if (det) {
                   detList.emplace_back(det);
                 }
@@ -1396,8 +1291,7 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
         break;
     }
     if (!keep) {
-      std::shared_ptr<const IComponent> parent =
-          inst->getComponentByName(det_name);
+      std::shared_ptr<const IComponent> parent = inst->getComponentByName(det_name);
       std::vector<Geometry::IComponent_const_sptr> children;
       std::shared_ptr<const Geometry::ICompAssembly> asmb =
           std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
@@ -1409,8 +1303,7 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
         asmb2->getChildren(grandchildren, false);
 
         for (auto &row : grandchildren) {
-          auto *d =
-              dynamic_cast<Detector *>(const_cast<IComponent *>(row.get()));
+          auto *d = dynamic_cast<Detector *>(const_cast<IComponent *>(row.get()));
           if (d)
             inst->removeDetector(d);
         }
@@ -1429,15 +1322,12 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
  * @param monitorsOnly :: Load only the monitors is true
  * @param bankNames :: An optional bank name for loading specified banks
  */
-void LoadEventNexus::createSpectraMapping(
-    const std::string &nxsfile, const bool monitorsOnly,
-    const std::vector<std::string> &bankNames) {
-  LoadEventNexusIndexSetup indexSetup(
-      m_ws->getSingleHeldWorkspace(), getProperty("SpectrumMin"),
-      getProperty("SpectrumMax"), getProperty("SpectrumList"), communicator());
+void LoadEventNexus::createSpectraMapping(const std::string &nxsfile, const bool monitorsOnly,
+                                          const std::vector<std::string> &bankNames) {
+  LoadEventNexusIndexSetup indexSetup(m_ws->getSingleHeldWorkspace(), getProperty("SpectrumMin"),
+                                      getProperty("SpectrumMax"), getProperty("SpectrumList"), communicator());
   if (!monitorsOnly && !bankNames.empty()) {
-    if (!isDefault("SpectrumMin") || !isDefault("SpectrumMax") ||
-        !isDefault("SpectrumList"))
+    if (!isDefault("SpectrumMin") || !isDefault("SpectrumMax") || !isDefault("SpectrumList"))
       g_log.warning() << "Spectrum min/max/list selection ignored when "
                          "`SingleBankPixelsOnly` is enabled\n";
     m_ws->setIndexInfo(indexSetup.makeIndexInfo(bankNames));
@@ -1468,36 +1358,30 @@ void LoadEventNexus::runLoadMonitors() {
   std::string mon_wsname = this->getProperty("OutputWorkspace");
   mon_wsname.append("_monitors");
 
-  IAlgorithm_sptr loadMonitors =
-      this->createChildAlgorithm("LoadNexusMonitors");
+  IAlgorithm_sptr loadMonitors = this->createChildAlgorithm("LoadNexusMonitors");
   g_log.information("Loading monitors from NeXus file...");
   loadMonitors->setPropertyValue("Filename", m_filename);
-  g_log.information() << "New workspace name for monitors: " << mon_wsname
-                      << '\n';
+  g_log.information() << "New workspace name for monitors: " << mon_wsname << '\n';
   loadMonitors->setPropertyValue("OutputWorkspace", mon_wsname);
-  loadMonitors->setPropertyValue("LoadOnly",
-                                 this->getProperty("MonitorsLoadOnly"));
-  loadMonitors->setPropertyValue("NXentryName",
-                                 this->getProperty("NXentryName"));
+  loadMonitors->setPropertyValue("LoadOnly", this->getProperty("MonitorsLoadOnly"));
+  loadMonitors->setPropertyValue("NXentryName", this->getProperty("NXentryName"));
   loadMonitors->execute();
   Workspace_sptr monsOut = loadMonitors->getProperty("OutputWorkspace");
   // create the output workspace property on the fly
-  this->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                            "MonitorWorkspace", mon_wsname, Direction::Output),
-                        "Monitors from the Event NeXus file");
+  this->declareProperty(
+      std::make_unique<WorkspaceProperty<Workspace>>("MonitorWorkspace", mon_wsname, Direction::Output),
+      "Monitors from the Event NeXus file");
   this->setProperty("MonitorWorkspace", monsOut);
 
   // The output will either be a group workspace or a matrix workspace
-  MatrixWorkspace_sptr mons =
-      std::dynamic_pointer_cast<MatrixWorkspace>(monsOut);
+  MatrixWorkspace_sptr mons = std::dynamic_pointer_cast<MatrixWorkspace>(monsOut);
   if (mons) {
     // Set the internal monitor workspace pointer as well
     m_ws->setMonitorWorkspace(mons);
 
     filterDuringPause(mons);
   } else {
-    WorkspaceGroup_sptr monsGrp =
-        std::dynamic_pointer_cast<WorkspaceGroup>(monsOut);
+    WorkspaceGroup_sptr monsGrp = std::dynamic_pointer_cast<WorkspaceGroup>(monsOut);
     if (monsGrp) {
       // declare a property for each member of the group
       for (int i = 0; i < monsGrp->getNumberOfEntries(); i++) {
@@ -1507,8 +1391,7 @@ void LoadEventNexus::runLoadMonitors() {
         ssPropName << "MonitorWorkspace"
                    << "_" << i + 1;
         this->declareProperty(
-            std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                ssPropName.str(), ssWsName.str(), Direction::Output),
+            std::make_unique<WorkspaceProperty<MatrixWorkspace>>(ssPropName.str(), ssWsName.str(), Direction::Output),
             "Monitors from the Event NeXus file");
         this->setProperty(ssPropName.str(), monsGrp->getItem(i));
       }
@@ -1530,8 +1413,7 @@ std::unique_ptr<std::pair<std::vector<int32_t>, std::vector<int32_t>>>
 LoadEventNexus::loadISISVMSSpectraMapping(const std::string &entry_name) {
   const std::string vms_str = "/isis_vms_compat";
   try {
-    g_log.debug() << "Attempting to load custom spectra mapping from '"
-                  << entry_name << vms_str << "'.\n";
+    g_log.debug() << "Attempting to load custom spectra mapping from '" << entry_name << vms_str << "'.\n";
     m_file->openPath("/" + entry_name + vms_str);
   } catch (::NeXus::Exception &) {
     return nullptr; // Doesn't exist
@@ -1575,15 +1457,12 @@ LoadEventNexus::loadISISVMSSpectraMapping(const std::string &entry_name) {
   const size_t ndets(udet.size());
   if (ndets != spec.size()) {
     std::ostringstream os;
-    os << "UDET/SPEC list size mismatch. UDET=" << udet.size()
-       << ", SPEC=" << spec.size() << "\n";
+    os << "UDET/SPEC list size mismatch. UDET=" << udet.size() << ", SPEC=" << spec.size() << "\n";
     throw std::runtime_error(os.str());
   }
   // If mapping loaded the event ID is the spectrum number and not det ID
   this->event_id_is_spec = true;
-  return std::make_unique<
-      std::pair<std::vector<int32_t>, std::vector<int32_t>>>(std::move(spec),
-                                                             std::move(udet));
+  return std::make_unique<std::pair<std::vector<int32_t>, std::vector<int32_t>>>(std::move(spec), std::move(udet));
 }
 
 /**
@@ -1603,8 +1482,7 @@ void LoadEventNexus::setTimeFilters(const bool monitors) {
     // Nothing specified. Include everything
     filter_tof_min = -1e20;
     filter_tof_max = +1e20;
-  } else if ((filter_tof_min != EMPTY_DBL()) &&
-             (filter_tof_max != EMPTY_DBL())) {
+  } else if ((filter_tof_min != EMPTY_DBL()) && (filter_tof_max != EMPTY_DBL())) {
     // Both specified. Keep these values
   } else {
     std::string msg("You must specify both min & max or neither TOF filters");
@@ -1630,8 +1508,7 @@ void LoadEventNexus::setTimeFilters(const bool monitors) {
  * @param file : handle to the nexus file
  * @param WS : pointer to the workspace
  */
-void LoadEventNexus::loadSampleDataISIScompatibility(
-    ::NeXus::File &file, EventWorkspaceCollection &WS) {
+void LoadEventNexus::loadSampleDataISIScompatibility(::NeXus::File &file, EventWorkspaceCollection &WS) {
   try {
     file.openGroup("isis_vms_compat", "IXvms");
   } catch (::NeXus::Exception &) {
@@ -1671,8 +1548,7 @@ void LoadEventNexus::safeOpenFile(const std::string &fname) {
   try {
     m_file = std::make_unique<::NeXus::File>(m_filename, NXACC_READ);
   } catch (std::runtime_error &e) {
-    throw std::runtime_error("Severe failure when trying to open NeXus file: " +
-                             std::string(e.what()));
+    throw std::runtime_error("Severe failure when trying to open NeXus file: " + std::string(e.what()));
   }
   // make sure that by no means we could dereference NULL later on
   if (!m_file) {
@@ -1685,10 +1561,8 @@ void LoadEventNexus::safeOpenFile(const std::string &fname) {
 
 /// The parallel loader currently has no support for a series of special
 /// cases, as indicated by the return value of this method.
-LoadEventNexus::LoaderType
-LoadEventNexus::defineLoaderType(const bool haveWeights,
-                                 const bool oldNeXusFileNames,
-                                 const std::string &classType) const {
+LoadEventNexus::LoaderType LoadEventNexus::defineLoaderType(const bool haveWeights, const bool oldNeXusFileNames,
+                                                            const std::string &classType) const {
   auto propVal = getPropertyValue("LoadType");
   if (propVal == "Default")
     return LoaderType::DEFAULT;
@@ -1697,15 +1571,11 @@ LoadEventNexus::defineLoaderType(const bool haveWeights,
   noParallelConstrictions &= !(m_ws->nPeriods() != 1);
   noParallelConstrictions &= !haveWeights;
   noParallelConstrictions &= !oldNeXusFileNames;
-  noParallelConstrictions &=
-      !(filter_tof_min != -1e20 || filter_tof_max != 1e20);
-  noParallelConstrictions &=
-      !((filter_time_start != Types::Core::DateAndTime::minimum() ||
-         filter_time_stop != Types::Core::DateAndTime::maximum()));
-  noParallelConstrictions &=
-      !((!isDefault("CompressTolerance") || !isDefault("SpectrumMin") ||
-         !isDefault("SpectrumMax") || !isDefault("SpectrumList") ||
-         !isDefault("ChunkNumber")));
+  noParallelConstrictions &= !(filter_tof_min != -1e20 || filter_tof_max != 1e20);
+  noParallelConstrictions &= !((filter_time_start != Types::Core::DateAndTime::minimum() ||
+                                filter_time_stop != Types::Core::DateAndTime::maximum()));
+  noParallelConstrictions &= !((!isDefault("CompressTolerance") || !isDefault("SpectrumMin") ||
+                                !isDefault("SpectrumMax") || !isDefault("SpectrumList") || !isDefault("ChunkNumber")));
   noParallelConstrictions &= !(classType != "NXevent_data");
 
   if (!noParallelConstrictions)
@@ -1717,8 +1587,8 @@ LoadEventNexus::defineLoaderType(const bool haveWeights,
 #endif
 }
 
-Parallel::ExecutionMode LoadEventNexus::getParallelExecutionMode(
-    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+Parallel::ExecutionMode
+LoadEventNexus::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   static_cast<void>(storageModes);
   return Parallel::ExecutionMode::Distributed;
 }

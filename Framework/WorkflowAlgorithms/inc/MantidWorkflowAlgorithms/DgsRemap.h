@@ -20,9 +20,7 @@ class DLLExport DgsRemap : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Mask and/or group the given workspace.";
-  }
+  const std::string summary() const override { return "Mask and/or group the given workspace."; }
 
   int version() const override;
   const std::string category() const override;
@@ -30,8 +28,7 @@ public:
 private:
   void init() override;
   void exec() override;
-  void execGrouping(const API::MatrixWorkspace_sptr &iWS,
-                    API::MatrixWorkspace_sptr &oWS);
+  void execGrouping(const API::MatrixWorkspace_sptr &iWS, API::MatrixWorkspace_sptr &oWS);
   void execMasking(const API::MatrixWorkspace_sptr &iWS);
 };
 

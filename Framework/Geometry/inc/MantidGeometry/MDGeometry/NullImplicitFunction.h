@@ -25,8 +25,7 @@ for Null checks and handles where ImplicitFunctions are used.
 @date 28/01/2011
 */
 
-class DLLExport NullImplicitFunction
-    : public Mantid::Geometry::MDImplicitFunction {
+class DLLExport NullImplicitFunction : public Mantid::Geometry::MDImplicitFunction {
 public:
   std::string getName() const override;
   std::string toXMLString() const override;

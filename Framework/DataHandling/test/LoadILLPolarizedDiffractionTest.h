@@ -43,8 +43,7 @@ std::tuple<std::string, std::string> commonSetUp() {
   return std::make_tuple(oldFacility, oldInstrument);
 }
 
-void commonTearDown(const std::string &oldFacility,
-                    const std::string &oldInstrument) {
+void commonTearDown(const std::string &oldFacility, const std::string &oldInstrument) {
   if (!oldFacility.empty()) {
     ConfigService::Instance().setFacility(oldFacility);
   }
@@ -57,16 +56,10 @@ class LoadILLPolarizedDiffractionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadILLPolarizedDiffractionTest *createSuite() {
-    return new LoadILLPolarizedDiffractionTest();
-  }
-  static void destroySuite(LoadILLPolarizedDiffractionTest *suite) {
-    delete suite;
-  }
+  static LoadILLPolarizedDiffractionTest *createSuite() { return new LoadILLPolarizedDiffractionTest(); }
+  static void destroySuite(LoadILLPolarizedDiffractionTest *suite) { delete suite; }
 
-  void setUp() override {
-    std::tie(m_oldFacility, m_oldInstrument) = commonSetUp();
-  }
+  void setUp() override { std::tie(m_oldFacility, m_oldInstrument) = commonSetUp(); }
 
   void tearDown() override { commonTearDown(m_oldFacility, m_oldInstrument); }
 
@@ -84,22 +77,19 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "None"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertToScatteringAngle", false))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TransposeMonochromatic", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
-    WorkspaceGroup_sptr outputWS = std::shared_ptr<Mantid::API::WorkspaceGroup>(
-        alg.getProperty("OutputWorkspace"));
+    WorkspaceGroup_sptr outputWS = std::shared_ptr<Mantid::API::WorkspaceGroup>(alg.getProperty("OutputWorkspace"));
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
     do_test_general_features(outputWS, "monochromatic");
 
     MatrixWorkspace_sptr workspaceEntry1 =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            outputWS->getItem(0));
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(0));
     TS_ASSERT(workspaceEntry1)
 
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 3.13, 0.01)
@@ -142,8 +132,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "395850"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "None"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
@@ -154,12 +143,10 @@ public:
     do_test_general_features(outputWS, "TOF");
 
     MatrixWorkspace_sptr workspaceEntry1 =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            outputWS->getItem(0));
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(0));
     TS_ASSERT(workspaceEntry1)
     TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->unitID(), "TOF")
-    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(),
-                     "Time-of-flight")
+    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(), "Time-of-flight")
 
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 180.00, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[1], 186.64, 0.01)
@@ -231,8 +218,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "395850"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "None"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TOFUnits", "TimeChannels"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -244,12 +230,10 @@ public:
     do_test_general_features(outputWS, "TOF");
 
     MatrixWorkspace_sptr workspaceEntry1 =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            outputWS->getItem(0));
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(0));
     TS_ASSERT(workspaceEntry1)
     TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->unitID(), "Label")
-    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(),
-                     "Time channel")
+    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(), "Time channel")
 
     TS_ASSERT_EQUALS(workspaceEntry1->x(0)[0], 0)
     TS_ASSERT_EQUALS(workspaceEntry1->x(0)[1], 1)
@@ -320,23 +304,19 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800+401801"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "None"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertToScatteringAngle", false))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TransposeMonochromatic", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
-    WorkspaceGroup_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("_outWS");
+    WorkspaceGroup_sptr outputWS = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("_outWS");
     TS_ASSERT(outputWS)
     TS_ASSERT(outputWS->isGroup())
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
     do_test_general_features(outputWS, "monochromatic");
 
-    MatrixWorkspace_sptr workspaceEntry1 =
-        std::static_pointer_cast<Mantid::API::MatrixWorkspace>(
-            outputWS->getItem(0));
+    MatrixWorkspace_sptr workspaceEntry1 = std::static_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(0));
     TS_ASSERT(workspaceEntry1)
 
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 3.13, 0.01)
@@ -379,23 +359,19 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800,401801"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "None"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertToScatteringAngle", false))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TransposeMonochromatic", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
-    WorkspaceGroup_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("_outWS");
+    WorkspaceGroup_sptr outputWS = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("_outWS");
     TS_ASSERT(outputWS)
     TS_ASSERT(outputWS->isGroup())
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 12)
     do_test_general_features(outputWS, "monochromatic");
 
-    MatrixWorkspace_sptr workspaceEntry1 =
-        std::static_pointer_cast<Mantid::API::MatrixWorkspace>(
-            outputWS->getItem(0));
+    MatrixWorkspace_sptr workspaceEntry1 = std::static_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(0));
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 3.13, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(0)[0], 11)
@@ -427,8 +403,7 @@ public:
     TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 45.18, 0.01)
 
     MatrixWorkspace_sptr workspaceEntry12 =
-        std::static_pointer_cast<Mantid::API::MatrixWorkspace>(
-            outputWS->getItem(11));
+        std::static_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(11));
     TS_ASSERT_DELTA(workspaceEntry12->x(0)[0], 3.13, 0.01)
     TS_ASSERT_DELTA(workspaceEntry12->x(0)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry12->y(0)[0], 14)
@@ -469,8 +444,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "None"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertToScatteringAngle", false))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TransposeMonochromatic", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -482,25 +456,17 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
     do_test_general_features(outputWS, "monochromatic");
 
-    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
-         ++entry_no) {
+    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries(); ++entry_no) {
       MatrixWorkspace_sptr workspaceEntry =
-          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-              outputWS->getItem(entry_no));
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(entry_no));
       TS_ASSERT(workspaceEntry)
 
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(0) * RAD_2_DEG,
-                      12.66, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(43) * RAD_2_DEG,
-                      55.45, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(44) * RAD_2_DEG,
-                      58.79, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(87) * RAD_2_DEG,
-                      101.58, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(88) * RAD_2_DEG,
-                      100.78, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(131) * RAD_2_DEG,
-                      143.57, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(0) * RAD_2_DEG, 12.66, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(43) * RAD_2_DEG, 55.45, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(44) * RAD_2_DEG, 58.79, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(87) * RAD_2_DEG, 101.58, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(88) * RAD_2_DEG, 100.78, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(131) * RAD_2_DEG, 143.57, 0.01)
     }
   }
 
@@ -511,8 +477,7 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PositionCalibration", "Nexus"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "Nexus"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertToScatteringAngle", false))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TransposeMonochromatic", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -524,25 +489,17 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
     do_test_general_features(outputWS, "monochromatic");
 
-    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
-         ++entry_no) {
+    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries(); ++entry_no) {
       MatrixWorkspace_sptr workspaceEntry =
-          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-              outputWS->getItem(entry_no));
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(entry_no));
       TS_ASSERT(workspaceEntry)
 
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(0) * RAD_2_DEG,
-                      10.86, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(43) * RAD_2_DEG,
-                      53.81, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(44) * RAD_2_DEG,
-                      57.06, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(87) * RAD_2_DEG,
-                      99.45, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(88) * RAD_2_DEG,
-                      101.38, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(131) * RAD_2_DEG,
-                      144.17, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(0) * RAD_2_DEG, 10.86, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(43) * RAD_2_DEG, 53.81, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(44) * RAD_2_DEG, 57.06, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(87) * RAD_2_DEG, 99.45, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(88) * RAD_2_DEG, 101.38, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(131) * RAD_2_DEG, 144.17, 0.01)
     }
   }
 
@@ -553,10 +510,8 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PositionCalibration", "YIGFile"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("YIGFilename", "D7_YIG_calibration.xml"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "YIGFile"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("YIGFilename", "D7_YIG_calibration.xml"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertToScatteringAngle", false))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TransposeMonochromatic", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -568,32 +523,21 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
     do_test_general_features(outputWS, "monochromatic");
 
-    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
-         ++entry_no) {
+    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries(); ++entry_no) {
       MatrixWorkspace_sptr workspaceEntry =
-          std::static_pointer_cast<Mantid::API::MatrixWorkspace>(
-              outputWS->getItem(entry_no));
+          std::static_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(entry_no));
       TS_ASSERT(workspaceEntry)
 
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(0) * RAD_2_DEG,
-                      10.86, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(43) * RAD_2_DEG,
-                      53.81, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(44) * RAD_2_DEG,
-                      57.06, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(87) * RAD_2_DEG,
-                      99.45, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(88) * RAD_2_DEG,
-                      101.38, 0.01)
-      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(131) * RAD_2_DEG,
-                      144.17, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(0) * RAD_2_DEG, 10.86, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(43) * RAD_2_DEG, 53.81, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(44) * RAD_2_DEG, 57.06, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(87) * RAD_2_DEG, 99.45, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(88) * RAD_2_DEG, 101.38, 0.01)
+      TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(131) * RAD_2_DEG, 144.17, 0.01)
     }
     // check for the correct wavelength value from the IPF
-    MatrixWorkspace_sptr ws =
-        std::static_pointer_cast<Mantid::API::MatrixWorkspace>(
-            outputWS->getItem(0));
-    double wavelength =
-        stod(ws->mutableRun().getLogData("monochromator.wavelength")->value());
+    MatrixWorkspace_sptr ws = std::static_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(0));
+    double wavelength = stod(ws->mutableRun().getLogData("monochromator.wavelength")->value());
     TS_ASSERT_DELTA(wavelength, 3.09, 0.01)
     checkTimeFormat(ws);
   }
@@ -606,8 +550,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "None"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertToScatteringAngle", false))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TransposeMonochromatic", true))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -618,19 +561,16 @@ public:
     TS_ASSERT(outputWS->isGroup())
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
 
-    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
-         entry_no++) {
+    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries(); entry_no++) {
       MatrixWorkspace_sptr workspaceEntry =
-          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-              outputWS->getItem(entry_no));
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(entry_no));
       TS_ASSERT(workspaceEntry)
       TS_ASSERT_EQUALS(workspaceEntry->getNumberHistograms(), 1)
       TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 134)
       TS_ASSERT(!workspaceEntry->isHistogramData())
       TS_ASSERT(!workspaceEntry->isDistribution())
       TS_ASSERT_EQUALS(workspaceEntry->YUnitLabel(), "Counts")
-      TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(),
-                       "Spectrum")
+      TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(), "Spectrum")
     }
   }
 
@@ -642,8 +582,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "401800"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "None"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertToScatteringAngle", true))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TransposeMonochromatic", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -654,19 +593,16 @@ public:
     TS_ASSERT(outputWS->isGroup())
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 6)
 
-    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
-         entry_no++) {
+    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries(); entry_no++) {
       MatrixWorkspace_sptr workspaceEntry =
-          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-              outputWS->getItem(entry_no));
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(entry_no));
       TS_ASSERT(workspaceEntry)
       TS_ASSERT_EQUALS(workspaceEntry->getNumberHistograms(), 134)
       TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 1)
       TS_ASSERT(workspaceEntry->isHistogramData())
       TS_ASSERT(!workspaceEntry->isDistribution())
       TS_ASSERT_EQUALS(workspaceEntry->YUnitLabel(), "Counts")
-      TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->unitID(),
-                       "Wavelength")
+      TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->unitID(), "Wavelength")
       TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(0), 12.66, 0.01)
       TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(1), 13.45, 0.01)
       TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(2), 14.66, 0.01)
@@ -683,8 +619,7 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "394458"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PositionCalibration", "None"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertToScatteringAngle", true))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TransposeMonochromatic", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -696,11 +631,9 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 1)
     do_test_general_features(outputWS, "monochromatic");
 
-    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
-         ++entry_no) {
+    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries(); ++entry_no) {
       MatrixWorkspace_sptr workspaceEntry =
-          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-              outputWS->getItem(entry_no));
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(entry_no));
       TS_ASSERT(workspaceEntry)
       auto axis = workspaceEntry->getAxis(1);
       TS_ASSERT(!axis->isSpectra())
@@ -713,13 +646,10 @@ public:
     }
   }
 
-  void do_test_general_features(WorkspaceGroup_sptr outputWS,
-                                std::string measurementMode) {
-    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
-         entry_no++) {
+  void do_test_general_features(WorkspaceGroup_sptr outputWS, std::string measurementMode) {
+    for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries(); entry_no++) {
       MatrixWorkspace_sptr workspaceEntry =
-          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-              outputWS->getItem(entry_no));
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWS->getItem(entry_no));
       TS_ASSERT(workspaceEntry)
       TS_ASSERT_EQUALS(workspaceEntry->getNumberHistograms(), 134)
       TS_ASSERT(workspaceEntry->detectorInfo().isMonitor(132))
@@ -730,8 +660,7 @@ public:
       checkTimeFormat(workspaceEntry);
       if (measurementMode == "monochromatic") {
         TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 1)
-        TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->unitID(),
-                         "Wavelength")
+        TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->unitID(), "Wavelength")
       } else if (measurementMode == "TOF") {
         { TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 512) }
       }
@@ -740,8 +669,8 @@ public:
 
   void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {
     TS_ASSERT(outputWS->run().hasProperty("start_time"));
-    TS_ASSERT(Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(
-        outputWS->run().getProperty("start_time")->value()));
+    TS_ASSERT(
+        Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(outputWS->run().getProperty("start_time")->value()));
   }
 
 private:
@@ -755,9 +684,7 @@ public:
   static LoadILLPolarizedDiffractionTestPerformance *createSuite() {
     return new LoadILLPolarizedDiffractionTestPerformance();
   }
-  static void destroySuite(LoadILLPolarizedDiffractionTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(LoadILLPolarizedDiffractionTestPerformance *suite) { delete suite; }
 
   LoadILLPolarizedDiffractionTestPerformance() {}
 

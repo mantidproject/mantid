@@ -17,14 +17,11 @@ using Mantid::Algorithms::ConvertFromDistribution;
 
 class ConvertFromDistributionTest : public CxxTest::TestSuite {
 public:
-  static ConvertFromDistributionTest *createSuite() {
-    return new ConvertFromDistributionTest();
-  }
+  static ConvertFromDistributionTest *createSuite() { return new ConvertFromDistributionTest(); }
   static void destroySuite(ConvertFromDistributionTest *suite) { delete suite; }
 
   ConvertFromDistributionTest() : dist("dist") {
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 0, 0.5);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 0, 0.5);
     WS->setDistribution(true);
     AnalysisDataService::Instance().add(dist, WS);
   }
@@ -48,9 +45,7 @@ public:
     TS_ASSERT(conv.isExecuted())
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output =
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dist))
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dist))
 
     const Mantid::MantidVec &X = output->dataX(0);
     const Mantid::MantidVec &Y = output->dataY(0);

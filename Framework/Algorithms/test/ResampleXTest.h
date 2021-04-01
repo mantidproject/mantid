@@ -154,8 +154,7 @@ public:
     TS_ASSERT(alg.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "value"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     //    "XMin"
     //    "XMax"
     //    "NumberBins"
@@ -167,8 +166,7 @@ public:
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
     Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -180,14 +178,12 @@ public:
   }
 
   // Set-up a generic function for running tests with EventWorkspace
-  void do_testResampleXEventWorkspace(EventType eventType, bool inPlace,
-                                      bool PreserveEvents) {
+  void do_testResampleXEventWorkspace(EventType eventType, bool inPlace, bool PreserveEvents) {
 
     int xlen = 100;
     int ylen = 2;
 
-    EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::createEventWorkspace2(ylen, xlen);
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::createEventWorkspace2(ylen, xlen);
     test_in->switchEventType(eventType);
 
     std::string inName("test_inEvent");
@@ -211,8 +207,7 @@ public:
 
     MatrixWorkspace_sptr outWS;
     TS_ASSERT_THROWS_NOTHING(
-        outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(outName)));
+        outWS = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outName)));
     TS_ASSERT(outWS);
     if (!outWS)
       return;
@@ -229,8 +224,7 @@ public:
     for (int yIndex = 0; yIndex < ylen; ++yIndex) {
 
       // The bin width for the current spectrum
-      double deltaBin =
-          (xmaxs[yIndex] - xmins[yIndex]) / static_cast<double>(nBins);
+      double deltaBin = (xmaxs[yIndex] - xmins[yIndex]) / static_cast<double>(nBins);
 
       // Check the axes lengths
       TS_ASSERT_EQUALS(outWS->x(yIndex).size(), nBins + 1);
@@ -240,12 +234,9 @@ public:
       // Loop over bins
       for (int xIndex = 0; xIndex < nBins; ++xIndex) {
 
-        TS_ASSERT_DELTA((outWS->x(yIndex))[xIndex],
-                        xmins[yIndex] + xIndex * deltaBin, tolerance);
-        TS_ASSERT_DELTA((outWS->y(yIndex))[xIndex], xmaxs[yIndex] / 25.0,
-                        tolerance);
-        TS_ASSERT_DELTA((outWS->e(yIndex))[xIndex], sqrt(xmaxs[yIndex] / 25.0),
-                        tolerance);
+        TS_ASSERT_DELTA((outWS->x(yIndex))[xIndex], xmins[yIndex] + xIndex * deltaBin, tolerance);
+        TS_ASSERT_DELTA((outWS->y(yIndex))[xIndex], xmaxs[yIndex] / 25.0, tolerance);
+        TS_ASSERT_DELTA((outWS->e(yIndex))[xIndex], sqrt(xmaxs[yIndex] / 25.0), tolerance);
       }
     }
 
@@ -253,33 +244,23 @@ public:
     AnalysisDataService::Instance().remove(outName);
   }
 
-  void testEventWorkspace_InPlace_PreserveEvents() {
-    do_testResampleXEventWorkspace(TOF, true, true);
-  }
+  void testEventWorkspace_InPlace_PreserveEvents() { do_testResampleXEventWorkspace(TOF, true, true); }
 
-  void testEventWorkspace_InPlace_PreserveEvents_weighted() {
-    do_testResampleXEventWorkspace(WEIGHTED, true, true);
-  }
+  void testEventWorkspace_InPlace_PreserveEvents_weighted() { do_testResampleXEventWorkspace(WEIGHTED, true, true); }
 
   void testEventWorkspace_InPlace_PreserveEvents_weightedNoTime() {
     do_testResampleXEventWorkspace(WEIGHTED_NOTIME, true, true);
   }
 
-  void testEventWorkspace_InPlace_NoPreserveEvents() {
-    do_testResampleXEventWorkspace(TOF, true, false);
-  }
+  void testEventWorkspace_InPlace_NoPreserveEvents() { do_testResampleXEventWorkspace(TOF, true, false); }
 
-  void testEventWorkspace_InPlace_NoPreserveEvents_weighted() {
-    do_testResampleXEventWorkspace(WEIGHTED, true, false);
-  }
+  void testEventWorkspace_InPlace_NoPreserveEvents_weighted() { do_testResampleXEventWorkspace(WEIGHTED, true, false); }
 
   void testEventWorkspace_InPlace_NoPreserveEvents_weightedNoTime() {
     do_testResampleXEventWorkspace(WEIGHTED_NOTIME, true, false);
   }
 
-  void testEventWorkspace_NotInPlace_NoPreserveEvents() {
-    do_testResampleXEventWorkspace(TOF, false, false);
-  }
+  void testEventWorkspace_NotInPlace_NoPreserveEvents() { do_testResampleXEventWorkspace(TOF, false, false); }
 
   void testEventWorkspace_NotInPlace_NoPreserveEvents_weighted() {
     do_testResampleXEventWorkspace(WEIGHTED, false, false);
@@ -289,9 +270,7 @@ public:
     do_testResampleXEventWorkspace(WEIGHTED_NOTIME, false, false);
   }
 
-  void testEventWorkspace_NotInPlace_PreserveEvents() {
-    do_testResampleXEventWorkspace(TOF, false, true);
-  }
+  void testEventWorkspace_NotInPlace_PreserveEvents() { do_testResampleXEventWorkspace(TOF, false, true); }
 
   void testEventWorkspace_NotInPlace_PreserveEvents_weighted() {
     do_testResampleXEventWorkspace(WEIGHTED, false, true);
@@ -315,9 +294,7 @@ public:
     double countVal = 3.0;
 
     Workspace2D_sptr ws = create<Workspace2D>(
-        ylen, Histogram(BinEdges(xlen + 1,
-                                 HistogramData::LinearGenerator(0.5, deltax)),
-                        Counts(xlen, countVal)));
+        ylen, Histogram(BinEdges(xlen + 1, HistogramData::LinearGenerator(0.5, deltax)), Counts(xlen, countVal)));
     ws->setDistribution(withDistribution);
     AnalysisDataService::Instance().add(inName, ws);
 
@@ -334,8 +311,7 @@ public:
 
     MatrixWorkspace_sptr outWS;
     TS_ASSERT_THROWS_NOTHING(
-        outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(outName)));
+        outWS = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outName)));
     TS_ASSERT(outWS);
     if (!outWS)
       return;
@@ -353,8 +329,7 @@ public:
     for (int yIndex = 0; yIndex < ylen; ++yIndex) {
 
       // The bin width for the current spectrum
-      double deltaBin =
-          (xmaxs[yIndex] - xmins[yIndex]) / static_cast<double>(nBins);
+      double deltaBin = (xmaxs[yIndex] - xmins[yIndex]) / static_cast<double>(nBins);
 
       // Check the axes lengths
       TS_ASSERT_EQUALS(outWS->x(yIndex).size(), nBins + 1);
@@ -364,8 +339,7 @@ public:
       // Loop over bins
       for (int xIndex = 0; xIndex < nBins; ++xIndex) {
 
-        TS_ASSERT_DELTA((outWS->x(yIndex))[xIndex],
-                        xmins[yIndex] + xIndex * deltaBin, tolerance);
+        TS_ASSERT_DELTA((outWS->x(yIndex))[xIndex], xmins[yIndex] + xIndex * deltaBin, tolerance);
 
         expectedCounts = -1.0;
         if (((outWS->x(yIndex))[xIndex] > (ws->x(yIndex))[0]) &&
@@ -380,10 +354,8 @@ public:
         }
 
         if (expectedCounts > -0.5) {
-          TS_ASSERT_DELTA((outWS->y(yIndex))[xIndex], expectedCounts,
-                          tolerance);
-          TS_ASSERT_DELTA((outWS->e(yIndex))[xIndex], sqrt(expectedCounts),
-                          tolerance);
+          TS_ASSERT_DELTA((outWS->y(yIndex))[xIndex], expectedCounts, tolerance);
+          TS_ASSERT_DELTA((outWS->e(yIndex))[xIndex], sqrt(expectedCounts), tolerance);
         }
       }
     }
@@ -392,23 +364,15 @@ public:
     AnalysisDataService::Instance().remove(outName);
   }
 
-  void testWorkspace2D_InPlace_NoDistribution() {
-    do_testResampleXWorkspace2D(true, false);
-  }
+  void testWorkspace2D_InPlace_NoDistribution() { do_testResampleXWorkspace2D(true, false); }
 
-  void testWorkspace2D_NotInPlace_NoDistribution() {
-    do_testResampleXWorkspace2D(false, false);
-  }
+  void testWorkspace2D_NotInPlace_NoDistribution() { do_testResampleXWorkspace2D(false, false); }
 
   // This test is disabled because ResampleX currently fails with distribution
   // data. See #22562
-  void xtestWorkspace2D_InPlace_WithDistribution() {
-    do_testResampleXWorkspace2D(true, true);
-  }
+  void xtestWorkspace2D_InPlace_WithDistribution() { do_testResampleXWorkspace2D(true, true); }
 
   // This test is disabled because ResampleX currently fails with distribution
   // data. See #22562
-  void xtestWorkspace2D_NotInPlace_WithDistribution() {
-    do_testResampleXWorkspace2D(false, true);
-  }
+  void xtestWorkspace2D_NotInPlace_WithDistribution() { do_testResampleXWorkspace2D(false, true); }
 };

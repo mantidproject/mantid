@@ -34,9 +34,7 @@ class CalculateCoverageDGSTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalculateCoverageDGSTest *createSuite() {
-    return new CalculateCoverageDGSTest();
-  }
+  static CalculateCoverageDGSTest *createSuite() { return new CalculateCoverageDGSTest(); }
   static void destroySuite(CalculateCoverageDGSTest *suite) { delete suite; }
 
   void test_Init() {
@@ -47,28 +45,22 @@ public:
 
   void test_exec() {
     // Name of the output workspace.
-    std::string outWSName("CalculateCoverageDGSTest_OutputWS"),
-        inputWSName("CalculateCoverageDGSTest_InputWS");
-    MatrixWorkspace_sptr inputWorkspace =
-        WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    std::string outWSName("CalculateCoverageDGSTest_OutputWS"), inputWSName("CalculateCoverageDGSTest_InputWS");
+    MatrixWorkspace_sptr inputWorkspace = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     std::vector<V3D> detectorPositions{{1, 1, 1}};
     V3D sampPos(0., 0., 0.), sourcePos(0, 0, -1.);
-    WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(
-        inputWorkspace, sampPos, sourcePos, detectorPositions);
-    inputWorkspace->mutableSample().setOrientedLattice(
-        std::make_unique<OrientedLattice>(2, 2, 2, 90, 90, 90));
+    WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(inputWorkspace, sampPos, sourcePos,
+                                                                       detectorPositions);
+    inputWorkspace->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(2, 2, 2, 90, 90, 90));
     Goniometer gon(DblMatrix(3, 3, true));
     inputWorkspace->mutableRun().setGoniometer(gon, true);
-    inputWorkspace->mutableRun().addLogData(
-        new PropertyWithValue<double>("Ei", 3.));
+    inputWorkspace->mutableRun().addLogData(new PropertyWithValue<double>("Ei", 3.));
     AnalysisDataService::Instance().add(inputWSName, inputWorkspace);
     CalculateCoverageDGS alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", inputWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Dimension1Min", "-1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Dimension1Max", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Dimension1Step", "0.05"));
@@ -86,8 +78,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -97,10 +88,8 @@ public:
     TS_ASSERT_EQUALS(out->getNumDims(), 4);
     TS_ASSERT_EQUALS(out->getDimension(0)->getNBins(), 40);
     double Ei = 3., dE, ki, kf,
-           energyToK =
-               8.0 * M_PI * M_PI * Mantid::PhysicalConstants::NeutronMass *
-               Mantid::PhysicalConstants::meV * 1e-20 /
-               (Mantid::PhysicalConstants::h * Mantid::PhysicalConstants::h);
+           energyToK = 8.0 * M_PI * M_PI * Mantid::PhysicalConstants::NeutronMass * Mantid::PhysicalConstants::meV *
+                       1e-20 / (Mantid::PhysicalConstants::h * Mantid::PhysicalConstants::h);
     DblMatrix inverserubw(3, 3, true);
     inverserubw /= M_PI;
     const auto &detectorInfo = inputWorkspace->detectorInfo();
@@ -110,8 +99,7 @@ public:
     for (dE = -0.99; dE < 0.99; dE += 0.05) {
       ki = std::sqrt(energyToK * Ei);
       kf = std::sqrt(energyToK * (Ei - dE));
-      V3D q(-kf * sin(twoTheta) * cos(phi), -kf * sin(twoTheta) * sin(phi),
-            ki - kf * cos(twoTheta));
+      V3D q(-kf * sin(twoTheta) * cos(phi), -kf * sin(twoTheta) * sin(phi), ki - kf * cos(twoTheta));
       q = inverserubw * q;
       const double h = q.X(), k = q.Y(), l = q.Z();
       std::vector<Mantid::coord_t> pos(4);

@@ -27,8 +27,7 @@ public:
   void setUpWorkspace() {
     inputWS = "sampledata";
 
-    Mantid::DataObjects::Workspace2D_sptr ws =
-        SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(inputWS);
+    Mantid::DataObjects::Workspace2D_sptr ws = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(inputWS);
 
     // Set up the X bin for the monitor channels
     for (int i = 0; i < SANSInstrumentCreationHelper::nMonitors; i++) {
@@ -39,8 +38,7 @@ public:
 
     for (int ix = 0; ix < SANSInstrumentCreationHelper::nBins; ix++) {
       for (int iy = 0; iy < SANSInstrumentCreationHelper::nBins; iy++) {
-        int i = ix * SANSInstrumentCreationHelper::nBins + iy +
-                SANSInstrumentCreationHelper::nMonitors;
+        int i = ix * SANSInstrumentCreationHelper::nBins + iy + SANSInstrumentCreationHelper::nMonitors;
         auto &X = ws->mutableX(i);
         auto &Y = ws->mutableY(i);
         auto &E = ws->mutableE(i);
@@ -73,37 +71,25 @@ public:
 
     const std::string outputWS("result");
     correction.setPropertyValue("InputWorkspace", inputWS);
-    TS_ASSERT_THROWS_NOTHING(
-        correction.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(correction.setPropertyValue("OutputWorkspace", outputWS))
 
     TS_ASSERT_THROWS_NOTHING(correction.execute())
     TS_ASSERT(correction.isExecuted())
 
     Mantid::API::Workspace_sptr ws_out;
-    TS_ASSERT_THROWS_NOTHING(
-        ws_out =
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS));
+    TS_ASSERT_THROWS_NOTHING(ws_out = Mantid::API::AnalysisDataService::Instance().retrieve(outputWS));
     Mantid::DataObjects::Workspace2D_sptr ws2d_out =
         std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
 
     double tolerance(1e-03);
-    TS_ASSERT_DELTA(ws2d_out->y(1 + SANSInstrumentCreationHelper::nMonitors)[0],
-                    0.9, tolerance);
-    TS_ASSERT_DELTA(
-        ws2d_out->y(15 + SANSInstrumentCreationHelper::nMonitors)[0], 0.9,
-        tolerance);
-    TS_ASSERT_DELTA(ws2d_out->y(6 + SANSInstrumentCreationHelper::nMonitors)[0],
-                    0.9, tolerance);
-    TS_ASSERT_DELTA(ws2d_out->y(5 + SANSInstrumentCreationHelper::nMonitors)[0],
-                    90.9, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(1 + SANSInstrumentCreationHelper::nMonitors)[0], 0.9, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(15 + SANSInstrumentCreationHelper::nMonitors)[0], 0.9, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(6 + SANSInstrumentCreationHelper::nMonitors)[0], 0.9, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(5 + SANSInstrumentCreationHelper::nMonitors)[0], 90.9, tolerance);
 
-    TS_ASSERT_DELTA(ws2d_out->e(1 + SANSInstrumentCreationHelper::nMonitors)[0],
-                    0.4502, tolerance);
-    TS_ASSERT_DELTA(
-        ws2d_out->e(15 + SANSInstrumentCreationHelper::nMonitors)[0], 0.4502,
-        tolerance);
-    TS_ASSERT_DELTA(ws2d_out->e(6 + SANSInstrumentCreationHelper::nMonitors)[0],
-                    0.4502, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(1 + SANSInstrumentCreationHelper::nMonitors)[0], 0.4502, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(15 + SANSInstrumentCreationHelper::nMonitors)[0], 0.4502, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(6 + SANSInstrumentCreationHelper::nMonitors)[0], 0.4502, tolerance);
 
     // Check that pixels that were out of range were masked
     const auto &oSpecInfo = ws2d_out->spectrumInfo();
@@ -112,46 +98,30 @@ public:
 
     // Repeat the calculation by excluding high/low pixels
 
-    TS_ASSERT_THROWS_NOTHING(
-        correction.setProperty<double>("MinEfficiency", 0.5))
-    TS_ASSERT_THROWS_NOTHING(
-        correction.setProperty<double>("MaxEfficiency", 1.50))
+    TS_ASSERT_THROWS_NOTHING(correction.setProperty<double>("MinEfficiency", 0.5))
+    TS_ASSERT_THROWS_NOTHING(correction.setProperty<double>("MaxEfficiency", 1.50))
 
     TS_ASSERT_THROWS_NOTHING(correction.execute())
     TS_ASSERT(correction.isExecuted())
 
-    TS_ASSERT_THROWS_NOTHING(
-        ws_out =
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS));
-    ws2d_out =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
+    TS_ASSERT_THROWS_NOTHING(ws_out = Mantid::API::AnalysisDataService::Instance().retrieve(outputWS));
+    ws2d_out = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
 
-    TS_ASSERT_DELTA(ws2d_out->x(1 + SANSInstrumentCreationHelper::nMonitors)[0],
-                    1.0, tolerance);
-    TS_ASSERT_DELTA(ws2d_out->x(1 + SANSInstrumentCreationHelper::nMonitors)[1],
-                    2.0, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->x(1 + SANSInstrumentCreationHelper::nMonitors)[0], 1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->x(1 + SANSInstrumentCreationHelper::nMonitors)[1], 2.0, tolerance);
 
-    TS_ASSERT_DELTA(ws2d_out->y(1 + SANSInstrumentCreationHelper::nMonitors)[0],
-                    1.0, tolerance);
-    TS_ASSERT_DELTA(
-        ws2d_out->y(15 + SANSInstrumentCreationHelper::nMonitors)[0], 1.0,
-        tolerance);
-    TS_ASSERT_DELTA(ws2d_out->y(6 + SANSInstrumentCreationHelper::nMonitors)[0],
-                    1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(1 + SANSInstrumentCreationHelper::nMonitors)[0], 1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(15 + SANSInstrumentCreationHelper::nMonitors)[0], 1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(6 + SANSInstrumentCreationHelper::nMonitors)[0], 1.0, tolerance);
 
-    TS_ASSERT_DELTA(ws2d_out->e(1 + SANSInstrumentCreationHelper::nMonitors)[0],
-                    0.5002, tolerance);
-    TS_ASSERT_DELTA(
-        ws2d_out->e(15 + SANSInstrumentCreationHelper::nMonitors)[0], 0.5002,
-        tolerance);
-    TS_ASSERT_DELTA(ws2d_out->e(6 + SANSInstrumentCreationHelper::nMonitors)[0],
-                    0.5002, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(1 + SANSInstrumentCreationHelper::nMonitors)[0], 0.5002, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(15 + SANSInstrumentCreationHelper::nMonitors)[0], 0.5002, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(6 + SANSInstrumentCreationHelper::nMonitors)[0], 0.5002, tolerance);
 
     // Check that pixels that were out of range were masked
     const auto &oSpecInfo2 = ws2d_out->spectrumInfo();
     TS_ASSERT(oSpecInfo2.isMasked(5 + SANSInstrumentCreationHelper::nMonitors));
-    TS_ASSERT(
-        !oSpecInfo2.isMasked(1 + SANSInstrumentCreationHelper::nMonitors));
+    TS_ASSERT(!oSpecInfo2.isMasked(1 + SANSInstrumentCreationHelper::nMonitors));
 
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
@@ -186,37 +156,28 @@ public:
       correction.initialize();
 
     const std::string outputWS("result");
-    TS_ASSERT_THROWS_NOTHING(
-        correction.setPropertyValue("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        correction.setPropertyValue("OutputWorkspace", outputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        correction.setProperty<double>("MinEfficiency", 0.5))
-    TS_ASSERT_THROWS_NOTHING(
-        correction.setProperty<double>("MaxEfficiency", 1.50))
+    TS_ASSERT_THROWS_NOTHING(correction.setPropertyValue("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(correction.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(correction.setProperty<double>("MinEfficiency", 0.5))
+    TS_ASSERT_THROWS_NOTHING(correction.setProperty<double>("MaxEfficiency", 1.50))
 
     correction.execute();
 
     TS_ASSERT(correction.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 36866)
 
     TS_ASSERT_EQUALS(result->getAxis(0)->unit()->unitID(), "Wavelength")
 
     Mantid::API::Workspace_sptr ws_in;
-    TS_ASSERT_THROWS_NOTHING(
-        ws_in = Mantid::API::AnalysisDataService::Instance().retrieve(inputWS));
-    Mantid::DataObjects::Workspace2D_sptr ws2d_in =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_in);
+    TS_ASSERT_THROWS_NOTHING(ws_in = Mantid::API::AnalysisDataService::Instance().retrieve(inputWS));
+    Mantid::DataObjects::Workspace2D_sptr ws2d_in = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_in);
 
     Mantid::API::Workspace_sptr ws_out;
-    TS_ASSERT_THROWS_NOTHING(
-        ws_out =
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS));
+    TS_ASSERT_THROWS_NOTHING(ws_out = Mantid::API::AnalysisDataService::Instance().retrieve(outputWS));
     Mantid::DataObjects::Workspace2D_sptr ws2d_out =
         std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
 

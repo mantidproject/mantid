@@ -26,9 +26,7 @@ void StaticKuboToyabeTimesExpDecay::init() {
   declareParameter("Lambda", 0.2, "Exponential decay rate");
 }
 
-void StaticKuboToyabeTimesExpDecay::function1D(double *out,
-                                               const double *xValues,
-                                               const size_t nData) const {
+void StaticKuboToyabeTimesExpDecay::function1D(double *out, const double *xValues, const size_t nData) const {
   const double A = getParameter("A");
   const double D = getParameter("Delta");
   const double L = getParameter("Lambda");
@@ -39,8 +37,7 @@ void StaticKuboToyabeTimesExpDecay::function1D(double *out,
   for (size_t i = 0; i < nData; i++) {
     double x = xValues[i];
     double DXSquared = pow(D * x, 2);
-    out[i] =
-        A * (exp(-DXSquared / 2) * (1 - DXSquared) * C1 + C2) * exp(-L * x);
+    out[i] = A * (exp(-DXSquared / 2) * (1 - DXSquared) * C1 + C2) * exp(-L * x);
   }
 }
 

@@ -17,24 +17,18 @@ namespace ISISReflectometry {
 class MockExperimentView : public IExperimentView {
 public:
   MockExperimentView() {
-    ON_CALL(*this, getAnalysisMode())
-        .WillByDefault(testing::Return("PointDetectorAnalysis"));
-    ON_CALL(*this, getSummationType())
-        .WillByDefault(testing::Return("SumInLambda"));
+    ON_CALL(*this, getAnalysisMode()).WillByDefault(testing::Return("PointDetectorAnalysis"));
+    ON_CALL(*this, getSummationType()).WillByDefault(testing::Return("SumInLambda"));
     ON_CALL(*this, getReductionType()).WillByDefault(testing::Return("Normal"));
-    ON_CALL(*this, getPolarizationCorrectionOption())
-        .WillByDefault(testing::Return(false));
-    ON_CALL(*this, getFloodCorrectionType())
-        .WillByDefault(testing::Return("Workspace"));
+    ON_CALL(*this, getPolarizationCorrectionOption()).WillByDefault(testing::Return(false));
+    ON_CALL(*this, getFloodCorrectionType()).WillByDefault(testing::Return("Workspace"));
     ON_CALL(*this, getDebugOption()).WillByDefault(testing::Return(false));
-    ON_CALL(*this, getIncludePartialBins())
-        .WillByDefault(testing::Return(false));
+    ON_CALL(*this, getIncludePartialBins()).WillByDefault(testing::Return(false));
   }
   MOCK_METHOD1(subscribe, void(ExperimentViewSubscriber *));
   MOCK_METHOD0(connectExperimentSettingsWidgets, void());
   MOCK_METHOD0(disconnectExperimentSettingsWidgets, void());
-  MOCK_METHOD1(createStitchHints,
-               void(const std::vector<MantidWidgets::Hint> &));
+  MOCK_METHOD1(createStitchHints, void(const std::vector<MantidWidgets::Hint> &));
   MOCK_CONST_METHOD0(getAnalysisMode, std::string());
   MOCK_METHOD1(setAnalysisMode, void(std::string const &));
   MOCK_CONST_METHOD0(getSummationType, std::string());
@@ -49,10 +43,8 @@ public:
   MOCK_METHOD0(disableIncludePartialBins, void());
   MOCK_CONST_METHOD0(getDebugOption, bool());
   MOCK_METHOD1(setDebugOption, void(bool));
-  MOCK_CONST_METHOD0(getPerAngleOptions,
-                     std::vector<PerThetaDefaults::ValueArray>());
-  MOCK_METHOD1(setPerAngleOptions,
-               void(std::vector<PerThetaDefaults::ValueArray>));
+  MOCK_CONST_METHOD0(getPerAngleOptions, std::vector<PerThetaDefaults::ValueArray>());
+  MOCK_METHOD1(setPerAngleOptions, void(std::vector<PerThetaDefaults::ValueArray>));
   MOCK_METHOD2(showPerAngleOptionsAsInvalid, void(int row, int column));
   MOCK_METHOD1(showPerAngleOptionsAsValid, void(int row));
   MOCK_METHOD0(showAllPerAngleOptionsAsValid, void());
@@ -98,9 +90,8 @@ public:
   MOCK_METHOD1(setFloodWorkspace, void(std::string const &));
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_METHOD1(setStitchOptions, void(std::string const &));
-  MOCK_METHOD2(showOptionLoadErrors,
-               void(std::vector<InstrumentParameterTypeMissmatch> const &,
-                    std::vector<MissingInstrumentParameterValue> const &));
+  MOCK_METHOD2(showOptionLoadErrors, void(std::vector<InstrumentParameterTypeMissmatch> const &,
+                                          std::vector<MissingInstrumentParameterValue> const &));
   MOCK_METHOD0(disableAll, void());
   MOCK_METHOD0(enableAll, void());
   MOCK_METHOD0(addPerThetaDefaultsRow, void());

@@ -21,18 +21,16 @@ public:
     const int *dim0;  ///< dimension zero array
     const int *dim1;  ///< dimension one array
     /// Constructor
-    item_t(const T *v, bool da, const int *d0, const int *d1)
-        : value(v), det_average(da), dim0(d0), dim1(d1) {}
+    item_t(const T *v, bool da, const int *d0, const int *d1) : value(v), det_average(da), dim0(d0), dim1(d1) {}
   };
 
   item_struct() : m_items(), m_spec_array(nullptr), m_ndet(0){};
 
 private:
-  using items_map_t =
-      std::map<std::string,
-               item_t>;        ///< Type def of internal map of named items
-  items_map_t m_items;         ///< internal map of named items
-  unsigned long *m_spec_array; ///< length m_ndet; used for averaging values
+  using items_map_t = std::map<std::string,
+                               item_t>; ///< Type def of internal map of named items
+  items_map_t m_items;                  ///< internal map of named items
+  unsigned long *m_spec_array;          ///< length m_ndet; used for averaging values
   /// with det_average
   long m_ndet; ///< number of detectors
 public:
@@ -44,11 +42,10 @@ public:
   @param dim1 :: Diemnsion array one
   @return 0 on success, -1 if it is a duplicate
   */
-  int addItem(const std::string &name, const T *value, bool det_average = false,
-              const int *dim0 = nullptr, const int *dim1 = nullptr) {
+  int addItem(const std::string &name, const T *value, bool det_average = false, const int *dim0 = nullptr,
+              const int *dim1 = nullptr) {
     std::pair<typename items_map_t::iterator, bool> insert_ret;
-    insert_ret = m_items.insert(typename items_map_t::value_type(
-        name, item_t(value, det_average, dim0, dim1)));
+    insert_ret = m_items.insert(typename items_map_t::value_type(name, item_t(value, det_average, dim0, dim1)));
     if (!insert_ret.second) {
       return -1; // duplicate
     } else {
@@ -72,10 +69,8 @@ public:
   }
 
   int getItem(const std::string &item_name, T &value);
-  int getItem(const std::string &item_name, long *spec_array, int nspec,
-              T *lVal);
-  int getArrayItemSize(const std::string &item_name, int *dims_array,
-                       int &ndims);
+  int getItem(const std::string &item_name, long *spec_array, int nspec, T *lVal);
+  int getArrayItemSize(const std::string &item_name, int *dims_array, int &ndims);
   int getArrayItem(const std::string &item_name, int nspec, T *larray);
   int getArrayItem(const std::string &item_name, T *larray);
 };

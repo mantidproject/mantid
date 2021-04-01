@@ -31,8 +31,7 @@ public:
 
 private:
   struct CalibrationParams {
-    CalibrationParams(const double _difc, const double _difa,
-                      const double _tzero);
+    CalibrationParams(const double _difc, const double _difa, const double _tzero);
     const double difa;
     const double difc;
     const double tzero;

@@ -25,10 +25,8 @@ namespace TubeHelpers {
  * detPositions.
  * @return. Collection of virtual tubes based on linearity of points.
  */
-std::vector<detail::TubeBuilder>
-findAndSortTubes(const Mantid::Geometry::IObject &detShape,
-                 const Pixels &detPositions,
-                 const std::vector<Mantid::detid_t> &detIDs) {
+std::vector<detail::TubeBuilder> findAndSortTubes(const Mantid::Geometry::IObject &detShape, const Pixels &detPositions,
+                                                  const std::vector<Mantid::detid_t> &detIDs) {
   std::vector<detail::TubeBuilder> tubes;
   tubes.emplace_back(detShape, detPositions.col(0), detIDs[0]);
 
@@ -50,11 +48,9 @@ findAndSortTubes(const Mantid::Geometry::IObject &detShape,
   }
 
   // Remove "tubes" with only 1 element
-  tubes.erase(std::remove_if(tubes.begin(), tubes.end(),
-                             [](const detail::TubeBuilder &tube) {
-                               return tube.size() == 1;
-                             }),
-              tubes.end());
+  tubes.erase(
+      std::remove_if(tubes.begin(), tubes.end(), [](const detail::TubeBuilder &tube) { return tube.size() == 1; }),
+      tubes.end());
 
   return tubes;
 }
@@ -65,9 +61,8 @@ findAndSortTubes(const Mantid::Geometry::IObject &detShape,
  * @param tubes
  * @return vector of detector ids not part of tubes
  */
-std::vector<Mantid::detid_t>
-notInTubes(const std::vector<detail::TubeBuilder> &tubes,
-           std::vector<Mantid::detid_t> detIDs) {
+std::vector<Mantid::detid_t> notInTubes(const std::vector<detail::TubeBuilder> &tubes,
+                                        std::vector<Mantid::detid_t> detIDs) {
   std::vector<Mantid::detid_t> used;
   for (const auto &tube : tubes) {
     for (const auto &id : tube.detIDs()) {
@@ -77,8 +72,7 @@ notInTubes(const std::vector<detail::TubeBuilder> &tubes,
   std::vector<Mantid::detid_t> diff;
   std::sort(detIDs.begin(), detIDs.end());
   std::sort(used.begin(), used.end());
-  std::set_difference(detIDs.begin(), detIDs.end(), used.begin(), used.end(),
-                      std::inserter(diff, diff.begin()));
+  std::set_difference(detIDs.begin(), detIDs.end(), used.begin(), used.end(), std::inserter(diff, diff.begin()));
   return diff;
 }
 } // namespace TubeHelpers

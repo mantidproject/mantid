@@ -56,19 +56,13 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "SaveSPE"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Writes a workspace into a file the spe format.";
-  }
+  const std::string summary() const override { return "Writes a workspace into a file the spe format."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadSPE", "SavePAR", "SavePHX"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadSPE", "SavePAR", "SavePHX"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\SPE;Inelastic\\DataHandling";
-  }
+  const std::string category() const override { return "DataHandling\\SPE;Inelastic\\DataHandling"; }
 
   /// the mask flag (=-1e30) from the SPE specification
   /// http://www.mantidproject.org/images/3/3d/Spe_file_format.pdf
@@ -80,17 +74,13 @@ private:
   /// Execution code
   void exec() override;
 
-  void writeSPEFile(FILE *outSPEFile,
-                    const API::MatrixWorkspace_const_sptr &inputWS);
-  void writeHists(const API::MatrixWorkspace_const_sptr &WS,
-                  FILE *const outFile);
-  void writeHist(const API::MatrixWorkspace_const_sptr &WS, FILE *const outFile,
-                 const int wsIn) const;
+  void writeSPEFile(FILE *outSPEFile, const API::MatrixWorkspace_const_sptr &inputWS);
+  void writeHists(const API::MatrixWorkspace_const_sptr &WS, FILE *const outFile);
+  void writeHist(const API::MatrixWorkspace_const_sptr &WS, FILE *const outFile, const int wsIn) const;
   void writeMaskFlags(FILE *const outFile) const;
   void writeBins(const std::vector<double> &Vs, FILE *const outFile) const;
   void writeValue(const double value, FILE *const outFile) const;
-  void logMissingMasked(const std::vector<int> &inds, const size_t nonMasked,
-                        const int masked) const;
+  void logMissingMasked(const std::vector<int> &inds, const size_t nonMasked, const int masked) const;
 
   /// the SPE files have a constant number of numbers written on each line, but
   /// depending on the number of bins there will be some "spare" numbers at the
@@ -112,10 +102,8 @@ private:
 
   // method verifies if a spectra contains any NaN or Inf values and replaces
   // these values with SPE-specified constants
-  void check_and_copy_spectra(const HistogramData::HistogramY &inSignal,
-                              const HistogramData::HistogramE &inErr,
-                              std::vector<double> &Signal,
-                              std::vector<double> &Error) const;
+  void check_and_copy_spectra(const HistogramData::HistogramY &inSignal, const HistogramData::HistogramE &inErr,
+                              std::vector<double> &Signal, std::vector<double> &Error) const;
 };
 
 } // namespace DataHandling

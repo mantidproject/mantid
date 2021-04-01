@@ -71,8 +71,7 @@ public:
    * 500 pixels
    * 1000 histogrammed bins.
    */
-  EventWorkspace_sptr createEventWorkspace(bool initialize_pixels, bool setX,
-                                           bool evenTOFs = false) {
+  EventWorkspace_sptr createEventWorkspace(bool initialize_pixels, bool setX, bool evenTOFs = false) {
 
     EventWorkspace_sptr retVal(new EventWorkspace);
     if (initialize_pixels) {
@@ -118,9 +117,7 @@ public:
    * 1000 histogrammed bins.
    * 2 events per bin
    */
-  EventWorkspace_sptr createFlatEventWorkspace() {
-    return createEventWorkspace(true, true, true);
-  }
+  EventWorkspace_sptr createFlatEventWorkspace() { return createEventWorkspace(true, true, true); }
 
   void setUp() override { ew = createEventWorkspace(true, true); }
 
@@ -142,13 +139,11 @@ public:
   void test_getMemorySize() {
     // Because of the way vectors allocate, we can only know the minimum amount
     // of memory that can be used.
-    size_t min_memory = (ew->getNumberEvents() * sizeof(TofEvent) +
-                         NUMPIXELS * sizeof(EventList));
+    size_t min_memory = (ew->getNumberEvents() * sizeof(TofEvent) + NUMPIXELS * sizeof(EventList));
     TS_ASSERT_LESS_THAN_EQUALS(min_memory, ew->getMemorySize());
   }
 
-  void
-  test_that_isRaggedWorkspace_returns_false_for_a_non_ragged_EventWorkspace() {
+  void test_that_isRaggedWorkspace_returns_false_for_a_non_ragged_EventWorkspace() {
     ew = createEventWorkspace(true, false);
 
     TS_ASSERT(!ew->isRaggedWorkspace());
@@ -173,18 +168,15 @@ public:
     TS_ASSERT_EQUALS(ew->getNumberBins(1), 1);
   }
 
-  void
-  test_that_getNumberBins_throws_when_provided_an_index_which_is_too_large() {
+  void test_that_getNumberBins_throws_when_provided_an_index_which_is_too_large() {
     ew = createEventWorkspace(true, false);
 
     const auto numberOfHistograms = ew->getNumberHistograms();
     TS_ASSERT_THROWS_NOTHING(ew->getNumberBins(numberOfHistograms - 1u));
-    TS_ASSERT_THROWS(ew->getNumberBins(numberOfHistograms),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(ew->getNumberBins(numberOfHistograms), const std::invalid_argument &);
   }
 
-  void
-  test_that_getMaxNumberBins_returns_the_correct_number_for_a_ragged_EventWorkspace() {
+  void test_that_getMaxNumberBins_returns_the_correct_number_for_a_ragged_EventWorkspace() {
     ew = createEventWorkspace(true, false);
     ew->getSpectrum(0).setHistogram(BinEdges({0., 10., 20.}));
 
@@ -233,8 +225,7 @@ public:
 
   void test_maskWorkspaceIndex() {
     EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
-            1, 10, false /*dont clear the events*/);
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10, false /*dont clear the events*/);
     TS_ASSERT_EQUALS(ws->getSpectrum(2).getNumberEvents(), 200);
     ws->getSpectrum(2).clearData();
     ws->mutableSpectrumInfo().setMasked(2, true);
@@ -270,10 +261,8 @@ public:
 
     // The spectra map should take each workspace index and point to the right
     // pixel id: 5,15,25, etc.
-    for (int wi = 0; wi < static_cast<int>(uneven->getNumberHistograms());
-         wi++) {
-      TS_ASSERT_EQUALS(*uneven->getSpectrum(wi).getDetectorIDs().begin(),
-                       5 + wi * 10);
+    for (int wi = 0; wi < static_cast<int>(uneven->getNumberHistograms()); wi++) {
+      TS_ASSERT_EQUALS(*uneven->getSpectrum(wi).getDetectorIDs().begin(), 5 + wi * 10);
     }
 
     // Workspace index 0 is at pixelid 5 and has 5 events
@@ -306,8 +295,7 @@ public:
 
   void test_setX_individually() {
     // Create A DIFFERENT x-axis for histogramming.
-    auto axis = Kernel::make_cow<HistogramData::HistogramX>(
-        NUMBINS / 2, LinearGenerator(0.0, 2.0 * BIN_DELTA));
+    auto axis = Kernel::make_cow<HistogramData::HistogramX>(NUMBINS / 2, LinearGenerator(0.0, 2.0 * BIN_DELTA));
 
     ew->setX(0, axis);
     const EventList el(ew->getSpectrum(0));
@@ -365,8 +353,7 @@ public:
 
   void test_histogram_cache() {
     // Try caching and most-recently-used MRU list.
-    EventWorkspace_const_sptr ew2 =
-        std::dynamic_pointer_cast<const EventWorkspace>(ew);
+    EventWorkspace_const_sptr ew2 = std::dynamic_pointer_cast<const EventWorkspace>(ew);
 
     // Are the returned arrays the right size?
     MantidVec data1 = ew2->dataY(1);
@@ -462,12 +449,10 @@ public:
 
     MantidVec X, Y, E;
     TSM_ASSERT_THROWS("Number of histograms is out of range, should throw",
-                      ws->generateHistogramPulseTime(nHistos + 1, X, Y, E),
-                      const std::range_error &);
+                      ws->generateHistogramPulseTime(nHistos + 1, X, Y, E), const std::range_error &);
   }
 
-  void do_test_binning(const EventWorkspace_sptr &ws, const BinEdges &axis,
-                       size_t expected_occupancy_per_bin) {
+  void do_test_binning(const EventWorkspace_sptr &ws, const BinEdges &axis, size_t expected_occupancy_per_bin) {
     MantidVec Y(NUMBINS - 1);
     MantidVec E(NUMBINS - 1);
     // Required since we are rebinning in place.
@@ -481,10 +466,9 @@ public:
   }
 
   void test_histogram_pulse_time() {
-    EventWorkspace_sptr ws =
-        createEventWorkspace(true, false); // Creates TOF events with
-                                           // pulse_time intervals of
-                                           // BIN_DELTA/2
+    EventWorkspace_sptr ws = createEventWorkspace(true, false); // Creates TOF events with
+                                                                // pulse_time intervals of
+                                                                // BIN_DELTA/2
 
     // Create bin steps = 4*BIN_DELTA.
     BinEdges axis1(NUMBINS / 4, LinearGenerator(0.0, 4.0 * BIN_DELTA));
@@ -548,8 +532,7 @@ public:
     // Second detector sits on the first.
     std::vector<V3D> detectorPositions{{11, 1, 0}, {11, 1, 0}};
 
-    WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(
-        ws, source, sample, detectorPositions);
+    WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(ws, source, sample, detectorPositions);
 
     DateAndTime foundMin = ws->getTimeAtSampleMin();
     DateAndTime foundMax = ws->getTimeAtSampleMax();
@@ -574,8 +557,7 @@ public:
 
   void test_droppingOffMRU() {
     // Try caching and most-recently-used MRU list.
-    EventWorkspace_const_sptr ew2 =
-        std::dynamic_pointer_cast<const EventWorkspace>(ew);
+    EventWorkspace_const_sptr ew2 = std::dynamic_pointer_cast<const EventWorkspace>(ew);
 
     // OK, we grab data0 from the MRU.
     const auto &inSpec = ew2->getSpectrum(0);
@@ -598,8 +580,7 @@ public:
   }
 
   void test_sortAll_TOF() {
-    EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
 
     test_in->sortAll(TOF_SORT, nullptr);
 
@@ -617,8 +598,7 @@ public:
    */
   void test_sortAll_SingleEventList() {
     int numEvents = 30;
-    EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, 1);
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, 1);
 
     test_in->sortAll(TOF_SORT, nullptr);
 
@@ -634,8 +614,7 @@ public:
    */
   void test_sortAll_byTime_SingleEventList() {
     int numEvents = 30;
-    EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, 1);
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, 1);
 
     test_in->sortAll(PULSETIME_SORT, nullptr);
 
@@ -647,8 +626,7 @@ public:
   }
 
   void test_sortAll_ByTime() {
-    EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
 
     test_in->sortAll(PULSETIME_SORT, nullptr);
 
@@ -669,8 +647,7 @@ public:
   void xtestSegFault() ///< Disabled because ~2.5 seconds.
   {
     int numpix = 100000;
-    EventWorkspace_const_sptr ew1 =
-        WorkspaceCreationHelper::createRandomEventWorkspace(50, numpix);
+    EventWorkspace_const_sptr ew1 = WorkspaceCreationHelper::createRandomEventWorkspace(50, numpix);
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < numpix; i++) {
@@ -686,8 +663,7 @@ public:
   void do_test_dirtyFlag(bool do_parallel) {
     // 50 pixels, 100 bins, 2 events in each
     int numpixels = 900;
-    EventWorkspace_sptr ew1 =
-        WorkspaceCreationHelper::createEventWorkspace2(numpixels, 100);
+    EventWorkspace_sptr ew1 = WorkspaceCreationHelper::createEventWorkspace2(numpixels, 100);
     PARALLEL_FOR_IF(do_parallel)
     for (int i = 0; i < numpixels; i += 3) {
       const MantidVec &Y = ew1->readY(i);
@@ -739,11 +715,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     EventWorkspace_const_sptr wsConst;
     EventWorkspace_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<EventWorkspace_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<EventWorkspace_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(wsNonConst =
-                                 manager.getValue<EventWorkspace_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<EventWorkspace_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
@@ -771,11 +745,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     IEventWorkspace_const_sptr wsConst;
     IEventWorkspace_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<IEventWorkspace_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<IEventWorkspace_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(
-        wsNonConst = manager.getValue<IEventWorkspace_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<IEventWorkspace_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
@@ -793,9 +765,7 @@ public:
   void test_writeAccessInvalidatesCommonBinsFlagIsSet() {
     const int numEvents = 2;
     const int numHistograms = 2;
-    EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents,
-                                                            numHistograms);
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, numHistograms);
     // Calling isCommonBins() sets the flag m_isCommonBinsFlagSet
     TS_ASSERT(ws->isCommonBins())
     // Calling dataX should unset the flag m_isCommonBinsFlagSet
@@ -820,9 +790,7 @@ public:
   void test_readYE() {
     int numEvents = 2;
     int numHistograms = 2;
-    EventWorkspace_const_sptr ws =
-        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents,
-                                                            numHistograms);
+    EventWorkspace_const_sptr ws = WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, numHistograms);
     TS_ASSERT_THROWS_NOTHING(ws->readY(0));
     TS_ASSERT_THROWS_NOTHING(ws->dataY(0));
     TS_ASSERT_THROWS_NOTHING(ws->readE(0));
@@ -832,9 +800,7 @@ public:
   void test_histogram() {
     int numEvents = 2;
     int numHistograms = 2;
-    EventWorkspace_const_sptr ws =
-        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents,
-                                                            numHistograms);
+    EventWorkspace_const_sptr ws = WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, numHistograms);
     auto hist1 = ws->histogram(0);
     auto hist2 = ws->histogram(0);
     TS_ASSERT_EQUALS(hist1.sharedX(), hist2.sharedX());
@@ -854,9 +820,7 @@ public:
   void test_swapping_spectrum_numbers_does_not_break_MRU() {
     int numEvents = 2;
     int numHistograms = 2;
-    EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents,
-                                                            numHistograms);
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, numHistograms);
     // put two items into MRU
     auto &yOld0 = ws->y(0);
     auto &yOld1 = ws->y(1);

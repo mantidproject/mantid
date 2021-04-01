@@ -32,28 +32,20 @@ EvaluateMDFunction::EvaluateMDFunction() { useAlgorithm("EvaluateFunction"); }
 int EvaluateMDFunction::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string EvaluateMDFunction::category() const {
-  return "MDAlgorithms\\Creation";
-}
+const std::string EvaluateMDFunction::category() const { return "MDAlgorithms\\Creation"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string EvaluateMDFunction::summary() const {
-  return "Evaluates an MD function on a MD histo workspace.";
-}
+const std::string EvaluateMDFunction::summary() const { return "Evaluates an MD function on a MD histo workspace."; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void EvaluateMDFunction::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
-      "An input workspace that provides dimensions for the output.");
-  declareProperty(
-      std::make_unique<API::FunctionProperty>("Function", Direction::InOut),
-      "Parameters defining the fitting function and its initial values");
-  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input),
+                  "An input workspace that provides dimensions for the output.");
+  declareProperty(std::make_unique<API::FunctionProperty>("Function", Direction::InOut),
+                  "Parameters defining the fitting function and its initial values");
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -71,8 +63,7 @@ void EvaluateMDFunction::exec() {
   cloner->execute();
 
   API::IMDWorkspace_sptr clone = cloner->getProperty("OutputWorkspace");
-  API::IMDHistoWorkspace_sptr output =
-      std::dynamic_pointer_cast<API::IMDHistoWorkspace>(clone);
+  API::IMDHistoWorkspace_sptr output = std::dynamic_pointer_cast<API::IMDHistoWorkspace>(clone);
 
   if (!output)
     throw std::runtime_error("Cannot create output workspace");

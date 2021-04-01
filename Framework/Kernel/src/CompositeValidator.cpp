@@ -58,8 +58,7 @@ std::vector<std::string> CompositeValidator::allowedValues() const {
  * @return A newly constructed validator object. Each child is also cloned
  */
 Kernel::IValidator_sptr CompositeValidator::clone() const {
-  std::shared_ptr<CompositeValidator> copy =
-      std::make_shared<CompositeValidator>(m_relation);
+  std::shared_ptr<CompositeValidator> copy = std::make_shared<CompositeValidator>(m_relation);
   for (const auto &itr : m_children) {
     copy->add(itr->clone());
   }
@@ -69,9 +68,7 @@ Kernel::IValidator_sptr CompositeValidator::clone() const {
 /** Adds a validator to the group of validators to check
  *  @param child :: A pointer to the validator to add
  */
-void CompositeValidator::add(const Kernel::IValidator_sptr &child) {
-  m_children.emplace_back(child);
-}
+void CompositeValidator::add(const Kernel::IValidator_sptr &child) { m_children.emplace_back(child); }
 
 /** Checks the value of all child validators. Fails if any child fails.
  *  @param value :: The workspace to test
@@ -106,8 +103,7 @@ std::string CompositeValidator::checkAny(const boost::any &value) const {
   // Lambda to check if a validator is valid. If it is not valid then
   // capture its error message to a stream so we can potentially print it out
   // to the user if required.
-  const auto checkIfValid = [&errorStream,
-                             &value](const IValidator_sptr &validator) {
+  const auto checkIfValid = [&errorStream, &value](const IValidator_sptr &validator) {
     const auto errorMessage = validator->check(value);
     if (errorMessage.empty()) {
       return true;
@@ -118,8 +114,7 @@ std::string CompositeValidator::checkAny(const boost::any &value) const {
     }
   };
 
-  const auto valid =
-      std::any_of(m_children.begin(), m_children.end(), checkIfValid);
+  const auto valid = std::any_of(m_children.begin(), m_children.end(), checkIfValid);
   return buildErrorMessage(valid, errorStream.str());
 }
 
@@ -132,9 +127,7 @@ std::string CompositeValidator::checkAny(const boost::any &value) const {
  * @return a user friendly message with all the child validator messages
  * combined.
  */
-std::string
-CompositeValidator::buildErrorMessage(const bool valid,
-                                      const std::string &errors) const {
+std::string CompositeValidator::buildErrorMessage(const bool valid, const std::string &errors) const {
   if (!valid) {
     return "Invalid property. You must statisfy one of the following "
            "conditions:\n" +

@@ -42,25 +42,19 @@ public:
   };
 
   LogParserTest()
-      : log_num_good("TST000000_good.txt"), log_num_late("TST000000_late.txt"),
-        log_num_early("TST000000_early.txt"),
-        log_num_single("TST000000_single.txt"), log_str("TST000000_str.txt"),
-        icp_file("TST000000_icpevent.txt"),
-        log_str_repeat("TST000000_repeat.txt"),
-        log_num_repeat("TST000000_num_repeat.txt"),
+      : log_num_good("TST000000_good.txt"), log_num_late("TST000000_late.txt"), log_num_early("TST000000_early.txt"),
+        log_num_single("TST000000_single.txt"), log_str("TST000000_str.txt"), icp_file("TST000000_icpevent.txt"),
+        log_str_repeat("TST000000_repeat.txt"), log_num_repeat("TST000000_num_repeat.txt"),
         log_str_continuations("TST000000_str_continue.txt") {}
 
   void testGood() {
     mkICP();
     mkGood();
-    const auto &icp_log = std::unique_ptr<Property>(
-        LogParser::createLogProperty(icp_file.path(), "icpevent"));
+    const auto &icp_log = std::unique_ptr<Property>(LogParser::createLogProperty(icp_file.path(), "icpevent"));
     const LogParser lp(icp_log.get());
-    const auto &p1 = std::unique_ptr<Property>(
-        lp.createLogProperty(log_num_good.path(), "good"));
+    const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_num_good.path(), "good"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<double> *tp1 =
-        dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
+    TimeSeriesProperty<double> *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
     std::map<DateAndTime, double> vmap = tp1->valueAsMap();
     std::map<DateAndTime, double>::iterator v = vmap.begin();
     // time 1
@@ -101,14 +95,11 @@ public:
   void testLate() {
     mkICP();
     mkLate();
-    const auto &icp_log = std::unique_ptr<Property>(
-        LogParser::createLogProperty(icp_file.path(), "icpevent"));
+    const auto &icp_log = std::unique_ptr<Property>(LogParser::createLogProperty(icp_file.path(), "icpevent"));
     const LogParser lp(icp_log.get());
-    const auto &p1 = std::unique_ptr<Property>(
-        lp.createLogProperty(log_num_late.path(), "late"));
+    const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_num_late.path(), "late"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<double> *tp1 =
-        dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
+    TimeSeriesProperty<double> *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
     std::map<DateAndTime, double> vmap = tp1->valueAsMap();
     std::map<DateAndTime, double>::iterator v = vmap.begin();
 
@@ -139,14 +130,11 @@ public:
   void testEarly() {
     mkICP();
     mkEarly();
-    const auto &icp_log = std::unique_ptr<Property>(
-        LogParser::createLogProperty(icp_file.path(), "icpevent"));
+    const auto &icp_log = std::unique_ptr<Property>(LogParser::createLogProperty(icp_file.path(), "icpevent"));
     const LogParser lp(icp_log.get());
-    const auto &p1 = std::unique_ptr<Property>(
-        lp.createLogProperty(log_num_early.path(), "early"));
+    const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_num_early.path(), "early"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<double> *tp1 =
-        dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
+    TimeSeriesProperty<double> *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
     std::map<DateAndTime, double> vmap = tp1->valueAsMap();
     std::map<DateAndTime, double>::iterator v = vmap.begin();
 
@@ -176,14 +164,11 @@ public:
   void testSingle() {
     mkICP();
     mkSingle();
-    const auto &icp_log = std::unique_ptr<Property>(
-        LogParser::createLogProperty(icp_file.path(), "icpevent"));
+    const auto &icp_log = std::unique_ptr<Property>(LogParser::createLogProperty(icp_file.path(), "icpevent"));
     const LogParser lp(icp_log.get());
-    const auto &p1 = std::unique_ptr<Property>(
-        lp.createLogProperty(log_num_single.path(), "single"));
+    const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_num_single.path(), "single"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<double> *tp1 =
-        dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
+    TimeSeriesProperty<double> *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
     std::map<DateAndTime, double> vmap = tp1->valueAsMap();
     std::map<DateAndTime, double>::iterator v = vmap.begin();
 
@@ -200,14 +185,11 @@ public:
   void testStr() {
     mkICP();
     mkStr();
-    const auto &icp_log = std::unique_ptr<Property>(
-        LogParser::createLogProperty(icp_file.path(), "icpevent"));
+    const auto &icp_log = std::unique_ptr<Property>(LogParser::createLogProperty(icp_file.path(), "icpevent"));
     const LogParser lp(icp_log.get());
-    const auto &p1 =
-        std::unique_ptr<Property>(lp.createLogProperty(log_str.path(), "str"));
+    const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_str.path(), "str"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<std::string> *tp1 =
-        dynamic_cast<TimeSeriesProperty<std::string> *>(p1.get());
+    TimeSeriesProperty<std::string> *tp1 = dynamic_cast<TimeSeriesProperty<std::string> *>(p1.get());
     std::map<DateAndTime, std::string> vmap = tp1->valueAsMap();
     std::map<DateAndTime, std::string>::iterator v = vmap.begin();
     // time 1
@@ -236,88 +218,62 @@ public:
   // Test a variant of the log file containing CHANGE_PERIOD flags
   void testConstructionFromFileUsingICPVariant_CHANGE_PERIOD() {
     mkICPVariant();
-    const auto &icp_log = std::unique_ptr<Property>(
-        LogParser::createLogProperty(icp_file.path(), "icpevent"));
+    const auto &icp_log = std::unique_ptr<Property>(LogParser::createLogProperty(icp_file.path(), "icpevent"));
     const LogParser lp(icp_log.get());
     const auto &prop = std::unique_ptr<Property>(lp.createAllPeriodsLog());
-    const auto *timeseriesprop =
-        dynamic_cast<const TimeSeriesProperty<int> *>(prop.get());
+    const auto *timeseriesprop = dynamic_cast<const TimeSeriesProperty<int> *>(prop.get());
     TS_ASSERT(timeseriesprop);
     // Check the size
     TS_ASSERT_EQUALS(4, timeseriesprop->size());
     // Check the exact time stamps
-    TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:22:55"),
-                     timeseriesprop->nthTime(0));
-    TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:23:08"),
-                     timeseriesprop->nthTime(1));
-    TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:23:22"),
-                     timeseriesprop->nthTime(2));
-    TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:23:37"),
-                     timeseriesprop->nthTime(3));
+    TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:22:55"), timeseriesprop->nthTime(0));
+    TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:23:08"), timeseriesprop->nthTime(1));
+    TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:23:22"), timeseriesprop->nthTime(2));
+    TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:23:37"), timeseriesprop->nthTime(3));
   }
 
   void testConstructionFromPropertyUsingICPVariant_CHANGE_PERIOD() {
     auto log = std::make_unique<TimeSeriesProperty<std::string>>("ICPLog");
     // Notice we are using "CHANGE_PERIOD"
-    TS_ASSERT_THROWS_NOTHING(
-        log->addValue("2007-11-30T16:15:00", "CHANGE_PERIOD 1"));
-    TS_ASSERT_THROWS_NOTHING(
-        log->addValue("2007-11-30T16:16:00", "CHANGE_PERIOD 2"));
-    TS_ASSERT_THROWS_NOTHING(
-        log->addValue("2007-11-30T16:17:00", "CHANGE_PERIOD 3"));
-    TS_ASSERT_THROWS_NOTHING(
-        log->addValue("2007-11-30T16:18:00", "CHANGE_PERIOD 2"));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:15:00", "CHANGE_PERIOD 1"));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:16:00", "CHANGE_PERIOD 2"));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:00", "CHANGE_PERIOD 3"));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:18:00", "CHANGE_PERIOD 2"));
 
     const LogParser logparser(log.get());
 
-    const auto &prop =
-        std::unique_ptr<Property>(logparser.createAllPeriodsLog());
-    const auto *timeseriesprop =
-        dynamic_cast<const TimeSeriesProperty<int> *>(prop.get());
+    const auto &prop = std::unique_ptr<Property>(logparser.createAllPeriodsLog());
+    const auto *timeseriesprop = dynamic_cast<const TimeSeriesProperty<int> *>(prop.get());
     TS_ASSERT(timeseriesprop);
     // Check the size
     TS_ASSERT_EQUALS(4, timeseriesprop->size());
     // Check the exact time stamps
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:15:00"),
-                     timeseriesprop->nthTime(0));
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:16:00"),
-                     timeseriesprop->nthTime(1));
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:17:00"),
-                     timeseriesprop->nthTime(2));
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:18:00"),
-                     timeseriesprop->nthTime(3));
+    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:15:00"), timeseriesprop->nthTime(0));
+    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:16:00"), timeseriesprop->nthTime(1));
+    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:17:00"), timeseriesprop->nthTime(2));
+    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:18:00"), timeseriesprop->nthTime(3));
   }
 
   void testConstructionFromPropertyUsingICPVariant_CHANGE_SPACE_PERIOD() {
     auto log = std::make_unique<TimeSeriesProperty<std::string>>("ICPLog");
     // Notice we are using "CHANGE PERIOD"
-    TS_ASSERT_THROWS_NOTHING(
-        log->addValue("2007-11-30T16:15:00", "CHANGE PERIOD 1"));
-    TS_ASSERT_THROWS_NOTHING(
-        log->addValue("2007-11-30T16:16:00", "CHANGE PERIOD 2"));
-    TS_ASSERT_THROWS_NOTHING(
-        log->addValue("2007-11-30T16:17:00", "CHANGE PERIOD 3"));
-    TS_ASSERT_THROWS_NOTHING(
-        log->addValue("2007-11-30T16:18:00", "CHANGE PERIOD 2"));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:15:00", "CHANGE PERIOD 1"));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:16:00", "CHANGE PERIOD 2"));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:00", "CHANGE PERIOD 3"));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:18:00", "CHANGE PERIOD 2"));
 
     const LogParser logparser(log.get());
 
-    const auto &prop =
-        std::unique_ptr<Property>(logparser.createAllPeriodsLog());
-    const auto *timeseriesprop =
-        dynamic_cast<const TimeSeriesProperty<int> *>(prop.get());
+    const auto &prop = std::unique_ptr<Property>(logparser.createAllPeriodsLog());
+    const auto *timeseriesprop = dynamic_cast<const TimeSeriesProperty<int> *>(prop.get());
     TS_ASSERT(timeseriesprop);
     // Check the size
     TS_ASSERT_EQUALS(4, timeseriesprop->size());
     // Check the exact time stamps
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:15:00"),
-                     timeseriesprop->nthTime(0));
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:16:00"),
-                     timeseriesprop->nthTime(1));
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:17:00"),
-                     timeseriesprop->nthTime(2));
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:18:00"),
-                     timeseriesprop->nthTime(3));
+    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:15:00"), timeseriesprop->nthTime(0));
+    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:16:00"), timeseriesprop->nthTime(1));
+    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:17:00"), timeseriesprop->nthTime(2));
+    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:18:00"), timeseriesprop->nthTime(3));
   }
 
   // Check that periods that don't have a full "CHANGE PERIOD" flag are not
@@ -325,32 +281,23 @@ public:
   void testWontAddPeriodWithoutPERIODpartOfCHANGE_SPACE_PERIOD() {
     auto log = std::make_unique<TimeSeriesProperty<std::string>>("ICPLog");
     // Notice we are using "CHANGE PERIOD"
-    TS_ASSERT_THROWS_NOTHING(
-        log->addValue("2007-11-30T16:15:00", "CHANGE PERIOD 1"));
-    TS_ASSERT_THROWS_NOTHING(
-        log->addValue("2007-11-30T16:16:00", "CHANGE PERIOD 2"));
-    TS_ASSERT_THROWS_NOTHING(
-        log->addValue("2007-11-30T16:17:00", "CHANGE PERIOD 3"));
-    TS_ASSERT_THROWS_NOTHING(log->addValue(
-        "2007-11-30T16:18:00",
-        "CHANGE 2")); // This is a duff entry. Shouldn't get added.
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:15:00", "CHANGE PERIOD 1"));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:16:00", "CHANGE PERIOD 2"));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:00", "CHANGE PERIOD 3"));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:18:00",
+                                           "CHANGE 2")); // This is a duff entry. Shouldn't get added.
 
     const LogParser logparser(log.get());
 
-    const auto &prop =
-        std::unique_ptr<Property>(logparser.createAllPeriodsLog());
-    const auto *timeseriesprop =
-        dynamic_cast<const TimeSeriesProperty<int> *>(prop.get());
+    const auto &prop = std::unique_ptr<Property>(logparser.createAllPeriodsLog());
+    const auto *timeseriesprop = dynamic_cast<const TimeSeriesProperty<int> *>(prop.get());
     TS_ASSERT(timeseriesprop);
     // Check the size
     TS_ASSERT_EQUALS(3, timeseriesprop->size());
     // Check the exact time stamps
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:15:00"),
-                     timeseriesprop->nthTime(0));
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:16:00"),
-                     timeseriesprop->nthTime(1));
-    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:17:00"),
-                     timeseriesprop->nthTime(2));
+    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:15:00"), timeseriesprop->nthTime(0));
+    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:16:00"), timeseriesprop->nthTime(1));
+    TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:17:00"), timeseriesprop->nthTime(2));
   }
 
   void testCreatesCurrentPeriodLog() {
@@ -364,14 +311,11 @@ public:
     if (icp_file.exists())
       icp_file.remove();
     mkGood();
-    const auto &icp_log = std::unique_ptr<Property>(
-        LogParser::createLogProperty(icp_file.path(), "icpevent"));
+    const auto &icp_log = std::unique_ptr<Property>(LogParser::createLogProperty(icp_file.path(), "icpevent"));
     const LogParser lp(icp_log.get());
-    const auto &p1 = std::unique_ptr<Property>(
-        lp.createLogProperty(log_num_good.path(), "good"));
+    const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_num_good.path(), "good"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<double> *tp1 =
-        dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
+    TimeSeriesProperty<double> *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
     std::map<DateAndTime, double> vmap = tp1->valueAsMap();
     std::map<DateAndTime, double>::iterator v = vmap.begin();
 
@@ -404,8 +348,7 @@ public:
     std::iota(values.begin(), values.end(), 1);
     DateAndTime firstTime("2007-11-30T16:17:00");
     std::vector<DateAndTime> times(logSize);
-    std::generate(times.begin(), times.end(),
-                  [&firstTime] { return firstTime += 10.0; });
+    std::generate(times.begin(), times.end(), [&firstTime] { return firstTime += 10.0; });
     TS_ASSERT_THROWS_NOTHING(log->addValues(times, values));
     TS_ASSERT_EQUALS(log->realSize(), logSize);
     TS_ASSERT_DELTA(timeMean(log.get()), 6.0, 1e-3);
@@ -431,8 +374,7 @@ public:
   }
 
   void test_isICPEventLogNewStyle_works() {
-    auto oldlog =
-        std::make_unique<TimeSeriesProperty<std::string>>("MyOldICPevent");
+    auto oldlog = std::make_unique<TimeSeriesProperty<std::string>>("MyOldICPevent");
     TS_ASSERT_THROWS_NOTHING(oldlog->addValue("2012-07-19T20:00:00", "START"));
     TS_ASSERT_THROWS_NOTHING(oldlog->addValue("2012-07-19T20:00:01", "BEGIN"));
     TS_ASSERT_THROWS_NOTHING(oldlog->addValue("2012-07-19T20:00:02", "PAUSE"));
@@ -440,11 +382,9 @@ public:
     const auto &oldLogm = oldlog->valueAsMultiMap();
     TS_ASSERT(!LogParser::isICPEventLogNewStyle(oldLogm));
 
-    auto newlog =
-        std::make_unique<TimeSeriesProperty<std::string>>("MyNewICPevent");
+    auto newlog = std::make_unique<TimeSeriesProperty<std::string>>("MyNewICPevent");
     TS_ASSERT_THROWS_NOTHING(newlog->addValue("2012-07-19T20:00:00", "START"));
-    TS_ASSERT_THROWS_NOTHING(
-        newlog->addValue("2012-07-19T20:00:01", "START_COLLECTION PERIOD 1"));
+    TS_ASSERT_THROWS_NOTHING(newlog->addValue("2012-07-19T20:00:01", "START_COLLECTION PERIOD 1"));
     TS_ASSERT_THROWS_NOTHING(newlog->addValue("2012-07-19T20:00:02", "PAUSE"));
 
     const auto &logm = newlog->valueAsMultiMap();
@@ -452,8 +392,7 @@ public:
 
     newlog.reset(new TimeSeriesProperty<std::string>("MyNewICPevent1"));
     TS_ASSERT_THROWS_NOTHING(newlog->addValue("2012-07-19T20:00:00", "START"));
-    TS_ASSERT_THROWS_NOTHING(
-        newlog->addValue("2012-07-19T20:00:01", "STOP_COLLECTION PERIOD 1"));
+    TS_ASSERT_THROWS_NOTHING(newlog->addValue("2012-07-19T20:00:01", "STOP_COLLECTION PERIOD 1"));
     TS_ASSERT_THROWS_NOTHING(newlog->addValue("2012-07-19T20:00:02", "PAUSE"));
 
     const auto &newLogm = newlog->valueAsMultiMap();
@@ -464,57 +403,42 @@ public:
     auto log = std::make_unique<TimeSeriesProperty<std::string>>("MyICPevent");
     log->addValue("2013-10-16T19:04:47", "CHANGE_PERIOD 1");
     log->addValue("2013-10-16T19:04:48", "RESUME");
-    log->addValue("2013-10-16T19:04:48",
-                  "START_COLLECTION PERIOD 1 GF 60015 RF 75039 GUAH 69.875610");
-    log->addValue(
-        "2013-10-16T19:06:53",
-        "STOP_COLLECTION PERIOD 1 GF 65024 RF 81303 GUAH 75.712013 DUR 125");
+    log->addValue("2013-10-16T19:04:48", "START_COLLECTION PERIOD 1 GF 60015 RF 75039 GUAH 69.875610");
+    log->addValue("2013-10-16T19:06:53", "STOP_COLLECTION PERIOD 1 GF 65024 RF 81303 GUAH 75.712013 DUR 125");
     log->addValue("2013-10-16T19:06:53", "PAUSE");
     log->addValue("2013-10-16T19:06:53", "CHANGE_PERIOD 2");
     log->addValue("2013-10-16T19:06:53", "RESUME");
-    log->addValue("2013-10-16T19:06:53",
-                  "START_COLLECTION PERIOD 2 GF 65024 RF 81303 GUAH 75.712013");
-    log->addValue(
-        "2013-10-16T19:08:58",
-        "STOP_COLLECTION PERIOD 2 GF 70033 RF 87567 GUAH 81.547050 DUR 125");
+    log->addValue("2013-10-16T19:06:53", "START_COLLECTION PERIOD 2 GF 65024 RF 81303 GUAH 75.712013");
+    log->addValue("2013-10-16T19:08:58", "STOP_COLLECTION PERIOD 2 GF 70033 RF 87567 GUAH 81.547050 DUR 125");
     log->addValue("2013-10-16T19:08:58", "PAUSE");
     log->addValue("2013-10-16T19:08:58", "CHANGE_PERIOD 1");
     log->addValue("2013-10-16T19:08:59", "RESUME");
-    log->addValue("2013-10-16T19:08:59",
-                  "START_COLLECTION PERIOD 1 GF 70033 RF 87567 GUAH 81.547050");
-    log->addValue(
-        "2013-10-16T19:11:03",
-        "STOP_COLLECTION PERIOD 1 GF 75005 RF 93784 GUAH 87.339035 DUR 124");
+    log->addValue("2013-10-16T19:08:59", "START_COLLECTION PERIOD 1 GF 70033 RF 87567 GUAH 81.547050");
+    log->addValue("2013-10-16T19:11:03", "STOP_COLLECTION PERIOD 1 GF 75005 RF 93784 GUAH 87.339035 DUR 124");
     log->addValue("2013-10-16T19:11:03", "PAUSE");
     log->addValue("2013-10-16T19:11:03", "CHANGE_PERIOD 2");
     log->addValue("2013-10-16T19:11:04", "RESUME");
-    log->addValue("2013-10-16T19:11:04",
-                  "START_COLLECTION PERIOD 2 GF 75005 RF 93784 GUAH 87.339035");
-    log->addValue(
-        "2013-10-16T19:13:09",
-        "STOP_COLLECTION PERIOD 2 GF 80016 RF 100049 GUAH 93.174751 DUR 125");
+    log->addValue("2013-10-16T19:11:04", "START_COLLECTION PERIOD 2 GF 75005 RF 93784 GUAH 87.339035");
+    log->addValue("2013-10-16T19:13:09", "STOP_COLLECTION PERIOD 2 GF 80016 RF 100049 GUAH 93.174751 DUR 125");
     log->addValue("2013-10-16T19:13:09", "PAUSE");
     log->addValue("2013-10-16T19:13:09", "CHANGE_PERIOD 1");
     log->addValue("2013-10-16T19:13:09", "RESUME");
 
-    const std::vector<std::pair<std::string, int>> checkPeriod{
-        {"2013-10-16T19:04:47", 1},
-        {"2013-10-16T19:06:53", 2},
-        {"2013-10-16T19:08:58", 1},
-        {"2013-10-16T19:11:03", 2},
-        {"2013-10-16T19:13:09", 1}};
+    const std::vector<std::pair<std::string, int>> checkPeriod{{"2013-10-16T19:04:47", 1},
+                                                               {"2013-10-16T19:06:53", 2},
+                                                               {"2013-10-16T19:08:58", 1},
+                                                               {"2013-10-16T19:11:03", 2},
+                                                               {"2013-10-16T19:13:09", 1}};
 
     const std::vector<std::pair<std::string, bool>> checkRunning{
-        {"2013-10-16T19:04:48", true}, {"2013-10-16T19:06:53", false},
-        {"2013-10-16T19:06:53", true}, {"2013-10-16T19:08:58", false},
-        {"2013-10-16T19:08:59", true}, {"2013-10-16T19:11:03", false},
-        {"2013-10-16T19:11:04", true}, {"2013-10-16T19:13:09", false}};
+        {"2013-10-16T19:04:48", true},  {"2013-10-16T19:06:53", false}, {"2013-10-16T19:06:53", true},
+        {"2013-10-16T19:08:58", false}, {"2013-10-16T19:08:59", true},  {"2013-10-16T19:11:03", false},
+        {"2013-10-16T19:11:04", true},  {"2013-10-16T19:13:09", false}};
 
     const LogParser logparser(log.get());
 
     auto prop = std::unique_ptr<Property>(logparser.createAllPeriodsLog());
-    const auto *allPeriodsProp =
-        dynamic_cast<const TimeSeriesProperty<int> *>(prop.get());
+    const auto *allPeriodsProp = dynamic_cast<const TimeSeriesProperty<int> *>(prop.get());
     TS_ASSERT(allPeriodsProp);
 
     TS_ASSERT_EQUALS(5, allPeriodsProp->size());
@@ -527,8 +451,7 @@ public:
     }
 
     prop.reset(logparser.createRunningLog());
-    const auto *runningProp =
-        dynamic_cast<const TimeSeriesProperty<bool> *>(prop.get());
+    const auto *runningProp = dynamic_cast<const TimeSeriesProperty<bool> *>(prop.get());
     TS_ASSERT(runningProp);
 
     TS_ASSERT_EQUALS(8, runningProp->size());
@@ -543,10 +466,8 @@ public:
 
   void test_str_repeat() {
     mkStrRepeat();
-    const auto &prop = std::unique_ptr<Property>(
-        LogParser::createLogProperty(log_str_repeat.path(), "log"));
-    const auto *log =
-        dynamic_cast<const TimeSeriesProperty<std::string> *>(prop.get());
+    const auto &prop = std::unique_ptr<Property>(LogParser::createLogProperty(log_str_repeat.path(), "log"));
+    const auto *log = dynamic_cast<const TimeSeriesProperty<std::string> *>(prop.get());
     TS_ASSERT(log);
     const auto &logm = log->valueAsMultiMap();
     auto it = logm.begin();
@@ -572,10 +493,8 @@ public:
 
   void test_num_repeat() {
     mkNumRepeat();
-    const auto &prop = std::unique_ptr<Property>(
-        LogParser::createLogProperty(log_str_repeat.path(), "log"));
-    const auto *log =
-        dynamic_cast<const TimeSeriesProperty<double> *>(prop.get());
+    const auto &prop = std::unique_ptr<Property>(LogParser::createLogProperty(log_str_repeat.path(), "log"));
+    const auto *log = dynamic_cast<const TimeSeriesProperty<double> *>(prop.get());
     TS_ASSERT(log);
     const auto &logm = log->valueAsMultiMap();
     auto it = logm.begin();
@@ -601,10 +520,8 @@ public:
 
   void test_str_continuation() {
     mkStrContinuations();
-    const auto &prop = std::unique_ptr<Property>(
-        LogParser::createLogProperty(log_str_continuations.path(), "log"));
-    const auto *log =
-        dynamic_cast<const TimeSeriesProperty<std::string> *>(prop.get());
+    const auto &prop = std::unique_ptr<Property>(LogParser::createLogProperty(log_str_continuations.path(), "log"));
+    const auto *log = dynamic_cast<const TimeSeriesProperty<std::string> *>(prop.get());
     TS_ASSERT(log);
     const auto &logm = log->valueAsMultiMap();
     auto it = logm.begin();
@@ -626,37 +543,33 @@ public:
 
     // (This is a cut-down version of EMU66122)
     const DateAndTime timeZero{"2016-10-01T10:01:44"};
-    const std::vector<DateAndTime> times{
-        timeZero,        timeZero + 3.0,  timeZero + 3.0,   timeZero + 3.0,
-        timeZero + 51.0, timeZero + 51.0, timeZero + 57.0,  timeZero + 60.0,
-        timeZero + 60.0, timeZero + 60.0, timeZero + 111.0, timeZero + 111.0};
-    const std::vector<std::string> values{
-        "CHANGE_PERIOD 1",
-        "CHANGE_PERIOD 1",
-        "START_COLLECTION PERIOD 1 GF 0 RF 0 GUAH 0.000000",
-        "BEGIN",
-        "STOP_COLLECTION PERIOD 1 GF 1931 RF 1933 GUAH 0.000000 DUR 48",
-        "ABORT",
-        "CHANGE_PERIOD 1",
-        "CHANGE_PERIOD 1",
-        "START_COLLECTION PERIOD 1 GF 0 RF 0 GUAH 0.000000",
-        "BEGIN",
-        "STOP_COLLECTION PERIOD 1 GF 2062 RF 2064 GUAH 0.000000 DUR 51",
-        "END"};
+    const std::vector<DateAndTime> times{timeZero,        timeZero + 3.0,  timeZero + 3.0,   timeZero + 3.0,
+                                         timeZero + 51.0, timeZero + 51.0, timeZero + 57.0,  timeZero + 60.0,
+                                         timeZero + 60.0, timeZero + 60.0, timeZero + 111.0, timeZero + 111.0};
+    const std::vector<std::string> values{"CHANGE_PERIOD 1",
+                                          "CHANGE_PERIOD 1",
+                                          "START_COLLECTION PERIOD 1 GF 0 RF 0 GUAH 0.000000",
+                                          "BEGIN",
+                                          "STOP_COLLECTION PERIOD 1 GF 1931 RF 1933 GUAH 0.000000 DUR 48",
+                                          "ABORT",
+                                          "CHANGE_PERIOD 1",
+                                          "CHANGE_PERIOD 1",
+                                          "START_COLLECTION PERIOD 1 GF 0 RF 0 GUAH 0.000000",
+                                          "BEGIN",
+                                          "STOP_COLLECTION PERIOD 1 GF 2062 RF 2064 GUAH 0.000000 DUR 51",
+                                          "END"};
     log->addValues(times, values);
 
-    const std::multimap<DateAndTime, bool> expectedRunning{
-        {timeZero + 3.0, false},    // start - run later aborted
-        {timeZero + 51.0, false},   // stop
-        {timeZero + 51.0, false},   // abort
-        {timeZero + 60.0, true},    // start
-        {timeZero + 111.0, false}}; // stop
+    const std::multimap<DateAndTime, bool> expectedRunning{{timeZero + 3.0, false},    // start - run later aborted
+                                                           {timeZero + 51.0, false},   // stop
+                                                           {timeZero + 51.0, false},   // abort
+                                                           {timeZero + 60.0, true},    // start
+                                                           {timeZero + 111.0, false}}; // stop
 
     const LogParser logparser(log.get());
 
     const auto &prop = std::unique_ptr<Property>(logparser.createRunningLog());
-    const auto *runningProp =
-        dynamic_cast<const TimeSeriesProperty<bool> *>(prop.get());
+    const auto *runningProp = dynamic_cast<const TimeSeriesProperty<bool> *>(prop.get());
     TS_ASSERT(runningProp);
     TS_ASSERT_EQUALS(expectedRunning.size(), runningProp->size());
     const auto &runningMap = runningProp->valueAsMultiMap();
@@ -670,25 +583,21 @@ public:
 
     // (This is a cut-down version of EMU66122, changed to "old style" commands)
     const DateAndTime timeZero{"2016-10-01T10:01:44"};
-    const std::vector<DateAndTime> times{
-        timeZero,        timeZero + 3.0,  timeZero + 3.0,  timeZero + 51.0,
-        timeZero + 57.0, timeZero + 60.0, timeZero + 60.0, timeZero + 111.0};
-    const std::vector<std::string> values{
-        "CHANGE_PERIOD 1", "CHANGE_PERIOD 1", "BEGIN", "ABORT",
-        "CHANGE_PERIOD 1", "CHANGE_PERIOD 1", "BEGIN", "END"};
+    const std::vector<DateAndTime> times{timeZero,        timeZero + 3.0,  timeZero + 3.0,  timeZero + 51.0,
+                                         timeZero + 57.0, timeZero + 60.0, timeZero + 60.0, timeZero + 111.0};
+    const std::vector<std::string> values{"CHANGE_PERIOD 1", "CHANGE_PERIOD 1", "BEGIN", "ABORT",
+                                          "CHANGE_PERIOD 1", "CHANGE_PERIOD 1", "BEGIN", "END"};
     log->addValues(times, values);
 
-    const std::multimap<DateAndTime, bool> expectedRunning{
-        {timeZero + 3.0, false},    // begin - run later aborted
-        {timeZero + 51.0, false},   // abort
-        {timeZero + 60.0, true},    // begin
-        {timeZero + 111.0, false}}; // end
+    const std::multimap<DateAndTime, bool> expectedRunning{{timeZero + 3.0, false},    // begin - run later aborted
+                                                           {timeZero + 51.0, false},   // abort
+                                                           {timeZero + 60.0, true},    // begin
+                                                           {timeZero + 111.0, false}}; // end
 
     const LogParser logparser(log.get());
 
     const auto &prop = std::unique_ptr<Property>(logparser.createRunningLog());
-    const auto *runningProp =
-        dynamic_cast<const TimeSeriesProperty<bool> *>(prop.get());
+    const auto *runningProp = dynamic_cast<const TimeSeriesProperty<bool> *>(prop.get());
     TS_ASSERT(runningProp);
     TS_ASSERT_EQUALS(expectedRunning.size(), runningProp->size());
     const auto &runningMap = runningProp->valueAsMultiMap();
@@ -698,13 +607,10 @@ public:
 private:
   /// Helper method to run common test code for checking period logs.
   void doTestCurrentPeriodLog(const int &expected_period) {
-    const auto &log =
-        std::make_unique<TimeSeriesProperty<std::string>>("ICPLog");
+    const auto &log = std::make_unique<TimeSeriesProperty<std::string>>("ICPLog");
     const LogParser logparser(log.get());
-    const auto prop = std::unique_ptr<Property>(
-        logparser.createCurrentPeriodLog(expected_period));
-    const auto *prop_with_value =
-        dynamic_cast<PropertyWithValue<int> *>(prop.get());
+    const auto prop = std::unique_ptr<Property>(logparser.createCurrentPeriodLog(expected_period));
+    const auto *prop_with_value = dynamic_cast<PropertyWithValue<int> *>(prop.get());
 
     TS_ASSERT(prop_with_value != nullptr);
     int value = boost::lexical_cast<int>(prop_with_value->value());
@@ -843,8 +749,7 @@ private:
     f.close();
   }
 
-  TmpFile
-      log_num_good; // run time interval is within first - last times of the log
+  TmpFile log_num_good;          // run time interval is within first - last times of the log
   TmpFile log_num_late;          // first time is later than run start
   TmpFile log_num_early;         // last time is earlier than run ends
   TmpFile log_num_single;        // single value

@@ -17,12 +17,11 @@ namespace ISISReflectometry {
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
 
-BatchJobAlgorithm::BatchJobAlgorithm(
-    Mantid::API::IAlgorithm_sptr algorithm,
-    MantidQt::API::ConfiguredAlgorithm::AlgorithmRuntimeProps properties,
-    UpdateFunction updateFunction, Item *item)
-    : ConfiguredAlgorithm(std::move(algorithm), std::move(properties)),
-      m_item(item), m_updateFunction(updateFunction) {}
+BatchJobAlgorithm::BatchJobAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
+                                     MantidQt::API::ConfiguredAlgorithm::AlgorithmRuntimeProps properties,
+                                     UpdateFunction updateFunction, Item *item)
+    : ConfiguredAlgorithm(std::move(algorithm), std::move(properties)), m_item(item), m_updateFunction(updateFunction) {
+}
 
 Item *BatchJobAlgorithm::item() { return m_item; }
 

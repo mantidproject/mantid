@@ -20,15 +20,9 @@ class testalg : public Algorithm {
 public:
   testalg() : Algorithm() {}
   ~testalg() override {}
-  const std::string name() const override {
-    return "testalg";
-  } ///< Algorithm's name for identification
-  int version() const override {
-    return 1;
-  } ///< Algorithm's version for identification
-  const std::string category() const override {
-    return "Cat";
-  } ///< Algorithm's category for identification
+  const std::string name() const override { return "testalg"; } ///< Algorithm's name for identification
+  int version() const override { return 1; }                    ///< Algorithm's version for identification
+  const std::string category() const override { return "Cat"; } ///< Algorithm's category for identification
   const std::string summary() const override { return "Test summary"; }
 
   void init() override {
@@ -87,8 +81,7 @@ public:
     TS_ASSERT_EQUALS(compareAlg->getPropertyValue("arg1_param"), "x");
     TS_ASSERT_EQUALS(compareAlg->getPropertyValue("arg2_param"), "5");
 
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe(testInput->name(),
-                                                          testInput->version());
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe(testInput->name(), testInput->version());
     delete testInput;
   }
 
@@ -136,8 +129,7 @@ public:
     for (it = children.begin(); it != children.end(); ++it, ++i) {
       IAlgorithm_sptr childAlg = (*it)->createAlgorithm();
       std::string index = boost::lexical_cast<std::string>(i);
-      TS_ASSERT_EQUALS(childAlg->getPropertyValue("arg1_param"),
-                       "child" + index);
+      TS_ASSERT_EQUALS(childAlg->getPropertyValue("arg1_param"), "child" + index);
 
       // check sub children
       auto subchildren = (*it)->getChildHistories();
@@ -146,12 +138,10 @@ public:
       for (jt = subchildren.begin(); jt != subchildren.end(); ++j, ++jt) {
         IAlgorithm_sptr subChildAlg = (*jt)->createAlgorithm();
         std::string subindex = boost::lexical_cast<std::string>(j);
-        TS_ASSERT_EQUALS(subChildAlg->getPropertyValue("arg1_param"),
-                         "subChild" + index + subindex);
+        TS_ASSERT_EQUALS(subChildAlg->getPropertyValue("arg1_param"), "subChild" + index + subindex);
       }
     }
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe(testInput->name(),
-                                                          testInput->version());
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe(testInput->name(), testInput->version());
     delete testInput;
   }
 
@@ -183,8 +173,7 @@ public:
     TS_ASSERT_EQUALS(alg->version(), testInput->version());
     TS_ASSERT_EQUALS(alg->category(), testInput->category());
 
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe(testInput->name(),
-                                                          testInput->version());
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe(testInput->name(), testInput->version());
     delete testInput;
 
     TS_ASSERT_EQUALS(alg->getPropertyValue("arg1_param"), "child1");
@@ -222,8 +211,7 @@ private:
     timeinfo->tm_min = 54;
     timeinfo->tm_sec = 49;
     // Convert to time_t but assuming the tm is specified in UTC time.
-    std::time_t execTime_t =
-        Mantid::Types::Core::DateAndTime::utc_mktime(timeinfo);
+    std::time_t execTime_t = Mantid::Types::Core::DateAndTime::utc_mktime(timeinfo);
     // Create a UTC datetime from it
     Mantid::Types::Core::DateAndTime execTime;
     execTime.set_from_time_t(execTime_t);

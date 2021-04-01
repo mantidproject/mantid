@@ -23,12 +23,9 @@ public:
   /// Get log names from workspaces
   std::vector<std::string> getLogNames() const;
   /// Get log value from workspace position in list
-  double getLogValue(const QString &logName,
-                     const Mantid::Kernel::Math::StatisticType &function,
-                     int index) const;
+  double getLogValue(const QString &logName, const Mantid::Kernel::Math::StatisticType &function, int index) const;
   /// Get log value from workspace name
-  double getLogValue(const QString &logName,
-                     const Mantid::Kernel::Math::StatisticType &function,
+  double getLogValue(const QString &logName, const Mantid::Kernel::Math::StatisticType &function,
                      const QString &wsName) const;
 
 private:

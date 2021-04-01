@@ -68,13 +68,13 @@ energy respectively. Units conversion into elastic momentum transfer
 (MomentumTransfer) will throw in elastic mode (emode=0) on inelastic
 workspace (when energy transfer is specified along x-axis)
 
-**Note on d-spacing**: The coefficients DIFA, DIFC and TZERO may be obtained 
+**Note on d-spacing**: The coefficients DIFA, DIFC and TZERO may be obtained
 via calibration of a TOF diffraction instrument. In the absence of a calibration,
 DIFA=TZERO=0 and the default value of DIFC is:
 
 :math:`DIFC = 10^{-4} \frac{m_N}{h} (L_1 + L_2) 2 \sin(\theta)`
 
-where the scaling factor adjusts for the fact that DIFC is required in units 
+where the scaling factor adjusts for the fact that DIFC is required in units
 of :math:`\mu s` per :math:`\mathrm{\AA}`.
 
 **d-spacingPerpendicular** is a unit invented in `J. Appl. Cryst. (2015) 48, pp. 1627--1636 <https://doi.org/10.1107/S1600576715016520>`_ for 2D Rietveld refinement

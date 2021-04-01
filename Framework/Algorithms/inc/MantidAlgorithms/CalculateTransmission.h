@@ -47,8 +47,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 22/01/2009
 */
-class MANTID_ALGORITHMS_DLL CalculateTransmission
-    : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL CalculateTransmission : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CalculateTransmission"; }
@@ -65,9 +64,7 @@ public:
     return {"CalculateTransmissionBeamSpreader", "ApplyTransmissionCorrection"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "SANS;CorrectionFunctions\\TransmissionCorrections";
-  }
+  const std::string category() const override { return "SANS;CorrectionFunctions\\TransmissionCorrections"; }
 
 private:
   /// stores an estimate of the progress so far as a proportion (starts at zero
@@ -80,27 +77,22 @@ private:
   void exec() override;
 
   /// Pull out a single spectrum from a 2D workspace
-  API::MatrixWorkspace_sptr extractSpectra(const API::MatrixWorkspace_sptr &ws,
-                                           const std::vector<size_t> &indices);
+  API::MatrixWorkspace_sptr extractSpectra(const API::MatrixWorkspace_sptr &ws, const std::vector<size_t> &indices);
   /// Returns a workspace with the evaulation of the fit to the calculated
   /// transmission fraction
-  API::MatrixWorkspace_sptr fit(const API::MatrixWorkspace_sptr &raw,
-                                const std::vector<double> &rebinParams,
+  API::MatrixWorkspace_sptr fit(const API::MatrixWorkspace_sptr &raw, const std::vector<double> &rebinParams,
                                 const std::string &fitMethod);
   /// Call the Linear fitting algorithm as a child algorithm
-  API::MatrixWorkspace_sptr fitData(const API::MatrixWorkspace_sptr &WS,
-                                    double &grad, double &offset);
+  API::MatrixWorkspace_sptr fitData(const API::MatrixWorkspace_sptr &WS, double &grad, double &offset);
   /// Call the Polynomial fitting algorithm as a child algorithm
-  API::MatrixWorkspace_sptr fitPolynomial(const API::MatrixWorkspace_sptr &WS,
-                                          int order,
+  API::MatrixWorkspace_sptr fitPolynomial(const API::MatrixWorkspace_sptr &WS, int order,
                                           std::vector<double> &coeficients);
   /// Calls the rebin algorithm
-  API::MatrixWorkspace_sptr rebin(const std::vector<double> &binParams,
-                                  const API::MatrixWorkspace_sptr &ws);
+  API::MatrixWorkspace_sptr rebin(const std::vector<double> &binParams, const API::MatrixWorkspace_sptr &ws);
   /// Outpus message to log if the detector at the given index is not a monitor
   /// in both input workspaces.
-  void logIfNotMonitor(const API::MatrixWorkspace_sptr &sampleWS,
-                       const API::MatrixWorkspace_sptr &directWS, size_t index);
+  void logIfNotMonitor(const API::MatrixWorkspace_sptr &sampleWS, const API::MatrixWorkspace_sptr &directWS,
+                       size_t index);
 };
 
 } // namespace Algorithms

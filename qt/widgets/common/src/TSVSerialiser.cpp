@@ -20,10 +20,7 @@ using namespace MantidQt::API;
 
 TSVSerialiser::TSVSerialiser() : m_curIndex(0), m_midLine(false) {}
 
-TSVSerialiser::TSVSerialiser(const std::string &lines)
-    : m_curIndex(0), m_midLine(false) {
-  parseLines(lines);
-}
+TSVSerialiser::TSVSerialiser(const std::string &lines) : m_curIndex(0), m_midLine(false) { parseLines(lines); }
 
 void TSVSerialiser::parseLines(const std::string &lines) {
   std::vector<std::string> lineVec;
@@ -113,23 +110,16 @@ void TSVSerialiser::parseLines(const std::string &lines) {
       lineIt = secIt;
     } else {
       // If we've made it here then we don't know what kind of line this is.
-      g_log.warning()
-          << "Unable to identify line in TSVSerialiser::parseLines(): '" << line
-          << "'\n";
+      g_log.warning() << "Unable to identify line in TSVSerialiser::parseLines(): '" << line << "'\n";
     }
   }
 }
 
-bool TSVSerialiser::hasLine(const std::string &name) const {
-  return (m_lines.find(name) != m_lines.end());
-}
+bool TSVSerialiser::hasLine(const std::string &name) const { return (m_lines.find(name) != m_lines.end()); }
 
-bool TSVSerialiser::hasSection(const std::string &name) const {
-  return (m_sections.find(name) != m_sections.end());
-}
+bool TSVSerialiser::hasSection(const std::string &name) const { return (m_sections.find(name) != m_sections.end()); }
 
-std::vector<std::string> TSVSerialiser::values(const std::string &name,
-                                               size_t i) const {
+std::vector<std::string> TSVSerialiser::values(const std::string &name, size_t i) const {
   // Select correct line with lineAsString, parse it, then return values
   std::vector<std::string> ret;
 
@@ -139,16 +129,14 @@ std::vector<std::string> TSVSerialiser::values(const std::string &name,
   return ret;
 }
 
-std::vector<std::string>
-TSVSerialiser::sections(const std::string &name) const {
+std::vector<std::string> TSVSerialiser::sections(const std::string &name) const {
   if (!hasSection(name))
     return std::vector<std::string>();
 
   return m_sections.at(name);
 }
 
-std::string TSVSerialiser::lineAsString(const std::string &name,
-                                        const size_t i) const {
+std::string TSVSerialiser::lineAsString(const std::string &name, const size_t i) const {
   if (!hasLine(name))
     return "";
 
@@ -157,8 +145,7 @@ std::string TSVSerialiser::lineAsString(const std::string &name,
   return lines[i];
 }
 
-QString TSVSerialiser::lineAsQString(const std::string &name,
-                                     const size_t i) const {
+QString TSVSerialiser::lineAsQString(const std::string &name, const size_t i) const {
   return QString::fromStdString(lineAsString(name, i));
 }
 
@@ -325,9 +312,7 @@ QString TSVSerialiser::asQString(const size_t i) const {
 void TSVSerialiser::storeDouble(const double val) { m_output << "\t" << val; }
 
 void TSVSerialiser::storeInt(const int val) { m_output << "\t" << val; }
-void TSVSerialiser::storeString(const std::string &val) {
-  m_output << "\t" << val;
-}
+void TSVSerialiser::storeString(const std::string &val) { m_output << "\t" << val; }
 
 void TSVSerialiser::storeBool(const bool val) { m_output << "\t" << val; }
 
@@ -445,15 +430,13 @@ TSVSerialiser &TSVSerialiser::operator<<(const bool &val) {
 TSVSerialiser &TSVSerialiser::operator<<(const QRect &val) {
   auto point0 = val.topLeft();
   auto point1 = val.bottomRight();
-  m_output << "\t" << point0.x() << "\t" << point0.y() << "\t" << point1.x()
-           << "\t" << point1.y();
+  m_output << "\t" << point0.x() << "\t" << point0.y() << "\t" << point1.x() << "\t" << point1.y();
   return *this;
 }
 
 TSVSerialiser &TSVSerialiser::operator<<(const QColor &val) {
 
-  m_output << "\t" << val.red() << "\t" << val.green() << "\t" << val.blue()
-           << "\t" << val.alpha();
+  m_output << "\t" << val.red() << "\t" << val.green() << "\t" << val.blue() << "\t" << val.alpha();
   return *this;
 }
 
@@ -481,8 +464,7 @@ void TSVSerialiser::writeRaw(const std::string &raw) {
   m_midLine = (raw.length() > 0 && raw[raw.length() - 1] != '\n');
 }
 
-void TSVSerialiser::writeSection(const std::string &name,
-                                 const std::string &body) {
+void TSVSerialiser::writeSection(const std::string &name, const std::string &body) {
   // If we're not on a new line, make one
   if (m_midLine) {
     m_output << "\n";
@@ -501,8 +483,7 @@ void TSVSerialiser::writeSection(const std::string &name,
            << "\n";
 }
 
-void TSVSerialiser::writeInlineSection(const std::string &name,
-                                       const std::string &body) {
+void TSVSerialiser::writeInlineSection(const std::string &name, const std::string &body) {
   // If we're not on a new line, make one
   if (m_midLine) {
     m_output << "\n";

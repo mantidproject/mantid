@@ -23,14 +23,11 @@ public:
   // Destructor
   virtual ~MaxentEntropy() = default;
   // First derivative of the entropy
-  virtual std::vector<double> derivative(const std::vector<double> &values,
-                                         double background) = 0;
+  virtual std::vector<double> derivative(const std::vector<double> &values, double background) = 0;
   // Second derivative of the entropy
-  virtual std::vector<double>
-  secondDerivative(const std::vector<double> &values, double background) = 0;
+  virtual std::vector<double> secondDerivative(const std::vector<double> &values, double background) = 0;
   // Corrects an invalid value
-  virtual std::vector<double> correctValues(const std::vector<double> &value,
-                                            double newValue) = 0;
+  virtual std::vector<double> correctValues(const std::vector<double> &value, double newValue) = 0;
 };
 
 using MaxentEntropy_sptr = std::shared_ptr<MaxentEntropy>;

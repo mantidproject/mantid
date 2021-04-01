@@ -46,15 +46,11 @@ public:
   BackgroundHelper &operator=(const BackgroundHelper &) = delete;
   BackgroundHelper(const BackgroundHelper &) = delete;
 
-  void initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
-                  const API::MatrixWorkspace_sptr &sourceWS,
-                  Kernel::DeltaEMode::Type emode,
-                  Kernel::Logger *pLog = nullptr, int nThreads = 1,
-                  bool inPlace = true, bool nullifyNegative = false);
-  void removeBackground(int nHist, HistogramData::HistogramX &x_data,
-                        HistogramData::HistogramY &y_data,
-                        HistogramData::HistogramE &e_data,
-                        int threadNum = 0) const;
+  void initialize(const API::MatrixWorkspace_const_sptr &bkgWS, const API::MatrixWorkspace_sptr &sourceWS,
+                  Kernel::DeltaEMode::Type emode, Kernel::Logger *pLog = nullptr, int nThreads = 1, bool inPlace = true,
+                  bool nullifyNegative = false);
+  void removeBackground(int nHist, HistogramData::HistogramX &x_data, HistogramData::HistogramY &y_data,
+                        HistogramData::HistogramE &e_data, int threadNum = 0) const;
 
 private:
   // vector of pointers to the units conversion class for the working workspace;
@@ -107,9 +103,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "CorrectionFunctions\\BackgroundCorrections";
-  }
+  const std::string category() const override { return "CorrectionFunctions\\BackgroundCorrections"; }
 
 protected:
   // Overridden Algorithm methods

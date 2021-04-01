@@ -19,9 +19,7 @@ class PoldiPeakSummaryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiPeakSummaryTest *createSuite() {
-    return new PoldiPeakSummaryTest();
-  }
+  static PoldiPeakSummaryTest *createSuite() { return new PoldiPeakSummaryTest(); }
   static void destroySuite(PoldiPeakSummaryTest *suite) { delete suite; }
 
   void test_Init() {
@@ -38,20 +36,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TableWorkspace_sptr poldiPeaks =
-        PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace();
+    TableWorkspace_sptr poldiPeaks = PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace();
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", poldiPeaks));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
     Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -77,9 +72,8 @@ public:
     TestablePoldiPeakSummary alg;
     TableWorkspace_sptr table = alg.getInitializedResultWorkspace();
 
-    PoldiPeak_sptr peak = PoldiPeak::create(
-        MillerIndices(1, 2, 3), UncertainValue(1.2, 0.001),
-        UncertainValue(100.0, 0.1), UncertainValue(0.01, 0.0001));
+    PoldiPeak_sptr peak = PoldiPeak::create(MillerIndices(1, 2, 3), UncertainValue(1.2, 0.001),
+                                            UncertainValue(100.0, 0.1), UncertainValue(0.01, 0.0001));
 
     TS_ASSERT_THROWS_NOTHING(alg.storePeakSummary(table->appendRow(), peak));
 
@@ -87,8 +81,7 @@ public:
   }
 
   void testGetSummaryTable() {
-    PoldiPeakCollection_sptr peaks =
-        PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
+    PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
 
     TestablePoldiPeakSummary alg;
     TableWorkspace_sptr summary = alg.getSummaryTable(peaks);

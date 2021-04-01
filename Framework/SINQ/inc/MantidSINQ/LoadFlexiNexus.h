@@ -43,15 +43,11 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "LoadFlexiNexus"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Loads a NeXus file directed by a dictionary file";
-  }
+  const std::string summary() const override { return "Loads a NeXus file directed by a dictionary file"; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadNexus"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
@@ -75,8 +71,7 @@ private:
   /// Personal wrapper for sqrt to allow msvs to compile
   static double dblSqrt(double in);
 
-  Mantid::Geometry::MDHistoDimension_sptr makeDimension(NeXus::File *fin,
-                                                        int index, int length);
+  Mantid::Geometry::MDHistoDimension_sptr makeDimension(NeXus::File *fin, int index, int length);
 
   std::unordered_set<std::string> populateSpecialMap();
 

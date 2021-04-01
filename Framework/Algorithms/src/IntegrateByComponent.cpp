@@ -26,17 +26,13 @@ using namespace Mantid::Kernel;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string IntegrateByComponent::name() const {
-  return "IntegrateByComponent";
-}
+const std::string IntegrateByComponent::name() const { return "IntegrateByComponent"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int IntegrateByComponent::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string IntegrateByComponent::category() const {
-  return "Utility\\Workspaces";
-}
+const std::string IntegrateByComponent::category() const { return "Utility\\Workspaces"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -44,20 +40,17 @@ const std::string IntegrateByComponent::category() const {
 /** Initialize the algorithm's properties.
  */
 void IntegrateByComponent::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<HistogramValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<HistogramValidator>()),
                   "The input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
   auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
-  declareProperty(
-      "LevelsUp", 0, mustBePosInt,
-      "Levels above pixel that will be used to compute the average.\n"
-      "If no level is specified, the median is over the whole instrument.\n If "
-      "0, it will just return the integrated values in each pixel");
+  declareProperty("LevelsUp", 0, mustBePosInt,
+                  "Levels above pixel that will be used to compute the average.\n"
+                  "If no level is specified, the median is over the whole instrument.\n If "
+                  "0, it will just return the integrated values in each pixel");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -113,14 +106,12 @@ void IntegrateByComponent::exec() {
 
       double averageY, averageE;
       if (averageYInput.empty()) {
-        g_log.information(
-            "some group has no valid histograms. Will use 0 for average.");
+        g_log.information("some group has no valid histograms. Will use 0 for average.");
         averageY = 0.;
         averageE = 0.;
       } else {
         averageY = gsl_stats_mean(&averageYInput[0], 1, averageEInput.size());
-        averageE = std::sqrt(
-            gsl_stats_mean(&averageEInput[0], 1, averageYInput.size()));
+        averageE = std::sqrt(gsl_stats_mean(&averageEInput[0], 1, averageYInput.size()));
       }
 
       PARALLEL_FOR_IF(Kernel::threadSafe(*integratedWS))
@@ -158,8 +149,7 @@ void IntegrateByComponent::exec() {
  * @return  vector of vectors, containing each spectrum that belongs to each
  * group
  */
-std::vector<std::vector<size_t>> IntegrateByComponent::makeInstrumentMap(
-    const API::MatrixWorkspace_sptr &countsWS) {
+std::vector<std::vector<size_t>> IntegrateByComponent::makeInstrumentMap(const API::MatrixWorkspace_sptr &countsWS) {
   std::vector<std::vector<size_t>> mymap;
   std::vector<size_t> single;
 
@@ -177,9 +167,7 @@ std::vector<std::vector<size_t>> IntegrateByComponent::makeInstrumentMap(
  * @return vector of vectors, containing each spectrum that belongs to each
  * group
  */
-std::vector<std::vector<size_t>>
-IntegrateByComponent::makeMap(const API::MatrixWorkspace_sptr &countsWS,
-                              int parents) {
+std::vector<std::vector<size_t>> IntegrateByComponent::makeMap(const API::MatrixWorkspace_sptr &countsWS, int parents) {
   std::unordered_multimap<Mantid::Geometry::ComponentID, size_t> mymap;
 
   if (parents == 0) // this should not happen in this file, but if one reuses
@@ -198,8 +186,7 @@ IntegrateByComponent::makeMap(const API::MatrixWorkspace_sptr &countsWS,
     }
 
     const auto detIdx = spectrumInfo.spectrumDefinition(i)[0].first;
-    std::vector<std::shared_ptr<const Mantid::Geometry::IComponent>> anc =
-        detectorInfo.detector(detIdx).getAncestors();
+    std::vector<std::shared_ptr<const Mantid::Geometry::IComponent>> anc = detectorInfo.detector(detIdx).getAncestors();
 
     if (anc.size() < static_cast<size_t>(parents)) {
       g_log.warning("Too many levels up. Will ignore LevelsUp");

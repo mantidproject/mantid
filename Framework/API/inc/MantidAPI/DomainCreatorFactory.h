@@ -27,14 +27,11 @@ class IDomainCreator;
 
 Constructs a DomainCreator object from a string
  */
-class MANTID_API_DLL DomainCreatorFactoryImpl
-    : public Kernel::DynamicFactory<IDomainCreator> {
+class MANTID_API_DLL DomainCreatorFactoryImpl : public Kernel::DynamicFactory<IDomainCreator> {
 public:
   /// Returns an initialized domain creator
-  IDomainCreator *createDomainCreator(const std::string &id,
-                                      Kernel::IPropertyManager *pm,
-                                      const std::string &workspacePropertyName,
-                                      const unsigned int domainType) const;
+  IDomainCreator *createDomainCreator(const std::string &id, Kernel::IPropertyManager *pm,
+                                      const std::string &workspacePropertyName, const unsigned int domainType) const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<DomainCreatorFactoryImpl>;
@@ -46,8 +43,7 @@ private:
   DomainCreatorFactoryImpl(const DomainCreatorFactoryImpl &) = delete;
 
   /// No copying
-  DomainCreatorFactoryImpl &
-  operator=(const DomainCreatorFactoryImpl &) = delete;
+  DomainCreatorFactoryImpl &operator=(const DomainCreatorFactoryImpl &) = delete;
 
   /// Private Destructor for singleton
   ~DomainCreatorFactoryImpl() override = default;
@@ -57,15 +53,13 @@ private:
   using Kernel::DynamicFactory<IDomainCreator>::createUnwrapped;
 };
 
-using DomainCreatorFactory =
-    Mantid::Kernel::SingletonHolder<DomainCreatorFactoryImpl>;
+using DomainCreatorFactory = Mantid::Kernel::SingletonHolder<DomainCreatorFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<Mantid::API::DomainCreatorFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::DomainCreatorFactoryImpl>;
 }
 } // namespace Mantid

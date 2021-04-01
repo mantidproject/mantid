@@ -90,27 +90,23 @@ void CreateEPP::init() {
   auto inputWSValidator = std::make_shared<Kernel::CompositeValidator>();
   inputWSValidator->add(std::make_shared<API::InstrumentValidator>());
   inputWSValidator->add(std::make_shared<API::WorkspaceUnitValidator>("TOF"));
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input, inputWSValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input,
+                                                                            inputWSValidator),
                   "An input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The calculated output EPP table.");
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0);
-  declareProperty(PropertyNames::SIGMA, 0.0, mustBePositive,
-                  "The value to fill the Sigma column with.");
+  declareProperty(PropertyNames::SIGMA, 0.0, mustBePositive, "The value to fill the Sigma column with.");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CreateEPP::exec() {
-  API::MatrixWorkspace_sptr inputWS =
-      getProperty(PropertyNames::INPUT_WORKSPACE);
+  API::MatrixWorkspace_sptr inputWS = getProperty(PropertyNames::INPUT_WORKSPACE);
   const auto &spectrumInfo = inputWS->spectrumInfo();
-  API::ITableWorkspace_sptr outputWS =
-      std::make_shared<DataObjects::TableWorkspace>();
+  API::ITableWorkspace_sptr outputWS = std::make_shared<DataObjects::TableWorkspace>();
   addEPPColumns(outputWS);
   const double sigma = getProperty(PropertyNames::SIGMA);
   const size_t spectraCount = spectrumInfo.size();
@@ -119,8 +115,8 @@ void CreateEPP::exec() {
   const double EFixed = inputWS->run().getPropertyAsSingleValue("Ei");
   for (size_t i = 0; i < spectraCount; ++i) {
     const auto l2 = spectrumInfo.l2(i);
-    const auto elasticTOF = Kernel::UnitConversion::run(
-        "Energy", "TOF", EFixed, l1, l2, 0, Kernel::DeltaEMode::Direct, EFixed);
+    const auto elasticTOF =
+        Kernel::UnitConversion::run("Energy", "TOF", EFixed, l1, l2, 0, Kernel::DeltaEMode::Direct, EFixed);
     outputWS->getRef<int>(ColumnNames::WS_INDEX, i) = static_cast<int>(i);
     outputWS->getRef<double>(ColumnNames::PEAK_CENTRE, i) = elasticTOF;
     outputWS->getRef<double>(ColumnNames::PEAK_CENTRE_ERR, i) = 0;
@@ -132,8 +128,7 @@ void CreateEPP::exec() {
       height = inputWS->y(i)[elasticIndex];
     } catch (std::out_of_range &) {
       std::ostringstream sout;
-      sout << "EPP out of TOF range for workspace index " << i
-           << ". Peak height set to zero.";
+      sout << "EPP out of TOF range for workspace index " << i << ". Peak height set to zero.";
       g_log.warning() << sout.str();
     }
     outputWS->getRef<double>(ColumnNames::HEIGHT, i) = height;
@@ -150,11 +145,9 @@ void CreateEPP::exec() {
  */
 std::map<std::string, std::string> CreateEPP::validateInputs(void) {
   std::map<std::string, std::string> issues;
-  API::MatrixWorkspace_sptr inputWS =
-      getProperty(PropertyNames::INPUT_WORKSPACE);
+  API::MatrixWorkspace_sptr inputWS = getProperty(PropertyNames::INPUT_WORKSPACE);
   if (!inputWS->run().hasProperty("Ei")) {
-    issues[PropertyNames::INPUT_WORKSPACE] =
-        "Workspace is missing the 'Ei' sample log.";
+    issues[PropertyNames::INPUT_WORKSPACE] = "Workspace is missing the 'Ei' sample log.";
   }
   return issues;
 }

@@ -20,17 +20,13 @@ DECLARE_ALGORITHM(ExtractUnmaskedSpectra)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string ExtractUnmaskedSpectra::name() const {
-  return "ExtractUnmaskedSpectra";
-}
+const std::string ExtractUnmaskedSpectra::name() const { return "ExtractUnmaskedSpectra"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int ExtractUnmaskedSpectra::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ExtractUnmaskedSpectra::category() const {
-  return "Transforms\\Splitting";
-}
+const std::string ExtractUnmaskedSpectra::category() const { return "Transforms\\Splitting"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ExtractUnmaskedSpectra::summary() const {
@@ -42,15 +38,11 @@ const std::string ExtractUnmaskedSpectra::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ExtractUnmaskedSpectra::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
-                  "An input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input), "An input workspace.");
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "MaskWorkspace", "", Direction::Input, API::PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("MaskWorkspace", "", Direction::Input, API::PropertyMode::Optional),
       "An optional mask workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -99,8 +91,7 @@ void ExtractUnmaskedSpectra::exec() {
   extractSpectra->executeAsChildAlg();
 
   // Store the output
-  API::MatrixWorkspace_sptr outputWorkspace =
-      extractSpectra->getProperty("OutputWorkspace");
+  API::MatrixWorkspace_sptr outputWorkspace = extractSpectra->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outputWorkspace);
 }
 

@@ -11,12 +11,12 @@ Description
 
 Loads diffractometer constants (DIFA, DIFC, TZERO) from a calibration data source and
 stores them in the instrument parameter map of the `InstrumentWorkspace`. The constants
-are used in time of flight diffraction instruments to convert from time of flight to 
+are used in time of flight diffraction instruments to convert from time of flight to
 d spacing and vice versa.
 
 This algorithm either reads the constants from the
 `CalibrationWorkspace`, reads them from `CalibrationFile` using :ref:`LoadDiffCal
-<algm-LoadDiffCal>`, or uses :ref:`ConvertDiffCal<algm-ConvertDiffCal>` to generate 
+<algm-LoadDiffCal>`, or uses :ref:`ConvertDiffCal<algm-ConvertDiffCal>` to generate
 them from the `OffsetsWorkspace`.
 
 This algorithm allows unit conversions between time of flight and d spacing using

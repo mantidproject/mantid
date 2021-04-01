@@ -94,15 +94,13 @@ public:
    * use HKLGenerator::begin() and HKLGenerator::end().
    */
   class MANTID_GEOMETRY_DLL const_iterator
-      : public boost::iterator_facade<const_iterator, const Kernel::V3D &,
-                                      boost::forward_traversal_tag> {
+      : public boost::iterator_facade<const_iterator, const Kernel::V3D &, boost::forward_traversal_tag> {
   public:
     const_iterator();
 
     explicit const_iterator(const Kernel::V3D &current);
 
-    explicit const_iterator(const Kernel::V3D &hklMin,
-                            const Kernel::V3D &hklMax);
+    explicit const_iterator(const Kernel::V3D &hklMin, const Kernel::V3D &hklMax);
 
   private:
     // Required for boost::iterator_facade to work
@@ -112,8 +110,7 @@ public:
 
     /// Returns true if other is at the same position
     inline bool equal(const const_iterator &other) const {
-      return this->m_h == other.m_h && this->m_k == other.m_k &&
-             this->m_l == other.m_l;
+      return this->m_h == other.m_h && this->m_k == other.m_k && this->m_l == other.m_l;
     }
 
     /// Returns a const reference to the currently pointed at HKL.

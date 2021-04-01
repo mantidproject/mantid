@@ -17,20 +17,13 @@ class IsotropicAtomBraggScattererTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IsotropicAtomBraggScattererTest *createSuite() {
-    return new IsotropicAtomBraggScattererTest();
-  }
-  static void destroySuite(IsotropicAtomBraggScattererTest *suite) {
-    delete suite;
-  }
+  static IsotropicAtomBraggScattererTest *createSuite() { return new IsotropicAtomBraggScattererTest(); }
+  static void destroySuite(IsotropicAtomBraggScattererTest *suite) { delete suite; }
 
-  void testConstructor() {
-    TS_ASSERT_THROWS_NOTHING(IsotropicAtomBraggScatterer scatterer);
-  }
+  void testConstructor() { TS_ASSERT_THROWS_NOTHING(IsotropicAtomBraggScatterer scatterer); }
 
   void testProperties() {
-    IsotropicAtomBraggScatterer_sptr scatterer =
-        std::make_shared<IsotropicAtomBraggScatterer>();
+    IsotropicAtomBraggScatterer_sptr scatterer = std::make_shared<IsotropicAtomBraggScatterer>();
 
     TS_ASSERT_THROWS_NOTHING(scatterer->initialize());
 
@@ -59,10 +52,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("Occupancy", 0.0));
     TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("Occupancy", 1.0));
 
-    TS_ASSERT_THROWS(scatterer->setProperty("Occupancy", -0.3),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(scatterer->setProperty("Occupancy", 1.3),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(scatterer->setProperty("Occupancy", -0.3), const std::invalid_argument &);
+    TS_ASSERT_THROWS(scatterer->setProperty("Occupancy", 1.3), const std::invalid_argument &);
   }
 
   void testGetSetU() {
@@ -75,13 +66,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("U", 1.23e12));
     TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("U", 1.23e-2));
 
-    TS_ASSERT_THROWS(scatterer->setProperty("U", -0.2),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(scatterer->setProperty("U", -0.2), const std::invalid_argument &);
   }
 
   void testCreate() {
-    IsotropicAtomBraggScatterer_sptr isotropic =
-        getInitializedScatterer("Si", "[0.3, 0.1, 0.12]", 1.0, 0.5);
+    IsotropicAtomBraggScatterer_sptr isotropic = getInitializedScatterer("Si", "[0.3, 0.1, 0.12]", 1.0, 0.5);
 
     TS_ASSERT(isotropic);
     TS_ASSERT_EQUALS(isotropic->getElement(), "Si");
@@ -93,8 +82,7 @@ public:
   void testClone() {
     UnitCell cell(5.43, 5.43, 5.43);
 
-    IsotropicAtomBraggScatterer_sptr scatterer =
-        getInitializedScatterer("H", "[1, 0, 0]", 0.0);
+    IsotropicAtomBraggScatterer_sptr scatterer = getInitializedScatterer("H", "[1, 0, 0]", 0.0);
     scatterer->setProperty("U", 3.04);
     scatterer->setProperty("Occupancy", 0.5);
     scatterer->setProperty("UnitCell", unitCellToStr(cell));
@@ -108,8 +96,7 @@ public:
     TS_ASSERT_EQUALS(clone->getPosition(), scatterer->getPosition());
     TS_ASSERT_EQUALS(clone->getCell().getG(), scatterer->getCell().getG());
 
-    IsotropicAtomBraggScatterer_sptr scattererClone =
-        std::dynamic_pointer_cast<IsotropicAtomBraggScatterer>(clone);
+    IsotropicAtomBraggScatterer_sptr scattererClone = std::dynamic_pointer_cast<IsotropicAtomBraggScatterer>(clone);
     TS_ASSERT(scattererClone);
 
     TS_ASSERT_EQUALS(scattererClone->getU(), scatterer->getU());
@@ -117,8 +104,7 @@ public:
   }
 
   void testCalculateStructureFactor() {
-    IsotropicAtomBraggScatterer_sptr scatterer =
-        getInitializedScatterer("Si", "0, 0, 0", 0.0);
+    IsotropicAtomBraggScatterer_sptr scatterer = getInitializedScatterer("Si", "0, 0, 0", 0.0);
 
     double bSi = scatterer->getNeutronAtom().coh_scatt_length_real;
 
@@ -149,8 +135,7 @@ public:
     // Occupancy goes in directly
     scatterer->setProperty("Occupancy", 0.5);
     structureFactor = scatterer->calculateStructureFactor(hkl);
-    TS_ASSERT_EQUALS(structureFactor.real(),
-                     bSi * 0.5 * 0.96708061593352515459);
+    TS_ASSERT_EQUALS(structureFactor.real(), bSi * 0.5 * 0.96708061593352515459);
 
     /* Assume a space group with F centering.
      *
@@ -214,23 +199,19 @@ public:
      *
      * That means 4 * real * debye waller * occupation. d = 3.13...
      */
-    TS_ASSERT_DELTA(totalStructureFactorAllowed.real(),
-                    4.0 * bSi * 0.90445723107190849637 * 0.5, 5e-16);
+    TS_ASSERT_DELTA(totalStructureFactorAllowed.real(), 4.0 * bSi * 0.90445723107190849637 * 0.5, 5e-16);
   }
 
 private:
   IsotropicAtomBraggScatterer_sptr getInitializedScatterer() {
-    IsotropicAtomBraggScatterer_sptr scatterer =
-        std::make_shared<IsotropicAtomBraggScatterer>();
+    IsotropicAtomBraggScatterer_sptr scatterer = std::make_shared<IsotropicAtomBraggScatterer>();
     scatterer->initialize();
 
     return scatterer;
   }
 
-  IsotropicAtomBraggScatterer_sptr
-  getInitializedScatterer(const std::string &element,
-                          const std::string &position, double U = 0.0,
-                          double occ = 1.0) {
+  IsotropicAtomBraggScatterer_sptr getInitializedScatterer(const std::string &element, const std::string &position,
+                                                           double U = 0.0, double occ = 1.0) {
     IsotropicAtomBraggScatterer_sptr scatterer = getInitializedScatterer();
 
     scatterer->setProperty("Element", element);

@@ -19,9 +19,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "QueryRemoteFile"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Retrieve a list of the files from a remote compute resource.";
-  }
+  const std::string summary() const override { return "Retrieve a list of the files from a remote compute resource."; }
 
   /// Algorithm's version
   int version() const override { return (2); }

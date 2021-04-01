@@ -15,12 +15,9 @@
 
 namespace Mantid {
 namespace API {
-IndexProperty::IndexProperty(const std::string &name,
-                             const IWorkspaceProperty &workspaceProp,
-                             const IndexTypeProperty &indexTypeProp,
-                             const Kernel::IValidator_sptr &validator)
-    : ArrayProperty(name, "", std::move(validator)),
-      m_workspaceProp(workspaceProp), m_indexTypeProp(indexTypeProp),
+IndexProperty::IndexProperty(const std::string &name, const IWorkspaceProperty &workspaceProp,
+                             const IndexTypeProperty &indexTypeProp, const Kernel::IValidator_sptr &validator)
+    : ArrayProperty(name, "", std::move(validator)), m_workspaceProp(workspaceProp), m_indexTypeProp(indexTypeProp),
       m_indices(0), m_indicesExtracted(false) {}
 
 IndexProperty *IndexProperty::clone() const { return new IndexProperty(*this); }
@@ -52,9 +49,7 @@ IndexProperty &IndexProperty::operator=(const std::string &rhs) {
   return *this;
 }
 
-IndexProperty::operator Indexing::SpectrumIndexSet() const {
-  return getIndices();
-}
+IndexProperty::operator Indexing::SpectrumIndexSet() const { return getIndices(); }
 
 Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
   const auto &indexInfo = getIndexInfoFromWorkspace();
@@ -69,24 +64,19 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
     if (isRange) {
       switch (type) {
       case IndexType::WorkspaceIndex:
-        return indexInfo.makeIndexSet(
-            static_cast<Indexing::GlobalSpectrumIndex>(min),
-            static_cast<Indexing::GlobalSpectrumIndex>(max));
+        return indexInfo.makeIndexSet(static_cast<Indexing::GlobalSpectrumIndex>(min),
+                                      static_cast<Indexing::GlobalSpectrumIndex>(max));
       case IndexType::SpectrumNum:
-        return indexInfo.makeIndexSet(
-            static_cast<Indexing::SpectrumNumber>(static_cast<int32_t>(min)),
-            static_cast<Indexing::SpectrumNumber>(static_cast<int32_t>(max)));
+        return indexInfo.makeIndexSet(static_cast<Indexing::SpectrumNumber>(static_cast<int32_t>(min)),
+                                      static_cast<Indexing::SpectrumNumber>(static_cast<int32_t>(max)));
       }
     } else {
       MSVC_DIAG_OFF(4244);
       switch (type) {
       case IndexType::WorkspaceIndex:
-        return indexInfo.makeIndexSet(
-            std::vector<Indexing::GlobalSpectrumIndex>(m_value.begin(),
-                                                       m_value.end()));
+        return indexInfo.makeIndexSet(std::vector<Indexing::GlobalSpectrumIndex>(m_value.begin(), m_value.end()));
       case IndexType::SpectrumNum: {
-        std::vector<Indexing::SpectrumNumber> spectrumNumbers(m_value.cbegin(),
-                                                              m_value.cend());
+        std::vector<Indexing::SpectrumNumber> spectrumNumbers(m_value.cbegin(), m_value.cend());
         return indexInfo.makeIndexSet(spectrumNumbers);
       }
       }
@@ -110,27 +100,20 @@ Indexing::IndexInfo IndexProperty::getFilteredIndexInfo() const {
     return indexInfo;
   switch (m_indexTypeProp.selectedType()) {
   case IndexType::WorkspaceIndex:
-    return {std::vector<Indexing::GlobalSpectrumIndex>(m_value.begin(),
-                                                       m_value.end()),
-            indexInfo};
+    return {std::vector<Indexing::GlobalSpectrumIndex>(m_value.begin(), m_value.end()), indexInfo};
   case IndexType::SpectrumNum: {
-    std::vector<Indexing::SpectrumNumber> spectrumNumbers(m_value.cbegin(),
-                                                          m_value.cend());
+    std::vector<Indexing::SpectrumNumber> spectrumNumbers(m_value.cbegin(), m_value.cend());
     return {spectrumNumbers, indexInfo};
   }
   default:
-    throw std::runtime_error(
-        "IndexProperty::getFilteredIndexInfo -- unsupported index type");
+    throw std::runtime_error("IndexProperty::getFilteredIndexInfo -- unsupported index type");
   }
 }
 
-std::string IndexProperty::generatePropertyName(const std::string &name) {
-  return name + "IndexSet";
-}
+std::string IndexProperty::generatePropertyName(const std::string &name) { return name + "IndexSet"; }
 
 const Indexing::IndexInfo &IndexProperty::getIndexInfoFromWorkspace() const {
-  auto wksp = std::dynamic_pointer_cast<MatrixWorkspace>(
-      m_workspaceProp.getWorkspace());
+  auto wksp = std::dynamic_pointer_cast<MatrixWorkspace>(m_workspaceProp.getWorkspace());
   if (!wksp)
     throw std::runtime_error("Invalid workspace type provided to "
                              "IndexProperty. Must be convertible to "

@@ -32,49 +32,34 @@ using namespace DataObjects;
  */
 void GetDetectorOffsets::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<WorkspaceUnitValidator>("dSpacing")),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<WorkspaceUnitValidator>("dSpacing")),
                   "A 2D workspace with X values of d-spacing");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
 
-  declareProperty("Step", 0.001, mustBePositive,
-                  "Step size used to bin d-spacing data");
-  declareProperty("DReference", 2.0, mustBePositive,
-                  "Center of reference peak in d-space");
-  declareProperty(
-      "XMin", 0.0,
-      "Minimum of CrossCorrelation data to search for peak, usually negative");
-  declareProperty(
-      "XMax", 0.0,
-      "Maximum of CrossCorrelation data to search for peak, usually positive");
+  declareProperty("Step", 0.001, mustBePositive, "Step size used to bin d-spacing data");
+  declareProperty("DReference", 2.0, mustBePositive, "Center of reference peak in d-space");
+  declareProperty("XMin", 0.0, "Minimum of CrossCorrelation data to search for peak, usually negative");
+  declareProperty("XMax", 0.0, "Maximum of CrossCorrelation data to search for peak, usually positive");
 
-  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
-                                                 FileProperty::OptionalSave,
-                                                 ".cal"),
+  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "", FileProperty::OptionalSave, ".cal"),
                   "Optional: The name of the output CalFile to save the "
                   "generated OffsetsWorkspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace containing the offsets.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask", Direction::Output),
                   "An output workspace containing the mask.");
   // Only keep peaks
-  declareProperty(
-      "PeakFunction", "Gaussian",
-      std::make_shared<StringListValidator>(
-          FunctionFactory::Instance().getFunctionNames<IPeakFunction>()),
-      "The function type for fitting the peaks.");
-  declareProperty("MaxOffset", 1.0,
-                  "Maximum absolute value of offsets; default is 1");
+  declareProperty("PeakFunction", "Gaussian",
+                  std::make_shared<StringListValidator>(FunctionFactory::Instance().getFunctionNames<IPeakFunction>()),
+                  "The function type for fitting the peaks.");
+  declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
 
   std::vector<std::string> modes{"Relative", "Absolute"};
 
-  declareProperty("OffsetMode", "Relative",
-                  std::make_shared<StringListValidator>(modes),
+  declareProperty("OffsetMode", "Relative", std::make_shared<StringListValidator>(modes),
                   "Whether to calculate a relative or absolute offset");
   declareProperty("DIdeal", 2.0, mustBePositive,
                   "The known peak centre value from the NIST standard "
@@ -111,8 +96,7 @@ void GetDetectorOffsets::exec() {
   // Create the output MaskWorkspace
   auto maskWS = std::make_shared<MaskWorkspace>(inputW->getInstrument());
   // To get the workspace index from the detector ID
-  const detid2index_map pixel_to_wi =
-      maskWS->getDetectorIDToWorkspaceIndexMap(true);
+  const detid2index_map pixel_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // Fit all the spectra with a gaussian
   Progress prog(this, 0.0, 1.0, nspec);
@@ -203,9 +187,8 @@ double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
   fit_alg->setProperty("Function", fun);
 
   fit_alg->setProperty("InputWorkspace", inputW);
-  fit_alg->setProperty<int>(
-      "WorkspaceIndex",
-      static_cast<int>(s)); // TODO what is the right thing to do here?
+  fit_alg->setProperty<int>("WorkspaceIndex",
+                            static_cast<int>(s)); // TODO what is the right thing to do here?
   fit_alg->setProperty("StartX", m_Xmin);
   fit_alg->setProperty("EndX", m_Xmax);
   fit_alg->setProperty("MaxIterations", 100);
@@ -239,12 +222,10 @@ double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
  * @param peakHeight :: The height of the peak
  * @param peakLoc :: The location of the peak
  */
-IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
-                                                  const double peakLoc) {
+IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight, const double peakLoc) {
   FunctionFactoryImpl &creator = FunctionFactory::Instance();
   auto background = creator.createFunction("LinearBackground");
-  auto peak = std::dynamic_pointer_cast<IPeakFunction>(
-      creator.createFunction(getProperty("PeakFunction")));
+  auto peak = std::dynamic_pointer_cast<IPeakFunction>(creator.createFunction(getProperty("PeakFunction")));
   peak->setHeight(peakHeight);
   peak->setCentre(peakLoc);
   const double sigma(10.0);

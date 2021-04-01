@@ -29,8 +29,7 @@ public:
 
   std::string name() const override { return "ProductFunctionMWTest_Gauss"; }
 
-  void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const override {
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override {
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
@@ -39,8 +38,7 @@ public:
       out[i] = h * exp(-x * x * w);
     }
   }
-  void functionDerivLocal(Mantid::API::Jacobian *out, const double *xValues,
-                          const size_t nData) override {
+  void functionDerivLocal(Mantid::API::Jacobian *out, const double *xValues, const size_t nData) override {
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
@@ -65,8 +63,7 @@ public:
   void setFwhm(const double w) override { setParameter(2, w); }
 };
 
-class ProductFunctionMWTest_Linear : public Mantid::API::ParamFunction,
-                                     public Mantid::API::IFunction1D {
+class ProductFunctionMWTest_Linear : public Mantid::API::ParamFunction, public Mantid::API::IFunction1D {
 public:
   ProductFunctionMWTest_Linear() {
     declareParameter("a");
@@ -75,16 +72,14 @@ public:
 
   std::string name() const override { return "ProductFunctionMWTest_Linear"; }
 
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override {
+  void function1D(double *out, const double *xValues, const size_t nData) const override {
     double a = getParameter("a");
     double b = getParameter("b");
     for (size_t i = 0; i < nData; i++) {
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDeriv1D(Mantid::API::Jacobian *out, const double *xValues,
-                       const size_t nData) override {
+  void functionDeriv1D(Mantid::API::Jacobian *out, const double *xValues, const size_t nData) override {
     for (size_t i = 0; i < nData; i++) {
       out->set(i, 0, 1.);
       out->set(i, 1, xValues[i]);
@@ -147,9 +142,7 @@ public:
 
     TS_ASSERT_EQUALS(prodF.parameterLocalName(0), "a");
 
-    Mantid::API::IFunction_sptr fun =
-        Mantid::API::FunctionFactory::Instance().createInitialized(
-            prodF.asString());
+    Mantid::API::IFunction_sptr fun = Mantid::API::FunctionFactory::Instance().createInitialized(prodF.asString());
     TS_ASSERT(fun);
 
     ProductFunction *prodF1 = dynamic_cast<ProductFunction *>(fun.get());
@@ -219,8 +212,7 @@ public:
 
     for (int i = 0; i < N; i++) {
       TS_ASSERT_DELTA(out.getCalculated(i),
-                      h1 * exp(-0.5 * (x[i] - c1) * (x[i] - c1) / (s1 * s1)) *
-                          h2 *
+                      h1 * exp(-0.5 * (x[i] - c1) * (x[i] - c1) / (s1 * s1)) * h2 *
                           exp(-0.5 * (x[i] - c2) * (x[i] - c2) / (s2 * s2)),
                       1e-6);
     }

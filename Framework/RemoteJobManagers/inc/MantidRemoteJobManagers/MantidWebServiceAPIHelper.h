@@ -55,24 +55,17 @@ public:
   // It's up to the various algorithms to know what to do with these functions
 
   // Perform an HTTP GET request (with optional HTTP Basic Auth)
-  std::istream &httpGet(const std::string &path,
-                        const std::string &query_str = "",
-                        const std::string &username = "",
+  std::istream &httpGet(const std::string &path, const std::string &query_str = "", const std::string &username = "",
                         const std::string &password = "") const;
 
   // Perform an HTTP POST request
   std::istream &httpPost(const std::string &path, const PostDataMap &postData,
-                         const PostDataMap &fileData = PostDataMap(),
-                         const std::string &username = "",
+                         const PostDataMap &fileData = PostDataMap(), const std::string &username = "",
                          const std::string &password = "") const;
 
   // Return the status code (200, 404, etc..) from the most recent request
-  Poco::Net::HTTPResponse::HTTPStatus lastStatus() const {
-    return m_response.getStatus();
-  }
-  const std::string &lastStatusReason() {
-    return m_response.getReasonForStatus(m_response.getStatus());
-  }
+  Poco::Net::HTTPResponse::HTTPStatus lastStatus() const { return m_response.getStatus(); }
+  const std::string &lastStatusReason() { return m_response.getReasonForStatus(m_response.getStatus()); }
 
   const std::string &getDisplayName() const { return m_displayName; }
 
@@ -82,17 +75,13 @@ public:
 private:
   // Wraps up some of the boilerplate code needed to execute HTTP GET and POST
   // requests
-  void initGetRequest(Poco::Net::HTTPRequest &req, const std::string &extraPath,
-                      const std::string &queryString) const;
-  void initPostRequest(Poco::Net::HTTPRequest &req,
-                       const std::string &extraPath) const;
-  void initHTTPRequest(Poco::Net::HTTPRequest &req, const std::string &method,
-                       const std::string &extraPath,
+  void initGetRequest(Poco::Net::HTTPRequest &req, const std::string &extraPath, const std::string &queryString) const;
+  void initPostRequest(Poco::Net::HTTPRequest &req, const std::string &extraPath) const;
+  void initHTTPRequest(Poco::Net::HTTPRequest &req, const std::string &method, const std::string &extraPath,
                        const std::string &queryString = "") const;
 
   std::string m_displayName;
-  std::string
-      m_serviceBaseUrl; // What we're going to connect to.  The full URL will be
+  std::string m_serviceBaseUrl; // What we're going to connect to.  The full URL will be
   // built by appending a path (and possibly a query string)
   // to this string.
 
@@ -110,12 +99,10 @@ private:
   static std::vector<Poco::Net::HTTPCookie> g_cookies;
   Poco::Net::NameValueCollection getCookies() const;
 
-  mutable std::unique_ptr<Poco::Net::HTTPClientSession>
-      m_session; // Pointer to session object for all our HTTP requests
-                 // (Has to be a pointer because we allocate and delete
-                 // it multiple times)
-  Poco::Net::HTTPResponse
-      m_response; // Response object for all of our HTTP requests
+  mutable std::unique_ptr<Poco::Net::HTTPClientSession> m_session; // Pointer to session object for all our HTTP
+                                                                   // requests (Has to be a pointer because we allocate
+                                                                   // and delete it multiple times)
+  Poco::Net::HTTPResponse m_response;                              // Response object for all of our HTTP requests
 
   // No default copy constructor or assignment operator (mainly because
   // HTTPResponse doesn't have them

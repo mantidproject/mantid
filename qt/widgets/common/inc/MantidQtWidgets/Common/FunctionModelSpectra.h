@@ -41,15 +41,9 @@ public:
   std::pair<WorkspaceIndex, WorkspaceIndex> getMinMax() const;
   WorkspaceIndex front() const { return m_vec.front(); }
   WorkspaceIndex back() const { return m_vec.back(); }
-  std::vector<WorkspaceIndex>::const_iterator begin() const {
-    return m_vec.cbegin();
-  }
-  std::vector<WorkspaceIndex>::const_iterator end() const {
-    return m_vec.cend();
-  }
-  const WorkspaceIndex &operator[](FitDomainIndex index) const {
-    return m_vec[index.value];
-  }
+  std::vector<WorkspaceIndex>::const_iterator begin() const { return m_vec.cbegin(); }
+  std::vector<WorkspaceIndex>::const_iterator end() const { return m_vec.cend(); }
+  const WorkspaceIndex &operator[](FitDomainIndex index) const { return m_vec[index.value]; }
   bool operator==(FunctionModelSpectra const &spec) const;
   bool isContinuous() const;
   FitDomainIndex indexOf(WorkspaceIndex i) const;
@@ -91,8 +85,7 @@ private:
   F m_functor;
 };
 
-template <class T>
-std::vector<T> vectorFromString(const std::string &listString) {
+template <class T> std::vector<T> vectorFromString(const std::string &listString) {
   try {
     return Mantid::Kernel::ArrayProperty<T>("vector", listString);
   } catch (const std::runtime_error &) {

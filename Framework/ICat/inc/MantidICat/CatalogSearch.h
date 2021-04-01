@@ -54,13 +54,10 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"CatalogMyDataSearch", "CatalogGetDataFiles", "CatalogLogin",
-            "CatalogPublish"};
+    return {"CatalogMyDataSearch", "CatalogGetDataFiles", "CatalogLogin", "CatalogPublish"};
   }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Catalog";
-  }
+  const std::string category() const override { return "DataHandling\\Catalog"; }
 
 private:
   /// Overwrites Algorithm init method.

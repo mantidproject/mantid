@@ -40,18 +40,15 @@ public:
     Chebyshev cheb;
     cheb.initialize();
 
-    TS_ASSERT_THROWS(cheb.setAttributeValue("A0", 3.3),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(cheb.setAttributeValue("n", -1),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(cheb.setAttributeValue("A0", 3.3), const std::invalid_argument &);
+    TS_ASSERT_THROWS(cheb.setAttributeValue("n", -1), const std::invalid_argument &);
   }
 
   void testZero() {
     Chebyshev cheb;
     cheb.initialize();
 
-    TS_ASSERT_THROWS(cheb.setAttributeValue("A1", 3.3),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(cheb.setAttributeValue("A1", 3.3), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(cheb.setAttributeValue("n", 0));
   }
 
@@ -97,8 +94,7 @@ public:
     cheb.setAttributeValue("StartX", -10.0);
     cheb.setAttributeValue("EndX", 10.0);
 
-    Mantid::API::MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 21, 21);
+    Mantid::API::MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 21, 21);
     Mantid::MantidVec &X = ws->dataX(0);
 
     Mantid::API::FunctionDomain1DVector domain(X);

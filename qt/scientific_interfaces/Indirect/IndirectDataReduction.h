@@ -55,12 +55,10 @@ public:
 
   Mantid::API::MatrixWorkspace_sptr instrumentWorkspace();
 
-  void loadInstrumentIfNotExist(const std::string &instrumentName,
-                                const std::string &analyser = "",
+  void loadInstrumentIfNotExist(const std::string &instrumentName, const std::string &analyser = "",
                                 const std::string &reflection = "");
 
-  std::vector<std::pair<std::string, std::vector<std::string>>>
-  getInstrumentModes();
+  std::vector<std::pair<std::string, std::vector<std::string>>> getInstrumentModes();
   QMap<QString, QString> getInstrumentDetails();
 
 signals:
@@ -78,9 +76,7 @@ private slots:
   void instrumentLoadingDone(bool error);
 
   /// Called when the instrument setup has been changed
-  void instrumentSetupChanged(const QString &instrumentName,
-                              const QString &analyser,
-                              const QString &reflection);
+  void instrumentSetupChanged(const QString &instrumentName, const QString &analyser, const QString &reflection);
 
 private:
   std::string documentationPage() const override;
@@ -89,9 +85,7 @@ private:
 
   void loadInstrumentDetails();
 
-  QString getInstrumentParameterFrom(
-      const Mantid::Geometry::IComponent_const_sptr &comp,
-      const std::string &param);
+  QString getInstrumentParameterFrom(const Mantid::Geometry::IComponent_const_sptr &comp, const std::string &param);
 
   void readSettings();
   void saveSettings();
@@ -119,17 +113,15 @@ private:
     QWidget *tabContent = new QWidget(tabScrollArea);
     tabContent->setObjectName("tab" + QString(name).remove(QRegExp("[ ,()]")));
     tabScrollArea->setWidget(tabContent);
-    tabScrollArea->setSizePolicy(QSizePolicy::Expanding,
-                                 QSizePolicy::Expanding);
+    tabScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     IndirectDataReductionTab *tabIDRContent = new T(this, tabContent);
     tabIDRContent->setupTab();
     tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    connect(tabIDRContent, SIGNAL(runAsPythonScript(const QString &, bool)),
-            this, SIGNAL(runAsPythonScript(const QString &, bool)));
-    connect(tabIDRContent, SIGNAL(showMessageBox(const QString &)), this,
-            SLOT(showMessageBox(const QString &)));
+    connect(tabIDRContent, SIGNAL(runAsPythonScript(const QString &, bool)), this,
+            SIGNAL(runAsPythonScript(const QString &, bool)));
+    connect(tabIDRContent, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
 
     // Add to the cache
     m_tabs[name] = qMakePair(tabWidget, tabIDRContent);
@@ -150,9 +142,7 @@ private:
   QMap<QString, QPair<QWidget *, IndirectDataReductionTab *>> m_tabs;
 
   /// Poco observer for changes in user directory settings
-  Poco::NObserver<IndirectDataReduction,
-                  Mantid::Kernel::ConfigValChangeNotification>
-      m_changeObserver;
+  Poco::NObserver<IndirectDataReduction, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
   QString m_dataDir; ///< default data search directory
   QString m_saveDir; ///< default data save directory
 

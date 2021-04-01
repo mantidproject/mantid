@@ -41,26 +41,21 @@ void ConvertSpectrumAxis::init() {
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input, wsVal),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsVal),
                   "The name of the input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace.");
-  std::vector<std::string> targetOptions =
-      Mantid::Kernel::UnitFactory::Instance().getKeys();
+  std::vector<std::string> targetOptions = Mantid::Kernel::UnitFactory::Instance().getKeys();
   targetOptions.emplace_back("theta");
   targetOptions.emplace_back("signed_theta");
-  declareProperty("Target", "",
-                  std::make_shared<StringListValidator>(targetOptions),
+  declareProperty("Target", "", std::make_shared<StringListValidator>(targetOptions),
                   "The unit to which the spectrum axis should be converted. "
                   "This can be either \"theta\" (for <math>\\theta</math> "
                   "degrees), or any of the IDs known to the [[Unit Factory]].");
   std::vector<std::string> eModeOptions;
   eModeOptions.emplace_back("Direct");
   eModeOptions.emplace_back("Indirect");
-  declareProperty("EMode", "Direct",
-                  std::make_shared<StringListValidator>(eModeOptions),
+  declareProperty("EMode", "Direct", std::make_shared<StringListValidator>(eModeOptions),
                   "Some unit conversions require this value to be set "
                   "(\"Direct\" or \"Indirect\")");
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
@@ -103,8 +98,7 @@ void ConvertSpectrumAxis::exec() {
       double efixedProp = getProperty("Efixed");
       if (efixedProp != EMPTY_DBL()) {
         pmap[UnitParams::efixed] = efixedProp;
-        g_log.debug() << "Detector: " << spectrumInfo.detector(i).getID()
-                      << " Efixed: " << efixedProp << "\n";
+        g_log.debug() << "Detector: " << spectrumInfo.detector(i).getID() << " Efixed: " << efixedProp << "\n";
       }
 
       spectrumInfo.getDetectorValues(*fromUnit, *toUnit, emode, false, i, pmap);
@@ -123,8 +117,7 @@ void ConvertSpectrumAxis::exec() {
       indexMap.emplace(value, i);
     }
     if (nfailures == nHist) {
-      throw std::runtime_error(
-          "Unable to convert spectrum axis values on all spectra");
+      throw std::runtime_error("Unable to convert spectrum axis values on all spectra");
     }
   } else {
     // Set up binding to memeber funtion. Avoids condition as part of loop over
@@ -132,11 +125,9 @@ void ConvertSpectrumAxis::exec() {
     using namespace std::placeholders;
     std::function<double(const IDetector &)> thetaFunction;
     if (unitTarget == "signed_theta") {
-      thetaFunction =
-          std::bind(&MatrixWorkspace::detectorSignedTwoTheta, inputWS, _1);
+      thetaFunction = std::bind(&MatrixWorkspace::detectorSignedTwoTheta, inputWS, _1);
     } else {
-      thetaFunction =
-          std::bind(&MatrixWorkspace::detectorTwoTheta, inputWS, _1);
+      thetaFunction = std::bind(&MatrixWorkspace::detectorTwoTheta, inputWS, _1);
     }
 
     bool warningGiven = false;
@@ -159,8 +150,7 @@ void ConvertSpectrumAxis::exec() {
   builder.setX(nxBins);
   builder.setY(nBins);
   builder.setDistribution(inputWS->isDistribution());
-  MatrixWorkspace_sptr outputWS =
-      create<MatrixWorkspace>(*inputWS, indexMap.size(), builder.build());
+  MatrixWorkspace_sptr outputWS = create<MatrixWorkspace>(*inputWS, indexMap.size(), builder.build());
   // Now set up a new, numeric axis holding the theta values corresponding to
   // each spectrum
   auto newAxis = std::make_unique<NumericAxis>(indexMap.size());
@@ -180,23 +170,19 @@ void ConvertSpectrumAxis::exec() {
     // Now copy over the data
     outputWS->setHistogram(currentIndex, inputWS->histogram(it->second));
     // We can keep the spectrum numbers etc.
-    outputWS->getSpectrum(currentIndex)
-        .copyInfoFrom(inputWS->getSpectrum(it->second));
+    outputWS->getSpectrum(currentIndex).copyInfoFrom(inputWS->getSpectrum(it->second));
     ++currentIndex;
   }
   setProperty("OutputWorkspace", outputWS);
 }
 
-double
-ConvertSpectrumAxis::getEfixed(const Mantid::Geometry::IDetector &detector,
-                               const MatrixWorkspace_const_sptr &inputWS,
-                               int emode) const {
+double ConvertSpectrumAxis::getEfixed(const Mantid::Geometry::IDetector &detector,
+                                      const MatrixWorkspace_const_sptr &inputWS, int emode) const {
   double efixed(0);
   double efixedProp = getProperty("Efixed");
   if (efixedProp != EMPTY_DBL()) {
     efixed = efixedProp;
-    g_log.debug() << "Detector: " << detector.getID() << " Efixed: " << efixed
-                  << "\n";
+    g_log.debug() << "Detector: " << detector.getID() << " Efixed: " << efixed << "\n";
   } else {
     if (emode == 1) {
       if (inputWS->run().hasProperty("Ei")) {
@@ -206,30 +192,25 @@ ConvertSpectrumAxis::getEfixed(const Mantid::Geometry::IDetector &detector,
           efixed = (*doublep)();
         } else {
           efixed = 0.0;
-          g_log.warning() << "Efixed could not be found for detector "
-                          << detector.getID() << ", set to 0.0\n";
+          g_log.warning() << "Efixed could not be found for detector " << detector.getID() << ", set to 0.0\n";
         }
       } else {
         efixed = 0.0;
-        g_log.warning() << "Efixed could not be found for detector "
-                        << detector.getID() << ", set to 0.0\n";
+        g_log.warning() << "Efixed could not be found for detector " << detector.getID() << ", set to 0.0\n";
       }
     } else if (emode == 2) {
       std::vector<double> efixedVec = detector.getNumberParameter("Efixed");
       if (efixedVec.empty()) {
         int detid = detector.getID();
-        IDetector_const_sptr detectorSingle =
-            inputWS->getInstrument()->getDetector(detid);
+        IDetector_const_sptr detectorSingle = inputWS->getInstrument()->getDetector(detid);
         efixedVec = detectorSingle->getNumberParameter("Efixed");
       }
       if (!efixedVec.empty()) {
         efixed = efixedVec.at(0);
-        g_log.debug() << "Detector: " << detector.getID()
-                      << " EFixed: " << efixed << "\n";
+        g_log.debug() << "Detector: " << detector.getID() << " EFixed: " << efixed << "\n";
       } else {
         efixed = 0.0;
-        g_log.warning() << "Efixed could not be found for detector "
-                        << detector.getID() << ", set to 0.0\n";
+        g_log.warning() << "Efixed could not be found for detector " << detector.getID() << ", set to 0.0\n";
       }
     }
   }

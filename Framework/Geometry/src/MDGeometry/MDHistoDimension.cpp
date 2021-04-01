@@ -54,22 +54,19 @@ std::string MDHistoDimension::toXMLString() const {
 
   // Set the upper bounds
   AutoPtr<Element> upperBoundsElement = pDoc->createElement("UpperBounds");
-  AutoPtr<Text> upperBoundsText = pDoc->createTextNode(
-      boost::str(boost::format("%.4f") % this->getMaximum()));
+  AutoPtr<Text> upperBoundsText = pDoc->createTextNode(boost::str(boost::format("%.4f") % this->getMaximum()));
   upperBoundsElement->appendChild(upperBoundsText);
   pDimensionElement->appendChild(upperBoundsElement);
 
   // Set the lower bounds
   AutoPtr<Element> lowerBoundsElement = pDoc->createElement("LowerBounds");
-  AutoPtr<Text> lowerBoundsText = pDoc->createTextNode(
-      boost::str(boost::format("%.4f") % this->getMinimum()));
+  AutoPtr<Text> lowerBoundsText = pDoc->createTextNode(boost::str(boost::format("%.4f") % this->getMinimum()));
   lowerBoundsElement->appendChild(lowerBoundsText);
   pDimensionElement->appendChild(lowerBoundsElement);
 
   // Set the number of bins
   AutoPtr<Element> numberOfBinsElement = pDoc->createElement("NumberOfBins");
-  AutoPtr<Text> numberOfBinsText = pDoc->createTextNode(
-      boost::str(boost::format("%.4d") % this->getNBins()));
+  AutoPtr<Text> numberOfBinsText = pDoc->createTextNode(boost::str(boost::format("%.4d") % this->getNBins()));
   numberOfBinsElement->appendChild(numberOfBinsText);
   pDimensionElement->appendChild(numberOfBinsElement);
 
@@ -78,19 +75,19 @@ std::string MDHistoDimension::toXMLString() const {
     AutoPtr<Element> integratedElement = pDoc->createElement("Integrated");
     // Set the upper limit
     AutoPtr<Element> upperLimitElement = pDoc->createElement("UpperLimit");
-    AutoPtr<Text> upperLimitText = pDoc->createTextNode(boost::str(
-        boost::format("%.4f") % this->getMaximum())); // Dimension does not yet
-                                                      // provide integration
-                                                      // ranges.
+    AutoPtr<Text> upperLimitText =
+        pDoc->createTextNode(boost::str(boost::format("%.4f") % this->getMaximum())); // Dimension does not yet
+                                                                                      // provide integration
+                                                                                      // ranges.
     upperLimitElement->appendChild(upperLimitText);
     integratedElement->appendChild(upperLimitElement);
 
     // Set the lower limit
     AutoPtr<Element> lowerLimitElement = pDoc->createElement("LowerLimit");
-    AutoPtr<Text> lowerLimitText = pDoc->createTextNode(boost::str(
-        boost::format("%.4f") % this->getMinimum())); // Dimension does not yet
-                                                      // provide integration
-                                                      // ranges.
+    AutoPtr<Text> lowerLimitText =
+        pDoc->createTextNode(boost::str(boost::format("%.4f") % this->getMinimum())); // Dimension does not yet
+                                                                                      // provide integration
+                                                                                      // ranges.
     lowerLimitElement->appendChild(lowerLimitText);
     integratedElement->appendChild(lowerLimitElement);
 

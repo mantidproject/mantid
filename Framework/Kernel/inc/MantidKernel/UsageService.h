@@ -40,8 +40,7 @@ enum class FeatureType { Algorithm, Interface, Feature, Function };
 class FeatureUsage {
 public:
   /// Constructor
-  FeatureUsage(const FeatureType &type, std::string name, const bool internal,
-               std::string application);
+  FeatureUsage(const FeatureType &type, std::string name, const bool internal, std::string application);
   bool operator<(const FeatureUsage &r) const;
 
   ::Json::Value asJson() const;
@@ -69,19 +68,14 @@ public:
   /// Provide three overloads:
   /// Version that takes vector of strings if want to register
   /// usage of a particular class/method combination
-  void registerFeatureUsage(const FeatureType &type,
-                            const std::vector<std::string> &name,
-                            const bool internal);
+  void registerFeatureUsage(const FeatureType &type, const std::vector<std::string> &name, const bool internal);
   /// Version that takes a string if just registering usage of a class
-  void registerFeatureUsage(const FeatureType &type, const std::string &name,
-                            const bool internal);
+  void registerFeatureUsage(const FeatureType &type, const std::string &name, const bool internal);
   /// Version that accepts an initializer list. This is required because
   /// {"abc","def"} is both a valid constructor for std::string and an
   /// initializer list so without this it's not clear which overload is being
   /// called
-  void registerFeatureUsage(const FeatureType &type,
-                            std::initializer_list<std::string> name,
-                            const bool internal);
+  void registerFeatureUsage(const FeatureType &type, std::initializer_list<std::string> name, const bool internal);
 
   /// Returns true if usage reporting is enabled
   bool isEnabled() const;
@@ -154,8 +148,7 @@ private:
   std::string m_url;
 };
 
-EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
-    Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
+EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
 using UsageService = Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
 
 } // namespace Kernel

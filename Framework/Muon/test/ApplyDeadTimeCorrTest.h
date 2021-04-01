@@ -32,8 +32,7 @@ public:
 
   void testCategory() {
     ApplyDeadTimeCorr applyDeadTime;
-    TS_ASSERT_EQUALS(applyDeadTime.category(),
-                     "Muon;CorrectionFunctions\\EfficiencyCorrections")
+    TS_ASSERT_EQUALS(applyDeadTime.category(), "Muon;CorrectionFunctions\\EfficiencyCorrections")
   }
 
   void testInit() {
@@ -49,12 +48,9 @@ public:
     ApplyDeadTimeCorr applyDeadTime;
     applyDeadTime.initialize();
     applyDeadTime.setChild(true);
-    TS_ASSERT_THROWS_NOTHING(
-        applyDeadTime.setProperty("InputWorkspace", inputWs));
-    TS_ASSERT_THROWS_NOTHING(
-        applyDeadTime.setProperty("DeadTimeTable", deadTimes));
-    TS_ASSERT_THROWS_NOTHING(
-        applyDeadTime.setProperty("OutputWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(applyDeadTime.setProperty("InputWorkspace", inputWs));
+    TS_ASSERT_THROWS_NOTHING(applyDeadTime.setProperty("DeadTimeTable", deadTimes));
+    TS_ASSERT_THROWS_NOTHING(applyDeadTime.setProperty("OutputWorkspace", "__NotUsed"));
     TS_ASSERT_THROWS_NOTHING(applyDeadTime.execute());
     TS_ASSERT(applyDeadTime.isExecuted());
 
@@ -62,31 +58,22 @@ public:
     const Run &run = inputWs->run();
     TS_ASSERT(run.hasProperty("goodfrm"))
 
-    numGoodFrames =
-        boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
+    numGoodFrames = boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
 
-    MatrixWorkspace_sptr outputWs =
-        applyDeadTime.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outputWs = applyDeadTime.getProperty("OutputWorkspace");
     TS_ASSERT(outputWs);
 
-    TS_ASSERT_EQUALS(
-        outputWs->y(0)[0],
-        inputWs->y(0)[0] /
-            (1 - inputWs->y(0)[0] *
-                     (deadValue() / ((inputWs->x(0)[1] - inputWs->x(0)[0]) *
-                                     numGoodFrames))));
+    TS_ASSERT_EQUALS(outputWs->y(0)[0],
+                     inputWs->y(0)[0] / (1 - inputWs->y(0)[0] * (deadValue() / ((inputWs->x(0)[1] - inputWs->x(0)[0]) *
+                                                                                numGoodFrames))));
     TS_ASSERT_EQUALS(
         outputWs->y(0)[40],
         inputWs->y(0)[40] /
-            (1 - inputWs->y(0)[40] *
-                     (deadValue() / ((inputWs->x(0)[1] - inputWs->x(0)[0]) *
-                                     numGoodFrames))));
+            (1 - inputWs->y(0)[40] * (deadValue() / ((inputWs->x(0)[1] - inputWs->x(0)[0]) * numGoodFrames))));
     TS_ASSERT_EQUALS(
         outputWs->y(31)[20],
         inputWs->y(31)[20] /
-            (1 - inputWs->y(31)[20] *
-                     (deadValue() / ((inputWs->x(0)[1] - inputWs->x(0)[0]) *
-                                     numGoodFrames))));
+            (1 - inputWs->y(31)[20] * (deadValue() / ((inputWs->x(0)[1] - inputWs->x(0)[0]) * numGoodFrames))));
 
     TS_ASSERT_DELTA(35.9991, outputWs->y(12)[2], 0.001);
     TS_ASSERT_DELTA(4901.5439, outputWs->y(20)[14], 0.001);
@@ -101,12 +88,9 @@ public:
     ApplyDeadTimeCorr applyDeadTime;
     applyDeadTime.initialize();
     applyDeadTime.setChild(true);
-    TS_ASSERT_THROWS_NOTHING(
-        applyDeadTime.setProperty("InputWorkspace", inputWs));
-    TS_ASSERT_THROWS_NOTHING(
-        applyDeadTime.setProperty("DeadTimeTable", deadTimes));
-    TS_ASSERT_THROWS_NOTHING(
-        applyDeadTime.setProperty("OutputWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(applyDeadTime.setProperty("InputWorkspace", inputWs));
+    TS_ASSERT_THROWS_NOTHING(applyDeadTime.setProperty("DeadTimeTable", deadTimes));
+    TS_ASSERT_THROWS_NOTHING(applyDeadTime.setProperty("OutputWorkspace", "__NotUsed"));
     TS_ASSERT_THROWS(applyDeadTime.execute(), const std::logic_error &);
 
     // Check new table wasn't created
@@ -117,8 +101,7 @@ public:
   void testSelectedSpectrum() {
     MatrixWorkspace_sptr inputWs = loadDataFromFile();
 
-    std::shared_ptr<ITableWorkspace> deadTimes =
-        std::make_shared<Mantid::DataObjects::TableWorkspace>();
+    std::shared_ptr<ITableWorkspace> deadTimes = std::make_shared<Mantid::DataObjects::TableWorkspace>();
     deadTimes->addColumn("int", "Spectrum Number");
     deadTimes->addColumn("double", "DeadTime Value");
 
@@ -133,12 +116,9 @@ public:
     ApplyDeadTimeCorr applyDeadTime;
     applyDeadTime.initialize();
     applyDeadTime.setChild(true);
-    TS_ASSERT_THROWS_NOTHING(
-        applyDeadTime.setProperty("InputWorkspace", inputWs));
-    TS_ASSERT_THROWS_NOTHING(
-        applyDeadTime.setProperty("DeadTimeTable", deadTimes));
-    TS_ASSERT_THROWS_NOTHING(
-        applyDeadTime.setProperty("OutputWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(applyDeadTime.setProperty("InputWorkspace", inputWs));
+    TS_ASSERT_THROWS_NOTHING(applyDeadTime.setProperty("DeadTimeTable", deadTimes));
+    TS_ASSERT_THROWS_NOTHING(applyDeadTime.setProperty("OutputWorkspace", "__NotUsed"));
     TS_ASSERT_THROWS_NOTHING(applyDeadTime.execute());
     TS_ASSERT(applyDeadTime.isExecuted());
 
@@ -146,20 +126,16 @@ public:
     const Run &run = inputWs->run();
     TS_ASSERT(run.hasProperty("goodfrm"))
 
-    numGoodFrames =
-        boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
+    numGoodFrames = boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
 
-    MatrixWorkspace_sptr outputWs =
-        applyDeadTime.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outputWs = applyDeadTime.getProperty("OutputWorkspace");
     TS_ASSERT(outputWs);
 
     TS_ASSERT_EQUALS(outputWs->y(0)[0], inputWs->y(0)[0]);
     TS_ASSERT_EQUALS(
         outputWs->y(14)[40],
         inputWs->y(14)[40] /
-            (1 - inputWs->y(14)[40] *
-                     (deadValue() / ((inputWs->x(0)[1] - inputWs->x(0)[0]) *
-                                     numGoodFrames))));
+            (1 - inputWs->y(14)[40] * (deadValue() / ((inputWs->x(0)[1] - inputWs->x(0)[0]) * numGoodFrames))));
     TS_ASSERT_EQUALS(outputWs->y(31)[20], inputWs->y(31)[20]);
 
     // Should be the same (no dead time associated with it)
@@ -172,8 +148,7 @@ public:
   /// Test algorithm rejects an input workspace with uneven bin widths
   void testUnevenBinWidths() {
     constexpr size_t numSpectra(2);
-    auto workspace = WorkspaceCreationHelper::create2DWorkspace(
-        static_cast<int>(numSpectra), 10);
+    auto workspace = WorkspaceCreationHelper::create2DWorkspace(static_cast<int>(numSpectra), 10);
 
     // Rebin the workspace to make bin widths uneven
     auto rebin = AlgorithmFactory::Instance().create("Rebin", 1);
@@ -192,8 +167,7 @@ public:
     ApplyDeadTimeCorr applyDT;
     applyDT.initialize();
     applyDT.setChild(true);
-    TS_ASSERT_THROWS(applyDT.setProperty("InputWorkspace", rebinned),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(applyDT.setProperty("InputWorkspace", rebinned), const std::invalid_argument &);
   }
 
   // Test that algorithm throws if input workspace does not contain number of
@@ -209,12 +183,9 @@ public:
     ApplyDeadTimeCorr applyDeadTime;
     applyDeadTime.initialize();
     applyDeadTime.setChild(true);
-    TS_ASSERT_THROWS_NOTHING(
-        applyDeadTime.setProperty("InputWorkspace", inputWs));
-    TS_ASSERT_THROWS_NOTHING(
-        applyDeadTime.setProperty("DeadTimeTable", deadTimes));
-    TS_ASSERT_THROWS_NOTHING(
-        applyDeadTime.setProperty("OutputWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(applyDeadTime.setProperty("InputWorkspace", inputWs));
+    TS_ASSERT_THROWS_NOTHING(applyDeadTime.setProperty("DeadTimeTable", deadTimes));
+    TS_ASSERT_THROWS_NOTHING(applyDeadTime.setProperty("OutputWorkspace", "__NotUsed"));
     TS_ASSERT_THROWS(applyDeadTime.execute(), const std::invalid_argument &);
     TS_ASSERT(!applyDeadTime.isExecuted());
   }
@@ -226,8 +197,7 @@ private:
    * @returns :: Dead time table
    */
   std::shared_ptr<ITableWorkspace> makeDeadTimeTable(size_t numSpectra) {
-    std::shared_ptr<ITableWorkspace> deadTimes =
-        std::make_shared<Mantid::DataObjects::TableWorkspace>();
+    std::shared_ptr<ITableWorkspace> deadTimes = std::make_shared<Mantid::DataObjects::TableWorkspace>();
     deadTimes->addColumn("int", "Spectrum Number");
     deadTimes->addColumn("double", "DeadTime Value");
     for (size_t i = 0; i < numSpectra; i++) {

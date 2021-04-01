@@ -23,8 +23,7 @@ using namespace Mantid::API;
 namespace {
 Mantid::Kernel::Logger g_log("ApplyAbsorptionCorrections");
 
-template <typename T = MatrixWorkspace>
-std::shared_ptr<T> getADSWorkspace(std::string const &workspaceName) {
+template <typename T = MatrixWorkspace> std::shared_ptr<T> getADSWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
 }
 
@@ -32,35 +31,24 @@ std::shared_ptr<T> getADSWorkspace(std::string const &workspaceName) {
 
 namespace MantidQt {
 namespace CustomInterfaces {
-ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
-    : CorrectionsTab(parent) {
+ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : CorrectionsTab(parent) {
   m_spectra = 0;
   m_uiForm.setupUi(parent);
-  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
-      m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraContour));
+  setOutputPlotOptionsPresenter(
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraContour));
 
-  connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
-          SLOT(newSample(const QString &)));
-  connect(m_uiForm.dsContainer, SIGNAL(dataReady(const QString &)), this,
-          SLOT(newContainer(const QString &)));
-  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
-          SLOT(plotPreview(int)));
-  connect(m_uiForm.spCanScale, SIGNAL(valueChanged(double)), this,
-          SLOT(updateContainer()));
-  connect(m_uiForm.spCanShift, SIGNAL(valueChanged(double)), this,
-          SLOT(updateContainer()));
-  connect(m_uiForm.ckShiftCan, SIGNAL(toggled(bool)), this,
-          SLOT(updateContainer()));
-  connect(m_uiForm.ckScaleCan, SIGNAL(toggled(bool)), this,
-          SLOT(updateContainer()));
-  connect(m_uiForm.ckRebinContainer, SIGNAL(toggled(bool)), this,
-          SLOT(updateContainer()));
-  connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), this,
-          SLOT(updateContainer()));
+  connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this, SLOT(newSample(const QString &)));
+  connect(m_uiForm.dsContainer, SIGNAL(dataReady(const QString &)), this, SLOT(newContainer(const QString &)));
+  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(plotPreview(int)));
+  connect(m_uiForm.spCanScale, SIGNAL(valueChanged(double)), this, SLOT(updateContainer()));
+  connect(m_uiForm.spCanShift, SIGNAL(valueChanged(double)), this, SLOT(updateContainer()));
+  connect(m_uiForm.ckShiftCan, SIGNAL(toggled(bool)), this, SLOT(updateContainer()));
+  connect(m_uiForm.ckScaleCan, SIGNAL(toggled(bool)), this, SLOT(updateContainer()));
+  connect(m_uiForm.ckRebinContainer, SIGNAL(toggled(bool)), this, SLOT(updateContainer()));
+  connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), this, SLOT(updateContainer()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-          SLOT(plotCurrentPreview()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsSample->isOptional(true);
@@ -99,8 +87,7 @@ void ApplyAbsorptionCorrections::newSample(const QString &dataName) {
 
   // Plot the curve
   plotInPreview("Sample", m_ppSampleWS, Qt::black);
-  m_uiForm.spPreviewSpec->setMaximum(
-      static_cast<int>(m_ppSampleWS->getNumberHistograms()) - 1);
+  m_uiForm.spPreviewSpec->setMaximum(static_cast<int>(m_ppSampleWS->getNumberHistograms()) - 1);
   m_sampleWorkspaceName = dataName.toStdString();
   m_pythonExportWsName.clear();
 
@@ -168,8 +155,7 @@ void ApplyAbsorptionCorrections::updateContainer() {
 
     const auto sampleValid = m_uiForm.dsSample->isValid();
     if (sampleValid && m_uiForm.ckRebinContainer->isChecked()) {
-      IAlgorithm_sptr rebin =
-          AlgorithmManager::Instance().create("RebinToWorkspace");
+      IAlgorithm_sptr rebin = AlgorithmManager::Instance().create("RebinToWorkspace");
       rebin->initialize();
       rebin->setLogging(false);
       rebin->setProperty("WorkspaceToRebin", m_containerWorkspaceName);
@@ -194,8 +180,7 @@ void ApplyAbsorptionCorrections::run() {
 
   // Create / Initialize algorithm
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
-  IAlgorithm_sptr applyCorrAlg =
-      AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrection");
+  IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrection");
   applyCorrAlg->initialize();
 
   // get Sample Workspace
@@ -206,11 +191,9 @@ void ApplyAbsorptionCorrections::run() {
   // Get Can and Clone
   MatrixWorkspace_sptr canClone;
   if (useCan) {
-    const auto canName =
-        m_uiForm.dsContainer->getCurrentDataName().toStdString();
+    const auto canName = m_uiForm.dsContainer->getCurrentDataName().toStdString();
     const auto cloneName = "__algorithm_can";
-    IAlgorithm_sptr clone =
-        AlgorithmManager::Instance().create("CloneWorkspace");
+    IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
     clone->initialize();
     clone->setProperty("InputWorkspace", canName);
     clone->setProperty("Outputworkspace", cloneName);
@@ -222,8 +205,7 @@ void ApplyAbsorptionCorrections::run() {
       const char *text = "Binning on sample and container does not match."
                          "Would you like to enable rebinning of the container?";
 
-      int result = QMessageBox::question(nullptr, tr("Rebin sample?"), tr(text),
-                                         QMessageBox::Yes, QMessageBox::No,
+      int result = QMessageBox::question(nullptr, tr("Rebin sample?"), tr(text), QMessageBox::Yes, QMessageBox::No,
                                          QMessageBox::NoButton);
 
       if (result == QMessageBox::Yes) {
@@ -256,29 +238,23 @@ void ApplyAbsorptionCorrections::run() {
 
   QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
 
-  auto const corrections =
-      getADSWorkspace<WorkspaceGroup>(correctionsWsName.toStdString());
+  auto const corrections = getADSWorkspace<WorkspaceGroup>(correctionsWsName.toStdString());
   bool interpolateAll = false;
   for (std::size_t i = 0; i < corrections->size(); i++) {
-    MatrixWorkspace_sptr factorWs =
-        std::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+    MatrixWorkspace_sptr factorWs = std::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
 
     // Check for matching binning
     const auto factorBlocksize = factorWs->blocksize();
-    if (sampleWs &&
-        (factorBlocksize != sampleWs->blocksize() && factorBlocksize != 1)) {
+    if (sampleWs && (factorBlocksize != sampleWs->blocksize() && factorBlocksize != 1)) {
       int result;
       if (interpolateAll) {
         result = QMessageBox::Yes;
       } else {
-        std::string text = "Number of bins on sample and " +
-                           factorWs->getName() +
-                           " workspace does not match.\n" +
+        std::string text = "Number of bins on sample and " + factorWs->getName() + " workspace does not match.\n" +
                            "Would you like to interpolate this workspace to "
                            "match the sample?";
 
-        result = QMessageBox::question(nullptr, tr("Interpolate corrections?"),
-                                       tr(text.c_str()), QMessageBox::YesToAll,
+        result = QMessageBox::question(nullptr, tr("Interpolate corrections?"), tr(text.c_str()), QMessageBox::YesToAll,
                                        QMessageBox::Yes, QMessageBox::No);
       }
 
@@ -293,15 +269,13 @@ void ApplyAbsorptionCorrections::run() {
         m_batchAlgoRunner->clearQueue();
         setRunIsRunning(false);
         setSaveResultEnabled(false);
-        g_log.error(
-            "ApplyAbsorptionCorrections cannot run with corrections that do "
-            "not match sample binning.");
+        g_log.error("ApplyAbsorptionCorrections cannot run with corrections that do "
+                    "not match sample binning.");
         return;
       }
     }
 
-    applyCorrAlg->setProperty("CorrectionsWorkspace",
-                              correctionsWsName.toStdString());
+    applyCorrAlg->setProperty("CorrectionsWorkspace", correctionsWsName.toStdString());
   }
 
   // Generate output workspace name
@@ -331,13 +305,11 @@ void ApplyAbsorptionCorrections::run() {
 
   // Using container
   if (m_uiForm.ckUseCan->isChecked()) {
-    auto const canName =
-        m_uiForm.dsContainer->getCurrentDataName().toStdString();
+    auto const canName = m_uiForm.dsContainer->getCurrentDataName().toStdString();
     auto const containerWs = getADSWorkspace(canName);
     auto logs = containerWs->run();
     if (logs.hasProperty("run_number")) {
-      outputWsName +=
-          "_" + QString::fromStdString(logs.getProperty("run_number")->value());
+      outputWsName += "_" + QString::fromStdString(logs.getProperty("run_number")->value());
     } else {
       auto canCutIndex = QString::fromStdString(canName).indexOf("_");
       outputWsName += "_" + QString::fromStdString(canName).left(canCutIndex);
@@ -352,8 +324,7 @@ void ApplyAbsorptionCorrections::run() {
   m_batchAlgoRunner->addAlgorithm(applyCorrAlg, absCorProps);
 
   // Run algorithm queue
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(absCorComplete(bool)));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(absCorComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
@@ -370,17 +341,14 @@ void ApplyAbsorptionCorrections::run() {
  * @param toInterpolate Pointer to the workspace to interpolate
  * @param toMatch Name of the workspace to match
  */
-void ApplyAbsorptionCorrections::addInterpolationStep(
-    const MatrixWorkspace_sptr &toInterpolate, std::string toMatch) {
+void ApplyAbsorptionCorrections::addInterpolationStep(const MatrixWorkspace_sptr &toInterpolate, std::string toMatch) {
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps interpolationProps;
   interpolationProps["WorkspaceToMatch"] = std::move(toMatch);
 
-  IAlgorithm_sptr interpolationAlg =
-      AlgorithmManager::Instance().create("SplineInterpolation");
+  IAlgorithm_sptr interpolationAlg = AlgorithmManager::Instance().create("SplineInterpolation");
   interpolationAlg->initialize();
 
-  interpolationAlg->setProperty("WorkspaceToInterpolate",
-                                toInterpolate->getName());
+  interpolationAlg->setProperty("WorkspaceToInterpolate", toInterpolate->getName());
   interpolationAlg->setProperty("OutputWorkspace", toInterpolate->getName());
 
   m_batchAlgoRunner->addAlgorithm(interpolationAlg, interpolationProps);
@@ -392,35 +360,30 @@ void ApplyAbsorptionCorrections::addInterpolationStep(
  * @param error True if algorithm failed.
  */
 void ApplyAbsorptionCorrections::absCorComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(absCorComplete(bool)));
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(absCorComplete(bool)));
   setRunIsRunning(false);
 
   if (!error) {
     if (m_uiForm.ckUseCan->isChecked()) {
       if (m_uiForm.ckShiftCan->isChecked()) { // If container is shifted
-        IAlgorithm_sptr shiftLog =
-            AlgorithmManager::Instance().create("AddSampleLog");
+        IAlgorithm_sptr shiftLog = AlgorithmManager::Instance().create("AddSampleLog");
         shiftLog->initialize();
 
         shiftLog->setProperty("Workspace", m_pythonExportWsName);
         shiftLog->setProperty("LogName", "container_shift");
         shiftLog->setProperty("LogType", "Number");
-        shiftLog->setProperty("LogText", boost::lexical_cast<std::string>(
-                                             m_uiForm.spCanShift->value()));
+        shiftLog->setProperty("LogText", boost::lexical_cast<std::string>(m_uiForm.spCanShift->value()));
         m_batchAlgoRunner->addAlgorithm(shiftLog);
       }
     }
     // Run algorithm queue
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-            SLOT(postProcessComplete(bool)));
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(postProcessComplete(bool)));
     m_batchAlgoRunner->executeBatchAsync();
 
     setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
   } else {
     setSaveResultEnabled(false);
-    emit showMessageBox(
-        "Unable to apply corrections.\nSee Results Log for more details.");
+    emit showMessageBox("Unable to apply corrections.\nSee Results Log for more details.");
   }
 }
 
@@ -430,8 +393,7 @@ void ApplyAbsorptionCorrections::absCorComplete(bool error) {
  * @param error True if algorithm failed.
  */
 void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(postProcessComplete(bool)));
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(postProcessComplete(bool)));
   setRunIsRunning(false);
 
   if (!error) {
@@ -439,16 +401,14 @@ void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
     plotPreview(m_uiForm.spPreviewSpec->value());
 
     // Clean up unwanted workspaces
-    IAlgorithm_sptr deleteAlg =
-        AlgorithmManager::Instance().create("DeleteWorkspace");
+    IAlgorithm_sptr deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
     if (AnalysisDataService::Instance().doesExist("__algorithm_can")) {
 
       deleteAlg->initialize();
       deleteAlg->setProperty("Workspace", "__algorithm_can");
       deleteAlg->execute();
     }
-    const auto conv =
-        AnalysisDataService::Instance().doesExist("__algorithm_can_Wavelength");
+    const auto conv = AnalysisDataService::Instance().doesExist("__algorithm_can_Wavelength");
     if (conv) {
       deleteAlg->setProperty("Workspace", "__algorithm_can_Wavelength");
       deleteAlg->execute();
@@ -464,17 +424,14 @@ bool ApplyAbsorptionCorrections::validate() {
   UserInputValidator uiv;
 
   // Validate the sample workspace
-  validateDataIsOneOf(uiv, m_uiForm.dsSample, "Sample", DataType::Red,
-                      {DataType::Sqw});
+  validateDataIsOneOf(uiv, m_uiForm.dsSample, "Sample", DataType::Red, {DataType::Sqw});
 
   // Validate the container workspace
   if (m_uiForm.ckUseCan->isChecked())
-    validateDataIsOneOf(uiv, m_uiForm.dsContainer, "Container", DataType::Red,
-                        {DataType::Sqw});
+    validateDataIsOneOf(uiv, m_uiForm.dsContainer, "Container", DataType::Red, {DataType::Sqw});
 
   // Validate the corrections workspace
-  validateDataIsOfType(uiv, m_uiForm.dsCorrections, "Corrections",
-                       DataType::Corrections);
+  validateDataIsOfType(uiv, m_uiForm.dsCorrections, "Corrections", DataType::Corrections);
 
   // Show errors if there are any
   if (!uiv.isAllInputValid())
@@ -492,18 +449,12 @@ void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {
 void ApplyAbsorptionCorrections::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("ApplyCorrections");
-  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
-                                          : getExtensions(tabName));
-  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
-                                          : noSuffixes);
-  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName)
-                                             : getExtensions(tabName));
-  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName)
-                                             : noSuffixes);
-  m_uiForm.dsCorrections->setFBSuffixes(
-      filter ? getCorrectionsFBSuffixes(tabName) : getExtensions(tabName));
-  m_uiForm.dsCorrections->setWSSuffixes(
-      filter ? getCorrectionsWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsCorrections->setFBSuffixes(filter ? getCorrectionsFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsCorrections->setWSSuffixes(filter ? getCorrectionsWSSuffixes(tabName) : noSuffixes);
 }
 
 /**
@@ -517,20 +468,14 @@ void ApplyAbsorptionCorrections::plotPreview(int wsIndex) {
   m_uiForm.ppPreview->clear();
 
   // Plot sample
-  m_uiForm.ppPreview->addSpectrum("Sample",
-                                  QString::fromStdString(m_sampleWorkspaceName),
-                                  wsIndex, Qt::black);
+  m_uiForm.ppPreview->addSpectrum("Sample", QString::fromStdString(m_sampleWorkspaceName), wsIndex, Qt::black);
 
   // Plot result
   if (AnalysisDataService::Instance().doesExist(m_pythonExportWsName))
-    m_uiForm.ppPreview->addSpectrum(
-        "Corrected", QString::fromStdString(m_pythonExportWsName), wsIndex,
-        Qt::blue);
+    m_uiForm.ppPreview->addSpectrum("Corrected", QString::fromStdString(m_pythonExportWsName), wsIndex, Qt::blue);
   // Plot container
   if (m_ppContainerWS && useCan) {
-    m_uiForm.ppPreview->addSpectrum(
-        "Container", QString::fromStdString(m_containerWorkspaceName), wsIndex,
-        Qt::red);
+    m_uiForm.ppPreview->addSpectrum("Container", QString::fromStdString(m_containerWorkspaceName), wsIndex, Qt::red);
   }
 
   m_spectra = boost::numeric_cast<size_t>(wsIndex);
@@ -585,8 +530,7 @@ void ApplyAbsorptionCorrections::plotCurrentPreview() {
  * @param ws          The workspace whose spectra to plot in the preview.
  * @param curveColor  The color of the curve to plot in the preview.
  */
-void ApplyAbsorptionCorrections::plotInPreview(const QString &curveName,
-                                               MatrixWorkspace_sptr &ws,
+void ApplyAbsorptionCorrections::plotInPreview(const QString &curveName, MatrixWorkspace_sptr &ws,
                                                const QColor &curveColor) {
 
   // Check whether the selected spectra is now out of bounds with
@@ -597,13 +541,9 @@ void ApplyAbsorptionCorrections::plotInPreview(const QString &curveName,
     size_t specNo = 0;
 
     if (m_ppSampleWS) {
-      specNo = std::min(ws->getNumberHistograms(),
-                        m_ppSampleWS->getNumberHistograms()) -
-               1;
+      specNo = std::min(ws->getNumberHistograms(), m_ppSampleWS->getNumberHistograms()) - 1;
     } else if (m_ppContainerWS) {
-      specNo = std::min(ws->getNumberHistograms(),
-                        m_ppContainerWS->getNumberHistograms()) -
-               1;
+      specNo = std::min(ws->getNumberHistograms(), m_ppContainerWS->getNumberHistograms()) - 1;
     }
 
     m_uiForm.ppPreview->addSpectrum(curveName, ws, specNo, curveColor);
@@ -613,13 +553,9 @@ void ApplyAbsorptionCorrections::plotInPreview(const QString &curveName,
   }
 }
 
-void ApplyAbsorptionCorrections::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-}
+void ApplyAbsorptionCorrections::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void ApplyAbsorptionCorrections::setSaveResultEnabled(bool enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
-}
+void ApplyAbsorptionCorrections::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 void ApplyAbsorptionCorrections::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);

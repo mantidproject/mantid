@@ -26,12 +26,11 @@ namespace CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
-                                       QWidget *parent)
+IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
-  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
-      m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
+  setOutputPlotOptionsPresenter(
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
 
   m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
   m_uiForm.ppPreviewPlot->setCanvasColour(QColor(240, 240, 240));
@@ -47,8 +46,7 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
 
   // Editor Factories
   auto *doubleEditorFactory = new DoubleEditorFactory();
-  m_propTrees["SymmPropTree"]->setFactoryForManager(m_dblManager,
-                                                    doubleEditorFactory);
+  m_propTrees["SymmPropTree"]->setFactoryForManager(m_dblManager, doubleEditorFactory);
 
   // Raw Properties
   m_properties["EMin"] = m_dblManager->addProperty("EMin");
@@ -83,19 +81,18 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   auto const yLimits = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
 
   // Indicators for Y value at each EMin position
-  auto negativeEMinYPos = m_uiForm.ppRawPlot->addSingleSelector(
-      "NegativeEMinYPos", MantidWidgets::SingleSelector::YSINGLE, 0.0);
+  auto negativeEMinYPos =
+      m_uiForm.ppRawPlot->addSingleSelector("NegativeEMinYPos", MantidWidgets::SingleSelector::YSINGLE, 0.0);
   negativeEMinYPos->setColour(Qt::blue);
   negativeEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
 
-  auto positiveEMinYPos = m_uiForm.ppRawPlot->addSingleSelector(
-      "PositiveEMinYPos", MantidWidgets::SingleSelector::YSINGLE, 1.0);
+  auto positiveEMinYPos =
+      m_uiForm.ppRawPlot->addSingleSelector("PositiveEMinYPos", MantidWidgets::SingleSelector::YSINGLE, 1.0);
   positiveEMinYPos->setColour(Qt::red);
   positiveEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
 
   // Indicator for centre of symmetry (x=0)
-  auto centreMarkRaw = m_uiForm.ppRawPlot->addSingleSelector(
-      "CentreMark", MantidWidgets::SingleSelector::XSINGLE, 0.0);
+  auto centreMarkRaw = m_uiForm.ppRawPlot->addSingleSelector("CentreMark", MantidWidgets::SingleSelector::XSINGLE, 0.0);
   centreMarkRaw->setColour(Qt::cyan);
   centreMarkRaw->setBounds(std::get<0>(xLimits), std::get<1>(xLimits));
 
@@ -112,35 +109,25 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
 
   // SIGNAL/SLOT CONNECTIONS
   // Validate the E range when it is changed
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(verifyERange(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(verifyERange(QtProperty *, double)));
   // Plot a new spectrum when the user changes the value of the preview spectrum
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(replotNewSpectrum(QtProperty *, double)));
   // Plot miniplot when file has finished loading
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this,
-          SLOT(handleDataReady(QString const &)));
+  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(QString const &)));
   // Preview symmetrise
   connect(m_uiForm.pbPreview, SIGNAL(clicked()), this, SLOT(preview()));
   // X range selectors
-  connect(positiveERaw, SIGNAL(minValueChanged(double)), this,
-          SLOT(xRangeMinChanged(double)));
-  connect(positiveERaw, SIGNAL(maxValueChanged(double)), this,
-          SLOT(xRangeMaxChanged(double)));
-  connect(negativeERaw, SIGNAL(minValueChanged(double)), this,
-          SLOT(xRangeMinChanged(double)));
-  connect(negativeERaw, SIGNAL(maxValueChanged(double)), this,
-          SLOT(xRangeMaxChanged(double)));
+  connect(positiveERaw, SIGNAL(minValueChanged(double)), this, SLOT(xRangeMinChanged(double)));
+  connect(positiveERaw, SIGNAL(maxValueChanged(double)), this, SLOT(xRangeMaxChanged(double)));
+  connect(negativeERaw, SIGNAL(minValueChanged(double)), this, SLOT(xRangeMinChanged(double)));
+  connect(negativeERaw, SIGNAL(maxValueChanged(double)), this, SLOT(xRangeMaxChanged(double)));
   // Handle running, plotting and saving
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
-  connect(this,
-          SIGNAL(updateRunButton(bool, std::string const &, QString const &,
-                                 QString const &)),
-          this,
-          SLOT(updateRunButton(bool, std::string const &, QString const &,
-                               QString const &)));
+  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), this,
+          SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
 
   // Set default X range values
   m_dblManager->setValue(m_properties["EMin"], 0.1);
@@ -162,9 +149,7 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   m_uiForm.dsInput->isForRunFiles(false);
 }
 
-IndirectSymmetrise::~IndirectSymmetrise() {
-  m_propTrees["SymmPropTree"]->unsetFactoryForManager(m_dblManager);
-}
+IndirectSymmetrise::~IndirectSymmetrise() { m_propTrees["SymmPropTree"]->unsetFactoryForManager(m_dblManager); }
 
 void IndirectSymmetrise::setup() {}
 
@@ -210,20 +195,17 @@ void IndirectSymmetrise::run() {
   m_uiForm.ppRawPlot->watchADS(false);
 
   QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
-  QString outputWorkspaceName = workspaceName.left(workspaceName.length() - 4) +
-                                "_sym" + workspaceName.right(4);
+  QString outputWorkspaceName = workspaceName.left(workspaceName.length() - 4) + "_sym" + workspaceName.right(4);
 
   double e_min = m_dblManager->value(m_properties["EMin"]);
   double e_max = m_dblManager->value(m_properties["EMax"]);
 
-  IAlgorithm_sptr symmetriseAlg =
-      AlgorithmManager::Instance().create("Symmetrise", -1);
+  IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise", -1);
   symmetriseAlg->initialize();
   symmetriseAlg->setProperty("InputWorkspace", workspaceName.toStdString());
   symmetriseAlg->setProperty("XMin", e_min);
   symmetriseAlg->setProperty("XMax", e_max);
-  symmetriseAlg->setProperty("OutputWorkspace",
-                             outputWorkspaceName.toStdString());
+  symmetriseAlg->setProperty("OutputWorkspace", outputWorkspaceName.toStdString());
   symmetriseAlg->setProperty("OutputPropertiesTable", "__SymmetriseProps_temp");
 
   m_batchAlgoRunner->addAlgorithm(symmetriseAlg);
@@ -232,8 +214,7 @@ void IndirectSymmetrise::run() {
   m_pythonExportWsName = outputWorkspaceName.toStdString();
 
   // Handle algorithm completion signal
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
   // Execute algorithm on seperate thread
   m_batchAlgoRunner->executeBatchAsync();
@@ -245,8 +226,7 @@ void IndirectSymmetrise::run() {
  * @param error If the algorithm failed
  */
 void IndirectSymmetrise::algorithmComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(algorithmComplete(bool)));
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   m_uiForm.ppRawPlot->watchADS(true);
 
   if (error)
@@ -266,11 +246,9 @@ void IndirectSymmetrise::algorithmComplete(bool error) {
  */
 void IndirectSymmetrise::plotNewData(QString const &workspaceName) {
   // Set the preview spectrum number to the first spectrum in the workspace
-  auto sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      workspaceName.toStdString());
+  auto sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
   int minSpectrumRange = sampleWS->getSpectrum(0).getSpectrumNo();
-  m_dblManager->setValue(m_properties["PreviewSpec"],
-                         static_cast<double>(minSpectrumRange));
+  m_dblManager->setValue(m_properties["PreviewSpec"], static_cast<double>(minSpectrumRange));
 
   updateMiniPlots();
 
@@ -294,12 +272,10 @@ void IndirectSymmetrise::plotNewData(QString const &workspaceName) {
   auto const yLimits = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
 
   // Set indicator positions
-  auto negativeEMinYPos =
-      m_uiForm.ppRawPlot->getSingleSelector("NegativeEMinYPos");
+  auto negativeEMinYPos = m_uiForm.ppRawPlot->getSingleSelector("NegativeEMinYPos");
   negativeEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
 
-  auto positiveEMinYPos =
-      m_uiForm.ppRawPlot->getSingleSelector("PositiveEMinYPos");
+  auto positiveEMinYPos = m_uiForm.ppRawPlot->getSingleSelector("PositiveEMinYPos");
   positiveEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
 
   auto centreMarkRaw = m_uiForm.ppRawPlot->getSingleSelector("CentreMark");
@@ -314,13 +290,10 @@ void IndirectSymmetrise::updateMiniPlots() {
     return;
 
   QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
-  int spectrumNumber =
-      static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"]));
+  int spectrumNumber = static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"]));
 
-  Mantid::API::MatrixWorkspace_sptr input =
-      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          Mantid::API::AnalysisDataService::Instance().retrieve(
-              workspaceName.toStdString()));
+  Mantid::API::MatrixWorkspace_sptr input = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName.toStdString()));
 
   // Plot the spectrum chosen by the user
   size_t spectrumIndex = input->getIndexFromSpectrumNumber(spectrumNumber);
@@ -345,12 +318,9 @@ void IndirectSymmetrise::replotNewSpectrum(QtProperty *prop, double value) {
     // Get the range of possible spectra numbers
     QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
     MatrixWorkspace_sptr sampleWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            workspaceName.toStdString());
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
     int minSpectrumRange = sampleWS->getSpectrum(0).getSpectrumNo();
-    int maxSpectrumRange =
-        sampleWS->getSpectrum(sampleWS->getNumberHistograms() - 1)
-            .getSpectrumNo();
+    int maxSpectrumRange = sampleWS->getSpectrum(sampleWS->getNumberHistograms() - 1).getSpectrumNo();
 
     // If entered value is lower then set spectra number to lowest valid value
     if (value < minSpectrumRange) {
@@ -422,8 +392,7 @@ void IndirectSymmetrise::verifyERange(QtProperty *prop, double value) {
  */
 void IndirectSymmetrise::preview() {
   // Handle algorithm completion signal
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(previewAlgDone(bool)));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(previewAlgDone(bool)));
   m_uiForm.ppRawPlot->watchADS(false);
 
   // Do nothing if no data has been laoded
@@ -435,19 +404,16 @@ void IndirectSymmetrise::preview() {
   double e_max = m_dblManager->value(m_properties["EMax"]);
 
   if (e_min == m_originalMin && e_max == m_originalMax) {
-    IndirectTab::showMessageBox(
-        "Preview has been called, but the max and min are still default. "
-        "Please update the min and max lines on the top graph.");
+    IndirectTab::showMessageBox("Preview has been called, but the max and min are still default. "
+                                "Please update the min and max lines on the top graph.");
     return;
   }
 
-  long spectrumNumber =
-      static_cast<long>(m_dblManager->value(m_properties["PreviewSpec"]));
+  long spectrumNumber = static_cast<long>(m_dblManager->value(m_properties["PreviewSpec"]));
   std::vector<long> spectraRange(2, spectrumNumber);
 
   // Run the algorithm on the preview spectrum only
-  IAlgorithm_sptr symmetriseAlg =
-      AlgorithmManager::Instance().create("Symmetrise", -1);
+  IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise", -1);
   symmetriseAlg->initialize();
   symmetriseAlg->setProperty("InputWorkspace", workspaceName.toStdString());
   symmetriseAlg->setProperty("XMin", e_min);
@@ -472,18 +438,13 @@ void IndirectSymmetrise::previewAlgDone(bool error) {
     return;
 
   QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
-  int spectrumNumber =
-      static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"]));
+  int spectrumNumber = static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"]));
 
   MatrixWorkspace_sptr sampleWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          workspaceName.toStdString());
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
   ITableWorkspace_sptr propsTable =
-      AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-          "__SymmetriseProps_temp");
-  MatrixWorkspace_sptr symmWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          "__Symmetrise_temp");
+      AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("__SymmetriseProps_temp");
+  MatrixWorkspace_sptr symmWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__Symmetrise_temp");
 
   // Get the index of XCut on each side of zero
   int negativeIndex = propsTable->getColumn("NegativeXMinIndex")->cell<int>(0);
@@ -501,25 +462,21 @@ void IndirectSymmetrise::previewAlgDone(bool error) {
 
   auto const yLimits = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
   // Set indicator positions
-  auto const negativeEMinYPos =
-      m_uiForm.ppRawPlot->getSingleSelector("NegativeEMinYPos");
+  auto const negativeEMinYPos = m_uiForm.ppRawPlot->getSingleSelector("NegativeEMinYPos");
   negativeEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
   negativeEMinYPos->setPosition(negativeY);
 
-  auto const positiveEMinYPos =
-      m_uiForm.ppRawPlot->getSingleSelector("PositiveEMinYPos");
+  auto const positiveEMinYPos = m_uiForm.ppRawPlot->getSingleSelector("PositiveEMinYPos");
   positiveEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
   positiveEMinYPos->setPosition(positiveY);
 
   // Plot preview plot
   size_t spectrumIndex = symmWS->getIndexFromSpectrumNumber(spectrumNumber);
   m_uiForm.ppPreviewPlot->clear();
-  m_uiForm.ppPreviewPlot->addSpectrum("Symmetrised", "__Symmetrise_temp",
-                                      spectrumIndex);
+  m_uiForm.ppPreviewPlot->addSpectrum("Symmetrised", "__Symmetrise_temp", spectrumIndex);
 
   // Don't want this to trigger when the algorithm is run for all spectra
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(previewAlgDone(bool)));
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(previewAlgDone(bool)));
   m_uiForm.ppRawPlot->watchADS(true);
 }
 
@@ -555,8 +512,7 @@ void IndirectSymmetrise::xRangeMinChanged(double value) {
   auto negativeERaw = m_uiForm.ppRawPlot->getRangeSelector("NegativeE");
   auto positiveERaw = m_uiForm.ppRawPlot->getRangeSelector("PositiveE");
 
-  MantidWidgets::RangeSelector *from =
-      qobject_cast<MantidWidgets::RangeSelector *>(sender());
+  MantidWidgets::RangeSelector *from = qobject_cast<MantidWidgets::RangeSelector *>(sender());
 
   if (from == positiveERaw) {
     m_dblManager->setValue(m_properties["EMin"], std::abs(value));
@@ -575,8 +531,7 @@ void IndirectSymmetrise::xRangeMaxChanged(double value) {
   auto negativeERaw = m_uiForm.ppRawPlot->getRangeSelector("NegativeE");
   auto positiveERaw = m_uiForm.ppRawPlot->getRangeSelector("PositiveE");
 
-  MantidWidgets::RangeSelector *from =
-      qobject_cast<MantidWidgets::RangeSelector *>(sender());
+  MantidWidgets::RangeSelector *from = qobject_cast<MantidWidgets::RangeSelector *>(sender());
 
   if (from == positiveERaw) {
     m_dblManager->setValue(m_properties["EMax"], std::abs(value));
@@ -589,10 +544,8 @@ void IndirectSymmetrise::xRangeMaxChanged(double value) {
 void IndirectSymmetrise::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Symmetrise");
-  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
-                                         : getExtensions(tabName));
-  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
-                                         : noSuffixes);
+  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
 /**
@@ -605,21 +558,14 @@ void IndirectSymmetrise::runClicked() { runTab(); }
  */
 void IndirectSymmetrise::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
-    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName),
-                            QString::fromStdString(m_pythonExportWsName));
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName), QString::fromStdString(m_pythonExportWsName));
 }
 
-void IndirectSymmetrise::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-}
+void IndirectSymmetrise::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void IndirectSymmetrise::setSaveEnabled(bool enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
-}
+void IndirectSymmetrise::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
-void IndirectSymmetrise::updateRunButton(bool enabled,
-                                         std::string const &enableOutputButtons,
-                                         QString const &message,
+void IndirectSymmetrise::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
                                          QString const &tooltip) {
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);

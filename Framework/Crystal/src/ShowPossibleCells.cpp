@@ -27,27 +27,22 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void ShowPossibleCells::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
-                            "PeaksWorkspace", "", Direction::InOut),
+  this->declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   this->declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "MaxScalarError", 0.2, mustBePositive, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("MaxScalarError", 0.2, mustBePositive, Direction::Input),
       "Max Scalar Error (0.2)");
 
-  this->declareProperty("BestOnly", true,
-                        "Show at most one for each Bravais Lattice");
+  this->declareProperty("BestOnly", true, "Show at most one for each Bravais Lattice");
 
-  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
-                            "NumberOfCells", 0, Direction::Output),
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>("NumberOfCells", 0, Direction::Output),
                         "Gets set with the number of possible cells.");
 
-  this->declareProperty("AllowPermutations", true,
-                        "Allow permutations of conventional cells");
+  this->declareProperty("AllowPermutations", true, "Allow permutations of conventional cells");
 }
 
 /** Execute the algorithm.
@@ -62,16 +57,14 @@ void ShowPossibleCells::exec() {
   const Matrix<double> &UB = o_lattice.getUB();
 
   if (!IndexingUtils::CheckUB(UB)) {
-    throw std::runtime_error(
-        "ERROR: The stored UB is not a valid orientation matrix");
+    throw std::runtime_error("ERROR: The stored UB is not a valid orientation matrix");
   }
 
   double max_scalar_error = this->getProperty("MaxScalarError");
   bool best_only = this->getProperty("BestOnly");
   bool allowPermutations = this->getProperty("AllowPermutations");
 
-  std::vector<ConventionalCell> list =
-      ScalarUtils::GetCells(UB, best_only, allowPermutations);
+  std::vector<ConventionalCell> list = ScalarUtils::GetCells(UB, best_only, allowPermutations);
 
   ScalarUtils::RemoveHighErrorForms(list, max_scalar_error);
 
@@ -82,8 +75,7 @@ void ShowPossibleCells::exec() {
 
   for (size_t i = 0; i < num_cells; i++) {
     DblMatrix newUB = list[i].GetNewUB();
-    std::string message = list[i].GetDescription() + " Lat Par:" +
-                          IndexingUtils::GetLatticeParameterString(newUB);
+    std::string message = list[i].GetDescription() + " Lat Par:" + IndexingUtils::GetLatticeParameterString(newUB);
 
     g_log.notice(std::string(message));
   }

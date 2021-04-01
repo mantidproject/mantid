@@ -30,22 +30,16 @@ public:
   }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"RingProfile", "RadiusSum"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"RingProfile", "RadiusSum"}; }
   const std::string category() const override;
 
-  static bool
-  inputWorkspaceHasInstrumentAssociated(const API::MatrixWorkspace_sptr &);
+  static bool inputWorkspaceHasInstrumentAssociated(const API::MatrixWorkspace_sptr &);
 
-  static std::vector<double>
-  getBoundariesOfNumericImage(const API::MatrixWorkspace_sptr &);
+  static std::vector<double> getBoundariesOfNumericImage(const API::MatrixWorkspace_sptr &);
 
-  static std::vector<double>
-  getBoundariesOfInstrument(const API::MatrixWorkspace_sptr &);
+  static std::vector<double> getBoundariesOfInstrument(const API::MatrixWorkspace_sptr &);
 
-  static void centerIsInsideLimits(const std::vector<double> &centre,
-                                   const std::vector<double> &boundaries);
+  static void centerIsInsideLimits(const std::vector<double> &centre, const std::vector<double> &boundaries);
 
 private:
   void init() override;
@@ -59,8 +53,7 @@ private:
   void numBinsIsReasonable();
   std::vector<double> getBoundariesOfInputWorkspace();
 
-  double getMaxDistance(const Kernel::V3D &centre,
-                        const std::vector<double> &boundary_limits);
+  double getMaxDistance(const Kernel::V3D &centre, const std::vector<double> &boundary_limits);
 
   void setUpOutputWorkspace(const std::vector<double> &values);
 
@@ -99,8 +92,7 @@ private:
    * return bin position.
    */
   int fromDistanceToBin(double distance) {
-    return static_cast<int>(((distance - min_radius) * num_bins) /
-                            (max_radius - min_radius));
+    return static_cast<int>(((distance - min_radius) * num_bins) / (max_radius - min_radius));
   }
 
   void normalizeOutputByRadius(std::vector<double> &values, double exp_power);

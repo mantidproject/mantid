@@ -14,8 +14,7 @@ namespace Mantid {
 namespace Algorithms {
 /** Filters events in an EventWorkspace using values in a SampleLog.
  */
-class MANTID_ALGORITHMS_DLL FilterByLogValue
-    : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL FilterByLogValue : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FilterByLogValue"; };
@@ -28,13 +27,10 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
-    return {"FilterByXValue", "FilterEvents", "FilterLogByTime",
-            "FilterBadPulses", "FilterByTime"};
+    return {"FilterByXValue", "FilterEvents", "FilterLogByTime", "FilterBadPulses", "FilterByTime"};
   }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Events\\EventFiltering";
-  }
+  const std::string category() const override { return "Events\\EventFiltering"; }
 
   std::map<std::string, std::string> validateInputs() override;
 

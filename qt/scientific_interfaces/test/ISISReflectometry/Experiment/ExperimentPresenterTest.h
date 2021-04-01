@@ -21,8 +21,7 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
-using namespace MantidQt::CustomInterfaces::ISISReflectometry::
-    ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using testing::_;
 using testing::AtLeast;
 using testing::Mock;
@@ -40,14 +39,10 @@ class ExperimentPresenterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ExperimentPresenterTest *createSuite() {
-    return new ExperimentPresenterTest();
-  }
+  static ExperimentPresenterTest *createSuite() { return new ExperimentPresenterTest(); }
   static void destroySuite(ExperimentPresenterTest *suite) { delete suite; }
 
-  ExperimentPresenterTest() : m_view() {
-    Mantid::API::FrameworkManager::Instance();
-  }
+  ExperimentPresenterTest() : m_view() { Mantid::API::FrameworkManager::Instance(); }
 
   void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
@@ -98,12 +93,10 @@ public:
   void testModelUpdatedWhenAnalysisModeChanged() {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getAnalysisMode())
-        .WillOnce(Return(std::string("MultiDetectorAnalysis")));
+    EXPECT_CALL(m_view, getAnalysisMode()).WillOnce(Return(std::string("MultiDetectorAnalysis")));
     presenter.notifySettingsChanged();
 
-    TS_ASSERT_EQUALS(presenter.experiment().analysisMode(),
-                     AnalysisMode::MultiDetector);
+    TS_ASSERT_EQUALS(presenter.experiment().analysisMode(), AnalysisMode::MultiDetector);
     verifyAndClear();
   }
 
@@ -113,8 +106,7 @@ public:
     expectViewReturnsSumInQDefaults();
     presenter.notifySummationTypeChanged();
 
-    TS_ASSERT_EQUALS(presenter.experiment().summationType(),
-                     SummationType::SumInQ);
+    TS_ASSERT_EQUALS(presenter.experiment().summationType(), SummationType::SumInQ);
     verifyAndClear();
   }
 
@@ -169,8 +161,7 @@ public:
     verifyAndClear();
   }
 
-  void
-  testBackgroundSubtractionMethodIsEnabledWhenSubtractBackgroundIsChecked() {
+  void testBackgroundSubtractionMethodIsEnabledWhenSubtractBackgroundIsChecked() {
     auto presenter = makePresenter();
     expectSubtractBackground(true);
     EXPECT_CALL(m_view, enableBackgroundSubtractionMethod()).Times(1);
@@ -225,25 +216,19 @@ public:
 
   void testSetFloodCorrectionsUpdatesModel() {
     auto presenter = makePresenter();
-    FloodCorrections floodCorr(FloodCorrectionType::Workspace,
-                               std::string{"testWS"});
+    FloodCorrections floodCorr(FloodCorrectionType::Workspace, std::string{"testWS"});
 
     EXPECT_CALL(m_view, getFloodCorrectionType()).WillOnce(Return("Workspace"));
-    EXPECT_CALL(m_view, getFloodWorkspace())
-        .WillOnce(Return(floodCorr.workspace().get()));
+    EXPECT_CALL(m_view, getFloodWorkspace()).WillOnce(Return(floodCorr.workspace().get()));
     presenter.notifySettingsChanged();
 
     TS_ASSERT_EQUALS(presenter.experiment().floodCorrections(), floodCorr);
     verifyAndClear();
   }
 
-  void testSetFloodCorrectionsToWorkspaceEnablesInputs() {
-    runWithFloodCorrectionInputsEnabled("Workspace");
-  }
+  void testSetFloodCorrectionsToWorkspaceEnablesInputs() { runWithFloodCorrectionInputsEnabled("Workspace"); }
 
-  void testSetFloodCorrectionsToParameterFileDisablesInputs() {
-    runWithFloodCorrectionInputsDisabled("ParameterFile");
-  }
+  void testSetFloodCorrectionsToParameterFileDisablesInputs() { runWithFloodCorrectionInputsDisabled("ParameterFile"); }
 
   void testSetValidTransmissionRunRange() {
     RangeInLambda range(7.2, 10);
@@ -275,49 +260,30 @@ public:
     runTestForValidTransmissionRunRange(range, boost::none);
   }
 
-  void testTransmissionParamsAreValidWithPositiveValue() {
-    runTestForValidTransmissionParams("0.02");
-  }
+  void testTransmissionParamsAreValidWithPositiveValue() { runTestForValidTransmissionParams("0.02"); }
 
-  void testTransmissionParamsAreValidWithNoValues() {
-    runTestForValidTransmissionParams("");
-  }
+  void testTransmissionParamsAreValidWithNoValues() { runTestForValidTransmissionParams(""); }
 
-  void testTransmissionParamsAreValidWithNegativeValue() {
-    runTestForValidTransmissionParams("-0.02");
-  }
+  void testTransmissionParamsAreValidWithNegativeValue() { runTestForValidTransmissionParams("-0.02"); }
 
-  void testTransmissionParamsAreValidWithThreeValues() {
-    runTestForValidTransmissionParams("0.1, -0.02, 5");
-  }
+  void testTransmissionParamsAreValidWithThreeValues() { runTestForValidTransmissionParams("0.1, -0.02, 5"); }
 
-  void testTransmissionParamsAreValidWithFiveValues() {
-    runTestForValidTransmissionParams("0.1, -0.02, 5, 6, 7.9");
-  }
+  void testTransmissionParamsAreValidWithFiveValues() { runTestForValidTransmissionParams("0.1, -0.02, 5, 6, 7.9"); }
 
-  void testTransmissionParamsIgnoresWhitespace() {
-    runTestForValidTransmissionParams("    0.1  , -0.02 , 5   ");
-  }
+  void testTransmissionParamsIgnoresWhitespace() { runTestForValidTransmissionParams("    0.1  , -0.02 , 5   "); }
 
-  void testTransmissionParamsAreInvalidWithTwoValues() {
-    runTestForInvalidTransmissionParams("1, 2");
-  }
+  void testTransmissionParamsAreInvalidWithTwoValues() { runTestForInvalidTransmissionParams("1, 2"); }
 
-  void testTransmissionParamsAreInvalidWithFourValues() {
-    runTestForInvalidTransmissionParams("1, 2, 3, 4");
-  }
+  void testTransmissionParamsAreInvalidWithFourValues() { runTestForInvalidTransmissionParams("1, 2, 3, 4"); }
 
   void testSetTransmissionScaleRHSProperty() {
     auto presenter = makePresenter();
     auto const scaleRHS = false;
 
-    EXPECT_CALL(m_view, getTransmissionScaleRHSWorkspace())
-        .WillOnce(Return(scaleRHS));
+    EXPECT_CALL(m_view, getTransmissionScaleRHSWorkspace()).WillOnce(Return(scaleRHS));
     presenter.notifySettingsChanged();
 
-    TS_ASSERT_EQUALS(
-        presenter.experiment().transmissionStitchOptions().scaleRHS(),
-        scaleRHS);
+    TS_ASSERT_EQUALS(presenter.experiment().transmissionStitchOptions().scaleRHS(), scaleRHS);
     verifyAndClear();
   }
 
@@ -329,9 +295,7 @@ public:
     EXPECT_CALL(m_view, showTransmissionStitchParamsInvalid());
     presenter.notifySettingsChanged();
 
-    TS_ASSERT_EQUALS(
-        presenter.experiment().transmissionStitchOptions().rebinParameters(),
-        "");
+    TS_ASSERT_EQUALS(presenter.experiment().transmissionStitchOptions().rebinParameters(), "");
     verifyAndClear();
   }
 
@@ -357,8 +321,7 @@ public:
     EXPECT_CALL(m_view, showStitchParametersInvalid());
     presenter.notifySettingsChanged();
 
-    TS_ASSERT_EQUALS(presenter.experiment().stitchParameters(),
-                     emptyOptionsMap);
+    TS_ASSERT_EQUALS(presenter.experiment().stitchParameters(), emptyOptionsMap);
     verifyAndClear();
   }
 
@@ -392,8 +355,7 @@ public:
 
     auto const row = 1;
     auto const column = 0;
-    OptionsTable const optionsTable = {optionsRowWithFirstAngle(),
-                                       optionsRowWithSecondAngle()};
+    OptionsTable const optionsTable = {optionsRowWithFirstAngle(), optionsRowWithSecondAngle()};
     EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
     presenter.notifyPerAngleDefaultsChanged(row, column);
 
@@ -406,14 +368,12 @@ public:
   }
 
   void testMultipleUniqueAnglesAreValid() {
-    OptionsTable const optionsTable = {optionsRowWithFirstAngle(),
-                                       optionsRowWithSecondAngle()};
+    OptionsTable const optionsTable = {optionsRowWithFirstAngle(), optionsRowWithSecondAngle()};
     runTestForValidPerAngleOptions(optionsTable);
   }
 
   void testMultipleNonUniqueAnglesAreInvalid() {
-    OptionsTable const optionsTable = {optionsRowWithFirstAngle(),
-                                       optionsRowWithFirstAngle()};
+    OptionsTable const optionsTable = {optionsRowWithFirstAngle(), optionsRowWithFirstAngle()};
     runTestForNonUniqueAngles(optionsTable);
   }
 
@@ -423,16 +383,13 @@ public:
   }
 
   void testAngleAndWildcardRowAreValid() {
-    OptionsTable const optionsTable = {optionsRowWithFirstAngle(),
-                                       optionsRowWithWildcard()};
+    OptionsTable const optionsTable = {optionsRowWithFirstAngle(), optionsRowWithWildcard()};
     runTestForValidPerAngleOptions(optionsTable);
   }
 
   void testMultipleWildcardRowsAreInvalid() {
-    OptionsTable const optionsTable = {optionsRowWithWildcard(),
-                                       optionsRowWithWildcard()};
-    runTestForInvalidPerAngleOptions(optionsTable, {0, 1},
-                                     PerThetaDefaults::Column::THETA);
+    OptionsTable const optionsTable = {optionsRowWithWildcard(), optionsRowWithWildcard()};
+    runTestForInvalidPerAngleOptions(optionsTable, {0, 1}, PerThetaDefaults::Column::THETA);
   }
 
   void testSetFirstTransmissionRun() {
@@ -442,8 +399,7 @@ public:
 
   void testSetSecondTransmissionRun() {
     OptionsTable const optionsTable = {optionsRowWithSecondTransmissionRun()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0,
-                                     PerThetaDefaults::Column::FIRST_TRANS);
+    runTestForInvalidPerAngleOptions(optionsTable, 0, PerThetaDefaults::Column::FIRST_TRANS);
   }
 
   void testSetBothTransmissionRuns() {
@@ -452,16 +408,13 @@ public:
   }
 
   void testSetTransmissionProcessingInstructionsValid() {
-    OptionsTable const optionsTable = {
-        optionsRowWithTransProcessingInstructions()};
+    OptionsTable const optionsTable = {optionsRowWithTransProcessingInstructions()};
     runTestForValidPerAngleOptions(optionsTable);
   }
 
   void testSetTransmissionProcessingInstructionsInvalid() {
-    OptionsTable const optionsTable = {
-        optionsRowWithTransProcessingInstructionsInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0,
-                                     PerThetaDefaults::Column::TRANS_SPECTRA);
+    OptionsTable const optionsTable = {optionsRowWithTransProcessingInstructionsInvalid()};
+    runTestForInvalidPerAngleOptions(optionsTable, 0, PerThetaDefaults::Column::TRANS_SPECTRA);
   }
 
   void testSetQMin() {
@@ -471,8 +424,7 @@ public:
 
   void testSetQMinInvalid() {
     OptionsTable const optionsTable = {optionsRowWithQMinInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0,
-                                     PerThetaDefaults::Column::QMIN);
+    runTestForInvalidPerAngleOptions(optionsTable, 0, PerThetaDefaults::Column::QMIN);
   }
 
   void testSetQMax() {
@@ -482,8 +434,7 @@ public:
 
   void testSetQMaxInvalid() {
     OptionsTable const optionsTable = {optionsRowWithQMaxInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0,
-                                     PerThetaDefaults::Column::QMAX);
+    runTestForInvalidPerAngleOptions(optionsTable, 0, PerThetaDefaults::Column::QMAX);
   }
 
   void testSetQStep() {
@@ -493,8 +444,7 @@ public:
 
   void testSetQStepInvalid() {
     OptionsTable const optionsTable = {optionsRowWithQStepInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0,
-                                     PerThetaDefaults::Column::QSTEP);
+    runTestForInvalidPerAngleOptions(optionsTable, 0, PerThetaDefaults::Column::QSTEP);
   }
 
   void testSetScale() {
@@ -504,8 +454,7 @@ public:
 
   void testSetScaleInvalid() {
     OptionsTable const optionsTable = {optionsRowWithScaleInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0,
-                                     PerThetaDefaults::Column::SCALE);
+    runTestForInvalidPerAngleOptions(optionsTable, 0, PerThetaDefaults::Column::SCALE);
   }
 
   void testSetProcessingInstructions() {
@@ -514,23 +463,18 @@ public:
   }
 
   void testSetProcessingInstructionsInvalid() {
-    OptionsTable const optionsTable = {
-        optionsRowWithProcessingInstructionsInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0,
-                                     PerThetaDefaults::Column::RUN_SPECTRA);
+    OptionsTable const optionsTable = {optionsRowWithProcessingInstructionsInvalid()};
+    runTestForInvalidPerAngleOptions(optionsTable, 0, PerThetaDefaults::Column::RUN_SPECTRA);
   }
 
   void testSetBackgroundProcessingInstructionsValid() {
-    OptionsTable const optionsTable = {
-        optionsRowWithBackgroundProcessingInstructions()};
+    OptionsTable const optionsTable = {optionsRowWithBackgroundProcessingInstructions()};
     runTestForValidPerAngleOptions(optionsTable);
   }
 
   void testSetBackgroundProcessingInstructionsInvalid() {
-    OptionsTable const optionsTable = {
-        optionsRowWithBackgroundProcessingInstructionsInvalid()};
-    runTestForInvalidPerAngleOptions(
-        optionsTable, 0, PerThetaDefaults::Column::BACKGROUND_SPECTRA);
+    OptionsTable const optionsTable = {optionsRowWithBackgroundProcessingInstructionsInvalid()};
+    runTestForInvalidPerAngleOptions(optionsTable, 0, PerThetaDefaults::Column::BACKGROUND_SPECTRA);
   }
 
   void testChangingSettingsNotifiesMainPresenter() {
@@ -568,14 +512,12 @@ public:
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
-    TS_ASSERT_EQUALS(presenter.experiment().analysisMode(),
-                     AnalysisMode::MultiDetector);
+    TS_ASSERT_EQUALS(presenter.experiment().analysisMode(), AnalysisMode::MultiDetector);
     verifyAndClear();
   }
 
   void testInstrumentChangedUpdatesReductionOptionsInView() {
-    auto model = makeModelWithReduction(SummationType::SumInQ,
-                                        ReductionType::NonFlatSample, true);
+    auto model = makeModelWithReduction(SummationType::SumInQ, ReductionType::NonFlatSample, true);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setSummationType("SumInQ")).Times(1);
@@ -586,15 +528,12 @@ public:
   }
 
   void testInstrumentChangedUpdatesReductionOptionsInModel() {
-    auto model = makeModelWithReduction(SummationType::SumInQ,
-                                        ReductionType::NonFlatSample, true);
+    auto model = makeModelWithReduction(SummationType::SumInQ, ReductionType::NonFlatSample, true);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
-    TS_ASSERT_EQUALS(presenter.experiment().summationType(),
-                     SummationType::SumInQ);
-    TS_ASSERT_EQUALS(presenter.experiment().reductionType(),
-                     ReductionType::NonFlatSample);
+    TS_ASSERT_EQUALS(presenter.experiment().summationType(), SummationType::SumInQ);
+    TS_ASSERT_EQUALS(presenter.experiment().reductionType(), ReductionType::NonFlatSample);
     TS_ASSERT_EQUALS(presenter.experiment().includePartialBins(), true);
     verifyAndClear();
   }
@@ -618,36 +557,29 @@ public:
   }
 
   void testInstrumentChangedUpdatesPerThetaInView() {
-    auto perThetaDefaults =
-        PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none,
-                         RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415"),
-                         std::string("370-389,416-430"));
+    auto perThetaDefaults = PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
+                                             0.7, std::string("390-415"), std::string("370-389,416-430"));
     auto model = makeModelWithPerThetaDefaults(std::move(perThetaDefaults));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     auto const expected = std::vector<PerThetaDefaults::ValueArray>{
-        {"", "", "", "", "0.010000", "0.200000", "0.030000", "0.700000",
-         "390-415", "370-389,416-430"}};
+        {"", "", "", "", "0.010000", "0.200000", "0.030000", "0.700000", "390-415", "370-389,416-430"}};
     EXPECT_CALL(m_view, setPerAngleOptions(expected)).Times(1);
     presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
   }
 
   void testInstrumentChangedUpdatesPerThetaInModel() {
-    auto model = makeModelWithPerThetaDefaults(
-        PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none,
-                         RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415"),
-                         std::string("370-389,416-430")));
+    auto model = makeModelWithPerThetaDefaults(PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none,
+                                                                RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415"),
+                                                                std::string("370-389,416-430")));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
-    auto expected =
-        PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none,
-                         RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415"),
-                         std::string("370-389,416-430"));
+    auto expected = PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2), 0.7,
+                                     std::string("390-415"), std::string("370-389,416-430"));
     TS_ASSERT_EQUALS(presenter.experiment().perThetaDefaults().size(), 1);
-    TS_ASSERT_EQUALS(presenter.experiment().perThetaDefaults().front(),
-                     expected);
+    TS_ASSERT_EQUALS(presenter.experiment().perThetaDefaults().front(), expected);
     verifyAndClear();
   }
 
@@ -668,17 +600,14 @@ public:
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
     auto const expected = RangeInLambda{10.0, 12.0};
-    TS_ASSERT_EQUALS(
-        presenter.experiment().transmissionStitchOptions().overlapRange(),
-        expected);
+    TS_ASSERT_EQUALS(presenter.experiment().transmissionStitchOptions().overlapRange(), expected);
     verifyAndClear();
   }
 
   void testInstrumentChangedUpdatesCorrectionInView() {
-    auto model = makeModelWithCorrections(
-        PolarizationCorrections(PolarizationCorrectionType::ParameterFile),
-        FloodCorrections(FloodCorrectionType::ParameterFile),
-        makeBackgroundSubtraction());
+    auto model =
+        makeModelWithCorrections(PolarizationCorrections(PolarizationCorrectionType::ParameterFile),
+                                 FloodCorrections(FloodCorrectionType::ParameterFile), makeBackgroundSubtraction());
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setPolarizationCorrectionOption(true)).Times(1);
@@ -692,10 +621,9 @@ public:
   }
 
   void testInstrumentChangedUpdatesCorrectionInModel() {
-    auto model = makeModelWithCorrections(
-        PolarizationCorrections(PolarizationCorrectionType::ParameterFile),
-        FloodCorrections(FloodCorrectionType::ParameterFile),
-        makeBackgroundSubtraction());
+    auto model =
+        makeModelWithCorrections(PolarizationCorrections(PolarizationCorrectionType::ParameterFile),
+                                 FloodCorrections(FloodCorrectionType::ParameterFile), makeBackgroundSubtraction());
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
@@ -740,73 +668,50 @@ private:
   double m_thetaTolerance{0.01};
 
   Experiment makeModelWithAnalysisMode(AnalysisMode analysisMode) {
-    return Experiment(
-        analysisMode, ReductionType::Normal, SummationType::SumInLambda, false,
-        false, BackgroundSubtraction(), makeEmptyPolarizationCorrections(),
-        makeFloodCorrections(), makeEmptyTransmissionStitchOptions(),
-        makeEmptyStitchOptions(), makePerThetaDefaults());
+    return Experiment(analysisMode, ReductionType::Normal, SummationType::SumInLambda, false, false,
+                      BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
+                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makePerThetaDefaults());
   }
 
-  Experiment makeModelWithReduction(SummationType summationType,
-                                    ReductionType reductionType,
-                                    bool includePartialBins) {
-    return Experiment(AnalysisMode::PointDetector, reductionType, summationType,
-                      includePartialBins, false, BackgroundSubtraction(),
-                      makeEmptyPolarizationCorrections(),
-                      makeFloodCorrections(),
-                      makeEmptyTransmissionStitchOptions(),
-                      makeEmptyStitchOptions(), makePerThetaDefaults());
+  Experiment makeModelWithReduction(SummationType summationType, ReductionType reductionType, bool includePartialBins) {
+    return Experiment(AnalysisMode::PointDetector, reductionType, summationType, includePartialBins, false,
+                      BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
+                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makePerThetaDefaults());
   }
 
   Experiment makeModelWithDebug(bool debug) {
-    return Experiment(
-        AnalysisMode::PointDetector, ReductionType::Normal,
-        SummationType::SumInLambda, false, debug, BackgroundSubtraction(),
-        makeEmptyPolarizationCorrections(), makeFloodCorrections(),
-        makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(),
-        makePerThetaDefaults());
+    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, debug,
+                      BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
+                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makePerThetaDefaults());
   }
 
   Experiment makeModelWithPerThetaDefaults(PerThetaDefaults perThetaDefaults) {
     auto perThetaList = std::vector<PerThetaDefaults>();
     perThetaList.emplace_back(std::move(perThetaDefaults));
-    return Experiment(
-        AnalysisMode::PointDetector, ReductionType::Normal,
-        SummationType::SumInLambda, false, false, BackgroundSubtraction(),
-        makeEmptyPolarizationCorrections(), makeFloodCorrections(),
-        makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(),
-        std::move(perThetaList));
+    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
+                      BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
+                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), std::move(perThetaList));
   }
 
   Experiment makeModelWithTransmissionRunRange(RangeInLambda range) {
-    return Experiment(
-        AnalysisMode::PointDetector, ReductionType::Normal,
-        SummationType::SumInLambda, false, false, BackgroundSubtraction(),
-        makeEmptyPolarizationCorrections(), makeFloodCorrections(),
-        TransmissionStitchOptions(std::move(range), std::string(), false),
-        makeEmptyStitchOptions(), makePerThetaDefaults());
+    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
+                      BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
+                      TransmissionStitchOptions(std::move(range), std::string(), false), makeEmptyStitchOptions(),
+                      makePerThetaDefaults());
   }
 
-  Experiment
-  makeModelWithCorrections(PolarizationCorrections polarizationCorrections,
-                           FloodCorrections floodCorrections,
-                           BackgroundSubtraction backgroundSubtraction) {
-    return Experiment(
-        AnalysisMode::PointDetector, ReductionType::Normal,
-        SummationType::SumInLambda, false, false,
-        std::move(backgroundSubtraction), std::move(polarizationCorrections),
-        std::move(floodCorrections), makeEmptyTransmissionStitchOptions(),
-        makeEmptyStitchOptions(), makePerThetaDefaults());
+  Experiment makeModelWithCorrections(PolarizationCorrections polarizationCorrections,
+                                      FloodCorrections floodCorrections, BackgroundSubtraction backgroundSubtraction) {
+    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
+                      std::move(backgroundSubtraction), std::move(polarizationCorrections), std::move(floodCorrections),
+                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makePerThetaDefaults());
   }
 
-  ExperimentPresenter
-  makePresenter(std::unique_ptr<IExperimentOptionDefaults> defaultOptions =
-                    std::make_unique<MockExperimentOptionDefaults>()) {
+  ExperimentPresenter makePresenter(
+      std::unique_ptr<IExperimentOptionDefaults> defaultOptions = std::make_unique<MockExperimentOptionDefaults>()) {
     // The presenter gets values from the view on construction so the view must
     // return something sensible
-    auto presenter =
-        ExperimentPresenter(&m_view, makeEmptyExperiment(), m_thetaTolerance,
-                            std::move(defaultOptions));
+    auto presenter = ExperimentPresenter(&m_view, makeEmptyExperiment(), m_thetaTolerance, std::move(defaultOptions));
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }
@@ -816,95 +721,54 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
   }
 
-  void expectProcessing() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(1)
-        .WillOnce(Return(true));
-  }
+  void expectProcessing() { EXPECT_CALL(m_mainPresenter, isProcessing()).Times(1).WillOnce(Return(true)); }
 
-  void expectAutoreducing() {
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(1)
-        .WillOnce(Return(true));
-  }
+  void expectAutoreducing() { EXPECT_CALL(m_mainPresenter, isAutoreducing()).Times(1).WillOnce(Return(true)); }
 
   void expectNotProcessingOrAutoreducing() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(1)
-        .WillOnce(Return(false));
+    EXPECT_CALL(m_mainPresenter, isProcessing()).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing()).Times(1).WillOnce(Return(false));
   }
 
   void expectViewReturnsSumInQDefaults() {
-    EXPECT_CALL(m_view, getSummationType())
-        .WillOnce(Return(std::string("SumInQ")));
-    EXPECT_CALL(m_view, getReductionType())
-        .WillOnce(Return(std::string("DivergentBeam")));
+    EXPECT_CALL(m_view, getSummationType()).WillOnce(Return(std::string("SumInQ")));
+    EXPECT_CALL(m_view, getReductionType()).WillOnce(Return(std::string("DivergentBeam")));
   }
 
-  void expectSubtractBackground(
-      bool subtractBackground = true,
-      std::string const &subtractionType = std::string("Polynomial"),
-      int degreeOfPolynomial = 3,
-      std::string const &costFunction =
-          std::string("Unweighted least squares")) {
-    EXPECT_CALL(m_view, getSubtractBackground())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(subtractBackground));
-    EXPECT_CALL(m_view, getBackgroundSubtractionMethod())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(subtractionType));
-    EXPECT_CALL(m_view, getPolynomialDegree())
-        .Times(1)
-        .WillRepeatedly(Return(degreeOfPolynomial));
-    EXPECT_CALL(m_view, getCostFunction())
-        .Times(1)
-        .WillRepeatedly(Return(costFunction));
+  void expectSubtractBackground(bool subtractBackground = true,
+                                std::string const &subtractionType = std::string("Polynomial"),
+                                int degreeOfPolynomial = 3,
+                                std::string const &costFunction = std::string("Unweighted least squares")) {
+    EXPECT_CALL(m_view, getSubtractBackground()).Times(AtLeast(1)).WillRepeatedly(Return(subtractBackground));
+    EXPECT_CALL(m_view, getBackgroundSubtractionMethod()).Times(AtLeast(1)).WillRepeatedly(Return(subtractionType));
+    EXPECT_CALL(m_view, getPolynomialDegree()).Times(1).WillRepeatedly(Return(degreeOfPolynomial));
+    EXPECT_CALL(m_view, getCostFunction()).Times(1).WillRepeatedly(Return(costFunction));
   }
 
   void assertBackgroundSubtractionOptionsSet(
       ExperimentPresenter const &presenter, bool subtractBackground = true,
-      BackgroundSubtractionType subtractionType =
-          BackgroundSubtractionType::Polynomial,
-      int degreeOfPolynomial = 3,
-      CostFunctionType costFunction =
-          CostFunctionType::UnweightedLeastSquares) {
-    TS_ASSERT_EQUALS(
-        presenter.experiment().backgroundSubtraction().subtractBackground(),
-        subtractBackground);
-    TS_ASSERT_EQUALS(
-        presenter.experiment().backgroundSubtraction().subtractionType(),
-        subtractionType);
-    TS_ASSERT_EQUALS(
-        presenter.experiment().backgroundSubtraction().degreeOfPolynomial(),
-        degreeOfPolynomial);
-    TS_ASSERT_EQUALS(
-        presenter.experiment().backgroundSubtraction().costFunction(),
-        costFunction);
+      BackgroundSubtractionType subtractionType = BackgroundSubtractionType::Polynomial, int degreeOfPolynomial = 3,
+      CostFunctionType costFunction = CostFunctionType::UnweightedLeastSquares) {
+    TS_ASSERT_EQUALS(presenter.experiment().backgroundSubtraction().subtractBackground(), subtractBackground);
+    TS_ASSERT_EQUALS(presenter.experiment().backgroundSubtraction().subtractionType(), subtractionType);
+    TS_ASSERT_EQUALS(presenter.experiment().backgroundSubtraction().degreeOfPolynomial(), degreeOfPolynomial);
+    TS_ASSERT_EQUALS(presenter.experiment().backgroundSubtraction().costFunction(), costFunction);
   }
 
   void expectPolarizationAnalysisOn() {
-    EXPECT_CALL(m_view, getPolarizationCorrectionOption())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(AtLeast(1)).WillRepeatedly(Return(true));
   }
 
   void assertPolarizationAnalysisOn(ExperimentPresenter const &presenter) {
-    TS_ASSERT_EQUALS(
-        presenter.experiment().polarizationCorrections().correctionType(),
-        PolarizationCorrectionType::ParameterFile);
+    TS_ASSERT_EQUALS(presenter.experiment().polarizationCorrections().correctionType(),
+                     PolarizationCorrectionType::ParameterFile);
   }
 
-  void
-  assertFloodCorrectionUsesParameterFile(ExperimentPresenter const &presenter) {
-    TS_ASSERT_EQUALS(presenter.experiment().floodCorrections().correctionType(),
-                     FloodCorrectionType::ParameterFile);
+  void assertFloodCorrectionUsesParameterFile(ExperimentPresenter const &presenter) {
+    TS_ASSERT_EQUALS(presenter.experiment().floodCorrections().correctionType(), FloodCorrectionType::ParameterFile);
   }
 
-  std::unique_ptr<MockExperimentOptionDefaults>
-  expectDefaults(Experiment const &model) {
+  std::unique_ptr<MockExperimentOptionDefaults> expectDefaults(Experiment const &model) {
     // Create a defaults object, set expectations on it, and return it so
     // that it can be passed to the presenter
     auto defaultOptions = std::make_unique<MockExperimentOptionDefaults>();
@@ -912,26 +776,20 @@ private:
     return defaultOptions;
   }
 
-  void runTestThatPolarizationCorrectionsAreEnabledForInstrument(
-      std::string const &instrument) {
+  void runTestThatPolarizationCorrectionsAreEnabledForInstrument(std::string const &instrument) {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_mainPresenter, instrumentName())
-        .Times(1)
-        .WillOnce(Return(instrument));
+    EXPECT_CALL(m_mainPresenter, instrumentName()).Times(1).WillOnce(Return(instrument));
     EXPECT_CALL(m_view, enablePolarizationCorrections()).Times(1);
     presenter.notifySettingsChanged();
 
     verifyAndClear();
   }
 
-  void runTestThatPolarizationCorrectionsAreDisabledForInstrument(
-      std::string const &instrument) {
+  void runTestThatPolarizationCorrectionsAreDisabledForInstrument(std::string const &instrument) {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_mainPresenter, instrumentName())
-        .Times(1)
-        .WillOnce(Return(instrument));
+    EXPECT_CALL(m_mainPresenter, instrumentName()).Times(1).WillOnce(Return(instrument));
     EXPECT_CALL(m_view, setPolarizationCorrectionOption(false)).Times(1);
     EXPECT_CALL(m_view, disablePolarizationCorrections()).Times(1);
     presenter.notifySettingsChanged();
@@ -961,33 +819,23 @@ private:
     verifyAndClear();
   }
 
-  void runTestForValidTransmissionRunRange(
-      RangeInLambda const &range,
-      boost::optional<RangeInLambda> const &result) {
+  void runTestForValidTransmissionRunRange(RangeInLambda const &range, boost::optional<RangeInLambda> const &result) {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getTransmissionStartOverlap())
-        .WillOnce(Return(range.min()));
-    EXPECT_CALL(m_view, getTransmissionEndOverlap())
-        .WillOnce(Return(range.max()));
+    EXPECT_CALL(m_view, getTransmissionStartOverlap()).WillOnce(Return(range.min()));
+    EXPECT_CALL(m_view, getTransmissionEndOverlap()).WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showTransmissionRangeValid()).Times(1);
     presenter.notifySettingsChanged();
-    TS_ASSERT_EQUALS(
-        presenter.experiment().transmissionStitchOptions().overlapRange(),
-        result);
+    TS_ASSERT_EQUALS(presenter.experiment().transmissionStitchOptions().overlapRange(), result);
     verifyAndClear();
   }
 
   void runTestForInvalidTransmissionRunRange(RangeInLambda const &range) {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getTransmissionStartOverlap())
-        .WillOnce(Return(range.min()));
-    EXPECT_CALL(m_view, getTransmissionEndOverlap())
-        .WillOnce(Return(range.max()));
+    EXPECT_CALL(m_view, getTransmissionStartOverlap()).WillOnce(Return(range.min()));
+    EXPECT_CALL(m_view, getTransmissionEndOverlap()).WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showTransmissionRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
-    TS_ASSERT_EQUALS(
-        presenter.experiment().transmissionStitchOptions().overlapRange(),
-        boost::none);
+    TS_ASSERT_EQUALS(presenter.experiment().transmissionStitchOptions().overlapRange(), boost::none);
     verifyAndClear();
   }
 
@@ -995,51 +843,32 @@ private:
   // either as an input array of strings or an output model
   OptionsRow optionsRowWithFirstAngle() { return {"0.5", "13463", ""}; }
   PerThetaDefaults defaultsWithFirstAngle() {
-    return PerThetaDefaults(0.5, TransmissionRunPair("13463", ""), boost::none,
-                            RangeInQ(), boost::none, boost::none, boost::none);
+    return PerThetaDefaults(0.5, TransmissionRunPair("13463", ""), boost::none, RangeInQ(), boost::none, boost::none,
+                            boost::none);
   }
 
   OptionsRow optionsRowWithSecondAngle() { return {"2.3", "13463", "13464"}; }
   PerThetaDefaults defaultsWithSecondAngle() {
-    return PerThetaDefaults(2.3, TransmissionRunPair("13463", "13464"),
-                            boost::none, RangeInQ(), boost::none, boost::none,
-                            boost::none);
+    return PerThetaDefaults(2.3, TransmissionRunPair("13463", "13464"), boost::none, RangeInQ(), boost::none,
+                            boost::none, boost::none);
   }
   OptionsRow optionsRowWithWildcard() { return {"", "13463", "13464"}; }
   OptionsRow optionsRowWithFirstTransmissionRun() { return {"", "13463"}; }
   OptionsRow optionsRowWithSecondTransmissionRun() { return {"", "", "13464"}; }
-  OptionsRow optionsRowWithBothTransmissionRuns() {
-    return {"", "13463", "13464"};
-  }
-  OptionsRow optionsRowWithTransProcessingInstructions() {
-    return {"", "", "", "1-4"};
-  }
-  OptionsRow optionsRowWithTransProcessingInstructionsInvalid() {
-    return {"", "", "", "bad"};
-  }
+  OptionsRow optionsRowWithBothTransmissionRuns() { return {"", "13463", "13464"}; }
+  OptionsRow optionsRowWithTransProcessingInstructions() { return {"", "", "", "1-4"}; }
+  OptionsRow optionsRowWithTransProcessingInstructionsInvalid() { return {"", "", "", "bad"}; }
   OptionsRow optionsRowWithQMin() { return {"", "", "", "", "0.008"}; }
   OptionsRow optionsRowWithQMinInvalid() { return {"", "", "", "", "bad"}; }
   OptionsRow optionsRowWithQMax() { return {"", "", "", "", "", "0.1"}; }
   OptionsRow optionsRowWithQMaxInvalid() { return {"", "", "", "", "", "bad"}; }
   OptionsRow optionsRowWithQStep() { return {"", "", "", "", "", "", "0.02"}; }
-  OptionsRow optionsRowWithQStepInvalid() {
-    return {"", "", "", "", "", "", "bad"};
-  }
-  OptionsRow optionsRowWithScale() {
-    return {"", "", "", "", "", "", "", "1.4"};
-  }
-  OptionsRow optionsRowWithScaleInvalid() {
-    return {"", "", "", "", "", "", "", "bad"};
-  }
-  OptionsRow optionsRowWithProcessingInstructions() {
-    return {"", "", "", "", "", "", "", "", "1-4"};
-  }
-  OptionsRow optionsRowWithProcessingInstructionsInvalid() {
-    return {"", "", "", "", "", "", "", "", "bad"};
-  }
-  OptionsRow optionsRowWithBackgroundProcessingInstructions() {
-    return {"", "", "", "", "", "", "", "", "", "1-4"};
-  }
+  OptionsRow optionsRowWithQStepInvalid() { return {"", "", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithScale() { return {"", "", "", "", "", "", "", "1.4"}; }
+  OptionsRow optionsRowWithScaleInvalid() { return {"", "", "", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithProcessingInstructions() { return {"", "", "", "", "", "", "", "", "1-4"}; }
+  OptionsRow optionsRowWithProcessingInstructionsInvalid() { return {"", "", "", "", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithBackgroundProcessingInstructions() { return {"", "", "", "", "", "", "", "", "", "1-4"}; }
   OptionsRow optionsRowWithBackgroundProcessingInstructionsInvalid() {
     return {"", "", "", "", "", "", "", "", "", "bad"};
   }
@@ -1052,9 +881,7 @@ private:
     verifyAndClear();
   }
 
-  void runTestForInvalidPerAngleOptions(OptionsTable const &optionsTable,
-                                        const std::vector<int> &rows,
-                                        int column) {
+  void runTestForInvalidPerAngleOptions(OptionsTable const &optionsTable, const std::vector<int> &rows, int column) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
     for (auto row : rows)
@@ -1063,8 +890,7 @@ private:
     verifyAndClear();
   }
 
-  void runTestForInvalidPerAngleOptions(OptionsTable const &optionsTable,
-                                        int row, int column) {
+  void runTestForInvalidPerAngleOptions(OptionsTable const &optionsTable, int row, int column) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
     EXPECT_CALL(m_view, showPerAngleOptionsAsInvalid(row, column)).Times(1);
@@ -1085,9 +911,7 @@ private:
     EXPECT_CALL(m_view, getTransmissionStitchParams()).WillOnce(Return(params));
     EXPECT_CALL(m_view, showTransmissionStitchParamsValid());
     presenter.notifySettingsChanged();
-    TS_ASSERT_EQUALS(
-        presenter.experiment().transmissionStitchOptions().rebinParameters(),
-        params);
+    TS_ASSERT_EQUALS(presenter.experiment().transmissionStitchOptions().rebinParameters(), params);
     verifyAndClear();
   }
 
@@ -1096,9 +920,7 @@ private:
     EXPECT_CALL(m_view, getTransmissionStitchParams()).WillOnce(Return(params));
     EXPECT_CALL(m_view, showTransmissionStitchParamsInvalid());
     presenter.notifySettingsChanged();
-    TS_ASSERT_EQUALS(
-        presenter.experiment().transmissionStitchOptions().rebinParameters(),
-        "");
+    TS_ASSERT_EQUALS(presenter.experiment().transmissionStitchOptions().rebinParameters(), "");
     verifyAndClear();
   }
 };

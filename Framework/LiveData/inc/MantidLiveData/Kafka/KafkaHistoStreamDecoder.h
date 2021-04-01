@@ -24,10 +24,8 @@ namespace LiveData {
 */
 class DLLExport KafkaHistoStreamDecoder : public IKafkaStreamDecoder {
 public:
-  KafkaHistoStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
-                          const std::string &histoTopic,
-                          const std::string &runInfoTopic,
-                          const std::string &sampleEnvTopic,
+  KafkaHistoStreamDecoder(std::shared_ptr<IKafkaBroker> broker, const std::string &histoTopic,
+                          const std::string &runInfoTopic, const std::string &sampleEnvTopic,
                           const std::string &chopperTopic);
   ~KafkaHistoStreamDecoder() override;
   // Disable copies since multiple subscribers will cause problems

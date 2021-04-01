@@ -14,21 +14,17 @@ DECLARE_ALGORITHM(CatalogListInvestigationTypes)
 
 /// Init method
 void CatalogListInvestigationTypes::init() {
-  declareProperty("Session", "",
-                  "The session information of the catalog to use.");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
-                      "InvestigationTypes", std::vector<std::string>(),
-                      std::make_shared<Kernel::NullValidator>(),
-                      Kernel::Direction::Output),
+  declareProperty("Session", "", "The session information of the catalog to use.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>("InvestigationTypes", std::vector<std::string>(),
+                                                                       std::make_shared<Kernel::NullValidator>(),
+                                                                       Kernel::Direction::Output),
                   "A list containing investigation types.");
 }
 
 /// exec method
 void CatalogListInvestigationTypes::exec() {
   std::vector<std::string> investigationTypes;
-  API::CatalogManager::Instance()
-      .getCatalog(getPropertyValue("Session"))
-      ->listInvestigationTypes(investigationTypes);
+  API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"))->listInvestigationTypes(investigationTypes);
   setProperty("InvestigationTypes", investigationTypes);
 }
 } // namespace ICat

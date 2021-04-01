@@ -32,9 +32,7 @@ void MantidTreeModel::deleteWorkspaces(const QStringList &wsNames) {
       alg->setLogging(false);
       std::vector<std::string> vecWsNames;
       vecWsNames.reserve(wsNames.size());
-      foreach (auto wsName, wsNames) {
-        vecWsNames.emplace_back(wsName.toStdString());
-      }
+      foreach (auto wsName, wsNames) { vecWsNames.emplace_back(wsName.toStdString()); }
       alg->setProperty("WorkspaceList", vecWsNames);
       executeAlgorithmAsync(alg);
     }
@@ -59,12 +57,10 @@ void MantidTreeModel::renameWorkspace(QStringList wsName) {
 }
 
 // Algorithm Display and Execution Methods
-Mantid::API::IAlgorithm_sptr
-MantidTreeModel::createAlgorithm(const QString &algName, int version) {
+Mantid::API::IAlgorithm_sptr MantidTreeModel::createAlgorithm(const QString &algName, int version) {
   Mantid::API::IAlgorithm_sptr alg;
   try {
-    alg = Mantid::API::AlgorithmManager::Instance().create(
-        algName.toStdString(), version);
+    alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(), version);
   } catch (...) {
     QString message = "Cannot create algorithm \"" + algName + "\"";
     if (version != -1) {
@@ -81,30 +77,26 @@ void MantidTreeModel::showAlgorithmDialog(const QString &algName, int version) {
   if (!alg)
     return;
   MantidQt::API::InterfaceManager interfaceManager;
-  MantidQt::API::AlgorithmDialog *dlg =
-      interfaceManager.createDialog(alg, nullptr, false);
+  MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(alg, nullptr, false);
   dlg->show();
   dlg->raise();
   dlg->activateWindow();
 }
 
-void MantidTreeModel::showAlgorithmDialog(const QString &algName,
-                                          QHash<QString, QString> paramList,
-                                          Mantid::API::AlgorithmObserver *obs,
-                                          int version) {
+void MantidTreeModel::showAlgorithmDialog(const QString &algName, QHash<QString, QString> paramList,
+                                          Mantid::API::AlgorithmObserver *obs, int version) {
   // Get latest version of the algorithm
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
   if (!alg)
     return;
 
   try {
-    for (QHash<QString, QString>::Iterator it = paramList.begin();
-         it != paramList.end(); ++it) {
+    for (QHash<QString, QString>::Iterator it = paramList.begin(); it != paramList.end(); ++it) {
       alg->setPropertyValue(it.key().toStdString(), it.value().toStdString());
     }
   } catch (std::exception &ex) {
-    g_log.error() << "Error setting the properties for algotithm "
-                  << algName.toStdString() << ": " << ex.what() << '\n';
+    g_log.error() << "Error setting the properties for algotithm " << algName.toStdString() << ": " << ex.what()
+                  << '\n';
     return;
   }
   MantidQt::API::AlgorithmDialog *dlg = createAlgorithmDialog(alg);
@@ -121,8 +113,7 @@ void MantidTreeModel::showAlgorithmDialog(const QString &algName,
  * This creates an algorithm dialog (the default property entry thingie).
  * Helper function not required by interface
  */
-MantidQt::API::AlgorithmDialog *MantidTreeModel::createAlgorithmDialog(
-    const Mantid::API::IAlgorithm_sptr &alg) {
+MantidQt::API::AlgorithmDialog *MantidTreeModel::createAlgorithmDialog(const Mantid::API::IAlgorithm_sptr &alg) {
   QHash<QString, QString> presets;
   QStringList enabled;
 
@@ -143,17 +134,14 @@ MantidQt::API::AlgorithmDialog *MantidTreeModel::createAlgorithmDialog(
   QString optional_msg(alg->summary().c_str());
 
   MantidQt::API::InterfaceManager interfaceManager;
-  MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(
-      alg, nullptr, false, presets, optional_msg, enabled);
+  MantidQt::API::AlgorithmDialog *dlg =
+      interfaceManager.createDialog(alg, nullptr, false, presets, optional_msg, enabled);
   return dlg;
 }
 
-void MantidTreeModel::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
-  executeAlgorithmAsync(alg);
-}
+void MantidTreeModel::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) { executeAlgorithmAsync(alg); }
 
-bool MantidTreeModel::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
-                                            const bool wait) {
+bool MantidTreeModel::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const bool wait) {
   if (wait) {
     Poco::ActiveResult<bool> result(alg->executeAsync());
     while (!result.available()) {
@@ -170,19 +158,16 @@ bool MantidTreeModel::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
     try {
       alg->executeAsync();
     } catch (Poco::NoThreadAvailableException &) {
-      g_log.error() << "No thread was available to run the " << alg->name()
-                    << " algorithm in the background.\n";
+      g_log.error() << "No thread was available to run the " << alg->name() << " algorithm in the background.\n";
       return false;
     }
     return true;
   }
 }
 
-Workspace_const_sptr
-MantidTreeModel::getWorkspace(const QString &workspaceName) {
+Workspace_const_sptr MantidTreeModel::getWorkspace(const QString &workspaceName) {
   if (AnalysisDataService::Instance().doesExist(workspaceName.toStdString())) {
-    return AnalysisDataService::Instance().retrieve(
-        workspaceName.toStdString());
+    return AnalysisDataService::Instance().retrieve(workspaceName.toStdString());
   }
   Workspace_const_sptr empty;
   return empty;
@@ -195,12 +180,10 @@ MantidTreeModel::getWorkspace(const QString &workspaceName) {
 // require other code to be ported to the workbench
 // In the case of functions that return, they return nullptr
 
-void MantidTreeModel::updateRecentFilesList(
-    const QString &fname) { /*Not require until tool bar is created*/
+void MantidTreeModel::updateRecentFilesList(const QString &fname) { /*Not require until tool bar is created*/
   Q_UNUSED(fname);
 }
-void MantidTreeModel::enableSaveNexus(
-    const QString &wsName) { /*handled by widget*/
+void MantidTreeModel::enableSaveNexus(const QString &wsName) { /*handled by widget*/
   Q_UNUSED(wsName);
 }
 void MantidTreeModel::disableSaveNexus() { /* handled by widget*/
@@ -221,9 +204,8 @@ void MantidTreeModel::showLogFileWindow() {}
 void MantidTreeModel::showSampleMaterialWindow() {}
 void MantidTreeModel::importWorkspace() {}
 
-MantidMatrix *MantidTreeModel::importMatrixWorkspace(
-    const Mantid::API::MatrixWorkspace_sptr workspace, int lower, int upper,
-    bool showDlg) {
+MantidMatrix *MantidTreeModel::importMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr workspace, int lower,
+                                                     int upper, bool showDlg) {
   Q_UNUSED(workspace);
   Q_UNUSED(lower);
   Q_UNUSED(upper);
@@ -231,28 +213,23 @@ MantidMatrix *MantidTreeModel::importMatrixWorkspace(
   return nullptr;
 }
 
-void MantidTreeModel::importWorkspace(const QString &wsName, bool showDlg,
-                                      bool makeVisible) {
+void MantidTreeModel::importWorkspace(const QString &wsName, bool showDlg, bool makeVisible) {
   Q_UNUSED(wsName);
   Q_UNUSED(showDlg);
   Q_UNUSED(makeVisible);
 }
 
-Table *MantidTreeModel::createDetectorTable(const QString &wsName,
-                                            const std::vector<int> &indices,
-                                            bool include_data) {
+Table *MantidTreeModel::createDetectorTable(const QString &wsName, const std::vector<int> &indices, bool include_data) {
   Q_UNUSED(wsName);
   Q_UNUSED(indices);
   Q_UNUSED(include_data);
   return nullptr;
 }
 
-MultiLayer *
-MantidTreeModel::plot1D(const QMultiMap<QString, std::set<int>> &toPlot,
-                        bool spectrumPlot, MantidQt::DistributionFlag distr,
-                        bool errs, MultiLayer *plotWindow, bool clearWindow,
-                        bool waterfallPlot, const QString &log,
-                        const std::set<double> &customLogValues) {
+MultiLayer *MantidTreeModel::plot1D(const QMultiMap<QString, std::set<int>> &toPlot, bool spectrumPlot,
+                                    MantidQt::DistributionFlag distr, bool errs, MultiLayer *plotWindow,
+                                    bool clearWindow, bool waterfallPlot, const QString &log,
+                                    const std::set<double> &customLogValues) {
   Q_UNUSED(toPlot);
   Q_UNUSED(spectrumPlot);
   Q_UNUSED(distr);
@@ -265,16 +242,13 @@ MantidTreeModel::plot1D(const QMultiMap<QString, std::set<int>> &toPlot,
   return nullptr;
 }
 
-void MantidTreeModel::drawColorFillPlots(const QStringList &wsNames,
-                                         GraphOptions::CurveType curveType) {
+void MantidTreeModel::drawColorFillPlots(const QStringList &wsNames, GraphOptions::CurveType curveType) {
   Q_UNUSED(wsNames);
   Q_UNUSED(curveType);
 }
 
-MultiLayer *
-MantidTreeModel::plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
-                              MantidQt::DistributionFlag distr, bool errs,
-                              MultiLayer *plotWindow) {
+MultiLayer *MantidTreeModel::plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
+                                          MantidQt::DistributionFlag distr, bool errs, MultiLayer *plotWindow) {
   Q_UNUSED(toPlot);
   Q_UNUSED(distr);
   Q_UNUSED(errs);
@@ -283,11 +257,8 @@ MantidTreeModel::plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
   return nullptr;
 }
 
-void MantidTreeModel::plotSurface(bool accepted, int plotIndex,
-                                  const QString &axisName,
-                                  const QString &logName,
-                                  const std::set<double> &customLogValues,
-                                  const QList<QString> &workspaceNames) {
+void MantidTreeModel::plotSurface(bool accepted, int plotIndex, const QString &axisName, const QString &logName,
+                                  const std::set<double> &customLogValues, const QList<QString> &workspaceNames) {
   Q_UNUSED(accepted);
   Q_UNUSED(plotIndex);
   Q_UNUSED(axisName);
@@ -296,11 +267,8 @@ void MantidTreeModel::plotSurface(bool accepted, int plotIndex,
   Q_UNUSED(workspaceNames);
 }
 
-void MantidTreeModel::plotContour(bool accepted, int plotIndex,
-                                  const QString &axisName,
-                                  const QString &logName,
-                                  const std::set<double> &customLogValues,
-                                  const QList<QString> &workspaceNames) {
+void MantidTreeModel::plotContour(bool accepted, int plotIndex, const QString &axisName, const QString &logName,
+                                  const std::set<double> &customLogValues, const QList<QString> &workspaceNames) {
   Q_UNUSED(accepted);
   Q_UNUSED(plotIndex);
   Q_UNUSED(axisName);
@@ -310,11 +278,8 @@ void MantidTreeModel::plotContour(bool accepted, int plotIndex,
 }
 
 MantidQt::MantidWidgets::MantidWSIndexDialog *
-MantidTreeModel::createWorkspaceIndexDialog(int flags,
-                                            const QStringList &wsNames,
-                                            bool showWaterfall,
-                                            bool showPlotAll, bool showTiledOpt,
-                                            bool isAdvanced) {
+MantidTreeModel::createWorkspaceIndexDialog(int flags, const QStringList &wsNames, bool showWaterfall, bool showPlotAll,
+                                            bool showTiledOpt, bool isAdvanced) {
   Q_UNUSED(flags);
   Q_UNUSED(wsNames);
   Q_UNUSED(showWaterfall);

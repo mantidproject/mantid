@@ -26,9 +26,7 @@ public:
     std::string ThisIsAFile("directoryvalidatortestfile.txt");
     Poco::File txt_file(ThisIsAFile);
     txt_file.createFile();
-    TS_ASSERT_EQUALS(v.isValid(ThisIsAFile),
-                     "Directory \"" + ThisIsAFile +
-                         "\" specified is actually a file");
+    TS_ASSERT_EQUALS(v.isValid(ThisIsAFile), "Directory \"" + ThisIsAFile + "\" specified is actually a file");
     txt_file.remove();
   }
 

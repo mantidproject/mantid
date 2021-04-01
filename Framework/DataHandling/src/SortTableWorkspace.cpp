@@ -23,28 +23,20 @@ DECLARE_ALGORITHM(SortTableWorkspace)
 int SortTableWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SortTableWorkspace::category() const {
-  return "Utility\\Sorting";
-}
+const std::string SortTableWorkspace::category() const { return "Utility\\Sorting"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string SortTableWorkspace::summary() const {
-  return "Sort a TableWorkspace.";
-}
+const std::string SortTableWorkspace::summary() const { return "Sort a TableWorkspace."; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SortTableWorkspace::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
-  declareProperty(
-      std::make_unique<Kernel::ArrayProperty<std::string>>("Columns"),
-      "Column names to sort by.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>("Columns"), "Column names to sort by.");
   declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("Ascending"),
                   "List of bools for each column: true for ascending order, "
                   "false for descending. "
@@ -73,15 +65,13 @@ void SortTableWorkspace::exec() {
     int commonValue = ascending.front();
     ascending.resize(columns.size(), commonValue);
   } else if (ascending.size() != columns.size()) {
-    throw std::invalid_argument(
-        "Number of sorting options is different form number of columns.");
+    throw std::invalid_argument("Number of sorting options is different form number of columns.");
   }
 
   std::vector<std::pair<std::string, bool>> criteria(columns.size());
   auto col = columns.begin();
   auto asc = ascending.begin();
-  for (auto crt = criteria.begin(); crt != criteria.end();
-       ++crt, ++col, ++asc) {
+  for (auto crt = criteria.begin(); crt != criteria.end(); ++crt, ++col, ++asc) {
     crt->first = *col;
     crt->second = (*asc) != 0;
   }

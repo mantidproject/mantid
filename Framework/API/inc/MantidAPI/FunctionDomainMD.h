@@ -22,8 +22,7 @@ namespace API {
 class MANTID_API_DLL FunctionDomainMD : public FunctionDomain {
 public:
   /// Constructor.
-  FunctionDomainMD(const IMDWorkspace_const_sptr &ws, size_t start = 0,
-                   size_t length = 0);
+  FunctionDomainMD(const IMDWorkspace_const_sptr &ws, size_t start = 0, size_t length = 0);
   /// Destructor.
   ~FunctionDomainMD() override;
   /// Return the number of arguments in the domain

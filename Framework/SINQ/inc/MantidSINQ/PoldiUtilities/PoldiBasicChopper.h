@@ -27,8 +27,7 @@ class MANTID_SINQ_DLL PoldiBasicChopper : public PoldiAbstractChopper {
 public:
   PoldiBasicChopper();
 
-  void
-  loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) override;
+  void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) override;
 
   void setRotationSpeed(double rotationSpeed) override;
 
@@ -42,8 +41,7 @@ public:
   double distanceFromSample() override;
 
 protected:
-  void initializeFixedParameters(std::vector<double> slitPositions,
-                                 double distanceFromSample, double t0,
+  void initializeFixedParameters(std::vector<double> slitPositions, double distanceFromSample, double t0,
                                  double t0const);
   void initializeVariableParameters(double rotationSpeed);
 

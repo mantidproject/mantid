@@ -39,35 +39,30 @@ Kernel::Logger g_log("Instrument");
 
 void raiseDuplicateDetectorError(const size_t detectorId) {
   std::stringstream sstream;
-  sstream << "Instrument Definition corrupt. Detector with ID " << detectorId
-          << " already exists.";
+  sstream << "Instrument Definition corrupt. Detector with ID " << detectorId << " already exists.";
   throw Exception::InstrumentDefinitionError(sstream.str());
 }
 } // namespace
 
 /// Default constructor
 Instrument::Instrument()
-    : CompAssembly(), m_detectorCache(), m_sourceCache(nullptr),
-      m_sampleCache(nullptr), m_defaultView("3D"), m_defaultViewAxis("Z+"),
-      m_referenceFrame(new ReferenceFrame) {}
+    : CompAssembly(), m_detectorCache(), m_sourceCache(nullptr), m_sampleCache(nullptr), m_defaultView("3D"),
+      m_defaultViewAxis("Z+"), m_referenceFrame(new ReferenceFrame) {}
 
 /// Constructor with name
 Instrument::Instrument(const std::string &name)
-    : CompAssembly(name), m_detectorCache(), m_sourceCache(nullptr),
-      m_sampleCache(nullptr), m_defaultView("3D"), m_defaultViewAxis("Z+"),
-      m_referenceFrame(new ReferenceFrame) {}
+    : CompAssembly(name), m_detectorCache(), m_sourceCache(nullptr), m_sampleCache(nullptr), m_defaultView("3D"),
+      m_defaultViewAxis("Z+"), m_referenceFrame(new ReferenceFrame) {}
 
 /** Constructor to create a parametrized instrument
  *  @param instr :: instrument for parameter inclusion
  *  @param map :: parameter map to include
  */
-Instrument::Instrument(const std::shared_ptr<const Instrument> &instr,
-                       const std::shared_ptr<ParameterMap> &map)
-    : CompAssembly(instr.get(), map.get()), m_sourceCache(instr->m_sourceCache),
-      m_sampleCache(instr->m_sampleCache), m_defaultView(instr->m_defaultView),
-      m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
-      m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
-      m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame) {
+Instrument::Instrument(const std::shared_ptr<const Instrument> &instr, const std::shared_ptr<ParameterMap> &map)
+    : CompAssembly(instr.get(), map.get()), m_sourceCache(instr->m_sourceCache), m_sampleCache(instr->m_sampleCache),
+      m_defaultView(instr->m_defaultView), m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
+      m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom), m_ValidTo(instr->m_ValidTo),
+      m_referenceFrame(new ReferenceFrame) {
   // Note that we do not copy m_detectorInfo and m_componentInfo into the
   // parametrized instrument since the ParameterMap will make a copy, if
   // applicable.
@@ -79,14 +74,10 @@ Instrument::Instrument(const std::shared_ptr<const Instrument> &instr,
  *  in indirect instruments.
  */
 Instrument::Instrument(const Instrument &instr)
-    : CompAssembly(instr), m_sourceCache(nullptr),
-      m_sampleCache(nullptr), /* Should only be temporarily null */
-      m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit),
-      m_defaultView(instr.m_defaultView),
-      m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(),
-      m_map_nonconst(), /* Should not be parameterized */
-      m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo),
-      m_referenceFrame(instr.m_referenceFrame) {
+    : CompAssembly(instr), m_sourceCache(nullptr), m_sampleCache(nullptr), /* Should only be temporarily null */
+      m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit), m_defaultView(instr.m_defaultView),
+      m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(), m_map_nonconst(), /* Should not be parameterized */
+      m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo), m_referenceFrame(instr.m_referenceFrame) {
   // Note that we do not copy m_detectorInfo and m_componentInfo into the new
   // instrument since they are only non-NULL for the base instrument, which
   // should usually not be copied.
@@ -165,8 +156,7 @@ Instrument_const_sptr Instrument::getPhysicalInstrument() const {
       // owning instrument in the ParameterMap. We need to undo this immediately
       // since the ParameterMap must always be owned by the neutronic
       // instrument.
-      return std::make_shared<Instrument>(m_instr->getPhysicalInstrument(),
-                                          m_map_nonconst);
+      return std::make_shared<Instrument>(m_instr->getPhysicalInstrument(), m_map_nonconst);
     } else {
       return Instrument_const_sptr();
     }
@@ -267,8 +257,7 @@ void Instrument::getMinMaxDetectorIDs(detid_t &min, detid_t &max) const {
   const auto *in_dets = m_map ? &m_instr->m_detectorCache : &m_detectorCache;
 
   if (in_dets->empty())
-    throw std::runtime_error(
-        "No detectors on this instrument. Can't find min/max ids");
+    throw std::runtime_error("No detectors on this instrument. Can't find min/max ids");
   // Maps are sorted by key. So it is easy to find
   min = std::get<0>(*in_dets->begin());
   max = std::get<0>(*in_dets->rbegin());
@@ -283,8 +272,7 @@ void Instrument::getMinMaxDetectorIDs(detid_t &min, detid_t &max) const {
  * @param[out] dets :: vector filled with detector pointers
  * @param comp :: the parent component assembly that contains detectors.
  */
-void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
-                                    const IComponent &comp) const {
+void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const IComponent &comp) const {
   const auto bank = dynamic_cast<const ICompAssembly *>(&comp);
   if (bank) {
     // Get a vector of children (recursively)
@@ -292,8 +280,7 @@ void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
     bank->getChildren(children, true);
     std::vector<std::shared_ptr<const IComponent>>::iterator it;
     for (it = children.begin(); it != children.end(); ++it) {
-      IDetector_const_sptr det =
-          std::dynamic_pointer_cast<const IDetector>(*it);
+      IDetector_const_sptr det = std::dynamic_pointer_cast<const IDetector>(*it);
       if (det) {
         dets.emplace_back(det);
       }
@@ -311,12 +298,10 @@ void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
  * (getComponentByName) is used.
  * @throws NotFoundError if the given bank does not exist.
  */
-void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
-                                    const std::string &bankName) const {
+void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const std::string &bankName) const {
   std::shared_ptr<const IComponent> comp = this->getComponentByName(bankName);
   if (!comp) {
-    throw Kernel::Exception::NotFoundError("Could not find component",
-                                           bankName);
+    throw Kernel::Exception::NotFoundError("Could not find component", bankName);
   }
   getDetectorsInBank(dets, *comp);
 }
@@ -387,21 +372,17 @@ IComponent_const_sptr Instrument::getSample() const {
  *  Not virtual because it relies the getSample() & getPos() virtual functions
  *  @returns A unit vector denoting the direction of the beam
  */
-Kernel::V3D Instrument::getBeamDirection() const {
-  return normalize(getSample()->getPos() - getSource()->getPos());
-}
+Kernel::V3D Instrument::getBeamDirection() const { return normalize(getSample()->getPos() - getSource()->getPos()); }
 
 //------------------------------------------------------------------------------------------
 /**  Get a shared pointer to a component by its ID, const version
  *   @param id :: ID
  *   @return A pointer to the component.
  */
-std::shared_ptr<const IComponent>
-Instrument::getComponentByID(const IComponent *id) const {
+std::shared_ptr<const IComponent> Instrument::getComponentByID(const IComponent *id) const {
   const auto *base = static_cast<const IComponent *>(id);
   if (m_map)
-    return ParComponentFactory::create(
-        std::shared_ptr<const IComponent>(base, NoDeleting()), m_map);
+    return ParComponentFactory::create(std::shared_ptr<const IComponent>(base, NoDeleting()), m_map);
   else
     return std::shared_ptr<const IComponent>(base, NoDeleting());
 }
@@ -415,10 +396,8 @@ Instrument::getComponentByID(const IComponent *id) const {
  * the first one found is returned.
  *  @returns Pointers to components
  */
-std::vector<std::shared_ptr<const IComponent>>
-Instrument::getAllComponentsWithName(const std::string &cname) const {
-  std::shared_ptr<const IComponent> node =
-      std::shared_ptr<const IComponent>(this, NoDeleting());
+std::vector<std::shared_ptr<const IComponent>> Instrument::getAllComponentsWithName(const std::string &cname) const {
+  std::shared_ptr<const IComponent> node = std::shared_ptr<const IComponent>(this, NoDeleting());
   std::vector<std::shared_ptr<const IComponent>> retVec;
   // Check the instrument name first
   if (this->getName() == cname) {
@@ -432,8 +411,7 @@ Instrument::getAllComponentsWithName(const std::string &cname) const {
     node = nodeQueue.front();
     nodeQueue.pop_front();
     int nchildren(0);
-    std::shared_ptr<const ICompAssembly> asmb =
-        std::dynamic_pointer_cast<const ICompAssembly>(node);
+    std::shared_ptr<const ICompAssembly> asmb = std::dynamic_pointer_cast<const ICompAssembly>(node);
     if (asmb) {
       nchildren = asmb->nelements();
     }
@@ -455,17 +433,14 @@ namespace {
 // Helpers for accessing m_detectorCache, which is a vector of tuples used as a
 // map. Lookup is by first element in a tuple. Templated to support const and
 // non-const.
-template <class T>
-auto lower_bound(T &map, const detid_t key) -> decltype(map.begin()) {
-  return std::lower_bound(
-      map.begin(), map.end(),
-      std::make_tuple(key, IDetector_const_sptr(nullptr), false),
-      [](const typename T::value_type &a, const typename T::value_type &b)
-          -> bool { return std::get<0>(a) < std::get<0>(b); });
+template <class T> auto lower_bound(T &map, const detid_t key) -> decltype(map.begin()) {
+  return std::lower_bound(map.begin(), map.end(), std::make_tuple(key, IDetector_const_sptr(nullptr), false),
+                          [](const typename T::value_type &a, const typename T::value_type &b) -> bool {
+                            return std::get<0>(a) < std::get<0>(b);
+                          });
 }
 
-template <class T>
-auto find(T &map, const detid_t key) -> decltype(map.begin()) {
+template <class T> auto find(T &map, const detid_t key) -> decltype(map.begin()) {
   auto it = lower_bound(map, key);
   if ((it != map.end()) && (std::get<0>(*it) == key))
     return it;
@@ -489,8 +464,7 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
   if (it == baseInstr.m_detectorCache.end()) {
     std::stringstream readInt;
     readInt << detector_id;
-    throw Kernel::Exception::NotFoundError(
-        "Instrument: Detector with ID " + readInt.str() + " not found.", "");
+    throw Kernel::Exception::NotFoundError("Instrument: Detector with ID " + readInt.str() + " not found.", "");
   }
   IDetector_const_sptr baseDet = std::get<1>(*it);
 
@@ -539,14 +513,12 @@ bool Instrument::isMonitor(const std::set<detid_t> &detector_ids) const {
  *  @returns A pointer to the detector object
  *  @throw   NotFoundError If no detector is found for the detector ID given
  */
-IDetector_const_sptr
-Instrument::getDetectorG(const std::set<detid_t> &det_ids) const {
+IDetector_const_sptr Instrument::getDetectorG(const std::set<detid_t> &det_ids) const {
   const size_t ndets(det_ids.size());
   if (ndets == 1) {
     return this->getDetector(*det_ids.begin());
   } else {
-    std::shared_ptr<DetectorGroup> det_group =
-        std::make_shared<DetectorGroup>();
+    std::shared_ptr<DetectorGroup> det_group = std::make_shared<DetectorGroup>();
     for (const auto detID : det_ids) {
       det_group->addDetector(this->getDetector(detID));
     }
@@ -558,8 +530,7 @@ Instrument::getDetectorG(const std::set<detid_t> &det_ids) const {
  * Returns a list of Detectors for the given detectors ids
  *
  */
-std::vector<IDetector_const_sptr>
-Instrument::getDetectors(const std::vector<detid_t> &det_ids) const {
+std::vector<IDetector_const_sptr> Instrument::getDetectors(const std::vector<detid_t> &det_ids) const {
   std::vector<IDetector_const_sptr> dets_ptr;
   dets_ptr.reserve(det_ids.size());
   std::vector<detid_t>::const_iterator it;
@@ -573,8 +544,7 @@ Instrument::getDetectors(const std::vector<detid_t> &det_ids) const {
  * Returns a list of Detectors for the given detectors ids
  *
  */
-std::vector<IDetector_const_sptr>
-Instrument::getDetectors(const std::set<detid_t> &det_ids) const {
+std::vector<IDetector_const_sptr> Instrument::getDetectors(const std::set<detid_t> &det_ids) const {
   std::vector<IDetector_const_sptr> dets_ptr;
   dets_ptr.reserve(det_ids.size());
   std::set<detid_t>::const_iterator it;
@@ -601,22 +571,19 @@ void Instrument::markAsSamplePos(const IComponent *comp) {
 
   auto objComp = dynamic_cast<const IObjComponent *>(comp);
   if (objComp) {
-    throw std::runtime_error(
-        "Instrument::markAsSamplePos() called on an IObjComponent "
-        "object that supports shape definition. Sample is prevented from "
-        "being this type because the shape must only be stored in "
-        "ExperimentInfo::m_sample.");
+    throw std::runtime_error("Instrument::markAsSamplePos() called on an IObjComponent "
+                             "object that supports shape definition. Sample is prevented from "
+                             "being this type because the shape must only be stored in "
+                             "ExperimentInfo::m_sample.");
   }
 
   if (!m_sampleCache) {
     if (comp->getName().empty()) {
-      throw Exception::InstrumentDefinitionError(
-          "The sample component is required to have a name.");
+      throw Exception::InstrumentDefinitionError("The sample component is required to have a name.");
     }
     m_sampleCache = comp;
   } else {
-    g_log.warning(
-        "Have already added samplePos component to the _sampleCache.");
+    g_log.warning("Have already added samplePos component to the _sampleCache.");
   }
 }
 
@@ -637,8 +604,7 @@ void Instrument::markAsSource(const IComponent *comp) {
 
   if (!m_sourceCache) {
     if (comp->getName().empty()) {
-      throw Exception::InstrumentDefinitionError(
-          "The source component is required to have a name.");
+      throw Exception::InstrumentDefinitionError("The source component is required to have a name.");
     }
     m_sourceCache = comp;
   } else {
@@ -691,16 +657,13 @@ void Instrument::markAsDetectorFinalize() {
   std::sort(
       m_detectorCache.begin(), m_detectorCache.end(),
       [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
-         const std::tuple<detid_t, IDetector_const_sptr, bool> &b) -> bool {
-        return std::get<0>(a) < std::get<0>(b);
-      });
+         const std::tuple<detid_t, IDetector_const_sptr, bool> &b) -> bool { return std::get<0>(a) < std::get<0>(b); });
 
-  auto resultIt = std::adjacent_find(
-      m_detectorCache.begin(), m_detectorCache.end(),
-      [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
-         const std::tuple<detid_t, IDetector_const_sptr, bool> &b) -> bool {
-        return std::get<0>(a) == std::get<0>(b);
-      });
+  auto resultIt = std::adjacent_find(m_detectorCache.begin(), m_detectorCache.end(),
+                                     [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
+                                        const std::tuple<detid_t, IDetector_const_sptr, bool> &b) -> bool {
+                                       return std::get<0>(a) == std::get<0>(b);
+                                     });
   if (resultIt != m_detectorCache.end()) {
     raiseDuplicateDetectorError(std::get<0>(*resultIt));
   }
@@ -743,8 +706,7 @@ void Instrument::removeDetector(IDetector *det) {
 
   // Remove it from the parent assembly (and thus the instrument). Evilness
   // required here unfortunately.
-  auto *parentAssembly = dynamic_cast<CompAssembly *>(
-      const_cast<IComponent *>(det->getBareParent()));
+  auto *parentAssembly = dynamic_cast<CompAssembly *>(const_cast<IComponent *>(det->getBareParent()));
   if (parentAssembly) // Should always be true, but check just in case
   {
     parentAssembly->remove(det);
@@ -781,8 +743,7 @@ void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
 
     // Loop over the children and define a box large enough for all of them
     ComponentID sourceID = getSource()->getComponentID();
-    assemblyBox =
-        BoundingBox(); // this makes the instrument BB always axis aligned
+    assemblyBox = BoundingBox(); // this makes the instrument BB always axis aligned
     int nchildren = nelements();
     for (int i = 0; i < nchildren; ++i) {
       IComponent_sptr comp = this->getChild(i);
@@ -811,22 +772,18 @@ void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
   }
 }
 
-std::shared_ptr<const std::vector<IObjComponent_const_sptr>>
-Instrument::getPlottable() const {
+std::shared_ptr<const std::vector<IObjComponent_const_sptr>> Instrument::getPlottable() const {
   if (m_map) {
     // Get the 'base' plottable components
-    std::shared_ptr<const std::vector<IObjComponent_const_sptr>> objs =
-        m_instr->getPlottable();
+    std::shared_ptr<const std::vector<IObjComponent_const_sptr>> objs = m_instr->getPlottable();
 
     // Get a reference to the underlying vector, casting away the constness so
     // that we
     // can modify it to get our result rather than creating another long vector
     auto &res = const_cast<std::vector<IObjComponent_const_sptr> &>(*objs);
     const std::vector<IObjComponent_const_sptr>::size_type total = res.size();
-    for (std::vector<IObjComponent_const_sptr>::size_type i = 0; i < total;
-         ++i) {
-      res[i] = std::dynamic_pointer_cast<const Detector>(
-          ParComponentFactory::create(objs->at(i), m_map));
+    for (std::vector<IObjComponent_const_sptr>::size_type i = 0; i < total; ++i) {
+      res[i] = std::dynamic_pointer_cast<const Detector>(ParComponentFactory::create(objs->at(i), m_map));
     }
     return objs;
 
@@ -839,8 +796,7 @@ Instrument::getPlottable() const {
   }
 }
 
-void Instrument::appendPlottable(
-    const CompAssembly &ca, std::vector<IObjComponent_const_sptr> &lst) const {
+void Instrument::appendPlottable(const CompAssembly &ca, std::vector<IObjComponent_const_sptr> &lst) const {
   for (int i = 0; i < ca.nelements(); i++) {
     IComponent *c = ca[i].get();
     auto *a = dynamic_cast<CompAssembly *>(c);
@@ -868,14 +824,12 @@ void Instrument::appendPlottable(
  * @param beamline_norm :: 2 * the length of beamline
  * @param samplePos :: vector of the position of the sample
  */
-void Instrument::getInstrumentParameters(double &l1, Kernel::V3D &beamline,
-                                         double &beamline_norm,
+void Instrument::getInstrumentParameters(double &l1, Kernel::V3D &beamline, double &beamline_norm,
                                          Kernel::V3D &samplePos) const {
   // Get some positions
   const IComponent_const_sptr sourceObj = this->getSource();
   if (sourceObj == nullptr) {
-    throw Exception::InstrumentDefinitionError(
-        "Failed to get source component from instrument");
+    throw Exception::InstrumentDefinitionError("Failed to get source component from instrument");
   }
   const Kernel::V3D sourcePos = sourceObj->getPos();
   samplePos = this->getSample()->getPos();
@@ -887,8 +841,7 @@ void Instrument::getInstrumentParameters(double &l1, Kernel::V3D &beamline,
   try {
     l1 = this->getSource()->getDistance(*sample);
   } catch (Exception::NotFoundError &) {
-    throw Exception::InstrumentDefinitionError(
-        "Unable to calculate source-sample distance ", this->getName());
+    throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance ", this->getName());
   }
 }
 
@@ -936,8 +889,7 @@ const std::string &Instrument::getXmlText() const {
  * @param file :: open NeXus file
  * @param group :: name of the group to create
  */
-void Instrument::saveNexus(::NeXus::File *file,
-                           const std::string &group) const {
+void Instrument::saveNexus(::NeXus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXinstrument", true);
   file->putAttr("version", 1);
 
@@ -997,8 +949,7 @@ void Instrument::saveNexus(::NeXus::File *file,
  *                 a group must be open that has only one call of this function.
  *  @param detIDs :: the dectector IDs of the detectors belonging to the set
  */
-void Instrument::saveDetectorSetInfoToNexus(
-    ::NeXus::File *file, const std::vector<detid_t> &detIDs) const {
+void Instrument::saveDetectorSetInfoToNexus(::NeXus::File *file, const std::vector<detid_t> &detIDs) const {
 
   size_t nDets = detIDs.size();
   if (nDets == 0)
@@ -1053,9 +1004,7 @@ void Instrument::loadNexus(::NeXus::File *file, const std::string &group) {
 Setter for the reference frame.
 @param frame : reference frame object to use.
 */
-void Instrument::setReferenceFrame(std::shared_ptr<ReferenceFrame> frame) {
-  m_referenceFrame = std::move(frame);
-}
+void Instrument::setReferenceFrame(std::shared_ptr<ReferenceFrame> frame) { m_referenceFrame = std::move(frame); }
 
 /**
 Getter for the reference frame.
@@ -1080,17 +1029,12 @@ std::shared_ptr<const ReferenceFrame> Instrument::getReferenceFrame() const {
 void Instrument::setDefaultView(const std::string &type) {
   std::string typeUC(type);
   std::transform(typeUC.begin(), typeUC.end(), typeUC.begin(), toupper);
-  if (typeUC == "3D" || typeUC == "CYLINDRICAL_X" ||
-      typeUC == "CYLINDRICAL_Y" || typeUC == "CYLINDRICAL_Z" ||
-      typeUC == "SPHERICAL_X" || typeUC == "SPHERICAL_Y" ||
-      typeUC == "SPHERICAL_Z") {
+  if (typeUC == "3D" || typeUC == "CYLINDRICAL_X" || typeUC == "CYLINDRICAL_Y" || typeUC == "CYLINDRICAL_Z" ||
+      typeUC == "SPHERICAL_X" || typeUC == "SPHERICAL_Y" || typeUC == "SPHERICAL_Z") {
     m_defaultView = typeUC;
   } else {
     m_defaultView = "3D";
-    g_log.warning()
-        << type
-        << " is not allowed as an instrument view type. Default to \"3D\""
-        << '\n';
+    g_log.warning() << type << " is not allowed as an instrument view type. Default to \"3D\"" << '\n';
   }
 }
 
@@ -1126,18 +1070,15 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
     compQueue.pop();
 
     // Skip source, is has one
-    if (m_sourceCache &&
-        m_sourceCache->getComponentID() == comp->getComponentID())
+    if (m_sourceCache && m_sourceCache->getComponentID() == comp->getComponentID())
       continue;
 
     // Skip sample, if has one
-    if (m_sampleCache &&
-        m_sampleCache->getComponentID() == comp->getComponentID())
+    if (m_sampleCache && m_sampleCache->getComponentID() == comp->getComponentID())
       continue;
 
     // Skip monitors
-    IDetector_const_sptr detector =
-        std::dynamic_pointer_cast<const IDetector>(comp);
+    IDetector_const_sptr detector = std::dynamic_pointer_cast<const IDetector>(comp);
     if (detector && isMonitor(detector->getID()))
       continue;
 
@@ -1150,8 +1091,7 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
       if (!foundRect)
         foundRect = true;
     } else {
-      ICompAssembly_const_sptr assembly =
-          std::dynamic_pointer_cast<const ICompAssembly>(comp);
+      ICompAssembly_const_sptr assembly = std::dynamic_pointer_cast<const ICompAssembly>(comp);
 
       if (assembly) {
         for (int i = 0; i < assembly->nelements(); i++)
@@ -1234,8 +1174,7 @@ std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
     if (makeTransform) {
       oldParentIndex = parentIndex;
       const auto parentPos = toVector3d(componentInfo.position(parentIndex));
-      const auto invParentRot =
-          toQuaterniond(componentInfo.rotation(parentIndex)).conjugate();
+      const auto invParentRot = toQuaterniond(componentInfo.rotation(parentIndex)).conjugate();
 
       transformation = invParentRot;
       transformation.translate(-parentPos);
@@ -1243,11 +1182,9 @@ std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
 
     if (componentInfo.isDetector(i)) {
 
-      const std::shared_ptr<const IDetector> &baseDet =
-          std::get<1>(baseInstr.m_detectorCache[i]);
+      const std::shared_ptr<const IDetector> &baseDet = std::get<1>(baseInstr.m_detectorCache[i]);
 
-      isDetFixedInBank =
-          ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo, i);
+      isDetFixedInBank = ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo, i);
       if (detectorInfo.isMasked(i)) {
         pmap->forceUnsafeSetMasked(baseDet.get(), true);
       }
@@ -1272,19 +1209,14 @@ std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
     const auto componentId = componentInfo.componentID(i);
     const IComponent *baseComponent = componentId->getBaseComponent();
     // Generic sca scale factors
-    const auto newScaleFactor =
-        Kernel::toVector3d(componentInfo.scaleFactor(i));
-    if ((newScaleFactor - toVector3d(baseComponent->getScaleFactor())).norm() >=
-        1e-9) {
-      pmap->addV3D(componentId, ParameterMap::scale(),
-                   componentInfo.scaleFactor(i));
+    const auto newScaleFactor = Kernel::toVector3d(componentInfo.scaleFactor(i));
+    if ((newScaleFactor - toVector3d(baseComponent->getScaleFactor())).norm() >= 1e-9) {
+      pmap->addV3D(componentId, ParameterMap::scale(), componentInfo.scaleFactor(i));
     }
 
     // Undo parent transformation to obtain relative position/rotation.
-    Eigen::Vector3d relPos =
-        transformation * toVector3d(componentInfo.position(i));
-    Eigen::Quaterniond relRot =
-        toQuaterniond(componentInfo.relativeRotation(i));
+    Eigen::Vector3d relPos = transformation * toVector3d(componentInfo.position(i));
+    Eigen::Quaterniond relRot = toQuaterniond(componentInfo.relativeRotation(i));
 
     // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
     if ((relPos - toVector3d(baseComponent->getRelativePos())).norm() >= 1e-9) {
@@ -1295,9 +1227,7 @@ std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
       }
       pmap->addV3D(componentId, ParameterMap::pos(), Kernel::toV3D(relPos));
     }
-    if ((relRot * toQuaterniond(baseComponent->getRelativeRot()).conjugate())
-            .vec()
-            .norm() >= imag_norm_max) {
+    if ((relRot * toQuaterniond(baseComponent->getRelativeRot()).conjugate()).vec().norm() >= imag_norm_max) {
       pmap->addQuat(componentId, ParameterMap::rot(), Kernel::toQuat(relRot));
     }
   }
@@ -1316,8 +1246,7 @@ void Instrument::parseTreeAndCacheBeamline() {
     throw std::logic_error("Instrument::parseTreeAndCacheBeamline must be "
                            "called with the base instrument, not a "
                            "parametrized instrument");
-  std::tie(m_componentInfo, m_detectorInfo) =
-      InstrumentVisitor::makeWrappers(*this);
+  std::tie(m_componentInfo, m_detectorInfo) = InstrumentVisitor::makeWrappers(*this);
 }
 
 /** Return ComponentInfo and DetectorInfo for instrument given by pmap.
@@ -1345,8 +1274,7 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   auto detInfo = std::make_unique<DetectorInfo>(detectorInfo);
   compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
   const auto parInstrument = ParComponentFactory::createInstrument(
-      std::shared_ptr<const Instrument>(this, NoDeleting()),
-      std::shared_ptr<ParameterMap>(&pmap, NoDeleting()));
+      std::shared_ptr<const Instrument>(this, NoDeleting()), std::shared_ptr<ParameterMap>(&pmap, NoDeleting()));
   detInfo->m_instrument = parInstrument;
   return {std::move(compInfo), std::move(detInfo)};
 }
@@ -1361,8 +1289,7 @@ namespace Conversion {
  * @param offset
  * @return
  */
-double tofToDSpacingFactor(const double l1, const double l2,
-                           const double twoTheta, const double offset) {
+double tofToDSpacingFactor(const double l1, const double l2, const double twoTheta, const double offset) {
   return Kernel::Units::tofToDSpacingFactor(l1, l2, twoTheta, offset);
 }
 

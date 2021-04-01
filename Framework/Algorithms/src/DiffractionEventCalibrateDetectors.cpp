@@ -66,8 +66,7 @@ static double gsl_costFunction(const gsl_vector *v, void *params) {
   roty = gsl_vector_get(v, 4);
   rotz = gsl_vector_get(v, 5);
   Mantid::Algorithms::DiffractionEventCalibrateDetectors u;
-  return u.intensity(x, y, z, rotx, roty, rotz, detname, inname, outname,
-                     peakOpt, rb_param, groupWSName);
+  return u.intensity(x, y, z, rotx, roty, rotz, detname, inname, outname, peakOpt, rb_param, groupWSName);
 }
 
 /**
@@ -82,9 +81,9 @@ static double gsl_costFunction(const gsl_vector *v, void *params) {
  * @param inputW :: The workspace
  */
 
-void DiffractionEventCalibrateDetectors::movedetector(
-    double x, double y, double z, double rotx, double roty, double rotz,
-    const std::string &detname, const EventWorkspace_sptr &inputW) {
+void DiffractionEventCalibrateDetectors::movedetector(double x, double y, double z, double rotx, double roty,
+                                                      double rotz, const std::string &detname,
+                                                      const EventWorkspace_sptr &inputW) {
 
   IAlgorithm_sptr alg1 = createChildAlgorithm("MoveInstrumentComponent");
   alg1->setProperty<EventWorkspace_sptr>("Workspace", inputW);
@@ -143,14 +142,13 @@ void DiffractionEventCalibrateDetectors::movedetector(
  * @param groupWSName :: GroupingWorkspace for this detector only.
  *  */
 
-double DiffractionEventCalibrateDetectors::intensity(
-    double x, double y, double z, double rotx, double roty, double rotz,
-    const std::string &detname, const std::string &inname,
-    const std::string &outname, const std::string &peakOpt,
-    const std::string &rb_param, const std::string &groupWSName) {
+double DiffractionEventCalibrateDetectors::intensity(double x, double y, double z, double rotx, double roty,
+                                                     double rotz, const std::string &detname, const std::string &inname,
+                                                     const std::string &outname, const std::string &peakOpt,
+                                                     const std::string &rb_param, const std::string &groupWSName) {
 
-  EventWorkspace_sptr inputW = std::dynamic_pointer_cast<EventWorkspace>(
-      AnalysisDataService::Instance().retrieve(inname));
+  EventWorkspace_sptr inputW =
+      std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inname));
 
   CPUTimer tim;
 
@@ -203,8 +201,7 @@ double DiffractionEventCalibrateDetectors::intensity(
     throw;
   }
   std::ostringstream fun_str;
-  fun_str << "name=Gaussian,Height=" << peakHeight
-          << ",Sigma=0.01,PeakCentre=" << peakLoc;
+  fun_str << "name=Gaussian,Height=" << peakHeight << ",Sigma=0.01,PeakCentre=" << peakLoc;
   fit_alg->setProperty("Function", fun_str.str());
   fit_alg->setProperty("InputWorkspace", outputW);
   fit_alg->setProperty("WorkspaceIndex", 0);
@@ -230,8 +227,7 @@ double DiffractionEventCalibrateDetectors::intensity(
 
   // Optimize C/peakheight + |peakLoc-peakOpt|  where C is scaled by number of
   // events
-  EventWorkspace_const_sptr inputE =
-      std::dynamic_pointer_cast<const EventWorkspace>(inputW);
+  EventWorkspace_const_sptr inputE = std::dynamic_pointer_cast<const EventWorkspace>(inputW);
   return (static_cast<int>(inputE->getNumberEvents()) / 1.e6) / peakHeight +
          std::fabs(peakLoc - boost::lexical_cast<double>(peakOpt));
 }
@@ -239,9 +235,8 @@ double DiffractionEventCalibrateDetectors::intensity(
 /** Initialisation method
  */
 void DiffractionEventCalibrateDetectors::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<InstrumentValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input,
+                                                                      std::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
   declareProperty("Params", "",
@@ -253,23 +248,19 @@ void DiffractionEventCalibrateDetectors::init() {
                   "Negative width values indicate logarithmic binning.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
-  declareProperty(
-      "MaxIterations", 10, mustBePositive,
-      "Stop after this number of iterations if a good fit is not found");
+  declareProperty("MaxIterations", 10, mustBePositive,
+                  "Stop after this number of iterations if a good fit is not found");
 
   auto dblmustBePositive = std::make_shared<BoundedValidator<double>>();
   declareProperty("LocationOfPeakToOptimize", 2.0308, dblmustBePositive,
                   "Optimize this location of peak by moving detectors");
 
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "DetCalFilename", "", API::FileProperty::Save, ".DetCal"),
+  declareProperty(std::make_unique<API::FileProperty>("DetCalFilename", "", API::FileProperty::Save, ".DetCal"),
                   "The output filename of the ISAW DetCal file");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("BankName", "",
-                                                       Direction::Input),
-      "Optional: To only calibrate one bank. Any bank whose name does not "
-      "match the given string will have no events.");
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("BankName", "", Direction::Input),
+                  "Optional: To only calibrate one bank. Any bank whose name does not "
+                  "match the given string will have no events.");
 
   // Disable default gsl error handler (which is to call abort!)
   gsl_set_error_handler_off();
@@ -334,8 +325,7 @@ void DiffractionEventCalibrateDetectors::exec() {
             assem2 = std::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
             if (assem2) {
               for (int k = 0; k < assem2->nelements(); k++) {
-                det = std::dynamic_pointer_cast<RectangularDetector>(
-                    (*assem2)[k]);
+                det = std::dynamic_pointer_cast<RectangularDetector>((*assem2)[k]);
                 if (det) {
                   if (det->getName() == onebank)
                     detList.emplace_back(det);
@@ -376,8 +366,7 @@ void DiffractionEventCalibrateDetectors::exec() {
     outfile << "# Base and up give directions of unit vectors for a local\n";
     outfile << "# x,y coordinate system on the face of the detector.\n";
     outfile << "#\n";
-    outfile << "# " << DateAndTime::getCurrentTime().toFormattedString("%c")
-            << "\n";
+    outfile << "# " << DateAndTime::getCurrentTime().toFormattedString("%c") << "\n";
     outfile << "#\n";
     outfile << "6         L1     T0_SHIFT\n";
     IComponent_const_sptr source = inst->getSource();
@@ -401,8 +390,7 @@ void DiffractionEventCalibrateDetectors::exec() {
 
     // --- Create a GroupingWorkspace for this detector name ------
     CPUTimer tim;
-    IAlgorithm_sptr alg2 =
-        AlgorithmFactory::Instance().create("CreateGroupingWorkspace", 1);
+    IAlgorithm_sptr alg2 = AlgorithmFactory::Instance().create("CreateGroupingWorkspace", 1);
     alg2->initialize();
     alg2->setProperty("InputWorkspace", inputW);
     alg2->setPropertyValue("GroupNames", detList[det]->getName());
@@ -453,15 +441,12 @@ void DiffractionEventCalibrateDetectors::exec() {
       double size = gsl_multimin_fminimizer_size(s);
       status = gsl_multimin_test_size(size, 1e-2);
 
-    } while (status == GSL_CONTINUE && iter < maxIterations &&
-             s->fval != -0.000);
+    } while (status == GSL_CONTINUE && iter < maxIterations && s->fval != -0.000);
 
     // Output summary to log file
     if (s->fval != -0.000)
-      movedetector(gsl_vector_get(s->x, 0), gsl_vector_get(s->x, 1),
-                   gsl_vector_get(s->x, 2), gsl_vector_get(s->x, 3),
-                   gsl_vector_get(s->x, 4), gsl_vector_get(s->x, 5), par[0],
-                   getProperty("InputWorkspace"));
+      movedetector(gsl_vector_get(s->x, 0), gsl_vector_get(s->x, 1), gsl_vector_get(s->x, 2), gsl_vector_get(s->x, 3),
+                   gsl_vector_get(s->x, 4), gsl_vector_get(s->x, 5), par[0], getProperty("InputWorkspace"));
     else {
       gsl_vector_set(s->x, 0, 0.0);
       gsl_vector_set(s->x, 1, 0.0);
@@ -471,8 +456,7 @@ void DiffractionEventCalibrateDetectors::exec() {
       gsl_vector_set(s->x, 5, 0.0);
     }
 
-    std::string reportOfDiffractionEventCalibrateDetectors =
-        gsl_strerror(status);
+    std::string reportOfDiffractionEventCalibrateDetectors = gsl_strerror(status);
     if (s->fval == -0.000)
       reportOfDiffractionEventCalibrateDetectors = "No events";
 
@@ -481,24 +465,18 @@ void DiffractionEventCalibrateDetectors::exec() {
                         << "Simplex"
                         << "\n"
                         << "Iteration = " << iter << "\n"
-                        << "Status = "
-                        << reportOfDiffractionEventCalibrateDetectors << "\n"
-                        << "Minimize PeakLoc-" << peakOpt << " = " << s->fval
-                        << "\n";
+                        << "Status = " << reportOfDiffractionEventCalibrateDetectors << "\n"
+                        << "Minimize PeakLoc-" << peakOpt << " = " << s->fval << "\n";
     // Move in cm for small shifts
-    g_log.information() << "Move (X)   = " << gsl_vector_get(s->x, 0) * 0.01
-                        << "  \n";
-    g_log.information() << "Move (Y)   = " << gsl_vector_get(s->x, 1) * 0.01
-                        << "  \n";
-    g_log.information() << "Move (Z)   = " << gsl_vector_get(s->x, 2) * 0.01
-                        << "  \n";
+    g_log.information() << "Move (X)   = " << gsl_vector_get(s->x, 0) * 0.01 << "  \n";
+    g_log.information() << "Move (Y)   = " << gsl_vector_get(s->x, 1) * 0.01 << "  \n";
+    g_log.information() << "Move (Z)   = " << gsl_vector_get(s->x, 2) * 0.01 << "  \n";
     g_log.information() << "Rotate (X) = " << gsl_vector_get(s->x, 3) << "  \n";
     g_log.information() << "Rotate (Y) = " << gsl_vector_get(s->x, 4) << "  \n";
     g_log.information() << "Rotate (Z) = " << gsl_vector_get(s->x, 5) << "  \n";
 
     Kernel::V3D CalCenter =
-        V3D(gsl_vector_get(s->x, 0) * 0.01, gsl_vector_get(s->x, 1) * 0.01,
-            gsl_vector_get(s->x, 2) * 0.01);
+        V3D(gsl_vector_get(s->x, 0) * 0.01, gsl_vector_get(s->x, 1) * 0.01, gsl_vector_get(s->x, 2) * 0.01);
     Kernel::V3D Center = detList[det]->getPos() + CalCenter;
     int pixmax = detList[det]->xpixels() - 1;
     int pixmid = (detList[det]->ypixels() - 1) / 2;
@@ -523,45 +501,38 @@ void DiffractionEventCalibrateDetectors::exec() {
     baseZ = Base[2];
     double deg2rad = M_PI / 180.0;
     double angle = gsl_vector_get(s->x, 3) * deg2rad;
-    Base = V3D(baseX, baseY * cos(angle) - baseZ * sin(angle),
-               baseY * sin(angle) + baseZ * cos(angle));
+    Base = V3D(baseX, baseY * cos(angle) - baseZ * sin(angle), baseY * sin(angle) + baseZ * cos(angle));
     upX = Up[0];
     upY = Up[1];
     upZ = Up[2];
-    Up = V3D(upX, upY * cos(angle) - upZ * sin(angle),
-             upY * sin(angle) + upZ * cos(angle));
+    Up = V3D(upX, upY * cos(angle) - upZ * sin(angle), upY * sin(angle) + upZ * cos(angle));
     // Rotate around y
     baseX = Base[0];
     baseY = Base[1];
     baseZ = Base[2];
     angle = gsl_vector_get(s->x, 4) * deg2rad;
-    Base = V3D(baseZ * sin(angle) + baseX * cos(angle), baseY,
-               baseZ * cos(angle) - baseX * sin(angle));
+    Base = V3D(baseZ * sin(angle) + baseX * cos(angle), baseY, baseZ * cos(angle) - baseX * sin(angle));
     upX = Up[0];
     upY = Up[1];
     upZ = Up[2];
-    Up = V3D(upZ * cos(angle) - upX * sin(angle), upY,
-             upZ * sin(angle) + upX * cos(angle));
+    Up = V3D(upZ * cos(angle) - upX * sin(angle), upY, upZ * sin(angle) + upX * cos(angle));
     // Rotate around z
     baseX = Base[0];
     baseY = Base[1];
     baseZ = Base[2];
     angle = gsl_vector_get(s->x, 5) * deg2rad;
-    Base = V3D(baseX * cos(angle) - baseY * sin(angle),
-               baseX * sin(angle) + baseY * cos(angle), baseZ);
+    Base = V3D(baseX * cos(angle) - baseY * sin(angle), baseX * sin(angle) + baseY * cos(angle), baseZ);
     upX = Up[0];
     upY = Up[1];
     upZ = Up[2];
-    Up = V3D(upX * cos(angle) - upY * sin(angle),
-             upX * sin(angle) + upY * cos(angle), upZ);
+    Up = V3D(upX * cos(angle) - upY * sin(angle), upX * sin(angle) + upY * cos(angle), upZ);
     Base.normalize();
     Up.normalize();
     Center *= 100.0;
     // << det+1  << "  "
-    outfile << "5  " << detList[det]->getName().substr(4) << "  "
-            << detList[det]->xpixels() << "  " << detList[det]->ypixels()
-            << "  " << 100.0 * detList[det]->xsize() << "  "
-            << 100.0 * detList[det]->ysize() << "  "
+    outfile << "5  " << detList[det]->getName().substr(4) << "  " << detList[det]->xpixels() << "  "
+            << detList[det]->ypixels() << "  " << 100.0 * detList[det]->xsize() << "  " << 100.0 * detList[det]->ysize()
+            << "  "
             << "0.2000"
             << "  " << Center.norm() << "  ";
     Center.write(outfile);

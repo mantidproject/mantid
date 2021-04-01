@@ -33,15 +33,12 @@ class DetectorInfoIteratorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DetectorInfoIteratorTest *createSuite() {
-    return new DetectorInfoIteratorTest();
-  }
+  static DetectorInfoIteratorTest *createSuite() { return new DetectorInfoIteratorTest(); }
   static void destroySuite(DetectorInfoIteratorTest *suite) { delete suite; }
 
   DetectorInfoIteratorTest(){};
 
-  std::unique_ptr<Mantid::Geometry::DetectorInfo>
-  create_detector_info_object() {
+  std::unique_ptr<Mantid::Geometry::DetectorInfo> create_detector_info_object() {
 
     // Create a very basic instrument to visit
     auto visitee = createMinimalInstrument(V3D(0, 0, 0),   // Source position
@@ -54,8 +51,7 @@ public:
 
     // Add 10 more detectors to the instrument
     for (int i = 2; i < numDetectors; i++) {
-      Detector *det =
-          new Detector("point-detector", i /*detector id*/, nullptr);
+      Detector *det = new Detector("point-detector", i /*detector id*/, nullptr);
       det->setPos(V3D(10 + i, 0, 0));
       std::string num = std::to_string(i);
       det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), num));
@@ -149,20 +145,16 @@ public:
 
   void test_iterator_catagory() {
     // Characterisation tests
-    using ItTag =
-        typename std::iterator_traits<DetectorInfoConstIt>::iterator_category;
+    using ItTag = typename std::iterator_traits<DetectorInfoConstIt>::iterator_category;
     using InputItTag = std::input_iterator_tag;
     using BidirectionalItTag = std::bidirectional_iterator_tag;
     const static bool inputit = std::is_convertible<ItTag, InputItTag>::value;
-    const static bool bidirectionalit =
-        std::is_convertible<ItTag, BidirectionalItTag>::value;
+    const static bool bidirectionalit = std::is_convertible<ItTag, BidirectionalItTag>::value;
     TSM_ASSERT("Iterator expected to be treated as input_iterator", inputit);
     // Assert below. Iterator not bidirectional. This is why decrement via
     // std::advance is not supported. Iterator reference must be true reference
     // to support this.
-    TSM_ASSERT(
-        "Iterator expected not to be treated as legacy bidirectional iterator",
-        !bidirectionalit);
+    TSM_ASSERT("Iterator expected not to be treated as legacy bidirectional iterator", !bidirectionalit);
 
     // see https://en.cppreference.com/w/cpp/iterator/advance
   }

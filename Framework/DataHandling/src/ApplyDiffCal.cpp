@@ -46,9 +46,7 @@ const std::string ApplyDiffCal::name() const { return "ApplyDiffCal"; }
 int ApplyDiffCal::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ApplyDiffCal::category() const {
-  return "DataHandling\\Instrument;Diffraction\\DataHandling";
-}
+const std::string ApplyDiffCal::category() const { return "DataHandling\\Instrument;Diffraction\\DataHandling"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ApplyDiffCal::summary() const {
@@ -58,39 +56,27 @@ const std::string ApplyDiffCal::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ApplyDiffCal::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
-                      "InstrumentWorkspace", "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>("InstrumentWorkspace", "", Direction::InOut),
                   "Set the workspace whose instrument should be updated");
   const std::vector<std::string> exts{".h5", ".hd5", ".hdf", ".cal"};
-  declareProperty(
-      std::make_unique<FileProperty>("CalibrationFile", "",
-                                     FileProperty::OptionalLoad, exts),
-      "Optional: The .cal file containing the position correction factors. "
-      "Either this, CalibrationWorkspace or OffsetsWorkspace needs to be "
-      "specified.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "CalibrationWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional: Set the Diffraction Calibration workspace");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
-          "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional: A OffsetsWorkspace containing the calibration offsets. Either "
-      "this, CalibrationWorkspace or CalibrationFile needs to be specified.");
-  declareProperty("ClearCalibration", false,
-                  "Remove any existing calibration from the workspace");
-  setPropertySettings(
-      "CalibrationFile",
-      std::make_unique<Kernel::EnabledWhenProperty>(
-          "ClearCalibration", Kernel::ePropertyCriterion::IS_EQUAL_TO, "0"));
-  setPropertySettings(
-      "CalibrationWorkspace",
-      std::make_unique<Kernel::EnabledWhenProperty>(
-          "ClearCalibration", Kernel::ePropertyCriterion::IS_EQUAL_TO, "0"));
-  setPropertySettings(
-      "OffsetsWorkspace",
-      std::make_unique<Kernel::EnabledWhenProperty>(
-          "ClearCalibration", Kernel::ePropertyCriterion::IS_EQUAL_TO, "0"));
+  declareProperty(std::make_unique<FileProperty>("CalibrationFile", "", FileProperty::OptionalLoad, exts),
+                  "Optional: The .cal file containing the position correction factors. "
+                  "Either this, CalibrationWorkspace or OffsetsWorkspace needs to be "
+                  "specified.");
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("CalibrationWorkspace", "", Direction::Input,
+                                                                       PropertyMode::Optional),
+                  "Optional: Set the Diffraction Calibration workspace");
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>("OffsetsWorkspace", "", Direction::Input,
+                                                                        PropertyMode::Optional),
+                  "Optional: A OffsetsWorkspace containing the calibration offsets. Either "
+                  "this, CalibrationWorkspace or CalibrationFile needs to be specified.");
+  declareProperty("ClearCalibration", false, "Remove any existing calibration from the workspace");
+  setPropertySettings("CalibrationFile", std::make_unique<Kernel::EnabledWhenProperty>(
+                                             "ClearCalibration", Kernel::ePropertyCriterion::IS_EQUAL_TO, "0"));
+  setPropertySettings("CalibrationWorkspace", std::make_unique<Kernel::EnabledWhenProperty>(
+                                                  "ClearCalibration", Kernel::ePropertyCriterion::IS_EQUAL_TO, "0"));
+  setPropertySettings("OffsetsWorkspace", std::make_unique<Kernel::EnabledWhenProperty>(
+                                              "ClearCalibration", Kernel::ePropertyCriterion::IS_EQUAL_TO, "0"));
 }
 
 std::map<std::string, std::string> ApplyDiffCal::validateInputs() {
@@ -112,8 +98,7 @@ std::map<std::string, std::string> ApplyDiffCal::validateInputs() {
   if (!calFileName.empty())
     numWays += 1;
 
-  ITableWorkspace_const_sptr calibrationWS =
-      getProperty("CalibrationWorkspace");
+  ITableWorkspace_const_sptr calibrationWS = getProperty("CalibrationWorkspace");
   if (bool(calibrationWS))
     numWays += 1;
 
@@ -124,8 +109,7 @@ std::map<std::string, std::string> ApplyDiffCal::validateInputs() {
   bool clearCalibration = getProperty("ClearCalibration");
   std::string message;
   if ((clearCalibration) && (numWays > 0)) {
-    message =
-        "You cannot supply a calibration input when clearing the calibration.";
+    message = "You cannot supply a calibration input when clearing the calibration.";
   }
   if (!clearCalibration) {
     if (numWays == 0) {
@@ -146,8 +130,7 @@ std::map<std::string, std::string> ApplyDiffCal::validateInputs() {
   return result;
 }
 
-void ApplyDiffCal::loadCalFile(const Workspace_sptr &inputWS,
-                               const std::string &filename) {
+void ApplyDiffCal::loadCalFile(const Workspace_sptr &inputWS, const std::string &filename) {
   IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("Filename", filename);
@@ -192,8 +175,7 @@ void ApplyDiffCal::exec() {
 
   Workspace_sptr InstrumentWorkspace = getProperty("InstrumentWorkspace");
   // validateInputs guarantees this will be an ExperimentInfo object
-  auto experimentInfo =
-      std::dynamic_pointer_cast<API::ExperimentInfo>(InstrumentWorkspace);
+  auto experimentInfo = std::dynamic_pointer_cast<API::ExperimentInfo>(InstrumentWorkspace);
   auto instrument = experimentInfo->getInstrument();
   auto &paramMap = experimentInfo->instrumentParameters();
   bool clearCalibration = getProperty("ClearCalibration");

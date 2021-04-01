@@ -79,7 +79,7 @@ void midpt_split(ANNpointArray pa,        // point array
                  int dim,                 // dimension of space
                  int &cut_dim,            // cutting dimension (returned)
                  ANNcoord &cut_val,       // cutting value (returned)
-                 int &n_lo) // num of points on low side (returned)
+                 int &n_lo)               // num of points on low side (returned)
 {
   int d;
 
@@ -145,14 +145,14 @@ void midpt_split(ANNpointArray pa,        // point array
 //
 //----------------------------------------------------------------------
 
-void sl_midpt_split(ANNpointArray pa, // point array
-                    ANNidxArray pidx, // point indices (permuted on return)
+void sl_midpt_split(ANNpointArray pa,        // point array
+                    ANNidxArray pidx,        // point indices (permuted on return)
                     const ANNorthRect &bnds, // bounding rectangle for cell
                     int n,                   // number of points
                     int dim,                 // dimension of space
                     int &cut_dim,            // cutting dimension (returned)
                     ANNcoord &cut_val,       // cutting value (returned)
-                    int &n_lo) // num of points on low side (returned)
+                    int &n_lo)               // num of points on low side (returned)
 {
   int d;
 
@@ -352,14 +352,14 @@ void fair_split(ANNpointArray pa,        // point array
 //
 //----------------------------------------------------------------------
 
-void sl_fair_split(ANNpointArray pa, // point array
-                   ANNidxArray pidx, // point indices (permuted on return)
+void sl_fair_split(ANNpointArray pa,        // point array
+                   ANNidxArray pidx,        // point indices (permuted on return)
                    const ANNorthRect &bnds, // bounding rectangle for cell
                    int n,                   // number of points
                    int dim,                 // dimension of space
                    int &cut_dim,            // cutting dimension (returned)
                    ANNcoord &cut_val,       // cutting value (returned)
-                   int &n_lo) // num of points on low side (returned)
+                   int &n_lo)               // num of points on low side (returned)
 {
   int d;
   ANNcoord min, max; // min/max coordinates

@@ -29,41 +29,30 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 void GoniometerAnglesFromPhiRotation::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "PeaksWorkspace1", "", Kernel::Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace1", "", Kernel::Direction::Input),
                   "Input Peaks Workspace for Run 1");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "PeaksWorkspace2", "", Kernel::Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace2", "", Kernel::Direction::InOut),
                   "Input Peaks Workspace for Run 2");
 
-  declareProperty(
-      "Tolerance", .12,
-      "Integer offset for h,k,and l values to be considered valid.(def=.12)");
+  declareProperty("Tolerance", .12, "Integer offset for h,k,and l values to be considered valid.(def=.12)");
 
   declareProperty("MIND", -1.0, "Minimium d-spacing to consider,(def=-1)");
   declareProperty("MAXD", -1.0, "Maximum d-spacing to consider,(def=-1)");
 
   declareProperty("Run1Phi", 0.0, "Phi for Run 1(def=0.0)");
 
-  declareProperty(std::string("Phi2"), 0.0,
-                  std::string("Phi angle for Run2(def=0.0)"),
-                  Kernel::Direction::InOut);
+  declareProperty(std::string("Phi2"), 0.0, std::string("Phi angle for Run2(def=0.0)"), Kernel::Direction::InOut);
 
   declareProperty("Chi2", 0.0, "Chi angle for Run2", Kernel::Direction::Output);
-  declareProperty("Omega2", 0.0, "Omega angle for Run2",
+  declareProperty("Omega2", 0.0, "Omega angle for Run2", Kernel::Direction::Output);
+
+  declareProperty("NIndexed", 0, "Number peaks indexed", Kernel::Direction::Output);
+
+  declareProperty("AvErrIndex", 0.0, "Average abs offset from integer values for indexed peaks",
                   Kernel::Direction::Output);
 
-  declareProperty("NIndexed", 0, "Number peaks indexed",
-                  Kernel::Direction::Output);
-
-  declareProperty("AvErrIndex", 0.0,
-                  "Average abs offset from integer values for indexed peaks",
-                  Kernel::Direction::Output);
-
-  declareProperty("AvErrAll", 0.0,
-                  "Average abs offset from integer values for all peaks",
-                  Kernel::Direction::Output);
+  declareProperty("AvErrAll", 0.0, "Average abs offset from integer values for all peaks", Kernel::Direction::Output);
 }
 
 /**
@@ -82,10 +71,9 @@ void GoniometerAnglesFromPhiRotation::init() {
  * @param AvErrorAll  The average error in the hkl values of all the peaks
  * @param tolerance  The indexing tolerance
  */
-void GoniometerAnglesFromPhiRotation::IndexRaw(
-    const PeaksWorkspace_sptr &Peaks, const Kernel::Matrix<double> &UBraw,
-    int &Nindexed, double &AvErrIndexed, double &AvErrorAll,
-    double tolerance) const {
+void GoniometerAnglesFromPhiRotation::IndexRaw(const PeaksWorkspace_sptr &Peaks, const Kernel::Matrix<double> &UBraw,
+                                               int &Nindexed, double &AvErrIndexed, double &AvErrorAll,
+                                               double tolerance) const {
   Kernel::Matrix<double> InvUB2(UBraw);
 
   InvUB2.Invert();
@@ -156,8 +144,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
     const std::string fft("FindUBUsingFFT");
     API::IAlgorithm_sptr findUB = this->createChildAlgorithm(fft);
     findUB->initialize();
-    findUB->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace",
-                                             getProperty("PeaksWorkspace1"));
+    findUB->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace", getProperty("PeaksWorkspace1"));
     findUB->setProperty("MIND", static_cast<double>(getProperty("MIND")));
     findUB->setProperty("MAXD", static_cast<double>(getProperty("MAXD")));
     findUB->setProperty("Tolerance", Tolerance);
@@ -165,10 +152,8 @@ void GoniometerAnglesFromPhiRotation::exec() {
     findUB->executeAsChildAlg();
 
     if (!PeaksRun1->sample().hasOrientedLattice()) {
-      g_log.notice(std::string("Could not find UB for ") +
-                   std::string(PeaksRun1->getName()));
-      throw std::invalid_argument(std::string("Could not find UB for ") +
-                                  std::string(PeaksRun1->getName()));
+      g_log.notice(std::string("Could not find UB for ") + std::string(PeaksRun1->getName()));
+      throw std::invalid_argument(std::string("Could not find UB for ") + std::string(PeaksRun1->getName()));
     }
   }
   //-------------get UB raw :No goniometer----------------
@@ -182,24 +167,20 @@ void GoniometerAnglesFromPhiRotation::exec() {
   IndexRaw(PeaksRun1, UB1, N1, avErrIndx, avErrAll, Tolerance);
 
   if (N1 < .6 * PeaksRun1->getNumberPeaks()) {
-    g_log.notice(std::string("UB did not index well for ") +
-                 std::string(PeaksRun1->getName()));
-    throw std::invalid_argument(std::string("UB did not index well for ") +
-                                std::string(PeaksRun1->getName()));
+    g_log.notice(std::string("UB did not index well for ") + std::string(PeaksRun1->getName()));
+    throw std::invalid_argument(std::string("UB did not index well for ") + std::string(PeaksRun1->getName()));
   }
 
   //----------------------------------------------
 
-  auto lat2 = std::make_unique<OrientedLattice>(
-      PeaksRun1->sample().getOrientedLattice());
+  auto lat2 = std::make_unique<OrientedLattice>(PeaksRun1->sample().getOrientedLattice());
   lat2->setUB(UB1);
   PeaksRun2->mutableSample().setOrientedLattice(std::move(lat2));
 
   if (!Run1HasOrientedLattice)
     PeaksRun1->mutableSample().setOrientedLattice(nullptr);
 
-  double dphi = static_cast<double>(getProperty("Phi2")) -
-                static_cast<double>(getProperty("Run1Phi"));
+  double dphi = static_cast<double>(getProperty("Phi2")) - static_cast<double>(getProperty("Run1Phi"));
   Kernel::Matrix<double> Gon22(3, 3, true);
 
   for (int i = 0; i < PeaksRun2->getNumberPeaks(); i++) {
@@ -226,8 +207,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
       int Nindexed;
       double dummyAvErrIndx, dummyAvErrAll;
-      IndexRaw(PeaksRun2, Rot * UB1, Nindexed, dummyAvErrIndx, dummyAvErrAll,
-               Tolerance);
+      IndexRaw(PeaksRun2, Rot * UB1, Nindexed, dummyAvErrIndx, dummyAvErrAll, Tolerance);
 
       if (Nindexed > MinData[0]) {
         MinData[0] = Nindexed;
@@ -239,8 +219,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
       }
     }
 
-  g_log.debug() << "Best direction unOptimized is ("
-                << (MinData[1] * MinData[2]) << "," << (MinData[1] * MinData[3])
+  g_log.debug() << "Best direction unOptimized is (" << (MinData[1] * MinData[2]) << "," << (MinData[1] * MinData[3])
                 << "," << (MinData[1] * MinData[4]) << ")\n";
 
   //----------------------- Optimize around best----------------------------
@@ -270,22 +249,18 @@ void GoniometerAnglesFromPhiRotation::exec() {
   MinData[3] = omchiphi[1];
   MinData[4] = omchiphi[0];
 
-  std::string FunctionArgs =
-      "name=PeakHKLErrors, PeakWorkspaceName=" + PeaksRun2->getName() +
-      ",OptRuns=" + RunNumStr + ",phi" + RunNumStr + "=" +
-      boost::lexical_cast<std::string>(MinData[2]) + ",chi" + RunNumStr + "=" +
-      boost::lexical_cast<std::string>(MinData[3]) + ",omega" + RunNumStr +
-      "=" + boost::lexical_cast<std::string>(MinData[4]);
+  std::string FunctionArgs = "name=PeakHKLErrors, PeakWorkspaceName=" + PeaksRun2->getName() + ",OptRuns=" + RunNumStr +
+                             ",phi" + RunNumStr + "=" + boost::lexical_cast<std::string>(MinData[2]) + ",chi" +
+                             RunNumStr + "=" + boost::lexical_cast<std::string>(MinData[3]) + ",omega" + RunNumStr +
+                             "=" + boost::lexical_cast<std::string>(MinData[4]);
 
-  std::string Constr = boost::lexical_cast<std::string>(MinData[2] - 5) +
-                       "<phi" + RunNumStr + "<" +
+  std::string Constr = boost::lexical_cast<std::string>(MinData[2] - 5) + "<phi" + RunNumStr + "<" +
                        boost::lexical_cast<std::string>(MinData[2] + 5);
-  Constr += "," + boost::lexical_cast<std::string>(MinData[3] - 5) + "<chi" +
-            RunNumStr + "<" + boost::lexical_cast<std::string>(MinData[3] + 5) +
-            ",";
+  Constr += "," + boost::lexical_cast<std::string>(MinData[3] - 5) + "<chi" + RunNumStr + "<" +
+            boost::lexical_cast<std::string>(MinData[3] + 5) + ",";
 
-  Constr += boost::lexical_cast<std::string>(MinData[4] - 5) + "<omega" +
-            RunNumStr + "<" + boost::lexical_cast<std::string>(MinData[4] + 5);
+  Constr += boost::lexical_cast<std::string>(MinData[4] - 5) + "<omega" + RunNumStr + "<" +
+            boost::lexical_cast<std::string>(MinData[4] + 5);
 
   std::string Ties = "SampleXOffset=0.0,SampleYOffset=0.0,SampleZOffset=0.0,"
                      "GonRotx=0.0,GonRoty=0.0,GonRotz=0.0";
@@ -305,8 +280,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   Fit->executeAsChildAlg();
 
-  std::shared_ptr<API::ITableWorkspace> results =
-      Fit->getProperty("OutputParameters");
+  std::shared_ptr<API::ITableWorkspace> results = Fit->getProperty("OutputParameters");
   double chisq = Fit->getProperty("OutputChi2overDoF");
 
   MinData[0] = chisq;
@@ -314,12 +288,11 @@ void GoniometerAnglesFromPhiRotation::exec() {
   MinData[3] = results->Double(7, 1);
   MinData[4] = results->Double(8, 1);
 
-  g_log.debug() << "Best direction Optimized is (" << (MinData[2]) << ","
-                << (MinData[3]) << "," << (MinData[4]) << ")\n";
+  g_log.debug() << "Best direction Optimized is (" << (MinData[2]) << "," << (MinData[3]) << "," << (MinData[4])
+                << ")\n";
 
   //          ---------------------Find number indexed -----------------------
-  Quat Q1 = Quat(MinData[4], V3D(0, 1, 0)) * Quat(MinData[3], V3D(0, 0, 1)) *
-            Quat(MinData[2], V3D(0, 1, 0));
+  Quat Q1 = Quat(MinData[4], V3D(0, 1, 0)) * Quat(MinData[3], V3D(0, 0, 1)) * Quat(MinData[2], V3D(0, 1, 0));
 
   int Nindexed;
   Kernel::Matrix<double> Mk(Q1.getRotation());
@@ -341,13 +314,10 @@ void GoniometerAnglesFromPhiRotation::exec() {
   double chi2 = acos(ax2) / M_PI * 180;
   double omega2 = atan2(ax3, -ax1) / M_PI * 180;
 
-  g_log.notice()
-      << "============================ Results ============================\n";
-  g_log.notice() << "     phi,chi, and omega= (" << phi2 << "," << chi2 << ","
-                 << omega2 << ")\n";
+  g_log.notice() << "============================ Results ============================\n";
+  g_log.notice() << "     phi,chi, and omega= (" << phi2 << "," << chi2 << "," << omega2 << ")\n";
   g_log.notice() << "     #indexed =" << Nindexed << '\n';
-  g_log.notice()
-      << "              ==============================================\n";
+  g_log.notice() << "              ==============================================\n";
 
   setProperty("Phi2", phi2);
   setProperty("Chi2", chi2);
@@ -359,15 +329,13 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   setProperty("AvErrAll", avErrAll);
 
-  Q1 = Quat(omega2, V3D(0, 1, 0)) * Quat(chi2, V3D(0, 0, 1)) *
-       Quat(phi2, V3D(0, 1, 0));
+  Q1 = Quat(omega2, V3D(0, 1, 0)) * Quat(chi2, V3D(0, 0, 1)) * Quat(phi2, V3D(0, 1, 0));
   Kernel::Matrix<double> Gon2a(Q1.getRotation());
   for (int i = 0; i < PeaksRun2->getNumberPeaks(); i++) {
     PeaksRun2->getPeak(i).setGoniometerMatrix(Gon2a);
   }
 
-  auto latt2 = std::make_unique<OrientedLattice>(
-      PeaksRun2->mutableSample().getOrientedLattice());
+  auto latt2 = std::make_unique<OrientedLattice>(PeaksRun2->mutableSample().getOrientedLattice());
   Rot.Invert();
   Gon2a.Invert();
   latt2->setUB(Gon2a * Mk * UB1);
@@ -381,9 +349,8 @@ void GoniometerAnglesFromPhiRotation::exec() {
  * @param Peaks   The PeaksWorkspace
  * @param GoniometerMatrix  the goniometer matrix for the run
  */
-bool GoniometerAnglesFromPhiRotation::CheckForOneRun(
-    const PeaksWorkspace_sptr &Peaks,
-    Kernel::Matrix<double> &GoniometerMatrix) const {
+bool GoniometerAnglesFromPhiRotation::CheckForOneRun(const PeaksWorkspace_sptr &Peaks,
+                                                     Kernel::Matrix<double> &GoniometerMatrix) const {
 
   int RunNumber = -1;
   for (int peak = 0; peak < Peaks->getNumberPeaks(); peak++) {
@@ -409,9 +376,8 @@ bool GoniometerAnglesFromPhiRotation::CheckForOneRun(
  *
  * @return The raw UB
  */
-Kernel::Matrix<double> GoniometerAnglesFromPhiRotation::getUBRaw(
-    const Kernel::Matrix<double> &UB,
-    const Kernel::Matrix<double> &GoniometerMatrix) const {
+Kernel::Matrix<double> GoniometerAnglesFromPhiRotation::getUBRaw(const Kernel::Matrix<double> &UB,
+                                                                 const Kernel::Matrix<double> &GoniometerMatrix) const {
   return GoniometerMatrix * UB;
 }
 

@@ -17,9 +17,7 @@ using namespace API;
 DECLARE_ALGORITHM(CalculateChiSquared)
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CalculateChiSquared::name() const {
-  return "CalculateChiSquared";
-}
+const std::string CalculateChiSquared::name() const { return "CalculateChiSquared"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CalculateChiSquared::version() const { return 1; }
@@ -32,8 +30,7 @@ const std::string CalculateChiSquared::summary() const {
 //----------------------------------------------------------------------------------------------
 /// Initialize the algorithm's properties.
 void CalculateChiSquared::initConcrete() {
-  declareProperty("ChiSquared", 0.0, "Output value of chi squared.",
-                  Direction::Output);
+  declareProperty("ChiSquared", 0.0, "Output value of chi squared.", Direction::Output);
   declareProperty("ChiSquaredDividedByDOF", 0.0,
                   "Output value of chi squared divided by the "
                   "number of degrees of freedom (NofData "
@@ -43,8 +40,7 @@ void CalculateChiSquared::initConcrete() {
                   "Output value of chi squared divided by the "
                   "number of data points).",
                   Direction::Output);
-  declareProperty("ChiSquaredWeighted", 0.0,
-                  "Output value of weighted chi squared.", Direction::Output);
+  declareProperty("ChiSquaredWeighted", 0.0, "Output value of weighted chi squared.", Direction::Output);
   declareProperty("ChiSquaredWeightedDividedByDOF", 0.0,
                   "Output value of weighted chi squared divided by the "
                   "number of degrees of freedom (NofData "
@@ -87,8 +83,7 @@ void CalculateChiSquared::execConcrete() {
   double chiSquared = 0.0;
   double chiSquaredWeighted = 0.0;
   double dof = 0.0;
-  calcChiSquared(*m_function, nParams, *domain, *values, chiSquared,
-                 chiSquaredWeighted, dof);
+  calcChiSquared(*m_function, nParams, *domain, *values, chiSquared, chiSquaredWeighted, dof);
   g_log.notice() << "Chi squared " << chiSquared << "\n"
                  << "Chi squared weighted " << chiSquaredWeighted << "\n";
 
@@ -101,8 +96,7 @@ void CalculateChiSquared::execConcrete() {
   const double chiSquaredNData = chiSquared / nData;
   const double chiSquaredWeightedNData = chiSquaredWeighted / nData;
   g_log.notice() << "Chi squared / NData " << chiSquaredNData << "\n"
-                 << "Chi squared weighed / NData " << chiSquaredWeightedNData
-                 << "\n"
+                 << "Chi squared weighed / NData " << chiSquaredWeightedNData << "\n"
                  << "NParams " << nParams << "\n";
 
   // Store the result.
@@ -117,8 +111,7 @@ void CalculateChiSquared::execConcrete() {
   const double chiSquaredDOF = chiSquared / dof;
   const double chiSquaredWeightedDOF = chiSquaredWeighted / dof;
   g_log.notice() << "Chi squared / DOF " << chiSquaredDOF << "\n"
-                 << "Chi squared weighed / DOF " << chiSquaredWeightedDOF
-                 << "\n"
+                 << "Chi squared weighed / DOF " << chiSquaredWeightedDOF << "\n"
                  << "DOF " << dof << "\n";
 
   // Store the result.
@@ -137,10 +130,9 @@ void CalculateChiSquared::execConcrete() {
 /// @param chiSquared :: unweighted chi squared
 /// @param chiSquaredWeighted :: weighted chi squared
 /// @param dof :: degrees of freedom
-void CalculateChiSquared::calcChiSquared(
-    const API::IFunction &fun, size_t nParams,
-    const API::FunctionDomain &domain, API::FunctionValues &values,
-    double &chiSquared, double &chiSquaredWeighted, double &dof) {
+void CalculateChiSquared::calcChiSquared(const API::IFunction &fun, size_t nParams, const API::FunctionDomain &domain,
+                                         API::FunctionValues &values, double &chiSquared, double &chiSquaredWeighted,
+                                         double &dof) {
 
   // Calculate function values.
   fun.function(domain, values);
