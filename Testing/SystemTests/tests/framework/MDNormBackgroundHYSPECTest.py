@@ -160,7 +160,7 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
                Dimension3Binning='-0.5,0.5',
                SymmetryOperations=SYMMETRY_OPERATION,
                OutputWorkspace=bkgd_processed_mdh,
-               OutputDataWorkspace='background_dataMD',
+               OutputDataWorkspace=bkgd_data_mdh,
                OutputNormalizationWorkspace=f'{prefix}_background_normMD')
 
         # clean data
@@ -221,16 +221,13 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
         Load(Filename='HYS_13656', OutputWorkspace='sum')
         SetGoniometer(Workspace='sum', Axis0='s1,0,1,0,1')
 
-        # prepare sample MD
-        self.prepare_md(input_ws_name='sum', merged_md_name='merged', min_log_value=10, max_log_value=15,
+	# prepare sample MD: in test must between 10 and 12 to match the gold data
+        self.prepare_md(input_ws_name='sum', merged_md_name='merged', min_log_value=10, max_log_value=12,
                         log_step=LOG_VALUE_STEP)
 
         # 1-1 Existing method (but to keep)
         clean_data, sample_data_mdh, sample_norm_mdh, background_data_mdh = self.run_old_solution()
         self._old_clean = str(clean_data)
-
-        # Test
-        self.test_property_setup()
 
         # Prepare background workspace
         self.prepare_single_exp_info_background(input_md_name='reduced_1',
@@ -254,12 +251,16 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
                    OutputNormalizationWorkspace='normMD',
                    OutputBackgroundDataWorkspace='background_dataMD',
                    OutputBackgroundNormalizationWorkspace='background_normMD')
+        # Test solution
+        assert hasattr(r, 'OutputBackgroundNormalizationWorkspace'), 'MDNorm does not execute.'
         # Compare workspace
-        r = CompareMDWorkspaces(Workspace1=background_data_mdh, Workspace2='background_dataMD')
-        assert r.Equals, f'Error message: {r.Result}'
+        rc = CompareMDWorkspaces(Workspace1=background_data_mdh, Workspace2='background_dataMD')
+        assert rc.Equals, f'Error message: {rc.Result}'
 
-        # Test
-        assert hasattr(r, 'OutputBackgroundNormalizationWorkspace')
+	# Test: This can mess some experimental data set up for verifying
+	# whether the reduction is correct.
+        self.test_property_setup()
+
 
         # clean_data = r.OutputWorkspace
         # print(f'[VZ DEBUG] clean data: s1 = 10 .. 12: Number of Experiment Info = {clean_data.getNumExperimentInfo()}')
