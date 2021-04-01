@@ -18,12 +18,6 @@ HEADER_COLUMN_MAP = {"Period Number": 0,
                      "Total Good Frames": 5,
                      "Counts": 6,
                      "Tag": 7}
-CONTEXT_MAP = {"Name": 1,
-               "Type": 2,
-               "Frames": 3,
-               "Total Good Frames": 4,
-               "Counts": 5,
-               "Tag": 6}
 PERIOD_INFO_NOT_FOUND = "Not found"
 NOT_DAQ_STRING = "-"
 DAQ = "1"
