@@ -89,7 +89,7 @@ void FilterPeaks::init() {
   const std::string SELECT("Select Bank by Name");
   std::vector<std::string> action{"=", "!="};
   declareProperty("Criterion", "=", std::make_shared<StringListValidator>(action), "");
-  declareProperty("BankName", "", "Selected bank name, empty means skip selection");
+  declareProperty("BankName", "", "Selected bank name, empty means skip selection. Applicable only to PeaksWorkspace");
   setPropertyGroup("Criterion", SELECT);
   setPropertyGroup("BankName", SELECT);
 }
@@ -111,7 +111,7 @@ void FilterPeaks::exec() {
   const std::string bankname = getProperty("BankName");
   const std::string criterion = getProperty("Criterion");
 
-  if (!bankname.empty()) {
+  if (!bankname.empty() && (inputWS->id() == "PeaksWorkspace")) {
     FilterFunctionStr filterFunction = &BANKNAME;
     IPeaksWorkspace_sptr selectedWS = filteredWS->clone();
 
@@ -128,7 +128,7 @@ void FilterPeaks::exec() {
 
   if (!isDefault("FilterValue")) {
     const auto filterFunction = getFilterVariableFunction(filterVariable);
-    // Choose which version of the function to use based on the operator
+    // Choose which version of the function to u.se based on the operator
     if (Operator == "<")
       filterPeaks<std::less<double>>(*inputWS, *filteredWS, filterFunction, filterValue);
     else if (Operator == ">")
