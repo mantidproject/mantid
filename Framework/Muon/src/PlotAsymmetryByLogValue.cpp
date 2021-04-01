@@ -279,8 +279,7 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber, size_t &la
 
   // If file names empty, first and last provided so need to populate vector
   if (m_fileNames.empty()) {
-    populateFileNamesFromFirstLast(getProperty("FirstRun"),
-                                   getProperty("LastRun"));
+    populateFileNamesFromFirstLast(getProperty("FirstRun"), getProperty("LastRun"));
   }
 
   // Extract run numbers for all runs and map to filenames
