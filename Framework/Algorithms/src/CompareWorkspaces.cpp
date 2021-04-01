@@ -122,9 +122,7 @@ void CompareWorkspaces::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace2", "", Direction::Input),
                   "The name of the second input workspace.");
 
-  declareProperty(
-      "Tolerance", 1e-10,
-      "The maximum amount by which values may differ between the workspaces.");
+  declareProperty("Tolerance", 1e-10, "The maximum amount by which values may differ between the workspaces.");
 
   declareProperty("CheckType", true,
                   "Whether to check that the data types "
@@ -1073,8 +1071,7 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
                        << "s2 = " << s2 << "\n"
                        << "std::fabs(s1 - s2) = " << std::fabs(s1 - s2) << "\n"
                        << "tolerance = " << tolerance << "\n";
-        g_log.notice() << "Data mismatch at cell (row#,col#): (" << i << ","
-                       << j << ")\n";
+        g_log.notice() << "Data mismatch at cell (row#,col#): (" << i << "," << j << ")\n";
         recordMismatch("Data mismatch");
         return;
       }
@@ -1169,8 +1166,7 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(LeanElasticPeaksWorkspace_s
                        << "s2 = " << s2 << "\n"
                        << "std::fabs(s1 - s2) = " << std::fabs(s1 - s2) << "\n"
                        << "tolerance = " << tolerance << "\n";
-        g_log.notice() << "Data mismatch at cell (row#,col#): (" << i << ","
-                       << j << ")\n";
+        g_log.notice() << "Data mismatch at cell (row#,col#): (" << i << "," << j << ")\n";
         recordMismatch("Data mismatch");
         return;
       }
