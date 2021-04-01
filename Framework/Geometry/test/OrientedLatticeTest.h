@@ -32,6 +32,11 @@ public:
     u2.seta(13);
     TS_ASSERT_DELTA(u2.a(), 13, 1e-10);
     TS_ASSERT_DELTA(u2.getUB()[0][0], 1. / 13., 1e-10);
+
+    // Check that the ModUB is initialized correctly
+    const DblMatrix &modUB = u1.getModUB();
+    DblMatrix expected(3, 3);
+    TS_ASSERT(modUB.equals(expected, 1e-8));
   }
 
   void test_hklFromQ() {
