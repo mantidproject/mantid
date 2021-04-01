@@ -19,6 +19,11 @@ class_path = 'Engineering.gui.engineering_diffraction.tabs.calibration.model.Cal
 file_path = 'Engineering.gui.engineering_diffraction.tabs.calibration.model'
 
 
+def _run_calibration_returns():
+    stuff = (None, None, None)
+    return list(stuff), list(stuff), None
+
+
 class CalibrationModelTest(unittest.TestCase):
     def setUp(self):
         self.model = CalibrationModel()
@@ -31,23 +36,14 @@ class CalibrationModelTest(unittest.TestCase):
 
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
-    @patch(class_path + '.run_calibration')
-    @patch(file_path + ".path_handling.load_workspace")
-    @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
-    def test_EnggVanadiumCorrections_algorithm_is_called(self, van, load_sample, calib,
-                                                         output_files, update_table):
-        van.return_value = ("A", "B")
-        self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
-        van.assert_called_once()
-
-    @patch(class_path + '.update_calibration_params_table')
-    @patch(class_path + '.create_output_files')
+    @patch(class_path + '.handle_van_curves')
     @patch(file_path + ".path_handling.load_workspace")
     @patch(class_path + '.run_calibration')
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
-    def test_fetch_vanadium_is_called(self, van_corr, calibrate_alg, load_sample, output_files,
+    def test_fetch_vanadium_is_called(self, van_corr, calibrate_alg, load_sample, handle_vc, output_files,
                                       update_table):
         van_corr.return_value = ("mocked_integration", "mocked_curves")
+        calibrate_alg.side_effect = _run_calibration_returns()
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
         self.assertEqual(van_corr.call_count, 1)
 
@@ -56,12 +52,14 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
     @patch(file_path + '.LoadAscii')
+    @patch(class_path + '.handle_van_curves')
     @patch(file_path + ".path_handling.load_workspace")
     @patch(class_path + '.run_calibration')
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
-    def test_having_full_calib_set_uses_file(self, van_corr, calibrate_alg, load_workspace, load_ascii,
+    def test_having_full_calib_set_uses_file(self, van_corr, calibrate_alg, load_workspace, handle_vc, load_ascii,
                                              output_files, update_table, setting, path):
         path.return_value = True
+        calibrate_alg.side_effect = _run_calibration_returns()
         setting.return_value = "mocked/out/path"
         mocked_integration = MagicMock()
         mocked_curves = MagicMock()
@@ -78,20 +76,17 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + '.create_output_files')
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
-    @patch(class_path + '._plot_vanadium_curves')
     @patch(class_path + '._generate_tof_fit_workspace')
     @patch(class_path + '._plot_tof_fit')
     @patch(class_path + '.run_calibration')
-    def test_plotting_check(self, calib, plot_tof, gen_tof, plot_van, van, sample,
+    def test_plotting_check(self, calib, plot_tof, gen_tof, van, sample,
                             output_files, update_table):
         calib.return_value = [MagicMock(), MagicMock()]
         van.return_value = ("A", "B")
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
-        plot_van.assert_not_called()
         plot_tof.assert_not_called()
         gen_tof.assert_not_called()
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, True, "ENGINX")
-        plot_van.assert_called_once()
         self.assertEqual(gen_tof.call_count, 2)
         self.assertEqual(plot_tof.call_count, 1)
 

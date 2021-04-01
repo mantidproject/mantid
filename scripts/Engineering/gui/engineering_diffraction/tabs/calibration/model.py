@@ -13,7 +13,7 @@ from mantid.kernel import logger, IntArrayProperty
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, Integration, DiffractionFocussing, \
     CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, LoadAscii, NormaliseByCurrent, AlignDetectors, \
     CreateGroupingWorkspace, EditInstrumentGeometry, ConvertUnits, Load, GroupDetectors, RebinToWorkspace,\
-    Divide, EnggEstimateFocussedBackground
+    Divide, EnggEstimateFocussedBackground, ApplyDiffCal
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
@@ -115,7 +115,7 @@ class CalibrationModel(object):
         SouthBank = ws_inst.getComponentByName("SouthBank")
         params_north = []
         params_south = []
-        for param_name in ["alpha", "beta_0","beta_1","sigma_0_sq", "sigma_1_sq", "sigma_2_sq"]:
+        for param_name in ["alpha", "beta_0", "beta_1", "sigma_0_sq", "sigma_1_sq", "sigma_2_sq"]:
             params_north += [NorthBank.getNumberParameter(param_name)[0]]
             params_south += [SouthBank.getNumberParameter(param_name)[0]]
 
@@ -237,18 +237,18 @@ class CalibrationModel(object):
 
         def focus_and_normalise(ws_d, ws_van_d, grouping_kwarg):
             # focus sample
-            focused_sample = DiffractionFocussing(InputWorkspace=ws_d, *grouping_kwarg)
+            focused_sample = DiffractionFocussing(InputWorkspace=ws_d, **grouping_kwarg)
+            ApplyDiffCal(InstrumentWorkspace=focused_sample, ClearCalibration=True)
 
             # focus van data
-            focused_van = DiffractionFocussing(InputWorkspace=ws_van_d, *grouping_kwarg)
+            focused_van = DiffractionFocussing(InputWorkspace=ws_van_d, **grouping_kwarg)
+            ApplyDiffCal(InstrumentWorkspace=focused_van, ClearCalibration=True)
             background_van = EnggEstimateFocussedBackground(InputWorkspace=focused_van, NIterations='15', XWindow=0.03)
 
             # normalise by focused vanadium
             bg_rebinned = RebinToWorkspace(WorkspaceToRebin=background_van, WorkspaceToMatch=focused_sample)
             normalised = Divide(LHSWorkspace=focused_sample, RHSWorkspace=bg_rebinned)
 
-            # edit instrument geometry so we can convert units
-            EditInstrumentGeometry(Workspace=normalised, L2='1.5', Polar='90', InstrumentName='ENGIN-X')
             tof_focused = ConvertUnits(InputWorkspace=normalised, Target='TOF')
 
             return tof_focused, focused_van
@@ -265,7 +265,8 @@ class CalibrationModel(object):
             "PeakFunction": 'BackToBackExponential',
             "CalibrationParameters": 'DIFC+TZERO',
             "OutputCalibrationTable": 'cal_B2B_DIFC_TZERO_chisq',
-            "DiagnosticWorkspaces": 'diag_B2B_DIFC_TZERO_chisq'
+            "DiagnosticWorkspaces": 'diag_B2B_DIFC_TZERO_chisq',
+            "UseChiSq": True
         }
 
         # initial calibration of instrument
@@ -273,14 +274,17 @@ class CalibrationModel(object):
 
         ws_van = Load(vanadium_workspace)
         NormaliseByCurrent(InputWorkspace=ws_van, OutputWorkspace=ws_van)
-        ws_van_d = AlignDetectors(InputWorkspace=ws_van, CalibrationWorkspace=cal_initial)
+        ApplyDiffCal(InstrumentWorkspace=ws_van, CalibrationWorkspace=cal_initial)
+        ws_van_d = ConvertUnits(InputWorkspace=ws_van, Target='dSpacing')
 
         ws_van_d /= van_integration
 
         # sensitivity correction for sample
         sample = CloneWorkspace(sample_raw)
         NormaliseByCurrent(InputWorkspace=sample, OutputWorkspace=sample)
-        ws_d = AlignDetectors(InputWorkspace=sample, CalibrationWorkspace=cal_initial)
+        ApplyDiffCal(InstrumentWorkspace=sample, CalibrationWorkspace=cal_initial)
+        ws_d = ConvertUnits(InputWorkspace=sample, Target='dSpacing')
+
         ws_d /= van_integration
 
         kwargs = {
@@ -290,26 +294,29 @@ class CalibrationModel(object):
             "MinimumPeakHeight": 0.5,
             "PeakFunction": 'BackToBackExponential',
             "CalibrationParameters": 'DIFC+TZERO+DIFA',
+            "UseChiSq": True
         }
         cal_output = list()
         curves_output = list()
 
         if spectrum_numbers is None:
-            if bank == 1 or bank is None:
-                pdc_kwarg = {"GroupingFileName": NORTH_BANK_CAL}
-                focused_North, curves_North = focus_and_normalise(ws_d, ws_van_d, pdc_kwarg)
+            if bank == '1' or bank is None:
+                df_kwarg = {"GroupingFileName": NORTH_BANK_CAL}
+                focused_North, curves_North = focus_and_normalise(ws_d, ws_van_d, df_kwarg)
                 # final calibration of focused data
                 kwargs["InputWorkspace"] = focused_North
                 kwargs["OutputCalibrationTable"] = 'engggui_calibration_bank_1'
                 kwargs["DiagnosticWorkspaces"] = 'diag_North'
 
-                cal_north = run_pd_calibration(kwargs)[0]
+                debug_output_ws = run_pd_calibration(kwargs)
+                cal_north = debug_output_ws[0]
                 cal_output.append(cal_north)
-                curves_output.append(curves_North)
+                curves_north = CloneWorkspace(curves_North)
+                curves_output.append(curves_north)
 
-            if bank == 2 or bank is None:
-                pdc_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
-                focused_South, curves_South = focus_and_normalise(ws_d, ws_van_d, pdc_kwarg)
+            if bank == '2' or bank is None:
+                df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
+                focused_South, curves_South = focus_and_normalise(ws_d, ws_van_d, df_kwarg)
                 # final calibration of focused data
                 kwargs["InputWorkspace"] = focused_South
                 kwargs["OutputCalibrationTable"] = 'engggui_calibration_bank_2'
@@ -317,12 +324,15 @@ class CalibrationModel(object):
 
                 cal_north = run_pd_calibration(kwargs)[0]
                 cal_output.append(cal_north)
-                curves_output.append(curves_South)
+                curves_south = CloneWorkspace(curves_South)
+                curves_output.append(curves_south)
         else:
             grp_ws, _, _ = CreateGroupingWorkspace(InputWorkspace=sample_raw)  # blank grouping workspace based on inst
             int_spectrum_numbers = self._create_spectrum_list_from_string(spectrum_numbers)
             for spec in int_spectrum_numbers:
-                det_id = grp_ws.getSpectrum(spec).getDetectorIDs()
+                ws_ind = int(spec - 1)
+                det_ids = grp_ws.getDetectorIDs(ws_ind)
+                det_id = det_ids[0]
                 grp_ws.setValue(det_id, 1)
             df_kwarg = {"GroupingWorkspace": grp_ws}
             focused_Cropped, curves_Cropped = focus_and_normalise(ws_d, ws_van_d, df_kwarg)
@@ -333,7 +343,8 @@ class CalibrationModel(object):
 
             cal_north = run_pd_calibration(kwargs)[0]
             cal_output.append(cal_north)
-            curves_output.append(curves_Cropped)
+            curves_cropped = CloneWorkspace(curves_Cropped)
+            curves_output.append(curves_cropped)
 
         cal = list()
         for bank_cal in cal_output:
