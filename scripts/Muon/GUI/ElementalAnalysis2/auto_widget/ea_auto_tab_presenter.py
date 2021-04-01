@@ -92,11 +92,11 @@ class EAAutoTabPresenter(object):
             all_runs.append(self.model.split_run_and_detector(group)[0])
 
         show_peaks_options = []
-        # show_matches_option = []
+        show_matches_option = []
         all_runs = list(set(all_runs))
         for run in all_runs:
-            group = retrieve_ws(run)
-            workspace_names = group.getNames()
+            group_ws = retrieve_ws(run)
+            workspace_names = group_ws.getNames()
             for name in workspace_names:
                 if len(name) > 15:
                     if name[-15:] == "_refitted_peaks":
@@ -105,8 +105,14 @@ class EAAutoTabPresenter(object):
                 if len(name) > 6:
                     if name[-6:] == "_peaks":
                         show_peaks_options.append(name)
+                        continue
+                if len(name) > 8:
+                    if name[-8:] == "_matches":
+                        matches_group = retrieve_ws(name)
+                        show_matches_option += matches_group.getNames()
 
         self.view.add_options_to_show_peak_combobox(show_peaks_options)
+        self.view.add_options_to_show_matches_combobox(show_matches_option)
 
         peak_label_info = self.model.current_peak_table_info
         # Update peak info label

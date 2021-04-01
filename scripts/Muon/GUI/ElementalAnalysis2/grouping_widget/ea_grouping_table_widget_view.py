@@ -8,7 +8,7 @@ from qtpy import QtWidgets, QtGui, QtCore
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QTableWidgetItem
 from Muon.GUI.Common import message_box
-from mantidqt.utils.observer_pattern import GenericObserver
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 
 GROUP_TABLE_COLUMNS = {0: 'workspace_name', 1: 'run', 2: 'detector', 3: 'to_analyse', 4: 'rebin', 5: 'rebin_options'}
 INVERSE_GROUP_TABLE_COLUMNS = {'workspace_name': 0, 'run': 1, 'detector': 2, 'to_analyse': 3, 'rebin': 4,
@@ -45,6 +45,8 @@ class EAGroupingTableView(QtWidgets.QWidget):
         self._disabled = False
 
         self.change_once = False
+
+        self.data_changed_notifier = GenericObservable()
 
         self.disable_table_observer = GenericObserver(self.disable_editing)
         self.enable_table_observer = GenericObserver(self.enable_editing)
@@ -116,6 +118,7 @@ class EAGroupingTableView(QtWidgets.QWidget):
         return self.grouping_table.columnCount()
 
     def notify_data_changed(self):
+        self.data_changed_notifier.notify_subscribers()
         if not self._updating:
             self.dataChanged.emit()
 
@@ -225,6 +228,7 @@ class EAGroupingTableView(QtWidgets.QWidget):
         self._on_table_data_changed = slot
 
     def on_cell_changed(self, _row, _col):
+        self.data_changed_notifier.notify_subscribers()
         if not self._updating:
             self._on_table_data_changed(_row, _col)
 

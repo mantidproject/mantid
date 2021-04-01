@@ -14,14 +14,24 @@ class EAMatchTablePresenter(object):
         self.table_entries = []
 
     def update_table(self, entry):
-        self.table_entries += entry
+        index = self.find_entry_index(entry)
+        if index != -1:
+            self.remove_entry(index)
+        self.table_entries.append(entry)
         self.view.add_entry_to_table(entry)
 
-    def remove_element(self, row):
-        pass
+    def remove_entry(self, row_index):
+        del self.table_entries[row_index]
+        self.view.remove_row(row_index)
 
-    def check_if_entry_is_present(self, entry):
-        pass
+    def find_entry_index(self, new_entry):
+        """
+            Finds index of entry using first 2 columns returns -1 if not found
+        """
+        for i, entry in enumerate(self.table_entries):
+            if entry[:2] == new_entry[:2]:
+                return i
+        return -1
 
     def clear_table(self):
         self.table_entries = []

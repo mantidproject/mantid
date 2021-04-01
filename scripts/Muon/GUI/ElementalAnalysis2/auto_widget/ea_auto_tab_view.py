@@ -108,10 +108,13 @@ class EAAutoTabView(QtWidgets.QWidget):
             parameters["threshold"] = float(self.threshold_line_edit.text())
 
         except ValueError:
-            message_box.warning("Invalid arguments for peak finding")
+            message_box.warning("ERROR: Invalid arguments for peak finding")
             return None
-
-        parameters["workspace"] = self.find_peaks_combobox.currentText()
+        workspace_name = self.find_peaks_combobox.currentText()
+        if workspace_name == "":
+            message_box.warning("ERROR: No workspace selected")
+            return None
+        parameters["workspace"] = workspace_name
         parameters["plot_peaks"] = self.plot_peaks_checkbox.isChecked()
 
         return parameters

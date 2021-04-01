@@ -8,7 +8,8 @@
 from Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
 from mantidqt.utils.observer_pattern import GenericObservable
 
-INVALID_STRINGS_FOR_GROUP_NAMES = ["EA_Rebinned_Fixed", "EA_Rebinned_Variable"]
+INVALID_STRINGS_FOR_GROUP_NAMES = ["EA_Rebinned_Fixed", "EA_Rebinned_Variable", "peaks", "refitted_peaks",
+                                   "with_errors", "matches"]
 
 
 def get_default_grouping(loadedData):

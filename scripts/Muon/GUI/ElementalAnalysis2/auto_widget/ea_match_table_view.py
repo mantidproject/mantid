@@ -20,10 +20,6 @@ class EAMatchTableView(QtWidgets.QWidget):
         self.table = QtWidgets.QTableWidget(self)
         self.setup_table()
         self.setup_interface_layout()
-        self.add_entry_to_table(["Ag", "14", "6"])
-        self.add_entry_to_table(["Au", "12", "5"])
-        self.add_entry_to_table(["Fe", "10", "4"])
-        self.add_entry_to_table(["Li", "8", "3"])
 
     def setup_table(self):
         self.table.setColumnCount(3)
@@ -54,3 +50,7 @@ class EAMatchTableView(QtWidgets.QWidget):
         for i, entry in enumerate(row_entries):
             table_item = QtWidgets.QTableWidgetItem(str(entry))
             self.table.setItem(row_position, i, table_item)
+
+    def remove_row(self, row_index):
+        print("in_remove")
+        self.table.removeRow(row_index)

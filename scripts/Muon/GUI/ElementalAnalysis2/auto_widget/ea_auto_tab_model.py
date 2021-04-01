@@ -4,12 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import FindPeaksAutomatic  # , PeakMatching
+from mantid.simpleapi import FindPeaksAutomatic, PeakMatching, GroupWorkspaces
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 from Muon.GUI.Common import thread_model, message_box
 from mantidqt.utils.observer_pattern import GenericObservable
-from mantid.simpleapi import AnalysisDataService
 from queue import Queue
 
 
@@ -44,18 +43,21 @@ class EAAutoTabModel(object):
         self.calculation_finished_notifier.notify_subscribers()
         self.handle_warnings()
         self.update_view_notifier.notify_subscribers()
+        self.update_match_table_notifier.notify_subscribers()
 
     def handle_calculation_error(self, error):
         message_box.warning("ERROR: " + str(error), None)
         self.calculation_finished_notifier.notify_subscribers()
         self.handle_warnings()
         self.update_view_notifier.notify_subscribers()
+        self.update_match_table_notifier.notify_subscribers()
 
     def handle_warnings(self):
         while not self.warnings.empty():
             message_box.warning("Warning: " + self.warnings.get(), None)
 
     def _run_peak_algorithms(self, parameters):
+        # Run FindPeaksAutomatic algorithm
         workspace = parameters["workspace"]
         min_energy = parameters["min_energy"]
         max_energy = parameters["max_energy"]
@@ -77,17 +79,30 @@ class EAAutoTabModel(object):
 
         peak_table = retrieve_ws(workspace + "_peaks")
         number_of_peaks = peak_table.rowCount()
+        self.current_peak_table_info["workspace"] = workspace
+        self.current_peak_table_info["number_of_peaks"] = number_of_peaks
         if number_of_peaks != 0:
             group.add(workspace + "_peaks")
         else:
             peak_table.delete()
             raise RuntimeError(f"No peaks found in {workspace} try reducing acceptance threshold")
 
-        self.current_peak_table_info["workspace"] = workspace
-        self.current_peak_table_info["number_of_peaks"] = number_of_peaks
+        # Run PeakMatching workspace
+        match_table_names = [workspace + "_all_matches", workspace + "_primary_matches",
+                             workspace + "_secondary_matches",
+                             workspace + "_all_matches_sorted_by_energy", workspace + "_likelihood"]
+
+        PeakMatching(PeakTable=workspace + "_peaks", AllPeaks=match_table_names[0],
+                     PrimaryPeaks=match_table_names[1], SecondaryPeaks=match_table_names[2],
+                     SortedByEnergy=match_table_names[3], ElementLikelihood=match_table_names[4])
+
+        GroupWorkspaces(InputWorkspaces=match_table_names, OutputWorkspace=workspace + "_matches")
+
+        group.add(workspace + "_matches")
+        self.update_match_table(workspace + "_likelihood", workspace)
 
     def update_match_table(self, likelihood_table_name, workspace_name):
-        likelihood_table = AnalysisDataService.Instance().retrieve(likelihood_table_name)
+        likelihood_table = retrieve_ws(likelihood_table_name)
         entry = list(self.split_run_and_detector(workspace_name))
 
         likelihood_data = likelihood_table.toDict()
@@ -95,7 +110,6 @@ class EAAutoTabModel(object):
             elements_list = likelihood_data["Element"][:3]
         else:
             elements_list = likelihood_data["Element"]
-        elements = ",".join(elements_list)
+        elements = " , ".join(elements_list)
         entry.append(elements)
         self.table_entries.put(entry)
-        self.update_match_table_notifier.notify_subscribers()
