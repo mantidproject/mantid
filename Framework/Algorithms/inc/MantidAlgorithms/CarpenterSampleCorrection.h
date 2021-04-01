@@ -17,8 +17,7 @@ namespace Algorithms {
     out by Jack Carpenter and Asfia Huq and implmented in Java by
     Alok Chatterjee.  Translated to C++ by Dennis Mikkelson.
  */
-class MANTID_ALGORITHMS_DLL CarpenterSampleCorrection
-    : public API::DistributedDataProcessorAlgorithm {
+class MANTID_ALGORITHMS_DLL CarpenterSampleCorrection : public API::DistributedDataProcessorAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override;
@@ -44,24 +43,18 @@ public:
   }
 
   // Algorithm's alias for identification overriding a virtual method
-  const std::string alias() const override {
-    return "MultipleScatteringCylinderAbsorption";
-  }
+  const std::string alias() const override { return "MultipleScatteringCylinderAbsorption"; }
 
 private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
 
-  API::WorkspaceGroup_sptr
-  calculateCorrection(API::MatrixWorkspace_sptr &inputWksp, double radius,
-                      double coeff1, double coeff2, double coeff3, bool doAbs,
-                      bool doMS);
+  API::WorkspaceGroup_sptr calculateCorrection(API::MatrixWorkspace_sptr &inputWksp, double radius, double coeff1,
+                                               double coeff2, double coeff3, bool doAbs, bool doMS);
 
-  API::MatrixWorkspace_sptr multiply(const API::MatrixWorkspace_sptr &lhsWS,
-                                     const API::MatrixWorkspace_sptr &rhsWS);
-  API::MatrixWorkspace_sptr minus(const API::MatrixWorkspace_sptr &lhsWS,
-                                  const API::MatrixWorkspace_sptr &rhsWS);
+  API::MatrixWorkspace_sptr multiply(const API::MatrixWorkspace_sptr &lhsWS, const API::MatrixWorkspace_sptr &rhsWS);
+  API::MatrixWorkspace_sptr minus(const API::MatrixWorkspace_sptr &lhsWS, const API::MatrixWorkspace_sptr &rhsWS);
 };
 
 } // namespace Algorithms

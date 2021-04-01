@@ -15,4 +15,4 @@ achieve this you will need to add:
 #. In the initialisation of the presenter get the allowed colours from
    the model and pass them to the view.
 
-See :ref:`here <ModelExerciseSolution>` for the solution. 
+See :ref:`here <ModelExerciseSolution>` for the solution.

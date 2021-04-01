@@ -22,8 +22,7 @@ class PreviewPlot;
 /** PeakPicker : A simplified version of PeakPickerTool, available for use on
   general QwtPlots.
 */
-class EXPORT_OPT_MANTIDQT_PLOTTING PeakPicker : public QwtPlotPicker,
-                                                public QwtPlotItem {
+class EXPORT_OPT_MANTIDQT_PLOTTING PeakPicker : public QwtPlotPicker, public QwtPlotItem {
   Q_OBJECT
 
 public:

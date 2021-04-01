@@ -27,8 +27,7 @@ public:
   VMDBase(double val0, double val1, double val2);
   VMDBase(double val0, double val1, double val2, double val3);
   VMDBase(double val0, double val1, double val2, double val3, double val4);
-  VMDBase(double val0, double val1, double val2, double val3, double val4,
-          double val5);
+  VMDBase(double val0, double val1, double val2, double val3, double val4, double val5);
 
   VMDBase(const VMDBase &other);
   VMDBase &operator=(const VMDBase &other);
@@ -70,8 +69,7 @@ public:
   TYPE normalize();
   TYPE angle(const VMDBase &v) const;
 
-  static std::vector<VMDBase>
-  makeVectorsOrthogonal(std::vector<VMDBase> &vectors);
+  static std::vector<VMDBase> makeVectorsOrthogonal(std::vector<VMDBase> &vectors);
   static VMDBase getNormalVector(const std::vector<VMDBase> &vectors);
 
 protected:
@@ -88,10 +86,8 @@ using VMD_t = float;
 using VMD = VMDBase<VMD_t>;
 
 // Overload operator <<
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
-                                           const VMDBase<double> &);
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
-                                           const VMDBase<float> &);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const VMDBase<double> &);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const VMDBase<float> &);
 
 } // namespace Kernel
 } // namespace Mantid

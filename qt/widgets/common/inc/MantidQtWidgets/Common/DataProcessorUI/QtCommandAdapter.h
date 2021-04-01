@@ -33,8 +33,7 @@ public:
    * @param menu :: The menu where the actions will be added
    * @param adaptee :: The action to add
    */
-  QtCommandAdapter(QMenu *menu, Command_uptr adaptee)
-      : m_action(nullptr), m_adaptee(std::move(adaptee)) {
+  QtCommandAdapter(QMenu *menu, Command_uptr adaptee) : m_action(nullptr), m_adaptee(std::move(adaptee)) {
 
     if (m_adaptee->hasChildren()) {
       initializeSubmenu(menu);
@@ -48,8 +47,7 @@ public:
    * @param toolbar :: The toolbar where actions will be added
    * @param adaptee :: The action to add
    */
-  QtCommandAdapter(QToolBar *toolbar, Command_uptr adaptee)
-      : m_action(nullptr), m_adaptee(std::move(adaptee)) {
+  QtCommandAdapter(QToolBar *toolbar, Command_uptr adaptee) : m_action(nullptr), m_adaptee(std::move(adaptee)) {
 
     // Sub-menus cannot be added to a toolbar
     if (m_adaptee->hasChildren())
@@ -102,9 +100,7 @@ private:
     auto &children = m_adaptee->getChildren();
     std::transform(
         children.begin(), children.end(), std::back_inserter(m_childAdapters),
-        [&submenu](Command_uptr &child) {
-          return std::make_unique<QtCommandAdapter>(submenu, std::move(child));
-        });
+        [&submenu](Command_uptr &child) { return std::make_unique<QtCommandAdapter>(submenu, std::move(child)); });
   }
 
   /**

@@ -26,9 +26,7 @@ namespace detail {
 class Renderer;
 class GeometryTriangulator;
 
-template <typename Adaptee>
-std::unique_ptr<Geometry::RenderingMesh>
-makeRenderingMesh(const Adaptee &adaptee) {
+template <typename Adaptee> std::unique_ptr<Geometry::RenderingMesh> makeRenderingMesh(const Adaptee &adaptee) {
 
   // Local class adapter
   class Adapter : public Geometry::RenderingMesh {
@@ -38,18 +36,10 @@ makeRenderingMesh(const Adaptee &adaptee) {
 
   public:
     Adapter(const Adaptee &adaptee) : m_adaptee(adaptee) {}
-    size_t numberOfVertices() const override {
-      return m_adaptee.numberOfVertices();
-    }
-    size_t numberOfTriangles() const override {
-      return m_adaptee.numberOfTriangles();
-    }
-    std::vector<double> getVertices() const override {
-      return m_adaptee.getVertices();
-    }
-    std::vector<uint32_t> getTriangles() const override {
-      return m_adaptee.getTriangles();
-    }
+    size_t numberOfVertices() const override { return m_adaptee.numberOfVertices(); }
+    size_t numberOfTriangles() const override { return m_adaptee.numberOfTriangles(); }
+    std::vector<double> getVertices() const override { return m_adaptee.getVertices(); }
+    std::vector<uint32_t> getTriangles() const override { return m_adaptee.getTriangles(); }
     virtual ~Adapter() {}
   };
   return std::make_unique<Adapter>(adaptee);
@@ -71,9 +61,8 @@ private:
 protected:
   std::shared_ptr<detail::ShapeInfo> m_shapeInfo;
   std::unique_ptr<detail::GeometryTriangulator> m_triangulator;
-  IObjComponent *m_objComp =
-      nullptr; ///< ObjComponent that uses this geometry handler
-  CSGObject *m_csgObj = nullptr; ///< Object that uses this geometry handler
+  IObjComponent *m_objComp = nullptr; ///< ObjComponent that uses this geometry handler
+  CSGObject *m_csgObj = nullptr;      ///< Object that uses this geometry handler
 public:
   GeometryHandler(IObjComponent *comp);                   ///< Constructor
   GeometryHandler(const std::shared_ptr<CSGObject> &obj); ///< Constructor
@@ -83,9 +72,8 @@ public:
   GeometryHandler(const GeometryHandler &handler);
   std::shared_ptr<GeometryHandler> clone() const;
   ~GeometryHandler();
-  void render() const; ///< Render Object or ObjComponent
-  void
-  initialize() const; ///< Prepare/Initialize Object/ObjComponent to be rendered
+  void render() const;     ///< Render Object or ObjComponent
+  void initialize() const; ///< Prepare/Initialize Object/ObjComponent to be rendered
   bool canTriangulate() const { return !(m_triangulator == nullptr); }
   /// get the number of triangles
   size_t numberOfTriangles() const;
@@ -99,12 +87,10 @@ public:
   /// Extract the Faces of the triangles
   const std::vector<uint32_t> &getTriangleFaces() const;
   /// Sets the geometry cache using the triangulation information provided
-  void setGeometryCache(size_t nPts, size_t nFaces, std::vector<double> &&pts,
-                        std::vector<uint32_t> &&faces);
+  void setGeometryCache(size_t nPts, size_t nFaces, std::vector<double> &&pts, std::vector<uint32_t> &&faces);
   /// return the actual type and points of one of the "standard" objects,
   /// cuboid/cone/cyl/sphere
-  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
-                     std::vector<Kernel::V3D> &vector, double &innerRadius,
+  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vector<Kernel::V3D> &vector, double &innerRadius,
                      double &radius, double &height) const;
   void setShapeInfo(detail::ShapeInfo &&shapeInfo);
 };

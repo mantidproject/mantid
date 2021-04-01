@@ -22,15 +22,12 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(ChangeBinOffset)
 
 void ChangeBinOffset::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
   auto isDouble = std::make_shared<BoundedValidator<double>>();
-  declareProperty("Offset", 0.0, isDouble,
-                  "The amount to change each time bin by");
+  declareProperty("Offset", 0.0, isDouble, "The amount to change each time bin by");
 
   declareWorkspaceIndexSetProperties();
 }
@@ -44,18 +41,14 @@ void ChangeBinOffset::exec() {
   }
 
   const double offset = getProperty("Offset");
-  EventWorkspace_sptr eventWS =
-      std::dynamic_pointer_cast<EventWorkspace>(outputW);
+  EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(outputW);
   if (eventWS) {
-    this->for_each<Indices::FromProperty>(
-        *eventWS, std::make_tuple(EventWorkspaceAccess::eventList),
-        [offset](EventList &eventList) { eventList.addTof(offset); });
+    this->for_each<Indices::FromProperty>(*eventWS, std::make_tuple(EventWorkspaceAccess::eventList),
+                                          [offset](EventList &eventList) { eventList.addTof(offset); });
   } else {
     this->for_each<Indices::FromProperty>(
-        *outputW, std::make_tuple(MatrixWorkspaceAccess::x),
-        [offset](std::vector<double> &dataX) {
-          std::transform(dataX.begin(), dataX.end(), dataX.begin(),
-                         [offset](double x) { return x + offset; });
+        *outputW, std::make_tuple(MatrixWorkspaceAccess::x), [offset](std::vector<double> &dataX) {
+          std::transform(dataX.begin(), dataX.end(), dataX.begin(), [offset](double x) { return x + offset; });
         });
   }
 }

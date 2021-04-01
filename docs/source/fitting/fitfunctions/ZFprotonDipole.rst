@@ -17,7 +17,7 @@ ZF PCR signal from interaction with a single dipole.
 
 where,
 
-:math:`A_0` is the amplitude, 
+:math:`A_0` is the amplitude,
 
 :math:`\lambda` (MHz) is the relaxation rate,
 
@@ -30,7 +30,7 @@ where,
 and :math:`\mu_n` is the proton moment.
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

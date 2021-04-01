@@ -26,8 +26,7 @@
 #include <utility>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
-using namespace MantidQt::CustomInterfaces::ISISReflectometry::
-    ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using testing::_;
 using testing::AtLeast;
 using testing::Mock;
@@ -40,15 +39,9 @@ using testing::ReturnRef;
 //=====================================================================================
 class RunsPresenterTest : public CxxTest::TestSuite {
 public:
-  void setUp() override {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility",
-                                                        "ISIS");
-  }
+  void setUp() override { Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS"); }
 
-  void tearDown() override {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility",
-                                                        " ");
-  }
+  void tearDown() override { Mantid::Kernel::ConfigService::Instance().setString("default.facility", " "); }
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -56,12 +49,9 @@ public:
   static void destroySuite(RunsPresenterTest *suite) { delete suite; }
 
   RunsPresenterTest()
-      : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
-                                              "POLREF", "OFFSPEC"},
-        m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()),
-        m_searchString("test search string"), m_searchResult("", ""),
-        m_instrument("INTER"), m_cycle("19_4"), m_searcher(nullptr),
-        m_runNotifier(nullptr) {
+      : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"},
+        m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()), m_searchString("test search string"),
+        m_searchResult("", ""), m_instrument("INTER"), m_cycle("19_4"), m_searcher(nullptr), m_runNotifier(nullptr) {
     Mantid::API::FrameworkManager::Instance();
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_view, getSearchInstrument()).WillByDefault(Return(m_instrument));
@@ -129,9 +119,7 @@ public:
 
   void testStartingSearchDisablesSearchInputs() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_searcher, searchInProgress())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*m_searcher, searchInProgress()).Times(AtLeast(1)).WillRepeatedly(Return(true));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(false)).Times(1);
     EXPECT_CALL(m_view, setSearchButtonEnabled(false)).Times(1);
     EXPECT_CALL(m_view, setSearchResultsEnabled(false)).Times(1);
@@ -142,9 +130,7 @@ public:
 
   void testNotifySearchResultsEnablesSearchInputs() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_searcher, searchInProgress())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(*m_searcher, searchInProgress()).Times(AtLeast(1)).WillRepeatedly(Return(false));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(true)).Times(1);
     EXPECT_CALL(m_view, setSearchButtonEnabled(true)).Times(1);
     EXPECT_CALL(m_view, setSearchResultsEnabled(true)).Times(1);
@@ -161,9 +147,7 @@ public:
     expectSearchString(searchString);
     expectSearchInstrument(instrument);
     expectSearchCycle(cycle);
-    EXPECT_CALL(*m_searcher, startSearchAsync(SearchCriteria{instrument, cycle,
-                                                             searchString}))
-        .Times(1);
+    EXPECT_CALL(*m_searcher, startSearchAsync(SearchCriteria{instrument, cycle, searchString})).Times(1);
     presenter.notifySearch();
     verifyAndClear();
   }
@@ -180,13 +164,10 @@ public:
   void testStartingSearchFails() {
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
-    EXPECT_CALL(*m_searcher, startSearchAsync(SearchCriteria{
-                                 m_instrument, m_cycle, m_searchString}))
+    EXPECT_CALL(*m_searcher, startSearchAsync(SearchCriteria{m_instrument, m_cycle, m_searchString}))
         .Times(1)
         .WillOnce(Return(false));
-    EXPECT_CALL(m_messageHandler,
-                giveUserCritical("Error starting search", "Error"))
-        .Times(1);
+    EXPECT_CALL(m_messageHandler, giveUserCritical("Error starting search", "Error")).Times(1);
     presenter.notifySearch();
     verifyAndClear();
   }
@@ -194,8 +175,7 @@ public:
   void testStartingSearchSucceeds() {
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
-    EXPECT_CALL(*m_searcher, startSearchAsync(SearchCriteria{
-                                 m_instrument, m_cycle, m_searchString}))
+    EXPECT_CALL(*m_searcher, startSearchAsync(SearchCriteria{m_instrument, m_cycle, m_searchString}))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
@@ -206,8 +186,7 @@ public:
 
   void testNotifyReductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, notifyResumeReductionRequested())
-        .Times(AtLeast(1));
+    EXPECT_CALL(m_mainPresenter, notifyResumeReductionRequested()).Times(AtLeast(1));
     presenter.notifyResumeReductionRequested();
     verifyAndClear();
   }
@@ -254,10 +233,8 @@ public:
     expectSearchString(m_searchString);
     expectSearchSettingsChanged();
     expectUnsavedSearchResults();
-    EXPECT_CALL(
-        m_mainPresenter,
-        discardChanges("This will cause unsaved changes in the search results "
-                       "to be lost. Continue?"))
+    EXPECT_CALL(m_mainPresenter, discardChanges("This will cause unsaved changes in the search results "
+                                                "to be lost. Continue?"))
         .Times(AtLeast(1));
     presenter.resumeAutoreduction();
     verifyAndClear();
@@ -268,32 +245,27 @@ public:
     presenter.notifyTableChanged();
     expectSearchString(m_searchString);
     expectSearchSettingsChanged();
-    EXPECT_CALL(m_mainPresenter,
-                discardChanges("This will cause unsaved changes in the table "
-                               "to be lost. Continue?"))
+    EXPECT_CALL(m_mainPresenter, discardChanges("This will cause unsaved changes in the table "
+                                                "to be lost. Continue?"))
         .Times(AtLeast(1));
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
-  void
-  testCheckDiscardChangesOnAutoreductionResumedIfUnsavedTableAndSearchResults() {
+  void testCheckDiscardChangesOnAutoreductionResumedIfUnsavedTableAndSearchResults() {
     auto presenter = makePresenter();
     presenter.notifyTableChanged();
     expectSearchString(m_searchString);
     expectSearchSettingsChanged();
     expectUnsavedSearchResults();
-    EXPECT_CALL(
-        m_mainPresenter,
-        discardChanges("This will cause unsaved changes in the search results "
-                       "and main table to be lost. Continue?"))
+    EXPECT_CALL(m_mainPresenter, discardChanges("This will cause unsaved changes in the search results "
+                                                "and main table to be lost. Continue?"))
         .Times(AtLeast(1));
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
-  void
-  testDoNotStartAutoreductionWhenOverwritePreventedOnResumeAutoreductionWithNewSettings() {
+  void testDoNotStartAutoreductionWhenOverwritePreventedOnResumeAutoreductionWithNewSettings() {
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
     expectSearchSettingsChanged();
@@ -379,32 +351,28 @@ public:
 
   void testChildPresentersAreUpdatedWhenAnyBatchReductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_runsTablePresenter, notifyAnyBatchReductionResumed())
-        .Times(1);
+    EXPECT_CALL(*m_runsTablePresenter, notifyAnyBatchReductionResumed()).Times(1);
     presenter.notifyAnyBatchReductionResumed();
     verifyAndClear();
   }
 
   void testChildPresentersAreUpdatedWhenAnyBatchReductionPaused() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_runsTablePresenter, notifyAnyBatchReductionPaused())
-        .Times(1);
+    EXPECT_CALL(*m_runsTablePresenter, notifyAnyBatchReductionPaused()).Times(1);
     presenter.notifyAnyBatchReductionPaused();
     verifyAndClear();
   }
 
   void testChildPresentersAreUpdatedWhenAnyBatchAutoreductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_runsTablePresenter, notifyAnyBatchAutoreductionResumed())
-        .Times(1);
+    EXPECT_CALL(*m_runsTablePresenter, notifyAnyBatchAutoreductionResumed()).Times(1);
     presenter.notifyAnyBatchAutoreductionResumed();
     verifyAndClear();
   }
 
   void testChildPresentersAreUpdatedWhenAnyBatchAutoreductionPaused() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_runsTablePresenter, notifyAnyBatchAutoreductionPaused())
-        .Times(1);
+    EXPECT_CALL(*m_runsTablePresenter, notifyAnyBatchAutoreductionPaused()).Times(1);
     presenter.notifyAnyBatchAutoreductionPaused();
     verifyAndClear();
   }
@@ -477,8 +445,7 @@ public:
   void testNotifySearchResultsResumesReductionWhenAutoreducing() {
     auto presenter = makePresenter();
     expectIsAutoreducing();
-    EXPECT_CALL(m_mainPresenter, notifyResumeReductionRequested())
-        .Times(AtLeast(1));
+    EXPECT_CALL(m_mainPresenter, notifyResumeReductionRequested()).Times(AtLeast(1));
     presenter.notifySearchComplete();
     verifyAndClear();
   }
@@ -488,14 +455,10 @@ public:
     expectIsAutoreducing();
     // Transfer some valid rows
     auto rowsToTransfer = std::set<int>{0, 1, 2};
-    EXPECT_CALL(m_view, getAllSearchRows())
-        .Times(1)
-        .WillOnce(Return(rowsToTransfer));
+    EXPECT_CALL(m_view, getAllSearchRows()).Times(1).WillOnce(Return(rowsToTransfer));
     auto searchResult = SearchResult("12345", "Test run th=0.5");
     for (auto rowIndex : rowsToTransfer)
-      EXPECT_CALL(*m_searcher, getSearchResult(rowIndex))
-          .Times(1)
-          .WillOnce(ReturnRef(searchResult));
+      EXPECT_CALL(*m_searcher, getSearchResult(rowIndex)).Times(1).WillOnce(ReturnRef(searchResult));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
     presenter.notifySearchComplete();
     verifyAndClear();
@@ -504,12 +467,8 @@ public:
   void testTransferWithNoRowsSelected() {
     auto presenter = makePresenter();
     auto const selectedRows = std::set<int>({});
-    EXPECT_CALL(m_view, getSelectedSearchRows())
-        .Times(1)
-        .WillOnce(Return(selectedRows));
-    EXPECT_CALL(m_messageHandler,
-                giveUserCritical("Please select at least one run to transfer.",
-                                 "No runs selected"))
+    EXPECT_CALL(m_view, getSelectedSearchRows()).Times(1).WillOnce(Return(selectedRows));
+    EXPECT_CALL(m_messageHandler, giveUserCritical("Please select at least one run to transfer.", "No runs selected"))
         .Times(1);
     presenter.notifyTransfer();
     verifyAndClear();
@@ -536,8 +495,7 @@ public:
   void testTransferUpdatesTablePresenter() {
     auto presenter = makePresenter();
     auto expectedJobs = expectGetValidSearchResult();
-    EXPECT_CALL(*m_runsTablePresenter, mergeAdditionalJobs(expectedJobs))
-        .Times(1);
+    EXPECT_CALL(*m_runsTablePresenter, mergeAdditionalJobs(expectedJobs)).Times(1);
     presenter.notifyTransfer();
     verifyAndClear();
   }
@@ -547,8 +505,7 @@ public:
     auto const instrument = std::string("TEST-instrumnet");
     expectPreviousInstrument("INTER");
     expectSearchInstrument(instrument);
-    EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument))
-        .Times(AtLeast(1));
+    EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument)).Times(AtLeast(1));
     presenter.notifyChangeInstrumentRequested();
     verifyAndClear();
   }
@@ -559,11 +516,8 @@ public:
     expectPreviousInstrument("INTER");
     expectSearchInstrument(instrument);
     expectUnsavedSearchResults();
-    EXPECT_CALL(
-        m_mainPresenter,
-        discardChanges(
-            "This will cause unsaved changes in the search results to be "
-            "lost. Continue?"))
+    EXPECT_CALL(m_mainPresenter, discardChanges("This will cause unsaved changes in the search results to be "
+                                                "lost. Continue?"))
         .Times(1);
     presenter.notifyChangeInstrumentRequested();
     verifyAndClear();
@@ -606,8 +560,7 @@ public:
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
     expectPreviousInstrument("INTER");
-    EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument))
-        .Times(AtLeast(1));
+    EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument)).Times(AtLeast(1));
     presenter.notifyChangeInstrumentRequested(instrument);
     verifyAndClear();
   }
@@ -652,8 +605,7 @@ public:
   void testInstrumentChangedUpdatesChildPresenter() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
-    EXPECT_CALL(*m_runsTablePresenter, notifyInstrumentChanged(instrument))
-        .Times(1);
+    EXPECT_CALL(*m_runsTablePresenter, notifyInstrumentChanged(instrument)).Times(1);
     presenter.notifyInstrumentChanged(instrument);
     verifyAndClear();
   }
@@ -699,9 +651,7 @@ public:
   void testPercentCompleteIsRequestedFromMainPresenter() {
     auto presenter = makePresenter();
     auto progress = 33;
-    EXPECT_CALL(m_mainPresenter, percentComplete())
-        .Times(1)
-        .WillOnce(Return(progress));
+    EXPECT_CALL(m_mainPresenter, percentComplete()).Times(1).WillOnce(Return(progress));
     TS_ASSERT_EQUALS(presenter.percentComplete(), progress);
     verifyAndClear();
   }
@@ -730,8 +680,7 @@ public:
     expectGetLiveDataOptions(instrument, updateInterval);
     auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();
-    auto expected =
-        defaultLiveMonitorAlgorithmOptions(instrument, updateInterval);
+    auto expected = defaultLiveMonitorAlgorithmOptions(instrument, updateInterval);
     assertAlgorithmPropertiesContainOptions(expected, algRunner);
     verifyAndClear();
   }
@@ -758,8 +707,7 @@ public:
 
   void testStopMonitorUpdatesView() {
     auto presenter = makePresenter();
-    presenter.m_monitorAlg =
-        AlgorithmManager::Instance().createUnmanaged("MonitorLiveData");
+    presenter.m_monitorAlg = AlgorithmManager::Instance().createUnmanaged("MonitorLiveData");
     expectUpdateViewWhenMonitorStopped();
     presenter.notifyStopMonitor();
     TS_ASSERT_EQUALS(presenter.m_monitorAlg, nullptr);
@@ -772,12 +720,9 @@ public:
 
     // Ideally we should have a mock algorithm but for now just create the real
     // one but don't run it so that it will fail to find the results
-    auto startMonitorAlg =
-        AlgorithmManager::Instance().createUnmanaged("StartLiveData");
+    auto startMonitorAlg = AlgorithmManager::Instance().createUnmanaged("StartLiveData");
     startMonitorAlg->initialize();
-    EXPECT_CALL(*algRunner, getAlgorithm())
-        .Times(1)
-        .WillOnce(Return(startMonitorAlg));
+    EXPECT_CALL(*algRunner, getAlgorithm()).Times(1).WillOnce(Return(startMonitorAlg));
     expectUpdateViewWhenMonitorStopped();
     presenter.notifyStartMonitorComplete();
     verifyAndClear();
@@ -811,12 +756,9 @@ private:
 
   public:
     RunsPresenterFriend(IRunsView *mainView, ProgressableView *progressView,
-                        const RunsTablePresenterFactory &makeRunsTablePresenter,
-                        double thetaTolerance,
-                        std::vector<std::string> const &instruments,
-                        IMessageHandler *messageHandler)
-        : RunsPresenter(mainView, progressView, makeRunsTablePresenter,
-                        thetaTolerance, instruments, messageHandler) {}
+                        const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
+                        std::vector<std::string> const &instruments, IMessageHandler *messageHandler)
+        : RunsPresenter(mainView, progressView, makeRunsTablePresenter, thetaTolerance, instruments, messageHandler) {}
   };
 
   RunsPresenterFriend makePresenter() {
@@ -826,26 +768,20 @@ private:
 #else
     Plotter plotter;
 #endif
-    auto makeRunsTablePresenter = RunsTablePresenterFactory(
-        m_instruments, m_thetaTolerance, std::move(plotter));
-    auto presenter =
-        RunsPresenterFriend(&m_view, &m_progressView, makeRunsTablePresenter,
-                            m_thetaTolerance, m_instruments, &m_messageHandler);
+    auto makeRunsTablePresenter = RunsTablePresenterFactory(m_instruments, m_thetaTolerance, std::move(plotter));
+    auto presenter = RunsPresenterFriend(&m_view, &m_progressView, makeRunsTablePresenter, m_thetaTolerance,
+                                         m_instruments, &m_messageHandler);
 
     presenter.acceptMainPresenter(&m_mainPresenter);
     presenter.m_tablePresenter.reset(new NiceMock<MockRunsTablePresenter>());
-    m_runsTablePresenter = dynamic_cast<NiceMock<MockRunsTablePresenter> *>(
-        presenter.m_tablePresenter.get());
+    m_runsTablePresenter = dynamic_cast<NiceMock<MockRunsTablePresenter> *>(presenter.m_tablePresenter.get());
     presenter.m_runNotifier.reset(new NiceMock<MockRunNotifier>());
-    m_runNotifier = dynamic_cast<NiceMock<MockRunNotifier> *>(
-        presenter.m_runNotifier.get());
+    m_runNotifier = dynamic_cast<NiceMock<MockRunNotifier> *>(presenter.m_runNotifier.get());
     presenter.m_searcher.reset(new NiceMock<MockSearcher>());
-    m_searcher =
-        dynamic_cast<NiceMock<MockSearcher> *>(presenter.m_searcher.get());
+    m_searcher = dynamic_cast<NiceMock<MockSearcher> *>(presenter.m_searcher.get());
 
     // Return an empty table by default
-    ON_CALL(*m_runsTablePresenter, runsTable())
-        .WillByDefault(ReturnRef(m_runsTable));
+    ON_CALL(*m_runsTablePresenter, runsTable()).WillByDefault(ReturnRef(m_runsTable));
 
     return presenter;
   }
@@ -863,9 +799,8 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
   }
 
-  AlgorithmRuntimeProps defaultLiveMonitorAlgorithmOptions(
-      const std::string &instrument = std::string("OFFSPEC"),
-      const int &updateInterval = 15) {
+  AlgorithmRuntimeProps defaultLiveMonitorAlgorithmOptions(const std::string &instrument = std::string("OFFSPEC"),
+                                                           const int &updateInterval = 15) {
     const std::string updateIntervalString = std::to_string(updateInterval);
     return AlgorithmRuntimeProps{
         {"Instrument", instrument},
@@ -878,18 +813,14 @@ private:
     };
   }
 
-  AlgorithmRuntimeProps defaultLiveMonitorReductionOptions(
-      const std::string &instrument = std::string("OFFSPEC")) {
-    return AlgorithmRuntimeProps{
-        {"GetLiveValueAlgorithm", "GetLiveInstrumentValue"},
-        {"InputWorkspace", "TOF_live"},
-        {"Instrument", instrument}};
+  AlgorithmRuntimeProps defaultLiveMonitorReductionOptions(const std::string &instrument = std::string("OFFSPEC")) {
+    return AlgorithmRuntimeProps{{"GetLiveValueAlgorithm", "GetLiveInstrumentValue"},
+                                 {"InputWorkspace", "TOF_live"},
+                                 {"Instrument", instrument}};
   }
 
   void expectRunsTableWithContent(RunsTable &runsTable) {
-    EXPECT_CALL(*m_runsTablePresenter, runsTable())
-        .Times(1)
-        .WillOnce(ReturnRef(runsTable));
+    EXPECT_CALL(*m_runsTablePresenter, runsTable()).Times(1).WillOnce(ReturnRef(runsTable));
   }
 
   void expectUpdateViewWhenMonitorStarting() {
@@ -910,35 +841,26 @@ private:
     EXPECT_CALL(m_view, setUpdateIntervalSpinBoxEnabled(true));
   }
 
-  void expectStopAutoreduction() {
-    EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
-  }
+  void expectStopAutoreduction() { EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1); }
 
   void expectSearchSettingsChanged() {
-    auto const newCriteria =
-        SearchCriteria{"new_instrument", "new cycle", "new search string"};
-    EXPECT_CALL(*m_searcher, searchCriteria())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(newCriteria));
+    auto const newCriteria = SearchCriteria{"new_instrument", "new cycle", "new search string"};
+    EXPECT_CALL(*m_searcher, searchCriteria()).Times(AtLeast(1)).WillRepeatedly(Return(newCriteria));
   }
 
   void expectSearchSettingsDefault() {
     auto const criteria = SearchCriteria{m_instrument, m_cycle, m_searchString};
-    EXPECT_CALL(*m_searcher, searchCriteria())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(criteria));
+    EXPECT_CALL(*m_searcher, searchCriteria()).Times(AtLeast(1)).WillRepeatedly(Return(criteria));
   }
 
   void expectClearExistingTable() {
     EXPECT_CALL(*m_searcher, reset()).Times(1);
-    EXPECT_CALL(*m_runsTablePresenter, notifyRemoveAllRowsAndGroupsRequested())
-        .Times(1);
+    EXPECT_CALL(*m_runsTablePresenter, notifyRemoveAllRowsAndGroupsRequested()).Times(1);
   }
 
   void expectDoNotClearExistingTable() {
     EXPECT_CALL(*m_searcher, reset()).Times(0);
-    EXPECT_CALL(*m_runsTablePresenter, notifyRemoveAllRowsAndGroupsRequested())
-        .Times(0);
+    EXPECT_CALL(*m_runsTablePresenter, notifyRemoveAllRowsAndGroupsRequested()).Times(0);
   }
 
   void expectCheckForNewRuns() {
@@ -946,8 +868,7 @@ private:
     expectSearchInstrument(m_instrument);
     expectSearchString(m_searchString);
     expectSearchCycle(m_cycle);
-    EXPECT_CALL(*m_searcher, startSearchAsync(SearchCriteria{
-                                 m_instrument, m_cycle, m_searchString}))
+    EXPECT_CALL(*m_searcher, startSearchAsync(SearchCriteria{m_instrument, m_cycle, m_searchString}))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
@@ -963,39 +884,28 @@ private:
     auto row1Index = 3;
     auto row2Index = 5;
     auto const selectedRows = std::set<int>({row1Index, row2Index});
-    EXPECT_CALL(m_view, getSelectedSearchRows())
-        .Times(1)
-        .WillOnce(Return(selectedRows));
+    EXPECT_CALL(m_view, getSelectedSearchRows()).Times(1).WillOnce(Return(selectedRows));
     m_searchResult = SearchResult("", "");
     for (auto rowIndex : selectedRows)
-      EXPECT_CALL(*m_searcher, getSearchResult(rowIndex))
-          .Times(1)
-          .WillOnce(ReturnRef(m_searchResult));
+      EXPECT_CALL(*m_searcher, getSearchResult(rowIndex)).Times(1).WillOnce(ReturnRef(m_searchResult));
   }
 
   // Set up a valid search result with content and return the corresponding
   // model
-  ReductionJobs
-  expectGetValidSearchResult(std::string const &run = "13245",
-                             std::string const &groupName = "Test group 1",
-                             double theta = 0.5) {
+  ReductionJobs expectGetValidSearchResult(std::string const &run = "13245",
+                                           std::string const &groupName = "Test group 1", double theta = 0.5) {
     // Set a selected row in the search results table
     auto const rowIndex = 0;
     auto const selectedRows = std::set<int>({rowIndex});
-    EXPECT_CALL(m_view, getSelectedSearchRows())
-        .Times(1)
-        .WillOnce(Return(selectedRows));
+    EXPECT_CALL(m_view, getSelectedSearchRows()).Times(1).WillOnce(Return(selectedRows));
     // Set the expected result from the search results model
     auto const title = groupName + std::string("th=") + std::to_string(theta);
     m_searchResult = SearchResult(run, title);
-    EXPECT_CALL(*m_searcher, getSearchResult(rowIndex))
-        .Times(1)
-        .WillOnce(ReturnRef(m_searchResult));
+    EXPECT_CALL(*m_searcher, getSearchResult(rowIndex)).Times(1).WillOnce(ReturnRef(m_searchResult));
     // Construct the corresponding model expected in the main table
     auto jobs = ReductionJobs();
     auto group = Group(groupName);
-    group.appendRow(Row({run}, theta, TransmissionRunPair(), RangeInQ(),
-                        boost::none, ReductionOptionsMap(),
+    group.appendRow(Row({run}, theta, TransmissionRunPair(), RangeInQ(), boost::none, ReductionOptionsMap(),
                         ReductionWorkspaces({run}, TransmissionRunPair())));
     jobs.appendGroup(group);
     return jobs;
@@ -1065,45 +975,35 @@ private:
   void expectInstrumentComboIsDisabledWhenAnotherBatchReducing() {
     expectIsNotProcessing();
     expectIsNotAutoreducing();
-    EXPECT_CALL(m_mainPresenter, isAnyBatchProcessing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_mainPresenter, isAnyBatchProcessing()).Times(AtLeast(1)).WillRepeatedly(Return(true));
     EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
   }
 
   void expectInstrumentComboIsEnabledWhenNoBatchesAreReducing() {
     expectIsNotProcessing();
     expectIsNotAutoreducing();
-    EXPECT_CALL(m_mainPresenter, isAnyBatchProcessing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAnyBatchProcessing()).Times(AtLeast(1)).WillRepeatedly(Return(false));
     EXPECT_CALL(m_view, setInstrumentComboEnabled(true));
   }
 
   void expectInstrumentComboIsDisabledWhenAnotherBatchAutoreducing() {
     expectIsNotProcessing();
     expectIsNotAutoreducing();
-    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(true));
     EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
   }
 
   void expectInstrumentComboIsEnabledWhenNoBatchesAreAutoreducing() {
     expectIsNotProcessing();
     expectIsNotAutoreducing();
-    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(false));
     EXPECT_CALL(m_view, setInstrumentComboEnabled(true));
   }
 
   void expectAutoreduceButtonDisabledWhenAnotherBatchAutoreducing() {
     expectIsNotProcessing();
     expectIsNotAutoreducing();
-    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(true));
     EXPECT_CALL(m_view, setAutoreduceButtonEnabled(false));
     EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
   }
@@ -1111,118 +1011,82 @@ private:
   void expectAutoreduceButtonEnabledWhenNoBatchesAreAutoreducing() {
     expectIsNotProcessing();
     expectIsNotAutoreducing();
-    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(false));
     EXPECT_CALL(m_view, setAutoreduceButtonEnabled(true));
     EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
   }
 
   void expectIsProcessing() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
-    ON_CALL(m_mainPresenter, isAnyBatchProcessing())
-        .WillByDefault(Return(true));
+    EXPECT_CALL(m_mainPresenter, isProcessing()).Times(AtLeast(1)).WillRepeatedly(Return(true));
+    ON_CALL(m_mainPresenter, isAnyBatchProcessing()).WillByDefault(Return(true));
   }
 
   void expectIsNotProcessing() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
-    ON_CALL(m_mainPresenter, isAnyBatchProcessing())
-        .WillByDefault(Return(false));
+    EXPECT_CALL(m_mainPresenter, isProcessing()).Times(AtLeast(1)).WillRepeatedly(Return(false));
+    ON_CALL(m_mainPresenter, isAnyBatchProcessing()).WillByDefault(Return(false));
   }
 
   void expectIsAutoreducing() {
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
-    ON_CALL(m_mainPresenter, isAnyBatchAutoreducing())
-        .WillByDefault(Return(true));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(true));
+    ON_CALL(m_mainPresenter, isAnyBatchAutoreducing()).WillByDefault(Return(true));
   }
 
   void expectIsNotAutoreducing() {
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
-    ON_CALL(m_mainPresenter, isAnyBatchAutoreducing())
-        .WillByDefault(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(false));
+    ON_CALL(m_mainPresenter, isAnyBatchAutoreducing()).WillByDefault(Return(false));
   }
 
   // current search instrument on the view
   void expectSearchInstrument(std::string const &instrument) {
-    EXPECT_CALL(m_view, getSearchInstrument())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(instrument));
+    EXPECT_CALL(m_view, getSearchInstrument()).Times(AtLeast(1)).WillRepeatedly(Return(instrument));
   }
 
   // previously saved instrument
   void expectPreviousInstrument(std::string const &instrument) {
-    EXPECT_CALL(m_mainPresenter, instrumentName())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(instrument));
+    EXPECT_CALL(m_mainPresenter, instrumentName()).Times(AtLeast(1)).WillRepeatedly(Return(instrument));
   }
 
   void expectUnsavedSearchResults() {
-    EXPECT_CALL(*m_searcher, hasUnsavedChanges())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*m_searcher, hasUnsavedChanges()).Times(AtLeast(1)).WillRepeatedly(Return(true));
   }
 
   void expectNoUnsavedSearchResults() {
-    EXPECT_CALL(*m_searcher, hasUnsavedChanges())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(*m_searcher, hasUnsavedChanges()).Times(AtLeast(1)).WillRepeatedly(Return(false));
   }
 
   void expectChangeInstrumentPrevented() {
     expectUnsavedSearchResults();
-    EXPECT_CALL(m_mainPresenter, discardChanges(_))
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_mainPresenter, discardChanges(_)).Times(AtLeast(1)).WillRepeatedly(Return(false));
   }
 
   void expectSearchString(std::string const &searchString) {
-    EXPECT_CALL(m_view, getSearchString())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(searchString));
+    EXPECT_CALL(m_view, getSearchString()).Times(AtLeast(1)).WillRepeatedly(Return(searchString));
   }
 
   void expectSearchCycle(std::string const &cycle) {
-    EXPECT_CALL(m_view, getSearchCycle())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(cycle));
+    EXPECT_CALL(m_view, getSearchCycle()).Times(AtLeast(1)).WillRepeatedly(Return(cycle));
   }
 
   void expectGetUpdateInterval(int const &updateInterval) {
-    EXPECT_CALL(m_view, getLiveDataUpdateInterval())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(updateInterval));
+    EXPECT_CALL(m_view, getLiveDataUpdateInterval()).Times(AtLeast(1)).WillRepeatedly(Return(updateInterval));
   }
 
-  void expectGetLiveDataOptions(
-      AlgorithmRuntimeProps options = AlgorithmRuntimeProps(),
-      std::string const &instrument = std::string("OFFSPEC"),
-      int const &updateInterval = 15) {
+  void expectGetLiveDataOptions(AlgorithmRuntimeProps options = AlgorithmRuntimeProps(),
+                                std::string const &instrument = std::string("OFFSPEC"),
+                                int const &updateInterval = 15) {
     expectSearchInstrument(instrument);
     expectGetUpdateInterval(updateInterval);
-    EXPECT_CALL(m_mainPresenter, rowProcessingProperties())
-        .Times(1)
-        .WillOnce(Return(std::move(options)));
+    EXPECT_CALL(m_mainPresenter, rowProcessingProperties()).Times(1).WillOnce(Return(std::move(options)));
   }
 
-  void expectGetLiveDataOptions(std::string const &instrument,
-                                const int &updateInterval) {
-    expectGetLiveDataOptions(AlgorithmRuntimeProps(), instrument,
-                             updateInterval);
+  void expectGetLiveDataOptions(std::string const &instrument, const int &updateInterval) {
+    expectGetLiveDataOptions(AlgorithmRuntimeProps(), instrument, updateInterval);
   }
 
   std::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
     // Get the algorithm runner
     auto algRunner = std::make_shared<NiceMock<MockAlgorithmRunner>>();
-    ON_CALL(m_view, getMonitorAlgorithmRunner())
-        .WillByDefault(Return(algRunner));
+    ON_CALL(m_view, getMonitorAlgorithmRunner()).WillByDefault(Return(algRunner));
     return algRunner;
   }
 
@@ -1235,23 +1099,19 @@ private:
 
   void expectOverwriteSearchResultsPrevented() {
     expectUnsavedSearchResults();
-    EXPECT_CALL(m_mainPresenter, discardChanges(_))
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_mainPresenter, discardChanges(_)).Times(AtLeast(1)).WillRepeatedly(Return(false));
   }
 
-  void assertAlgorithmPropertiesContainOptions(
-      AlgorithmRuntimeProps const &expected,
-      std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
+  void assertAlgorithmPropertiesContainOptions(AlgorithmRuntimeProps const &expected,
+                                               std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
     for (auto const &kvp : expected) {
       TS_ASSERT_EQUALS(alg->getPropertyValue(kvp.first), kvp.second);
     }
   }
 
-  void assertPostProcessingPropertiesContainOptions(
-      AlgorithmRuntimeProps &expected,
-      std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
+  void assertPostProcessingPropertiesContainOptions(AlgorithmRuntimeProps &expected,
+                                                    std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
     auto resultString = alg->getPropertyValue("PostProcessingProperties");
     auto result = parseKeyValueString(resultString, ";");

@@ -27,8 +27,7 @@ public:
 
   std::string cell(std::string const &text) const { return text; }
 
-  template <typename... Args>
-  std::vector<Cell> cells(Args const &... cellText) const {
+  template <typename... Args> std::vector<Cell> cells(Args const &...cellText) const {
     return std::vector<Cell>({cell(cellText)...});
   }
 
@@ -51,8 +50,7 @@ public:
 
   void testTwoSiblingsResultsInTwoRoots() {
     auto extractSubtrees = ExtractSubtrees();
-    auto region = std::vector<Row>({Row(RowLocation({1}), cells("Root 1")),
-                                    Row(RowLocation({2}), cells("Root 2"))});
+    auto region = std::vector<Row>({Row(RowLocation({1}), cells("Root 1")), Row(RowLocation({2}), cells("Root 2"))});
     // clang-format off
     auto expectedSubtrees =
         std::vector<Subtree>({
@@ -71,8 +69,7 @@ public:
 
   void testParentAndChildResultsInParent() {
     auto extractSubtrees = ExtractSubtrees();
-    auto region = std::vector<Row>({Row(RowLocation({1}), cells("Root")),
-                                    Row(RowLocation({1, 2}), cells("Child"))});
+    auto region = std::vector<Row>({Row(RowLocation({1}), cells("Root")), Row(RowLocation({1, 2}), cells("Child"))});
 
     // clang-format off
     auto expectedSubtrees =

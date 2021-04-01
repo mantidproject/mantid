@@ -23,15 +23,11 @@ public:
 
 public:
   // ----------------------- Success tests ------------------------
-  void testgetCMapKnownCMapIsSuccesful() {
-    TS_ASSERT_THROWS_NOTHING(getCMap("jet"));
-  }
+  void testgetCMapKnownCMapIsSuccesful() { TS_ASSERT_THROWS_NOTHING(getCMap("jet")); }
 
   void testcmapExistsForKnownCMapReturnsTrue() { TS_ASSERT(cmapExists("jet")); }
 
-  void testcmapExistsForUnknownCMapReturnsFalse() {
-    TS_ASSERT(!cmapExists("NotAKnownCMap"));
-  }
+  void testcmapExistsForUnknownCMapReturnsFalse() { TS_ASSERT(!cmapExists("NotAKnownCMap")); }
 
   void testConstructionColorMapInstanceIsSuccessful() {
     auto jet = getCMap("jet");
@@ -44,7 +40,6 @@ public:
   }
 
   void testConstructionWithNonColorMapObjectThrows() {
-    TS_ASSERT_THROWS(Colormap cmap(MantidQt::Widgets::Common::Python::Object{}),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(Colormap cmap(MantidQt::Widgets::Common::Python::Object{}), const std::invalid_argument &);
   }
 };

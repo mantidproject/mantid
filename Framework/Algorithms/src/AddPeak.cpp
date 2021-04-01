@@ -34,11 +34,9 @@ using Mantid::Geometry::IPeak_uptr;
 /** Initialize the algorithm's properties.
  */
 void AddPeak::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "PeaksWorkspace", "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "", Direction::InOut),
                   "A peaks workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "RunWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("RunWorkspace", "", Direction::Input),
                   "An input workspace containing the run information.");
   declareProperty("TOF", 0.0, "Peak position in time of flight.");
   declareProperty("DetectorID", 0, "ID of a detector at the peak centre.");
@@ -56,8 +54,7 @@ void AddPeak::exec() {
   auto runInst = runWS->getInstrument()->getName();
   auto peakInst = peaksWS->getInstrument()->getName();
   if (peaksWS->getNumberPeaks() > 0 && (runInst != peakInst)) {
-    throw std::runtime_error("The peak from " + runWS->getName() +
-                             " comes from a different instrument (" + runInst +
+    throw std::runtime_error("The peak from " + runWS->getName() + " comes from a different instrument (" + runInst +
                              ") to the peaks "
                              "already in the table (" +
                              peakInst + "). It could not be added.");
@@ -83,6 +80,8 @@ void AddPeak::exec() {
   double Qz = 1.0 - cos(theta2);
   double l1 = detectorInfo.l1();
   double l2 = detectorInfo.l2(detectorIndex);
+  std::vector<int> emptyWarningVec;
+  auto [difa, difc, tzero] = detectorInfo.diffractometerConstants(detectorIndex, emptyWarningVec, emptyWarningVec);
 
   Mantid::Kernel::Unit_sptr unit = runWS->getAxis(0)->unit();
   if (unit->unitID() != "TOF") {
@@ -95,10 +94,8 @@ void AddPeak::exec() {
     } else if (det.hasParameter("Efixed")) {
       emode = 2; // indirect
       try {
-        const Mantid::Geometry::ParameterMap &pmap =
-            runWS->constInstrumentParameters();
-        Mantid::Geometry::Parameter_sptr par =
-            pmap.getRecursive(&det, "Efixed");
+        const Mantid::Geometry::ParameterMap &pmap = runWS->constInstrumentParameters();
+        Mantid::Geometry::Parameter_sptr par = pmap.getRecursive(&det, "Efixed");
         if (par) {
           efixed = par->value<double>();
         }
@@ -112,12 +109,17 @@ void AddPeak::exec() {
     }
     std::vector<double> xdata(1, tof);
     std::vector<double> ydata;
-    unit->toTOF(xdata, ydata, l1, l2, theta2, emode, efixed, 0.0);
+    unit->toTOF(xdata, ydata, l1, emode,
+                {{Kernel::UnitParams::l2, l2},
+                 {Kernel::UnitParams::twoTheta, theta2},
+                 {Kernel::UnitParams::efixed, efixed},
+                 {Kernel::UnitParams::difa, difa},
+                 {Kernel::UnitParams::difc, difc},
+                 {Kernel::UnitParams::tzero, tzero}});
     tof = xdata[0];
   }
 
-  std::string m_qConvention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
+  std::string m_qConvention = Kernel::ConfigService::Instance().getString("Q.convention");
   double qSign = 1.0;
   if (m_qConvention == "Crystallography") {
     qSign = -1.0;

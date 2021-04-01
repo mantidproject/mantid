@@ -28,15 +28,12 @@ using namespace Mantid::API;
 /** Initialize the algorithm's properties.
  */
 void LoadIsawUB::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
-                                                     Direction::InOut),
-      "An input workspace to which to add the lattice information.");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::InOut),
+                  "An input workspace to which to add the lattice information.");
 
   const std::vector<std::string> exts{".mat", ".ub", ".txt"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "Path to an ISAW-style UB matrix text file.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "Path to an ISAW-style UB matrix text file.");
 
   declareProperty("CheckUMatrix", true,
                   "If True (default) then a check is "
@@ -61,9 +58,7 @@ void LoadIsawUB::exec() {
     for (size_t col = 0; col < 3; col++) {
       s = getWord(in, true);
       if (!convert(s, val))
-        throw std::runtime_error(
-            "The string '" + s +
-            "' in the file was not understood as a number.");
+        throw std::runtime_error("The string '" + s + "' in the file was not understood as a number.");
       ub[row][col] = val;
     }
     readToEndOfLine(in, true);
@@ -86,9 +81,7 @@ void LoadIsawUB::readModulatedUB(std::ifstream &in, DblMatrix &ub) {
       for (size_t col = 0; col < 3; col++) {
         s = getWord(in, true);
         if (!convert(s, val))
-          throw std::runtime_error(
-              "The string '" + s +
-              "' in the file was not understood as a number.");
+          throw std::runtime_error("The string '" + s + "' in the file was not understood as a number.");
         modub[row][col] = val;
       }
       readToEndOfLine(in, true);
@@ -103,8 +96,7 @@ void LoadIsawUB::readModulatedUB(std::ifstream &in, DblMatrix &ub) {
   for (double &latVal : latVals) {
     s = getWord(in, true);
     if (!convert(s, val))
-      throw std::runtime_error("The string '" + s +
-                               "' in the file was not understood as a number.");
+      throw std::runtime_error("The string '" + s + "' in the file was not understood as a number.");
     latVal = val;
   }
 
@@ -118,9 +110,7 @@ void LoadIsawUB::readModulatedUB(std::ifstream &in, DblMatrix &ub) {
       for (int j = 0; j < 3; j++) {
         s = getWord(in, true);
         if (!convert(s, val))
-          throw std::runtime_error(
-              "The string '" + s +
-              "' in the file was not understood as a number.");
+          throw std::runtime_error("The string '" + s + "' in the file was not understood as a number.");
         ModVecErr[i][j] = val;
       }
       readToEndOfLine(in, true);
@@ -130,16 +120,14 @@ void LoadIsawUB::readModulatedUB(std::ifstream &in, DblMatrix &ub) {
     for (int j = 0; j < 3; j++)
       s = getWord(in, true);
     if (!convert(s, val))
-      throw std::runtime_error("The string '" + s +
-                               "' in the file was not understood as a number.");
+      throw std::runtime_error("The string '" + s + "' in the file was not understood as a number.");
     maxorder = static_cast<int>(val);
     readToEndOfLine(in, true);
     for (int j = 0; j < 3; j++)
       s = getWord(in, true);
     bool valBool;
     if (!convert(s, valBool))
-      throw std::runtime_error("The string '" + s +
-                               "' in the file was not understood as a number.");
+      throw std::runtime_error("The string '" + s + "' in the file was not understood as a number.");
     crossterm = valBool;
   }
   // Adjust the UB by transposing
@@ -151,8 +139,7 @@ void LoadIsawUB::readModulatedUB(std::ifstream &in, DblMatrix &ub) {
    * This is compatible (same results) with the ISAW lattice parameters */
   auto latt = std::make_unique<OrientedLattice>();
   latt->setUB(ub);
-  latt->setError(latVals[0], latVals[1], latVals[2], latVals[3], latVals[4],
-                 latVals[5]);
+  latt->setError(latVals[0], latVals[1], latVals[2], latVals[3], latVals[4], latVals[5]);
   latt->setModUB(modub);
 
   for (int i = 0; i < ModDim; i++)
@@ -179,8 +166,7 @@ void LoadIsawUB::readModulatedUB(std::ifstream &in, DblMatrix &ub) {
   Workspace_sptr ws1 = getProperty("InputWorkspace");
 
   ExperimentInfo_sptr ws;
-  MultipleExperimentInfos_sptr MDWS =
-      std::dynamic_pointer_cast<MultipleExperimentInfos>(ws1);
+  MultipleExperimentInfos_sptr MDWS = std::dynamic_pointer_cast<MultipleExperimentInfos>(ws1);
   if (MDWS != nullptr) {
     ws = MDWS->getExperimentInfo(0);
   } else {
@@ -194,8 +180,7 @@ void LoadIsawUB::readModulatedUB(std::ifstream &in, DblMatrix &ub) {
   if ((MDWS != nullptr) && (MDWS->getNumExperimentInfo() > 1)) {
     for (uint16_t i = 1; i < MDWS->getNumExperimentInfo(); i++) {
       ws = MDWS->getExperimentInfo(i);
-      ws->mutableSample().setOrientedLattice(
-          std::make_unique<OrientedLattice>(*latt));
+      ws->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(*latt));
     }
   }
   // Save it into the main workspace

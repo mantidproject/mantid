@@ -26,15 +26,12 @@ class CompositeClusterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CompositeClusterTest *createSuite() {
-    return new CompositeClusterTest();
-  }
+  static CompositeClusterTest *createSuite() { return new CompositeClusterTest(); }
   static void destroySuite(CompositeClusterTest *suite) { delete suite; }
 
   void test_dont_add_if_child_empty() {
     MockICluster *pMockCluster = new MockICluster();
-    EXPECT_CALL(*pMockCluster, size())
-        .WillRepeatedly(Return(0)); // Size==0, empty child cluster.
+    EXPECT_CALL(*pMockCluster, size()).WillRepeatedly(Return(0)); // Size==0, empty child cluster.
     std::shared_ptr<ICluster> mockCluster(pMockCluster);
 
     CompositeCluster composite;
@@ -78,9 +75,8 @@ public:
   void test_writeTo() {
     MockICluster *pMockCluster = new MockICluster();
     EXPECT_CALL(*pMockCluster, writeTo(_)).Times(2);
-    EXPECT_CALL(*pMockCluster, size())
-        .WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will
-                                    // not be added to composite cluster
+    EXPECT_CALL(*pMockCluster, size()).WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will
+                                                                  // not be added to composite cluster
     std::shared_ptr<ICluster> mockCluster1(pMockCluster, null_deleter());
     std::shared_ptr<ICluster> mockCluster2(pMockCluster, null_deleter());
 
@@ -97,11 +93,9 @@ public:
 
   void test_integrate() {
     MockICluster *pMockCluster = new MockICluster();
-    EXPECT_CALL(*pMockCluster, size())
-        .WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will
-                                    // not be added to composite cluster
-    EXPECT_CALL(*pMockCluster, integrate(_))
-        .WillRepeatedly(Return(ICluster::ClusterIntegratedValues(1, 2)));
+    EXPECT_CALL(*pMockCluster, size()).WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will
+                                                                  // not be added to composite cluster
+    EXPECT_CALL(*pMockCluster, integrate(_)).WillRepeatedly(Return(ICluster::ClusterIntegratedValues(1, 2)));
     std::shared_ptr<ICluster> mockCluster1(pMockCluster, null_deleter());
     std::shared_ptr<ICluster> mockCluster2(pMockCluster, null_deleter());
 
@@ -125,32 +119,23 @@ public:
     std::shared_ptr<ICluster> mockClusterA(pMockClusterA);
     std::shared_ptr<ICluster> mockClusterB(pMockClusterB);
 
-    EXPECT_CALL(*pMockClusterA, size())
-        .WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will
-                                    // not be added to composite cluster
-    EXPECT_CALL(*pMockClusterB, size())
-        .WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will
-                                    // not be added to composite cluster
-    EXPECT_CALL(*pMockClusterA, getLabel())
-        .WillRepeatedly(Return(1)); // Max label
-    EXPECT_CALL(*pMockClusterB, getLabel())
-        .WillRepeatedly(Return(0)); // Min label
-    EXPECT_CALL(*pMockClusterA, setRootCluster(pMockClusterB))
-        .Times(1); // Use minimum as root
-    EXPECT_CALL(*pMockClusterB, setRootCluster(pMockClusterB))
-        .Times(1); // Use minimum as root
-    EXPECT_CALL(*pMockClusterA, toUniformMinimum(_))
-        .Times(1); // Use minimum as root
-    EXPECT_CALL(*pMockClusterB, toUniformMinimum(_))
-        .Times(1); // Use minimum as root
+    EXPECT_CALL(*pMockClusterA, size()).WillRepeatedly(Return(1));       // Fake the size as non-zero otherwise will
+                                                                         // not be added to composite cluster
+    EXPECT_CALL(*pMockClusterB, size()).WillRepeatedly(Return(1));       // Fake the size as non-zero otherwise will
+                                                                         // not be added to composite cluster
+    EXPECT_CALL(*pMockClusterA, getLabel()).WillRepeatedly(Return(1));   // Max label
+    EXPECT_CALL(*pMockClusterB, getLabel()).WillRepeatedly(Return(0));   // Min label
+    EXPECT_CALL(*pMockClusterA, setRootCluster(pMockClusterB)).Times(1); // Use minimum as root
+    EXPECT_CALL(*pMockClusterB, setRootCluster(pMockClusterB)).Times(1); // Use minimum as root
+    EXPECT_CALL(*pMockClusterA, toUniformMinimum(_)).Times(1);           // Use minimum as root
+    EXPECT_CALL(*pMockClusterB, toUniformMinimum(_)).Times(1);           // Use minimum as root
 
     CompositeCluster composite;
     composite.add(mockClusterA);
     composite.add(mockClusterB);
 
     composite.toUniformMinimum(disjointSet);
-    TSM_ASSERT_EQUALS("Label should be minimum of subjects", 0,
-                      composite.getLabel());
+    TSM_ASSERT_EQUALS("Label should be minimum of subjects", 0, composite.getLabel());
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockClusterA));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockClusterB));
@@ -162,16 +147,12 @@ public:
     std::shared_ptr<ICluster> mockClusterA(pMockClusterA);
     std::shared_ptr<ICluster> mockClusterB(pMockClusterB);
 
-    EXPECT_CALL(*pMockClusterA, size())
-        .WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will
-                                    // not be added to composite cluster
-    EXPECT_CALL(*pMockClusterB, size())
-        .WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will
-                                    // not be added to composite cluster
-    EXPECT_CALL(*pMockClusterA, getLabel())
-        .WillRepeatedly(Return(1)); // Label 1 in set
-    EXPECT_CALL(*pMockClusterB, getLabel())
-        .WillRepeatedly(Return(2)); // Label 2 in set
+    EXPECT_CALL(*pMockClusterA, size()).WillRepeatedly(Return(1));     // Fake the size as non-zero otherwise will
+                                                                       // not be added to composite cluster
+    EXPECT_CALL(*pMockClusterB, size()).WillRepeatedly(Return(1));     // Fake the size as non-zero otherwise will
+                                                                       // not be added to composite cluster
+    EXPECT_CALL(*pMockClusterA, getLabel()).WillRepeatedly(Return(1)); // Label 1 in set
+    EXPECT_CALL(*pMockClusterB, getLabel()).WillRepeatedly(Return(2)); // Label 2 in set
 
     CompositeCluster composite;
     composite.add(mockClusterA);

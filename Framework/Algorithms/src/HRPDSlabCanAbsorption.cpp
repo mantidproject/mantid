@@ -25,10 +25,8 @@ using namespace Geometry;
 using namespace Mantid::PhysicalConstants;
 
 void HRPDSlabCanAbsorption::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input));
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output));
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -48,21 +46,18 @@ void HRPDSlabCanAbsorption::init() {
 
   auto positiveInt = std::make_shared<BoundedValidator<int64_t>>();
   positiveInt->setLower(1);
-  declareProperty(
-      "NumberOfWavelengthPoints", int64_t(EMPTY_INT()), positiveInt,
-      "The number of wavelength points for which the numerical integral is\n"
-      "calculated (default: all points)");
+  declareProperty("NumberOfWavelengthPoints", int64_t(EMPTY_INT()), positiveInt,
+                  "The number of wavelength points for which the numerical integral is\n"
+                  "calculated (default: all points)");
 
   std::vector<std::string> exp_options{"Normal", "FastApprox"};
-  declareProperty(
-      "ExpMethod", "Normal", std::make_shared<StringListValidator>(exp_options),
-      "Select the method to use to calculate exponentials, normal or a\n"
-      "fast approximation (default: Normal)");
+  declareProperty("ExpMethod", "Normal", std::make_shared<StringListValidator>(exp_options),
+                  "Select the method to use to calculate exponentials, normal or a\n"
+                  "fast approximation (default: Normal)");
 
   auto moreThanZero = std::make_shared<BoundedValidator<double>>();
   moreThanZero->setLower(0.001);
-  declareProperty("ElementSize", 1.0, moreThanZero,
-                  "The size of one side of an integration element cube in mm");
+  declareProperty("ElementSize", 1.0, moreThanZero, "The size of one side of an integration element cube in mm");
 }
 
 void HRPDSlabCanAbsorption::exec() {
@@ -131,12 +126,10 @@ void HRPDSlabCanAbsorption::exec() {
       // 90 degree bank aluminium sample holder
       if (detID > 900000) {
         // Below values are for aluminium
-        Y[j] *= exp(-angleFactor * 0.011 * 6.02 *
-                    ((0.231 * lambda / 1.798) + 1.503));
+        Y[j] *= exp(-angleFactor * 0.011 * 6.02 * ((0.231 * lambda / 1.798) + 1.503));
       } else // Another vanadium window
       {
-        Y[j] *= exp(angleFactor * vanWinThickness *
-                    ((vanRefAtten * lambda) + vanScat));
+        Y[j] *= exp(angleFactor * vanWinThickness * ((vanRefAtten * lambda) + vanScat));
       }
     }
 
@@ -150,7 +143,7 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption() {
   MatrixWorkspace_sptr m_inputWS = getProperty("InputWorkspace");
   double sigma_atten = getProperty("SampleAttenuationXSection"); // in barns
   double sigma_s = getProperty("SampleScatteringXSection");      // in barns
-  double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
+  double rho = getProperty("SampleNumberDensity");               // in Angstroms-3
   const Material &sampleMaterial = m_inputWS->sample().getMaterial();
   if (sampleMaterial.totalScatterXSection() != 0.0) {
     if (rho == EMPTY_DBL())
@@ -163,21 +156,18 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption() {
   {
     NeutronAtom neutron(0, 0, 0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
     auto shape = std::shared_ptr<IObject>(
-        m_inputWS->sample().getShape().cloneWithMaterial(
-            Material("SetInSphericalAbsorption", neutron, rho)));
+        m_inputWS->sample().getShape().cloneWithMaterial(Material("SetInSphericalAbsorption", neutron, rho)));
     m_inputWS->mutableSample().setShape(shape);
   }
 
   // Call FlatPlateAbsorption as a Child Algorithm
-  IAlgorithm_sptr childAlg =
-      createChildAlgorithm("FlatPlateAbsorption", 0.0, 0.9);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("FlatPlateAbsorption", 0.0, 0.9);
   // Pass through all the properties
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_inputWS);
   childAlg->setProperty<double>("AttenuationXSection", sigma_atten);
   childAlg->setProperty<double>("ScatteringXSection", sigma_s);
   childAlg->setProperty<double>("SampleNumberDensity", rho);
-  childAlg->setProperty<int64_t>("NumberOfWavelengthPoints",
-                                 getProperty("NumberOfWavelengthPoints"));
+  childAlg->setProperty<int64_t>("NumberOfWavelengthPoints", getProperty("NumberOfWavelengthPoints"));
   childAlg->setProperty<std::string>("ExpMethod", getProperty("ExpMethod"));
   childAlg->setProperty<double>("ElementSize", getProperty("ElementSize"));
   // The height and width of the sample holder are standard for HRPD

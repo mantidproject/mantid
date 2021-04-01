@@ -38,42 +38,38 @@ namespace {
  Helper method to create an event workspace with a set number of distributed
  events between pulseTimeMax and pulseTimeMin.
  */
-IEventWorkspace_sptr
-createEventWorkspace(const int numberspectra, const int nDistrubutedEvents,
-                     const int pulseTimeMinSecs, const int pulseTimeMaxSecs,
-                     const DateAndTime runStart = DateAndTime(int(1))) {
+IEventWorkspace_sptr createEventWorkspace(const int numberspectra, const int nDistrubutedEvents,
+                                          const int pulseTimeMinSecs, const int pulseTimeMaxSecs,
+                                          const DateAndTime runStart = DateAndTime(int(1))) {
   uint64_t pulseTimeMin = uint64_t(1e9) * pulseTimeMinSecs;
   uint64_t pulseTimeMax = uint64_t(1e9) * pulseTimeMaxSecs;
 
   EventWorkspace_sptr retVal(new EventWorkspace);
   retVal->initialize(numberspectra, 1, 1);
-  double binWidth =
-      std::abs(double(pulseTimeMax - pulseTimeMin) / nDistrubutedEvents);
+  double binWidth = std::abs(double(pulseTimeMax - pulseTimeMin) / nDistrubutedEvents);
 
   // Make fake events
   for (int pix = 0; pix < numberspectra; pix++) {
     for (int i = 0; i < nDistrubutedEvents; i++) {
       double tof = 0;
-      uint64_t pulseTime =
-          uint64_t(((double)i + 0.5) * binWidth); // Stick an event with a
-                                                  // pulse_time in the middle of
-                                                  // each pulse_time bin.
+      uint64_t pulseTime = uint64_t(((double)i + 0.5) * binWidth); // Stick an event with a
+                                                                   // pulse_time in the middle of
+                                                                   // each pulse_time bin.
       retVal->getSpectrum(pix) += TofEvent(tof, pulseTime);
     }
   }
 
   // Add the required start time.
   PropertyWithValue<std::string> *testProperty =
-      new PropertyWithValue<std::string>(
-          "start_time", runStart.toSimpleString(), Direction::Input);
+      new PropertyWithValue<std::string>("start_time", runStart.toSimpleString(), Direction::Input);
   retVal->mutableRun().addLogData(testProperty);
 
   V3D samplePosition(10, 0, 0);
   V3D sourcePosition(0, 0, 0);
   std::vector<V3D> detectorPositions(numberspectra, V3D(20, 0, 0));
 
-  WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(
-      retVal, samplePosition, sourcePosition, detectorPositions);
+  WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(retVal, samplePosition, sourcePosition,
+                                                                     detectorPositions);
 
   return retVal;
 }
@@ -93,9 +89,8 @@ public:
   MOCK_CONST_METHOD1(getTimeAtSampleMax, DateAndTime(double));
   MOCK_CONST_METHOD1(getTimeAtSampleMin, DateAndTime(double));
   MOCK_CONST_METHOD0(getEventType, EventType());
-  MOCK_CONST_METHOD5(generateHistogram,
-                     void(const std::size_t, const Mantid::MantidVec &,
-                          Mantid::MantidVec &, Mantid::MantidVec &, bool));
+  MOCK_CONST_METHOD5(generateHistogram, void(const std::size_t, const Mantid::MantidVec &, Mantid::MantidVec &,
+                                             Mantid::MantidVec &, bool));
   MOCK_METHOD1(setAllX, void(const Mantid::HistogramData::BinEdges &));
   MOCK_METHOD0(resetAllXToSingleBin, void());
   MOCK_METHOD0(clearMRU, void());
@@ -107,24 +102,19 @@ public:
   MOCK_CONST_METHOD0(size, std::size_t());
   MOCK_CONST_METHOD0(getNumberHistograms, std::size_t());
   MOCK_METHOD1(getSpectrum, Mantid::API::IEventList &(const std::size_t));
-  MOCK_CONST_METHOD1(getSpectrum,
-                     const Mantid::API::IEventList &(const std::size_t));
+  MOCK_CONST_METHOD1(getSpectrum, const Mantid::API::IEventList &(const std::size_t));
   MOCK_METHOD3(init, void(const size_t &, const size_t &, const size_t &));
   MOCK_METHOD1(init, void(const Mantid::HistogramData::Histogram &));
-  MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
-                     Mantid::Kernel::SpecialCoordinateSystem());
+  MOCK_CONST_METHOD0(getSpecialCoordinateSystem, Mantid::Kernel::SpecialCoordinateSystem());
 
 private:
   MockIEventWorkspace *doClone() const override {
-    throw std::runtime_error(
-        "Cloning of MockIEventWorkspace is not implemented.");
+    throw std::runtime_error("Cloning of MockIEventWorkspace is not implemented.");
   }
   MockIEventWorkspace *doCloneEmpty() const override {
-    throw std::runtime_error(
-        "Cloning of MockIEventWorkspace is not implemented.");
+    throw std::runtime_error("Cloning of MockIEventWorkspace is not implemented.");
   }
-  MOCK_METHOD1(getSpectrumWithoutInvalidation,
-               Mantid::API::IEventList &(const std::size_t));
+  MOCK_METHOD1(getSpectrumWithoutInvalidation, Mantid::API::IEventList &(const std::size_t));
 };
 } // namespace
 
@@ -145,12 +135,9 @@ private:
    Sets up the algorithm for rebinning and executes it. Also verifies the
    results.
    */
-  void do_execute_and_check_binning(const int nSpectra, const int pulseTimeMin,
-                                    const int pulseTimeMax,
-                                    const int nUniformDistributedEvents,
-                                    const int nBinsToBinTo) {
-    IEventWorkspace_sptr inWS = createEventWorkspace(
-        nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax);
+  void do_execute_and_check_binning(const int nSpectra, const int pulseTimeMin, const int pulseTimeMax,
+                                    const int nUniformDistributedEvents, const int nBinsToBinTo) {
+    IEventWorkspace_sptr inWS = createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax);
 
     // Rebin pameters require the step.
     const int step = (pulseTimeMax - pulseTimeMin) / (nBinsToBinTo);
@@ -159,23 +146,19 @@ private:
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
-    auto rebinArgsList = {double(pulseTimeMin), double(step),
-                          double(pulseTimeMax)};
+    auto rebinArgsList = {double(pulseTimeMin), double(step), double(pulseTimeMax)};
     Mantid::MantidVec rebinArgs = rebinArgsList; // Provide rebin arguments.
     alg.setProperty("Params", rebinArgs);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
 
-    MatrixWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
+    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
 
     // Check the units of the output workspace.
     Unit_const_sptr expectedUnit(new Units::Time());
-    TSM_ASSERT_EQUALS("X unit should be Time/s", expectedUnit->unitID(),
-                      outWS->getAxis(0)->unit()->unitID());
+    TSM_ASSERT_EQUALS("X unit should be Time/s", expectedUnit->unitID(), outWS->getAxis(0)->unit()->unitID());
     for (int i = 1; i < outWS->axes(); ++i) {
-      TSM_ASSERT_EQUALS("Axis units do not match.",
-                        inWS->getAxis(i)->unit()->unitID(),
+      TSM_ASSERT_EQUALS("Axis units do not match.", inWS->getAxis(i)->unit()->unitID(),
                         outWS->getAxis(i)->unit()->unitID());
     }
 
@@ -236,9 +219,8 @@ public:
     const int nUniformDistributedEvents = 4;
     const int nSpectra = 1;
 
-    IEventWorkspace_sptr ws = createEventWorkspace(
-        nSpectra, nUniformDistributedEvents, pulseTimeMin,
-        pulseTimeMax); // Create an otherwise valid input workspace.
+    IEventWorkspace_sptr ws = createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin,
+                                                   pulseTimeMax); // Create an otherwise valid input workspace.
 
     AlgorithmType alg;
     alg.setRethrows(true);
@@ -302,9 +284,7 @@ public:
     const int numberOfBinsToBinTo = 20; // Gives the expected occupancy of each
                                         // bin, given that the original setup is
                                         // 1 event per bin.
-    do_execute_and_check_binning(nSpectra, pulseTimeMin, pulseTimeMax,
-                                 nUninformDistributedEvents,
-                                 numberOfBinsToBinTo);
+    do_execute_and_check_binning(nSpectra, pulseTimeMin, pulseTimeMax, nUninformDistributedEvents, numberOfBinsToBinTo);
   }
 
   /**
@@ -331,9 +311,7 @@ public:
     const int nUninformDistributedEvents = 20;
 
     const int numberOfBinsToBinTo = 10; // The bins are now twice as big!
-    do_execute_and_check_binning(nSpectra, pulseTimeMin, pulseTimeMax,
-                                 nUninformDistributedEvents,
-                                 numberOfBinsToBinTo);
+    do_execute_and_check_binning(nSpectra, pulseTimeMin, pulseTimeMax, nUninformDistributedEvents, numberOfBinsToBinTo);
   }
 
   /**
@@ -360,9 +338,7 @@ public:
     const int nUninformDistributedEvents = 20;
 
     const int numberOfBinsToBinTo = 5; // The bins are now four times as big.
-    do_execute_and_check_binning(nSpectra, pulseTimeMin, pulseTimeMax,
-                                 nUninformDistributedEvents,
-                                 numberOfBinsToBinTo);
+    do_execute_and_check_binning(nSpectra, pulseTimeMin, pulseTimeMax, nUninformDistributedEvents, numberOfBinsToBinTo);
   }
 
   void test_execute_with_multiple_spectra() {
@@ -372,9 +348,7 @@ public:
     const int nUninformDistributedEvents = 20;
 
     const int numberOfBinsToBinTo = 5;
-    do_execute_and_check_binning(nSpectra, pulseTimeMin, pulseTimeMax,
-                                 nUninformDistributedEvents,
-                                 numberOfBinsToBinTo);
+    do_execute_and_check_binning(nSpectra, pulseTimeMin, pulseTimeMax, nUninformDistributedEvents, numberOfBinsToBinTo);
   }
 
   void test_execute_with_xmin_larger_than_xmax_throws() {
@@ -386,8 +360,7 @@ public:
     AlgorithmType alg;
     alg.setRethrows(true);
     alg.initialize();
-    auto rebinArgsList = {double(pulseTimeMin), double(step),
-                          double(pulseTimeMax)};
+    auto rebinArgsList = {double(pulseTimeMin), double(step), double(pulseTimeMax)};
     Mantid::MantidVec rebinArgs = rebinArgsList; // Provide rebin arguments.
 
     try {
@@ -404,12 +377,10 @@ public:
     const int nSpectra = 1;
     const int nBinsToBinTo = 10;
 
-    IEventWorkspace_sptr ws = createEventWorkspace(
-        nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax);
+    IEventWorkspace_sptr ws = createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax);
 
     // Rebin pameters require the step.
-    const int step =
-        static_cast<int>((pulseTimeMax - pulseTimeMin) / (nBinsToBinTo));
+    const int step = static_cast<int>((pulseTimeMax - pulseTimeMin) / (nBinsToBinTo));
 
     AlgorithmType alg;
     alg.setRethrows(true);
@@ -424,8 +395,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
 
-    MatrixWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
+    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
     auto &X = outWS->x(0);
 
     // Check that xmin and xmax have been caclulated correctly.
@@ -460,26 +430,22 @@ public:
     DateAndTime offSet(size_t(1e9)); // Offset (start_time).
 
     IEventWorkspace_sptr ws =
-        createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin,
-                             pulseTimeMax, offSet);
+        createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax, offSet);
 
     // Rebin pameters require the step.
-    const int step =
-        static_cast<int>((pulseTimeMax - pulseTimeMin) / (nBinsToBinTo));
+    const int step = static_cast<int>((pulseTimeMax - pulseTimeMin) / (nBinsToBinTo));
 
     AlgorithmType alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
-    auto rebinArgsList = {double(pulseTimeMin), double(step),
-                          double(pulseTimeMax)};
+    auto rebinArgsList = {double(pulseTimeMin), double(step), double(pulseTimeMax)};
     Mantid::MantidVec rebinArgs = rebinArgsList; // Provide rebin arguments.
     alg.setProperty("Params", rebinArgs);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
 
-    MatrixWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
+    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
     auto &X = outWS->x(0);
 
     // Check that xmin and xmax have been caclulated correctly.
@@ -511,13 +477,11 @@ private:
 
 public:
   RebinByTimeBaseTestPerformance()
-      : pulseTimeMin(0), pulseTimeMax(4), nUniformDistributedEvents(10000),
-        nSpectra(1000), nBinsToBinTo(100) {}
+      : pulseTimeMin(0), pulseTimeMax(4), nUniformDistributedEvents(10000), nSpectra(1000), nBinsToBinTo(100) {}
 
   void setUp() {
     // Make a reasonably sized workspace to rebin.
-    m_ws = createEventWorkspace(nSpectra, nUniformDistributedEvents,
-                                pulseTimeMin, pulseTimeMax);
+    m_ws = createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax);
   }
 
   void testExecution() {
@@ -529,16 +493,14 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", m_ws);
-    auto rebinArgsList = {double(dPulseTimeMin), double(step),
-                          double(dPulseTimeMax)};
+    auto rebinArgsList = {double(dPulseTimeMin), double(step), double(dPulseTimeMax)};
     Mantid::MantidVec rebinArgs = rebinArgsList; // Provide rebin arguments.
     alg.setProperty("Params", rebinArgs);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     // Simple tests. Functionality tests cover this much better.
-    MatrixWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
+    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
     TS_ASSERT(outWS != nullptr);
   }
 };

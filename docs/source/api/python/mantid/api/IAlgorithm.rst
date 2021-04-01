@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::API::IAlgorithm.
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.IAlgorithm 
+.. autoclass:: mantid.api.IAlgorithm
     :members:
     :undoc-members:
     :inherited-members:

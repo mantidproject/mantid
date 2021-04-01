@@ -19,23 +19,17 @@ namespace Kernel {
  * Returns the framework version
  * @returns A string containing the Mantid version
  */
-std::string EnvironmentHistory::frameworkVersion() const {
-  return MantidVersion::version();
-}
+std::string EnvironmentHistory::frameworkVersion() const { return MantidVersion::version(); }
 /**
  * Returns the OS name
  * @returns A string containing the OS name
  */
-std::string EnvironmentHistory::osName() const {
-  return ConfigService::Instance().getOSName();
-}
+std::string EnvironmentHistory::osName() const { return ConfigService::Instance().getOSName(); }
 /**
  * Returns the OS version
  * @returns A string containing the OS version
  */
-std::string EnvironmentHistory::osVersion() const {
-  return ConfigService::Instance().getOSVersion();
-}
+std::string EnvironmentHistory::osVersion() const { return ConfigService::Instance().getOSVersion(); }
 
 /** Prints a text representation of itself
  *  @param os :: The ouput stream to write to
@@ -43,8 +37,7 @@ std::string EnvironmentHistory::osVersion() const {
  * sub-objects
  */
 void EnvironmentHistory::printSelf(std::ostream &os, const int indent) const {
-  os << std::string(indent, ' ') << "Framework Version: " << frameworkVersion()
-     << '\n';
+  os << std::string(indent, ' ') << "Framework Version: " << frameworkVersion() << '\n';
   os << std::string(indent, ' ') << "OS name: " << osName() << '\n';
   os << std::string(indent, ' ') << "OS version: " << osVersion() << '\n';
 }

@@ -37,39 +37,32 @@ using namespace MantidQt::MantidWidgets;
 class FitOptionsBrowserTest : public CxxTest::TestSuite {
 
 public:
-  static FitOptionsBrowserTest *createSuite() {
-    return new FitOptionsBrowserTest;
-  }
+  static FitOptionsBrowserTest *createSuite() { return new FitOptionsBrowserTest; }
   static void destroySuite(FitOptionsBrowserTest *suite) { delete suite; }
 
   void setUp() override { m_numberOfTries = 100u; }
 
   void tearDown() override { m_fitOptionsBrowser.reset(); }
 
-  void
-  test_that_the_FitOptionsBrowser_can_be_instantiated_many_times_without_instability() {
+  void test_that_the_FitOptionsBrowser_can_be_instantiated_many_times_without_instability() {
     for (auto i = 0u; i < m_numberOfTries; ++i)
       m_fitOptionsBrowser = std::make_unique<FitOptionsBrowser>(nullptr);
   }
 
-  void
-  test_that_setting_the_fitting_mode_to_sequential_will_then_return_the_sequential_fitting_mode() {
+  void test_that_setting_the_fitting_mode_to_sequential_will_then_return_the_sequential_fitting_mode() {
     m_fitOptionsBrowser = std::make_unique<FitOptionsBrowser>(nullptr);
 
     m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SEQUENTIAL);
 
-    TS_ASSERT_EQUALS(m_fitOptionsBrowser->getCurrentFittingType(),
-                     FittingMode::SEQUENTIAL);
+    TS_ASSERT_EQUALS(m_fitOptionsBrowser->getCurrentFittingType(), FittingMode::SEQUENTIAL);
   }
 
-  void
-  test_that_setting_the_fitting_mode_to_simultaneous_will_then_return_the_simultaneous_fitting_mode() {
+  void test_that_setting_the_fitting_mode_to_simultaneous_will_then_return_the_simultaneous_fitting_mode() {
     m_fitOptionsBrowser = std::make_unique<FitOptionsBrowser>(nullptr);
 
     m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SIMULTANEOUS);
 
-    TS_ASSERT_EQUALS(m_fitOptionsBrowser->getCurrentFittingType(),
-                     FittingMode::SIMULTANEOUS);
+    TS_ASSERT_EQUALS(m_fitOptionsBrowser->getCurrentFittingType(), FittingMode::SIMULTANEOUS);
   }
 
 private:

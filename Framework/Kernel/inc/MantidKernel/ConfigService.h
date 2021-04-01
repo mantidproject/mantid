@@ -85,23 +85,15 @@ public:
      *   @param newvalue :: new value of property
      *   @param prevvalue :: previous value of property
      */
-    ValueChanged(const std::string &name, const std::string &newvalue,
-                 const std::string &prevvalue)
-        : ConfigServiceNotification(), m_name(name), m_value(newvalue),
-          m_prev(prevvalue) {}
+    ValueChanged(const std::string &name, const std::string &newvalue, const std::string &prevvalue)
+        : ConfigServiceNotification(), m_name(name), m_value(newvalue), m_prev(prevvalue) {}
     /// The name of the user property that has changed, as it appears in the
     /// user.properties file
-    const std::string &key() const {
-      return this->m_name;
-    } ///< @return The name of the changed the property
+    const std::string &key() const { return this->m_name; } ///< @return The name of the changed the property
     /// The new value for the property
-    const std::string &curValue() const {
-      return this->m_value;
-    } ///< @return The new value for the property
+    const std::string &curValue() const { return this->m_value; } ///< @return The new value for the property
     /// The previous value for the property
-    const std::string &preValue() const {
-      return this->m_prev;
-    } ///< @return The previous value for the property
+    const std::string &preValue() const { return this->m_prev; } ///< @return The previous value for the property
   private:
     std::string m_name;  ///< The name of the changed the property
     std::string m_value; ///< The new value for the property
@@ -113,13 +105,11 @@ public:
   /// Reset to "factory" settings. Removes current user properties
   void reset();
   /// Wipe out the current configuration and load a new one
-  void updateConfig(const std::string &filename, const bool append = false,
-                    const bool update_caches = true);
+  void updateConfig(const std::string &filename, const bool append = false, const bool update_caches = true);
   /// Save the configuration to the user file
   void saveConfig(const std::string &filename) const;
   /// Searches for a configuration property
-  std::string getString(const std::string &keyName,
-                        bool pathAbsolute = true) const;
+  std::string getString(const std::string &keyName, bool pathAbsolute = true) const;
   /// Searches for a key in the configuration property
   std::vector<std::string> getKeys(const std::string &keyName) const;
   /// Returns a list of all full keys in the config
@@ -131,8 +121,7 @@ public:
   /// Checks to see whether the target passed is an executable file
   bool isExecutable(const std::string &target) const;
   /// Launches a process i.e opening a program
-  void launchProcess(const std::string &programFilePath,
-                     const std::vector<std::string> &programArguments) const;
+  void launchProcess(const std::string &programFilePath, const std::vector<std::string> &programArguments) const;
   /// Sets a configuration property
   void setString(const std::string &key, const std::string &value);
   // Searches for a configuration property and returns its value
@@ -218,8 +207,7 @@ public:
   void setLogLevel(int logLevel, bool quiet = false);
 
   /// Look for an instrument
-  const InstrumentInfo &
-  getInstrument(const std::string &instrumentName = "") const;
+  const InstrumentInfo &getInstrument(const std::string &instrumentName = "") const;
 
   /// Add an observer for a notification
   void addObserver(const Poco::AbstractObserver &observer) const;
@@ -233,8 +221,7 @@ public:
   /// Gets the proxy for the system
   Kernel::ProxyInfo &getProxy(const std::string &url);
 
-  std::string getFullPath(const std::string &filename, const bool ignoreDirs,
-                          const int options) const;
+  std::string getFullPath(const std::string &filename, const bool ignoreDirs, const int options) const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
@@ -256,8 +243,7 @@ private:
   /// Writes out a fresh user properties file
   void createUserPropertiesFile() const;
   /// Make a relative path or a list of relative paths into an absolute one.
-  std::string makeAbsolute(const std::string &dir,
-                           const std::string &key) const;
+  std::string makeAbsolute(const std::string &dir, const std::string &key) const;
   /// Create the storage of the data search directories
   void cacheDataSearchPaths();
   /// Create the storage of the instrument directories
@@ -271,11 +257,9 @@ private:
   const std::vector<std::string> getFacilityFilenames(const std::string &fName);
   /// Verifies the directory exists and add it to the back of the directory list
   /// if valid
-  bool addDirectoryifExists(const std::string &directoryName,
-                            std::vector<std::string> &directoryList);
+  bool addDirectoryifExists(const std::string &directoryName, std::vector<std::string> &directoryList);
   /// Returns a list of all keys under a given root key
-  void getKeysRecursive(const std::string &root,
-                        std::vector<std::string> &allKeys) const;
+  void getKeysRecursive(const std::string &root, std::vector<std::string> &allKeys) const;
 
   /// the POCO file config object
   Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> m_pConf;
@@ -310,14 +294,11 @@ private:
   bool m_isProxySet;
 };
 
-EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
-    Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
+EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
 using ConfigService = Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
 
-using ConfigValChangeNotification =
-    Mantid::Kernel::ConfigServiceImpl::ValueChanged;
-using ConfigValChangeNotification_ptr =
-    const Poco::AutoPtr<Mantid::Kernel::ConfigServiceImpl::ValueChanged> &;
+using ConfigValChangeNotification = Mantid::Kernel::ConfigServiceImpl::ValueChanged;
+using ConfigValChangeNotification_ptr = const Poco::AutoPtr<Mantid::Kernel::ConfigServiceImpl::ValueChanged> &;
 
 } // namespace Kernel
 } // namespace Mantid

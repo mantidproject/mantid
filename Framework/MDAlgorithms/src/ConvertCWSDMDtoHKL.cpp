@@ -44,31 +44,25 @@ DECLARE_ALGORITHM(ConvertCWSDMDtoHKL)
 /** Init
  */
 void ConvertCWSDMDtoHKL::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Name of the input MDEventWorkspace that stores detectors "
                   "counts from a constant-wave powder diffraction experiment.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-          "PeaksWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Input Peaks Workspace");
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "", Direction::Input,
+                                                                      PropertyMode::Optional),
+                  "Input Peaks Workspace");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("UBMatrix"),
-      "A comma seperated list of doubles for UB matrix from (0,0), (0,1)"
-      "... (2,1),(2,2)");
+  declareProperty(std::make_unique<ArrayProperty<double>>("UBMatrix"),
+                  "A comma seperated list of doubles for UB matrix from (0,0), (0,1)"
+                  "... (2,1),(2,2)");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace in HKL-space.");
 
-  declareProperty(std::make_unique<FileProperty>(
-                      "QSampleFileName", "", API::FileProperty::OptionalSave),
+  declareProperty(std::make_unique<FileProperty>("QSampleFileName", "", API::FileProperty::OptionalSave),
                   "Name of file for sample sample.");
 
-  declareProperty(std::make_unique<FileProperty>(
-                      "HKLFileName", "", API::FileProperty::OptionalSave),
+  declareProperty(std::make_unique<FileProperty>("HKLFileName", "", API::FileProperty::OptionalSave),
                   "Name of file for HKL.");
 }
 
@@ -79,8 +73,8 @@ void ConvertCWSDMDtoHKL::exec() {
   IMDEventWorkspace_sptr inputWS = getProperty("InputWorkspace");
   if (inputWS->getSpecialCoordinateSystem() != Mantid::Kernel::QSample) {
     std::stringstream errmsg;
-    errmsg << "Input MDEventWorkspace's coordinate system is not QSample but "
-           << inputWS->getSpecialCoordinateSystem() << ".";
+    errmsg << "Input MDEventWorkspace's coordinate system is not QSample but " << inputWS->getSpecialCoordinateSystem()
+           << ".";
     throw std::invalid_argument(errmsg.str());
   }
 
@@ -98,8 +92,7 @@ void ConvertCWSDMDtoHKL::exec() {
     std::vector<Kernel::V3D> vec_mindex(0);
 
     convertFromQSampleToHKL(vec_qsample, vec_mindex);
-    g_log.notice() << "[DB Number of returned Miller Index = "
-                   << vec_mindex.size() << "\n";
+    g_log.notice() << "[DB Number of returned Miller Index = " << vec_mindex.size() << "\n";
     g_log.notice() << "[DB] Output HKL = " << vec_mindex[0].toString() << "\n";
   }
 
@@ -112,8 +105,7 @@ void ConvertCWSDMDtoHKL::exec() {
   std::string qsamplefilename = getPropertyValue("QSampleFileName");
   // Abort with an empty string
   if (!qsamplefilename.empty())
-    saveEventsToFile(qsamplefilename, vec_event_qsample, vec_event_signal,
-                     vec_event_det);
+    saveEventsToFile(qsamplefilename, vec_event_qsample, vec_event_signal, vec_event_det);
 
   // Convert to HKL
   std::vector<Kernel::V3D> vec_event_hkl;
@@ -123,17 +115,14 @@ void ConvertCWSDMDtoHKL::exec() {
   std::string hklfilename = getPropertyValue("HKLFileName");
   // Abort mission if no file name is given
   if (!hklfilename.empty())
-    saveEventsToFile(hklfilename, vec_event_hkl, vec_event_signal,
-                     vec_event_det);
+    saveEventsToFile(hklfilename, vec_event_hkl, vec_event_signal, vec_event_det);
 
   // Create output workspace
-  m_outputWS =
-      createHKLMDWorkspace(vec_event_hkl, vec_event_signal, vec_event_det);
+  m_outputWS = createHKLMDWorkspace(vec_event_hkl, vec_event_signal, vec_event_det);
   // Experiment info
   ExperimentInfo_sptr expinfo = std::make_shared<ExperimentInfo>();
   expinfo->setInstrument(inputWS->getExperimentInfo(0)->getInstrument());
-  expinfo->mutableRun().setGoniometer(
-      inputWS->getExperimentInfo(0)->run().getGoniometer(), false);
+  expinfo->mutableRun().setGoniometer(inputWS->getExperimentInfo(0)->run().getGoniometer(), false);
   expinfo->mutableRun().addProperty("run_number", 1);
   m_outputWS->addExperimentInfo(expinfo);
 
@@ -142,12 +131,10 @@ void ConvertCWSDMDtoHKL::exec() {
 
 void ConvertCWSDMDtoHKL::getUBMatrix() {
   std::string peakwsname = getPropertyValue("PeaksWorkspace");
-  if (!peakwsname.empty() &&
-      AnalysisDataService::Instance().doesExist(peakwsname)) {
+  if (!peakwsname.empty() && AnalysisDataService::Instance().doesExist(peakwsname)) {
     // Get from peak works
     DataObjects::PeaksWorkspace_sptr peakws = getProperty("PeaksWorkspace");
-    m_UB =
-        Kernel::Matrix<double>(peakws->sample().getOrientedLattice().getUB());
+    m_UB = Kernel::Matrix<double>(peakws->sample().getOrientedLattice().getUB());
   } else {
     // Get from ...
     std::vector<double> ub_array = getProperty("UBMatrix");
@@ -168,11 +155,8 @@ void ConvertCWSDMDtoHKL::getUBMatrix() {
  * It is a convenient algorithm if number of events are few relative to
  * number of detectors
  */
-void ConvertCWSDMDtoHKL::exportEvents(
-    const IMDEventWorkspace_sptr &mdws,
-    std::vector<Kernel::V3D> &vec_event_qsample,
-    std::vector<signal_t> &vec_event_signal,
-    std::vector<detid_t> &vec_event_det) {
+void ConvertCWSDMDtoHKL::exportEvents(const IMDEventWorkspace_sptr &mdws, std::vector<Kernel::V3D> &vec_event_qsample,
+                                      std::vector<signal_t> &vec_event_signal, std::vector<detid_t> &vec_event_det) {
   // Set the size of the output vectors
   size_t numevents = mdws->getNEvents();
   g_log.information() << "Number of events = " << numevents << "\n";
@@ -221,9 +205,8 @@ void ConvertCWSDMDtoHKL::exportEvents(
 //--------------------------------------------------------------------------
 /** Save Q-sample to file
  */
-void ConvertCWSDMDtoHKL::saveMDToFile(
-    std::vector<std::vector<coord_t>> &vec_event_qsample,
-    std::vector<float> &vec_event_signal) {
+void ConvertCWSDMDtoHKL::saveMDToFile(std::vector<std::vector<coord_t>> &vec_event_qsample,
+                                      std::vector<float> &vec_event_signal) {
   // Get file name
   std::string filename = getPropertyValue("QSampleFileName");
 
@@ -231,8 +214,7 @@ void ConvertCWSDMDtoHKL::saveMDToFile(
   if (filename.empty())
     return;
   if (vec_event_qsample.size() != vec_event_signal.size())
-    throw std::runtime_error(
-        "Input vectors of Q-sample and signal have different sizes.");
+    throw std::runtime_error("Input vectors of Q-sample and signal have different sizes.");
 
   // Write to file
   std::ofstream ofile;
@@ -240,8 +222,8 @@ void ConvertCWSDMDtoHKL::saveMDToFile(
 
   size_t numevents = vec_event_qsample.size();
   for (size_t i = 0; i < numevents; ++i) {
-    ofile << vec_event_qsample[i][0] << ", " << vec_event_qsample[i][1] << ", "
-          << vec_event_qsample[i][2] << ", " << vec_event_signal[i] << "\n";
+    ofile << vec_event_qsample[i][0] << ", " << vec_event_qsample[i][1] << ", " << vec_event_qsample[i][2] << ", "
+          << vec_event_signal[i] << "\n";
   }
   ofile.close();
 }
@@ -249,24 +231,20 @@ void ConvertCWSDMDtoHKL::saveMDToFile(
 //--------------------------------------------------------------------------
 /** Save HKL to file for 3D visualization
  */
-void ConvertCWSDMDtoHKL::saveEventsToFile(
-    const std::string &filename, std::vector<Kernel::V3D> &vec_event_pos,
-    std::vector<signal_t> &vec_event_signal,
-    std::vector<detid_t> &vec_event_detid) {
+void ConvertCWSDMDtoHKL::saveEventsToFile(const std::string &filename, std::vector<Kernel::V3D> &vec_event_pos,
+                                          std::vector<signal_t> &vec_event_signal,
+                                          std::vector<detid_t> &vec_event_detid) {
   // Check
-  if (vec_event_detid.size() != vec_event_pos.size() ||
-      vec_event_pos.size() != vec_event_signal.size())
-    throw std::invalid_argument(
-        "Input vectors for HKL, signal and detector ID have different size.");
+  if (vec_event_detid.size() != vec_event_pos.size() || vec_event_pos.size() != vec_event_signal.size())
+    throw std::invalid_argument("Input vectors for HKL, signal and detector ID have different size.");
 
   std::ofstream ofile;
   ofile.open(filename.c_str());
 
   size_t numevents = vec_event_pos.size();
   for (size_t i = 0; i < numevents; ++i) {
-    ofile << vec_event_pos[i].X() << ", " << vec_event_pos[i].Y() << ", "
-          << vec_event_pos[i].Z() << ", " << vec_event_signal[i] << ", "
-          << vec_event_detid[i] << "\n";
+    ofile << vec_event_pos[i].X() << ", " << vec_event_pos[i].Y() << ", " << vec_event_pos[i].Z() << ", "
+          << vec_event_signal[i] << ", " << vec_event_detid[i] << "\n";
   }
   ofile.close();
 }
@@ -274,16 +252,15 @@ void ConvertCWSDMDtoHKL::saveEventsToFile(
 //--------------------------------------------------------------------------
 /** Convert from Q-sample to HKL
  */
-void ConvertCWSDMDtoHKL::convertFromQSampleToHKL(
-    const std::vector<V3D> &q_vectors, std::vector<V3D> &miller_indices) {
+void ConvertCWSDMDtoHKL::convertFromQSampleToHKL(const std::vector<V3D> &q_vectors, std::vector<V3D> &miller_indices) {
 
   Matrix<double> tempUB(m_UB);
 
   int original_indexed = 0;
   double original_error = 0;
   double tolerance = 0.55; // to make sure no output is invalid
-  original_indexed = IndexingUtils::CalculateMillerIndices(
-      tempUB, q_vectors, tolerance, miller_indices, original_error);
+  original_indexed =
+      IndexingUtils::CalculateMillerIndices(tempUB, q_vectors, tolerance, miller_indices, original_error);
 
   g_log.notice() << "[DB] " << original_indexed << " peaks are indexed."
                  << "\n";
@@ -294,20 +271,17 @@ void ConvertCWSDMDtoHKL::convertFromQSampleToHKL(
  * @brief ConvertCWSDExpToMomentum::createExperimentMDWorkspace
  * @return
  */
-API::IMDEventWorkspace_sptr ConvertCWSDMDtoHKL::createHKLMDWorkspace(
-    const std::vector<Kernel::V3D> &vec_hkl,
-    const std::vector<signal_t> &vec_signal,
-    const std::vector<detid_t> &vec_detid) {
+API::IMDEventWorkspace_sptr ConvertCWSDMDtoHKL::createHKLMDWorkspace(const std::vector<Kernel::V3D> &vec_hkl,
+                                                                     const std::vector<signal_t> &vec_signal,
+                                                                     const std::vector<detid_t> &vec_detid) {
   // Check
-  if (vec_hkl.size() != vec_signal.size() ||
-      vec_signal.size() != vec_detid.size())
+  if (vec_hkl.size() != vec_signal.size() || vec_signal.size() != vec_detid.size())
     throw std::invalid_argument("Input vectors for HKL, signal and detector "
                                 "IDs are of different size!");
 
   // Create workspace in Q_sample with dimenion as 3
   size_t nDimension = 3;
-  IMDEventWorkspace_sptr mdws =
-      MDEventFactory::CreateMDWorkspace(nDimension, "MDEvent");
+  IMDEventWorkspace_sptr mdws = MDEventFactory::CreateMDWorkspace(nDimension, "MDEvent");
 
   // Extract Dimensions and add to the output workspace.
   std::vector<std::string> vec_ID(3);
@@ -320,8 +294,7 @@ API::IMDEventWorkspace_sptr ConvertCWSDMDtoHKL::createHKLMDWorkspace(
   dimensionNames[1] = "K";
   dimensionNames[2] = "L";
 
-  Mantid::Kernel::SpecialCoordinateSystem coordinateSystem =
-      Mantid::Kernel::HKL;
+  Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::HKL;
 
   // Add dimensions
   std::vector<double> m_extentMins(3);
@@ -338,18 +311,15 @@ API::IMDEventWorkspace_sptr ConvertCWSDMDtoHKL::createHKLMDWorkspace(
     std::string id = vec_ID[i];
     std::string name = dimensionNames[i];
     // std::string units = "A^-1";
-    mdws->addDimension(
-        Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
-            id, name, frame, static_cast<coord_t>(m_extentMins[i]),
-            static_cast<coord_t>(m_extentMaxs[i]), m_numBins[i])));
+    mdws->addDimension(Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
+        id, name, frame, static_cast<coord_t>(m_extentMins[i]), static_cast<coord_t>(m_extentMaxs[i]), m_numBins[i])));
   }
 
   // Set coordinate system
   mdws->setCoordinateSystem(coordinateSystem);
 
   // Creates a new instance of the MDEventInserter to output workspace
-  MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 =
-      std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(mdws);
+  MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 = std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(mdws);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   // Go though each spectrum to conver to MDEvent
@@ -366,16 +336,14 @@ API::IMDEventWorkspace_sptr ConvertCWSDMDtoHKL::createHKLMDWorkspace(
     detid_t detid = vec_detid[iq];
 
     // Insert
-    inserter.insertMDEvent(
-        static_cast<float>(signal), static_cast<float>(error * error),
-        static_cast<uint16_t>(runnumber), 0, detid, millerindex.data());
+    inserter.insertMDEvent(static_cast<float>(signal), static_cast<float>(error * error),
+                           static_cast<uint16_t>(runnumber), 0, detid, millerindex.data());
   }
 
   return mdws;
 }
 
-void ConvertCWSDMDtoHKL::getRange(const std::vector<Kernel::V3D> &vec_hkl,
-                                  std::vector<double> &extentMins,
+void ConvertCWSDMDtoHKL::getRange(const std::vector<Kernel::V3D> &vec_hkl, std::vector<double> &extentMins,
                                   std::vector<double> &extentMaxs) {
   assert(extentMins.size() == 3);
   assert(extentMaxs.size() == 3);

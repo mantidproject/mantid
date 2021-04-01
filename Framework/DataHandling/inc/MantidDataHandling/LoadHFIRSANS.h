@@ -71,13 +71,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadSpiceAscii", "LoadSpiceXML2DDet"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadSpiceAscii", "LoadSpiceXML2DDet"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Text;SANS\\DataHandling";
-  }
+  const std::string category() const override { return "DataHandling\\Text;SANS\\DataHandling"; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
@@ -99,14 +95,10 @@ private:
   std::vector<int> readData(const std::string &dataXpath = "//Data");
   void permuteTubes(std::vector<int> &data);
 
-  void storeValue(int specID, double value, double error, double wavelength,
-                  double dwavelength);
+  void storeValue(int specID, double value, double error, double wavelength, double dwavelength);
   void createWorkspace();
-  template <class T>
-  void addRunProperty(const std::string &name, const T &value,
-                      const std::string &units = "");
-  template <class T>
-  void addRunTimeSeriesProperty(const std::string &name, const T &value);
+  template <class T> void addRunProperty(const std::string &name, const T &value, const std::string &units = "");
+  template <class T> void addRunTimeSeriesProperty(const std::string &name, const T &value);
   void setBeamTrapRunProperty();
   void storeMetaDataIntoWS();
   void runLoadInstrument();

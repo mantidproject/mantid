@@ -55,14 +55,12 @@ private:
   /// Called upon a close event.
   void closeEvent(QCloseEvent * /*unused*/) override;
   /// Handle POCO event
-  void
-  handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
+  void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
   /// Map of tabs indexed by position on the window
   std::map<unsigned int, IndirectToolsTab *> m_tabs;
   /// Change Observer for ConfigService (monitors user directories)
-  Poco::NObserver<IndirectTools, Mantid::Kernel::ConfigValChangeNotification>
-      m_changeObserver;
+  Poco::NObserver<IndirectTools, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
   /// Main interface window
   Ui::IndirectTools m_uiForm;
 };

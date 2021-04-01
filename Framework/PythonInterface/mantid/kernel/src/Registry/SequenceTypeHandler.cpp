@@ -32,8 +32,7 @@ template <typename HeldType> struct StdVectorExtractor {
 };
 template <> struct StdVectorExtractor<bool> {
   static std::vector<bool> extract(const boost::python::object & /*unused*/) {
-    throw std::runtime_error(
-        "Unable to supported extracting std::vector<bool> from python object");
+    throw std::runtime_error("Unable to supported extracting std::vector<bool> from python object");
   }
 };
 } // namespace
@@ -46,9 +45,8 @@ template <> struct StdVectorExtractor<bool> {
  * @param value :: A boost python object that stores the container values
  */
 template <typename ContainerType>
-void SequenceTypeHandler<ContainerType>::set(
-    Kernel::IPropertyManager *alg, const std::string &name,
-    const boost::python::object &value) const {
+void SequenceTypeHandler<ContainerType>::set(Kernel::IPropertyManager *alg, const std::string &name,
+                                             const boost::python::object &value) const {
   using namespace boost::python;
   using DestElementType = typename ContainerType::value_type;
 
@@ -59,15 +57,12 @@ void SequenceTypeHandler<ContainerType>::set(
   // numpy arrays requires special handling to extract their types. Hand-off to
   // a more appropriate handler
   else if (NDArray::check(value)) {
-    alg->setProperty(
-        name, Converters::NDArrayToVector<DestElementType>(NDArray(value))());
+    alg->setProperty(name, Converters::NDArrayToVector<DestElementType>(NDArray(value))());
   } else if (PySequence_Check(value.ptr())) {
-    alg->setProperty(name,
-                     Converters::PySequenceToVector<DestElementType>(value)());
+    alg->setProperty(name, Converters::PySequenceToVector<DestElementType>(value)());
   } else // assume it is a scalar and try to convert into a vector of length one
   {
-    DestElementType scalar =
-        boost::python::extract<DestElementType>(value.ptr());
+    DestElementType scalar = boost::python::extract<DestElementType>(value.ptr());
     alg->setProperty(name, std::vector<DestElementType>(1, scalar));
   }
 }
@@ -84,10 +79,9 @@ void SequenceTypeHandler<ContainerType>::set(
  * @returns A pointer to a newly constructed property instance
  */
 template <typename ContainerType>
-std::unique_ptr<Kernel::Property> SequenceTypeHandler<ContainerType>::create(
-    const std::string &name, const boost::python::object &defaultValue,
-    const boost::python::object &validator,
-    const unsigned int direction) const {
+std::unique_ptr<Kernel::Property>
+SequenceTypeHandler<ContainerType>::create(const std::string &name, const boost::python::object &defaultValue,
+                                           const boost::python::object &validator, const unsigned int direction) const {
   using DestElementType = typename ContainerType::value_type;
   using boost::python::extract;
   using Kernel::IValidator;
@@ -101,19 +95,16 @@ std::unique_ptr<Kernel::Property> SequenceTypeHandler<ContainerType>::create(
     valueInC = Converters::PySequenceToVector<DestElementType>(defaultValue)();
   } else // assume it is a scalar and try to convert into a vector of length one
   {
-    DestElementType scalar =
-        boost::python::extract<DestElementType>(defaultValue.ptr());
+    DestElementType scalar = boost::python::extract<DestElementType>(defaultValue.ptr());
     valueInC = std::vector<DestElementType>(1, scalar);
   }
 
   std::unique_ptr<Kernel::Property> valueProp;
   if (isNone(validator)) {
-    valueProp = std::make_unique<PropertyWithValue<ContainerType>>(
-        name, valueInC, direction);
+    valueProp = std::make_unique<PropertyWithValue<ContainerType>>(name, valueInC, direction);
   } else {
     const IValidator *propValidator = extract<IValidator *>(validator);
-    valueProp = std::make_unique<PropertyWithValue<ContainerType>>(
-        name, valueInC, propValidator->clone(), direction);
+    valueProp = std::make_unique<PropertyWithValue<ContainerType>>(name, valueInC, propValidator->clone(), direction);
   }
   return valueProp;
 }
@@ -122,8 +113,7 @@ std::unique_ptr<Kernel::Property> SequenceTypeHandler<ContainerType>::create(
 // Concrete instantiations
 //-----------------------------------------------------------------------
 ///@cond
-#define INSTANTIATE(ElementType)                                               \
-  template struct DLLExport SequenceTypeHandler<std::vector<ElementType>>;
+#define INSTANTIATE(ElementType) template struct DLLExport SequenceTypeHandler<std::vector<ElementType>>;
 
 INSTANTIATE(int)
 INSTANTIATE(long)

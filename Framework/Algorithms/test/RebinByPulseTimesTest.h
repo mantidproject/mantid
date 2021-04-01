@@ -21,34 +21,24 @@ class RebinByPulseTimesTest : public CxxTest::TestSuite, public Super {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RebinByPulseTimesTest *createSuite() {
-    return new RebinByPulseTimesTest();
-  }
+  static RebinByPulseTimesTest *createSuite() { return new RebinByPulseTimesTest(); }
   static void destroySuite(RebinByPulseTimesTest *suite) { delete suite; }
 
   void test_Init() { Super::test_Init(); }
 
-  void test_not_a_event_workspace_throws() {
-    Super::test_not_a_event_workspace_throws();
-  }
+  void test_not_a_event_workspace_throws() { Super::test_not_a_event_workspace_throws(); }
 
-  void do_test_bad_step_throws(const double &badStep) {
-    Super::do_test_bad_step_throws(badStep);
-  }
+  void do_test_bad_step_throws(const double &badStep) { Super::do_test_bad_step_throws(badStep); }
 
   void test_zero_step_throws() { Super::test_zero_step_throws(); }
 
-  void test_less_than_zero_step_throws() {
-    Super::test_less_than_zero_step_throws();
-  }
+  void test_less_than_zero_step_throws() { Super::test_less_than_zero_step_throws(); }
 
   /*
   Test that the input workspace must be an event workspace, other types of
   matrix workspace will not do.
   */
-  void test_input_workspace2D_throws() {
-    Super::test_input_workspace2D_throws();
-  }
+  void test_input_workspace2D_throws() { Super::test_input_workspace2D_throws(); }
 
   /**
   Test setup description.
@@ -67,9 +57,7 @@ public:
 
       so Y array should work out to be [1, 1, 1, ...] counts.
   */
-  void test_execute_with_original_binning() {
-    Super::test_execute_with_original_binning();
-  }
+  void test_execute_with_original_binning() { Super::test_execute_with_original_binning(); }
 
   /**
   Test setup description.
@@ -88,9 +76,7 @@ public:
 
       so Y array should work out to be [2, 2, 2, ...] counts.
   */
-  void test_execute_with_double_sized_bins_binning() {
-    Super::test_execute_with_double_sized_bins_binning();
-  }
+  void test_execute_with_double_sized_bins_binning() { Super::test_execute_with_double_sized_bins_binning(); }
 
   /**
   Test setup description.
@@ -109,17 +95,11 @@ public:
 
       so Y array should work out to be [4, 4, 4, ...] counts.
   */
-  void test_execute_with_quadruple_sized_bins_binning() {
-    Super::test_execute_with_quadruple_sized_bins_binning();
-  }
+  void test_execute_with_quadruple_sized_bins_binning() { Super::test_execute_with_quadruple_sized_bins_binning(); }
 
-  void test_execute_with_multiple_spectra() {
-    Super::test_execute_with_multiple_spectra();
-  }
+  void test_execute_with_multiple_spectra() { Super::test_execute_with_multiple_spectra(); }
 
-  void test_execute_with_xmin_larger_than_xmax_throws() {
-    Super::test_execute_with_xmin_larger_than_xmax_throws();
-  }
+  void test_execute_with_xmin_larger_than_xmax_throws() { Super::test_execute_with_xmin_larger_than_xmax_throws(); }
 
   void test_calculate_xmin_xmax() { Super::test_calculate_xmin_xmax(); }
 
@@ -139,9 +119,7 @@ public:
 
         so Y array should work out to be [1, 1, 1, 0] counts.
     */
-  void test_calculate_non_zero_offset() {
-    Super::test_calculate_non_zero_offset();
-  }
+  void test_calculate_non_zero_offset() { Super::test_calculate_non_zero_offset(); }
 };
 
 //=====================================================================================
@@ -153,20 +131,12 @@ class RebinByPulseTimesTestPerformance : public CxxTest::TestSuite, public Rebin
 {
 
 public:
-  static RebinByPulseTimesTestPerformance *createSuite() {
-    return new RebinByPulseTimesTestPerformance();
-  }
-  static void destroySuite(RebinByPulseTimesTestPerformance *suite) {
-    delete suite;
-  }
+  static RebinByPulseTimesTestPerformance *createSuite() { return new RebinByPulseTimesTestPerformance(); }
+  static void destroySuite(RebinByPulseTimesTestPerformance *suite) { delete suite; }
 
   RebinByPulseTimesTestPerformance() {}
 
-  void setUp() override {
-    RebinByTimeBaseTestPerformance<RebinByPulseTimes>::setUp();
-  }
+  void setUp() override { RebinByTimeBaseTestPerformance<RebinByPulseTimes>::setUp(); }
 
-  void testExecution() {
-    RebinByTimeBaseTestPerformance<RebinByPulseTimes>::testExecution();
-  }
+  void testExecution() { RebinByTimeBaseTestPerformance<RebinByPulseTimes>::testExecution(); }
 };

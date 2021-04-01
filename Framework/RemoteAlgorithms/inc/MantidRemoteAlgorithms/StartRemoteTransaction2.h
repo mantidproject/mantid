@@ -19,9 +19,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "StartRemoteTransaction"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Start a (new) transaction on a remote compute resource.";
-  }
+  const std::string summary() const override { return "Start a (new) transaction on a remote compute resource."; }
 
   /// Algorithm's version
   int version() const override { return (2); }

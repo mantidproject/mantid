@@ -19,8 +19,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-class EXPORT_OPT_MANTIDQT_COMMON FilteredTreeModel
-    : public QSortFilterProxyModel {
+class EXPORT_OPT_MANTIDQT_COMMON FilteredTreeModel : public QSortFilterProxyModel {
 public:
   FilteredTreeModel(RowLocationAdapter rowLocation, QObject *parent = nullptr);
   void setPredicate(std::unique_ptr<RowPredicate> predicate);

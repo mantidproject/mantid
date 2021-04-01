@@ -20,8 +20,7 @@ namespace DataHandling {
  * Uses Template Method pattern to reuse as much as possible from base
  * SaveNexusProcessed.
  */
-class MANTID_DATAHANDLING_DLL SaveNexusESS
-    : public Mantid::DataHandling::SaveNexusProcessed {
+class MANTID_DATAHANDLING_DLL SaveNexusESS : public Mantid::DataHandling::SaveNexusProcessed {
 public:
   const std::string name() const override;
   int version() const override;
@@ -32,8 +31,7 @@ protected:
   bool processGroups() override;
 
 private:
-  void saveNexusGeometry(const Mantid::API::MatrixWorkspace &ws,
-                         const std::string &filename);
+  void saveNexusGeometry(const Mantid::API::MatrixWorkspace &ws, const std::string &filename);
   virtual bool saveLegacyInstrument() override;
   void init() override;
   void exec() override;

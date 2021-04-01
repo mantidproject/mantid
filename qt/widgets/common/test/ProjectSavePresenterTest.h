@@ -33,9 +33,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProjectSavePresenterTest *createSuite() {
-    return new ProjectSavePresenterTest();
-  }
+  static ProjectSavePresenterTest *createSuite() { return new ProjectSavePresenterTest(); }
 
   static void destroySuite(ProjectSavePresenterTest *suite) { delete suite; }
 
@@ -137,8 +135,7 @@ public:
     WindowStub window1(win1Info.name, wsNames);
     WindowStub window2(win2Info.name, wsNames);
 
-    std::vector<MantidQt::API::IProjectSerialisable *> windows = {&window1,
-                                                                  &window2};
+    std::vector<MantidQt::API::IProjectSerialisable *> windows = {&window1, &window2};
     std::vector<WindowInfo> winInfo = {win1Info, win2Info};
 
     // View should be passed what workspaces exist and what windows
@@ -189,8 +186,7 @@ public:
     WindowStub window1(win1Info.name, {wsNames[0]});
     WindowStub window2(win2Info.name, {wsNames[1]});
 
-    std::vector<MantidQt::API::IProjectSerialisable *> windows = {&window1,
-                                                                  &window2};
+    std::vector<MantidQt::API::IProjectSerialisable *> windows = {&window1, &window2};
     std::vector<WindowInfo> winInfo = {win1Info, win2Info};
 
     // View should be passed what workspaces exist and what windows
@@ -221,16 +217,14 @@ public:
     // View should be passed what workspaces exist and what windows
     // are currently included.
     ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
-    ON_CALL(m_view, getUncheckedWorkspaceNames())
-        .WillByDefault(Return(wsNames));
+    ON_CALL(m_view, getUncheckedWorkspaceNames()).WillByDefault(Return(wsNames));
 
     EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
     EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
     EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo)).Times(Exactly(1));
     EXPECT_CALL(m_view, getUncheckedWorkspaceNames()).WillOnce(Return(wsNames));
     EXPECT_CALL(m_view, updateExcludedWindowsList(winInfo)).Times(Exactly(1));
-    EXPECT_CALL(m_view, removeFromIncludedWindowsList(windowNames))
-        .Times(Exactly(1));
+    EXPECT_CALL(m_view, removeFromIncludedWindowsList(windowNames)).Times(Exactly(1));
 
     ProjectSavePresenter presenter(&m_view);
     presenter.notify(ProjectSavePresenter::Notification::UncheckWorkspace);
@@ -252,8 +246,7 @@ public:
     std::vector<WindowInfo> winInfo = {info};
 
     ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
-    ON_CALL(m_view, getUncheckedWorkspaceNames())
-        .WillByDefault(Return(wsNames));
+    ON_CALL(m_view, getUncheckedWorkspaceNames()).WillByDefault(Return(wsNames));
     ON_CALL(m_view, getCheckedWorkspaceNames()).WillByDefault(Return(wsNames));
 
     EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
@@ -262,10 +255,8 @@ public:
     EXPECT_CALL(m_view, getUncheckedWorkspaceNames()).WillOnce(Return(wsNames));
     EXPECT_CALL(m_view, updateExcludedWindowsList(winInfo)).Times(Exactly(1));
     EXPECT_CALL(m_view, getCheckedWorkspaceNames()).WillOnce(Return(wsNames));
-    EXPECT_CALL(m_view, removeFromIncludedWindowsList(windowNames))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_view, removeFromExcludedWindowsList(windowNames))
-        .Times(Exactly(1));
+    EXPECT_CALL(m_view, removeFromIncludedWindowsList(windowNames)).Times(Exactly(1));
+    EXPECT_CALL(m_view, removeFromExcludedWindowsList(windowNames)).Times(Exactly(1));
 
     ProjectSavePresenter presenter(&m_view);
     presenter.notify(ProjectSavePresenter::Notification::UncheckWorkspace);
@@ -280,8 +271,7 @@ public:
     std::vector<WorkspaceInfo> wsInfo;
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
     QFileInfo fi(".");
-    QString filePath =
-        fi.absolutePath() + "/mantidprojecttest/mantidprojecttest.mantid";
+    QString filePath = fi.absolutePath() + "/mantidprojecttest/mantidprojecttest.mantid";
 
     ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
     ON_CALL(m_view, getProjectPath()).WillByDefault(Return(filePath));
@@ -314,8 +304,7 @@ public:
     EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo)).Times(Exactly(1));
 
     EXPECT_CALL(m_view, getProjectPath()).Times(Exactly(1));
-    EXPECT_CALL(m_view, setProjectPath(filePath + "/mantidprojecttest.mantid"))
-        .Times(Exactly(1));
+    EXPECT_CALL(m_view, setProjectPath(filePath + "/mantidprojecttest.mantid")).Times(Exactly(1));
 
     ProjectSavePresenter presenter(&m_view);
     presenter.notify(ProjectSavePresenter::Notification::PrepareProjectFolder);
@@ -335,8 +324,7 @@ public:
    * @param workspaces :: List of workspace names
    * @return a vector of workspace info structs
    */
-  std::vector<WorkspaceInfo>
-  setUpWorkspaces(const std::vector<std::string> &workspaces) {
+  std::vector<WorkspaceInfo> setUpWorkspaces(const std::vector<std::string> &workspaces) {
     std::vector<WorkspaceInfo> wsInfo;
 
     for (auto &name : workspaces) {

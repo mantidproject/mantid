@@ -21,8 +21,7 @@ enum wsType {
   Undefined   //< unknown initial state
 };
 
-ConvToMDSelector::ConvToMDSelector(ConvToMDSelector::ConverterType tp)
-    : converterType(tp) {}
+ConvToMDSelector::ConvToMDSelector(ConvToMDSelector::ConverterType tp) : converterType(tp) {}
 
 /** function which selects the convertor depending on workspace type and
 (possibly, in a future) some workspace properties
@@ -32,9 +31,8 @@ initiated)
 
 *@returns shared pointer to new solver, which corresponds to the workspace
 */
-std::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
-    const API::MatrixWorkspace_sptr &inputWS,
-    std::shared_ptr<ConvToMDBase> &currentSolver) const {
+std::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(const API::MatrixWorkspace_sptr &inputWS,
+                                                             std::shared_ptr<ConvToMDBase> &currentSolver) const {
   // identify what kind of workspace we expect to process
   wsType inputWSType = Undefined;
   if (std::dynamic_pointer_cast<DataObjects::EventWorkspace>(inputWS))
@@ -43,10 +41,9 @@ std::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
     inputWSType = Matrix2DWS;
 
   if (inputWSType == Undefined)
-    throw(std::invalid_argument(
-        "ConvToDataObjectsSelector::got a workspace which "
-        "is neither matrix nor event workspace; Can "
-        "not deal with it"));
+    throw(std::invalid_argument("ConvToDataObjectsSelector::got a workspace which "
+                                "is neither matrix nor event workspace; Can "
+                                "not deal with it"));
 
   // identify what converter (if any) is currently initialized;
   wsType existingWsConvType(Undefined);
@@ -60,8 +57,7 @@ std::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
 
   std::shared_ptr<ConvToMDBase> res;
   // select a converter, which corresponds to the workspace type
-  if ((existingWsConvType == Undefined) ||
-      (existingWsConvType != inputWSType)) {
+  if ((existingWsConvType == Undefined) || (existingWsConvType != inputWSType)) {
     switch (inputWSType) {
     case (EventWS):
       // check if user set a property to use indexing

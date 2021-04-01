@@ -15,20 +15,16 @@ DECLARE_IMPLICIT_FUNCTION_PARAMETER_PARSER(InvalidParameterParser)
 
 InvalidParameterParser::InvalidParameterParser() {}
 
-Mantid::API::ImplicitFunctionParameter *
-InvalidParameterParser::createParameter(Poco::XML::Element *parameterElement) {
-  std::string sParameterValue =
-      parameterElement->getChildElement("Value")->innerText();
+Mantid::API::ImplicitFunctionParameter *InvalidParameterParser::createParameter(Poco::XML::Element *parameterElement) {
+  std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
   return parseInvalidParameter(sParameterValue);
 }
 
-InvalidParameter *
-InvalidParameterParser::parseInvalidParameter(std::string value) {
+InvalidParameter *InvalidParameterParser::parseInvalidParameter(std::string value) {
   return new InvalidParameter(std::move(value));
 }
 
-void InvalidParameterParser::setSuccessorParser(
-    ImplicitFunctionParameterParser *parser) {
+void InvalidParameterParser::setSuccessorParser(ImplicitFunctionParameterParser *parser) {
   UNUSED_ARG(parser);
   // Do nothing. No successor allowed.
 }

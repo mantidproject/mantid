@@ -20,12 +20,8 @@ using namespace MantidQt::MantidWidgets;
 class FitScriptGeneratorDataTableTest : public CxxTest::TestSuite {
 
 public:
-  static FitScriptGeneratorDataTableTest *createSuite() {
-    return new FitScriptGeneratorDataTableTest;
-  }
-  static void destroySuite(FitScriptGeneratorDataTableTest *suite) {
-    delete suite;
-  }
+  static FitScriptGeneratorDataTableTest *createSuite() { return new FitScriptGeneratorDataTableTest; }
+  static void destroySuite(FitScriptGeneratorDataTableTest *suite) { delete suite; }
 
   void setUp() override {
     assertNoTopLevelWidgets();
@@ -42,8 +38,7 @@ public:
     assertWidgetCreated();
   }
 
-  void
-  test_that_adding_a_domain_to_the_data_table_will_change_the_number_of_table_rows() {
+  void test_that_adding_a_domain_to_the_data_table_will_change_the_number_of_table_rows() {
     m_dataTable->show();
     TS_ASSERT_EQUALS(m_dataTable->rowCount(), 0);
 
@@ -52,8 +47,7 @@ public:
     TS_ASSERT_EQUALS(m_dataTable->rowCount(), 1);
   }
 
-  void
-  test_that_adding_a_domain_to_the_data_table_will_show_the_correct_data_in_the_table() {
+  void test_that_adding_a_domain_to_the_data_table_will_show_the_correct_data_in_the_table() {
     m_dataTable->show();
     m_dataTable->addDomain("Name", WorkspaceIndex(0), 0.0, 2.0);
 
@@ -63,8 +57,7 @@ public:
     TS_ASSERT_EQUALS(m_dataTable->endX(0), 2.0);
   }
 
-  void
-  test_that_removing_a_domain_in_the_data_table_will_change_the_number_of_table_rows() {
+  void test_that_removing_a_domain_in_the_data_table_will_change_the_number_of_table_rows() {
     m_dataTable->show();
     m_dataTable->addDomain("Name", WorkspaceIndex(0), 0.0, 2.0);
 
@@ -100,8 +93,7 @@ public:
     TS_ASSERT_EQUALS(selectedIndices[0].value, rowIndex);
   }
 
-  void
-  test_that_selectedDomainFunctionPrefix_will_return_the_currently_selected_function_index() {
+  void test_that_selectedDomainFunctionPrefix_will_return_the_currently_selected_function_index() {
     int rowIndex(1);
 
     m_dataTable->show();
@@ -116,13 +108,9 @@ public:
   }
 
 private:
-  void assertWidgetCreated() {
-    TS_ASSERT_LESS_THAN(0, QApplication::topLevelWidgets().size());
-  }
+  void assertWidgetCreated() { TS_ASSERT_LESS_THAN(0, QApplication::topLevelWidgets().size()); }
 
-  void assertNoTopLevelWidgets() {
-    TS_ASSERT_EQUALS(0, QApplication::topLevelWidgets().size());
-  }
+  void assertNoTopLevelWidgets() { TS_ASSERT_EQUALS(0, QApplication::topLevelWidgets().size()); }
 
   void selectRowInTable(int row) {
     // Retrieve the pixel position of the first column cell at rowIndex

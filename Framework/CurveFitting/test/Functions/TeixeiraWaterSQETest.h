@@ -67,25 +67,21 @@ public:
     std::vector<double> xValues(nData, 0);
     std::iota(xValues.begin(), xValues.end(), -10000.0);
     using std::placeholders::_1;
-    std::transform(xValues.begin(), xValues.end(), xValues.begin(),
-                   std::bind(std::multiplies<double>(), dE, _1));
+    std::transform(xValues.begin(), xValues.end(), xValues.begin(), std::bind(std::multiplies<double>(), dE, _1));
     // Evaluate the function on the domain
     std::vector<double> calculatedValues(nData, 0);
     func->function1D(calculatedValues.data(), xValues.data(), nData);
     // Integrate the evaluation
-    std::transform(calculatedValues.begin(), calculatedValues.end(),
-                   calculatedValues.begin(),
+    std::transform(calculatedValues.begin(), calculatedValues.end(), calculatedValues.begin(),
                    std::bind(std::multiplies<double>(), dE, _1));
-    auto integral =
-        std::accumulate(calculatedValues.begin(), calculatedValues.end(), 0.0);
+    auto integral = std::accumulate(calculatedValues.begin(), calculatedValues.end(), 0.0);
     TS_ASSERT_DELTA(integral, 1.0, 0.01);
   }
 
 private:
   class TestableTeixeiraWaterSQE : public TeixeiraWaterSQE {
   public:
-    void function1D(double *out, const double *xValues,
-                    const size_t nData) const override {
+    void function1D(double *out, const double *xValues, const size_t nData) const override {
       TeixeiraWaterSQE::function1D(out, xValues, nData);
     }
   };

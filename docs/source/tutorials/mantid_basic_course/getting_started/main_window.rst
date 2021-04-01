@@ -7,10 +7,10 @@ Workbench Main Window
 .. raw:: html
 
     <style> .red {color:#FF0000; font-weight:bold} </style>
-    <style> .green {color:#008000; font-weight:bold} </style>    
-    <style> .blue {color:#0000FF; font-weight:bold} </style> 
-    <style> .orange {color:#FF8C00; font-weight:bold} </style> 
-    <style> .purple {color:#A431E6; font-weight:bold} </style> 
+    <style> .green {color:#008000; font-weight:bold} </style>
+    <style> .blue {color:#0000FF; font-weight:bold} </style>
+    <style> .orange {color:#FF8C00; font-weight:bold} </style>
+    <style> .purple {color:#A431E6; font-weight:bold} </style>
 
 .. role:: red
 .. role:: blue
@@ -41,12 +41,12 @@ Quick Intro to Workspaces and Bins
 ==================================
 
 A workspace is data stored within Mantid. It will appear in the Workspaces Toolbox.
-When you load a data file, it will create a Workspace. Likewise you can save a Workspace to a file. 
-Many of the features of Mantid change Workspaces into other Workspaces. There are even different types of Workspaces in Mantid, which hold data in different formats. 
+When you load a data file, it will create a Workspace. Likewise you can save a Workspace to a file.
+Many of the features of Mantid change Workspaces into other Workspaces. There are even different types of Workspaces in Mantid, which hold data in different formats.
 
 A usual Workspace consists of a number of spectra, each cut into blocks called bins (more about spectra later). Mantid sums the number of counts in each bin and the line we plot connects the top of these bins.
 
-(Note that the bins can have different widths (defined by the instrument set-up)), such as below the bin-widths change from 10 to 20). 
+(Note that the bins can have different widths (defined by the instrument set-up)), such as below the bin-widths change from 10 to 20).
 
 .. plot::
    :align: center
@@ -74,6 +74,6 @@ A usual Workspace consists of a number of spectra, each cut into blocks called b
    plt.xlabel("X data      eg. Time ($\mu s$)")
    plt.ylabel("Y data      eg. Counts ($\mu s$)$^{-1}$")
    plt.title("Bins and Line Plots")
-   plt.xticks(bin_edges) 
+   plt.xticks(bin_edges)
    plt.legend()
    plt.show()

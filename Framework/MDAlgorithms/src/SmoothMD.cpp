@@ -39,13 +39,11 @@ using WidthVector = std::vector<double>;
 using KernelVector = std::vector<double>;
 
 // Typedef for an optional md histo workspace
-using OptionalIMDHistoWorkspace_const_sptr =
-    boost::optional<IMDHistoWorkspace_const_sptr>;
+using OptionalIMDHistoWorkspace_const_sptr = boost::optional<IMDHistoWorkspace_const_sptr>;
 
 // Typedef for a smoothing function
-using SmoothFunction = std::function<IMDHistoWorkspace_sptr(
-    IMDHistoWorkspace_const_sptr, const WidthVector &,
-    OptionalIMDHistoWorkspace_const_sptr)>;
+using SmoothFunction = std::function<IMDHistoWorkspace_sptr(IMDHistoWorkspace_const_sptr, const WidthVector &,
+                                                            OptionalIMDHistoWorkspace_const_sptr)>;
 
 // Typedef for a smoothing function map keyed by name.
 using SmoothFunctionMap = std::map<std::string, SmoothFunction>;
@@ -60,11 +58,8 @@ SmoothFunctionMap makeFunctionMap(Mantid::MDAlgorithms::SmoothMD *instance) {
   using std::placeholders::_1;
   using std::placeholders::_2;
   using std::placeholders::_3;
-  return {
-      {"Hat", std::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth, instance,
-                        _1, _2, _3)},
-      {"Gaussian", std::bind(&Mantid::MDAlgorithms::SmoothMD::gaussianSmooth,
-                             instance, _1, _2, _3)}};
+  return {{"Hat", std::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth, instance, _1, _2, _3)},
+          {"Gaussian", std::bind(&Mantid::MDAlgorithms::SmoothMD::gaussianSmooth, instance, _1, _2, _3)}};
 }
 } // namespace
 
@@ -96,18 +91,15 @@ KernelVector gaussianKernel(const double fwhm) {
   while (pixel_value > 0.02) {
     kernel_one_side.emplace_back(pixel_value);
     pixel_count++;
-    pixel_value = (std::erf((pixel_count + 0.5) * sigma_factor) -
-                   std::erf((pixel_count - 0.5) * sigma_factor)) *
-                  0.5 * sigma;
+    pixel_value =
+        (std::erf((pixel_count + 0.5) * sigma_factor) - std::erf((pixel_count - 0.5) * sigma_factor)) * 0.5 * sigma;
   }
 
   // Create the symmetric kernel vector
   KernelVector kernel;
   kernel.resize(kernel_one_side.size() * 2 - 1);
-  std::reverse_copy(kernel_one_side.cbegin(), kernel_one_side.cend(),
-                    kernel.begin());
-  std::copy(kernel_one_side.cbegin() + 1, kernel_one_side.cend(),
-            kernel.begin() + kernel_one_side.size());
+  std::reverse_copy(kernel_one_side.cbegin(), kernel_one_side.cend(), kernel.begin());
+  std::copy(kernel_one_side.cbegin() + 1, kernel_one_side.cend(), kernel.begin() + kernel_one_side.size());
 
   return normaliseKernel(kernel);
 }
@@ -118,11 +110,9 @@ KernelVector gaussianKernel(const double fwhm) {
  * workspace
  * The contributing elements should sum to unity
  */
-KernelVector renormaliseKernel(KernelVector kernel,
-                               const std::vector<bool> &validity) {
+KernelVector renormaliseKernel(KernelVector kernel, const std::vector<bool> &validity) {
 
-  if (validity.size() == kernel.size() &&
-      std::find(validity.cbegin(), validity.cend(), false) != validity.cend()) {
+  if (validity.size() == kernel.size() && std::find(validity.cbegin(), validity.cend(), false) != validity.cend()) {
     // Use validity as a mask
     for (size_t i = 0; i < kernel.size(); ++i) {
       kernel[i] *= validity[i];
@@ -138,8 +128,7 @@ KernelVector renormaliseKernel(KernelVector kernel,
  * Normalise the kernel so that sum of valid elements is unity
  */
 KernelVector normaliseKernel(KernelVector kernel) {
-  double sum_kernel_recip =
-      1.0 / std::accumulate(kernel.cbegin(), kernel.cend(), 0.0);
+  double sum_kernel_recip = 1.0 / std::accumulate(kernel.cbegin(), kernel.cend(), 0.0);
   for (auto &pixel : kernel) {
     pixel *= sum_kernel_recip;
   }
@@ -159,14 +148,10 @@ const std::string SmoothMD::name() const { return "SmoothMD"; }
 int SmoothMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SmoothMD::category() const {
-  return "MDAlgorithms\\Transforms";
-}
+const std::string SmoothMD::category() const { return "MDAlgorithms\\Transforms"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string SmoothMD::summary() const {
-  return "Smooth an MDHistoWorkspace according to a weight function";
-}
+const std::string SmoothMD::summary() const { return "Smooth an MDHistoWorkspace according to a weight function"; }
 
 /**
  * Hat function smoothing. All weights even. Hat function boundaries beyond
@@ -176,21 +161,17 @@ const std::string SmoothMD::summary() const {
  * @param weightingWS : Weighting workspace (optional)
  * @return Smoothed MDHistoWorkspace
  */
-IMDHistoWorkspace_sptr
-SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
-                    const WidthVector &widthVector,
-                    OptionalIMDHistoWorkspace_const_sptr weightingWS) {
+IMDHistoWorkspace_sptr SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &toSmooth, const WidthVector &widthVector,
+                                           OptionalIMDHistoWorkspace_const_sptr weightingWS) {
 
   const bool useWeights = weightingWS.is_initialized();
   uint64_t nPoints = toSmooth->getNPoints();
   Progress progress(this, 0.0, 1.0, size_t(double(nPoints) * 1.1));
   // Create the output workspace.
   IMDHistoWorkspace_sptr outWS(toSmooth->clone());
-  progress.reportIncrement(
-      size_t(double(nPoints) * 0.1)); // Report ~10% progress
+  progress.reportIncrement(size_t(double(nPoints) * 0.1)); // Report ~10% progress
 
-  const int nThreads = Mantid::API::FrameworkManager::Instance()
-                           .getNumOMPThreads(); // NThreads to Request
+  const int nThreads = Mantid::API::FrameworkManager::Instance().getNumOMPThreads(); // NThreads to Request
 
   auto iterators = toSmooth->createIterators(nThreads, nullptr);
 
@@ -198,12 +179,10 @@ SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
   for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
     PARALLEL_START_INTERUPT_REGION
-    auto iterator =
-        dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it].get());
+    auto iterator = dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it].get());
 
     if (!iterator) {
-      throw std::logic_error(
-          "Failed to cast IMDIterator to MDHistoWorkspaceIterator");
+      throw std::logic_error("Failed to cast IMDIterator to MDHistoWorkspaceIterator");
     }
 
     do {
@@ -215,10 +194,8 @@ SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
         // Check that we could measure here.
         if ((*weightingWS)->getSignalAt(iteratorIndex) == 0) {
 
-          outWS->setSignalAt(iteratorIndex,
-                             std::numeric_limits<double>::quiet_NaN());
-          outWS->setErrorSquaredAt(iteratorIndex,
-                                   std::numeric_limits<double>::quiet_NaN());
+          outWS->setSignalAt(iteratorIndex, std::numeric_limits<double>::quiet_NaN());
+          outWS->setErrorSquaredAt(iteratorIndex, std::numeric_limits<double>::quiet_NaN());
 
           continue; // Skip we couldn't measure here.
         }
@@ -229,12 +206,10 @@ SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
       // integer values and well below max int
       std::vector<int> widthVectorInt;
       widthVectorInt.resize(widthVector.size());
-      std::transform(widthVector.cbegin(), widthVector.cend(),
-                     widthVectorInt.begin(),
+      std::transform(widthVector.cbegin(), widthVector.cend(), widthVectorInt.begin(),
                      [](double w) -> int { return static_cast<int>(w); });
 
-      std::vector<size_t> neighbourIndexes =
-          iterator->findNeighbourIndexesByWidth(widthVectorInt);
+      std::vector<size_t> neighbourIndexes = iterator->findNeighbourIndexesByWidth(widthVectorInt);
 
       size_t nNeighbours = neighbourIndexes.size();
       double sumSignal = iterator->getSignal();
@@ -255,8 +230,7 @@ SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
       // Calculate the mean
       outWS->setSignalAt(iteratorIndex, sumSignal / double(nNeighbours + 1));
       // Calculate the sample variance
-      outWS->setErrorSquaredAt(iteratorIndex,
-                               sumSqError / double(nNeighbours + 1));
+      outWS->setErrorSquaredAt(iteratorIndex, sumSqError / double(nNeighbours + 1));
 
       progress.report();
 
@@ -279,10 +253,9 @@ SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
  * @param weightingWS : Weighting workspace (optional)
  * @return Smoothed MDHistoWorkspace
  */
-IMDHistoWorkspace_sptr
-SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
-                         const WidthVector &widthVector,
-                         OptionalIMDHistoWorkspace_const_sptr weightingWS) {
+IMDHistoWorkspace_sptr SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
+                                                const WidthVector &widthVector,
+                                                OptionalIMDHistoWorkspace_const_sptr weightingWS) {
 
   const bool useWeights = weightingWS.is_initialized();
   uint64_t nPoints = toSmooth->getNPoints();
@@ -301,12 +274,10 @@ SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
     gaussian_kernels.emplace_back(gaussianKernel(width));
   }
 
-  const int nThreads = Mantid::API::FrameworkManager::Instance()
-                           .getNumOMPThreads(); // NThreads to Request
+  const int nThreads = Mantid::API::FrameworkManager::Instance().getNumOMPThreads(); // NThreads to Request
 
   auto write_ws = tempWS;
-  for (size_t dimension_number = 0; dimension_number < widthVector.size();
-       ++dimension_number) {
+  for (size_t dimension_number = 0; dimension_number < widthVector.size(); ++dimension_number) {
 
     auto iterators = toSmooth->createIterators(nThreads, nullptr);
 
@@ -324,11 +295,9 @@ SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
     for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
       PARALLEL_START_INTERUPT_REGION
-      auto iterator =
-          dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it].get());
+      auto iterator = dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it].get());
       if (!iterator) {
-        throw std::logic_error(
-            "Failed to cast IMDIterator to MDHistoWorkspaceIterator");
+        throw std::logic_error("Failed to cast IMDIterator to MDHistoWorkspaceIterator");
       }
 
       do {
@@ -341,23 +310,18 @@ SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
           // Check that we could measure here.
           if ((*weightingWS)->getSignalAt(iteratorIndex) == 0) {
 
-            write_ws->setSignalAt(iteratorIndex,
-                                  std::numeric_limits<double>::quiet_NaN());
-            write_ws->setErrorSquaredAt(
-                iteratorIndex, std::numeric_limits<double>::quiet_NaN());
+            write_ws->setSignalAt(iteratorIndex, std::numeric_limits<double>::quiet_NaN());
+            write_ws->setErrorSquaredAt(iteratorIndex, std::numeric_limits<double>::quiet_NaN());
 
             continue; // Skip we couldn't measure here.
           }
         }
 
-        std::pair<std::vector<size_t>, std::vector<bool>> indexesAndValidity =
-            iterator->findNeighbourIndexesByWidth1D(
-                static_cast<int>(gaussian_kernels[dimension_number].size()),
-                static_cast<int>(dimension_number));
+        std::pair<std::vector<size_t>, std::vector<bool>> indexesAndValidity = iterator->findNeighbourIndexesByWidth1D(
+            static_cast<int>(gaussian_kernels[dimension_number].size()), static_cast<int>(dimension_number));
         std::vector<size_t> neighbourIndexes = std::get<0>(indexesAndValidity);
         std::vector<bool> indexValidity = std::get<1>(indexesAndValidity);
-        auto normalised_kernel = renormaliseKernel(
-            gaussian_kernels[dimension_number], indexValidity);
+        auto normalised_kernel = renormaliseKernel(gaussian_kernels[dimension_number], indexValidity);
 
         // Convolve signal with kernel
         double sumSignal = 0;
@@ -365,10 +329,8 @@ SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
         double error = 0;
         for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
           if (indexValidity[i]) {
-            sumSignal += read_ws->getSignalAt(neighbourIndexes[i]) *
-                         normalised_kernel[i];
-            error =
-                read_ws->getErrorAt(neighbourIndexes[i]) * normalised_kernel[i];
+            sumSignal += read_ws->getSignalAt(neighbourIndexes[i]) * normalised_kernel[i];
+            error = read_ws->getErrorAt(neighbourIndexes[i]) * normalised_kernel[i];
             sumSquareError += error * error;
           }
 
@@ -390,23 +352,18 @@ SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
 /** Initialize the algorithm's properties.
  */
 void SmoothMD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input MDHistoWorkspace to smooth.");
 
   auto widthVectorValidator = std::make_shared<CompositeValidator>();
-  auto boundedValidator =
-      std::make_shared<ArrayBoundedValidator<double>>(1, 1000);
+  auto boundedValidator = std::make_shared<ArrayBoundedValidator<double>>(1, 1000);
   widthVectorValidator->add(boundedValidator);
-  widthVectorValidator->add(
-      std::make_shared<MandatoryValidator<WidthVector>>());
+  widthVectorValidator->add(std::make_shared<MandatoryValidator<WidthVector>>());
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "WidthVector", widthVectorValidator, Direction::Input),
-      "Width vector. Either specify the width in n-pixels for each "
-      "dimension, or provide a single entry (n-pixels) for all "
-      "dimensions. Must be odd integers if Hat function is chosen.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("WidthVector", widthVectorValidator, Direction::Input),
+                  "Width vector. Either specify the width in n-pixels for each "
+                  "dimension, or provide a single entry (n-pixels) for all "
+                  "dimensions. Must be odd integers if Hat function is chosen.");
 
   const std::array<std::string, 2> allFunctionTypes = {{"Hat", "Gaussian"}};
   const std::string first = allFunctionTypes.front();
@@ -415,9 +372,7 @@ void SmoothMD::init() {
   docBuffer << "Smoothing function. Defaults to " << first;
   declareProperty(
       std::make_unique<PropertyWithValue<std::string>>(
-          "Function", first,
-          std::make_shared<ListValidator<std::string>>(allFunctionTypes),
-          Direction::Input),
+          "Function", first, std::make_shared<ListValidator<std::string>>(allFunctionTypes), Direction::Input),
       docBuffer.str());
 
   std::array<std::string, 1> unitOptions = {{"pixels"}};
@@ -429,18 +384,14 @@ void SmoothMD::init() {
     docUnits << unitOption << ", ";
   }
   declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                      "Units", "pixels",
-                      std::make_shared<ListValidator<std::string>>(unitOptions),
-                      Direction::Input),
+                      "Units", "pixels", std::make_shared<ListValidator<std::string>>(unitOptions), Direction::Input),
                   docUnits.str());
 
-  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
-                      "InputNormalizationWorkspace", "", Direction::Input,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>("InputNormalizationWorkspace", "",
+                                                                              Direction::Input, PropertyMode::Optional),
                   "Multidimensional weighting workspace. Optional.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output smoothed MDHistoWorkspace.");
 }
 
@@ -453,8 +404,7 @@ void SmoothMD::exec() {
   IMDHistoWorkspace_sptr toSmooth = this->getProperty("InputWorkspace");
 
   // Get the input weighting workspace
-  IMDHistoWorkspace_sptr weightingWS =
-      this->getProperty("InputNormalizationWorkspace");
+  IMDHistoWorkspace_sptr weightingWS = this->getProperty("InputNormalizationWorkspace");
   OptionalIMDHistoWorkspace_const_sptr optionalWeightingWS;
   if (weightingWS) {
     optionalWeightingWS = weightingWS;
@@ -465,8 +415,7 @@ void SmoothMD::exec() {
   if (widthVector.size() == 1) {
     // Pad the width vector out to the right size if only one entry has been
     // provided.
-    widthVector =
-        std::vector<double>(toSmooth->getNumDims(), widthVector.front());
+    widthVector = std::vector<double>(toSmooth->getNumDims(), widthVector.front());
   }
 
   // Find the chosen smooth operation
@@ -496,13 +445,10 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
   const std::string widthVectorPropertyName = "WidthVector";
   std::vector<double> widthVector = this->getProperty(widthVectorPropertyName);
 
-  if (widthVector.size() != 1 &&
-      widthVector.size() != toSmoothWs->getNumDims()) {
-    product.emplace(widthVectorPropertyName,
-                    widthVectorPropertyName +
-                        " can either have one entry or needs to "
-                        "have entries for each dimension of the "
-                        "InputWorkspace.");
+  if (widthVector.size() != 1 && widthVector.size() != toSmoothWs->getNumDims()) {
+    product.emplace(widthVectorPropertyName, widthVectorPropertyName + " can either have one entry or needs to "
+                                                                       "have entries for each dimension of the "
+                                                                       "InputWorkspace.");
   } else if (function_type == "Hat") {
     // If Hat function is used then widthVector must contain odd integers only
     for (auto const widthEntry : widthVector) {
@@ -527,11 +473,9 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
   }
 
   // Check the dimensionality of the normalization workspace
-  const std::string normalisationWorkspacePropertyName =
-      "InputNormalizationWorkspace";
+  const std::string normalisationWorkspacePropertyName = "InputNormalizationWorkspace";
 
-  IMDHistoWorkspace_sptr normWs =
-      this->getProperty(normalisationWorkspacePropertyName);
+  IMDHistoWorkspace_sptr normWs = this->getProperty(normalisationWorkspacePropertyName);
   if (normWs) {
     const size_t nDimsNorm = normWs->getNumDims();
     const size_t nDimsSmooth = toSmoothWs->getNumDims();
@@ -541,8 +485,7 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
               << " has a different number of dimensions than InputWorkspace. "
                  "Shapes of inputs must be the same. Cannot continue "
                  "smoothing.";
-      product.insert(
-          std::make_pair(normalisationWorkspacePropertyName, message.str()));
+      product.insert(std::make_pair(normalisationWorkspacePropertyName, message.str()));
     } else {
       // Loop over dimensions and check nbins.
       for (size_t i = 0; i < nDimsNorm; ++i) {
@@ -550,10 +493,8 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
         const size_t nBinsSmooth = toSmoothWs->getDimension(i)->getNBins();
         if (nBinsNorm != nBinsSmooth) {
           std::stringstream message;
-          message << normalisationWorkspacePropertyName
-                  << ". Number of bins from dimension with index " << i
-                  << " do not match. " << nBinsSmooth << " expected. Got "
-                  << nBinsNorm
+          message << normalisationWorkspacePropertyName << ". Number of bins from dimension with index " << i
+                  << " do not match. " << nBinsSmooth << " expected. Got " << nBinsNorm
                   << ". Shapes of inputs must be the same. Cannot "
                      "continue smoothing.";
           product.emplace(normalisationWorkspacePropertyName, message.str());

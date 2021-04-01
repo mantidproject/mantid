@@ -21,14 +21,10 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "AddPeak"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Adds a peak to a PeaksWorkspace.";
-  }
+  const std::string summary() const override { return "Adds a peak to a PeaksWorkspace."; }
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"AddPeakHKL", "CalculatePeaksHKL"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AddPeakHKL", "CalculatePeaksHKL"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\Peaks"; }
 

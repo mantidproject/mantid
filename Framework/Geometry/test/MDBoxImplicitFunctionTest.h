@@ -24,11 +24,9 @@ public:
   void test_constructor_throws() {
     std::vector<coord_t> min;
     std::vector<coord_t> max;
-    TSM_ASSERT_THROWS_ANYTHING("0 dimensions is bad.",
-                               MDBoxImplicitFunction f(min, max));
+    TSM_ASSERT_THROWS_ANYTHING("0 dimensions is bad.", MDBoxImplicitFunction f(min, max));
     min.emplace_back(1.234f);
-    TSM_ASSERT_THROWS_ANYTHING("Mismatch in nd",
-                               MDBoxImplicitFunction f(min, max));
+    TSM_ASSERT_THROWS_ANYTHING("Mismatch in nd", MDBoxImplicitFunction f(min, max));
     max.emplace_back(4.56f);
     TS_ASSERT_THROWS_NOTHING(MDBoxImplicitFunction f(min, max));
   }
@@ -146,8 +144,7 @@ public:
 
     */
 
-    TSM_ASSERT_DELTA("Overlap fraction is incorrectly calculated", 0.1,
-                     f.fraction(extents), 1e-4);
+    TSM_ASSERT_DELTA("Overlap fraction is incorrectly calculated", 0.1, f.fraction(extents), 1e-4);
   }
 
   void test_fraction_when_partially_contained_1D_complex() {
@@ -177,8 +174,7 @@ public:
 
     */
 
-    TSM_ASSERT_DELTA("Overlap fraction is incorrectly calculated", 0.5,
-                     f.fraction(extents), 1e-4);
+    TSM_ASSERT_DELTA("Overlap fraction is incorrectly calculated", 0.5, f.fraction(extents), 1e-4);
   }
 
   void test_fraction_when_partially_contained_2d_simple() {
@@ -222,8 +218,7 @@ public:
     // extent
     extents.emplace_back(Extent(boxMin, boxMax));
 
-    TSM_ASSERT_DELTA("2d overlap incorrectly calculated", 1.0 / 4,
-                     f.fraction(extents), 1e-3);
+    TSM_ASSERT_DELTA("2d overlap incorrectly calculated", 1.0 / 4, f.fraction(extents), 1e-3);
   }
 
   void test_fraction_when_partially_contained_2d_complex() {
@@ -267,8 +262,7 @@ public:
     // extent
     extents.emplace_back(Extent(boxMin, boxMax));
 
-    TSM_ASSERT_DELTA("2d overlap incorrectly calculated", 1.0 / 8,
-                     f.fraction(extents), 1e-3);
+    TSM_ASSERT_DELTA("2d overlap incorrectly calculated", 1.0 / 8, f.fraction(extents), 1e-3);
   }
 };
 

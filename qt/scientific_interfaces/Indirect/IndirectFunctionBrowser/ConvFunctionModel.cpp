@@ -29,10 +29,9 @@ void ConvFunctionModel::clearData() {
 }
 
 void ConvFunctionModel::setModel() {
-  m_model.setModel(buildBackgroundFunctionString(), m_fitResolutions,
-                   buildLorentzianPeaksString(), buildFitTypeString(),
-                   m_hasDeltaFunction, m_qValues, m_isQDependentFunction,
-                   m_hasTempCorrection, m_tempValue);
+  m_model.setModel(buildBackgroundFunctionString(), m_fitResolutions, buildLorentzianPeaksString(),
+                   buildFitTypeString(), m_hasDeltaFunction, m_qValues, m_isQDependentFunction, m_hasTempCorrection,
+                   m_tempValue);
   if (m_hasTempCorrection && !m_globals.contains(ParamID::TEMPERATURE)) {
     m_globals.push_back(ParamID::TEMPERATURE);
   }
@@ -89,12 +88,10 @@ void ConvFunctionModel::checkConvolution(const IFunction_sptr &fun) {
         throw std::runtime_error("Function has wrong structure.");
       }
       m_hasTempCorrection = true;
-      if (std::dynamic_pointer_cast<CompositeFunction>(
-              innerFunction->getFunction(1)))
+      if (std::dynamic_pointer_cast<CompositeFunction>(innerFunction->getFunction(1)))
         checkConvolution(innerFunction->getFunction(1));
       else
-        checkSingleFunction(innerFunction->getFunction(1), isLorentzianTypeSet,
-                            isFitTypeSet);
+        checkSingleFunction(innerFunction->getFunction(1), isLorentzianTypeSet, isFitTypeSet);
     }
 
     else if (name == "CompositeFunction") {
@@ -105,14 +102,11 @@ void ConvFunctionModel::checkConvolution(const IFunction_sptr &fun) {
   }
 }
 
-void ConvFunctionModel::checkSingleFunction(const IFunction_sptr &fun,
-                                            bool &isLorentzianTypeSet,
-                                            bool &isFitTypeSet) {
+void ConvFunctionModel::checkSingleFunction(const IFunction_sptr &fun, bool &isLorentzianTypeSet, bool &isFitTypeSet) {
   assert(fun->nFunctions() == 0);
   auto const name = fun->name();
   if (name == "Lorentzian") {
-    if (isLorentzianTypeSet &&
-        m_lorentzianType != LorentzianType::OneLorentzian) {
+    if (isLorentzianTypeSet && m_lorentzianType != LorentzianType::OneLorentzian) {
       throw std::runtime_error("Function has wrong structure.");
     }
     if (isLorentzianTypeSet)
@@ -124,8 +118,7 @@ void ConvFunctionModel::checkSingleFunction(const IFunction_sptr &fun,
 
   if (FitTypeStringToEnum.count(name) == 1) {
     if (isFitTypeSet) {
-      throw std::runtime_error(
-          "Function has wrong structure. More than one fit type set");
+      throw std::runtime_error("Function has wrong structure. More than one fit type set");
     }
     m_fitType = FitTypeStringToEnum[name];
     m_isQDependentFunction = FitTypeQDepends[m_fitType];
@@ -134,38 +127,25 @@ void ConvFunctionModel::checkSingleFunction(const IFunction_sptr &fun,
     m_hasDeltaFunction = true;
   } else if (!isFitTypeSet && !isLorentzianTypeSet) {
     clear();
-    throw std::runtime_error(
-        "Function has wrong structure. Function not recognized");
+    throw std::runtime_error("Function has wrong structure. Function not recognized");
   }
 }
 
-IFunction_sptr ConvFunctionModel::getFitFunction() const {
-  return m_model.getFitFunction();
-}
+IFunction_sptr ConvFunctionModel::getFitFunction() const { return m_model.getFitFunction(); }
 
-void ConvFunctionModel::setQValues(const std::vector<double> &qValues) {
-  m_qValues = qValues;
-}
+void ConvFunctionModel::setQValues(const std::vector<double> &qValues) { m_qValues = qValues; }
 
 FitType ConvFunctionModel::getFitType() const { return m_fitType; }
-BackgroundType ConvFunctionModel::getBackgroundType() const {
-  return m_backgroundType;
-}
+BackgroundType ConvFunctionModel::getBackgroundType() const { return m_backgroundType; }
 
-LorentzianType ConvFunctionModel::getLorentzianType() const {
-  return m_lorentzianType;
-}
+LorentzianType ConvFunctionModel::getLorentzianType() const { return m_lorentzianType; }
 
 bool ConvFunctionModel::hasFunction() const { return m_model.hasFunction(); }
 
-void ConvFunctionModel::addFunction(const QString &prefix,
-                                    const QString &funStr) {
+void ConvFunctionModel::addFunction(const QString &prefix, const QString &funStr) {
   if (!prefix.isEmpty())
-    throw std::runtime_error(
-        "Function doesn't have member function with prefix " +
-        prefix.toStdString());
-  auto fun =
-      FunctionFactory::Instance().createInitialized(funStr.toStdString());
+    throw std::runtime_error("Function doesn't have member function with prefix " + prefix.toStdString());
+  auto fun = FunctionFactory::Instance().createInitialized(funStr.toStdString());
   auto const name = fun->name();
   QString newPrefix;
   if (name == "Lorentzian") {
@@ -229,9 +209,7 @@ void ConvFunctionModel::removeFunction(const QString &prefix) {
     removeBackground();
     return;
   }
-  throw std::runtime_error(
-      "Function doesn't have member function with prefix " +
-      prefix.toStdString());
+  throw std::runtime_error("Function doesn't have member function with prefix " + prefix.toStdString());
 }
 
 void ConvFunctionModel::setDeltaFunction(bool on) {
@@ -249,9 +227,7 @@ void ConvFunctionModel::setTempCorrection(bool on, double value) {
   setCurrentValues(oldValues);
 }
 
-bool ConvFunctionModel::hasTempCorrection() const {
-  return m_hasTempCorrection;
-}
+bool ConvFunctionModel::hasTempCorrection() const { return m_hasTempCorrection; }
 
 double ConvFunctionModel::getTempValue() const { return m_tempValue; }
 
@@ -271,33 +247,26 @@ void ConvFunctionModel::removeBackground() {
   setCurrentValues(oldValues);
 }
 
-bool ConvFunctionModel::hasBackground() const {
-  return m_backgroundType != BackgroundType::None;
-}
+bool ConvFunctionModel::hasBackground() const { return m_backgroundType != BackgroundType::None; }
 
-void ConvFunctionModel::updateParameterEstimationData(
-    DataForParameterEstimationCollection &&data) {
+void ConvFunctionModel::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_estimationData = std::move(data);
 }
 
-void ConvFunctionModel::setResolution(std::string const &name,
-                                      TableDatasetIndex const &index) {
+void ConvFunctionModel::setResolution(std::string const &name, TableDatasetIndex const &index) {
   m_resolutionName = name;
   m_resolutionIndex = index;
   setModel();
 }
 
-void ConvFunctionModel::setResolution(
-    const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
+void ConvFunctionModel::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   m_fitResolutions = fitResolutions;
   setModel();
 }
 
 QString ConvFunctionModel::setBackgroundA0(double value) {
   if (hasBackground()) {
-    auto const paramID = (m_backgroundType == BackgroundType::Flat)
-                             ? ParamID::FLAT_BG_A0
-                             : ParamID::LINEAR_BG_A0;
+    auto const paramID = (m_backgroundType == BackgroundType::Flat) ? ParamID::FLAT_BG_A0 : ParamID::LINEAR_BG_A0;
     setParameter(paramID, value);
     return *getParameterName(paramID);
   }
@@ -306,51 +275,33 @@ QString ConvFunctionModel::setBackgroundA0(double value) {
 
 void ConvFunctionModel::setNumberDomains(int n) { m_model.setNumberDomains(n); }
 
-int ConvFunctionModel::getNumberDomains() const {
-  return m_model.getNumberDomains();
-}
+int ConvFunctionModel::getNumberDomains() const { return m_model.getNumberDomains(); }
 
-void ConvFunctionModel::setParameter(const QString &paramName, double value) {
-  m_model.setParameter(paramName, value);
-}
+void ConvFunctionModel::setParameter(const QString &paramName, double value) { m_model.setParameter(paramName, value); }
 
-void ConvFunctionModel::setParameterError(const QString &paramName,
-                                          double value) {
+void ConvFunctionModel::setParameterError(const QString &paramName, double value) {
   m_model.setParameterError(paramName, value);
 }
 
-double ConvFunctionModel::getParameter(const QString &paramName) const {
-  return m_model.getParameter(paramName);
-}
+double ConvFunctionModel::getParameter(const QString &paramName) const { return m_model.getParameter(paramName); }
 
 double ConvFunctionModel::getParameterError(const QString &paramName) const {
   return m_model.getParameterError(paramName);
 }
 
-QString
-ConvFunctionModel::getParameterDescription(const QString &paramName) const {
+QString ConvFunctionModel::getParameterDescription(const QString &paramName) const {
   return m_model.getParameterDescription(paramName);
 }
 
-QStringList ConvFunctionModel::getParameterNames() const {
-  return m_model.getParameterNames();
-}
+QStringList ConvFunctionModel::getParameterNames() const { return m_model.getParameterNames(); }
 
-IFunction_sptr ConvFunctionModel::getSingleFunction(int index) const {
-  return m_model.getSingleFunction(index);
-}
+IFunction_sptr ConvFunctionModel::getSingleFunction(int index) const { return m_model.getSingleFunction(index); }
 
-IFunction_sptr ConvFunctionModel::getCurrentFunction() const {
-  return m_model.getCurrentFunction();
-}
+IFunction_sptr ConvFunctionModel::getCurrentFunction() const { return m_model.getCurrentFunction(); }
 
-QStringList ConvFunctionModel::getGlobalParameters() const {
-  return m_model.getGlobalParameters();
-}
+QStringList ConvFunctionModel::getGlobalParameters() const { return m_model.getGlobalParameters(); }
 
-QStringList ConvFunctionModel::getLocalParameters() const {
-  return m_model.getLocalParameters();
-}
+QStringList ConvFunctionModel::getLocalParameters() const { return m_model.getLocalParameters(); }
 
 void ConvFunctionModel::setGlobalParameters(const QStringList &globals) {
   m_globals.clear();
@@ -361,9 +312,7 @@ void ConvFunctionModel::setGlobalParameters(const QStringList &globals) {
   m_model.setGlobalParameters(newGlobals);
 }
 
-bool ConvFunctionModel::isGlobal(const QString &parName) const {
-  return m_model.isGlobal(parName);
-}
+bool ConvFunctionModel::isGlobal(const QString &parName) const { return m_model.isGlobal(parName); }
 
 void ConvFunctionModel::setGlobal(const QString &parName, bool on) {
   if (parName.isEmpty())
@@ -426,8 +375,7 @@ void ConvFunctionModel::updateMultiDatasetParameters(const IFunction &fun) {
   m_model.updateMultiDatasetParameters(fun);
 }
 
-void ConvFunctionModel::updateMultiDatasetParameters(
-    const ITableWorkspace &paramTable) {
+void ConvFunctionModel::updateMultiDatasetParameters(const ITableWorkspace &paramTable) {
   auto const nRows = paramTable.rowCount();
   if (nRows == 0)
     return;
@@ -446,106 +394,72 @@ void ConvFunctionModel::updateMultiDatasetParameters(
     auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
     if (nRows > 1) {
       for (size_t i = 0; i < nRows; ++i) {
-        m_model.setLocalParameterValue(name, static_cast<int>(i),
-                                       valueColumn->toDouble(i),
-                                       errorColumn->toDouble(i));
+        m_model.setLocalParameterValue(name, static_cast<int>(i), valueColumn->toDouble(i), errorColumn->toDouble(i));
       }
     } else {
       auto const i = m_model.currentDomainIndex();
-      m_model.setLocalParameterValue(name, static_cast<int>(i),
-                                     valueColumn->toDouble(0),
-                                     errorColumn->toDouble(0));
+      m_model.setLocalParameterValue(name, static_cast<int>(i), valueColumn->toDouble(0), errorColumn->toDouble(0));
     }
   }
 }
 
-void ConvFunctionModel::updateParameters(const IFunction &fun) {
-  m_model.updateParameters(fun);
-}
+void ConvFunctionModel::updateParameters(const IFunction &fun) { m_model.updateParameters(fun); }
 
-void ConvFunctionModel::setCurrentDomainIndex(int i) {
-  m_model.setCurrentDomainIndex(i);
-}
+void ConvFunctionModel::setCurrentDomainIndex(int i) { m_model.setCurrentDomainIndex(i); }
 
-int ConvFunctionModel::currentDomainIndex() const {
-  return m_model.currentDomainIndex();
-}
+int ConvFunctionModel::currentDomainIndex() const { return m_model.currentDomainIndex(); }
 
-void ConvFunctionModel::changeTie(const QString &paramName,
-                                  const QString &tie) {
-  m_model.changeTie(paramName, tie);
-}
+void ConvFunctionModel::changeTie(const QString &paramName, const QString &tie) { m_model.changeTie(paramName, tie); }
 
-void ConvFunctionModel::addConstraint(const QString &functionIndex,
-                                      const QString &constraint) {
+void ConvFunctionModel::addConstraint(const QString &functionIndex, const QString &constraint) {
   m_model.addConstraint(functionIndex, constraint);
 }
 
-void ConvFunctionModel::removeConstraint(const QString &paramName) {
-  m_model.removeConstraint(paramName);
-}
+void ConvFunctionModel::removeConstraint(const QString &paramName) { m_model.removeConstraint(paramName); }
 
-void ConvFunctionModel::setDatasets(
-    const QList<FunctionModelDataset> &datasets) {
-  m_model.setDatasets(datasets);
-}
+void ConvFunctionModel::setDatasets(const QList<FunctionModelDataset> &datasets) { m_model.setDatasets(datasets); }
 
-QStringList ConvFunctionModel::getDatasetNames() const {
-  return m_model.getDatasetNames();
-}
+QStringList ConvFunctionModel::getDatasetNames() const { return m_model.getDatasetNames(); }
 
-QStringList ConvFunctionModel::getDatasetDomainNames() const {
-  return m_model.getDatasetDomainNames();
-}
+QStringList ConvFunctionModel::getDatasetDomainNames() const { return m_model.getDatasetDomainNames(); }
 
-double ConvFunctionModel::getLocalParameterValue(const QString &parName,
-                                                 int i) const {
+double ConvFunctionModel::getLocalParameterValue(const QString &parName, int i) const {
   return m_model.getLocalParameterValue(parName, i);
 }
 
-bool ConvFunctionModel::isLocalParameterFixed(const QString &parName,
-                                              int i) const {
+bool ConvFunctionModel::isLocalParameterFixed(const QString &parName, int i) const {
   return m_model.isLocalParameterFixed(parName, i);
 }
 
-QString ConvFunctionModel::getLocalParameterTie(const QString &parName,
-                                                int i) const {
+QString ConvFunctionModel::getLocalParameterTie(const QString &parName, int i) const {
   return m_model.getLocalParameterTie(parName, i);
 }
 
-QString ConvFunctionModel::getLocalParameterConstraint(const QString &parName,
-                                                       int i) const {
+QString ConvFunctionModel::getLocalParameterConstraint(const QString &parName, int i) const {
   return m_model.getLocalParameterConstraint(parName, i);
 }
 
-void ConvFunctionModel::setLocalParameterValue(const QString &parName, int i,
-                                               double value) {
+void ConvFunctionModel::setLocalParameterValue(const QString &parName, int i, double value) {
   m_model.setLocalParameterValue(parName, i, value);
 }
 
-void ConvFunctionModel::setLocalParameterValue(const QString &parName, int i,
-                                               double value, double error) {
+void ConvFunctionModel::setLocalParameterValue(const QString &parName, int i, double value, double error) {
   m_model.setLocalParameterValue(parName, i, value, error);
 }
 
-void ConvFunctionModel::setLocalParameterTie(const QString &parName, int i,
-                                             const QString &tie) {
+void ConvFunctionModel::setLocalParameterTie(const QString &parName, int i, const QString &tie) {
   m_model.setLocalParameterTie(parName, i, tie);
 }
 
-void ConvFunctionModel::setLocalParameterConstraint(const QString &parName,
-                                                    int i,
-                                                    const QString &constraint) {
+void ConvFunctionModel::setLocalParameterConstraint(const QString &parName, int i, const QString &constraint) {
   m_model.setLocalParameterConstraint(parName, i, constraint);
 }
 
-void ConvFunctionModel::setLocalParameterFixed(const QString &parName, int i,
-                                               bool fixed) {
+void ConvFunctionModel::setLocalParameterFixed(const QString &parName, int i, bool fixed) {
   m_model.setLocalParameterFixed(parName, i, fixed);
 }
 
-void ConvFunctionModel::setGlobalParameterValue(const QString &paramName,
-                                                double value) {
+void ConvFunctionModel::setGlobalParameterValue(const QString &paramName, double value) {
   m_model.setGlobalParameterValue(paramName, value);
 }
 
@@ -558,28 +472,22 @@ void ConvFunctionModel::setParameter(ParamID name, double value) {
 
 boost::optional<double> ConvFunctionModel::getParameter(ParamID name) const {
   auto const paramName = getParameterName(name);
-  return paramName ? m_model.getParameter(*paramName)
-                   : boost::optional<double>();
+  return paramName ? m_model.getParameter(*paramName) : boost::optional<double>();
 }
 
-boost::optional<double>
-ConvFunctionModel::getParameterError(ParamID name) const {
+boost::optional<double> ConvFunctionModel::getParameterError(ParamID name) const {
   auto const paramName = getParameterName(name);
-  return paramName ? m_model.getParameterError(*paramName)
-                   : boost::optional<double>();
+  return paramName ? m_model.getParameterError(*paramName) : boost::optional<double>();
 }
 
-boost::optional<QString>
-ConvFunctionModel::getParameterName(ParamID name) const {
+boost::optional<QString> ConvFunctionModel::getParameterName(ParamID name) const {
   auto const prefix = getPrefix(name);
   return prefix ? *prefix + paramName(name) : boost::optional<QString>();
 }
 
-boost::optional<QString>
-ConvFunctionModel::getParameterDescription(ParamID name) const {
+boost::optional<QString> ConvFunctionModel::getParameterDescription(ParamID name) const {
   auto const paramName = getParameterName(name);
-  return paramName ? m_model.getParameterDescription(*paramName)
-                   : boost::optional<QString>();
+  return paramName ? m_model.getParameterDescription(*paramName) : boost::optional<QString>();
 }
 
 boost::optional<QString> ConvFunctionModel::getPrefix(ParamID name) const {
@@ -595,35 +503,28 @@ boost::optional<QString> ConvFunctionModel::getPrefix(ParamID name) const {
     auto const prefixes = m_model.peakPrefixes();
     if (!prefixes)
       return boost::optional<QString>();
-    auto const index =
-        name > ParamID::LOR2_FWHM_1 && name <= ParamID::LOR2_FWHM_2 ? 1 : 0;
+    auto const index = name > ParamID::LOR2_FWHM_1 && name <= ParamID::LOR2_FWHM_2 ? 1 : 0;
     return m_model.peakPrefixes()->at(index);
   }
 }
 
 QMap<ParamID, double> ConvFunctionModel::getCurrentValues() const {
   QMap<ParamID, double> values;
-  auto store = [&values, this](ParamID name) {
-    values[name] = *getParameter(name);
-  };
+  auto store = [&values, this](ParamID name) { values[name] = *getParameter(name); };
   applyParameterFunction(store);
   return values;
 }
 
 QMap<ParamID, double> ConvFunctionModel::getCurrentErrors() const {
   QMap<ParamID, double> errors;
-  auto store = [&errors, this](ParamID name) {
-    errors[name] = *getParameterError(name);
-  };
+  auto store = [&errors, this](ParamID name) { errors[name] = *getParameterError(name); };
   applyParameterFunction(store);
   return errors;
 }
 
 QMap<int, QString> ConvFunctionModel::getParameterNameMap() const {
   QMap<int, QString> out;
-  auto addToMap = [&out, this](ParamID name) {
-    out[static_cast<int>(name)] = *getParameterName(name);
-  };
+  auto addToMap = [&out, this](ParamID name) { out[static_cast<int>(name)] = *getParameterName(name); };
   applyParameterFunction(addToMap);
   return out;
 }
@@ -634,19 +535,16 @@ void ConvFunctionModel::setCurrentValues(const QMap<ParamID, double> &values) {
   }
 }
 
-void ConvFunctionModel::applyParameterFunction(
-    const std::function<void(ParamID)> &paramFun) const {
+void ConvFunctionModel::applyParameterFunction(const std::function<void(ParamID)> &paramFun) const {
   applyToLorentzianType(m_lorentzianType, paramFun);
   applyToFitType(m_fitType, paramFun);
   applyToBackground(m_backgroundType, paramFun);
   applyToDelta(m_hasDeltaFunction, paramFun);
-  auto tempType = m_hasTempCorrection ? TempCorrectionType::Exponential
-                                      : TempCorrectionType::None;
+  auto tempType = m_hasTempCorrection ? TempCorrectionType::Exponential : TempCorrectionType::None;
   applyToTemp(tempType, paramFun);
 }
 
-boost::optional<ParamID>
-ConvFunctionModel::getParameterId(const QString &parName) {
+boost::optional<ParamID> ConvFunctionModel::getParameterId(const QString &parName) {
   boost::optional<ParamID> result;
   auto getter = [&result, parName, this](ParamID pid) {
     if (parName == *getParameterName(pid))
@@ -688,20 +586,17 @@ std::string ConvFunctionModel::buildDiffSphereFunctionString() const {
          "f1.Intensity = 1, f1.Radius = 2, f1.Diffusion = 0.05, f1.Shift = 0";
 }
 
-std::string
-ConvFunctionModel::buildInelasticDiffRotDiscreteCircleFunctionString() const {
+std::string ConvFunctionModel::buildInelasticDiffRotDiscreteCircleFunctionString() const {
   return "name=InelasticDiffRotDiscreteCircle, Intensity=1, Radius=1, Decay=1, "
          "Shift=0, constraints=(Intensity>0, Radius>0)";
 }
 
-std::string
-ConvFunctionModel::buildElasticDiffRotDiscreteCircleFunctionString() const {
+std::string ConvFunctionModel::buildElasticDiffRotDiscreteCircleFunctionString() const {
   return "name=ElasticDiffRotDiscreteCircle, Height=1, Centre=0, Radius=1, "
          "constraints=(Height>0, Radius>0)";
 }
 
-std::string
-ConvFunctionModel::buildDiffRotDiscreteCircleFunctionString() const {
+std::string ConvFunctionModel::buildDiffRotDiscreteCircleFunctionString() const {
   return "name=DiffRotDiscreteCircle, Intensity=1, Radius=1, Decay=1, "
          "Shift=0, constraints=(Intensity>0, Radius>0)";
 }
@@ -774,29 +669,18 @@ std::string ConvFunctionModel::buildFitTypeString() const {
 std::string ConvFunctionModel::buildBackgroundFunctionString() const {
   if (m_backgroundType == BackgroundType::None)
     return "";
-  return "name=" + m_backgroundSubtype.getFunctionName(m_backgroundType) +
-         ",A0=0,constraints=(A0>0)";
+  return "name=" + m_backgroundSubtype.getFunctionName(m_backgroundType) + ",A0=0,constraints=(A0>0)";
 }
 
-boost::optional<QString> ConvFunctionModel::getLor1Prefix() const {
-  return m_model.peakPrefixes()->at(0);
-}
+boost::optional<QString> ConvFunctionModel::getLor1Prefix() const { return m_model.peakPrefixes()->at(0); }
 
-boost::optional<QString> ConvFunctionModel::getLor2Prefix() const {
-  return m_model.peakPrefixes()->at(1);
-}
+boost::optional<QString> ConvFunctionModel::getLor2Prefix() const { return m_model.peakPrefixes()->at(1); }
 
-boost::optional<QString> ConvFunctionModel::getFitTypePrefix() const {
-  return m_model.fitTypePrefix();
-}
+boost::optional<QString> ConvFunctionModel::getFitTypePrefix() const { return m_model.fitTypePrefix(); }
 
-boost::optional<QString> ConvFunctionModel::getDeltaPrefix() const {
-  return m_model.deltaFunctionPrefix();
-}
+boost::optional<QString> ConvFunctionModel::getDeltaPrefix() const { return m_model.deltaFunctionPrefix(); }
 
-boost::optional<QString> ConvFunctionModel::getBackgroundPrefix() const {
-  return m_model.backgroundPrefix();
-}
+boost::optional<QString> ConvFunctionModel::getBackgroundPrefix() const { return m_model.backgroundPrefix(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

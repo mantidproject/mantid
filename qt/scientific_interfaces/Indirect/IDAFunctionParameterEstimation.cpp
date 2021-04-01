@@ -13,16 +13,14 @@ namespace CustomInterfaces {
 namespace IDA {
 
 // Add function name and estimation function to the stored function map.
-void IDAFunctionParameterEstimation::addParameterEstimationFunction(
-    std::string name, EstimationFunction function) {
+void IDAFunctionParameterEstimation::addParameterEstimationFunction(std::string name, EstimationFunction function) {
   m_funcMap.insert(std::make_pair(std::move(name), std::move(function)));
 }
 // Estimate the function parameters for the input function
 // If the input function exists in the stored map it will update the function
 // parameters in-place.
-void IDAFunctionParameterEstimation::estimateFunctionParameters(
-    ::Mantid::API::IFunction_sptr &function,
-    const DataForParameterEstimation &estimationData) {
+void IDAFunctionParameterEstimation::estimateFunctionParameters(::Mantid::API::IFunction_sptr &function,
+                                                                const DataForParameterEstimation &estimationData) {
   if (function) {
     std::string functionName = function->name();
     if (m_funcMap.find(functionName) != m_funcMap.end()) {

@@ -37,8 +37,8 @@ public:
   //--------------------------------------------------------------------------------------------
 
   void testShape() {
-    IObject_sptr shape_sptr = ComponentCreationHelper::createCappedCylinder(
-        0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
+    IObject_sptr shape_sptr =
+        ComponentCreationHelper::createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
     Sample sample;
     TS_ASSERT_THROWS_NOTHING(sample.setShape(shape_sptr))
     const IObject &sampleShape = sample.getShape();
@@ -57,12 +57,10 @@ public:
     TS_ASSERT_THROWS(sample.getEnvironment(), const std::runtime_error &);
   }
 
-  void
-  test_That_An_Environment_Can_Be_Set_And_The_Same_Environment_Is_Returned() {
+  void test_That_An_Environment_Can_Be_Set_And_The_Same_Environment_Is_Returned() {
     Sample sample;
     const std::string envName("TestKit");
-    auto kit = std::make_unique<SampleEnvironment>(
-        envName, std::make_shared<const Container>(""));
+    auto kit = std::make_unique<SampleEnvironment>(envName, std::make_shared<const Container>(""));
     kit->add(std::make_shared<const CSGObject>());
 
     TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(std::move(kit)));
@@ -115,8 +113,7 @@ public:
 
   void test_clearOrientedLattice() {
     Sample sample;
-    TS_ASSERT_THROWS_NOTHING(sample.setOrientedLattice(
-        std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90)));
+    TS_ASSERT_THROWS_NOTHING(sample.setOrientedLattice(std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90)));
 
     TS_ASSERT(sample.hasOrientedLattice())
     TS_ASSERT_THROWS_NOTHING(sample.getOrientedLattice())
@@ -131,8 +128,7 @@ public:
   void test_clearOrientedLattice_and_the_copy_constructor() {
     // Create a sample with an oriented lattice.
     Sample sampleA;
-    TS_ASSERT_THROWS_NOTHING(sampleA.setOrientedLattice(
-        std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90)));
+    TS_ASSERT_THROWS_NOTHING(sampleA.setOrientedLattice(std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90)));
 
     // Copy the sample.
     Sample sampleB(sampleA);
@@ -167,8 +163,7 @@ public:
   void test_clearOrientedLattice_and_assignment() {
     // Create a sample with an oriented lattice.
     Sample sampleA;
-    TS_ASSERT_THROWS_NOTHING(sampleA.setOrientedLattice(
-        std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90)));
+    TS_ASSERT_THROWS_NOTHING(sampleA.setOrientedLattice(std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90)));
 
     // Create and then assign to the sample.
     Sample sampleB;
@@ -206,8 +201,7 @@ public:
     TS_ASSERT(!sample.hasCrystalStructure());
     TS_ASSERT_THROWS(sample.getCrystalStructure(), const std::runtime_error &);
 
-    CrystalStructure structure("3 4 5 90 90 90", "C m m m",
-                               "Fe 0.12 0.23 0.121");
+    CrystalStructure structure("3 4 5 90 90 90", "C m m m", "Fe 0.12 0.23 0.121");
 
     TS_ASSERT_THROWS_NOTHING(sample.setCrystalStructure(structure));
     TS_ASSERT(sample.hasCrystalStructure());
@@ -222,8 +216,7 @@ public:
     TS_ASSERT(!sample.hasCrystalStructure());
     TS_ASSERT_THROWS(sample.getCrystalStructure(), const std::runtime_error &);
 
-    CrystalStructure structure("3 4 5 90 90 90", "C m m m",
-                               "Fe 0.12 0.23 0.121");
+    CrystalStructure structure("3 4 5 90 90 90", "C m m m", "Fe 0.12 0.23 0.121");
     sample.setCrystalStructure(structure);
     TS_ASSERT(sample.hasCrystalStructure());
 
@@ -234,8 +227,7 @@ public:
   void test_crystalStructureCopyConstructorAndAssignment() {
     Sample sampleA;
 
-    CrystalStructure structure("3 4 5 90 90 90", "C m m m",
-                               "Fe 0.12 0.23 0.121");
+    CrystalStructure structure("3 4 5 90 90 90", "C m m m", "Fe 0.12 0.23 0.121");
     sampleA.setCrystalStructure(structure);
     TS_ASSERT(sampleA.hasCrystalStructure());
 
@@ -244,19 +236,16 @@ public:
 
     CrystalStructure fromA = sampleA.getCrystalStructure();
     CrystalStructure fromB = sampleB.getCrystalStructure();
-    TS_ASSERT_EQUALS(fromA.spaceGroup()->hmSymbol(),
-                     fromB.spaceGroup()->hmSymbol());
+    TS_ASSERT_EQUALS(fromA.spaceGroup()->hmSymbol(), fromB.spaceGroup()->hmSymbol());
 
     Sample sampleC(sampleA);
 
     CrystalStructure fromC = sampleC.getCrystalStructure();
-    TS_ASSERT_EQUALS(fromA.spaceGroup()->hmSymbol(),
-                     fromC.spaceGroup()->hmSymbol());
+    TS_ASSERT_EQUALS(fromA.spaceGroup()->hmSymbol(), fromC.spaceGroup()->hmSymbol());
   }
 
   void test_Material_Returns_The_Correct_Value() {
-    Material vanBlock("vanBlock",
-                      Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
+    Material vanBlock("vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
     Sample sample;
     auto shape = Mantid::Geometry::ShapeFactory().createShape("");
     shape->setMaterial(vanBlock);
@@ -276,12 +265,9 @@ public:
 
     // void casts are to stop the unused variable warnings.
     TS_ASSERT_THROWS_ANYTHING(Sample &sampleRef = sample[1]; (void)sampleRef;);
-    TS_ASSERT_THROWS_ANYTHING(Sample &sampleRef2 = sample[999];
-                              (void)sampleRef2;);
-    TS_ASSERT_THROWS_ANYTHING(Sample &sampleRef3 = sample[-1];
-                              (void)sampleRef3;);
-    TS_ASSERT_THROWS_NOTHING(Sample &sampleRef = sample[0]; TS_ASSERT(
-                                 sample.getName() == sampleRef.getName()););
+    TS_ASSERT_THROWS_ANYTHING(Sample &sampleRef2 = sample[999]; (void)sampleRef2;);
+    TS_ASSERT_THROWS_ANYTHING(Sample &sampleRef3 = sample[-1]; (void)sampleRef3;);
+    TS_ASSERT_THROWS_NOTHING(Sample &sampleRef = sample[0]; TS_ASSERT(sample.getName() == sampleRef.getName()););
   }
 
   void test_Multiple_Samples() {
@@ -296,10 +282,9 @@ public:
     sample.addSample(sample2);
     TS_ASSERT_EQUALS(sample.size(), 3);
 
-    TS_ASSERT_THROWS_NOTHING(
-        TS_ASSERT(sample[0].getName() == sample.getName());
-        TS_ASSERT(sample[1].getName() == sample2->getName());
-        TS_ASSERT(sample[2].getName() == sample2->getName()););
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(sample[0].getName() == sample.getName());
+                             TS_ASSERT(sample[1].getName() == sample2->getName());
+                             TS_ASSERT(sample[2].getName() == sample2->getName()););
 
     TS_ASSERT_THROWS_ANYTHING(Sample &sampleRef = sample[3]; (void)sampleRef;);
   }
@@ -308,19 +293,17 @@ public:
     NexusTestHelper th(true);
     th.createFile("SampleTest.nxs");
 
-    IObject_sptr shape_sptr = ComponentCreationHelper::createCappedCylinder(
-        0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
+    IObject_sptr shape_sptr =
+        ComponentCreationHelper::createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
     Sample sample;
     sample.setShape(shape_sptr);
     sample.setName("NameOfASample");
     sample.setWidth(1.234);
-    sample.setOrientedLattice(
-        std::make_unique<OrientedLattice>(4, 5, 6, 90, 91, 92));
+    sample.setOrientedLattice(std::make_unique<OrientedLattice>(4, 5, 6, 90, 91, 92));
     auto sample2 = std::make_shared<Sample>();
     sample2->setName("test name for test_Multiple_Sample - 2");
     sample.addSample(sample2);
-    TS_ASSERT(
-        dynamic_cast<const CSGObject &>(sample.getShape()).getShapeXML() != "");
+    TS_ASSERT(dynamic_cast<const CSGObject &>(sample.getShape()).getShapeXML() != "");
 
     sample.saveNexus(th.file.get(), "sample");
     th.reopenFile();
@@ -336,11 +319,9 @@ public:
     TS_ASSERT_DELTA(loaded.getOrientedLattice().a(), 4.0, 1e-6);
     TS_ASSERT_DELTA(loaded.getOrientedLattice().b(), 5.0, 1e-6);
     TS_ASSERT_DELTA(loaded.getOrientedLattice().c(), 6.0, 1e-6);
-    TS_ASSERT_EQUALS(loaded.getShape().getBoundingBox().xMax(),
-                     sample.getShape().getBoundingBox().xMax());
-    TS_ASSERT_EQUALS(
-        dynamic_cast<const CSGObject &>(loaded.getShape()).getShapeXML(),
-        dynamic_cast<const CSGObject &>(sample.getShape()).getShapeXML());
+    TS_ASSERT_EQUALS(loaded.getShape().getBoundingBox().xMax(), sample.getShape().getBoundingBox().xMax());
+    TS_ASSERT_EQUALS(dynamic_cast<const CSGObject &>(loaded.getShape()).getShapeXML(),
+                     dynamic_cast<const CSGObject &>(sample.getShape()).getShapeXML());
     // Geometry values
     TS_ASSERT_DELTA(loaded.getWidth(), sample.getWidth(), 1e-6);
   }
@@ -400,15 +381,12 @@ public:
   }
 
   void test_not_equal_when_sample_differs_in_environment() {
-    auto kit1 = std::make_unique<SampleEnvironment>(
-        "Env", std::make_shared<const Container>(""));
+    auto kit1 = std::make_unique<SampleEnvironment>("Env", std::make_shared<const Container>(""));
 
-    auto kit2 = std::make_unique<SampleEnvironment>(
-        "Env2", std::make_shared<const Container>(""));
+    auto kit2 = std::make_unique<SampleEnvironment>("Env2", std::make_shared<const Container>(""));
 
     // same as kit1
-    auto kit3 = std::make_unique<SampleEnvironment>(
-        kit1->name(), std::make_shared<const Container>(""));
+    auto kit3 = std::make_unique<SampleEnvironment>(kit1->name(), std::make_shared<const Container>(""));
 
     Sample a;
     auto b = a;
@@ -429,11 +407,9 @@ public:
   }
 
   void test_not_equal_when_sample_differs_in_shape() {
-    IObject_sptr shape1 = ComponentCreationHelper::createCappedCylinder(
-        0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
+    IObject_sptr shape1 = ComponentCreationHelper::createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
 
-    IObject_sptr shape2 = ComponentCreationHelper::createCappedCylinder(
-        0.0137, 1.0, V3D(), V3D(0.0, 0.0, 0.0), "cyl");
+    IObject_sptr shape2 = ComponentCreationHelper::createCappedCylinder(0.0137, 1.0, V3D(), V3D(0.0, 0.0, 0.0), "cyl");
 
     Sample a;
     auto b = a;
@@ -454,14 +430,11 @@ public:
   }
 
   void test_not_equal_when_sample_differs_in_space_group() {
-    CrystalStructure structure1("3 4 5 90 90 90", "C m m m",
-                                "Fe 0.12 0.23 0.121");
+    CrystalStructure structure1("3 4 5 90 90 90", "C m m m", "Fe 0.12 0.23 0.121");
     // Same as above
-    CrystalStructure structure2("3 4 5 90 90 90", "C m m m",
-                                "Fe 0.12 0.23 0.121");
+    CrystalStructure structure2("3 4 5 90 90 90", "C m m m", "Fe 0.12 0.23 0.121");
     // Different
-    CrystalStructure structure3("5.431 5.431 5.431", "F d -3 m",
-                                "Si 0 0 0 1.0 0.02");
+    CrystalStructure structure3("5.431 5.431 5.431", "F d -3 m", "Si 0 0 0 1.0 0.02");
 
     Sample a;
     auto b = a;

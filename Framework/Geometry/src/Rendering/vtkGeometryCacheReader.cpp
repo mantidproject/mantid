@@ -98,15 +98,13 @@ void vtkGeometryCacheReader::readCacheForObject(IObject *obj) {
 
   // First check whether Object can be written to the file
   std::shared_ptr<GeometryHandler> handle = obj->getGeometryHandler();
-  handle->setGeometryCache(noOfPoints, noOfTriangles, std::move(Points),
-                           std::move(Faces));
+  handle->setGeometryCache(noOfPoints, noOfTriangles, std::move(Points), std::move(Faces));
 }
 
 /**
  * Get the Element by using the object name
  */
-Poco::XML::Element *
-vtkGeometryCacheReader::getElementByObjectName(const std::string &name) {
+Poco::XML::Element *vtkGeometryCacheReader::getElementByObjectName(const std::string &name) {
   Element *pRoot = mDoc->documentElement();
   if (pRoot == nullptr || pRoot->nodeName() != "VTKFile")
     return nullptr;
@@ -119,9 +117,7 @@ vtkGeometryCacheReader::getElementByObjectName(const std::string &name) {
 /**
  * Read the points from the element
  */
-void vtkGeometryCacheReader::readPoints(Poco::XML::Element *pEle,
-                                        int noOfPoints,
-                                        std::vector<double> &points) {
+void vtkGeometryCacheReader::readPoints(Poco::XML::Element *pEle, int noOfPoints, std::vector<double> &points) {
   if (pEle == nullptr) {
     noOfPoints = 0;
     return;
@@ -146,9 +142,7 @@ void vtkGeometryCacheReader::readPoints(Poco::XML::Element *pEle,
 /**
  * Read triangle face indexs
  */
-void vtkGeometryCacheReader::readTriangles(Poco::XML::Element *pEle,
-                                           int noOfTriangles,
-                                           std::vector<uint32_t> &faces) {
+void vtkGeometryCacheReader::readTriangles(Poco::XML::Element *pEle, int noOfTriangles, std::vector<uint32_t> &faces) {
   if (pEle == nullptr) {
     noOfTriangles = 0;
     return;

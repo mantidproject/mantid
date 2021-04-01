@@ -52,11 +52,9 @@ public:
     ws[0] = create2DWorkspace123(5, 3, false, std::set<int64_t>(),
                                  true); // 3 points
     ws[1] = create2DWorkspace154(5, 2, false, std::set<int64_t>(),
-                                 true); // 2 points
-    ws[2] =
-        create2DWorkspace123(5, 1, false, std::set<int64_t>(), true); // 1 point
-    ws[3] =
-        create2DWorkspace154(5, 1, false, std::set<int64_t>(), true); // 1 point
+                                 true);                                   // 2 points
+    ws[2] = create2DWorkspace123(5, 1, false, std::set<int64_t>(), true); // 1 point
+    ws[3] = create2DWorkspace154(5, 1, false, std::set<int64_t>(), true); // 1 point
     ws[4] = create2DWorkspace123(5, 3, false, std::set<int64_t>(),
                                  true); // 3 points
     ws[5] = create2DWorkspace123(5, 3, false, std::set<int64_t>(),
@@ -82,14 +80,12 @@ public:
   }
 
   void testHappyCase() {
-    m_testee.setProperty("InputWorkspaces",
-                         std::vector<std::string>{"ws1", "ws2", "ws3", "ws4"});
+    m_testee.setProperty("InputWorkspaces", std::vector<std::string>{"ws1", "ws2", "ws3", "ws4"});
     m_testee.setProperty("OutputWorkspace", "out");
     TS_ASSERT_THROWS_NOTHING(m_testee.execute());
     TS_ASSERT(m_testee.isExecuted());
 
-    MatrixWorkspace_sptr out =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
 
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 5);
@@ -111,15 +107,13 @@ public:
 
     GroupWorkspaces group;
     group.initialize();
-    group.setProperty("InputWorkspaces",
-                      std::vector<std::string>{"table", "ws1"});
+    group.setProperty("InputWorkspaces", std::vector<std::string>{"table", "ws1"});
     group.setProperty("OutputWorkspace", "group");
     group.execute();
     m_testee.setProperty("InputWorkspaces", "group");
     m_testee.setProperty("OutputWorkspace", "out");
-    TS_ASSERT_THROWS_EQUALS(
-        m_testee.execute(), const std::runtime_error &e, std::string(e.what()),
-        "Some invalid Properties found: [ InputWorkspaces ]");
+    TS_ASSERT_THROWS_EQUALS(m_testee.execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some invalid Properties found: [ InputWorkspaces ]");
   }
 
   void testWSWithoutDxValues() {
@@ -130,14 +124,12 @@ public:
     ws1->getAxis(0)->setUnit("TOF");
     storeWS("ws_0", ws0);
     storeWS("ws_1", ws1);
-    m_testee.setProperty("InputWorkspaces",
-                         std::vector<std::string>{"ws_0", "ws_1"});
+    m_testee.setProperty("InputWorkspaces", std::vector<std::string>{"ws_0", "ws_1"});
     m_testee.setProperty("OutputWorkspace", "out");
     TS_ASSERT_THROWS_NOTHING(m_testee.execute());
     TS_ASSERT(m_testee.isExecuted());
 
-    MatrixWorkspace_sptr out =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
 
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 5);
@@ -153,36 +145,30 @@ public:
   }
 
   void testFailDifferentNumberBins() {
-    MatrixWorkspace_sptr ws5 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws5");
+    MatrixWorkspace_sptr ws5 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws5");
 
     Counts counts{{5, 8}};
     Points points{{0.4, 0.9}};
     ws5->setHistogram(3, points, counts);
 
-    m_testee.setProperty("InputWorkspaces",
-                         std::vector<std::string>{"ws1", "ws5"});
+    m_testee.setProperty("InputWorkspaces", std::vector<std::string>{"ws1", "ws5"});
     TS_ASSERT_THROWS(m_testee.execute(), const std::runtime_error &);
   }
 
   void testPassDifferentAxes() {
-    MatrixWorkspace_sptr ws6 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws6");
+    MatrixWorkspace_sptr ws6 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws6");
 
-    for (auto i = 0; i < 5;
-         i++) { // modify all 5 spectra of ws6 in terms of y and x
+    for (auto i = 0; i < 5; i++) { // modify all 5 spectra of ws6 in terms of y and x
       ws6->mutableY(i) = {4., 9., 16.};
       ws6->mutableX(i) = {0.4, 0.9, 1.1};
     }
 
-    m_testee.setProperty("InputWorkspaces",
-                         std::vector<std::string>{"ws1", "ws6"});
+    m_testee.setProperty("InputWorkspaces", std::vector<std::string>{"ws1", "ws6"});
 
     TS_ASSERT_THROWS_NOTHING(m_testee.execute());
     TS_ASSERT(m_testee.isExecuted());
 
-    MatrixWorkspace_sptr out =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
 
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 5);
@@ -213,8 +199,7 @@ public:
     logAdder.setProperty("LogText", "0.7");
     logAdder.execute();
 
-    m_testee.setProperty("InputWorkspaces",
-                         std::vector<std::string>{"ws1", "ws2", "ws3", "ws4"});
+    m_testee.setProperty("InputWorkspaces", std::vector<std::string>{"ws1", "ws2", "ws3", "ws4"});
 
     m_testee.setProperty("SampleLogAsXAxis", "TestNumLog");
 
@@ -237,15 +222,13 @@ public:
     logAdder.setProperty("LogText", "1.1");
     logAdder.execute();
 
-    m_testee.setProperty("InputWorkspaces",
-                         std::vector<std::string>{"ws3", "ws4"});
+    m_testee.setProperty("InputWorkspaces", std::vector<std::string>{"ws3", "ws4"});
 
     m_testee.setProperty("SampleLogAsXAxis", "TestNumLog");
 
     TS_ASSERT_THROWS_NOTHING(m_testee.execute());
 
-    MatrixWorkspace_sptr out =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->blocksize(), 2);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 5);
@@ -269,8 +252,7 @@ public:
     logAdder.setProperty("LogText", "str");
     logAdder.execute();
 
-    m_testee.setProperty("InputWorkspaces",
-                         std::vector<std::string>{"ws1", "ws2", "ws3", "ws4"});
+    m_testee.setProperty("InputWorkspaces", std::vector<std::string>{"ws1", "ws2", "ws3", "ws4"});
     m_testee.setProperty("SampleLogAsXAxis", "TestStrLog");
 
     // string log not supported, fail
@@ -307,12 +289,10 @@ public:
     timeLogAdder.execute();
 
     m_testee.setProperty("SampleLogAsXAxis", "TestTimeLog");
-    m_testee.setProperty("InputWorkspaces",
-                         std::vector<std::string>{"ws1", "ws2"});
+    m_testee.setProperty("InputWorkspaces", std::vector<std::string>{"ws1", "ws2"});
 
     TS_ASSERT_THROWS_NOTHING(m_testee.execute());
-    MatrixWorkspace_sptr out =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->blocksize(), 5);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 5);
@@ -342,8 +322,7 @@ public:
     timeLogAdder.execute();
 
     m_testee.setProperty("SampleLogAsXAxis", "TestTimeLog");
-    m_testee.setProperty("InputWorkspaces",
-                         std::vector<std::string>{"ws1", "ws2"});
+    m_testee.setProperty("InputWorkspaces", std::vector<std::string>{"ws1", "ws2"});
 
     // ws1 has 3 bins, ws2 has 2, fail
     TS_ASSERT_THROWS(m_testee.execute(), const std::runtime_error &);
@@ -367,8 +346,7 @@ public:
     m_testee.setProperty("SampleLogsFailTolerances", "0.1");
     m_testee.setProperty("FailBehaviour", "Stop");
 
-    m_testee.setProperty("InputWorkspaces",
-                         std::vector<std::string>{"ws1", "ws2"});
+    m_testee.setProperty("InputWorkspaces", std::vector<std::string>{"ws1", "ws2"});
 
     TS_ASSERT_THROWS(m_testee.execute(), const std::runtime_error &);
   }
@@ -380,9 +358,7 @@ private:
 
 class ConjoinXRunsTestPerformance : public CxxTest::TestSuite {
 public:
-  static ConjoinXRunsTestPerformance *createSuite() {
-    return new ConjoinXRunsTestPerformance();
-  }
+  static ConjoinXRunsTestPerformance *createSuite() { return new ConjoinXRunsTestPerformance(); }
   static void destroySuite(ConjoinXRunsTestPerformance *suite) { delete suite; }
 
   ConjoinXRunsTestPerformance() {}
@@ -390,8 +366,7 @@ public:
   void setUp() override {
     m_ws.reserve(100);
     for (size_t i = 0; i < 100; ++i) {
-      MatrixWorkspace_sptr ws =
-          create2DWorkspace123(2000, 100, false, std::set<int64_t>(), true);
+      MatrixWorkspace_sptr ws = create2DWorkspace123(2000, 100, false, std::set<int64_t>(), true);
       std::string name = "ws" + std::to_string(i);
       storeWS(name, ws);
       m_ws.emplace_back(name);

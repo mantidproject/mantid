@@ -39,16 +39,14 @@ public:
    * @return BoxController instance
    */
   BoxController(size_t nd)
-      : nd(nd), m_maxId(0), m_SplitThreshold(1024), m_splitTopInto(boost::none),
-        m_numSplit(1), m_numTopSplit(1),
+      : nd(nd), m_maxId(0), m_SplitThreshold(1024), m_splitTopInto(boost::none), m_numSplit(1), m_numTopSplit(1),
         m_fileIO(std::shared_ptr<API::IBoxControllerIO>()) {
     // TODO: Smarter ways to determine all of these values
     m_maxDepth = 5;
     m_numEventsAtMax = 0;
     m_addingEvents_eventsPerTask = 1000;
     m_significantEventsNumber = 10000000;
-    m_addingEvents_numTasksPerBlock =
-        Kernel::ThreadPool::getNumPhysicalCores() * 5;
+    m_addingEvents_numTasksPerBlock = Kernel::ThreadPool::getNumPhysicalCores() * 5;
     m_splitInto.resize(this->nd, 1);
     resetNumBoxes();
   }
@@ -179,9 +177,8 @@ public:
    */
   void setSplitTopInto(size_t dim, size_t num) {
     if (dim >= nd)
-      throw std::invalid_argument(
-          "BoxController::setSplitTopInto() called with "
-          "too high of a dimension index.");
+      throw std::invalid_argument("BoxController::setSplitTopInto() called with "
+                                  "too high of a dimension index.");
     // If the vector is not created, then create it
     if (!m_splitTopInto) {
       m_splitTopInto = std::vector<size_t>(nd, 1);
@@ -199,23 +196,18 @@ public:
     this->m_addingEvents_eventsPerTask = m_addingEvents_eventsPerTask;
   }
   /// @return When adding events, how many events per task should be done?
-  size_t getAddingEvents_eventsPerTask() const {
-    return m_addingEvents_eventsPerTask;
-  }
+  size_t getAddingEvents_eventsPerTask() const { return m_addingEvents_eventsPerTask; }
 
   /** When adding events, how many events tasks per block should be done?
    *
    * @param m_addingEvents_numTasksPerBlock :: tasks/block
    */
-  void
-  setAddingEvents_numTasksPerBlock(size_t m_addingEvents_numTasksPerBlock) {
+  void setAddingEvents_numTasksPerBlock(size_t m_addingEvents_numTasksPerBlock) {
     this->m_addingEvents_numTasksPerBlock = m_addingEvents_numTasksPerBlock;
   }
 
   /// @return When adding events, how many tasks per block should be done?
-  size_t getAddingEvents_numTasksPerBlock() const {
-    return m_addingEvents_numTasksPerBlock;
-  }
+  size_t getAddingEvents_numTasksPerBlock() const { return m_addingEvents_numTasksPerBlock; }
 
   //-----------------------------------------------------------------------------------
   /** Get parameters for adding events to a MDGridBox, trying to optimize
@@ -231,8 +223,7 @@ public:
    *will
    *    help the CPU be used fully.
    */
-  void getAddingEventsParameters(size_t &eventsPerTask,
-                                 size_t &numTasksPerBlock) const {
+  void getAddingEventsParameters(size_t &eventsPerTask, size_t &numTasksPerBlock) const {
     // TODO: Smarter values here depending on nd, etc.
     eventsPerTask = m_addingEvents_eventsPerTask;
     numTasksPerBlock = m_addingEvents_numTasksPerBlock;
@@ -252,9 +243,7 @@ public:
   }
 
   /// The number of events that triggers box splitting
-  size_t getSignificantEventsNumber() const {
-    return m_significantEventsNumber;
-  }
+  size_t getSignificantEventsNumber() const { return m_significantEventsNumber; }
 
   //-----------------------------------------------------------------------------------
   /** Determine when would be a good time to split MDBoxes into MDGridBoxes.
@@ -269,8 +258,7 @@ public:
    *the workspace
    * @return true if the boxes should get split.
    */
-  bool shouldSplitBoxes(size_t nEventsInOutput, size_t eventsAdded,
-                        size_t numMDBoxes) const {
+  bool shouldSplitBoxes(size_t nEventsInOutput, size_t eventsAdded, size_t numMDBoxes) const {
     // Avoid divide by zero
     if (numMDBoxes == 0)
       return false;
@@ -279,8 +267,7 @@ public:
     // Split when adding 1/16^th as many events as are already in the output,
     //  (because when the workspace gets very large you should split less often)
     // But no more often than every 10 million events.
-    const size_t comparisonPoint =
-        std::max(nEventsInOutput / 16, m_significantEventsNumber);
+    const size_t comparisonPoint = std::max(nEventsInOutput / 16, m_significantEventsNumber);
     if (eventsAdded > comparisonPoint)
       return true;
 
@@ -330,8 +317,7 @@ public:
 
       const auto &splitTopInto = m_splitTopInto.get();
       size_t numSplitTop =
-          std::accumulate(splitTopInto.cbegin(), splitTopInto.cend(), size_t{1},
-                          std::multiplies<size_t>());
+          std::accumulate(splitTopInto.cbegin(), splitTopInto.cend(), size_t{1}, std::multiplies<size_t>());
       m_numMDBoxes[depth + 1] += numSplitTop;
     } else {
       m_numMDBoxes[depth + 1] += m_numSplit;
@@ -343,26 +329,20 @@ public:
 
   /** Return the vector giving the number of MD Grid Boxes as a function of
    * depth */
-  const std::vector<size_t> &getNumMDGridBoxes() const {
-    return m_numMDGridBoxes;
-  }
+  const std::vector<size_t> &getNumMDGridBoxes() const { return m_numMDGridBoxes; }
 
   /** Return the vector giving the MAXIMUM number of MD Boxes as a function of
    * depth */
-  const std::vector<double> &getMaxNumMDBoxes() const {
-    return m_maxNumMDBoxes;
-  }
+  const std::vector<double> &getMaxNumMDBoxes() const { return m_maxNumMDBoxes; }
 
   /** Return the total number of MD Boxes, irrespective of depth */
   size_t getTotalNumMDBoxes() const {
-    return std::accumulate(m_numMDBoxes.cbegin(), m_numMDBoxes.cend(),
-                           size_t{0}, std::plus<size_t>());
+    return std::accumulate(m_numMDBoxes.cbegin(), m_numMDBoxes.cend(), size_t{0}, std::plus<size_t>());
   }
 
   /** Return the total number of MDGridBox'es, irrespective of depth */
   size_t getTotalNumMDGridBoxes() const {
-    return std::accumulate(m_numMDGridBoxes.cbegin(), m_numMDGridBoxes.cend(),
-                           size_t{0}, std::plus<size_t>());
+    return std::accumulate(m_numMDGridBoxes.cbegin(), m_numMDGridBoxes.cend(), size_t{0}, std::plus<size_t>());
   }
 
   /** Return the average recursion depth of gridding.
@@ -375,8 +355,7 @@ public:
       // units of the volume of the finest possible box.
       // I.e. a box at level 1 is 100 x bigger than a box at level 2, so it
       // counts 100x more.
-      total += double(depth * m_numMDBoxes[depth]) *
-               (maxNumberOfFinestBoxes / m_maxNumMDBoxes[depth]);
+      total += double(depth * m_numMDBoxes[depth]) * (maxNumberOfFinestBoxes / m_maxNumMDBoxes[depth]);
     }
     return total / maxNumberOfFinestBoxes;
   }
@@ -399,8 +378,7 @@ public:
   IBoxControllerIO *getFileIO() { return m_fileIO.get(); }
   /// makes box controller file based by providing class, responsible for
   /// fileIO.
-  void setFileBacked(const std::shared_ptr<IBoxControllerIO> &newFileIO,
-                     const std::string &fileName = "");
+  void setFileBacked(const std::shared_ptr<IBoxControllerIO> &newFileIO, const std::string &fileName = "");
   void clearFileBacked();
   //-----------------------------------------------------------------------------------
   // BoxCtrlChangesInterface *getChangesList(){return m_ChangesList;}
@@ -449,11 +427,9 @@ private:
     m_maxNumMDBoxes[0] = 1;
     for (size_t depth = 1; depth < m_maxNumMDBoxes.size(); depth++) {
       if (depth == 1 && m_splitTopInto) {
-        m_maxNumMDBoxes[depth] =
-            m_maxNumMDBoxes[depth - 1] * double(m_numTopSplit);
+        m_maxNumMDBoxes[depth] = m_maxNumMDBoxes[depth - 1] * double(m_numTopSplit);
       } else {
-        m_maxNumMDBoxes[depth] =
-            m_maxNumMDBoxes[depth - 1] * double(m_numSplit);
+        m_maxNumMDBoxes[depth] = m_maxNumMDBoxes[depth - 1] * double(m_numSplit);
       }
     }
   }

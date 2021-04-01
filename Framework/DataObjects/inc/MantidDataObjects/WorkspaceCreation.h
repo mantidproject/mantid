@@ -90,68 +90,48 @@ class Workspace2D;
 */
 
 namespace detail {
-MANTID_DATAOBJECTS_DLL HistogramData::Histogram
-stripData(HistogramData::Histogram histogram);
+MANTID_DATAOBJECTS_DLL HistogramData::Histogram stripData(HistogramData::Histogram histogram);
 
-template <class T> std::unique_ptr<T> createHelper() {
-  return std::make_unique<T>();
-}
+template <class T> std::unique_ptr<T> createHelper() { return std::make_unique<T>(); }
 
-template <class T> std::unique_ptr<T> createConcreteHelper() {
-  return std::make_unique<T>();
-}
+template <class T> std::unique_ptr<T> createConcreteHelper() { return std::make_unique<T>(); }
 
-template <>
-MANTID_DATAOBJECTS_DLL std::unique_ptr<API::HistoWorkspace> createHelper();
+template <> MANTID_DATAOBJECTS_DLL std::unique_ptr<API::HistoWorkspace> createHelper();
 
 // Dummy specialization, should never be called, must exist for compilation.
-template <>
-MANTID_DATAOBJECTS_DLL std::unique_ptr<EventWorkspace> createHelper();
+template <> MANTID_DATAOBJECTS_DLL std::unique_ptr<EventWorkspace> createHelper();
 // Dummy specialization, should never be called, must exist for compilation.
-template <>
-MANTID_DATAOBJECTS_DLL std::unique_ptr<API::MatrixWorkspace> createHelper();
+template <> MANTID_DATAOBJECTS_DLL std::unique_ptr<API::MatrixWorkspace> createHelper();
 
 // Dummy specialization, should never be called, must exist for compilation.
-template <>
-MANTID_DATAOBJECTS_DLL std::unique_ptr<API::MatrixWorkspace>
-createConcreteHelper();
+template <> MANTID_DATAOBJECTS_DLL std::unique_ptr<API::MatrixWorkspace> createConcreteHelper();
 // Dummy specialization, should never be called, must exist for compilation.
-template <>
-MANTID_DATAOBJECTS_DLL std::unique_ptr<API::HistoWorkspace>
-createConcreteHelper();
+template <> MANTID_DATAOBJECTS_DLL std::unique_ptr<API::HistoWorkspace> createConcreteHelper();
 
-template <class HistArg>
-void fixDistributionFlag(API::MatrixWorkspace &, const HistArg &) {}
+template <class HistArg> void fixDistributionFlag(API::MatrixWorkspace &, const HistArg &) {}
 
 template <>
-MANTID_DATAOBJECTS_DLL void
-fixDistributionFlag(API::MatrixWorkspace &workspace,
-                    const HistogramData::Histogram &histArg);
+MANTID_DATAOBJECTS_DLL void fixDistributionFlag(API::MatrixWorkspace &workspace,
+                                                const HistogramData::Histogram &histArg);
 
 template <class T> struct IsIndexInfo { using type = std::false_type; };
-template <> struct IsIndexInfo<Indexing::IndexInfo> {
-  using type = std::true_type;
-};
+template <> struct IsIndexInfo<Indexing::IndexInfo> { using type = std::true_type; };
 template <class UseIndexInfo>
-void initializeFromParent(const API::MatrixWorkspace &parent,
-                          API::MatrixWorkspace &workspace);
+void initializeFromParent(const API::MatrixWorkspace &parent, API::MatrixWorkspace &workspace);
 } // namespace detail
 
 /** This is the create() method that all the other create() methods call.
  *  And it is also called directly.
  */
 template <class T, class P, class IndexArg, class HistArg,
-          class = typename std::enable_if<
-              std::is_base_of<API::MatrixWorkspace, P>::value>::type>
-std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
-                          const HistArg &histArg) {
+          class = typename std::enable_if<std::is_base_of<API::MatrixWorkspace, P>::value>::type>
+std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg, const HistArg &histArg) {
   // Figure out (dynamic) target type:
   // - Type is same as parent if T is base of parent
   // - If T is not base of parent, conversion may occur. Currently only
   //   supported for EventWorkspace
   std::unique_ptr<T> ws;
-  if (std::is_base_of<API::HistoWorkspace, T>::value &&
-      parent.id() == "EventWorkspace") {
+  if (std::is_base_of<API::HistoWorkspace, T>::value && parent.id() == "EventWorkspace") {
     // Drop events, create Workspace2D or T whichever is more derived.
     ws = detail::createHelper<T>();
   } else {
@@ -171,8 +151,7 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
   // future of WorkspaceFactory.
   ws->setInstrument(parent.getInstrument());
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
-  detail::initializeFromParent<typename detail::IsIndexInfo<IndexArg>::type>(
-      parent, *ws);
+  detail::initializeFromParent<typename detail::IsIndexInfo<IndexArg>::type>(parent, *ws);
   // initializeFromParent sets the distribution flag to the same value as
   // parent. In case histArg is an actual Histogram that is not the correct
   // behavior so we have to set it back to the value given by histArg.
@@ -181,8 +160,7 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
 }
 
 template <class T, class IndexArg, class HistArg,
-          typename std::enable_if<!std::is_base_of<
-              API::MatrixWorkspace, IndexArg>::value>::type * = nullptr>
+          typename std::enable_if<!std::is_base_of<API::MatrixWorkspace, IndexArg>::value>::type * = nullptr>
 std::unique_ptr<T> create(const IndexArg &indexArg, const HistArg &histArg) {
   auto ws = std::make_unique<T>();
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
@@ -190,24 +168,19 @@ std::unique_ptr<T> create(const IndexArg &indexArg, const HistArg &histArg) {
 }
 
 template <class T, class IndexArg, class HistArg,
-          typename std::enable_if<!std::is_base_of<
-              API::MatrixWorkspace, IndexArg>::value>::type * = nullptr>
-std::unique_ptr<T>
-create(const std::shared_ptr<const Geometry::Instrument> &instrument,
-       const IndexArg &indexArg, const HistArg &histArg) {
+          typename std::enable_if<!std::is_base_of<API::MatrixWorkspace, IndexArg>::value>::type * = nullptr>
+std::unique_ptr<T> create(const std::shared_ptr<const Geometry::Instrument> &instrument, const IndexArg &indexArg,
+                          const HistArg &histArg) {
   auto ws = std::make_unique<T>();
   ws->setInstrument(std::move(instrument));
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
   return ws;
 }
 
-template <class T, class P,
-          typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
-                                                  P>::value>::type * = nullptr>
+template <class T, class P, typename std::enable_if<std::is_base_of<API::MatrixWorkspace, P>::value>::type * = nullptr>
 std::unique_ptr<T> create(const P &parent) {
   const auto numHistograms = parent.getNumberHistograms();
-  auto ws =
-      create<T>(parent, numHistograms, detail::stripData(parent.histogram(0)));
+  auto ws = create<T>(parent, numHistograms, detail::stripData(parent.histogram(0)));
   for (size_t i = 0; i < numHistograms; ++i) {
     ws->setSharedX(i, parent.sharedX(i));
   }
@@ -217,27 +190,18 @@ std::unique_ptr<T> create(const P &parent) {
 // Templating with HistArg clashes with the IndexArg template above. Could be
 // fixed with many enable_if cases, but for now we simply provide 3 variants
 // (Histogram, BinEdges, Points) by hand.
-template <class T, class P,
-          typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
-                                                  P>::value>::type * = nullptr>
-std::unique_ptr<T> create(const P &parent,
-                          const HistogramData::Histogram &histogram) {
+template <class T, class P, typename std::enable_if<std::is_base_of<API::MatrixWorkspace, P>::value>::type * = nullptr>
+std::unique_ptr<T> create(const P &parent, const HistogramData::Histogram &histogram) {
   return create<T>(parent, parent.getNumberHistograms(), histogram);
 }
 
-template <class T, class P,
-          typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
-                                                  P>::value>::type * = nullptr>
-std::unique_ptr<T> create(const P &parent,
-                          const HistogramData::BinEdges &binEdges) {
+template <class T, class P, typename std::enable_if<std::is_base_of<API::MatrixWorkspace, P>::value>::type * = nullptr>
+std::unique_ptr<T> create(const P &parent, const HistogramData::BinEdges &binEdges) {
   return create<T>(parent, parent.getNumberHistograms(), binEdges);
 }
 
-template <class T, class P,
-          typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
-                                                  P>::value>::type * = nullptr>
-std::unique_ptr<T> create(const P &parent,
-                          const HistogramData::Points &points) {
+template <class T, class P, typename std::enable_if<std::is_base_of<API::MatrixWorkspace, P>::value>::type * = nullptr>
+std::unique_ptr<T> create(const P &parent, const HistogramData::Points &points) {
   return create<T>(parent, parent.getNumberHistograms(), points);
 }
 

@@ -31,8 +31,7 @@ namespace RemoteAlgorithms {
     @date 04/30/2013
     */
 
-class DLLExport Authenticate : public Mantid::API::Algorithm,
-                               public API::DeprecatedAlgorithm {
+class DLLExport Authenticate : public Mantid::API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Default constructor
   Authenticate();
@@ -40,9 +39,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "Authenticate"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Authenticate to the remote compute resource.";
-  }
+  const std::string summary() const override { return "Authenticate to the remote compute resource."; }
 
   /// Algorithm's version
   int version() const override { return (1); }

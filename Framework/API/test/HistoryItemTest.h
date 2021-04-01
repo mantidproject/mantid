@@ -21,9 +21,7 @@ class HistoryItemTest : public CxxTest::TestSuite {
 public:
   void test_Minimum() {
     // not really much to test
-    AlgorithmHistory algHist(
-        "AnAlg", 1,
-        boost::uuids::to_string(boost::uuids::random_generator()()));
+    AlgorithmHistory algHist("AnAlg", 1, boost::uuids::to_string(boost::uuids::random_generator()()));
     HistoryItem item(std::make_shared<AlgorithmHistory>(algHist));
     item.unrolled(true);
 

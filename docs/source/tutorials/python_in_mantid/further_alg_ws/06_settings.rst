@@ -25,7 +25,7 @@ All settings specified in these files are accessible via python through the conf
 .. code-block:: python
 
 	from mantid import config
-	 
+
 	default_inst_name = config['default.instrument']
 
 The config object behaves like a Python dictionary, where each setting in the properties file is used as a key to obtain its value from the config object.
@@ -64,7 +64,7 @@ Some keys in the properties are considered special and have their own accessors.
 	config.setDataSearchDirs('path1;path2;path3')
 
 	# Set it via a list
-	config.setDataSearchDirs(['path1','path2']) 
+	config.setDataSearchDirs(['path1','path2'])
 
 
 Facility & Instrument Information

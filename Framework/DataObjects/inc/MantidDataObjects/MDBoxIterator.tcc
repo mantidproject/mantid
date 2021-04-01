@@ -25,9 +25,8 @@ namespace DataObjects {
  *it is outside the
  *        implicit function
  */
-TMDE(MDBoxIterator)::MDBoxIterator(
-    API::IMDNode *topBox, size_t maxDepth, bool leafOnly,
-    Mantid::Geometry::MDImplicitFunction *function)
+TMDE(MDBoxIterator)::MDBoxIterator(API::IMDNode *topBox, size_t maxDepth, bool leafOnly,
+                                   Mantid::Geometry::MDImplicitFunction *function)
     : m_pos(0), m_current(nullptr), m_currentMDBox(nullptr), m_events(nullptr),
       m_skippingPolicy(new SkipMaskedBins(this)) {
   commonConstruct(topBox, maxDepth, leafOnly, function);
@@ -47,12 +46,9 @@ TMDE(MDBoxIterator)::MDBoxIterator(
  *it is outside the
  *        implicit function
  */
-TMDE(MDBoxIterator)::MDBoxIterator(
-    API::IMDNode *topBox, size_t maxDepth, bool leafOnly,
-    SkippingPolicy *skippingPolicy,
-    Mantid::Geometry::MDImplicitFunction *function)
-    : m_pos(0), m_current(nullptr), m_currentMDBox(nullptr), m_events(nullptr),
-      m_skippingPolicy(skippingPolicy) {
+TMDE(MDBoxIterator)::MDBoxIterator(API::IMDNode *topBox, size_t maxDepth, bool leafOnly, SkippingPolicy *skippingPolicy,
+                                   Mantid::Geometry::MDImplicitFunction *function)
+    : m_pos(0), m_current(nullptr), m_currentMDBox(nullptr), m_events(nullptr), m_skippingPolicy(skippingPolicy) {
   commonConstruct(topBox, maxDepth, leafOnly, function);
 }
 
@@ -69,12 +65,10 @@ TMDE(MDBoxIterator)::MDBoxIterator(
  *it is outside the
  *        implicit function
  */
-TMDE(void MDBoxIterator)::commonConstruct(
-    API::IMDNode *topBox, size_t maxDepth, bool leafOnly,
-    Mantid::Geometry::MDImplicitFunction *function) {
+TMDE(void MDBoxIterator)::commonConstruct(API::IMDNode *topBox, size_t maxDepth, bool leafOnly,
+                                          Mantid::Geometry::MDImplicitFunction *function) {
   if (!topBox)
-    throw std::invalid_argument(
-        "MDBoxIterator::ctor(): NULL top-level box given.");
+    throw std::invalid_argument("MDBoxIterator::ctor(): NULL top-level box given.");
 
   if (topBox->getDepth() > maxDepth)
     throw std::invalid_argument("MDBoxIterator::ctor(): The maxDepth parameter "
@@ -101,8 +95,7 @@ TMDE(void MDBoxIterator)::commonConstruct(
  * @param begin :: start iterating at this point in the list
  * @param end :: stop iterating at this point in the list
  */
-TMDE(MDBoxIterator)::MDBoxIterator(std::vector<API::IMDNode *> &boxes,
-                                   size_t begin, size_t end)
+TMDE(MDBoxIterator)::MDBoxIterator(std::vector<API::IMDNode *> &boxes, size_t begin, size_t end)
     : m_pos(0), m_current(nullptr), m_currentMDBox(nullptr), m_events(nullptr),
       m_skippingPolicy(new SkipMaskedBins(this))
 
@@ -116,22 +109,18 @@ TMDE(MDBoxIterator)::MDBoxIterator(std::vector<API::IMDNode *> &boxes,
  * @param begin :: start iterating at this point in the list
  * @param end :: stop iterating at this point in the list
  */
-TMDE(void MDBoxIterator)::init(std::vector<API::IMDNode *> &boxes, size_t begin,
-                               size_t end) {
+TMDE(void MDBoxIterator)::init(std::vector<API::IMDNode *> &boxes, size_t begin, size_t end) {
   if (begin >= boxes.size())
-    throw std::runtime_error(
-        "MDBoxIterator::ctor(): invalid beginning position.");
+    throw std::runtime_error("MDBoxIterator::ctor(): invalid beginning position.");
   size_t theEnd = end;
   if (theEnd < begin)
-    throw std::runtime_error(
-        "MDBoxIterator::ctor(): end position is before the position.");
+    throw std::runtime_error("MDBoxIterator::ctor(): end position is before the position.");
   if (theEnd > boxes.size())
     theEnd = boxes.size();
 
   // Copy the pointers to boxes in the range.
   m_boxes.clear();
-  m_boxes.insert(m_boxes.begin(), boxes.begin() + begin,
-                 boxes.begin() + theEnd);
+  m_boxes.insert(m_boxes.begin(), boxes.begin() + begin, boxes.begin() + theEnd);
 
   m_max = m_boxes.size();
   // Get the first box
@@ -256,22 +245,18 @@ TMDE(signal_t MDBoxIterator)::getNormalizedError() const {
 }
 
 /// Returns the signal for this box
-TMDE(signal_t MDBoxIterator)::getSignal() const {
-  return m_current->getSignal();
-}
+TMDE(signal_t MDBoxIterator)::getSignal() const { return m_current->getSignal(); }
 
 /// Returns the error for this box
 TMDE(signal_t MDBoxIterator)::getError() const { return m_current->getError(); }
 
 /// Return a list of vertexes defining the volume pointed to
-TMDE(std::unique_ptr<coord_t[]> MDBoxIterator)::getVertexesArray(
-    size_t &numVertices) const {
+TMDE(std::unique_ptr<coord_t[]> MDBoxIterator)::getVertexesArray(size_t &numVertices) const {
   return m_current->getVertexesArray(numVertices);
 }
 
-TMDE(std::unique_ptr<coord_t[]> MDBoxIterator)::getVertexesArray(
-    size_t &numVertices, const size_t outDimensions,
-    const bool *maskDim) const {
+TMDE(std::unique_ptr<coord_t[]> MDBoxIterator)::getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                                                                 const bool *maskDim) const {
   return m_current->getVertexesArray(numVertices, outDimensions, maskDim);
 }
 
@@ -312,8 +297,7 @@ TMDE(int32_t MDBoxIterator)::getInnerDetectorID(size_t index) const {
 }
 
 /// Returns the position of a given event for a given dimension
-TMDE(coord_t MDBoxIterator)::getInnerPosition(size_t index,
-                                              size_t dimension) const {
+TMDE(coord_t MDBoxIterator)::getInnerPosition(size_t index, size_t dimension) const {
   getEvents();
   return (*m_events)[index].getCenter(dimension);
 }
@@ -339,14 +323,11 @@ TMDE(bool MDBoxIterator)::getIsMasked() const {
 }
 
 TMDE(std::vector<size_t> MDBoxIterator)::findNeighbourIndexes() const {
-  throw std::runtime_error(
-      "MDBoxIterator does not implement findNeighbourIndex");
+  throw std::runtime_error("MDBoxIterator does not implement findNeighbourIndex");
 }
 
-TMDE(std::vector<size_t> MDBoxIterator)::findNeighbourIndexesFaceTouching()
-    const {
-  throw std::runtime_error(
-      "MDBoxIterator does not implement findNeighbourIndexesFaceTouching");
+TMDE(std::vector<size_t> MDBoxIterator)::findNeighbourIndexesFaceTouching() const {
+  throw std::runtime_error("MDBoxIterator does not implement findNeighbourIndexesFaceTouching");
 }
 
 TMDE(size_t MDBoxIterator)::getLinearIndex() const {

@@ -132,8 +132,7 @@ const std::string OUTER_INNER_RADIUS("OuterInnerRadius");
  * @param height Height of the cylinder (in metres)
  * @param axis The index of the height-axis of the cylinder
  */
-V3D cylBaseCentre(const std::vector<double> &cylCentre, double height,
-                  unsigned axisIdx) {
+V3D cylBaseCentre(const std::vector<double> &cylCentre, double height, unsigned axisIdx) {
   const V3D halfHeight = [&]() {
     switch (axisIdx) {
     case 0:
@@ -156,13 +155,11 @@ V3D cylBaseCentre(const std::vector<double> &cylCentre, double height,
  * @param height Height of the cylinder (in metres)
  * @param axis The height-axis of the cylinder
  */
-V3D cylBaseCentre(const std::vector<double> &cylCentre, double height,
-                  const std::vector<double> &axis) {
+V3D cylBaseCentre(const std::vector<double> &cylCentre, double height, const std::vector<double> &axis) {
   using Kernel::V3D;
   V3D axisVector = V3D{axis[0], axis[1], axis[2]};
   axisVector.normalize();
-  return V3D(cylCentre[0], cylCentre[1], cylCentre[2]) -
-         axisVector * height * 0.5;
+  return V3D(cylCentre[0], cylCentre[1], cylCentre[2]) - axisVector * height * 0.5;
 }
 
 /**
@@ -190,8 +187,7 @@ std::string axisXML(unsigned axisIdx) {
  */
 std::string axisXML(const std::vector<double> &axis) {
   std::ostringstream str;
-  str << "<axis x=\"" << axis[0] << "\" y=\"" << axis[1] << "\" z=\"" << axis[2]
-      << "\" /> ";
+  str << "<axis x=\"" << axis[0] << "\" y=\"" << axis[1] << "\" z=\"" << axis[2] << "\" /> ";
   return str.str();
 }
 
@@ -203,8 +199,7 @@ std::string axisXML(const std::vector<double> &axis) {
  * @return The value of the property as a double
  * @throws Exception::NotFoundError if the property does not exist
  */
-double getPropertyAsDouble(const Kernel::PropertyManager &args,
-                           const std::string &name) {
+double getPropertyAsDouble(const Kernel::PropertyManager &args, const std::string &name) {
   try {
     return args.getProperty(name);
   } catch (std::runtime_error &) {
@@ -220,9 +215,7 @@ double getPropertyAsDouble(const Kernel::PropertyManager &args,
  * @return The value of the property as a double
  * @throws Exception::NotFoundError if the property does not exist
  */
-std::vector<double>
-getPropertyAsVectorDouble(const Kernel::PropertyManager &args,
-                          const std::string &name) {
+std::vector<double> getPropertyAsVectorDouble(const Kernel::PropertyManager &args, const std::string &name) {
   try {
     return args.getProperty(name);
   } catch (std::runtime_error &) {
@@ -238,8 +231,7 @@ getPropertyAsVectorDouble(const Kernel::PropertyManager &args,
  * @param name the name of the property
  * @return true if property with name exists, and its value is not empty
  */
-bool existsAndNotEmptyString(const PropertyManager &pm,
-                             const std::string &name) {
+bool existsAndNotEmptyString(const PropertyManager &pm, const std::string &name) {
   if (pm.existsProperty(name)) {
     const auto value = pm.getPropertyValue(name);
     return !value.empty();
@@ -288,8 +280,7 @@ const std::string SetSample::summary() const {
  * @param geomArgs geometry arguments
  * @param flavour sample or container
  */
-void SetSample::validateGeometry(std::map<std::string, std::string> &errors,
-                                 const Kernel::PropertyManager &geomArgs,
+void SetSample::validateGeometry(std::map<std::string, std::string> &errors, const Kernel::PropertyManager &geomArgs,
                                  const std::string &flavour) {
 
   // Validate as much of the shape information as possible
@@ -297,13 +288,11 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors,
     auto shape = geomArgs.getPropertyValue(GeometryArgs::SHAPE);
     if (shape == ShapeArgs::CSG) {
       if (!existsAndNotEmptyString(geomArgs, GeometryArgs::VALUE)) {
-        errors[flavour] =
-            "For " + shape + " shape " + GeometryArgs::VALUE + " is required";
+        errors[flavour] = "For " + shape + " shape " + GeometryArgs::VALUE + " is required";
       } else {
         // check if the value is a valid shape XML
         ShapeFactory shapeFactory;
-        auto shape = shapeFactory.createShape(
-            geomArgs.getPropertyValue(GeometryArgs::VALUE));
+        auto shape = shapeFactory.createShape(geomArgs.getPropertyValue(GeometryArgs::VALUE));
         if (!shape || !shape->hasValidShape()) {
           errors[flavour] = "Invalid XML for CSG shape value";
         }
@@ -311,59 +300,46 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors,
     } else {
       // for the predefined 3 shapes height is mandatory
       if (!existsAndNotEmptyString(geomArgs, ShapeArgs::HEIGHT)) {
-        errors[flavour] =
-            "For " + shape + " shape " + ShapeArgs::HEIGHT + " is required";
+        errors[flavour] = "For " + shape + " shape " + ShapeArgs::HEIGHT + " is required";
       }
-      if (shape == ShapeArgs::FLAT_PLATE ||
-          shape == ShapeArgs::FLAT_PLATE_HOLDER) {
+      if (shape == ShapeArgs::FLAT_PLATE || shape == ShapeArgs::FLAT_PLATE_HOLDER) {
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::WIDTH)) {
-          errors[flavour] =
-              "For " + shape + " shape " + ShapeArgs::WIDTH + " is required";
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::WIDTH + " is required";
         }
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::THICK)) {
-          errors[flavour] =
-              "For " + shape + " shape " + ShapeArgs::THICK + " is required";
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::THICK + " is required";
         }
       }
       if (shape == ShapeArgs::CYLINDER) {
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::RADIUS)) {
-          errors[flavour] =
-              "For " + shape + " shape " + ShapeArgs::RADIUS + " is required";
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::RADIUS + " is required";
         }
       }
-      if (shape == ShapeArgs::HOLLOW_CYLINDER ||
-          shape == ShapeArgs::HOLLOW_CYLINDER_HOLDER) {
+      if (shape == ShapeArgs::HOLLOW_CYLINDER || shape == ShapeArgs::HOLLOW_CYLINDER_HOLDER) {
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::INNER_RADIUS)) {
-          errors[flavour] = "For " + shape + " shape " +
-                            ShapeArgs::INNER_RADIUS + " is required";
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::INNER_RADIUS + " is required";
         }
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::OUTER_RADIUS)) {
-          errors[flavour] = "For " + shape + " shape " +
-                            ShapeArgs::OUTER_RADIUS + " is required";
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::OUTER_RADIUS + " is required";
         }
       }
       if (shape == ShapeArgs::FLAT_PLATE_HOLDER) {
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::WIDTH)) {
-          errors[flavour] =
-              "For " + shape + " shape " + ShapeArgs::WIDTH + " is required";
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::WIDTH + " is required";
         }
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::FRONT_THICK)) {
-          errors[flavour] = "For " + shape + " shape " +
-                            ShapeArgs::FRONT_THICK + " is required";
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::FRONT_THICK + " is required";
         }
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::BACK_THICK)) {
-          errors[flavour] = "For " + shape + " shape " + ShapeArgs::BACK_THICK +
-                            " is required";
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::BACK_THICK + " is required";
         }
       }
       if (shape == ShapeArgs::HOLLOW_CYLINDER_HOLDER) {
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::INNER_OUTER_RADIUS)) {
-          errors[flavour] = "For " + shape + " shape " +
-                            ShapeArgs::INNER_OUTER_RADIUS + " is required";
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::INNER_OUTER_RADIUS + " is required";
         }
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::OUTER_INNER_RADIUS)) {
-          errors[flavour] = "For " + shape + " shape " +
-                            ShapeArgs::OUTER_INNER_RADIUS + " is required";
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::OUTER_INNER_RADIUS + " is required";
         }
       }
     }
@@ -378,8 +354,7 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors,
  * @param inputArgs material arguments
  * @param flavour sample or container
  */
-void SetSample::validateMaterial(std::map<std::string, std::string> &errors,
-                                 const Kernel::PropertyManager &inputArgs,
+void SetSample::validateMaterial(std::map<std::string, std::string> &errors, const Kernel::PropertyManager &inputArgs,
                                  const std::string &flavour) {
   PropertyManager args = materialSettingsEnsureLegacyCompatibility(inputArgs);
   ReadMaterial::MaterialParameters materialParams;
@@ -401,10 +376,8 @@ void SetSample::validateMaterial(std::map<std::string, std::string> &errors,
  * @param flavour sample or container
  * @param keys the vector of property names to check
  */
-void SetSample::assertNonNegative(
-    std::map<std::string, std::string> &errors,
-    const Kernel::PropertyManager &geomArgs, const std::string &flavour,
-    const std::vector<const std::string *> &keys) {
+void SetSample::assertNonNegative(std::map<std::string, std::string> &errors, const Kernel::PropertyManager &geomArgs,
+                                  const std::string &flavour, const std::vector<const std::string *> &keys) {
   if (existsAndNotEmptyString(geomArgs, GeometryArgs::SHAPE)) {
     for (const auto &arg : keys) {
       if (existsAndNegative(geomArgs, *arg)) {
@@ -418,8 +391,7 @@ void SetSample::assertNonNegative(
  * @brief Checks if a json dictionary parameter is populated or not
  * @param dict map
  */
-bool SetSample::isDictionaryPopulated(
-    const PropertyManager_const_sptr &dict) const {
+bool SetSample::isDictionaryPopulated(const PropertyManager_const_sptr &dict) const {
   bool isPopulated = false;
   if (dict)
     if (dict->propertyCount() > 0)
@@ -440,54 +412,42 @@ std::map<std::string, std::string> SetSample::validateInputs() {
                                              "PeaksWorkspace.";
   }
 
-  const PropertyManager_const_sptr geomArgs =
-      getProperty(PropertyNames::GEOMETRY);
+  const PropertyManager_const_sptr geomArgs = getProperty(PropertyNames::GEOMETRY);
 
-  const PropertyManager_const_sptr materialArgs =
-      getProperty(PropertyNames::MATERIAL);
+  const PropertyManager_const_sptr materialArgs = getProperty(PropertyNames::MATERIAL);
 
-  const PropertyManager_const_sptr environArgs =
-      getProperty(PropertyNames::ENVIRONMENT);
+  const PropertyManager_const_sptr environArgs = getProperty(PropertyNames::ENVIRONMENT);
 
-  const PropertyManager_const_sptr canGeomArgs =
-      getProperty(PropertyNames::CONTAINER_GEOMETRY);
+  const PropertyManager_const_sptr canGeomArgs = getProperty(PropertyNames::CONTAINER_GEOMETRY);
 
-  const PropertyManager_const_sptr canMaterialArgs =
-      getProperty(PropertyNames::CONTAINER_MATERIAL);
+  const PropertyManager_const_sptr canMaterialArgs = getProperty(PropertyNames::CONTAINER_MATERIAL);
 
-  const std::vector<const std::string *> positiveValues = {
-      {&ShapeArgs::HEIGHT, &ShapeArgs::WIDTH, &ShapeArgs::THICK,
-       &ShapeArgs::RADIUS, &ShapeArgs::INNER_RADIUS, &ShapeArgs::OUTER_RADIUS}};
+  const std::vector<const std::string *> positiveValues = {{&ShapeArgs::HEIGHT, &ShapeArgs::WIDTH, &ShapeArgs::THICK,
+                                                            &ShapeArgs::RADIUS, &ShapeArgs::INNER_RADIUS,
+                                                            &ShapeArgs::OUTER_RADIUS}};
 
-  if (!isDictionaryPopulated(geomArgs) &&
-      !isDictionaryPopulated(materialArgs) &&
-      !isDictionaryPopulated(environArgs) &&
-      !isDictionaryPopulated(canGeomArgs) &&
-      !isDictionaryPopulated(canMaterialArgs)) {
-    errors["Geometry"] =
-        "At least one of the input parameters must be populated";
+  if (!isDictionaryPopulated(geomArgs) && !isDictionaryPopulated(materialArgs) && !isDictionaryPopulated(environArgs) &&
+      !isDictionaryPopulated(canGeomArgs) && !isDictionaryPopulated(canMaterialArgs)) {
+    errors["Geometry"] = "At least one of the input parameters must be populated";
   }
 
   if (isDictionaryPopulated(environArgs)) {
     if (!existsAndNotEmptyString(*environArgs, SEArgs::NAME)) {
-      errors[PropertyNames::ENVIRONMENT] =
-          "Environment flags require a non-empty 'Name' entry.";
+      errors[PropertyNames::ENVIRONMENT] = "Environment flags require a non-empty 'Name' entry.";
     } else {
       // If specifying the environment through XML file, we can not strictly
       // validate the sample settings, since only the overriding properties
       // are specified. Hence we just make sure that whatever is specified is
       // at least positive
       if (isDictionaryPopulated(geomArgs)) {
-        assertNonNegative(errors, *geomArgs, PropertyNames::GEOMETRY,
-                          positiveValues);
+        assertNonNegative(errors, *geomArgs, PropertyNames::GEOMETRY, positiveValues);
       }
     }
   } else {
     // We cannot strictly require geometry and material to be defined
     // simultaneously; it can be that one is defined at a later time
     if (isDictionaryPopulated(geomArgs)) {
-      assertNonNegative(errors, *geomArgs, PropertyNames::GEOMETRY,
-                        positiveValues);
+      assertNonNegative(errors, *geomArgs, PropertyNames::GEOMETRY, positiveValues);
       validateGeometry(errors, *geomArgs, PropertyNames::GEOMETRY);
     }
     if (isDictionaryPopulated(materialArgs)) {
@@ -495,14 +455,12 @@ std::map<std::string, std::string> SetSample::validateInputs() {
     }
   }
   if (isDictionaryPopulated(canGeomArgs)) {
-    assertNonNegative(errors, *canGeomArgs, PropertyNames::CONTAINER_GEOMETRY,
-                      positiveValues);
+    assertNonNegative(errors, *canGeomArgs, PropertyNames::CONTAINER_GEOMETRY, positiveValues);
     validateGeometry(errors, *canGeomArgs, PropertyNames::CONTAINER_GEOMETRY);
   }
 
   if (isDictionaryPopulated(canMaterialArgs)) {
-    validateMaterial(errors, *canMaterialArgs,
-                     PropertyNames::CONTAINER_MATERIAL);
+    validateMaterial(errors, *canMaterialArgs, PropertyNames::CONTAINER_MATERIAL);
   }
   return errors;
 }
@@ -517,25 +475,18 @@ void SetSample::init() {
   using Kernel::PropertyManagerProperty;
 
   // Inputs
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      PropertyNames::INPUT_WORKSPACE, "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(PropertyNames::INPUT_WORKSPACE, "", Direction::InOut),
                   "A workspace whose sample properties will be updated");
-  declareProperty(std::make_unique<PropertyManagerProperty>(
-                      PropertyNames::GEOMETRY, Direction::Input),
+  declareProperty(std::make_unique<PropertyManagerProperty>(PropertyNames::GEOMETRY, Direction::Input),
                   "A dictionary of geometry parameters for the sample.");
-  declareProperty(std::make_unique<PropertyManagerProperty>(
-                      PropertyNames::MATERIAL, Direction::Input),
+  declareProperty(std::make_unique<PropertyManagerProperty>(PropertyNames::MATERIAL, Direction::Input),
                   "A dictionary of material parameters for the sample. See "
                   "SetSampleMaterial for all accepted parameters");
-  declareProperty(
-      std::make_unique<PropertyManagerProperty>(PropertyNames::ENVIRONMENT,
-                                                Direction::Input),
-      "A dictionary of parameters to configure the sample environment");
-  declareProperty(std::make_unique<PropertyManagerProperty>(
-                      PropertyNames::CONTAINER_GEOMETRY, Direction::Input),
+  declareProperty(std::make_unique<PropertyManagerProperty>(PropertyNames::ENVIRONMENT, Direction::Input),
+                  "A dictionary of parameters to configure the sample environment");
+  declareProperty(std::make_unique<PropertyManagerProperty>(PropertyNames::CONTAINER_GEOMETRY, Direction::Input),
                   "A dictionary of geometry parameters for the container.");
-  declareProperty(std::make_unique<PropertyManagerProperty>(
-                      PropertyNames::CONTAINER_MATERIAL, Direction::Input),
+  declareProperty(std::make_unique<PropertyManagerProperty>(PropertyNames::CONTAINER_MATERIAL, Direction::Input),
                   "A dictionary of material parameters for the container.");
 }
 
@@ -550,10 +501,8 @@ void SetSample::exec() {
   PropertyManager_sptr environArgs = getProperty(PropertyNames::ENVIRONMENT);
   PropertyManager_sptr geometryArgs = getProperty(PropertyNames::GEOMETRY);
   PropertyManager_sptr materialArgs = getProperty(PropertyNames::MATERIAL);
-  PropertyManager_sptr canGeometryArgs =
-      getProperty(PropertyNames::CONTAINER_GEOMETRY);
-  PropertyManager_sptr canMaterialArgs =
-      getProperty(PropertyNames::CONTAINER_MATERIAL);
+  PropertyManager_sptr canGeometryArgs = getProperty(PropertyNames::CONTAINER_GEOMETRY);
+  PropertyManager_sptr canMaterialArgs = getProperty(PropertyNames::CONTAINER_MATERIAL);
 
   // validateInputs guarantees this will be an ExperimentInfo object
   auto experimentInfo = std::dynamic_pointer_cast<ExperimentInfo>(workspace);
@@ -564,8 +513,7 @@ void SetSample::exec() {
   if (isDictionaryPopulated(environArgs)) {
     sampleEnviron = setSampleEnvironmentFromFile(*experimentInfo, environArgs);
   } else if (isDictionaryPopulated(canGeometryArgs)) {
-    setSampleEnvironmentFromXML(*experimentInfo, canGeometryArgs,
-                                canMaterialArgs);
+    setSampleEnvironmentFromXML(*experimentInfo, canGeometryArgs, canMaterialArgs);
   }
 
   double sampleVolume = 0.;
@@ -573,22 +521,18 @@ void SetSample::exec() {
     setSampleShape(*experimentInfo, geometryArgs, sampleEnviron);
     if (experimentInfo->sample().getShape().hasValidShape()) {
       // get the volume back out to use in setting the material
-      sampleVolume =
-          CUBIC_METRE_TO_CM * experimentInfo->sample().getShape().volume();
+      sampleVolume = CUBIC_METRE_TO_CM * experimentInfo->sample().getShape().volume();
     }
   }
 
   // Finally the material arguments
   if (isDictionaryPopulated(materialArgs)) {
-    PropertyManager materialArgsCompatible =
-        materialSettingsEnsureLegacyCompatibility(*materialArgs);
+    PropertyManager materialArgsCompatible = materialSettingsEnsureLegacyCompatibility(*materialArgs);
     // add the sample volume if it was defined/determined
     if (sampleVolume > 0.) {
       // only add the volume if it isn't already specfied
       if (!materialArgsCompatible.existsProperty("Volume")) {
-        materialArgsCompatible.declareProperty(
-            std::make_unique<PropertyWithValue<double>>("Volume",
-                                                        sampleVolume));
+        materialArgsCompatible.declareProperty(std::make_unique<PropertyWithValue<double>>("Volume", sampleVolume));
       }
     }
     // this does what SetSampleMaterial would do, but without calling it
@@ -597,8 +541,8 @@ void SetSample::exec() {
     ReadMaterial reader;
     reader.setMaterialParameters(materialParams);
     const auto sampleMaterial = reader.buildMaterial();
-    auto shapeObject = std::shared_ptr<Geometry::IObject>(
-        experimentInfo->sample().getShape().cloneWithMaterial(*sampleMaterial));
+    auto shapeObject =
+        std::shared_ptr<Geometry::IObject>(experimentInfo->sample().getShape().cloneWithMaterial(*sampleMaterial));
     experimentInfo->mutableSample().setShape(shapeObject);
   }
 }
@@ -610,9 +554,8 @@ void SetSample::exec() {
  * @param args The dictionary of flags for the environment
  * @return A pointer to the new sample environment
  */
-const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromFile(
-    API::ExperimentInfo &exptInfo,
-    const Kernel::PropertyManager_const_sptr &args) {
+const Geometry::SampleEnvironment *
+SetSample::setSampleEnvironmentFromFile(API::ExperimentInfo &exptInfo, const Kernel::PropertyManager_const_sptr &args) {
   using Kernel::ConfigService;
 
   const std::string envName = args->getPropertyValue(SEArgs::NAME);
@@ -644,8 +587,7 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromFile(
   }
   auto finder = std::make_unique<SampleEnvironmentSpecFileFinder>(environDirs);
   SampleEnvironmentFactory factory(std::move(finder));
-  auto sampleEnviron =
-      factory.create(facilityName, instrumentName, envName, canName);
+  auto sampleEnviron = factory.create(facilityName, instrumentName, envName, canName);
   exptInfo.mutableSample().setEnvironment(std::move(sampleEnviron));
   return &(exptInfo.sample().getEnvironment());
 }
@@ -657,10 +599,10 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromFile(
  * @param canMaterialArgs The dictionary of material parameters
  * @return A pointer to the new sample environment
  */
-const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromXML(
-    API::ExperimentInfo &exptInfo,
-    const Kernel::PropertyManager_const_sptr &canGeomArgs,
-    const Kernel::PropertyManager_const_sptr &canMaterialArgs) {
+const Geometry::SampleEnvironment *
+SetSample::setSampleEnvironmentFromXML(API::ExperimentInfo &exptInfo,
+                                       const Kernel::PropertyManager_const_sptr &canGeomArgs,
+                                       const Kernel::PropertyManager_const_sptr &canMaterialArgs) {
   const auto refFrame = exptInfo.getInstrument()->getReferenceFrame();
   const auto xml = tryCreateXMLFromArgsOnly(*canGeomArgs, *refFrame);
   if (!xml.empty()) {
@@ -669,8 +611,7 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromXML(
     auto shape = sFactory.createShape(xml);
     if (shape->hasValidShape()) {
       if (canMaterialArgs) {
-        PropertyManager canMaterialCompatible =
-            materialSettingsEnsureLegacyCompatibility(*canMaterialArgs);
+        PropertyManager canMaterialCompatible = materialSettingsEnsureLegacyCompatibility(*canMaterialArgs);
         ReadMaterial::MaterialParameters materialParams;
         setMaterial(materialParams, canMaterialCompatible);
         if (materialParams.volume <= 0.) {
@@ -682,8 +623,7 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromXML(
         shape->setMaterial(*canMaterial);
       }
       const SampleEnvironment se("unnamed", std::make_shared<Container>(shape));
-      exptInfo.mutableSample().setEnvironment(
-          std::make_unique<SampleEnvironment>(se));
+      exptInfo.mutableSample().setEnvironment(std::make_unique<SampleEnvironment>(se));
     }
   }
   return &(exptInfo.sample().getEnvironment());
@@ -698,8 +638,7 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromXML(
 void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
                             const Kernel::PropertyManager &materialArgs) {
   if (materialArgs.existsProperty("ChemicalFormula")) {
-    materialParams.chemicalSymbol =
-        materialArgs.getPropertyValue("ChemicalFormula");
+    materialParams.chemicalSymbol = materialArgs.getPropertyValue("ChemicalFormula");
   }
   if (materialArgs.existsProperty("AtomicNumber")) {
     materialParams.atomicNumber = materialArgs.getProperty("AtomicNumber");
@@ -708,30 +647,23 @@ void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
     materialParams.massNumber = materialArgs.getProperty("MassNumber");
   }
   if (materialArgs.existsProperty("CoherentXSection")) {
-    materialParams.coherentXSection =
-        materialArgs.getProperty("CoherentXSection");
+    materialParams.coherentXSection = materialArgs.getProperty("CoherentXSection");
   }
   if (materialArgs.existsProperty("IncoherentXSection")) {
-    materialParams.incoherentXSection =
-        materialArgs.getProperty("IncoherentXSection");
+    materialParams.incoherentXSection = materialArgs.getProperty("IncoherentXSection");
   }
   if (materialArgs.existsProperty("AttenuationXSection")) {
-    materialParams.attenuationXSection =
-        materialArgs.getProperty("AttenuationXSection");
+    materialParams.attenuationXSection = materialArgs.getProperty("AttenuationXSection");
   }
   if (materialArgs.existsProperty("ScatteringXSection")) {
-    materialParams.scatteringXSection =
-        materialArgs.getProperty("ScatteringXSection");
+    materialParams.scatteringXSection = materialArgs.getProperty("ScatteringXSection");
   }
   if (materialArgs.existsProperty("NumberDensityUnit")) {
-    const std::string numberDensityUnit =
-        materialArgs.getProperty("NumberDensityUnit");
+    const std::string numberDensityUnit = materialArgs.getProperty("NumberDensityUnit");
     if (numberDensityUnit == "Atoms") {
-      materialParams.numberDensityUnit =
-          MaterialBuilder::NumberDensityUnit::Atoms;
+      materialParams.numberDensityUnit = MaterialBuilder::NumberDensityUnit::Atoms;
     } else {
-      materialParams.numberDensityUnit =
-          MaterialBuilder::NumberDensityUnit::FormulaUnits;
+      materialParams.numberDensityUnit = MaterialBuilder::NumberDensityUnit::FormulaUnits;
     }
   }
   if (materialArgs.existsProperty("ZParameter")) {
@@ -747,12 +679,10 @@ void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
     materialParams.massDensity = materialArgs.getProperty("MassDensity");
   }
   if (materialArgs.existsProperty("EffectiveNumberDensity")) {
-    materialParams.numberDensityEffective =
-        materialArgs.getProperty("numberDensityEffective");
+    materialParams.numberDensityEffective = materialArgs.getProperty("numberDensityEffective");
   }
   if (materialArgs.existsProperty("PackingFraction")) {
-    materialParams.packingFraction =
-        materialArgs.getProperty("packingFraction");
+    materialParams.packingFraction = materialArgs.getProperty("packingFraction");
   }
   if (materialArgs.existsProperty("Mass")) {
     materialParams.mass = materialArgs.getProperty("Mass");
@@ -769,8 +699,7 @@ void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
  * null
  * @return A string containing the XML definition of the shape
  */
-void SetSample::setSampleShape(API::ExperimentInfo &experiment,
-                               const Kernel::PropertyManager_const_sptr &args,
+void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::PropertyManager_const_sptr &args,
                                const Geometry::SampleEnvironment *sampleEnv) {
   using Geometry::Container;
   /* The sample geometry can be specified in two ways:
@@ -799,8 +728,7 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment,
         for (const auto &prop : props) {
           // assume in cm
           const double val = getPropertyAsDouble(*args, prop->name());
-          shapeArgs.emplace(boost::algorithm::to_lower_copy(prop->name()),
-                            val * 0.01);
+          shapeArgs.emplace(boost::algorithm::to_lower_copy(prop->name()), val * 0.01);
         }
       }
       auto shapeObject = can.createSampleShape(shapeArgs);
@@ -808,8 +736,7 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment,
       // directly on the sample ensuring we preserve the
       // material.
       const auto mat = experiment.sample().getMaterial();
-      if (auto csgObj =
-              std::dynamic_pointer_cast<Geometry::CSGObject>(shapeObject)) {
+      if (auto csgObj = std::dynamic_pointer_cast<Geometry::CSGObject>(shapeObject)) {
         csgObj->setMaterial(mat);
       }
       experiment.mutableSample().setShape(shapeObject);
@@ -822,12 +749,9 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment,
 
       // apply Goniometer rotation
       // Rotate only implemented on mesh objects so far
-      if (typeid(shapeObject) ==
-          typeid(std::shared_ptr<Geometry::MeshObject>)) {
-        const std::vector<double> rotationMatrix =
-            experiment.run().getGoniometer().getR();
-        std::dynamic_pointer_cast<Geometry::MeshObject>(shapeObject)
-            ->rotate(rotationMatrix);
+      if (typeid(shapeObject) == typeid(std::shared_ptr<Geometry::MeshObject>)) {
+        const std::vector<double> rotationMatrix = experiment.run().getGoniometer().getR();
+        std::dynamic_pointer_cast<Geometry::MeshObject>(shapeObject)->rotate(rotationMatrix);
       }
 
       const auto mat = experiment.sample().getMaterial();
@@ -857,9 +781,8 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment,
  * @param refFrame Defines the reference frame for the shape
  * @return A string containing the XML if possible or an empty string
  */
-std::string
-SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
-                                    const Geometry::ReferenceFrame &refFrame) {
+std::string SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
+                                                const Geometry::ReferenceFrame &refFrame) {
   std::string result;
   if (!args.existsProperty(GeometryArgs::SHAPE)) {
     return result;
@@ -871,21 +794,16 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
   } else if (shape == ShapeArgs::FLAT_PLATE) {
     result = createFlatPlateXML(args, refFrame);
   } else if (boost::algorithm::ends_with(shape, ShapeArgs::CYLINDER)) {
-    result = createCylinderLikeXML(
-        args, refFrame,
-        boost::algorithm::equals(shape, ShapeArgs::HOLLOW_CYLINDER));
+    result = createCylinderLikeXML(args, refFrame, boost::algorithm::equals(shape, ShapeArgs::HOLLOW_CYLINDER));
   } else if (boost::algorithm::ends_with(shape, ShapeArgs::FLAT_PLATE_HOLDER)) {
     result = createFlatPlateHolderXML(args, refFrame);
-  } else if (boost::algorithm::ends_with(shape,
-                                         ShapeArgs::HOLLOW_CYLINDER_HOLDER)) {
+  } else if (boost::algorithm::ends_with(shape, ShapeArgs::HOLLOW_CYLINDER_HOLDER)) {
     result = createHollowCylinderHolderXML(args, refFrame);
   } else {
     std::stringstream msg;
-    msg << "Unknown 'Shape' argument '" << shape
-        << "' provided in 'Geometry' property. Allowed values are "
-        << ShapeArgs::CSG << ", " << ShapeArgs::FLAT_PLATE << ", "
-        << ShapeArgs::CYLINDER << ", " << ShapeArgs::HOLLOW_CYLINDER << ", "
-        << ShapeArgs::FLAT_PLATE_HOLDER << ", "
+    msg << "Unknown 'Shape' argument '" << shape << "' provided in 'Geometry' property. Allowed values are "
+        << ShapeArgs::CSG << ", " << ShapeArgs::FLAT_PLATE << ", " << ShapeArgs::CYLINDER << ", "
+        << ShapeArgs::HOLLOW_CYLINDER << ", " << ShapeArgs::FLAT_PLATE_HOLDER << ", "
         << ShapeArgs::HOLLOW_CYLINDER_HOLDER;
     throw std::invalid_argument(msg.str());
   }
@@ -902,10 +820,8 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
  * @param id A generic id for the shape element
  * @return The XML definition string
  */
-std::string
-SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
-                              const Geometry::ReferenceFrame &refFrame,
-                              const std::string &id) const {
+std::string SetSample::createFlatPlateXML(const Kernel::PropertyManager &args, const Geometry::ReferenceFrame &refFrame,
+                                          const std::string &id) const {
   // Helper to take 3 coordinates and turn them to a V3D respecting the
   // current reference frame
   auto makeV3D = [&refFrame](double x, double y, double z) {
@@ -931,8 +847,7 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
   if (args.existsProperty(ShapeArgs::ANGLE)) {
     Goniometer gr;
     const auto upAxis = makeV3D(0, 1, 0);
-    gr.pushAxis("up", upAxis.X(), upAxis.Y(), upAxis.Z(),
-                args.getProperty(ShapeArgs::ANGLE), Geometry::CCW,
+    gr.pushAxis("up", upAxis.X(), upAxis.Y(), upAxis.Z(), args.getProperty(ShapeArgs::ANGLE), Geometry::CCW,
                 Geometry::angDegrees);
     auto &rotation = gr.getR();
     lfb.rotate(rotation);
@@ -952,14 +867,14 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
   }
   std::ostringstream xmlShapeStream;
   xmlShapeStream << " <cuboid id=\"" << id << "\"> "
-                 << "<left-front-bottom-point x=\"" << lfb.X() << "\" y=\""
-                 << lfb.Y() << "\" z=\"" << lfb.Z() << "\"  /> "
-                 << "<left-front-top-point  x=\"" << lft.X() << "\" y=\""
-                 << lft.Y() << "\" z=\"" << lft.Z() << "\"  /> "
-                 << "<left-back-bottom-point  x=\"" << lbb.X() << "\" y=\""
-                 << lbb.Y() << "\" z=\"" << lbb.Z() << "\"  /> "
-                 << "<right-front-bottom-point  x=\"" << rfb.X() << "\" y =\""
-                 << rfb.Y() << "\" z=\"" << rfb.Z() << "\"  /> "
+                 << "<left-front-bottom-point x=\"" << lfb.X() << "\" y=\"" << lfb.Y() << "\" z=\"" << lfb.Z()
+                 << "\"  /> "
+                 << "<left-front-top-point  x=\"" << lft.X() << "\" y=\"" << lft.Y() << "\" z=\"" << lft.Z()
+                 << "\"  /> "
+                 << "<left-back-bottom-point  x=\"" << lbb.X() << "\" y=\"" << lbb.Y() << "\" z=\"" << lbb.Z()
+                 << "\"  /> "
+                 << "<right-front-bottom-point  x=\"" << rfb.X() << "\" y =\"" << rfb.Y() << "\" z=\"" << rfb.Z()
+                 << "\"  /> "
                  << "</cuboid>";
   return xmlShapeStream.str();
 }
@@ -975,9 +890,8 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
  * @param refFrame Defines the reference frame for the shape
  * @return The XML definition string
  */
-std::string SetSample::createFlatPlateHolderXML(
-    const Kernel::PropertyManager &args,
-    const Geometry::ReferenceFrame &refFrame) const {
+std::string SetSample::createFlatPlateHolderXML(const Kernel::PropertyManager &args,
+                                                const Geometry::ReferenceFrame &refFrame) const {
 
   std::vector<double> centre = {0., 0., 0.};
   if (args.existsProperty(ShapeArgs::CENTER)) {
@@ -985,10 +899,8 @@ std::string SetSample::createFlatPlateHolderXML(
   }
 
   const double sampleThickness = getPropertyAsDouble(args, ShapeArgs::THICK);
-  const double frontPlateThickness =
-      getPropertyAsDouble(args, ShapeArgs::FRONT_THICK);
-  const double backPlateThickness =
-      getPropertyAsDouble(args, ShapeArgs::BACK_THICK);
+  const double frontPlateThickness = getPropertyAsDouble(args, ShapeArgs::FRONT_THICK);
+  const double backPlateThickness = getPropertyAsDouble(args, ShapeArgs::BACK_THICK);
   double angle = 0.;
   if (args.existsProperty(ShapeArgs::ANGLE)) {
     angle = degToRad(getPropertyAsDouble(args, ShapeArgs::ANGLE));
@@ -996,37 +908,31 @@ std::string SetSample::createFlatPlateHolderXML(
   const auto pointingAlongBeam = refFrame.pointingAlongBeam();
   const auto pointingHorizontal = refFrame.pointingHorizontal();
   const auto handedness = refFrame.getHandedness();
-  const int signHorizontal =
-      (handedness == Mantid::Geometry::Handedness::Right) ? 1 : -1;
+  const int signHorizontal = (handedness == Mantid::Geometry::Handedness::Right) ? 1 : -1;
 
   auto frontPlate = args;
   frontPlate.setProperty(ShapeArgs::THICK, frontPlateThickness);
   auto frontCentre = centre;
-  const double frontCentreOffset =
-      (frontPlateThickness + sampleThickness) * 0.5;
+  const double frontCentreOffset = (frontPlateThickness + sampleThickness) * 0.5;
   frontCentre[pointingAlongBeam] -= frontCentreOffset * std::cos(angle);
-  frontCentre[pointingHorizontal] -=
-      signHorizontal * frontCentreOffset * std::sin(angle);
+  frontCentre[pointingHorizontal] -= signHorizontal * frontCentreOffset * std::sin(angle);
   if (!frontPlate.existsProperty(ShapeArgs::CENTER)) {
     frontPlate.declareProperty(ShapeArgs::CENTER, frontCentre);
   }
   frontPlate.setProperty(ShapeArgs::CENTER, frontCentre);
-  const std::string frontPlateXML =
-      createFlatPlateXML(frontPlate, refFrame, "front");
+  const std::string frontPlateXML = createFlatPlateXML(frontPlate, refFrame, "front");
 
   auto backPlate = args;
   backPlate.setProperty(ShapeArgs::THICK, backPlateThickness);
   auto backCentre = centre;
   const double backCentreOffset = (backPlateThickness + sampleThickness) * 0.5;
   backCentre[pointingAlongBeam] += backCentreOffset * std::cos(angle);
-  backCentre[pointingHorizontal] +=
-      signHorizontal * backCentreOffset * std::sin(angle);
+  backCentre[pointingHorizontal] += signHorizontal * backCentreOffset * std::sin(angle);
   if (!backPlate.existsProperty(ShapeArgs::CENTER)) {
     backPlate.declareProperty(ShapeArgs::CENTER, backCentre);
   }
   backPlate.setProperty(ShapeArgs::CENTER, backCentre);
-  const std::string backPlateXML =
-      createFlatPlateXML(backPlate, refFrame, "back");
+  const std::string backPlateXML = createFlatPlateXML(backPlate, refFrame, "back");
 
   return frontPlateXML + backPlateXML + "<algebra val=\"back:front\"/>";
 }
@@ -1041,21 +947,16 @@ std::string SetSample::createFlatPlateHolderXML(
  * @param refFrame Defines the reference frame for the shape
  * @return The XML definition string
  */
-std::string SetSample::createHollowCylinderHolderXML(
-    const Kernel::PropertyManager &args,
-    const Geometry::ReferenceFrame &refFrame) const {
+std::string SetSample::createHollowCylinderHolderXML(const Kernel::PropertyManager &args,
+                                                     const Geometry::ReferenceFrame &refFrame) const {
   auto innerCylinder = args;
-  const double innerOuterRadius =
-      getPropertyAsDouble(args, ShapeArgs::INNER_OUTER_RADIUS);
+  const double innerOuterRadius = getPropertyAsDouble(args, ShapeArgs::INNER_OUTER_RADIUS);
   innerCylinder.setProperty(ShapeArgs::OUTER_RADIUS, innerOuterRadius);
-  const std::string innerCylinderXML =
-      createCylinderLikeXML(innerCylinder, refFrame, true, "inner");
+  const std::string innerCylinderXML = createCylinderLikeXML(innerCylinder, refFrame, true, "inner");
   auto outerCylinder = args;
-  const double outerInnerRadius =
-      getPropertyAsDouble(args, ShapeArgs::OUTER_INNER_RADIUS);
+  const double outerInnerRadius = getPropertyAsDouble(args, ShapeArgs::OUTER_INNER_RADIUS);
   outerCylinder.setProperty(ShapeArgs::INNER_RADIUS, outerInnerRadius);
-  const std::string outerCylinderXML =
-      createCylinderLikeXML(outerCylinder, refFrame, true, "outer");
+  const std::string outerCylinderXML = createCylinderLikeXML(outerCylinder, refFrame, true, "outer");
   return innerCylinderXML + outerCylinderXML + "<algebra val=\"inner:outer\"/>";
 }
 
@@ -1067,22 +968,18 @@ std::string SetSample::createHollowCylinderHolderXML(
  * @param id A generic id for the shape element
  * @return The XML definition string
  */
-std::string
-SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
-                                 const Geometry::ReferenceFrame &refFrame,
-                                 bool hollow, const std::string &id) const {
+std::string SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
+                                             const Geometry::ReferenceFrame &refFrame, bool hollow,
+                                             const std::string &id) const {
   const std::string tag = hollow ? "hollow-cylinder" : "cylinder";
   double height = getPropertyAsDouble(args, ShapeArgs::HEIGHT);
-  double innerRadius =
-      hollow ? getPropertyAsDouble(args, ShapeArgs::INNER_RADIUS) : 0.0;
-  double outerRadius = hollow
-                           ? getPropertyAsDouble(args, ShapeArgs::OUTER_RADIUS)
-                           : getPropertyAsDouble(args, "Radius");
+  double innerRadius = hollow ? getPropertyAsDouble(args, ShapeArgs::INNER_RADIUS) : 0.0;
+  double outerRadius =
+      hollow ? getPropertyAsDouble(args, ShapeArgs::OUTER_RADIUS) : getPropertyAsDouble(args, "Radius");
   std::vector<double> centre = {0., 0., 0.};
   if (args.existsProperty(ShapeArgs::CENTER)) {
     centre = getPropertyAsVectorDouble(args, ShapeArgs::CENTER);
-    std::transform(centre.begin(), centre.end(), centre.begin(),
-                   [](double val) { return val *= 0.01; });
+    std::transform(centre.begin(), centre.end(), centre.begin(), [](double val) { return val *= 0.01; });
   }
   // convert to metres
   height *= 0.01;
@@ -1099,8 +996,7 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
       XMLString << axisXML(axisId);
       baseCentre = cylBaseCentre(centre, height, axisId);
     } else {
-      const std::vector<double> axis =
-          getPropertyAsVectorDouble(args, ShapeArgs::AXIS);
+      const std::vector<double> axis = getPropertyAsVectorDouble(args, ShapeArgs::AXIS);
       XMLString << axisXML(axis);
       baseCentre = cylBaseCentre(centre, height, axis);
     }
@@ -1112,9 +1008,8 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
 
   std::ostringstream xmlShapeStream;
   xmlShapeStream << "<" << tag << " id=\"" << id << "\"> "
-                 << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
-                 << baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\" /> "
-                 << XMLString.str() << "<height val=\"" << height << "\" /> ";
+                 << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\"" << baseCentre.Y() << "\" z=\""
+                 << baseCentre.Z() << "\" /> " << XMLString.str() << "<height val=\"" << height << "\" /> ";
   if (hollow) {
     xmlShapeStream << "<inner-radius val=\"" << innerRadius << "\"/>"
                    << "<outer-radius val=\"" << outerRadius << "\"/>";
@@ -1130,8 +1025,7 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
  * @param materialArgs const input material arguments
  * @return copy of material arguments without Sample prefix (see the comment)
  */
-PropertyManager SetSample::materialSettingsEnsureLegacyCompatibility(
-    const PropertyManager &materialArgs) {
+PropertyManager SetSample::materialSettingsEnsureLegacyCompatibility(const PropertyManager &materialArgs) {
   PropertyManager compatible(materialArgs);
 
   // The material should be agnostic whether it's sample's material or
@@ -1140,8 +1034,7 @@ PropertyManager SetSample::materialSettingsEnsureLegacyCompatibility(
   // However, for legacy compatibility, those prefixed with Sample are still
   // considered through aliases
   if (materialArgs.existsProperty("SampleNumberDensity")) {
-    const double numberDensity =
-        materialArgs.getProperty("SampleNumberDensity");
+    const double numberDensity = materialArgs.getProperty("SampleNumberDensity");
     if (!compatible.existsProperty("NumberDensity")) {
       compatible.declareProperty("NumberDensity", numberDensity);
     } else {
@@ -1149,8 +1042,7 @@ PropertyManager SetSample::materialSettingsEnsureLegacyCompatibility(
     }
   }
   if (materialArgs.existsProperty("SampleEffectiveNumberDensity")) {
-    const double numberDensityEff =
-        materialArgs.getProperty("SampleEffectiveNumberDensity");
+    const double numberDensityEff = materialArgs.getProperty("SampleEffectiveNumberDensity");
     if (!compatible.existsProperty("EffectiveNumberDensity")) {
       compatible.declareProperty("EffectiveNumberDensity", numberDensityEff);
     } else {
@@ -1158,8 +1050,7 @@ PropertyManager SetSample::materialSettingsEnsureLegacyCompatibility(
     }
   }
   if (materialArgs.existsProperty("SamplePackingFraction")) {
-    const double packingFraction =
-        materialArgs.getProperty("SamplePackingFraction");
+    const double packingFraction = materialArgs.getProperty("SamplePackingFraction");
     if (!compatible.existsProperty("PackingFraction")) {
       compatible.declareProperty("PackingFraction", packingFraction);
     } else {

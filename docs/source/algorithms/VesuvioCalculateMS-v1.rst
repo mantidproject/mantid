@@ -32,7 +32,7 @@ Usage
    height = 0.1 # y-dir (m)
    width = 0.1 # x-dir (m)
    thick = 0.005 # z-dir (m)
-   
+
    half_height, half_width, half_thick = 0.5*height, 0.5*width, 0.5*thick
    xml_str = \
       " <cuboid id=\"sample-shape\"> " \

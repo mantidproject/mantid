@@ -24,8 +24,8 @@ public:
   static void destroySuite(CyclicGroupTest *suite) { delete suite; }
 
   void testConstructor() {
-    CyclicGroup_const_sptr group = std::make_shared<const CyclicGroup>(
-        SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
+    CyclicGroup_const_sptr group =
+        std::make_shared<const CyclicGroup>(SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
     TS_ASSERT_EQUALS(group->order(), 2);
   }

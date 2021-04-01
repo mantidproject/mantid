@@ -28,16 +28,12 @@ class CalibrationHelpersTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalibrationHelpersTest *createSuite() {
-    return new CalibrationHelpersTest();
-  }
+  static CalibrationHelpersTest *createSuite() { return new CalibrationHelpersTest(); }
   static void destroySuite(CalibrationHelpersTest *suite) { delete suite; }
 
   void test_fixUpSampleAndSourcePositions_moves_the_sample_and_the_source() {
     // Create two identical workspaces
-    const auto wsOld =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1000,
-                                                                     true);
+    const auto wsOld = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1000, true);
     wsNew = wsOld->clone();
 
     const auto &positionSampleOld = wsOld->detectorInfo().samplePosition();
@@ -49,23 +45,19 @@ public:
     const auto &positionSourceNew = V3D(1.0, 2.0, newZ - l1);
 
     // Check what happens if l1 is negative
-    TS_ASSERT_THROWS(CalibrationHelpers::adjustUpSampleAndSourcePositions(
-                         -l1, positionSampleNew, wsNew->mutableComponentInfo()),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(
+        CalibrationHelpers::adjustUpSampleAndSourcePositions(-l1, positionSampleNew, wsNew->mutableComponentInfo()),
+        const std::runtime_error &);
 
-    CalibrationHelpers::adjustUpSampleAndSourcePositions(
-        l1, positionSampleNew, wsNew->mutableComponentInfo());
+    CalibrationHelpers::adjustUpSampleAndSourcePositions(l1, positionSampleNew, wsNew->mutableComponentInfo());
 
     TS_ASSERT_EQUALS(wsOld->detectorInfo().samplePosition(), positionSampleOld);
     TS_ASSERT_EQUALS(wsNew->detectorInfo().samplePosition(), positionSampleNew);
     TS_ASSERT_EQUALS(wsOld->detectorInfo().sourcePosition(), positionSourceOld);
     TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition(), positionSourceNew);
-    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().X(),
-                     positionSourceNew.X());
-    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().Y(),
-                     positionSourceNew.Y());
-    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().Z(),
-                     positionSourceNew.Z());
+    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().X(), positionSourceNew.X());
+    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().Y(), positionSourceNew.Y());
+    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().Z(), positionSourceNew.Z());
   }
 
   void test_fixUpBankParameterMap_applies_move_to_rectangular_detectors() {
@@ -79,25 +71,18 @@ public:
     std::vector<std::string> bankNames = {"bank1", "bank3"};
     auto newInstr = wsNew->getInstrument();
 
-    CalibrationHelpers::adjustBankPositionsAndSizes(
-        bankNames, *newInstr, newPos, newRot, heightScale, widthScale,
-        componentInfoWsNew);
+    CalibrationHelpers::adjustBankPositionsAndSizes(bankNames, *newInstr, newPos, newRot, heightScale, widthScale,
+                                                    componentInfoWsNew);
 
     const auto &detectorInfoWsNew = wsNew->detectorInfo();
 
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_1),
-                     newPos + oldPosFirstBank1);
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_2),
-                     oldPosFirstBank2);
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_3),
-                     newPos + oldPosFirstBank3);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_1), newPos + oldPosFirstBank1);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_2), oldPosFirstBank2);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_3), newPos + oldPosFirstBank3);
 
-    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_1),
-                     oldRotFirstBank1);
-    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_2),
-                     oldRotFirstBank2);
-    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_3),
-                     oldRotFirstBank3);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_1), oldRotFirstBank1);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_2), oldRotFirstBank2);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_3), oldRotFirstBank3);
   }
 
   void test_fixUpBankParameterMap_applies_scale_to_rectangular_detectors() {
@@ -111,25 +96,17 @@ public:
 
     auto newInstr = wsNew->getInstrument();
 
-    CalibrationHelpers::adjustBankPositionsAndSizes(
-        bankNames, *newInstr, newPos, newRot, heightScale, widthScale,
-        componentInfoWsNew);
+    CalibrationHelpers::adjustBankPositionsAndSizes(bankNames, *newInstr, newPos, newRot, heightScale, widthScale,
+                                                    componentInfoWsNew);
 
     const auto &detectorInfoWsNew = wsNew->detectorInfo();
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_1).X(),
-                     heightScale * oldPosLastBank1.X());
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_1).Y(),
-                     widthScale * oldPosLastBank1.Y());
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_1).Z(),
-                     oldPosLastBank1.Z());
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_2),
-                     oldPosLastBank2);
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_3).X(),
-                     heightScale * oldPosLastBank3.X());
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_3).Y(),
-                     widthScale * oldPosLastBank3.Y());
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_3).Z(),
-                     oldPosLastBank3.Z());
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_1).X(), heightScale * oldPosLastBank1.X());
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_1).Y(), widthScale * oldPosLastBank1.Y());
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_1).Z(), oldPosLastBank1.Z());
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_2), oldPosLastBank2);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_3).X(), heightScale * oldPosLastBank3.X());
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_3).Y(), widthScale * oldPosLastBank3.Y());
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_3).Z(), oldPosLastBank3.Z());
   }
 
   void test_fixUpBankParameterMap_applies_rotation_to_rectangular_detectors() {
@@ -143,28 +120,20 @@ public:
     const double heightScale = 1.0;
     const double widthScale = 1.0;
 
-    CalibrationHelpers::adjustBankPositionsAndSizes(
-        bankNames, *instNew, newPos, newRot, heightScale, widthScale,
-        componentInfoWsNew);
+    CalibrationHelpers::adjustBankPositionsAndSizes(bankNames, *instNew, newPos, newRot, heightScale, widthScale,
+                                                    componentInfoWsNew);
 
     const auto &detectorInfoWsNew = wsNew->detectorInfo();
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_1),
-                     oldPosFirstBank1);
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_2),
-                     oldPosFirstBank2);
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_3),
-                     oldPosFirstBank3);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_1), oldPosFirstBank1);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_2), oldPosFirstBank2);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_3), oldPosFirstBank3);
 
-    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_1),
-                     newRot * oldRotFirstBank1);
-    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_2),
-                     oldRotFirstBank2);
-    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_3),
-                     newRot * oldRotFirstBank3);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_1), newRot * oldRotFirstBank1);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_2), oldRotFirstBank2);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_3), newRot * oldRotFirstBank3);
   }
 
-  void
-  test_fixUpBankParameterMap_applies_all_changes_to_rectangular_detectors() {
+  void test_fixUpBankParameterMap_applies_all_changes_to_rectangular_detectors() {
     setUpFixUpBankParameterMap();
 
     auto &componentInfoWsNew = wsNew->mutableComponentInfo();
@@ -177,36 +146,26 @@ public:
 
     std::vector<std::string> bankNames = {"bank1", "bank3"};
 
-    CalibrationHelpers::adjustBankPositionsAndSizes(
-        bankNames, *instNew, newPos, newRot, heightScale, widthScale,
-        componentInfoWsNew);
+    CalibrationHelpers::adjustBankPositionsAndSizes(bankNames, *instNew, newPos, newRot, heightScale, widthScale,
+                                                    componentInfoWsNew);
 
     const auto &detectorInfoWsNew = wsNew->detectorInfo();
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_1),
-                     newPos + oldPosFirstBank1);
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_2),
-                     oldPosFirstBank2);
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_3),
-                     newPos + oldPosFirstBank3);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_1), newPos + oldPosFirstBank1);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_2), oldPosFirstBank2);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_3), newPos + oldPosFirstBank3);
 
     // Can these be made deterministic? This test is being added as a regression
     // test, so not a primary concern here to do so.
     const auto &expectedPositionBank1 = V3D(1.0, 2.032, 8.048);
     const auto &expectedPositionBank3 = V3D(1.0, 2.032, 18.048);
 
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_1),
-                     expectedPositionBank1);
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_2),
-                     oldPosLastBank2);
-    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_3),
-                     expectedPositionBank3);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_1), expectedPositionBank1);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_2), oldPosLastBank2);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_3), expectedPositionBank3);
 
-    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_1),
-                     newRot * oldRotFirstBank1);
-    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_2),
-                     oldRotFirstBank2);
-    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_3),
-                     newRot * oldRotFirstBank3);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_1), newRot * oldRotFirstBank1);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_2), oldRotFirstBank2);
+    TS_ASSERT_EQUALS(detectorInfoWsNew.rotation(FIRST_DET_INDEX_BANK_3), newRot * oldRotFirstBank3);
   }
 
 private:
@@ -242,8 +201,7 @@ private:
   std::vector<std::string> bankNames = {"bank1", "bank3"};
 
   void setUpFixUpBankParameterMap() {
-    wsOld = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-        3, 3, 3);
+    wsOld = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(3, 3, 3);
     wsNew = wsOld->clone();
 
     const auto &detectorInfoWsNew = wsNew->detectorInfo();

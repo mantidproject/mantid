@@ -21,24 +21,19 @@ namespace Algorithms {
     @author Roman Tolchenov
     @date 07/07/2009
  */
-class MANTID_ALGORITHMS_DLL FFTSmooth : public API::Algorithm,
-                                        public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL FFTSmooth : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   FFTSmooth() { this->useAlgorithm("FFTSmooth", 2); }
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FFTSmooth"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Performs smoothing of a spectrum using various filters.";
-  }
+  const std::string summary() const override { return "Performs smoothing of a spectrum using various filters."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Arithmetic\\FFT;Transforms\\Smoothing";
-  }
+  const std::string category() const override { return "Arithmetic\\FFT;Transforms\\Smoothing"; }
 
 private:
   // Overridden Algorithm methods

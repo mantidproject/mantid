@@ -24,8 +24,7 @@ namespace Kernel {
  * @param name The name of the property
  * @param direction Direction of the property
  */
-PropertyManagerProperty::PropertyManagerProperty(const std::string &name,
-                                                 unsigned int direction)
+PropertyManagerProperty::PropertyManagerProperty(const std::string &name, unsigned int direction)
     : PropertyManagerProperty(name, ValueType(), direction) {}
 
 /**
@@ -34,11 +33,9 @@ PropertyManagerProperty::PropertyManagerProperty(const std::string &name,
  * @param defaultValue A default value for the property
  * @param direction Direction of the property
  */
-PropertyManagerProperty::PropertyManagerProperty(const std::string &name,
-                                                 const ValueType &defaultValue,
+PropertyManagerProperty::PropertyManagerProperty(const std::string &name, const ValueType &defaultValue,
                                                  unsigned int direction)
-    : BaseClass(name, defaultValue, direction), m_dataServiceKey(),
-      m_defaultAsStr() {
+    : BaseClass(name, defaultValue, direction), m_dataServiceKey(), m_defaultAsStr() {
   if (name.empty()) {
     throw std::invalid_argument("PropertyManagerProperty() requires a name");
   }
@@ -60,17 +57,13 @@ std::string PropertyManagerProperty::value() const {
 /**
  * Create a Json::Value objectValue from the PropertyManager
  */
-Json::Value PropertyManagerProperty::valueAsJson() const {
-  return (*this)()->asJson(true);
-}
+Json::Value PropertyManagerProperty::valueAsJson() const { return (*this)()->asJson(true); }
 
 /**
  *
  * @return The string representation of the default value
  */
-std::string PropertyManagerProperty::getDefault() const {
-  return m_defaultAsStr;
-}
+std::string PropertyManagerProperty::getDefault() const { return m_defaultAsStr; }
 
 /**
  * Overwrite the current value. The string is expected to contain either:
@@ -122,15 +115,13 @@ std::string PropertyManagerProperty::setValue(const std::string &strValue) {
  * @return An empty string indicating success otherwise a help message
  * indicating what error has occurred
  */
-std::string
-PropertyManagerProperty::setValueFromJson(const Json::Value &value) {
+std::string PropertyManagerProperty::setValueFromJson(const Json::Value &value) {
   if (value.type() == Json::objectValue) {
     try {
       *this = createPropertyManager(value);
       return "";
     } catch (std::exception &exc) {
-      return std::string("Attempt to set Json value to property failed: ") +
-             exc.what();
+      return std::string("Attempt to set Json value to property failed: ") + exc.what();
     }
   } else {
     return std::string("Attempt to set incorrect Json type to "
@@ -143,32 +134,25 @@ PropertyManagerProperty::setValueFromJson(const Json::Value &value) {
 // IPropertyManager::getValue instantiations
 // -----------------------------------------------------------------------------
 template <>
-MANTID_KERNEL_DLL PropertyManager_sptr
-IPropertyManager::getValue<PropertyManager_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<PropertyManager_sptr> *>(
-      getPointerToProperty(name));
+MANTID_KERNEL_DLL PropertyManager_sptr IPropertyManager::getValue<PropertyManager_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<PropertyManager_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
-    throw std::runtime_error(
-        std::string("Attempt to assign property ") + name +
-        " to incorrect type. Expected shared_ptr<PropertyManager>.");
+    throw std::runtime_error(std::string("Attempt to assign property ") + name +
+                             " to incorrect type. Expected shared_ptr<PropertyManager>.");
   }
 }
 
 template <>
 MANTID_KERNEL_DLL PropertyManager_const_sptr
-IPropertyManager::getValue<PropertyManager_const_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<PropertyManager_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<PropertyManager_const_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<PropertyManager_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const shared_ptr<PropertyManager>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<PropertyManager>.";
     throw std::runtime_error(message);
   }
 }

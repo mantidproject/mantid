@@ -10,11 +10,11 @@ Workspace
 What are Workspaces?
 --------------------
 
-Workspaces store data that :ref:`algorithms <algorithm>` operate on. Workspaces are usually stored in-memory. An algorithm can manipulate a workspace in-place or create a new one as an output. 
+Workspaces store data that :ref:`algorithms <algorithm>` operate on. Workspaces are usually stored in-memory. An algorithm can manipulate a workspace in-place or create a new one as an output.
 
 Workspace is as loose term that encompases a range of possible data structures. All forms of Workspace provide some common information:
 
-- The type identifier (id) of the workspace (see below), unique to every type of workspace 
+- The type identifier (id) of the workspace (see below), unique to every type of workspace
 - The name of the workspace, unique to every instance of a workspace even those of the same type
 - The history of :ref:`algorithms <algorithm>` that were run to form and manipulate the workspace to its current state
 
@@ -39,7 +39,7 @@ Workspaces Types
    workspaces. Algorithms given a group as input usually run sequentially on
    each member of the group.
 
-The workspace type id identifies the type of a Workspace instance.  
+The workspace type id identifies the type of a Workspace instance.
 
 .. tip:: For C++ or Python development, these values are needed in such functions as the :ref:`Analysis Data Service's <Analysis Data Service>` createWorkspace.
 

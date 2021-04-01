@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Kernel::ArrayLengthValidator.
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.IntArrayLengthValidator 
+.. autoclass:: mantid.kernel.IntArrayLengthValidator
     :members:
     :undoc-members:
     :inherited-members:

@@ -19,9 +19,7 @@ SingleCountValidator::SingleCountValidator(const bool &mustBeSingleCount)
     : MatrixWorkspaceValidator(), m_mustBeSingleCount(mustBeSingleCount) {}
 
 /// Clone the current state
-Kernel::IValidator_sptr SingleCountValidator::clone() const {
-  return std::make_shared<SingleCountValidator>(*this);
-}
+Kernel::IValidator_sptr SingleCountValidator::clone() const { return std::make_shared<SingleCountValidator>(*this); }
 
 /** Checks if the workspace contains a single counts when it should not and
  * vice-versa. For perofrmance reasons this takes the first spectrum size only,
@@ -30,8 +28,7 @@ Kernel::IValidator_sptr SingleCountValidator::clone() const {
  *  @return A user level description if a problem exists, otherwise an empty
  * string
  */
-std::string
-SingleCountValidator::checkValidity(const MatrixWorkspace_sptr &ws) const {
+std::string SingleCountValidator::checkValidity(const MatrixWorkspace_sptr &ws) const {
   auto blockSize = ws->histogram(0).size();
 
   if (m_mustBeSingleCount) {

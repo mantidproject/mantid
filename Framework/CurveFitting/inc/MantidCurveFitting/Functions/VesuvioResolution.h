@@ -38,14 +38,11 @@ struct ResolutionParams {
   Calculate the resolution from a workspace of Vesuvio data using the mass &
   instrument definition.
 */
-class MANTID_CURVEFITTING_DLL VesuvioResolution : public API::ParamFunction,
-                                                  public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL VesuvioResolution : public API::ParamFunction, public API::IFunction1D {
 public:
   /// Creates a POD struct containing the required resolution parameters for
   /// this spectrum
-  static ResolutionParams
-  getResolutionParameters(const API::MatrixWorkspace_const_sptr &ws,
-                          const size_t index);
+  static ResolutionParams getResolutionParameters(const API::MatrixWorkspace_const_sptr &ws, const size_t index);
 
   /// Default constructor required for factory
   VesuvioResolution();
@@ -59,26 +56,21 @@ public:
   /// Access lorentz FWHM
   inline double lorentzFWHM() const { return m_lorentzFWHM; }
   /// Calculate the function
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
   /// Ensure the object is ready to be fitted
   void setUpForFit() override;
   /// Cache a copy of the workspace pointer and pull out the parameters
-  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
-                          size_t wsIndex, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wsIndex, double startX,
+                          double endX) override;
   /// Pre-calculate the resolution components values
-  void cacheResolutionComponents(const Algorithms::DetectorParams &detpar,
-                                 const ResolutionParams &respar);
+  void cacheResolutionComponents(const Algorithms::DetectorParams &detpar, const ResolutionParams &respar);
   /// Turn off logger
   void disableLogging() { m_log.setEnabled(false); }
   /// Compute Voigt function
-  void voigtApprox(std::vector<double> &voigt,
-                   const std::vector<double> &xValues, const double lorentzPos,
-                   const double lorentzAmp, const double lorentzWidth,
-                   const double gaussWidth) const;
+  void voigtApprox(std::vector<double> &voigt, const std::vector<double> &xValues, const double lorentzPos,
+                   const double lorentzAmp, const double lorentzWidth, const double gaussWidth) const;
   /// Compute Voigt function with cached values
-  void voigtApprox(std::vector<double> &voigt,
-                   const std::vector<double> &xValues, const double lorentzPos,
+  void voigtApprox(std::vector<double> &voigt, const std::vector<double> &xValues, const double lorentzPos,
                    const double lorentzAmp) const;
 
   ///@}

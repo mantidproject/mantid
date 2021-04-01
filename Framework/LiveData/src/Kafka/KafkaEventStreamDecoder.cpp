@@ -66,8 +66,7 @@ const std::string SAMPLE_MESSAGE_ID = "f142";
  * @param value : Sample log measured value
  */
 template <typename T>
-void appendToLog(Mantid::API::Run &mutableRunInfo, const std::string &name,
-                 const Core::DateAndTime &time, T value) {
+void appendToLog(Mantid::API::Run &mutableRunInfo, const std::string &name, const Core::DateAndTime &time, T value) {
   if (mutableRunInfo.hasProperty(name)) {
     auto property = mutableRunInfo.getTimeSeriesProperty<T>(name);
     property->addValue(time, value);
@@ -79,24 +78,20 @@ void appendToLog(Mantid::API::Run &mutableRunInfo, const std::string &name,
 }
 
 void sortIntermediateEventBuffer(
-    std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent>
-        &eventBuffer,
-    const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedPulse>
-        &pulseBuffer) {
-  tbb::parallel_sort(
-      eventBuffer.begin(), eventBuffer.end(),
-      [&](const Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent &lhs,
-          const Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent &rhs)
-          -> bool {
-        const auto &lhsPulse = pulseBuffer[lhs.pulseIndex];
-        const auto &rhsPulse = pulseBuffer[rhs.pulseIndex];
+    std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent> &eventBuffer,
+    const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedPulse> &pulseBuffer) {
+  tbb::parallel_sort(eventBuffer.begin(), eventBuffer.end(),
+                     [&](const Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent &lhs,
+                         const Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent &rhs) -> bool {
+                       const auto &lhsPulse = pulseBuffer[lhs.pulseIndex];
+                       const auto &rhsPulse = pulseBuffer[rhs.pulseIndex];
 
-        /* If events are from different periods compare the period
-         * numbers, otherwise compare the workspace index */
-        return (lhsPulse.periodNumber != rhsPulse.periodNumber)
-                   ? lhsPulse.periodNumber < rhsPulse.periodNumber
-                   : lhs.wsIdx < rhs.wsIdx;
-      });
+                       /* If events are from different periods compare the period
+                        * numbers, otherwise compare the workspace index */
+                       return (lhsPulse.periodNumber != rhsPulse.periodNumber)
+                                  ? lhsPulse.periodNumber < rhsPulse.periodNumber
+                                  : lhs.wsIdx < rhs.wsIdx;
+                     });
 }
 } // namespace
 
@@ -114,13 +109,11 @@ using Types::Event::TofEvent;
  * @param eventTopic The name of the topic streaming the event data
  * run mapping
  */
-KafkaEventStreamDecoder::KafkaEventStreamDecoder(
-    std::shared_ptr<IKafkaBroker> broker, const std::string &eventTopic,
-    const std::string &runInfoTopic, const std::string &sampleEnvTopic,
-    const std::string &chopperTopic, const std::string &monitorTopic,
-    const std::size_t bufferThreshold)
-    : IKafkaStreamDecoder(std::move(broker), eventTopic, runInfoTopic,
-                          sampleEnvTopic, chopperTopic, monitorTopic),
+KafkaEventStreamDecoder::KafkaEventStreamDecoder(std::shared_ptr<IKafkaBroker> broker, const std::string &eventTopic,
+                                                 const std::string &runInfoTopic, const std::string &sampleEnvTopic,
+                                                 const std::string &chopperTopic, const std::string &monitorTopic,
+                                                 const std::size_t bufferThreshold)
+    : IKafkaStreamDecoder(std::move(broker), eventTopic, runInfoTopic, sampleEnvTopic, chopperTopic, monitorTopic),
       m_intermediateBufferFlushThreshold(bufferThreshold) {
 #ifndef _OPENMP
   g_log.warning() << "Multithreading is not available on your system. This "
@@ -153,10 +146,8 @@ KafkaEventStreamDecoder::~KafkaEventStreamDecoder() {
   stopCapture();
 }
 
-KafkaEventStreamDecoder::KafkaEventStreamDecoder(
-    KafkaEventStreamDecoder &&o) noexcept
-    : IKafkaStreamDecoder(std::move(o)),
-      m_intermediateBufferFlushThreshold(o.m_intermediateBufferFlushThreshold) {
+KafkaEventStreamDecoder::KafkaEventStreamDecoder(KafkaEventStreamDecoder &&o) noexcept
+    : IKafkaStreamDecoder(std::move(o)), m_intermediateBufferFlushThreshold(o.m_intermediateBufferFlushThreshold) {
 
   std::scoped_lock lck(m_intermediateBufferMutex, m_mutex);
   m_localEvents = std::move(o.m_localEvents);
@@ -199,22 +190,19 @@ bool KafkaEventStreamDecoder::hasReachedEndOfRun() noexcept {
 
 API::Workspace_sptr KafkaEventStreamDecoder::extractDataImpl() {
   std::lock_guard<std::mutex> workspaceLock(m_mutex);
-  g_log.debug() << "Events since last timeout "
-                << totalNumEventsSinceStart - totalNumEventsBeforeLastTimeout
+  g_log.debug() << "Events since last timeout " << totalNumEventsSinceStart - totalNumEventsBeforeLastTimeout
                 << std::endl;
   totalNumEventsBeforeLastTimeout = totalNumEventsSinceStart;
 
   if (m_localEvents.size() == 1) {
-    auto temp = createBufferWorkspace<DataObjects::EventWorkspace>(
-        "EventWorkspace", m_localEvents.front());
+    auto temp = createBufferWorkspace<DataObjects::EventWorkspace>("EventWorkspace", m_localEvents.front());
     std::swap(m_localEvents.front(), temp);
     return temp;
   } else if (m_localEvents.size() > 1) {
     auto group = std::make_shared<API::WorkspaceGroup>();
     size_t index(0);
     for (auto &filledBuffer : m_localEvents) {
-      auto temp = createBufferWorkspace<DataObjects::EventWorkspace>(
-          "EventWorkspace", filledBuffer);
+      auto temp = createBufferWorkspace<DataObjects::EventWorkspace>("EventWorkspace", filledBuffer);
       std::swap(m_localEvents[index++], temp);
       group->addWorkspace(temp);
     }
@@ -239,8 +227,8 @@ void KafkaEventStreamDecoder::captureImplExcept() {
   auto runStartStruct = getRunStartMessage(runBuffer);
   initLocalCaches(runStartStruct);
 
-  m_interrupt = false; // Allow MonitorLiveData or user to interrupt
-  m_endRun = false; // Indicates to MonitorLiveData that end of run is reached
+  m_interrupt = false;     // Allow MonitorLiveData or user to interrupt
+  m_endRun = false;        // Indicates to MonitorLiveData that end of run is reached
   m_runStatusSeen = false; // Flag to ensure MonitorLiveData observes end of run
   // Flag to ensure LoadLiveData extracts data before start of next run
   m_extractedEndRunData = true;
@@ -295,23 +283,18 @@ void KafkaEventStreamDecoder::captureImplExcept() {
       g_log.debug() << "Consuming " << rate << "Hz\n";
       nMessages = 0;
       g_log.debug() << eventsPerMessage << " events per message\n";
-      const auto mpp = static_cast<double>(numMessagesForSinglePulse) /
-                       static_cast<double>(pulseTimeCount);
+      const auto mpp = static_cast<double>(numMessagesForSinglePulse) / static_cast<double>(pulseTimeCount);
       g_log.debug() << mpp << " event messages per pulse\n";
       g_log.debug() << "Achievable pulse rate is " << rate / mpp << "Hz\n";
       g_log.debug() << "Average time taken to convert event messages "
-                    << totalEventFromMessageDuration / numEventFromMessageCalls
-                    << " seconds\n";
+                    << totalEventFromMessageDuration / numEventFromMessageCalls << " seconds\n";
       g_log.debug() << "Average time taken to populate workspace "
-                    << totalPopulateWorkspaceDuration /
-                           numPopulateWorkspaceCalls
-                    << " seconds\n";
+                    << totalPopulateWorkspaceDuration / numPopulateWorkspaceCalls << " seconds\n";
       start = std::chrono::system_clock::now();
     }
 
     if (checkOffsets) {
-      checkRunEnd(topicName, checkOffsets, offset, partition, stopOffsets,
-                  reachedEnd);
+      checkRunEnd(topicName, checkOffsets, offset, partition, stopOffsets, reachedEnd);
       if (offset > stopOffsets[topicName][static_cast<size_t>(partition)]) {
         // If the offset is beyond the end of the current run, then skip to
         // the next iteration and don't process the message
@@ -322,9 +305,7 @@ void KafkaEventStreamDecoder::captureImplExcept() {
 
     // Check if we have an event message
     // Most will be event messages so we check for this type first
-    if (flatbuffers::BufferHasIdentifier(
-            reinterpret_cast<const uint8_t *>(buffer.c_str()),
-            EVENT_MESSAGE_ID.c_str())) {
+    if (flatbuffers::BufferHasIdentifier(reinterpret_cast<const uint8_t *>(buffer.c_str()), EVENT_MESSAGE_ID.c_str())) {
       uint64_t currentPulseTime(-1);
       eventDataFromMessage(buffer, nEvents, currentPulseTime);
 
@@ -353,9 +334,8 @@ void KafkaEventStreamDecoder::captureImplExcept() {
       ++totalMessages;
     }
     // Check if we have a sample environment log message
-    else if (flatbuffers::BufferHasIdentifier(
-                 reinterpret_cast<const uint8_t *>(buffer.c_str()),
-                 SAMPLE_MESSAGE_ID.c_str())) {
+    else if (flatbuffers::BufferHasIdentifier(reinterpret_cast<const uint8_t *>(buffer.c_str()),
+                                              SAMPLE_MESSAGE_ID.c_str())) {
       sampleDataFromMessage(buffer);
     }
     // Check if we have a runMessage
@@ -369,9 +349,7 @@ void KafkaEventStreamDecoder::captureImplExcept() {
 
   const auto globend = std::chrono::system_clock::now();
   const std::chrono::duration<double> dur = globend - globstart;
-  g_log.debug() << "Consumed at a rate of "
-                << static_cast<double>(totalMessages) / dur.count() << "Hz"
-                << std::endl;
+  g_log.debug() << "Consumed at a rate of " << static_cast<double>(totalMessages) / dur.count() << "Hz" << std::endl;
   g_log.debug("Event capture finished");
   totalNumEventsBeforeLastTimeout = 0;
   totalNumEventsSinceStart = 0;
@@ -383,12 +361,10 @@ void KafkaEventStreamDecoder::captureImplExcept() {
   numEventFromMessageCalls = 0;
 }
 
-void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer,
-                                                   size_t &eventCount,
+void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer, size_t &eventCount,
                                                    uint64_t &pulseTimeRet) {
   /* Parse message */
-  const auto eventMsg =
-      GetEventMessage(reinterpret_cast<const uint8_t *>(buffer.c_str()));
+  const auto eventMsg = GetEventMessage(reinterpret_cast<const uint8_t *>(buffer.c_str()));
 
   /* Parse pulse time */
   pulseTimeRet = static_cast<uint64_t>(eventMsg->pulse_time());
@@ -407,13 +383,11 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer,
   /* Perform facility specific operations */
   if (eventMsg->facility_specific_data_type() == FacilityData::ISISData) {
     std::lock_guard<std::mutex> workspaceLock(m_mutex);
-    const auto ISISMsg =
-        static_cast<const ISISData *>(eventMsg->facility_specific_data());
+    const auto ISISMsg = static_cast<const ISISData *>(eventMsg->facility_specific_data());
     pulse.periodNumber = static_cast<int>(ISISMsg->period_number());
     auto periodWs = m_localEvents[pulse.periodNumber];
     auto &mutableRunInfo = periodWs->mutableRun();
-    mutableRunInfo.getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)
-        ->addValue(pulseTime, ISISMsg->proton_charge());
+    mutableRunInfo.getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)->addValue(pulseTime, ISISMsg->proton_charge());
   }
 
   const auto starttime = std::chrono::system_clock::now();
@@ -429,11 +403,9 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer,
     const auto oldBufferSize(m_receivedEventBuffer.size());
     m_receivedEventBuffer.reserve(oldBufferSize + nEvents);
 
-    std::transform(detData.begin(), detData.end(), tofData.begin(),
-                   std::back_inserter(m_receivedEventBuffer),
+    std::transform(detData.begin(), detData.end(), tofData.begin(), std::back_inserter(m_receivedEventBuffer),
                    [&](uint64_t detId, uint64_t tof) -> BufferedEvent {
-                     const auto workspaceIndex =
-                         m_specToIdx[detId + m_specToIdxOffset];
+                     const auto workspaceIndex = m_specToIdx[detId + m_specToIdxOffset];
                      return {workspaceIndex, tof, pulseIndex};
                    });
   }
@@ -450,8 +422,7 @@ void KafkaEventStreamDecoder::flushIntermediateBuffer() {
     return;
   }
 
-  g_log.debug() << "Populating event workspace with "
-                << m_receivedEventBuffer.size() << " events\n";
+  g_log.debug() << "Populating event workspace with " << m_receivedEventBuffer.size() << " events\n";
 
   const auto startTime = std::chrono::system_clock::now();
 
@@ -461,8 +432,7 @@ void KafkaEventStreamDecoder::flushIntermediateBuffer() {
 
   /* Compute groups for parallel insertion */
   const auto numberOfGroups = PARALLEL_GET_MAX_THREADS;
-  const auto groupBoundaries =
-      computeGroupBoundaries(m_receivedEventBuffer, numberOfGroups);
+  const auto groupBoundaries = computeGroupBoundaries(m_receivedEventBuffer, numberOfGroups);
 
   /* Insert events into EventWorkspace(s) */
   {
@@ -474,17 +444,14 @@ void KafkaEventStreamDecoder::flushIntermediateBuffer() {
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (auto group = 0; group < numberOfGroups; ++group) {
-      for (auto idx = groupBoundaries[group]; idx < groupBoundaries[group + 1];
-           ++idx) {
+      for (auto idx = groupBoundaries[group]; idx < groupBoundaries[group + 1]; ++idx) {
         const auto &event = m_receivedEventBuffer[idx];
         const auto &pulse = m_receivedPulseBuffer[event.pulseIndex];
 
-        auto *spectrum =
-            m_localEvents[pulse.periodNumber]->getSpectrumUnsafe(event.wsIdx);
+        auto *spectrum = m_localEvents[pulse.periodNumber]->getSpectrumUnsafe(event.wsIdx);
 
         // nanoseconds to microseconds
-        spectrum->addEventQuickly(
-            TofEvent(static_cast<double>(event.tof) * 1e-3, pulse.pulseTime));
+        spectrum->addEventQuickly(TofEvent(static_cast<double>(event.tof) * 1e-3, pulse.pulseTime));
       }
     }
   }
@@ -515,16 +482,14 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
   for (const auto &periodBuffer : m_localEvents) {
     auto &mutableRunInfo = periodBuffer->mutableRun();
 
-    auto seEvent =
-        GetLogData(reinterpret_cast<const uint8_t *>(buffer.c_str()));
+    auto seEvent = GetLogData(reinterpret_cast<const uint8_t *>(buffer.c_str()));
 
     auto name = seEvent->source_name()->str();
 
     // Convert time from nanoseconds since 1 Jan 1970 to nanoseconds since 1 Jan
     // 1990 to create a Mantid timestamp
     const int64_t nanoseconds1970To1990 = 631152000000000000L;
-    auto time = Core::DateAndTime(static_cast<int64_t>(seEvent->timestamp()) -
-                                  nanoseconds1970To1990);
+    auto time = Core::DateAndTime(static_cast<int64_t>(seEvent->timestamp()) - nanoseconds1970To1990);
 
     // If sample log with this name already exists then append to it
     // otherwise create a new log
@@ -539,21 +504,17 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
       appendToLog<double>(mutableRunInfo, name, time, value->value());
     } else if (seEvent->value_type() == Value::Float) {
       auto value = static_cast<const Float *>(seEvent->value());
-      appendToLog<double>(mutableRunInfo, name, time,
-                          static_cast<double>(value->value()));
+      appendToLog<double>(mutableRunInfo, name, time, static_cast<double>(value->value()));
     } else if (seEvent->value_type() == Value::Short) {
       auto value = static_cast<const Short *>(seEvent->value());
-      appendToLog<int32_t>(mutableRunInfo, name, time,
-                           static_cast<int32_t>(value->value()));
+      appendToLog<int32_t>(mutableRunInfo, name, time, static_cast<int32_t>(value->value()));
     } else if (seEvent->value_type() == Value::String) {
       auto value = static_cast<const String *>(seEvent->value());
-      appendToLog<std::string>(mutableRunInfo, name, time,
-                               static_cast<std::string>(value->value()->str()));
+      appendToLog<std::string>(mutableRunInfo, name, time, static_cast<std::string>(value->value()->str()));
     } else if (seEvent->value_type() == Value::ArrayByte) {
       // do nothing for now.
     } else {
-      g_log.warning() << "Value for sample log named '" << name
-                      << "' was not of recognised type. The value type is "
+      g_log.warning() << "Value for sample log named '" << name << "' was not of recognised type. The value type is "
                       << EnumNameValue(seEvent->value_type()) << std::endl;
     }
   }
@@ -566,8 +527,7 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
  * By the end of this method the local event buffer is ready to accept
  * events
  */
-void KafkaEventStreamDecoder::initLocalCaches(
-    const RunStartStruct &runStartData) {
+void KafkaEventStreamDecoder::initLocalCaches(const RunStartStruct &runStartData) {
   m_runId = runStartData.runId;
 
   const auto jsonGeometry = runStartData.nexusStructure;
@@ -576,34 +536,28 @@ void KafkaEventStreamDecoder::initLocalCaches(
   DataObjects::EventWorkspace_sptr eventBuffer;
   if (!runStartData.detSpecMapSpecified) {
     /* Load the instrument to get the number of spectra :c */
-    auto ws =
-        API::WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1);
+    auto ws = API::WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1);
     loadInstrument<API::MatrixWorkspace>(instName, ws, jsonGeometry);
     const auto nspec = ws->getInstrument()->getNumberDetectors();
 
     // Create buffer
     eventBuffer = std::static_pointer_cast<DataObjects::EventWorkspace>(
-        API::WorkspaceFactory::Instance().create("EventWorkspace", nspec, 2,
-                                                 1));
+        API::WorkspaceFactory::Instance().create("EventWorkspace", nspec, 2, 1));
     eventBuffer->setInstrument(ws->getInstrument());
     /* Need a mapping with spectra numbers starting at zero */
     eventBuffer->rebuildSpectraMapping(true, 0);
-    eventBuffer->getAxis(0)->unit() =
-        Kernel::UnitFactory::Instance().create("TOF");
+    eventBuffer->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
     eventBuffer->setYUnit("Counts");
   } else {
     // Create buffer
     eventBuffer = createBufferWorkspace<DataObjects::EventWorkspace>(
-        "EventWorkspace", runStartData.numberOfSpectra,
-        runStartData.spectrumNumbers.data(), runStartData.detectorIDs.data(),
-        static_cast<uint32_t>(runStartData.detectorIDs.size()));
+        "EventWorkspace", runStartData.numberOfSpectra, runStartData.spectrumNumbers.data(),
+        runStartData.detectorIDs.data(), static_cast<uint32_t>(runStartData.detectorIDs.size()));
   }
 
   // Load the instrument if possible but continue if we can't
-  if (!loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
-                                                   jsonGeometry))
-    g_log.warning(
-        "Instrument could not be loaded.Continuing without instrument");
+  if (!loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer, jsonGeometry))
+    g_log.warning("Instrument could not be loaded.Continuing without instrument");
 
   auto &mutableRun = eventBuffer->mutableRun();
   // Run start. Cache locally for computing frame times
@@ -615,19 +569,16 @@ void KafkaEventStreamDecoder::initLocalCaches(
   mutableRun.addProperty(RUN_START_PROPERTY, std::string(timeString));
   mutableRun.addProperty(RUN_NUMBER_PROPERTY, runStartData.runId);
   // Create the proton charge property
-  mutableRun.addProperty(
-      new Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY));
+  mutableRun.addProperty(new Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY));
 
   // Cache spec->index mapping. We assume it is the same across all periods
-  m_specToIdx =
-      eventBuffer->getSpectrumToWorkspaceIndexVector(m_specToIdxOffset);
+  m_specToIdx = eventBuffer->getSpectrumToWorkspaceIndexVector(m_specToIdxOffset);
 
   // Buffers for each period
   size_t nperiods = runStartData.nPeriods;
   if (nperiods == 0) {
-    g_log.warning(
-        "KafkaEventStreamDecoder - Stream reports 0 periods. This is "
-        "an error by the data producer. Number of periods being set to 1.");
+    g_log.warning("KafkaEventStreamDecoder - Stream reports 0 periods. This is "
+                  "an error by the data producer. Number of periods being set to 1.");
     nperiods = 1;
   }
   {
@@ -644,23 +595,20 @@ void KafkaEventStreamDecoder::initLocalCaches(
   m_dataReset = true;
 }
 
-std::vector<size_t> computeGroupBoundaries(
-    const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent>
-        &eventBuffer,
-    const size_t numberOfGroups) {
+std::vector<size_t>
+computeGroupBoundaries(const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent> &eventBuffer,
+                       const size_t numberOfGroups) {
   std::vector<size_t> groupBoundaries(numberOfGroups + 1, eventBuffer.size());
 
   /* First group always starts at beginning of buffer */
   groupBoundaries[0] = 0;
 
-  const auto eventsPerGroup =
-      std::max<size_t>(1, eventBuffer.size() / numberOfGroups);
+  const auto eventsPerGroup = std::max<size_t>(1, eventBuffer.size() / numberOfGroups);
 
   /* Iterate over groups */
   for (size_t group = 1; group < numberOfGroups; ++group) {
     /* Calculate a reasonable end boundary for the group */
-    groupBoundaries[group] = std::min(
-        groupBoundaries[group - 1] + eventsPerGroup - 1, eventBuffer.size());
+    groupBoundaries[group] = std::min(groupBoundaries[group - 1] + eventsPerGroup - 1, eventBuffer.size());
 
     /* If we have already gotten through all events then exit early, leaving
      * some threads without events. */
@@ -671,8 +619,7 @@ std::vector<size_t> computeGroupBoundaries(
     /* Advance the end boundary of the group until all events for a given
      * workspace index fall within a single group */
     while (groupBoundaries[group] + 1 < eventBuffer.size() &&
-           (eventBuffer[groupBoundaries[group]].wsIdx ==
-            eventBuffer[groupBoundaries[group] + 1].wsIdx)) {
+           (eventBuffer[groupBoundaries[group]].wsIdx == eventBuffer[groupBoundaries[group] + 1].wsIdx)) {
       ++groupBoundaries[group];
     }
 

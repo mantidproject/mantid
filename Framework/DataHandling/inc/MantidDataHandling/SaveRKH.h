@@ -32,15 +32,11 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "SaveRKH"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Save a file in the LOQ RKH/'FISH' format";
-  }
+  const std::string summary() const override { return "Save a file in the LOQ RKH/'FISH' format"; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadRKH"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadRKH"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Text"; }
 

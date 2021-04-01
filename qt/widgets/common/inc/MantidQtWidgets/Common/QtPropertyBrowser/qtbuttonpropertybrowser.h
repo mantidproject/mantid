@@ -99,8 +99,7 @@ class QLabel;
 class QToolButton;
 class QGridLayout;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtButtonPropertyBrowser
-    : public QtAbstractPropertyBrowser {
+class EXPORT_OPT_MANTIDQT_COMMON QtButtonPropertyBrowser : public QtAbstractPropertyBrowser {
   Q_OBJECT
 public:
   QtButtonPropertyBrowser(QWidget *parent = nullptr);
@@ -137,9 +136,7 @@ public:
   void propertyInserted(QtBrowserItem *index, QtBrowserItem *afterIndex);
   void propertyRemoved(QtBrowserItem *index);
   void propertyChanged(QtBrowserItem *index);
-  QWidget *createEditor(QtProperty *property, QWidget *parent) const {
-    return q_ptr->createEditor(property, parent);
-  }
+  QWidget *createEditor(QtProperty *property, QWidget *parent) const { return q_ptr->createEditor(property, parent); }
 
   void slotEditorDestroyed();
   void slotUpdate();
@@ -147,16 +144,14 @@ public:
 
   struct WidgetItem {
     WidgetItem()
-        : widget(nullptr), label(nullptr), widgetLabel(nullptr),
-          button(nullptr), container(nullptr), layout(nullptr),
+        : widget(nullptr), label(nullptr), widgetLabel(nullptr), button(nullptr), container(nullptr), layout(nullptr),
           /*line(0), */ parent(nullptr), expanded(false) {}
     QWidget *widget;     // can be null
     QLabel *label;       // main label with property name
     QLabel *widgetLabel; // label substitute showing the current value if there
                          // is no widget
     QToolButton *button; // expandable button for items with children
-    QWidget
-        *container; // container which is expanded when the button is clicked
+    QWidget *container;  // container which is expanded when the button is clicked
     QGridLayout *layout; // layout in container
     WidgetItem *parent;
     QList<WidgetItem *> children;

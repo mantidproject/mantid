@@ -30,11 +30,8 @@ public:
 
   void test_has_correct_mixins() {
     HistogramX x;
-    TS_ASSERT_THROWS_NOTHING(
-        UNUSED_ARG(dynamic_cast<detail::FixedLengthVector<HistogramX> &>(x)));
-    TS_ASSERT_THROWS_NOTHING(
-        UNUSED_ARG(dynamic_cast<detail::Offsetable<HistogramX> &>(x)));
-    TS_ASSERT_THROWS_NOTHING(
-        UNUSED_ARG(dynamic_cast<detail::Scalable<HistogramX> &>(x)));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::FixedLengthVector<HistogramX> &>(x)));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Offsetable<HistogramX> &>(x)));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Scalable<HistogramX> &>(x)));
   }
 };

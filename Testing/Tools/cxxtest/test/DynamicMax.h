@@ -55,7 +55,7 @@ public:
             x[i] = (unsigned char)i;
             y[i] = (unsigned char)~x[i];
         }
-        
+
         CxxTest::setMaxDumpSize( 12 );
     }
 

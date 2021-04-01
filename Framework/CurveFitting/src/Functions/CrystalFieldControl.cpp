@@ -45,16 +45,13 @@ CrystalFieldControl::CrystalFieldControl() : CompositeFunction() {
 }
 
 /// Set a value to attribute attName
-void CrystalFieldControl::setAttribute(const std::string &name,
-                                       const API::IFunction::Attribute &attr) {
+void CrystalFieldControl::setAttribute(const std::string &name, const API::IFunction::Attribute &attr) {
   if (name == "Ions") {
     parseStringListAttribute("Ions", attr.asUnquotedString(), m_ions);
   } else if (name == "Symmetries") {
-    parseStringListAttribute("Symmetries", attr.asUnquotedString(),
-                             m_symmetries);
+    parseStringListAttribute("Symmetries", attr.asUnquotedString(), m_symmetries);
   } else if (name == "PhysicalProperties") {
-    parseStringListAttribute("PhysicalProperties", attr.asString(),
-                             m_physProps);
+    parseStringListAttribute("PhysicalProperties", attr.asString(), m_physProps);
     buildPhysPropControls();
   } else {
     if (name == "Temperatures") {
@@ -83,9 +80,7 @@ void CrystalFieldControl::setAttribute(const std::string &name,
           }
         }
       }
-    } else if ((name.compare(0, 5, "FWHMX") == 0 ||
-                name.compare(0, 5, "FWHMY") == 0) &&
-               !attr.asVector().empty()) {
+    } else if ((name.compare(0, 5, "FWHMX") == 0 || name.compare(0, 5, "FWHMY") == 0) && !attr.asVector().empty()) {
       m_FWHMs.clear();
     }
     API::IFunction::setAttribute(name, attr);
@@ -96,12 +91,10 @@ void CrystalFieldControl::setAttribute(const std::string &name,
 /// @param attName :: A name of the attribute to parse.
 /// @param value :: A value to parse.
 /// @param cache :: A vector to cache the parsed values.
-void CrystalFieldControl::parseStringListAttribute(
-    const std::string &attName, const std::string &value,
-    std::vector<std::string> &cache) {
+void CrystalFieldControl::parseStringListAttribute(const std::string &attName, const std::string &value,
+                                                   std::vector<std::string> &cache) {
   // Split the attribute value into separate names, white spaces removed
-  Kernel::StringTokenizer tokenizer(value, ",",
-                                    Kernel::StringTokenizer::TOK_TRIM);
+  Kernel::StringTokenizer tokenizer(value, ",", Kernel::StringTokenizer::TOK_TRIM);
   cache.clear();
   cache.insert(cache.end(), tokenizer.begin(), tokenizer.end());
   auto attrValue = Kernel::Strings::join(cache.begin(), cache.end(), ",");
@@ -139,8 +132,7 @@ void CrystalFieldControl::checkConsistent() {
     throw std::runtime_error("No ions are set.");
   }
   if (m_ions.size() != m_symmetries.size()) {
-    throw std::runtime_error(
-        "Number of ions is different from number of symmetries.");
+    throw std::runtime_error("Number of ions is different from number of symmetries.");
   }
   if (!m_temperatures.empty()) {
     // If temperatures are given then there will be spectra with peaks
@@ -160,8 +152,7 @@ void CrystalFieldControl::checkConsistent() {
       if (nSpec > 1) {
         auto specFun = getFunction(i).get();
         if (!dynamic_cast<CrystalFieldSpectrumControl *>(specFun)) {
-          throw std::logic_error(
-              "CrystalFieldSpectrumControl function expected");
+          throw std::logic_error("CrystalFieldSpectrumControl function expected");
         }
       }
       if (m_fwhmX[i].size() != m_fwhmY[i].size()) {
@@ -178,8 +169,7 @@ void CrystalFieldControl::checkConsistent() {
                                  "FWHMY attributes not set).");
       } else if (someXYEmpty) {
         // If given they all must be given
-        throw std::runtime_error(
-            "FWHMX, FWHMY attributes are not given for all spectra.");
+        throw std::runtime_error("FWHMX, FWHMY attributes are not given for all spectra.");
       }
     } else if (m_FWHMs.size() != nSpec) {
       if (m_FWHMs.size() == 1) {
@@ -187,32 +177,24 @@ void CrystalFieldControl::checkConsistent() {
         m_FWHMs.assign(nSpec, m_FWHMs.front());
       } else {
         // Otherwise it's an error
-        throw std::runtime_error(
-            "Vector of FWHMs must either have same size as "
-            "Temperatures (" +
-            std::to_string(nSpec) + ") or have size 1.");
+        throw std::runtime_error("Vector of FWHMs must either have same size as "
+                                 "Temperatures (" +
+                                 std::to_string(nSpec) + ") or have size 1.");
       }
     } else if (!allXYEmpty) {
       // Conflicting width attributes
-      throw std::runtime_error(
-          "Either FWHMs or (FWHMX and FWHMY) can be set but not all.");
+      throw std::runtime_error("Either FWHMs or (FWHMX and FWHMY) can be set but not all.");
     }
   } else if (physProps().empty()) {
     throw std::runtime_error("No temperatures are set.");
   }
 }
 
-const std::vector<double> &CrystalFieldControl::temperatures() const {
-  return m_temperatures;
-}
+const std::vector<double> &CrystalFieldControl::temperatures() const { return m_temperatures; }
 
-const std::vector<double> &CrystalFieldControl::FWHMs() const {
-  return m_FWHMs;
-}
+const std::vector<double> &CrystalFieldControl::FWHMs() const { return m_FWHMs; }
 
-const std::vector<std::string> &CrystalFieldControl::physProps() const {
-  return m_physProps;
-}
+const std::vector<std::string> &CrystalFieldControl::physProps() const { return m_physProps; }
 
 /// Build control functions for individual spectra.
 void CrystalFieldControl::buildControls() {
@@ -239,17 +221,13 @@ void CrystalFieldControl::buildPhysPropControls() {
 /// (Multiple ions defined)
 bool CrystalFieldControl::isMultiSite() const { return m_ions.size() > 1; }
 
-bool CrystalFieldControl::isMultiSpectrum() const {
-  return m_temperatures.size() > 1 || !m_physProps.empty();
-}
+bool CrystalFieldControl::isMultiSpectrum() const { return m_temperatures.size() > 1 || !m_physProps.empty(); }
 
 /// Any peaks defined?
 bool CrystalFieldControl::hasPeaks() const { return !m_temperatures.empty(); }
 
 /// Check if there are any phys. properties.
-bool CrystalFieldControl::hasPhysProperties() const {
-  return !m_physProps.empty();
-}
+bool CrystalFieldControl::hasPhysProperties() const { return !m_physProps.empty(); }
 
 /// Build the source function.
 API::IFunction_sptr CrystalFieldControl::buildSource() {
@@ -288,10 +266,8 @@ API::IFunction_sptr CrystalFieldControl::buildSingleSiteSingleSpectrum() {
   auto source = IFunction_sptr(new CrystalFieldPeaks);
   source->setAttributeValue("Ion", m_ions[0]);
   source->setAttributeValue("Symmetry", m_symmetries[0]);
-  source->setAttribute("ToleranceEnergy",
-                       IFunction::getAttribute("ToleranceEnergy"));
-  source->setAttribute("ToleranceIntensity",
-                       IFunction::getAttribute("ToleranceIntensity"));
+  source->setAttribute("ToleranceEnergy", IFunction::getAttribute("ToleranceEnergy"));
+  source->setAttribute("ToleranceIntensity", IFunction::getAttribute("ToleranceIntensity"));
   source->setAttributeValue("Temperature", m_temperatures[0]);
   return source;
 }
@@ -301,10 +277,8 @@ API::IFunction_sptr CrystalFieldControl::buildSingleSiteMultiSpectrum() {
   auto source = IFunction_sptr(new CrystalFieldPeaksBaseImpl);
   source->setAttributeValue("Ion", m_ions[0]);
   source->setAttributeValue("Symmetry", m_symmetries[0]);
-  source->setAttribute("ToleranceEnergy",
-                       IFunction::getAttribute("ToleranceEnergy"));
-  source->setAttribute("ToleranceIntensity",
-                       IFunction::getAttribute("ToleranceIntensity"));
+  source->setAttribute("ToleranceEnergy", IFunction::getAttribute("ToleranceEnergy"));
+  source->setAttribute("ToleranceIntensity", IFunction::getAttribute("ToleranceIntensity"));
   return source;
 }
 
@@ -319,10 +293,8 @@ API::IFunction_sptr CrystalFieldControl::buildMultiSiteSingleSpectrum() {
     source->addFunction(peakSource);
     peakSource->setAttributeValue("Ion", m_ions[i]);
     peakSource->setAttributeValue("Symmetry", m_symmetries[i]);
-    peakSource->setAttribute("ToleranceEnergy",
-                             IFunction::getAttribute("ToleranceEnergy"));
-    peakSource->setAttribute("ToleranceIntensity",
-                             IFunction::getAttribute("ToleranceIntensity"));
+    peakSource->setAttribute("ToleranceEnergy", IFunction::getAttribute("ToleranceEnergy"));
+    peakSource->setAttribute("ToleranceIntensity", IFunction::getAttribute("ToleranceIntensity"));
     peakSource->setAttributeValue("Temperature", temperature);
   }
   return source;
@@ -337,10 +309,8 @@ API::IFunction_sptr CrystalFieldControl::buildMultiSiteMultiSpectrum() {
     source->addFunction(peakSource);
     peakSource->setAttributeValue("Ion", m_ions[i]);
     peakSource->setAttributeValue("Symmetry", m_symmetries[i]);
-    peakSource->setAttribute("ToleranceEnergy",
-                             IFunction::getAttribute("ToleranceEnergy"));
-    peakSource->setAttribute("ToleranceIntensity",
-                             IFunction::getAttribute("ToleranceIntensity"));
+    peakSource->setAttribute("ToleranceEnergy", IFunction::getAttribute("ToleranceEnergy"));
+    peakSource->setAttribute("ToleranceIntensity", IFunction::getAttribute("ToleranceIntensity"));
   }
   return source;
 }
@@ -351,19 +321,14 @@ API::IFunction_sptr CrystalFieldControl::buildMultiSiteMultiSpectrum() {
 CrystalFieldSpectrumControl::CrystalFieldSpectrumControl() : ParamFunction() {
   declareAttribute("FWHMX", Attribute(std::vector<double>()));
   declareAttribute("FWHMY", Attribute(std::vector<double>()));
-  declareParameter("IntensityScaling", 1.0,
-                   "Scales intensities of peaks in a spectrum.");
+  declareParameter("IntensityScaling", 1.0, "Scales intensities of peaks in a spectrum.");
 }
 
-std::string CrystalFieldSpectrumControl::name() const {
-  return "CrystalFieldSpectrumControl";
-}
+std::string CrystalFieldSpectrumControl::name() const { return "CrystalFieldSpectrumControl"; }
 
-void CrystalFieldSpectrumControl::function(
-    const API::FunctionDomain & /*domain*/,
-    API::FunctionValues & /*values*/) const {
-  throw Kernel::Exception::NotImplementedError(
-      "This method is intentionally not implemented.");
+void CrystalFieldSpectrumControl::function(const API::FunctionDomain & /*domain*/,
+                                           API::FunctionValues & /*values*/) const {
+  throw Kernel::Exception::NotImplementedError("This method is intentionally not implemented.");
 }
 
 // -----------------------------------------------------------------------------------
@@ -371,15 +336,11 @@ void CrystalFieldSpectrumControl::function(
 
 CrystalFieldPhysPropControl::CrystalFieldPhysPropControl() : ParamFunction() {}
 
-std::string CrystalFieldPhysPropControl::name() const {
-  return "CrystalFieldPhysPropControl";
-}
+std::string CrystalFieldPhysPropControl::name() const { return "CrystalFieldPhysPropControl"; }
 
-void CrystalFieldPhysPropControl::function(
-    const API::FunctionDomain & /*domain*/,
-    API::FunctionValues & /*values*/) const {
-  throw Kernel::Exception::NotImplementedError(
-      "This method is intentionally not implemented.");
+void CrystalFieldPhysPropControl::function(const API::FunctionDomain & /*domain*/,
+                                           API::FunctionValues & /*values*/) const {
+  throw Kernel::Exception::NotImplementedError("This method is intentionally not implemented.");
 }
 
 } // namespace Functions

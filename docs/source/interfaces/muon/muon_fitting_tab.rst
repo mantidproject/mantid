@@ -11,8 +11,8 @@ This tab is used to evaluate a single fit object, which corresponds to a list of
 
 **Fit** Executes the specified fit.
 
-**Simultaneous Fit** This option will perform a fit for multiple data sets, which may share parameters. 
-The simultaneous fit can be performed over a selected run, or selected group/pair. 
+**Simultaneous Fit** This option will perform a fit for multiple data sets, which may share parameters.
+The simultaneous fit can be performed over a selected run, or selected group/pair.
 
 **Select Workspace** This drop-down list can be used select the workspace to perform a single fit over.
 

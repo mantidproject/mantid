@@ -24,8 +24,7 @@ public:
   virtual void indicateModified() = 0;
   virtual void indicateDefault() = 0;
   virtual void indicateInvalid() = 0;
-  virtual void initalize(double a1, double a2, double a3, double b1, double b2,
-                         double b3) = 0;
+  virtual void initalize(double a1, double a2, double a3, double b1, double b2, double b3) = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

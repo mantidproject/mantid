@@ -36,9 +36,7 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"PredictPeaks"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"PredictPeaks"}; }
 
   /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\Peaks"; }
@@ -55,16 +53,13 @@ private:
   void exec() override;
   void exec_peaks();
   Kernel::V3D getOffsetVector(const std::string &label);
-  void predictOffsets(int iVector, Kernel::V3D offsets, int &maxOrder,
-                      Kernel::V3D &hkl,
-                      Geometry::HKLFilterWavelength &lambdaFilter,
-                      bool &includePeaksInRange, bool &includeOrderZero,
+  void predictOffsets(int iVector, Kernel::V3D offsets, int &maxOrder, Kernel::V3D &hkl,
+                      Geometry::HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange, bool &includeOrderZero,
                       std::vector<std::vector<int>> &AlreadyDonePeaks);
-  void predictOffsetsWithCrossTerms(
-      Kernel::V3D offsets1, Kernel::V3D offsets2, Kernel::V3D offsets3,
-      int &maxOrder, Kernel::V3D &hkl,
-      Geometry::HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange,
-      bool &includeOrderZero, std::vector<std::vector<int>> &AlreadyDonePeaks);
+  void predictOffsetsWithCrossTerms(Kernel::V3D offsets1, Kernel::V3D offsets2, Kernel::V3D offsets3, int &maxOrder,
+                                    Kernel::V3D &hkl, Geometry::HKLFilterWavelength &lambdaFilter,
+                                    bool &includePeaksInRange, bool &includeOrderZero,
+                                    std::vector<std::vector<int>> &AlreadyDonePeaks);
 };
 
 } // namespace Crystal

@@ -21,16 +21,13 @@ namespace API {
 */
 class MANTID_API_DLL IEventWorkspace : public MatrixWorkspace {
 public:
-  IEventWorkspace(
-      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned)
+  IEventWorkspace(const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned)
       : MatrixWorkspace(storageMode) {}
   IEventWorkspace &operator=(const IEventWorkspace &) = delete;
   /// Returns a clone of the workspace
   IEventWorkspace_uptr clone() const { return IEventWorkspace_uptr(doClone()); }
   /// Returns a default-initialized clone of the workspace
-  IEventWorkspace_uptr cloneEmpty() const {
-    return IEventWorkspace_uptr(doCloneEmpty());
-  }
+  IEventWorkspace_uptr cloneEmpty() const { return IEventWorkspace_uptr(doCloneEmpty()); }
 
   IEventList &getSpectrum(const size_t index) override = 0;
   const IEventList &getSpectrum(const size_t index) const override = 0;
@@ -42,13 +39,10 @@ public:
   virtual double getTofMax() const = 0;
   virtual Mantid::Types::Core::DateAndTime getPulseTimeMax() const = 0;
   virtual Mantid::Types::Core::DateAndTime getPulseTimeMin() const = 0;
-  virtual Mantid::Types::Core::DateAndTime
-  getTimeAtSampleMax(double tofOffset = 0) const = 0;
-  virtual Mantid::Types::Core::DateAndTime
-  getTimeAtSampleMin(double tofOffset = 0) const = 0;
+  virtual Mantid::Types::Core::DateAndTime getTimeAtSampleMax(double tofOffset = 0) const = 0;
+  virtual Mantid::Types::Core::DateAndTime getTimeAtSampleMin(double tofOffset = 0) const = 0;
   virtual EventType getEventType() const = 0;
-  void generateHistogram(const std::size_t index, const MantidVec &X,
-                         MantidVec &Y, MantidVec &E,
+  void generateHistogram(const std::size_t index, const MantidVec &X, MantidVec &Y, MantidVec &E,
                          bool skipError = false) const override = 0;
 
   virtual void setAllX(const HistogramData::BinEdges &x) = 0;

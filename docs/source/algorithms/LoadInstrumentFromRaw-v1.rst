@@ -15,8 +15,8 @@ add detectors which are positioned relative to the sample in spherical
 coordinates as (r,theta,phi)=(L2,2-theta,0.0). Also adds dummy source and
 samplepos components to instrument.
 
-LoadInstrumentFromRaw is intended to be used as a child algorithm of 
-other Load algorithms, rather than being used directly.    
+LoadInstrumentFromRaw is intended to be used as a child algorithm of
+other Load algorithms, rather than being used directly.
 
 Usage
 -----

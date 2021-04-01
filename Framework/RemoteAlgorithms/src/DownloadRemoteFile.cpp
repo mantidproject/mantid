@@ -28,9 +28,7 @@ using namespace Mantid::API;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 
-DownloadRemoteFile::DownloadRemoteFile() {
-  this->useAlgorithm("DownloadRemoteFile", 2);
-}
+DownloadRemoteFile::DownloadRemoteFile() { this->useAlgorithm("DownloadRemoteFile", 2); }
 
 void DownloadRemoteFile::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....
@@ -38,21 +36,14 @@ void DownloadRemoteFile::init() {
   auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
-  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
-                                          .getFacility()
-                                          .computeResources();
-  declareProperty(
-      "ComputeResource", "", std::make_shared<StringListValidator>(computes),
-      "The name of the remote computer holding the file", Direction::Input);
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty("ComputeResource", "", std::make_shared<StringListValidator>(computes),
+                  "The name of the remote computer holding the file", Direction::Input);
 
   // The transaction ID comes from the StartRemoteTransaction algortithm
-  declareProperty("TransactionID", "", requireValue,
-                  "The ID of the transaction that owns the file",
-                  Direction::Input);
-  declareProperty(
-      "RemoteFileName", "", requireValue,
-      "The name of the file on the remote machine. (Filename only; no path)",
-      Direction::Input);
+  declareProperty("TransactionID", "", requireValue, "The ID of the transaction that owns the file", Direction::Input);
+  declareProperty("RemoteFileName", "", requireValue,
+                  "The name of the file on the remote machine. (Filename only; no path)", Direction::Input);
   declareProperty("LocalFileName", "", requireValue,
                   "The full pathname on the local machine where the downloaded "
                   "file should be saved.",
@@ -65,22 +56,19 @@ void DownloadRemoteFile::init() {
 
 void DownloadRemoteFile::exec() {
   std::shared_ptr<RemoteJobManager> jobManager =
-      Mantid::Kernel::ConfigService::Instance()
-          .getFacility()
-          .getRemoteJobManager(getPropertyValue("ComputeResource"));
+      Mantid::Kernel::ConfigService::Instance().getFacility().getRemoteJobManager(getPropertyValue("ComputeResource"));
 
   // jobManager is a std::shared_ptr...
   if (!jobManager) {
     // Requested compute resource doesn't exist
     // TODO: should we create our own exception class for this??
     throw(std::runtime_error(
-        std::string("Unable to create a compute resource named " +
-                    getPropertyValue("ComputeResource"))));
+        std::string("Unable to create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
-  std::istream &respStream = jobManager->httpGet(
-      "/download", std::string("TransID=") + getPropertyValue("TransactionID") +
-                       "&File=" + getPropertyValue("RemoteFileName"));
+  std::istream &respStream =
+      jobManager->httpGet("/download", std::string("TransID=") + getPropertyValue("TransactionID") +
+                                           "&File=" + getPropertyValue("RemoteFileName"));
 
   if (jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
 
@@ -89,12 +77,10 @@ void DownloadRemoteFile::exec() {
     if (outfile.good()) {
       outfile << respStream.rdbuf();
       outfile.close();
-      g_log.information() << "Downloaded '"
-                          << getPropertyValue("RemoteFileName") << "' to '"
+      g_log.information() << "Downloaded '" << getPropertyValue("RemoteFileName") << "' to '"
                           << getPropertyValue("LocalFileName") << "'\n";
     } else {
-      throw(std::runtime_error(
-          std::string("Failed to open " + getPropertyValue("LocalFileName"))));
+      throw(std::runtime_error(std::string("Failed to open " + getPropertyValue("LocalFileName"))));
     }
   } else {
     JSONObject resp;

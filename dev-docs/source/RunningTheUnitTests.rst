@@ -116,7 +116,7 @@ Open the Mantid solution in Visual Studio. To run a subset of tests (for example
 
 -  Right click the directory again and select Debug->Start new instance.
 
--  Once the build has finished, open a file browser and navigate to the mantid build directory, run the command-prompt.bat file to open a command prompt and run 
+-  Once the build has finished, open a file browser and navigate to the mantid build directory, run the command-prompt.bat file to open a command prompt and run
 
    .. code-block:: sh
 

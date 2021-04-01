@@ -49,23 +49,20 @@ using namespace Geometry;
 void LoadSampleEnvironment::init() {
   auto wsValidator = std::make_shared<InstrumentValidator>();
   // input workspace
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the workspace containing the instrument to add "
                   "the Environment");
 
   // Environment file
   const std::vector<std::string> extensions{".stl", ".3mf"};
-  declareProperty(std::make_unique<FileProperty>(
-                      "Filename", "", FileProperty::Load, extensions),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
                   "The path name of the file containing the Environment");
 
   // scale to use for stl
   declareProperty("Scale", "cm", "The scale of the stl: m, cm, or mm");
 
   // Output workspace
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will contain the loaded "
                   "Environment of the sample");
 
@@ -81,28 +78,24 @@ void LoadSampleEnvironment::init() {
   declareProperty("ZDegrees", 0.0, "The degrees to rotate on the z axis by");
 
   // Vector to translate mesh
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("TranslationVector", "0,0,0"),
-      "Vector by which to translate the loaded environment");
+  declareProperty(std::make_unique<ArrayProperty<double>>("TranslationVector", "0,0,0"),
+                  "Vector by which to translate the loaded environment");
 
   declareProperty("SetMaterial", false);
 
   // properties for SetMaterial
 
-  declareProperty("ChemicalFormula", "",
-                  "The chemical formula, see examples in documentation");
+  declareProperty("ChemicalFormula", "", "The chemical formula, see examples in documentation");
 
   declareProperty("AtomicNumber", 0, "The atomic number");
-  declareProperty("MassNumber", 0,
-                  "Mass number if ion (use 0 for default mass sensity)");
+  declareProperty("MassNumber", 0, "Mass number if ion (use 0 for default mass sensity)");
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
                   "This number density of the sample in number of "
                   "atoms per cubic angstrom will be used instead of "
                   "calculated");
-  declareProperty("ZParameter", EMPTY_DBL(), mustBePositive,
-                  "Number of formula units in unit cell");
+  declareProperty("ZParameter", EMPTY_DBL(), mustBePositive, "Number of formula units in unit cell");
   declareProperty("UnitCellVolume", EMPTY_DBL(), mustBePositive,
                   "Unit cell volume in Angstoms^3. Will be calculated from the "
                   "OrientedLattice if not supplied.");
@@ -120,16 +113,13 @@ void LoadSampleEnvironment::init() {
                   "incoherent) for the sample material in barns will be used "
                   "instead of tabulated");
   const std::vector<std::string> attExtensions{".DAT"};
-  declareProperty(
-      std::make_unique<FileProperty>("AttenuationProfile", "",
-                                     FileProperty::OptionalLoad, attExtensions),
-      "The path name of the file containing the attenuation profile");
+  declareProperty(std::make_unique<FileProperty>("AttenuationProfile", "", FileProperty::OptionalLoad, attExtensions),
+                  "The path name of the file containing the attenuation profile");
   declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
                   "Measured mass density in g/cubic cm of the sample "
                   "to be used to calculate the number density.");
   const std::vector<std::string> units({"Atoms", "Formula Units"});
-  declareProperty("NumberDensityUnit", units.front(),
-                  std::make_shared<StringListValidator>(units),
+  declareProperty("NumberDensityUnit", units.front(), std::make_shared<StringListValidator>(units),
                   "Choose which units SampleNumberDensity referes to.");
 
   // Perform Group Associations.
@@ -137,12 +127,9 @@ void LoadSampleEnvironment::init() {
   setPropertyGroup("ChemicalFormula", formulaGrp);
   setPropertyGroup("AtomicNumber", formulaGrp);
   setPropertyGroup("MassNumber", formulaGrp);
-  setPropertySettings("ChemicalFormula", std::make_unique<EnabledWhenProperty>(
-                                             "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("AtomicNumber", std::make_unique<EnabledWhenProperty>(
-                                          "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("MassNumber", std::make_unique<EnabledWhenProperty>(
-                                        "SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("ChemicalFormula", std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("AtomicNumber", std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("MassNumber", std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
 
   std::string densityGrp("Sample Density");
   setPropertyGroup("SampleNumberDensity", densityGrp);
@@ -150,19 +137,12 @@ void LoadSampleEnvironment::init() {
   setPropertyGroup("ZParameter", densityGrp);
   setPropertyGroup("UnitCellVolume", densityGrp);
   setPropertyGroup("SampleMassDensity", densityGrp);
-  setPropertySettings(
-      "SampleNumberDensity",
-      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("ZParameter", std::make_unique<EnabledWhenProperty>(
-                                        "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("UnitCellVolume", std::make_unique<EnabledWhenProperty>(
-                                            "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings(
-      "SampleMassDensity",
-      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("SampleNumberDensity", std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("ZParameter", std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("UnitCellVolume", std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("SampleMassDensity", std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings("NumberDensityUnit",
-                      std::make_unique<EnabledWhenProperty>(
-                          "SampleNumberDensity", IS_NOT_DEFAULT));
+                      std::make_unique<EnabledWhenProperty>("SampleNumberDensity", IS_NOT_DEFAULT));
 
   std::string specificValuesGrp("Override Cross Section Values");
   setPropertyGroup("CoherentXSection", specificValuesGrp);
@@ -170,20 +150,11 @@ void LoadSampleEnvironment::init() {
   setPropertyGroup("AttenuationXSection", specificValuesGrp);
   setPropertyGroup("ScatteringXSection", specificValuesGrp);
   setPropertyGroup("AttenuationProfile", specificValuesGrp);
-  setPropertySettings("CoherentXSection", std::make_unique<EnabledWhenProperty>(
-                                              "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings(
-      "IncoherentXSection",
-      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings(
-      "AttenuationXSection",
-      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings(
-      "ScatteringXSection",
-      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings(
-      "AttenuationProfile",
-      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("CoherentXSection", std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("IncoherentXSection", std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("AttenuationXSection", std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("ScatteringXSection", std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("AttenuationProfile", std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
 }
 
 std::map<std::string, std::string> LoadSampleEnvironment::validateInputs() {
@@ -211,9 +182,7 @@ std::map<std::string, std::string> LoadSampleEnvironment::validateInputs() {
  * be added to any pre-existing components already in the environment
  * @param debugString Debug string that can be appended to by this function
  */
-void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string filename,
-                                                   Sample &sample,
-                                                   const bool add,
+void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string filename, Sample &sample, const bool add,
                                                    std::string debugString) {
   std::unique_ptr<SampleEnvironment> environment = nullptr;
   std::shared_ptr<MeshObject> environmentMesh = nullptr;
@@ -229,8 +198,7 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string filename,
   } else if (LoadAsciiStl::isAsciiSTL(filename)) {
     isBinary = false;
   } else {
-    throw Exception::ParseError(
-        "Could not read file, did not match either STL Format", filename, 0);
+    throw Exception::ParseError("Could not read file, did not match either STL Format", filename, 0);
   }
   std::unique_ptr<LoadStl> reader = nullptr;
 
@@ -252,8 +220,7 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string filename,
     if (numberDensityUnit == "Atoms") {
       params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::Atoms;
     } else {
-      params.numberDensityUnit =
-          MaterialBuilder::NumberDensityUnit::FormulaUnits;
+      params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::FormulaUnits;
     }
     if (isBinary) {
       reader = std::make_unique<LoadBinaryStl>(filename, scaleType, params);
@@ -273,10 +240,8 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string filename,
   const double xRotation = DegreesToRadians(getProperty("xDegrees"));
   const double yRotation = DegreesToRadians(getProperty("yDegrees"));
   const double zRotation = DegreesToRadians(getProperty("zDegrees"));
-  environmentMesh =
-      reader->rotate(environmentMesh, xRotation, yRotation, zRotation);
-  const std::vector<double> translationVector =
-      getProperty("TranslationVector");
+  environmentMesh = reader->rotate(environmentMesh, xRotation, yRotation, zRotation);
+  const std::vector<double> translationVector = getProperty("TranslationVector");
   environmentMesh = reader->translate(environmentMesh, translationVector);
 
   std::string name = getProperty("EnvironmentName");
@@ -288,9 +253,7 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string filename,
     environment = std::make_unique<SampleEnvironment>(name, can);
   }
 
-  debugString +=
-      "Environment has: " + std::to_string(environment->nelements()) +
-      " elements.";
+  debugString += "Environment has: " + std::to_string(environment->nelements()) + " elements.";
 
   // Put Environment into sample.
   sample.setEnvironment(std::move(environment));
@@ -318,9 +281,8 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string filename,
  * be added to any pre-existing components already in the environment
  * @param debugString Debug string that can be appended to by this function
  */
-void LoadSampleEnvironment::loadEnvironmentFrom3MF(
-    MatrixWorkspace_const_sptr inputWS, const std::string filename,
-    Sample &sample, const bool add, std::string debugString) {
+void LoadSampleEnvironment::loadEnvironmentFrom3MF(MatrixWorkspace_const_sptr inputWS, const std::string filename,
+                                                   Sample &sample, const bool add, std::string debugString) {
 #ifdef ENABLE_LIB3MF
   std::unique_ptr<Geometry::SampleEnvironment> environment = nullptr;
   Mantid3MFFileIO MeshLoader;
@@ -340,8 +302,7 @@ void LoadSampleEnvironment::loadEnvironmentFrom3MF(
   for (auto environmentMesh : environmentMeshes) {
     if (!environment) {
       if (add) {
-        environment =
-            std::make_unique<SampleEnvironment>(sample.getEnvironment());
+        environment = std::make_unique<SampleEnvironment>(sample.getEnvironment());
         environment->add(environmentMesh);
       } else {
         auto can = std::make_shared<Container>(environmentMesh);
@@ -351,9 +312,7 @@ void LoadSampleEnvironment::loadEnvironmentFrom3MF(
       environment->add(environmentMesh);
     }
 
-    debugString +=
-        "Environment has: " + std::to_string(environment->nelements()) +
-        " elements.";
+    debugString += "Environment has: " + std::to_string(environment->nelements()) + " elements.";
   }
 
   // Put Environment into sample.
@@ -401,8 +360,7 @@ void LoadSampleEnvironment::exec() {
   }
 
   // get the material name and number density for debug
-  const auto outMaterial =
-      outputWS->sample().getEnvironment().getContainer().material();
+  const auto outMaterial = outputWS->sample().getEnvironment().getContainer().material();
   debugString += "\n"
                  "Environment Material: " +
                  outMaterial.name();

@@ -15,14 +15,14 @@ for debugging / testing.
 Usage
 -----
 
-**Example - MARI**  
+**Example - MARI**
 
 .. testcode:: Ex1
 
   import os
   inst_dir = config["instrumentDefinition.directory"]
   inst_file_path = os.path.join(inst_dir,"MARI_Definition.xml")
-  
+
   ws=RayTracerTester(inst_file_path)
 
 

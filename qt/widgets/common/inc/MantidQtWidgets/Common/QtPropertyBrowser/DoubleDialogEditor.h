@@ -23,8 +23,7 @@ class QPushButton;
 class DoubleDialogEditor : public QWidget {
   Q_OBJECT
 public:
-  DoubleDialogEditor(QtProperty *property, QWidget *parent,
-                     bool hasOption = false, bool isOptionSet = false);
+  DoubleDialogEditor(QtProperty *property, QWidget *parent, bool hasOption = false, bool isOptionSet = false);
 signals:
   void buttonClicked(QtProperty * /*_t1*/);
   void closeEditor();
@@ -57,24 +56,18 @@ private:
  * method which creates a specific editor. The underlying type of the edited
  * property must be string.
  */
-class EXPORT_OPT_MANTIDQT_COMMON DoubleDialogEditorFactory
-    : public QtAbstractEditorFactory<ParameterPropertyManager> {
+class EXPORT_OPT_MANTIDQT_COMMON DoubleDialogEditorFactory : public QtAbstractEditorFactory<ParameterPropertyManager> {
   Q_OBJECT
 public:
   DoubleDialogEditorFactory(QObject *parent = nullptr, bool hasOption = false)
-      : QtAbstractEditorFactory<ParameterPropertyManager>(parent),
-        m_hasOption(hasOption) {}
-  QWidget *createEditorForManager(ParameterPropertyManager *,
-                                  QtProperty *property,
-                                  QWidget *parent) override;
+      : QtAbstractEditorFactory<ParameterPropertyManager>(parent), m_hasOption(hasOption) {}
+  QWidget *createEditorForManager(ParameterPropertyManager *, QtProperty *property, QWidget *parent) override;
 signals:
   void buttonClicked(QtProperty * /*_t1*/);
   void closeEditor();
 
 protected:
-  void connectPropertyManager(ParameterPropertyManager * /*manager*/) override {
-  }
-  void
-  disconnectPropertyManager(ParameterPropertyManager * /*manager*/) override {}
+  void connectPropertyManager(ParameterPropertyManager * /*manager*/) override {}
+  void disconnectPropertyManager(ParameterPropertyManager * /*manager*/) override {}
   bool m_hasOption;
 };

@@ -105,9 +105,7 @@ template <class T> struct ShapeDetailsInstantiator : public BaseInstantiator {
   /// Default constructor
   ShapeDetailsInstantiator() {}
   /// Create an instance of this type
-  ShapeDetails *createInstance() const override {
-    return static_cast<ShapeDetails *>(new T);
-  }
+  ShapeDetails *createInstance() const override { return static_cast<ShapeDetails *>(new T); }
 
 private:
   /// Private copy constructor
@@ -124,8 +122,7 @@ class ShapeDetails : public QWidget {
 
 public:
   /// Constructor
-  ShapeDetails(QWidget *parent = nullptr)
-      : QWidget(parent), m_idvalue(""), m_isComplement(false) {}
+  ShapeDetails(QWidget *parent = nullptr) : QWidget(parent), m_idvalue(""), m_isComplement(false) {}
   /// Constructor
   ~ShapeDetails() override {}
 
@@ -373,8 +370,7 @@ public:
 
 private:
   /// Corner points
-  PointGroupBox *m_left_frt_bot, *m_left_frt_top, *m_left_bck_bot,
-      *m_right_frt_bot;
+  PointGroupBox *m_left_frt_bot, *m_left_frt_top, *m_left_bck_bot, *m_right_frt_bot;
 };
 
 /**
@@ -399,9 +395,8 @@ public:
 
 private:
   /// Corner points
-  PointGroupBox *m_left_bck_bot, *m_left_frt_bot, *m_right_frt_bot,
-      *m_right_bck_bot, *m_left_bck_top, *m_left_frt_top, *m_right_frt_top,
-      *m_right_bck_top;
+  PointGroupBox *m_left_bck_bot, *m_left_frt_bot, *m_right_frt_bot, *m_right_bck_bot, *m_left_bck_top, *m_left_frt_top,
+      *m_right_frt_top, *m_right_bck_top;
 };
 
 // /**

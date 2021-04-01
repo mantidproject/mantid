@@ -52,9 +52,7 @@ const std::string Q3D("Q3D");
 /// Q-vector is always three dimensional.
 const std::size_t DIMS(3);
 
-void IntegrateEllipsoids::qListFromEventWS(IntegrateQLabEvents &integrator,
-                                           Progress &prog,
-                                           EventWorkspace_sptr &wksp) {
+void IntegrateEllipsoids::qListFromEventWS(IntegrateQLabEvents &integrator, Progress &prog, EventWorkspace_sptr &wksp) {
   auto numSpectra = static_cast<int>(wksp->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int i = 0; i < numSpectra; ++i) {
@@ -89,8 +87,7 @@ void IntegrateEllipsoids::qListFromEventWS(IntegrateQLabEvents &integrator,
     // loop over the events
     double signal(1.);  // ignorable garbage
     double errorSq(1.); // ignorable garbage
-    const std::vector<WeightedEventNoTime> &raw_events =
-        events.getWeightedEventsNoTime();
+    const std::vector<WeightedEventNoTime> &raw_events = events.getWeightedEventsNoTime();
     std::vector<std::pair<std::pair<double, double>, V3D>> qList;
     for (const auto &raw_event : raw_events) {
       double val = unitConverter.convertUnits(raw_event.tof());
@@ -99,9 +96,7 @@ void IntegrateEllipsoids::qListFromEventWS(IntegrateQLabEvents &integrator,
         buffer[dim] = locCoord[dim];
       }
       V3D qVec(buffer[0], buffer[1], buffer[2]);
-      qList.emplace_back(std::pair<double, double>(raw_event.m_weight,
-                                                   raw_event.m_errorSquared),
-                         qVec);
+      qList.emplace_back(std::pair<double, double>(raw_event.m_weight, raw_event.m_errorSquared), qVec);
     } // end of loop over events in list
     PARALLEL_CRITICAL(addEvents) { integrator.addEvents(qList); }
 
@@ -112,9 +107,7 @@ void IntegrateEllipsoids::qListFromEventWS(IntegrateQLabEvents &integrator,
   integrator.populateCellsWithPeaks();
 }
 
-void IntegrateEllipsoids::qListFromHistoWS(IntegrateQLabEvents &integrator,
-                                           Progress &prog,
-                                           Workspace2D_sptr &wksp) {
+void IntegrateEllipsoids::qListFromHistoWS(IntegrateQLabEvents &integrator, Progress &prog, Workspace2D_sptr &wksp) {
   auto numSpectra = static_cast<int>(wksp->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int i = 0; i < numSpectra; ++i) {
@@ -147,7 +140,7 @@ void IntegrateEllipsoids::qListFromHistoWS(IntegrateQLabEvents &integrator,
     for (size_t j = 0; j < yVals.size(); ++j) {
       const double &yVal = yVals[j];
       const double &esqVal = eVals[j] * eVals[j]; // error squared (variance)
-      if (yVal > 0) // TODO, is this condition right?
+      if (yVal > 0)                               // TODO, is this condition right?
       {
         double val = unitConverter.convertUnits(xVals[j]);
         qConverter.calcMatrixCoord(val, locCoord, signal, errorSq);
@@ -178,30 +171,25 @@ void IntegrateEllipsoids::init() {
   ws_valid->add<InstrumentValidator>();
   // the validator which checks if the workspace has axis
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input, ws_valid),
-                  "An input MatrixWorkspace with time-of-flight units along "
-                  "X-axis and defined instrument with defined sample");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, ws_valid),
+      "An input MatrixWorkspace with time-of-flight units along "
+      "X-axis and defined instrument with defined sample");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "PeaksWorkspace", "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "", Direction::InOut),
                   "Workspace with Peaks to be integrated. NOTE: The peaks MUST "
                   "be indexed with integer HKL values.");
 
-  std::shared_ptr<BoundedValidator<double>> mustBePositive(
-      new BoundedValidator<double>());
+  std::shared_ptr<BoundedValidator<double>> mustBePositive(new BoundedValidator<double>());
   mustBePositive->setLower(0.0);
 
   declareProperty("RegionRadius", .35, mustBePositive,
                   "Only events at most this distance from a peak will be "
                   "considered when integrating");
 
-  declareProperty(
-      "SpecifySize", false,
-      "If true, use the following for the major axis sizes, else use 3-sigma");
+  declareProperty("SpecifySize", false, "If true, use the following for the major axis sizes, else use 3-sigma");
 
-  declareProperty("PeakSize", .18, mustBePositive,
-                  "Half-length of major axis for peak ellipsoid");
+  declareProperty("PeakSize", .18, mustBePositive, "Half-length of major axis for peak ellipsoid");
 
   declareProperty("BackgroundInnerSize", .18, mustBePositive,
                   "Half-length of major axis for inner ellipsoidal surface of "
@@ -211,11 +199,9 @@ void IntegrateEllipsoids::init() {
                   "Half-length of major axis for outer ellipsoidal surface of "
                   "background region");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                          Direction::Output),
-      "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
-      "with the peaks' integrated intensities.");
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
+                  "with the peaks' integrated intensities.");
 
   declareProperty("CutoffIsigI", EMPTY_DBL(), mustBePositive,
                   "Cuttoff for I/sig(i) when finding mean of half-length of "
@@ -226,10 +212,9 @@ void IntegrateEllipsoids::init() {
                   "Number of sigmas to add to mean of half-length of "
                   "major radius for second pass when SpecifySize is false.");
 
-  declareProperty(
-      "IntegrateIfOnEdge", true,
-      "Set to false to not integrate if peak radius is off edge of detector."
-      "Background will be scaled if background radius is off edge.");
+  declareProperty("IntegrateIfOnEdge", true,
+                  "Set to false to not integrate if peak radius is off edge of detector."
+                  "Background will be scaled if background radius is off edge.");
 
   declareProperty("AdaptiveQBackground", false,
                   "Default is false.   If true, "
@@ -260,8 +245,7 @@ void IntegrateEllipsoids::exec() {
 
   // error out if there are not events
   if (eventWS && eventWS->getNumberEvents() <= 0) {
-    throw std::runtime_error(
-        "IntegrateEllipsoids does not work for empty event lists");
+    throw std::runtime_error("IntegrateEllipsoids does not work for empty event lists");
   }
 
   PeaksWorkspace_sptr in_peak_ws = getProperty("PeaksWorkspace");
@@ -280,8 +264,7 @@ void IntegrateEllipsoids::exec() {
   bool adaptiveQBackground = getProperty("AdaptiveQBackground");
   double adaptiveQMultiplier = getProperty("AdaptiveQMultiplier");
   double adaptiveQBackgroundMultiplier = 0.0;
-  bool useOnePercentBackgroundCorrection =
-      getProperty("UseOnePercentBackgroundCorrection");
+  bool useOnePercentBackgroundCorrection = getProperty("UseOnePercentBackgroundCorrection");
 
   if (adaptiveQBackground)
     adaptiveQBackgroundMultiplier = adaptiveQMultiplier;
@@ -298,8 +281,7 @@ void IntegrateEllipsoids::exec() {
     calculateE1(in_peak_ws->detectorInfo()); // fill E1Vec for use in detectorQ
   }
 
-  Mantid::DataObjects::PeaksWorkspace_sptr peak_ws =
-      getProperty("OutputWorkspace");
+  Mantid::DataObjects::PeaksWorkspace_sptr peak_ws = getProperty("OutputWorkspace");
   if (peak_ws != in_peak_ws)
     peak_ws = in_peak_ws->clone();
 
@@ -324,21 +306,17 @@ void IntegrateEllipsoids::exec() {
   std::vector<double> BackgroundOuterRadiusVector(n_peaks, back_outer_radius);
   if (specify_size) {
     if (back_outer_radius > radius_m)
-      throw std::runtime_error(
-          "BackgroundOuterSize must be less than or equal to the RegionRadius");
+      throw std::runtime_error("BackgroundOuterSize must be less than or equal to the RegionRadius");
 
     if (back_inner_radius >= back_outer_radius)
-      throw std::runtime_error(
-          "BackgroundInnerSize must be less BackgroundOuterSize");
+      throw std::runtime_error("BackgroundInnerSize must be less BackgroundOuterSize");
 
     if (peak_radius > back_inner_radius)
-      throw std::runtime_error(
-          "PeakSize must be less than or equal to the BackgroundInnerSize");
+      throw std::runtime_error("PeakSize must be less than or equal to the BackgroundInnerSize");
   }
 
   // make the integrator
-  IntegrateQLabEvents integrator(qList, radius_m,
-                                 useOnePercentBackgroundCorrection);
+  IntegrateQLabEvents integrator(qList, radius_m, useOnePercentBackgroundCorrection);
 
   // get the events and add
   // them to the inegrator
@@ -368,8 +346,8 @@ void IntegrateEllipsoids::exec() {
     const double lenQpeak = adaptiveQMultiplier != 0.0 ? peak_q.norm() : 0.0;
     double adaptiveRadius = adaptiveQMultiplier * lenQpeak + peak_radius;
     if (adaptiveRadius <= 0.0) {
-      g_log.error() << "Error: Radius for integration sphere of peak " << i
-                    << " is negative =  " << adaptiveRadius << '\n';
+      g_log.error() << "Error: Radius for integration sphere of peak " << i << " is negative =  " << adaptiveRadius
+                    << '\n';
       peaks[i].setIntensity(0.0);
       peaks[i].setSigmaIntensity(0.0);
       PeakRadiusVector[i] = 0.0;
@@ -380,20 +358,16 @@ void IntegrateEllipsoids::exec() {
 
     double adaptiveBack_inner_radius;
     double adaptiveBack_outer_radius;
-    adaptiveBack_inner_radius =
-        adaptiveQBackgroundMultiplier * lenQpeak + back_inner_radius;
-    adaptiveBack_outer_radius =
-        adaptiveQBackgroundMultiplier * lenQpeak + back_outer_radius;
+    adaptiveBack_inner_radius = adaptiveQBackgroundMultiplier * lenQpeak + back_inner_radius;
+    adaptiveBack_outer_radius = adaptiveQBackgroundMultiplier * lenQpeak + back_outer_radius;
     PeakRadiusVector[i] = adaptiveRadius;
     BackgroundInnerRadiusVector[i] = adaptiveBack_inner_radius;
     BackgroundOuterRadiusVector[i] = adaptiveBack_outer_radius;
 
     std::vector<double> axes_radii;
     Mantid::Geometry::PeakShape_const_sptr shape =
-        integrator.ellipseIntegrateEvents(
-            E1Vec, peak_q, specify_size, adaptiveRadius,
-            adaptiveBack_inner_radius, adaptiveBack_outer_radius, axes_radii,
-            inti, sigi);
+        integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveBack_inner_radius,
+                                          adaptiveBack_outer_radius, axes_radii, inti, sigi);
     peaks[i].setIntensity(inti);
     peaks[i].setSigmaIntensity(sigi);
     peaks[i].setPeakShape(shape);
@@ -408,29 +382,21 @@ void IntegrateEllipsoids::exec() {
   if (principalaxis1.size() > 1) {
     Statistics stats1 = getStatistics(principalaxis1);
     g_log.notice() << "principalaxis1: "
-                   << " mean " << stats1.mean << " standard_deviation "
-                   << stats1.standard_deviation << " minimum " << stats1.minimum
-                   << " maximum " << stats1.maximum << " median "
-                   << stats1.median << "\n";
+                   << " mean " << stats1.mean << " standard_deviation " << stats1.standard_deviation << " minimum "
+                   << stats1.minimum << " maximum " << stats1.maximum << " median " << stats1.median << "\n";
     Statistics stats2 = getStatistics(principalaxis2);
     g_log.notice() << "principalaxis2: "
-                   << " mean " << stats2.mean << " standard_deviation "
-                   << stats2.standard_deviation << " minimum " << stats2.minimum
-                   << " maximum " << stats2.maximum << " median "
-                   << stats2.median << "\n";
+                   << " mean " << stats2.mean << " standard_deviation " << stats2.standard_deviation << " minimum "
+                   << stats2.minimum << " maximum " << stats2.maximum << " median " << stats2.median << "\n";
     Statistics stats3 = getStatistics(principalaxis3);
     g_log.notice() << "principalaxis3: "
-                   << " mean " << stats3.mean << " standard_deviation "
-                   << stats3.standard_deviation << " minimum " << stats3.minimum
-                   << " maximum " << stats3.maximum << " median "
-                   << stats3.median << "\n";
+                   << " mean " << stats3.mean << " standard_deviation " << stats3.standard_deviation << " minimum "
+                   << stats3.minimum << " maximum " << stats3.maximum << " median " << stats3.median << "\n";
 
     constexpr size_t histogramNumber = 3;
-    Workspace_sptr wsProfile = WorkspaceFactory::Instance().create(
-        "Workspace2D", histogramNumber, principalaxis1.size(),
-        principalaxis1.size());
-    Workspace2D_sptr wsProfile2D =
-        std::dynamic_pointer_cast<Workspace2D>(wsProfile);
+    Workspace_sptr wsProfile = WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
+                                                                   principalaxis1.size(), principalaxis1.size());
+    Workspace2D_sptr wsProfile2D = std::dynamic_pointer_cast<Workspace2D>(wsProfile);
     AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
 
     // set output workspace
@@ -444,11 +410,9 @@ void IntegrateEllipsoids::exec() {
       principalaxis2.clear();
       principalaxis3.clear();
       specify_size = true;
-      double meanMax =
-          std::max(std::max(stats1.mean, stats2.mean), stats3.mean);
-      double stdMax = std::max(
-          std::max(stats1.standard_deviation, stats2.standard_deviation),
-          stats3.standard_deviation);
+      double meanMax = std::max(std::max(stats1.mean, stats2.mean), stats3.mean);
+      double stdMax =
+          std::max(std::max(stats1.standard_deviation, stats2.standard_deviation), stats3.standard_deviation);
       peak_radius = meanMax + numSigmas * stdMax;
       back_inner_radius = peak_radius;
       back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3)
@@ -456,9 +420,8 @@ void IntegrateEllipsoids::exec() {
       for (size_t i = 0; i < n_peaks; i++) {
         const V3D peak_q = peaks[i].getQLabFrame();
         std::vector<double> axes_radii;
-        integrator.ellipseIntegrateEvents(
-            E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
-            back_outer_radius, axes_radii, inti, sigi);
+        integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
+                                          back_outer_radius, axes_radii, inti, sigi);
         peaks[i].setIntensity(inti);
         peaks[i].setSigmaIntensity(sigi);
         if (axes_radii.size() == 3) {
@@ -468,21 +431,15 @@ void IntegrateEllipsoids::exec() {
         }
       }
       if (principalaxis1.size() > 1) {
-        Workspace_sptr wsProfile2 = WorkspaceFactory::Instance().create(
-            "Workspace2D", histogramNumber, principalaxis1.size(),
-            principalaxis1.size());
-        Workspace2D_sptr wsProfile2D2 =
-            std::dynamic_pointer_cast<Workspace2D>(wsProfile2);
-        AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass",
-                                                     wsProfile2D2);
+        Workspace_sptr wsProfile2 = WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
+                                                                        principalaxis1.size(), principalaxis1.size());
+        Workspace2D_sptr wsProfile2D2 = std::dynamic_pointer_cast<Workspace2D>(wsProfile2);
+        AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass", wsProfile2D2);
 
         Points profilePoints(principalaxis1.size(), LinearGenerator(0, 1));
-        wsProfile2D->setHistogram(0, profilePoints,
-                                  Counts(std::move(principalaxis1)));
-        wsProfile2D->setHistogram(1, profilePoints,
-                                  Counts(std::move(principalaxis2)));
-        wsProfile2D->setHistogram(2, profilePoints,
-                                  Counts(std::move(principalaxis3)));
+        wsProfile2D->setHistogram(0, profilePoints, Counts(std::move(principalaxis1)));
+        wsProfile2D->setHistogram(1, profilePoints, Counts(std::move(principalaxis2)));
+        wsProfile2D->setHistogram(2, profilePoints, Counts(std::move(principalaxis3)));
       }
     }
   }
@@ -492,38 +449,31 @@ void IntegrateEllipsoids::exec() {
   peak_ws->mutableRun().addProperty("PeaksIntegrated", 1, true);
   // These flags are specific to the algorithm.
   peak_ws->mutableRun().addProperty("PeakRadius", PeakRadiusVector, true);
-  peak_ws->mutableRun().addProperty("BackgroundInnerRadius",
-                                    BackgroundInnerRadiusVector, true);
-  peak_ws->mutableRun().addProperty("BackgroundOuterRadius",
-                                    BackgroundOuterRadiusVector, true);
+  peak_ws->mutableRun().addProperty("BackgroundInnerRadius", BackgroundInnerRadiusVector, true);
+  peak_ws->mutableRun().addProperty("BackgroundOuterRadius", BackgroundOuterRadiusVector, true);
 
   setProperty("OutputWorkspace", peak_ws);
 }
 
 void IntegrateEllipsoids::initTargetWSDescr(MatrixWorkspace_sptr &wksp) {
-  m_targWSDescr.setMinMax(std::vector<double>(3, -2000.),
-                          std::vector<double>(3, 2000.));
+  m_targWSDescr.setMinMax(std::vector<double>(3, -2000.), std::vector<double>(3, 2000.));
   m_targWSDescr.buildFromMatrixWS(wksp, Q3D, ELASTIC);
   m_targWSDescr.setLorentsCorr(false);
 
   // generate the detectors table
-  Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm(
-      "PreprocessDetectorsToMD", 0.,
-      .5); // HACK. soft dependency on non-dependent package.
+  Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("PreprocessDetectorsToMD", 0.,
+                                                              .5); // HACK. soft dependency on non-dependent package.
   childAlg->setProperty("InputWorkspace", wksp);
   childAlg->executeAsChildAlg();
 
-  DataObjects::TableWorkspace_sptr table =
-      childAlg->getProperty("OutputWorkspace");
+  DataObjects::TableWorkspace_sptr table = childAlg->getProperty("OutputWorkspace");
   if (!table)
-    throw(std::runtime_error(
-        "Can not retrieve results of \"PreprocessDetectorsToMD\""));
+    throw(std::runtime_error("Can not retrieve results of \"PreprocessDetectorsToMD\""));
   else
     m_targWSDescr.m_PreprDetTable = table;
 }
 
-void IntegrateEllipsoids::calculateE1(
-    const Geometry::DetectorInfo &detectorInfo) {
+void IntegrateEllipsoids::calculateE1(const Geometry::DetectorInfo &detectorInfo) {
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
     if (detectorInfo.isMonitor(i))
       continue; // skip monitor
@@ -539,15 +489,13 @@ void IntegrateEllipsoids::calculateE1(
   }
 }
 
-void IntegrateEllipsoids::runMaskDetectors(
-    const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
-    const std::string &property, const std::string &values) {
+void IntegrateEllipsoids::runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
+                                           const std::string &property, const std::string &values) {
   IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
   alg->setProperty<Workspace_sptr>("Workspace", peakWS);
   alg->setProperty(property, values);
   if (!alg->execute())
-    throw std::runtime_error(
-        "MaskDetectors Child Algorithm has not executed successfully");
+    throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
 }
 } // namespace MDAlgorithms
 } // namespace Mantid

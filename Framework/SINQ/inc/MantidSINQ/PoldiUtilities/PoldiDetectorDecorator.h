@@ -26,14 +26,12 @@ namespace Poldi {
 class MANTID_SINQ_DLL PoldiDetectorDecorator : public PoldiAbstractDetector {
 public:
   PoldiDetectorDecorator(
-      std::shared_ptr<PoldiAbstractDetector> decoratedDetector =
-          std::shared_ptr<PoldiAbstractDetector>());
+      std::shared_ptr<PoldiAbstractDetector> decoratedDetector = std::shared_ptr<PoldiAbstractDetector>());
 
   void setDecoratedDetector(std::shared_ptr<PoldiAbstractDetector> detector);
   std::shared_ptr<PoldiAbstractDetector> decoratedDetector();
 
-  void
-  loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) override;
+  void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) override;
 
   double efficiency() override;
 
@@ -45,8 +43,7 @@ public:
 
   const std::vector<int> &availableElements() override;
 
-  std::pair<double, double> qLimits(double lambdaMin,
-                                    double lambdaMax) override;
+  std::pair<double, double> qLimits(double lambdaMin, double lambdaMax) override;
 
 protected:
   virtual void detectorSetHook();

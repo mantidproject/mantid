@@ -31,13 +31,10 @@ namespace ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL Experiment {
 public:
   Experiment();
-  Experiment(AnalysisMode analysisMode, ReductionType reductionType,
-             SummationType summationType, bool includePartialBins, bool debug,
-             BackgroundSubtraction backgroundSubtraction,
-             PolarizationCorrections polarizationCorrections,
-             FloodCorrections floodCorrections,
-             TransmissionStitchOptions transmissionStitchOptions,
-             std::map<std::string, std::string> stitchParameters,
+  Experiment(AnalysisMode analysisMode, ReductionType reductionType, SummationType summationType,
+             bool includePartialBins, bool debug, BackgroundSubtraction backgroundSubtraction,
+             PolarizationCorrections polarizationCorrections, FloodCorrections floodCorrections,
+             TransmissionStitchOptions transmissionStitchOptions, std::map<std::string, std::string> stitchParameters,
              std::vector<PerThetaDefaults> perThetaDefaults);
 
   AnalysisMode analysisMode() const;
@@ -54,8 +51,7 @@ public:
   std::vector<PerThetaDefaults> const &perThetaDefaults() const;
   std::vector<PerThetaDefaults::ValueArray> perThetaDefaultsArray() const;
 
-  PerThetaDefaults const *defaultsForTheta(double thetaAngle,
-                                           double tolerance) const;
+  PerThetaDefaults const *defaultsForTheta(double thetaAngle, double tolerance) const;
   PerThetaDefaults const *wildcardDefaults() const;
 
 private:
@@ -74,10 +70,8 @@ private:
   std::vector<PerThetaDefaults> m_perThetaDefaults;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Experiment const &lhs,
-                                               Experiment const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Experiment const &lhs,
-                                               Experiment const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Experiment const &lhs, Experiment const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Experiment const &lhs, Experiment const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

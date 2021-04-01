@@ -11,8 +11,8 @@ Description
 
 This algorithm subtracts a dark run from a workspace. *InputWorkspace* and *DarkRun* have to
 be of type Workspace2D and need to contain the same spectra.
-The user can choose to either subtract spectra which are associated with detecors 
-(*ApplyToDetectors*) and/or monitors (*ApplyToMonitors*). In the case of monitors, the user can 
+The user can choose to either subtract spectra which are associated with detecors
+(*ApplyToDetectors*) and/or monitors (*ApplyToMonitors*). In the case of monitors, the user can
 select specific monitors (*SelectedMonitors*) according to their detecotor IDs.
 
 The *NormalizationRatio* is used to scale the signal values of the *DarkRun* workspace before
@@ -36,7 +36,7 @@ Usage
     ws_sample = CreateSampleWorkspace()
     ws_dark_run = CloneWorkspace(ws_sample)
 
-    out_ws = SANSDarkRunBackgroundCorrection(InputWorkspace = ws_sample, 
+    out_ws = SANSDarkRunBackgroundCorrection(InputWorkspace = ws_sample,
                                              DarkRun = ws_dark_run,
                                              NormalizationRatio = 0.5,
                                              Uniform = False,

@@ -7,19 +7,24 @@ Mantid Workbench Changes
 
 New and Improved
 ----------------
-Added Floating/On Top setting for all the windows that are opened by workbench (plots, interfaces, etc.)
 
+- Added Floating/On Top setting for all the windows that are opened by workbench (plots, interfaces, etc.)
 - New plot interactions: Double click a legend to hide it, double click a curve to open it in the plot config dialog.
 - It is now possible to overplot bin data from the matrix workspace view.
 - Improved the performance of the table workspace display for large datasets
 - Added a sample material dialog that is accessed via the context menu in the workspace widget.
 - When a workspace is renamed it now updates the relevant plot labels with the new workspace name.
 - Add a checkbox to freeze the rotation in the instrument viewer in Full 3D mode.
+- Calling python's `input` now raises an input dialog in the script editor and the iPython shell.
 
 - A new empty facility with empty instrument is the default facility now, and
   user has to select their choice of facility (including ISIS) and instrument for the first time
+
+- Added an algorithm ProfileChiSquared1D to profile chi squared after a fit. This can be used
+  to find better estimates of parameter errors.
+
 - Instrument view: when in tube selection mode, the sum of pixel counts is now output to the selection pane.
-  
+
 Bugfixes
 --------
 

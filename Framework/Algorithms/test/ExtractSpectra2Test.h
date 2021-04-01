@@ -31,8 +31,7 @@ void run_parallel(const Parallel::Communicator &comm) {
   Indexing::IndexInfo indexInfo(1000, Parallel::StorageMode::Distributed, comm);
   auto alg = ParallelTestHelpers::create<ExtractSpectra2>(comm);
   alg->setProperty("InputWorkspace", create<Workspace2D>(indexInfo, Points(1)));
-  alg->setProperty("InputWorkspaceIndexSet",
-                   "0-" + std::to_string(comm.size()));
+  alg->setProperty("InputWorkspaceIndexSet", "0-" + std::to_string(comm.size()));
   TS_ASSERT_THROWS_NOTHING(alg->execute());
   MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
   TS_ASSERT_EQUALS(out->storageMode(), Parallel::StorageMode::Distributed);
@@ -58,9 +57,7 @@ class ExtractSpectra2Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ExtractSpectra2Test *createSuite() {
-    return new ExtractSpectra2Test();
-  }
+  static ExtractSpectra2Test *createSuite() { return new ExtractSpectra2Test(); }
   static void destroySuite(ExtractSpectra2Test *suite) { delete suite; }
 
   void test_full() {
@@ -70,8 +67,7 @@ public:
     alg.setProperty("InputWorkspace", std::move(input));
     alg.setProperty("OutputWorkspace", "out");
     alg.execute();
-    auto ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 5);
   }
 
@@ -83,8 +79,7 @@ public:
     alg.setProperty("InputWorkspaceIndexSet", "4,0-3");
     alg.setProperty("OutputWorkspace", "out");
     alg.execute();
-    auto ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 5);
     const auto &indexInfo = ws->indexInfo();
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 5);
@@ -112,8 +107,7 @@ public:
     alg.setProperty("InputWorkspaceIndexSet", "4,1-2");
     alg.setProperty("OutputWorkspace", "out");
     alg.execute();
-    auto ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 3);
     const auto &indexInfo = ws->indexInfo();
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 5);
@@ -165,9 +159,8 @@ public:
     alg.setProperty("InputWorkspace", std::move(input));
     alg.setProperty("InputWorkspaceIndexSet", "1,3");
     alg.setProperty("OutputWorkspace", "out");
-    TS_ASSERT_THROWS_EQUALS(
-        alg.execute(), const std::invalid_argument &e, e.what(),
-        std::string("Cannot extract non-contiguous set of spectra when the "
-                    "vertical axis has bin edges."))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::invalid_argument &e, e.what(),
+                            std::string("Cannot extract non-contiguous set of spectra when the "
+                                        "vertical axis has bin edges."))
   }
 };
