@@ -164,6 +164,7 @@ class SuperplotView(QWidget):
             name (str): name of the workspace
         """
         item = WorkspaceItem(self._sideView.workspacesList, name)
+        item.signals.delClicked.connect(self._presenter.onDelButtonClicked)
         item.setText(0, name)
 
     def removeWorkspace(self, name):
@@ -215,6 +216,7 @@ class SuperplotView(QWidget):
         self._sideView.workspacesList.clear()
         for name in names:
             item = WorkspaceItem(self._sideView.workspacesList, name)
+            item.signals.delClicked.connect(self._presenter.onDelButtonClicked)
             item.setText(0, name)
         self._sideView.workspacesList.blockSignals(False)
 
