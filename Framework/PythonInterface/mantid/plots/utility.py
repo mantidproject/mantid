@@ -5,17 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
-# std imports
-import math
-import numpy as np
 import collections
 from contextlib import contextmanager
 from enum import Enum
 
-# 3rd party imports
-from matplotlib.legend import Legend
+import matplotlib.pyplot as plt
 from matplotlib import cm, __version__ as mpl_version_str
 from matplotlib.container import ErrorbarContainer
+from matplotlib.legend import Legend
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -109,7 +106,7 @@ def find_errorbar_container(line, containers):
 
 
 def get_colormap_names():
-    return sorted([cmap for cmap in cm.cmap_d.keys() if not cmap.endswith('_r')])
+    return sorted([cmap for cmap in plt.colormaps() if not cmap.endswith('_r')])
 
 
 def get_errorbar_containers(ax):

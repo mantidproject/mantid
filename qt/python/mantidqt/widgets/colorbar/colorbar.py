@@ -5,21 +5,19 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-#
-#
 import sys
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.colorbar import Colorbar
+from matplotlib.colors import Normalize, SymLogNorm, PowerNorm, LogNorm
+from matplotlib.figure import Figure
+from qtpy.QtCore import Signal, Qt
+from qtpy.QtGui import QDoubleValidator
+from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QComboBox, QCheckBox, QLabel
 
 from mantid.kernel import ConfigService
 from mantid.plots.utility import mpl_version_info, get_current_cmap
 from mantidqt.MPLwidgets import FigureCanvas
-from matplotlib.colorbar import Colorbar
-from matplotlib.figure import Figure
-from matplotlib.colors import Normalize, SymLogNorm, PowerNorm, LogNorm
-from matplotlib import cm
-import numpy as np
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QComboBox, QCheckBox, QLabel
-from qtpy.QtCore import Signal, Qt
-from qtpy.QtGui import QDoubleValidator
 
 NORM_OPTS = ["Linear", "Log", "SymmetricLog10", "Power"]
 MIN_LOG_VALUE = 1e-4
@@ -28,13 +26,9 @@ MIN_LOG_VALUE = 1e-4
 class ColorbarWidget(QWidget):
     colorbarChanged = Signal()  # The parent should simply redraw their canvas
     scaleNormChanged = Signal()
-    cmap_list = sorted([cmap for cmap in cm.cmap_d.keys() if not cmap.endswith('_r')])
+    cmap_list = sorted([cmap for cmap in plt.colormaps() if not cmap.endswith('_r')])
 
     def __init__(self, parent=None, default_norm_scale=None):
-        """
-        :param default_scale: None uses linear, else either a string or tuple(string, other arguuments), e.g. tuple('Power', exponent)
-        """
-
         super(ColorbarWidget, self).__init__(parent)
 
         self.setWindowTitle("Colorbar")
@@ -174,7 +168,7 @@ class ColorbarWidget(QWidget):
         self.cmin_value = low
         self.cmax_value = high
         self.update_clim_text()
-        self.cmap.setCurrentIndex(sorted(cm.cmap_d.keys()).index(mappable_cmap.name))
+        self.cmap.setCurrentIndex(sorted(plt.colormaps()).index(mappable_cmap.name))
         self.redraw()
 
     def norm_changed(self):

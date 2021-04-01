@@ -18,13 +18,7 @@ from mantid.plots.plotfunctions import get_plot_fig
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
-
-from matplotlib.backends.qt_compat import is_pyqt5
-
-if is_pyqt5():
-    from matplotlib.backends.backend_qt5agg import FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvas
 
 # The y limit to use when y_min == y_max when autoscaling y
 ARBITRARY_Y_LIMIT = 1.0
