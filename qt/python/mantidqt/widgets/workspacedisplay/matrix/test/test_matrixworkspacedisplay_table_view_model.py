@@ -19,6 +19,8 @@ from mantidqt.utils.testing.mocks.mock_mantid import AXIS_INDEX_FOR_HORIZONTAL, 
 from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex
 from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModel, \
     MatrixWorkspaceTableViewModelType
+from mantid.simpleapi import CreateWorkspace
+from mantid.kernel import UnitLabel
 
 
 def setup_common_for_test_data():
@@ -616,6 +618,24 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         model = MatrixWorkspaceTableViewModel(ws, model_type)
 
         self.assertEqual(data_len, model.columnCount())
+
+    def test_set_unicode_unit_label(self):
+        """
+        Set the label of the x-axis using ascii only with a non-ascii character and make sure it's handled properly.
+        """
+        ws = CreateWorkspace(DataX=[0,1,2],DataY=[3,7,5],DataE=[0.2,0.3,0.1],NSpec=1)
+        label_unit = ws.getAxis(0).setUnit("Label")
+        microseconds = "\u00B5s"
+        # Second argument will implicitly call the ascii only constructor of UnitLabel.
+        # We are intentionally passing a non-ascii string to try and break it.
+        label_unit.setLabel("Time", microseconds)
+
+        model_type = MatrixWorkspaceTableViewModelType.y
+        model = MatrixWorkspaceTableViewModel(ws, model_type)
+        header = model.headerData(0, Qt.Horizontal, Qt.DisplayRole)
+
+        # Header should contain the microseconds unicode string.
+        self.assertTrue(microseconds in header)
 
 
 if __name__ == '__main__':
