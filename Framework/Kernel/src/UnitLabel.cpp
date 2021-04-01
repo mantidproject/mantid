@@ -23,7 +23,7 @@ UnitLabel::UnitLabel(const AsciiString &ascii, const Utf8String &unicode, const 
  * Use an ASCII string for the unicode variant too
  * @param ascii A plain-text label containing only ascii characters
  */
-UnitLabel::UnitLabel(const UnitLabel::AsciiString &ascii) : m_ascii(ascii), m_latex(ascii) {
+UnitLabel::UnitLabel(const AsciiString &ascii) : m_ascii(ascii), m_latex(ascii) {
   std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
   m_utf8 = converter.from_bytes(m_ascii);
 }
@@ -32,10 +32,7 @@ UnitLabel::UnitLabel(const UnitLabel::AsciiString &ascii) : m_ascii(ascii), m_la
  * as a C-style string
  * @param ascii A plain-text label
  */
-UnitLabel::UnitLabel(const char *ascii) : m_ascii(ascii), m_latex(ascii) {
-  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-  m_utf8 = converter.from_bytes(m_ascii);
-}
+UnitLabel::UnitLabel(const char *ascii) : UnitLabel(AsciiString(ascii)) {}
 
 /**
  * Test if two objects are considered equal

@@ -32,7 +32,7 @@ public:
   UnitLabel(const AsciiString &ascii, const Utf8String &unicode, const AsciiString &latex);
   /// Constructor creating all labels from the ascii string
   UnitLabel(const AsciiString &ascii);
-  /// Constructor giving all labels as ascii using a C-style string
+  /// Constructor creating all labels using a C-style string
   UnitLabel(const char *ascii);
 
   /// Equality operator with other label
