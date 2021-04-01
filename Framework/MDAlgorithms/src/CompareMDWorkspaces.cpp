@@ -135,13 +135,10 @@ void CompareMDWorkspaces::compareMDGeometry(const Mantid::API::IMDWorkspace_sptr
 //----------------------------------------------------------------------------------------------
 /** Compare the dimensions etc. of two MDWorkspaces
  */
-void CompareMDWorkspaces::compareMDHistoWorkspaces(
-    const Mantid::DataObjects::MDHistoWorkspace_sptr &ws1,
-    const Mantid::DataObjects::MDHistoWorkspace_sptr &ws2) {
-  compare(ws1->getNumDims(), ws2->getNumDims(),
-          "Workspaces have a different number of dimensions");
-  compare(ws1->getNPoints(), ws2->getNPoints(),
-          "Workspaces have a different number of points");
+void CompareMDWorkspaces::compareMDHistoWorkspaces(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws1,
+                                                   const Mantid::DataObjects::MDHistoWorkspace_sptr &ws2) {
+  compare(ws1->getNumDims(), ws2->getNumDims(), "Workspaces have a different number of dimensions");
+  compare(ws1->getNPoints(), ws2->getNPoints(), "Workspaces have a different number of points");
 
   g_log.notice() << "[DEBUG] N Points = " << ws1->getNPoints() << "\n";
   bool diffsig = false;
@@ -158,51 +155,51 @@ void CompareMDWorkspaces::compareMDHistoWorkspaces(
     double diff = fabs(ws1->getSignalAt(i) - ws2->getSignalAt(i));
 
     if (ws1->getSignalAt(i) < 0.1 || ws2->getSignalAt(i) < 0.1) {
-        zerocounts += 1;
+      zerocounts += 1;
     } else {
-        if (ws1->getSignalAt(i) > max_sig1) {
-            max_sig1 = ws1-> getSignalAt(i);
-            max_sig_index1 = i;
-        }
-        if (ws2->getSignalAt(i) > max_sig2) {
-            max_sig2 = ws2->getSignalAt(i);
-            max_sig_index2 = i;
-        }
+      if (ws1->getSignalAt(i) > max_sig1) {
+        max_sig1 = ws1->getSignalAt(i);
+        max_sig_index1 = i;
+      }
+      if (ws2->getSignalAt(i) > max_sig2) {
+        max_sig2 = ws2->getSignalAt(i);
+        max_sig_index2 = i;
+      }
     }
 
-    if (diff > m_tolerance)
-    {
-//      throw CompareFailsException(
-//          "MDHistoWorkspaces have a different signal at index " +
-//          Strings::toString(i) + " " +
-//          versus(ws1->getSignalAt(i), ws2->getSignalAt(i)));
-        diffsig = true;
-        diffcount += 1;
-        g_log.error() << "MDHistoWorkspaces have a different signal at index " <<
-                    Strings::toString(i) << " " << versus(ws1->getSignalAt(i), ws2->getSignalAt(i)) << "\n";
+    if (diff > m_tolerance) {
+      //      throw CompareFailsException(
+      //          "MDHistoWorkspaces have a different signal at index " +
+      //          Strings::toString(i) + " " +
+      //          versus(ws1->getSignalAt(i), ws2->getSignalAt(i)));
+      diffsig = true;
+      diffcount += 1;
+      g_log.error() << "MDHistoWorkspaces have a different signal at index " << Strings::toString(i) << " "
+                    << versus(ws1->getSignalAt(i), ws2->getSignalAt(i)) << "\n";
     }
 
     double diffErr = fabs(ws1->getErrorAt(i) - ws2->getErrorAt(i));
-    if (diffErr > m_tolerance)
-    {
-        g_log.error() << "MDHistoWorkspaces have a different error at index " +
-                                   Strings::toString(i) + " " +
-                                   versus(ws1->getErrorAt(i), ws2->getErrorAt(i)) << "\n";
-//      throw CompareFailsException(
-//          "MDHistoWorkspaces have a different error at index " +
-//          Strings::toString(i) + " " +
-//          versus(ws1->getErrorAt(i), ws2->getErrorAt(i)));
-        // continue;
-        differr = true;
+    if (diffErr > m_tolerance) {
+      g_log.error() << "MDHistoWorkspaces have a different error at index " + Strings::toString(i) + " " +
+                           versus(ws1->getErrorAt(i), ws2->getErrorAt(i))
+                    << "\n";
+      //      throw CompareFailsException(
+      //          "MDHistoWorkspaces have a different error at index " +
+      //          Strings::toString(i) + " " +
+      //          versus(ws1->getErrorAt(i), ws2->getErrorAt(i)));
+      // continue;
+      differr = true;
     }
   }
 
   if (diffsig)
-      throw CompareFailsException("Not Same on Signal: " + Strings::toString(diffcount) + " different pixels out of " + Strings::toString(zerocounts) + " zero counts"
-                                  + " WS1 Max signal = " + Strings::toString(max_sig1) + " at index " + Strings::toString(max_sig_index1)
-                                  + " WS2 Max signal = " + Strings::toString(max_sig2) + " at index " + Strings::toString(max_sig_index2));
+    throw CompareFailsException("Not Same on Signal: " + Strings::toString(diffcount) + " different pixels out of " +
+                                Strings::toString(zerocounts) + " zero counts" +
+                                " WS1 Max signal = " + Strings::toString(max_sig1) + " at index " +
+                                Strings::toString(max_sig_index1) + " WS2 Max signal = " + Strings::toString(max_sig2) +
+                                " at index " + Strings::toString(max_sig_index2));
   if (differr)
-      throw CompareFailsException("Not Same on Signal Error: " + Strings::toString(diffcount) + " different pixels");
+    throw CompareFailsException("Not Same on Signal Error: " + Strings::toString(diffcount) + " different pixels");
 }
 
 //----------------------------------------------------------------------------------------------
