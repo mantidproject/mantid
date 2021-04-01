@@ -52,26 +52,27 @@ def has_modulated_indexing(workspace):
     return num_modulation_vectors(workspace) > 0
 
 
-def modulation_indices(peak, num_mod_vec):
+def get_intHKLM(peak, workspace):
+    """Get the HKL to write to file. If t
+
+    :params: peak :: peak object from workspace
+    :params: workspace :: the peak workspace
+    :returns: list containing hkl to write (hkl of the parent if a satellite peak)
+    :returns: list of mnp (empty if not a satellite peak)
     """
-    Gather non-zero modulated structure indices from a peak
-
-    :param workspace: A single Peak
-    :param num_mod_vec: The number of modulation vectors set on the workspace
-    :return: A list of the modulation indices
-    """
-    mnp = peak.getIntMNP()
-    return [mnp[i] for i in range(num_mod_vec)]
-
-
-def get_additional_index_names(workspace):
-    """Get the names of the additional indices to export
-
-    :params: workspace :: the workspace to get column names from
-    :returns: the names of any additional columns in the workspace
-    """
-    num_mod_vec = num_modulation_vectors(workspace)
-    return ["m{}".format(i + 1) for i in range(num_mod_vec)]
+    hkl = peak.getHKL()
+    mnp = []
+    if has_modulated_indexing(workspace):
+        lattice = workspace.sample().getOrientedLattice()
+        num_mod_vec = num_modulation_vectors(workspace)
+        mnp = list(peak.getIntMNP())[:num_mod_vec]  # +/- 1 for one of up to 3 mod vecs (0 otherwise)
+        for ivec in range(num_mod_vec):
+            if abs(mnp[ivec]) > 1e-10:
+                # undo modulation to get integer HKL (can't round if cell non-primitive and mod component > 0.5)
+                mod_vec = lattice.getModVec(ivec)
+                hkl -= mod_vec * mnp[ivec]
+                break
+    return list(hkl), mnp
 
 
 class SaveReflections(PythonAlgorithm):
@@ -154,7 +155,7 @@ class FullprofFormat(object):
         if has_modulated_indexing(workspace):
             # num_rows = 2*num_vecs (separate rows for +/- q)
             f_handle.write("   {:>4.0f}\n".format(2 * num_modulation_vectors(workspace)))
-            # now write out mode vectors
+            # now write out mod vectors
             lattice = workspace.sample().getOrientedLattice()
             row_num = 1
             for ivec in range(num_modulation_vectors(workspace)):
@@ -175,14 +176,17 @@ class FullprofFormat(object):
         :param workspace: the PeaksWorkspace to save to file.
         """
         num_mod_vec = num_modulation_vectors(workspace)
-        print('num_mod_vec = ', num_mod_vec)
         for i, peak in enumerate(workspace):
-            data = [peak.getH(), peak.getK(), peak.getL()]
-            # find num of mod vector as written in header
-            iq = [2 * im + 1 + (m < 0) for im, m in enumerate(peak.getIntMNP()) if
-                  (abs(m) > 1e-10) and im < num_mod_vec]
-            data.extend(iq)
-            hkls = "".join(["{:>4.0f}".format(item) for item in data])
+            hkl, mnp = get_intHKLM(peak, workspace)
+            if mnp:
+                if all([abs(m) < 1e-10 for m in mnp]):
+                    # modulations present in ws but this is not a satellite peak
+                    iq = [0]
+                else:
+                    # find num of mod vector as written in header
+                    iq = [2 * im + 1 + (m < 0) for im, m in enumerate(mnp) if (abs(m) > 1e-10)]
+                hkl.extend(iq)
+            hkls = "".join(["{:>4.0f}".format(item) for item in hkl])
 
             data = (peak.getIntensity(), peak.getSigmaIntensity(), 1, peak.getWavelength())
             line = "{:>12.2f}{:>12.2f}{:>5.0f}{:>10.4f}\n".format(*data)
@@ -278,15 +282,14 @@ class JanaFormat(object):
             for peak in self._workspace:
                 if self._num_mod_vec > 0:
                     # if this is a main peak write it out. if not decide if it should be in this file
-                    hkl = peak.getIntHKL()
-                    mnp = peak.getIntMNP()
+                    hkl, mnp = get_intHKLM(peak, self._workspace)
                     if self._modulation_col_num is None:
                         # write all modulation indices
                         modulation_indices = [mnp[i] for i in range(self._num_mod_vec)]
                     else:
                         # is this a main peak or one with the modulation vector matching this file
                         mnp_index = -1
-                        for i in range(3):
+                        for i in range(self._num_mod_vec):
                             if abs(mnp[i]) > 0.0:
                                 mnp_index = i
                                 break
