@@ -78,7 +78,12 @@ class SaveReflectionsTest(unittest.TestCase):
         lattice.setModVec2(V3D(0.333, 0.333, 0.))
         for row, peak in enumerate(modulated):
             row_indices = m1m2[row]
-            peak.setIntMNP(V3D(row_indices[0], row_indices[1], 0))
+            mnp = V3D(row_indices[0], row_indices[1], 0)
+            peak.setIntMNP(mnp)
+            # update hkl
+            modvec = lattice.getModVec(0) * mnp[0] + lattice.getModVec(1) * mnp[1]
+            hkl = peak.getHKL() + modvec
+            peak.setHKL(hkl[0], hkl[1], hkl[2])
 
         return modulated
 
