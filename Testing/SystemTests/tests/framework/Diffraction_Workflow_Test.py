@@ -170,7 +170,7 @@ class Diffraction_Workflow_Test(systemtesting.MantidSystemTest):
 
         # load output hkl file and the golden one
         LoadHKL(Filename="TOPAZ_3132.hkl", OutputWorkspace="TOPAZ_3132")
-        LoadHKL(Filename='TOPAZ_3132_reference.hkl', OutputWorkspace="TOPAZ_3132_golden")
+        LoadHKL(Filename='TOPAZ_3132_reference_04012021.hkl', OutputWorkspace="TOPAZ_3132_golden")
 
     def validateMethod(self):
         return "ValidateWorkspaceToWorkspace"
