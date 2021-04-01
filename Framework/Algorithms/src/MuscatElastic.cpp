@@ -20,6 +20,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
 
@@ -85,6 +86,15 @@ void MuscatElastic::init() {
 
   auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
+  declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
+                  "The number of wavelength points for which a simulation is "
+                  "attempted if ResimulateTracksForDifferentWavelengths=true");
+
+  std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
+  declareProperty("EMode", "Elastic",
+                  std::make_shared<Kernel::StringListValidator>(propOptions),
+                  "The energy mode (default: elastic)");
+
   declareProperty(
       "NeutronPathsSingle", DEFAULT_NPATHS, positiveInt,
       "The number of \"neutron\" paths to generate for single scattering");
@@ -100,6 +110,8 @@ void MuscatElastic::init() {
   declareProperty("NumberScatterings", DEFAULT_NSCATTERINGS,
                   nScatteringsValidator, "Number of scatterings");
 
+  auto interpolateOpt = createInterpolateOption();
+  declareProperty(interpolateOpt->property(), interpolateOpt->propertyDoc());
   declareProperty("SparseInstrument", false,
                   "Enable simulation on special "
                   "instrument with a sparse grid of "
@@ -156,6 +168,12 @@ std::map<std::string, std::string> MuscatElastic::validateInputs() {
                   [](const auto yval) { return (yval <= 0); })) {
     issues["SofqWorkspace"] = "S(Q) workspace must have all y > 0";
   }
+
+  const std::string emodeStr = getProperty("EMode");
+  auto emode = Kernel::DeltaEMode::fromString(emodeStr);
+  if (emode != Kernel::DeltaEMode::Elastic) {
+    issues["EMode"] = "Only elastic mode is supported at the moment";
+  }
   return issues;
 }
 
@@ -179,13 +197,12 @@ void MuscatElastic::exec() {
     std::transform(y.begin(), y.end(), y.begin(),
                    static_cast<double (*)(double)>(std::log));
   }
-
+  const auto inputNbins = static_cast<int>(inputWS->blocksize());
   const bool useSparseInstrument = getProperty("SparseInstrument");
   SparseWorkspace_sptr sparseWS;
   if (useSparseInstrument) {
     const int latitudinalDets = getProperty("NumberOfDetectorRows");
     const int longitudinalDets = getProperty("NumberOfDetectorColumns");
-    const auto inputNbins = static_cast<int>(inputWS->blocksize());
     sparseWS = createSparseWorkspace(*inputWS, inputNbins, latitudinalDets,
                                      longitudinalDets);
   }
@@ -220,6 +237,19 @@ void MuscatElastic::exec() {
 
   const int seed = getProperty("SeedValue");
 
+  int nlambda = getProperty("NumberOfWavelengthPoints");
+  if (isEmpty(nlambda) || nlambda > inputNbins) {
+    if (!isEmpty(nlambda)) {
+      g_log.warning() << "The requested number of wavelength points is larger "
+                         "than the spectra size. "
+                         "Defaulting to spectra size.\n";
+    }
+    nlambda = inputNbins;
+  }
+  InterpolationOption interpolateOpt;
+  interpolateOpt.set(getPropertyValue("Interpolation"));
+  interpolateOpt.setIndependentErrors(true);
+
   Progress prog(this, 0.0, 1.0, nhists * nbins);
   prog.setNotifyStep(0.01);
   const std::string reportMsg = "Computing corrections";
@@ -236,7 +266,19 @@ void MuscatElastic::exec() {
     MersenneTwister rng(seed + int(i));
     // no two theta for monitors
     if (!instrumentWS.spectrumInfo().isMonitor(i)) {
-      for (int bin = 0; bin < nbins; bin++) {
+
+      const auto lambdas = instrumentWS.points(i).rawData();
+
+      const auto nbins = lambdas.size();
+      const size_t lambdaStepSize = nbins / nlambda;
+
+      for (int bin = 0; bin < nbins; bin += lambdaStepSize) {
+        // Ensure we have the last point for the interpolation
+        if (lambdaStepSize > 1 && bin + lambdaStepSize >= nbins &&
+            bin + 1 != nbins) {
+          bin = nbins - lambdaStepSize - 1;
+        }
+
         double kinc = 2 * M_PI / instrumentWS.histogram(i).points()[bin];
 
         auto detPos = instrumentWS.detectorInfo().position(i);
@@ -245,8 +287,6 @@ void MuscatElastic::exec() {
         total = simulatePaths(nSingleScatterEvents, 1, sample, *instrument, rng,
                               sigmaSSWS, SQWS, kinc, detPos, true);
         noAbsSimulationWS->getSpectrum(i).dataY()[bin] = total;
-        /*if (!useSparseInstrument && lambdaStepSize > 1) {
-        }*/
 
         for (size_t ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
@@ -254,15 +294,34 @@ void MuscatElastic::exec() {
           total = simulatePaths(nEvents, ne + 1, sample, *instrument, rng,
                                 sigmaSSWS, SQWS, kinc, detPos, false);
           simulationWSs[ne]->getSpectrum(i).dataY()[bin] = total;
-
-          // interpolate through points not simulated
-          /*if (!useSparseInstrument && lambdaStepSize > 1) {
-            auto histnew = simulationWSs[ne]->histogram(i);
-            outputWSs[ne]->setHistogram(i, histnew);
-          }*/
         }
 
         prog.report(reportMsg);
+      } // bins
+
+      // interpolate through points not simulated. Simulation WS only has
+      // reduced X values if using sparse instrument so no interpolation
+      // required
+      if (!useSparseInstrument && lambdaStepSize > 1) {
+        auto histnew = noAbsSimulationWS->histogram(i);
+        if (lambdaStepSize < nbins) {
+          interpolateOpt.applyInplace(histnew, lambdaStepSize);
+        } else {
+          std::fill(histnew.mutableY().begin() + 1, histnew.mutableY().end(),
+                    histnew.y()[0]);
+        }
+        noAbsOutputWS->setHistogram(i, histnew);
+
+        for (size_t ne = 0; ne < nScatters; ne++) {
+          auto histnew = simulationWSs[ne]->histogram(i);
+          if (lambdaStepSize < nbins) {
+            interpolateOpt.applyInplace(histnew, lambdaStepSize);
+          } else {
+            std::fill(histnew.mutableY().begin() + 1, histnew.mutableY().end(),
+                      histnew.y()[0]);
+          }
+          outputWSs[ne]->setHistogram(i, histnew);
+        }
       }
     }
 
@@ -270,9 +329,18 @@ void MuscatElastic::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  // if (useSparseInstrument) {
-  //  interpolateFromSparse(*outputWS, *sparseWS, interpolateOpt);
-  //}
+  if (useSparseInstrument) {
+    interpolateFromSparse(
+        *noAbsOutputWS,
+        *std::dynamic_pointer_cast<SparseWorkspace>(noAbsSimulationWS),
+        interpolateOpt);
+    for (size_t ne = 0; ne < nScatters; ne++) {
+      interpolateFromSparse(
+          *outputWSs[ne],
+          *std::dynamic_pointer_cast<SparseWorkspace>(simulationWSs[ne]),
+          interpolateOpt);
+    }
+  }
 
   // Create workspace group that holds output workspaces
   auto wsgroup = std::make_shared<WorkspaceGroup>();
@@ -662,6 +730,40 @@ MuscatElastic::createOutputWorkspace(const MatrixWorkspace &inputWS) const {
   outputWS->setYUnit("");
   outputWS->setYUnitLabel("Scattered Intensity");
   return outputWS;
+}
+
+/**
+ * Factory method to return an instance of the required InterpolationOption
+ * class
+ * @return a pointer to an InterpolationOption object
+ */
+std::unique_ptr<InterpolationOption> MuscatElastic::createInterpolateOption() {
+  auto interpolationOpt = std::make_unique<InterpolationOption>();
+  return interpolationOpt;
+}
+
+void MuscatElastic::interpolateFromSparse(
+    MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
+    const Mantid::Algorithms::InterpolationOption &interpOpt) {
+  const auto &spectrumInfo = targetWS.spectrumInfo();
+  const auto refFrame = targetWS.getInstrument()->getReferenceFrame();
+  PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
+  for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    double lat, lon;
+    std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
+    const auto spatiallyInterpHisto =
+        sparseWS.bilinearInterpolateFromDetectorGrid(lat, lon);
+    if (spatiallyInterpHisto.size() > 1) {
+      auto targetHisto = targetWS.histogram(i);
+      interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);
+      targetWS.setHistogram(i, targetHisto);
+    } else {
+      targetWS.mutableY(i) = spatiallyInterpHisto.y().front();
+    }
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 } // namespace Algorithms

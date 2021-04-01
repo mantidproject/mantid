@@ -38,12 +38,14 @@ public:
   SparseWorkspace(const API::MatrixWorkspace &modelWS,
                   const size_t wavelengthPoints, const size_t rows,
                   const size_t columns);
+
   virtual HistogramData::Histogram
   interpolateFromDetectorGrid(const double lat, const double lon) const;
   virtual HistogramData::Histogram
   bilinearInterpolateFromDetectorGrid(const double lat, const double lon) const;
 
 protected:
+  SparseWorkspace(const SparseWorkspace &other);
   std::unique_ptr<Algorithms::DetectorGridDefinition> m_gridDef;
   static std::array<double, 4>
   inverseDistanceWeights(const std::array<double, 4> &distances);
@@ -62,6 +64,9 @@ protected:
                    const double distanceStep) const;
   HistogramData::HistogramE esq(HistogramData::HistogramE e) const;
   HistogramData::HistogramE esqrt(HistogramData::HistogramE e) const;
+
+private:
+  Workspace2D *doClone() const override;
 };
 
 /// unique pointer to Mantid::API::SparseWorkspace

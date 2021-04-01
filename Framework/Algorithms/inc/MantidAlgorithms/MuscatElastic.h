@@ -11,6 +11,7 @@
 //------------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidAlgorithms/SampleCorrections/SparseWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
@@ -56,6 +57,7 @@ protected:
   createSparseWorkspace(const API::MatrixWorkspace &modelWS,
                         const size_t wavelengthPoints, const size_t rows,
                         const size_t columns);
+  virtual std::unique_ptr<InterpolationOption> createInterpolateOption();
 
 private:
   void init() override;
@@ -98,6 +100,9 @@ private:
              const double kinc, const double scatteringXSection,
              Kernel::PseudoRandomNumberGenerator &rng, double &QSS,
              double &weight);
+  void interpolateFromSparse(
+      API::MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
+      const Mantid::Algorithms::InterpolationOption &interpOpt);
   int m_callsToInterceptSurface{0};
 };
 } // namespace Algorithms

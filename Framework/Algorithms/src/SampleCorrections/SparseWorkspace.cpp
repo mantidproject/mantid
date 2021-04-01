@@ -149,6 +149,9 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS,
   }
 }
 
+SparseWorkspace::SparseWorkspace(const SparseWorkspace &other)
+    : Workspace2D(other) {}
+
 /** Find the latitude and longitude intervals the detectors
  *  of the given workspace span as seen from the sample.
  *  Just do this for detectors that have a histogram in the ws
@@ -471,6 +474,10 @@ SparseWorkspace::bilinearInterpolateFromDetectorGrid(const double lat,
   // so the following line also has useful side effect of taking abs value
   h.mutableE() = esqrt(esq(interpolationError) + esq(errFromSourcePoints));
   return h;
+}
+
+DataObjects::Workspace2D *SparseWorkspace::doClone() const {
+  return new SparseWorkspace(*this);
 }
 
 } // namespace Algorithms
