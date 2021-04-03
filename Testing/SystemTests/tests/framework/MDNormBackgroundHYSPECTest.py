@@ -11,7 +11,7 @@ System test for MDNorm
 """
 from mantid.simpleapi import (config, Load, SetGoniometer, GenerateEventsFilter, FilterEvents, DeleteWorkspace,
                               DgsReduction, SetUB, CropWorkspaceForMDNorm, ConvertToMD, MergeMD,
-                              MDNorm, CloneWorkspace, AddSampleLogMultiple, mtd, SaveMD,
+                              MDNorm, CloneWorkspace, AddSampleLogMultiple, mtd,
                               MinusMD, RenameWorkspace, CompareMDWorkspaces)
 from typing import Tuple
 import systemtesting
@@ -149,6 +149,7 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
 
         # do MDNorm to background
         bkgd_data_mdh = f'{prefix}_background_dataMD'
+        bkgd_norm_mdh = f'{prefix}_background_normMD'
         MDNorm(InputWorkspace='background_MDE',
                Dimension0Name='QDimension1',
                Dimension0Binning='-5,0.05,5',
@@ -161,12 +162,12 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
                SymmetryOperations=SYMMETRY_OPERATION,
                OutputWorkspace=bkgd_processed_mdh,
                OutputDataWorkspace=bkgd_data_mdh,
-               OutputNormalizationWorkspace=f'{prefix}_background_normMD')
+               OutputNormalizationWorkspace=bkgd_norm_mdh)
 
         # clean data
         clean_data = MinusMD(sample_processed_mdh, bkgd_processed_mdh, OutputWorkspace=f'{prefix}_clean')
 
-        return clean_data, sample_data_mdh, sample_norm_mdh, bkgd_data_mdh
+        return clean_data, sample_data_mdh, sample_norm_mdh, bkgd_data_mdh, bkgd_norm_mdh
 
     @staticmethod
     def test_property_setup():
@@ -221,12 +222,12 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
         Load(Filename='HYS_13656', OutputWorkspace='sum')
         SetGoniometer(Workspace='sum', Axis0='s1,0,1,0,1')
 
-	# prepare sample MD: in test must between 10 and 12 to match the gold data
+        # prepare sample MD: in test must between 10 and 12 to match the gold data
         self.prepare_md(input_ws_name='sum', merged_md_name='merged', min_log_value=10, max_log_value=12,
                         log_step=LOG_VALUE_STEP)
 
         # 1-1 Existing method (but to keep)
-        clean_data, sample_data_mdh, sample_norm_mdh, background_data_mdh = self.run_old_solution()
+        clean_data, sample_data_mdh, sample_norm_mdh, background_data_mdh, background_norm_mdh = self.run_old_solution()
         self._old_clean = str(clean_data)
 
         # Prepare background workspace
@@ -253,14 +254,16 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
                    OutputBackgroundNormalizationWorkspace='background_normMD')
         # Test solution
         assert hasattr(r, 'OutputBackgroundNormalizationWorkspace'), 'MDNorm does not execute.'
-        # Compare workspace
+        # Compare workspaces: binned background data workspace
         rc = CompareMDWorkspaces(Workspace1=background_data_mdh, Workspace2='background_dataMD')
         assert rc.Equals, f'Error message: {rc.Result}'
+        # Compare workspaces: background normalization workspace
+        r89 = CompareMDWorkspaces(Workspace1=background_norm_mdh, Workspace2='background_normMD', Tolerance=1E-9)
+        assert r89.Equals, f'Incompatible background normalization workspaces: {r89.Result}'
 
-	# Test: This can mess some experimental data set up for verifying
-	# whether the reduction is correct.
+        # Test: This can mess some experimental data set up for verifying
+        # whether the reduction is correct.
         self.test_property_setup()
-
 
         # clean_data = r.OutputWorkspace
         # print(f'[VZ DEBUG] clean data: s1 = 10 .. 12: Number of Experiment Info = {clean_data.getNumExperimentInfo()}')

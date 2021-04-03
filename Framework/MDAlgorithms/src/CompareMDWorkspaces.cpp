@@ -175,7 +175,8 @@ void CompareMDWorkspaces::compareMDHistoWorkspaces(const Mantid::DataObjects::MD
       diffsig = true;
       diffcount += 1;
       g_log.error() << "MDHistoWorkspaces have a different signal at index " << Strings::toString(i) << " "
-                    << versus(ws1->getSignalAt(i), ws2->getSignalAt(i)) << "\n";
+                    << versus(ws1->getSignalAt(i), ws2->getSignalAt(i)) << ".  delta = " << diff
+                    << " > tol = " << m_tolerance << "\n";
     }
 
     double diffErr = fabs(ws1->getErrorAt(i) - ws2->getErrorAt(i));

@@ -1518,6 +1518,9 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues, con
   const double protonChargeBkgd =
       (m_backgroundWS != nullptr) ? m_backgroundWS->getExperimentInfo(0)->run().getProtonCharge() : 0;
 
+  g_log.notice() << "[DEBUG VZ] Proton charge = " << protonCharge << ", Background proton charge = " << protonChargeBkgd
+                 << "\n";
+
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
 
   // Mappings: solid angle and flux workspaces' detector to ws_index map
