@@ -82,6 +82,12 @@ public:
   Geometry::Instrument_const_sptr getInstrument() const;
   std::shared_ptr<const Geometry::ReferenceFrame> getReferenceFrame() const override;
 
+  int getCol() const;
+  void setCol(int m_col);
+
+  int getRow() const;
+  void setRow(int m_row);
+
   std::string getBankName() const;
   void setBankName(std::string bankName);
 
@@ -133,6 +139,12 @@ private:
 
   /// Name of the parent bank
   std::string m_bankName;
+
+  /// Cached row in the detector
+  int m_row;
+
+  /// Cached column in the detector
+  int m_col;
 
   /// ID of the detector
   int m_detectorID;
