@@ -338,7 +338,7 @@ int Peak::getRow() const { return m_row; }
 
 /**
  * @brief For RectangularDetectors only, sets the row (y) of the pixel of the detector
- * @param m_row :: row value
+ * @param row :: row value
  */
 void Peak::setRow(int row) { m_row = row; }
 
@@ -347,7 +347,7 @@ int Peak::getCol() const { return m_col; }
 
 /**
  * @brief For RectangularDetectors only, sets the column (x) of the pixel of the detector
- * @param m_col :: col value
+ * @param col :: col value
  */
 void Peak::setCol(int col) { m_col = col; }
 

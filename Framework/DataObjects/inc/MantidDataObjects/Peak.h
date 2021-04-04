@@ -83,10 +83,10 @@ public:
   std::shared_ptr<const Geometry::ReferenceFrame> getReferenceFrame() const override;
 
   int getCol() const;
-  void setCol(int m_col);
+  void setCol(int col);
 
   int getRow() const;
-  void setRow(int m_row);
+  void setRow(int row);
 
   std::string getBankName() const;
   void setBankName(std::string bankName);
