@@ -199,7 +199,9 @@ void PredictSatellitePeaks::exec() {
   // adjacent
   std::vector<std::pair<std::string, bool>> criteria;
   criteria.emplace_back("RunNumber", true);
-  criteria.emplace_back("BankName", true);
+  auto isPeaksWorkspace = std::dynamic_pointer_cast<PeaksWorkspace>(outPeaks);
+  if (isPeaksWorkspace)
+    criteria.emplace_back("BankName", true);
   criteria.emplace_back("h", true);
   criteria.emplace_back("k", true);
   criteria.emplace_back("l", true);
