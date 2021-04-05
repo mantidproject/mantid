@@ -85,6 +85,7 @@ class MainWindow(QMainWindow):
         self.setObjectName(MAIN_WINDOW_OBJECT_NAME)
 
         # widgets
+        self.memorywidget = None
         self.messagedisplay = None
         self.ipythonconsole = None
         self.workspacewidget = None
@@ -171,6 +172,12 @@ class MainWindow(QMainWindow):
         prompt = CONF.get('project/prompt_on_deleting_workspace')
         self.workspacewidget.workspacewidget.enableDeletePrompt(bool(prompt))
         self.widgets.append(self.workspacewidget)
+
+        self.set_splash("Loading memory widget")
+        from workbench.plugins.memorywidget import MemoryWidget
+        self.memorywidget = MemoryWidget(self)
+        self.memorywidget.register_plugin()
+        self.widgets.append(self.memorywidget)
 
         # set the link between the algorithm and workspace widget
         self.algorithm_selector.algorithm_selector.set_get_selected_workspace_fn(
@@ -462,12 +469,18 @@ class MainWindow(QMainWindow):
     def setup_default_layouts(self):
         """Set the default layouts of the child widgets"""
         # layout definition
+        memorywidget = self.memorywidget
         logmessages = self.messagedisplay
         ipython = self.ipythonconsole
         workspacewidget = self.workspacewidget
         editor = self.editor
         algorithm_selector = self.algorithm_selector
         plot_selector = self.plot_selector
+
+        # If more than two rows are needed in a column,
+        # arrange_layout function needs to be revisited.
+        # In the first column, there are three widgets in two rows
+        # as the algorithm_selector and plot_selector are tabified.
         default_layout = {
             'widgets': [
                 # column 0
@@ -475,18 +488,8 @@ class MainWindow(QMainWindow):
                 # column 1
                 [[editor, ipython]],
                 # column 2
-                [[logmessages]]
+                [[memorywidget], [logmessages]]
             ],
-            'width-fraction': [
-                0.25,  # column 0 width
-                0.50,  # column 1 width
-                0.25
-            ],  # column 2 width
-            'height-fraction': [
-                [0.5, 0.5],  # column 0 row heights
-                [1.0],  # column 1 row heights
-                [1.0]
-            ]  # column 2 row heights
         }
 
         size = self.size()  # Preserve size on reset
@@ -513,6 +516,7 @@ class MainWindow(QMainWindow):
                     first_row, second_row = column[i], column[i + 1]
                     self.splitDockWidget(first_row[0].dockwidget, second_row[0].dockwidget,
                                          Qt.Vertical)
+
             # and finally tabify those in the same position
             for column in widgets_layout:
                 for row in column:
