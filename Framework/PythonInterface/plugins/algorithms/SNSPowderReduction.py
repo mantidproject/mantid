@@ -272,9 +272,9 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         # If doing absorption correction, make sure the sample formula is correct
         if self.getProperty("TypeOfCorrection").value != "None":
-            if self.getProperty("SampleFormula").value != '':
+            if self.getProperty("SampleFormula").value.strip() != '':
                 try:
-                    MaterialBuilder().setFormula(self.getProperty("SampleFormula").value)
+                    MaterialBuilder().setFormula(self.getProperty("SampleFormula").value.strip())
                 except ValueError as ex:
                     issues['SampleFormula'] = "Invalid SampleFormula: '{}'".format(str(ex))
 
