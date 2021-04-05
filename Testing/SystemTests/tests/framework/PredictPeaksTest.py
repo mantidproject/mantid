@@ -176,9 +176,9 @@ class PredictPeaksTestDEMAND(systemtesting.MantidSystemTest):
         g = Goniometer()
         g.setR(peak0.getGoniometerMatrix())
         YZY = g.getEulerAngles('YZY')
-        self.assertDelta(YZY[0], -20.4997, 1e-7)
-        self.assertDelta(YZY[1], 0.0003, 1e-7)
-        self.assertDelta(YZY[2], 90, 1e-7)
+        self.assertDelta(YZY[0], 0, 1e-7)
+        self.assertDelta(YZY[1], 0, 1e-7)
+        self.assertDelta(YZY[2], 0, 1e-7)
         self.assertDelta(peak0.getWavelength(), 0, 1e-9)
 
         HFIRCalculateGoniometer(filtered_peaks)

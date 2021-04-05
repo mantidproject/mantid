@@ -27,7 +27,7 @@ class HFIRCalculateGoniometer(PythonAlgorithm):
         return "HFIRCalculateGoniometer"
 
     def seeAlso(self):
-        return ["FindPeaksMD", "PredictPeaks"]
+        return ["FindPeaksMD", "PredictPeaks", 'SetGoniometer']
 
     def PyInit(self):
         self.declareProperty(IPeaksWorkspaceProperty('Workspace', '', direction=Direction.InOut),
@@ -66,10 +66,12 @@ class HFIRCalculateGoniometer(PythonAlgorithm):
             else:
                 inner = False
 
+        starting_goniometer = peaks.run().getGoniometer().getR()
+
         for n in range(peaks.getNumberPeaks()):
             p = peaks.getPeak(n)
             g = Goniometer()
-            g.setR(p.getGoniometerMatrix())
+            g.setR(starting_goniometer)
             g.calcFromQSampleAndWavelength(V3D(*p.getQSampleFrame()), wavelength, flip_x, inner)
             logger.information("Found goniometer omega={:.2f} chi={:.2f} phi={:.2f} for peak {} with Q_sample {}"
                                .format(*g.getEulerAngles('YZY'), n, p.getQSampleFrame()))

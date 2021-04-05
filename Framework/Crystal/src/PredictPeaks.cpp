@@ -144,11 +144,11 @@ void PredictPeaks::init() {
   std::vector<std::string> peakTypes = {"Peak", "LeanElasticPeak"};
   declareProperty("OutputType", "Peak", std::make_shared<StringListValidator>(peakTypes),
                   "Type of Peak in OutputWorkspace");
-  declareProperty("CalculateWavelength", true,
-                  "When OutputType is LeanElasticPeak you can choose to calculate the "
-                  "wavelength of the peak using the instrument and check it is in the "
-                  "valid range or alternatively just accept every peak and set the "
-                  "goniometer.");
+  declareProperty(
+      "CalculateWavelength", true,
+      "When OutputType is LeanElasticPeak you can choose to calculate the wavelength of the peak using the instrument "
+      "and check it is in the valid range or alternatively just accept every peak while not setting the goniometer "
+      "(Q-lab will be incorrect).");
   setPropertySettings("CalculateWavelength", std::make_unique<EnabledWhenProperty>("OutputType", IS_NOT_DEFAULT));
 
   declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
@@ -171,7 +171,7 @@ void PredictPeaks::exec() {
   Workspace_sptr rawInputWorkspace = getProperty("InputWorkspace");
   m_edge = this->getProperty("EdgePixels");
   m_leanElasticPeak = (getPropertyValue("OutputType") == "LeanElasticPeak");
-  bool leanElasticPeak_calculate_wl = getProperty("CalculateWavelength");
+  bool usingInstrument = !(m_leanElasticPeak && !getProperty("CalculateWavelength"));
 
   ExperimentInfo_sptr inputExperimentInfo = std::dynamic_pointer_cast<ExperimentInfo>(rawInputWorkspace);
 
@@ -242,7 +242,7 @@ void PredictPeaks::exec() {
     gonioVec.emplace_back(DblMatrix(3, 3, true));
   }
 
-  if (!(m_leanElasticPeak && !leanElasticPeak_calculate_wl)) {
+  if (usingInstrument) {
     setInstrumentFromInputWorkspace(inputExperimentInfo);
     setRunNumberFromInputWorkspace(inputExperimentInfo);
     setReferenceFrameAndBeamDirection();
@@ -287,12 +287,12 @@ void PredictPeaks::exec() {
   Progress prog(this, 0.0, 1.0, possibleHKLs.size() * gonioVec.size());
   prog.setNotifyStep(0.01);
 
-  if (!(m_leanElasticPeak && !leanElasticPeak_calculate_wl))
+  if (usingInstrument)
     m_detectorCacheSearch = std::make_unique<DetectorSearcher>(m_inst, m_pw->detectorInfo());
 
-  if (m_leanElasticPeak && !leanElasticPeak_calculate_wl) {
+  if (!usingInstrument) {
     for (auto &possibleHKL : possibleHKLs) {
-      calculateQAndAddToOutputLeanElastic(possibleHKL, ub, gonioVec.front());
+      calculateQAndAddToOutputLeanElastic(possibleHKL, ub);
     }
   } else if (getProperty("CalculateGoniometerForCW")) {
     size_t allowedPeakCount = 0;
@@ -615,16 +615,13 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl, const DblMatrix &ori
  *
  * @param hkl
  * @param UB
- * @param goniometerMatrix
  */
-void PredictPeaks::calculateQAndAddToOutputLeanElastic(const V3D &hkl, const DblMatrix &UB,
-                                                       const DblMatrix &goniometerMatrix) {
+void PredictPeaks::calculateQAndAddToOutputLeanElastic(const V3D &hkl, const DblMatrix &UB) {
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   // This is in inelastic convention: momentum transfer of the LATTICE!
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
   const auto q = UB * hkl * (2.0 * M_PI * m_qConventionFactor);
   auto peak = std::make_unique<LeanElasticPeak>(q);
-  peak->setGoniometerMatrix(goniometerMatrix);
 
   // Save the run number found before.
   peak->setRunNumber(m_runNumber);
