@@ -75,23 +75,13 @@ public:
       const auto &col = name.first;
       const bool ascending = name.second;
       bool lessThan = false;
-      if (col == "BankName") {
-        // If this criterion is equal, move on to the next one
-        const std::string valA = a.getBankName();
-        const std::string valB = b.getBankName();
-        // Move on to lesser criterion if equal
-        if (valA == valB)
-          continue;
-        lessThan = (valA < valB);
-      } else {
-        // General double comparison
-        const double valA = a.getValueByColName(col);
-        const double valB = b.getValueByColName(col);
-        // Move on to lesser criterion if equal
-        if (valA == valB)
-          continue;
-        lessThan = (valA < valB);
-      }
+      // General double comparison
+      const double valA = a.getValueByColName(col);
+      const double valB = b.getValueByColName(col);
+      // Move on to lesser criterion if equal
+      if (valA == valB)
+        continue;
+      lessThan = (valA < valB);
       // Flip the sign of comparison if descending.
       if (ascending)
         return lessThan;

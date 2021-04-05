@@ -86,7 +86,6 @@ public:
   virtual Mantid::Kernel::Matrix<double> getGoniometerMatrix() const = 0;
   virtual void setGoniometerMatrix(const Mantid::Kernel::Matrix<double> &m_GoniometerMatrix) = 0;
 
-  virtual std::string getBankName() const = 0;
   virtual int getRow() const = 0;
   virtual int getCol() const = 0;
 

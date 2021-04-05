@@ -60,7 +60,6 @@ void export_IPeak() {
       .def("getRunNumber", &IPeak::getRunNumber, arg("self"), "Return the run number this peak was measured at")
       .def("getIntMNP", &IPeak::getIntMNP, arg("self"), "Return the modulated scructure for this peak")
       .def("getPeakNumber", &IPeak::getPeakNumber, arg("self"), "Return the peak number for this peak")
-      .def("getBankName", &IPeak::getBankName, arg("self"), "Return the bank name for this peak")
       .def("setRunNumber", &IPeak::setRunNumber, (arg("self"), arg("run_number")),
            "Set the run number that measured this peak")
       .def("setIntMNP", &IPeak::setIntMNP, (arg("self"), arg("modulated_structure")),

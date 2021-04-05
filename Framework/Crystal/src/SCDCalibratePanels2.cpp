@@ -554,9 +554,12 @@ IPeaksWorkspace_sptr SCDCalibratePanels2::removeUnindexedPeaks(Mantid::API::IPea
  * @param pws
  */
 void SCDCalibratePanels2::getBankNames(IPeaksWorkspace_sptr pws) {
+  auto peaksWorkspace = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(pws);
+  if (!peaksWorkspace)
+    throw std::invalid_argument("a PeaksWorkspace is required to retrieve bank names");
   int npeaks = static_cast<int>(pws->getNumberPeaks());
   for (int i = 0; i < npeaks; ++i) {
-    std::string bname = pws->getPeak(i).getBankName();
+    std::string bname = peaksWorkspace->getPeak(i).getBankName();
     if (bname != "None")
       m_BankNames.insert(bname);
   }
