@@ -75,8 +75,9 @@ class HFIRCalculateGoniometerTest(unittest.TestCase):
         peaks = CreatePeaksWorkspace(OutputType="LeanElasticPeak", NumberOfPeaks=0)
 
         p = peaks.createPeakQSample(q_sample)
-        p.setGoniometerMatrix(np.dot(R2, R3)) # don't set omega
         peaks.addPeak(p)
+
+        SetGoniometer(Workspace=peaks, Axis0='-3,0,0,1,-1', Axis1='23,0,1,0,-1') # don't set omega
 
         HFIRCalculateGoniometer(peaks, wl)
 
@@ -117,7 +118,7 @@ class HFIRCalculateGoniometerTest(unittest.TestCase):
 
         peaks = CreatePeaksWorkspace(OutputType="LeanElasticPeak", NumberOfPeaks=0)
         AddSampleLog(peaks, "Wavelength", str(wl), "Number")
-        SetGoniometer(peaks, Axis0='42,0,1,0,-1', Axis1='-3,0,0,1,-1')
+        SetGoniometer(peaks, Axis0='42,0,1,0,-1', Axis1='-3,0,0,1,-1') # don't set phi
 
         p = peaks.createPeakQSample(q_sample)
         peaks.addPeak(p)
