@@ -415,6 +415,15 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             api.Load(Filename=samRuns[0], OutputWorkspace=absName, MetaDataOnly=True)
             self._info = self._getinfo(absName)
             metaws = absName
+            if self._sampleFormula == '' and "SampleFormula" in mtd[metaws].run():
+                # Do a quick check to see if the sample formula in the logs is correct
+                try:
+                    MaterialBuilder().setFormula(mtd[metaws].run()["SampleFormula"].lastValue().strip())
+                except ValueError:
+                    self.log().warning(
+                        "Sample formula '{}' found in sample logs does not have a valid format - specify manually in "
+                        "algorithm input.".format(mtd[metaws].run()["SampleFormula"].lastValue().strip()))
+
         # NOTE: inconsistent naming among different methods
         #       -> adding more comments to help clarify
         a_sample, a_container = absorptioncorrutils.calculate_absorption_correction(
