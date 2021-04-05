@@ -153,9 +153,9 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         q_lab = ki - kf  # inelastic convention
         peak = pws.createPeak(q_lab)
         pws.addPeak(peak)
-        row, col = pws.row(0)['Col'], pws.row(0)['Col']
-        self.assertAlmostEqual(row, 4)
-        self.assertAlmostEquals(col, 2)
+        col, row = pws.row(0)['Col'], pws.row(0)['Row']
+        self.assertAlmostEqual(col, 4)
+        self.assertAlmostEquals(row, 2)
 
 
 if __name__ == '__main__':
