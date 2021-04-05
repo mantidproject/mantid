@@ -365,7 +365,8 @@ void PredictPeaks::exec() {
   // adjacent
   std::vector<std::pair<std::string, bool>> criteria;
   criteria.emplace_back("RunNumber", true);
-  criteria.emplace_back("BankName", true);
+  if (!m_leanElasticPeak)
+    criteria.emplace_back("BankName", true);
   m_pw->sort(criteria);
 
   for (int i = 0; i < static_cast<int>(m_pw->getNumberPeaks()); ++i) {
