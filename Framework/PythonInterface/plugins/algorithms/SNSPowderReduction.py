@@ -274,8 +274,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         if self.getProperty("TypeOfCorrection").value != "None":
             if self.getProperty("SampleFormula").value != '':
                 try:
-                    material = MaterialBuilder()
-                    material.setFormula(self.getProperty("SampleFormula").value)
+                    MaterialBuilder().setFormula(self.getProperty("SampleFormula").value)
                 except ValueError as ex:
                     issues['SampleFormula'] = "Invalid SampleFormula: '{}'".format(str(ex))
 
