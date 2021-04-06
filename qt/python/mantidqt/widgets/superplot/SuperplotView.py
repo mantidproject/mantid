@@ -233,6 +233,8 @@ class SuperplotView(QWidget):
         wsItem.takeChildren()
         for num in nums:
             item = SpectrumItem(wsItem, num)
+            item.signals.delClicked.connect(
+                    lambda : self._presenter.onHoldButtonToggled(False))
             item.setText(0, str(num))
 
     def getSpectraList(self, name):
