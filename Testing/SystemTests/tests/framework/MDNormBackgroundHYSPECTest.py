@@ -247,7 +247,10 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
         # Compare workspaces: background normalization workspace
         r89 = CompareMDWorkspaces(Workspace1=benchmark.bkgd_norm, Workspace2='background_normMD', Tolerance=1E-9)
         assert r89.Equals, f'Incompatible background normalization workspaces: {r89.Result}'
-
+        # Compare the cleaned MD
+        r_out = CompareMDWorkspaces(Workspace1=benchmark.cleaned, Workspace2='clean_data', Tolerance=1E-16)
+        if not r_out.Equals:
+            raise ValueError(f'Sample output data does not match: {r_out.Result}')
         print(f'[STATUS REPORT] Task #88 and #89 non-accumulation mode is done... ...')
 
         # Round 2: Test accumulation mode
@@ -338,7 +341,7 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-8
         # FIXME - this is cheating to make #85 and #88 work!
-        test_ws_name = self._old_clean
+        test_ws_name = 'clean_data'
         return test_ws_name, 'MDNormBackgroundHYSPEC.nxs'   # FIXME , 'clean2', 'MDNormBackgroundHYSPEC_10_15.nxs'
 
     @staticmethod

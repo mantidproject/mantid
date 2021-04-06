@@ -504,12 +504,13 @@ void MDNorm::exec() {
 
   // Background
   m_backgroundWS = this->getProperty("BackgroundWorkspace");
+  DataObjects::MDHistoWorkspace_sptr outputBackgroundDataWS(nullptr);
   // Outputs for background related
   if (m_backgroundWS) {
     // auto outputBkgdWS = binBackgroundWS(symmetryOps);
     // TODO/FIXME - Implement binBackgroundWS and replace outputDataWS with
     // outputBkgdDataWS! [Task 88]
-    auto outputBackgroundDataWS = binBackgroundWS(symmetryOps);
+    outputBackgroundDataWS = binBackgroundWS(symmetryOps);
     createBackgroundNormalizationWS(*outputBackgroundDataWS);
     this->setProperty("OutputBackgroundNormalizationWorkspace", m_bkgdNormWS);
     // TODO/FIXME [Task 88] Enable this
@@ -542,12 +543,62 @@ void MDNorm::exec() {
     m_accumulate = true;
   }
 
-  IAlgorithm_sptr divideMD = createChildAlgorithm("DivideMD", 0.99, 1.);
-  divideMD->setProperty("LHSWorkspace", outputDataWS);
-  divideMD->setProperty("RHSWorkspace", m_normWS);
-  divideMD->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
-  divideMD->executeAsChildAlg();
-  API::IMDWorkspace_sptr out = divideMD->getProperty("OutputWorkspace");
+  API::IMDWorkspace_sptr out(nullptr);
+
+  if (m_backgroundWS) {
+    // Normalize binned (BinMD) sample workspace with background
+    IAlgorithm_sptr divideMD = createChildAlgorithm("DivideMD", 0.97, 0.98);
+
+    // Normalize sample
+    divideMD->setProperty("LHSWorkspace", outputDataWS);
+    divideMD->setProperty("RHSWorkspace", m_normWS);
+    divideMD->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
+    divideMD->executeAsChildAlg();
+
+    out = divideMD->getProperty("OutputWorkspace");
+    g_log.notice("[DEBUG] Divide MD1");
+
+    // Normalize background
+    IAlgorithm_sptr divideBkgdMD = createChildAlgorithm("DivideMD", 0.98, 0.99);
+
+    // Normalize sample
+    divideBkgdMD->setProperty("LHSWorkspace", outputBackgroundDataWS);
+    divideBkgdMD->setProperty("RHSWorkspace", m_bkgdNormWS);
+    // const std::string normedBkgdWSName(getProperty("OutputWorkspace") + "_normedBkgd");
+    const std::string normedBkgdWSName("_normedBkgd");
+    const std::string extra(getPropertyValue("OutputWorkspace") + "_normBkgd");
+    g_log.notice() << "[DEBUG] set property OutputWorkspace value to " << normedBkgdWSName << ".  But " << extra
+                   << " does not work\n";
+    divideBkgdMD->setPropertyValue("OutputWorkspace", normedBkgdWSName);
+    divideBkgdMD->executeAsChildAlg();
+
+    // Clean background from sample: outbkgd cannot be specified as 'auto'
+    // otherwise it will fail the build on minusMD->setProperty
+    API::IMDWorkspace_sptr outbkgd = divideBkgdMD->getProperty("OutputWorkspace");
+
+    // Clean workspace
+    IAlgorithm_sptr minusMD = createChildAlgorithm("MinusMD", 0.99, 1.00);
+    // set up
+    minusMD->setProperty("LHSWorkspace", out);
+    minusMD->setProperty("RHSWorkspace", outbkgd);
+    minusMD->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
+    // run and return
+    minusMD->executeAsChildAlg();
+    out = minusMD->getProperty("OutputWorkspace");
+
+  } else {
+    // Normalize binned (BinMD) sample workspace without background
+    IAlgorithm_sptr divideMD = createChildAlgorithm("DivideMD", 0.97, 1.);
+    divideMD->setProperty("LHSWorkspace", outputDataWS);
+    divideMD->setProperty("RHSWorkspace", m_normWS);
+    divideMD->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
+    divideMD->executeAsChildAlg();
+    // API::IMDWorkspace_sptr
+    out = divideMD->getProperty("OutputWorkspace");
+  }
+  //
+
+  // Set output workspace
   this->setProperty("OutputWorkspace", out);
 
   // [DEBUG VZ] Now it is a good place to output some helpful information
