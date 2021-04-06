@@ -1396,8 +1396,7 @@ public:
     alg.setChild(true);
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspaces", "group1, group2, group3"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "group1, group2, group3"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "0.1, 0.1, 2.6"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartOverlaps", "0.8, 1.6"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndOverlaps", "1.1, 1.9"));
@@ -1413,8 +1412,7 @@ public:
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
     // First item in the output group
-    auto stitched =
-        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values

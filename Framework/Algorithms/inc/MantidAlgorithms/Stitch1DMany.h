@@ -37,7 +37,7 @@ public:
   /// Performs the Stitch1DMany algorithm at a specific period
   void doStitch1DMany(const size_t period, const bool useManualScaleFactors, std::string &outName,
                       std::vector<double> &outScaleFactors, const size_t indexOfReference,
-		      const bool storeInADS = true);
+                      const bool storeInADS = true);
 
 private:
   /// Overwrites Algorithm method.
