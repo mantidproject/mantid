@@ -179,7 +179,6 @@ class FullprofFormat(object):
         :param f_handle: handle to the file to write to.
         :param workspace: the PeaksWorkspace to save to file.
         """
-        num_mod_vec = num_modulation_vectors(workspace)
         for i, peak in enumerate(workspace):
             hkl, mnp = get_intHKLM(peak, workspace)
             if mnp:
