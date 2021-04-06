@@ -204,6 +204,8 @@ void ConvertHFIRSCDtoMDE::exec() {
 
   double cop = this->getProperty("ObliquityParallaxCoefficient");
 
+  float coeff = static_cast<float>(cop);
+
   float k = boost::math::float_constants::two_pi / static_cast<float>(wavelength);
   std::vector<Eigen::Vector3f> q_lab_pre;
   q_lab_pre.reserve(azimuthal.size());
@@ -211,7 +213,7 @@ void ConvertHFIRSCDtoMDE::exec() {
     auto twotheta_f = static_cast<float>(twotheta[m]);
     auto azimuthal_f = static_cast<float>(azimuthal[m]);
     q_lab_pre.push_back({-sin(twotheta_f) * cos(azimuthal_f) * k, 
-                         -sin(twotheta_f) * sin(azimuthal_f) * k * cop,
+                         -sin(twotheta_f) * sin(azimuthal_f) * k * coeff,
                          (1.f - cos(twotheta_f)) * k});
   }
   const auto run = inputWS->getExperimentInfo(0)->run();
