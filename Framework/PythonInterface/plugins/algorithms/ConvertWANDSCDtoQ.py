@@ -65,6 +65,8 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                              "format: 'minimum,maximum,number_of_bins'.")
         self.declareProperty('KeepTemporaryWorkspaces', False,
                              "If True the normalization and data workspaces in addition to the normalized data will be outputted")
+        self.declareProperty("ObliquityParallaxCoefficient", 1.0, validator=FloatBoundedValidator(0.0)
+                             "Geometrical correction for shift in vertical beam position due to wide beam'.")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "",
                                                optional=PropertyMode.Mandatory,
                                                direction=Direction.Output),
@@ -252,8 +254,10 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             if inWS.getExperimentInfo(0).getInstrument().getName() == 'HB3A':
                 azim = azim.reshape(512*3, 512).T.flatten()
 
+        cop = self.getProperty('ObliquityParallaxCoefficient').value
+
         qlab = np.vstack((np.sin(polar)*np.cos(azim),
-                          np.sin(polar)*np.sin(azim),
+                          np.sin(polar)*np.sin(azim)*cop,
                           np.cos(polar) - 1)).T * -k # Kf - Ki(0,0,1)
 
         progress.report('Calculating Q volume')
