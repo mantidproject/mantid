@@ -281,7 +281,7 @@ template <class T> void *PeakColumn<T>::void_pointer(size_t index) {
  */
 template <class T> const void *PeakColumn<T>::void_pointer(size_t index) const {
   const T &peak = m_peaks[index];
-  auto fatPeak = dynamic_cast<const DataObjects::Peak &>(peak); // additional methods available in class Peak
+  auto fullPeak = dynamic_cast<const DataObjects::Peak *>(&peak); // additional methods available in class Peak
 
   // The cell() api requires that the value exist somewhere in memory, however,
   // some of the values from a Peak are calculated on the fly so a reference
@@ -303,11 +303,11 @@ template <class T> const void *PeakColumn<T>::void_pointer(size_t index) const {
   } else if (m_name == "PeakNumber") {
     value = peak.getPeakNumber();
     return boost::get<int>(&value);
-  } else if (m_name == "DetID") {
-    value = fatPeak.getDetectorID();
+  } else if (m_name == "DetID" && fullPeak) {
+    value = fullPeak->getDetectorID();
     return boost::get<int>(&value);
-  } else if (m_name == "BankName") {
-    value = fatPeak.getBankName();
+  } else if (m_name == "BankName" && fullPeak) {
+    value = fullPeak->getBankName();
     return boost::get<std::string>(&value);
   } else if (m_name == "QLab") {
     value = peak.getQLabFrame();
