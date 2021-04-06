@@ -25,16 +25,13 @@ using namespace API;
 DECLARE_FUNCTION(EndErfc)
 
 void EndErfc::init() {
-  declareParameter(
-      "A", 2000.0,
-      "Half value at minus infinity minus half value at plus infinity");
+  declareParameter("A", 2000.0, "Half value at minus infinity minus half value at plus infinity");
   declareParameter("B", 50.0, "Mid x value");
   declareParameter("C", 6.0, "Width parameter");
   declareParameter("D", 0.0, "Minimum value - must not be negative");
 }
 
-void EndErfc::function1D(double *out, const double *xValues,
-                         const size_t nData) const {
+void EndErfc::function1D(double *out, const double *xValues, const size_t nData) const {
   const double gA = getParameter("A");
   const double gB = getParameter("B");
   const double gC = getParameter("C");

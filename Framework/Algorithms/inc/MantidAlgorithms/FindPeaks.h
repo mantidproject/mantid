@@ -56,19 +56,13 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "FindPeaks"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Searches for peaks in a dataset.";
-  }
+  const std::string summary() const override { return "Searches for peaks in a dataset."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"MatchPeaks", "FindPeaksMD", "GeneratePeaks"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"MatchPeaks", "FindPeaksMD", "GeneratePeaks"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Optimization\\PeakFinding";
-  }
+  const std::string category() const override { return "Optimization\\PeakFinding"; }
   /// needed by FindPeaksBackground
   int getIndex(const HistogramData::HistogramX &vecX, double x);
 
@@ -83,53 +77,39 @@ private:
   void findPeaksUsingMariscotti();
 
   /// Find peaks according to given peak positions
-  void findPeaksGivenStartingPoints(const std::vector<double> &peakcentres,
-                                    const std::vector<double> &fitwindows);
+  void findPeaksGivenStartingPoints(const std::vector<double> &peakcentres, const std::vector<double> &fitwindows);
 
   /// Methods searving for findPeaksUsingMariscotti()
-  std::vector<HistogramData::Histogram>
-  calculateSecondDifference(const API::MatrixWorkspace_const_sptr &input);
-  void smoothData(std::vector<HistogramData::Histogram> &histograms,
-                  const int w, const int g_z);
-  void
-  calculateStandardDeviation(const API::MatrixWorkspace_const_sptr &input,
-                             std::vector<HistogramData::Histogram> &smoothed,
-                             const int &w);
+  std::vector<HistogramData::Histogram> calculateSecondDifference(const API::MatrixWorkspace_const_sptr &input);
+  void smoothData(std::vector<HistogramData::Histogram> &histograms, const int w, const int g_z);
+  void calculateStandardDeviation(const API::MatrixWorkspace_const_sptr &input,
+                                  std::vector<HistogramData::Histogram> &smoothed, const int &w);
   long long computePhi(const int &w) const;
 
   /// Fit peak confined in a given window (x-min, x-max)
-  void fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
-                       const int spectrum, const double centre_guess,
+  void fitPeakInWindow(const API::MatrixWorkspace_sptr &input, const int spectrum, const double centre_guess,
                        const double xmin, const double xmax);
 
   /// Fit peak by given/guessed FWHM
-  void fitPeakGivenFWHM(const API::MatrixWorkspace_sptr &input,
-                        const int spectrum, const double center_guess,
-                        const int fitWidth, const bool hasleftpeak,
-                        const double leftpeakcentre, const bool hasrightpeak,
-                        const double rightpeakcentre);
+  void fitPeakGivenFWHM(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess,
+                        const int fitWidth, const bool hasleftpeak, const double leftpeakcentre,
+                        const bool hasrightpeak, const double rightpeakcentre);
 
   /// Fit peak: this is a basic peak fit function as a root function for all
   /// different type of user input
-  void fitSinglePeak(const API::MatrixWorkspace_sptr &input, const int spectrum,
-                     const int i_min, const int i_max, const int i_centre);
+  void fitSinglePeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min, const int i_max,
+                     const int i_centre);
 
-  void fitPeakHighBackground(const API::MatrixWorkspace_sptr &input,
-                             const size_t spectrum, int i_centre, int i_min,
-                             int i_max, double &in_bg0, double &in_bg1,
-                             double &in_bg2, int i_peakmin, int i_peakmax);
+  void fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const size_t spectrum, int i_centre, int i_min,
+                             int i_max, double &in_bg0, double &in_bg1, double &in_bg2, int i_peakmin, int i_peakmax);
 
-  void fitPeakOneStep(const API::MatrixWorkspace_sptr &input,
-                      const int spectrum, const int &i0, const int &i2,
-                      const int &i4, const double &in_bg0, const double &in_bg1,
-                      const double &in_bg2);
+  void fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int spectrum, const int &i0, const int &i2,
+                      const int &i4, const double &in_bg0, const double &in_bg1, const double &in_bg2);
 
   /// Add a new row in output TableWorkspace containing information of the
   /// fitted peak+background
-  void addInfoRow(const size_t spectrum,
-                  const API::IPeakFunction_const_sptr &peakfunction,
-                  const API::IBackgroundFunction_sptr &bkgdfunction,
-                  const bool isoutputraw, const double mincost);
+  void addInfoRow(const size_t spectrum, const API::IPeakFunction_const_sptr &peakfunction,
+                  const API::IBackgroundFunction_sptr &bkgdfunction, const bool isoutputraw, const double mincost);
 
   /// Add the fit record (failure) to output workspace
   void addNonFitRecord(const size_t spectrum, const double centre);
@@ -138,29 +118,22 @@ private:
   void createFunctions();
 
   /// Find peak background
-  int findPeakBackground(const API::MatrixWorkspace_sptr &input, int spectrum,
-                         size_t i_min, size_t i_max,
-                         std::vector<double> &vecBkgdParamValues,
-                         std::vector<double> &vecpeakrange);
+  int findPeakBackground(const API::MatrixWorkspace_sptr &input, int spectrum, size_t i_min, size_t i_max,
+                         std::vector<double> &vecBkgdParamValues, std::vector<double> &vecpeakrange);
 
   /// Estimate background of a given range
-  void estimateBackground(const HistogramData::HistogramX &X,
-                          const HistogramData::HistogramY &Y,
-                          const size_t i_min, const size_t i_max,
-                          std::vector<double> &vecbkgdparvalues);
+  void estimateBackground(const HistogramData::HistogramX &X, const HistogramData::HistogramY &Y, const size_t i_min,
+                          const size_t i_max, std::vector<double> &vecbkgdparvalues);
 
   /// Estimate peak range based on background peak parameter
-  void estimatePeakRange(const HistogramData::HistogramX &vecX, size_t i_centre,
-                         size_t i_min, size_t i_max, const double &leftfwhm,
-                         const double &rightfwhm,
-                         std::vector<double> &vecpeakrange);
+  void estimatePeakRange(const HistogramData::HistogramX &vecX, size_t i_centre, size_t i_min, size_t i_max,
+                         const double &leftfwhm, const double &rightfwhm, std::vector<double> &vecpeakrange);
 
   /// Estimate peak parameters
-  std::string estimatePeakParameters(
-      const HistogramData::HistogramX &vecX,
-      const HistogramData::HistogramY &vecY, size_t i_min, size_t i_max,
-      const std::vector<double> &vecbkgdparvalues, size_t &iobscentre,
-      double &height, double &fwhm, double &leftfwhm, double &rightfwhm);
+  std::string estimatePeakParameters(const HistogramData::HistogramX &vecX, const HistogramData::HistogramY &vecY,
+                                     size_t i_min, size_t i_max, const std::vector<double> &vecbkgdparvalues,
+                                     size_t &iobscentre, double &height, double &fwhm, double &leftfwhm,
+                                     double &rightfwhm);
 
   /// Generate a table workspace for output peak parameters
   void generateOutputPeakParameterTable();
@@ -169,12 +142,9 @@ private:
   std::vector<double> getStartingBkgdValues();
 
   /// Fit peak by calling 'FitPeak'
-  double callFitPeak(const API::MatrixWorkspace_sptr &dataws, int wsindex,
-                     const API::IPeakFunction_sptr &peakfunction,
-                     const API::IBackgroundFunction_sptr &backgroundfunction,
-                     const std::vector<double> &vec_fitwindow,
-                     const std::vector<double> &vec_peakrange, int minGuessFWHM,
-                     int maxGuessFWHM, int guessedFWHMStep,
+  double callFitPeak(const API::MatrixWorkspace_sptr &dataws, int wsindex, const API::IPeakFunction_sptr &peakfunction,
+                     const API::IBackgroundFunction_sptr &backgroundfunction, const std::vector<double> &vec_fitwindow,
+                     const std::vector<double> &vec_peakrange, int minGuessFWHM, int maxGuessFWHM, int guessedFWHMStep,
                      int estBackResult = 0);
 
   std::vector<std::string> m_peakParameterNames;
@@ -195,12 +165,11 @@ private:
   int m_inputPeakFWHM;                   ///< holder for the requested peak FWHM
   Indexing::SpectrumIndexSet m_indexSet; ///< list of workspace indicies to
                                          ///< check
-  bool m_highBackground; ///< flag for find relatively weak peak in high
+  bool m_highBackground;                 ///< flag for find relatively weak peak in high
   /// background
   bool m_rawPeaksTable; ///< flag for whether the output is the raw peak
   /// parameters or effective (centre, width, height)
-  std::size_t
-      m_numTableParams; //<Number of parameters in the output table workspace
+  std::size_t m_numTableParams; //<Number of parameters in the output table workspace
   std::size_t m_centreIndex;    //< Column in output table of peak centre
   std::string m_peakFuncType;   //< The name of the peak function to fit
   std::string m_backgroundType; //< The type of background to fit

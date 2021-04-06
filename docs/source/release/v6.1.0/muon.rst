@@ -54,6 +54,7 @@ Bug fixes
 Algorithms
 ----------
 - Added the ability to specify the spectrum number in :ref:`FindPeaksAutomatic <algm-FindPeaksAutomatic>`.
+- Added :ref:`PeakMatching <algm-PeakMatching>` algorithm.
 
 Fit Functions
 -------------

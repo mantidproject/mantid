@@ -205,8 +205,7 @@ public:
   @retval 0 :: All passed
   */
   {
-    std::vector<std::string> SphStr{
-        "so 1", "s 1.5 -2.5 1.8 1"}; // sphere origin, sphere
+    std::vector<std::string> SphStr{"so 1", "s 1.5 -2.5 1.8 1"}; // sphere origin, sphere
     Kernel::V3D P(3, 7, 4);
     Kernel::V3D Q(0, 0, 4);
     std::vector<std::string>::const_iterator vc;
@@ -221,11 +220,9 @@ public:
         std::cout << "Sphere == ";
         A.Surface::write(std::cout);
         std::cout << "TestPoint == " << P << '\n';
-        std::cout << "Distance == " << A.distance(P) << " === " << A.distance(P)
-                  << '\n';
+        std::cout << "Distance == " << A.distance(P) << " === " << A.distance(P) << '\n';
         std::cout << "--------------\n";
-        std::cout << "Distance == " << A.distance(Q) << " === " << A.distance(Q)
-                  << '\n';
+        std::cout << "Distance == " << A.distance(Q) << " === " << A.distance(Q) << '\n';
       }
     }
   }

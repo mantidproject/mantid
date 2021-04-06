@@ -36,8 +36,7 @@ CICatHelper::CICatHelper() : m_session() {}
  * @param request :: request object
  * @param response :: response object
  */
-int CICatHelper::doSearch(ICATPortBindingProxy &icat,
-                          std::shared_ptr<ns1__searchByAdvanced> &request,
+int CICatHelper::doSearch(ICATPortBindingProxy &icat, std::shared_ptr<ns1__searchByAdvanced> &request,
                           ns1__searchByAdvancedResponse &response) {
   setICATProxySettings(icat);
 
@@ -49,8 +48,7 @@ int CICatHelper::doSearch(ICATPortBindingProxy &icat,
   }
   clock_t end = clock();
   float diff = float(end - start) / CLOCKS_PER_SEC;
-  g_log.information() << " Time taken to do  search is " << diff
-                      << "  seconds \n";
+  g_log.information() << " Time taken to do  search is " << diff << "  seconds \n";
   return ret_advsearch;
 }
 
@@ -59,9 +57,8 @@ int CICatHelper::doSearch(ICATPortBindingProxy &icat,
  *  @param response :: const reference to response object
  *  @param outputws :: shared pointer to output workspace
  */
-void CICatHelper::saveSearchRessults(
-    const ns1__searchByAdvancedPaginationResponse &response,
-    API::ITableWorkspace_sptr &outputws) {
+void CICatHelper::saveSearchRessults(const ns1__searchByAdvancedPaginationResponse &response,
+                                     API::ITableWorkspace_sptr &outputws) {
   if (outputws->getColumnNames().empty()) {
     outputws->addColumn("str", "Investigation id");
     outputws->addColumn("str", "Facility");
@@ -79,9 +76,8 @@ void CICatHelper::saveSearchRessults(
  *  @param investigations :: a vector containing investigation data
  *  @param outputws :: shared pointer to output workspace
  */
-void CICatHelper::saveInvestigations(
-    const std::vector<ns1__investigation *> &investigations,
-    API::ITableWorkspace_sptr &outputws) {
+void CICatHelper::saveInvestigations(const std::vector<ns1__investigation *> &investigations,
+                                     API::ITableWorkspace_sptr &outputws) {
   try {
     std::vector<ns1__investigation *>::const_iterator citr;
     for (citr = investigations.begin(); citr != investigations.end(); ++citr) {
@@ -105,8 +101,7 @@ void CICatHelper::saveInvestigations(
       savetoTableWorkspace(&sessionID, t);
     }
   } catch (std::runtime_error &) {
-    throw std::runtime_error(
-        "Error when saving  the ICat Search Results data to Workspace");
+    throw std::runtime_error("Error when saving  the ICat Search Results data to Workspace");
   }
 }
 
@@ -118,8 +113,7 @@ void CICatHelper::saveInvestigations(
  * @param responsews_sptr :: table workspace to save the response data
  * @returns zero if success otherwise error code
  */
-void CICatHelper::getDataFiles(long long invstId,
-                               ns1__investigationInclude include,
+void CICatHelper::getDataFiles(long long invstId, ns1__investigationInclude include,
                                API::ITableWorkspace_sptr &responsews_sptr) {
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
@@ -147,9 +141,8 @@ void CICatHelper::getDataFiles(long long invstId,
  * @param response :: const reference to response object
  * @param outputws :: shared pointer to table workspace which stores the data
  */
-void CICatHelper::saveInvestigationIncludesResponse(
-    const ns1__getInvestigationIncludesResponse &response,
-    API::ITableWorkspace_sptr &outputws) {
+void CICatHelper::saveInvestigationIncludesResponse(const ns1__getInvestigationIncludesResponse &response,
+                                                    API::ITableWorkspace_sptr &outputws) {
   if (outputws->getColumnNames().empty()) {
     outputws->addColumn("str", "Name");
     outputws->addColumn("str", "Location");
@@ -162,26 +155,22 @@ void CICatHelper::saveInvestigationIncludesResponse(
 
   try {
     std::vector<ns1__dataset *> datasetVec;
-    datasetVec.assign((response.return_)->datasetCollection.begin(),
-                      (response.return_)->datasetCollection.end());
+    datasetVec.assign((response.return_)->datasetCollection.begin(), (response.return_)->datasetCollection.end());
     if (datasetVec.empty()) {
       throw std::runtime_error("No data files exists in the ICAT database for "
                                "the selected investigation");
     }
     std::vector<ns1__dataset *>::const_iterator dataset_citr;
-    for (dataset_citr = datasetVec.begin(); dataset_citr != datasetVec.end();
-         ++dataset_citr) {
+    for (dataset_citr = datasetVec.begin(); dataset_citr != datasetVec.end(); ++dataset_citr) {
       std::vector<ns1__datafile *> datafileVec;
-      datafileVec.assign((*dataset_citr)->datafileCollection.begin(),
-                         (*dataset_citr)->datafileCollection.end());
+      datafileVec.assign((*dataset_citr)->datafileCollection.begin(), (*dataset_citr)->datafileCollection.end());
       if (datafileVec.empty()) {
         throw std::runtime_error("No data files exists in the ICAT database "
                                  "for the selected  investigation ");
       }
 
       std::vector<ns1__datafile *>::const_iterator datafile_citr;
-      for (datafile_citr = datafileVec.begin();
-           datafile_citr != datafileVec.end(); ++datafile_citr) {
+      for (datafile_citr = datafileVec.begin(); datafile_citr != datafileVec.end(); ++datafile_citr) {
 
         API::TableRow t = outputws->appendRow();
 
@@ -195,16 +184,14 @@ void CICatHelper::saveInvestigationIncludesResponse(
           std::string creationTime;
           creationTime.resize(format.size());
           const time_t crtime = *(*datafile_citr)->datafileCreateTime;
-          strftime(const_cast<char *>(creationTime.data()), creationTime.size(),
-                   format.data(), localtime(&crtime));
+          strftime(const_cast<char *>(creationTime.data()), creationTime.size(), format.data(), localtime(&crtime));
           savetoTableWorkspace(creationTime.data(), t);
         }
 
         //
         savetoTableWorkspace((*datafile_citr)->id, t);
 
-        auto fileSize =
-            boost::lexical_cast<LONG64>(*(*datafile_citr)->fileSize);
+        auto fileSize = boost::lexical_cast<LONG64>(*(*datafile_citr)->fileSize);
         savetoTableWorkspace(&fileSize, t);
 
         savetoTableWorkspace((*datafile_citr)->description, t);
@@ -224,8 +211,7 @@ void CICatHelper::saveInvestigationIncludesResponse(
  * @param responsews_sptr :: table workspace to save the response data
  * @returns an integer zero if success if not an error number.
  */
-void CICatHelper::doDataSetsSearch(long long invstId,
-                                   ns1__investigationInclude include,
+void CICatHelper::doDataSetsSearch(long long invstId, ns1__investigationInclude include,
                                    API::ITableWorkspace_sptr &responsews_sptr) {
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
@@ -253,9 +239,8 @@ void CICatHelper::doDataSetsSearch(long long invstId,
  * @param outputws ::  shred pointer to workspace
  * @returns shared pointer to table workspace which stores the data
  */
-void CICatHelper::saveDataSets(
-    const ns1__getInvestigationIncludesResponse &response,
-    API::ITableWorkspace_sptr &outputws) {
+void CICatHelper::saveDataSets(const ns1__getInvestigationIncludesResponse &response,
+                               API::ITableWorkspace_sptr &outputws) {
   // create table workspace
   if (outputws->getColumnNames().empty()) {
     outputws->addColumn("str", "Name"); // File name
@@ -267,12 +252,10 @@ void CICatHelper::saveDataSets(
   try {
 
     std::vector<ns1__dataset *> datasetVec;
-    datasetVec.assign((response.return_)->datasetCollection.begin(),
-                      (response.return_)->datasetCollection.end());
+    datasetVec.assign((response.return_)->datasetCollection.begin(), (response.return_)->datasetCollection.end());
 
     std::vector<ns1__dataset *>::const_iterator dataset_citr;
-    for (dataset_citr = datasetVec.begin(); dataset_citr != datasetVec.end();
-         ++dataset_citr) {
+    for (dataset_citr = datasetVec.begin(); dataset_citr != datasetVec.end(); ++dataset_citr) {
       API::TableRow t = outputws->appendRow();
 
       // DataSet Name
@@ -313,8 +296,7 @@ void CICatHelper::listInstruments(std::vector<std::string> &instruments) {
 
   if (result == 0) {
     instruments.reserve(instruments.size() + response.return_.size());
-    std::move(response.return_.begin(), response.return_.end(),
-              std::back_inserter(instruments));
+    std::move(response.return_.begin(), response.return_.end(), std::back_inserter(instruments));
   } else {
     CErrorHandling::throwErrorMessages(icat);
   }
@@ -324,8 +306,7 @@ void CICatHelper::listInstruments(std::vector<std::string> &instruments) {
  * Updates the list of investigation types.
  * @param investTypes :: The list of investigation types.
  */
-void CICatHelper::listInvestigationTypes(
-    std::vector<std::string> &investTypes) {
+void CICatHelper::listInvestigationTypes(std::vector<std::string> &investTypes) {
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
 
@@ -339,8 +320,7 @@ void CICatHelper::listInvestigationTypes(
 
   if (result == 0) {
     investTypes.reserve(investTypes.size() + response.return_.size());
-    std::move(response.return_.begin(), response.return_.end(),
-              std::back_inserter(investTypes));
+    std::move(response.return_.begin(), response.return_.end(), std::back_inserter(investTypes));
   } else {
     CErrorHandling::throwErrorMessages(icat);
   }
@@ -360,8 +340,7 @@ int CICatHelper::doLogout() {
   request.sessionId = &sessionID;
   int ret = icat.logout(&request, &response);
   if (ret != 0) {
-    throw std::runtime_error(
-        "You are not currently logged into the cataloging system.");
+    throw std::runtime_error("You are not currently logged into the cataloging system.");
   }
   m_session->setSessionId("");
   return ret;
@@ -382,19 +361,16 @@ void CICatHelper::doMyDataSearch(API::ITableWorkspace_sptr &ws_sptr) {
   std::string sessionID = m_session->getSessionId();
   request.sessionId = &sessionID;
   // investigation include
-  std::shared_ptr<ns1__investigationInclude> invstInculde_sptr =
-      std::make_shared<ns1__investigationInclude>();
+  std::shared_ptr<ns1__investigationInclude> invstInculde_sptr = std::make_shared<ns1__investigationInclude>();
   request.investigationInclude = invstInculde_sptr.get();
-  *request.investigationInclude =
-      ns1__investigationInclude__INVESTIGATORS_USCORESHIFTS_USCOREAND_USCORESAMPLES;
+  *request.investigationInclude = ns1__investigationInclude__INVESTIGATORS_USCORESHIFTS_USCOREAND_USCORESAMPLES;
 
   int ret = icat.getMyInvestigationsIncludes(&request, &response);
   if (ret != 0) {
     CErrorHandling::throwErrorMessages(icat);
   }
   if (response.return_.empty()) {
-    g_log.information()
-        << "ICat Mydata search is complete.There are no results to display\n";
+    g_log.information() << "ICat Mydata search is complete.There are no results to display\n";
     return;
   }
   // save response to a table workspace
@@ -407,9 +383,8 @@ void CICatHelper::doMyDataSearch(API::ITableWorkspace_sptr &ws_sptr) {
  * @param outputws :: shared pointer to table workspace which stores the
  * investigations search result
  */
-void CICatHelper::saveMyInvestigations(
-    const ns1__getMyInvestigationsIncludesResponse &response,
-    API::ITableWorkspace_sptr &outputws) {
+void CICatHelper::saveMyInvestigations(const ns1__getMyInvestigationsIncludesResponse &response,
+                                       API::ITableWorkspace_sptr &outputws) {
   if (outputws->getColumnNames().empty()) {
     outputws->addColumn("str", "Investigation id");
     outputws->addColumn("str", "Facility");
@@ -430,8 +405,7 @@ void CICatHelper::saveMyInvestigations(
  * point.
  * @param limit    :: limit the number of rows returned by the query.
  */
-void CICatHelper::doAdvancedSearch(const CatalogSearchParam &inputs,
-                                   API::ITableWorkspace_sptr &outputws,
+void CICatHelper::doAdvancedSearch(const CatalogSearchParam &inputs, API::ITableWorkspace_sptr &outputws,
                                    const int &offset, const int &limit) {
   // Show "my data" (without paging).
   if (inputs.getMyData()) {
@@ -478,14 +452,12 @@ void CICatHelper::doAdvancedSearch(const CatalogSearchParam &inputs,
  * Return A populated searchDetails class used for performing a query against
  * ICAT.
  */
-ICat3::ns1__advancedSearchDetails *
-CICatHelper::buildSearchQuery(const CatalogSearchParam &inputs) {
+ICat3::ns1__advancedSearchDetails *CICatHelper::buildSearchQuery(const CatalogSearchParam &inputs) {
   // As this is a member variable we need to reset the search terms once
   // a new search is performed.
   auto advancedSearchDetails = new ICat3::ns1__advancedSearchDetails;
 
-  ns1__investigationInclude invesInclude =
-      ns1__investigationInclude__INVESTIGATORS_USCOREAND_USCOREKEYWORDS;
+  ns1__investigationInclude invesInclude = ns1__investigationInclude__INVESTIGATORS_USCOREAND_USCOREKEYWORDS;
   advancedSearchDetails->investigationInclude = &invesInclude;
 
   double runStart, runEnd;
@@ -552,8 +524,7 @@ CICatHelper::buildSearchQuery(const CatalogSearchParam &inputs) {
 
   // investigator's surname
   if (!inputs.getInvestigatorSurName().empty()) {
-    advancedSearchDetails->investigators.emplace_back(
-        inputs.getInvestigatorSurName());
+    advancedSearchDetails->investigators.emplace_back(inputs.getInvestigatorSurName());
   }
 
   return advancedSearchDetails;
@@ -564,8 +535,7 @@ CICatHelper::buildSearchQuery(const CatalogSearchParam &inputs) {
  * paging.
  * @return The number of investigations returned by the search performed.
  */
-int64_t
-CICatHelper::getNumberOfSearchResults(const CatalogSearchParam &inputs) {
+int64_t CICatHelper::getNumberOfSearchResults(const CatalogSearchParam &inputs) {
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
 
@@ -600,10 +570,8 @@ CICatHelper::getNumberOfSearchResults(const CatalogSearchParam &inputs) {
  * @param endpoint :: The endpoint url of the catalog to log in to.
  * @param facility :: The facility of the catalog to log in to.
  */
-API::CatalogSession_sptr CICatHelper::doLogin(const std::string &username,
-                                              const std::string &password,
-                                              const std::string &endpoint,
-                                              const std::string &facility) {
+API::CatalogSession_sptr CICatHelper::doLogin(const std::string &username, const std::string &password,
+                                              const std::string &endpoint, const std::string &facility) {
   m_session = std::make_shared<API::CatalogSession>("", facility, endpoint);
 
   // Obtain the ICAT proxy that has been securely set, including soap-endpoint.
@@ -695,16 +663,15 @@ void CICatHelper::setICATProxySettings(ICat3::ICATPortBindingProxy &icat) {
  * @param icat :: ICATPortBindingProxy object.
  */
 void CICatHelper::setSSLContext(ICat3::ICATPortBindingProxy &icat) {
-  if (soap_ssl_client_context(
-          &icat, SOAP_SSL_CLIENT, /* use SOAP_SSL_DEFAULT in production code */
-          nullptr, /* keyfile: required only when client must authenticate to
-                server (see SSL docs on how to obtain this file) */
-          nullptr, /* password to read the keyfile */
-          nullptr, /* optional cacert file to store trusted certificates */
-          nullptr, /* optional capath to directory with trusted certificates */
-          nullptr  /* if randfile!=NULL: use a file with random data to seed
-                   randomness */
-          )) {
+  if (soap_ssl_client_context(&icat, SOAP_SSL_CLIENT, /* use SOAP_SSL_DEFAULT in production code */
+                              nullptr,                /* keyfile: required only when client must authenticate to
+                                                   server (see SSL docs on how to obtain this file) */
+                              nullptr,                /* password to read the keyfile */
+                              nullptr,                /* optional cacert file to store trusted certificates */
+                              nullptr,                /* optional capath to directory with trusted certificates */
+                              nullptr                 /* if randfile!=NULL: use a file with random data to seed
+                                                      randomness */
+                              )) {
     CErrorHandling::throwErrorMessages(icat);
   }
 }

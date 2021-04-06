@@ -41,8 +41,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 
-using file_holder_type =
-    std::unique_ptr<Mantid::DataObjects::BoxControllerNeXusIO>;
+using file_holder_type = std::unique_ptr<Mantid::DataObjects::BoxControllerNeXusIO>;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -53,9 +52,8 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMD)
 /** Constructor
  */
 LoadMD::LoadMD()
-    : m_numDims(0), // uninitialized incorrect value
-      m_coordSystem(None),
-      m_BoxStructureAndMethadata(true), // this is faster but rarely needed.
+    : m_numDims(0),                                          // uninitialized incorrect value
+      m_coordSystem(None), m_BoxStructureAndMethadata(true), // this is faster but rarely needed.
       m_saveMDVersion(false), m_requiresMDFrameCorrection(false) {}
 
 /**
@@ -69,8 +67,7 @@ int LoadMD::confidence(Kernel::NexusDescriptor &descriptor) const {
   const auto &rootPathNameType = descriptor.firstEntryNameType();
   if (rootPathNameType.second != "NXentry")
     return 0;
-  if (descriptor.pathExists("/MDEventWorkspace") ||
-      descriptor.pathExists("/MDHistoWorkspace")) {
+  if (descriptor.pathExists("/MDEventWorkspace") || descriptor.pathExists("/MDHistoWorkspace")) {
     return 95;
   } else
     return 0;
@@ -83,41 +80,30 @@ int LoadMD::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadMD::init() {
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load,
-                                     ".nxs"),
-      "The name of the Nexus file to load, as a full or relative path");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
+                  "The name of the Nexus file to load, as a full or relative path");
 
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<bool>>("MetadataOnly", false),
-      "Load Box structure and other metadata without events. The "
-      "loaded workspace will be empty and not file-backed.");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("MetadataOnly", false),
+                  "Load Box structure and other metadata without events. The "
+                  "loaded workspace will be empty and not file-backed.");
 
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<bool>>("BoxStructureOnly",
-                                                        false),
-      "Load partial information about the boxes and events. Redundant property "
-      "currently equivalent to MetadataOnly");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("BoxStructureOnly", false),
+                  "Load partial information about the boxes and events. Redundant property "
+                  "currently equivalent to MetadataOnly");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("FileBackEnd", false),
-      "Set to true to load the data only on demand.");
-  setPropertySettings("FileBackEnd", std::make_unique<EnabledWhenProperty>(
-                                         "MetadataOnly", IS_EQUAL_TO, "0"));
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("FileBackEnd", false),
+                  "Set to true to load the data only on demand.");
+  setPropertySettings("FileBackEnd", std::make_unique<EnabledWhenProperty>("MetadataOnly", IS_EQUAL_TO, "0"));
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("Memory", -1),
-      "For FileBackEnd only: the amount of memory (in MB) to allocate to the "
-      "in-memory cache.\n"
-      "If not specified, a default of 40% of free physical memory is used.");
-  setPropertySettings("Memory", std::make_unique<EnabledWhenProperty>(
-                                    "FileBackEnd", IS_EQUAL_TO, "1"));
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Memory", -1),
+                  "For FileBackEnd only: the amount of memory (in MB) to allocate to the "
+                  "in-memory cache.\n"
+                  "If not specified, a default of 40% of free physical memory is used.");
+  setPropertySettings("Memory", std::make_unique<EnabledWhenProperty>("FileBackEnd", IS_EQUAL_TO, "1"));
 
-  declareProperty("LoadHistory", true,
-                  "If true, the workspace history will be loaded");
+  declareProperty("LoadHistory", true, "If true, the workspace history will be loaded");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
 }
 
@@ -151,8 +137,7 @@ void LoadMD::exec() {
   }
 
   if (!m_file)
-    throw Kernel::Exception::FileError("Can not open file " + for_access,
-                                       m_filename);
+    throw Kernel::Exception::FileError("Can not open file " + for_access, m_filename);
 
   // The main entry
   std::map<std::string, std::string> entries;
@@ -200,8 +185,7 @@ void LoadMD::exec() {
 
   // Display normalization settting
   if (levelEntries.find(VISUAL_NORMALIZATION_KEY) != levelEntries.end()) {
-    this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY,
-                                  m_visualNormalization);
+    this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY, m_visualNormalization);
   }
 
   if (entryName == "MDEventWorkspace") {
@@ -209,17 +193,14 @@ void LoadMD::exec() {
     std::string eventType;
     m_file->getAttr("event_type", eventType);
 
-    if (levelEntries.find(VISUAL_NORMALIZATION_KEY_HISTO) !=
-        levelEntries.end()) {
-      this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY_HISTO,
-                                    m_visualNormalizationHisto);
+    if (levelEntries.find(VISUAL_NORMALIZATION_KEY_HISTO) != levelEntries.end()) {
+      this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY_HISTO, m_visualNormalizationHisto);
     }
 
     // Use the factory to make the workspace of the right type
     IMDEventWorkspace_sptr ws;
     if (m_visualNormalizationHisto && m_visualNormalization) {
-      ws = MDEventFactory::CreateMDWorkspace(m_numDims, eventType,
-                                             m_visualNormalization.get(),
+      ws = MDEventFactory::CreateMDWorkspace(m_numDims, eventType, m_visualNormalization.get(),
                                              m_visualNormalizationHisto.get());
     } else {
       ws = MDEventFactory::CreateMDWorkspace(m_numDims, eventType);
@@ -227,8 +208,7 @@ void LoadMD::exec() {
 
     // Now the ExperimentInfo
     bool lazyLoadExpt = fileBacked;
-    MDBoxFlatTree::loadExperimentInfos(m_file.get(), m_filename, ws,
-                                       lazyLoadExpt);
+    MDBoxFlatTree::loadExperimentInfos(m_file.get(), m_filename, ws, lazyLoadExpt);
 
     // Wrapper to cast to MDEventWorkspace then call the function
     CALL_MDEVENT_FUNCTION(this->doLoad, ws);
@@ -240,20 +220,16 @@ void LoadMD::exec() {
     }
     // Write out the Qconvention
     // ki-kf for Inelastic convention; kf-ki for Crystallography convention
-    std::string pref_QConvention =
-        Kernel::ConfigService::Instance().getString("Q.convention");
-    g_log.information() << "Convention for Q in Preferences is "
-                        << pref_QConvention
-                        << "; Convention of Q in NeXus file is "
-                        << m_QConvention << '\n';
+    std::string pref_QConvention = Kernel::ConfigService::Instance().getString("Q.convention");
+    g_log.information() << "Convention for Q in Preferences is " << pref_QConvention
+                        << "; Convention of Q in NeXus file is " << m_QConvention << '\n';
 
     if (pref_QConvention != m_QConvention) {
       std::vector<double> scaling(m_numDims);
       scaling = qDimensions(ws);
       g_log.information() << "Transforming Q\n";
       Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
-      transform_alg->setProperty("InputWorkspace",
-                                 std::dynamic_pointer_cast<IMDWorkspace>(ws));
+      transform_alg->setProperty("InputWorkspace", std::dynamic_pointer_cast<IMDWorkspace>(ws));
       transform_alg->setProperty("Scaling", scaling);
       transform_alg->executeAsChildAlg();
       IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
@@ -275,13 +251,10 @@ void LoadMD::exec() {
  * @param ws
  * @param dataType
  */
-void LoadMD::loadSlab(const std::string &name, void *data,
-                      const MDHistoWorkspace_sptr &ws,
-                      NeXus::NXnumtype dataType) {
+void LoadMD::loadSlab(const std::string &name, void *data, const MDHistoWorkspace_sptr &ws, NeXus::NXnumtype dataType) {
   m_file->openData(name);
   if (m_file->getInfo().type != dataType)
-    throw std::runtime_error("Unexpected data type for '" + name +
-                             "' data set.'");
+    throw std::runtime_error("Unexpected data type for '" + name + "' data set.'");
 
   int nPoints = 1;
   size_t numDims = m_file->getInfo().dims.size();
@@ -291,9 +264,8 @@ void LoadMD::loadSlab(const std::string &name, void *data,
     size[d] = static_cast<int>(m_file->getInfo().dims[d]);
   }
   if (nPoints != static_cast<int>(ws->getNPoints()))
-    throw std::runtime_error(
-        "Inconsistency between the number of points in '" + name +
-        "' and the number of bins defined by the dimensions.");
+    throw std::runtime_error("Inconsistency between the number of points in '" + name +
+                             "' and the number of bins defined by the dimensions.");
   std::vector<int> start(numDims, 0);
   try {
     m_file->getSlab(data, start, size);
@@ -312,11 +284,9 @@ void LoadMD::loadHisto() {
   MDHistoWorkspace_sptr ws;
   // If display normalization has been provided. Use that.
   if (m_visualNormalization) {
-    ws =
-        std::make_shared<MDHistoWorkspace>(m_dims, m_visualNormalization.get());
+    ws = std::make_shared<MDHistoWorkspace>(m_dims, m_visualNormalization.get());
   } else {
-    ws = std::make_shared<MDHistoWorkspace>(
-        m_dims); // Whatever MDHistoWorkspace defaults to.
+    ws = std::make_shared<MDHistoWorkspace>(m_dims); // Whatever MDHistoWorkspace defaults to.
   }
 
   // Now the ExperimentInfo
@@ -336,10 +306,8 @@ void LoadMD::loadHisto() {
     m_file->openGroup("data", "NXdata");
   // Load each data slab
   this->loadSlab("signal", ws->mutableSignalArray(), ws, ::NeXus::FLOAT64);
-  this->loadSlab("errors_squared", ws->mutableErrorSquaredArray(), ws,
-                 ::NeXus::FLOAT64);
-  this->loadSlab("num_events", ws->mutableNumEventsArray(), ws,
-                 ::NeXus::FLOAT64);
+  this->loadSlab("errors_squared", ws->mutableErrorSquaredArray(), ws, ::NeXus::FLOAT64);
+  this->loadSlab("num_events", ws->mutableNumEventsArray(), ws, ::NeXus::FLOAT64);
   this->loadSlab("mask", ws->mutableMaskArray(), ws, ::NeXus::INT8);
 
   m_file->close();
@@ -352,20 +320,16 @@ void LoadMD::loadHisto() {
 
   // Write out the Qconvention
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
-  std::string pref_QConvention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
-  g_log.information() << "Convention for Q in Preferences is "
-                      << pref_QConvention
-                      << "; Convention of Q in NeXus file is " << m_QConvention
-                      << '\n';
+  std::string pref_QConvention = Kernel::ConfigService::Instance().getString("Q.convention");
+  g_log.information() << "Convention for Q in Preferences is " << pref_QConvention
+                      << "; Convention of Q in NeXus file is " << m_QConvention << '\n';
 
   if (pref_QConvention != m_QConvention) {
     std::vector<double> scaling(m_numDims);
     scaling = qDimensions(ws);
     g_log.information() << "Transforming Q\n";
     Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
-    transform_alg->setProperty("InputWorkspace",
-                               std::dynamic_pointer_cast<IMDWorkspace>(ws));
+    transform_alg->setProperty("InputWorkspace", std::dynamic_pointer_cast<IMDWorkspace>(ws));
     transform_alg->setProperty("Scaling", scaling);
     transform_alg->executeAsChildAlg();
     IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
@@ -427,28 +391,23 @@ void LoadMD::loadDimensions2() {
       frame = Mantid::Geometry::UnknownFrame::UnknownFrameName;
       m_requiresMDFrameCorrection = true;
     }
-    Geometry::MDFrame_const_uptr mdFrame =
-        Geometry::makeMDFrameFactoryChain()->create(
-            MDFrameArgument(frame, units));
+    Geometry::MDFrame_const_uptr mdFrame = Geometry::makeMDFrameFactoryChain()->create(MDFrameArgument(frame, units));
     m_file->getData(axis);
     m_file->closeData();
-    m_dims.emplace_back(std::make_shared<MDHistoDimension>(
-        long_name, splitAxes[d - 1], *mdFrame,
-        static_cast<coord_t>(axis.front()), static_cast<coord_t>(axis.back()),
-        axis.size() - 1));
+    m_dims.emplace_back(std::make_shared<MDHistoDimension>(long_name, splitAxes[d - 1], *mdFrame,
+                                                           static_cast<coord_t>(axis.front()),
+                                                           static_cast<coord_t>(axis.back()), axis.size() - 1));
   }
   m_file->closeGroup();
   m_numDims = m_dims.size();
 }
 
-void LoadMD::loadVisualNormalization(
-    const std::string &key,
-    boost::optional<Mantid::API::MDNormalization> &normalization) {
+void LoadMD::loadVisualNormalization(const std::string &key,
+                                     boost::optional<Mantid::API::MDNormalization> &normalization) {
   try {
     uint32_t readVisualNormalization(0);
     m_file->readData(key, readVisualNormalization);
-    normalization =
-        static_cast<Mantid::API::MDNormalization>(readVisualNormalization);
+    normalization = static_cast<Mantid::API::MDNormalization>(readVisualNormalization);
   } catch (::NeXus::Exception &) {
 
   } catch (std::exception &) {
@@ -495,8 +454,7 @@ void LoadMD::loadQConvention() {
  *
  * @param             ws :: MDEventWorkspace of the given type
  */
-template <typename MDE, size_t nd>
-void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
+template <typename MDE, size_t nd> void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Are we using the file back end?
   bool fileBackEnd = getProperty("FileBackEnd");
 
@@ -546,15 +504,13 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   prog->report("Restoring box structure and connectivity");
   std::vector<API::IMDNode *> boxTree;
-  FlatBoxTree.restoreBoxTree(boxTree, bc, fileBackEnd,
-                             m_BoxStructureAndMethadata);
+  FlatBoxTree.restoreBoxTree(boxTree, bc, fileBackEnd, m_BoxStructureAndMethadata);
   size_t numBoxes = boxTree.size();
 
   // ---------------------------------------- DEAL WITH BOXES
   // ------------------------------------
   if (fileBackEnd) { // TODO:: call to the file format factory
-    auto loader = std::shared_ptr<DataObjects::BoxControllerNeXusIO>(
-        new DataObjects::BoxControllerNeXusIO(bc.get()));
+    auto loader = std::shared_ptr<DataObjects::BoxControllerNeXusIO>(new DataObjects::BoxControllerNeXusIO(bc.get()));
     loader->setDataType(sizeof(coord_t), MDE::getTypeName());
     bc->setFileBacked(loader, m_filename);
     // boxes have been already made file-backed when restoring the boxTree;
@@ -566,26 +522,22 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       // Defaults have changed, default disk buffer size should be 10 data
       // chunks TODO: find optimal, 100 may be better.
       if (mb <= 0)
-        mb = double(10 * loader->getDataChunk() * sizeof(MDE)) /
-             double(1024 * 1024);
+        mb = double(10 * loader->getDataChunk() * sizeof(MDE)) / double(1024 * 1024);
 
       // Express the cache memory in units of number of events.
-      uint64_t cacheMemory =
-          static_cast<uint64_t>((mb * 1024. * 1024.) / sizeof(MDE)) + 1;
+      uint64_t cacheMemory = static_cast<uint64_t>((mb * 1024. * 1024.) / sizeof(MDE)) + 1;
 
       // Set these values in the diskMRU
       bc->getFileIO()->setWriteBufferSize(cacheMemory);
 
-      g_log.information() << "Setting a DiskBuffer cache size of " << mb
-                          << " MB, or " << cacheMemory << " events.\n";
+      g_log.information() << "Setting a DiskBuffer cache size of " << mb << " MB, or " << cacheMemory << " events.\n";
     }
   } // Not file back end
   else if (!m_BoxStructureAndMethadata) {
     // ---------------------------------------- READ IN THE BOXES
     // ------------------------------------
     // TODO:: call to the file format factory
-    auto loader =
-        file_holder_type(new DataObjects::BoxControllerNeXusIO(bc.get()));
+    auto loader = file_holder_type(new DataObjects::BoxControllerNeXusIO(bc.get()));
     loader->setDataType(sizeof(coord_t), MDE::getTypeName());
     loader->openFile(m_filename, "r");
 
@@ -598,21 +550,17 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       if (!box)
         continue;
 
-      if (BoxEventIndex[2 * i + 1] >
-          0) // Load in memory NOT using the file as the back-end,
+      if (BoxEventIndex[2 * i + 1] > 0) // Load in memory NOT using the file as the back-end,
       {
         boxTree[i]->reserveMemoryForLoad(BoxEventIndex[2 * i + 1]);
-        boxTree[i]->loadAndAddFrom(
-            loader.get(), BoxEventIndex[2 * i],
-            static_cast<size_t>(BoxEventIndex[2 * i + 1]));
+        boxTree[i]->loadAndAddFrom(loader.get(), BoxEventIndex[2 * i], static_cast<size_t>(BoxEventIndex[2 * i + 1]));
       }
     }
     loader->closeFile();
   } else // box structure and metadata only
   {
   }
-  g_log.debug() << tim
-                << " to create all the boxes and fill them with events.\n";
+  g_log.debug() << tim << " to create all the boxes and fill them with events.\n";
 
   // Box of ID 0 is the head box.
   ws->setBox(boxTree[0]);
@@ -623,8 +571,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Refresh cache
   // TODO:if(!fileBackEnd)ws->refreshCache();
   ws->refreshCache();
-  g_log.debug() << tim << " to refreshCache(). " << ws->getNPoints()
-                << " points after refresh.\n";
+  g_log.debug() << tim << " to refreshCache(). " << ws->getNPoints() << " points after refresh.\n";
 
   g_log.debug() << tim << " to finish up.\n";
 }
@@ -676,8 +623,7 @@ CoordTransform *LoadMD::loadAffineMatrix(const std::string &entry_name) {
     affine->setMatrix(mat);
     transform = affine;
   } else {
-    g_log.information("Do not know how to process coordinate transform " +
-                      type);
+    g_log.information("Do not know how to process coordinate transform " + type);
   }
   return transform;
 }
@@ -686,13 +632,11 @@ CoordTransform *LoadMD::loadAffineMatrix(const std::string &entry_name) {
  * Set MDFrames for workspaces from legacy files
  * @param ws:: poitner to the workspace which needs to be corrected
  */
-void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(
-    const API::IMDWorkspace_sptr &ws) {
+void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(const API::IMDWorkspace_sptr &ws) {
 
-  g_log.information()
-      << "LoadMD: Encountered a legacy file which has a mismatch between "
-         "its MDFrames and its Special Coordinate System. "
-         "Attempting to convert MDFrames.\n";
+  g_log.information() << "LoadMD: Encountered a legacy file which has a mismatch between "
+                         "its MDFrames and its Special Coordinate System. "
+                         "Attempting to convert MDFrames.\n";
   auto numberOfDimensions = ws->getNumDims();
 
   // Select an MDFrame based on the special coordinates.
@@ -717,16 +661,14 @@ void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(
   // Get the old frames just in case something goes wrong. In this case we
   // reset the frames.
 
-  std::vector<std::string> oldFrames(
-      numberOfDimensions, Mantid::Geometry::GeneralFrame::GeneralFrameName);
+  std::vector<std::string> oldFrames(numberOfDimensions, Mantid::Geometry::GeneralFrame::GeneralFrameName);
   for (size_t index = 0; index < numberOfDimensions; ++index) {
     oldFrames[index] = ws->getDimension(index)->getMDFrame().name();
   }
 
   // We want to set only up to the first three dimensions to the selected Frame;
   // Everything else will be set to a General Frame
-  std::vector<std::string> framesToSet(
-      numberOfDimensions, Mantid::Geometry::GeneralFrame::GeneralFrameName);
+  std::vector<std::string> framesToSet(numberOfDimensions, Mantid::Geometry::GeneralFrame::GeneralFrameName);
   auto fillUpTo = numberOfDimensions > 3 ? 3 : numberOfDimensions;
   std::fill_n(framesToSet.begin(), fillUpTo, selectedFrame);
 
@@ -772,8 +714,7 @@ void LoadMD::checkForRequiredLegacyFixup(const API::IMDWorkspace_sptr &ws) {
   // Check if all MDFrames are of type Unknown frame
   auto containsOnlyUnkownFrames = true;
   for (size_t index = 0; index < ws->getNumDims(); ++index) {
-    if (ws->getDimension(index)->getMDFrame().name() !=
-        Mantid::Geometry::UnknownFrame::UnknownFrameName) {
+    if (ws->getDimension(index)->getMDFrame().name() != Mantid::Geometry::UnknownFrame::UnknownFrameName) {
       containsOnlyUnkownFrames = false;
       break;
     }
@@ -805,8 +746,7 @@ std::vector<double> LoadMD::qDimensions(const API::IMDWorkspace_sptr &ws) {
   return scaling;
 }
 const std::string LoadMD::VISUAL_NORMALIZATION_KEY = "visual_normalization";
-const std::string LoadMD::VISUAL_NORMALIZATION_KEY_HISTO =
-    "visual_normalization_histo";
+const std::string LoadMD::VISUAL_NORMALIZATION_KEY_HISTO = "visual_normalization_histo";
 
 } // namespace MDAlgorithms
 } // namespace Mantid

@@ -17,10 +17,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectSettings)
 
-IndirectSettings::IndirectSettings(QWidget *parent)
-    : MantidQt::API::UserSubWindow(parent) {
-  m_uiForm.setupUi(this);
-}
+IndirectSettings::IndirectSettings(QWidget *parent) : MantidQt::API::UserSubWindow(parent) { m_uiForm.setupUi(this); }
 
 QIcon IndirectSettings::icon() {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -36,28 +33,20 @@ void IndirectSettings::initLayout() {
   auto centralWidget = m_uiForm.centralWidget->layout();
   centralWidget->addWidget(m_presenter->getView());
 
-  connect(m_presenter.get(), SIGNAL(applySettings()), this,
-          SIGNAL(applySettings()));
-  connect(m_presenter.get(), SIGNAL(closeSettings()), this,
-          SLOT(closeSettings()));
+  connect(m_presenter.get(), SIGNAL(applySettings()), this, SIGNAL(applySettings()));
+  connect(m_presenter.get(), SIGNAL(closeSettings()), this, SLOT(closeSettings()));
 }
 
-void IndirectSettings::otherUserSubWindowCreated(
-    QPointer<UserSubWindow> window) {
-  connectIndirectInterface(window);
-}
+void IndirectSettings::otherUserSubWindowCreated(QPointer<UserSubWindow> window) { connectIndirectInterface(window); }
 
-void IndirectSettings::otherUserSubWindowCreated(
-    QList<QPointer<UserSubWindow>> &windows) {
+void IndirectSettings::otherUserSubWindowCreated(QList<QPointer<UserSubWindow>> &windows) {
   for (auto &window : windows)
     connectIndirectInterface(window);
 }
 
-void IndirectSettings::connectIndirectInterface(
-    const QPointer<UserSubWindow> &window) {
+void IndirectSettings::connectIndirectInterface(const QPointer<UserSubWindow> &window) {
   if (auto indirectInterface = dynamic_cast<IndirectInterface *>(window.data()))
-    connect(m_presenter.get(), SIGNAL(applySettings()), indirectInterface,
-            SLOT(applySettings()));
+    connect(m_presenter.get(), SIGNAL(applySettings()), indirectInterface, SLOT(applySettings()));
 }
 
 std::map<std::string, QVariant> IndirectSettings::getSettings() const {

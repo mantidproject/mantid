@@ -46,26 +46,19 @@ const std::string ResampleX::alias() const { return ""; }
 /** Initialize the algorithm's properties.
  */
 void ResampleX::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
-                  "An input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input), "An input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("XMin"),
-      "A comma separated list of the XMin for every spectrum. (Optional)");
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("XMax"),
-      "A comma separated list of the XMax for every spectrum. (Optional)");
+  declareProperty(std::make_unique<ArrayProperty<double>>("XMin"),
+                  "A comma separated list of the XMin for every spectrum. (Optional)");
+  declareProperty(std::make_unique<ArrayProperty<double>>("XMax"),
+                  "A comma separated list of the XMax for every spectrum. (Optional)");
 
   auto min = std::make_shared<BoundedValidator<int>>();
   min->setLower(1);
-  declareProperty("NumberBins", 0, min,
-                  "Number of bins to split up each spectrum into.");
-  declareProperty("LogBinning", false,
-                  "Use logarithmic binning. If false use constant step sizes.");
+  declareProperty("NumberBins", 0, min, "Number of bins to split up each spectrum into.");
+  declareProperty("LogBinning", false, "Use logarithmic binning. If false use constant step sizes.");
 
   declareProperty("PreserveEvents", true,
                   "Keep the output workspace as an EventWorkspace, if the "
@@ -86,16 +79,14 @@ map<string, string> ResampleX::validateInputs() {
   if ((!xmins.empty()) && (!xmaxs.empty())) {
     if (xmins.size() != xmaxs.size()) {
       stringstream msg;
-      msg << "XMin and XMax do not define same number of spectra ("
-          << xmins.size() << " != " << xmaxs.size() << ")";
+      msg << "XMin and XMax do not define same number of spectra (" << xmins.size() << " != " << xmaxs.size() << ")";
       errors.emplace("XMax", msg.str());
     } else {
       size_t size = xmins.size();
       for (size_t i = 0; i < size; ++i) {
         if (xmins[i] >= xmaxs[i]) {
           stringstream msg;
-          msg << "XMin (" << xmins[i] << ") cannot be greater than XMax ("
-              << xmaxs[i] << ")";
+          msg << "XMin (" << xmins[i] << ") cannot be greater than XMax (" << xmaxs[i] << ")";
           errors.emplace("XMax", msg.str());
         }
       }
@@ -117,8 +108,7 @@ map<string, string> ResampleX::validateInputs() {
  *everything
  * went according to plan.
  */
-string determineXMinMax(const MatrixWorkspace_sptr &inputWS,
-                        vector<double> &xmins, vector<double> &xmaxs) {
+string determineXMinMax(const MatrixWorkspace_sptr &inputWS, vector<double> &xmins, vector<double> &xmaxs) {
   const size_t numSpectra = inputWS->getNumberHistograms();
 
   // pad out the ranges by copying the first value to the rest that are needed
@@ -140,8 +130,7 @@ string determineXMinMax(const MatrixWorkspace_sptr &inputWS,
   // determine overall xmin/xmax
   double xmin_wksp = inputWS->getXMin();
   double xmax_wksp = inputWS->getXMax();
-  EventWorkspace_const_sptr inputEventWS =
-      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  EventWorkspace_const_sptr inputEventWS = std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (inputEventWS != nullptr && inputEventWS->getNumberEvents() > 0) {
     xmin_wksp = inputEventWS->getTofMin();
     xmax_wksp = inputEventWS->getTofMax();
@@ -173,8 +162,7 @@ string determineXMinMax(const MatrixWorkspace_sptr &inputWS,
     if (xmins[i] >= xmaxs[i]) {
       if (!msg.str().empty())
         msg << ", ";
-      msg << "at wksp_index=" << i << " XMin >= XMax (" << xmins[i]
-          << " >= " << xmaxs[i] << ")";
+      msg << "at wksp_index=" << i << " XMin >= XMax (" << xmins[i] << " >= " << xmaxs[i] << ")";
     }
   }
 
@@ -189,8 +177,7 @@ string determineXMinMax(const MatrixWorkspace_sptr &inputWS,
  * @param useLogBins True if you want log binning.
  * @param isDist True if you want binning for a histogram.
  */
-void ResampleX::setOptions(const int numBins, const bool useLogBins,
-                           const bool isDist) {
+void ResampleX::setOptions(const int numBins, const bool useLogBins, const bool isDist) {
   m_numBins = numBins;
   m_useLogBinning = useLogBins;
   m_isDistribution = isDist;
@@ -205,8 +192,7 @@ void ResampleX::setOptions(const int numBins, const bool useLogBins,
  *
  * @return The final delta value (absolute value).
  */
-double ResampleX::determineBinning(MantidVec &xValues, const double xmin,
-                                   const double xmax) {
+double ResampleX::determineBinning(MantidVec &xValues, const double xmin, const double xmax) {
   xValues.clear(); // clear out the x-values
 
   int numBoundaries(0);
@@ -230,8 +216,7 @@ double ResampleX::determineBinning(MantidVec &xValues, const double xmin,
       throw std::invalid_argument("Cannot calculate log of xmax=0");
     if (xmin < 0. && xmax > 0.) {
       std::stringstream msg;
-      msg << "Cannot calculate logorithmic binning that changes sign (xmin="
-          << xmin << ", xmax=" << xmax << ")";
+      msg << "Cannot calculate logorithmic binning that changes sign (xmin=" << xmin << ", xmax=" << xmax << ")";
       throw std::invalid_argument(msg.str());
     }
 
@@ -245,16 +230,13 @@ double ResampleX::determineBinning(MantidVec &xValues, const double xmin,
       params[1] = -1. * delta;
       if (!m_isDistribution)
         params[2] = xmax + delta;
-      numBoundaries =
-          VectorHelper::createAxisFromRebinParams(params, xValues, true);
+      numBoundaries = VectorHelper::createAxisFromRebinParams(params, xValues, true);
 
       if (numBoundaries == expNumBoundaries) {
         double diff = (xmax - xValues.back());
         if (diff != 0.) {
-          g_log.debug()
-              << "Didn't get the exact xmax value: [xmax - xValues.back()="
-              << diff << "] [relative diff = " << fabs(100. * diff / xmax)
-              << "%]\n";
+          g_log.debug() << "Didn't get the exact xmax value: [xmax - xValues.back()=" << diff
+                        << "] [relative diff = " << fabs(100. * diff / xmax) << "%]\n";
           g_log.debug() << "Resetting final x-value to xmax\n";
           *(xValues.rbegin()) = xmax;
         }
@@ -275,15 +257,12 @@ double ResampleX::determineBinning(MantidVec &xValues, const double xmin,
     }
   } else {
     params[1] = (xmax - xmin) / static_cast<double>(reqNumBoundaries);
-    numBoundaries =
-        VectorHelper::createAxisFromRebinParams(params, xValues, true);
+    numBoundaries = VectorHelper::createAxisFromRebinParams(params, xValues, true);
   }
 
   if (numBoundaries != expNumBoundaries) {
-    g_log.warning()
-        << "Did not generate the requested number of bins: generated "
-        << numBoundaries << " requested " << expNumBoundaries
-        << "(xmin=" << xmin << ", xmax=" << xmax << ")\n";
+    g_log.warning() << "Did not generate the requested number of bins: generated " << numBoundaries << " requested "
+                    << expNumBoundaries << "(xmin=" << xmin << ", xmax=" << xmax << ")\n";
   }
 
   // return the delta value so the caller can do debug printing
@@ -336,8 +315,7 @@ void ResampleX::exec() {
   }
 
   // start doing actual work
-  EventWorkspace_const_sptr inputEventWS =
-      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  EventWorkspace_const_sptr inputEventWS = std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (inputEventWS != nullptr) {
     if (m_preserveEvents) {
       if (inPlace) {
@@ -351,8 +329,7 @@ void ResampleX::exec() {
       if (common_limits) {
         // get the delta from the first since they are all the same
         BinEdges xValues(0);
-        const double delta = this->determineBinning(xValues.mutableRawData(),
-                                                    xmins[0], xmaxs[0]);
+        const double delta = this->determineBinning(xValues.mutableRawData(), xmins[0], xmaxs[0]);
         g_log.debug() << "delta = " << delta << "\n";
         outputEventWS->setAllX(xValues);
       } else {
@@ -364,10 +341,8 @@ void ResampleX::exec() {
         for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
           PARALLEL_START_INTERUPT_REGION
           BinEdges xValues(0);
-          const double delta = this->determineBinning(
-              xValues.mutableRawData(), xmins[wkspIndex], xmaxs[wkspIndex]);
-          g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
-                        << " xmin=" << xmins[wkspIndex]
+          const double delta = this->determineBinning(xValues.mutableRawData(), xmins[wkspIndex], xmaxs[wkspIndex]);
+          g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta << " xmin=" << xmins[wkspIndex]
                         << " xmax=" << xmaxs[wkspIndex] << "\n";
           outputEventWS->setHistogram(wkspIndex, xValues);
           prog.report(name()); // Report progress
@@ -379,10 +354,8 @@ void ResampleX::exec() {
     else // event workspace -> matrix workspace
     {
       //--------- Different output, OR you're inplace but not preserving Events
-      g_log.information() << "Creating a Workspace2D from the EventWorkspace "
-                          << inputEventWS->getName() << ".\n";
-      outputWS = create<DataObjects::Workspace2D>(
-          *inputWS, numSpectra, HistogramData::BinEdges(m_numBins + 1));
+      g_log.information() << "Creating a Workspace2D from the EventWorkspace " << inputEventWS->getName() << ".\n";
+      outputWS = create<DataObjects::Workspace2D>(*inputWS, numSpectra, HistogramData::BinEdges(m_numBins + 1));
 
       // Initialize progress reporting.
       Progress prog(this, 0.0, 1.0, numSpectra);
@@ -394,10 +367,8 @@ void ResampleX::exec() {
 
         // Set the X axis for each output histogram
         MantidVec xValues;
-        const double delta =
-            this->determineBinning(xValues, xmins[wkspIndex], xmaxs[wkspIndex]);
-        g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
-                      << "\n";
+        const double delta = this->determineBinning(xValues, xmins[wkspIndex], xmaxs[wkspIndex]);
+        g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta << "\n";
         outputWS->setBinEdges(wkspIndex, xValues);
 
         // Get a const event list reference. inputEventWS->dataY() doesn't work.
@@ -418,9 +389,7 @@ void ResampleX::exec() {
 
       // Copy all the axes
       for (int i = 1; i < inputWS->axes(); i++) {
-        outputWS->replaceAxis(
-            i,
-            std::unique_ptr<Axis>(inputWS->getAxis(i)->clone(outputWS.get())));
+        outputWS->replaceAxis(i, std::unique_ptr<Axis>(inputWS->getAxis(i)->clone(outputWS.get())));
         outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
       }
 
@@ -439,8 +408,7 @@ void ResampleX::exec() {
     // workspace2d ----------------------------------------------------------
     if (!m_isHistogram) {
       g_log.information() << "Rebin: Converting Data to Histogram.\n";
-      Mantid::API::Algorithm_sptr ChildAlg =
-          createChildAlgorithm("ConvertToHistogram");
+      Mantid::API::Algorithm_sptr ChildAlg = createChildAlgorithm("ConvertToHistogram");
       ChildAlg->initialize();
       ChildAlg->setProperty("InputWorkspace", inputWS);
       ChildAlg->execute();
@@ -449,13 +417,11 @@ void ResampleX::exec() {
 
     // make output Workspace the same type is the input, but with new length of
     // signal array
-    outputWS = API::WorkspaceFactory::Instance().create(
-        inputWS, numSpectra, m_numBins + 1, m_numBins);
+    outputWS = API::WorkspaceFactory::Instance().create(inputWS, numSpectra, m_numBins + 1, m_numBins);
 
     // Copy over the 'vertical' axis
     if (inputWS->axes() > 1)
-      outputWS->replaceAxis(
-          1, std::unique_ptr<Axis>(inputWS->getAxis(1)->clone(outputWS.get())));
+      outputWS->replaceAxis(1, std::unique_ptr<Axis>(inputWS->getAxis(1)->clone(outputWS.get())));
 
     Progress prog(this, 0.0, 1.0, numSpectra);
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
@@ -474,15 +440,12 @@ void ResampleX::exec() {
 
       // create new output X axis
       MantidVec XValues_new;
-      const double delta = this->determineBinning(XValues_new, xmins[wkspIndex],
-                                                  xmaxs[wkspIndex]);
-      g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
-                    << "\n";
+      const double delta = this->determineBinning(XValues_new, xmins[wkspIndex], xmaxs[wkspIndex]);
+      g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta << "\n";
 
       // output data arrays are implicitly filled by function
       try {
-        VectorHelper::rebin(XValues, YValues, YErrors, XValues_new, YValues_new,
-                            YErrors_new, m_isDistribution);
+        VectorHelper::rebin(XValues, YValues, YErrors, XValues_new, YValues_new, YErrors_new, m_isDistribution);
       } catch (std::exception &ex) {
         g_log.error() << "Error in rebin function: " << ex.what() << '\n';
         throw;
@@ -501,8 +464,7 @@ void ResampleX::exec() {
     // More efficient to have this in a separate loop because
     // MatrixWorkspace::maskBins blocks multi-threading
     for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
-      if (inputWS->hasMaskedBins(
-              wkspIndex)) // Does the current spectrum have any masked bins?
+      if (inputWS->hasMaskedBins(wkspIndex)) // Does the current spectrum have any masked bins?
       {
         this->propagateMasks(inputWS, outputWS, wkspIndex);
       }
@@ -514,8 +476,7 @@ void ResampleX::exec() {
 
     if (!m_isHistogram) {
       g_log.information() << "Rebin: Converting Data back to Data Points.\n";
-      Mantid::API::Algorithm_sptr ChildAlg =
-          createChildAlgorithm("ConvertToPointData");
+      Mantid::API::Algorithm_sptr ChildAlg = createChildAlgorithm("ConvertToPointData");
       ChildAlg->initialize();
       ChildAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
       ChildAlg->execute();

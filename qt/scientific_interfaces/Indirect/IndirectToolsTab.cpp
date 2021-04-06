@@ -26,8 +26,6 @@ IndirectToolsTab::~IndirectToolsTab() {}
  *
  * @param pyInput :: A string of python code to execute
  */
-void IndirectToolsTab::runPythonScript(const QString &pyInput) {
-  emit executePythonScript(pyInput, false);
-}
+void IndirectToolsTab::runPythonScript(const QString &pyInput) { emit executePythonScript(pyInput, false); }
 } // namespace CustomInterfaces
 } // namespace MantidQt

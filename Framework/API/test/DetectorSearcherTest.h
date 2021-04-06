@@ -23,25 +23,20 @@ using namespace Mantid::API;
 class DetectorSearcherTest : public CxxTest::TestSuite {
 public:
   void test_init() {
-    auto inst1 = ComponentCreationHelper::createTestInstrumentCylindrical(
-        3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
-    auto inst2 =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
+    auto inst1 = ComponentCreationHelper::createTestInstrumentCylindrical(3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
+    auto inst2 = ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
 
     ExperimentInfo expInfo1;
     expInfo1.setInstrument(inst1);
     ExperimentInfo expInfo2;
     expInfo2.setInstrument(inst2);
 
-    TS_ASSERT_THROWS_NOTHING(
-        DetectorSearcher searcher(inst1, expInfo1.detectorInfo()))
-    TS_ASSERT_THROWS_NOTHING(
-        DetectorSearcher searcher(inst2, expInfo2.detectorInfo()))
+    TS_ASSERT_THROWS_NOTHING(DetectorSearcher searcher(inst1, expInfo1.detectorInfo()))
+    TS_ASSERT_THROWS_NOTHING(DetectorSearcher searcher(inst2, expInfo2.detectorInfo()))
   }
 
   void test_search_cylindrical() {
-    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(
-        3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
+    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
@@ -83,8 +78,7 @@ public:
   }
 
   void test_invalid_rectangular() {
-    auto inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
+    auto inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
@@ -99,8 +93,7 @@ public:
   }
 
   void test_invalid_cylindrical() {
-    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(
-        3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
+    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
     const auto &info = expInfo.detectorInfo();
@@ -114,8 +107,7 @@ public:
   }
 
   void test_search_rectangular() {
-    auto inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
+    auto inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
     const auto &info = expInfo.detectorInfo();
@@ -137,18 +129,16 @@ public:
   V3D convertDetectorPositionToQ(const IDetector &det) {
     const auto tt1 = det.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
     const auto ph1 = det.getPhi();                                // phi
-    auto E1 =
-        V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
-            1. - std::cos(tt1));  // end of trajectory
-    return E1 * (1. / E1.norm()); // normalize
+    auto E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
+                  1. - std::cos(tt1)); // end of trajectory
+    return E1 * (1. / E1.norm());      // normalize
   }
 };
 
 class DetectorSearcherTestPerformance : public CxxTest::TestSuite {
 public:
   void test_rectangular() {
-    auto inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
+    auto inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
     const auto &info = expInfo.detectorInfo();
@@ -162,17 +152,15 @@ public:
     // create x values of the range -1 to 1
     int index = 0;
     double startValue = -1;
-    std::generate(
-        xDirections.begin(), xDirections.end(),
-        [&index, &startValue]() { return startValue + index++ * 0.1; });
+    std::generate(xDirections.begin(), xDirections.end(),
+                  [&index, &startValue]() { return startValue + index++ * 0.1; });
 
     // create z values of the range 0.1 to 1
     // ignore negative z values as these are not physical!
     index = 0;
     startValue = 0.1;
-    std::generate(
-        zDirections.begin(), zDirections.end(),
-        [&index, &startValue]() { return startValue + index++ * 0.1; });
+    std::generate(zDirections.begin(), zDirections.end(),
+                  [&index, &startValue]() { return startValue + index++ * 0.1; });
 
     yDirections = xDirections;
 
@@ -191,8 +179,7 @@ public:
   }
 
   void test_cylindrical() {
-    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(
-        3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
+    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
@@ -207,17 +194,15 @@ public:
     // create x values of the range -1 to 1
     int index = 0;
     double startValue = -1;
-    std::generate(
-        xDirections.begin(), xDirections.end(),
-        [&index, &startValue]() { return startValue + index++ * 0.1; });
+    std::generate(xDirections.begin(), xDirections.end(),
+                  [&index, &startValue]() { return startValue + index++ * 0.1; });
 
     // create z values of the range 0.1 to 1
     // ignore negative z values as these are not physical!
     index = 0;
     startValue = 0.1;
-    std::generate(
-        zDirections.begin(), zDirections.end(),
-        [&index, &startValue]() { return startValue + index++ * 0.1; });
+    std::generate(zDirections.begin(), zDirections.end(),
+                  [&index, &startValue]() { return startValue + index++ * 0.1; });
 
     yDirections = xDirections;
 

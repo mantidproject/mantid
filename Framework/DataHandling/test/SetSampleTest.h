@@ -85,26 +85,24 @@ public:
     goodStream << xml;
     goodStream.close();
 
-    const std::string xml_fixed =
-        "<environmentspec>"
-        " <materials>"
-        "  <material id=\"van\" formula=\"V\"/>"
-        " </materials>"
-        " <components>"
-        "  <containers>"
-        "   <container id=\"10mm\" material=\"van\">"
-        "    <geometry>"
-        "     <stlfile filename = \"Sphere10units.stl\" scale =\"mm\" >"
-        "     </stlfile>"
-        "    </geometry>"
-        "    <samplestlfile filename =\"Sphere10units.stl\" scale =\"mm\" >"
-        "    </samplestlfile>"
-        "   </container>"
-        "  </containers>"
-        " </components>"
-        "</environmentspec>";
-    Poco::File envFileFixed(
-        Poco::Path(testDirec, m_envName + "_fixedgeometry.xml"));
+    const std::string xml_fixed = "<environmentspec>"
+                                  " <materials>"
+                                  "  <material id=\"van\" formula=\"V\"/>"
+                                  " </materials>"
+                                  " <components>"
+                                  "  <containers>"
+                                  "   <container id=\"10mm\" material=\"van\">"
+                                  "    <geometry>"
+                                  "     <stlfile filename = \"Sphere10units.stl\" scale =\"mm\" >"
+                                  "     </stlfile>"
+                                  "    </geometry>"
+                                  "    <samplestlfile filename =\"Sphere10units.stl\" scale =\"mm\" >"
+                                  "    </samplestlfile>"
+                                  "   </container>"
+                                  "  </containers>"
+                                  " </components>"
+                                  "</environmentspec>";
+    Poco::File envFileFixed(Poco::Path(testDirec, m_envName + "_fixedgeometry.xml"));
     std::ofstream goodStreamFixed(envFileFixed.path(), std::ios_base::out);
     goodStreamFixed << xml_fixed;
     goodStreamFixed.close();
@@ -142,8 +140,7 @@ public:
     const auto &material = inputWS->sample().getMaterial();
     TS_ASSERT_EQUALS("V", material.name());
     TS_ASSERT_DELTA(0.0722, material.numberDensity(), 1e-04);
-    TS_ASSERT_EQUALS(material.numberDensityEffective(),
-                     material.numberDensity())
+    TS_ASSERT_EQUALS(material.numberDensityEffective(), material.numberDensity())
     TS_ASSERT_EQUALS(material.packingFraction(), 1.0)
   }
 
@@ -159,8 +156,7 @@ public:
     const auto &material = container.material();
     TS_ASSERT_EQUALS("V", material.name());
     TS_ASSERT_DELTA(0.0722, material.numberDensity(), 1e-04);
-    TS_ASSERT_EQUALS(material.numberDensityEffective(),
-                     material.numberDensity())
+    TS_ASSERT_EQUALS(material.numberDensityEffective(), material.numberDensity())
     TS_ASSERT_EQUALS(material.packingFraction(), 1.0)
   }
 
@@ -181,15 +177,13 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     // New shape
-    auto &sphere = dynamic_cast<const Mantid::Geometry::CSGObject &>(
-        inputWS->sample().getShape());
+    auto &sphere = dynamic_cast<const Mantid::Geometry::CSGObject &>(inputWS->sample().getShape());
     TS_ASSERT_DELTA(0.02, getSphereRadius(sphere), 1e-08);
     // Old material
     const auto &material = inputWS->sample().getMaterial();
     TS_ASSERT_EQUALS("Al", material.name());
     TS_ASSERT_DELTA(2.6989, material.numberDensity(), 1e-04);
-    TS_ASSERT_EQUALS(material.numberDensityEffective(),
-                     material.numberDensity())
+    TS_ASSERT_EQUALS(material.numberDensityEffective(), material.numberDensity())
     TS_ASSERT_EQUALS(material.packingFraction(), 1.0)
   }
 
@@ -257,11 +251,7 @@ public:
     // New shape
     // radius was 0.1 in <samplegeometry> set in constructor now 0.4
     // from createOverrideGeometryProps
-    TS_ASSERT_DELTA(
-        0.4,
-        getSphereRadius(
-            dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)),
-        1e-08);
+    TS_ASSERT_DELTA(0.4, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)), 1e-08);
   }
 
   void test_Setting_Environment_Without_Sample() {
@@ -297,9 +287,7 @@ public:
     // New shape
     const auto &sampleShape = inputWS->sample().getShape();
     TS_ASSERT(sampleShape.hasValidShape());
-    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
-                   .getShapeXML()
-                   .find("cuboid");
+    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape).getShapeXML().find("cuboid");
     TS_ASSERT(tag != std::string::npos);
 
     // Center
@@ -323,17 +311,14 @@ public:
     // New shape
     const auto &sampleShape = inputWS->sample().getShape();
     TS_ASSERT(sampleShape.hasValidShape());
-    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
-                   .getShapeXML()
-                   .find("cuboid");
+    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape).getShapeXML().find("cuboid");
     TS_ASSERT(tag != std::string::npos);
 
     // Center should be preserved inside the shape
     TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0.01, 0, 0)));
     // V3D(0.0005, 0.025, 0.02) rotated by 45 degrees CCW and translated
     // to center
-    TS_ASSERT_EQUALS(true,
-                     sampleShape.isValid(V3D(-0.00732412, 0.01803122, 0.02)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(-0.00732412, 0.01803122, 0.02)));
     // End of horizontal axis should now not be inside the object
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.025, 0)));
   }
@@ -351,22 +336,19 @@ public:
     const auto &sample = inputWS->sample();
     const auto &sampleShape = sample.getShape();
     TS_ASSERT(sampleShape.hasValidShape());
-    const auto xml =
-        dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
-            .getShapeXML();
+    const auto xml = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape).getShapeXML();
     std::stringstream expectedXML;
-    expectedXML
-        << "<type name=\"userShape\">  <cuboid id=\"front\"> "
-           "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"-0.009\"/> "
-           "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"-0.009\"/> "
-           "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"-0.005\"/> "
-           "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" "
-           "z=\"-0.009\"/> </cuboid> <cuboid id=\"back\"> "
-           "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.005\"/> "
-           "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"0.005\"/> "
-           "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.007\"/> "
-           "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" z=\"0.005\"/> "
-           "</cuboid><algebra val=\"back:front\"/> </type>";
+    expectedXML << "<type name=\"userShape\">  <cuboid id=\"front\"> "
+                   "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"-0.009\"/> "
+                   "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"-0.009\"/> "
+                   "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"-0.005\"/> "
+                   "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" "
+                   "z=\"-0.009\"/> </cuboid> <cuboid id=\"back\"> "
+                   "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.005\"/> "
+                   "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"0.005\"/> "
+                   "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.007\"/> "
+                   "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" z=\"0.005\"/> "
+                   "</cuboid><algebra val=\"back:front\"/> </type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -384,21 +366,19 @@ public:
     const auto &environment = sample.getEnvironment();
     const auto &can = environment.getContainer();
     const auto &canShape = can.getShape();
-    const auto xml = dynamic_cast<const Mantid::Geometry::CSGObject &>(canShape)
-                         .getShapeXML();
+    const auto xml = dynamic_cast<const Mantid::Geometry::CSGObject &>(canShape).getShapeXML();
     std::stringstream expectedXML;
-    expectedXML
-        << "<type name=\"userShape\">  <cuboid id=\"front\"> "
-           "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"-0.009\"/> "
-           "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"-0.009\"/> "
-           "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"-0.005\"/> "
-           "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" "
-           "z=\"-0.009\"/> </cuboid> <cuboid id=\"back\"> "
-           "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.005\"/> "
-           "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"0.005\"/> "
-           "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.007\"/> "
-           "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" z=\"0.005\"/> "
-           "</cuboid><algebra val=\"back:front\"/> </type>";
+    expectedXML << "<type name=\"userShape\">  <cuboid id=\"front\"> "
+                   "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"-0.009\"/> "
+                   "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"-0.009\"/> "
+                   "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"-0.005\"/> "
+                   "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" "
+                   "z=\"-0.009\"/> </cuboid> <cuboid id=\"back\"> "
+                   "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.005\"/> "
+                   "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"0.005\"/> "
+                   "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.007\"/> "
+                   "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" z=\"0.005\"/> "
+                   "</cuboid><algebra val=\"back:front\"/> </type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -409,30 +389,26 @@ public:
     const std::vector<double> center = {0., 0., 1.};
 
     auto alg = createAlgorithm(inputWS);
-    alg->setProperty("Geometry",
-                     createFlatPlateHolderGeometryProps(0., center));
+    alg->setProperty("Geometry", createFlatPlateHolderGeometryProps(0., center));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
     const auto &sample = inputWS->sample();
     const auto &sampleShape = sample.getShape();
     TS_ASSERT(sampleShape.hasValidShape());
-    const auto xml =
-        dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
-            .getShapeXML();
+    const auto xml = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape).getShapeXML();
     std::stringstream expectedXML;
-    expectedXML
-        << "<type name=\"userShape\">  <cuboid id=\"front\"> "
-           "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.001\"/> "
-           "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"0.001\"/> "
-           "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.005\"/> "
-           "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" "
-           "z=\"0.001\"/> </cuboid> <cuboid id=\"back\"> "
-           "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.015\"/> "
-           "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"0.015\"/> "
-           "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.017\"/> "
-           "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" z=\"0.015\"/> "
-           "</cuboid><algebra val=\"back:front\"/> </type>";
+    expectedXML << "<type name=\"userShape\">  <cuboid id=\"front\"> "
+                   "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.001\"/> "
+                   "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"0.001\"/> "
+                   "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.005\"/> "
+                   "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" "
+                   "z=\"0.001\"/> </cuboid> <cuboid id=\"back\"> "
+                   "<left-front-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.015\"/> "
+                   "<left-front-top-point x=\"0.004\" y=\"0.0065\" z=\"0.015\"/> "
+                   "<left-back-bottom-point x=\"0.004\" y=\"-0.0065\" z=\"0.017\"/> "
+                   "<right-front-bottom-point x=\"-0.004\" y=\"-0.0065\" z=\"0.015\"/> "
+                   "</cuboid><algebra val=\"back:front\"/> </type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -449,22 +425,19 @@ public:
     const auto &sample = inputWS->sample();
     const auto &sampleShape = sample.getShape();
     TS_ASSERT(sampleShape.hasValidShape());
-    const auto xml =
-        dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
-            .getShapeXML();
+    const auto xml = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape).getShapeXML();
     std::stringstream expectedXML;
-    expectedXML
-        << "<type name=\"userShape\">  <cuboid id=\"front\"> "
-           "<left-front-bottom-point x=\"-0.009\" y=\"-0.0065\" z=\"-0.004\"/> "
-           "<left-front-top-point x=\"-0.009\" y=\"0.0065\" z=\"-0.004\"/> "
-           "<left-back-bottom-point x=\"-0.005\" y=\"-0.0065\" z=\"-0.004\"/> "
-           "<right-front-bottom-point x=\"-0.009\" y=\"-0.0065\" z=\"0.004\"/> "
-           "</cuboid> <cuboid id=\"back\"> <left-front-bottom-point "
-           "x=\"0.005\" y=\"-0.0065\" z=\"-0.004\"/> <left-front-top-point "
-           "x=\"0.005\" y=\"0.0065\" z=\"-0.004\"/> <left-back-bottom-point "
-           "x=\"0.007\" y=\"-0.0065\" z=\"-0.004\"/> <right-front-bottom-point "
-           "x=\"0.005\" y=\"-0.0065\" z=\"0.004\"/> </cuboid><algebra "
-           "val=\"back:front\"/> </type>";
+    expectedXML << "<type name=\"userShape\">  <cuboid id=\"front\"> "
+                   "<left-front-bottom-point x=\"-0.009\" y=\"-0.0065\" z=\"-0.004\"/> "
+                   "<left-front-top-point x=\"-0.009\" y=\"0.0065\" z=\"-0.004\"/> "
+                   "<left-back-bottom-point x=\"-0.005\" y=\"-0.0065\" z=\"-0.004\"/> "
+                   "<right-front-bottom-point x=\"-0.009\" y=\"-0.0065\" z=\"0.004\"/> "
+                   "</cuboid> <cuboid id=\"back\"> <left-front-bottom-point "
+                   "x=\"0.005\" y=\"-0.0065\" z=\"-0.004\"/> <left-front-top-point "
+                   "x=\"0.005\" y=\"0.0065\" z=\"-0.004\"/> <left-back-bottom-point "
+                   "x=\"0.007\" y=\"-0.0065\" z=\"-0.004\"/> <right-front-bottom-point "
+                   "x=\"0.005\" y=\"-0.0065\" z=\"0.004\"/> </cuboid><algebra "
+                   "val=\"back:front\"/> </type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -481,9 +454,7 @@ public:
     const auto &sample = inputWS->sample();
     const auto &sampleShape = sample.getShape();
     TS_ASSERT(sampleShape.hasValidShape());
-    const auto xml =
-        dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
-            .getShapeXML();
+    const auto xml = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape).getShapeXML();
     std::stringstream expectedXML;
     expectedXML << "<type name=\"userShape\"> <hollow-cylinder id=\"inner\"> "
                    "<centre-of-bottom-base x=\"0\" y=\"-0.005\" z=\"0\"/> "
@@ -504,29 +475,25 @@ public:
     setStandardReferenceFrame(inputWS);
 
     auto alg = createAlgorithm(inputWS);
-    alg->setProperty("Geometry",
-                     createHollowCylinderHolderGeometryProps({3, 5, 7}));
+    alg->setProperty("Geometry", createHollowCylinderHolderGeometryProps({3, 5, 7}));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
     const auto &sample = inputWS->sample();
     const auto &sampleShape = sample.getShape();
     TS_ASSERT(sampleShape.hasValidShape());
-    const auto xml =
-        dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
-            .getShapeXML();
+    const auto xml = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape).getShapeXML();
     std::stringstream expectedXML;
-    expectedXML
-        << "<type name=\"userShape\"> <hollow-cylinder id=\"inner\"> "
-           "<centre-of-bottom-base x=\"0.03\" y=\"0.045\" z=\"0.07\"/> "
-           "<axis x=\"0\" y=\"1\" z=\"0\"/> <height val=\"0.01\"/> "
-           "<inner-radius val=\"0.001\"/><outer-radius "
-           "val=\"0.002\"/></hollow-cylinder><hollow-cylinder "
-           "id=\"outer\"> <centre-of-bottom-base x=\"0.03\" y=\"0.045\" "
-           "z=\"0.07\"/> <axis x=\"0\" y=\"1\" z=\"0\"/> <height "
-           "val=\"0.01\"/> <inner-radius val=\"0.003\"/><outer-radius "
-           "val=\"0.004\"/></hollow-cylinder><algebra "
-           "val=\"inner:outer\"/> </type>";
+    expectedXML << "<type name=\"userShape\"> <hollow-cylinder id=\"inner\"> "
+                   "<centre-of-bottom-base x=\"0.03\" y=\"0.045\" z=\"0.07\"/> "
+                   "<axis x=\"0\" y=\"1\" z=\"0\"/> <height val=\"0.01\"/> "
+                   "<inner-radius val=\"0.001\"/><outer-radius "
+                   "val=\"0.002\"/></hollow-cylinder><hollow-cylinder "
+                   "id=\"outer\"> <centre-of-bottom-base x=\"0.03\" y=\"0.045\" "
+                   "z=\"0.07\"/> <axis x=\"0\" y=\"1\" z=\"0\"/> <height "
+                   "val=\"0.01\"/> <inner-radius val=\"0.003\"/><outer-radius "
+                   "val=\"0.004\"/></hollow-cylinder><algebra "
+                   "val=\"inner:outer\"/> </type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -536,8 +503,7 @@ public:
     setStandardReferenceFrame(inputWS);
 
     auto alg = createAlgorithm(inputWS);
-    alg->setProperty("ContainerGeometry",
-                     createHollowCylinderHolderGeometryProps());
+    alg->setProperty("ContainerGeometry", createHollowCylinderHolderGeometryProps());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
@@ -545,8 +511,7 @@ public:
     const auto &environment = sample.getEnvironment();
     const auto &can = environment.getContainer();
     const auto &canShape = can.getShape();
-    const auto xml = dynamic_cast<const Mantid::Geometry::CSGObject &>(canShape)
-                         .getShapeXML();
+    const auto xml = dynamic_cast<const Mantid::Geometry::CSGObject &>(canShape).getShapeXML();
     std::stringstream expectedXML;
     expectedXML << "<type name=\"userShape\"> <hollow-cylinder id=\"inner\"> "
                    "<centre-of-bottom-base x=\"0\" y=\"-0.005\" z=\"0\"/> "
@@ -575,15 +540,13 @@ public:
     const auto &environment = sample.getEnvironment();
     const auto &can = environment.getContainer();
     const auto &canShape = can.getShape();
-    const auto xml = dynamic_cast<const Mantid::Geometry::CSGObject &>(canShape)
-                         .getShapeXML();
+    const auto xml = dynamic_cast<const Mantid::Geometry::CSGObject &>(canShape).getShapeXML();
     std::stringstream expectedXML;
-    expectedXML
-        << "<type name=\"userShape\"> <hollow-cylinder id=\"sample-shape\"> "
-           "<centre-of-bottom-base x=\"0\" y=\"-0.01\" z=\"0.01\"/> <axis "
-           "x=\"0\" y=\"1\" z=\"0\"/><height val=\"0.02\"/> <inner-radius "
-           "val=\"0.03\"/><outer-radius val=\"0.04\"/></hollow-cylinder> "
-           "</type>";
+    expectedXML << "<type name=\"userShape\"> <hollow-cylinder id=\"sample-shape\"> "
+                   "<centre-of-bottom-base x=\"0\" y=\"-0.01\" z=\"0.01\"/> <axis "
+                   "x=\"0\" y=\"1\" z=\"0\"/><height val=\"0.02\"/> <inner-radius "
+                   "val=\"0.03\"/><outer-radius val=\"0.04\"/></hollow-cylinder> "
+                   "</type>";
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
@@ -600,9 +563,7 @@ public:
     // New shape
     const auto &sampleShape = inputWS->sample().getShape();
     TS_ASSERT(sampleShape.hasValidShape());
-    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
-                   .getShapeXML()
-                   .find("cylinder");
+    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape).getShapeXML().find("cylinder");
     TS_ASSERT(tag != std::string::npos);
 
     TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.049, 0.019)));
@@ -624,9 +585,7 @@ public:
     // New shape
     const auto &sampleShape = inputWS->sample().getShape();
     TS_ASSERT(sampleShape.hasValidShape());
-    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
-                   .getShapeXML()
-                   .find("cylinder");
+    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape).getShapeXML().find("cylinder");
     TS_ASSERT(tag != std::string::npos);
 
     TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.049, 0.019)));
@@ -648,9 +607,7 @@ public:
     // New shape
     const auto &sampleShape = inputWS->sample().getShape();
     TS_ASSERT(sampleShape.hasValidShape());
-    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
-                   .getShapeXML()
-                   .find("cylinder");
+    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape).getShapeXML().find("cylinder");
     TS_ASSERT(tag != std::string::npos);
 
     TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.049, 0.019)));
@@ -675,9 +632,7 @@ public:
     // New shape
     const auto &sampleShape = inputWS->sample().getShape();
     TS_ASSERT(sampleShape.hasValidShape());
-    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
-                   .getShapeXML()
-                   .find("cylinder");
+    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape).getShapeXML().find("cylinder");
     TS_ASSERT(tag != std::string::npos);
 
     TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.049, 0.019)));
@@ -688,8 +643,7 @@ public:
     const auto &material = inputWS->sample().getMaterial();
     TS_ASSERT_EQUALS("V", material.name());
     TS_ASSERT_DELTA(0.0722, material.numberDensity(), 1e-04);
-    TS_ASSERT_EQUALS(material.numberDensityEffective(),
-                     material.numberDensity())
+    TS_ASSERT_EQUALS(material.numberDensityEffective(), material.numberDensity())
     TS_ASSERT_EQUALS(material.packingFraction(), 1.0)
   }
 
@@ -737,8 +691,7 @@ public:
     setTestReferenceFrame(inputWS);
 
     auto alg = createAlgorithm(inputWS);
-    alg->setProperty("Geometry",
-                     createHollowCylinderWithIndexedAxisGeometryProps());
+    alg->setProperty("Geometry", createHollowCylinderWithIndexedAxisGeometryProps());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
@@ -754,8 +707,7 @@ public:
   void test_PeaksWorkspace_Is_Accepted_Workspace_Type() {
     auto inputWS = WorkspaceCreationHelper::createPeaksWorkspace(1);
     auto alg = createAlgorithm(inputWS);
-    alg->setProperty("Geometry",
-                     createHollowCylinderWithIndexedAxisGeometryProps());
+    alg->setProperty("Geometry", createHollowCylinderWithIndexedAxisGeometryProps());
   }
 
   void test_flat_plate_holder() {}
@@ -796,8 +748,7 @@ public:
     auto alg = createAlgorithm(inputWS);
 
     auto args = std::make_shared<PropertyManager>();
-    args->declareProperty(std::make_unique<StringProperty>("Container", "8mm"),
-                          "");
+    args->declareProperty(std::make_unique<StringProperty>("Container", "8mm"), "");
     alg->setProperty("Environment", args);
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
@@ -813,8 +764,7 @@ public:
     auto alg = createAlgorithm(inputWS);
 
     auto args = std::make_shared<PropertyManager>();
-    args->declareProperty(std::make_unique<StringProperty>("Name", m_envName),
-                          "");
+    args->declareProperty(std::make_unique<StringProperty>("Name", m_envName), "");
     alg->setProperty("Environment", args);
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
@@ -831,8 +781,7 @@ public:
     alg->setProperty("Environment", args);
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     args->removeProperty("Name");
-    args->declareProperty(std::make_unique<StringProperty>("Container", ""),
-                          "");
+    args->declareProperty(std::make_unique<StringProperty>("Container", ""), "");
     alg->setProperty("Environment", args);
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
@@ -845,10 +794,8 @@ public:
 
     auto alg = createAlgorithm();
     auto args = std::make_shared<PropertyManager>();
-    args->declareProperty(
-        std::make_unique<StringProperty>("Shape", "FlatPlate"), "");
-    std::array<const std::string, 3> dimensions = {
-        {"Width", "Height", "Thick"}};
+    args->declareProperty(std::make_unique<StringProperty>("Shape", "FlatPlate"), "");
+    std::array<const std::string, 3> dimensions = {{"Width", "Height", "Thick"}};
     const std::string geometryProp("Geometry");
     for (const auto &dim : dimensions) {
       args->declareProperty(std::make_unique<DoubleProperty>(dim, -1.0), "");
@@ -865,8 +812,7 @@ public:
 
     auto alg = createAlgorithm();
     auto args = std::make_shared<PropertyManager>();
-    args->declareProperty(std::make_unique<StringProperty>("Shape", "Cylinder"),
-                          "");
+    args->declareProperty(std::make_unique<StringProperty>("Shape", "Cylinder"), "");
     std::array<const std::string, 2> dimensions = {{"Radius", "Height"}};
     const std::string geometryProp("Geometry");
     for (const auto &dim : dimensions) {
@@ -885,10 +831,8 @@ public:
 
     auto alg = createAlgorithm();
     auto args = std::make_shared<PropertyManager>();
-    args->declareProperty(
-        std::make_unique<StringProperty>("Shape", "FlatPlate"), "");
-    std::array<const std::string, 3> dimensions = {
-        {"InnerRadius", "OuterRadius", "Height"}};
+    args->declareProperty(std::make_unique<StringProperty>("Shape", "FlatPlate"), "");
+    std::array<const std::string, 3> dimensions = {{"InnerRadius", "OuterRadius", "Height"}};
     const std::string geometryProp("Geometry");
     for (const auto &dim : dimensions) {
       args->declareProperty(std::make_unique<DoubleProperty>(dim, -1.0), "");
@@ -916,9 +860,7 @@ public:
     config.setString("instrumentDefinition.directory", m_testRoot);
     auto alg = createAlgorithm(inputWS);
     auto props = std::make_shared<PropertyManager>();
-    props->declareProperty(
-        std::make_unique<StringProperty>("Name", m_envName + "_fixedgeometry"),
-        "");
+    props->declareProperty(std::make_unique<StringProperty>("Name", m_envName + "_fixedgeometry"), "");
     alg->setProperty("Environment", props);
     alg->setProperty("Geometry", createOverrideGeometryProps());
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
@@ -964,8 +906,7 @@ public:
   //----------------------------------------------------------------------------
 private:
   Mantid::API::IAlgorithm_uptr
-  createAlgorithm(const Mantid::API::Workspace_sptr &inputWS =
-                      Mantid::API::Workspace_sptr()) {
+  createAlgorithm(const Mantid::API::Workspace_sptr &inputWS = Mantid::API::Workspace_sptr()) {
     auto alg = std::make_unique<SetSample>();
     alg->setChild(true);
     alg->setRethrows(true);
@@ -976,8 +917,7 @@ private:
     return alg;
   }
 
-  bool validateErrorProduced(Mantid::API::IAlgorithm &alg,
-                             const std::string &name) {
+  bool validateErrorProduced(Mantid::API::IAlgorithm &alg, const std::string &name) {
     const auto errors = alg.validateInputs();
     if (errors.find(name) != errors.end())
       return true;
@@ -985,39 +925,33 @@ private:
       return false;
   }
 
-  void
-  setTestReferenceFrame(const Mantid::API::MatrixWorkspace_sptr &workspace) {
+  void setTestReferenceFrame(const Mantid::API::MatrixWorkspace_sptr &workspace) {
     using Mantid::Geometry::Instrument;
     using Mantid::Geometry::ReferenceFrame;
     // Use Z=up,Y=across,X=beam so we test it listens to the reference frame
     auto inst = std::make_shared<Instrument>();
-    inst->setReferenceFrame(std::make_shared<ReferenceFrame>(
-        Mantid::Geometry::Z, Mantid::Geometry::X, Mantid::Geometry::Right, ""));
+    inst->setReferenceFrame(
+        std::make_shared<ReferenceFrame>(Mantid::Geometry::Z, Mantid::Geometry::X, Mantid::Geometry::Right, ""));
     workspace->setInstrument(inst);
   }
 
-  void setStandardReferenceFrame(
-      const Mantid::API::MatrixWorkspace_sptr &workspace) {
+  void setStandardReferenceFrame(const Mantid::API::MatrixWorkspace_sptr &workspace) {
     using Mantid::Geometry::Instrument;
     using Mantid::Geometry::ReferenceFrame;
     auto inst = std::make_shared<Instrument>();
-    inst->setReferenceFrame(std::make_shared<ReferenceFrame>(
-        Mantid::Geometry::Y, Mantid::Geometry::Z, Mantid::Geometry::Right, ""));
+    inst->setReferenceFrame(
+        std::make_shared<ReferenceFrame>(Mantid::Geometry::Y, Mantid::Geometry::Z, Mantid::Geometry::Right, ""));
     workspace->setInstrument(inst);
   }
 
-  Mantid::Kernel::PropertyManager_sptr
-  createMaterialProps(const double volume = 0.) {
+  Mantid::Kernel::PropertyManager_sptr createMaterialProps(const double volume = 0.) {
     using Mantid::Kernel::PropertyManager;
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
     auto props = std::make_shared<PropertyManager>();
-    props->declareProperty(
-        std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
+    props->declareProperty(std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
     if (volume > 0.) // <mass> = <standard mass density for vanadium> x <volume>
-      props->declareProperty(std::make_unique<PropertyWithValue<double>>(
-                                 "SampleMass", 6.11 * volume),
-                             "");
+      props->declareProperty(std::make_unique<PropertyWithValue<double>>("SampleMass", 6.11 * volume), "");
     return props;
   }
 
@@ -1027,25 +961,19 @@ private:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
     auto props = std::make_shared<PropertyManager>();
-    props->declareProperty(std::make_unique<StringProperty>("Shape", "CSG"),
-                           "");
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "CSG"), "");
     props->declareProperty(
-        std::make_unique<StringProperty>(
-            "Value", ComponentCreationHelper::sphereXML(0.02, V3D(), "sp-1")),
-        "");
+        std::make_unique<StringProperty>("Value", ComponentCreationHelper::sphereXML(0.02, V3D(), "sp-1")), "");
     return props;
   }
 
-  Mantid::Kernel::PropertyManager_sptr
-  createEnvironmentProps(const std::string &containerName) {
+  Mantid::Kernel::PropertyManager_sptr createEnvironmentProps(const std::string &containerName) {
     using Mantid::Kernel::PropertyManager;
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
     auto props = std::make_shared<PropertyManager>();
-    props->declareProperty(std::make_unique<StringProperty>("Name", m_envName),
-                           "");
-    props->declareProperty(
-        std::make_unique<StringProperty>("Container", containerName), "");
+    props->declareProperty(std::make_unique<StringProperty>("Name", m_envName), "");
+    props->declareProperty(std::make_unique<StringProperty>("Container", containerName), "");
     return props;
   }
 
@@ -1058,25 +986,21 @@ private:
     return props;
   }
 
-  Mantid::Kernel::PropertyManager_sptr
-  createFlatPlateGeometryProps(double angle = 0.0) {
+  Mantid::Kernel::PropertyManager_sptr createFlatPlateGeometryProps(double angle = 0.0) {
     using namespace Mantid::Kernel;
     using DoubleArrayProperty = ArrayProperty<double>;
     using DoubleProperty = PropertyWithValue<double>;
     using StringProperty = PropertyWithValue<std::string>;
 
     auto props = std::make_shared<PropertyManager>();
-    props->declareProperty(
-        std::make_unique<StringProperty>("Shape", "FlatPlate"), "");
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "FlatPlate"), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Width", 5), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Height", 4), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Thick", 0.1), "");
     std::vector<double> center{1, 0, 0};
-    props->declareProperty(
-        std::make_unique<DoubleArrayProperty>("Center", std::move(center)), "");
+    props->declareProperty(std::make_unique<DoubleArrayProperty>("Center", std::move(center)), "");
     if (angle != 0.0) {
-      props->declareProperty(std::make_unique<DoubleProperty>("Angle", angle),
-                             "");
+      props->declareProperty(std::make_unique<DoubleProperty>("Angle", angle), "");
     }
     return props;
   }
@@ -1088,13 +1012,11 @@ private:
     using StringProperty = PropertyWithValue<std::string>;
 
     auto props = std::make_shared<PropertyManager>();
-    props->declareProperty(
-        std::make_unique<StringProperty>("Shape", "Cylinder"), "");
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "Cylinder"), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Height", 2), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Radius", 5), "");
     std::vector<double> center{0, 0, 1};
-    props->declareProperty(
-        std::make_unique<DoubleArrayProperty>("Center", std::move(center)), "");
+    props->declareProperty(std::make_unique<DoubleArrayProperty>("Center", std::move(center)), "");
 
     return props;
   }
@@ -1105,13 +1027,11 @@ private:
     auto props = createCylinderGeometryProps();
     // Use the same pointing up direction as in the without axis test
     std::vector<double> axis{0, 0, 1};
-    props->declareProperty(std::make_unique<DoubleArrayProperty>("Axis", axis),
-                           "");
+    props->declareProperty(std::make_unique<DoubleArrayProperty>("Axis", axis), "");
     return props;
   }
 
-  Mantid::Kernel::PropertyManager_sptr
-  createCylinderWithIndexedAxisGeometryProps() {
+  Mantid::Kernel::PropertyManager_sptr createCylinderWithIndexedAxisGeometryProps() {
     using namespace Mantid::Kernel;
     using IntProperty = PropertyWithValue<int>;
     auto props = createCylinderGeometryProps();
@@ -1128,34 +1048,27 @@ private:
     using StringProperty = PropertyWithValue<std::string>;
 
     auto props = std::make_shared<PropertyManager>();
-    props->declareProperty(
-        std::make_unique<StringProperty>("Shape", "HollowCylinder"), "");
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "HollowCylinder"), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Height", 2), "");
-    props->declareProperty(std::make_unique<DoubleProperty>("InnerRadius", 3),
-                           "");
-    props->declareProperty(std::make_unique<DoubleProperty>("OuterRadius", 4),
-                           "");
+    props->declareProperty(std::make_unique<DoubleProperty>("InnerRadius", 3), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("OuterRadius", 4), "");
     std::vector<double> center{0, 0, 1};
-    props->declareProperty(
-        std::make_unique<DoubleArrayProperty>("Center", std::move(center)), "");
+    props->declareProperty(std::make_unique<DoubleArrayProperty>("Center", std::move(center)), "");
 
     return props;
   }
 
-  Mantid::Kernel::PropertyManager_sptr
-  createHollowCylinderWithAxisGeometryProps() {
+  Mantid::Kernel::PropertyManager_sptr createHollowCylinderWithAxisGeometryProps() {
     using namespace Mantid::Kernel;
     using DoubleArrayProperty = ArrayProperty<double>;
     auto props = createHollowCylinderGeometryProps();
     // Use the same pointing up direction as in the without axis test
     std::vector<double> axis{0, 0, 1};
-    props->declareProperty(std::make_unique<DoubleArrayProperty>("Axis", axis),
-                           "");
+    props->declareProperty(std::make_unique<DoubleArrayProperty>("Axis", axis), "");
     return props;
   }
 
-  Mantid::Kernel::PropertyManager_sptr
-  createHollowCylinderWithIndexedAxisGeometryProps() {
+  Mantid::Kernel::PropertyManager_sptr createHollowCylinderWithIndexedAxisGeometryProps() {
     using namespace Mantid::Kernel;
     using IntProperty = PropertyWithValue<int>;
     auto props = createHollowCylinderGeometryProps();
@@ -1165,52 +1078,40 @@ private:
     return props;
   }
 
-  Mantid::Kernel::PropertyManager_sptr createFlatPlateHolderGeometryProps(
-      double angle = 0., std::vector<double> center = {0., 0., 0.}) {
+  Mantid::Kernel::PropertyManager_sptr createFlatPlateHolderGeometryProps(double angle = 0.,
+                                                                          std::vector<double> center = {0., 0., 0.}) {
     using namespace Mantid::Kernel;
     using DoubleArrayProperty = ArrayProperty<double>;
     using DoubleProperty = PropertyWithValue<double>;
     using StringProperty = PropertyWithValue<std::string>;
     auto props = std::make_shared<PropertyManager>();
-    props->declareProperty(
-        std::make_unique<StringProperty>("Shape", "FlatPlateHolder"), "");
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "FlatPlateHolder"), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Height", 1.3), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Width", 0.8), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Thick", 1.), "");
-    props->declareProperty(std::make_unique<DoubleProperty>("FrontThick", 0.4),
-                           "");
-    props->declareProperty(std::make_unique<DoubleProperty>("BackThick", 0.2),
-                           "");
-    props->declareProperty(std::make_unique<DoubleProperty>("Angle", angle),
-                           "");
-    props->declareProperty(
-        std::make_unique<DoubleArrayProperty>("Center", center), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("FrontThick", 0.4), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("BackThick", 0.2), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Angle", angle), "");
+    props->declareProperty(std::make_unique<DoubleArrayProperty>("Center", center), "");
     return props;
   }
 
-  Mantid::Kernel::PropertyManager_sptr createHollowCylinderHolderGeometryProps(
-      std::vector<double> center = {0., 0., 0.},
-      std::vector<double> axis = {0, 1, 0}) {
+  Mantid::Kernel::PropertyManager_sptr createHollowCylinderHolderGeometryProps(std::vector<double> center = {0., 0.,
+                                                                                                             0.},
+                                                                               std::vector<double> axis = {0, 1, 0}) {
     using namespace Mantid::Kernel;
     using DoubleArrayProperty = ArrayProperty<double>;
     using DoubleProperty = PropertyWithValue<double>;
     using StringProperty = PropertyWithValue<std::string>;
     auto props = std::make_shared<PropertyManager>();
-    props->declareProperty(
-        std::make_unique<StringProperty>("Shape", "HollowCylinderHolder"), "");
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "HollowCylinderHolder"), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Height", 1.), "");
-    props->declareProperty(std::make_unique<DoubleProperty>("InnerRadius", 0.1),
-                           "");
-    props->declareProperty(
-        std::make_unique<DoubleProperty>("InnerOuterRadius", 0.2), "");
-    props->declareProperty(
-        std::make_unique<DoubleProperty>("OuterInnerRadius", 0.3), "");
-    props->declareProperty(std::make_unique<DoubleProperty>("OuterRadius", 0.4),
-                           "");
-    props->declareProperty(
-        std::make_unique<DoubleArrayProperty>("Center", center), "");
-    props->declareProperty(std::make_unique<DoubleArrayProperty>("Axis", axis),
-                           "");
+    props->declareProperty(std::make_unique<DoubleProperty>("InnerRadius", 0.1), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("InnerOuterRadius", 0.2), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("OuterInnerRadius", 0.3), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("OuterRadius", 0.4), "");
+    props->declareProperty(std::make_unique<DoubleArrayProperty>("Center", center), "");
+    props->declareProperty(std::make_unique<DoubleArrayProperty>("Axis", axis), "");
     return props;
   }
 

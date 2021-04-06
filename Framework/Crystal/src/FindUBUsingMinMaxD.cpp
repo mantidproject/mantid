@@ -30,21 +30,16 @@ FindUBUsingMinMaxD::FindUBUsingMinMaxD() {
   deprecatedDate("2013-06-03");
 }
 
-const std::string FindUBUsingMinMaxD::name() const {
-  return "FindUBUsingMinMaxD";
-}
+const std::string FindUBUsingMinMaxD::name() const { return "FindUBUsingMinMaxD"; }
 
 int FindUBUsingMinMaxD::version() const { return 1; }
 
-const std::string FindUBUsingMinMaxD::category() const {
-  return "Crystal\\UBMatrix";
-}
+const std::string FindUBUsingMinMaxD::category() const { return "Crystal\\UBMatrix"; }
 
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingMinMaxD::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
-                            "PeaksWorkspace", "", Direction::InOut),
+  this->declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
@@ -54,21 +49,17 @@ void FindUBUsingMinMaxD::init() {
   atLeast3Int->setLower(3);
 
   // use negative values, force user to input all parameters
-  this->declareProperty(std::make_unique<PropertyWithValue<double>>(
-                            "MinD", -1.0, mustBePositive, Direction::Input),
+  this->declareProperty(std::make_unique<PropertyWithValue<double>>("MinD", -1.0, mustBePositive, Direction::Input),
                         "Lower Bound on Lattice Parameters a, b, c");
 
-  this->declareProperty(std::make_unique<PropertyWithValue<double>>(
-                            "MaxD", -1.0, mustBePositive, Direction::Input),
+  this->declareProperty(std::make_unique<PropertyWithValue<double>>("MaxD", -1.0, mustBePositive, Direction::Input),
                         "Upper Bound on Lattice Parameters a, b, c");
 
-  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
-                            "NumInitial", 20, atLeast3Int, Direction::Input),
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>("NumInitial", 20, atLeast3Int, Direction::Input),
                         "Number of Peaks to Use on First Pass(20)");
 
   this->declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "Tolerance", 0.15, mustBePositive, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("Tolerance", 0.15, mustBePositive, Direction::Input),
       "Indexing Tolerance (0.15)");
 }
 
@@ -98,16 +89,14 @@ void FindUBUsingMinMaxD::exec() {
 
   Matrix<double> UB(3, 3, false);
   double error =
-      IndexingUtils::Find_UB(UB, q_vectors, min_d, max_d, tolerance, base_index,
-                             num_initial, degrees_per_step);
+      IndexingUtils::Find_UB(UB, q_vectors, min_d, max_d, tolerance, base_index, num_initial, degrees_per_step);
 
   std::cout << "Error = " << error << '\n';
   std::cout << "UB = " << UB << '\n';
 
   if (!IndexingUtils::CheckUB(UB)) // UB not found correctly
   {
-    g_log.notice(std::string(
-        "Found Invalid UB...peaks used might not be linearly independent"));
+    g_log.notice(std::string("Found Invalid UB...peaks used might not be linearly independent"));
     g_log.notice(std::string("UB NOT SAVED."));
   } else // tell user how many would be indexed
   {      // and save the UB in the sample
@@ -118,23 +107,18 @@ void FindUBUsingMinMaxD::exec() {
     double fit_error;
     miller_ind.reserve(q_vectors.size());
     indexed_qs.reserve(q_vectors.size());
-    IndexingUtils::GetIndexedPeaks(UB, q_vectors, tolerance, miller_ind,
-                                   indexed_qs, fit_error);
+    IndexingUtils::GetIndexedPeaks(UB, q_vectors, tolerance, miller_ind, indexed_qs, fit_error);
 
     IndexingUtils::Optimize_UB(UB, miller_ind, indexed_qs, sigabc);
     char logInfo[200];
     int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
-    sprintf(logInfo,
-            std::string(
-                "New UB will index %1d Peaks out of %1d with tolerance %5.3f")
-                .c_str(),
-            num_indexed, n_peaks, tolerance);
+    sprintf(logInfo, std::string("New UB will index %1d Peaks out of %1d with tolerance %5.3f").c_str(), num_indexed,
+            n_peaks, tolerance);
     g_log.notice(std::string(logInfo));
 
     auto lattice = std::make_unique<OrientedLattice>();
     lattice->setUB(UB);
-    lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
-                      sigabc[5]);
+    lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
     // Show the modified lattice parameters
     g_log.notice() << *lattice << "\n";
     ws->mutableSample().setOrientedLattice(std::move(lattice));

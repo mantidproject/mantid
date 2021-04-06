@@ -63,12 +63,10 @@ public:
   QString getLocalParameterTie(const QString &parName, int i) const;
   QString getLocalParameterConstraint(const QString &parName, int i) const;
   void setLocalParameterValue(const QString &parName, int i, double value);
-  void setLocalParameterValue(const QString &parName, int i, double value,
-                              double error);
+  void setLocalParameterValue(const QString &parName, int i, double value, double error);
   void setLocalParameterFixed(const QString &parName, int i, bool fixed);
   void setLocalParameterTie(const QString &parName, int i, const QString &tie);
-  void setLocalParameterConstraint(const QString &parName, int i,
-                                   const QString &constraint);
+  void setLocalParameterConstraint(const QString &parName, int i, const QString &constraint);
   QStringList getGlobalParameters() const;
   void setGlobalParameters(const QStringList &globals);
   QStringList getLocalParameters() const;
@@ -88,8 +86,7 @@ private slots:
   void viewAddedFunction(const QString &funStr);
   void viewRemovedFunction(const QString &functionIndex);
   void viewChangedTie(const QString &parName, const QString &tie);
-  void viewAddedConstraint(const QString &functionIndex,
-                           const QString &constraint);
+  void viewAddedConstraint(const QString &functionIndex, const QString &constraint);
   void viewRemovedConstraint(const QString &parName);
   void viewRequestedCopyToClipboard();
   void viewChangedGlobals(const QStringList &globalParameters);

@@ -33,31 +33,23 @@ CentroidPeaksMD::CentroidPeaksMD() { this->useAlgorithm("CentroidPeaksMD", 2); }
 /** Initialize the algorithm's properties.
  */
 void CentroidPeaksMD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace.");
 
-  std::vector<std::string> propOptions{"Q (lab frame)", "Q (sample frame)",
-                                       "HKL"};
-  declareProperty("CoordinatesToUse", "HKL",
-                  std::make_shared<StringListValidator>(propOptions),
+  std::vector<std::string> propOptions{"Q (lab frame)", "Q (sample frame)", "HKL"};
+  declareProperty("CoordinatesToUse", "HKL", std::make_shared<StringListValidator>(propOptions),
                   "Ignored:  algorithm uses the InputWorkspace's coordinates.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("PeakRadius", 1.0,
-                                                  Direction::Input),
-      "Fixed radius around each peak position in which to calculate the "
-      "centroid.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("PeakRadius", 1.0, Direction::Input),
+                  "Fixed radius around each peak position in which to calculate the "
+                  "centroid.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "PeaksWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to centroid.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                          Direction::Output),
-      "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
-      "with the peaks' positions modified by the new found centroids.");
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
+                  "with the peaks' positions modified by the new found centroids.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -65,19 +57,16 @@ void CentroidPeaksMD::init() {
  * class
  * @param ws ::  MDEventWorkspace to integrate
  */
-template <typename MDE, size_t nd>
-void CentroidPeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
+template <typename MDE, size_t nd> void CentroidPeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (nd != 3)
     throw std::invalid_argument("For now, we expect the input MDEventWorkspace "
                                 "to have 3 dimensions only.");
 
   /// Peak workspace to centroid
-  Mantid::DataObjects::PeaksWorkspace_sptr inPeakWS =
-      getProperty("PeaksWorkspace");
+  Mantid::DataObjects::PeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
 
   /// Output peaks workspace, create if needed
-  Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
-      getProperty("OutputWorkspace");
+  Mantid::DataObjects::PeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
   if (peakWS != inPeakWS)
     peakWS = inPeakWS->clone();
 
@@ -127,9 +116,7 @@ void CentroidPeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         centroid[d] = 0.0;
 
       // Perform centroid
-      ws->getBox()->centroidSphere(
-          sphere, static_cast<coord_t>(PeakRadius * PeakRadius), centroid,
-          signal);
+      ws->getBox()->centroidSphere(sphere, static_cast<coord_t>(PeakRadius * PeakRadius), centroid, signal);
 
       // Normalize by signal
       if (signal != 0.0) {
@@ -152,12 +139,10 @@ void CentroidPeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           p.setHKL(vecCentroid);
         }
 
-        g_log.information() << "Peak " << i << " at " << pos << ": signal "
-                            << signal << ", centroid " << vecCentroid << " in "
-                            << CoordinatesToUse << '\n';
+        g_log.information() << "Peak " << i << " at " << pos << ": signal " << signal << ", centroid " << vecCentroid
+                            << " in " << CoordinatesToUse << '\n';
       } else {
-        g_log.information() << "Peak " << i << " at " << pos
-                            << " had no signal, and could not be centroided.\n";
+        g_log.information() << "Peak " << i << " at " << pos << " had no signal, and could not be centroided.\n";
       }
     }
 

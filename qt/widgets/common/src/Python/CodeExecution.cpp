@@ -36,8 +36,7 @@ QHash<PyObject *, ScriptEditorDetails> EDITOR_LOOKUP;
  * @param arg :: Meaning varies depending on event type, see
  * http://docs.python.org/c-api/init.html#profiling-and-tracing
  */
-int traceLineNumber(PyObject *obj, PyFrameObject *frame, int event,
-                    PyObject *arg) {
+int traceLineNumber(PyObject *obj, PyFrameObject *frame, int event, PyObject *arg) {
   Q_UNUSED(obj);
   Q_UNUSED(arg);
   if (event != PyTrace_LINE)
@@ -69,15 +68,13 @@ CodeExecution::CodeExecution(ScriptEditor *editor) : m_editor(editor) {}
  * @param globals A dictionary containing the current globals mapping
  * @param lineOffset The number of lines offset to apply to the marker
  */
-PyObject *CodeExecution::execute(const QString &codeStr,
-                                 const QString &filename, int flags,
-                                 PyObject *globals, int lineOffset) const {
+PyObject *CodeExecution::execute(const QString &codeStr, const QString &filename, int flags, PyObject *globals,
+                                 int lineOffset) const {
   GlobalInterpreterLock gil;
   PyCompilerFlags compileFlags;
   compileFlags.cf_flags = flags;
-  auto compiledCode = Py_CompileStringFlags(codeStr.toUtf8().constData(),
-                                            filename.toUtf8().constData(),
-                                            Py_file_input, &compileFlags);
+  auto compiledCode =
+      Py_CompileStringFlags(codeStr.toUtf8().constData(), filename.toUtf8().constData(), Py_file_input, &compileFlags);
   if (!compiledCode) {
     return nullptr;
   }
@@ -90,8 +87,7 @@ PyObject *CodeExecution::execute(const QString &codeStr,
   const auto coFileObject = ((PyCodeObject *)compiledCode)->co_filename;
   const auto posIter = EDITOR_LOOKUP.insert(coFileObject, editor_details);
   PyEval_SetTrace((Py_tracefunc)&traceLineNumber, nullptr);
-  const auto result =
-      PyEval_EvalCode(CODE_OBJECT(compiledCode), globals, globals);
+  const auto result = PyEval_EvalCode(CODE_OBJECT(compiledCode), globals, globals);
   PyEval_SetTrace(nullptr, nullptr);
   EDITOR_LOOKUP.erase(posIter);
   return result;

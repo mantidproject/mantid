@@ -18,14 +18,11 @@ DeleteRowCommand defines the action "Delete Row"
 */
 class DeleteRowCommand : public CommandBase {
 public:
-  DeleteRowCommand(DataProcessorPresenter *tablePresenter)
-      : CommandBase(tablePresenter){};
+  DeleteRowCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter){};
   DeleteRowCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~DeleteRowCommand(){};
 
-  void execute() override {
-    m_presenter->notify(DataProcessorPresenter::DeleteRowFlag);
-  };
+  void execute() override { m_presenter->notify(DataProcessorPresenter::DeleteRowFlag); };
   QString name() override { return QString("Delete Row"); }
   QString icon() override { return QString("://delete_row.png"); }
   QString tooltip() override { return QString("Deletes a row"); }

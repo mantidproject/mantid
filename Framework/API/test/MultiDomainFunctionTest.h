@@ -21,20 +21,16 @@
 using namespace Mantid;
 using namespace Mantid::API;
 
-class MultiDomainFunctionTest_Function : public IFunction1D,
-                                         public ParamFunction {
+class MultiDomainFunctionTest_Function : public IFunction1D, public ParamFunction {
 public:
   MultiDomainFunctionTest_Function() : IFunction1D(), ParamFunction() {
     this->declareParameter("A", 0);
     this->declareParameter("B", 0);
   }
-  std::string name() const override {
-    return "MultiDomainFunctionTest_Function";
-  }
+  std::string name() const override { return "MultiDomainFunctionTest_Function"; }
 
 protected:
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override {
+  void function1D(double *out, const double *xValues, const size_t nData) const override {
     const double A = getParameter(0);
     const double B = getParameter(1);
 
@@ -43,8 +39,7 @@ protected:
       out[i] = A + B * x;
     }
   }
-  void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) override {
+  void functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) override {
     for (size_t i = 0; i < nData; ++i) {
       double x = xValues[i];
       out->set(i, 0, x);
@@ -94,9 +89,7 @@ class MultiDomainFunctionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MultiDomainFunctionTest *createSuite() {
-    return new MultiDomainFunctionTest();
-  }
+  static MultiDomainFunctionTest *createSuite() { return new MultiDomainFunctionTest(); }
   static void destroySuite(MultiDomainFunctionTest *suite) { delete suite; }
 
   MultiDomainFunctionTest() {
@@ -139,8 +132,7 @@ public:
 
     const double A = multi.getFunction(0)->getParameter("A");
     const double B = multi.getFunction(0)->getParameter("B");
-    const FunctionDomain1D &d =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(0));
+    const FunctionDomain1D &d = static_cast<const FunctionDomain1D &>(domain.getDomain(0));
     for (size_t i = 0; i < 9; ++i) {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d[i]);
     }
@@ -162,8 +154,7 @@ public:
 
     const double A = multi.getFunction(0)->getParameter("A");
     const double B = multi.getFunction(0)->getParameter("B");
-    const FunctionDomain1D &d =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(1));
+    const FunctionDomain1D &d = static_cast<const FunctionDomain1D &>(domain.getDomain(1));
     for (size_t i = 0; i < 9; ++i) {
       TS_ASSERT_EQUALS(values.getCalculated(i), 0);
     }
@@ -185,8 +176,7 @@ public:
 
     const double A = multi.getFunction(0)->getParameter("A");
     const double B = multi.getFunction(0)->getParameter("B");
-    const FunctionDomain1D &d =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(2));
+    const FunctionDomain1D &d = static_cast<const FunctionDomain1D &>(domain.getDomain(2));
     for (size_t i = 0; i < 9; ++i) {
       TS_ASSERT_EQUALS(values.getCalculated(i), 0);
     }
@@ -208,18 +198,15 @@ public:
 
     const double A = multi.getFunction(0)->getParameter("A");
     const double B = multi.getFunction(0)->getParameter("B");
-    const FunctionDomain1D &d0 =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(0));
+    const FunctionDomain1D &d0 = static_cast<const FunctionDomain1D &>(domain.getDomain(0));
     for (size_t i = 0; i < 9; ++i) {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d0[i]);
     }
-    const FunctionDomain1D &d1 =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(1));
+    const FunctionDomain1D &d1 = static_cast<const FunctionDomain1D &>(domain.getDomain(1));
     for (size_t i = 9; i < 19; ++i) {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d1[i - 9]);
     }
-    const FunctionDomain1D &d2 =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(2));
+    const FunctionDomain1D &d2 = static_cast<const FunctionDomain1D &>(domain.getDomain(2));
     for (size_t i = 19; i < 30; ++i) {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d2[i - 19]);
     }
@@ -232,12 +219,10 @@ public:
     FunctionValues values(domain);
 
     multi.setDomainIndex(0, 3);
-    TS_ASSERT_THROWS(multi.function(domain, values),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(multi.function(domain, values), const std::invalid_argument &);
 
     multi.setDomainIndex(0, 4);
-    TS_ASSERT_THROWS(multi.function(domain, values),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(multi.function(domain, values), const std::invalid_argument &);
   }
 
   void test_calc() {
@@ -254,30 +239,25 @@ public:
     FunctionValues values(domain);
     multi.function(domain, values);
 
-    double A = multi.getFunction(0)->getParameter("A") +
-               multi.getFunction(1)->getParameter("A") +
+    double A = multi.getFunction(0)->getParameter("A") + multi.getFunction(1)->getParameter("A") +
                multi.getFunction(2)->getParameter("A");
-    double B = multi.getFunction(0)->getParameter("B") +
-               multi.getFunction(1)->getParameter("B") +
+    double B = multi.getFunction(0)->getParameter("B") + multi.getFunction(1)->getParameter("B") +
                multi.getFunction(2)->getParameter("B");
-    const FunctionDomain1D &d0 =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(0));
+    const FunctionDomain1D &d0 = static_cast<const FunctionDomain1D &>(domain.getDomain(0));
     for (size_t i = 0; i < 9; ++i) {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d0[i]);
     }
 
     A = multi.getFunction(1)->getParameter("A");
     B = multi.getFunction(1)->getParameter("B");
-    const FunctionDomain1D &d1 =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(1));
+    const FunctionDomain1D &d1 = static_cast<const FunctionDomain1D &>(domain.getDomain(1));
     for (size_t i = 9; i < 19; ++i) {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d1[i - 9]);
     }
 
     A = multi.getFunction(2)->getParameter("A");
     B = multi.getFunction(2)->getParameter("B");
-    const FunctionDomain1D &d2 =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(2));
+    const FunctionDomain1D &d2 = static_cast<const FunctionDomain1D &>(domain.getDomain(2));
     for (size_t i = 19; i < 30; ++i) {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d2[i - 19]);
     }
@@ -292,30 +272,25 @@ public:
     FunctionValues values(domain);
     multi.function(domain, values);
 
-    double A = multi.getFunction(0)->getParameter("A") +
-               multi.getFunction(1)->getParameter("A") +
+    double A = multi.getFunction(0)->getParameter("A") + multi.getFunction(1)->getParameter("A") +
                multi.getFunction(2)->getParameter("A");
-    double B = multi.getFunction(0)->getParameter("B") +
-               multi.getFunction(1)->getParameter("B") +
+    double B = multi.getFunction(0)->getParameter("B") + multi.getFunction(1)->getParameter("B") +
                multi.getFunction(2)->getParameter("B");
-    const FunctionDomain1D &d0 =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(0));
+    const FunctionDomain1D &d0 = static_cast<const FunctionDomain1D &>(domain.getDomain(0));
     for (size_t i = 0; i < 9; ++i) {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d0[i]);
     }
 
     A = multi.getFunction(1)->getParameter("A");
     B = multi.getFunction(1)->getParameter("B");
-    const FunctionDomain1D &d1 =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(1));
+    const FunctionDomain1D &d1 = static_cast<const FunctionDomain1D &>(domain.getDomain(1));
     for (size_t i = 9; i < 19; ++i) {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d1[i - 9]);
     }
 
     A = multi.getFunction(2)->getParameter("A");
     B = multi.getFunction(2)->getParameter("B");
-    const FunctionDomain1D &d2 =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(2));
+    const FunctionDomain1D &d2 = static_cast<const FunctionDomain1D &>(domain.getDomain(2));
     for (size_t i = 19; i < 30; ++i) {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d2[i - 19]);
     }
@@ -332,53 +307,41 @@ public:
 
     double A = multi.getFunction(0)->getParameter("A");
     double B = multi.getFunction(0)->getParameter("B");
-    const FunctionDomain1D &d0 =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(0));
+    const FunctionDomain1D &d0 = static_cast<const FunctionDomain1D &>(domain.getDomain(0));
     for (size_t i = 0; i < 9; ++i) {
       TS_ASSERT_DELTA(values.getCalculated(i), A + B * d0[i], 1e-6);
     }
 
-    A = multi.getFunction(0)->getParameter("A") +
-        multi.getFunction(1)->getParameter("A");
-    B = multi.getFunction(0)->getParameter("B") +
-        multi.getFunction(1)->getParameter("B");
-    const FunctionDomain1D &d1 =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(1));
+    A = multi.getFunction(0)->getParameter("A") + multi.getFunction(1)->getParameter("A");
+    B = multi.getFunction(0)->getParameter("B") + multi.getFunction(1)->getParameter("B");
+    const FunctionDomain1D &d1 = static_cast<const FunctionDomain1D &>(domain.getDomain(1));
     for (size_t i = 9; i < 19; ++i) {
       TS_ASSERT_DELTA(values.getCalculated(i), A + B * d1[i - 9], 1e-6);
     }
 
-    A = multi.getFunction(0)->getParameter("A") +
-        multi.getFunction(2)->getParameter("A");
-    B = multi.getFunction(0)->getParameter("B") +
-        multi.getFunction(2)->getParameter("B");
-    const FunctionDomain1D &d2 =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(2));
+    A = multi.getFunction(0)->getParameter("A") + multi.getFunction(2)->getParameter("A");
+    B = multi.getFunction(0)->getParameter("B") + multi.getFunction(2)->getParameter("B");
+    const FunctionDomain1D &d2 = static_cast<const FunctionDomain1D &>(domain.getDomain(2));
     for (size_t i = 19; i < 30; ++i) {
       TS_ASSERT_DELTA(values.getCalculated(i), A + B * d2[i - 19], 1e-6);
     }
   }
 
   void test_attribute_in_FunctionFactory() {
-    std::string ini =
-        "composite=MultiDomainFunction;"
-        "name=MultiDomainFunctionTest_Function,A=0,B=1,$domains=i;"
-        "name=MultiDomainFunctionTest_Function,A=1,B=2,$domains=(0,1);"
-        "name=MultiDomainFunctionTest_Function,A=2,B=3,$domains=(0,2)";
-    auto mfun = std::dynamic_pointer_cast<CompositeFunction>(
-        FunctionFactory::Instance().createInitialized(ini));
+    std::string ini = "composite=MultiDomainFunction;"
+                      "name=MultiDomainFunctionTest_Function,A=0,B=1,$domains=i;"
+                      "name=MultiDomainFunctionTest_Function,A=1,B=2,$domains=(0,1);"
+                      "name=MultiDomainFunctionTest_Function,A=2,B=3,$domains=(0,2)";
+    auto mfun = std::dynamic_pointer_cast<CompositeFunction>(FunctionFactory::Instance().createInitialized(ini));
 
     FunctionValues values(domain);
     mfun->function(domain, values);
 
-    double A = mfun->getFunction(0)->getParameter("A") +
-               mfun->getFunction(1)->getParameter("A") +
+    double A = mfun->getFunction(0)->getParameter("A") + mfun->getFunction(1)->getParameter("A") +
                mfun->getFunction(2)->getParameter("A");
-    double B = mfun->getFunction(0)->getParameter("B") +
-               mfun->getFunction(1)->getParameter("B") +
+    double B = mfun->getFunction(0)->getParameter("B") + mfun->getFunction(1)->getParameter("B") +
                mfun->getFunction(2)->getParameter("B");
-    const FunctionDomain1D &d0 =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(0));
+    const FunctionDomain1D &d0 = static_cast<const FunctionDomain1D &>(domain.getDomain(0));
     double checksum = 0;
     for (size_t i = 0; i < 9; ++i) {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d0[i]);
@@ -389,8 +352,7 @@ public:
     checksum = 0;
     A = mfun->getFunction(1)->getParameter("A");
     B = mfun->getFunction(1)->getParameter("B");
-    const FunctionDomain1D &d1 =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(1));
+    const FunctionDomain1D &d1 = static_cast<const FunctionDomain1D &>(domain.getDomain(1));
     for (size_t i = 9; i < 19; ++i) {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d1[i - 9]);
       checksum += values.getCalculated(i);
@@ -400,8 +362,7 @@ public:
     checksum = 0;
     A = mfun->getFunction(2)->getParameter("A");
     B = mfun->getFunction(2)->getParameter("B");
-    const FunctionDomain1D &d2 =
-        static_cast<const FunctionDomain1D &>(domain.getDomain(2));
+    const FunctionDomain1D &d2 = static_cast<const FunctionDomain1D &>(domain.getDomain(2));
     for (size_t i = 19; i < 30; ++i) {
       TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d2[i - 19]);
       checksum += values.getCalculated(i);
@@ -458,20 +419,16 @@ public:
   }
 
   void test_equivalent_functions() {
-    std::string ini =
-        "composite=MultiDomainFunction;"
-        "name=MultiDomainFunctionTest_Function,A=1,B=2,$domains=i;"
-        "name=MultiDomainFunctionTest_Function,A=3,B=4,$domains=i;ties=(f1.A="
-        "f0.B)";
-    auto mfun = std::dynamic_pointer_cast<CompositeFunction>(
-        FunctionFactory::Instance().createInitialized(ini));
+    std::string ini = "composite=MultiDomainFunction;"
+                      "name=MultiDomainFunctionTest_Function,A=1,B=2,$domains=i;"
+                      "name=MultiDomainFunctionTest_Function,A=3,B=4,$domains=i;ties=(f1.A="
+                      "f0.B)";
+    auto mfun = std::dynamic_pointer_cast<CompositeFunction>(FunctionFactory::Instance().createInitialized(ini));
 
     auto eqFuns = mfun->createEquivalentFunctions();
     TS_ASSERT_EQUALS(eqFuns.size(), 2);
-    TS_ASSERT_EQUALS(eqFuns[0]->asString(),
-                     "name=MultiDomainFunctionTest_Function,A=1,B=2");
-    TS_ASSERT_EQUALS(eqFuns[1]->asString(),
-                     "name=MultiDomainFunctionTest_Function,A=2,B=4");
+    TS_ASSERT_EQUALS(eqFuns[0]->asString(), "name=MultiDomainFunctionTest_Function,A=1,B=2");
+    TS_ASSERT_EQUALS(eqFuns[1]->asString(), "name=MultiDomainFunctionTest_Function,A=2,B=4");
   }
 
   void test_string_nested_composite() {
@@ -486,16 +443,15 @@ public:
                       "MultiDomainFunctionTest_Function))";
     auto f = FunctionFactory::Instance().createInitialized(ini);
     auto g = FunctionFactory::Instance().createInitialized(f->asString());
-    TS_ASSERT_EQUALS(g->asString(),
-                     "composite=MultiDomainFunction,NumDeriv=true;(composite="
-                     "CompositeFunction,NumDeriv=false,$domains=i;name="
-                     "MultiDomainFunctionTest_Function,A=0,B=0;(name="
-                     "MultiDomainFunctionTest_Function,A=0,B=0;name="
-                     "MultiDomainFunctionTest_Function,A=0,B=0));(composite="
-                     "CompositeFunction,NumDeriv=false,$domains=i;name="
-                     "MultiDomainFunctionTest_Function,A=0,B=0;(name="
-                     "MultiDomainFunctionTest_Function,A=0,B=0;name="
-                     "MultiDomainFunctionTest_Function,A=0,B=0))");
+    TS_ASSERT_EQUALS(g->asString(), "composite=MultiDomainFunction,NumDeriv=true;(composite="
+                                    "CompositeFunction,NumDeriv=false,$domains=i;name="
+                                    "MultiDomainFunctionTest_Function,A=0,B=0;(name="
+                                    "MultiDomainFunctionTest_Function,A=0,B=0;name="
+                                    "MultiDomainFunctionTest_Function,A=0,B=0));(composite="
+                                    "CompositeFunction,NumDeriv=false,$domains=i;name="
+                                    "MultiDomainFunctionTest_Function,A=0,B=0;(name="
+                                    "MultiDomainFunctionTest_Function,A=0,B=0;name="
+                                    "MultiDomainFunctionTest_Function,A=0,B=0))");
   }
 
 private:

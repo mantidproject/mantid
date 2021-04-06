@@ -30,8 +30,7 @@ data.</li>
 @author Roman Tolchenov, Tessella plc
 @date 3/07/09
 */
-class DLLExport LoadAscii : public API::IFileLoader<Kernel::FileDescriptor>,
-                            public API::DeprecatedAlgorithm {
+class DLLExport LoadAscii : public API::IFileLoader<Kernel::FileDescriptor>, public API::DeprecatedAlgorithm {
 public:
   /// Default constructor
   LoadAscii();
@@ -61,11 +60,9 @@ protected:
   /// Return true if the line is to be skipped
   bool skipLine(const std::string &line) const;
   /// Split the data into columns.
-  int splitIntoColumns(std::list<std::string> &columns,
-                       const std::string &str) const;
+  int splitIntoColumns(std::list<std::string> &columns, const std::string &str) const;
   /// Fill the given vector with the data values
-  void fillInputValues(std::vector<double> &values,
-                       const std::list<std::string> &columns) const;
+  void fillInputValues(std::vector<double> &values, const std::list<std::string> &columns) const;
 
   /// The column separator
   std::string m_columnSep;

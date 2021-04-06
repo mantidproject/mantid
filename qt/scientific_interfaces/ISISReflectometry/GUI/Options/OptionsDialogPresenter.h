@@ -22,12 +22,10 @@ namespace ISISReflectometry {
 /**
 Implements a presenter for the options dialog.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogPresenter
-    : public IOptionsDialogPresenter,
-      public OptionsDialogViewSubscriber {
+class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogPresenter : public IOptionsDialogPresenter,
+                                                              public OptionsDialogViewSubscriber {
 public:
-  explicit OptionsDialogPresenter(IOptionsDialogView *view,
-                                  std::unique_ptr<IOptionsDialogModel> model);
+  explicit OptionsDialogPresenter(IOptionsDialogView *view, std::unique_ptr<IOptionsDialogModel> model);
   // IOptionsDialogPresenter overrides
   void notifySubscribeView() override;
   bool getBoolOption(const std::string &optionName) override;

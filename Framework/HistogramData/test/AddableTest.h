@@ -27,8 +27,7 @@ class AddableTester : public VectorOf<AddableTester, HistogramX>,
 };
 
 // Does Addable also work with FixedLengthVector instead of VectorOf?
-struct AddableTester2 : public FixedLengthVector<AddableTester2>,
-                        public Addable<AddableTester2> {
+struct AddableTester2 : public FixedLengthVector<AddableTester2>, public Addable<AddableTester2> {
   using FixedLengthVector<AddableTester2>::FixedLengthVector;
 };
 

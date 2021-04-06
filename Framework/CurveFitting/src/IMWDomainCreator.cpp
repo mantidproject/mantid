@@ -48,13 +48,10 @@ using API::Workspace;
  * @param workspacePropertyName :: Name of the workspace property.
  * @param domainType :: Type of the domain: Simple, Sequential, or Parallel.
  */
-IMWDomainCreator::IMWDomainCreator(Kernel::IPropertyManager *fit,
-                                   const std::string &workspacePropertyName,
+IMWDomainCreator::IMWDomainCreator(Kernel::IPropertyManager *fit, const std::string &workspacePropertyName,
                                    IMWDomainCreator::DomainType domainType)
-    : API::IDomainCreator(
-          fit, std::vector<std::string>(1, workspacePropertyName), domainType),
-      m_workspaceIndex(-1), m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()),
-      m_startIndex(0) {
+    : API::IDomainCreator(fit, std::vector<std::string>(1, workspacePropertyName), domainType), m_workspaceIndex(-1),
+      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_startIndex(0) {
   if (m_workspacePropertyNames.empty()) {
     throw std::runtime_error("Cannot create FitMW: no workspace given");
   }
@@ -88,8 +85,7 @@ void IMWDomainCreator::setParameters() const {
  * @param addProp :: allows for the declaration of certain properties of the
  * dataset
  */
-void IMWDomainCreator::declareDatasetProperties(const std::string &suffix,
-                                                bool addProp) {
+void IMWDomainCreator::declareDatasetProperties(const std::string &suffix, bool addProp) {
   m_workspaceIndexPropertyName = "WorkspaceIndex" + suffix;
   m_startXPropertyName = "StartX" + suffix;
   m_endXPropertyName = "EndX" + suffix;
@@ -97,19 +93,16 @@ void IMWDomainCreator::declareDatasetProperties(const std::string &suffix,
   if (addProp && !m_manager->existsProperty(m_workspaceIndexPropertyName)) {
     auto mustBePositive = std::make_shared<BoundedValidator<int>>();
     mustBePositive->setLower(0);
-    declareProperty(new PropertyWithValue<int>(m_workspaceIndexPropertyName, 0,
-                                               mustBePositive),
+    declareProperty(new PropertyWithValue<int>(m_workspaceIndexPropertyName, 0, mustBePositive),
                     "The Workspace Index to fit in the input workspace");
-    declareProperty(
-        new PropertyWithValue<double>(m_startXPropertyName, EMPTY_DBL()),
-        "A value of x in, or on the low x boundary of, the first bin to "
-        "include in\n"
-        "the fit (default lowest value of x)");
-    declareProperty(
-        new PropertyWithValue<double>(m_endXPropertyName, EMPTY_DBL()),
-        "A value in, or on the high x boundary of, the last bin the fitting "
-        "range\n"
-        "(default the highest value of x)");
+    declareProperty(new PropertyWithValue<double>(m_startXPropertyName, EMPTY_DBL()),
+                    "A value of x in, or on the low x boundary of, the first bin to "
+                    "include in\n"
+                    "the fit (default lowest value of x)");
+    declareProperty(new PropertyWithValue<double>(m_endXPropertyName, EMPTY_DBL()),
+                    "A value in, or on the high x boundary of, the last bin the fitting "
+                    "range\n"
+                    "(default the highest value of x)");
   }
 }
 
@@ -140,8 +133,7 @@ std::pair<size_t, size_t> IMWDomainCreator::getXInterval() const {
     m_endX = X.back();
     to = X.end();
   } else if (m_startX == EMPTY_DBL() || m_endX == EMPTY_DBL()) {
-    throw std::invalid_argument(
-        "Both StartX and EndX must be given to set fitting interval.");
+    throw std::invalid_argument("Both StartX and EndX must be given to set fitting interval.");
   } else if (isXAscending) {
     if (m_startX > m_endX) {
       std::swap(m_startX, m_endX);
@@ -169,8 +161,7 @@ std::pair<size_t, size_t> IMWDomainCreator::getXInterval() const {
       to = X.end() - 1;
     }
   }
-  return std::make_pair(std::distance(X.begin(), from),
-                        std::distance(X.begin(), to));
+  return std::make_pair(std::distance(X.begin(), from), std::distance(X.begin(), to));
 }
 
 /**
@@ -193,8 +184,7 @@ void IMWDomainCreator::initFunction(API::IFunction_sptr function) {
     throw std::runtime_error("Cannot initialize empty function.");
   }
   function->setWorkspace(m_matrixWorkspace);
-  function->setMatrixWorkspace(m_matrixWorkspace, m_workspaceIndex, m_startX,
-                               m_endX);
+  function->setMatrixWorkspace(m_matrixWorkspace, m_workspaceIndex, m_startX, m_endX);
   setInitialValues(*function);
 }
 
@@ -205,14 +195,12 @@ void IMWDomainCreator::initFunction(API::IFunction_sptr function) {
  * @param nhistograms The number of histograms
  * @param nyvalues The number of y values to hold
  */
-API::MatrixWorkspace_sptr
-IMWDomainCreator::createEmptyResultWS(const size_t nhistograms,
-                                      const size_t nyvalues) {
+API::MatrixWorkspace_sptr IMWDomainCreator::createEmptyResultWS(const size_t nhistograms, const size_t nyvalues) {
   size_t nxvalues(nyvalues);
   if (m_matrixWorkspace->isHistogramData())
     nxvalues += 1;
-  API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", nhistograms, nxvalues, nyvalues);
+  API::MatrixWorkspace_sptr ws =
+      API::WorkspaceFactory::Instance().create("Workspace2D", nhistograms, nxvalues, nyvalues);
   ws->setTitle("");
   ws->setYUnitLabel(m_matrixWorkspace->YUnitLabel());
   ws->setYUnit(m_matrixWorkspace->YUnit());
@@ -225,14 +213,11 @@ IMWDomainCreator::createEmptyResultWS(const size_t nhistograms,
   auto &inputE = m_matrixWorkspace->e(m_workspaceIndex);
   // X values for all
   for (size_t i = 0; i < nhistograms; i++) {
-    ws->mutableX(i).assign(inputX.begin() + m_startIndex,
-                           inputX.begin() + m_startIndex + nxvalues);
+    ws->mutableX(i).assign(inputX.begin() + m_startIndex, inputX.begin() + m_startIndex + nxvalues);
   }
   // Data values for the first histogram
-  ws->mutableY(0).assign(inputY.begin() + m_startIndex,
-                         inputY.begin() + m_startIndex + nyvalues);
-  ws->mutableE(0).assign(inputE.begin() + m_startIndex,
-                         inputE.begin() + m_startIndex + nyvalues);
+  ws->mutableY(0).assign(inputY.begin() + m_startIndex, inputY.begin() + m_startIndex + nyvalues);
+  ws->mutableE(0).assign(inputE.begin() + m_startIndex, inputE.begin() + m_startIndex + nyvalues);
 
   return ws;
 }
@@ -258,10 +243,8 @@ void IMWDomainCreator::setInitialValues(API::IFunction &function) {
  * @param outputWorkspacePropertyName :: The property name
  */
 std::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
-    const std::string &baseName, API::IFunction_sptr function,
-    std::shared_ptr<API::FunctionDomain> domain,
-    std::shared_ptr<API::FunctionValues> values,
-    const std::string &outputWorkspacePropertyName) {
+    const std::string &baseName, API::IFunction_sptr function, std::shared_ptr<API::FunctionDomain> domain,
+    std::shared_ptr<API::FunctionValues> values, const std::string &outputWorkspacePropertyName) {
   if (!values) {
     throw std::logic_error("FunctionValues expected");
   }
@@ -308,19 +291,15 @@ std::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
   }
 
   if (!outputWorkspacePropertyName.empty()) {
-    declareProperty(
-        new API::WorkspaceProperty<MatrixWorkspace>(outputWorkspacePropertyName,
-                                                    "", Direction::Output),
-        "Name of the output Workspace holding resulting simulated spectrum");
-    m_manager->setPropertyValue(outputWorkspacePropertyName,
-                                baseName + "Workspace");
+    declareProperty(new API::WorkspaceProperty<MatrixWorkspace>(outputWorkspacePropertyName, "", Direction::Output),
+                    "Name of the output Workspace holding resulting simulated spectrum");
+    m_manager->setPropertyValue(outputWorkspacePropertyName, baseName + "Workspace");
     m_manager->setProperty(outputWorkspacePropertyName, ws);
   }
 
   // If the input is a not an EventWorkspace and is a distrubution, then convert
   // the output also to a distribution
-  if (!std::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(
-          m_matrixWorkspace)) {
+  if (!std::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(m_matrixWorkspace)) {
     if (m_matrixWorkspace->isDistribution()) {
       ws->setDistribution(true);
     }
@@ -333,25 +312,21 @@ std::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
  * @param functionList The current list of functions to append to
  * @param function A function that may or not be composite
  */
-void IMWDomainCreator::appendCompositeFunctionMembers(
-    std::list<API::IFunction_sptr> &functionList,
-    const API::IFunction_sptr &function) const {
+void IMWDomainCreator::appendCompositeFunctionMembers(std::list<API::IFunction_sptr> &functionList,
+                                                      const API::IFunction_sptr &function) const {
   // if function is a Convolution then output of convolved model's mebers may be
   // required
-  if (m_convolutionCompositeMembers &&
-      std::dynamic_pointer_cast<Functions::Convolution>(function)) {
+  if (m_convolutionCompositeMembers && std::dynamic_pointer_cast<Functions::Convolution>(function)) {
     appendConvolvedCompositeFunctionMembers(functionList, function);
   } else {
-    const auto compositeFn =
-        std::dynamic_pointer_cast<API::CompositeFunction>(function);
+    const auto compositeFn = std::dynamic_pointer_cast<API::CompositeFunction>(function);
     if (!compositeFn)
       return;
 
     const size_t nlocals = compositeFn->nFunctions();
     for (size_t i = 0; i < nlocals; ++i) {
       auto localFunction = compositeFn->getFunction(i);
-      auto localComposite =
-          std::dynamic_pointer_cast<API::CompositeFunction>(localFunction);
+      auto localComposite = std::dynamic_pointer_cast<API::CompositeFunction>(localFunction);
       if (localComposite)
         appendCompositeFunctionMembers(functionList, localComposite);
       else
@@ -373,14 +348,11 @@ void IMWDomainCreator::appendCompositeFunctionMembers(
  * @return True if all conditions are fulfilled and it is possible to produce
  * the output.
  */
-void IMWDomainCreator::appendConvolvedCompositeFunctionMembers(
-    std::list<API::IFunction_sptr> &functionList,
-    const API::IFunction_sptr &function) const {
-  std::shared_ptr<Functions::Convolution> convolution =
-      std::dynamic_pointer_cast<Functions::Convolution>(function);
+void IMWDomainCreator::appendConvolvedCompositeFunctionMembers(std::list<API::IFunction_sptr> &functionList,
+                                                               const API::IFunction_sptr &function) const {
+  std::shared_ptr<Functions::Convolution> convolution = std::dynamic_pointer_cast<Functions::Convolution>(function);
 
-  const auto compositeFn = std::dynamic_pointer_cast<API::CompositeFunction>(
-      convolution->getFunction(1));
+  const auto compositeFn = std::dynamic_pointer_cast<API::CompositeFunction>(convolution->getFunction(1));
   if (!compositeFn) {
     functionList.insert(functionList.end(), convolution);
   } else {
@@ -388,8 +360,7 @@ void IMWDomainCreator::appendConvolvedCompositeFunctionMembers(
     const size_t nlocals = compositeFn->nFunctions();
     for (size_t i = 0; i < nlocals; ++i) {
       auto localFunction = compositeFn->getFunction(i);
-      std::shared_ptr<Functions::Convolution> localConvolution =
-          std::make_shared<Functions::Convolution>();
+      std::shared_ptr<Functions::Convolution> localConvolution = std::make_shared<Functions::Convolution>();
       localConvolution->addFunction(resolution);
       localConvolution->addFunction(localFunction);
       functionList.insert(functionList.end(), localConvolution);
@@ -406,11 +377,10 @@ void IMWDomainCreator::appendConvolvedCompositeFunctionMembers(
  * @param domain The domain to calculate the values over
  * @param resultValues A presized values holder for the results
  */
-void IMWDomainCreator::addFunctionValuesToWS(
-    const API::IFunction_sptr &function,
-    std::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
-    const std::shared_ptr<API::FunctionDomain> &domain,
-    const std::shared_ptr<API::FunctionValues> &resultValues) const {
+void IMWDomainCreator::addFunctionValuesToWS(const API::IFunction_sptr &function,
+                                             std::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
+                                             const std::shared_ptr<API::FunctionDomain> &domain,
+                                             const std::shared_ptr<API::FunctionValues> &resultValues) const {
   const size_t nData = resultValues->size();
   resultValues->zeroCalculated();
   // Confidence bands are calculated based on the example in

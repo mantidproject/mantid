@@ -22,8 +22,8 @@ using namespace API;
 DECLARE_FUNCTION(PoldiSpectrumDomainFunction)
 
 PoldiSpectrumDomainFunction::PoldiSpectrumDomainFunction()
-    : FunctionParameterDecorator(), m_chopperSlitOffsets(), m_deltaT(0.0),
-      m_timeTransformer(), m_2dHelpers(), m_profileFunction() {}
+    : FunctionParameterDecorator(), m_chopperSlitOffsets(), m_deltaT(0.0), m_timeTransformer(), m_2dHelpers(),
+      m_profileFunction() {}
 
 /**
  * Sets the workspace and initializes helper data
@@ -34,14 +34,11 @@ PoldiSpectrumDomainFunction::PoldiSpectrumDomainFunction()
  *
  * @param ws :: Workspace with valid POLDI instrument and run information
  */
-void PoldiSpectrumDomainFunction::setWorkspace(
-    std::shared_ptr<const Workspace> ws) {
-  Workspace2D_const_sptr workspace2D =
-      std::dynamic_pointer_cast<const Workspace2D>(ws);
+void PoldiSpectrumDomainFunction::setWorkspace(std::shared_ptr<const Workspace> ws) {
+  Workspace2D_const_sptr workspace2D = std::dynamic_pointer_cast<const Workspace2D>(ws);
 
   if (!workspace2D) {
-    throw std::invalid_argument(
-        "PoldiSpectrumDomainFunction can only work with Workspace2D.");
+    throw std::invalid_argument("PoldiSpectrumDomainFunction can only work with Workspace2D.");
   }
 
   initializeParametersFromWorkspace(workspace2D);
@@ -57,9 +54,8 @@ void PoldiSpectrumDomainFunction::setWorkspace(
  * @param domain :: FunctionDomain1DSpectrum, containing a workspace index
  * @param values :: Object to store the calculated function values
  */
-void PoldiSpectrumDomainFunction::function1DSpectrum(
-    const API::FunctionDomain1DSpectrum &domain,
-    API::FunctionValues &values) const {
+void PoldiSpectrumDomainFunction::function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
+                                                     API::FunctionValues &values) const {
   values.zeroCalculated();
 
   size_t index = domain.getWorkspaceIndex();
@@ -73,8 +69,7 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(
 
     double dWidth = 2.0 * fwhm;
     double dCalcMin = centre - dWidth;
-    size_t dWidthN = static_cast<size_t>(
-        std::max(2, 2 * static_cast<int>(dWidth / helper->deltaD) + 1));
+    size_t dWidthN = static_cast<size_t>(std::max(2, 2 * static_cast<int>(dWidth / helper->deltaD) + 1));
 
     int pos = 0;
 
@@ -94,12 +89,10 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(
       size_t offset = static_cast<size_t>(helper->dOffsets[i]) + baseOffset;
 
       m_profileFunction->setCentre(newD);
-      m_profileFunction->functionLocal(
-          &localOut[0], helper->domain->getPointerAt(pos), dWidthN);
+      m_profileFunction->functionLocal(&localOut[0], helper->domain->getPointerAt(pos), dWidthN);
 
       for (size_t j = 0; j < dWidthN; ++j) {
-        values.addToCalculated((offset + j) % domainSize,
-                               localOut[j] * helper->factors[pos + j]);
+        values.addToCalculated((offset + j) % domainSize, localOut[j] * helper->factors[pos + j]);
       }
     }
 
@@ -116,8 +109,7 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(
  * @param domain :: FunctionDomain1DSpectrum, containing a workspace index
  * @param jacobian :: Jacobian matrix.
  */
-void PoldiSpectrumDomainFunction::functionDeriv1DSpectrum(
-    const FunctionDomain1DSpectrum &domain, Jacobian &jacobian) {
+void PoldiSpectrumDomainFunction::functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain, Jacobian &jacobian) {
   size_t index = domain.getWorkspaceIndex();
   Poldi2DHelper_sptr helper = m_2dHelpers[index];
 
@@ -129,8 +121,7 @@ void PoldiSpectrumDomainFunction::functionDeriv1DSpectrum(
 
     double dWidth = 2.0 * fwhm;
     double dCalcMin = centre - dWidth;
-    size_t dWidthN = static_cast<size_t>(
-        std::max(2, 2 * static_cast<int>(dWidth / helper->deltaD) + 1));
+    size_t dWidthN = static_cast<size_t>(std::max(2, 2 * static_cast<int>(dWidth / helper->deltaD) + 1));
 
     int pos = 0;
 
@@ -146,27 +137,23 @@ void PoldiSpectrumDomainFunction::functionDeriv1DSpectrum(
     for (size_t i = 0; i < helper->dOffsets.size(); ++i) {
       double newD = centre + helper->dFractionalOffsets[i];
       size_t offset = static_cast<size_t>(helper->dOffsets[i]) + baseOffset;
-      WrapAroundJacobian smallJ(jacobian, offset, helper->factors, pos,
-                                domainSize);
+      WrapAroundJacobian smallJ(jacobian, offset, helper->factors, pos, domainSize);
 
       m_profileFunction->setCentre(newD);
 
-      m_profileFunction->functionDerivLocal(
-          &smallJ, helper->domain->getPointerAt(pos), dWidthN);
+      m_profileFunction->functionDerivLocal(&smallJ, helper->domain->getPointerAt(pos), dWidthN);
     }
 
     m_profileFunction->setCentre(centre);
   }
 }
 
-void PoldiSpectrumDomainFunction::poldiFunction1D(
-    const std::vector<int> &indices, const FunctionDomain1D &domain,
-    FunctionValues &values) const {
+void PoldiSpectrumDomainFunction::poldiFunction1D(const std::vector<int> &indices, const FunctionDomain1D &domain,
+                                                  FunctionValues &values) const {
 
   FunctionValues localValues(domain);
 
-  m_profileFunction->functionLocal(localValues.getPointerToCalculated(0),
-                                   domain.getPointerAt(0), domain.size());
+  m_profileFunction->functionLocal(localValues.getPointerToCalculated(0), domain.getPointerAt(0), domain.size());
 
   auto chopperSlitCount = static_cast<double>(m_chopperSlitOffsets.size());
 
@@ -175,16 +162,13 @@ void PoldiSpectrumDomainFunction::poldiFunction1D(
 
     for (size_t i = 0; i < factors.size(); ++i) {
       values.addToCalculated(i, chopperSlitCount * localValues[i] *
-                                    m_timeTransformer->detectorElementIntensity(
-                                        domain[i], static_cast<size_t>(index)));
+                                    m_timeTransformer->detectorElementIntensity(domain[i], static_cast<size_t>(index)));
     }
   }
 }
 
 /// Returns a smart pointer to the wrapped profile function.
-IPeakFunction_sptr PoldiSpectrumDomainFunction::getProfileFunction() const {
-  return m_profileFunction;
-}
+IPeakFunction_sptr PoldiSpectrumDomainFunction::getProfileFunction() const { return m_profileFunction; }
 
 /// Does nothing.
 void PoldiSpectrumDomainFunction::init() {}
@@ -195,14 +179,12 @@ void PoldiSpectrumDomainFunction::init() {}
  * @param workspace2D :: Workspace with valid POLDI instrument and required
  *                       run information
  */
-void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(
-    const Workspace2D_const_sptr &workspace2D) {
+void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(const Workspace2D_const_sptr &workspace2D) {
   const auto &xVals = workspace2D->x(0);
   m_deltaT = xVals[1] - xVals[0];
 
   PoldiInstrumentAdapter_sptr adapter =
-      std::make_shared<PoldiInstrumentAdapter>(workspace2D->getInstrument(),
-                                               workspace2D->run());
+      std::make_shared<PoldiInstrumentAdapter>(workspace2D->getInstrument(), workspace2D->run());
   initializeInstrumentParameters(adapter);
 }
 
@@ -215,8 +197,7 @@ void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(
  *
  * @param poldiInstrument :: Valid PoldiInstrumentAdapter
  */
-void PoldiSpectrumDomainFunction::initializeInstrumentParameters(
-    const PoldiInstrumentAdapter_sptr &poldiInstrument) {
+void PoldiSpectrumDomainFunction::initializeInstrumentParameters(const PoldiInstrumentAdapter_sptr &poldiInstrument) {
   m_timeTransformer = std::make_shared<PoldiTimeTransformer>(poldiInstrument);
   m_chopperSlitOffsets = getChopperSlitOffsets(poldiInstrument->chopper());
 
@@ -236,27 +217,22 @@ void PoldiSpectrumDomainFunction::initializeInstrumentParameters(
 
   for (int i = 0; i < static_cast<int>(detector->elementCount()); ++i) {
     double sinTheta = sin(detector->twoTheta(i) / 2.0);
-    double distance =
-        detector->distanceFromSample(i) + chopper->distanceFromSample();
+    double distance = detector->distanceFromSample(i) + chopper->distanceFromSample();
     double deltaD = Conversions::TOFtoD(m_deltaT, distance, sinTheta);
 
     Poldi2DHelper_sptr curr = std::make_shared<Poldi2DHelper>();
-    curr->setChopperSlitOffsets(distance, sinTheta, deltaD,
-                                m_chopperSlitOffsets);
+    curr->setChopperSlitOffsets(distance, sinTheta, deltaD, m_chopperSlitOffsets);
     curr->setDomain(dMin, dMax, deltaD);
     curr->deltaD = deltaD;
-    curr->minTOFN = static_cast<int>(
-        Conversions::dtoTOF(dMin, distance, sinTheta) / m_deltaT);
+    curr->minTOFN = static_cast<int>(Conversions::dtoTOF(dMin, distance, sinTheta) / m_deltaT);
     curr->setFactors(m_timeTransformer, static_cast<size_t>(i));
 
     m_2dHelpers.emplace_back(curr);
   }
 }
 
-void PoldiSpectrumDomainFunction::beforeDecoratedFunctionSet(
-    const IFunction_sptr &fn) {
-  IPeakFunction_sptr peakFunction =
-      std::dynamic_pointer_cast<IPeakFunction>(fn);
+void PoldiSpectrumDomainFunction::beforeDecoratedFunctionSet(const IFunction_sptr &fn) {
+  IPeakFunction_sptr peakFunction = std::dynamic_pointer_cast<IPeakFunction>(fn);
 
   if (!peakFunction) {
     throw std::invalid_argument("Function is not a peak function.");
@@ -272,8 +248,7 @@ void PoldiSpectrumDomainFunction::beforeDecoratedFunctionSet(
  *                   zero-offset
  * @return vector with zero-offset-corrected chopper slit times
  */
-std::vector<double> PoldiSpectrumDomainFunction::getChopperSlitOffsets(
-    const PoldiAbstractChopper_sptr &chopper) {
+std::vector<double> PoldiSpectrumDomainFunction::getChopperSlitOffsets(const PoldiAbstractChopper_sptr &chopper) {
   const auto zeroOffset = chopper->zeroOffset();
   const std::vector<double> &chopperSlitTimes = chopper->slitTimes();
   std::vector<double> offsets;

@@ -17,26 +17,19 @@ const std::string QSample::QSampleName = "QSample";
  */
 QSample::QSample() : m_unit(new Mantid::Kernel::InverseAngstromsUnit) {}
 
-Kernel::UnitLabel QSample::getUnitLabel() const {
-  return m_unit->getUnitLabel();
-}
+Kernel::UnitLabel QSample::getUnitLabel() const { return m_unit->getUnitLabel(); }
 
 const Kernel::MDUnit &QSample::getMDUnit() const { return *m_unit; }
 
-bool QSample::setMDUnit(const Mantid::Kernel::MDUnit & /*newUnit*/) {
-  return false;
-}
+bool QSample::setMDUnit(const Mantid::Kernel::MDUnit & /*newUnit*/) { return false; }
 
-bool QSample::canConvertTo(const Kernel::MDUnit &otherUnit) const {
-  return this->getMDUnit() == otherUnit;
-}
+bool QSample::canConvertTo(const Kernel::MDUnit &otherUnit) const { return this->getMDUnit() == otherUnit; }
 
 std::string QSample::name() const { return QSampleName; }
 
 QSample *QSample::clone() const { return new QSample; }
 
-Mantid::Kernel::SpecialCoordinateSystem
-QSample::equivalientSpecialCoordinateSystem() const {
+Mantid::Kernel::SpecialCoordinateSystem QSample::equivalientSpecialCoordinateSystem() const {
   return Mantid::Kernel::SpecialCoordinateSystem::QSample;
 }
 

@@ -27,22 +27,17 @@ public:
   const std::string name() const override { return "CorelliCalibrationApply"; };
 
   /// Summary of algorithm's purpose
-  const std::string summary() const override {
-    return "Apply Corelli calibration results onto input workspace";
-  };
+  const std::string summary() const override { return "Apply Corelli calibration results onto input workspace"; };
 
   /// Algorithm's version, overriding a virtual method
   int version() const override { return 1; };
 
   /// Algorithm's category, overriding a virtual method
-  const std::string category() const override {
-    return "Diffraction\\Calibration";
-  };
+  const std::string category() const override { return "Diffraction\\Calibration"; };
 
   /// Extra help info
   const std::vector<std::string> seeAlso() const override {
-    return {"CorelliPowderCalibrationGenerate", "CorelliCalibrationDatabase",
-            "CorelliPowderCalibrationLoad"};
+    return {"CorelliPowderCalibrationGenerate", "CorelliCalibrationDatabase", "CorelliPowderCalibrationLoad"};
   };
 
 private:

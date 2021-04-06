@@ -50,67 +50,51 @@ struct IntegrationParameters {
 
  */
 
-using EventListMap = std::unordered_map<
-    int64_t,
-    std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>>>;
+using EventListMap =
+    std::unordered_map<int64_t, std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>>>;
 using PeakQMap = std::unordered_map<int64_t, Mantid::Kernel::V3D>;
 
 class DLLExport Integrate3DEvents {
 public:
   /// Construct object to store events around peaks and integrate peaks
-  Integrate3DEvents(
-      const std::vector<std::pair<std::pair<double, double>,
-                                  Mantid::Kernel::V3D>> &peak_q_list,
-      Kernel::DblMatrix const &UBinv, double radius,
-      const bool useOnePercentBackgroundCorrection = true);
+  Integrate3DEvents(const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list,
+                    Kernel::DblMatrix const &UBinv, double radius, const bool useOnePercentBackgroundCorrection = true);
 
-  Integrate3DEvents(
-      const std::vector<std::pair<std::pair<double, double>,
-                                  Mantid::Kernel::V3D>> &peak_q_list,
-      std::vector<Mantid::Kernel::V3D> const &hkl_list,
-      std::vector<Mantid::Kernel::V3D> const &mnp_list,
-      Kernel::DblMatrix const &UBinv, Kernel::DblMatrix const &ModHKL,
-      double radius_m, double radius_s, int MaxO, const bool CrossT,
-      const bool useOnePercentBackgroundCorrection = true);
+  Integrate3DEvents(const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list,
+                    std::vector<Mantid::Kernel::V3D> const &hkl_list, std::vector<Mantid::Kernel::V3D> const &mnp_list,
+                    Kernel::DblMatrix const &UBinv, Kernel::DblMatrix const &ModHKL, double radius_m, double radius_s,
+                    int MaxO, const bool CrossT, const bool useOnePercentBackgroundCorrection = true);
 
   /// Add event Q's to lists of events near peaks
-  void addEvents(std::vector<std::pair<std::pair<double, double>,
-                                       Mantid::Kernel::V3D>> const &event_qs,
+  void addEvents(std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const &event_qs,
                  bool hkl_integ);
 
   /// Find the net integrated intensity of a peak, using ellipsoidal volumes
-  std::shared_ptr<const Mantid::Geometry::PeakShape> ellipseIntegrateEvents(
-      const std::vector<Kernel::V3D> &E1Vec, Mantid::Kernel::V3D const &peak_q,
-      bool specify_size, double peak_radius, double back_inner_radius,
-      double back_outer_radius, std::vector<double> &axes_radii, double &inti,
-      double &sigi);
+  std::shared_ptr<const Mantid::Geometry::PeakShape>
+  ellipseIntegrateEvents(const std::vector<Kernel::V3D> &E1Vec, Mantid::Kernel::V3D const &peak_q, bool specify_size,
+                         double peak_radius, double back_inner_radius, double back_outer_radius,
+                         std::vector<double> &axes_radii, double &inti, double &sigi);
 
   /// Find the net integrated intensity of a modulated peak, using ellipsoidal
   /// volumes
-  std::shared_ptr<const Mantid::Geometry::PeakShape> ellipseIntegrateModEvents(
-      const std::vector<Kernel::V3D> &E1Vec, Mantid::Kernel::V3D const &peak_q,
-      Mantid::Kernel::V3D const &hkl, Mantid::Kernel::V3D const &mnp,
-      bool specify_size, double peak_radius, double back_inner_radius,
-      double back_outer_radius, std::vector<double> &axes_radii, double &inti,
-      double &sigi);
+  std::shared_ptr<const Mantid::Geometry::PeakShape>
+  ellipseIntegrateModEvents(const std::vector<Kernel::V3D> &E1Vec, Mantid::Kernel::V3D const &peak_q,
+                            Mantid::Kernel::V3D const &hkl, Mantid::Kernel::V3D const &mnp, bool specify_size,
+                            double peak_radius, double back_inner_radius, double back_outer_radius,
+                            std::vector<double> &axes_radii, double &inti, double &sigi);
 
   /// Find the net integrated intensity of a peak, using ellipsoidal volumes
-  std::pair<std::shared_ptr<const Mantid::Geometry::PeakShape>,
-            std::tuple<double, double, double>>
-  integrateStrongPeak(const IntegrationParameters &params,
-                      const Kernel::V3D &peak_q, double &inti, double &sigi);
+  std::pair<std::shared_ptr<const Mantid::Geometry::PeakShape>, std::tuple<double, double, double>>
+  integrateStrongPeak(const IntegrationParameters &params, const Kernel::V3D &peak_q, double &inti, double &sigi);
 
-  std::shared_ptr<const Geometry::PeakShape>
-  integrateWeakPeak(const IntegrationParameters &params,
-                    Mantid::DataObjects::PeakShapeEllipsoid_const_sptr shape,
-                    const std::tuple<double, double, double> &libPeak,
-                    const Mantid::Kernel::V3D &peak_q, double &inti,
-                    double &sigi);
+  std::shared_ptr<const Geometry::PeakShape> integrateWeakPeak(const IntegrationParameters &params,
+                                                               Mantid::DataObjects::PeakShapeEllipsoid_const_sptr shape,
+                                                               const std::tuple<double, double, double> &libPeak,
+                                                               const Mantid::Kernel::V3D &peak_q, double &inti,
+                                                               double &sigi);
 
-  double estimateSignalToNoiseRatio(const IntegrationParameters &params,
-                                    const Mantid::Kernel::V3D &center,
-                                    bool forceSpherical = false,
-                                    double sphericityTol = 0.02);
+  double estimateSignalToNoiseRatio(const IntegrationParameters &params, const Mantid::Kernel::V3D &center,
+                                    bool forceSpherical = false, double sphericityTol = 0.02);
 
 private:
   /// Get a list of events for a given Q
@@ -118,37 +102,27 @@ private:
   getEvents(const Mantid::Kernel::V3D &peak_q);
 
   bool correctForDetectorEdges(std::tuple<double, double, double> &radii,
-                               const std::vector<Mantid::Kernel::V3D> &E1Vecs,
-                               const Mantid::Kernel::V3D &peak_q,
-                               const std::vector<double> &axesRadii,
-                               const std::vector<double> &bkgInnerRadii,
+                               const std::vector<Mantid::Kernel::V3D> &E1Vecs, const Mantid::Kernel::V3D &peak_q,
+                               const std::vector<double> &axesRadii, const std::vector<double> &bkgInnerRadii,
                                const std::vector<double> &bkgOuterRadii);
 
   /// Calculate the number of events in an ellipsoid centered at 0,0,0
   static std::pair<double, double>
-  numInEllipsoid(std::vector<std::pair<std::pair<double, double>,
-                                       Mantid::Kernel::V3D>> const &events,
-                 std::vector<Mantid::Kernel::V3D> const &directions,
-                 std::vector<double> const &sizes);
+  numInEllipsoid(std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const &events,
+                 std::vector<Mantid::Kernel::V3D> const &directions, std::vector<double> const &sizes);
 
   /// Calculate the number of events in an ellipsoid centered at 0,0,0
   static std::pair<double, double>
-  numInEllipsoidBkg(std::vector<std::pair<std::pair<double, double>,
-                                          Mantid::Kernel::V3D>> const &events,
-                    std::vector<Mantid::Kernel::V3D> const &directions,
-                    std::vector<double> const &sizes,
-                    std::vector<double> const &sizesIn,
-                    const bool useOnePercentBackgroundCorrection);
+  numInEllipsoidBkg(std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const &events,
+                    std::vector<Mantid::Kernel::V3D> const &directions, std::vector<double> const &sizes,
+                    std::vector<double> const &sizesIn, const bool useOnePercentBackgroundCorrection);
 
   /// Calculate the 3x3 covariance matrix of a list of Q-vectors at 0,0,0
-  static void makeCovarianceMatrix(
-      std::vector<std::pair<std::pair<double, double>,
-                            Mantid::Kernel::V3D>> const &events,
-      Kernel::DblMatrix &matrix, double radius);
+  static void makeCovarianceMatrix(std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const &events,
+                                   Kernel::DblMatrix &matrix, double radius);
 
   /// Calculate the eigen vectors of a 3x3 real symmetric matrix
-  static void getEigenVectors(Kernel::DblMatrix const &cov_matrix,
-                              std::vector<Mantid::Kernel::V3D> &eigen_vectors,
+  static void getEigenVectors(Kernel::DblMatrix const &cov_matrix, std::vector<Mantid::Kernel::V3D> &eigen_vectors,
                               std::vector<double> &eigen_values);
 
   /// Form a map key as 10^12*h + 10^6*k + l from the integers h, k, l
@@ -163,32 +137,23 @@ private:
   int64_t getHklMnpKey2(Mantid::Kernel::V3D const &hkl);
 
   /// Add an event to the vector of events for the closest h,k,l
-  void
-  addEvent(std::pair<std::pair<double, double>, Mantid::Kernel::V3D> event_Q,
-           bool hkl_integ);
-  void
-  addModEvent(std::pair<std::pair<double, double>, Mantid::Kernel::V3D> event_Q,
-              bool hkl_integ);
+  void addEvent(std::pair<std::pair<double, double>, Mantid::Kernel::V3D> event_Q, bool hkl_integ);
+  void addModEvent(std::pair<std::pair<double, double>, Mantid::Kernel::V3D> event_Q, bool hkl_integ);
 
   /// Find the net integrated intensity of a list of Q's using ellipsoids
   std::shared_ptr<const Mantid::DataObjects::PeakShapeEllipsoid>
-  ellipseIntegrateEvents(
-      const std::vector<Kernel::V3D> &E1Vec, Kernel::V3D const &peak_q,
-      std::vector<std::pair<std::pair<double, double>,
-                            Mantid::Kernel::V3D>> const &ev_list,
-      std::vector<Mantid::Kernel::V3D> const &directions,
-      std::vector<double> const &sigmas, bool specify_size, double peak_radius,
-      double back_inner_radius, double back_outer_radius,
-      std::vector<double> &axes_radii, double &inti, double &sigi);
+  ellipseIntegrateEvents(const std::vector<Kernel::V3D> &E1Vec, Kernel::V3D const &peak_q,
+                         std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const &ev_list,
+                         std::vector<Mantid::Kernel::V3D> const &directions, std::vector<double> const &sigmas,
+                         bool specify_size, double peak_radius, double back_inner_radius, double back_outer_radius,
+                         std::vector<double> &axes_radii, double &inti, double &sigi);
 
   /// Compute if a particular Q falls on the edge of a detector
-  double detectorQ(const std::vector<Kernel::V3D> &E1Vec,
-                   const Mantid::Kernel::V3D QLabFrame,
+  double detectorQ(const std::vector<Kernel::V3D> &E1Vec, const Mantid::Kernel::V3D QLabFrame,
                    const std::vector<double> &r);
 
-  std::tuple<double, double, double>
-  calculateRadiusFactors(const IntegrationParameters &params,
-                         double max_sigma) const;
+  std::tuple<double, double, double> calculateRadiusFactors(const IntegrationParameters &params,
+                                                            double max_sigma) const;
 
   // Private data members
 

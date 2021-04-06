@@ -32,14 +32,12 @@ public:
     using Mantid::Kernel::ConfigService;
     auto &config = ConfigService::Instance();
     auto baseInstDir = config.getInstrumentDirectory();
-    Poco::Path testFile =
-        Poco::Path(baseInstDir).resolve("unit_testing/UnitTestFacilities.xml");
+    Poco::Path testFile = Poco::Path(baseInstDir).resolve("unit_testing/UnitTestFacilities.xml");
     // Load the test facilities file
     config.updateFacilities(testFile.toString());
     config.setFacility("TEST");
     // Update instrument search directory
-    config.setString("instrumentDefinition.directory",
-                     baseInstDir + "/unit_testing");
+    config.setString("instrumentDefinition.directory", baseInstDir + "/unit_testing");
   }
 
   void tearDown() override {
@@ -66,15 +64,13 @@ public:
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
         .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)));
     auto testWrapper = createTestInstance(mockBroker);
-    TSM_ASSERT("testInstance should not have create data buffers yet",
-               !testWrapper->hasData());
+    TSM_ASSERT("testInstance should not have create data buffers yet", !testWrapper->hasData());
 
     testWrapper.runKafkaOneStep(); // Start up
 
     // Checks
     Workspace_sptr workspace;
-    TSM_ASSERT("testInstance's data buffers should be created now",
-               testWrapper->hasData());
+    TSM_ASSERT("testInstance's data buffers should be created now", testWrapper->hasData());
 
     TS_ASSERT_THROWS_NOTHING(testWrapper.stopCapture());
     TS_ASSERT(!testWrapper->isCapturing());
@@ -82,12 +78,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(workspace = testWrapper->extractData());
 
     // -- Workspace checks --
-    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
-               workspace);
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()", workspace);
     auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(workspace);
-    TSM_ASSERT(
-        "Expected an EventWorkspace from extractData(). Found something else",
-        eventWksp);
+    TSM_ASSERT("Expected an EventWorkspace from extractData(). Found something else", eventWksp);
     checkWorkspaceMetadata(*eventWksp);
     checkWorkspaceEventData(*eventWksp);
 
@@ -124,19 +117,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(workspace = testInstance->extractData());
 
     // --- Workspace checks ---
-    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
-               workspace);
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()", workspace);
     auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
-    TSM_ASSERT(
-        "Expected a WorkspaceGroup from extractData(). Found something else.",
-        group);
+    TSM_ASSERT("Expected a WorkspaceGroup from extractData(). Found something else.", group);
 
     TS_ASSERT_EQUALS(2, group->size());
     for (size_t i = 0; i < 2; ++i) {
-      auto eventWksp =
-          std::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
-      TSM_ASSERT("Expected an EventWorkspace for each member of the group",
-                 eventWksp);
+      auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
+      TSM_ASSERT("Expected an EventWorkspace for each member of the group", eventWksp);
       checkWorkspaceMetadata(*eventWksp);
       checkWorkspaceEventData(*eventWksp);
     }
@@ -168,8 +156,7 @@ public:
         .WillOnce(Return(new FakeVariablePeriodSubscriber(4))); // 2nd run
 
     auto testInstance = createTestInstance(mockBroker);
-    TSM_ASSERT("testInstance should not have create data buffers yet",
-               !testInstance->hasData());
+    TSM_ASSERT("testInstance should not have create data buffers yet", !testInstance->hasData());
     // Run start, Event, Run stop, Run start, (2 period)
     for (size_t i = 0; i < 5; i++) {
       testInstance.runKafkaOneStep();
@@ -193,19 +180,14 @@ public:
     TS_ASSERT(!testInstance->isCapturing());
 
     // --- Workspace checks ---
-    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
-               workspace);
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()", workspace);
     auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
-    TSM_ASSERT(
-        "Expected a WorkspaceGroup from extractData(). Found something else.",
-        group);
+    TSM_ASSERT("Expected a WorkspaceGroup from extractData(). Found something else.", group);
 
     TS_ASSERT_EQUALS(2, group->size());
     for (size_t i = 0; i < 2; ++i) {
-      auto eventWksp =
-          std::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
-      TSM_ASSERT("Expected an EventWorkspace for each member of the group",
-                 eventWksp);
+      auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
+      TSM_ASSERT("Expected an EventWorkspace for each member of the group", eventWksp);
       checkWorkspaceMetadata(*eventWksp);
       checkWorkspaceEventData(*eventWksp);
     }
@@ -224,8 +206,7 @@ public:
         .WillOnce(Return(new FakeDataStreamSubscriber(1)))
         .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)));
     auto testInstance = createTestInstance(mockBroker);
-    TSM_ASSERT("testInstance should not have create data buffers yet",
-               !testInstance->hasData());
+    TSM_ASSERT("testInstance should not have create data buffers yet", !testInstance->hasData());
     // 3 iterations to get first run, consisting of a run start message, an
     // event message and a run stop message
     for (int i = 0; i < 3; i++) {
@@ -242,19 +223,14 @@ public:
     TS_ASSERT(!testInstance->isCapturing());
 
     // -- Workspace checks --
-    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
-               workspace);
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()", workspace);
     auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(workspace);
-    TSM_ASSERT(
-        "Expected an EventWorkspace from extractData(). Found something else",
-        eventWksp);
+    TSM_ASSERT("Expected an EventWorkspace from extractData(). Found something else", eventWksp);
 
-    TSM_ASSERT_EQUALS("Expected exactly 6 events from message in first run", 6,
-                      eventWksp->getNumberEvents());
+    TSM_ASSERT_EQUALS("Expected exactly 6 events from message in first run", 6, eventWksp->getNumberEvents());
   }
 
-  void
-  test_Get_All_Run_Events_When_Run_Stop_Message_Received_Before_Last_Event_Message() {
+  void test_Get_All_Run_Events_When_Run_Stop_Message_Received_Before_Last_Event_Message() {
     using namespace ::testing;
     using namespace KafkaTesting;
     using Mantid::API::Workspace_sptr;
@@ -267,8 +243,7 @@ public:
         .WillOnce(Return(new FakeDataStreamSubscriber(3)))
         .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)));
     auto testInstance = createTestInstance(mockBroker);
-    TSM_ASSERT("testInstance should not have create data buffers yet",
-               !testInstance->hasData());
+    TSM_ASSERT("testInstance should not have create data buffers yet", !testInstance->hasData());
     // 4 iterations to get first run, consisting of a run start message, an
     // event message, a run stop message, lastly another event message
     for (int i = 0; i < 5; i++) {
@@ -283,15 +258,11 @@ public:
     TS_ASSERT(!testInstance->isCapturing());
 
     // -- Workspace checks --
-    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
-               workspace);
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()", workspace);
     auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(workspace);
-    TSM_ASSERT(
-        "Expected an EventWorkspace from extractData(). Found something else",
-        eventWksp);
+    TSM_ASSERT("Expected an EventWorkspace from extractData(). Found something else", eventWksp);
 
-    TSM_ASSERT_EQUALS("Expected exactly 12 events from messages in first run",
-                      12, eventWksp->getNumberEvents());
+    TSM_ASSERT_EQUALS("Expected exactly 12 events from messages in first run", 12, eventWksp->getNumberEvents());
   }
 
   void test_Sample_Log_From_Event_Stream() {
@@ -307,8 +278,7 @@ public:
         .WillOnce(Return(new FakeSampleEnvironmentSubscriber))
         .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)));
     auto testInstance = createTestInstance(mockBroker);
-    TSM_ASSERT("testInstance should not have create data buffers yet",
-               !testInstance->hasData());
+    TSM_ASSERT("testInstance should not have create data buffers yet", !testInstance->hasData());
     testInstance.runKafkaOneStep();
     Workspace_sptr workspace;
     TS_ASSERT_THROWS_NOTHING(workspace = testInstance->extractData());
@@ -316,12 +286,9 @@ public:
     TS_ASSERT(!testInstance->isCapturing());
 
     // -- Workspace checks --
-    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
-               workspace);
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()", workspace);
     auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(workspace);
-    TSM_ASSERT(
-        "Expected an EventWorkspace from extractData(). Found something else",
-        eventWksp);
+    TSM_ASSERT("Expected an EventWorkspace from extractData(). Found something else", eventWksp);
 
     checkWorkspaceLogData(*eventWksp);
   }
@@ -343,8 +310,7 @@ public:
     TS_ASSERT(!testInstance->isCapturing());
   }
 
-  void
-  test_No_Exception_When_Event_Message_Without_Facility_Data_Is_Processed() {
+  void test_No_Exception_When_Event_Message_Without_Facility_Data_Is_Processed() {
     using namespace ::testing;
     using namespace KafkaTesting;
     using Mantid::API::Workspace_sptr;
@@ -366,24 +332,18 @@ public:
     TS_ASSERT_THROWS_NOTHING(workspace = testInstance->extractData());
 
     // Check we did process the event message and extract the events
-    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
-               workspace);
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()", workspace);
     auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(workspace);
-    TSM_ASSERT(
-        "Expected an EventWorkspace from extractData(). Found something else",
-        eventWksp);
+    TSM_ASSERT("Expected an EventWorkspace from extractData(). Found something else", eventWksp);
 
-    TSM_ASSERT_EQUALS("Expected 3 events from the event message", 3,
-                      eventWksp->getNumberEvents());
+    TSM_ASSERT_EQUALS("Expected 3 events from the event message", 3, eventWksp->getNumberEvents());
   }
 
   void test_Compute_Bounds_Multiple_Threads() {
-    const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent>
-        events = {
-            {0, 0, 0}, {0, 0, 0}, {1, 0, 0}, {1, 0, 0}, {2, 0, 0}, {2, 0, 0},
-            {3, 0, 0}, {3, 0, 0}, {4, 0, 0}, {4, 0, 0}, {5, 0, 0}, {5, 0, 0},
-            {6, 0, 0}, {6, 0, 0}, {7, 0, 0}, {7, 0, 0},
-        };
+    const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent> events = {
+        {0, 0, 0}, {0, 0, 0}, {1, 0, 0}, {1, 0, 0}, {2, 0, 0}, {2, 0, 0}, {3, 0, 0}, {3, 0, 0},
+        {4, 0, 0}, {4, 0, 0}, {5, 0, 0}, {5, 0, 0}, {6, 0, 0}, {6, 0, 0}, {7, 0, 0}, {7, 0, 0},
+    };
 
     const auto groupBounds = computeGroupBoundaries(events, 8);
     TS_ASSERT_EQUALS(9, groupBounds.size());
@@ -400,10 +360,9 @@ public:
   }
 
   void test_Compute_Bounds_Multiple_Threads_Low_Events() {
-    const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent>
-        events = {
-            {0, 0, 0}, {1, 0, 0}, {2, 0, 0}, {3, 0, 0}, {3, 0, 0}, {4, 0, 0},
-        };
+    const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent> events = {
+        {0, 0, 0}, {1, 0, 0}, {2, 0, 0}, {3, 0, 0}, {3, 0, 0}, {4, 0, 0},
+    };
 
     const auto groupBounds = computeGroupBoundaries(events, 8);
     TS_ASSERT_EQUALS(9, groupBounds.size());
@@ -422,35 +381,34 @@ public:
   }
 
   void test_Compute_Bounds_Multiple_Threads_Very_Inbalanced() {
-    const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent>
-        events = {/* 0 */
-                  {0, 0, 0},
-                  {0, 0, 0},
-                  {0, 0, 0},
-                  {0, 0, 0},
-                  {0, 0, 0},
-                  {0, 0, 0},
-                  {0, 0, 0},
-                  {0, 0, 0},
-                  {0, 0, 0},
-                  {0, 0, 0},
-                  {0, 0, 0},
-                  {0, 0, 0},
-                  {0, 0, 0},
-                  {0, 0, 0},
+    const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent> events = {/* 0 */
+                                                                                          {0, 0, 0},
+                                                                                          {0, 0, 0},
+                                                                                          {0, 0, 0},
+                                                                                          {0, 0, 0},
+                                                                                          {0, 0, 0},
+                                                                                          {0, 0, 0},
+                                                                                          {0, 0, 0},
+                                                                                          {0, 0, 0},
+                                                                                          {0, 0, 0},
+                                                                                          {0, 0, 0},
+                                                                                          {0, 0, 0},
+                                                                                          {0, 0, 0},
+                                                                                          {0, 0, 0},
+                                                                                          {0, 0, 0},
 
-                  /* 14 */
-                  {1, 0, 0},
+                                                                                          /* 14 */
+                                                                                          {1, 0, 0},
 
-                  /* 15 */
-                  {2, 0, 0},
+                                                                                          /* 15 */
+                                                                                          {2, 0, 0},
 
-                  /* 16 */
-                  {3, 0, 0},
-                  {3, 0, 0},
+                                                                                          /* 16 */
+                                                                                          {3, 0, 0},
+                                                                                          {3, 0, 0},
 
-                  /* 18 */
-                  {4, 0, 0}};
+                                                                                          /* 18 */
+                                                                                          {4, 0, 0}};
 
     const auto groupBounds = computeGroupBoundaries(events, 8);
     TS_ASSERT_EQUALS(9, groupBounds.size());
@@ -470,10 +428,9 @@ public:
   }
 
   void test_Compute_Bounds_Single_Thread() {
-    const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent>
-        events = {
-            {0, 0, 0}, {1, 0, 0}, {2, 0, 0}, {3, 0, 0}, {3, 0, 0}, {4, 0, 0},
-        };
+    const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent> events = {
+        {0, 0, 0}, {1, 0, 0}, {2, 0, 0}, {3, 0, 0}, {3, 0, 0}, {4, 0, 0},
+    };
 
     const auto groupBounds = computeGroupBoundaries(events, 1);
     TS_ASSERT_EQUALS(2, groupBounds.size());
@@ -520,22 +477,17 @@ public:
 
 private:
   KafkaTesting::KafkaTestThreadHelper<Mantid::LiveData::KafkaEventStreamDecoder>
-  createTestInstance(
-      const std::shared_ptr<Mantid::LiveData::IKafkaBroker> &broker) {
+  createTestInstance(const std::shared_ptr<Mantid::LiveData::IKafkaBroker> &broker) {
     using namespace Mantid::LiveData;
 
     KafkaEventStreamDecoder testInstance(broker, "", "", "", "", "", 0);
-    return KafkaTesting::KafkaTestThreadHelper<KafkaEventStreamDecoder>(
-        std::move(testInstance));
+    return KafkaTesting::KafkaTestThreadHelper<KafkaEventStreamDecoder>(std::move(testInstance));
   }
 
-  void
-  checkWorkspaceMetadata(const Mantid::DataObjects::EventWorkspace &eventWksp) {
+  void checkWorkspaceMetadata(const Mantid::DataObjects::EventWorkspace &eventWksp) {
     TS_ASSERT(eventWksp.getInstrument());
     TS_ASSERT_EQUALS("HRPDTEST", eventWksp.getInstrument()->getName());
-    TS_ASSERT_EQUALS(
-        "2016-08-31T12:07:42",
-        eventWksp.run().getPropertyValueAsType<std::string>("run_start"));
+    TS_ASSERT_EQUALS("2016-08-31T12:07:42", eventWksp.run().getPropertyValueAsType<std::string>("run_start"));
     std::array<Mantid::specnum_t, 5> specs = {{1, 2, 3, 4, 5}};
     std::array<Mantid::detid_t, 5> ids = {{1001, 1002, 1100, 901000, 10100}};
     TS_ASSERT_EQUALS(specs.size(), eventWksp.getNumberHistograms());
@@ -547,8 +499,7 @@ private:
     }
   }
 
-  void checkWorkspaceEventData(
-      const Mantid::DataObjects::EventWorkspace &eventWksp) {
+  void checkWorkspaceEventData(const Mantid::DataObjects::EventWorkspace &eventWksp) {
     // A timer-based test and each message contains 6 events so the total
     // should be divisible by 6, but not be 0
     TS_ASSERT(eventWksp.getNumberEvents() % 6 == 0);
@@ -559,11 +510,9 @@ private:
     Mantid::Kernel::TimeSeriesProperty<int32_t> *log = nullptr;
     auto run = eventWksp.mutableRun();
     // We should find a sample log with this name
-    TS_ASSERT_THROWS_NOTHING(
-        log = run.getTimeSeriesProperty<int32_t>("fake source"));
+    TS_ASSERT_THROWS_NOTHING(log = run.getTimeSeriesProperty<int32_t>("fake source"));
     if (log) {
-      TS_ASSERT_EQUALS(log->firstTime().toISO8601String(),
-                       "2017-05-24T09:29:48")
+      TS_ASSERT_EQUALS(log->firstTime().toISO8601String(), "2017-05-24T09:29:48")
       TS_ASSERT_EQUALS(log->firstValue(), 42)
     }
   }

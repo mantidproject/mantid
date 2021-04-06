@@ -37,15 +37,11 @@ namespace {
  * @param exts A list of extensions, only use for File-type actions and are
  *             passed to the validator
  */
-IValidator_sptr createValidator(unsigned int action,
-                                const std::vector<std::string> &exts) {
-  if (action == FileProperty::Directory ||
-      action == FileProperty::OptionalDirectory) {
-    return std::make_shared<DirectoryValidator>(action ==
-                                                FileProperty::Directory);
+IValidator_sptr createValidator(unsigned int action, const std::vector<std::string> &exts) {
+  if (action == FileProperty::Directory || action == FileProperty::OptionalDirectory) {
+    return std::make_shared<DirectoryValidator>(action == FileProperty::Directory);
   } else {
-    return std::make_shared<FileValidator>(exts,
-                                           (action == FileProperty::Load));
+    return std::make_shared<FileValidator>(exts, (action == FileProperty::Load));
   }
 }
 
@@ -54,10 +50,8 @@ IValidator_sptr createValidator(unsigned int action,
  * @param extension A string listing the extension
  * @param extensions The existing collection
  */
-void addExtension(const std::string &extension,
-                  std::vector<std::string> &extensions) {
-  if (std::find(extensions.begin(), extensions.end(), extension) !=
-      extensions.end())
+void addExtension(const std::string &extension, std::vector<std::string> &extensions) {
+  if (std::find(extensions.begin(), extensions.end(), extension) != extensions.end())
     return;
   else
     extensions.emplace_back(extension);
@@ -108,8 +102,7 @@ std::string expandUser(const std::string &filepath) {
     return filepath;
 
   // Position of the first slash after the variable
-  auto nextSlash =
-      find_if(start, end, [](const char &c) { return c == '/' || c == '\\'; });
+  auto nextSlash = find_if(start, end, [](const char &c) { return c == '/' || c == '\\'; });
 
   // ~user/blah format - no support for this as yet
   if (std::distance(start, nextSlash) != 1)
@@ -136,8 +129,7 @@ std::string createDirectory(const std::string &path) {
         stem.createDirectories();
       } catch (Poco::Exception &e) {
         std::stringstream msg;
-        msg << "Failed to create directory \"" << stempath.toString()
-            << "\": " << e.what();
+        msg << "Failed to create directory \"" << stempath.toString() << "\": " << e.what();
         return msg.str();
       }
     }
@@ -161,14 +153,10 @@ std::string createDirectory(const std::string &path) {
  * will be the default extension
  * @param direction An optional direction (default=Input)
  */
-FileProperty::FileProperty(const std::string &name,
-                           const std::string &defaultValue, unsigned int action,
-                           const std::vector<std::string> &exts,
-                           unsigned int direction)
-    : PropertyWithValue<std::string>(name, defaultValue,
-                                     createValidator(action, exts), direction),
-      m_action(action), m_defaultExt((!exts.empty()) ? exts.front() : ""),
-      m_runFileProp(isLoadProperty() && extsMatchRunFiles()),
+FileProperty::FileProperty(const std::string &name, const std::string &defaultValue, unsigned int action,
+                           const std::vector<std::string> &exts, unsigned int direction)
+    : PropertyWithValue<std::string>(name, defaultValue, createValidator(action, exts), direction), m_action(action),
+      m_defaultExt((!exts.empty()) ? exts.front() : ""), m_runFileProp(isLoadProperty() && extsMatchRunFiles()),
       m_oldLoadPropValue(""), m_oldLoadFoundFile("") {}
 
 /**
@@ -180,12 +168,9 @@ FileProperty::FileProperty(const std::string &name,
  * property
  * @param direction ::     An optional direction (default=Input)
  */
-FileProperty::FileProperty(const std::string &name,
-                           const std::string &default_value,
-                           unsigned int action, const std::string &ext,
-                           unsigned int direction)
-    : FileProperty(name, default_value, action,
-                   std::vector<std::string>(1, ext), direction) {}
+FileProperty::FileProperty(const std::string &name, const std::string &default_value, unsigned int action,
+                           const std::string &ext, unsigned int direction)
+    : FileProperty(name, default_value, action, std::vector<std::string>(1, ext), direction) {}
 
 /**
  * Constructor
@@ -196,45 +181,34 @@ FileProperty::FileProperty(const std::string &name,
  * property
  * @param direction ::     An optional direction (default=Input)
  */
-FileProperty::FileProperty(const std::string &name,
-                           const std::string &default_value,
-                           unsigned int action,
-                           std::initializer_list<std::string> exts,
-                           unsigned int direction)
-    : FileProperty(name, default_value, action, std::vector<std::string>(exts),
-                   direction) {}
+FileProperty::FileProperty(const std::string &name, const std::string &default_value, unsigned int action,
+                           std::initializer_list<std::string> exts, unsigned int direction)
+    : FileProperty(name, default_value, action, std::vector<std::string>(exts), direction) {}
 
 /**
  * Check if this is a load property
  * @returns True if the property is a Load property and false otherwise
  */
-bool FileProperty::isLoadProperty() const {
-  return m_action == Load || m_action == OptionalLoad;
-}
+bool FileProperty::isLoadProperty() const { return m_action == Load || m_action == OptionalLoad; }
 
 /**
  * Check if this is a Save property
  * @returns True if the property is a Save property and false otherwise
  */
-bool FileProperty::isSaveProperty() const {
-  return m_action == Save || m_action == OptionalSave;
-}
+bool FileProperty::isSaveProperty() const { return m_action == Save || m_action == OptionalSave; }
 
 /**
  * Check if this is a directory selection property
  * @returns True if the property is a Directory property
  */
-bool FileProperty::isDirectoryProperty() const {
-  return m_action == Directory || m_action == OptionalDirectory;
-}
+bool FileProperty::isDirectoryProperty() const { return m_action == Directory || m_action == OptionalDirectory; }
 
 /**
  * Check if this property is optional
  * @returns True if the property is optinal, false otherwise
  */
 bool FileProperty::isOptional() const {
-  return (m_action == OptionalLoad || m_action == OptionalSave ||
-          m_action == OptionalDirectory);
+  return (m_action == OptionalLoad || m_action == OptionalSave || m_action == OptionalDirectory);
 }
 
 /**
@@ -316,16 +290,14 @@ std::string FileProperty::isEmptyValueValid() const {
 bool FileProperty::extsMatchRunFiles() {
   bool match(false);
   try {
-    Kernel::FacilityInfo facilityInfo =
-        Kernel::ConfigService::Instance().getFacility();
+    Kernel::FacilityInfo facilityInfo = Kernel::ConfigService::Instance().getFacility();
     const std::vector<std::string> facilityExts = facilityInfo.extensions();
     auto facilityExtsBegin = facilityExts.cbegin();
     auto facilityExtsEnd = facilityExts.cend();
     const std::vector<std::string> allowedExts = this->allowedValues();
 
     for (const auto &ext : allowedExts) {
-      if (std::find(facilityExtsBegin, facilityExtsEnd, ext) !=
-          facilityExtsEnd) {
+      if (std::find(facilityExtsBegin, facilityExtsEnd, ext) != facilityExtsEnd) {
         match = true;
         break;
       }
@@ -410,8 +382,7 @@ std::string FileProperty::setSaveProperty(const std::string &propValue) {
   // 'defaultsave.directory'
   // Note that this catches the Poco::NotFoundException and returns an empty
   // string in that case
-  std::string save_path =
-      ConfigService::Instance().getString("defaultsave.directory");
+  std::string save_path = ConfigService::Instance().getString("defaultsave.directory");
   Poco::Path save_dir;
   if (save_path.empty()) {
     save_dir = Poco::Path(propValue).parent();

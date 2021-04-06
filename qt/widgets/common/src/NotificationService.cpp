@@ -14,24 +14,20 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 // Key for the "Notifications.Enabled" option
-const std::string NotificationService::NOTIFICATIONS_ENABLED_KEY =
-    "Notifications.Enabled";
+const std::string NotificationService::NOTIFICATIONS_ENABLED_KEY = "Notifications.Enabled";
 // Minimum number os seconds between identical warnings
-const float NotificationService::MIN_SECONDS_BETWEEN_IDENTICAL_NOTIFICATIONS =
-    5.0;
+const float NotificationService::MIN_SECONDS_BETWEEN_IDENTICAL_NOTIFICATIONS = 5.0;
 
 // setup static variables
 QString NotificationService::g_lastMessage = "";
 QString NotificationService::g_lastTitle = "";
 Mantid::Kernel::Timer NotificationService::g_timer;
 
-void NotificationService::showMessage(const QString &title,
-                                      const QString &message, MessageIcon icon,
+void NotificationService::showMessage(const QString &title, const QString &message, MessageIcon icon,
                                       int millisecondsTimeoutHint) {
   if (isEnabled() && isSupportedByOS()) {
     if ((g_lastMessage != message) || (g_lastTitle != title) ||
-        (g_timer.elapsed_no_reset() >
-         MIN_SECONDS_BETWEEN_IDENTICAL_NOTIFICATIONS)) {
+        (g_timer.elapsed_no_reset() > MIN_SECONDS_BETWEEN_IDENTICAL_NOTIFICATIONS)) {
       // remeber the last message details
       g_lastMessage = message;
       g_lastTitle = title;
@@ -63,9 +59,7 @@ void NotificationService::showMessage(const QString &title,
 bool NotificationService::isEnabled() {
   bool retVal = false;
   try {
-    retVal = Mantid::Kernel::ConfigService::Instance()
-                 .getValue<bool>(NOTIFICATIONS_ENABLED_KEY)
-                 .get_value_or(true);
+    retVal = Mantid::Kernel::ConfigService::Instance().getValue<bool>(NOTIFICATIONS_ENABLED_KEY).get_value_or(true);
   } catch (const Mantid::Kernel::Exception::FileError &) {
     // The Config Service could not find the properties file
     // Disable notifications
@@ -78,9 +72,7 @@ bool NotificationService::isEnabled() {
   return retVal;
 }
 
-bool NotificationService::isSupportedByOS() {
-  return QSystemTrayIcon::supportsMessages();
-}
+bool NotificationService::isSupportedByOS() { return QSystemTrayIcon::supportsMessages(); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -41,8 +41,7 @@ Python::Object createPyCanvasFromFigure(const Figure &fig) {
  * @param projection A string denoting the projection to use
  * @return A new FigureCanvasQT object
  */
-Python::Object createPyCanvas(const int subplotspec,
-                              const QString &projection) {
+Python::Object createPyCanvas(const int subplotspec, const QString &projection) {
   Figure fig{true};
   fig.setFaceColor(DEFAULT_FACECOLOR);
 
@@ -74,10 +73,8 @@ QWidget *initLayout(FigureCanvasQt *cppCanvas) {
  * @param projection A string denoting the projection to use on the canvas
  * @param parent The owning parent widget
  */
-FigureCanvasQt::FigureCanvasQt(const int subplotspec, const QString &projection,
-                               QWidget *parent)
-    : QWidget(parent),
-      InstanceHolder(createPyCanvas(subplotspec, projection), "draw"),
+FigureCanvasQt::FigureCanvasQt(const int subplotspec, const QString &projection, QWidget *parent)
+    : QWidget(parent), InstanceHolder(createPyCanvas(subplotspec, projection), "draw"),
       m_figure(Figure(Python::Object(pyobj().attr("figure")))) {
   // Cannot use delegating constructor here as InstanceHolder needs to be
   // initialized before the axes can be created
@@ -91,8 +88,7 @@ FigureCanvasQt::FigureCanvasQt(const int subplotspec, const QString &projection,
  * @param parent The owning parent widget
  */
 FigureCanvasQt::FigureCanvasQt(Figure fig, QWidget *parent)
-    : QWidget(parent), InstanceHolder(createPyCanvasFromFigure(fig), "draw"),
-      m_figure(std::move(fig)) {
+    : QWidget(parent), InstanceHolder(createPyCanvasFromFigure(fig), "draw"), m_figure(std::move(fig)) {
   m_mplCanvas = initLayout(this);
 }
 
@@ -114,9 +110,7 @@ void FigureCanvasQt::installEventFilterToMplCanvas(QObject *filter) {
  * "rect", etc.)
  * @param args A hash of parameters to pass to set_tight_layout
  */
-void FigureCanvasQt::setTightLayout(QHash<QString, QVariant> const &args) {
-  m_figure.setTightLayout(args);
-}
+void FigureCanvasQt::setTightLayout(QHash<QString, QVariant> const &args) { m_figure.setTightLayout(args); }
 
 /**
  * @param pos A point in Qt screen coordinates from, for example, a mouse click
@@ -135,19 +129,16 @@ QPointF FigureCanvasQt::toDataCoords(QPoint pos) const {
   const double xPosPhysical = pos.x() * dpiRatio;
   GlobalInterpreterLock lock;
   // Y=0 is at the bottom
-  double height = PyFloat_AsDouble(
-      Python::Object(m_figure.pyobj().attr("bbox").attr("height")).ptr());
-  const double yPosPhysical =
-      ((height / devicePixelRatio()) - pos.y()) * dpiRatio;
+  double height = PyFloat_AsDouble(Python::Object(m_figure.pyobj().attr("bbox").attr("height")).ptr());
+  const double yPosPhysical = ((height / devicePixelRatio()) - pos.y()) * dpiRatio;
   // Transform to data coordinates
   QPointF dataCoords;
   try {
     auto invTransform = gca().pyobj().attr("transData").attr("inverted")();
-    NDArray transformed = invTransform.attr("transform_point")(
-        Python::NewRef(Py_BuildValue("(ff)", xPosPhysical, yPosPhysical)));
+    NDArray transformed =
+        invTransform.attr("transform_point")(Python::NewRef(Py_BuildValue("(ff)", xPosPhysical, yPosPhysical)));
     auto rawData = reinterpret_cast<double *>(transformed.get_data());
-    dataCoords =
-        QPointF(static_cast<qreal>(rawData[0]), static_cast<qreal>(rawData[1]));
+    dataCoords = QPointF(static_cast<qreal>(rawData[0]), static_cast<qreal>(rawData[1]));
   } catch (Python::ErrorAlreadySet &) {
     PyErr_Clear();
     // an exception indicates no transform possible. Matplotlib sets this as

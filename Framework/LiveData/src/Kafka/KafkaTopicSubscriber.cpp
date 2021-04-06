@@ -33,10 +33,8 @@ Mantid::Kernel::Logger &LOGGER() {
 }
 
 /// Create and return the global configuration object
-std::unique_ptr<RdKafka::Conf>
-createGlobalConfiguration(const std::string &brokerAddr) {
-  auto conf =
-      std::unique_ptr<RdKafka::Conf>(RdKafka::Conf::create(Conf::CONF_GLOBAL));
+std::unique_ptr<RdKafka::Conf> createGlobalConfiguration(const std::string &brokerAddr) {
+  auto conf = std::unique_ptr<RdKafka::Conf>(RdKafka::Conf::create(Conf::CONF_GLOBAL));
   std::string errorMsg;
   conf->set("metadata.broker.list", brokerAddr, errorMsg);
   conf->set("session.timeout.ms", "10000", errorMsg);
@@ -77,11 +75,10 @@ const std::string KafkaTopicSubscriber::MONITOR_TOPIC_SUFFIX = "_monitors";
  * @param broker The host:port address of the broker
  * @param topics Name of the topics
  */
-KafkaTopicSubscriber::KafkaTopicSubscriber(std::string broker,
-                                           std::vector<std::string> topics,
+KafkaTopicSubscriber::KafkaTopicSubscriber(std::string broker, std::vector<std::string> topics,
                                            SubscribeAtOption subscribeOption)
-    : IKafkaStreamSubscriber(), m_consumer(), m_brokerAddr(std::move(broker)),
-      m_topicNames(std::move(topics)), m_subscribeOption(subscribeOption) {}
+    : IKafkaStreamSubscriber(), m_consumer(), m_brokerAddr(std::move(broker)), m_topicNames(std::move(topics)),
+      m_subscribeOption(subscribeOption) {}
 
 /// Destructor
 KafkaTopicSubscriber::~KafkaTopicSubscriber() {
@@ -101,9 +98,7 @@ KafkaTopicSubscriber::~KafkaTopicSubscriber() {
 /**
  * @return The names of the topics subscription
  */
-std::vector<std::string> KafkaTopicSubscriber::topics() const {
-  return m_topicNames;
-}
+std::vector<std::string> KafkaTopicSubscriber::topics() const { return m_topicNames; }
 
 /**
  * Setup the connection to the broker for the configured topic
@@ -125,25 +120,20 @@ void KafkaTopicSubscriber::subscribe(int64_t offset) {
  * Construct list of partitions on configured topics
  * @return list of TopicPartitions
  */
-std::vector<RdKafka::TopicPartition *>
-KafkaTopicSubscriber::getTopicPartitions() {
+std::vector<RdKafka::TopicPartition *> KafkaTopicSubscriber::getTopicPartitions() {
   std::vector<RdKafka::TopicPartition *> partitions;
   auto metadata = queryMetadata();
   auto topics = metadata->topics();
   // Search through all topics for the ones we are interested in
   for (const auto &topicName : m_topicNames) {
     auto iter = std::find_if(topics->cbegin(), topics->cend(),
-                             [topicName](const TopicMetadata *tpc) {
-                               return tpc->topic() == topicName;
-                             });
+                             [topicName](const TopicMetadata *tpc) { return tpc->topic() == topicName; });
     auto matchedTopic = *iter;
     auto partitionMetadata = matchedTopic->partitions();
     auto numberOfPartitions = partitionMetadata->size();
     // Create a TopicPartition for each partition in the topic
-    for (size_t partitionNumber = 0; partitionNumber < numberOfPartitions;
-         ++partitionNumber) {
-      auto topicPartition = RdKafka::TopicPartition::create(
-          topicName, static_cast<int>(partitionNumber));
+    for (size_t partitionNumber = 0; partitionNumber < numberOfPartitions; ++partitionNumber) {
+      auto topicPartition = RdKafka::TopicPartition::create(topicName, static_cast<int>(partitionNumber));
       partitions.emplace_back(topicPartition);
     }
   }
@@ -155,8 +145,7 @@ KafkaTopicSubscriber::getTopicPartitions() {
  * @return map with key of topic name and value of vector of offsets for its
  * partitions
  */
-std::unordered_map<std::string, std::vector<int64_t>>
-KafkaTopicSubscriber::getCurrentOffsets() {
+std::unordered_map<std::string, std::vector<int64_t>> KafkaTopicSubscriber::getCurrentOffsets() {
   std::unordered_map<std::string, std::vector<int64_t>> currentOffsets;
   std::vector<RdKafka::TopicPartition *> partitions;
   auto error = m_consumer->assignment(partitions);
@@ -171,13 +160,11 @@ KafkaTopicSubscriber::getCurrentOffsets() {
   }
   for (auto topicPartition : partitions) {
     std::vector<int64_t> offsetList = {topicPartition->offset()};
-    auto result = currentOffsets.emplace(
-        std::make_pair(topicPartition->topic(), offsetList));
+    auto result = currentOffsets.emplace(std::make_pair(topicPartition->topic(), offsetList));
     if (!result.second) {
       // If we could not emplace a new pair then the key already exists, so
       // append the offset to the vector belonging to the existing topic key
-      currentOffsets[topicPartition->topic()].emplace_back(
-          topicPartition->offset());
+      currentOffsets[topicPartition->topic()].emplace_back(topicPartition->offset());
     }
   }
   return currentOffsets;
@@ -209,9 +196,7 @@ std::unique_ptr<Metadata> KafkaTopicSubscriber::queryMetadata() const {
 void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
   auto partitions = getTopicPartitions();
   std::for_each(partitions.cbegin(), partitions.cend(),
-                [time](RdKafka::TopicPartition *partition) {
-                  partition->set_offset(time);
-                });
+                [time](RdKafka::TopicPartition *partition) { partition->set_offset(time); });
 
   // Convert the timestamps to partition offsets
   auto error = m_consumer->offsetsForTimes(partitions, 10000);
@@ -223,22 +208,17 @@ void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
 
   if (LOGGER().debug()) {
     for (auto partition : partitions) {
-      LOGGER().debug() << "Topic: " << partition->topic()
-                       << ", partition: " << partition->partition()
+      LOGGER().debug() << "Topic: " << partition->topic() << ", partition: " << partition->partition()
                        << ", time (milliseconds past epoch): " << time
-                       << ", looked up offset as: " << partition->offset()
-                       << ", current high watermark is: "
-                       << getCurrentOffset(partition->topic(),
-                                           partition->partition())
-                       << std::endl;
+                       << ", looked up offset as: " << partition->offset() << ", current high watermark is: "
+                       << getCurrentOffset(partition->topic(), partition->partition()) << std::endl;
     }
   }
 
   error = m_consumer->assign(partitions);
 
   // Clean up topicPartition pointers
-  std::for_each(partitions.cbegin(), partitions.cend(),
-                [](RdKafka::TopicPartition *partition) { delete partition; });
+  std::for_each(partitions.cbegin(), partitions.cend(), [](RdKafka::TopicPartition *partition) { delete partition; });
   reportSuccessOrFailure(error, 0);
 }
 
@@ -249,16 +229,13 @@ void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
  * @param partition : partition number
  * @return high watermark offset
  */
-int64_t KafkaTopicSubscriber::getCurrentOffset(const std::string &topic,
-                                               int partition) {
+int64_t KafkaTopicSubscriber::getCurrentOffset(const std::string &topic, int partition) {
   int64_t lowOffset = 0;
   int64_t highOffset = 0;
-  auto err = m_consumer->query_watermark_offsets(topic, partition, &lowOffset,
-                                                 &highOffset, -1);
+  auto err = m_consumer->query_watermark_offsets(topic, partition, &lowOffset, &highOffset, -1);
   if (err != RdKafka::ERR_NO_ERROR) {
-    LOGGER().debug()
-        << "Failed to query current high watermark offset, returning as -1 "
-        << RdKafka::err2str(err) << std::endl;
+    LOGGER().debug() << "Failed to query current high watermark offset, returning as -1 " << RdKafka::err2str(err)
+                     << std::endl;
     return -1;
   }
   return highOffset;
@@ -271,8 +248,7 @@ int64_t KafkaTopicSubscriber::getCurrentOffset(const std::string &topic,
  * @param partition : partition number
  * @param offset : offset to seek to
  */
-void KafkaTopicSubscriber::seek(const std::string &topic, uint32_t partition,
-                                int64_t offset) {
+void KafkaTopicSubscriber::seek(const std::string &topic, uint32_t partition, int64_t offset) {
   auto topicPartition = RdKafka::TopicPartition::create(topic, partition);
   topicPartition->set_offset(offset);
   auto error = m_consumer->seek(*topicPartition, 2000);
@@ -281,8 +257,7 @@ void KafkaTopicSubscriber::seek(const std::string &topic, uint32_t partition,
     os << "Offset seek failed with error: '" << err2str(error) << "'";
     throw std::runtime_error(os.str());
   }
-  LOGGER().debug() << "Successful seek of topic: " << topic
-                   << ", partition: " << partition << " to offset: " << offset
+  LOGGER().debug() << "Successful seek of topic: " << topic << ", partition: " << partition << " to offset: " << offset
                    << std::endl;
 }
 
@@ -292,8 +267,7 @@ void KafkaTopicSubscriber::seek(const std::string &topic, uint32_t partition,
 void KafkaTopicSubscriber::createConsumer() {
   auto globalConf = createGlobalConfiguration(m_brokerAddr);
   std::string errorMsg;
-  m_consumer = std::unique_ptr<KafkaConsumer>(
-      KafkaConsumer::create(globalConf.get(), errorMsg));
+  m_consumer = std::unique_ptr<KafkaConsumer>(KafkaConsumer::create(globalConf.get(), errorMsg));
   if (!m_consumer) {
     std::ostringstream os;
     os << "Failed to create Kafka consumer: '" << errorMsg << "'";
@@ -310,9 +284,7 @@ void KafkaTopicSubscriber::checkTopicsExist() const {
   auto topics = metadata->topics();
   for (const auto &topicName : m_topicNames) {
     auto iter = std::find_if(topics->cbegin(), topics->cend(),
-                             [topicName](const TopicMetadata *tpc) {
-                               return tpc->topic() == topicName;
-                             });
+                             [topicName](const TopicMetadata *tpc) { return tpc->topic() == topicName; });
     if (iter == topics->cend()) {
       std::ostringstream os;
       os << "Failed to find topic '" << topicName << "' on broker";
@@ -338,12 +310,10 @@ void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) {
 
   for (const auto &topicName : m_topicNames) {
     const int partitionId = 0;
-    auto topicPartition =
-        RdKafka::TopicPartition::create(topicName, partitionId);
+    auto topicPartition = RdKafka::TopicPartition::create(topicName, partitionId);
     int64_t lowOffset, highOffset = 0;
     // This gets the lowest and highest offsets available on the brokers
-    m_consumer->query_watermark_offsets(topicName, partitionId, &lowOffset,
-                                        &highOffset, -1);
+    m_consumer->query_watermark_offsets(topicName, partitionId, &lowOffset, &highOffset, -1);
 
     switch (m_subscribeOption) {
     case SubscribeAtOption::LATEST:
@@ -370,8 +340,7 @@ void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) {
     topicPartitions.emplace_back(topicPartition);
   }
   LOGGER().debug() << "Attempting to subscribe to " << topicPartitions.size()
-                   << " partitions in KafkaTopicSubscriber::subscribeAtOffset()"
-                   << std::endl;
+                   << " partitions in KafkaTopicSubscriber::subscribeAtOffset()" << std::endl;
   error = m_consumer->assign(topicPartitions);
 
   // Clean up topicPartition pointers
@@ -387,8 +356,7 @@ void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) {
  * @param error : rdkafka error code
  * @param confOffset : offset to start receiving messages at
  */
-void KafkaTopicSubscriber::reportSuccessOrFailure(
-    const RdKafka::ErrorCode &error, int64_t confOffset) const {
+void KafkaTopicSubscriber::reportSuccessOrFailure(const RdKafka::ErrorCode &error, int64_t confOffset) const {
   if (confOffset < 0) {
     std::ostringstream os;
     os << "No messages are yet available on the Kafka brokers for one "
@@ -421,8 +389,7 @@ void KafkaTopicSubscriber::reportSuccessOrFailure(
  * cleared
  * on entry into the method
  */
-void KafkaTopicSubscriber::consumeMessage(std::string *payload, int64_t &offset,
-                                          int32_t &partition,
+void KafkaTopicSubscriber::consumeMessage(std::string *payload, int64_t &offset, int32_t &partition,
                                           std::string &topic) {
   using RdKafka::err2str;
   using RdKafka::Message;
@@ -430,15 +397,13 @@ void KafkaTopicSubscriber::consumeMessage(std::string *payload, int64_t &offset,
   assert(payload);
 
   payload->clear();
-  auto kfMsg =
-      std::unique_ptr<Message>(m_consumer->consume(CONSUME_TIMEOUT_MS));
+  auto kfMsg = std::unique_ptr<Message>(m_consumer->consume(CONSUME_TIMEOUT_MS));
 
   switch (kfMsg->err()) {
   case RdKafka::ERR_NO_ERROR:
     // Real message
     if (kfMsg->len() > 0) {
-      payload->assign(static_cast<const char *>(kfMsg->payload()),
-                      static_cast<int>(kfMsg->len()));
+      payload->assign(static_cast<const char *>(kfMsg->payload()), static_cast<int>(kfMsg->len()));
       topic = kfMsg->topic_name();
       offset = kfMsg->offset();
       partition = kfMsg->partition();
@@ -459,8 +424,7 @@ void KafkaTopicSubscriber::consumeMessage(std::string *payload, int64_t &offset,
   default:
     /* All other errors */
     std::ostringstream os;
-    os << "KafkaTopicSubscriber::consumeMessage() - "
-       << RdKafka::err2str(kfMsg->err());
+    os << "KafkaTopicSubscriber::consumeMessage() - " << RdKafka::err2str(kfMsg->err());
     throw std::runtime_error(os.str());
   }
 }
@@ -472,8 +436,7 @@ void KafkaTopicSubscriber::consumeMessage(std::string *payload, int64_t &offset,
  * @return : map with topic names as key with a vector of offsets for the
  * partitions
  */
-std::unordered_map<std::string, std::vector<int64_t>>
-KafkaTopicSubscriber::getOffsetsForTimestamp(int64_t timestamp) {
+std::unordered_map<std::string, std::vector<int64_t>> KafkaTopicSubscriber::getOffsetsForTimestamp(int64_t timestamp) {
   auto partitions = getTopicPartitions();
   for (auto partition : partitions) {
     partition->set_offset(timestamp);
@@ -489,15 +452,11 @@ KafkaTopicSubscriber::getOffsetsForTimestamp(int64_t timestamp) {
   auto metadata = queryMetadata();
   auto topics = metadata->topics();
   std::unordered_map<std::string, std::vector<int64_t>> partitionOffsetMap;
-  std::for_each(
-      topics->cbegin(), topics->cend(),
-      [&partitionOffsetMap, this](const TopicMetadata *tpc) {
-        if (std::find(m_topicNames.cbegin(), m_topicNames.cend(),
-                      tpc->topic()) != m_topicNames.cend()) {
-          partitionOffsetMap.insert(
-              {tpc->topic(), std::vector<int64_t>(tpc->partitions()->size())});
-        }
-      });
+  std::for_each(topics->cbegin(), topics->cend(), [&partitionOffsetMap, this](const TopicMetadata *tpc) {
+    if (std::find(m_topicNames.cbegin(), m_topicNames.cend(), tpc->topic()) != m_topicNames.cend()) {
+      partitionOffsetMap.insert({tpc->topic(), std::vector<int64_t>(tpc->partitions()->size())});
+    }
+  });
 
   // Get the offsets from the topic partitions and add them to map
   for (auto partition : partitions) {
@@ -508,8 +467,7 @@ KafkaTopicSubscriber::getOffsetsForTimestamp(int64_t timestamp) {
   }
 
   // Clean up topicPartition pointers
-  std::for_each(partitions.cbegin(), partitions.cend(),
-                [](RdKafka::TopicPartition *partition) { delete partition; });
+  std::for_each(partitions.cbegin(), partitions.cend(), [](RdKafka::TopicPartition *partition) { delete partition; });
 
   return partitionOffsetMap;
 }

@@ -39,29 +39,24 @@ using namespace API;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void RealFFT::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The name of the input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace. It contains three "
                   "spectra: the real, the imaginary parts of the transform and "
                   "their modulus.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty(
-      "WorkspaceIndex", 0, mustBePositive,
-      "The index of the spectrum in the input workspace to transform.");
+  declareProperty("WorkspaceIndex", 0, mustBePositive,
+                  "The index of the spectrum in the input workspace to transform.");
 
   std::vector<std::string> fft_dir{"Forward", "Backward"};
-  declareProperty(
-      "Transform", "Forward", std::make_shared<StringListValidator>(fft_dir),
-      R"(The direction of the transform: "Forward" or "Backward".)");
-  declareProperty(
-      "IgnoreXBins", false,
-      "Ignores the requirement that X bins be linear and of the same size. "
-      "FFT result will not be valid for the X axis, and should be ignored.");
+  declareProperty("Transform", "Forward", std::make_shared<StringListValidator>(fft_dir),
+                  R"(The direction of the transform: "Forward" or "Backward".)");
+  declareProperty("IgnoreXBins", false,
+                  "Ignores the requirement that X bins be linear and of the same size. "
+                  "FFT result will not be valid for the X axis, and should be ignored.");
 }
 
 /** Executes the algorithm
@@ -142,8 +137,7 @@ void RealFFT::exec() {
   {
 
     if (inWS->getNumberHistograms() < 2)
-      throw std::runtime_error(
-          "The input workspace must have at least 2 spectra.");
+      throw std::runtime_error("The input workspace must have at least 2 spectra.");
 
     int yOutSize = (ySize - 1) * 2;
     if (inWS->y(1).back() != 0.0)
@@ -177,16 +171,14 @@ void RealFFT::exec() {
       }
     }
 
-    gsl_fft_halfcomplex_wavetable *wavetable =
-        gsl_fft_halfcomplex_wavetable_alloc(yOutSize);
+    gsl_fft_halfcomplex_wavetable *wavetable = gsl_fft_halfcomplex_wavetable_alloc(yOutSize);
 
     // &(yData[0]) because gsl func wants non const double data[]
     gsl_fft_halfcomplex_inverse(&(yData[0]), 1, yOutSize, wavetable, workspace);
     gsl_fft_halfcomplex_wavetable_free(wavetable);
     gsl_fft_real_workspace_free(workspace);
 
-    std::generate(xData.begin(), xData.end(),
-                  HistogramData::LinearGenerator(0, df));
+    std::generate(xData.begin(), xData.end(), HistogramData::LinearGenerator(0, df));
     yData /= df;
 
     if (outWS->isHistogramData())

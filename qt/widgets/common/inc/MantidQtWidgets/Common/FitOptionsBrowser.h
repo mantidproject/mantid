@@ -43,8 +43,7 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_COMMON FitOptionsBrowser : public QWidget {
   Q_OBJECT
 public:
-  FitOptionsBrowser(QWidget *parent = nullptr,
-                    FittingMode fitType = FittingMode::SIMULTANEOUS);
+  FitOptionsBrowser(QWidget *parent = nullptr, FittingMode fitType = FittingMode::SIMULTANEOUS);
   ~FitOptionsBrowser();
   QString getProperty(const QString &name) const;
   void setProperty(const QString &name, const QString &value);
@@ -88,10 +87,8 @@ private:
 
   QtProperty *createPropertyProperty(Mantid::Kernel::Property *prop);
 
-  void addProperty(const QString &name, QtProperty *prop,
-                   QString (FitOptionsBrowser::*getter)(QtProperty *) const,
-                   void (FitOptionsBrowser::*setter)(QtProperty *,
-                                                     const QString &));
+  void addProperty(const QString &name, QtProperty *prop, QString (FitOptionsBrowser::*getter)(QtProperty *) const,
+                   void (FitOptionsBrowser::*setter)(QtProperty *, const QString &));
 
   void removeProperty(const QString &name);
 

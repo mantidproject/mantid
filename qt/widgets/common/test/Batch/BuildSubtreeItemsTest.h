@@ -23,14 +23,10 @@ class BuildSubtreeItemsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BuildSubtreeItemsTest *createSuite() {
-    return new BuildSubtreeItemsTest;
-  }
+  static BuildSubtreeItemsTest *createSuite() { return new BuildSubtreeItemsTest; }
   static void destroySuite(BuildSubtreeItemsTest *suite) { delete suite; }
 
-  std::unique_ptr<QStandardItemModel> emptyModel() const {
-    return std::make_unique<QStandardItemModel>();
-  }
+  std::unique_ptr<QStandardItemModel> emptyModel() const { return std::make_unique<QStandardItemModel>(); }
 
   QtStandardItemTreeModelAdapter adapt(QStandardItemModel *model) {
     return QtStandardItemTreeModelAdapter(*model, Cell(""));
@@ -38,8 +34,7 @@ public:
 
   Cell cell(std::string const &text) const { return Cell(text); }
 
-  template <typename... Args>
-  std::vector<Cell> cells(Args const &... cellText) const {
+  template <typename... Args> std::vector<Cell> cells(Args const &...cellText) const {
     return std::vector<Cell>({cell(cellText)...});
   }
 
@@ -77,8 +72,7 @@ public:
     auto build = BuildSubtreeItems(adaptedModel, RowLocationAdapter(*model));
     auto positionRelativeToMainTree = RowLocation();
 
-    auto subtree = Subtree({Row(RowLocation(), cells("Root")),
-                            Row(RowLocation({0}), cells("Child"))});
+    auto subtree = Subtree({Row(RowLocation(), cells("Root")), Row(RowLocation({0}), cells("Child"))});
 
     build(positionRelativeToMainTree, 0, subtree);
 
@@ -98,8 +92,7 @@ public:
     auto build = BuildSubtreeItems(adaptedModel, RowLocationAdapter(*model));
     auto positionRelativeToMainTree = RowLocation();
 
-    auto subtree = Subtree({Row(RowLocation(), cells("Root")),
-                            Row(RowLocation({0}), cells("Child 1")),
+    auto subtree = Subtree({Row(RowLocation(), cells("Root")), Row(RowLocation({0}), cells("Child 1")),
                             Row(RowLocation({1}), cells("Child 2"))});
 
     build(positionRelativeToMainTree, 0, subtree);
@@ -125,10 +118,8 @@ public:
     auto positionRelativeToMainTree = RowLocation();
 
     auto subtree =
-        Subtree({Row(RowLocation(), cells("Root")),
-                 Row(RowLocation({0}), cells("1st Child")),
-                 Row(RowLocation({0, 0}), cells("Child of 1st Child")),
-                 Row(RowLocation({1}), cells("2nd Child")),
+        Subtree({Row(RowLocation(), cells("Root")), Row(RowLocation({0}), cells("1st Child")),
+                 Row(RowLocation({0, 0}), cells("Child of 1st Child")), Row(RowLocation({1}), cells("2nd Child")),
                  Row(RowLocation({1, 0}), cells("Child of 2nd Child"))});
 
     build(positionRelativeToMainTree, 0, subtree);

@@ -22,14 +22,10 @@ class PoldiDetectorDecoratorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiDetectorDecoratorTest *createSuite() {
-    return new PoldiDetectorDecoratorTest();
-  }
+  static PoldiDetectorDecoratorTest *createSuite() { return new PoldiDetectorDecoratorTest(); }
   static void destroySuite(PoldiDetectorDecoratorTest *suite) { delete suite; }
 
-  PoldiDetectorDecoratorTest() {
-    m_detector = std::make_shared<MockDetector>();
-  }
+  PoldiDetectorDecoratorTest() { m_detector = std::make_shared<MockDetector>(); }
 
   void testInitialization() {
     PoldiDetectorDecorator decorator(m_detector);
@@ -56,11 +52,9 @@ public:
     EXPECT_CALL(*m_detector, centralElement()).WillOnce(Return(199));
     TS_ASSERT_EQUALS(decorator.centralElement(), 199);
     std::vector<int> forwardedAvailableElements = decorator.availableElements();
-    TS_ASSERT_EQUALS(forwardedAvailableElements,
-                     m_detector->availableElements());
+    TS_ASSERT_EQUALS(forwardedAvailableElements, m_detector->availableElements());
 
-    EXPECT_CALL(*m_detector, qLimits(_, _))
-        .WillOnce(Return(std::make_pair(1.0, 5.0)));
+    EXPECT_CALL(*m_detector, qLimits(_, _)).WillOnce(Return(std::make_pair(1.0, 5.0)));
     std::pair<double, double> forwardedQLimits = decorator.qLimits(1.1, 5.0);
     TS_ASSERT_EQUALS(forwardedQLimits.first, 1.0);
     TS_ASSERT_EQUALS(forwardedQLimits.second, 5.0);
@@ -70,8 +64,7 @@ public:
     PoldiDetectorDecorator decorator;
 
     TS_ASSERT_THROWS(decorator.twoTheta(0), const std::runtime_error &);
-    TS_ASSERT_THROWS(decorator.distanceFromSample(0),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(decorator.distanceFromSample(0), const std::runtime_error &);
     TS_ASSERT_THROWS(decorator.elementCount(), const std::runtime_error &);
     TS_ASSERT_THROWS(decorator.centralElement(), const std::runtime_error &);
     TS_ASSERT_THROWS(decorator.availableElements(), const std::runtime_error &);

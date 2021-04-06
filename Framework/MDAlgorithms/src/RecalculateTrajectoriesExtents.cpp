@@ -27,17 +27,13 @@ DECLARE_ALGORITHM(RecalculateTrajectoriesExtents)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string RecalculateTrajectoriesExtents::name() const {
-  return "RecalculateTrajectoriesExtents";
-}
+const std::string RecalculateTrajectoriesExtents::name() const { return "RecalculateTrajectoriesExtents"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int RecalculateTrajectoriesExtents::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string RecalculateTrajectoriesExtents::category() const {
-  return "MDAlgorithms\\Normalisation";
-}
+const std::string RecalculateTrajectoriesExtents::category() const { return "MDAlgorithms\\Normalisation"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string RecalculateTrajectoriesExtents::summary() const {
@@ -48,53 +44,43 @@ const std::string RecalculateTrajectoriesExtents::summary() const {
 /** Initialize the algorithm's properties.
  */
 void RecalculateTrajectoriesExtents::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace. Must be in Q_sample frame.");
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Copy of the input MDEventWorkspace with the corrected "
                   "trajectory extents.");
 }
 
 /// Validate the input workspace @see Algorithm::validateInputs
-std::map<std::string, std::string>
-RecalculateTrajectoriesExtents::validateInputs() {
+std::map<std::string, std::string> RecalculateTrajectoriesExtents::validateInputs() {
   std::map<std::string, std::string> errorMessage;
 
   // Check for input workspace frame
-  Mantid::API::IMDEventWorkspace_sptr inputWS =
-      this->getProperty("InputWorkspace");
+  Mantid::API::IMDEventWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   if (inputWS->getNumDims() < 3) {
-    errorMessage.emplace("InputWorkspace",
-                         "The input workspace must be at least 3D");
+    errorMessage.emplace("InputWorkspace", "The input workspace must be at least 3D");
   } else {
     for (size_t i = 0; i < 3; i++) {
-      if (inputWS->getDimension(i)->getMDFrame().name() !=
-          Mantid::Geometry::QSample::QSampleName) {
-        errorMessage.emplace("InputWorkspace",
-                             "The input workspace must be in Q_sample");
+      if (inputWS->getDimension(i)->getMDFrame().name() != Mantid::Geometry::QSample::QSampleName) {
+        errorMessage.emplace("InputWorkspace", "The input workspace must be in Q_sample");
       }
     }
   }
   // Check for property MDNorm_low and MDNorm_high
   size_t nExperimentInfos = inputWS->getNumExperimentInfo();
   if (nExperimentInfos == 0) {
-    errorMessage.emplace("InputWorkspace",
-                         "There must be at least one experiment info");
+    errorMessage.emplace("InputWorkspace", "There must be at least one experiment info");
   } else {
     for (size_t iExpInfo = 0; iExpInfo < nExperimentInfos; iExpInfo++) {
-      auto &currentExptInfo =
-          *(inputWS->getExperimentInfo(static_cast<uint16_t>(iExpInfo)));
+      auto &currentExptInfo = *(inputWS->getExperimentInfo(static_cast<uint16_t>(iExpInfo)));
       if (!currentExptInfo.run().hasProperty("MDNorm_low")) {
         errorMessage.emplace("InputWorkspace", "Missing MDNorm_low log. Please "
                                                "use CropWorkspaceForMDNorm "
                                                "before converting to MD");
       }
       if (!currentExptInfo.run().hasProperty("MDNorm_high")) {
-        errorMessage.emplace("InputWorkspace",
-                             "Missing MDNorm_high log. Please use "
-                             "CropWorkspaceForMDNorm before converting to MD");
+        errorMessage.emplace("InputWorkspace", "Missing MDNorm_high log. Please use "
+                                               "CropWorkspaceForMDNorm before converting to MD");
       }
     }
   }
@@ -121,19 +107,16 @@ void RecalculateTrajectoriesExtents::exec() {
     if (outWS->getDimension(3)->getMDFrame().name() == "DeltaE") {
       diffraction = false;
       if (outWS->getExperimentInfo(0)->run().hasProperty("Ei")) {
-        Ei = outWS->getExperimentInfo(0)->run().getPropertyValueAsType<double>(
-            "Ei");
+        Ei = outWS->getExperimentInfo(0)->run().getPropertyValueAsType<double>("Ei");
       } else {
-        throw std::runtime_error(
-            "Workspace contains energy transfer axis, but no Ei."
-            "The MD normalization workflow is not implemented for "
-            "indirect geometry");
+        throw std::runtime_error("Workspace contains energy transfer axis, but no Ei."
+                                 "The MD normalization workflow is not implemented for "
+                                 "indirect geometry");
       }
     }
   }
 
-  const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass *
-                           PhysicalConstants::meV * 1e-20 /
+  const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
                            (PhysicalConstants::h * PhysicalConstants::h);
 
   auto convention = Kernel::ConfigService::Instance().getString("Q.convention");
@@ -167,25 +150,21 @@ void RecalculateTrajectoriesExtents::exec() {
   }
 
   for (size_t iExpInfo = 0; iExpInfo < nExperimentInfos; iExpInfo++) {
-    auto &currentExptInfo =
-        *(outWS->getExperimentInfo(static_cast<uint16_t>(iExpInfo)));
+    auto &currentExptInfo = *(outWS->getExperimentInfo(static_cast<uint16_t>(iExpInfo)));
 
     const auto &spectrumInfo = currentExptInfo.spectrumInfo();
     const auto nspectra = static_cast<int64_t>(spectrumInfo.size());
     std::vector<double> lowValues, highValues;
 
-    auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(
-        currentExptInfo.getLog("MDNorm_low"));
+    auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_low"));
     lowValues = (*lowValuesLog)();
 
-    auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(
-        currentExptInfo.getLog("MDNorm_high"));
+    auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_high"));
     highValues = (*highValuesLog)();
 
     // deal with other dimensions first
     bool zeroWeights(false);
-    for (size_t iOtherDims = 0; iOtherDims < otherDimsNames.size();
-         iOtherDims++) {
+    for (size_t iOtherDims = 0; iOtherDims < otherDimsNames.size(); iOtherDims++) {
       // check other dimensions. there might be no events, but if the first log
       // value is not within limits, the weight should be zero as well
       auto *otherDimsLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
@@ -193,8 +172,8 @@ void RecalculateTrajectoriesExtents::exec() {
       if ((otherDimsLog->firstValue() < otherDimsMin[iOtherDims]) ||
           (otherDimsLog->firstValue() > otherDimsMax[iOtherDims])) {
         zeroWeights = true;
-        g_log.warning() << "In experimentInfo " << iExpInfo << ", log "
-                        << otherDimsNames[iOtherDims] << " is outside limits\n";
+        g_log.warning() << "In experimentInfo " << iExpInfo << ", log " << otherDimsNames[iOtherDims]
+                        << " is outside limits\n";
         continue;
       }
     }
@@ -210,16 +189,15 @@ void RecalculateTrajectoriesExtents::exec() {
 
       // calculate limits in Q_sample
       for (int64_t i = 0; i < nspectra; i++) {
-        if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
-            spectrumInfo.isMasked(i)) {
+        if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
           highValues[i] = lowValues[i];
           continue;
         }
         const auto &detector = spectrumInfo.detector(i);
         double theta = detector.getTwoTheta(sample, beamDir);
         double phi = detector.getPhi();
-        V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)),
-            qin(0., 0., 1.), qLabLow, qLabHigh, qSampleLow, qSampleHigh;
+        V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)), qin(0., 0., 1.), qLabLow, qLabHigh,
+            qSampleLow, qSampleHigh;
         double kfmin, kfmax;
         if (convention == "Crystallography") {
           qout *= -1;
@@ -266,9 +244,8 @@ void RecalculateTrajectoriesExtents::exec() {
         }
         // either intersection or completely indide the box
         if ((qxmin - qSampleLow.X()) * (qxmin - qSampleHigh.X()) < 0) {
-          double kfIntersection = (qxmin - qSampleLow.X()) * (kfmax - kfmin) /
-                                      (qSampleHigh.X() - qSampleLow.X()) +
-                                  kfmin;
+          double kfIntersection =
+              (qxmin - qSampleLow.X()) * (kfmax - kfmin) / (qSampleHigh.X() - qSampleLow.X()) + kfmin;
           if (!diffraction) {
             kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
           }
@@ -281,9 +258,8 @@ void RecalculateTrajectoriesExtents::exec() {
         }
 
         if ((qxmax - qSampleLow.X()) * (qxmax - qSampleHigh.X()) < 0) {
-          double kfIntersection = (qxmax - qSampleLow.X()) * (kfmax - kfmin) /
-                                      (qSampleHigh.X() - qSampleLow.X()) +
-                                  kfmin;
+          double kfIntersection =
+              (qxmax - qSampleLow.X()) * (kfmax - kfmin) / (qSampleHigh.X() - qSampleLow.X()) + kfmin;
           if (!diffraction) {
             kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
           }
@@ -296,9 +272,8 @@ void RecalculateTrajectoriesExtents::exec() {
         }
 
         if ((qymin - qSampleLow.Y()) * (qymin - qSampleHigh.Y()) < 0) {
-          double kfIntersection = (qymin - qSampleLow.Y()) * (kfmax - kfmin) /
-                                      (qSampleHigh.Y() - qSampleLow.Y()) +
-                                  kfmin;
+          double kfIntersection =
+              (qymin - qSampleLow.Y()) * (kfmax - kfmin) / (qSampleHigh.Y() - qSampleLow.Y()) + kfmin;
           if (!diffraction) {
             kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
           }
@@ -311,9 +286,8 @@ void RecalculateTrajectoriesExtents::exec() {
         }
 
         if ((qymax - qSampleLow.Y()) * (qymax - qSampleHigh.Y()) < 0) {
-          double kfIntersection = (qymax - qSampleLow.Y()) * (kfmax - kfmin) /
-                                      (qSampleHigh.Y() - qSampleLow.Y()) +
-                                  kfmin;
+          double kfIntersection =
+              (qymax - qSampleLow.Y()) * (kfmax - kfmin) / (qSampleHigh.Y() - qSampleLow.Y()) + kfmin;
           if (!diffraction) {
             kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
           }
@@ -326,9 +300,8 @@ void RecalculateTrajectoriesExtents::exec() {
         }
 
         if ((qzmin - qSampleLow.Z()) * (qzmin - qSampleHigh.Z()) < 0) {
-          double kfIntersection = (qzmin - qSampleLow.Z()) * (kfmax - kfmin) /
-                                      (qSampleHigh.Z() - qSampleLow.Z()) +
-                                  kfmin;
+          double kfIntersection =
+              (qzmin - qSampleLow.Z()) * (kfmax - kfmin) / (qSampleHigh.Z() - qSampleLow.Z()) + kfmin;
           if (!diffraction) {
             kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
           }
@@ -341,9 +314,8 @@ void RecalculateTrajectoriesExtents::exec() {
         }
 
         if ((qzmax - qSampleLow.Z()) * (qzmax - qSampleHigh.Z()) < 0) {
-          double kfIntersection = (qzmax - qSampleLow.Z()) * (kfmax - kfmin) /
-                                      (qSampleHigh.Z() - qSampleLow.Z()) +
-                                  kfmin;
+          double kfIntersection =
+              (qzmax - qSampleLow.Z()) * (kfmax - kfmin) / (qSampleHigh.Z() - qSampleLow.Z()) + kfmin;
           if (!diffraction) {
             kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
           }

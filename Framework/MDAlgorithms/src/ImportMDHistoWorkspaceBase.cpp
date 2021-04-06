@@ -43,16 +43,14 @@ void ImportMDHistoWorkspaceBase::initGenericImportProps() {
   validator->add(std::make_shared<BoundedValidator<int>>(1, 9));
   validator->add(std::make_shared<MandatoryValidator<int>>());
 
-  declareProperty(std::make_unique<PropertyWithValue<int>>(
-                      "Dimensionality", -1, validator, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("Dimensionality", -1, validator, Direction::Input),
                   "Dimensionality of the data in the file.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("Extents"),
                   "A comma separated list of min, max for each dimension,\n"
                   "specifying the extents of each dimension.");
 
-  declareProperty(std::make_unique<ArrayProperty<int>>("NumberOfBins"),
-                  "Number of bin in each dimension.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("NumberOfBins"), "Number of bin in each dimension.");
 
   declareProperty(std::make_unique<ArrayProperty<std::string>>("Names"),
                   "A comma separated list of the name of each dimension.");
@@ -60,20 +58,18 @@ void ImportMDHistoWorkspaceBase::initGenericImportProps() {
   declareProperty(std::make_unique<ArrayProperty<std::string>>("Units"),
                   "A comma separated list of the units of each dimension.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "MDHistoWorkspace reflecting the input text file.");
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>("Frames"),
-      " A comma separated list of the frames of each dimension. "
-      " The frames can be"
-      " **General Frame**: Any frame which is not a Q-based frame."
-      " **QLab**: Wave-vector converted into the lab frame."
-      " **QSample**: Wave-vector converted into the frame of the sample."
-      " **HKL**: Wave-vector converted into the crystal's HKL indices."
-      " Note if nothing is specified then the **General Frame** is being "
-      "selected. Also note that if you select a frame then this might override "
-      "your unit selection if it is not compatible with the frame.");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("Frames"),
+                  " A comma separated list of the frames of each dimension. "
+                  " The frames can be"
+                  " **General Frame**: Any frame which is not a Q-based frame."
+                  " **QLab**: Wave-vector converted into the lab frame."
+                  " **QSample**: Wave-vector converted into the frame of the sample."
+                  " **HKL**: Wave-vector converted into the crystal's HKL indices."
+                  " Note if nothing is specified then the **General Frame** is being "
+                  "selected. Also note that if you select a frame then this might override "
+                  "your unit selection if it is not compatible with the frame.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -99,22 +95,18 @@ MDHistoWorkspace_sptr ImportMDHistoWorkspaceBase::createEmptyOutputWorkspace() {
     throw std::invalid_argument("You must specify twice as many extents "
                                 "(min,max) as there are dimensions.");
   if (nbins.size() != ndims)
-    throw std::invalid_argument(
-        "You must specify as number of bins as there are dimensions.");
+    throw std::invalid_argument("You must specify as number of bins as there are dimensions.");
   if (names.size() != ndims)
-    throw std::invalid_argument(
-        "You must specify as many names as there are dimensions.");
+    throw std::invalid_argument("You must specify as many names as there are dimensions.");
   if (units.size() != ndims)
-    throw std::invalid_argument(
-        "You must specify as many units as there are dimensions.");
+    throw std::invalid_argument("You must specify as many units as there are dimensions.");
 
   // If no frames are specified we want to default to the General Frame,
   // to ensure backward compatibility. But if they are only partly specified,
   // then we want to throw an error. It should be either used correctly or not
   // at all
   if (!frames.empty() && frames.size() != ndims) {
-    throw std::invalid_argument(
-        "You must specify as many frames as there are dimensions.");
+    throw std::invalid_argument("You must specify as many frames as there are dimensions.");
   }
 
   if (frames.empty()) {
@@ -126,9 +118,9 @@ MDHistoWorkspace_sptr ImportMDHistoWorkspaceBase::createEmptyOutputWorkspace() {
   std::vector<MDHistoDimension_sptr> dimensions;
   for (size_t k = 0; k < ndims; ++k) {
     auto frame = createMDFrame(frames[k], units[k]);
-    dimensions.emplace_back(MDHistoDimension_sptr(new MDHistoDimension(
-        names[k], names[k], *frame, static_cast<coord_t>(extents[k * 2]),
-        static_cast<coord_t>(extents[(k * 2) + 1]), nbins[k])));
+    dimensions.emplace_back(
+        MDHistoDimension_sptr(new MDHistoDimension(names[k], names[k], *frame, static_cast<coord_t>(extents[k * 2]),
+                                                   static_cast<coord_t>(extents[(k * 2) + 1]), nbins[k])));
   }
 
   // Calculate the total number of bins by multiplying across each dimension.
@@ -145,16 +137,13 @@ MDHistoWorkspace_sptr ImportMDHistoWorkspaceBase::createEmptyOutputWorkspace() {
  * @param unit: the selected unit
  * @returns a unique pointer to an MDFrame
  */
-MDFrame_uptr
-ImportMDHistoWorkspaceBase::createMDFrame(const std::string &frame,
-                                          const std::string &unit) {
+MDFrame_uptr ImportMDHistoWorkspaceBase::createMDFrame(const std::string &frame, const std::string &unit) {
   auto frameFactory = makeMDFrameFactoryChain();
   MDFrameArgument frameArg(frame, unit);
   return frameFactory->create(frameArg);
 }
 
-std::map<std::string, std::string>
-ImportMDHistoWorkspaceBase::validateInputs() {
+std::map<std::string, std::string> ImportMDHistoWorkspaceBase::validateInputs() {
   // Check Frame names
   std::map<std::string, std::string> errors;
   std::string framePropertyName = "Frames";
@@ -195,11 +184,10 @@ ImportMDHistoWorkspaceBase::validateInputs() {
  * @param targetFrames: the allowed frame names
  * @returns true if the frame name is valid else false
  */
-bool ImportMDHistoWorkspaceBase::checkIfFrameValid(
-    const std::string &frame, const std::vector<std::string> &targetFrames) {
-  return std::any_of(
-      targetFrames.cbegin(), targetFrames.cend(),
-      [&frame](const auto &targetFrame) { return targetFrame == frame; });
+bool ImportMDHistoWorkspaceBase::checkIfFrameValid(const std::string &frame,
+                                                   const std::vector<std::string> &targetFrames) {
+  return std::any_of(targetFrames.cbegin(), targetFrames.cend(),
+                     [&frame](const auto &targetFrame) { return targetFrame == frame; });
 }
 
 } // namespace MDAlgorithms

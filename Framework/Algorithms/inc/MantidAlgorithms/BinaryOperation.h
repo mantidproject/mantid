@@ -52,14 +52,12 @@ public:
   using BinaryOperationTable = std::vector<int64_t>;
   using BinaryOperationTable_sptr = std::shared_ptr<BinaryOperationTable>;
 
-  static BinaryOperationTable_sptr
-  buildBinaryOperationTable(const API::MatrixWorkspace_const_sptr &lhs,
-                            const API::MatrixWorkspace_const_sptr &rhs);
+  static BinaryOperationTable_sptr buildBinaryOperationTable(const API::MatrixWorkspace_const_sptr &lhs,
+                                                             const API::MatrixWorkspace_const_sptr &rhs);
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override;
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
 
   // Overridden Algorithm methods
   void exec() override;
@@ -68,8 +66,7 @@ protected:
   bool handleSpecialDivideMinus();
 
   /// Execution method for event workspaces, to be overridden as needed.
-  virtual void execEvent(DataObjects::EventWorkspace_const_sptr lhs,
-                         DataObjects::EventWorkspace_const_sptr rhs);
+  virtual void execEvent(DataObjects::EventWorkspace_const_sptr lhs, DataObjects::EventWorkspace_const_sptr rhs);
 
   /// The name of the first input workspace property
   virtual std::string inputPropName1() const { return "LHSWorkspace"; }
@@ -79,25 +76,19 @@ protected:
   virtual std::string outputPropName() const { return "OutputWorkspace"; }
 
   /// Checks the compatibility of the two workspaces
-  virtual bool
-  checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                     const API::MatrixWorkspace_const_sptr rhs) const;
+  virtual bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                  const API::MatrixWorkspace_const_sptr rhs) const;
 
   /// Checks the compatibility of event-based processing of the two workspaces
-  virtual bool
-  checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                          const API::MatrixWorkspace_const_sptr rhs);
+  virtual bool checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                       const API::MatrixWorkspace_const_sptr rhs);
 
   /// Checks the overall size compatibility of two workspaces
-  virtual std::string
-  checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                         const API::MatrixWorkspace_const_sptr rhs) const;
+  virtual std::string checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                             const API::MatrixWorkspace_const_sptr rhs) const;
 
-  virtual bool propagateSpectraMask(const API::SpectrumInfo &lhsSpectrumInfo,
-                                    const API::SpectrumInfo &rhsSpectrumInfo,
-                                    const int64_t index,
-                                    API::MatrixWorkspace &out,
-                                    API::SpectrumInfo &outSpectrumInfo);
+  virtual bool propagateSpectraMask(const API::SpectrumInfo &lhsSpectrumInfo, const API::SpectrumInfo &rhsSpectrumInfo,
+                                    const int64_t index, API::MatrixWorkspace &out, API::SpectrumInfo &outSpectrumInfo);
 
   /** Carries out the binary operation on a single spectrum, with another
    *spectrum as the right-hand operand.
@@ -107,10 +98,8 @@ protected:
    *  @param YOut :: Data values resulting from the operation
    *  @param EOut :: Drror values resulting from the operation
    */
-  virtual void performBinaryOperation(const HistogramData::Histogram &lhs,
-                                      const HistogramData::Histogram &rhs,
-                                      HistogramData::HistogramY &YOut,
-                                      HistogramData::HistogramE &EOut) = 0;
+  virtual void performBinaryOperation(const HistogramData::Histogram &lhs, const HistogramData::Histogram &rhs,
+                                      HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) = 0;
 
   /** Carries out the binary operation when the right hand operand is a single
    *number.
@@ -121,10 +110,8 @@ protected:
    *  @param YOut :: Data values resulting from the operation
    *  @param EOut :: Error values resulting from the operation
    */
-  virtual void performBinaryOperation(const HistogramData::Histogram &lhs,
-                                      const double rhsY, const double rhsE,
-                                      HistogramData::HistogramY &YOut,
-                                      HistogramData::HistogramE &EOut) = 0;
+  virtual void performBinaryOperation(const HistogramData::Histogram &lhs, const double rhsY, const double rhsE,
+                                      HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) = 0;
 
   // ===================================== EVENT LIST BINARY OPERATIONS
   // ==========================================
@@ -136,8 +123,7 @@ protected:
    *  @param lhs :: Reference to the EventList that will be modified in place.
    *  @param rhs :: Const reference to the EventList on the right hand side.
    */
-  virtual void performEventBinaryOperation(DataObjects::EventList &lhs,
-                                           const DataObjects::EventList &rhs);
+  virtual void performEventBinaryOperation(DataObjects::EventList &lhs, const DataObjects::EventList &rhs);
 
   /** Carries out the binary operation IN-PLACE on a single EventList,
    * with another (histogrammed) spectrum as the right-hand operand.
@@ -147,9 +133,7 @@ protected:
    *  @param rhsY :: Rhs data values
    *  @param rhsE :: Rhs error values
    */
-  virtual void performEventBinaryOperation(DataObjects::EventList &lhs,
-                                           const MantidVec &rhsX,
-                                           const MantidVec &rhsY,
+  virtual void performEventBinaryOperation(DataObjects::EventList &lhs, const MantidVec &rhsX, const MantidVec &rhsY,
                                            const MantidVec &rhsE);
 
   /** Carries out the binary operation IN-PLACE on a single EventList,
@@ -159,9 +143,7 @@ protected:
    *  @param rhsY :: The rhs data value
    *  @param rhsE :: The rhs error value
    */
-  virtual void performEventBinaryOperation(DataObjects::EventList &lhs,
-                                           const double &rhsY,
-                                           const double &rhsE);
+  virtual void performEventBinaryOperation(DataObjects::EventList &lhs, const double &rhsY, const double &rhsE);
 
   /** Should be overridden by operations that need to manipulate the units of
    * the output workspace.
@@ -170,8 +152,7 @@ protected:
    *  @param rhs :: The second input workspace
    *  @param out :: The output workspace
    */
-  virtual void setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
-                              const API::MatrixWorkspace_const_sptr rhs,
+  virtual void setOutputUnits(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs,
                               API::MatrixWorkspace_sptr out) {
     (void)lhs; // Avoid compiler warning
     (void)rhs;
@@ -186,8 +167,7 @@ protected:
    *  @param ans :: The output workspace
    */
 
-  virtual void operateOnRun(const API::Run &lhs, const API::Run &rhs,
-                            API::Run &ans) const {
+  virtual void operateOnRun(const API::Run &lhs, const API::Run &rhs, API::Run &ans) const {
     (void)lhs; // Avoid compiler warning
     (void)rhs;
     (void)ans;
@@ -255,8 +235,7 @@ private:
   void doSingleColumn();
   void do2D(bool mismatchedSpectra);
 
-  void propagateBinMasks(const API::MatrixWorkspace_const_sptr &rhs,
-                         const API::MatrixWorkspace_sptr &out);
+  void propagateBinMasks(const API::MatrixWorkspace_const_sptr &rhs, const API::MatrixWorkspace_sptr &out);
   /// Progress reporting
   std::unique_ptr<API::Progress> m_progress = nullptr;
 };

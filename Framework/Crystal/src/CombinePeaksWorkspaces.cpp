@@ -23,41 +23,31 @@ using namespace Kernel;
 using namespace API;
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string CombinePeaksWorkspaces::name() const {
-  return "CombinePeaksWorkspaces";
-}
+const std::string CombinePeaksWorkspaces::name() const { return "CombinePeaksWorkspaces"; }
 /// Algorithm's version for identification. @see Algorithm::version
 int CombinePeaksWorkspaces::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CombinePeaksWorkspaces::category() const {
-  return "Crystal\\Peaks";
-}
+const std::string CombinePeaksWorkspaces::category() const { return "Crystal\\Peaks"; }
 
 /** Initialises the algorithm's properties.
  */
 void CombinePeaksWorkspaces::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
-                      "LHSWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("LHSWorkspace", "", Direction::Input),
                   "The first set of peaks.");
-  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
-                      "RHSWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("RHSWorkspace", "", Direction::Input),
                   "The second set of peaks.");
-  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The combined peaks list.");
 
-  declareProperty(
-      "CombineMatchingPeaks", false,
-      "Whether to combine peaks that are identical across the two workspaces");
+  declareProperty("CombineMatchingPeaks", false,
+                  "Whether to combine peaks that are identical across the two workspaces");
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   // N.B. Andrei reckons it should be delta_q/q
   declareProperty("Tolerance", EMPTY_DBL(), mustBePositive,
                   "Maximum difference in each component of Q for which peaks "
                   "are considered identical");
-  setPropertySettings(
-      "Tolerance", std::make_unique<EnabledWhenProperty>("CombineMatchingPeaks",
-                                                         IS_EQUAL_TO, "1"));
+  setPropertySettings("Tolerance", std::make_unique<EnabledWhenProperty>("CombineMatchingPeaks", IS_EQUAL_TO, "1"));
 }
 
 /** Executes the algorithm.
@@ -69,14 +59,12 @@ void CombinePeaksWorkspaces::exec() {
   const bool CombineMatchingPeaks = getProperty("CombineMatchingPeaks");
 
   // Warn if not the same instrument, sample
-  if (LHSWorkspace->getInstrument()->getName() !=
-      RHSWorkspace->getInstrument()->getName()) {
+  if (LHSWorkspace->getInstrument()->getName() != RHSWorkspace->getInstrument()->getName()) {
     g_log.warning("The two input workspaces do not appear to come from data "
                   "take on the same instrument");
   }
   if (LHSWorkspace->sample().getName() != RHSWorkspace->sample().getName()) {
-    g_log.warning(
-        "The two input workspaces do not appear to relate to the same sample");
+    g_log.warning("The two input workspaces do not appear to relate to the same sample");
   }
 
   // Copy the first workspace to our output workspace
@@ -96,26 +84,22 @@ void CombinePeaksWorkspaces::exec() {
 
     // Collect modulation vectors for both workspaces.
     for (int i = 0; i < 3; ++i) { // Currently contains up to 3 vectors.
-      const auto modVecR =
-          RHSWorkspace->sample().getOrientedLattice().getModVec(i);
+      const auto modVecR = RHSWorkspace->sample().getOrientedLattice().getModVec(i);
       // Each vector contains 3 values, check that at least one is not 0.
       if (!(modVecR[0] == 0 && modVecR[1] == 0 && modVecR[2] == 0)) {
         rhsModVectors.push_back(modVecR);
       }
-      const auto modVecL =
-          LHSWorkspace->sample().getOrientedLattice().getModVec(i);
+      const auto modVecL = LHSWorkspace->sample().getOrientedLattice().getModVec(i);
       if (!(modVecL[0] == 0 && modVecL[1] == 0 && modVecL[2] == 0)) {
         lhsModVectors.push_back(modVecL);
       }
     }
 
     // Add only unique mod vectors from the rhs list to the lhs list.
-    std::remove_copy_if(
-        rhsModVectors.begin(), rhsModVectors.end(),
-        back_inserter(lhsModVectors), [lhsModVectors](Kernel::V3D modVec) {
-          return lhsModVectors.end() !=
-                 std::find(lhsModVectors.begin(), lhsModVectors.end(), modVec);
-        });
+    std::remove_copy_if(rhsModVectors.begin(), rhsModVectors.end(), back_inserter(lhsModVectors),
+                        [lhsModVectors](Kernel::V3D modVec) {
+                          return lhsModVectors.end() != std::find(lhsModVectors.begin(), lhsModVectors.end(), modVec);
+                        });
 
     // Hard limit of 3 mod vectors until PeaksWorkspace is refactored.
     if (lhsModVectors.size() > 3) {
@@ -126,14 +110,11 @@ void CombinePeaksWorkspaces::exec() {
       // methods.
       for (size_t i = 0; i < lhsModVectors.size(); ++i) {
         if (i == 0) {
-          output->mutableSample().getOrientedLattice().setModVec1(
-              lhsModVectors[i]);
+          output->mutableSample().getOrientedLattice().setModVec1(lhsModVectors[i]);
         } else if (i == 1) {
-          output->mutableSample().getOrientedLattice().setModVec2(
-              lhsModVectors[i]);
+          output->mutableSample().getOrientedLattice().setModVec2(lhsModVectors[i]);
         } else if (i == 2) {
-          output->mutableSample().getOrientedLattice().setModVec3(
-              lhsModVectors[i]);
+          output->mutableSample().getOrientedLattice().setModVec3(lhsModVectors[i]);
         }
       }
     }
@@ -172,8 +153,7 @@ void CombinePeaksWorkspaces::exec() {
       bool match = false;
       for (int i = 0; i < lhs_n_peaks; i++) {
         const V3D deltaQ = currentPeak.getQSampleFrame() - q_vectors[i];
-        if (deltaQ.nullVector(
-                Tolerance)) // Using a V3D method that does the job
+        if (deltaQ.nullVector(Tolerance)) // Using a V3D method that does the job
         {
           match = true;
           break;

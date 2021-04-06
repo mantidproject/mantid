@@ -21,13 +21,10 @@ void export_PropertyHistory() {
 
   class_<PropertyHistory, boost::noncopyable>("PropertyHistory", no_init)
       .def("name", &PropertyHistory::name, "Returns the name of the property.")
-      .def("value", &PropertyHistory::value,
-           "Returns the value of the property.")
+      .def("value", &PropertyHistory::value, "Returns the value of the property.")
       .def("type", &PropertyHistory::type, "Returns the type of the property.")
-      .def("isDefault", &PropertyHistory::isDefault,
-           "Returns if the property value is the default value.")
-      .def("direction", &PropertyHistory::direction,
-           "Returns the direction of the property.")
+      .def("isDefault", &PropertyHistory::isDefault, "Returns if the property value is the default value.")
+      .def("direction", &PropertyHistory::direction, "Returns the direction of the property.")
       // ----------------- Operators --------------------------------------
       .def(self_ns::str(self));
 }

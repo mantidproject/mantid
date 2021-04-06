@@ -29,6 +29,6 @@ void export_DetectorInfoItem() {
       .add_property("rotation", &DetectorInfoItem<DetectorInfo>::rotation)
       .add_property("l2", &DetectorInfoItem<DetectorInfo>::l2)
       .add_property("index", &DetectorInfoItem<DetectorInfo>::index)
-      .def("setMasked", &DetectorInfoItem<DetectorInfo>::setMasked,
-           (arg("self"), arg("masked")), "Set the mask flag for the detector");
+      .def("setMasked", &DetectorInfoItem<DetectorInfo>::setMasked, (arg("self"), arg("masked")),
+           "Set the mask flag for the detector");
 }

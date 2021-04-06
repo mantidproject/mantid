@@ -49,14 +49,12 @@ public:
     presenter.notifySliceTypeChanged(sliceType);
 
     TS_ASSERT_EQUALS(presenter.slicing().which(), 2);
-    auto const &uniformSlicingByTime =
-        boost::get<UniformSlicingByTime>(presenter.slicing());
+    auto const &uniformSlicingByTime = boost::get<UniformSlicingByTime>(presenter.slicing());
     TS_ASSERT(uniformSlicingByTime == UniformSlicingByTime(secondsPerSlice));
     verifyAndClear();
   }
 
-  void
-  testInitializesWithStateFromViewWhenChangingToUniformSlicingByNumberOfSlices() {
+  void testInitializesWithStateFromViewWhenChangingToUniformSlicingByNumberOfSlices() {
     auto presenter = makePresenter();
     auto const numberOfSlices = 11;
     auto const sliceType = SliceType::UniformEven;
@@ -66,18 +64,15 @@ public:
     presenter.notifySliceTypeChanged(sliceType);
 
     TS_ASSERT_EQUALS(presenter.slicing().which(), 3);
-    auto const &uniformSlicingByNumberOfSlices =
-        boost::get<UniformSlicingByNumberOfSlices>(presenter.slicing());
-    TS_ASSERT(uniformSlicingByNumberOfSlices ==
-              UniformSlicingByNumberOfSlices(numberOfSlices));
+    auto const &uniformSlicingByNumberOfSlices = boost::get<UniformSlicingByNumberOfSlices>(presenter.slicing());
+    TS_ASSERT(uniformSlicingByNumberOfSlices == UniformSlicingByNumberOfSlices(numberOfSlices));
     verifyAndClear();
   }
 
   void testInitializesWithStateFromViewWhenChangingToCustomSlicing() {
     auto presenter = makePresenter();
     auto const sliceType = SliceType::Custom;
-    auto const expectedSliceTimes =
-        std::vector<double>({11.0, 12.0, 33.0, 23.2});
+    auto const expectedSliceTimes = std::vector<double>({11.0, 12.0, 33.0, 23.2});
     auto const sliceTimeList = std::string("11, 12,33, 23.2");
 
     EXPECT_CALL(m_view, customBreakpoints()).WillOnce(Return(sliceTimeList));
@@ -86,8 +81,7 @@ public:
     presenter.notifySliceTypeChanged(sliceType);
 
     TS_ASSERT_EQUALS(presenter.slicing().which(), 4);
-    auto const &sliceTimes =
-        boost::get<CustomSlicingByList>(presenter.slicing());
+    auto const &sliceTimes = boost::get<CustomSlicingByList>(presenter.slicing());
     TS_ASSERT(sliceTimes == CustomSlicingByList(expectedSliceTimes));
     verifyAndClear();
   }
@@ -106,10 +100,8 @@ public:
     presenter.notifySliceTypeChanged(sliceType);
 
     TS_ASSERT_EQUALS(presenter.slicing().which(), 5);
-    auto const &sliceValues =
-        boost::get<SlicingByEventLog>(presenter.slicing());
-    TS_ASSERT(sliceValues ==
-              SlicingByEventLog(expectedSliceValues, logBlockName));
+    auto const &sliceValues = boost::get<SlicingByEventLog>(presenter.slicing());
+    TS_ASSERT(sliceValues == SlicingByEventLog(expectedSliceValues, logBlockName));
     verifyAndClear();
   }
 
@@ -118,17 +110,13 @@ public:
     auto const sliceType = SliceType::UniformEven;
     auto const expectedSliceCount = 10;
 
-    EXPECT_CALL(m_view, uniformSliceCount())
-        .WillOnce(Return(0))
-        .WillOnce(Return(expectedSliceCount));
+    EXPECT_CALL(m_view, uniformSliceCount()).WillOnce(Return(0)).WillOnce(Return(expectedSliceCount));
     expectChangeSliceType(SliceType::None, sliceType);
     presenter.notifySliceTypeChanged(sliceType);
 
     presenter.notifyUniformSliceCountChanged(expectedSliceCount);
-    auto const &sliceValues =
-        boost::get<UniformSlicingByNumberOfSlices>(presenter.slicing());
-    TS_ASSERT(sliceValues ==
-              UniformSlicingByNumberOfSlices(expectedSliceCount));
+    auto const &sliceValues = boost::get<UniformSlicingByNumberOfSlices>(presenter.slicing());
+    TS_ASSERT(sliceValues == UniformSlicingByNumberOfSlices(expectedSliceCount));
     verifyAndClear();
   }
 
@@ -137,9 +125,7 @@ public:
     auto const sliceType = SliceType::Custom;
     auto const invalidCustomBreakpoints = std::string("1,");
 
-    EXPECT_CALL(m_view, customBreakpoints())
-        .WillOnce(Return("1"))
-        .WillOnce(Return(invalidCustomBreakpoints));
+    EXPECT_CALL(m_view, customBreakpoints()).WillOnce(Return("1")).WillOnce(Return(invalidCustomBreakpoints));
     expectChangeSliceType(SliceType::None, sliceType);
     presenter.notifySliceTypeChanged(sliceType);
 
@@ -153,9 +139,7 @@ public:
     auto const sliceType = SliceType::Custom;
     auto const invalidCustomBreakpoints = std::string("1,");
 
-    EXPECT_CALL(m_view, customBreakpoints())
-        .WillOnce(Return("1"))
-        .WillOnce(Return(invalidCustomBreakpoints));
+    EXPECT_CALL(m_view, customBreakpoints()).WillOnce(Return("1")).WillOnce(Return(invalidCustomBreakpoints));
     expectChangeSliceType(SliceType::None, sliceType);
     presenter.notifySliceTypeChanged(sliceType);
 
@@ -170,9 +154,7 @@ public:
     auto const sliceType = SliceType::Custom;
     auto const validCustomBreakpoints = std::string("1");
 
-    EXPECT_CALL(m_view, customBreakpoints())
-        .WillOnce(Return("1,"))
-        .WillOnce(Return(validCustomBreakpoints));
+    EXPECT_CALL(m_view, customBreakpoints()).WillOnce(Return("1,")).WillOnce(Return(validCustomBreakpoints));
     expectChangeSliceType(SliceType::None, sliceType);
     presenter.notifySliceTypeChanged(sliceType);
 
@@ -186,9 +168,7 @@ public:
     auto const sliceType = SliceType::Custom;
     auto const validCustomBreakpoints = std::string("1");
 
-    EXPECT_CALL(m_view, customBreakpoints())
-        .WillOnce(Return("1,"))
-        .WillOnce(Return(validCustomBreakpoints));
+    EXPECT_CALL(m_view, customBreakpoints()).WillOnce(Return("1,")).WillOnce(Return(validCustomBreakpoints));
     expectChangeSliceType(SliceType::None, sliceType);
     presenter.notifySliceTypeChanged(sliceType);
 
@@ -228,9 +208,7 @@ private:
     return presenter;
   }
 
-  void verifyAndClear() {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
-  }
+  void verifyAndClear() { TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view)); }
 
   void expectChangeSliceType(SliceType oldSliceType, SliceType newSliceType) {
     EXPECT_CALL(m_view, disableSliceType(oldSliceType)).Times(1);

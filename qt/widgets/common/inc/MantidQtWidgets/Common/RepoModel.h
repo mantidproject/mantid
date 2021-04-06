@@ -87,8 +87,7 @@ class EXPORT_OPT_MANTIDQT_COMMON RepoModel : public QAbstractItemModel {
   class RepoItem {
   public:
     // construct the RepoItem passing the script repository path
-    RepoItem(const QString &label, const QString &path = "/",
-             RepoItem *parent = nullptr);
+    RepoItem(const QString &label, const QString &path = "/", RepoItem *parent = nullptr);
 
     ~RepoItem();
     // append child to build the directory tree
@@ -171,11 +170,9 @@ public:
   /// information on the available interaction
   Qt::ItemFlags flags(const QModelIndex &index) const override;
   /// header strings
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
+  QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   /// access to the index
-  QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
+  QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
   /// access to parent
   QModelIndex parent(const QModelIndex &index) const override;
   //// provide the number of the rows
@@ -183,8 +180,7 @@ public:
   /// provide the number of the columns
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   /// change data
-  bool setData(const QModelIndex &index, const QVariant &value,
-               int role = Qt::EditRole) override;
+  bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
   static const QString &localOnlySt();
   static const QString &remoteOnlySt();
@@ -219,8 +215,8 @@ private:
   Q_DISABLE_COPY(RepoModel)
 
   /// auxiliary method to deal with exceptions
-  void handleExceptions(const Mantid::API::ScriptRepoException &ex,
-                        const QString &title, bool showWarning = true) const;
+  void handleExceptions(const Mantid::API::ScriptRepoException &ex, const QString &title,
+                        bool showWarning = true) const;
 
   // handle download in thread
   QFuture<QString> download_threads;

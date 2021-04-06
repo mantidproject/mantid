@@ -34,14 +34,11 @@ public:
 
   void test_exec_PointData_fails() { do_test_exec(true, true); }
 
-  void do_test_exec(bool GenerateMultipleEvents,
-                    bool ConvertToPointData = false) {
+  void do_test_exec(bool GenerateMultipleEvents, bool ConvertToPointData = false) {
     std::string inWSName("ConvertToEventWorkspaceTest_InputWS");
     std::string outWSName("ConvertToEventWorkspaceTest_OutputWS");
     // Create the input
-    Workspace2D_sptr inWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(50, 10,
-                                                                     true);
+    Workspace2D_sptr inWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(50, 10, true);
     AnalysisDataService::Instance().addOrReplace(inWSName, inWS);
 
     inWS->dataY(0)[0] = 1.0;
@@ -56,19 +53,16 @@ public:
     inWS->dataE(0)[4] = 100.0;
 
     if (ConvertToPointData) {
-      FrameworkManager::Instance().exec("ConvertToPointData", 4,
-                                        "InputWorkspace", inWSName.c_str(),
-                                        "OutputWorkspace", inWSName.c_str());
+      FrameworkManager::Instance().exec("ConvertToPointData", 4, "InputWorkspace", inWSName.c_str(), "OutputWorkspace",
+                                        inWSName.c_str());
     }
 
     ConvertToEventWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("GenerateMultipleEvents", GenerateMultipleEvents));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateMultipleEvents", GenerateMultipleEvents));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     if (ConvertToPointData) {
       // Should NOT work
@@ -81,9 +75,7 @@ public:
 
     // Retrieve the workspace from data service.
     EventWorkspace_sptr outWS;
-    TS_ASSERT_THROWS_NOTHING(
-        outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
     TS_ASSERT(outWS);
     if (!outWS)
       return;
@@ -91,10 +83,8 @@ public:
     // This performs a full comparison (histogram
     CompareWorkspaces matcher;
     matcher.initialize();
-    matcher.setProperty("Workspace1",
-                        std::dynamic_pointer_cast<MatrixWorkspace>(inWS));
-    matcher.setProperty("Workspace2",
-                        std::dynamic_pointer_cast<MatrixWorkspace>(outWS));
+    matcher.setProperty("Workspace1", std::dynamic_pointer_cast<MatrixWorkspace>(inWS));
+    matcher.setProperty("Workspace2", std::dynamic_pointer_cast<MatrixWorkspace>(outWS));
     matcher.setProperty("CheckType", false);
     matcher.setProperty("Tolerance", 1e-6);
     matcher.execute();
@@ -102,15 +92,12 @@ public:
     TS_ASSERT(matcher.getProperty("Result"));
 
     // Event-specific checks
-    TS_ASSERT_EQUALS(outWS->getNumberEvents(),
-                     GenerateMultipleEvents ? 1006 : 499);
-    TS_ASSERT_EQUALS(outWS->getSpectrum(1).getNumberEvents(),
-                     GenerateMultipleEvents ? 20 : 10);
+    TS_ASSERT_EQUALS(outWS->getNumberEvents(), GenerateMultipleEvents ? 1006 : 499);
+    TS_ASSERT_EQUALS(outWS->getSpectrum(1).getNumberEvents(), GenerateMultipleEvents ? 20 : 10);
 
     // Check a couple of events
     EventList &el = outWS->getSpectrum(0);
-    TS_ASSERT_EQUALS(el.getWeightedEventsNoTime().size(),
-                     GenerateMultipleEvents ? 26 : 9);
+    TS_ASSERT_EQUALS(el.getWeightedEventsNoTime().size(), GenerateMultipleEvents ? 26 : 9);
     WeightedEventNoTime ev;
     ev = el.getWeightedEventsNoTime()[0];
     TS_ASSERT_DELTA(ev.tof(), 0.5, 1e-6);
@@ -194,16 +181,13 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateMultipleEvents", false));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     EventWorkspace_sptr outWS;
-    TS_ASSERT_THROWS_NOTHING(
-        outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
     TS_ASSERT(outWS);
     if (!outWS)
       return;
@@ -229,16 +213,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateMultipleEvents", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateZeros", true));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     EventWorkspace_sptr outWS;
-    TS_ASSERT_THROWS_NOTHING(
-        outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
     TS_ASSERT(outWS);
     if (!outWS)
       return;

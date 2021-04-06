@@ -16,9 +16,7 @@ class MaxentSpaceRealTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MaxentSpaceRealTest *createSuite() {
-    return new MaxentSpaceRealTest();
-  }
+  static MaxentSpaceRealTest *createSuite() { return new MaxentSpaceRealTest(); }
   static void destroySuite(MaxentSpaceRealTest *suite) { delete suite; }
 
   void test_toComplex() {

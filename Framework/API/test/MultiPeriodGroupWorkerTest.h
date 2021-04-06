@@ -24,27 +24,19 @@ public:
   int version() const override { return 1; }
   const std::string summary() const override { return "Test summary"; }
   void init() override {
-    declareProperty(std::make_unique<ArrayProperty<std::string>>(
-        "MyInputWorkspaces", Direction::Input));
-    declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                          Direction::Output),
-                    "");
+    declareProperty(std::make_unique<ArrayProperty<std::string>>("MyInputWorkspaces", Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output), "");
   }
-  void exec() override {
-    setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester));
-  }
+  void exec() override { setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester)); }
   ~TestAlgorithm() override {}
 };
 DECLARE_ALGORITHM(TestAlgorithm)
 
-class MultiPeriodGroupWorkerTest : public CxxTest::TestSuite,
-                                   public MultiPeriodGroupTestBase {
+class MultiPeriodGroupWorkerTest : public CxxTest::TestSuite, public MultiPeriodGroupTestBase {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MultiPeriodGroupWorkerTest *createSuite() {
-    return new MultiPeriodGroupWorkerTest();
-  }
+  static MultiPeriodGroupWorkerTest *createSuite() { return new MultiPeriodGroupWorkerTest(); }
   static void destroySuite(MultiPeriodGroupWorkerTest *suite) { delete suite; }
 
   void test_default_construction() {
@@ -91,8 +83,7 @@ public:
     TS_ASSERT(worker.processGroups(alg.get(), groups));
 
     AnalysisDataService::Instance().doesExist("out_ws");
-    auto out_group =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out_ws");
+    auto out_group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out_ws");
     TS_ASSERT_EQUALS(a->size(), out_group->size());
     AnalysisDataService::Instance().remove("out_ws");
   }

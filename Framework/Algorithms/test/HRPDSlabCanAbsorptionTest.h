@@ -41,13 +41,11 @@ public:
     if (!atten.isInitialized())
       atten.initialize();
 
-    std::shared_ptr<Instrument> testInst =
-        std::make_shared<Instrument>("testInst");
+    std::shared_ptr<Instrument> testInst = std::make_shared<Instrument>("testInst");
 
     // Define a source and sample position
     // Define a source component
-    ObjComponent *source =
-        new ObjComponent("moderator", IObject_sptr(), testInst.get());
+    ObjComponent *source = new ObjComponent("moderator", IObject_sptr(), testInst.get());
     source->setPos(V3D(0.0, 0.0, -95.0));
     testInst->add(source);
     testInst->markAsSource(source);
@@ -72,35 +70,26 @@ public:
     testInst->add(det3);
     testInst->markAsDetector(det3);
 
-    auto testWS = create<Workspace2D>(
-        testInst, Mantid::Indexing::IndexInfo(3),
-        Histogram(BinEdges(11, LinearGenerator(0.25, 0.5)), Counts(10, 2.0)));
+    auto testWS = create<Workspace2D>(testInst, Mantid::Indexing::IndexInfo(3),
+                                      Histogram(BinEdges(11, LinearGenerator(0.25, 0.5)), Counts(10, 2.0)));
     // Needs to have units of wavelength
-    testWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    testWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
-    TS_ASSERT_THROWS_NOTHING(atten.setProperty<MatrixWorkspace_sptr>(
-        "InputWorkspace", std::move(testWS)));
+    TS_ASSERT_THROWS_NOTHING(atten.setProperty<MatrixWorkspace_sptr>("InputWorkspace", std::move(testWS)));
     std::string outputWS("factors");
-    TS_ASSERT_THROWS_NOTHING(
-        atten.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("Thickness", "1.5"));
-    TS_ASSERT_THROWS_NOTHING(
-        atten.setPropertyValue("SampleAttenuationXSection", "6.52"));
-    TS_ASSERT_THROWS_NOTHING(
-        atten.setPropertyValue("SampleScatteringXSection", "19.876"));
-    TS_ASSERT_THROWS_NOTHING(
-        atten.setPropertyValue("SampleNumberDensity", "0.0093"));
-    TS_ASSERT_THROWS_NOTHING(
-        atten.setPropertyValue("NumberOfWavelengthPoints", "3"));
+    TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("SampleAttenuationXSection", "6.52"));
+    TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("SampleScatteringXSection", "19.876"));
+    TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("SampleNumberDensity", "0.0093"));
+    TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("NumberOfWavelengthPoints", "3"));
     TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("ExpMethod", "Normal"));
     TS_ASSERT_THROWS_NOTHING(atten.execute());
     TS_ASSERT(atten.isExecuted());
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_DELTA(result->y(0).front(), 0.7423, 0.0001);
     TS_ASSERT_DELTA(result->y(0)[1], 0.7244, 0.0001);
     TS_ASSERT_DELTA(result->y(0).back(), 0.5964, 0.0001);

@@ -27,17 +27,13 @@ DECLARE_ALGORITHM(ResizeRectangularDetector)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string ResizeRectangularDetector::name() const {
-  return "ResizeRectangularDetector";
-}
+const std::string ResizeRectangularDetector::name() const { return "ResizeRectangularDetector"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int ResizeRectangularDetector::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ResizeRectangularDetector::category() const {
-  return "DataHandling\\Instrument";
-}
+const std::string ResizeRectangularDetector::category() const { return "DataHandling\\Instrument"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -47,14 +43,10 @@ const std::string ResizeRectangularDetector::category() const {
 void ResizeRectangularDetector::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-      "Workspace", "Anonymous", Direction::InOut));
-  declareProperty("ComponentName", "",
-                  "The name of the RectangularDetector to resize.");
-  declareProperty("ScaleX", 1.0,
-                  "The scaling factor in the X direction. Default 1.0");
-  declareProperty("ScaleY", 1.0,
-                  "The scaling factor in the Y direction. Default 1.0");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace", "Anonymous", Direction::InOut));
+  declareProperty("ComponentName", "", "The name of the RectangularDetector to resize.");
+  declareProperty("ScaleX", 1.0, "The scaling factor in the X direction. Default 1.0");
+  declareProperty("ScaleY", 1.0, "The scaling factor in the Y direction. Default 1.0");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -64,8 +56,7 @@ void ResizeRectangularDetector::exec() {
   // Get the input workspace
   Workspace_sptr ws = getProperty("Workspace");
   MatrixWorkspace_sptr inputW = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  DataObjects::PeaksWorkspace_sptr inputP =
-      std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+  DataObjects::PeaksWorkspace_sptr inputP = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
 
   // Get some stuff from the input workspace
   Instrument_sptr inst;
@@ -99,14 +90,11 @@ void ResizeRectangularDetector::exec() {
 
   comp = inst->getComponentByName(ComponentName);
   if (!comp)
-    throw std::runtime_error("Component with name " + ComponentName +
-                             " was not found.");
+    throw std::runtime_error("Component with name " + ComponentName + " was not found.");
 
-  RectangularDetector_const_sptr det =
-      std::dynamic_pointer_cast<const RectangularDetector>(comp);
+  RectangularDetector_const_sptr det = std::dynamic_pointer_cast<const RectangularDetector>(comp);
   if (!det)
-    throw std::runtime_error("Component with name " + ComponentName +
-                             " is not a RectangularDetector.");
+    throw std::runtime_error("Component with name " + ComponentName + " is not a RectangularDetector.");
 
   auto input = std::dynamic_pointer_cast<ExperimentInfo>(ws);
   Geometry::ParameterMap &pmap = input->instrumentParameters();
@@ -127,9 +115,8 @@ void ResizeRectangularDetector::exec() {
     relscalex /= oldscalex[0];
   if (!oldscaley.empty())
     relscaley /= oldscaley[0];
-  applyRectangularDetectorScaleToComponentInfo(input->mutableComponentInfo(),
-                                               comp->getComponentID(),
-                                               relscalex, relscaley);
+  applyRectangularDetectorScaleToComponentInfo(input->mutableComponentInfo(), comp->getComponentID(), relscalex,
+                                               relscaley);
 }
 
 } // namespace Algorithms

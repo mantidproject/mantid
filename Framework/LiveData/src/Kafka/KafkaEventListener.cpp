@@ -28,8 +28,7 @@ KafkaEventListener::KafkaEventListener() : API::LiveListener() {
                   "buffer will be flushed to the buffered EventWorkspace.");
 }
 
-void KafkaEventListener::setAlgorithm(
-    const Mantid::API::IAlgorithm &callingAlgorithm) {
+void KafkaEventListener::setAlgorithm(const Mantid::API::IAlgorithm &callingAlgorithm) {
   this->updatePropertyValues(callingAlgorithm);
   // Get the instrument name from StartLiveData so we can sub to correct topics
   if (callingAlgorithm.existsProperty("Instrument")) {
@@ -43,25 +42,19 @@ void KafkaEventListener::setAlgorithm(
 /// @copydoc ILiveListener::connect
 bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
   if (m_instrumentName.empty()) {
-    g_log.error(
-        "KafkaEventListener::connect requires a non-empty instrument name");
+    g_log.error("KafkaEventListener::connect requires a non-empty instrument name");
   }
 
-  auto instrumentInfo =
-      Kernel::ConfigService::Instance().getInstrument(m_instrumentName);
+  auto instrumentInfo = Kernel::ConfigService::Instance().getInstrument(m_instrumentName);
 
   // Get topics from Facilites.xml if available otherwise use defaults.
   auto topics = instrumentInfo.topicInfoList();
 
-  std::string eventTopic(m_instrumentName +
-                         KafkaTopicSubscriber::EVENT_TOPIC_SUFFIX),
+  std::string eventTopic(m_instrumentName + KafkaTopicSubscriber::EVENT_TOPIC_SUFFIX),
       runInfoTopic(m_instrumentName + KafkaTopicSubscriber::RUN_TOPIC_SUFFIX),
-      sampleEnvTopic(m_instrumentName +
-                     KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX),
-      chopperTopic(m_instrumentName +
-                   KafkaTopicSubscriber::CHOPPER_TOPIC_SUFFIX),
-      monitorTopic(m_instrumentName +
-                   KafkaTopicSubscriber::MONITOR_TOPIC_SUFFIX);
+      sampleEnvTopic(m_instrumentName + KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX),
+      chopperTopic(m_instrumentName + KafkaTopicSubscriber::CHOPPER_TOPIC_SUFFIX),
+      monitorTopic(m_instrumentName + KafkaTopicSubscriber::MONITOR_TOPIC_SUFFIX);
 
   for (const auto &topic : topics) {
     switch (topic.type()) {
@@ -86,12 +79,10 @@ bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
   const std::size_t bufferThreshold = getProperty("BufferThreshold");
   auto broker = std::make_shared<KafkaBroker>(address.toString());
   try {
-    m_decoder = std::make_unique<KafkaEventStreamDecoder>(
-        broker, eventTopic, runInfoTopic, sampleEnvTopic, chopperTopic,
-        monitorTopic, bufferThreshold);
+    m_decoder = std::make_unique<KafkaEventStreamDecoder>(broker, eventTopic, runInfoTopic, sampleEnvTopic,
+                                                          chopperTopic, monitorTopic, bufferThreshold);
   } catch (std::exception &exc) {
-    g_log.error() << "KafkaEventListener::connect - Connection Error: "
-                  << exc.what() << "\n";
+    g_log.error() << "KafkaEventListener::connect - Connection Error: " << exc.what() << "\n";
     return false;
   }
   return true;
@@ -131,9 +122,7 @@ std::shared_ptr<API::Workspace> KafkaEventListener::extractData() {
 }
 
 /// @copydoc ILiveListener::isConnected
-bool KafkaEventListener::isConnected() {
-  return (m_decoder ? m_decoder->isCapturing() : false);
-}
+bool KafkaEventListener::isConnected() { return (m_decoder ? m_decoder->isCapturing() : false); }
 
 /// @copydoc ILiveListener::runStatus
 API::ILiveListener::RunStatus KafkaEventListener::runStatus() {
@@ -141,13 +130,9 @@ API::ILiveListener::RunStatus KafkaEventListener::runStatus() {
 }
 
 /// @copydoc ILiveListener::runNumber
-int KafkaEventListener::runNumber() const {
-  return (m_decoder ? m_decoder->runNumber() : -1);
-}
+int KafkaEventListener::runNumber() const { return (m_decoder ? m_decoder->runNumber() : -1); }
 
 /// @copydoc ILiveListener::dataReset
-bool KafkaEventListener::dataReset() {
-  return (m_decoder ? m_decoder->dataReset() : false);
-}
+bool KafkaEventListener::dataReset() { return (m_decoder ? m_decoder->dataReset() : false); }
 } // namespace LiveData
 } // namespace Mantid

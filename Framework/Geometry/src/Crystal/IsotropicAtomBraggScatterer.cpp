@@ -25,13 +25,11 @@ using namespace Kernel;
 
 /// Constructor which takes an element symbol, fractional coordinates, isotropic
 /// atomic displacement parameter and occupancy.
-IsotropicAtomBraggScatterer::IsotropicAtomBraggScatterer()
-    : BraggScattererInCrystalStructure(), m_atom(), m_label() {}
+IsotropicAtomBraggScatterer::IsotropicAtomBraggScatterer() : BraggScattererInCrystalStructure(), m_atom(), m_label() {}
 
 /// Clones the instance.
 BraggScatterer_sptr IsotropicAtomBraggScatterer::clone() const {
-  IsotropicAtomBraggScatterer_sptr clone =
-      std::make_shared<IsotropicAtomBraggScatterer>();
+  IsotropicAtomBraggScatterer_sptr clone = std::make_shared<IsotropicAtomBraggScatterer>();
   clone->initialize();
   clone->setProperties(this->asString(false));
 
@@ -51,15 +49,10 @@ void IsotropicAtomBraggScatterer::setElement(const std::string &element) {
 std::string IsotropicAtomBraggScatterer::getElement() const { return m_label; }
 
 /// Returns the internally stored NeutronAtom that holds element specific data.
-PhysicalConstants::NeutronAtom
-IsotropicAtomBraggScatterer::getNeutronAtom() const {
-  return m_atom;
-}
+PhysicalConstants::NeutronAtom IsotropicAtomBraggScatterer::getNeutronAtom() const { return m_atom; }
 
 /// Returns the occupancy.
-double IsotropicAtomBraggScatterer::getOccupancy() const {
-  return getProperty("Occupancy");
-}
+double IsotropicAtomBraggScatterer::getOccupancy() const { return getProperty("Occupancy"); }
 
 /// Returns the isotropic atomic displacement parameter.
 double IsotropicAtomBraggScatterer::getU() const { return getProperty("U"); }
@@ -73,10 +66,8 @@ double IsotropicAtomBraggScatterer::getU() const { return getProperty("U"); }
  * @param hkl :: HKL for which the structure factor should be calculated
  * @return Structure factor (complex).
  */
-StructureFactor
-IsotropicAtomBraggScatterer::calculateStructureFactor(const V3D &hkl) const {
-  double amplitude =
-      getOccupancy() * getDebyeWallerFactor(hkl) * getScatteringLength();
+StructureFactor IsotropicAtomBraggScatterer::calculateStructureFactor(const V3D &hkl) const {
+  double amplitude = getOccupancy() * getDebyeWallerFactor(hkl) * getScatteringLength();
 
   double phase = 2.0 * M_PI * m_position.scalar_prod(hkl);
 
@@ -99,18 +90,14 @@ void IsotropicAtomBraggScatterer::declareScattererProperties() {
   // Default behavior requires this.
   setElement("H");
 
-  std::shared_ptr<BoundedValidator<double>> uValidator =
-      std::make_shared<BoundedValidator<double>>();
+  std::shared_ptr<BoundedValidator<double>> uValidator = std::make_shared<BoundedValidator<double>>();
   uValidator->setLower(0.0);
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("U", 0.0, uValidator),
-      "Isotropic atomic displacement in Angstrom^2");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("U", 0.0, uValidator),
+                  "Isotropic atomic displacement in Angstrom^2");
 
-  IValidator_sptr occValidator =
-      std::make_shared<BoundedValidator<double>>(0.0, 1.0);
-  declareProperty(std::make_unique<PropertyWithValue<double>>("Occupancy", 1.0,
-                                                              occValidator),
+  IValidator_sptr occValidator = std::make_shared<BoundedValidator<double>>(0.0, 1.0);
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Occupancy", 1.0, occValidator),
                   "Site occupancy, values on interval [0,1].");
 
   declareProperty(std::make_unique<PropertyWithValue<std::string>>(
@@ -118,8 +105,7 @@ void IsotropicAtomBraggScatterer::declareScattererProperties() {
 }
 
 /// After setting the element as a string, the corresponding
-void IsotropicAtomBraggScatterer::afterScattererPropertySet(
-    const std::string &propertyName) {
+void IsotropicAtomBraggScatterer::afterScattererPropertySet(const std::string &propertyName) {
   if (propertyName == "Element") {
     setElement(getPropertyValue(propertyName));
   }
@@ -134,9 +120,7 @@ double IsotropicAtomBraggScatterer::getDebyeWallerFactor(const V3D &hkl) const {
 }
 
 /// Returns the scattering length of the stored element.
-double IsotropicAtomBraggScatterer::getScatteringLength() const {
-  return m_atom.coh_scatt_length_real;
-}
+double IsotropicAtomBraggScatterer::getScatteringLength() const { return m_atom.coh_scatt_length_real; }
 
 DECLARE_BRAGGSCATTERER(IsotropicAtomBraggScatterer)
 
@@ -151,15 +135,12 @@ DECLARE_BRAGGSCATTERER(IsotropicAtomBraggScatterer)
  *
  * @param scattererString :: String in the format specified above
  */
-IsotropicAtomBraggScattererParser::IsotropicAtomBraggScattererParser(
-    const std::string &scattererString)
+IsotropicAtomBraggScattererParser::IsotropicAtomBraggScattererParser(const std::string &scattererString)
     : m_scattererString(scattererString) {}
 
 /// Operator that returns vector of IsotropicAtomBraggScatterers.
-std::vector<BraggScatterer_sptr> IsotropicAtomBraggScattererParser::
-operator()() const {
-  Mantid::Kernel::StringTokenizer tokens(
-      m_scattererString, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+std::vector<BraggScatterer_sptr> IsotropicAtomBraggScattererParser::operator()() const {
+  Mantid::Kernel::StringTokenizer tokens(m_scattererString, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   std::vector<BraggScatterer_sptr> scatterers;
   scatterers.reserve(tokens.size());
   for (const auto &token : tokens) {
@@ -170,20 +151,16 @@ operator()() const {
 
 /// Returns IsotropicAtomBraggScatterer for string with format "Element x y z
 /// occupancy u_iso".
-BraggScatterer_sptr IsotropicAtomBraggScattererParser::getScatterer(
-    const std::string &singleScatterer) const {
+BraggScatterer_sptr IsotropicAtomBraggScattererParser::getScatterer(const std::string &singleScatterer) const {
   std::vector<std::string> tokens;
   boost::split(tokens, singleScatterer, boost::is_any_of(" "));
 
   if (tokens.size() < 4 || tokens.size() > 6) {
-    throw std::invalid_argument("Could not parse scatterer string: " +
-                                singleScatterer);
+    throw std::invalid_argument("Could not parse scatterer string: " + singleScatterer);
   }
 
-  std::vector<std::string> cleanScattererTokens =
-      getCleanScattererTokens(tokens);
-  std::vector<std::string> properties = {"Element", "Position", "Occupancy",
-                                         "U"};
+  std::vector<std::string> cleanScattererTokens = getCleanScattererTokens(tokens);
+  std::vector<std::string> properties = {"Element", "Position", "Occupancy", "U"};
 
   ::Json::Value root;
   for (size_t i = 0; i < cleanScattererTokens.size(); ++i) {
@@ -193,22 +170,19 @@ BraggScatterer_sptr IsotropicAtomBraggScattererParser::getScatterer(
   ::Json::FastWriter writer;
   std::string initString = writer.write(root);
 
-  return BraggScattererFactory::Instance().createScatterer(
-      "IsotropicAtomBraggScatterer", initString);
+  return BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", initString);
 }
 
 /// Converts tokens for getScatterer method so they can be processed by factory.
 std::vector<std::string>
-IsotropicAtomBraggScattererParser::getCleanScattererTokens(
-    const std::vector<std::string> &tokens) const {
+IsotropicAtomBraggScattererParser::getCleanScattererTokens(const std::vector<std::string> &tokens) const {
   std::vector<std::string> cleanTokens;
 
   // Element
   cleanTokens.emplace_back(tokens[0]);
 
   // X, Y, Z
-  cleanTokens.emplace_back("[" + tokens[1] + "," + tokens[2] + "," + tokens[3] +
-                           "]");
+  cleanTokens.emplace_back("[" + tokens[1] + "," + tokens[2] + "," + tokens[3] + "]");
 
   for (size_t i = 4; i < tokens.size(); ++i) {
     cleanTokens.emplace_back(tokens[i]);
@@ -217,25 +191,19 @@ IsotropicAtomBraggScattererParser::getCleanScattererTokens(
   return cleanTokens;
 }
 
-std::string
-getIsotropicAtomBraggScattererString(const BraggScatterer_sptr &scatterer) {
-  IsotropicAtomBraggScatterer_sptr isotropicAtom =
-      std::dynamic_pointer_cast<IsotropicAtomBraggScatterer>(scatterer);
+std::string getIsotropicAtomBraggScattererString(const BraggScatterer_sptr &scatterer) {
+  IsotropicAtomBraggScatterer_sptr isotropicAtom = std::dynamic_pointer_cast<IsotropicAtomBraggScatterer>(scatterer);
 
   if (!isotropicAtom) {
-    throw std::invalid_argument(
-        "Printing function can only process IsotropicAtomBraggScatterer.");
+    throw std::invalid_argument("Printing function can only process IsotropicAtomBraggScatterer.");
   }
 
   std::string rawPositionString = isotropicAtom->getProperty("Position");
-  std::vector<std::string> positionComponents =
-      getTokenizedPositionString(rawPositionString);
+  std::vector<std::string> positionComponents = getTokenizedPositionString(rawPositionString);
 
   std::stringstream outStream;
-  outStream << isotropicAtom->getElement() << " " << positionComponents[0]
-            << " " << positionComponents[1] << " " << positionComponents[2]
-            << " " << isotropicAtom->getOccupancy() << " "
-            << isotropicAtom->getU();
+  outStream << isotropicAtom->getElement() << " " << positionComponents[0] << " " << positionComponents[1] << " "
+            << positionComponents[2] << " " << isotropicAtom->getOccupancy() << " " << isotropicAtom->getU();
 
   return outStream.str();
 }

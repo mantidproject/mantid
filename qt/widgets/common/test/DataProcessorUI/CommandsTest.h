@@ -60,8 +60,7 @@ public:
 
     // The presenter should not be notified with the OpenTableFlag because
     // this is a submenu rather than an action
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::OpenTableFlag))
-        .Times(Exactly(0));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::OpenTableFlag)).Times(Exactly(0));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -73,8 +72,7 @@ public:
     NewTableCommand command(&mockPresenter);
 
     // The presenter should be notified with the NewTableFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::NewTableFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::NewTableFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -86,8 +84,7 @@ public:
     SaveTableCommand command(&mockPresenter);
 
     // The presenter should be notified with the SaveFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::SaveFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::SaveFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -99,8 +96,7 @@ public:
     SaveTableAsCommand command(&mockPresenter);
 
     // The presenter should be notified with the SaveAsFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::SaveAsFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::SaveAsFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -112,8 +108,7 @@ public:
     ImportTableCommand command(&mockPresenter);
 
     // The presenter should be notified with the ImportTableFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::ImportTableFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::ImportTableFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -125,8 +120,7 @@ public:
     ExportTableCommand command(&mockPresenter);
 
     // The presenter should be notified with the ExportTableFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::ExportTableFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::ExportTableFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -138,9 +132,7 @@ public:
     OptionsCommand command(&mockPresenter);
 
     // The presenter should be notified with the OptionsDialogFlag
-    EXPECT_CALL(mockPresenter,
-                notify(DataProcessorPresenter::OptionsDialogFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::OptionsDialogFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -152,8 +144,7 @@ public:
     ProcessCommand command(&mockPresenter);
 
     // The presenter should be notified with the ProcessFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::ProcessFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::ProcessFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -165,8 +156,7 @@ public:
     PauseCommand command(&mockPresenter);
 
     // The presenter should be notified with the PauseFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::PauseFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::PauseFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -178,9 +168,7 @@ public:
     ExpandCommand command(&mockPresenter);
 
     // The presenter should be notified with the ExpandSelectionFlag
-    EXPECT_CALL(mockPresenter,
-                notify(DataProcessorPresenter::ExpandSelectionFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::ExpandSelectionFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -192,9 +180,7 @@ public:
     ExpandGroupsCommand command(&mockPresenter);
 
     // The presenter should be notified with the ExpandAllGroupsFlag
-    EXPECT_CALL(mockPresenter,
-                notify(DataProcessorPresenter::ExpandAllGroupsFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::ExpandAllGroupsFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -206,9 +192,7 @@ public:
     CollapseGroupsCommand command(&mockPresenter);
 
     // The presenter should be notified with the CollapseAllGroupsFlag
-    EXPECT_CALL(mockPresenter,
-                notify(DataProcessorPresenter::CollapseAllGroupsFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::CollapseAllGroupsFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -220,8 +204,7 @@ public:
     PlotRowCommand command(&mockPresenter);
 
     // The presenter should be notified with the PlotRowFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::PlotRowFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::PlotRowFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -233,8 +216,7 @@ public:
     PlotGroupCommand command(&mockPresenter);
 
     // The presenter should be notified with the PlotGroupFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::PlotGroupFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::PlotGroupFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -246,8 +228,7 @@ public:
     AppendRowCommand command(&mockPresenter);
 
     // The presenter should be notified with the AppendRowFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::AppendRowFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::AppendRowFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -259,8 +240,7 @@ public:
     AppendGroupCommand command(&mockPresenter);
 
     // The presenter should be notified with the AppendRowFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::AppendGroupFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::AppendGroupFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -272,8 +252,7 @@ public:
     GroupRowsCommand command(&mockPresenter);
 
     // The presenter should be notified with the GroupRowsFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::GroupRowsFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::GroupRowsFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -285,8 +264,7 @@ public:
     CopySelectedCommand command(&mockPresenter);
 
     // The presenter should be notified with the CopySelectedFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::CopySelectedFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::CopySelectedFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -298,8 +276,7 @@ public:
     CutSelectedCommand command(&mockPresenter);
 
     // The presenter should be notified with the CutSelectedFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::CutSelectedFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::CutSelectedFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -311,9 +288,7 @@ public:
     PasteSelectedCommand command(&mockPresenter);
 
     // The presenter should be notified with the PasteSelectedFlag
-    EXPECT_CALL(mockPresenter,
-                notify(DataProcessorPresenter::PasteSelectedFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::PasteSelectedFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -325,9 +300,7 @@ public:
     ClearSelectedCommand command(&mockPresenter);
 
     // The presenter should be notified with the ClearSelectedFlag
-    EXPECT_CALL(mockPresenter,
-                notify(DataProcessorPresenter::ClearSelectedFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::ClearSelectedFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -339,8 +312,7 @@ public:
     DeleteRowCommand command(&mockPresenter);
 
     // The presenter should be notified with the DeleteRowFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::DeleteRowFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::DeleteRowFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -352,8 +324,7 @@ public:
     DeleteGroupCommand command(&mockPresenter);
 
     // The presenter should be notified with the DeleteRowFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::DeleteGroupFlag))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::DeleteGroupFlag)).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations
@@ -377,8 +348,7 @@ public:
     WorkspaceCommand command(&mockPresenter, "workspace");
 
     // The presenter should set the name of the ws
-    EXPECT_CALL(mockPresenter, setModel(QString("workspace")))
-        .Times(Exactly(1));
+    EXPECT_CALL(mockPresenter, setModel(QString("workspace"))).Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations

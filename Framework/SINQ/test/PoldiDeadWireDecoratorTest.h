@@ -25,9 +25,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiDeadWireDecoratorTest *createSuite() {
-    return new PoldiDeadWireDecoratorTest();
-  }
+  static PoldiDeadWireDecoratorTest *createSuite() { return new PoldiDeadWireDecoratorTest(); }
   static void destroySuite(PoldiDeadWireDecoratorTest *suite) { delete suite; }
 
   PoldiDeadWireDecoratorTest() {
@@ -71,7 +69,6 @@ public:
   void testinvalid() {
     PoldiDeadWireDecorator decorator(std::set<int>(), m_detector);
 
-    TS_ASSERT_THROWS(decorator.setDeadWires(m_invalidDeadWires),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(decorator.setDeadWires(m_invalidDeadWires), const std::runtime_error &);
   }
 };

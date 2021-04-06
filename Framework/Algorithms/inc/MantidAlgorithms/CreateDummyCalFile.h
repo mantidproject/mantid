@@ -58,14 +58,11 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return {"ReadGroupsFromFile",   "CreateCalFileByNames", "AlignDetectors",
-            "DiffractionFocussing", "LoadCalFile",          "SaveCalFile",
-            "MergeCalFiles"};
+    return {"ReadGroupsFromFile", "CreateCalFileByNames", "AlignDetectors", "DiffractionFocussing",
+            "LoadCalFile",        "SaveCalFile",          "MergeCalFiles"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Diffraction\\DataHandling\\CalFiles";
-  }
+  const std::string category() const override { return "Diffraction\\DataHandling\\CalFiles"; }
 
 private:
   /// Calibration entries map
@@ -81,10 +78,8 @@ private:
   /// @return true if the grouping file exists
   bool groupingFileDoesExist(const std::string &filename) const;
   void saveGroupingFile(const std::string &, bool overwrite) const;
-  static void writeCalEntry(std::ostream &os, int number, int udet,
-                            double offset, int select, int group);
-  void writeHeaders(std::ostream &os, const std::string &filename,
-                    bool overwrite) const;
+  static void writeCalEntry(std::ostream &os, int number, int udet, double offset, int select, int group);
+  void writeHeaders(std::ostream &os, const std::string &filename, bool overwrite) const;
   /// The names of the groups
   std::string groups;
   /// Calibration map used if the *.cal file exist. All entries in the *.cal

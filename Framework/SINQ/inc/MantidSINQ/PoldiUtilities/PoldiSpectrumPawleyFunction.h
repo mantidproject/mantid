@@ -15,22 +15,18 @@ namespace Poldi {
 
 /** PoldiSpectrumPawleyFunction : TODO: DESCRIPTION
  */
-class MANTID_SINQ_DLL PoldiSpectrumPawleyFunction
-    : public PoldiSpectrumDomainFunction {
+class MANTID_SINQ_DLL PoldiSpectrumPawleyFunction : public PoldiSpectrumDomainFunction {
 public:
   PoldiSpectrumPawleyFunction();
 
   std::string name() const override { return "PoldiSpectrumPawleyFunction"; }
 
-  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
-                          size_t wi, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
+                          double endX) override;
 
-  void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
-                          API::FunctionValues &values) const override;
-  void functionDeriv1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
-                               API::Jacobian &jacobian) override;
-  void poldiFunction1D(const std::vector<int> &indices,
-                       const API::FunctionDomain1D &domain,
+  void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::FunctionValues &values) const override;
+  void functionDeriv1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::Jacobian &jacobian) override;
+  void poldiFunction1D(const std::vector<int> &indices, const API::FunctionDomain1D &domain,
                        API::FunctionValues &values) const override;
 
   API::IPawleyFunction_sptr getPawleyFunction() const;

@@ -19,17 +19,14 @@ PreprocessingAlgorithm defines a pre-processor algorithm that will
 be
 responsible for pre-processsing a specific column in a Data Processor UI.
 */
-class EXPORT_OPT_MANTIDQT_COMMON PreprocessingAlgorithm
-    : public ProcessingAlgorithmBase {
+class EXPORT_OPT_MANTIDQT_COMMON PreprocessingAlgorithm : public ProcessingAlgorithmBase {
 public:
   // Constructor
-  PreprocessingAlgorithm(
-      const QString &name, const QString &prefix = "",
-      const QString &separator = "",
-      const std::set<QString> &blacklist = std::set<QString>());
+  PreprocessingAlgorithm(const QString &name, const QString &prefix = "", const QString &separator = "",
+                         const std::set<QString> &blacklist = std::set<QString>());
   // Delegating constructor
-  PreprocessingAlgorithm(const QString &name, const QString &prefix,
-                         const QString &separator, const QString &blacklist);
+  PreprocessingAlgorithm(const QString &name, const QString &prefix, const QString &separator,
+                         const QString &blacklist);
   // Default constructor
   PreprocessingAlgorithm();
   // Destructor

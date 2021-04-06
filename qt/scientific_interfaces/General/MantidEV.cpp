@@ -30,138 +30,108 @@ using namespace Mantid::API;
 /**
  *  Class to call loadEvents in a separate thread.
  */
-RunLoadAndConvertToMD::RunLoadAndConvertToMD(
-    MantidEVWorker *worker, const std::string &file_name,
-    const std::string &ev_ws_name, const std::string &md_ws_name,
-    const double modQ, const double minQ, const double maxQ,
-    const bool do_lorentz_corr, const bool load_data, const bool load_det_cal,
-    const std::string &det_cal_file, const std::string &det_cal_file2,
-    const std::string &axisCORELLI)
-    : worker(worker), file_name(file_name), ev_ws_name(ev_ws_name),
-      md_ws_name(md_ws_name), modQ(modQ), minQ(minQ), maxQ(maxQ),
-      do_lorentz_corr(do_lorentz_corr), load_data(load_data),
-      load_det_cal(load_det_cal), det_cal_file(det_cal_file),
-      det_cal_file2(det_cal_file2), axisCORELLI(axisCORELLI) {}
+RunLoadAndConvertToMD::RunLoadAndConvertToMD(MantidEVWorker *worker, const std::string &file_name,
+                                             const std::string &ev_ws_name, const std::string &md_ws_name,
+                                             const double modQ, const double minQ, const double maxQ,
+                                             const bool do_lorentz_corr, const bool load_data, const bool load_det_cal,
+                                             const std::string &det_cal_file, const std::string &det_cal_file2,
+                                             const std::string &axisCORELLI)
+    : worker(worker), file_name(file_name), ev_ws_name(ev_ws_name), md_ws_name(md_ws_name), modQ(modQ), minQ(minQ),
+      maxQ(maxQ), do_lorentz_corr(do_lorentz_corr), load_data(load_data), load_det_cal(load_det_cal),
+      det_cal_file(det_cal_file), det_cal_file2(det_cal_file2), axisCORELLI(axisCORELLI) {}
 
 void RunLoadAndConvertToMD::run() {
-  worker->loadAndConvertToMD(file_name, ev_ws_name, md_ws_name, modQ, minQ,
-                             maxQ, do_lorentz_corr, load_data, load_det_cal,
-                             det_cal_file, det_cal_file2, axisCORELLI);
+  worker->loadAndConvertToMD(file_name, ev_ws_name, md_ws_name, modQ, minQ, maxQ, do_lorentz_corr, load_data,
+                             load_det_cal, det_cal_file, det_cal_file2, axisCORELLI);
 }
 
 /**
  * Class to call findPeaks in a separate thread.
  */
-RunFindPeaks::RunFindPeaks(MantidEVWorker *worker,
-                           const std::string &ev_ws_name,
-                           const std::string &md_ws_name,
-                           const std::string &peaks_ws_name, double max_abc,
-                           size_t num_to_find, double min_intensity,
-                           double minQPeaks, double maxQPeaks,
-                           const std::string &file_name)
-    : worker(worker), ev_ws_name(ev_ws_name), md_ws_name(md_ws_name),
-      peaks_ws_name(peaks_ws_name), max_abc(max_abc), num_to_find(num_to_find),
-      min_intensity(min_intensity), minQPeaks(minQPeaks), maxQPeaks(maxQPeaks),
+RunFindPeaks::RunFindPeaks(MantidEVWorker *worker, const std::string &ev_ws_name, const std::string &md_ws_name,
+                           const std::string &peaks_ws_name, double max_abc, size_t num_to_find, double min_intensity,
+                           double minQPeaks, double maxQPeaks, const std::string &file_name)
+    : worker(worker), ev_ws_name(ev_ws_name), md_ws_name(md_ws_name), peaks_ws_name(peaks_ws_name), max_abc(max_abc),
+      num_to_find(num_to_find), min_intensity(min_intensity), minQPeaks(minQPeaks), maxQPeaks(maxQPeaks),
       file_name(file_name) {}
 
 /**
  *  Class to call findPeaks in a separate thread.
  */
 void RunFindPeaks::run() {
-  worker->findPeaks(ev_ws_name, md_ws_name, peaks_ws_name, max_abc, num_to_find,
-                    min_intensity, minQPeaks, maxQPeaks, file_name);
+  worker->findPeaks(ev_ws_name, md_ws_name, peaks_ws_name, max_abc, num_to_find, min_intensity, minQPeaks, maxQPeaks,
+                    file_name);
 }
 
 /**
  * Class to call predictPeaks in a separate thread.
  */
-RunPredictPeaks::RunPredictPeaks(MantidEVWorker *worker,
-                                 const std::string &peaks_ws_name,
-                                 double min_pred_wl, double max_pred_wl,
-                                 double min_pred_dspacing,
-                                 double max_pred_dspacing)
-    : worker(worker), peaks_ws_name(peaks_ws_name), min_pred_wl(min_pred_wl),
-      max_pred_wl(max_pred_wl), min_pred_dspacing(min_pred_dspacing),
-      max_pred_dspacing(max_pred_dspacing) {}
+RunPredictPeaks::RunPredictPeaks(MantidEVWorker *worker, const std::string &peaks_ws_name, double min_pred_wl,
+                                 double max_pred_wl, double min_pred_dspacing, double max_pred_dspacing)
+    : worker(worker), peaks_ws_name(peaks_ws_name), min_pred_wl(min_pred_wl), max_pred_wl(max_pred_wl),
+      min_pred_dspacing(min_pred_dspacing), max_pred_dspacing(max_pred_dspacing) {}
 
 /**
  *  Class to call predictPeaks in a separate thread.
  */
 void RunPredictPeaks::run() {
-  worker->predictPeaks(peaks_ws_name, min_pred_wl, max_pred_wl,
-                       min_pred_dspacing, max_pred_dspacing);
+  worker->predictPeaks(peaks_ws_name, min_pred_wl, max_pred_wl, min_pred_dspacing, max_pred_dspacing);
 }
 
 /**
  *  Class to call sphereIntegrate in a separate thread.
  */
-RunSphereIntegrate::RunSphereIntegrate(
-    MantidEVWorker *worker, const std::string &peaks_ws_name,
-    const std::string &event_ws_name, double peak_radius, double inner_radius,
-    double outer_radius, bool integrate_edge, bool use_cylinder_integration,
-    double cylinder_length, double cylinder_percent_bkg,
-    const std::string &cylinder_profile_fit, bool adaptiveQBkg,
-    double adaptiveQMult)
-    : worker(worker), peaks_ws_name(peaks_ws_name),
-      event_ws_name(event_ws_name), peak_radius(peak_radius),
-      inner_radius(inner_radius), outer_radius(outer_radius),
-      integrate_edge(integrate_edge),
-      use_cylinder_integration(use_cylinder_integration),
-      cylinder_length(cylinder_length),
-      cylinder_percent_bkg(cylinder_percent_bkg),
-      cylinder_profile_fit(cylinder_profile_fit), adaptiveQBkg(adaptiveQBkg),
-      adaptiveQMult(adaptiveQMult) {}
+RunSphereIntegrate::RunSphereIntegrate(MantidEVWorker *worker, const std::string &peaks_ws_name,
+                                       const std::string &event_ws_name, double peak_radius, double inner_radius,
+                                       double outer_radius, bool integrate_edge, bool use_cylinder_integration,
+                                       double cylinder_length, double cylinder_percent_bkg,
+                                       const std::string &cylinder_profile_fit, bool adaptiveQBkg, double adaptiveQMult)
+    : worker(worker), peaks_ws_name(peaks_ws_name), event_ws_name(event_ws_name), peak_radius(peak_radius),
+      inner_radius(inner_radius), outer_radius(outer_radius), integrate_edge(integrate_edge),
+      use_cylinder_integration(use_cylinder_integration), cylinder_length(cylinder_length),
+      cylinder_percent_bkg(cylinder_percent_bkg), cylinder_profile_fit(cylinder_profile_fit),
+      adaptiveQBkg(adaptiveQBkg), adaptiveQMult(adaptiveQMult) {}
 
 /**
  *  Class to call sphereIntegrate in a separate thread.
  */
 void RunSphereIntegrate::run() {
-  worker->sphereIntegrate(
-      peaks_ws_name, event_ws_name, peak_radius, inner_radius, outer_radius,
-      integrate_edge, use_cylinder_integration, cylinder_length,
-      cylinder_percent_bkg, cylinder_profile_fit, adaptiveQBkg, adaptiveQMult);
+  worker->sphereIntegrate(peaks_ws_name, event_ws_name, peak_radius, inner_radius, outer_radius, integrate_edge,
+                          use_cylinder_integration, cylinder_length, cylinder_percent_bkg, cylinder_profile_fit,
+                          adaptiveQBkg, adaptiveQMult);
 }
 
 /**
  *  Class to call fitIntegrate in a separate thread.
  */
-RunFitIntegrate::RunFitIntegrate(MantidEVWorker *worker,
-                                 const std::string &peaks_ws_name,
-                                 const std::string &event_ws_name,
-                                 const std::string &rebin_params,
-                                 size_t n_bad_edge_pix,
-                                 bool use_ikeda_carpenter)
-    : worker(worker), peaks_ws_name(peaks_ws_name),
-      event_ws_name(event_ws_name), rebin_params(rebin_params),
-      n_bad_edge_pix(n_bad_edge_pix), use_ikeda_carpenter(use_ikeda_carpenter) {
-}
+RunFitIntegrate::RunFitIntegrate(MantidEVWorker *worker, const std::string &peaks_ws_name,
+                                 const std::string &event_ws_name, const std::string &rebin_params,
+                                 size_t n_bad_edge_pix, bool use_ikeda_carpenter)
+    : worker(worker), peaks_ws_name(peaks_ws_name), event_ws_name(event_ws_name), rebin_params(rebin_params),
+      n_bad_edge_pix(n_bad_edge_pix), use_ikeda_carpenter(use_ikeda_carpenter) {}
 
 /**
  *  Class to call fitIntegrate in a separate thread.
  */
 void RunFitIntegrate::run() {
-  worker->fitIntegrate(peaks_ws_name, event_ws_name, rebin_params,
-                       n_bad_edge_pix, use_ikeda_carpenter);
+  worker->fitIntegrate(peaks_ws_name, event_ws_name, rebin_params, n_bad_edge_pix, use_ikeda_carpenter);
 }
 
 /**
  *  Class to call ellipsoidIntegrate in a separate thread.
  */
-RunEllipsoidIntegrate::RunEllipsoidIntegrate(
-    MantidEVWorker *worker, const std::string &peaks_ws_name,
-    const std::string &event_ws_name, double region_radius, bool specify_size,
-    double peak_size, double inner_size, double outer_size)
-    : worker(worker), peaks_ws_name(peaks_ws_name),
-      event_ws_name(event_ws_name), region_radius(region_radius),
-      specify_size(specify_size), peak_size(peak_size), inner_size(inner_size),
-      outer_size(outer_size) {}
+RunEllipsoidIntegrate::RunEllipsoidIntegrate(MantidEVWorker *worker, const std::string &peaks_ws_name,
+                                             const std::string &event_ws_name, double region_radius, bool specify_size,
+                                             double peak_size, double inner_size, double outer_size)
+    : worker(worker), peaks_ws_name(peaks_ws_name), event_ws_name(event_ws_name), region_radius(region_radius),
+      specify_size(specify_size), peak_size(peak_size), inner_size(inner_size), outer_size(outer_size) {}
 
 /**
  *  Class to call ellipsoidIntegrate in a separate thread.
  */
 void RunEllipsoidIntegrate::run() {
-  worker->ellipsoidIntegrate(peaks_ws_name, event_ws_name, region_radius,
-                             specify_size, peak_size, inner_size, outer_size);
+  worker->ellipsoidIntegrate(peaks_ws_name, event_ws_name, region_radius, specify_size, peak_size, inner_size,
+                             outer_size);
 }
 
 ///
@@ -173,13 +143,11 @@ void RunEllipsoidIntegrate::run() {
  *  MantidEVWorker.
  */
 MantidEV::MantidEV(QWidget *parent)
-    : UserSubWindow(parent), worker(new MantidEVWorker()), last_Q(V3D(0, 0, 0)),
-      m_thread_pool(new QThreadPool(this)) {
+    : UserSubWindow(parent), worker(new MantidEVWorker()), last_Q(V3D(0, 0, 0)), m_thread_pool(new QThreadPool(this)) {
 
   m_thread_pool->setMaxThreadCount(1);
   QObject::connect(&(MantidQt::API::SelectionNotificationService::Instance()),
-                   SIGNAL(QPointSelection_signal(bool, double, double, double)),
-                   this,
+                   SIGNAL(QPointSelection_signal(bool, double, double, double)), this,
                    SLOT(QPointSelection_slot(bool, double, double, double)));
 }
 
@@ -204,93 +172,66 @@ void MantidEV::initLayout() {
   // to carry out the requested action
 
   // apply button on "Select Data" tab
-  QObject::connect(m_uiForm.ApplySelectData_btn, SIGNAL(clicked()), this,
-                   SLOT(selectWorkspace_slot()));
+  QObject::connect(m_uiForm.ApplySelectData_btn, SIGNAL(clicked()), this, SLOT(selectWorkspace_slot()));
 
   // browse button for event filename
-  QObject::connect(m_uiForm.SelectEventFile_btn, SIGNAL(clicked()), this,
-                   SLOT(loadEventFile_slot()));
+  QObject::connect(m_uiForm.SelectEventFile_btn, SIGNAL(clicked()), this, SLOT(loadEventFile_slot()));
 
-  QObject::connect(m_uiForm.SelectCalFile_btn, SIGNAL(clicked()), this,
-                   SLOT(selectDetCalFile_slot()));
+  QObject::connect(m_uiForm.SelectCalFile_btn, SIGNAL(clicked()), this, SLOT(selectDetCalFile_slot()));
 
-  QObject::connect(m_uiForm.SelectCalFile2_btn, SIGNAL(clicked()), this,
-                   SLOT(selectDetCalFile2_slot()));
+  QObject::connect(m_uiForm.SelectCalFile2_btn, SIGNAL(clicked()), this, SLOT(selectDetCalFile2_slot()));
 
-  QObject::connect(m_uiForm.ApplyFindPeaks_btn, SIGNAL(clicked()), this,
-                   SLOT(findPeaks_slot()));
+  QObject::connect(m_uiForm.ApplyFindPeaks_btn, SIGNAL(clicked()), this, SLOT(findPeaks_slot()));
 
-  QObject::connect(m_uiForm.SelectPeaksFile_btn, SIGNAL(clicked()), this,
-                   SLOT(getLoadPeaksFileName_slot()));
+  QObject::connect(m_uiForm.SelectPeaksFile_btn, SIGNAL(clicked()), this, SLOT(getLoadPeaksFileName_slot()));
 
-  QObject::connect(m_uiForm.ApplyFindUB_btn, SIGNAL(clicked()), this,
-                   SLOT(findUB_slot()));
+  QObject::connect(m_uiForm.ApplyFindUB_btn, SIGNAL(clicked()), this, SLOT(findUB_slot()));
 
-  QObject::connect(m_uiForm.SelectUBFile_btn, SIGNAL(clicked()), this,
-                   SLOT(getLoadUB_FileName_slot()));
+  QObject::connect(m_uiForm.SelectUBFile_btn, SIGNAL(clicked()), this, SLOT(getLoadUB_FileName_slot()));
 
-  QObject::connect(m_uiForm.ApplyChooseCell_btn, SIGNAL(clicked()), this,
-                   SLOT(chooseCell_slot()));
+  QObject::connect(m_uiForm.ApplyChooseCell_btn, SIGNAL(clicked()), this, SLOT(chooseCell_slot()));
 
-  QObject::connect(m_uiForm.ApplyChangeHKL_btn, SIGNAL(clicked()), this,
-                   SLOT(changeHKL_slot()));
+  QObject::connect(m_uiForm.ApplyChangeHKL_btn, SIGNAL(clicked()), this, SLOT(changeHKL_slot()));
 
-  QObject::connect(m_uiForm.ApplyIntegrate_btn, SIGNAL(clicked()), this,
-                   SLOT(integratePeaks_slot()));
+  QObject::connect(m_uiForm.ApplyIntegrate_btn, SIGNAL(clicked()), this, SLOT(integratePeaks_slot()));
 
-  QObject::connect(m_uiForm.ShowInfo_btn, SIGNAL(clicked()), this,
-                   SLOT(showInfo_slot()));
+  QObject::connect(m_uiForm.ShowInfo_btn, SIGNAL(clicked()), this, SLOT(showInfo_slot()));
 
   // connect the slots for the menu items
-  QObject::connect(m_uiForm.actionSave_State, SIGNAL(triggered()), this,
-                   SLOT(saveState_slot()));
+  QObject::connect(m_uiForm.actionSave_State, SIGNAL(triggered()), this, SLOT(saveState_slot()));
 
-  QObject::connect(m_uiForm.actionLoad_State, SIGNAL(triggered()), this,
-                   SLOT(loadState_slot()));
+  QObject::connect(m_uiForm.actionLoad_State, SIGNAL(triggered()), this, SLOT(loadState_slot()));
 
-  QObject::connect(m_uiForm.actionReset_Default_Settings, SIGNAL(triggered()),
-                   this, SLOT(setDefaultState_slot()));
+  QObject::connect(m_uiForm.actionReset_Default_Settings, SIGNAL(triggered()), this, SLOT(setDefaultState_slot()));
 
-  QObject::connect(m_uiForm.actionSave_Isaw_UB, SIGNAL(triggered()), this,
-                   SLOT(saveIsawUB_slot()));
+  QObject::connect(m_uiForm.actionSave_Isaw_UB, SIGNAL(triggered()), this, SLOT(saveIsawUB_slot()));
 
-  QObject::connect(m_uiForm.actionLoad_Isaw_UB, SIGNAL(triggered()), this,
-                   SLOT(loadIsawUB_slot()));
+  QObject::connect(m_uiForm.actionLoad_Isaw_UB, SIGNAL(triggered()), this, SLOT(loadIsawUB_slot()));
 
-  QObject::connect(m_uiForm.actionSave_Isaw_Peaks, SIGNAL(triggered()), this,
-                   SLOT(saveIsawPeaks_slot()));
+  QObject::connect(m_uiForm.actionSave_Isaw_Peaks, SIGNAL(triggered()), this, SLOT(saveIsawPeaks_slot()));
 
-  QObject::connect(m_uiForm.actionLoad_Isaw_Peaks, SIGNAL(triggered()), this,
-                   SLOT(loadIsawPeaks_slot()));
+  QObject::connect(m_uiForm.actionLoad_Isaw_Peaks, SIGNAL(triggered()), this, SLOT(loadIsawPeaks_slot()));
 
-  QObject::connect(m_uiForm.actionSave_Nexus_Peaks, SIGNAL(triggered()), this,
-                   SLOT(saveNexusPeaks_slot()));
+  QObject::connect(m_uiForm.actionSave_Nexus_Peaks, SIGNAL(triggered()), this, SLOT(saveNexusPeaks_slot()));
 
-  QObject::connect(m_uiForm.actionLoad_Nexus_Peaks, SIGNAL(triggered()), this,
-                   SLOT(loadNexusPeaks_slot()));
+  QObject::connect(m_uiForm.actionLoad_Nexus_Peaks, SIGNAL(triggered()), this, SLOT(loadNexusPeaks_slot()));
 
-  QObject::connect(m_uiForm.actionShow_UB, SIGNAL(triggered()), this,
-                   SLOT(showUB_slot()));
+  QObject::connect(m_uiForm.actionShow_UB, SIGNAL(triggered()), this, SLOT(showUB_slot()));
 
-  QObject::connect(m_uiForm.actionHelp_Page, SIGNAL(triggered()), this,
-                   SLOT(help_slot()));
+  QObject::connect(m_uiForm.actionHelp_Page, SIGNAL(triggered()), this, SLOT(help_slot()));
 
-  QObject::connect(m_uiForm.EventFileName_ledt, SIGNAL(editingFinished()), this,
-                   SLOT(loadEventFileEntered_slot()));
+  QObject::connect(m_uiForm.EventFileName_ledt, SIGNAL(editingFinished()), this, SLOT(loadEventFileEntered_slot()));
 
   // connect the slots for enabling and disabling
   // various subsets of widgets
   QObject::connect(m_uiForm.convertToMDGroupBox, SIGNAL(toggled(bool)), this,
                    SLOT(setEnabledLoadEventFileParams_slot(bool)));
 
-  QObject::connect(m_uiForm.LoadDetCal_ckbx, SIGNAL(clicked()), this,
-                   SLOT(setEnabledLoadCalFiles_slot()));
+  QObject::connect(m_uiForm.LoadDetCal_ckbx, SIGNAL(clicked()), this, SLOT(setEnabledLoadCalFiles_slot()));
 
-  QObject::connect(m_uiForm.FindPeaks_rbtn, SIGNAL(toggled(bool)), this,
-                   SLOT(setEnabledFindPeaksParams_slot(bool)));
+  QObject::connect(m_uiForm.FindPeaks_rbtn, SIGNAL(toggled(bool)), this, SLOT(setEnabledFindPeaksParams_slot(bool)));
 
-  QObject::connect(m_uiForm.PredictPeaks_ckbx, SIGNAL(clicked()), this,
-                   SLOT(setEnabledPredictPeaksParams_slot()));
+  QObject::connect(m_uiForm.PredictPeaks_ckbx, SIGNAL(clicked()), this, SLOT(setEnabledPredictPeaksParams_slot()));
 
   QObject::connect(m_uiForm.LoadIsawPeaks_rbtn, SIGNAL(toggled(bool)), this,
                    SLOT(setEnabledLoadPeaksParams_slot(bool)));
@@ -298,14 +239,12 @@ void MantidEV::initLayout() {
   QObject::connect(m_uiForm.FindUBUsingFFT_rbtn, SIGNAL(toggled(bool)), this,
                    SLOT(setEnabledFindUBFFTParams_slot(bool)));
 
-  QObject::connect(m_uiForm.LoadISAWUB_rbtn, SIGNAL(toggled(bool)), this,
-                   SLOT(setEnabledLoadUBParams_slot(bool)));
+  QObject::connect(m_uiForm.LoadISAWUB_rbtn, SIGNAL(toggled(bool)), this, SLOT(setEnabledLoadUBParams_slot(bool)));
 
-  QObject::connect(m_uiForm.OptimizeGoniometerAngles_ckbx, SIGNAL(clicked()),
-                   this, SLOT(setEnabledMaxOptimizeDegrees_slot()));
+  QObject::connect(m_uiForm.OptimizeGoniometerAngles_ckbx, SIGNAL(clicked()), this,
+                   SLOT(setEnabledMaxOptimizeDegrees_slot()));
 
-  QObject::connect(m_uiForm.IndexPeaks_ckbx, SIGNAL(clicked(bool)), this,
-                   SLOT(setEnabledIndexParams_slot(bool)));
+  QObject::connect(m_uiForm.IndexPeaks_ckbx, SIGNAL(clicked(bool)), this, SLOT(setEnabledIndexParams_slot(bool)));
 
   QObject::connect(m_uiForm.ShowPossibleCells_rbtn, SIGNAL(toggled(bool)), this,
                    SLOT(setEnabledShowCellsParams_slot(bool)));
@@ -313,75 +252,50 @@ void MantidEV::initLayout() {
   QObject::connect(m_uiForm.SelectCellOfType_rbtn, SIGNAL(toggled(bool)), this,
                    SLOT(setEnabledSetCellTypeParams_slot(bool)));
 
-  QObject::connect(m_uiForm.CreateHKLWorkspace_ckbx, SIGNAL(clicked(bool)),
-                   this, SLOT(setEnabledCreateHKLWorkspaceParams_slot(bool)));
+  QObject::connect(m_uiForm.CreateHKLWorkspace_ckbx, SIGNAL(clicked(bool)), this,
+                   SLOT(setEnabledCreateHKLWorkspaceParams_slot(bool)));
 
-  QObject::connect(m_uiForm.SelectCellWithForm_rbtn, SIGNAL(toggled(bool)),
-                   this, SLOT(setEnabledSetCellFormParams_slot(bool)));
+  QObject::connect(m_uiForm.SelectCellWithForm_rbtn, SIGNAL(toggled(bool)), this,
+                   SLOT(setEnabledSetCellFormParams_slot(bool)));
 
   QObject::connect(m_uiForm.SphereIntegration_rbtn, SIGNAL(toggled(bool)), this,
                    SLOT(setEnabledSphereIntParams_slot(bool)));
 
-  QObject::connect(m_uiForm.TwoDFitIntegration_rbtn, SIGNAL(toggled(bool)),
-                   this, SLOT(setEnabledFitIntParams_slot(bool)));
+  QObject::connect(m_uiForm.TwoDFitIntegration_rbtn, SIGNAL(toggled(bool)), this,
+                   SLOT(setEnabledFitIntParams_slot(bool)));
 
-  QObject::connect(m_uiForm.EllipsoidIntegration_rbtn, SIGNAL(toggled(bool)),
-                   this, SLOT(setEnabledEllipseIntParams_slot(bool)));
+  QObject::connect(m_uiForm.EllipsoidIntegration_rbtn, SIGNAL(toggled(bool)), this,
+                   SLOT(setEnabledEllipseIntParams_slot(bool)));
 
-  QObject::connect(m_uiForm.SpecifySize_ckbx, SIGNAL(clicked(bool)), this,
-                   SLOT(setEnabledEllipseSizeOptions_slot()));
+  QObject::connect(m_uiForm.SpecifySize_ckbx, SIGNAL(clicked(bool)), this, SLOT(setEnabledEllipseSizeOptions_slot()));
 
   // Add validators to all QLineEdit objects that require numeric values
-  m_uiForm.MaxMagQ_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.MaxMagQ_ledt));
-  m_uiForm.MaxABC_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.MaxABC_ledt));
-  m_uiForm.NumToFind_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.NumToFind_ledt));
-  m_uiForm.MinIntensity_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.MinIntensity_ledt));
+  m_uiForm.MaxMagQ_ledt->setValidator(new QDoubleValidator(m_uiForm.MaxMagQ_ledt));
+  m_uiForm.MaxABC_ledt->setValidator(new QDoubleValidator(m_uiForm.MaxABC_ledt));
+  m_uiForm.NumToFind_ledt->setValidator(new QDoubleValidator(m_uiForm.NumToFind_ledt));
+  m_uiForm.MinIntensity_ledt->setValidator(new QDoubleValidator(m_uiForm.MinIntensity_ledt));
   m_uiForm.MinD_ledt->setValidator(new QDoubleValidator(m_uiForm.MinD_ledt));
   m_uiForm.MaxD_ledt->setValidator(new QDoubleValidator(m_uiForm.MaxD_ledt));
-  m_uiForm.FFTTolerance_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.FFTTolerance_ledt));
-  m_uiForm.IndexedPeaksTolerance_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.IndexedPeaksTolerance_ledt));
-  m_uiForm.MaxGoniometerChange_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.MaxGoniometerChange_ledt));
-  m_uiForm.IndexingTolerance_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.IndexingTolerance_ledt));
-  m_uiForm.MaxScalarError_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.MaxScalarError_ledt));
-  m_uiForm.min_pred_wl_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.min_pred_wl_ledt));
-  m_uiForm.max_pred_wl_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.max_pred_wl_ledt));
-  m_uiForm.min_pred_dspacing_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.min_pred_dspacing_ledt));
-  m_uiForm.max_pred_dspacing_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.max_pred_dspacing_ledt));
-  m_uiForm.PeakRadius_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.PeakRadius_ledt));
-  m_uiForm.BackgroundInnerRadius_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.BackgroundInnerRadius_ledt));
-  m_uiForm.BackgroundOuterRadius_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.BackgroundOuterRadius_ledt));
-  m_uiForm.CylinderLength_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.CylinderLength_ledt));
-  m_uiForm.CylinderPercentBkg_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.CylinderPercentBkg_ledt));
-  m_uiForm.AdaptiveQMult_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.AdaptiveQMult_ledt));
-  m_uiForm.NBadEdgePixels_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.NBadEdgePixels_ledt));
-  m_uiForm.RegionRadius_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.RegionRadius_ledt));
-  m_uiForm.PeakSize_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.PeakSize_ledt));
-  m_uiForm.BackgroundInnerSize_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.BackgroundInnerSize_ledt));
-  m_uiForm.BackgroundOuterSize_ledt->setValidator(
-      new QDoubleValidator(m_uiForm.BackgroundOuterSize_ledt));
+  m_uiForm.FFTTolerance_ledt->setValidator(new QDoubleValidator(m_uiForm.FFTTolerance_ledt));
+  m_uiForm.IndexedPeaksTolerance_ledt->setValidator(new QDoubleValidator(m_uiForm.IndexedPeaksTolerance_ledt));
+  m_uiForm.MaxGoniometerChange_ledt->setValidator(new QDoubleValidator(m_uiForm.MaxGoniometerChange_ledt));
+  m_uiForm.IndexingTolerance_ledt->setValidator(new QDoubleValidator(m_uiForm.IndexingTolerance_ledt));
+  m_uiForm.MaxScalarError_ledt->setValidator(new QDoubleValidator(m_uiForm.MaxScalarError_ledt));
+  m_uiForm.min_pred_wl_ledt->setValidator(new QDoubleValidator(m_uiForm.min_pred_wl_ledt));
+  m_uiForm.max_pred_wl_ledt->setValidator(new QDoubleValidator(m_uiForm.max_pred_wl_ledt));
+  m_uiForm.min_pred_dspacing_ledt->setValidator(new QDoubleValidator(m_uiForm.min_pred_dspacing_ledt));
+  m_uiForm.max_pred_dspacing_ledt->setValidator(new QDoubleValidator(m_uiForm.max_pred_dspacing_ledt));
+  m_uiForm.PeakRadius_ledt->setValidator(new QDoubleValidator(m_uiForm.PeakRadius_ledt));
+  m_uiForm.BackgroundInnerRadius_ledt->setValidator(new QDoubleValidator(m_uiForm.BackgroundInnerRadius_ledt));
+  m_uiForm.BackgroundOuterRadius_ledt->setValidator(new QDoubleValidator(m_uiForm.BackgroundOuterRadius_ledt));
+  m_uiForm.CylinderLength_ledt->setValidator(new QDoubleValidator(m_uiForm.CylinderLength_ledt));
+  m_uiForm.CylinderPercentBkg_ledt->setValidator(new QDoubleValidator(m_uiForm.CylinderPercentBkg_ledt));
+  m_uiForm.AdaptiveQMult_ledt->setValidator(new QDoubleValidator(m_uiForm.AdaptiveQMult_ledt));
+  m_uiForm.NBadEdgePixels_ledt->setValidator(new QDoubleValidator(m_uiForm.NBadEdgePixels_ledt));
+  m_uiForm.RegionRadius_ledt->setValidator(new QDoubleValidator(m_uiForm.RegionRadius_ledt));
+  m_uiForm.PeakSize_ledt->setValidator(new QDoubleValidator(m_uiForm.PeakSize_ledt));
+  m_uiForm.BackgroundInnerSize_ledt->setValidator(new QDoubleValidator(m_uiForm.BackgroundInnerSize_ledt));
+  m_uiForm.BackgroundOuterSize_ledt->setValidator(new QDoubleValidator(m_uiForm.BackgroundOuterSize_ledt));
   m_uiForm.Qx_ledt->setValidator(new QDoubleValidator(m_uiForm.Qx_ledt));
   m_uiForm.Qy_ledt->setValidator(new QDoubleValidator(m_uiForm.Qy_ledt));
   m_uiForm.Qz_ledt->setValidator(new QDoubleValidator(m_uiForm.Qz_ledt));
@@ -506,8 +420,7 @@ void MantidEV::setDefaultState_slot() {
  * Go to MantidEV help page when help menu item is chosen
  */
 void MantidEV::help_slot() {
-  MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("SCD Event Data Reduction"), QString("diffraction"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("SCD Event Data Reduction"), QString("diffraction"));
 }
 
 /**
@@ -515,8 +428,7 @@ void MantidEV::help_slot() {
  */
 void MantidEV::selectWorkspace_slot() {
   // Check that the event workspace name is non-blank.
-  std::string ev_ws_name =
-      m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
+  std::string ev_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
 
   if (ev_ws_name.length() == 0) {
     errorMessage("Specify the name of an Event Workspace on Select Data tab.");
@@ -524,8 +436,7 @@ void MantidEV::selectWorkspace_slot() {
   }
 
   // Check that the MD workspace name is non-blank.
-  std::string md_ws_name =
-      m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
+  std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
 
   if (md_ws_name.length() == 0) {
     errorMessage("Specify the name of an MD Workspace on Select Data tab.");
@@ -533,17 +444,14 @@ void MantidEV::selectWorkspace_slot() {
   }
 
   if (m_thread_pool->activeThreadCount() >= 1) {
-    errorMessage(
-        "Previous operation still running, please wait until it is finished");
+    errorMessage("Previous operation still running, please wait until it is finished");
     return;
   }
-  std::string file_name =
-      m_uiForm.EventFileName_ledt->text().trimmed().toStdString();
+  std::string file_name = m_uiForm.EventFileName_ledt->text().trimmed().toStdString();
   if (m_uiForm.convertToMDGroupBox->isChecked()) {
     if (!m_uiForm.loadDataGroupBox->isChecked()) {
       if (!worker->isEventWorkspace(ev_ws_name)) {
-        errorMessage(
-            "Requested Event Workspace is NOT a valid Event workspace");
+        errorMessage("Requested Event Workspace is NOT a valid Event workspace");
         return;
       }
     } else {
@@ -562,24 +470,19 @@ void MantidEV::selectWorkspace_slot() {
     double maxQ;
     getDouble(m_uiForm.MaxMagQ_ledt, maxQ);
 
-    std::string det_cal_file =
-        m_uiForm.CalFileName_ledt->text().trimmed().toStdString();
-    std::string det_cal_file2 =
-        m_uiForm.CalFileName2_ledt->text().trimmed().toStdString();
+    std::string det_cal_file = m_uiForm.CalFileName_ledt->text().trimmed().toStdString();
+    std::string det_cal_file2 = m_uiForm.CalFileName2_ledt->text().trimmed().toStdString();
     bool load_det_cal = m_uiForm.LoadDetCal_ckbx->isChecked();
     if (load_det_cal && det_cal_file.length() == 0) {
       errorMessage("Specify the name of a .DetCal file if Load ISAW Detector "
                    "Calibration is selected");
       return;
     }
-    std::string axisCORELLI =
-        m_uiForm.axisCORELLI_cmbx->currentText().toStdString();
+    std::string axisCORELLI = m_uiForm.axisCORELLI_cmbx->currentText().toStdString();
 
     auto *runner = new RunLoadAndConvertToMD(
-        worker, file_name, ev_ws_name, md_ws_name, modQ, minQ, maxQ,
-        m_uiForm.LorentzCorrection_ckbx->isChecked(),
-        m_uiForm.loadDataGroupBox->isChecked(), load_det_cal, det_cal_file,
-        det_cal_file2, axisCORELLI);
+        worker, file_name, ev_ws_name, md_ws_name, modQ, minQ, maxQ, m_uiForm.LorentzCorrection_ckbx->isChecked(),
+        m_uiForm.loadDataGroupBox->isChecked(), load_det_cal, det_cal_file, det_cal_file2, axisCORELLI);
     bool running = m_thread_pool->tryStart(runner);
     if (!running)
       errorMessage("Failed to start Load and ConvertToMD thread...previous "
@@ -612,11 +515,9 @@ void MantidEV::loadEventFileEntered_slot() {
     std::string md_ws_name = base_name + "_md";
     std::string peaks_ws_name = base_name + "_peaks";
 
-    m_uiForm.SelectEventWorkspace_ledt->setText(
-        QString::fromStdString(event_ws_name));
+    m_uiForm.SelectEventWorkspace_ledt->setText(QString::fromStdString(event_ws_name));
     m_uiForm.MDworkspace_ledt->setText(QString::fromStdString(md_ws_name));
-    m_uiForm.PeaksWorkspace_ledt->setText(
-        QString::fromStdString(peaks_ws_name));
+    m_uiForm.PeaksWorkspace_ledt->setText(QString::fromStdString(peaks_ws_name));
   }
 }
 
@@ -626,9 +527,8 @@ void MantidEV::loadEventFileEntered_slot() {
  */
 void MantidEV::loadEventFile_slot() {
   QString file_path = getFilePath(last_event_file);
-  QString Qfile_name = QFileDialog::getOpenFileName(
-      this, tr("Load event file"), file_path,
-      tr("Nexus Files (*.nxs *.h5);; All files(*)"));
+  QString Qfile_name = QFileDialog::getOpenFileName(this, tr("Load event file"), file_path,
+                                                    tr("Nexus Files (*.nxs *.h5);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     m_uiForm.EventFileName_ledt->setText(Qfile_name);
@@ -642,9 +542,8 @@ void MantidEV::loadEventFile_slot() {
  */
 void MantidEV::selectDetCalFile_slot() {
   QString file_path = getFilePath(last_cal_file);
-  QString Qfile_name = QFileDialog::getOpenFileName(
-      this, tr("Load calibration file"), file_path,
-      tr("ISAW .DetCal Files (*.DetCal);; All files(*)"));
+  QString Qfile_name = QFileDialog::getOpenFileName(this, tr("Load calibration file"), file_path,
+                                                    tr("ISAW .DetCal Files (*.DetCal);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     m_uiForm.CalFileName_ledt->setText(Qfile_name);
@@ -658,9 +557,8 @@ void MantidEV::selectDetCalFile_slot() {
  */
 void MantidEV::selectDetCalFile2_slot() {
   QString file_path = getFilePath(last_cal_file2);
-  QString Qfile_name = QFileDialog::getOpenFileName(
-      this, tr("Load calibration file"), file_path,
-      tr("ISAW .DetCal Files (*.DetCal);; All files(*)"));
+  QString Qfile_name = QFileDialog::getOpenFileName(this, tr("Load calibration file"), file_path,
+                                                    tr("ISAW .DetCal Files (*.DetCal);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     m_uiForm.CalFileName2_ledt->setText(Qfile_name);
@@ -672,27 +570,23 @@ void MantidEV::selectDetCalFile2_slot() {
  *  Slot called when the Apply button is pressed on the Find Peaks tab.
  */
 void MantidEV::findPeaks_slot() {
-  std::string peaks_ws_name =
-      m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
+  std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
   if (peaks_ws_name.length() == 0) {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
     return;
   }
 
   if (m_thread_pool->activeThreadCount() >= 1) {
-    errorMessage(
-        "Previous operation still running, please wait until it is finished");
+    errorMessage("Previous operation still running, please wait until it is finished");
     return;
   }
 
   bool find_new_peaks = m_uiForm.FindPeaks_rbtn->isChecked();
-  bool use_existing_peaks =
-      m_uiForm.UseExistingPeaksWorkspace_rbtn->isChecked();
+  bool use_existing_peaks = m_uiForm.UseExistingPeaksWorkspace_rbtn->isChecked();
   bool load_peaks = m_uiForm.LoadIsawPeaks_rbtn->isChecked();
 
   if (find_new_peaks) {
-    std::string md_ws_name =
-        m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
+    std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
     if (md_ws_name.length() == 0) {
       errorMessage("Specify an MD workspace name on Select Data tab.");
       return;
@@ -717,25 +611,20 @@ void MantidEV::findPeaks_slot() {
     double maxQPeaks;
     getDouble(m_uiForm.MaxQPeaks_ledt, maxQPeaks);
 
-    std::string ev_ws_name =
-        m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
-    std::string file_name =
-        m_uiForm.EventFileName_ledt->text().trimmed().toStdString();
-    auto *runner = new RunFindPeaks(
-        worker, ev_ws_name, md_ws_name, peaks_ws_name, max_abc, num_to_find,
-        min_intensity, minQPeaks, maxQPeaks, file_name);
+    std::string ev_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
+    std::string file_name = m_uiForm.EventFileName_ledt->text().trimmed().toStdString();
+    auto *runner = new RunFindPeaks(worker, ev_ws_name, md_ws_name, peaks_ws_name, max_abc, num_to_find, min_intensity,
+                                    minQPeaks, maxQPeaks, file_name);
 
     bool running = m_thread_pool->tryStart(runner);
     if (!running)
-      errorMessage(
-          "Failed to start findPeaks thread...previous operation not complete");
+      errorMessage("Failed to start findPeaks thread...previous operation not complete");
   } else if (use_existing_peaks) {
     if (!worker->isPeaksWorkspace(peaks_ws_name)) {
       errorMessage("Requested Peaks Workspace Doesn't Exist");
     }
   } else if (load_peaks) {
-    std::string file_name =
-        m_uiForm.SelectPeaksFile_ledt->text().trimmed().toStdString();
+    std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().trimmed().toStdString();
     std::string extension = Poco::Path(file_name).getExtension();
     if (file_name.length() == 0) {
       errorMessage("Specify a peaks file with the peaks to be loaded.");
@@ -759,9 +648,8 @@ void MantidEV::findPeaks_slot() {
  */
 void MantidEV::getLoadPeaksFileName_slot() {
   QString file_path = getFilePath(last_peaks_file);
-  QString Qfile_name = QFileDialog::getOpenFileName(
-      this, tr("Load peaks file"), file_path,
-      tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*)"));
+  QString Qfile_name = QFileDialog::getOpenFileName(this, tr("Load peaks file"), file_path,
+                                                    tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     last_peaks_file = Qfile_name.toStdString();
@@ -775,10 +663,9 @@ void MantidEV::getLoadPeaksFileName_slot() {
  */
 void MantidEV::getSavePeaksFileName() {
   QString file_path = getFilePath(last_peaks_file);
-  QString Qfile_name = QFileDialog::getSaveFileName(
-      this, tr("Save peaks file"), file_path,
-      tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*)"),
-      nullptr, QFileDialog::DontConfirmOverwrite);
+  QString Qfile_name = QFileDialog::getSaveFileName(this, tr("Save peaks file"), file_path,
+                                                    tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*)"),
+                                                    nullptr, QFileDialog::DontConfirmOverwrite);
 
   if (Qfile_name.length() > 0) {
     last_peaks_file = Qfile_name.toStdString();
@@ -790,16 +677,14 @@ void MantidEV::getSavePeaksFileName() {
  *  Slot called when the Apply button is pressed on the Find UB tab
  */
 void MantidEV::findUB_slot() {
-  std::string peaks_ws_name =
-      m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
+  std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
   if (peaks_ws_name.length() == 0) {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
     return;
   }
 
   if (m_thread_pool->activeThreadCount() >= 1) {
-    errorMessage(
-        "Previous operation still running, please wait until it is finished");
+    errorMessage("Previous operation still running, please wait until it is finished");
     return;
   }
 
@@ -824,16 +709,14 @@ void MantidEV::findUB_slot() {
     if (!getPositiveDouble(m_uiForm.FFTTolerance_ledt, fft_tolerance))
       return;
 
-    if (!worker->findUBUsingFFT(peaks_ws_name, min_abc, max_abc,
-                                fft_tolerance)) {
+    if (!worker->findUBUsingFFT(peaks_ws_name, min_abc, max_abc, fft_tolerance)) {
       errorMessage("Find UB Using FFT Failed");
       return;
     }
   } else if (use_IndexedPeaks) {
     double indPeaks_tolerance = 0.1;
 
-    if (!getPositiveDouble(m_uiForm.IndexedPeaksTolerance_ledt,
-                           indPeaks_tolerance))
+    if (!getPositiveDouble(m_uiForm.IndexedPeaksTolerance_ledt, indPeaks_tolerance))
       return;
 
     if (!worker->findUBUsingIndexedPeaks(peaks_ws_name, indPeaks_tolerance)) {
@@ -841,8 +724,7 @@ void MantidEV::findUB_slot() {
       return;
     }
   } else if (load_UB) {
-    std::string file_name =
-        m_uiForm.SelectUBFile_ledt->text().trimmed().toStdString();
+    std::string file_name = m_uiForm.SelectUBFile_ledt->text().trimmed().toStdString();
     if (file_name.length() == 0) {
       errorMessage("Select a .mat file with the UB matrix to be loaded.");
       return;
@@ -867,10 +749,8 @@ void MantidEV::findUB_slot() {
   }
   // Now that we set a UB copy it to md_workspace.  If
   // copy fails a log notice is output by copyLattice
-  std::string md_ws_name =
-      m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
-  std::string event_ws_name =
-      m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
+  std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
+  std::string event_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
   worker->copyLattice(peaks_ws_name, md_ws_name, event_ws_name);
 
   if (index_peaks) {
@@ -903,8 +783,7 @@ void MantidEV::findUB_slot() {
       return;
 
     auto *runner =
-        new RunPredictPeaks(worker, peaks_ws_name, min_pred_wl, max_pred_wl,
-                            min_pred_dspacing, max_pred_dspacing);
+        new RunPredictPeaks(worker, peaks_ws_name, min_pred_wl, max_pred_wl, min_pred_dspacing, max_pred_dspacing);
 
     bool running = m_thread_pool->tryStart(runner);
     if (!running)
@@ -920,8 +799,7 @@ void MantidEV::findUB_slot() {
 void MantidEV::getLoadUB_FileName_slot() {
   QString file_path = getFilePath(last_UB_file);
   QString Qfile_name =
-      QFileDialog::getOpenFileName(this, tr("Load matrix file"), file_path,
-                                   tr("Matrix Files (*.mat);; All files(*)"));
+      QFileDialog::getOpenFileName(this, tr("Load matrix file"), file_path, tr("Matrix Files (*.mat);; All files(*)"));
   if (Qfile_name.length() > 0) {
     last_UB_file = Qfile_name.toStdString();
     m_uiForm.SelectUBFile_ledt->setText(Qfile_name);
@@ -934,8 +812,7 @@ void MantidEV::getLoadUB_FileName_slot() {
 void MantidEV::getSaveUB_FileName() {
   QString file_path = getFilePath(last_UB_file);
   QString Qfile_name =
-      QFileDialog::getSaveFileName(this, tr("Save matrix file"), file_path,
-                                   tr("Matrix Files (*.mat);; All files(*)"));
+      QFileDialog::getSaveFileName(this, tr("Save matrix file"), file_path, tr("Matrix Files (*.mat);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     last_UB_file = Qfile_name.toStdString();
@@ -947,16 +824,14 @@ void MantidEV::getSaveUB_FileName() {
  *  Slot called when the apply button is pressed on the Choose Cell tab.
  */
 void MantidEV::chooseCell_slot() {
-  std::string peaks_ws_name =
-      m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
+  std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
   if (peaks_ws_name.length() == 0) {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
     return;
   }
 
   if (m_thread_pool->activeThreadCount() >= 1) {
-    errorMessage(
-        "Previous operation still running, please wait until it is finished");
+    errorMessage("Previous operation still running, please wait until it is finished");
     return;
   }
 
@@ -971,42 +846,34 @@ void MantidEV::chooseCell_slot() {
     double max_scalar_error = 0;
     if (!getPositiveDouble(m_uiForm.MaxScalarError_ledt, max_scalar_error))
       return;
-    if (!worker->showCells(peaks_ws_name, max_scalar_error, best_only,
-                           allow_perm)) {
+    if (!worker->showCells(peaks_ws_name, max_scalar_error, best_only, allow_perm)) {
       errorMessage("Failed to Show Conventional Cells");
     }
   } else if (select_cell_type) {
     std::string cell_type = m_uiForm.CellType_cmbx->currentText().toStdString();
-    std::string centering =
-        m_uiForm.CellCentering_cmbx->currentText().toStdString();
+    std::string centering = m_uiForm.CellCentering_cmbx->currentText().toStdString();
     double index_tolerance = 0.12;
     if (!getPositiveDouble(m_uiForm.IndexingTolerance_ledt, index_tolerance))
       return;
-    if (!worker->selectCellOfType(peaks_ws_name, cell_type, centering,
-                                  allow_perm, index_tolerance)) {
+    if (!worker->selectCellOfType(peaks_ws_name, cell_type, centering, allow_perm, index_tolerance)) {
       errorMessage("Failed to Select Specified Conventional Cell");
     }
   } else if (select_cell_form) {
-    std::string form =
-        m_uiForm.CellFormNumber_cmbx->currentText().toStdString();
+    std::string form = m_uiForm.CellFormNumber_cmbx->currentText().toStdString();
     double form_num = 0;
     double index_tolerance = 0.12;
     if (!getPositiveDouble(m_uiForm.IndexingTolerance_ledt, index_tolerance))
       return;
     getDouble(form, form_num);
-    if (!worker->selectCellWithForm(peaks_ws_name, (size_t)form_num, allow_perm,
-                                    index_tolerance)) {
+    if (!worker->selectCellWithForm(peaks_ws_name, (size_t)form_num, allow_perm, index_tolerance)) {
       errorMessage("Failed to Select the Requested Form Number");
     }
   }
 
-  if (select_cell_type ||
-      select_cell_form) { // Try to copy the UB to md_workspace.  If it
-                          // fails a log notice is output by copyLattice
-    std::string md_ws_name =
-        m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
-    std::string event_ws_name =
-        m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
+  if (select_cell_type || select_cell_form) { // Try to copy the UB to md_workspace.  If it
+                                              // fails a log notice is output by copyLattice
+    std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
+    std::string event_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
     worker->copyLattice(peaks_ws_name, md_ws_name, event_ws_name);
   }
 
@@ -1017,10 +884,8 @@ void MantidEV::chooseCell_slot() {
     double maxQ;
     getDouble(m_uiForm.MaxMagQ_ledt, maxQ);
 
-    std::string md_ws_name =
-        m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
-    std::string ev_ws_name =
-        m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
+    std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
+    std::string ev_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
     worker->convertToHKL(ev_ws_name, md_ws_name, minQ, maxQ);
   }
 }
@@ -1029,16 +894,14 @@ void MantidEV::chooseCell_slot() {
  *  Slot called when the Apply button is pressed on the Change HKL tab.
  */
 void MantidEV::changeHKL_slot() {
-  std::string peaks_ws_name =
-      m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
+  std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
   if (peaks_ws_name.length() == 0) {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
     return;
   }
 
   if (m_thread_pool->activeThreadCount() >= 1) {
-    errorMessage(
-        "Previous operation still running, please wait until it is finished");
+    errorMessage("Previous operation still running, please wait until it is finished");
     return;
   }
 
@@ -1046,18 +909,15 @@ void MantidEV::changeHKL_slot() {
   std::string row_2_str = m_uiForm.HKL_tran_row_2_ledt->text().toStdString();
   std::string row_3_str = m_uiForm.HKL_tran_row_3_ledt->text().toStdString();
 
-  bool changed =
-      worker->changeHKL(peaks_ws_name, row_1_str, row_2_str, row_3_str);
+  bool changed = worker->changeHKL(peaks_ws_name, row_1_str, row_2_str, row_3_str);
   if (!changed) {
     errorMessage("Failed to Change the Miller Indicies and UB");
   }
 
   // Try to copy the UB to md_workspace.  If it
   // fails a log notice is output by copyLattice
-  std::string md_ws_name =
-      m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
-  std::string event_ws_name =
-      m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
+  std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
+  std::string event_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
   worker->copyLattice(peaks_ws_name, md_ws_name, event_ws_name);
 
   bool create_hkl_workspace = m_uiForm.CreateHKLWorkspace_ckbx->isChecked();
@@ -1076,24 +936,21 @@ void MantidEV::changeHKL_slot() {
  *  Slot called when the Apply button is pressed on the Integrate tab.
  */
 void MantidEV::integratePeaks_slot() {
-  std::string peaks_ws_name =
-      m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
+  std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
 
   if (peaks_ws_name.length() == 0) {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
     return;
   }
 
-  std::string event_ws_name =
-      m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
+  std::string event_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
   if (event_ws_name.length() == 0) {
     errorMessage("Specify a time-of-flight event workspace name.");
     return;
   }
 
   if (m_thread_pool->activeThreadCount() >= 1) {
-    errorMessage(
-        "Previous operation still running, please wait until it is finished");
+    errorMessage("Previous operation still running, please wait until it is finished");
     return;
   }
 
@@ -1124,23 +981,20 @@ void MantidEV::integratePeaks_slot() {
     if (!getPositiveDouble(m_uiForm.CylinderLength_ledt, cylinder_length))
       return;
 
-    if (!getPositiveDouble(m_uiForm.CylinderPercentBkg_ledt,
-                           cylinder_percent_bkg))
+    if (!getPositiveDouble(m_uiForm.CylinderPercentBkg_ledt, cylinder_percent_bkg))
       return;
 
-    std::string cylinder_profile_fit =
-        m_uiForm.CylinderProfileFit_cmbx->currentText().toStdString();
+    std::string cylinder_profile_fit = m_uiForm.CylinderProfileFit_cmbx->currentText().toStdString();
 
     bool adaptive_background = m_uiForm.AdaptiveQBkg_ckbx->isChecked();
 
     if (!getDouble(m_uiForm.AdaptiveQMult_ledt, adaptiveQMult))
       return;
 
-    auto *runner = new RunSphereIntegrate(
-        worker, peaks_ws_name, event_ws_name, peak_radius, inner_radius,
-        outer_radius, integrate_edge, use_cylinder_integration, cylinder_length,
-        cylinder_percent_bkg, cylinder_profile_fit, adaptive_background,
-        adaptiveQMult);
+    auto *runner =
+        new RunSphereIntegrate(worker, peaks_ws_name, event_ws_name, peak_radius, inner_radius, outer_radius,
+                               integrate_edge, use_cylinder_integration, cylinder_length, cylinder_percent_bkg,
+                               cylinder_profile_fit, adaptive_background, adaptiveQMult);
 
     bool running = m_thread_pool->tryStart(runner);
     if (!running)
@@ -1148,15 +1002,13 @@ void MantidEV::integratePeaks_slot() {
                    "operation not complete");
   } else if (fit_integrate) {
     bool use_ikeda_carpenter = m_uiForm.IkedaCarpenter_ckbx->isChecked();
-    std::string rebin_params =
-        m_uiForm.FitRebinParams_ledt->text().toStdString();
+    std::string rebin_params = m_uiForm.FitRebinParams_ledt->text().toStdString();
     double n_bad_edge_pix = 5;
     if (!getPositiveDouble(m_uiForm.NBadEdgePixels_ledt, n_bad_edge_pix))
       return;
 
-    auto *runner =
-        new RunFitIntegrate(worker, peaks_ws_name, event_ws_name, rebin_params,
-                            (size_t)n_bad_edge_pix, use_ikeda_carpenter);
+    auto *runner = new RunFitIntegrate(worker, peaks_ws_name, event_ws_name, rebin_params, (size_t)n_bad_edge_pix,
+                                       use_ikeda_carpenter);
 
     bool running = m_thread_pool->tryStart(runner);
     if (!running)
@@ -1182,9 +1034,8 @@ void MantidEV::integratePeaks_slot() {
         return;
     }
 
-    auto *runner = new RunEllipsoidIntegrate(
-        worker, peaks_ws_name, event_ws_name, region_radius, specify_size,
-        peak_size, inner_size, outer_size);
+    auto *runner = new RunEllipsoidIntegrate(worker, peaks_ws_name, event_ws_name, region_radius, specify_size,
+                                             peak_size, inner_size, outer_size);
 
     bool running = m_thread_pool->tryStart(runner);
     if (!running)
@@ -1205,8 +1056,7 @@ void MantidEV::showInfo_slot() {
   getDouble(m_uiForm.Qz_ledt, qz);
 
   /// loop back test of SelectionNotificationService
-  MantidQt::API::SelectionNotificationService::Instance().sendQPointSelection(
-      true, qx, qy, qz);
+  MantidQt::API::SelectionNotificationService::Instance().sendQPointSelection(true, qx, qy, qz);
 }
 
 /**
@@ -1219,8 +1069,7 @@ void MantidEV::showInfo_slot() {
  *  @param qy           The y-component of the Mantid Q-vector.
  *  @param qz           The z-component of the Mantid Q-vector.
  */
-void MantidEV::QPointSelection_slot(bool lab_coords, double qx, double qy,
-                                    double qz) {
+void MantidEV::QPointSelection_slot(bool lab_coords, double qx, double qy, double qz) {
   Mantid::Kernel::V3D q_point(qx, qy, qz);
   showInfo(lab_coords, q_point);
 }
@@ -1234,8 +1083,7 @@ void MantidEV::QPointSelection_slot(bool lab_coords, double qx, double qy,
  *  @param  q_point     Vector containing the Q-coordinates.
  */
 void MantidEV::showInfo(bool lab_coords, Mantid::Kernel::V3D q_point) {
-  std::string peaks_ws_name =
-      m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
+  std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
 
   std::vector<std::pair<std::string, std::string>> info;
 
@@ -1243,12 +1091,10 @@ void MantidEV::showInfo(bool lab_coords, Mantid::Kernel::V3D q_point) {
   {
     errorMessage("NOTE: Peaks Workspace Doesn't Exist");
     if (lab_coords) {
-      std::pair<std::string, std::string> QlabStr(
-          "Qlab", boost::lexical_cast<std::string>(q_point));
+      std::pair<std::string, std::string> QlabStr("Qlab", boost::lexical_cast<std::string>(q_point));
       info.emplace_back(QlabStr);
     } else {
-      std::pair<std::string, std::string> QSampleStr(
-          "QSample", boost::lexical_cast<std::string>(q_point));
+      std::pair<std::string, std::string> QSampleStr("QSample", boost::lexical_cast<std::string>(q_point));
       info.emplace_back(QSampleStr);
     }
   } else // get the info from the peaks workspace
@@ -1257,8 +1103,7 @@ void MantidEV::showInfo(bool lab_coords, Mantid::Kernel::V3D q_point) {
   }
 
   double q_dist = (q_point - last_Q).norm();
-  std::pair<std::string, std::string> Q_dist_str(
-      "|Q2-Q1|", boost::lexical_cast<std::string>(q_dist));
+  std::pair<std::string, std::string> Q_dist_str("|Q2-Q1|", boost::lexical_cast<std::string>(q_dist));
   info.emplace_back(Q_dist_str);
 
   Mantid::Kernel::Matrix<double> UB(3, 3, false);
@@ -1272,8 +1117,7 @@ void MantidEV::showInfo(bool lab_coords, Mantid::Kernel::V3D q_point) {
     hkl_1 = hkl_1 / (2 * M_PI);
     hkl_2 = hkl_2 / (2 * M_PI);
     double hkl_dist = (hkl_2 - hkl_1).norm();
-    std::pair<std::string, std::string> hkl_dist_str(
-        "|hkl2-hkl1|", boost::lexical_cast<std::string>(hkl_dist));
+    std::pair<std::string, std::string> hkl_dist_str("|hkl2-hkl1|", boost::lexical_cast<std::string>(hkl_dist));
     info.emplace_back(hkl_dist_str);
   }
 
@@ -1301,9 +1145,8 @@ void MantidEV::showInfo(bool lab_coords, Mantid::Kernel::V3D q_point) {
  */
 void MantidEV::saveState_slot() {
   QString file_path = getFilePath(last_ini_file);
-  QString Qfile_name = QFileDialog::getSaveFileName(
-      this, tr("Save Settings File(.ini)"), file_path,
-      tr("Settings Files (*.ini);; All files(*) "));
+  QString Qfile_name = QFileDialog::getSaveFileName(this, tr("Save Settings File(.ini)"), file_path,
+                                                    tr("Settings Files (*.ini);; All files(*) "));
 
   if (Qfile_name.length() > 0) {
     last_ini_file = Qfile_name.toStdString();
@@ -1316,9 +1159,8 @@ void MantidEV::saveState_slot() {
  */
 void MantidEV::loadState_slot() {
   QString file_path = getFilePath(last_ini_file);
-  QString Qfile_name = QFileDialog::getOpenFileName(
-      this, tr("Load Settings File(.ini)"), file_path,
-      tr("Settings Files (*.ini);; All files(*)"));
+  QString Qfile_name = QFileDialog::getOpenFileName(this, tr("Load Settings File(.ini)"), file_path,
+                                                    tr("Settings Files (*.ini);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     last_ini_file = Qfile_name.toStdString();
@@ -1330,8 +1172,7 @@ void MantidEV::loadState_slot() {
  *  Slot called when the Save Isaw UB action is selected from the File menu.
  */
 void MantidEV::saveIsawUB_slot() {
-  std::string peaks_ws_name =
-      m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
+  std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
   if (peaks_ws_name.length() == 0) {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
     return;
@@ -1339,8 +1180,7 @@ void MantidEV::saveIsawUB_slot() {
 
   getSaveUB_FileName();
 
-  std::string file_name =
-      m_uiForm.SelectUBFile_ledt->text().trimmed().toStdString();
+  std::string file_name = m_uiForm.SelectUBFile_ledt->text().trimmed().toStdString();
   if (file_name.length() == 0) {
     errorMessage("Select a .mat file with the UB matrix to be loaded.");
     return;
@@ -1356,8 +1196,7 @@ void MantidEV::saveIsawUB_slot() {
  *  Slot called when the Load Isaw UB action is selected from the File menu.
  */
 void MantidEV::loadIsawUB_slot() {
-  std::string peaks_ws_name =
-      m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
+  std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
   if (peaks_ws_name.length() == 0) {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
     return;
@@ -1365,8 +1204,7 @@ void MantidEV::loadIsawUB_slot() {
 
   getLoadUB_FileName_slot();
 
-  std::string file_name =
-      m_uiForm.SelectUBFile_ledt->text().trimmed().toStdString();
+  std::string file_name = m_uiForm.SelectUBFile_ledt->text().trimmed().toStdString();
   if (file_name.length() == 0) {
     errorMessage("Select a .mat file with the UB matrix to be loaded.");
     return;
@@ -1382,8 +1220,7 @@ void MantidEV::loadIsawUB_slot() {
  *  Slot called when the Save Isaw Peaks action is selected from the File menu.
  */
 void MantidEV::saveIsawPeaks_slot() {
-  std::string peaks_ws_name =
-      m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
+  std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
   if (peaks_ws_name.length() == 0) {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
     return;
@@ -1391,8 +1228,7 @@ void MantidEV::saveIsawPeaks_slot() {
 
   getSavePeaksFileName();
 
-  std::string file_name =
-      m_uiForm.SelectPeaksFile_ledt->text().trimmed().toStdString();
+  std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().trimmed().toStdString();
   if (file_name.length() == 0) {
     errorMessage("Specify a peaks file name for saving the peaks workspace.");
     return;
@@ -1404,10 +1240,8 @@ void MantidEV::saveIsawPeaks_slot() {
       QMessageBox message_box(this->window());
       message_box.setText(tr("File Exists"));
       message_box.setInformativeText("Replace file, or append peaks to file?");
-      QAbstractButton *replace_btn =
-          message_box.addButton(tr("Replace"), QMessageBox::NoRole);
-      QAbstractButton *append_btn =
-          message_box.addButton(tr("Append"), QMessageBox::YesRole);
+      QAbstractButton *replace_btn = message_box.addButton(tr("Replace"), QMessageBox::NoRole);
+      QAbstractButton *append_btn = message_box.addButton(tr("Append"), QMessageBox::YesRole);
       message_box.setIcon(QMessageBox::Question);
       // it should not be necessary to do the next
       // four lines, but without them the message box
@@ -1416,14 +1250,12 @@ void MantidEV::saveIsawPeaks_slot() {
       QSize box_size = message_box.sizeHint();
       QRect screen_rect = QDesktopWidget().screen()->rect();
       message_box.move(
-          QPoint(screen_rect.width() / 2 - box_size.width() / 2,
-                 screen_rect.height() / 2 - box_size.height() / 2));
+          QPoint(screen_rect.width() / 2 - box_size.width() / 2, screen_rect.height() / 2 - box_size.height() / 2));
       message_box.exec();
 
       if (message_box.clickedButton() == append_btn) {
         append = true;
-      } else if (message_box.clickedButton() ==
-                 replace_btn) // no strictly needed, but clearer
+      } else if (message_box.clickedButton() == replace_btn) // no strictly needed, but clearer
       {
         append = false;
       }
@@ -1440,8 +1272,7 @@ void MantidEV::saveIsawPeaks_slot() {
  *  Slot called when the Save Nexus Peaks action is selected from the File menu.
  */
 void MantidEV::saveNexusPeaks_slot() {
-  std::string peaks_ws_name =
-      m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
+  std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
   if (peaks_ws_name.length() == 0) {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
     return;
@@ -1449,8 +1280,7 @@ void MantidEV::saveNexusPeaks_slot() {
 
   getSavePeaksFileName();
 
-  std::string file_name =
-      m_uiForm.SelectPeaksFile_ledt->text().trimmed().toStdString();
+  std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().trimmed().toStdString();
   if (file_name.length() == 0) {
     errorMessage("Specify a peaks file name for saving the peaks workspace.");
     return;
@@ -1462,10 +1292,8 @@ void MantidEV::saveNexusPeaks_slot() {
       QMessageBox message_box(this->window());
       message_box.setText(tr("File Exists"));
       message_box.setInformativeText("Replace file, or append peaks to file?");
-      QAbstractButton *replace_btn =
-          message_box.addButton(tr("Replace"), QMessageBox::NoRole);
-      QAbstractButton *append_btn =
-          message_box.addButton(tr("Append"), QMessageBox::YesRole);
+      QAbstractButton *replace_btn = message_box.addButton(tr("Replace"), QMessageBox::NoRole);
+      QAbstractButton *append_btn = message_box.addButton(tr("Append"), QMessageBox::YesRole);
       message_box.setIcon(QMessageBox::Question);
       // it should not be necessary to do the next
       // four lines, but without them the message box
@@ -1474,14 +1302,12 @@ void MantidEV::saveNexusPeaks_slot() {
       QSize box_size = message_box.sizeHint();
       QRect screen_rect = QDesktopWidget().screen()->rect();
       message_box.move(
-          QPoint(screen_rect.width() / 2 - box_size.width() / 2,
-                 screen_rect.height() / 2 - box_size.height() / 2));
+          QPoint(screen_rect.width() / 2 - box_size.width() / 2, screen_rect.height() / 2 - box_size.height() / 2));
       message_box.exec();
 
       if (message_box.clickedButton() == append_btn) {
         append = true;
-      } else if (message_box.clickedButton() ==
-                 replace_btn) // no strictly needed, but clearer
+      } else if (message_box.clickedButton() == replace_btn) // no strictly needed, but clearer
       {
         append = false;
       }
@@ -1498,8 +1324,7 @@ void MantidEV::saveNexusPeaks_slot() {
  *  Slot called when the Load Isaw Peaks action is selected from the File menu.
  */
 void MantidEV::loadIsawPeaks_slot() {
-  std::string peaks_ws_name =
-      m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
+  std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
   if (peaks_ws_name.length() == 0) {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
     return;
@@ -1507,8 +1332,7 @@ void MantidEV::loadIsawPeaks_slot() {
 
   getLoadPeaksFileName_slot();
 
-  std::string file_name =
-      m_uiForm.SelectPeaksFile_ledt->text().trimmed().toStdString();
+  std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().trimmed().toStdString();
   if (file_name.length() == 0) {
     errorMessage("Select a peaks file to be loaded.");
     return;
@@ -1524,8 +1348,7 @@ void MantidEV::loadIsawPeaks_slot() {
  *  Slot called when the Load Nexus Peaks action is selected from the File menu.
  */
 void MantidEV::loadNexusPeaks_slot() {
-  std::string peaks_ws_name =
-      m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
+  std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
   if (peaks_ws_name.length() == 0) {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
     return;
@@ -1533,8 +1356,7 @@ void MantidEV::loadNexusPeaks_slot() {
 
   getLoadPeaksFileName_slot();
 
-  std::string file_name =
-      m_uiForm.SelectPeaksFile_ledt->text().trimmed().toStdString();
+  std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().trimmed().toStdString();
   if (file_name.length() == 0) {
     errorMessage("Select a peaks file to be loaded.");
     return;
@@ -1550,8 +1372,7 @@ void MantidEV::loadNexusPeaks_slot() {
  *  Slot called when the Show UB action is selected from the View menu.
  */
 void MantidEV::showUB_slot() {
-  std::string peaks_ws_name =
-      m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
+  std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
   if (peaks_ws_name.length() == 0) {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
     return;
@@ -1567,9 +1388,7 @@ void MantidEV::showUB_slot() {
  *
  * @param on  If true, components will be enabled, if false, disabled.
  */
-void MantidEV::setEnabledLoadEventFileParams_slot(bool on) {
-  m_uiForm.loadDataGroupBox->setEnabled(on);
-}
+void MantidEV::setEnabledLoadEventFileParams_slot(bool on) { m_uiForm.loadDataGroupBox->setEnabled(on); }
 
 /**
  * Set the enabled state of the calibration file labels,
@@ -1745,9 +1564,7 @@ void MantidEV::setEnabledSetCellTypeParams_slot(bool on) {
  *
  * @param on  If true, components will be enabled, if false, disabled.
  */
-void MantidEV::setEnabledSetCellFormParams_slot(bool on) {
-  m_uiForm.CellFormNumber_cmbx->setEnabled(on);
-}
+void MantidEV::setEnabledSetCellFormParams_slot(bool on) { m_uiForm.CellFormNumber_cmbx->setEnabled(on); }
 
 /**
  * Set the enabled state of the sphere integration components to the
@@ -1805,8 +1622,7 @@ void MantidEV::setEnabledEllipseIntParams_slot(bool on) {
  * specify size checkbox.
  */
 void MantidEV::setEnabledEllipseSizeOptions_slot() {
-  bool on = m_uiForm.EllipsoidIntegration_rbtn->isChecked() &&
-            m_uiForm.SpecifySize_ckbx->isChecked();
+  bool on = m_uiForm.EllipsoidIntegration_rbtn->isChecked() && m_uiForm.SpecifySize_ckbx->isChecked();
   m_uiForm.PeakSize_lbl->setEnabled(on);
   m_uiForm.PeakSize_ledt->setEnabled(on);
   m_uiForm.BackgroundInnerSize_lbl->setEnabled(on);
@@ -1987,24 +1803,20 @@ QString MantidEV::getFilePath(const std::string &file_name) {
 void MantidEV::saveSettings(const std::string &filename) {
   QSettings *state;
   if (filename.length() > 0)
-    state = new QSettings(QString::fromStdString(filename),
-                          QSettings::IniFormat, this);
+    state = new QSettings(QString::fromStdString(filename), QSettings::IniFormat, this);
   else
     state = new QSettings;
   // Save Tab 1, Select Data
-  state->setValue("SelectEventWorkspace_ledt",
-                  m_uiForm.SelectEventWorkspace_ledt->text());
+  state->setValue("SelectEventWorkspace_ledt", m_uiForm.SelectEventWorkspace_ledt->text());
   state->setValue("MDworkspace_ledt", m_uiForm.MDworkspace_ledt->text());
   state->setValue("LoadEventFile_rbtn", m_uiForm.loadDataGroupBox->isChecked());
   state->setValue("EventFileName_ledt", m_uiForm.EventFileName_ledt->text());
   state->setValue("MaxMagQ_ledt", m_uiForm.MaxMagQ_ledt->text());
-  state->setValue("LorentzCorrection_ckbx",
-                  m_uiForm.LorentzCorrection_ckbx->isChecked());
+  state->setValue("LorentzCorrection_ckbx", m_uiForm.LorentzCorrection_ckbx->isChecked());
   state->setValue("LoadDetCal_ckbx", m_uiForm.LoadDetCal_ckbx->isChecked());
   state->setValue("CalFileName_ledt", m_uiForm.CalFileName_ledt->text());
   state->setValue("CalFileName2_ledt", m_uiForm.CalFileName2_ledt->text());
-  state->setValue("ConvertToMD_rbtn",
-                  m_uiForm.convertToMDGroupBox->isChecked());
+  state->setValue("ConvertToMD_rbtn", m_uiForm.convertToMDGroupBox->isChecked());
 
   // Save Tab 2, Find Peaks
   state->setValue("PeaksWorkspace_ledt", m_uiForm.PeaksWorkspace_ledt->text());
@@ -2014,60 +1826,42 @@ void MantidEV::saveSettings(const std::string &filename) {
   state->setValue("MinIntensity_ledt", m_uiForm.MinIntensity_ledt->text());
   state->setValue("MinQPeaks_ledt", m_uiForm.MinQPeaks_ledt->text());
   state->setValue("MaxQPeaks_ledt", m_uiForm.MaxQPeaks_ledt->text());
-  state->setValue("UseExistingPeaksWorkspace_rbtn",
-                  m_uiForm.UseExistingPeaksWorkspace_rbtn->isChecked());
-  state->setValue("LoadIsawPeaks_rbtn",
-                  m_uiForm.LoadIsawPeaks_rbtn->isChecked());
-  state->setValue("SelectPeaksFile_ledt",
-                  m_uiForm.SelectPeaksFile_ledt->text());
+  state->setValue("UseExistingPeaksWorkspace_rbtn", m_uiForm.UseExistingPeaksWorkspace_rbtn->isChecked());
+  state->setValue("LoadIsawPeaks_rbtn", m_uiForm.LoadIsawPeaks_rbtn->isChecked());
+  state->setValue("SelectPeaksFile_ledt", m_uiForm.SelectPeaksFile_ledt->text());
   state->setValue("PredictPeaks_ckbx", m_uiForm.PredictPeaks_ckbx->isChecked());
   state->setValue("min_pred_wl_ledt", m_uiForm.min_pred_wl_ledt->text());
   state->setValue("max_pred_wl_ledt", m_uiForm.max_pred_wl_ledt->text());
-  state->setValue("min_pred_dspacing_ledt",
-                  m_uiForm.min_pred_dspacing_ledt->text());
-  state->setValue("max_pred_dspacing_ledt",
-                  m_uiForm.max_pred_dspacing_ledt->text());
+  state->setValue("min_pred_dspacing_ledt", m_uiForm.min_pred_dspacing_ledt->text());
+  state->setValue("max_pred_dspacing_ledt", m_uiForm.max_pred_dspacing_ledt->text());
 
   // Save Tab 3, Find UB
-  state->setValue("FindUBUsingFFT_rbtn",
-                  m_uiForm.FindUBUsingFFT_rbtn->isChecked());
+  state->setValue("FindUBUsingFFT_rbtn", m_uiForm.FindUBUsingFFT_rbtn->isChecked());
   state->setValue("MinD_ledt", m_uiForm.MinD_ledt->text());
   state->setValue("MaxD_ledt", m_uiForm.MaxD_ledt->text());
   state->setValue("FFTTolerance_ledt", m_uiForm.FFTTolerance_ledt->text());
-  state->setValue("FindUBUsingIndexedPeaks_rbtn",
-                  m_uiForm.FindUBUsingIndexedPeaks_rbtn->isChecked());
-  state->setValue("IndexedPeaksTolerance_ledt",
-                  m_uiForm.IndexedPeaksTolerance_ledt->text());
+  state->setValue("FindUBUsingIndexedPeaks_rbtn", m_uiForm.FindUBUsingIndexedPeaks_rbtn->isChecked());
+  state->setValue("IndexedPeaksTolerance_ledt", m_uiForm.IndexedPeaksTolerance_ledt->text());
   state->setValue("LoadISAWUB_rbtn", m_uiForm.LoadISAWUB_rbtn->isChecked());
   state->setValue("SelectUBFile_ledt", m_uiForm.SelectUBFile_ledt->text());
-  state->setValue("OptimizeGoniometerAngles_ckbx",
-                  m_uiForm.OptimizeGoniometerAngles_ckbx->isChecked());
-  state->setValue("MaxGoniometerChange_ledt",
-                  m_uiForm.MaxGoniometerChange_ledt->text());
+  state->setValue("OptimizeGoniometerAngles_ckbx", m_uiForm.OptimizeGoniometerAngles_ckbx->isChecked());
+  state->setValue("MaxGoniometerChange_ledt", m_uiForm.MaxGoniometerChange_ledt->text());
   state->setValue("UseCurrentUB_rbtn", m_uiForm.UseCurrentUB_rbtn->isChecked());
   state->setValue("IndexPeaks_ckbx", m_uiForm.IndexPeaks_ckbx->isChecked());
-  state->setValue("IndexingTolerance_ledt",
-                  m_uiForm.IndexingTolerance_ledt->text());
+  state->setValue("IndexingTolerance_ledt", m_uiForm.IndexingTolerance_ledt->text());
   state->setValue("RoundHKLs_ckbx", m_uiForm.RoundHKLs_ckbx->isChecked());
 
   // Save Tab 4, Choose Cell
-  state->setValue("ShowPossibleCells_rbtn",
-                  m_uiForm.ShowPossibleCells_rbtn->isChecked());
+  state->setValue("ShowPossibleCells_rbtn", m_uiForm.ShowPossibleCells_rbtn->isChecked());
   state->setValue("MaxScalarError_ledt", m_uiForm.MaxScalarError_ledt->text());
   state->setValue("BestCellOnly_ckbx", m_uiForm.BestCellOnly_ckbx->isChecked());
-  state->setValue("BestCellOnly_ckbx",
-                  m_uiForm.AllowPermutations_ckbx->isChecked());
-  state->setValue("SelectCellOfType_rbtn",
-                  m_uiForm.SelectCellOfType_rbtn->isChecked());
-  state->setValue("CreateHKLWorkspace_ckbx",
-                  m_uiForm.CreateHKLWorkspace_ckbx->isChecked());
+  state->setValue("BestCellOnly_ckbx", m_uiForm.AllowPermutations_ckbx->isChecked());
+  state->setValue("SelectCellOfType_rbtn", m_uiForm.SelectCellOfType_rbtn->isChecked());
+  state->setValue("CreateHKLWorkspace_ckbx", m_uiForm.CreateHKLWorkspace_ckbx->isChecked());
   state->setValue("CellType_cmbx", m_uiForm.CellType_cmbx->currentIndex());
-  state->setValue("CellCentering_cmbx",
-                  m_uiForm.CellCentering_cmbx->currentIndex());
-  state->setValue("SelectCellWithForm_rbtn",
-                  m_uiForm.SelectCellWithForm_rbtn->isChecked());
-  state->setValue("CellFormNumber_cmbx",
-                  m_uiForm.CellFormNumber_cmbx->currentIndex());
+  state->setValue("CellCentering_cmbx", m_uiForm.CellCentering_cmbx->currentIndex());
+  state->setValue("SelectCellWithForm_rbtn", m_uiForm.SelectCellWithForm_rbtn->isChecked());
+  state->setValue("CellFormNumber_cmbx", m_uiForm.CellFormNumber_cmbx->currentIndex());
 
   // Save Tab 5,Change HKL
   state->setValue("HKL_tran_row_1_ledt", m_uiForm.HKL_tran_row_1_ledt->text());
@@ -2075,38 +1869,26 @@ void MantidEV::saveSettings(const std::string &filename) {
   state->setValue("HKL_tran_row_3_ledt", m_uiForm.HKL_tran_row_3_ledt->text());
 
   // Save Tab 6, Integrate
-  state->setValue("SphereIntegration_rbtn",
-                  m_uiForm.SphereIntegration_rbtn->isChecked());
+  state->setValue("SphereIntegration_rbtn", m_uiForm.SphereIntegration_rbtn->isChecked());
   state->setValue("PeakRadius_ledt", m_uiForm.PeakRadius_ledt->text());
-  state->setValue("BackgroundInnerRadius_ledt",
-                  m_uiForm.BackgroundInnerRadius_ledt->text());
-  state->setValue("BackgroundOuterRadius_ledt",
-                  m_uiForm.BackgroundOuterRadius_ledt->text());
+  state->setValue("BackgroundInnerRadius_ledt", m_uiForm.BackgroundInnerRadius_ledt->text());
+  state->setValue("BackgroundOuterRadius_ledt", m_uiForm.BackgroundOuterRadius_ledt->text());
   state->setValue("CylinderLength_ledt", m_uiForm.CylinderLength_ledt->text());
-  state->setValue("CylinderPercentBkg_ledt",
-                  m_uiForm.CylinderPercentBkg_ledt->text());
-  state->setValue("IntegrateEdge_ckbx",
-                  m_uiForm.IntegrateEdge_ckbx->isChecked());
+  state->setValue("CylinderPercentBkg_ledt", m_uiForm.CylinderPercentBkg_ledt->text());
+  state->setValue("IntegrateEdge_ckbx", m_uiForm.IntegrateEdge_ckbx->isChecked());
   state->setValue("Cylinder_ckbx", m_uiForm.Cylinder_ckbx->isChecked());
-  state->setValue("CylinderProfileFit_cmbx",
-                  m_uiForm.CylinderProfileFit_cmbx->currentIndex());
-  state->setValue("axisCORELLI_cmbx",
-                  m_uiForm.axisCORELLI_cmbx->currentIndex());
-  state->setValue("TwoDFitIntegration_rbtn",
-                  m_uiForm.TwoDFitIntegration_rbtn->isChecked());
+  state->setValue("CylinderProfileFit_cmbx", m_uiForm.CylinderProfileFit_cmbx->currentIndex());
+  state->setValue("axisCORELLI_cmbx", m_uiForm.axisCORELLI_cmbx->currentIndex());
+  state->setValue("TwoDFitIntegration_rbtn", m_uiForm.TwoDFitIntegration_rbtn->isChecked());
   state->setValue("FitRebinParams_ledt", m_uiForm.FitRebinParams_ledt->text());
   state->setValue("NBadEdgePixels_ledt", m_uiForm.NBadEdgePixels_ledt->text());
-  state->setValue("IkedaCarpenter_ckbx",
-                  m_uiForm.IkedaCarpenter_ckbx->isChecked());
-  state->setValue("EllipsoidIntegration_rbtn",
-                  m_uiForm.EllipsoidIntegration_rbtn->isChecked());
+  state->setValue("IkedaCarpenter_ckbx", m_uiForm.IkedaCarpenter_ckbx->isChecked());
+  state->setValue("EllipsoidIntegration_rbtn", m_uiForm.EllipsoidIntegration_rbtn->isChecked());
   state->setValue("RegionRadius_ledt", m_uiForm.RegionRadius_ledt->text());
   state->setValue("SpecifySize_ckbx", m_uiForm.SpecifySize_ckbx->isChecked());
   state->setValue("PeakSize_ledt", m_uiForm.PeakSize_ledt->text());
-  state->setValue("BackgroundInnerSize_ledt",
-                  m_uiForm.BackgroundInnerSize_ledt->text());
-  state->setValue("BackgroundOuterSize_ledt",
-                  m_uiForm.BackgroundOuterSize_ledt->text());
+  state->setValue("BackgroundInnerSize_ledt", m_uiForm.BackgroundInnerSize_ledt->text());
+  state->setValue("BackgroundOuterSize_ledt", m_uiForm.BackgroundOuterSize_ledt->text());
   state->setValue("AdaptiveQBkg_ckbx", m_uiForm.AdaptiveQBkg_ckbx->isChecked());
   state->setValue("AdaptiveQMult_ledt", m_uiForm.AdaptiveQMult_ledt->text());
 
@@ -2135,17 +1917,14 @@ void MantidEV::saveSettings(const std::string &filename) {
 void MantidEV::loadSettings(const std::string &filename) {
   QSettings *state;
   if (filename.length() > 0)
-    state = new QSettings(QString::fromStdString(filename),
-                          QSettings::IniFormat, this);
+    state = new QSettings(QString::fromStdString(filename), QSettings::IniFormat, this);
   else
     state = new QSettings;
 
   // Load Tab 1, Select Data
-  restore(state, "SelectEventWorkspace_ledt",
-          m_uiForm.SelectEventWorkspace_ledt);
+  restore(state, "SelectEventWorkspace_ledt", m_uiForm.SelectEventWorkspace_ledt);
   restore(state, "MDworkspace_ledt", m_uiForm.MDworkspace_ledt);
-  m_uiForm.loadDataGroupBox->setChecked(
-      state->value("LoadEventFile_rbtn", true).toBool());
+  m_uiForm.loadDataGroupBox->setChecked(state->value("LoadEventFile_rbtn", true).toBool());
   restore(state, "EventFileName_ledt", m_uiForm.EventFileName_ledt);
   restore(state, "MaxMagQ_ledt", m_uiForm.MaxMagQ_ledt);
   restore(state, "LorentzCorrection_ckbx", m_uiForm.LorentzCorrection_ckbx);
@@ -2153,8 +1932,7 @@ void MantidEV::loadSettings(const std::string &filename) {
   restore(state, "CalFileName_ledt", m_uiForm.CalFileName_ledt);
   restore(state, "CalFileName2_ledt", m_uiForm.CalFileName2_ledt);
   setEnabledLoadCalFiles_slot();
-  m_uiForm.convertToMDGroupBox->setChecked(
-      state->value("ConvertToMD_rbtn", true).toBool());
+  m_uiForm.convertToMDGroupBox->setChecked(state->value("ConvertToMD_rbtn", true).toBool());
   // Load Tab 2, Find Peaks
   restore(state, "PeaksWorkspace_ledt", m_uiForm.PeaksWorkspace_ledt);
   restore(state, "FindPeaks_rbtn", m_uiForm.FindPeaks_rbtn);
@@ -2163,8 +1941,7 @@ void MantidEV::loadSettings(const std::string &filename) {
   restore(state, "MinIntensity_ledt", m_uiForm.MinIntensity_ledt);
   restore(state, "MinQPeaks_ledt", m_uiForm.MinQPeaks_ledt);
   restore(state, "MaxQPeaks_ledt", m_uiForm.MaxQPeaks_ledt);
-  restore(state, "UseExistingPeaksWorkspace_rbtn",
-          m_uiForm.UseExistingPeaksWorkspace_rbtn);
+  restore(state, "UseExistingPeaksWorkspace_rbtn", m_uiForm.UseExistingPeaksWorkspace_rbtn);
   restore(state, "LoadIsawPeaks_rbtn", m_uiForm.LoadIsawPeaks_rbtn);
   restore(state, "SelectPeaksFile_ledt", m_uiForm.SelectPeaksFile_ledt);
   restore(state, "PredictPeaks_ckbx", m_uiForm.PredictPeaks_ckbx);
@@ -2179,14 +1956,11 @@ void MantidEV::loadSettings(const std::string &filename) {
   restore(state, "MinD_ledt", m_uiForm.MinD_ledt);
   restore(state, "MaxD_ledt", m_uiForm.MaxD_ledt);
   restore(state, "FFTTolerance_ledt", m_uiForm.FFTTolerance_ledt);
-  restore(state, "FindUBUsingIndexedPeaks_rbtn",
-          m_uiForm.FindUBUsingIndexedPeaks_rbtn);
-  restore(state, "IndexedPeaksTolerance_ledt",
-          m_uiForm.IndexedPeaksTolerance_ledt);
+  restore(state, "FindUBUsingIndexedPeaks_rbtn", m_uiForm.FindUBUsingIndexedPeaks_rbtn);
+  restore(state, "IndexedPeaksTolerance_ledt", m_uiForm.IndexedPeaksTolerance_ledt);
   restore(state, "LoadISAWUB_rbtn", m_uiForm.LoadISAWUB_rbtn);
   restore(state, "SelectUBFile_ledt", m_uiForm.SelectUBFile_ledt);
-  restore(state, "OptimizeGoniometerAngles_ckbx",
-          m_uiForm.OptimizeGoniometerAngles_ckbx);
+  restore(state, "OptimizeGoniometerAngles_ckbx", m_uiForm.OptimizeGoniometerAngles_ckbx);
   restore(state, "MaxGoniometerChange_ledt", m_uiForm.MaxGoniometerChange_ledt);
   setEnabledMaxOptimizeDegrees_slot();
   restore(state, "UseCurrentUB_rbtn", m_uiForm.UseCurrentUB_rbtn);
@@ -2214,10 +1988,8 @@ void MantidEV::loadSettings(const std::string &filename) {
   // Load Tab 6, Integrate
   restore(state, "SphereIntegration_rbtn", m_uiForm.SphereIntegration_rbtn);
   restore(state, "PeakRadius_ledt", m_uiForm.PeakRadius_ledt);
-  restore(state, "BackgroundInnerRadius_ledt",
-          m_uiForm.BackgroundInnerRadius_ledt);
-  restore(state, "BackgroundOuterRadius_ledt",
-          m_uiForm.BackgroundOuterRadius_ledt);
+  restore(state, "BackgroundInnerRadius_ledt", m_uiForm.BackgroundInnerRadius_ledt);
+  restore(state, "BackgroundOuterRadius_ledt", m_uiForm.BackgroundOuterRadius_ledt);
   restore(state, "CylinderLength_ledt", m_uiForm.CylinderLength_ledt);
   restore(state, "CylinderPercentBkg_ledt", m_uiForm.CylinderPercentBkg_ledt);
   restore(state, "IntegrateEdge_ckbx", m_uiForm.IntegrateEdge_ckbx);
@@ -2228,8 +2000,7 @@ void MantidEV::loadSettings(const std::string &filename) {
   restore(state, "FitRebinParams_ledt", m_uiForm.FitRebinParams_ledt);
   restore(state, "NBadEdgePixels_ledt", m_uiForm.NBadEdgePixels_ledt);
   restore(state, "IkedaCarpenter_ckbx", m_uiForm.IkedaCarpenter_ckbx);
-  restore(state, "EllipsoidIntegration_rbtn",
-          m_uiForm.EllipsoidIntegration_rbtn);
+  restore(state, "EllipsoidIntegration_rbtn", m_uiForm.EllipsoidIntegration_rbtn);
   restore(state, "RegionRadius_ledt", m_uiForm.RegionRadius_ledt);
   restore(state, "SpecifySize_ckbx", m_uiForm.SpecifySize_ckbx);
   restore(state, "PeakSize_ledt", m_uiForm.PeakSize_ledt);
@@ -2240,10 +2011,8 @@ void MantidEV::loadSettings(const std::string &filename) {
   setEnabledEllipseSizeOptions_slot();
   // load info for file paths
   last_UB_file = state->value("last_UB_file", "").toString().toStdString();
-  last_event_file =
-      state->value("last_event_file", "").toString().toStdString();
-  last_peaks_file =
-      state->value("last_peaks_file", "").toString().toStdString();
+  last_event_file = state->value("last_event_file", "").toString().toStdString();
+  last_peaks_file = state->value("last_peaks_file", "").toString().toStdString();
   last_ini_file = state->value("last_ini_file", "").toString().toStdString();
   last_cal_file = state->value("last_cal_file", "").toString().toStdString();
   last_cal_file2 = state->value("last_cal_file2", "").toString().toStdString();
@@ -2278,8 +2047,7 @@ void MantidEV::restore(QSettings *state, const QString &name, QLineEdit *ledt) {
  * @param btn      pointer to the QCheckbox or QRadioButton component
  *                 whose state is to be restored.
  */
-void MantidEV::restore(QSettings *state, const QString &name,
-                       QAbstractButton *btn) {
+void MantidEV::restore(QSettings *state, const QString &name, QAbstractButton *btn) {
   btn->setChecked(state->value(name, false).toBool());
 }
 

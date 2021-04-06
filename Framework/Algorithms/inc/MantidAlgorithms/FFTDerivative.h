@@ -39,8 +39,7 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return {"ExtractFFTSpectrum", "FFT",      "MaxEnt", "RealFFT",
-            "SassenaFFT",         "FFTSmooth"};
+    return {"ExtractFFTSpectrum", "FFT", "MaxEnt", "RealFFT", "SassenaFFT", "FFTSmooth"};
   }
   /// Algorithm's category for identification
   const std::string category() const override { return "Arithmetic\\FFT"; }
@@ -51,13 +50,9 @@ private:
   /// Execution code
   void exec() override;
   void execComplexFFT();
-  void symmetriseSpectrum(const HistogramData::Histogram &in,
-                          HistogramData::HistogramX &symX,
-                          HistogramData::HistogramY &symY, const size_t nx,
-                          const size_t ny);
-  void multiplyTransform(HistogramData::HistogramX &nu,
-                         HistogramData::HistogramY &re,
-                         HistogramData::HistogramY &im);
+  void symmetriseSpectrum(const HistogramData::Histogram &in, HistogramData::HistogramX &symX,
+                          HistogramData::HistogramY &symY, const size_t nx, const size_t ny);
+  void multiplyTransform(HistogramData::HistogramX &nu, HistogramData::HistogramY &re, HistogramData::HistogramY &im);
 };
 
 } // namespace Algorithms

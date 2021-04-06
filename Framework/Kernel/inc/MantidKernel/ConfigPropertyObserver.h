@@ -20,11 +20,9 @@ public:
   virtual ~ConfigPropertyObserver() = default;
 
 protected:
-  void onValueChanged(const std::string &name, const std::string &newValue,
-                      const std::string &prevValue) override;
+  void onValueChanged(const std::string &name, const std::string &newValue, const std::string &prevValue) override;
 
-  virtual void onPropertyValueChanged(const std::string &newValue,
-                                      const std::string &prevValue) = 0;
+  virtual void onPropertyValueChanged(const std::string &newValue, const std::string &prevValue) = 0;
 
 private:
   std::string m_propertyName;

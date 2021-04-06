@@ -75,9 +75,7 @@ public:
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override { return {"Divide"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "CorrectionFunctions\\NormalisationCorrections";
-  }
+  const std::string category() const override { return "CorrectionFunctions\\NormalisationCorrections"; }
 
 private:
   // Overridden Algorithm methods
@@ -87,28 +85,21 @@ private:
 
 protected: // for testing
   void checkProperties(const API::MatrixWorkspace_sptr &inputWorkspace);
-  API::MatrixWorkspace_sptr
-  getInWSMonitorSpectrum(const API::MatrixWorkspace_sptr &inputWorkspace);
+  API::MatrixWorkspace_sptr getInWSMonitorSpectrum(const API::MatrixWorkspace_sptr &inputWorkspace);
   size_t getInWSMonitorIndex(const API::MatrixWorkspace_sptr &inputWorkspace);
-  API::MatrixWorkspace_sptr
-  getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWorkspace);
-  API::MatrixWorkspace_sptr
-  extractMonitorSpectra(const API::MatrixWorkspace_sptr &ws,
-                        const std::vector<size_t> &workspaceIndexes);
+  API::MatrixWorkspace_sptr getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWorkspace);
+  API::MatrixWorkspace_sptr extractMonitorSpectra(const API::MatrixWorkspace_sptr &ws,
+                                                  const std::vector<size_t> &workspaceIndexes);
   bool setIntegrationProps(const bool isSingleCountWorkspace);
 
-  void
-  normaliseByIntegratedCount(const API::MatrixWorkspace_sptr &inputWorkspace,
-                             API::MatrixWorkspace_sptr &outputWorkspace,
-                             const bool isSingleCountWorkspace);
+  void normaliseByIntegratedCount(const API::MatrixWorkspace_sptr &inputWorkspace,
+                                  API::MatrixWorkspace_sptr &outputWorkspace, const bool isSingleCountWorkspace);
 
   void performHistogramDivision(const API::MatrixWorkspace_sptr &inputWorkspace,
                                 API::MatrixWorkspace_sptr &outputWorkspace);
 
-  void normaliseBinByBin(const API::MatrixWorkspace_sptr &inputWorkspace,
-                         API::MatrixWorkspace_sptr &outputWorkspace);
-  void normalisationFactor(const HistogramData::BinEdges &X,
-                           HistogramData::Counts &Y,
+  void normaliseBinByBin(const API::MatrixWorkspace_sptr &inputWorkspace, API::MatrixWorkspace_sptr &outputWorkspace);
+  void normalisationFactor(const HistogramData::BinEdges &X, HistogramData::Counts &Y,
                            HistogramData::CountStandardDeviations &E);
 
 private:
@@ -126,23 +117,19 @@ private:
 
 // the internal class to verify and modify interconnected properties affecting
 // the different ways to normalize ws by this ws spectrum.
-class MANTID_ALGORITHMS_DLL MonIDPropChanger
-    : public Kernel::IPropertySettings {
+class MANTID_ALGORITHMS_DLL MonIDPropChanger : public Kernel::IPropertySettings {
 
 public:
   //   properties this property depends on:
   //   "InputWorkspace","MonitorSpectrum","MonitorWorkspace"
-  MonIDPropChanger(const std::string &WSProperty,
-                   const std::string &SpectrToNormByProperty,
+  MonIDPropChanger(const std::string &WSProperty, const std::string &SpectrToNormByProperty,
                    const std::string &MonitorWorkspace)
-      : hostWSname(WSProperty), SpectraNum(SpectrToNormByProperty),
-        MonitorWorkspaceProp(MonitorWorkspace), is_enabled(true) {}
+      : hostWSname(WSProperty), SpectraNum(SpectrToNormByProperty), MonitorWorkspaceProp(MonitorWorkspace),
+        is_enabled(true) {}
   // if input to this property is enabled
   bool isEnabled(const Mantid::Kernel::IPropertyManager *algo) const override;
-  bool isConditionChanged(
-      const Mantid::Kernel::IPropertyManager *algo) const override;
-  void applyChanges(const Mantid::Kernel::IPropertyManager *algo,
-                    Kernel::Property *const pProp) override;
+  bool isConditionChanged(const Mantid::Kernel::IPropertyManager *algo) const override;
+  void applyChanges(const Mantid::Kernel::IPropertyManager *algo, Kernel::Property *const pProp) override;
 
   // interface needs it but if indeed proper clone used -- do not know.
   IPropertySettings *clone() const override {

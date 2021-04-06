@@ -20,20 +20,16 @@ namespace Functions {
 
 DECLARE_FUNCTION(ConvTempCorrection)
 
-void ConvTempCorrection::init() {
-  declareParameter("Temperature", 300.0, "Temperature correction value (K)");
-}
+void ConvTempCorrection::init() { declareParameter("Temperature", 300.0, "Temperature correction value (K)"); }
 
-void ConvTempCorrection::function1D(double *out, const double *xValues,
-                                    const size_t nData) const {
+void ConvTempCorrection::function1D(double *out, const double *xValues, const size_t nData) const {
   const double T = getParameter("Temperature");
   for (size_t i = 0; i < nData; ++i) {
     double x = xValues[i];
     if (x == 0.0) {
       out[i] = 1.00;
     } else {
-      out[i] =
-          (x * CONVERSIONFACTOR) / T / (1 - exp(-((x * CONVERSIONFACTOR) / T)));
+      out[i] = (x * CONVERSIONFACTOR) / T / (1 - exp(-((x * CONVERSIONFACTOR) / T)));
     }
   }
 }
