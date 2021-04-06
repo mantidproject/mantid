@@ -122,7 +122,7 @@ void CompareWorkspaces::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace2", "", Direction::Input),
                   "The name of the second input workspace.");
 
-  declareProperty("Tolerance", 0.0, "The maximum amount by which values may differ between the workspaces.");
+  declareProperty("Tolerance", 1e-10, "The maximum amount by which values may differ between the workspaces.");
 
   declareProperty("CheckType", true,
                   "Whether to check that the data types "
@@ -1020,10 +1020,10 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
       std::string name = col->name();
       double s1 = 0.0;
       double s2 = 0.0;
-      if (name == "runnumber") {
+      if (name == "RunNumber") {
         s1 = double(peak1.getRunNumber());
         s2 = double(peak2.getRunNumber());
-      } else if (name == "detid") {
+      } else if (name == "DetId") {
         s1 = double(peak1.getDetectorID());
         s2 = double(peak2.getDetectorID());
       } else if (name == "h") {
@@ -1035,41 +1035,43 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
       } else if (name == "l") {
         s1 = peak1.getL();
         s2 = peak2.getL();
-      } else if (name == "wavelength") {
+      } else if (name == "Wavelength") {
         s1 = peak1.getWavelength();
         s2 = peak2.getWavelength();
-      } else if (name == "energy") {
+      } else if (name == "Energy") {
         s1 = peak1.getInitialEnergy();
         s2 = peak2.getInitialEnergy();
-      } else if (name == "tof") {
+      } else if (name == "TOF") {
         s1 = peak1.getTOF();
         s2 = peak2.getTOF();
-      } else if (name == "dspacing") {
+      } else if (name == "DSpacing") {
         s1 = peak1.getDSpacing();
         s2 = peak2.getDSpacing();
-      } else if (name == "intens") {
+      } else if (name == "Intens") {
         s1 = peak1.getIntensity();
         s2 = peak2.getIntensity();
-      } else if (name == "sigint") {
+      } else if (name == "SigInt") {
         s1 = peak1.getSigmaIntensity();
         s2 = peak2.getSigmaIntensity();
-      } else if (name == "bincount") {
+      } else if (name == "BinCount") {
         s1 = peak1.getBinCount();
         s2 = peak2.getBinCount();
-      } else if (name == "row") {
+      } else if (name == "Row") {
         s1 = peak1.getRow();
         s2 = peak2.getRow();
-      } else if (name == "col") {
+      } else if (name == "Col") {
         s1 = peak1.getCol();
         s2 = peak2.getCol();
+      } else {
+        g_log.information() << "Column " << name << " is not compared\n";
       }
       if (std::fabs(s1 - s2) > tolerance) {
-        g_log.debug(name);
-        g_log.debug() << "s1 = " << s1 << "\n"
-                      << "s2 = " << s2 << "\n"
-                      << "std::fabs(s1 - s2) = " << std::fabs(s1 - s2) << "\n"
-                      << "tolerance = " << tolerance << "\n";
-        g_log.debug() << "Data mismatch at cell (row#,col#): (" << i << "," << j << ")\n";
+        g_log.notice(name);
+        g_log.notice() << "s1 = " << s1 << "\n"
+                       << "s2 = " << s2 << "\n"
+                       << "std::fabs(s1 - s2) = " << std::fabs(s1 - s2) << "\n"
+                       << "tolerance = " << tolerance << "\n";
+        g_log.notice() << "Data mismatch at cell (row#,col#): (" << i << "," << j << ")\n";
         recordMismatch("Data mismatch");
         return;
       }
@@ -1155,9 +1157,16 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(LeanElasticPeaksWorkspace_s
           s1 += (q1[i] - q2[i]) * (q1[i] - q2[i]);
         }
         s1 = std::sqrt(s1);
+      } else {
+        g_log.information() << "Column " << name << " is not compared\n";
       }
       if (std::fabs(s1 - s2) > tolerance) {
-        g_log.debug() << "Data mismatch at cell (row#,col#): (" << i << "," << j << ")\n";
+        g_log.notice(name);
+        g_log.notice() << "s1 = " << s1 << "\n"
+                       << "s2 = " << s2 << "\n"
+                       << "std::fabs(s1 - s2) = " << std::fabs(s1 - s2) << "\n"
+                       << "tolerance = " << tolerance << "\n";
+        g_log.notice() << "Data mismatch at cell (row#,col#): (" << i << "," << j << ")\n";
         recordMismatch("Data mismatch");
         return;
       }
