@@ -638,7 +638,6 @@ class BasicFittingModel:
         alg = self._create_double_pulse_alg()
         alg.initialize()
         alg.setAlwaysStoreInADS(True)
-        alg.setRethrows(True)
         alg.setProperty("Function", fit_function)
         alg.setProperty("InputWorkspace", self.current_dataset_name)
         alg.setProperty("StartX", self.current_start_x)

@@ -62,10 +62,8 @@ class GeneralFittingModel(BasicFittingModel):
         if not isinstance(self.simultaneous_fit_function, MultiDomainFunction):
             return self.simultaneous_fit_function
 
-        if self.current_dataset_index is not None:
-            return self.simultaneous_fit_function.getFunction(self.current_dataset_index)
-        else:
-            return self.simultaneous_fit_function.getFunction(0)
+        index = self.current_data_index if self.current_data_set_index is not None else 0
+        return self.simultaneous_fit_function.getFunction(index)
 
     @property
     def simultaneous_fit_function_cache(self) -> IFunction:
